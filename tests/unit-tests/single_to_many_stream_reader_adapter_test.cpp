@@ -262,6 +262,7 @@ TEST_CASE("Demux audio stream adapter stress and multithreaed", "[core][demux ad
                 int lastReadValue = -1;
 
                 SPX_TRACE_INFO("Task:'%s' Iteration:'%d' ", taskName.c_str(), i);
+                UNUSED(taskName); // unused in release builds
                 // Reset previous byte validation here
                 lastReadValue = -1;
 

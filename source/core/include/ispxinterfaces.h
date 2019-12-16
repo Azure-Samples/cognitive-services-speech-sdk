@@ -48,7 +48,7 @@ protected:
     std::shared_ptr<I> QueryInterfaceInternal()
     {
         // try to query for the interface via our virtual method...
-        auto ptr = QueryInterface(PAL::GetTypeName<I>().c_str());
+        auto ptr = QueryInterface(SpxTypeName(I));
         if (ptr != nullptr)
         {
             auto interfacePtr = reinterpret_cast<I*>(ptr);
@@ -82,8 +82,8 @@ std::shared_ptr<I> SpxQueryInterface(std::shared_ptr<ISpxInterfaceBase> from)
         #if defined(_MSC_VER) && defined(_DEBUG)
             std::shared_ptr<I> ptr1 = std::dynamic_pointer_cast<I>(from);
             std::shared_ptr<I> ptr2 = from->QueryInterface<I>();
-            SPX_DBG_TRACE_ERROR_IF(ptr1 != nullptr && ptr2 == nullptr, "dynamic_pointer_cast() and QueryInterface() do not agree!! UNEXPECTED!");
-            SPX_DBG_TRACE_ERROR_IF(ptr1 == nullptr && ptr2 != nullptr, "dynamic_pointer_cast() and QueryInterface() do not agree!! UNEXPECTED!");
+            SPX_TRACE_ERROR_IF(ptr1 != nullptr && ptr2 == nullptr, "dynamic_pointer_cast() and QueryInterface() do not agree!! UNEXPECTED!");
+            SPX_TRACE_ERROR_IF(ptr1 == nullptr && ptr2 != nullptr, "dynamic_pointer_cast() and QueryInterface() do not agree!! UNEXPECTED!");
             SPX_IFTRUE_THROW_HR(ptr1 != nullptr && ptr2 == nullptr, SPXERR_ABORT);
             SPX_IFTRUE_THROW_HR(ptr1 == nullptr && ptr2 != nullptr, SPXERR_ABORT);
             return ptr1;
@@ -141,9 +141,9 @@ public:
 };
 
 template <class T, class I, class... Types>
-inline std::shared_ptr<I> SpxCreateObjectInternal(Types&&... Args)
+std::shared_ptr<I> SpxCreateObjectInternal(Types&&... Args)
 {
-    SPX_DBG_TRACE_VERBOSE("Creating object via %s: %s as %s", __FUNCTION__, PAL::GetTypeName<T>(), PAL::GetTypeName<I>());
+    SPX_DBG_TRACE_VERBOSE("Creating object via %s: %s as %s", __FUNCTION__, SpxTypeName(T), SpxTypeName(I));
     std::shared_ptr<T> ptr = std::make_shared<T>(std::forward<Types>(Args)...);
     auto it = std::dynamic_pointer_cast<I>(ptr);
     return it;
@@ -157,7 +157,7 @@ public:
     std::shared_ptr<I> CreateObject(const char* className)
     {
         // try to create the object from our interface virtual method...
-        auto obj = CreateObject(className, PAL::GetTypeName<I>().c_str());
+        auto obj = CreateObject(className, SpxTypeName(I));
         if (obj != nullptr)
         {
             auto ptr = reinterpret_cast<I*>(obj);
@@ -171,7 +171,7 @@ public:
     template <class T, class I>
     std::shared_ptr<I> CreateObject()
     {
-        auto obj = CreateObject<I>(PAL::GetTypeName<T>());
+        auto obj = CreateObject<I>(SpxTypeName(T));
         if (obj != nullptr)
         {
             return obj;
@@ -257,7 +257,7 @@ public:
     template <class T>
     void AddService(std::shared_ptr<T> service)
     {
-        AddService(PAL::GetTypeName<T>(), service);
+        AddService(SpxTypeName(T), service);
     }
 
     virtual void AddService(const char* serviceName, std::shared_ptr<ISpxInterfaceBase> service) = 0;
@@ -332,9 +332,9 @@ inline uint16_t SpxCopyWAVEFORMATEX(SpxWAVEFORMATEX_Type source, SPXWAVEFORMATEX
     return sourceSize;
 }
 
-#define SPX_DBG_TRACE_VERBOSE_WAVEFORMAT(format) \
-    SPX_DBG_TRACE_VERBOSE_IF(format == nullptr, "%s - format == nullptr", __FUNCTION__); \
-    SPX_DBG_TRACE_VERBOSE_IF(format != nullptr, "%s\n  wFormatTag:      %s\n  nChannels:       %d\n  nSamplesPerSec:  %d\n  nAvgBytesPerSec: %d\n  nBlockAlign:     %d\n  wBitsPerSample:  %d\n  cbSize:          %d", \
+#define SPX_TRACE_VERBOSE_WAVEFORMAT(format) \
+    SPX_TRACE_VERBOSE_IF(format == nullptr, "%s - format == nullptr", __FUNCTION__); \
+    SPX_TRACE_VERBOSE_IF(format != nullptr, "%s\n  wFormatTag:      %s\n  nChannels:       %d\n  nSamplesPerSec:  %d\n  nAvgBytesPerSec: %d\n  nBlockAlign:     %d\n  wBitsPerSample:  %d\n  cbSize:          %d", \
         __FUNCTION__, \
         format->wFormatTag == WAVE_FORMAT_PCM ? "PCM" : std::to_string(format->wFormatTag).c_str(), \
         format->nChannels, \

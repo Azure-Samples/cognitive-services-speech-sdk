@@ -19,7 +19,7 @@ namespace Impl {
 
         if (languageList.find(lang) != std::string::npos)
         {
-            SPX_DBG_TRACE_WARNING("%s: The language to be added %s already in target lanugages: %s", __FUNCTION__, lang.c_str(), languageList.c_str());
+            SPX_DBG_TRACE_INFO("%s: The language to be added %s already in target lanugages: %s", __FUNCTION__, lang.c_str(), languageList.c_str());
         }
         else
         {
@@ -44,7 +44,7 @@ namespace Impl {
         auto pos = languageList.find(lang);
         if (pos == std::string::npos)
         {
-            SPX_DBG_TRACE_WARNING("%s: The language to be removed %s is not in target languages: %s", __FUNCTION__, lang.c_str(), languageList.c_str());
+            SPX_DBG_TRACE_INFO("%s: The language to be removed %s is not in target languages: %s", __FUNCTION__, lang.c_str(), languageList.c_str());
         }
         else
         {

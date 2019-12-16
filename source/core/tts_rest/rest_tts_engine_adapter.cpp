@@ -12,7 +12,6 @@
 #include "guid_utils.h"
 #include "http_utils.h"
 #include "endpoint_utils.h"
-#include "handle_table.h"
 #include "service_helpers.h"
 #include "shared_ptr_helpers.h"
 #include "property_bag_impl.h"

@@ -29,7 +29,7 @@ namespace Impl {
 #define SPX_FACTORY_MAP_ENTRY_IF(condition, x, y, create)                       \
     if (PAL::stricmp(className, #x) == 0)                                       \
     {                                                                           \
-        if (PAL::stricmp(interfaceName, PAL::GetTypeName<y>().c_str()) == 0)    \
+        if (PAL::stricmp(interfaceName, SpxTypeName(y)) == 0)                   \
         {                                                                       \
             if (condition)                                                      \
             {                                                                   \
@@ -53,7 +53,7 @@ namespace Impl {
 template <class T, class I>
 void* SpxFactoryEntryCreateObject()
 {
-    SPX_DBG_TRACE_VERBOSE_IF(1, "Creating object via %s: %s as %s", __FUNCTION__, PAL::GetTypeName<T>().c_str(), PAL::GetTypeName<I>().c_str());
+    SPX_DBG_TRACE_VERBOSE_IF(1, "Creating object via %s: %s as %s", __FUNCTION__, SpxTypeName(T), SpxTypeName(I));
     auto ptr = new T();
     auto interface = static_cast<I*>(ptr);
     return interface;

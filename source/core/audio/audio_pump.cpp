@@ -25,8 +25,8 @@ struct __StateName
     inline const char* operator[](ISpxAudioPump::State state)
     {
         int index = (int)state;
-        SPX_ASSERT(index >= 0 && (index < (int)(sizeof(g_stateNames) / sizeof(g_stateNames[0]))));
-        return g_stateNames[(int)state];
+        SPX_DBG_ASSERT(index >= 0 && (index < (int)(sizeof(g_stateNames) / sizeof(g_stateNames[0]))));
+        return g_stateNames[index];
     }
 } StateName;
 
@@ -216,8 +216,9 @@ void CSpxAudioPump::PumpThread(std::shared_ptr<CSpxAudioPump> keepAlive, std::sh
 
             // Read audio buffer, and send it to the processor
             auto cbRead = m_reader->Read(data.get(), bytesPerFrame);
-            auto readCallDuraction = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - start);
-            SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioPump::PumpThread(): read frame duration: %" PRIu64 " ms => sending audio buffer size %u", (void*)this, (uint64_t)readCallDuraction.count(), cbRead);
+            auto readCallDuration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - start);
+            SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioPump::PumpThread(): read frame duration: %" PRIu64 " ms => sending audio buffer size %u", (void*)this, (uint64_t)readCallDuration.count(), cbRead);
+            UNUSED(readCallDuration); // unused in release builds
             std::string capturedTime, userId;
             if (cbRead != 0)
             {
@@ -230,7 +231,7 @@ void CSpxAudioPump::PumpThread(std::shared_ptr<CSpxAudioPump> keepAlive, std::sh
             // If we didn't read any data, move to the 'Idle' state
             if (cbRead == 0)
             {
-                SPX_DBG_TRACE_INFO("[%p]CSpxAudioPump::PumpThread(): m_reader->Read() read ZERO (0) bytes... Indicating end of stream based input.", (void*)this);
+                SPX_TRACE_INFO("[%p]CSpxAudioPump::PumpThread(): m_reader->Read() read ZERO (0) bytes... Indicating end of stream based input.", (void*)this);
                 std::unique_lock<std::mutex> lock(m_mutex);
                 m_stateRequested = State::Idle;
             }
@@ -247,7 +248,7 @@ void CSpxAudioPump::PumpThread(std::shared_ptr<CSpxAudioPump> keepAlive, std::sh
     }
     catch (const std::exception& e)
     {
-        SPX_DBG_TRACE_ERROR("[%p]CSpxAudioPump::PumpThread(): exception caught during pumping, %s", (void*)this, e.what());
+        SPX_TRACE_ERROR("[%p]CSpxAudioPump::PumpThread(): exception caught during pumping, %s", (void*)this, e.what());
         SPX_DBG_ASSERT(GetSite() != nullptr);
         InvokeOnSite([msg = e.what()](const SitePtr& site)
         {
@@ -256,7 +257,7 @@ void CSpxAudioPump::PumpThread(std::shared_ptr<CSpxAudioPump> keepAlive, std::sh
     }
     catch (SPXHR& hrError)
     {
-        SPX_DBG_TRACE_ERROR("[%p]CSpxAudioPump::PumpThread(): exception caught during pumping, SPXHR: %p", (void*)this, reinterpret_cast<void*>(hrError));
+        SPX_TRACE_ERROR("[%p]CSpxAudioPump::PumpThread(): exception caught during pumping, SPXHR: %p", (void*)this, reinterpret_cast<void*>(hrError));
         SPX_DBG_ASSERT(GetSite() != nullptr);
         InvokeOnSite([&](const SitePtr& site)
         {
@@ -274,11 +275,11 @@ void CSpxAudioPump::PumpThread(std::shared_ptr<CSpxAudioPump> keepAlive, std::sh
         }
         catch (const std::exception& e)
         {
-            SPX_DBG_TRACE_ERROR("[%p]CSpxAudioPump::PumpThread(): pISpxAudioProcessor->SetFormat(nullptr) thrown exception, %s", (void*)this, e.what());
+            SPX_TRACE_ERROR("[%p]CSpxAudioPump::PumpThread(): pISpxAudioProcessor->SetFormat(nullptr) thrown exception, %s", (void*)this, e.what());
         }
         catch (SPXHR& hrError)
         {
-            SPX_DBG_TRACE_ERROR("[%p]CSpxAudioPump::PumpThread(): pISpxAudioProcessor->SetFormat(nullptr) thrown error: %p", (void*)this, reinterpret_cast<void*>(hrError));
+            SPX_TRACE_ERROR("[%p]CSpxAudioPump::PumpThread(): pISpxAudioProcessor->SetFormat(nullptr) thrown error: %p", (void*)this, reinterpret_cast<void*>(hrError));
         }
         processorFormatSet = false;
     }
@@ -309,7 +310,7 @@ void CSpxAudioPump::WaitForPumpIdle(std::unique_lock<std::mutex>& lock)
     }
 
     SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioPump::WaitForPumpIdle() ... post m_cv.wait_for(); state='%s' (requestedState='%s')", (void*)this, StateName[m_state], StateName[m_stateRequested]);
-    SPX_DBG_TRACE_WARNING_IF(m_state != State::Idle, "[%p]CSpxAudioPump::WaitForPumpIdle(): Unexpected: state != State::Idle; state='%s'", (void*)this, StateName[m_state]);
+    SPX_TRACE_WARNING_IF(m_state != State::Idle, "[%p]CSpxAudioPump::WaitForPumpIdle(): Unexpected: state != State::Idle; state='%s'", (void*)this, StateName[m_state]);
 }
 
 std::string CSpxAudioPump::GetPropertyValue(const std::string& key) const

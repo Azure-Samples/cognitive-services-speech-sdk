@@ -6,6 +6,7 @@
 //
 #include "stdafx.h"
 #include "event_helpers.h"
+#include "handle_table.h"
 
 namespace Microsoft {
 namespace CognitiveServices {

@@ -12,13 +12,13 @@
 #include <atomic>
 
 #ifdef _DEBUG
-#define SPX_CONFIG_INCLUDE_ALL_DBG 1
-#define SPX_CONFIG_INCLUDE_ALL 1
+#define SPX_CONFIG_DBG_TRACE_ALL 1
+#define SPX_CONFIG_TRACE_ALL 1
 #else
-#define SPX_CONFIG_INCLUDE_ALL 1
+#define SPX_CONFIG_TRACE_ALL 1
 #endif
 
-extern void SpxTraceMessage(int level, const char* pszTitle, bool enableDebugOutput, const char* fileName, const int lineNumber, const char* pszFormat, ...);
+extern void SpxTraceMessage(int level, const char* pszTitle, const char* fileName, const int lineNumber, const char* pszFormat, ...);
 #define __SPX_DO_TRACE_IMPL SpxTraceMessage
 
 #include "exception.h"

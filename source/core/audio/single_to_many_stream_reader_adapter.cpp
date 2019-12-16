@@ -62,8 +62,8 @@ CSpxSingleToManyStreamReaderAdapter::CSpxSingleToManyStreamReaderAdapter()
 CSpxSingleToManyStreamReaderAdapter::~CSpxSingleToManyStreamReaderAdapter()
 {
     SPX_DBG_TRACE_VERBOSE("CSpxSingleToManyStreamReaderAdapter::~CSpxSingleToManyStreamReaderAdapter");
-    SPX_ASSERT(m_clientCount == 0);
-    SPX_ASSERT(m_readersMap.size() == 0);
+    SPX_DBG_ASSERT(m_clientCount == 0);
+    SPX_DBG_ASSERT(m_readersMap.size() == 0);
 
     Term();
 }
@@ -84,7 +84,7 @@ void CSpxSingleToManyStreamReaderAdapter::SetSingletonReader(std::shared_ptr<ISp
     m_sourceStreamReaderInitNeeded = false;
     m_audioStarted = false;
 
-    SPX_DBG_TRACE_INFO("CSpxSingleToManyStreamReaderAdapter::SetSingletonReader: %p", (void*)m_sourceSingletonStreamReader.get());
+    SPX_TRACE_INFO("CSpxSingleToManyStreamReaderAdapter::SetSingletonReader: %p", (void*)m_sourceSingletonStreamReader.get());
 }
 
 void CSpxSingleToManyStreamReaderAdapter::InitializeServices()
@@ -152,7 +152,7 @@ void CSpxSingleToManyStreamReaderAdapter::ClosePumpAndStream()
     {
         m_singletonAudioPump->StopPump();
 
-        SPX_DBG_TRACE_INFO("CSpxSingleToManyStreamReaderAdapter::ClosePumpAndStream: Closing the singleton: %p", (void*)m_sourceSingletonStreamReader.get());
+        SPX_TRACE_INFO("CSpxSingleToManyStreamReaderAdapter::ClosePumpAndStream: Closing the singleton: %p", (void*)m_sourceSingletonStreamReader.get());
         m_sourceSingletonStreamReader->Close();
         ResetAudioProcessing();
 
@@ -170,7 +170,7 @@ void CSpxSingleToManyStreamReaderAdapter::ReconnectClient(long clientId, std::sh
     m_readersMap.emplace(std::make_pair(clientId, reader));
     EnsureAudioStreamStarted();
     m_clientCount++;
-    SPX_ASSERT((size_t)m_clientCount == m_readersMap.size());
+    SPX_DBG_ASSERT((size_t)m_clientCount == m_readersMap.size());
 }
 
 void CSpxSingleToManyStreamReaderAdapter::DisconnectClient(long clientId)
@@ -182,7 +182,7 @@ void CSpxSingleToManyStreamReaderAdapter::DisconnectClient(long clientId)
     {
         m_clientCount--;
         SPX_DBG_TRACE_INFO("CSpxSingleToManyStreamReaderAdapter::DisconnectClient[%ld]: %d", clientId, m_clientCount);
-        SPX_ASSERT((size_t)m_clientCount == m_readersMap.size());
+        SPX_DBG_ASSERT((size_t)m_clientCount == m_readersMap.size());
 
         if (m_clientCount == 0)
         {
@@ -191,7 +191,7 @@ void CSpxSingleToManyStreamReaderAdapter::DisconnectClient(long clientId)
     }
     else
     {
-        SPX_DBG_TRACE_ERROR("CSpxSingleToManyStreamReaderAdapter::DisconnectClient[%ld]: 0 clients", clientId);
+        SPX_TRACE_ERROR("CSpxSingleToManyStreamReaderAdapter::DisconnectClient[%ld]: 0 clients", clientId);
     }
 }
 
@@ -227,7 +227,7 @@ void CSpxSingleToManyStreamReaderAdapter::Error(const std::string& error)
     // TODO: Direct this to clients
     if (!error.empty())
     {
-        SPX_DBG_TRACE_ERROR("CSpxSingleToManyStreamReaderAdapter::Error: '%s'", error.c_str());
+        SPX_TRACE_ERROR("CSpxSingleToManyStreamReaderAdapter::Error: '%s'", error.c_str());
 
         // We may need to get this on a separate thread if locks overlap.
         HandleDownstreamError(error);

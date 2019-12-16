@@ -171,7 +171,7 @@ public:
 
     static std::string BuildSsml(const std::string& text, const std::string& language, const std::string& voice)
     {
-        std::map<std::string, std::string> languageToDefaultVoice = {
+        std::map<const char*, const char*> languageToDefaultVoice = {
             { "ar-EG", "Microsoft Server Speech Text to Speech Voice (ar-EG, Hoda)" },
             { "ar-SA", "Microsoft Server Speech Text to Speech Voice (ar-SA, Naayf)" },
             { "bg-BG", "Microsoft Server Speech Text to Speech Voice (bg-BG, Ivan)" },
@@ -233,16 +233,17 @@ public:
 
         if (chosenVoice.empty())
         {
+            // If it's not found, use en-US default voice
+            chosenVoice = "Microsoft Server Speech Text to Speech Voice (en-US, JessaRUS)";
+
             // Set default voice based on language
-            auto iter = languageToDefaultVoice.find(chosenLanguage);
-            if (iter != languageToDefaultVoice.end())
+            for (auto item : languageToDefaultVoice)
             {
-                chosenVoice = iter->second;
-            }
-            else
-            {
-                // Not found, use en-US default voice
-                chosenVoice = "Microsoft Server Speech Text to Speech Voice (en-US, JessaRUS)";
+                if (PAL::stricmp(item.first, chosenLanguage.c_str()) == 0)
+                {
+                    chosenVoice = item.second;
+                    break;
+                }
             }
         }
 

@@ -24,29 +24,65 @@ namespace CognitiveServices {
 namespace Speech {
 namespace USP {
 
+namespace event
+{
+    // Top level Array keys for events
+    const char* keys::array::ReceivedMessages = "ReceivedMessages";
+    const char* keys::array::Metrics = "Metrics";
+
+    // Received Message event Keys
+    const char* keys::received::Audio = "audio";
+    const char* keys::received::AudioMetadata = "audio.metadata";
+    const char* keys::received::Response = "response";
+
+    const char* keys::Value = "value";
+    const char* keys::EventType = "EventType";
+    const char* keys::Name = "name";
+    const char* keys::Start = "Start";
+    const char* keys::End = "End";
+    const char* keys::DeviceId = "DeviceId";
+    const char* keys::Id = "Id";
+    const char* keys::Memory = "Memory";
+    const char* keys::CPU = "CPU";
+    const char* keys::Error = "Error";
+    const char* keys::Status = "Status";
+
+    // Metric event name keys
+    const char* name::AudioPlayback = "audio:playback";
+    const char* name::AudioStart = "AudioStart";
+    const char* name::Microphone = "Microphone";
+    const char* name::ListeningTrigger = "ListeningTrigger";
+    const char* name::Connection = "Connection";
+    const char* name::Device = "device";
+    const char* name::Notification = "notification";
+    const char* name::SDK = "sdk";
+    const char* name::PhraseLatency = "PhraseLatencyMs";
+    const char* name::FirstHypothesisLatency = "FirstHypothesisLatencyMs";
+}
+
 constexpr std::size_t MaxMessagesToRecord{ 50 };
 
-const std::array<std::tuple<IncomingMsgType, const std::string*>, static_cast<size_t>(countOfMsgTypes)> message_mappings{ {
-    std::make_tuple(turnStart, &path::turnStart),
-    std::make_tuple(turnEnd, &path::turnEnd),
-    std::make_tuple(speechStartDetected, &path::speechStartDetected),
-    std::make_tuple(speechEndDetected, &path::speechEndDetected),
-    std::make_tuple(speechHypothesis, &path::speechHypothesis),
-    std::make_tuple(speechFragment, &path::speechFragment),
-    std::make_tuple(speechPhrase, &path::speechPhrase),
-    std::make_tuple(translationHypothesis, &path::translationHypothesis),
-    std::make_tuple(translationPhrase, &path::translationPhrase),
-    std::make_tuple(translationSynthesis, &path::translationSynthesis),
-    std::make_tuple(translationSynthesisEnd, &path::translationSynthesisEnd),
-    std::make_tuple(translationResponse, &path::translationResponse),
-    std::make_tuple(audio, &event::keys::received::Audio),
-    std::make_tuple(audioMetadata, &event::keys::received::AudioMetadata),
-    std::make_tuple(response, &event::keys::received::Response),
-    std::make_tuple(audioStart, &path::audioStart),
-    std::make_tuple(audioEnd, &path::audioEnd)
+const std::array<std::tuple<IncomingMsgType, const char*>, static_cast<size_t>(countOfMsgTypes)> message_mappings{ {
+    std::make_tuple(turnStart, path::turnStart),
+    std::make_tuple(turnEnd, path::turnEnd),
+    std::make_tuple(speechStartDetected, path::speechStartDetected),
+    std::make_tuple(speechEndDetected, path::speechEndDetected),
+    std::make_tuple(speechHypothesis, path::speechHypothesis),
+    std::make_tuple(speechFragment, path::speechFragment),
+    std::make_tuple(speechPhrase, path::speechPhrase),
+    std::make_tuple(translationHypothesis, path::translationHypothesis),
+    std::make_tuple(translationPhrase, path::translationPhrase),
+    std::make_tuple(translationSynthesis, path::translationSynthesis),
+    std::make_tuple(translationSynthesisEnd, path::translationSynthesisEnd),
+    std::make_tuple(translationResponse, path::translationResponse),
+    std::make_tuple(audio, event::keys::received::Audio),
+    std::make_tuple(audioMetadata, event::keys::received::AudioMetadata),
+    std::make_tuple(response, event::keys::received::Response),
+    std::make_tuple(audioStart, path::audioStart),
+    std::make_tuple(audioEnd, path::audioEnd)
 } };
 
-const std::string* get_message_name(const IncomingMsgType type)
+const char* get_message_name(const IncomingMsgType type)
 {
     /* No point in using a map to such a small collection, loss of locality and heap copies probably worse than O(n) vs O(log(n)) */
     for (auto& m : message_mappings)
@@ -63,7 +99,7 @@ IncomingMsgType message_from_name(const std::string& name)
 {
     for (const auto& m : message_mappings)
     {
-        const auto& n = *std::get<1>(m);
+        const auto& n = std::get<1>(m);
         if (name == n)
         {
             return std::get<0>(m);
@@ -345,7 +381,7 @@ static nlohmann::json telemetry_add_recvmsgs(const TELEMETRY_DATA& telemetry_obj
     {
         if (!telemetry_object.receivedMsgs[i].is_null())
         {
-            auto recvObj = PropertybagInitializeWithKeyValue(*get_message_name(static_cast<IncomingMsgType>(i)), telemetry_object.receivedMsgs[i]);
+            auto recvObj = PropertybagInitializeWithKeyValue(get_message_name(static_cast<IncomingMsgType>(i)), telemetry_object.receivedMsgs[i]);
             json_array.push_back(recvObj);
         }
     }

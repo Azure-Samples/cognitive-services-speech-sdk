@@ -321,6 +321,7 @@ std::string RecordedDataReader::getNextBase64EncodedData()
     if (!m_frameType.empty())
     {
         auto iType = std::stoi(m_frameType);
+        UNUSED(iType); // unused in release builds
         SPX_DBG_ASSERT(iType == 1 || iType == 2 || iType == 3);
     }
     m_timestamp = getField(header, TIMESTAMP_STRING);

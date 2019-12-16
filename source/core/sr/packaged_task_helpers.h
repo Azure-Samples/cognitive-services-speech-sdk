@@ -73,7 +73,7 @@ public:
             std::future_status status = future.wait_for(std::chrono::milliseconds(5000));
             UNUSED(status); // Release builds
 
-            SPX_DBG_TRACE_ERROR_IF(status == std::future_status::timeout, "************************** Task<void> %p did not complete. This may corrupt your memory", (void*)&future);
+            SPX_TRACE_ERROR_IF(status == std::future_status::timeout, "************************** Task<void> %p did not complete. This may corrupt your memory", (void*)&future);
 
             lock.lock();
             m_runAsyncFutures.pop_front();
@@ -89,7 +89,7 @@ public:
             std::future_status status = future.wait_for(std::chrono::milliseconds(5000));
             UNUSED(status); // Release builds
 
-            SPX_DBG_TRACE_ERROR_IF(status == std::future_status::timeout, "************************** Task<ISpxRecognitionResult> %p did not complete. This may corrupt your memory", (void*)&future);
+            SPX_TRACE_ERROR_IF(status == std::future_status::timeout, "************************** Task<ISpxRecognitionResult> %p did not complete. This may corrupt your memory", (void*)&future);
 
             lock.lock();
             m_runAsyncFutures2.pop_front();

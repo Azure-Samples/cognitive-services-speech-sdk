@@ -47,14 +47,14 @@ namespace Impl {
         SPX_DBG_TRACE_SERVICE_MAP_BEGIN();
 
 #define SPX_SERVICE_MAP_ENTRY(x)                                                        \
-        if (PAL::stricmp(PAL::GetTypeName<x>().c_str(), serviceName) == 0)              \
+        if (PAL::stricmp(SpxTypeName(x), serviceName) == 0)                             \
         {                                                                               \
             SPX_DBG_TRACE_SERVICE_MAP_FOUND_IT();                                       \
             return SpxSharedPtrFromThis<x>((x*)this);                                   \
         }
 
 #define SPX_SERVICE_MAP_ENTRY_OBJECT(x, y)                                              \
-        if (PAL::stricmp(PAL::GetTypeName<x>().c_str(), serviceName) == 0)              \
+        if (PAL::stricmp(SpxTypeName(x), serviceName) == 0)                             \
         {                                                                               \
             SPX_DBG_TRACE_SERVICE_MAP_FOUND_IT();                                       \
             return SpxQueryInterface<x>(y);                                     \
@@ -100,7 +100,7 @@ std::shared_ptr<I> SpxQueryService(std::shared_ptr<ISpxInterfaceBase> servicePro
 }
 
 template <class I, class T>
-inline std::shared_ptr<I> SpxQueryService(std::shared_ptr<T> serviceProvider, const char* serviceName)
+std::shared_ptr<I> SpxQueryService(std::shared_ptr<T> serviceProvider, const char* serviceName)
 {
     auto provider = SpxQueryInterface<ISpxServiceProvider>(serviceProvider);
     if (provider != nullptr)
@@ -114,9 +114,9 @@ inline std::shared_ptr<I> SpxQueryService(std::shared_ptr<T> serviceProvider, co
 }
 
 template <class I, class T>
-inline std::shared_ptr<I> SpxQueryService(std::shared_ptr<T> serviceProvider)
+std::shared_ptr<I> SpxQueryService(std::shared_ptr<T> serviceProvider)
 {
-    return SpxQueryService<I>(serviceProvider, PAL::GetTypeName<I>().c_str());
+    return SpxQueryService<I>(serviceProvider, SpxTypeName(I));
 }
 
 template <typename I, typename T, typename F>

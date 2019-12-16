@@ -188,7 +188,7 @@ namespace ConversationTranslation {
 
             case ValueType::Unknown:
             default:
-                SPX_DBG_TRACE_ERROR("Don't know how to serialize value of type '%d'. Skipping...", m_type);
+                SPX_TRACE_ERROR("Don't know how to serialize value of type '%d'. Skipping...", m_type);
                 break;
         }
     }
@@ -223,7 +223,7 @@ namespace ConversationTranslation {
             json json = json::parse(jsonString, nullptr, false);
             if (json.is_discarded() || json.is_object() != true)
             {
-                SPX_DBG_TRACE_ERROR("Could not parse the JSON string OR unexpected JSON value: '%s'", jsonString.c_str());
+                SPX_TRACE_ERROR("Could not parse the JSON string OR unexpected JSON value: '%s'", jsonString.c_str());
                 return nullptr;
             }
 
@@ -231,7 +231,7 @@ namespace ConversationTranslation {
             string msgTypeStr;
             if (!TryReadString(json, KEY_TYPE, msgTypeStr))
             {
-                SPX_DBG_TRACE_ERROR("JSON does not contain the '%s' key: '%s'", KEY_TYPE, jsonString.c_str());
+                SPX_TRACE_ERROR("JSON does not contain the '%s' key: '%s'", KEY_TYPE, jsonString.c_str());
                 return nullptr;
             }
 
@@ -241,7 +241,7 @@ namespace ConversationTranslation {
             if (MessageType_FromString(msgTypeStr.c_str(), &msgType))
             {
                 // unknown message type
-                SPX_DBG_TRACE_ERROR("Unknown message type '%s' in JSON: '%s'", msgTypeStr.c_str(), jsonString.c_str());
+                SPX_TRACE_ERROR("Unknown message type '%s' in JSON: '%s'", msgTypeStr.c_str(), jsonString.c_str());
                 return nullptr;
             }
 
@@ -277,7 +277,7 @@ namespace ConversationTranslation {
                 case MessageType::Unknown:
                 default:
                     // don't know how to parse this
-                    SPX_DBG_TRACE_ERROR("Don't know how to parse '%s' type in JSON: '%s'", msgTypeStr.c_str(), jsonString.c_str());
+                    SPX_TRACE_ERROR("Don't know how to parse '%s' type in JSON: '%s'", msgTypeStr.c_str(), jsonString.c_str());
                     return nullptr;
             }
 
@@ -290,20 +290,21 @@ namespace ConversationTranslation {
                 }
                 else
                 {
-                    SPX_DBG_TRACE_ERROR("Could not deserialize the '%s' JSON message into a type: '%s'", msgTypeStr.c_str(), jsonString.c_str());
+                    SPX_TRACE_ERROR("Could not deserialize the '%s' JSON message into a type: '%s'", msgTypeStr.c_str(), jsonString.c_str());
                 }
             }
         }
         catch (exception& ex)
         {
-            SPX_DBG_TRACE_ERROR(
+            SPX_TRACE_ERROR(
                 "Exception while parsing JSON string. Cause: '%s'. JSON: '%s'",
                 ex.what(),
                 jsonString.c_str());
+            UNUSED(ex); // unused in release builds
         }
         catch (...)
         {
-            SPX_DBG_TRACE_ERROR(
+            SPX_TRACE_ERROR(
                 "Exception while parsing JSON string. JSON: '%s'",
                 jsonString.c_str());
         }
@@ -322,16 +323,17 @@ namespace ConversationTranslation {
         }
         catch (exception& ex)
         {
-            SPX_DBG_TRACE_ERROR(
+            SPX_TRACE_ERROR(
                 "Failed to serialize the current '%s' conversation message instance. Reason: %s",
                 MessageTypeStrings(Type),
                 ex.what());
+            UNUSED(ex); // unused in release builds
 
             throw;
         }
         catch (...)
         {
-            SPX_DBG_TRACE_ERROR(
+            SPX_TRACE_ERROR(
                 "Failed to serialize the current '%s' conversation message instance.",
                 MessageTypeStrings(Type));
 

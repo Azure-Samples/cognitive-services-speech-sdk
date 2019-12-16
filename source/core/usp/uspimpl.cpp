@@ -54,6 +54,173 @@ namespace CognitiveServices {
 namespace Speech {
 namespace USP {
 
+const char* path::speechHypothesis = "speech.hypothesis";
+const char* path::speechPhrase = "speech.phrase";
+const char* path::speechFragment = "speech.fragment";
+const char* path::speechKeyword = "speech.keyword";
+const char* path::turnStart = "turn.start";
+const char* path::turnEnd = "turn.end";
+const char* path::speechStartDetected = "speech.startDetected";
+const char* path::speechEndDetected = "speech.endDetected";
+const char* path::translationHypothesis = "translation.hypothesis";
+const char* path::translationPhrase = "translation.phrase";
+const char* path::translationSynthesis = "translation.synthesis";
+const char* path::translationSynthesisEnd = "translation.synthesis.end";
+const char* path::translationResponse = "translation.response";
+const char* path::audio = "audio";
+const char* path::audioMetaData = "audio.metadata";
+const char* path::audioStart = "audio.start";
+const char* path::audioEnd = "audio.end";
+
+const char* json_properties::offset = "Offset";
+const char* json_properties::duration = "Duration";
+const char* json_properties::status = "Status";
+const char* json_properties::text = "Text";
+const char* json_properties::recoStatus = "RecognitionStatus";
+const char* json_properties::displayText = "DisplayText";
+const char* json_properties::context = "context";
+const char* json_properties::tag = "serviceTag";
+const char* json_properties::speaker = "SpeakerId";
+const char* json_properties::nbest = "NBest";
+const char* json_properties::confidence = "Confidence";
+const char* json_properties::display = "Display";
+
+const char* json_properties::translation = "Translation";
+const char* json_properties::translationStatus = "TranslationStatus";
+const char* json_properties::failureReason = "FailureReason";
+const char* json_properties::translations = "Translations";
+const char* json_properties::synthesisStatus = "SynthesisStatus";
+const char* json_properties::lang = "Language";
+const char* json_properties::translationLanguage = "TranslationLanguage";
+
+const char* json_properties::metadata = "Metadata";
+const char* json_properties::type = "Type";
+const char* json_properties::data = "Data";
+const char* json_properties::wordBoundary = "WordBoundary";
+const char* json_properties::lowerText = "text";
+
+const char* json_properties::primaryLanguage = "PrimaryLanguage";
+const char* json_properties::speechHypothesis = "SpeechHypothesis";
+const char* json_properties::speechPhrase = "SpeechPhrase";
+
+const char* endpoint::protocol = "wss://";
+
+const char* endpoint::outputFormatQueryParam = "format=";
+const char* endpoint::langQueryParam = "language=";
+const char* endpoint::deploymentIdQueryParam = "cid=";
+const char* endpoint::profanityQueryParam = "profanity=";
+const char* endpoint::initialSilenceTimeoutQueryParam = "initialSilenceTimeoutMs=";
+const char* endpoint::endSilenceTimeoutQueryParam = "endSilenceTimeoutMs=";
+const char* endpoint::stableIntermediateThresholdQueryParam = "stableIntermediateThreshold=";
+const char* endpoint::storeAudioQueryParam = "storeAudio=";
+const char* endpoint::wordLevelTimestampsQueryParam = "wordLevelTimestamps=";
+
+const char* endpoint::outputFormatSimple = "simple";
+const char* endpoint::outputFormatDetailed = "detailed";
+
+const char* endpoint::postProcessingTrueText = "TrueText";
+
+const char* endpoint::profanityMasked = "masked";
+const char* endpoint::profanityRemoved = "removed";
+const char* endpoint::profanityRaw = "raw";
+
+const char* endpoint::unifiedspeech::hostnameSuffix = ".stt.speech.microsoft.com";
+const char* endpoint::unifiedspeech::pathPrefix = "/speech/recognition/";
+const char* endpoint::unifiedspeech::pathSuffix = "/cognitiveservices/v1";
+
+const char* endpoint::unifiedspeech::postprocessingQueryParam = "postprocessing=";
+const char* endpoint::unifiedspeech::lidEnabledQueryParam = "lidEnabled=";
+
+const std::vector<std::string> endpoint::unifiedspeech::queryParameters = {
+
+    endpoint::langQueryParam,
+    endpoint::deploymentIdQueryParam,
+    endpoint::initialSilenceTimeoutQueryParam,
+    endpoint::endSilenceTimeoutQueryParam,
+    endpoint::storeAudioQueryParam,
+
+    endpoint::outputFormatQueryParam,
+    endpoint::wordLevelTimestampsQueryParam,
+    endpoint::profanityQueryParam,
+    endpoint::stableIntermediateThresholdQueryParam,
+    endpoint::unifiedspeech::postprocessingQueryParam,
+
+    lidEnabledQueryParam
+};
+
+const char* endpoint::translation::hostnameSuffix = ".s2s.speech.microsoft.com";
+const char* endpoint::translation::path = "/speech/translation/cognitiveservices/v1";
+
+const char* endpoint::translation::fromQueryParam = "from=";
+const char* endpoint::translation::toQueryParam = "to=";
+const char* endpoint::translation::voiceQueryParam = "voice=";
+const char* endpoint::translation::featuresQueryParam = "features=";
+const char* endpoint::translation::stableTranslationQueryParam = "stableTranslation=";
+
+const char* endpoint::translation::requireVoice = "texttospeech";
+
+const std::vector<std::string> endpoint::translation::queryParameters = {
+
+    endpoint::translation::fromQueryParam,
+    endpoint::translation::toQueryParam,
+    endpoint::translation::voiceQueryParam,
+
+    endpoint::deploymentIdQueryParam,
+    endpoint::initialSilenceTimeoutQueryParam,
+    endpoint::endSilenceTimeoutQueryParam,
+    endpoint::storeAudioQueryParam,
+
+    endpoint::outputFormatQueryParam,
+    endpoint::wordLevelTimestampsQueryParam,
+    endpoint::profanityQueryParam,
+    endpoint::stableIntermediateThresholdQueryParam,
+
+    endpoint::translation::stableTranslationQueryParam
+};
+
+const char* endpoint::luis::hostname = "speech.platform.bing.com";
+const char* endpoint::luis::pathPrefix1 = "/speech/";
+const char* endpoint::luis::pathPrefix2 = "/recognition/";
+const char* endpoint::luis::pathSuffix = "/cognitiveservices/v1";
+
+const std::vector<std::string> endpoint::luis::queryParameters = {
+    endpoint::langQueryParam,
+    endpoint::outputFormatQueryParam
+};
+
+const char* endpoint::dialog::url = ".convai.speech.microsoft.com";
+
+const char* endpoint::dialog::resourcePath::botFramework = "";
+const char* endpoint::dialog::resourcePath::customCommands = "/commands";
+
+const char* endpoint::dialog::suffix = "/api";
+
+const char* endpoint::dialog::version::botFramework = "/v3";
+const char* endpoint::dialog::version::customCommands = "/v1";
+
+const char* endpoint::dialog::customVoiceDeploymentIdsQueryParam = "voiceDeploymentId=";
+
+const std::vector<std::string> endpoint::dialog::queryParameters = {
+    endpoint::langQueryParam,
+    endpoint::dialog::customVoiceDeploymentIdsQueryParam
+};
+
+const char* endpoint::conversationTranscriber::hostname = ".cts.speech.microsoft.com";
+const char* endpoint::conversationTranscriber::pathPrefix1 = "transcribe.";
+const char* endpoint::conversationTranscriber::pathPrefix2 = "/speech/recognition";
+const char* endpoint::conversationTranscriber::pathSuffixMultiAudio = "/multiaudio";
+
+const std::vector<std::string> endpoint::conversationTranscriber::queryParameters = {
+    endpoint::langQueryParam,
+    endpoint::outputFormatQueryParam
+};
+
+const char* endpoint::speechSynthesis::hostnameSuffix = ".tts.speech.microsoft.com";
+const char* endpoint::speechSynthesis::path = "/cognitiveservices/websocket/v1";
+
+const std::vector<std::string> endpoint::speechSynthesis::queryParameters = { };
+
+
 using namespace std;
 using namespace Microsoft::CognitiveServices::Speech::Impl;
 
@@ -1156,7 +1323,7 @@ void Connection::Impl::OnTransportData(TransportResponse *response, void *contex
     string requestId = HTTPHeaders_FindHeaderValue(response->responseHeader, headers::requestId);
     if (!connection->m_activeRequestIds.count(requestId))
     {
-        if (requestId.empty() || path != path::turnStart)
+        if (requestId.empty() || strncmp(path, path::turnStart, strlen(path::turnStart)) != 0)
         {
             PROTOCOL_VIOLATION("Unexpected request id '%s', Path: %s", requestId.c_str(), path);
             MetricsUnexpectedRequestId(requestId);
@@ -1191,13 +1358,14 @@ void Connection::Impl::OnTransportData(TransportResponse *response, void *contex
 
     if (response->frameType == FRAME_TYPE_BINARY)
     {
-        if (path == path::translationSynthesis || path == path::audio)
+        if (strncmp(path, path::translationSynthesis, strlen(path::translationSynthesis)) == 0 ||
+            strncmp(path, path::audio, strlen(path::audio)) == 0)
         {
             // streamId is optional
             auto streamId = HTTPHeaders_FindHeaderValue(response->responseHeader, headers::streamId);
 
             AudioOutputChunkMsg msg;
-            if (path == path::audio && connection->m_streamIdLangMap.size() > 0)
+            if (strncmp(path, path::audio, strlen(path::audio)) == 0 && connection->m_streamIdLangMap.size() > 0)
             {
                 SPX_DBG_TRACE_VERBOSE("m_streamIdLangMap has data, will FillLanguageForAudioOutputChunkMsg");
                 connection->FillLanguageForAudioOutputChunkMsg(streamId, path, msg);
@@ -1215,13 +1383,14 @@ void Connection::Impl::OnTransportData(TransportResponse *response, void *contex
     else if (response->frameType == FRAME_TYPE_TEXT)
     {
         auto json = (response->bufferSize > 0) ? nlohmann::json::parse(response->buffer, response->buffer + response->bufferSize) : nlohmann::json();
-        if (path == path::speechStartDetected || path == path::speechEndDetected)
+        if (strncmp(path, path::speechStartDetected, strlen(path::speechStartDetected)) == 0 ||
+            strncmp(path, path::speechEndDetected, strlen(path::speechEndDetected)) == 0)
         {
             auto offsetObj = json[json_properties::offset];
             // For whatever reason, offset is sometimes missing on the end detected message.
             auto offset = offsetObj.is_null() ? 0 : offsetObj.get<OffsetType>();
 
-            if (path == path::speechStartDetected)
+            if (strncmp(path, path::speechStartDetected, strlen(path::speechStartDetected)) == 0)
             {
                 connection->Invoke([&] { callbacks->OnSpeechStartDetected({PAL::ToWString(json.dump()), offset}); });
             }
@@ -1230,7 +1399,7 @@ void Connection::Impl::OnTransportData(TransportResponse *response, void *contex
                 connection->Invoke([&] { callbacks->OnSpeechEndDetected({PAL::ToWString(json.dump()), offset}); });
             }
         }
-        else if (path == path::turnStart)
+        else if (strncmp(path, path::turnStart, strlen(path::turnStart)) == 0)
         {
             auto tag = json[json_properties::context][json_properties::tag].get<string>();
             if (requestId == connection->m_speechRequestId)
@@ -1244,7 +1413,7 @@ void Connection::Impl::OnTransportData(TransportResponse *response, void *contex
                 connection->Invoke([&] { callbacks->OnMessageStart({ PAL::ToWString(json.dump()), tag, requestId }); });
             }
         }
-        else if (path == path::turnEnd)
+        else if (strncmp(path, path::turnEnd, strlen(path::turnEnd)) == 0)
         {
             {
                 connection->m_activeRequestIds.erase(requestId);
@@ -1267,7 +1436,7 @@ void Connection::Impl::OnTransportData(TransportResponse *response, void *contex
                 connection->Invoke([&] { callbacks->OnMessageEnd({ requestId }); });
             }
         }
-        else if (path == path::speechKeyword)
+        else if (strncmp(path, path::speechKeyword, strlen(path::speechKeyword)) == 0)
         {
             auto status = ToKeywordVerificationStatus(json[json_properties::status].get<string>());
             auto offsetObj = json[json_properties::offset];
@@ -1285,7 +1454,8 @@ void Connection::Impl::OnTransportData(TransportResponse *response, void *contex
                                             PAL::ToWString(text) });
             });
         }
-        else if (path == path::speechHypothesis || path == path::speechFragment)
+        else if (strncmp(path, path::speechHypothesis, strlen(path::speechHypothesis)) == 0 ||
+                 strncmp(path, path::speechFragment, strlen(path::speechFragment)) == 0)
         {
             auto offset = json[json_properties::offset].get<OffsetType>();
             auto duration = json[json_properties::duration].get<DurationType>();
@@ -1296,7 +1466,7 @@ void Connection::Impl::OnTransportData(TransportResponse *response, void *contex
                 speaker = json[json_properties::speaker].get<string>();
             }
             auto language = RetrievePrimaryLanguage(json, path);
-            if (path == path::speechHypothesis)
+            if (strncmp(path, path::speechHypothesis, strlen(path::speechHypothesis)) == 0)
             {
                 connection->Invoke([&] {
                     callbacks->OnSpeechHypothesis({PAL::ToWString(json.dump()),
@@ -1319,7 +1489,7 @@ void Connection::Impl::OnTransportData(TransportResponse *response, void *contex
                 });
             }
         }
-        else if (path == path::speechPhrase)
+        else if (strncmp(path, path::speechPhrase, strlen(path::speechPhrase)) == 0)
         {
             SpeechPhraseMsg result = connection->RetrieveSpeechPhraseResult(json);
             if (connection->isErrorRecognitionStatus(result.recognitionStatus))
@@ -1331,7 +1501,7 @@ void Connection::Impl::OnTransportData(TransportResponse *response, void *contex
                 connection->Invoke([&] { callbacks->OnSpeechPhrase(result); });
             }
         }
-        else if (path == path::translationHypothesis)
+        else if (strncmp(path, path::translationHypothesis, strlen(path::translationHypothesis)) == 0)
         {
             auto speechResult = RetrieveSpeechResult(json);
             auto translationResult = RetrieveTranslationResult(json[json_properties::translation], false);
@@ -1346,7 +1516,7 @@ void Connection::Impl::OnTransportData(TransportResponse *response, void *contex
                                                     move(translationResult)});
             });
         }
-        else if (path == path::translationPhrase)
+        else if (strncmp(path, path::translationPhrase, strlen(path::translationPhrase)) == 0)
         {
             auto status = ToRecognitionStatus(json.at(json_properties::recoStatus));
             if (connection->isErrorRecognitionStatus(status))
@@ -1377,7 +1547,7 @@ void Connection::Impl::OnTransportData(TransportResponse *response, void *contex
                 });
             }
         }
-        else if (path == path::translationSynthesisEnd)
+        else if (strncmp(path, path::translationSynthesisEnd, strlen(path::translationSynthesisEnd)) == 0)
         {
             string failureReason;
             bool synthesisSuccess = false;
@@ -1422,11 +1592,11 @@ void Connection::Impl::OnTransportData(TransportResponse *response, void *contex
                 connection->Invoke([&] { callbacks->OnError(false, ErrorCode::ServiceError, failureReason.c_str()); });
             }
         }
-        else if (path == path::translationResponse)
+        else if (strncmp(path, path::translationResponse, strlen(path::translationResponse)) == 0)
         {
             if (json.find(json_properties::speechHypothesis) != json.end())
             {
-                SPX_DBG_TRACE_INFO("Got translation response for %s.", json_properties::speechHypothesis.c_str());
+                SPX_DBG_TRACE_INFO("Got translation response for %s.", json_properties::speechHypothesis);
                 auto speechHypothesisJson = json[json_properties::speechHypothesis];
                 auto speechHypothesisMsg = RetrieveSpeechResult(speechHypothesisJson);
                 auto translationResult = RetrieveTranslationResult(json, true);
@@ -1448,7 +1618,7 @@ void Connection::Impl::OnTransportData(TransportResponse *response, void *contex
             }
             else if (json.find(json_properties::speechPhrase) != json.end())
             {
-                SPX_DBG_TRACE_INFO("Got translation response for %s.", json_properties::speechPhrase.c_str());
+                SPX_DBG_TRACE_INFO("Got translation response for %s.", json_properties::speechPhrase);
                 auto speechPhraseJson = json[json_properties::speechPhrase];
                 auto status = ToRecognitionStatus(speechPhraseJson.at(json_properties::recoStatus));
                 if (connection->isErrorRecognitionStatus(status))
@@ -1484,12 +1654,12 @@ void Connection::Impl::OnTransportData(TransportResponse *response, void *contex
             else
             {
                  PROTOCOL_VIOLATION("Invalid translation response, no %s or %s data. Json=%s",
-                     json_properties::speechPhrase.c_str(),
-                     json_properties::speechHypothesis.c_str(),
+                     json_properties::speechPhrase,
+                     json_properties::speechHypothesis,
                      json.dump().c_str());
             }
         }
-        else if (path == path::audioMetaData)
+        else if (strncmp(path, path::audioMetaData, strlen(path::audioMetaData)) == 0)
         {
             AudioOutputMetadataMsg msg;
             msg.requestId = requestId;
@@ -1530,7 +1700,7 @@ void Connection::Impl::OnTransportData(TransportResponse *response, void *contex
 
             connection->Invoke([&] { callbacks->OnAudioOutputMetadata(msg); });
         }
-        else if (path == path::audioStart)
+        else if (strncmp(path, path::audioStart, strlen(path::audioStart)) == 0)
         {
             auto streamId = HTTPHeaders_FindHeaderValue(response->responseHeader, headers::streamId);
             if (streamId == nullptr)
@@ -1560,7 +1730,7 @@ void Connection::Impl::OnTransportData(TransportResponse *response, void *contex
                 }
             }
         }
-        else if (path == path::audioEnd)
+        else if (strncmp(path, path::audioEnd, strlen(path::audioEnd)) == 0)
         {
             string failureReason;
             auto status = json[json_properties::status].get<string>();

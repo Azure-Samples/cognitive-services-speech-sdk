@@ -31,14 +31,14 @@ namespace Impl {
         SPX_DBG_TRACE_INTERFACE_MAP_BEGIN();
 
 #define SPX_INTERFACE_MAP_ENTRY(x)                                                      \
-        if (PAL::stricmp(PAL::GetTypeName<x>().c_str(), interfaceName) == 0)            \
+        if (PAL::stricmp(SpxTypeName(x), interfaceName) == 0)                           \
         {                                                                               \
             SPX_DBG_TRACE_INTERFACE_MAP_FOUND_IT();                                     \
             return static_cast<x*>(this);                                               \
         }
 
 #define SPX_INTERFACE_MAP_ENTRY2(x, y)                                                  \
-        if (PAL::stricmp(PAL::GetTypeName<x>().c_str(), interfaceName) == 0)            \
+        if (PAL::stricmp(SpxTypeName(x), interfaceName) == 0)                           \
         {                                                                               \
             SPX_DBG_TRACE_INTERFACE_MAP_FOUND_IT();                                     \
             return static_cast<x*>(static_cast<y*>(this));                              \

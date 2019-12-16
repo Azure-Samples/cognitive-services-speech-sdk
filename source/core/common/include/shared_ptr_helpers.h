@@ -16,7 +16,7 @@ namespace Impl {
 
 
 template <class T>
-inline std::shared_ptr<T> SpxSharedPtrFromThis(T* ptr)
+std::shared_ptr<T> SpxSharedPtrFromThis(T* ptr)
 {
     return ptr != nullptr
         ? ptr->shared_from_this()
@@ -24,7 +24,7 @@ inline std::shared_ptr<T> SpxSharedPtrFromThis(T* ptr)
 }
 
 template <class T>
-inline std::shared_ptr<T> SpxAllocSharedBuffer(size_t sizeInBytes)
+std::shared_ptr<T> SpxAllocSharedBuffer(size_t sizeInBytes)
 {
     auto ptr = reinterpret_cast<T*>(new uint8_t[sizeInBytes]);
     auto deleter = [](T* p) { delete [] reinterpret_cast<uint8_t*>(p); };

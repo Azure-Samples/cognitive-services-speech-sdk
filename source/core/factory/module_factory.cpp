@@ -53,7 +53,7 @@ CSpxModuleFactory::CSpxModuleFactory(const std::string& filename) :
     m_pfnCreateModuleObject(nullptr)
 {
     m_pfnCreateModuleObject = GetCreateModuleObjectFunctionPointer(filename);
-    SPX_DBG_TRACE_VERBOSE("Load Module Factory ('%s')... %s!", filename.c_str(), !m_pfnCreateModuleObject ? "NOT FOUND" : "SUCCEEDED");
+    SPX_TRACE_VERBOSE("Load Module Factory ('%s')... %s!", filename.c_str(), !m_pfnCreateModuleObject ? "NOT FOUND" : "SUCCEEDED");
 }
 
 void* CSpxModuleFactory::CreateObject(const char* className, const char* interfaceName)
@@ -99,18 +99,18 @@ CSpxModuleFactory::PCREATE_MODULE_OBJECT_FUNC CSpxModuleFactory::GetCreateModule
     #else
 
     void* handle = dlopen(filename.c_str(), RTLD_LOCAL | RTLD_LAZY);
-    SPX_DBG_TRACE_VERBOSE_IF(handle != NULL, "dlopen('%s') returned non-NULL", filename.c_str());
-    SPX_DBG_TRACE_VERBOSE_IF(handle == NULL, "dlopen('%s') returned NULL: %s", filename.c_str(), dlerror());
+    SPX_TRACE_VERBOSE_IF(handle != NULL, "dlopen('%s') returned non-NULL", filename.c_str());
+    SPX_TRACE_VERBOSE_IF(handle == NULL, "dlopen('%s') returned NULL: %s", filename.c_str(), dlerror());
 
     if (handle != NULL)
     {
         auto pfn = (PCREATE_MODULE_OBJECT_FUNC)dlsym(handle, "CreateModuleObject");
-        SPX_DBG_TRACE_VERBOSE_IF(pfn != NULL, "dlsym('CreateModuleObject') returned non-NULL");
-        SPX_DBG_TRACE_VERBOSE_IF(pfn == nullptr, "dlsym('CreateModuleObject') returned NULL: %s",  dlerror());
+        SPX_TRACE_VERBOSE_IF(pfn != NULL, "dlsym('CreateModuleObject') returned non-NULL");
+        SPX_TRACE_VERBOSE_IF(pfn == nullptr, "dlsym('CreateModuleObject') returned NULL: %s",  dlerror());
 
         if (pfn == nullptr)
         {
-            SPX_DBG_TRACE_VERBOSE("dlsym('CreateModuleObject') returned NULL: ... thus ... using libMicrosoft.CognitiveServices.Speech.so!CreateModuleObject directly");
+            SPX_TRACE_VERBOSE("dlsym('CreateModuleObject') returned NULL: ... thus ... using libMicrosoft.CognitiveServices.Speech.so!CreateModuleObject directly");
             pfn = CreateModuleObject;
         }
 

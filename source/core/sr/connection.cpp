@@ -29,7 +29,7 @@ std::shared_ptr<ISpxRecognizer> CSpxConnection::GetRecognizer()
     auto shared = m_recognizer.lock();
     if (shared == nullptr)
     {
-        SPX_DBG_TRACE_INFO("GetRecognizer from connection: recognizer is no longer valid");
+        SPX_TRACE_WARNING("GetRecognizer from connection: recognizer is no longer valid");
     }
     return shared;
 }

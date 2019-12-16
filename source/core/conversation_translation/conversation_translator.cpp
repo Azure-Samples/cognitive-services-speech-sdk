@@ -967,7 +967,7 @@ namespace ConversationTranslation {
     {
         SPX_DBG_TRACE_FUNCTION();
         auto state = GetState();
-        switch (GetState())
+        switch (state)
         {
             default:
             case ConversationState::Failed:

@@ -278,7 +278,7 @@ SPXAPI dialog_service_connector_send_activity_async(SPXRECOHANDLE h_connector, c
         }
         catch (const std::exception& ex)
         {
-            SPX_DBG_TRACE_VERBOSE("%s: Parsing received activity failed (what=%s)", __FUNCTION__, ex.what());
+            SPX_TRACE_ERROR("%s: Parsing received activity failed (what=%s)", __FUNCTION__, ex.what());
             return SPXERR_INVALID_ARG;
         }
 

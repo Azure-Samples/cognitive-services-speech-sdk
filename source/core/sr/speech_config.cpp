@@ -79,7 +79,7 @@ void CSpxSpeechConfig::SetServiceProperty(string name, string value, ServiceProp
     }
     else
     {
-        SPX_DBG_TRACE_ERROR("Unsupported channel: %d. Only UriQueryParameter is supported.", (int)channel);
+        SPX_TRACE_ERROR("Unsupported channel: %d. Only UriQueryParameter is supported.", (int)channel);
         SPX_THROW_HR(SPXERR_INVALID_ARG);
     }
 }
@@ -99,7 +99,7 @@ void CSpxSpeechConfig::SetProfanity(ProfanityOption profanity)
         valueStr = USP::endpoint::profanityRaw;
         break;
     default:
-        SPX_DBG_TRACE_ERROR("Unsupported profanity: %d.", (int)profanity);
+        SPX_TRACE_ERROR("Unsupported profanity: %d.", (int)profanity);
         SPX_THROW_HR(SPXERR_INVALID_ARG);
         break;
     }
@@ -114,7 +114,7 @@ void CSpxSpeechConfig::CheckRegionString(const char *region)
     {
         if (regionStr.find(pattern) != string::npos)
         {
-            SPX_DBG_TRACE_ERROR("Invalid region: %s.", region);
+            SPX_TRACE_ERROR("Invalid region: %s.", region);
             SPX_THROW_HR(SPXERR_INVALID_ARG);
         }
     }

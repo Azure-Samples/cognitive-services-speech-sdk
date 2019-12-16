@@ -142,12 +142,12 @@ public:
         }
         catch (const std::exception& ex)
         {
-            SPX_DBG_TRACE_ERROR("Exception caught in ~Connection(): %s", ex.what());
+            SPX_TRACE_ERROR("Exception caught in ~Connection(): %s", ex.what());
             (void)ex;
         }
         catch (...)
         {
-            SPX_DBG_TRACE_ERROR("Unknown exception happened during ~Connection().");
+            SPX_TRACE_ERROR("Unknown exception happened during ~Connection().");
         }
 
         if (m_connectionHandle != SPXHANDLE_INVALID)
@@ -185,7 +185,7 @@ private:
         // taking care we propagate this exception further.
         catch (abi::__forced_unwind&)
         {
-            SPX_DBG_TRACE_ERROR("__forced_unwind exception caught in FireConnectionEvent.");
+            SPX_TRACE_ERROR("__forced_unwind exception caught in FireConnectionEvent.");
             throw;
         }
 #endif
@@ -194,7 +194,7 @@ private:
             if (recognizer_event_handle_is_valid(event)) {
                 recognizer_event_handle_release(event);
             }
-            SPX_DBG_TRACE_ERROR("Caught exception in FireConnectionEvent(%s). Will rethrow later.", firingConnectedEvent ? "Connected" : "Disconnected");
+            SPX_TRACE_ERROR("Caught exception in FireConnectionEvent(%s). Will rethrow later.", firingConnectedEvent ? "Connected" : "Disconnected");
             throw;
         }
 

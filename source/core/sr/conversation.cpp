@@ -78,7 +78,7 @@ std::shared_ptr<ISpxSession> CSpxConversation::InternalQueryService(const char* 
         SPX_THROW_HR(SPXERR_INVALID_ARG);
     }
 
-    if (PAL::stricmp(PAL::GetTypeName<ISpxSession>().c_str(), serviceName) == 0)
+    if (PAL::stricmp(SpxTypeName(ISpxSession), serviceName) == 0)
     {
         return SpxQueryService<ISpxSession>(GetSite());
     }

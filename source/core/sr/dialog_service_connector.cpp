@@ -6,7 +6,6 @@
 //
 #include "stdafx.h"
 #include "recognizer.h"
-#include "handle_table.h"
 #include "service_helpers.h"
 #include "create_object_helpers.h"
 #include "property_id_2_name_map.h"

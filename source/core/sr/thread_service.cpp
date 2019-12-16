@@ -14,7 +14,7 @@ namespace Microsoft { namespace CognitiveServices { namespace Speech { namespace
 
     void CSpxThreadService::Init()
     {
-        SPX_DBG_TRACE_ERROR_IF(!m_threads.empty(), "Init should be called only once at the beginning.");
+        SPX_TRACE_ERROR_IF(!m_threads.empty(), "Init should be called only once at the beginning.");
         SPX_IFTRUE_THROW_HR(!m_threads.empty(), SPXERR_INVALID_STATE);
         m_threads =
         {
@@ -50,7 +50,7 @@ namespace Microsoft { namespace CognitiveServices { namespace Speech { namespace
 
     void CSpxThreadService::CheckInitialized()
     {
-        SPX_DBG_TRACE_ERROR_IF(m_threads.empty(), "Thread service should be initialized.");
+        SPX_TRACE_ERROR_IF(m_threads.empty(), "Thread service should be initialized.");
         SPX_IFTRUE_THROW_HR(m_threads.empty(), SPXERR_INVALID_STATE);
     }
 
@@ -95,7 +95,7 @@ namespace Microsoft { namespace CognitiveServices { namespace Speech { namespace
         {
             if (t.second->Id() == this_thread::get_id())
             {
-                SPX_DBG_TRACE_ERROR("Task cannot be executed synchronously on the thread"
+                SPX_TRACE_ERROR("Task cannot be executed synchronously on the thread"
                     " from the thread service in order to avoid potential deadlocks.");
                 SPX_THROW_HR(SPXERR_ABORT);
             }
@@ -143,7 +143,7 @@ namespace Microsoft { namespace CognitiveServices { namespace Speech { namespace
     {
         if (m_started)
         {
-            SPX_DBG_TRACE_ERROR("Thread has already been started");
+            SPX_TRACE_ERROR("Thread has already been started");
             SPX_THROW_HR(SPXERR_INVALID_STATE);
         }
 
@@ -162,7 +162,7 @@ namespace Microsoft { namespace CognitiveServices { namespace Speech { namespace
         }
         else if (m_thread.get_id() == this_thread::get_id())
         {
-            SPX_DBG_TRACE_ERROR("Thread cannot be stopped from its own task.");
+            SPX_TRACE_ERROR("Thread cannot be stopped from its own task.");
             SPX_THROW_HR(SPXERR_ABORT);
         }
 
@@ -335,8 +335,7 @@ namespace Microsoft { namespace CognitiveServices { namespace Speech { namespace
         // so that the next access to the thread object will result in an error.
         catch (const exception& e)
         {
-            UNUSED(e);
-            SPX_DBG_TRACE_ERROR("Exception caused termination of the thread service: %s", e.what());
+            SPX_TRACE_ERROR("Exception caused termination of the thread service: %s", e.what());
             self->MarkFailed(current_exception());
         }
 #ifdef SHOULD_HANDLE_FORCED_UNWIND
@@ -344,7 +343,7 @@ namespace Microsoft { namespace CognitiveServices { namespace Speech { namespace
         // taking care we propagate this exception further.
         catch (abi::__forced_unwind&)
         {
-            SPX_DBG_TRACE_ERROR("Caught forced unwind in a thread service thread, rethrowing");
+            SPX_TRACE_ERROR("Caught forced unwind in a thread service thread, rethrowing");
             self->MarkFailed(make_exception_ptr(runtime_error("Forced unwind")));
             self->CancelAllTasks();
             throw;
@@ -352,7 +351,7 @@ namespace Microsoft { namespace CognitiveServices { namespace Speech { namespace
 #endif
         catch (...)
         {
-            SPX_DBG_TRACE_ERROR("Unknown exception happened during task execution");
+            SPX_TRACE_ERROR("Unknown exception happened during task execution");
             self->MarkFailed(current_exception());
         }
 

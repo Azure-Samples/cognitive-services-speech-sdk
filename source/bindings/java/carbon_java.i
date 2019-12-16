@@ -20,7 +20,7 @@
 
 #if defined(ANDROID) || defined(__ANDROID__)
 #define __SPX_DO_TRACE_IMPL __swig_spx_do_trace_message
-void __swig_spx_do_trace_message(int level, const char* pszTitle, bool enableDebugOutput, const char* fileName, const int lineNumber, const char* pszFormat, ...) throw();
+void __swig_spx_do_trace_message(int level, const char* pszTitle, const char* fileName, const int lineNumber, const char* pszFormat, ...) throw();
 #endif
 %}
 
@@ -111,44 +111,42 @@ struct StdMapStringStringMapIterator {
 #include <android/log.h>
 #endif
 
-void __swig_spx_do_trace_message(int level, const char* pszTitle, bool enableDebugOutput, const char* fileName, const int lineNumber, const char* pszFormat, ...) throw()
+void __swig_spx_do_trace_message(int level, const char* pszTitle, const char* fileName, const int lineNumber, const char* pszFormat, ...) throw()
 {
-    if (enableDebugOutput)
+    UNUSED(level);
+    try
     {
-        UNUSED(level);
-        try 
+        va_list argptr;
+        va_start(argptr, pszFormat);
+
+        std::string format;
+        while (*pszFormat == '\n' || *pszFormat == '\r')
         {
-            va_list argptr;
-            va_start(argptr, pszFormat);
-
-            std::string format;
-            while (*pszFormat == '\n' || *pszFormat == '\r')
+            if (*pszFormat == '\r')
             {
-                if (*pszFormat == '\r')
-                {
-                    pszTitle = nullptr;
-                }
-
-                format += *pszFormat++;
+                pszTitle = nullptr;
             }
 
-            if (pszTitle != nullptr)
-            {
-                format += pszTitle;
-            }
+            format += *pszFormat++;
+        }
 
-            std::string fileNameOnly(fileName);
-            std::replace(fileNameOnly.begin(), fileNameOnly.end(), '\\', '/');
+        if (pszTitle != nullptr)
+        {
+            format += pszTitle;
+        }
 
-            std::string fileNameLineNumber = " " + fileNameOnly.substr(fileNameOnly.find_last_of('/', std::string::npos) + 1) + ":" + std::to_string(lineNumber) + " ";
+        std::string fileNameOnly(fileName);
+        std::replace(fileNameOnly.begin(), fileNameOnly.end(), '\\', '/');
 
-            format += fileNameLineNumber;
-            format += pszFormat;
+        std::string fileNameLineNumber = " " + fileNameOnly.substr(fileNameOnly.find_last_of('/', std::string::npos) + 1) + ":" + std::to_string(lineNumber) + " ";
 
-            if (format.length() < 1 || format[format.length() - 1] != '\n')
-            {
-                format += "\n";
-            }
+        format += fileNameLineNumber;
+        format += pszFormat;
+
+        if (format.length() < 1 || format[format.length() - 1] != '\n')
+        {
+            format += "\n";
+        }
 
 // In current NDK, static libc does not provide
 // symbols for stderr. In case, the dynamic libc does
@@ -157,27 +155,26 @@ void __swig_spx_do_trace_message(int level, const char* pszTitle, bool enableDeb
 // Thus, we drop all logging into logcat if we are in debug mode or
 // drain it if in release mode)
 #if defined(ANDROID) || defined(__ANDROID__)
-            int androidPrio = ANDROID_LOG_ERROR;
-            switch (level)
-            {
-                case __SPX_TRACE_LEVEL_INFO:    androidPrio = ANDROID_LOG_INFO;     break; // Trace_Info
-                case __SPX_TRACE_LEVEL_WARNING: androidPrio = ANDROID_LOG_WARN;     break; // Trace_Warning
-                case __SPX_TRACE_LEVEL_ERROR:   androidPrio = ANDROID_LOG_ERROR;    break; // Trace_Error
-                case __SPX_TRACE_LEVEL_VERBOSE: androidPrio = ANDROID_LOG_VERBOSE;  break; // Trace_Verbose
-                default: androidPrio = ANDROID_LOG_FATAL; break;
-            }
+        int androidPrio = ANDROID_LOG_ERROR;
+        switch (level)
+        {
+            case __SPX_TRACE_LEVEL_INFO:    androidPrio = ANDROID_LOG_INFO;     break; // Trace_Info
+            case __SPX_TRACE_LEVEL_WARNING: androidPrio = ANDROID_LOG_WARN;     break; // Trace_Warning
+            case __SPX_TRACE_LEVEL_ERROR:   androidPrio = ANDROID_LOG_ERROR;    break; // Trace_Error
+            case __SPX_TRACE_LEVEL_VERBOSE: androidPrio = ANDROID_LOG_VERBOSE;  break; // Trace_Verbose
+            default: androidPrio = ANDROID_LOG_FATAL; break;
+        }
 
-            __android_log_vprint(androidPrio, "SpeechSDKJavaBinding", format.c_str(), argptr);
+        __android_log_vprint(androidPrio, "SpeechSDKJavaBinding", format.c_str(), argptr);
 
 #else
-            vfprintf(stderr, format.c_str(), argptr);
+        vfprintf(stderr, format.c_str(), argptr);
 #endif
 
-            va_end(argptr);
-        }
-        catch(...)
-        {
-        } 
-    } //if (enableDebugOutput)
+        va_end(argptr);
+    }
+    catch(...)
+    {
+    }
 }
 %}

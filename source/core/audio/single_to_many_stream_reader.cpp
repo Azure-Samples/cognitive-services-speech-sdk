@@ -21,7 +21,7 @@ CSpxSingleToManyStreamReader::CSpxSingleToManyStreamReader(long id, SpxWAVEFORMA
 
 CSpxSingleToManyStreamReader::~CSpxSingleToManyStreamReader()
 {
-    SPX_DBG_TRACE_INFO("CSpxSingleToManyStreamReader(%ld)::dctor", m_id);
+    SPX_DBG_TRACE_INFO("CSpxSingleToManyStreamReader(%ld)::dtor", m_id);
 }
 
 void CSpxSingleToManyStreamReader::SetError(const std::string& error)
@@ -62,7 +62,7 @@ void CSpxSingleToManyStreamReader::Close()
     m_lastError.clear();
     if (!m_streamOpened)
     {
-        SPX_DBG_TRACE_ERROR("CSpxSingleToManyStreamReader(%ld)::Close - already closed", m_id);
+        SPX_TRACE_ERROR("CSpxSingleToManyStreamReader(%ld)::Close - already closed", m_id);
         return;
     }
 
@@ -80,7 +80,7 @@ void CSpxSingleToManyStreamReader::Init()
 {
     if (m_streamOpened)
     {
-        SPX_DBG_TRACE_ERROR("CSpxSingleToManyStreamReader(%ld)::Init already initialized", m_id);
+        SPX_TRACE_ERROR("CSpxSingleToManyStreamReader(%ld)::Init already initialized", m_id);
         return;
     }
 

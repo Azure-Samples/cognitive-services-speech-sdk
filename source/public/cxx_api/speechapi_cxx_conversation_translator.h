@@ -219,6 +219,7 @@ namespace Transcription {
 
         static inline bool ValidateHandle(SPXCONVERSATIONTRANSLATORHANDLE handle, const char* function)
         {
+            UNUSED(function); // not used in release builds
             SPX_DBG_TRACE_VERBOSE("%s: handle=0x%8p", function, (void*)handle);
             bool valid = ::conversation_translator_handle_is_valid(handle);
             SPX_DBG_TRACE_VERBOSE_IF(!valid, "%s: handle is INVALID!!!", function);

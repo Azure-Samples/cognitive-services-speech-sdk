@@ -6,6 +6,7 @@
 #include <assert.h>
 #include <cstring>
 #include "stdafx.h"
+#include "handle_table.h"
 #include "string_utils.h"
 #include "speechapi_cxx_translation_result.h"
 

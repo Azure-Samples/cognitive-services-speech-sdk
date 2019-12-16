@@ -40,25 +40,27 @@ namespace CognitiveServices {
 namespace Speech {
 namespace USP {
 
-    namespace path {
-        const std::string speechHypothesis = "speech.hypothesis";
-        const std::string speechPhrase = "speech.phrase";
-        const std::string speechFragment = "speech.fragment";
-        const std::string speechKeyword = "speech.keyword";
-        const std::string turnStart = "turn.start";
-        const std::string turnEnd = "turn.end";
-        const std::string speechStartDetected = "speech.startDetected";
-        const std::string speechEndDetected = "speech.endDetected";
-        const std::string translationHypothesis = "translation.hypothesis";
-        const std::string translationPhrase = "translation.phrase";
-        const std::string translationSynthesis = "translation.synthesis";
-        const std::string translationSynthesisEnd = "translation.synthesis.end";
-        const std::string translationResponse = "translation.response";
-        const std::string audio = "audio";
-        const std::string audioMetaData = "audio.metadata";
-        const std::string audioStart = "audio.start";
-        const std::string audioEnd = "audio.end";
-    }
+    class path
+    {
+    public:
+        static const char* speechHypothesis;
+        static const char* speechPhrase;
+        static const char* speechFragment;
+        static const char* speechKeyword;
+        static const char* turnStart;
+        static const char* turnEnd;
+        static const char* speechStartDetected;
+        static const char* speechEndDetected;
+        static const char* translationHypothesis;
+        static const char* translationPhrase;
+        static const char* translationSynthesis;
+        static const char* translationSynthesisEnd;
+        static const char* translationResponse;
+        static const char* audio;
+        static const char* audioMetaData;
+        static const char* audioStart;
+        static const char* audioEnd;
+    };
 
     namespace headers {
         constexpr auto userAgent = "User-Agent";
@@ -75,38 +77,40 @@ namespace USP {
         constexpr auto capitoConversationToken = "X-CapitoToken";
     }
 
-    namespace json_properties {
-        const std::string offset = "Offset";
-        const std::string duration = "Duration";
-        const std::string status = "Status";
-        const std::string text = "Text";
-        const std::string recoStatus = "RecognitionStatus";
-        const std::string displayText = "DisplayText";
-        const std::string context = "context";
-        const std::string tag = "serviceTag";
-        const std::string speaker = "SpeakerId";
-        const std::string nbest = "NBest";
-        const std::string confidence = "Confidence";
-        const std::string display = "Display";
+    class json_properties
+    {
+    public:
+        static const char* offset;
+        static const char* duration;
+        static const char* status;
+        static const char* text;
+        static const char* recoStatus;
+        static const char* displayText;
+        static const char* context;
+        static const char* tag;
+        static const char* speaker;
+        static const char* nbest;
+        static const char* confidence;
+        static const char* display;
 
-        const std::string translation = "Translation";
-        const std::string translationStatus = "TranslationStatus";
-        const std::string failureReason = "FailureReason";
-        const std::string translations = "Translations";
-        const std::string synthesisStatus = "SynthesisStatus";
-        const std::string lang = "Language";
-        const std::string translationLanguage = "TranslationLanguage";
+        static const char* translation;
+        static const char* translationStatus;
+        static const char* failureReason;
+        static const char* translations;
+        static const char* synthesisStatus;
+        static const char* lang;
+        static const char* translationLanguage;
 
-        const std::string metadata = "Metadata";
-        const std::string type = "Type";
-        const std::string data = "Data";
-        const std::string wordBoundary = "WordBoundary";
-        const std::string lowerText = "text";
+        static const char* metadata;
+        static const char* type;
+        static const char* data;
+        static const char* wordBoundary;
+        static const char* lowerText;
 
-        const std::string primaryLanguage = "PrimaryLanguage";
-        const std::string speechHypothesis = "SpeechHypothesis";
-        const std::string speechPhrase = "SpeechPhrase";
-    }
+        static const char* primaryLanguage;
+        static const char* speechHypothesis;
+        static const char* speechPhrase;
+    };
 
 }
 }

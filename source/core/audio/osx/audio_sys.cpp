@@ -5,10 +5,10 @@
 // audio_sys.c: Audio susbystem for macOS and iOS
 //
 #ifdef _DEBUG
-#define SPX_CONFIG_INCLUDE_ALL_DBG 1
-#define SPX_CONFIG_INCLUDE_ALL 1
+#define SPX_CONFIG_DBG_TRACE_ALL 1
+#define SPX_CONFIG_TRACE_ALL 1
 #else
-#define SPX_CONFIG_INCLUDE_ALL 1
+#define SPX_CONFIG_TRACE_ALL 1
 #endif
 
 #include "trace_message.h"
@@ -137,7 +137,7 @@ static void logOSStatusError(OSStatus error, const char *operation)
     char message[1024];
     snprintf(message, 1024, "Error: %s (%s)", operation, errorString);
     LogError("%s", message);
-    SPX_DBG_TRACE_ERROR("%s", message);
+    SPX_TRACE_ERROR("%s", message);
 }
 
 static void audioQueueDispose(AUDIO_SYS_DATA* audioData)
@@ -151,7 +151,7 @@ static void audioQueueDispose(AUDIO_SYS_DATA* audioData)
         logOSStatusError(error, "AudioQueueDispose failed");
     }
     audioData->audioQueue = nullptr;
-    SPX_DBG_TRACE_ERROR("AudioQueue destroyed.");
+    SPX_DBG_TRACE_INFO("AudioQueue destroyed.");
     if (audioData->stopLock) {
         Unlock(audioData->stopLock);
     }
@@ -194,7 +194,7 @@ static void audioQueueInputCallback(void *inUserData,
             int error = pushBuffer(audioData, inBuffer);
             if (0 != error)
             {
-                SPX_DBG_TRACE_ERROR("push Buffer failed; n buffers on stack: %s", audioData->nStackedBuffers);
+                SPX_TRACE_ERROR("push Buffer failed; n buffers on stack: %s", audioData->nStackedBuffers);
             }
         }
     }
@@ -325,7 +325,7 @@ AUDIO_SYS_HANDLE audio_input_create_with_parameters(AUDIO_SETTINGS_HANDLE format
         if (0 != strcmp(STRING_c_str(format->hDeviceName), ""))
         {
             CFStringRef deviceUID = CFStringCreateWithCString(NULL, STRING_c_str(format->hDeviceName), kCFStringEncodingUTF8);
-            SPX_DBG_TRACE_INFO("Initializing microphone input from device: %s", STRING_c_str(format->hDeviceName));
+            SPX_TRACE_INFO("Initializing microphone input from device: %s", STRING_c_str(format->hDeviceName));
             error = AudioQueueSetProperty(audioData->audioQueue,
                                   kAudioQueueProperty_CurrentDevice,
                                   &deviceUID,
@@ -340,7 +340,7 @@ AUDIO_SYS_HANDLE audio_input_create_with_parameters(AUDIO_SETTINGS_HANDLE format
         }
         else
         {
-            SPX_DBG_TRACE_INFO("Initializing microphone input from default device.");
+            SPX_TRACE_INFO("Initializing microphone input from default device.");
         }
 
         if (setup_ok)
@@ -670,7 +670,7 @@ AUDIO_RESULT audio_stop(AUDIO_SYS_DATA* audioData, AUDIO_STATE& current_state)
     }
     else
     {
-        SPX_DBG_TRACE_ERROR("could not stop AudioQueue");
+        SPX_TRACE_ERROR("could not stop AudioQueue");
         result = AUDIO_RESULT_INVALID_ARG;
     }
     return result;
@@ -844,7 +844,7 @@ AUDIO_RESULT audio_output_pause(AUDIO_SYS_HANDLE handle)
     }
     else
     {
-        SPX_DBG_TRACE_ERROR("could not pause AudioQueue");
+        SPX_TRACE_ERROR("could not pause AudioQueue");
         result = AUDIO_RESULT_INVALID_ARG;
     }
     return AUDIO_RESULT_OK;

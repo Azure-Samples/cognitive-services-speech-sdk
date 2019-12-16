@@ -12,7 +12,6 @@
 #include "pull_audio_output_stream.h"
 #include "create_object_helpers.h"
 #include "guid_utils.h"
-#include "handle_table.h"
 #include "service_helpers.h"
 #include "shared_ptr_helpers.h"
 #include "property_bag_impl.h"

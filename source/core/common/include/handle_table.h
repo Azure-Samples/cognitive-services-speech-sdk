@@ -82,12 +82,12 @@ public:
         WriteLock_Type writeLock(m_mutex);
 
         T* ptr = t.get();
-        SPX_DBG_TRACE_VERBOSE_IF(1, "%s ptr=0x%8p", __FUNCTION__, (void*)ptr);
+        SPX_DBG_TRACE_VERBOSE_IF(1, "%s ptr=0x%8p", "CSpxHandleTable::TrackHandle", (void*)ptr);
 
         if (ptr != nullptr)
         {
             handle = reinterpret_cast<Handle>(ptr);
-            SPX_DBG_TRACE_VERBOSE_IF(1, "%s type=%s handle=0x%8p, ptr=0x%8p, total=%zu", __FUNCTION__, PAL::GetTypeName<T>().c_str(), (void*)handle, (void*)ptr, m_ptrMap.size() + 1);
+            SPX_DBG_TRACE_VERBOSE_IF(1, "%s type=%s handle=0x%8p, ptr=0x%8p, total=%zu", "CSpxHandleTable::TrackHandle", SpxTypeName(T), (void*)handle, (void*)ptr, m_ptrMap.size() + 1);
 
             m_counter->Increment();
             m_handleMap.emplace(handle, t);
@@ -127,7 +127,7 @@ public:
 
     void StopTracking(Handle handle)
     {
-        SPX_DBG_TRACE_VERBOSE_IF(1, "%s handle=0x%8p", __FUNCTION__, (void*)handle);
+        SPX_DBG_TRACE_VERBOSE_IF(1, "%s handle=0x%8p", "CSpxHandleTable::StopTracking", (void*)handle);
         if (IsTracked(handle))
         {
             WriteLock_Type writeLock(m_mutex);
@@ -137,7 +137,7 @@ public:
                 auto sharedPtr = iterHandleMap->second;
                 auto iterPtrMap = m_ptrMap.find(sharedPtr.get());
 
-                SPX_DBG_TRACE_VERBOSE_IF(1, "%s type=%s handle=0x%8p, ptr=0x%8p, total=%zu", __FUNCTION__, PAL::GetTypeName<T>().c_str(), (void*)handle, (void*)sharedPtr.get(), m_ptrMap.size() -1 );
+                SPX_DBG_TRACE_VERBOSE_IF(1, "%s type=%s handle=0x%8p, ptr=0x%8p, total=%zu", "CSpxHandleTable::StopTracking", SpxTypeName(T), (void*)handle, (void*)sharedPtr.get(), m_ptrMap.size() -1 );
 
                 m_handleMap.erase(iterHandleMap);
                 m_ptrMap.erase(iterPtrMap);
@@ -168,7 +168,7 @@ public:
                 auto iterHandleMap = m_handleMap.find(handle);
                 auto sharedPtr = iterHandleMap->second;
 
-                SPX_DBG_TRACE_VERBOSE_IF(1, "%s type=%s handle=0x%8x, ptr=0x%8p, total=%zu", __FUNCTION__, PAL::GetTypeName<T>().c_str(), handle, (void*)sharedPtr.get(), m_ptrMap.size() -1 );
+                SPX_DBG_TRACE_VERBOSE_IF(1, "%s type=%s handle=0x%8x, ptr=0x%8p, total=%zu", __FUNCTION__, SpxTypeName(T), handle, (void*)sharedPtr.get(), m_ptrMap.size() -1 );
 
                 m_ptrMap.erase(iterPtrMap);
                 m_handleMap.erase(iterHandleMap);
@@ -189,7 +189,7 @@ public:
     void Term()
     {
         SPX_DBG_TRACE_VERBOSE_IF(m_ptrMap.size() == 0, "%s: ZERO handles 'leaked'", __FUNCTION__);
-        SPX_DBG_TRACE_WARNING_IF(m_ptrMap.size() >= 1, "%s: non-zero handles 'leaked'", __FUNCTION__);
+        SPX_TRACE_WARNING_IF(m_ptrMap.size() >= 1, "%s: non-zero handles 'leaked'", __FUNCTION__);
 
 #if _DEBUG
         for (const auto& entry : m_handleMap)

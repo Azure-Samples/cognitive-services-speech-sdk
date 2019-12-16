@@ -36,7 +36,7 @@ void CSpxWavFileReader::Open(const wchar_t* fileName)
 {
     m_fileName = fileName;
 
-    SPX_DBG_TRACE_VERBOSE("Opening WAV file '%ls'", fileName);
+    SPX_TRACE_VERBOSE("Opening WAV file '%ls'", fileName);
 
     auto file = std::make_unique<WavFile_Type>();
     PAL::OpenStream(*file.get(), fileName, true);
@@ -56,7 +56,7 @@ void CSpxWavFileReader::Open(const wchar_t* fileName)
 
 void CSpxWavFileReader::Close()
 {
-    SPX_DBG_TRACE_VERBOSE("Closing WAV file");
+    SPX_TRACE_VERBOSE("Closing WAV file");
 
     if (m_file.get() != nullptr)
     {
@@ -88,7 +88,7 @@ uint16_t CSpxWavFileReader::GetFormat(SPXWAVEFORMATEX* format, uint16_t cbFormat
     SPX_IFTRUE_THROW_HR(!IsOpen(), SPXERR_UNINITIALIZED);
 
     EnsureGetFormat();
-    SPX_DBG_TRACE_ERROR_IF(m_waveformat.get() == nullptr, "IsOpen() returned true; EnsureGetFormat() didn't throw; we should have a SPXWAVEFORMAT now...");
+    SPX_TRACE_ERROR_IF(m_waveformat.get() == nullptr, "IsOpen() returned true; EnsureGetFormat() didn't throw; we should have a SPXWAVEFORMAT now...");
     SPX_IFTRUE_THROW_HR(m_waveformat.get() == nullptr, SPXERR_UNSUPPORTED_FORMAT);
 
     uint16_t cbFormatRequired = sizeof(SPXWAVEFORMATEX) + m_waveformat->cbSize;

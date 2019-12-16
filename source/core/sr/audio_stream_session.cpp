@@ -82,12 +82,12 @@ CSpxAudioStreamSession::CSpxAudioStreamSession() :
     m_bytesTransited(0),
     m_interactionId{ PAL::CreateGuidWithDashesUTF8(), PAL::CreateGuidWithDashesUTF8() }
 {
-    SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::CSpxAudioStreamSession", (void*)this);
+    SPX_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::CSpxAudioStreamSession", (void*)this);
 }
 
 CSpxAudioStreamSession::~CSpxAudioStreamSession()
 {
-    SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::~CSpxAudioStreamSession", (void*)this);
+    SPX_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::~CSpxAudioStreamSession", (void*)this);
     SPX_DBG_ASSERT(m_kwsAdapter == nullptr);
     SPX_DBG_ASSERT(m_recoAdapter == nullptr);
     SPX_DBG_ASSERT(m_luAdapter == nullptr);
@@ -95,7 +95,7 @@ CSpxAudioStreamSession::~CSpxAudioStreamSession()
 
 void CSpxAudioStreamSession::Init()
 {
-    SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::Init:... ", (void*)this);
+    SPX_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::Init:... ", (void*)this);
 
     // NOTE: Due to current ownership model, and our late-into-the-cycle changes for SpeechConfig objects
     // the CSpxAudioStreamSession is sited to the CSpxApiFactory. This ApiFactory is not held by the
@@ -112,7 +112,7 @@ void CSpxAudioStreamSession::Init()
 void CSpxAudioStreamSession::Term()
 {
     SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
-    SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::Term:... ", (void*)this);
+    SPX_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::Term:... ", (void*)this);
 
     // No other threads after this point can access internal structures,
     // so it is safe to clean them up.
@@ -138,7 +138,7 @@ void CSpxAudioStreamSession::Term()
     }
     else
     {
-        SPX_DBG_TRACE_ERROR("[%p]CSpxAudioStreamSession::Term: **NOT CALLED** StopPump[%p] - state: %d", (void*)this, (void*)m_audioPump.get(), (int)m_sessionState);
+        SPX_DBG_TRACE_WARNING("[%p]CSpxAudioStreamSession::Term: **NOT CALLED** StopPump[%p] - state: %d", (void*)this, (void*)m_audioPump.get(), (int)m_sessionState);
     }
 
     // Stopping all threads.
@@ -388,7 +388,7 @@ void CSpxAudioStreamSession::SetFormat(const SPXWAVEFORMATEX* pformat)
 
 void CSpxAudioStreamSession::ProcessAudio(const DataChunkPtr& audioChunk)
 {
-    SPX_DBG_TRACE_INFO("Received audio chunk: time: %s, size:%d.", PAL::GetTimeInString(audioChunk->receivedTime).c_str(), audioChunk->size);
+    SPX_TRACE_VERBOSE("Received audio chunk: time: %s, size:%d.", PAL::GetTimeInString(audioChunk->receivedTime).c_str(), audioChunk->size);
 
     SlowDownThreadIfNecessary(audioChunk->size);
     auto task = CreateTask([=]() {
@@ -539,7 +539,7 @@ bool CSpxAudioStreamSession::ProcessNextAudio()
     }
     else
     {
-        SPX_DBG_TRACE_WARNING("[%p]CSpxAudioStreamSession::ProcessNextAudio: Unexpected SessionState: recoKind %d; sessionState %d", (void*)this, m_recoKind, m_sessionState);
+        SPX_TRACE_ERROR("[%p]CSpxAudioStreamSession::ProcessNextAudio: Unexpected SessionState: recoKind %d; sessionState %d", (void*)this, m_recoKind, m_sessionState);
     }
     return false;
 }
@@ -626,7 +626,7 @@ void CSpxAudioStreamSession::WaitForIdle(std::chrono::milliseconds timeout)
     });
     if (!success)
     {
-        SPX_DBG_TRACE_WARNING("[%p]CSpxAudioStreamSession::WaitForIdle: Timeout happened during waiting for Idle", (void*)this);
+        SPX_TRACE_WARNING("[%p]CSpxAudioStreamSession::WaitForIdle: Timeout happened during waiting for Idle", (void*)this);
     }
 }
 
@@ -1169,7 +1169,7 @@ void CSpxAudioStreamSession::DispatchEvent(const list<weak_ptr<ISpxRecognizer>>&
                 break;
             }
             default:
-                SPX_DBG_TRACE_ERROR("EventDelivery unknown event type %d", (int)sessionType);
+                SPX_TRACE_ERROR("EventDelivery unknown event type %d", (int)sessionType);
             }
         }
         SPXAPI_CATCH_ONLY()
@@ -1206,9 +1206,8 @@ void CSpxAudioStreamSession::KeywordDetected(ISpxKwsEngineAdapter* adapter, uint
 {
     UNUSED(adapter);
 
-    SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::KeywordDetected: Keyword detected!! Starting KwsSingleShot recognition... offset=%" PRIu64 "; size=%d", (void*)this, offset, audioChunk->size);
-
-    SPX_ASSERT_WITH_MESSAGE(m_threadService->IsOnServiceThread(), "called on wrong thread, must be thread service managed thread.");
+    SPX_DBG_TRACE_VERBOSE("[%p] CSpxAudioStreamSession::KeywordDetected: Keyword detected!! Starting KwsSingleShot recognition... offset=%" PRIu64 "; size=%d", (void*)this, offset, audioChunk->size);
+    SPX_DBG_ASSERT_WITH_MESSAGE(m_threadService->IsOnServiceThread(), "called on wrong thread, must be thread service managed thread.");
 
     // Report that we have a keyword candidate
     auto factory = SpxQueryService<ISpxRecoResultFactory>(SpxSharedPtrFromThis<ISpxSession>(this));
@@ -1356,7 +1355,7 @@ void CSpxAudioStreamSession::AdapterStoppedTurn(ISpxRecoEngineAdapter* /* adapte
             // turn.
             if (!bufferedBytes || m_currentTurnGlobalOffset == previousTurnGlobalOffset || bIsConversationTranscriber)
             {
-                SPX_DBG_TRACE_WARNING_IF(m_currentTurnGlobalOffset == previousTurnGlobalOffset, "[%p]CSpxAudioStreamSession::AdapterStoppedTurn: Dropping %d bytes due to no progress in the last turn", (void*)this, (int)bufferedBytes);
+                SPX_TRACE_WARNING_IF(m_currentTurnGlobalOffset == previousTurnGlobalOffset, "[%p]CSpxAudioStreamSession::AdapterStoppedTurn: Dropping %d bytes due to no progress in the last turn", (void*)this, (int)bufferedBytes);
                 ChangeState(SessionState::ProcessingAudioLeftovers, SessionState::WaitForAdapterCompletedSetFormatStop);
                 EncounteredEndOfStream();
             }
@@ -1572,12 +1571,12 @@ void CSpxAudioStreamSession::FireAdapterResult_Intermediate(ISpxRecoEngineAdapte
             }
             else
             {
-                SPX_DBG_TRACE_ERROR("FirstHypothesisLatency:(%ls): no audio timestamp available.", result->GetResultId().c_str());
+                SPX_TRACE_ERROR("FirstHypothesisLatency:(%ls): no audio timestamp available.", result->GetResultId().c_str());
             }
         }
         else
         {
-            SPX_DBG_TRACE_ERROR("FirstHypothesisLatency:(%ls): audio buffer is empty, cannot get audio timestamp.", result->GetResultId().c_str());
+            SPX_TRACE_ERROR("FirstHypothesisLatency:(%ls): audio buffer is empty, cannot get audio timestamp.", result->GetResultId().c_str());
         }
         // Write latency entry in result and telemetry.
         result->SetLatency(latencyMs);
@@ -1638,7 +1637,7 @@ void CSpxAudioStreamSession::FireAdapterResult_FinalResult(ISpxRecoEngineAdapter
         }
         else
         {
-            SPX_DBG_TRACE_ERROR("ResultLatency:(%ls): no audio timestamp available.", result->GetResultId().c_str());
+            SPX_TRACE_ERROR("ResultLatency:(%ls): no audio timestamp available.", result->GetResultId().c_str());
         }
     }
     // Write latency entry in result and telemetry.
@@ -1786,7 +1785,7 @@ void CSpxAudioStreamSession::AdapterRequestingAudioMute(ISpxRecoEngineAdapter* /
     }
     else
     {
-        SPX_DBG_TRACE_WARNING("%s: Is this OK? recoKind/sessionState: %d/%d", __FUNCTION__, m_recoKind, m_sessionState);
+        SPX_TRACE_ERROR("%s: Is this OK? recoKind/sessionState: %d/%d", __FUNCTION__, m_recoKind, m_sessionState);
     }
 }
 
@@ -1825,7 +1824,7 @@ void CSpxAudioStreamSession::Error(ISpxRecoEngineAdapter* adapter, ErrorPayload_
         {
             // Unexpected runtime error. However, this is called by USP worker thread, so
             // it should not throw exception here.
-            SPX_DBG_TRACE_ERROR("Wrong adapter instance.");
+            SPX_TRACE_ERROR("Wrong adapter instance.");
             SPX_DBG_TRACE_VERBOSE("%s: Session is in idle state, ignore error events.", __FUNCTION__);
         }
         else
@@ -2036,7 +2035,7 @@ void CSpxAudioStreamSession::EnsureIntentRegionSet()
 
 std::string CSpxAudioStreamSession::SpeechRegionFromIntentRegion(const std::string& intentRegion)
 {
-    static std::pair<std::string, std::string> intentToSpeechRegion[] = {
+    static std::pair<const char*, const char*> intentToSpeechRegion[] = {
 
         std::make_pair("West US",          "uswest"),
         std::make_pair("US West",          "uswest"),
@@ -2089,7 +2088,7 @@ std::string CSpxAudioStreamSession::SpeechRegionFromIntentRegion(const std::stri
 
     for (auto item : intentToSpeechRegion)
     {
-        if (PAL::stricmp(item.first.c_str(), intentRegion.c_str()) == 0)
+        if (PAL::stricmp(item.first, intentRegion.c_str()) == 0)
         {
             return item.second;
         }
@@ -2421,7 +2420,7 @@ void CSpxAudioStreamSession::InformAdapterSetFormatStopping(SessionState comingF
     {
         if (m_audioProcessor)
         {
-            SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::InformAdapterSetFormatStoppingProcessingAudio - Send zero size audio.", (void*)this);
+            SPX_TRACE_INFO("[%p]CSpxAudioStreamSession::InformAdapterSetFormatStoppingProcessingAudio - Send zero size audio.", (void*)this);
             m_audioProcessor->ProcessAudio(std::make_shared<DataChunk>(nullptr, 0));
         }
     }
@@ -2429,7 +2428,7 @@ void CSpxAudioStreamSession::InformAdapterSetFormatStopping(SessionState comingF
     if (!m_expectAdapterStartedTurn && !m_expectAdapterStoppedTurn)
     {
         // Then we can finally tell it we're done, by sending a nullptr SPXWAVEFORMAT
-        SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::InformAdapterSetFormatStoppingSetFormat(nullptr)", (void*)this);
+        SPX_TRACE_INFO("[%p]CSpxAudioStreamSession::InformAdapterSetFormatStoppingSetFormat(nullptr)", (void*)this);
         if (m_audioProcessor)
         {
             m_audioProcessor->SetFormat(nullptr);
@@ -2612,7 +2611,7 @@ std::shared_ptr<ISpxThreadService> CSpxAudioStreamSession::InternalQueryService(
     if (!serviceName)
         SPX_THROW_HR(SPXERR_INVALID_ARG);
 
-    if (PAL::stricmp(PAL::GetTypeName<ISpxThreadService>().c_str(), serviceName) == 0)
+    if (PAL::stricmp(SpxTypeName(ISpxThreadService), serviceName) == 0)
     {
         return m_threadService;
     }

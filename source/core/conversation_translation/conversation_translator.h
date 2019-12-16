@@ -153,13 +153,16 @@ namespace ConversationTranslation {
                 previous == from,
                 "Unexpected state transition for ConversationTranslator %p, From: %d, To: %d, Actual: %d",
                 (void *)this, from, next, previous);
+
+            UNUSED(from); // unused in release builds
+            UNUSED(previous);
         }
 
         ConversationState GetState() const { return m_state_; }
 
         std::shared_ptr<ISpxInterfaceBase> QueryServiceInternal(const char * serviceName)
         {
-            if (PAL::stricmp(PAL::GetTypeName<ISpxNamedProperties>().c_str(), serviceName) == 0
+            if (PAL::stricmp(SpxTypeName(ISpxNamedProperties), serviceName) == 0
                 && m_recognizer != nullptr)
             {
                 return m_recognizer->QueryInterface<ISpxNamedProperties>();

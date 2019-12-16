@@ -7,6 +7,7 @@
 
 #include "stdafx.h"
 #include "string_utils.h"
+#include "handle_table.h"
 
 using namespace Microsoft::CognitiveServices::Speech::Impl;
 

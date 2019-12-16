@@ -8,6 +8,7 @@
 #pragma once
 #include <speechapi_c_common.h>
 #include "try_catch_helpers.h"
+#include "handle_table.h"
 
 
 namespace Microsoft {

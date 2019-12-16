@@ -8,7 +8,6 @@
 #include "stdafx.h"
 #include "synthesizer.h"
 #include <future>
-#include "handle_table.h"
 #include "site_helpers.h"
 #include "service_helpers.h"
 #include "create_object_helpers.h"

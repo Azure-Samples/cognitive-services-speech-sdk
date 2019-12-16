@@ -131,30 +131,4 @@ private:
     }
 };
 
-template <class T, class I>
-class CSpxDelegateToThisCastPtrHelper
-{
-public:
-
-    CSpxDelegateToThisCastPtrHelper() = default;
-    virtual ~CSpxDelegateToThisCastPtrHelper() = default;
-
-    bool IsZombie() const { return m_zombie; }
-    void Zombie(bool zombie = true) { SPX_DBG_ASSERT(!zombie); }
-
-    bool IsClear() { return false; }
-    void Clear() { SPX_DBG_ASSERT(false); }
-
-    bool IsReady() { return !IsZombie() && !IsClear(); }
-
-protected:
-
-    using Delegate_Type = T*;
-    Delegate_Type GetDelegate() { return m_zombie ? nullptr : static_cast<I*>(static_cast<T*>(this)); }
-
-private:
-
-    bool m_zombie = false;
-};
-
 } } } } // Microsoft::CognitiveServices::Speech::Impl

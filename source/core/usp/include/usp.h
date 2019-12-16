@@ -414,135 +414,125 @@ private:
 
 extern void PlatformInit(const char* proxyHost, int proxyPort, const char* proxyUsername, const char* proxyPassword);
 
-namespace endpoint
+class endpoint
 {
-    const std::string protocol = "wss://";
+public:
 
-    const std::string outputFormatQueryParam = "format=";
-    const std::string langQueryParam = "language=";
-    const std::string deploymentIdQueryParam = "cid=";
-    const std::string profanityQueryParam = "profanity=";
-    const std::string initialSilenceTimeoutQueryParam = "initialSilenceTimeoutMs=";
-    const std::string endSilenceTimeoutQueryParam = "endSilenceTimeoutMs=";
-    const std::string stableIntermediateThresholdQueryParam = "stableIntermediateThreshold=";
-    const std::string storeAudioQueryParam = "storeAudio=";
-    const std::string wordLevelTimestampsQueryParam = "wordLevelTimestamps=";
+    static const char* protocol;
 
-    const std::string outputFormatSimple = "simple";
-    const std::string outputFormatDetailed = "detailed";
+    static const char* outputFormatQueryParam;
+    static const char* langQueryParam;
+    static const char* deploymentIdQueryParam;
+    static const char* profanityQueryParam;
+    static const char* initialSilenceTimeoutQueryParam;
+    static const char* endSilenceTimeoutQueryParam;
+    static const char* stableIntermediateThresholdQueryParam;
+    static const char* storeAudioQueryParam;
+    static const char* wordLevelTimestampsQueryParam;
 
-    const std::string postProcessingTrueText = "TrueText";
+    static const char* outputFormatSimple;
+    static const char* outputFormatDetailed;
 
-    const std::string profanityMasked = "masked";
-    const std::string profanityRemoved = "removed";
-    const std::string profanityRaw = "raw";
+    static const char* postProcessingTrueText;
 
+    static const char* profanityMasked;
+    static const char* profanityRemoved;
+    static const char* profanityRaw;
 
-    namespace unifiedspeech
+    class unifiedspeech
     {
-        const std::string hostnameSuffix = ".stt.speech.microsoft.com";
-        const std::string pathPrefix = "/speech/recognition/";
-        const std::string pathSuffix = "/cognitiveservices/v1";
+    public:
 
-        const std::string postprocessingQueryParam = "postprocessing=";
-        const std::string lidEnabledQueryParam = "lidEnabled=";
-        const std::vector<std::string> queryParameters = {
-            langQueryParam,
-            deploymentIdQueryParam,
-            initialSilenceTimeoutQueryParam,
-            endSilenceTimeoutQueryParam,
-            storeAudioQueryParam,
+        static const char* hostnameSuffix;
+        static const char* pathPrefix;
+        static const char* pathSuffix;
 
-            outputFormatQueryParam,
-            wordLevelTimestampsQueryParam,
-            profanityQueryParam,
-            stableIntermediateThresholdQueryParam,
-            postprocessingQueryParam,
+        static const char* postprocessingQueryParam;
+        static const char* lidEnabledQueryParam;
 
-            lidEnabledQueryParam
-        };
-    }
+        static const std::vector<std::string> queryParameters;
+    };
 
-    namespace translation
+    class translation
     {
-        const std::string hostnameSuffix = ".s2s.speech.microsoft.com";
-        const std::string path = "/speech/translation/cognitiveservices/v1";
+    public:
 
-        const std::string fromQueryParam = "from=";
-        const std::string toQueryParam = "to=";
-        const std::string voiceQueryParam = "voice=";
-        const std::string featuresQueryParam = "features=";
-        const std::string stableTranslationQueryParam = "stableTranslation=";
+        static const char* hostnameSuffix;
+        static const char* path;
 
-        const std::string requireVoice = "texttospeech";
+        static const char* fromQueryParam;
+        static const char* toQueryParam;
+        static const char* voiceQueryParam;
+        static const char* featuresQueryParam;
+        static const char* stableTranslationQueryParam;
 
-        const std::vector<std::string> queryParameters = {
-            fromQueryParam,
-            toQueryParam,
-            voiceQueryParam,
+        static const char* requireVoice;
 
-            deploymentIdQueryParam,
-            initialSilenceTimeoutQueryParam,
-            endSilenceTimeoutQueryParam,
-            storeAudioQueryParam,
+        static const std::vector<std::string> queryParameters;
+    };
 
-            outputFormatQueryParam,
-            wordLevelTimestampsQueryParam,
-            profanityQueryParam,
-            stableIntermediateThresholdQueryParam,
-
-            stableTranslationQueryParam
-        };
-    }
-
-    namespace luis
+    class luis
     {
-        const std::string hostname = "speech.platform.bing.com";
-        const std::string pathPrefix1 = "/speech/";
-        const std::string pathPrefix2 = "/recognition/";
-        const std::string pathSuffix = "/cognitiveservices/v1";
+    public:
 
-        const std::vector<std::string> queryParameters = { langQueryParam, outputFormatQueryParam };
-    }
+        static const char* hostname;
+        static const char* pathPrefix1;
+        static const char* pathPrefix2;
+        static const char* pathSuffix;
 
-    namespace dialog
+        static const std::vector<std::string> queryParameters;
+    };
+
+    class dialog
     {
-        constexpr auto url = ".convai.speech.microsoft.com";
+    public:
 
-        namespace resourcePath
+        static const char* url;
+
+        class resourcePath
         {
-            constexpr auto botFramework = "";
-            constexpr auto customCommands = "/commands";
-        }
+        public:
 
-        constexpr auto suffix = "/api";
+            static const char* botFramework;
+            static const char* customCommands;
+        };
 
-        namespace version
+        static const char* suffix;
+
+        class version
         {
-            constexpr auto botFramework = "/v3";
-            constexpr auto customCommands = "/v1";
-        }
+        public:
 
-        const std::string customVoiceDeploymentIdsQueryParam = "voiceDeploymentId=";
+            static const char* botFramework;
+            static const char* customCommands;
+        };
 
-        const std::vector<std::string> queryParameters = { langQueryParam, customVoiceDeploymentIdsQueryParam };
-    }
+        static const char* customVoiceDeploymentIdsQueryParam;
 
-    namespace conversationTranscriber
+        static const std::vector<std::string> queryParameters;
+    };
+
+    class conversationTranscriber
     {
-        const std::vector<std::string> queryParameters = { langQueryParam, outputFormatQueryParam };
-        const std::string hostname = ".cts.speech.microsoft.com";
-        const std::string pathPrefix1 = "transcribe.";
-        const std::string pathPrefix2 = "/speech/recognition";
-        const std::string pathSuffixMultiAudio = "/multiaudio";
-    }
+    public:
 
-    namespace speechSynthesis
+        static const char* hostname;
+        static const char* pathPrefix1;
+        static const char* pathPrefix2;
+        static const char* pathSuffixMultiAudio;
+
+        static const std::vector<std::string> queryParameters;
+    };
+
+    class speechSynthesis
     {
-        const std::string hostnameSuffix = ".tts.speech.microsoft.com";
-        const std::string path = "/cognitiveservices/websocket/v1";
+    public:
 
-        const std::vector<std::string> queryParameters = { };
-    }
-}
+        static const char* hostnameSuffix;
+        static const char* path;
+
+        static const std::vector<std::string> queryParameters;
+    };
+};
+
 }}}}

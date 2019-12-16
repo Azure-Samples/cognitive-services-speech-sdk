@@ -200,50 +200,55 @@ typedef enum _METRIC_ID
 /* These could be inline once we go C++17 */
 namespace event
 {
-    namespace keys
+    class keys
     {
+    public:
+
         // Top level Array keys for events
-        namespace array
+        class array
         {
-            static const std::string ReceivedMessages = "ReceivedMessages";
-            static const std::string Metrics = "Metrics";
-        }
+        public:
+            static const char* ReceivedMessages;
+            static const char* Metrics;
+        };
 
         // Received Message event Keys
-        namespace received
+        class received
         {
-            static const std::string Audio = "audio";
-            static const std::string AudioMetadata = "audio.metadata";
-            static const std::string Response = "response";
-        }
+        public:
+            static const char* Audio;
+            static const char* AudioMetadata;
+            static const char* Response;
+        };
 
-        static const std::string Value = "value";
-        static const std::string EventType = "EventType";
-        static const std::string Name = "name";
-        static const std::string Start = "Start";
-        static const std::string End = "End";
-        static const std::string DeviceId = "DeviceId";
-        static const std::string Id = "Id";
-        static const std::string Memory = "Memory";
-        static const std::string CPU = "CPU";
-        static const std::string Error = "Error";
-        static const std::string Status = "Status";
-    }
+        static const char* Value;
+        static const char* EventType;
+        static const char* Name;
+        static const char* Start;
+        static const char* End;
+        static const char* DeviceId;
+        static const char* Id;
+        static const char* Memory;
+        static const char* CPU;
+        static const char* Error;
+        static const char* Status;
+    };
 
     // Metric event name keys
-    namespace name
+    class name
     {
-        static const std::string AudioPlayback = "audio:playback";
-        static const std::string AudioStart = "AudioStart";
-        static const std::string Microphone = "Microphone";
-        static const std::string ListeningTrigger = "ListeningTrigger";
-        static const std::string Connection = "Connection";
-        static const std::string Device = "device";
-        static const std::string Notification = "notification";
-        static const std::string SDK = "sdk";
-        static const std::string PhraseLatency = "PhraseLatencyMs";
-        static const std::string FirstHypothesisLatency = "FirstHypothesisLatencyMs";
-    }
+    public:
+        static const char* AudioPlayback;
+        static const char* AudioStart;
+        static const char* Microphone;
+        static const char* ListeningTrigger;
+        static const char* Connection;
+        static const char* Device;
+        static const char* Notification;
+        static const char* SDK;
+        static const char* PhraseLatency;
+        static const char* FirstHypothesisLatency;
+    };
 }
 
 

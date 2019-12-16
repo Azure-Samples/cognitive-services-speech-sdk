@@ -195,7 +195,7 @@ void CSpxMicrophonePumpBase::UpdateState(AUDIO_STATE state)
         break;
 
     default:
-        SPX_DBG_TRACE_VERBOSE("%s: unexpected audio state: %d.", __FUNCTION__, int(state));
+        SPX_TRACE_ERROR("%s: unexpected audio state: %d.", __FUNCTION__, int(state));
         SPX_THROW_ON_FAIL(SPXERR_INVALID_STATE);
     }
 

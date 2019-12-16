@@ -315,13 +315,13 @@ bool CarbonTestConsole::ValidateConsoleArgs(ConsoleArgs* pconsoleArgs)
     }
     else if (PAL::access(pconsoleArgs->m_audioInput.c_str(), 0) != 0)
     {
-        SPX_DBG_TRACE_ERROR("File does not exist: %s", pconsoleArgs->m_audioInput.c_str());
+        SPX_TRACE_ERROR("File does not exist: %s", pconsoleArgs->m_audioInput.c_str());
         fValid = false;
     }
 
     if (!pconsoleArgs->m_kwsTable.empty() && PAL::access(pconsoleArgs->m_kwsTable.c_str(), 0) != 0)
     {
-        SPX_DBG_TRACE_ERROR("File does not exist: %s", pconsoleArgs->m_kwsTable.c_str());
+        SPX_TRACE_ERROR("File does not exist: %s", pconsoleArgs->m_kwsTable.c_str());
         fValid = false;
     }
 

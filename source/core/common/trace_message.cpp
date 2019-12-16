@@ -33,8 +33,13 @@
 
 decltype(std::chrono::high_resolution_clock::now()) __g_spx_trace_message_time0 = std::chrono::high_resolution_clock::now();
 
-void SpxTraceMessage_Internal(int level, const char* pszTitle, const char* fileName, const int lineNumber, const char* pszFormat, va_list argptr, bool logToConsole)
+void SpxTraceMessage_Internal(int level, const char* pszTitle, const char* fileName, const int lineNumber, const char* pszFormat, va_list argptr)
 {
+    bool logToConsole = false;
+#if defined(DEBUG) || defined(_DEBUG)
+    logToConsole = true;
+#endif
+
     bool logToFile = FileLogger::Instance().IsFileLoggingEnabled();
     if (!logToConsole && !logToFile)
     {
@@ -154,14 +159,14 @@ void SpxTraceMessage_Internal(int level, const char* pszTitle, const char* fileN
 #endif
 }
 
-void SpxTraceMessage(int level, const char* pszTitle, bool enableDebugOutput, const char* fileName, const int lineNumber, const char* pszFormat, ...)
+void SpxTraceMessage(int level, const char* pszTitle, const char* fileName, const int lineNumber, const char* pszFormat, ...)
 {
     UNUSED(level);
     try
     {
         va_list argptr;
         va_start(argptr, pszFormat);
-        SpxTraceMessage_Internal(level, pszTitle, fileName, lineNumber, pszFormat, argptr, enableDebugOutput);
+        SpxTraceMessage_Internal(level, pszTitle, fileName, lineNumber, pszFormat, argptr);
         va_end(argptr);
     }
     catch(...)
@@ -176,19 +181,14 @@ void SpxConsoleLogger_Log(LOG_CATEGORY log_category, const char* file, const cha
     va_list args;
     va_start(args, format);
 
-    bool enable_console_log = false;
-#ifdef _DEBUG
-    enable_console_log = true;
-#endif
-
     switch (log_category)
     {
     case AZ_LOG_INFO:
-        SpxTraceMessage_Internal(__SPX_TRACE_LEVEL_INFO, "SPX_TRACE_INFO: AZ_LOG_INFO: ", file, line, format, args, enable_console_log);
+        SpxTraceMessage_Internal(__SPX_TRACE_LEVEL_INFO, "SPX_TRACE_INFO: AZ_LOG_INFO: ", file, line, format, args);
         break;
 
     case AZ_LOG_ERROR:
-        SpxTraceMessage_Internal(__SPX_TRACE_LEVEL_INFO, "SPX_TRACE_ERROR: AZ_LOG_ERROR: ", file, line, format, args, enable_console_log);
+        SpxTraceMessage_Internal(__SPX_TRACE_LEVEL_INFO, "SPX_TRACE_ERROR: AZ_LOG_ERROR: ", file, line, format, args);
         SPX_TRACE_ERROR("Error: File:%s Func:%s Line:%d ", file, func, line);
         break;
 

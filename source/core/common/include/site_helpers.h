@@ -16,7 +16,7 @@ namespace Impl {
 
 
 template <class T>
-inline std::shared_ptr<ISpxGenericSite> SpxSiteFromThis(T* ptr)
+std::shared_ptr<ISpxGenericSite> SpxSiteFromThis(T* ptr)
 {
     return SpxSharedPtrFromThis<ISpxGenericSite>(ptr);
 }

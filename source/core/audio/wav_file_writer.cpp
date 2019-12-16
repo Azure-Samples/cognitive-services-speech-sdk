@@ -35,7 +35,7 @@ void CSpxWavFileWriter::Open(const wchar_t* fileName)
 {
     m_fileName = fileName;
 
-    SPX_DBG_TRACE_VERBOSE("Opening WAV file '%ls'", fileName);
+    SPX_TRACE_VERBOSE("Opening WAV file '%ls'", fileName);
 
     auto file = std::make_unique<std::fstream>();
     PAL::OpenStream(*file.get(), fileName, false);
@@ -47,7 +47,7 @@ void CSpxWavFileWriter::Open(const wchar_t* fileName)
 
 void CSpxWavFileWriter::Close()
 {
-    SPX_DBG_TRACE_VERBOSE("Closing WAV file");
+    SPX_TRACE_VERBOSE("Closing WAV file");
 
     if (m_file.get() != nullptr)
     {

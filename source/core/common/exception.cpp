@@ -100,28 +100,28 @@ namespace Impl {
     _Analysis_noreturn_ void ThrowWithCallstack(SPXHR hr, size_t skipLevels/* = 0*/)
     {
         ExceptionWithCallStack ex(hr, skipLevels + 1);
-        SPX_DBG_TRACE_VERBOSE("About to throw %s %s", ex.what(), ex.GetCallStack());
+        SPX_TRACE_ERROR("About to throw %s %s", ex.what(), ex.GetCallStack());
         throw ex;
     }
 
     _Analysis_noreturn_ void ThrowRuntimeError(const std::string& msg, size_t skipLevels/* = 0*/)
     {
         ExceptionWithCallStack ex("Runtime error: " + std::string(msg), SPXERR_INVALID_ARG, skipLevels + 1);
-        SPX_DBG_TRACE_VERBOSE("About to throw %s %s", ex.what(), ex.GetCallStack());
+        SPX_TRACE_ERROR("About to throw %s %s", ex.what(), ex.GetCallStack());
         throw ex;
     }
 
     _Analysis_noreturn_ void ThrowInvalidArgumentException(const std::string& msg, size_t skipLevels/* = 0*/)
     {
         ExceptionWithCallStack ex("Invalid argument exception: " + std::string(msg), SPXERR_INVALID_ARG, skipLevels + 1);
-        SPX_DBG_TRACE_VERBOSE("About to throw %s %s", ex.what(), ex.GetCallStack());
+        SPX_TRACE_ERROR("About to throw %s %s", ex.what(), ex.GetCallStack());
         throw ex;
     }
 
     _Analysis_noreturn_ void ThrowLogicError(const std::string& msg, size_t skipLevels/* = 0*/)
     {
         ExceptionWithCallStack ex("Logic error: " + std::string(msg), SPXERR_INVALID_ARG, skipLevels + 1);
-        SPX_DBG_TRACE_VERBOSE("About to throw %s %s", ex.what(), ex.GetCallStack());
+        SPX_TRACE_ERROR("About to throw %s %s", ex.what(), ex.GetCallStack());
         throw ex;
     }
 

@@ -38,7 +38,7 @@ protected:
     template <class I>
     std::shared_ptr<I> InternalQueryService()
     {
-        auto service = InternalQueryService(PAL::GetTypeName<I>().c_str());
+        auto service = InternalQueryService(SpxTypeName(I));
         return SpxQueryInterface<I>(service);
     }
 
@@ -64,7 +64,7 @@ protected:
     void InternalAddService(std::shared_ptr<T> service)
     {
         SPX_IFTRUE_THROW_HR(service == nullptr, SPXERR_INVALID_ARG);
-        InternalAddService(PAL::GetTypeName<T>().c_str(), SpxQueryInterface<ISpxInterfaceBase>(service));
+        InternalAddService(SpxTypeName(T), SpxQueryInterface<ISpxInterfaceBase>(service));
     }
 
     void InternalAddService(const char* serviceName, std::shared_ptr<ISpxInterfaceBase> service)

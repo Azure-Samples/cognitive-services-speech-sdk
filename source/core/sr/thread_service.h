@@ -208,7 +208,7 @@ private:
             }
             catch (const std::exception& e)
             {
-                SPX_DBG_TRACE_ERROR("Exception happened during task execution: %s", e.what());
+                SPX_TRACE_ERROR("Exception happened during task execution: %s", e.what());
                 p = std::current_exception();
             }
 #ifdef SHOULD_HANDLE_FORCED_UNWIND
@@ -216,14 +216,14 @@ private:
             // taking care we propagate this exception further.
             catch (abi::__forced_unwind&)
             {
-                SPX_DBG_TRACE_ERROR("Caught forced unwind in a thread service task, rethrowing");
+                SPX_TRACE_ERROR("Caught forced unwind in a thread service task, rethrowing");
                 executed.set_exception(make_exception_ptr(std::runtime_error("Forced unwind")));
                 throw;
             }
 #endif
             catch (...)
             {
-                SPX_DBG_TRACE_ERROR("Unknown exception happened during task execution");
+                SPX_TRACE_ERROR("Unknown exception happened during task execution");
                 p = std::current_exception();
             }
             if (p == nullptr)

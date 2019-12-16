@@ -72,7 +72,7 @@ void CSpxRecognitionResult::InitIntermediateResult(const wchar_t* resultId, cons
 
     m_text = text;
 
-    SPX_DBG_TRACE_VERBOSE("%s: resultId=%ls", __FUNCTION__, m_resultId.c_str());
+    SPX_TRACE_VERBOSE("%s: resultId=%ls", __FUNCTION__, m_resultId.c_str());
 }
 
 void CSpxRecognitionResult::InitFinalResult(const wchar_t* resultId, ResultReason reason, NoMatchReason noMatchReason, CancellationReason cancellation, CancellationErrorCode errorCode, const wchar_t* text, uint64_t offset, uint64_t duration)
@@ -101,7 +101,7 @@ void CSpxRecognitionResult::InitFinalResult(const wchar_t* resultId, ResultReaso
         SetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_JsonErrorDetails), errorDetails.c_str());
     }
 
-    SPX_DBG_TRACE_VERBOSE("%s: resultId=%ls reason=%d, cancellationReason=%d, text='%ls'", __FUNCTION__, m_resultId.c_str(), (int)m_reason, (int)m_cancellationReason, m_text.c_str());
+    SPX_TRACE_VERBOSE("%s: resultId=%ls reason=%d, cancellationReason=%d, text='%ls'", __FUNCTION__, m_resultId.c_str(), (int)m_reason, (int)m_cancellationReason, m_text.c_str());
 }
 
 void CSpxRecognitionResult::SetLatency(uint64_t latencyInTicks)
@@ -165,7 +165,7 @@ void CSpxRecognitionResult::InitKeywordResult(const double confidence, const uin
     m_resultId = PAL::CreateGuidWithoutDashes();
     m_text = keyword;
 
-    SPX_DBG_TRACE_VERBOSE("%s: resultId=%ls", __FUNCTION__, m_resultId.c_str());
+    SPX_TRACE_VERBOSE("%s: resultId=%ls", __FUNCTION__, m_resultId.c_str());
 }
 
 const map<wstring, wstring>& CSpxRecognitionResult::GetTranslationText()
@@ -203,7 +203,7 @@ void CSpxRecognitionResult::InitTranslationRecognitionResult(TranslationStatusCo
         // Instead, m_reason is not upgraded to TranslatingSpeech/TranslatedSpeech, but remains as RecognizingSpeech/RecognizedSpeech,
         // and the property SpeechServiceResponse_JsonErrorDetails is set with the translation error details.
         auto errorDetails = PAL::ToString(failureReason);
-        SPX_DBG_TRACE_VERBOSE("%s: Recognition succeeded but translation has error. Error details: %s", __FUNCTION__, errorDetails.c_str());
+        SPX_TRACE_ERROR("%s: Recognition succeeded but translation has error. Error details: %s", __FUNCTION__, errorDetails.c_str());
         SetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_JsonErrorDetails), errorDetails.c_str());
     }
     else

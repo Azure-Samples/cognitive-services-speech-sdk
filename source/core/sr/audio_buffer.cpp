@@ -89,13 +89,13 @@ namespace Impl {
         {
             if (m_totalSizeInBytes != 0)
             {
-                SPX_DBG_TRACE_ERROR("%s: Invalid state of the audio buffer, no chunks but totalSize %d", __FUNCTION__, (int)m_totalSizeInBytes);
+                SPX_TRACE_ERROR("%s: Invalid state of the audio buffer, no chunks but totalSize %d", __FUNCTION__, (int)m_totalSizeInBytes);
                 SPX_THROW_HR(SPXERR_RUNTIME_ERROR);
             }
 
             if (bytes > 0)
             {
-                SPX_DBG_TRACE_WARNING("%s: Discarding %d more bytes than were available in the buffer. Using oldest available timestamp: %s",
+                SPX_TRACE_WARNING("%s: Discarding %d more bytes than were available in the buffer. Using oldest available timestamp: %s",
                         __FUNCTION__, (int)bytes, PAL::GetTimeInString(audioTimestamp).c_str());
             }
 
@@ -234,7 +234,7 @@ namespace Impl {
         uint64_t offsetInBytes = DurationToBytes(offsetInTicks);
         if (offsetInBytes < m_bufferStartOffsetInBytesTurnRelative)
         {
-            SPX_DBG_TRACE_WARNING("%s: Offset is not monothonically increasing. Current turn offset in bytes %d, discarding bytes %d",
+            SPX_TRACE_WARNING("%s: Offset is not monotonically increasing. Current turn offset in bytes %d, discarding bytes %d",
                 __FUNCTION__, (int)m_bufferStartOffsetInBytesTurnRelative, (int)offsetInBytes);
             return nullptr;
         }
@@ -260,7 +260,7 @@ namespace Impl {
         uint64_t offsetInBytes = DurationToBytes(offsetInTicks);
         if (offsetInBytes < m_bufferStartOffsetInBytesTurnRelative)
         {
-            SPX_DBG_TRACE_WARNING("%s: Offset is not monotonically increasing. Current turn offset in bytes %d, offset to get timestamp in bytes %d",
+            SPX_TRACE_WARNING("%s: Offset is not monotonically increasing. Current turn offset in bytes %d, offset to get timestamp in bytes %d",
                 __FUNCTION__, (int)m_bufferStartOffsetInBytesTurnRelative, (int)offsetInBytes);
             return nullptr;
         }
@@ -289,9 +289,8 @@ namespace Impl {
             if (index >= queueSize)
             {
                 audioTimestamp = m_audioBuffers.back()->receivedTime;
+                SPX_TRACE_ERROR("%s: Offset exceeds what is available in the buffer %d. No timestamp can be retrieved, using oldest available timestamp %s.", __FUNCTION__, (int)bytes, PAL::GetTimeInString(audioTimestamp).c_str());
                 SPX_DBG_ASSERT_WITH_MESSAGE(bytes > 0, "Reach end of queue, but no bytes left.");
-                SPX_DBG_TRACE_WARNING("%s: Offset exceeds what is available in the buffer %d. No timestamp can be retrieved, using oldest available timestamp %s.",
-                    __FUNCTION__, (int)bytes, PAL::GetTimeInString(audioTimestamp).c_str());
             }
             else
             {

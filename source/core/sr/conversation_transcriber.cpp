@@ -135,7 +135,7 @@ void CSpxConversationTranscriber::FireResultEvent(const std::wstring& sessionId,
     }
     else
     {
-        SPX_DBG_TRACE_INFO("Not dispatching recognizing and recognized results due to participants left the conversation.");
+        SPX_TRACE_INFO("Not dispatching recognizing and recognized results due to participants left the conversation.");
     }
 }
 

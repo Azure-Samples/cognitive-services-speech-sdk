@@ -10,9 +10,9 @@
 #include "azure_c_shared_utility_xlogging_wrapper.h"
 
 
-void SpxTraceMessage(int level, const char* pszTitle, bool enableDebugOutput, const char* fileName, const int lineNumber, const char* pszFormat, ...)
+void SpxTraceMessage(int level, const char* pszTitle, const char* fileName, const int lineNumber, const char* pszFormat, ...)
 #ifdef __clang__
-    __attribute__ (( format( printf, 6, 7 ) ))
+    __attribute__ (( format( printf, 5, 6 ) ))
 #endif
     ;
 void SpxConsoleLogger_Log(LOG_CATEGORY log_category, const char* file, const char* func, int line, unsigned int options, const char* format, ...);

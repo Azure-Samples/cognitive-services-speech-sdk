@@ -17,7 +17,7 @@ namespace Impl {
 
 
 template <class I>
-inline std::shared_ptr<I> SpxCreateObjectWithSite(const char* className, ISpxGenericSite* site)
+std::shared_ptr<I> SpxCreateObjectWithSite(const char* className, ISpxGenericSite* site)
 {
     // convert the argument to a shared pointer to the base site interface
     auto sharedSitePtr = site->shared_from_this();
@@ -27,14 +27,14 @@ inline std::shared_ptr<I> SpxCreateObjectWithSite(const char* className, ISpxGen
 }
 
 template <class I>
-inline std::shared_ptr<I> SpxCreateObjectWithSite(const char* className, std::shared_ptr<ISpxGenericSite> site)
+std::shared_ptr<I> SpxCreateObjectWithSite(const char* className, std::shared_ptr<ISpxGenericSite> site)
 {
     // create the object
 
     auto factory = SpxQueryService<ISpxObjectFactory>(site);
     if (factory == nullptr)
     {
-        SPX_DBG_TRACE_ERROR("site does not support ISpxObjectFactory");
+        SPX_TRACE_ERROR("site does not support ISpxObjectFactory");
         SPX_THROW_HR(SPXERR_UNEXPECTED_CREATE_OBJECT_FAILURE);
         return nullptr;
     }
@@ -49,7 +49,7 @@ inline std::shared_ptr<I> SpxCreateObjectWithSite(const char* className, std::sh
     else
     {
         SPX_DBG_TRACE_VERBOSE_IF(site != nullptr && objectWithSite == nullptr, "%s: Attempted SetSite(%s), objectWithSite==nullptr", __FUNCTION__, className);
-        SPX_DBG_TRACE_WARNING_IF(site == nullptr && objectWithSite != nullptr, "%s: Object Expects Site; No Site provided! UNEXPECTED!", __FUNCTION__);
+        SPX_TRACE_WARNING_IF(site == nullptr && objectWithSite != nullptr, "%s: Object Expects Site; No Site provided! UNEXPECTED!", __FUNCTION__);
         SPX_IFTRUE_THROW_HR(site == nullptr && objectWithSite != nullptr, SPXERR_UNEXPECTED_CREATE_OBJECT_FAILURE);
     }
 
@@ -63,7 +63,7 @@ inline std::shared_ptr<I> SpxCreateObject(const char* className, std::shared_ptr
     auto factory = SpxQueryService<ISpxObjectFactory>(site);
     if (factory == nullptr)
     {
-        SPX_DBG_TRACE_ERROR("site does not support ISpxObjectFactory");
+        SPX_TRACE_ERROR("site does not support ISpxObjectFactory");
         SPX_THROW_HR(SPXERR_UNEXPECTED_CREATE_OBJECT_FAILURE);
         return nullptr;
     }
@@ -71,7 +71,7 @@ inline std::shared_ptr<I> SpxCreateObject(const char* className, std::shared_ptr
 }
 
 template <class T>
-inline void SpxTerm(const std::shared_ptr<T>& ptr)
+void SpxTerm(const std::shared_ptr<T>& ptr)
 {
     if (ptr == nullptr)
         return;
@@ -91,7 +91,7 @@ inline void SpxTerm(const std::shared_ptr<T>& ptr)
 
 
 template <class T>
-inline void SpxTermAndClear(std::shared_ptr<T>& ptr)
+void SpxTermAndClear(std::shared_ptr<T>& ptr)
 {
     if (ptr != nullptr)
     {
@@ -101,7 +101,7 @@ inline void SpxTermAndClear(std::shared_ptr<T>& ptr)
 }
 
 template <class T>
-inline void SpxTermAndClearNothrow(std::shared_ptr<T>& ptr) noexcept
+void SpxTermAndClearNothrow(std::shared_ptr<T>& ptr) noexcept
 {
     if (ptr != nullptr)
     {
