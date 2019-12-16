@@ -2,7 +2,7 @@
 # N.B. we don't care about < VS 2017
 function(GET_WINDOWS_PLATFORM OUTVAR)
   if(CMAKE_HOST_WIN32)
-    if(CMAKE_GENERATOR MATCHES " Win64$")
+    if((CMAKE_GENERATOR MATCHES " Win64$") OR (CMAKE_GENERATOR_PLATFORM STREQUAL "x64"))
       set(_arch x64)
     elseif(CMAKE_GENERATOR MATCHES " ARM$")
       set(_arch arm32)
