@@ -2032,7 +2032,7 @@ jobs:
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' LinuxDrop '))
   pool:
     name: Hosted Ubuntu 1604
-  timeoutInMinutes: 120
+  timeoutInMinutes: 150
   steps:
   - bash: |
       set -x -e -o pipefail
@@ -2128,7 +2128,7 @@ jobs:
     displayName: Build and test quickstarts
     condition: eq(variables['SPEECHSDK_RUN_TESTS'], 'true')
     continueOnError: ${{ parameters.continueOnTestFailure }}
-    timeoutInMinutes: 90
+    timeoutInMinutes: 120
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: Linux Release Drop'
     inputs:
