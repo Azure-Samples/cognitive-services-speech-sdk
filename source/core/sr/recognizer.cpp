@@ -299,12 +299,6 @@ void CSpxRecognizer::SetStringValueInProperties(const char* name, const char* va
     // For now, we can only have one Recognizer per Session, so, we'll just pass this over to the default session.
     EnsureDefaultSession();
     auto namedProperties = SpxQueryService<ISpxNamedProperties>(m_defaultSession);
-
-    // only allow authorization token to be set again.
-    if (PAL::stricmp(name, GetPropertyName(PropertyId::SpeechServiceAuthorization_Token)) != 0)
-    {
-        SPX_IFTRUE_THROW_HR(namedProperties->HasStringValue(name), SPXERR_ALREADY_INITIALIZED); // throw if it's already been set
-    }
     namedProperties->SetStringValue(name, value);
 }
 
