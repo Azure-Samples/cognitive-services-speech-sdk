@@ -33,8 +33,24 @@ import java.nio.file.StandardCopyOption;
  */
 class NativeLibraryLoader {
 
-    private static String[] nativeList = new String[0];
-    private static String[] externalNativeList = new String[0];
+    private static class NativeLibrary {
+        private String name;
+        private boolean required;
+
+        public NativeLibrary(String name, boolean required) {
+            this.name = name;
+            this.required = required;
+        }
+
+        public String getName() { return name; }
+        public boolean getRequired() { return required; }
+
+        private void setName() { this.name = name; }
+        private void setRequired() { this.required = required; }
+    }
+
+    private static NativeLibrary[] nativeList = new NativeLibrary[0];
+    private static NativeLibrary[] externalNativeList = new NativeLibrary[0];
     private static Boolean extractionDone = false;
     private static Boolean loadAll = false;
     private static File tempDir;
@@ -60,12 +76,26 @@ class NativeLibraryLoader {
             for (int i = 0; i < nativeList.length; i++)
             {
                 if (loadAll || (i == nativeList.length - 1)) {
-                    String libName = nativeList[i];
+                    String libName = nativeList[i].getName();
                     String fullPathName = new File(tempDir.getCanonicalPath(), libName).getCanonicalPath();
                     if(!fullPathName.startsWith(tempDir.getCanonicalPath())) {
                         throw new SecurityException("illegal path");
                     }
-                    System.load(fullPathName);
+                    try {
+                        System.load(fullPathName);
+                    }
+                    catch (UnsatisfiedLinkError e) {
+                        // Required library
+                        if (nativeList[i].getRequired() == true) {
+                            throw new UnsatisfiedLinkError(
+                            String.format("Could not load a required Speech SDK library because of the following error: %s", e.getMessage()));
+                        }
+                        // Optional library; just print a message
+                        else {
+                            System.err.println(
+                            String.format("Could not load an optional Speech SDK library because of the following error: %s", e.getMessage()));
+                        }
+                    }
                 }
             }
         }
@@ -82,8 +112,8 @@ class NativeLibraryLoader {
                 nativeList = getResourceLines();
 
                 // Extract all operatingSystem specific native libraries to temporary location
-                for (String libName: nativeList) {
-                    extractResourceFromPath(libName, getResourcesPath());
+                for (NativeLibrary library: nativeList) {
+                    extractResourceFromPath(library, getResourcesPath());
                 }
 
                 externalNativeList = getExternalResourceLines();
@@ -95,8 +125,8 @@ class NativeLibraryLoader {
                     try {
                         path = new File(ClassLoader.getSystemClassLoader().getResource(".").getPath()).getAbsolutePath();
                         if (path != null) {
-                            for (String libName: externalNativeList) {
-                                copyLibraryFromPath(libName, path);
+                            for (NativeLibrary library: externalNativeList) {
+                                copyLibraryFromPath(library, path);
                             }
                         }
                     }
@@ -116,33 +146,33 @@ class NativeLibraryLoader {
      * Depending on the OS, return the list of libraries to be extracted, the
      * first of which is to be loaded as well.
      */
-    private static String[] getResourceLines() throws IOException {
+    private static NativeLibrary[] getResourceLines() throws IOException {
         String operatingSystem = ("" + System.getProperty("os.name")).toLowerCase();
 
         if (operatingSystem.contains("linux")) {
-            return new String[] {
-                    "libMicrosoft.CognitiveServices.Speech.core.so",
-                    "libMicrosoft.CognitiveServices.Speech.extension.kws.so",
-                    "libMicrosoft.CognitiveServices.Speech.extension.codec.so",
-                    "libMicrosoft.CognitiveServices.Speech.java.bindings.so"
+            return new NativeLibrary[] {
+                    new NativeLibrary("libMicrosoft.CognitiveServices.Speech.core.so", true),
+                    new NativeLibrary("libMicrosoft.CognitiveServices.Speech.extension.kws.so", false),
+                    new NativeLibrary("libMicrosoft.CognitiveServices.Speech.extension.codec.so", false),
+                    new NativeLibrary("libMicrosoft.CognitiveServices.Speech.java.bindings.so", true)
             };
         }
         else if (operatingSystem.contains("windows")) {
-            return new String[] {
-                    "Microsoft.CognitiveServices.Speech.core.dll",
+            return new NativeLibrary[] {
+                    new NativeLibrary("Microsoft.CognitiveServices.Speech.core.dll", true),
                     // Note: the Speech SDK core library loads extension DLLs
                     // relative to its location, so this one is currently only
                     // needed for extraction (TODO however due to 'loadAll ==
                     // true' below, we'll still load it later; should fix).
-                    "Microsoft.CognitiveServices.Speech.extension.kws.dll",
-                    "Microsoft.CognitiveServices.Speech.java.bindings.dll"
+                    new NativeLibrary("Microsoft.CognitiveServices.Speech.extension.kws.dll", false),
+                    new NativeLibrary("Microsoft.CognitiveServices.Speech.java.bindings.dll", true)
             };
         }
         else if (operatingSystem.contains("mac") || operatingSystem.contains("darwin")) {
             // Note: currently no KWS on macOS
-            return new String[] {
-                    "libMicrosoft.CognitiveServices.Speech.core.dylib",
-                    "libMicrosoft.CognitiveServices.Speech.java.bindings.jnilib"
+            return new NativeLibrary[] {
+                    new NativeLibrary("libMicrosoft.CognitiveServices.Speech.core.dylib", true),
+                    new NativeLibrary("libMicrosoft.CognitiveServices.Speech.java.bindings.jnilib", true)
             };
         }
 
@@ -153,16 +183,16 @@ class NativeLibraryLoader {
     /**
      * Depending on the OS, return the list of external optional libraries to be copied.
      */
-    private static String[] getExternalResourceLines() {
+    private static NativeLibrary[] getExternalResourceLines() {
         String operatingSystem = ("" + System.getProperty("os.name")).toLowerCase();
 
         if (operatingSystem.contains("windows")) {
-            return new String[] {
-                    "Microsoft.CognitiveServices.Speech.extension.pma.dll"
+            return new NativeLibrary[] {
+                    new NativeLibrary("Microsoft.CognitiveServices.Speech.extension.pma.dll", false)
             };
         }
 
-        return new String[0];
+        return new NativeLibrary[0];
     }
 
     private static String getResourcesPath() {
@@ -201,7 +231,8 @@ class NativeLibraryLoader {
                 String.format("The Speech SDK doesn't currently have native support for operating system: %s data model size %s", operatingSystem, dataModelSize));
     }
 
-    private static void extractResourceFromPath(String libName, String prefix) throws IOException {
+    private static void extractResourceFromPath(NativeLibrary library, String prefix) throws IOException {
+        String libName = library.getName();
         File temp = new File(tempDir.getCanonicalPath(), libName);
         if (!temp.getCanonicalPath().startsWith(tempDir.getCanonicalPath())) {
             throw new SecurityException("illegal name " + temp.getCanonicalPath());
@@ -219,7 +250,14 @@ class NativeLibraryLoader {
         String path = prefix + libName;
         InputStream inStream = SpeechConfig.class.getResourceAsStream(path);
         if (inStream == null) {
-            throw new FileNotFoundException(String.format("Could not find resource %s in jar.", path));
+            if (library.getRequired() == true) {
+                throw new FileNotFoundException(String.format("Could not find resource %s in jar.", path));
+            }
+            else {
+                // Optional library; just print a message
+                System.err.println(String.format("Could not find optional resource %s in jar.", path));
+                return;
+            }
         }
 
         FileOutputStream outStream = null;
@@ -237,7 +275,8 @@ class NativeLibraryLoader {
         }
     }
 
-    private static void copyLibraryFromPath(String libName, String sourcePath) throws Exception {
+    private static void copyLibraryFromPath(NativeLibrary library, String sourcePath) throws Exception {
+        String libName = library.getName();
         File sourceFile = new File(sourcePath, libName);
         if (!sourceFile.exists()) {
             return;
