@@ -451,7 +451,7 @@ void CSpxAudioStreamSession::SlowDownThreadIfNecessary(uint32_t dataSize)
     {
         slowdownRate = m_simulateRealtimePercentage;
     }
-    
+
     // The amount of time we should ensure current audio packet takes to process.
     auto currentPacketAudioDelay = std::chrono::milliseconds((long)((dataSize * 1000 / m_avgBytesPerSecond) * (1 / (slowdownRate / 100.0))));
 
@@ -1197,6 +1197,7 @@ void CSpxAudioStreamSession::FireEvent(EventType eventType, shared_ptr<ISpxRecog
     // i.e. if some events cannot be delivered to the user, we do not try to deliver events about failed events...
     auto task = CreateTask([this, weakRecognizers, sessionId, eventType, offset, result, activity{ std::move(activity) }, audio]()
     {
+        SPX_DBG_TRACE_SCOPE("DispatchEvent task started...", "DispatchEvent task complete!");
         DispatchEvent(weakRecognizers, sessionId, eventType, offset, result, std::move(activity), audio);
     }, false);
     m_threadService->ExecuteAsync(move(task), ISpxThreadService::Affinity::User);
