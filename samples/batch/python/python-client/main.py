@@ -58,13 +58,21 @@ def transcribe():
             # ignore swagger error on empty response message body: https://github.com/swagger-api/swagger-core/issues/2446
             pass
 
-    # Use base models for transcription. Comment this block if you are using a custom model.
-    # Note: you can specify additional transcription properties by passing a
-    # dictionary in the properties parameter. See
-    # https://docs.microsoft.com/azure/cognitive-services/speech-service/batch-transcription
+    # Specify transcription properties by passing a dict to the properties parameter. See
+    # https://docs.microsoft.com/azure/cognitive-services/speech-service/batch-transcription#configuration-properties
     # for supported parameters.
+    properties = {
+        # 'PunctuationMode': 'Automatic',
+        # 'ProfanityFilterMode': 'None',
+        # 'AddWordLevelTimestamps': 'true',
+        # 'AddDiarization': 'true',
+        # 'AddSentiment': false
+    }
+
+    # Use base models for transcription. Comment this block if you are using a custom model.
     transcription_definition = cris_client.TranscriptionDefinition(
-        name=NAME, description=DESCRIPTION, locale=LOCALE, recordings_url=RECORDINGS_BLOB_URI
+        name=NAME, description=DESCRIPTION, locale=LOCALE, recordings_url=RECORDINGS_BLOB_URI,
+        properties=properties
     )
 
     # Uncomment this block to use custom models for transcription.
@@ -119,8 +127,8 @@ def transcribe():
                 not_started += 1
 
         logging.info("Transcriptions status: "
-                "completed (this transcription): {}, {} running, {} not started yet".format(
-                    completed, running, not_started))
+                     "completed (this transcription): {}, {} running, {} not started yet".format(
+                         completed, running, not_started))
 
         # wait for 5 seconds
         time.sleep(5)
@@ -130,4 +138,3 @@ def transcribe():
 
 if __name__ == "__main__":
     transcribe()
-
