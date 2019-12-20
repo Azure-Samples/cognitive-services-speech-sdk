@@ -1158,7 +1158,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
-                AssertMatching(result.Text, AudioUtterancesMap[AudioUtteranceKeys.PROFANTITY_SINGLE_UTTERANCE_ENGLISH_1].Utterances[Language.EN][0].Text);
+                AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.PROFANTITY_SINGLE_UTTERANCE_ENGLISH_1].Utterances[Language.EN][0].Text, result.Text);
                 WarnIfNotContains(result.Text, AudioUtterancesMap[AudioUtteranceKeys.PROFANTITY_SINGLE_UTTERANCE_ENGLISH_1].Utterances[Language.EN][0].ProfanityRaw);
             }
         }

@@ -154,35 +154,35 @@ TEST_CASE("conversation transcriber reco", "[api][cxx]")
     SPXTEST_REQUIRE(FindTheRef(result->phrases, katieSteve.m_utterance));
 }
 
-TEST_CASE("conversation add while pumping", "[api][cxx]")
-{
-    auto config = CreateSpeechConfigForCTSInRoom();
-    auto myId = PAL::CreateGuidWithDashesUTF8();
-    INFO(myId);
-    auto conversation = Conversation::CreateConversationAsync(config, myId).get();
-
-    std::shared_ptr<PullAudioInputStream> pullAudio;
-    auto audioInput = CreateAudioPullFromRecordedFile(pullAudio);
-    auto transcriber = ConversationTranscriber::FromConfig(audioInput);
-
-    // must join
-    REQUIRE_NOTHROW(transcriber->JoinConversationAsync(conversation).get());
-
-    auto result = make_shared<RecoPhrases>();
-    ConnectCallbacks(transcriber.get(), result);
-
-    transcriber->StartTranscribingAsync().get();
-    this_thread::sleep_for(100ms);
-    conversation->AddParticipantAsync("AddParticipantWhileAudioPumping").get();
-    // the recorded audio is really long, intentionally timeout in 5min.
-    WaitForResult(result->ready.get_future(), 15min);
-    auto text = GetText(result->phrases);
-    INFO(text);
-
-    // Changed verification string from 'ABC' to '123' per suggestion as work around from Sarah Lu
-    bool res = VerifyTextAndSpeaker(result->phrases, "123.", "Unidentified") || VerifyTextAndSpeaker(result->phrases, "123", "Unidentified");
-    SPXTEST_REQUIRE(res == true);
-}
+//TEST_CASE("conversation add while pumping", "[api][cxx]")
+//{
+//    auto config = CreateSpeechConfigForCTSInRoom();
+//    auto myId = PAL::CreateGuidWithDashesUTF8();
+//    INFO(myId);
+//    auto conversation = Conversation::CreateConversationAsync(config, myId).get();
+//
+//    std::shared_ptr<PullAudioInputStream> pullAudio;
+//    auto audioInput = CreateAudioPullFromRecordedFile(pullAudio);
+//    auto transcriber = ConversationTranscriber::FromConfig(audioInput);
+//
+//    // must join
+//    REQUIRE_NOTHROW(transcriber->JoinConversationAsync(conversation).get());
+//
+//    auto result = make_shared<RecoPhrases>();
+//    ConnectCallbacks(transcriber.get(), result);
+//
+//    transcriber->StartTranscribingAsync().get();
+//    this_thread::sleep_for(100ms);
+//    conversation->AddParticipantAsync("AddParticipantWhileAudioPumping").get();
+//    // the recorded audio is really long, intentionally timeout in 5min.
+//    WaitForResult(result->ready.get_future(), 15min);
+//    auto text = GetText(result->phrases);
+//    INFO(text);
+//
+//    // Changed verification string from 'ABC' to '123' per suggestion as work around from Sarah Lu
+//    bool res = VerifyTextAndSpeaker(result->phrases, "123.", "Unidentified") || VerifyTextAndSpeaker(result->phrases, "123", "Unidentified");
+//    SPXTEST_REQUIRE(res == true);
+//}
 
 TEST_CASE("conversation bad connection", "[api][cxx]")
 {
