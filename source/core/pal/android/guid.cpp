@@ -51,6 +51,7 @@ std::string PAL::GenerateGUID()
          *
          *  With code added to do the UTF-16 -> UTF-8 conversion.
          */
+        env->PushLocalFrame(16);
         auto cl = throw_if_null(env->FindClass("java/util/UUID"), "Can't find UUID class.");
         auto randomUUID = throw_if_null(env->GetStaticMethodID(cl, "randomUUID", "()Ljava/util/UUID;"), "Can't find static method \"UUID.randomUUID()\"");
         auto toString = throw_if_null(env->GetMethodID(cl, "toString", "()Ljava/lang/String;"), "Can't find method \"UUID.toString()\"");
@@ -60,6 +61,7 @@ std::string PAL::GenerateGUID()
         std::string uuid{ uuidUTFStr };
         env->DeleteLocalRef(uuidObj);
         env->ReleaseStringUTFChars(uuidStr, uuidUTFStr);
+        env->PopLocalFrame(nullptr);
         return uuid;
     });
 }
