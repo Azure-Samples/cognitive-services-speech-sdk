@@ -23,6 +23,7 @@ set(SOURCES
     "${SRC_DIR}/single_to_many_stream_reader_adapter_test.cpp"
     "${SRC_DIR}/sequence_generator_audio_stream_reader.cpp"
     "${SRC_DIR}/read_write_ring_buffer_test_case.cpp"
+    "${SRC_DIR}/string_utils_test.cpp"
     )
 
 source_group("Source Files" FILES ${SOURCES})

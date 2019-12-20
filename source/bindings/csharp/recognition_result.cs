@@ -89,7 +89,7 @@ namespace Microsoft.CognitiveServices.Speech
         }
 
         internal InteropSafeHandle resultHandle;
-        internal const Int32 maxCharCount = 1024;
+        internal const Int32 maxCharCount = 2048;
     }
 
     /// <summary>

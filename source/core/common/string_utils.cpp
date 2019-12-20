@@ -76,19 +76,21 @@ int xcsicmp(const WCHAR* a, const WCHAR* b)
 // arrays in terms of number of elements (in wide characters).
 void strcpy(char *dst, size_t dstSize, const char *src, size_t srcSize, bool truncate)
 {
-    // TODO (alrezni): throw instead of asserting,
-    // see https://msdn.microsoft.com/en-us/library/5dae5d43.aspx
-    // and https://msdn.microsoft.com/en-us/library/td1esda9.aspx
-    // for more details on error conditions, add unit tests.
     assert(src);
     assert(dst);
     assert(dstSize != 0);
 
     auto toCopy = std::min(dstSize, srcSize);
-
-    if (!truncate)
+    if (dstSize == toCopy && src[toCopy - 1] != 0)
     {
-        assert(dstSize > toCopy);
+        if (!truncate)
+        {
+            throw std::invalid_argument("Destination buffer is too small.");
+        }
+        else // truncate; the array will be null-terminated after copy
+        {
+            toCopy--; // prevent runtime error from strncpy_s
+        }
     }
 
 #ifdef _MSC_VER
@@ -102,19 +104,21 @@ void strcpy(char *dst, size_t dstSize, const char *src, size_t srcSize, bool tru
 
 void wcscpy(wchar_t *dst, size_t dstSize, const wchar_t *src, size_t srcSize, bool truncate)
 {
-    // TODO (alrezni): throw instead of asserting, 
-    // see https://msdn.microsoft.com/en-us/library/5dae5d43.aspx
-    // and https://msdn.microsoft.com/en-us/library/td1esda9.aspx
-    // for more details on error conditions, add unit tests.
     assert(src);
     assert(dst);
     assert(dstSize != 0);
 
     auto toCopy = std::min(dstSize, srcSize);
-
-    if (!truncate)
+    if (dstSize == toCopy && src[toCopy - 1] != 0)
     {
-        assert(dstSize > toCopy);
+        if (!truncate)
+        {
+            throw std::invalid_argument("Destination buffer is too small.");
+        }
+        else // truncate; the array will be null-terminated after copy
+        {
+            toCopy--; // prevent runtime error from wcsncpy_s
+        }
     }
 
 #ifdef _MSC_VER

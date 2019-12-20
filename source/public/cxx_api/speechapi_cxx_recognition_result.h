@@ -127,7 +127,7 @@ private:
 
         SPX_INIT_HR(hr);
 
-        const size_t maxCharCount = 1024;
+        const size_t maxCharCount = 2048;
         char sz[maxCharCount + 1];
 
         if (resultId != nullptr)
