@@ -62,11 +62,12 @@ def transcribe():
     # https://docs.microsoft.com/azure/cognitive-services/speech-service/batch-transcription#configuration-properties
     # for supported parameters.
     properties = {
-        # 'PunctuationMode': 'Automatic',
-        # 'ProfanityFilterMode': 'None',
-        # 'AddWordLevelTimestamps': 'true',
-        # 'AddDiarization': 'true',
-        # 'AddSentiment': false
+        # 'PunctuationMode': 'DictatedAndAutomatic',
+        # 'ProfanityFilterMode': 'Masked',
+        # 'AddWordLevelTimestamps': 'False',
+        # 'AddDiarization': 'False',
+        # 'AddSentiment': False,
+        # 'TranscriptionResultsContainerUrl': "<results container>"
     }
 
     # Use base models for transcription. Comment this block if you are using a custom model.
@@ -81,7 +82,8 @@ def transcribe():
     #     logging.info("Custom model ids must be set to when using custom models")
     # transcription_definition = cris_client.TranscriptionDefinition(
     #     name=NAME, description=DESCRIPTION, locale=LOCALE, recordings_url=RECORDINGS_BLOB_URI,
-    #     models=[cris_client.ModelIdentity(ADAPTED_ACOUSTIC_ID), cris_client.ModelIdentity(ADAPTED_LANGUAGE_ID)]
+    #     models=[cris_client.ModelIdentity(ADAPTED_ACOUSTIC_ID), cris_client.ModelIdentity(ADAPTED_LANGUAGE_ID)],
+    #     properties=properties
     # )
 
     data, status, headers = transcription_api.create_transcription_with_http_info(transcription_definition)
