@@ -243,8 +243,9 @@ public class SpeechConfig implements Closeable {
     }
 
     /**
-     * Sets output format.
-     * @param format The output format.
+     * Sets speech recognition output format (simple or detailed).
+     * Note: This output format is for speech recognition results, use <see cref="SpeechConfig.setSpeechSynthesisOutputFormat"/> to set synthesized audio output format.
+     * @param format The speech recognition output format.
      */
     public void setOutputFormat(OutputFormat format) {
         String value = "false";
@@ -255,8 +256,9 @@ public class SpeechConfig implements Closeable {
     }
 
     /**
-     * Gets output format.
-     * @return Returns the output format.
+     * Gets speech recognition output format (simple or detailed).
+     * Note: This output format is for speech recognition results, use <see cref="SpeechConfig.getSpeechSynthesisOutputFormat"/> to get synthesized audio output format.
+     * @return Returns the speech recognition output format.
      */
     public OutputFormat getOutputFormat() {
         String result = speechConfigImpl.GetProperty(com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceResponse_RequestDetailedResultTrueFalse);

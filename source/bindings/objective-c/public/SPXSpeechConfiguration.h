@@ -23,7 +23,10 @@ SPX_EXPORT
 @property (nonatomic, copy, nullable)NSString *endpointId;
 
 /**
- * The output format of the recognition result.
+ * The output format of the speech recognition result.
+ * 
+ * Note: This output format is for speech recognition result, use SPXSpeechConfiguration.speechSynthesisOutputFormat 
+ * and SPXSpeechConfiguration.setSpeechSynthesisOutputFormat to get/set the systhesized audio output format.
  */
 @property (nonatomic)SPXOutputFormat outputFormat;
 

@@ -167,7 +167,7 @@ class SpeechConfig():
     @property
     def output_format(self) -> OutputFormat:
         """
-        The output format for results.
+        The output format (simple or detailed) of the speech recognition result.
         """
         return OutputFormat(impl._speech_py_impl.SpeechConfig_get_output_format(self._impl))
 

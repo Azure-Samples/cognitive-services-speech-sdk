@@ -295,9 +295,10 @@ public:
     }
 
     /// <summary>
-    /// Gets output format.
+    /// Gets speech recognition output format (simple or detailed).
+    /// Note: This output format is for speech recognition result, use <see cref="SpeechConfig::GetSpeechSynthesisOutputFormat"/> to get synthesized audio output format.
     /// </summary>
-    /// <returns>Output format.</returns>
+    /// <returns>Speech recognition output format.</returns>
     OutputFormat GetOutputFormat() const
     {
         auto result = GetProperty(PropertyId::SpeechServiceResponse_RequestDetailedResultTrueFalse);
@@ -305,9 +306,10 @@ public:
     }
 
     /// <summary>
-    /// Sets output format.
+    /// Sets speech recognition output format (simple or detailed).
+    /// Note: This output format is for speech recognition result, use <see cref="SpeechConfig::SetSpeechSynthesisOutputFormat"/> to set synthesized audio output format.
     /// </summary>
-    /// <param name="format">Output format</param>
+    /// <param name="format">Speech recognition output format</param>
     void SetOutputFormat(OutputFormat format)
     {
         property_bag_set_string(m_propertybag, static_cast<int>(PropertyId::SpeechServiceResponse_RequestDetailedResultTrueFalse), nullptr,

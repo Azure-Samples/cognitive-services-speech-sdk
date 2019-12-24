@@ -207,7 +207,9 @@ namespace Microsoft.CognitiveServices.Speech
         }
 
         /// <summary>
-        /// Output format: simple or detailed.
+        /// Gets/sets the speech recognition output format: simple or detailed.
+        /// Note: This output format is for speech recognition results, use <see cref="SpeechConfig.SpeechSynthesisOutputFormat"/> 
+        /// and <see cref="SpeechConfig.SetSpeechSynthesisOutputFormat"/> to get/set synthesized audio output format.
         /// </summary>
         public OutputFormat OutputFormat
         {
