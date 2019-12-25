@@ -195,12 +195,13 @@ std::shared_ptr<ISpxSynthesisResult> CSpxRestTtsEngineAdapter::Speak(const std::
 
         EnsureHttpConnection();
 
-        std::string token = "";
-        if (m_authenticator.get() != nullptr && !m_authenticator->GetAccessToken().empty())
+        std::string token;
+        if (m_authenticator != nullptr)
         {
             token = m_authenticator->GetAccessToken();
         }
-        else
+
+        if (token.empty())
         {
             token = ISpxPropertyBagImpl::GetStringValue(GetPropertyName(PropertyId::SpeechServiceAuthorization_Token), "");
         }
@@ -226,7 +227,7 @@ std::shared_ptr<ISpxSynthesisResult> CSpxRestTtsEngineAdapter::Speak(const std::
                 HTTPAPI_CloseConnection(m_httpConnect);
                 m_httpConnect = nullptr;
 
-                if (result->GetAudioData()->size() == 0 && request.response.body.size() == 0)
+                if (result->GetAudioData()->empty() && request.response.body.empty())
                 {
                     // Re-connect and re-send the request if disconnection happened and no data was received
                     EnsureHttpConnection();

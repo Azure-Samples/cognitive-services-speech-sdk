@@ -6,6 +6,7 @@ include_directories("${CARBON_CORE}/include")
 include_directories("${COMMON}/include")
 include_directories("${USP}/include")
 include_directories("${SR}")
+include_directories("${TTS_REST}")
 include_directories("${AUDIO}")
 include_directories("${AUDIO}/include")
 include_directories("${CARBON_EXTERNAL}/Catch2")
@@ -19,6 +20,7 @@ set(SOURCES
     "${SRC_DIR}/usp_test_case.cpp"
     "${SRC_DIR}/mic_test_case.cpp"
     "${SRC_DIR}/sr_test_case.cpp"
+    "${SRC_DIR}/tts_test_case.cpp"
     "${SRC_DIR}/speech_context_json_test.cpp"
     )
 

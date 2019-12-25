@@ -43,9 +43,10 @@ void CSpxRestTtsAuthenticator::Init()
         return;
     }
 
-    // Access token expires every 10 minutes. Renew it every 9 minutes only
-    m_accessTokenRenewer.Start(9 * 60 * 1000, std::bind([this]() {
-        RenewAccessToken();
+    // Access token expires every 10 minutes. Renew it every 9 minutes if getting token successfully,
+    // retry after 30 seconds if failed.
+    m_accessTokenRenewer.Start(9 * 60 * 1000, 30 * 1000, std::bind([this]() {
+        return RenewAccessToken();
     }));
 }
 
@@ -54,7 +55,7 @@ void CSpxRestTtsAuthenticator::Term()
     m_accessTokenRenewer.Expire(); // Stop the timer
 }
 
-std::string CSpxRestTtsAuthenticator::GetAccessToken()
+std::string CSpxRestTtsAuthenticator::GetAccessToken(uint32_t timeoutInMs)
 {
     SPX_DBG_TRACE_VERBOSE_IF(SPX_DBG_TRACE_REST_TTS_AUTHENTICATOR, __FUNCTION__);
 
@@ -63,17 +64,24 @@ std::string CSpxRestTtsAuthenticator::GetAccessToken()
         return std::string();
     }
 
-    // Access token expires every 10 minutes. Check if it refreshed within 9.5 minutes.
-    m_accessTokenRenewer.WaitUntilValid(570000);  // 9.5 * 60 * 1000
+    if (m_accessToken.empty())
+    {
+        m_accessTokenRenewer.ForceRenew();
+    }
 
-    return m_accessToken;
+    // Threshold is 30s, timeout is 2s default
+    if (m_accessTokenRenewer.WaitUntilValid(30 * 1000, timeoutInMs))
+        return m_accessToken;
+    return std::string();
 }
 
-void CSpxRestTtsAuthenticator::RenewAccessToken()
+bool CSpxRestTtsAuthenticator::RenewAccessToken()
 {
     SPX_DBG_TRACE_VERBOSE_IF(SPX_DBG_TRACE_REST_TTS_AUTHENTICATOR, __FUNCTION__);
 
     m_accessToken = HttpPost(m_issueTokenUri, m_subscriptionKey, m_proxyHost, m_proxyPort, m_proxyUsername, m_proxyPassword);
+
+    return !m_accessToken.empty();
 }
 
 std::string CSpxRestTtsAuthenticator::HttpPost(const std::string& issueTokenUri, const std::string& subscriptionKey,

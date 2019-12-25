@@ -87,8 +87,10 @@ void CSpxUspTtsEngineAdapter::Init()
 
         // Construct cognitive service token issue URL based on region
         auto issueTokenUrl = std::string(HTTPS_URL_PREFIX) + region + ISSUE_TOKEN_HOST_SUFFIX + ISSUE_TOKEN_URL_PATH;
-
-        m_authenticator = std::make_shared<CSpxRestTtsAuthenticator>(issueTokenUrl, subscriptionKey, m_proxyHost, m_proxyPort, m_proxyUsername, m_proxyPassword);
+        if (!subscriptionKey.empty())
+        {
+            m_authenticator = std::make_shared<CSpxRestTtsAuthenticator>(issueTokenUrl, subscriptionKey, m_proxyHost, m_proxyPort, m_proxyUsername, m_proxyPassword);
+        }
     }
     else if ((endpoint.empty() && !region.empty()) || (!endpoint.empty() && CSpxSynthesisHelper::IsStandardVoiceEndpoint(endpoint)))
     {
@@ -108,7 +110,10 @@ void CSpxUspTtsEngineAdapter::Init()
         // Construct cognitive service token issue URL based on region
         auto issueTokenUrl = std::string(HTTPS_URL_PREFIX) + region + ISSUE_TOKEN_HOST_SUFFIX + ISSUE_TOKEN_URL_PATH;
 
-        m_authenticator = std::make_shared<CSpxRestTtsAuthenticator>(issueTokenUrl, subscriptionKey, m_proxyHost, m_proxyPort, m_proxyUsername, m_proxyPassword);
+        if (!subscriptionKey.empty())
+        {
+            m_authenticator = std::make_shared<CSpxRestTtsAuthenticator>(issueTokenUrl, subscriptionKey, m_proxyHost, m_proxyPort, m_proxyUsername, m_proxyPassword);
+        }
     }
     else
     {
@@ -343,7 +348,7 @@ void CSpxUspTtsEngineAdapter::EnsureUspConnection()
         UspTerminate();
         UspInitialize();
     }
-    else if (PAL::GetTicks(std::chrono::system_clock::now() - m_lastConnectTime) > (uint64_t)9 * 60 * 1000 * 10000)
+    else if (PAL::GetTicks(std::chrono::system_clock::now() - m_lastConnectTime) > static_cast<uint64_t>(9) * 60 * 1000 * 10000)
     {
         // Per https://speechwiki.azurewebsites.net/partners/protocol-websockets-tts.html#connection-duration-limitations
         // The service closes the active connect after 10 mins.
@@ -360,13 +365,28 @@ void CSpxUspTtsEngineAdapter::UspInitialize()
 
     // Fill authorization token
     std::array<std::string, static_cast<size_t>(USP::AuthenticationType::SIZE_AUTHENTICATION_TYPE)> authData;
-    if (m_authenticator != nullptr && !m_authenticator->GetAccessToken().empty())
+    std::string token;
+    if (m_authenticator != nullptr)
     {
-        authData[static_cast<size_t>(USP::AuthenticationType::AuthorizationToken)] = m_authenticator->GetAccessToken();
+        const auto getAccessTokenTimeout = std::stoi(ISpxPropertyBagImpl::GetStringValue("SpeechSynthesis_GetAccessTokenTimeoutMs", "5000"));
+        token = m_authenticator->GetAccessToken(getAccessTokenTimeout);
+    }
+
+    if (token.empty())
+    {
+        token = ISpxPropertyBagImpl::GetStringValue(GetPropertyName(PropertyId::SpeechServiceAuthorization_Token), "");
+    }
+
+    if (token.empty())
+    {
+        SPX_TRACE_ERROR("Error: issue token is empty, check your subscription key and network.");
+        m_currentErrorMessage = "Error occurs while getting access token, check your subscription key, access token or network connection.";
+        m_uspState = UspState::Error;
+        return;
     }
     else
     {
-        authData[static_cast<size_t>(USP::AuthenticationType::AuthorizationToken)] = ISpxPropertyBagImpl::GetStringValue(GetPropertyName(PropertyId::SpeechServiceAuthorization_Token), "");
+        authData[static_cast<size_t>(USP::AuthenticationType::AuthorizationToken)] = token;
     }
 
     // Create the usp client, which we'll configure and use to create the actual connection
@@ -407,9 +427,11 @@ void CSpxUspTtsEngineAdapter::UspInitialize()
         OnError(true, USP::ErrorCode::ConnectionError, "Error: Unexpected exception in UspInitialize");
     }
 
-    // if error occurs in the above client.Connect, return.
+    // if error occurs in the above client.Connect, set state to error and return.
     if (uspConnection == nullptr)
     {
+        m_uspState = UspState::Error;
+        m_currentErrorMessage = "USP connection establishment failed.";
         return;
     }
 

@@ -25,40 +25,42 @@ class Timer
 {
 public:
 
-    Timer() : m_stopped(true), m_tryToStop(false) {}
-
-    ~Timer() = default;
-
-    void Start(uint32_t intervalInMs, std::function<void()> task)
+    Timer() : m_stopped(true), m_tryToStop(false), m_nextRefreshTime(0)
     {
-        if (!m_stopped)
-        {
-            return; // timer is currently running, need expire it first
-        }
+    }
 
-        m_thread = std::thread([this, intervalInMs, task]()
+    ~Timer()
+    {
+        Expire();
+    }
+
+    void Start(uint32_t successRefreshIntervalInMs, uint32_t failureRefreshIntervalInMs, std::function<bool()> task)
+    {
+        SPX_TRACE_ERROR_IF(!m_stopped, "timer is currently running, need expire it first.");
+        SPX_IFTRUE_THROW_HR(!m_stopped, SPXERR_INVALID_STATE);
+
+        m_thread = std::thread([this, successRefreshIntervalInMs, failureRefreshIntervalInMs, task]()
         {
             while (!m_tryToStop)
             {
                 {
+                    auto refreshDelta = task() ? successRefreshIntervalInMs : failureRefreshIntervalInMs;
                     std::unique_lock<std::mutex> lock(m_mutex);
-                    task();
-                    m_lastRefreshTime = std::chrono::duration_cast<std::chrono::milliseconds>(
-                        std::chrono::system_clock::now().time_since_epoch()).count();
+                    m_nextRefreshTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+                        std::chrono::system_clock::now().time_since_epoch()).count() + refreshDelta;
                     m_cv.notify_all();
                 }
 
                 while (!m_tryToStop)
                 {
-                    auto currentTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+                    const auto currentTime = std::chrono::duration_cast<std::chrono::milliseconds>(
                         std::chrono::system_clock::now().time_since_epoch()).count();
-                    auto timeSinceLastRefresh = currentTime - m_lastRefreshTime;
-                    if (timeSinceLastRefresh >= intervalInMs)
+                    if (currentTime >= m_nextRefreshTime)
                     {
                         break;
                     }
 
-                    auto checkIntervalInMs = std::min(static_cast<int64_t>(m_checkIntervalInMs), static_cast<int64_t>(intervalInMs - timeSinceLastRefresh));
+                    auto checkIntervalInMs = std::min(static_cast<int64_t>(m_checkIntervalInMs), static_cast<int64_t>(m_nextRefreshTime - currentTime));
                     std::this_thread::sleep_for(std::chrono::milliseconds(checkIntervalInMs));
                 }
             }
@@ -69,17 +71,37 @@ public:
         m_stopped = false;
     }
 
-    void WaitUntilValid(uint32_t expirationTimeInMS)
+    /**
+     * \brief wait until the result is valid
+     * \param thresholdTimeInMS threshold time, i.e. if current time - m_nextRefreshTime < threshold, the result is valid
+     * \param timeoutInMs waiting timeout, in milliseconds
+     * \return bool, if result is valid after waiting
+     */
+    bool WaitUntilValid(uint32_t thresholdTimeInMS, uint32_t timeoutInMs)
     {
         std::unique_lock<std::mutex> lock(m_mutex);
 #ifdef _DEBUG
-        while (!m_cv.wait_for(lock, std::chrono::milliseconds(100), [&] { return IsValid(expirationTimeInMS); }))
+        int remainingTime = timeoutInMs;
+        while (!m_cv.wait_for(lock, std::chrono::milliseconds(100), [&] { return m_stopped || IsValid(thresholdTimeInMS); }))
         {
             SPX_DBG_TRACE_VERBOSE("%s: waiting ...", __FUNCTION__);
+            remainingTime -= 100;
+            if (remainingTime <= 0)
+            {
+                break;
+            }
         }
+        return IsValid(thresholdTimeInMS);
 #else
-        m_cv.wait(lock, [&] { return IsValid(expirationTimeInMS); });
+        m_cv.wait_for(lock, std::chrono::milliseconds(timeoutInMs), [&] { return m_stopped || IsValid(thresholdTimeInMS); });
+        return IsValid(thresholdTimeInMS);
 #endif
+    }
+
+    void ForceRenew()
+    {
+        std::unique_lock<std::mutex> lock(m_mutex);
+        m_nextRefreshTime = 0;
     }
 
     void Expire()
@@ -104,12 +126,11 @@ public:
 
 private:
 
-    bool IsValid(uint32_t expirationTimeInMS) const
+    bool IsValid(uint32_t thresholdTimeInMS) const
     {
-        auto currentTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+        const auto currentTime = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now().time_since_epoch()).count();
-        auto timeSinceLastRefresh = currentTime - m_lastRefreshTime;
-        return timeSinceLastRefresh < expirationTimeInMS;
+        return currentTime - m_nextRefreshTime < thresholdTimeInMS;
     }
 
 private:
@@ -119,7 +140,7 @@ private:
     std::thread m_thread;
     std::atomic<bool> m_stopped;
     std::atomic<bool> m_tryToStop;
-    std::atomic<int64_t> m_lastRefreshTime;  // milliseconds since epoch.
+    std::atomic<int64_t> m_nextRefreshTime;  // milliseconds since epoch.
 
     std::mutex m_mutex;
     std::condition_variable m_cv;
@@ -142,12 +163,12 @@ public:
     void Init() override;
     void Term() override;
 
-    std::string GetAccessToken();
+    std::string GetAccessToken(uint32_t timeoutInMs=5000);
 
 
 private:
 
-    void RenewAccessToken();
+    bool RenewAccessToken();
     std::string HttpPost(const std::string& issueTokenUri, const std::string& subscriptionKey,
         const std::string& proxyHost, int proxyPort, const std::string& proxyUsername, const std::string& proxyPassword);
 
