@@ -41,7 +41,7 @@ std::wstring CSpxSynthesisResult::GetRequestId()
 
 std::shared_ptr<ISpxSynthesizerEvents> CSpxSynthesisResult::GetEvents()
 {
-    return m_events;
+    return m_events.lock();
 }
 
 std::shared_ptr<CSpxAsyncOp<std::shared_ptr<ISpxSynthesisResult>>> CSpxSynthesisResult::GetFutureResult()
@@ -115,7 +115,7 @@ void CSpxSynthesisResult::InitSynthesisResult(const std::wstring& requestId, Res
     CancellationReason cancellation, CancellationErrorCode errorCode,
     uint8_t* audio_buffer, size_t audio_length, SPXWAVEFORMATEX* format, bool hasHeader)
 {
-    SPX_IFTRUE_THROW_HR(m_audiodata.size() > 0, SPXERR_ALREADY_INITIALIZED);
+    SPX_IFTRUE_THROW_HR(!m_audiodata.empty(), SPXERR_ALREADY_INITIALIZED);
     SPX_IFTRUE_THROW_HR(m_audioformat != nullptr, SPXERR_ALREADY_INITIALIZED);
 
     // Set result ID
@@ -181,7 +181,7 @@ void CSpxSynthesisResult::Reset()
 {
     m_resultId.clear();
     m_requestId.clear();
-    m_events = nullptr;
+    m_events.reset();
     m_reason = static_cast<ResultReason>(0);
     m_cancellationReason = static_cast<CancellationReason>(0);
     m_cancellationErrorCode = CancellationErrorCode::NoError;

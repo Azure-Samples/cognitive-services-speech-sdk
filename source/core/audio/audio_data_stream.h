@@ -79,7 +79,7 @@ private:
     SynthesisCallbackFunction_Type m_pfnSynthesizing;
     SynthesisCallbackFunction_Type m_pfnSynthesisStopped; // This is for synthesis is either completed or canceled
 
-    std::shared_ptr<ISpxSynthesizerEvents> m_synthEvents;
+    std::weak_ptr<ISpxSynthesizerEvents> m_synthEvents;
     std::mutex m_eventMutex;
 
     std::list<std::pair<SpxSharedAudioBuffer_Type, uint32_t>> m_audioList;

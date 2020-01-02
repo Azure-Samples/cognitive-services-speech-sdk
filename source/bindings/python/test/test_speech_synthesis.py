@@ -108,7 +108,6 @@ def test_speech_synthesizer_synthesizer_output_to_file(subscription, speech_regi
     result1 = synthesizer.speak_text_async("{{{text1}}}").get()
     # "{{{wavefile.wav}}}" now contains synthesized audio for "{{{text1}}}""
     result_reason1 = result1.reason
-    result1 = None
     synthesizer = None
     # "{{{wavefile.wav}}}" is now closed
 
@@ -123,8 +122,6 @@ def test_speech_synthesizer_synthesizer_output_to_file(subscription, speech_regi
     # "{{{wavefile.wav}}}" now contains synthesized audio for both "{{{text1}}}"" and "{{{text2}}}"
     result_reason21 = result1.reason
     result_reason22 = result2.reason
-    result1 = None
-    result2 = None
     synthesizer = None
     # "{{{wavefile.wav}}}" is now closed
 
@@ -143,7 +140,6 @@ def test_speech_synthesizer_synthesizer_output_to_mp3_file(subscription, speech_
     result = synthesizer.speak_text_async("{{{text1}}}").get()
     # "{{{audiofile.wav}}}" now contains synthesized audio for "{{{text1}}}""
     result_reason1 = result.reason
-    result = None
     synthesizer = None
     # "{{{audiofile.wav}}}" is now closed
 
@@ -159,7 +155,6 @@ def test_speech_synthesizer_synthesizer_output_to_mp3_file(subscription, speech_
     result = synthesizer.speak_text_async("{{{text1}}}").get()
     # "{{{audiofile.mp3}}}" now contains synthesized audio for "{{{text1}}}""
     result_reason2 = result.reason
-    result = None
     synthesizer = None
     # "{{{audiofile.mp3}}}" is now closed
 
@@ -190,8 +185,6 @@ def test_speech_synthesizer_synthesizer_output_to_push_stream(subscription, spee
     result2_canceled = result2.reason == msspeech.ResultReason.Canceled
     canceled = result1_canceled and result2_canceled
 
-    result1 = None
-    result2 = None
     synthesizer = None
 
     _do_something_with_audio_in_push_stream(stream_callback, canceled)
@@ -215,8 +208,6 @@ def test_speech_synthesizer_synthesizer_output_to_pull_stream_use_after_synthesi
     result2_canceled = result2.reason == msspeech.ResultReason.Canceled
     canceled = [result1_canceled and result2_canceled]
 
-    result1 = None
-    result2 = None
     synthesizer = None
 
     _do_something_with_audio_in_pull_stream(pull_stream, canceled)
@@ -243,8 +234,6 @@ def test_speech_synthesizer_synthesizer_output_to_pull_stream_start_using_before
     result2_canceled = result2.reason == msspeech.ResultReason.Canceled
     canceled[0] = result1_canceled and result2_canceled
 
-    result1 = None
-    result2 = None
     synthesizer = None
 
     future.result()

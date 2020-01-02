@@ -111,8 +111,7 @@
     [self checkResult:result1];
     NSUInteger fileSize = [[[NSFileManager defaultManager] attributesOfItemAtPath:fileName error:nil] fileSize];
     XCTAssertGreaterThan(fileSize, emptyWaveFileSize, @"The size of output wave file 1 is unexpected. Expected: greater than %lu, Actual: %lu", emptyWaveFileSize, fileSize);
-    
-    result1 = nil;
+
     synthesizer = nil; // wavefile.wav is now closed
 
     // Make a second run with 2 speaks to verify that the audio can be append to the file while speaking
@@ -143,8 +142,7 @@
     SPXSpeechSynthesisResult* result2 = [synthesizer speakSsml:ssml];
     [self checkResult:result1];
     [self checkResult:result2];
-    result1 = nil;
-    result2 = nil;
+
     synthesizer = nil;
     XCTAssertTrue(isClosed, @"The push audio output stream is not closed.");
 }
@@ -157,8 +155,7 @@
     SPXSpeechSynthesisResult* result2 = [synthesizer speakText:@"{{{text2}}}"];
     [self checkResult:result1];
     [self checkResult:result2];
-    result1 = nil;
-    result2 = nil;
+
     synthesizer = nil;
     NSMutableData* data = [[NSMutableData alloc] initWithCapacity:1024];
     NSUInteger audioLength = 0;
@@ -188,8 +185,6 @@
     SPXSpeechSynthesisResult* result2 = [synthesizer speakText:@"{{{text2}}}"];
     [self checkResult:result1];
     [self checkResult:result2];
-    result1 = nil;
-    result2 = nil;
     synthesizer = nil;
     dispatch_semaphore_wait(semaphore,DISPATCH_TIME_FOREVER);
 }
@@ -282,7 +277,6 @@
     }];
     SPXSpeechSynthesisResult* result1 = [synthesizer speakText:@"{{{text1}}}"];
     [self checkResult:result1];
-    result1 = nil;
     synthesizer = nil;
     dispatch_semaphore_wait(semaphore,DISPATCH_TIME_FOREVER);
 }

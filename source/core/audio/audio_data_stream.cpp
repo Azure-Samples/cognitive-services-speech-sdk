@@ -120,31 +120,39 @@ void CSpxAudioDataStream::InitFromSynthesisResult(std::shared_ptr<ISpxSynthesisR
         // Close the stream
         Close();
 
-        auto events = result->GetEvents();
+        if (auto synthEvents = result->GetEvents())
+        {
+            // Disconnect synthesizing event when SynthesisCompleted/SynthesisCanceled event is fired
+            synthEvents->DisconnectSynthesizingCallback(static_cast<void*>(this), m_pfnSynthesizing);
 
-        // Disconnect synthesizing event when SynthesisCompleted/SynthesisCanceled event is fired
-        events->DisconnectSynthesizingCallback((void *)this, m_pfnSynthesizing);
+            // Disconnect synthesis completed event when SynthesisCompleted/SynthesisCanceled event is fired
+            synthEvents->DisconnectSynthesisCompletedCallback(static_cast<void*>(this), m_pfnSynthesisStopped);
 
-        // Disconnect synthesis completed event when SynthesisCompleted/SynthesisCanceled event is fired
-        events->DisconnectSynthesisCompletedCallback((void *)this, m_pfnSynthesisStopped);
-
-        // Disconnect synthesis canceled event when SynthesisCompleted/SynthesisCanceled event is fired
-        events->DisconnectSynthesisCanceledCallback((void *)this, m_pfnSynthesisStopped);
+            // Disconnect synthesis canceled event when SynthesisCompleted/SynthesisCanceled event is fired
+            synthEvents->DisconnectSynthesisCanceledCallback(static_cast<void*>(this), m_pfnSynthesisStopped);
+        }
     };
 
     // Connect events
-    m_synthEvents = result->GetEvents();
-
-    if (result->GetReason() == ResultReason::SynthesizingAudioStarted || result->GetReason() == ResultReason::SynthesizingAudio)
+    if (auto synthEvents = result->GetEvents())
     {
-        // Connect synthesizing event
-        m_synthEvents->ConnectSynthesizingCallback((void *)this, m_pfnSynthesizing);
+        m_synthEvents = synthEvents;
 
-        // Connect synthesis completed event
-        m_synthEvents->ConnectSynthesisCompletedCallback((void *)this, m_pfnSynthesisStopped);
+        if (result->GetReason() == ResultReason::SynthesizingAudioStarted || result->GetReason() == ResultReason::SynthesizingAudio)
+        {
+            // Connect synthesizing event
+            synthEvents->ConnectSynthesizingCallback(static_cast<void*>(this), m_pfnSynthesizing);
 
-        // Connect synthesis canceled event
-        m_synthEvents->ConnectSynthesisCanceledCallback((void *)this, m_pfnSynthesisStopped);
+            // Connect synthesis completed event
+            synthEvents->ConnectSynthesisCompletedCallback(static_cast<void*>(this), m_pfnSynthesisStopped);
+
+            // Connect synthesis canceled event
+            synthEvents->ConnectSynthesisCanceledCallback(static_cast<void*>(this), m_pfnSynthesisStopped);
+        }
+    }
+    else
+    {
+        m_writingEnded = true;
     }
 }
 
@@ -364,16 +372,16 @@ void CSpxAudioDataStream::DisconnectSynthEvents()
 {
     std::unique_lock<std::mutex> lock(m_eventMutex);
 
-    if (m_synthEvents.get() != nullptr)
+    if (auto synthEvents = m_synthEvents.lock())
     {
         // Disconnect synthesizing event
-        m_synthEvents->DisconnectSynthesizingCallback((void *)this, nullptr);
+        synthEvents->DisconnectSynthesizingCallback(static_cast<void *>(this), nullptr);
 
         // Disconnect synthesis completed event
-        m_synthEvents->DisconnectSynthesisCompletedCallback((void *)this, nullptr);
+        synthEvents->DisconnectSynthesisCompletedCallback(static_cast<void *>(this), nullptr);
 
         // Disconnect synthesis canceled event
-        m_synthEvents->DisconnectSynthesisCanceledCallback((void *)this, nullptr);
+        synthEvents->DisconnectSynthesisCanceledCallback(static_cast<void *>(this), nullptr);
     }
 }
 

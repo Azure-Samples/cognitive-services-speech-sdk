@@ -67,7 +67,7 @@ private:
 
     std::wstring m_resultId;
     std::wstring m_requestId;
-    std::shared_ptr<ISpxSynthesizerEvents> m_events;
+    std::weak_ptr<ISpxSynthesizerEvents> m_events;
     std::shared_ptr<CSpxAsyncOp<std::shared_ptr<ISpxSynthesisResult>>> m_futureResult;
     ResultReason m_reason;
     CancellationReason m_cancellationReason;

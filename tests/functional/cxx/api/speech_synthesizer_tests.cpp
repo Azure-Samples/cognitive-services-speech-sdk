@@ -268,8 +268,6 @@ TEST_CASE("Synthesizer output to push stream - REST", "[api][cxx]")
 
     bool canceled = result1->Reason == ResultReason::Canceled && result2->Reason == ResultReason::Canceled;
 
-    result1 = nullptr;
-    result2 = nullptr;
     synthesizer = nullptr;
 
     if (!canceled)
@@ -296,8 +294,6 @@ TEST_CASE("Synthesizer output to pull stream use after synthesis completed - RES
 
     bool canceled = result1->Reason == ResultReason::Canceled && result2->Reason == ResultReason::Canceled;
 
-    result1 = nullptr;
-    result2 = nullptr;
     synthesizer = nullptr;
 
     DoSomethingWithAudioInPullStream(stream, canceled);
@@ -316,12 +312,6 @@ TEST_CASE("Synthesizer output to pull stream start using before done synthesizin
 
     auto result1 = synthesizer->SpeakTextAsync("{{{text1}}}").get(); /* "{{{text1}}}" has completed rendering to pullstream */
     auto result2 = synthesizer->SpeakTextAsync("{{{text2}}}").get(); /* "{{{text2}}}" has completed rendering to pullstream */
-
-    canceled = result1->Reason == ResultReason::Canceled && result2->Reason == ResultReason::Canceled;
-
-    result1 = nullptr;
-    result2 = nullptr;
-    synthesizer = nullptr;
 }
 
 TEST_CASE("Speak out in results - REST", "[api][cxx]")
@@ -712,8 +702,6 @@ TEST_CASE("Synthesizer output to push stream - USP", "[api][cxx]")
 
     bool canceled = result1->Reason == ResultReason::Canceled && result2->Reason == ResultReason::Canceled;
 
-    result1 = nullptr;
-    result2 = nullptr;
     synthesizer = nullptr;
 
     if (!canceled)
@@ -764,8 +752,6 @@ TEST_CASE("Synthesizer output to pull stream use after synthesis completed - USP
 
     bool canceled = result1->Reason == ResultReason::Canceled && result2->Reason == ResultReason::Canceled;
 
-    result1 = nullptr;
-    result2 = nullptr;
     synthesizer = nullptr;
 
     DoSomethingWithAudioInPullStream(stream, canceled);
@@ -784,12 +770,6 @@ TEST_CASE("Synthesizer output to pull stream start using before done synthesizin
 
     auto result1 = synthesizer->SpeakTextAsync("{{{text1}}}").get(); /* "{{{text1}}}" has completed rendering to pullstream */
     auto result2 = synthesizer->SpeakTextAsync("{{{text2}}}").get(); /* "{{{text2}}}" has completed rendering to pullstream */
-
-    canceled = result1->Reason == ResultReason::Canceled && result2->Reason == ResultReason::Canceled;
-
-    result1 = nullptr;
-    result2 = nullptr;
-    synthesizer = nullptr;
 }
 
 TEST_CASE("Speak out in results - USP", "[api][cxx]")
@@ -1244,8 +1224,6 @@ TEST_CASE("Synthesizer output to push stream - Mock", "[api][cxx]")
     auto expectedAudioData12 = MergeBinary(expectedAudioData1, expectedAudioData2);
     SPXTEST_REQUIRE(AreBinaryEqual(expectedAudioData12, callback->GetAudioData()));
 
-    result1 = nullptr;
-    result2 = nullptr;
     synthesizer = nullptr;
 
     SPXTEST_REQUIRE(callback->IsClosed());
@@ -1261,8 +1239,6 @@ TEST_CASE("Synthesizer output to pull stream use after synthesis completed - Moc
     auto result1 = synthesizer->SpeakTextAsync("{{{text1}}}").get(); /* "{{{text1}}}" has completed rendering to pullstream */
     auto result2 = synthesizer->SpeakTextAsync("{{{text2}}}").get(); /* "{{{text2}}}" has completed rendering to pullstream */
 
-    result1 = nullptr;
-    result2 = nullptr;
     synthesizer = nullptr;
 
     auto expectedAudioData1 = BuildMockSynthesizedAudio("{{{text1}}}", DEFAULT_LANGUAGE, DEFAULT_VOICE);
@@ -1290,12 +1266,6 @@ TEST_CASE("Synthesizer output to pull stream start using before done synthesizin
 
     auto result1 = synthesizer->SpeakTextAsync("{{{text1}}}").get(); /* "{{{text1}}}" has completed rendering to pullstream */
     auto result2 = synthesizer->SpeakTextAsync("{{{text2}}}").get(); /* "{{{text2}}}" has completed rendering to pullstream */
-
-    canceled = result1->Reason == ResultReason::Canceled && result2->Reason == ResultReason::Canceled;
-
-    result1 = nullptr;
-    result2 = nullptr;
-    synthesizer = nullptr;
 }
 
 TEST_CASE("Speak out in results - Mock", "[api][cxx]")
