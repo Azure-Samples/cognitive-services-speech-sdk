@@ -436,7 +436,7 @@
 @implementation SPXSpeechSynthesisEndtoEndTestRest
 
 - (void)setSpeechConfig {
-    self.speechConfig = [[SPXSpeechConfiguration alloc] initWithEndpoint:[NSString stringWithFormat:@"https://%@.tts.speech.microsoft.com/cognitiveservices/v1", self.serviceRegion] subscription:self.speechKey];
+    self.speechConfig = [[SPXSpeechConfiguration alloc] initWithEndpoint:[NSString stringWithFormat:@"https://%@.tts.speech.microsoft.com/cognitiveservices/v1?TrafficType=Test", self.serviceRegion] subscription:self.speechKey];
 }
 
 #if !TARGET_OS_IPHONE // ignore speaker related test on iOS

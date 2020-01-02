@@ -17,7 +17,8 @@ namespace TTS
 
     std::shared_ptr<SpeechConfig> RestSpeechConfig()
     {
-        const auto endpoint = "https://" + Config::Region + ".tts.speech.microsoft.com/cognitiveservices/v1";
+        auto endpoint = "https://" + Config::Region + ".tts.speech.microsoft.com/cognitiveservices/v1";
+        endpoint += "?TrafficType=Test";
         auto config = SpeechConfig::FromEndpoint(endpoint, Keys::Speech);
         return config;
     }

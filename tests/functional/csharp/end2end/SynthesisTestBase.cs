@@ -43,7 +43,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestInitialize]
         public void BaseTestInit()
         {
-            var endpoint = $"https://{region}.tts.speech.microsoft.com/cognitiveservices/v1";
+            var endpoint = $"https://{region}.tts.speech.microsoft.com/cognitiveservices/v1?TrafficType=Test";
             restConfig = SpeechConfig.FromEndpoint(new Uri(endpoint), subscriptionKey);
             var restHost = $"https://{region}.tts.speech.microsoft.com";
             restHostConfig = SpeechConfig.FromHost(new Uri(restHost), subscriptionKey);

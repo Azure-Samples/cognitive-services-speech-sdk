@@ -19,6 +19,7 @@
 #include "usp.h"
 #include "azure_c_shared_utility_platform_wrapper.h"
 #include "azure_c_shared_utility/shared_util_options.h"
+#include <spx_build_information.h>
 
 #define SPX_DBG_TRACE_REST_TTS 0
 
@@ -359,7 +360,7 @@ void CSpxRestTtsEngineAdapter::PostTtsRequest(HTTP_HANDLE http_connect, RestTtsR
             throw std::runtime_error("Could not add HTTP request header: Host");
         }
 
-        if (HTTPHeaders_AddHeaderNameValuePair(httpRequestHeaders, "User-Agent", USER_AGENT) != HTTP_HEADERS_OK)
+        if (HTTPHeaders_AddHeaderNameValuePair(httpRequestHeaders, "User-Agent", ConstructUserAgent().c_str()) != HTTP_HEADERS_OK)
         {
             throw std::runtime_error("Could not add HTTP request header: User-Agent");
         }
@@ -379,9 +380,10 @@ void CSpxRestTtsEngineAdapter::PostTtsRequest(HTTP_HANDLE http_connect, RestTtsR
             throw std::runtime_error("Could not add HTTP request header: Content-Type");
         }
 
-        if (HTTPHeaders_AddHeaderNameValuePair(httpRequestHeaders, "X-FD-ImpressionGUID", PAL::ToString(request.requestId).c_str()) != HTTP_HEADERS_OK)
+        // X-ConnectionId will be logged as clientConnectionId, in guid format with dash
+        if (HTTPHeaders_AddHeaderNameValuePair(httpRequestHeaders, "X-ConnectionId", PAL::ToString(request.requestId).c_str()) != HTTP_HEADERS_OK)
         {
-            throw std::runtime_error("Could not add HTTP request header: X-FD-ImpressionGUID");
+            throw std::runtime_error("Could not add HTTP request header: X-ConnectionId");
         }
 
         if (!request.accessToken.empty())
@@ -502,5 +504,18 @@ void CSpxRestTtsEngineAdapter::OnChunkReceived(void* context, const unsigned cha
     memcpy(request->response.body.data() + originalSize, buffer, size);
 }
 
+std::string CSpxRestTtsEngineAdapter::ConstructUserAgent()
+{
+    std::stringstream ss;
+
+    // Set SDK info
+    ss << "SpeechSDK/" << BuildInformation::g_fullVersion << " " << BuildInformation::g_buildPlatform;
+
+    // Set OS info
+    const auto osInfo = PAL::getOperatingSystem();
+    ss << " (" << osInfo.platform << "; " << osInfo.version << "; " << osInfo.name << ")";
+
+    return ss.str();
+}
 
 } } } } // Microsoft::CognitiveServices::Speech::Impl

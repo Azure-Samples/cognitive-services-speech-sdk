@@ -91,6 +91,8 @@ private:
     static void PostTtsRequest(HTTP_HANDLE http_connect, RestTtsRequest& request, std::shared_ptr<ISpxSynthesisResultInit> result_init);
     static void OnChunkReceived(void* context, const unsigned char* buffer, size_t size);
 
+    static std::string ConstructUserAgent();
+
 
 private:
 
