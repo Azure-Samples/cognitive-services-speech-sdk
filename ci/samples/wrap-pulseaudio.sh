@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -u -e -x -o pipefail
+set -u -e -o pipefail
 on_exit() {
   local exit_code=$?
   pulseaudio --kill || true

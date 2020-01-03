@@ -91,6 +91,16 @@ jobs:
       imageBase: $(DOCKER_BASE)
       outvarImage: DOCKER_IMAGE
   - bash: |
+      rm -f ./tests/test.subscriptions.regions.json
+      cp ./tests/test.settings.json ./bin
+      cp ./tests/test.defaults.json ./bin
+      cp ./tests/test.audio.utterances.json ./bin
+      cat > ./tests/test.subscriptions.regions.json <<HEREDOC
+        $(KEYS_AND_REGIONS)
+      HEREDOC
+      cp ./tests/test.subscriptions.regions.json ./bin
+    displayName: Write Subscriptions Regions Data
+  - bash: |
       docker run --rm -i --workdir /csspeech --volume "$PWD:/csspeech" "$DOCKER_IMAGE" bash - <<"SCRIPT"
         set -e
         mkdir build

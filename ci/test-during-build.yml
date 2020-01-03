@@ -32,10 +32,6 @@ steps:
       export LD_LIBRARY_PATH=$PWD/build/lib
       wrapMe=()
     fi
-    rm -f ./tests/test.subscriptions.regions.json
-    cat > ./tests/test.subscriptions.regions.json <<HEREDOC
-    $(KEYS_AND_REGIONS)
-    HEREDOC
     "${wrapMe[@]}" ./ci/run-tests.sh \
       --test-configuration ci/test-config.json \
       --build-dir build \

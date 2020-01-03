@@ -5,7 +5,7 @@
 #
 
 ARTIFACTS_DIR=$1
-set -e -x -u
+set -e -u
 set -o pipefail
 
 proxylog=tinyproxy/tinyproxy.log

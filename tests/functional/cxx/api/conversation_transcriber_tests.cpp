@@ -23,9 +23,9 @@ using namespace Microsoft::CognitiveServices::Speech::Transcription;
 
 std::shared_ptr<SpeechConfig> CreateSpeechConfigForCTSInRoom()
 {
-    auto audioEndpoint = Config::InRoomAudioEndpoint;
+    auto audioEndpoint = DefaultSettingsMap[INROOM_AUDIO_ENDPOINT];
     audioEndpoint += "/multiaudio";
-    auto config = SpeechConfig::FromEndpoint(audioEndpoint, Keys::ConversationTranscriber);
+    auto config = SpeechConfig::FromEndpoint(audioEndpoint, SubscriptionsRegionsMap[CONVERSATION_TRANSCRIPTION_PPE_SUBSCRIPTION].Key);
     // this is the clue for Carbon to tell go to CTSInRoom service by using CSpxParticipantMgrImpl.
     config->SetProperty("ConversationTranscriptionInRoomAndOnline", "true");
     return config;
@@ -35,8 +35,7 @@ TEST_CASE("conversation transcriber no join", "[api][cxx]")
 {
     auto config = CreateSpeechConfigForCTSInRoom();
 
-    katieSteve.UpdateFullFilename(Config::InputDir);
-    auto audioInput = AudioConfig::FromWavFileInput(katieSteve.m_inputDataFilename);
+    auto audioInput = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(CONVERSATION_BETWEEN_TWO_PERSONS_ENGLISH));
     auto myId = PAL::CreateGuidWithDashesUTF8();
     INFO(myId);
     auto conversation = Conversation::CreateConversationAsync(config, myId).get();
@@ -50,8 +49,7 @@ TEST_CASE("conversation transcriber leave conversation", "[api][cxx]")
 {
     auto config = CreateSpeechConfigForCTSInRoom();
 
-    katieSteve.UpdateFullFilename(Config::InputDir);
-    auto audioInput = AudioConfig::FromWavFileInput(katieSteve.m_inputDataFilename);
+    auto audioInput = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(CONVERSATION_BETWEEN_TWO_PERSONS_ENGLISH));
     auto myId = PAL::CreateGuidWithDashesUTF8();
     INFO(myId);
     auto conversation = Conversation::CreateConversationAsync(config, myId).get();
@@ -132,8 +130,7 @@ TEST_CASE("conversation transcriber reco", "[api][cxx]")
 {
     auto config = CreateSpeechConfigForCTSInRoom();
 
-    katieSteve.UpdateFullFilename(Config::InputDir);
-    auto audioInput = AudioConfig::FromWavFileInput(katieSteve.m_inputDataFilename);
+    auto audioInput = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(CONVERSATION_BETWEEN_TWO_PERSONS_ENGLISH));
     auto myId = PAL::CreateGuidWithDashesUTF8();
     INFO(myId);
     auto conversation = Conversation::CreateConversationAsync(config, myId).get();
@@ -151,7 +148,7 @@ TEST_CASE("conversation transcriber reco", "[api][cxx]")
 
     INFO(GetText(result->phrases));
     SPXTEST_REQUIRE(!result->phrases.empty());
-    SPXTEST_REQUIRE(FindTheRef(result->phrases, katieSteve.m_utterance));
+    SPXTEST_REQUIRE(FindTheRef(result->phrases, AudioUtterancesMap[CONVERSATION_BETWEEN_TWO_PERSONS_ENGLISH].Utterances["en-US"][0].Text));
 }
 
 //TEST_CASE("conversation add while pumping", "[api][cxx]")
@@ -187,7 +184,7 @@ TEST_CASE("conversation transcriber reco", "[api][cxx]")
 TEST_CASE("conversation bad connection", "[api][cxx]")
 {
     auto audioEndpoint = "wrong_endpoint";
-    auto config = SpeechConfig::FromEndpoint(audioEndpoint, Keys::ConversationTranscriber);
+    auto config = SpeechConfig::FromEndpoint(audioEndpoint, SubscriptionsRegionsMap[CONVERSATION_TRANSCRIPTION_PPE_SUBSCRIPTION].Key);
     config->SetProperty("ConversationTranscriptionInRoomAndOnline", "true");
 
     std::shared_ptr<PullAudioInputStream> pullAudio;
@@ -211,8 +208,7 @@ TEST_CASE("conversation bad connection", "[api][cxx]")
 TEST_CASE("conversation_inroom_8_channel_file", "[api][cxx]")
 {
     auto config = CreateSpeechConfigForCTSInRoom();
-    katieSteve.UpdateFullFilename(Config::InputDir);
-    auto audioInput = AudioConfig::FromWavFileInput(katieSteve.m_inputDataFilename);
+    auto audioInput = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(CONVERSATION_BETWEEN_TWO_PERSONS_ENGLISH));
 
     auto myId = PAL::CreateGuidWithDashesUTF8();
     INFO(myId);
@@ -227,7 +223,7 @@ TEST_CASE("conversation_inroom_8_channel_file", "[api][cxx]")
     auto text = PumpAudioAndWaitForResult(transcriber.get(), result);
     INFO(text);
     SPXTEST_REQUIRE(result->phrases.empty() == false);
-    SPXTEST_REQUIRE(FindTheRef(result->phrases, katieSteve.m_utterance));
+    SPXTEST_REQUIRE(FindTheRef(result->phrases, AudioUtterancesMap[CONVERSATION_BETWEEN_TWO_PERSONS_ENGLISH].Utterances["en-US"][0].Text));
 }
 
 TEST_CASE("conversation_inroom_8_channel_audio_pull", "[api][cxx]")
@@ -258,7 +254,7 @@ TEST_CASE("conversation_inroom_8_channel_audio_pull", "[api][cxx]")
         // Note: INFO prints out the phrases before removing punctuations and lowercasing.
         INFO(text);
         SPXTEST_REQUIRE(result->phrases.empty() == false);
-        SPXTEST_REQUIRE(FindTheRef(result->phrases, katieSteve.m_utterance));
+        SPXTEST_REQUIRE(FindTheRef(result->phrases, AudioUtterancesMap[CONVERSATION_BETWEEN_TWO_PERSONS_ENGLISH].Utterances["en-US"][0].Text));
     }
 
     SPXTEST_SECTION("AddParticipantByUserId")
@@ -288,7 +284,7 @@ TEST_CASE("conversation_inroom_8_channel_audio_pull", "[api][cxx]")
 
         INFO(GetText(result->phrases));
         SPXTEST_REQUIRE(!result->phrases.empty());
-        SPXTEST_REQUIRE(FindTheRef(result->phrases, katieSteve.m_utterance));
+        SPXTEST_REQUIRE(FindTheRef(result->phrases, AudioUtterancesMap[CONVERSATION_BETWEEN_TWO_PERSONS_ENGLISH].Utterances["en-US"][0].Text));
     }
 
     SPXTEST_SECTION("AddParticipantByUserObject")
@@ -306,7 +302,7 @@ TEST_CASE("conversation_inroom_8_channel_audio_pull", "[api][cxx]")
 
         INFO(GetText(result->phrases));
         SPXTEST_REQUIRE(!result->phrases.empty());
-        SPXTEST_REQUIRE(FindTheRef(result->phrases, katieSteve.m_utterance));
+        SPXTEST_REQUIRE(FindTheRef(result->phrases, AudioUtterancesMap[CONVERSATION_BETWEEN_TWO_PERSONS_ENGLISH].Utterances["en-US"][0].Text));
     }
     SPXTEST_SECTION("AddParticipantSetters")
     {
@@ -329,7 +325,7 @@ TEST_CASE("conversation_inroom_8_channel_audio_pull", "[api][cxx]")
 
         INFO(GetText(result->phrases));
         SPXTEST_REQUIRE(!result->phrases.empty());
-        SPXTEST_REQUIRE(FindTheRef(result->phrases, katieSteve.m_utterance));
+        SPXTEST_REQUIRE(FindTheRef(result->phrases, AudioUtterancesMap[CONVERSATION_BETWEEN_TWO_PERSONS_ENGLISH].Utterances["en-US"][0].Text));
     }
     SPXTEST_SECTION("AddParticipants")
     {
@@ -347,7 +343,7 @@ TEST_CASE("conversation_inroom_8_channel_audio_pull", "[api][cxx]")
 
         INFO(GetText(result->phrases));
         SPXTEST_REQUIRE(!result->phrases.empty());
-        SPXTEST_REQUIRE(FindTheRef(result->phrases, katieSteve.m_utterance));
+        SPXTEST_REQUIRE(FindTheRef(result->phrases, AudioUtterancesMap[CONVERSATION_BETWEEN_TWO_PERSONS_ENGLISH].Utterances["en-US"][0].Text));
     }
     SPXTEST_SECTION("AddRemoveParticipants")
     {
@@ -370,7 +366,7 @@ TEST_CASE("conversation_inroom_8_channel_audio_pull", "[api][cxx]")
 
         INFO(GetText(result->phrases));
         SPXTEST_REQUIRE(!result->phrases.empty());
-        SPXTEST_REQUIRE(FindTheRef(result->phrases, katieSteve.m_utterance));
+        SPXTEST_REQUIRE(FindTheRef(result->phrases, AudioUtterancesMap[CONVERSATION_BETWEEN_TWO_PERSONS_ENGLISH].Utterances["en-US"][0].Text));
     }
     // a meeting without participant should still be fine!
     SPXTEST_SECTION("conversation_with_no_participant")
@@ -384,7 +380,7 @@ TEST_CASE("conversation_inroom_8_channel_audio_pull", "[api][cxx]")
 
         INFO(GetText(result->phrases));
         SPXTEST_REQUIRE(!result->phrases.empty());
-        SPXTEST_REQUIRE(FindTheRef(result->phrases, katieSteve.m_utterance));
+        SPXTEST_REQUIRE(FindTheRef(result->phrases, AudioUtterancesMap[CONVERSATION_BETWEEN_TWO_PERSONS_ENGLISH].Utterances["en-US"][0].Text));
     }
 }
 
@@ -415,7 +411,7 @@ TEST_CASE("conversation_inroom_8_channel_audio_push", "[api][cxx]")
 
     auto reader = std::make_shared<CSpxWavFileReader>();
 
-    reader->Open(PAL::ToWString(katieSteve.m_inputDataFilename).c_str());
+    reader->Open(PAL::ToWString(ROOT_RELATIVE_PATH(CONVERSATION_BETWEEN_TWO_PERSONS_ENGLISH)).c_str());
     SPXWAVEFORMATEX format;
     reader->GetFormat(&format, sizeof(SPXWAVEFORMATEX));
     auto bytesPerSample = format.wBitsPerSample / 8;
@@ -446,17 +442,16 @@ TEST_CASE("conversation_inroom_8_channel_audio_push", "[api][cxx]")
 
     INFO(GetText(result->phrases));
     SPXTEST_REQUIRE(!result->phrases.empty());
-    SPXTEST_REQUIRE(FindTheRef(result->phrases, katieSteve.m_utterance));
+    SPXTEST_REQUIRE(FindTheRef(result->phrases, AudioUtterancesMap[CONVERSATION_BETWEEN_TWO_PERSONS_ENGLISH].Utterances["en-US"][0].Text));
 }
 
 TEST_CASE("conversation_online_pull_stream", "[api][cxx][transcriber]")
 {
-    REQUIRE(!Config::OnlineAudioEndpoint.empty());
-    REQUIRE(!Keys::ConversationTranscriber.empty());
-    auto config = SpeechConfig::FromEndpoint(Config::OnlineAudioEndpoint, Keys::ConversationTranscriber);
+    REQUIRE(!DefaultSettingsMap[ONLINE_AUDIO_ENDPOINT].empty());
+    REQUIRE(!SubscriptionsRegionsMap[CONVERSATION_TRANSCRIPTION_PPE_SUBSCRIPTION].Key.empty());
+    auto config = SpeechConfig::FromEndpoint(DefaultSettingsMap[ONLINE_AUDIO_ENDPOINT], SubscriptionsRegionsMap[CONVERSATION_TRANSCRIPTION_PPE_SUBSCRIPTION].Key);
     config->SetProperty("ConversationTranscriptionInRoomAndOnline", "true");
-    weather.UpdateFullFilename(Config::InputDir);
-    auto fs = OpenWaveFile(weather.m_inputDataFilename);
+    auto fs = OpenWaveFile(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
 
     // Create the "pull stream" object with C++ lambda callbacks
     auto pullStream = AudioInputStream::CreatePullStream(
@@ -516,17 +511,16 @@ TEST_CASE("conversation_online_pull_stream", "[api][cxx][transcriber]")
         WaitForResult(result->ready.get_future(), 15min);
         transcriber->StopTranscribingAsync().get();
         SPXTEST_REQUIRE(result->phrases.size() >= 1);
-        SPXTEST_REQUIRE(result->phrases[0].Text == weather.m_utterance);
+        SPXTEST_REQUIRE(result->phrases[0].Text == AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH].Utterances["en-US"][0].Text);
     }
 }
 
 TEST_CASE("conversation_online_1_channel_file", "[api][cxx]")
 {
-    auto config = SpeechConfig::FromEndpoint(Config::OnlineAudioEndpoint, Keys::ConversationTranscriber);
+    auto config = SpeechConfig::FromEndpoint(DefaultSettingsMap[ONLINE_AUDIO_ENDPOINT], SubscriptionsRegionsMap[CONVERSATION_TRANSCRIPTION_PPE_SUBSCRIPTION].Key);
     config->SetProperty("ConversationTranscriptionInRoomAndOnline", "true");
 
-    weather.UpdateFullFilename(Config::InputDir);
-    auto audioInput = AudioConfig::FromWavFileInput(weather.m_inputDataFilename);
+    auto audioInput = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
 
     auto myId = PAL::CreateGuidWithDashesUTF8();
     INFO(myId);
@@ -543,7 +537,7 @@ TEST_CASE("conversation_online_1_channel_file", "[api][cxx]")
     WaitForResult(result->ready.get_future(), 15min);
     transcriber->StopTranscribingAsync().get();
     SPXTEST_REQUIRE(result->phrases.size() >= 1);
-    SPXTEST_REQUIRE(result->phrases[0].Text == weather.m_utterance);
+    SPXTEST_REQUIRE(result->phrases[0].Text == AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH].Utterances["en-US"][0].Text);
 }
 
 #if 0

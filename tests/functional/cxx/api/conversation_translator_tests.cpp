@@ -170,8 +170,7 @@ TEST_CASE("Conversation call unsupported methods", "[api][cxx][conversation_tran
 TEST_CASE("Conversation Translator Host Audio", "[api][cxx][conversation_translator][cxx_conversation_translator][audio][host]")
 {
     UseMocks(false);
-    weather.UpdateFullFilename(Config::InputDir);
-    REQUIRE(exists(weather.m_inputDataFilename));
+    REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
 
     string speechLang("en-US");
     string hostname("TheHost");
@@ -183,7 +182,7 @@ TEST_CASE("Conversation Translator Host Audio", "[api][cxx][conversation_transla
     SPX_TRACE_INFO("Starting conversation");
     conversation->StartConversationAsync().get();
 
-    shared_ptr<AudioConfig> audioConfig = AudioConfig::FromWavFileInput(weather.m_inputDataFilename);
+    shared_ptr<AudioConfig> audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
     shared_ptr<ConversationTranslator> conversationTranslator = ConversationTranslator::FromConfig(audioConfig);
 
     ConversationTranslatorCallbacks eventHandlers(conversationTranslator);
@@ -213,17 +212,15 @@ TEST_CASE("Conversation Translator Host Audio", "[api][cxx][conversation_transla
     eventHandlers.VerifyBasicEvents(true, hostname, true, participantId);
     eventHandlers.VerifyTranscriptions(participantId,
     {
-        ExpectedTranscription(participantId, weather.m_utterance, speechLang)
+        ExpectedTranscription(participantId, AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH].Utterances["en-US"][0].Text, speechLang)
     });
 }
 
 TEST_CASE("Join a conversation with translation", "[api][cxx][conversation_translator][cxx_conversation_translator][audio][join]")
 {
     UseMocks(false);
-    weather.UpdateFullFilename(Config::InputDir);
-    weatherInChinese.UpdateFullFilename(Config::InputDir);
-    REQUIRE(exists(weather.m_inputDataFilename));
-    REQUIRE(exists(weatherInChinese.m_inputDataFilename));
+    REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
+    REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_CHINESE)));
 
     string hostLang("en-US");
     string hostName("TheHost");
@@ -239,7 +236,7 @@ TEST_CASE("Join a conversation with translation", "[api][cxx][conversation_trans
     auto conversation = Conversation::CreateConversationAsync(speechConfig).get();
     conversation->StartConversationAsync().get();
 
-    auto audioConfig = AudioConfig::FromWavFileInput(weather.m_inputDataFilename);
+    auto audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
 
     auto hostTranslator = ConversationTranslator::FromConfig(audioConfig);
     ConversationTranslatorCallbacks hostEvents(hostTranslator);
@@ -247,7 +244,7 @@ TEST_CASE("Join a conversation with translation", "[api][cxx][conversation_trans
 
 
     // Join room
-    auto bobAudioConfig = AudioConfig::FromWavFileInput(weatherInChinese.m_inputDataFilename);
+    auto bobAudioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_CHINESE));
     SetParticipantConfig(bobAudioConfig);
 
     auto bobTranslator = ConversationTranslator::FromConfig(bobAudioConfig);
@@ -281,27 +278,26 @@ TEST_CASE("Join a conversation with translation", "[api][cxx][conversation_trans
     hostEvents.VerifyBasicEvents(true, hostName, true, hostId);
     bobEvents.VerifyTranscriptions(bobId,
     {
-        ExpectedTranscription(bobId, weatherInChinese.m_utterance, bobLang),
-        ExpectedTranscription(hostId, weather.m_utterance, hostLang)
+        ExpectedTranscription(bobId, AudioUtterancesMap[SINGLE_UTTERANCE_CHINESE].Utterances["zh-CN"][0].Text, bobLang),
+        ExpectedTranscription(hostId, AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH].Utterances["en-US"][0].Text, hostLang)
     });
     
     hostEvents.VerifyTranscriptions(hostId,
     {
-        ExpectedTranscription(bobId, weatherInChinese.m_utterance, bobLang, { { "en-US", "Weather." }, { "de", "wetter." } }),
-        ExpectedTranscription(hostId, weather.m_utterance, hostLang, { { "de", "Wie ist das Wetter?" } }),
+        ExpectedTranscription(bobId, AudioUtterancesMap[SINGLE_UTTERANCE_CHINESE].Utterances["zh-CN"][0].Text, bobLang, { { "en-US", "Weather." }, { "de", "wetter." } }),
+        ExpectedTranscription(hostId, AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH].Utterances["en-US"][0].Text, hostLang, { { "de", "Wie ist das Wetter?" } }),
     });
 }
 
 TEST_CASE("Host sends an instant message", "[api][cxx][conversation_translator][cxx_conversation_translator][im][host]")
 {
     UseMocks(false);
-    weather.UpdateFullFilename(Config::InputDir);
-    REQUIRE(exists(weather.m_inputDataFilename));
+    REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
 
     auto speechConfig = CreateConfig("en-US", { "ja", "ar" });
     TestConversationParticipant host(speechConfig, "Host");
 
-    auto audioConfig = AudioConfig::FromWavFileInput(weather.m_inputDataFilename);
+    auto audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
     host.Join(audioConfig);
 
     host.ConvTrans->SendTextMessageAsync("This is a test").get(); // Translations for this are hard coded
@@ -320,19 +316,17 @@ TEST_CASE("Host sends an instant message", "[api][cxx][conversation_translator][
 TEST_CASE("Host and participants send an instant messages", "[api][cxx][conversation_translator][cxx_conversation_translator][im][join]")
 {
     UseMocks(false);
-    weather.UpdateFullFilename(Config::InputDir);
-    weatherInChinese.UpdateFullFilename(Config::InputDir);
-    REQUIRE(exists(weather.m_inputDataFilename));
-    REQUIRE(exists(weatherInChinese.m_inputDataFilename));
+    REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
+    REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_CHINESE)));
 
     auto speechConfig = CreateConfig("en-US", {});
     TestConversationParticipant host(speechConfig, "Host");
-    auto audioConfig = AudioConfig::FromWavFileInput(weather.m_inputDataFilename);
+    auto audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
     host.Join(audioConfig);
 
     TestConversationParticipant alice("Alice", "fr", host);
 
-    auto aliceAudioConfig = AudioConfig::FromWavFileInput(weatherInChinese.m_inputDataFilename);
+    auto aliceAudioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_CHINESE));
     SetParticipantConfig(aliceAudioConfig);
     alice.Join(aliceAudioConfig);
 
@@ -362,15 +356,13 @@ TEST_CASE("Host and participants send an instant messages", "[api][cxx][conversa
 TEST_CASE("Join locked room", "[api][cxx][conversation_translator][cxx_conversation_translator][join_locked]")
 {
     UseMocks(false);
-    weather.UpdateFullFilename(Config::InputDir);
-    weatherInChinese.UpdateFullFilename(Config::InputDir);
-    REQUIRE(exists(weather.m_inputDataFilename));
-    REQUIRE(exists(weatherInChinese.m_inputDataFilename));
+    REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
+    REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_CHINESE)));
 
     auto speechConfig = CreateConfig("en-US", {});
 
     TestConversationParticipant host(speechConfig, "Host");
-    auto audioConfig = AudioConfig::FromWavFileInput(weather.m_inputDataFilename);
+    auto audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
     host.Join(audioConfig);
     host.Conv->LockConversationAsync().get();
 
@@ -378,7 +370,7 @@ TEST_CASE("Join locked room", "[api][cxx][conversation_translator][cxx_conversat
 
     TestConversationParticipant alice("Alice", "fr", host);
 
-    auto aliceAudioConfig = AudioConfig::FromWavFileInput(weatherInChinese.m_inputDataFilename);
+    auto aliceAudioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_CHINESE));
     SetParticipantConfig(aliceAudioConfig);
 
     REQUIRE_THROWS_WITH(alice.Join(aliceAudioConfig), Catch::Contains("HTTP 400", Catch::CaseSensitive::No));
@@ -390,18 +382,16 @@ TEST_CASE("Join locked room", "[api][cxx][conversation_translator][cxx_conversat
 TEST_CASE("ConversationTranslator Host disconnects room", "[api][cxx][conversation_translator][cxx_conversation_translator][host_disconnect]")
 {
     UseMocks(false);
-    weather.UpdateFullFilename(Config::InputDir);
-    weatherInChinese.UpdateFullFilename(Config::InputDir);
-    REQUIRE(exists(weather.m_inputDataFilename));
-    REQUIRE(exists(weatherInChinese.m_inputDataFilename));
+    REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
+    REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_CHINESE)));
 
     auto speechConfig = CreateConfig("en-US", {});
     TestConversationParticipant host(speechConfig, "Host");
-    auto audioConfig = AudioConfig::FromWavFileInput(weather.m_inputDataFilename);
+    auto audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
     host.Join(audioConfig);
 
     TestConversationParticipant alice("Alice", "zh-CN", host);
-    auto aliceAudioConfig = AudioConfig::FromWavFileInput(weatherInChinese.m_inputDataFilename);
+    auto aliceAudioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_CHINESE));
     SetParticipantConfig(aliceAudioConfig);
     alice.Join(aliceAudioConfig);
 

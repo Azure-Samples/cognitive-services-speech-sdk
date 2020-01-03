@@ -44,10 +44,6 @@ int main(int argc, char* argv[])
         std::string rootPathOnly = rootPath.substr(0, rootPath.find_last_of('/') + 1);
 
         ConfigSettings::LoadFromJsonFile(rootPathOnly);
-
-        Config::InputDir = rootPathOnly + "input";
-
-        SpxConsoleLogger_Log(LOG_CATEGORY::AZ_LOG_INFO, __FILE__, "main", __LINE__, 0, "Setting InputDir to %s", Config::InputDir.c_str());
     }
 
     // Let Catch (using Clara) parse the command line

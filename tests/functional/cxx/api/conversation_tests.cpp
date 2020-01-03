@@ -23,9 +23,9 @@ using namespace Microsoft::CognitiveServices::Speech::Transcription;
 
 std::shared_ptr<SpeechConfig> CreateCTSInroomServiceSpeechConfig()
 {
-    auto audioEndpoint = Config::InRoomAudioEndpoint;
+    auto audioEndpoint = DefaultSettingsMap[INROOM_AUDIO_ENDPOINT];
     audioEndpoint += "/multiaudio";
-    auto config = SpeechConfig::FromEndpoint(audioEndpoint, Keys::ConversationTranscriber);
+    auto config = SpeechConfig::FromEndpoint(audioEndpoint, SubscriptionsRegionsMap[CONVERSATION_TRANSCRIPTION_PPE_SUBSCRIPTION].Key);
     config->SetProperty("ConversationTranscriptionInRoomAndOnline", "true");
     return config;
 }
@@ -67,8 +67,7 @@ TEST_CASE("conversation create transcriber no get", "[api][cxx]")
     std::string id = "asdf";
     auto conversation = Conversation::CreateConversationAsync(config, id).get();
 
-    katieSteve.UpdateFullFilename(Config::InputDir);
-    auto audioInput = AudioConfig::FromWavFileInput(katieSteve.m_inputDataFilename);
+    auto audioInput = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(CONVERSATION_BETWEEN_TWO_PERSONS_ENGLISH));
     auto transcriber = ConversationTranscriber::FromConfig(audioInput);
 
     REQUIRE_NOTHROW(transcriber->JoinConversationAsync(conversation));  // did not have .get() by intention. Carbon should not crash when customers forget .get()
@@ -81,8 +80,7 @@ TEST_CASE("conversation create transcriber", "[api][cxx]")
     std::string id = "asdf";
     auto conversation = Conversation::CreateConversationAsync(config, id).get();
 
-    katieSteve.UpdateFullFilename(Config::InputDir);
-    auto audioInput = AudioConfig::FromWavFileInput(katieSteve.m_inputDataFilename);
+    auto audioInput = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(CONVERSATION_BETWEEN_TWO_PERSONS_ENGLISH));
     auto transcriber = ConversationTranscriber::FromConfig(audioInput);
 
     REQUIRE_NOTHROW(transcriber->JoinConversationAsync(conversation).get());
@@ -156,11 +154,10 @@ TEST_CASE("conversation add_remove participant by participant object", "[api][cx
 
 TEST_CASE("conversation online end meeting destroy resources", "[api][cxx]")
 {
-    auto config = SpeechConfig::FromEndpoint(Config::OnlineAudioEndpoint, Keys::ConversationTranscriber);
+    auto config = SpeechConfig::FromEndpoint(DefaultSettingsMap[ONLINE_AUDIO_ENDPOINT], SubscriptionsRegionsMap[CONVERSATION_TRANSCRIPTION_PPE_SUBSCRIPTION].Key);
     config->SetProperty("ConversationTranscriptionInRoomAndOnline", "true");
 
-    weather.UpdateFullFilename(Config::InputDir);
-    auto audioInput = AudioConfig::FromWavFileInput(weather.m_inputDataFilename);
+    auto audioInput = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
     auto myId = PAL::CreateGuidWithDashesUTF8();
     INFO(myId);
     auto conversation = Conversation::CreateConversationAsync(config, myId).get();
@@ -191,7 +188,7 @@ TEST_CASE("conversation online end meeting destroy resources", "[api][cxx]")
     SPXTEST_REQUIRE(!result->phrases.empty());
     auto text = GetText(result->phrases);
     INFO(text);
-    SPXTEST_REQUIRE(FindTheRef(result->phrases, weather.m_utterance));
+    SPXTEST_REQUIRE(FindTheRef(result->phrases, AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH].Utterances["en-US"][0].Text));
 
     // allow EndConversationAsync at any time.
     REQUIRE_NOTHROW(conversation->EndConversationAsync().get());

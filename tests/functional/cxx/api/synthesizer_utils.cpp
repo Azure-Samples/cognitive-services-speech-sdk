@@ -17,17 +17,17 @@ namespace TTS
 
     std::shared_ptr<SpeechConfig> RestSpeechConfig()
     {
-        auto endpoint = "https://" + Config::Region + ".tts.speech.microsoft.com/cognitiveservices/v1";
+        auto endpoint = "https://" + SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Region + ".tts.speech.microsoft.com/cognitiveservices/v1";
         endpoint += "?TrafficType=Test";
-        auto config = SpeechConfig::FromEndpoint(endpoint, Keys::Speech);
+        auto config = SpeechConfig::FromEndpoint(endpoint, SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
         return config;
     }
 
     shared_ptr<SpeechConfig> UspSpeechConfig()
     {
-        auto endpoint = "wss://" + Config::Region + ".tts.speech.microsoft.com/cognitiveservices/websocket/v1";
+        auto endpoint = "wss://" + SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Region + ".tts.speech.microsoft.com/cognitiveservices/websocket/v1";
         endpoint += "?TrafficType=Test";
-        auto config = SpeechConfig::FromEndpoint(endpoint, Keys::Speech);
+        auto config = SpeechConfig::FromEndpoint(endpoint, SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
         return config;
     }
 

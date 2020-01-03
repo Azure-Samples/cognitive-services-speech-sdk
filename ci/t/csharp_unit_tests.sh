@@ -74,7 +74,6 @@ else
   OFFLINE_UNIDEC_FILTER="&TestCategory!=OfflineUnidec"
 fi
 
-set -x
 if [[ $SPEECHSDK_LONG_RUNNING = true ]]; then
   TEST_CASE_FILTER="TestCategory=LongTest&TestCategory!=CompressedStreamTest${OFFLINE_UNIDEC_FILTER}"
   LOG_FILE_NAME=LogFileName=test-$T-$PLATFORM-long-running.trx

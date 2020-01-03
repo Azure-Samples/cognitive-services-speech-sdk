@@ -1,12 +1,11 @@
 {
   "SingleUtteranceEnglish": {
-    "filePath": "audio/whatstheweatherlike.wav",
-    "nativeLanguage": "en-US",
-    "utterances": {
+    "FilePath": "audio/whatstheweatherlike.wav",
+    "NativeLanguage": "en-US",
+    "Utterances": {
       "en-US": [
         {
           "Text": "What's the weather like?"
-
         }
       ],
       "de": [
@@ -38,9 +37,9 @@
     }
   },
   "SingleUtteranceChinese": {
-    "filePath": "audio/weatherInChinese.wav",
-    "nativeLanguage": "zh-CN",
-    "utterances": {
+    "FilePath": "audio/weatherInChinese.wav",
+    "NativeLanguage": "zh-CN",
+    "Utterances": {
       "zh-CN": [
         {
           "Text": "天气."
@@ -49,9 +48,9 @@
     }
   },
   "SingleUtteranceMP3": {
-    "filePath": "audio/whatstheweatherlike.mp3",
-    "nativeLanguage": "en-US",
-    "utterances": {
+    "FilePath": "audio/whatstheweatherlike.mp3",
+    "NativeLanguage": "en-US",
+    "Utterances": {
       "en-US": [
         {
           "Text": "What's the weather like?"
@@ -60,9 +59,9 @@
     }
   },
   "SingleUtteranceOPUS": {
-    "filePath": "audio/whatstheweatherlike.opus",
-    "nativeLanguage": "en-US",
-    "utterances": {
+    "FilePath": "audio/whatstheweatherlike.opus",
+    "NativeLanguage": "en-US",
+    "Utterances": {
       "en-US": [
         {
           "Text": "What's the weather like?"
@@ -71,9 +70,9 @@
     }
   },
   "SingleUtteranceALaw": {
-    "filePath": "audio/whatstheweatherlike.alaw",
-    "nativeLanguage": "en-US",
-    "utterances": {
+    "FilePath": "audio/whatstheweatherlike.alaw",
+    "NativeLanguage": "en-US",
+    "Utterances": {
       "en-US": [
         {
           "Text": "What's the weather like?"
@@ -82,9 +81,9 @@
     }
   },
   "SingleUtteranceMULaw": {
-    "filePath": "audio/whatstheweatherlike.mulaw",
-    "nativeLanguage": "en-US",
-    "utterances": {
+    "FilePath": "audio/whatstheweatherlike.mulaw",
+    "NativeLanguage": "en-US",
+    "Utterances": {
       "en-US": [
         {
           "Text": "What's the weather like?"
@@ -93,9 +92,9 @@
     }
   },
   "SingleUtteranceFLAC": {
-    "filePath": "audio/whatstheweatherlike.flac",
-    "nativeLanguage": "en-US",
-    "utterances": {
+    "FilePath": "audio/whatstheweatherlike.flac",
+    "NativeLanguage": "en-US",
+    "Utterances": {
       "en-US": [
         {
           "Text": "What's the weather like?"
@@ -104,9 +103,9 @@
     }
   },
   "SingleUtterance3x": {
-    "filePath": "audio/whatstheweatherlike-5secsilences.wav",
-    "nativeLanguage": "en-US",
-    "utterances": {
+    "FilePath": "audio/whatstheweatherlike-5secsilences.wav",
+    "NativeLanguage": "en-US",
+    "Utterances": {
       "en-US": [
         {
           "Text": "What's the weather like?"
@@ -115,9 +114,9 @@
     }
   },
   "SingleUtteranceMultipleTurns": {
-    "filePath": "audio/whatstheweatherlike-5secsilences.wav",
-    "nativeLanguage": "en-US",
-    "utterances": {
+    "FilePath": "audio/whatstheweatherlike-5secsilences.wav",
+    "NativeLanguage": "en-US",
+    "Utterances": {
       "en-US": [
         {
           "Text": "What's the weather like?"
@@ -133,9 +132,9 @@
     }
   },
   "SingleUtteranceCatalan": {
-    "filePath": "audio/ca-es.wav",
-    "nativeLanguage": "ca-ES",
-    "utterances": {
+    "FilePath": "audio/ca-es.wav",
+    "NativeLanguage": "ca-ES",
+    "Utterances": {
       "ca-ES": [
         {
           "Text": "\"Com estàs fent amb els elements de treball avui\""
@@ -149,9 +148,9 @@
     }
   },
   "MultipleUtteranceEnglish": {
-    "filePath": "audio/batman.wav",
-    "nativeLanguage": "en-US",
-    "utterances": {
+    "FilePath": "audio/batman.wav",
+    "NativeLanguage": "en-US",
+    "Utterances": {
       "en-US": [
         {
           "Text": "Skills and abilities Batman has no inherent super powers, he relies on his own scientific knowledge detective skills and athletic prowess in the stories. Batman is regarded as one of the world's greatest detective if not the world's greatest crime solver. Batman has been repeatedly described as having genius level intellect. One of the greatest martial artists in the DC universe."
@@ -207,9 +206,9 @@
     }
   },
   "Audio441Khz": {
-    "filePath": "audio/Margarita-44100.wav",
-    "nativeLanguage": "en-US",
-    "utterances": {
+    "FilePath": "audio/Margarita-44100.wav",
+    "NativeLanguage": "en-US",
+    "Utterances": {
       "en-US": [
         {
           "Text": "we all know and Love, a margarita and if you're anything like me, you probably had your fair share and if you have youve probably noticed that margaritas can vary from incredible too"
@@ -221,12 +220,12 @@
     }
   },
   "Audio11Khz": {
-    "filePath": "audio/11khztest.wav"
+    "FilePath": "audio/11khztest.wav"
   },
   "HeyCortana": {
-    "filePath": "audio/heyCortana.wav",
-    "nativeLanguage": "en-US",
-    "utterances": {
+    "FilePath": "audio/heyCortana.wav",
+    "NativeLanguage": "en-US",
+    "Utterances": {
       "en-US": [
         {
           "Text": "Hey Cortana,"
@@ -235,9 +234,10 @@
     }
   },
   "SingleUtteranceGerman": {
-    "filePath": "audio/CallTheFirstOne.wav",
-    "nativeLanguage": "de",
-    "utterances": {
+    "FilePath": "audio/CallTheFirstOne.wav",
+    "NativeLanguage": "de",
+    "Utterances": {
+
       "de": [
         {
           "Text": "Rufe die erste an."
@@ -259,9 +259,9 @@
     }
   },
   "IntentUtterance": {
-    "filePath": "audio/TurnOnTheLamp.wav",
-    "nativeLanguage": "en-US",
-    "utterances": {
+    "FilePath": "audio/TurnOnTheLamp.wav",
+    "NativeLanguage": "en-US",
+    "Utterances": {
       "en-US": [
         {
           "Text": "Turn on the lamp."
@@ -270,9 +270,9 @@
     }
   },
   "AmbiguousSpeech": {
-    "filePath": "audio/wreck-a-nice-beach.wav",
-    "nativeLanguage": "en-US",
-    "utterances": {
+    "FilePath": "audio/wreck-a-nice-beach.wav",
+    "NativeLanguage": "en-US",
+    "Utterances": {
       "en-US": [
         {
           "Text": "Wreck a nice beach."
@@ -281,9 +281,9 @@
     }
   },
   "ComputerKeywordWithSingleUtterance1": {
-    "filePath": "kws/kws_whatstheweatherlike.wav",
-    "nativeLanguage": "en-US",
-    "utterances": {
+    "FilePath": "kws/kws_whatstheweatherlike.wav",
+    "NativeLanguage": "en-US",
+    "Utterances": {
       "en-US": [
         {
           "Text": "Computer what's the weather like?"
@@ -292,13 +292,13 @@
     }
   },
   "ComputerKeywordWithSingleUtterance2": {
-    "filePath": "kws/kws_howoldareyou.wav",
-    "nativeLanguage": "en-US"
+    "FilePath": "kws/kws_howoldareyou.wav",
+    "NativeLanguage": "en-US"
   },
   "ComputerKeywordWithSingleUtterance2x": {
-    "filePath": "kws/kws_whatstheweatherlike_x2.wav",
-    "nativeLanguage": "en-US",
-    "utterances": {
+    "FilePath": "kws/kws_whatstheweatherlike_x2.wav",
+    "NativeLanguage": "en-US",
+    "Utterances": {
       "en-US": [
         {
 
@@ -308,9 +308,9 @@
     }
   },
   "ComputerKeywordWithSingleUtterance3": {
-    "filePath": "kws/kws_whatshouldIcallyou.wav",
-    "nativeLanguage": "en-US",
-    "utterances": {
+    "FilePath": "kws/kws_whatshouldIcallyou.wav",
+    "NativeLanguage": "en-US",
+    "Utterances": {
       "en-US": [
         {
           "Text": "Hey Computer what should I call you?"
@@ -319,9 +319,9 @@
     }
   },
   "SecretKeywords": {
-    "filePath": "kws/kws_secret.wav",
-    "nativeLanguage": "en-US",
-    "utterances": {
+    "FilePath": "kws/kws_secret.wav",
+    "NativeLanguage": "en-US",
+    "Utterances": {
       "en-US": [
         {
           "Text": "secret"
@@ -330,9 +330,9 @@
     }
   },
   "ComputerKeywordWithMultipleTurns": {
-    "filePath": "kws/kws_whatstheweatherlike_turnontheradio.wav",
-    "nativeLanguage": "en-US",
-    "utterances": {
+    "FilePath": "kws/kws_whatstheweatherlike_turnontheradio.wav",
+    "NativeLanguage": "en-US",
+    "Utterances": {
       "en-US": [
         {
           "Text": "Computer what's the weather like? Turn on the radio."
@@ -341,8 +341,8 @@
     }
   },
   "ConversationBetweenTwoPersonsEnglish": {
-    "filePath": "audio/katiesteve.wav",
-    "nativeLanguage": "en-US",
+    "FilePath": "audio/katiesteve.wav",
+    "NativeLanguage": "en-US",
     "Utterances": {
       "en-US": [
         {
@@ -352,15 +352,15 @@
     }
   },
   "PersonEnrollmentEnglish1": {
-    "filePath": "audio/enrollment_audio_katie.wav"
+    "FilePath": "audio/enrollment_audio_katie.wav"
   },
   "PersonEnrollmentEnglish2": {
-    "filePath": "audio/enrollment_audio_steve.wav"
+    "FilePath": "audio/enrollment_audio_steve.wav"
   },
   "SingleUtteranceWithSpecialCharacter": {
-    "filePath": "audio/TStockValue.wav",
-    "nativeLanguage": "en-US",
-    "utterances": {
+    "FilePath": "audio/TStockValue.wav",
+    "NativeLanguage": "en-US",
+    "Utterances": {
       "en-US": [
         {
           "Text": "What's the AT&T stock value today?"
@@ -369,12 +369,12 @@
     }
   },
   "ShortSilence": {
-    "filePath": "audio/silenceshort.wav"
+    "FilePath": "audio/silenceshort.wav"
   },
   "SingleUtteranceWithPunctuation": {
-    "filePath": "audio/explicitpunc1.wav",
-    "nativeLanguage": "en-US",
-    "utterances": {
+    "FilePath": "audio/explicitpunc1.wav",
+    "NativeLanguage": "en-US",
+    "Utterances": {
       "en-US": [
         {
           "Text": "If it rains, sent me an email."
@@ -383,8 +383,8 @@
     }
   },
   "ProfanitySingleUtteranceEnglish1": {
-    "filePath": "audio/profanity.wav",
-    "nativeLanguage": "en-US",
+    "FilePath": "audio/profanity.wav",
+    "NativeLanguage": "en-US",
     "Utterances": {
       "en-US": [
         {
@@ -407,9 +407,9 @@
     }
   },
   "ProfanitySingleUtteranceEnglish2": {
-    "filePath": "audio/WTFProfanity.wav",
-    "nativeLanguage": "en-US",
-    "utterances": {
+    "FilePath": "audio/WTFProfanity.wav",
+    "NativeLanguage": "en-US",
+    "Utterances": {
       "en-US": [
         {
           "Text": "What does the word fuck mean?",

@@ -10,6 +10,7 @@
 #include "test_utils.h"
 #include "test_PAL.h"
 #include <azure_c_shared_utility_platform_wrapper.h>
+#include <vector>
 
 #if defined(_MSC_VER) && defined(_DEBUG)
 // in case of asserts in debug mode, print the message into stderr and throw exception
@@ -37,8 +38,6 @@ int main(int argc, char* argv[])
     }
 #endif
 
-    add_signal_handlers();
-
     Catch::Session session; // There must be exactly one instance
 
     // The catch2 test adapter runs a Discovery phase and we shouldn't attempt io during this phase
@@ -49,15 +48,10 @@ int main(int argc, char* argv[])
         std::string rootPathOnly = rootPath.substr(0, rootPath.find_last_of('/') + 1);
 
         ConfigSettings::LoadFromJsonFile(rootPathOnly);
-
-        Config::InputDir = rootPathOnly + "input";
-
-        SpxConsoleLogger_Log(LOG_CATEGORY::AZ_LOG_INFO, __FILE__, "main", __LINE__, 0, "Setting InputDir to %s", Config::InputDir.c_str());
     }
 
     // Let Catch (using Clara) parse the command line
     int returnCode = parse_cli_args(session, argc, argv);
-
     if (returnCode != 0) // Indicates a command line error
     {
         return returnCode;
@@ -70,6 +64,8 @@ int main(int argc, char* argv[])
         std::string proxyString = proxyStruct.host + ":" + std::to_string(proxyStruct.port);
         platform_set_http_proxy(proxyString.c_str(), nullptr);
     }
+
+    add_signal_handlers();
 
     return session.run();
 }

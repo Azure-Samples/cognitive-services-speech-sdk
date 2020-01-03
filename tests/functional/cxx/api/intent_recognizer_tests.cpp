@@ -23,9 +23,9 @@ using namespace std;
 
 std::shared_ptr<SpeechConfig> SpeechConfigForIntentTests()
 {
-    auto config = !Config::Endpoint.empty()
-        ? SpeechConfig::FromEndpoint(Config::Endpoint, Keys::LUIS)
-        : SpeechConfig::FromSubscription(Keys::LUIS, Config::LuisRegion);
+    auto config = !DefaultSettingsMap[ENDPOINT].empty()
+        ? SpeechConfig::FromEndpoint(DefaultSettingsMap[ENDPOINT], SubscriptionsRegionsMap[LANGUAGE_UNDERSTANDING_SUBSCRIPTION].Key)
+        : SpeechConfig::FromSubscription(SubscriptionsRegionsMap[LANGUAGE_UNDERSTANDING_SUBSCRIPTION].Key, SubscriptionsRegionsMap[LANGUAGE_UNDERSTANDING_SUBSCRIPTION].Region);
     return config;
 }
 
@@ -33,15 +33,14 @@ TEST_CASE("Intent Recognizer basics", "[api][cxx][intent]")
 {
     SECTION("Intent Recognition works")
     {
-        turnOnLamp.UpdateFullFilename(Config::InputDir);
-        REQUIRE(exists(turnOnLamp.m_inputDataFilename));
+        REQUIRE(exists(ROOT_RELATIVE_PATH(INTENT_UTTERANCE)));
 
         auto config = SpeechConfigForIntentTests();
-        auto audioConfig = AudioConfig::FromWavFileInput(turnOnLamp.m_inputDataFilename);
+        auto audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(INTENT_UTTERANCE));
         auto recognizer = IntentRecognizer::FromConfig(config, audioConfig);
 
-        REQUIRE(!Config::LuisAppId.empty());
-        auto model = LanguageUnderstandingModel::FromAppId(Config::LuisAppId);
+        REQUIRE(!DefaultSettingsMap[LANGUAGE_UNDERSTANDING_HOME_AUTOMATION_APP_ID].empty());
+        auto model = LanguageUnderstandingModel::FromAppId(DefaultSettingsMap[LANGUAGE_UNDERSTANDING_HOME_AUTOMATION_APP_ID]);
         std::string sessionId;
 
         recognizer->SessionStarted.Connect([&sessionId](const SessionEventArgs& e)

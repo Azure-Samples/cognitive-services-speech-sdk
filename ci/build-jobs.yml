@@ -70,6 +70,12 @@ jobs:
       versionSpec: $(SPEECHSDK_NUGET_VERSION)
   - bash: ./ci/install-build-dependencies.sh
     displayName: Install build dependencies
+  - bash: |
+      rm -f ./tests/test.subscriptions.regions.json
+      cat > ./tests/test.subscriptions.regions.json << HEREDOC
+        $(KEYS_AND_REGIONS)
+      HEREDOC
+    displayName: Write Subscriptions Regions Data
   - task: CMake@1
     displayName: Generate solution
     inputs:
@@ -359,6 +365,12 @@ jobs:
     parameters:
       enableVariable: SPEECHSDK_ENABLE_KWS
       os: Windows
+  - bash: |
+      rm -f ./tests/test.subscriptions.regions.json
+      cat > ./tests/test.subscriptions.regions.json <<HEREDOC
+        $(KEYS_AND_REGIONS)
+      HEREDOC
+    displayName: Write Subscriptions Regions Data
   - task: CMake@1
     displayName: Generate solution
     inputs:
@@ -1685,6 +1697,12 @@ jobs:
     inputs:
       type: FilePath
       scriptPath: './ci/check-gcc-parse.sh'
+  - bash: |
+      rm -f ./tests/test.subscriptions.regions.json
+      cat > ./tests/test.subscriptions.regions.json << HEREDOC
+        $(KEYS_AND_REGIONS)
+      HEREDOC
+    displayName: Write Subscriptions Regions Data
   - task: CMake@1
     displayName: Generate makefiles
     inputs:
@@ -2074,7 +2092,7 @@ jobs:
         -D long-running=false
     displayName: Patch quickstart
   - bash: |
-      set -u -e -x -o pipefail
+      set -u -e -o pipefail
       . ci/functions.sh
       ERRORS=0
 
@@ -2088,6 +2106,12 @@ jobs:
 
       mkdir speechsdk # will fail if existing
       tar -xzf "$(Build.ArtifactStagingDirectory)/Linux/Drop/SpeechSDK-Linux-$(SPEECHSDK_SEMVER2NOMETA).tar.gz" --strip-components=1 -C speechsdk
+
+      rm -f ./tests/test.subscriptions.regions.json
+      cat > ./tests/test.subscriptions.regions.json << HEREDOC
+        $(KEYS_AND_REGIONS)
+      HEREDOC
+      echo $PWD
 
       for i in $(DOCKER_IMAGES); do
         [[ $i =~ _([^_]*): ]] || exitWithError "Cannot parse out architecture from %s" "$i"

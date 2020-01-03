@@ -34,49 +34,7 @@ using namespace std;
 using MilliSeconds = chrono::duration<int, milli>;
 #define WAIT_FOR_RECO_RESULT_TIME  20s
 
-struct TestData
-{
-    TestData(const string& audioFilename, const string& utt)
-        : m_inputDataFilename(audioFilename), m_utterance(utt)
-    {
-    }
-
-    void UpdateFullFilename(const string& dir)
-    {
-        if (m_dir.empty())
-        {
-            m_dir = dir;
-            m_inputDataFilename = m_dir + m_inputDataFilename;
-        }
-    }
-    string m_dir;
-    string m_inputDataFilename;
-    string m_utterance;
-};
-
 // declare the test data here
-extern TestData weather;
-extern TestData weatherGerman;
-extern TestData weatherInChinese;
-extern TestData weathermp3;
-extern TestData weatheropus;
-extern TestData weatherflac;
-extern TestData weatheralaw;
-extern TestData weathermulaw;
-extern TestData weather8Channels;
-extern TestData weather3x;
-extern TestData batman;
-extern TestData wrongSamplingRateFile;
-extern TestData callTheFirstOne;
-extern TestData turnOnLamp;
-extern TestData dgiWreckANiceBeach;
-extern TestData recordedAudioMessage;
-extern TestData kwvAccept;
-extern TestData kwvAccept2x;
-extern TestData kwvReject;
-extern TestData kwvMultiturn;
-extern TestData katieSteve;
-
 struct RecoPhrase
 {
     RecoPhrase(const std::string& txt, const std::string& id, const std::string& json, uint64_t offset)

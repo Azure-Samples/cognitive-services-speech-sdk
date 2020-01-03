@@ -12,8 +12,7 @@ TEST_CASE("Offline continuous recognition using file input", "[api][cxx][unidec]
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
     UseMocks(false);
-    weather.UpdateFullFilename(Config::InputDir);
-    SPXTEST_REQUIRE(exists(weather.m_inputDataFilename));
+    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
 
     auto config = CurrentSpeechConfig();
     UseOfflineUnidec(config);
@@ -24,7 +23,7 @@ TEST_CASE("Offline continuous recognition using file input", "[api][cxx][unidec]
 
         for (int i = 0; i < numLoops; i++)
         {
-            auto audioInput = AudioConfig::FromWavFileInput(weather.m_inputDataFilename);
+            auto audioInput = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
             auto recognizer = SpeechRecognizer::FromConfig(config, audioInput);
             auto result = make_shared<RecoPhrases>();
 
@@ -36,7 +35,7 @@ TEST_CASE("Offline continuous recognition using file input", "[api][cxx][unidec]
 
             INFO(GetText(result->phrases));
             SPXTEST_REQUIRE(!result->phrases.empty());
-            SPXTEST_REQUIRE(MatchText(weather.m_utterance, result->phrases[0].Text));
+            SPXTEST_REQUIRE(MatchText(AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH].Utterances["en-US"][0].Text, result->phrases[0].Text));
         }
     }
 }
@@ -48,8 +47,7 @@ TEST_CASE("Offline continuous recognition using file input fails", "[.][api][cxx
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
     UseMocks(false);
-    weather3x.UpdateFullFilename(Config::InputDir);
-    SPXTEST_REQUIRE(exists(weather3x.m_inputDataFilename));
+    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_3X)));
 
     auto config = CurrentSpeechConfig();
     UseOfflineUnidec(config);
@@ -57,7 +55,7 @@ TEST_CASE("Offline continuous recognition using file input fails", "[.][api][cxx
     SPXTEST_SECTION("continuous recognition")
     {
         auto numUtterances = 3u;
-        auto audioInput = AudioConfig::FromWavFileInput(weather3x.m_inputDataFilename);
+        auto audioInput = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_3X));
         auto recognizer = SpeechRecognizer::FromConfig(config, audioInput);
         auto result = make_shared<RecoPhrases>();
 
@@ -71,7 +69,7 @@ TEST_CASE("Offline continuous recognition using file input fails", "[.][api][cxx
         SPXTEST_REQUIRE(result->phrases.size() == numUtterances);
         for (auto i = 0u; i < result->phrases.size(); i++)
         {
-            SPXTEST_REQUIRE(MatchText(weather3x.m_utterance, result->phrases[i].Text));
+            SPXTEST_REQUIRE(MatchText(AudioUtterancesMap[SINGLE_UTTERANCE_3X].Utterances["en-US"][0].Text, result->phrases[i].Text));
         }
     }
 }
@@ -81,8 +79,7 @@ TEST_CASE("Offline single recognition using file input", "[api][cxx][unidec]")
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
     UseMocks(false);
-    weather.UpdateFullFilename(Config::InputDir);
-    SPXTEST_REQUIRE(exists(weather.m_inputDataFilename));
+    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
 
     auto config = CurrentSpeechConfig();
     UseOfflineUnidec(config);
@@ -93,13 +90,13 @@ TEST_CASE("Offline single recognition using file input", "[api][cxx][unidec]")
 
         for (int i = 0; i < numLoops; i++)
         {
-            auto audioInput = AudioConfig::FromWavFileInput(weather.m_inputDataFilename);
+            auto audioInput = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
             auto recognizer = SpeechRecognizer::FromConfig(config, audioInput);
 
             auto result = recognizer->RecognizeOnceAsync().get();
 
             SPXTEST_REQUIRE(result->Reason == ResultReason::RecognizedSpeech);
-            SPXTEST_REQUIRE(MatchText(weather.m_utterance, result->Text));
+            SPXTEST_REQUIRE(MatchText(AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH].Utterances["en-US"][0].Text, result->Text));
         }
     }
 }
@@ -109,8 +106,7 @@ TEST_CASE("Offline continuous recognition using push stream input", "[api][cxx][
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
     UseMocks(false);
-    weather.UpdateFullFilename(Config::InputDir);
-    SPXTEST_REQUIRE(exists(weather.m_inputDataFilename));
+    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
 
     auto config = CurrentSpeechConfig();
     UseOfflineUnidec(config);
@@ -127,7 +123,7 @@ TEST_CASE("Offline continuous recognition using push stream input", "[api][cxx][
             auto result = make_shared<RecoPhrases>();
 
             ConnectCallbacks(recognizer.get(), result);
-            PushData(pushStream.get(), weather.m_inputDataFilename);
+            PushData(pushStream.get(), ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
             recognizer->StartContinuousRecognitionAsync().get();
 
             WaitForResult(result->ready.get_future(), WAIT_FOR_RECO_RESULT_TIME);
@@ -135,7 +131,7 @@ TEST_CASE("Offline continuous recognition using push stream input", "[api][cxx][
 
             INFO(GetText(result->phrases));
             SPXTEST_REQUIRE(!result->phrases.empty());
-            SPXTEST_REQUIRE(MatchText(weather.m_utterance, result->phrases[0].Text));
+            SPXTEST_REQUIRE(MatchText(AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH].Utterances["en-US"][0].Text, result->phrases[0].Text));
         }
     }
 }
@@ -147,8 +143,7 @@ TEST_CASE("Offline continuous recognition using push stream input fails", "[.][a
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
     UseMocks(false);
-    weather.UpdateFullFilename(Config::InputDir);
-    SPXTEST_REQUIRE(exists(weather.m_inputDataFilename));
+    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
 
     auto config = CurrentSpeechConfig();
     UseOfflineUnidec(config);
@@ -165,7 +160,7 @@ TEST_CASE("Offline continuous recognition using push stream input fails", "[.][a
             auto result = make_shared<RecoPhrases>();
 
             ConnectCallbacks(recognizer.get(), result);
-            PushData(pushStream.get(), weather.m_inputDataFilename);
+            PushData(pushStream.get(), ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
             recognizer->StartContinuousRecognitionAsync().get();
 
             WaitForResult(result->ready.get_future(), WAIT_FOR_RECO_RESULT_TIME);
@@ -173,7 +168,7 @@ TEST_CASE("Offline continuous recognition using push stream input fails", "[.][a
 
             INFO(GetText(result->phrases));
             SPXTEST_REQUIRE(!result->phrases.empty());
-            SPXTEST_REQUIRE(MatchText(weather.m_utterance, result->phrases[0].Text));
+            SPXTEST_REQUIRE(MatchText(AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH].Utterances["en-US"][0].Text, result->phrases[0].Text));
         }
     }
 }
@@ -183,8 +178,7 @@ TEST_CASE("Offline single recognition using push stream input", "[api][cxx][unid
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
     UseMocks(false);
-    weather.UpdateFullFilename(Config::InputDir);
-    SPXTEST_REQUIRE(exists(weather.m_inputDataFilename));
+    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
 
     auto config = CurrentSpeechConfig();
     UseOfflineUnidec(config);
@@ -199,11 +193,11 @@ TEST_CASE("Offline single recognition using push stream input", "[api][cxx][unid
             auto audioInput = AudioConfig::FromStreamInput(pushStream);
             auto recognizer = SpeechRecognizer::FromConfig(config, audioInput);
 
-            PushData(pushStream.get(), weather.m_inputDataFilename);
+            PushData(pushStream.get(), ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
             auto result = recognizer->RecognizeOnceAsync().get();
 
             SPXTEST_REQUIRE(result->Reason == ResultReason::RecognizedSpeech);
-            SPXTEST_REQUIRE(MatchText(weather.m_utterance, result->Text));
+            SPXTEST_REQUIRE(MatchText(AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH].Utterances["en-US"][0].Text, result->Text));
         }
     }
 }
@@ -236,7 +230,7 @@ TEST_CASE("Offline continuous recognition using pull stream input", "[api][cxx][
 
             INFO(GetText(result->phrases));
             SPXTEST_REQUIRE(!result->phrases.empty());
-            SPXTEST_REQUIRE(MatchText(weather.m_utterance, result->phrases[0].Text));
+            SPXTEST_REQUIRE(MatchText(AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH].Utterances["en-US"][0].Text, result->phrases[0].Text));
         }
     }
 }
@@ -263,7 +257,7 @@ TEST_CASE("Offline single recognition using pull stream input", "[api][cxx][unid
             auto result = recognizer->RecognizeOnceAsync().get();
 
             SPXTEST_REQUIRE(result->Reason == ResultReason::RecognizedSpeech);
-            SPXTEST_REQUIRE(MatchText(weather.m_utterance, result->Text));
+            SPXTEST_REQUIRE(MatchText(AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH].Utterances["en-US"][0].Text, result->Text));
         }
     }
 }
@@ -278,26 +272,25 @@ TEST_CASE("Offline recognition with KWS", "[api][cxx][unidec]")
     UseOfflineUnidec(config);
     auto pushStream = AudioInputStream::CreatePushStream();
     auto audioInput = AudioConfig::FromStreamInput(pushStream);
-    auto model = KeywordRecognitionModel::FromFile(Config::InputDir + "/kws/Computer/kws.table");
+    auto model = KeywordRecognitionModel::FromFile(DefaultSettingsMap[INPUT_DIR] + "/kws/Computer/kws.table");
 
     SPXTEST_SECTION("detect and recognize twice")
     {
-        kwvAccept.UpdateFullFilename(Config::InputDir);
-        SPXTEST_REQUIRE(exists(kwvAccept.m_inputDataFilename));
+        SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(COMPUTER_KEYWORD_WITH_SINGLE_UTTERANCE_1)));
 
         for (int i = 0; i < 2; i++)
         {
             auto recognizer = SpeechRecognizer::FromConfig(config, audioInput);
             auto result = make_shared<RecoPhrases>();
             ConnectCallbacks(recognizer.get(), result);
-            PushData(pushStream.get(), kwvAccept.m_inputDataFilename);
+            PushData(pushStream.get(), ROOT_RELATIVE_PATH(COMPUTER_KEYWORD_WITH_SINGLE_UTTERANCE_1));
 
             recognizer->StartKeywordRecognitionAsync(model).get();
             WaitForResult(result->ready.get_future(), WAIT_FOR_RECO_RESULT_TIME);
             recognizer->StopKeywordRecognitionAsync().get();
 
             SPXTEST_REQUIRE(!result->phrases.empty());
-            SPXTEST_REQUIRE(MatchText(kwvAccept.m_utterance, result->phrases[0].Text));
+            SPXTEST_REQUIRE(MatchText(AudioUtterancesMap[COMPUTER_KEYWORD_WITH_SINGLE_UTTERANCE_1].Utterances["en-US"][0].Text, result->phrases[0].Text));
         }
     }
 }
@@ -315,13 +308,12 @@ TEST_CASE("Offline recognition with KWS fails", "[.][api][cxx][unidec]")
     auto pushStream = AudioInputStream::CreatePushStream();
     auto audioInput = AudioConfig::FromStreamInput(pushStream);
     auto recognizer = SpeechRecognizer::FromConfig(config, audioInput);
-    auto model = KeywordRecognitionModel::FromFile(Config::InputDir + "/kws/Computer/kws.table");
+    auto model = KeywordRecognitionModel::FromFile(DefaultSettingsMap[INPUT_DIR] + "/kws/Computer/kws.table");
 
     SPXTEST_SECTION("detect and recognize twice")
     {
-        kwvAccept2x.UpdateFullFilename(Config::InputDir);
-        SPXTEST_REQUIRE(exists(kwvAccept2x.m_inputDataFilename));
-        PushData(pushStream.get(), kwvAccept2x.m_inputDataFilename);
+        SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(COMPUTER_KEYWORD_WITH_SINGLE_UTTERANCE_2X)));
+        PushData(pushStream.get(), ROOT_RELATIVE_PATH(COMPUTER_KEYWORD_WITH_SINGLE_UTTERANCE_2X));
 
         for (int i = 0; i < 2; i++)
         {
@@ -333,7 +325,7 @@ TEST_CASE("Offline recognition with KWS fails", "[.][api][cxx][unidec]")
             recognizer->StopKeywordRecognitionAsync().get();
 
             SPXTEST_REQUIRE(!result->phrases.empty());
-            SPXTEST_REQUIRE(MatchText(kwvAccept2x.m_utterance, result->phrases[0].Text));
+            SPXTEST_REQUIRE(MatchText(AudioUtterancesMap[COMPUTER_KEYWORD_WITH_SINGLE_UTTERANCE_2X].Utterances["en-US"][0].Text, result->phrases[0].Text));
         }
     }
 }

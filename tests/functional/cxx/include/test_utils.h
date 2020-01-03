@@ -47,57 +47,120 @@
 #define EXTERN
 #endif
 
-#define TEST_SETTINGS_FILE "test.settings.json"
-
-namespace Keys
-{
-    EXTERN std::string Speech;
-    EXTERN std::string LUIS;
-    EXTERN std::string Dialog;
-    EXTERN std::string ConversationTranscriber;
-    EXTERN std::string ConversationTranslator;
-}
+#define TEST_AUDIOUTTERANCES_FILE "test.audio.utterances.json"
+#define TEST_DEFAULTS_FILE "test.defaults.json"
+#define TEST_SUBSCRIPTIONSREGIONS_FILE "test.subscriptions.regions.json"
 
 namespace Config
 {
-    EXTERN std::string Endpoint;
-    EXTERN std::string Region;
-    EXTERN std::string LuisRegion;
-    EXTERN std::string LuisAppId;
-    EXTERN std::string InputDir;
-    EXTERN std::string DialogRegion;
-    EXTERN std::string DialogBotSecret;
-    EXTERN std::string InRoomAudioEndpoint;
-    EXTERN std::string OnlineAudioEndpoint;
     EXTERN std::string OfflineModelPathRoot;
     EXTERN std::string OfflineModelLanguage;
-    EXTERN std::string ConversationTranslatorRegion;
-    EXTERN std::string ConversationTranslatorHost;
-    EXTERN std::string ConversationTranslatorSpeechEndpoint;
-    EXTERN std::string ConversationTranslatorClientId;
     EXTERN bool DoDiscover;
 }
 
-#define UNIFIED_SPEECH_SUBSCRIPTION_KEY "UnifiedSpeechSubscriptionKey"
-#define LANGUAGE_UNDERSTANDING_SUBSCRIPTION_KEY "LanguageUnderstandingSubscriptionKey"
-#define DIALOG_SUBSCRIPTION_KEY "DialogSubscriptionKey"
-#define CONVERSATION_TRANSCRIPTION_SUBSCRIPTION_KEY "ConversationTranscriptionPPEKey"
-#define CONVERSATION_TRANSLATOR_SUBSCRIPTION_KEY "ConversationTranslatorSubscriptionKey"
+#define ROOT_RELATIVE_PATH(pathName) DefaultSettingsMap[INPUT_DIR] + "/" + AudioUtterancesMap[pathName].FilePath
 
-#define CONVERSATION_TRANSCRIPTION_ENDPOINT "ConversationTranscriptionEndpoint"
+// Subscriptions and regions keys
+#define KEY "Key"
 #define REGION "Region"
-#define LANGUAGE_UNDERSTANDING_SERVICE_REGION "LanguageUnderstandingServiceRegion"
+#define UNIFIED_SPEECH_SUBSCRIPTION "UnifiedSpeechSubscription"
+#define DIALOG_SUBSCRIPTION "DialogSubscription"
+#define LANGUAGE_UNDERSTANDING_SUBSCRIPTION "LanguageUnderstandingSubscription"
+#define CONVERSATION_TRANSCRIPTION_PROD_SUBSCRIPTION "ConversationTranscriptionPRODSubscription"
+#define CONVERSATION_TRANSCRIPTION_PPE_SUBSCRIPTION "ConversationTranscriptionPPESubscription"
+#define CONVERSATION_TRANSLATOR_SUBSCRIPTION "ConversationTranslatorSubscription"
+
+// Default settings keys
+#define ENDPOINT "Endpoint"
+#define DIALOG_FUNCTIONAL_TEST_BOT "DialogFunctionalTestBot"
 #define LANGUAGE_UNDERSTANDING_HOME_AUTOMATION_APP_ID "LanguageUnderstandingHomeAutomationAppId"
-#define SPEECH_REGION_FOR_CONVERSATION_TRANSCRIPTION "SpeechRegionForConversationTranscription"
-#define IN_ROOM_AUDIO_ENDPOINT "InRoomAudioEndpoint"
+#define INROOM_AUDIO_ENDPOINT "InRoomAudioEndpoint"
+#define CONVERSATION_TRANSCRIPTION_ENDPOINT "ConversationTranscriptionEndpoint"
+#define LONG_RUNNING "LongRunning"
+#define DEPLOYMENT_ID "DeploymentId"
 #define ONLINE_AUDIO_ENDPOINT "OnlineAudioEndpoint"
 #define INPUT_DIR "InputDir"
-#define DIALOG_FUNCTIONAL_TEST_BOT "DialogFunctionalTestBot"
-#define DIALOG_REGION "DialogRegion"
-#define CONVERSATION_TRANSLATOR_REGION "ConversationTranslatorRegion"
 #define CONVERSATION_TRANSLATOR_HOST "ConversationTranslatorHost"
 #define CONVERSATION_TRANSLATOR_SPEECH_ENDPOINT "ConversationTranslatorSpeechEndpoint"
 #define CONVERSATION_TRANSLATOR_CLIENTID "ConversationTranslatorClientId"
+
+// Audio file and utterances keys
+#define FILE_PATH "FilePath"
+#define NATIVE_LANGUAGE "NativeLanguage"
+#define UTTERANCES "Utterances"
+#define UTTERANCE_TEXT "Text"
+#define PROFANITY_RAW "ProfanityRaw"
+#define PROFANITY_MASKED "ProfanityMasked"
+#define PROFANITY_MASKED_PATTERN "ProfanityMaskedPattern"
+#define PROFANITY_REMOVED "ProfanityRemoved"
+#define PROFANITY_TAGGED "ProfanityTagged"
+#define AUDIO_OFFSET "AudioOffset"
+#define AUDIO_DURATION "AudioDuration"
+#define TEXT_OFFSET "TextOffset"
+#define SSML_OFFSET "SsmlOffse"
+
+#define SINGLE_UTTERANCE_ENGLISH "SingleUtteranceEnglish"
+#define SINGLE_UTTERANCE_CHINESE "SingleUtteranceChinese"
+#define SINGLE_UTTERANCE_MP3 "SingleUtteranceMP3"
+#define SINGLE_UTTERANCE_OPUS "SingleUtteranceOPUS"
+#define SINGLE_UTTERANCE_A_LAW "SingleUtteranceALaw"
+#define SINGLE_UTTERANCE_MU_LAW "SingleUtteranceMULaw"
+#define SINGLE_UTTERANCE_FLAC "SingleUtteranceFLAC"
+#define SINGLE_UTTERANCE_3X "SingleUtterance3x"
+#define SINGLE_UTTERANCE_MULTIPLE_TURNS "SingleUtteranceMultipleTurns"
+#define SINGLE_UTTERANCE_CATALAN "SingleUtteranceCatalan"
+#define MULTIPLE_UTTERANCE_ENGLISH "MultipleUtteranceEnglish"
+#define AUDIO_44_1KHZ "Audio441Khz"
+#define AUDIO_11_KHZ "Audio11Khz"
+#define HEY_CORTANA "HeyCortana"
+#define SINGLE_UTTERANCE_GERMAN "SingleUtteranceGerman"
+#define INTENT_UTTERANCE "IntentUtterance"
+#define AMBIGUOUS_SPEECH "AmbiguousSpeech"
+#define COMPUTER_KEYWORD_WITH_SINGLE_UTTERANCE_1 "ComputerKeywordWithSingleUtterance1" // Used to be accept
+#define COMPUTER_KEYWORD_WITH_SINGLE_UTTERANCE_2 "ComputerKeywordWithSingleUtterance2"
+#define COMPUTER_KEYWORD_WITH_SINGLE_UTTERANCE_2X "ComputerKeywordWithSingleUtterance2x" // Used to be acceptx2
+#define COMPUTER_KEYWORD_WITH_SINGLE_UTTERANCE_3 "ComputerKeywordWithSingleUtterance3"
+#define COMPUTER_KEYWORD_WITH_MULTIPLE_TURNS_1 "ComputerKeywordWithMultipleTurns"
+#define SECRET_KEYWORDS "SecretKeywords"
+#define CONVERSATION_BETWEEN_TWO_PERSONS_ENGLISH "ConversationBetweenTwoPersonsEnglish"
+#define PERSON_ENROLLMENT_ENGLISH_1 "PersonEnrollmentEnglish1"
+#define PERSON_ENROLLMENT_ENGLISH_2 "PersonEnrollmentEnglish2"
+#define SINGLE_UTTERANCE_WITH_SPECIAL_CHARACTER "SingleUtteranceWithSpecialCharacter"
+#define SHORT_SILENCE "ShortSilence"
+#define SINGLE_UTTERANCE_WITH_PUNCTUATION "SingleUtteranceWithPunctuation"
+#define PROFANTITY_SINGLE_UTTERANCE_ENGLISH_1 "ProfanitySingleUtteranceEnglish1"
+#define PROFANITY_SINGLE_UTTERANCE_ENGLISH_2 "ProfanitySingleUtteranceEnglish2"
+
+struct SubscriptionRegion
+{
+    std::string Key;
+    std::string Region;
+};
+
+struct Utterance
+{
+    std::string Text;
+    std::string ProfanityRaw;
+    std::string ProfanityMasked;
+    std::string ProfanityMaskedPattern;
+    std::string ProfanityRemoved;
+    std::string ProfanityTagged;
+    int AudioOffset;
+    int AudioDuration;
+    int TextOffset;
+    int SsmlOffset;
+};
+
+struct AudioEntry
+{
+    std::string FilePath;
+    std::string NativeLanguage;
+    std::map<std::string, std::vector<Utterance>> Utterances;
+};
+
+EXTERN std::map<std::string, AudioEntry> AudioUtterancesMap;
+EXTERN std::map<std::string, std::string> DefaultSettingsMap;
+EXTERN std::map<std::string, SubscriptionRegion> SubscriptionsRegionsMap;
 
 inline bool exists(const std::string& name) {
     return std::ifstream(name.c_str()).good();
@@ -190,8 +253,152 @@ private:
 
         *errors = Levenshtein(words1, words2);
         *words = words1.size();
-       }
+    }
 };
+
+inline void to_json(nlohmann::json& jsonString, const SubscriptionRegion& subscriptionRegion)
+{
+    jsonString = nlohmann::json{ {KEY, subscriptionRegion.Key},
+    {REGION, subscriptionRegion.Region}
+    };
+}
+
+inline void from_json(const nlohmann::json& jsonString, SubscriptionRegion& subscriptionRegion) {
+    try {
+        jsonString.at(KEY).get_to(subscriptionRegion.Key);
+    }
+    catch (std::exception exception) {
+        SpxConsoleLogger_Log(LOG_CATEGORY::AZ_LOG_TRACE, __FILE__, "from_json", __LINE__, 0, "SubscriptionRegion - failed to find key");
+        throw;
+    }
+    try {
+        jsonString.at(REGION).get_to(subscriptionRegion.Region);
+    }
+    catch (std::exception exception) {
+        SpxConsoleLogger_Log(LOG_CATEGORY::AZ_LOG_TRACE, __FILE__, "from_json", __LINE__, 0, "SubscriptionRegion - failed to find region");
+        throw;
+    }
+}
+
+inline void to_json(nlohmann::json& jsonString, const Utterance& utterance)
+{
+    jsonString = nlohmann::json{ {UTTERANCE_TEXT,utterance.Text},
+    {PROFANITY_RAW, utterance.ProfanityRaw},
+    {PROFANITY_MASKED, utterance.ProfanityMasked},
+    {PROFANITY_MASKED_PATTERN, utterance.ProfanityMaskedPattern},
+    {PROFANITY_REMOVED, utterance.ProfanityRemoved},
+    {PROFANITY_TAGGED, utterance.ProfanityTagged},
+    {AUDIO_OFFSET, utterance.AudioOffset},
+    {AUDIO_DURATION, utterance.AudioDuration},
+    {TEXT_OFFSET, utterance.TextOffset},
+    {SSML_OFFSET, utterance.SsmlOffset}
+    };
+}
+
+inline void from_json(const nlohmann::json& jsonString, Utterance& utterance)
+{
+    try {
+        jsonString.at(UTTERANCE_TEXT).get_to(utterance.Text);
+    }
+    catch (std::exception exception)
+    {
+        utterance.Text = "";
+    }
+    try {
+        jsonString.at(PROFANITY_RAW).get_to(utterance.ProfanityRaw);
+    }
+    catch (std::exception exception)
+    {
+        utterance.ProfanityRaw = "";
+    }
+    try {
+        jsonString.at(PROFANITY_MASKED).get_to(utterance.ProfanityMasked);
+    }
+    catch (std::exception exception)
+    {
+        utterance.ProfanityMasked = "";
+    }
+    try {
+        jsonString.at(PROFANITY_MASKED_PATTERN).get_to(utterance.ProfanityMaskedPattern);
+    }
+    catch (std::exception exception)
+    {
+        utterance.ProfanityMaskedPattern = "";
+    }
+    try {
+        jsonString.at(PROFANITY_REMOVED).get_to(utterance.ProfanityRemoved);
+    }
+    catch (std::exception exception)
+    {
+        utterance.ProfanityRemoved = "";
+    }
+    try {
+        jsonString.at(PROFANITY_TAGGED).get_to(utterance.ProfanityTagged);
+    }
+    catch (std::exception exception)
+    {
+        utterance.ProfanityTagged = "";
+    }
+    try {
+        jsonString.at(AUDIO_OFFSET).get_to(utterance.AudioOffset);
+    }
+    catch (std::exception exception)
+    {
+        utterance.AudioOffset = -1;
+    }
+    try {
+        jsonString.at(AUDIO_DURATION).get_to(utterance.AudioDuration);
+    }
+    catch (std::exception exception)
+    {
+        utterance.AudioDuration = -1;
+    }
+    try {
+        jsonString.at(TEXT_OFFSET).get_to(utterance.TextOffset);
+    }
+    catch (std::exception exception)
+    {
+        utterance.TextOffset = -1;
+    }
+    try {
+        jsonString.at(SSML_OFFSET).get_to(utterance.SsmlOffset);
+    }
+    catch (std::exception exception)
+    {
+        utterance.SsmlOffset = -1;
+    }
+}
+
+inline void to_json(nlohmann::json& jsonString, const AudioEntry& audioEntry)
+{
+    jsonString = nlohmann::json{ {FILE_PATH, audioEntry.FilePath},
+    {NATIVE_LANGUAGE, audioEntry.NativeLanguage} };
+}
+
+inline void from_json(const nlohmann::json& jsonString, AudioEntry& audioEntry)
+{
+    try {
+        jsonString.at(FILE_PATH).get_to(audioEntry.FilePath);
+    }
+    catch (nlohmann::json::exception exception)
+    {
+        audioEntry.FilePath = "";
+    }
+    try {
+        jsonString.at(NATIVE_LANGUAGE).get_to(audioEntry.NativeLanguage);
+    }
+    catch (nlohmann::json::exception exception)
+    {
+        audioEntry.NativeLanguage = "";
+    }
+    try {
+        audioEntry.Utterances = jsonString.at(UTTERANCES).get<std::map<std::string, std::vector<Utterance>>>();
+    }
+    catch (nlohmann::json::exception exception)
+    {
+        audioEntry.Utterances.clear();
+    }
+}
 
 class ConfigSettings {
 private:
@@ -199,11 +406,25 @@ private:
     {
         nlohmann::json nlohmanJson = nullptr;
 
+        SpxConsoleLogger_Log(LOG_CATEGORY::AZ_LOG_INFO, __FILE__, "getJson", __LINE__, 0, "Loading json from %s", path.c_str());
+
         if (exists(path))
         {
             std::ifstream testSettingsFile(path);
-            testSettingsFile >> nlohmanJson;
+            try {
+                testSettingsFile >> nlohmanJson;
+            }
+            catch (nlohmann::json::parse_error exception)
+            {
+                SpxConsoleLogger_Log(LOG_CATEGORY::AZ_LOG_ERROR, __FILE__, "getJson", __LINE__, 0, "json exception from %s - %s", path.c_str(), exception.what());
+            }
         }
+        else
+        {
+            SpxConsoleLogger_Log(LOG_CATEGORY::AZ_LOG_INFO, __FILE__, "getJson", __LINE__, 0, "json file %s cannot be found", path.c_str());
+        }
+
+        SpxConsoleLogger_Log(LOG_CATEGORY::AZ_LOG_INFO, __FILE__, "getJson", __LINE__, 0, "json loaded: %s", nlohmanJson.dump().c_str());
 
         return nlohmanJson;
     }
@@ -211,35 +432,50 @@ private:
 public:
     static void LoadFromJsonFile(std::string rootPathString)
     {
-        std::string testSettingsPath = rootPathString.append(TEST_SETTINGS_FILE);
-        SpxConsoleLogger_Log(LOG_CATEGORY::AZ_LOG_INFO, __FILE__, "LoadFromJsonFile", __LINE__, 0, "Attempting to read file at %s", testSettingsPath.c_str());
+        SpxConsoleLogger_Log(LOG_CATEGORY::AZ_LOG_INFO, __FILE__, "LoadFromJsonFile", __LINE__, 0, "rootPathString is %s", rootPathString.c_str());
 
-        nlohmann::json data = getJson(testSettingsPath);
+        std::string testSubscriptionsRegionsPath = rootPathString + TEST_SUBSCRIPTIONSREGIONS_FILE;
+        std::string testAudioUtterancesPath = rootPathString + TEST_AUDIOUTTERANCES_FILE;
+        std::string testDefaultsPath = rootPathString + TEST_DEFAULTS_FILE;
 
-        if (data != nullptr)
+        nlohmann::json subscriptionRegionData = getJson(testSubscriptionsRegionsPath);
+        if (subscriptionRegionData != nullptr)
         {
-            GetKeyValue(UNIFIED_SPEECH_SUBSCRIPTION_KEY, Keys::Speech, data, __FILE__, __LINE__);
-            GetKeyValue(LANGUAGE_UNDERSTANDING_SUBSCRIPTION_KEY, Keys::LUIS, data, __FILE__, __LINE__);
-            GetKeyValue(DIALOG_SUBSCRIPTION_KEY, Keys::Dialog, data, __FILE__, __LINE__);
-            GetKeyValue(DIALOG_FUNCTIONAL_TEST_BOT, Config::DialogBotSecret, data, __FILE__, __LINE__);
-            GetKeyValue(CONVERSATION_TRANSCRIPTION_SUBSCRIPTION_KEY, Keys::ConversationTranscriber, data, __FILE__, __LINE__);
-            GetKeyValue(DIALOG_REGION, Config::DialogRegion, data, __FILE__, __LINE__),
-            GetKeyValue(REGION, Config::Region, data, __FILE__, __LINE__);
-            GetKeyValue(LANGUAGE_UNDERSTANDING_SERVICE_REGION, Config::LuisRegion, data, __FILE__, __LINE__);
-            GetKeyValue(LANGUAGE_UNDERSTANDING_HOME_AUTOMATION_APP_ID, Config::LuisAppId, data, __FILE__, __LINE__);
-            GetKeyValue(IN_ROOM_AUDIO_ENDPOINT, Config::InRoomAudioEndpoint, data, __FILE__, __LINE__);
-            GetKeyValue(ONLINE_AUDIO_ENDPOINT, Config::OnlineAudioEndpoint, data, __FILE__, __LINE__);
-            GetKeyValue(INPUT_DIR, Config::InputDir, data, __FILE__, __LINE__);
-            
-            GetKeyValue(CONVERSATION_TRANSLATOR_SUBSCRIPTION_KEY, Keys::ConversationTranslator, data, __FILE__, __LINE__);
-            GetKeyValue(CONVERSATION_TRANSLATOR_REGION, Config::ConversationTranslatorRegion, data, __FILE__, __LINE__);
-            GetKeyValue(CONVERSATION_TRANSLATOR_HOST, Config::ConversationTranslatorHost, data, __FILE__, __LINE__);
-            GetKeyValue(CONVERSATION_TRANSLATOR_SPEECH_ENDPOINT, Config::ConversationTranslatorSpeechEndpoint, data, __FILE__, __LINE__);
-            GetKeyValue(CONVERSATION_TRANSLATOR_CLIENTID, Config::ConversationTranslatorClientId, data, __FILE__, __LINE__);
+            SubscriptionsRegionsMap = subscriptionRegionData.get<std::map<std::string, SubscriptionRegion>>();
         }
         else
         {
-            SpxConsoleLogger_Log(LOG_CATEGORY::AZ_LOG_ERROR, __FILE__, "LoadFromJsonFile", __LINE__, 0, "JSON could not be loaded from %s", testSettingsPath.c_str());
+            SpxConsoleLogger_Log(LOG_CATEGORY::AZ_LOG_ERROR, __FILE__, "LoadFromJsonFile", __LINE__, 0, "JSON could not be loaded from %s", testSubscriptionsRegionsPath.c_str());
+        }
+
+        nlohmann::json defaultsData = getJson(testDefaultsPath);
+        if (defaultsData != nullptr)
+        {
+            DefaultSettingsMap = defaultsData.get<std::map<std::string, std::string>>();
+        }
+        else
+        {
+            SpxConsoleLogger_Log(LOG_CATEGORY::AZ_LOG_ERROR, __FILE__, "LoadFromJsonFile", __LINE__, 0, "JSON could not be loaded from %s", testDefaultsPath.c_str());
+        }
+
+        SpxConsoleLogger_Log(LOG_CATEGORY::AZ_LOG_INFO, __FILE__, "LoadFromJsonFile", __LINE__, 0, "rootPathString is: %s", rootPathString.c_str());
+        DefaultSettingsMap[INPUT_DIR] = rootPathString + DefaultSettingsMap[INPUT_DIR];
+
+        if (!exists(DefaultSettingsMap[INPUT_DIR]))
+        {
+            SpxConsoleLogger_Log(LOG_CATEGORY::AZ_LOG_ERROR, __FILE__, "LoadFromJsonFile", __LINE__, 0, "input file path %s is invalid", DefaultSettingsMap[INPUT_DIR].c_str());
+        }
+
+        SpxConsoleLogger_Log(LOG_CATEGORY::AZ_LOG_INFO, __FILE__, "LoadFromJsonFile", __LINE__, 0, "Setting InputDir to %s", DefaultSettingsMap[INPUT_DIR].c_str());
+
+        nlohmann::json audioUtterancesData = getJson(testAudioUtterancesPath);
+        if (audioUtterancesData != nullptr)
+        {
+            AudioUtterancesMap = audioUtterancesData.get<std::map<std::string, AudioEntry>>();
+        }
+        else
+        {
+            SpxConsoleLogger_Log(LOG_CATEGORY::AZ_LOG_ERROR, __FILE__, "LoadFromJsonFile", __LINE__, 0, "JSON could not be loaded from %s", testAudioUtterancesPath.c_str());
         }
     }
 };
@@ -272,70 +508,70 @@ inline int parse_cli_args(Catch::Session& session, int argc, char* argv[])
 
     auto cli
         = session.cli() // Get Catch's composite command line parser
-        | Opt(Keys::Speech, "SpeechSubscriptionKey") // bind variable to a new option, with a hint string
-          ["--keySpeech"]    // the option names it will respond to
-          ("The subscription key for speech")
-        | Opt(Keys::LUIS, "LuisSubscriptionKey")
-          ["--keyLUIS"]
-          ("The subscription key for language understanding")
-        | Opt(Keys::Dialog, "keyDialog")
-          ["--keyDialog"]
-          ("The subscription key for the Speech Channel")
-        | Opt(Config::Endpoint, "endpoint")
-          ["--endpoint"]
-          ("The endpoint url to test against.")
-        | Opt(Config::Region, "Region")
-          ["--region"]
-          ("The region id to be used for subscription and authorization requests")
-        | Opt(Config::LuisRegion, "LuisRegionId")
-          ["--regionIdLUIS"]
-          ("The region id to be used for language understanding subscription and authorization requests")
-        | Opt(Config::LuisAppId, "LuisAppId")
-          ["--luisAppId"]
-          ("The language understanding app id to be used intent recognition tests")
-        | Opt(Config::InRoomAudioEndpoint, "InRoomAudioEndpoint")
-          ["--InRoomAudioEndpoint"]
-          ("The endpoint that in-room tests in intelligent meeting recognizer talks to")
-        | Opt(Config::OnlineAudioEndpoint, "OnlineAudioEndpoint")
-          ["--OnlineAudioEndpoint"]
-          ("The endpoint that on-line tests in intelligent meeting recognizer talks to")
-        | Opt(Keys::ConversationTranscriber, "ConversationTranscriber")
-          ["--keyConversationTranscriberPPE"]
-          ("The conversation transcriber key")
-        | Opt(Config::InputDir, "InputDir")
-          ["--inputDir"]
-          ("The directory where test input files are placed")
-        | Opt(Config::DialogRegion, "DialogRegion")
-          ["--dialogRegionId"]
-          ("The region id to be used for the Speech Channel Service")
-        | Opt(Config::DialogBotSecret, "DialogBotSecret")
-          ["--dialogBotSecret"]
-          ("Secret for the functional test bot")
+        | Opt(SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key, "SpeechSubscriptionKey") // bind variable to a new option, with a hint string
+        ["--keySpeech"]    // the option names it will respond to
+    ("The subscription key for speech")
+        | Opt(SubscriptionsRegionsMap[LANGUAGE_UNDERSTANDING_SUBSCRIPTION].Key, "LuisSubscriptionKey")
+        ["--keyLUIS"]
+    ("The subscription key for language understanding")
+        | Opt(SubscriptionsRegionsMap[DIALOG_SUBSCRIPTION].Key, "keyDialog")
+        ["--keyDialog"]
+    ("The subscription key for the Speech Channel")
+        | Opt(DefaultSettingsMap[ENDPOINT], "endpoint")
+        ["--endpoint"]
+    ("The endpoint url to test against.")
+        | Opt(SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Region, "Region")
+        ["--region"]
+    ("The region id to be used for subscription and authorization requests")
+        | Opt(SubscriptionsRegionsMap[LANGUAGE_UNDERSTANDING_SUBSCRIPTION].Region, "LuisRegionId")
+        ["--regionIdLUIS"]
+    ("The region id to be used for language understanding subscription and authorization requests")
+        | Opt(DefaultSettingsMap[LANGUAGE_UNDERSTANDING_HOME_AUTOMATION_APP_ID], "LuisAppId")
+        ["--luisAppId"]
+    ("The language understanding app id to be used intent recognition tests")
+        | Opt(DefaultSettingsMap[INROOM_AUDIO_ENDPOINT], "InRoomAudioEndpoint")
+        ["--InRoomAudioEndpoint"]
+    ("The endpoint that in-room tests in intelligent meeting recognizer talks to")
+        | Opt(DefaultSettingsMap[ONLINE_AUDIO_ENDPOINT], "OnlineAudioEndpoint")
+        ["--OnlineAudioEndpoint"]
+    ("The endpoint that on-line tests in intelligent meeting recognizer talks to")
+        | Opt(SubscriptionsRegionsMap[CONVERSATION_TRANSCRIPTION_PROD_SUBSCRIPTION].Key, "ConversationTranscriber")
+        ["--keyConversationTranscriberPPE"]
+    ("The conversation transcriber key")
+        | Opt(DefaultSettingsMap[INPUT_DIR], "InputDir")
+        ["--inputDir"]
+    ("The directory where test input files are placed")
+        | Opt(SubscriptionsRegionsMap[DIALOG_SUBSCRIPTION].Region, "DialogRegion")
+        ["--dialogRegionId"]
+    ("The region id to be used for the Speech Channel Service")
+        | Opt(DefaultSettingsMap[DIALOG_FUNCTIONAL_TEST_BOT], "DialogBotSecret")
+        ["--dialogBotSecret"]
+    ("Secret for the functional test bot")
         | Opt(Config::OfflineModelPathRoot, "OfflineModelPathRoot")
-          ["--offlineModelPathRoot"]
-          ("The root path under which offline speech recognition models are located.")
+        ["--offlineModelPathRoot"]
+    ("The root path under which offline speech recognition models are located.")
         | Opt(Config::OfflineModelLanguage, "OfflineModelLanguage")
-          ["--offlineModelLanguage"]
-          ("The language code of the offline speech recognition model used in tests.")
+        ["--offlineModelLanguage"]
+    ("The language code of the offline speech recognition model used in tests.")
         | Opt(Config::DoDiscover)
-          ["--discovery"]
-          ("Perform VS Test Adaptor discovery")
-        | Opt(Keys::ConversationTranslator, "ConversationTranslatorSubscriptionKey")
-          ["--keyConversationTranslator"]
-          ("The subscription key to use for the conversation translator service")
-        | Opt(Config::ConversationTranslatorHost, "ConversationTranslatorHost")
-          ["--conversationTranslatorHost"]
-          ("The conversation host to use")
-        | Opt(Config::ConversationTranslatorRegion, "ConversationTranslatorRegion")
-          ["--conversationTranslatorRegion"]
-          ("The conversation region to use")
-        | Opt(Config::ConversationTranslatorSpeechEndpoint, "ConversationTranslatorSpeechEndpoint")
-          ["--conversationTranslatorEndpoint"]
-          ("The speech endpoint to use for the conversation translator")
-        | Opt(Config::ConversationTranslatorClientId, "ConversationTranslatorClientId")
-          ["--conversationTranslatorClientId"]
-          ("The client ID to use for the conversation translator")
-    ;
+        ["--discovery"]
+    ("Perform VS Test Adaptor discovery")
+        | Opt(SubscriptionsRegionsMap[CONVERSATION_TRANSLATOR_SUBSCRIPTION].Key, "ConversationTranslatorSubscriptionKey")
+        ["--keyConversationTranslator"]
+    ("The subscription key to use for the conversation translator service")
+        | Opt(DefaultSettingsMap[CONVERSATION_TRANSLATOR_HOST], "ConversationTranslatorHost")
+        ["--conversationTranslatorHost"]
+    ("The conversation host to use")
+        | Opt(SubscriptionsRegionsMap[CONVERSATION_TRANSLATOR_SUBSCRIPTION].Region, "ConversationTranslatorRegion")
+        ["--conversationTranslatorRegion"]
+    ("The conversation region to use")
+        | Opt(DefaultSettingsMap[CONVERSATION_TRANSLATOR_SPEECH_ENDPOINT], "ConversationTranslatorSpeechEndpoint")
+        ["--conversationTranslatorEndpoint"]
+    ("The speech endpoint to use for the conversation translator")
+        | Opt(DefaultSettingsMap[CONVERSATION_TRANSLATOR_CLIENTID], "ConversationTranslatorClientId")
+        ["--conversationTranslatorClientId"]
+    ("The client ID to use for the conversation translator")
+        ;
 
     // Now pass the new composite back to Catch so it uses that
     session.cli(cli);

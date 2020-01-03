@@ -4,7 +4,7 @@
 # Licensed under the MIT license.
 #
 
-set -e -x -u
+set -e -u
 set -o pipefail
 
 MAC_ARTEFACTS_DIR=$1

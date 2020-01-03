@@ -21,8 +21,8 @@ std::shared_ptr<SpeechTranslationConfig> CreateTranslationConfigWithLanguageId(
         defaultLanguage = PAL::split(from, CommaDelim)[0];
     }
     
-    auto endPoint = "wss://" + Config::Region + ".sr.speech.microsoft.com/speech/translation/" + mode + "/mstranslator/v1?TrafficType=Test&language=" + defaultLanguage;
-    auto config = SpeechTranslationConfig::FromEndpoint(endPoint, Keys::Speech);
+    auto endPoint = "wss://" + SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Region + ".sr.speech.microsoft.com/speech/translation/" + mode + "/mstranslator/v1?TrafficType=Test&language=" + defaultLanguage;
+    auto config = SpeechTranslationConfig::FromEndpoint(endPoint, SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
     config->SetProperty(PropertyId::SpeechServiceConnection_AutoDetectSourceLanguages, from);
     for (auto item : to)
     {
@@ -76,11 +76,9 @@ TEST_CASE("Translation", "[api][cxx]")
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
     UseMocks(false);
-    weather.UpdateFullFilename(Config::InputDir);
-    REQUIRE(exists(weather.m_inputDataFilename));
+    REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
 
-    batman.UpdateFullFilename(Config::InputDir);
-    SPXTEST_REQUIRE(exists(batman.m_inputDataFilename));
+    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(MULTIPLE_UTTERANCE_ENGLISH)));
 
     SPXTEST_SECTION("TranslationContinuous")
     {
@@ -92,7 +90,7 @@ TEST_CASE("Translation", "[api][cxx]")
         vector<string> translatedResults;
         vector<string> errorResults;
         
-        auto recognizer = CreateTranslationRecognizer(weather.m_inputDataFilename, "en-US", { "de" });
+        auto recognizer = CreateTranslationRecognizer(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH), "en-US", { "de" });
 
         recognizer->Recognizing.DisconnectAll();
         recognizer->Recognizing.Connect([&recognizingResults, &translatingResults](const TranslationRecognitionEventArgs& e)
@@ -169,8 +167,8 @@ TEST_CASE("Translation", "[api][cxx]")
         REQUIRE(translatingResults.size() == recognizingResults.size());
         REQUIRE(recognizedResults.size() > 0);
         REQUIRE(translatedResults.size() == recognizedResults.size());
-        REQUIRE(recognizedResults[0] == weather.m_utterance);
-        REQUIRE(translatedResults[0] == weatherGerman.m_utterance);
+        REQUIRE(recognizedResults[0] == AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH].Utterances["en-US"][0].Text);
+        REQUIRE(translatedResults[0] == AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH].Utterances["de"][0].Text);
     }
 
     SPXTEST_SECTION("TranslationOnce")
@@ -181,7 +179,7 @@ TEST_CASE("Translation", "[api][cxx]")
 
         SPXTEST_SECTION("Without Language Id")
         {
-            recognizer = CreateTranslationRecognizer(weather.m_inputDataFilename, "en-US", { "de" });
+            recognizer = CreateTranslationRecognizer(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH), "en-US", { "de" });
             expectedTargetLanguage = "de";
         }
 
@@ -191,7 +189,7 @@ TEST_CASE("Translation", "[api][cxx]")
                 "interactive",
                 "en-US,de-DE",
                 { "en-US" , "de-DE" });
-            recognizer = CreateTranslationRecognizer(weather.m_inputDataFilename, config);
+            recognizer = CreateTranslationRecognizer(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH), config);
             expectedLanguageDetected = "en-US";
             expectedTargetLanguage = "de-DE";
         }
@@ -199,16 +197,15 @@ TEST_CASE("Translation", "[api][cxx]")
         auto result = recognizer->RecognizeOnceAsync().get();
         REQUIRE(result != nullptr);
         REQUIRE(result->Reason == ResultReason::TranslatedSpeech);
-        REQUIRE(!result->Text.compare(weather.m_utterance));
-        REQUIRE(!result->Translations.at(expectedTargetLanguage).compare(weatherGerman.m_utterance));
+        REQUIRE(!result->Text.compare(AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH].Utterances["en-US"][0].Text));
+        REQUIRE(!result->Translations.at(expectedTargetLanguage).compare(AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH].Utterances["de"][0].Text));
         REQUIRE(result->Properties.GetProperty(PropertyId::SpeechServiceConnection_AutoDetectSourceLanguageResult) == expectedLanguageDetected);
     }
 
     SPXTEST_SECTION("Change languages in config, before turn and after turn.")
     {
-        batman.UpdateFullFilename(Config::InputDir);
-        SPXTEST_REQUIRE(exists(batman.m_inputDataFilename));
-        auto config = SpeechTranslationConfig::FromSubscription(Keys::Speech, Config::Region);
+        SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(MULTIPLE_UTTERANCE_ENGLISH)));
+        auto config = SpeechTranslationConfig::FromSubscription(SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key, SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Region);
 
         // Change languages in config
         config->SetSpeechRecognitionLanguage("en-US");
@@ -228,7 +225,7 @@ TEST_CASE("Translation", "[api][cxx]")
         targetLangs = config->GetProperty(PropertyId::SpeechServiceConnection_TranslationToLanguages);
         REQUIRE(!targetLangs.compare("fr,de"));
 
-        auto recognizer = TranslationRecognizer::FromConfig(config, AudioConfig::FromWavFileInput(batman.m_inputDataFilename));
+        auto recognizer = TranslationRecognizer::FromConfig(config, AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(MULTIPLE_UTTERANCE_ENGLISH)));
 
         // Change languages before turn.
         recognizer->AddTargetLanguage("es");
@@ -277,7 +274,7 @@ TEST_CASE("Translation", "[api][cxx]")
 
     SPXTEST_SECTION("Change languages in turn.")
     {
-        auto config = SpeechTranslationConfig::FromSubscription(Keys::Speech, Config::Region);
+        auto config = SpeechTranslationConfig::FromSubscription(SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key, SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Region);
 
         // Change languages in config
         config->SetSpeechRecognitionLanguage("en-US");
@@ -290,7 +287,7 @@ TEST_CASE("Translation", "[api][cxx]")
         vector<string> translatedResultsFr;
         vector<string> errorResults;
 
-        auto recognizer = TranslationRecognizer::FromConfig(config, AudioConfig::FromWavFileInput(batman.m_inputDataFilename));
+        auto recognizer = TranslationRecognizer::FromConfig(config, AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(MULTIPLE_UTTERANCE_ENGLISH)));
         recognizer->AddTargetLanguage("de");
 
         recognizer->Recognized.DisconnectAll();
@@ -381,15 +378,14 @@ TEST_CASE("Custom translation endpoints", "[api][cxx]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
-    callTheFirstOne.UpdateFullFilename(Config::InputDir);
-    SPXTEST_REQUIRE(exists(callTheFirstOne.m_inputDataFilename));
-    auto audioInput = AudioConfig::FromWavFileInput(callTheFirstOne.m_inputDataFilename);
-    string speechEndpoint = "wss://" + Config::Region + ".s2s.speech.microsoft.com";
+    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_GERMAN)));
+    auto audioInput = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_GERMAN));
+    string speechEndpoint = "wss://" + SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Region + ".s2s.speech.microsoft.com";
 
     SPXTEST_SECTION("Host only")
     {
         auto host = speechEndpoint;
-        auto config = SpeechTranslationConfig::FromHost(host, Keys::Speech);
+        auto config = SpeechTranslationConfig::FromHost(host, SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
         config->SetServiceProperty("language", "de-DE", ServicePropertyChannel::UriQueryParameter);
         config->SetServiceProperty("from", "de-DE", ServicePropertyChannel::UriQueryParameter);
         config->SetServiceProperty("to", "en", ServicePropertyChannel::UriQueryParameter);
@@ -403,7 +399,7 @@ TEST_CASE("Custom translation endpoints", "[api][cxx]")
     SPXTEST_SECTION("Host with parameters") // not allowed
     {
         auto host = speechEndpoint + "?from=de-DE&to=en";
-        auto config = SpeechTranslationConfig::FromHost(host, Keys::Speech);
+        auto config = SpeechTranslationConfig::FromHost(host, SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
         config->SetServiceProperty("language", "de-DE", ServicePropertyChannel::UriQueryParameter);
         auto recognizer = TranslationRecognizer::FromConfig(config, audioInput);
 

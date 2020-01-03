@@ -34,9 +34,9 @@ public:
 
     void Init()
     {
-        auto region = Config::Region.empty() ? "westus" : Config::Region;
+        auto region = SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Region.empty() ? "westus" : SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Region;
         std::array<std::string, static_cast<size_t>(USP::AuthenticationType::SIZE_AUTHENTICATION_TYPE)> authData;
-        authData[static_cast<size_t>(USP::AuthenticationType::SubscriptionKey)] = Keys::Speech;
+        authData[static_cast<size_t>(USP::AuthenticationType::SubscriptionKey)] = SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key;
 
         m_threadService = std::make_shared<CSpxThreadService>();
         m_threadService->Init();
@@ -45,9 +45,9 @@ public:
             .SetRegion(region)
             .SetAuthentication(authData)
             .SetQueryParameter(USP::endpoint::langQueryParam, "en-us");
-        if (!Config::Endpoint.empty())
+        if (!DefaultSettingsMap[ENDPOINT].empty())
         {
-            client.SetEndpointType(USP::EndpointType::Speech).SetEndpointUrl(Config::Endpoint);
+            client.SetEndpointType(USP::EndpointType::Speech).SetEndpointUrl(DefaultSettingsMap[ENDPOINT]);
         }
 
         m_connection = client.Connect();
@@ -91,8 +91,7 @@ TEST_CASE("USP is properly functioning", "[usp]")
         REQUIRE_NOTHROW(client->Term());
     }
 
-    string input_file{ Config::InputDir + "/audio/whatstheweatherlike.wav" };
-    REQUIRE(exists(input_file));
+    REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
 
     SECTION("usp can be used to upload binary data")
     {
@@ -111,7 +110,7 @@ TEST_CASE("USP is properly functioning", "[usp]")
     {
         auto client = std::make_shared<UspClient>();
         client->Init();
-        auto is = get_stream(input_file);
+        auto is = get_stream(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
 
         while (is) {
             auto size_to_read = max(size_t(1 << 10), rnd() % buffer_size_8k);
@@ -130,7 +129,7 @@ TEST_CASE("USP is properly functioning", "[usp]")
         {
             auto client = std::make_shared<UspClient>();
             client->Init();
-            auto is = get_stream(input_file);
+            auto is = get_stream(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
             while (is && (rnd()%i < i>>1)) {
                 is.read(buffer.data(), buffer_size_8k);
                 auto bytesRead = (uint32_t)is.gcount();
@@ -152,7 +151,7 @@ TEST_CASE("USP is properly functioning", "[usp]")
             clients[i]->Init();
         }
 
-        auto is = get_stream(input_file);
+        auto is = get_stream(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
         is.read(buffer.data(), buffer_size_8k);
         REQUIRE(is.good());
 

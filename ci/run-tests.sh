@@ -156,10 +156,31 @@ perl $SCRIPT_DIR/generateTestSettingsJson.pl \
     --SerializedSpeechActivityFile "activityWithSpeech.json" \
     --LongRunning "false"
 
-cp -R tests/input $binaryDir
 # For Python, these entries need to be in the root
+cp -rf tests/input .
 cp $binaryDir/test.settings.json .
-cp -r tests/input .
+cp ./tests/test.defaults.json .
+cp ./tests/test.audio.utterances.json .
+cp ./tests/test.subscriptions.regions.json .
+
+[[ -d $binaryDir/input ]] && cp -rf tests/input $binaryDir
+[[ -e $binaryDir/test.defaults.json ]] && cp ./tests/test.defaults.json $binaryDir
+[[ -e $binaryDir/test.audio.utterances.json ]] && cp ./tests/test.audio.utterances.json $binaryDir
+[[ -e $binaryDir/test.subscriptions.regions.json ]] && cp ./tests/test.subscriptions.regions.json $binaryDir
+
+if [ -d buildfromdropx64 ]; then
+    cp -rf tests/input buildfromdropx64/bin
+    cp ./tests/test.defaults.json buildfromdropx64/bin
+    cp ./tests/test.audio.utterances.json buildfromdropx64/bin
+    cp ./tests/test.subscriptions.regions.json buildfromdropx64/bin
+fi
+
+if [ -d buildfromdropx86 ]; then
+    cp -rf tests/input buildfromdropx86/bin
+    cp ./tests/test.defaults.json buildfromdropx86/bin
+    cp ./tests/test.audio.utterances.json buildfromdropx86/bin
+    cp ./tests/test.subscriptions.regions.json buildfromdropx86/bin
+fi
 
 cmdTimeout=
 [[ $(type -t timeout) != file ]] || cmdTimeout=timeout

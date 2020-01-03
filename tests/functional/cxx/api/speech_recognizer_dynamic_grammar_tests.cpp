@@ -19,20 +19,19 @@ using namespace Microsoft::CognitiveServices::Speech;
 
 std::shared_ptr<SpeechConfig> GetDynamicGrammarTestsConfig()
 {
-    return !Config::Endpoint.empty()
-        ? SpeechConfig::FromEndpoint(Config::Endpoint, Keys::Speech)
-        : SpeechConfig::FromSubscription(Keys::Speech, Config::Region);
+    return !DefaultSettingsMap[ENDPOINT].empty()
+        ? SpeechConfig::FromEndpoint(DefaultSettingsMap[ENDPOINT], SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key)
+        : SpeechConfig::FromSubscription(SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key, SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Region);
 }
 
 TEST_CASE("Dynamic Grammar Basics", "[api][cxx][dgi]")
 {
-    dgiWreckANiceBeach.UpdateFullFilename(Config::InputDir);
-    REQUIRE(exists(dgiWreckANiceBeach.m_inputDataFilename));
+    REQUIRE(exists(ROOT_RELATIVE_PATH(AMBIGUOUS_SPEECH)));
 
     auto getRecognizer = []()
     {
         auto config = GetDynamicGrammarTestsConfig();
-        auto audioConfig = AudioConfig::FromWavFileInput(dgiWreckANiceBeach.m_inputDataFilename);
+        auto audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(AMBIGUOUS_SPEECH));
         auto recognizer = SpeechRecognizer::FromConfig(config, audioConfig);
         return recognizer;
     };
@@ -70,7 +69,7 @@ TEST_CASE("Dynamic Grammar Basics", "[api][cxx][dgi]")
     SPXTEST_SECTION("PhraseListGrammar")
     {
         auto beachHint = "Wreck a nice beach"; // DGI currently doesn't strip away punctuation
-        auto correctRecoText = dgiWreckANiceBeach.m_utterance;
+        auto correctRecoText = AudioUtterancesMap[AMBIGUOUS_SPEECH].Utterances["en-US"][0].Text;
         auto defaultRecoText = "Recognize speech.";
         auto unrelatedPhrase1 = "This is a test of the emergency broadcast system.";
         auto unrelatedPhrase2 = "This is not the right transcript.";

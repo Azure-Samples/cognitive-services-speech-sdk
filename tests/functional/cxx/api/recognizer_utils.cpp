@@ -11,40 +11,17 @@
 #include "wav_file_reader.h"
 #include "azure_c_shared_utility_includes.h"
 
-TestData weather {"/audio/whatstheweatherlike.wav", "What's the weather like?" };
-TestData weatherGerman { "", "Wie ist das Wetter?" };
-TestData weatherInChinese { "/audio/weatherInChinese.wav", "天气." };
-TestData weathermp3{ "/audio/whatstheweatherlike.mp3", "What's the weather like?" };
-TestData weatheropus{ "/audio/whatstheweatherlike.opus", "What's the weather like?" };
-TestData weatheralaw{ "/audio/whatstheweatherlike.alaw", "What's the weather like?" };
-TestData weathermulaw{ "/audio/whatstheweatherlike.mulaw", "What's the weather like?" };
-TestData weatherflac{ "/audio/whatstheweatherlike.flac", "What's the weather like?" };
-TestData weather3x{ "/audio/whatstheweatherlike-5secsilences.wav", "What's the weather like?" };
-TestData batman{ "/audio/batman.wav", "" };
-TestData wrongSamplingRateFile {"/audio/11khztest.wav", "" };
-TestData cortana {"/audio/heyCortana.wav", "Hey Cortana," };
-TestData callTheFirstOne{ "/audio/CallTheFirstOne.wav", "Rufe die erste an." };
-TestData turnOnLamp {"/audio/TurnOnTheLamp.wav", "Turn on lamp" };
-TestData dgiWreckANiceBeach {"/audio/wreck-a-nice-beach.wav", "Wreck a nice beach." };
-TestData recordedAudioMessage { "/audio/RecordedAudioMessages.json", "" };
-TestData kwvAccept { "/kws/kws_whatstheweatherlike.wav", "Computer what's the weather like?" };
-TestData kwvAccept2x { "/kws/kws_whatstheweatherlike_x2.wav", "Computer what's the weather like?" };
-TestData kwvReject { "/kws/kws_whatshouldIcallyou.wav", "Hey Computer what should I call you?" };
-TestData kwvMultiturn { "/kws/kws_whatstheweatherlike_turnontheradio.wav", "Computer what's the weather like? Turn on the radio." };
-TestData katieSteve{ "/audio/katiesteve.wav", "Good morning Steve" };
-
 std::shared_ptr<SpeechConfig> CurrentSpeechConfig()
 {
-    return !Config::Endpoint.empty()
-        ? SpeechConfig::FromEndpoint(Config::Endpoint, Keys::Speech)
-        : SpeechConfig::FromSubscription(Keys::Speech, Config::Region);
+    return !DefaultSettingsMap[ENDPOINT].empty() ? SpeechConfig::FromEndpoint(DefaultSettingsMap[ENDPOINT], SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key)
+        : SpeechConfig::FromSubscription(SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key, SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Region);
 }
 
 std::shared_ptr<SpeechTranslationConfig> CurrentTranslationConfig()
 {
-    return !Config::Endpoint.empty()
-        ? SpeechTranslationConfig::FromEndpoint(Config::Endpoint, Keys::Speech)
-        : SpeechTranslationConfig::FromSubscription(Keys::Speech, Config::Region);
+    return !DefaultSettingsMap[ENDPOINT].empty()
+        ? SpeechTranslationConfig::FromEndpoint(DefaultSettingsMap[ENDPOINT], SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key)
+        : SpeechTranslationConfig::FromSubscription(SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key, SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Region);
 }
 
 void UseMocks(bool value)
@@ -183,27 +160,26 @@ void DoContinuousReco(SpeechRecognizer* recognizer, PushAudioInputStream* pushSt
 {
     auto result = make_shared<RecoPhrases>();
     ConnectCallbacks(recognizer, result);
-    PushData(pushStream, weather.m_inputDataFilename);
+    PushData(pushStream, ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
     recognizer->StartContinuousRecognitionAsync().get();
     WaitForResult(result->ready.get_future(), WAIT_FOR_RECO_RESULT_TIME);
     recognizer->StopContinuousRecognitionAsync().get();
     SPXTEST_REQUIRE(!result->phrases.empty());
-    SPXTEST_REQUIRE(StringComparisions::AssertFuzzyMatch(result->phrases[0].Text, weather.m_utterance));
+    SPXTEST_REQUIRE(StringComparisions::AssertFuzzyMatch(result->phrases[0].Text, AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH].Utterances["en-US"][0].Text));
 }
 
 void DoKWS(SpeechRecognizer* recognizer, PushAudioInputStream* pushStream)
 {
     auto res = make_shared<RecoPhrases>();
-    cortana.UpdateFullFilename(Config::InputDir);
 
     ConnectCallbacks(recognizer, res);
-    PushData(pushStream, cortana.m_inputDataFilename);
-    auto model = KeywordRecognitionModel::FromFile(Config::InputDir + "/kws/Computer/kws.table");
+    PushData(pushStream, ROOT_RELATIVE_PATH(HEY_CORTANA));
+    auto model = KeywordRecognitionModel::FromFile(DefaultSettingsMap[INPUT_DIR] + "/kws/Computer/kws.table");
     recognizer->StartKeywordRecognitionAsync(model).get();
     WaitForResult(res->ready.get_future(), WAIT_FOR_RECO_RESULT_TIME);
     recognizer->StopKeywordRecognitionAsync().get();
     SPXTEST_REQUIRE(!res->phrases.empty());
-    SPXTEST_REQUIRE(StringComparisions::AssertFuzzyMatch(res->phrases[0].Text, cortana.m_utterance));
+    SPXTEST_REQUIRE(StringComparisions::AssertFuzzyMatch(res->phrases[0].Text, AudioUtterancesMap[HEY_CORTANA].Utterances["en-US"][0].Text));
 }
 
 auto createCallbacksMap() -> std::map<Callbacks, atomic_int>
@@ -351,8 +327,6 @@ SPXSTRING RecordedDataReader::GetProperty(PropertyId propertyId)
 
 std::shared_ptr<AudioConfig> CreateAudioPushUsingKatieSteveFile(std::shared_ptr<PushAudioInputStream>& pushAudio)
 {
-    katieSteve.UpdateFullFilename(Config::InputDir);
-
     // Create the "audio pull stream" object with C++ lambda callbacks
     pushAudio = AudioInputStream::CreatePushStream(AudioStreamFormat::GetWaveFormatPCM(16000, 16, 8));
     return AudioConfig::FromStreamInput(pushAudio);
@@ -360,9 +334,8 @@ std::shared_ptr<AudioConfig> CreateAudioPushUsingKatieSteveFile(std::shared_ptr<
 
 std::shared_ptr<AudioConfig> CreateAudioPullUsingKatieSteveFile(std::shared_ptr<PullAudioInputStream>& pullStream)
 {
-    katieSteve.UpdateFullFilename(Config::InputDir);
     auto reader = std::make_shared<CSpxWavFileReader>();
-    reader->Open(PAL::ToWString(katieSteve.m_inputDataFilename).c_str());
+    reader->Open(PAL::ToWString(ROOT_RELATIVE_PATH(CONVERSATION_BETWEEN_TWO_PERSONS_ENGLISH)).c_str());
 
     // Create the "audio pull stream" object with C++ lambda callbacks
     pullStream = AudioInputStream::CreatePullStream(
@@ -389,9 +362,8 @@ std::shared_ptr<AudioConfig> CreateAudioPullUsingKatieSteveFile(std::shared_ptr<
 
 std::shared_ptr<AudioConfig> CreateAudioPullSingleChannel(std::shared_ptr<PullAudioInputStream>& pullStream)
 {
-    weather.UpdateFullFilename(Config::InputDir);
     auto reader = std::make_shared<CSpxWavFileReader>();
-    reader->Open(PAL::ToWString(weather.m_inputDataFilename).c_str());
+    reader->Open(PAL::ToWString(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)).c_str());
 
     // Create the "audio pull stream" object with C++ lambda callbacks
     pullStream = AudioInputStream::CreatePullStream(
@@ -417,9 +389,8 @@ std::shared_ptr<AudioConfig> CreateAudioPullSingleChannel(std::shared_ptr<PullAu
 std::shared_ptr<AudioConfig> CreateAudioPullFromRecordedFile(std::shared_ptr<PullAudioInputStream>& pullStream)
 {
     auto audioReader = std::make_shared<RecordedDataReader>("audio");
-    recordedAudioMessage.UpdateFullFilename(Config::InputDir);
-    REQUIRE(exists(recordedAudioMessage.m_inputDataFilename));
-    audioReader->Open(recordedAudioMessage.m_inputDataFilename);
+    REQUIRE(exists(DefaultSettingsMap[INPUT_DIR] + ("/audio/RecordedAudioMessages.json")));
+    audioReader->Open(DefaultSettingsMap[INPUT_DIR] + ("/audio/RecordedAudioMessages.json"));
 
     pullStream = AudioInputStream::CreatePullStream(
         AudioStreamFormat::GetWaveFormatPCM(16000, 16, 8),

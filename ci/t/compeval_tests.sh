@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -x -e
+set -e
 set -o pipefail
 
 T="$(basename "$0" .sh)"

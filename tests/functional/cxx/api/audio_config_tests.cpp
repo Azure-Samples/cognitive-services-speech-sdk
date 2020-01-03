@@ -31,17 +31,17 @@ using namespace std;
 
 static std::shared_ptr<SpeechConfig> SpeechConfigForAudioConfigTests()
 {
-    return !Config::Endpoint.empty()
-        ? SpeechConfig::FromEndpoint(Config::Endpoint, Keys::Speech)
-        : SpeechConfig::FromSubscription(Keys::Speech, Config::Region);
+    return !DefaultSettingsMap[ENDPOINT].empty()
+        ? SpeechConfig::FromEndpoint(DefaultSettingsMap[ENDPOINT], SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key)
+        : SpeechConfig::FromSubscription(SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key, SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Region);
 }
 
 TEST_CASE("Audio Basics", "[api][cxx][audio]")
 {
     std::string sessionId;
 
-    weather.UpdateFullFilename(Config::InputDir);
-    REQUIRE(exists(weather.m_inputDataFilename));
+    std::string filePath = ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH);
+    REQUIRE(exists(filePath));
 
     auto requireRecognizedSpeech = [&sessionId](std::shared_ptr<SpeechRecognitionResult> result)
     {
@@ -94,9 +94,9 @@ TEST_CASE("Audio Basics", "[api][cxx][audio]")
 
         WHEN("verify audio configuration from audio file")
         {
-            auto audioConfig = AudioConfig::FromWavFileInput(weather.m_inputDataFilename);
+            auto audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
 
-            auto config = SpeechConfig::FromSubscription(Keys::Speech, Config::Region);
+            auto config = SpeechConfig::FromSubscription(SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key, SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Region);
             auto recognizer = SpeechRecognizer::FromConfig(config, audioConfig);
 
             verifyAudioConfigInRecognizerProperties(recognizer);
@@ -106,7 +106,7 @@ TEST_CASE("Audio Basics", "[api][cxx][audio]")
         {
             auto channelsExpected = "1";
             auto deviceNameExpected = "default";
-            auto audioConfig = AudioConfig::FromWavFileInput(weather.m_inputDataFilename);
+            auto audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
 
             // verify number of channels
             audioConfig->SetProperty(PropertyId::AudioConfig_NumberOfChannelsForCapture, channelsExpected);
@@ -128,7 +128,7 @@ TEST_CASE("Audio Basics", "[api][cxx][audio]")
     SECTION("pull stream works")
     {
         // Prepare for the stream to be "Pulled"
-        auto fs = OpenWaveFile(weather.m_inputDataFilename);
+        auto fs = OpenWaveFile(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
 
         // Create the "pull stream" object with C++ lambda callbacks
         auto pullStream = AudioInputStream::CreatePullStream(
@@ -166,7 +166,7 @@ TEST_CASE("Audio Basics", "[api][cxx][audio]")
 
         // Prepare to use the "Push stream" by opening the file, and moving to head of data chunk
         FILE* hfile = nullptr;
-        PAL::fopen_s(&hfile, weather.m_inputDataFilename.c_str(), "rb");
+        PAL::fopen_s(&hfile, (ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)).c_str(), "rb");
         fseek(hfile, 44, SEEK_CUR);
 
         // Set up a lambda we'll use to push the data

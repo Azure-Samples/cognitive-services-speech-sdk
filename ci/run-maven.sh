@@ -8,7 +8,7 @@ USAGE="Usage: $0 samples-dir [<path-to-maven-repository>]"
 
 SAMPLES_DIR="${1?$USAGE}"
 
-set -e -x -o pipefail
+set -e -o pipefail
 
 if [[ -n $2 ]]; then
   PACKAGE_PATH="$2"

@@ -35,15 +35,15 @@ std::shared_ptr<DialogServiceConfig> DialogServiceConfigForTests(bool isBot = tr
     std::shared_ptr<DialogServiceConfig> config;
     if (isBot)
     {
-        config = BotFrameworkConfig::FromSubscription(Keys::Dialog, Config::DialogRegion);
+        config = BotFrameworkConfig::FromSubscription(SubscriptionsRegionsMap[DIALOG_SUBSCRIPTION].Key, SubscriptionsRegionsMap[DIALOG_SUBSCRIPTION].Region);
     }
     else
     {
-        config = CustomCommandsConfig::FromSubscription(Config::DialogBotSecret, Keys::Dialog, Config::DialogRegion);
+        config = CustomCommandsConfig::FromSubscription(DefaultSettingsMap[DIALOG_FUNCTIONAL_TEST_BOT], SubscriptionsRegionsMap[DIALOG_SUBSCRIPTION].Key, SubscriptionsRegionsMap[DIALOG_SUBSCRIPTION].Region);
     }
     config->SetLanguage("en-us");
     config->SetProperty("Conversation_Communication_Type", "AutoReply");
-    config->SetProperty(PropertyId::Conversation_ApplicationId, Config::DialogBotSecret);
+    config->SetProperty(PropertyId::Conversation_ApplicationId, DefaultSettingsMap[DIALOG_FUNCTIONAL_TEST_BOT]);
     return config;
 }
 
@@ -344,10 +344,9 @@ TEST_CASE("Dialog Service Connector basics", "[api][cxx][dialog_service_connecto
 {
     SECTION("Listen Once works")
     {
-        turnOnLamp.UpdateFullFilename(Config::InputDir);
-        REQUIRE(exists(turnOnLamp.m_inputDataFilename));
+        REQUIRE(exists(ROOT_RELATIVE_PATH(INTENT_UTTERANCE)));
         auto config = DialogServiceConfigForTests();
-        auto audioConfig = AudioConfig::FromWavFileInput(turnOnLamp.m_inputDataFilename);
+        auto audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(INTENT_UTTERANCE));
 
         test_runner runner{ config, audioConfig };
 
@@ -371,10 +370,9 @@ TEST_CASE("Dialog Service Connector basics", "[api][cxx][dialog_service_connecto
 
     SECTION("Send/Receive activity works (w/TTS)")
     {
-        turnOnLamp.UpdateFullFilename(Config::InputDir);
-        REQUIRE(exists(turnOnLamp.m_inputDataFilename));
+        REQUIRE(exists(ROOT_RELATIVE_PATH(INTENT_UTTERANCE)));
         auto config = DialogServiceConfigForTests();
-        auto audioConfig = AudioConfig::FromWavFileInput(turnOnLamp.m_inputDataFilename);
+        auto audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(INTENT_UTTERANCE));
 
         test_runner runner{ config, audioConfig };
 
@@ -455,10 +453,9 @@ TEST_CASE("Dialog Service Connector extended", "[api][cxx][dialog_service_connec
 {
     SECTION("Interleaving speech and activities.")
     {
-        turnOnLamp.UpdateFullFilename(Config::InputDir);
-        REQUIRE(exists(turnOnLamp.m_inputDataFilename));
+        REQUIRE(exists(ROOT_RELATIVE_PATH(INTENT_UTTERANCE)));
         auto config = DialogServiceConfigForTests();
-        auto audioConfig = AudioConfig::FromWavFileInput(turnOnLamp.m_inputDataFilename);
+        auto audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(INTENT_UTTERANCE));
 
         test_runner runner{ config, audioConfig };
 
@@ -502,10 +499,9 @@ TEST_CASE("Dialog Service Connector CustomCommands", "[api][cxx][dialog_service_
 {
     SECTION("Send/receive activities.")
     {
-        turnOnLamp.UpdateFullFilename(Config::InputDir);
-        REQUIRE(exists(turnOnLamp.m_inputDataFilename));
+        REQUIRE(exists(ROOT_RELATIVE_PATH(INTENT_UTTERANCE)));
         auto config = DialogServiceConfigForTests(false);
-        auto audioConfig = AudioConfig::FromWavFileInput(turnOnLamp.m_inputDataFilename);
+        auto audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(INTENT_UTTERANCE));
 
         test_runner runner{ config, audioConfig };
 
@@ -551,13 +547,12 @@ TEST_CASE("Dialog Service Connector KWS basics", "[api][cxx][dialog_service_conn
     SECTION("Listen once with KWS only works")
     {
         UseMocks(false);
-        kwvAccept.UpdateFullFilename(Config::InputDir);
-        REQUIRE(exists(kwvAccept.m_inputDataFilename));
+        REQUIRE(exists(ROOT_RELATIVE_PATH(COMPUTER_KEYWORD_WITH_SINGLE_UTTERANCE_1)));
         auto config = DialogServiceConfigForTests();
         // Turn off keyword verification
         config->SetProperty("KeywordConfig_EnableKeywordVerification", "false");
-        auto audioConfig = AudioConfig::FromWavFileInput(kwvAccept.m_inputDataFilename);
-        auto model = KeywordRecognitionModel::FromFile(Config::InputDir + "/kws/Computer/kws.table");
+        auto audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(COMPUTER_KEYWORD_WITH_SINGLE_UTTERANCE_1));
+        auto model = KeywordRecognitionModel::FromFile(DefaultSettingsMap[INPUT_DIR] + "/kws/Computer/kws.table");
 
         test_runner runner{ config, audioConfig };
 
@@ -591,11 +586,10 @@ TEST_CASE("Dialog Service Connector KWV basics", "[api][cxx][dialog_service_conn
     SECTION("Listen once with KWS + KWV accept works")
     {
         UseMocks(false);
-        kwvAccept.UpdateFullFilename(Config::InputDir);
-        REQUIRE(exists(kwvAccept.m_inputDataFilename));
+        REQUIRE(exists(ROOT_RELATIVE_PATH(COMPUTER_KEYWORD_WITH_SINGLE_UTTERANCE_1)));
         auto config = DialogServiceConfigForTests();
-        auto audioConfig = AudioConfig::FromWavFileInput(kwvAccept.m_inputDataFilename);
-        auto model = KeywordRecognitionModel::FromFile(Config::InputDir + "/kws/Computer/kws.table");
+        auto audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(COMPUTER_KEYWORD_WITH_SINGLE_UTTERANCE_1));
+        auto model = KeywordRecognitionModel::FromFile(DefaultSettingsMap[INPUT_DIR] + "/kws/Computer/kws.table");
 
         test_runner runner{ config, audioConfig };
 
@@ -625,11 +619,10 @@ TEST_CASE("Dialog Service Connector KWV basics", "[api][cxx][dialog_service_conn
     SECTION("Listen once with KWS + KWV reject works")
     {
         UseMocks(false);
-        kwvReject.UpdateFullFilename(Config::InputDir);
-        REQUIRE(exists(kwvReject.m_inputDataFilename));
+        REQUIRE(exists(ROOT_RELATIVE_PATH(COMPUTER_KEYWORD_WITH_SINGLE_UTTERANCE_2)));
         auto config = DialogServiceConfigForTests();
-        auto audioConfig = AudioConfig::FromWavFileInput(kwvReject.m_inputDataFilename);
-        auto model = KeywordRecognitionModel::FromFile(Config::InputDir + "/kws/Computer/kws.table");
+        auto audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(COMPUTER_KEYWORD_WITH_SINGLE_UTTERANCE_2));
+        auto model = KeywordRecognitionModel::FromFile(DefaultSettingsMap[INPUT_DIR] + "/kws/Computer/kws.table");
 
         test_runner runner{ config, audioConfig };
 

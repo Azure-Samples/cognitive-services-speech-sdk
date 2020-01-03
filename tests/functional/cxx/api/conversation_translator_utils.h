@@ -70,28 +70,28 @@ namespace IntegrationTests {
     template<typename I>
     static void SetCommonConfig(std::shared_ptr<I> config)
     {
-        if (false == Config::ConversationTranslatorHost.empty())
+        if (false == DefaultSettingsMap[CONVERSATION_TRANSLATOR_HOST].empty())
         {
-            config->SetProperty(ConversationKeys::Conversation_Management_Endpoint, (string("https://") + Config::ConversationTranslatorHost + "/capito/room").c_str());
-            config->SetProperty(ConversationKeys::Conversation_Endpoint, (string("wss://") + Config::ConversationTranslatorHost + "/capito/translate").c_str());
+            config->SetProperty(ConversationKeys::Conversation_Management_Endpoint, (string("https://") + DefaultSettingsMap[CONVERSATION_TRANSLATOR_HOST] + "/capito/room").c_str());
+            config->SetProperty(ConversationKeys::Conversation_Endpoint, (string("wss://") + DefaultSettingsMap[CONVERSATION_TRANSLATOR_HOST] + "/capito/translate").c_str());
         }
 
         config->SetProperty(PropertyId::Speech_SessionId, string("IntegrationTest:") + to_string(chrono::high_resolution_clock::now().time_since_epoch().count()));
 
         // set conversation specific overrides
-        if (!Keys::ConversationTranslator.empty())
+        if (!SubscriptionsRegionsMap[CONVERSATION_TRANSLATOR_SUBSCRIPTION].Key.empty())
         {
-            config->SetProperty(ConversationKeys::ConversationServiceConnection_Key, Keys::ConversationTranslator.c_str());
+            config->SetProperty(ConversationKeys::ConversationServiceConnection_Key, SubscriptionsRegionsMap[CONVERSATION_TRANSLATOR_SUBSCRIPTION].Key.c_str());
         }
 
-        if (!Config::ConversationTranslatorRegion.empty())
+        if (!SubscriptionsRegionsMap[CONVERSATION_TRANSLATOR_SUBSCRIPTION].Region.empty())
         {
-            config->SetProperty(ConversationKeys::Conversation_Region, Config::ConversationTranslatorRegion.c_str());
+            config->SetProperty(ConversationKeys::Conversation_Region, SubscriptionsRegionsMap[CONVERSATION_TRANSLATOR_SUBSCRIPTION].Region.c_str());
         }
 
-        if (!Config::ConversationTranslatorClientId.empty())
+        if (!DefaultSettingsMap[CONVERSATION_TRANSLATOR_CLIENTID].empty())
         {
-            config->SetProperty(ConversationKeys::Conversation_ClientId, Config::ConversationTranslatorClientId.c_str());
+            config->SetProperty(ConversationKeys::Conversation_ClientId, DefaultSettingsMap[CONVERSATION_TRANSLATOR_CLIENTID].c_str());
         }
 
         // set proxy for easier debugging if e.g. using fiddler
@@ -107,16 +107,16 @@ namespace IntegrationTests {
     {
         shared_ptr<SpeechTranslationConfig> config;
 
-        string subscriptionKey = FirstOrDefault({ Keys::ConversationTranslator, Keys::Speech });
-        string region = FirstOrDefault({ Config::ConversationTranslatorRegion, Config::Region });
+        string subscriptionKey = FirstOrDefault({ SubscriptionsRegionsMap[CONVERSATION_TRANSLATOR_SUBSCRIPTION].Key, SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key });
+        string region = FirstOrDefault({ SubscriptionsRegionsMap[CONVERSATION_TRANSLATOR_SUBSCRIPTION].Region, SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Region });
 
-        if (Config::ConversationTranslatorSpeechEndpoint.empty())
+        if (DefaultSettingsMap[CONVERSATION_TRANSLATOR_SPEECH_ENDPOINT].empty())
         {
             config = SpeechTranslationConfig::FromSubscription(subscriptionKey, region);
         }
         else
         {
-            config = SpeechTranslationConfig::FromEndpoint(Config::ConversationTranslatorSpeechEndpoint, subscriptionKey);
+            config = SpeechTranslationConfig::FromEndpoint(DefaultSettingsMap[CONVERSATION_TRANSLATOR_SPEECH_ENDPOINT], subscriptionKey);
         }
 
         config->SetSpeechRecognitionLanguage(lang);
@@ -131,9 +131,9 @@ namespace IntegrationTests {
 
     static void SetParticipantConfig(std::shared_ptr<AudioConfig> config)
     {
-        if (!Config::ConversationTranslatorSpeechEndpoint.empty())
+        if (!DefaultSettingsMap[CONVERSATION_TRANSLATOR_SPEECH_ENDPOINT].empty())
         {
-            config->SetProperty(PropertyId::SpeechServiceConnection_Endpoint, Config::ConversationTranslatorSpeechEndpoint);
+            config->SetProperty(PropertyId::SpeechServiceConnection_Endpoint, DefaultSettingsMap[CONVERSATION_TRANSLATOR_SPEECH_ENDPOINT]);
         }
 
         SetCommonConfig(config);

@@ -540,7 +540,7 @@ TEST_CASE("Result data should be consistent with output stream data - REST", "[a
 
 TEST_CASE("Synthesis with invalid subscription key", "[api][cxx]")
 {
-    auto config = SpeechConfig::FromSubscription("InvalidKey", Config::Region);
+    auto config = SpeechConfig::FromSubscription("InvalidKey",  SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Region);
 
     auto synthesizer = SpeechSynthesizer::FromConfig(config, nullptr);
     bool synthesisCanceled = false;
@@ -1482,13 +1482,13 @@ TEST_CASE("Speak output in streams with all data get since synthesizing result -
 
 TEST_CASE("Custom text-to-speech endpoints", "[api][cxx]")
 {
-    string speechHost = Config::Region + ".tts.speech.microsoft.com";
+    string speechHost = SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Region + ".tts.speech.microsoft.com";
     string speechHostRest = "https://" + speechHost;
     string speechHostUsp  = "wss://" + speechHost;
 
     SPXTEST_SECTION("Host only - REST")
     {
-        auto config = SpeechConfig::FromHost(speechHostRest, Keys::Speech);
+        auto config = SpeechConfig::FromHost(speechHostRest, SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
         auto synthesizer = SpeechSynthesizer::FromConfig(config);
 
         auto result = synthesizer->SpeakTextAsync("{{{text1}}}").get();
@@ -1498,7 +1498,7 @@ TEST_CASE("Custom text-to-speech endpoints", "[api][cxx]")
 
     SPXTEST_SECTION("Host only - USP")
     {
-        auto config = SpeechConfig::FromHost(speechHostUsp, Keys::Speech);
+        auto config = SpeechConfig::FromHost(speechHostUsp, SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
         auto synthesizer = SpeechSynthesizer::FromConfig(config);
 
         auto result = synthesizer->SpeakTextAsync("{{{text2}}}").get();
@@ -1509,14 +1509,14 @@ TEST_CASE("Custom text-to-speech endpoints", "[api][cxx]")
     SPXTEST_SECTION("Host with path - REST") // not allowed
     {
         const auto host = speechHostRest + "/cognitiveservices/v1";
-        auto config = SpeechConfig::FromHost(host, Keys::Speech);
+        auto config = SpeechConfig::FromHost(host, SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
         REQUIRE_THROWS(SpeechSynthesizer::FromConfig(config));
     }
 
     SPXTEST_SECTION("Host with path - USP") // not allowed
     {
         const auto host = speechHostUsp + "/cognitiveservices/websocket/v1";
-        auto config = SpeechConfig::FromHost(host, Keys::Speech);
+        auto config = SpeechConfig::FromHost(host, SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
         auto synthesizer = SpeechSynthesizer::FromConfig(config);
 
         auto result = synthesizer->SpeakTextAsync("{{{text1}}}").get();
@@ -1525,8 +1525,8 @@ TEST_CASE("Custom text-to-speech endpoints", "[api][cxx]")
 
     SPXTEST_SECTION("Invalid url from portal") // test the REST code path
     {
-        const auto endpoint = "https://" + Config::Region + ".api.cognitive.microsoft.com/sts/v1.0/issueToken";
-        auto config = SpeechConfig::FromEndpoint(endpoint, Keys::Speech);
+        const auto endpoint = "https://" + SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Region + ".api.cognitive.microsoft.com/sts/v1.0/issueToken";
+        auto config = SpeechConfig::FromEndpoint(endpoint, SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
         auto synthesizer = SpeechSynthesizer::FromConfig(config);
 
         auto result = synthesizer->SpeakTextAsync("{{{text1}}}").get();

@@ -15,20 +15,20 @@ static std::shared_ptr<RecogType> CreateRecognizers(const string& filename)
     return RecogType::FromConfig(CurrentSpeechConfig(), audioInput);
 }
 
-static void DoRecoFromCompressedPushStreamHelper(TestData fileName, std::shared_ptr<SpeechRecognizer> recognizer, std::shared_ptr<PushAudioInputStream> pushStream)
+static void DoRecoFromCompressedPushStreamHelper(std::string fileName, std::shared_ptr<SpeechRecognizer> recognizer, std::shared_ptr<PushAudioInputStream> pushStream)
 {
     auto result = make_shared<RecoPhrases>();
 
     ConnectCallbacks(recognizer.get(), result);
     recognizer->StartContinuousRecognitionAsync().get();
-    PushData(pushStream.get(), fileName.m_inputDataFilename, true);
+    PushData(pushStream.get(), fileName, true);
     WaitForResult(result->ready.get_future(), WAIT_FOR_RECO_RESULT_TIME);
     recognizer->StopContinuousRecognitionAsync().get();
     SPXTEST_REQUIRE(!result->phrases.empty());
-    SPXTEST_REQUIRE(result->phrases[0].Text == weather.m_utterance);
+    SPXTEST_REQUIRE(result->phrases[0].Text == AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH].Utterances["en-US"][0].Text);
 }
 
-static void DoRecoFromCompressedPushStream(TestData fileName, AudioStreamContainerFormat containerType)
+static void DoRecoFromCompressedPushStream(std::string fileName, AudioStreamContainerFormat containerType)
 {
 #ifndef __linux__
     try
@@ -61,22 +61,20 @@ static void DoRecoFromCompressedPullStreamHelper(std::shared_ptr<SpeechRecognize
     WaitForResult(result->ready.get_future(), WAIT_FOR_RECO_RESULT_TIME);
     recognizer->StopContinuousRecognitionAsync().get();
     SPXTEST_REQUIRE(!result->phrases.empty());
-    SPXTEST_REQUIRE(result->phrases[0].Text == weather.m_utterance);
+    SPXTEST_REQUIRE(result->phrases[0].Text == AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH].Utterances["en-US"][0].Text);
 }
 
-static void DoRecoFromCompressedPullStream(TestData filename, AudioStreamContainerFormat containerType)
+static void DoRecoFromCompressedPullStream(std::string filename, AudioStreamContainerFormat containerType)
 {
 #ifndef __linux__
     try
     {
 #endif
         promise<string> result;
-        filename.UpdateFullFilename(Config::InputDir);
-        REQUIRE(exists(filename.m_inputDataFilename));
         auto config = CurrentSpeechConfig();
 
         // Prepare for the stream to be "Pulled"
-        auto fs = OpenFile(filename.m_inputDataFilename);
+        auto fs = OpenFile(filename);
 
         // Create the "pull stream" object with C++ lambda callbacks
         auto pullStream = AudioInputStream::CreatePullStream(
@@ -103,69 +101,60 @@ static void DoRecoFromCompressedPullStream(TestData filename, AudioStreamContain
 
 TEST_CASE("compressed stream test", "[api][cxx]")
 {
-    weathermp3.UpdateFullFilename(Config::InputDir);
-    REQUIRE(exists(weathermp3.m_inputDataFilename));
-
-    weatheropus.UpdateFullFilename(Config::InputDir);
-    REQUIRE(exists(weatheropus.m_inputDataFilename));
-
-    weatheralaw.UpdateFullFilename(Config::InputDir);
-    REQUIRE(exists(weatheralaw.m_inputDataFilename));
-
-    weathermulaw.UpdateFullFilename(Config::InputDir);
-    REQUIRE(exists(weathermulaw.m_inputDataFilename));
-
-    weatherflac.UpdateFullFilename(Config::InputDir);
-    REQUIRE(exists(weatherflac.m_inputDataFilename));
+    REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_MP3)));
+    REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_OPUS)));
+    REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_A_LAW)));
+    REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_MU_LAW)));
+    REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_FLAC)));
 
     SPXTEST_SECTION("push stream works mp3")
     {
-        DoRecoFromCompressedPushStream(weathermp3, AudioStreamContainerFormat::MP3);
+        DoRecoFromCompressedPushStream(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_MP3), AudioStreamContainerFormat::MP3);
     }
 
     SPXTEST_SECTION("push stream works opus")
     {
-        DoRecoFromCompressedPushStream(weatheropus, AudioStreamContainerFormat::OGG_OPUS);
+        DoRecoFromCompressedPushStream(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_OPUS), AudioStreamContainerFormat::OGG_OPUS);
     }
 
     SPXTEST_SECTION("push stream failed with FLAC")
     {
-        DoRecoFromCompressedPushStream(weatherflac, AudioStreamContainerFormat::FLAC);
+        DoRecoFromCompressedPushStream(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_FLAC), AudioStreamContainerFormat::FLAC);
     }
 
     SPXTEST_SECTION("push stream failed with ALAW")
     {
-        DoRecoFromCompressedPushStream(weatheralaw, AudioStreamContainerFormat::ALAW);
+        DoRecoFromCompressedPushStream(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_A_LAW), AudioStreamContainerFormat::ALAW);
     }
 
     SPXTEST_SECTION("push stream failed with MULAW")
     {
-        DoRecoFromCompressedPushStream(weathermulaw, AudioStreamContainerFormat::MULAW);
+        DoRecoFromCompressedPushStream(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_MU_LAW), AudioStreamContainerFormat::MULAW);
     }
 
     SPXTEST_SECTION("pull stream works mp3")
     {
-        DoRecoFromCompressedPullStream(weathermp3, AudioStreamContainerFormat::MP3);
+        DoRecoFromCompressedPullStream(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_MP3), AudioStreamContainerFormat::MP3);
     }
 
     SPXTEST_SECTION("pull stream works opus")
     {
-        DoRecoFromCompressedPullStream(weatheropus, AudioStreamContainerFormat::OGG_OPUS);
+        DoRecoFromCompressedPullStream(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_OPUS), AudioStreamContainerFormat::OGG_OPUS);
     }
 
     SPXTEST_SECTION("pull stream failed with FLAC")
     {
-        DoRecoFromCompressedPullStream(weatherflac, AudioStreamContainerFormat::FLAC);
+        DoRecoFromCompressedPullStream(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_FLAC), AudioStreamContainerFormat::FLAC);
     }
 
     SPXTEST_SECTION("pull stream failed with ALAW")
     {
-        DoRecoFromCompressedPullStream(weatheralaw, AudioStreamContainerFormat::ALAW);
+        DoRecoFromCompressedPullStream(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_A_LAW), AudioStreamContainerFormat::ALAW);
     }
 
     SPXTEST_SECTION("pull stream failed with MULAW")
     {
-        DoRecoFromCompressedPullStream(weathermulaw, AudioStreamContainerFormat::MULAW);
+        DoRecoFromCompressedPullStream(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_MU_LAW), AudioStreamContainerFormat::MULAW);
     }
 }
 
@@ -178,7 +167,6 @@ TEST_CASE("continuousRecognitionAsync using push stream", "[api][cxx]")
     // Creates a speech recognizer from stream input;
     auto audioInput = AudioConfig::FromStreamInput(pushStream);
     auto recognizer = SpeechRecognizer::FromConfig(config, audioInput);
-    weather.UpdateFullFilename(Config::InputDir);
     SpxSetMockParameterBool("CARBON-INTERNAL-MOCK-SdkKwsEngine", true);
 
     SPXTEST_SECTION("continuous and once")
@@ -186,11 +174,11 @@ TEST_CASE("continuousRecognitionAsync using push stream", "[api][cxx]")
         auto result = make_shared<RecoPhrases>();
         ConnectCallbacks(recognizer.get(), result);
         recognizer->StartContinuousRecognitionAsync().get();
-        PushData(pushStream.get(), weather.m_inputDataFilename);
+        PushData(pushStream.get(), ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
         WaitForResult(result->ready.get_future(), WAIT_FOR_RECO_RESULT_TIME);
         recognizer->StopContinuousRecognitionAsync().get();
         SPXTEST_REQUIRE(!result->phrases.empty());
-        SPXTEST_REQUIRE(result->phrases[0].Text == weather.m_utterance);
+        SPXTEST_REQUIRE(result->phrases[0].Text == AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH].Utterances["en-US"][0].Text);
 
         //todo: we should allow switching recog mode. Fix this later.
         //pushData(pushStream.get(), weather.m_audioFilename);
@@ -210,13 +198,13 @@ TEST_CASE("continuousRecognitionAsync using push stream", "[api][cxx]")
             ConnectCallbacks(recognizer.get(), result);
             // TODO: move PushData() after StartContinuousRecongtion
             // after fixing the bug Bug 1506194: PushStream Improvement, endOfStream
-            PushData(pushStream.get(), weather.m_inputDataFilename);
+            PushData(pushStream.get(), ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
             recognizer->StartContinuousRecognitionAsync().get();
 
             WaitForResult(result->ready.get_future(), WAIT_FOR_RECO_RESULT_TIME);
             recognizer->StopContinuousRecognitionAsync().get();
             SPXTEST_REQUIRE(!result->phrases.empty());
-            SPXTEST_REQUIRE(result->phrases[0].Text == weather.m_utterance);
+            SPXTEST_REQUIRE(result->phrases[0].Text == AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH].Utterances["en-US"][0].Text);
         }
     }
 #if 0
@@ -232,18 +220,16 @@ TEST_CASE("continuousRecognitionAsync using push stream", "[api][cxx]")
 
 }
 
-TEST_CASE("ContinuousRecognitionAsync using file input", "[api][cxx]")
+TEST_CASE("ContinuousRecognitionAsync using file input", "[a0pi][cxx]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
     UseMocks(false);
-    weather.UpdateFullFilename(Config::InputDir);
-    SPXTEST_REQUIRE(exists(weather.m_inputDataFilename));
+    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
 
-    batman.UpdateFullFilename(Config::InputDir);
-    SPXTEST_REQUIRE(exists(batman.m_inputDataFilename));
+    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(MULTIPLE_UTTERANCE_ENGLISH)));
 
-    auto recognizer = CreateRecognizers<SpeechRecognizer>(weather.m_inputDataFilename);
+    auto recognizer = CreateRecognizers<SpeechRecognizer>(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
 
     // a normal case.
     SPXTEST_SECTION("start and stop once")
@@ -255,7 +241,7 @@ TEST_CASE("ContinuousRecognitionAsync using file input", "[api][cxx]")
         WaitForResult(result->ready.get_future(), WAIT_FOR_RECO_RESULT_TIME);
         recognizer->StopContinuousRecognitionAsync().get();
         SPXTEST_REQUIRE(!result->phrases.empty());
-        SPXTEST_REQUIRE(result->phrases[0].Text == weather.m_utterance);
+        SPXTEST_REQUIRE(result->phrases[0].Text == AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH].Utterances["en-US"][0].Text);
     }
     // Another normal case. no stop is a valid user case.
     SPXTEST_SECTION("start without stop")
@@ -266,12 +252,12 @@ TEST_CASE("ContinuousRecognitionAsync using file input", "[api][cxx]")
         ConnectCallbacks(recognizer.get(), result);
         WaitForResult(result->ready.get_future(), WAIT_FOR_RECO_RESULT_TIME);
         SPXTEST_REQUIRE(!result->phrases.empty());
-        SPXTEST_REQUIRE(result->phrases[0].Text == weather.m_utterance);
+        SPXTEST_REQUIRE(result->phrases[0].Text == AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH].Utterances["en-US"][0].Text);
     }
 
     SPXTEST_SECTION("two starts in a row")
     {
-        auto recognizer2 = CreateRecognizers<SpeechRecognizer>(batman.m_inputDataFilename);
+        auto recognizer2 = CreateRecognizers<SpeechRecognizer>(ROOT_RELATIVE_PATH(MULTIPLE_UTTERANCE_ENGLISH));
 
         auto result = make_shared<RecoPhrases>();
         ConnectCallbacks(recognizer2.get(), result);
@@ -375,15 +361,14 @@ TEST_CASE("Single trusted root", "[.][int][prod]")
         "emyPxgcYxn/eR44/KJ4EBs+lVDR3veyJm+kXQ99b21/+jh5Xos1AnX5iItreGCc=\n"
         "-----END CERTIFICATE-----\n";
 
-    weather.UpdateFullFilename(Config::InputDir);
     UseMocks(false);
-    SPXTEST_REQUIRE(exists(weather.m_inputDataFilename));
+    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH("WEATHER")));
     SPXTEST_REQUIRE(!IsUsingMocks());
-    auto audio = AudioConfig::FromWavFileInput(weather.m_inputDataFilename);
+    auto audio = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH("WEATHER"));
 
     SPXTEST_SECTION("with Speech Service cert")
     {
-        auto config = SpeechConfig::FromSubscription(Keys::Speech, Config::Region);
+        auto config = SpeechConfig::FromSubscription(SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key, SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Region);
         SPXTEST_SECTION("fail with invalid single trusted cert")
         {
             config->SetProperty("OPENSSL_SINGLE_TRUSTED_CERT", "bogus");
@@ -441,12 +426,10 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
-    weather.UpdateFullFilename(Config::InputDir);
-
     SPXTEST_SECTION("push stream with continuous reco")
     {
         UseMocks(false);
-        SPXTEST_REQUIRE(exists(weather.m_inputDataFilename));
+        SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
 
         auto config = CurrentSpeechConfig();
         auto pushStream = AudioInputStream::CreatePushStream();
@@ -497,7 +480,7 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
             recognitionEnd.set_value();
         });
 
-        auto fs = OpenWaveFile(weather.m_inputDataFilename);
+        auto fs = OpenWaveFile(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
 
         std::array<uint8_t, 1000> buffer;
         recognizer->StartContinuousRecognitionAsync().get();
@@ -515,23 +498,24 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
         recognitionEnd.get_future().get();
         recognizer->StopContinuousRecognitionAsync().get();
 
-        SPXTEST_REQUIRE(result == weather.m_utterance);
+        SPXTEST_REQUIRE(result == AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH].Utterances["en-US"][0].Text);
         SPXTEST_REQUIRE(error == "");
     }
 
     SPXTEST_SECTION("KWS throws exception given 11khz sampling rate")
     {
         SPX_TRACE_VERBOSE("%s: line=%d", __FUNCTION__, __LINE__);
-        wrongSamplingRateFile.UpdateFullFilename(Config::InputDir);
         UseMocks(false);
-        SPXTEST_REQUIRE(exists(wrongSamplingRateFile.m_inputDataFilename));
+        SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(AUDIO_11_KHZ)));
 
         SPXTEST_REQUIRE(!IsUsingMocks());
 
-        auto config = SpeechConfig::FromSubscription(Keys::Speech, Config::Region);
-        auto audio = AudioConfig::FromWavFileInput(wrongSamplingRateFile.m_inputDataFilename);
+        auto config = SpeechConfig::FromSubscription(SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key,
+            SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Region);
+
+        auto audio = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(AUDIO_11_KHZ));
         auto recognizer = SpeechRecognizer::FromConfig(config, audio);
-        auto model = KeywordRecognitionModel::FromFile(Config::InputDir + "/kws/Computer/kws.table");
+        auto model = KeywordRecognitionModel::FromFile(DefaultSettingsMap[INPUT_DIR] + "/kws/Computer/kws.table");
         REQUIRE_THROWS(recognizer->StartKeywordRecognitionAsync(model).get());
     }
     SPXTEST_SECTION("throw exception when the file does not existing")
@@ -548,11 +532,11 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
         SPX_TRACE_VERBOSE("%s: line=%d", __FUNCTION__, __LINE__);
 
         UseMocks(false);
-        SPXTEST_REQUIRE(exists(weather.m_inputDataFilename));
+        SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
         SPXTEST_REQUIRE(!IsUsingMocks());
 
-        auto config = SpeechConfig::FromEndpoint("Invalid-endpoint", Keys::Speech);
-        auto audio = AudioConfig::FromWavFileInput(weather.m_inputDataFilename);
+        auto config = SpeechConfig::FromEndpoint("Invalid-endpoint", SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
+        auto audio = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
         auto recognizer = SpeechRecognizer::FromConfig(config, audio);
         auto result = recognizer->RecognizeOnceAsync().get();
 
@@ -569,11 +553,11 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
         SPX_TRACE_VERBOSE("%s: line=%d", __FUNCTION__, __LINE__);
 
         UseMocks(false);
-        SPXTEST_REQUIRE(exists(weather.m_inputDataFilename));
+        SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
         SPXTEST_REQUIRE(!IsUsingMocks());
 
-        auto config = SpeechConfig::FromEndpoint("Invalid-endpoint", Keys::Speech);
-        auto audio = AudioConfig::FromWavFileInput(weather.m_inputDataFilename);
+        auto config = SpeechConfig::FromEndpoint("Invalid-endpoint", SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
+        auto audio = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
         auto recognizer = SpeechRecognizer::FromConfig(config, audio);
         std::string errorDetails;
         CancellationErrorCode errorCode;
@@ -598,10 +582,10 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
         SPX_TRACE_VERBOSE("%s: line=%d", __FUNCTION__, __LINE__);
 
         UseMocks(false);
-        SPXTEST_REQUIRE(exists(weather.m_inputDataFilename));
+        SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
         SPXTEST_REQUIRE(!IsUsingMocks());
 
-        auto recognizer = CreateRecognizers<SpeechRecognizer>(weather.m_inputDataFilename);
+        auto recognizer = CreateRecognizers<SpeechRecognizer>(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
 
         std::string token("Thursday");
         recognizer->SetAuthorizationToken(token);
@@ -629,7 +613,7 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
             }
         }
 
-        auto model = KeywordRecognitionModel::FromFile(Config::InputDir + "/kws/Computer/kws.table");
+        auto model = KeywordRecognitionModel::FromFile(DefaultSettingsMap[INPUT_DIR] + "/kws/Computer/kws.table");
         SPXTEST_REQUIRE(model != nullptr);
 
         {
@@ -665,7 +649,7 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
 
         UseMocks(true);
 
-        SPXTEST_REQUIRE(exists(weather.m_inputDataFilename));
+        SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
 
         mutex mtx;
         condition_variable cv;
@@ -677,13 +661,13 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
             // We're going to loop thru 11 times... The first 10, we'll use mocks. The last time we'll use the USP
             // NOTE: Please keep this at 11... It tests various "race"/"speed" configurations of the core system...
             // NOTE: When running against the localhost, loop 20 times... Half the time, we'll use mocks, and half - the USP.
-            const int numLoops = (Config::Endpoint.empty()) ? 11 : 20;
+            const int numLoops = (DefaultSettingsMap[ENDPOINT].empty()) ? 11 : 20;
 
             for (int i = 0; i < numLoops; i++)
             {
                 auto useMockUsp = true;
 
-                if (!Config::Endpoint.empty() && i % 2 == 0)
+                if (!DefaultSettingsMap[ENDPOINT].empty() && i % 2 == 0)
                 {
                     useMockUsp = false;
                 }
@@ -698,7 +682,7 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
 
                 SPX_TRACE_VERBOSE("%s: START of loop #%d; mockUsp=%d; realtime=%d", __FUNCTION__, i, useMockUsp, realTimeRate);
 
-                auto recognizer = CreateRecognizers<SpeechRecognizer>(weather.m_inputDataFilename);
+                auto recognizer = CreateRecognizers<SpeechRecognizer>(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
                 SPXTEST_REQUIRE(recognizer != nullptr);
                 SPXTEST_REQUIRE(IsUsingMocks(useMockUsp));
 
@@ -766,10 +750,10 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
         SPX_TRACE_VERBOSE("%s: line=%d", __FUNCTION__, __LINE__);
 
         UseMocks(false);
-        SPXTEST_REQUIRE(exists(weather.m_inputDataFilename));
+        SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
         SPXTEST_REQUIRE(!IsUsingMocks());
 
-        auto recognizer = CreateRecognizers<SpeechRecognizer>(weather.m_inputDataFilename);
+        auto recognizer = CreateRecognizers<SpeechRecognizer>(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
         auto result = recognizer->RecognizeOnceAsync().get();
         SPXTEST_REQUIRE(!result->Properties.GetProperty(PropertyId::SpeechServiceResponse_JsonResult).empty());
     }
@@ -779,10 +763,10 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
         SPX_TRACE_VERBOSE("%s: line=%d", __FUNCTION__, __LINE__);
 
         UseMocks(false);
-        SPXTEST_REQUIRE(exists(weather.m_inputDataFilename));
+        SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
         SPXTEST_REQUIRE(!IsUsingMocks());
         auto badKeyConfig = SpeechConfig::FromSubscription("invalid_key", "invalid_region");
-        auto audioConfig = AudioConfig::FromWavFileInput(weather.m_inputDataFilename);
+        auto audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
         auto recognizer = SpeechRecognizer::FromConfig(badKeyConfig, audioConfig);
         auto result = recognizer->RecognizeOnceAsync().get();
 
@@ -802,7 +786,7 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
 
     SPXTEST_SECTION("Wrong Key triggers Canceled Event")
     {
-        SPXTEST_REQUIRE(exists(weather.m_inputDataFilename));
+        SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
         UseMocks(false);
         std::promise<void> canceledPromise;
 
@@ -811,7 +795,7 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
         string wrongKey = "wrongKey";
 
         auto sc = SpeechConfig::FromSubscription(wrongKey, "westus");
-        auto a = AudioConfig::FromWavFileInput(weather.m_inputDataFilename);
+        auto a = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
         auto recognizer = SpeechRecognizer::FromConfig(sc, a);
 
         recognizer->Canceled.Connect([&](const SpeechRecognitionCanceledEventArgs& args) {
@@ -831,25 +815,32 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
 
     SPXTEST_SECTION("German Speech Recognition works")
     {
-        callTheFirstOne.UpdateFullFilename(Config::InputDir);
-        SPXTEST_REQUIRE(exists(callTheFirstOne.m_inputDataFilename));
+        SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_GERMAN)));
 
-        auto sc = !Config::Endpoint.empty() ? SpeechConfig::FromEndpoint(Config::Endpoint, Keys::Speech) : SpeechConfig::FromSubscription(Keys::Speech, Config::Region);
-        auto audioConfig = AudioConfig::FromWavFileInput(callTheFirstOne.m_inputDataFilename);
+        auto sc = !DefaultSettingsMap[ENDPOINT].empty() ? SpeechConfig::FromEndpoint(DefaultSettingsMap[ENDPOINT],
+            SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key) :
+            SpeechConfig::FromSubscription(SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key,
+                SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Region);
+
+        auto audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_GERMAN));
         auto recognizer = SpeechRecognizer::FromConfig(sc, "de-DE", audioConfig);
 
         auto result = recognizer->RecognizeOnceAsync().get();
         SPXTEST_REQUIRE(result != nullptr);
         SPXTEST_REQUIRE(result->Reason == ResultReason::RecognizedSpeech);
-        SPXTEST_REQUIRE(StringComparisions::AssertFuzzyMatch(result->Text, callTheFirstOne.m_utterance));
+        SPXTEST_REQUIRE(StringComparisions::AssertFuzzyMatch(result->Text, AudioUtterancesMap[SINGLE_UTTERANCE_GERMAN].Utterances["de"][0].Text));
     }
 
     SPXTEST_SECTION("Canceled/EndOfStream works")
     {
-        SPXTEST_REQUIRE(exists(weather.m_inputDataFilename));
+        SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
 
-        auto sc = !Config::Endpoint.empty() ? SpeechConfig::FromEndpoint(Config::Endpoint, Keys::Speech) : SpeechConfig::FromSubscription(Keys::Speech, Config::Region);
-        auto audioConfig = AudioConfig::FromWavFileInput(weather.m_inputDataFilename);
+        auto sc = !DefaultSettingsMap[ENDPOINT].empty() ? SpeechConfig::FromEndpoint(DefaultSettingsMap[ENDPOINT],
+            SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key) :
+            SpeechConfig::FromSubscription(SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key,
+                SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Region);
+
+        auto audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
         auto recognizer = SpeechRecognizer::FromConfig(sc, audioConfig);
 
         WHEN("using RecognizeOnceAsync() result")
@@ -1038,7 +1029,7 @@ TEST_CASE("KWS basics", "[api][cxx]")
                 cv.notify_all();
             };
 
-            auto model = KeywordRecognitionModel::FromFile(Config::InputDir + "/kws/Computer/kws.table");
+            auto model = KeywordRecognitionModel::FromFile(DefaultSettingsMap[INPUT_DIR] + "/kws/Computer/kws.table");
             recognizer->StartKeywordRecognitionAsync(model);
 
             THEN("We wait up to 30 seconds for a KwsSingleShot recognition and it's accompanying SessionStopped")
@@ -1070,27 +1061,26 @@ TEST_CASE("KWS basics", "[api][cxx]")
 TEST_CASE("Speech on local server", "[api][cxx]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
-    weather.UpdateFullFilename(Config::InputDir);
 
     SPXTEST_SECTION("Stress testing against the local server")
     {
         SPX_TRACE_VERBOSE("%s: line=%d", __FUNCTION__, __LINE__);
 
-        if (Config::Endpoint.empty())
+        if (DefaultSettingsMap[ENDPOINT].empty())
         {
             return;
         }
 
         UseMocks(false);
-        SPXTEST_REQUIRE(exists(weather.m_inputDataFilename));
+        SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
         SPXTEST_REQUIRE(!IsUsingMocks());
 
         const int numLoops = 10;
 
-        auto sc = SpeechConfig::FromEndpoint(Config::Endpoint, R"({"max_timeout":"0"})");
+        auto sc = SpeechConfig::FromEndpoint(DefaultSettingsMap[ENDPOINT], R"({"max_timeout":"0"})");
         for (int i = 0; i < numLoops; i++)
         {
-            auto audioConfig = AudioConfig::FromWavFileInput(weather.m_inputDataFilename);
+            auto audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
             auto recognizer = SpeechRecognizer::FromConfig(sc, audioConfig);
             auto result = recognizer->RecognizeOnceAsync().get();
             SPXTEST_REQUIRE(result->Reason == ResultReason::RecognizedSpeech);
@@ -1116,9 +1106,7 @@ TEST_CASE("Speech Recognizer is thread-safe.", "[api][cxx]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
-    weather.UpdateFullFilename(Config::InputDir);
-
-    SPXTEST_REQUIRE(exists(weather.m_inputDataFilename));
+    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
 
     mutex mtx;
     condition_variable cv;
@@ -1130,7 +1118,7 @@ TEST_CASE("Speech Recognizer is thread-safe.", "[api][cxx]")
         bool callback_invoked = false;
 
         SPXTEST_REQUIRE(!IsUsingMocks());
-        auto recognizer = CreateRecognizers<SpeechRecognizer>(weather.m_inputDataFilename);
+        auto recognizer = CreateRecognizers<SpeechRecognizer>(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
 
         auto callback = [&](const SpeechRecognitionEventArgs& args)
         {
@@ -1163,7 +1151,7 @@ TEST_CASE("Speech Recognizer is thread-safe.", "[api][cxx]")
         SPX_TRACE_VERBOSE("%s: line=%d", __FUNCTION__, __LINE__);
 
         SPXTEST_REQUIRE(!IsUsingMocks());
-        auto recognizer = CreateRecognizers<SpeechRecognizer>(weather.m_inputDataFilename);
+        auto recognizer = CreateRecognizers<SpeechRecognizer>(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
 
         auto callback1 = [&](const SpeechRecognitionEventArgs& args)
         {
@@ -1191,7 +1179,7 @@ TEST_CASE("Speech Recognizer is thread-safe.", "[api][cxx]")
         };
         auto canceledCallback2 = [&](const SpeechRecognitionCanceledEventArgs& args) { callback2(args); };
 
-        recognizer = CreateRecognizers<SpeechRecognizer>(weather.m_inputDataFilename);
+        recognizer = CreateRecognizers<SpeechRecognizer>(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
         recognizer->Recognized.Connect(callback2);
         recognizer->Canceled.Connect(canceledCallback2);
 
@@ -1211,7 +1199,7 @@ TEST_CASE("Speech Recognizer is thread-safe.", "[api][cxx]")
             callback3(args);
         };
 
-        recognizer = CreateRecognizers<SpeechRecognizer>(weather.m_inputDataFilename);
+        recognizer = CreateRecognizers<SpeechRecognizer>(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
         recognizer->Recognized.Connect(callback3);
         recognizer->Canceled.Connect(canceledCallback3);
         auto future = recognizer->RecognizeOnceAsync();
@@ -1241,8 +1229,8 @@ TEST_CASE("Speech Recognizer SpeechConfig validations", "[api][cxx]")
         CHECK_THROWS(SpeechConfig::FromSubscription("illegal-subscription", ""));
         CHECK_NOTHROW(SpeechConfig::FromSubscription("illegal-subscription", "illegal-region"));
         auto endpointAsRegion = "wss://westus.stt.speech.microsoft.com/speech/recognition/dictation/cognitiveservices/v1";
-        CHECK_THROWS(SpeechConfig::FromSubscription(Keys::Speech, endpointAsRegion));
-        CHECK_THROWS(SpeechTranslationConfig::FromSubscription(Keys::Speech, endpointAsRegion));
+        CHECK_THROWS(SpeechConfig::FromSubscription(SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key, endpointAsRegion));
+        CHECK_THROWS(SpeechTranslationConfig::FromSubscription(SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key, endpointAsRegion));
         CHECK_THROWS(SpeechConfig::FromAuthorizationToken("sometoken", endpointAsRegion));
         CHECK_THROWS(SpeechTranslationConfig::FromAuthorizationToken("sometoken", endpointAsRegion));
     }
@@ -1260,8 +1248,8 @@ TEST_CASE("Speech Recognizer SpeechConfig validations", "[api][cxx]")
 
 static void ConnectionEventTests(bool forContinuousRecognition)
 {
-    auto sc = !Config::Endpoint.empty() ? SpeechConfig::FromEndpoint(Config::Endpoint, Keys::Speech) : SpeechConfig::FromSubscription(Keys::Speech, Config::Region);
-    auto audioConfig = AudioConfig::FromWavFileInput(weather.m_inputDataFilename);
+    auto sc = !DefaultSettingsMap[ENDPOINT].empty() ? SpeechConfig::FromEndpoint(DefaultSettingsMap[ENDPOINT], SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key) : SpeechConfig::FromSubscription(SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key, SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Region);
+    auto audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
     auto recognizer = SpeechRecognizer::FromConfig(sc, audioConfig);
     auto connection = Connection::FromRecognizer(recognizer);
 
@@ -1359,8 +1347,7 @@ TEST_CASE("ConnectionEventsTest", "[api][cxx]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
-    weather.UpdateFullFilename(Config::InputDir);
-    REQUIRE(exists(weather.m_inputDataFilename));
+    REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
 
     SPXTEST_SECTION("Connected Disconnected Events with RecognizeOnceAsnyc")
     {
@@ -1377,9 +1364,8 @@ TEST_CASE("FromEndpoint without key and token", "[api][cxx]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
-    weather.UpdateFullFilename(Config::InputDir);
-    SPXTEST_REQUIRE(exists(weather.m_inputDataFilename));
-    auto audioInput = AudioConfig::FromWavFileInput(weather.m_inputDataFilename);
+    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
+    auto audioInput = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
 
     SPXTEST_SECTION("SpeechConfig FromEndpoint")
     {
@@ -1408,25 +1394,24 @@ TEST_CASE("SetServiceProperty", "[api][cxx]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
-    callTheFirstOne.UpdateFullFilename(Config::InputDir);
-    SPXTEST_REQUIRE(exists(callTheFirstOne.m_inputDataFilename));
-    auto audioInput = AudioConfig::FromWavFileInput(callTheFirstOne.m_inputDataFilename);
+    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_GERMAN)));
+    auto audioInput = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_GERMAN));
 
     SPXTEST_SECTION("SetServiceProperty single setting")
     {
-        auto config = SpeechConfig::FromSubscription(Keys::Speech, Config::Region);
+        auto config = SpeechConfig::FromSubscription(SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key, SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Region);
         config->SetServiceProperty("language", "de-DE", ServicePropertyChannel::UriQueryParameter);
         auto recognizer = SpeechRecognizer::FromConfig(config, audioInput);
 
         auto result = recognizer->RecognizeOnceAsync().get();
         SPXTEST_REQUIRE(result != nullptr);
         SPXTEST_REQUIRE(result->Reason == ResultReason::RecognizedSpeech);
-        SPXTEST_REQUIRE(StringComparisions::AssertFuzzyMatch(result->Text, callTheFirstOne.m_utterance));
+        SPXTEST_REQUIRE(StringComparisions::AssertFuzzyMatch(result->Text, AudioUtterancesMap[SINGLE_UTTERANCE_GERMAN].Utterances["de"][0].Text));
     }
 
     SPXTEST_SECTION("SetServiceProperty property overwrite")
     {
-        auto config = SpeechConfig::FromSubscription(Keys::Speech, Config::Region);
+        auto config = SpeechConfig::FromSubscription(SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key, SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Region);
         config->SetSpeechRecognitionLanguage("en-US");
         config->SetServiceProperty("language", "de-DE", ServicePropertyChannel::UriQueryParameter);
         auto recognizer = SpeechRecognizer::FromConfig(config, audioInput);
@@ -1434,12 +1419,12 @@ TEST_CASE("SetServiceProperty", "[api][cxx]")
         auto result = recognizer->RecognizeOnceAsync().get();
         SPXTEST_REQUIRE(result != nullptr);
         SPXTEST_REQUIRE(result->Reason == ResultReason::RecognizedSpeech);
-        SPXTEST_REQUIRE(StringComparisions::AssertFuzzyMatch(result->Text, callTheFirstOne.m_utterance));
+        SPXTEST_REQUIRE(StringComparisions::AssertFuzzyMatch(result->Text, AudioUtterancesMap[SINGLE_UTTERANCE_GERMAN].Utterances["de"][0].Text));
     }
 
     SPXTEST_SECTION("SetServiceProperty 2 properties")
     {
-        auto config = SpeechConfig::FromSubscription(Keys::Speech, Config::Region);
+        auto config = SpeechConfig::FromSubscription(SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key, SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Region);
         config->SetServiceProperty("language", "de-DE", ServicePropertyChannel::UriQueryParameter);
         config->SetServiceProperty("format", "detailed", ServicePropertyChannel::UriQueryParameter);
         auto recognizer = SpeechRecognizer::FromConfig(config, audioInput);
@@ -1447,7 +1432,7 @@ TEST_CASE("SetServiceProperty", "[api][cxx]")
         auto result = recognizer->RecognizeOnceAsync().get();
         SPXTEST_REQUIRE(result != nullptr);
         SPXTEST_REQUIRE(result->Reason == ResultReason::RecognizedSpeech);
-        SPXTEST_REQUIRE(StringComparisions::AssertFuzzyMatch(result->Text, callTheFirstOne.m_utterance));
+        SPXTEST_REQUIRE(StringComparisions::AssertFuzzyMatch(result->Text, AudioUtterancesMap[SINGLE_UTTERANCE_GERMAN].Utterances["de"][0].Text));
         auto detailedResult = result->Properties.GetProperty(PropertyId::SpeechServiceResponse_JsonResult);
         SPXTEST_REQUIRE(detailedResult.find("NBest") != string::npos);
         SPXTEST_REQUIRE(detailedResult.find("ITN") != string::npos);
@@ -1458,28 +1443,28 @@ TEST_CASE("SetServiceProperty", "[api][cxx]")
 
     SPXTEST_SECTION("SetServiceProperty FromEndpoint")
     {
-        string speechEndpoint = "wss://" + Config::Region + ".stt.speech.microsoft.com/speech/recognition/interactive/cognitiveservices/v1";
-        auto config = SpeechConfig::FromEndpoint(speechEndpoint, Keys::Speech);
+        string speechEndpoint = "wss://" + SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Region + ".stt.speech.microsoft.com/speech/recognition/interactive/cognitiveservices/v1";
+        auto config = SpeechConfig::FromEndpoint(speechEndpoint, SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
         config->SetServiceProperty("language", "de-DE", ServicePropertyChannel::UriQueryParameter);
         auto recognizer = SpeechRecognizer::FromConfig(config, audioInput);
 
         auto result = recognizer->RecognizeOnceAsync().get();
         SPXTEST_REQUIRE(result != nullptr);
         SPXTEST_REQUIRE(result->Reason == ResultReason::RecognizedSpeech);
-        SPXTEST_REQUIRE(StringComparisions::AssertFuzzyMatch(result->Text, callTheFirstOne.m_utterance));
+        SPXTEST_REQUIRE(StringComparisions::AssertFuzzyMatch(result->Text, AudioUtterancesMap[SINGLE_UTTERANCE_GERMAN].Utterances["de"][0].Text));
     }
 
     SPXTEST_SECTION("SetServiceProperty FromEndpoint with parameters")
     {
-        string speechEndpoint = "wss://" + Config::Region + ".stt.speech.microsoft.com/speech/recognition/interactive/cognitiveservices/v1?format=detailed";
-        auto config = SpeechConfig::FromEndpoint(speechEndpoint, Keys::Speech);
+        string speechEndpoint = "wss://" + SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Region + ".stt.speech.microsoft.com/speech/recognition/interactive/cognitiveservices/v1?format=detailed";
+        auto config = SpeechConfig::FromEndpoint(speechEndpoint, SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
         config->SetServiceProperty("language", "de-DE", ServicePropertyChannel::UriQueryParameter);
         auto recognizer = SpeechRecognizer::FromConfig(config, audioInput);
 
         auto result = recognizer->RecognizeOnceAsync().get();
         SPXTEST_REQUIRE(result != nullptr);
         SPXTEST_REQUIRE(result->Reason == ResultReason::RecognizedSpeech);
-        SPXTEST_REQUIRE(StringComparisions::AssertFuzzyMatch(result->Text, callTheFirstOne.m_utterance));
+        SPXTEST_REQUIRE(StringComparisions::AssertFuzzyMatch(result->Text, AudioUtterancesMap[SINGLE_UTTERANCE_GERMAN].Utterances["de"][0].Text));
         auto detailedResult = result->Properties.GetProperty(PropertyId::SpeechServiceResponse_JsonResult);
         SPXTEST_REQUIRE(detailedResult.find("NBest") != string::npos);
         SPXTEST_REQUIRE(detailedResult.find("ITN") != string::npos);
@@ -1490,7 +1475,7 @@ TEST_CASE("SetServiceProperty", "[api][cxx]")
 
     SPXTEST_SECTION("SetServiceProperty invalid parameters")
     {
-        auto config = SpeechConfig::FromSubscription(Keys::Speech, Config::Region);
+        auto config = SpeechConfig::FromSubscription(SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key, SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Region);
         CHECK_THROWS(config->SetServiceProperty("", "Value", ServicePropertyChannel::UriQueryParameter));
         CHECK_THROWS(config->SetServiceProperty("Name", "", ServicePropertyChannel::UriQueryParameter));
         CHECK_THROWS(config->SetServiceProperty("Name", "Value", (ServicePropertyChannel)2));
@@ -1498,7 +1483,7 @@ TEST_CASE("SetServiceProperty", "[api][cxx]")
 
     SPXTEST_SECTION("SetServiceProperty SpeechTranslationConfig")
     {
-        auto config = SpeechTranslationConfig::FromSubscription(Keys::Speech, Config::Region);
+        auto config = SpeechTranslationConfig::FromSubscription(SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key, SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Region);
 
         config->SetServiceProperty("from", "de-DE", ServicePropertyChannel::UriQueryParameter);
         config->SetServiceProperty("to", "en", ServicePropertyChannel::UriQueryParameter);
@@ -1508,7 +1493,7 @@ TEST_CASE("SetServiceProperty", "[api][cxx]")
         auto result = recognizer->RecognizeOnceAsync().get();
         SPXTEST_REQUIRE(result != nullptr);
         SPXTEST_REQUIRE(result->Reason == ResultReason::TranslatedSpeech);
-        SPXTEST_REQUIRE(StringComparisions::AssertFuzzyMatch(result->Text, callTheFirstOne.m_utterance));
+        SPXTEST_REQUIRE(StringComparisions::AssertFuzzyMatch(result->Text, AudioUtterancesMap[SINGLE_UTTERANCE_GERMAN].Utterances["de"][0].Text));
         SPXTEST_REQUIRE(!result->Translations.at("en").compare("Call the first one."));
     }
 }
@@ -1517,10 +1502,9 @@ TEST_CASE("SpeechConfig properties", "[api][cxx]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
-    callTheFirstOne.UpdateFullFilename(Config::InputDir);
-    SPXTEST_REQUIRE(exists(callTheFirstOne.m_inputDataFilename));
-    auto audioInput = AudioConfig::FromWavFileInput(callTheFirstOne.m_inputDataFilename);
-    auto config = SpeechConfig::FromSubscription(Keys::Speech, Config::Region);
+    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_GERMAN)));
+    auto audioInput = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_GERMAN));
+    auto config = SpeechConfig::FromSubscription(SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key, SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Region);
 
     SPXTEST_SECTION("property get and set via propertyId")
     {
@@ -1611,7 +1595,7 @@ TEST_CASE("SpeechConfig properties", "[api][cxx]")
         CAPTURE(connectionUrl);
 
         CHECK(ResultReason::RecognizedSpeech == result->Reason);
-        CHECK(StringComparisions::AssertFuzzyMatch(result->Text, callTheFirstOne.m_utterance));
+        CHECK(StringComparisions::AssertFuzzyMatch(result->Text, AudioUtterancesMap[SINGLE_UTTERANCE_GERMAN].Utterances["de"][0].Text));
         // Check no word-level timestamps included, but only detailed output.
         string jsonResult = result->Properties.GetProperty(PropertyId::SpeechServiceResponse_JsonResult);
         CAPTURE(jsonResult);
@@ -1644,7 +1628,7 @@ TEST_CASE("SpeechConfig properties", "[api][cxx]")
         CAPTURE(connectionUrl);
 
         CHECK(ResultReason::RecognizedSpeech == result->Reason);
-        CHECK(StringComparisions::AssertFuzzyMatch(result->Text, callTheFirstOne.m_utterance));
+        CHECK(StringComparisions::AssertFuzzyMatch(result->Text, AudioUtterancesMap[SINGLE_UTTERANCE_GERMAN].Utterances["de"][0].Text));
         // Check word-level timestamps included, but only detailed output.
         string jsonResult = result->Properties.GetProperty(PropertyId::SpeechServiceResponse_JsonResult);
         CAPTURE(jsonResult);
@@ -1671,8 +1655,7 @@ TEST_CASE("Dictation Corrections", "[api][cxx]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
-    weather.UpdateFullFilename(Config::InputDir);
-    SPXTEST_REQUIRE(exists(weather.m_inputDataFilename));
+    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
 
     auto pushStream = AudioInputStream::CreatePushStream();
     auto audioInput = AudioConfig::FromStreamInput(pushStream);
@@ -1680,7 +1663,7 @@ TEST_CASE("Dictation Corrections", "[api][cxx]")
 
     SPXTEST_SECTION("send_event")
     {
-        auto config = SpeechConfig::FromEndpoint(endpoint, Keys::Speech);
+        auto config = SpeechConfig::FromEndpoint(endpoint, SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
         config->SetServiceProperty("format", "corrections", ServicePropertyChannel::UriQueryParameter);
         config->EnableDictation();
 
@@ -1717,7 +1700,7 @@ TEST_CASE("Dictation Corrections", "[api][cxx]")
         auto result = make_shared<RecoPhrases>();
         ConnectCallbacks(recognizer.get(), result);
         recognizer->StartContinuousRecognitionAsync().get();
-        PushData(pushStream.get(), weather.m_inputDataFilename);
+        PushData(pushStream.get(), ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
         WaitForResult(result->ready.get_future(), 60s);
         recognizer->StopContinuousRecognitionAsync().get();
 
@@ -1729,7 +1712,7 @@ TEST_CASE("Dictation Corrections", "[api][cxx]")
 
     SPXTEST_SECTION("set_parameters_in_speech_context_and_config")
     {
-        auto config = SpeechConfig::FromEndpoint(endpoint, Keys::Speech);
+        auto config = SpeechConfig::FromEndpoint(endpoint, SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
         config->SetServiceProperty("format", "corrections", ServicePropertyChannel::UriQueryParameter);
         config->EnableDictation();
 
@@ -1758,7 +1741,7 @@ TEST_CASE("Dictation Corrections", "[api][cxx]")
         auto result = make_shared<RecoPhrases>();
         ConnectCallbacks(recognizer.get(), result);
         recognizer->StartContinuousRecognitionAsync().get();
-        PushData(pushStream.get(), weather.m_inputDataFilename);
+        PushData(pushStream.get(), ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
         WaitForResult(result->ready.get_future(), WAIT_FOR_RECO_RESULT_TIME);
         recognizer->StopContinuousRecognitionAsync().get();
 
@@ -1769,7 +1752,7 @@ TEST_CASE("Dictation Corrections", "[api][cxx]")
     }
     SPXTEST_SECTION("correction_and_left_right_context")
     {
-        auto config = SpeechConfig::FromEndpoint(endpoint, Keys::Speech);
+        auto config = SpeechConfig::FromEndpoint(endpoint, SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
         config->SetServiceProperty("format", "corrections", ServicePropertyChannel::UriQueryParameter);
         config->EnableDictation();
 
@@ -1785,7 +1768,7 @@ TEST_CASE("Dictation Corrections", "[api][cxx]")
         auto result = make_shared<RecoPhrases>();
         ConnectCallbacks(recognizer.get(), result);
         recognizer->StartContinuousRecognitionAsync().get();
-        PushData(pushStream.get(), weather.m_inputDataFilename);
+        PushData(pushStream.get(), ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
         WaitForResult(result->ready.get_future(), WAIT_FOR_RECO_RESULT_TIME);
         recognizer->StopContinuousRecognitionAsync().get();
 
@@ -1800,7 +1783,7 @@ TEST_CASE("Dictation Corrections", "[api][cxx]")
     }
     SPXTEST_SECTION("empty_left_right_context")
     {
-        auto config = SpeechConfig::FromEndpoint(endpoint, Keys::Speech);
+        auto config = SpeechConfig::FromEndpoint(endpoint, SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
         config->SetServiceProperty("format", "corrections", ServicePropertyChannel::UriQueryParameter);
         config->EnableDictation();
 
@@ -1816,7 +1799,7 @@ TEST_CASE("Dictation Corrections", "[api][cxx]")
         auto result = make_shared<RecoPhrases>();
         ConnectCallbacks(recognizer.get(), result);
         recognizer->StartContinuousRecognitionAsync().get();
-        PushData(pushStream.get(), weather.m_inputDataFilename);
+        PushData(pushStream.get(), ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
         WaitForResult(result->ready.get_future(), WAIT_FOR_RECO_RESULT_TIME);
         recognizer->StopContinuousRecognitionAsync().get();
 
@@ -1834,9 +1817,8 @@ TEST_CASE("Dictation Corrections", "[api][cxx]")
 TEST_CASE("Verify auto detect source language config in SpeechRecognizer", "[api][cxx]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
-    weather.UpdateFullFilename(Config::InputDir);
-    SPXTEST_REQUIRE(exists(weather.m_inputDataFilename));
-    auto audioConfig = AudioConfig::FromWavFileInput(weather.m_inputDataFilename);
+    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
+    auto audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
 
     SPXTEST_SECTION("auto detect source language config with a vector of string parameters")
     {
@@ -1870,9 +1852,8 @@ TEST_CASE("Verify auto detect source language config in SpeechRecognizer", "[api
 TEST_CASE("Verify source language config in SpeechRecognizer", "[api][cxx]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
-    weather.UpdateFullFilename(Config::InputDir);
-    SPXTEST_REQUIRE(exists(weather.m_inputDataFilename));
-    auto audioConfig = AudioConfig::FromWavFileInput(weather.m_inputDataFilename);
+    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
+    auto audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
     SPXTEST_SECTION("source language")
     {
         auto recognizer = SpeechRecognizer::FromConfig(CurrentSpeechConfig(), "zh-CN", audioConfig);
@@ -1897,9 +1878,8 @@ TEST_CASE("Verify source language config in SpeechRecognizer", "[api][cxx]")
 
 TEST_CASE("Verify auto detect source language result from speech recognition result", "[api][cxx]") {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
-    weather.UpdateFullFilename(Config::InputDir);
-    SPXTEST_REQUIRE(exists(weather.m_inputDataFilename));
-    auto audioConfig = AudioConfig::FromWavFileInput(weather.m_inputDataFilename);
+    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
+    auto audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
     auto expectedLanguage = "";
     std::shared_ptr<SpeechRecognitionResult> speechRecognitionResult;
     ResultReason expectedReason = ResultReason::RecognizedSpeech;
@@ -1958,9 +1938,8 @@ TEST_CASE("Verify auto detect source language result from speech recognition res
 
 TEST_CASE("Verify language id detection for continous speech recognition", "[api][cxx]") {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
-    callTheFirstOne.UpdateFullFilename(Config::InputDir);
-    SPXTEST_REQUIRE(exists(callTheFirstOne.m_inputDataFilename));
-    auto audioConfig = AudioConfig::FromWavFileInput(callTheFirstOne.m_inputDataFilename);
+    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_GERMAN)));
+    auto audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_GERMAN));
     auto autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig::FromLanguages({ "de-DE", "fr-FR" });
     auto recognizer = SpeechRecognizer::FromConfig(CurrentSpeechConfig(), autoDetectSourceLanguageConfig, audioConfig);
 
@@ -2054,22 +2033,21 @@ TEST_CASE("Verify language id detection for continous speech recognition", "[api
     REQUIRE(errorResults.size() == 0);
     REQUIRE(recognizingResults.size() > 0);
     REQUIRE(recognizedResults.size() > 0);
-    REQUIRE(recognizedResults[0] == callTheFirstOne.m_utterance);
+    REQUIRE(recognizedResults[0] == AudioUtterancesMap[SINGLE_UTTERANCE_GERMAN].Utterances["de"][0].Text);
 }
 
 TEST_CASE("Custom speech-to-text endpoints", "[api][cxx]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
-    weather.UpdateFullFilename(Config::InputDir);
-    SPXTEST_REQUIRE(exists(weather.m_inputDataFilename));
-    auto audioInput = AudioConfig::FromWavFileInput(weather.m_inputDataFilename);
-    string speechHost = "wss://" + Config::Region + ".stt.speech.microsoft.com";
+    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
+    auto audioInput = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
+    string speechHost = "wss://" + SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Region + ".stt.speech.microsoft.com";
 
     SPXTEST_SECTION("Host only")
     {
         string host = speechHost;
-        auto config = SpeechConfig::FromHost(speechHost, Keys::Speech);
+        auto config = SpeechConfig::FromHost(speechHost, SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
         auto recognizer = SpeechRecognizer::FromConfig(config, audioInput);
 
         auto result = recognizer->RecognizeOnceAsync().get();
@@ -2080,7 +2058,7 @@ TEST_CASE("Custom speech-to-text endpoints", "[api][cxx]")
     SPXTEST_SECTION("Host with root path") // parsed as empty path
     {
         string host = speechHost + "/";
-        auto config = SpeechConfig::FromHost(host, Keys::Speech);
+        auto config = SpeechConfig::FromHost(host, SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
         auto recognizer = SpeechRecognizer::FromConfig(config, audioInput);
 
         auto result = recognizer->RecognizeOnceAsync().get();
@@ -2091,7 +2069,7 @@ TEST_CASE("Custom speech-to-text endpoints", "[api][cxx]")
     SPXTEST_SECTION("Host with parameters") // not allowed
     {
         string host = speechHost + "?format=detailed";
-        auto config = SpeechConfig::FromHost(host, Keys::Speech);
+        auto config = SpeechConfig::FromHost(host, SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
         auto recognizer = SpeechRecognizer::FromConfig(config, audioInput);
 
         auto result = recognizer->RecognizeOnceAsync().get();
@@ -2108,7 +2086,7 @@ TEST_CASE("Custom speech-to-text endpoints", "[api][cxx]")
     SPXTEST_SECTION("Host with non-root path") // not allowed
     {
         string host = speechHost + "/speech/recognition/interactive/cognitiveservices/v1";
-        auto config = SpeechConfig::FromHost(host, Keys::Speech);
+        auto config = SpeechConfig::FromHost(host, SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
         auto recognizer = SpeechRecognizer::FromConfig(config, audioInput);
 
         auto result = recognizer->RecognizeOnceAsync().get();
@@ -2124,24 +2102,22 @@ TEST_CASE("Custom speech-to-text endpoints", "[api][cxx]")
 
     SPXTEST_SECTION("Invalid url from portal")
     {
-        const auto speechEndpoint = "https://" + Config::Region + ".api.cognitive.microsoft.com/sts/v1.0/issueToken";
-        auto config = SpeechConfig::FromEndpoint(speechEndpoint, Keys::Speech);
+        const auto speechEndpoint = "https://" + SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Region + ".api.cognitive.microsoft.com/sts/v1.0/issueToken";
+        auto config = SpeechConfig::FromEndpoint(speechEndpoint, SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
         auto recognizer = SpeechRecognizer::FromConfig(config, audioInput);
 
         auto result = recognizer->RecognizeOnceAsync().get();
         SPXTEST_REQUIRE(result != nullptr);
         SPXTEST_REQUIRE(result->Reason == ResultReason::RecognizedSpeech);
-        SPXTEST_REQUIRE(StringComparisions::AssertFuzzyMatch(result->Text, weather.m_utterance));
+        SPXTEST_REQUIRE(StringComparisions::AssertFuzzyMatch(result->Text, AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH].Utterances["en-US"][0].Text));
     }
 }
 
 TEST_CASE("Local speech-to-text endpoints", "[.][api][cxx]") // for manual testing of speech service containers
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
-
-    weather.UpdateFullFilename(Config::InputDir);
-    SPXTEST_REQUIRE(exists(weather.m_inputDataFilename));
-    auto audioInput = AudioConfig::FromWavFileInput(weather.m_inputDataFilename);
+    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
+    auto audioInput = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
 
     SPXTEST_SECTION("Host only")
     {
@@ -2152,7 +2128,7 @@ TEST_CASE("Local speech-to-text endpoints", "[.][api][cxx]") // for manual testi
         auto result = recognizer->RecognizeOnceAsync().get();
         SPXTEST_REQUIRE(result != nullptr);
         SPXTEST_REQUIRE(result->Reason == ResultReason::RecognizedSpeech);
-        SPXTEST_REQUIRE(StringComparisions::AssertFuzzyMatch(result->Text, weather.m_utterance));
+        SPXTEST_REQUIRE(StringComparisions::AssertFuzzyMatch(result->Text, AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH].Utterances["en-US"][0].Text));
     }
 
     SPXTEST_SECTION("Host with root path")
@@ -2164,6 +2140,6 @@ TEST_CASE("Local speech-to-text endpoints", "[.][api][cxx]") // for manual testi
         auto result = recognizer->RecognizeOnceAsync().get();
         SPXTEST_REQUIRE(result != nullptr);
         SPXTEST_REQUIRE(result->Reason == ResultReason::RecognizedSpeech);
-        SPXTEST_REQUIRE(StringComparisions::AssertFuzzyMatch(result->Text, weather.m_utterance));
+        SPXTEST_REQUIRE(StringComparisions::AssertFuzzyMatch(result->Text, AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH].Utterances["en-US"][0].Text));
     }
 }
