@@ -255,6 +255,10 @@ if(MSVC)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /guard:cf")
   set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /guard:cf")
 
+  # add symbol info needed for MaxScan and other static analysis tools used in windows build system.
+  set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} /INCREMENTAL:NO /DEBUGTYPE:CV,FIXUP")
+  set(CMAKE_SHARED_LINKER_FLAGS_DEBUG "${CMAKE_SHARED_LINKER_FLAGS_DEBUG} /INCREMENTAL:NO /DEBUGTYPE:CV,FIXUP")
+
   # make sure we generate pdbs for release as well
   set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Zi")
   set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /Zi")
