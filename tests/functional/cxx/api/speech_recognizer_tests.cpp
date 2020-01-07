@@ -220,7 +220,7 @@ TEST_CASE("continuousRecognitionAsync using push stream", "[api][cxx]")
 
 }
 
-TEST_CASE("ContinuousRecognitionAsync using file input", "[a0pi][cxx]")
+TEST_CASE("ContinuousRecognitionAsync using file input", "[api][cxx]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
@@ -296,7 +296,7 @@ TEST_CASE("ContinuousRecognitionAsync using file input", "[a0pi][cxx]")
 }
 
 #ifdef SPEECHSDK_USE_OPENSSL
-TEST_CASE("Single trusted root", "[.][int][prod]")
+TEST_CASE("Single trusted root", "[api][cxx]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
@@ -362,9 +362,9 @@ TEST_CASE("Single trusted root", "[.][int][prod]")
         "-----END CERTIFICATE-----\n";
 
     UseMocks(false);
-    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH("WEATHER")));
+    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
     SPXTEST_REQUIRE(!IsUsingMocks());
-    auto audio = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH("WEATHER"));
+    auto audio = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
 
     SPXTEST_SECTION("with Speech Service cert")
     {
