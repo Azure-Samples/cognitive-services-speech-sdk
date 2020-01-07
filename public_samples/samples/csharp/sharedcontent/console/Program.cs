@@ -43,6 +43,7 @@ namespace MicrosoftSpeechSDKSamples
             Console.WriteLine("P. Speech Recognition using Phrase Lists");
             Console.WriteLine("Q. Speech synthesis word boundary event.");
             Console.WriteLine("R. Speech synthesis using authorization token.");
+            Console.WriteLine("S. Speech synthesis in server scenario.");
 
             Console.Write(prompt);
 
@@ -133,6 +134,9 @@ namespace MicrosoftSpeechSDKSamples
                         break;
                     case ConsoleKey.R:
                         SpeechSynthesisWithTokenSample.SpeechSynthesisWithAuthorizationTokenAsync().Wait();
+                        break;
+                    case ConsoleKey.S:
+                        SpeechSynthesisServerScenarioSample.SpeechSynthesizeWithPool();
                         break;
                     case ConsoleKey.D0:
                         Console.WriteLine("Exiting...");
