@@ -682,19 +682,18 @@ TEST_CASE("Dialog Service Connector KWV basics", "[api][cxx][dialog_service_conn
     }
 }
 
-#if 0
 // Disable multi-turn tests for now as we don't have an easy way of loading audio in stages to simulate a microphone scenario
+#if 0
 TEST_CASE("Dialog Service Connector KWV multi-turn tests", "[api][cxx][dialog_service_connector]")
 {
 
     SECTION("Later utterances should not be polluted by KWV during multi turn recognition")
     {
         UseMocks(false);
-        kwvMultiturn.UpdateFullFilename(Config::InputDir);
-        REQUIRE(exists(kwvMultiturn.m_inputDataFilename));
+        REQUIRE(exists(ROOT_RELATIVE_PATH(MULTIPLE_UTTERANCE_ENGLISH)));
         auto config = DialogServiceConfigForTests();
-        auto audioConfig = AudioConfig::FromWavFileInput(kwvMultiturn.m_inputDataFilename);
-        auto model = KeywordRecognitionModel::FromFile(Config::InputDir + "/kws/Computer/kws.table");
+        auto audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(MULTIPLE_UTTERANCE_ENGLISH));
+        auto model = KeywordRecognitionModel::FromFile(ROOT_RELATIVE_PATH(MULTIPLE_UTTERANCE_ENGLISH) + "/kws/Computer/kws.table");
 
         test_runner runner{ DialogServiceConnector::FromConfig(config, audioConfig), model };
 

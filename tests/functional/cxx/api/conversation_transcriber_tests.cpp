@@ -543,7 +543,7 @@ TEST_CASE("conversation_online_1_channel_file", "[api][cxx]")
 #if 0
 TEST_CASE("conversation_online_microphone", "[api][cxx]")
 {
-    auto config = SpeechConfig::FromEndpoint(Config::OnlineAudioEndpoint, Keys::Speech);
+    auto config = SpeechConfig::FromEndpoint(DefaultSettings[ONLINE_AUDIO_ENDPOINT], Keys::Speech);
     config->SetProperty("ConversationTranscriptionInRoomAndOnline", "true");
 
     auto transcriber = ConversationTranscriber::FromConfig(config);

@@ -52,7 +52,7 @@ void UseOfflineUnidec(std::shared_ptr<SpeechConfig> config)
 {
     // Test offline speech recognition without public API
     config->SetProperty(R"(CARBON-INTERNAL-UseRecoEngine-Unidec)", "true");
-    config->SetProperty(R"(CARBON-INTERNAL-SPEECH-RecoLocalModelPathRoot)", Config::OfflineModelPathRoot);
+    config->SetProperty(R"(CARBON-INTERNAL-SPEECH-RecoLocalModelPathRoot)",  Config::OfflineModelPathRoot);
 
     if (!Config::OfflineModelLanguage.empty())
     {

@@ -465,8 +465,7 @@ TEST_CASE("Conversation Translator call methods when not joined", "[api][cxx][co
 TEST_CASE("Sample host code", "[sample_code][host]")
 {
     UseMocks(false);
-    weather.UpdateFullFilename(Config::InputDir);
-    REQUIRE(exists(weather.m_inputDataFilename));
+    REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
 
     // For the host
     auto config = SpeechTranslationConfig::FromSubscription("<Cognitive speech subscription key>", "<subscription key region>");
@@ -590,5 +589,4 @@ TEST_CASE("Sample participant code", "[sample_code][participant]")
     // stop sending audio and cleanup
     conversationTranslator->LeaveConversationAsync().get();
 }
-
 */
