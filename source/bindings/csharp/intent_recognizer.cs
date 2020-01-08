@@ -325,6 +325,13 @@ namespace Microsoft.CognitiveServices.Speech.Intent
             Dispose(false);
         }
 
+        /// <summary>
+        /// This method performs cleanup of resources.
+        /// The Boolean parameter <paramref name="disposing"/> indicates whether the method is called from <see cref="IDisposable.Dispose"/> (if <paramref name="disposing"/> is true) or from the finalizer (if <paramref name="disposing"/> is false).
+        /// Derived classes should override this method to dispose resource if needed.
+        /// </summary>
+        /// <param name="disposing">Flag to request disposal.</param>
+        /// <returns></returns>
         protected override void Dispose(bool disposing)
         {
             if (disposed)

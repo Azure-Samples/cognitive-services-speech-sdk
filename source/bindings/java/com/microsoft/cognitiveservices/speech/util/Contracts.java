@@ -12,6 +12,7 @@ public class Contracts {
      * Checks if the argument is null, if yes, throws a NullPointerException
      * @param obj The object to test for null.
      * @param message The error message in case obj is null.
+     * @return
      */
     public static void throwIfNull(Object obj, String message) {
         if(obj == null) {
@@ -24,6 +25,7 @@ public class Contracts {
      * or NullPointerException.
      * @param obj The object to test for null.
      * @param message The error message in case obj is null.
+     * @return
      */
     public static void throwIfNullOrWhitespace(String obj, String message) {
         if(obj == null) {
@@ -39,6 +41,7 @@ public class Contracts {
      * Checks if the language is a valid identifier.
      * @param language The language identifier to test, e.g. "en-US"
      * @param message The error message in case obj is null.
+     * @return
      */
     public static void throwIfIllegalLanguage(String language, String message) {
         throwIfNullOrWhitespace(language, message);
@@ -50,6 +53,7 @@ public class Contracts {
      * Checks if the subscription is a valid identifier.
      * @param subscription The subscription key to test, usually in the form of a guid
      * @param message The error message in case obj is null.
+     * @return
      */
     public static void throwIfIllegalSubscriptionKey(String subscription, String message) {
         throwIfNullOrWhitespace(subscription, message);
@@ -61,6 +65,7 @@ public class Contracts {
      * Checks if the filename exists.
      * @param filename The filename to test
      * @param message The error message in case filename does not exist.
+     * @return
      */
     public static void throwIfFileDoesNotExist(String filename, String message) {
         throwIfNullOrWhitespace(filename, message);
@@ -76,6 +81,7 @@ public class Contracts {
      * Checks if the directory exists.
      * @param directory The directory to test
      * @param message The error message in case directory does not exist.
+     * @return
      */
     public static void throwIfDirectoryDoesNotExist(String directory, String message) {
         throwIfNullOrWhitespace(directory, message);

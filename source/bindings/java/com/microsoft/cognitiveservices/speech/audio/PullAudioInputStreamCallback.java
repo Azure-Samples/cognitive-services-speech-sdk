@@ -94,6 +94,7 @@ public abstract class PullAudioInputStreamCallback
 
     /**
       * Closes the audio input stream.
+      * @return
       */
     public abstract void close();
 

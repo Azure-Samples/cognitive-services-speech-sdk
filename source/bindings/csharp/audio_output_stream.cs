@@ -38,6 +38,7 @@ namespace Microsoft.CognitiveServices.Speech.Audio
         /// <summary>
         /// Dispose of associated resources.
         /// </summary>
+        /// <returns></returns>
         public void Dispose()
         {
             isDisposing = true;
@@ -51,6 +52,7 @@ namespace Microsoft.CognitiveServices.Speech.Audio
         /// Derived classes should override this method to dispose resource if needed.
         /// </summary>
         /// <param name="disposing">Flag to request disposal.</param>
+        /// <returns></returns>
         protected virtual void Dispose(bool disposing)
         {
             if (disposed)
@@ -126,6 +128,7 @@ namespace Microsoft.CognitiveServices.Speech.Audio
         /// Derived classes should override this method to dispose resource if needed.
         /// </summary>
         /// <param name="disposing">Flag to request disposal.</param>
+        /// <returns></returns>
         protected override void Dispose(bool disposing)
         {
             if (disposed)
@@ -180,6 +183,7 @@ namespace Microsoft.CognitiveServices.Speech.Audio
         /// Derived classes should override this method to dispose resource if needed.
         /// </summary>
         /// <param name="disposing">Flag to request disposal.</param>
+        /// <returns></returns>
         protected override void Dispose(bool disposing)
         {
             if (disposed)
@@ -297,6 +301,7 @@ namespace Microsoft.CognitiveServices.Speech.Audio
         /// <summary>
         /// Closes the audio output stream.
         /// </summary>
+        /// <returns></returns>
         virtual public void Close()
         {
             Dispose();
@@ -305,6 +310,7 @@ namespace Microsoft.CognitiveServices.Speech.Audio
         /// <summary>
         /// Dispose of associated resources.
         /// </summary>
+        /// <returns></returns>
         public void Dispose()
         {
             Dispose(true);
@@ -317,6 +323,7 @@ namespace Microsoft.CognitiveServices.Speech.Audio
         /// Derived classes should override this method to dispose resource if needed.
         /// </summary>
         /// <param name="disposing">Flag to request disposal.</param>
+        /// <returns></returns>
         protected virtual void Dispose(bool disposing)
         {
             if (disposed)

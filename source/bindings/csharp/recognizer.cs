@@ -158,6 +158,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// Derived classes should override this method to dispose resource if needed.
         /// </summary>
         /// <param name="disposing">Flag to request disposal.</param>
+        /// <returns></returns>
         protected virtual void Dispose(bool disposing)
         {
             if (disposed)

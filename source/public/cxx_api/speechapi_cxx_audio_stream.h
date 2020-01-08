@@ -370,6 +370,7 @@ public:
     /// <summary>
     /// This function is called to close the audio stream.
     /// </summary>
+    /// <returns></returns>
     virtual void Close() = 0;
 
 protected:
@@ -879,6 +880,7 @@ public:
     /// <summary>
     /// This function is called to close the audio stream.
     /// </summary>
+    /// <returns></returns>
     virtual void Close() = 0;
 
 protected:

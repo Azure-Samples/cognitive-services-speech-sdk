@@ -64,6 +64,7 @@ public abstract class PushAudioOutputStreamCallback
 
     /**
       * Closes the audio output stream.
+      * @return
       */
     public abstract void close();
 

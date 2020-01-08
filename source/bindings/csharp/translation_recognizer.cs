@@ -431,6 +431,11 @@ namespace Microsoft.CognitiveServices.Speech.Translation
             Dispose(false);
         }
 
+        /// <summary>
+        /// Disposes of the object.
+        /// </summary>
+        /// <param name="disposing">True to dispose managed resources.</param>
+        /// <returns></returns>
         protected override void Dispose(bool disposing)
         {
             if (disposed)

@@ -42,6 +42,7 @@ public:
     /// <summary>
     /// Enables the recognizer.
     /// </summary>
+    /// <returns></returns>
     virtual void Enable()
     {
         SPX_INIT_HR(hr);
@@ -51,6 +52,7 @@ public:
     /// <summary>
     /// Disables the recognizer.
     /// </summary>
+    /// <returns></returns>
     virtual void Disable()
     {
         SPX_INIT_HR(hr);

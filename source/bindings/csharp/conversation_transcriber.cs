@@ -255,6 +255,11 @@ namespace Microsoft.CognitiveServices.Speech.Transcription
             });
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="disposing"></param>
+        /// <returns></returns>
         protected override void Dispose(bool disposing)
         {
             if (disposed)

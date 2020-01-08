@@ -260,6 +260,7 @@ namespace Microsoft.CognitiveServices.Speech.Transcription
         /// 
         /// </summary>
         /// <param name="disposeManaged"></param>
+        /// <returns></returns>
         override protected void Dispose(bool disposeManaged)
         {
             if (disposeManaged)
