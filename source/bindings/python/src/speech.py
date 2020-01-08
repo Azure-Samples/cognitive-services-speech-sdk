@@ -6,7 +6,7 @@ Classes related to recognizing text from speech, synthesizing speech from text, 
 
 
 from . import speech_py_impl as impl
-from .audio import AudioConfig, AudioOutputConfig
+from . import audio
 
 from .speech_py_impl import (
     CancellationDetails,
@@ -754,7 +754,7 @@ class SpeechRecognizer(Recognizer):
     :param speech_config: The config for the speech recognizer
     :param audio_config: The config for the audio input
     """
-    def __init__(self, speech_config: SpeechConfig, audio_config: Optional[AudioConfig] = None):
+    def __init__(self, speech_config: SpeechConfig, audio_config: Optional[audio.AudioConfig] = None):
         if not isinstance(speech_config, SpeechConfig):
             raise ValueError('speech_config must be a SpeechConfig instance')
 
@@ -929,13 +929,13 @@ class Connection():
     By default, a :class:`.Recognizer` autonomously manages connection to service when needed. The
     :class:`.Connection` class provides additional methods for users to explicitly open or close a
     connection and to subscribe to connection status changes. The use of :class:`.Connection` is
-    optional. It is intended for scenarios where fine tuning of application behavior based on connection 
-    status is needed. Users can optionally call :meth:`.open()` to manually initiate a service connection 
-    before starting recognition on the :class:`.Recognizer` associated with this :class:`.Connection`. 
+    optional. It is intended for scenarios where fine tuning of application behavior based on connection
+    status is needed. Users can optionally call :meth:`.open()` to manually initiate a service connection
+    before starting recognition on the :class:`.Recognizer` associated with this :class:`.Connection`.
     After starting a recognition, calling :meth:`.open()` or :meth:`close()` might fail. This will not impact
-    the Recognizer or the ongoing recognition. Connection might drop for various reasons, the Recognizer will 
-    always try to reinstitute the connection as required to guarantee ongoing operations. In all these cases 
-    :attr:`.connected`/:attr:`.disconnected` events will indicate the change of the connection status.
+    the Recognizer or the ongoing recognition. Connection might drop for various reasons, the Recognizer will
+    always try to reinstitute the connection as required to guarantee ongoing operations. In all these cases
+    :obj:`.connected`/:obj:`.disconnected` events will indicate the change of the connection status.
 
     .. note::
       Added in version 1.2.0.
@@ -1278,7 +1278,7 @@ class SpeechSynthesizer:
         None can be used for scenarios like performance test.
     """
     def __init__(self, speech_config: SpeechConfig,
-                audio_config: Optional[AudioOutputConfig] = 'None'):
+                audio_config: Optional[audio.AudioOutputConfig] = 'None'):
         if not isinstance(speech_config, SpeechConfig):
             raise ValueError('speech_config must be a SpeechConfig instance')
 

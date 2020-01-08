@@ -60,7 +60,7 @@ def test_pull_audio_input_stream_callback(speech_input: SpeechInput, use_default
         stream = msspeech.audio.PullAudioInputStream(stream_format=wave_format, pull_stream_callback=callback)
 
     speech_config = msspeech.SpeechConfig(**default_speech_auth)
-    audio_config = msspeech.AudioConfig(stream=stream)
+    audio_config = msspeech.audio.AudioConfig(stream=stream)
 
     reco = msspeech.SpeechRecognizer(speech_config, audio_config)
 

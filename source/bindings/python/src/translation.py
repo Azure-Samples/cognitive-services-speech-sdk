@@ -5,8 +5,9 @@ Classes related to translation of speech to other languages.
 """
 
 from . import speech_py_impl as impl
-from .speech import (SpeechConfig, Recognizer, AudioConfig, ResultFuture, RecognitionEventArgs,
+from .speech import (SpeechConfig, Recognizer, ResultFuture, RecognitionEventArgs,
         RecognitionResult, EventSignal, SessionEventArgs)
+from .audio import AudioConfig
 
 from typing import Optional, Iterable, Tuple, Dict
 OptionalStr = Optional[str]

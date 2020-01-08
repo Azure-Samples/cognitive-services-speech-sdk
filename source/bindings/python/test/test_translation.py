@@ -76,7 +76,7 @@ def test_set_service_property(subscription, speech_input, speech_region):
     config = msspeech.translation.SpeechTranslationConfig(subscription=subscription, region=speech_region)
     config.speech_recognition_language = 'en-us'
     config.set_service_property(name='to', value='de', channel=msspeech.ServicePropertyChannel.UriQueryParameter)
-    audio_input = msspeech.AudioConfig(filename=speech_input.path)
+    audio_input = msspeech.audio.AudioConfig(filename=speech_input.path)
     translation_recognizer = msspeech.translation.TranslationRecognizer(config, audio_input)
     result = translation_recognizer.recognize_once()
     _check_translation_result(result, speech_input, 0, target_languages=['de'])
@@ -88,7 +88,7 @@ def test_speech_translation_with_custom_host(subscription, speech_input, speech_
     config = msspeech.translation.SpeechTranslationConfig(subscription=subscription, host=host)
     config.speech_recognition_language = 'en-us'
     config.set_service_property(name='to', value='de', channel=msspeech.ServicePropertyChannel.UriQueryParameter)
-    audio_input = msspeech.AudioConfig(filename=speech_input.path)
+    audio_input = msspeech.audio.AudioConfig(filename=speech_input.path)
     translation_recognizer = msspeech.translation.TranslationRecognizer(config, audio_input)
     result = translation_recognizer.recognize_once()
     _check_translation_result(result, speech_input, 0, target_languages=['de'])
@@ -102,7 +102,7 @@ def test_change_target_languages(subscription, speech_input, speech_region):
     assert set(config.target_languages) == set(['fr', 'ja'])
     config.remove_target_language('fr')
     assert set(config.target_languages) == set(['ja'])
-    audio_input = msspeech.AudioConfig(filename=speech_input.path)
+    audio_input = msspeech.audio.AudioConfig(filename=speech_input.path)
     translation_recognizer = msspeech.translation.TranslationRecognizer(config, audio_input)
     translation_recognizer.add_target_language('de')
     assert set(translation_recognizer.target_languages) == set(['ja', 'de'])

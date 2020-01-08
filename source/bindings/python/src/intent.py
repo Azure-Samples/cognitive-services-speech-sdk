@@ -5,8 +5,9 @@ Classes related to intent recognition from speech.
 """
 
 from . import speech_py_impl as impl
-from .speech import (SpeechConfig, Recognizer, AudioConfig, ResultFuture, EventSignal,
+from .speech import (SpeechConfig, Recognizer, ResultFuture, EventSignal,
                      RecognitionEventArgs, RecognitionResult)
+from .audio import AudioConfig
 
 from typing import Optional, Union, Tuple, Iterable
 OptionalStr = Optional[str]

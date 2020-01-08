@@ -509,7 +509,7 @@ def test_set_authorization_token_on_recognizer(subscription, speech_input, speec
     config_with_token = msspeech.SpeechConfig(auth_token=invalid_token, region=speech_region)
     assert invalid_token == config_with_token.authorization_token
 
-    audio_input = msspeech.AudioConfig(filename=speech_input.path)
+    audio_input = msspeech.audio.AudioConfig(filename=speech_input.path)
     speech_recognizer = msspeech.SpeechRecognizer(config_with_token, audio_input)
 
     new_token = get_token(subscription, speech_region)
@@ -525,7 +525,7 @@ def test_subscription_key_and_invalid_auth_token(speech_input, default_speech_au
     invalid_token = "InvalidToken"
     config = msspeech.SpeechConfig(**default_speech_auth)
 
-    audio_input = msspeech.AudioConfig(filename=speech_input.path)
+    audio_input = msspeech.audio.AudioConfig(filename=speech_input.path)
     speech_recognizer = msspeech.SpeechRecognizer(config, audio_input)
     speech_recognizer.authorization_token = invalid_token
 
@@ -539,7 +539,7 @@ def test_subscription_key_and_valid_auth_token(subscription, speech_input, speec
     config = msspeech.SpeechConfig(subscription=subscription, region=speech_region)
     config.authorization_token = valid_token
 
-    audio_input = msspeech.AudioConfig(filename=speech_input.path)
+    audio_input = msspeech.audio.AudioConfig(filename=speech_input.path)
     speech_recognizer = msspeech.SpeechRecognizer(config, audio_input)
 
     result = speech_recognizer.recognize_once()
@@ -552,7 +552,7 @@ def test_subscription_key_and_expired_auth_token(speech_input, default_speech_au
     config = msspeech.SpeechConfig(**default_speech_auth)
     config.authorization_token = expired_token
 
-    audio_input = msspeech.AudioConfig(filename=speech_input.path)
+    audio_input = msspeech.audio.AudioConfig(filename=speech_input.path)
     speech_recognizer = msspeech.SpeechRecognizer(config, audio_input)
     assert expired_token == speech_recognizer.authorization_token
 
@@ -565,7 +565,7 @@ def test_set_service_property(speech_input, default_speech_auth):
     config = msspeech.SpeechConfig(**default_speech_auth)
     config.speech_recognition_language = 'invalid'
     config.set_service_property(name='language', value='en-us', channel=msspeech.ServicePropertyChannel.UriQueryParameter)
-    audio_input = msspeech.AudioConfig(filename=speech_input.path)
+    audio_input = msspeech.audio.AudioConfig(filename=speech_input.path)
     speech_recognizer = msspeech.SpeechRecognizer(config, audio_input)
     result = speech_recognizer.recognize_once()
     _check_sr_result(result, speech_input, 0)
@@ -611,7 +611,7 @@ def test_speech_config_properties_set_and_get(speech_input):
     config.set_property(PropertyId.SpeechServiceResponse_PostProcessingOption, trueText)
     assert trueText == config.get_property(PropertyId.SpeechServiceResponse_PostProcessingOption)
 
-    audio_input = msspeech.AudioConfig(filename=speech_input.path)
+    audio_input = msspeech.audio.AudioConfig(filename=speech_input.path)
     recognizer = msspeech.SpeechRecognizer(config, audio_input)
 
     assert initialSilenceTimeout == recognizer.properties.get_property(PropertyId.SpeechServiceConnection_InitialSilenceTimeoutMs)
@@ -636,7 +636,7 @@ def test_speech_config_properties_direct_set_and_get(speech_input):
     config.request_word_level_timestamps()
     config.enable_dictation()
 
-    audio_input = msspeech.AudioConfig(filename=speech_input.path)
+    audio_input = msspeech.audio.AudioConfig(filename=speech_input.path)
     recognizer = msspeech.SpeechRecognizer(config, audio_input)
 
     assert "DICTATION" == config.get_property(PropertyId.SpeechServiceConnection_RecoMode)

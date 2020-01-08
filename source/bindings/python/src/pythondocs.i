@@ -226,7 +226,7 @@ is the translation text in that language.
 ";
 
 %feature("docstring") Microsoft::CognitiveServices::Speech::Translation::TranslationSynthesisEventArgs "
-Defines payload that is sent with the event :py:attr:`TranslationRecognizer.synthesizing`.
+Defines payload that is sent with the event :py:obj:`TranslationRecognizer.synthesizing`.
 ";
 
 %feature("docstring") Microsoft::CognitiveServices::Speech::Translation::TranslationSynthesisEventArgs::Result "
@@ -295,7 +295,7 @@ DocstringForPropertyId = """
       token). Under normal circumstances, you shouldn't have to use this
       property directly. Instead, construct a :py:class:`.SpeechConfig`
       instance from an authorization token, or set
-      :py:attr:`.Recognizer.authorization_token`.
+      :py:obj:`.Recognizer.authorization_token`.
 
     .. py:attribute:: SpeechServiceAuthorization_Type
 
@@ -306,7 +306,7 @@ DocstringForPropertyId = """
 
       The Cognitive Services Custom Speech Service endpoint id. Under normal
       circumstances, you shouldn't have to use this property directly. Instead
-      set :py:attr:`.SpeechConfig.endpoint_id`.
+      set :py:obj:`.SpeechConfig.endpoint_id`.
 
       .. note::
 
@@ -360,13 +360,13 @@ DocstringForPropertyId = """
       languages. Under normal circumstances, you shouldn't have to use this
       property directly. Instead use
       :py:meth:`.SpeechTranslationConfig.add_target_language` and
-      :py:attr:`.SpeechTranslationConfig.target_languages`.
+      :py:obj:`.SpeechTranslationConfig.target_languages`.
 
     .. py:attribute:: SpeechServiceConnection_TranslationVoice
 
       The name of the Cognitive Service Text to Speech Service voice. Under
       normal circumstances, you shouldn't have to use this property directly.
-      Instead set :py:attr:`.SpeechTranslationConfig.voice_name`.
+      Instead set :py:obj:`.SpeechTranslationConfig.voice_name`.
 
       .. note::
 
@@ -392,7 +392,7 @@ DocstringForPropertyId = """
 
       The spoken language to be recognized (in BCP-47 format). Under normal
       circumstances, you shouldn't have to use this property directly. Instead,
-      use :py:attr:`.SpeechConfig.speech_recognition_language`.
+      use :py:obj:`.SpeechConfig.speech_recognition_language`.
 
     .. py:attribute:: Speech_SessionId
 
@@ -400,7 +400,7 @@ DocstringForPropertyId = """
       representing a specific binding of an audio input stream and the
       underlying speech recognition instance to which it is bound. Under normal
       circumstances, you shouldn't have to use this property directly. Instead
-      use :py:attr:`.SessionEventArgs.session_id`.
+      use :py:obj:`.SessionEventArgs.session_id`.
 
     .. py:attribute:: SpeechServiceConnection_SynthLanguage
 
@@ -449,7 +449,7 @@ DocstringForPropertyId = """
       The requested Cognitive Services Speech Service response output format
       (simple or detailed). Under normal circumstances, you shouldn't have to
       use this property directly. Instead use
-      :py:attr:`.SpeechConfig.output_format`.
+      :py:obj:`.SpeechConfig.output_format`.
 
     .. py:attribute:: SpeechServiceResponse_RequestProfanityFilterTrueFalse
 
@@ -505,14 +505,14 @@ DocstringForPropertyId = """
     .. py:attribute:: SpeechServiceResponse_JsonResult
 
       The Cognitive Services Speech Service response output (in JSON format).
-      This property is available as :py:attr:`.RecognitionResult.json`.
+      This property is available as :py:obj:`.RecognitionResult.json`.
 
     .. py:attribute:: SpeechServiceResponse_JsonErrorDetails
 
       The Cognitive Services Speech Service error details (in JSON format).
       Under normal circumstances, you shouldn't have to use this property
       directly. This property is available as
-      :py:attr:`.RecognitionResult.error_json`.
+      :py:obj:`.RecognitionResult.error_json`.
 
     .. py:attribute:: SpeechServiceResponse_RecognitionLatencyMs
 
@@ -543,7 +543,7 @@ DocstringForPropertyId = """
 
       The Language Understanding Service response output (in JSON format).
       This property is available as
-      :py:attr:`.IntentRecognitionResult.intent_json`.
+      :py:obj:`.IntentRecognitionResult.intent_json`.
 
     .. py:attribute:: AudioConfig_DeviceNameForCapture
 

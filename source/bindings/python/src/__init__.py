@@ -29,9 +29,10 @@ from .speech_py_impl import (
     ServicePropertyChannel,
 )
 
+from .audio import AudioConfig
+
 # override __module__ for correct docs generation
-for cls in (
-    AudioConfig,
+root_namespace_classes = (
     AudioDataStream,
     CancellationDetails,
     CancellationErrorCode,
@@ -66,42 +67,8 @@ for cls in (
     SpeechSynthesisWordBoundaryEventArgs,
     SpeechSynthesizer,
     StreamStatus,
-):
+)
+for cls in root_namespace_classes:
     cls.__module__ = __name__
-
-
-__all__ = [
-    'AudioDataStream',
-    'CancellationDetails',
-    'CancellationReason',
-    'Connection',
-    'ConnectionEventArgs',
-    'EventSignal',
-    'KeywordRecognitionModel',
-    'NoMatchDetails',
-    'NoMatchReason',
-    'OutputFormat',
-    'PhraseListGrammar',
-    'ProfanityOption',
-    'PropertyCollection',
-    'PropertyId',
-    'RecognitionEventArgs',
-    'RecognitionResult',
-    'Recognizer',
-    'ResultReason',
-    'ServicePropertyChannel',
-    'SessionEventArgs',
-    'SpeechConfig',
-    'SpeechRecognitionCanceledEventArgs',
-    'SpeechRecognitionEventArgs',
-    'SpeechRecognitionResult',
-    'SpeechRecognizer',
-    'SpeechSynthesisCancellationDetails',
-    'SpeechSynthesisEventArgs',
-    'SpeechSynthesisOutputFormat',
-    'SpeechSynthesisResult',
-    'SpeechSynthesisWordBoundaryEventArgs',
-    'SpeechSynthesizer',
-    'StreamStatus',
-]
+__all__ = [cls.__name__ for cls in root_namespace_classes]
 
