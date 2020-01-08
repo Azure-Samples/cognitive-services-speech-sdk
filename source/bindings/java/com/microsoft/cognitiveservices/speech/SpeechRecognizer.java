@@ -5,6 +5,7 @@
 package com.microsoft.cognitiveservices.speech;
 
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.SpeechRecognitionCanceledEventArgs;
@@ -24,17 +25,17 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
     /**
      * The event recognizing signals that an intermediate recognition result is received.
      */
-    final public EventHandlerImpl<SpeechRecognitionEventArgs> recognizing = new EventHandlerImpl<SpeechRecognitionEventArgs>();
+    final public EventHandlerImpl<SpeechRecognitionEventArgs> recognizing = new EventHandlerImpl<SpeechRecognitionEventArgs>(eventCounter);
 
     /**
      * The event recognized signals that a final recognition result is received.
      */
-    final public EventHandlerImpl<SpeechRecognitionEventArgs> recognized = new EventHandlerImpl<SpeechRecognitionEventArgs>();
+    final public EventHandlerImpl<SpeechRecognitionEventArgs> recognized = new EventHandlerImpl<SpeechRecognitionEventArgs>(eventCounter);
 
     /**
      * The event canceled signals that the recognition was canceled.
      */
-    final public EventHandlerImpl<SpeechRecognitionCanceledEventArgs> canceled = new EventHandlerImpl<SpeechRecognitionCanceledEventArgs>();
+    final public EventHandlerImpl<SpeechRecognitionCanceledEventArgs> canceled = new EventHandlerImpl<SpeechRecognitionCanceledEventArgs>(eventCounter);
 
     /**
      * Initializes a new instance of Speech Recognizer.
@@ -317,37 +318,54 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
     /*! \cond PROTECTED */
 
     @Override
-    protected void dispose(boolean disposing)
+    protected void dispose(final boolean disposing)
     {
         if (disposed) {
             return;
         }
 
         if (disposing) {
-            if (this.recognizing.isUpdateNotificationOnConnectedFired())
-                recoImpl.getRecognizing().RemoveEventListener(recognizingHandler);
-            if (this.recognized.isUpdateNotificationOnConnectedFired())
-                recoImpl.getRecognized().RemoveEventListener(recognizedHandler);
-            if (this.canceled.isUpdateNotificationOnConnectedFired())
-                recoImpl.getCanceled().RemoveEventListener(errorHandler);
-            if (this.sessionStarted.isUpdateNotificationOnConnectedFired())
-                recoImpl.getSessionStarted().RemoveEventListener(sessionStartedHandler);
-            if (this.sessionStopped.isUpdateNotificationOnConnectedFired())
-                recoImpl.getSessionStopped().RemoveEventListener(sessionStoppedHandler);
-            if (this.speechStartDetected.isUpdateNotificationOnConnectedFired())
-                recoImpl.getSpeechStartDetected().RemoveEventListener(speechStartDetectedHandler);
-            if (this.speechEndDetected.isUpdateNotificationOnConnectedFired())
-                recoImpl.getSpeechEndDetected().RemoveEventListener(speechEndDetectedHandler);
+            if(this.eventCounter.get() != 0 && backgroundAttempts <= 50 ) {
+                // There is an event callback in progress, closing while in an event call results in SWIG problems, so 
+                // spin a thread to try again in 500ms and return.
+                getProperties().getProperty("Backgrounding release " + backgroundAttempts.toString() + " " + this.eventCounter.get(), ""); 
+                Thread t = new Thread(
+                    new Runnable(){
+                        @Override
+                        public void run() {
+                            try{
+                                Thread.sleep(500 * ++backgroundAttempts);
+                                dispose(disposing);
+                            } catch (Exception e){}
+                        }
+                    });
+                t.start();
+            } else {
+                if (this.recognizing.isUpdateNotificationOnConnectedFired())
+                    recoImpl.getRecognizing().RemoveEventListener(recognizingHandler);
+                if (this.recognized.isUpdateNotificationOnConnectedFired())
+                    recoImpl.getRecognized().RemoveEventListener(recognizedHandler);
+                if (this.canceled.isUpdateNotificationOnConnectedFired())
+                    recoImpl.getCanceled().RemoveEventListener(errorHandler);
+                if (this.sessionStarted.isUpdateNotificationOnConnectedFired())
+                    recoImpl.getSessionStarted().RemoveEventListener(sessionStartedHandler);
+                if (this.sessionStopped.isUpdateNotificationOnConnectedFired())
+                    recoImpl.getSessionStopped().RemoveEventListener(sessionStoppedHandler);
+                if (this.speechStartDetected.isUpdateNotificationOnConnectedFired())
+                    recoImpl.getSpeechStartDetected().RemoveEventListener(speechStartDetectedHandler);
+                if (this.speechEndDetected.isUpdateNotificationOnConnectedFired())
+                    recoImpl.getSpeechEndDetected().RemoveEventListener(speechEndDetectedHandler);
 
-            recognizingHandler.delete();
-            recognizedHandler.delete();
-            errorHandler.delete();
-            recoImpl.delete();
-            _Parameters.close();
+                recognizingHandler.delete();
+                recognizedHandler.delete();
+                errorHandler.delete();
+                recoImpl.delete();
+                _Parameters.close();
 
-            _speechRecognizerObjects.remove(this);
-            disposed = true;
-            super.dispose(disposing);
+                _speechRecognizerObjects.remove(this);
+                disposed = true;
+                super.dispose(disposing);                
+            }    
         }
     }
 
@@ -478,7 +496,7 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
     // Defines a private class to raise an event for error during recognition when a corresponding callback is invoked by the native layer.
     private class CanceledHandlerImpl extends com.microsoft.cognitiveservices.speech.internal.SpeechRecognitionCanceledEventListener {
 
-        CanceledHandlerImpl(SpeechRecognizer recognizer) {
+        CanceledHandlerImpl(SpeechRecognizer recognizer ) {
             Contracts.throwIfNull(recognizer, "recognizer");
             this.recognizer = recognizer;
         }

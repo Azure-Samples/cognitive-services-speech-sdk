@@ -5,6 +5,7 @@
 package com.microsoft.cognitiveservices.speech.util;
 
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Implements the binding between the Speech SDK core event handler and Java event handling.
@@ -12,23 +13,15 @@ import java.util.ArrayList;
 public class EventHandlerImpl<T> {
     /**
      * Creates and initializes a new instance of the EventHandlerImpl.
+     * @param runCounter Counter to track if an event is in progress or not.
      */
-    public EventHandlerImpl()
+    public EventHandlerImpl(AtomicInteger runCounter)
     {
         this.notifyConnectedOnceFired = false;
+        this.runCounter = runCounter;
     }
 
-     /**
-     * Creates and initializes a new instance of the EventHandlerImpl.
-     * @param notifyConnectedOnce The handler to be called when the first client subscribes to the event.
-     */
-    public EventHandlerImpl(Runnable notifyConnectedOnce)
-    {
-        this();
-        this.notifyConnectedOnce = notifyConnectedOnce;
-    }
-
-     /**
+    /**
      * Updates the handler to be notified when the first client subscribes to the event.
      * @param notifyConnectedOnce The handler to be called when the first client subscribes to the event.
      *  If there is already a client subscribed, the callback is immediately invoked.
@@ -95,11 +88,18 @@ public class EventHandlerImpl<T> {
     {
         for(EventHandler<T> a : eventHandlerClients)
         {
+            if(null != this.runCounter) {
+                this.runCounter.incrementAndGet();
+            }
             a.onEvent(sender, e);
+            if(null != this.runCounter) {
+                this.runCounter.decrementAndGet();
+            }
         }
     }
 
     private ArrayList<EventHandler<T>> eventHandlerClients = new ArrayList<EventHandler<T>> ();
     private Runnable notifyConnectedOnce;
     private boolean notifyConnectedOnceFired;
+    private AtomicInteger runCounter;
 }

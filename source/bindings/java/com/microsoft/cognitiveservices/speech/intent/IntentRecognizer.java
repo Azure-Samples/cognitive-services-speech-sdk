@@ -23,17 +23,17 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
     /**
      * The event recognizing signals that an intermediate recognition result is received.
      */
-    final public EventHandlerImpl<IntentRecognitionEventArgs> recognizing = new EventHandlerImpl<IntentRecognitionEventArgs>();
+    final public EventHandlerImpl<IntentRecognitionEventArgs> recognizing = new EventHandlerImpl<IntentRecognitionEventArgs>(eventCounter);
 
     /**
      * The event recognized signals that a final recognition result is received.
      */
-    final public EventHandlerImpl<IntentRecognitionEventArgs> recognized = new EventHandlerImpl<IntentRecognitionEventArgs>();
+    final public EventHandlerImpl<IntentRecognitionEventArgs> recognized = new EventHandlerImpl<IntentRecognitionEventArgs>(eventCounter);
 
     /**
      * The event canceled signals that the intent recognition was canceled.
      */
-    final public EventHandlerImpl<IntentRecognitionCanceledEventArgs> canceled = new EventHandlerImpl<IntentRecognitionCanceledEventArgs>();
+    final public EventHandlerImpl<IntentRecognitionCanceledEventArgs> canceled = new EventHandlerImpl<IntentRecognitionCanceledEventArgs>(eventCounter);
 
     /**
      * Creates a new instance of an intent recognizer.
@@ -272,36 +272,54 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
     /*! \cond PROTECTED */
 
     @Override
-    protected void dispose(boolean disposing) {
+    protected void dispose(final boolean disposing) {
         if (disposed) {
             return;
         }
 
         if (disposing) {
-            if (this.recognizing.isUpdateNotificationOnConnectedFired())
-                recoImpl.getRecognizing().RemoveEventListener(recognizingHandler);
-            if (this.recognized.isUpdateNotificationOnConnectedFired())
-                recoImpl.getRecognized().RemoveEventListener(recognizedHandler);
-            if (this.canceled.isUpdateNotificationOnConnectedFired())
-                recoImpl.getCanceled().RemoveEventListener(errorHandler);
-            if (this.sessionStarted.isUpdateNotificationOnConnectedFired())
-                recoImpl.getSessionStarted().RemoveEventListener(sessionStartedHandler);
-            if (this.sessionStopped.isUpdateNotificationOnConnectedFired())
-                recoImpl.getSessionStopped().RemoveEventListener(sessionStoppedHandler);
-            if (this.speechStartDetected.isUpdateNotificationOnConnectedFired())
-                recoImpl.getSpeechStartDetected().RemoveEventListener(speechStartDetectedHandler);
-            if (this.speechEndDetected.isUpdateNotificationOnConnectedFired())
-                recoImpl.getSpeechEndDetected().RemoveEventListener(speechEndDetectedHandler);
+            if(this.eventCounter.get() != 0 && backgroundAttempts <= 50 ) {
+                // There is an event callback in progress, closing while in an event call results in SWIG problems, so 
+                // spin a thread to try again in 500ms and return.
+                getProperties().getProperty("Backgrounding release " + backgroundAttempts.toString() + " " + this.eventCounter.get(), ""); 
+                Thread t = new Thread(
+                    new Runnable(){
+                        @Override
+                        public void run() {
+                            try{
+                                Thread.sleep(500 * ++backgroundAttempts);
+                                dispose(disposing);
+                            } catch (Exception e){}
+                        }
+                    });
+                t.start();
+            }
+            else {
+                if (this.recognizing.isUpdateNotificationOnConnectedFired())
+                    recoImpl.getRecognizing().RemoveEventListener(recognizingHandler);
+                if (this.recognized.isUpdateNotificationOnConnectedFired())
+                    recoImpl.getRecognized().RemoveEventListener(recognizedHandler);
+                if (this.canceled.isUpdateNotificationOnConnectedFired())
+                    recoImpl.getCanceled().RemoveEventListener(errorHandler);
+                if (this.sessionStarted.isUpdateNotificationOnConnectedFired())
+                    recoImpl.getSessionStarted().RemoveEventListener(sessionStartedHandler);
+                if (this.sessionStopped.isUpdateNotificationOnConnectedFired())
+                    recoImpl.getSessionStopped().RemoveEventListener(sessionStoppedHandler);
+                if (this.speechStartDetected.isUpdateNotificationOnConnectedFired())
+                    recoImpl.getSpeechStartDetected().RemoveEventListener(speechStartDetectedHandler);
+                if (this.speechEndDetected.isUpdateNotificationOnConnectedFired())
+                    recoImpl.getSpeechEndDetected().RemoveEventListener(speechEndDetectedHandler);
 
-            recognizingHandler.delete();
-            recognizedHandler.delete();
-            errorHandler.delete();
-            recoImpl.delete();
-            _Parameters.close();
+                recognizingHandler.delete();
+                recognizedHandler.delete();
+                errorHandler.delete();
+                recoImpl.delete();
+                _Parameters.close();
 
-            _intentRecognizerObjects.remove(this);
-            disposed = true;
-            super.dispose(disposing);
+                _intentRecognizerObjects.remove(this);
+                disposed = true;
+                super.dispose(disposing);
+            }
         }
     }
 

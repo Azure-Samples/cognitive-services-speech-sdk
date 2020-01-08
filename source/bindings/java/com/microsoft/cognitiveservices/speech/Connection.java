@@ -5,6 +5,7 @@
 package com.microsoft.cognitiveservices.speech;
 
 import java.io.Closeable;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -120,19 +121,21 @@ public final class Connection implements Closeable
         }
     }
 
+    private AtomicInteger eventCounter = new AtomicInteger(0);
+
     /**
      * The Connected event to indicate that the recognizer is connected to service.
      * In order to receive the connected event after subscribing to it, the Connection object itself needs to be alive.
      * If the Connection object owning this event is out of its life time, all subscribed events won't be delivered.
      */
-    public final EventHandlerImpl<ConnectionEventArgs> connected = new EventHandlerImpl<ConnectionEventArgs>();
+    public final EventHandlerImpl<ConnectionEventArgs> connected = new EventHandlerImpl<ConnectionEventArgs>(eventCounter);
 
     /**
      * The Diconnected event to indicate that the recognizer is disconnected from service.
      * In order to receive the disconnected event after subscribing to it, the Connection object itself needs to be alive.
      * If the Connection object owning this event is out of its life time, all subscribed events won't be delivered.
      */
-    public final EventHandlerImpl<ConnectionEventArgs> disconnected = new EventHandlerImpl<ConnectionEventArgs>();
+    public final EventHandlerImpl<ConnectionEventArgs> disconnected = new EventHandlerImpl<ConnectionEventArgs>(eventCounter);
 
     /**
      * Dispose of associated resources.
@@ -150,29 +153,48 @@ public final class Connection implements Closeable
 
     /*! \cond PROTECTED */
 
+    private Integer backgroundAttempts = 0;
+
     /**
      * This method performs cleanup of resources.
      * The Boolean parameter disposing indicates whether the method is called from Dispose (if disposing is true) or from the finalizer (if disposing is false).
      * Derived classes should override this method to dispose resource if needed.
      * @param disposing Flag to request disposal.
      */
-    protected void dispose(boolean disposing) {
+    protected void dispose(final boolean disposing) {
         if (disposed) {
             return;
         }
 
         if (disposing) {
-            // disconnect
-            if (this.connected.isUpdateNotificationOnConnectedFired())
-                connectionImpl.getConnected().DisconnectAll();
-            if (this.disconnected.isUpdateNotificationOnConnectedFired())
-                connectionImpl.getDisconnected().DisconnectAll();
+            if(this.eventCounter.get() != 0 && backgroundAttempts <= 50 ) {
+                // There is an event callback in progress, closing while in an event call results in SWIG problems, so 
+                // spin a thread to try again in 500ms and return.
+                Thread t = new Thread(
+                    new Runnable(){
+                        @Override
+                        public void run() {
+                            try{
+                                Thread.sleep(500 * ++backgroundAttempts);
+                                dispose(disposing);
+                            } catch (Exception e){}
+                        }
+                    });
+                t.start();
+            }
+            else {
+                // disconnect
+                if (this.connected.isUpdateNotificationOnConnectedFired())
+                    connectionImpl.getConnected().DisconnectAll();
+                if (this.disconnected.isUpdateNotificationOnConnectedFired())
+                    connectionImpl.getDisconnected().DisconnectAll();
 
-            connectedHandler.delete();
-            disconnectedHandler.delete();
-            connectionImpl.delete();
-            _connectionObjects.remove(this);
-            disposed = true;
+                connectedHandler.delete();
+                disconnectedHandler.delete();
+                connectionImpl.delete();
+                _connectionObjects.remove(this);
+                disposed = true;
+            }
         }
     }
 

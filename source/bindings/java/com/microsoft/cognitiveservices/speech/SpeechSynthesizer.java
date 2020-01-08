@@ -5,6 +5,7 @@
 package com.microsoft.cognitiveservices.speech;
 
 import java.io.Closeable;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -19,30 +20,32 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
  */
 public class SpeechSynthesizer implements Closeable
 {
+    private AtomicInteger eventCounter = new AtomicInteger(0);
+
     /**
      * Defines event handler for synthesis started event.
      */
-    final public EventHandlerImpl<SpeechSynthesisEventArgs> SynthesisStarted = new EventHandlerImpl<SpeechSynthesisEventArgs>();
+    final public EventHandlerImpl<SpeechSynthesisEventArgs> SynthesisStarted = new EventHandlerImpl<SpeechSynthesisEventArgs>(eventCounter);
 
     /**
      * Defines event handler for synthesizing event.
      */
-    final public EventHandlerImpl<SpeechSynthesisEventArgs> Synthesizing = new EventHandlerImpl<SpeechSynthesisEventArgs>();
+    final public EventHandlerImpl<SpeechSynthesisEventArgs> Synthesizing = new EventHandlerImpl<SpeechSynthesisEventArgs>(eventCounter);
 
     /**
      * Defines event handler for synthesis completed event.
      */
-    final public EventHandlerImpl<SpeechSynthesisEventArgs> SynthesisCompleted = new EventHandlerImpl<SpeechSynthesisEventArgs>();
+    final public EventHandlerImpl<SpeechSynthesisEventArgs> SynthesisCompleted = new EventHandlerImpl<SpeechSynthesisEventArgs>(eventCounter);
 
     /**
      * Defines event handler for synthesis canceled event.
      */
-    final public EventHandlerImpl<SpeechSynthesisEventArgs> SynthesisCanceled = new EventHandlerImpl<SpeechSynthesisEventArgs>();
+    final public EventHandlerImpl<SpeechSynthesisEventArgs> SynthesisCanceled = new EventHandlerImpl<SpeechSynthesisEventArgs>(eventCounter);
 
     /**
      * Defines event handler for word boundary event.
      */
-    final public EventHandlerImpl<SpeechSynthesisWordBoundaryEventArgs> WordBoundary = new EventHandlerImpl<SpeechSynthesisWordBoundaryEventArgs>();
+    final public EventHandlerImpl<SpeechSynthesisWordBoundaryEventArgs> WordBoundary = new EventHandlerImpl<SpeechSynthesisWordBoundaryEventArgs>(eventCounter);
 
     private static ExecutorService s_executorService;
 
@@ -325,33 +328,52 @@ public class SpeechSynthesizer implements Closeable
         }
     }
 
-    private void dispose(boolean disposing)
+    private Integer backgroundAttempts = 0;
+
+    private void dispose(final boolean disposing)
     {
         if (this.disposed) {
             return;
         }
 
         if (disposing) {
-            if (this.SynthesisStarted.isUpdateNotificationOnConnectedFired())
-                this.synthImpl.getSynthesisStarted().RemoveEventListener(this.synthesisStartedHandler);
-            if (this.Synthesizing.isUpdateNotificationOnConnectedFired())
-                this.synthImpl.getSynthesizing().RemoveEventListener(this.synthesizingHandler);
-            if (this.SynthesisCompleted.isUpdateNotificationOnConnectedFired())
-                this.synthImpl.getSynthesisCompleted().RemoveEventListener(this.synthesisCompletedHandler);
-            if (this.SynthesisCanceled.isUpdateNotificationOnConnectedFired())
-                this.synthImpl.getSynthesisCanceled().RemoveEventListener(this.synthesisCanceledHandler);
-            if (this.WordBoundary.isUpdateNotificationOnConnectedFired())
-                this.synthImpl.getWordBoundary().RemoveEventListener(this.wordBoundaryHandler);
+            if(this.eventCounter.get() != 0 && backgroundAttempts <= 50 ) {
+                // There is an event callback in progress, closing while in an event call results in SWIG problems, so 
+                // spin a thread to try again in 500ms and return.
+                Thread t = new Thread(
+                    new Runnable(){
+                        @Override
+                        public void run() {
+                            try{
+                                Thread.sleep(500 * ++backgroundAttempts);
+                                dispose(disposing);
+                            } catch (Exception e){}
+                        }
+                    });
+                t.start();
+            }
+            else {
+                if (this.SynthesisStarted.isUpdateNotificationOnConnectedFired())
+                    this.synthImpl.getSynthesisStarted().RemoveEventListener(this.synthesisStartedHandler);
+                if (this.Synthesizing.isUpdateNotificationOnConnectedFired())
+                    this.synthImpl.getSynthesizing().RemoveEventListener(this.synthesizingHandler);
+                if (this.SynthesisCompleted.isUpdateNotificationOnConnectedFired())
+                    this.synthImpl.getSynthesisCompleted().RemoveEventListener(this.synthesisCompletedHandler);
+                if (this.SynthesisCanceled.isUpdateNotificationOnConnectedFired())
+                    this.synthImpl.getSynthesisCanceled().RemoveEventListener(this.synthesisCanceledHandler);
+                if (this.WordBoundary.isUpdateNotificationOnConnectedFired())
+                    this.synthImpl.getWordBoundary().RemoveEventListener(this.wordBoundaryHandler);
 
-            this.synthesisStartedHandler.delete();
-            this.synthesizingHandler.delete();
-            this.synthesisCompletedHandler.delete();
-            this.synthesisCanceledHandler.delete();
-            this.wordBoundaryHandler.delete();
-            this.synthImpl.delete();
-            this.parameters.close();
-            s_speechSynthesizerObjects.remove(this);
-            this.disposed = true;
+                this.synthesisStartedHandler.delete();
+                this.synthesizingHandler.delete();
+                this.synthesisCompletedHandler.delete();
+                this.synthesisCanceledHandler.delete();
+                this.wordBoundaryHandler.delete();
+                this.synthImpl.delete();
+                this.parameters.close();
+                s_speechSynthesizerObjects.remove(this);
+                this.disposed = true;
+            }
         }
     }
 

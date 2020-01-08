@@ -5,6 +5,7 @@
 package com.microsoft.cognitiveservices.speech;
 
 import java.io.Closeable;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -21,6 +22,8 @@ public class Recognizer implements Closeable
 
     protected static ExecutorService s_executorService;
 
+    protected AtomicInteger eventCounter = new AtomicInteger(0);
+    protected Integer backgroundAttempts = 0;
     /*! \endcond */
 
     static {
@@ -30,22 +33,22 @@ public class Recognizer implements Closeable
     /**
      * Defines event handler for session started event.
      */
-    final public EventHandlerImpl<SessionEventArgs> sessionStarted = new EventHandlerImpl<SessionEventArgs>();
+    final public EventHandlerImpl<SessionEventArgs> sessionStarted = new EventHandlerImpl<SessionEventArgs>(eventCounter);
 
     /**
      * Defines event handler for session stopped event.
      */
-    final public EventHandlerImpl<SessionEventArgs> sessionStopped = new EventHandlerImpl<SessionEventArgs>();
+    final public EventHandlerImpl<SessionEventArgs> sessionStopped = new EventHandlerImpl<SessionEventArgs>(eventCounter);
 
     /**
      * Defines event handler for speech start detected event.
      */
-    final public EventHandlerImpl<RecognitionEventArgs> speechStartDetected = new EventHandlerImpl<RecognitionEventArgs>();
+    final public EventHandlerImpl<RecognitionEventArgs> speechStartDetected = new EventHandlerImpl<RecognitionEventArgs>(eventCounter);
 
     /**
      * Defines event handler for speech end detected event.
      */
-    final public EventHandlerImpl<RecognitionEventArgs> speechEndDetected = new EventHandlerImpl<RecognitionEventArgs>();
+    final public EventHandlerImpl<RecognitionEventArgs> speechEndDetected = new EventHandlerImpl<RecognitionEventArgs>(eventCounter);
 
     @SuppressWarnings("unused")
     private AudioConfig audioInputKeepAlive;
@@ -98,18 +101,35 @@ public class Recognizer implements Closeable
      * Derived classes should override this method to dispose resource if needed.
      * @param disposing Flag to request disposal.
      */
-    protected void dispose(boolean disposing) {
+    protected void dispose(final boolean disposing) {
         if (disposed) {
             return;
         }
 
         if (disposing) {
-            // disconnect
-            sessionStartedHandler.delete();
-            sessionStoppedHandler.delete();
-            speechStartDetectedHandler.delete();
-            speechEndDetectedHandler.delete();
-            internalRecognizerImpl.delete();
+            if(this.eventCounter.get() != 0 && backgroundAttempts <= 50 ) {
+                // There is an event callback in progress, closing while in an event call results in SWIG problems, so 
+                // spin a thread to try again in 500ms and return.
+                Thread t = new Thread(
+                    new Runnable(){
+                        @Override
+                        public void run() {
+                            try{
+                                Thread.sleep(500 * ++backgroundAttempts);
+                                dispose(disposing);
+                            } catch (Exception e){}
+                        }
+                    });
+                t.start();
+            }
+            else {
+                // disconnect
+                sessionStartedHandler.delete();
+                sessionStoppedHandler.delete();
+                speechStartDetectedHandler.delete();
+                speechEndDetectedHandler.delete();
+                internalRecognizerImpl.delete();
+            }
         }
 
         disposed = true;

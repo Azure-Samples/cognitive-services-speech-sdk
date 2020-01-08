@@ -5,6 +5,7 @@
 package com.microsoft.cognitiveservices.speech.dialog;
 
 import java.io.Closeable;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -29,7 +30,9 @@ public class DialogServiceConnector implements Closeable {
     /*! \cond PROTECTED */
     static Class<?> dialogServiceConnector = null;
     private ExecutorService executorService;
-
+    private AtomicInteger eventCounter = new AtomicInteger(0);
+    protected Integer backgroundAttempts = 0;
+    
     // load the native library.
     static {
         // trigger loading of native library
@@ -189,34 +192,35 @@ public class DialogServiceConnector implements Closeable {
     /**
      * Defines event handler for the recognizing event.
      */
-    public EventHandlerImpl<SpeechRecognitionEventArgs> recognizing = new EventHandlerImpl<SpeechRecognitionEventArgs>();
+    public EventHandlerImpl<SpeechRecognitionEventArgs> recognizing = new EventHandlerImpl<SpeechRecognitionEventArgs>(eventCounter);
 
     /**
      * Defines event handler for the recognized event.
      */
-    public EventHandlerImpl<SpeechRecognitionEventArgs> recognized = new EventHandlerImpl<SpeechRecognitionEventArgs>();
+    public EventHandlerImpl<SpeechRecognitionEventArgs> recognized = new EventHandlerImpl<SpeechRecognitionEventArgs>(eventCounter);
 
     /**
      * Defines event handler for the session start event.
      */
-    public EventHandlerImpl<SessionEventArgs> sessionStarted = new EventHandlerImpl<SessionEventArgs>();
+    public EventHandlerImpl<SessionEventArgs> sessionStarted = new EventHandlerImpl<SessionEventArgs>(eventCounter);
 
     /**
      * Defines event handler for the session stop event.
      */
-    public EventHandlerImpl<SessionEventArgs> sessionStopped = new EventHandlerImpl<SessionEventArgs>();
+    public EventHandlerImpl<SessionEventArgs> sessionStopped = new EventHandlerImpl<SessionEventArgs>(eventCounter);
 
     /**
      * Defines event handler for the canceled event.
      */
-    public EventHandlerImpl<SpeechRecognitionCanceledEventArgs> canceled = new EventHandlerImpl<SpeechRecognitionCanceledEventArgs>();
+    public EventHandlerImpl<SpeechRecognitionCanceledEventArgs> canceled = new EventHandlerImpl<SpeechRecognitionCanceledEventArgs>(eventCounter);
 
     /**
      * Defines event handler for the activity received event.
      */
-    public EventHandlerImpl<ActivityReceivedEventArgs> activityReceived = new EventHandlerImpl<ActivityReceivedEventArgs>();
+    public EventHandlerImpl<ActivityReceivedEventArgs> activityReceived = new EventHandlerImpl<ActivityReceivedEventArgs>(eventCounter);
 
     /*! \cond PROTECTED */
+
     private void initialize() {
         final DialogServiceConnector _this = this;
 
@@ -408,48 +412,65 @@ public class DialogServiceConnector implements Closeable {
     /*! \cond PROTECTED */
     private boolean disposed = false;
 
-    protected void dispose(boolean disposing) {
+    protected void dispose(final boolean disposing) {
         if (disposed) {
             return;
         }
         if (disposing) {
+            if(this.eventCounter.get() != 0 && backgroundAttempts <= 50 ) {
+                // There is an event callback in progress, closing while in an event call results in SWIG problems, so 
+                // spin a thread to try again in 500ms and return.
+                Thread t = new Thread(
+                    new Runnable(){
+                        @Override
+                        public void run() {
+                            try{
+                                Thread.sleep(500 * ++backgroundAttempts);
+                                dispose(disposing);
+                            } catch (Exception e){}
+                        }
+                    });
+                t.start();
+            }
+            else {
 
-            // Trigger graceful shutdown of executor service
-            executorService.shutdown();
+                // Trigger graceful shutdown of executor service
+                executorService.shutdown();
 
-            if (this.recognizing.isUpdateNotificationOnConnectedFired()) {
-                dialogServiceConnectorImpl.getRecognizing().RemoveEventListener(recognizingHandler);
-            }
-            if (this.recognized.isUpdateNotificationOnConnectedFired()) {
-                dialogServiceConnectorImpl.getRecognized().RemoveEventListener(recognizedHandler);
-            }
-            if (this.sessionStarted.isUpdateNotificationOnConnectedFired()) {
-                dialogServiceConnectorImpl.getSessionStarted().RemoveEventListener(sessionStartedHandler);
-            }
-            if (this.sessionStopped.isUpdateNotificationOnConnectedFired()) {
-                dialogServiceConnectorImpl.getSessionStopped().RemoveEventListener(sessionStoppedHandler);
-            }
-            if (this.canceled.isUpdateNotificationOnConnectedFired()) {
-                dialogServiceConnectorImpl.getCanceled().RemoveEventListener(canceledHandler);
-            }
-            if (this.activityReceived.isUpdateNotificationOnConnectedFired()) {
-                dialogServiceConnectorImpl.getActivityReceived().RemoveEventListener(activityReceivedHandler);
-            }
+                if (this.recognizing.isUpdateNotificationOnConnectedFired()) {
+                    dialogServiceConnectorImpl.getRecognizing().RemoveEventListener(recognizingHandler);
+                }
+                if (this.recognized.isUpdateNotificationOnConnectedFired()) {
+                    dialogServiceConnectorImpl.getRecognized().RemoveEventListener(recognizedHandler);
+                }
+                if (this.sessionStarted.isUpdateNotificationOnConnectedFired()) {
+                    dialogServiceConnectorImpl.getSessionStarted().RemoveEventListener(sessionStartedHandler);
+                }
+                if (this.sessionStopped.isUpdateNotificationOnConnectedFired()) {
+                    dialogServiceConnectorImpl.getSessionStopped().RemoveEventListener(sessionStoppedHandler);
+                }
+                if (this.canceled.isUpdateNotificationOnConnectedFired()) {
+                    dialogServiceConnectorImpl.getCanceled().RemoveEventListener(canceledHandler);
+                }
+                if (this.activityReceived.isUpdateNotificationOnConnectedFired()) {
+                    dialogServiceConnectorImpl.getActivityReceived().RemoveEventListener(activityReceivedHandler);
+                }
 
-            recognizingHandler.delete();
-            recognizedHandler.delete();
-            sessionStartedHandler.delete();
-            sessionStoppedHandler.delete();
-            canceledHandler.delete();
-            activityReceivedHandler.delete();
-            dialogServiceConnectorImpl.delete();
-            _dialogServiceConnectorObjects.remove(this);
+                recognizingHandler.delete();
+                recognizedHandler.delete();
+                sessionStartedHandler.delete();
+                sessionStoppedHandler.delete();
+                canceledHandler.delete();
+                activityReceivedHandler.delete();
+                dialogServiceConnectorImpl.delete();
+                _dialogServiceConnectorObjects.remove(this);
 
-            // If the executor service has not been shut down, force shut down
-            if (!executorService.isShutdown()) {
-                executorService.shutdownNow();
+                // If the executor service has not been shut down, force shut down
+                if (!executorService.isShutdown()) {
+                    executorService.shutdownNow();
+                }
+                disposed = true;
             }
-            disposed = true;
         }
     }
     /*! \endcond */

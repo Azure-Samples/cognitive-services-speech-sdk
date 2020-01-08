@@ -22,22 +22,22 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
     /**
      * The event recognizing signals that an intermediate recognition result is received.
      */
-    public final EventHandlerImpl<TranslationRecognitionEventArgs> recognizing = new EventHandlerImpl<TranslationRecognitionEventArgs>();
+    public final EventHandlerImpl<TranslationRecognitionEventArgs> recognizing = new EventHandlerImpl<TranslationRecognitionEventArgs>(eventCounter);
 
     /**
      * The event recognized signals that a final recognition result is received.
      */
-    public final EventHandlerImpl<TranslationRecognitionEventArgs> recognized = new EventHandlerImpl<TranslationRecognitionEventArgs>();
+    public final EventHandlerImpl<TranslationRecognitionEventArgs> recognized = new EventHandlerImpl<TranslationRecognitionEventArgs>(eventCounter);
 
     /**
      * The event canceled signals that the recognition/translation was canceled.
      */
-    public final EventHandlerImpl<TranslationRecognitionCanceledEventArgs> canceled = new EventHandlerImpl<TranslationRecognitionCanceledEventArgs>();
+    public final EventHandlerImpl<TranslationRecognitionCanceledEventArgs> canceled = new EventHandlerImpl<TranslationRecognitionCanceledEventArgs>(eventCounter);
 
     /**
      * The event synthesizing signals that a translation synthesis result is received.
      */
-    public final EventHandlerImpl<TranslationSynthesisEventArgs> synthesizing = new EventHandlerImpl<TranslationSynthesisEventArgs>();
+    public final EventHandlerImpl<TranslationSynthesisEventArgs> synthesizing = new EventHandlerImpl<TranslationSynthesisEventArgs>(eventCounter);
 
     /**
      * Constructs an instance of a translation recognizer.
@@ -207,41 +207,58 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
     /*! \cond PROTECTED */
 
     @Override
-    protected void dispose(boolean disposing)
+    protected void dispose(final boolean disposing)
     {
         if (disposed)
         {
             return;
         }
 
-        if (disposing)
-        {
-            if (this.recognizing.isUpdateNotificationOnConnectedFired())
-                recoImpl.getRecognizing().RemoveEventListener(recognizingHandler);
-            if (this.recognized.isUpdateNotificationOnConnectedFired())
-                recoImpl.getRecognized().RemoveEventListener(recognizedHandler);
-            if (this.synthesizing.isUpdateNotificationOnConnectedFired())
-                recoImpl.getSynthesizing().RemoveEventListener(synthesisResultHandler);
-            if (this.canceled.isUpdateNotificationOnConnectedFired())
-                recoImpl.getCanceled().RemoveEventListener(errorHandler);
-            if (this.sessionStarted.isUpdateNotificationOnConnectedFired())
-                recoImpl.getSessionStarted().RemoveEventListener(sessionStartedHandler);
-            if (this.sessionStopped.isUpdateNotificationOnConnectedFired())
-                recoImpl.getSessionStopped().RemoveEventListener(sessionStoppedHandler);
-            if (this.speechStartDetected.isUpdateNotificationOnConnectedFired())
-                recoImpl.getSpeechStartDetected().RemoveEventListener(speechStartDetectedHandler);
-            if (this.speechEndDetected.isUpdateNotificationOnConnectedFired())
-                recoImpl.getSpeechEndDetected().RemoveEventListener(speechEndDetectedHandler);
+        if (disposing) {
+            if(this.eventCounter.get() != 0) {
+                // There is an event callback in progress, closing while in an event call results in SWIG problems, so 
+                // spin a thread to try again in 500ms and return.
+                getProperties().getProperty("Backgrounding release", ""); 
+                Thread t = new Thread(
+                    new Runnable(){
+                        @Override
+                        public void run() {
+                            try{
+                                Thread.sleep(500);
+                                dispose(disposing);
+                            } catch (Exception e){}
+                        }
+                    });
+                t.start();
+            }
+            else {
+                if (this.recognizing.isUpdateNotificationOnConnectedFired())
+                    recoImpl.getRecognizing().RemoveEventListener(recognizingHandler);
+                if (this.recognized.isUpdateNotificationOnConnectedFired())
+                    recoImpl.getRecognized().RemoveEventListener(recognizedHandler);
+                if (this.synthesizing.isUpdateNotificationOnConnectedFired())
+                    recoImpl.getSynthesizing().RemoveEventListener(synthesisResultHandler);
+                if (this.canceled.isUpdateNotificationOnConnectedFired())
+                    recoImpl.getCanceled().RemoveEventListener(errorHandler);
+                if (this.sessionStarted.isUpdateNotificationOnConnectedFired())
+                    recoImpl.getSessionStarted().RemoveEventListener(sessionStartedHandler);
+                if (this.sessionStopped.isUpdateNotificationOnConnectedFired())
+                    recoImpl.getSessionStopped().RemoveEventListener(sessionStoppedHandler);
+                if (this.speechStartDetected.isUpdateNotificationOnConnectedFired())
+                    recoImpl.getSpeechStartDetected().RemoveEventListener(speechStartDetectedHandler);
+                if (this.speechEndDetected.isUpdateNotificationOnConnectedFired())
+                    recoImpl.getSpeechEndDetected().RemoveEventListener(speechEndDetectedHandler);
 
-            recognizingHandler.delete();
-            recognizedHandler.delete();
-            errorHandler.delete();
-            recoImpl.delete();
-            _Parameters.close();
+                recognizingHandler.delete();
+                recognizedHandler.delete();
+                errorHandler.delete();
+                recoImpl.delete();
+                _Parameters.close();
 
-            _translationRecognizerObjects.remove(this);
-            disposed = true;
-            super.dispose(disposing);
+                _translationRecognizerObjects.remove(this);
+                disposed = true;
+                super.dispose(disposing);
+            }
         }
     }
 

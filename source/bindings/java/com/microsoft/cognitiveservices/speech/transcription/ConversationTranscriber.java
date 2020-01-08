@@ -4,6 +4,7 @@
 //
 package com.microsoft.cognitiveservices.speech.transcription;
 
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.Future;
 import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.SpeechConfig;
@@ -21,20 +22,22 @@ import com.microsoft.cognitiveservices.speech.PropertyCollection;
  */
 public final class ConversationTranscriber extends com.microsoft.cognitiveservices.speech.Recognizer
 {
+    private AtomicInteger eventCounter = new AtomicInteger(0);
+
     /**
      * The event transcribing signals that an intermediate recognition result is received.
      */
-    final public EventHandlerImpl<ConversationTranscriptionEventArgs> transcribing = new EventHandlerImpl<ConversationTranscriptionEventArgs>();
+    final public EventHandlerImpl<ConversationTranscriptionEventArgs> transcribing = new EventHandlerImpl<ConversationTranscriptionEventArgs>(eventCounter);
 
     /**
      * The event transcribed signals that a final recognition result is received.
      */
-    final public EventHandlerImpl<ConversationTranscriptionEventArgs> transcribed = new EventHandlerImpl<ConversationTranscriptionEventArgs>();
+    final public EventHandlerImpl<ConversationTranscriptionEventArgs> transcribed = new EventHandlerImpl<ConversationTranscriptionEventArgs>(eventCounter);
 
     /**
      * The event canceled signals that the recognition was canceled.
      */
-    final public EventHandlerImpl<ConversationTranscriptionCanceledEventArgs> canceled = new EventHandlerImpl<ConversationTranscriptionCanceledEventArgs>();
+    final public EventHandlerImpl<ConversationTranscriptionCanceledEventArgs> canceled = new EventHandlerImpl<ConversationTranscriptionCanceledEventArgs>(eventCounter);
 
     /**
      * Initializes a new instance of Conversation Transcriber.
@@ -161,37 +164,55 @@ public final class ConversationTranscriber extends com.microsoft.cognitiveservic
     /*! \cond PROTECTED */
 
     @Override
-    protected void dispose(boolean disposing)
+    protected void dispose(final boolean disposing)
     {
         if (disposed) {
             return;
         }
 
-        if (disposing) {
-            if (this.transcribing.isUpdateNotificationOnConnectedFired())
-                transcriberImpl.getTranscribing().RemoveEventListener(transcribingHandler);
-            if (this.transcribed.isUpdateNotificationOnConnectedFired())
-                transcriberImpl.getTranscribed().RemoveEventListener(recognizedHandler);
-            if (this.canceled.isUpdateNotificationOnConnectedFired())
-                transcriberImpl.getCanceled().RemoveEventListener(errorHandler);
-            if (this.sessionStarted.isUpdateNotificationOnConnectedFired())
-                transcriberImpl.getSessionStarted().RemoveEventListener(sessionStartedHandler);
-            if (this.sessionStopped.isUpdateNotificationOnConnectedFired())
-                transcriberImpl.getSessionStopped().RemoveEventListener(sessionStoppedHandler);
-            if (this.speechStartDetected.isUpdateNotificationOnConnectedFired())
-                transcriberImpl.getSpeechStartDetected().RemoveEventListener(speechStartDetectedHandler);
-            if (this.speechEndDetected.isUpdateNotificationOnConnectedFired())
-                transcriberImpl.getSpeechEndDetected().RemoveEventListener(speechEndDetectedHandler);
+        if (disposing) {  
+            if(this.eventCounter.get() != 0 && backgroundAttempts <= 50 ) {
+                // There is an event callback in progress, closing while in an event call results in SWIG problems, so 
+                // spin a thread to try again in 500ms and return.
+                getProperties().getProperty("Backgrounding release " + backgroundAttempts.toString() + " " + this.eventCounter.get(), ""); 
+                Thread t = new Thread(
+                    new Runnable(){
+                        @Override
+                        public void run() {
+                            try{
+                                Thread.sleep(500 * ++backgroundAttempts);
+                                dispose(disposing);
+                            } catch (Exception e){}
+                        }
+                    });
+                t.start();
+            }
+            else {
+                if (this.transcribing.isUpdateNotificationOnConnectedFired())
+                    transcriberImpl.getTranscribing().RemoveEventListener(transcribingHandler);
+                if (this.transcribed.isUpdateNotificationOnConnectedFired())
+                    transcriberImpl.getTranscribed().RemoveEventListener(recognizedHandler);
+                if (this.canceled.isUpdateNotificationOnConnectedFired())
+                    transcriberImpl.getCanceled().RemoveEventListener(errorHandler);
+                if (this.sessionStarted.isUpdateNotificationOnConnectedFired())
+                    transcriberImpl.getSessionStarted().RemoveEventListener(sessionStartedHandler);
+                if (this.sessionStopped.isUpdateNotificationOnConnectedFired())
+                    transcriberImpl.getSessionStopped().RemoveEventListener(sessionStoppedHandler);
+                if (this.speechStartDetected.isUpdateNotificationOnConnectedFired())
+                    transcriberImpl.getSpeechStartDetected().RemoveEventListener(speechStartDetectedHandler);
+                if (this.speechEndDetected.isUpdateNotificationOnConnectedFired())
+                    transcriberImpl.getSpeechEndDetected().RemoveEventListener(speechEndDetectedHandler);
 
-            transcribingHandler.delete();
-            recognizedHandler.delete();
-            errorHandler.delete();
-            transcriberImpl.delete();
-            _Parameters.close();
+                transcribingHandler.delete();
+                recognizedHandler.delete();
+                errorHandler.delete();
+                transcriberImpl.delete();
+                _Parameters.close();
 
-            _conversationTranscriberObjects.remove(this);
-            disposed = true;
-            super.dispose(disposing);
+                _conversationTranscriberObjects.remove(this);
+                disposed = true;
+                super.dispose(disposing);
+            }
         }
     }
 
