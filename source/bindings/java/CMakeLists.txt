@@ -345,6 +345,7 @@ set(JAVA_SOURCES
     ${PACKAGE_DIR}/util/EventHandler.java
     ${PACKAGE_DIR}/util/EventHandlerImpl.java
     ${PACKAGE_DIR}/util/Contracts.java
+    ${PACKAGE_DIR}/util/CloseGuard.java
 )
 if(NOT ANDROID)
   list(APPEND JAVA_SOURCES ${PACKAGE_DIR}/NativeLibraryLoader.java)

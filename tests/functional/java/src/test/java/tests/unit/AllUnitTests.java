@@ -27,6 +27,7 @@ import org.junit.runners.Suite.SuiteClasses;
     GrammarListTests.class,
     ClassLanguageModelTests.class,
     ConversationTranscriberTests.class,
+    CloseGuardTests.class,
     })
 public class AllUnitTests {
 

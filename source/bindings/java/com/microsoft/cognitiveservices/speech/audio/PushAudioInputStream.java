@@ -5,6 +5,7 @@ package com.microsoft.cognitiveservices.speech.audio;
 //
 
 import com.microsoft.cognitiveservices.speech.SpeechConfig;
+import com.microsoft.cognitiveservices.speech.util.CloseGuard;
 
 /**
  * Represents memory backed push audio input stream used for custom audio input configurations.
@@ -47,7 +48,12 @@ public final class PushAudioInputStream extends com.microsoft.cognitiveservices.
      * @param dataBuffer The audio buffer of which this function will make a copy.
      */
     public void write(byte[] dataBuffer) {
-        this._pushStreamImpl.Write(dataBuffer);
+        cg.enterUseObject();
+        try {
+            this._pushStreamImpl.Write(dataBuffer);
+        } finally {
+            cg.exitUseObject();
+        }
     }
 
     /**
@@ -56,11 +62,15 @@ public final class PushAudioInputStream extends com.microsoft.cognitiveservices.
      */
     @Override
     public void close() {
-        if (this._pushStreamImpl != null) {
-            this._pushStreamImpl.Close();
-            this._pushStreamImpl.delete();
-        }
+        cg.closeObject();
+
+        com.microsoft.cognitiveservices.speech.internal.PushAudioInputStream tempStream = this._pushStreamImpl;
         this._pushStreamImpl = null;
+
+        if (tempStream != null) {
+            tempStream.Close();
+            tempStream.delete();
+        }
     }
 
     /*! \cond PROTECTED */
@@ -73,4 +83,5 @@ public final class PushAudioInputStream extends com.microsoft.cognitiveservices.
     /*! \endcond */
 
     private com.microsoft.cognitiveservices.speech.internal.PushAudioInputStream _pushStreamImpl;
+    private CloseGuard cg = new CloseGuard();
 }
