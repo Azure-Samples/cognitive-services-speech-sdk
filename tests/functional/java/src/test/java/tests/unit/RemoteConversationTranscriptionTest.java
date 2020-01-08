@@ -5,6 +5,7 @@
 
 package tests.unit;
 
+import com.azure.core.util.polling.LongRunningOperationStatus;
 import com.azure.core.util.polling.PollerFlux;
 import com.azure.core.util.polling.SyncPoller;
 import com.microsoft.cognitiveservices.speech.PropertyId;
@@ -62,45 +63,56 @@ public class RemoteConversationTranscriptionTest {
     @Test
     public void simpleRemoteConversationTest() {
         SpeechConfig config = null;
+        RemoteConversationTranscriptionResult pollResponse;
+        int retryCount = 0;
         try {
             String randomUUIDString = testStartAndStopConversationTranscribingAsyncInternal(false);
+            System.out.println(randomUUIDString);
 
             config = SpeechConfig.fromSubscription(speechKey,speechRegion);
-            RemoteConversationTranscriptionClient client = new RemoteConversationTranscriptionClient(config);
-            PollerFlux<RemoteConversationTranscriptionOperation, RemoteConversationTranscriptionResult> remoteTranscriptionOperation = client.getTranscriptionOperation(randomUUIDString);
-
-            remoteTranscriptionOperation.subscribe(
-                    pollResponse -> {
-                        System.out.println("Poll response status : " + pollResponse.getStatus());
-                        System.out.println("Poll response status : " + pollResponse.getValue().getServiceStatus());
+            
+            do{
+                Thread.sleep((10000));
+                RemoteConversationTranscriptionClient client = new RemoteConversationTranscriptionClient(config);
+                PollerFlux<RemoteConversationTranscriptionOperation, RemoteConversationTranscriptionResult> remoteTranscriptionOperation = client.getTranscriptionOperation(randomUUIDString, 5);
+    
+                remoteTranscriptionOperation.subscribe(
+                    pr -> {
+                        System.out.println("Poll response status : " + pr.getStatus());
+                        System.out.println("Poll response status : " + pr.getValue().getServiceStatus());
+                        if(pr.getStatus() == LongRunningOperationStatus.FAILED) {
+                            System.out.println("Error : " + pr.getValue().getError());
+                        }
                     }
-            );
-
-            SyncPoller<RemoteConversationTranscriptionOperation, RemoteConversationTranscriptionResult> blockingOperation =  remoteTranscriptionOperation.getSyncPoller();
-            blockingOperation.waitForCompletion();
-            RemoteConversationTranscriptionResult pollResponse = blockingOperation.getFinalResult();
+                );
+    
+                SyncPoller<RemoteConversationTranscriptionOperation, RemoteConversationTranscriptionResult> blockingOperation =  remoteTranscriptionOperation.getSyncPoller();
+                blockingOperation.waitForCompletion();
+                pollResponse = blockingOperation.getFinalResult();
+    
+                if(pollResponse != null) {
+                    if(pollResponse.getConversationTranscriptionResults() != null) {
+                        for (int i = 0; i < pollResponse.getConversationTranscriptionResults().size(); i++) {
+                            ConversationTranscriptionResult result = pollResponse.getConversationTranscriptionResults().get(i);
+                            System.out.println(result.getProperties().getProperty(PropertyId.SpeechServiceResponse_JsonResult.name()));
+                            System.out.println(result.getProperties().getProperty(PropertyId.SpeechServiceResponse_JsonResult));
+                            System.out.println(result.getOffset());
+                            System.out.println(result.getDuration());
+                            System.out.println(result.getUserId());
+                            System.out.println(result.getReason());
+                            System.out.println(result.getResultId());
+                            System.out.println(result.getText());
+                            System.out.println(result.toString());
+                        }
+                    }
+                }
+                retryCount++;
+            } while(pollResponse == null && retryCount < 3);
 
             assertNotNull("Final result can not be not null", pollResponse);
             if(pollResponse.getConversationTranscriptionResults().size() < 4)
             {
                 assertNotNull("Total transcription results do not match", null);
-            }
-
-            if(pollResponse != null) {
-                if(pollResponse.getConversationTranscriptionResults() != null) {
-                    for (int i = 0; i < pollResponse.getConversationTranscriptionResults().size(); i++) {
-                        ConversationTranscriptionResult result = pollResponse.getConversationTranscriptionResults().get(i);
-                        System.out.println(result.getProperties().getProperty(PropertyId.SpeechServiceResponse_JsonResult.name()));
-                        System.out.println(result.getProperties().getProperty(PropertyId.SpeechServiceResponse_JsonResult));
-                        System.out.println(result.getOffset());
-                        System.out.println(result.getDuration());
-                        System.out.println(result.getUserId());
-                        System.out.println(result.getReason());
-                        System.out.println(result.getResultId());
-                        System.out.println(result.getText());
-                        System.out.println(result.toString());
-                    }
-                }
             }
 
             while(!endofProcessing) {
@@ -112,9 +124,10 @@ public class RemoteConversationTranscriptionTest {
             fail(e.getMessage());
         } catch (TimeoutException e) {
             fail(e.getMessage());
-        }
-        if(config != null) {
-            config.close();
+        } finally {
+            if(config != null) {
+                config.close();
+            }
         }
     }
 
