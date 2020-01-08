@@ -79,7 +79,16 @@ if(ANDROID)
     PRIVATE conversation_translation
     PRIVATE factory
     PRIVATE pal
-    PRIVATE z) # libz
+    PRIVATE z # libz
+  )
+elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+  target_link_libraries(${PROJECT_NAME}
+    PRIVATE common
+    PRIVATE factory
+    PRIVATE conversation_translation
+    PRIVATE usp
+    PRIVATE z # libz
+  )
 else()
   target_link_libraries(${PROJECT_NAME}
     PRIVATE common

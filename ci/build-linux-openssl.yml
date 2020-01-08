@@ -1,0 +1,24 @@
+# https://msasg.visualstudio.com/DefaultCollection/Skyman/_build?definitionId=7260
+#
+pool:
+  vmImage: 'Ubuntu 16.04'
+steps:
+- bash: |
+    set -u -e -x -o pipefail
+    DOCKER_IMAGE=ubuntu:16.04
+    docker pull "$DOCKER_IMAGE"
+    docker run --rm -i --env _UID=$(id -u) --env _GID=$(id -g) --volume "$(Build.Repository.LocalPath):/csspeech" --workdir /csspeech "$DOCKER_IMAGE" bash - <<"SCRIPT"
+      set -u -e -x -o pipefail
+      mkdir linuxlibs
+      cd linuxlibs
+      ../ci/build-linux-openssl.sh
+      cd ..
+      chown -R $_UID:$_GID linuxlibs
+    SCRIPT
+    find linuxlibs/linux-openssl -type d || true
+  displayName: Build OpenSSL library
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish artifacts'
+  inputs:
+    PathtoPublish: linuxlibs/linux-openssl
+    ArtifactName: linux-openssl

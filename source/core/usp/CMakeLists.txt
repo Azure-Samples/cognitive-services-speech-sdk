@@ -52,7 +52,11 @@ if(WIN32 AND SPECTRE_MITIGATION)
     set_property(TARGET usp PROPERTY VS_GLOBAL_SpectreMitigation "Spectre")
 endif()
 
-set(USP_LIBS ${AZURE_SHARED_LIB})
+if(SPEECHSDK_OS STREQUAL "Linux")
+    set(USP_LIBS ${AZURE_SHARED_LIB} -lz -ldl)
+else()
+    set(USP_LIBS ${AZURE_SHARED_LIB})
+endif()
 
 if(WIN32)
     list(APPEND USP_LIBS rpcrt4.lib)

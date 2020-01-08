@@ -1692,6 +1692,8 @@ jobs:
     parameters:
       enableVariable: SPEECHSDK_ENABLE_UNIDEC
       os: linux
+  - bash: sudo ./ci/build-linux-openssl.sh linux-x86_64
+    displayName: Build OpenSSL 1.1.1b (target=linux-x86_64)
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
     displayName: C API can be parsed by GCC
     inputs:

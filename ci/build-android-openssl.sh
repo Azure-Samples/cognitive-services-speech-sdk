@@ -109,7 +109,7 @@ for target in "${targets[@]}"; do
     # (-fstack-protector-all is also ok, but how does it impact perf?)
     # Control Flow Integrity (link errors building OpenSSL for ARMv8; also link errors in the Speech SDK)
     # -flto -fsanitize=cfi
-    # -fvisibility=hidden
+    -fvisibility=hidden
     # Address Space Layout Randomization
     -fPIE -pie # for executables
     -fPIC # for shared libraries
