@@ -303,8 +303,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             Assert.AreEqual(expectedUtterances.Count(), actualTranslationsTextResults.Count());
             for (var i = 0; i < actualTranslations.Count; i++)
             {
-                AssertStringWordEditPercentage(Normalize(expectedUtterances[i].Text), Normalize(actualRecognitionTextResults[i]), 5, 2);
-                AssertStringWordEditPercentage(Normalize(expectedTranslations[i].Text), Normalize(actualTranslationsTextResults[i]), 5, 2);
+                AssertStringWordEditPercentage(Normalize(expectedUtterances[i].Text), Normalize(actualRecognitionTextResults[i]), 5, 3);
+                AssertStringWordEditPercentage(Normalize(expectedTranslations[i].Text), Normalize(actualTranslationsTextResults[i]), 5, 3);
             }
         }
 
