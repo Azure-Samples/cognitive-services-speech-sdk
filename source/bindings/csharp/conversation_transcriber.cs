@@ -256,9 +256,9 @@ namespace Microsoft.CognitiveServices.Speech.Transcription
         }
 
         /// <summary>
-        /// 
+        /// Disposes of the object
         /// </summary>
-        /// <param name="disposing"></param>
+        /// <param name="disposing">True to dispose managed resources</param>
         /// <returns></returns>
         protected override void Dispose(bool disposing)
         {
