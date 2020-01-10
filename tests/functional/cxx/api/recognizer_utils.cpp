@@ -450,7 +450,7 @@ std::shared_ptr<VideoConfig> CreateVideoPush(std::shared_ptr<PushVideoInputStrea
 void CreateVoiceSignatures(std::string* katieVoiceSignature, std::string* steveVoiceSignature)
 {
     *katieVoiceSignature = R"(
-        {"Version":0,
+        {"Version":"0",
          "Tag" : "VtZQ7sJp8np3AxQC+87WYyBHWsZohWFBN0zgWzzOnpw=",
          "Data" : "rrukpyUGGFGHidLz51PatCKm/jIh4uwtgVKUkAo3tBjQZbvdKdIHRb47nfsk2RycDutA09sb5UtVkYPdwnj/SuamcOJi+sGNczeqvkcF5dQHCnJiPMHl56/rPgJm9gNaxSbvvanthk6h6NFRcpfxw1mrp3bq1BtflduuoVcBrIBuEqE3JlT7P4VuaeSaQ2KHGffIM6xi/4ylqA3FKYyRGJefZnzjGIjGQl6GauV/YwSSDR19n7ovKAJCYuJKfTXG0qgrO0zdSQ5bHiTBTiS52B3WgkYglyn5aDMKlcZjpCyg7xAWcA3lnz2Fsmjjo/e0bz99mARNCHkk4OrwImgNzxpnqPqHi3YLhdSo9W0/sKM+QQ625U2YlD0hASh97YDPenzEGSNnMD8mLn5EJs2Naf8u52yIQO+6SHB3HcmjIJRhaXZXJAznFUQ6+XD3k0uKBNvg8C0kNuUzi77aKqbohO8OS4b2hGbQqSmHep3lCdRr8W2SAf7UzabJq8qxTGb7E/qh9AuOdHI1iqrIHpx3oL68O7FUzSY7sBwVlsPsziPfYu1FAxjuICsqxha6kqyemjiSc3SjzLsHz5V0cz0f3X6K4QQw6TonqICLLRuaTJwhUNnBGlDXi1wc5265TdJi3hEqqVtwjYGeqYAYhSItKbE+h76zsQcNu2qUYeQRCUm30+k2KrqDcgmskAdaV85+"}
         )";

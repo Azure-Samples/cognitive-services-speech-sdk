@@ -22,10 +22,10 @@ class CSpxParticipantMgrImpl : public ISpxConversation, public ISpxPropertyBagIm
 public:
     struct CSpxVoiceSignature
     {
-        CSpxVoiceSignature() : Version(-1), Tag(std::string{}), Data(std::string{})
+        CSpxVoiceSignature() : Version("-1"), Tag(std::string{}), Data(std::string{})
         {}
 
-        int Version;
+        std::string Version;
         std::string Tag;
         std::string Data;
     };
@@ -57,7 +57,16 @@ public:
                 try
                 {
                     auto voice_json = nlohmann::json::parse(voice_raw_string);
-                    voice.Version = voice_json["Version"].get<int>();
+                    auto version = voice_json["Version"];
+                    if (version.type() == nlohmann::json::value_t::number_unsigned)
+                    {
+                        voice.Version = std::to_string(version.get<int>());
+                    }
+                    else
+                    {
+                        voice.Version = version.get<std::string>();
+                    }
+
                     voice.Tag = voice_json["Tag"].get<std::string>();
                     voice.Data = voice_json["Data"].get<std::string>();
                 }
