@@ -87,6 +87,17 @@
 inline void __spx_do_trace_message(int level, const char* pszTitle, const char* fileName, const int lineNumber, const char* pszFormat, ...) throw()
 {
     UNUSED(level);
+
+    bool logToConsole = false;
+#if defined(DEBUG) || defined(_DEBUG)
+    logToConsole = true;
+#endif
+
+    if (!logToConsole)
+    {
+        return;
+    }
+
     try
     {
         va_list argptr;
