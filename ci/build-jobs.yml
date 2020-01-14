@@ -1425,6 +1425,9 @@ jobs:
   steps:
   - bash: ./ci/set-variables.sh
     displayName: Set variables
+  - task: UseNode@1
+    inputs:
+      version: '10.15.1'
   - script: npm -g i appcenter-cli@1.1.13
     displayName: Install AppCenter CLI
   - task: DownloadBuildArtifacts@0
