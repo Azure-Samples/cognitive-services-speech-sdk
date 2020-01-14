@@ -28,11 +28,11 @@ namespace helloworld
             // Creates an intent recognizer using microphone as audio input.
             using (var recognizer = new IntentRecognizer(config))
             {
-                // Creates a Language Understanding model using the app id, and adds specific intents from your model
+                // Creates a Language Understanding model using the app id, and adds 
+                // specific intents from your home automation model.
                 var model = LanguageUnderstandingModel.FromAppId("YourLanguageUnderstandingAppId");
-                recognizer.AddIntent(model, "YourLanguageUnderstandingIntentName1", "id1");
-                recognizer.AddIntent(model, "YourLanguageUnderstandingIntentName2", "id2");
-                recognizer.AddIntent(model, "YourLanguageUnderstandingIntentName3", "any-IntentId-here");
+                recognizer.AddIntent(model, "HomeAutomation.TurnOn");
+                recognizer.AddIntent(model, "HomeAutomation.TurnOff");
 
                 // Starts recognizing.
                 Console.WriteLine("Say something...");
