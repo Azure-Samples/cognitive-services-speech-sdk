@@ -38,6 +38,7 @@ public class Main {
         System.out.println("N. Speech synthesis to audio data stream.");
         System.out.println("O. Speech synthesis events.");
         System.out.println("P. Speech synthesis word boundary event.");
+        System.out.println("Q: Speech synthesis server scenario example.");
 
         System.out.print(prompt);
 
@@ -122,6 +123,8 @@ public class Main {
                 case "p":
                     SpeechSynthesisSamples.synthesisWordBoundaryEventAsync();
                     break;
+                case "q":
+                    SpeechSynthesisScenarioSamples.synthesisServerScenarioAsync();
                 case "0":
                     System.out.println("Exiting...");
                     break;
