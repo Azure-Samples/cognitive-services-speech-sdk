@@ -1,12 +1,12 @@
 {
   "Registrations": [
 
-    // Location: external/android-openssl; ci/build-android-openssl-curl.yml
+    // Location: external/android-openssl; external/linux-openssl; build-linux-openssl.sh; ci/build-android-openssl-curl.yml
     // Version: 1.1.1b
     // Tag: OpenSSL_1_1_1b
     // OSS request: https://ossmsft.visualstudio.com/_oss?requestId=1581773&_a=progress
     // IP Scan: https://ossmsft.visualstudio.com/DefaultCollection/Reviews/_workitems/edit/24435
-    // Usage: distributed (Android)
+    // Usage: distributed (Android and Linux)
     {
       "component": {
         "type": "git",
