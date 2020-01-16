@@ -4,7 +4,7 @@ steps:
 - bash: |
     # stage the wheels in dist/
     set -u -x -e -o pipefail
-    pythonMajorMinorVersions=(3.7 3.6 3.5)
+    pythonMajorMinorVersions=(3.8 3.7 3.6 3.5)
     . ci/functions.sh
     if [[ $(SPEECHSDK_TARGET_PLATFORM) == OSX-x64 ]]; then
       hostedtoolsPath=/Users/runner/hostedtoolcache
@@ -22,11 +22,26 @@ steps:
     for pythonMajorMinorWithDot in ${pythonMajorMinorVersions[*]}; do
       thisPythonVersionBasePath=$(getLatest ${hostedtoolsPath}/Python/${pythonMajorMinorWithDot}.*)
       wheelPythonVersion=${pythonMajorMinorWithDot//./}
+      # pymalloc flag has been dropped from 3.8
+      if [[ $pythonMajorMinorWithDot == 3.8 ]]; then
+        pymallocFlag=""
+      else
+        pymallocFlag="m"
+      fi
+      # set library file
+      pythonLibrary="${thisPythonVersionBasePath}/x64/lib/libpython${pythonMajorMinorWithDot}${pymallocFlag}.a"
+      if [[ ! -h $pythonLibrary ]]; then
+        if [[ $(SPEECHSDK_TARGET_PLATFORM) == Linux-x64 ]]; then
+          pythonLibrary="${thisPythonVersionBasePath}/x64/lib/python${pythonMajorMinorWithDot}/config-${pythonMajorMinorWithDot}${pymallocFlag}-x86_64-linux-gnu/libpython${pythonMajorMinorWithDot}${pymallocFlag}.a"
+        else
+          pythonLibrary="${thisPythonVersionBasePath}/x64/lib/python${pythonMajorMinorWithDot}/config-${pythonMajorMinorWithDot}${pymallocFlag}-darwin/libpython${pythonMajorMinorWithDot}${pymallocFlag}.a"
+        fi
+      fi
       # reconfigure for python build
       cmake -H. -Bbuild -DBUILD_PYTHON=ON -DBUILD_CSHARP=OFF -DBUILD_JAVA=OFF \
         -DPYTHON_EXECUTABLE:FILEPATH="${thisPythonVersionBasePath}/x64/python" \
-        -DPYTHON_LIBRARY="${thisPythonVersionBasePath}/x64/lib/libpython${pythonMajorMinorWithDot}m.a" \
-        -DPYTHON_INCLUDE_DIR:PATH="${thisPythonVersionBasePath}/x64/include/python${pythonMajorMinorWithDot}m" \
+        -DPYTHON_LIBRARY="$pythonLibrary" \
+        -DPYTHON_INCLUDE_DIR:PATH="${thisPythonVersionBasePath}/x64/include/python${pythonMajorMinorWithDot}${pymallocFlag}" \
         -DSPEECHSDK_PYTHON_WHEEL_ARGS=${extraCmakeArgs//%wheelPythonVersion%/${wheelPythonVersion}} \
         -DEXTENSION_UNIDEC_ENABLED=${enableUnidec}
       cmake --build build --target bdist -j 4
@@ -37,7 +52,7 @@ steps:
   displayName: Build Python wheels
 - bash: |
     set -u -x -e -o pipefail
-    python -m pip install wheel==0.33.1
+    python -m pip install wheel==0.33.6
     declare -A dylibExtByPlatform=([Linux-x64]="so" [OSX-x64]="dylib")
     coreLib=repack/azure/cognitiveservices/speech/libMicrosoft.CognitiveServices.Speech.core.${dylibExtByPlatform[$(SPEECHSDK_TARGET_PLATFORM)]}
     coreHash=($(md5sum ${coreLib//repack/build}))

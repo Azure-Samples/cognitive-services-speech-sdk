@@ -98,7 +98,7 @@ jobs:
   - bash: |
       set -u -x -e -o pipefail
       . ci/functions.sh
-      pythonMajorMinorVersions=(3.7 3.6 3.5)
+      pythonMajorMinorVersions=(3.8 3.7 3.6 3.5)
       pythonBasePath=C:/hostedtoolcache/windows/Python
       coreLib=build/bin/$(BuildConfiguration)/Microsoft.CognitiveServices.Speech.core.pdb
       coreHash=($(md5sum ${coreLib}))
@@ -157,9 +157,9 @@ jobs:
     condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
   - bash: |
       set -u -x -e -o pipefail
-      python -m pip install wheel==0.33.1
+      python -m pip install wheel==0.33.6
       mv repack/CodeSignSummary-*.md .
-      for wheelPythonVersion in 35 36 37; do
+      for wheelPythonVersion in 35 36 37 38; do
         python -m wheel pack --dest-dir $(cygpath -au "$(OutputDirectory)\wheelhouse") repack/${wheelPythonVersion}
         rm -rf repack/${wheelPythonVersion}
       done

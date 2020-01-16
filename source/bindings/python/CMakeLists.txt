@@ -18,6 +18,9 @@ if(MSVC)
     # Don't try to link pythonXY_d.lib, use release version of python.lib instead.
      add_definitions(-DSWIG_PYTHON_INTERPRETER_NO_DEBUG)
      add_definitions(-D_ITERATOR_DEBUG_LEVEL=0)
+else()
+     # Prevent warning for deprecated tp_print with SWIG 3.x and Python 3.8
+     add_definitions(-Wno-deprecated-declarations)
 endif()
 
 set(CMAKE_SWIG_FLAGS
@@ -184,7 +187,7 @@ add_custom_command(OUTPUT ${SETUP_PY}
   VERBATIM
   )
 
-search_python_module(wheel 0.33.1)
+search_python_module(wheel 0.33.6)
 search_python_module(strip_hints 0.1.4)
 
 # strip swig-generated type hints, because they confuse sphinx.

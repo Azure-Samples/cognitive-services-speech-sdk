@@ -160,13 +160,14 @@ else
       PYTHONS=($(getLatest ${pythonBasePath}/3.5.*)/$arch/python
         $(getLatest ${pythonBasePath}/3.6.*)/$arch/python
         $(getLatest ${pythonBasePath}/3.7.*)/$arch/python
+        $(getLatest ${pythonBasePath}/3.8.*)/$arch/python
       )
       ;;
     dev)
       # Run tests for only a single Python version
 
       # defines which python version is used for tests during dev builds on which platform
-      declare -A pythonVersionsByOs=([OSX]=3.5 [Linux]=3.6 [Windows]=3.7)
+      declare -A pythonVersionsByOs=([OSX]=3.6 [Linux]=3.7 [Windows]=3.8)
 
       PYTHONS=($(getLatest ${pythonBasePath}/${pythonVersionsByOs[$os]}.*)/$arch/python)
       ;;
