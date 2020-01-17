@@ -1,0 +1,28 @@
+Content like data, models, tests, and endpoints are organized into Projects in the Custom Speech portal. Each project is specific to a domain and country/language. For example, you may create a project for call centers that use English in the United States. To create your first project, select the Speech-to-text/Custom speech, then click New Project. Follow the instructions provided by the wizard to create your project. After you've created a project, you should see four tabs: Data, Testing, Training, and Deployment. Use the links provided in Next steps to learn how to use each tab.
+Custom Speech provides tools that allow you to visually inspect the recognition quality of a model by comparing audio data with the corresponding recognition result. From the Custom Speech portal, you can play back uploaded audio and determine if the provided recognition result is correct. This tool allows you to quickly inspect quality of Microsoft's baseline speech-to-text model or a trained custom model without having to transcribe any audio data.
+In this document, you'll learn how to quantitatively measure the quality of Microsoft's speech-to-text model or your custom model. Audio + human-labeled transcription data is required to test accuracy, and 30 minutes to 5 hours of representative audio should be provided.
+What is Word Error Rate (WER)?
+The industry standard to measure model accuracy is Word Error Rate (WER). WER counts the number of incorrect words identified during recognition, then divides by the total number of words provided in the human-labeled transcript. Finally, that number is multiplied by 100% to calculate the WER.
+WER formula
+Incorrectly identified words fall into three categories:
+Insertion (I): Words that are incorrectly added in the hypothesis transcript
+Deletion (D): Words that are undetected in the hypothesis transcript
+Substitution (S): Words that were substituted between reference and hypothesis
+Here's an example:
+Example of incorrectly identified words
+Resolve errors and improve WER
+You can use the WER from the machine recognition results to evaluate the quality of the model you are using with your app, tool, or product. A WER of 5%-10% is considered to be good quality and is ready to use. A WER of 20% is acceptable, however you may want to consider additional training. A WER of 30% or more signals poor quality and requires customization and training.
+How the errors are distributed is important. When many deletion errors are encountered, it's usually because of weak audio signal strength. To resolve this issue, you'll need to collect audio data closer to the source. Insertion errors mean that the audio was recorded in a noisy environment and crosstalk may be present, causing recognition issues. Substitution errors are often encountered when an insufficient sample of domain-specific terms has been provided as either human-labeled transcriptions or related text.
+By analyzing individual files, you can determine what type of errors exist, and which errors are unique to a specific file. Understanding issues at the file level will help you target improvements.
+Create a test
+If you'd like to test the quality of Microsoft's speech-to-text baseline model or a custom model that you've trained, you can compare two models side by side to evaluate accuracy. The comparison includes WER and recognition results. Typically, a custom model is compared with Microsoft's baseline model.
+To evaluate models side by side:
+Sign in to the Custom Speech portal.
+Navigate to Speech-to-text > Custom Speech > Testing.
+Click Add Test.
+Select Evaluate accuracy. Give the test a name, description, and select your audio + human-labeled transcription dataset.
+Select up to two models that you'd like to test.
+Click Create.
+After your test has been successfully created, you can compare the results side by side.
+Side-by-side comparison
+Once the test is complete, indicated by the status change to Succeeded, you'll find a WER number for both models included in your test. Click on the test name to view the testing detail page. This detail page lists all the utterances in your dataset, indicating the recognition results of the two models alongside the transcription from the submitted dataset. To help inspect the side-by-side comparison, you can toggle various error types including insertion, deletion, and substitution. By listening to the audio and comparing recognition results in each column, which shows the human-labeled transcription and the results for two speech-to-text models, you can decide which model meets your needs and where additional training and improvements are required.

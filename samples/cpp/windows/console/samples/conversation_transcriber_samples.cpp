@@ -12,7 +12,7 @@
 
 using namespace std;
 using namespace Microsoft::CognitiveServices::Speech;
-using namespace Microsoft::CognitiveServices::Speech::Conversation;
+using namespace Microsoft::CognitiveServices::Speech::Transcription;
 using namespace Microsoft::CognitiveServices::Speech::Audio;
 
 
@@ -56,6 +56,7 @@ void ConversationWithPullAudioStream()
     // Replace with your own subscription key and service region (e.g., "eastasia").
     // Conversation Transcription is currently available in eastasia and centralus region.
     auto config = SpeechConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+    config->SetProperty("ConversationTranscriptionInRoomAndOnline", "true");
 
     // Creates a callback that will read audio data from a WAV file.
     shared_ptr<AudioInputFromFileCallback> callback;
@@ -72,13 +73,16 @@ void ConversationWithPullAudioStream()
 
     // Create a pull stream that support 16kHz, 16 bits and 8 channels of PCM audio.
     auto pullStream = AudioInputStream::CreatePullStream(AudioStreamFormat::GetWaveFormatPCM(16000, 16, 8), callback);
-
-    // Creates a speech recognizer from stream input;
     auto audioInput = AudioConfig::FromStreamInput(pullStream);
-    auto recognizer = ConversationTranscriber::FromConfig(config, audioInput);
 
-    // Sets a conversation Id.
-    recognizer->SetConversationId("ConversationTranscriberSamples");
+    // Create a conversation from a speech config and conversation Id.
+    auto conversation = Conversation::CreateConversationAsync(config, "ConversationTranscriberSamples").get();
+
+    // Create a conversation transcriber given an audio config. If you don't specify any audio input, Speech SDK opens the default microphone.
+    auto recognizer = ConversationTranscriber::FromConfig(audioInput);
+
+    // Need to join a conversation before streaming audio.
+    recognizer->JoinConversationAsync(conversation).get();
 
     // Create voice signatures using REST API at https://signature.centralus.cts.speech.microsoft.com by using YourSubscriptionKey
     // and the provided enrollment_audio_katie.wav and enrollment_audio_steve.wav.
@@ -102,25 +106,25 @@ void ConversationWithPullAudioStream()
     auto steve = Participant::From("steve@example.com", "en-us", voiceSignatureSteve);
 
     // Adds katie as a participant to the conversation.
-    recognizer->AddParticipant(katie);
+    conversation->AddParticipantAsync(katie).get();
 
     // Adds steve as a participant to the conversation.
-    recognizer->AddParticipant(steve);
+    conversation->AddParticipantAsync(steve).get();
 
     // a promise for synchronization of recognition end.
     promise<void> recognitionEnd;
 
     // Subscribes to events.
-    recognizer->Recognizing.Connect([](const ConversationTranscriptionEventArgs& e)
+    recognizer->Transcribing.Connect([](const ConversationTranscriptionEventArgs& e)
     {
-        cout << "Recognizing:" << e.Result->Text << std::endl;
+        cout << "TRANSCRIBING: Text=" << e.Result->Text << std::endl;
     });
 
-    recognizer->Recognized.Connect([](const ConversationTranscriptionEventArgs& e)
+    recognizer->Transcribed.Connect([](const ConversationTranscriptionEventArgs& e)
     {
         if (e.Result->Reason == ResultReason::RecognizedSpeech)
         {
-            cout << "RECOGNIZED: Text=" << e.Result->Text << std::endl
+            cout << "Transcribed: Text=" << e.Result->Text << std::endl
                 << "  Offset=" << e.Result->Offset() << std::endl
                 << "  Duration=" << e.Result->Duration() << std::endl
                 << "  UserId=" << e.Result->UserId << std::endl;
@@ -152,7 +156,7 @@ void ConversationWithPullAudioStream()
 
     recognizer->SessionStopped.Connect([&recognitionEnd](const SessionEventArgs& e)
     {
-        cout << "session: " << e.SessionId << " stopped." << std::endl;
+        cout << "SESSION: " << e.SessionId << " stopped." << std::endl;
         recognitionEnd.set_value(); // Notify to stop recognition.
     });
 
@@ -174,14 +178,14 @@ void ConversationWithPushAudioStream()
     // Replace with your own subscription key and service region (e.g., "eastasia").
     // Conversation Transcription is currently available in eastasia and centralus region.
     auto config = SpeechConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+    config->SetProperty("ConversationTranscriptionInRoomAndOnline", "true");
 
     // Creates a push stream using 16kHz, 16bits per sample and 8 channels audio.
     auto pushStream = AudioInputStream::CreatePushStream(AudioStreamFormat::GetWaveFormatPCM(16000, 16, 8));
     auto audioInput = AudioConfig::FromStreamInput(pushStream);
-    auto recognizer = ConversationTranscriber::FromConfig(config, audioInput);
-
-    // Sets a conversation Id.
-    recognizer->SetConversationId("ConversationTranscriberSamples");
+    auto conversation = Conversation::CreateConversationAsync(config, "ConversationTranscriberSamples").get();
+    auto recognizer = ConversationTranscriber::FromConfig(audioInput);
+    recognizer->JoinConversationAsync(conversation).get();
 
     // Create voice signatures using REST API at https://signature.centralus.cts.speech.microsoft.com by using YourSubscriptionKey
     // and the provided enrollment_audio_katie.wav and enrollment_audio_steve.wav.
@@ -205,21 +209,21 @@ void ConversationWithPushAudioStream()
     auto steve = Participant::From("steve@example.com", "en-us", voiceSignatureSteve);
 
     // adds katie as a participant to the conversation.
-    recognizer->AddParticipant(katie);
+    conversation->AddParticipantAsync(katie).get();
 
     // adds steve as a participant to the conversation.
-    recognizer->AddParticipant(steve);
+    conversation->AddParticipantAsync(steve).get();
 
     // promise for synchronization of recognition end.
     promise<void> recognitionEnd;
 
     // Subscribes to events.
-    recognizer->Recognizing.Connect([](const ConversationTranscriptionEventArgs& e)
+    recognizer->Transcribing.Connect([](const ConversationTranscriptionEventArgs& e)
     {
-        cout << "Recognizing:" << e.Result->Text << std::endl;
+        cout << "TRANSCRIBING: Text=" << e.Result->Text << std::endl;
     });
 
-    recognizer->Recognized.Connect([](const ConversationTranscriptionEventArgs& e)
+    recognizer->Transcribed.Connect([](const ConversationTranscriptionEventArgs& e)
     {
         if (e.Result->Reason == ResultReason::RecognizedSpeech)
         {
@@ -256,7 +260,7 @@ void ConversationWithPushAudioStream()
     // Starts transcribing conversation.
     recognizer->SessionStopped.Connect([&recognitionEnd](const SessionEventArgs& e)
     {
-        cout << "session: " << e.SessionId << " stopped." << std::endl;
+        cout << "SESSION: " << e.SessionId << " stopped." << std::endl;
 
         // Notify transcribing ends.
         recognitionEnd.set_value();

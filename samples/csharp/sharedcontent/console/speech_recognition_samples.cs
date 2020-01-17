@@ -71,12 +71,11 @@ namespace MicrosoftSpeechSDKSamples
 
             // Replace the language with your language in BCP-47 format, e.g., en-US.
             var language = "de-DE";
-            config.SpeechRecognitionLanguage = language;
             config.OutputFormat = OutputFormat.Detailed;
 
             // Creates a speech recognizer for the specified language, using microphone as audio input.
             // Requests detailed output format.
-            using (var recognizer = new SpeechRecognizer(config))
+            using (var recognizer = new SpeechRecognizer(config, language))
             {
                 // Starts recognizing.
                 Console.WriteLine($"Say something in {language} ...");
@@ -128,10 +127,10 @@ namespace MicrosoftSpeechSDKSamples
             // Replace with your own subscription key and service region (e.g., "westus").
             var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
             // Replace with the CRIS endpoint id of your customized model.
-            config.EndpointId = "YourEndpointId";
+            var sourceLanguageConfig = SourceLanguageConfig.FromLanguage("en-US", "YourEndpointId");
 
             // Creates a speech recognizer using microphone as audio input.
-            using (var recognizer = new SpeechRecognizer(config))
+            using (var recognizer = new SpeechRecognizer(config, sourceLanguageConfig))
             {
                 Console.WriteLine("Say something...");
 
@@ -556,6 +555,186 @@ namespace MicrosoftSpeechSDKSamples
                     // Before starting recognition, add a phrase list to help recognition.
                     PhraseListGrammar phraseListGrammar = PhraseListGrammar.FromRecognizer(recognizer);
                     phraseListGrammar.AddPhrase("Wreck a nice beach");
+
+                    // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
+                    await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
+
+                    // Waits for completion.
+                    // Use Task.WaitAny to keep the task rooted.
+                    Task.WaitAny(new[] { stopRecognition.Task });
+
+                    // Stops recognition.
+                    await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
+                }
+            }
+        }
+
+        // Speech recognition with auto detection for source language
+        public static async Task RecognitionWithAutoDetectSourceLanguageAsync()
+        {
+            // Creates an instance of a speech config with specified subscription key and service region.
+            // Replace with your own subscription key and service region (e.g., "westus").
+            var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+
+            // Creates an instance of AutoDetectSourceLanguageConfig with the 2 source language candidates
+            // Currently this feature only supports 2 different language candidates
+            // Replace the languages to be the language candidates for your speech. Please see https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support for all supported langauges
+            var autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig.FromLanguages(new string[] { "de-DE", "fr-FR" });
+
+            var stopRecognition = new TaskCompletionSource<int>();
+
+            // Creates a speech recognizer using the auto detect source language config, and the file as audio input.
+            // Replace with your own audio file name.
+            using (var audioInput = AudioConfig.FromWavFileInput(@"whatstheweatherlike.wav"))
+            {
+                using (var recognizer = new SpeechRecognizer(config, autoDetectSourceLanguageConfig, audioInput))
+                {
+                    // Subscribes to events.
+                    recognizer.Recognizing += (s, e) =>
+                    {
+                        if (e.Result.Reason == ResultReason.RecognizingSpeech)
+                        {
+                            Console.WriteLine($"RECOGNIZING: Text={e.Result.Text}");
+                            // Retrieve the detected language
+                            var autoDetectSourceLanguageResult = AutoDetectSourceLanguageResult.FromResult(e.Result);
+                            Console.WriteLine($"DETECTED: Language={autoDetectSourceLanguageResult.Language}");
+                        }
+                    };
+
+                    recognizer.Recognized += (s, e) =>
+                    {
+                        if (e.Result.Reason == ResultReason.RecognizedSpeech)
+                        {
+                            Console.WriteLine($"RECOGNIZED: Text={e.Result.Text}");
+                            // Retrieve the detected language
+                            var autoDetectSourceLanguageResult = AutoDetectSourceLanguageResult.FromResult(e.Result);
+                            Console.WriteLine($"DETECTED: Language={autoDetectSourceLanguageResult.Language}");
+                        }
+                        else if (e.Result.Reason == ResultReason.NoMatch)
+                        {
+                            Console.WriteLine($"NOMATCH: Speech could not be recognized.");
+                        }
+                    };
+
+                    recognizer.Canceled += (s, e) =>
+                    {
+                        Console.WriteLine($"CANCELED: Reason={e.Reason}");
+
+                        if (e.Reason == CancellationReason.Error)
+                        {
+                            Console.WriteLine($"CANCELED: ErrorCode={e.ErrorCode}");
+                            Console.WriteLine($"CANCELED: ErrorDetails={e.ErrorDetails}");
+                            Console.WriteLine($"CANCELED: Did you update the subscription info?");
+                        }
+
+                        stopRecognition.TrySetResult(0);
+                    };
+
+                    recognizer.SessionStarted += (s, e) =>
+                    {
+                        Console.WriteLine("\n    Session started event.");
+                    };
+
+                    recognizer.SessionStopped += (s, e) =>
+                    {
+                        Console.WriteLine("\n    Session stopped event.");
+                        Console.WriteLine("\nStop recognition.");
+                        stopRecognition.TrySetResult(0);
+                    };
+
+                    // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
+                    await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
+
+                    // Waits for completion.
+                    // Use Task.WaitAny to keep the task rooted.
+                    Task.WaitAny(new[] { stopRecognition.Task });
+
+                    // Stops recognition.
+                    await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
+                }
+            }
+        }
+
+        // Speech recognition with auto detection for source language and custom model
+        public static async Task RecognitionWithAutoDetectSourceLanguageAndCustomModelAsync()
+        {
+            // Creates an instance of a speech config with specified subscription key and service region.
+            // Replace with your own subscription key and service region (e.g., "westus").
+            var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+
+            var sourceLanguageConfigs = new SourceLanguageConfig[]
+            {
+                // The endpoint id is optional, if not specified,  the service will use the default model for en-US
+                // Replace the language with your source language candidate. Please see https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support for all supported langauges
+                SourceLanguageConfig.FromLanguage("en-US"),
+
+                // Replace the id with the CRIS endpoint id of your customized model. If the speech is in fr-FR, the service will use the corresponding customized model for speech recognition
+                SourceLanguageConfig.FromLanguage("fr-FR", "YourEndpointId"),
+            };
+
+            // Creates an instance of AutoDetectSourceLanguageConfig with the 2 source language configurations
+            // Currently this feature only supports 2 different language candidates
+            var autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig.FromSourceLanguageConfigs(sourceLanguageConfigs);
+
+            var stopRecognition = new TaskCompletionSource<int>();
+
+            // Creates a speech recognizer using the auto detect source language config, and the file as audio input.
+            // Replace with your own audio file name.
+            using (var audioInput = AudioConfig.FromWavFileInput(@"whatstheweatherlike.wav"))
+            {
+                using (var recognizer = new SpeechRecognizer(config, autoDetectSourceLanguageConfig, audioInput))
+                {
+                    recognizer.Recognizing += (s, e) =>
+                    {
+                        if (e.Result.Reason == ResultReason.RecognizingSpeech)
+                        {
+                            Console.WriteLine($"RECOGNIZING: Text={e.Result.Text}");
+                            // Retrieve the detected language
+                            var autoDetectSourceLanguageResult = AutoDetectSourceLanguageResult.FromResult(e.Result);
+                            Console.WriteLine($"DETECTED: Language={autoDetectSourceLanguageResult.Language}");
+                        }
+                    };
+
+                    recognizer.Recognized += (s, e) =>
+                    {
+                        if (e.Result.Reason == ResultReason.RecognizedSpeech)
+                        {
+                            Console.WriteLine($"RECOGNIZED: Text={e.Result.Text}");
+                            // Retrieve the detected language
+                            var autoDetectSourceLanguageResult = AutoDetectSourceLanguageResult.FromResult(e.Result);
+                            Console.WriteLine($"DETECTED: Language={autoDetectSourceLanguageResult.Language}");
+                        }
+                        else if (e.Result.Reason == ResultReason.NoMatch)
+                        {
+                            Console.WriteLine($"NOMATCH: Speech could not be recognized.");
+                        }
+                    };
+
+                    recognizer.Canceled += (s, e) =>
+                    {
+                        Console.WriteLine($"CANCELED: Reason={e.Reason}");
+
+                        if (e.Reason == CancellationReason.Error)
+                        {
+                            Console.WriteLine($"CANCELED: ErrorCode={e.ErrorCode}");
+                            Console.WriteLine($"CANCELED: ErrorDetails={e.ErrorDetails}");
+                            Console.WriteLine($"CANCELED: Did you update the subscription info?");
+                        }
+
+                        stopRecognition.TrySetResult(0);
+                    };
+
+                    recognizer.SessionStarted += (s, e) =>
+                    {
+                        Console.WriteLine("\n    Session started event.");
+                    };
+
+                    recognizer.SessionStopped += (s, e) =>
+                    {
+                        Console.WriteLine("\n    Session stopped event.");
+                        Console.WriteLine("\nStop recognition.");
+                        stopRecognition.TrySetResult(0);
+                    };
 
                     // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
                     await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
