@@ -53,7 +53,14 @@ void synthesizeSpeech()
 
 int wmain()
 {
-    synthesizeSpeech();
+    try
+    {
+        synthesizeSpeech();
+    }
+    catch (exception e)
+    {
+        cout << e.what();
+    }
     return 0;
 }
 // </code>

@@ -93,6 +93,9 @@
     <Compile Include="..\..\..\sharedcontent\console\speech_synthesis_with_token_sample.cs">
       <Link>speech_synthesis_with_token_sample.cs</Link>
     </Compile>
+    <Compile Include="..\..\..\sharedcontent\console\speech_synthesis_server_scenario_sample.cs">
+      <Link>speech_synthesis_server_scenario_sample.cs</Link>
+    </Compile>
     <Compile Include="..\..\..\sharedcontent\console\translation_samples.cs">
       <Link>translation_samples.cs</Link>
     </Compile>

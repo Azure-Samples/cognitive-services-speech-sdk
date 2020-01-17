@@ -14,7 +14,7 @@ fi
 
 echo $PACKAGE_PATH
 
-set -e -x -o pipefail
+set -e -o pipefail
 
 # We were using process substitution before for find/readarray, which started failing.
 # Possibly related to https://github.com/git-for-windows/git/issues/2291, although
