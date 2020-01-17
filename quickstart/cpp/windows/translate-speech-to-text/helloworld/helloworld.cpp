@@ -74,7 +74,14 @@ void TranslationWithMicrophone()
 
 int wmain()
 {
-    TranslationWithMicrophone();
+    try
+    {
+        TranslationWithMicrophone();
+    }
+    catch (exception e)
+    {
+        cout << e.what();
+    }
     cout << "Please press a key to continue.\n";
     cin.get();
     return 0;

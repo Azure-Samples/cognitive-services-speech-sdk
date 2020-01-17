@@ -273,7 +273,6 @@
         NSLog(@"There was an error.");
         [self updateErrorText:(@"Speech synthesis error.")];
     }
-    speechResult = nil;
     synthesizer = nil;
     NSFileHandle *file = [NSFileHandle fileHandleForWritingAtPath:fileAtPath];
     if (file == nil) {
@@ -350,7 +349,6 @@
         NSLog(@"There was an error.");
         [self updateErrorText:(@"Speech synthesis error.")];
     }
-    speechResult = nil;
     synthesizer = nil;
 }
 
