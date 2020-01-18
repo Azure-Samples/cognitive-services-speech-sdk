@@ -135,6 +135,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
+        [Ignore] // TODO: This is being worked on by Ryan
         public async Task RecognizeIntentSpecialCharacters()
         {
             var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_WITH_SPECIAL_CHARACTER].FilePath.GetRootRelativePath());
