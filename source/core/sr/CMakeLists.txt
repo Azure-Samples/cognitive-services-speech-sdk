@@ -52,6 +52,7 @@ set(HEADERS_PRIVATE
     "${SRC_DIR}/speech_translation_config.h"
     "${SRC_DIR}/language_list_utils.h"
     "${SRC_DIR}/auto_detect_source_lang_config.h"
+    "${SRC_DIR}/interaction_id_provider.h"
     "${SRC_DIR}/source_lang_config.h"
     "${SRC_DIR}/participants_mgr.h"
     )

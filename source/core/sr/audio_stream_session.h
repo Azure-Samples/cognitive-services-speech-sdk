@@ -14,6 +14,7 @@
 #include "service_helpers.h"
 #include "audio_buffer.h"
 #include "thread_service.h"
+#include "interaction_id_provider.h"
 
 #include <shared_mutex>
 #include <unordered_map>
@@ -38,9 +39,9 @@ class CSpxAudioStreamSession :
     public ISpxRecoResultFactory,
     public ISpxEventArgsFactory,
     public ISpxPropertyBagImpl,
-    public ISpxInteractionIdProvider,
     public ISpxSpeechEventPayloadProvider,
-    public ISpxGetUspMessageParamsFromUser
+    public ISpxGetUspMessageParamsFromUser,
+    public CSpxInteractionIdProvider<CSpxAudioStreamSession>
 {
 public:
 
@@ -179,10 +180,6 @@ public:
     // --- ISpxNamedProperties (overrides)
     std::string GetStringValue(const char* name, const char* defaultValue) const override;
     void SetStringValue(const char* name, const char* value) override;
-
-    // --- ISpxInteractionIdProvider
-    std::string PeekNextInteractionId(InteractionIdPurpose purpose) final;
-    std::string GetInteractionId(InteractionIdPurpose purpose) final;
 
     // --- ISpxSpeechEventPayloadProvider
     std::string GetSpeechEventPayload(bool startMeeting) override;
@@ -361,7 +358,7 @@ private:
     // of 30 seconds to generate a speech segment. To be on the safe side, similar to the old SDK we buffer for 1 minute.
     seconds m_maxBufferedBeforeOverflow = seconds(60);
     milliseconds m_maxTransmittedInFastLane = milliseconds(5000);
-    
+
     unsigned long m_simulateRealtimePercentage = 200;
     uint64_t m_maxFastLaneSizeBytes = 16000 * 2 * 5;
     uint32_t m_avgBytesPerSecond = 16000 * 2;
@@ -418,20 +415,6 @@ private:
 
     // Single shot in flight operation.
     std::shared_ptr<Operation> m_singleShotInFlight;
-
-    struct InteractionId
-    {
-        inline InteractionId(std::string nextSpeech, std::string nextActivity):
-            m_nextSpeech{nextSpeech}, m_nextActivity{nextActivity}
-        {}
-
-        std::string m_nextSpeech;
-        std::string m_nextActivity;
-        std::mutex m_lock;
-    };
-
-    InteractionId m_interactionId;
-
 };
 
 

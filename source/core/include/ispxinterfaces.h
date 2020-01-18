@@ -721,8 +721,8 @@ enum class InteractionIdPurpose { Speech = 0, Activity };
 class ISpxInteractionIdProvider: public ISpxInterfaceBaseFor<ISpxInteractionIdProvider>
 {
 public:
-    virtual std::string PeekNextInteractionId(InteractionIdPurpose purpose) = 0;
-    virtual std::string GetInteractionId(InteractionIdPurpose purpose) = 0;
+    virtual std::string NextInteractionId(InteractionIdPurpose purpose) noexcept = 0;
+    virtual std::string GetInteractionId(InteractionIdPurpose purpose) const noexcept = 0;
 };
 
 class ISpxDialogServiceConnector : public ISpxInterfaceBaseFor<ISpxDialogServiceConnector>

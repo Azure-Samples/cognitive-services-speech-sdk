@@ -79,8 +79,7 @@ CSpxAudioStreamSession::CSpxAudioStreamSession() :
     m_isReliableDelivery{ false },
     m_lastErrorGlobalOffset{ 0 },
     m_currentTurnGlobalOffset{ 0 },
-    m_bytesTransited(0),
-    m_interactionId{ PAL::CreateGuidWithDashesUTF8(), PAL::CreateGuidWithDashesUTF8() }
+    m_bytesTransited(0)
 {
     SPX_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::CSpxAudioStreamSession", (void*)this);
 }
@@ -653,7 +652,7 @@ CSpxAsyncOp<std::string> CSpxAudioStreamSession::SendActivityAsync(std::string a
     /* Need to change thread service to support generic tasks */
     std::shared_future<std::string> taskFuture = std::async(std::launch::async, [this, activity{ std::move(activity) }, keep_alive]()
     {
-        auto interaction_id = PAL::CreateGuidWithDashesUTF8();
+        auto interaction_id = CSpxInteractionIdProvider::NextInteractionId(InteractionIdPurpose::Activity);
 
         auto task = CreateTask([&]() {
             auto message_payload = nlohmann::json::parse(activity);
@@ -1021,7 +1020,7 @@ void CSpxAudioStreamSession::FireSessionStartedEvent()
     /* For dialog service connector, we replace session id with the interaction id that's going to be send in the context message. */
     if (IsRecognizerType<ISpxDialogServiceConnector>())
     {
-        sessionIdOverride = PAL::ToWString(PeekNextInteractionId(InteractionIdPurpose::Speech));
+        sessionIdOverride = PAL::ToWString(CSpxInteractionIdProvider::NextInteractionId(InteractionIdPurpose::Speech));
     }
 
     SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::FireSessionStartedEvent: Firing SessionStarted event: SessionId: %ls", (void*)this, m_sessionId.c_str());
@@ -1034,9 +1033,16 @@ void CSpxAudioStreamSession::FireSessionStoppedEvent()
 {
     SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::FireSessionStoppedEvent: Firing SessionStopped event: SessionId: %ls", (void*)this, m_sessionId.c_str());
 
+    /* For dialog service connector, we replace session id with the interaction id that was sent in the context message. */
+    std::wstring sessionIdOverride;
+    if (IsRecognizerType<ISpxDialogServiceConnector>())
+    {
+        sessionIdOverride = PAL::ToWString(CSpxInteractionIdProvider::GetInteractionId(InteractionIdPurpose::Speech));
+    }
+
     EnsureFireResultEvent();
 
-    FireEvent(EventType::SessionStop);
+    FireEvent(EventType::SessionStop, nullptr, sessionIdOverride.empty() ? nullptr : sessionIdOverride.c_str());
 }
 
 void CSpxAudioStreamSession::FireConnectedEvent()
@@ -1870,7 +1876,7 @@ void CSpxAudioStreamSession::Error(ISpxRecoEngineAdapter* adapter, ErrorPayload_
             m_audioBuffer->Drop();
         }
 
-        // We're not going to see a start or stop message. We're done. Canceled. 
+        // We're not going to see a start or stop message. We're done. Canceled.
         m_expectAdapterStartedTurn = false;
         m_expectAdapterStoppedTurn = false;
     }
@@ -2653,33 +2659,6 @@ void CSpxAudioStreamSession::SendNetworkMessage(std::string&& path, std::string&
 bool CSpxAudioStreamSession::IsStreaming()
 {
     return IsState(SessionState::ProcessingAudio) || IsState(SessionState::ProcessingAudioLeftovers);
-}
-
-std::string CSpxAudioStreamSession::PeekNextInteractionId(InteractionIdPurpose purpose)
-{
-    std::lock_guard<std::mutex> lk{ m_interactionId.m_lock };
-    if (purpose == InteractionIdPurpose::Speech)
-    {
-        return m_interactionId.m_nextSpeech;
-    }
-    return m_interactionId.m_nextActivity;
-}
-
-std::string CSpxAudioStreamSession::GetInteractionId(InteractionIdPurpose purpose)
-{
-    std::lock_guard<std::mutex> lk{ m_interactionId.m_lock };
-    /* Select the per-scenario ID to retrieve and return the current value while also updating with a new GUID */
-    auto& iidRef = [&](InteractionIdPurpose purpose) -> std::string&
-    {
-        if (purpose == InteractionIdPurpose::Speech)
-        {
-            return m_interactionId.m_nextSpeech;
-        }
-        return m_interactionId.m_nextActivity;
-    }(purpose);
-    auto interactionId = iidRef;
-    iidRef = PAL::CreateGuidWithDashesUTF8();
-    return interactionId;
 }
 
 std::string CSpxAudioStreamSession::GetSpeechEventPayload(bool startMeeting)
