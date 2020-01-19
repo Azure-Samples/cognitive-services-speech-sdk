@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.8.0" />
+    <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.9.0" />
   </ItemGroup>
 
 </Project>

@@ -510,7 +510,7 @@ void SpeechRecognitionWithSourceLanguageAutoDetection()
     // Replace with your own subscription key and service region (e.g., "westus").
     auto speechConfig = SpeechConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
-     // Currently this feature only supports 2 languages
+     // Currently this feature only supports 2 different language candidates
      // Replace the languages with your languages in BCP-47 format, e.g. fr-FR.
      // Please see https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support for all supported langauges
      auto autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig::FromLanguages({ "en-US", "de-DE" });
@@ -578,7 +578,7 @@ void SpeechRecognitionWithSourceLanguageAutoDetectionUsingCustomizedModel()
     // Set the endpoint ID of your customized mode that will be used for fr-FR,  Replace with your own CRIS endpoint ID.
     sourceLanguageConfigs.push_back(SourceLanguageConfig::FromLanguage("fr-FR", "The Endpoint Id for custom model of fr-FR"));
     // Construct AutoDetectSourceLanguageConfig with the 2 source language configurations
-    // Currently this feature only supports 2 languages
+    // Currently this feature only supports 2 different language candidates
     auto autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig::FromSourceLanguageConfigs(sourceLanguageConfigs);
 
     // Creates a speech recognizer using the auto detect source language config
