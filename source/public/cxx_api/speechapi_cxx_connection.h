@@ -8,6 +8,7 @@
 #include <speechapi_cxx_recognizer.h>
 #include <speechapi_cxx_eventsignal.h>
 #include <speechapi_cxx_connection_eventargs.h>
+#include <speechapi_cxx_connection_message_eventargs.h>
 #include <speechapi_c.h>
 
 namespace Microsoft {
@@ -90,11 +91,11 @@ public:
     }
 
     /// <summary>
-    /// Send a message to service.
+    /// Send a message to the speech service.
     /// Added in version 1.7.0.
     /// </summary>
-    /// <param name="path">the message path.</param>
-    /// <param name="payload">payload of the message. This is a json string.</param>
+    /// <param name="path">The path of the message.</param>
+    /// <param name="payload">The payload of the message. This is a json string.</param>
     /// <returns>An empty future.</returns>
     std::future<void> SendMessageAsync(const SPXSTRING& path, const SPXSTRING& payload)
     {
@@ -102,6 +103,24 @@ public:
         auto future = std::async(std::launch::async, [keep_alive, this, path, payload]() -> void {
             SPX_IFTRUE_THROW_HR(m_connectionHandle == SPXHANDLE_INVALID, SPXERR_INVALID_HANDLE);
             SPX_THROW_ON_FAIL(::connection_send_message(m_connectionHandle, Utils::ToUTF8(path.c_str()), Utils::ToUTF8(payload.c_str())));
+        });
+        return future;
+    }
+
+    /// <summary>
+    /// Send a binary message to the speech service.
+    /// Added in version 1.10.0.
+    /// </summary>
+    /// <param name="path">The path of the message.</param>
+    /// <param name="payload">The binary payload of the message.</param>
+    /// <param name="size">The size of the binary payload.</param>
+    /// <returns>An empty future.</returns>
+    std::future<void> SendMessageAsync(const SPXSTRING& path, uint8_t* payload, uint32_t size)
+    {
+        auto keep_alive = this->shared_from_this();
+        auto future = std::async(std::launch::async, [keep_alive, this, path, payload, size]() -> void {
+            SPX_IFTRUE_THROW_HR(m_connectionHandle == SPXHANDLE_INVALID, SPXERR_INVALID_HANDLE);
+            SPX_THROW_ON_FAIL(::connection_send_message_data(m_connectionHandle, Utils::ToUTF8(path.c_str()), payload, size));
         });
         return future;
     }
@@ -117,12 +136,19 @@ public:
     EventSignal<const ConnectionEventArgs&> Disconnected;
 
     /// <summary>
+    /// The MessageReceived event to indicate that the underlying protocol received a message from the service.
+    /// Added in version 1.10.0.
+    /// </summary>
+    EventSignal<const ConnectionMessageEventArgs&> MessageReceived;
+
+    /// <summary>
     /// Internal constructor. Creates a new instance using the provided handle.
     /// </summary>
     /// <param name="handle">The connection handle.</param>
     explicit Connection(SPXCONNECTIONHANDLE handle) :
         Connected(GetConnectionEventConnectionsChangedCallback(), GetConnectionEventConnectionsChangedCallback(), false),
         Disconnected(GetConnectionEventConnectionsChangedCallback(), GetConnectionEventConnectionsChangedCallback(), false),
+        MessageReceived(GetConnectionMessageEventConnectionsChangedCallback(), GetConnectionMessageEventConnectionsChangedCallback(), false),
         m_connectionHandle(handle)
     {
         SPX_DBG_TRACE_FUNCTION();
@@ -213,6 +239,15 @@ private:
         FireConnectionEvent(false, event, context);
     }
 
+    static void FireEvent_MessageReceived(SPXEVENTHANDLE event, void* context)
+    {
+        std::unique_ptr<ConnectionMessageEventArgs> connectionEvent { new ConnectionMessageEventArgs(event) };
+
+        auto connection = static_cast<Connection*>(context);
+        auto keepAlive = connection->shared_from_this();
+        connection->MessageReceived.Signal(*connectionEvent.get());
+    }
+
     void ConnectionEventConnectionsChanged(const EventSignal<const ConnectionEventArgs&>& connectionEvent)
     {
         if (m_connectionHandle != SPXHANDLE_INVALID)
@@ -231,9 +266,28 @@ private:
         }
     }
 
+    void ConnectionMessageEventConnectionsChanged(const EventSignal<const ConnectionMessageEventArgs&>& connectionEvent)
+    {
+        if (m_connectionHandle != SPXHANDLE_INVALID)
+        {
+            SPX_DBG_TRACE_VERBOSE("%s: m_connectionHandle=0x%8p", __FUNCTION__, (void*)m_connectionHandle);
+            SPX_DBG_TRACE_VERBOSE_IF(!::connection_handle_is_valid(m_connectionHandle), "%s: m_connectionHandle is INVALID!!!", __FUNCTION__);
+
+            if (&connectionEvent == &MessageReceived)
+            {
+                SPX_THROW_ON_FAIL(connection_message_received_set_callback(m_connectionHandle, MessageReceived.IsConnected() ? FireEvent_MessageReceived : nullptr, this));
+            }
+        }
+    }
+
     inline std::function<void(const EventSignal<const ConnectionEventArgs&>&)> GetConnectionEventConnectionsChangedCallback()
     {
         return [=](const EventSignal<const ConnectionEventArgs&>& connectionEvent) { this->ConnectionEventConnectionsChanged(connectionEvent); };
+    }
+
+    inline std::function<void(const EventSignal<const ConnectionMessageEventArgs&>&)> GetConnectionMessageEventConnectionsChangedCallback()
+    {
+        return [=](const EventSignal<const ConnectionMessageEventArgs&>& connectionEvent) { this->ConnectionMessageEventConnectionsChanged(connectionEvent); };
     }
 };
 

@@ -377,7 +377,7 @@ private:
     /*! \endcond */
 public:
     /// <summary>
-    /// A collection or properties and their values defined for this <see cref="DialogServiceConnector"/>.
+    /// A collection of properties and their values defined for this <see cref="DialogServiceConnector"/>.
     /// </summary>
     PropertyCollection& Properties;
 };

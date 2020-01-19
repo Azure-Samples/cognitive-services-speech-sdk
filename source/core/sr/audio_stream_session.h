@@ -119,6 +119,7 @@ public:
 
     void SendSpeechEventMessage(std::string&& payload) override;
     void SendNetworkMessage(std::string&& path, std::string&& payload) override;
+    void SendNetworkMessage(std::string&& path, std::vector<uint8_t>&& payload) override;
 
     bool IsStreaming() override;
 
@@ -147,6 +148,7 @@ public:
     // -- ISpxEventArgsFactory
     std::shared_ptr<ISpxSessionEventArgs> CreateSessionEventArgs(const std::wstring& sessionId) override;
     std::shared_ptr<ISpxConnectionEventArgs> CreateConnectionEventArgs(const std::wstring& sessionId) override;
+    std::shared_ptr<ISpxConnectionMessageEventArgs> CreateConnectionMessageEventArgs(const std::string& headers, const std::string& path, const uint8_t* buffer, uint32_t bufferSize, bool isBufferBinary) override;
     std::shared_ptr<ISpxRecognitionEventArgs> CreateRecognitionEventArgs(const std::wstring& sessionId, uint64_t offset) override;
     std::shared_ptr<ISpxRecognitionEventArgs> CreateRecognitionEventArgs(const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result) override;
     std::shared_ptr<ISpxActivityEventArgs> CreateActivityEventArgs(std::string activity, std::shared_ptr<ISpxAudioOutput> audio) final;
@@ -164,6 +166,7 @@ public:
     void FireAdapterResult_TranslationSynthesis(ISpxRecoEngineAdapter* adapter, std::shared_ptr<ISpxRecognitionResult> result) override;
     void FireConnectedEvent() override;
     void FireDisconnectedEvent() override;
+    void FireConnectionMessageReceived(const std::string& headers, const std::string& path, const uint8_t* buffer, uint32_t bufferSize, bool isBufferBinary) override;
 
     void AdapterCompletedSetFormatStop(ISpxRecoEngineAdapter* /* adapter */) override { AdapterCompletedSetFormatStop(AdapterDoneProcessingAudio::Speech); }
     void AdapterRequestingAudioMute(ISpxRecoEngineAdapter* adapter, bool muteAudio) override;
@@ -296,6 +299,18 @@ private:
     void SetThrottleVariables(const SPXWAVEFORMATEX* format);
 
     void UpdateAdapterResult_JsonResult(std::shared_ptr<ISpxRecognitionResult> result);
+
+    void ForEachRecognizer(std::function<void(std::shared_ptr<ISpxRecognizer>)> fn)
+    {
+        for (auto iter = m_recognizers.begin(); iter != m_recognizers.end(); iter++)
+        {
+            auto recognizer = iter->lock();
+            if (recognizer != nullptr)
+            {
+                fn(iter->lock());
+            }
+        }
+    }
 
 private:
 

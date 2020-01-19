@@ -93,6 +93,33 @@ SPXAPI_PRIVATE connection_set_event_callback(ISpxRecognizerEvents::ConnectionEve
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
+SPXAPI_PRIVATE connection_message_set_event_callback(ISpxRecognizerEvents::ConnectionMessageEvent_Type ISpxRecognizerEvents::*connectionMessageEvent, SPXCONNECTIONHANDLE connectionHandle, CONNECTION_CALLBACK_FUNC callback, void* context)
+{
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        SPX_IFTRUE_THROW_HR(connectionMessageEvent == nullptr, SPXERR_INVALID_ARG);
+        auto connection = CSpxSharedPtrHandleTableManager::GetPtr<ISpxConnection, SPXCONNECTIONHANDLE>(connectionHandle);
+
+        auto pfn = [=](std::shared_ptr<ISpxConnectionMessageEventArgs> e) {
+            auto eventHandle = CSpxSharedPtrHandleTableManager::TrackHandle<ISpxConnectionMessageEventArgs, SPXEVENTHANDLE>(e);
+            (*callback)(eventHandle, context);
+        };
+
+        auto recognizer = connection->GetRecognizer();
+        SPX_IFTRUE_THROW_HR(recognizer == nullptr && callback != nullptr, SPXERR_INVALID_RECOGNIZER);
+
+        auto pISpxRecognizerEvents = SpxQueryInterface<ISpxRecognizerEvents>(recognizer).get();
+        SPX_IFTRUE_THROW_HR(pISpxRecognizerEvents == nullptr, SPXERR_RUNTIME_ERROR);
+        (pISpxRecognizerEvents->*connectionMessageEvent).Disconnect(pfn);
+
+        if (callback != nullptr)
+        {
+            (pISpxRecognizerEvents->*connectionMessageEvent).Connect(pfn);
+        }
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
 SPXAPI_PRIVATE synthesizer_set_event_callback(std::list<std::pair<void*, std::shared_ptr<ISpxSynthesizerEvents::SynthEvent_Type>>> ISpxSynthesizerEvents::*psynthEvents, SPXSYNTHHANDLE hsynth, PSYNTHESIS_CALLBACK_FUNC pCallback, void* pvContext)
 {
     SPXAPI_INIT_HR_TRY(hr)

@@ -25,6 +25,8 @@
 #include "recognizer.h"
 #include "session_event_args.h"
 #include "connection_event_args.h"
+#include "connection_message.h"
+#include "connection_message_event_args.h"
 #include "usp_reco_engine_adapter.h"
 #include "dialog_service_connector.h"
 #include "connection.h"
@@ -67,8 +69,10 @@ SPX_EXTERN_C void* SRLib_CreateModuleObject(const char* className, const char* i
     SPX_FACTORY_MAP_ENTRY(CSpxUspRecoEngineAdapter, ISpxRecoEngineAdapter);
     SPX_FACTORY_MAP_ENTRY(CSpxUspCallbackWrapper, ISpxUspCallbacks);
     SPX_FACTORY_MAP_ENTRY(CSpxLuisDirectEngineAdapter, ISpxLuEngineAdapter);
-    SPX_FACTORY_MAP_ENTRY(CSpxConnectionEventArgs, ISpxConnectionEventArgs);
     SPX_FACTORY_MAP_ENTRY(CSpxConnection, ISpxConnection);
+    SPX_FACTORY_MAP_ENTRY(CSpxConnectionEventArgs, ISpxConnectionEventArgs);
+    SPX_FACTORY_MAP_ENTRY(CSpxConnectionMessage, ISpxConnectionMessage);
+    SPX_FACTORY_MAP_ENTRY(CSpxConnectionMessageEventArgs, ISpxConnectionMessageEventArgs);
     SPX_FACTORY_MAP_ENTRY(CSpxStoredGrammar, ISpxStoredGrammar);
     SPX_FACTORY_MAP_ENTRY(CSpxClassLanguageModel, ISpxClassLanguageModel);
     SPX_FACTORY_MAP_ENTRY(CSpxSpeechConfig, ISpxSpeechConfig);

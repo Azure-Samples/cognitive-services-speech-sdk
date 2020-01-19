@@ -1059,6 +1059,22 @@ void CSpxAudioStreamSession::FireDisconnectedEvent()
     FireEvent(EventType::Disconnected);
 }
 
+void CSpxAudioStreamSession::FireConnectionMessageReceived(const std::string& headers, const std::string& path, const uint8_t* buffer, uint32_t bufferSize, bool isBufferBinary)
+{
+    SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::FireConnectionMessageReceived; path=%s", (void*)this, path.c_str());
+
+    auto bufferKeepAlive = SpxAllocSharedUint8Buffer(bufferSize);
+    memcpy(bufferKeepAlive.get(), buffer, bufferSize);
+
+    auto task = CreateTask([=]() {
+        ForEachRecognizer([=](auto recognizer) {
+            auto ptr = SpxQueryInterface<ISpxRecognizerEvents>(recognizer);
+            ptr->FireConnectionMessageReceived(headers, path, bufferKeepAlive.get(), bufferSize, isBufferBinary);
+        });
+    });
+    m_threadService->ExecuteAsync(move(task), ISpxThreadService::Affinity::User);
+}
+
 void CSpxAudioStreamSession::FireSpeechStartDetectedEvent(uint64_t offset)
 {
     SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::FireSpeechStartDetectedEvent", (void*)this);
@@ -1475,6 +1491,19 @@ std::shared_ptr<ISpxConnectionEventArgs> CSpxAudioStreamSession::CreateConnectio
     argsInit->Init(sessionId);
 
     return connectionEvent;
+}
+
+std::shared_ptr<ISpxConnectionMessageEventArgs> CSpxAudioStreamSession::CreateConnectionMessageEventArgs(const std::string& headers, const std::string& path, const uint8_t* buffer, uint32_t bufferSize, bool isBufferBinary)
+{
+    auto message = SpxCreateObjectWithSite<ISpxConnectionMessage>("CSpxConnectionMessage", this);
+    auto messageInit = SpxQueryInterface<ISpxConnectionMessageInit>(message);
+    messageInit->Init(headers, path, buffer, bufferSize, isBufferBinary);
+
+    auto connectionMessageEvent = SpxCreateObjectWithSite<ISpxConnectionMessageEventArgs>("CSpxConnectionMessageEventArgs", this);
+    auto argsInit = SpxQueryInterface<ISpxConnectionMessageEventArgsInit>(connectionMessageEvent);
+    argsInit->Init(message);
+
+    return connectionMessageEvent;
 }
 
 std::shared_ptr<ISpxRecognitionEventArgs> CSpxAudioStreamSession::CreateRecognitionEventArgs(const std::wstring& sessionId, uint64_t offset)
@@ -2645,6 +2674,18 @@ void CSpxAudioStreamSession::SendSpeechEventMessage(std::string&& payload)
 }
 
 void CSpxAudioStreamSession::SendNetworkMessage(std::string&& path, std::string&& payload)
+{
+    SPX_DBG_TRACE_FUNCTION();
+    auto keepAlive = SpxSharedPtrFromThis<ISpxSession>(this);
+    auto task = CreateTask([this, keepAlive, path, payload] () mutable {
+        EnsureInitRecoEngineAdapter();
+        m_recoAdapter->SendNetworkMessage(std::move(path), std::move(payload));
+    });
+
+    m_threadService->ExecuteAsync(move(task));
+}
+
+void CSpxAudioStreamSession::SendNetworkMessage(std::string&& path, std::vector<uint8_t>&& payload)
 {
     SPX_DBG_TRACE_FUNCTION();
     auto keepAlive = SpxSharedPtrFromThis<ISpxSession>(this);

@@ -1,3 +1,10 @@
+//
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+//
+// connection.cpp: Implementation definitions for CSpxConnection C++ class
+//
+
 #include "stdafx.h"
 #include "connection.h"
 
@@ -62,6 +69,16 @@ void CSpxConnection::SetParameter(std::string&& path, std::string&& name, std::s
 }
 
 void CSpxConnection::SendNetworkMessage(std::string&& path, std::string&& payload)
+{
+    auto shared = m_setMessageParamFromUser.lock();
+    if (shared == nullptr)
+    {
+        ThrowRuntimeError("Could not get ISpxMessageParamFromUser.");
+    }
+    shared->SendNetworkMessage(move(path), move(payload));
+}
+
+void CSpxConnection::SendNetworkMessage(std::string&& path, std::vector<uint8_t>&& payload)
 {
     auto shared = m_setMessageParamFromUser.lock();
     if (shared == nullptr)

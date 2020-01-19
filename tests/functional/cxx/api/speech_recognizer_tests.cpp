@@ -4,6 +4,7 @@
 //
 
 #include <map>
+#include <queue>
 #include "test_utils.h"
 #include "file_utils.h"
 #include "recognizer_utils.h"
@@ -2034,6 +2035,138 @@ TEST_CASE("Verify language id detection for continous speech recognition", "[api
     REQUIRE(recognizingResults.size() > 0);
     REQUIRE(recognizedResults.size() > 0);
     REQUIRE(recognizedResults[0] == AudioUtterancesMap[SINGLE_UTTERANCE_GERMAN].Utterances["de"][0].Text);
+}
+
+
+TEST_CASE("Connection Message Received Events", "[api][cxx]")
+{
+    SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+
+    std::promise<void> turnEndPromise;
+    auto turnEndComplete = turnEndPromise.get_future();
+
+    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
+    auto audioInput = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
+
+    auto config = CurrentSpeechConfig();
+    auto recognizer = SpeechRecognizer::FromConfig(CurrentSpeechConfig(), audioInput);
+    auto connection = Connection::FromRecognizer(recognizer);
+
+    std::queue<std::shared_ptr<ConnectionMessage>> messages;
+    connection->MessageReceived += [&](const ConnectionMessageEventArgs& e) {
+        auto message = e.GetMessage();
+        auto turnEnd = message->GetPath() == "turn.end";
+        messages.emplace(std::move(message));
+        if (turnEnd) turnEndPromise.set_value();
+    };
+
+    SPXTEST_SECTION("RecognizeOnceAsync")
+    {
+        auto result = recognizer->RecognizeOnceAsync().get();
+        SPXTEST_REQUIRE(turnEndComplete.wait_for(WAIT_FOR_RECO_RESULT_TIME) == std::future_status::ready);
+
+        SPXTEST_REQUIRE(result != nullptr);
+        SPXTEST_REQUIRE(result->Reason == ResultReason::RecognizedSpeech);
+        SPXTEST_REQUIRE(StringComparisions::AssertFuzzyMatch(result->Text, AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH].Utterances["en-US"][0].Text));
+
+        auto message = messages.front();
+        auto requestId = message->Properties.GetProperty("X-RequestId");
+
+        SPXTEST_REQUIRE(message->GetPath() == "turn.start");
+        SPXTEST_REQUIRE(message->Properties.GetProperty("X-RequestId") == requestId);
+        SPXTEST_REQUIRE(message->Properties.GetProperty("Content-Type").find("application/json") != std::string::npos);
+        messages.pop();
+
+        message = messages.front();
+        SPXTEST_REQUIRE(message->GetPath() == "speech.startDetected");
+        SPXTEST_REQUIRE(message->Properties.GetProperty("X-RequestId") == requestId);
+        SPXTEST_REQUIRE(message->Properties.GetProperty("Content-Type").find("application/json") != std::string::npos);
+        messages.pop();
+
+        message = messages.front();
+        while (message->GetPath() == "speech.hypothesis")
+        {
+            SPXTEST_REQUIRE(message->GetPath() == "speech.hypothesis");
+            SPXTEST_REQUIRE(message->Properties.GetProperty("X-RequestId") == requestId);
+            SPXTEST_REQUIRE(message->Properties.GetProperty("Content-Type").find("application/json") != std::string::npos);
+            messages.pop();
+            message = messages.front();
+        }
+
+        SPXTEST_REQUIRE(message->GetPath() == "speech.endDetected");
+        SPXTEST_REQUIRE(message->Properties.GetProperty("X-RequestId") == requestId);
+        SPXTEST_REQUIRE(message->Properties.GetProperty("Content-Type").find("application/json") != std::string::npos);
+        messages.pop();
+
+        message = messages.front();
+        SPXTEST_REQUIRE(message->GetPath() == "speech.phrase");
+        SPXTEST_REQUIRE(message->Properties.GetProperty("X-RequestId") == requestId);
+        SPXTEST_REQUIRE(message->Properties.GetProperty("Content-Type").find("application/json") != std::string::npos);
+        messages.pop();
+
+        message = messages.front();
+        SPXTEST_REQUIRE(message->GetPath() == "turn.end");
+        SPXTEST_REQUIRE(message->Properties.GetProperty("X-RequestId") == requestId);
+        SPXTEST_REQUIRE(message->Properties.GetProperty("Content-Type").find("application/json") != std::string::npos);
+        messages.pop();
+
+        SPXTEST_REQUIRE(messages.size() == 0);
+    }
+
+    SPXTEST_SECTION("ContinuousRecognition")
+    {
+        auto result = make_shared<RecoPhrases>();
+        recognizer->StartContinuousRecognitionAsync().get();
+
+        SPXTEST_REQUIRE(turnEndComplete.wait_for(WAIT_FOR_RECO_RESULT_TIME) == std::future_status::ready);
+        recognizer->StopContinuousRecognitionAsync().get();
+
+        auto message = messages.front();
+        auto requestId = message->Properties.GetProperty("X-RequestId");
+
+        SPXTEST_REQUIRE(message->GetPath() == "turn.start");
+        SPXTEST_REQUIRE(message->Properties.GetProperty("X-RequestId") == requestId);
+        SPXTEST_REQUIRE(message->Properties.GetProperty("Content-Type").find("application/json") != std::string::npos);
+        messages.pop();
+
+        message = messages.front();
+        SPXTEST_REQUIRE(message->GetPath() == "speech.startDetected");
+        SPXTEST_REQUIRE(message->Properties.GetProperty("X-RequestId") == requestId);
+        SPXTEST_REQUIRE(message->Properties.GetProperty("Content-Type").find("application/json") != std::string::npos);
+        messages.pop();
+
+        message = messages.front();
+        while (message->GetPath() != "speech.endDetected")
+        {
+            SPXTEST_REQUIRE((message->GetPath() == "speech.hypothesis" || message->GetPath() == "speech.phrase"));
+            SPXTEST_REQUIRE(message->Properties.GetProperty("X-RequestId") == requestId);
+            SPXTEST_REQUIRE(message->Properties.GetProperty("Content-Type").find("application/json") != std::string::npos);
+            messages.pop();
+            message = messages.front();
+        }
+
+        SPXTEST_REQUIRE(message->GetPath() == "speech.endDetected");
+        SPXTEST_REQUIRE(message->Properties.GetProperty("X-RequestId") == requestId);
+        SPXTEST_REQUIRE(message->Properties.GetProperty("Content-Type").find("application/json") != std::string::npos);
+        messages.pop();
+
+        message = messages.front();
+        if (message->GetPath() == "speech.phrase")
+        {
+            SPXTEST_REQUIRE(message->GetTextMessage().find("EndOfDictation") != std::string::npos);
+            SPXTEST_REQUIRE(message->Properties.GetProperty("X-RequestId") == requestId);
+            SPXTEST_REQUIRE(message->Properties.GetProperty("Content-Type").find("application/json") != std::string::npos);
+            messages.pop();
+            message = messages.front();
+        }
+
+        SPXTEST_REQUIRE(message->GetPath() == "turn.end");
+        SPXTEST_REQUIRE(message->Properties.GetProperty("X-RequestId") == requestId);
+        SPXTEST_REQUIRE(message->Properties.GetProperty("Content-Type").find("application/json") != std::string::npos);
+        messages.pop();
+
+        SPXTEST_REQUIRE(messages.size() == 0);
+    }
 }
 
 TEST_CASE("Custom speech-to-text endpoints", "[api][cxx]")

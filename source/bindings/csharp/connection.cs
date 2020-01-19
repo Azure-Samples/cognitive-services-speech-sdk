@@ -87,6 +87,7 @@ namespace Microsoft.CognitiveServices.Speech
             {
                 LogErrorIfFail(Internal.Connection.connection_connected_set_callback(connectionHandle, null, IntPtr.Zero));
                 LogErrorIfFail(Internal.Connection.connection_disconnected_set_callback(connectionHandle, null, IntPtr.Zero));
+                LogErrorIfFail(Internal.Connection.connection_message_received_set_callback(connectionHandle, null, IntPtr.Zero));
             }
 
             if (gch.IsAllocated)
@@ -94,10 +95,11 @@ namespace Microsoft.CognitiveServices.Speech
                 gch.Free();
             }
             disposed = true;
+
             // keep delegates alive and set null here
             connectedCallbackDelegate = null;
             disconnectedCallbackDelegate = null;
-
+            messageReceivedCallbackDelegate = null;
         }
 
         internal Connection(IntPtr connectionPtr)
@@ -107,6 +109,7 @@ namespace Microsoft.CognitiveServices.Speech
 
             connectedCallbackDelegate = FireEvent_Connected;
             disconnectedCallbackDelegate = FireEvent_Disconnected;
+            messageReceivedCallbackDelegate = FireEvent_MessageReceived;
 
             gch = GCHandle.Alloc(this, GCHandleType.Weak);
         }
@@ -139,10 +142,10 @@ namespace Microsoft.CognitiveServices.Speech
         }
 
         /// <summary>
-        /// Sends a message to service.
+        /// Sends a message to the speech service.
         /// Added in version 1.7.0.
         /// </summary>
-        /// <param name="path">The path of the message to service.</param>
+        /// <param name="path">The path of the message.</param>
         /// <param name="payload">The payload of the message. This is a json string.</param>
         /// <returns>A task representing the asynchronous operation that sends the message.</returns>
         public Task SendMessageAsync(string path, string payload)
@@ -150,6 +153,22 @@ namespace Microsoft.CognitiveServices.Speech
             return Task.Run(() =>
             {
                 DoAsyncConnectionAction(() => SendMessage(path, payload));
+            });
+        }
+
+        /// <summary>
+        /// Sends a binary message to the speech service.
+        /// Added in version 1.10.0.
+        /// </summary>
+        /// <param name="path">The path of the message.</param>
+        /// <param name="payload">The binary payload of the message.</param>
+        /// <param name="size">The size of the binary payload.</param>
+        /// <returns>A task representing the asynchronous operation that sends the message.</returns>
+        public Task SendMessageAsync(string path, byte[] payload, uint size)
+        {
+            return Task.Run(() =>
+            {
+                DoAsyncConnectionAction(() => SendMessageData(path, payload, size));
             });
         }
 
@@ -168,6 +187,7 @@ namespace Microsoft.CognitiveServices.Speech
 
         private event EventHandler<ConnectionEventArgs> _Connected;
         private event EventHandler<ConnectionEventArgs> _Disconnected;
+        private event EventHandler<ConnectionMessageEventArgs> _MessageReceived;
 
         /// <summary>
         /// The Connected event to indicate that the recognizer is connected to service.
@@ -225,12 +245,39 @@ namespace Microsoft.CognitiveServices.Speech
             }
         }
 
+        /// <summary>
+        /// The MessageReceived event indicates that the service has sent a network message to the client.
+        /// </summary>
+        public event EventHandler<ConnectionMessageEventArgs> MessageReceived
+        {
+            add
+            {
+                if (this._MessageReceived == null)
+                {
+                    ThrowIfFail(Internal.Connection.connection_message_received_set_callback(connectionHandle, messageReceivedCallbackDelegate, GCHandle.ToIntPtr(gch)));
+                }
+                this._MessageReceived += value;
+            }
+            remove
+            {
+                this._MessageReceived -= value;
+                if (this._MessageReceived == null)
+                {
+                    if (connectionHandle != null)
+                    {
+                        LogErrorIfFail(Internal.Connection.connection_message_received_set_callback(connectionHandle, null, IntPtr.Zero));
+                    }
+                }
+            }
+        }
+
         private GCHandle gch;
         volatile bool disposed = false;
         volatile bool isDisposing = false;
         private InteropSafeHandle connectionHandle;
         private ConnectionCallbackFunctionDelegate connectedCallbackDelegate;
         private ConnectionCallbackFunctionDelegate disconnectedCallbackDelegate;
+        private ConnectionCallbackFunctionDelegate messageReceivedCallbackDelegate;
         object connectionLock = new object();
         private int activeAsyncConnectionCounter = 0;
 
@@ -266,6 +313,23 @@ namespace Microsoft.CognitiveServices.Speech
                     return;
                 var resultEventArg = new ConnectionEventArgs(hevent);
                 connection._Disconnected?.Invoke(connection, resultEventArg);
+            }
+            catch (InvalidOperationException)
+            {
+                LogError(Internal.SpxError.InvalidHandle);
+            }
+        }
+
+        [MonoPInvokeCallback(typeof(ConnectionCallbackFunctionDelegate))]
+        private static void FireEvent_MessageReceived(IntPtr hevent, IntPtr pvContext)
+        {
+            try
+            {
+                var connection = InteropSafeHandle.GetObjectFromWeakHandle<Connection>(pvContext);
+                if (connection == null || connection.isDisposing)
+                    return;
+                var eventArgs = new ConnectionMessageEventArgs(hevent);
+                connection._MessageReceived?.Invoke(connection, eventArgs);
             }
             catch (InvalidOperationException)
             {
@@ -310,6 +374,12 @@ namespace Microsoft.CognitiveServices.Speech
             {
                 Marshal.FreeHGlobal(payloadPtr);
             }
+        }
+
+        internal void SendMessageData(string path, byte[] payload, UInt32 size)
+        {
+            ThrowIfFail(connectionHandle != null, SpxError.InvalidHandle.ToInt32());
+            ThrowIfFail(Internal.Connection.connection_send_message_data(connectionHandle, path, payload, size));
         }
     }
 }

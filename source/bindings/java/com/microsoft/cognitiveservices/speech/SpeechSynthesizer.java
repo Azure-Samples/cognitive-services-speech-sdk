@@ -221,8 +221,8 @@ public class SpeechSynthesizer implements Closeable
     }
 
     /**
-     * The collection or properties and their values defined for this SpeechSynthesizer.
-     * @return The collection or properties and their values defined for this SpeechSynthesizer.
+     * The collection of properties and their values defined for this SpeechSynthesizer.
+     * @return The collection of properties and their values defined for this SpeechSynthesizer.
      */
     public PropertyCollection getProperties() {
         return this.parameters;

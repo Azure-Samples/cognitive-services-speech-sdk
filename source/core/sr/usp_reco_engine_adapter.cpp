@@ -184,6 +184,18 @@ void CSpxUspRecoEngineAdapter::SendNetworkMessage(std::string&& path, std::strin
     UspSendMessage(path, payload, GetMessageType(std::move(path)));
 }
 
+void CSpxUspRecoEngineAdapter::SendNetworkMessage(std::string&& path, std::vector<uint8_t>&& payload)
+{
+    // Establish the connection to service.
+    EnsureUspInit();
+    // for some reason, no connection is established
+    if (m_uspConnection == nullptr || IsState(UspState::Error))
+    {
+        return;
+    }
+    UspSendMessage(path, payload.data(), payload.size(), GetMessageType(std::move(path)));
+}
+
 void CSpxUspRecoEngineAdapter::SetFormat(const SPXWAVEFORMATEX* pformat)
 {
     SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
@@ -1176,6 +1188,11 @@ void CSpxUspRecoEngineAdapter::WriteTelemetryLatency(uint64_t latencyInTicks, bo
     }
 }
 
+void CSpxUspRecoEngineAdapter::OnMessageReceived(const USP::RawMsg& m)
+{
+    InvokeOnSite([&](const SitePtr& p) { p->FireConnectionMessageReceived(m.headers, m.path, m.buffer, m.bufferSize, m.isBufferBinary); });
+}
+
 void CSpxUspRecoEngineAdapter::OnSpeechStartDetected(const USP::SpeechStartDetectedMsg& message)
 {
     // The USP message for SpeechStartDetected isn't what it might sound like in all "reco modes" ...
@@ -1829,7 +1846,6 @@ void CSpxUspRecoEngineAdapter::OnConnected()
 {
     InvokeOnSite([](const SitePtr& p) { p->FireConnectedEvent(); });
 }
-
 
 void CSpxUspRecoEngineAdapter::OnDisconnected()
 {

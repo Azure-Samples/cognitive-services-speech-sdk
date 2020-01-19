@@ -241,6 +241,8 @@ private:
     void Sample_HelloWorld_Subscription_With_CRIS();
     void Sample_HelloWorld_Language(const char* language);
     void Sample_HelloWorld_Kws();
+    void Sample_SendMessageAsync();
+    void Sample_ConnectionMessageCallback();
 
     int Sample_Do_Channel9();
 

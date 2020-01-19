@@ -134,8 +134,8 @@ public final class AudioDataStream implements Closeable
     }
 
     /**
-     * The collection or properties and their values defined for this audio data stream.
-     * @return The collection or properties and their values defined for this audio data stream.
+     * The collection of properties and their values defined for this audio data stream.
+     * @return The collection of properties and their values defined for this audio data stream.
      */
     public PropertyCollection getProperties() {
         return this.parameters;

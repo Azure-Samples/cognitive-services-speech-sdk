@@ -673,6 +673,10 @@
 %include <speechapi_cxx_eventargs.h>
 %include <speechapi_cxx_eventsignal.h>
 
+%ignore Microsoft::CognitiveServices::Speech::Connection::MessageReceived;
+%ignore Microsoft::CognitiveServices::Speech::ConnectionMessage;
+%ignore Microsoft::CognitiveServices::Speech::ConnectionMessageEventArgs;
+
 %include <speechapi_cxx_session_eventargs.h>
 %include <speechapi_cxx_connection_eventargs.h>
 

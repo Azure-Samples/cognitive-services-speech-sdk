@@ -125,7 +125,7 @@ public:
     }
 
     /// <summary>
-    /// A collection or properties and their values defined for this <see cref="IntentRecognizer"/>.
+    /// A collection of properties and their values defined for this <see cref="IntentRecognizer"/>.
     /// </summary>
     PropertyCollection& Properties;
 

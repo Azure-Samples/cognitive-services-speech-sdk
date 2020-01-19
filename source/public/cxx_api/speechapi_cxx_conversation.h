@@ -331,7 +331,7 @@ private:
 
 public:
     /// <summary>
-    /// A collection or properties and their values defined for this <see cref="Conversation"/>.
+    /// A collection of properties and their values defined for this <see cref="Conversation"/>.
     /// </summary>
     PropertyCollection& Properties;
 

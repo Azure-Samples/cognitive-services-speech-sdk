@@ -1,3 +1,10 @@
+//
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+//
+// recognizer.h: Implementation declarations for CSpxRecognizer C++ class
+//
+
 #pragma once
 #include <atomic>
 #include <future>
@@ -85,6 +92,7 @@ public:
 
     void FireConnected(const std::wstring& sessionId) override;
     void FireDisconnected(const std::wstring& sessionId) override;
+    void FireConnectionMessageReceived(const std::string& headers, const std::string& path, const uint8_t* buffer, uint32_t bufferSize, bool isBufferBinary) override;
 
     void FireSpeechStartDetected(const std::wstring& sessionId, uint64_t offset) override;
     void FireSpeechEndDetected(const std::wstring& sessionId, uint64_t offset) override;
@@ -103,6 +111,7 @@ public:
     // --- ISpxSetUspMessageParamFromUser
     void SetParameter(std::string&& path, std::string&& name, std::string&& value) override;
     void SendNetworkMessage(std::string&& path, std::string&& payload) override;
+    void SendNetworkMessage(std::string&& path, std::vector<uint8_t>&& payload) override;
 
     // --- ISpxGetUspMessageParamsFromUser
     CSpxStringMap GetParametersFromUser(std::string&& path) override;

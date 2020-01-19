@@ -1396,6 +1396,139 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
+        public async Task TestMessageReceivedEvents_SpeechRecognizer_RecognizeOnce()
+        {
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
+            {
+                var connection = Connection.FromRecognizer(recognizer);
+                var turnEndComplete = new TaskCompletionSource<int>();
+
+                List<ConnectionMessage> messages = new List<ConnectionMessage>();
+                connection.MessageReceived += (sender, e) => {
+                    messages.Add(e.Message);
+                    turnEndComplete.TrySetResult(0);
+                };
+
+                var result = await helper.CompleteRecognizeOnceAsync(recognizer).ConfigureAwait(false);
+                await Task.WhenAny(turnEndComplete.Task, Task.Delay(TimeSpan.FromMinutes(3)));
+
+                Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
+                AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text, result.Text);
+
+                int i = 0;
+                var requestId = messages[0].Properties.GetProperty("X-RequestId");
+
+                Assert.AreEqual(messages[i].Path, "turn.start");
+                Assert.AreEqual(messages[i].Properties.GetProperty("X-RequestId"), requestId);
+                Assert.IsTrue(messages[i].Properties.GetProperty("Content-Type").Contains("application/json"));
+                i += 1;
+
+                Assert.AreEqual(messages[i].Path, "speech.startDetected");
+                Assert.AreEqual(messages[i].Properties.GetProperty("X-RequestId"), requestId);
+                Assert.IsTrue(messages[i].Properties.GetProperty("Content-Type").Contains("application/json"));
+                i += 1;
+
+                while (messages[i].Path == "speech.hypothesis")
+                {
+                    Assert.AreEqual(messages[i].Path, "speech.hypothesis");
+                    Assert.AreEqual(messages[i].Properties.GetProperty("X-RequestId"), requestId);
+                    Assert.IsTrue(messages[i].Properties.GetProperty("Content-Type").Contains("application/json"));
+                    i += 1;
+                }
+
+                Assert.AreEqual(messages[i].Path, "speech.endDetected");
+                Assert.AreEqual(messages[i].Properties.GetProperty("X-RequestId"), requestId);
+                Assert.IsTrue(messages[i].Properties.GetProperty("Content-Type").Contains("application/json"));
+                i += 1;
+
+                Assert.AreEqual(messages[i].Path, "speech.phrase");
+                Assert.AreEqual(messages[i].Properties.GetProperty("X-RequestId"), requestId);
+                Assert.IsTrue(messages[i].Properties.GetProperty("Content-Type").Contains("application/json"));
+                i += 1;
+
+                Assert.AreEqual(messages[i].Path, "turn.end");
+                Assert.AreEqual(messages[i].Properties.GetProperty("X-RequestId"), requestId);
+                Assert.IsTrue(messages[i].Properties.GetProperty("Content-Type").Contains("application/json"));
+                i += 1;
+
+                Assert.AreEqual(i, messages.Count());
+            }
+        }
+
+        [TestMethod]
+        public async Task TestMessageReceivedEvents_SpeechRecognizer_ContinuousRecognition()
+        {
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
+            {
+                var connection = Connection.FromRecognizer(recognizer);
+                var turnEndComplete = new TaskCompletionSource<int>();
+
+                List<ConnectionMessage> messages = new List<ConnectionMessage>();
+                connection.MessageReceived += (sender, e) => {
+                    var turnEnd = e.Message.Path == "turn.end";
+                    messages.Add(e.Message);
+                    if (turnEnd) {
+                        turnEndComplete.TrySetResult(0);
+                    }
+                };
+
+                await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
+
+                await Task.WhenAny(turnEndComplete.Task, Task.Delay(TimeSpan.FromMinutes(3)));
+                await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
+
+                int i = 0;
+                var requestId = messages[0].Properties.GetProperty("X-RequestId");
+
+                Assert.AreEqual(messages[i].Path, "turn.start");
+                Assert.AreEqual(messages[i].Properties.GetProperty("X-RequestId"), requestId);
+                Assert.IsTrue(messages[i].Properties.GetProperty("Content-Type").Contains("application/json"));
+                i += 1;
+
+                Assert.AreEqual(messages[1].Path, "speech.startDetected");
+                Assert.AreEqual(messages[i].Properties.GetProperty("X-RequestId"), requestId);
+                Assert.IsTrue(messages[i].Properties.GetProperty("Content-Type").Contains("application/json"));
+                i += 1;
+
+                while (i < messages.Count() && messages[i].Path != "speech.endDetected")
+                {
+                    Assert.IsTrue(messages[i].Path == "speech.hypothesis" || messages[i].Path == "speech.phrase");
+                    Assert.AreEqual(messages[i].Properties.GetProperty("X-RequestId"), requestId);
+                    Assert.IsTrue(messages[i].Properties.GetProperty("Content-Type").Contains("application/json"));
+                    i += 1;
+                }
+
+                i -= 1;
+                Assert.AreEqual(messages[i].Path, "speech.phrase");
+                Assert.AreEqual(messages[i].Properties.GetProperty("X-RequestId"), requestId);
+                Assert.IsTrue(messages[i].Properties.GetProperty("Content-Type").Contains("application/json"));
+                i += 1;
+
+                Assert.AreEqual(messages[i].Path, "speech.endDetected");
+                Assert.AreEqual(messages[i].Properties.GetProperty("X-RequestId"), requestId);
+                Assert.IsTrue(messages[i].Properties.GetProperty("Content-Type").Contains("application/json"));
+                i += 1;
+
+                if (messages[i].Path == "speech.phrase")
+                {
+                    Assert.IsTrue(messages[i].GetTextMessage().Contains("EndOfDictation"));
+                    Assert.AreEqual(messages[i].Properties.GetProperty("X-RequestId"), requestId);
+                    Assert.IsTrue(messages[i].Properties.GetProperty("Content-Type").Contains("application/json"));
+                    i += 1;
+                }
+
+                Assert.AreEqual(messages[i].Path, "turn.end");
+                Assert.AreEqual(messages[i].Properties.GetProperty("X-RequestId"), requestId);
+                Assert.IsTrue(messages[i].Properties.GetProperty("Content-Type").Contains("application/json"));
+                i += 1;
+
+                Assert.AreEqual(i, messages.Count());
+            }
+        }
+
+        [TestMethod]
         public async Task TestSpeechConfigFromHost()
         {
             var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());

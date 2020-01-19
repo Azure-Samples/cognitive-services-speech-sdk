@@ -97,8 +97,8 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
     }
 
     /**
-     * The collection or properties and their values defined for this IntentRecognizer.
-     * @return The collection or properties and their values defined for this IntentRecognizer.
+     * The collection of properties and their values defined for this IntentRecognizer.
+     * @return The collection of properties and their values defined for this IntentRecognizer.
      */
     public PropertyCollection getProperties() {
         return _Parameters;

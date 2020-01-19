@@ -9,7 +9,7 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
 import com.microsoft.cognitiveservices.speech.PropertyId;
 
 /**
- * Represents collection or properties and their values.
+ * Represents collection of properties and their values.
  */
 public class PropertyCollection implements Closeable {
 

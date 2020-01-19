@@ -1,3 +1,10 @@
+//
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+//
+// recognizer.cpp: Implementation definitions for CSpxRecognizer C++ class
+//
+
 #include "stdafx.h"
 #include "recognizer.h"
 #include <future>
@@ -227,6 +234,16 @@ void CSpxRecognizer::FireDisconnected(const std::wstring& sessionId)
 {
     auto connectionEvent = CreateConnectionEventArgs(sessionId);
     Disconnected.Signal(connectionEvent);
+}
+
+void CSpxRecognizer::FireConnectionMessageReceived(const std::string& headers, const std::string& path, const uint8_t* buffer, uint32_t bufferSize, bool isBufferBinary)
+{
+    if (ConnectionMessageReceived.IsConnected())
+    {
+        auto factory = GetEventArgsFactory();
+        auto connectionMessageEvent = factory->CreateConnectionMessageEventArgs(headers, path, buffer, bufferSize, isBufferBinary);
+        ConnectionMessageReceived.Signal(connectionMessageEvent);
+    }
 }
 
 void CSpxRecognizer::FireSpeechStartDetected(const std::wstring& sessionId, uint64_t offset)
@@ -459,7 +476,13 @@ void CSpxRecognizer::SendNetworkMessage(std::string&& path, std::string&& payloa
         ThrowInvalidArgumentException(message);
     }
 
-    SPX_IFTRUE_THROW_HR(m_defaultSession == nullptr, SPXERR_INVALID_ARG);
+    SPX_IFTRUE_THROW_HR(m_defaultSession == nullptr, SPXERR_UNINITIALIZED);
+    m_defaultSession->SendNetworkMessage(std::move(path), std::move(payload));
+}
+
+void CSpxRecognizer::SendNetworkMessage(std::string&& path, std::vector<uint8_t>&& payload)
+{
+    SPX_IFTRUE_THROW_HR(m_defaultSession == nullptr, SPXERR_UNINITIALIZED);
     m_defaultSession->SendNetworkMessage(std::move(path), std::move(payload));
 }
 

@@ -203,7 +203,7 @@ public:
     }
 
     /// <summary>
-    /// A collection or properties and their values defined for this <see cref="SpeechRecognizer"/>.
+    /// A collection of properties and their values defined for this <see cref="SpeechRecognizer"/>.
     /// </summary>
     PropertyCollection& Properties;
 

@@ -163,7 +163,7 @@ namespace Microsoft.CognitiveServices.Speech.Transcription
             => Properties.GetProperty(PropertyId.SpeechServiceConnection_RecoLanguage);
 
         /// <summary>
-        /// Gets the collection or properties and their values defined for this <see cref="ConversationTranslator"/>.
+        /// Gets the collection of properties and their values defined for this <see cref="ConversationTranslator"/>.
         /// </summary>
         public PropertyCollection Properties { get; internal set; }
 

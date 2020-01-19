@@ -1,3 +1,10 @@
+//
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+//
+// connection.h: Implementation declarations for CSpxConnection C++ class
+//
+
 #pragma once
 
 #include <memory>
@@ -36,6 +43,7 @@ public:
     // --- ISpxUspMessageParamFromUser
     void SetParameter(std::string&& path, std::string&& name, std::string&& value) override;
     void SendNetworkMessage(std::string&& path, std::string&& payload) override;
+    void SendNetworkMessage(std::string&& path, std::vector<uint8_t>&& payload) override;
 
 private:
 

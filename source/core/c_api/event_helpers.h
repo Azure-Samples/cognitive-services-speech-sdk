@@ -23,6 +23,7 @@ SPXAPI_PRIVATE dialog_service_connector_recognition_set_event_callback(ISpxRecog
 SPXAPI_PRIVATE dialog_service_connector_activity_received_set_event_callback(ISpxDialogServiceConnectorEvents::ActivityReceivedEvent_Type ISpxDialogServiceConnectorEvents::*p_act_event, SPXRECOHANDLE h_connector, PRECOGNITION_CALLBACK_FUNC p_callback, void* pv_context);
 
 SPXAPI_PRIVATE connection_set_event_callback(ISpxRecognizerEvents::ConnectionEvent_Type ISpxRecognizerEvents::*connectionEvent, SPXCONNECTIONHANDLE connection, CONNECTION_CALLBACK_FUNC callback, void* context);
+SPXAPI_PRIVATE connection_message_set_event_callback(ISpxRecognizerEvents::ConnectionMessageEvent_Type ISpxRecognizerEvents::*connectionMessageEvent, SPXCONNECTIONHANDLE message, CONNECTION_CALLBACK_FUNC callback, void* context);
 
 SPXAPI_PRIVATE synthesizer_set_event_callback(std::list<std::pair<void*, std::shared_ptr<ISpxSynthesizerEvents::SynthEvent_Type>>> ISpxSynthesizerEvents::*psynthEvents, SPXSYNTHHANDLE hsynth, PSYNTHESIS_CALLBACK_FUNC pCallback, void* pvContext);
 SPXAPI_PRIVATE synthesizer_word_boundary_set_event_callback(ISpxSynthesizerEvents::WordBoundaryEvent_Type ISpxSynthesizerEvents::*pwordBoundaryEvent, SPXSYNTHHANDLE hsynth, PSYNTHESIS_CALLBACK_FUNC pCallback, void* pvContext);

@@ -764,6 +764,7 @@ class ISpxMessageParamFromUser : public ISpxInterfaceBaseFor<ISpxMessageParamFro
 public:
     virtual void SetParameter(std::string&& path, std::string&& name, std::string&& value) = 0;
     virtual void SendNetworkMessage(std::string&& path, std::string&& payload) = 0;
+    virtual void SendNetworkMessage(std::string&& path, std::vector<uint8_t>&& payload) = 0;
 };
 
 using CSpxStringMap = std::unordered_map<std::string, std::string>;
@@ -825,6 +826,37 @@ public:
     virtual void Init(const std::wstring& sessionId) = 0;
 };
 
+class ISpxConnectionMessage : public ISpxInterfaceBaseFor<ISpxConnectionMessage>
+{
+public:
+
+    virtual const std::string& GetHeaders() const = 0;
+    virtual const std::string& GetPath() const = 0;
+
+    virtual const uint8_t* GetBuffer() const = 0;
+    virtual uint32_t GetBufferSize() const = 0;
+    virtual bool IsBufferBinary() const = 0;
+};
+
+class ISpxConnectionMessageInit : public ISpxInterfaceBaseFor<ISpxConnectionMessageInit>
+{
+public:
+    virtual void Init(const std::string& headers, const std::string& path, const uint8_t* buffer, uint32_t bufferSize, bool bufferIsBinary) = 0;
+};
+
+class ISpxConnectionMessageEventArgs : public ISpxInterfaceBaseFor<ISpxConnectionMessageEventArgs>
+{
+public:
+    virtual std::shared_ptr<ISpxConnectionMessage> GetMessage() const = 0;
+};
+
+class ISpxConnectionMessageEventArgsInit : public ISpxInterfaceBaseFor<ISpxConnectionMessageEventArgsInit>
+{
+public:
+
+    virtual void Init(std::shared_ptr<ISpxConnectionMessage> message) = 0;
+};
+
 /// <summary>
 /// Interface for miscellaneous conversation related event arguments (e.g. expiration, participants
 /// changed, etc...)
@@ -868,6 +900,7 @@ public:
     using RecoEvent_Type = EventSignal<std::shared_ptr<ISpxRecognitionEventArgs>>;
     using SessionEvent_Type = EventSignal<std::shared_ptr<ISpxSessionEventArgs>>;
     using ConnectionEvent_Type = EventSignal<std::shared_ptr<ISpxConnectionEventArgs>>;
+    using ConnectionMessageEvent_Type = EventSignal<std::shared_ptr<ISpxConnectionMessageEventArgs>>;
 
     virtual void FireSessionStarted(const std::wstring& sessionId) = 0;
     virtual void FireSessionStopped(const std::wstring& sessionId) = 0;
@@ -877,6 +910,7 @@ public:
 
     virtual void FireSpeechStartDetected(const std::wstring& sessionId, uint64_t offset) = 0;
     virtual void FireSpeechEndDetected(const std::wstring& sessionId, uint64_t offset) = 0;
+    virtual void FireConnectionMessageReceived(const std::string& headers, const std::string& path, const uint8_t* buffer, uint32_t bufferSize, bool isBufferBinary) = 0;
 
     virtual void FireResultEvent(const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result) = 0;
 
@@ -885,6 +919,7 @@ public:
 
     ConnectionEvent_Type Connected;
     ConnectionEvent_Type Disconnected;
+    ConnectionMessageEvent_Type ConnectionMessageReceived;
 
     RecoEvent_Type SpeechStartDetected;
     RecoEvent_Type SpeechEndDetected;
@@ -1048,6 +1083,7 @@ public:
     virtual void WriteTelemetryLatency(uint64_t latencyInTicks, bool isPhraseLatency) = 0;
     virtual void SendSpeechEventMessage(std::string&& payload) = 0;
     virtual void SendNetworkMessage(std::string&& path, std::string&& payload) = 0;
+    virtual void SendNetworkMessage(std::string&& path, std::vector<uint8_t>&& payload) = 0;
 
     virtual void SetConversation(std::shared_ptr<ISpxConversation> conversation) = 0;
 };
@@ -1147,6 +1183,7 @@ public:
     virtual void WriteTelemetryLatency(uint64_t, bool) {};
     virtual void SendSpeechEventMessage(std::string&&) {};
     virtual void SendNetworkMessage(std::string&&, std::string&&) {};
+    virtual void SendNetworkMessage(std::string&&, std::vector<uint8_t>&&) {};
 };
 
 class SpxRecoEngineAdapterError
@@ -1213,6 +1250,7 @@ public:
     virtual void AdapterEndOfDictation(ISpxRecoEngineAdapter* adapter, uint64_t offset, uint64_t duration) = 0;
     virtual void FireConnectedEvent() = 0;
     virtual void FireDisconnectedEvent() = 0;
+    virtual void FireConnectionMessageReceived(const std::string& headers, const std::string& path, const uint8_t* buffer, uint32_t bufferSize, bool isBufferBinary) = 0;
 
     virtual void AdapterRequestingAudioMute(ISpxRecoEngineAdapter* adapter, bool mute) = 0;
     virtual void AdapterCompletedSetFormatStop(ISpxRecoEngineAdapter* adapter) = 0;
@@ -1275,6 +1313,7 @@ class ISpxEventArgsFactory : public ISpxInterfaceBaseFor<ISpxEventArgsFactory>
 public:
     virtual std::shared_ptr<ISpxSessionEventArgs> CreateSessionEventArgs(const std::wstring& sessionId) = 0;
     virtual std::shared_ptr<ISpxConnectionEventArgs> CreateConnectionEventArgs(const std::wstring& sessionId) = 0;
+    virtual std::shared_ptr<ISpxConnectionMessageEventArgs> CreateConnectionMessageEventArgs(const std::string& headers, const std::string& path, const uint8_t* buffer, uint32_t bufferSize, bool isBufferBinary) = 0;
     virtual std::shared_ptr<ISpxRecognitionEventArgs> CreateRecognitionEventArgs(const std::wstring& sessionId, uint64_t offset) = 0;
     virtual std::shared_ptr<ISpxRecognitionEventArgs> CreateRecognitionEventArgs(const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result) = 0;
     virtual std::shared_ptr<ISpxActivityEventArgs> CreateActivityEventArgs(std::string activity, std::shared_ptr<ISpxAudioOutput> audio) = 0;
@@ -1302,6 +1341,32 @@ class ISpxSpeechSynthesisApiFactory : public ISpxInterfaceBaseFor<ISpxSpeechSynt
 public:
     virtual std::shared_ptr<ISpxSynthesizer> CreateSpeechSynthesizerFromConfig(std::shared_ptr<ISpxAudioConfig> audioConfig) = 0;
 };
+
+// class ISpxNamedValues : public ISpxInterfaceBaseFor<ISpxNamedValues>
+// {
+// public:
+//     virtual uint32_t ValueCount() const = 0;
+//     virtual std::string ValueName(int index) const = 0;
+
+//     virtual bool HasStringValue(const char* name) const = 0;
+//     virtual std::string GetStringValue(const char* name, const char* defaultValue = "") const = 0;
+
+//     virtual bool HasBinaryValue(const char* name) const = 0;
+//     virtual std::vector<uint8_t> GetBinaryValue(const char* name, const uint8_t* defaultValue = null, uint32_t defaultValueSize = 0) const = 0;
+// };
+
+// class ISpxNamedValuesWriter : public ISpxInterfaceBaseFor<ISpxNamedValuesWriter>
+// {
+// public:
+
+//     virtual void AddValue(const char* name, const char* value) = 0;
+//     virtual void AddValue(const char* name, const uint8_t* value, uint32_t valueSize) = 0;
+
+//     virtual void RemoveValue(const char* name) = 0;
+
+//     virtual void ReplaceValue(const char* name, const char* value) = 0;
+//     virtual void ReplaceValue(const char* name, const uint8_t* value, uint32_t valueSize) = 0;
+// };
 
 class ISpxNamedProperties : public ISpxInterfaceBaseFor<ISpxNamedProperties>
 {

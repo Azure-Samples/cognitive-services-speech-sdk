@@ -86,7 +86,7 @@ public final class ConversationTranscriber extends com.microsoft.cognitiveservic
 
     /**
      * The collection of properties and their values defined for this ConversationTranscriber.
-     * @return The collection or properties and their values defined for this ConversationTranscriber.
+     * @return The collection of properties and their values defined for this ConversationTranscriber.
      */
     public PropertyCollection getProperties() {
         return _Parameters;

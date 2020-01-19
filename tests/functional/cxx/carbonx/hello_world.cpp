@@ -395,3 +395,80 @@ void CarbonTestConsole::Sample_HelloWorld_Language(const char* language)
 
     ConsoleWriteLine("You said:\n\n    '%s'", result->Text.c_str());
 }
+
+void CarbonTestConsole::Sample_SendMessageAsync()
+{
+    auto config = SpeechConfig::FromSubscription(m_subscriptionKey, m_region);
+    auto recognizer = SpeechRecognizer::FromConfig(config, nullptr);
+    auto connection = Connection::FromRecognizer(recognizer);
+    connection->Open(false);
+
+    ConsoleWriteLine("Sending message...");
+    connection->SendMessageAsync("robch.test", (uint8_t*)"{}", 3);
+    ConsoleWriteLine("Sending message... Done!\n");
+
+    ConsoleWriteLine("Sleeping for 1 second (see TFS #XXX)...");
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+}
+
+void CarbonTestConsole::Sample_ConnectionMessageCallback()
+{
+    SPX_DBG_TRACE_SCOPE("Sample_ConnectionMessageCallback", "Sample_ConnectionMessageCallback");
+
+    auto config = SpeechConfig::FromSubscription(m_subscriptionKey, m_region);
+    // auto audio = AudioConfig::FromWavFileInput("c:\\temp\\whatstheweatherlike.wav");
+    // auto recognizer = SpeechRecognizer::FromConfig(config, audio);
+    auto recognizer = SpeechRecognizer::FromConfig(config);
+
+    recognizer->Recognizing += [&](const SpeechRecognitionEventArgs& e) {
+        ConsoleWriteLine("INTERMEDIATE: %s ...", e.Result->Text.c_str());
+    };
+
+    recognizer->Recognized += [&](const SpeechRecognitionEventArgs& e) {
+        ConsoleWriteLine("FINAL RESULT: '%s'", e.Result->Text.c_str());
+    };
+
+    auto connection = Connection::FromRecognizer(recognizer);
+    connection->MessageReceived += [&](const ConnectionMessageEventArgs& e) {
+
+        auto message = e.GetMessage();
+        ConsoleWriteLine("\nMessage path: '%s'", message->GetPath().c_str());
+
+        if (message->IsTextMessage())
+        {
+            ConsoleWriteLine("Message type: 'text'");
+            ConsoleWriteLine("Message text: '%s'", message->GetTextMessage().c_str());
+        }
+        else if (message->IsBinaryMessage())
+        {
+            ConsoleWriteLine("Message type: 'binary'");
+            ConsoleWriteLine("Message binary:");
+            auto binary = message->GetBinaryMessage();
+            auto size = binary.size();
+            ConsoleWriteLine("Message binary size: %d", size);
+            for (uint32_t i = 0; i < size; i++)
+            {
+                if (i % 16 == 0)
+                {
+                    ConsoleWriteLine("%04X: %02X ", i, binary[i]);
+                }
+                else
+                {
+                    ConsoleWrite("%02X ", binary[i]);
+                }
+            }
+        }
+
+        ConsoleWriteLine("header['path'] = %s", message->Properties.GetProperty("Path").c_str());
+        ConsoleWriteLine("header['Content-Type'] = %s", message->Properties.GetProperty("Content-Type").c_str());
+        ConsoleWriteLine("header['X-RequestId'] = %s", message->Properties.GetProperty("X-RequestId").c_str());
+    };
+
+    recognizer->StartContinuousRecognitionAsync().get();
+    ConsoleWriteLine("Listening... (press ENTER to exit)");
+
+    while (getchar() != '\n');
+    recognizer->StopContinuousRecognitionAsync().get();
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+}

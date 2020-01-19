@@ -143,8 +143,8 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
     }
 
     /**
-     * The collection or properties and their values defined for this TranslationRecognizer.
-     * @return The collection or properties and their values defined for this TranslationRecognizer.
+     * The collection of properties and their values defined for this TranslationRecognizer.
+     * @return The collection of properties and their values defined for this TranslationRecognizer.
      */
     public PropertyCollection getProperties() {
         return _Parameters;

@@ -411,7 +411,7 @@ public:
     }
 
     /// <summary>
-    /// A collection or properties and their values defined for this <see cref="SpeechSynthesizer"/>.
+    /// A collection of properties and their values defined for this <see cref="SpeechSynthesizer"/>.
     /// </summary>
     PropertyCollection& Properties;
 

@@ -54,6 +54,7 @@ public:
     SPX_INTERFACE_MAP_END()
 
     // --- ISpxUspCallbacks (overrides)
+    inline void OnMessageReceived(const USP::RawMsg& m) final { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnMessageReceived(m); }); }
     inline void OnSpeechStartDetected(const USP::SpeechStartDetectedMsg& m) final { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnSpeechStartDetected(m); }); }
     inline void OnSpeechEndDetected(const USP::SpeechEndDetectedMsg& m) final { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnSpeechEndDetected(m); }); }
     inline void OnSpeechHypothesis(const USP::SpeechHypothesisMsg& m) final { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnSpeechHypothesis(m); }); }
@@ -115,6 +116,7 @@ public:
     void SendAgentMessage(const std::string &buffer) final;
     void SendSpeechEventMessage(std::string&& msg) override;
     void SendNetworkMessage(std::string&& path, std::string&& msg) override;
+    void SendNetworkMessage(std::string&& path, std::vector<uint8_t>&& msg) override;
 
     // --- ISpxAudioProcessor
     void SetFormat(const SPXWAVEFORMATEX* pformat) override;
@@ -166,6 +168,7 @@ private:
     void UspWriteActual(const DataChunkPtr& audioChunk);
     void UspWriteFlush();
 
+    void OnMessageReceived(const USP::RawMsg&) override;
     void OnSpeechStartDetected(const USP::SpeechStartDetectedMsg&) override;
     void OnSpeechEndDetected(const USP::SpeechEndDetectedMsg&) override;
     void OnSpeechHypothesis(const USP::SpeechHypothesisMsg&) override;

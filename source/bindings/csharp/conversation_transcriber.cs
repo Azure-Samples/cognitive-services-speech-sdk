@@ -225,7 +225,7 @@ namespace Microsoft.CognitiveServices.Speech.Transcription
         }
 
         /// <summary>
-        /// Gets the collection or properties and their values defined for this <see cref="ConversationTranscriber"/>.
+        /// Gets the collection of properties and their values defined for this <see cref="ConversationTranscriber"/>.
         /// </summary>
         public PropertyCollection Properties { get; internal set; }
 

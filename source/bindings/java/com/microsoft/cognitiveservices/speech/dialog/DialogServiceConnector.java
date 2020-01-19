@@ -92,8 +92,8 @@ public class DialogServiceConnector implements Closeable {
     }
 
      /**
-     * The collection or properties and their values defined for this DialogServiceConnector.
-     * @return The collection or properties and their values defined for this DialogServiceConnector.
+     * The collection of properties and their values defined for this DialogServiceConnector.
+     * @return The collection of properties and their values defined for this DialogServiceConnector.
      */
     public PropertyCollection getProperties() {
         return _Parameters;

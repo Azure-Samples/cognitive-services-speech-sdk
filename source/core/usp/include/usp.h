@@ -33,6 +33,11 @@ namespace USP {
 struct Callbacks
 {
     /**
+     * A callback function that will be invoked for all USP messages received from the service.
+    */
+    virtual void OnMessageReceived(const RawMsg&) {}
+
+    /**
      * A callback function that will be invoked when a speech.startDetected message is received from service.
     */
     virtual void OnSpeechStartDetected(const SpeechStartDetectedMsg&) {}

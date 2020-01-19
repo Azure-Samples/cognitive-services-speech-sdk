@@ -2077,6 +2077,16 @@ void CarbonTestConsole::RunSample(const std::string& strSampleName)
         ConsoleWriteLine("Running sample: %s\n", strSampleName.c_str());
         ch9_do_translation();
     }
+    else if (PAL::stricmp(strSampleName.c_str(), "send_message_async") == 0)
+    {
+        ConsoleWriteLine("Running sample: %s\n", strSampleName.c_str());
+        Sample_SendMessageAsync();
+    }
+    else if (PAL::stricmp(strSampleName.c_str(), "connection_message_callback") == 0)
+    {
+        ConsoleWriteLine("Running sample: %s\n", strSampleName.c_str());
+        Sample_ConnectionMessageCallback();
+    }
     else
     {
         ConsoleWriteLine("\nUnknown sample: '%s'.\n", strSampleName.c_str());

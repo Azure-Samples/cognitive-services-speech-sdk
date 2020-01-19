@@ -214,8 +214,8 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
     }
 
     /**
-     * The collection or properties and their values defined for this SpeechRecognizer.
-     * @return The collection or properties and their values defined for this SpeechRecognizer.
+     * The collection of properties and their values defined for this SpeechRecognizer.
+     * @return The collection of properties and their values defined for this SpeechRecognizer.
      */
     public PropertyCollection getProperties() {
         return _Parameters;

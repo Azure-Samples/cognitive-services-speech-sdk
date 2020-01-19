@@ -116,7 +116,7 @@ public final class Conversation implements Closeable
 
     /**
      * The collection of properties and their values defined for this Conversation.
-     * @return The collection or properties and their values defined for this Conversation.
+     * @return The collection of properties and their values defined for this Conversation.
      */
     public PropertyCollection getProperties() {
         return this.parameters;

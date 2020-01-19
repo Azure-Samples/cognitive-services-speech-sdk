@@ -349,4 +349,16 @@ struct UserMsg
     size_t size;
 };
 
+/**
+* Represents a raw USP message
+*/
+struct RawMsg
+{
+    const std::string headers;
+    const std::string path;
+    const uint8_t* buffer;
+    uint32_t bufferSize;
+    bool isBufferBinary;
+};
+
 }}}}

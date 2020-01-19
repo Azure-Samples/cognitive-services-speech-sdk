@@ -195,7 +195,7 @@ public:
     }
 
     /// <summary>
-    /// The collection or properties and their values defined for this <see cref="TranslationRecognizer"/>.
+    /// The collection of properties and their values defined for this <see cref="TranslationRecognizer"/>.
     /// </summary>
     PropertyCollection& Properties;
 

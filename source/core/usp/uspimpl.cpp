@@ -1290,6 +1290,36 @@ static TranslationResult RetrieveTranslationResult(const nlohmann::json& transla
     }
 }
 
+std::string GetHeadersAsString(HTTP_HEADERS_HANDLE responseHeader)
+{
+    size_t headersCount;
+
+    if (HTTPHeaders_GetHeaderCount(responseHeader, &headersCount) != HTTP_HEADERS_OK)
+    {
+        LogError("HTTPHeaders_GetHeaderCount failed.");
+        return std::string{};
+    }
+
+    std::ostringstream oss;
+    for (size_t i = 0; i < headersCount; i++)
+    {
+        char *temp;
+        oss << "\r\n";
+        if (HTTPHeaders_GetHeader(responseHeader, i, &temp) == HTTP_HEADERS_OK)
+        {
+            oss << temp;
+            free(temp);
+        }
+        else
+        {
+            LogError("HTTPHeaders_GetHeader failed");
+            return std::string{};
+        }
+    }
+
+    return oss.str();
+}
+
 // Callback for data available on transport
 void Connection::Impl::OnTransportData(TransportResponse *response, void *context)
 {
@@ -1318,6 +1348,15 @@ void Connection::Impl::OnTransportData(TransportResponse *response, void *contex
     {
         PROTOCOL_VIOLATION("response missing '%s' header", KEYWORD_PATH);
         return;
+    }
+
+    auto callbacks = connection->m_config.m_callbacks;
+    if (response->frameType == FRAME_TYPE_TEXT || response->frameType == FRAME_TYPE_BINARY)
+    {
+        connection->Invoke([&] { callbacks->OnMessageReceived({
+            GetHeadersAsString(response->responseHeader), path,
+            response->buffer, (uint32_t)response->bufferSize,
+            response->frameType == FRAME_TYPE_BINARY }); });
     }
 
     string requestId = HTTPHeaders_FindHeaderValue(response->responseHeader, headers::requestId);
@@ -1353,8 +1392,6 @@ void Connection::Impl::OnTransportData(TransportResponse *response, void *contex
     MetricsReceivedMessage(*connection->m_telemetry, requestId, path);
 
     LogInfo("TS:%" PRIu64 " Response Message: path: %s, size: %zu.", connection->getTimestamp(), path, response->bufferSize);
-
-    auto callbacks = connection->m_config.m_callbacks;
 
     if (response->frameType == FRAME_TYPE_BINARY)
     {
