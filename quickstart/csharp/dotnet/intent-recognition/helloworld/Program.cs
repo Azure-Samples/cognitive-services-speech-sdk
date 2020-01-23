@@ -28,7 +28,7 @@ namespace helloworld
             // Creates an intent recognizer using microphone as audio input.
             using (var recognizer = new IntentRecognizer(config))
             {
-                // Creates a Language Understanding model using the app id, and adds 
+                // Creates a Language Understanding model using the app id, and adds
                 // specific intents from your home automation model.
                 var model = LanguageUnderstandingModel.FromAppId("YourLanguageUnderstandingAppId");
                 recognizer.AddIntent(model, "HomeAutomation.TurnOn");
@@ -39,9 +39,9 @@ namespace helloworld
 
                 // Starts intent recognition, and returns after a single utterance is recognized. The end of a
                 // single utterance is determined by listening for silence at the end or until a maximum of 15
-                // seconds of audio is processed.  The task returns the recognition text as result. 
+                // seconds of audio is processed.  The task returns the recognition text as result.
                 // Note: Since RecognizeOnceAsync() returns only a single utterance, it is suitable only for single
-                // shot recognition like command or query. 
+                // shot recognition like command or query.
                 // For long-running multi-utterance recognition, use StartContinuousRecognitionAsync() instead.
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
 
