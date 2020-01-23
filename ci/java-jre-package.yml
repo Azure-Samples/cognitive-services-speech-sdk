@@ -17,6 +17,13 @@ jobs:
     name: Hosted VS2017
   timeoutInMinutes: 60
   steps:
+  - script: |
+      echo ##vso[task.prependpath]C:\Program Files\Git\mingw64\bin
+      echo ##vso[task.prependpath]C:\Program Files\Git\usr\bin
+      echo ##vso[task.prependpath]C:\Program Files\Git\bin
+    displayName: Work around for recent broken system path on Hosted VS2017 build agents.
+    # see ICM https://icm.ad.msft.net/imp/v3/incidents/details/171621867/home
+    # see PR  https://github.com/actions/virtual-environments/pull/211/files that broke many bash commands on Hosted VS2017 build agents.
   - bash: ./ci/set-variables.sh
     displayName: Set variables
   - bash: |

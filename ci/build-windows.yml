@@ -30,6 +30,13 @@ jobs:
   variables:
     OutputDirectory: $(Build.ArtifactStagingDirectory)/$(BuildPlatform)/$(BuildConfiguration)
   steps:
+  - script: |
+      echo ##vso[task.prependpath]C:\Program Files\Git\mingw64\bin
+      echo ##vso[task.prependpath]C:\Program Files\Git\usr\bin
+      echo ##vso[task.prependpath]C:\Program Files\Git\bin
+    displayName: Work around for recent broken system path on Hosted VS2017 build agents.
+    # see ICM https://icm.ad.msft.net/imp/v3/incidents/details/171621867/home
+    # see PR  https://github.com/actions/virtual-environments/pull/211/files that broke many bash commands on Hosted VS2017 build agents.
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
     displayName: Set Windows target platform (Windows-x86 or Windows-x64)
     inputs:

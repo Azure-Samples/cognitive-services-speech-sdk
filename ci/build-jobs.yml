@@ -46,6 +46,13 @@ jobs:
     BuildConfiguration: Release
     SPEECHSDK_BUILD_PHASES: $[ dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'] ]
   steps:
+  - script: |
+      echo ##vso[task.prependpath]C:\Program Files\Git\mingw64\bin
+      echo ##vso[task.prependpath]C:\Program Files\Git\usr\bin
+      echo ##vso[task.prependpath]C:\Program Files\Git\bin
+    displayName: Work around for recent broken system path on Hosted VS2017 build agents.
+    # see ICM https://icm.ad.msft.net/imp/v3/incidents/details/171621867/home
+    # see PR  https://github.com/actions/virtual-environments/pull/211/files that broke many bash commands on Hosted VS2017 build agents.
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
     displayName: Set Windows target platform (Windows-x64)
     inputs:
@@ -186,6 +193,13 @@ jobs:
     name: Hosted VS2017
   timeoutInMinutes: 30
   steps:
+  - script: |
+      echo ##vso[task.prependpath]C:\Program Files\Git\mingw64\bin
+      echo ##vso[task.prependpath]C:\Program Files\Git\usr\bin
+      echo ##vso[task.prependpath]C:\Program Files\Git\bin
+    displayName: Work around for recent broken system path on Hosted VS2017 build agents.
+    # see ICM https://icm.ad.msft.net/imp/v3/incidents/details/171621867/home
+    # see PR  https://github.com/actions/virtual-environments/pull/211/files that broke many bash commands on Hosted VS2017 build agents.
   - task: DownloadBuildArtifacts@0
     displayName: 'Downloading CodeAnalysisLogs Artifacts'
     inputs:
@@ -232,6 +246,13 @@ jobs:
     name: Hosted VS2017
   timeoutInMinutes: 400
   steps:
+  - script: |
+      echo ##vso[task.prependpath]C:\Program Files\Git\mingw64\bin
+      echo ##vso[task.prependpath]C:\Program Files\Git\usr\bin
+      echo ##vso[task.prependpath]C:\Program Files\Git\bin
+    displayName: Work around for recent broken system path on Hosted VS2017 build agents.
+    # see ICM https://icm.ad.msft.net/imp/v3/incidents/details/171621867/home
+    # see PR  https://github.com/actions/virtual-environments/pull/211/files that broke many bash commands on Hosted VS2017 build agents.
   - bash: ./ci/set-variables.sh
     displayName: Set variables
   - task: DownloadBuildArtifacts@0
@@ -311,6 +332,13 @@ jobs:
         BuildPlatform: Win32
         BuildConfiguration: Debug
   steps:
+  - script: |
+      echo ##vso[task.prependpath]C:\Program Files\Git\mingw64\bin
+      echo ##vso[task.prependpath]C:\Program Files\Git\usr\bin
+      echo ##vso[task.prependpath]C:\Program Files\Git\bin
+    displayName: Work around for recent broken system path on Hosted VS2017 build agents.
+    # see ICM https://icm.ad.msft.net/imp/v3/incidents/details/171621867/home
+    # see PR  https://github.com/actions/virtual-environments/pull/211/files that broke many bash commands on Hosted VS2017 build agents.
   - bash: |
       set -u -e -o pipefail
       . ci/functions.sh
@@ -614,6 +642,13 @@ jobs:
     name: Hosted VS2017
   timeoutInMinutes: 30
   steps:
+  - script: |
+      echo ##vso[task.prependpath]C:\Program Files\Git\mingw64\bin
+      echo ##vso[task.prependpath]C:\Program Files\Git\usr\bin
+      echo ##vso[task.prependpath]C:\Program Files\Git\bin
+    displayName: Work around for recent broken system path on Hosted VS2017 build agents.
+    # see ICM https://icm.ad.msft.net/imp/v3/incidents/details/171621867/home
+    # see PR  https://github.com/actions/virtual-environments/pull/211/files that broke many bash commands on Hosted VS2017 build agents.
   - checkout: self
     fetchDepth: 2
     submodules: false
@@ -767,6 +802,13 @@ jobs:
   variables:
     UwpSampleDir: public_samples/quickstart/csharp/uwp/from-microphone
   steps:
+  - script: |
+      echo ##vso[task.prependpath]C:\Program Files\Git\mingw64\bin
+      echo ##vso[task.prependpath]C:\Program Files\Git\usr\bin
+      echo ##vso[task.prependpath]C:\Program Files\Git\bin
+    displayName: Work around for recent broken system path on Hosted VS2017 build agents.
+    # see ICM https://icm.ad.msft.net/imp/v3/incidents/details/171621867/home
+    # see PR  https://github.com/actions/virtual-environments/pull/211/files that broke many bash commands on Hosted VS2017 build agents.
   - bash: ./ci/set-variables.sh
     displayName: Set variables
   - task: DownloadBuildArtifacts@0
@@ -1294,6 +1336,13 @@ jobs:
         GstAbiFilter: x86
         BuildConfiguration: Release
   steps:
+  - script: |
+      echo ##vso[task.prependpath]C:\Program Files\Git\mingw64\bin
+      echo ##vso[task.prependpath]C:\Program Files\Git\usr\bin
+      echo ##vso[task.prependpath]C:\Program Files\Git\bin
+    displayName: Work around for recent broken system path on Hosted VS2017 build agents.
+    # see ICM https://icm.ad.msft.net/imp/v3/incidents/details/171621867/home
+    # see PR  https://github.com/actions/virtual-environments/pull/211/files that broke many bash commands on Hosted VS2017 build agents.
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
     displayName: Set Android target platform (arm32 or arm64)
     inputs:
@@ -1423,6 +1472,13 @@ jobs:
     # them w/o breaking historical test.
     APPCENTER_DEVICESET_VERSION: 1
   steps:
+  - script: |
+      echo ##vso[task.prependpath]C:\Program Files\Git\mingw64\bin
+      echo ##vso[task.prependpath]C:\Program Files\Git\usr\bin
+      echo ##vso[task.prependpath]C:\Program Files\Git\bin
+    displayName: Work around for recent broken system path on Hosted VS2017 build agents.
+    # see ICM https://icm.ad.msft.net/imp/v3/incidents/details/171621867/home
+    # see PR  https://github.com/actions/virtual-environments/pull/211/files that broke many bash commands on Hosted VS2017 build agents.
   - bash: ./ci/set-variables.sh
     displayName: Set variables
   - task: UseNode@1
@@ -1553,6 +1609,13 @@ jobs:
     name: Hosted VS2017
   timeoutInMinutes: 30
   steps:
+  - script: |
+      echo ##vso[task.prependpath]C:\Program Files\Git\mingw64\bin
+      echo ##vso[task.prependpath]C:\Program Files\Git\usr\bin
+      echo ##vso[task.prependpath]C:\Program Files\Git\bin
+    displayName: Work around for recent broken system path on Hosted VS2017 build agents.
+    # see ICM https://icm.ad.msft.net/imp/v3/incidents/details/171621867/home
+    # see PR  https://github.com/actions/virtual-environments/pull/211/files that broke many bash commands on Hosted VS2017 build agents.
   - bash: ./ci/set-variables.sh
     displayName: Set variables
   - bash: |
@@ -2752,6 +2815,13 @@ jobs:
     name: Hosted VS2017
   timeoutInMinutes: 60
   steps:
+  - script: |
+      echo ##vso[task.prependpath]C:\Program Files\Git\mingw64\bin
+      echo ##vso[task.prependpath]C:\Program Files\Git\usr\bin
+      echo ##vso[task.prependpath]C:\Program Files\Git\bin
+    displayName: Work around for recent broken system path on Hosted VS2017 build agents.
+    # see ICM https://icm.ad.msft.net/imp/v3/incidents/details/171621867/home
+    # see PR  https://github.com/actions/virtual-environments/pull/211/files that broke many bash commands on Hosted VS2017 build agents.
   - task: NuGetToolInstaller@0
     displayName: 'NuGet Installer'
     inputs:
@@ -2873,6 +2943,13 @@ jobs:
   pool:
     name: Hosted VS2017
   steps:
+  - script: |
+      echo ##vso[task.prependpath]C:\Program Files\Git\mingw64\bin
+      echo ##vso[task.prependpath]C:\Program Files\Git\usr\bin
+      echo ##vso[task.prependpath]C:\Program Files\Git\bin
+    displayName: Work around for recent broken system path on Hosted VS2017 build agents.
+    # see ICM https://icm.ad.msft.net/imp/v3/incidents/details/171621867/home
+    # see PR  https://github.com/actions/virtual-environments/pull/211/files that broke many bash commands on Hosted VS2017 build agents.
   - script: choco install docfx -y
     displayName: Install DocFX
   - script: docfx
