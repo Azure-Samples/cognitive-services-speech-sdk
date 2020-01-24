@@ -24,12 +24,10 @@ set(HEADERS
     "${INC_DIR}/mock_controller.h"
     "${INC_DIR}/property_bag_impl.h"
     "${INC_DIR}/object_init_impl.h"
-    "${INC_DIR}/resource_manager.h"
     "${INC_DIR}/service_helpers.h"
     "${INC_DIR}/service_provider_impl.h"
     "${INC_DIR}/shared_ptr_helpers.h"
     "${INC_DIR}/singleton.h"
-    "${INC_DIR}/site_helpers.h"
     "${INC_DIR}/trace_message.h"
     "${INC_DIR}/platform.h"
     "${INC_DIR}/string_utils.h"
@@ -50,6 +48,8 @@ set(HEADERS
     "${INC_DIR}/memory_utils.h"
     "${INC_DIR}/http_utils.h"
     "${INC_DIR}/event.h"
+    "${INC_DIR}/extension_resource_manager.h"
+    "${INC_DIR}/site_helpers.h"
     )
 
 set(HEADERS_PRIVATE
@@ -72,7 +72,6 @@ set(SOURCES
     "${SRC_DIR}/file_utils.cpp"
     "${SRC_DIR}/guid_utils.cpp"
     "${SRC_DIR}/platform.cpp"
-    "${SRC_DIR}/site_helpers.cpp"
     "${SRC_DIR}/time_utils.cpp"
     "${SRC_DIR}/ring_buffer.cpp"
     "${SRC_DIR}/httpapi_platform_proxy.c"
@@ -81,6 +80,9 @@ set(SOURCES
     "${SRC_DIR}/http_response.cpp"
     "${SRC_DIR}/http_utils.cpp"
     "${SRC_DIR}/memory_utils.cpp"
+    "${SRC_DIR}/extension_resource_manager.cpp"
+    "${SRC_DIR}/extension_site_helpers.cpp"
+    "${SRC_DIR}/module_factory.cpp"
     )
 
 if(CMAKE_SYSTEM_NAME STREQUAL "WindowsStore")
@@ -121,13 +123,13 @@ set_target_properties(common PROPERTIES
     FOLDER core
 )
 
-target_link_libraries(common pal factory)
+target_link_libraries(common PRIVATE pal)
 
 if(WIN32)
-    target_link_libraries(common Dbghelp.lib)
+    target_link_libraries(common PRIVATE Dbghelp.lib)
 endif()
 
 # Adding logcat logging
 if(ANDROID)
-    target_link_libraries(common log)
+    target_link_libraries(common PRIVATE log)
 endif()

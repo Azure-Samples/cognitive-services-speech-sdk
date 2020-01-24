@@ -47,10 +47,4 @@ SPX_EXTERN_C void* PrimaryCarbon_CreateModuleObject(const char* className, const
     SPX_FACTORY_MAP_END();
 }
 
-SPX_EXTERN_C SPXDLL_EXPORT void* CreateModuleObject(const char* className, const char* interfaceName)
-{
-    return PrimaryCarbon_CreateModuleObject(className, interfaceName);
-}
-
-
 } } } } // Microsoft::CognitiveServices::Speech::Impl

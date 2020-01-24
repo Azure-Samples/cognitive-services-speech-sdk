@@ -194,7 +194,7 @@ TEST_CASE("Conversation Translator Host Audio", "[api][cxx][conversation_transla
 
     eventHandlers.WaitForAudioStreamCompletion(15000ms, 2000ms);
 
- 
+
     SPX_TRACE_INFO("Stop Transcribing");
     conversationTranslator->StopTranscribingAsync().get();
 
@@ -281,7 +281,7 @@ TEST_CASE("Join a conversation with translation", "[api][cxx][conversation_trans
         ExpectedTranscription(bobId, AudioUtterancesMap[SINGLE_UTTERANCE_CHINESE].Utterances["zh-CN"][0].Text, bobLang),
         ExpectedTranscription(hostId, AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH].Utterances["en-US"][0].Text, hostLang)
     });
-    
+
     hostEvents.VerifyTranscriptions(hostId,
     {
         ExpectedTranscription(bobId, AudioUtterancesMap[SINGLE_UTTERANCE_CHINESE].Utterances["zh-CN"][0].Text, bobLang, { { "en-US", "Weather." }, { "de", "wetter." } }),
@@ -374,7 +374,7 @@ TEST_CASE("Join locked room", "[api][cxx][conversation_translator][cxx_conversat
     SetParticipantConfig(aliceAudioConfig);
 
     REQUIRE_THROWS_WITH(alice.Join(aliceAudioConfig), Catch::Contains("HTTP 400", Catch::CaseSensitive::No));
-    
+
     host.Leave();
     host.VerifyBasicEvents(false);
 }
@@ -405,7 +405,7 @@ TEST_CASE("ConversationTranslator Host disconnects room", "[api][cxx][conversati
     host.Leave(); // should cause Alice to become disconnected
 
     this_thread::sleep_for(2s);
-    
+
     host.VerifyBasicEvents(true);
     alice.VerifyBasicEvents(true);
 }
@@ -477,7 +477,7 @@ TEST_CASE("Sample host code", "[sample_code][host]")
     conversation->StartConversationAsync().get();
 
     // Create the conversation translator using the default microphone
-    
+
     auto audioConfig = AudioConfig::FromWavFileInput(weather.m_inputDataFilename);
     auto conversationTranslator = ConversationTranslator::FromConfig();
 

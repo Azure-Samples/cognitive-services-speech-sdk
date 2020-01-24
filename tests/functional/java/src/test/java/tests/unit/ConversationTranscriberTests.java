@@ -153,7 +153,7 @@ public class ConversationTranscriberTests {
         conversation.addParticipantAsync(participant);
 
         boolean found = false;
-        ArrayList<String> phrases = getTranscriberResult(ct);
+        ArrayList<String> phrases = ConversationTranscriberHelper.getTranscriberResult(ct);
         for( String phrase: phrases) {
           System.out.println("phrase comes back from CTS is '" + phrase + "'");
           String cleanedPhrase = phrase.replaceAll("[^a-zA-Z0-9 ]", "");
@@ -168,7 +168,7 @@ public class ConversationTranscriberTests {
         assertEquals(found, true);
 
         ct.close();
-        conversation.close();        
+        conversation.close();
     }
 
     @Test
@@ -212,7 +212,7 @@ public class ConversationTranscriberTests {
         conversation.addParticipantAsync(user).get();
 
         boolean found = false;
-        ArrayList<String> phrases = getTranscriberResult(ct);
+        ArrayList<String> phrases = ConversationTranscriberHelper.getTranscriberResult(ct);
         for( String phrase: phrases) {
           System.out.println("phrase comes back from CTS is '" + phrase + "'");
           String cleanedPhrase = phrase.replaceAll("[^a-zA-Z0-9 ]", "");
@@ -262,7 +262,7 @@ public class ConversationTranscriberTests {
         conversation.addParticipantAsync("UserFromEndConversationTest").get();
 
         boolean found = false;
-        ArrayList<String> phrases = getTranscriberResult(ct);
+        ArrayList<String> phrases = ConversationTranscriberHelper.getTranscriberResult(ct);
         for( String phrase: phrases) {
           System.out.println("phrase comes back from CTS is '" + phrase + "'");
           if(phrase.toLowerCase().startsWith("what's the weather like") )  {
@@ -294,51 +294,6 @@ public class ConversationTranscriberTests {
         conversation.close();
     }
 
-    private ArrayList<String> getTranscriberResult(ConversationTranscriber ct) throws InterruptedException, ExecutionException, TimeoutException {
-        String result;
-        final ArrayList<String> phrases = new ArrayList<>();
-
-        AtomicBoolean allDone = new AtomicBoolean(false);
-
-        ct.transcribing.addEventListener((o, e) -> {
-            //System.out.println("Conversation transcriber transcibing:" + e.toString());
-        });
-
-        ct.transcribed.addEventListener((o, e) -> {
-            phrases.add(e.getResult().getText());
-            System.out.println("Conversation transcriber transcribed:" + e.toString());
-        });
-
-        // SDK does not send out sessionstopped when there is an error.
-        ct.canceled.addEventListener((o, e) -> {
-            if (e.getReason() != CancellationReason.EndOfStream)
-            {
-                allDone.set(true);
-                System.out.println("Conversation transcriber canceled:" + e.toString());
-            }
-        });
-
-        ct.sessionStopped.addEventListener((o, e) -> {
-            allDone.set(true);
-            System.out.println("Conversation transcriber stopped:" + e.toString());
-        });
-
-        ct.startTranscribingAsync().get();
-
-        // wait for 300 seconds for sessionStopped or cancelled, othewise we time out
-        int timeoutInMillis = 300000;
-        long now = System.currentTimeMillis();
-        while(((System.currentTimeMillis() - now) < timeoutInMillis) && (allDone.get() == false ) ) {
-            Thread.sleep(200);
-        }
-
-        if( allDone.get() == false) {
-            System.out.println("timeout!" + timeoutInMillis);
-    }
-
-        ct.stopTranscribingAsync().get();
-        return phrases;
-    }
 
     private Conversation CreateConversation(SpeechConfig speech_config, String id) throws InterruptedException, ExecutionException, TimeoutException {
         assertNotNull(speech_config);

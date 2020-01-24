@@ -20,7 +20,10 @@ class CSpxModuleFactory : public ISpxObjectFactory
 {
 public:
 
+    typedef void* (*PCREATE_MODULE_OBJECT_FUNC)(const char* className, const char* interfaceName);
+    static std::mutex m_mutex;
     static std::shared_ptr<ISpxObjectFactory> Get(const std::string& filename);
+    static std::shared_ptr<ISpxObjectFactory> Get(PCREATE_MODULE_OBJECT_FUNC filename);
 
     SPX_INTERFACE_MAP_BEGIN()
         SPX_INTERFACE_MAP_ENTRY(ISpxObjectFactory)
@@ -30,6 +33,7 @@ public:
 private:
 
     CSpxModuleFactory(const std::string& filename);
+    CSpxModuleFactory(PCREATE_MODULE_OBJECT_FUNC pFunc);
 
     CSpxModuleFactory() = delete;
     CSpxModuleFactory(const CSpxModuleFactory&) = delete;
@@ -38,7 +42,6 @@ private:
     CSpxModuleFactory& operator =(const CSpxModuleFactory&) = delete;
     CSpxModuleFactory&& operator =(const CSpxModuleFactory&&) = delete;
 
-    typedef void* (*PCREATE_MODULE_OBJECT_FUNC)(const char* className, const char* interfaceName);
     PCREATE_MODULE_OBJECT_FUNC m_pfnCreateModuleObject;
 
     typedef std::map<std::string, std::weak_ptr<ISpxObjectFactory>> MapType;

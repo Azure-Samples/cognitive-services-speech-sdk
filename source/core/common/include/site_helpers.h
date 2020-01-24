@@ -8,12 +8,10 @@
 #pragma once
 #include "spxcore_common.h"
 
-
 namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
 namespace Impl {
-
 
 template <class T>
 std::shared_ptr<ISpxGenericSite> SpxSiteFromThis(T* ptr)
@@ -21,8 +19,23 @@ std::shared_ptr<ISpxGenericSite> SpxSiteFromThis(T* ptr)
     return SpxSharedPtrFromThis<ISpxGenericSite>(ptr);
 }
 
-
+// SpxGetRootSite is mapped into different function based on USE_NON_CORE_ROOT_SITE.
+// Extensions(Unit Tests) should define USE_NON_CORE_ROOT_SITE in its CMakeLists.txt.
 std::shared_ptr<ISpxGenericSite> SpxGetRootSite();
+
+// USE_NON_CORE_ROOT_SITE is defined in the CMakeLists.txt in extensions or unit tests.
+#ifdef USE_NON_CORE_ROOT_SITE
+std::shared_ptr<ISpxGenericSite> SpxGetNonCoreRootSite();  // this is for extensions and unit tests.
+#define SpxGetRootSite SpxGetNonCoreRootSite
+#else
+std::shared_ptr<ISpxGenericSite> SpxGetCoreRootSite();  // this is for creating any objects inside core.
+#define SpxGetRootSite SpxGetCoreRootSite
+
+#endif
+
+
+
+
 
 
 } } } } // Microsoft::CognitiveServices::Speech::Impl

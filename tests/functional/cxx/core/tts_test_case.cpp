@@ -12,6 +12,7 @@
 #define __SPX_THROW_HR_IMPL(hr) Microsoft::CognitiveServices::Speech::Impl::ThrowWithCallstack(hr)
 
 #include "test_utils.h"
+#include "site_helpers.h"
 #include "authenticator.h"
 #include "guid_utils.h"
 
@@ -119,8 +120,8 @@ TEST_CASE("Authenticator Timer: Wait for valid timeout", "[tts]")
         {
             std::this_thread::sleep_for(std::chrono::milliseconds(500));
         }
-        counter++; 
-        return true; 
+        counter++;
+        return true;
         };
 
     REQUIRE_NOTHROW(timer->Start(20 * 1000, 20 * 1000, successTask500Ms));

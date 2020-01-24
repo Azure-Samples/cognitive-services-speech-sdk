@@ -5,6 +5,7 @@ set(SRC_DIR "${PROJECT_SOURCE_DIR}")
 include_directories(${CARBON_C_API})
 include_directories(${CARBON_CXX_API})
 include_directories(${CARBON_INCLUDE})
+include_directories("${FACTORY}/include")
 include_directories("${COMMON}/include")
 
 set(HEADERS)
@@ -68,34 +69,18 @@ endif()
 set_target_properties (${PROJECT_NAME} PROPERTIES
   FOLDER core)
 
-if(ANDROID)
-  target_link_libraries(${PROJECT_NAME}
-    PRIVATE sr
-    PRIVATE tts
-    PRIVATE tts_rest
-    PRIVATE audio
-    PRIVATE usp
+# the following list are needed to make ld producing a .core.so that can be loaded by a python wheel
+target_link_libraries(${PROJECT_NAME}
     PRIVATE common
-    PRIVATE conversation_translation
     PRIVATE factory
-    PRIVATE pal
-    PRIVATE z # libz
+    PRIVATE conversation_translation
+    PRIVATE usp
   )
-elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-  target_link_libraries(${PROJECT_NAME}
-    PRIVATE common
-    PRIVATE factory
-    PRIVATE conversation_translation
-    PRIVATE usp
-    PRIVATE z # libz
-  )
-else()
-  target_link_libraries(${PROJECT_NAME}
-    PRIVATE common
-    PRIVATE factory
-    PRIVATE conversation_translation
-    PRIVATE usp
-    )
+
+if(ANDROID OR (${CMAKE_SYSTEM_NAME} STREQUAL "Linux"))
+  if(${use_openssl})
+    target_link_libraries(${PROJECT_NAME} PRIVATE z dl) # libz dl
+  endif()
 endif()
 
 if(APPLE)

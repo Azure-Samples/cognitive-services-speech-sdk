@@ -58,4 +58,6 @@ set_target_properties (${PROJECT_NAME} PROPERTIES
     FOLDER core
 )
 
-target_link_libraries(${PROJECT_NAME} common usp)
+target_link_libraries(${PROJECT_NAME}
+                      PRIVATE usp
+                      PRIVATE common)

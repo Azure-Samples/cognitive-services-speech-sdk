@@ -14,7 +14,7 @@ include_directories(${CARBON_CXX_API})
 include_directories(${TEST_INCLUDE})
 include_directories("${CARBON_EXTERNAL}/json")
 
-set (HEADERS_PRIVATE 
+set (HEADERS_PRIVATE
     "${SRC_DIR}/sequence_generator_audio_stream_reader.h"
     )
 
@@ -30,7 +30,8 @@ source_group("Source Files" FILES ${SOURCES})
 source_group("Header Files" FILES ${TEST_HEADERS})
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${TEST_HEADERS})
-target_link_libraries(${PROJECT_NAME} usp sr common audio conversation_translation ${TEST_LIBS})
+
+target_link_libraries(${PROJECT_NAME} usp audio factory common)
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "WindowsStore")
 if (${use_openssl})
@@ -47,6 +48,8 @@ set_target_properties (core_unit_tests PROPERTIES
     FOLDER tests
     OUTPUT_NAME core_unit_tests
 )
+
+add_compile_definitions(USE_NON_CORE_ROOT_SITE)
 
 if (EXTENSION_CODEC_ENABLED AND STATIC_CODEC_EXTENSION)
   target_link_libraries(${PROJECT_NAME} codec)

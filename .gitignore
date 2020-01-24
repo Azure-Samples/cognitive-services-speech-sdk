@@ -115,3 +115,5 @@ tests/functional/java/.settings/
 tests/**/obj
 tests/**/objd
 tests/**/bin
+/tests/functional/java/.idea
+/tests/functional/java/speechsdk-tests.iml

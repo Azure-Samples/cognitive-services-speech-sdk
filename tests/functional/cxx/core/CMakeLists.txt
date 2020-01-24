@@ -28,7 +28,12 @@ source_group("Source Files" FILES ${SOURCES})
 source_group("Header Files" FILES ${TEST_HEADERS})
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${TEST_HEADERS})
-target_link_libraries(${PROJECT_NAME} usp sr common audio conversation_translation ${TEST_LIBS})
+
+# define USE_NON_CORE_ROOT_SITE when building extensions or unit tests. This enable the extensions or unit test to use the extension root site provided by CSpxExtensionResourceManager.
+# unit tests against modules other than common: they still need to be linked with factory since SpxGetCoreRootSite is defined in factory.
+add_compile_definitions(USE_NON_CORE_ROOT_SITE)
+
+target_link_libraries(${PROJECT_NAME} sr conversation_translation factory common audio usp ${TEST_LIBS})
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "WindowsStore")
 if (${use_openssl})

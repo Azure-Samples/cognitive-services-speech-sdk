@@ -30,7 +30,7 @@ SPXAPI language_understanding_model_create_from_uri(SPXLUMODELHANDLE* hlumodel, 
 
         auto model = SpxCreateObjectWithSite<ISpxLanguageUnderstandingModel>("CSpxLanguageUnderstandingModel", SpxGetRootSite());
         model->InitEndpoint(PAL::ToWString(uri).c_str());
-        
+
         auto languageUnderstandingModelHandles = CSpxSharedPtrHandleTableManager::Get<ISpxLanguageUnderstandingModel, SPXLUMODELHANDLE>();
         *hlumodel = languageUnderstandingModelHandles->TrackHandle(model);
     }

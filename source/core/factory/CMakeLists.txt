@@ -18,13 +18,14 @@ endif()
 
 set(HEADERS
     "${SRC_DIR}/stdafx.h"
-    "${SRC_DIR}/create_module_object.h"
+    "${INC_DIR}/create_module_object.h"
+    "${INC_DIR}/resource_manager.h"
     )
 
 set(SOURCES
     "${SRC_DIR}/create_module_object.cpp"
-    "${SRC_DIR}/module_factory.cpp"
     "${SRC_DIR}/resource_manager.cpp"
+    "${SRC_DIR}/factory_site_helpers.cpp"
     "${SRC_DIR}/stdafx.cpp"
     )
 
@@ -41,5 +42,14 @@ set_target_properties (factory PROPERTIES
     FOLDER core
 )
 
-target_link_libraries(factory sr tts audio usp tts_rest tts_usp conversation_translation ${CMAKE_DL_LIBS})
+target_link_libraries(factory
+                      PRIVATE sr
+                      PRIVATE tts
+                      PRIVATE audio
+                      PRIVATE usp
+                      PRIVATE tts_rest
+                      PRIVATE tts_usp
+                      PRIVATE conversation_translation
+                      PRIVATE common
+                      PRIVATE ${CMAKE_DL_LIBS})
 

@@ -51,9 +51,8 @@ add_executable(carbonx
     ${SPEECH_C_API_HEADERS} ${SPEECH_CXX_API_HEADERS}
     ${HEADERS} ${HEADERS_PRIVATE} ${SOURCES}
     )
-# common is needed for PAL etc
-target_link_libraries(carbonx common pal conversation_translation ${SPEECHSDK_CORE_LIBRARY})
 
+target_link_libraries(carbonx common pal conversation_translation ${SPEECHSDK_CORE_LIBRARY})
 if(CMAKE_SYSTEM_NAME STREQUAL "WindowsStore")
 if(use_openssl)
     set_target_properties(carbonx PROPERTIES LINK_FLAGS "/ignore:4099")

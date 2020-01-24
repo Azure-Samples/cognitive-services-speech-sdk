@@ -54,4 +54,4 @@ set_target_properties (tts PROPERTIES
     FOLDER core
 )
 
-target_link_libraries(tts PRIVATE factory common)
+target_link_libraries(tts PRIVATE common)

@@ -38,6 +38,9 @@ else()
         )
 endif()
 
+# Set USE_NON_CORE_ROOT_SITE based on if we are building extensions or unit tests
+add_compile_definitions(USE_NON_CORE_ROOT_SITE)
+
 target_include_directories(kws_factory
     PRIVATE
         ${SDKKWS_HEADERS}
@@ -48,16 +51,13 @@ target_include_directories(kws_factory
     )
 
 if(SPEECHSDK_OS MATCHES "^IOS")
-    target_link_libraries(kws_factory PRIVATE
-        common
-        kws_wrapper
+    target_link_libraries(kws_factory
+     PRIVATE common
+     PRIVATE kws_wrapper
         )
 else()
-    target_link_libraries(kws_factory PRIVATE
-        common
-        kws_wrapper
-        # TODO seems not needed:
-        ${SPEECHSDK_CORE_LIBRARY}
-        $<TARGET_OBJECTS:c_api>
+    target_link_libraries(kws_factory
+    PRIVATE common
+    PRIVATE kws_wrapper
         )
 endif()

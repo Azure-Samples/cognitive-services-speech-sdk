@@ -15,6 +15,7 @@
 #include "exception.h"
 #define __SPX_THROW_HR_IMPL(hr) Microsoft::CognitiveServices::Speech::Impl::ThrowWithCallstack(hr)
 
+#include "site_helpers.h"
 #include "test_utils.h"
 #include "sequence_generator_audio_stream_reader.h"
 

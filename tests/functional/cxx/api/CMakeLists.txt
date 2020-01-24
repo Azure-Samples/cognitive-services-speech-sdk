@@ -62,7 +62,13 @@ source_group("Source Files" FILES ${SOURCES})
 source_group("Header Files" FILES ${TEST_HEADERS} ${HEADERS_PRIVATE})
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${TEST_HEADERS} ${HEADERS_PRIVATE})
-target_link_libraries(${PROJECT_NAME} common conversation_translation ${SPEECHSDK_CORE_LIBRARY} ${TEST_LIBS})
+target_link_libraries(${PROJECT_NAME} ${SPEECHSDK_CORE_LIBRARY} audio common ${TEST_LIBS})
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+if(${use_openssl})
+   target_link_libraries(${PROJECT_NAME} z dl)
+endif()
+endif()
 
 if (NOT WIN32)
     find_package (Threads)
@@ -74,3 +80,11 @@ add_dependencies(${PROJECT_NAME} mock)
 set_target_properties (${PROJECT_NAME} PROPERTIES
     FOLDER tests/api
 )
+
+if (EXTENSION_CODEC_ENABLED AND STATIC_CODEC_EXTENSION)
+  target_link_libraries(${PROJECT_NAME} codec)
+endif()
+
+if(EXTENSION_KWS_ENABLED AND STATIC_KWS_EXTENSION)
+  target_link_libraries(${PROJECT_NAME} kws_factory)
+endif()

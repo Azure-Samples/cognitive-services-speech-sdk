@@ -13,6 +13,7 @@
 
 #include "thread_service.h"
 #include "test_utils.h"
+#include "site_helpers.h"
 #include "usp.h"
 #include "guid_utils.h"
 

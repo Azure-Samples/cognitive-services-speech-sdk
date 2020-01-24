@@ -45,7 +45,6 @@ import static org.junit.Assert.assertNotNull;
 public class RemoteConversationTranscriptionTest {
     private static ConversationTranscriber transcriber;
     private static WavFileAudioInputStream waveFilePullStream;
-    private static boolean endofProcessing = false;
     private static Conversation conversation = null;
 
     private static String speechKey;
@@ -84,12 +83,11 @@ public class RemoteConversationTranscriptionTest {
             System.out.println(randomUUIDString);
 
             config = SpeechConfig.fromSubscription(speechKey,speechRegion);
-            
+
             do{
-                Thread.sleep((10000));
                 RemoteConversationTranscriptionClient client = new RemoteConversationTranscriptionClient(config);
                 PollerFlux<RemoteConversationTranscriptionOperation, RemoteConversationTranscriptionResult> remoteTranscriptionOperation = client.getTranscriptionOperation(randomUUIDString, 5);
-    
+
                 remoteTranscriptionOperation.subscribe(
                     pr -> {
                         System.out.println("Poll response status : " + pr.getStatus());
@@ -99,11 +97,11 @@ public class RemoteConversationTranscriptionTest {
                         }
                     }
                 );
-    
+
                 SyncPoller<RemoteConversationTranscriptionOperation, RemoteConversationTranscriptionResult> blockingOperation =  remoteTranscriptionOperation.getSyncPoller();
                 blockingOperation.waitForCompletion();
                 pollResponse = blockingOperation.getFinalResult();
-    
+
                 if(pollResponse != null) {
                     if(pollResponse.getConversationTranscriptionResults() != null) {
                         for (int i = 0; i < pollResponse.getConversationTranscriptionResults().size(); i++) {
@@ -120,17 +118,16 @@ public class RemoteConversationTranscriptionTest {
                         }
                     }
                 }
+                else {
+                    Thread.sleep((10000));
+                }
                 retryCount++;
             } while(pollResponse == null && retryCount < 3);
 
             assertNotNull("Final result can not be not null", pollResponse);
             if(pollResponse.getConversationTranscriptionResults().size() < 4)
             {
-                assertNotNull("Total transcription results do not match", null);
-            }
-
-            while(!endofProcessing) {
-                Thread.sleep(200);
+                assertNotNull("Total remote transcription results do not match", null);
             }
         } catch (InterruptedException e) {
             fail(e.getMessage());
@@ -164,59 +161,13 @@ public class RemoteConversationTranscriptionTest {
         transcriber = new ConversationTranscriber(AudioConfig.fromStreamInput(audioInputStream));
         transcriber.joinConversationAsync(conversation);
         conversation.addParticipantAsync("xyz@example.com");
-        getFirstTranscriberResult(transcriber);
+        ArrayList<String> phrases = ConversationTranscriberHelper.getTranscriberResult(transcriber);
+        if(phrases.size() < 4)
+        {
+            assertNotNull("Total realtime transcription results do not match", null);
+        }
 
         config.close();
         return meetingId;
-    }
-
-    private void getFirstTranscriberResult(ConversationTranscriber t) throws InterruptedException, ExecutionException, TimeoutException {
-        getFirstTranscriberResultInternal(t, true, false);
-    }
-
-    private void getFirstTranscriberResult(ConversationTranscriber t, boolean destroyResource) throws InterruptedException, ExecutionException, TimeoutException {
-        getFirstTranscriberResultInternal(t, false, destroyResource);
-    }
-
-    private void getFirstTranscriberResultInternal(ConversationTranscriber t, boolean useDefaultStopTranscribing, boolean destroyResource) throws InterruptedException, ExecutionException, TimeoutException {
-        String result;
-        final ArrayList<String> rEvents = new ArrayList<>();
-        final ArrayList<String> cEvents = new ArrayList<>();
-
-        t.transcribing.addEventListener((o, e) -> {
-            System.out.println("On Websocket recognizing:" + e.getResult().getText());
-        });
-
-        t.transcribed.addEventListener((o, e) -> {
-            rEvents.add(e.getResult().getText());
-            System.out.println("On Websocket recognized:" + e.toString());
-        });
-
-        t.canceled.addEventListener((o, e) -> {
-            System.out.println("Conversation transcriber Stopped:" + e.toString());
-            try {
-                t.stopTranscribingAsync().get();
-            } catch (InterruptedException ex) {
-                ex.printStackTrace();
-            } catch (ExecutionException ex) {
-                ex.printStackTrace();
-            }
-        });
-
-        t.sessionStopped.addEventListener((o, e) -> {
-            System.out.println("Conversation transcriber Stopped:" + e.toString());
-
-            try {
-                t.stopTranscribingAsync().get();
-            } catch (InterruptedException ex) {
-                ex.printStackTrace();
-            } catch (ExecutionException ex) {
-                ex.printStackTrace();
-            }
-            endofProcessing = true;
-            t.close();
-        });
-
-        Future<?> future = t.startTranscribingAsync();
     }
 }

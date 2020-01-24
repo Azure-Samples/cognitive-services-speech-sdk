@@ -113,4 +113,4 @@ set_target_properties (sr PROPERTIES
     FOLDER core
 )
 
-target_link_libraries(sr PRIVATE factory common)
+target_link_libraries(sr PRIVATE common pal)

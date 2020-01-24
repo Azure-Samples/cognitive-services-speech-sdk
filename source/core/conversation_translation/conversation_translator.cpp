@@ -606,7 +606,7 @@ namespace ConversationTranslation {
             bool sendStopped = false;
 
             CancellationErrorCode errorCode = ToCancellationErrorCode(reason);
-            
+
             switch (state)
             {
                 default:
@@ -1032,7 +1032,7 @@ namespace ConversationTranslation {
             default:
                 SPX_TRACE_ERROR("Unknown state on 0x%p for when attempting to move to failed state: %d", P_FORMAT_POINTER(this), state);
                 return;
-            
+
             case ConversationState::Failed:
             case ConversationState::Closed:
                 // should theoretically not get here
@@ -1302,7 +1302,7 @@ namespace ConversationTranslation {
                     // This is unexpected. Log this but ignore
                     SPX_TRACE_WARNING("Got recognizer session disconnected event on 0x%p when state is already opening/closed (%d). Possible logic bug.", P_FORMAT_POINTER(this), state);
                     return;
-                
+
                 case ConversationState::Closing:
                     // If the conversation connection is also closed, we should transition to
                     // the closed state. Otherwise we wait for that to trigger the closed state
@@ -1324,7 +1324,7 @@ namespace ConversationTranslation {
                     sendDisconnected = true;
                     ChangeState(state, ConversationState::PartiallyOpen);
                     break;
-                
+
             }
 
             string sessionId = GetSessionId();

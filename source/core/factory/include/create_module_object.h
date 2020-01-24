@@ -6,8 +6,6 @@
 //
 
 #pragma once
-#include "spxcore_common.h"
-
 
 namespace Microsoft {
 namespace CognitiveServices {

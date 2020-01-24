@@ -86,7 +86,7 @@ void CSpxActivitySession::BuildActivityMsg(const std::string* activityMsg)
 {
     auto messageJSON = nlohmann::json::parse(*activityMsg);
     /* We first build the activity */
-    m_activity = messageJSON["messagePayload"].dump();    
+    m_activity = messageJSON["messagePayload"].dump();
     /* We now check if there is a stream associated */
     if (messageJSON["messageDataStreamType"].is_number_unsigned())
     {

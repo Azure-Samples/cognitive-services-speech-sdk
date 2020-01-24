@@ -24,7 +24,7 @@ SPXAPI_(bool) audio_stream_is_handle_valid(SPXAUDIOSTREAMHANDLE haudioStream)
 SPXAPI audio_stream_create_push_audio_input_stream(SPXAUDIOSTREAMHANDLE* haudioStream, SPXAUDIOSTREAMFORMATHANDLE hformat)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, haudioStream == nullptr);
-    
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         *haudioStream = SPXHANDLE_INVALID;

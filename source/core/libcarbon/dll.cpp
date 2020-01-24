@@ -17,6 +17,9 @@ TRACELOGGING_DECLARE_PROVIDER(tracingEventProvider);
 #include "stdafx.h"
 #include "debug_utils.h"
 #include "handle_table.h"
+#include "create_module_object.h"
+
+SPX_EXTERN_C SPXDLL_EXPORT void* CreateModuleObject(const char* className, const char* interfaceName);
 
 using namespace Microsoft::CognitiveServices::Speech::Impl;
 
@@ -73,3 +76,8 @@ __attribute__((destructor)) static void LibUnload()
 }
 
 #endif
+
+SPX_EXTERN_C SPXDLL_EXPORT void* CreateModuleObject(const char* className, const char* interfaceName)
+{
+    return PrimaryCarbon_CreateModuleObject(className, interfaceName);
+}

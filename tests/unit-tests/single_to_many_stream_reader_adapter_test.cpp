@@ -50,7 +50,7 @@ bool ValidateBufferSequence(uint8_t* buffer, int readCount, int* previousLastVal
 void ReadStreamAndValidateIsInSequence(std::shared_ptr<ISpxAudioStreamReader> reader, int bufferSize, int totalReadCount, int* previousLastValue = nullptr)
 {
     std::unique_ptr<uint8_t[]> buffer{ new uint8_t[bufferSize] };
-    
+
     while (totalReadCount > 0)
     {
         reader->Read(buffer.get(), bufferSize);
@@ -70,7 +70,7 @@ TEST_CASE("Demux audio stream adapter is properly functioning", "[core][demux ad
     const uint32_t c_SequentialBufferSize = 500;
 
     std::shared_ptr<ISpxGenericSite> rootSite;
-    // try to get the root site by reaching out to the resource manager first as that is the item to have. 
+    // try to get the root site by reaching out to the resource manager first as that is the item to have.
     INFO("Try to reach the root site from the site at hand by finding the resource manager on a given site")
     {
         auto objectFactory = SpxQueryService<ISpxObjectFactory>(SpxGetRootSite());
@@ -207,7 +207,7 @@ TEST_CASE("Demux audio stream adapter stress and multithreaed", "[core][demux ad
     const uint32_t c_SequentialBufferSize = 500;
 
     std::shared_ptr<ISpxGenericSite> rootSite;
-    // try to get the root site by reaching out to the resource manager first as that is the item to have. 
+    // try to get the root site by reaching out to the resource manager first as that is the item to have.
     INFO("Try to reach the root site from the site at hand by finding the resource manager on a given site")
     {
         auto objectFactory = SpxQueryService<ISpxObjectFactory>(SpxGetRootSite());

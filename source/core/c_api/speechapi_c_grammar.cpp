@@ -91,7 +91,7 @@ SPXAPI grammar_phrase_create_from_text(SPXPHRASEHANDLE* hphrase, const char* tex
         SPX_RETURN_HR_IF(SPXERR_RUNTIME_ERROR, phrase == nullptr);
 
         phrase->InitPhrase(PAL::ToWString(text).c_str());
-        
+
         *hphrase = CSpxSharedPtrHandleTableManager::TrackHandle<ISpxPhrase, SPXPHRASEHANDLE>(phrase);
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
@@ -108,7 +108,7 @@ SPXAPI grammar_create_from_storage_id(SPXGRAMMARHANDLE *hgrammar, const char *id
 
         auto grammar = SpxCreateObjectWithSite<ISpxStoredGrammar>("CSpxStoredGrammar", SpxGetRootSite());
         SPX_RETURN_HR_IF(SPXERR_RUNTIME_ERROR, grammar == nullptr);
-        
+
         grammar->InitStoredGrammar(PAL::ToWString(id).c_str());
 
         auto g = SpxQueryInterface<ISpxGrammar>(grammar);

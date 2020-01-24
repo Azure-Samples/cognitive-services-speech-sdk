@@ -15,6 +15,7 @@
 #include <dlfcn.h>
 #endif
 
+#include "exception.h"
 #include "module_factory.h"
 SPX_EXTERN_C SPXDLL_EXPORT void* CreateModuleObject(const char* className, const char* interfaceName);
 
@@ -30,12 +31,27 @@ namespace Impl {
 
 
 std::unique_ptr<CSpxModuleFactory::MapType> CSpxModuleFactory::m_factoryMap = std::make_unique<CSpxModuleFactory::MapType>();
+std::mutex CSpxModuleFactory::m_mutex;
 
+std::shared_ptr<ISpxObjectFactory> CSpxModuleFactory::Get(PCREATE_MODULE_OBJECT_FUNC pFunc)
+{
+    std::unique_lock<std::mutex> lock(m_mutex);
+
+    auto item = m_factoryMap->find("carbon");
+    if (item != m_factoryMap->end())
+    {
+        return item->second.lock();
+    }
+
+    std::shared_ptr<ISpxObjectFactory> factory(new CSpxModuleFactory(pFunc));
+    m_factoryMap->emplace("carbon", factory);
+
+    return factory;
+}
 
 std::shared_ptr<ISpxObjectFactory> CSpxModuleFactory::Get(const std::string& filename)
 {
-    static std::mutex mutex;
-    std::unique_lock<std::mutex> lock(mutex);
+    std::unique_lock<std::mutex> lock(m_mutex);
 
     auto item = m_factoryMap->find(filename);
     if (item != m_factoryMap->end())
@@ -56,6 +72,12 @@ CSpxModuleFactory::CSpxModuleFactory(const std::string& filename) :
     SPX_TRACE_VERBOSE("Load Module Factory ('%s')... %s!", filename.c_str(), !m_pfnCreateModuleObject ? "NOT FOUND" : "SUCCEEDED");
 }
 
+CSpxModuleFactory::CSpxModuleFactory(PCREATE_MODULE_OBJECT_FUNC pFunc) :
+    m_pfnCreateModuleObject(pFunc)
+{
+    SPX_TRACE_VERBOSE("Load Module Factory ('carbon')... %s!", !m_pfnCreateModuleObject ? "NOT FOUND" : "SUCCEEDED");
+}
+
 void* CSpxModuleFactory::CreateObject(const char* className, const char* interfaceName)
 {
     return m_pfnCreateModuleObject != nullptr
@@ -65,14 +87,6 @@ void* CSpxModuleFactory::CreateObject(const char* className, const char* interfa
 
 CSpxModuleFactory::PCREATE_MODULE_OBJECT_FUNC CSpxModuleFactory::GetCreateModuleObjectFunctionPointer(const std::string& filename)
 {
-    if (filename == "carbon")
-    {
-        // "carbon" is magic value which means that we don't need to load anything
-        // (this code is already a part of a carbon lib linked to an executable that
-        // uses carbon API).
-        return CreateModuleObject;
-    }
-
 #if _MSC_VER
     std::vector<char> basePath(_MAX_PATH); // zero-initialized
     if (::GetModuleFileNameA((HINSTANCE)&__ImageBase, &basePath[0], _MAX_PATH) != 0)
@@ -111,7 +125,8 @@ CSpxModuleFactory::PCREATE_MODULE_OBJECT_FUNC CSpxModuleFactory::GetCreateModule
         if (pfn == nullptr)
         {
             SPX_TRACE_VERBOSE("dlsym('CreateModuleObject') returned NULL: ... thus ... using libMicrosoft.CognitiveServices.Speech.so!CreateModuleObject directly");
-            pfn = CreateModuleObject;
+            std::string msg = "can't find 'CreateModuleObject' from " + filename;
+            ThrowRuntimeError(msg);
         }
 
         return pfn;

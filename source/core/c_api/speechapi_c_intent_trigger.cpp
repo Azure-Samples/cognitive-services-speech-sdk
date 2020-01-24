@@ -27,7 +27,7 @@ SPXAPI intent_trigger_create_from_phrase(SPXTRIGGERHANDLE* htrigger, const char*
 
         auto trigger = SpxCreateObjectWithSite<ISpxTrigger>("CSpxIntentTrigger", SpxGetRootSite());
         trigger->InitPhraseTrigger(PAL::ToWString(phrase).c_str());
-        
+
         auto triggerhandles = CSpxSharedPtrHandleTableManager::Get<ISpxTrigger, SPXTRIGGERHANDLE>();
         *htrigger = triggerhandles->TrackHandle(trigger);
     }

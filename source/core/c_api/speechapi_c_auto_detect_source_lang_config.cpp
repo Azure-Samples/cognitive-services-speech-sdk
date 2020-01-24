@@ -48,7 +48,7 @@ SPXAPI create_auto_detect_source_lang_config_from_source_lang_config(SPXAUTODETE
         auto sourceLangConfigPtr = (*sourceLangConfigs)[hSourceLanguageConfig];
         auto sourceLangaugeConfig = SpxQueryInterface<ISpxSourceLanguageConfig>(sourceLangConfigPtr);
         SPX_IFTRUE_THROW_HR(sourceLangaugeConfig == nullptr, SPXERR_INVALID_ARG);
-        
+
         autoDetectSourceLangConfig->AddSourceLanguageConfig(sourceLangaugeConfig);
 
          auto autoDetectSourceLangConfigs = CSpxSharedPtrHandleTableManager::Get<ISpxAutoDetectSourceLangConfig, SPXAUTODETECTSOURCELANGCONFIGHANDLE>();

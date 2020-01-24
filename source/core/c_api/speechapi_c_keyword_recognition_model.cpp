@@ -35,7 +35,7 @@ SPXAPI keyword_recognition_model_create_from_file(const char* fileName, SPXKEYWO
 
         auto model = SpxCreateObjectWithSite<ISpxKwsModel>("CSpxKwsModel", SpxGetRootSite());
         model->InitFromFile(PAL::ToWString(fileName).c_str());
-        
+
         auto handles = CSpxSharedPtrHandleTableManager::Get<ISpxKwsModel, SPXKEYWORDHANDLE>();
         *phkwmodel = handles->TrackHandle(model);
     }
