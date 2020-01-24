@@ -969,6 +969,44 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
+        public async Task SynthesisFirstChunkTimeoutUsp()
+        {
+            using (var synthesizer = new SpeechSynthesizer(uspConfig, null))
+            {
+                // set timeout threshold to 0
+                synthesizer.Properties.SetProperty("SpeechSynthesis_FirstChunkTimeoutMs", "0");
+
+                // use a long sentence here
+                using (var result = await synthesizer.SpeakTextAsync("I have a dream that one day this nation will rise up and live out the true meaning of its creed."))
+                {
+                    Assert.AreEqual(ResultReason.Canceled, result.Reason);
+                    var cancellation = SpeechSynthesisCancellationDetails.FromResult(result);
+                    AssertHelpers.AssertStringContains(cancellation.ErrorDetails, "timeout");
+                    Assert.AreEqual(result.AudioData.Length, 0);
+                }
+            }
+        }
+
+        [TestMethod]
+        public async Task SynthesisAllChunkTimeoutUsp()
+        {
+            using (var synthesizer = new SpeechSynthesizer(uspConfig, null))
+            {
+                // set timeout threshold to 0
+                synthesizer.Properties.SetProperty("SpeechSynthesis_AllChunkTimeoutMs", "0");
+
+                // use a long sentence here
+                using (var result = await synthesizer.SpeakTextAsync("I have a dream that one day this nation will rise up and live out the true meaning of its creed."))
+                {
+                    Assert.AreEqual(ResultReason.Canceled, result.Reason);
+                    var cancellation = SpeechSynthesisCancellationDetails.FromResult(result);
+                    AssertHelpers.AssertStringContains(cancellation.ErrorDetails, "timeout");
+                    Assert.IsTrue(result.AudioData.Length > 0);
+                }
+            }
+        }
+
+        [TestMethod]
         public async Task CheckWordBoundaryEventsUsp()
         {
             uspConfig.SpeechSynthesisVoiceName = "Microsoft Server Speech Text to Speech Voice (zh-CN, HuihuiRUS)";

@@ -66,7 +66,7 @@ CancellationErrorCode CSpxSynthesisResult::GetCancellationErrorCode()
 
 uint32_t CSpxSynthesisResult::GetAudioLength()
 {
-    return (uint32_t)m_audiodata.size();
+    return static_cast<uint32_t>(m_audiodata.size());
 }
 
 std::shared_ptr<std::vector<uint8_t>> CSpxSynthesisResult::GetAudioData()
@@ -146,8 +146,8 @@ void CSpxSynthesisResult::InitSynthesisResult(const std::wstring& requestId, Res
         m_headerLength = 0;
         if (hasHeader)
         {
-            auto headerVector = CSpxSynthesisHelper::BuildRiffHeader((uint32_t)audio_length, 0, m_audioformat);
-            m_headerLength = (uint32_t)headerVector->size();
+            auto headerVector = CSpxSynthesisHelper::BuildRiffHeader(static_cast<uint32_t>(audio_length), 0, m_audioformat);
+            m_headerLength = static_cast<uint32_t>(headerVector->size());
             m_audiodata.resize(m_headerLength + audio_length);
             memcpy(m_audiodata.data(), headerVector->data(), m_headerLength);
         }
@@ -169,7 +169,7 @@ void CSpxSynthesisResult::SetEvents(const std::shared_ptr<ISpxSynthesizerEvents>
     // Initialize audio data stream
     // Put audio data stream init in this method because it requires events
     m_audioStream = SpxCreateObjectWithSite<ISpxAudioDataStream>("CSpxAudioDataStream", SpxGetRootSite());
-    m_audioStream->InitFromSynthesisResult(((ISpxSynthesisResult*)this)->shared_from_this());
+    m_audioStream->InitFromSynthesisResult(static_cast<ISpxSynthesisResult*>(this)->shared_from_this());
 }
 
 void CSpxSynthesisResult::SetFutureResult(std::shared_ptr<CSpxAsyncOp<std::shared_ptr<ISpxSynthesisResult>>> futureResult)

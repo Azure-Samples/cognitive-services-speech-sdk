@@ -20,16 +20,7 @@ namespace Speech {
 namespace Impl {
 
 
-CSpxAudioDataStream::CSpxAudioDataStream()
-{
-}
-
 CSpxAudioDataStream::~CSpxAudioDataStream()
-{
-    Term();
-}
-
-void CSpxAudioDataStream::Term()
 {
     DisconnectSynthEvents();
 }
@@ -55,7 +46,7 @@ void CSpxAudioDataStream::InitFromSynthesisResult(std::shared_ptr<ISpxSynthesisR
         // Shouldn't set for synthesizing event
         // Since the synthesizing event for current chunk will be fired immediately after this stream is created
         auto audioData = result->GetRawAudioData();
-        Write(audioData->data(), (uint32_t)audioData->size());
+        Write(audioData->data(), static_cast<uint32_t>(audioData->size()));
     }
 
     if (result->GetReason() == ResultReason::SynthesizingAudioCompleted || result->GetReason() == ResultReason::Canceled)
@@ -68,7 +59,7 @@ void CSpxAudioDataStream::InitFromSynthesisResult(std::shared_ptr<ISpxSynthesisR
             m_cancellationReason = result->GetCancellationReason();
             m_cancellationErrorCode = result->GetCancellationErrorCode();
             auto properties = SpxQueryInterface<ISpxNamedProperties>(result);
-            auto cancellationDetailedText = properties->GetStringValue(GetPropertyName(PropertyId::CancellationDetails_ReasonDetailedText), "");
+            auto cancellationDetailedText = properties->GetStringValue(GetPropertyName(PropertyId::CancellationDetails_ReasonDetailedText));
             SetStringValue(GetPropertyName(PropertyId::CancellationDetails_ReasonDetailedText), cancellationDetailedText.data());
         }
     }
@@ -90,7 +81,7 @@ void CSpxAudioDataStream::InitFromSynthesisResult(std::shared_ptr<ISpxSynthesisR
         m_latestReason = result->GetReason();
 
         auto audioData = result->GetRawAudioData();
-        Write(audioData->data(), (uint32_t)audioData->size());
+        Write(audioData->data(), static_cast<uint32_t>(audioData->size()));
     };
 
     m_pfnSynthesisStopped = [this](std::shared_ptr<ISpxSynthesisEventArgs> e) {
@@ -113,7 +104,7 @@ void CSpxAudioDataStream::InitFromSynthesisResult(std::shared_ptr<ISpxSynthesisR
             m_cancellationReason = result->GetCancellationReason();
             m_cancellationErrorCode = result->GetCancellationErrorCode();
             auto properties = SpxQueryInterface<ISpxNamedProperties>(result);
-            auto cancellationDetailedText = properties->GetStringValue(GetPropertyName(PropertyId::CancellationDetails_ReasonDetailedText), "");
+            auto cancellationDetailedText = properties->GetStringValue(GetPropertyName(PropertyId::CancellationDetails_ReasonDetailedText));
             SetStringValue(GetPropertyName(PropertyId::CancellationDetails_ReasonDetailedText), cancellationDetailedText.data());
         }
 
@@ -330,7 +321,7 @@ uint32_t CSpxAudioDataStream::FillBuffer(uint8_t* buffer, uint32_t bufferSize, u
     while (iterator != m_audioList.end() && scannedSize + iterator->second <= m_position)
     {
         scannedSize += iterator->second;
-        iterator++;
+        ++iterator;
     }
 
     uint32_t positionInItem = m_position - scannedSize;
@@ -338,7 +329,7 @@ uint32_t CSpxAudioDataStream::FillBuffer(uint8_t* buffer, uint32_t bufferSize, u
     // Read data from current item
     if (remainedBytesToBeRead > 0)
     {
-        SPX_DBG_ASSERT_WITH_MESSAGE(iterator != m_audioList.end(), "m_position is out of m_audioList, which is unexpeted.");
+        SPX_DBG_ASSERT_WITH_MESSAGE(iterator != m_audioList.end(), "m_position is out of m_audioList, which is unexpected.");
         uint32_t bytesToBeRead = std::min(iterator->second - positionInItem, remainedBytesToBeRead);
         memcpy(buffer, iterator->first.get() + positionInItem, bytesToBeRead);
         remainedBytesToBeRead -= bytesToBeRead;
@@ -348,8 +339,8 @@ uint32_t CSpxAudioDataStream::FillBuffer(uint8_t* buffer, uint32_t bufferSize, u
 
     if (remainedBytesToBeRead > 0)
     {
-        SPX_DBG_ASSERT_WITH_MESSAGE(iterator != m_audioList.end(), "m_position is out of m_audioList, which is unexpeted.");
-        iterator++;
+        SPX_DBG_ASSERT_WITH_MESSAGE(iterator != m_audioList.end(), "m_position is out of m_audioList, which is unexpected.");
+        ++iterator;
     }
 
     // Read data from more items until remainedBytesToBeRead == 0
@@ -361,7 +352,7 @@ uint32_t CSpxAudioDataStream::FillBuffer(uint8_t* buffer, uint32_t bufferSize, u
         offsetInBuffer += bytesToBeRead;
         m_position += bytesToBeRead;
 
-        iterator++;
+        ++iterator;
     }
 
     SPX_DBG_TRACE_VERBOSE("CSpxAudioDataStream::Read: bytesRead=%d", totalBytesToBeRead);

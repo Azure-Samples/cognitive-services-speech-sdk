@@ -26,13 +26,13 @@ CSpxRestTtsAuthenticator::CSpxRestTtsAuthenticator(const std::string& issueToken
     m_proxyHost(proxyHost), m_proxyPort(proxyPort), m_proxyUsername(proxyUsername), m_proxyPassword(proxyPassword)
 {
     SPX_DBG_TRACE_VERBOSE_IF(SPX_DBG_TRACE_REST_TTS_AUTHENTICATOR, __FUNCTION__);
-    Init();
+    CSpxRestTtsAuthenticator::Init();
 }
 
 CSpxRestTtsAuthenticator::~CSpxRestTtsAuthenticator()
 {
     SPX_DBG_TRACE_VERBOSE_IF(SPX_DBG_TRACE_REST_TTS_AUTHENTICATOR, __FUNCTION__);
-    Term();
+    CSpxRestTtsAuthenticator::Term();
 }
 
 void CSpxRestTtsAuthenticator::Init()

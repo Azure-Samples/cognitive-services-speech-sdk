@@ -108,8 +108,6 @@ private:
 
     void EnsureTtsEngineAdapter();
     void InitializeTtsEngineAdapter();
-    void ReleaseTtsEngineAdapter();
-
 
 private:
 

@@ -17,13 +17,14 @@
 #include "json.h"
 #include "spx_build_information.h"
 #include "time_utils.h"
+#include "thread_service.h"
 
 #define SPX_DBG_TRACE_USP_TTS 0
 
 #define MAX_RETRY 1
 
-#define WAIT_FOR_FIRST_CHUNK_TIMEOUT 10 // in seconds
-#define RECEIVE_ALL_CHUNKS_TIMEOUT 30   // in seconds
+#define WAIT_FOR_FIRST_CHUNK_TIMEOUT 10000  // in milliseconds
+#define RECEIVE_ALL_CHUNKS_TIMEOUT 300000   // in milliseconds
 #ifdef _DEBUG
 #define DEBUG_WAIT_INTERVAL 100         // in milliseconds
 #endif
@@ -42,7 +43,9 @@ CSpxUspTtsEngineAdapter::CSpxUspTtsEngineAdapter()
 CSpxUspTtsEngineAdapter::~CSpxUspTtsEngineAdapter()
 {
     SPX_DBG_TRACE_VERBOSE_IF(SPX_DBG_TRACE_USP_TTS, __FUNCTION__);
-    CSpxUspTtsEngineAdapter::Term();
+    SPX_DBG_TRACE_VERBOSE("%s: this=0x%8p", __FUNCTION__, (void*)this);
+    SPX_DBG_ASSERT(m_uspCallbacks == nullptr);
+    SPX_DBG_ASSERT(m_uspConnection == nullptr);
 }
 
 void CSpxUspTtsEngineAdapter::Init()
@@ -124,7 +127,7 @@ void CSpxUspTtsEngineAdapter::Init()
 void CSpxUspTtsEngineAdapter::Term()
 {
     UspTerminate();
-    SpxQueryInterface<ISpxObjectInit>(m_threadService)->Term();
+    SpxTerm(m_threadService);
 }
 
 void CSpxUspTtsEngineAdapter::SetOutput(std::shared_ptr<ISpxAudioOutput> output)
@@ -140,7 +143,8 @@ std::shared_ptr<ISpxSynthesisResult> CSpxUspTtsEngineAdapter::Speak(const std::s
 
     auto currentRequestId = requestId;
     std::shared_ptr<ISpxSynthesisResult> result;
-    for (auto tryCount = 0; tryCount <= MAX_RETRY; ++tryCount)
+    const auto maxRetry = std::stoi(ISpxPropertyBagImpl::GetStringValue("SpeechSynthesis_MaxRetryTimes", std::to_string(MAX_RETRY).c_str()));
+    for (auto tryCount = 0; tryCount <= maxRetry; ++tryCount)
     {
         result = SpeakInternal(text, isSsml, currentRequestId);
         if (ResultReason::SynthesizingAudioCompleted == result->GetReason())
@@ -194,15 +198,16 @@ std::shared_ptr<ISpxSynthesisResult> CSpxUspTtsEngineAdapter::SpeakInternal(cons
     std::unique_lock<std::mutex> lock(m_mutex);
 
     // wait to get the first audio chunk
+    const auto firstChunkTimeout = std::stoi(ISpxPropertyBagImpl::GetStringValue("SpeechSynthesis_FirstChunkTimeoutMs", std::to_string(WAIT_FOR_FIRST_CHUNK_TIMEOUT).c_str()));
 #ifdef _DEBUG
-    auto remainingTime = WAIT_FOR_FIRST_CHUNK_TIMEOUT * 1000;
+    auto remainingTime = firstChunkTimeout;
     while (!m_cv.wait_for(lock, std::chrono::milliseconds(DEBUG_WAIT_INTERVAL), [&] { return m_uspState == UspState::ReceivingData || m_uspState == UspState::Idle || m_uspState == UspState::Error; }) && remainingTime > 0)
     {
         SPX_DBG_TRACE_VERBOSE("%s: waiting for USP to get first audio chunk ...", __FUNCTION__);
         remainingTime -= DEBUG_WAIT_INTERVAL;
     }
 #else
-    m_cv.wait_for(lock, std::chrono::seconds(WAIT_FOR_FIRST_CHUNK_TIMEOUT), [&] { return m_uspState == UspState::ReceivingData || m_uspState == UspState::Idle || m_uspState == UspState::Error; });
+    m_cv.wait_for(lock, std::chrono::milliseconds(firstChunkTimeout), [&] { return m_uspState == UspState::ReceivingData || m_uspState == UspState::Idle || m_uspState == UspState::Error; });
 #endif
 
     if (m_uspState == UspState::Sending || m_uspState == UspState::TurnStarted)
@@ -210,18 +215,20 @@ std::shared_ptr<ISpxSynthesisResult> CSpxUspTtsEngineAdapter::SpeakInternal(cons
         LogError("USP error, timeout to get the first audio chunk.");
         m_currentErrorMessage = "USP error, timeout to get the first audio chunk.";
         m_uspState = UspState::Error;
+        UspTerminate();
     }
 
     // wait to receive all audio data
+    const auto allChunkTimeout = std::stoi(ISpxPropertyBagImpl::GetStringValue("SpeechSynthesis_AllChunkTimeoutMs", std::to_string(RECEIVE_ALL_CHUNKS_TIMEOUT).c_str()));
 #ifdef _DEBUG
-    remainingTime = RECEIVE_ALL_CHUNKS_TIMEOUT * 1000;
+    remainingTime = allChunkTimeout;
     while (!m_cv.wait_for(lock, std::chrono::milliseconds(DEBUG_WAIT_INTERVAL), [&] { return m_uspState == UspState::Idle || m_uspState == UspState::Error; }) && remainingTime > 0)
     {
         SPX_DBG_TRACE_VERBOSE("%s: waiting for USP to finish receiving data ...", __FUNCTION__);
         remainingTime -= DEBUG_WAIT_INTERVAL;
     }
 #else
-    m_cv.wait_for(lock, std::chrono::seconds(RECEIVE_ALL_CHUNKS_TIMEOUT), [&] { return m_uspState == UspState::Idle || m_uspState == UspState::Error; });
+    m_cv.wait_for(lock, std::chrono::milliseconds(allChunkTimeout), [&] { return m_uspState == UspState::Idle || m_uspState == UspState::Error; });
 #endif
 
     if (m_uspState == UspState::ReceivingData)
@@ -230,6 +237,7 @@ std::shared_ptr<ISpxSynthesisResult> CSpxUspTtsEngineAdapter::SpeakInternal(cons
         m_currentErrorMessage = "USP error, timeout to get all audio data.";
         m_currentErrorMessage += " Received audio size: " + CSpxSynthesisHelper::itos(m_currentReceivedData.size()) + "bytes.";
         m_uspState = UspState::Error;
+        UspTerminate();
     }
 
     bool hasHeader = false;
@@ -459,11 +467,8 @@ void CSpxUspTtsEngineAdapter::UspTerminate()
     // Term the callbacks first and then reset/release the connection
     SpxTermAndClear(m_uspCallbacks);
 
-    if (m_uspConnection != nullptr)
-    {
-        m_uspConnection.reset();
-        m_uspConnection = nullptr;
-    }
+    m_uspConnection.reset();
+
 }
 
 void CSpxUspTtsEngineAdapter::OnTurnStart(const USP::TurnStartMsg& message)
@@ -542,6 +547,9 @@ void CSpxUspTtsEngineAdapter::OnError(bool transport, USP::ErrorCode errorCode, 
         m_uspState = UspState::Error;
         m_cv.notify_all();
     }
+
+    // terminate usp connection on error
+    UspTerminate();
 }
 
 SpxWAVEFORMATEX_Type CSpxUspTtsEngineAdapter::GetOutputFormat(std::shared_ptr<ISpxAudioOutput> output, bool* hasHeader)

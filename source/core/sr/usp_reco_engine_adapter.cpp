@@ -389,7 +389,7 @@ void CSpxUspRecoEngineAdapter::UspTerminate()
     // Term the callbacks first and then reset/release the connection
     SpxTermAndClear(m_uspCallbacks); // After this ... we won't be called back on ISpxUspCallbacks ever again...
 
-    // NOTE: Even if we are in a callback from the USP on another thread, we won't be destoyed until those functions release their shared ptrs
+    // NOTE: Even if we are in a callback from the USP on another thread, we won't be destroyed until those functions release their shared ptrs
     m_uspConnection.reset();
 
     // Fix up some of our counters...

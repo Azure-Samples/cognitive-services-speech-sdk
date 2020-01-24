@@ -28,7 +28,7 @@ class CSpxAudioDataStream :
 {
 public:
 
-    CSpxAudioDataStream();
+    CSpxAudioDataStream() = default;
     ~CSpxAudioDataStream();
 
     SPX_INTERFACE_MAP_BEGIN()
@@ -44,9 +44,6 @@ public:
         SPX_INTERFACE_MAP_ENTRY(ISpxAudioOutputReader)
         SPX_INTERFACE_MAP_ENTRY(ISpxServiceProvider)
     SPX_INTERFACE_MAP_END()
-
-    // --- ISpxObjectInit ---
-    void Term() override;
 
     // --- ISpxAudioDataStream ---
     void InitFromSynthesisResult(std::shared_ptr<ISpxSynthesisResult> result) override;

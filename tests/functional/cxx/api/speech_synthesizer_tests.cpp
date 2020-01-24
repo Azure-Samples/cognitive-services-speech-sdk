@@ -667,7 +667,7 @@ TEST_CASE("Synthesizer output to file - USP", "[api][cxx]")
 
     auto synthesizer = SpeechSynthesizer::FromConfig(config, fileConfig);
     auto result1 = synthesizer->SpeakTextAsync("{{{text1}}}").get(); /* "{{{wavefile.wav}}}" now contains synthesized audio for "{{{text1}}}"" */
-    synthesizer = nullptr; /* "{{{wavefile.wav}}}" is now closed */
+    synthesizer.reset(); /* "{{{wavefile.wav}}}" is now closed */
 
     auto waveSize1 = GetFileSize("wavefile.wav");
     if (result1->Reason != ResultReason::Canceled)
@@ -678,7 +678,7 @@ TEST_CASE("Synthesizer output to file - USP", "[api][cxx]")
     synthesizer = SpeechSynthesizer::FromConfig(config, fileConfig);
     result1 = synthesizer->SpeakTextAsync("{{{text1}}}").get(); /* "{{{wavefile.wav}}}" now contains synthesized audio for "{{{text1}}}"" */
     auto result2 = synthesizer->SpeakTextAsync("{{{text2}}}").get(); /* "{{{wavefile.wav}}}" now contains synthesized audio for both "{{{text1}}}"" and "{{{text2}}}" */
-    synthesizer = nullptr; /* "{{{wavefile.wav}}}" is now closed */
+    synthesizer.reset(); /* "{{{wavefile.wav}}}" is now closed */
 
     auto waveSize2 = GetFileSize("wavefile.wav");
     if (result1->Reason != ResultReason::Canceled && result2->Reason != ResultReason::Canceled)

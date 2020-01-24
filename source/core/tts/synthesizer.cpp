@@ -50,7 +50,8 @@ void CSpxSynthesizer::Init()
 
 void CSpxSynthesizer::Term()
 {
-    ReleaseTtsEngineAdapter();
+    SpxTermAndClear(m_ttsAdapter);
+
     if (m_audioOutput)
     {
         m_audioOutput->Close();
@@ -633,14 +634,6 @@ void CSpxSynthesizer::InitializeTtsEngineAdapter()
 
     // if we still don't have an adapter... that's an exception
     SPX_IFTRUE_THROW_HR(m_ttsAdapter == nullptr, SPXERR_NOT_FOUND);
-}
-
-void CSpxSynthesizer::ReleaseTtsEngineAdapter()
-{
-    if (m_ttsAdapter != nullptr)
-    {
-        m_ttsAdapter->Term();
-    }
 }
 
 } } } } // Microsoft::CognitiveServices::Speech::Impl
