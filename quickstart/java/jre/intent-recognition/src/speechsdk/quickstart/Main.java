@@ -31,9 +31,8 @@ public class Main {
 
             // Creates a language understanding model using the app id, and adds specific intents from your model
             LanguageUnderstandingModel model = LanguageUnderstandingModel.fromAppId("YourLanguageUnderstandingAppId");
-            recognizer.addIntent(model, "YourLanguageUnderstandingIntentName1", "id1");
-            recognizer.addIntent(model, "YourLanguageUnderstandingIntentName2", "id2");
-            recognizer.addIntent(model, "YourLanguageUnderstandingIntentName3", "any-IntentId-here");
+            recognizer.addIntent(model, "HomeAutomation.TurnOn");
+            recognizer.addIntent(model, "HomeAutomation.TurnOff");
 
             System.out.println("Say something...");
 
@@ -63,7 +62,7 @@ public class Main {
                     System.out.println("CANCELED: Did you update the subscription info?");
                 }
             }
-            
+
             result.close();
             recognizer.close();
         } catch (Exception ex) {
@@ -71,7 +70,7 @@ public class Main {
 
             assert(false);
             System.exit(1);
-        } 
+        }
     }
 }
 // </code>

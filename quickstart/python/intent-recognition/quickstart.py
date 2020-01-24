@@ -19,10 +19,7 @@ intent_recognizer = speechsdk.intent.IntentRecognizer(speech_config=intent_confi
 model = speechsdk.intent.LanguageUnderstandingModel(app_id="YourLanguageUnderstandingAppId")
 intents = [
     (model, "HomeAutomation.TurnOn"),
-    (model, "HomeAutomation.TurnOff"),
-    ("This is a test.", "test"),
-    ("Switch to channel 34.", "34"),
-    ("what's the weather like", "weather"),
+    (model, "HomeAutomation.TurnOff")
 ]
 intent_recognizer.add_intents(intents)
 
