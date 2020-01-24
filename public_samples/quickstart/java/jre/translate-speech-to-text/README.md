@@ -29,7 +29,7 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 > Note: more detailed step-by-step instructions are available [here](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-translate-speech-java-jre).
 
 * **By downloading the Microsoft Cognitive Services Speech SDK when building this sample, you acknowledge its license, see [Speech SDK license agreement](https://docs.microsoft.com/azure/cognitive-services/speech-service/license).**
-* [Download the sample code to your development PC.](../../../README.md#get-the-samples)
+* [Download the sample code to your development PC.](/README.md#get-the-samples)
 * Create an empty workspace in Eclipse and import the folder containing this sample as a project into your workspace.
 * Edit the `Main` source:
   * Replace the string `YourSubscriptionKey` with your own subscription key.
