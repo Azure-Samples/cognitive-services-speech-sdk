@@ -8,9 +8,13 @@ package tests.endtoend;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.io.FileNotFoundException;
+
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.google.gson.JsonIOException;
+import com.google.gson.JsonSyntaxException;
 import com.microsoft.cognitiveservices.speech.SpeechConfig;
 import com.microsoft.cognitiveservices.speech.SpeechRecognizer;
 import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
@@ -18,7 +22,9 @@ import com.microsoft.cognitiveservices.speech.intent.IntentRecognizer;
 import com.microsoft.cognitiveservices.speech.translation.SpeechTranslationConfig;
 import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
 
+import tests.AudioUtterancesKeys;
 import tests.Settings;
+import tests.SubscriptionsRegionsKeys;
 
 public class RecognizerTests {
     static SpeechConfig speechConfig;
@@ -26,13 +32,17 @@ public class RecognizerTests {
     static AudioConfig audioConfig;
 
     @BeforeClass
-    public static void setUpBeforeClass() {
+    public static void setUpBeforeClass() throws JsonIOException, JsonSyntaxException, FileNotFoundException {
         Settings.LoadSettings();
-        speechConfig = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-        translationConfig = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey,Settings.SpeechRegion);
+        speechConfig = SpeechConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key, 
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+
+        translationConfig = SpeechTranslationConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+
         translationConfig.addTargetLanguage("de");
         translationConfig.setSpeechRecognitionLanguage("en-US");
-        audioConfig = AudioConfig.fromWavFileInput(Settings.WavFile);
+        audioConfig = AudioConfig.fromWavFileInput(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath));
     }
 
     @Test
@@ -85,7 +95,9 @@ public class RecognizerTests {
 
     @Test
     public void testAsyncRecognitionAfterClosingIntentRecognizer() {
-        speechConfig = SpeechConfig.fromSubscription(Settings.LuisSubscriptionKey, Settings.LuisRegion);
+        speechConfig = SpeechConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.LANGUAGE_UNDERSTANDING_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.LANGUAGE_UNDERSTANDING_SUBSCRIPTION).Region);
+
         IntentRecognizer recognizer = new IntentRecognizer(translationConfig, audioConfig);
         recognizer.addIntent("dummy speech");
         recognizer.close();
@@ -99,7 +111,9 @@ public class RecognizerTests {
 
     @Test
     public void testClosingIntentRecognizerWhileAsyncRecognition() {
-        speechConfig = SpeechConfig.fromSubscription(Settings.LuisSubscriptionKey, Settings.LuisRegion);
+        speechConfig = SpeechConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.LANGUAGE_UNDERSTANDING_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.LANGUAGE_UNDERSTANDING_SUBSCRIPTION).Region);
+
         IntentRecognizer recognizer = new IntentRecognizer(translationConfig, audioConfig);
         recognizer.addIntent("Turn on the lamp.");
         try {

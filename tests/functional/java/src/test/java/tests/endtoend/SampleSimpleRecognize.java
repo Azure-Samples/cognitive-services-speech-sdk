@@ -14,6 +14,7 @@ import com.microsoft.cognitiveservices.speech.SpeechRecognitionResult;
 import com.microsoft.cognitiveservices.speech.SpeechRecognizer;
 import com.microsoft.cognitiveservices.speech.Connection;
 
+import tests.AudioUtterancesKeys;
 import tests.Settings;
 
 public class SampleSimpleRecognize implements Runnable {
@@ -49,7 +50,7 @@ public class SampleSimpleRecognize implements Runnable {
 
         try {
             // Note: to use the microphone, use "AudioConfig.fromDefaultMicrophoneInput()"
-            AudioConfig audioInput = AudioConfig.fromWavFileInput(Settings.WavFile);
+            AudioConfig audioInput = AudioConfig.fromWavFileInput(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath));
             SpeechRecognizer reco = new SpeechRecognizer(config, audioInput);
             connection = Connection.fromRecognizer(reco);
 

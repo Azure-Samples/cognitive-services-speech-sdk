@@ -41,7 +41,9 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
 import com.microsoft.cognitiveservices.speech.translation.SpeechTranslationConfig;
 import com.microsoft.cognitiveservices.speech.translation.TranslationRecognitionResult;
 
+import tests.AudioUtterancesKeys;
 import tests.Settings;
+import tests.SubscriptionsRegionsKeys;
 import tests.TestHelper;
 
 @SuppressWarnings({"unused", "resource"})
@@ -52,7 +54,8 @@ public class SpeechConfigTests {
     @BeforeClass
     static public void setUpBeforeClass() throws Exception {
         Settings.LoadSettings();
-        authorizationToken = TestHelper.getAuthorizationToken(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        authorizationToken = TestHelper.getAuthorizationToken(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
     }
 
     public void checkBadRequestResult(RecognitionResult res)
@@ -80,7 +83,9 @@ public class SpeechConfigTests {
     // -----------------------------------------------------------------------
     @Test
     public void testFromSubscriptionSuccess() {
-        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+
         assertNotNull(s);
         s.close();
     }
@@ -92,18 +97,18 @@ public class SpeechConfigTests {
 
     @Test(expected = NullPointerException.class)
     public void testFromSubscriptionNullRegion() {
-        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, null);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key, null);
     }
 
     @Test(expected = NullPointerException.class)
     public void testFromSubscriptionNullKey() {
-        SpeechConfig s = SpeechConfig.fromSubscription(null, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromSubscription(null, Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
     }
 
     @Test
     public void testFromSubscriptionInvalidKeyAndRegion()  throws InterruptedException, ExecutionException, TimeoutException  {
         SpeechConfig s = SpeechConfig.fromSubscription("illegal", "illegal");
-        SpeechRecognizer r = new SpeechRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
+        SpeechRecognizer r = new SpeechRecognizer(s, AudioConfig.fromWavFileInput(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath)));
         SpeechRecognitionResult res = r.recognizeOnceAsync().get();
         assertNotNull(res);
         System.out.println("Reason:" + res.getReason());
@@ -117,8 +122,8 @@ public class SpeechConfigTests {
 
     @Test
     public void testFromSubscriptionInvalidKey()  throws InterruptedException, ExecutionException, TimeoutException  {
-        SpeechConfig s = SpeechConfig.fromSubscription("illegal", Settings.SpeechRegion);
-        SpeechRecognizer r = new SpeechRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
+        SpeechConfig s = SpeechConfig.fromSubscription("illegal", Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+        SpeechRecognizer r = new SpeechRecognizer(s, AudioConfig.fromWavFileInput(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath)));
         SpeechRecognitionResult res = r.recognizeOnceAsync().get();
         assertNotNull(res);
         System.out.println("Reason:" + res.getReason());
@@ -135,7 +140,7 @@ public class SpeechConfigTests {
     // -----------------------------------------------------------------------
     @Test
     public void testFromAuthorizationToken() {
-        SpeechConfig s = SpeechConfig.fromAuthorizationToken(authorizationToken, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromAuthorizationToken(authorizationToken, Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
         assertNotNull(s);
         s.close();
     }
@@ -143,7 +148,7 @@ public class SpeechConfigTests {
     @Test
     public void testGetAuthorizationToken() {
         String token1 = "token1";
-        SpeechConfig s = SpeechConfig.fromAuthorizationToken(token1, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromAuthorizationToken(token1, Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
         assertNotNull(s);
         String actualToken = s.getAuthorizationToken();
         assertEquals(token1, actualToken);
@@ -154,7 +159,7 @@ public class SpeechConfigTests {
     public void testSetAuthorizationToken() {
         String token1 = "token1";
         String token2 = "token2";
-        SpeechConfig s = SpeechConfig.fromAuthorizationToken(token1, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromAuthorizationToken(token1, Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
         assertNotNull(s);
         String actualToken = s.getAuthorizationToken();
         assertEquals(token1, actualToken);
@@ -176,18 +181,18 @@ public class SpeechConfigTests {
 
     @Test
     public void testFromEndpointWithoutKeyAndToken() {
-        String endpoint = "wss://" + Settings.SpeechRegion + ".stt.speech.microsoft.com/speech/recognition/conversation/cognitiveservices/v1";
+        String endpoint = "wss://" + Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region + ".stt.speech.microsoft.com/speech/recognition/conversation/cognitiveservices/v1";
         SpeechConfig sc = SpeechConfig.fromEndpoint(URI.create(endpoint));
-        SpeechRecognizer sr = new SpeechRecognizer(sc, AudioConfig.fromWavFileInput(Settings.WavFile));
+        SpeechRecognizer sr = new SpeechRecognizer(sc, AudioConfig.fromWavFileInput(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath)));
         // We cannot really test whether recognizer works, since there is no test endpoint available which supports no authentication.
         assertTrue(sr.getProperties().getProperty(PropertyId.SpeechServiceAuthorization_Token).isEmpty());
         assertTrue(sr.getProperties().getProperty(PropertyId.SpeechServiceConnection_Key).isEmpty());
 
-        endpoint = "wss://" + Settings.SpeechRegion + ".s2s.speech.microsoft.com/speech/translation/cognitiveservices/v1";
+        endpoint = "wss://" + Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region + ".s2s.speech.microsoft.com/speech/translation/cognitiveservices/v1";
         SpeechTranslationConfig tc = SpeechTranslationConfig.fromEndpoint(URI.create(endpoint));
         tc.setSpeechRecognitionLanguage("en-us");
         tc.addTargetLanguage("de");
-        TranslationRecognizer tr = new TranslationRecognizer(tc, AudioConfig.fromWavFileInput(Settings.WavFile));
+        TranslationRecognizer tr = new TranslationRecognizer(tc, AudioConfig.fromWavFileInput(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath)));
         // We cannot really test whether recognizer works, since there is no test endpoint available which supports no authentication.
         assertTrue(tr.getProperties().getProperty(PropertyId.SpeechServiceAuthorization_Token).isEmpty());
         assertTrue(tr.getProperties().getProperty(PropertyId.SpeechServiceConnection_Key).isEmpty());
@@ -203,7 +208,7 @@ public class SpeechConfigTests {
 
     @Test(expected = NullPointerException.class)
     public void testFromEndpointNullEndpoint() {
-        SpeechConfig s = SpeechConfig.fromEndpoint(null, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromEndpoint(null, Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
         s.close();
     }
 
@@ -225,18 +230,18 @@ public class SpeechConfigTests {
 
     @Test
     public void testFromHostWithoutKeyAndToken() {
-        String host = "wss://" + Settings.SpeechRegion + ".stt.speech.microsoft.com";
+        String host = "wss://" + Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region + ".stt.speech.microsoft.com";
         SpeechConfig sc = SpeechConfig.fromHost(URI.create(host));
-        SpeechRecognizer sr = new SpeechRecognizer(sc, AudioConfig.fromWavFileInput(Settings.WavFile));
+        SpeechRecognizer sr = new SpeechRecognizer(sc, AudioConfig.fromWavFileInput(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath)));
         // We cannot really test whether recognizer works, since there is no non-container test host available which supports no authentication.
         assertTrue(sr.getProperties().getProperty(PropertyId.SpeechServiceAuthorization_Token).isEmpty());
         assertTrue(sr.getProperties().getProperty(PropertyId.SpeechServiceConnection_Key).isEmpty());
 
-        host = "wss://" + Settings.SpeechRegion + ".s2s.speech.microsoft.com";
+        host = "wss://" + Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region + ".s2s.speech.microsoft.com";
         SpeechTranslationConfig tc = SpeechTranslationConfig.fromHost(URI.create(host));
         tc.setSpeechRecognitionLanguage("en-us");
         tc.addTargetLanguage("de");
-        TranslationRecognizer tr = new TranslationRecognizer(tc, AudioConfig.fromWavFileInput(Settings.WavFile));
+        TranslationRecognizer tr = new TranslationRecognizer(tc, AudioConfig.fromWavFileInput(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath)));
         // We cannot really test whether recognizer works, since there is no non-container test host available which supports no authentication.
         assertTrue(tr.getProperties().getProperty(PropertyId.SpeechServiceAuthorization_Token).isEmpty());
         assertTrue(tr.getProperties().getProperty(PropertyId.SpeechServiceConnection_Key).isEmpty());
@@ -268,7 +273,9 @@ public class SpeechConfigTests {
     @Ignore("Tests fails if there is no mic on the test machine.")
     @Test
     public void testCreateSpeechRecognizerNullAudioConfig() {
-        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+
         // null audio config will use default mic.
         SpeechRecognizer r = new SpeechRecognizer(s);
         assertNotNull(r);
@@ -282,8 +289,10 @@ public class SpeechConfigTests {
     // -----------------------------------------------------------------------
     @Test
     public void testCreateSpeechRecognizerFromFileInputSuccess() {
-        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-        SpeechRecognizer r = new SpeechRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+
+        SpeechRecognizer r = new SpeechRecognizer(s, AudioConfig.fromWavFileInput(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath)));
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
@@ -293,7 +302,9 @@ public class SpeechConfigTests {
 
     @Test
     public void testCreateSpeechRecognizerNullFileName() {
-        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+
         try {
             SpeechRecognizer r = new SpeechRecognizer(s, AudioConfig.fromWavFileInput((String)null));
             fail("not expected");
@@ -306,9 +317,11 @@ public class SpeechConfigTests {
 
     @Test
     public void testCreateSpeechRecognizerInvalidFileName() {
-        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+
         try {
-            SpeechRecognizer r = new SpeechRecognizer(s, AudioConfig.fromWavFileInput("illegal-" + Settings.WavFile));
+            SpeechRecognizer r = new SpeechRecognizer(s, AudioConfig.fromWavFileInput("illegal-" + Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath)));
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -322,8 +335,10 @@ public class SpeechConfigTests {
     // -----------------------------------------------------------------------
     @Test
     public void testCreateSpeechRecognizerWithLanguageSuccess() {
-        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-        SpeechRecognizer r = new SpeechRecognizer(s, "en-EN", AudioConfig.fromWavFileInput(Settings.WavFile));
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+
+        SpeechRecognizer r = new SpeechRecognizer(s, "en-EN", AudioConfig.fromWavFileInput(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath)));
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         r.close();
@@ -332,9 +347,11 @@ public class SpeechConfigTests {
 
     @Test
     public void testCreateSpeechRecognizerInvalidLanguage()  throws InterruptedException, ExecutionException, TimeoutException {
-        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+
         s.setSpeechRecognitionLanguage("illegal-language");
-        SpeechRecognizer r = new SpeechRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
+        SpeechRecognizer r = new SpeechRecognizer(s, AudioConfig.fromWavFileInput(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath)));
         SpeechRecognitionResult res = r.recognizeOnceAsync().get();
         checkBadRequestResult(res);
         r.close();
@@ -343,7 +360,9 @@ public class SpeechConfigTests {
 
     @Test
     public void testCreateSpeechRecognizerNullLanguage() {
-        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+
         try {
             s.setSpeechRecognitionLanguage(null);
             fail("not expected");
@@ -359,8 +378,10 @@ public class SpeechConfigTests {
     // -----------------------------------------------------------------------
     @Test
     public void testCreateSpeechRecognizerAudioInputStreamSuccess() {
-        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-        WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+
+        WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath));
         SpeechRecognizer r = new SpeechRecognizer(s, AudioConfig.fromStreamInput(ais));
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
@@ -385,8 +406,10 @@ public class SpeechConfigTests {
     // -----------------------------------------------------------------------
     @Test
     public void testCreateIntentRecognizerStringSuccess() {
-        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-        IntentRecognizer r = new IntentRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+
+        IntentRecognizer r = new IntentRecognizer(s, AudioConfig.fromWavFileInput(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath)));
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
@@ -397,7 +420,9 @@ public class SpeechConfigTests {
     @Ignore("Tests fails if there is no mic on the test machine.")
     @Test
     public void testCreateIntentRecognizerNullAudioConfig() {
-        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+
         IntentRecognizer r = new IntentRecognizer(s, null);
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
@@ -408,7 +433,9 @@ public class SpeechConfigTests {
 
     @Test
     public void testCreateIntentRecognizerNullFileName() {
-        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+
         try {
             IntentRecognizer r = new IntentRecognizer(s, AudioConfig.fromWavFileInput((String)null));
             fail("not expected");
@@ -421,9 +448,11 @@ public class SpeechConfigTests {
 
     @Test
     public void testCreateIntentRecognizerInvalidFileName() {
-        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+
         try {
-            IntentRecognizer r = new IntentRecognizer(s, AudioConfig.fromWavFileInput("illegal-" + Settings.WavFile));
+            IntentRecognizer r = new IntentRecognizer(s, AudioConfig.fromWavFileInput("illegal-" + Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath)));
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -437,8 +466,10 @@ public class SpeechConfigTests {
     // -----------------------------------------------------------------------
     @Test
     public void testCreateIntentRecognizerAudioInputStreamSuccess() {
-        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-        WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+
+        WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath));
         IntentRecognizer r = new IntentRecognizer(s, AudioConfig.fromStreamInput(ais));
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
@@ -449,9 +480,11 @@ public class SpeechConfigTests {
 
     @Test
     public void testCreateIntentRecognizerAudioInputStreamWithLanguageSuccess() {
-        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+
         s.setSpeechRecognitionLanguage("en-US");
-        WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
+        WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath));
         IntentRecognizer r = new IntentRecognizer(s, AudioConfig.fromStreamInput(ais));
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
@@ -462,9 +495,11 @@ public class SpeechConfigTests {
 
     @Test
     public void testCreateIntentRecognizerAudioInputStreamInvalidLanguage() throws InterruptedException, ExecutionException, TimeoutException {
-        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+
         s.setSpeechRecognitionLanguage("illegal-language");
-        WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
+        WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath));
         IntentRecognizer r = new IntentRecognizer(s, AudioConfig.fromStreamInput(ais));
         IntentRecognitionResult res = r.recognizeOnceAsync().get();
         assertNotNull(res);
@@ -484,7 +519,9 @@ public class SpeechConfigTests {
     @Ignore("Tests fails if there is no mic on the test machine.")
     @Test
     public void testCreateTranslationRecognizerNullAudioConfigNoFromNoTo() {
-        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+
         // Null audio config will use default mic.
         TranslationRecognizer r = new TranslationRecognizer(s, null);
         r.close();
@@ -507,11 +544,13 @@ public class SpeechConfigTests {
     // -----------------------------------------------------------------------
     @Test
     public void testCreateTranslationRecognizerWithFileInputSuccess() {
-        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+
         s.setSpeechRecognitionLanguage("en-US");
         s.addTargetLanguage("en-US");
 
-        TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
+        TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath)));
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
@@ -522,9 +561,11 @@ public class SpeechConfigTests {
 
     @Test
     public void testCreateTranslationRecognizerInvalidFileInput() {
-        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+
         try {
-            TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput("illegal-" + Settings.WavFile));
+            TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput("illegal-" + Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath)));
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -538,8 +579,10 @@ public class SpeechConfigTests {
     // -----------------------------------------------------------------------
     @Test
     public void testCreateTranslationRecognizerNoFromNoTo() throws InterruptedException, ExecutionException, TimeoutException {
-        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-        TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+
+        TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath)));
         TranslationRecognitionResult res = r.recognizeOnceAsync().get();
         checkBadRequestResult(res);
         r.close();
@@ -548,9 +591,11 @@ public class SpeechConfigTests {
 
     @Test
     public void testCreateTranslationRecognizerNoFrom() throws InterruptedException, ExecutionException, TimeoutException {
-        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+
         s.addTargetLanguage("de");
-        TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
+        TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath)));
         TranslationRecognitionResult res = r.recognizeOnceAsync().get();
         checkBadRequestResult(res);
         r.close();
@@ -559,10 +604,12 @@ public class SpeechConfigTests {
 
     @Test
     public void testCreateTranslationRecognizerInvalidFrom() throws InterruptedException, ExecutionException, TimeoutException {
-        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+
         s.setSpeechRecognitionLanguage("illegal");
         s.addTargetLanguage("de");
-        TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
+        TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath)));
         TranslationRecognitionResult res = r.recognizeOnceAsync().get();
         checkBadRequestResult(res);
         r.close();
@@ -571,9 +618,11 @@ public class SpeechConfigTests {
 
     @Test
     public void testCreateTranslationRecognizerNoTo() throws InterruptedException, ExecutionException, TimeoutException {
-        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+
         s.setSpeechRecognitionLanguage("en-US");
-        TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
+        TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath)));
         TranslationRecognitionResult res = r.recognizeOnceAsync().get();
         checkBadRequestResult(res);
         r.close();
@@ -582,10 +631,12 @@ public class SpeechConfigTests {
 
     @Test
     public void testCreateTranslationRecognizerInvalidTo() throws InterruptedException, ExecutionException, TimeoutException {
-        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+
         s.setSpeechRecognitionLanguage("en-US");
         s.addTargetLanguage("illegal");
-        TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
+        TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath)));
         TranslationRecognitionResult res = r.recognizeOnceAsync().get();
         checkInvalidTargetLanguageResult(res);
         r.close();
@@ -597,11 +648,13 @@ public class SpeechConfigTests {
     // -----------------------------------------------------------------------
     @Test
     public void testCreateTranslationRecognizerWithVoiceName() {
-        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+
         s.setSpeechRecognitionLanguage("en-US");
         s.addTargetLanguage("en-US");
         s.setVoiceName("Microsoft Server Speech Text to Speech Voice (de-DE, Hedda)");
-        TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
+        TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath)));
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
@@ -611,14 +664,16 @@ public class SpeechConfigTests {
 
     @Test
     public void testCreateTranslationRecognizerInvalidVoice() throws InterruptedException, ExecutionException, TimeoutException {
-        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+
         s.setSpeechRecognitionLanguage("en-US");
         s.addTargetLanguage("en-US");
         s.setVoiceName("illegal");
         AtomicInteger synthesizingEventCount = new AtomicInteger(0);
         AtomicInteger sessionStoppedCount = new AtomicInteger(0);
         AtomicBoolean expectedCancellationError = new AtomicBoolean(false);
-        TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
+        TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath)));
         r.synthesizing.addEventListener((o, e) -> {
             synthesizingEventCount.getAndIncrement();
         });
@@ -654,10 +709,12 @@ public class SpeechConfigTests {
     // -----------------------------------------------------------------------
     @Test
     public void testCreateTranslationRecognizerWithStreamAudioInputStreamSuccess() {
-        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+
         s.addTargetLanguage("en-US");
         s.setSpeechRecognitionLanguage("en-US");
-        WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
+        WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath));
         TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromStreamInput(ais));
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
@@ -672,13 +729,17 @@ public class SpeechConfigTests {
 
     @Test
     public void testClose() {
-        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+
         s.close();
     }
 
     @Test
     public void testGetConfigImpl() {
-        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+
         assertNotNull(s);
         assertNotNull(s.getImpl());
         s.close();
@@ -687,7 +748,9 @@ public class SpeechConfigTests {
     @Test
     public void testSetProperty() {
         String auth_token = "token";
-        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+
         s.setProperty(PropertyId.SpeechServiceAuthorization_Token, auth_token);
         assertEquals(auth_token, s.getProperty(PropertyId.SpeechServiceAuthorization_Token));
         assertEquals(auth_token, s.getAuthorizationToken());
@@ -696,32 +759,40 @@ public class SpeechConfigTests {
 
     @Test(expected = NullPointerException.class)
     public void testSetPropertyNullValue() {
-        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+
         s.setProperty(PropertyId.SpeechServiceConnection_Endpoint, null);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testSetPropertyEmptyValue() {
-        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+
         s.setProperty(PropertyId.SpeechServiceConnection_Endpoint, "");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testSetPropertyWhiteSpaceValue() {
-        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+
         s.setProperty(PropertyId.SpeechServiceConnection_Endpoint, " ");
     }
 
     @Test
     public void testSetLogFilename() {
-        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+            
         s.setSpeechRecognitionLanguage("en-US");
         s.addTargetLanguage("de");
         String logFilename = new java.io.File(System.getProperty("java.io.tmpdir", ""), "test_filename.txt").getAbsolutePath();
 
         s.setProperty(PropertyId.Speech_LogFilename, logFilename);
         assertEquals(s.getProperty(PropertyId.Speech_LogFilename), logFilename);
-        TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
+        TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath)));
         assertTrue(new File(logFilename).length() > 0);
         r.close();
         s.close();

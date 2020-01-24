@@ -18,13 +18,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.net.URI;
 
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.Ignore;
 
 import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
-import com.microsoft.cognitiveservices.speech.CancellationDetails;
 import com.microsoft.cognitiveservices.speech.CancellationReason;
 import com.microsoft.cognitiveservices.speech.ResultReason;
 import com.microsoft.cognitiveservices.speech.ServicePropertyChannel;
@@ -35,7 +33,9 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
 import com.microsoft.cognitiveservices.speech.translation.TranslationRecognitionResult;
 import com.microsoft.cognitiveservices.speech.Connection;
 
+import tests.AudioUtterancesKeys;
 import tests.Settings;
+import tests.SubscriptionsRegionsKeys;
 import tests.TestHelper;
 
 public class TranslationRecognizerTests {
@@ -45,7 +45,8 @@ public class TranslationRecognizerTests {
     @BeforeClass
     static public void setUpBeforeClass() throws Exception {
         Settings.LoadSettings();
-        authorizationToken = TestHelper.getAuthorizationToken(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        authorizationToken = TestHelper.getAuthorizationToken(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
     }
 
     // -----------------------------------------------------------------------
@@ -66,7 +67,9 @@ public class TranslationRecognizerTests {
     @Ignore("TODO not working with microphone")
     @Test
     public void testTranslationRecognizer1() {
-        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+
         assertNotNull(s);
         s.setSpeechRecognitionLanguage("en-US");
         s.addTargetLanguage("de");
@@ -82,10 +85,12 @@ public class TranslationRecognizerTests {
 
     @Test
     public void testTranslationRecognizer2() throws InterruptedException, ExecutionException {
-        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+
         assertNotNull(s);
 
-        WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
+        WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath));
         assertNotNull(ais);
 
         s.setSpeechRecognitionLanguage("en-US");
@@ -106,10 +111,12 @@ public class TranslationRecognizerTests {
 
     @Test
     public void testGetSpeechRecognitionLanguage() {
-        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+
         assertNotNull(s);
 
-        WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
+        WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath));
         assertNotNull(ais);
 
         String language = "en-US";
@@ -126,10 +133,12 @@ public class TranslationRecognizerTests {
 
     @Test
     public void testGetTargetLanguages() {
-        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+
         assertNotNull(s);
 
-        WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
+        WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath));
         assertNotNull(ais);
 
         String language = "en-US";
@@ -150,10 +159,12 @@ public class TranslationRecognizerTests {
 
     @Test
     public void testGetOutputVoiceNameNoSetting() {
-        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+
         assertNotNull(s);
 
-        WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
+        WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath));
         assertNotNull(ais);
 
         String language = "en-US";
@@ -169,10 +180,12 @@ public class TranslationRecognizerTests {
 
     @Test
     public void testGetVoiceName() {
-        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+
         assertNotNull(s);
 
-        WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
+        WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath));
         assertNotNull(ais);
 
         String language = "en-US";
@@ -195,14 +208,16 @@ public class TranslationRecognizerTests {
 
     @Test
     public void testGetParameters() {
-        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+
         assertNotNull(s);
 
         String language = "en-US";
         s.setSpeechRecognitionLanguage(language);
         s.addTargetLanguage(language);
 
-        TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
+        TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath)));
         assertNotNull(r);
 
         assertNotNull(r.getProperties());
@@ -221,14 +236,16 @@ public class TranslationRecognizerTests {
 
     @Test
     public void testRecognizeOnceAsync1() throws InterruptedException, ExecutionException, TimeoutException {
-        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+
         assertNotNull(s);
 
         String language = "en-US";
         s.setSpeechRecognitionLanguage(language);
         s.addTargetLanguage(language);
 
-        TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
+        TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath)));
         Connection connection = Connection.fromRecognizer(r);
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
@@ -277,14 +294,16 @@ public class TranslationRecognizerTests {
 
     @Test
     public void testRecognizeOnceAsync2() throws InterruptedException, ExecutionException {
-        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+
         assertNotNull(s);
 
         String language = "en-US";
         s.setSpeechRecognitionLanguage(language);
         s.addTargetLanguage(language);
 
-        TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
+        TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath)));
         Connection connection = Connection.fromRecognizer(r);
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
@@ -399,14 +418,16 @@ public class TranslationRecognizerTests {
 
     @Test
     public void testStartContinuousRecognitionAsync() throws InterruptedException, ExecutionException, TimeoutException {
-        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+
         assertNotNull(s);
 
         String language = "en-US";
         s.setSpeechRecognitionLanguage(language);
         s.addTargetLanguage(language);
 
-        TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
+        TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath)));
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
@@ -424,14 +445,16 @@ public class TranslationRecognizerTests {
 
     @Test
     public void testStopContinuousRecognitionAsync() throws InterruptedException, ExecutionException, TimeoutException {
-        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+
         assertNotNull(s);
 
         String language = "en-US";
         s.setSpeechRecognitionLanguage(language);
         s.addTargetLanguage(language);
 
-        TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
+        TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath)));
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
@@ -461,14 +484,16 @@ public class TranslationRecognizerTests {
 
     @Test
     public void testStartStopContinuousRecognitionAsync() throws InterruptedException, ExecutionException, TimeoutException {
-        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+
         assertNotNull(s);
 
         String language = "en-US";
         s.setSpeechRecognitionLanguage(language);
         s.addTargetLanguage(language);
 
-        TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
+        TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath)));
         Connection connection = Connection.fromRecognizer(r);
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
@@ -520,7 +545,9 @@ public class TranslationRecognizerTests {
 
     @Test
     public void testCreateTranslationRecognizerWithVoice() throws InterruptedException, ExecutionException, TimeoutException {
-        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+
         s.setSpeechRecognitionLanguage("en-US");
         s.addTargetLanguage("de");
         s.setVoiceName("Microsoft Server Speech Text to Speech Voice (de-DE, Hedda)");
@@ -528,7 +555,7 @@ public class TranslationRecognizerTests {
         AtomicInteger synthesizingEventCount = new AtomicInteger(0);
         AtomicInteger sessionStoppedCount = new AtomicInteger(0);
         AtomicInteger audioLength = new AtomicInteger(0);
-        TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
+        TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath)));
         r.synthesizing.addEventListener((o, e) -> {
             synthesizingEventCount.getAndIncrement();
             audioLength.getAndAdd(e.getResult().getAudio().length);
@@ -561,7 +588,9 @@ public class TranslationRecognizerTests {
     @Ignore("TODO not working with microphone")
     @Test
     public void testGetRecoImpl() {
-        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+
         assertNotNull(s);
 
         String language = "en-US";
@@ -579,7 +608,7 @@ public class TranslationRecognizerTests {
 
     @Test
     public void testEndpointWithAuthTokenInTranslation() throws InterruptedException, ExecutionException, TimeoutException {
-        String endpoint = "wss://" + Settings.SpeechRegion + ".s2s.speech.microsoft.com/speech/translation/cognitiveservices/v1?format=simple&from=en-us&to=de-DE";
+        String endpoint = "wss://" + Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region + ".s2s.speech.microsoft.com/speech/translation/cognitiveservices/v1?format=simple&from=en-us&to=de-DE";
         SpeechTranslationConfig s = SpeechTranslationConfig.fromEndpoint(URI.create(endpoint), "");
 
         assertNotNull(s);
@@ -588,7 +617,7 @@ public class TranslationRecognizerTests {
         s.setSpeechRecognitionLanguage(language);
         s.addTargetLanguage("de");
 
-        TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
+        TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath)));
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
@@ -632,11 +661,13 @@ public class TranslationRecognizerTests {
 
     @Test
     public void testSetServiceProperty() throws InterruptedException, ExecutionException, TimeoutException {
-        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+
         s.setServiceProperty("from", "en-US", ServicePropertyChannel.UriQueryParameter);
         s.setServiceProperty("to", "de", ServicePropertyChannel.UriQueryParameter);
 
-        TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
+        TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath)));
 
         TranslationRecognitionResult res = r.recognizeOnceAsync().get();
 
@@ -651,7 +682,9 @@ public class TranslationRecognizerTests {
 
     @Test
     public void testChangeTargetLanguages() throws InterruptedException, ExecutionException, TimeoutException {
-        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+
         assertNotNull(s);
 
         String language = "en-US";
@@ -673,7 +706,7 @@ public class TranslationRecognizerTests {
         assertEquals("fr", targetLangListFromConfig.get(0));
         assertEquals("es", targetLangListFromConfig.get(1));
 
-        TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
+        TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath)));
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
@@ -713,7 +746,9 @@ public class TranslationRecognizerTests {
     
     @Test
     public void testExceptionsDuringEventsRecognizeOnce() throws InterruptedException, ExecutionException {
-      SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+      SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+        Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+
         assertNotNull(s);
 
         String language = "en-US";
@@ -721,7 +756,7 @@ public class TranslationRecognizerTests {
         s.addTargetLanguage(language);
         s.setVoiceName("Microsoft Server Speech Text to Speech Voice (de-DE, Hedda)");
 
-        TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
+        TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath)));
         Connection connection = Connection.fromRecognizer(r);
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
@@ -799,7 +834,9 @@ public class TranslationRecognizerTests {
 
     @Test
     public void testExceptionsDuringEventsContinuousRecognition() throws InterruptedException, ExecutionException {
-       SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+       SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+        Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+
         assertNotNull(s);
 
         String language = "en-US";
@@ -807,7 +844,7 @@ public class TranslationRecognizerTests {
         s.addTargetLanguage(language);
         s.setVoiceName("Microsoft Server Speech Text to Speech Voice (de-DE, Hedda)");
 
-        TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
+        TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath)));
         Connection connection = Connection.fromRecognizer(r);
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
@@ -896,7 +933,7 @@ public class TranslationRecognizerTests {
     private void testRecognizeWithLanguageId(boolean testRecognizeAsync) throws InterruptedException, ExecutionException, TimeoutException {
         String mode = testRecognizeAsync ? "interactive" : "conversation";
         String endpointUrl = "wss://northeurope.sr.speech.microsoft.com/speech/translation/" + mode + "/mstranslator/v1?language=en-US";
-        SpeechTranslationConfig configFromEndpoint = SpeechTranslationConfig.fromEndpoint(URI.create(endpointUrl), Settings.SpeechSubscriptionKey);
+        SpeechTranslationConfig configFromEndpoint = SpeechTranslationConfig.fromEndpoint(URI.create(endpointUrl), Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key);
         assertNotNull(configFromEndpoint);
         String autoDetectSrcLanguageProperty = "Auto-Detect-Source-Languages";
         String sourceLanguages = "en-US,de-DE";
@@ -906,7 +943,7 @@ public class TranslationRecognizerTests {
         configFromEndpoint.addTargetLanguage("en-US");
         configFromEndpoint.addTargetLanguage("de-DE");
 
-        TranslationRecognizer recognizer = new TranslationRecognizer(configFromEndpoint, AudioConfig.fromWavFileInput(Settings.WavFile));
+        TranslationRecognizer recognizer = new TranslationRecognizer(configFromEndpoint, AudioConfig.fromWavFileInput(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath)));
         Connection connection = Connection.fromRecognizer(recognizer);
         assertNotNull(recognizer);
         assertNotNull(recognizer.getRecoImpl());

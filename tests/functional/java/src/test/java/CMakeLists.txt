@@ -50,7 +50,7 @@ set(CMAKE_JAVA_COMPILE_FLAGS ${CMAKE_JAVA_COMPILE_FLAGS} "-encoding" "utf-8")
 
 add_jar(${PROJECT_NAME}
     SOURCES ${JAVA_SOURCES_TESTS}
-    INCLUDE_JARS ${PROJECT_NAME} com.microsoft.cognitiveservices.speech ${CARBON_EXTERNAL}/junit/junit-4.12.jar ${CARBON_EXTERNAL}/junit/hamcrest-core-1.3.jar ${CARBON_EXTERNAL}/json/javax.json-1.1.jar ${CARBON_EXTERNAL}/json/javax.json-api-1.0.jar
+    INCLUDE_JARS ${PROJECT_NAME} com.microsoft.cognitiveservices.speech ${CARBON_EXTERNAL}/junit/junit-4.12.jar ${CARBON_EXTERNAL}/junit/hamcrest-core-1.3.jar ${CARBON_EXTERNAL}/json/gson-2.8.6.jar
     OUTPUT_DIR ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
 set_target_properties(${PROJECT_NAME} PROPERTIES

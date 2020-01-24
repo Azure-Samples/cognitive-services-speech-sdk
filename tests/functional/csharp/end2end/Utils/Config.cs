@@ -64,6 +64,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils
         public static string CONVERSATION_TRANSLATOR_HOST => "ConversationTranslatorHost";
         public static string CONVERSATION_TRANSLATOR_SPEECH_ENDPOINT => "ConversationTranslatorSpeechEndpoint";
         public static string CONVERSATION_TRANSLATOR_CLIENTID => "ConversationTranslatorClientId";
+        public static string SERIALIZED_SPEECH_ACTIVITY_FILE => "SerializedSpeechActivityFile";
     }
 
     // Audio file and utterances keys

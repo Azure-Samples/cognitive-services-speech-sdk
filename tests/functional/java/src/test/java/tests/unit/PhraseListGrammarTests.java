@@ -26,7 +26,10 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import tests.AudioUtterancesKeys;
+import tests.DefaultSettingsKeys;
 import tests.Settings;
+import tests.SubscriptionsRegionsKeys;
 
 public class PhraseListGrammarTests {
 
@@ -52,10 +55,13 @@ public class PhraseListGrammarTests {
 
     @Test
     public void testConjurePhraseListGrammar() throws InterruptedException, ExecutionException {
-        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+
         assertNotNull(s);
 
-        SpeechRecognizer r = new SpeechRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
+        String inputFile = Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.AMBIGUOUS_SPEECH).FilePath);
+        SpeechRecognizer r = new SpeechRecognizer(s, AudioConfig.fromWavFileInput(inputFile));
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
@@ -70,13 +76,16 @@ public class PhraseListGrammarTests {
 
     @Test
     public void phraselistAssistsSpeechReco() throws InterruptedException, ExecutionException {
-        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+
         assertNotNull(s);
         boolean passed = false;
 
         for(int RetryLimit=10; RetryLimit>0; RetryLimit--) {
 
-            SpeechRecognizer r = new SpeechRecognizer(s, AudioConfig.fromWavFileInput(Settings.AudioInputDirectory + "/wreck-a-nice-beach.wav"));
+            String inputFile = Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.AMBIGUOUS_SPEECH).FilePath);
+            SpeechRecognizer r = new SpeechRecognizer(s, AudioConfig.fromWavFileInput(inputFile));
             assertNotNull(r);
             assertNotNull(r.getRecoImpl());
             assertTrue(r instanceof Recognizer);
@@ -105,13 +114,15 @@ public class PhraseListGrammarTests {
 
    @Test
    public void extraPhrasesDontHurtReco() throws InterruptedException, ExecutionException {
-        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+
         assertNotNull(s);
         boolean passed = false;
 
         for(int RetryLimit=10; RetryLimit>0; RetryLimit--) {
-
-            SpeechRecognizer r = new SpeechRecognizer(s, AudioConfig.fromWavFileInput(Settings.AudioInputDirectory + "/wreck-a-nice-beach.wav"));
+            String inputFile = Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.AMBIGUOUS_SPEECH).FilePath);
+            SpeechRecognizer r = new SpeechRecognizer(s, AudioConfig.fromWavFileInput(inputFile));
             assertNotNull(r);
             assertNotNull(r.getRecoImpl());
             assertTrue(r instanceof Recognizer);
@@ -141,13 +152,16 @@ public class PhraseListGrammarTests {
 
    @Test
    public void phraselistAssistsSpeechRecoIntent() throws InterruptedException, ExecutionException {
-        SpeechConfig s = SpeechConfig.fromSubscription(Settings.LuisSubscriptionKey, Settings.LuisRegion);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.LANGUAGE_UNDERSTANDING_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.LANGUAGE_UNDERSTANDING_SUBSCRIPTION).Region);
+
         assertNotNull(s);
         boolean passed = false;
 
         for(int RetryLimit=10; RetryLimit>0; RetryLimit--) {
 
-            IntentRecognizer r = new IntentRecognizer(s, AudioConfig.fromWavFileInput(Settings.AudioInputDirectory + "/wreck-a-nice-beach.wav"));
+            String inputFile = Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.AMBIGUOUS_SPEECH).FilePath);
+            IntentRecognizer r = new IntentRecognizer(s, AudioConfig.fromWavFileInput(inputFile));
             assertNotNull(r);
             assertNotNull(r.getRecoImpl());
             assertTrue(r instanceof Recognizer);
@@ -175,13 +189,15 @@ public class PhraseListGrammarTests {
 
    @Test
    public void extraPhrasesDontHurtRecoIntent() throws InterruptedException, ExecutionException {
-        SpeechConfig s = SpeechConfig.fromSubscription(Settings.LuisSubscriptionKey, Settings.LuisRegion);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.LANGUAGE_UNDERSTANDING_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.LANGUAGE_UNDERSTANDING_SUBSCRIPTION).Region);
+
         assertNotNull(s);
         boolean passed = false;
 
         for(int RetryLimit=10; RetryLimit>0; RetryLimit--) {
-
-            IntentRecognizer r = new IntentRecognizer(s, AudioConfig.fromWavFileInput(Settings.AudioInputDirectory + "/wreck-a-nice-beach.wav"));
+            String inputFile = Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.AMBIGUOUS_SPEECH).FilePath);
+            IntentRecognizer r = new IntentRecognizer(s, AudioConfig.fromWavFileInput(inputFile));
             assertNotNull(r);
             assertNotNull(r.getRecoImpl());
             assertTrue(r instanceof Recognizer);
@@ -210,10 +226,13 @@ public class PhraseListGrammarTests {
 
    @Test
    public void clearedPhraseList() throws InterruptedException, ExecutionException {
-        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+
         assertNotNull(s);
 
-        SpeechRecognizer r = new SpeechRecognizer(s, AudioConfig.fromWavFileInput(Settings.AudioInputDirectory + "/wreck-a-nice-beach.wav"));
+        String inputFile = Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.AMBIGUOUS_SPEECH).FilePath);
+        SpeechRecognizer r = new SpeechRecognizer(s, AudioConfig.fromWavFileInput(inputFile));
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);

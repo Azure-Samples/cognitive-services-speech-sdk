@@ -12,6 +12,7 @@ import org.junit.Test;
 
 import com.microsoft.cognitiveservices.speech.audio.PullAudioInputStreamCallback;
 
+import tests.AudioUtterancesKeys;
 import tests.Settings;
 
 public class AudioInputStreamTests {
@@ -26,7 +27,7 @@ public class AudioInputStreamTests {
 
     @Test
     public void testRead1() {
-        WavFileAudioInputStream s = new WavFileAudioInputStream(Settings.WavFile);
+        WavFileAudioInputStream s = new WavFileAudioInputStream(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath));
         assertNotNull(s);
 
         try {
@@ -42,7 +43,7 @@ public class AudioInputStreamTests {
 
     @Test
     public void testRead2() {
-        WavFileAudioInputStream s = new WavFileAudioInputStream(Settings.WavFile);
+        WavFileAudioInputStream s = new WavFileAudioInputStream(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath));
         assertNotNull(s);
 
         byte[] b = new byte[0];
@@ -55,7 +56,7 @@ public class AudioInputStreamTests {
 
     @Test
     public void testRead3() {
-        WavFileAudioInputStream s = new WavFileAudioInputStream(Settings.WavFile);
+        WavFileAudioInputStream s = new WavFileAudioInputStream(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath));
         assertNotNull(s);
 
         byte[] b = new byte[16];
@@ -70,7 +71,7 @@ public class AudioInputStreamTests {
 
     @Test
     public void testRead4() {
-        WavFileAudioInputStream s = new WavFileAudioInputStream(Settings.WavFile);
+        WavFileAudioInputStream s = new WavFileAudioInputStream(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath));
         assertNotNull(s);
 
         byte[] b = new byte[3];
@@ -84,7 +85,7 @@ public class AudioInputStreamTests {
 
     @Test
     public void testRead5() {
-        WavFileAudioInputStream s = new WavFileAudioInputStream(Settings.WavFile);
+        WavFileAudioInputStream s = new WavFileAudioInputStream(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath));
         assertNotNull(s);
 
         // know for sure that file is smaller than 8MB
@@ -99,7 +100,7 @@ public class AudioInputStreamTests {
 
     @Test
     public void testRead6() {
-        WavFileAudioInputStream s = new WavFileAudioInputStream(Settings.WavFile);
+        WavFileAudioInputStream s = new WavFileAudioInputStream(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath));
         assertNotNull(s);
 
         // know for sure that file is smaller than 8MB
@@ -122,7 +123,7 @@ public class AudioInputStreamTests {
 
     @Test
     public void testClose() {
-        WavFileAudioInputStream s = new WavFileAudioInputStream(Settings.WavFile);
+        WavFileAudioInputStream s = new WavFileAudioInputStream(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath));
         assertNotNull(s);
 
         s.close();
@@ -134,7 +135,7 @@ public class AudioInputStreamTests {
 
     @Test
     public void testAudioInputStream() {
-        WavFileAudioInputStream s = new WavFileAudioInputStream(Settings.WavFile);
+        WavFileAudioInputStream s = new WavFileAudioInputStream(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath));
         assertTrue(s instanceof PullAudioInputStreamCallback);
 
         s.close();

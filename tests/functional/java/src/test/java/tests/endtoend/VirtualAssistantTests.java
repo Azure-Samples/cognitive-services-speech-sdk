@@ -5,6 +5,8 @@
 
 package tests.endtoend;
 
+import com.google.gson.JsonIOException;
+import com.google.gson.JsonSyntaxException;
 import com.microsoft.cognitiveservices.speech.PropertyId;
 import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.dialog.DialogServiceConfig;
@@ -13,10 +15,15 @@ import com.microsoft.cognitiveservices.speech.dialog.DialogServiceConnector;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import tests.AudioUtterancesKeys;
+import tests.DefaultSettingsKeys;
 import tests.Settings;
+import tests.SubscriptionsRegionsKeys;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
@@ -34,14 +41,12 @@ public class VirtualAssistantTests {
     private DialogServiceConnector dialogServiceConnector;
     private EventRecord eventRecord;
 
-    private static String readFileAsString(String path) throws IOException
-    {
+    private static String readFileAsString(String path) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(path), "UTF-8"));
         String result = "";
         String line;
 
-        while ((line = br.readLine()) != null)
-        {
+        while ((line = br.readLine()) != null) {
             result += line;
         }
         br.close();
@@ -54,19 +59,26 @@ public class VirtualAssistantTests {
         System.out.println("Current operation system: " + operatingSystem);
         boolean isMac = operatingSystem.contains("mac") || operatingSystem.contains("darwin");
         org.junit.Assume.assumeFalse(isMac);
-        Settings.LoadSettings();
+        try {
+            Settings.LoadSettings();
+        } catch (JsonIOException | JsonSyntaxException | FileNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
     @Before
     public void setUp() {
         // Bot secret is not required when using AutoReply connection type
-        final DialogServiceConfig dialogServiceConfig = BotFrameworkConfig.fromSubscription(SpeechSubscriptionKeyForVirtualAssistant, SpeechRegionForVirtualAssistant);
-        dialogServiceConfig.setProperty(PropertyId.Conversation_ApplicationId, SpeechChannelSecretForVirtualAssistant);
+        final DialogServiceConfig dialogServiceConfig = BotFrameworkConfig.fromSubscription(SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.DIALOG_SUBSCRIPTION).Key, 
+            SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.DIALOG_SUBSCRIPTION).Region);
+
+        dialogServiceConfig.setProperty(PropertyId.Conversation_ApplicationId, DefaultSettingsMap.get(DefaultSettingsKeys.DIALOG_FUNCTIONAL_TEST_BOT));
         dialogServiceConfig.setProperty(COMMUNICATION_TYPE_STRING, AUTO_REPLY_CONNECTION_TYPE);
         dialogServiceConfig.setLanguage(EN_US);
 
         // For tests we are using the wav file. For manual testing use fromDefaultMicrophone.
-        final AudioConfig audioConfig = AudioConfig.fromWavFileInput(WavFile);
+        final AudioConfig audioConfig = AudioConfig.fromWavFileInput(Settings.GetRootRelativePath(AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath));
 
         dialogServiceConnector = new DialogServiceConnector(dialogServiceConfig, audioConfig);
         registerEventHandlers(dialogServiceConnector);
@@ -77,7 +89,8 @@ public class VirtualAssistantTests {
     public void testSendActivity() throws IOException {
         assertNotNull("dialogServiceConnector should not be null.", dialogServiceConnector);
         try {
-            final String activity = readFileAsString(SerializedSpeechActivityFile);
+            String inputFile = Settings.GetRootRelativePath(Settings.DefaultSettingsMap.get(DefaultSettingsKeys.SERIALIZED_SPEECH_ACTIVITY_FILE));
+            final String activity = readFileAsString(inputFile);
             // Connect to the dialog
             dialogServiceConnector.connectAsync();
             dialogServiceConnector.sendActivityAsync(activity);

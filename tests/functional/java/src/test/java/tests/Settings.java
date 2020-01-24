@@ -1,52 +1,31 @@
-package tests;
-//
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
-//
+
+package tests;
 
 import java.io.File;
-import java.io.FileInputStream;
+
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.lang.reflect.Type;
+import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 
-import javax.json.JsonObject;
-
+import com.google.gson.*;
+import com.google.gson.reflect.TypeToken;
 import com.microsoft.cognitiveservices.speech.SpeechConfig;
 
 public class Settings {
-
-    // Subscription
-    public static String SpeechSubscriptionKey = "<<YOUR_SUBSCRIPTION_KEY>>";
-    public static String SpeechRegion = "<<YOUR_REGION>>";
-    public static String LuisSubscriptionKey = "<<YOUR_LUIS_SUBSCRIPTION_KEY>>";
-    public static String LuisRegion = "<<YOUR_LUIS_REGION>>";
-    public static String LuisAppId = "<<YOUR_LUIS_APP_KEY>>";
-
-    public static String AudioInputDirectory = ".";
-    public static String InputDirectory = ".";
-    public static String WavFile = "whatstheweatherlike.wav";
-    public static String TwoSpeakersAudio = "katiesteve.wav";
-    public static String TwoSpeakersAudioUtterance = "good morning steve";
-    public static String TurnOnTheLampAudio = "TurnOnTheLamp.wav";
-    public static String TurnOnTheLampAudioUtterance = "Turn on the lamp.";
-
-    public static String Keyword = "Computer";
-    public static String KeywordModel = "/data/keyword/kws.table";
-
-    public static String SerializedSpeechActivityFile = "activityWithSpeech.json";
-    public static String SpeechSubscriptionKeyForVirtualAssistant = "<<YOUR_SUBSCRIPTION_KEY>>";
-    public static String SpeechRegionForVirtualAssistant = "westus2";
-    public static String SpeechChannelSecretForVirtualAssistant = "<<SPEECH_CHANNEL_SECRET>>";
-
-    public static String ConversationTranscriptionEndpoint = "<<YOUR_CONVERSATION_TRANSCRIPTION_ENDPOINT>>";
-    public static String ConversationTranscriptionPPEKey = "<<YOUR_CONVERSATION_TRANSCRIPTION_PPE_KEY>>";
-    public static String ConversationTranscriptionPRODKey = "<<YOUR_CONVERSATION_TRANSCRIPTION_PROD_KEY>>";
-    public static String SpeechRegionForConversationTranscription = "centralus";
-
     private static SpeechConfig config;
 
     private static Boolean isSettingsInitialized = false;
     public static Object s_settingsClassLock;
+
+    public static String Keyword = "Computer";
+    public static String KeywordModel = "/data/keyword/kws.table";
 
     static {
         try {
@@ -59,116 +38,132 @@ public class Settings {
         // throwing away any custom setting value..
         s_settingsClassLock = new Settings();
 
-        LoadSettings();
+        try {
+            LoadSettings();
+        } catch (JsonIOException | JsonSyntaxException | FileNotFoundException e) {
+            e.printStackTrace();
+        }
     };
 
-    private static void LoadSettingsJson() {
+    public static Map<String, String> DefaultSettingsMap;
+    public static Map<String, SubscriptionRegion> SubscriptionsRegionsMap;
+    public static Map<String, AudioEntry> AudioUtterancesMap;
+
+    private static void LoadSettingsJson() throws JsonIOException, JsonSyntaxException, FileNotFoundException {
         if (isSettingsInitialized) {
             return;
         }
 
         String cwd = System.getProperty("user.dir");
-        String settingsFilePath = cwd + "/test.settings.json";
-        File settingsFile = new File(settingsFilePath);
+        System.out.println("Current working directory: " + cwd);
 
-        try (FileInputStream fileInputStream = new FileInputStream(settingsFile)) {
-            javax.json.JsonReader jsonReader = javax.json.Json.createReader(fileInputStream);
+        Gson gson = new Gson();
+        Type defaultSettingsType = new TypeToken<Map<String, String>>(){}.getType();
+        Type subscriptionsRegionsType = new TypeToken<Map<String, SubscriptionRegion>>(){}.getType();
+        Type audioEntryType = new TypeToken<Map<String, AudioEntry>>(){}.getType();
+        
+        File defaultSettingsFile = new File("test.defaults.json");
+        
+        if(defaultSettingsFile.exists()) {
+            Map<String, String> defaultSettingsMap = gson.fromJson(new FileReader("test.defaults.json"), defaultSettingsType);
 
-            JsonObject json = jsonReader.readObject();
+            defaultSettingsMap.forEach((key, value) -> DefaultSettingsMap.merge(key, value, (v1, v2) -> v2));
+        }
 
-            SpeechSubscriptionKey = json.getString("UnifiedSpeechSubscriptionKey", SpeechSubscriptionKey);
-            SpeechRegion = json.getString("Region", SpeechRegion);
-            LuisSubscriptionKey = json.getString("LanguageUnderstandingSubscriptionKey", LuisSubscriptionKey);
-            LuisRegion = json.getString("LanguageUnderstandingServiceRegion", LuisRegion);
-            LuisAppId = json.getString("LanguageUnderstandingHomeAutomationAppId", LuisAppId);
+        File subscriptionsRegionsFile = new File("test.subscriptions.regions.json");
 
-            InputDirectory = json.getString("InputDir", InputDirectory);
-            AudioInputDirectory = InputDirectory + "/audio/";
+        if(subscriptionsRegionsFile.exists()) {
+            Map<String, SubscriptionRegion> subscriptionsRegionsMap = gson.fromJson(new FileReader("test.subscriptions.regions.json"), subscriptionsRegionsType);
 
-            WavFile = json.getString("WaveFile", WavFile);
-            TwoSpeakersAudio = json.getString("TwoSpeakersAudio", TwoSpeakersAudio);
-            TwoSpeakersAudioUtterance = json.getString("TwoSpeakersAudioUtterance", TwoSpeakersAudioUtterance);
-            TurnOnTheLampAudio = json.getString("TurnOnTheLampAudio", TurnOnTheLampAudio);
-            TurnOnTheLampAudioUtterance = json.getString("TurnOnTheLampAudioUtterance", TurnOnTheLampAudioUtterance);
-            SerializedSpeechActivityFile = json.getString("SerializedSpeechActivityFile", SerializedSpeechActivityFile);
+            subscriptionsRegionsMap.forEach((key, value) -> SubscriptionsRegionsMap.merge(key, value, (v1, v2) -> v2));
+        }
 
-            SpeechSubscriptionKeyForVirtualAssistant = json.getString("DialogSubscriptionKey",
-                    SpeechSubscriptionKeyForVirtualAssistant);
+        File audioUtterancesFile = new File("test.audio.utterances.json");
 
-            SpeechRegionForVirtualAssistant = json.getString("DialogRegion", SpeechRegionForVirtualAssistant);
-            SpeechChannelSecretForVirtualAssistant = json.getString("DialogFunctionalTestBot",
-                    SpeechChannelSecretForVirtualAssistant);
+        if(audioUtterancesFile.exists()) {
+            Map<String, AudioEntry> audioUtterancesMap = gson.fromJson(new FileReader("test.audio.utterances.json"), audioEntryType);
 
-            ConversationTranscriptionEndpoint = json.getString("ConversationTranscriptionEndpoint",
-                    ConversationTranscriptionEndpoint);
-
-            ConversationTranscriptionPPEKey = json.getString("ConversationTranscriptionPPEKey",
-                    ConversationTranscriptionPPEKey);
-
-            ConversationTranscriptionPRODKey = json.getString("ConversationTranscriptionPRODKey",
-                    ConversationTranscriptionPRODKey);
-
-            SpeechRegionForConversationTranscription = json.getString("SpeechRegionForConversationTranscription",
-                    SpeechRegionForConversationTranscription);
-
-            Keyword = json.getString("Keyword", Keyword);
-            KeywordModel = InputDirectory + "/kws/" + Keyword + "/" + json.getString("KeywordModel", KeywordModel);
-        } catch (Exception exception) {
-            displayException(exception);
+            audioUtterancesMap.forEach((key, value) -> AudioUtterancesMap.merge(key, value, (v1, v2) -> v2));
         }
     }
 
-    public static void LoadSettings() {
+    public static void LoadSettings() throws JsonIOException, JsonSyntaxException, FileNotFoundException {
         if(!isSettingsInitialized)
         {
-            LoadSettingsJson();
+            DefaultSettingsMap = new HashMap<String,String>();
+            SubscriptionsRegionsMap = new HashMap<String,SubscriptionRegion>();
+            AudioUtterancesMap = new HashMap<String,AudioEntry>();
+
             LoadSettingsProperties();
+            LoadSettingsJson();
+
+            isSettingsInitialized = true;
         }
     }
 
     private static void LoadSettingsProperties() {
-        SpeechSubscriptionKey = System.getProperty("SpeechSubscriptionKey", SpeechSubscriptionKey);
-        SpeechRegion = System.getProperty("SpeechRegion", SpeechRegion);
+        SubscriptionsRegionsMap.put("UnifiedSpeechSubscription", 
+            new SubscriptionRegion()
+            {{ Key=System.getProperty("SpeechSubscriptionKey");
+               Region= System.getProperty("SpeechRegion");
+            }});
 
-        LuisSubscriptionKey = System.getProperty("LuisSubscriptionKey", LuisSubscriptionKey);
-        LuisRegion = System.getProperty("LuisRegion", LuisRegion);
-        LuisAppId = System.getProperty("LuisAppId", LuisAppId);
+        SubscriptionsRegionsMap.put("LanguageUnderstandingSubscription",
+            new SubscriptionRegion()
+            {{ Key=System.getProperty("LuisSubscriptionKey");
+               Region=System.getProperty("LuisRegion");
+            }});
 
-        AudioInputDirectory = System.getProperty("AudioInputDirectory", AudioInputDirectory);
+        DefaultSettingsMap.put("LanguageUnderstandingHomeAutomationAppId", System.getProperty("LuisAppId"));
 
-        WavFile = System.getProperty("WaveFile", AudioInputDirectory + "/" + WavFile);
-        TwoSpeakersAudio = System.getProperty("TwoSpeakersAudio", AudioInputDirectory + "/" + TwoSpeakersAudio);
-        TurnOnTheLampAudio = System.getProperty("TurnOnTheLampAudio", AudioInputDirectory + "/" + TurnOnTheLampAudio);
+        DefaultSettingsMap.put("InputDir", System.getProperty("AudioInputDirectory"));
 
-        SerializedSpeechActivityFile = System.getProperty("SerializedSpeechActivityFile",
-                AudioInputDirectory + "/" + SerializedSpeechActivityFile);
+        AudioUtterancesMap.put("SingleUtteranceEnglish", new AudioEntry()
+        {{
+            FilePath=System.getProperty("WaveFile");
+        }});
 
-        SpeechSubscriptionKeyForVirtualAssistant = System.getProperty("SpeechSubscriptionKeyForVirtualAssistant",
-                SpeechSubscriptionKeyForVirtualAssistant);
-        SpeechRegionForVirtualAssistant = System.getProperty("SpeechRegionForVirtualAssistant",
-                SpeechRegionForVirtualAssistant);
-        SpeechChannelSecretForVirtualAssistant = System.getProperty("SpeechChannelSecretForVirtualAssistant",
-                SpeechChannelSecretForVirtualAssistant);
+        AudioUtterancesMap.put("ConversationBetweenTwoPersonsEnglish", new AudioEntry()
+        {{
+            FilePath=System.getProperty("TwoSpeakersAudio");
+        }});
 
-        ConversationTranscriptionEndpoint = System.getProperty("ConversationTranscriptionEndpoint",
-                ConversationTranscriptionEndpoint);
-        ConversationTranscriptionPPEKey = System.getProperty("ConversationTranscriptionPPEKey",
-                ConversationTranscriptionPPEKey);
-        ConversationTranscriptionPRODKey = System.getProperty("ConversationTranscriptionPRODKey",
-                ConversationTranscriptionPRODKey);
-        SpeechRegionForConversationTranscription = System.getProperty("SpeechRegionForConversationTranscription",
-                SpeechRegionForConversationTranscription);
+        AudioUtterancesMap.put("IntentUtterance", new AudioEntry()
+        {{
+            FilePath=System.getProperty("TurnOnTheLampAudio");
+        }});
 
-        Keyword = System.getProperty("Keyword", Keyword);
-        KeywordModel = System.getProperty("KeywordModel", KeywordModel);
+        DefaultSettingsMap.put("SerializedSpeechActivityFile", System.getProperty("SerializedSpeechActivityFile"));
 
-        isSettingsInitialized = true;
+        SubscriptionsRegionsMap.put("DialogSubscription", new SubscriptionRegion()
+        {{
+            Key=System.getProperty("SpeechSubscriptionKeyForVirtualAssistant");
+            Region=System.getProperty("SpeechRegionForVirtualAssistant");
+        }});
+
+        DefaultSettingsMap.put("DialogFunctionalTestBot", System.getProperty("SpeechChannelSecretForVirtualAssistant"));
+        DefaultSettingsMap.put("ConversationTranscriptionEndpoint", System.getProperty("ConversationTranscriptionEndpoint"));
+        SubscriptionsRegionsMap.put("ConversationTranscriptionPPESubscription", new SubscriptionRegion()
+        {{
+            Key=System.getProperty("ConversationTranscriptionPPEKey");
+            Region=System.getProperty("SpeechRegionForConversationTranscription");
+        }});
+
+        SubscriptionsRegionsMap.put("ConversationTranscriptionPRODSubscription", new SubscriptionRegion()
+        {{
+            Key=System.getProperty("ConversationTranscriptionPRODKey");
+            Region=System.getProperty("SpeechRegionForConversationTranscription");
+        }});
+
+        DefaultSettingsMap.put("Keyword", System.getProperty("Keyword"));
+        DefaultSettingsMap.put("KeywordModel", System.getProperty("KeywordModel"));
     }
 
     public static SpeechConfig getSpeechConfig() {
         if (config == null) {
             try {
-                config = SpeechConfig.fromSubscription(SpeechSubscriptionKey, SpeechRegion);
+                config = SpeechConfig.fromSubscription(SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+                    SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
 
                 // PMA parameters
                 config.setProperty("DeviceGeometry", "Circular6+1");
@@ -199,5 +194,9 @@ public class Settings {
 
     public interface OnTaskCompletedListener<T> {
         public void onCompleted(T taskResult);
+    }
+
+    public static String GetRootRelativePath(String input) {
+        return Paths.get(DefaultSettingsMap.get(DefaultSettingsKeys.INPUT_DIR), input).toString();
     }
 }

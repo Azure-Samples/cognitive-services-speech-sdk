@@ -26,7 +26,9 @@ import com.microsoft.cognitiveservices.speech.intent.IntentRecognizer;
 import com.microsoft.cognitiveservices.speech.intent.LanguageUnderstandingModel;
 import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
 
+import tests.DefaultSettingsKeys;
 import tests.Settings;
+import tests.SubscriptionsRegionsKeys;
 
 @SuppressWarnings("unused")
 public class LanguageUnderstandingModelTests {
@@ -42,7 +44,7 @@ public class LanguageUnderstandingModelTests {
 
     @Test
     public void testFromEndpoint() {
-        LanguageUnderstandingModel s = LanguageUnderstandingModel.fromAppId(Settings.LuisAppId);
+        LanguageUnderstandingModel s = LanguageUnderstandingModel.fromAppId(Settings.DefaultSettingsMap.get(DefaultSettingsKeys.LANGUAGE_UNDERSTANDING_HOME_AUTOMATION_APP_ID));
         assertNotNull(s);
     }
 
@@ -52,7 +54,7 @@ public class LanguageUnderstandingModelTests {
 
     @Test
     public void testFromAppId() {
-        LanguageUnderstandingModel s = LanguageUnderstandingModel.fromAppId(Settings.LuisAppId);
+        LanguageUnderstandingModel s = LanguageUnderstandingModel.fromAppId(Settings.DefaultSettingsMap.get(DefaultSettingsKeys.LANGUAGE_UNDERSTANDING_HOME_AUTOMATION_APP_ID));
         assertNotNull(s);
     }
 
@@ -62,7 +64,10 @@ public class LanguageUnderstandingModelTests {
 
     @Test
     public void testFromSubscription() {
-        LanguageUnderstandingModel s = LanguageUnderstandingModel.fromSubscription(Settings.LuisSubscriptionKey, Settings.LuisAppId, Settings.LuisRegion);
+        LanguageUnderstandingModel s = LanguageUnderstandingModel.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.LANGUAGE_UNDERSTANDING_SUBSCRIPTION).Key, 
+            Settings.DefaultSettingsMap.get(DefaultSettingsKeys.LANGUAGE_UNDERSTANDING_HOME_AUTOMATION_APP_ID),
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.LANGUAGE_UNDERSTANDING_SUBSCRIPTION).Region);
+
         assertNotNull(s);
     }
 
@@ -82,7 +87,7 @@ public class LanguageUnderstandingModelTests {
 
     @Test
     public void testGetModelImpl1() {
-        LanguageUnderstandingModel s = LanguageUnderstandingModel.fromAppId(Settings.LuisAppId);
+        LanguageUnderstandingModel s = LanguageUnderstandingModel.fromAppId(Settings.DefaultSettingsMap.get(DefaultSettingsKeys.LANGUAGE_UNDERSTANDING_HOME_AUTOMATION_APP_ID));
 
         assertNotNull(s);
         assertNotNull(s.getModelImpl());
@@ -98,7 +103,9 @@ public class LanguageUnderstandingModelTests {
 
     @Test
     public void testGetModelImpl3() {
-        LanguageUnderstandingModel s = LanguageUnderstandingModel.fromSubscription(Settings.LuisSubscriptionKey, Settings.LuisAppId, Settings.LuisRegion);
+        LanguageUnderstandingModel s = LanguageUnderstandingModel.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.LANGUAGE_UNDERSTANDING_SUBSCRIPTION).Key,
+            Settings.DefaultSettingsMap.get(DefaultSettingsKeys.LANGUAGE_UNDERSTANDING_HOME_AUTOMATION_APP_ID),
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.LANGUAGE_UNDERSTANDING_SUBSCRIPTION).Region);
 
         assertNotNull(s);
         assertNotNull(s.getModelImpl());

@@ -10,17 +10,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.SpeechConfig;
 import com.microsoft.cognitiveservices.speech.intent.IntentRecognitionResult;
-import com.microsoft.cognitiveservices.speech.intent.IntentRecognitionEventArgs;
 import com.microsoft.cognitiveservices.speech.intent.IntentRecognizer;
 import com.microsoft.cognitiveservices.speech.intent.LanguageUnderstandingModel;
-import com.microsoft.cognitiveservices.speech.Connection;
-
+import tests.AudioUtterancesKeys;
+import tests.DefaultSettingsKeys;
 import tests.Settings;
+import tests.SubscriptionsRegionsKeys;
 import tests.TestHelper;
 
 public class SampleRecognizeIntent implements Runnable {
@@ -48,21 +46,23 @@ public class SampleRecognizeIntent implements Runnable {
     @Override
     public void run() {
         // create config
-        SpeechConfig config = SpeechConfig.fromSubscription(Settings.LuisSubscriptionKey, Settings.LuisRegion);
+        SpeechConfig config = SpeechConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.LANGUAGE_UNDERSTANDING_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.LANGUAGE_UNDERSTANDING_SUBSCRIPTION).Region);
+
         List<String> content = new ArrayList<>();
 
         content.add("");
         try {
             // TODO: to use the microphone, replace the parameter with "new MicrophoneAudioInputStream()"
-            AudioConfig audioInput = AudioConfig.fromWavFileInput(Settings.TurnOnTheLampAudio);
+            AudioConfig audioInput = AudioConfig.fromWavFileInput(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.INTENT_UTTERANCE).FilePath));
             IntentRecognizer reco = new IntentRecognizer(config, audioInput);
 
             HashMap<String, String> intentIdMap = new HashMap<>();
             intentIdMap.put("1", "HomeAutomation.TurnOn");
             intentIdMap.put("2", "HomeAutomation.TurnOff");
 
-            LanguageUnderstandingModel intentModel = LanguageUnderstandingModel.fromAppId(Settings.LuisAppId);
-            System.out.println("LuisAppId: " + Settings.LuisAppId);
+            LanguageUnderstandingModel intentModel = LanguageUnderstandingModel.fromAppId(Settings.DefaultSettingsMap.get(DefaultSettingsKeys.LANGUAGE_UNDERSTANDING_HOME_AUTOMATION_APP_ID));
+            System.out.println("LuisAppId: " + Settings.DefaultSettingsMap.get(DefaultSettingsKeys.LANGUAGE_UNDERSTANDING_HOME_AUTOMATION_APP_ID));
 
             for (Map.Entry<String, String> entry : intentIdMap.entrySet()) {
                 reco.addIntent(intentModel, entry.getValue(), entry.getKey());

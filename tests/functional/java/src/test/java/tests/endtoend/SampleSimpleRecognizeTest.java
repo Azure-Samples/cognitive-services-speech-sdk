@@ -9,8 +9,6 @@ import static org.junit.Assert.*;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.Ignore;
-
 import tests.Settings;
 import tests.TestHelper;
 import tests.endtoend.SampleSimpleRecognize;

@@ -25,7 +25,9 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
 import com.microsoft.cognitiveservices.speech.translation.SpeechTranslationConfig;
 import com.microsoft.cognitiveservices.speech.PropertyId;
 
+import tests.AudioUtterancesKeys;
 import tests.Settings;
+import tests.SubscriptionsRegionsKeys;
 
 @SuppressWarnings("unused")
 public class PropertyCollectionTests {
@@ -42,19 +44,23 @@ public class PropertyCollectionTests {
     @SuppressWarnings("resource")
     @Test
     public void testPropertyCollection() {
-        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+
         assertNotNull(s);
 
-        PropertyCollection crp  = new IntentRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile)).getProperties();
+        PropertyCollection crp  = new IntentRecognizer(s, AudioConfig.fromWavFileInput(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath))).getProperties();
         assertNotNull(crp);
 
-        PropertyCollection srp  = new SpeechRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile)).getProperties();
+        PropertyCollection srp  = new SpeechRecognizer(s, AudioConfig.fromWavFileInput(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath))).getProperties();
         assertNotNull(srp);
 
-        SpeechTranslationConfig st = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig st = SpeechTranslationConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+
         st.setSpeechRecognitionLanguage("en-US");
         st.addTargetLanguage("en-US");
-        PropertyCollection trp  = new TranslationRecognizer(st, AudioConfig.fromWavFileInput(Settings.WavFile)).getProperties();
+        PropertyCollection trp  = new TranslationRecognizer(st, AudioConfig.fromWavFileInput(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath))).getProperties();
         assertNotNull(crp);
     }
 
@@ -65,10 +71,12 @@ public class PropertyCollectionTests {
     @SuppressWarnings("resource")
     @Test
     public void testPropertyCollectionSetpropertyId() {
-        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+
         assertNotNull(s);
 
-        PropertyCollection crp  = new IntentRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile)).getProperties();
+        PropertyCollection crp  = new IntentRecognizer(s, AudioConfig.fromWavFileInput(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath))).getProperties();
         assertNotNull(crp);
 
         String value = "seattle";
@@ -89,21 +97,25 @@ public class PropertyCollectionTests {
     @SuppressWarnings("resource")
     @Test
     public void testIsString() {
-        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+
         assertNotNull(s);
 
-        PropertyCollection crp  = new IntentRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile)).getProperties();
+        PropertyCollection crp  = new IntentRecognizer(s, AudioConfig.fromWavFileInput(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath))).getProperties();
         assertNotNull(crp);
         testIsParametersString(crp);
 
-        PropertyCollection srp  = new SpeechRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile)).getProperties();
+        PropertyCollection srp  = new SpeechRecognizer(s, AudioConfig.fromWavFileInput(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath))).getProperties();
         assertNotNull(srp);
         testIsParametersString(srp);
 
-        SpeechTranslationConfig st = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig st = SpeechTranslationConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+
         st.setSpeechRecognitionLanguage("en-US");
         st.addTargetLanguage("en-US");
-        PropertyCollection trp  = new TranslationRecognizer(st, AudioConfig.fromWavFileInput(Settings.WavFile)).getProperties();
+        PropertyCollection trp  = new TranslationRecognizer(st, AudioConfig.fromWavFileInput(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath))).getProperties();
         assertNotNull(trp);
         testIsParametersString(trp);
     }
@@ -125,21 +137,25 @@ public class PropertyCollectionTests {
     @SuppressWarnings("resource")
     @Test
     public void testGetSetStringString() {
-        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+
         assertNotNull(s);
 
-        PropertyCollection crp  = new IntentRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile)).getProperties();
+        PropertyCollection crp  = new IntentRecognizer(s, AudioConfig.fromWavFileInput(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath))).getProperties();
         assertNotNull(crp);
         testIsParametersString(crp);
 
-        PropertyCollection srp  = new SpeechRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile)).getProperties();
+        PropertyCollection srp  = new SpeechRecognizer(s, AudioConfig.fromWavFileInput(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath))).getProperties();
         assertNotNull(srp);
         testIsParametersString(srp);
 
-        SpeechTranslationConfig st = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig st = SpeechTranslationConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+
         st.setSpeechRecognitionLanguage("en-US");
         st.addTargetLanguage("en-US");
-        PropertyCollection trp  = new TranslationRecognizer(st, AudioConfig.fromWavFileInput(Settings.WavFile)).getProperties();
+        PropertyCollection trp  = new TranslationRecognizer(st, AudioConfig.fromWavFileInput(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath))).getProperties();
         assertNotNull(trp);
         testIsParametersString(trp);
     }
@@ -164,21 +180,25 @@ public class PropertyCollectionTests {
     @Ignore("TODO string string tests fail")
     @Test
     public void testGetStringStringString() {
-        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+
         assertNotNull(s);
 
-        PropertyCollection crp  = new IntentRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile)).getProperties();
+        PropertyCollection crp  = new IntentRecognizer(s, AudioConfig.fromWavFileInput(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath))).getProperties();
         assertNotNull(crp);
         testGetParametersStringString(crp);
 
-        PropertyCollection srp  = new SpeechRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile)).getProperties();
+        PropertyCollection srp  = new SpeechRecognizer(s, AudioConfig.fromWavFileInput(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath))).getProperties();
         assertNotNull(srp);
         testGetParametersStringString(srp);
 
-        SpeechTranslationConfig st = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig st = SpeechTranslationConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+
         st.setSpeechRecognitionLanguage("en-US");
         st.addTargetLanguage("en-US");
-        PropertyCollection trp  = new TranslationRecognizer(st, AudioConfig.fromWavFileInput(Settings.WavFile)).getProperties();
+        PropertyCollection trp  = new TranslationRecognizer(st, AudioConfig.fromWavFileInput(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath))).getProperties();
         assertNotNull(trp);
         testGetParametersStringString(trp);
     }
@@ -190,19 +210,23 @@ public class PropertyCollectionTests {
     @SuppressWarnings("resource")
     @Test
     public void testClose() {
-        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+
         assertNotNull(s);
 
-        PropertyCollection crp  = new IntentRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile)).getProperties();
+        PropertyCollection crp  = new IntentRecognizer(s, AudioConfig.fromWavFileInput(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath))).getProperties();
         assertNotNull(crp);
 
-        PropertyCollection srp  = new SpeechRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile)).getProperties();
+        PropertyCollection srp  = new SpeechRecognizer(s, AudioConfig.fromWavFileInput(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath))).getProperties();
         assertNotNull(srp);
 
-        SpeechTranslationConfig st = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig st = SpeechTranslationConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+
         st.setSpeechRecognitionLanguage("en-US");
         st.addTargetLanguage("en-US");
-        PropertyCollection trp  = new TranslationRecognizer(st, AudioConfig.fromWavFileInput(Settings.WavFile)).getProperties();
+        PropertyCollection trp  = new TranslationRecognizer(st, AudioConfig.fromWavFileInput(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath))).getProperties();
         assertNotNull(trp);
 
         s.close();

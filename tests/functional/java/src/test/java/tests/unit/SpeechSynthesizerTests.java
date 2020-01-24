@@ -6,16 +6,10 @@
 package tests.unit;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -34,7 +28,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.Ignore;
 
-
 import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.audio.AudioOutputStream;
 import com.microsoft.cognitiveservices.speech.audio.PullAudioOutputStream;
@@ -50,11 +43,10 @@ import com.microsoft.cognitiveservices.speech.SpeechSynthesisWordBoundaryEventAr
 import com.microsoft.cognitiveservices.speech.SpeechSynthesizer;
 import com.microsoft.cognitiveservices.speech.StreamStatus;
 import com.microsoft.cognitiveservices.speech.SpeechSynthesisCancellationDetails;
-import com.microsoft.cognitiveservices.speech.SpeechSynthesisOutputFormat;
-import com.microsoft.cognitiveservices.speech.PropertyId;
 import com.microsoft.cognitiveservices.speech.util.EventHandler;
 
 import tests.Settings;
+import tests.SubscriptionsRegionsKeys;
 import tests.TestHelper;
 
 public class SpeechSynthesizerTests {
@@ -512,7 +504,9 @@ public class SpeechSynthesizerTests {
 
     @Test
     public void testSpeakOutputInStreamsWithAllDataGetOnSynthesisStartedResult() throws URISyntaxException, InterruptedException, ExecutionException {
-        SpeechConfig speechConfig = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechConfig speechConfig = SpeechConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+            
         assertNotNull(speechConfig);
 
         SpeechSynthesizer synthesizer = new SpeechSynthesizer(speechConfig, null); // null indicates to do nothing with synthesizer audio by default
@@ -602,14 +596,16 @@ public class SpeechSynthesizerTests {
 
     @Test
     public void testAuthorizationToken() throws URISyntaxException, InterruptedException, ExecutionException, IOException {
-        SpeechConfig speechConfig = SpeechConfig.fromAuthorizationToken("InvalidToken", Settings.SpeechRegion);
+        SpeechConfig speechConfig = SpeechConfig.fromAuthorizationToken("InvalidToken", Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
         assertNotNull(speechConfig);
 
         SpeechSynthesizer synthesizer = new SpeechSynthesizer(speechConfig, null); // null indicates to do nothing with synthesizer audio by default
         assertNotNull(synthesizer);
         assertEquals("InvalidToken", synthesizer.getAuthorizationToken());
 
-        String authorizationToken = TestHelper.getAuthorizationToken(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        String authorizationToken = TestHelper.getAuthorizationToken(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+
         synthesizer.setAuthorizationToken(authorizationToken);
 
         SpeechSynthesisResult result1 = synthesizer.SpeakTextAsync("{{{text1}}}").get(); // "{{{text1}}}" has completed rendering, and available in result1
@@ -1199,9 +1195,9 @@ public class SpeechSynthesizerTests {
     }
 
     private SpeechConfig CreateSpeechConfig() throws URISyntaxException {
-        String endpoint = String.format("wss://%s.tts.speech.microsoft.com/cognitiveservices/websocket/v1?TrafficType=Test", Settings.SpeechRegion);
+        String endpoint = String.format("wss://%s.tts.speech.microsoft.com/cognitiveservices/websocket/v1?TrafficType=Test", Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
         URI endpointUri =  new URI(endpoint);
-        SpeechConfig speechConfig = SpeechConfig.fromEndpoint(endpointUri, Settings.SpeechSubscriptionKey);
+        SpeechConfig speechConfig = SpeechConfig.fromEndpoint(endpointUri, Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key);
         assertNotNull(speechConfig);
         return speechConfig;
     }

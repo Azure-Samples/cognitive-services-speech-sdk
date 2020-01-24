@@ -6,7 +6,6 @@
 package tests.unit;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -32,7 +31,10 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import tests.AudioUtterancesKeys;
+import tests.DefaultSettingsKeys;
 import tests.Settings;
+import tests.SubscriptionsRegionsKeys;
 
 public class ConversationTranscriberTests {
     private static String inroomEndpoint = "";
@@ -40,6 +42,7 @@ public class ConversationTranscriberTests {
 
     // Copy the Signature value from the Response body after calling the RESTFUL API at https://signature.centralus.cts.speech.microsoft.com
     // Voice signature format example: { "Version": <Numeric value>, "Tag": "string", "Data": "string" }
+    // [SuppressMessage("Microsoft.Security", "CS002:SecretInNextLine", Justification="There are no secrets here")]
     private String voiceSignatureKatie = "{ \"Version\": 0, \"Tag\": \"VtZQ7sJp8np3AxQC+87WYyBHWsZohWFBN0zgWzzOnpw=\", \"Data\": \"BhRRgDCrg6ij5fylg5Jpf5ZW/o/uDWi199DYBbfL1Qdspj77qiuvsVKzG2g5Z9jxKtfdwtkKtaDxog9O6pGD7Ot/8mM1jUtt6LKNz4H9EFvznV/dlFk2Oisg8ZKx/RBlNFMYJkQJnxT/zLfhNWiIF5Y97jH4sgRh2orDg6/567FGktAgcESAbiDx1e7tf0TTLdwijw4p1vJ3qJ2cSCdNbXE9KeUd8sClQLDheCPo+et3rMs5W+Rju3W1SJE6ru9gAoH88CyAfI80+ysAecH3GPJYM+j1uhvmWoKIrSfS40BYOe6AUgLNb3a4Pue4oGAmuAyWfwpP1uezleSanpJc73HT91n2UsaHrQj5eK6uuBCjwmu+JI3FT+Vo6JhAARHecdb70U1wyW9vv5t0Q3tV1WNiN/30qSVydDtyrSVpgBiIwlj41Ua22JJCOMrPl7NKLnFmeZ4Hi4aIKoHAxDvrApteL60sxLX/ADAtYCB3Y6iagDyR1IOsIlbaPhL0rQDnC/0z65k7BDekietFNzvvPVoIwJ26GHrXFYYwZe3alVvCsXTpZGBknvSiaCalrixnyGqYo0nG/cd/LodEEIht/PWoFkNlbABqHMbToeI/6j+ICKuVJgTDtcsDQiWKSvrQp9kTSv+cF3LyPVkbks0JvbQhj4AkAv7Rvymgnsu6o8gGyxTX0kxujqCMPCzgFrVd\"}";
     private String voiceSignatureSteve = "{ \"Version\": 0, \"Tag\": \"HbIvzbfAWjeR/3R+WvUEoeid1AbDaHNOMWItgs7mTxc=\", \"Data\": \"DizY04Z7PH/sYu2Yw2EcL4Mvj1GnEDOWJ/DhXHGdQJsQ8/zDc13z1cwllbEo5OSr3oGoKEHLV95OUA6PgksZzvTkf42iOFEv3yifUNfYkZuIzStZoDxWu1H1BoFBejqzSpCYyvqLwilWOyUeMn+z+E4+zXjqHUCyYJ/xf0C3+58kCbmyA55yj7YZ6OtMVyFmfT2GLiXr4YshUB14dgwl3Y08SRNavnG+/QOs+ixf3UoZ6BC1VZcVQnC2tn2FB+8v6ehnIOTQedo++6RWIB0RYmQ8VaEeI0E4hkpA1OxQ9f2gBVtw3KZXWSWBz8sXig2igpwMsQoFRmmIOGsu+p6tM8/OThQpARZ7OyAxsurzmaSGZAaXYt0YwMdIIXKeDBF6/KnUyw+NNzku1875u2Fde/bxgVvCOwhrLPPuu/RZUeAkwVQge7nKYNW5YjDcz8mfg4LfqWEGOVCcmf2IitQtcIEjY3MwLVNvsAB6GT2es1/1QieCfQKy/Tdu8IUfEvekwSCxSlWhfVrLjRhGeWa9idCjsngQbNkqYUNdnIlidkn2DC4BavSTYXR5lVxV4SR/Vvj8h4N5nP/URPDhkzl7n7Tqd4CGFZDzZzAr7yRo3PeUBX0CmdrKLW3+GIXAdvpFAx592pB0ySCv5qBFhJNErEINawfGcmeWZSORxJg1u+agj51zfTdrHZeugFcMs6Be\"}";
 
@@ -50,7 +53,7 @@ public class ConversationTranscriberTests {
         boolean isMac = operatingSystem.contains("mac") || operatingSystem.contains("darwin");
         org.junit.Assume.assumeFalse(isMac);
         Settings.LoadSettings();
-        inroomEndpoint = Settings.ConversationTranscriptionEndpoint + "/multiaudio";
+        inroomEndpoint = Settings.DefaultSettingsMap.get(DefaultSettingsKeys.CONVERSATION_TRANSCRIPTION_ENDPOINT) + "/multiaudio";
         onlineEndpoint = "wss://westus2.online.princetondev.customspeech.ai/recognition/onlinemeeting/v1";
     }
 
@@ -67,7 +70,9 @@ public class ConversationTranscriberTests {
 
     @Test
     public void testConversationIdWithAnsiOnly() throws InterruptedException, ExecutionException, TimeoutException {
-        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+
         assertNotNull(s);
         String myConversationId = "123 456";
 
@@ -114,10 +119,10 @@ public class ConversationTranscriberTests {
 
     @Test
     public void testConversationAddParticipant() throws InterruptedException, ExecutionException, TimeoutException {
-        SpeechConfig s = SpeechConfig.fromEndpoint(URI.create(inroomEndpoint), Settings.ConversationTranscriptionPPEKey);
+        SpeechConfig s = SpeechConfig.fromEndpoint(URI.create(inroomEndpoint), Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.CONVERSATION_TRANSCRIPTION_PPE_SUBSCRIPTION).Key);
         assertNotNull(s);
 
-        WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.TwoSpeakersAudio);
+        WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.CONVERSATION_BETWEEN_TWO_PERSONS_ENGLISH).FilePath));
         assertNotNull(ais);
 
         String conversationId = "test_from_cts_add_participant_in_java";
@@ -152,7 +157,7 @@ public class ConversationTranscriberTests {
         for( String phrase: phrases) {
           System.out.println("phrase comes back from CTS is '" + phrase + "'");
           String cleanedPhrase = phrase.replaceAll("[^a-zA-Z0-9 ]", "");
-          String reference = Settings.TwoSpeakersAudioUtterance.replaceAll("[^a-zA-Z0-9 ]", "").toLowerCase();
+          String reference = Settings.AudioUtterancesMap.get(AudioUtterancesKeys.CONVERSATION_BETWEEN_TWO_PERSONS_ENGLISH).Utterances.get("en-US")[0].Text.replaceAll("[^a-zA-Z0-9 ]", "").toLowerCase();
           System.out.println("cleaned version of Settings.TwoSpeakersAudioUtterance is '" + reference + "'");
           if(cleanedPhrase.toLowerCase().startsWith(reference) )  {
               found = true;
@@ -168,10 +173,10 @@ public class ConversationTranscriberTests {
 
     @Test
     public void testRemoveParticipant() throws InterruptedException, ExecutionException, TimeoutException {
-        SpeechConfig s = SpeechConfig.fromEndpoint(URI.create(inroomEndpoint), Settings.ConversationTranscriptionPPEKey);
+        SpeechConfig s = SpeechConfig.fromEndpoint(URI.create(inroomEndpoint), Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.CONVERSATION_TRANSCRIPTION_PPE_SUBSCRIPTION).Key);
         assertNotNull(s);
 
-        WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.TwoSpeakersAudio);
+        WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.CONVERSATION_BETWEEN_TWO_PERSONS_ENGLISH).FilePath));
         assertNotNull(ais);
 
         String conversationId = "test_from_cts_remove_participant_in_java";
@@ -211,7 +216,7 @@ public class ConversationTranscriberTests {
         for( String phrase: phrases) {
           System.out.println("phrase comes back from CTS is '" + phrase + "'");
           String cleanedPhrase = phrase.replaceAll("[^a-zA-Z0-9 ]", "");
-          String reference = Settings.TwoSpeakersAudioUtterance.replaceAll("[^a-zA-Z0-9 ]", "").toLowerCase();
+          String reference = Settings.AudioUtterancesMap.get(AudioUtterancesKeys.CONVERSATION_BETWEEN_TWO_PERSONS_ENGLISH).Utterances.get("en-US")[0].Text.replaceAll("[^a-zA-Z0-9 ]", "").toLowerCase();
           System.out.println("cleaned version of Settings.TwoSpeakersAudioUtterance is '" + reference + "'");
           if(cleanedPhrase.toLowerCase().startsWith(reference) )  {
               found = true;
@@ -231,11 +236,11 @@ public class ConversationTranscriberTests {
     @Ignore
     @Test
     public void testEndConversation() throws InterruptedException, ExecutionException, TimeoutException {
-        SpeechConfig s = SpeechConfig.fromEndpoint(URI.create(onlineEndpoint), Settings.ConversationTranscriptionPPEKey);
+        SpeechConfig s = SpeechConfig.fromEndpoint(URI.create(onlineEndpoint), Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.CONVERSATION_TRANSCRIPTION_PPE_SUBSCRIPTION).Key);
         assertNotNull(s);
         s.setProperty("iCalUid", "040000008200E00074C5B7101A82E008000000001003D722197CD4010000000000000000100000009E970FDF583F9D4FB999E607891A2F66");
 
-        WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
+        WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath));
         assertNotNull(ais);
 
         String conversationId = "test_from_end_conversation_in_java";

@@ -12,7 +12,7 @@
   "ConversationTranslatorSpeechEndpoint": "",
   "ConversationTranslatorClientId": "D5253FF2-C6B4-4A72-852A-22F8007EC9E8",
   "Host": "",
-  "SerializedSpeechActivityFile": "activityWithSpeech.json",
+  "SerializedSpeechActivityFile": "audio/activityWithSpeech.json",
   "Keyword": "Computer"
 }
 

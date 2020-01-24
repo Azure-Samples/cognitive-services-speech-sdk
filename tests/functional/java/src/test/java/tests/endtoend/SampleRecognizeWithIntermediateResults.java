@@ -13,6 +13,7 @@ import com.microsoft.cognitiveservices.speech.SpeechRecognitionResult;
 import com.microsoft.cognitiveservices.speech.SpeechRecognitionEventArgs;
 import com.microsoft.cognitiveservices.speech.SpeechRecognizer;
 
+import tests.AudioUtterancesKeys;
 import tests.Settings;
 
 public class SampleRecognizeWithIntermediateResults implements Runnable {
@@ -40,7 +41,7 @@ public class SampleRecognizeWithIntermediateResults implements Runnable {
 
         try {
 
-            AudioConfig audioInput = AudioConfig.fromWavFileInput(Settings.WavFile);
+            AudioConfig audioInput = AudioConfig.fromWavFileInput(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath));
             SpeechRecognizer reco = new SpeechRecognizer(config, audioInput);
 
             reco.recognizing.addEventListener((o, speechRecognitionEventArgs) -> {

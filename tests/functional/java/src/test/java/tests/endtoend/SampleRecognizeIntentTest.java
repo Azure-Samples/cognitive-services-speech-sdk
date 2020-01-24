@@ -12,10 +12,8 @@ import org.junit.Test;
 
 import com.microsoft.cognitiveservices.speech.PropertyId;
 
-import org.junit.Ignore;
-
+import tests.AudioUtterancesKeys;
 import tests.Settings;
-import tests.TestHelper;
 import tests.endtoend.SampleRecognizeIntent;
 
 public class SampleRecognizeIntentTest {
@@ -32,7 +30,7 @@ public class SampleRecognizeIntentTest {
 
         test.run();
         assertNotNull(test.getResult()); // we got the final result
-        assertEquals(Settings.TurnOnTheLampAudioUtterance, test.getResult().getText());
+        assertEquals(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.INTENT_UTTERANCE).Utterances.get("en-US")[0].Text, test.getResult().getText());
         assertEquals("1", test.getIntentId());
         assertEquals("HomeAutomation.TurnOn", test.getIntentName());
 
