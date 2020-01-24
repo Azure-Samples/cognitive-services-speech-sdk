@@ -7,6 +7,8 @@ include_directories(${INC_DIR})
 
 if(SPEECHSDK_OS STREQUAL "Android")
     set(PAL_SRC "${SRC_DIR}/android")
+elseif(SPEECHSDK_OS STREQUAL "WindowsUwp")
+    set(PAL_SRC "${SRC_DIR}/uwp")
 else()
     set(PAL_SRC "${SRC_DIR}/base")
 endif()
