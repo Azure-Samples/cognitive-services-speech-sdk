@@ -33,8 +33,11 @@ namespace Speech {
 namespace Dialog {
 
 /// <summary>
-/// Connects to a speech enabled dialog backend.
+/// Object used to connect DirectLineSpeech or CustomCommands.
 /// </summary>
+/// <remarks>
+/// Objects of this type are created via the <see cref="FromConfig"/> factory method.
+/// </remarks>
 class DialogServiceConnector : public std::enable_shared_from_this<DialogServiceConnector>, public Utils::NonCopyable, public Utils::NonMovable
 {
 public:
@@ -54,19 +57,34 @@ public:
     }
 
     /// <summary>
-    /// Creates a dialog service connector from a dialog service config and an audio config.
+    /// Creates a dialog service connector from a <see cref="DialogServiceConfig"/> and an <see cref="Audio::AudioConfig" />.
     /// Users should use this function to create a dialog service connector.
     /// </summary>
-    /// <param name="connector_config">Speech translation config.</param>
-    /// <param name="audio_input">Audio config.</param>
+    /// <param name="connectorConfig">Dialog service config.</param>
+    /// <param name="audioConfig">Audio config.</param>
     /// <returns>The shared smart pointer of the created dialog service connector.</returns>
-    static std::shared_ptr<DialogServiceConnector> FromConfig(std::shared_ptr<DialogServiceConfig> connector_config, std::shared_ptr<Audio::AudioConfig> audio_input = nullptr)
+    /// <example>
+    /// <code>
+    /// auto audioConfig = Audio::AudioConfig::FromDefaultMicrophoneInput();
+    /// auto config = CustomCommandsConfig::FromAuthorizationToken("my_app_id","my_auth_token", "my_region");
+    /// auto connector = DialogServiceConnector::FromConfig(config, audioConfig);
+    /// </code>
+    /// </example>
+    /// <remarks>
+    /// When speaking of <see cref="DialogServiceConfig" /> we are referring to one of the classes that inherit from it.
+    /// The specific class to be used depends on the dialog backend being used:
+    /// <ul>
+    ///   <li><see cref="BotFrameworkConfig" /> for DirectLineSpeech</li>
+    ///   <li><see cref="CustomCommandsConfig" /> for CustomCommands</li>
+    /// </ul>
+    /// </remarks>
+    static std::shared_ptr<DialogServiceConnector> FromConfig(std::shared_ptr<DialogServiceConfig> connectorConfig, std::shared_ptr<Audio::AudioConfig> audioConfig = nullptr)
     {
         SPXRECOHANDLE h_connector;
         SPX_THROW_ON_FAIL(::dialog_service_connector_create_dialog_service_connector_from_config(
             &h_connector,
-            Utils::HandleOrInvalid<SPXSPEECHCONFIGHANDLE, DialogServiceConfig>(connector_config),
-            Utils::HandleOrInvalid<SPXAUDIOCONFIGHANDLE, Audio::AudioConfig>(audio_input)
+            Utils::HandleOrInvalid<SPXSPEECHCONFIGHANDLE, DialogServiceConfig>(connectorConfig),
+            Utils::HandleOrInvalid<SPXAUDIOCONFIGHANDLE, Audio::AudioConfig>(audioConfig)
         ));
         return std::shared_ptr<DialogServiceConnector> { new DialogServiceConnector(h_connector) };
     }
