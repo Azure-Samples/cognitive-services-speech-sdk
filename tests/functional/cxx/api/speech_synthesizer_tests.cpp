@@ -600,7 +600,7 @@ TEST_CASE("Pick language - USP", "[api][cxx]")
 {
     auto config = UspSpeechConfig();
     config->SetSpeechSynthesisLanguage("en-GB");
-    auto synthesizer = SpeechSynthesizer::FromConfig(config);
+    auto synthesizer = SpeechSynthesizer::FromConfig(config, nullptr);
 
     synthesizer->SpeakTextAsync("{{{text1}}}"); /* "{{{text1}}}" has now completed rendering to default speakers */
     synthesizer->SpeakTextAsync("{{{text2}}}"); /* "{{{text2}}}" has now completed rendering to default speakers */
@@ -610,7 +610,7 @@ TEST_CASE("Pick voice - USP", "[api][cxx]")
 {
     auto config = UspSpeechConfig();
     config->SetSpeechSynthesisVoiceName("Microsoft Server Speech Text to Speech Voice (en-GB, HazelRUS)");
-    auto synthesizer = SpeechSynthesizer::FromConfig(config);
+    auto synthesizer = SpeechSynthesizer::FromConfig(config, nullptr);
 
     synthesizer->SpeakTextAsync("{{{text1}}}"); /* "{{{text1}}}" has now completed rendering to default speakers */
     synthesizer->SpeakTextAsync("{{{text2}}}"); /* "{{{text2}}}" has now completed rendering to default speakers */
@@ -1133,7 +1133,7 @@ TEST_CASE("Pick language - Mock", "[api][cxx]")
 {
     auto config = MockSpeechConfig();
     config->SetSpeechSynthesisLanguage("en-GB");
-    auto synthesizer = SpeechSynthesizer::FromConfig(config);
+    auto synthesizer = SpeechSynthesizer::FromConfig(config, nullptr);
 
     auto result1 = synthesizer->SpeakTextAsync("{{{text1}}}").get(); /* "{{{text1}}}" has now completed rendering to default speakers */
     auto result2 = synthesizer->SpeakTextAsync("{{{text2}}}").get(); /* "{{{text2}}}" has now completed rendering to default speakers */
@@ -1149,7 +1149,7 @@ TEST_CASE("Pick voice - Mock", "[api][cxx]")
 {
     auto config = MockSpeechConfig();
     config->SetSpeechSynthesisVoiceName("Microsoft Server Speech Text to Speech Voice (en-GB, HazelRUS)");
-    auto synthesizer = SpeechSynthesizer::FromConfig(config);
+    auto synthesizer = SpeechSynthesizer::FromConfig(config, nullptr);
 
     auto result1 = synthesizer->SpeakTextAsync("{{{text1}}}").get(); /* "{{{text1}}}" has now completed rendering to default speakers */
     auto result2 = synthesizer->SpeakTextAsync("{{{text2}}}").get(); /* "{{{text2}}}" has now completed rendering to default speakers */
@@ -1480,6 +1480,20 @@ TEST_CASE("Speak output in streams with all data get since synthesizing result -
     CheckAudioInDataStream(stream, expectedAudioData);
 }
 
+TEST_CASE("Custom voice - REST", "[api][cxx]")
+{
+    string customVoiceEndpoint = "https://" + SubscriptionsRegionsMap[CUSTOM_VOICE_SUBSCRIPTION].Region + ".voice.speech.microsoft.com";
+    customVoiceEndpoint += "/cognitiveservices/v1?deploymentId=" + DefaultSettingsMap[CUSTOM_VOICE_DEPLOYMENT_ID];
+
+    auto config = SpeechConfig::FromEndpoint(customVoiceEndpoint, SubscriptionsRegionsMap[CUSTOM_VOICE_SUBSCRIPTION].Key);
+    config->SetSpeechSynthesisVoiceName(DefaultSettingsMap[CUSTOM_VOICE_VOICE_NAME]);
+    auto synthesizer = SpeechSynthesizer::FromConfig(config, nullptr);
+
+    auto result = synthesizer->SpeakTextAsync("{{{text1}}}").get();
+    SPXTEST_REQUIRE(result->Reason == ResultReason::SynthesizingAudioCompleted);
+    SPXTEST_REQUIRE(result->GetAudioLength() > 0);
+}
+
 TEST_CASE("Custom text-to-speech endpoints", "[api][cxx]")
 {
     string speechHost = SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Region + ".tts.speech.microsoft.com";
@@ -1489,7 +1503,7 @@ TEST_CASE("Custom text-to-speech endpoints", "[api][cxx]")
     SPXTEST_SECTION("Host only - REST")
     {
         auto config = SpeechConfig::FromHost(speechHostRest, SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
-        auto synthesizer = SpeechSynthesizer::FromConfig(config);
+        auto synthesizer = SpeechSynthesizer::FromConfig(config, nullptr);
 
         auto result = synthesizer->SpeakTextAsync("{{{text1}}}").get();
         SPXTEST_REQUIRE(result->Reason == ResultReason::SynthesizingAudioCompleted);
@@ -1499,7 +1513,7 @@ TEST_CASE("Custom text-to-speech endpoints", "[api][cxx]")
     SPXTEST_SECTION("Host only - USP")
     {
         auto config = SpeechConfig::FromHost(speechHostUsp, SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
-        auto synthesizer = SpeechSynthesizer::FromConfig(config);
+        auto synthesizer = SpeechSynthesizer::FromConfig(config, nullptr);
 
         auto result = synthesizer->SpeakTextAsync("{{{text2}}}").get();
         SPXTEST_REQUIRE(result->Reason == ResultReason::SynthesizingAudioCompleted);
@@ -1510,7 +1524,7 @@ TEST_CASE("Custom text-to-speech endpoints", "[api][cxx]")
     {
         const auto host = speechHostRest + "/cognitiveservices/v1";
         auto config = SpeechConfig::FromHost(host, SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
-        REQUIRE_THROWS(SpeechSynthesizer::FromConfig(config));
+        REQUIRE_THROWS(SpeechSynthesizer::FromConfig(config, nullptr));
     }
 
     SPXTEST_SECTION("Host with path - USP") // not allowed

@@ -27,6 +27,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public SpeechConfig uspConfig;
         public SpeechConfig uspHostConfig;
         public SpeechConfig mockConfig;
+        public SpeechConfig customVoiceConfig;
 
         private static Config _config;
 
@@ -53,6 +54,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             uspHostConfig = SpeechConfig.FromHost(new Uri(uspHost), subscriptionKey);
             mockConfig = SpeechConfig.FromSubscription("None", "None");
             mockConfig.SetProperty("CARBON-INTERNAL-UseTtsEngine-Mock", "true");
+            var customVoiceRegion = SubscriptionsRegionsMap[SubscriptionsRegionsKeys.CUSTOM_VOICE_SUBSCRIPTION].Region;
+            var customVoiceDeploymentId = DefaultSettingsMap[DefaultSettingKeys.CUSTOM_VOICE_DEPLOYMENT_ID];
+            var customVoiceEndpoint = $"https://{customVoiceRegion}.voice.speech.microsoft.com/cognitiveservices/v1";
+            customVoiceEndpoint += "?deploymentId=" + customVoiceDeploymentId;
+            customVoiceConfig = SpeechConfig.FromEndpoint(new Uri(customVoiceEndpoint), SubscriptionsRegionsMap[SubscriptionsRegionsKeys.CUSTOM_VOICE_SUBSCRIPTION].Key);
+            customVoiceConfig.SpeechSynthesisVoiceName = DefaultSettingsMap[DefaultSettingKeys.CUSTOM_VOICE_VOICE_NAME];
         }
     }
 }

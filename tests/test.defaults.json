@@ -13,7 +13,9 @@
   "ConversationTranslatorClientId": "D5253FF2-C6B4-4A72-852A-22F8007EC9E8",
   "Host": "",
   "SerializedSpeechActivityFile": "audio/activityWithSpeech.json",
-  "Keyword": "Computer"
+  "Keyword": "Computer",
+  "CustomVoiceDeploymentId": "6b231818-6b8c-4452-9a69-2009355d5d7a",
+  "CustomVoiceVoiceName": "sdk-test"
 }
 
 

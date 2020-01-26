@@ -113,6 +113,10 @@ variables:
       "ConversationTranslatorSubscription": {
         "Key": "$(DialogSubscriptionKey)",
         "Region": "$(DialogRegion)"
+      },
+      "CustomVoiceSubscription": {
+        "Key": "$(NorthEuropeKeySkyMan)",
+        "Region": "northeurope"
       }
     }
   SPEECHSDK_MAVEN_ARTIFACT_ID: client-sdk

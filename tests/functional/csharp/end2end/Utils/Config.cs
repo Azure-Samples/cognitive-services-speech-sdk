@@ -47,6 +47,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils
         public static string CONVERSATION_TRANSCRIPTION_PROD_SUBSCRIPTION => "ConversationTranscriptionPRODSubscription";
         public static string CONVERSATION_TRANSCRIPTION_PPE_SUBSCRIPTION => "ConversationTranscriptionPPESubscription";
         public static string CONVERSATION_TRANSLATOR => "ConversationTranslatorSubscription";
+        public static string CUSTOM_VOICE_SUBSCRIPTION => "CustomVoiceSubscription";
     }
 
     // Default settings keys
@@ -64,6 +65,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils
         public static string CONVERSATION_TRANSLATOR_HOST => "ConversationTranslatorHost";
         public static string CONVERSATION_TRANSLATOR_SPEECH_ENDPOINT => "ConversationTranslatorSpeechEndpoint";
         public static string CONVERSATION_TRANSLATOR_CLIENTID => "ConversationTranslatorClientId";
+        public static string CUSTOM_VOICE_DEPLOYMENT_ID => "CustomVoiceDeploymentId";
+        public static string CUSTOM_VOICE_VOICE_NAME => "CustomVoiceVoiceName";
         public static string SERIALIZED_SPEECH_ACTIVITY_FILE => "SerializedSpeechActivityFile";
     }
 

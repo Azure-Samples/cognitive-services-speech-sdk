@@ -1619,6 +1619,18 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
+        public async Task TestSynthesisWithCustomVoice()
+        {
+            using (var synthesizer = new SpeechSynthesizer(customVoiceConfig, null))
+            {
+                using (var result = await synthesizer.SpeakTextAsync("text"))
+                {
+                    CheckResult(result);
+                }
+            }
+        }
+
+        [TestMethod]
         public async Task TestSynthesisConfigFromHost()
         {
             using (var synthesizer = new SpeechSynthesizer(restHostConfig))

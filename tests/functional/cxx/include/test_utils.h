@@ -69,6 +69,7 @@ namespace Config
 #define CONVERSATION_TRANSCRIPTION_PROD_SUBSCRIPTION "ConversationTranscriptionPRODSubscription"
 #define CONVERSATION_TRANSCRIPTION_PPE_SUBSCRIPTION "ConversationTranscriptionPPESubscription"
 #define CONVERSATION_TRANSLATOR_SUBSCRIPTION "ConversationTranslatorSubscription"
+#define CUSTOM_VOICE_SUBSCRIPTION "CustomVoiceSubscription"
 
 // Default settings keys
 #define ENDPOINT "Endpoint"
@@ -83,6 +84,8 @@ namespace Config
 #define CONVERSATION_TRANSLATOR_HOST "ConversationTranslatorHost"
 #define CONVERSATION_TRANSLATOR_SPEECH_ENDPOINT "ConversationTranslatorSpeechEndpoint"
 #define CONVERSATION_TRANSLATOR_CLIENTID "ConversationTranslatorClientId"
+#define CUSTOM_VOICE_DEPLOYMENT_ID "CustomVoiceDeploymentId"
+#define CUSTOM_VOICE_VOICE_NAME "CustomVoiceVoiceName"
 
 // Audio file and utterances keys
 #define FILE_PATH "FilePath"
