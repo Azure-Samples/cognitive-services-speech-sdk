@@ -901,7 +901,7 @@ jobs:
       cd tests/functional/java
       sed -i "s/buildVersion1234/$RELEASE_SDK_VERSION_FOR_USE/g" pom.xml
       cat pom.xml
-    # mvn clean test -Dtest=tests.unit.RemoteConversationTranscriptionTest
+      mvn clean test -Dtest=tests.unit.RemoteConversationTranscriptionTest
     displayName: run unit test for remote conversation transcription package
   - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
     displayName: 'Sign *.jar'
