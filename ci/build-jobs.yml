@@ -77,12 +77,6 @@ jobs:
       versionSpec: $(SPEECHSDK_NUGET_VERSION)
   - bash: ./ci/install-build-dependencies.sh
     displayName: Install build dependencies
-  - bash: |
-      rm -f ./tests/test.subscriptions.regions.json
-      cat > ./tests/test.subscriptions.regions.json << HEREDOC
-        $(KEYS_AND_REGIONS)
-      HEREDOC
-    displayName: Write Subscriptions Regions Data
   - task: CMake@1
     displayName: Generate solution
     inputs:
@@ -98,6 +92,10 @@ jobs:
       # Needed for SDL:
       createLogFile: true
   # Checks BEGIN
+  - bash: |
+      rm -f source/bindings/python/test.audio.utterances.json
+      ls -al source/bindings/python
+    displayName: Remove test data
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-roslynanalyzers.RoslynAnalyzers@2
     displayName: 'Run Roslyn Analyzers'
     # Note: source/bindings/csharp/CMakeLists.txt (Microsoft.CognitiveServices.Speech.csharp.csproj.template)

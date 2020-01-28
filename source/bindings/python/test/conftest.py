@@ -30,8 +30,8 @@ def pytest_addoption(parser):
 
 
 @pytest.fixture
-def config_settings(request):
-    fileName = os.path.abspath(os.path.join(os.getcwd(), "test.settings.json"))
+def default_settings(request):
+    fileName = os.path.abspath(os.path.join(os.getcwd(), "test.defaults.json"))
     try:
         with open(fileName) as data_file:
             return json.load(data_file)
@@ -39,32 +39,50 @@ def config_settings(request):
         return None
 
 @pytest.fixture
-def subscription(request, config_settings):
+def subscriptions_regions_settings(request):
+    fileName = os.path.abspath(os.path.join(os.getcwd(), "test.subscriptions.regions.json"))
+    try:
+        with open(fileName) as data_file:
+            return json.load(data_file)
+    except:
+        return None
+
+@pytest.fixture
+def audio_utterances_settings(request):
+    fileName = os.path.abspath(os.path.join(os.getcwd(), "test.audio.utterances.json"))
+    try:
+        with open(fileName) as data_file:
+            return json.load(data_file)
+    except:
+        return None
+
+@pytest.fixture
+def subscription(request, subscriptions_regions_settings):
     subscription = request.config.getoption("--subscription")
     if subscription is None:
-        if config_settings is not None:
-            subscription = config_settings['UnifiedSpeechSubscriptionKey']
+        if subscriptions_regions_settings is not None:
+            subscription = subscriptions_regions_settings['UnifiedSpeechSubscription']['Key']
 
     return subscription
 
 
 @pytest.fixture
-def luis_subscription(request, config_settings):
+def luis_subscription(request, subscriptions_regions_settings):
     luis_subscription = request.config.getoption("--luis-subscription")
     if luis_subscription is None:
-        if config_settings is not None:
+        if subscriptions_regions_settings is not None:
             luis_subscription = \
-                config_settings['LanguageUnderstandingSubscriptionKey']
+                subscriptions_regions_settings['LanguageUnderstandingSubscription']['Key']
 
     return luis_subscription
 
 
 @pytest.fixture
-def speech_region(request, config_settings):
+def speech_region(request, subscriptions_regions_settings):
     region = request.config.getoption("--speech-region")
     if region is None:
-        if config_settings is not None:
-            region = config_settings['Region']
+        if subscriptions_regions_settings is not None:
+            region = subscriptions_regions_settings['UnifiedSpeechSubscription']['Region']
 
     if region == "":
         region = None
@@ -73,22 +91,22 @@ def speech_region(request, config_settings):
 
 
 @pytest.fixture
-def luis_region(request, config_settings):
+def luis_region(request, subscriptions_regions_settings):
     luis_region = request.config.getoption("--luis-region")
     if luis_region is None:
-        if config_settings is not None:
-            luis_region = config_settings['LanguageUnderstandingServiceRegion']
+        if subscriptions_regions_settings is not None:
+            luis_region = subscriptions_regions_settings['LanguageUnderstandingSubscription']['Region']
 
     return luis_region
 
 
 @pytest.fixture
-def endpoint(request, config_settings):
+def endpoint(request, default_settings):
     """specify an endpoint. If given, it overrides the region settings for speech recognizers."""
     endpoint = request.config.getoption("--endpoint")
     if endpoint is None:
-        if config_settings is not None:
-            endpoint = config_settings['Endpoint']
+        if default_settings is not None:
+            endpoint = default_settings['Endpoint']
 
     if endpoint == "":
         endpoint = None
@@ -97,13 +115,13 @@ def endpoint(request, config_settings):
 
 
 @pytest.fixture
-def host(request, config_settings):
+def host(request, default_settings):
     """specify a host. If given, it overrides the
        region settings for speech recognizers."""
     host = request.config.getoption("--host")
     if host is None:
-        if config_settings is not None:
-            host = config_settings['Host']
+        if default_settings is not None:
+            host = default_settings['Host']
 
     if host == "":
         host = None
@@ -121,11 +139,11 @@ def default_speech_auth(subscription, speech_region, endpoint, host):
 
 
 @pytest.fixture
-def language_understanding_app_id(request, config_settings):
+def language_understanding_app_id(request, default_settings):
     language_understanding_app_id = request.config.getoption("--language-understanding-app-id")
     if language_understanding_app_id is None:
-        if config_settings is not None:
-            language_understanding_app_id = config_settings['LanguageUnderstandingHomeAutomationAppId']
+        if default_settings is not None:
+            language_understanding_app_id = default_settings['LanguageUnderstandingHomeAutomationAppId']
 
     return language_understanding_app_id
 
@@ -197,12 +215,12 @@ speech_input_data_raw = {'weather':
 
 
 @pytest.fixture
-def speech_input(request, config_settings):
+def speech_input(request, default_settings):
     inputdir = request.config.getoption("--inputdir")
 
     if inputdir is None:
-        if config_settings is not None:
-            inputdir = config_settings['InputDir']
+        if default_settings is not None:
+            inputdir = default_settings['InputDir']
 
     inputdir = os.path.abspath(os.path.join(os.getcwd(),
                                             inputdir.lstrip('./\\'),
@@ -236,12 +254,12 @@ intent_input_data_raw = {
 
 
 @pytest.fixture
-def intent_input(request, config_settings):
+def intent_input(request, default_settings):
     inputdir = request.config.getoption("--inputdir")
 
     if inputdir is None:
-        if config_settings is not None:
-            inputdir = config_settings['InputDir']
+        if default_settings is not None:
+            inputdir = default_settings['InputDir']
 
     inputdir = os.path.abspath(os.path.join(os.getcwd(),
                                inputdir.lstrip('./\\'),
@@ -270,12 +288,12 @@ kws_input_data_raw = {
 
 
 @pytest.fixture
-def kws_input(request, config_settings):
+def kws_input(request, default_settings):
     inputdir = request.config.getoption("--inputdir")
 
     if inputdir is None:
-        if config_settings is not None:
-            inputdir = config_settings['InputDir']
+        if default_settings is not None:
+            inputdir = default_settings['InputDir']
 
     try:
         args = dict(zip(KwsInput._fields, kws_input_data_raw[request.param]))

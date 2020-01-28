@@ -23,6 +23,10 @@
       <name>Microsoft Cognitive Services Speech Maven Repository</name>
       <url>https://csspeechstorage.blob.core.windows.net/maven/</url>
     </repository>
+    <repository>
+      <id>local-maven-repo</id>
+      <url>file:///${project.basedir}/lib</url>
+  </repository>
   </repositories>
 
   <dependencies>
@@ -40,7 +44,7 @@
     <dependency>
         <groupId>com.microsoft.cognitiveservices.speech.remoteconversation</groupId>
         <artifactId>remote-conversation</artifactId>
-        <version>buildVersion1234</version>
+        <version>1.8.0</version>
     </dependency>
   </dependencies>
   <build>

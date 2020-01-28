@@ -488,6 +488,11 @@ if(${CMAKE_VERSION} VERSION_GREATER "3.14.4")
     file(CREATE_LINK "${TESTS}/test.audio.utterances.json" "${CMAKE_CURRENT_BINARY_DIR}/bin/test.audio.utterances.json" RESULT LinkResult SYMBOLIC)
     file(CREATE_LINK "${TESTS}/input" "${CMAKE_CURRENT_BINARY_DIR}/bin/input" RESULT LinkResult SYMBOLIC)
     file(CREATE_LINK "${CMAKE_CURRENT_BINARY_DIR}/lib" "${CARBON_ROOT}/tests/functional/java/lib" RESULT LinkResult SYMBOLIC)
+    
+    file(CREATE_LINK "${TESTS}/test.defaults.json" "${CMAKE_CURRENT_SOURCE_DIR}/source/bindings/python/test.defaults.json" RESULT LinkResult SYMBOLIC)
+    file(CREATE_LINK "${TESTS}/test.subscriptions.regions.json" "${CMAKE_CURRENT_SOURCE_DIR}/source/bindings/python/test.subscriptions.regions.json" RESULT LinkResult SYMBOLIC)
+    file(CREATE_LINK "${TESTS}/test.audio.utterances.json" "${CMAKE_CURRENT_SOURCE_DIR}/source/bindings/python/test.audio.utterances.json" RESULT LinkResult SYMBOLIC)
+    file(CREATE_LINK "${TESTS}/input" "${CMAKE_CURRENT_SOURCE_DIR}/source/bindings/python/input" RESULT LinkResult SYMBOLIC)
 else()
     if(NOT EXISTS "${TESTS}/input/unidec")
       if(EXISTS "${CARBON_EXTERNAL}/unidec/Unidec.Model")
@@ -521,6 +526,11 @@ else()
     file(COPY "${TESTS}/test.subscriptions.regions.json" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/bin")
     file(COPY "${TESTS}/test.audio.utterances.json" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/bin")
     file(COPY "${TESTS}/input" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/bin")
+
+    file(COPY "${TESTS}/test.defaults.json" DESTINATION "${CMAKE_CURRENT_SOURCE_DIR}/source/bindings/python")
+    file(COPY "${TESTS}/test.subscriptions.regions.json" DESTINATION "${CMAKE_CURRENT_SOURCE_DIR}/source/bindings/python")
+    file(COPY "${TESTS}/test.audio.utterances.json" DESTINATION "${CMAKE_CURRENT_SOURCE_DIR}/source/bindings/python")
+    file(COPY "${TESTS}/input" DESTINATION "${CMAKE_CURRENT_SOURCE_DIR}/source/bindings/python")
 endif()
 
 
