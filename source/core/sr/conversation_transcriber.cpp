@@ -47,14 +47,17 @@ void CSpxConversationTranscriber::LeaveConversation()
 void CSpxConversationTranscriber::Init()
 {
     SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+    EnsureDefaultSession();
+    CheckLogFilename();
     m_has_participant = true;
 }
 
 //todo:
 void CSpxConversationTranscriber::Term()
 {
-
+    SPX_DBG_TRACE_FUNCTION();
 }
+
 void CSpxConversationTranscriber::SetAudioConfig(std::weak_ptr<ISpxAudioConfig> audio_config)
 {
     m_audioInput = audio_config;
