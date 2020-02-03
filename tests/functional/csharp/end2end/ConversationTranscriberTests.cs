@@ -501,6 +501,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
+        [Ignore]
         [TestMethod]
         public async Task ConversationDefaultLanguageAndDetailedOutput()
         {
