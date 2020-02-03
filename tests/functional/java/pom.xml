@@ -44,7 +44,7 @@
     <dependency>
         <groupId>com.microsoft.cognitiveservices.speech.remoteconversation</groupId>
         <artifactId>remote-conversation</artifactId>
-        <version>1.8.0</version>
+        <version>buildVersion1234</version>
     </dependency>
   </dependencies>
   <build>

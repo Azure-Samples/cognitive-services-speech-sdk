@@ -207,12 +207,9 @@ jobs:
           displayName: Run LongRunning tests
           condition: and(eq(variables['SPEECHSDK_RUN_TESTS'], 'true'), eq(variables['SPEECHSDK_BUILD_TYPE'], 'int'), eq(variables['BuildPlatform'], 'x64'), eq(variables['BuildConfiguration'], 'Release'))
           continueOnError: ${{ parameters.continueOnTestFailure }}
-  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+  - bash: |
+      ./ci/drop/bindrop.sh $(BuildPlatform) $(BuildConfiguration) "$(cygpath -au "$(Build.ArtifactStagingDirectory)/$(BuildPlatform)/$(BuildConfiguration)")"
     displayName: Create drop files
-    inputs:
-      type: FilePath
-      scriptPath: './ci/drop/bindrop.sh'
-      args: '$(BuildPlatform) $(BuildConfiguration) $(Build.ArtifactStagingDirectory)/$(BuildPlatform)/$(BuildConfiguration)'
   - task: PublishBuildArtifacts@1
     displayName: Publish drop
     inputs:
