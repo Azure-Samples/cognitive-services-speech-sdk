@@ -300,74 +300,73 @@ inline void to_json(nlohmann::json& jsonString, const Utterance& utterance)
 
 inline void from_json(const nlohmann::json& jsonString, Utterance& utterance)
 {
-    try {
+    if (jsonString.contains(UTTERANCE_TEXT)) {
         jsonString.at(UTTERANCE_TEXT).get_to(utterance.Text);
     }
-    catch (std::exception exception)
-    {
+    else {
         utterance.Text = "";
     }
-    try {
+
+    if (jsonString.contains(PROFANITY_RAW)) {
         jsonString.at(PROFANITY_RAW).get_to(utterance.ProfanityRaw);
     }
-    catch (std::exception exception)
-    {
+    else {
         utterance.ProfanityRaw = "";
     }
-    try {
+
+    if (jsonString.contains(PROFANITY_MASKED)) {
         jsonString.at(PROFANITY_MASKED).get_to(utterance.ProfanityMasked);
     }
-    catch (std::exception exception)
-    {
+    else {
         utterance.ProfanityMasked = "";
     }
-    try {
+
+    if (jsonString.contains(PROFANITY_MASKED_PATTERN)) {
         jsonString.at(PROFANITY_MASKED_PATTERN).get_to(utterance.ProfanityMaskedPattern);
     }
-    catch (std::exception exception)
-    {
+    else {
         utterance.ProfanityMaskedPattern = "";
     }
-    try {
+
+    if (jsonString.contains(PROFANITY_REMOVED)) {
         jsonString.at(PROFANITY_REMOVED).get_to(utterance.ProfanityRemoved);
     }
-    catch (std::exception exception)
-    {
+    else {
         utterance.ProfanityRemoved = "";
     }
-    try {
+
+    if (jsonString.contains(PROFANITY_TAGGED)) {
         jsonString.at(PROFANITY_TAGGED).get_to(utterance.ProfanityTagged);
     }
-    catch (std::exception exception)
-    {
+    else {
         utterance.ProfanityTagged = "";
     }
-    try {
+
+    if (jsonString.contains(AUDIO_OFFSET)) {
         jsonString.at(AUDIO_OFFSET).get_to(utterance.AudioOffset);
     }
-    catch (std::exception exception)
-    {
+    else {
         utterance.AudioOffset = -1;
     }
-    try {
+
+    if (jsonString.contains(AUDIO_DURATION)) {
         jsonString.at(AUDIO_DURATION).get_to(utterance.AudioDuration);
     }
-    catch (std::exception exception)
-    {
+    else {
         utterance.AudioDuration = -1;
     }
-    try {
+
+    if (jsonString.contains(TEXT_OFFSET)) {
         jsonString.at(TEXT_OFFSET).get_to(utterance.TextOffset);
     }
-    catch (std::exception exception)
-    {
+    else {
         utterance.TextOffset = -1;
     }
-    try {
+
+    if (jsonString.contains(SSML_OFFSET)) {
         jsonString.at(SSML_OFFSET).get_to(utterance.SsmlOffset);
     }
-    catch (std::exception exception)
-    {
+    else {
         utterance.SsmlOffset = -1;
     }
 }
@@ -380,25 +379,24 @@ inline void to_json(nlohmann::json& jsonString, const AudioEntry& audioEntry)
 
 inline void from_json(const nlohmann::json& jsonString, AudioEntry& audioEntry)
 {
-    try {
+    if (jsonString.contains(FILE_PATH)) {
         jsonString.at(FILE_PATH).get_to(audioEntry.FilePath);
     }
-    catch (nlohmann::json::exception exception)
-    {
+    else {
         audioEntry.FilePath = "";
     }
-    try {
+
+    if (jsonString.contains(NATIVE_LANGUAGE)) {
         jsonString.at(NATIVE_LANGUAGE).get_to(audioEntry.NativeLanguage);
     }
-    catch (nlohmann::json::exception exception)
-    {
+    else {
         audioEntry.NativeLanguage = "";
     }
-    try {
+
+    if(jsonString.contains(UTTERANCES)) {
         audioEntry.Utterances = jsonString.at(UTTERANCES).get<std::map<std::string, std::vector<Utterance>>>();
     }
-    catch (nlohmann::json::exception exception)
-    {
+    else {
         audioEntry.Utterances.clear();
     }
 }
