@@ -219,3 +219,12 @@ function(PARSE_PLATFORM)
   set("${OPT_PREFIX}_OS" "${_os}" PARENT_SCOPE)
 
 endfunction()
+
+function(CREATE_LINK_WITH_COPY_FAILOVER LINK_SOURCE LINK_TARGET_PATH LINK_TARGET_FILE_NAME )
+  file(CREATE_LINK ${LINK_SOURCE} ${LINK_TARGET_PATH}${LINK_TARGET_FILE_NAME} RESULT linkResult SYMBOLIC)
+  if(NOT ${linkResult} EQUAL 0)
+    message("Could not generate symbolic link for ${LINK_TARGET_PATH}${LINK_TARGET_FILE_NAME} will copy file instead. This means that you will have to update ${LINK_TARGET_FILE_NAME} in ${CARBON_ROOT}/tests as well as every other place this file is copied. (If you run cmake as admin this won't happen)")
+    message("")
+    file(COPY ${LINK_SOURCE} DESTINATION ${LINK_TARGET_PATH})
+  endif()
+endfunction()
