@@ -1629,6 +1629,66 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 }
             }
         }
+        
+        [TestMethod]
+        public async Task SynthesisWithSovereignCloudToken()
+        {
+            var mooncakeSubscriptionKey = SubscriptionsRegionsMap[SubscriptionsRegionsKeys.MOONCAKE_SUBSCRIPTION].Key;
+            var mooncakeRegion = SubscriptionsRegionsMap[SubscriptionsRegionsKeys.MOONCAKE_SUBSCRIPTION].Region;
+            var token = await GetToken(mooncakeSubscriptionKey, mooncakeRegion, "azure.cn");
+
+            var restEndpoint = $"https://{mooncakeRegion}.tts.speech.azure.cn/cognitiveservices/v1?TrafficType=Test";
+            var restMooncakeConfig = SpeechConfig.FromEndpoint(new Uri(restEndpoint));
+            using (var synthesizer = new SpeechSynthesizer(restMooncakeConfig, null))
+            {
+                synthesizer.AuthorizationToken = token;
+                using (var result = await synthesizer.SpeakTextAsync("{{{text}}}"))
+                {
+                    CheckResult(result);
+                }
+            }
+
+            var uspEndpoint = $"wss://{mooncakeRegion}.tts.speech.azure.cn/cognitiveservices/websocket/v1?TrafficType=Test";
+            var uspMooncakeConfig = SpeechConfig.FromEndpoint(new Uri(uspEndpoint));
+            using (var synthesizer = new SpeechSynthesizer(uspMooncakeConfig, null))
+            {
+                synthesizer.AuthorizationToken = token;
+                using (var result = await synthesizer.SpeakTextAsync("{{{text}}}"))
+                {
+                    CheckResult(result);
+                }
+            }
+        }
+
+        [TestMethod]
+        public async Task SynthesisWithSovereignCloudFromHost()
+        {
+            var mooncakeSubscriptionKey = SubscriptionsRegionsMap[SubscriptionsRegionsKeys.MOONCAKE_SUBSCRIPTION].Key;
+            var mooncakeRegion = SubscriptionsRegionsMap[SubscriptionsRegionsKeys.MOONCAKE_SUBSCRIPTION].Region;
+            var token = await GetToken(mooncakeSubscriptionKey, mooncakeRegion, "azure.cn");
+
+            var restHost = $"https://{mooncakeRegion}.tts.speech.azure.cn";
+            var restMooncakeConfig = SpeechConfig.FromHost(new Uri(restHost));
+            using (var synthesizer = new SpeechSynthesizer(restMooncakeConfig, null))
+            {
+                synthesizer.AuthorizationToken = token;
+                using (var result = await synthesizer.SpeakTextAsync("{{{text}}}"))
+                {
+                    CheckResult(result);
+                }
+            }
+
+            var uspHost = $"wss://{mooncakeRegion}.tts.speech.azure.cn";
+            var uspMooncakeConfig = SpeechConfig.FromHost(new Uri(uspHost));
+            using (var synthesizer = new SpeechSynthesizer(uspMooncakeConfig, null))
+            {
+                synthesizer.AuthorizationToken = token;
+                using (var result = await synthesizer.SpeakTextAsync("{{{text}}}"))
+                {
+                    CheckResult(result);
+                }
+            }
+        }
 
         [TestMethod]
         public async Task TestSynthesisConfigFromHost()

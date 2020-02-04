@@ -26,5 +26,9 @@
   "CustomVoiceSubscription": {
     "Key": "",
     "Region": "northeurope"
+  },
+  "MooncakeSubscription": {
+    "Key": "",
+    "Region": "chinaeast2"
   }
 }

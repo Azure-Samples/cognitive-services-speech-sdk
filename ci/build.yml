@@ -117,6 +117,10 @@ variables:
       "CustomVoiceSubscription": {
         "Key": "$(NorthEuropeKeySkyMan)",
         "Region": "northeurope"
+      },
+      "MooncakeSubscription": {
+        "Key": "$(KeyChinaEast2Speech)",
+        "Region": "chinaeast2"
       }
     }
   SPEECHSDK_MAVEN_ARTIFACT_ID: client-sdk

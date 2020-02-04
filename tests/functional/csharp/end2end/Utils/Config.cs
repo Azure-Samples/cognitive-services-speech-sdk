@@ -48,6 +48,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils
         public static string CONVERSATION_TRANSCRIPTION_PPE_SUBSCRIPTION => "ConversationTranscriptionPPESubscription";
         public static string CONVERSATION_TRANSLATOR => "ConversationTranslatorSubscription";
         public static string CUSTOM_VOICE_SUBSCRIPTION => "CustomVoiceSubscription";
+        public static string MOONCAKE_SUBSCRIPTION => "MooncakeSubscription";
     }
 
     // Default settings keys
@@ -173,12 +174,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils
             return byteArrList;
         }
 
-        public static async Task<string> GetToken(string key, string region)
+        public static async Task<string> GetToken(string key, string region, string hostSuffix = "microsoft.com")
         {
             using (HttpClient client = new HttpClient())
             {
                 client.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", key);
-                UriBuilder uriBuilder = new UriBuilder($"https://{region}.api.cognitive.microsoft.com/sts/v1.0");
+                UriBuilder uriBuilder = new UriBuilder($"https://{region}.api.cognitive.{hostSuffix}/sts/v1.0");
                 uriBuilder.Path += "/issueToken";
 
                 using (HttpResponseMessage result = await client.PostAsync(uriBuilder.Uri.AbsoluteUri, null))
