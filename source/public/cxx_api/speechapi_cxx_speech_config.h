@@ -67,7 +67,7 @@ public:
         return std::shared_ptr<SpeechConfig>(ptr);
     }
 
-    // <summary>
+    /// <summary>
     /// Creates an instance of the speech config with specified endpoint and subscription.
     /// This method is intended only for users who use a non-standard service endpoint.
     /// Note: The query parameters specified in the endpoint URI are not changed, even if they are set by any other APIs.

@@ -6,6 +6,7 @@
 //
 
 #include "stdafx.h"
+#include <sstream>
 #include <spxdebug.h>
 #include <http_utils.h>
 #include <site_helpers.h>
@@ -63,7 +64,7 @@ namespace ConversationTranslation {
     }
 
     template <typename I>
-    static inline shared_ptr<I> As(shared_ptr<ISpxTranslationRecognizer> reco)
+    static inline shared_ptr<I> As(shared_ptr<ISpxRecognizer> reco)
     {
         SPX_IFTRUE_THROW_HR(reco == nullptr, SPXERR_UNINITIALIZED);
         auto cast = reco->QueryInterface<I>();
@@ -71,7 +72,7 @@ namespace ConversationTranslation {
         return cast;
     }
 
-    static inline shared_ptr<ISpxNamedProperties> AsNamedProperties(shared_ptr<ISpxTranslationRecognizer> reco)
+    static inline shared_ptr<ISpxNamedProperties> AsNamedProperties(shared_ptr<ISpxRecognizer> reco)
     {
         return As<ISpxNamedProperties>(reco);
     }
@@ -235,9 +236,7 @@ namespace ConversationTranslation {
 
         // we should create the TranslatorRecognizer instance here but NOT call Init()
         // on it, nor set its site
-        auto recognizer = SpxCreateObject<ISpxRecognizer>("CSpxTranslationRecognizer", SpxGetRootSite());
-        SPX_IFTRUE_THROW_HR(recognizer == nullptr, SPXERR_UNEXPECTED_CREATE_OBJECT_FAILURE);
-        m_recognizer = dynamic_pointer_cast<ISpxTranslationRecognizer>(recognizer);
+        m_recognizer = SpxCreateObject<ISpxRecognizer>("CSpxTranslationRecognizer", SpxGetRootSite());
         SPX_IFTRUE_THROW_HR(m_recognizer == nullptr, SPXERR_UNEXPECTED_CREATE_OBJECT_FAILURE);
     }
 
@@ -253,7 +252,9 @@ namespace ConversationTranslation {
         ThreadingHelpers::Init();
 
         shared_ptr<ISpxRecognizerSite> site = GetSite();
-        auto genericSite = dynamic_pointer_cast<ISpxGenericSite>(site);
+        SPX_IFTRUE_THROW_HR(site == nullptr, SPXERR_UNEXPECTED_CONVERSATION_TRANSLATOR_SITE_FAILURE);
+
+        auto genericSite = SpxQueryInterface<ISpxGenericSite>(site);
         SPX_IFTRUE_THROW_HR(genericSite == nullptr, SPXERR_UNEXPECTED_CONVERSATION_TRANSLATOR_SITE_FAILURE);
 
         auto factory = SpxQueryService<ISpxObjectFactory>(site);
@@ -272,7 +273,7 @@ namespace ConversationTranslation {
         auto withSite = As<ISpxObjectWithSite>(m_recognizer);
         withSite->SetSite(genericSite);
 
-        ConnectTranslationRecognizer(m_recognizer);
+        ConnectRecognizer(m_recognizer);
     }
 
     void CSpxConversationTranslator::Term()
@@ -835,6 +836,27 @@ namespace ConversationTranslation {
         SetStringValue(ConversationKeys::Conversation_Token, internals->GetConversationArgs()->SessionToken.c_str());
         SetStringValue(PropertyId::SpeechServiceAuthorization_Token, internals->GetConversationArgs()->CognitiveSpeechAuthToken.c_str());
 
+        if (IsMultiChannelAudio())
+        {
+            // set the additional endpoint URL query parameters
+            auto args = internals->GetConversationArgs();
+
+            std::string existingQuery = GetStringValue(PropertyId::SpeechServiceConnection_UserDefinedQueryParameters);
+
+            std::ostringstream queryParms; 
+            queryParms << existingQuery;
+            if (!existingQuery.empty())
+            {
+                queryParms << "&";
+            }
+
+            queryParms << "language=" << HttpUtils::UrlEscape(GetStringValue(PropertyId::SpeechServiceConnection_RecoLanguage))
+                       << "&meetingId=" << HttpUtils::UrlEscape(args->RoomCode)
+                       << "&deviceId=" << HttpUtils::UrlEscape(args->ParticipantId);
+
+            SetStringValue(PropertyId::SpeechServiceConnection_UserDefinedQueryParameters, queryParms.str().c_str());
+        }
+
         try
         {
             // The recognizer code is very finicky about not allowing you to set values that are already
@@ -901,13 +923,10 @@ namespace ConversationTranslation {
         _m_conv = nullptr;
     }
 
-    void CSpxConversationTranslator::ConnectTranslationRecognizer(std::shared_ptr<ISpxTranslationRecognizer> recognizer)
+    void CSpxConversationTranslator::ConnectRecognizer(std::shared_ptr<ISpxRecognizer> recognizer)
     {
         auto events = recognizer->QueryInterface<ISpxRecognizerEvents>();
         SPX_IFTRUE_THROW_HR(events == nullptr, SPXERR_UNEXPECTED_CREATE_OBJECT_FAILURE);
-
-        auto baseRecognizer = recognizer->QueryInterface<ISpxRecognizer>();
-        SPX_IFTRUE_THROW_HR(baseRecognizer == nullptr, SPXERR_UNEXPECTED_CREATE_OBJECT_FAILURE);
 
         AddHandler(events->SessionStarted, this, &CSpxConversationTranslator::OnRecognizerSessionStarted);
         AddHandler(events->SessionStopped, this, &CSpxConversationTranslator::OnRecognizerSessionStopped);
@@ -920,7 +939,7 @@ namespace ConversationTranslation {
         auto session = GetDefaultSession();
         if (session != nullptr)
         {
-            session->AddRecognizer(baseRecognizer);
+            session->AddRecognizer(recognizer);
         }
         else
         {
@@ -1017,6 +1036,12 @@ namespace ConversationTranslation {
     {
         auto convInternals = m_convInternals.lock();
         return convInternals != nullptr && convInternals->IsConnected();
+    }
+
+    inline bool CSpxConversationTranslator::IsMultiChannelAudio() const
+    {
+        auto multiChannelAudio = GetStringValue(ConversationKeys::Conversation_MultiChannelAudio, "false");
+        return PAL::ToBool(multiChannelAudio);
     }
 
     void CSpxConversationTranslator::ToFailedState(bool isRecognizer, CancellationErrorCode error, const std::string& message)

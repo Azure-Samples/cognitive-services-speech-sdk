@@ -260,7 +260,9 @@ namespace ConversationTranslation {
             m_args = make_unique<ConversationArgs>(m_manager->CreateOrJoin(create, m_conversationId, roomPin));
 
             // set the region to match what the conversation translator service tells us to use when joining a room
-            if (GetString(properties, PropertyId::SpeechServiceConnection_Region) != m_args->CognitiveSpeechRegion)
+            // except when the full endpoint URL is specified as that causes issues with the USP code
+            if (GetString(properties, PropertyId::SpeechServiceConnection_Region) != m_args->CognitiveSpeechRegion
+                && GetString(properties, PropertyId::SpeechServiceConnection_Endpoint).empty())
             {
                 properties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Region), m_args->CognitiveSpeechRegion.c_str());
             }

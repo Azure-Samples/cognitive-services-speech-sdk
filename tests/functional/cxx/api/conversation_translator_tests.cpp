@@ -461,6 +461,74 @@ TEST_CASE("Conversation Translator call methods when not joined", "[api][cxx][co
     }
 }
 
+//TEST_CASE("Tyler's test case", "[tyler_test]")
+//{
+//    auto subscriptionKey = SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key;
+//    auto subscriptionRegion = SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Region;
+//
+//    std::string speechLang("en-US");
+//    std::string endpointUrl;
+//    {
+//        int numChannels = 1;
+//        std::string host("its-loadbalancer-devb9503283r42485a4.princetondev.customspeech.ai");
+//        std::ostringstream oss;
+//
+//        oss << "wss://" << host << "/speech/recognition/dynamicaudio?&format=simple"
+//            << "&channelCount=" << numChannels;
+//
+//        endpointUrl = oss.str();
+//    }
+//
+//    auto speechConfig = SpeechConfig::FromEndpoint(endpointUrl, subscriptionKey);
+//    speechConfig->SetSpeechRecognitionLanguage(speechLang);
+//    speechConfig->SetProperty("ConversationTranslator_Region", subscriptionRegion);
+//    speechConfig->SetProperty("ConversationTranslator_MultiChannelAudio", "true");
+//    speechConfig->SetProxy("127.0.0.1", 8888);
+//
+//    shared_ptr<Conversation> conversation = Conversation::CreateConversationAsync(speechConfig).get();
+//    SPX_TRACE_INFO("Starting conversation");
+//    conversation->StartConversationAsync().get();
+//
+//    shared_ptr<AudioConfig> audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
+//    shared_ptr<ConversationTranslator> conversationTranslator = ConversationTranslator::FromConfig(audioConfig);
+//
+//    ConversationTranslatorCallbacks eventHandlers(conversationTranslator);
+//
+//    SPX_TRACE_INFO("Joining conversation");
+//    conversationTranslator->JoinConversationAsync(conversation, "TheHost").get();
+//    SPX_TRACE_INFO("Start transcribing");
+//    conversationTranslator->StartTranscribingAsync().get();
+//
+//    //eventHandlers.WaitForAudioStreamCompletion(15000ms, 2000ms);
+//    std::this_thread::sleep_for(15s);
+//
+//    SPX_TRACE_INFO("Stop Transcribing");
+//    conversationTranslator->StopTranscribingAsync().get();
+//
+//    SPX_TRACE_INFO("Leave conversation");
+//    conversationTranslator->LeaveConversationAsync().get();
+//
+//    SPX_TRACE_INFO("End conversation");
+//    conversation->EndConversationAsync().get();
+//    SPX_TRACE_INFO("Delete conversation");
+//    conversation->DeleteConversationAsync().get();
+//
+//    //auto speechConfig = SpeechTranslationConfig::FromEndpoint(endpointUrl, subscriptionKey);
+//    //speechConfig->SetProxy("127.0.0.1", 8888);
+//    //speechConfig->SetSpeechRecognitionLanguage(speechLang);
+//    //speechConfig->AddTargetLanguage("fr");
+//    ////speechConfig->SetProperty("ConversationTranslator_Region", "westus2");
+//
+//    //shared_ptr<AudioConfig> audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
+//    //auto from = SourceLanguageConfig::FromLanguage(speechLang);
+//
+//    //auto reco = TranslationRecognizer::FromConfig(speechConfig, audioConfig);
+//
+//    //reco->StartContinuousRecognitionAsync().get();
+//    //std::this_thread::sleep_for(900s);
+//    //reco->StopContinuousRecognitionAsync().get();
+//}
+
 /*
 TEST_CASE("Sample host code", "[sample_code][host]")
 {

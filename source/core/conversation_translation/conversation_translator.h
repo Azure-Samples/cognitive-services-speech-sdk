@@ -184,13 +184,14 @@ namespace ConversationTranslation {
         void ConnectConversation(std::shared_ptr<ISpxConversation> conv, bool owned);
         void DisconnectConversation();
 
-        void ConnectTranslationRecognizer(std::shared_ptr<ISpxTranslationRecognizer> recognizer);
+        void ConnectRecognizer(std::shared_ptr<ISpxRecognizer> recognizer);
         void DisconnectTranslationRecognizer();
 
         inline bool IsConsideredOpen() const;
         inline const std::string GetSessionId() const;
         inline const std::string GetParticipantId() const;
         inline bool IsConversationConnected() const;
+        inline bool IsMultiChannelAudio() const;
 
         void OnRecognizerSessionStarted(shared_ptr<ISpxSessionEventArgs>);
         void OnRecognizerSessionStopped(shared_ptr<ISpxSessionEventArgs>);
@@ -224,7 +225,7 @@ namespace ConversationTranslation {
         std::shared_ptr<ISpxConversation> _m_conv;
         std::weak_ptr<ISpxConversationInternals> m_convInternals;
         bool m_endConversationOnLeave;
-        std::shared_ptr<ISpxTranslationRecognizer> m_recognizer;
+        std::shared_ptr<ISpxRecognizer> m_recognizer;
         std::atomic_bool m_recognizerConnected;
         std::string m_speechLang;
         std::weak_ptr<ISpxAudioConfig> m_audioInput;
