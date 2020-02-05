@@ -49,6 +49,8 @@ set(HEADERS
     "${INC_DIR}/http_utils.h"
     "${INC_DIR}/event.h"
     "${INC_DIR}/extension_resource_manager.h"
+    "${INC_DIR}/dynamic_module.h"
+    "${INC_DIR}/module_factory.h"
     "${INC_DIR}/site_helpers.h"
     )
 
@@ -82,6 +84,7 @@ set(SOURCES
     "${SRC_DIR}/memory_utils.cpp"
     "${SRC_DIR}/extension_resource_manager.cpp"
     "${SRC_DIR}/extension_site_helpers.cpp"
+    "${SRC_DIR}/dynamic_module.cpp"
     "${SRC_DIR}/module_factory.cpp"
     )
 

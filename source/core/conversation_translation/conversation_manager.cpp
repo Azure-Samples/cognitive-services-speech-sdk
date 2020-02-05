@@ -221,7 +221,7 @@ ConversationArgs CSpxConversationManager::CreateOrJoin(const CreateConversationA
 
     SPX_TRACE_ERROR_IF(
         !response->IsSuccess(),
-        "Creating/Joining room failed with HTTP %lu [%s] at '%s'",
+        "Creating/Joining room failed with HTTP %u [%s] at '%s'",
         response->GetStatusCode(),
         response->GetHeader(ConversationConstants::RequestIdHeader).c_str(),
         GetUtcTimeString().c_str());
