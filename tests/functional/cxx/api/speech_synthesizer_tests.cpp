@@ -48,7 +48,7 @@ using namespace TTS;
 //
 //       (2) SPEAK OUTPUT - You can obtain all the audio data for a single SPEAK via a "completed"
 //           SpeechSynthesisResult (e.g. result->Reason == ResultReason::SynthesisStopped)
-//           NOTE: The audio data isn't availble to the developer customer until AFTER the synthesis
+//           NOTE: The audio data isn't available to the developer customer until AFTER the synthesis
 //                 completed successfully. This is appropriate for many scenarios, but for interactive
 //                 scenarios it's best to use a different pattern (#1 above, #3 or #4 below).
 //
@@ -203,10 +203,10 @@ TEST_CASE("Synthesis with recorded audio - REST", "[api][cxx]")
 TEST_CASE("Synthesis using std::wstring - REST", "[api][cxx]")
 {
     const auto config = RestSpeechConfig();
-    config->SetSpeechSynthesisVoiceName("Microsoft Server Speech Text to Speech Voice (zh-CN, HuihuiRUS)");
+    config->SetSpeechSynthesisVoiceName(AudioUtterancesMap[SYNTHESIS_SHORT_UTTERANCE_CHINESE].Utterances["zh-CN"][0].VoiceName);
     auto synthesizer = SpeechSynthesizer::FromConfig(config, nullptr);
-    const auto text = ToWString("你好。");
-    const auto ssml = ToWString("<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts' xmlns:emo='http://www.w3.org/2009/10/emotionml' xml:lang='zh-CN'><voice name='Microsoft Server Speech Text to Speech Voice (zh-CN, HuihuiRUS)'>今天天气很好。</voice></speak>");
+    const auto text = ToWString(AudioUtterancesMap[SYNTHESIS_SHORT_UTTERANCE_CHINESE].Utterances["zh-CN"][0].Text);
+    const auto ssml = ToWString(AudioUtterancesMap[SYNTHESIS_SHORT_UTTERANCE_CHINESE].Utterances["zh-CN"][0].Ssml);
 
     auto result1 = synthesizer->SpeakTextAsync(text).get();
     auto result2 = synthesizer->SpeakSsml(ssml);
@@ -645,10 +645,10 @@ TEST_CASE("Synthesis with recorded audio - USP", "[api][cxx]")
 TEST_CASE("Synthesis using std::wstring - USP", "[api][cxx]")
 {
     const auto config = UspSpeechConfig();
-    config->SetSpeechSynthesisVoiceName("Microsoft Server Speech Text to Speech Voice (zh-CN, HuihuiRUS)");
+    config->SetSpeechSynthesisVoiceName(AudioUtterancesMap[SYNTHESIS_SHORT_UTTERANCE_CHINESE].Utterances["zh-CN"][0].VoiceName);
     auto synthesizer = SpeechSynthesizer::FromConfig(config, nullptr);
-    const auto text = ToWString("你好。");
-    const auto ssml = ToWString("<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts' xmlns:emo='http://www.w3.org/2009/10/emotionml' xml:lang='zh-CN'><voice name='Microsoft Server Speech Text to Speech Voice (zh-CN, HuihuiRUS)'>今天天气很好。</voice></speak>");
+    const auto text = ToWString(AudioUtterancesMap[SYNTHESIS_SHORT_UTTERANCE_CHINESE].Utterances["zh-CN"][0].Text);
+    const auto ssml = ToWString(AudioUtterancesMap[SYNTHESIS_SHORT_UTTERANCE_CHINESE].Utterances["zh-CN"][0].Ssml);
 
     auto result1 = synthesizer->SpeakTextAsync(text).get();
     auto result2 = synthesizer->SpeakSsml(ssml);
@@ -976,27 +976,27 @@ TEST_CASE("Speak output in streams with all data get on synthesis started result
 TEST_CASE("Check word boundary events - USP", "[api][cxx]")
 {
     auto config = UspSpeechConfig();
-    config->SetSpeechSynthesisVoiceName("Microsoft Server Speech Text to Speech Voice (zh-CN, HuihuiRUS)");
+    config->SetSpeechSynthesisVoiceName(AudioUtterancesMap[SYNTHESIS_WORD_BOUNDARY_UTTERANCE_CHINESE].Utterances["zh-CN"][0].VoiceName);
     auto synthesizer = SpeechSynthesizer::FromConfig(config, nullptr);
 
-    std::string plainText = "您好，我是来自Microsoft的中文声音。";
-    std::string ssml = "<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts' xmlns:emo='http://www.w3.org/2009/10/emotionml' xml:lang='zh-CN'><voice name='Microsoft Server Speech Text to Speech Voice (zh-CN, HuihuiRUS)'>您好，<break time='50ms'/>我是来自Microsoft的中文声音。</voice></speak>";
+    std::string plainText = AudioUtterancesMap[SYNTHESIS_WORD_BOUNDARY_UTTERANCE_CHINESE].Utterances["zh-CN"][0].Text;
+    std::string ssml = AudioUtterancesMap[SYNTHESIS_WORD_BOUNDARY_UTTERANCE_CHINESE].Utterances["zh-CN"][0].Ssml;
 
-    std::vector<uint32_t> expectedTextOffsets{ 0, 3, 4, 5, 7, 16, 17, 19 };
-    std::vector<uint32_t> expectedSsmlOffsets{ 251, 274, 275, 276, 278, 287, 288, 290 };
-    std::vector<uint32_t> expectedWordLengths{ 2, 1, 1, 2, 9, 1, 2, 2 };
+    std::vector<int> expectedTextOffsets = AudioUtterancesMap[SYNTHESIS_WORD_BOUNDARY_UTTERANCE_CHINESE].Utterances["zh-CN"][0].TextOffsets;
+    std::vector<int> expectedSsmlOffsets = AudioUtterancesMap[SYNTHESIS_WORD_BOUNDARY_UTTERANCE_CHINESE].Utterances["zh-CN"][0].SsmlOffsets;
+    std::vector<int> expectedWordLengths = AudioUtterancesMap[SYNTHESIS_WORD_BOUNDARY_UTTERANCE_CHINESE].Utterances["zh-CN"][0].WordLengths;
 
     auto order = 0;
     auto actualAudioOffsets = std::vector<uint64_t>();
-    auto actualTextOffsets = std::vector<uint32_t>();
-    auto actualWordLengths = std::vector<uint32_t>();
+    auto actualTextOffsets = std::vector<int>();
+    auto actualWordLengths = std::vector<int>();
     synthesizer->WordBoundary += [&actualAudioOffsets, &actualTextOffsets, &actualWordLengths](const SpeechSynthesisWordBoundaryEventArgs& e) {
         actualAudioOffsets.push_back(e.AudioOffset);
         actualTextOffsets.push_back(e.TextOffset);
         actualWordLengths.push_back(e.WordLength);
     };
 
-    synthesizer->SpeakTextAsync(plainText);
+    (void)synthesizer->SpeakTextAsync(plainText);
 
     SPXTEST_REQUIRE(std::is_sorted(actualAudioOffsets.begin(), actualAudioOffsets.end()));
     SPXTEST_REQUIRE(expectedTextOffsets == actualTextOffsets);
@@ -1005,7 +1005,7 @@ TEST_CASE("Check word boundary events - USP", "[api][cxx]")
     synthesizer->WordBoundary.DisconnectAll();
 
     actualAudioOffsets.clear();
-    auto actualSsmlOffsets = std::vector<uint32_t>();
+    auto actualSsmlOffsets = std::vector<int>();
     actualWordLengths.clear();
     synthesizer->WordBoundary += [&actualAudioOffsets, &actualSsmlOffsets, &actualWordLengths](const SpeechSynthesisWordBoundaryEventArgs& e) {
         actualAudioOffsets.push_back(e.AudioOffset);
@@ -1013,7 +1013,7 @@ TEST_CASE("Check word boundary events - USP", "[api][cxx]")
         actualWordLengths.push_back(e.WordLength);
     };
 
-    synthesizer->SpeakSsmlAsync(ssml);
+    (void)synthesizer->SpeakSsmlAsync(ssml);
 
     SPXTEST_REQUIRE(std::is_sorted(actualAudioOffsets.begin(), actualAudioOffsets.end()));
     SPXTEST_REQUIRE(expectedSsmlOffsets == actualSsmlOffsets);
@@ -1021,51 +1021,53 @@ TEST_CASE("Check word boundary events - USP", "[api][cxx]")
 
     synthesizer->WordBoundary.DisconnectAll();
 
-    ssml = "<speak version='1.0' xmlns='https://www.w3.org/2001/10/synthesis' xmlns:mstts='https://www.w3.org/2001/mstts' xml:lang='zh-CN'><voice xml:lang='zh-CN' xml:gender='Female' name='Microsoft Server Speech Text to Speech Voice (zh-CN, HuihuiRUS)' xmlns=''><mstts:express-as type='normal'>1.导入微信文档可以选择多个文件，并且可多次选择上传文件</mstts:express-as></voice></speak>";
+    ssml = AudioUtterancesMap[SYNTHESIS_WORD_BOUNDARY_UTTERANCE_CHINESE].Utterances["zh-CN"][1].Ssml;
     order = 0;
-    synthesizer->WordBoundary += [&order](const SpeechSynthesisWordBoundaryEventArgs& e) {
-        SPXTEST_REQUIRE(e.TextOffset > 280);
+    auto firstOffset = static_cast<uint32_t>(AudioUtterancesMap[SYNTHESIS_WORD_BOUNDARY_UTTERANCE_CHINESE].Utterances["zh-CN"][1].SsmlOffsets[0]);
+    synthesizer->WordBoundary += [&order, &firstOffset](const SpeechSynthesisWordBoundaryEventArgs& e) {
+        SPXTEST_REQUIRE(e.TextOffset > firstOffset);
         ++order;
     };
 
-    synthesizer->SpeakSsmlAsync(ssml);
+    (void)synthesizer->SpeakSsmlAsync(ssml);
     SPXTEST_REQUIRE(order > 0);
 
     synthesizer->WordBoundary.DisconnectAll();
 
-    ssml = "<speak version='1.0' xmlns='https://www.w3.org/2001/10/synthesis' xmlns:mstts='https://www.w3.org/2001/mstts' xml:lang='zh-CN'><voice xml:lang='zh-CN' xml:gender='Male' name='Microsoft Server Speech Text to Speech Voice (zh-CN, Kangkang, Apollo)' xmlns=''><prosody rate='0%'><mstts:express-as type='normal'>在前途大会上，淮阳王张卬（下江兵）第一个表达了对前途的看衰和绿林诸大佬商议说 “赤眉和邓禹随时都会杀过来，咱们在这混不下去了！与其被人家赶走，不如现在就抢掠长安，逃回南阳，如果实在混不下去了，大不了咱们就再上山落草为寇！”</mstts:express-as></prosody></voice></speak>";
+    ssml = AudioUtterancesMap[SYNTHESIS_WORD_BOUNDARY_UTTERANCE_CHINESE].Utterances["zh-CN"][2].Ssml;
     order = 0;
-    synthesizer->WordBoundary += [&order](const SpeechSynthesisWordBoundaryEventArgs& e) {
-        SPXTEST_REQUIRE(e.TextOffset > 300);
+    firstOffset = static_cast<uint32_t>(AudioUtterancesMap[SYNTHESIS_WORD_BOUNDARY_UTTERANCE_CHINESE].Utterances["zh-CN"][1].SsmlOffsets[0]);
+    synthesizer->WordBoundary += [&order, &firstOffset](const SpeechSynthesisWordBoundaryEventArgs& e) {
+        SPXTEST_REQUIRE(e.TextOffset > firstOffset);
         ++order;
     };
 
-    synthesizer->SpeakSsmlAsync(ssml);
+    (void)synthesizer->SpeakSsmlAsync(ssml);
     SPXTEST_REQUIRE(order > 0);
 }
 
 TEST_CASE("Check word boundary events - USP [manual]", "[manual][api][cxx]") // manual test for AudioOffset of Word Boundary events
 {
     auto config = UspSpeechConfig();
-    config->SetSpeechSynthesisVoiceName("Microsoft Server Speech Text to Speech Voice (zh-CN, HuihuiRUS)");
+    config->SetSpeechSynthesisVoiceName(AudioUtterancesMap[SYNTHESIS_WORD_BOUNDARY_UTTERANCE_CHINESE].Utterances["zh-CN"][0].VoiceName);
     auto synthesizer = SpeechSynthesizer::FromConfig(config, nullptr);
 
-    std::string plainText = "您好，我是来自Microsoft的中文声音。";
+    std::string plainText = AudioUtterancesMap[SYNTHESIS_WORD_BOUNDARY_UTTERANCE_CHINESE].Utterances["zh-CN"][0].Text;
 
-    std::vector<uint64_t> expectedAudioOffsets{ 500000, 6924380, 8799380, 10495619, 14748750, 23915620, 26092500, 30358750 };
-    std::vector<uint32_t> expectedTextOffsets{ 0, 3, 4, 5, 7, 16, 17, 19 };
-    std::vector<uint32_t> expectedWordLengths{ 2, 1, 1, 2, 9, 1, 2, 2 };
+    std::vector<uint64_t> expectedAudioOffsets = AudioUtterancesMap[SYNTHESIS_WORD_BOUNDARY_UTTERANCE_CHINESE].Utterances["zh-CN"][0].AudioOffsets;
+    std::vector<int> expectedTextOffsets = AudioUtterancesMap[SYNTHESIS_WORD_BOUNDARY_UTTERANCE_CHINESE].Utterances["zh-CN"][0].TextOffsets;
+    std::vector<int> expectedWordLengths = AudioUtterancesMap[SYNTHESIS_WORD_BOUNDARY_UTTERANCE_CHINESE].Utterances["zh-CN"][0].WordLengths;
 
     auto actualAudioOffsets = std::vector<uint64_t>();
-    auto actualTextOffsets = std::vector<uint32_t>();
-    auto actualWordLengths = std::vector<uint32_t>();
+    auto actualTextOffsets = std::vector<int>();
+    auto actualWordLengths = std::vector<int>();
     synthesizer->WordBoundary += [&actualAudioOffsets, &actualTextOffsets, &actualWordLengths](const SpeechSynthesisWordBoundaryEventArgs& e) {
         actualAudioOffsets.push_back(e.AudioOffset);
         actualTextOffsets.push_back(e.TextOffset);
         actualWordLengths.push_back(e.WordLength);
     };
 
-    synthesizer->SpeakTextAsync(plainText);
+    (void)synthesizer->SpeakTextAsync(plainText);
 
     SPXTEST_REQUIRE(expectedAudioOffsets == actualAudioOffsets);
     SPXTEST_REQUIRE(expectedTextOffsets == actualTextOffsets);
@@ -1163,12 +1165,12 @@ TEST_CASE("Pick voice - Mock", "[api][cxx]")
 
 TEST_CASE("Synthesis using std::wstring - Mock", "[api][cxx]")
 {
-    const auto config = RestSpeechConfig();
-    config->SetSpeechSynthesisVoiceName("Microsoft Server Speech Text to Speech Voice (zh-CN, HuihuiRUS)");
+    const auto config = MockSpeechConfig();
+    config->SetSpeechSynthesisVoiceName(AudioUtterancesMap[SYNTHESIS_SHORT_UTTERANCE_CHINESE].Utterances["zh-CN"][0].VoiceName);
     auto synthesizer = SpeechSynthesizer::FromConfig(config, nullptr);
 
-    const auto text_s = "你好。"s;
-    const auto ssml_s = "<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts' xmlns:emo='http://www.w3.org/2009/10/emotionml' xml:lang='zh-CN'><voice name='Microsoft Server Speech Text to Speech Voice (zh-CN, HuihuiRUS)'>今天天气很好。</voice></speak>"s;
+    const auto text_s = AudioUtterancesMap[SYNTHESIS_SHORT_UTTERANCE_CHINESE].Utterances["zh-CN"][0].Text;
+    const auto ssml_s = AudioUtterancesMap[SYNTHESIS_SHORT_UTTERANCE_CHINESE].Utterances["zh-CN"][0].Ssml;
     const auto text_ws = ToWString(text_s);
     const auto ssml_ws = ToWString(ssml_s);
 

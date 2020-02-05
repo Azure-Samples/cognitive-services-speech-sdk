@@ -97,10 +97,13 @@ namespace Config
 #define PROFANITY_MASKED_PATTERN "ProfanityMaskedPattern"
 #define PROFANITY_REMOVED "ProfanityRemoved"
 #define PROFANITY_TAGGED "ProfanityTagged"
-#define AUDIO_OFFSET "AudioOffset"
+#define UTTERANCE_SSML "Ssml"
+#define VOICE_NAME "VoiceName"
+#define AUDIO_OFFSETS "AudioOffsets"
 #define AUDIO_DURATION "AudioDuration"
-#define TEXT_OFFSET "TextOffset"
-#define SSML_OFFSET "SsmlOffse"
+#define TEXT_OFFSETS "TextOffsets"
+#define SSML_OFFSETS "SsmlOffsets"
+#define WORD_LENGTHS "WordLengths"
 
 #define SINGLE_UTTERANCE_ENGLISH "SingleUtteranceEnglish"
 #define SINGLE_UTTERANCE_CHINESE "SingleUtteranceChinese"
@@ -134,6 +137,9 @@ namespace Config
 #define PROFANTITY_SINGLE_UTTERANCE_ENGLISH_1 "ProfanitySingleUtteranceEnglish1"
 #define PROFANITY_SINGLE_UTTERANCE_ENGLISH_2 "ProfanitySingleUtteranceEnglish2"
 
+#define SYNTHESIS_WORD_BOUNDARY_UTTERANCE_CHINESE "SynthesisWordBoundaryUtteranceChinese"
+#define SYNTHESIS_SHORT_UTTERANCE_CHINESE "SynthesisShortUtteranceChinese"
+
 struct SubscriptionRegion
 {
     std::string Key;
@@ -148,10 +154,13 @@ struct Utterance
     std::string ProfanityMaskedPattern;
     std::string ProfanityRemoved;
     std::string ProfanityTagged;
-    int AudioOffset;
+    std::string Ssml;
+    std::string VoiceName;
+    std::vector<uint64_t> AudioOffsets;
     int AudioDuration;
-    int TextOffset;
-    int SsmlOffset;
+    std::vector<int> TextOffsets;
+    std::vector<int> SsmlOffsets;
+    std::vector<int> WordLengths;
 };
 
 struct AudioEntry
@@ -291,10 +300,13 @@ inline void to_json(nlohmann::json& jsonString, const Utterance& utterance)
     {PROFANITY_MASKED_PATTERN, utterance.ProfanityMaskedPattern},
     {PROFANITY_REMOVED, utterance.ProfanityRemoved},
     {PROFANITY_TAGGED, utterance.ProfanityTagged},
-    {AUDIO_OFFSET, utterance.AudioOffset},
+    {UTTERANCE_SSML, utterance.Ssml},
+    {VOICE_NAME, utterance.VoiceName},
+    {AUDIO_OFFSETS, utterance.AudioOffsets},
     {AUDIO_DURATION, utterance.AudioDuration},
-    {TEXT_OFFSET, utterance.TextOffset},
-    {SSML_OFFSET, utterance.SsmlOffset}
+    {TEXT_OFFSETS, utterance.TextOffsets},
+    {SSML_OFFSETS, utterance.SsmlOffsets},
+    {WORD_LENGTHS, utterance.WordLengths}
     };
 }
 
@@ -342,11 +354,25 @@ inline void from_json(const nlohmann::json& jsonString, Utterance& utterance)
         utterance.ProfanityTagged = "";
     }
 
-    if (jsonString.contains(AUDIO_OFFSET)) {
-        jsonString.at(AUDIO_OFFSET).get_to(utterance.AudioOffset);
+    if (jsonString.contains(UTTERANCE_SSML)) {
+        jsonString.at(UTTERANCE_SSML).get_to(utterance.Ssml);
     }
     else {
-        utterance.AudioOffset = -1;
+        utterance.Ssml = "";
+    }
+
+    if (jsonString.contains(VOICE_NAME)) {
+        jsonString.at(VOICE_NAME).get_to(utterance.VoiceName);
+    }
+    else {
+        utterance.VoiceName = "";
+    }
+
+    if (jsonString.contains(AUDIO_OFFSETS)) {
+        jsonString.at(AUDIO_OFFSETS).get_to(utterance.AudioOffsets);
+    }
+    else {
+        utterance.AudioOffsets = std::vector<uint64_t>();
     }
 
     if (jsonString.contains(AUDIO_DURATION)) {
@@ -356,18 +382,25 @@ inline void from_json(const nlohmann::json& jsonString, Utterance& utterance)
         utterance.AudioDuration = -1;
     }
 
-    if (jsonString.contains(TEXT_OFFSET)) {
-        jsonString.at(TEXT_OFFSET).get_to(utterance.TextOffset);
+    if (jsonString.contains(TEXT_OFFSETS)) {
+        jsonString.at(TEXT_OFFSETS).get_to(utterance.TextOffsets);
     }
     else {
-        utterance.TextOffset = -1;
+        utterance.TextOffsets = std::vector<int>();
     }
 
-    if (jsonString.contains(SSML_OFFSET)) {
-        jsonString.at(SSML_OFFSET).get_to(utterance.SsmlOffset);
+    if (jsonString.contains(SSML_OFFSETS)) {
+        jsonString.at(SSML_OFFSETS).get_to(utterance.SsmlOffsets);
     }
     else {
-        utterance.SsmlOffset = -1;
+        utterance.SsmlOffsets = std::vector<int>();
+    }
+
+    if (jsonString.contains(WORD_LENGTHS)) {
+        jsonString.at(WORD_LENGTHS).get_to(utterance.WordLengths);
+    }
+    else {
+        utterance.WordLengths = std::vector<int>();
     }
 }
 

@@ -430,5 +430,43 @@
         }
       ]
     }
+  },
+  "SynthesisWordBoundaryUtteranceChinese": {
+    "FilePath": "null",
+    "NativeLanguage": "zh-CN",
+    "Utterances": {
+      "zh-CN": [
+        {
+          "Text": "您好，我是来自Microsoft的中文声音。",
+          "Ssml": "<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts' xmlns:emo='http://www.w3.org/2009/10/emotionml' xml:lang='zh-CN'><voice name='Microsoft Server Speech Text to Speech Voice (zh-CN, HuihuiRUS)'>您好，<break time='50ms'/>我是来自Microsoft的中文声音。</voice></speak>",
+          "VoiceName": "Microsoft Server Speech Text to Speech Voice (zh-CN, HuihuiRUS)",
+          "TextOffsets": [0, 3, 4, 5, 7, 16, 17, 19],
+          "SsmlOffsets": [251, 274, 275, 276, 278, 287, 288, 290],
+          "WordLengths": [2, 1, 1, 2, 9, 1, 2, 2],
+          "AudioOffsets": [500000, 6924380, 8799380, 10495619, 14748750, 23915620, 26092500, 30358750]
+        },
+        {
+          "Ssml": "<speak version='1.0' xmlns='https://www.w3.org/2001/10/synthesis' xmlns:mstts='https://www.w3.org/2001/mstts' xml:lang='zh-CN'><voice xml:lang='zh-CN' xml:gender='Female' name='Microsoft Server Speech Text to Speech Voice (zh-CN, HuihuiRUS)' xmlns=''><mstts:express-as type='normal'>1.导入微信文档可以选择多个文件，并且可多次选择上传文件</mstts:express-as></voice></speak>",
+          "SsmlOffsets": [280]
+        },
+        {
+          "Ssml": "<speak version='1.0' xmlns='https://www.w3.org/2001/10/synthesis' xmlns:mstts='https://www.w3.org/2001/mstts' xml:lang='zh-CN'><voice xml:lang='zh-CN' xml:gender='Male' name='Microsoft Server Speech Text to Speech Voice (zh-CN, Kangkang, Apollo)' xmlns=''><prosody rate='0%'><mstts:express-as type='normal'>在前途大会上，淮阳王张卬（下江兵）第一个表达了对前途的看衰和绿林诸大佬商议说 “赤眉和邓禹随时都会杀过来，咱们在这混不下去了！与其被人家赶走，不如现在就抢掠长安，逃回南阳，如果实在混不下去了，大不了咱们就再上山落草为寇！”</mstts:express-as></prosody></voice></speak>",
+          "SsmlOffsets": [300]
+        }
+      ]
+    }
+  },
+  "SynthesisShortUtteranceChinese": {
+    "FilePath": "null",
+    "NativeLanguage": "zh-CN",
+    "Utterances": {
+      "zh-CN": [
+        {
+          "Text": "你好。",
+          "Ssml": "<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts' xmlns:emo='http://www.w3.org/2009/10/emotionml' xml:lang='zh-CN'><voice name='Microsoft Server Speech Text to Speech Voice (zh-CN, HuihuiRUS)'>今天天气很好。</voice></speak>",
+          "VoiceName": "Microsoft Server Speech Text to Speech Voice (zh-CN, HuihuiRUS)"
+        }
+      ]
+    }
   }
 }
