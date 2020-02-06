@@ -34,6 +34,12 @@ CSpxActivitySession::CSpxActivitySession(std::weak_ptr<CSpxUspRecoEngineAdapter>
                         BuildActivityMsg(msg);
                         FireActivityResult();
                     }
+                },
+                {
+                    State::End,
+                    [](const std::string*, const USP::AudioOutputChunkMsg*)
+                    {
+                    }
                 }
             }
         },
@@ -49,9 +55,13 @@ CSpxActivitySession::CSpxActivitySession(std::weak_ptr<CSpxUspRecoEngineAdapter>
                 },
                 {
                     State::End,
-                    [](const std::string*, const USP::AudioOutputChunkMsg*)
+                    [this](const std::string*, const USP::AudioOutputChunkMsg*)
                     {
-                        /* Noop */
+                        if (m_output_stream != nullptr)
+                        {
+                            m_output_stream->Close();
+
+                        }
                     }
                 }
             }
@@ -74,12 +84,25 @@ CSpxActivitySession::CSpxActivitySession(std::weak_ptr<CSpxUspRecoEngineAdapter>
                     }
                 }
             }
+        },
+        {
+            State::End,
+            {
+                {
+                    State::End,
+                    [](const std::string*, const USP::AudioOutputChunkMsg*)
+                    {
+                    }
+                }
+            }
         }
     };
 }
 
 CSpxActivitySession::~CSpxActivitySession()
 {
+    /* Transition to end to release any resources if they are held */
+    m_state_machine.transition(State::End, nullptr, nullptr);
 }
 
 void CSpxActivitySession::BuildActivityMsg(const std::string* activityMsg)

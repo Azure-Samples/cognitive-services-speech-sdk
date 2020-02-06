@@ -1750,6 +1750,11 @@ void CSpxUspRecoEngineAdapter::OnError(bool isTransport, USP::ErrorCode errorCod
 {
     SPX_TRACE_ERROR("Response: On Error: Code:%d, Message: %s.\n", errorCode, errorMessage.c_str());
 
+    /* If we receive an error, clear all ongoing activity sessions. */
+    if (m_endpointType == USP::EndpointType::Dialog)
+    {
+        m_request_session_map.clear();
+    }
 
     if (IsBadState())
     {
