@@ -38,8 +38,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has now completed rendering to default speakers
                 using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has now completed rendering to default speakers
                 {
-                    CheckResult(result1);
-                    CheckResult(result2);
+                    CheckSynthesisResult(result1);
+                    CheckSynthesisResult(result2);
                 }
             }
         }
@@ -54,8 +54,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has now completed rendering to default speakers
                     using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has now completed rendering to default speakers
                     {
-                        CheckResult(result1);
-                        CheckResult(result2);
+                        CheckSynthesisResult(result1);
+                        CheckSynthesisResult(result2);
                     }
                 }
             }
@@ -70,8 +70,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has now completed rendering to default speakers
                 using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has now completed rendering to default speakers
                 {
-                    CheckResult(result1);
-                    CheckResult(result2);
+                    CheckSynthesisResult(result1);
+                    CheckSynthesisResult(result2);
                 }
             }
         }
@@ -85,8 +85,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has now completed rendering to default speakers
                 using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has now completed rendering to default speakers
                 {
-                    CheckResult(result1);
-                    CheckResult(result2);
+                    CheckSynthesisResult(result1);
+                    CheckSynthesisResult(result2);
                 }
             }
         }
@@ -100,7 +100,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 {
                     using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{wavefile.wav}}}" now contains synthesized audio for "{{{text1}}}"
                     {
-                        CheckResult(result1);
+                        CheckSynthesisResult(result1);
                     }
                 } // "{{{wavefile.wav}}}" is now closed
 
@@ -113,8 +113,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{wavefile.wav}}}" now contains synthesized audio for "{{{text1}}}"
                     using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{wavefile.wav}}}" now contains synthesized audio for both "{{{text1}}}"" and "{{{text2}}}"
                     {
-                        CheckResult(result1);
-                        CheckResult(result2);
+                        CheckSynthesisResult(result1);
+                        CheckSynthesisResult(result2);
                     }
                 } // "{{{wavefile.wav}}}" is now closed
 
@@ -135,8 +135,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has completed rendering to pushstream
                     using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has completed rendering to pushstream
                     {
-                        CheckResult(result1);
-                        CheckResult(result2);
+                        CheckSynthesisResult(result1);
+                        CheckSynthesisResult(result2);
                     }
 
                     Assert.IsFalse(callback.IsClosed(), "The push audio output stream should be opened until synthesizer is released.");
@@ -159,8 +159,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has completed rendering to pullstream
                     using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has completed rendering to pullstream
                     {
-                        CheckResult(result1);
-                        CheckResult(result2);
+                        CheckSynthesisResult(result1);
+                        CheckSynthesisResult(result2);
                     }
                 }
 
@@ -181,8 +181,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has completed rendering to pullstream
                     using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has completed rendering to pullstream
                     {
-                        CheckResult(result1);
-                        CheckResult(result2);
+                        CheckSynthesisResult(result1);
+                        CheckSynthesisResult(result2);
                     }
                 }
 
@@ -197,7 +197,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has completed rendering, and available in result1
                 {
-                    CheckResult(result1);
+                    CheckSynthesisResult(result1);
                     Assert.AreEqual(GuidLength, result1.ResultId.Length, "The length of result ID should be the length of a GUID (32).");
                     Assert.AreEqual(ResultReason.SynthesizingAudioCompleted, result1.Reason, "The synthesis should be completed now.");
                     var audioDataSize = result1.AudioData.Length;
@@ -206,7 +206,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has completed rendering, and available in result2
                 {
-                    CheckResult(result2);
+                    CheckSynthesisResult(result2);
                     Assert.AreEqual(GuidLength, result2.ResultId.Length, "The length of result ID should be the length of a GUID (32).");
                     Assert.AreEqual(ResultReason.SynthesizingAudioCompleted, result2.Reason, "The synthesis should be completed now.");
                     var audioDataSize = result2.AudioData.Length;
@@ -231,8 +231,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has completed rendering
                 using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has completed rendering
                 {
-                    CheckResult(result1);
-                    CheckResult(result2);
+                    CheckSynthesisResult(result1);
+                    CheckSynthesisResult(result2);
                 }
 
                 foreach (var resultReason in resultReasonList)
@@ -254,7 +254,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has completed rendering, and available in result1
                 {
-                    CheckResult(result1);
+                    CheckSynthesisResult(result1);
                     Assert.AreEqual(ResultReason.SynthesizingAudioCompleted, result1.Reason, "The synthesis should be completed now.");
                     var audioDataSize = result1.AudioData.Length;
                     Assert.IsTrue(audioDataSize > 0, $"The audio data size should be greater than zero, but actually it's {audioDataSize}.");
@@ -267,7 +267,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has completed rendering, and available in result2
                 {
-                    CheckResult(result2);
+                    CheckSynthesisResult(result2);
                     Assert.AreEqual(ResultReason.SynthesizingAudioCompleted, result2.Reason, "The synthesis should be completed now.");
                     var audioDataSize = result2.AudioData.Length;
                     Assert.IsTrue(audioDataSize > 0, $"The audio data size should be greater than zero, but actually it's {audioDataSize}.");
@@ -301,14 +301,14 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has completed rendering
                 using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has completed rendering
                 {
-                    CheckResult(result1);
-                    CheckResult(result2);
+                    CheckSynthesisResult(result1);
+                    CheckSynthesisResult(result2);
                 }
 
                 var future3 = synthesizer.SpeakTextAsync("{{{text3}}}"); // "{{{text3}}}" synthesis might have started
                 using (var result3 = await future3) // "{{{text3}}}" synthesis has completed
                 {
-                    CheckResult(result3);
+                    CheckSynthesisResult(result3);
                 }
 
                 foreach (var future in futureList)
@@ -340,7 +340,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 using (var result1 = await synthesizer.StartSpeakingTextAsync("{{{text1}}}")) // "{{{text1}}}" synthesis has started, likely not finished
                 {
-                    CheckResult(result1);
+                    CheckSynthesisResult(result1);
                     Assert.AreEqual(ResultReason.SynthesizingAudioStarted, result1.Reason, "The synthesis should be started now.");
                     Assert.AreEqual(0, result1.AudioData.Length, "The synthesized audio should still be zero at this point, since the synthesis just started, and no audio chunk has been synthesized yet.");
 
@@ -350,7 +350,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                         using (var result2 = await synthesizer.StartSpeakingTextAsync("{{{text2}}}")) // "{{{text2}}}" synthesis has started, likely not finished
                         {
-                            CheckResult(result2);
+                            CheckSynthesisResult(result2);
                             Assert.AreEqual(ResultReason.SynthesizingAudioStarted, result2.Reason, "The synthesis should be started now.");
                             Assert.AreEqual(0, result2.AudioData.Length, "The synthesized audio should still be zero at this point, since the synthesis just started, and no audio chunk has been synthesized yet.");
 
@@ -411,7 +411,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 using (var result = await synthesizer.StartSpeakingTextAsync("{{{text1}}}"))
                 {
-                    CheckResult(result);
+                    CheckSynthesisResult(result);
                     Assert.AreEqual(ResultReason.SynthesizingAudioStarted, result.Reason, "The synthesis should be started now.");
                     Assert.AreEqual(0, result.AudioData.Length, "The synthesized audio should still be zero at this point, since the synthesis just started, and no audio chunk has been synthesized yet.");
 
@@ -454,7 +454,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has completed rendering, and available in result1
                 {
-                    CheckResult(result1);
+                    CheckSynthesisResult(result1);
                     Assert.AreEqual(GuidLength, result1.ResultId.Length, "The length of result ID should be the length of a GUID (32).");
                     Assert.AreEqual(ResultReason.SynthesizingAudioCompleted, result1.Reason, "The synthesis should be completed now.");
                     var audioDataSize = result1.AudioData.Length;
@@ -463,7 +463,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has completed rendering, and available in result2
                 {
-                    CheckResult(result2);
+                    CheckSynthesisResult(result2);
                     Assert.AreEqual(GuidLength, result2.ResultId.Length, "The length of result ID should be the length of a GUID (32).");
                     Assert.AreEqual(ResultReason.SynthesizingAudioCompleted, result2.Reason, "The synthesis should be completed now.");
                     var audioDataSize = result2.AudioData.Length;
@@ -481,8 +481,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has now completed rendering to default speakers
                 using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has now completed rendering to default speakers
                 {
-                    CheckResult(result1);
-                    CheckResult(result2);
+                    CheckSynthesisResult(result1);
+                    CheckSynthesisResult(result2);
                 }
             }
         }
@@ -497,8 +497,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has now completed rendering to default speakers
                     using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has now completed rendering to default speakers
                     {
-                        CheckResult(result1);
-                        CheckResult(result2);
+                        CheckSynthesisResult(result1);
+                        CheckSynthesisResult(result2);
                     }
                 }
             }
@@ -513,8 +513,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has now completed rendering to default speakers
                 using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has now completed rendering to default speakers
                 {
-                    CheckResult(result1);
-                    CheckResult(result2);
+                    CheckSynthesisResult(result1);
+                    CheckSynthesisResult(result2);
                 }
             }
         }
@@ -528,8 +528,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has now completed rendering to default speakers
                 using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has now completed rendering to default speakers
                 {
-                    CheckResult(result1);
-                    CheckResult(result2);
+                    CheckSynthesisResult(result1);
+                    CheckSynthesisResult(result2);
                 }
             }
         }
@@ -544,7 +544,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     <voice  name='en-US-BenjaminRUS'>Good morning to you too Jessa!</voice></speak>";
                 using (var result = await synthesizer.SpeakSsmlAsync(ssmlWithMultiVoices)) 
                 {
-                    CheckResult(result);
+                    CheckSynthesisResult(result);
                 }
             }
         }
@@ -559,7 +559,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     <audio src='https://speechprobesstorage.blob.core.windows.net/ttsaudios/pcm16.wav'/>text</voice></speak>";
                 using (var result = await synthesizer.SpeakSsmlAsync(ssmlWithRecordedAudio)) 
                 {
-                    CheckResult(result);
+                    CheckSynthesisResult(result);
                 }
             }
         }
@@ -573,7 +573,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 {
                     using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{wavefile.wav}}}" now contains synthesized audio for "{{{text1}}}"
                     {
-                        CheckResult(result1);
+                        CheckSynthesisResult(result1);
                     }
                 } // "{{{wavefile.wav}}}" is now closed
 
@@ -586,8 +586,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{wavefile.wav}}}" now contains synthesized audio for "{{{text1}}}"
                     using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{wavefile.wav}}}" now contains synthesized audio for both "{{{text1}}}"" and "{{{text2}}}"
                     {
-                        CheckResult(result1);
-                        CheckResult(result2);
+                        CheckSynthesisResult(result1);
+                        CheckSynthesisResult(result2);
                     }
                 } // "{{{wavefile.wav}}}" is now closed
 
@@ -615,8 +615,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has completed rendering to pushstream
                     using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has completed rendering to pushstream
                     {
-                        CheckResult(result1);
-                        CheckResult(result2);
+                        CheckSynthesisResult(result1);
+                        CheckSynthesisResult(result2);
                     }
 
                     Assert.IsFalse(callback.IsClosed(), "The push audio output stream should be opened until synthesizer is released.");
@@ -638,7 +638,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 streamConfig.Dispose();
                 using (var result = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has completed rendering to pushstream
                 {
-                    CheckResult(result);
+                    CheckSynthesisResult(result);
                 }
 
                 synthesizer.Dispose();
@@ -658,8 +658,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has completed rendering to pullstream
                     using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has completed rendering to pullstream
                     {
-                        CheckResult(result1);
-                        CheckResult(result2);
+                        CheckSynthesisResult(result1);
+                        CheckSynthesisResult(result2);
                     }
                 }
 
@@ -680,8 +680,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has completed rendering to pullstream
                     using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has completed rendering to pullstream
                     {
-                        CheckResult(result1);
-                        CheckResult(result2);
+                        CheckSynthesisResult(result1);
+                        CheckSynthesisResult(result2);
                     }
                 }
 
@@ -696,7 +696,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has completed rendering, and available in result1
                 {
-                    CheckResult(result1);
+                    CheckSynthesisResult(result1);
                     Assert.AreEqual(GuidLength, result1.ResultId.Length, "The length of result ID should be the length of a GUID (32).");
                     Assert.AreEqual(ResultReason.SynthesizingAudioCompleted, result1.Reason, "The synthesis should be completed now.");
                     var audioDataSize = result1.AudioData.Length;
@@ -705,7 +705,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has completed rendering, and available in result2
                 {
-                    CheckResult(result2);
+                    CheckSynthesisResult(result2);
                     Assert.AreEqual(GuidLength, result2.ResultId.Length, "The length of result ID should be the length of a GUID (32).");
                     Assert.AreEqual(ResultReason.SynthesizingAudioCompleted, result2.Reason, "The synthesis should be completed now.");
                     var audioDataSize = result2.AudioData.Length;
@@ -730,8 +730,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has completed rendering
                 using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has completed rendering
                 {
-                    CheckResult(result1);
-                    CheckResult(result2);
+                    CheckSynthesisResult(result1);
+                    CheckSynthesisResult(result2);
                 }
 
                 foreach (var resultReason in resultReasonList)
@@ -753,7 +753,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has completed rendering, and available in result1
                 {
-                    CheckResult(result1);
+                    CheckSynthesisResult(result1);
                     Assert.AreEqual(ResultReason.SynthesizingAudioCompleted, result1.Reason, "The synthesis should be completed now.");
                     var audioDataSize = result1.AudioData.Length;
                     Assert.IsTrue(audioDataSize > 0, $"The audio data size should be greater than zero, but actually it's {audioDataSize}.");
@@ -766,7 +766,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has completed rendering, and available in result2
                 {
-                    CheckResult(result2);
+                    CheckSynthesisResult(result2);
                     Assert.AreEqual(ResultReason.SynthesizingAudioCompleted, result2.Reason, "The synthesis should be completed now.");
                     var audioDataSize = result2.AudioData.Length;
                     Assert.IsTrue(audioDataSize > 0, $"The audio data size should be greater than zero, but actually it's {audioDataSize}.");
@@ -800,14 +800,14 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has completed rendering
                 using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has completed rendering
                 {
-                    CheckResult(result1);
-                    CheckResult(result2);
+                    CheckSynthesisResult(result1);
+                    CheckSynthesisResult(result2);
                 }
 
                 var future3 = synthesizer.SpeakTextAsync("{{{text3}}}"); // "{{{text3}}}" synthesis might have started
                 using (var result3 = await future3) // "{{{text3}}}" synthesis has completed
                 {
-                    CheckResult(result3);
+                    CheckSynthesisResult(result3);
                 }
 
                 foreach (var future in futureList)
@@ -839,7 +839,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 using (var result1 = await synthesizer.StartSpeakingTextAsync("{{{text1}}}")) // "{{{text1}}}" synthesis has started, likely not finished
                 {
-                    CheckResult(result1);
+                    CheckSynthesisResult(result1);
                     Assert.AreEqual(ResultReason.SynthesizingAudioStarted, result1.Reason, "The synthesis should be started now.");
                     Assert.AreEqual(0, result1.AudioData.Length, "The synthesized audio should still be zero at this point, since the synthesis just started, and no audio chunk has been synthesized yet.");
 
@@ -849,7 +849,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                         using (var result2 = await synthesizer.StartSpeakingTextAsync("{{{text2}}}")) // "{{{text2}}}" synthesis has started, likely not finished
                         {
-                            CheckResult(result2);
+                            CheckSynthesisResult(result2);
                             Assert.AreEqual(ResultReason.SynthesizingAudioStarted, result2.Reason, "The synthesis should be started now.");
                             Assert.AreEqual(0, result2.AudioData.Length, "The synthesized audio should still be zero at this point, since the synthesis just started, and no audio chunk has been synthesized yet.");
 
@@ -910,7 +910,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 using (var result = await synthesizer.StartSpeakingTextAsync("{{{text1}}}"))
                 {
-                    CheckResult(result);
+                    CheckSynthesisResult(result);
                     Assert.AreEqual(ResultReason.SynthesizingAudioStarted, result.Reason, "The synthesis should be started now.");
                     Assert.AreEqual(0, result.AudioData.Length, "The synthesized audio should still be zero at this point, since the synthesis just started, and no audio chunk has been synthesized yet.");
 
@@ -950,7 +950,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has completed rendering, and available in result1
                 {
-                    CheckResult(result1);
+                    CheckSynthesisResult(result1);
                     Assert.AreEqual(GuidLength, result1.ResultId.Length, "The length of result ID should be the length of a GUID (32).");
                     Assert.AreEqual(ResultReason.SynthesizingAudioCompleted, result1.Reason, "The synthesis should be completed now.");
                     var audioDataSize = result1.AudioData.Length;
@@ -959,7 +959,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has completed rendering, and available in result2
                 {
-                    CheckResult(result2);
+                    CheckSynthesisResult(result2);
                     Assert.AreEqual(GuidLength, result2.ResultId.Length, "The length of result ID should be the length of a GUID (32).");
                     Assert.AreEqual(ResultReason.SynthesizingAudioCompleted, result2.Reason, "The synthesis should be completed now.");
                     var audioDataSize = result2.AudioData.Length;
@@ -1035,7 +1035,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 using (var result = await synthesizer.SpeakTextAsync(plainText))
                 {
-                    CheckResult(result);
+                    CheckSynthesisResult(result);
                 }
 
                 Assert.AreEqual(expectedTextOffsets.Length, actualAudioOffsets.Count, "Incorrect count of word boundary events.");
@@ -1062,7 +1062,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 using (var result = await synthesizer.SpeakSsmlAsync(ssml))
                 {
-                    CheckResult(result);
+                    CheckSynthesisResult(result);
                 }
 
                 Assert.AreEqual(expectedTextOffsets.Length, actualAudioOffsets.Count, "Incorrect count of word boundary events.");
@@ -1085,8 +1085,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has now completed rendering to default speakers
                 using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has now completed rendering to default speakers
                 {
-                    CheckResult(result1);
-                    CheckResult(result2);
+                    CheckSynthesisResult(result1);
+                    CheckSynthesisResult(result2);
 
                     var expectedAudioData1 = BuildMockSynthesizedAudioWithHeader("{{{text1}}}", DefaultLanguage, DefaultVoice);
                     var expectedAudioData2 = BuildMockSynthesizedAudioWithHeader("{{{text2}}}", DefaultLanguage, DefaultVoice);
@@ -1108,8 +1108,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has now completed rendering to default speakers
                     using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has now completed rendering to default speakers
                     {
-                        CheckResult(result1);
-                        CheckResult(result2);
+                        CheckSynthesisResult(result1);
+                        CheckSynthesisResult(result2);
 
                         var expectedAudioData1 = BuildMockSynthesizedAudioWithHeader("{{{text1}}}", DefaultLanguage, DefaultVoice);
                         var expectedAudioData2 = BuildMockSynthesizedAudioWithHeader("{{{text2}}}", DefaultLanguage, DefaultVoice);
@@ -1131,8 +1131,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has now completed rendering to default speakers
                 using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has now completed rendering to default speakers
                 {
-                    CheckResult(result1);
-                    CheckResult(result2);
+                    CheckSynthesisResult(result1);
+                    CheckSynthesisResult(result2);
 
                     var expectedAudioData1 = BuildMockSynthesizedAudioWithHeader("{{{text1}}}", "en-GB", "Microsoft Server Speech Text to Speech Voice (en-GB, HazelRUS)");
                     var expectedAudioData2 = BuildMockSynthesizedAudioWithHeader("{{{text2}}}", "en-GB", "Microsoft Server Speech Text to Speech Voice (en-GB, HazelRUS)");
@@ -1153,8 +1153,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has now completed rendering to default speakers
                 using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has now completed rendering to default speakers
                 {
-                    CheckResult(result1);
-                    CheckResult(result2);
+                    CheckSynthesisResult(result1);
+                    CheckSynthesisResult(result2);
 
                     var expectedAudioData1 = BuildMockSynthesizedAudioWithHeader("{{{text1}}}", DefaultLanguage, "Microsoft Server Speech Text to Speech Voice (en-GB, HazelRUS)");
                     var expectedAudioData2 = BuildMockSynthesizedAudioWithHeader("{{{text2}}}", DefaultLanguage, "Microsoft Server Speech Text to Speech Voice (en-GB, HazelRUS)");
@@ -1175,7 +1175,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 {
                     using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{wavefile.wav}}}" now contains synthesized audio for "{{{text1}}}""
                     {
-                        CheckResult(result1);
+                        CheckSynthesisResult(result1);
                     }
                 } // "{{{wavefile.wav}}}" is now closed
 
@@ -1188,8 +1188,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{wavefile.wav}}}" now contains synthesized audio for "{{{text1}}}""
                     using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{wavefile.wav}}}" now contains synthesized audio for both "{{{text1}}}"" and "{{{text2}}}"
                     {
-                        CheckResult(result1);
-                        CheckResult(result2);
+                        CheckSynthesisResult(result1);
+                        CheckSynthesisResult(result2);
                     }
                 } // "{{{wavefile.wav}}}" is now closed
 
@@ -1216,14 +1216,14 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                     using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has completed rendering to pushstream
                     {
-                        CheckResult(result1);
+                        CheckSynthesisResult(result1);
                         CheckBinaryEqual(expectedAudioData1, callback.GetAudioData());
                         Assert.IsFalse(callback.IsClosed(), "The push audio output stream should be opened until synthesizer is released.");
                     }
 
                     using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has completed rendering to pushstream
                     {
-                        CheckResult(result2);
+                        CheckSynthesisResult(result2);
                         CheckBinaryEqual(expectedAudioData12, callback.GetAudioData());
                         Assert.IsFalse(callback.IsClosed(), "The push audio output stream should be opened until synthesizer is released.");
                     }
@@ -1247,8 +1247,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has completed rendering to pullstream
                     using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has completed rendering to pullstream
                     {
-                        CheckResult(result1);
-                        CheckResult(result2);
+                        CheckSynthesisResult(result1);
+                        CheckSynthesisResult(result2);
                     }
                 }
 
@@ -1278,8 +1278,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has completed rendering to pullstream
                     using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has completed rendering to pullstream
                     {
-                        CheckResult(result1);
-                        CheckResult(result2);
+                        CheckSynthesisResult(result1);
+                        CheckSynthesisResult(result2);
                     }
                 }
 
@@ -1295,7 +1295,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has completed rendering, and available in result1
                 {
-                    CheckResult(result1);
+                    CheckSynthesisResult(result1);
                     Assert.AreEqual(GuidLength, result1.ResultId.Length, "The length of result ID should be the length of a GUID (32).");
                     Assert.AreEqual(ResultReason.SynthesizingAudioCompleted, result1.Reason, "The synthesis should be completed now.");
 
@@ -1305,7 +1305,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has completed rendering, and available in result2
                 {
-                    CheckResult(result2);
+                    CheckSynthesisResult(result2);
                     Assert.AreEqual(GuidLength, result2.ResultId.Length, "The length of result ID should be the length of a GUID (32).");
                     Assert.AreEqual(ResultReason.SynthesizingAudioCompleted, result2.Reason, "The synthesis should be completed now.");
 
@@ -1351,8 +1351,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has completed rendering
                 using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has completed rendering
                 {
-                    CheckResult(result1);
-                    CheckResult(result2);
+                    CheckSynthesisResult(result1);
+                    CheckSynthesisResult(result2);
                 }
 
                 foreach (var resultReason in resultReasonList)
@@ -1380,7 +1380,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has completed rendering, and available in result1
                 {
-                    CheckResult(result1);
+                    CheckSynthesisResult(result1);
                     Assert.AreEqual(ResultReason.SynthesizingAudioCompleted, result1.Reason, "The synthesis should be completed now.");
                     var audioDataSize = result1.AudioData.Length;
                     Assert.IsTrue(audioDataSize > 0, $"The audio data size should be greater than zero, but actually it's {audioDataSize}.");
@@ -1391,7 +1391,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                         using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has completed rendering, and available in result2
                         {
-                            CheckResult(result2);
+                            CheckSynthesisResult(result2);
                             Assert.AreEqual(ResultReason.SynthesizingAudioCompleted, result2.Reason, "The synthesis should be completed now.");
                             audioDataSize = result2.AudioData.Length;
                             Assert.IsTrue(audioDataSize > 0, $"The audio data size should be greater than zero, but actually it's {audioDataSize}.");
@@ -1442,14 +1442,14 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has completed rendering
                 using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has completed rendering
                 {
-                    CheckResult(result1);
-                    CheckResult(result2);
+                    CheckSynthesisResult(result1);
+                    CheckSynthesisResult(result2);
                 }
 
                 var future3 = synthesizer.SpeakTextAsync("{{{text3}}}"); // "{{{text3}}}" synthesis might have started
                 using (var result3 = await future3) // "{{{text3}}}" synthesis has completed
                 {
-                    CheckResult(result3);
+                    CheckSynthesisResult(result3);
                 }
 
                 foreach (var future in futureList)
@@ -1482,7 +1482,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 using (var result1 = await synthesizer.StartSpeakingTextAsync("{{{text1}}}")) // "{{{text1}}}" synthesis has started, likely not finished
                 {
-                    CheckResult(result1);
+                    CheckSynthesisResult(result1);
                     Assert.AreEqual(ResultReason.SynthesizingAudioStarted, result1.Reason, "The synthesis should be started now.");
                     Assert.AreEqual(0, result1.AudioData.Length, "The synthesized audio should still be zero at this point, since the synthesis just started, and no audio chunk has been synthesized yet.");
 
@@ -1493,7 +1493,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                         using (var result2 = await synthesizer.StartSpeakingTextAsync("{{{text2}}}")) // "{{{text2}}}" synthesis has started, likely not finished
                         {
-                            CheckResult(result2);
+                            CheckSynthesisResult(result2);
                             Assert.AreEqual(ResultReason.SynthesizingAudioStarted, result2.Reason, "The synthesis should be started now.");
                             Assert.AreEqual(0, result2.AudioData.Length, "The synthesized audio should still be zero at this point, since the synthesis just started, and no audio chunk has been synthesized yet.");
 
@@ -1559,7 +1559,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 using (var result = await synthesizer.StartSpeakingTextAsync("{{{text1}}}"))
                 {
-                    CheckResult(result);
+                    CheckSynthesisResult(result);
                     Assert.AreEqual(ResultReason.SynthesizingAudioStarted, result.Reason, "The synthesis should be started now.");
                     Assert.AreEqual(0, result.AudioData.Length, "The synthesized audio should still be zero at this point, since the synthesis just started, and no audio chunk has been synthesized yet.");
 
@@ -1604,7 +1604,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 using (var result = await synthesizer.SpeakTextAsync("{{{text1}}}"))
                 {
-                    CheckResult(result);
+                    CheckSynthesisResult(result);
                     Assert.AreEqual(ResultReason.SynthesizingAudioCompleted, result.Reason, "The synthesis should be completed now.");
                     Assert.AreEqual(StreamStatus.PartialData, stream.GetStatus(), "The stream should contain partial audio data since it's created from a synthesizing result.");
 
@@ -1625,7 +1625,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 using (var result = await synthesizer.SpeakTextAsync("text"))
                 {
-                    CheckResult(result);
+                    CheckSynthesisResult(result);
                 }
             }
         }
@@ -1644,7 +1644,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 synthesizer.AuthorizationToken = token;
                 using (var result = await synthesizer.SpeakTextAsync("{{{text}}}"))
                 {
-                    CheckResult(result);
+                    CheckSynthesisResult(result);
                 }
             }
 
@@ -1655,7 +1655,35 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 synthesizer.AuthorizationToken = token;
                 using (var result = await synthesizer.SpeakTextAsync("{{{text}}}"))
                 {
-                    CheckResult(result);
+                    CheckSynthesisResult(result);
+                }
+            }
+        }
+
+        [TestMethod]
+        public async Task SynthesisWithSovereignCloudFromEndpoint()
+        {
+            var mooncakeSubscriptionKey = SubscriptionsRegionsMap[SubscriptionsRegionsKeys.MOONCAKE_SUBSCRIPTION].Key;
+            var mooncakeRegion = SubscriptionsRegionsMap[SubscriptionsRegionsKeys.MOONCAKE_SUBSCRIPTION].Region;
+            var token = await GetToken(mooncakeSubscriptionKey, mooncakeRegion, "azure.cn");
+
+            var restEndpoint = $"https://{mooncakeRegion}.tts.speech.azure.cn/cognitiveservices/v1?TrafficType=Test";
+            var restMooncakeConfig = SpeechConfig.FromEndpoint(new Uri(restEndpoint), mooncakeSubscriptionKey);
+            using (var synthesizer = new SpeechSynthesizer(restMooncakeConfig, null))
+            {
+                using (var result = await synthesizer.SpeakTextAsync("{{{text}}}"))
+                {
+                    CheckSynthesisResult(result);
+                }
+            }
+
+            var uspEndpoint = $"wss://{mooncakeRegion}.tts.speech.azure.cn/cognitiveservices/websocket/v1?TrafficType=Test";
+            var uspMooncakeConfig = SpeechConfig.FromEndpoint(new Uri(uspEndpoint), mooncakeSubscriptionKey);
+            using (var synthesizer = new SpeechSynthesizer(uspMooncakeConfig, null))
+            {
+                using (var result = await synthesizer.SpeakTextAsync("{{{text}}}"))
+                {
+                    CheckSynthesisResult(result);
                 }
             }
         }
@@ -1668,24 +1696,22 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var token = await GetToken(mooncakeSubscriptionKey, mooncakeRegion, "azure.cn");
 
             var restHost = $"https://{mooncakeRegion}.tts.speech.azure.cn";
-            var restMooncakeConfig = SpeechConfig.FromHost(new Uri(restHost));
+            var restMooncakeConfig = SpeechConfig.FromHost(new Uri(restHost), mooncakeSubscriptionKey);
             using (var synthesizer = new SpeechSynthesizer(restMooncakeConfig, null))
             {
-                synthesizer.AuthorizationToken = token;
                 using (var result = await synthesizer.SpeakTextAsync("{{{text}}}"))
                 {
-                    CheckResult(result);
+                    CheckSynthesisResult(result);
                 }
             }
 
             var uspHost = $"wss://{mooncakeRegion}.tts.speech.azure.cn";
-            var uspMooncakeConfig = SpeechConfig.FromHost(new Uri(uspHost));
+            var uspMooncakeConfig = SpeechConfig.FromHost(new Uri(uspHost), mooncakeSubscriptionKey);
             using (var synthesizer = new SpeechSynthesizer(uspMooncakeConfig, null))
             {
-                synthesizer.AuthorizationToken = token;
                 using (var result = await synthesizer.SpeakTextAsync("{{{text}}}"))
                 {
-                    CheckResult(result);
+                    CheckSynthesisResult(result);
                 }
             }
         }
@@ -1697,19 +1723,19 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has now completed rendering to default speakers
                 {
-                    CheckResult(result1);
+                    CheckSynthesisResult(result1);
                 }
             }
             using (var synthesizer = new SpeechSynthesizer(uspHostConfig))
             {
                 using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has now completed rendering to default speakers
                 {
-                    CheckResult(result2);
+                    CheckSynthesisResult(result2);
                 }
             }
         }
 
-        private void CheckResult(SpeechSynthesisResult result)
+        public static void CheckSynthesisResult(SpeechSynthesisResult result)
         {
             string cancellationDetails = string.Empty;
             if (result.Reason == ResultReason.Canceled)
@@ -1795,7 +1821,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             uint filledSize = 0;
 
             while ((filledSize = stream.ReadData(buffer)) > 0)
-            { // blocks until atleast 1024 bytes are available
+            { // blocks until at least 1024 bytes are available
               // do something with buffer
                 totalSize += filledSize;
                 Array.Resize(ref audioData, (int)totalSize);

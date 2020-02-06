@@ -20,13 +20,11 @@ set(HEADERS)
 set(HEADERS_PRIVATE
     "${SRC_DIR}/stdafx.h"
     "${SRC_DIR}/rest_tts_engine_adapter.h"
-    "${SRC_DIR}/authenticator.h"
     )
 
 set(SOURCES
     "${SRC_DIR}/stdafx.cpp"
     "${SRC_DIR}/rest_tts_engine_adapter.cpp"
-    "${SRC_DIR}/authenticator.cpp"
     )
 
 source_group("Header Files (public)" FILES ${HEADERS})

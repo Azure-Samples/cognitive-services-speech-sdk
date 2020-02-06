@@ -74,6 +74,16 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 Assert.AreEqual(token, speechRecognizer.AuthorizationToken);
                 AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text, await helper.GetFirstRecognizerResult(speechRecognizer));
             }
+
+            using (var speechSynthesizer = new SpeechSynthesizer(configWithToken, null))
+            {
+                Assert.AreEqual(token, speechSynthesizer.AuthorizationToken);
+
+                using (var result = await speechSynthesizer.SpeakTextAsync("{{{text1}}}"))
+                {
+                    SpeechSynthesisTests.CheckSynthesisResult(result);
+                }
+            }
         }
 
         [TestMethod]
@@ -130,6 +140,20 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 Assert.AreEqual(invalidToken, speechRecognizer.AuthorizationToken);
                 AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text, await helper.GetFirstRecognizerResult(speechRecognizer));
             }
+
+            // Create synthesizer using subscription key.
+            using (var speechSynthesizer = new SpeechSynthesizer(this.defaultConfig, null))
+            {
+                speechSynthesizer.AuthorizationToken = invalidToken;
+
+                Assert.AreEqual(subscriptionKey, speechSynthesizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_Key));
+                Assert.AreEqual(invalidToken, speechSynthesizer.AuthorizationToken);
+
+                using (var result = await speechSynthesizer.SpeakTextAsync("{{{text1}}}"))
+                {
+                    SpeechSynthesisTests.CheckSynthesisResult(result);
+                }
+            }
         }
 
         [TestMethod]
@@ -147,6 +171,18 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 Assert.AreEqual(token, speechRecognizer.AuthorizationToken);
                 AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text, await helper.GetFirstRecognizerResult(speechRecognizer));
             }
+
+            // Create synthesizer using subscription key.
+            using (var speechSynthesizer = new SpeechSynthesizer(this.defaultConfig, null))
+            {
+                Assert.AreEqual(subscriptionKey, speechSynthesizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_Key));
+                Assert.AreEqual(token, speechSynthesizer.AuthorizationToken);
+
+                using (var result = await speechSynthesizer.SpeakTextAsync("{{{text1}}}"))
+                {
+                    SpeechSynthesisTests.CheckSynthesisResult(result);
+                }
+            }
         }
 
         [TestMethod]
@@ -163,6 +199,18 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 Assert.AreEqual(subscriptionKey, speechRecognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_Key));
                 Assert.AreEqual(expiredToken, speechRecognizer.AuthorizationToken);
                 AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text, await helper.GetFirstRecognizerResult(speechRecognizer));
+            }
+
+            // Create synthesizer using subscription key.
+            using (var speechSynthesizer = new SpeechSynthesizer(this.defaultConfig, null))
+            {
+                Assert.AreEqual(subscriptionKey, speechSynthesizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_Key));
+                Assert.AreEqual(expiredToken, speechSynthesizer.AuthorizationToken);
+
+                using (var result = await speechSynthesizer.SpeakTextAsync("{{{text1}}}"))
+                {
+                    SpeechSynthesisTests.CheckSynthesisResult(result);
+                }
             }
         }
 
@@ -183,6 +231,19 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 Assert.AreEqual(invalidKey, speechRecognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_Key));
                 Assert.AreEqual(token, speechRecognizer.AuthorizationToken);
                 AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text, await helper.GetFirstRecognizerResult(speechRecognizer));
+            }
+
+            using (var speechSynthesizer = new SpeechSynthesizer(configWithInvalidKey, null))
+            {
+                speechSynthesizer.AuthorizationToken = token;
+
+                Assert.AreEqual(invalidKey, speechSynthesizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_Key));
+                Assert.AreEqual(token, speechSynthesizer.AuthorizationToken);
+
+                using (var result = await speechSynthesizer.SpeakTextAsync("{{{text1}}}"))
+                {
+                    SpeechSynthesisTests.CheckSynthesisResult(result);
+                }
             }
         }
 
@@ -209,6 +270,25 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 AssertHelpers.AssertStringContains(cancellation.ErrorDetails, "WebSocket Upgrade failed with an authentication error (401)");
                 AssertHelpers.AssertStringContains(cancellation.ErrorDetails, "SessionId");
             }
+
+            // Create synthesizer using subscription key.
+            using (var speechSynthesizer = new SpeechSynthesizer(configWithInvalidKey, null))
+            {
+                speechSynthesizer.AuthorizationToken = invalidToken;
+
+                Assert.AreEqual(invalidKey, speechSynthesizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_Key));
+                Assert.AreEqual(invalidToken, speechSynthesizer.AuthorizationToken);
+
+                using (var result = await speechSynthesizer.SpeakTextAsync("{{{text1}}}"))
+                {
+                    Assert.AreEqual(ResultReason.Canceled, result.Reason);
+                    Assert.AreEqual(result.AudioData.Length, 0);
+                    var cancellation = SpeechSynthesisCancellationDetails.FromResult(result);
+                    Assert.AreEqual(CancellationReason.Error, cancellation.Reason);
+                    Assert.AreEqual(CancellationErrorCode.AuthenticationFailure, cancellation.ErrorCode);
+                    AssertHelpers.AssertStringContains(cancellation.ErrorDetails, "WebSocket Upgrade failed with an authentication error (401)");
+                }
+            }
         }
 
         [TestMethod]
@@ -233,6 +313,14 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 // We cannot really test whether recognizer works, since there is no endpoint available which supports no authentication.
                 Assert.IsTrue(string.IsNullOrEmpty(translationRecognizer.Properties.GetProperty(PropertyId.SpeechServiceAuthorization_Token)));
                 Assert.IsTrue(string.IsNullOrEmpty(translationRecognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_Key)));
+            }
+
+            var synthesisConfig = SpeechConfig.FromEndpoint(new Uri("wss://westus.tts.speech.microsoft.com/cognitiveservices/websocket/v1"));
+            using (var speechSynthesizer = new SpeechSynthesizer(synthesisConfig, null))
+            {
+                // We cannot really test whether synthesizer works, since there is no test endpoint available which supports no authentication.
+                Assert.IsTrue(string.IsNullOrEmpty(speechSynthesizer.Properties.GetProperty(PropertyId.SpeechServiceAuthorization_Token)));
+                Assert.IsTrue(string.IsNullOrEmpty(speechSynthesizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_Key)));
             }
         }
 

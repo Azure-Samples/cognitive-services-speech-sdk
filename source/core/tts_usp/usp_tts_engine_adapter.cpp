@@ -63,65 +63,25 @@ void CSpxUspTtsEngineAdapter::Init()
 
     std::string endpointUrl = ISpxPropertyBagImpl::GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Endpoint), "");
     std::string hostUrl = ISpxPropertyBagImpl::GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Host), "");
-    std::string endpoint;
     std::string region = ISpxPropertyBagImpl::GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Region), "");
     std::string subscriptionKey = ISpxPropertyBagImpl::GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Key), "");
 
     if (!endpointUrl.empty()) // use custom endpoint
     {
-        endpoint = endpointUrl;
+        m_endpoint = endpointUrl;
     }
     else if (!hostUrl.empty()) // or custom host
     {
-        endpoint = hostUrl;    // parse further in USP ConstructConnectionUrl()
+        m_endpoint = hostUrl;    // parse further in USP ConstructConnectionUrl()
         m_isCustomHost = true;
     }
 
-    if (!endpoint.empty() && !CSpxSynthesisHelper::IsCustomVoiceEndpoint(endpoint) && !CSpxSynthesisHelper::IsStandardVoiceEndpoint(endpoint))
+    if (m_endpoint.empty() && !region.empty())
     {
-        // Scenario 1, custom endpoint (e.g. on prem), no need authentication
-        m_endpoint = endpoint;
+        m_endpoint = std::string(WSS_URL_PREFIX) + region + TTS_COGNITIVE_SERVICE_HOST_SUFFIX + TTS_COGNITIVE_SERVICE_WSS_URL_PATH;
     }
-    else if (!endpoint.empty() && CSpxSynthesisHelper::IsCustomVoiceEndpoint(endpoint))
-    {
-        // Scenario 2, custom voice, need authentication (and therefore need initialize m_authenticator)
-        m_endpoint = endpoint;
-        region = CSpxSynthesisHelper::ParseRegionFromCognitiveServiceEndpoint(endpoint);
 
-        // Construct cognitive service token issue URL based on region
-        auto issueTokenUrl = std::string(HTTPS_URL_PREFIX) + region + ISSUE_TOKEN_HOST_SUFFIX + ISSUE_TOKEN_URL_PATH;
-        if (!subscriptionKey.empty())
-        {
-            m_authenticator = std::make_shared<CSpxRestTtsAuthenticator>(issueTokenUrl, subscriptionKey, m_proxyHost, m_proxyPort, m_proxyUsername, m_proxyPassword);
-        }
-    }
-    else if ((endpoint.empty() && !region.empty()) || (!endpoint.empty() && CSpxSynthesisHelper::IsStandardVoiceEndpoint(endpoint)))
-    {
-        // Scenario 3, standard voice, need issue token (and therefore need initialize m_authenticator)
-        if (endpoint.empty() && !region.empty())
-        {
-            // Construct standard voice endpoint based on region
-            m_endpoint = std::string(WSS_URL_PREFIX) + region + TTS_COGNITIVE_SERVICE_HOST_SUFFIX + TTS_COGNITIVE_SERVICE_WSS_URL_PATH;
-        }
-
-        if (!endpoint.empty() && CSpxSynthesisHelper::IsStandardVoiceEndpoint(endpoint))
-        {
-            m_endpoint = endpoint;
-            region = CSpxSynthesisHelper::ParseRegionFromCognitiveServiceEndpoint(endpoint);
-        }
-
-        // Construct cognitive service token issue URL based on region
-        auto issueTokenUrl = std::string(HTTPS_URL_PREFIX) + region + ISSUE_TOKEN_HOST_SUFFIX + ISSUE_TOKEN_URL_PATH;
-
-        if (!subscriptionKey.empty())
-        {
-            m_authenticator = std::make_shared<CSpxRestTtsAuthenticator>(issueTokenUrl, subscriptionKey, m_proxyHost, m_proxyPort, m_proxyUsername, m_proxyPassword);
-        }
-    }
-    else
-    {
-        ThrowRuntimeError("Invalid combination of endpoint, region and(or) subscription key.");
-    }
+    SPX_IFTRUE_THROW_HR(m_endpoint.empty(), SPXERR_INVALID_ARG);
 }
 
 void CSpxUspTtsEngineAdapter::Term()
@@ -373,29 +333,17 @@ void CSpxUspTtsEngineAdapter::UspInitialize()
 
     // Fill authorization token
     std::array<std::string, static_cast<size_t>(USP::AuthenticationType::SIZE_AUTHENTICATION_TYPE)> authData;
-    std::string token;
-    if (m_authenticator != nullptr)
-    {
-        const auto getAccessTokenTimeout = std::stoi(ISpxPropertyBagImpl::GetStringValue("SpeechSynthesis_GetAccessTokenTimeoutMs", "5000"));
-        token = m_authenticator->GetAccessToken(getAccessTokenTimeout);
-    }
 
-    if (token.empty())
-    {
-        token = ISpxPropertyBagImpl::GetStringValue(GetPropertyName(PropertyId::SpeechServiceAuthorization_Token), "");
-    }
+    // Get the named property service...
+    auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
+    SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_USP_SITE_FAILURE);
 
-    if (token.empty())
-    {
-        SPX_TRACE_ERROR("Error: issue token is empty, check your subscription key and network.");
-        m_currentErrorMessage = "Error occurs while getting access token, check your subscription key, access token or network connection.";
-        m_uspState = UspState::Error;
-        return;
-    }
-    else
-    {
-        authData[static_cast<size_t>(USP::AuthenticationType::AuthorizationToken)] = token;
-    }
+    // Get the properties that indicates what endpoint to use...
+    auto uspSubscriptionKey = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Key));
+    auto token = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceAuthorization_Token), "");
+
+    authData[static_cast<size_t>(USP::AuthenticationType::SubscriptionKey)] = std::move(uspSubscriptionKey);
+    authData[static_cast<size_t>(USP::AuthenticationType::AuthorizationToken)] = std::move(token);
 
     // Create the usp client, which we'll configure and use to create the actual connection
     auto uspCallbacks = SpxCreateObjectWithSite<ISpxUspCallbacks>("CSpxUspCallbackWrapper", this);
@@ -491,7 +439,7 @@ void CSpxUspTtsEngineAdapter::OnAudioOutputChunk(const USP::AudioOutputChunkMsg&
 
     std::unique_lock<std::mutex> lock(m_mutex);
     m_uspState = UspState::ReceivingData;
-    auto originalSize = m_currentReceivedData.size();
+    const auto originalSize = m_currentReceivedData.size();
     m_currentReceivedData.resize(originalSize + message.audioLength);
     memcpy(m_currentReceivedData.data() + originalSize, message.audioBuffer, message.audioLength);
     m_cv.notify_all();

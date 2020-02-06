@@ -44,11 +44,13 @@ void CSpxRestTtsEngineAdapter::Init()
 {
     SPX_DBG_TRACE_VERBOSE_IF(SPX_DBG_TRACE_REST_TTS, __FUNCTION__);
 
+    SPX_IFFALSE_THROW_HR(m_endpoint.empty(), SPXERR_ALREADY_INITIALIZED);
+
     // Get proxy setting
     GetProxySetting();
 
     // Initialize websocket platform
-    Microsoft::CognitiveServices::Speech::USP::PlatformInit(m_proxyHost.data(), m_proxyPort, m_proxyUsername.data(), m_proxyPassword.data());
+    USP::PlatformInit(m_proxyHost.data(), m_proxyPort, m_proxyUsername.data(), m_proxyPassword.data());
 
     // Initialize azure-c-shared HTTP API
     HTTPAPI_Init();
@@ -82,7 +84,7 @@ void CSpxRestTtsEngineAdapter::Init()
         }
         else
         {
-            endpoint = endpointUrl;
+            m_endpoint = endpointUrl;
         }
     }
 
@@ -109,49 +111,16 @@ void CSpxRestTtsEngineAdapter::Init()
             << url.host << ':' << url.port
             << TTS_COGNITIVE_SERVICE_URL_PATH;
 
-        endpoint = oss.str();
+        m_endpoint = oss.str();
     }
 
-    if (!endpoint.empty() && !CSpxSynthesisHelper::IsCustomVoiceEndpoint(endpoint) && !CSpxSynthesisHelper::IsStandardVoiceEndpoint(endpoint))
+    if (m_endpoint.empty() && !region.empty())
     {
-        // Scenario 1, custom endpoint (e.g. on prem), no need authentication
-        m_endpoint = endpoint;
+        // Construct standard voice endpoint based on region
+        m_endpoint = std::string(HTTPS_URL_PREFIX) + region + TTS_COGNITIVE_SERVICE_HOST_SUFFIX + TTS_COGNITIVE_SERVICE_URL_PATH;
     }
-    else if (!endpoint.empty() && CSpxSynthesisHelper::IsCustomVoiceEndpoint(endpoint))
-    {
-        // Scenario 2, custom voice, need authentication (and therefore need initialize m_authenticator)
-        m_endpoint = endpoint;
-        region = CSpxSynthesisHelper::ParseRegionFromCognitiveServiceEndpoint(endpoint);
 
-        // Construct cognitive service token issue URL based on region
-        auto issueTokenUrl = std::string(HTTPS_URL_PREFIX) + region + ISSUE_TOKEN_HOST_SUFFIX + ISSUE_TOKEN_URL_PATH;
-
-        m_authenticator = std::make_shared<CSpxRestTtsAuthenticator>(issueTokenUrl, subscriptionKey, m_proxyHost, m_proxyPort, m_proxyUsername, m_proxyPassword);
-    }
-    else if ((endpoint.empty() && !region.empty()) || (!endpoint.empty() && CSpxSynthesisHelper::IsStandardVoiceEndpoint(endpoint)))
-    {
-        // Scenario 3, standard voice, need issue token (and therefore need initialize m_authenticator)
-        if (endpoint.empty() && !region.empty())
-        {
-            // Construct standard voice endpoint based on region
-            m_endpoint = std::string(HTTPS_URL_PREFIX) + region + TTS_COGNITIVE_SERVICE_HOST_SUFFIX + TTS_COGNITIVE_SERVICE_URL_PATH;
-        }
-
-        if (!endpoint.empty() && CSpxSynthesisHelper::IsStandardVoiceEndpoint(endpoint))
-        {
-            m_endpoint = endpoint;
-            region = CSpxSynthesisHelper::ParseRegionFromCognitiveServiceEndpoint(endpoint);
-        }
-
-        // Construct cognitive service token issue URL based on region
-        auto issueTokenUrl = std::string(HTTPS_URL_PREFIX) + region + ISSUE_TOKEN_HOST_SUFFIX + ISSUE_TOKEN_URL_PATH;
-
-        m_authenticator = std::make_shared<CSpxRestTtsAuthenticator>(issueTokenUrl, subscriptionKey, m_proxyHost, m_proxyPort, m_proxyUsername, m_proxyPassword);
-    }
-    else
-    {
-        ThrowRuntimeError("Invalid combination of endpoint, region and(or) subscription key.");
-    }
+    SPX_IFTRUE_THROW_HR(m_endpoint.empty(), SPXERR_INVALID_ARG);
 }
 
 void CSpxRestTtsEngineAdapter::Term()
@@ -173,11 +142,17 @@ std::shared_ptr<ISpxSynthesisResult> CSpxRestTtsEngineAdapter::Speak(const std::
 {
     SPX_DBG_TRACE_VERBOSE_IF(SPX_DBG_TRACE_REST_TTS, __FUNCTION__);
 
+    auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
+
+    SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_TTS_ENGINE_SITE_FAILURE);
+    auto subscriptionKey = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Key));
+    auto token = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceAuthorization_Token));
+     
     auto ssml = text;
     if (!isSsml)
     {
-        auto language = ISpxPropertyBagImpl::GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_SynthLanguage), "");
-        auto voice = ISpxPropertyBagImpl::GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_SynthVoice), "");
+        auto language = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_SynthLanguage));
+        auto voice = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_SynthVoice));
         ssml = CSpxSynthesisHelper::BuildSsml(text, language, voice);
     }
 
@@ -189,28 +164,18 @@ std::shared_ptr<ISpxSynthesisResult> CSpxRestTtsEngineAdapter::Speak(const std::
 
     std::shared_ptr<ISpxSynthesisResult> result;
 
-    InvokeOnSite([this, requestId, ssml, outputFormatString, outputFormat, hasHeader, &result](const SitePtr& p) {
+    InvokeOnSite([this, requestId, ssml, subscriptionKey, token, outputFormatString, outputFormat, hasHeader, &result](const SitePtr& p) {
         result = SpxCreateObjectWithSite<ISpxSynthesisResult>("CSpxSynthesisResult", p->QueryInterface<ISpxGenericSite>());
         auto resultInit = SpxQueryInterface<ISpxSynthesisResultInit>(result);
 
         EnsureHttpConnection();
-
-        std::string token;
-        if (m_authenticator != nullptr)
-        {
-            token = m_authenticator->GetAccessToken();
-        }
-
-        if (token.empty())
-        {
-            token = ISpxPropertyBagImpl::GetStringValue(GetPropertyName(PropertyId::SpeechServiceAuthorization_Token), "");
-        }
 
         RestTtsRequest request;
         request.requestId = requestId;
         request.endpoint = m_endpoint;
         request.postContent = ssml;
         request.isSsml = true;
+        request.subscriptionKey = subscriptionKey;
         request.accessToken = token;
         request.outputFormatString = outputFormatString;
         request.outputFormat = outputFormat;
@@ -385,9 +350,16 @@ void CSpxRestTtsEngineAdapter::PostTtsRequest(HTTP_HANDLE http_connect, RestTtsR
             throw std::runtime_error("Could not add HTTP request header: X-ConnectionId");
         }
 
+        if (!request.subscriptionKey.empty())
+        {
+            if (HTTPHeaders_AddHeaderNameValuePair(httpRequestHeaders, "Ocp-Apim-Subscription-Key", request.subscriptionKey.c_str()) != HTTP_HEADERS_OK)
+            {
+                throw std::runtime_error("Could not add HTTP request header: Ocp-Apim-Subscription-Key");
+            }
+        }
+
         if (!request.accessToken.empty())
         {
-            // This is not always required, e.g. not required for on prem service
             if (HTTPHeaders_AddHeaderNameValuePair(httpRequestHeaders, "Authorization", (std::string("bearer ") + request.accessToken).data()) != HTTP_HEADERS_OK)
             {
                 throw std::runtime_error("Could not add HTTP request header: Authorization");

@@ -10,7 +10,6 @@
 #include <queue>
 #include "asyncop.h"
 #include "spxcore_common.h"
-#include "authenticator.h"
 #include "ispxinterfaces.h"
 #include "interface_helpers.h"
 #include "property_bag_impl.h"
@@ -35,6 +34,7 @@ typedef struct RestTtsRequest_Tag
     std::string endpoint;
     std::string postContent;
     bool isSsml;
+    std::string subscriptionKey;
     std::string accessToken;
     std::string outputFormatString;
     SpxWAVEFORMATEX_Type outputFormat;
@@ -98,7 +98,6 @@ private:
 
     std::string m_endpoint;
     std::shared_ptr<ISpxAudioOutput> m_audioOutput;
-    std::shared_ptr<CSpxRestTtsAuthenticator> m_authenticator;
     HTTP_HANDLE m_httpConnect = nullptr;
 
     std::string m_proxyHost;

@@ -14,7 +14,6 @@
 #include "interface_helpers.h"
 #include "property_bag_impl.h"
 #include "usp_reco_engine_adapter.h"
-#include "authenticator.h"
 #include "usp.h"
 
 #define METADATA_TYPE_WORD_BOUNDARY "WordBoundary"
@@ -116,7 +115,6 @@ private:
     std::string m_endpoint;
     bool m_isCustomHost = false;
     std::shared_ptr<ISpxAudioOutput> m_audioOutput;
-    std::shared_ptr<CSpxRestTtsAuthenticator> m_authenticator;
 
     std::string m_proxyHost;
     int m_proxyPort { 0 };

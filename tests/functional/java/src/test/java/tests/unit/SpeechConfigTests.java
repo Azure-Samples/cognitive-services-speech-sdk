@@ -40,6 +40,7 @@ import com.microsoft.cognitiveservices.speech.intent.IntentRecognitionResult;
 import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
 import com.microsoft.cognitiveservices.speech.translation.SpeechTranslationConfig;
 import com.microsoft.cognitiveservices.speech.translation.TranslationRecognitionResult;
+import com.microsoft.cognitiveservices.speech.SpeechSynthesizer;
 
 import tests.AudioUtterancesKeys;
 import tests.Settings;
@@ -187,6 +188,7 @@ public class SpeechConfigTests {
         // We cannot really test whether recognizer works, since there is no test endpoint available which supports no authentication.
         assertTrue(sr.getProperties().getProperty(PropertyId.SpeechServiceAuthorization_Token).isEmpty());
         assertTrue(sr.getProperties().getProperty(PropertyId.SpeechServiceConnection_Key).isEmpty());
+        sr.close();
 
         endpoint = "wss://" + Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region + ".s2s.speech.microsoft.com/speech/translation/cognitiveservices/v1";
         SpeechTranslationConfig tc = SpeechTranslationConfig.fromEndpoint(URI.create(endpoint));
@@ -196,8 +198,16 @@ public class SpeechConfigTests {
         // We cannot really test whether recognizer works, since there is no test endpoint available which supports no authentication.
         assertTrue(tr.getProperties().getProperty(PropertyId.SpeechServiceAuthorization_Token).isEmpty());
         assertTrue(tr.getProperties().getProperty(PropertyId.SpeechServiceConnection_Key).isEmpty());
-        sr.close();
         tc.close();
+
+        // TTS
+        endpoint = "wss://" + Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region + ".tts.speech.microsoft.com/cognitiveservices/websocket/v1";
+        SpeechConfig ttsConfig = SpeechConfig.fromEndpoint(URI.create(endpoint));
+        SpeechSynthesizer ss = new SpeechSynthesizer(ttsConfig, null);
+        // We cannot really test whether recognizer works, since there is no test endpoint available which supports no authentication.
+        assertTrue(ss.getProperties().getProperty(PropertyId.SpeechServiceAuthorization_Token).isEmpty());
+        assertTrue(ss.getProperties().getProperty(PropertyId.SpeechServiceConnection_Key).isEmpty());
+        ss.close();
     }
 
     @Test(expected = NullPointerException.class)
