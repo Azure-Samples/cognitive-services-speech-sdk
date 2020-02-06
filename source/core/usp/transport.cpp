@@ -1180,6 +1180,9 @@ void usp::TransportDoWork(TransportHandle transportHandle)
     {
         return;
     }
+    // We first want to read the packets we recieved from the serivce. In case of turn.end we make sure we enqueue the telemetry packets inside
+    // the request->queue and by the end of this function we will be sure that the packets has reached the azure_c_lib.
+    uws_client_dowork(request->ws.WSHandle);
 
     switch (request->state)
     {
@@ -1256,8 +1259,6 @@ void usp::TransportDoWork(TransportHandle transportHandle)
 
         break;
     }
-
-    uws_client_dowork(request->ws.WSHandle);
 }
 
 int usp::TransportSetCallbacks(TransportHandle transportHandle,
