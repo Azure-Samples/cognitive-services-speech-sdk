@@ -52,8 +52,13 @@
 
 #define SPXAPI_NOTHROW      __attribute__((nothrow))
 #define SPXAPI_RESULTTYPE   SPXHR
-// when __attribute__((stdcall)) is set, gcc generates a warning : stdcall attribute ignored.
+// When __attribute__((stdcall)) is set, gcc generates a warning in non-x86 architectures
+// For Android __attribute__((stdcall)) is needed for x86 architectures (emulator)
+#if defined(__ANDROID__) && defined(__i386__)
+#define SPXAPI_CALLTYPE     __attribute__((stdcall))
+#else
 #define SPXAPI_CALLTYPE
+#endif
 #define SPXAPI_VCALLTYPE    __attribute__((cdecl))
 
 #define SPXDLL_EXPORT       __attribute__ ((__visibility__("default")))
