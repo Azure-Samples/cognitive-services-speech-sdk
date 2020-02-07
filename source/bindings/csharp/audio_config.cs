@@ -186,12 +186,69 @@ namespace Microsoft.CognitiveServices.Speech.Audio
             {
                 streamKeepAlive = null;
             }
+
+            propBag?.Close();
+        }
+
+        /// <summary>
+        /// Sets the property by name.
+        /// Added in version 1.10.0.
+        /// </summary>
+        /// <param name="name">Name of the property</param>
+        /// <param name="value">Value of the property</param>
+        public void SetProperty(string name, string value)
+        {
+            if (value == null)
+            {
+                throw new ArgumentNullException("Invalid property value.");
+            }
+
+            propBag.SetProperty(name, value);
+        }
+
+        /// <summary>
+        /// Sets the property by propertyId
+        /// Added in version 1.10.0.
+        /// </summary>
+        /// <param name="id">PropertyId of the property</param>
+        /// <param name="value">Value of the property</param>
+        public void SetProperty(PropertyId id, string value)
+        {
+            if (value == null)
+            {
+                throw new ArgumentNullException("Invalid property value.");
+            }
+
+            propBag.SetProperty(id, value);
+        }
+
+        /// <summary>
+        /// Gets the property by name.
+        /// Added in version 1.10.0.
+        /// </summary>
+        /// <param name="name">Name of the property</param>
+        /// <returns>Value of the property</returns>
+        public string GetProperty(string name)
+        {
+            return propBag.GetProperty(name);
+        }
+
+        /// <summary>
+        /// Gets the property by propertyId
+        /// Added in version 1.10.0.
+        /// </summary>
+        /// <param name="id">PropertyId of the property</param>
+        /// <returns>Value of the property</returns>
+        public string GetProperty(PropertyId id)
+        {
+            return propBag.GetProperty(id);
         }
 
         private bool disposed = false;
         private IDisposable streamKeepAlive = null;
         private bool disposeStream = false;
         internal InteropSafeHandle configHandle;
+        private PropertyCollection propBag;
 
         internal AudioConfig(IntPtr configPtr, AudioInputStream audioStream = null, bool ownStream = false)
         {
@@ -199,6 +256,10 @@ namespace Microsoft.CognitiveServices.Speech.Audio
             configHandle = new InteropSafeHandle(configPtr, Internal.AudioConfig.audio_config_release);
             streamKeepAlive = audioStream;
             disposeStream = ownStream;
+
+            IntPtr hpropbag = IntPtr.Zero;
+            ThrowIfFail(Internal.AudioConfig.audio_config_get_property_bag(configPtr, out hpropbag));
+            propBag = new PropertyCollection(hpropbag);
         }
 
         internal AudioConfig(IntPtr configPtr, AudioOutputStream audioStream, bool ownStream)

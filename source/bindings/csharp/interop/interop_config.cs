@@ -38,6 +38,8 @@ namespace Microsoft.CognitiveServices.Speech.Internal
         public static extern SPXHR audio_config_create_audio_output_from_stream(out SPXAUDIOCONFIGHANDLE audioConfig, InteropSafeHandle audioStream);
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
         public static extern SPXHR audio_config_release(SPXAUDIOCONFIGHANDLE audioConfig);
+        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        public static extern SPXHR audio_config_get_property_bag(SPXAUDIOCONFIGHANDLE audioConfigHandle, out SPXPROPERTYBAGHANDLE propertyBagHandle);
     }
 
     internal static class SpeechConfig
