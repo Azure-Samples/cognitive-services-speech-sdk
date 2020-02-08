@@ -212,7 +212,7 @@ class NativeLibraryLoader {
 
         if (operatingSystem.contains("linux")) {
             String osArchitecture = System.getProperty("os.arch");
-            if (osArchitecture.contains("aarch64")) {
+            if (osArchitecture.contains("aarch64") || osArchitecture.contains("arm")) {
                 return String.format(speechPrefix, "linux-arm", dataModelSize);
             }
             else if (osArchitecture.contains("amd64") || osArchitecture.contains("x86_64")) {

@@ -7,6 +7,7 @@ set(SDKKWS_SUPPORTED_TARGETS
   "Android-x86"
   "IOS-all"
   "IOSSIMULATOR-x64"
+  "Linux-arm32"
   "Linux-arm64"
   "Linux-x86"
   "Linux-x64"

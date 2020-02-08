@@ -3,7 +3,7 @@ parameters:
   macArtifactName: macOS
   javaArtifactSuffix: ""
 
-# Note: for now this packages up only {Linux,Windows,macOS}-x64-Release and Linux-arm64-Release
+# Note: for now this packages up only {Windows,macOS}-x64-Release and Linux-{arm32,arm64,x64}-Release
 jobs:
 - job: ${{ format('JavaJrePackage{0}', parameters.javaArtifactSuffix) }}
   dependsOn:

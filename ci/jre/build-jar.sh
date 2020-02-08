@@ -41,7 +41,7 @@ unzip -q -o "$BASE_JAR" -d "$JAR_DIR"
 NOW=$(date -Iseconds)
 
 # (Shipping) platform list
-platforms=(Linux-{arm64,x64}-Release OSX-x64-Release Windows-x64-Release)
+platforms=(Linux-{arm32,arm64,x64}-Release OSX-x64-Release Windows-x64-Release)
 
 # Will need extension to support more archs / debug flavor (in sync with NativeLibraryLoader.java).
 for platformString in "${platforms[@]}"; do
