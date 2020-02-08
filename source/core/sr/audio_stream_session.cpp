@@ -2699,7 +2699,7 @@ void CSpxAudioStreamSession::SendNetworkMessage(std::string&& path, std::vector<
 
 bool CSpxAudioStreamSession::IsStreaming()
 {
-    return IsState(SessionState::ProcessingAudio) || IsState(SessionState::ProcessingAudioLeftovers);
+    return  m_expectAdapterStoppedTurn || m_expectAdapterStartedTurn;
 }
 
 std::string CSpxAudioStreamSession::GetSpeechEventPayload(bool startMeeting)

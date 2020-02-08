@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using System.Runtime.Serialization;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
@@ -553,6 +554,91 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var config = SpeechConfig.FromEndpoint(new Uri(conversationTranscriptionMultiAudioEndpoint), conversationTranscriptionPPEKey);
             config.SetProperty("ConversationTranscriptionInRoomAndOnline", "true");
             return config;
+        }
+
+        private SpeechConfig CreateCTSTeamsSpeechConfig()
+        {
+            var config = SpeechConfig.FromEndpoint(new Uri(DefaultSettingsMap[DefaultSettingKeys.ONLINE_AUDIO_ENDPOINT]), conversationTranscriptionPPEKey);
+            config.SetProperty("ConversationTranscriptionInRoomAndOnline", "true");
+            return config;
+        }
+
+        [TestMethod]
+        public async Task TestDelayedAudio()
+        {
+            var config = CreateCTSTeamsSpeechConfig();
+            config.OutputFormat = OutputFormat.Detailed;
+
+            ManualResetEvent transcribedEvent = new ManualResetEvent(false);
+            ManualResetEvent transcribingEvent = new ManualResetEvent(false);
+            ManualResetEvent speechStartEvent = new ManualResetEvent(false);
+            ManualResetEvent speechEndEvent = new ManualResetEvent(false);
+            ManualResetEvent canceledEvent = new ManualResetEvent(false);
+
+            var pushStream = AudioInputStream.CreatePushStream();
+            var audioInput = AudioConfig.FromStreamInput(pushStream);
+            var meetingID = Guid.NewGuid().ToString();
+
+            using (var conversation = await Conversation.CreateConversationAsync(config, meetingID))
+            using (var conversationTranscriber = TrackSessionId(new ConversationTranscriber(audioInput)))
+            {
+                await conversationTranscriber.JoinConversationAsync(conversation);
+                var recoLanguage = conversationTranscriber.Properties.GetProperty(PropertyId.SpeechServiceConnection_RecoLanguage);
+                Assert.IsTrue(String.IsNullOrEmpty(recoLanguage), "RecoLanguage should not be set here. RecoLanguage: " + recoLanguage);
+
+                conversationTranscriber.Transcribed += (s, e) =>
+                {
+                    Console.WriteLine($"Recognized {e.Result.Text}");
+                    transcribedEvent.Set();
+                };
+
+                conversationTranscriber.Transcribing += (s, e) =>
+                {
+                    Console.WriteLine($"Recognizing {e.Result.Text}");
+                    transcribingEvent.Set();
+                };
+
+                conversationTranscriber.SpeechStartDetected += (s, e) =>
+                {
+                    Console.WriteLine("Speech Started");
+                    speechStartEvent.Set();
+                };
+
+                conversationTranscriber.SpeechEndDetected += (s, e) =>
+                {
+                    Console.WriteLine("Speech Ended");
+                    speechEndEvent.Set();
+                };
+
+                conversationTranscriber.Canceled += (s, e) =>
+                {
+                    Assert.IsTrue(string.IsNullOrWhiteSpace(e.ErrorDetails), $"Error details were present {e.ErrorDetails}");
+                    Assert.IsTrue(e.Reason == CancellationReason.EndOfStream, $"Cancellation Reason was not EOS it was {e.Reason.ToString()} with error code ${e.ErrorCode.ToString()}");
+                    Console.WriteLine("Reached EndOfStream");
+                    canceledEvent.Set();
+                };
+
+                var con = Connection.FromRecognizer(conversationTranscriber);
+                con.MessageReceived += (s, e) =>
+                {
+                    Console.WriteLine($"Message Received {e.Message}");
+                };
+
+                await conversationTranscriber.StartTranscribingAsync();
+                await conversation.AddParticipantAsync("userID@microsoft.com");
+
+                await Task.Delay(TimeSpan.FromSeconds(5));
+
+                var fileContents = File.ReadAllBytes(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
+
+                pushStream.Write(fileContents);
+                pushStream.Close();
+
+                Assert.IsTrue(WaitHandle.WaitAll(new System.Threading.WaitHandle[] { transcribedEvent, canceledEvent, transcribingEvent, speechStartEvent, speechEndEvent },
+                    TimeSpan.FromSeconds(30)), "Events were not received in time");
+
+            }
+
         }
     }
 }
