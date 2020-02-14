@@ -42,7 +42,9 @@ jobs:
     inputs:
       versionSpec: 3.7
       addToPath: true
-  - bash: ./ci/install-build-dependencies.sh
+  - bash: |
+     brew unlink swig
+     ./ci/install-build-dependencies.sh
     displayName: Install build dependencies
   - bash: |
       rm -f ./tests/test.subscriptions.regions.json
