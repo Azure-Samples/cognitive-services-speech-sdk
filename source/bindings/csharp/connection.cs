@@ -4,11 +4,10 @@
 //
 
 using System;
-using System.Globalization;
 using System.Runtime.InteropServices;
-using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.CognitiveServices.Speech.Internal;
+using ConversationTranslator = Microsoft.CognitiveServices.Speech.Transcription.ConversationTranslator;
 using static Microsoft.CognitiveServices.Speech.Internal.SpxExceptionThrower;
 
 namespace Microsoft.CognitiveServices.Speech
@@ -39,6 +38,19 @@ namespace Microsoft.CognitiveServices.Speech
             ThrowIfNull(recognizer, "null recognizer");
             IntPtr handle = IntPtr.Zero;
             ThrowIfFail(Internal.Connection.connection_from_recognizer(recognizer.recoHandle, out handle));
+            return new Connection(handle);
+        }
+
+        /// <summary>
+        /// Gets the Connection instance from the conversation translator.
+        /// </summary>
+        /// <param name="convTrans">The conversation translator associated with the connection.</param>
+        /// <returns>The Connection instance of the conversation translator.</returns>
+        public static Connection FromConversationTranslator(ConversationTranslator convTrans)
+        {
+            ThrowIfNull(convTrans, "null conversation translator");
+            IntPtr handle = IntPtr.Zero;
+            ThrowIfFail(Internal.Connection.connection_from_conversation_translator(convTrans._nativeHandle, out handle));
             return new Connection(handle);
         }
 

@@ -6,7 +6,6 @@
 #include "stdafx.h"
 #include <sstream>
 #include <azure_c_shared_utility_urlencode_wrapper.h>
-#include "httpapi_platform_proxy.h"
 #include "http_utils.h"
 #include "http_request.h"
 #include "http_response.h"
@@ -21,23 +20,14 @@ namespace Speech {
 namespace Impl {
 
     HttpRequest::HttpRequest(const std::string& host, int port, bool isSecure) :
-        m_secure(isSecure),
-        m_host(host),
-        m_port(port),
-        m_path(),
-        m_query(),
-        m_proxyHost(),
-        m_proxyPort(),
-        m_proxyUsername(),
-        m_proxyPassword(),
+        m_endpoint(),
         m_handle(),
         m_requestHeaders()
     {
-        ValidatePort(port);
-        if (host.empty())
-        {
-            throw std::invalid_argument("You cannot specify an empty host");
-        }
+        m_endpoint
+            .Scheme(isSecure ? UriScheme::HTTPS : UriScheme::HTTP)
+            .Host(host)
+            .Port(port);
 
         m_requestHeaders = HTTPHeaders_Alloc();
         if (m_requestHeaders == nullptr)
@@ -45,7 +35,26 @@ namespace Impl {
             throw std::bad_alloc();
         }
         
-        SetRequestHeader("Host", m_host);
+        SetRequestHeader("Host", m_endpoint.Host());
+    }
+
+    HttpRequest::HttpRequest(const HttpEndpointInfo& endpoint) :
+        m_endpoint(endpoint),
+        m_handle(),
+        m_requestHeaders()
+    {
+        if (!endpoint.IsValid())
+        {
+            throw std::invalid_argument("You must specify valid HTTP endpoint information");
+        }
+
+        m_requestHeaders = HTTPHeaders_Alloc();
+        if (m_requestHeaders == nullptr)
+        {
+            throw std::bad_alloc();
+        }
+
+        SetRequestHeader("Host", m_endpoint.Host());
     }
 
     HttpRequest::~HttpRequest()
@@ -65,12 +74,12 @@ namespace Impl {
 
     std::string HttpRequest::GetPath()
     {
-        return m_path;
+        return m_endpoint.Path();
     }
 
     void HttpRequest::SetPath(const std::string & path)
     {
-        m_path = path;
+        m_endpoint.Path(path);
     }
 
     void HttpRequest::AddQueryParameter(const std::string & name, const std::string & value)
@@ -80,7 +89,7 @@ namespace Impl {
             throw std::invalid_argument("Query parameter name cannot be empty");
         }
 
-        m_query[name].push_back(value);
+        m_endpoint.AddQueryParameter(name, value);
     }
 
     void HttpRequest::SetRequestHeader(const std::string & name, const std::string & value)
@@ -90,75 +99,37 @@ namespace Impl {
             throw std::invalid_argument("Request header name cannot be empty");
         }
 
-        HTTPHeaders_AddHeaderNameValuePair(m_requestHeaders, name.data(), value.data());
+        m_endpoint.SetHeader(name, value);
     }
 
     void HttpRequest::SetProxy(const std::string & host, int port, const std::string & username, const std::string & password)
     {
-        if (false == host.empty())
-        {
-            ValidatePort(port);
-        }
-
-        m_proxyHost = host;
-        m_proxyPort = port;
-        m_proxyUsername = username;
-        m_proxyPassword = password;
+        m_endpoint.Proxy(host, port, username, password);
     }
 
     std::unique_ptr<HttpResponse> HttpRequest::SendRequest(HTTPAPI_REQUEST_TYPE type, const void *content, size_t contentSize)
     {
-        // add remaining standard HTTP headers
-        SetRequestHeader("Content-Length", std::to_string(contentSize));
+        std::string httpPath = m_endpoint.Path() + m_endpoint.QueryString();
 
-        std::string httpPath = m_path;
-
-        // Generate query string
-        if (m_query.size() > 0)
+        for (const auto& h : m_endpoint.Headers())
         {
-            bool first = true;
-            httpPath += "?";
-
-            for (auto const& kvp : m_query)
-            {
-                std::string encodedKey = HttpUtils::UrlEscape(kvp.first);
-
-                const std::vector<std::string> &values = kvp.second;
-                for (const std::string &value : values)
-                {
-                    if (first)
-                    {
-                        first = false;
-                    }
-                    else
-                    {
-                        httpPath += "&";
-                    }
-
-                    httpPath += encodedKey;
-                    httpPath += "=";
-                    httpPath += HttpUtils::UrlEscape(value);
-                }
-            }
+            HTTPHeaders_AddHeaderNameValuePair(m_requestHeaders, h.first.c_str(), h.second.c_str());
         }
 
+        HTTPHeaders_AddHeaderNameValuePair(m_requestHeaders, "Content-Length", std::to_string(contentSize).c_str());
+
+        // Create the native HTTP instance
         if (m_handle == nullptr)
         {
-            if (m_proxyHost.empty())
-            {
-                m_handle = HTTPAPI_CreateConnection_With_Platform_Proxy(m_host.c_str(), m_port, m_secure);
-            }
-            else
-            {
-                m_handle = HTTPAPI_CreateConnection_Advanced(
-                    m_host.c_str(),
-                    m_port,
-                    m_secure,
-                    m_proxyHost.c_str(),
-                    m_proxyPort,
-                    m_proxyUsername.c_str(),
-                    m_proxyPassword.c_str());
-            }
+            ProxyServerInfo proxy = m_endpoint.Proxy();
+            m_handle = HTTPAPI_CreateConnection_Advanced(
+                m_endpoint.Host().c_str(),
+                m_endpoint.Port(),
+                m_endpoint.IsSecure(),
+                proxy.host.empty() ? nullptr : proxy.host.c_str(),
+                proxy.port,
+                proxy.username.empty() ? nullptr : proxy.username.c_str(),
+                proxy.password.empty() ? nullptr : proxy.password.c_str());
 
             if (m_handle == nullptr)
             {
@@ -171,6 +142,17 @@ namespace Impl {
         if (HTTPAPI_SetOption(m_handle, OPTION_TLS_VERSION, &tls_version) != HTTPAPI_OK)
         {
             throw std::runtime_error("Could not set TLS 1.2 option");
+        }
+
+        bool disableDefaultVerifyPaths = m_endpoint.DisableDefaultVerifyPaths();
+        bool disableCrlChecks = m_endpoint.DisableCrlChecks();
+        std::string singleCert = m_endpoint.SingleTrustedCertificate();
+
+        HTTPAPI_SetOption(m_handle, OPTION_DISABLE_DEFAULT_VERIFY_PATHS, &disableDefaultVerifyPaths);
+        if (!singleCert.empty())
+        {
+            HTTPAPI_SetOption(m_handle, OPTION_TRUSTED_CERT, singleCert.c_str());
+            HTTPAPI_SetOption(m_handle, OPTION_DISABLE_CRL_CHECK, &disableCrlChecks);
         }
 #endif
 
@@ -193,12 +175,6 @@ namespace Impl {
         }
 
         return response;
-    }
-
-    void HttpRequest::ValidatePort(int port)
-    {
-        if (false == HttpUtils::IsValidPort(port))
-            throw std::invalid_argument("The port is not valid. (0 < port <= 65535)");
     }
 
 } } } }

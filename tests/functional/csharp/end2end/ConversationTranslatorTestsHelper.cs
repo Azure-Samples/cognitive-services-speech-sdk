@@ -300,10 +300,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             });
         }
 
-        public void VerifyBasicEvents(bool expectEndOfStream, string name, bool isHost, out string participantId)
+        public void VerifyBasicEvents(bool expectEndOfStream, bool expectSessionStopped, string name, bool isHost, out string participantId)
         {
             SPXTEST_REQUIRE(SessionStarted.Count > 0);
-            SPXTEST_REQUIRE(SessionStopped.Count > 0);
+            if (expectSessionStopped)
+            {
+                SPXTEST_REQUIRE(SessionStopped.Count > 0);
+            }
 
             if (expectEndOfStream)
             {
@@ -549,7 +552,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public void VerifyBasicEvents(bool expectEndOfStream)
         {
             string partId;
-            Events.VerifyBasicEvents(expectEndOfStream, Name, IsHost, out partId);
+            Events.VerifyBasicEvents(expectEndOfStream, IsHost, Name, IsHost, out partId);
             ParticipantId = partId;
         }
 

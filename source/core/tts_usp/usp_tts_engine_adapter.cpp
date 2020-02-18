@@ -78,7 +78,7 @@ void CSpxUspTtsEngineAdapter::Init()
 
     if (m_endpoint.empty() && !region.empty())
     {
-        m_endpoint = std::string(WSS_URL_PREFIX) + region + TTS_COGNITIVE_SERVICE_HOST_SUFFIX + TTS_COGNITIVE_SERVICE_WSS_URL_PATH;
+        m_endpoint = HttpUtils::SchemePrefix(UriScheme::WSS) + region + TTS_COGNITIVE_SERVICE_HOST_SUFFIX + TTS_COGNITIVE_SERVICE_WSS_URL_PATH;
     }
 
     SPX_IFTRUE_THROW_HR(m_endpoint.empty(), SPXERR_INVALID_ARG);

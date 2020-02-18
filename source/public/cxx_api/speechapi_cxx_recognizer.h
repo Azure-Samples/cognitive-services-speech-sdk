@@ -6,6 +6,9 @@
 //
 
 #pragma once
+#include <spxdebug.h>
+#include <speechapi_c_common.h>
+#include <speechapi_c_recognizer.h>
 #include <speechapi_cxx_common.h>
 
 

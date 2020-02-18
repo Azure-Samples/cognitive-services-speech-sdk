@@ -3,15 +3,15 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
-#include "stdafx.h"
+#include "common.h"
 #include <sstream>
 #include <azure_c_shared_utility_xlogging_wrapper.h>
 #include <azure_c_shared_utility_urlencode_wrapper.h>
-#include <WebSocket.h>
 #include <string_utils.h>
 #include <http_utils.h>
 #include "conversation_connection.h"
 #include "conversation_utils.h"
+#include "web_socket.h"
 
 using namespace Microsoft::CognitiveServices::Speech::USP;
 
@@ -60,102 +60,22 @@ namespace ConversationTranslation {
         }
     }
 
-    ConversationClient::ConversationClient(ConversationCallbacksPtr callbacks, const std::string & connectionId, const std::shared_ptr<ISpxThreadService>& threadService)
-        : m_params(connectionId, ConversationConstants::Host, ConversationConstants::WebSocketPath),
-        m_callbacks(callbacks),
-        m_threadService(threadService)
-    {
-        m_params.setQueryParameter(ConversationQueryParameters::ApiVersion, ConversationConstants::ApiVersion);
-    }
-
-    ConversationClient & ConversationClient::SetParticipantId(const std::string & particpantId)
-    {
-        m_participantId = particpantId;
-        return *this;
-    }
-
-    ConversationClient & ConversationClient::SetAuthenticationToken(const std::string & authToken)
-    {
-        m_params.setQueryParameter(ConversationQueryParameters::AuthTokenHeader, authToken);
-        return *this;
-    }
-
-    ConversationClient & ConversationClient::SetEndpointUrl(const std::string & endpointUrl)
-    {
-        Url parsed = HttpUtils::ParseUrl(endpointUrl);
-
-        m_params.setHost(parsed.host);
-
-        if (!parsed.path.empty())
-        {
-            m_params.setPath(parsed.path);
-        }
-
-        if (!parsed.query.empty())
-        {
-            for (const auto& kvp : HttpUtils::ParseQueryString(parsed.query))
-            {
-                for (const auto& value : kvp.second)
-                {
-                    m_params.addQueryParameter(kvp.first, value);
-                }
-            }
-        }
-        
-        return *this;
-    }
-
-    ConversationClient & ConversationClient::SetUserDefinedQueryParameters(const std::string & queryParameters)
-    {
-        m_userDefinedQueryParameters = queryParameters;
-        return *this;
-    }
-
-    ConversationClient & ConversationClient::SetProxyServerInfo(const char * proxyHost, int proxyPort, const char * proxyUsername, const char * proxyPassword)
-    {
-        m_params.setProxy(
-            StringUtils::AsStringOrEmpty(proxyHost),
-            proxyPort,
-            StringUtils::AsStringOrEmpty(proxyUsername),
-            StringUtils::AsStringOrEmpty(proxyPassword));
-
-        return *this;
-    }
-
-    ConversationClient & ConversationClient::SetSingleTrustedCert(const std::string & trustedCert, bool disable_crl_check)
-    {
-        m_params.setSingleTrustedCert(trustedCert, disable_crl_check);
-        return *this;
-    }
-
-    ConversationClient & ConversationClient::SetQueryParameter(const std::string & name, const std::string & value)
-    {
-        m_params.addQueryParameter(name, value);
-        return *this;
-    }
-
-    ConversationClient& ConversationClient::SetPollingInterval(const std::uint32_t pollingIntervalInMs)
-    {
-        m_pollingIntervalMs = pollingIntervalInMs;
-        return *this;
-    }
-
-    std::shared_ptr<ConversationConnection> ConversationClient::Connect()
-    {
-        auto connection = std::shared_ptr<ConversationConnection>(new ConversationConnection(*this));
-        connection->Connect();
-        return connection;
-    }
-
-    ConversationConnection::ConversationConnection(const ConversationClient& client)
-        : m_callbacks(client.m_callbacks),
-        m_params(client.m_params),
+    ConversationConnection::ConversationConnection(
+            const HttpEndpointInfo& endpoint,
+            std::shared_ptr<ISpxThreadService> threadService,
+            ISpxThreadService::Affinity affinity,
+            const std::string& sessionId,
+            std::chrono::milliseconds pollingInterval)
+        : m_webSocketEndpoint(endpoint),
+        m_sessionId(sessionId),
+        m_callbacks(),
         m_webSocket(),
-        m_threadService(client.m_threadService),
-        m_pollingIntervalMs(client.m_pollingIntervalMs),
+        m_threadService(threadService),
+        m_affinity(affinity),
+        m_pollingIntervalMs(pollingInterval),
         m_roomId(),
         m_participants(),
-        m_currentParticipantId(StringUtils::ToUpper(client.m_participantId)),
+        m_currentParticipantId(),
         m_receivedParticipantsList(false),
         m_mutedByHost(false),
         m_callbackIds(),
@@ -184,7 +104,7 @@ namespace ConversationTranslation {
         m_callbackIds.clear();
     }
 
-    void ConversationConnection::Connect()
+    void ConversationConnection::Connect(const std::string& participantId, const std::string conversationToken)
     {
         if (m_webSocket != nullptr)
         {
@@ -211,7 +131,7 @@ namespace ConversationTranslation {
 
         if (m_webSocket == nullptr)
         {
-            m_webSocket = WebSocket::Create(m_threadService, m_pollingIntervalMs);
+            m_webSocket = WebSocket::Create(m_threadService, m_affinity, m_pollingIntervalMs);
 
             auto ptr = shared_from_this();
 
@@ -221,6 +141,18 @@ namespace ConversationTranslation {
             m_callbackIds.push_back(m_webSocket->OnTextData.add(ptr, &ConversationConnection::HandleTextData));
             m_callbackIds.push_back(m_webSocket->OnBinaryData.add(ptr, &ConversationConnection::HandleBinaryData));
             m_callbackIds.push_back(m_webSocket->OnError.add(ptr, &ConversationConnection::HandleError));
+
+            // TODO: right now the USP code doesn't allow you to set the web socket headers directly. Instead, we can use the
+            //       query parameters to set the same values
+
+            m_webSocketEndpoint.SetQueryParameter(ConversationQueryParameters::ApiVersion, ConversationConstants::ApiVersion);
+            m_webSocketEndpoint.SetQueryParameter(ConversationQueryParameters::AuthTokenHeader, conversationToken);
+            if (!m_sessionId.empty())
+            {
+                m_webSocketEndpoint.SetQueryParameter(ConversationConstants::ClientTraceIdHeader, m_sessionId);
+            }
+
+            m_currentParticipantId = StringUtils::ToUpper(participantId);
         }
 
         m_connectionOpenPromise = std::promise<bool>();
@@ -231,7 +163,7 @@ namespace ConversationTranslation {
         unordered_map<string, ConversationParticipant> empty;
         m_participants.swap(empty);
 
-        m_webSocket->Connect(m_params);
+        m_webSocket->Connect(m_webSocketEndpoint);
 
         // wait for the web socket to connect and to receive the list of participants from the service.
         WaitForConnect(m_connectionOpen);
@@ -387,7 +319,7 @@ namespace ConversationTranslation {
         m_webSocket->SendTextData(msg.ToJsonString());
     }
 
-    void ConversationConnection::SetCallbacks(ConversationCallbacksPtr callbacks)
+    void ConversationConnection::SetCallbacks(std::shared_ptr<ConversationCallbacks> callbacks)
     {
         m_callbacks = callbacks;
     }
@@ -436,7 +368,7 @@ namespace ConversationTranslation {
         }
     }
 
-    void ConversationConnection::HandleDisconnected(USP::WebSocketDisconnectReason reason, const std::string & message)
+    void ConversationConnection::HandleDisconnected(USP::WebSocketDisconnectReason reason, const std::string & message, bool serverRequested)
     {
         m_receivedParticipantsList = false;
         m_mutedByHost = false;
@@ -456,7 +388,7 @@ namespace ConversationTranslation {
 
         if (m_callbacks != nullptr)
         {
-            m_callbacks->OnDisconnected(reason, message);
+            m_callbacks->OnDisconnected(reason, message, serverRequested);
         }
     }
 

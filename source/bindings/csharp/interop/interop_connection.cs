@@ -26,6 +26,9 @@ namespace Microsoft.CognitiveServices.Speech.Internal
         public static extern SPXHR connection_from_recognizer(InteropSafeHandle recognizerHandle, out SPXCONNECTIONHANDLE connectionHandle);
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        public static extern SPXHR connection_from_conversation_translator(InteropSafeHandle convTransHandle, out SPXCONNECTIONHANDLE connectionHandle);
+
+        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
         public static extern bool connection_handle_is_valid(InteropSafeHandle handle);
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]

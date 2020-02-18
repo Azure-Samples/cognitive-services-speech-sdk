@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include <proxy_server_info.h>
+#include <http_headers.h>
 #include "usperror.h"
 
 #define UNUSED(x) (void)(x)
@@ -24,14 +26,6 @@
 #else
 #define PROTOCOL_VIOLATION(__fmt, ...)  LogError("ProtocolViolation:" __fmt, ##__VA_ARGS__)
 #endif
-
-typedef struct ProxyServerInfo
-{
-    std::string host;
-    int port;
-    std::string username;
-    std::string password;
-} ProxyServerInfo;
 
 #include <string>
 
@@ -61,21 +55,6 @@ namespace USP {
         static const char* audioStart;
         static const char* audioEnd;
     };
-
-    namespace headers {
-        constexpr auto userAgent = "User-Agent";
-        constexpr auto ocpApimSubscriptionKey = "Ocp-Apim-Subscription-Key";
-        constexpr auto authorization = "Authorization";
-        constexpr auto searchDelegationRPSToken = "X-Search-DelegationRPSToken";
-        constexpr auto audioResponseFormat = "X-Output-AudioCodec";
-        constexpr auto contentType = "Content-Type";
-        constexpr auto streamId = "X-StreamId";
-        constexpr auto requestId = "X-RequestId";
-        constexpr auto region = "Ocp-Apim-Subscription-Region";
-        constexpr auto dialogDLSSecret = "X-DLS-Secret";
-        constexpr auto dialogCommandsAppId = "X-CommandsAppId";
-        constexpr auto capitoConversationToken = "X-CapitoToken";
-    }
 
     class json_properties
     {

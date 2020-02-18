@@ -16,11 +16,13 @@ include_directories("${COMMON_GENERATED_INCLUDE}")
 
 set(HEADERS
     "${INC_DIR}/ISpxConversationInterfaces.h"
+    "${INC_DIR}/i_web_socket.h"
+    "${INC_DIR}/web_socket.h"
     "${INC_DIR}/create_module_object.h"
     )
 
 set(HEADERS_PRIVATE
-    "${SRC_DIR}/stdafx.h"
+    "${SRC_DIR}/common.h"
     "${SRC_DIR}/conversation_impl.h"
     "${SRC_DIR}/conversation_messages.h"
     "${SRC_DIR}/conversation_manager.h"
@@ -28,6 +30,8 @@ set(HEADERS_PRIVATE
     "${SRC_DIR}/conversation_translator.h"
     "${SRC_DIR}/conversation_utils.h"
     "${SRC_DIR}/conversation_events.h"
+    "${SRC_DIR}/conversation_translator_logging.h"
+    "${SRC_DIR}/conversation_translator_connection.h"
     )
 
 set(SOURCES
@@ -38,6 +42,8 @@ set(SOURCES
     "${SRC_DIR}/conversation_messages.cpp"
     "${SRC_DIR}/conversation_connection.cpp"
     "${SRC_DIR}/conversation_translator.cpp"
+    "${SRC_DIR}/web_socket.cpp"
+    "${SRC_DIR}/conversation_translator_connection.cpp"
     )
 
 source_group("Header Files (public)" FILES ${HEADERS})

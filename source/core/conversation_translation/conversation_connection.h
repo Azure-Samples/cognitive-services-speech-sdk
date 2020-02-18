@@ -10,9 +10,9 @@
 #include <vector>
 #include <unordered_map>
 
-#include "ispxinterfaces.h"
+#include <ispxinterfaces.h>
 #include <event.h>
-#include "IWebSocket.h"
+#include "i_web_socket.h"
 #include "conversation_messages.h"
 
 namespace Microsoft {
@@ -22,7 +22,7 @@ namespace Impl {
 namespace ConversationTranslation {
 
     #define _CONVERSATION_ERROR_CODE_VALUES \
-        AuthenticationError = 1, \
+        AuthenticationError, \
         BadRequest, \
         TooManyRequests, \
         Forbidden, \
@@ -47,6 +47,7 @@ namespace ConversationTranslation {
     template<typename T>
     using deleted_unique_ptr = std::unique_ptr<T, std::function<void(T*)>>;
 
+
     /// <summary>
     /// The Callbacks type represents an application-defined structure used to register callbacks for conversation events.
     /// The callbacks are invoked during the processing of the request, an application should spend as little time as possible
@@ -64,10 +65,12 @@ namespace ConversationTranslation {
         /// </summary>
         /// <param name="reason">The web socket disconnect reason</param>
         /// <param name="message">Any additional message explaining the disconnect (can be an empty string)</param>
-        virtual void OnDisconnected(const USP::WebSocketDisconnectReason reason, const string& message)
+        /// <param name="serverRequested">True if the server requested that the web socket be closed</param>
+        virtual void OnDisconnected(const USP::WebSocketDisconnectReason reason, const string& message, bool serverRequested)
         {
             (void)reason;
             (void)message;
+            (void)serverRequested;
         }
 
         /// <summary>
@@ -119,114 +122,6 @@ namespace ConversationTranslation {
         }
     };
 
-    using ConversationCallbacksPtr = std::shared_ptr<ConversationCallbacks>;
-    class ConversationConnection;
-
-    /// <summary>
-    /// A client that can be used to create ConversationConnections
-    /// </summary>
-    class ConversationClient
-    {
-    public:
-        /// <summary>
-        /// Creates a conversation client.
-        /// </summary>
-        /// <param name="callbacks">The struct defines callback functions that will be invoked when various events occur.</param>
-        /// <param name="connectionId">Connection id that will be passed to the service, and can be used for diagnostics.</param>
-        /// <param name="threadService">The thread service. This is used to send/receive on the web socket in the background.</param>
-        ConversationClient(ConversationCallbacksPtr callbacks, const std::string& connectionId, const std::shared_ptr<ISpxThreadService>& threadService);
-
-        /// <summary>
-        /// Default copy constructor
-        /// </summary>
-        ConversationClient(const ConversationClient&) = default;
-
-        /// <summary>
-        /// Destructor
-        /// </summary>
-        ~ConversationClient() = default;
-
-        /// <summary>
-        /// Sets the identifier for the participant for whom we are creating the connection to the conversation service
-        /// </summary>
-        /// <param name="particpantId">The participant identifier (a GUID)</param>
-        /// <returns>Reference to self</returns>
-        ConversationClient& SetParticipantId(const std::string& particpantId);
-
-        /// <summary>
-        /// Sets the conversation service endpoint. It should contain the host name, resource path and all query parameters needed.
-        /// </summary>
-        /// <param name="endpointUrl">The endpoint URL to use</param>
-        /// <returns>Reference to self</returns>
-        ConversationClient& SetEndpointUrl(const std::string& endpointUrl);
-
-        /// <summary>
-        /// Adds some user specified query parameters. These will be appended to the URL used to connect to the service
-        /// </summary>
-        /// <param name="queryParameters">The query parameters string to include. Should not start with ? or &</param>
-        /// <returns>Reference to self</returns>
-        ConversationClient& SetUserDefinedQueryParameters(const std::string& queryParameters);
-
-        /// <summary>
-        /// Sets the proxy server information, which is used to configure the connection to go through a proxy server.
-        /// </summary>
-        /// <param name="proxyHost">The proxy host name</param>
-        /// <param name="proxyPort">The port the proxy is listening on</param>
-        /// <param name="proxyUsername">The proxy username</param>
-        /// <param name="proxyPassword">The proxy password</param>
-        /// <returns>Reference to self</returns>
-        ConversationClient& SetProxyServerInfo(const char* proxyHost, int proxyPort, const char* proxyUsername = nullptr, const char* proxyPassword = nullptr);
-
-        /// <summary>
-        /// When using OpenSSL only: sets a single trusted cert, optionally w/o CRL checks.
-        /// This is meant to be used in a firewall setting with potential lack of
-        /// CRLs (particularly on the leaf).
-        /// </summary>
-        /// <param name="trustedCert">The certificate to trust (PEM format)</param>
-        /// <param name="disable_crl_check">Whether to also disable CRL checks</param>
-        /// <returns>Reference to self</returns>
-        ConversationClient& SetSingleTrustedCert(const std::string& trustedCert, bool disable_crl_check);
-
-        /// <summary>
-        /// Sets the authentication token to use for the conversation. This is returned in response to a call to
-        /// CSpxConversationManager::CreateOrJoin. Please note that this is different from the speech service
-        /// authentication tokens
-        /// </summary>
-        /// <param name="authToken">The conversation authentication token to use</param>
-        /// <returns>Reference to self</returns>
-        ConversationClient& SetAuthenticationToken(const std::string& authToken);
-
-        /// <summary>
-        /// Sets query parameters
-        /// </summary>
-        /// <param name="name">The query parameter name</param>
-        /// <param name="value">The query value</param>
-        /// <returns>Reference to self</returns>
-        ConversationClient& SetQueryParameter(const std::string& name, const std::string& value);
-
-        /// <summary>
-        /// Sets the polling interval the client will use. The default is 10ms
-        /// </summary>
-        /// <param name="pollingIntervalInMs">The polling interval in ms to use</param>
-        /// <returns>Reference to self</returns>
-        ConversationClient& SetPollingInterval(const std::uint32_t pollingIntervalInMs);
-
-        /// <summary>
-        /// Establishes a web socket connection to the conversation service
-        /// </summary>
-        /// <returns>A pointer to the connection</returns>
-        std::shared_ptr<ConversationConnection> Connect();
-
-    private:
-        friend class ConversationConnection;
-
-        USP::WebSocketParams m_params;
-        ConversationCallbacksPtr m_callbacks;
-        std::shared_ptr<ISpxThreadService> m_threadService;
-        std::uint32_t m_pollingIntervalMs = 10;
-        std::string m_userDefinedQueryParameters;
-        std::string m_participantId;
-    };
 
     /// <summary>
     /// A conversation web socket connection. This enables you to receive recognitions, instant messages,
@@ -236,6 +131,25 @@ namespace ConversationTranslation {
     class ConversationConnection : public std::enable_shared_from_this<ConversationConnection>
     {
     public:
+        /// <summary>
+        /// Creates a new instance of the conversation connection
+        /// </summary>
+        /// <param name="endpoint">The conversation web socket endpoint</param>
+        /// <param name="threadService">The thread service to use for sending/receiving data on the web socket</param>
+        /// <param name="affinity">Which affinity to use when sending/receiving data on the web socket. Default is background</param>
+        /// <param name="sessionId">(Optional) the unique identifier for the session</param>
+        /// <param name="pollingInterval">How often to poll for new received data on the web socket connection. Default is 10ms</param>
+        /// <returns>The conversation connection instance</returns>
+        static std::shared_ptr<ConversationConnection> Create(
+            const HttpEndpointInfo& endpoint,
+            std::shared_ptr<ISpxThreadService> threadService,
+            ISpxThreadService::Affinity affinity = ISpxThreadService::Affinity::Background,
+            const std::string& sessionId = "",
+            std::chrono::milliseconds pollingInterval = 10ms)
+        {
+            return std::shared_ptr<ConversationConnection>(new ConversationConnection(endpoint, threadService, affinity, sessionId, pollingInterval));
+        }
+
         /// <summary>
         /// Destructor
         /// </summary>
@@ -257,6 +171,13 @@ namespace ConversationTranslation {
         /// Gets the participants in the conversation
         /// </summary>
         const std::vector<ConversationParticipant> GetParticipants() const;
+
+        /// <summary>
+        /// Connects the web socket connection
+        /// </summary>
+        /// <param name="participantId">The identifier for the current participant</param>
+        /// <param name="conversationToken">The token to use to identify the conversation to connect to</param>
+        void Connect(const std::string& participantId, const std::string conversationToken);
 
         /// <summary>
         /// Disconnects the web socket connection
@@ -313,14 +234,15 @@ namespace ConversationTranslation {
         /// Sets the callback functions to use
         /// </summary>
         /// <param name="callbacks">The new callbacks to use</param>
-        void SetCallbacks(ConversationCallbacksPtr callbacks);
+        void SetCallbacks(std::shared_ptr<ConversationCallbacks> callbacks);
 
     private:
-        friend class ConversationClient;
-
-        ConversationConnection(const ConversationClient& client);
-
-        void Connect();
+        ConversationConnection(
+            const HttpEndpointInfo& endpoint,
+            std::shared_ptr<ISpxThreadService> threadService,
+            ISpxThreadService::Affinity affinity,
+            const std::string& sessionId,
+            std::chrono::milliseconds pollingInterval);
 
         /// <summary>
         /// Checks if we are connected, and whether or not we can send messages
@@ -334,7 +256,7 @@ namespace ConversationTranslation {
         inline void CheckHostCanSend();
 
         void HandleConnected();
-        void HandleDisconnected(USP::WebSocketDisconnectReason reason, const std::string& message);
+        void HandleDisconnected(USP::WebSocketDisconnectReason reason, const std::string& message, bool serverRequested);
         void HandleTextData(const std::string& text);
         void HandleBinaryData(const uint8_t* data, const size_t length);
         void HandleError(USP::WebSocketError error, int code, const std::string& message);
@@ -351,10 +273,12 @@ namespace ConversationTranslation {
         }
 
     private:
-        ConversationCallbacksPtr m_callbacks;
-        USP::WebSocketParams m_params;
+        HttpEndpointInfo m_webSocketEndpoint;
+        std::string m_sessionId;
+        std::shared_ptr<ConversationCallbacks> m_callbacks;
         std::shared_ptr<USP::IWebSocket> m_webSocket;
         std::shared_ptr<ISpxThreadService> m_threadService;
+        const ISpxThreadService::Affinity m_affinity;
         std::chrono::milliseconds m_pollingIntervalMs;
         std::string m_roomId;
         std::unordered_map<std::string, ConversationParticipant> m_participants;

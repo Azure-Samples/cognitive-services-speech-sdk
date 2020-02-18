@@ -100,6 +100,12 @@ external/KWS/*/
 external/uwp_ssl/*/
 external/android-openssl/*/
 
+# Ignore Open SSL 1.1.1b
+/openssl-1.1.1b/
+/external/android-openssl
+/external/linux-openssl
+/openssl-1.1.1b.tar.gz
+
 # Ignores for the Java Maven test project
 tests/functional/java/target/
 tests/functional/java/.classpath
@@ -117,3 +123,14 @@ tests/**/objd
 tests/**/bin
 /tests/functional/java/.idea
 /tests/functional/java/speechsdk-tests.iml
+
+# Ignore test symlinks
+/source/bindings/python/input
+/source/bindings/python/test.audio.utterances.json
+/source/bindings/python/test.defaults.json
+/source/bindings/python/test.subscriptions.regions.json
+/tests/functional/java/input
+/tests/functional/java/lib
+/tests/functional/java/test.audio.utterances.json
+/tests/functional/java/test.defaults.json
+/tests/functional/java/test.subscriptions.regions.json

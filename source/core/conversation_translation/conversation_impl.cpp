@@ -3,12 +3,13 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
-#include "stdafx.h"
+#include "common.h"
 #include <create_object_helpers.h>
 #include <http_utils.h>
 #include <http_exception.h>
 #include <string_utils.h>
-#include <thread_service.h>
+#include <http_endpoint_info.h>
+#include <file_logger.h>
 #include "conversation_impl.h"
 #include "conversation_manager.h"
 #include "conversation_utils.h"
@@ -33,54 +34,45 @@ namespace ConversationTranslation {
 
     using StringUtils = PAL::StringUtils;
 
-    static constexpr auto UNSET_DEFAULT_VALUE = "!!<<NOT_SET>>!!";
 
-    static inline const string __GetString(shared_ptr<ISpxNamedProperties> properties, PropertyId id)
+    static void ConfigureEndpointFromProperties(
+        HttpEndpointInfo& endpoint, shared_ptr<ISpxNamedProperties> properties, const char * urlPropertyName)
     {
-        const char * propertyName = GetPropertyName(id);
-        if (propertyName == nullptr)
+        // Set the override URL if specified
+        string url = properties->GetStringValue(urlPropertyName);
+        if (false == url.empty())
         {
-            SPX_THROW_HR(SPXERR_RUNTIME_ERROR);
-        }
-        
-        return properties->GetStringValue(propertyName, UNSET_DEFAULT_VALUE);
-    }
-
-    static inline const string GetString(shared_ptr<ISpxNamedProperties> properties, PropertyId id, const char * defaultValue = nullptr)
-    {
-        string value = __GetString(properties, id);
-        return value == UNSET_DEFAULT_VALUE
-            ? string(defaultValue == nullptr ? "" : defaultValue)
-            : value;
-    }
-
-    static inline const string GetString(shared_ptr<ISpxNamedProperties> properties, initializer_list<std::string> ids, const char * defaultValue = nullptr)
-    {
-        for (const std::string& id : ids)
-        {
-            string value = properties->GetStringValue(id.c_str(), UNSET_DEFAULT_VALUE);
-            if (value != UNSET_DEFAULT_VALUE)
-            {
-                return value;
-            }
+            endpoint.EndpointUrl(url);
         }
 
-        return defaultValue == nullptr ? "" : defaultValue;
-    }
+        // Get the proxy server info
+        string proxyHost = NamedPropertiesHelper::GetString(properties, PropertyId::SpeechServiceConnection_ProxyHostName);
+        const int32_t proxyPort = NamedPropertiesHelper::GetInt(properties, PropertyId::SpeechServiceConnection_ProxyPort, 0);
+        string proxyUserName = NamedPropertiesHelper::GetString(properties, PropertyId::SpeechServiceConnection_ProxyUserName);
+        string proxyPassword = NamedPropertiesHelper::GetString(properties, PropertyId::SpeechServiceConnection_ProxyPassword);
 
-    static inline int32_t GetInt(shared_ptr<ISpxNamedProperties> properties, PropertyId id, int32_t defaultValue = -1)
-    {
-        string value = __GetString(properties, id);
-        if (value == UNSET_DEFAULT_VALUE || value.empty())
+        if (false == proxyHost.empty())
         {
-            return defaultValue;
+            endpoint.Proxy(proxyHost, proxyPort, proxyUserName, proxyPassword);
         }
 
-        return static_cast<int32_t>(std::stol(value));
+#ifdef SPEECHSDK_USE_OPENSSL
+        // Set the SSL certificate properties
+        string singleTrustedCert = properties->GetStringValue("OPENSSL_SINGLE_TRUSTED_CERT");
+        if (!singleTrustedCert.empty())
+        {
+            bool disable_crl_check = NamedPropertiesHelper::GetBool(properties, "OPENSSL_SINGLE_TRUSTED_CERT_CRL_CHECK");
+            endpoint
+                .DisableDefaultVerifyPaths(true)
+                .SingleTrustedCertificate(singleTrustedCert, disable_crl_check);
+        }
+#endif
     }
+
 
     CSpxConversationImpl::CSpxConversationImpl()
-        : m_conversationId(), m_args(), m_manager(), m_client(), m_connection(), m_permanentRoom(false)
+        : ThreadingHelpers(ISpxThreadService::Affinity::User),
+        m_conversationId(), m_args(), m_manager(), m_connection(), m_canRejoin(false), m_permanentRoom(false)
     {
         SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
     }
@@ -94,7 +86,6 @@ namespace ConversationTranslation {
             Term();
 
             m_connection.reset();
-            m_client.reset();
             m_manager.reset();
             m_args.reset();
         }
@@ -122,65 +113,48 @@ namespace ConversationTranslation {
         auto properties = SpxQueryService<ISpxNamedProperties>(site);
         SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_CONVERSATION_SITE_FAILURE);
 
-        // proxy server info
-        string proxyHost = GetString(properties, PropertyId::SpeechServiceConnection_ProxyHostName);
-        const int32_t proxyPort = GetInt(properties, PropertyId::SpeechServiceConnection_ProxyPort, 0);
-        string proxyUserName = GetString(properties, PropertyId::SpeechServiceConnection_ProxyUserName);
-        string proxyPassword = GetString(properties, PropertyId::SpeechServiceConnection_ProxyPassword);
+        // Initialize logging
+        FileLogger::Instance().SetFileOptions(properties);
 
         // Initialize websocket platform
         USP::PlatformInit(nullptr, 0, nullptr, nullptr);
 
         // Create the conversation manager object
-        string restEndpoint = properties->GetStringValue(ConversationKeys::Conversation_Management_Endpoint);
-        if (false == restEndpoint.empty())
         {
-            // parse out the URL parts
-            Url restEndpointParts = HttpUtils::ParseUrl(restEndpoint);
+            HttpEndpointInfo restEndpoint;
+            restEndpoint
+                .Scheme(UriScheme::HTTPS)
+                .Host(ConversationConstants::Host)
+                .Path(ConversationConstants::RestPath);
 
-            m_manager = make_shared<CSpxConversationManager>(restEndpointParts.host);
-            m_manager->SetPath(restEndpointParts.path);
-            m_manager->SetPort(restEndpointParts.port);
-            m_manager->SetSecure(restEndpointParts.secure);
-        }
-        else
-        {
-            m_manager = make_shared<CSpxConversationManager>(ConversationConstants::Host);
+            ConfigureEndpointFromProperties(restEndpoint, properties, ConversationKeys::Conversation_Management_Endpoint);
+
+            m_manager = ConversationManager::Create(restEndpoint);
         }
 
-        if (false == proxyHost.empty())
         {
-            m_manager->SetProxy(proxyHost.c_str(), proxyPort, proxyUserName.c_str(), proxyPassword.c_str());
+            // Create the conversation web socket connection client
+            HttpEndpointInfo webSocketEndpoint;
+            webSocketEndpoint
+                .Scheme(UriScheme::WSS)
+                .Host(ConversationConstants::Host)
+                .Path(ConversationConstants::WebSocketPath);
+
+            ConfigureEndpointFromProperties(webSocketEndpoint, properties, ConversationKeys::Conversation_Endpoint);
+
+            // Create the client we can use to create the conversation web socket connections
+            // NOTE: We are using the thread service's 'user' affinity here act as a dispatcher for our
+            //       synchronous operations. To prevent deadlocks, we need to set the conversation web
+            //       socket connection to use the 'background' affinity of the thread service to prevent
+            //       deadlocks. If we were sharing the same thread, deadlocks could happen if we are
+            //       processing an operation that needs to wait for the web socket to send/receive
+            //       something, but waiting blocks progress on the web socket.
+            m_connection = ConversationConnection::Create(
+                webSocketEndpoint,
+                m_threadService,
+                ISpxThreadService::Affinity::Background,
+                NamedPropertiesHelper::GetString(properties, PropertyId::Speech_SessionId));
         }
-
-        m_manager->Init();
-
-        // Create the client we can use to create conversation connections
-        // NOTE: We need to use a separate thread service for this CSpxConversationImpl class and the 
-        //       ConvesationConnection (which is the web socket connection). The reason for this is
-        //       that the web socket will use the passed in thread service to send/receive on a
-        //       separate thread. We are also using this same thread service here to do our asynchronous
-        //       operations. Since the thread service works as a dispatcher and we are using the same
-        //       background queue, processing the asynchronous operations here will block progress from
-        //       happening on the web socket. This becomes problematic if we want to wait for the web
-        //       socket to connect but doing so, blocks it from making the progress needed to connect
-        m_client = make_unique<ConversationClient>(
-            nullptr,
-            properties->GetStringValue(GetPropertyName(PropertyId::Speech_SessionId)),
-            FactoryUtils::CreateInstance<ISpxThreadService, CSpxThreadService>());
-
-        string webSocketEndpoint = properties->GetStringValue(ConversationKeys::Conversation_Endpoint);
-        if (false == webSocketEndpoint.empty())
-        {
-            m_client->SetEndpointUrl(webSocketEndpoint);
-        }
-
-        if (false == proxyHost.empty())
-        {
-            m_client->SetProxyServerInfo(proxyHost.c_str(), proxyPort, proxyUserName.c_str(), proxyPassword.c_str());
-        }
-
-        // TODO ralphe: how to set Single Cert, SSL properties for Linux?
     }
 
     void CSpxConversationImpl::Term()
@@ -234,24 +208,24 @@ namespace ConversationTranslation {
 
             // first create the room
             CreateConversationArgs create;
-            create.CognitiveSpeechAuthenticationToken = GetString(properties, PropertyId::SpeechServiceAuthorization_Token);
-            create.CognitiveSpeechRegion = GetString(properties,
+            create.CognitiveSpeechAuthenticationToken = NamedPropertiesHelper::GetString(properties, PropertyId::SpeechServiceAuthorization_Token);
+            create.CognitiveSpeechRegion = NamedPropertiesHelper::GetString(properties,
             {
                 ConversationKeys::Conversation_Region,
                 GetPropertyName(PropertyId::SpeechServiceConnection_Region)
             });
-            create.CognitiveSpeechSubscriptionKey = GetString(properties,
+            create.CognitiveSpeechSubscriptionKey = NamedPropertiesHelper::GetString(properties,
             {
                 ConversationKeys::ConversationServiceConnection_Key,
                 GetPropertyName(PropertyId::SpeechServiceConnection_Key)
             });
-            create.CorrelationId = GetString(properties, PropertyId::Speech_SessionId);
-            create.LanguageCode = GetString(properties, PropertyId::SpeechServiceConnection_RecoLanguage);
+            create.CorrelationId = NamedPropertiesHelper::GetString(properties, PropertyId::Speech_SessionId);
+            create.LanguageCode = NamedPropertiesHelper::GetString(properties, PropertyId::SpeechServiceConnection_RecoLanguage);
             create.Nickname = nickname;
             create.TranslateTo = StringUtils::Tokenize(
-                    GetString(properties, PropertyId::SpeechServiceConnection_TranslationToLanguages),
+                NamedPropertiesHelper::GetString(properties, PropertyId::SpeechServiceConnection_TranslationToLanguages),
                     ", ");
-            create.TtsVoiceCode = GetString(properties, PropertyId::SpeechServiceConnection_SynthVoice);
+            create.TtsVoiceCode = NamedPropertiesHelper::GetString(properties, PropertyId::SpeechServiceConnection_SynthVoice);
             create.TtsFormat = TextToSpeechFormat::Wav; // TODO ralphe: parse the PropertyId::SpeechServiceConnection_SynthOutputFormat?
             create.ClientAppId = properties->GetStringValue(ConversationKeys::Conversation_ClientId, ConversationConstants::ClientAppId);
 
@@ -259,12 +233,14 @@ namespace ConversationTranslation {
 
             m_args = make_unique<ConversationArgs>(m_manager->CreateOrJoin(create, m_conversationId, roomPin));
 
+            m_canRejoin = true;
+
             // set the region to match what the conversation translator service tells us to use when joining a room
             // except when the full endpoint URL is specified as that causes issues with the USP code
-            if (GetString(properties, PropertyId::SpeechServiceConnection_Region) != m_args->CognitiveSpeechRegion
-                && GetString(properties, PropertyId::SpeechServiceConnection_Endpoint).empty())
+            if (NamedPropertiesHelper::GetString(properties, PropertyId::SpeechServiceConnection_Region) != m_args->CognitiveSpeechRegion
+                && NamedPropertiesHelper::GetString(properties, PropertyId::SpeechServiceConnection_Endpoint).empty())
             {
-                properties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Region), m_args->CognitiveSpeechRegion.c_str());
+                NamedPropertiesHelper::SetString(properties, PropertyId::SpeechServiceConnection_Region, m_args->CognitiveSpeechRegion.c_str());
             }
         });
     }
@@ -276,12 +252,9 @@ namespace ConversationTranslation {
             SPX_IFTRUE_THROW_HR(
                 m_args == nullptr || m_args->RoomCode.empty() || m_args->SessionToken.empty() || m_args->ParticipantId.empty(),
                 SPXERR_INVALID_STATE);
-            SPX_IFTRUE_THROW_HR(m_client == nullptr, SPXERR_UNINITIALIZED);
+            SPX_IFTRUE_THROW_HR(m_connection == nullptr, SPXERR_UNINITIALIZED);
 
-            m_client->SetAuthenticationToken(m_args->SessionToken);
-            m_client->SetParticipantId(m_args->ParticipantId);
-
-            m_connection = m_client->Connect();
+            m_connection->Connect(m_args->ParticipantId, m_args->SessionToken);
 
             SPX_TRACE_INFO("CSpxConversationImpl::StartConversationAsync has completed");
         });
@@ -297,6 +270,7 @@ namespace ConversationTranslation {
         RunSynchronously([this]()
         {
             SPX_IFTRUE_THROW_HR(m_manager == nullptr, SPXERR_UNINITIALIZED);
+            m_canRejoin = false;
             this->DeleteConversationInternal();
         });
     }
@@ -340,9 +314,13 @@ namespace ConversationTranslation {
     {
         return m_args != nullptr
             && m_manager != nullptr
-            && m_client != nullptr
             && m_connection != nullptr
             && m_connection->IsConnected();
+    }
+
+    bool CSpxConversationImpl::CanRejoin() const
+    {
+        return m_canRejoin;
     }
 
     std::shared_ptr<ConversationArgs> CSpxConversationImpl::GetConversationArgs() const
@@ -350,7 +328,7 @@ namespace ConversationTranslation {
         return m_args;
     }
     
-    std::shared_ptr<CSpxConversationManager> CSpxConversationImpl::GetConversationManager() const
+    std::shared_ptr<ConversationManager> CSpxConversationImpl::GetConversationManager() const
     {
         return m_manager;
     }
@@ -390,6 +368,8 @@ namespace ConversationTranslation {
                     throw;
                 }
             }
+
+            ConversationDeleted.raise();
 
             m_args->SessionToken = "";
         }

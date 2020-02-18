@@ -18,6 +18,7 @@
 #include <speechapi_cxx_conversation_transcription_eventargs.h>
 #include <speechapi_cxx_translation_eventargs.h>
 #include <speechapi_cxx_session_eventargs.h>
+#include <speechapi_cxx_participant.h>
 
 namespace Microsoft {
 namespace CognitiveServices {

@@ -114,6 +114,42 @@ static SPXHR SetCallback(
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
+template<typename TInterface>
+static SPXHR SetCallback(
+    EventSignal<std::shared_ptr<TInterface>> ISpxConversationTranslator::* pEvt,
+    SPXCONVERSATIONTRANSLATORHANDLE hConvTrans,
+    CONNECTION_CALLBACK_FUNC pCallback,
+    void * pvCtxt)
+{
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        auto convTrans = GetTranslator(hConvTrans);
+        std::weak_ptr<ISpxInterfaceBase> weak(convTrans->shared_from_this());
+
+        auto eventHandler = [weak, hConvTrans, pCallback, pvCtxt](std::shared_ptr<TInterface> e)
+        {
+            auto keepAlive = weak.lock();
+            // safety checks
+            if (keepAlive == nullptr || keepAlive != GetTranslator(hConvTrans))
+            {
+                SPX_TRACE_ERROR("The conversation translator instance has been disposed OR does not match retrieved handle value");
+                return;
+            }
+
+            auto eventhandles = CSpxSharedPtrHandleTableManager::Get<typename TInterface::HandleInterfaceType, typename TInterface::HandleType>();
+            auto hevent = eventhandles->TrackHandle(e);
+            (*pCallback)(hevent, pvCtxt);
+        };
+
+        (convTrans.get()->*pEvt).Disconnect(eventHandler);
+        if (pCallback != nullptr)
+        {
+            (convTrans.get()->*pEvt).Connect(eventHandler);
+        }
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
 template<typename TValue, typename TInterface, typename THandle>
 static inline SPXHR _RetrieveValue(THandle handle, TValue* pVal, TValue(TInterface::*getter)() const)
 {
@@ -226,40 +262,37 @@ static inline SPXHR TryRetrieveStringValue(THandle handle, char * psz, uint32_t 
     }
 }
 
-static SPXHR ConversationTranslatorJoin(SPXCONVERSATIONTRANSLATORHANDLE hconvtranslator, SPXCONVERSATIONHANDLE hconv, const char* psznickname, bool endOnLeave)
+static void ConversationTranslatorJoin(std::shared_ptr<ISpxConversationTranslator> convTranslator, SPXCONVERSATIONHANDLE hconv, const char* psznickname, bool endOnLeave)
 {
     SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
-    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, hconvtranslator == nullptr);
-    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, hconv == nullptr);
-    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, psznickname == nullptr);
+    SPX_THROW_HR_IF(SPXERR_INVALID_ARG, hconv == nullptr);
+    SPX_THROW_HR_IF(SPXERR_INVALID_ARG, psznickname == nullptr);
 
-    SPXAPI_INIT_HR_TRY(hr)
-    {
-        auto conv = GetConversation(hconv);
-        auto convTranslator = GetTranslator(hconvtranslator);
+    // protect against calling join twice and accidentally destroying internal state
+    SPX_IFTRUE_THROW_HR(!convTranslator->CanJoin(), SPXERR_INVALID_STATE);
 
-        auto factory = SpxQueryService<ISpxSpeechApiFactory>(conv);
-        SPX_IFTRUE_THROW_HR(factory == nullptr, SPXERR_RUNTIME_ERROR);
+    auto conv = GetConversation(hconv);
 
-        auto session = SpxQueryService<ISpxSession>(conv);
-        SPX_IFTRUE_THROW_HR(session == nullptr, SPXERR_RUNTIME_ERROR);
+    auto factory = SpxQueryService<ISpxSpeechApiFactory>(conv);
+    SPX_IFTRUE_THROW_HR(factory == nullptr, SPXERR_RUNTIME_ERROR);
 
-        auto session_as_site = SpxQueryInterface<ISpxGenericSite>(session); //ISpxRecognizerSite
-        auto conv_translator_with_site = SpxQueryInterface<ISpxObjectWithSite>(convTranslator);
+    auto session = SpxQueryService<ISpxSession>(conv);
+    SPX_IFTRUE_THROW_HR(session == nullptr, SPXERR_RUNTIME_ERROR);
 
-        // NOTE: The SetSite() call will call Init() on the conversation translator instance. This
-        // will also register a recognizer with the session;
-        conv_translator_with_site->SetSite(session_as_site);
+    auto session_as_site = SpxQueryInterface<ISpxGenericSite>(session); //ISpxRecognizerSite
+    auto conv_translator_with_site = SpxQueryInterface<ISpxObjectWithSite>(convTranslator);
 
-        // hook audio input to session
-        auto audio_input = SpxQueryInterface<ISpxObjectWithAudioConfig>(conv_translator_with_site);
-        factory->InitSessionFromAudioInputConfig(session, audio_input->GetAudioConfig());
+    // NOTE: The SetSite() call will call Init() on the conversation translator instance. This
+    // will also register a recognizer with the session;
+    conv_translator_with_site->SetSite(session_as_site);
 
-        // Call the implementation join method
-        convTranslator->JoinConversation(conv, psznickname, endOnLeave);
-    }
-    SPXAPI_CATCH_AND_RETURN_HR(hr);
+    // hook audio input to session
+    auto audio_input = SpxQueryInterface<ISpxObjectWithAudioConfig>(conv_translator_with_site);
+    factory->InitSessionFromAudioInputConfig(session, audio_input->GetAudioConfig());
+
+    // Call the implementation join method
+    convTranslator->JoinConversation(conv, psznickname, endOnLeave);
 }
 
 SPXAPI conversation_translator_get_property_bag(SPXCONVERSATIONTRANSLATORHANDLE hconvtranslator, SPXPROPERTYBAGHANDLE * phpropertyBag)
@@ -282,7 +315,16 @@ SPXAPI conversation_translator_get_property_bag(SPXCONVERSATIONTRANSLATORHANDLE 
 
 SPXAPI conversation_translator_join(SPXCONVERSATIONTRANSLATORHANDLE hconvtranslator, SPXCONVERSATIONHANDLE hconv, const char* psznickname)
 {
-    return ConversationTranslatorJoin(hconvtranslator, hconv, psznickname, false);
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        auto instance = GetTranslator(hconvtranslator);
+
+        // protect against calling join twice and accidentally destroying internal state
+        SPX_IFTRUE_THROW_HR(!instance->CanJoin(), SPXERR_INVALID_STATE);
+
+        ConversationTranslatorJoin(instance, hconv, psznickname, false);
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
 SPXAPI conversation_translator_join_with_id(SPXCONVERSATIONTRANSLATORHANDLE hconvtranslator, const char * pszconversationid, const char * psznickname, const char * pszlang)
@@ -300,6 +342,11 @@ SPXAPI conversation_translator_join_with_id(SPXCONVERSATIONTRANSLATORHANDLE hcon
     SPXHR hr = SPX_NOERROR;
     try
     {
+        auto instance = GetTranslator(hconvtranslator);
+
+        // protect against calling join twice and accidentally destroying internal state
+        SPX_IFTRUE_THROW_HR(!instance->CanJoin(), SPXERR_INVALID_STATE);
+
         // create a placeholder speech config first. Since we don't need a subscription key when joining,
         // pass in dummy values
         SPX_THROW_ON_FAIL(speech_config_from_subscription(
@@ -336,7 +383,8 @@ SPXAPI conversation_translator_join_with_id(SPXCONVERSATIONTRANSLATORHANDLE hcon
         SPX_THROW_ON_FAIL(conversation_start_conversation(h_converation));
 
         // now join the conversation instance
-        SPX_THROW_ON_FAIL(ConversationTranslatorJoin(hconvtranslator, h_converation, psznickname, true));
+        ConversationTranslatorJoin(instance, h_converation, psznickname, true);
+
         SPX_REPORT_ON_FAIL(conversation_release_handle(h_converation));
         h_converation = SPXHANDLE_INVALID;
     }
@@ -417,6 +465,40 @@ SPXAPI conversation_translator_session_started_set_callback(SPXCONVERSATIONTRANS
 SPXAPI conversation_translator_session_stopped_set_callback(SPXCONVERSATIONTRANSLATORHANDLE hConvTrans, PCONV_TRANS_CALLBACK pCallback, void * pvContext)
 {
     return SetCallback(&ISpxConversationTranslator::SessionStopped, hConvTrans, pCallback, pvContext);
+}
+
+static SPXCONVERSATIONTRANSLATORHANDLE GetConversationTranslatorHandleFromConnection(SPXCONNECTIONHANDLE hConnection)
+{
+    auto connection = GetInstance<ISpxConnection>(hConnection);
+
+    auto convTransConnection = connection->QueryInterface<ISpxConversationTranslatorConnection>();
+    SPX_IFTRUE_THROW_HR(convTransConnection == nullptr, SPXERR_INVALID_HANDLE);
+
+    auto convTrans = convTransConnection->GetConversationTranslator();
+    SPX_IFTRUE_THROW_HR(convTrans == nullptr, SPXERR_INVALID_HANDLE);
+
+    auto convTransHandleTable = CSpxSharedPtrHandleTableManager::Get<ISpxConversationTranslator, SPXCONVERSATIONTRANSLATORHANDLE>();
+    return (*convTransHandleTable)[convTrans.get()];
+}
+
+SPXAPI conversation_translator_connection_connected_set_callback(SPXCONNECTIONHANDLE hConnection, CONNECTION_CALLBACK_FUNC pCallback, void * pvContext)
+{
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        SPXCONVERSATIONTRANSLATORHANDLE hConvTrans = GetConversationTranslatorHandleFromConnection(hConnection);
+        return SetCallback(&ISpxConversationTranslator::Connected, hConvTrans, pCallback, pvContext);
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
+SPXAPI conversation_translator_connection_disconnected_set_callback(SPXCONNECTIONHANDLE hConnection, CONNECTION_CALLBACK_FUNC pCallback, void * pvContext)
+{
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        SPXCONVERSATIONTRANSLATORHANDLE hConvTrans = GetConversationTranslatorHandleFromConnection(hConnection);
+        return SetCallback(&ISpxConversationTranslator::Disconnected, hConvTrans, pCallback, pvContext);
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
 SPXAPI conversation_translator_canceled_set_callback(SPXCONVERSATIONTRANSLATORHANDLE hConvTrans, PCONV_TRANS_CALLBACK pCallback, void * pvContext)

@@ -63,6 +63,10 @@ namespace Microsoft.CognitiveServices.Speech.Internal
 
                 _managedHandlers += handler;
             }
+
+            // Extend the lifetime of this to after the call to the native code to ensure
+            // the finalizer doesn't run unexpectedly
+            GC.KeepAlive(this);
         }
 
         /// <summary>

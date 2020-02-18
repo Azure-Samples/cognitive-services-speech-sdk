@@ -10,6 +10,7 @@
 #include <speechapi_cxx_connection_eventargs.h>
 #include <speechapi_cxx_connection_message_eventargs.h>
 #include <speechapi_c.h>
+#include <speechapi_cxx_conversation_translator.h>
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -45,6 +46,21 @@ public:
 
         SPXCONNECTIONHANDLE handle = SPXHANDLE_INVALID;
         SPX_THROW_ON_FAIL(hr = ::connection_from_recognizer(recognizer->m_hreco, &handle));
+
+        return std::make_shared<Connection>(handle);
+    }
+
+    /// <summary>
+    /// Gets the Connection instance from the specified conversation translator.
+    /// </summary>
+    /// <param name="convTrans">The conversation translator associated with the connection.</param>
+    /// <returns>The Connection instance of the conversation translator.</returns>
+    static std::shared_ptr<Connection> FromConversationTranslator(std::shared_ptr<Transcription::ConversationTranslator> convTrans)
+    {
+        SPX_IFTRUE_THROW_HR(convTrans == nullptr, SPXERR_INVALID_ARG);
+
+        SPXCONNECTIONHANDLE handle = SPXHANDLE_INVALID;
+        SPX_THROW_ON_FAIL(::connection_from_conversation_translator(convTrans->m_handle, &handle));
 
         return std::make_shared<Connection>(handle);
     }

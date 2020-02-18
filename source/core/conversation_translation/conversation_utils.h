@@ -7,7 +7,7 @@
 
 #include <create_object_helpers.h>
 #include <event.h>
-#include <thread_service.h>
+#include <property_id_2_name_map.h>
 #include "conversation_connection.h"
 #include "conversation_manager.h"
 
@@ -23,6 +23,7 @@ namespace ConversationTranslation {
         constexpr auto RestPath = "/capito/room";
         constexpr auto WebSocketPath = "/capito/translate";
         constexpr auto ApiVersion = "2.0";
+        constexpr auto ClientTraceIdHeader = "X-ClientTraceId";
         constexpr auto RequestIdHeader = "X-RequestId";
         constexpr auto ClientAppIdHeader = "X-ClientAppId";
         constexpr auto ClientAppId = "F8E43FCD-AB42-4215-9D16-8C5FA34E780D";
@@ -55,76 +56,25 @@ namespace ConversationTranslation {
     class ISpxConversationInternals : public ISpxInterfaceBaseFor<ISpxConversationInternals>
     {
     public:
+        Impl::event<> ConversationDeleted;
+
         virtual bool IsConnected() const = 0;
+        virtual bool CanRejoin() const = 0;
         virtual std::shared_ptr<ConversationArgs> GetConversationArgs() const = 0;
-        virtual std::shared_ptr<CSpxConversationManager> GetConversationManager() const = 0;
+        virtual std::shared_ptr<ConversationManager> GetConversationManager() const = 0;
         virtual std::shared_ptr<ConversationConnection> GetConversationConnection() const = 0;
-    };
-
-    struct FactoryUtils
-    {
-        /// <summary>
-        /// Helper method to create new instances of ISpx interfaces. This bypasses the site
-        /// factory methods and is intended for internal use only
-        /// </summary>
-        /// <typeparam name="C">The type that implements the interface I</typeparam>
-        /// <typeparam name="Args...">The arguments to pass to the constructor for C</typeparam>
-        template<typename C, typename ...Args>
-        static shared_ptr<ISpxInterfaceBase> CreateBaseInstance(Args... args)
-        {
-            // WARNING: Because of the way the ISpx interface hierarchy is set up, directly creating a new
-            //          instance of the concrete type won't properly set up the internals of enable_shared_from_this.
-            //          This means that calling shared_from_this() will throw an exception. The reason is
-            //          that the C++ memory code won't properly detect an unambiguous and accessible
-            //          inheritance of shared_from_this. Instead, we instantiate in a roundabout way and
-            //          create the shared_ptr with an instance of an interface pointer
-            unique_ptr<C> rawPtr = make_unique<C>(args...);
-            shared_ptr<ISpxInterfaceBase> ptr(dynamic_cast<ISpxInterfaceBase*>(rawPtr.get()));
-            if (ptr != nullptr)
-            {
-                rawPtr.release();
-            }
-
-            auto init = dynamic_pointer_cast<ISpxObjectInit>(ptr);
-            if (init != nullptr)
-            {
-                init->Init();
-            }
-
-            return ptr;
-        }
-
-        /// <summary>
-        /// Helper method to create new instances of ISpx interfaces. This bypasses the site
-        /// factory methods and is intended for internal use only
-        /// </summary>
-        /// <typeparam name="C">The type that implements the interface I</typeparam>
-        /// <typeparam name="Args...">The arguments to pass to the constructor for C</typeparam>
-        template<typename C, typename ...Args>
-        static shared_ptr<C> CreateInstance(Args... args)
-        {
-            auto base = CreateBaseInstance<C, Args...>(args...);
-            return dynamic_pointer_cast<C>(base);
-;       }
-
-        /// <summary>
-        /// Helper method to create new instances of ISpx interfaces. This bypasses the site
-        /// factory methods and is intended for internal use only
-        /// </summary>
-        /// <typeparam name="I">The ISpx interface type</typeparam>
-        /// <typeparam name="C">The type that implements the interface I</typeparam>
-        /// <typeparam name="Args...">The arguments to pass to the constructor for C</typeparam>
-        template<typename I, typename C, typename ...Args>
-        static shared_ptr<I> CreateInstance(Args... args)
-        {
-            auto base = CreateBaseInstance<C, Args...>(args...);
-            return dynamic_pointer_cast<I>(base);
-        }
     };
 
     class ThreadingHelpers : public ISpxObjectWithSiteInitImpl<ISpxRecognizerSite>
     {
     public:
+        ThreadingHelpers(ISpxThreadService::Affinity affinity) :
+            m_threadService(),
+            m_affinity(affinity),
+            m_keepSessionAlive()
+        {
+        }
+
         ~ThreadingHelpers()
         {
             SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
@@ -135,11 +85,16 @@ namespace ConversationTranslation {
         virtual void Init()
         {
             SPX_DBG_TRACE_FUNCTION();
+
             std::shared_ptr<ISpxRecognizerSite> site = GetSite();
             SPX_IFTRUE_THROW_HR(site == nullptr, SPXERR_UNINITIALIZED);
             m_keepSessionAlive = site;
 
-            m_threadService = FactoryUtils::CreateInstance<ISpxThreadService, CSpxThreadService>();
+            // get the base site if available
+            auto baseSite = SpxQueryInterface<ISpxGenericSite>(site);
+            SPX_IFTRUE_THROW_HR(baseSite == nullptr, SPXERR_UNEXPECTED_CONVERSATION_TRANSLATOR_SITE_FAILURE);
+
+            m_threadService = SpxCreateObjectWithSite<ISpxThreadService>("CSpxThreadService", baseSite);
             SPX_IFTRUE_THROW_HR(m_threadService == nullptr, SPXERR_UNEXPECTED_CONVERSATION_SITE_FAILURE);
         }
 
@@ -157,7 +112,7 @@ namespace ConversationTranslation {
                 return func();
             });
             auto future = task.get_future().share();
-            m_threadService->ExecuteAsync(move(task), ISpxThreadService::Affinity::Background, std::move(executed));
+            m_threadService->ExecuteAsync(move(task), m_affinity, std::move(executed));
             return CSpxAsyncOp<void>(future, AsyncOpState::AOS_Started);
         }
 
@@ -171,7 +126,7 @@ namespace ConversationTranslation {
 
             TRet ret;
             std::packaged_task<void()> task([func, &ret]() { ret = func(); });
-            m_threadService->ExecuteSync(move(task), ISpxThreadService::Affinity::Background);
+            m_threadService->ExecuteSync(move(task), m_affinity);
             return ret;
         }
 
@@ -185,7 +140,7 @@ namespace ConversationTranslation {
 
             TRet ret;
             std::packaged_task<void()> task([func, &ret]() { ret = func(); });
-            m_threadService->ExecuteSync(move(task), ISpxThreadService::Affinity::Background);
+            m_threadService->ExecuteSync(move(task), m_affinity);
             return ret;
         }
 
@@ -197,7 +152,7 @@ namespace ConversationTranslation {
             }
 
             std::packaged_task<void()> task(func);
-            m_threadService->ExecuteSync(move(task), ISpxThreadService::Affinity::Background);
+            m_threadService->ExecuteSync(move(task), m_affinity);
         }
 
         inline void RunSynchronously(std::function<void()> func) const
@@ -208,14 +163,105 @@ namespace ConversationTranslation {
             }
 
             std::packaged_task<void()> task(func);
-            m_threadService->ExecuteSync(move(task), ISpxThreadService::Affinity::Background);
+            m_threadService->ExecuteSync(move(task), m_affinity);
         }
 
     protected:
         std::shared_ptr<ISpxThreadService> m_threadService;
 
     private:
+        const ISpxThreadService::Affinity m_affinity;
         std::shared_ptr<ISpxRecognizerSite> m_keepSessionAlive;
+    };
+
+    class NamedPropertiesHelper
+    {
+    public:
+        static inline const string GetString(shared_ptr<ISpxNamedProperties> properties, PropertyId id, const char * defaultValue = nullptr)
+        {
+            string value = __GetString(properties, id);
+            return value == UNSET_DEFAULT_VALUE
+                ? string(defaultValue == nullptr ? "" : defaultValue)
+                : value;
+        }
+
+        static inline const string GetString(shared_ptr<ISpxNamedProperties> properties, initializer_list<std::string> ids, const char * defaultValue = nullptr)
+        {
+            for (const std::string& id : ids)
+            {
+                string value = properties->GetStringValue(id.c_str(), UNSET_DEFAULT_VALUE);
+                if (value != UNSET_DEFAULT_VALUE)
+                {
+                    return value;
+                }
+            }
+
+            return defaultValue == nullptr ? "" : defaultValue;
+        }
+
+        static inline int32_t GetInt(shared_ptr<ISpxNamedProperties> properties, PropertyId id, int32_t defaultValue = -1)
+        {
+            string value = __GetString(properties, id);
+            if (value == UNSET_DEFAULT_VALUE || value.empty())
+            {
+                return defaultValue;
+            }
+
+            return static_cast<int32_t>(std::stol(value));
+        }
+
+        static inline bool GetBool(shared_ptr<ISpxNamedProperties> properties, PropertyId id, int32_t defaultValue = -1)
+        {
+            string value = __GetString(properties, id);
+            if (value == UNSET_DEFAULT_VALUE || value.empty())
+            {
+                return defaultValue;
+            }
+
+            return PAL::ToBool(value);
+        }
+
+        static inline bool GetBool(shared_ptr<ISpxNamedProperties> properties, const char * propertyName, bool defaultValue = false)
+        {
+            string value = properties->GetStringValue(propertyName, UNSET_DEFAULT_VALUE);
+            if (value == UNSET_DEFAULT_VALUE || value.empty())
+            {
+                return defaultValue;
+            }
+
+            return PAL::ToBool(value);
+        }
+
+        static inline void SetString(shared_ptr<ISpxNamedProperties> properties, PropertyId id, const std::string& value)
+        {
+            SetString(properties, id, value.c_str());
+        }
+
+        static inline void SetString(shared_ptr<ISpxNamedProperties> properties, PropertyId id, const char * value)
+        {
+            const char * propertyName = GetPropertyName(id);
+            if (propertyName == nullptr)
+            {
+                SPX_THROW_HR(SPXERR_RUNTIME_ERROR);
+            }
+
+            properties->SetStringValue(propertyName, value);
+        }
+
+    private:
+        static inline const string __GetString(shared_ptr<ISpxNamedProperties> properties, PropertyId id)
+        {
+            const char * propertyName = GetPropertyName(id);
+            if (propertyName == nullptr)
+            {
+                SPX_THROW_HR(SPXERR_RUNTIME_ERROR);
+            }
+
+            return properties->GetStringValue(propertyName, UNSET_DEFAULT_VALUE);
+        }
+
+    private:
+        static constexpr auto UNSET_DEFAULT_VALUE = "!!<<NOT_SET>>!!";
     };
 
 }}}}} // Microsoft::CognitiveServices::Speech::Impl::Conversation

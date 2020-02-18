@@ -3,6 +3,7 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
+#include <speechapi_cxx_connection.h>
 #include "conversation_translator_utils.h"
 #include "recognizer_utils.h"
 #include "guid_utils.h"
@@ -185,15 +186,14 @@ TEST_CASE("Conversation Translator Host Audio", "[api][cxx][conversation_transla
     shared_ptr<AudioConfig> audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
     shared_ptr<ConversationTranslator> conversationTranslator = ConversationTranslator::FromConfig(audioConfig);
 
-    ConversationTranslatorCallbacks eventHandlers(conversationTranslator);
+    auto eventHandlers = ConversationTranslatorCallbacks::From(conversationTranslator);
 
     SPX_TRACE_INFO("Joining conversation");
     conversationTranslator->JoinConversationAsync(conversation, hostname).get();
     SPX_TRACE_INFO("Start transcribing");
     conversationTranslator->StartTranscribingAsync().get();
 
-    eventHandlers.WaitForAudioStreamCompletion(15000ms, 2000ms);
-
+    eventHandlers->WaitForAudioStreamCompletion(15000ms, 2000ms);
 
     SPX_TRACE_INFO("Stop Transcribing");
     conversationTranslator->StopTranscribingAsync().get();
@@ -209,8 +209,8 @@ TEST_CASE("Conversation Translator Host Audio", "[api][cxx][conversation_transla
     SPX_TRACE_INFO("Verifying callbacks");
 
     std::string participantId;
-    eventHandlers.VerifyBasicEvents(true, hostname, true, participantId);
-    eventHandlers.VerifyTranscriptions(participantId,
+    eventHandlers->VerifyBasicEvents(true, hostname, true, participantId);
+    eventHandlers->VerifyTranscriptions(participantId,
     {
         ExpectedTranscription(participantId, AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH].Utterances["en-US"][0].Text, speechLang)
     });
@@ -239,7 +239,7 @@ TEST_CASE("Join a conversation with translation", "[api][cxx][conversation_trans
     auto audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
 
     auto hostTranslator = ConversationTranslator::FromConfig(audioConfig);
-    ConversationTranslatorCallbacks hostEvents(hostTranslator);
+    auto hostEvents = ConversationTranslatorCallbacks::From(hostTranslator);
     hostTranslator->JoinConversationAsync(conversation, hostName).get();
 
 
@@ -248,7 +248,7 @@ TEST_CASE("Join a conversation with translation", "[api][cxx][conversation_trans
     SetParticipantConfig(bobAudioConfig);
 
     auto bobTranslator = ConversationTranslator::FromConfig(bobAudioConfig);
-    ConversationTranslatorCallbacks bobEvents(bobTranslator);
+    auto bobEvents = ConversationTranslatorCallbacks::From(bobTranslator);
     bobTranslator->JoinConversationAsync(conversation->GetConversationId(), bobName, bobLang).get();
 
 
@@ -256,8 +256,8 @@ TEST_CASE("Join a conversation with translation", "[api][cxx][conversation_trans
     hostTranslator->StartTranscribingAsync().get();
     bobTranslator->StartTranscribingAsync().get();
 
-    hostEvents.WaitForAudioStreamCompletion(15000ms);
-    bobEvents.WaitForAudioStreamCompletion(15000ms, 2000ms);
+    hostEvents->WaitForAudioStreamCompletion(15000ms);
+    bobEvents->WaitForAudioStreamCompletion(15000ms, 2000ms);
 
     bobTranslator->StopTranscribingAsync().get();
     hostTranslator->StopTranscribingAsync().get();
@@ -274,15 +274,15 @@ TEST_CASE("Join a conversation with translation", "[api][cxx][conversation_trans
     conversation->DeleteConversationAsync().get();
 
     // verify events
-    bobEvents.VerifyBasicEvents(true, bobName, false, bobId);
-    hostEvents.VerifyBasicEvents(true, hostName, true, hostId);
-    bobEvents.VerifyTranscriptions(bobId,
+    bobEvents->VerifyBasicEvents(true, bobName, false, bobId);
+    hostEvents->VerifyBasicEvents(true, hostName, true, hostId);
+    bobEvents->VerifyTranscriptions(bobId,
     {
         ExpectedTranscription(bobId, AudioUtterancesMap[SINGLE_UTTERANCE_CHINESE].Utterances["zh-CN"][0].Text, bobLang),
         ExpectedTranscription(hostId, AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH].Utterances["en-US"][0].Text, hostLang)
     });
 
-    hostEvents.VerifyTranscriptions(hostId,
+    hostEvents->VerifyTranscriptions(hostId,
     {
         ExpectedTranscription(bobId, AudioUtterancesMap[SINGLE_UTTERANCE_CHINESE].Utterances["zh-CN"][0].Text, bobLang, { { "en-US", "Weather." }, { "de", "wetter." } }),
         ExpectedTranscription(hostId, AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH].Utterances["en-US"][0].Text, hostLang, { { "de", "Wie ist das Wetter?" } }),
@@ -412,6 +412,8 @@ TEST_CASE("ConversationTranslator Host disconnects room", "[api][cxx][conversati
 
 TEST_CASE("Conversation Translator call methods when not joined", "[api][cxx][conversation_translator][cxx_conversation_translator][not_joined]")
 {
+    UseMocks(false);
+
     SECTION("Host")
     {
         auto speechConfig = CreateConfig("de-DE", {});
@@ -461,200 +463,401 @@ TEST_CASE("Conversation Translator call methods when not joined", "[api][cxx][co
     }
 }
 
-//TEST_CASE("Tyler's test case", "[tyler_test]")
-//{
-//    auto subscriptionKey = SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key;
-//    auto subscriptionRegion = SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Region;
-//
-//    std::string speechLang("en-US");
-//    std::string endpointUrl;
-//    {
-//        int numChannels = 1;
-//        std::string host("its-loadbalancer-devb9503283r42485a4.princetondev.customspeech.ai");
-//        std::ostringstream oss;
-//
-//        oss << "wss://" << host << "/speech/recognition/dynamicaudio?&format=simple"
-//            << "&channelCount=" << numChannels;
-//
-//        endpointUrl = oss.str();
-//    }
-//
-//    auto speechConfig = SpeechConfig::FromEndpoint(endpointUrl, subscriptionKey);
-//    speechConfig->SetSpeechRecognitionLanguage(speechLang);
-//    speechConfig->SetProperty("ConversationTranslator_Region", subscriptionRegion);
-//    speechConfig->SetProperty("ConversationTranslator_MultiChannelAudio", "true");
-//    speechConfig->SetProxy("127.0.0.1", 8888);
-//
-//    shared_ptr<Conversation> conversation = Conversation::CreateConversationAsync(speechConfig).get();
-//    SPX_TRACE_INFO("Starting conversation");
-//    conversation->StartConversationAsync().get();
-//
-//    shared_ptr<AudioConfig> audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
-//    shared_ptr<ConversationTranslator> conversationTranslator = ConversationTranslator::FromConfig(audioConfig);
-//
-//    ConversationTranslatorCallbacks eventHandlers(conversationTranslator);
-//
-//    SPX_TRACE_INFO("Joining conversation");
-//    conversationTranslator->JoinConversationAsync(conversation, "TheHost").get();
-//    SPX_TRACE_INFO("Start transcribing");
-//    conversationTranslator->StartTranscribingAsync().get();
-//
-//    //eventHandlers.WaitForAudioStreamCompletion(15000ms, 2000ms);
-//    std::this_thread::sleep_for(15s);
-//
-//    SPX_TRACE_INFO("Stop Transcribing");
-//    conversationTranslator->StopTranscribingAsync().get();
-//
-//    SPX_TRACE_INFO("Leave conversation");
-//    conversationTranslator->LeaveConversationAsync().get();
-//
-//    SPX_TRACE_INFO("End conversation");
-//    conversation->EndConversationAsync().get();
-//    SPX_TRACE_INFO("Delete conversation");
-//    conversation->DeleteConversationAsync().get();
-//
-//    //auto speechConfig = SpeechTranslationConfig::FromEndpoint(endpointUrl, subscriptionKey);
-//    //speechConfig->SetProxy("127.0.0.1", 8888);
-//    //speechConfig->SetSpeechRecognitionLanguage(speechLang);
-//    //speechConfig->AddTargetLanguage("fr");
-//    ////speechConfig->SetProperty("ConversationTranslator_Region", "westus2");
-//
-//    //shared_ptr<AudioConfig> audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
-//    //auto from = SourceLanguageConfig::FromLanguage(speechLang);
-//
-//    //auto reco = TranslationRecognizer::FromConfig(speechConfig, audioConfig);
-//
-//    //reco->StartContinuousRecognitionAsync().get();
-//    //std::this_thread::sleep_for(900s);
-//    //reco->StopContinuousRecognitionAsync().get();
-//}
+TEST_CASE("Double join should fail", "[api][cxx][conversation_translator][cxx_conversation_translator][double_join]")
+{
+    UseMocks(false);
 
-/*
-TEST_CASE("Sample host code", "[sample_code][host]")
+    REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
+    auto hostSpeechConfig = CreateConfig("en-US", {});
+    auto hostAudioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
+
+    REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_CHINESE)));
+    auto aliceAudioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_CHINESE));
+
+    TestConversationParticipant host(hostSpeechConfig, "Host");
+    host.Join(hostAudioConfig);
+
+    // host tries to join again. should fail
+    REQUIRE_THROWS_MATCHES(
+        host.ConvTrans->JoinConversationAsync(host.Conv, host.Name).get(),
+        std::runtime_error,
+        HasHR(SPXERR_INVALID_STATE));
+
+    TestConversationParticipant alice("Alice", "zh-CN", host);
+    alice.Join(aliceAudioConfig);
+
+    // Alice tries to join again, should fail
+    REQUIRE_THROWS_MATCHES(
+        alice.ConvTrans->JoinConversationAsync(host.ConversationId, alice.Name, alice.Lang).get(),
+        std::runtime_error,
+        HasHR(SPXERR_INVALID_STATE));
+
+    alice.Leave();
+    host.Leave();
+}
+
+TEST_CASE("Conversation Translator Connection Before Join", "[api][cxx][conversation_translator][cxx_conversation_translator][connection][before_join]")
+{
+    UseMocks(false);
+
+    REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
+    auto audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
+
+    auto conversationTranslator = ConversationTranslator::FromConfig(audioConfig);
+
+    auto connection = Connection::FromConversationTranslator(conversationTranslator);
+
+    REQUIRE_THROWS_MATCHES(
+        connection->Open(false),
+        std::runtime_error,
+        HasHR(SPXERR_INVALID_STATE)
+    );
+
+    REQUIRE_THROWS_MATCHES(
+        connection->Open(true),
+        std::runtime_error,
+        HasHR(SPXERR_INVALID_STATE)
+    );
+
+    // Close should not throw exceptions
+    REQUIRE_NOTHROW(connection->Close());
+}
+
+TEST_CASE("Conversation Translator Connection After Leave", "[api][cxx][conversation_translator][cxx_conversation_translator][connection][after_leave]")
+{
+    UseMocks(false);
+
+    auto speechConfig = CreateConfig("en-US", {});
+    REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
+    auto audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
+
+    TestConversationParticipant host(speechConfig, "Host");
+    host.Join(audioConfig);
+
+    std::this_thread::sleep_for(200ms);
+
+    host.Leave();
+
+    // connecting should fail now
+    REQUIRE_THROWS_MATCHES(
+        host.Conn->Open(false),
+        std::runtime_error,
+        HasHR(SPXERR_INVALID_STATE)
+    );
+
+    REQUIRE_THROWS_MATCHES(
+        host.Conn->Open(true),
+        std::runtime_error,
+        HasHR(SPXERR_INVALID_STATE)
+    );
+
+    // Close should not throw exceptions
+    REQUIRE_NOTHROW(host.Conn->Close());
+}
+
+TEST_CASE("Conversation Translator Connection Recognizer events/methods", "[api][cxx][conversation_translator][cxx_conversation_translator][connection][recognizer]")
+{
+    UseMocks(false);
+
+    auto speechConfig = CreateConfig("en-US", {});
+    REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
+    auto audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
+
+    TestConversationParticipant host(speechConfig, "Host");
+    host.Join(audioConfig);
+
+    std::vector<shared_ptr<ConnectionMessage>> evts;
+
+    host.Conn->MessageReceived += [&evts](const ConnectionMessageEventArgs& evt)
+    {
+        evts.push_back(evt.GetMessage());
+    };
+
+    host.StartAudio();
+
+    // send message
+    host.Conn->SendMessageAsync("speech.context", "{\"translationcontext\":{\"to\":[\"en-US\"]}}").get();
+
+    host.WaitForAudioToFinish();
+    host.Leave();
+
+    SPXTEST_REQUIRE(evts.size() > 0);
+}
+
+TEST_CASE("Conversation Translator Host Leave Rejoin", "[api][cxx][conversation_translator][cxx_conversation_translator][connection][host][rejoin]")
 {
     UseMocks(false);
     REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
 
-    // For the host
-    auto config = SpeechTranslationConfig::FromSubscription("<Cognitive speech subscription key>", "<subscription key region>");
-    config->SetSpeechRecognitionLanguage("en-US");
-    config->AddTargetLanguage("fr");
+    string speechLang("en-US");
+    string hostname("TheHost");
+    vector<string> toLangs{ "fr", "de" };
+    shared_ptr<SpeechTranslationConfig> speechConfig = CreateConfig(speechLang, toLangs);
 
-    // Create and start the conversation
-    auto conversation = Conversation::CreateConversationAsync(config).get();
+    SPX_TRACE_INFO("Creating conversation");
+    shared_ptr<Conversation> conversation = Conversation::CreateConversationAsync(speechConfig).get();
+    SPX_TRACE_INFO("Starting conversation");
     conversation->StartConversationAsync().get();
 
-    // Create the conversation translator using the default microphone
+    shared_ptr<AudioConfig> audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
+    shared_ptr<ConversationTranslator> conversationTranslator = ConversationTranslator::FromConfig(audioConfig);
 
-    auto audioConfig = AudioConfig::FromWavFileInput(weather.m_inputDataFilename);
-    auto conversationTranslator = ConversationTranslator::FromConfig();
+    auto eventHandlers = ConversationTranslatorCallbacks::From(conversationTranslator);
 
-    // hook up the event handlers
-    conversationTranslator->Canceled += [](const ConversationTranslationCanceledEventArgs& args)
-    {
-        std::cout << "Canceled Reason:" << to_string((int)args.Reason) << ", Error code: " << to_string((int)args.ErrorCode) << endl;
-    };
-    conversationTranslator->ConversationExpiration += [](const ConversationExpirationEventArgs& args)
-    {
-        std::cout << "Conversation will expire in " << args.ExpirationTime.count() << " minute(s)" << endl;
-    };
-    conversationTranslator->ParticipantsChanged += [](const ConversationParticipantsChangedEventArgs& args)
-    {
-        std::cout << "Participants(s) ";
-        switch (args.Reason)
-        {
-            case ParticipantChangedReason::JoinedConversation:
-                std::cout << "joined";
-                break;
-            case ParticipantChangedReason::Updated:
-                std::cout << "updated";
-                break;
-            case ParticipantChangedReason::LeftConversation:
-                std::cout << "left";
-                break;
-        }
+    SPX_TRACE_INFO("Joining conversation");
+    conversationTranslator->JoinConversationAsync(conversation, hostname).get();
 
-        for (std::shared_ptr<Participant> participant : args.Participants)
-        {
-            std::cout << ", " << participant->DisplayName << "[" << participant->Id << "]";
-        }
+    SPX_TRACE_INFO("Getting connection object");
+    auto connection = Connection::FromConversationTranslator(conversationTranslator);
+    eventHandlers->AddConnectionCallbacks(connection);
 
-        std::cout << endl;
-    };
-    conversationTranslator->SessionStarted += [](const SessionEventArgs& args)
-    {
-        std::cout << "Session has started " << args.SessionId << endl;
-    };
-    conversationTranslator->SessionStopped += [](const SessionEventArgs& args)
-    {
-        std::cout << "Session has stopped " << args.SessionId << endl;
-    };
-    conversationTranslator->TextMessageReceived += [](const ConversationTranslationEventArgs& args)
-    {
-        std::cout << "Text message received from " << args.Result->ParticipantId << ": '" << args.Result->Text << "'" << endl;
-        for (const auto& translation : args.Result->Translations)
-        {
-            std::cout << "\t" << translation.first << ": '" << translation.second << "'" << endl;
-        }
-    };
-    conversationTranslator->Transcribing += [](const ConversationTranslationEventArgs& args)
-    {
-        std::cout << "Partial transcription received from " << args.Result->ParticipantId << ": '" << args.Result->Text << "'" << endl;
-        for (const auto& translation : args.Result->Translations)
-        {
-            std::cout << "\t" << translation.first << ": '" << translation.second << "'" << endl;
-        }
-    };
-    conversationTranslator->Transcribed += [](const ConversationTranslationEventArgs& args)
-    {
-        std::cout << "Transcription received from " << args.Result->ParticipantId << ": '" << args.Result->Text << "'" << endl;
-        for (const auto& translation : args.Result->Translations)
-        {
-            std::cout << "\t" << translation.first << ": '" << translation.second << "'" << endl;
-        }
-    };
+    std::this_thread::sleep_for(200ms);
 
-    // join the conversation. After this you still start receiving events
-    conversationTranslator->JoinConversationAsync(conversation, "<the display name to use>").get();
+    SPX_TRACE_INFO("Disconnecting conversation");
+    connection->Close();
 
-    // as the host you can manage the room
-    conversation->MuteAllParticipantsAsync().get(); // mute everyone other than yourself
-    conversation->LockConversationAsync().get(); // prevent new participants from joining the room
+    std::this_thread::sleep_for(200ms);
 
-    // start and stop capturing audio from the microphone
+    SPX_TRACE_INFO("Reconnecting conversation");
+    connection->Open(false);
+
+    SPX_TRACE_INFO("Start transcribing after reconnect");
     conversationTranslator->StartTranscribingAsync().get();
-    this_thread::sleep_for(30s);
+
+    SPX_TRACE_INFO("Send text message after reconnect");
+    conversationTranslator->SendTextMessageAsync("This is a test");
+
+    eventHandlers->WaitForAudioStreamCompletion(15000ms, 2000ms);
+
+    SPX_TRACE_INFO("Stop Transcribing");
     conversationTranslator->StopTranscribingAsync().get();
 
-    // exit and cleanup
-    conversationTranslator->LeaveConversationAsync().get(); // after this you will not receive events
+    SPX_TRACE_INFO("Leave conversation");
+    conversationTranslator->LeaveConversationAsync().get();
 
-    conversation->EndConversationAsync().get(); // all other current participants will be removed from the room
+    SPX_TRACE_INFO("End conversation");
+    conversation->EndConversationAsync().get();
+    SPX_TRACE_INFO("Delete conversation");
+    conversation->DeleteConversationAsync().get();
+
+    SPX_TRACE_INFO("Verifying callbacks");
+
+    std::string participantId;  
+    eventHandlers->VerifyBasicEvents(true, hostname, true, participantId);
+    eventHandlers->VerifyConnectionEvents(1, 2);
+    eventHandlers->VerifyTranscriptions(participantId,
+        {
+            ExpectedTranscription(participantId, AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH].Utterances["en-US"][0].Text, speechLang),
+        });
+    eventHandlers->VerifyIms(participantId,
+        {
+            ExpectedTranscription(participantId, "This is a test", speechLang, {{ "fr", "C'est un test" }, { "de", "Dies ist ein Test" }})
+        });
+}
+
+TEST_CASE("Conversation Translator can't call methods after disconnect", "[api][cxx][conversation_translator][cxx_conversation_translator][connection][after_disconnect]")
+{
+    UseMocks(false);
+
+    REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
+    auto speechConfig = CreateConfig("en-US", {});
+    auto audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
+
+    TestConversationParticipant host(speechConfig, "Host");
+    host.Join(audioConfig);
+
+    std::this_thread::sleep_for(200ms);
+
+    host.Conn->Close();
+
+    std::this_thread::sleep_for(200ms);
+
+    REQUIRE_THROWS_MATCHES(
+        host.ConvTrans->StartTranscribingAsync().get(),
+        std::runtime_error,
+        HasHR(SPXERR_INVALID_STATE));
+
+    REQUIRE_THROWS_MATCHES(
+        host.ConvTrans->StopTranscribingAsync().get(),
+        std::runtime_error,
+        HasHR(SPXERR_INVALID_STATE));
+
+    REQUIRE_THROWS_MATCHES(
+        host.ConvTrans->SendTextMessageAsync("This is a short test").get(),
+        std::runtime_error,
+        HasHR(SPXERR_INVALID_STATE));
+
+    host.Leave();
+}
+
+TEST_CASE("Conversation Translator Participant Rejoin", "[api][cxx][conversation_translator][cxx_conversation_translator][connection][participant][rejoin]")
+{
+    UseMocks(false);
+
+    REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
+    auto hostSpeechConfig = CreateConfig("en-US", {});
+    auto hostAudioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
+
+    REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_CHINESE)));
+    auto aliceAudioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_CHINESE));
+
+    TestConversationParticipant host(hostSpeechConfig, "Host");
+    host.Join(hostAudioConfig);
+
+    TestConversationParticipant alice("Alice", "zh-CN", host);
+    alice.Join(aliceAudioConfig);
+
+    std::this_thread::sleep_for(200ms);
+
+    // Alice disconnects
+    SPX_TRACE_INFO("Alice disconnecting");
+    alice.Conn->Close();
+    std::this_thread::sleep_for(400ms);
+
+    // Alice reconnects
+    SPX_TRACE_INFO("Alice reconnecting");
+    alice.Conn->Open(false);
+
+    // Do audio playback for both host and participant
+    host.StartAudio();
+    alice.StartAudio();
+
+    host.WaitForAudioToFinish();
+    alice.WaitForAudioToFinish();
+
+    // Disconnect both
+    alice.Leave();
+    host.Leave();
+
+    // validate events
+    SPX_TRACE_INFO("Validating host basic events");
+    host.VerifyBasicEvents(true);
+    SPX_TRACE_INFO("Validating Alice basic events");
+    alice.VerifyBasicEvents(true);
+    SPXTEST_REQUIRE(alice.Events->Connected.size() == 2);
+    SPXTEST_REQUIRE(alice.Events->Disconnected.size() == 2);
+
+    auto expectedTranscriptions =
+    {
+        ExpectedTranscription(host.ParticipantId, AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH].Utterances["en-US"][0].Text, host.Lang),
+        ExpectedTranscription(alice.ParticipantId, AudioUtterancesMap[SINGLE_UTTERANCE_CHINESE].Utterances["zh-CN"][0].Text, alice.Lang)
+    };
+
+    SPX_TRACE_INFO("Validating host transcriptions");
+    host.VerifyTranscriptions(expectedTranscriptions);
+    SPX_TRACE_INFO("Validating Alice transcriptions");
+    alice.VerifyTranscriptions(expectedTranscriptions);
+}
+
+TEST_CASE("Conversation Translator Participant Rejoin After Delete", "[api][cxx][conversation_translator][cxx_conversation_translator][connection][participant][rejoin_after_delete]")
+{
+    UseMocks(false);
+
+    REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
+    auto hostSpeechConfig = CreateConfig("en-US", {});
+    auto hostAudioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
+
+    REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_CHINESE)));
+    auto aliceAudioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_CHINESE));
+
+    TestConversationParticipant host(hostSpeechConfig, "Host");
+    host.Join(hostAudioConfig);
+
+    TestConversationParticipant alice("Alice", "zh-CN", host);
+    alice.Join(aliceAudioConfig);
+
+    std::this_thread::sleep_for(200ms);
+
+    // Alice disconnects. This prevents the conversation translator from detecting the conversation
+    // has been deleted since we no longer have an active web socket connection
+    SPX_TRACE_INFO("Alice disconnecting");
+    alice.Conn->Close();
+    std::this_thread::sleep_for(200ms);
+
+    // Delete the room
+    host.Leave();
+
+    // Alice tries to reconnect
+    SPX_TRACE_INFO("Alice reconnecting");
+    REQUIRE_THROWS_MATCHES(
+        alice.Conn->Open(false),
+        std::runtime_error,
+        MessageContains("BadRequest") && MessageContains("WebSocket Upgrade failed"));
+
+    std::this_thread::sleep_for(200ms);
+
+    // Make sure we got the correct cancelled event
+    SPXTEST_REQUIRE(alice.Events->Canceled.size() > 0);
+    const auto& canceled = alice.Events->Canceled[0];
+    SPXTEST_REQUIRE(canceled.Reason == CancellationReason::Error);
+    SPXTEST_REQUIRE(canceled.ErrorCode == CancellationErrorCode::BadRequest);
+
+    // Make sure we can't call open again
+    REQUIRE_THROWS_MATCHES(
+        alice.Conn->Open(false),
+        std::runtime_error,
+        HasHR(SPXERR_INVALID_STATE)
+    );
+
+    REQUIRE_THROWS_MATCHES(
+        alice.Conn->Open(true),
+        std::runtime_error,
+        HasHR(SPXERR_INVALID_STATE)
+    );
+}
+
+
+
+TEST_CASE("Conversation Translator Sweden demo", "[!hide][cxx_conversation_translator][Sweden]")
+{
+    auto subscriptionKey = SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key;
+    auto subscriptionRegion = SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Region;
+
+    std::string speechLang("en-US");
+    std::string endpointUrl;
+    {
+        std::string host("its-loadbalancer-devb9503283r42485a4.princetondev.customspeech.ai");
+        std::ostringstream oss;
+
+        oss << "wss://" << host << "/speech/recognition/dynamicaudio?&format=simple"
+            << "&channelCount=1";;
+
+        endpointUrl = oss.str();
+    }
+
+    auto speechConfig = SpeechConfig::FromEndpoint(endpointUrl, subscriptionKey);
+    speechConfig->SetSpeechRecognitionLanguage(speechLang);
+    speechConfig->SetProperty("ConversationTranslator_Region", subscriptionRegion);
+    speechConfig->SetProperty("ConversationTranslator_MultiChannelAudio", "true");
+    //speechConfig->SetProxy("127.0.0.1", 8888);
+
+    shared_ptr<Conversation> conversation = Conversation::CreateConversationAsync(speechConfig).get();
+    SPX_TRACE_INFO("Starting conversation");
+    conversation->StartConversationAsync().get();
+
+    shared_ptr<AudioConfig> audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
+    shared_ptr<ConversationTranslator> conversationTranslator = ConversationTranslator::FromConfig(audioConfig);
+
+    auto eventHandlers = ConversationTranslatorCallbacks::From(conversationTranslator);
+
+    SPX_TRACE_INFO("Joining conversation");
+    conversationTranslator->JoinConversationAsync(conversation, "TheHost").get();
+
+    SPX_TRACE_INFO("Start transcribing");
+    conversationTranslator->StartTranscribingAsync().get();
+
+    //eventHandlers.WaitForAudioStreamCompletion(15000ms, 2000ms);
+    std::this_thread::sleep_for(15s);
+
+    SPX_TRACE_INFO("Stop Transcribing");
+    conversationTranslator->StopTranscribingAsync().get();
+
+    SPX_TRACE_INFO("Leave conversation");
+    conversationTranslator->LeaveConversationAsync().get();
+
+    SPX_TRACE_INFO("End conversation");
+    conversation->EndConversationAsync().get();
+    SPX_TRACE_INFO("Delete conversation");
     conversation->DeleteConversationAsync().get();
 }
 
-TEST_CASE("Sample participant code", "[sample_code][participant]")
-{
-    // For a participant joining you don't need a conversation object
-
-    // play back audio from a wave file
-    auto audioConfig = AudioConfig::FromWavFileInput("<full path to wave file>");
-    auto conversationTranslator = ConversationTranslator::FromConfig(audioConfig);
-
-    // hook up events
-
-    // join the existing conversation, after this you will receive events
-    conversationTranslator->JoinConversationAsync("<conversation id>", "<the display name to use>", "en-US").get();
-
-    // start sending the audio, then stop
-    conversationTranslator->StartTranscribingAsync().get();
-    this_thread::sleep_for(15s);
-    conversationTranslator->StopTranscribingAsync().get();
-
-    // you can send text messages at any time
-    conversationTranslator->SendTextMessageAsync("This is a test message").get();
-
-    // stop sending audio and cleanup
-    conversationTranslator->LeaveConversationAsync().get();
-}
-*/

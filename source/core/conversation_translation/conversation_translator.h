@@ -54,25 +54,36 @@ namespace ConversationTranslation {
             /// </summary>
             Failed = -1,
             /// <summary>
-            /// Not currently connected
+            /// The initial state
             /// </summary>
-            Closed = 0,
+            Initial = 0,
             /// <summary>
-            /// In the process of disconnecting
+            /// The connections are now closed. This is the final state
+            /// </summary>
+            Closed,
+            /// <summary>
+            /// In the process of closing
             /// </summary>
             Closing,
             /// <summary>
-            /// In the process of connecting
+            /// If you are host, the conversation is currently being created. If you are the participant,
+            /// you are in the process of registering with the conversation service to join an existing
+            /// conversation
+            /// </summary>
+            CreatingOrJoining,
+            /// <summary>
+            /// The host has successfully created the conversation, or the participant has successfully
+            /// registered to join an existing conversation. At this point, we do not yet have an open
+            /// web socket connection to the conversation service nor the speech service.
+            CreatedOrJoined,
+            /// <summary>
+            /// In the process of opening a web socket connection to the conversation service
             /// </summary>
             Opening,
             /// <summary>
-            /// One of the two underlying connections is not open yet
+            /// You are currently connected to the conversation service
             /// </summary>
-            PartiallyOpen,
-            /// <summary>
-            /// The connections to the service are open
-            /// </summary>
-            Open
+            Open,
         };
 
         /// <summary>
@@ -104,10 +115,13 @@ namespace ConversationTranslation {
         // --- ISpxConversationTranslator
         const std::vector<std::shared_ptr<ISpxConversationParticipant>> GetParticipants() override;
         void JoinConversation(std::shared_ptr<ISpxConversation> conversation, const std::string& nickname, bool endConversationOnLeave) override;
+        void Connect() override;
         void StartTranscribing() override;
         void StopTranscribing() override;
         void SendTextMsg(const std::string& message) override;
+        void Disconnect() override;
         void LeaveConversation() override;
+        bool CanJoin() const override;
 
         // --- IServiceProvider
         SPX_SERVICE_MAP_BEGIN()
@@ -133,7 +147,7 @@ namespace ConversationTranslation {
 
         // ConversationCallbacks
         virtual void OnConnected() override;
-        virtual void OnDisconnected(const USP::WebSocketDisconnectReason reason, const string& message) override;
+        virtual void OnDisconnected(const USP::WebSocketDisconnectReason reason, const string& message, bool serverRequested) override;
         virtual void OnSpeechRecognition(const ConversationSpeechRecognitionMessage& reco) override;
         virtual void OnInstantMessage(const ConversationTranslatedMessage& im) override;
         virtual void OnParticipantChanged(const ConversationParticipantAction action, const std::vector<ConversationParticipant>& participants) override;
@@ -141,24 +155,25 @@ namespace ConversationTranslation {
         virtual void OnError(const bool isWebSocket, const ConversationErrorCode error, const std::string& message) override;
 
     protected:
-        void SetState(const ConversationState next)
+        ConversationState SetState(const ConversationState next)
         {
-            m_state_ = next;
+            return m_state_.exchange(next);
         }
 
-        void ChangeState(const ConversationState from, const ConversationState next)
-        {
-            ConversationState previous = m_state_.exchange(next);
-            SPX_DBG_ASSERT_WITH_MESSAGE(
-                previous == from,
-                "Unexpected state transition for ConversationTranslator %p, From: %d, To: %d, Actual: %d",
-                (void *)this, from, next, previous);
+        ConversationState GetState() const { return m_state_.load(); }
 
-            UNUSED(from); // unused in release builds
-            UNUSED(previous);
-        }
+        struct EventsToSend;
 
-        ConversationState GetState() const { return m_state_; }
+        void SendStateEvents(const EventsToSend& evt);
+        EventsToSend GetStateExitEvents();
+
+        void ToFailedState(bool isRecognizer, CancellationErrorCode error, const std::string& message);
+        void ToClosedState();
+        void ToClosingState();
+        void ToCreatingOrJoiningState();
+        void ToCreatedOrJoinedState(CancellationErrorCode error, const std::string& message);
+        void ToOpeningState();
+        void ToOpenState();
 
         std::shared_ptr<ISpxInterfaceBase> QueryServiceInternal(const char * serviceName)
         {
@@ -172,26 +187,23 @@ namespace ConversationTranslation {
         }
 
     private:
-        /** \brief Disable copy constructor */
-        CSpxConversationTranslator(const CSpxConversationTranslator&) = delete;
-        /** \brief Disable copy assignment */
-        CSpxConversationTranslator& operator=(const CSpxConversationTranslator&) = delete;
-        /** \brief Disable move constructor */
-        CSpxConversationTranslator(CSpxConversationTranslator&&) = delete;
-        /** \brief Disable move assignment */
-        CSpxConversationTranslator& operator=(CSpxConversationTranslator&&) = delete;
+        DISABLE_COPY_AND_MOVE(CSpxConversationTranslator);
 
         void ConnectConversation(std::shared_ptr<ISpxConversation> conv, bool owned);
-        void DisconnectConversation();
+        bool StopConversation();
+        void DisconnectConversation(bool waitForEvents);
 
         void ConnectRecognizer(std::shared_ptr<ISpxRecognizer> recognizer);
-        void DisconnectTranslationRecognizer();
+        bool StopRecognizer();
+        void DisconnectRecognizer(bool waitForEvents);
 
-        inline bool IsConsideredOpen() const;
+        static inline bool IsConsideredOpen(ConversationState state);
         inline const std::string GetSessionId() const;
         inline const std::string GetParticipantId() const;
         inline bool IsConversationConnected() const;
         inline bool IsMultiChannelAudio() const;
+
+        void OnConversationDeleted();
 
         void OnRecognizerSessionStarted(shared_ptr<ISpxSessionEventArgs>);
         void OnRecognizerSessionStopped(shared_ptr<ISpxSessionEventArgs>);
@@ -200,7 +212,7 @@ namespace ConversationTranslation {
         void OnRecognizerResult(shared_ptr<ISpxRecognitionEventArgs>);
         void OnRecognizerCanceled(shared_ptr<ISpxRecognitionEventArgs>);
 
-        void ToFailedState(bool isRecognizer, CancellationErrorCode error, const std::string& message);
+        
 
         template<typename I>
         inline static shared_ptr<I> SafeQueryInterface(std::shared_ptr<ISpxInterfaceBase> ptr)
@@ -230,6 +242,7 @@ namespace ConversationTranslation {
         std::string m_speechLang;
         std::weak_ptr<ISpxAudioConfig> m_audioInput;
         std::string m_utteranceId;
+        size_t m_convDeletedEvtHandlerId;
     };
 
 }}}}} // Microsoft::CognitiveServices::Speech::Impl::Conversation

@@ -8,7 +8,8 @@
 #include <map>
 #include <string>
 #include <azure_c_shared_utility_httpapi_wrapper.h>
-#include "http_exception.h"
+#include <http_exception.h>
+#include <http_endpoint_info.h>
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -24,7 +25,7 @@ namespace Impl {
     {
     public:
         /// <summary>
-        /// Creates a new instance using the platform proxy (if set)
+        /// Creates a new instance
         /// </summary>
         /// <param name="host">The host to send requests to</param>
         /// <param name="isSecure">True if the request should use a secure connection.</param>
@@ -33,12 +34,18 @@ namespace Impl {
         {}
 
         /// <summary>
-        /// Creates a new instance using the platform proxy (if set)
+        /// Creates a new instance
         /// </summary>
         /// <param name="host">The host to send requests to</param>
         /// <param name="port">The port on the host to connect to</param>
         /// <param name="isSecure">True if the request should use a secure connection.</param>
         HttpRequest(const std::string& host, int port, bool isSecure);
+
+        /// <summary>
+        /// Creates a new instance
+        /// </summary>
+        /// <param name="host">The endpoint information</param>
+        HttpRequest(const HttpEndpointInfo& endpoint);
 
         /// <summary>
         /// Destructor
@@ -105,18 +112,7 @@ namespace Impl {
         std::unique_ptr<HttpResponse> SendRequest(HTTPAPI_REQUEST_TYPE type, const void *content, size_t contentSize);
 
     private:
-        void ValidatePort(int port);
-
-    private:
-        bool m_secure;
-        std::string m_host;
-        int m_port;
-        std::string m_path;
-        std::map<std::string, std::vector<std::string>> m_query;
-        std::string m_proxyHost;
-        int m_proxyPort;
-        std::string m_proxyUsername;
-        std::string m_proxyPassword;
+        HttpEndpointInfo m_endpoint;
         HTTP_HANDLE m_handle;
         HTTP_HEADERS_HANDLE m_requestHeaders;
     };

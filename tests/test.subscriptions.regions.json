@@ -21,7 +21,7 @@
   },
   "ConversationTranslatorSubscription": {
     "Key": "",
-    "Region": "westus2"
+    "Region": ""
   },
   "CustomVoiceSubscription": {
     "Key": "",

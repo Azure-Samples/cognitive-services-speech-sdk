@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "ispxinterfaces.h"
+#include <ispxinterfaces.h>
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -256,6 +256,11 @@ namespace ConversationTranslation {
         virtual void JoinConversation(std::shared_ptr<ISpxConversation> conversation, const std::string& nickname, bool endConversationOnLeave) = 0;
 
         /// <summary>
+        /// Connects and/or reconnects to the conversation service
+        /// </summary>
+        virtual void Connect() = 0;
+
+        /// <summary>
         /// Starts sending audio to the conversation service for speech recognition
         /// </summary>
         /// <returns>Asynchronous operation</returns>
@@ -276,11 +281,44 @@ namespace ConversationTranslation {
         virtual void SendTextMsg(const std::string& message) = 0;
 
         /// <summary>
+        /// Disconnects from the conversation service. After this you can rejoin within a limited time window
+        /// using the Connect() method
+        /// </summary>
+        virtual void Disconnect() = 0;
+
+        /// <summary>
         /// Leaves the current conversation. After this is called, you will no longer receive any
         /// events
         /// </summary>
         /// <returns>Asynchronous operation</returns>
         virtual void LeaveConversation() = 0;
+
+        /// <summary>
+        /// Determines whether or not we can join using this instance. This will be true until you
+        /// call one of the Join methods a first time
+        /// </summary>
+        /// <returns>True if you can call join, false otherwise</returns>
+        virtual bool CanJoin() const = 0;
+    };
+
+    /// <summary>
+    /// Interface used to initialize a conversation translator connection instance
+    /// </summary>
+    class ISpxConversationTranslatorConnection : public ISpxInterfaceBaseFor<ISpxConversationTranslatorConnection>
+    {
+    public:
+        /// <summary>
+        /// Initialises the conversation translator connection
+        /// </summary>
+        /// <param name="convTrans">The conversation translator instance this connection is for</param>
+        /// <param name="recognizer">The recognizer this connection is for</param>
+        virtual void Init(std::weak_ptr<ISpxConversationTranslator> convTrans, std::weak_ptr<ISpxRecognizer> recognizer) = 0;
+
+        /// <summary>
+        /// Gets the conversation translator instance
+        /// </summary>
+        /// <returns>The instance, or a nullptr if the instance is no longer valid</returns>
+        virtual std::shared_ptr<ISpxConversationTranslator> GetConversationTranslator() = 0;
     };
 
 }}}}} // Microsoft::CognitiveServices::Speech::Impl::Conversation

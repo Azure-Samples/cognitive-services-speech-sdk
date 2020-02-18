@@ -107,7 +107,7 @@ void CSpxRestTtsEngineAdapter::Init()
 
         std::ostringstream oss;
 
-        oss << (url.secure ? HTTPS_PROTOCOL : HTTP_PROTOCOL)
+        oss << HttpUtils::SchemePrefix(url.scheme)
             << url.host << ':' << url.port
             << TTS_COGNITIVE_SERVICE_URL_PATH;
 
@@ -117,7 +117,7 @@ void CSpxRestTtsEngineAdapter::Init()
     if (m_endpoint.empty() && !region.empty())
     {
         // Construct standard voice endpoint based on region
-        m_endpoint = std::string(HTTPS_URL_PREFIX) + region + TTS_COGNITIVE_SERVICE_HOST_SUFFIX + TTS_COGNITIVE_SERVICE_URL_PATH;
+        m_endpoint = std::string(HttpUtils::SchemePrefix(UriScheme::HTTPS)) + region + TTS_COGNITIVE_SERVICE_HOST_SUFFIX + TTS_COGNITIVE_SERVICE_URL_PATH;
     }
 
     SPX_IFTRUE_THROW_HR(m_endpoint.empty(), SPXERR_INVALID_ARG);
@@ -239,7 +239,7 @@ void CSpxRestTtsEngineAdapter::EnsureHttpConnection()
 
     // Create the connection
     auto url = HttpUtils::ParseUrl(m_endpoint);
-    m_httpConnect = HTTPAPI_CreateConnection_Advanced(url.host.data(), url.port, url.secure,
+    m_httpConnect = HTTPAPI_CreateConnection_Advanced(url.host.data(), url.port, url.isSecure(),
         m_proxyHost.data(), m_proxyPort, m_proxyUsername.data(), m_proxyPassword.data());
     if (!m_httpConnect)
     {

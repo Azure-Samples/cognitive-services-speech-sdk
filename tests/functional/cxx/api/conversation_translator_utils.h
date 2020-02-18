@@ -15,6 +15,7 @@
 #include <speechapi_cxx_conversation.h>
 #include <speechapi_cxx_conversation_translator.h>
 #include <speechapi_cxx_participant.h>
+#include <speechapi_cxx_connection_eventargs.h>
 #include <string_utils.h>
 #include "test_PAL.h"
 #include "conversation_utils.h"
@@ -143,11 +144,11 @@ namespace IntegrationTests {
     struct ExpectedTranscription
     {
         ExpectedTranscription() = default;
-        ExpectedTranscription(string id, string text, string lang, std::initializer_list<std::pair<string, string>> tran)
-            : ExpectedTranscription(id, text, lang, 1, tran)
+        ExpectedTranscription(const string& id, const string& text, const string& lang, std::initializer_list<std::pair<string, string>> tran)
+            : ExpectedTranscription(id, text, lang, 0, tran)
         {
         }
-        ExpectedTranscription(string id, string text, string lang, int min = 0, std::initializer_list<std::pair<string, string>> tran = {})
+        ExpectedTranscription(const string& id, const string& text, const string& lang, int min = 0, std::initializer_list<std::pair<string, string>> tran = {})
             : participantId(id), text(text), lang(lang), minPartials(min), translations()
         {
             for (const auto& pair : tran)
@@ -164,13 +165,23 @@ namespace IntegrationTests {
     };
 
 
-    class ConversationTranslatorCallbacks
+    class ConversationTranslatorCallbacks : public std::enable_shared_from_this<ConversationTranslatorCallbacks>
     {
     public:
         struct _Session
         {
             _Session() = default;
             _Session(const SessionEventArgs& args)
+                : SessionId(args.SessionId)
+            {
+            }
+
+            std::string SessionId;
+        };
+        struct _Connection
+        {
+            _Connection() = default;
+            _Connection(const ConnectionEventArgs& args)
                 : SessionId(args.SessionId)
             {
             }
@@ -245,16 +256,26 @@ namespace IntegrationTests {
             ResultReason Reason;
         };
 
-        ConversationTranslatorCallbacks(std::shared_ptr<ConversationTranslator> convTrans);
+        static std::shared_ptr<ConversationTranslatorCallbacks> From(std::shared_ptr<ConversationTranslator> convTrans);
 
         std::vector<_Session> SessionStarted;
         std::vector<_Session> SessionStopped;
+        std::vector<_Connection> Connected;
+        std::vector<_Connection> Disconnected;
         std::vector<_Canceled> Canceled;
         std::vector<_ParticipantChanged> ParticipantsChanged;
         std::vector<_Expiration> ConversationExpiration;
         std::vector<_Reco> Transcribing;
         std::vector<_Reco> Transcribed;
         std::vector<_Reco> TextMessageReceived;
+
+        void AddConnectionCallbacks(std::shared_ptr<Connection> connection)
+        {
+            Bind(Connected, connection->Connected, "Connected");
+            Bind(Disconnected, connection->Disconnected, "Disconnected");
+
+            m_hasConnection = true;
+        }
 
         void WaitForAudioStreamCompletion(std::chrono::milliseconds maxWaitTime, std::chrono::milliseconds additionalWaitTime = 0ms)
         {
@@ -281,6 +302,12 @@ namespace IntegrationTests {
         {
             SPXTEST_REQUIRE(SessionStarted.size() > 0);
             SPXTEST_REQUIRE(SessionStopped.size() > 0);
+
+            if (m_hasConnection)
+            {
+                SPXTEST_REQUIRE(Connected.size() > 0);
+                SPXTEST_REQUIRE(Disconnected.size() > 0);
+            }
 
             if (expectEndOfStream)
             {
@@ -317,6 +344,12 @@ namespace IntegrationTests {
 
             SPXTEST_REQUIRE(ParticipantsChanged[1].Participants.size() == 1);
             SPXTEST_REQUIRE(ParticipantsChanged[1].Participants.front()->DisplayName == name);
+        }
+
+        void VerifyConnectionEvents(size_t expectedConnections, size_t expectedDisconnections)
+        {
+            SPXTEST_REQUIRE(Connected.size() == expectedConnections);
+            SPXTEST_REQUIRE(Disconnected.size() == expectedDisconnections);
         }
 
         void VerifyTranscriptions(const std::string participantId, std::initializer_list<ExpectedTranscription> expectedTranscriptions)
@@ -410,12 +443,19 @@ namespace IntegrationTests {
 
     private:
         std::promise<void> m_audioStreamFinished;
+        bool m_hasConnection;
 
     private:
+        ConversationTranslatorCallbacks()
+            : m_audioStreamFinished(), m_hasConnection(false)
+        {
+        }
+
         template<typename TArgs, typename TStore>
         void Bind(std::vector<TStore>& list, EventSignal<TArgs>& evt, const std::string& name)
         {
-            evt.Connect([&list, name](TArgs arg)
+            auto keepalive = shared_from_this();
+            evt.Connect([&list, name, keepalive](TArgs arg)
             {
                 SPX_TRACE_INFO("%s: Received event", name.c_str());
                 list.push_back(arg);
@@ -426,16 +466,20 @@ namespace IntegrationTests {
     template<>
     void ConversationTranslatorCallbacks::Bind(std::vector<_Canceled>& list, EventSignal<const ConversationTranslationCanceledEventArgs&>& evt, const std::string& name)
     {
-        evt.Connect([&list, name, this](const ConversationTranslationCanceledEventArgs& arg)
+        auto keepalive = shared_from_this();
+        evt.Connect([&list, name, keepalive](const ConversationTranslationCanceledEventArgs& arg)
         {
             SPX_TRACE_INFO(">>%s: Received event. Reason: %d, Error: %d, Details: %s", name.c_str(), arg.Reason, arg.ErrorCode, arg.ErrorDetails.c_str());
 
             _Canceled parsed(arg);
+
+            list.push_back(parsed);
+
             try
             {
                 if (parsed.Reason == CancellationReason::EndOfStream)
                 {
-                    m_audioStreamFinished.set_value();
+                    keepalive->m_audioStreamFinished.set_value();
                 }
                 else
                 {
@@ -445,23 +489,25 @@ namespace IntegrationTests {
             }
             catch (std::exception&)
             {
-                m_audioStreamFinished.set_exception(std::current_exception());
+                keepalive->m_audioStreamFinished.set_exception(std::current_exception());
             }
-
-            list.push_back(parsed);
         });
     }
 
-    ConversationTranslatorCallbacks::ConversationTranslatorCallbacks(std::shared_ptr<ConversationTranslator> convTrans)
+    std::shared_ptr<ConversationTranslatorCallbacks> ConversationTranslatorCallbacks::From(std::shared_ptr<ConversationTranslator> convTrans)
     {
-        Bind(SessionStarted, convTrans->SessionStarted, "SessionStarted");
-        Bind(SessionStopped, convTrans->SessionStopped, "SessionStopped");
-        Bind(Canceled, convTrans->Canceled, "Canceled");
-        Bind(ParticipantsChanged, convTrans->ParticipantsChanged, "ParticipantsChanged");
-        Bind(ConversationExpiration, convTrans->ConversationExpiration, "ConversationExpiration");
-        Bind(Transcribing, convTrans->Transcribing, "Transcribing");
-        Bind(Transcribed, convTrans->Transcribed, "Transcribed");
-        Bind(TextMessageReceived, convTrans->TextMessageReceived, "TextMessageReceived");
+        auto evts = std::shared_ptr<ConversationTranslatorCallbacks>(new ConversationTranslatorCallbacks());
+
+        evts->Bind(evts->SessionStarted, convTrans->SessionStarted, "SessionStarted");
+        evts->Bind(evts->SessionStopped, convTrans->SessionStopped, "SessionStopped");
+        evts->Bind(evts->Canceled, convTrans->Canceled, "Canceled");
+        evts->Bind(evts->ParticipantsChanged, convTrans->ParticipantsChanged, "ParticipantsChanged");
+        evts->Bind(evts->ConversationExpiration, convTrans->ConversationExpiration, "ConversationExpiration");
+        evts->Bind(evts->Transcribing, convTrans->Transcribing, "Transcribing");
+        evts->Bind(evts->Transcribed, convTrans->Transcribed, "Transcribed");
+        evts->Bind(evts->TextMessageReceived, convTrans->TextMessageReceived, "TextMessageReceived");
+
+        return evts;
     }
 
     struct TestConversationParticipant
@@ -519,7 +565,11 @@ namespace IntegrationTests {
 
                 SPX_TRACE_INFO(">> [%s] Creating conversation translator", Name.c_str());
                 ConvTrans = ConversationTranslator::FromConfig(audioConfig);
-                Events = make_unique<ConversationTranslatorCallbacks>(ConvTrans);
+                Events = ConversationTranslatorCallbacks::From(ConvTrans);
+
+                SPX_TRACE_INFO(">> [%s] Creating connection", Name.c_str());
+                Conn = Connection::FromConversationTranslator(ConvTrans);
+                Events->AddConnectionCallbacks(Conn);
 
                 SPX_TRACE_INFO(">> [%s] Joining conversation", Name.c_str());
                 ConvTrans->JoinConversationAsync(Conv, Name).get();
@@ -528,7 +578,11 @@ namespace IntegrationTests {
             {
                 SPX_TRACE_INFO(">> [%s] Creating conversation translator", Name.c_str());
                 ConvTrans = ConversationTranslator::FromConfig(audioConfig);
-                Events = make_unique<ConversationTranslatorCallbacks>(ConvTrans);
+                Events = ConversationTranslatorCallbacks::From(ConvTrans);
+
+                SPX_TRACE_INFO(">> [%s] Creating connection", Name.c_str());
+                Conn = Connection::FromConversationTranslator(ConvTrans);
+                Events->AddConnectionCallbacks(Conn);
 
                 SPX_TRACE_INFO(">> [%s] Joining conversation %s", Name.c_str(), m_convId.c_str());
                 ConvTrans->JoinConversationAsync(m_convId, Name, Lang).get();
@@ -595,7 +649,8 @@ namespace IntegrationTests {
         const std::string& ParticipantId;
         shared_ptr<Conversation> Conv;
         shared_ptr<ConversationTranslator> ConvTrans;
-        unique_ptr<ConversationTranslatorCallbacks> Events;
+        shared_ptr<Connection> Conn;
+        shared_ptr<ConversationTranslatorCallbacks> Events;
     };
 
 #ifdef _MSC_VER

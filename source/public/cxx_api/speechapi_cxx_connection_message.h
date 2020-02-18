@@ -7,6 +7,8 @@
 
 #pragma once
 #include <string>
+#include <vector>
+#include <speechapi_c_connection.h>
 #include <speechapi_cxx_common.h>
 #include <speechapi_cxx_properties.h>
 #include <speechapi_cxx_session_eventargs.h>

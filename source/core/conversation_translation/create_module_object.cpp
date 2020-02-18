@@ -5,11 +5,12 @@
 // create_module_object.cpp: Implementation definitions for *CreateModuleObject* methods
 //
 
-#include "stdafx.h"
+#include "common.h"
 #include <factory_helpers.h>
 #include "ISpxConversationInterfaces.h"
 #include "conversation_translator.h"
 #include "conversation_impl.h"
+#include "conversation_translator_connection.h"
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -23,6 +24,7 @@ namespace Impl {
         SPX_FACTORY_MAP_BEGIN();
         SPX_FACTORY_MAP_ENTRY(CSpxConversationTranslator, ISpxConversationTranslator);
         SPX_FACTORY_MAP_ENTRY(CSpxConversationImpl, ISpxConversation);
+        SPX_FACTORY_MAP_ENTRY(CSpxConversationTranslatorConnection, ISpxConnection);
         SPX_FACTORY_MAP_END();
     }
 

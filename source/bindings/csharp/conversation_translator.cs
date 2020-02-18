@@ -21,7 +21,7 @@ namespace Microsoft.CognitiveServices.Speech.Transcription
     /// </summary>
     public sealed class ConversationTranslator : Internal.DisposableBase
     {
-        private Internal.InteropSafeHandle _nativeHandle;
+        internal Internal.InteropSafeHandle _nativeHandle;
         private int _activeAsyncCounter = 0;
 
         private InteropEvent<SessionEventArgs> _sessionStarted;

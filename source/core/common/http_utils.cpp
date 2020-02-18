@@ -34,35 +34,7 @@ namespace Impl {
             ThrowRuntimeError("Invalid url (unexpected length)");
         }
 
-        // If url starts with "http://" (protocol), 'secure' shall be set to false
-        if (PAL::strnicmp(urlStr.data(), HTTP_PROTOCOL, strlen(HTTP_PROTOCOL)) == 0)
-        {
-            url.protocol = Protocol::HTTP;
-            url.secure = false;
-        }
-        // If url starts with "https://" (protocol), 'secure' shall be set to true
-        else if (PAL::strnicmp(urlStr.data(), HTTPS_PROTOCOL, strlen(HTTPS_PROTOCOL)) == 0)
-        {
-            url.protocol = Protocol::HTTP;
-            url.secure = true;
-        }
-        // If url starts with "ws://" (protocol), 'secure' shall be set to false
-        else if (PAL::strnicmp(urlStr.data(), WS_PROTOCOL, strlen(WS_PROTOCOL)) == 0)
-        {
-            url.protocol = Protocol::WebSocket;
-            url.secure = false;
-        }
-        // If url starts with "wss://" (protocol), 'secure' shall be set to true
-        else if (PAL::strnicmp(urlStr.data(), WSS_PROTOCOL, strlen(WSS_PROTOCOL)) == 0)
-        {
-            url.protocol = Protocol::WebSocket;
-            url.secure = true;
-        }
-        else
-        {
-            // If protocol cannot be identified in url, the function shall fail
-            ThrowRuntimeError("Url protocol prefix not recognized");
-        }
+        url.scheme = HttpUtils::ParseScheme(urlStr.data());
 
         size_t host_begin;
 
@@ -89,7 +61,7 @@ namespace Impl {
         delimiters1[2] = query_delimiter;
         delimiters2[0] = query_delimiter;
 
-        host_begin = (url.protocol == Protocol::HTTP ? (url.secure ? strlen(HTTPS_PROTOCOL) : strlen(HTTP_PROTOCOL)) : (url.secure ? strlen(WSS_PROTOCOL) : strlen(WS_PROTOCOL)));
+        host_begin = strlen(HttpUtils::SchemePrefix(url.scheme));
 
         token = StringToken_GetFirst(urlStr.data() + host_begin, urlStr.length() - host_begin, current_delimiters, delimiter_count);
 
@@ -122,7 +94,7 @@ namespace Impl {
                         host_parsed = true;
                     }
                 }
-                // If after 'host' the 'port_delimiter' occurs (not preceeded by 'path_delimiter' or 'query_delimiter') the number that follows shall be parsed and stored in 'port'
+                // If after 'host' the 'port_delimiter' occurs (not preceded by 'path_delimiter' or 'query_delimiter') the number that follows shall be parsed and stored in 'port'
                 else if (previous_delimiter == port_delimiter && host_parsed && !port_parsed && !path_parsed && !query_parsed)
                 {
                     const char* port_str = StringToken_GetValue(token);
@@ -142,7 +114,7 @@ namespace Impl {
                         port_parsed = true;
                     }
                 }
-                // If after 'host' or the port number the 'path_delimiter' occurs (not preceeded by 'query_delimiter') the following pointer address shall be stored in 'path'
+                // If after 'host' or the port number the 'path_delimiter' occurs (not preceded by 'query_delimiter') the following pointer address shall be stored in 'path'
                 else if (previous_delimiter == path_delimiter && host_parsed && !path_parsed && !query_parsed)
                 {
                     auto path = StringToken_GetValue(token);
@@ -197,7 +169,7 @@ namespace Impl {
 
         if (url.port < 0)
         {
-            url.port = url.secure ? HTTP_SECURE_PORT : HTTP_NON_SECURE_PORT;
+            url.port = url.isSecure() ? HTTP_SECURE_PORT : HTTP_NON_SECURE_PORT;
         }
 
         return url;
@@ -252,7 +224,7 @@ namespace Impl {
             if (parts.size() > 0 && parts.size() <= 2)
             {
                 std::string key = parts[0];
-                if (first && !key.empty() && key[1] == '?')
+                if (first && !key.empty() && key[0] == '?')
                 {
                     key = UrlUnescape(key.substr(1));
                 }
@@ -275,6 +247,54 @@ namespace Impl {
 
         return parsed;
     }
-    
+
+    const char * HttpUtils::SchemePrefix(UriScheme scheme)
+    {
+        switch (scheme)
+        {
+            case UriScheme::HTTP: return HTTP;
+            case UriScheme::HTTPS: return HTTPS;
+            case UriScheme::WS: return WS;
+            case UriScheme::WSS: return WSS;
+            default:
+                ThrowRuntimeError("Unsupported scheme");
+                return nullptr;
+        }
+    }
+
+    /// <summary>
+    /// Determines the URI scheme from the specified prefix string
+    /// </summary>
+    /// <param name="str">The null terminated string to examine (e.g. https://)</param>
+    /// <returns>The equivalent URI scheme</returns>
+    UriScheme HttpUtils::ParseScheme(const char * str)
+    {
+        // If url starts with "http://" (protocol), 'secure' shall be set to false
+        if (PAL::strnicmp(str, HTTP, strlen(HTTP)) == 0)
+        {
+            return UriScheme::HTTP;
+        }
+        // If url starts with "https://" (protocol), 'secure' shall be set to true
+        else if (PAL::strnicmp(str, HTTPS, strlen(HTTPS)) == 0)
+        {
+            return UriScheme::HTTPS;
+        }
+        // If url starts with "ws://" (protocol), 'secure' shall be set to false
+        else if (PAL::strnicmp(str, WS, strlen(WS)) == 0)
+        {
+            return UriScheme::WS;
+        }
+        // If url starts with "wss://" (protocol), 'secure' shall be set to true
+        else if (PAL::strnicmp(str, WSS, strlen(WSS)) == 0)
+        {
+            return UriScheme::WSS;
+        }
+        else
+        {
+            // If protocol cannot be identified in url, the function shall fail
+            ThrowRuntimeError("Url protocol prefix not recognized");
+            return UriScheme::HTTPS; // should never get here
+        }
+    }
 
 } } } }

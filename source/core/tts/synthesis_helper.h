@@ -15,8 +15,6 @@
 
 
 
-#define HTTPS_URL_PREFIX HTTPS_PROTOCOL
-#define WSS_URL_PREFIX WSS_PROTOCOL
 #define ISSUE_TOKEN_HOST_SUFFIX ".api.cognitive.microsoft.com"
 #define ISSUE_TOKEN_URL_PATH "/sts/v1.0/issueToken"
 #define TTS_COGNITIVE_SERVICE_HOST_SUFFIX ".tts.speech.microsoft.com"

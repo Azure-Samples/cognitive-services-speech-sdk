@@ -812,7 +812,9 @@
 
 %include <speechapi_cxx_session.h>
 
+%ignore Microsoft::CognitiveServices::Speech::Connection::FromConversationTranslator;
 %include <speechapi_cxx_connection.h>
+
 %include <speechapi_cxx_grammar.h>
 %include <speechapi_cxx_phrase_list_grammar.h>
 %include <speechapi_cxx_grammar_list.h>

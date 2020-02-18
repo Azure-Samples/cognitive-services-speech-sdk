@@ -5,7 +5,7 @@
 // conversation_translator.cpp: implementation declarations for conversation translator
 //
 
-#include "stdafx.h"
+#include "common.h"
 #include <sstream>
 #include <spxdebug.h>
 #include <http_utils.h>
@@ -17,13 +17,8 @@
 #include "conversation_translator.h"
 #include "conversation_utils.h"
 #include "conversation_events.h"
-
-namespace Microsoft {
-namespace CognitiveServices {
-namespace Speech {
-namespace USP {
-    extern void PlatformInit(const char* proxyHost, int proxyPort, const char* proxyUsername, const char* proxyPassword);
-}}}} // Microsoft::CognitiveServices::Speech::USP
+#include "conversation_translator_logging.h"
+#include "conversation_translator_connection.h"
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -31,15 +26,25 @@ namespace Speech {
 namespace Impl {
 namespace ConversationTranslation {
 
-// The Android GCC compiler expects a void * argument when the %p format specifier is used
-#if defined(ANDROID) || defined(__ANDROID__)
-    #define P_FORMAT_POINTER(T) ((void *)T)
-#else
-    #define P_FORMAT_POINTER(T) T
-#endif
-
     using namespace std;
     using StringUtils = PAL::StringUtils;
+
+
+    const char * ConversationStateString(const CSpxConversationTranslator::ConversationState state)
+    {
+        switch (state)
+        {
+            case CSpxConversationTranslator::ConversationState::Failed: return "Failed";
+            case CSpxConversationTranslator::ConversationState::Initial: return "Initial";
+            case CSpxConversationTranslator::ConversationState::Closed: return "Closed";
+            case CSpxConversationTranslator::ConversationState::Closing: return "Closing";
+            case CSpxConversationTranslator::ConversationState::CreatingOrJoining: return "CreatingOrJoining";
+            case CSpxConversationTranslator::ConversationState::CreatedOrJoined: return "CreatedOrJoined";
+            case CSpxConversationTranslator::ConversationState::Opening: return "Opening";
+            case CSpxConversationTranslator::ConversationState::Open: return "Open";
+            default:  return "<<UnknownState>>";
+        }
+    }
 
     /// <summary>
     /// Creates an object with the specified site. This will implicitly call the Init() method on that
@@ -50,7 +55,7 @@ namespace ConversationTranslation {
     {
         // get the base site if available
         auto baseSite = SpxQueryInterface<ISpxGenericSite>(site);
-        SPX_IFTRUE_THROW_HR(baseSite == nullptr, SPXERR_UNEXPECTED_CONVERSATION_TRANSLATOR_SITE_FAILURE);
+        CT_THROW_HR_IF(baseSite == nullptr, SPXERR_UNEXPECTED_CONVERSATION_TRANSLATOR_SITE_FAILURE);
 
         auto instance = SpxCreateObjectWithSite<I>(className, baseSite);
         return instance;
@@ -66,9 +71,9 @@ namespace ConversationTranslation {
     template <typename I>
     static inline shared_ptr<I> As(shared_ptr<ISpxRecognizer> reco)
     {
-        SPX_IFTRUE_THROW_HR(reco == nullptr, SPXERR_UNINITIALIZED);
+        CT_THROW_HR_IF(reco == nullptr, SPXERR_UNINITIALIZED);
         auto cast = reco->QueryInterface<I>();
-        SPX_IFTRUE_THROW_HR(cast == nullptr, SPXERR_RUNTIME_ERROR);
+        CT_THROW_HR_IF(cast == nullptr, SPXERR_RUNTIME_ERROR);
         return cast;
     }
 
@@ -104,11 +109,11 @@ namespace ConversationTranslation {
         }
         catch (exception& ex)
         {
-            SPX_TRACE_ERROR("Exception while raising event. EventArgs: %p, What: %s", P_FORMAT_POINTER(eventArgs.get()), ex.what());
+            CT_LOG_ERROR("Exception while raising event. EventArgs: %p, What: %s", P_FORMAT_POINTER(eventArgs.get()), ex.what());
         }
         catch (...)
         {
-            SPX_TRACE_ERROR("Unknown throwable while raising event. EventArgs: %p", P_FORMAT_POINTER(eventArgs.get()));
+            CT_LOG_ERROR("Unknown throwable while raising event. EventArgs: %p", P_FORMAT_POINTER(eventArgs.get()));
         }
     }
 
@@ -136,49 +141,91 @@ namespace ConversationTranslation {
         RaiseEvent<I>(event, CreateEventArgs<C, I, Args...>(args...));
     }
 
-    static CancellationErrorCode ToCancellationErrorCode(bool isWebSocket, ConversationErrorCode error)
+    struct ErrorCodeHandling
     {
+        bool isPermanentFailure;
+        CancellationErrorCode errorCode;
+    };
+
+    static ErrorCodeHandling ToCancellationErrorCode(bool isWebSocket, ConversationErrorCode error)
+    {
+        ErrorCodeHandling ret;
+        ret.isPermanentFailure = false;
+        ret.errorCode = CancellationErrorCode::RuntimeError;
+
         if (!isWebSocket)
         {
-            return CancellationErrorCode::RuntimeError;
+            ret.isPermanentFailure = false;
+            ret.errorCode = CancellationErrorCode::RuntimeError;
+            return ret;
         }
 
         switch (error)
         {
             case ConversationErrorCode::AuthenticationError:
-                return CancellationErrorCode::AuthenticationFailure;
+                ret.isPermanentFailure = true;
+                ret.errorCode = CancellationErrorCode::AuthenticationFailure;
+                break;
             case ConversationErrorCode::BadRequest:
-                return CancellationErrorCode::BadRequest;
+                ret.isPermanentFailure = true;
+                ret.errorCode = CancellationErrorCode::BadRequest;
+                break;
             case ConversationErrorCode::ConnectionError:
-                return CancellationErrorCode::ConnectionFailure;
+                ret.isPermanentFailure = false;
+                ret.errorCode = CancellationErrorCode::ConnectionFailure;
+                break;
             case ConversationErrorCode::Forbidden:
-                return CancellationErrorCode::Forbidden;
+                ret.isPermanentFailure = true;
+                ret.errorCode = CancellationErrorCode::Forbidden;
+                break;
             case ConversationErrorCode::RuntimeError:
-                return CancellationErrorCode::RuntimeError;
+                ret.isPermanentFailure = false;
+                ret.errorCode = CancellationErrorCode::RuntimeError;
+                break;
             case ConversationErrorCode::ServiceError:
-                return CancellationErrorCode::ServiceError;
+                ret.isPermanentFailure = false;
+                ret.errorCode = CancellationErrorCode::ServiceError;
+                break;
             case ConversationErrorCode::ServiceUnavailable:
-                return CancellationErrorCode::ServiceUnavailable;
+                ret.isPermanentFailure = false;
+                ret.errorCode = CancellationErrorCode::ServiceUnavailable;
+                break;
             case ConversationErrorCode::TooManyRequests:
-                return CancellationErrorCode::TooManyRequests;
+                ret.isPermanentFailure = false;
+                ret.errorCode = CancellationErrorCode::TooManyRequests;
+                break;
             default:
-                return CancellationErrorCode::RuntimeError;
+                ret.isPermanentFailure = false;
+                ret.errorCode = CancellationErrorCode::RuntimeError;
+                break;
         }
+
+        return ret;
     }
 
-    static CancellationErrorCode ToCancellationErrorCode(const USP::WebSocketDisconnectReason reason)
+    static ErrorCodeHandling ParseDisconnectReason(const USP::WebSocketDisconnectReason reason)
     {
+        ErrorCodeHandling ret;
+        ret.isPermanentFailure = false;
+        ret.errorCode = CancellationErrorCode::RuntimeError;
+
         switch (reason)
         {
             default:
             case USP::WebSocketDisconnectReason::Unknown:
-                return CancellationErrorCode::RuntimeError;
+                ret.isPermanentFailure = false;
+                ret.errorCode = CancellationErrorCode::RuntimeError;
+                break;
 
             case USP::WebSocketDisconnectReason::Normal:
-                return CancellationErrorCode::NoError;
+                ret.isPermanentFailure = false;
+                ret.errorCode = CancellationErrorCode::NoError;
+                break;
 
             case USP::WebSocketDisconnectReason::EndpointUnavailable:
-                return CancellationErrorCode::ServiceUnavailable;
+                ret.isPermanentFailure = false;
+                ret.errorCode = CancellationErrorCode::ServiceUnavailable;
+                break;
 
             case USP::WebSocketDisconnectReason::ProtocolError:
             case USP::WebSocketDisconnectReason::CannotAcceptDataType:
@@ -186,10 +233,17 @@ namespace ConversationTranslation {
             case USP::WebSocketDisconnectReason::PolicyViolation:
             case USP::WebSocketDisconnectReason::MessageTooBig:
             case USP::WebSocketDisconnectReason::UnexpectedCondition:
-                return CancellationErrorCode::BadRequest;
+                ret.isPermanentFailure = true;
+                ret.errorCode = CancellationErrorCode::BadRequest;
+                break;
 
-            case USP::WebSocketDisconnectReason::InternalServerError: return CancellationErrorCode::ServiceError;
+            case USP::WebSocketDisconnectReason::InternalServerError:
+                ret.isPermanentFailure = false;
+                ret.errorCode = CancellationErrorCode::ServiceError;
+                break;
         }
+
+        return ret;
     }
 
     static ParticipantChangedReason ToReason(ConversationParticipantAction action)
@@ -207,11 +261,15 @@ namespace ConversationTranslation {
     /// Register an instance method as an event callback. This uses a weak_ptr to ensure we don't
     /// try to invoke a callback on a disposed instance.
     /// </summary>
-    template<typename I>
-    static void AddHandler(EventSignal<shared_ptr<I>>& event, CSpxConversationTranslator* instance, void (CSpxConversationTranslator:: *callback)(shared_ptr<I>))
+    /// <param name="event">The event to register a handler for</param>
+    /// <param name="instance">The instance to call the callback method on</param>
+    /// <param name="callback">The callback method to invoke</param>
+    /// <typeparam name="TEventArgs">The type of the event arguments for this event</typeparam>
+    template<typename TEventArgs>
+    static void AddHandler(EventSignal<shared_ptr<TEventArgs>>& event, CSpxConversationTranslator* instance, void (CSpxConversationTranslator:: *callback)(shared_ptr<TEventArgs>))
     {
         weak_ptr<ISpxConversationTranslator> weak(instance->ISpxConversationTranslator::shared_from_this());
-        event.Connect([weak, callback](shared_ptr<I> eventArgs)
+        event.Connect([weak, callback](shared_ptr<TEventArgs> eventArgs)
         {
             auto ptr = dynamic_pointer_cast<CSpxConversationTranslator>(weak.lock());
             if (ptr != nullptr)
@@ -222,7 +280,8 @@ namespace ConversationTranslation {
     }
 
     CSpxConversationTranslator::CSpxConversationTranslator() :
-        m_state_(ConversationState::Closed),
+        ThreadingHelpers(ISpxThreadService::Affinity::User),
+        m_state_(ConversationState::Initial),
         _m_conv(),
         m_convInternals(),
         m_endConversationOnLeave(false),
@@ -230,44 +289,42 @@ namespace ConversationTranslation {
         m_recognizerConnected(false),
         m_speechLang(),
         m_audioInput(),
-        m_utteranceId()
+        m_utteranceId(),
+        m_convDeletedEvtHandlerId()
     {
-        SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+        CT_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
         // we should create the TranslatorRecognizer instance here but NOT call Init()
         // on it, nor set its site
         m_recognizer = SpxCreateObject<ISpxRecognizer>("CSpxTranslationRecognizer", SpxGetRootSite());
-        SPX_IFTRUE_THROW_HR(m_recognizer == nullptr, SPXERR_UNEXPECTED_CREATE_OBJECT_FAILURE);
+        CT_I_THROW_HR_IF(m_recognizer == nullptr, SPXERR_UNEXPECTED_CREATE_OBJECT_FAILURE);
     }
 
     CSpxConversationTranslator::~CSpxConversationTranslator()
     {
-        SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+        CT_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
         Term();
     }
 
     void CSpxConversationTranslator::Init()
     {
-        SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+        CT_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
         ThreadingHelpers::Init();
 
         shared_ptr<ISpxRecognizerSite> site = GetSite();
-        SPX_IFTRUE_THROW_HR(site == nullptr, SPXERR_UNEXPECTED_CONVERSATION_TRANSLATOR_SITE_FAILURE);
+        CT_I_THROW_HR_IF(site == nullptr, SPXERR_UNEXPECTED_CONVERSATION_TRANSLATOR_SITE_FAILURE);
 
         auto genericSite = SpxQueryInterface<ISpxGenericSite>(site);
-        SPX_IFTRUE_THROW_HR(genericSite == nullptr, SPXERR_UNEXPECTED_CONVERSATION_TRANSLATOR_SITE_FAILURE);
+        CT_I_THROW_HR_IF(genericSite == nullptr, SPXERR_UNEXPECTED_CONVERSATION_TRANSLATOR_SITE_FAILURE);
 
         auto factory = SpxQueryService<ISpxObjectFactory>(site);
-        SPX_IFTRUE_THROW_HR(factory == nullptr, SPXERR_UNEXPECTED_CONVERSATION_TRANSLATOR_SITE_FAILURE);
+        CT_I_THROW_HR_IF(factory == nullptr, SPXERR_UNEXPECTED_CONVERSATION_TRANSLATOR_SITE_FAILURE);
 
         auto properties = SpxQueryService<ISpxNamedProperties>(site);
-        SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_CONVERSATION_TRANSLATOR_SITE_FAILURE);
-
-        // Initialize Azure C shared library HTTP platform
-        USP::PlatformInit(nullptr, 0, nullptr, nullptr);
+        CT_I_THROW_HR_IF(properties == nullptr, SPXERR_UNEXPECTED_CONVERSATION_TRANSLATOR_SITE_FAILURE);
 
         m_speechLang = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_RecoLanguage), "");
-        SPX_IFTRUE_THROW_HR(m_speechLang.empty(), SPXERR_INVALID_ARG);
+        CT_I_THROW_HR_IF(m_speechLang.empty(), SPXERR_INVALID_ARG);
 
         // Initialise the speech translator recognizer instance by setting the site.
         auto withSite = As<ISpxObjectWithSite>(m_recognizer);
@@ -279,10 +336,15 @@ namespace ConversationTranslation {
     void CSpxConversationTranslator::Term()
     {
         m_recognizerConnected = false;
+        DisconnectRecognizer(false);
         m_recognizer = nullptr;
-        DisconnectTranslationRecognizer();
-        DisconnectConversation();
+        DisconnectConversation(false);
+
         m_audioInput.reset();
+
+        // release our references in the right order
+        m_convInternals.reset();
+        _m_conv.reset();
     }
 
     const vector<shared_ptr<ISpxConversationParticipant>> CSpxConversationTranslator::GetParticipants()
@@ -311,50 +373,70 @@ namespace ConversationTranslation {
 
     void CSpxConversationTranslator::JoinConversation(shared_ptr<ISpxConversation> conversation, const string & nickname, bool endConversationOnLeave)
     {
-        SPX_DBG_TRACE_FUNCTION();
+        CT_DBG_TRACE_FUNCTION();
 
-        SPX_IFTRUE_THROW_HR(GetSite() == nullptr || m_threadService == nullptr, SPXERR_UNINITIALIZED);
-        SPX_IFTRUE_THROW_HR(conversation == nullptr, SPXERR_INVALID_ARG);
+        CT_I_THROW_HR_IF(GetSite() == nullptr || m_threadService == nullptr, SPXERR_UNINITIALIZED);
+        CT_I_THROW_HR_IF(conversation == nullptr, SPXERR_INVALID_ARG);
 
         RunSynchronously([this, conversation, nickname, endConversationOnLeave]()
         {
-            switch (GetState())
-            {
-                case ConversationState::Closed:
-                    break;
+            CT_GET_AND_LOG_STATE(
+                "JoinConversation 0x%p, nickname: %s, endOnLeave: %d",
+                P_FORMAT_POINTER(conversation.get()), nickname.c_str(), endConversationOnLeave);
 
+            switch (state)
+            {
                 default:
-                case ConversationState::Closing:
+                    CT_HANDLE_UNSUPPORTED_STATE();
+                    return;
+
                 case ConversationState::Failed:
-                case ConversationState::Open:
+                case ConversationState::Closed:
+                case ConversationState::Closing:
+                case ConversationState::CreatingOrJoining:
+                case ConversationState::CreatedOrJoined:
                 case ConversationState::Opening:
-                case ConversationState::PartiallyOpen:
-                    SPX_THROW_HR(SPXERR_INVALID_STATE);
+                case ConversationState::Open:
+                    CT_I_THROW_HR(SPXERR_INVALID_STATE);
+                    return;
+
+                case ConversationState::Initial:
+                    // Because we are connecting to a CSPxConversationImpl instance, we always start at the
+                    // open. Thus we should "jump ahead"
                     break;
             }
 
-            auto impl = SafeQueryInterface<ISpxConversationWithImpl>(conversation);
-            SPX_IFTRUE_THROW_HR(impl == nullptr, SPXERR_UNEXPECTED_CONVERSATION_SITE_FAILURE);
-
+            // Hook up to this conversation to start receiving events
             ConnectConversation(conversation, endConversationOnLeave);
 
-            // since we now have the nickname to use, let's change it here
+            auto convInternals = m_convInternals.lock();
+            CT_I_THROW_HR_IF(convInternals == nullptr, SPXERR_UNINITIALIZED);
+
+            // Update the user's nickname since we now have it
+            if (!nickname.empty())
             {
-                auto internals = m_convInternals.lock();
-                if (internals)
-                {
-                    internals->GetConversationConnection()->SetNickname(nickname);
-                }
+                convInternals->GetConversationConnection()->SetNickname(nickname);
             }
 
+            // send session started
             RaiseEvent<ConversationSessionEventArgs>(SessionStarted, GetSessionId());
-            RaiseEvent<ConversationConnectionEventArgs>(Connected, GetSessionId());
 
+            // Go to the correct state
+            if (convInternals->IsConnected())
+            {
+                ToOpenState();
+            }
+            else
+            {
+                ToOpeningState();
+            }
+
+            // send participants event
             auto eventArgs = CreateShared<ConversationParticipantChangedEventArgs>(
                 GetSessionId(), ParticipantChangedReason::JoinedConversation);
 
             auto conv = m_convInternals.lock();
-            SPX_IFTRUE_THROW_HR(conv == nullptr, SPXERR_UNINITIALIZED);
+            CT_I_THROW_HR_IF(conv == nullptr, SPXERR_UNINITIALIZED);
 
             for (const auto& p : conv->GetConversationConnection()->GetParticipants())
             {
@@ -366,23 +448,62 @@ namespace ConversationTranslation {
         });
     }
 
+    void CSpxConversationTranslator::Connect()
+    {
+        CT_I_THROW_HR_IF(m_threadService == nullptr, SPXERR_INVALID_STATE);
+
+        RunSynchronously([this]()
+        {
+            CT_GET_AND_LOG_STATE("User initiated connect");
+
+            switch (state)
+            {
+                default:
+                    CT_HANDLE_UNSUPPORTED_STATE();
+                    return;
+
+                case ConversationState::Initial:
+                case ConversationState::Failed:
+                case ConversationState::Closed:
+                case ConversationState::Closing:
+                case ConversationState::CreatingOrJoining:
+                    CT_LOG_ERROR("Invalid state for connecting/reconnecting");
+                    CT_I_THROW_HR(SPXERR_INVALID_STATE);
+                    return;
+
+                case ConversationState::Opening:
+                case ConversationState::Open:
+                    // Nothing to do since we are already reconnecting or connected
+                    return;
+
+                case ConversationState::CreatedOrJoined:
+                    // let's try to rejoin
+                    break;
+            }
+
+            // can we rejoin?
+            auto convInternals = m_convInternals.lock();
+            CT_I_THROW_HR_IF(convInternals == nullptr, SPXERR_UNEXPECTED_CONVERSATION_TRANSLATOR_SITE_FAILURE);
+
+            if (convInternals->CanRejoin())
+            {
+                ToOpeningState();
+            }
+            else
+            {
+                CT_I_THROW_HR(SPXERR_INVALID_STATE);
+            }
+        });
+    }
+
     void CSpxConversationTranslator::StartTranscribing()
     {
         RunSynchronously([this]()
         {
-            switch (GetState())
+            CT_GET_AND_LOG_STATE("Start Transcribing");
+            if (false == IsConsideredOpen(state))
             {
-                case ConversationState::Open:
-                case ConversationState::PartiallyOpen:
-                    break;
-
-                default:
-                case ConversationState::Closed:
-                case ConversationState::Closing:
-                case ConversationState::Failed:
-                case ConversationState::Opening:
-                    SPX_THROW_HR(SPXERR_INVALID_STATE);
-                    break;
+                CT_I_THROW_HR(SPXERR_INVALID_STATE);
             }
 
             As<ISpxRecognizer>(m_recognizer)->StartContinuousRecognitionAsync().Future.get();
@@ -393,19 +514,10 @@ namespace ConversationTranslation {
     {
         RunSynchronously([this]()
         {
-            switch (GetState())
+            CT_GET_AND_LOG_STATE("Start Transcribing");
+            if (false == IsConsideredOpen(state))
             {
-                case ConversationState::Open:
-                case ConversationState::PartiallyOpen:
-                    break;
-
-                default:
-                case ConversationState::Closed:
-                case ConversationState::Closing:
-                case ConversationState::Failed:
-                case ConversationState::Opening:
-                    SPX_THROW_HR(SPXERR_INVALID_STATE);
-                    break;
+                CT_I_THROW_HR(SPXERR_INVALID_STATE);
             }
 
             As<ISpxRecognizer>(m_recognizer)->StopContinuousRecognitionAsync().Future.get();
@@ -416,33 +528,19 @@ namespace ConversationTranslation {
     {
         RunSynchronously([this, message]()
         {
-            switch (GetState())
+            CT_GET_AND_LOG_STATE("Send text message (%zu chars)", message.length());
+            if (false == IsConsideredOpen(state))
             {
-                case ConversationState::Open:
-                    break;
-
-                case ConversationState::PartiallyOpen:
-                    // check if the conversation connection is open
-                    if (!IsConversationConnected())
-                    {
-                        SPX_THROW_HR(SPXERR_INVALID_STATE);
-                    }
-                    break;
-
-                default:
-                case ConversationState::Closed:
-                case ConversationState::Closing:
-                case ConversationState::Failed:
-                case ConversationState::Opening:
-                    SPX_THROW_HR(SPXERR_INVALID_STATE);
-                    break;
+                CT_I_THROW_HR(SPXERR_INVALID_STATE);
             }
 
             auto convInternals = m_convInternals.lock();
-            if (convInternals != nullptr)
+            if (convInternals == nullptr)
             {
-                convInternals->GetConversationConnection()->SendTextMessage(message);
+                CT_I_THROW_HR(SPXERR_INVALID_STATE);
             }
+
+            convInternals->GetConversationConnection()->SendTextMessage(message);
         });
     }
 
@@ -459,38 +557,28 @@ namespace ConversationTranslation {
 
         RunAsynchronously([this]()
         {
-            auto state = GetState();
-            SPX_TRACE_INFO("Called leave conversation on 0x%p in %d state", P_FORMAT_POINTER(this), state);
-
-            switch (GetState())
+            CT_GET_AND_LOG_STATE("Leave conversation");
+            switch (state)
             {
                 default:
-                    SPX_TRACE_ERROR("Unknown state on 0x%p while leaving conversation: %d", P_FORMAT_POINTER(this), state);
+                    CT_HANDLE_UNSUPPORTED_STATE();
                     return;
 
                 case ConversationState::Failed:
-                case ConversationState::Closing:
+                case ConversationState::Initial:
+                case ConversationState::CreatingOrJoining:
                 case ConversationState::Closed:
-                    // nothing to do here
+                case ConversationState::Closing:
+                    // Calling leave should not throw exceptions even if you are not in the right state
+                    CT_LOG_INFO("Leaving is not actionable in current state.");
                     return;
 
-                case ConversationState::Open:
-                case ConversationState::PartiallyOpen:
+                case ConversationState::CreatedOrJoined:
                 case ConversationState::Opening:
-                    // continue
+                case ConversationState::Open:
+                    // Can leave
+                    ToClosingState();
                     break;
-            }
-
-            SetState(ConversationState::Closing);
-            RaiseEvent<ConversationConnectionEventArgs>(Disconnected, GetSessionId());
-
-            // stop the transcriber, disconnect the conversation
-            As<ISpxRecognizer>(m_recognizer)->StopContinuousRecognitionAsync().Future.get();
-            DisconnectTranslationRecognizer();
-
-            if (m_endConversationOnLeave && _m_conv != nullptr)
-            {
-                _m_conv->EndConversation();
             }
 
             // we want to get off the background thread now to give the event handlers a
@@ -498,9 +586,80 @@ namespace ConversationTranslation {
         }, std::move(promise));
 
         bool success = future.get();
-        SPX_IFTRUE_THROW_HR(false == success, SPXERR_CANCELED);
+        CT_I_THROW_HR_IF(false == success, SPXERR_CANCELED);
 
-        RunSynchronously([this]() { DisconnectConversation(); });
+        RunSynchronously([this]() { DisconnectConversation(true); });
+    }
+
+    bool CSpxConversationTranslator::CanJoin() const
+    {
+        if (m_threadService == nullptr)
+        {
+            return true; // we are not initialised yet so assume we can join
+        }
+
+        bool canJoin = false;
+
+        RunSynchronously([this, &canJoin]()
+        {
+            CT_GET_AND_LOG_STATE("Checking if can join conversation translator");
+            switch (state)
+            {
+                default:
+                    CT_HANDLE_UNSUPPORTED_STATE();
+                    return;
+
+                case ConversationState::Failed:
+                case ConversationState::Closed:
+                case ConversationState::Closing:
+                case ConversationState::CreatingOrJoining:
+                case ConversationState::CreatedOrJoined:
+                case ConversationState::Opening:
+                case ConversationState::Open:
+                    canJoin = false;
+                    break;
+
+                case ConversationState::Initial:
+                    canJoin = true;
+                    break;
+            }
+        });
+
+        return canJoin;
+    }
+
+    void CSpxConversationTranslator::Disconnect()
+    {
+        if (m_threadService == nullptr)
+        {
+            // we are not initialized and should not throw exceptions here
+            return;
+        }
+
+        RunSynchronously([this]()
+        {
+            CT_GET_AND_LOG_STATE("Disconnect conversation");
+            switch (state)
+            {
+                default:
+                    CT_HANDLE_UNSUPPORTED_STATE();
+                    return;
+
+                case ConversationState::Failed:
+                case ConversationState::Initial:
+                case ConversationState::Closed:
+                case ConversationState::Closing:
+                case ConversationState::CreatingOrJoining:
+                case ConversationState::CreatedOrJoined:
+                    // nothing to do here
+                    break;
+
+                case ConversationState::Opening:
+                case ConversationState::Open:
+                    ToCreatedOrJoinedState(CancellationErrorCode::NoError, "");
+                    break;
+            }
+        });
     }
 
     string CSpxConversationTranslator::GetStringValue(const char* name, const char* defaultValue) const
@@ -530,7 +689,19 @@ namespace ConversationTranslation {
 
     shared_ptr<ISpxConnection> CSpxConversationTranslator::GetConnection()
     {
-        return As<ISpxConnectionFromRecognizer>(m_recognizer)->GetConnection();
+        // we cannot rely on the site to create objects since we may want to get a Connection
+        // instance from this *before* the site is set. Since the Connection instance doesn't
+        // need to have a site, we can create directly here
+        auto ptr = new CSpxConversationTranslatorConnection();
+        auto interface = static_cast<ISpxConnection*>(ptr);
+        std::shared_ptr<ISpxConnection> connection(interface);
+
+        auto connectionInit = connection->QueryInterface<ISpxConversationTranslatorConnection>();
+        CT_I_THROW_HR_IF(connection == nullptr, SPXERR_UNEXPECTED_CONVERSATION_TRANSLATOR_SITE_FAILURE);
+
+        connectionInit->Init(ISpxConversationTranslator::shared_from_this(), m_recognizer);
+
+        return connection;
     }
 
     void CSpxConversationTranslator::SetAudioConfig(std::weak_ptr<ISpxAudioConfig> audio_config)
@@ -547,71 +718,57 @@ namespace ConversationTranslation {
     {
         RunAsynchronously([this]()
         {
-            bool sendSessionStarted = false;
-            bool sendConnected = false;
-
-            auto state = GetState();
+            CT_GET_AND_LOG_STATE("Conversation connected");
             switch (state)
             {
                 default:
-                    SPX_TRACE_ERROR("Unknown state on 0x%p for connected conversation event: %d", P_FORMAT_POINTER(this), state);
+                    CT_HANDLE_UNSUPPORTED_STATE();
                     return;
 
-                case ConversationState::Failed:
+                case ConversationState::Initial:
                 case ConversationState::Closed:
+                case ConversationState::CreatingOrJoining:
+                case ConversationState::CreatedOrJoined:
+                    CT_I_LOG_WARNING("Not expected here");
+                    break;
+
+                case ConversationState::Failed:
+                case ConversationState::Open:
+                    // don't care
+                    break;
+
                 case ConversationState::Closing:
-                    // Should theoretically never get here
-                    SPX_TRACE_WARNING("Unexpected state on 0x%p when for connected conversation event: %d", P_FORMAT_POINTER(this), state);
+                    // If the recognizer is also not connected, we should treat this as if the conversation
+                    // connection successfully closed and go to the closed state
+                    CT_I_LOG_WARNING("Not expected here");
+                    if (!m_recognizerConnected.load())
+                    {
+                        ToClosedState();
+                    }
+                    
                     break;
 
                 case ConversationState::Opening:
-                    sendSessionStarted = true;
-                    sendConnected = true;
-                    ChangeState(state, m_recognizerConnected ? ConversationState::Open : ConversationState::PartiallyOpen);
+                    ToOpenState();
                     break;
-
-                case ConversationState::PartiallyOpen:
-                    if (m_recognizerConnected)
-                    {
-                        sendConnected = true;
-                        ChangeState(state, ConversationState::Open);
-                    }
-                    break;
-
-                case ConversationState::Open:
-                    // In theory, this shouldn't happen so we log that we may have a logic bug and move on
-                    SPX_TRACE_WARNING("Got connected conversation event on 0x%p when state is open. Possible logic bug.", P_FORMAT_POINTER(this));
-                    break;
-            }
-
-            if (sendSessionStarted)
-            {
-                RaiseEvent<ConversationSessionEventArgs>(SessionStarted, GetSessionId());
-            }
-
-            if (sendConnected)
-            {
-                RaiseEvent<ConversationConnectionEventArgs>(Connected, GetSessionId());
             }
         });
     }
 
-    void CSpxConversationTranslator::OnDisconnected(const USP::WebSocketDisconnectReason reason, const string & message)
+    void CSpxConversationTranslator::OnDisconnected(const USP::WebSocketDisconnectReason reason, const string & message, bool serverRequested)
     {
-        RunAsynchronously([this, reason, message]()
+        RunAsynchronously([this, reason, message, serverRequested]()
         {
-            auto state = GetState();
-            SPX_TRACE_INFO("Disconnected conversation event on 0x%p in state %d. Reason: %d, Message: '%s'", P_FORMAT_POINTER(this), state, reason, message.c_str());
+            CT_GET_AND_LOG_STATE(
+                "Conversation disconnected. Reason: %d, Message: '%s', Server requested: %d",
+                reason, message.c_str(), serverRequested);
 
-            bool sendDisconnected = false;
-            bool sendStopped = false;
-
-            CancellationErrorCode errorCode = ToCancellationErrorCode(reason);
+            const auto parsedReason = ParseDisconnectReason(reason);
 
             switch (state)
             {
                 default:
-                    SPX_TRACE_ERROR("Unknown state on 0x%p for connected conversation event: %d", P_FORMAT_POINTER(this), state);
+                    CT_HANDLE_UNSUPPORTED_STATE();
                     return;
 
                 case ConversationState::Failed:
@@ -620,9 +777,11 @@ namespace ConversationTranslation {
                     // recognizer
                     break;
 
+                case ConversationState::Initial:
                 case ConversationState::Closed:
+                case ConversationState::CreatingOrJoining:
                     // should never get here
-                    SPX_TRACE_WARNING("Got disconnected conversation event on 0x%p when state is already closed. Possible logic bug.", P_FORMAT_POINTER(this));
+                    CT_I_LOG_WARNING("Not expected here");
                     break;
 
                 case ConversationState::Closing:
@@ -630,54 +789,46 @@ namespace ConversationTranslation {
                     // closed state. Otherwise we wait for that trigger the closed state
                     if (!m_recognizerConnected)
                     {
-                        sendStopped = true;
-                        ChangeState(state, ConversationState::Closed);
-
-                        DisconnectConversation();
+                        ToClosedState();
                     }
                     break;
 
-                case ConversationState::Opening:
-                    // Something went wrong and the conversation connection closed before it
-                    // became open. Handle as an error
-                    ToFailedState(false, errorCode, message);
-                    break;
-
-                case ConversationState::PartiallyOpen:
-                case ConversationState::Open:
-                    // if the server requested the close, treat this as the client closing
-                    // the connection
-                    if (reason == USP::WebSocketDisconnectReason::Normal)
+                case ConversationState::CreatedOrJoined:
+                    // Did we get here because of an error that is non recoverable (e.g. authentication failure,
+                    // conversation has been deleted, etc...)? If so, go to failed state
+                    if (parsedReason.isPermanentFailure)
                     {
-                        sendDisconnected = true;
-
-                        if (state == ConversationState::PartiallyOpen || !m_recognizerConnected)
-                        {
-                            sendStopped = true;
-                            ChangeState(state, ConversationState::Closed);
-                        }
-                        else
-                        {
-                            ChangeState(state, ConversationState::Closing);
-                        }
-
-                        DisconnectTranslationRecognizer();
+                        ToFailedState(false, parsedReason.errorCode, message);
                     }
                     else
                     {
-                        ToFailedState(false, errorCode, message);
+                        // no need to do anything more
+                    }
+                    
+                    break;
+
+                case ConversationState::Opening:
+                case ConversationState::Open:
+                    // Did the server request the disconnection and there are no errors? If so, and the
+                    // "end conversation on leaving" flag is set (usually means you are the participant)
+                    // then we treat this as the host has deleted the conversation and so we move to the
+                    // closed state
+                    if (reason == USP::WebSocketDisconnectReason::Normal
+                        && serverRequested
+                        && m_endConversationOnLeave)
+                    {
+                        CT_I_LOG_INFO("The host has most likely deleted the conversation. Will go to closed state");
+                        ToClosedState();
+                    }
+                    else if (parsedReason.isPermanentFailure)
+                    {
+                        ToFailedState(false, parsedReason.errorCode, message);
+                    }
+                    else
+                    {
+                        ToCreatedOrJoinedState(parsedReason.errorCode, message);
                     }
                     break;
-            }
-
-            if (sendDisconnected)
-            {
-                RaiseEvent<ConversationConnectionEventArgs>(Disconnected, GetSessionId());
-            }
-
-            if (sendStopped)
-            {
-                RaiseEvent<ConversationSessionEventArgs>(SessionStopped, GetSessionId());
             }
         });
     }
@@ -686,10 +837,17 @@ namespace ConversationTranslation {
     {
         RunAsynchronously([this, reco]()
         {
-            if (!IsConsideredOpen())
+            CT_GET_AND_LOG_STATE(
+                "Conversation speech recognition. Id: %s, Time: %s, From: %s (%s), %zu chars",
+                reco.Id.c_str(), reco.Timestamp.c_str(), reco.Nickname.c_str(), reco.ParticipantId.c_str(), reco.Recognition.length());
+
+            if (!IsConsideredOpen(state))
             {
-                SPX_TRACE_WARNING("Got speech recognition event on 0x%p when state is not considered open.", P_FORMAT_POINTER(this));
-                return;
+                CT_I_LOG_WARNING("Got speech recognition when state is not considered open.");
+
+                // though not expected, we should err on the side of caution and try to raise the event
+                // anyway in case we ran into a bug in our state machine. That is better than losing
+                // events
             }
 
             if (StringUtils::ToUpper(reco.ParticipantId) == StringUtils::ToUpper(GetParticipantId()))
@@ -728,10 +886,17 @@ namespace ConversationTranslation {
     {
         RunAsynchronously([this, im]()
         {
-            if (!IsConsideredOpen())
+            CT_GET_AND_LOG_STATE(
+                "Conversation instant message. Id: %s, Time: %s, From: %s (%s), %zu chars",
+                im.Id.c_str(), im.Timestamp.c_str(), im.Nickname.c_str(), im.ParticipantId.c_str(), im.Text.length());
+
+            if (!IsConsideredOpen(state))
             {
-                SPX_TRACE_WARNING("Got an instant message event on 0x%p when state is not considered open.", P_FORMAT_POINTER(this));
-                return;
+                CT_I_LOG_WARNING("Got an instant message event when state is not considered open.");
+
+                // though not expected, we should err on the side of caution and try to raise the event
+                // anyway in case we ran into a bug in our state machine. That is better than losing
+                // events
             }
 
             ResultReason reason = StringUtils::ToUpper(im.ParticipantId) == GetParticipantId()
@@ -760,9 +925,17 @@ namespace ConversationTranslation {
     {
         RunAsynchronously([this, action, participants]()
         {
-            if (!IsConsideredOpen())
+            CT_GET_AND_LOG_STATE(
+                "Conversation participant changed event. Action: %u, Participants changed: %zu",
+                action, participants.size());
+
+            if (!IsConsideredOpen(state))
             {
-                SPX_TRACE_WARNING("Got a participant changed event on 0x%p when state is not considered open.", P_FORMAT_POINTER(this));
+                CT_I_LOG_WARNING("Got a participant changed event when state is not considered open.");
+
+                // though not expected, we should err on the side of caution and try to raise the event
+                // anyway in case we ran into a bug in our state machine. That is better than losing
+                // events
                 return;
             }
 
@@ -781,9 +954,10 @@ namespace ConversationTranslation {
     {
         RunAsynchronously([this, minutesLeft]()
         {
-            if (!IsConsideredOpen())
+            CT_GET_AND_LOG_STATE("Conversation will expire in %d minutes", minutesLeft);
+            if (!IsConsideredOpen(state))
             {
-                SPX_TRACE_WARNING("Got a room expiration event on 0x%p when state is not considered open.", P_FORMAT_POINTER(this));
+                CT_I_LOG_WARNING("Got a room expiration event when state is not considered open.");
                 return;
             }
 
@@ -795,8 +969,96 @@ namespace ConversationTranslation {
     {
         RunAsynchronously([this, isWebSocket, error, message]()
         {
-            SPX_TRACE_ERROR("Got an error event on 0x%p. Error: %d-%d, Message: '%s'", P_FORMAT_POINTER(this), isWebSocket, error, message.c_str());
-            ToFailedState(false, ToCancellationErrorCode(isWebSocket, error), message);
+            CT_GET_AND_LOG_STATE(
+                "Conversation connection error. IsWebSocket: %d, Error: %u, Message: '%s'",
+                isWebSocket, error, message.c_str());
+
+            auto parsedError = ToCancellationErrorCode(isWebSocket, error);
+
+            switch (state)
+            {
+                default:
+                    CT_HANDLE_UNSUPPORTED_STATE();
+                    return;
+
+                case ConversationState::Failed:
+                case ConversationState::Closed:
+                    // Ignore this
+                    return;
+
+                case ConversationState::Initial:
+                case ConversationState::CreatingOrJoining:
+                    CT_I_LOG_WARNING("Not expected");
+                    return;
+
+                case ConversationState::Closing:
+                    // If the recognizer is also not connected, we should treat this as if the conversation
+                    // connection successfully closed and go to the closed state
+                    if (!m_recognizerConnected)
+                    {
+                        ToClosedState();
+                    }
+                    break;
+
+                case ConversationState::CreatedOrJoined:
+                    if (parsedError.isPermanentFailure)
+                    {
+                        ToFailedState(false, parsedError.errorCode, message);
+                    }
+                    else
+                    {
+                        // nothing more to do here
+                    }
+                    break;
+
+                case ConversationState::Opening:
+                case ConversationState::Open:
+                    if (parsedError.isPermanentFailure)
+                    {
+                        ToFailedState(false, parsedError.errorCode, message);
+                    }
+                    else
+                    {
+                        ToCreatedOrJoinedState(parsedError.errorCode, message);
+                    }
+
+                    break;
+            }
+        });
+    }
+
+    void CSpxConversationTranslator::OnConversationDeleted()
+    {
+        // In order to ensure we move to the correct state, we need to run this synchronously
+        // to block execution from continuing.
+        RunSynchronously([this]()
+        {
+            CT_GET_AND_LOG_STATE("Conversation was deleted");
+
+            switch (state)
+            {
+            default:
+                CT_HANDLE_UNSUPPORTED_STATE();
+                return;
+
+            case ConversationState::Failed:
+            case ConversationState::Closed:
+                // Ignore this
+                return;
+
+            case ConversationState::Initial:
+            case ConversationState::CreatingOrJoining:
+                CT_I_LOG_WARNING("Not expected");
+                ToClosedState();
+                return;
+
+            case ConversationState::Closing:
+            case ConversationState::CreatedOrJoined:
+            case ConversationState::Opening:
+            case ConversationState::Open:
+                ToClosedState();
+                break;
+            }
         });
     }
 
@@ -812,13 +1074,12 @@ namespace ConversationTranslation {
         }
 
         auto internals = SafeQueryInterface<ISpxConversationInternals>(internalConv);
-        SPX_IFTRUE_THROW_HR(internals == nullptr, SPXERR_INVALID_ARG);
-        SPX_IFTRUE_THROW_HR(!internals->IsConnected(), SPXERR_INVALID_ARG);
-        SPX_IFTRUE_THROW_HR(internals->GetConversationArgs() == nullptr, SPXERR_INVALID_ARG);
-        SPX_IFTRUE_THROW_HR(internals->GetConversationConnection() == nullptr, SPXERR_INVALID_ARG);
-        SPX_IFTRUE_THROW_HR(internals->GetConversationManager() == nullptr, SPXERR_INVALID_ARG);
+        CT_I_THROW_HR_IF(internals == nullptr, SPXERR_INVALID_ARG);
+        CT_I_THROW_HR_IF(internals->GetConversationArgs() == nullptr, SPXERR_INVALID_ARG);
+        CT_I_THROW_HR_IF(internals->GetConversationConnection() == nullptr, SPXERR_INVALID_ARG);
+        CT_I_THROW_HR_IF(internals->GetConversationManager() == nullptr, SPXERR_INVALID_ARG);
 
-        SPX_IFTRUE_THROW_HR(_m_conv != nullptr, SPXERR_ALREADY_INITIALIZED);
+        CT_I_THROW_HR_IF(_m_conv != nullptr, SPXERR_ALREADY_INITIALIZED);
 
         // NOTE:
         // Since the instance of ISpxConversationInternals is contained in the parent
@@ -829,6 +1090,14 @@ namespace ConversationTranslation {
         _m_conv = conversation; // shared_ptr
         m_convInternals = internals; // weak_ptr
         m_endConversationOnLeave = endConversationOnLeave;
+
+        // register event handlers
+        internals->GetConversationConnection()->SetCallbacks(
+            dynamic_pointer_cast<ConversationCallbacks>(ISpxInterfaceBase::shared_from_this()));
+
+        auto self = std::dynamic_pointer_cast<CSpxConversationTranslator>(ISpxInterfaceBase::shared_from_this());
+        CT_I_THROW_HR_IF(self == nullptr, SPXERR_UNEXPECTED_CONVERSATION_TRANSLATOR_SITE_FAILURE);
+        m_convDeletedEvtHandlerId = internals->ConversationDeleted.add(self, &CSpxConversationTranslator::OnConversationDeleted);
 
         // Set the conversation token to be sent to the speech service. This enables the
         // service to service call from the speech service to the Capito service for relaying
@@ -886,16 +1155,24 @@ namespace ConversationTranslation {
             }
         }
         catch (...) { /* don't care, it means the region is already set */ }
-
-        internals->GetConversationConnection()->SetCallbacks(
-            dynamic_pointer_cast<ConversationCallbacks>(ISpxInterfaceBase::shared_from_this()));
-
-        ChangeState(ConversationState::Closed, ConversationState::PartiallyOpen);
     }
 
-    void CSpxConversationTranslator::DisconnectConversation()
+    bool CSpxConversationTranslator::StopConversation()
     {
-        if (_m_conv == nullptr)
+        auto convInternals = m_convInternals.lock();
+        if (convInternals != nullptr && convInternals->IsConnected())
+        {
+            convInternals->GetConversationConnection()->Disconnect();
+            return true;
+        }
+
+        return false;
+    }
+
+    void CSpxConversationTranslator::DisconnectConversation(bool waitForEvents)
+    {
+        auto conv = _m_conv;
+        if (conv == nullptr)
         {
             return;
         }
@@ -906,27 +1183,21 @@ namespace ConversationTranslation {
             return;
         }
 
-        if (convInternals->IsConnected())
+        bool wasConnected = StopConversation();
+
+        if (!waitForEvents || !wasConnected)
         {
-            convInternals->GetConversationConnection()->Disconnect();
-
-            // we will call this method again when we transition from the closing
-            // to closed state to clean up
-            return;
+            // remove callbacks
+            convInternals->GetConversationConnection()->SetCallbacks(nullptr);
+            convInternals->ConversationDeleted.remove(m_convDeletedEvtHandlerId);
+            m_convDeletedEvtHandlerId = 0;
         }
-
-        // remove callbacks
-        convInternals->GetConversationConnection()->SetCallbacks(nullptr);
-
-        // release our references in the right order
-        convInternals = nullptr;
-        _m_conv = nullptr;
     }
 
     void CSpxConversationTranslator::ConnectRecognizer(std::shared_ptr<ISpxRecognizer> recognizer)
     {
         auto events = recognizer->QueryInterface<ISpxRecognizerEvents>();
-        SPX_IFTRUE_THROW_HR(events == nullptr, SPXERR_UNEXPECTED_CREATE_OBJECT_FAILURE);
+        CT_I_THROW_HR_IF(events == nullptr, SPXERR_UNEXPECTED_CREATE_OBJECT_FAILURE);
 
         AddHandler(events->SessionStarted, this, &CSpxConversationTranslator::OnRecognizerSessionStarted);
         AddHandler(events->SessionStopped, this, &CSpxConversationTranslator::OnRecognizerSessionStopped);
@@ -943,18 +1214,50 @@ namespace ConversationTranslation {
         }
         else
         {
-            SPX_TRACE_WARNING("Unexpected null default session on 0x%p", P_FORMAT_POINTER(this));
+            CT_I_LOG_WARNING("Unexpected null default session on 0x%p", P_FORMAT_POINTER(this));
         }
     }
 
-    void CSpxConversationTranslator::DisconnectTranslationRecognizer()
+    bool CSpxConversationTranslator::StopRecognizer()
     {
-        if (m_recognizer == nullptr)
+        auto reco = m_recognizer;
+        if (reco == nullptr)
+        {
+            return false;
+        }
+
+        // attempt to stop audio capture
+        try
+        {
+            reco->StopContinuousRecognitionAsync().Future.get();
+        }
+        catch (exception& ex)
+        {
+            CT_I_LOG_ERROR("Exception while attempting to stop continuous audio recognition on recognizer. What: %s", ex.what());
+        }
+        catch (...)
+        {
+            CT_I_LOG_ERROR("Unknown throwable while attempting to stop continuous audio recognition on recognizer");
+        }
+
+        if (m_recognizerConnected.load())
+        {
+            reco->CloseConnection();
+            return true;
+        }
+
+        return false;
+    }
+
+    void CSpxConversationTranslator::DisconnectRecognizer(bool waitForEvents)
+    {
+        auto reco = m_recognizer;
+        if (reco == nullptr)
         {
             return;
         }
 
-        auto events = m_recognizer->QueryInterface<ISpxRecognizerEvents>();
+        auto events = reco->QueryInterface<ISpxRecognizerEvents>();
         if (events == nullptr)
         {
             return;
@@ -967,40 +1270,34 @@ namespace ConversationTranslation {
         events->FinalResult.DisconnectAll();
         events->Canceled.DisconnectAll();
 
-        // if we're already disconnected let's clear the SessionStopped event handler
-        // otherwise the session stopped callback will do this
-        if (false == m_recognizerConnected.load())
+        bool wasConnected = StopRecognizer();
+
+        if (!waitForEvents || !wasConnected)
         {
             events->SessionStopped.DisconnectAll();
-            m_recognizer = nullptr;
-        }
-        else
-        {
-            auto reco = As<ISpxRecognizer>(m_recognizer);
-            reco->StopContinuousRecognitionAsync().Future.get();
-            reco->CloseConnection();
         }
     }
 
-    inline bool CSpxConversationTranslator::IsConsideredOpen() const
+
+    inline bool CSpxConversationTranslator::IsConsideredOpen(ConversationState state)
     {
-        SPX_DBG_TRACE_FUNCTION();
-        auto state = GetState();
         switch (state)
         {
             default:
             case ConversationState::Failed:
+            case ConversationState::Initial:
             case ConversationState::Closed:
             case ConversationState::Closing:
-                SPX_DBG_TRACE_INFO("State is considered closed on 0x%p (%d)", P_FORMAT_POINTER(this), state);
+            case ConversationState::CreatingOrJoining:
+            case ConversationState::CreatedOrJoined:
+            case ConversationState::Opening:
                 return false;
 
-            case ConversationState::PartiallyOpen:
             case ConversationState::Open:
-            case ConversationState::Opening:
                 return true;
         }
     }
+
 
     inline const string CSpxConversationTranslator::GetSessionId() const
     {
@@ -1044,129 +1341,266 @@ namespace ConversationTranslation {
         return PAL::ToBool(multiChannelAudio);
     }
 
-    void CSpxConversationTranslator::ToFailedState(bool isRecognizer, CancellationErrorCode error, const std::string& message)
+    struct CSpxConversationTranslator::EventsToSend
     {
-        // method should be called in background thread
-        SPX_TRACE_ERROR("About to go to failed state on 0x%p. ErrorCode: %d, Message: '%s'", P_FORMAT_POINTER(this), error, message.c_str());
-
-        bool sendDisconnected = false;
-
-        auto state = GetState();
-        switch (state)
+        EventsToSend() :
+            sessionStarted(false),
+            connected(false),
+            canceled(false),
+            cancellationResult(),
+            disconnected(false),
+            sessionStopped(false)
         {
-            default:
-                SPX_TRACE_ERROR("Unknown state on 0x%p for when attempting to move to failed state: %d", P_FORMAT_POINTER(this), state);
-                return;
-
-            case ConversationState::Failed:
-            case ConversationState::Closed:
-                // should theoretically not get here
-                SPX_TRACE_WARNING("Attempting to go to failed state on 0x%p when state is already closed/failed (%d). Possible logic bug.", P_FORMAT_POINTER(this), state);
-                return;
-
-            case ConversationState::Opening:
-            case ConversationState::Closing:
-                // nothing special to do here
-                break;
-
-            case ConversationState::PartiallyOpen:
-            case ConversationState::Open:
-                sendDisconnected = true;
-                break;
         }
 
-        ChangeState(state, ConversationState::Failed);
+        bool sessionStarted;
+        bool connected;
+        bool canceled;
+        std::shared_ptr<ConversationCancellationResult> cancellationResult;
+        bool disconnected;
+        bool sessionStopped;
+    };
 
-        try
+    void CSpxConversationTranslator::SendStateEvents(const EventsToSend & evt)
+    {
+        std::string sessionId = GetSessionId();
+
+        if (evt.sessionStarted)
         {
-            if (isRecognizer)
-            {
-                DisconnectConversation();
-            }
-            else
-            {
-                DisconnectTranslationRecognizer();
-            }
-        }
-        catch (exception& ex)
-        {
-            SPX_TRACE_ERROR(
-                "Exception while attempting to disconnect %s on 0x%p in failed state. What: %s",
-                (isRecognizer ? "recognizer" : "conversation"), P_FORMAT_POINTER(this), ex.what());
-        }
-        catch (...)
-        {
-            SPX_TRACE_ERROR(
-                "Unknown throwable while attempting to disconnect %s on 0x%p in failed state",
-                (isRecognizer ? "recognizer" : "conversation"), P_FORMAT_POINTER(this));
+            RaiseEvent<ConversationSessionEventArgs>(SessionStarted, sessionId);
         }
 
-        string sessionId = GetSessionId();
-        auto recoResult = CreateShared<ConversationCancellationResult>(GetParticipantId(), CancellationReason::Error, error);
-        if (!message.empty())
+        if (evt.connected)
         {
-            recoResult->SetCancellationErrorDetails(message);
+            RaiseEvent<ConversationConnectionEventArgs>(Connected, sessionId);
         }
 
-        RaiseEvent<ConversationTranslationEventArgs>(Canceled, sessionId, recoResult);
+        if (evt.canceled)
+        {
+            RaiseEvent<ConversationTranslationEventArgs>(Canceled, sessionId, evt.cancellationResult);
+        }
 
-        if (sendDisconnected)
+        if (evt.disconnected)
         {
             RaiseEvent<ConversationConnectionEventArgs>(Disconnected, sessionId);
         }
 
-        RaiseEvent<ConversationSessionEventArgs>(SessionStopped, sessionId);
+        if (evt.sessionStopped)
+        {
+            RaiseEvent<ConversationSessionEventArgs>(SessionStopped, sessionId);
+        }
+    }
+
+    CSpxConversationTranslator::EventsToSend CSpxConversationTranslator::GetStateExitEvents()
+    {
+        EventsToSend evt;
+
+        switch (m_state_.load())
+        {
+            case ConversationState::Failed:
+            case ConversationState::Initial:
+            case ConversationState::Closed:
+            case ConversationState::CreatedOrJoined:
+            case ConversationState::Opening:
+            case ConversationState::Closing:
+                // no exit events to send
+                break;
+
+            case ConversationState::CreatingOrJoining:
+                evt.sessionStarted = true;
+                break;
+            case ConversationState::Open:
+                evt.disconnected = true;
+                break;
+        }
+
+        return evt;
+    }
+
+    void CSpxConversationTranslator::ToFailedState(bool isRecognizer, CancellationErrorCode error, const std::string& message)
+    {
+        auto evt = GetStateExitEvents();
+
+        CT_GET_AND_LOG_STATE(
+            "Transition to failed state. IsRecognizer: %d, Error: %d, Message: '%s'",
+            isRecognizer, error, message.c_str());
+
+        // Failed state always sends canceled and session stopped events except if coming from creating or joining state.
+        // This is because we have not yet sent any session started event
+        if (state != ConversationState::CreatingOrJoining)
+        {
+            evt.canceled = true;
+            evt.sessionStopped = true;
+
+            evt.cancellationResult = CreateShared<ConversationCancellationResult>(GetParticipantId(), CancellationReason::Error, error);
+            if (!message.empty())
+            {
+                evt.cancellationResult->SetCancellationErrorDetails(message);
+            }
+        }
+
+        SetState(ConversationState::Failed);
+
+        // Disconnect if we are still connected and remove all registered handlers
+        DisconnectRecognizer(false);
+        DisconnectConversation(false);
+
+        // TODO: once CSpxConversationImpl and this class are merged, we need to call Delete the conversation
+        //       here for both host and participant
+
+        // send events
+        SendStateEvents(evt);
+    }
+
+    void CSpxConversationTranslator::ToClosedState()
+    {
+        auto evt = GetStateExitEvents();
+        evt.sessionStopped = true;
+
+        SetState(ConversationState::Closed);
+
+        DisconnectRecognizer(false);
+        DisconnectConversation(false);
+
+        // TODO: once CSpxConversationImpl and this class are merged, we need to call Delete the conversation
+        //       here for both host and participant
+
+        SendStateEvents(evt);
+    }
+
+    void CSpxConversationTranslator::ToClosingState()
+    {
+        auto evt = GetStateExitEvents();
+
+        SetState(ConversationState::Closing);
+
+        // Should always stop the recognizer
+        DisconnectRecognizer(true);
+
+        // Disconnect and end the conversation if needed (e.g. joined as a participant)
+        if (m_endConversationOnLeave)
+        {
+            DisconnectConversation(true);
+        }
+
+        SendStateEvents(evt);
+    }
+
+    void CSpxConversationTranslator::ToCreatingOrJoiningState()
+    {
+        auto evt = GetStateExitEvents();
+        SetState(ConversationState::CreatingOrJoining);
+        // This state does nothing at the moment since the logic here is part of CSpxConversationImpl
+        // At some point I hope to merge that into this class for cleaner overall state
+        SendStateEvents(evt);
+    }
+
+    void CSpxConversationTranslator::ToCreatedOrJoinedState(CancellationErrorCode error, const std::string& message)
+    {
+        auto evt = GetStateExitEvents();
+
+        CT_GET_AND_LOG_STATE(
+            "Transition to created or joined state. Error: %d, Message: '%s'",
+            error, message.c_str());
+
+        if (error != CancellationErrorCode::NoError)
+        {
+            evt.canceled = true;
+            evt.cancellationResult = CreateShared<ConversationCancellationResult>(GetParticipantId(), CancellationReason::Error, error);
+            if (!message.empty())
+            {
+                evt.cancellationResult->SetCancellationErrorDetails(message);
+            }
+        }
+
+        SetState(ConversationState::CreatedOrJoined);
+
+        // stop recognizer and conversation connection
+        if (state != ConversationState::CreatedOrJoined)
+        {
+            StopRecognizer();
+            StopConversation();
+        }
+
+        SendStateEvents(evt);
+    }
+
+    void CSpxConversationTranslator::ToOpeningState()
+    {
+        auto evt = GetStateExitEvents();
+
+        SetState(ConversationState::Opening);
+
+        bool wasConnected = false;
+
+        // attempt to connect/reconnect to the conversation
+        auto convInternals = m_convInternals.lock();
+        if (convInternals != nullptr)
+        {
+            if (convInternals->IsConnected())
+            {
+                wasConnected = true;
+            }
+            else
+            {
+                auto connection = convInternals->GetConversationConnection();
+                auto args = convInternals->GetConversationArgs();
+
+                connection->Connect(args->ParticipantId, args->SessionToken);
+            }
+        }
+
+        SendStateEvents(evt);
+
+        if (wasConnected)
+        {
+            ToOpenState();
+        }
+    }
+
+    void CSpxConversationTranslator::ToOpenState()
+    {
+        auto evt = GetStateExitEvents();
+
+        evt.connected = true;
+
+        SetState(ConversationState::Open);
+
+        SendStateEvents(evt);
     }
 
     void CSpxConversationTranslator::OnRecognizerSessionStarted(shared_ptr<ISpxSessionEventArgs> args)
     {
         RunAsynchronously([this, args]()
         {
-            bool sendConnected = false;
-
             bool wasConnected = m_recognizerConnected.exchange(true);
-            if (wasConnected)
-            {
-                SPX_TRACE_WARNING("Got a recognizer session started event on 0x%p when the recognizer is already open. Possible logic bug.", P_FORMAT_POINTER(this));
-            }
+            CT_GET_AND_LOG_STATE("Recognizer session started. Was connected: %d", wasConnected);
 
-            auto state = GetState();
             switch (state)
             {
                 default:
-                    SPX_TRACE_ERROR("Unknown state on 0x%p for recognizer session started event: %d", P_FORMAT_POINTER(this), state);
+                    CT_HANDLE_UNSUPPORTED_STATE();
                     return;
 
                 case ConversationState::Failed:
+                case ConversationState::Initial:
                 case ConversationState::Closed:
-                case ConversationState::Closing:
-                    // should theoretically never get here
-                    SPX_TRACE_WARNING("Got recognizer session started event on 0x%p when state is already closing/closed/failed (%d). Possible logic bug.", P_FORMAT_POINTER(this), state);
-                    return;
-
+                case ConversationState::CreatingOrJoining:
+                case ConversationState::CreatedOrJoined:
                 case ConversationState::Opening:
-                    sendConnected = true;
-                    ChangeState(state, ConversationState::PartiallyOpen);
+                    CT_I_LOG_WARNING("Not expected");
                     break;
 
-                case ConversationState::PartiallyOpen:
-                    // if the conversation web socket connection is open, we can move to Open state
-                    if (IsConversationConnected())
+                case ConversationState::Closing:
+                    if (!IsConversationConnected())
                     {
-                        sendConnected = true;
-                        ChangeState(state, ConversationState::Open);
+                        ToClosedState();
                     }
                     break;
-
+                
                 case ConversationState::Open:
-                    // In theory, this shouldn't happen so we log that we may have a logic bug and move on
-                    SPX_TRACE_WARNING("Got recognizer session started event on 0x%p when state is open. Possible logic bug.", P_FORMAT_POINTER(this));
+                    // This is normal. nothing to do here
                     break;
-            }
-
-            if (sendConnected)
-            {
-                RaiseEvent<ConversationConnectionEventArgs>(Connected, GetSessionId());
             }
         });
     }
@@ -1176,66 +1610,35 @@ namespace ConversationTranslation {
         RunAsynchronously([this, args]()
         {
             bool wasConnected = m_recognizerConnected.exchange(false);
-            if (false == wasConnected)
-            {
-                SPX_TRACE_WARNING("Got a recognizer session stopped event on 0x%p when the recognizer is already closed. Possible logic bug.", P_FORMAT_POINTER(this));
-            }
+            CT_GET_AND_LOG_STATE("Recognizer session stopped. Was connected: %d", wasConnected);
 
-            bool sendDisconnected = false;
-            bool sendStopped = false;
-
-            auto state = GetState();
             switch (state)
             {
                 default:
-                    SPX_TRACE_ERROR("Unknown state on 0x%p for recognizer session stopped event: %d", P_FORMAT_POINTER(this), state);
+                    CT_HANDLE_UNSUPPORTED_STATE();
                     return;
-
-                case ConversationState::Failed:
-                    // Ignore. This can happen if the failure was caused by the conversation
-                    // web socket connection. In that case, we will tear down the translator
-                    // recognizer
-                    return;
-
-                case ConversationState::Opening:
-                case ConversationState::Closed:
-                    // This is unexpected. Log this but ignore
-                    SPX_TRACE_WARNING("Got recognizer session stopped event on 0x%p when state is Opening/Closed (%d). Possible logic bug.", P_FORMAT_POINTER(this), state);
-                    return;
+                
+                case ConversationState::Initial:
+                case ConversationState::CreatingOrJoining:
+                    CT_I_LOG_WARNING("Not expected");
+                    break;
 
                 case ConversationState::Closing:
                     // If the conversation connection is also closed, we should transition to
                     // the closed state. Otherwise we wait for that to trigger the closed state
                     if (false == IsConversationConnected())
                     {
-                        sendStopped = true;
-                        ChangeState(state, ConversationState::Closed);
-
-                        DisconnectTranslationRecognizer();
+                        ToClosedState();
                     }
                     break;
 
-                case ConversationState::PartiallyOpen:
-                    // do nothing for now. The conversation events will trigger a state transition as needed
-                    SPX_TRACE_WARNING("Got recognizer session stopped event on 0x%p when state is PartiallyOpen (%d).", P_FORMAT_POINTER(this), state);
-                    break;
-
+                case ConversationState::Failed:
+                case ConversationState::Closed:
+                case ConversationState::Opening:
+                case ConversationState::CreatedOrJoined:
                 case ConversationState::Open:
-                    sendDisconnected = true;
-                    ChangeState(state, ConversationState::PartiallyOpen);
+                    // nothing to do here
                     break;
-            }
-
-            string sessionId = GetSessionId();
-
-            if (sendDisconnected)
-            {
-                RaiseEvent<ConversationConnectionEventArgs>(Disconnected, sessionId);
-            }
-
-            if (sendStopped)
-            {
-                RaiseEvent<ConversationSessionEventArgs>(SessionStopped, sessionId);
             }
         });
     }
@@ -1244,54 +1647,34 @@ namespace ConversationTranslation {
     {
         RunAsynchronously([this, args]()
         {
-            m_recognizerConnected.exchange(true);
+            bool wasConnected = m_recognizerConnected.exchange(true);
+            CT_GET_AND_LOG_STATE("Recognizer connected. Was connected: %d", wasConnected);
 
-            bool sendConnected = false;
-
-            auto state = GetState();
             switch (state)
             {
                 default:
-                    SPX_TRACE_ERROR("Unknown state on 0x%p for recognizer connected event: %d", P_FORMAT_POINTER(this), state);
+                    CT_HANDLE_UNSUPPORTED_STATE();
                     return;
 
                 case ConversationState::Failed:
-                case ConversationState::Closing:
+                case ConversationState::Initial:
                 case ConversationState::Closed:
-                    // This is unexpected. Log but ignore
-                    SPX_TRACE_WARNING("Got recognizer session connected event on 0x%p when state is already closing/closed/failed (%d). Possible logic bug.", P_FORMAT_POINTER(this), state);
-                    return;
+                case ConversationState::CreatingOrJoining:
+                case ConversationState::CreatedOrJoined:
+                case ConversationState::Opening:
+                    CT_I_LOG_WARNING("Not expected");
+                    break;
 
-
-                case ConversationState::PartiallyOpen:
-                    if (IsConversationConnected())
+                case ConversationState::Closing:
+                    if (!IsConversationConnected())
                     {
-                        sendConnected = true;
-                        ChangeState(state, ConversationState::Open);
+                        ToClosedState();
                     }
                     break;
 
                 case ConversationState::Open:
-                    // Unexpected since we think we are already connection
-                    SPX_TRACE_WARNING("Got recognizer session connected event on 0x%p when state is open. Possible logic bug.", P_FORMAT_POINTER(this));
+                    // This is normal. nothing to do here
                     break;
-
-                case ConversationState::Opening:
-                    sendConnected = true;
-                    if (IsConversationConnected())
-                    {
-                        ChangeState(state, ConversationState::Open);
-                    }
-                    else
-                    {
-                        ChangeState(state, ConversationState::PartiallyOpen);
-                    }
-                    break;
-            }
-
-            if (sendConnected)
-            {
-                RaiseEvent<ConversationConnectionEventArgs>(Connected, GetSessionId());
             }
         });
     }
@@ -1301,67 +1684,35 @@ namespace ConversationTranslation {
         RunAsynchronously([this, args]()
         {
             bool wasConnected = m_recognizerConnected.exchange(false);
-            if (false == wasConnected)
-            {
-                SPX_TRACE_WARNING("Got a recognizer disconnected event on 0x%p when the recognizer is already closed. Possible logic bug.", P_FORMAT_POINTER(this));
-            }
+            CT_GET_AND_LOG_STATE("Recognizer disconnected. Was connected: %d", wasConnected);
 
-            bool sendStopped = false;
-            bool sendDisconnected = false;
-
-            auto state = GetState();
             switch (state)
             {
                 default:
-                    SPX_TRACE_ERROR("Unknown state on 0x%p for recognizer connected event: %d", P_FORMAT_POINTER(this), state);
+                    CT_HANDLE_UNSUPPORTED_STATE();
                     return;
 
-                case ConversationState::Failed:
-                    // Ignore. This can happen if the failure was caused by the conversation
-                    // web socket connection. In that case, we will tear down the translator
-                    // recognizer
-                    return;
-
-                case ConversationState::Closed:
-                case ConversationState::Opening:
-                    // This is unexpected. Log this but ignore
-                    SPX_TRACE_WARNING("Got recognizer session disconnected event on 0x%p when state is already opening/closed (%d). Possible logic bug.", P_FORMAT_POINTER(this), state);
-                    return;
+                case ConversationState::Initial:
+                case ConversationState::CreatingOrJoining:
+                    CT_I_LOG_WARNING("Not expected");
+                    break;
 
                 case ConversationState::Closing:
                     // If the conversation connection is also closed, we should transition to
                     // the closed state. Otherwise we wait for that to trigger the closed state
                     if (false == IsConversationConnected())
                     {
-                        sendStopped = true;
-                        ChangeState(state, ConversationState::Closed);
-
-                        DisconnectTranslationRecognizer();
+                        ToClosedState();
                     }
                     break;
 
-                case ConversationState::PartiallyOpen:
-                    // do nothing for now. The conversation events will trigger a state transition as needed
-                    SPX_TRACE_WARNING("Got recognizer disconnected event on 0x%p when state is PartiallyOpen (%d).", P_FORMAT_POINTER(this), state);
-                    break;
-
+                case ConversationState::Failed:
+                case ConversationState::Closed:
+                case ConversationState::Opening:
+                case ConversationState::CreatedOrJoined:
                 case ConversationState::Open:
-                    sendDisconnected = true;
-                    ChangeState(state, ConversationState::PartiallyOpen);
+                    // nothing to do here
                     break;
-
-            }
-
-            string sessionId = GetSessionId();
-
-            if (sendDisconnected)
-            {
-                RaiseEvent<ConversationConnectionEventArgs>(Disconnected, sessionId);
-            }
-
-            if (sendStopped)
-            {
-                RaiseEvent<ConversationSessionEventArgs>(SessionStopped, sessionId);
             }
         });
     }
@@ -1370,21 +1721,37 @@ namespace ConversationTranslation {
     {
         RunAsynchronously([this, args]()
         {
-            if (!IsConsideredOpen())
+            if (args == nullptr)
             {
-                SPX_TRACE_WARNING("Got a recognizer speech recognition event on 0x%p when state is not considered open.", P_FORMAT_POINTER(this));
+                CT_I_LOG_ERROR("Recognizer result with null argument");
                 return;
             }
 
-            shared_ptr<ISpxRecognitionResult> result;
-            if (args == nullptr || (result = args->GetResult()) == nullptr)
+            shared_ptr<ISpxRecognitionResult> result = args->GetResult();
+            if (result == nullptr)
             {
-                // TODO log error
+                CT_I_LOG_ERROR("Recognizer result with null argument result");
                 return;
+            }
+
+            CT_GET_AND_LOG_STATE(
+                "Recognizer result. Reason: %d, %zu chars, NoMatchReason: %d, Offset: %llu",
+                result->GetReason(), result->GetText().length(), result->GetNoMatchReason(), result->GetOffset());
+
+
+            if (!IsConsideredOpen(state))
+            {
+                CT_I_LOG_WARNING("Got a recognizer speech recognition event when state is not considered open.");
+
+                // though not expected, we should err on the side of caution and try to raise the event
+                // anyway in case we ran into a bug in our state machine. That is better than losing
+                // events
             }
 
             bool isFinal;
             ResultReason reason;
+
+            // TODO suppress empty finals without intermediate non-empty partials?
 
             switch (result->GetReason())
             {
@@ -1401,7 +1768,7 @@ namespace ConversationTranslation {
                     break;
 
                 default:
-                    SPX_TRACE_WARNING("a recognizer speech recognition event on 0x%p with an unknown reason %d.", P_FORMAT_POINTER(this), result->GetReason());
+                    CT_I_LOG_WARNING("Speech recognition event with an unknown reason %d.", result->GetReason());
                     return;
             }
 
@@ -1445,50 +1812,105 @@ namespace ConversationTranslation {
     {
         RunAsynchronously([this, args]()
         {
-            SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+            CT_DBG_TRACE_FUNCTION();
 
+            bool wasConnected = m_recognizerConnected.exchange(false);
+
+            bool sendCanceledEvent = false;
             shared_ptr<ISpxRecognitionResult> result;
-            if (args == nullptr
-                || (result = args->GetResult()) == nullptr
-                || result->GetReason() != ResultReason::Canceled)
+
+            if (args == nullptr)
             {
-                SPX_TRACE_ERROR("Got a malformed recognizer canceled event on 0x%p. Event args were null, result was null, or result reason was not canceled", P_FORMAT_POINTER(this));
+                CT_I_LOG_ERROR("Recognizer canceled with null argument");
+                return;
+            }
+            else if ((result = args->GetResult()) == nullptr)
+            {
+                CT_I_LOG_ERROR("Recognizer canceled with null argument result");
+                return;
+            }
+            else if (result->GetReason() != ResultReason::Canceled)
+            {
+                CT_I_LOG_ERROR("Recognizer canceled with non-canceled result reason: %d", result->GetReason());
                 return;
             }
 
-            switch (result->GetCancellationReason())
+            CT_GET_AND_LOG_STATE(
+                "Recognizer cancelled. Reason: %d, CancellationReason: %d, CancellationError: %d, WasConnected: %d",
+                result->GetReason(), result->GetCancellationReason(), result->GetCancellationErrorCode(), wasConnected);
+
+            std::string errorDetails;
+            CancellationErrorCode errorCode = result->GetCancellationErrorCode();
+            auto namedProperties = args->QueryInterface<ISpxNamedProperties>();
+            if (namedProperties != nullptr)
             {
-                case CancellationReason::EndOfStream:
-                {
-                    m_recognizerConnected.exchange(false);
+                errorDetails = NamedPropertiesHelper::GetString(namedProperties, PropertyId::SpeechServiceResponse_JsonErrorDetails);
+            }
 
-                    SPX_TRACE_INFO("Got an end of audio stream event from the recognizer on 0x%p", P_FORMAT_POINTER(this));
-                    auto canceledResult = CreateShared<ConversationCancellationResult>(
-                        GetParticipantId(),
-                        result->GetCancellationReason(),
-                        result->GetCancellationErrorCode());
+            switch (state)
+            {
+                default:
+                    CT_HANDLE_UNSUPPORTED_STATE();
+                    return;
 
-                    RaiseEvent<ConversationTranslationEventArgs>(Canceled, GetSessionId(), canceledResult);
+                case ConversationState::Failed:
+                case ConversationState::Initial:
+                case ConversationState::Closed:
+                case ConversationState::CreatingOrJoining:
+                    CT_I_LOG_WARNING("Not expected");
                     break;
-                }
 
-                case CancellationReason::Error:
-                {
-                    SPX_TRACE_ERROR("Got an error canceled event from the recognizer on 0x%p. ErrorCode: %d", P_FORMAT_POINTER(this), result->GetCancellationErrorCode());
-                    std::string errorDetails;
-                    auto namedProperties = args->QueryInterface<ISpxNamedProperties>();
-                    if (namedProperties != nullptr)
+                case ConversationState::CreatedOrJoined:
+                case ConversationState::Opening:
+                    // not really expecting events here but send it through anyway
+                    sendCanceledEvent = true;
+                    break;
+
+                case ConversationState::Open:
+                    sendCanceledEvent = true;
+                    break;
+
+                case ConversationState::Closing:
+                    // treat as recognizer disconnected
+                    if (false == IsConversationConnected())
                     {
-                        errorDetails = namedProperties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_JsonErrorDetails), "");
+                        ToClosedState();
+                    }
+                    break;
+            }
+
+            if (sendCanceledEvent)
+            {
+                switch (result->GetCancellationReason())
+                {
+                    case CancellationReason::EndOfStream:
+                    {
+                        CT_I_LOG_INFO("Got an end of audio stream event from the recognizer");
+                        break;
                     }
 
-                    ToFailedState(true, result->GetCancellationErrorCode(), errorDetails);
-                    break;
+                    case CancellationReason::Error:
+                    {
+                        CT_I_LOG_ERROR(
+                            "Got an error canceled event from the recognizer. ErrorCode: %d, ErrorDetails: '%s'",
+                            result->GetCancellationErrorCode(), errorDetails.c_str());
+                        break;
+                    }
+
+                    default:
+                        CT_I_LOG_ERROR(
+                            "Got an error canceled event with an unknown cancellation reason: %d", result->GetCancellationReason());
+                        break;
                 }
 
-                default:
-                    SPX_TRACE_ERROR("Got an error canceled event from the recognizer on 0x%p with an unknown cancellation reason: %d", P_FORMAT_POINTER(this), result->GetCancellationReason());
-                    break;
+                auto eventArgs = CreateShared<ConversationCancellationResult>(
+                    GetParticipantId(), result->GetCancellationReason(), errorCode);
+                if (!errorDetails.empty())
+                {
+                    eventArgs->SetCancellationErrorDetails(errorDetails);
+                }
+
+                RaiseEvent<ConversationTranslationEventArgs>(Canceled, GetSessionId(), eventArgs);
             }
         });
     }

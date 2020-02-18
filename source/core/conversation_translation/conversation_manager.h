@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <http_endpoint_info.h>
 #include "interface_helpers.h"
 
 namespace Microsoft {
@@ -51,39 +52,24 @@ namespace ConversationTranslation {
         std::string RequestId;
     };
 
-    class CSpxConversationManager : public ISpxObjectInit
+    class ConversationManager : public std::enable_shared_from_this<ConversationManager>
     {
     public:
-        CSpxConversationManager(const std::string& host);
-        virtual ~CSpxConversationManager();
+        static std::shared_ptr<ConversationManager> Create(const HttpEndpointInfo& endpointInfo)
+        {
+            return std::shared_ptr<ConversationManager>(new ConversationManager(endpointInfo));
+        }
 
-        SPX_INTERFACE_MAP_BEGIN()
-            SPX_INTERFACE_MAP_ENTRY(ISpxObjectInit)
-        SPX_INTERFACE_MAP_END()
-
-        // --- ISpxObjectInit
-        void Init() override;
-        void Term() override;
-
-        void SetPort(int port);
-        void SetSecure(bool secure);
-        void SetPath(const std::string& path);
-        void SetAutomaticProxy(bool autoProxy);
-        void SetProxy(const std::string& proxy, const int port, const std::string& username = "", const std::string& password = "");
+        virtual ~ConversationManager();
 
         ConversationArgs CreateOrJoin(const CreateConversationArgs& args, const std::string& roomCode, const std::string& roomPin = "");
         void Leave(const std::string& sessionToken);
 
     private:
-        const std::string m_host;
-        int m_port;
-        bool m_secure;
-        std::string m_path;
-        bool m_autoProxy;
-        std::string m_proxyHost;
-        int m_proxyPort;
-        std::string m_proxyUsername;
-        std::string m_proxyPassword;
+        ConversationManager(const HttpEndpointInfo& endpointInfo);
+
+    private:
+        const HttpEndpointInfo m_endpointInfo;
     };
 
 }}}}} // Microsoft::CognitiveServices::Speech::Impl::Conversation

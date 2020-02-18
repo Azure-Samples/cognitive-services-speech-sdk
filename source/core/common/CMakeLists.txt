@@ -41,7 +41,6 @@ set(HEADERS
     "${INC_DIR}/audio_chunk.h"
     "${INC_DIR}/time_utils.h"
     "${INC_DIR}/file_logger.h"
-    "${INC_DIR}/httpapi_platform_proxy.h"
     "${INC_DIR}/http_exception.h"
     "${INC_DIR}/http_request.h"
     "${INC_DIR}/http_response.h"
@@ -52,6 +51,9 @@ set(HEADERS
     "${INC_DIR}/dynamic_module.h"
     "${INC_DIR}/module_factory.h"
     "${INC_DIR}/site_helpers.h"
+    "${INC_DIR}/proxy_server_info.h"
+    "${INC_DIR}/http_headers.h"
+    "${INC_DIR}/http_endpoint_info.h"
     )
 
 set(HEADERS_PRIVATE
@@ -62,6 +64,7 @@ set(HEADERS_PRIVATE
     "${INC_DIR}/azure_c_shared_utility_strings_wrapper.h"
     "${INC_DIR}/azure_c_shared_utility_xlogging_wrapper.h"
     "${INC_DIR}/azure_c_shared_utility_macro_utils.h"
+    "${INC_DIR}/azure_c_shared_utility_includes.h"
     )
 
 set(SOURCES
@@ -76,7 +79,6 @@ set(SOURCES
     "${SRC_DIR}/platform.cpp"
     "${SRC_DIR}/time_utils.cpp"
     "${SRC_DIR}/ring_buffer.cpp"
-    "${SRC_DIR}/httpapi_platform_proxy.c"
     "${SRC_DIR}/http_exception.cpp"
     "${SRC_DIR}/http_request.cpp"
     "${SRC_DIR}/http_response.cpp"
@@ -86,6 +88,7 @@ set(SOURCES
     "${SRC_DIR}/extension_site_helpers.cpp"
     "${SRC_DIR}/dynamic_module.cpp"
     "${SRC_DIR}/module_factory.cpp"
+    "${SRC_DIR}/http_endpoint_info.cpp"
     )
 
 if(CMAKE_SYSTEM_NAME STREQUAL "WindowsStore")

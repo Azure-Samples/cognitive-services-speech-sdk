@@ -5,12 +5,14 @@
 // WebSocket.cpp: A web socket C++ implementation using the Azure C shared library
 //
 
-#include "stdafx.h"
-#include "WebSocket.h"
+#include "common.h"
+#include <ispxinterfaces.h>
+#include <azure_c_shared_utility_includes.h>
+#include <azure_c_shared_utility_macro_utils.h>
+#include <proxy_server_info.h>
+#include "web_socket.h"
 #include "exception.h"
-#include "azure_c_shared_utility_includes.h"
-#include "azure_c_shared_utility_macro_utils.h"
-#include "uspcommon.h"
+#include "../usp/dnscache.h"
 
 // uncomment the line below to see all non-binary protocol messages in the log
 // #define LOG_TEXT_MESSAGES
@@ -78,69 +80,6 @@ namespace USP {
         unique_ptr<TValue> m_value;
     };
 
-    struct WebSocket::connection_params
-    {
-        connection_params() = default;
-        connection_params(const WebSocketParams& params) :
-            scheme(params.IsSecure() ? "wss" : "ws"),
-            host(params.Host()),
-            port(params.Port()),
-            pathAndQuery(params.Path() + params.QueryString()),
-            protocols(params.webSocketProtocols()),
-            connectionId(params.ConnectionId()),
-            headers(HTTPHeaders_Alloc()),
-            proxy(params.proxyServerInfo()),
-            singleTrustedCert(params.singleTrustedCertificate()),
-            disableCrlChecks(params.disableCrlChecks()),
-            disableDefaultVerifyPaths(params.disableDefaultVerifyPaths())
-        {
-            if (host.empty())
-            {
-                Impl::ThrowInvalidArgumentException("Received an empty host. Please provide a valid host.");
-            }
-            else if (port <= 0 || port > 65535)
-            {
-                Impl::ThrowInvalidArgumentException("The port must be a value between 1 and 65535 (inclusive)");
-            }
-
-            if (pathAndQuery.empty() || pathAndQuery[0] != '/')
-            {
-                pathAndQuery = "/" + pathAndQuery;
-            }
-
-            // set the headers
-            for (const auto& kvp : params.Headers())
-            {
-                HTTP_HEADERS_RESULT res = HTTPHeaders_ReplaceHeaderNameValuePair(headers, kvp.first.c_str(), kvp.second.c_str());
-                if (res != HTTP_HEADERS_OK)
-                {
-                    std::string errMsg("Failed to set the following web socket error: ");
-                    errMsg += kvp.first;
-                    Impl::ThrowRuntimeError(errMsg);
-                }
-            }
-
-            HTTPHeaders_ReplaceHeaderNameValuePair(headers, "X-ConnectionId", connectionId.c_str());
-        }
-
-        ~connection_params()
-        {
-            HTTPHeaders_Free(headers);
-        }
-
-        std::string scheme;
-        std::string host;
-        int port;
-        std::string pathAndQuery;
-        std::string protocols;
-        std::string connectionId;
-        HTTP_HEADERS_HANDLE headers;
-        ProxyServerInfo proxy;
-        std::string singleTrustedCert;
-        bool disableCrlChecks;
-        bool disableDefaultVerifyPaths;
-    };
-
     static uint64_t get_epoch_time()
     {
         auto now = chrono::high_resolution_clock::now();
@@ -160,14 +99,16 @@ namespace USP {
 
     WebSocket::WebSocket(
             shared_ptr<Microsoft::CognitiveServices::Speech::Impl::ISpxThreadService> threadService,
+            Microsoft::CognitiveServices::Speech::Impl::ISpxThreadService::Affinity affinity,
             const chrono::milliseconds& pollingIntervalMs) :
         m_threadService(threadService),
+        m_affinity(affinity),
         m_pollingIntervalMs(pollingIntervalMs),
         m_valid(false),
         m_creationTime(get_epoch_time()),
         m_connectionTime(),
         m_dnsCache(nullptr, DnsCacheDestroy),
-        m_params(),
+        m_webSocketEndpoint(),
         m_WSHandle(),
         m_open(),
         m_state(WebSocketState::CLOSED),
@@ -194,7 +135,6 @@ namespace USP {
 
         m_threadService.reset();
         m_dnsCache.reset();
-        m_params.reset();
 
         if (m_WSHandle)
         {
@@ -205,35 +145,34 @@ namespace USP {
         swap(m_queue, empty);
     }
 
-    void WebSocket::Connect(const WebSocketParams& params)
+    void WebSocket::Connect(const Impl::HttpEndpointInfo& endpoint)
     {
         if (m_open)
         {
             Impl::ThrowLogicError("Web socket is already connected.");
         }
 
-        // copy and validate the connection parameters. This is needed to keep
-        // valid c_strings pointers in memory
-        m_params = make_unique<connection_params>(params);
+        // copy and validate the connection parameters. This is needed to keep valid c_strings pointers in memory
+        m_webSocketEndpoint = endpoint.GetInternals();
 
         // USP: This is where the original transport code used the protocol header value to add
         //      additional headers. The latest version of the UWS Azure C shared code includes
         //      a proper way to set headers
 
         WS_PROTOCOL wsProto;
-        wsProto.protocol = m_params->protocols.c_str();
-        int protocolCount = m_params->protocols.empty() ? 0 : 1;
+        wsProto.protocol = m_webSocketEndpoint.webSocketProtcols.c_str();
+        int protocolCount = static_cast<int>(m_webSocketEndpoint.webSocketProtocolCount);
 
         // create the underlying web socket handle
-        if (!m_params->proxy.host.empty())
+        if (!m_webSocketEndpoint.proxy.host.empty())
         {
             HTTP_PROXY_IO_CONFIG proxyConfig;
-            proxyConfig.hostname = m_params->host.c_str();
-            proxyConfig.port = m_params->port;
-            proxyConfig.proxy_hostname = m_params->proxy.host.c_str();
-            proxyConfig.proxy_port = m_params->proxy.port;
-            proxyConfig.username = m_params->proxy.username.c_str();
-            proxyConfig.password = m_params->proxy.password.c_str();
+            proxyConfig.hostname = m_webSocketEndpoint.host.c_str();
+            proxyConfig.port = m_webSocketEndpoint.port;
+            proxyConfig.proxy_hostname = m_webSocketEndpoint.proxy.host.c_str();
+            proxyConfig.proxy_port = m_webSocketEndpoint.proxy.port;
+            proxyConfig.username = m_webSocketEndpoint.proxy.username.c_str();
+            proxyConfig.password = m_webSocketEndpoint.proxy.password.c_str();
 
             void* underlyingIOParameters = &proxyConfig;
             const IO_INTERFACE_DESCRIPTION* underlyingIOInterface = http_proxy_io_get_interface_description();
@@ -243,7 +182,7 @@ namespace USP {
             }
 
             TLSIO_CONFIG tlsioConfig;
-            if (params.IsSecure())
+            if (m_webSocketEndpoint.isSecure())
             {
                 tlsioConfig.hostname = proxyConfig.hostname;
                 tlsioConfig.port = proxyConfig.port;
@@ -261,19 +200,19 @@ namespace USP {
             m_WSHandle = uws_client_create_with_io(
                 underlyingIOInterface,
                 underlyingIOParameters,
-                m_params->host.c_str(),
-                m_params->port,
-                m_params->pathAndQuery.c_str(),
+                m_webSocketEndpoint.host.c_str(),
+                m_webSocketEndpoint.port,
+                m_webSocketEndpoint.pathAndQuery.c_str(),
                 protocolCount > 0 ? &wsProto : nullptr,
                 protocolCount);
         }
         else
         {
             m_WSHandle = uws_client_create(
-                m_params->host.c_str(),
-                m_params->port,
-                m_params->pathAndQuery.c_str(),
-                params.IsSecure(),
+                m_webSocketEndpoint.host.c_str(),
+                m_webSocketEndpoint.port,
+                m_webSocketEndpoint.pathAndQuery.c_str(),
+                m_webSocketEndpoint.isSecure(),
                 protocolCount > 0 ? &wsProto : nullptr,
                 protocolCount);
         }
@@ -284,16 +223,20 @@ namespace USP {
             return;
         }
 
+        // TODO: Once we have updated to the latest Azure IoT shared library code, we should be able to set headers without hacks
+
 #ifdef SPEECHSDK_USE_OPENSSL
         int tls_version = OPTION_TLS_VERSION_1_2;
-        uws_client_set_option(m_WSHandle, OPTION_TLS_VERSION, &tls_version);
-
-        uws_client_set_option(m_WSHandle, OPTION_DISABLE_DEFAULT_VERIFY_PATHS, &(m_params->disableDefaultVerifyPaths));
-        if (!m_params->singleTrustedCert.empty())
+        if (uws_client_set_option(m_WSHandle, OPTION_TLS_VERSION, &tls_version) != HTTPAPI_OK)
         {
-            uws_client_set_option(m_WSHandle, OPTION_TRUSTED_CERT, m_params->singleTrustedCert.c_str());
+            throw std::runtime_error("Could not set TLS 1.2 option");
+        }
 
-            uws_client_set_option(m_WSHandle, OPTION_DISABLE_CRL_CHECK, &(m_params->disableCrlChecks));
+        uws_client_set_option(m_WSHandle, OPTION_DISABLE_DEFAULT_VERIFY_PATHS, &(m_webSocketEndpoint.disableDefaultVerifyPaths));
+        if (!m_webSocketEndpoint.singleTrustedCert.empty())
+        {
+            uws_client_set_option(m_WSHandle, OPTION_TRUSTED_CERT, m_webSocketEndpoint.singleTrustedCert.c_str());
+            uws_client_set_option(m_WSHandle, OPTION_DISABLE_CRL_CHECK, &(m_webSocketEndpoint.disableCrlChecks));
         }
 #endif
 
@@ -315,7 +258,7 @@ namespace USP {
         WorkLoop(shared_from_this());
     }
 
-    static void PumpWebSocketInBackground(UWS_CLIENT_HANDLE handle, std::shared_ptr<Impl::ISpxThreadService> threadService)
+    static void PumpWebSocketInBackground(UWS_CLIENT_HANDLE handle, std::shared_ptr<Impl::ISpxThreadService> threadService, Impl::ISpxThreadService::Affinity affinity)
     {
         // Helper method to pump the Azure C shared library web socket code on a background thread. This
         // prevents situations where disconnecting can trigger event callbacks on the same thread as
@@ -326,7 +269,7 @@ namespace USP {
             uws_client_dowork(handle);
         });
 
-        threadService->ExecuteSync(std::move(task));
+        threadService->ExecuteSync(std::move(task), affinity);
     }
 
     void WebSocket::Disconnect()
@@ -388,7 +331,7 @@ namespace USP {
                     while (m_open && retries++ < MAX_WAIT_RETRIES)
                     {
                         LogInfo("%s: Continue to pump while waiting for close frame response (%d/%d).", __FUNCTION__, retries, MAX_WAIT_RETRIES);
-                        PumpWebSocketInBackground(m_WSHandle, m_threadService);
+                        PumpWebSocketInBackground(m_WSHandle, m_threadService, m_affinity);
                         std::this_thread::sleep_for(SLEEP_INTERVAL);
                     }
 
@@ -407,7 +350,7 @@ namespace USP {
                     // wait for force close.
                     while (m_open)
                     {
-                        PumpWebSocketInBackground(m_WSHandle, m_threadService);
+                        PumpWebSocketInBackground(m_WSHandle, m_threadService, m_affinity);
                         std::this_thread::sleep_for(SLEEP_INTERVAL);
                     }
 
@@ -581,9 +524,9 @@ namespace USP {
         }
     }
 
-    void WebSocket::HandleDisconnected(WebSocketDisconnectReason reason, const string & cause)
+    void WebSocket::HandleDisconnected(WebSocketDisconnectReason reason, const string & cause, bool serverRequested)
     {
-        OnDisconnected(reason, cause);
+        OnDisconnected(reason, cause, serverRequested);
     }
 
     void WebSocket::HandleTextData(const string & data)
@@ -665,7 +608,7 @@ namespace USP {
             }
 
             packaged_task<void()> task([ptr]() { WorkLoop(ptr); });
-            ptr->m_threadService->ExecuteAsync(move(task), ptr->m_pollingIntervalMs);
+            ptr->m_threadService->ExecuteAsync(move(task), ptr->m_pollingIntervalMs, ptr->m_affinity);
         });
 
         auto ptr = weakPtr.lock();
@@ -674,7 +617,7 @@ namespace USP {
             return;
         }
 
-        ptr->m_threadService->ExecuteAsync(move(task));
+        ptr->m_threadService->ExecuteAsync(move(task), ptr->m_affinity);
     }
 
     void WebSocket::DoWork()
@@ -710,7 +653,7 @@ namespace USP {
                 else
                 {
                     ChangeState(WebSocketState::NETWORK_CHECK, WebSocketState::NETWORK_CHECKING);
-                    const char* host = m_params->host.c_str();
+                    const char* host = m_webSocketEndpoint.host.c_str();
                     LogInfo("Start network check %s", host);
 
                     // USP: Sends telemetry here: MetricsTransportStateStart(MetricMessageType::METRIC_TRANSPORT_STATE_DNS);
@@ -890,7 +833,7 @@ namespace USP {
                 break;
 
             default:
-                PROTOCOL_VIOLATION("Unknown message type: %d", frame_type);
+                LogError("ProtocolViolation: Unknown message type: %d", frame_type);
                 break;
         }
     }
@@ -911,7 +854,7 @@ namespace USP {
             cause = std::string(reinterpret_cast<const char *>(extraData), extraDataLength);
         }
 
-        HandleDisconnected(reason, cause);
+        HandleDisconnected(reason, cause, true);
     }
 
     void WebSocket::OnWebSocketError(WS_ERROR errorCode)
@@ -934,7 +877,7 @@ namespace USP {
 
         if (GetState() == WebSocketState::RESETTING)
         {
-            HandleDisconnected(WebSocketDisconnectReason::Normal, "Web socket connection is resetting");
+            HandleDisconnected(WebSocketDisconnectReason::Normal, "Web socket connection is resetting", false);
 
             // Re-open the connection.
             ChangeState(WebSocketState::RESETTING, WebSocketState::NETWORK_CHECK);
@@ -945,7 +888,7 @@ namespace USP {
 
             // USP: Sends telemetry: MetricsTransportClosed();
 
-            HandleDisconnected(WebSocketDisconnectReason::Normal, "");
+            HandleDisconnected(WebSocketDisconnectReason::Normal, "", false);
         }
     }
 

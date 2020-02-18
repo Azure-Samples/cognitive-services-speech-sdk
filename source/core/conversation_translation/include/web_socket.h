@@ -8,9 +8,9 @@
 #pragma once
 
 #include <queue>
-#include "../azure_c_shared_utility_includes.h"
-#include "IWebSocket.h"
-#include "../dnscache.h"
+#include <azure_c_shared_utility_includes.h>
+#include "i_web_socket.h"
+#include "../usp/dnscache.h"
 
 using namespace std;
 
@@ -28,12 +28,13 @@ namespace USP {
 
         static shared_ptr<WebSocket> Create(
             shared_ptr<Microsoft::CognitiveServices::Speech::Impl::ISpxThreadService> threadService,
+            Microsoft::CognitiveServices::Speech::Impl::ISpxThreadService::Affinity affinity,
             const chrono::milliseconds& pollingIntervalMs)
         {
-            return shared_ptr<WebSocket>(new WebSocket(threadService, pollingIntervalMs));
+            return shared_ptr<WebSocket>(new WebSocket(threadService, affinity, pollingIntervalMs));
         }
 
-        void Connect(const WebSocketParams& params) override;
+        void Connect(const Impl::HttpEndpointInfo& params) override;
         virtual void Disconnect() override;
 
         void SendTextData(const string& text) override;
@@ -76,7 +77,7 @@ namespace USP {
         virtual int SendPacket(unique_ptr<TransportPacket> packet);
 
         virtual void HandleConnected();
-        virtual void HandleDisconnected(WebSocketDisconnectReason reason, const string& cause);
+        virtual void HandleDisconnected(WebSocketDisconnectReason reason, const string& cause, bool serverRequested);
         virtual void HandleTextData(const string& data);
         virtual void HandleBinaryData(const uint8_t* data, const size_t size);
         virtual void HandleError(WebSocketError reason, int errorCode, const std::string& errorMessage);
@@ -86,6 +87,7 @@ namespace USP {
     private:
         WebSocket(
             shared_ptr<Microsoft::CognitiveServices::Speech::Impl::ISpxThreadService> threadService,
+            Microsoft::CognitiveServices::Speech::Impl::ISpxThreadService::Affinity affinity,
             const chrono::milliseconds& pollingIntervalMs);
 
         DISABLE_DEFAULT_CTORS(WebSocket);
@@ -108,13 +110,14 @@ namespace USP {
         struct connection_params;
 
         shared_ptr<Microsoft::CognitiveServices::Speech::Impl::ISpxThreadService> m_threadService;
+        const Microsoft::CognitiveServices::Speech::Impl::ISpxThreadService::Affinity m_affinity;
         const chrono::milliseconds m_pollingIntervalMs;
         atomic_bool m_valid;
         uint64_t m_creationTime;
         uint64_t m_connectionTime;
         DnsCachePtr m_dnsCache;
 
-        unique_ptr<connection_params> m_params;
+        Impl::HttpEndpointInfo::Internals m_webSocketEndpoint;
         UWS_CLIENT_HANDLE m_WSHandle;
         atomic_bool m_open;
         atomic<WebSocketState> m_state;

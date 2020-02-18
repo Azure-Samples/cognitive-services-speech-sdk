@@ -208,6 +208,10 @@ public:
     {
     }
 
+    ExceptionWithCallStackMatcher(const std::string& contains)
+        : m_expectedString(contains)
+    {}
+
     bool match(const std::exception& ex) const override
     {
         size_t pos = std::string(ex.what()).find(m_expectedString, 0);
@@ -225,6 +229,11 @@ public:
 inline ExceptionWithCallStackMatcher HasHR(SPXHR hr)
 {
     return ExceptionWithCallStackMatcher(hr);
+}
+
+inline ExceptionWithCallStackMatcher MessageContains(const std::string& str)
+{
+    return ExceptionWithCallStackMatcher(str);
 }
 
 class StringComparisions {

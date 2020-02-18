@@ -6,6 +6,8 @@
 #include "stdafx.h"
 #include "handle_helpers.h"
 #include "event_helpers.h"
+#include <ISpxConversationInterfaces.h>
+#include <speechapi_c_conversation_translator.h>
 
 using namespace Microsoft::CognitiveServices::Speech::Impl;
 
@@ -32,6 +34,28 @@ SPXAPI connection_from_recognizer(SPXRECOHANDLE recognizerHandle, SPXCONNECTIONH
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
+SPXAPI connection_from_conversation_translator(SPXCONVERSATIONTRANSLATORHANDLE convTransHandle, SPXCONNECTIONHANDLE* connectionHandle)
+{
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, connectionHandle == nullptr);
+    SPX_RETURN_HR_IF(SPXERR_INVALID_HANDLE, convTransHandle == SPXHANDLE_INVALID);
+
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        *connectionHandle = SPXHANDLE_INVALID;
+
+        auto recoHandleTable = CSpxSharedPtrHandleTableManager::Get<ConversationTranslation::ISpxConversationTranslator, SPXCONVERSATIONTRANSLATORHANDLE>();
+        auto convTrans = (*recoHandleTable)[convTransHandle];
+        SPX_IFTRUE_THROW_HR(convTrans == nullptr, SPXERR_INVALID_HANDLE);
+
+        auto recoForConnection = SpxQueryInterface<ISpxConnectionFromRecognizer>(convTrans);
+        SPX_IFTRUE_THROW_HR(recoForConnection == nullptr, SPXERR_EXPLICIT_CONNECTION_NOT_SUPPORTED_BY_RECOGNIZER);
+        auto connection = recoForConnection->GetConnection();
+
+        auto connectionHandleTable = CSpxSharedPtrHandleTableManager::Get<ISpxConnection, SPXCONNECTIONHANDLE>();
+        *connectionHandle = connectionHandleTable->TrackHandle(connection);
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
 
 SPXAPI_(bool) connection_handle_is_valid(SPXCONNECTIONHANDLE handle)
 {
@@ -45,12 +69,30 @@ SPXAPI connection_handle_release(SPXCONNECTIONHANDLE handle)
 
 SPXAPI connection_connected_set_callback(SPXCONNECTIONHANDLE connection, CONNECTION_CALLBACK_FUNC callback, void* context)
 {
-    return connection_set_event_callback(&ISpxRecognizerEvents::Connected, connection, callback, context);
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        // the conversation translator connection is a special case so let's try that first
+        hr = conversation_translator_connection_connected_set_callback(connection, callback, context);
+        if (hr != SPX_NOERROR)
+        {
+            hr = connection_set_event_callback(&ISpxRecognizerEvents::Connected, connection, callback, context);
+        }
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
 SPXAPI connection_disconnected_set_callback(SPXCONNECTIONHANDLE connection, CONNECTION_CALLBACK_FUNC callback, void* context)
 {
-    return connection_set_event_callback(&ISpxRecognizerEvents::Disconnected, connection, callback, context);
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        // the conversation translator connection is a special case so let's try that first
+        hr = conversation_translator_connection_disconnected_set_callback(connection, callback, context);
+        if (hr != SPX_NOERROR)
+        {
+            hr = connection_set_event_callback(&ISpxRecognizerEvents::Disconnected, connection, callback, context);
+        }
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
 SPXAPI connection_message_received_set_callback(SPXCONNECTIONHANDLE connection, CONNECTION_CALLBACK_FUNC callback, void* context)

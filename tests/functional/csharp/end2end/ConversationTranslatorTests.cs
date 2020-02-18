@@ -287,7 +287,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             SPX_TRACE_INFO("Verifying callbacks");
 
             string participantId;
-            eventHandlers.VerifyBasicEvents(true, hostname, true, out participantId);
+            eventHandlers.VerifyBasicEvents(true, true, hostname, true, out participantId);
             eventHandlers.VerifyTranscriptions(participantId,
                 new ExpectedTranscription(participantId, AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text, speechLang)
             );
@@ -365,8 +365,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
             // verify events
             SPX_TRACE_INFO("Verifying callbacks");
-            bobEvents.VerifyBasicEvents(true, bobName, false, out bobId);
-            hostEvents.VerifyBasicEvents(true, hostName, true, out hostId);
+            bobEvents.VerifyBasicEvents(true, false, bobName, false, out bobId);
+            hostEvents.VerifyBasicEvents(true, true, hostName, true, out hostId);
             bobEvents.VerifyTranscriptions(bobId,
                 new ExpectedTranscription(bobId, AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.ZH_CN][0].Text, bobLang),
                 new ExpectedTranscription(hostId, AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text, hostLang)

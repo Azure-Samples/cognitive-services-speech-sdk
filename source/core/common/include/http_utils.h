@@ -16,18 +16,15 @@ namespace CognitiveServices {
 namespace Speech {
 namespace Impl {
 
-#define HTTP_PROTOCOL "http://"
-#define HTTPS_PROTOCOL "https://"
-#define WS_PROTOCOL "ws://"
-#define WSS_PROTOCOL "wss://"
-
 /// <summary>
-/// URL protocols
+/// URI schemes
 /// </summary>
-enum class Protocol
+enum class UriScheme
 {
-    HTTP = 0,
-    WebSocket = 1
+    HTTPS = 0,
+    WSS,
+    HTTP,
+    WS
 };
 
 
@@ -37,13 +34,30 @@ enum class Protocol
 typedef struct Url_Tag
 {
     /// <summary>
-    /// The protocol of the URL
+    /// The scheme of the URL
     /// </summary>
-    Protocol protocol;
+    UriScheme scheme;
+
     /// <summary>
     /// Whether or not a secure connection should be used
     /// </summary>
-    bool secure;
+    bool isSecure() const
+    {
+        switch (scheme)
+        {
+            case UriScheme::HTTPS:
+            case UriScheme::WSS:
+                return true;
+
+            case UriScheme::HTTP:
+            case UriScheme::WS:
+                return false;
+
+            default:
+                throw std::runtime_error("Could not determine if the unsupported URI scheme is secure");
+        }
+    }
+
     /// <summary>
     /// The host name (e.g. dev.microsofttranslator.com)
     /// </summary>
@@ -108,6 +122,26 @@ public:
     {
         return port > 0 && port <= 65535;
     }
+
+    /// <summary>
+    /// Gets the prefix to use for the URI scheme e.g. https://
+    /// </summary>
+    /// <param name="scheme">The URI scheme</param>
+    /// <returns>The scheme prefix to use</returns>
+    static const char * SchemePrefix(UriScheme scheme);
+
+    /// <summary>
+    /// Determines the URI scheme from the specified prefix string
+    /// </summary>
+    /// <param name="str">The null terminated string to examine (e.g. https://)</param>
+    /// <returns>The equivalent URI scheme</returns>
+    static UriScheme ParseScheme(const char * str);
+
+private:
+    static constexpr auto HTTP = "http://";
+    static constexpr auto HTTPS = "https://";
+    static constexpr auto WS = "ws://";
+    static constexpr auto WSS = "wss://";
 };
 
 } } } } // Microsoft::CognitiveServices::Speech::Impl

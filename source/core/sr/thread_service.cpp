@@ -91,9 +91,10 @@ namespace Microsoft { namespace CognitiveServices { namespace Speech { namespace
 
     void CSpxThreadService::ExecuteSync(std::packaged_task<void()>&& task, Affinity affinity)
     {
+        // are we trying to schedule synchronous work on our own thread from the same thread?
         for (const auto& t : m_threads)
         {
-            if (t.second->Id() == this_thread::get_id())
+            if (t.first == affinity && t.second->Id() == this_thread::get_id())
             {
                 SPX_TRACE_ERROR("Task cannot be executed synchronously on the thread"
                     " from the thread service in order to avoid potential deadlocks.");

@@ -10,7 +10,8 @@
 #include <json.h>
 #include <http_request.h>
 #include <http_response.h>
-#include "stdafx.h"
+#include <http_headers.h>
+#include "common.h"
 #include "conversation_manager.h"
 #include "conversation_utils.h"
 
@@ -56,92 +57,27 @@ static std::string GetUtcTimeString()
     return std::string(buffer, written);
 }
 
-CSpxConversationManager::CSpxConversationManager(const std::string& host) :
-    m_host(host),
-    m_port(443),
-    m_secure(true),
-    m_path(ConversationConstants::RestPath),
-    m_autoProxy(true),
-    m_proxyHost(),
-    m_proxyPort(),
-    m_proxyUsername(),
-    m_proxyPassword()
+ConversationManager::ConversationManager(const HttpEndpointInfo& endpointInfo) :
+    m_endpointInfo(endpointInfo)
 {
     SPX_DBG_TRACE_VERBOSE_IF(SPX_DBG_TRACE_CONVERSATION_ROOM_MANAGER, __FUNCTION__);
-    Init();
+
+    if (!m_endpointInfo.IsValid())
+    {
+        throw std::invalid_argument("The endpoint info is not valid for the conversation manager");
+    }
 }
 
-CSpxConversationManager::~CSpxConversationManager()
-{
-    SPX_DBG_TRACE_VERBOSE_IF(SPX_DBG_TRACE_CONVERSATION_ROOM_MANAGER, __FUNCTION__);
-    Term();
-}
-
-void CSpxConversationManager::Init()
+ConversationManager::~ConversationManager()
 {
     SPX_DBG_TRACE_VERBOSE_IF(SPX_DBG_TRACE_CONVERSATION_ROOM_MANAGER, __FUNCTION__);
 }
 
-void CSpxConversationManager::Term()
-{
-    SPX_DBG_TRACE_VERBOSE_IF(SPX_DBG_TRACE_CONVERSATION_ROOM_MANAGER, __FUNCTION__);
-}
-
-void CSpxConversationManager::SetPort(int port)
-{
-    if (port <= 0)
-    {
-        Impl::ThrowInvalidArgumentException("Port cannot be 0 or negative");
-    }
-    else if (port > 65535)
-    {
-        Impl::ThrowInvalidArgumentException("Port cannot be greater than 65535");
-    }
-
-    m_port = port;
-}
-
-void CSpxConversationManager::SetSecure(bool secure)
-{
-    m_secure = secure;
-}
-
-void CSpxConversationManager::SetPath(const std::string & path)
-{
-    if (path.empty() || path[0] != '/')
-    {
-        m_path = std::string("/") + path;
-    }
-    else
-    {
-        m_path = path;
-    }
-}
-
-void CSpxConversationManager::SetAutomaticProxy(bool autoProxy)
-{
-    m_autoProxy = autoProxy;
-}
-
-void CSpxConversationManager::SetProxy(const std::string & proxy, const int port, const std::string & username, const std::string & password)
-{
-    m_autoProxy = false;
-    m_proxyHost = proxy;
-    m_proxyPort = port;
-    m_proxyUsername = username;
-    m_proxyPassword = password;
-}
-
-ConversationArgs CSpxConversationManager::CreateOrJoin(const CreateConversationArgs& args, const std::string& roomCode, const std::string& roomPin)
+ConversationArgs ConversationManager::CreateOrJoin(const CreateConversationArgs& args, const std::string& roomCode, const std::string& roomPin)
 {
     SPX_DBG_TRACE_VERBOSE_IF(SPX_DBG_TRACE_CONVERSATION_ROOM_MANAGER, __FUNCTION__);
 
-    HttpRequest request(m_host, m_port, m_secure);
-    request.SetPath(m_path);
-    if (false == m_autoProxy)
-    {
-        request.SetProxy(m_proxyHost, m_proxyPort, m_proxyUsername, m_proxyPassword);
-    }
+    HttpRequest request(m_endpointInfo);
 
     ADD_API_VERSION(request);
     request.AddQueryParameter("language", args.LanguageCode);
@@ -216,7 +152,7 @@ ConversationArgs CSpxConversationManager::CreateOrJoin(const CreateConversationA
         request.SetRequestHeader(ConversationConstants::ClientAppIdHeader, args.ClientAppId);
     }
 
-    SPX_TRACE_INFO("Sending create/join room request to '%s/%s'", m_host.c_str(), m_path.c_str());
+    SPX_TRACE_INFO("Sending create/join room request to '%s'", m_endpointInfo.EndpointUrl().c_str());
     auto response = request.SendRequest(HTTPAPI_REQUEST_POST);
 
     SPX_TRACE_ERROR_IF(
@@ -265,20 +201,14 @@ ConversationArgs CSpxConversationManager::CreateOrJoin(const CreateConversationA
     return roomArgs;
 }
 
-void CSpxConversationManager::Leave(const std::string& sessionToken)
+void ConversationManager::Leave(const std::string& sessionToken)
 {
     SPX_DBG_TRACE_VERBOSE_IF(SPX_DBG_TRACE_CONVERSATION_ROOM_MANAGER, __FUNCTION__);
 
-    HttpRequest request(m_host);
+    HttpRequest request(m_endpointInfo);
 
-    request.SetPath(ConversationConstants::RestPath);
     ADD_API_VERSION(request);
     request.AddQueryParameter(ConversationQueryParameters::AuthToken, sessionToken);
-
-    if (false == m_autoProxy)
-    {
-        request.SetProxy(m_proxyHost, m_proxyPort, m_proxyUsername, m_proxyPassword);
-    }
 
     auto response = request.SendRequest(HTTPAPI_REQUEST_DELETE);
     response->EnsureSuccess();

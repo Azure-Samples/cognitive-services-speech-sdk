@@ -39,6 +39,9 @@ SPXAPI conversation_translator_transcribing_set_callback(SPXCONVERSATIONTRANSLAT
 SPXAPI conversation_translator_transcribed_set_callback(SPXCONVERSATIONTRANSLATORHANDLE hConvTrans, PCONV_TRANS_CALLBACK pCallback, void* pvContext);
 SPXAPI conversation_translator_text_message_recevied_set_callback(SPXCONVERSATIONTRANSLATORHANDLE hConvTrans, PCONV_TRANS_CALLBACK pCallback, void* pvContext);
 
+SPXAPI conversation_translator_connection_connected_set_callback(SPXCONNECTIONHANDLE hConnection, CONNECTION_CALLBACK_FUNC pCallback, void * pvContext);
+SPXAPI conversation_translator_connection_disconnected_set_callback(SPXCONNECTIONHANDLE hConnection, CONNECTION_CALLBACK_FUNC pCallback, void * pvContext);
+
 SPXAPI_(bool) conversation_translator_event_handle_is_valid(SPXCONVERSATIONTRANSLATORHANDLE handle);
 SPXAPI conversation_translator_event_handle_release(SPXHANDLE handle);
 

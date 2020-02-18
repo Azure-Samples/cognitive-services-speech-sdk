@@ -16,6 +16,7 @@
 #include <speechapi_c_conversation_translator.h>
 #include <speechapi_cxx_eventsignal.h>
 #include <speechapi_cxx_audio_config.h>
+#include <speechapi_cxx_conversation.h>
 #include <speechapi_cxx_conversation_translator_events.h>
 #include <speechapi_cxx_conversation_transcription_eventargs.h>
 
@@ -236,19 +237,19 @@ namespace Transcription {
             {
                 if (SessionStarted.IsConnected())
                 {
-                    callback = [](auto, auto b, auto c)  { FireEvent(b, c, &ConversationTranslator::SessionStarted); };
+                    callback = [](auto, auto b, auto c) { FireEvent(b, c, &ConversationTranslator::SessionStarted); };
                 }
 
                 conversation_translator_session_started_set_callback(m_handle, callback, this);
             }
             else if (&evt == &SessionStopped)
             {
-                if (SessionStarted.IsConnected())
+                if (SessionStopped.IsConnected())
                 {
                     callback = [](auto, auto b, auto c) { FireEvent(b, c, &ConversationTranslator::SessionStopped); };
                 }
 
-                conversation_translator_session_stopped_set_callback(m_handle, SessionStopped.IsConnected() ? callback : nullptr, this);
+                conversation_translator_session_stopped_set_callback(m_handle, callback, this);
             }
         }
 
@@ -331,6 +332,8 @@ namespace Transcription {
 
     private:
         /*! \cond PRIVATE */
+
+        friend class Microsoft::CognitiveServices::Speech::Connection;
 
         DISABLE_DEFAULT_CTORS(ConversationTranslator);
 

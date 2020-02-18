@@ -435,7 +435,7 @@ string Connection::Impl::ConstructConnectionUrl() const
             ThrowInvalidArgumentException("Query parameters are not allowed in the host URI.");
         }
         
-        oss << (url.secure ? WSS_PROTOCOL : WS_PROTOCOL) << url.host << ':' << url.port;
+        oss << HttpUtils::SchemePrefix(url.scheme) << url.host << ':' << url.port;
         customHost = true;
     }
     else

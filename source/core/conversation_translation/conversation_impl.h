@@ -68,8 +68,9 @@ namespace ConversationTranslation {
 
         // Inherited via ISpxConversationInternals
         virtual bool IsConnected() const override;
+        virtual bool CanRejoin() const override;
         virtual std::shared_ptr<ConversationArgs> GetConversationArgs() const override;
-        virtual std::shared_ptr<CSpxConversationManager> GetConversationManager() const override;
+        virtual std::shared_ptr<ConversationManager> GetConversationManager() const override;
         virtual std::shared_ptr<ConversationConnection> GetConversationConnection() const override;
 
     private:
@@ -89,9 +90,9 @@ namespace ConversationTranslation {
     private:
         std::string m_conversationId;
         std::shared_ptr<ConversationArgs> m_args;
-        std::shared_ptr<CSpxConversationManager> m_manager;
-        std::unique_ptr<ConversationClient> m_client;
+        std::shared_ptr<ConversationManager> m_manager;
         std::shared_ptr<ConversationConnection> m_connection;
+        std::atomic_bool m_canRejoin;
 
         /// <summary>
         /// A flag indicating whether or not this is a permanent room. This is for future

@@ -7,6 +7,7 @@
 #include <speechapi_c_common.h>
 
 SPXAPI connection_from_recognizer(SPXRECOHANDLE recognizerHandle, SPXCONNECTIONHANDLE* connectionHandle);
+SPXAPI connection_from_conversation_translator(SPXCONVERSATIONTRANSLATORHANDLE convTransHandle, SPXCONNECTIONHANDLE* connectionHandle);
 
 SPXAPI_(bool) connection_handle_is_valid(SPXCONNECTIONHANDLE handle);
 SPXAPI connection_handle_release(SPXCONNECTIONHANDLE handle);

@@ -583,13 +583,17 @@ void CSpxSynthesizer::InitializeTtsEngineAdapter()
     if (!endpoint.empty())
     {
         auto url = HttpUtils::ParseUrl(endpoint);
-        if (Protocol::HTTP == url.protocol)
+        switch (url.scheme)
         {
-            tryRest = true;
-        }
-        else if (Protocol::WebSocket == url.protocol)
-        {
-            tryUsp = true;
+            case UriScheme::HTTP:
+            case UriScheme::HTTPS:
+                tryRest = true;
+                break;
+
+            case UriScheme::WS:
+            case UriScheme::WSS:
+                tryUsp = true;
+                break;
         }
     }
 
