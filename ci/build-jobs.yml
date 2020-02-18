@@ -452,7 +452,7 @@ jobs:
 - template: java-jre-package-test.yml
   parameters:
     name: JavaJrePackageLinuxTest
-    poolName: Hosted Ubuntu 1604
+    vmImage: 'ubuntu-16.04'
     extraSteps:
       - bash: |
           set -u -e -o pipefail
@@ -538,7 +538,7 @@ jobs:
 - template: java-jre-package-test.yml
   parameters:
     name: JavaJrePackageOsxUnitTest
-    poolName: Hosted macOS
+    vmImage: 'macOS-10.15'
     extraSteps:
       - task: DownloadBuildArtifacts@0
         displayName: 'Downloading macOS Java test'
@@ -574,6 +574,7 @@ jobs:
           [[ -f $(PathToJar) ]]
           # set +e to allow capturing exit codes
           set +e
+          java -version
           for retry in {0..3}; do
               java \
               -cp $(printf "%s:" \

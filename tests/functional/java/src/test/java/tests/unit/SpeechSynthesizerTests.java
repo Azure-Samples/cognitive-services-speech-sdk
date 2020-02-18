@@ -523,6 +523,10 @@ public class SpeechSynthesizerTests {
             SynthesisCompleted[0] = true;
         });
 
+        synthesizer.SynthesisCanceled.addEventListener((o, e) -> {
+            SynthesisCompleted[0] = true;
+        });
+
         while (!SynthesisCompleted[0]) {
             Thread.sleep(100); // wait for the synthesis to be done
         }

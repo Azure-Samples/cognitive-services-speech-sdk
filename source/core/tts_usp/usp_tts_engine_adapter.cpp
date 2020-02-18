@@ -101,12 +101,11 @@ std::shared_ptr<ISpxSynthesisResult> CSpxUspTtsEngineAdapter::Speak(const std::s
     SPX_DBG_TRACE_VERBOSE_IF(SPX_DBG_TRACE_USP_TTS, __FUNCTION__);
     SPX_DBG_ASSERT(UspState::Idle == m_uspState || UspState::Error == m_uspState);
 
-    auto currentRequestId = requestId;
     std::shared_ptr<ISpxSynthesisResult> result;
     const auto maxRetry = std::stoi(ISpxPropertyBagImpl::GetStringValue("SpeechSynthesis_MaxRetryTimes", std::to_string(MAX_RETRY).c_str()));
     for (auto tryCount = 0; tryCount <= maxRetry; ++tryCount)
     {
-        result = SpeakInternal(text, isSsml, currentRequestId);
+        result = SpeakInternal(text, isSsml, requestId);
         if (ResultReason::SynthesizingAudioCompleted == result->GetReason())
         {
             break;
@@ -117,7 +116,6 @@ std::shared_ptr<ISpxSynthesisResult> CSpxUspTtsEngineAdapter::Speak(const std::s
             break;
         }
 
-        currentRequestId = PAL::CreateGuidWithoutDashes();
         LogError("Synthesis cancelled without data received, retrying.");
     }
 

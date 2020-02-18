@@ -105,14 +105,14 @@ namespace TTS
 
     void DoSomethingWithAudioInDataStream(shared_ptr<AudioDataStream> stream, bool afterSynthesisDone, std::shared_ptr<std::vector<uint8_t>> expectedData)
     {
-        if (afterSynthesisDone && stream->GetStatus() != StreamStatus::Canceled)
+        if (afterSynthesisDone)
         {
             SPXTEST_REQUIRE(stream->GetStatus() == StreamStatus::AllData);
         }
 
         CheckAudioInDataStream(stream, expectedData);
 
-        if (!afterSynthesisDone && stream->GetStatus() != StreamStatus::Canceled)
+        if (!afterSynthesisDone)
         {
             SPXTEST_REQUIRE(stream->GetStatus() == StreamStatus::AllData);
         }

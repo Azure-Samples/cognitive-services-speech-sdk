@@ -60,7 +60,7 @@ void CSpxAudioDataStream::InitFromSynthesisResult(std::shared_ptr<ISpxSynthesisR
             m_cancellationErrorCode = result->GetCancellationErrorCode();
             auto properties = SpxQueryInterface<ISpxNamedProperties>(result);
             auto cancellationDetailedText = properties->GetStringValue(GetPropertyName(PropertyId::CancellationDetails_ReasonDetailedText));
-            SetStringValue(GetPropertyName(PropertyId::CancellationDetails_ReasonDetailedText), cancellationDetailedText.data());
+            SetStringValue(GetPropertyName(PropertyId::CancellationDetails_ReasonDetailedText), cancellationDetailedText.c_str());
         }
     }
 
@@ -71,9 +71,12 @@ void CSpxAudioDataStream::InitFromSynthesisResult(std::shared_ptr<ISpxSynthesisR
 
         // Check consistency of request ID, to make sure the event is handled by the right CSpxAudioDataStream instance
         auto result = e->GetResult();
-        auto requestId = result->GetRequestId();
-        if (strcmp(PAL::ToString(requestId).c_str(), PAL::ToString(m_requestId).c_str()) != 0)
+        const auto requestId = result->GetRequestId();
+        if (requestId != m_requestId)
         {
+            LogInfo(
+                "The request id of this data stream (%s) is different from the request id of current event (%s), ignored.",
+                PAL::ToString(m_requestId).c_str(), PAL::ToString(requestId).c_str());
             return;
         }
 
@@ -89,9 +92,12 @@ void CSpxAudioDataStream::InitFromSynthesisResult(std::shared_ptr<ISpxSynthesisR
 
         // Check consistency of request ID, to make sure the event is handled by the right CSpxAudioDataStream instance
         auto result = e->GetResult();
-        auto requestId = result->GetRequestId();
-        if (strcmp(PAL::ToString(requestId).c_str(), PAL::ToString(m_requestId).c_str()) != 0)
+        const auto requestId = result->GetRequestId();
+        if (requestId != m_requestId)
         {
+            LogInfo(
+                "The request id of this data stream (%s) is different from the request id of current event (%s), ignored.",
+                PAL::ToString(m_requestId).c_str(), PAL::ToString(requestId).c_str());
             return;
         }
 
@@ -105,7 +111,7 @@ void CSpxAudioDataStream::InitFromSynthesisResult(std::shared_ptr<ISpxSynthesisR
             m_cancellationErrorCode = result->GetCancellationErrorCode();
             auto properties = SpxQueryInterface<ISpxNamedProperties>(result);
             auto cancellationDetailedText = properties->GetStringValue(GetPropertyName(PropertyId::CancellationDetails_ReasonDetailedText));
-            SetStringValue(GetPropertyName(PropertyId::CancellationDetails_ReasonDetailedText), cancellationDetailedText.data());
+            SetStringValue(GetPropertyName(PropertyId::CancellationDetails_ReasonDetailedText), cancellationDetailedText.c_str());
         }
 
         // Close the stream

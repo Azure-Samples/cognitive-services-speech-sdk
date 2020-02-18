@@ -1,6 +1,6 @@
 parameters:
   name: ''
-  poolName: ''
+  vmImage: ''
   extraSteps: ''
 
 jobs:
@@ -8,12 +8,12 @@ jobs:
   dependsOn: [Pre, JavaJrePackage]
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' ${{ parameters.name }} '))
   pool:
-    name: ${{ parameters.poolName }}
+    vmImage: ${{ parameters.vmImage }}
   timeoutInMinutes: 60
   steps:
   - bash: brew config && brew install bash
     displayName: Install modern bash on macOS
-    condition: contains('${{ parameters.poolName }}', 'macOS')
+    condition: contains('${{ parameters.vmImage }}', 'macOS')
   - bash: |
       set -x -e -o pipefail
       . ci/functions.sh
