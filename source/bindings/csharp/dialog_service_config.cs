@@ -133,11 +133,12 @@ namespace Microsoft.CognitiveServices.Speech.Dialog
         /// </summary>
         /// <param name="subscription">Subscription key associated with the bot</param>
         /// <param name="region">The region name (see the <a href="https://aka.ms/csspeech/region">region page</a>).</param>
+        /// <param name="botId">The optional bot ID (aka bot secret) used to specify a bot</param>
         /// <returns>A new bot framework config.</returns>
-        public static BotFrameworkConfig FromSubscription(string subscription, string region)
+        public static BotFrameworkConfig FromSubscription(string subscription, string region, string botId = "")
         {
             IntPtr configHandle = IntPtr.Zero;
-            ThrowIfFail(Internal.DialogServiceConfig.bot_framework_config_from_subscription(out configHandle, subscription, region));
+            ThrowIfFail(Internal.DialogServiceConfig.bot_framework_config_from_subscription(out configHandle, subscription, region, botId));
             return new BotFrameworkConfig(configHandle);
         }
 

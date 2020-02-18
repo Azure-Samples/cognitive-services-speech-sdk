@@ -35,7 +35,7 @@ std::shared_ptr<DialogServiceConfig> DialogServiceConfigForTests(bool isBot = tr
     std::shared_ptr<DialogServiceConfig> config;
     if (isBot)
     {
-        config = BotFrameworkConfig::FromSubscription(SubscriptionsRegionsMap[DIALOG_SUBSCRIPTION].Key, SubscriptionsRegionsMap[DIALOG_SUBSCRIPTION].Region);
+        config = BotFrameworkConfig::FromSubscription(SubscriptionsRegionsMap[DIALOG_SUBSCRIPTION].Key, SubscriptionsRegionsMap[DIALOG_SUBSCRIPTION].Region, DefaultSettingsMap[DIALOG_FUNCTIONAL_TEST_BOT]);
     }
     else
     {

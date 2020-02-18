@@ -25,7 +25,20 @@ public final class BotFrameworkConfig extends DialogServiceConfig {
     public static BotFrameworkConfig fromSubscription(String subscription, String region) {
         Contracts.throwIfNull(subscription, "subscription");
         Contracts.throwIfNull(region, "region");
-        return new BotFrameworkConfig(com.microsoft.cognitiveservices.speech.internal.BotFrameworkConfig.FromSubscription(subscription, region));
+        return new BotFrameworkConfig(com.microsoft.cognitiveservices.speech.internal.BotFrameworkConfig.FromSubscription(subscription, region, ""));
+    }
+
+    /**
+     * Creates an instance of the bot framework config with the specified subscription, region, and bot ID.
+     * @param subscription Service subscription key.
+     * @param region Service region key.
+     * @param botId Optional, ID for using a specific bot.
+     * @return The created config.
+     */
+    public static BotFrameworkConfig fromSubscription(String subscription, String region, String botId) {
+        Contracts.throwIfNull(subscription, "subscription");
+        Contracts.throwIfNull(region, "region");
+        return new BotFrameworkConfig(com.microsoft.cognitiveservices.speech.internal.BotFrameworkConfig.FromSubscription(subscription, region, botId));
     }
 
     /**

@@ -16,7 +16,8 @@ namespace Microsoft.CognitiveServices.Speech.Dialog.Internal
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         public static extern SPXHR bot_framework_config_from_subscription(out SPXCONNECTORCONFIGHANDLE config,
             [MarshalAs(UnmanagedType.LPStr)] string subscription,
-            [MarshalAs(UnmanagedType.LPStr)] string region);
+            [MarshalAs(UnmanagedType.LPStr)] string region,
+            [MarshalAs(UnmanagedType.LPStr)] string botId);
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         public static extern SPXHR bot_framework_config_from_authorization_token(out SPXCONNECTORCONFIGHANDLE config,

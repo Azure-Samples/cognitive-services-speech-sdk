@@ -138,11 +138,12 @@ public:
     /// </summary>
     /// <param name="subscription">Subscription key associated with the bot</param>
     /// <param name="region">The region name (see the <a href="https://aka.ms/csspeech/region">region page</a>).</param>
+    /// <param name="bot_Id"> Optional, ID for using a specific bot.</param>
     /// <returns>A shared pointer to the new bot framework config.</returns>
-    inline static std::shared_ptr<BotFrameworkConfig> FromSubscription(const SPXSTRING& subscription, const SPXSTRING& region)
+    inline static std::shared_ptr<BotFrameworkConfig> FromSubscription(const SPXSTRING& subscription, const SPXSTRING& region, const SPXSTRING& bot_Id)
     {
         SPXSPEECHCONFIGHANDLE h_config = SPXHANDLE_INVALID;
-        SPX_THROW_ON_FAIL(bot_framework_config_from_subscription(&h_config, Utils::ToUTF8(subscription).c_str(), Utils::ToUTF8(region).c_str()));
+        SPX_THROW_ON_FAIL(bot_framework_config_from_subscription(&h_config, Utils::ToUTF8(subscription).c_str(), Utils::ToUTF8(region).c_str(), Utils::ToUTF8(bot_Id).c_str()));
         return std::shared_ptr<BotFrameworkConfig>{ new BotFrameworkConfig(h_config) };
     }
 
