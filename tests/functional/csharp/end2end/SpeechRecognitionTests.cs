@@ -131,6 +131,35 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
+        [Ignore]
+        [DataTestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
+        public async Task ValidBaselineRecognitionWithSovereignCloud(bool usingPreConnection)
+        {
+            var mooncakeSubscriptionKey = SubscriptionsRegionsMap[SubscriptionsRegionsKeys.MOONCAKE_SUBSCRIPTION].Key;
+            var mooncakeRegion = SubscriptionsRegionsMap[SubscriptionsRegionsKeys.MOONCAKE_SUBSCRIPTION].Region;
+
+            var mooncakeConfig = SpeechConfig.FromSubscription(mooncakeSubscriptionKey, mooncakeRegion);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(mooncakeConfig, audioInput)))
+            {
+                using (var connection = Connection.FromRecognizer(recognizer))
+                {
+                    if (usingPreConnection)
+                    {
+                        connection.Open(false);
+                    }
+
+                    var result = await helper.CompleteRecognizeOnceAsync(recognizer, connection).ConfigureAwait(false);
+                    AssertConnectionCountMatching(helper.ConnectedEventCount, helper.DisconnectedEventCount);
+                    Assert.IsTrue(result.Duration.Ticks > 0, result.Reason.ToString(), "Duration == 0");
+                    Assert.IsTrue(100000 < result.OffsetInTicks && result.OffsetInTicks < 700000, $"Offset value ${result.OffsetInTicks} seems incorrect");
+                    AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text, result.Text);
+                }
+            }
+        }
+
         [DataTestMethod]
         [DataRow(true)]
         [DataRow(false)]

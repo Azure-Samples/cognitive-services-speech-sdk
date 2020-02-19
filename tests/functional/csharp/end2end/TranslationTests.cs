@@ -435,6 +435,26 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_CATALAN].Utterances[Language.DE][0].Text, actualTranslationRecognition.Result.Translations[Language.DE]);
         }
 
+        [Ignore]
+        [TestMethod]
+        public async Task TranslationFromCatalanToGermanInSovereignCloud()
+        {
+            var toLanguages = new List<string>() { Language.DE };
+
+            var mooncakeSubscriptionKey = SubscriptionsRegionsMap[SubscriptionsRegionsKeys.MOONCAKE_SUBSCRIPTION].Key;
+            var mooncakeRegion = SubscriptionsRegionsMap[SubscriptionsRegionsKeys.MOONCAKE_SUBSCRIPTION].Region;
+
+            TranslationTestsHelper trHelper = new TranslationTestsHelper(mooncakeSubscriptionKey, mooncakeRegion);
+            var actualTranslations = await trHelper.GetTranslationRecognizedContinuous(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_CATALAN].FilePath.GetRootRelativePath(), Language.CA_ES, toLanguages);
+            Assert.AreEqual(1, actualTranslations[ResultType.RecognizedText].Count, AssertOutput.WrongTranslatedUtterancesCount);
+            var actualTranslationRecognition = (TranslationRecognitionEventArgs)actualTranslations[ResultType.RecognizedText].Single();
+
+            Assert.AreNotEqual(ResultReason.Canceled, actualTranslationRecognition.Result.Reason);
+            AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_CATALAN].Utterances[Language.CA_ES][0].Text, actualTranslationRecognition.Result.Text);
+
+            AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_CATALAN].Utterances[Language.DE][0].Text, actualTranslationRecognition.Result.Translations[Language.DE]);
+        }
+
         [TestMethod]
         [ExpectedException(typeof(ObjectDisposedException))]
         public async Task AsyncRecognitionAfterDisposingTranslationRecognizer()

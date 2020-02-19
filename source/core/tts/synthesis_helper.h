@@ -22,6 +22,8 @@
 #define TTS_COGNITIVE_SERVICE_WSS_URL_PATH "/cognitiveservices/websocket/v1"
 #define TTS_CUSTOM_VOICE_HOST_SUFFIX ".voice.speech.microsoft.com"
 #define USER_AGENT "SpeechSDK"
+#define TTS_COGNITIVE_SERVICE_AZURE_CN_HOST_SUFFIX ".tts.speech.azure.cn"
+#define AZURE_CN_REGION "china"
 
 #define SSML_TEMPLATE "<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts' xmlns:emo='http://www.w3.org/2009/10/emotionml' xml:lang='%s'><voice name='%s'>%s</voice></speak>"
 #define SSML_BUFFER_SIZE 0x10000

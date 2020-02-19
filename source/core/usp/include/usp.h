@@ -458,6 +458,27 @@ public:
         static const std::vector<std::string> queryParameters;
     };
 
+    class azurecnspeech
+    {
+    public:
+
+        static const char* hostnameSuffix;
+    };
+
+    class azurecntranslation
+    {
+    public:
+
+        static const char* hostnameSuffix;
+    };
+
+    class azurecnspeechsynthesis
+    {
+    public:
+
+        static const char* hostnameSuffix;
+    };
+
     class translation
     {
     public:

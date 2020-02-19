@@ -78,7 +78,14 @@ void CSpxUspTtsEngineAdapter::Init()
 
     if (m_endpoint.empty() && !region.empty())
     {
-        m_endpoint = HttpUtils::SchemePrefix(UriScheme::WSS) + region + TTS_COGNITIVE_SERVICE_HOST_SUFFIX + TTS_COGNITIVE_SERVICE_WSS_URL_PATH;
+        if (region.find(AZURE_CN_REGION) == 0)
+        {
+            m_endpoint = HttpUtils::SchemePrefix(UriScheme::WSS) + region + TTS_COGNITIVE_SERVICE_AZURE_CN_HOST_SUFFIX + TTS_COGNITIVE_SERVICE_WSS_URL_PATH;
+        }
+        else
+        {
+            m_endpoint = HttpUtils::SchemePrefix(UriScheme::WSS) + region + TTS_COGNITIVE_SERVICE_HOST_SUFFIX + TTS_COGNITIVE_SERVICE_WSS_URL_PATH;
+        }
     }
 
     SPX_IFTRUE_THROW_HR(m_endpoint.empty(), SPXERR_INVALID_ARG);

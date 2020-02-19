@@ -1691,6 +1691,22 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
+        public async Task SynthesisWithMooncakeFromSubscription()
+        {
+            var mooncakeSubscriptionKey = SubscriptionsRegionsMap[SubscriptionsRegionsKeys.MOONCAKE_SUBSCRIPTION].Key;
+            var mooncakeRegion = SubscriptionsRegionsMap[SubscriptionsRegionsKeys.MOONCAKE_SUBSCRIPTION].Region;
+
+            var mooncakeConfig = SpeechConfig.FromSubscription(mooncakeSubscriptionKey, mooncakeRegion);
+            using (var synthesizer = new SpeechSynthesizer(mooncakeConfig, null))
+            {
+                using (var result = await synthesizer.SpeakTextAsync("{{{text}}}"))
+                {
+                    CheckSynthesisResult(result);
+                }
+            }
+        }
+
+        [TestMethod]
         public async Task SynthesisWithSovereignCloudFromHost()
         {
             var mooncakeSubscriptionKey = SubscriptionsRegionsMap[SubscriptionsRegionsKeys.MOONCAKE_SUBSCRIPTION].Key;

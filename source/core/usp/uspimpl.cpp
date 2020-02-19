@@ -131,6 +131,17 @@ const char* endpoint::unifiedspeech::pathSuffix = "/cognitiveservices/v1";
 const char* endpoint::unifiedspeech::postprocessingQueryParam = "postprocessing=";
 const char* endpoint::unifiedspeech::lidEnabledQueryParam = "lidEnabled=";
 
+const char* endpoint::azurecnspeech::hostnameSuffix = ".stt.speech.azure.cn";
+const char* endpoint::azurecntranslation::hostnameSuffix = ".s2s.speech.azure.cn";
+const char* endpoint::azurecnspeechsynthesis::hostnameSuffix = ".tts.speech.azure.cn";
+const char* azurecnRegion = "china";
+
+enum class NetworkType
+{
+    Default,
+    AzureCN
+};
+
 const std::vector<std::string> endpoint::unifiedspeech::queryParameters = {
 
     endpoint::langQueryParam,
@@ -378,6 +389,64 @@ string Connection::Impl::EncodeParameterString(const string& parameter) const
     return encodedStr;
 }
 
+NetworkType GetNetworkType(std::string region)
+{
+    if (region.find(azurecnRegion) == 0)
+    {
+        return NetworkType::AzureCN;
+    }
+    else
+    {
+        return NetworkType::Default;
+    }
+}
+
+std::string GetHostNameSuffix(std::string region, EndpointType endpointType)
+{
+    std::string result = "";
+    NetworkType networkType = GetNetworkType(region);
+
+    switch (endpointType)
+    {
+    case EndpointType::Speech:
+        switch (networkType)
+        {
+        case NetworkType::AzureCN:
+            result = region + endpoint::azurecnspeech::hostnameSuffix;
+            break;
+        default:
+            result = region + endpoint::unifiedspeech::hostnameSuffix;
+            break;
+        }
+        break;
+    case EndpointType::Translation:
+        switch (networkType)
+        {
+        case NetworkType::AzureCN:
+            result = region + endpoint::azurecntranslation::hostnameSuffix;
+            break;
+        default:
+            result = region + endpoint::translation::hostnameSuffix;
+            break;
+        }
+        break;
+    case EndpointType::SpeechSynthesis:
+        switch (networkType)
+        {
+        case NetworkType::AzureCN:
+            result = region + endpoint::azurecnspeechsynthesis::hostnameSuffix;
+            break;
+        default:
+            result = region + endpoint::speechSynthesis::hostnameSuffix;
+            break;
+        }
+        break;
+    default:
+        break;
+    }
+    return result;
+}
+
 string Connection::Impl::ConstructConnectionUrl() const
 {
     auto recoMode = static_cast<underlying_type_t<RecognitionMode>>(m_config.m_recoMode);
@@ -450,8 +519,7 @@ string Connection::Impl::ConstructConnectionUrl() const
         case EndpointType::Speech:
             if (!customHost)
             {
-                oss << region
-                    << endpoint::unifiedspeech::hostnameSuffix;
+                oss << GetHostNameSuffix(region, EndpointType::Speech);
             }
             oss << endpoint::unifiedspeech::pathPrefix
                 << g_recoModeStrings[recoMode]
@@ -461,8 +529,7 @@ string Connection::Impl::ConstructConnectionUrl() const
         case EndpointType::Translation:
             if (!customHost)
             {
-                oss << region
-                    << endpoint::translation::hostnameSuffix;
+                oss << GetHostNameSuffix(region, EndpointType::Translation);
             }
             oss << endpoint::translation::path;
             break;
@@ -528,8 +595,7 @@ string Connection::Impl::ConstructConnectionUrl() const
         case EndpointType::SpeechSynthesis:
             if (!customHost)
             {
-                oss << region
-                    << endpoint::speechSynthesis::hostnameSuffix;
+                oss << GetHostNameSuffix(region, EndpointType::SpeechSynthesis);
             }
             oss << endpoint::speechSynthesis::path;
             break;
