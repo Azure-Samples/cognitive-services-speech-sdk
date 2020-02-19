@@ -203,11 +203,13 @@ void CSpxDialogServiceConnector::SetStringValueInProperties(const char* name, co
     EnsureDefaultSession();
     auto namedProperties = SpxQueryService<ISpxNamedProperties>(m_defaultSession);
 
-    // only allow authorization token to be set again.
-    if (PAL::stricmp(name, GetPropertyName(PropertyId::SpeechServiceAuthorization_Token)) != 0)
+    // only allow authorization token and activity template to be set again.
+    if (PAL::stricmp(name, GetPropertyName(PropertyId::SpeechServiceAuthorization_Token)) != 0 ||
+        PAL::stricmp(name, GetPropertyName(PropertyId::Conversation_Speech_Activity_Template)) != 0)
     {
         SPX_IFTRUE_THROW_HR(namedProperties->HasStringValue(name), SPXERR_ALREADY_INITIALIZED); // throw if it's already been set
     }
+
     namedProperties->SetStringValue(name, value);
 }
 

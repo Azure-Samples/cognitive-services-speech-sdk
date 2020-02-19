@@ -198,6 +198,24 @@ public:
         return Properties.GetProperty(PropertyId::SpeechServiceAuthorization_Token, SPXSTRING());
     }
 
+    /// <summary>
+    /// Sets the speech activity template. It is used to stamp properties from the template on the service generated
+    /// activty for speech.
+    /// </summary>
+    /// <param name="activityTemplate">Activity properties for the speech generated activity.</param>
+    void SetSpeechActivityTemplate(const SPXSTRING& activityTemplate)
+    {
+        Properties.SetProperty(PropertyId::Conversation_Speech_Activity_Template, activityTemplate);
+    }
+
+    /// <summary>
+    /// Gets the speech activity template.
+    /// </summary>
+    /// <returns>Value of the previously set activity format</returns>
+    SPXSTRING GetSpeechActivityTemplate()
+    {
+        return Properties.GetProperty(PropertyId::Conversation_Speech_Activity_Template, SPXSTRING());
+    }
 
     /// <summary>
     /// Signal for events containing speech recognition results.

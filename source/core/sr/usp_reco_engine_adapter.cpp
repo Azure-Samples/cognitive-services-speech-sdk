@@ -1012,6 +1012,12 @@ void CSpxUspRecoEngineAdapter::UspSendSpeechAgentContext()
         auto site = GetSite();
         auto provider = SpxQueryInterface<ISpxInteractionIdProvider>(site);
         auto interactionId = provider->GetInteractionId(InteractionIdPurpose::Speech);
+
+        auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
+        SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_USP_SITE_FAILURE);
+
+        auto activityTemplate = properties->GetStringValue(GetPropertyName(PropertyId::Conversation_Speech_Activity_Template));
+
         json contextJson = {
             {"version", 0.5},
             {"context", {
@@ -1019,6 +1025,12 @@ void CSpxUspRecoEngineAdapter::UspSendSpeechAgentContext()
             }},
             {"channelData", ""}
         };
+
+        if (activityTemplate.size() > 0)
+        {
+            contextJson["messagePayload"] = activityTemplate;
+        }
+        
         UspSendMessage("speech.agent.context", contextJson.dump(), USP::MessageType::AgentContext);
     }
 }

@@ -358,6 +358,18 @@ TEST_CASE("Dialog Service Connector basics", "[api][cxx][dialog_service_connecto
         auto result = runner.run<std::shared_ptr<SpeechRecognitionResult>>(
             [](DialogServiceConnector& connector)
             {
+                // Verified manually using fiddler, we need a better test once we have our own bot for testing.
+                nlohmann::json jsonActTemplate{
+                    { "from",
+                        {
+                            { "id", "MyOwnFromId_ID_+2345" }
+                        }
+                    },
+                    { "deliveryMode", "MyOwnDeliveryMode"}
+                };
+                auto strActTemplate = jsonActTemplate.dump();
+
+                connector.SetSpeechActivityTemplate(strActTemplate);
                 return connector.ListenOnceAsync();
             },
             20s, 3u);
@@ -373,7 +385,6 @@ TEST_CASE("Dialog Service Connector basics", "[api][cxx][dialog_service_connecto
         REQUIRE(exists(ROOT_RELATIVE_PATH(INTENT_UTTERANCE)));
         auto config = DialogServiceConfigForTests();
         auto audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(INTENT_UTTERANCE));
-
         test_runner runner{ config, audioConfig };
 
         constexpr auto activity_text = "message";

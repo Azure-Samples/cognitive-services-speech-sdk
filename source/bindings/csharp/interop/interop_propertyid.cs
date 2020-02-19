@@ -64,6 +64,7 @@ namespace Microsoft.CognitiveServices.Speech.Internal
         Conversation_From_Id = 10003,
         Conversation_Conversation_Id = 10004,
         Conversation_Custom_Voice_Deployment_Ids = 10005,
+        Conversation_Speech_Activity_Template = 10006,
         DataBuffer_TimeStamp = 11001,
         DataBuffer_UserId = 11002
     }
