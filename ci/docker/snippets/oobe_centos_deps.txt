@@ -1,0 +1,4 @@
+        # Native dependencies
+        alsa-lib \
+        alsa-plugins-pulseaudio \
+        openssl \

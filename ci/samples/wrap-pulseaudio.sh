@@ -11,6 +11,10 @@ if [[ $ID = debian ]]; then
   # On Debian, patch the PulseAudio config to fix the PulseAudio daemon launch.
   perl -pi.bak -e 's/^(\Q.ifexists module-console-kit.so\E)/\1NOTLOADINGTHIS/' /etc/pulse/default.pa
 fi
+if [[ $ID = centos ]]; then
+  # On CentOS, set the SSL cert file location (for non-interactive bash shell).
+  export SSL_CERT_FILE=/etc/pki/tls/cert.pem
+fi
 
 pulseaudio -D --exit-idle-time=-1
 trap on_exit EXIT

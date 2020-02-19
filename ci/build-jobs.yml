@@ -515,7 +515,7 @@ jobs:
         displayName: Patch and build samples
       - template: get-docker-image.yml
         parameters:
-          imageBase: oobejre_ubuntu1604_x64 oobejre_ubuntu1804_x64 oobejre_debian9_x64
+          imageBase: oobejre_ubuntu1604_x64 oobejre_ubuntu1804_x64 oobejre_debian9_x64 oobejre_centos8_x64
           outvarImage: DOCKER_IMAGES
       - bash: |
           set -u -e -o pipefail
@@ -1976,7 +1976,7 @@ jobs:
       itemPattern: '**/*linux*_x86_64.whl'
   - template: get-docker-image.yml
     parameters:
-      imageBase: oobedevpy35_ubuntu1604_x64 oobedevpy36_ubuntu1804_x64 oobedevpy35_debian9_x64 oobedevpy37_debian9py37_x64
+      imageBase: oobedevpy35_ubuntu1604_x64 oobedevpy36_ubuntu1804_x64 oobedevpy35_debian9_x64 oobedevpy37_debian9py37_x64 oobedevpy36_centos8_x64
       outvarImage: DOCKER_IMAGES
   - bash: |
       set -u -e -x -o pipefail

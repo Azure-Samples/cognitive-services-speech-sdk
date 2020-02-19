@@ -144,6 +144,10 @@ my %images = (
     version => 'TESTLOCAL',
     spec => ['from-fedora27-x64', yumInstallWith(qw/oobedevcpp_fedora oobe_fedora_deps test_deps/), 'builduser'],
   },
+  oobedevcpp_centos8_x64 => {
+    version => 2,
+    spec => ['from-centos8-x64', yumInstallWith(qw/oobe_centos_deps oobedevcpp_centos_deps oobe_centos_gstreamer_deps test_deps/), 'builduser', 'set_centos_env'],
+  },
   oobedevcpp_ubuntu1804_x86 => {
     version => 3,
     spec => ['from-ubuntu1804-x86', aptInstallWith(qw/oobedevcpp_ubuntu1604_deps oobe_ubuntu1604_deps oobe_ubuntu_gstreamer_deps test_deps_ubuntu1804/), 'builduser'],
@@ -168,6 +172,10 @@ my %images = (
     version => 1,
     spec => ['from-debian9-x64', aptInstallWith(qw/oobe_debian9_deps oobejre_ubuntu1604_deps oobe_ubuntu_gstreamer_deps test_deps/), 'builduser'],
   },
+  oobejre_centos8_x64 => {
+    version => 2,
+    spec => ['from-centos8-x64', yumInstallWith(qw/oobe_centos_deps oobejre_centos_deps oobe_centos_gstreamer_deps test_deps/), 'builduser', 'set_centos_env'],
+  },
   oobedevdnc20_ubuntu1604_x64 => {
     version => 4,
     spec => ['from-ubuntu1604-x64', aptInstallWith(qw/oobe_ubuntu1604_deps oobe_ubuntu_gstreamer_deps test_deps/), 'oobedevdnc20_ubuntu1604_x64_deps', 'builduser'],
@@ -179,6 +187,10 @@ my %images = (
   oobedevdnc20_debian9_x64 => {
     version => 1,
     spec => ['from-debian9-x64', aptInstallWith(qw/oobe_debian9_deps oobe_ubuntu_gstreamer_deps test_deps/), 'oobedevdnc20_debian9_x64_deps', 'builduser'],
+  },
+  oobedevdnc21_centos8_x64 => {
+    version => 2,
+    spec => ['from-centos8-x64', yumInstallWith(qw/oobe_centos_deps oobedevdnc21_centos_deps oobe_centos_gstreamer_deps test_deps/), 'builduser', 'set_centos_env'],
   },
   # .NET Core development against official .NET Core images from the Microsoft Container Registry
   oobedevdnc21_mcr_x64 => {
@@ -202,6 +214,10 @@ my %images = (
     version => 1,
     # Note: libssl1.0.2 is already in this specific image...
     spec => ['from-python37-x64', aptInstallWith(qw/oobe_debian9_deps test_deps/), 'oobepython_jupyter', 'builduser'],
+  },
+  oobedevpy36_centos8_x64 => {
+    version => 2,
+    spec => ['from-centos8-x64', yumInstallWith(qw/oobe_centos_deps oobepython_centos_deps oobe_centos_gstreamer_deps test_deps/), 'builduser', 'set_centos_env'],
   },
 );
 

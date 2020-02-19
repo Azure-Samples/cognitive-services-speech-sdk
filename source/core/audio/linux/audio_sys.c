@@ -1214,7 +1214,7 @@ static int CaptureAudio(void *p)
         }
     }
 
-    snd_pcm_drain(audioData->pcmHandle);
+    snd_pcm_drop(audioData->pcmHandle);
 
     audioData->current_input_state = AUDIO_STATE_STOPPED;
     if (audioData->input_state_cb)
