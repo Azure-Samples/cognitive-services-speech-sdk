@@ -279,7 +279,7 @@ private:
 
     CSpxStringMap GetParametersFromUser(std::string&& path);
 
-    USP::MessageType GetMessageType(std::string&& path);
+    USP::MessageType GetMessageType(const std::string& path);
 
 private:
     friend CSpxActivitySession;

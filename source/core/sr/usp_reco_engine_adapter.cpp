@@ -167,7 +167,7 @@ void CSpxUspRecoEngineAdapter::SendSpeechEventMessage(std::string&& message)
     UspSendMessage("speech.event", message, USP::MessageType::SpeechEvent);
 }
 
-USP::MessageType CSpxUspRecoEngineAdapter::GetMessageType(std::string&& path)
+USP::MessageType CSpxUspRecoEngineAdapter::GetMessageType(const std::string& path)
 {
     return m_message_name_to_type_map.find(path) == m_message_name_to_type_map.end() ? USP::MessageType::Unknown : m_message_name_to_type_map[path];
 }
@@ -181,7 +181,7 @@ void CSpxUspRecoEngineAdapter::SendNetworkMessage(std::string&& path, std::strin
     {
         return;
     }
-    UspSendMessage(path, payload, GetMessageType(std::move(path)));
+    UspSendMessage(path, payload, GetMessageType(path));
 }
 
 void CSpxUspRecoEngineAdapter::SendNetworkMessage(std::string&& path, std::vector<uint8_t>&& payload)
@@ -193,7 +193,7 @@ void CSpxUspRecoEngineAdapter::SendNetworkMessage(std::string&& path, std::vecto
     {
         return;
     }
-    UspSendMessage(path, payload.data(), payload.size(), GetMessageType(std::move(path)));
+    UspSendMessage(path, payload.data(), payload.size(), GetMessageType(path));
 }
 
 void CSpxUspRecoEngineAdapter::SetFormat(const SPXWAVEFORMATEX* pformat)
