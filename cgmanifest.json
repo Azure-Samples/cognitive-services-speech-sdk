@@ -240,6 +240,16 @@
           "downloadUrl": "http://repo1.maven.org/maven2/com/azure/azure-core-http-netty/1.0.0/azure-core-http-netty-1.0.0.jar"
         }
       }
+    },
+    {
+      "component": {
+        "type": "other",
+        "other": {
+          "name": "Silk",
+          "version": "1.0.9",
+          "downloadUrl": "https://tools.ietf.org/html/draft-vos-silk-01"
+        }
+      }
     }
   ]
 }

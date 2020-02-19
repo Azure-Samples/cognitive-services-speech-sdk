@@ -41,6 +41,12 @@ set(SOURCES
     "${SRC_DIR}/conversation_tests.cpp"
     )
 
+if(EXTENSION_AUDIOCOMPRESSION_ENABLED)
+  list(APPEND SOURCES
+    "${SRC_DIR}/wire_compression_tests.cpp"
+  )
+endif()
+ 
 if(WIN32 AND (NOT SPEECHSDK_OS STREQUAL "WindowsUwp"))
     include_directories("${SRC_DIR}/Windows")
     list(APPEND SOURCES

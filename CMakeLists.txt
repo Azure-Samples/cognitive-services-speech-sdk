@@ -37,6 +37,9 @@ option(SPECTRE_MITIGATION "Build with Spectre mitigation" OFF)
 # Make the compilation of KWS optional
 option(EXTENSION_KWS_ENABLED "Build the KWS extension based on the VoiceActivation component" OFF)
 
+# Make the compilation of compression codec optional
+option(EXTENSION_AUDIOCOMPRESSION_ENABLED "Build the compression codec extension component" OFF)
+
 # Make the compilation of gstreamer (for decoding audio format) optional
 option(EXTENSION_CODEC_ENABLED "Build the CODEC extension based on the supported platform" OFF)
 
@@ -233,7 +236,7 @@ if(MSVC)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W4 /WX")
   # disable precompiled headers (for now) to allow build in IDE environment
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Y-")
-  
+
   # enable multiprocessor optimizations
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
 
@@ -454,6 +457,12 @@ if(EXTENSION_KWS_ENABLED)
   add_definitions(-DSPEECHSDK_KWS_ENABLED)
 endif()
 
+if(EXTENSION_AUDIOCOMPRESSION_ENABLED)
+  add_subdirectory("${CARBON_EXTENSIONS}/audio-compression")
+  add_definitions(-DSPEECHSDK_AUDIOCOMPRESSION_ENABLED)
+endif()
+
+
 add_subdirectory(${CARBON_BINDINGS})
 
 add_subdirectory(${TESTS})
@@ -496,7 +505,7 @@ if(${CMAKE_VERSION} VERSION_GREATER "3.14.4")
 
   if(NOT EXISTS "${CARBON_ROOT}/tests/functional/java/lib")
     CREATE_LINK_WITH_COPY_FAILOVER("${CMAKE_CURRENT_BINARY_DIR}/lib" "${CARBON_ROOT}/tests/functional/java" "/lib")
-  endif()    
+  endif()
 
   CREATE_LINK_WITH_COPY_FAILOVER("${TESTS}/test.defaults.json" "${CMAKE_CURRENT_SOURCE_DIR}/source/bindings/python" "/test.defaults.json")
   CREATE_LINK_WITH_COPY_FAILOVER("${TESTS}/test.subscriptions.regions.json" "${CMAKE_CURRENT_SOURCE_DIR}/source/bindings/python" "/test.subscriptions.regions.json")
@@ -545,7 +554,7 @@ else()
 
   if(NOT EXISTS "${CARBON_ROOT}/tests/functional/java/lib")
     file(COPY "${CMAKE_CURRENT_BINARY_DIR}/lib" DESTINATION "${CARBON_ROOT}/tests/functional/java")
-  endif()    
+  endif()
 
   file(COPY "${TESTS}/test.defaults.json" DESTINATION "${CMAKE_CURRENT_SOURCE_DIR}/source/bindings/python")
   file(COPY "${TESTS}/test.subscriptions.regions.json" DESTINATION "${CMAKE_CURRENT_SOURCE_DIR}/source/bindings/python")

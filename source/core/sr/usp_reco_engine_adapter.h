@@ -156,7 +156,8 @@ private:
     void SetSpeechConfigMessage(const ISpxNamedProperties& properties);
     void SetAgentConfigMessage(const ISpxNamedProperties& properties);
 
-    void UspWrite(const DataChunkPtr& audioChunk);
+    void ProcessAudioFormat(SPXWAVEFORMATEX* pformat);
+    void ProcessAudioChunk(const DataChunkPtr& audioChunk);
     void UspSendSpeechConfig();
     void UspSendAgentConfig();
     void UspSendSpeechContext();
@@ -164,9 +165,8 @@ private:
     void UspSendSpeechAgentContext();
     void UspSendMessage(const std::string& messagePath, const std::string &buffer, USP::MessageType messageType);
     void UspSendMessage(const std::string& messagePath, const uint8_t* buffer, size_t size, USP::MessageType messageType);
-    void UspWriteFormat(SPXWAVEFORMATEX* pformat);
     void UspWriteActual(const DataChunkPtr& audioChunk);
-    void UspWriteFlush();
+    void FlushAudio(bool flushCodec = false);
 
     void OnMessageReceived(const USP::RawMsg&) override;
     void OnSpeechStartDetected(const USP::SpeechStartDetectedMsg&) override;
@@ -187,7 +187,6 @@ private:
     void OnTranslationHypothesis(const USP::TranslationHypothesisMsg&) override;
     void OnTranslationPhrase(const USP::TranslationPhraseMsg&) override;
     void OnAudioOutputChunk(const USP::AudioOutputChunkMsg&) override;
-
     uint8_t* FormatBufferWriteBytes(uint8_t* buffer, const uint8_t* source, size_t bytes);
     uint8_t* FormatBufferWriteNumber(uint8_t* buffer, uint32_t number);
     uint8_t* FormatBufferWriteChars(uint8_t* buffer, const char* psz, size_t cch);
@@ -253,8 +252,12 @@ private:
     bool ChangeState(AudioState toAudioState, UspState toUspState) { return ChangeState(m_audioState, m_uspState, toAudioState, toUspState); }
     bool ChangeState(AudioState fromAudioState, UspState fromUspState, AudioState toAudioState, UspState toUspState);
 
+    SPXHR PrepareCompressionCodec(const SPXWAVEFORMATEX* format, ISpxInternalAudioCodecAdapter::SPXCompressedDataCallback dataCallback);
+    void HandleCompressedAudioData(const uint8_t* outData, size_t nBytesOut);
+
     void PrepareFirstAudioReadyState(const SPXWAVEFORMATEX* format);
     void PrepareAudioReadyState();
+    void PrepareUspAudioStream();
     void SendPreAudioMessages();
 
     bool ShouldResetAfterError();
@@ -267,6 +270,12 @@ private:
     void ResetBeforeFirstAudio();
 
     void CreateConversationResult(std::shared_ptr<ISpxRecognitionResult>& result, const std::wstring& userId);
+
+#ifdef _DEBUG
+    void OpenAudioDumpFile();
+#endif
+
+    DataChunkPtr MakeDataChunkForAudioFormat(SPXWAVEFORMATEX* pformat);
 
     CSpxStringMap GetParametersFromUser(std::string&& path);
 
@@ -301,6 +310,9 @@ private:
     const bool m_allowUspResetAfterError = true;
     bool m_singleShot = false;
     SpxWAVEFORMATEX_Type m_format;
+    bool m_audioFormatSent = true;
+    bool m_audioFlushed = false;
+    std::shared_ptr<ISpxInternalAudioCodecAdapter> m_compressionCodec;
     AudioState m_audioState;
     UspState m_uspState;
 

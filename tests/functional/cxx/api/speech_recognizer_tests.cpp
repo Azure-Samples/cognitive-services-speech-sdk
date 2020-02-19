@@ -9,13 +9,6 @@
 #include "file_utils.h"
 #include "recognizer_utils.h"
 
-template<typename RecogType>
-static std::shared_ptr<RecogType> CreateRecognizers(const string& filename)
-{
-    auto audioInput = AudioConfig::FromWavFileInput(filename);
-    return RecogType::FromConfig(CurrentSpeechConfig(), audioInput);
-}
-
 static void DoRecoFromCompressedPushStreamHelper(std::string fileName, std::shared_ptr<SpeechRecognizer> recognizer, std::shared_ptr<PushAudioInputStream> pushStream)
 {
     auto result = make_shared<RecoPhrases>();

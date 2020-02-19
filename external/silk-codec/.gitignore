@@ -1,0 +1,3 @@
+#Allow silk libs in the build
+!lib/**/*.lib
+!lib/**/*.a

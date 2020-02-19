@@ -518,6 +518,20 @@ public:
     virtual void ProcessAudio(const DataChunkPtr& audioChunk) = 0;
 };
 
+class ISpxInternalAudioCodecAdapter : public ISpxInterfaceBaseFor <ISpxInternalAudioCodecAdapter>
+{
+public:
+    using SPXCompressedDataCallback = std::function<void(const uint8_t * outData, size_t nBytesOut)>;
+
+    virtual SPXHR Load(const std::string& modulename, const std::string& codec, SPXCompressedDataCallback dataCallback) = 0;
+    virtual void InitCodec(const SPXWAVEFORMATEX* inputFormat) = 0;
+    virtual std::string GetContentType() = 0;
+    virtual void Encode(const uint8_t* buffer, size_t bufferSize) = 0;
+    virtual void Flush() = 0;
+    virtual void CloseEncodingStream() = 0;
+};
+
+
 class ISpxReadWriteBufferInit : public ISpxInterfaceBaseFor<ISpxReadWriteBufferInit>
 {
 public:

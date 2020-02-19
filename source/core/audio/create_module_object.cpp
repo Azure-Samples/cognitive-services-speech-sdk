@@ -28,7 +28,7 @@
 #include "audio_source_buffer_properties.h"
 #include "blocking_read_write_ring_buffer.h"
 #include "read_write_ring_buffer.h"
-
+#include "internal_audio_codec_adapter.h"
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -60,6 +60,7 @@ SPX_EXTERN_C void* AudioLib_CreateModuleObject(const char* className, const char
     SPX_FACTORY_MAP_ENTRY(CSpxAudioSourceBufferData, ISpxAudioSourceBufferData);
     SPX_FACTORY_MAP_ENTRY(CSpxAudioSourceBufferProperties, ISpxAudioSourceBufferProperties);
     SPX_FACTORY_MAP_ENTRY(CSpxAudioProcessorWriteToAudioSourceBuffer, ISpxAudioProcessor);
+    SPX_FACTORY_MAP_ENTRY(CSpxInternalAudioCodecAdapter, ISpxInternalAudioCodecAdapter);
     SPX_FACTORY_MAP_END();
 }
 

@@ -55,6 +55,7 @@ jobs:
         vsts_setvar SPEECHSDK_BUILD_CONFIGURATION "$(BuildConfiguration)"
         vsts_setvar SPEECHSDK_ENABLE_KWS ${{ parameters.kws }}
         vsts_setvar SPEECHSDK_ENABLE_UNIDEC true
+        vsts_setvar EXTENSION_AUDIOCOMPRESSION_ENABLED true
         vsts_setvar VSTS_TOKEN "$(System.AccessToken)"
   - bash: ./ci/set-variables.sh
     displayName: Set variables
@@ -88,6 +89,7 @@ jobs:
         -DSPECTRE_MITIGATION=$(SPEECHSDK_SPECTRE_MITIGATION)
         -DEXTENSION_KWS_ENABLED=$(SPEECHSDK_ENABLE_KWS)
         -DSPEECHSDK_CRT="${{ parameters.crt }}"
+        -DEXTENSION_AUDIOCOMPRESSION_ENABLED=$(EXTENSION_AUDIOCOMPRESSION_ENABLED)
         -DEXTENSION_UNIDEC_ENABLED=$(SPEECHSDK_ENABLE_UNIDEC)
         ..
   - task: VSBuild@1

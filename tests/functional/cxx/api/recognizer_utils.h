@@ -233,3 +233,35 @@ using My90kHzDuration = std::chrono::duration<double, std::ratio<1, 90000>>;
 std::string CreateTimestamp();
 uint64_t VerifySpeaker(const RecoResultVector& phrases, const std::wstring& speakerId);
 bool FindTheRef(RecoResultVector phrases, const std::string& reference);
+
+inline void EnableSilkAudioCompression(const std::shared_ptr<AudioConfig>& config)
+{
+    config->SetProperty("SPEECH-Compression-Codec-Module", "Microsoft.CognitiveServices.Speech.extension.silk_codec.dll");
+    config->SetProperty("SPEECH-Compression-EncodingFormat", "Silk");
+}
+
+inline void SetDefaultFiddlerProxy(const std::shared_ptr<AudioConfig>& config)
+{
+    config->SetProperty(PropertyId::SpeechServiceConnection_ProxyHostName, "localhost");
+    config->SetProperty(PropertyId::SpeechServiceConnection_ProxyPort, "8888");
+}
+
+template<typename RecogType>
+static std::shared_ptr<RecogType> CreateRecognizers(const string& filename, bool requestCompression = false, bool enableFiddlerProxy = false)
+{
+    auto audioInput = AudioConfig::FromWavFileInput(filename);
+    if (requestCompression)
+    {
+        EnableSilkAudioCompression(audioInput);
+    }
+
+    if (enableFiddlerProxy)
+    {
+        SetDefaultFiddlerProxy(audioInput);
+    }
+
+    return RecogType::FromConfig(CurrentSpeechConfig(), audioInput);
+}
+
+
+

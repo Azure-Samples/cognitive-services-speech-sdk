@@ -127,10 +127,21 @@ usp::TransportRequest::~TransportRequest()
 }
 
 /*
+ * Gets content type for the first audio chunk of a stream. 
+ */
+size_t GetContentTypeForAudioChunk(const Microsoft::CognitiveServices::Speech::Impl::DataChunkPtr& audioChunk, const char*& contentType);
+
+/*
 *  Helper function.
 */
-int TransportCreateDataHeader(TransportHandle transportHandle, const char* requestId, char* buffer, size_t payloadSize, const std::string& psttimeStamp, const std::string& userId, bool wavHeader);
-
+int TransportCreateDataHeader(
+        TransportHandle transportHandle,
+        const char* requestId,
+        char* buffer,
+        size_t payloadSize,
+        const std::string& psttimeStamp,
+        const std::string& userId,
+        const char* contentType);
 
 int ParseHttpHeaders(HTTP_HEADERS_HANDLE headersHandle, const unsigned char* buffer, size_t size)
 {
@@ -1019,6 +1030,9 @@ int usp::TransportStreamWrite(TransportHandle transportHandle, const std::string
     std::string pstTimeStamp = audioChunk->capturedTime;
     std::string userId = audioChunk->userId;
 
+    const char* contentType = nullptr;
+    size_t contentTypeSize = GetContentTypeForAudioChunk(audioChunk, contentType);
+
     size_t payloadSize = sizeof(g_requestFormat3) +
         path.size() +
         sizeof(g_KeywordStreamId) +
@@ -1028,7 +1042,7 @@ int usp::TransportStreamWrite(TransportHandle transportHandle, const std::string
         sizeof(g_timeStampHeaderName) +
         TIME_STRING_MAX_SIZE +
         sizeof(g_keywordContentType) +
-        sizeof(g_audioWavName) +
+        contentTypeSize +
         pstTimeStamp.length() +
         userId.length() +
         bufferSize + 2; // 2 = header length
@@ -1036,8 +1050,15 @@ int usp::TransportStreamWrite(TransportHandle transportHandle, const std::string
     auto msg = std::make_unique<TransportPacket>(msgtype, static_cast<unsigned char>(WS_FRAME_TYPE_BINARY), payloadSize);
 
     // fill the msg->buffer with the header content
-    bool wavheader = audioChunk->isWavHeader;
-    auto headerLen = TransportCreateDataHeader(request, requestId, reinterpret_cast<char *>(msg->buffer.get()), payloadSize, pstTimeStamp, userId, wavheader);
+    auto headerLen = TransportCreateDataHeader(
+                                    request,
+                                    requestId,
+                                    reinterpret_cast<char *>(msg->buffer.get()),
+                                    payloadSize,
+                                    pstTimeStamp,
+                                    userId,
+                                    contentType);
+
     if (headerLen < 0)
     {
         return -1;
@@ -1055,8 +1076,38 @@ int usp::TransportStreamWrite(TransportHandle transportHandle, const std::string
     return 0;
 }
 
-int TransportCreateDataHeader(TransportHandle transportHandle, const char* requestId, char* buffer, size_t payloadSize, const std::string& psttimeStamp, const std::string& userId, bool wavheader)
+size_t GetContentTypeForAudioChunk(const Microsoft::CognitiveServices::Speech::Impl::DataChunkPtr& audioChunk, const char*& contentType)
 {
+    size_t contentTypeSize = audioChunk->contentType.size();
+    bool needsContentTypeHeader = audioChunk->isWavHeader || contentTypeSize > 0;
+    contentType = nullptr;
+
+    if (needsContentTypeHeader)
+    {
+        if (contentTypeSize == 0)
+        {
+            contentTypeSize = sizeof(g_audioWavName);
+            contentType = g_audioWavName;
+        }
+        else
+        {
+            contentType = audioChunk->contentType.c_str();
+            contentTypeSize++;
+        }
+    }
+    return contentTypeSize;
+}
+
+int TransportCreateDataHeader(
+        TransportHandle transportHandle,
+        const char* requestId,
+        char* buffer,
+        size_t payloadSize,
+        const std::string& psttimeStamp,
+        const std::string& userId,
+        const char* contentType)
+{
+    bool addContentTypeHeader = contentType != nullptr;
     TransportRequest* request = (TransportRequest*)transportHandle;
     if (NULL == request)
     {
@@ -1072,7 +1123,7 @@ int TransportCreateDataHeader(TransportHandle transportHandle, const char* reque
     }
     size_t headerLen;
     std::string path = "audio";
-    if (wavheader)
+    if (addContentTypeHeader)
     {
         headerLen = sprintf_s(buffer + WS_MESSAGE_HEADER_SIZE,
             payloadSize - WS_MESSAGE_HEADER_SIZE,
@@ -1085,7 +1136,7 @@ int TransportCreateDataHeader(TransportHandle transportHandle, const char* reque
             g_keywordRequestId,
             requestId,
             g_keywordContentType,
-            g_audioWavName);
+            contentType);
     }
     else if (psttimeStamp.empty() && userId.empty())
     {

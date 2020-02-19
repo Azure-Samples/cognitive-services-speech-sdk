@@ -262,9 +262,9 @@ void CSpxUspRecoEngineAdapter::ProcessAudio(const DataChunkPtr& audioChunk)
     }
     else if (size > 0 && ChangeState(AudioState::Ready, UspState::Idle, AudioState::Sending, UspState::WaitingForTurnStart))
     {
-        SPX_DBG_TRACE_VERBOSE_IF(1, "%s: (0x%8p)->SendPreAudioMessages() ... size=%d", __FUNCTION__, (void*)this, size);
-        SendPreAudioMessages();
-        UspWrite(audioChunk);
+        SPX_DBG_TRACE_VERBOSE_IF(1, "%s: (0x%8p)->PrepareUspAudioStream() ... size=%d", __FUNCTION__, (void*)this, size);
+        PrepareUspAudioStream();
+        ProcessAudioChunk(audioChunk);
 
         SPX_DBG_TRACE_VERBOSE("%s: site->AdapterStartingTurn()", __FUNCTION__);
         InvokeOnSite([this](const SitePtr& p) { p->AdapterStartingTurn(this); });
@@ -272,12 +272,12 @@ void CSpxUspRecoEngineAdapter::ProcessAudio(const DataChunkPtr& audioChunk)
     else if (audioChunk->size > 0 && IsState(AudioState::Sending))
     {
         SPX_DBG_TRACE_VERBOSE_IF(1, "%s: (0x%8p) Sending Audio ... size=%d", __FUNCTION__, (void*)this, size);
-        UspWrite(audioChunk);
+        ProcessAudioChunk(audioChunk);
     }
     else if (size == 0 && IsState(AudioState::Sending))
     {
         SPX_DBG_TRACE_VERBOSE_IF(1, "%s: (0x%8p) Flushing Audio ... size=0 USP-FLUSH", __FUNCTION__, (void*)this);
-        UspWriteFlush();
+        FlushAudio(true);
     }
     else if (!IsState(AudioState::Sending))
     {
@@ -1075,74 +1075,49 @@ void CSpxUspRecoEngineAdapter::UspSendMessage(const std::string& messagePath, co
     }
 }
 
-void CSpxUspRecoEngineAdapter::UspWriteFormat(SPXWAVEFORMATEX* pformat)
+//
+// This is called for writing the audio file format
+//
+void CSpxUspRecoEngineAdapter::ProcessAudioFormat(SPXWAVEFORMATEX* pformat)
 {
-    static const uint16_t cbTag = 4;
-    static const uint16_t cbChunkType = 4;
-    static const uint16_t cbChunkSize = 4;
+    bool useAudioCompression = m_compressionCodec != nullptr;
 
-    uint32_t cbFormatChunk = sizeof(SPXWAVEFORMAT) + pformat->cbSize;
-    uint32_t cbRiffChunk = 0;       // NOTE: This isn't technically accurate for a RIFF/WAV file, but it's fine for Truman/Newman/Skyman
-    uint32_t cbDataChunk = 0;       // NOTE: Similarly, this isn't technically correct for the 'data' chunk, but it's fine for Truman/Newman/Skyman
+    if (!useAudioCompression
+#ifdef _DEBUG
+        || m_audioDumpFile
+#endif
+    )
+    {
+        auto wavHeaderDataPtr = MakeDataChunkForAudioFormat(pformat);
 
-    uint32_t cbHeader =
-        cbTag + cbChunkSize +       // 'RIFF' #size_of_RIFF#
-        cbChunkType +               // 'WAVE'
-        cbChunkType + cbChunkSize + // 'fmt ' #size_fmt#
-        cbFormatChunk +             // actual format
-        cbChunkType + cbChunkSize;  // 'data' #size_of_data#
-
-    // Allocate the buffer, and create a ptr we'll use to advance thru the buffer as we're writing stuff into it
-    auto buffer = SpxAllocSharedAudioBuffer(cbHeader);
-    auto ptr = buffer.get();
-
-    // The 'RIFF' header (consists of 'RIFF' followed by size of payload that follows)
-    ptr = FormatBufferWriteChars(ptr, "RIFF", cbTag);
-    ptr = FormatBufferWriteNumber(ptr, cbRiffChunk);
-
-    // The 'WAVE' chunk header
-    ptr = FormatBufferWriteChars(ptr, "WAVE", cbChunkType);
-
-    // The 'fmt ' chunk (consists of 'fmt ' followed by the total size of the SPXWAVEFORMAT(EX)(TENSIBLE), followed by the SPXWAVEFORMAT(EX)(TENSIBLE)
-    ptr = FormatBufferWriteChars(ptr, "fmt ", cbChunkType);
-    ptr = FormatBufferWriteNumber(ptr, cbFormatChunk);
-    ptr = FormatBufferWriteBytes(ptr, (uint8_t*)pformat, cbFormatChunk);
-
-    // The 'data' chunk is next
-    ptr = FormatBufferWriteChars(ptr, "data", cbChunkType);
-    ptr = FormatBufferWriteNumber(ptr, cbDataChunk);
-
-    // Now that we've prepared the header/buffer, send it along to Truman/Newman/Skyman via UspWrite
-    SPX_DBG_ASSERT(cbHeader == uint32_t(ptr - buffer.get()));
-    auto wavHeaderDataPtr = std::make_shared<DataChunk>(buffer, cbHeader);
-    wavHeaderDataPtr->isWavHeader = true;
-    UspWrite(wavHeaderDataPtr);
+        m_uspAudioByteCount += wavHeaderDataPtr->size;
+        if (!useAudioCompression)
+        {
+            UspWriteActual(wavHeaderDataPtr);
+        }
 
 #ifdef _DEBUG
-    auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
-    auto audioDumpDir = properties->GetStringValue("CARBON-INTERNAL-DumpAudioToDir");
-    SPX_DBG_TRACE_VERBOSE("CARBON-INTERNAL-DumpAudioToDir : %s", audioDumpDir.c_str());
-    if (!audioDumpDir.empty())
-    {
-        m_audioDumpDir = audioDumpDir;
-        auto tmpFilePath = PAL::AppendPath(m_audioDumpDir, s_tmpAudioDumpFileName);
-        auto err = PAL::fopen_s(&m_audioDumpFile, tmpFilePath.c_str(), "wb");
-        if (err != 0)
+        if (m_audioDumpFile)
         {
-            SPX_TRACE_ERROR("%s: (0x%8p) FAILED to open audio dump file %s for write (Error=%d)", __FUNCTION__, (void*)this, tmpFilePath.c_str(), err);
+            fwrite(wavHeaderDataPtr->data.get(), 1, wavHeaderDataPtr->size, m_audioDumpFile);
         }
-        else
-        {
-            SPX_DBG_TRACE_VERBOSE("%s: (0x%8p) Writing audio dump to file %s", __FUNCTION__, (void*)this, tmpFilePath.c_str());
-        }
-    }
 #endif
+    }
 }
 
-void CSpxUspRecoEngineAdapter::UspWrite(const DataChunkPtr& audioChunk)
+void CSpxUspRecoEngineAdapter::ProcessAudioChunk(const DataChunkPtr& audioChunk)
 {
     m_uspAudioByteCount += audioChunk->size;
-    UspWriteActual(audioChunk);
+
+    if (m_compressionCodec != nullptr)
+    {
+        m_compressionCodec->Encode(audioChunk->data.get(), audioChunk->size);
+    }
+    else
+    {
+        UspWriteActual(audioChunk);
+    }
+
 #ifdef _DEBUG
     if (m_audioDumpFile)
     {
@@ -1165,12 +1140,19 @@ void CSpxUspRecoEngineAdapter::UspWriteActual(const DataChunkPtr& audioChunk)
     }
 }
 
-void CSpxUspRecoEngineAdapter::UspWriteFlush()
+void CSpxUspRecoEngineAdapter::FlushAudio(bool flushCodec /*= false*/)
 {
     // We should only ever be asked to Flush when we're in a valid state ...
     SPX_DBG_ASSERT(m_uspConnection != nullptr || IsState(UspState::Terminating) || IsState(UspState::Zombie));
     if (!IsState(UspState::Terminating) && !IsState(UspState::Zombie) && m_uspConnection != nullptr)
     {
+        // Get the remains of compressed audio out of the codec
+        if (m_compressionCodec != nullptr && flushCodec && !m_audioFlushed)
+        {
+            m_compressionCodec->Flush();
+            m_audioFlushed = true;
+        }
+
         m_uspConnection->FlushAudio();
     }
 }
@@ -1241,7 +1223,7 @@ void CSpxUspRecoEngineAdapter::OnSpeechEndDetected(const USP::SpeechEndDetectedM
 
     SPX_DBG_TRACE_VERBOSE("%s: Flush ... (audioState/uspState=%d/%d)  USP-FLUSH", __FUNCTION__, m_audioState, m_uspState);
 
-    UspWriteFlush();
+    FlushAudio();
     if (requestMute && !IsBadState())
     {
         SPX_DBG_TRACE_VERBOSE("%s: site->AdapterRequestingAudioMute(true) ... (audioState/uspState=%d/%d)", __FUNCTION__, m_audioState, m_uspState);
@@ -1452,6 +1434,75 @@ static TranslationStatusCode GetTranslationStatus(::USP::TranslationStatus uspSt
     }
     return status;
 }
+
+#ifdef _DEBUG
+void CSpxUspRecoEngineAdapter::OpenAudioDumpFile()
+{
+    auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
+    auto audioDumpDir = properties->GetStringValue("CARBON-INTERNAL-DumpAudioToDir");
+    SPX_DBG_TRACE_VERBOSE("CARBON-INTERNAL-DumpAudioToDir : %s", audioDumpDir.c_str());
+    if (!audioDumpDir.empty())
+    {
+        m_audioDumpDir = audioDumpDir;
+        auto tmpFilePath = PAL::AppendPath(m_audioDumpDir, s_tmpAudioDumpFileName);
+        auto err = PAL::fopen_s(&m_audioDumpFile, tmpFilePath.c_str(), "wb");
+        if (err != 0)
+        {
+            SPX_TRACE_ERROR("%s: (0x%8p) FAILED to open audio dump file %s for write (Error=%d)", __FUNCTION__, (void*)this, tmpFilePath.c_str(), err);
+        }
+        else
+        {
+            SPX_DBG_TRACE_VERBOSE("%s: (0x%8p) Writing audio dump to file %s", __FUNCTION__, (void*)this, tmpFilePath.c_str());
+        }
+    }
+}
+#endif
+
+DataChunkPtr CSpxUspRecoEngineAdapter::MakeDataChunkForAudioFormat(SPXWAVEFORMATEX* pformat)
+{
+    static const uint16_t cbTag = 4;
+    static const uint16_t cbChunkType = 4;
+    static const uint16_t cbChunkSize = 4;
+
+    uint32_t cbFormatChunk = sizeof(SPXWAVEFORMAT) + pformat->cbSize;
+    uint32_t cbRiffChunk = 0;       // NOTE: This isn't technically accurate for a RIFF/WAV file, but it's fine for Truman/Newman/Skyman
+    uint32_t cbDataChunk = 0;       // NOTE: Similarly, this isn't technically correct for the 'data' chunk, but it's fine for Truman/Newman/Skyman
+
+    uint32_t cbHeader =
+        cbTag + cbChunkSize +       // 'RIFF' #size_of_RIFF#
+        cbChunkType +               // 'WAVE'
+        cbChunkType + cbChunkSize + // 'fmt ' #size_fmt#
+        cbFormatChunk +             // actual format
+        cbChunkType + cbChunkSize;  // 'data' #size_of_data#
+
+    // Allocate the buffer, and create a ptr we'll use to advance thru the buffer as we're writing stuff into it
+    auto buffer = SpxAllocSharedAudioBuffer(cbHeader);
+    auto ptr = buffer.get();
+
+    // The 'RIFF' header (consists of 'RIFF' followed by size of payload that follows)
+    ptr = FormatBufferWriteChars(ptr, "RIFF", cbTag);
+    ptr = FormatBufferWriteNumber(ptr, cbRiffChunk);
+
+    // The 'WAVE' chunk header
+    ptr = FormatBufferWriteChars(ptr, "WAVE", cbChunkType);
+
+    // The 'fmt ' chunk (consists of 'fmt ' followed by the total size of the SPXWAVEFORMAT(EX)(TENSIBLE), followed by the SPXWAVEFORMAT(EX)(TENSIBLE)
+    ptr = FormatBufferWriteChars(ptr, "fmt ", cbChunkType);
+    ptr = FormatBufferWriteNumber(ptr, cbFormatChunk);
+    ptr = FormatBufferWriteBytes(ptr, (uint8_t*)pformat, cbFormatChunk);
+
+    // The 'data' chunk is next
+    ptr = FormatBufferWriteChars(ptr, "data", cbChunkType);
+    ptr = FormatBufferWriteNumber(ptr, cbDataChunk);
+
+    // Now that we've prepared the header/buffer, send it along to Truman/Newman/Skyman via UspWrite
+    SPX_DBG_ASSERT(cbHeader == uint32_t(ptr - buffer.get()));
+    auto wavHeaderDataPtr = std::make_shared<DataChunk>(buffer, cbHeader);
+    wavHeaderDataPtr->isWavHeader = true;
+
+    return wavHeaderDataPtr;
+}
+
 
 void CSpxUspRecoEngineAdapter::OnTranslationHypothesis(const USP::TranslationHypothesisMsg& message)
 {
@@ -1690,12 +1741,15 @@ void CSpxUspRecoEngineAdapter::OnTurnEnd(const USP::TurnEndMsg& message)
 
     if (requestMute)
     {
-        SPX_DBG_TRACE_VERBOSE("%s: UspWriteFlush()  USP-FLUSH", __FUNCTION__);
-        UspWriteFlush();
+        SPX_DBG_TRACE_VERBOSE("%s: FlushAudio()  USP-FLUSH", __FUNCTION__);
+        FlushAudio();
 
         SPX_DBG_TRACE_VERBOSE("%s: site->AdapterRequestingAudioMute(true) ... (audioState/uspState=%d/%d)", __FUNCTION__, m_audioState, m_uspState);
         site->AdapterRequestingAudioMute(this, true);
     }
+
+    // Disposing of the codec.
+    m_compressionCodec.reset();
 
 #ifdef _DEBUG
     if (m_audioDumpFile)
@@ -2269,6 +2323,57 @@ bool CSpxUspRecoEngineAdapter::ChangeState(AudioState fromAudioState, UspState f
     return false;
 }
 
+SPXHR CSpxUspRecoEngineAdapter::PrepareCompressionCodec(
+                                    const SPXWAVEFORMATEX* format,
+                                    ISpxInternalAudioCodecAdapter::SPXCompressedDataCallback dataCallback)
+{
+    m_compressionCodec.reset();
+
+    SPX_DBG_TRACE_VERBOSE("%s: Prepare compression codec.", __FUNCTION__);
+
+    auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
+    SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_USP_SITE_FAILURE);
+
+    std::string codecModule = properties->GetStringValue("SPEECH-Compression-Codec-Module");
+    SPX_IFTRUE_RETURN_HR(codecModule.length() == 0, SPXERR_NOT_FOUND);
+
+    // it should come as empty or audio/silk for now
+    std::string encodingFormat = properties->GetStringValue("SPEECH-Compression-EncodingFormat");
+
+    auto codecAdapter = SpxCreateObjectWithSite<ISpxInternalAudioCodecAdapter>("CSpxInternalAudioCodecAdapter", this);
+    SPX_RETURN_ON_FAIL(codecAdapter->Load(codecModule, encodingFormat, dataCallback));
+
+    codecAdapter->InitCodec(format);
+    m_compressionCodec = codecAdapter;
+
+    return SPX_NOERROR;
+}
+
+void CSpxUspRecoEngineAdapter::HandleCompressedAudioData(const uint8_t* outData, size_t nBytesOut)
+{
+    // Handle null / 0 bytes of data on ending the stream
+    if (outData == nullptr || nBytesOut == 0)
+    {
+        // NOOP
+        return;
+    }
+
+    // Gets the compressed audio data
+    auto data = SpxAllocSharedAudioBuffer(nBytesOut);
+    memcpy(data.get(), outData, nBytesOut);
+
+    // BUGBUG: Track audio timestamps as well
+    auto dataChunkPtr = std::make_shared<DataChunk>(data, (uint32_t)nBytesOut);
+
+    if (!m_audioFormatSent)
+    {
+        dataChunkPtr->contentType = m_compressionCodec->GetContentType();
+        m_audioFormatSent = true;
+    }
+
+    UspWriteActual(dataChunkPtr);
+}
+
 void CSpxUspRecoEngineAdapter::PrepareFirstAudioReadyState(const SPXWAVEFORMATEX* format)
 {
     SPX_DBG_ASSERT(IsState(AudioState::Ready, UspState::Idle));
@@ -2283,6 +2388,14 @@ void CSpxUspRecoEngineAdapter::PrepareFirstAudioReadyState(const SPXWAVEFORMATEX
         ResetBeforeFirstAudio();
     }
 
+    auto codecInitResult = PrepareCompressionCodec(format,
+        [this](const uint8_t* outData, size_t nBytesOut)
+        {
+            HandleCompressedAudioData(outData, nBytesOut);
+        });
+
+    SPX_DBG_TRACE_VERBOSE_IF(SPX_FAILED(codecInitResult), "%s: (0x%8p)->PrepareCompressionCodec() failed: %8lx. Sending the audio uncompressed", __FUNCTION__, (void*)this, (unsigned long)codecInitResult);
+
     PrepareAudioReadyState();
 }
 
@@ -2292,6 +2405,7 @@ void CSpxUspRecoEngineAdapter::PrepareAudioReadyState()
     {
         SPX_TRACE_ERROR("wrong state in PrepareAudioReadyState current audio state %d, usp state %d", m_audioState, m_uspState);
     }
+
     EnsureUspInit();
 }
 
@@ -2302,7 +2416,18 @@ void CSpxUspRecoEngineAdapter::SendPreAudioMessages()
     UspSendSpeechContext();
     UspSendSpeechAgentContext();
     UspSendSpeechEvent();
-    UspWriteFormat(m_format.get());
+}
+
+void CSpxUspRecoEngineAdapter::PrepareUspAudioStream()
+{
+    SendPreAudioMessages();
+    m_audioFormatSent = false;
+
+#ifdef _DEBUG
+    OpenAudioDumpFile();
+#endif
+
+    ProcessAudioFormat(m_format.get());
 }
 
 bool CSpxUspRecoEngineAdapter::ShouldResetAfterError()

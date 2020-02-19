@@ -58,6 +58,7 @@ private:
         std::string m_strPassthroughCertFile;
         std::string m_strOfflineModelPathRoot;
         std::string m_strOfflineModelLanguage;
+        std::string m_strWireCompression;
 
         bool m_fRecognizeOnceAsync = false;
 
@@ -279,6 +280,7 @@ private:
     std::string m_offlineModelPathRoot;
     std::string m_offlineModelLanguage;
     std::string m_kwsTable;
+    std::string m_wireCodec;
 
     void* m_commandSystem = nullptr;
     std::shared_ptr<PullAudioInputStream> m_pullAudioStream;

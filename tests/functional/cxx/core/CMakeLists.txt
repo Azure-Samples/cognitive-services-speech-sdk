@@ -23,6 +23,12 @@ set(SOURCES
     "${SRC_DIR}/speech_context_json_test.cpp"
     )
 
+if(EXTENSION_AUDIOCOMPRESSION_ENABLED)
+  list(APPEND SOURCES
+    "${SRC_DIR}/compression_codec_test.cpp"
+  )
+endif()
+
 source_group("Source Files" FILES ${SOURCES})
 source_group("Header Files" FILES ${TEST_HEADERS})
 

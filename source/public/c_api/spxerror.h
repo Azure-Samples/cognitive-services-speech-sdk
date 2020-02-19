@@ -310,3 +310,15 @@ typedef uintptr_t SPXHR;
 /// Added in version 1.8.0.
 /// </summary>
 #define SPXERR_CANCELED  __SPX_ERRCODE_FAILED(0x032)
+
+/// <summary>
+/// Codec for compression could not be initialized.
+/// Added in version 1.10.0.
+/// </summary>
+#define SPXERR_COMPRESS_AUDIO_CODEC_INITIFAILED    __SPX_ERRCODE_FAILED(0x033)
+
+/// <summary>
+/// Data not available.
+/// Added in version 1.10.0.
+/// </summary>
+#define SPXERR_DATA_NOT_AVAILABLE    __SPX_ERRCODE_FAILED(0x034)

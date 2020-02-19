@@ -200,6 +200,15 @@ bool CarbonTestConsole::ParseConsoleArgs(const std::vector<std::string>& args, C
             pstrNextArg = &pconsoleArgs->m_strIntentNames;
             fNextArgRequired = true;
         }
+        else if (PAL::strnicmp(pszArg, "--wireCompressionCodec", strlen("--wireCompressionCodec")) == 0)
+        {
+            fShowOptions = pconsoleArgs->m_strWireCompression.length() > 0 || fNextArgRequired;
+
+            // Use silk as default value
+            pconsoleArgs->m_strWireCompression = "Silk";
+            pstrNextArg = &pconsoleArgs->m_strWireCompression;
+            fNextArgRequired = false;
+        }
         else if (PAL::stricmp(pszArg, "--single") == 0)
         {
             fShowOptions = pconsoleArgs->m_fContinuousRecognition || fNextArgRequired;
@@ -261,7 +270,7 @@ bool CarbonTestConsole::ParseConsoleArgs(const std::vector<std::string>& args, C
         }
         else if (pstrNextArg != NULL)
         {
-            fShowOptions = pstrNextArg->length() > 0;
+            // We may get here even if fNextArgRequired is set to false. In this case pstrNextArg will not be null but may be populated with a default which will be overwritten. 
             *pstrNextArg = pszArg;
             pstrNextArg = NULL;
             fNextArgRequired = false;
@@ -426,6 +435,8 @@ void CarbonTestConsole::DisplayConsoleUsage()
     ConsoleWriteLine("");
     ConsoleWriteLine("       --debug                 Stops execution and waits (max 30s) for debugger.");
     ConsoleWriteLine("       --interactive           Allows interactive Carbon use via console window.");
+    ConsoleWriteLine("");
+    ConsoleWriteLine("       --wireCompressionCodec[:{SILK}]   Allows interactive Carbon to compress audio over the wire. At this time only SILK is supported");
     ConsoleWriteLine("");
 }
 
@@ -1649,6 +1660,11 @@ void CarbonTestConsole::InitGlobalParameters(ConsoleArgs* pconsoleArgs)
         m_intentAppId = pconsoleArgs->m_strIntentAppId;
     }
 
+    if (!pconsoleArgs->m_strWireCompression.empty())
+    {
+        m_wireCodec = pconsoleArgs->m_strWireCompression;
+    }
+
     if (!pconsoleArgs->m_strIntentNames.empty())
     {
         std::string::size_type i, j;
@@ -1736,6 +1752,12 @@ void CarbonTestConsole::InitRecognizer(const std::string& recognizerType, const 
         if (!proxyHost.empty() && !proxyPort.empty())
         {
             sc->SetProxy(proxyHost, std::stoi(proxyPort));
+        }
+
+        if (!m_wireCodec.empty())
+        {
+            sc->SetProperty("SPEECH-Compression-Codec-Module", "Microsoft.CognitiveServices.Speech.extension.silk_codec.dll");
+            sc->SetProperty("SPEECH-Compression-EncodingFormat", m_wireCodec);
         }
 
         if (!passthroughCertFile.empty())

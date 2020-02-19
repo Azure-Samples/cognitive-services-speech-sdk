@@ -47,6 +47,7 @@ struct DataChunk
     const std::chrono::system_clock::time_point receivedTime; // The receive time of audio chunk.
     std::string capturedTime;
     std::string userId;
+    std::string contentType;
     bool isWavHeader;
 };
 
