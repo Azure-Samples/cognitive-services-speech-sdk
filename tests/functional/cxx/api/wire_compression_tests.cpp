@@ -204,6 +204,16 @@ TEST_CASE("ContinuousRecognitionAsync with compressed audio - multiple recognize
 
 TEST_CASE("ContinuousRecognitionAsync with compressed audio - long dictation", "[!hide][api][cxx]")
 {
+    // This works as a semi - manual test for reconnecting after a disconnect :
+    // This test takes about 1 minute to complete.
+    //    1. Test : Change the call to create recognizer with a proxy :
+    //      auto recognizer = CreateRecognizers<SpeechRecognizer>(ROOT_RELATIVE_PATH(c_utteranceId), true, __true__);
+    //    2. Fiddler: Start Fiddler(optional : press F12 to stop automatic tracking of applications and clear the window)
+    //    3. Test : Run the test
+    //    4. Fiddler : After ~15s right click on the session showing in fiddler and pick "Abort Session"
+    //    5. Fiddler : Check a new session was created and it keeps going.
+    //    6. Test : test passes.Some times it may fail especially if ran under debugger but it is the same behavior as in the case without audio compression
+
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
     UseMocks(false);
     const auto c_utteranceId = MULTIPLE_UTTERANCE_ENGLISH;

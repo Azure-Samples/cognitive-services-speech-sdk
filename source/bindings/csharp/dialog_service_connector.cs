@@ -29,7 +29,7 @@ namespace Microsoft.CognitiveServices.Speech.Dialog
 
 
         /// <summary>
-        /// Signal that indicates the start of a listening session.
+        /// Signal that indicates the start of a listening session. See also <see cref="SessionEventArgs"/>.
         /// </summary>
         public event EventHandler<SessionEventArgs> SessionStarted
         {
@@ -52,7 +52,7 @@ namespace Microsoft.CognitiveServices.Speech.Dialog
         }
 
         /// <summary>
-        /// Signal that indicates the end of a listening session.
+        /// Signal that indicates the end of a listening session. See also <see cref="SessionEventArgs"/>.
         /// </summary>
         public event EventHandler<SessionEventArgs> SessionStopped
         {
@@ -75,7 +75,7 @@ namespace Microsoft.CognitiveServices.Speech.Dialog
         }
 
         /// <summary>
-        /// Signal for events containing speech recognition results.
+        /// Signal for events containing speech recognition results. See also <see cref="SpeechRecognitionEventArgs"/>.
         /// </summary>
         public event EventHandler<SpeechRecognitionEventArgs> Recognized
         {
@@ -98,7 +98,7 @@ namespace Microsoft.CognitiveServices.Speech.Dialog
         }
 
         /// <summary>
-        /// Signal for events containing intermediate recognition results.
+        /// Signal for events containing intermediate recognition results. See also <see cref="SpeechRecognitionEventArgs"/>.
         /// </summary>
         public event EventHandler<SpeechRecognitionEventArgs> Recognizing
         {
@@ -121,7 +121,7 @@ namespace Microsoft.CognitiveServices.Speech.Dialog
         }
 
         /// <summary>
-        /// Signal for events relating to the cancellation of an interaction.
+        /// Signal for events relating to the cancellation of an interaction. See also <see cref="SpeechRecognitionCanceledEventArgs"/>.
         /// </summary>
         public event EventHandler<SpeechRecognitionCanceledEventArgs> Canceled
         {
@@ -144,7 +144,7 @@ namespace Microsoft.CognitiveServices.Speech.Dialog
         }
 
         /// <summary>
-        /// Signal that an activity was received from the backing dialog.
+        /// Signal that an activity was received from the backing dialog. See also <see cref="ActivityReceivedEventArgs"/>.
         /// </summary>
         public event EventHandler<ActivityReceivedEventArgs> ActivityReceived
         {
