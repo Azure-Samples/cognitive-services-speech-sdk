@@ -165,6 +165,18 @@ void CSpxAudioPump::PumpThread(std::shared_ptr<CSpxAudioPump> keepAlive, std::sh
         SPX_DBG_ASSERT(channels >= 1);
 
         auto bytesPerFrame = samplesPerSec / framesPerSec * bytesPerSample * channels;
+
+        auto processorProperties = SpxQueryService<ISpxNamedProperties>(pISpxAudioProcessor);
+        if (processorProperties)
+        {
+            auto overrideBytesPerFrame = processorProperties->GetStringValue("SPEECH-BytesPerFrame", "");
+            if(!overrideBytesPerFrame.empty())
+            {
+                bytesPerFrame = stoi(overrideBytesPerFrame);
+                SPX_TRACE_INFO("%s -- BytesPerFrame override used, %d bytes will be pulled for each frame", __FUNCTION__, bytesPerFrame);
+            }
+        }
+
         auto data = SpxAllocSharedAudioBuffer(bytesPerFrame);
 
         // When the pump is pumping, m_state is only changed in this lambda, on the background thread

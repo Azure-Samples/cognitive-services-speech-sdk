@@ -2269,10 +2269,11 @@ void CSpxAudioStreamSession::StartAudioPump(RecognitionKind startKind, std::shar
     {
         // Disable the fast lane for KWS.
         auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
-        auto hasProperty = properties->GetStringValue("SPEECH-TransmitLengthBeforThrottleMs", "");
-        if (hasProperty.empty())
+
+        // It was spelled wrong originally. Check both until Carbon 2.0.
+        if(!properties->HasStringValue("SPEECH-TransmitLengthBeforThrottleMs") && !properties->HasStringValue("SPEECH-TransmitLengthBeforeThrottleMs"))
         {
-            properties->SetStringValue("SPEECH-TransmitLengthBeforThrottleMs", "0");
+            properties->SetStringValue("SPEECH-TransmitLengthBeforeThrottleMs", "0");
         }
     }
 
@@ -2426,7 +2427,10 @@ void CSpxAudioStreamSession::SetThrottleVariables(const SPXWAVEFORMATEX* format)
     // Look for runtime buffer overrides. These are set once when the buffer is created.
     auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
     m_maxBufferedBeforeOverflow = seconds(stoi(properties->GetStringValue("SPEECH-MaxBufferSizeSeconds", maxBufferDefault)));
-    m_maxTransmittedInFastLane = milliseconds(stoi(properties->GetStringValue("SPEECH-TransmitLengthBeforThrottleMs", "5000")));
+
+    // If the misspelled (old) value is set and the new (correct) one is not, use the old. Else use the new.
+    const char *throttleFastLaneName = properties->HasStringValue("SPEECH-TransmitLengthBeforThrottleMs") && !properties->HasStringValue("SPEECH-TransmitLengthBeforeThrottleMs") ? "SPEECH-TransmitLengthBeforThrottleMs" : "SPEECH-TransmitLengthBeforeThrottleMs";
+    m_maxTransmittedInFastLane = milliseconds(stoi(properties->GetStringValue(throttleFastLaneName, "5000")));
 
     m_avgBytesPerSecond = format->nAvgBytesPerSec;
     m_maxFastLaneSizeBytes = (m_avgBytesPerSecond / 1000) * m_maxTransmittedInFastLane.count();
