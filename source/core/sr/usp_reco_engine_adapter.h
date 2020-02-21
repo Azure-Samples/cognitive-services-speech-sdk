@@ -273,6 +273,7 @@ private:
 
 #ifdef _DEBUG
     void OpenAudioDumpFile();
+    void CloseAudioDumpFile();
 #endif
 
     DataChunkPtr MakeDataChunkForAudioFormat(SPXWAVEFORMATEX* pformat);
@@ -326,6 +327,10 @@ private:
     std::unordered_map<std::string, Microsoft::CognitiveServices::Speech::USP::MessageType> m_message_name_to_type_map;
 
 #ifdef _DEBUG
+    static std::atomic<unsigned int> s_nextAudioLogFileIndex;
+    unsigned int m_audioLogFileIndex;
+    std::string m_tempAudioLogFileName;
+
     FILE* m_audioDumpFile = nullptr;
     std::string m_audioDumpDir;
     std::string m_audioDumpInstTag;
