@@ -35,6 +35,9 @@ public class Main {
             recognizer.addIntent(model, "YourLanguageUnderstandingIntentName2", "id2");
             recognizer.addIntent(model, "YourLanguageUnderstandingIntentName3", "any-IntentId-here");
 
+            // Add all of the possible intents from a LUIS model to the recognizer.
+            recognizer.addAllIntents(model);
+
             System.out.println("Say something...");
 
             // Starts recognition. It returns when the first utterance has been recognized.

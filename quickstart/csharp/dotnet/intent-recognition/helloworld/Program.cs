@@ -34,6 +34,9 @@ namespace helloworld
                 recognizer.AddIntent(model, "YourLanguageUnderstandingIntentName2", "id2");
                 recognizer.AddIntent(model, "YourLanguageUnderstandingIntentName3", "any-IntentId-here");
 
+                // Add all of the possible intents from a LUIS model to the recognizer.
+                recognizer.AddAllIntents(model);
+
                 // Starts recognizing.
                 Console.WriteLine("Say something...");
 

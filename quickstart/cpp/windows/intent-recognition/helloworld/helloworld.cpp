@@ -33,6 +33,9 @@ void recognizeIntent()
     recognizer->AddIntent(model, "YourLanguageUnderstandingIntentName2", "id2");
     recognizer->AddIntent(model, "YourLanguageUnderstandingIntentName3", "any-IntentId-here");
 
+    // Add all of the possible intents from a LUIS model to the recognizer.
+    recognizer->AddAllIntents(model);
+
     cout << "Say something...\n";
 
     // Starts intent recognition, and returns after a single utterance is recognized. The end of a
