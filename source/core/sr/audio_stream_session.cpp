@@ -34,6 +34,7 @@ TRACELOGGING_DEFINE_PROVIDER(tracingEventProvider,
 #endif
 
 #include "audio_stream_session.h"
+#include "speech_audio_processor.h"
 #include "spxcore_common.h"
 #include "asyncop.h"
 #include "create_object_helpers.h"
@@ -158,6 +159,7 @@ void CSpxAudioStreamSession::Term()
     SpxTermAndClear(m_siteKeepAlive);
     SpxTermAndClear(m_codecAdapter);
     m_audioProcessor = nullptr;
+    m_speechProcessor = nullptr;
     m_audioBuffer = nullptr;
 }
 
@@ -488,11 +490,13 @@ bool CSpxAudioStreamSession::ProcessNextAudio()
     {
         AudioBufferPtr buffer;
         std::shared_ptr<ISpxAudioProcessor> processor;
+        std::shared_ptr<ISpxAudioProcessor> speechProcessor;
         bool isKwsProcessor = false;
 
         {
             buffer = m_audioBuffer;
             processor = m_audioProcessor;
+            speechProcessor = m_speechProcessor;
             isKwsProcessor = m_isKwsProcessor;
         }
 
@@ -513,6 +517,12 @@ bool CSpxAudioStreamSession::ProcessNextAudio()
             }
 
             processor->ProcessAudio(item);
+
+            if (speechProcessor)
+            {
+                speechProcessor->ProcessAudio(item);
+            }
+
             if (item->size > 0)
             {
                 m_fireEndOfStreamAtSessionStop = false;
@@ -1431,20 +1441,24 @@ void CSpxAudioStreamSession::AdapterEndOfDictation(ISpxRecoEngineAdapter*, uint6
 void CSpxAudioStreamSession::AdapterDetectedSpeechStart(ISpxRecoEngineAdapter* adapter, uint64_t offset)
 {
     UNUSED(adapter);
+    if (!m_speechProcessor)
+    {
+        auto buffer = m_audioBuffer;
+        offset = buffer ? buffer->ToAbsolute(offset) : offset;
 
-    auto buffer = m_audioBuffer;
-    offset = buffer ? buffer->ToAbsolute(offset) : offset;
-
-    FireSpeechStartDetectedEvent(offset);
+        FireSpeechStartDetectedEvent(offset);
+    }
 }
 
 void CSpxAudioStreamSession::AdapterDetectedSpeechEnd(ISpxRecoEngineAdapter* adapter, uint64_t originalOffset)
 {
     UNUSED(adapter);
-
-    auto buffer = m_audioBuffer;
-    auto offset = buffer ? buffer->ToAbsolute(originalOffset) : originalOffset;
-    FireSpeechEndDetectedEvent(offset);
+    if (!m_speechProcessor)
+    {
+        auto buffer = m_audioBuffer;
+        auto offset = buffer ? buffer->ToAbsolute(originalOffset) : originalOffset;
+        FireSpeechEndDetectedEvent(offset);
+    }
 }
 
 void CSpxAudioStreamSession::AdapterDetectedSoundStart(ISpxRecoEngineAdapter* adapter, uint64_t offset)
@@ -1948,6 +1962,13 @@ std::shared_ptr<ISpxRecoEngineAdapter> CSpxAudioStreamSession::EnsureInitRecoEng
     return m_recoAdapter;
 }
 
+std::shared_ptr < ISpxSpeechAudioProcessorAdapter> CSpxAudioStreamSession::EnsureInitSpeechProcessor()
+{
+    std::shared_ptr < ISpxSpeechAudioProcessorAdapter> retval = SpxCreateObjectWithSite<ISpxSpeechAudioProcessorAdapter>("CSpxSpeechAudioProcessor", this);
+    m_speechProcessor = SpxQueryInterface<ISpxAudioProcessor>(retval);
+    return retval;
+}
+
 void CSpxAudioStreamSession::InitRecoEngineAdapter()
 {
     SPX_DBG_TRACE_FUNCTION();
@@ -2311,6 +2332,20 @@ void CSpxAudioStreamSession::StartAudioPump(RecognitionKind startKind, std::shar
         : SpxQueryInterface<ISpxAudioProcessor>(EnsureInitRecoEngineAdapter());
     m_isKwsProcessor = (startKind == RecognitionKind::Keyword);
 
+    // Should be conditional based on a property
+    if (PAL::ToBool(GetStringValue("UseLocalSpeechDetection", PAL::BoolToString(false).c_str())))
+    {
+        uint32_t energy = stoul(GetStringValue("LocalSpeechDetectionThreshold", "180").c_str());
+        uint32_t count = stoul(GetStringValue("LocalSpeechDetectionSilenceCount", "10").c_str());
+
+        std::shared_ptr<ISpxSpeechAudioProcessorAdapter> speechAdapter = EnsureInitSpeechProcessor();
+        if (speechAdapter)
+        {
+            speechAdapter->SetSpeechDetectionThreshold(energy);
+            speechAdapter->SetSpeechDetectionSilenceCount(count);
+        }
+    }
+
     // Start pumping audio data from the pump, to the Audio Stream Session
     auto ptr = (ISpxAudioProcessor*)this;
     auto pISpxAudioProcessor = ptr->shared_from_this();
@@ -2418,6 +2453,11 @@ void CSpxAudioStreamSession::InformAdapterSetFormatStarting(const SPXWAVEFORMATE
     {
         m_audioProcessor->SetFormat(format);
     }
+
+    if (m_speechProcessor)
+    {
+        m_speechProcessor->SetFormat(format);
+    }
 }
 
 void CSpxAudioStreamSession::SetThrottleVariables(const SPXWAVEFORMATEX* format)
@@ -2473,6 +2513,12 @@ void CSpxAudioStreamSession::InformAdapterSetFormatStopping(SessionState comingF
         {
             m_audioProcessor->SetFormat(nullptr);
         }
+
+        if (m_speechProcessor)
+        {
+            m_speechProcessor->SetFormat(nullptr);
+        }
+
         m_adapterAudioMuted = false;
     }
 }
@@ -2539,6 +2585,16 @@ void CSpxAudioStreamSession::AdapterCompletedSetFormatStop(AdapterDoneProcessing
     {
         SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::AdapterCompletedSetFormatStop:  Is this OK? doneAdapter=%d; sessionState=%d **************************", (void*)this, doneAdapter, m_sessionState);
     }
+}
+
+void CSpxAudioStreamSession::SpeechStartDetected(uint64_t offset)
+{
+    FireSpeechStartDetectedEvent(offset);
+}
+
+void CSpxAudioStreamSession::SpeechEndDetected(uint64_t offset)
+{
+    FireSpeechEndDetectedEvent(offset);
 }
 
 bool CSpxAudioStreamSession::IsKind(RecognitionKind kind)

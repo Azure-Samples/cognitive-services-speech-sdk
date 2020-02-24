@@ -1092,6 +1092,48 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
+        public async Task DictationRecognitionWithLocalSpeechDetection()
+        {
+            this.defaultConfig.EnableDictation();
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_WITH_PUNCTUATION].FilePath.GetRootRelativePath());
+            ManualResetEvent startEvent = new ManualResetEvent(false);
+            ManualResetEvent endEvent = new ManualResetEvent(false);
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
+            {
+                recognizer.Properties.SetProperty("UseLocalSpeechDetection", "true");
+                List<string> recognizedText = new List<string>();
+                recognizer.SpeechStartDetected += (sender, e) =>
+                {
+                    startEvent.Set();
+                };
+
+                recognizer.SpeechEndDetected += (sender, e) =>
+                {
+                    endEvent.Set();
+                };
+
+                recognizer.Recognized += (s, e) =>
+                {
+                    Console.WriteLine($"Received result '{e.ToString()}'");
+                    if (e.Result.Text.Length > 0)
+                    {
+                        recognizedText.Add(e.Result.Text);
+                    }
+                };
+
+                await helper.CompleteContinuousRecognition(recognizer);
+                var connectionUrl = recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_Url);
+                Assert.IsTrue(connectionUrl.Contains("speech/recognition/dictation/cognitiveservices"), "mismatch dictation mode in " + connectionUrl);
+                Assert.AreEqual(1, recognizedText.Count, "The number of recognized texts is not 1, but " + recognizedText.Count);
+                AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_WITH_PUNCTUATION].Utterances[Language.EN][0].Text, recognizedText[0]);
+                bool start = startEvent.WaitOne(100);
+                bool end = endEvent.WaitOne(100);
+                Assert.AreEqual(true, start, "expected SpeechStartDetected but did not receive");
+                Assert.AreEqual(true, end, "expected SpeechEndDetected but did not receive");
+            }
+        }
+
+        [TestMethod]
         public async Task DictationRecognizeOnce()
         {
             this.defaultConfig.EnableDictation();

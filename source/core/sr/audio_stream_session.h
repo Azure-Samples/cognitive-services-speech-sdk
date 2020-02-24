@@ -34,6 +34,7 @@ class CSpxAudioStreamSession :
     public ISpxRecognizerSite,
     public ISpxLuEngineAdapterSite,
     public ISpxKwsEngineAdapterSite,
+    public ISpxSpeechAudioProcessorAdapterSite,
     public ISpxAudioPumpSite,
     public ISpxRecoEngineAdapterSite,
     public ISpxRecoResultFactory,
@@ -57,6 +58,7 @@ public:
         SPX_INTERFACE_MAP_ENTRY(ISpxRecognizerSite)
         SPX_INTERFACE_MAP_ENTRY(ISpxLuEngineAdapterSite)
         SPX_INTERFACE_MAP_ENTRY(ISpxKwsEngineAdapterSite)
+        SPX_INTERFACE_MAP_ENTRY(ISpxSpeechAudioProcessorAdapterSite)
         SPX_INTERFACE_MAP_ENTRY(ISpxAudioPumpSite)
         SPX_INTERFACE_MAP_ENTRY(ISpxRecoEngineAdapterSite)
         SPX_INTERFACE_MAP_ENTRY(ISpxRecoResultFactory)
@@ -128,6 +130,10 @@ public:
     // --- ISpxKwsEngineAdapterSite
     void KeywordDetected(ISpxKwsEngineAdapter* adapter, uint64_t offset, uint64_t duration, double confidence, const std::string& keyword, const DataChunkPtr& audioChunk) override;
     void AdapterCompletedSetFormatStop(ISpxKwsEngineAdapter* /* adapter */) override { AdapterCompletedSetFormatStop(AdapterDoneProcessingAudio::Keyword); }
+
+    // --- ISpxSpeechAudioProcessorAdapterSite
+    void SpeechStartDetected(uint64_t offset) override;
+    void SpeechEndDetected(uint64_t offset) override;
 
     // --- ISpxRecoEngineAdapterSite (first part...)
     void GetScenarioCount(uint16_t* countSpeech, uint16_t* countIntent, uint16_t* countTranslation, uint16_t* countDialog, uint16_t* countTranscriber) override;
@@ -240,6 +246,7 @@ private:
 private:
     std::packaged_task<void()> CreateTask(std::function<void()> func, bool catchAll = true);
     std::shared_ptr<ISpxRecoEngineAdapter> EnsureInitRecoEngineAdapter();
+    std::shared_ptr<ISpxSpeechAudioProcessorAdapter> EnsureInitSpeechProcessor();
     void InitRecoEngineAdapter();
 
     void StartResetEngineAdapter();
@@ -365,6 +372,7 @@ private:
     // In order to reliably deliver audio, we always swap audio processor
     // together with its audio buffer. Otherwise data can be processed by a stale processor
     std::shared_ptr<ISpxAudioProcessor> m_audioProcessor;
+    std::shared_ptr<ISpxAudioProcessor> m_speechProcessor;
     bool m_isKwsProcessor;
     AudioBufferPtr m_audioBuffer;
     DataChunkPtr m_spottedKeyword;

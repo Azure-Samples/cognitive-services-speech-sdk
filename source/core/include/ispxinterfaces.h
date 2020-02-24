@@ -1295,6 +1295,22 @@ public:
     virtual void Error(const std::string& msg) = 0;
 };
 
+class ISpxSpeechAudioProcessorAdapter :
+    public ISpxAudioProcessor,
+    public ISpxInterfaceBaseFor<ISpxSpeechAudioProcessorAdapter>
+{
+public:
+    virtual void SetSpeechDetectionThreshold(uint32_t threshold) = 0;
+    virtual void SetSpeechDetectionSilenceCount(uint32_t count) = 0;
+};
+
+class ISpxSpeechAudioProcessorAdapterSite : public ISpxInterfaceBaseFor<ISpxSpeechAudioProcessorAdapterSite>
+{
+public:
+    virtual void SpeechStartDetected(uint64_t offset) = 0;
+    virtual void SpeechEndDetected(uint64_t offset) = 0;
+};
+
 class ISpxKwsEngineAdapter :
     public ISpxAudioProcessor,
     public ISpxInterfaceBaseFor<ISpxKwsEngineAdapter>
