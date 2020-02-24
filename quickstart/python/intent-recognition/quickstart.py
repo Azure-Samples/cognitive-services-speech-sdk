@@ -26,8 +26,8 @@ intents = [
 ]
 intent_recognizer.add_intents(intents)
 
-# add all of the possible intents from a LUIS model to the recognizer.
-intent_recognizer.add_all_intents(model);
+# To add all of the possible intents from a LUIS model to the recognizer, uncomment the line below:
+# intent_recognizer.add_all_intents(model);
 
 # Starts intent recognition, and returns after a single utterance is recognized. The end of a
 # single utterance is determined by listening for silence at the end or until a maximum of 15

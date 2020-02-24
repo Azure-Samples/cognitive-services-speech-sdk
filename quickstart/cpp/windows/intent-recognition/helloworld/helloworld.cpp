@@ -33,8 +33,8 @@ void recognizeIntent()
     recognizer->AddIntent(model, "YourLanguageUnderstandingIntentName2", "id2");
     recognizer->AddIntent(model, "YourLanguageUnderstandingIntentName3", "any-IntentId-here");
 
-    // Add all of the possible intents from a LUIS model to the recognizer.
-    recognizer->AddAllIntents(model);
+    // To add all of the possible intents from a LUIS model to the recognizer, uncomment the line below:
+    // recognizer->AddAllIntents(model);
 
     cout << "Say something...\n";
 
