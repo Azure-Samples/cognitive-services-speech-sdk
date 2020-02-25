@@ -1,3 +1,3 @@
-3CPO    three c p o
-CNTK    c n t k
-IEEE    i triple e
+﻿3CPO	three c p o
+CNTK	c n t k
+IEEE	i triple e
