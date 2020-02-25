@@ -89,9 +89,9 @@ namespace helloworld
             }
         }
 
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
-            TranslationContinuousRecognitionAsync().Wait();
+            await TranslationContinuousRecognitionAsync();
         }
     }
 }

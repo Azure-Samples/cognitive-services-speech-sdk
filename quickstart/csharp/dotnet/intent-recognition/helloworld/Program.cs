@@ -79,9 +79,9 @@ namespace helloworld
             }
         }
 
-        static void Main()
+        static async Task Main()
         {
-            RecognizeIntentAsync().Wait();
+            await RecognizeIntentAsync();
             Console.WriteLine("Please press <Return> to continue.");
             Console.ReadLine();
         }

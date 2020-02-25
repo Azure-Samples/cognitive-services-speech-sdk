@@ -35,8 +35,9 @@ namespace BatchClient
 
         static async Task Main()
         {
-            // For non-Windows 10 users.
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+            // Cognitive Services follows security best practices.
+            // If you experience connectivity issues, see:
+            // https://docs.microsoft.com/en-us/dotnet/framework/network-programming/tls
 
             await TranscribeAsync();
         }
