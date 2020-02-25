@@ -23,7 +23,9 @@ namespace helloworld
             // Once you've obtained it, replace with below with your own Language Understanding subscription key
             // and service region (e.g., "westus").
             // The default language is "en-us".
-            var config = SpeechConfig.FromSubscription("YourLanguageUnderstandingSubscriptionKey", "YourLanguageUnderstandingServiceRegion");
+            var config = SpeechConfig.FromSubscription(
+                "YourLanguageUnderstandingSubscriptionKey",
+                "YourLanguageUnderstandingServiceRegion");
 
             // Creates an intent recognizer using microphone as audio input.
             using (var recognizer = new IntentRecognizer(config))

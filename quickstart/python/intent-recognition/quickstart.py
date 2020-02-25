@@ -9,7 +9,9 @@ print("Say something...")
 """performs one-shot intent recognition from input from the default microphone"""
 
 # Set up the config for the intent recognizer (remember that this uses the Language Understanding key, not the Speech Services key)!
-intent_config = speechsdk.SpeechConfig(subscription="YourLanguageUnderstandingSubscriptionKey", region="YourLanguageUnderstandingServiceRegion")
+intent_config = speechsdk.SpeechConfig(
+    subscription="YourLanguageUnderstandingSubscriptionKey",
+    region="YourLanguageUnderstandingServiceRegion")
 
 # Set up the intent recognizer
 intent_recognizer = speechsdk.intent.IntentRecognizer(speech_config=intent_config)

@@ -24,7 +24,9 @@ public class Main {
             // and service region. Replace with your own subscription (endpoint) key
             // and service region (e.g., "westus2").
             // The default language is "en-us".
-            SpeechConfig config = SpeechConfig.fromSubscription("YourLanguageUnderstandingSubscriptionKey", "YourLanguageUnderstandingServiceRegion");
+            SpeechConfig config = SpeechConfig.fromSubscription(
+                "YourLanguageUnderstandingSubscriptionKey",
+                "YourLanguageUnderstandingServiceRegion");
 
             // Creates an intent recognizer using microphone as audio input.
             IntentRecognizer recognizer = new IntentRecognizer(config);

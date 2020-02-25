@@ -22,8 +22,10 @@ void recognizeIntent()
     // Once you've obtained it, replace with below with your own Language Understanding subscription key
     // and service region (e.g., "westus").
     // The default recognition language is "en-us".
-    auto config = SpeechConfig::FromSubscription("YourLanguageUnderstandingSubscriptionKey", "YourLanguageUnderstandingServiceRegion");
-    
+    auto config = SpeechConfig::FromSubscription(
+        "YourLanguageUnderstandingSubscriptionKey",
+        "YourLanguageUnderstandingServiceRegion");
+
     // Creates an intent recognizer using microphone as audio input.
     auto recognizer = IntentRecognizer::FromConfig(config);
 
