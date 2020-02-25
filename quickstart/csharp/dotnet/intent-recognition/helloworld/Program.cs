@@ -49,32 +49,32 @@ namespace helloworld
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
 
                 // Checks result.
-                if (result.Reason == ResultReason.RecognizedIntent)
+                switch (result.Reason)
                 {
-                    Console.WriteLine($"RECOGNIZED: Text={result.Text}");
-                    Console.WriteLine($"    Intent Id: {result.IntentId}.");
-                    Console.WriteLine($"    Language Understanding JSON: {result.Properties.GetProperty(PropertyId.LanguageUnderstandingServiceResponse_JsonResult)}.");
-                }
-                else if (result.Reason == ResultReason.RecognizedSpeech)
-                {
-                    Console.WriteLine($"RECOGNIZED: Text={result.Text}");
-                    Console.WriteLine($"    Intent not recognized.");
-                }
-                else if (result.Reason == ResultReason.NoMatch)
-                {
-                    Console.WriteLine($"NOMATCH: Speech could not be recognized.");
-                }
-                else if (result.Reason == ResultReason.Canceled)
-                {
-                    var cancellation = CancellationDetails.FromResult(result);
-                    Console.WriteLine($"CANCELED: Reason={cancellation.Reason}");
+                    case ResultReason.RecognizedIntent:
+                        Console.WriteLine($"RECOGNIZED: Text={result.Text}");
+                        Console.WriteLine($"    Intent Id: {result.IntentId}.");
+                        var json = result.Properties.GetProperty(PropertyId.LanguageUnderstandingServiceResponse_JsonResult);
+                        Console.WriteLine($"    Language Understanding JSON: {json}.");
+                        break;
+                    case ResultReason.RecognizedSpeech:
+                        Console.WriteLine($"RECOGNIZED: Text={result.Text}");
+                        Console.WriteLine($"    Intent not recognized.");
+                        break;
+                    case ResultReason.NoMatch:
+                        Console.WriteLine($"NOMATCH: Speech could not be recognized.");
+                        break;
+                    case ResultReason.Canceled:
+                        var cancellation = CancellationDetails.FromResult(result);
+                        Console.WriteLine($"CANCELED: Reason={cancellation.Reason}");
 
-                    if (cancellation.Reason == CancellationReason.Error)
-                    {
-                        Console.WriteLine($"CANCELED: ErrorCode={cancellation.ErrorCode}");
-                        Console.WriteLine($"CANCELED: ErrorDetails={cancellation.ErrorDetails}");
-                        Console.WriteLine($"CANCELED: Did you update the subscription info?");
-                    }
+                        if (cancellation.Reason == CancellationReason.Error)
+                        {
+                            Console.WriteLine($"CANCELED: ErrorCode={cancellation.ErrorCode}");
+                            Console.WriteLine($"CANCELED: ErrorDetails={cancellation.ErrorDetails}");
+                            Console.WriteLine($"CANCELED: Did you update the subscription info?");
+                        }
+                        break;
                 }
             }
         }
