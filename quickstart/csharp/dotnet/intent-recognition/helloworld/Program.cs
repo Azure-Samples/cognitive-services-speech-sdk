@@ -48,7 +48,7 @@ namespace helloworld
                 // Note: Since RecognizeOnceAsync() returns only a single utterance, it is suitable only for single
                 // shot recognition like command or query. 
                 // For long-running multi-utterance recognition, use StartContinuousRecognitionAsync() instead.
-                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+                var result = await recognizer.RecognizeOnceAsync();
 
                 // Checks result.
                 switch (result.Reason)
