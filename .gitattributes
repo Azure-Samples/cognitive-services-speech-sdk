@@ -1,3 +1,5 @@
+sampledata/* binary
+
 .gitattributes text
 .gitignore text
 Podfile text
@@ -59,4 +61,3 @@ proguard-rules.pro text
 *.table binary
 *.wav binary
 *.zip binary
-sampledata/* binary
