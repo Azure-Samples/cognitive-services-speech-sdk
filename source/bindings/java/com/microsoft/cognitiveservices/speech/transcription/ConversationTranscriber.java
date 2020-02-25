@@ -106,7 +106,7 @@ public final class ConversationTranscriber extends com.microsoft.cognitiveservic
 
         return s_executorService.submit(new java.util.concurrent.Callable<Void>() {
             public Void call() {
-                Runnable runnable = new Runnable() { public void run() { transcriberImpl.JoinConversationAsync(thisConv.getConversationImpl()); }};
+                Runnable runnable = new Runnable() { public void run() { transcriberImpl.JoinConversationAsync(thisConv.getConversationImpl()).Get(); }};
                 thisReco.doAsyncRecognitionAction(runnable);
                 return null;
         }});
@@ -123,7 +123,7 @@ public final class ConversationTranscriber extends com.microsoft.cognitiveservic
 
         return s_executorService.submit(new java.util.concurrent.Callable<Void>() {
             public Void call() {
-                Runnable runnable = new Runnable() { public void run() { transcriberImpl.LeaveConversationAsync(); }};
+                Runnable runnable = new Runnable() { public void run() { transcriberImpl.LeaveConversationAsync().Get(); }};
                 thisReco.doAsyncRecognitionAction(runnable);
                 return null;
         }});
@@ -139,7 +139,7 @@ public final class ConversationTranscriber extends com.microsoft.cognitiveservic
 
         return s_executorService.submit(new java.util.concurrent.Callable<Void>() {
             public Void call() {
-                Runnable runnable = new Runnable() { public void run() { transcriberImpl.StartTranscribingAsync(); }};
+                Runnable runnable = new Runnable() { public void run() { transcriberImpl.StartTranscribingAsync().Get(); }};
                 thisReco.doAsyncRecognitionAction(runnable);
                 return null;
         }});
@@ -155,7 +155,7 @@ public final class ConversationTranscriber extends com.microsoft.cognitiveservic
 
         return s_executorService.submit(new java.util.concurrent.Callable<Void>() {
             public Void call() {
-                Runnable runnable = new Runnable() { public void run() { transcriberImpl.StopTranscribingAsync(); }};
+                Runnable runnable = new Runnable() { public void run() { transcriberImpl.StopTranscribingAsync().Get(); }};
                 thisReco.doAsyncRecognitionAction(runnable);
                 return null;
         }});
