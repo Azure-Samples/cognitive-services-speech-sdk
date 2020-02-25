@@ -1748,7 +1748,7 @@ namespace ConversationTranslation {
                 // events
             }
 
-            bool isFinal;
+            bool isFinal = true;
             ResultReason reason;
 
             // TODO suppress empty finals without intermediate non-empty partials?

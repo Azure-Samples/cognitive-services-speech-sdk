@@ -5,6 +5,8 @@
 // file_logger.h: FileLogger() implementation declaration
 //
 
+#pragma once
+
 #include <string>
 #include <atomic>
 #include <ispxinterfaces.h>

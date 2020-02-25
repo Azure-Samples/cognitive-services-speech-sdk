@@ -177,7 +177,7 @@ namespace ConversationTranslation {
         /// </summary>
         /// <param name="participantId">The identifier for the current participant</param>
         /// <param name="conversationToken">The token to use to identify the conversation to connect to</param>
-        void Connect(const std::string& participantId, const std::string conversationToken);
+        void Connect(const std::string& participantId, const std::string& conversationToken);
 
         /// <summary>
         /// Disconnects the web socket connection

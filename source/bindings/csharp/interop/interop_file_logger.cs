@@ -44,7 +44,7 @@ namespace Microsoft.CognitiveServices.Speech.Internal
             }
 
             // we create a dummy speech config to wrap the file logger properties we want to set
-            var speechConfig = Speech.SpeechConfig.FromSubscription("123456789X123456789X123456789X12", "westus");
+            var speechConfig = Speech.SpeechConfig.FromSubscription("not_real", "not_real");
 
             speechConfig.SetProperty(Speech.PropertyId.Speech_LogFilename, logFile);
             if (appendToFile)

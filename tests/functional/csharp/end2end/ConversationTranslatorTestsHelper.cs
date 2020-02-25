@@ -194,6 +194,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
     public class ExpectedTranscription
     {
+        public ExpectedTranscription(string id, string text, string lang, IDictionary<string, string> translations)
+            : this(id, text, lang, 0, translations)
+        {
+        }
+
         public ExpectedTranscription(string id, string text, string lang, int min = 0, IDictionary<string, string> translations = null)
         {
             this.ParticipantId = id;
@@ -221,6 +226,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
     public class ConversationTranslatorCallbacks
     {
         private TaskCompletionSource<bool> _audioStreamCompleted;
+        private bool _hasConnection;
 
         public ConversationTranslatorCallbacks(ConversationTranslator convTrans)
         {
@@ -264,12 +270,22 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
         public IList<SessionEventArgs> SessionStarted { get; }
         public IList<SessionEventArgs> SessionStopped { get; }
+        public IList<ConnectionEventArgs> Connected { get; } = new List<ConnectionEventArgs>();
+        public IList<ConnectionEventArgs> Disconnected { get; } = new List<ConnectionEventArgs>();
         public IList<ConversationTranslationCanceledEventArgs> Canceled { get; }
         public IList<ConversationParticipantsChangedEventArgs> ParticipantsChanged { get; }
         public IList<ConversationExpirationEventArgs> ConversationExpiration { get; }
         public IList<ConversationTranslationResult> Transcribing { get; }
         public IList<ConversationTranslationResult> Transcribed { get; }
         public IList<ConversationTranslationResult> TextMessageReceived { get; }
+
+        public void AddConnectionCallbacks(Connection connection)
+        {
+            connection.Connected += (s, e) => Connected.Add(e.DumpToDebugOutput("Connected"));
+            connection.Disconnected += (s, e) => Disconnected.Add(e.DumpToDebugOutput("Disconnected"));
+
+            _hasConnection = true;
+        }
 
         public Task WaitForAudioStreamCompletion(int maxWaitMs, int waitAfter = 0)
             => WaitForAudioStreamCompletion(TimeSpan.FromMilliseconds(maxWaitMs), TimeSpan.FromMilliseconds(waitAfter));
@@ -300,12 +316,15 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             });
         }
 
-        public void VerifyBasicEvents(bool expectEndOfStream, bool expectSessionStopped, string name, bool isHost, out string participantId)
+        public void VerifyBasicEvents(bool expectEndOfStream, string name, bool isHost, out string participantId)
         {
             SPXTEST_REQUIRE(SessionStarted.Count > 0);
-            if (expectSessionStopped)
+            SPXTEST_REQUIRE(SessionStopped.Count > 0);
+
+            if (_hasConnection)
             {
-                SPXTEST_REQUIRE(SessionStopped.Count > 0);
+                SPXTEST_REQUIRE(Connected.Count > 0);
+                SPXTEST_REQUIRE(Disconnected.Count > 0);
             }
 
             if (expectEndOfStream)
@@ -340,6 +359,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
             SPXTEST_REQUIRE(ParticipantsChanged[1].Participants.Count == 1);
             SPXTEST_REQUIRE(ParticipantsChanged[1].Participants.First().DisplayName == name);
+        }
+
+        public void VerifyConnectionEvents(int expectedConnections, int expectedDisconnections)
+        {
+            SPXTEST_REQUIRE(Connected.Count == expectedConnections);
+            SPXTEST_REQUIRE(Disconnected.Count == expectedDisconnections);
         }
 
         public void VerifyTranscriptions(string participantId, params ExpectedTranscription[] expectedTranscriptions)
@@ -462,6 +487,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public Conversation Conversation { get; private set; }
         public ConversationTranslator Translator { get; private set; }
         public ConversationTranslatorCallbacks Events { get; private set; }
+        public Connection Connection { get; private set; }
 
         public async Task JoinAsync(AudioConfig audioConfig)
         {
@@ -488,6 +514,10 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     : new ConversationTranslator(audioConfig);
                 Events = new ConversationTranslatorCallbacks(Translator);
 
+                SPX_TRACE_INFO(">> [{0}] Creating connection", Name);
+                Connection = Connection.FromConversationTranslator(Translator);
+                Events.AddConnectionCallbacks(Connection);
+
                 SPX_TRACE_INFO(">> [{0}] Joining conversation", Name);
                 await Translator.JoinConversationAsync(Conversation, Name);
             }
@@ -499,6 +529,10 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     ? new ConversationTranslator()
                     : new ConversationTranslator(audioConfig);
                 Events = new ConversationTranslatorCallbacks(Translator);
+
+                SPX_TRACE_INFO(">> [{0}] Creating connection", Name);
+                Connection = Connection.FromConversationTranslator(Translator);
+                Events.AddConnectionCallbacks(Connection);
 
                 SPX_TRACE_INFO(">> [{0}] Joining conversation '{1}'", Name, ConversationId);
                 await Translator.JoinConversationAsync(ConversationId, Name, Lang);
@@ -552,7 +586,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public void VerifyBasicEvents(bool expectEndOfStream)
         {
             string partId;
-            Events.VerifyBasicEvents(expectEndOfStream, IsHost, Name, IsHost, out partId);
+            Events.VerifyBasicEvents(expectEndOfStream, Name, IsHost, out partId);
             ParticipantId = partId;
         }
 

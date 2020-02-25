@@ -104,7 +104,7 @@ namespace ConversationTranslation {
         m_callbackIds.clear();
     }
 
-    void ConversationConnection::Connect(const std::string& participantId, const std::string conversationToken)
+    void ConversationConnection::Connect(const std::string& participantId, const std::string& conversationToken)
     {
         if (m_webSocket != nullptr)
         {

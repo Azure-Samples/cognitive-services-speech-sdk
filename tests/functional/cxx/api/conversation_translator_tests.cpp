@@ -3,19 +3,29 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
+// Dump logs to the output stream in release builds
+#if !defined(DEBUG) && !defined(_DEBUG)
+#define INTEGRATION_TEST_LOG_AND_DUMP
+#endif
+
 #include <speechapi_cxx_connection.h>
-#include "conversation_translator_utils.h"
 #include "recognizer_utils.h"
 #include "guid_utils.h"
+#include "dump_log_files_at_end.h"
+#include "conversation_translator_utils.h"
+
+#define CT_INTEGRATION_TEST_INIT \
+    UseMocks(false); \
+    LogToFileAndDumpAtEnd("ct_integration_test_log.txt")
 
 using namespace std;
 using namespace Microsoft::CognitiveServices::Speech::Impl;
 using namespace Microsoft::CognitiveServices::Speech::IntegrationTests;
 using namespace Microsoft::CognitiveServices::Speech::Transcription;
 
-
 TEST_CASE("Conversation host without translations", "[api][cxx][conversation_translator][cxx_conversation][no_translate]")
 {
+    CT_INTEGRATION_TEST_INIT;
     auto speechConfig = CreateConfig("en-US", {});
     auto conversation = Conversation::CreateConversationAsync(speechConfig).get();
     conversation->DeleteConversationAsync().get();
@@ -23,6 +33,7 @@ TEST_CASE("Conversation host without translations", "[api][cxx][conversation_tra
 
 TEST_CASE("Conversation host with translations", "[api][cxx][conversation_translator][cxx_conversation][translate]")
 {
+    CT_INTEGRATION_TEST_INIT;
     auto speechConfig = CreateConfig("en-US", { "fr" });
     auto conversation = Conversation::CreateConversationAsync(speechConfig).get();
     conversation->DeleteConversationAsync().get();
@@ -30,6 +41,7 @@ TEST_CASE("Conversation host with translations", "[api][cxx][conversation_transl
 
 TEST_CASE("Conversation host destructor", "[api][cxx][conversation_translator][cxx_conversation][destructor]")
 {
+    CT_INTEGRATION_TEST_INIT;
     auto speechConfig = CreateConfig("en-US", { "fr", "ar" });
     auto conversation = Conversation::CreateConversationAsync(speechConfig).get();
 
@@ -38,6 +50,7 @@ TEST_CASE("Conversation host destructor", "[api][cxx][conversation_translator][c
 
 TEST_CASE("Conversation destructor after start", "[api][cxx][conversation_translator][cxx_conversation][start_destructor]")
 {
+    CT_INTEGRATION_TEST_INIT;
     auto speechConfig = CreateConfig("en-US", { "fr", "ar" });
     auto conversation = Conversation::CreateConversationAsync(speechConfig).get();
     conversation->StartConversationAsync().get();
@@ -47,6 +60,7 @@ TEST_CASE("Conversation destructor after start", "[api][cxx][conversation_transl
 
 TEST_CASE("Conversation call while not joined", "[api][cxx][conversation_translator][cxx_conversation][not_started]")
 {
+    CT_INTEGRATION_TEST_INIT;
     auto speechConfig = CreateConfig("en-US", { "fr", "ar" });
     auto conversation = Conversation::CreateConversationAsync(speechConfig).get();
 
@@ -95,6 +109,7 @@ TEST_CASE("Conversation call while not joined", "[api][cxx][conversation_transla
 
 TEST_CASE("Conversation call unsupported methods", "[api][cxx][conversation_translator][cxx_conversation][unsupported]")
 {
+    CT_INTEGRATION_TEST_INIT;
     auto speechConfig = CreateConfig("en-US", { "fr", "ar" });
 
     SECTION("Conversation Translator")
@@ -170,7 +185,7 @@ TEST_CASE("Conversation call unsupported methods", "[api][cxx][conversation_tran
 
 TEST_CASE("Conversation Translator Host Audio", "[api][cxx][conversation_translator][cxx_conversation_translator][audio][host]")
 {
-    UseMocks(false);
+    CT_INTEGRATION_TEST_INIT;
     REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
 
     string speechLang("en-US");
@@ -218,7 +233,7 @@ TEST_CASE("Conversation Translator Host Audio", "[api][cxx][conversation_transla
 
 TEST_CASE("Join a conversation with translation", "[api][cxx][conversation_translator][cxx_conversation_translator][audio][join]")
 {
-    UseMocks(false);
+    CT_INTEGRATION_TEST_INIT;
     REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
     REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_CHINESE)));
 
@@ -291,7 +306,7 @@ TEST_CASE("Join a conversation with translation", "[api][cxx][conversation_trans
 
 TEST_CASE("Host sends an instant message", "[api][cxx][conversation_translator][cxx_conversation_translator][im][host]")
 {
-    UseMocks(false);
+    CT_INTEGRATION_TEST_INIT;
     REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
 
     auto speechConfig = CreateConfig("en-US", { "ja", "ar" });
@@ -315,7 +330,7 @@ TEST_CASE("Host sends an instant message", "[api][cxx][conversation_translator][
 
 TEST_CASE("Host and participants send an instant messages", "[api][cxx][conversation_translator][cxx_conversation_translator][im][join]")
 {
-    UseMocks(false);
+    CT_INTEGRATION_TEST_INIT;
     REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
     REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_CHINESE)));
 
@@ -355,7 +370,7 @@ TEST_CASE("Host and participants send an instant messages", "[api][cxx][conversa
 
 TEST_CASE("Join locked room", "[api][cxx][conversation_translator][cxx_conversation_translator][join_locked]")
 {
-    UseMocks(false);
+    CT_INTEGRATION_TEST_INIT;
     REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
     REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_CHINESE)));
 
@@ -381,7 +396,7 @@ TEST_CASE("Join locked room", "[api][cxx][conversation_translator][cxx_conversat
 
 TEST_CASE("ConversationTranslator Host disconnects room", "[api][cxx][conversation_translator][cxx_conversation_translator][host_disconnect]")
 {
-    UseMocks(false);
+    CT_INTEGRATION_TEST_INIT;
     REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
     REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_CHINESE)));
 
@@ -412,7 +427,7 @@ TEST_CASE("ConversationTranslator Host disconnects room", "[api][cxx][conversati
 
 TEST_CASE("Conversation Translator call methods when not joined", "[api][cxx][conversation_translator][cxx_conversation_translator][not_joined]")
 {
-    UseMocks(false);
+    CT_INTEGRATION_TEST_INIT;
 
     SECTION("Host")
     {
@@ -465,7 +480,7 @@ TEST_CASE("Conversation Translator call methods when not joined", "[api][cxx][co
 
 TEST_CASE("Double join should fail", "[api][cxx][conversation_translator][cxx_conversation_translator][double_join]")
 {
-    UseMocks(false);
+    CT_INTEGRATION_TEST_INIT;
 
     REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
     auto hostSpeechConfig = CreateConfig("en-US", {});
@@ -498,7 +513,7 @@ TEST_CASE("Double join should fail", "[api][cxx][conversation_translator][cxx_co
 
 TEST_CASE("Conversation Translator Connection Before Join", "[api][cxx][conversation_translator][cxx_conversation_translator][connection][before_join]")
 {
-    UseMocks(false);
+    CT_INTEGRATION_TEST_INIT;
 
     REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
     auto audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
@@ -525,7 +540,7 @@ TEST_CASE("Conversation Translator Connection Before Join", "[api][cxx][conversa
 
 TEST_CASE("Conversation Translator Connection After Leave", "[api][cxx][conversation_translator][cxx_conversation_translator][connection][after_leave]")
 {
-    UseMocks(false);
+    CT_INTEGRATION_TEST_INIT;
 
     auto speechConfig = CreateConfig("en-US", {});
     REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
@@ -557,7 +572,7 @@ TEST_CASE("Conversation Translator Connection After Leave", "[api][cxx][conversa
 
 TEST_CASE("Conversation Translator Connection Recognizer events/methods", "[api][cxx][conversation_translator][cxx_conversation_translator][connection][recognizer]")
 {
-    UseMocks(false);
+    CT_INTEGRATION_TEST_INIT;
 
     auto speechConfig = CreateConfig("en-US", {});
     REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
@@ -575,10 +590,11 @@ TEST_CASE("Conversation Translator Connection Recognizer events/methods", "[api]
 
     host.StartAudio();
 
+    host.WaitForAudioToFinish();
+
     // send message
     host.Conn->SendMessageAsync("speech.context", "{\"translationcontext\":{\"to\":[\"en-US\"]}}").get();
 
-    host.WaitForAudioToFinish();
     host.Leave();
 
     SPXTEST_REQUIRE(evts.size() > 0);
@@ -586,7 +602,7 @@ TEST_CASE("Conversation Translator Connection Recognizer events/methods", "[api]
 
 TEST_CASE("Conversation Translator Host Leave Rejoin", "[api][cxx][conversation_translator][cxx_conversation_translator][connection][host][rejoin]")
 {
-    UseMocks(false);
+    CT_INTEGRATION_TEST_INIT;
     REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
 
     string speechLang("en-US");
@@ -625,7 +641,7 @@ TEST_CASE("Conversation Translator Host Leave Rejoin", "[api][cxx][conversation_
     conversationTranslator->StartTranscribingAsync().get();
 
     SPX_TRACE_INFO("Send text message after reconnect");
-    conversationTranslator->SendTextMessageAsync("This is a test");
+    conversationTranslator->SendTextMessageAsync("This is a test").get();
 
     eventHandlers->WaitForAudioStreamCompletion(15000ms, 2000ms);
 
@@ -657,7 +673,7 @@ TEST_CASE("Conversation Translator Host Leave Rejoin", "[api][cxx][conversation_
 
 TEST_CASE("Conversation Translator can't call methods after disconnect", "[api][cxx][conversation_translator][cxx_conversation_translator][connection][after_disconnect]")
 {
-    UseMocks(false);
+    CT_INTEGRATION_TEST_INIT;
 
     REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
     auto speechConfig = CreateConfig("en-US", {});
@@ -692,7 +708,7 @@ TEST_CASE("Conversation Translator can't call methods after disconnect", "[api][
 
 TEST_CASE("Conversation Translator Participant Rejoin", "[api][cxx][conversation_translator][cxx_conversation_translator][connection][participant][rejoin]")
 {
-    UseMocks(false);
+    CT_INTEGRATION_TEST_INIT;
 
     REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
     auto hostSpeechConfig = CreateConfig("en-US", {});
@@ -751,7 +767,7 @@ TEST_CASE("Conversation Translator Participant Rejoin", "[api][cxx][conversation
 
 TEST_CASE("Conversation Translator Participant Rejoin After Delete", "[api][cxx][conversation_translator][cxx_conversation_translator][connection][participant][rejoin_after_delete]")
 {
-    UseMocks(false);
+    CT_INTEGRATION_TEST_INIT;
 
     REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
     auto hostSpeechConfig = CreateConfig("en-US", {});
@@ -772,7 +788,7 @@ TEST_CASE("Conversation Translator Participant Rejoin After Delete", "[api][cxx]
     // has been deleted since we no longer have an active web socket connection
     SPX_TRACE_INFO("Alice disconnecting");
     alice.Conn->Close();
-    std::this_thread::sleep_for(200ms);
+    std::this_thread::sleep_for(400ms);
 
     // Delete the room
     host.Leave();
@@ -810,6 +826,8 @@ TEST_CASE("Conversation Translator Participant Rejoin After Delete", "[api][cxx]
 
 TEST_CASE("Conversation Translator Sweden demo", "[!hide][cxx_conversation_translator][Sweden]")
 {
+    CT_INTEGRATION_TEST_INIT;
+
     auto subscriptionKey = SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key;
     auto subscriptionRegion = SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Region;
 

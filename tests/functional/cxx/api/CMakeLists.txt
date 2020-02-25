@@ -20,6 +20,7 @@ include_directories(${CONVERSATION_TRANSLATION}/include)
 set(HEADERS_PRIVATE
     "${TEST_INCLUDE}/test_PAL.h"
     "${SRC_DIR}/conversation_translator_utils.h"
+    "${SRC_DIR}/dump_log_files_at_end.h"
     )
 
 set(SOURCES

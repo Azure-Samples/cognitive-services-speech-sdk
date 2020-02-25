@@ -249,6 +249,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public async Task ConversationTranslator_HostAudio()
         {
+            var audioUtterance = AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH];
+
             string speechLang = Language.EN;
             string hostname = "TheHost";
             var toLangs = new[] { Language.FR, Language.DE };
@@ -259,7 +261,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             SPX_TRACE_INFO($"Starting {conversation.ConversationId} conversation");
             await conversation.StartConversationAsync();
 
-            var audioConfig = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
+            var audioConfig = AudioConfig.FromWavFileInput(audioUtterance.FilePath.GetRootRelativePath());
             SPX_TRACE_INFO("Creating ConversationTranslator");
             var conversationTranslator = new ConversationTranslator(audioConfig);
 
@@ -287,9 +289,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             SPX_TRACE_INFO("Verifying callbacks");
 
             string participantId;
-            eventHandlers.VerifyBasicEvents(true, true, hostname, true, out participantId);
+            eventHandlers.VerifyBasicEvents(true, hostname, true, out participantId);
             eventHandlers.VerifyTranscriptions(participantId,
-                new ExpectedTranscription(participantId, AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text, speechLang)
+                new ExpectedTranscription(participantId, audioUtterance.Utterances[Language.EN][0].Text, speechLang)
             );
         }
 
@@ -365,8 +367,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
             // verify events
             SPX_TRACE_INFO("Verifying callbacks");
-            bobEvents.VerifyBasicEvents(true, false, bobName, false, out bobId);
-            hostEvents.VerifyBasicEvents(true, true, hostName, true, out hostId);
+            bobEvents.VerifyBasicEvents(true, bobName, false, out bobId);
+            hostEvents.VerifyBasicEvents(true, hostName, true, out hostId);
             bobEvents.VerifyTranscriptions(bobId,
                 new ExpectedTranscription(bobId, AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.ZH_CN][0].Text, bobLang),
                 new ExpectedTranscription(hostId, AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text, hostLang)
@@ -504,6 +506,332 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 REQUIRE_NOTHROW(translator.LeaveConversationAsync());
             }
         }
+
+        [TestMethod]
+        public async Task ConversationTranslator_DoubleJoinShouldFail()
+        {
+            var hostSpeechConfig = CreateConfig(Language.EN);
+
+            var host = new TestConversationParticipant (hostSpeechConfig, "Host");
+            await host.JoinAsync(null);
+
+            // host tries to join again. should fail
+            REQUIRE_THROWS_MATCHES(
+                host.Translator.JoinConversationAsync(host.Conversation, host.Name),
+                typeof(ApplicationException),
+                HasHR("SPXERR_INVALID_STATE"));
+
+            var alice = new TestConversationParticipant("Alice", Language.ZH_CN, host, SetParticipantConfig);
+            await alice.JoinAsync(null);
+
+            // Alice tries to join again, should fail
+            REQUIRE_THROWS_MATCHES(
+                alice.Translator.JoinConversationAsync(host.ConversationId, alice.Name, alice.Lang),
+                typeof(ApplicationException),
+                HasHR("SPXERR_INVALID_STATE"));
+
+            await alice.LeaveAsync();
+            await host.LeaveAsync();
+        }
+
+        [TestMethod]
+        public void ConversationTranslator_ConnectionBeforeJoin()
+        {
+            var audioConfig = AudioConfig.FromWavFileInput(Config.AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
+
+            var conversationTranslator = new ConversationTranslator(audioConfig);
+
+            var connection = Connection.FromConversationTranslator(conversationTranslator);
+
+            REQUIRE_THROWS_MATCHES(
+                () => connection.Open(false),
+                typeof(ApplicationException),
+                HasHR("SPXERR_INVALID_STATE")
+            );
+
+            REQUIRE_THROWS_MATCHES(
+                () => connection.Open(true),
+                typeof(ApplicationException),
+                HasHR("SPXERR_INVALID_STATE")
+            );
+
+            // Close should not throw exceptions
+            REQUIRE_NOTHROW(() => connection.Close());
+        }
+
+        [TestMethod]
+        public async Task ConversationTranslator_ConnectionAfterLeave()
+        {
+            var speechConfig = CreateConfig(Language.EN);
+
+            var host = new TestConversationParticipant(speechConfig, "Host");
+            await host.JoinAsync(null);
+
+            await Task.Delay(TimeSpan.FromMilliseconds(200));
+
+            await host.LeaveAsync();
+
+            // connecting should fail now
+            REQUIRE_THROWS_MATCHES(
+                () => host.Connection.Open(false),
+                typeof(ApplicationException),
+                HasHR("SPXERR_INVALID_STATE")
+            );
+
+            REQUIRE_THROWS_MATCHES(
+                () => host.Connection.Open(true),
+                typeof(ApplicationException),
+                HasHR("SPXERR_INVALID_STATE")
+            );
+
+            // Close should not throw exceptions
+            REQUIRE_NOTHROW(() => host.Connection.Close());
+        }
+
+        [TestMethod]
+        public async Task ConversationTranslator_RecognizerEventsAndMethods()
+        {
+            var speechConfig = CreateConfig(Language.EN);
+            var audioConfig = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
+
+            var host = new TestConversationParticipant(speechConfig, "Host");
+            await host.JoinAsync(null);
+
+            var evts = new List<ConnectionMessage>();
+
+            host.Connection.MessageReceived += (s, e) =>
+            {
+                evts.Add(e.Message.DumpToDebugOutput("Recognizer message received"));
+            };
+
+            await host.StartAudioAsync();
+
+            await host.WaitForAudioToFinish();
+
+            // send message
+            await host.Connection.SendMessageAsync("speech.context", "{\"translationcontext\":{\"to\":[\"en-US\"]}}");
+
+            await host.LeaveAsync();
+
+            SPXTEST_REQUIRE(evts.Count > 0);
+        }
+
+        [TestMethod]
+        public async Task ConversationTranslator_HostLeaveRejoin()
+        {
+            var audioFile = AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH];
+
+            var speechLang = Language.EN;
+            var hostname = "TheHost";
+
+            var toLangs = new[] { "fr", "de" };
+            var speechConfig = CreateConfig(speechLang, toLangs);
+
+            SPX_TRACE_INFO("Creating conversation");
+            var conversation = await Conversation.CreateConversationAsync(speechConfig);
+            SPX_TRACE_INFO("Starting conversation");
+            await conversation.StartConversationAsync();
+
+            var audioConfig = AudioConfig.FromWavFileInput(audioFile.FilePath.GetRootRelativePath());
+            var conversationTranslator = new ConversationTranslator(audioConfig);
+
+            var eventHandlers = new ConversationTranslatorCallbacks(conversationTranslator);
+
+            SPX_TRACE_INFO("Joining conversation");
+            await conversationTranslator.JoinConversationAsync(conversation, hostname);
+
+            SPX_TRACE_INFO("Getting connection object");
+            var connection = Connection.FromConversationTranslator(conversationTranslator);
+            eventHandlers.AddConnectionCallbacks(connection);
+
+            await Task.Delay(TimeSpan.FromMilliseconds(200));
+
+            SPX_TRACE_INFO("Disconnecting conversation");
+            connection.Close();
+
+            await Task.Delay(TimeSpan.FromMilliseconds(200));
+
+            SPX_TRACE_INFO("Reconnecting conversation");
+            connection.Open(false);
+
+            SPX_TRACE_INFO("Start transcribing after reconnect");
+            await conversationTranslator.StartTranscribingAsync();
+
+            SPX_TRACE_INFO("Send text message after reconnect");
+            await conversationTranslator.SendTextMessageAsync("This is a test");
+
+            await eventHandlers.WaitForAudioStreamCompletion(15000, 2000);
+
+            SPX_TRACE_INFO("Stop Transcribing");
+            await conversationTranslator.StopTranscribingAsync();
+
+            SPX_TRACE_INFO("Leave conversation");
+            await conversationTranslator.LeaveConversationAsync();
+
+            SPX_TRACE_INFO("End conversation");
+            await conversation.EndConversationAsync();
+            SPX_TRACE_INFO("Delete conversation");
+            await conversation.DeleteConversationAsync();
+
+            SPX_TRACE_INFO("Verifying callbacks");
+
+            string participantId;
+            eventHandlers.VerifyBasicEvents(true, hostname, true, out participantId);
+            eventHandlers.VerifyConnectionEvents(1, 2);
+            eventHandlers.VerifyTranscriptions(participantId,
+                new ExpectedTranscription(participantId, audioFile.Utterances["en-US"][0].Text, speechLang)
+            );
+            eventHandlers.VerifyIms(participantId,
+                new ExpectedTranscription(participantId, "This is a test", speechLang, new TRANS() { { "fr", "C'est un test" }, { "de", "Dies ist ein Test" } })
+            );
+        }
+
+        [TestMethod]
+        public async Task ConversationTranslator_CantCallMethodsAfterDisconnected()
+        {
+            var speechConfig = CreateConfig("en-US");
+
+            var host = new TestConversationParticipant(speechConfig, "Host");
+            await host.JoinAsync(null);
+
+            await Task.Delay(TimeSpan.FromMilliseconds(200));
+
+            host.Connection.Close();
+
+            await Task.Delay(TimeSpan.FromMilliseconds(200));
+
+            REQUIRE_THROWS_MATCHES(
+                host.Translator.StartTranscribingAsync(),
+                typeof(ApplicationException),
+                HasHR("SPXERR_INVALID_STATE"));
+
+            REQUIRE_THROWS_MATCHES(
+                host.Translator.StopTranscribingAsync(),
+                typeof(ApplicationException),
+                HasHR("SPXERR_INVALID_STATE"));
+
+            REQUIRE_THROWS_MATCHES(
+                host.Translator.SendTextMessageAsync("This is a short test"),
+                typeof(ApplicationException),
+                HasHR("SPXERR_INVALID_STATE"));
+
+            await host.LeaveAsync();
+        }
+
+        [TestMethod]
+        public async Task ConversationTranslator_ParticipantRejoin()
+        {
+            var hostUtterance = AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH];
+            var hostSpeechConfig = CreateConfig("en-US");
+            var hostAudioConfig = AudioConfig.FromWavFileInput(hostUtterance.FilePath.GetRootRelativePath());
+
+            var aliceUtterance = AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_CHINESE];
+            var aliceAudioConfig = AudioConfig.FromWavFileInput(aliceUtterance.FilePath.GetRootRelativePath());
+
+            var host = new TestConversationParticipant(hostSpeechConfig, "Host");
+            await host.JoinAsync(hostAudioConfig);
+
+            var alice = new TestConversationParticipant("Alice", "zh-CN", host, SetParticipantConfig);
+            await alice.JoinAsync(aliceAudioConfig);
+
+            await Task.Delay(TimeSpan.FromMilliseconds(200));
+
+            // Alice disconnects
+            SPX_TRACE_INFO("Alice disconnecting");
+            alice.Connection.Close();
+            await Task.Delay(TimeSpan.FromMilliseconds(400));
+
+            // Alice reconnects
+            SPX_TRACE_INFO("Alice reconnecting");
+            alice.Connection.Open(false);
+
+            // Do audio playback for both host and participant
+            await host.StartAudioAsync();
+            await alice.StartAudioAsync();
+
+            await host.WaitForAudioToFinish();
+            await alice.WaitForAudioToFinish();
+
+            // Disconnect both
+            await alice.LeaveAsync();
+            await host.LeaveAsync();
+
+            // validate events
+            SPX_TRACE_INFO("Validating host basic events");
+            host.VerifyBasicEvents(true);
+            SPX_TRACE_INFO("Validating Alice basic events");
+            alice.VerifyBasicEvents(true);
+            SPXTEST_REQUIRE(alice.Events.Connected.Count == 2);
+            SPXTEST_REQUIRE(alice.Events.Disconnected.Count == 2);
+
+            var expectedTranscriptions = new[]
+            {
+                new ExpectedTranscription(host.ParticipantId, hostUtterance.Utterances["en-US"][0].Text, host.Lang),
+                new ExpectedTranscription(alice.ParticipantId, aliceUtterance.Utterances["zh-CN"][0].Text, alice.Lang)
+            };
+
+            SPX_TRACE_INFO("Validating host transcriptions");
+            host.VerifyTranscriptions(expectedTranscriptions);
+            SPX_TRACE_INFO("Validating Alice transcriptions");
+            alice.VerifyTranscriptions(expectedTranscriptions);
+        }
+
+        [TestMethod]
+        public async Task ConversationTranslator_RejoinAfterDelete()
+        {
+            var hostUtterance = AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH];
+            var hostSpeechConfig = CreateConfig("en-US");
+            var hostAudioConfig = AudioConfig.FromWavFileInput(hostUtterance.FilePath.GetRootRelativePath());
+
+            var aliceUtterance = AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_CHINESE];
+            var aliceAudioConfig = AudioConfig.FromWavFileInput(aliceUtterance.FilePath.GetRootRelativePath());
+
+            var host = new TestConversationParticipant(hostSpeechConfig, "Host");
+            await host.JoinAsync(hostAudioConfig);
+
+            var alice = new TestConversationParticipant("Alice", "zh-CN", host, SetParticipantConfig);
+            await alice.JoinAsync(aliceAudioConfig);
+
+            await Task.Delay(TimeSpan.FromMilliseconds(200));
+
+            // Alice disconnects. This prevents the conversation translator from detecting the conversation
+            // has been deleted since we no longer have an active web socket connection
+            SPX_TRACE_INFO("Alice disconnecting");
+            alice.Connection.Close();
+            await Task.Delay(TimeSpan.FromMilliseconds(400));
+
+            // Delete the room
+            await host.LeaveAsync();
+
+            // Alice tries to reconnect
+            SPX_TRACE_INFO("Alice reconnecting");
+            REQUIRE_THROWS_MATCHES(
+                () => alice.Connection.Open(false),
+                typeof(ApplicationException),
+                HasHR("BadRequest") & HasHR("WebSocket Upgrade failed"));
+
+            await Task.Delay(TimeSpan.FromMilliseconds(200));
+
+            // Make sure we got the correct cancelled event
+            SPXTEST_REQUIRE(alice.Events.Canceled.Count > 0);
+            var canceled = alice.Events.Canceled[0];
+            SPXTEST_REQUIRE(canceled.Reason == CancellationReason.Error);
+            SPXTEST_REQUIRE(canceled.ErrorCode == CancellationErrorCode.BadRequest);
+
+            // Make sure we can't call open again
+            REQUIRE_THROWS_MATCHES(
+                () => alice.Connection.Open(false),
+                typeof(ApplicationException),
+                HasHR("SPXERR_INVALID_STATE")
+            );
+
+            REQUIRE_THROWS_MATCHES(
+                () => alice.Connection.Open(true),
+                typeof(ApplicationException),
+                HasHR("SPXERR_INVALID_STATE")
+            );
+        }
+
 
         #region helper methods
 

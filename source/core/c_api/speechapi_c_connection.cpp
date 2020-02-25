@@ -52,6 +52,7 @@ SPXAPI connection_from_conversation_translator(SPXCONVERSATIONTRANSLATORHANDLE c
         auto connection = recoForConnection->GetConnection();
 
         auto connectionHandleTable = CSpxSharedPtrHandleTableManager::Get<ISpxConnection, SPXCONNECTIONHANDLE>();
+        SPX_IFTRUE_THROW_HR(connectionHandleTable == nullptr, SPXERR_RUNTIME_ERROR);
         *connectionHandle = connectionHandleTable->TrackHandle(connection);
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);

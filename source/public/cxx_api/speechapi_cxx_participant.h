@@ -86,8 +86,9 @@ public:
     const SPXSTRING& Avatar;
 
     /// <summary>
-    /// The participant's display name. Please note that there may be more than one participant
-    /// with the same name. You can use the Id property to tell them apart.
+    /// The participant's display name. Please note that each participant within the same conversation must
+    /// have a different display name. Duplicate names within the same conversation are not allowed. You can
+    /// use the Id property as another way to refer to each participant.
     /// </summary>
     const SPXSTRING& DisplayName;
 

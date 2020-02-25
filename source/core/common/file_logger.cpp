@@ -109,6 +109,7 @@ bool FileLogger::IsFileLoggingEnabled()
 
 void FileLogger::CloseFile()
 {
+    WriteLock lock(&fileNameLock);
     if (file != nullptr)
     {
         fclose((FILE *)file);
@@ -144,7 +145,12 @@ void FileLogger::LogToFile(std::string&& logLine)
 
         if (log)
         {
-            ReadLock lock(&fileNameLock);
+            WriteLock lock(&fileNameLock);
+            if (file == nullptr)
+            {
+                return;
+            }
+
             FILE *fileToUse = (FILE *)file;
             fprintf(fileToUse, "%s", logLine.c_str());
             fflush(fileToUse);

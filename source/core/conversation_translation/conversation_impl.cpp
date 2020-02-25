@@ -114,7 +114,12 @@ namespace ConversationTranslation {
         SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_CONVERSATION_SITE_FAILURE);
 
         // Initialize logging
-        FileLogger::Instance().SetFileOptions(properties);
+        std::string unset("<<NOT_SET>>");
+        std::string logFile = NamedPropertiesHelper::GetString(properties, PropertyId::Speech_LogFilename, unset.c_str());
+        if (logFile != unset)
+        {
+            FileLogger::Instance().SetFileOptions(properties);
+        }
 
         // Initialize websocket platform
         USP::PlatformInit(nullptr, 0, nullptr, nullptr);

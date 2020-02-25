@@ -122,10 +122,15 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils
 
         public static void REQUIRE_THROWS_MATCHES(Task t, Type exceptionType, Catch.IMatcher matcher, [CallerMemberName]string caller = null, [CallerLineNumber]int line = 0, [CallerFilePath]string file = null)
         {
+            REQUIRE_THROWS_MATCHES(() => t.Wait(), exceptionType, matcher, caller, line, file);
+        }
+
+        public static void REQUIRE_THROWS_MATCHES(Action action, Type exceptionType, Catch.IMatcher matcher, [CallerMemberName]string caller = null, [CallerLineNumber]int line = 0, [CallerFilePath]string file = null)
+        {
             Exception ex = null;
             try
             {
-                t.Wait();
+                action();
             }
             catch (AggregateException ae)
             {
@@ -175,7 +180,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils
             System.Diagnostics.Debug.WriteLine("({0}) {1}", DateTime.UtcNow.ToString("yyyy-MM-dd HH::mm::ss.ff"), formatted);
         }
 
-        public static Catch.IMatcher HasHR(string hrString)
+        public static Catch.MatcherBase HasHR(string hrString)
         {
             return new Catch.ExceptionMessageContainsMatcher(hrString, Catch.CaseSensitive.Yes);
         }
@@ -197,7 +202,70 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils
             bool IsMatch(object other);
         }
 
-        public class StringEqualityMatcher : IMatcher
+        public abstract class MatcherBase : IMatcher
+        {
+            public abstract bool IsMatch(object other);
+
+            public static MatcherBase operator &(MatcherBase a, MatcherBase b)
+                => new LogicalMatcher(LogicalMatcher.Operation.And, a, b);
+
+            public static MatcherBase operator |(MatcherBase a, MatcherBase b)
+                => new LogicalMatcher(LogicalMatcher.Operation.Or, a, b);
+
+            public static MatcherBase operator !(MatcherBase a)
+                => new LogicalMatcher(LogicalMatcher.Operation.Not, a, null);
+        }
+
+        public class LogicalMatcher : MatcherBase
+        {
+            private IMatcher _a;
+            private IMatcher _b;
+            private readonly Operation _op;
+
+            public enum Operation
+            {
+                Not,
+                And,
+                Or
+            }
+
+            public LogicalMatcher(Operation op, IMatcher a, IMatcher b)
+            {
+                if (a == null)
+                {
+                    throw new ArgumentNullException(nameof(a));
+                }
+                else if (op > Operation.Not && b == null)
+                {
+                    throw new ArgumentNullException(nameof(b));
+                }
+
+                _op = op;
+                _a = a;
+                _b = b;
+            }
+
+            public override bool IsMatch(object other)
+            {
+                
+                switch (_op)
+                {
+                    case Operation.Not:
+                        return !_a.IsMatch(other);
+
+                    case Operation.And:
+                        return _a.IsMatch(other) && _b.IsMatch(other);
+
+                    case Operation.Or:
+                        return _a.IsMatch(other) || _b.IsMatch(other);
+
+                    default:
+                        return false;
+                }
+            }
+        }
+
+        public class StringEqualityMatcher : MatcherBase
         {
             private string _v;
             private StringComparison _c;
@@ -216,7 +284,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils
                 _op = op;
             }
 
-            public virtual bool IsMatch(object other) => IsMatch(_v, other as string, _c);
+            public override bool IsMatch(object other) => IsMatch(_v, other as string, _c);
 
             public override string ToString()
             {
@@ -258,12 +326,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils
                 => "Exception with message " + base.ToString();
         }
 
-        public static IMatcher Equals(string str, CaseSensitive cs)
+        public static MatcherBase Equals(string str, CaseSensitive cs)
         {
             return new StringEqualityMatcher(str, cs);
         }
 
-        public static IMatcher Contains(string str, CaseSensitive cs)
+        public static MatcherBase Contains(string str, CaseSensitive cs)
         {
             return new StringContainsMatcher(str, cs);
         }
