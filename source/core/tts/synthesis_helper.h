@@ -15,15 +15,9 @@
 
 
 
-#define ISSUE_TOKEN_HOST_SUFFIX ".api.cognitive.microsoft.com"
-#define ISSUE_TOKEN_URL_PATH "/sts/v1.0/issueToken"
 #define TTS_COGNITIVE_SERVICE_HOST_SUFFIX ".tts.speech.microsoft.com"
 #define TTS_COGNITIVE_SERVICE_URL_PATH "/cognitiveservices/v1"
-#define TTS_COGNITIVE_SERVICE_WSS_URL_PATH "/cognitiveservices/websocket/v1"
-#define TTS_CUSTOM_VOICE_HOST_SUFFIX ".voice.speech.microsoft.com"
 #define USER_AGENT "SpeechSDK"
-#define TTS_COGNITIVE_SERVICE_AZURE_CN_HOST_SUFFIX ".tts.speech.azure.cn"
-#define AZURE_CN_REGION "china"
 
 #define SSML_TEMPLATE "<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts' xmlns:emo='http://www.w3.org/2009/10/emotionml' xml:lang='%s'><voice name='%s'>%s</voice></speak>"
 #define SSML_BUFFER_SIZE 0x10000
@@ -104,70 +98,6 @@ public:
         ss << i;
         return ss.str();
     };
-
-    static std::string ParseRegionFromCognitiveServiceEndpoint(const std::string& endpoint)
-    {
-        auto url = HttpUtils::ParseUrl(endpoint);
-
-        size_t first_dot_pos = url.host.find('.');
-        if (first_dot_pos == size_t(-1))
-        {
-            ThrowRuntimeError("The given endpoint is not valid TTS cognitive service endpoint. Expected *.tts.speech.microsoft.com or *.voice.speech.microsoft.com");
-        }
-
-        std::string host_name_suffix = url.host.substr(first_dot_pos);
-        if (PAL::stricmp(host_name_suffix.data(), TTS_COGNITIVE_SERVICE_HOST_SUFFIX) != 0 &&
-            PAL::stricmp(host_name_suffix.data(), TTS_CUSTOM_VOICE_HOST_SUFFIX) != 0)
-        {
-            ThrowRuntimeError("The given endpoint is not valid TTS cognitive service endpoint. Expected *.tts.speech.microsoft.com or *.voice.speech.microsoft.com");
-        }
-
-        return url.host.substr(0, first_dot_pos);
-    }
-
-    static bool IsCustomVoiceEndpoint(const std::string& endpoint)
-    {
-        auto url = HttpUtils::ParseUrl(endpoint);
-
-        size_t first_dot_pos = url.host.find('.');
-        if (first_dot_pos == size_t(-1))
-        {
-            return false;
-        }
-
-        std::string host_name_suffix = url.host.substr(first_dot_pos);
-
-        if (PAL::stricmp(host_name_suffix.data(), TTS_CUSTOM_VOICE_HOST_SUFFIX) == 0)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-
-    static bool IsStandardVoiceEndpoint(const std::string& endpoint)
-    {
-        auto url = HttpUtils::ParseUrl(endpoint);
-
-        size_t first_dot_pos = url.host.find('.');
-        if (first_dot_pos == size_t(-1))
-        {
-            return false;
-        }
-
-        std::string host_name_suffix = url.host.substr(first_dot_pos);
-
-        if (PAL::stricmp(host_name_suffix.data(), TTS_COGNITIVE_SERVICE_HOST_SUFFIX) == 0)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
 
     static std::string BuildSsml(const std::string& text, const std::string& language, const std::string& voice)
     {

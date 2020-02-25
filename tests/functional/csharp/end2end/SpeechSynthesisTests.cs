@@ -1655,6 +1655,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var synthesizer = new SpeechSynthesizer(uspMooncakeConfig, null))
             {
                 synthesizer.AuthorizationToken = token;
+                // set timeout to 60s as the connection is flaky
+                synthesizer.Properties.SetProperty("SpeechSynthesis_FirstChunkTimeoutMs", "60000");
                 using (var result = await synthesizer.SpeakTextAsync("{{{text}}}"))
                 {
                     CheckSynthesisResult(result);
@@ -1683,6 +1685,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var uspMooncakeConfig = SpeechConfig.FromEndpoint(new Uri(uspEndpoint), mooncakeSubscriptionKey);
             using (var synthesizer = new SpeechSynthesizer(uspMooncakeConfig, null))
             {
+                // set timeout to 60s as the connection is flaky
+                synthesizer.Properties.SetProperty("SpeechSynthesis_FirstChunkTimeoutMs", "60000");
                 using (var result = await synthesizer.SpeakTextAsync("{{{text}}}"))
                 {
                     CheckSynthesisResult(result);
@@ -1699,10 +1703,15 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var mooncakeConfig = SpeechConfig.FromSubscription(mooncakeSubscriptionKey, mooncakeRegion);
             using (var synthesizer = new SpeechSynthesizer(mooncakeConfig, null))
             {
+                // set timeout to 60s as the connection is flaky
+                synthesizer.Properties.SetProperty("SpeechSynthesis_FirstChunkTimeoutMs", "60000");
                 using (var result = await synthesizer.SpeakTextAsync("{{{text}}}"))
                 {
                     CheckSynthesisResult(result);
                 }
+
+                var connectionUrl = synthesizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_Url);
+                Assert.IsTrue(connectionUrl.Contains("azure.cn"));
             }
         }
 

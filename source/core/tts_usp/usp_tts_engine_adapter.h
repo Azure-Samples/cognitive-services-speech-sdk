@@ -88,6 +88,8 @@ private:
     void UspInitialize();
     void UspTerminate();
 
+    USP::Client& SetUspEndpoint(const std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client) const;
+
     void OnTurnStart(const USP::TurnStartMsg& message) override;
     void OnAudioOutputChunk(const USP::AudioOutputChunkMsg& message) override;
     void OnAudioOutputMetadata(const USP::AudioOutputMetadataMsg& message) override;
@@ -112,8 +114,6 @@ private:
         ReceivingData = 4   // from first audio message received to turn.end received
     };
 
-    std::string m_endpoint;
-    bool m_isCustomHost = false;
     std::shared_ptr<ISpxAudioOutput> m_audioOutput;
 
     std::string m_proxyHost;

@@ -23,7 +23,7 @@
 
 #define MAX_RETRY 1
 
-#define WAIT_FOR_FIRST_CHUNK_TIMEOUT 10000  // in milliseconds
+#define WAIT_FOR_FIRST_CHUNK_TIMEOUT 20000  // in milliseconds
 #define RECEIVE_ALL_CHUNKS_TIMEOUT 300000   // in milliseconds
 #ifdef _DEBUG
 #define DEBUG_WAIT_INTERVAL 100         // in milliseconds
@@ -57,38 +57,8 @@ void CSpxUspTtsEngineAdapter::Init()
     GetProxySetting();
 
     // Initialize websocket platform
-    Microsoft::CognitiveServices::Speech::USP::PlatformInit(m_proxyHost.data(), m_proxyPort, m_proxyUsername.data(), m_proxyPassword.data());
-
-    // Initialize authentication related information
-
-    std::string endpointUrl = ISpxPropertyBagImpl::GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Endpoint), "");
-    std::string hostUrl = ISpxPropertyBagImpl::GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Host), "");
-    std::string region = ISpxPropertyBagImpl::GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Region), "");
-    std::string subscriptionKey = ISpxPropertyBagImpl::GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Key), "");
-
-    if (!endpointUrl.empty()) // use custom endpoint
-    {
-        m_endpoint = endpointUrl;
-    }
-    else if (!hostUrl.empty()) // or custom host
-    {
-        m_endpoint = hostUrl;    // parse further in USP ConstructConnectionUrl()
-        m_isCustomHost = true;
-    }
-
-    if (m_endpoint.empty() && !region.empty())
-    {
-        if (region.find(AZURE_CN_REGION) == 0)
-        {
-            m_endpoint = HttpUtils::SchemePrefix(UriScheme::WSS) + region + TTS_COGNITIVE_SERVICE_AZURE_CN_HOST_SUFFIX + TTS_COGNITIVE_SERVICE_WSS_URL_PATH;
-        }
-        else
-        {
-            m_endpoint = HttpUtils::SchemePrefix(UriScheme::WSS) + region + TTS_COGNITIVE_SERVICE_HOST_SUFFIX + TTS_COGNITIVE_SERVICE_WSS_URL_PATH;
-        }
-    }
-
-    SPX_IFTRUE_THROW_HR(m_endpoint.empty(), SPXERR_INVALID_ARG);
+    Microsoft::CognitiveServices::Speech::USP::PlatformInit(m_proxyHost.c_str(), m_proxyPort, m_proxyUsername.c_str(), m_proxyPassword.c_str());
+  
 }
 
 void CSpxUspTtsEngineAdapter::Term()
@@ -345,7 +315,7 @@ void CSpxUspTtsEngineAdapter::UspInitialize()
 
     // Get the properties that indicates what endpoint to use...
     auto uspSubscriptionKey = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Key));
-    auto token = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceAuthorization_Token), "");
+    auto token = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceAuthorization_Token));
 
     authData[static_cast<size_t>(USP::AuthenticationType::SubscriptionKey)] = std::move(uspSubscriptionKey);
     authData[static_cast<size_t>(USP::AuthenticationType::AuthorizationToken)] = std::move(token);
@@ -355,14 +325,7 @@ void CSpxUspTtsEngineAdapter::UspInitialize()
     auto client = USP::Client(uspCallbacks, USP::EndpointType::SpeechSynthesis, PAL::CreateGuidWithoutDashes(), m_threadService)
         .SetAuthentication(authData);
 
-    if (m_isCustomHost) // for FromHost specific handling
-    {
-        client.SetHostUrl(m_endpoint);
-    }
-    else
-    {
-        client.SetEndpointUrl(m_endpoint);
-    }
+    SetUspEndpoint(properties, client);
 
     // Set proxy
     if (!m_proxyHost.empty() && m_proxyPort > 0)
@@ -405,7 +368,7 @@ void CSpxUspTtsEngineAdapter::UspInitialize()
     // Send speech config message
     if (m_uspConnection != nullptr)
     {
-        ISpxPropertyBagImpl::SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Url), m_uspConnection->GetConnectionUrl().c_str());
+        properties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Url), m_uspConnection->GetConnectionUrl().c_str());
 
         // Construct config message payload
         SetSpeechConfigMessage();
@@ -422,6 +385,39 @@ void CSpxUspTtsEngineAdapter::UspTerminate()
 
     m_uspConnection.reset();
 
+}
+
+USP::Client& CSpxUspTtsEngineAdapter::SetUspEndpoint(const std::shared_ptr<ISpxNamedProperties>& properties,
+    USP::Client& client) const
+{
+    SPX_DBG_ASSERT(GetSite() != nullptr);
+    
+    const auto endpoint = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Endpoint));
+    const auto host = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Host));
+    const auto region = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Region));
+
+    SPX_IFFALSE_THROW_HR(
+        static_cast<int>(endpoint.empty()) + static_cast<int>(host.empty()) + static_cast<int>(region.empty()) == 2,
+        SPXERR_INVALID_ARG);
+
+    if (!endpoint.empty())
+    {
+        // set endpoint url if this is provided
+        SPX_DBG_TRACE_VERBOSE("%s: Using custom endpoint: %s", __FUNCTION__, endpoint.c_str());
+        client.SetEndpointUrl(endpoint);
+    }
+    else if (!host.empty())
+    {
+        // set host url if this is provided
+        SPX_DBG_TRACE_VERBOSE("%s: Using custom host: %s", __FUNCTION__, host.c_str());
+        client.SetHostUrl(host);
+    }
+    else
+    {
+        client.SetRegion(region);
+    }
+
+    return client;
 }
 
 void CSpxUspTtsEngineAdapter::OnTurnStart(const USP::TurnStartMsg& message)
