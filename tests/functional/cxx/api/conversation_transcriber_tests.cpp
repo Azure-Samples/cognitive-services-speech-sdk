@@ -45,87 +45,87 @@ TEST_CASE("conversation transcriber no join", "[api][cxx]")
     REQUIRE_THROWS(transcriber->StartTranscribingAsync().get());
 }
 
-// TODO: This test is not passing, and preventing otherwise good code from merging, FIX THIS TEST
-//TEST_CASE("conversation transcriber leave conversation", "[api][cxx]")
-//{
-//    auto config = CreateSpeechConfigForCTSInRoom();
-//
-//    auto audioInput = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(CONVERSATION_BETWEEN_TWO_PERSONS_ENGLISH));
-//    auto myId = PAL::CreateGuidWithDashesUTF8();
-//    INFO(myId);
-//    auto conversation = Conversation::CreateConversationAsync(config, myId).get();
-//
-//    auto transcriber = ConversationTranscriber::FromConfig(audioInput);
-//
-//    REQUIRE_NOTHROW(transcriber->JoinConversationAsync(conversation).get());
-//    // leave it so that we won't receive any reco events. We should still receive sessionStarted, sessionStopped and Cancaled events.
-//    REQUIRE_NOTHROW(transcriber->LeaveConversationAsync().get());
-//    auto result = make_shared<RecoPhrases>();
-//
-//    int recogEventCount = 0;
-//    std::promise<void> ready;
-//    std::atomic<bool> sessionStoppedReceived{ false };
-//    std::atomic<bool> sessionStartedReceived{ false };
-//    std::atomic<bool> canceledReceived{ false };
-//
-//    transcriber->Transcribing.DisconnectAll();
-//    transcriber->Transcribing.Connect([&recogEventCount](const ConversationTranscriptionEventArgs& e)
-//    {
-//        if (e.Result->Reason == ResultReason::RecognizingSpeech)
-//        {
-//            ostringstream os;
-//            os << "Text= " << e.Result->Text
-//                << " Offset= " << e.Result->Offset()
-//                << " Duration= " << e.Result->Duration();
-//            INFO(os.str());
-//            recogEventCount++;
-//        }
-//    });
-//    transcriber->Transcribed.DisconnectAll();
-//    transcriber->Transcribed.Connect([&recogEventCount](const ConversationTranscriptionEventArgs& e)
-//    {
-//        if (e.Result->Reason == ResultReason::RecognizingSpeech)
-//        {
-//            ostringstream os;
-//            os << "Text= " << e.Result->Text
-//                << " Offset= " << e.Result->Offset()
-//                << " Duration= " << e.Result->Duration();
-//            INFO(os.str());
-//            recogEventCount++;
-//        }
-//    });
-//    transcriber->SessionStopped.DisconnectAll();
-//    transcriber->SessionStopped.Connect([&ready, &sessionStoppedReceived](const SessionEventArgs& e)
-//    {
-//        UNUSED(e);
-//        sessionStoppedReceived = true;
-//        ready.set_value();
-//    });
-//
-//    transcriber->SessionStarted.DisconnectAll();
-//    transcriber->SessionStarted.Connect([&ready, &sessionStartedReceived](const SessionEventArgs& e)
-//    {
-//        UNUSED(e);
-//        sessionStartedReceived = true;
-//    });
-//
-//    transcriber->Canceled.DisconnectAll();
-//    transcriber->Canceled.Connect([&ready, &canceledReceived](const ConversationTranscriptionCanceledEventArgs& e)
-//    {
-//        if (e.Reason == CancellationReason::Error)
-//        {
-//            canceledReceived = true;
-//            INFO("Canceled received due to error.");
-//            ready.set_value();
-//        }
-//    });
-//    transcriber->StartTranscribingAsync().get();
-//    WaitForResult(ready.get_future(), 5min);
-//    transcriber->StopTranscribingAsync().get();
-//    SPXTEST_REQUIRE(recogEventCount == 0);
-//    SPXTEST_REQUIRE(sessionStartedReceived);
-//    SPXTEST_REQUIRE(sessionStoppedReceived);
-//}
+TEST_CASE("conversation transcriber leave conversation", "[api][cxx]")
+{
+    auto config = CreateSpeechConfigForCTSInRoom();
+
+    auto audioInput = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(CONVERSATION_BETWEEN_TWO_PERSONS_ENGLISH));
+    auto myId = PAL::CreateGuidWithDashesUTF8();
+    INFO(myId);
+    auto conversation = Conversation::CreateConversationAsync(config, myId).get();
+
+    auto transcriber = ConversationTranscriber::FromConfig(audioInput);
+
+    REQUIRE_NOTHROW(transcriber->JoinConversationAsync(conversation).get());
+    // leave it so that we won't receive any reco events. We should still receive sessionStarted, sessionStopped and Cancaled events.
+    REQUIRE_NOTHROW(transcriber->LeaveConversationAsync().get());
+    auto result = make_shared<RecoPhrases>();
+
+    int recogEventCount = 0;
+    std::promise<void> ready;
+    std::atomic<bool> sessionStoppedReceived{ false };
+    std::atomic<bool> sessionStartedReceived{ false };
+    std::atomic<bool> canceledReceived{ false };
+
+    transcriber->Transcribing.DisconnectAll();
+    transcriber->Transcribing.Connect([&recogEventCount](const ConversationTranscriptionEventArgs& e)
+    {
+        if (e.Result->Reason == ResultReason::RecognizingSpeech)
+        {
+            ostringstream os;
+            os << "Text= " << e.Result->Text
+                << " Offset= " << e.Result->Offset()
+                << " Duration= " << e.Result->Duration();
+            SPX_TRACE_VERBOSE("%s", os.str().c_str());
+            recogEventCount++;
+        }
+    });
+    transcriber->Transcribed.DisconnectAll();
+    transcriber->Transcribed.Connect([&recogEventCount](const ConversationTranscriptionEventArgs& e)
+    {
+        if (e.Result->Reason == ResultReason::RecognizedSpeech)
+        {
+            ostringstream os;
+            os << "Text= " << e.Result->Text
+                << " Offset= " << e.Result->Offset()
+                << " Duration= " << e.Result->Duration();
+            SPX_TRACE_VERBOSE("%s", os.str().c_str());
+            recogEventCount++;
+        }
+    });
+    transcriber->SessionStopped.DisconnectAll();
+    transcriber->SessionStopped.Connect([&ready, &sessionStoppedReceived](const SessionEventArgs& e)
+    {
+        UNUSED(e);
+        sessionStoppedReceived = true;
+        ready.set_value();
+    });
+
+    transcriber->SessionStarted.DisconnectAll();
+    transcriber->SessionStarted.Connect([&ready, &sessionStartedReceived](const SessionEventArgs& e)
+    {
+        UNUSED(e);
+        sessionStartedReceived = true;
+    });
+
+    transcriber->Canceled.DisconnectAll();
+    transcriber->Canceled.Connect([&ready, &canceledReceived](const ConversationTranscriptionCanceledEventArgs& e)
+    {
+        if (e.Reason == CancellationReason::Error)
+        {
+            canceledReceived = true;
+            SPX_TRACE_VERBOSE("Canceled received due to error.");
+            ready.set_value();
+        }
+    });
+    transcriber->StartTranscribingAsync().get();
+    WaitForResult(ready.get_future(), 5min);
+    transcriber->StopTranscribingAsync().get();
+    SPXTEST_REQUIRE(recogEventCount == 0);
+    SPXTEST_REQUIRE(sessionStartedReceived);
+    // sometimes, sessionStopped is not issued when there is 401 error.
+    SPXTEST_REQUIRE((sessionStoppedReceived||canceledReceived)) ;
+}
 
 TEST_CASE("conversation transcriber reco", "[api][cxx]")
 {
@@ -514,6 +514,124 @@ TEST_CASE("conversation_online_pull_stream", "[api][cxx][transcriber]")
         SPXTEST_REQUIRE(result->phrases.size() >= 1);
         SPXTEST_REQUIRE(result->phrases[0].Text == AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH].Utterances["en-US"][0].Text);
     }
+}
+
+TEST_CASE("conversation_online_pull_stream_internal_error", "[api][cxx][transcriber]")
+{
+    REQUIRE(!DefaultSettingsMap[ONLINE_AUDIO_ENDPOINT].empty());
+    REQUIRE(!SubscriptionsRegionsMap[CONVERSATION_TRANSCRIPTION_PPE_SUBSCRIPTION].Key.empty());
+    auto config = SpeechConfig::FromEndpoint(DefaultSettingsMap[ONLINE_AUDIO_ENDPOINT], SubscriptionsRegionsMap[CONVERSATION_TRANSCRIPTION_PPE_SUBSCRIPTION].Key);
+    config->SetProperty("ConversationTranscriptionInRoomAndOnline", "true");
+    config->SetProperty("DiscardAudioFromIntermediateRecoResult", "true");
+    auto fs = OpenWaveFile(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
+
+    auto myId = PAL::CreateGuidWithDashesUTF8();
+    INFO(myId);
+    auto conversation = Conversation::CreateConversationAsync(config, myId).get();
+
+    static uint32_t sampleCount = 0;
+    // Create the "pull stream" object with C++ lambda callbacks
+    auto pullStream = AudioInputStream::CreatePullStream(
+        AudioStreamFormat::GetWaveFormatPCM(16000, 16, 1),
+        [&fs](uint8_t* buffer, uint32_t size) -> int {
+            sampleCount += size;
+            return (int)ReadBuffer(fs, buffer, size); },
+        [=]() {},
+        [=](PropertyId propertyId) -> SPXSTRING {
+        if (propertyId == PropertyId::DataBuffer_TimeStamp)
+        {
+            std::this_thread::sleep_for(std::chrono::milliseconds(800));
+            return CreateTimestamp();
+        }
+        else if (propertyId == PropertyId::DataBuffer_UserId)
+        {
+            return "SP042@speechdemo.onmicrosoft.com";
+        }
+        else
+        {
+            return "";
+        }
+    }
+    );
+
+    auto audioInput = AudioConfig::FromStreamInput(pullStream);
+    auto transcriber = ConversationTranscriber::FromConfig(audioInput);
+    REQUIRE_NOTHROW(transcriber->JoinConversationAsync(conversation).get());
+
+    std::promise<void> ready;
+    std::atomic<bool> sessionStoppedReceived{ false };
+    std::atomic<bool> sessionStartedReceived{ false };
+    std::atomic<bool> canceledReceived{ false };
+
+    auto result = make_shared<RecoPhrases>();
+
+    transcriber->Transcribing.DisconnectAll();
+    transcriber->Transcribing.Connect([&conversation](const ConversationTranscriptionEventArgs& e)
+    {
+        if (e.Result->Reason == ResultReason::RecognizingSpeech)
+        {
+            ostringstream os;
+            os << "Text= " << e.Result->Text
+                << " Offset= " << e.Result->Offset()
+                << " Duration= " << e.Result->Duration();
+            SPX_TRACE_VERBOSE("Intermediate result: %s", os.str().c_str());
+
+            static int count = 0;
+            count++;
+            if (count == 2)
+            {
+                conversation->AddParticipantAsync("InduceException@FETestingHook").get();
+            }
+        }
+
+    });
+    int finalCount = 0;
+    transcriber->Transcribed.DisconnectAll();
+    transcriber->Transcribed.Connect([&finalCount](const ConversationTranscriptionEventArgs& e)
+    {
+        if (e.Result->Reason == ResultReason::RecognizedSpeech)
+        {
+            ostringstream os;
+            os << "Text= " << e.Result->Text
+                << " Offset= " << e.Result->Offset()
+                << " Duration= " << e.Result->Duration()
+                << " UserId= " << e.Result->UserId;
+            SPX_TRACE_VERBOSE("Final result: %s", os.str().c_str());
+            finalCount++;
+        }
+    });
+    transcriber->SessionStopped.DisconnectAll();
+    transcriber->SessionStopped.Connect([&ready, &sessionStoppedReceived](const SessionEventArgs& e)
+    {
+        UNUSED(e);
+        sessionStoppedReceived = true;
+        ready.set_value();
+    });
+
+    transcriber->SessionStarted.DisconnectAll();
+    transcriber->SessionStarted.Connect([&ready, &sessionStartedReceived](const SessionEventArgs& e)
+    {
+        UNUSED(e);
+        sessionStartedReceived = true;
+    });
+
+    transcriber->Canceled.DisconnectAll();
+    transcriber->Canceled.Connect([&ready, &canceledReceived](const ConversationTranscriptionCanceledEventArgs& e)
+    {
+        if (e.Reason == CancellationReason::Error)
+        {
+            canceledReceived = true;
+            SPX_TRACE_VERBOSE("Canceled received due to error.");
+            ready.set_value();
+        }
+    });
+    auto participant = Participant::From("test@speechdemo.onemicrosoft.com", "en-us");
+    conversation->AddParticipantAsync(participant).get();
+
+    transcriber->StartTranscribingAsync().get();
+    WaitForResult(ready.get_future(), 15min);
+    transcriber->StopTranscribingAsync().get();
+    SPXTEST_REQUIRE(finalCount >=2);
 }
 
 TEST_CASE("conversation_online_1_channel_file", "[api][cxx]")

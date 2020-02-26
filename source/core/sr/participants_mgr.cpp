@@ -237,6 +237,7 @@ void CSpxParticipantMgrImpl::UpdateParticipantInternal(bool add, const std::stri
     SanityCheckParticipants(id, person);
 
     m_current_participants.push_back(person);
+    SPX_TRACE_INFO("Added participant id='%s'", id.c_str());
 
     DoneUpdateParticipants();
 }

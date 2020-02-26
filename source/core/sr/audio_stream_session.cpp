@@ -78,7 +78,7 @@ CSpxAudioStreamSession::CSpxAudioStreamSession() :
     m_turnEndStopKind(RecognitionKind::Idle),
     m_isKwsProcessor{ false },
     m_isReliableDelivery{ false },
-    m_lastErrorGlobalOffset{ 0 },
+    m_lastErrorGlobalOffset{ -1 },
     m_currentTurnGlobalOffset{ 0 },
     m_bytesTransited(0)
 {
@@ -1549,6 +1549,7 @@ std::shared_ptr<ISpxRecognitionResult> CSpxAudioStreamSession::CreateIntermediat
     auto initResult = SpxQueryInterface<ISpxRecognitionResultInit>(result);
     initResult->InitIntermediateResult(resultId, text, offset, duration);
 
+    m_mostRecentIntermediateRecoResult = result;
     return result;
 }
 
@@ -1562,12 +1563,20 @@ std::shared_ptr<ISpxRecognitionResult> CSpxAudioStreamSession::CreateKeywordResu
     return result;
 }
 
-std::shared_ptr<ISpxRecognitionResult> CSpxAudioStreamSession::CreateFinalResult(const wchar_t* resultId, ResultReason reason, NoMatchReason noMatchReason, CancellationReason cancellation, CancellationErrorCode errorCode, const wchar_t* text, uint64_t offset, uint64_t duration)
+std::shared_ptr<ISpxRecognitionResult> CSpxAudioStreamSession::CreateFinalResult(const wchar_t* resultId, ResultReason reason, NoMatchReason noMatchReason, CancellationReason cancellation, CancellationErrorCode errorCode, const wchar_t* text, uint64_t offset, uint64_t duration, const wchar_t* userId)
 {
     auto result = SpxCreateObjectWithSite<ISpxRecognitionResult>("CSpxRecognitionResult", this);
 
     auto initResult = SpxQueryInterface<ISpxRecognitionResultInit>(result);
     initResult->InitFinalResult(resultId, reason, noMatchReason, cancellation, errorCode, text, offset, duration);
+
+    auto initConversationResult = SpxQueryInterface<ISpxConversationTranscriptionResultInit>(result);
+    if (initConversationResult)
+    {
+        initConversationResult->InitConversationResult(userId);
+    }
+
+    m_mostRecentIntermediateRecoResult = nullptr;
 
     return result;
 }
@@ -1663,7 +1672,7 @@ void CSpxAudioStreamSession::FireAdapterResult_FinalResult(ISpxRecoEngineAdapter
     UNUSED(adapter);
     SPX_DBG_ASSERT_WITH_MESSAGE(!IsState(SessionState::WaitForPumpSetFormatStart), "ERROR! FireAdapterResult_FinalResult was called with SessionState==WaitForPumpSetFormatStart");
 
-    // This must be called before luAdapter processes the result, since ITN and Lexcical properties are needed by ProcessResult.
+    // This must be called before luAdapter processes the result, since ITN and Lexical properties are needed by ProcessResult.
     UpdateAdapterResult_JsonResult(result);
 
     // Only try and process the result with the LU Adapter if we have one (we won't have one, if nobody every added an IntentTrigger)
@@ -1894,10 +1903,15 @@ void CSpxAudioStreamSession::Error(ISpxRecoEngineAdapter* adapter, ErrorPayload_
     // If it is a transport error and the connection was successfully before, we retry in continuous mode.
     // Otherwise report the error to the user, so that he can recreate a recognizer.
     else if (IsKind(RecognitionKind::Continuous) && payload->IsTransportError() &&
-             m_audioBuffer->GetAbsoluteOffset() > m_lastErrorGlobalOffset) // There was progress...
+        static_cast<int>(m_audioBuffer->GetAbsoluteOffset()) > m_lastErrorGlobalOffset ) // There was progress...
     {
         SPX_DBG_TRACE_VERBOSE("%s: Trying to reset the engine adapter", __FUNCTION__);
-        m_lastErrorGlobalOffset = m_audioBuffer->GetAbsoluteOffset();
+        auto finalResult = DiscardAudioUnderTransportErrors();
+        if (finalResult != nullptr)
+        {
+            FireResultEvent(GetSessionId(), finalResult);
+        }
+        m_lastErrorGlobalOffset = static_cast<int>(m_audioBuffer->GetAbsoluteOffset());
         StartResetEngineAdapter();
     }
     else
@@ -1923,6 +1937,56 @@ void CSpxAudioStreamSession::Error(ISpxRecoEngineAdapter* adapter, ErrorPayload_
         m_expectAdapterStartedTurn = false;
         m_expectAdapterStoppedTurn = false;
     }
+}
+
+std::shared_ptr<ISpxRecognitionResult> CSpxAudioStreamSession::DiscardAudioUnderTransportErrors()
+{
+    bool discardAudio = PAL::ToBool(GetStringValue("DiscardAudioFromIntermediateRecoResult", PAL::BoolToString(false).c_str()));
+    if (discardAudio == false)
+    {
+        return nullptr;
+    }
+    if (m_mostRecentIntermediateRecoResult == nullptr)
+    {
+        return nullptr;
+    }
+    SPX_DBG_TRACE_VERBOSE("Discarding audio after transportErrors");
+    uint64_t offset = m_mostRecentIntermediateRecoResult->GetOffset();
+    uint64_t duration = m_mostRecentIntermediateRecoResult->GetDuration();
+
+    auto buffer = m_audioBuffer;
+    if (buffer)
+    {
+        buffer->DiscardTill(offset + duration);
+    }
+    return CreateFakeFinalResult(m_mostRecentIntermediateRecoResult);
+}
+
+std::shared_ptr<ISpxRecognitionResult> CSpxAudioStreamSession::CreateFakeFinalResult(const std::shared_ptr<ISpxRecognitionResult>& intermediate)
+{
+    if (intermediate == nullptr)
+    {
+        return nullptr;
+    }
+
+    wstring text = intermediate->GetText();
+    uint64_t offset = intermediate->GetOffset();
+    uint64_t duration = intermediate->GetDuration();
+    wstring userId{};
+    auto ctsResult =  SpxQueryInterface<ISpxConversationTranscriptionResult>(intermediate);
+    if (ctsResult != nullptr)
+    {
+        userId = ctsResult->GetUserId();
+    }
+
+    auto factory = SpxQueryService<ISpxRecoResultFactory>(SpxSharedPtrFromThis<ISpxSession>(this));
+    if (factory == nullptr)
+    {
+        return nullptr;
+    }
+
+    auto result = factory->CreateFinalResult(nullptr, ResultReason::RecognizedSpeech, NO_MATCH_REASON_NONE, REASON_CANCELED_NONE, CancellationErrorCode::NoError, text.c_str(), offset, duration, userId.c_str());
+    return result;
 }
 
 std::shared_ptr<ISpxSession> CSpxAudioStreamSession::GetDefaultSession()

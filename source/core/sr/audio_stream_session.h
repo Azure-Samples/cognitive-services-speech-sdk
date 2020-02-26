@@ -161,7 +161,7 @@ public:
 
     // --- ISpxRecoResultFactory
     std::shared_ptr<ISpxRecognitionResult> CreateIntermediateResult(const wchar_t* resultId, const wchar_t* text, uint64_t offset, uint64_t duration) override;
-    std::shared_ptr<ISpxRecognitionResult> CreateFinalResult(const wchar_t* resultId, ResultReason reason, NoMatchReason noMatchReason, CancellationReason cancellation, CancellationErrorCode errorCode, const wchar_t* text, uint64_t offset, uint64_t duration) override;
+    std::shared_ptr<ISpxRecognitionResult> CreateFinalResult(const wchar_t* resultId, ResultReason reason, NoMatchReason noMatchReason, CancellationReason cancellation, CancellationErrorCode errorCode, const wchar_t* text, uint64_t offset, uint64_t duration, const wchar_t* userId = nullptr) override;
     std::shared_ptr<ISpxRecognitionResult> CreateKeywordResult(const double confidence, const uint64_t offset, const uint64_t duration, const wchar_t* keyword, ResultReason reason) override;
 
     // --- ISpxRecoEngineAdapterSite (second part...)
@@ -242,6 +242,10 @@ private:
 
     enum EventType { SessionStart, SessionStop, SpeechStart, SpeechEnd, RecoResultEvent, ActivityReceivedEvent, Connected, Disconnected };
     void FireEvent(EventType sessionType, std::shared_ptr<ISpxRecognitionResult> result = nullptr, const wchar_t* sessionId = nullptr, uint64_t offset = 0, std::string activity = std::string{}, std::shared_ptr<ISpxAudioOutput> audio = nullptr);
+
+    std::shared_ptr<ISpxRecognitionResult> DiscardAudioUnderTransportErrors();
+    std::shared_ptr<ISpxRecognitionResult> CreateFakeFinalResult(const std::shared_ptr<ISpxRecognitionResult>& intermediate);
+    std::shared_ptr<ISpxRecognitionResult> m_mostRecentIntermediateRecoResult;
 
 private:
     std::packaged_task<void()> CreateTask(std::function<void()> func, bool catchAll = true);
@@ -404,7 +408,7 @@ private:
     mutable std::mutex m_conversationLock;
 
     bool m_isReliableDelivery;
-    uint64_t m_lastErrorGlobalOffset;
+    int64_t m_lastErrorGlobalOffset;
     uint64_t m_currentTurnGlobalOffset;
 
     uint64_t m_bytesTransited;

@@ -578,7 +578,7 @@ inline int parse_cli_args(Catch::Session& session, int argc, char* argv[])
         | Opt(DefaultSettingsMap[ONLINE_AUDIO_ENDPOINT], "OnlineAudioEndpoint")
         ["--OnlineAudioEndpoint"]
     ("The endpoint that on-line tests in intelligent meeting recognizer talks to")
-        | Opt(SubscriptionsRegionsMap[CONVERSATION_TRANSCRIPTION_PROD_SUBSCRIPTION].Key, "ConversationTranscriber")
+        | Opt(SubscriptionsRegionsMap[CONVERSATION_TRANSCRIPTION_PPE_SUBSCRIPTION].Key, "ConversationTranscriber")
         ["--keyConversationTranscriberPPE"]
     ("The conversation transcriber key")
         | Opt(DefaultSettingsMap[INPUT_DIR], "InputDir")
