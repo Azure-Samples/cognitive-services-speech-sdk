@@ -2407,7 +2407,7 @@ jobs:
 
 - job: IosMultiPlatformTests
   dependsOn: [Pre, IosBuild]
-  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' IosMultiPlatformTests '))
+  condition: and(eq(variables['SPEECHSDK_RUN_TESTS'], 'true'), succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' IosMultiPlatformTests '))
   pool:
     name: Hosted macOS
   timeoutInMinutes: 60
