@@ -57,6 +57,7 @@ set(HEADERS_PRIVATE
     "${SRC_DIR}/interaction_id_provider.h"
     "${SRC_DIR}/source_lang_config.h"
     "${SRC_DIR}/participants_mgr.h"
+    "${SRC_DIR}/audio_file_logger.h"
     "${SRC_DIR}/speech_audio_processor.h"
     )
 
@@ -98,6 +99,7 @@ set(SOURCES
     "${SRC_DIR}/auto_detect_source_lang_config.cpp"
     "${SRC_DIR}/source_lang_config.cpp"
     "${SRC_DIR}/participants_mgr.cpp"
+    "${SRC_DIR}/audio_file_logger.cpp"
     "${SRC_DIR}/speech_audio_processor.cpp"
     )
 

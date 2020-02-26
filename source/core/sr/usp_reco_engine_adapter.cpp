@@ -31,10 +31,6 @@ using namespace std;
 
 using json = nlohmann::json;
 
-#ifdef _DEBUG
-std::atomic<unsigned int> CSpxUspRecoEngineAdapter::s_nextAudioLogFileIndex;
-#endif
-
 CSpxUspRecoEngineAdapter::CSpxUspRecoEngineAdapter() :
     m_resetUspAfterAudioByteCount(0),
     m_uspAudioByteCount(0),
@@ -76,7 +72,7 @@ void CSpxUspRecoEngineAdapter::Term()
     {
         SPX_DBG_TRACE_VERBOSE("%s: Terminating USP Connection (0x%8p)", __FUNCTION__, (void*)m_uspConnection.get());
 #ifdef _DEBUG
-        CloseAudioDumpFile();
+        m_audioLogger.reset();
 #endif
 
         UspTerminate();
@@ -1104,7 +1100,7 @@ void CSpxUspRecoEngineAdapter::ProcessAudioFormat(SPXWAVEFORMATEX* pformat)
 
     if (!useAudioCompression
 #ifdef _DEBUG
-        || m_audioDumpFile
+        || m_audioLogger
 #endif
     )
     {
@@ -1117,9 +1113,9 @@ void CSpxUspRecoEngineAdapter::ProcessAudioFormat(SPXWAVEFORMATEX* pformat)
         }
 
 #ifdef _DEBUG
-        if (m_audioDumpFile)
+        if (m_audioLogger)
         {
-            fwrite(wavHeaderDataPtr->data.get(), 1, wavHeaderDataPtr->size, m_audioDumpFile);
+            m_audioLogger->WriteAudio(wavHeaderDataPtr->data.get(), wavHeaderDataPtr->size);
         }
 #endif
     }
@@ -1139,9 +1135,9 @@ void CSpxUspRecoEngineAdapter::ProcessAudioChunk(const DataChunkPtr& audioChunk)
     }
 
 #ifdef _DEBUG
-    if (m_audioDumpFile)
+    if (m_audioLogger)
     {
-        fwrite(audioChunk->data.get(), 1, audioChunk->size, m_audioDumpFile);
+        m_audioLogger->WriteAudio(audioChunk->data.get(), audioChunk->size);
     }
 #endif
 }
@@ -1456,59 +1452,15 @@ static TranslationStatusCode GetTranslationStatus(::USP::TranslationStatus uspSt
 }
 
 #ifdef _DEBUG
-void CSpxUspRecoEngineAdapter::OpenAudioDumpFile()
+void CSpxUspRecoEngineAdapter::SetupAudioDumpFile()
 {
-    // In case we had no chance to close it.
-    CloseAudioDumpFile();
+    m_audioLogger.reset();
 
     auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
     auto audioDumpDir = properties->GetStringValue("CARBON-INTERNAL-DumpAudioToDir");
     SPX_DBG_TRACE_VERBOSE("CARBON-INTERNAL-DumpAudioToDir : %s", audioDumpDir.c_str());
-
-    if (!audioDumpDir.empty())
-    {
-        m_audioLogFileIndex = s_nextAudioLogFileIndex++;
-        char buffLogIndex[10]; // = "FFFFFFFF_";
-
-        snprintf(buffLogIndex, sizeof(buffLogIndex), "%08x_", m_audioLogFileIndex);
-
-        m_audioDumpDir = audioDumpDir;
-        m_tempAudioLogFileName = PAL::AppendPath(m_audioDumpDir, buffLogIndex);
-        m_tempAudioLogFileName.append(s_tmpAudioDumpFileName);
-        auto err = PAL::fopen_s(&m_audioDumpFile, m_tempAudioLogFileName.c_str(), "wb");
-        if (err != 0)
-        {
-            SPX_TRACE_ERROR("%s: (0x%8p) FAILED to open audio dump file %s for write (Error=%d)", __FUNCTION__, (void*)this, m_tempAudioLogFileName.c_str(), err);
-        }
-        else
-        {
-            SPX_DBG_TRACE_VERBOSE("%s: (0x%8p) Writing audio dump to file %s", __FUNCTION__, (void*)this, m_tempAudioLogFileName.c_str());
-        }
-    }
+    m_audioLogger = CSpxAudioFileLogger::Setup(audioDumpDir);
 }
-
-void CSpxUspRecoEngineAdapter::CloseAudioDumpFile()
-{
-    if (m_audioDumpFile)
-    {
-        fflush(m_audioDumpFile);
-        fclose(m_audioDumpFile);
-        auto newName = PAL::AppendPath(m_audioDumpDir, std::to_string(m_audioDumpInstCount) + "_" + m_audioDumpInstTag + ".wav");
-        m_audioDumpInstCount++;
-        m_audioDumpInstTag.clear();
-        if (0 != std::rename(m_tempAudioLogFileName.c_str(), newName.c_str()))
-        {
-            SPX_TRACE_ERROR("%s: Failed to rename audio dump %s to %s", __FUNCTION__, m_tempAudioLogFileName.c_str(), newName.c_str());
-        }
-        else
-        {
-            SPX_DBG_TRACE_VERBOSE("%s: Closing audio dump file %s", __FUNCTION__, newName.c_str());
-        }
-        m_audioDumpFile = nullptr;
-        m_tempAudioLogFileName.clear();
-    }
-}
-
 #endif
 
 DataChunkPtr CSpxUspRecoEngineAdapter::MakeDataChunkForAudioFormat(SPXWAVEFORMATEX* pformat)
@@ -1729,7 +1681,8 @@ void CSpxUspRecoEngineAdapter::OnTurnStart(const USP::TurnStartMsg& message)
     }
 
 #ifdef _DEBUG
-    m_audioDumpInstTag = message.contextServiceTag;
+    if (m_audioLogger)
+        m_audioLogger->SetDumpInstanceId(message.contextServiceTag);
 #endif
 }
 
@@ -1805,7 +1758,7 @@ void CSpxUspRecoEngineAdapter::OnTurnEnd(const USP::TurnEndMsg& message)
     m_compressionCodec.reset();
 
 #ifdef _DEBUG
-    CloseAudioDumpFile();
+    m_audioLogger.reset();
 #endif
 }
 
@@ -2460,7 +2413,7 @@ void CSpxUspRecoEngineAdapter::PrepareUspAudioStream()
     m_audioFormatSent = false;
 
 #ifdef _DEBUG
-    OpenAudioDumpFile();
+    SetupAudioDumpFile();
 #endif
 
     ProcessAudioFormat(m_format.get());

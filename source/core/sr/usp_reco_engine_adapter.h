@@ -16,6 +16,7 @@
 #include "json.h"
 #include "recognition_result.h"
 #include "service_helpers.h"
+#include "audio_file_logger.h"
 #include "usp.h"
 #include "activity_session.h"
 #include "json.h"
@@ -272,8 +273,7 @@ private:
     void CreateConversationResult(std::shared_ptr<ISpxRecognitionResult>& result, const std::wstring& userId);
 
 #ifdef _DEBUG
-    void OpenAudioDumpFile();
-    void CloseAudioDumpFile();
+    void SetupAudioDumpFile();
 #endif
 
     DataChunkPtr MakeDataChunkForAudioFormat(SPXWAVEFORMATEX* pformat);
@@ -327,15 +327,7 @@ private:
     std::unordered_map<std::string, Microsoft::CognitiveServices::Speech::USP::MessageType> m_message_name_to_type_map;
 
 #ifdef _DEBUG
-    static std::atomic<unsigned int> s_nextAudioLogFileIndex;
-    unsigned int m_audioLogFileIndex;
-    std::string m_tempAudioLogFileName;
-
-    FILE* m_audioDumpFile = nullptr;
-    std::string m_audioDumpDir;
-    std::string m_audioDumpInstTag;
-    uint32_t m_audioDumpInstCount = 1;
-    static constexpr auto s_tmpAudioDumpFileName = "tmpaudio.wav";
+    std::shared_ptr<CSpxAudioFileLogger> m_audioLogger;
 #endif
 };
 
