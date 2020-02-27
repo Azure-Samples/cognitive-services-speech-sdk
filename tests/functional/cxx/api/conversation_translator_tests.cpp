@@ -822,6 +822,33 @@ TEST_CASE("Conversation Translator Participant Rejoin After Delete", "[api][cxx]
     );
 }
 
+TEST_CASE("Conversation Translator SpeechRecognizer Connection Still Works", "[api][cxx][conversation_translator][cxx_conversation_translator][connection][trans_recognizer]")
+{
+    auto utterance = AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH];
+
+    REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
+    auto audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
+    auto speechConfig = CreateConfig("en-US", { });
+
+    auto recognizer = SpeechRecognizer::FromConfig(speechConfig, audioConfig);
+    auto connection = Connection::FromRecognizer(recognizer);
+
+    auto evts = ConversationTranslatorCallbacks::From(recognizer);
+    evts->AddConnectionCallbacks(connection);
+
+    recognizer->StartContinuousRecognitionAsync().get();
+    evts->WaitForAudioStreamCompletion(15s, 2s);
+    recognizer->StopContinuousRecognitionAsync().get();
+
+    connection->Close();
+
+    std::this_thread::sleep_for(2s);
+
+    evts->VerifySessionAndConnectEvents(true);
+    SPXTEST_REQUIRE(evts->Transcribed.size() > 0);
+    SPXTEST_REQUIRE_THAT(evts->Transcribed[0].Text, Catch::Equals(utterance.Utterances["en-US"][0].Text));
+}
+
 
 
 TEST_CASE("Conversation Translator Sweden demo", "[!hide][cxx_conversation_translator][Sweden]")

@@ -11,6 +11,15 @@
 
 using namespace Microsoft::CognitiveServices::Speech::Impl;
 
+static bool is_conversation_translator_connection(SPXCONNECTIONHANDLE connectionHandle)
+{
+    // this should throw an exception if the connection handle is invalid
+    auto connection = GetInstance<ISpxConnection>(connectionHandle);
+
+    auto convTransConnection = connection->QueryInterface<ConversationTranslation::ISpxConversationTranslatorConnection>();
+    return convTransConnection != nullptr;
+}
+
 SPXAPI connection_from_recognizer(SPXRECOHANDLE recognizerHandle, SPXCONNECTIONHANDLE* connectionHandle)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, connectionHandle == nullptr);
@@ -72,9 +81,13 @@ SPXAPI connection_connected_set_callback(SPXCONNECTIONHANDLE connection, CONNECT
 {
     SPXAPI_INIT_HR_TRY(hr)
     {
-        // the conversation translator connection is a special case so let's try that first
-        hr = conversation_translator_connection_connected_set_callback(connection, callback, context);
-        if (hr != SPX_NOERROR)
+        // the connected event from a conversation translation is a special case so let's check for that
+        // to set the right event handler first
+        if (is_conversation_translator_connection(connection))
+        {
+            hr = conversation_translator_connection_connected_set_callback(connection, callback, context);
+        }
+        else
         {
             hr = connection_set_event_callback(&ISpxRecognizerEvents::Connected, connection, callback, context);
         }
@@ -86,9 +99,13 @@ SPXAPI connection_disconnected_set_callback(SPXCONNECTIONHANDLE connection, CONN
 {
     SPXAPI_INIT_HR_TRY(hr)
     {
-        // the conversation translator connection is a special case so let's try that first
-        hr = conversation_translator_connection_disconnected_set_callback(connection, callback, context);
-        if (hr != SPX_NOERROR)
+        // the connected event from a conversation translation is a special case so let's check for that
+        // to set the right event handler first
+        if (is_conversation_translator_connection(connection))
+        {
+            hr = conversation_translator_connection_disconnected_set_callback(connection, callback, context);
+        }
+        else
         {
             hr = connection_set_event_callback(&ISpxRecognizerEvents::Disconnected, connection, callback, context);
         }

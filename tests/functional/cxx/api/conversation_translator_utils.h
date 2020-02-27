@@ -191,6 +191,12 @@ namespace IntegrationTests {
         struct _Canceled : public _Session
         {
             _Canceled() = default;
+            _Canceled(const SpeechRecognitionCanceledEventArgs& args) :
+                _Session(args),
+                Reason(args.Reason),
+                ErrorCode(args.ErrorCode)
+            {
+            }
             _Canceled(const ConversationTranslationCanceledEventArgs& args) :
                 _Session(args),
                 Reason(args.Reason),
@@ -231,6 +237,15 @@ namespace IntegrationTests {
         struct _Reco : public _Session
         {
             _Reco() = default;
+            _Reco(const SpeechRecognitionEventArgs& args) :
+                _Session(args),
+                Offset(args.Offset),
+                Translations(),
+                ResultId(args.Result->ResultId),
+                Text(args.Result->Text),
+                Reason(args.Result->Reason)
+            {
+            }
             _Reco(const ConversationTranslationEventArgs& args) :
                 _Session(args),
                 Offset(args.Offset),
@@ -257,6 +272,7 @@ namespace IntegrationTests {
         };
 
         static std::shared_ptr<ConversationTranslatorCallbacks> From(std::shared_ptr<ConversationTranslator> convTrans);
+        static std::shared_ptr<ConversationTranslatorCallbacks> From(std::shared_ptr<SpeechRecognizer> reco);
 
         std::vector<_Session> SessionStarted;
         std::vector<_Session> SessionStopped;
@@ -298,7 +314,7 @@ namespace IntegrationTests {
             }
         }
 
-        void VerifyBasicEvents(bool expectEndOfStream, const std::string name, bool isHost, std::string& participantId)
+        void VerifySessionAndConnectEvents(bool expectEndOfStream)
         {
             SPXTEST_REQUIRE(SessionStarted.size() > 0);
             SPXTEST_REQUIRE(SessionStopped.size() > 0);
@@ -319,6 +335,11 @@ namespace IntegrationTests {
             {
                 SPXTEST_REQUIRE(Canceled.size() == 0);
             }
+        }
+
+        void VerifyBasicEvents(bool expectEndOfStream, const std::string name, bool isHost, std::string& participantId)
+        {
+            VerifySessionAndConnectEvents(expectEndOfStream);
 
             SPXTEST_REQUIRE(ParticipantsChanged.size() >= 2);
             SPXTEST_REQUIRE(ParticipantsChanged[0].Reason == Transcription::ParticipantChangedReason::JoinedConversation);
@@ -494,6 +515,37 @@ namespace IntegrationTests {
         });
     }
 
+    template<>
+    void ConversationTranslatorCallbacks::Bind(std::vector<_Canceled>& list, EventSignal<const SpeechRecognitionCanceledEventArgs&>& evt, const std::string& name)
+    {
+        auto keepalive = shared_from_this();
+        evt.Connect([&list, name, keepalive](const SpeechRecognitionCanceledEventArgs& arg)
+        {
+            SPX_TRACE_INFO(">>%s: Received event. Reason: %d, Error: %d, Details: %s", name.c_str(), arg.Reason, arg.ErrorCode, arg.ErrorDetails.c_str());
+
+            _Canceled parsed(arg);
+
+            list.push_back(parsed);
+
+            try
+            {
+                if (parsed.Reason == CancellationReason::EndOfStream)
+                {
+                    keepalive->m_audioStreamFinished.set_value();
+                }
+                else
+                {
+                    std::string error = std::string("cancel message indicating error ") + std::to_string((int)parsed.ErrorCode);
+                    throw std::runtime_error(error.c_str());
+                }
+            }
+            catch (std::exception&)
+            {
+                keepalive->m_audioStreamFinished.set_exception(std::current_exception());
+            }
+        });
+    }
+
     std::shared_ptr<ConversationTranslatorCallbacks> ConversationTranslatorCallbacks::From(std::shared_ptr<ConversationTranslator> convTrans)
     {
         auto evts = std::shared_ptr<ConversationTranslatorCallbacks>(new ConversationTranslatorCallbacks());
@@ -506,6 +558,19 @@ namespace IntegrationTests {
         evts->Bind(evts->Transcribing, convTrans->Transcribing, "Transcribing");
         evts->Bind(evts->Transcribed, convTrans->Transcribed, "Transcribed");
         evts->Bind(evts->TextMessageReceived, convTrans->TextMessageReceived, "TextMessageReceived");
+
+        return evts;
+    }
+
+    std::shared_ptr<ConversationTranslatorCallbacks> ConversationTranslatorCallbacks::From(std::shared_ptr<SpeechRecognizer> reco)
+    {
+        auto evts = std::shared_ptr<ConversationTranslatorCallbacks>(new ConversationTranslatorCallbacks());
+
+        evts->Bind(evts->SessionStarted, reco->SessionStarted, "SessionStarted");
+        evts->Bind(evts->SessionStopped, reco->SessionStopped, "SessionStopped");
+        evts->Bind(evts->Canceled, reco->Canceled, "Canceled");
+        evts->Bind(evts->Transcribing, reco->Recognizing, "Recognizing");
+        evts->Bind(evts->Transcribed, reco->Recognized, "Recognized");
 
         return evts;
     }
