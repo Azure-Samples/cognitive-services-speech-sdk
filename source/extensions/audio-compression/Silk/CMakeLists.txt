@@ -29,10 +29,15 @@ source_group("Header Files (private)" FILES ${HEADERS_PRIVATE})
 source_group("Source Files" FILES ${SOURCES})
 
 # HINTS ${CARBON_EXTERNAL}/silk-codec/lib/${CMAKE_SYSTEM_NAME}/${PLATFORM_NAME}/${CMAKE_SYSTEM_PROCESSOR}
+
 if (WIN32)
   set (SILKLIBHINT ${CARBON_EXTERNAL}/silk-codec/lib/Windows/${SPEECHSDK_ARCH})
 else()
-  set (SILKLIBHINT ${CARBON_EXTERNAL}/silk-codec/lib/${CMAKE_SYSTEM_NAME}/${SPEECHSDK_ARCH})
+  if (CMAKE_SYSTEM_NAME STREQUAL "Android")
+    set (SILKLIBHINT ${CARBON_EXTERNAL}/silk-codec/lib/${CMAKE_SYSTEM_NAME}/${CMAKE_ANDROID_ARCH_ABI})
+  else()
+    set (SILKLIBHINT ${CARBON_EXTERNAL}/silk-codec/lib/${CMAKE_SYSTEM_NAME}/${SPEECHSDK_ARCH})
+  endif()
 endif()
 
 message("Silk lib path hint: " ${SILKLIBHINT})

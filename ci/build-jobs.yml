@@ -423,7 +423,7 @@ jobs:
     inputs:
       ConnectedServiceName: 'Speech SDK ESRP Signing Alternate'
       FolderPath: 'build/bin/$(BuildConfiguration)'
-      Pattern: 'Microsoft.CognitiveServices.Speech.core.dll,Microsoft.CognitiveServices.Speech.csharp.dll,Microsoft.CognitiveServices.Speech.extension.kws.dll'
+      Pattern: 'Microsoft.CognitiveServices.Speech.core.dll,Microsoft.CognitiveServices.Speech.csharp.dll,Microsoft.CognitiveServices.Speech.extension.kws.dll, Microsoft.CognitiveServices.Speech.extension.silk_codec.dll'
       signConfigType: inlineSignParams
       inlineOperation: $(SIGN_PARAMS_DLL)
     condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
@@ -1345,6 +1345,7 @@ jobs:
         vsts_setvar SPEECHSDK_BUILD_CONFIGURATION "$(BuildConfiguration)"
         vsts_setvar GST_BUILD_CONFIGURATION "$(ANDROID_GST)\$(GstBuildPlatform)"
         vsts_setvar SPEECHSDK_ENABLE_KWS true
+        vsts_setvar EXTENSION_AUDIOCOMPRESSION_ENABLED true
         vsts_setvar SPEECHSDK_ENABLE_CODEC true
   - bash: ./ci/set-variables.sh
     displayName: Set variables

@@ -9,6 +9,9 @@
 #include <SKP_Silk_SDK_API.h>
 #include "silk_codec_impl.h"
 
+#ifndef UNUSED
+    #define UNUSED(x) (void)x
+#endif
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -23,7 +26,7 @@ const uint64_t c_silkContentTypeSize = sizeof(c_silkContentType);
 CSilkCodecImpl::CSilkCodecImpl()
     : m_dataCallbackContext(nullptr),
       m_encoderBuffer{0},
-      m_encoderControl{0}
+      m_encoderControl{0, 0, 0, 0, 0, 0, 0, 0}
 {
 }
 
@@ -39,9 +42,9 @@ int CSilkCodecImpl::Init(
                         SilkDataCallbackFunc dataCallback,
                         void* callerContext)
 {
-    _CRT_UNUSED(inputSamplesPerSecond);
-    _CRT_UNUSED(inputBitsPerSample);
-    _CRT_UNUSED(inputChannels);
+    UNUSED(inputSamplesPerSecond);
+    UNUSED(inputBitsPerSample);
+    UNUSED(inputChannels);
 
     m_dataCallback = dataCallback;
     m_dataCallbackContext = callerContext;
@@ -125,7 +128,7 @@ int CSilkCodecImpl::Encode(const uint8_t* pBuffer, size_t bytesToWrite)
 
     if (NULL == pBuffer)
     {
-        // TODO: Log error buffer 
+        // TODO: Log error buffer
         return -1;
     }
     else if (0 == bytesToWrite)
@@ -290,7 +293,7 @@ int CSilkCodecImpl::SilkEncodeFrame(const uint8_t* pBuffer)
 
 int CSilkCodecImpl::EncodeUnfilledBuffer()
 {
-    // The codec does not encode small pieces of audio only multiples of our buffer size. We will fill everything with 0 for alignment purposes. 
+    // The codec does not encode small pieces of audio only multiples of our buffer size. We will fill everything with 0 for alignment purposes.
     SKP_int ret = 0;
 
     if (m_encoderBufferOffset > 0) // == SILK_MAXBYTESPERBLOCK)
