@@ -166,6 +166,28 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
+        public async Task TestSpeechKeywordspotterStartAndStopWithInvalidSubscription()
+        {
+            var str = AudioUtterancesMap[AudioUtteranceKeys.COMPUTER_KEYWORD_WITH_SINGLE_UTTERANCE_1].FilePath.GetRootRelativePath();
+            var audioInput = AudioConfig.FromStreamInput(new PullAudioInputStream(new RealTimeAudioInputStream(str)));
+            var stopRecognition = new TaskCompletionSource<int>();
+
+            var invalidConfig = SpeechConfig.FromSubscription("invalid", "invalid");
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(invalidConfig, audioInput)))
+            {
+                var model = KeywordRecognitionModel.FromFile(TestData.Kws.Computer.ModelFile);
+                recognizer.Canceled += (s, e) =>
+                {
+                    stopRecognition.TrySetResult(0);
+                };
+                await recognizer.StartKeywordRecognitionAsync(model).ConfigureAwait(false);
+                Task.WaitAny(new[] { stopRecognition.Task }, 10000);
+                Assert.IsTrue(stopRecognition.Task.IsCompleted, "Canceled event not received");
+                await recognizer.StopKeywordRecognitionAsync().ConfigureAwait(false);
+            }
+        }
+
+        [TestMethod]
         public async Task TestSpeechSpeechKeywordspotterStartStop()
         {
             var str = AudioUtterancesMap[AudioUtteranceKeys.COMPUTER_KEYWORD_WITH_SINGLE_UTTERANCE_1].FilePath.GetRootRelativePath();

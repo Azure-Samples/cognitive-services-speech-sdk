@@ -1914,6 +1914,12 @@ void CSpxAudioStreamSession::Error(ISpxRecoEngineAdapter* adapter, ErrorPayload_
         m_lastErrorGlobalOffset = static_cast<int>(m_audioBuffer->GetAbsoluteOffset());
         StartResetEngineAdapter();
     }
+    else if (IsKind(RecognitionKind::Keyword) && payload->IsTransportError())
+    {
+        // We see an error from adapter, need to reset it when start next recognition.
+        m_resetRecoAdapter = m_recoAdapter;
+        SPX_DBG_TRACE_VERBOSE("%s: Reset adapter at the next recognition. We are in active keyword recognition mode, ignore error events.", __FUNCTION__);
+    }
     else
     {
         SPX_DBG_TRACE_VERBOSE("%s: Creating/firing ResultReason::Canceled result", __FUNCTION__);
