@@ -11,9 +11,12 @@
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
     <summary>Microsoft Cognitive Services Speech SDK, built with Windows uCRT runtime.</summary>
     <description>
-      Same as the public Microsoft Cognitive Services Speech SDK, but built with Windows uCRT and build settings.
-      API Documentation is available at https://aka.ms/csspeech.
-      This version of the library is for internal Windows OS consumption only.
+      <![CDATA[<p>This package provides Windows uCRT libraries for the Microsoft Cognitive Services Speech SDK. This version of the library is for internal Windows OS consumption only.</p>
+        <b>More info:</b>
+        <a href="https://aka.ms/acomspeech">Product information</a> | 
+        <a href="https://aka.ms/csspeech">Documentation</a> | 
+        <a href="https://aka.ms/csspeech/csharpref">Developer reference documentation</a>
+      ]]>
     </description>
     <tags>Microsoft Speech Cognitive Services native C++ C# .NET .NETStandard</tags>
     <releaseNotes>

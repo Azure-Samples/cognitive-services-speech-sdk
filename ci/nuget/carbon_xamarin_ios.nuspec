@@ -11,8 +11,12 @@
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
     <summary>Microsoft Cognitive Services Speech SDK for Xamarin iOS</summary>
     <description>
-      This NuGet package provides native and managed libraries for Xamarin iOS with bitcode enabled.
-      Documentation is available at https://aka.ms/csspeech.
+      <![CDATA[<p>This NuGet package provides native and managed libraries for Xamarin iOS with bitcode enabled.</p>
+        <b>More info:</b>
+        <a href="https://aka.ms/acomspeech">Product information</a> | 
+        <a href="https://aka.ms/csspeech">Documentation</a> | 
+        <a href="https://aka.ms/csspeech/csharpref">Developer reference documentation</a>
+      ]]>
     </description>
     <tags>Microsoft Speech Cognitive Services native C++ C# .NET .NETStandard</tags>
     <releaseNotes>

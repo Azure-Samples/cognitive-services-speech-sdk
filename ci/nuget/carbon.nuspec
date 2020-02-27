@@ -11,8 +11,12 @@
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
     <summary>Microsoft Cognitive Services Speech SDK</summary>
     <description>
-      This NuGet package provides native and managed libraries for the Microsoft Cognitive Services Speech SDK.
-      Documentation is available at https://aka.ms/csspeech.
+      <![CDATA[<p>This package provides native and managed libraries for the Microsoft Cognitive Services Speech SDK.</p>
+        <b>More info:</b>
+        <a href="https://aka.ms/acomspeech">Product information</a> | 
+        <a href="https://aka.ms/csspeech">Documentation</a> | 
+        <a href="https://aka.ms/csspeech/csharpref">Developer reference documentation</a>
+      ]]>
     </description>
     <tags>Microsoft Speech Cognitive Services native C++ C# .NET .NETStandard</tags>
     <releaseNotes>
