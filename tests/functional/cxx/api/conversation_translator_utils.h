@@ -16,6 +16,8 @@
 #include <speechapi_cxx_conversation_translator.h>
 #include <speechapi_cxx_participant.h>
 #include <speechapi_cxx_connection_eventargs.h>
+#include <speechapi_cxx_speech_recognition_eventargs.h>
+#include <speechapi_cxx_speech_recognizer.h>
 #include <string_utils.h>
 #include "test_PAL.h"
 #include "conversation_utils.h"
