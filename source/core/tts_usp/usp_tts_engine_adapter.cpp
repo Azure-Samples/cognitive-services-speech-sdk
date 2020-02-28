@@ -271,10 +271,13 @@ void CSpxUspTtsEngineAdapter::UspSendMessage(const std::string& messagePath, con
 void CSpxUspTtsEngineAdapter::DoSendMessageWork(std::weak_ptr<USP::Connection> connectionPtr, const std::string& messagePath, const std::string& buffer, USP::MessageType messageType, const std::string& requestId)
 {
     auto connection = connectionPtr.lock();
-    SPX_DBG_ASSERT(connection != nullptr);
     if (connection != nullptr)
     {
         connection->SendMessage(messagePath, reinterpret_cast<const uint8_t*>(buffer.c_str()), buffer.length(), messageType, requestId);
+    }
+    else
+    {
+        LogInfo("usp connection lost when trying to send message.");
     }
 }
 
@@ -424,7 +427,17 @@ void CSpxUspTtsEngineAdapter::OnTurnStart(const USP::TurnStartMsg& message)
 {
     UNUSED(message);
     std::unique_lock<std::mutex> lock(m_mutex);
-    m_uspState = UspState::TurnStarted;
+    
+    if (m_uspState == UspState::Sending)
+    {
+        m_uspState = UspState::TurnStarted;
+    }
+    else if (m_uspState != UspState::Error)
+    {
+        LogError("turn.start received in invalid state, current state is: %d", UspState(m_uspState));
+        SPX_THROW_HR(SPXERR_INVALID_STATE);
+    }
+
     m_currentReceivedData.clear();
     m_cv.notify_all();
 }
@@ -439,7 +452,16 @@ void CSpxUspTtsEngineAdapter::OnAudioOutputChunk(const USP::AudioOutputChunkMsg&
     });
 
     std::unique_lock<std::mutex> lock(m_mutex);
-    m_uspState = UspState::ReceivingData;
+    if (m_uspState == UspState::TurnStarted)
+    {
+        m_uspState = UspState::ReceivingData;
+    }
+    else if ( m_uspState != UspState::ReceivingData)
+    {
+        LogInfo("Recieved chunck data in unexpected state, ingoring. Current state: %d", UspState(m_uspState));
+        return;
+    }
+    
     const auto originalSize = m_currentReceivedData.size();
     m_currentReceivedData.resize(originalSize + message.audioLength);
     memcpy(m_currentReceivedData.data() + originalSize, message.audioBuffer, message.audioLength);

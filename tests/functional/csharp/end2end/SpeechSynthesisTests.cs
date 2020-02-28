@@ -969,7 +969,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        [Ignore("Temporarily disabled as this test exceeds execution timeout period sometime")]
         public async Task SynthesisFirstChunkTimeoutUsp()
         {
             using (var synthesizer = new SpeechSynthesizer(uspConfig, null))
@@ -989,7 +988,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        [Ignore("Temporarily disabled as this test exceeds execution timeout period sometime")]
         public async Task SynthesisAllChunkTimeoutUsp()
         {
             using (var synthesizer = new SpeechSynthesizer(uspConfig, null))
