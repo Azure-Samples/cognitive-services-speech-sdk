@@ -107,6 +107,7 @@ SPXAPI_PRIVATE connection_message_set_event_callback(ISpxRecognizerEvents::Conne
 
         auto recognizer = connection->GetRecognizer();
         SPX_IFTRUE_THROW_HR(recognizer == nullptr && callback != nullptr, SPXERR_INVALID_RECOGNIZER);
+        SPX_IFTRUE_RETURN_X(recognizer == nullptr, hr);
 
         auto pISpxRecognizerEvents = SpxQueryInterface<ISpxRecognizerEvents>(recognizer).get();
         SPX_IFTRUE_THROW_HR(pISpxRecognizerEvents == nullptr, SPXERR_RUNTIME_ERROR);
