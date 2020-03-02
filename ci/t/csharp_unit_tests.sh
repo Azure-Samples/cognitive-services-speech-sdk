@@ -76,21 +76,69 @@ fi
 
 if [[ $SPEECHSDK_LONG_RUNNING = true ]]; then
   TEST_CASE_FILTER="TestCategory=LongTest&TestCategory!=CompressedStreamTest${OFFLINE_UNIDEC_FILTER}"
-  LOG_FILE_NAME=LogFileName=test-$T-$PLATFORM-long-running.trx
+  ACTUAL_LOG_FILE_NAME=test-$T-$PLATFORM-long-running.trx
+  LOG_FILE_NAME=LogFileName=$ACTUAL_LOG_FILE_NAME
 else
   TEST_CASE_FILTER="TestCategory!=LongTest&TestCategory!=CompressedStreamTest${OFFLINE_UNIDEC_FILTER}"
-  LOG_FILE_NAME=LogFileName=test-$T-$PLATFORM-$RANDOM.trx
+  ACTUAL_LOG_FILE_NAME=test-$T-$PLATFORM-$RANDOM.trx
+  LOG_FILE_NAME=LogFileName=$ACTUAL_LOG_FILE_NAME
 fi
+
+DIAG_FILENAME=diag-${ACTUAL_LOG_FILE_NAME::-4}
 
 "$VSTEST" \
 "$(cygpath -aw "$TEST_CODE")" \
---Settings:"$runSettings" \
 --Logger:"trx;$LOG_FILE_NAME" \
+--Diag:./vstsconsolelog/$DIAG_FILENAME.txt \
 --Blame \
 --TestAdapterPath:"$(cygpath -aw "$SOURCE_ROOT")" \
 --TestCaseFilter:"$TEST_CASE_FILTER"
 
 exitCode=$?
+
+ACTUAL_LOG_FILE_NAME_RETRY=$ACTUAL_LOG_FILE_NAME
+
+for i in $(seq 1 4); do
+  if [[ $exitCode != 0 ]]; then
+    echo Parsing the trx file "./TestResults/$ACTUAL_LOG_FILE_NAME_RETRY"
+    tests=""
+    FAILED="outcome=\"Failed\""
+    TESTNAME="testName"
+    while read p; do
+      if [[ "$p" == *"$FAILED"* ]] ; then
+        words=( $p )
+        for q in "${words[@]}"; do
+          if [[ "$q" == *"$TESTNAME"* ]] ; then
+            test=${q:10}
+            test="${test::-1}"
+            tests="$tests,$test"
+          fi
+        done
+      fi
+    done <"./TestResults/$ACTUAL_LOG_FILE_NAME_RETRY"
+    tests=${tests:1}
+
+    ACTUAL_LOG_FILE_NAME_RETRY=$ACTUAL_LOG_FILE_NAME-retry$i
+    LOG_FILE_NAME_RETRY=LogFileName=$ACTUAL_LOG_FILE_NAME_RETRY
+    DIAG_FILENAME_RETRY=$DIAG_FILENAME-retry$i.txt
+
+    echo "Rerunning the following failed test ${tests[*]}"
+
+    "$VSTEST" \
+    "$(cygpath -aw "$TEST_CODE")" \
+    --Logger:"trx;$LOG_FILE_NAME_RETRY" \
+    --Diag:./vstsconsolelog/$DIAG_FILENAME_RETRY \
+    --Blame \
+    --TestAdapterPath:"$(cygpath -aw "$SOURCE_ROOT")" \
+    --Tests:"$tests"
+  
+    exitCode=$?
+  else
+    break
+  fi
+done
+
+
 set +x
 rm -f "$runSettings"
 exit $exitCode

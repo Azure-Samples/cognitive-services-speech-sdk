@@ -192,51 +192,42 @@ callStdbuf=()
 [[ $(type -t stdbuf) != file ]] || callStdbuf=(stdbuf)
 [[ -z $callStdbuf ]] || callStdbuf+=(-o0 -e0)
 
+# create console log folder
+rm -rf vstsconsolelog
+mkdir -p vstsconsolelog
+
 pass=0
 total=0
+pids=()
+declare -A pid_test_map
+declare -A pid_log_map
 for testfile in "${testsToRun[@]}"; do
   T="$(basename "$testfile" .sh)"
   echo Starting $T with timeout ${options[timeout]}
   START_SECONDS=$(get_time)
+  consolelogfilename=consolelog-$T-${options[platform]}.txt
   $cmdTimeout -k 5s "${options[timeout]}" ${callStdbuf[@]} \
-  "$testfile" "${options[build-dir]}" "${options[platform]}" "$binaryDir" "${options[test-set]}"
-  exitCode=$?
+  "$testfile" "${options[build-dir]}" "${options[platform]}" "$binaryDir" "${options[test-set]}" &> ./vstsconsolelog/$consolelogfilename &
+  pid=$!
+  pid_test_map[$pid]=$T
+  pid_log_map[$pid]=$consolelogfilename
+  pids+=("$pid")
   TIME_SECONDS=$(get_seconds_elapsed "$START_SECONDS")
-  if [[ $exitCode == 0 ]]; then
-    ((pass++))
-    echo test suite $T: passed, \($TIME_SECONDS seconds\)
-  else
-      # if the test suite failed, wait two seconds and re-run it up to three times.
-      for retry in {1..3}; do
-        echo "Retry($retry) failed test suite $T with timeout ${options[timeout]}"
-        sleep 2s
-        START_SECONDS=$(get_time)
-        $cmdTimeout -k 5s "${options[timeout]}" ${callStdbuf[@]} \
-        "$testfile" "${options[build-dir]}" "${options[platform]}" "$binaryDir" "${options[test-set]}"
-        exitCode=$?
-        TIME_SECONDS=$(get_seconds_elapsed "$START_SECONDS")
-        if [[ $exitCode == 0 ]]; then
-          ((pass++))
-          echo "Test suite $T: passed after ($retry) retries, \($TIME_SECONDS seconds\)"
-          vsts_logissue warning "${options[platform]}: test suite $T passed after ($retry) retries, source $testfile."
-          break
-        else
-          echo Test suite $T: failed with error code $exitCode, \($TIME_SECONDS seconds\)
-          vsts_logissue warning "${options[platform]}: test suite $T failed, exit code $exitCode, source $testfile."
-
-          # Since internally the test harness for cxx tests retries failed tests up to 3 times, we don't attempt to rerun the test suite thrice
-          if [[$testfile ~= "cxx"]]; then
-            break;
-          fi
-        fi
-      done
-
-      if [[ $exitCode != 0 ]]; then
-        echo Test suite $T: failed after multiple reties.
-        vsts_logissue error "${options[platform]}: test suite $T failed, failed after multiple retries with exit code $exitCode, source $testfile."
-      fi
-  fi
   ((total++))
 done
+
+echo Total number of test are $total
+
+for pid in "${pids[@]}"; do
+  wait $pid
+  exitCode=$?
+  if [[ $exitCode == 0 ]]; then
+    ((pass++))
+    echo Passed: ${pid_test_map[$pid]} 
+  else
+    echo Failed: ${pid_test_map[$pid]}. The console log file is: ${pid_log_map[$pid]}
+  fi
+done
+
 echo Pass '(including skip)' $pass / $total.
 ((pass == total))

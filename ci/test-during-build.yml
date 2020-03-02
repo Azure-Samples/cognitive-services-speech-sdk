@@ -76,3 +76,11 @@ steps:
     testResultsFiles: '**/test-*trx'
   condition: eq(variables['SPEECHSDK_RUN_TESTS'], 'true')
   displayName: Publish test results (.trx)
+- task: PublishBuildArtifacts@1
+  condition: failed()
+  displayName: 'Publish test console and debug artifacts'
+  inputs:
+    PathtoPublish: 'vstsconsolelog'
+    ArtifactName: TestLog_$(SPEECHSDK_TARGET_PLATFORM)-$(SPEECHSDK_BUILD_CONFIGURATION)
+    publishLocation: Container
+

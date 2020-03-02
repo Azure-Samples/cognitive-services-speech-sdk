@@ -201,17 +201,40 @@ for PYTHON in ${PYTHONS[@]}; do
   echo "Installing ${wheel}"
   ${VIRTUALENV_PYTHON} -m pip install ${wheel}
 
-  runUnitTests || UNITTEST_ERROR=true
+  exitCode=0
+  for i in $(seq 1 4); do
+    runUnitTests
+    exitCode=$?
+    if [[ $exitCode == 0 ]]; then
+      break
+    fi
+  done
+  echo unittest EXIT_CODE=$exitCode
+  if [[ $exitCode != 0 ]]; then
+    UNITTEST_ERROR=true
+    echo Python Unit test failed
+  fi
 
   # run samples as part of unit test
   pushd ${SCRIPT_DIR}/../public_samples/samples/python/console
-  runPythonSampleSuite \
-    TESTRUNNER \
-    "test-py${MAJORMINOR}samples-$T-$PLATFORM" \
-    "$PLATFORM" \
-    "$SPEECHSDK_SPEECH_KEY $SPEECHSDK_LUIS_KEY $SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_PPE_KEY $SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_PROD_KEY" \
-    "py${MAJORMINOR}samples-$T" \
-    240 || SAMPLE_ERROR=true
+  exitCode=0
+  for i in $(seq 1 4); do
+    runPythonSampleSuite \
+      TESTRUNNER \
+      "test-py${MAJORMINOR}samples-$T-$PLATFORM" \
+      "$PLATFORM" \
+      "$SPEECHSDK_SPEECH_KEY $SPEECHSDK_LUIS_KEY $SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_PPE_KEY $SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_PROD_KEY" \
+      "py${MAJORMINOR}samples-$T" 240
+    exitCode=$?
+    if [[ $exitCode == 0 ]]; then
+      break
+    fi
+  done
+  echo sample EXIT_CODE=$exitCode
+  if [[ $exitCode != 0 ]]; then
+    SAMPLE_ERROR=true
+    echo Python sample failed
+  fi
   popd
 done
 
