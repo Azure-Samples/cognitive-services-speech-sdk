@@ -97,6 +97,11 @@ for platformString in "${platforms[@]}"; do
   ! [[ -f $CODEC_LIB ]] ||
     cp --verbose "$CODEC_LIB" "$JAR_DIR/$assetDir"
 
+  # Copy SILK codec extension if available
+  SILK_CODEC_LIB=$dropPrefix/${libPrefix}Microsoft.CognitiveServices.Speech.extension.silk_codec$libSuffix
+  ! [[ -f $SILK_CODEC_LIB ]] ||
+    cp --verbose "$SILK_CODEC_LIB" "$JAR_DIR/$assetDir"
+
 done
 
 cp -v "$SCRIPT_DIR/../../"{REDIST.txt,license.md,ThirdPartyNotices.md} "$JAR_DIR"
