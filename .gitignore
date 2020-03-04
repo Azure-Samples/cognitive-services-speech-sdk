@@ -266,7 +266,10 @@ paket-files/
 
 # JetBrains Rider
 .idea/
-*.sln.iml
+*.iml
+
+# Maven target
+**/java/**/target/
 
 # CodeRush
 .cr/

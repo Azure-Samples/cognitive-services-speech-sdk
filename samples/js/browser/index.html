@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Speech Sample</title>
     <meta charset="utf-8" />
 </head>
+
 <body style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:13px;">
     <div id="warning">
-        <h1 style="font-weight:500;">Speech Recognition Speech SDK not found (microsoft.cognitiveservices.speech.sdk.bundle.js missing).</h1>
+        <h1 style="font-weight:500;">Speech Recognition Speech SDK not found
+            (microsoft.cognitiveservices.speech.sdk.bundle.js missing).</h1>
     </div>
     <div id="content" style="display:none">
         <table>
@@ -18,7 +21,8 @@
                 </td>
             </tr>
             <tr>
-                <td align="right"><a href="https://www.microsoft.com/cognitive-services/sign-up" target="_blank">Subscription</a>:</td>
+                <td align="right"><a href="https://www.microsoft.com/cognitive-services/sign-up"
+                        target="_blank">Subscription</a>:</td>
                 <td><input id="key" type="text" size="40" value="YOUR_SPEECH_API_KEY"><b>YOUR_SPEECH_API_KEY</b></td>
             </tr>
             <tr>
@@ -90,6 +94,8 @@
                         <option value="Mic" selected="selected">Microphone</option>
                         <option value="File">Audio File</option>
                     </select>
+                    <select id="microphoneSource" style="display:none">
+                    </select>
                 </td>
             </tr>
             <tr>
@@ -109,45 +115,73 @@
                 <td align="right"><b>Speech SDK API Continuous Speech Recognition:</b></td>
                 <td>
                     <button id="speechsdkStartContinuousRecognition">startContinuousRecognitionAsync()</button>
-                    <button id="speechsdkStopContinuousRecognition" disabled="disabled">STOP stopContinuousRecognitionAsync()</button>
+                    <button id="speechsdkStopContinuousRecognition" disabled="disabled">STOP
+                        stopContinuousRecognitionAsync()</button>
                 </td>
             </tr>
             <tr>
                 <td align="right"><b>Speech SDK API Translation:</b></td>
                 <td>
                     <button id="speechsdkStartContinuousTranslation">startContinuousTranslation()</button>
-                    <button id="speechsdkStopContinuousTranslation" disabled="disabled">STOP stopContinuousTranslation()</button>
+                    <button id="speechsdkStopContinuousTranslation" disabled="disabled">STOP
+                        stopContinuousTranslation()</button>
 
                     <!-- For a full list of supported languages see: https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support#text-to-speech-->
                     <select id="languageTargetOptions">
                         <option value="Microsoft Server Speech Text to Speech Voice (ar-EG, Hoda)">Arabic - EG</option>
-                        <option value="Microsoft Server Speech Text to Speech Voice (ca-ES, HerenaRUS)">Catalan - ES</option>
-                        <option value="Microsoft Server Speech Text to Speech Voice (da-DK, HelleRUS)">Danish - DK</option>
-                        <option value="Microsoft Server Speech Text to Speech Voice (de-DE, Hedda)" selected="selected">German - DE</option>
-                        <option value="Microsoft Server Speech Text to Speech Voice (en-AU, Catherine)">English - AU</option>
-                        <option value="Microsoft Server Speech Text to Speech Voice (en-CA, Linda)">English - CA</option>
-                        <option value="Microsoft Server Speech Text to Speech Voice (en-GB, Susan, Apollo)">English - GB</option>
-                        <option value="Microsoft Server Speech Text to Speech Voice (en-IN, Heera, Apollo)">English - IN</option>
-                        <option value="Microsoft Server Speech Text to Speech Voice (en-US, ZiraRUS)">English - US</option>
-                        <option value="Microsoft Server Speech Text to Speech Voice (es-ES, Laura, Apollo)">Spanish - ES</option>
-                        <option value="Microsoft Server Speech Text to Speech Voice (es-MX, HildaRUS)">Spanish - MX</option>
-                        <option value="Microsoft Server Speech Text to Speech Voice (fi-FI, HeidiRUS)">Finnish - FI</option>
-                        <option value="Microsoft Server Speech Text to Speech Voice (fr-CA, Caroline)">French - CA</option>
-                        <option value="Microsoft Server Speech Text to Speech Voice (fr-FR, Julie, Apollo)">French - FR</option>
+                        <option value="Microsoft Server Speech Text to Speech Voice (ca-ES, HerenaRUS)">Catalan - ES
+                        </option>
+                        <option value="Microsoft Server Speech Text to Speech Voice (da-DK, HelleRUS)">Danish - DK
+                        </option>
+                        <option value="Microsoft Server Speech Text to Speech Voice (de-DE, Hedda)" selected="selected">
+                            German - DE</option>
+                        <option value="Microsoft Server Speech Text to Speech Voice (en-AU, Catherine)">English - AU
+                        </option>
+                        <option value="Microsoft Server Speech Text to Speech Voice (en-CA, Linda)">English - CA
+                        </option>
+                        <option value="Microsoft Server Speech Text to Speech Voice (en-GB, Susan, Apollo)">English - GB
+                        </option>
+                        <option value="Microsoft Server Speech Text to Speech Voice (en-IN, Heera, Apollo)">English - IN
+                        </option>
+                        <option value="Microsoft Server Speech Text to Speech Voice (en-US, ZiraRUS)">English - US
+                        </option>
+                        <option value="Microsoft Server Speech Text to Speech Voice (es-ES, Laura, Apollo)">Spanish - ES
+                        </option>
+                        <option value="Microsoft Server Speech Text to Speech Voice (es-MX, HildaRUS)">Spanish - MX
+                        </option>
+                        <option value="Microsoft Server Speech Text to Speech Voice (fi-FI, HeidiRUS)">Finnish - FI
+                        </option>
+                        <option value="Microsoft Server Speech Text to Speech Voice (fr-CA, Caroline)">French - CA
+                        </option>
+                        <option value="Microsoft Server Speech Text to Speech Voice (fr-FR, Julie, Apollo)">French - FR
+                        </option>
                         <option value="Microsoft Server Speech Text to Speech Voice (hi-IN, Hemant)">Hindi - IN</option>
-                        <option value="Microsoft Server Speech Text to Speech Voice (it-IT, LuciaRUS)">Italian - IT</option>
-                        <option value="Microsoft Server Speech Text to Speech Voice (ja-JP, Ayumi, Apollo)">Japanese - JP</option>
-                        <option value="Microsoft Server Speech Text to Speech Voice (ko-KR, HeamiRUS)">Korean - KR</option>
-                        <option value="Microsoft Server Speech Text to Speech Voice (nb-NO, HuldaRUS)">Norwegian - NO</option>
-                        <option value="Microsoft Server Speech Text to Speech Voice (nl-NL, HannaRUS)">Dutch - NL</option>
-                        <option value="Microsoft Server Speech Text to Speech Voice (pl-PL, PaulinaRUS)">Polish - PL</option>
-                        <option value="Microsoft Server Speech Text to Speech Voice (pt-BR, HeloisaRUS)">Portuguese - BR</option>
-                        <option value="Microsoft Server Speech Text to Speech Voice (pt-PT, HeliaRUS)">Portuguese - PT</option>
-                        <option value="Microsoft Server Speech Text to Speech Voice (ru-RU, Irina, Apollo)">Russian - RU</option>
-                        <option value="Microsoft Server Speech Text to Speech Voice (sv-SE, HedvigRUS)">Swedish - SE</option>
-                        <option value="Microsoft Server Speech Text to Speech Voice (zh-CN, Kangkang, Apollo)">Chinese - CN</option>
-                        <option value="Microsoft Server Speech Text to Speech Voice (zh-HK, Tracy, Apollo)">Chinese - HK</option>
-                        <option value="Microsoft Server Speech Text to Speech Voice (zh-TW, Yating, Apollo)">Chinese - TW</option>
+                        <option value="Microsoft Server Speech Text to Speech Voice (it-IT, LuciaRUS)">Italian - IT
+                        </option>
+                        <option value="Microsoft Server Speech Text to Speech Voice (ja-JP, Ayumi, Apollo)">Japanese -
+                            JP</option>
+                        <option value="Microsoft Server Speech Text to Speech Voice (ko-KR, HeamiRUS)">Korean - KR
+                        </option>
+                        <option value="Microsoft Server Speech Text to Speech Voice (nb-NO, HuldaRUS)">Norwegian - NO
+                        </option>
+                        <option value="Microsoft Server Speech Text to Speech Voice (nl-NL, HannaRUS)">Dutch - NL
+                        </option>
+                        <option value="Microsoft Server Speech Text to Speech Voice (pl-PL, PaulinaRUS)">Polish - PL
+                        </option>
+                        <option value="Microsoft Server Speech Text to Speech Voice (pt-BR, HeloisaRUS)">Portuguese - BR
+                        </option>
+                        <option value="Microsoft Server Speech Text to Speech Voice (pt-PT, HeliaRUS)">Portuguese - PT
+                        </option>
+                        <option value="Microsoft Server Speech Text to Speech Voice (ru-RU, Irina, Apollo)">Russian - RU
+                        </option>
+                        <option value="Microsoft Server Speech Text to Speech Voice (sv-SE, HedvigRUS)">Swedish - SE
+                        </option>
+                        <option value="Microsoft Server Speech Text to Speech Voice (zh-CN, Kangkang, Apollo)">Chinese -
+                            CN</option>
+                        <option value="Microsoft Server Speech Text to Speech Voice (zh-HK, Tracy, Apollo)">Chinese - HK
+                        </option>
+                        <option value="Microsoft Server Speech Text to Speech Voice (zh-TW, Yating, Apollo)">Chinese -
+                            TW</option>
                     </select>
                     <input id="voiceOutput" type="checkbox" checked>
                     <label for="voiceOutput">voice output</label>
@@ -157,13 +191,15 @@
                 <td align="right"><b>Speech SDK API Intent Recognition:</b></td>
                 <td>
                     <button id="speechsdkIntentStartRecognizeOnceAsync">recognizeOnceAsync()</button>
-                    <button id="speechsdkIntentStopRecognizeOnceAsync" disabled="disabled">STOP recognizeOnceAsync()</button>
+                    <button id="speechsdkIntentStopRecognizeOnceAsync" disabled="disabled">STOP
+                        recognizeOnceAsync()</button>
                 </td>
             </tr>
             <tr>
                 <td align="right">Application ID:</td>
                 <td>
-                    <input id="appId" type="text" size="60" value="YOUR_LANGUAGE_UNDERSTANDING_APP_ID">(only needed for intent recognition)
+                    <input id="appId" type="text" size="60" value="YOUR_LANGUAGE_UNDERSTANDING_APP_ID">(only needed for
+                    intent recognition)
                 </td>
             </tr>
             <tr>
@@ -180,7 +216,9 @@
             </tr>
             <tr>
                 <td align="right">Events:</td>
-                <td align="left"><textarea id="statusDiv" style="display: inline-block;width:500px;height:200px;overflow: scroll;white-space: nowrap;"></textarea></td>
+                <td align="left"><textarea id="statusDiv"
+                        style="display: inline-block;width:500px;height:200px;overflow: scroll;white-space: nowrap;"></textarea>
+                </td>
             </tr>
         </table>
     </div>
@@ -233,7 +271,7 @@
         var phraseDiv, statusDiv;
         var key, authorizationToken, appId, phrases;
         var regionOptions;
-        var languageOptions, formatOptions, inputSource, filePicker;
+        var languageOptions, formatOptions, inputSource, filePicker, microphoneSource;
         var SpeechSDK;
         var recognizer;
 
@@ -243,6 +281,7 @@
         var sdkStartRecognizeOnceAsyncBtn, sdkStopRecognizeOnceAsyncBtn, languageTargetOptions, voiceOutput;
         var sdkIntentStartRecognizeOnceAsyncBtn, sdkIntentStopRecognizeOnceAsyncBtn;
         var audioFile, audioFileValid;
+        var microphoneId;
 
         var soundContext = undefined;
         try {
@@ -282,6 +321,7 @@
             formatOptions = document.getElementById("formatOptions");
             inputSource = document.getElementById("inputSource");
             filePicker = document.getElementById('filePicker');
+            microphoneSource = document.getElementById("microphoneSource");
 
             // Starts continuous speech recognition.
             sdkStartContinousRecognitionBtn.addEventListener("click", function () {
@@ -292,8 +332,16 @@
                 // If an audio file was specified, use it. Else use the microphone.
                 // Depending on browser security settings, the user may be prompted to allow microphone use. Using continuous recognition allows multiple
                 // phrases to be recognized from a single use authorization.
-                var audioConfig = audioFileValid ? SpeechSDK.AudioConfig.fromWavFileInput(audioFile) : SpeechSDK.AudioConfig.fromDefaultMicrophoneInput();
-                
+                var audioConfig;
+                if (audioFileValid) {
+                    audioConfig = SpeechSDK.AudioConfig.fromWavFileInput(audioFile);
+                } else if (undefined != microphoneSource.value) {
+                    console.info("Getting Microphone " + microphoneSource.value);
+                    audioConfig = SpeechSDK.AudioConfig.fromMicrophoneInput(microphoneSource.value);
+                } else {
+                    audioConfig = SpeechSDK.AudioConfig.fromDefaultMicrophoneInput();
+                }
+
                 var speechConfig;
                 if (authorizationToken) {
                     speechConfig = SpeechSDK.SpeechConfig.fromAuthorizationToken(authorizationToken, regionOptions.value);
@@ -412,7 +460,16 @@
                 // If an audio file was specified, use it. Else use the microphone.
                 // Depending on browser security settings, the user may be prompted to allow microphone use. Using continuous recognition allows multiple
                 // phrases to be recognized from a single use authorization.
-                var audioConfig = audioFileValid ? SpeechSDK.AudioConfig.fromWavFileInput(audioFile) : SpeechSDK.AudioConfig.fromDefaultMicrophoneInput();
+                var audioConfig;
+                if (audioFileValid) {
+                    audioConfig = SpeechSDK.AudioConfig.fromWavFileInput(audioFile);
+                } else if (undefined != microphoneSource.value) {
+                    console.info("Getting Microphone " + microphoneSource.value);
+                    audioConfig = SpeechSDK.AudioConfig.fromMicrophoneInput(microphoneSource.value);
+                } else {
+                    audioConfig = SpeechSDK.AudioConfig.fromDefaultMicrophoneInput();
+                }
+
                 var speechConfig;
                 if (authorizationToken) {
                     speechConfig = SpeechSDK.SpeechTranslationConfig.fromAuthorizationToken(authorizationToken, regionOptions.value);
@@ -440,11 +497,11 @@
                 reco = new SpeechSDK.TranslationRecognizer(speechConfig, audioConfig);
 
                 // If Phrases are specified, include them.
-                if(phrases !== ""){
+                if (phrases !== "") {
                     var phraseListGrammar = SpeechSDK.PhraseListGrammar.fromRecognizer(reco);
                     phraseListGrammar.addPhrase(phrases.value.split(";"));
                 }
-                
+
                 // Before beginning speech recognition, setup the callbacks to be invoked when an event occurs.
 
                 // The event recognizing signals that an intermediate recognition result is received.
@@ -574,8 +631,16 @@
                 // If an audio file was specified, use it. Else use the microphone.
                 // Depending on browser security settings, the user may be prompted to allow microphone use. Using continuous recognition allows multiple
                 // phrases to be recognized from a single use authorization.
-                var audioConfig = audioFileValid ? SpeechSDK.AudioConfig.fromWavFileInput(audioFile) : SpeechSDK.AudioConfig.fromDefaultMicrophoneInput();
-                
+                var audioConfig;
+                if (audioFileValid) {
+                    audioConfig = SpeechSDK.AudioConfig.fromWavFileInput(audioFile);
+                } else if (undefined != microphoneSource.value) {
+                    console.info("Getting Microphone " + microphoneSource.value);
+                    audioConfig = SpeechSDK.AudioConfig.fromMicrophoneInput(microphoneSource.value);
+                } else {
+                    audioConfig = SpeechSDK.AudioConfig.fromDefaultMicrophoneInput();
+                }
+
                 var speechConfig;
                 if (authorizationToken) {
                     speechConfig = SpeechSDK.SpeechConfig.fromAuthorizationToken(authorizationToken, regionOptions.value);
@@ -591,7 +656,7 @@
                 reco = new SpeechSDK.SpeechRecognizer(speechConfig, audioConfig);
 
                 // If Phrase are specified, include them.
-                if(phrases !== ""){
+                if (phrases !== "") {
                     var phraseListGrammar = SpeechSDK.PhraseListGrammar.fromRecognizer(reco);
                     phraseListGrammar.addPhrase(phrases.value.split(";"));
                 }
@@ -726,7 +791,16 @@
                 // If an audio file was specified, use it. Else use the microphone.
                 // Depending on browser security settings, the user may be prompted to allow microphone use. Using continuous recognition allows multiple
                 // phrases to be recognized from a single use authorization.
-                var audioConfig = audioFileValid ? SpeechSDK.AudioConfig.fromWavFileInput(audioFile) : SpeechSDK.AudioConfig.fromDefaultMicrophoneInput();
+                var audioConfig;
+                if (audioFileValid) {
+                    audioConfig = SpeechSDK.AudioConfig.fromWavFileInput(audioFile);
+                } else if (undefined != microphoneSource.value) {
+                    console.info("Getting Microphone " + microphoneSource.value);
+                    audioConfig = SpeechSDK.AudioConfig.fromMicrophoneInput(microphoneSource.value);
+                } else {
+                    audioConfig = SpeechSDK.AudioConfig.fromDefaultMicrophoneInput();
+                }
+
                 var speechConfig;
                 if (authorizationToken) {
                     speechConfig = SpeechSDK.SpeechConfig.fromAuthorizationToken(authorizationToken, regionOptions.value);
@@ -750,7 +824,7 @@
                 }
 
                 // If Phrases are specified, include them.
-                if(phrases !== ""){
+                if (phrases !== "") {
                     var phraseListGrammar = SpeechSDK.PhraseListGrammar.fromRecognizer(reco);
                     phraseListGrammar.addPhrase(phrases.value.split(";"));
                 }
@@ -931,14 +1005,45 @@
                 audioFileValid = inputSource.value === "File";
 
                 if (inputSource.value === "File") {
+                    microphoneSource.disabled = true;
                     filePicker.click();
                     return;
+                } else {
+                    microphoneSource.disabled = false;
+
                 }
             });
 
             filePicker.addEventListener("change", function () {
                 audioFile = filePicker.files[0];
             });
+
+            if (navigator && navigator.mediaDevices && navigator.mediaDevices.enumerateDevices) {
+
+                // Enumerate the media devices.
+                navigator.mediaDevices.enumerateDevices().then((devices) => {
+                    var opt = document.createElement('option');
+                    opt.appendChild(document.createTextNode(""));
+                    opt.value = undefined;
+                    microphoneSource.appendChild(opt);
+
+                    for (const device of devices) {
+                        if (device.kind === "audioinput") {
+                            microphoneSource.style = "";
+                            // create new option element
+                            var opt = document.createElement('option');
+
+                            // create text node to add to option element (opt)
+                            opt.appendChild(document.createTextNode(device.label));
+
+                            // set value property of opt
+                            opt.value = device.deviceId;
+
+                            microphoneSource.appendChild(opt);
+                        }
+                    }
+                });
+            }
 
             Initialize(function (speechSdk) {
                 SpeechSDK = speechSdk;
@@ -953,4 +1058,5 @@
         });
     </script>
 </body>
+
 </html>
