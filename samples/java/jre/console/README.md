@@ -1,14 +1,14 @@
-# Java Console app for the Java Run-Time Environment (JRE) on Windows or Linux (Ubuntu 16.04, Ubuntu 18.04, Debian 9)
+# Java Console app for the Java Run-Time Environment (JRE) on Windows or Linux
 
 This sample demonstrates various forms of speech recognition, intent recognition, speech synthesis, and translation using the Speech SDK for Java on Windows or Linux.
 
 > **Note:**
-> the Speech SDK for the JRE currently supports only the Windows x64 platform, and Linux x64 and ARM64 (Ubuntu 16.04, Ubuntu 18.04, Debian 9).
+> the Speech SDK for the JRE currently supports only the Windows x64 platform, and Linux x64 and ARM64 (Ubuntu 16.04, Ubuntu 18.04, Debian 9, RHEL 8, CentOS 8).
 
 ## Prerequisites
 
 * A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
-* A PC (Windows x64, Ubuntu 16.04 or 18.04 on x64 or ARM64) capable to run Eclipse,[<sup>[1]</sup>](#footnote1) some sample scenarios require a working microphone.
+* A PC (Windows x64, Ubuntu 16.04 or 18.04 on x64 or ARM64, RHEL 8 or CentOS 8 on x64) capable to run Eclipse,[<sup>[1]</sup>](#footnote1) some sample scenarios require a working microphone.
 * 64-bit JRE/JDK for Java 8.
 * Version 4.8 of [Eclipse](https://www.eclipse.org), 64-bit.[<sup>[1]</sup>](#footnote1)
 * On Ubuntu, run the following commands for the installation of required packages:
@@ -23,6 +23,13 @@ This sample demonstrates various forms of speech recognition, intent recognition
   ```sh
   sudo apt-get update
   sudo apt-get install libssl1.0.2 libasound2
+  ```
+
+* On RHEL 8 or CentOS 8, run the following commands for the installation of required packages:
+
+  ```sh
+  sudo yum update
+  sudo yum install alsa-lib java-1.8.0-openjdk-devel openssl
   ```
 
 <small><a name="footnote1">1</a>. This sample has not been verified with Eclipse on ARM64.</small>
