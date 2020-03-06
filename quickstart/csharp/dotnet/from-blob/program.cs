@@ -28,7 +28,12 @@ namespace BatchClient
 
         const string SpeechToTextBasePath = "api/speechtotext/v2.0/";
 
-        static Task Main() => TranscribeAsync();
+        static async Task Main()
+        {
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+
+            await TranscribeAsync();
+        }
 
         static async Task TranscribeAsync()
         {
@@ -110,8 +115,7 @@ namespace BatchClient
                         var filename = Path.GetTempFileName();
                         webClient.DownloadFile(transcription.ResultsUrls["channel_0"], filename);
                         var results = File.ReadAllText(filename);
-                        Console.WriteLine("Transcription succeeded. Results: ");
-                        Console.WriteLine(results);
+                        Console.WriteLine($"Transcription succeeded. Results: {Environment.NewLine}{results}");
                         File.Delete(filename);
                         break;
 
@@ -151,8 +155,8 @@ namespace BatchClient
             string locale,
             DateTime createdDateTime,
             DateTime lastActionDateTime,
-            string status, 
-            Uri recordingsUrl, 
+            string status,
+            Uri recordingsUrl,
             IReadOnlyDictionary<string, string> resultsUrls)
         {
             Id = id;
