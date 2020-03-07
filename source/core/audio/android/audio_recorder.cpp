@@ -164,6 +164,7 @@ AudioRecorder::AudioRecorder(std::string deviceName, SampleFormat *sampleFormat,
     SLASSERT(result);
 
     sampleInfo_.bufSize_ = sampleInfo_.framesPerBuf_ * sampleInfo_.channels_ * SL_PCMSAMPLEFORMAT_FIXED_16;
+    sampleInfo_.bufSize_ = (sampleInfo_.bufSize_ + 7) >> 3; // 100ms package size
 
     audioBuffers_.reset(new std::unique_ptr<SLuint8[]>[DEVICE_SHADOW_BUFFER_QUEUE_LEN]);
 
