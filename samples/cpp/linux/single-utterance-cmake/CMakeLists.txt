@@ -15,7 +15,5 @@ target_compile_features(hello PUBLIC cxx_std_14)
 
 target_link_libraries(hello pthread Microsoft.CognitiveServices.Speech.core)
 
-target_include_directories(hello PUBLIC ${SPEECHSDK_ROOT}/include/cxx_api)
-
-target_include_directories(hello PUBLIC ${SPEECHSDK_ROOT}/include/c_api)
+target_include_directories(hello PUBLIC ${SPEECHSDK_ROOT}/include/cxx_api ${SPEECHSDK_ROOT}/include/c_api)
 
