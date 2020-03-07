@@ -5,7 +5,7 @@ project(speechtest   VERSION 1.0
                       DESCRIPTION "Testing Cognitive Services"
                       LANGUAGES CXX)
 
-#set(SPEECHSDK_ROOT /home/chief/speechsdk)
+
 set(SPEECHSDK_ROOT $ENV{SPEECHSDK_ROOT})
 link_directories(${SPEECHSDK_ROOT}/lib/x64 libasound.so.2)
 
