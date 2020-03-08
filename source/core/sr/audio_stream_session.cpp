@@ -2869,4 +2869,29 @@ CSpxStringMap CSpxAudioStreamSession::GetParametersFromUser(std::string&& path)
     return parametersFromUser;
 }
 
+void CSpxAudioStreamSession::ForEachRecognizer(std::function<void(std::shared_ptr<ISpxRecognizer>)> fn)
+{
+    // Make a copy of the recognizers (under lock), to use to send events;
+    // otherwise the underlying list could be modified while we're exeuting
+    list<weak_ptr<ISpxRecognizer>> weakRecognizers;
+    {
+        unique_lock<mutex> lock(m_recognizersLock);
+        weakRecognizers.assign(m_recognizers.begin(), m_recognizers.end());
+    }
+
+    string error;
+    SPXAPI_TRY()
+    {
+        for (auto iter = weakRecognizers.begin(); iter != weakRecognizers.end(); iter++)
+        {
+            auto recognizer = iter->lock();
+            if (recognizer != nullptr)
+            {
+                fn(iter->lock());
+            }
+        }
+    }
+    SPXAPI_CATCH_ONLY()
+}
+
 } } } } // Microsoft::CognitiveServices::Speech::Impl

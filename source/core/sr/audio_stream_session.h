@@ -311,17 +311,7 @@ private:
 
     void UpdateAdapterResult_JsonResult(std::shared_ptr<ISpxRecognitionResult> result);
 
-    void ForEachRecognizer(std::function<void(std::shared_ptr<ISpxRecognizer>)> fn)
-    {
-        for (auto iter = m_recognizers.begin(); iter != m_recognizers.end(); iter++)
-        {
-            auto recognizer = iter->lock();
-            if (recognizer != nullptr)
-            {
-                fn(iter->lock());
-            }
-        }
-    }
+    void ForEachRecognizer(std::function<void(std::shared_ptr<ISpxRecognizer>)> fn);
 
 private:
 

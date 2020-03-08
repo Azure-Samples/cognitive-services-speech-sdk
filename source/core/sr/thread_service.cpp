@@ -7,6 +7,9 @@
 #include "thread_service.h"
 #include "try_catch_helpers.h"
 
+const int timeoutInMilliseconds = 100;
+const int timeoutRetryLimit = 10;
+
 namespace Microsoft { namespace CognitiveServices { namespace Speech { namespace Impl {
 
     using namespace std;
@@ -159,6 +162,25 @@ namespace Microsoft { namespace CognitiveServices { namespace Speech { namespace
 
         if (detached)
         {
+            m_shouldStop = true;
+            // If thread is itself, no need to do thread join with timeout 
+            if (m_thread.get_id() != this_thread::get_id())
+            {
+                // Wait thread to complete operation (join) with the timeoutRetryLimit
+                int counter = 0;
+                while (counter < timeoutRetryLimit)
+                {
+                    if (m_thread.joinable())
+                    {
+                        std::this_thread::sleep_for(std::chrono::milliseconds(timeoutInMilliseconds));
+                    }
+                    else
+                    {
+                        break;
+                    }
+                    counter++;
+                }
+            }
             m_thread.detach();
         }
         else if (m_thread.get_id() == this_thread::get_id())
