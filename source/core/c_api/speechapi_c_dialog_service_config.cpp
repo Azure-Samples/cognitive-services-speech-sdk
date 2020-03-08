@@ -17,7 +17,7 @@
 
 using namespace Microsoft::CognitiveServices::Speech::Impl;
 
-SPXAPI bot_framework_config_from_subscription(SPXSPEECHCONFIGHANDLE* ph_dialog_service_config, const char *subscription, const char* region, const char *bot_Id = NULL)
+SPXAPI bot_framework_config_from_subscription(SPXSPEECHCONFIGHANDLE* ph_dialog_service_config, const char *subscription, const char* region, const char *bot_Id = nullptr)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, ph_dialog_service_config == nullptr);
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, subscription == nullptr);
@@ -46,7 +46,7 @@ SPXAPI bot_framework_config_from_subscription(SPXSPEECHCONFIGHANDLE* ph_dialog_s
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI bot_framework_config_from_authorization_token(SPXSPEECHCONFIGHANDLE* ph_dialog_service_config, const char *auth_token, const char* region)
+SPXAPI bot_framework_config_from_authorization_token(SPXSPEECHCONFIGHANDLE* ph_dialog_service_config, const char *auth_token, const char* region, const char *bot_Id = nullptr)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, ph_dialog_service_config == nullptr);
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, auth_token == nullptr);
@@ -64,6 +64,11 @@ SPXAPI bot_framework_config_from_authorization_token(SPXSPEECHCONFIGHANDLE* ph_d
         auto properties = SpxQueryInterface<ISpxNamedProperties>(config);
 
         properties->SetStringValue(GetPropertyName(PropertyId::Conversation_DialogType), g_dialogType_BotFramework);
+
+        if (bot_Id)
+        {
+            properties->SetStringValue(GetPropertyName(PropertyId::Conversation_ApplicationId), bot_Id);
+        }
 
         *ph_dialog_service_config = config_handles->TrackHandle(config);
     }

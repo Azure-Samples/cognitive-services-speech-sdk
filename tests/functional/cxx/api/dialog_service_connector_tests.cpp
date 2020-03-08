@@ -458,6 +458,88 @@ TEST_CASE("Dialog Service Connector basics", "[api][cxx][dialog_service_connecto
         REQUIRE(success);
 
     }
+
+    SECTION("Listen Once, no bot ID provided")
+    {
+        REQUIRE(exists(ROOT_RELATIVE_PATH(INTENT_UTTERANCE)));
+
+        auto config = BotFrameworkConfig::FromSubscription(SubscriptionsRegionsMap[DIALOG_SUBSCRIPTION].Key, SubscriptionsRegionsMap[DIALOG_SUBSCRIPTION].Region);
+        config->SetLanguage("en-us");
+
+        auto audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(INTENT_UTTERANCE));
+
+        test_runner runner{ config, audioConfig };
+
+        runner.add_recognized_test(verifyRecognizedSpeech);
+        runner.add_recognizing_test(verifyRecognizingSpeech);
+        runner.add_activity_received_test(verifyActivityReceived);
+        runner.add_canceled_test(verifyCanceledSpeech);
+
+        auto result = runner.run<std::shared_ptr<SpeechRecognitionResult>>(
+            [](DialogServiceConnector& connector)
+            {
+                // Verified manually using fiddler, we need a better test once we have our own bot for testing.
+                nlohmann::json jsonActTemplate{
+                    { "from",
+                        {
+                            { "id", "MyOwnFromId_ID_+2345" }
+                        }
+                    },
+                    { "deliveryMode", "MyOwnDeliveryMode"}
+                };
+                auto strActTemplate = jsonActTemplate.dump();
+
+                connector.SetSpeechActivityTemplate(strActTemplate);
+                return connector.ListenOnceAsync();
+            },
+            20s, 3u);
+
+        auto success = std::get<0>(result);
+        auto message = std::move(std::get<1>(result));
+        INFO(message);
+        REQUIRE(success);
+    }
+
+    SECTION("Listen Once, bot ID provided")
+    {
+        REQUIRE(exists(ROOT_RELATIVE_PATH(INTENT_UTTERANCE)));
+
+        auto config = BotFrameworkConfig::FromSubscription(SubscriptionsRegionsMap[DIALOG_SUBSCRIPTION].Key, SubscriptionsRegionsMap[DIALOG_SUBSCRIPTION].Region, DefaultSettingsMap[DIALOG_FUNCTIONAL_TEST_BOT]);
+        config->SetLanguage("en-us");
+
+        auto audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(INTENT_UTTERANCE));
+
+        test_runner runner{ config, audioConfig };
+
+        runner.add_recognized_test(verifyRecognizedSpeech);
+        runner.add_recognizing_test(verifyRecognizingSpeech);
+        runner.add_activity_received_test(verifyActivityReceived);
+        runner.add_canceled_test(verifyCanceledSpeech);
+
+        auto result = runner.run<std::shared_ptr<SpeechRecognitionResult>>(
+            [](DialogServiceConnector& connector)
+            {
+                // Verified manually using fiddler, we need a better test once we have our own bot for testing.
+                nlohmann::json jsonActTemplate{
+                    { "from",
+                        {
+                            { "id", "MyOwnFromId_ID_+2345" }
+                        }
+                    },
+                    { "deliveryMode", "MyOwnDeliveryMode"}
+                };
+                auto strActTemplate = jsonActTemplate.dump();
+
+                connector.SetSpeechActivityTemplate(strActTemplate);
+                return connector.ListenOnceAsync();
+            },
+            20s, 3u);
+
+        auto success = std::get<0>(result);
+        auto message = std::move(std::get<1>(result));
+        INFO(message);
+        REQUIRE(success);
+    }
 }
 
 TEST_CASE("Dialog Service Connector extended", "[api][cxx][dialog_service_connector][adv][!hide]")

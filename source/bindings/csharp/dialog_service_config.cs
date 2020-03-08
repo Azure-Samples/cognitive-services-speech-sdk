@@ -133,7 +133,20 @@ namespace Microsoft.CognitiveServices.Speech.Dialog
         /// </summary>
         /// <param name="subscription">Subscription key associated with the bot</param>
         /// <param name="region">The region name (see the <a href="https://aka.ms/csspeech/region">region page</a>).</param>
-        /// <param name="botId">The optional bot ID (aka bot secret) used to specify a bot</param>
+        /// <returns>A new bot framework config.</returns>
+        public static BotFrameworkConfig FromSubscription(string subscription, string region)
+        {
+            IntPtr configHandle = IntPtr.Zero;
+            ThrowIfFail(Internal.DialogServiceConfig.bot_framework_config_from_subscription(out configHandle, subscription, region, null));
+            return new BotFrameworkConfig(configHandle);
+        }
+
+        /// <summary>
+        /// Creates an instance of the bot framework config with the specified subscription and region.
+        /// </summary>
+        /// <param name="subscription">Subscription key associated with the bot</param>
+        /// <param name="region">The region name (see the <a href="https://aka.ms/csspeech/region">region page</a>).</param>
+        /// <param name="botId">The bot ID (aka bot secret) used to select a bot associated with this subscription</param>
         /// <returns>A new bot framework config.</returns>
         public static BotFrameworkConfig FromSubscription(string subscription, string region, string botId = "")
         {
@@ -152,11 +165,12 @@ namespace Microsoft.CognitiveServices.Speech.Dialog
         /// </summary>
         /// <param name="authorizationToken">The authorization token associated with the bot</param>
         /// <param name="region">The region name (see the <a href="https://aka.ms/csspeech/region">region page</a>).</param>
+        /// <param name="botId">The optional bot ID (aka bot secret) used to select a bot associated with this subscription</param>
         /// <returns>A new bot framework config.</returns>
-        public static BotFrameworkConfig FromAuthorizationToken(string authorizationToken, string region)
+        public static BotFrameworkConfig FromAuthorizationToken(string authorizationToken, string region, string botId = "")
         {
             IntPtr configHandle = IntPtr.Zero;
-            ThrowIfFail(Internal.DialogServiceConfig.bot_framework_config_from_authorization_token(out configHandle, authorizationToken, region));
+            ThrowIfFail(Internal.DialogServiceConfig.bot_framework_config_from_authorization_token(out configHandle, authorizationToken, region, botId));
             return new BotFrameworkConfig(configHandle);
         }
     }

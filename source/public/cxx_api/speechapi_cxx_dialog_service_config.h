@@ -138,7 +138,20 @@ public:
     /// </summary>
     /// <param name="subscription">Subscription key associated with the bot</param>
     /// <param name="region">The region name (see the <a href="https://aka.ms/csspeech/region">region page</a>).</param>
-    /// <param name="bot_Id"> Optional, ID for using a specific bot.</param>
+    /// <returns>A shared pointer to the new bot framework config.</returns>
+    inline static std::shared_ptr<BotFrameworkConfig> FromSubscription(const SPXSTRING& subscription, const SPXSTRING& region)
+    {
+        SPXSPEECHCONFIGHANDLE h_config = SPXHANDLE_INVALID;
+        SPX_THROW_ON_FAIL(bot_framework_config_from_subscription(&h_config, Utils::ToUTF8(subscription).c_str(), Utils::ToUTF8(region).c_str(), nullptr));
+        return std::shared_ptr<BotFrameworkConfig>{ new BotFrameworkConfig(h_config) };
+    }
+
+    /// <summary>
+    /// Creates a bot framework service config instance with the specified subscription key and region.
+    /// </summary>
+    /// <param name="subscription">Subscription key associated with the bot</param>
+    /// <param name="region">The region name (see the <a href="https://aka.ms/csspeech/region">region page</a>).</param>
+    /// <param name="bot_Id"> Identifier used to select a bot associated with this subscription.</param>
     /// <returns>A shared pointer to the new bot framework config.</returns>
     inline static std::shared_ptr<BotFrameworkConfig> FromSubscription(const SPXSTRING& subscription, const SPXSTRING& region, const SPXSTRING& bot_Id)
     {
@@ -161,7 +174,26 @@ public:
     inline static std::shared_ptr<BotFrameworkConfig> FromAuthorizationToken(const SPXSTRING& authToken, const SPXSTRING& region)
     {
         SPXSPEECHCONFIGHANDLE h_config = SPXHANDLE_INVALID;
-        SPX_THROW_ON_FAIL(bot_framework_config_from_authorization_token(&h_config, Utils::ToUTF8(authToken).c_str(), Utils::ToUTF8(region).c_str()));
+        SPX_THROW_ON_FAIL(bot_framework_config_from_authorization_token(&h_config, Utils::ToUTF8(authToken).c_str(), Utils::ToUTF8(region).c_str(), nullptr));
+        return std::shared_ptr<BotFrameworkConfig>{ new BotFrameworkConfig(h_config) };
+    }
+
+    /// <summary>
+    /// Creates a bot framework service config instance with the specified authorization token and region.
+    /// Note: The caller needs to ensure that the authorization token is valid. Before the authorization token
+    /// expires, the caller needs to refresh it by calling this setter with a new valid token.
+    /// As configuration values are copied when creating a new connector, the new token value will not apply to connectors that have already been created.
+    /// For connectors that have been created before, you need to set authorization token of the corresponding connector
+    /// to refresh the token. Otherwise, the connectors will encounter errors during operation.
+    /// </summary>
+    /// <param name="authToken">The authorization token.</param>
+    /// <param name="region">The region name (see the <a href="https://aka.ms/csspeech/region">region page</a>).</param>
+    /// <param name="bot_Id"> Identifier used to select a bot associated with this subscription.</param>
+    /// <returns>A shared pointer to the new bot framework config.</returns>
+    inline static std::shared_ptr<BotFrameworkConfig> FromAuthorizationToken(const SPXSTRING& authToken, const SPXSTRING& region, const SPXSTRING& bot_Id)
+    {
+        SPXSPEECHCONFIGHANDLE h_config = SPXHANDLE_INVALID;
+        SPX_THROW_ON_FAIL(bot_framework_config_from_authorization_token(&h_config, Utils::ToUTF8(authToken).c_str(), Utils::ToUTF8(region).c_str(), Utils::ToUTF8(bot_Id).c_str()));
         return std::shared_ptr<BotFrameworkConfig>{ new BotFrameworkConfig(h_config) };
     }
 private:

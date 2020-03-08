@@ -16,7 +16,7 @@
   "LanguageUnderstandingSubscriptionKey": "",
   "KeywordModel": "kws.table",
   "SerializedSpeechActivityFile": "activityWithSpeech.json",
-  "DialogFunctionalTestBot": "ShtxObXGgNo.cwA.GZg.gJSTsKOdg1b-Qtb6-Mci7pOlHQBKUq-rhfMB3rtdy7A",
+  "DialogFunctionalTestBot": "5c88db3d-64a2-404b-b0c0-5d3e50ae36e4",
   "ConversationTranscriptionEndpoint": "wss://transcribe.princetonppe.customspeech.ai/speech/recognition",
   "SpeechRegionForConversationTranscription": "",
   "LongRunning": "false",

@@ -25,14 +25,14 @@ public final class BotFrameworkConfig extends DialogServiceConfig {
     public static BotFrameworkConfig fromSubscription(String subscription, String region) {
         Contracts.throwIfNull(subscription, "subscription");
         Contracts.throwIfNull(region, "region");
-        return new BotFrameworkConfig(com.microsoft.cognitiveservices.speech.internal.BotFrameworkConfig.FromSubscription(subscription, region, ""));
+        return new BotFrameworkConfig(com.microsoft.cognitiveservices.speech.internal.BotFrameworkConfig.FromSubscription(subscription, region));
     }
 
     /**
      * Creates an instance of the bot framework config with the specified subscription, region, and bot ID.
      * @param subscription Service subscription key.
      * @param region Service region key.
-     * @param botId Optional, ID for using a specific bot.
+     * @param botId Identifier used to select a bot associated with this subscription.
      * @return The created config.
      */
     public static BotFrameworkConfig fromSubscription(String subscription, String region, String botId) {
@@ -56,5 +56,23 @@ public final class BotFrameworkConfig extends DialogServiceConfig {
         Contracts.throwIfNullOrWhitespace(authorizationToken, "authorizationToken");
         Contracts.throwIfNullOrWhitespace(region, "region");
         return new BotFrameworkConfig(com.microsoft.cognitiveservices.speech.internal.BotFrameworkConfig.FromAuthorizationToken(authorizationToken, region));
+    }
+    
+    /**
+     * Creates an instance of a bot framework config with specified authorization token, service region, and bot ID.
+     * Note: The caller needs to ensure that the authorization token is valid. Before the authorization token
+     * expires, the caller needs to refresh it by calling this setter with a new valid token.
+     * As configuration values are copied when creating a new recognizer, the new token value will not apply to recognizers that have already been created.
+     * For recognizers that have been created before, you need to set authorization token of the corresponding recognizer
+     * to refresh the token. Otherwise, the recognizers will encounter errors during recognition.
+     * @param authorizationToken The authorization token.
+     * @param region The region name (see the <a href="https://aka.ms/csspeech/region">region page</a>).
+     * @param botId Identifier used to select a bot associated with this subscription.
+     * @return A speech config instance.
+     */
+    public static BotFrameworkConfig fromAuthorizationToken(String authorizationToken, String region, String botId) {
+        Contracts.throwIfNullOrWhitespace(authorizationToken, "authorizationToken");
+        Contracts.throwIfNullOrWhitespace(region, "region");
+        return new BotFrameworkConfig(com.microsoft.cognitiveservices.speech.internal.BotFrameworkConfig.FromAuthorizationToken(authorizationToken, region, botId));
     }
 }
