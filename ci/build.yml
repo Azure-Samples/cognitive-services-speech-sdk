@@ -111,8 +111,8 @@ variables:
         "Region": "westus"
       },
       "ConversationTranslatorSubscription": {
-        "Key": "$(DialogSubscriptionKey)",
-        "Region": "$(DialogRegion)"
+        "Key": "$(ConverstationTranscriptionKeyCentralUS20190509)",
+        "Region": "centralus"
       },
       "CustomVoiceSubscription": {
         "Key": "$(NorthEuropeKeySkyMan)",
