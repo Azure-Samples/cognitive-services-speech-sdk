@@ -10,7 +10,7 @@
 #include "create_object_helpers.h"
 #include "property_id_2_name_map.h"
 #include "dialog_service_connector.h"
-#include "file_logger.h"
+#include "log_helpers.h"
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -253,8 +253,9 @@ std::shared_ptr<ISpxNamedProperties> CSpxDialogServiceConnector::GetParentProper
 void CSpxDialogServiceConnector::CheckLogFilename()
 {
     auto namedProperties = SpxQueryService<ISpxNamedProperties>(m_defaultSession);
-    FileLogger::Instance().SetFileOptions(namedProperties);
+    SpxDiagLogSetProperties(namedProperties);
 }
+
 CSpxAsyncOp<void> CSpxDialogServiceConnector::StartKeywordRecognitionAsync(std::shared_ptr<ISpxKwsModel> model)
 {
     const char* recoModePropertyName = GetPropertyName(PropertyId::SpeechServiceConnection_RecoMode);

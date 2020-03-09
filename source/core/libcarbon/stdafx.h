@@ -16,8 +16,8 @@
 #include "windows/targetver.h"
 #endif
 
-#include "trace_message.h"
-#define __SPX_DO_TRACE_IMPL SpxTraceMessage
+#include "speechapi_c_diagnostics.h"
+#define __SPX_DO_TRACE_IMPL diagnostics_log_trace_message
 
 #include "spx_namespace.h"
 #include "exception.h"

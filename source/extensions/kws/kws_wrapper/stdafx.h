@@ -18,8 +18,8 @@
 #define SPX_CONFIG_TRACE_ALL 1
 #endif
 
-extern void SpxTraceMessage(int level, const char* pszTitle, const char* fileName, const int lineNumber, const char* pszFormat, ...);
-#define __SPX_DO_TRACE_IMPL SpxTraceMessage
+#include "speechapi_c_diagnostics.h"
+#define __SPX_DO_TRACE_IMPL diagnostics_log_trace_message
 
 #include "exception.h"
 #define __SPX_THROW_HR_IMPL(hr) Microsoft::CognitiveServices::Speech::Impl::ThrowWithCallstack(hr)

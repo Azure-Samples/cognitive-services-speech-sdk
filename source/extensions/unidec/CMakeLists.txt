@@ -54,4 +54,4 @@ set_target_properties (unidec PROPERTIES
     FOLDER extensions
 )
 
-target_link_libraries(unidec PRIVATE ${UNIDEC_LIBS} common)
+target_link_libraries(unidec PRIVATE ${UNIDEC_LIBS} common ${SPEECHSDK_CORE_LIBRARY})

@@ -43,4 +43,4 @@ set_target_properties (tts_mock PROPERTIES
     FOLDER core
 )
 
-target_link_libraries(tts_mock PRIVATE common audio)
+target_link_libraries(tts_mock PRIVATE common audio ${SPEECHSDK_CORE_LIBRARY})

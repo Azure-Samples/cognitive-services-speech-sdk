@@ -260,6 +260,20 @@ public:
         return handletable->TrackHandle(t);
     }
 
+    template<class T, class Handle>
+    static void StopTracking(std::shared_ptr<T> t)
+    {
+        auto handletable = Get<T, Handle>();
+        handletable->StopTracking(t);
+    }
+
+    template<class T, class Handle>
+    static void StopTracking(Handle handle)
+    {
+        auto handletable = Get<T, Handle>();
+        handletable->StopTracking(handle);
+    }
+
     static void Term()
     {
         // TODO: on OSX statics are destroyed before LibUnload is invoked,

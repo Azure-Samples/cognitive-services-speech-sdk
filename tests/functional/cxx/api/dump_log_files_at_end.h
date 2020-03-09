@@ -26,16 +26,6 @@ namespace IntegrationTests {
     using namespace Microsoft::CognitiveServices::Speech::Impl;
 
     /// <summary>
-    /// Start file logging within the Microsoft.CognitiveServices.Speech.core shared library
-    /// </summary>
-    SPXAPI_PRIVATE file_logger_start_logging(SPXSPEECHCONFIGHANDLE hspeechconfig);
-
-    /// <summary>
-    /// Stop file logging within the Microsoft.CognitiveServices.Speech.core shared library
-    /// </summary>
-    SPXAPI_PRIVATE file_logger_stop_logging();
-
-    /// <summary>
     /// Helper class to enable logging to a file, and then dumping the file contents out at the end
     /// to the output stream. This is handy in release builds where there is no usable logging to
     /// help detect and fix issues
@@ -70,7 +60,7 @@ namespace IntegrationTests {
         ~LogToFileAndDumpAtEnd__()
         {
             // first try and stop logging since on Windows log files are not opened with file share read permissions
-            SPXHR hr = file_logger_stop_logging();
+            SPXHR hr = diagnostics_log_stop_logging();
             if (hr != SPX_NOERROR)
             {
                 cout << "ERROR: Failed to stop logging with HR 0x" << hex << hr << endl;
@@ -133,7 +123,7 @@ namespace IntegrationTests {
                     ThrowOnFail(property_bag_set_string(propertyBag, (int)PropertyId::Speech_LogFilename, nullptr, logFile.c_str()));
 
                     // call the C API to enable file logging
-                    ThrowOnFail(file_logger_start_logging(speechConfig));
+                    ThrowOnFail(diagnostics_log_start_logging(speechConfig, nullptr));
                 }
                 catch (SPXHR error)
                 {

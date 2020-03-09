@@ -114,6 +114,6 @@ if(SPEECHSDK_OS MATCHES "^IOS")
         PUBLIC "-weak_framework GStreamerWrapper -F${GSTREAMER_WRAPPER_DIR}"
         )
 else()
-    target_link_libraries(codec PRIVATE ${GST_LIBS} common)
+    target_link_libraries(codec PRIVATE ${GST_LIBS} common ${SPEECHSDK_CORE_LIBRARY})
 endif()
 

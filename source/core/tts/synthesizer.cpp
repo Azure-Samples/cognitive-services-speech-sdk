@@ -14,7 +14,7 @@
 #include "synthesis_helper.h"
 #include "property_id_2_name_map.h"
 #include "guid_utils.h"
-#include "file_logger.h"
+#include "log_helpers.h"
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -456,7 +456,7 @@ std::shared_ptr<ISpxNamedProperties> CSpxSynthesizer::GetParentProperties() cons
 
 void CSpxSynthesizer::CheckLogFilename()
 {
-    FileLogger::Instance().SetFileOptions(GetParentProperties());
+    SpxDiagLogSetProperties(GetParentProperties());
 }
 
 void CSpxSynthesizer::PushRequestIntoQueue(const std::wstring requestId)

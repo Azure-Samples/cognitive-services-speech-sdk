@@ -89,11 +89,11 @@ std::shared_ptr<ISpxSynthesisResult> CSpxUspTtsEngineAdapter::Speak(const std::s
         }
         else if (ResultReason::Canceled == result->GetReason() && !result->GetAudioData()->empty())
         {
-            LogError("Synthesis cancelled with partial data received, cannot retry.");
+            SPX_TRACE_ERROR("Synthesis cancelled with partial data received, cannot retry.");
             break;
         }
 
-        LogError("Synthesis cancelled without data received, retrying.");
+        SPX_TRACE_ERROR("Synthesis cancelled without data received, retrying.");
     }
 
     return result;
@@ -147,7 +147,7 @@ std::shared_ptr<ISpxSynthesisResult> CSpxUspTtsEngineAdapter::SpeakInternal(cons
 
     if (m_uspState == UspState::Sending || m_uspState == UspState::TurnStarted)
     {
-        LogError("USP error, timeout to get the first audio chunk.");
+        SPX_TRACE_ERROR("USP error, timeout to get the first audio chunk.");
         m_currentErrorMessage = "USP error, timeout to get the first audio chunk.";
         m_uspState = UspState::Error;
         UspTerminate();
@@ -168,7 +168,7 @@ std::shared_ptr<ISpxSynthesisResult> CSpxUspTtsEngineAdapter::SpeakInternal(cons
 
     if (m_uspState == UspState::ReceivingData)
     {
-        LogError("USP error, timeout to get all audio data.");
+        SPX_TRACE_ERROR("USP error, timeout to get all audio data.");
         m_currentErrorMessage = "USP error, timeout to get all audio data.";
         m_currentErrorMessage += " Received audio size: " + CSpxSynthesisHelper::itos(m_currentReceivedData.size()) + "bytes.";
         m_uspState = UspState::Error;
@@ -277,7 +277,7 @@ void CSpxUspTtsEngineAdapter::DoSendMessageWork(std::weak_ptr<USP::Connection> c
     }
     else
     {
-        LogInfo("usp connection lost when trying to send message.");
+        SPX_TRACE_ERROR("usp connection lost when trying to send message.");
     }
 }
 
@@ -434,7 +434,7 @@ void CSpxUspTtsEngineAdapter::OnTurnStart(const USP::TurnStartMsg& message)
     }
     else if (m_uspState != UspState::Error)
     {
-        LogError("turn.start received in invalid state, current state is: %d", UspState(m_uspState));
+        SPX_TRACE_ERROR("turn.start received in invalid state, current state is: %d", UspState(m_uspState));
         SPX_THROW_HR(SPXERR_INVALID_STATE);
     }
 
@@ -458,7 +458,7 @@ void CSpxUspTtsEngineAdapter::OnAudioOutputChunk(const USP::AudioOutputChunkMsg&
     }
     else if ( m_uspState != UspState::ReceivingData)
     {
-        LogInfo("Recieved chunck data in unexpected state, ingoring. Current state: %d", UspState(m_uspState));
+        SPX_TRACE_ERROR("Recieved chunck data in unexpected state, ingoring. Current state: %d", UspState(m_uspState));
         return;
     }
     

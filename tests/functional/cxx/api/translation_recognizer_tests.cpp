@@ -3,6 +3,7 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
+#include "stdafx.h"
 #include <map>
 #include "test_utils.h"
 #include "file_utils.h"
@@ -150,6 +151,7 @@ TEST_CASE("Translation", "[api][cxx]")
         recognizer->SessionStopped.DisconnectAll();
         recognizer->SessionStopped.Connect([&complete, &readyFuture](const SessionEventArgs& e)
             {
+                UNUSED(e);
                 SPX_TRACE_VERBOSE("CXX_API_TEST SessionStopped: session id %s", e.SessionId.c_str());
                 if (readyFuture.wait_for(std::chrono::seconds(0)) != std::future_status::ready)
                 {

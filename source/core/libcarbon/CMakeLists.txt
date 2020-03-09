@@ -7,6 +7,7 @@ include_directories(${CARBON_CXX_API})
 include_directories(${CARBON_INCLUDE})
 include_directories("${FACTORY}/include")
 include_directories("${COMMON}/include")
+include_directories("${LOGGING}/include")
 
 set(HEADERS)
 
@@ -47,6 +48,11 @@ source_group("Source Files" FILES ${SOURCES})
 
 add_library(${PROJECT_NAME} SHARED ${HEADERS} ${HEADERS_PRIVATE} ${SOURCES} $<TARGET_OBJECTS:c_api>)
 
+# Disable LNK4286 (caused by importing diagnostics_log_message)
+if(MSVC)
+  set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "/ignore:4286")
+endif()
+
 if(APPLE)
   add_library(${PROJECT_NAME}_static STATIC ${HEADERS} ${HEADERS_PRIVATE} ${SOURCES} $<TARGET_OBJECTS:c_api>)
   set_target_properties(${PROJECT_NAME}
@@ -72,6 +78,7 @@ set_target_properties (${PROJECT_NAME} PROPERTIES
 # the following list are needed to make ld producing a .core.so that can be loaded by a python wheel
 target_link_libraries(${PROJECT_NAME}
     PRIVATE common
+    PRIVATE logging
     PRIVATE factory
     PRIVATE conversation_translation
     PRIVATE usp

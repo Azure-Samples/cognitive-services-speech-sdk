@@ -67,19 +67,19 @@ namespace Microsoft.CognitiveServices.Speech.Internal
                 speechConfig.SetProperty("SPEECH-FileLogDurationSeconds", ((int)rolloverDuration.Value.TotalSeconds).ToString(CultureInfo.InvariantCulture));
             }
 
-            return file_logger_start_logging(speechConfig.configHandle);
+            return diagnostics_log_apply_properties(speechConfig.configHandle, (IntPtr)0);
         }
 
         /// <summary>
         /// Stops logging to a file. This releases the file so it can be accessed by other processes.
         /// </summary>
         /// <returns>The status code indicating success or the failure cause.</returns>
-        public static SPXHR StopLogging() => file_logger_stop_logging();
+        public static SPXHR StopLogging() => diagnostics_log_stop_logging();
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        private static extern SPXHR file_logger_start_logging(InteropSafeHandle speechconfig);
+        private static extern SPXHR diagnostics_log_apply_properties(InteropSafeHandle speechconfig, IntPtr reserved);
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        private static extern SPXHR file_logger_stop_logging();
+        private static extern SPXHR diagnostics_log_stop_logging();
     }
 }

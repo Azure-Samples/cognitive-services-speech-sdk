@@ -9,7 +9,7 @@
 #include <http_exception.h>
 #include <string_utils.h>
 #include <http_endpoint_info.h>
-#include <file_logger.h>
+#include <log_helpers.h>
 #include "conversation_impl.h"
 #include "conversation_manager.h"
 #include "conversation_utils.h"
@@ -118,7 +118,7 @@ namespace ConversationTranslation {
         std::string logFile = NamedPropertiesHelper::GetString(properties, PropertyId::Speech_LogFilename, unset.c_str());
         if (logFile != unset)
         {
-            FileLogger::Instance().SetFileOptions(properties);
+            SpxDiagLogSetProperties(properties);
         }
 
         // Initialize websocket platform

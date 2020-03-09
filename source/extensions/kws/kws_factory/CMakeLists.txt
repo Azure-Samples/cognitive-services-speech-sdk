@@ -61,3 +61,9 @@ else()
     PRIVATE kws_wrapper
         )
 endif()
+
+if(STATIC_KWS_EXTENSION)
+    target_link_libraries(kws_factory PRIVATE logging)
+else()
+    target_link_libraries(kws_factory PRIVATE ${SPEECHSDK_CORE_LIBRARY})
+endif()

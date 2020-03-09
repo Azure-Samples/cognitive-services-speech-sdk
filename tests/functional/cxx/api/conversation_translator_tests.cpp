@@ -8,6 +8,7 @@
 #define INTEGRATION_TEST_LOG_AND_DUMP
 #endif
 
+#include "stdafx.h"
 #include <speechapi_cxx_connection.h>
 #include "recognizer_utils.h"
 #include "guid_utils.h"

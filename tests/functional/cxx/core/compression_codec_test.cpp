@@ -3,6 +3,7 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
+#include "stdafx.h"
 #include "test_utils.h"
 #include "microphone_pump.h"
 #include <atomic>
@@ -14,9 +15,6 @@
 #include "site_helpers.h"
 #include "create_object_helpers.h"
 #include "internal_audio_codec_adapter.h"
-
-#include "exception.h"
-#define __SPX_THROW_HR_IMPL(hr) Microsoft::CognitiveServices::Speech::Impl::ThrowWithCallstack(hr)
 
 #include "ispxinterfaces.h"
 

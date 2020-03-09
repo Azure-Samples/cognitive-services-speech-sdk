@@ -14,6 +14,7 @@
 #include "common.h"
 #include "conversation_manager.h"
 #include "conversation_utils.h"
+#include "azure_c_shared_utility/xlogging.h"
 
 #define SPX_DBG_TRACE_CONVERSATION_ROOM_MANAGER 0
 

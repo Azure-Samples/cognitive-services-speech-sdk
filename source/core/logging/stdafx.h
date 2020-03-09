@@ -1,5 +1,10 @@
 #pragma once
 
+#include <future>
+#include <memory>
+#include <map>
+#include <string>
+
 #ifdef _DEBUG
 #define SPX_CONFIG_DBG_TRACE_ALL 1
 #define SPX_CONFIG_TRACE_ALL 1
@@ -12,10 +17,3 @@
 
 #include "exception.h"
 #define __SPX_THROW_HR_IMPL(hr) Microsoft::CognitiveServices::Speech::Impl::ThrowWithCallstack(hr)
-
-#include "spxcore_common.h"
-
-#include "try_catch_helpers.h"
-
-#include <speechapi_c.h>
-

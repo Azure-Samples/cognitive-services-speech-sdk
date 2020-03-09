@@ -668,7 +668,7 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspQueryParameters(const vector<string
             }
             else
             {
-                LogInfo("The property %s has an empty value, ignored.", propertyName.c_str());
+                SPX_TRACE_ERROR("The property %s has an empty value, ignored.", propertyName.c_str());
             }
             break;
         default:
@@ -779,7 +779,7 @@ void CSpxUspRecoEngineAdapter::UpdateOutputFormatOption(const std::shared_ptr<IS
         }
         else
         {
-            LogError("Unknown output format value %s", value.c_str());
+            SPX_TRACE_ERROR("Unknown output format value %s", value.c_str());
             SPX_THROW_HR(SPXERR_INVALID_ARG);
         }
     }
@@ -874,7 +874,7 @@ SPXHR CSpxUspRecoEngineAdapter::GetRecoModeFromProperties(const std::shared_ptr<
     else
     {
         SPX_DBG_ASSERT_WITH_MESSAGE(false, "Unknown RecognitionMode in USP::RecognitionMode.");
-        LogError("Unknown RecognitionMode value %s", value.c_str());
+        SPX_TRACE_ERROR("Unknown RecognitionMode value %s", value.c_str());
         hr = SPXERR_INVALID_ARG;
     }
 

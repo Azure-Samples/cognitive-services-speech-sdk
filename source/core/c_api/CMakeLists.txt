@@ -7,6 +7,7 @@ include_directories(${CARBON_CXX_API})
 include_directories(${CARBON_INCLUDE})
 include_directories("${FACTORY}/include")
 include_directories("${COMMON}/include")
+include_directories("${LOGGING}/include")
 include_directories("${SR}/include")
 include_directories("${CARBON_EXTERNAL}/json")
 include_directories("${CONVERSATION_TRANSLATION}/include")
@@ -27,6 +28,7 @@ set(SOURCES
     "${SRC_DIR}/speechapi_c_conversation_transcription_result.cpp"
     "${SRC_DIR}/speechapi_c_conversation.cpp"
     "${SRC_DIR}/speechapi_c_conversation_translator.cpp"
+    "${SRC_DIR}/speechapi_c_diagnostics.cpp"
     "${SRC_DIR}/speechapi_c_error.cpp"
     "${SRC_DIR}/speechapi_c_intent_recognizer.cpp"
     "${SRC_DIR}/speechapi_c_intent_result.cpp"
@@ -51,7 +53,6 @@ set(SOURCES
     "${SRC_DIR}/speechapi_c_participant.cpp"
     "${SRC_DIR}/speechapi_c_auto_detect_source_lang_config.cpp"
     "${SRC_DIR}/speechapi_c_source_lang_config.cpp"
-    "${SRC_DIR}/speechapi_c_file_logger.cpp"
     "${SRC_DIR}/stdafx.cpp"
     )
 

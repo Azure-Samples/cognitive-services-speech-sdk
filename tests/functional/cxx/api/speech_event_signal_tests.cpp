@@ -3,14 +3,13 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
+#include "stdafx.h"
 #include <iostream>
 #include <atomic>
 #include <map>
 #include <string>
 
 #include "test_utils.h"
-
-#include "speechapi_cxx.h"
 
 using namespace Microsoft::CognitiveServices::Speech;
 using namespace std;

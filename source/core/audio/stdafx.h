@@ -12,10 +12,12 @@
 #define SPX_CONFIG_TRACE_ALL 1
 #endif
 
-#include "trace_message.h"
-#define __SPX_DO_TRACE_IMPL SpxTraceMessage
+#include "speechapi_c_diagnostics.h"
+#define __SPX_DO_TRACE_IMPL diagnostics_log_trace_message
 
+#ifndef __SPX_THROW_HR_IMPL
 #include "exception.h"
 #define __SPX_THROW_HR_IMPL(hr) Microsoft::CognitiveServices::Speech::Impl::ThrowWithCallstack(hr)
+#endif
 
 #include "spxcore_common.h"

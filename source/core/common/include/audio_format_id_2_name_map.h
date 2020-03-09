@@ -38,7 +38,7 @@ const char* GetAudioFormatName(const SpeechSynthesisOutputFormat& formatId)
     case SpeechSynthesisOutputFormat::Raw24Khz16BitMonoPcm: return "raw-24khz-16bit-mono-pcm";
     case SpeechSynthesisOutputFormat::Raw8Khz16BitMonoPcm: return "raw-8khz-16bit-mono-pcm";
     default:
-        LogError("undefined SpeechSynthesisOutputFormat of %d", static_cast<int>(formatId));
+        SPX_TRACE_ERROR("undefined SpeechSynthesisOutputFormat of %d", static_cast<int>(formatId));
         SPX_THROW_ON_FAIL(SPXERR_INVALID_ARG);
         return "";
     }

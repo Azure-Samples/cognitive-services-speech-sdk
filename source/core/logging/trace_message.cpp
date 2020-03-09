@@ -9,12 +9,13 @@
 
 #include "stdafx.h"
 #include "trace_message.h"
+#include "speechapi_c_diagnostics.h"
 #include "file_utils.h"
 #include "file_logger.h"
 #include "exception.h"
+#include "string_utils.h"
 #include <chrono>
 #include <stdio.h>
-#include <stdarg.h>
 #include <sstream>
 #include <iostream>
 
@@ -33,7 +34,22 @@
 
 decltype(std::chrono::high_resolution_clock::now()) __g_spx_trace_message_time0 = std::chrono::high_resolution_clock::now();
 
-void SpxTraceMessage_Internal(int level, const char* pszTitle, const char* fileName, const int lineNumber, const char* pszFormat, va_list argptr)
+SPX_EXTERN_C void SpxTraceMessage1(int level, const char* pszTitle, const char* fileName, const int lineNumber, const char* pszFormat, ...)
+{
+    UNUSED(level);
+    try
+    {
+        va_list argptr;
+        va_start(argptr, pszFormat);
+        SpxTraceMessage2(level, pszTitle, fileName, lineNumber, pszFormat, argptr);
+        va_end(argptr);
+    }
+    catch(...)
+    {
+    }
+}
+
+SPX_EXTERN_C void SpxTraceMessage2(int level, const char* pszTitle, const char* fileName, const int lineNumber, const char* pszFormat, va_list argptr)
 {
     bool logToConsole = false;
 #if defined(DEBUG) || defined(_DEBUG)
@@ -102,6 +118,17 @@ void SpxTraceMessage_Internal(int level, const char* pszTitle, const char* fileN
     char sz[4096];
     vsnprintf(sz, 4096, format.c_str(), argptrDbg);
 
+    static constexpr char prefix[] = "Microsoft::CognitiveServices::Speech::Impl::";
+    static constexpr auto prefixLength = sizeof(prefix) - 1;
+    auto start = sz;
+    while (true)
+    {
+        auto found = strstr(start, prefix);
+        if (!found) break;
+        strcpy(found, &found[prefixLength]);
+        start = found;
+    }
+
 #ifdef SPX_CONFIG_INCLUDE_TRACE_WINDOWS_DEBUGGER
     OutputDebugStringA(sz);
 #endif // SPX_CONFIG_INCLUDE_TRACE_WINDOWS_DEBUGGER
@@ -159,23 +186,9 @@ void SpxTraceMessage_Internal(int level, const char* pszTitle, const char* fileN
 #endif
 }
 
-void SpxTraceMessage(int level, const char* pszTitle, const char* fileName, const int lineNumber, const char* pszFormat, ...)
+SPX_EXTERN_C void _xlogging_log_function_spx_trace_message_wrapper(LOG_CATEGORY log_category, const char* file, const char* func, int line, unsigned int options, const char* format, ...)
 {
-    UNUSED(level);
-    try
-    {
-        va_list argptr;
-        va_start(argptr, pszFormat);
-        SpxTraceMessage_Internal(level, pszTitle, fileName, lineNumber, pszFormat, argptr);
-        va_end(argptr);
-    }
-    catch(...)
-    {
-    }
-}
-
-void SpxConsoleLogger_Log(LOG_CATEGORY log_category, const char* file, const char* func, int line, unsigned int options, const char* format, ...)
-{
+    UNUSED(func);
     UNUSED(options);
 
     va_list args;
@@ -184,11 +197,11 @@ void SpxConsoleLogger_Log(LOG_CATEGORY log_category, const char* file, const cha
     switch (log_category)
     {
     case AZ_LOG_INFO:
-        SpxTraceMessage_Internal(__SPX_TRACE_LEVEL_INFO, "SPX_TRACE_INFO: AZ_LOG_INFO: ", file, line, format, args);
+        SpxTraceMessage2(__SPX_TRACE_LEVEL_INFO, "SPX_TRACE_INFO: AZ_LOG_INFO: ", file, line, format, args);
         break;
 
     case AZ_LOG_ERROR:
-        SpxTraceMessage_Internal(__SPX_TRACE_LEVEL_INFO, "SPX_TRACE_ERROR: AZ_LOG_ERROR: ", file, line, format, args);
+        SpxTraceMessage2(__SPX_TRACE_LEVEL_INFO, "SPX_TRACE_ERROR: AZ_LOG_ERROR: ", file, line, format, args);
         SPX_TRACE_ERROR("Error: File:%s Func:%s Line:%d ", file, func, line);
         break;
 

@@ -19,8 +19,8 @@
 #define SPX_CONFIG_TRACE_ALL 1
 #endif
 
-#include "trace_message.h"
-#define __SPX_DO_TRACE_IMPL SpxTraceMessage
+#include "speechapi_c_diagnostics.h"
+#define __SPX_DO_TRACE_IMPL diagnostics_log_trace_message
 
 #include "spxcore_common.h"
 

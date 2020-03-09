@@ -116,3 +116,9 @@ target_link_libraries(kws_wrapper PRIVATE
     ${CARBON_CORE_LIB}
     kwsapi
     )
+
+if(STATIC_KWS_EXTENSION)
+    target_link_libraries(kws_wrapper PRIVATE logging)
+else()
+    target_link_libraries(kws_wrapper PRIVATE ${SPEECHSDK_CORE_LIBRARY})
+endif()

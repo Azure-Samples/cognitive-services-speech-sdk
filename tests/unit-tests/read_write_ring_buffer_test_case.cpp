@@ -3,14 +3,14 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
+#include "exception.h"
+#define __SPX_THROW_HR_IMPL(hr) Microsoft::CognitiveServices::Speech::Impl::ThrowWithCallstack(hr)
+
 #include "test_utils.h"
 #include <chrono>
 #include <thread>
 #include <random>
 #include <string>
-
-#include "exception.h"
-#define __SPX_THROW_HR_IMPL(hr) Microsoft::CognitiveServices::Speech::Impl::ThrowWithCallstack(hr)
 
 #include "site_helpers.h"
 #include "create_object_helpers.h"

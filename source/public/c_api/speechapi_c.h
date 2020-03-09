@@ -9,6 +9,7 @@
 
 #include <speechapi_c_common.h>
 #include <speechapi_c_error.h>
+#include <speechapi_c_diagnostics.h>
 #include <speechapi_c_property_bag.h>
 #include <speechapi_c_intent_result.h>
 #include <speechapi_c_intent_trigger.h>

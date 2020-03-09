@@ -14,7 +14,7 @@ set(SOURCES "${SRC_DIR}/uspclientconsole.cpp")
 source_group("Source Files" FILES ${SOURCES})
 
 add_executable(${PROJECT_NAME} ${SOURCES})
-target_link_libraries(${PROJECT_NAME} audio sr usp)
+target_link_libraries(${PROJECT_NAME} audio sr usp ${SPEECHSDK_CORE_LIBRARY})
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "WindowsStore")
 if (${use_openssl})
@@ -35,3 +35,5 @@ endif()
 set_target_properties(${PROJECT_NAME} PROPERTIES
     FOLDER tools
 )
+
+

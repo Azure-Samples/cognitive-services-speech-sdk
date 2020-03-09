@@ -27,8 +27,8 @@ set(HEADERS
     "${INC_DIR}/service_helpers.h"
     "${INC_DIR}/service_provider_impl.h"
     "${INC_DIR}/shared_ptr_helpers.h"
+    "${INC_DIR}/log_helpers.h"
     "${INC_DIR}/singleton.h"
-    "${INC_DIR}/trace_message.h"
     "${INC_DIR}/platform.h"
     "${INC_DIR}/string_utils.h"
     "${INC_DIR}/file_utils.h"
@@ -40,7 +40,6 @@ set(HEADERS
     "${INC_DIR}/ring_buffer.h"
     "${INC_DIR}/audio_chunk.h"
     "${INC_DIR}/time_utils.h"
-    "${INC_DIR}/file_logger.h"
     "${INC_DIR}/http_exception.h"
     "${INC_DIR}/http_request.h"
     "${INC_DIR}/http_response.h"
@@ -68,11 +67,9 @@ set(HEADERS_PRIVATE
     )
 
 set(SOURCES
-    "${SRC_DIR}/file_logger.cpp"
     "${SRC_DIR}/exception.cpp"
     "${SRC_DIR}/handle_table.cpp"
     "${SRC_DIR}/mock_controller.cpp"
-    "${SRC_DIR}/trace_message.cpp"
     "${SRC_DIR}/string_utils.cpp"
     "${SRC_DIR}/file_utils.cpp"
     "${SRC_DIR}/guid_utils.cpp"

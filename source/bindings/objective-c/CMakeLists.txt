@@ -9,6 +9,7 @@ include_directories(${CARBON_CXX_API})
 include_directories(${OBJC_PUBLIC_HEADER_DIR})
 include_directories(${CARBON_INCLUDE})
 include_directories("${COMMON}/include")
+include_directories("${LOGGING}/include")
 include_directories("${FACTORY}/include")
 
 FILE(GLOB OBJC_PUBLIC_HEADERS "${OBJC_PUBLIC_HEADER_DIR}/*.h")
@@ -80,6 +81,7 @@ target_link_libraries(${PROJECT_NAME}
   PRIVATE usp
   PRIVATE common
   PRIVATE factory
+  PRIVATE logging
   PRIVATE conversation_translation
   )
 

@@ -11,7 +11,7 @@
 #define SPX_CONFIG_TRACE_ALL 1
 #endif
 
-#include "trace_message.h"
+#include "speechapi_c_diagnostics.h"
 #include "spx_namespace.h"
 
 #include <AudioToolbox/AudioToolbox.h>
@@ -22,6 +22,7 @@
 
 #include "audio_sys.h"
 #include "spxdebug.h"
+#include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/lock.h"
 
 

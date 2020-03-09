@@ -20,16 +20,16 @@
 #define SPX_CONFIG_TRACE_ALL 1
 #endif
 
-#include "trace_message.h"
-
+#include "speechapi_c_diagnostics.h"
 #ifndef __SPX_DO_TRACE_IMPL
-#define __SPX_DO_TRACE_IMPL SpxTraceMessage
+#define __SPX_DO_TRACE_IMPL diagnostics_log_trace_message
 #endif
 
 #include "string_utils.h"
 #include "debug_utils.h"
 #include "json.h"
 #include "exception.h"
+#include "spxdebug.h"
 
 #ifdef _MSC_VER
 #pragma warning( push )
@@ -182,6 +182,9 @@ inline std::ifstream get_stream(const std::string& name) {
     return std::ifstream(name.c_str(), std::ifstream::binary);
 }
 
+#define SPX_TEST_TRACE_ERROR(file, title, line, options, msg, ...) __SPX_TRACE_ERROR((std::string("SPX_TRACE_ERROR: ") + std::string(title)).c_str(), file, line, msg, ##__VA_ARGS__)
+#define SPX_TEST_TRACE_INFO(file, title, line, options, msg, ...)  __SPX_TRACE_INFO((std::string("SPX_TRACE_INFO: ") + std::string(title)).c_str(), file, line, msg, ##__VA_ARGS__)
+
 inline void GetKeyValue(const char* key, std::string &value, nlohmann::json &data, const char* file, int line)
 {
     try
@@ -190,7 +193,7 @@ inline void GetKeyValue(const char* key, std::string &value, nlohmann::json &dat
     }
     catch (nlohmann::json::type_error& e)
     {
-        SpxConsoleLogger_Log(LOG_CATEGORY::AZ_LOG_ERROR, file, "LoadFromJsonFile", line, 0, "Error: exception in AT, %s.", e.what());
+        SPX_TEST_TRACE_ERROR(file, "LoadFromJsonFile", line, 0, "Error: exception in AT, %s.", e.what());
     }
 }
 
@@ -289,14 +292,14 @@ inline void from_json(const nlohmann::json& jsonString, SubscriptionRegion& subs
         jsonString.at(KEY).get_to(subscriptionRegion.Key);
     }
     catch (std::exception exception) {
-        SpxConsoleLogger_Log(LOG_CATEGORY::AZ_LOG_TRACE, __FILE__, "from_json", __LINE__, 0, "SubscriptionRegion - failed to find key");
+        SPX_TEST_TRACE_ERROR(__FILE__, "from_json", __LINE__, 0, "SubscriptionRegion - failed to find key, %s", exception.what());
         throw;
     }
     try {
         jsonString.at(REGION).get_to(subscriptionRegion.Region);
     }
     catch (std::exception exception) {
-        SpxConsoleLogger_Log(LOG_CATEGORY::AZ_LOG_TRACE, __FILE__, "from_json", __LINE__, 0, "SubscriptionRegion - failed to find region");
+        SPX_TEST_TRACE_ERROR(__FILE__, "from_json", __LINE__, 0, "SubscriptionRegion - failed to find region, %s", exception.what());
         throw;
     }
 }
@@ -449,7 +452,7 @@ private:
     {
         nlohmann::json nlohmanJson = nullptr;
 
-        SpxConsoleLogger_Log(LOG_CATEGORY::AZ_LOG_INFO, __FILE__, "getJson", __LINE__, 0, "Loading json from %s", path.c_str());
+        SPX_TEST_TRACE_INFO(__FILE__, "getJson", __LINE__, 0, "Loading json from %s", path.c_str());
 
         if (exists(path))
         {
@@ -459,15 +462,15 @@ private:
             }
             catch (nlohmann::json::parse_error exception)
             {
-                SpxConsoleLogger_Log(LOG_CATEGORY::AZ_LOG_ERROR, __FILE__, "getJson", __LINE__, 0, "json exception from %s - %s", path.c_str(), exception.what());
+                SPX_TEST_TRACE_ERROR(__FILE__, "getJson", __LINE__, 0, "json exception from %s - %s", path.c_str(), exception.what());
             }
         }
         else
         {
-            SpxConsoleLogger_Log(LOG_CATEGORY::AZ_LOG_INFO, __FILE__, "getJson", __LINE__, 0, "json file %s cannot be found", path.c_str());
+            SPX_TEST_TRACE_INFO(__FILE__, "getJson", __LINE__, 0, "json file %s cannot be found", path.c_str());
         }
 
-        SpxConsoleLogger_Log(LOG_CATEGORY::AZ_LOG_INFO, __FILE__, "getJson", __LINE__, 0, "json loaded: %s", nlohmanJson.dump().c_str());
+        SPX_TEST_TRACE_INFO(__FILE__, "getJson", __LINE__, 0, "json loaded: %s", nlohmanJson.dump().c_str());
 
         return nlohmanJson;
     }
@@ -475,7 +478,7 @@ private:
 public:
     static void LoadFromJsonFile(std::string rootPathString)
     {
-        SpxConsoleLogger_Log(LOG_CATEGORY::AZ_LOG_INFO, __FILE__, "LoadFromJsonFile", __LINE__, 0, "rootPathString is %s", rootPathString.c_str());
+        SPX_TEST_TRACE_INFO(__FILE__, "LoadFromJsonFile", __LINE__, 0, "rootPathString is %s", rootPathString.c_str());
 
         std::string testSubscriptionsRegionsPath = rootPathString + TEST_SUBSCRIPTIONSREGIONS_FILE;
         std::string testAudioUtterancesPath = rootPathString + TEST_AUDIOUTTERANCES_FILE;
@@ -488,7 +491,7 @@ public:
         }
         else
         {
-            SpxConsoleLogger_Log(LOG_CATEGORY::AZ_LOG_ERROR, __FILE__, "LoadFromJsonFile", __LINE__, 0, "JSON could not be loaded from %s", testSubscriptionsRegionsPath.c_str());
+            SPX_TEST_TRACE_ERROR(__FILE__, "LoadFromJsonFile", __LINE__, 0, "JSON could not be loaded from %s", testSubscriptionsRegionsPath.c_str());
         }
 
         nlohmann::json defaultsData = getJson(testDefaultsPath);
@@ -498,18 +501,18 @@ public:
         }
         else
         {
-            SpxConsoleLogger_Log(LOG_CATEGORY::AZ_LOG_ERROR, __FILE__, "LoadFromJsonFile", __LINE__, 0, "JSON could not be loaded from %s", testDefaultsPath.c_str());
+            SPX_TEST_TRACE_ERROR(__FILE__, "LoadFromJsonFile", __LINE__, 0, "JSON could not be loaded from %s", testDefaultsPath.c_str());
         }
 
-        SpxConsoleLogger_Log(LOG_CATEGORY::AZ_LOG_INFO, __FILE__, "LoadFromJsonFile", __LINE__, 0, "rootPathString is: %s", rootPathString.c_str());
+        SPX_TEST_TRACE_INFO(__FILE__, "LoadFromJsonFile", __LINE__, 0, "rootPathString is: %s", rootPathString.c_str());
         DefaultSettingsMap[INPUT_DIR] = rootPathString + DefaultSettingsMap[INPUT_DIR];
 
         if (!exists(DefaultSettingsMap[INPUT_DIR]))
         {
-            SpxConsoleLogger_Log(LOG_CATEGORY::AZ_LOG_ERROR, __FILE__, "LoadFromJsonFile", __LINE__, 0, "input file path %s is invalid", DefaultSettingsMap[INPUT_DIR].c_str());
+            SPX_TEST_TRACE_ERROR(__FILE__, "LoadFromJsonFile", __LINE__, 0, "input file path %s is invalid", DefaultSettingsMap[INPUT_DIR].c_str());
         }
 
-        SpxConsoleLogger_Log(LOG_CATEGORY::AZ_LOG_INFO, __FILE__, "LoadFromJsonFile", __LINE__, 0, "Setting InputDir to %s", DefaultSettingsMap[INPUT_DIR].c_str());
+        SPX_TEST_TRACE_INFO(__FILE__, "LoadFromJsonFile", __LINE__, 0, "Setting InputDir to %s", DefaultSettingsMap[INPUT_DIR].c_str());
 
         nlohmann::json audioUtterancesData = getJson(testAudioUtterancesPath);
         if (audioUtterancesData != nullptr)
@@ -518,7 +521,7 @@ public:
         }
         else
         {
-            SpxConsoleLogger_Log(LOG_CATEGORY::AZ_LOG_ERROR, __FILE__, "LoadFromJsonFile", __LINE__, 0, "JSON could not be loaded from %s", testAudioUtterancesPath.c_str());
+            SPX_TEST_TRACE_ERROR(__FILE__, "LoadFromJsonFile", __LINE__, 0, "JSON could not be loaded from %s", testAudioUtterancesPath.c_str());
         }
     }
 };
