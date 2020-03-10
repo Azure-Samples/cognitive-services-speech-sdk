@@ -215,9 +215,8 @@ def recognize_intent_continuous():
     done = False
 
     def stop_cb(evt):
-        """callback that stops continuous recognition upon receiving an event `evt`"""
+        """callback that signals to stop continuous recognition upon receiving an event `evt`"""
         print('CLOSING on {}'.format(evt))
-        intent_recognizer.stop_continuous_recognition()
         nonlocal done
         done = True
 
@@ -242,5 +241,7 @@ def recognize_intent_continuous():
     intent_recognizer.start_continuous_recognition()
     while not done:
         time.sleep(.5)
+
+    intent_recognizer.stop_continuous_recognition()
     # </IntentContinuousRecognitionWithFile>
 

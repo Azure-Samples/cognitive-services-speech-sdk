@@ -204,9 +204,8 @@ def speech_recognize_continuous_from_file():
     done = False
 
     def stop_cb(evt):
-        """callback that stops continuous recognition upon receiving an event `evt`"""
+        """callback that signals to stop continuous recognition upon receiving an event `evt`"""
         print('CLOSING on {}'.format(evt))
-        speech_recognizer.stop_continuous_recognition()
         nonlocal done
         done = True
 
@@ -224,6 +223,8 @@ def speech_recognize_continuous_from_file():
     speech_recognizer.start_continuous_recognition()
     while not done:
         time.sleep(.5)
+
+    speech_recognizer.stop_continuous_recognition()
     # </SpeechContinuousRecognitionWithFile>
 
 def speech_recognize_keyword_from_microphone():
@@ -242,9 +243,8 @@ def speech_recognize_keyword_from_microphone():
     done = False
 
     def stop_cb(evt):
-        """callback that stops continuous recognition upon receiving an event `evt`"""
+        """callback that signals to stop continuous recognition upon receiving an event `evt`"""
         print('CLOSING on {}'.format(evt))
-        speech_recognizer.stop_keyword_recognition()
         nonlocal done
         done = True
 
@@ -279,6 +279,8 @@ def speech_recognize_keyword_from_microphone():
     print('Say something starting with "{}" followed by whatever you want...'.format(keyword))
     while not done:
         time.sleep(.5)
+
+    speech_recognizer.stop_keyword_recognition()
 
 def speech_recognition_with_pull_stream():
     """gives an example how to use a pull audio stream to recognize speech from a custom audio
@@ -327,9 +329,8 @@ def speech_recognition_with_pull_stream():
     done = False
 
     def stop_cb(evt):
-        """callback that stops continuous recognition upon receiving an event `evt`"""
+        """callback that signals to stop continuous recognition upon receiving an event `evt`"""
         print('CLOSING on {}'.format(evt))
-        speech_recognizer.stop_continuous_recognition()
         nonlocal done
         done = True
 
@@ -348,6 +349,8 @@ def speech_recognition_with_pull_stream():
 
     while not done:
         time.sleep(.5)
+
+    speech_recognizer.stop_continuous_recognition()
 
 
 def speech_recognition_with_push_stream():

@@ -526,7 +526,7 @@ public class SpeechRecognitionSamples {
         SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
         // Creates an instance of AutoDetectSourceLanguageConfig with the 2 source language candidates
-        // Currently this feature only supports 2 languages
+        // Currently this feature only supports 2 different language candidates
         // Replace the languages to be the language candidates for your speech. Please see https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support for all supported langauges
         AutoDetectSourceLanguageConfig autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig.fromLanguages(Arrays.asList("en-US", "de-DE"));
 
@@ -612,7 +612,7 @@ public class SpeechRecognitionSamples {
         sourceLanguageConfigs.add(SourceLanguageConfig.fromLanguage("fr-FR", "The Endpoint Id for custom model of fr-FR"));
 
         // Creates an instance of AutoDetectSourceLanguageConfig with the 2 source language configurations
-        // Currently this feature only supports 2 languages
+        // Currently this feature only supports 2 different language candidates
         AutoDetectSourceLanguageConfig autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig.fromSourceLanguageConfigs(sourceLanguageConfigs);
 
         // Replace with your own audio file name.
