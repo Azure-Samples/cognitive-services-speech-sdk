@@ -171,7 +171,7 @@ jobs:
       continueOnTestFailure: ${{ parameters.continueOnTestFailure }}
   - bash: |
       ./ci/drop/bindrop.sh \
-          $(SPEECHSDK_TARGET_PLATFORM) $(BuildConfiguration) "$(OutputDirectory)"
+          $(SPEECHSDK_TARGET_PLATFORM) $(BuildConfiguration) "$(OutputDirectory)" false
     displayName: Create drop files
   - task: PublishBuildArtifacts@1
     displayName: Publish drop

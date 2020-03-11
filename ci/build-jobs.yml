@@ -432,7 +432,7 @@ jobs:
     inputs:
       type: FilePath
       scriptPath: './ci/drop/bindrop.sh'
-      args: '$(BuildPlatform) $(BuildConfiguration) $(Build.ArtifactStagingDirectory)/$(BuildPlatform)/$(BuildConfiguration) UWP'
+      args: '$(BuildPlatform) $(BuildConfiguration) $(Build.ArtifactStagingDirectory)/$(BuildPlatform)/$(BuildConfiguration) false UWP'
   - task: PublishBuildArtifacts@1
     displayName: Publish drop
     inputs:
@@ -1443,7 +1443,7 @@ jobs:
     inputs:
       type: FilePath
       scriptPath: './ci/drop/bindrop.sh'
-      args: '"" $(BuildConfiguration) $(Build.ArtifactStagingDirectory)/Out/Android-$(BuildPlatform)/$(BuildConfiguration) $(SPEECHSDK_TARGET_PLATFORM)'
+      args: '"" $(BuildConfiguration) $(Build.ArtifactStagingDirectory)/Out/Android-$(BuildPlatform)/$(BuildConfiguration) false $(SPEECHSDK_TARGET_PLATFORM)'
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: Android'
     inputs:
@@ -1786,7 +1786,7 @@ jobs:
     inputs:
       type: FilePath
       scriptPath: './ci/drop/bindrop.sh'
-      args: '"" $(BuildConfiguration) $(Build.ArtifactStagingDirectory)/Linux-x64/$(BuildConfiguration)'
+      args: '"" $(BuildConfiguration) $(Build.ArtifactStagingDirectory)/Linux-x64/$(BuildConfiguration) false'
   - task: PublishBuildArtifacts@1
     displayName: Publish drop
     inputs:

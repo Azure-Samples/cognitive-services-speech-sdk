@@ -551,7 +551,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
         private SpeechConfig CreateCTSInRoomSpeechConfig()
         {
-            var config = SpeechConfig.FromEndpoint(new Uri(conversationTranscriptionMultiAudioEndpoint), conversationTranscriptionPPEKey);
+            var config = SpeechConfig.FromSubscription(conversationTranscriptionPRODKey, conversationTranscriptionPRODRegion);
             config.SetProperty("ConversationTranscriptionInRoomAndOnline", "true");
             return config;
         }

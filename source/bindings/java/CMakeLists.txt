@@ -366,6 +366,12 @@ if(ANDROID)
     target_link_libraries(${JAVA_BINDINGS} log)
 endif()
 
+if(${IS_CROSSCOMPILING})
+    target_link_libraries(${JAVA_BINDINGS} pthread)
+else()
+    target_link_libraries(${JAVA_BINDINGS})
+endif()
+
 # Note: this could also run earlier than post-build
 add_custom_command(TARGET ${JAVA_LIB}
                    POST_BUILD

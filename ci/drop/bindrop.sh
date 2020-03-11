@@ -7,7 +7,8 @@ set -e -o pipefail
 PLATFORM="${1?$USAGE}"
 CONFIG="${2?$USAGE}"
 DEST="${3?$USAGE}"
-TARGET="${4-UNKNOWN}"
+ISCROSS="${4?USAGE}"
+TARGET="${5-UNKNOWN}"
 
 SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
 . "$SCRIPT_DIR/../functions.sh"
@@ -153,8 +154,22 @@ fi
 # Linux: strip shipping binaries, but keep the unstripped version around.
 # N.B. there's an .so in disguise with the .dll extension
 if [[ $(uname) = Linux ]]; then
+  echo "ISCROSS IS $ISCROSS"
   cp $CPOPT -R "$DESTPUBLIB" "$DESTPRIVLIBUNSTRIPPED"
-  find "$DESTPUBLIB" \( -name \*.so -or -name \*.dll \) -print0 | xargs -0 strip
+  if [ $ISCROSS ]; then
+    echo "This is Crosscompiling!!!"
+    if [ $PLATFORM = Linux-arm32 ]; then
+      echo "Trying to use arm-linux-gneabihf-strip!"
+      find "$DESTPUBLIB" \( -name \*.so -or -name \*.dll \) -print0 | xargs -0 arm-linux-gnueabihf-strip
+    fi
+    if [ $PLATFORM = Linux-arm64 ]; then
+      echo "Trying to use aarch64-linux-gnu-strip!"
+      find "$DESTPUBLIB" \( -name \*.so -or -name \*.dll \) -print0 | xargs -0 aarch64-linux-gnu-strip
+    fi
+  else
+    echo "Trying to use strip!"
+    find "$DESTPUBLIB" \( -name \*.so -or -name \*.dll \) -print0 | xargs -0 strip
+  fi
 fi
 
 # Android: strip shipping binaries, but keep the unstripped version around.

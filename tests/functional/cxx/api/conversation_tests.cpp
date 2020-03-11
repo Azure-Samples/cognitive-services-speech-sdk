@@ -26,7 +26,7 @@ std::shared_ptr<SpeechConfig> CreateCTSInroomServiceSpeechConfig()
 {
     auto audioEndpoint = DefaultSettingsMap[INROOM_AUDIO_ENDPOINT];
     audioEndpoint += "/multiaudio";
-    auto config = SpeechConfig::FromEndpoint(audioEndpoint, SubscriptionsRegionsMap[CONVERSATION_TRANSCRIPTION_PPE_SUBSCRIPTION].Key);
+    auto config = SpeechConfig::FromSubscription(SubscriptionsRegionsMap[CONVERSATION_TRANSCRIPTION_PROD_SUBSCRIPTION].Key, SubscriptionsRegionsMap[CONVERSATION_TRANSCRIPTION_PROD_SUBSCRIPTION].Region);
     config->SetProperty("ConversationTranscriptionInRoomAndOnline", "true");
     return config;
 }

@@ -119,7 +119,8 @@ public class ConversationTranscriberTests {
 
     @Test
     public void testConversationAddParticipant() throws InterruptedException, ExecutionException, TimeoutException {
-        SpeechConfig s = SpeechConfig.fromEndpoint(URI.create(inroomEndpoint), Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.CONVERSATION_TRANSCRIPTION_PPE_SUBSCRIPTION).Key);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.CONVERSATION_TRANSCRIPTION_PROD_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.CONVERSATION_TRANSCRIPTION_PROD_SUBSCRIPTION).Region);
         assertNotNull(s);
 
         WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.CONVERSATION_BETWEEN_TWO_PERSONS_ENGLISH).FilePath));
@@ -173,7 +174,8 @@ public class ConversationTranscriberTests {
 
     @Test
     public void testRemoveParticipant() throws InterruptedException, ExecutionException, TimeoutException {
-        SpeechConfig s = SpeechConfig.fromEndpoint(URI.create(inroomEndpoint), Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.CONVERSATION_TRANSCRIPTION_PPE_SUBSCRIPTION).Key);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.CONVERSATION_TRANSCRIPTION_PROD_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.CONVERSATION_TRANSCRIPTION_PROD_SUBSCRIPTION).Region);
         assertNotNull(s);
 
         WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.CONVERSATION_BETWEEN_TWO_PERSONS_ENGLISH).FilePath));

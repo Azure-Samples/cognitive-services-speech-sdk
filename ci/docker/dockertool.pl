@@ -219,6 +219,16 @@ my %images = (
     version => 2,
     spec => ['from-centos8-x64', yumInstallWith(qw/oobe_centos_deps oobepython_centos_deps oobe_centos_gstreamer_deps test_deps/), 'builduser', 'set_centos_env'],
   },
+  ubuntu1604_arm64cc => {
+    version => 1,
+    # Note: libssl1.0.2 is already in this specific image...
+    spec => ['from-python37-x64', aptInstallWith(qw/oobe_debian9_deps test_deps/), 'oobepython_jupyter', 'builduser'],
+    },
+  ubuntu1604_arm32cc => {
+    version => 1,
+    # Note: cross-compile toolsand OpenSSL 1.1.1b is already in this specific image...
+    spec => ['from-debian9-x86', aptInstallWith(qw/oobedevcpp_ubuntu1604_deps oobe_debian9_deps oobe_ubuntu_gstreamer_deps test_deps/), 'builduser'],
+  },
 );
 
 sub imagetag {

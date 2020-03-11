@@ -271,7 +271,7 @@ jobs:
           condition: and(eq(variables['SPEECHSDK_RUN_TESTS'], 'true'), eq(variables['SPEECHSDK_BUILD_TYPE'], 'int'), eq(variables['BuildPlatform'], 'x64'), eq(variables['BuildConfiguration'], 'Release'))
           continueOnError: ${{ parameters.continueOnTestFailure }}
   - bash: |
-      ./ci/drop/bindrop.sh $(BuildPlatform) $(BuildConfiguration) "$(cygpath -au "$(Build.ArtifactStagingDirectory)/$(BuildPlatform)/$(BuildConfiguration)")"
+      ./ci/drop/bindrop.sh $(BuildPlatform) $(BuildConfiguration) "$(cygpath -au "$(Build.ArtifactStagingDirectory)/$(BuildPlatform)/$(BuildConfiguration)")" false
     displayName: Create drop files
   - task: PublishBuildArtifacts@1
     displayName: Publish drop

@@ -22,42 +22,63 @@ jobs:
       Linux x86 Release:
         SPEECHSDK_TARGET_PLATFORM: Linux-x86
         SPEECHSDK_BUILD_CONFIGURATION: Release
-        DOCKER_BASE: dev_ubuntu1604_x86
+        DOCKER_BUILD_BASE: dev_ubuntu1604_x86
+        DOCKER_TEST_BASE: dev_ubuntu1604_x86
         OPENSSL_TARGET: linux-x86
+        JAVA_DEV_TARGET: i386
+        JAVA_ARCH_TARGET: x86
       Linux x86 Debug:
         SPEECHSDK_TARGET_PLATFORM: Linux-x86
         SPEECHSDK_BUILD_CONFIGURATION: Debug
-        DOCKER_BASE: dev_ubuntu1604_x86
+        DOCKER_BUILD_BASE: dev_ubuntu1604_x86
+        DOCKER_TEST_BASE: dev_ubuntu1604_x86
         OPENSSL_TARGET: linux-x86
+        JAVA_DEV_TARGET: i386
+        JAVA_ARCH_TARGET: x86
       Linux arm32 Release:
         SPEECHSDK_TARGET_PLATFORM: Linux-arm32
         SPEECHSDK_BUILD_CONFIGURATION: Release
-        DOCKER_BASE: dev_ubuntu1604_arm32
+        DOCKER_BUILD_BASE: ubuntu1604_arm32cc
+        DOCKER_TEST_BASE: dev_ubuntu1604_arm32
         OPENSSL_TARGET: linux-armv4
+        JAVA_DEV_TARGET: armhf
+        JAVA_ARCH_TARGET: armhf
       Linux arm32 Debug:
         SPEECHSDK_TARGET_PLATFORM: Linux-arm32
         SPEECHSDK_BUILD_CONFIGURATION: Debug
-        DOCKER_BASE: dev_ubuntu1604_arm32
+        DOCKER_BUILD_BASE: ubuntu1604_arm32cc
+        DOCKER_TEST_BASE: dev_ubuntu1604_arm32
         OPENSSL_TARGET: linux-armv4
+        JAVA_DEV_TARGET: armhf
+        JAVA_ARCH_TARGET: armhf
       Linux arm64 Release:
         SPEECHSDK_TARGET_PLATFORM: Linux-arm64
         SPEECHSDK_BUILD_CONFIGURATION: Release
-        DOCKER_BASE: dev_ubuntu1604_arm64
+        DOCKER_BUILD_BASE: ubuntu1604_arm64cc
+        DOCKER_TEST_BASE: dev_ubuntu1604_arm64
         OPENSSL_TARGET: linux-aarch64
+        JAVA_DEV_TARGET: arm64
+        JAVA_ARCH_TARGET: aarch64
       Linux arm64 Debug:
         SPEECHSDK_TARGET_PLATFORM: Linux-arm64
         SPEECHSDK_BUILD_CONFIGURATION: Debug
-        DOCKER_BASE: dev_ubuntu1604_arm64
+        DOCKER_BUILD_BASE: ubuntu1604_arm64cc
+        DOCKER_TEST_BASE: dev_ubuntu1604_arm64
         OPENSSL_TARGET: linux-aarch64
+        JAVA_DEV_TARGET: arm64
+        JAVA_ARCH_TARGET: aarch64
       # More configurations in 'int' and 'prod' builds (cf. set-variables.sh)
       ${{ if in(parameters.buildType, 'int', 'prod') }}:
         Debian9 OpenSSL 1.1 x64 Debug:
           SPEECHSDK_TARGET_PLATFORM: Linux-x64
           SPEECHSDK_BUILD_CONFIGURATION: Debug
-          DOCKER_BASE: dev_debian9_x64
+          DOCKER_BUILD_BASE: dev_debian9_x64
+          DOCKER_TEST_BASE: dev_debian9_x64
           # Do not publish; this is just checking we can build on Debian 9 with
           # OpenSSL 1.1, and run tests during build.
-          OPENSSL_TARGET: linux-aarch64
+          OPENSSL_TARGET: linux-x64
+          JAVA_DEV_TARGET: x64
+          JAVA_ARCH_TARGET: amd64   
           Publish: false
   steps:
   - bash: |
@@ -95,8 +116,8 @@ jobs:
       os: linux
   - template: get-docker-image.yml
     parameters:
-      imageBase: $(DOCKER_BASE)
-      outvarImage: DOCKER_IMAGE
+      imageBase: $(DOCKER_BUILD_BASE)
+      outvarImage: DOCKER_BUILD_IMAGE
   - bash: |
       rm -f ./tests/test.subscriptions.regions.json
       cp ./tests/test.settings.json ./bin
@@ -108,26 +129,67 @@ jobs:
       cp ./tests/test.subscriptions.regions.json ./bin
     displayName: Write Subscriptions Regions Data
   - bash: |
-      docker run --rm -i --workdir /csspeech --volume "$PWD:/csspeech" "$DOCKER_IMAGE" bash - <<"SCRIPT"
-        set -e
-        ./ci/build-linux-openssl.sh $(OPENSSL_TARGET)
+      set -e -o pipefail
+      docker run --rm -i --workdir /csspeech --volume "$PWD:/csspeech" $(DOCKER_BUILD_IMAGE) bash - <<"HERE_DOC"
+        set -e -o pipefail
+        if [[ $SPEECHSDK_TARGET_PLATFORM =~ Linux-(arm32|arm64) ]]; then
+          dpkg --add-architecture arm64
+          dpkg --add-architecture armhf
+        fi
+        if [[ $(SPEECHSDK_TARGET_PLATFORM) =~ Linux-(x86|x64) ]]; then
+          apt-get install libz-dev
+          ./ci/build-linux-openssl.sh $(OPENSSL_TARGET)
+          apt-get install -y default-jre-headless default-jre default-jdk
+          mkdir /linux-openssl
+          ln -s /csspeech/external/linux-openssl/linux-x86 /linux-openssl/linux-x86
+        fi
+        if [[ $(SPEECHSDK_TARGET_PLATFORM) =~ Linux-(arm32|arm64) ]]; then
+          # For some reason this is necessary to prevent errors
+          apt-get install -y default-jre-headless:$(JAVA_DEV_TARGET) default-jre:$(JAVA_DEV_TARGET) default-jdk:$(JAVA_DEV_TARGET)
+          apt-get install -y default-jre-headless default-jre default-jdk
+          # Set the toolchains, no tool chain assumes the current platform this is running on
+          if [[ $(SPEECHSDK_TARGET_PLATFORM) == Linux-arm64 ]]; then
+            SPEECHSDK_TOOL_CHAIN=../external/aarch64-linux/aarch64-gnu.toolchain.cmake
+          fi
+          if [[ $(SPEECHSDK_TARGET_PLATFORM) == Linux-arm32 ]]; then
+            SPEECHSDK_TOOL_CHAIN=../external/aarch64-linux/arm-gnueabi.toolchain.cmake
+          fi
+        fi
         mkdir build
         cd build
+        cmake --version
         cmake \
           -DCMAKE_BUILD_TYPE=$(SPEECHSDK_BUILD_CONFIGURATION) \
           -DSPEECHSDK_TARGET_PLATFORM=$(SPEECHSDK_TARGET_PLATFORM) \
           -DSPEECHSDK_BUILD_TYPE=$(SPEECHSDK_BUILD_TYPE) \
           -DSPEECHSDK_VERSION=$(SPEECHSDK_SEMVER2NOMETA) \
           -DEXTENSION_KWS_ENABLED=$(SPEECHSDK_ENABLE_KWS) \
-          -DEXTENSION_CODEC_ENABLED="%SPEECHSDK_ENABLE_CODEC%" \
+          -DEXTENSION_CODEC_ENABLED=$(SPEECHSDK_ENABLE_CODEC) \
           -DEXTENSION_UNIDEC_ENABLED=$(SPEECHSDK_ENABLE_UNIDEC) \
+          -DCMAKE_TOOLCHAIN_FILE=$SPEECHSDK_TOOL_CHAIN\
+          -DOPENSSL_CRYPTO_LIBRARY=/linux-openssl/$(OPENSSL_TARGET)/usr/local/lib/libcrypto.a \
+          -DOPENSSL_INCLUDE_DIR=/linux-openssl/$(OPENSSL_TARGET)/usr/local/include \
+          -DOPENSSL_SSL_LIBRARY=/linux-openssl/$(OPENSSL_TARGET)/usr/local/lib/libssl.a \
+          -DJAVA_AWT_LIBRARY=/usr/lib/jvm/java-8-openjdk-$(JAVA_DEV_TARGET)/libawt.so \
+          -DJAVA_INCLUDE_PATH=/usr/lib/jvm/java-8-openjdk-$(JAVA_DEV_TARGET)/include \
+          -DJAVA_INCLUDE_PATH2=/usr/lib/jvm/java-8-openjdk-$(JAVA_DEV_TARGET)/include/linux \
+          -DJAVA_AWT_INCLUDE_PATH=/usr/lib/jvm/java-8-openjdk-$(JAVA_DEV_TARGET)/include \
+          -DJAVA_JVM_LIBRARY=/usr/lib/jvm/java-8-openjdk-$(JAVA_DEV_TARGET)/jre/lib/$(JAVA_ARCH_TARGET)/server/libjvm.so \
           ..
         cmake --build . -- -j$(nproc)
-      SCRIPT
+      HERE_DOC
     displayName: CMake build
   - bash: |
-      docker run --rm --workdir /csspeech --volume "$PWD:/csspeech" "$DOCKER_IMAGE" \
-        ci/drop/bindrop.sh $(SPEECHSDK_TARGET_PLATFORM) $(SPEECHSDK_BUILD_CONFIGURATION) _drop
+      set -e -o pipefail
+      if [[ $(SPEECHSDK_TARGET_PLATFORM) =~ Linux-(arm32|arm64) ]]; then
+        echo "Cross-Compiling!!!" 
+        docker run --rm --workdir /csspeech --volume "$PWD:/csspeech" "$(DOCKER_BUILD_IMAGE)" \
+          ci/drop/bindrop.sh $(SPEECHSDK_TARGET_PLATFORM) $(SPEECHSDK_BUILD_CONFIGURATION) _drop true
+      else
+        echo "Not Cross-Compiling!!!" 
+        docker run --rm --workdir /csspeech --volume "$PWD:/csspeech" "$(DOCKER_BUILD_IMAGE)" \
+          ci/drop/bindrop.sh $(SPEECHSDK_TARGET_PLATFORM) $(SPEECHSDK_BUILD_CONFIGURATION) _drop false
+      fi
     displayName: Create drop files
   - bash: |
       mkdir -p $(Build.ArtifactStagingDirectory)/$(SPEECHSDK_TARGET_PLATFORM)
@@ -140,7 +202,11 @@ jobs:
       ArtifactName: Linux
       publishLocation: Container
     condition: and(succeeded(), eq(variables['Publish'], 'true'))
+  - template: get-docker-image.yml
+    parameters:
+      imageBase: $(DOCKER_TEST_BASE)
+      outvarImage: DOCKER_TEST_IMAGE    
   - template: test-during-build.yml
     parameters:
       continueOnTestFailure: ${{ parameters.continueOnTestFailure }}
-      dockerImage: $(DOCKER_IMAGE)
+      dockerImage: $(DOCKER_TEST_IMAGE)
