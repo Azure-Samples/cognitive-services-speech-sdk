@@ -18,7 +18,7 @@ if(SPEECHSDK_OS STREQUAL "Linux")
             add_definitions(${GSTL_CFLAGS} ${GSTL_CFLAGS_OTHER})
         endif()
     endif()
-elseif(ANDROID)
+elseif(ANDROID OR (SPEECHSDK_OS STREQUAL "Windows"))
     include_directories("${GSTREAMER_PKG}/include/gstreamer-1.0")
     include_directories("${GSTREAMER_PKG}/include/glib-2.0")
     include_directories("${GSTREAMER_PKG}/lib/glib-2.0/include")
@@ -87,6 +87,12 @@ elseif(APPLE)
 elseif(ANDROID)
     # !!! libgstreamer_android.so MUST NOT BE SHIPPED with the distribution binary. We do not have license to do that. !!!
     set(GST_LIBS "${GSTREAMER_PKG}/libgstreamer_android.so")
+elseif(SPEECHSDK_OS STREQUAL "Windows")
+    set(GST_LIBS
+        "${GSTREAMER_PKG}/lib/gstreamer-1.0.lib"
+        "${GSTREAMER_PKG}/lib/glib-2.0.lib"
+        "${GSTREAMER_PKG}/lib/gobject-2.0.lib"
+    )
 endif()
 
 if(SPEECHSDK_OS MATCHES "^IOS")

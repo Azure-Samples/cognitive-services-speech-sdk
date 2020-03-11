@@ -35,7 +35,10 @@ namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
 namespace Impl {
-
-__attribute__((visibility ("default"))) void spx_gst_init();
+#ifdef WIN32
+    void spx_gst_init();
+#else
+    __attribute__((visibility ("default"))) void spx_gst_init();
+#endif
 
 } } } } // Microsoft::CognitiveServices::Speech::Impl

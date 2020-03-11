@@ -25,7 +25,7 @@ static void DoRecoFromCompressedPushStreamHelper(std::string fileName, std::shar
 
 static void DoRecoFromCompressedPushStream(std::string fileName, AudioStreamContainerFormat containerType)
 {
-#ifndef __linux__
+#if !defined(__linux__) && !defined(WIN32)
     try
     {
 #endif
@@ -35,7 +35,7 @@ static void DoRecoFromCompressedPushStream(std::string fileName, AudioStreamCont
         auto audioConfig = AudioConfig::FromStreamInput(pushStream);
         auto recognizer = SpeechRecognizer::FromConfig(config, audioConfig);
         DoRecoFromCompressedPushStreamHelper(fileName, recognizer, pushStream);
-#ifndef __linux__
+#if !defined(__linux__) && !defined(WIN32)
     }
     catch (const std::exception& e)
     {
@@ -61,7 +61,7 @@ static void DoRecoFromCompressedPullStreamHelper(std::shared_ptr<SpeechRecognize
 
 static void DoRecoFromCompressedPullStream(std::string filename, AudioStreamContainerFormat containerType)
 {
-#ifndef __linux__
+#if !defined(__linux__) && !defined(WIN32)
     try
     {
 #endif
@@ -82,7 +82,7 @@ static void DoRecoFromCompressedPullStream(std::string filename, AudioStreamCont
         auto recognizer = SpeechRecognizer::FromConfig(config, audioConfig);
 
         DoRecoFromCompressedPullStreamHelper(recognizer);
-#ifndef __linux__
+#if !defined(__linux__) && !defined(WIN32)
     }
     catch (const std::exception& e)
     {

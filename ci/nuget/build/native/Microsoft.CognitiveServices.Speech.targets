@@ -24,5 +24,6 @@
   <Target Name="SpeechRedistAfterBuild" AfterTargets="AfterBuild" >
     <Copy SourceFiles="$(SpeechNativeDllDir)\Microsoft.CognitiveServices.Speech.core.dll" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" />
     <Copy SourceFiles="$(SpeechNativeDllDir)\Microsoft.CognitiveServices.Speech.extension.kws.dll" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="$(SpeechNativeDllDir)\Microsoft.CognitiveServices.Speech.extension.codec.dll" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" />
   </Target>
 </Project>

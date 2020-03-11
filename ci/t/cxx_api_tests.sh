@@ -43,10 +43,20 @@ case $PLATFORM in
     fi
     ;;
   Windows-x64*)
+    GSTREAMER_RUNTIME_PATH="$SCRIPT_DIR/../gstreamer/1.0/x86_64/bin"
+    if [[ -d "$GSTREAMER_RUNTIME_PATH" ]]; then
+      PATH="${GSTREAMER_RUNTIME_PATH}:$PATH"
+    fi
     UNIDEC_RUNTIME_PATH="$SCRIPT_DIR/../external/unidec/Richland.Speech.UnidecRuntime/native"
     if [[ -d "$UNIDEC_RUNTIME_PATH" ]]; then
       PATH="${UNIDEC_RUNTIME_PATH}:$PATH"
       RUN_OFFLINE_UNIDEC_TESTS=true
+    fi
+    ;;
+  Windows-x86*)
+    GSTREAMER_RUNTIME_PATH="$SCRIPT_DIR/../gstreamer/1.0/x86/bin"
+    if [[ -d "$GSTREAMER_RUNTIME_PATH" ]]; then
+      PATH="${GSTREAMER_RUNTIME_PATH}:$PATH"
     fi
     ;;
 esac

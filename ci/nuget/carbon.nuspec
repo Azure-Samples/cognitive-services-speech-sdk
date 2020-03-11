@@ -105,6 +105,11 @@
     <file src="$WindowsUwpDropDir$\arm64\Release\public\lib\Microsoft.CognitiveServices.Speech.extension.silk_codec.dll" target="runtimes\win10-arm64\nativeassets\uap\Microsoft.CognitiveServices.Speech.extension.silk_codec.dll" />
     <file src="$WindowsUwpDropDir$\arm64\Release\public\lib\Microsoft.CognitiveServices.Speech.extension.silk_codec.pdb" target="runtimes\win10-arm64\nativeassets\uap\Microsoft.CognitiveServices.Speech.extension.silk_codec.pdb" />
 
+    <file src="$WindowsDropDir$\Win32\Release\public\lib\Microsoft.CognitiveServices.Speech.extension.codec.dll" target="runtimes\win-x86\native\Microsoft.CognitiveServices.Speech.extension.codec.dll" />
+    <file src="$WindowsDropDir$\Win32\Release\public\lib\Microsoft.CognitiveServices.Speech.extension.codec.pdb" target="runtimes\win-x86\native\Microsoft.CognitiveServices.Speech.extension.codec.pdb" />
+    <file src="$WindowsDropDir$\x64\Release\public\lib\Microsoft.CognitiveServices.Speech.extension.codec.dll" target="runtimes\win-x64\native\Microsoft.CognitiveServices.Speech.extension.codec.dll" />
+    <file src="$WindowsDropDir$\x64\Release\public\lib\Microsoft.CognitiveServices.Speech.extension.codec.pdb" target="runtimes\win-x64\native\Microsoft.CognitiveServices.Speech.extension.codec.pdb" />
+
     <!-- .NET standard dlls, built on Windows, used on Linux -->
     <file src="$WindowsDropDir$\x64\Release\public\lib\UnixOS\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.dll" target="runtimes\linux-x64\lib\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.dll" />
     <file src="$WindowsDropDir$\x64\Release\public\lib\UnixOS\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.pdb" target="runtimes\linux-x64\lib\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.pdb" />

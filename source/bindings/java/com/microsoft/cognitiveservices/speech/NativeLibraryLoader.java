@@ -165,6 +165,7 @@ class NativeLibraryLoader {
                     // needed for extraction (TODO however due to 'loadAll ==
                     // true' below, we'll still load it later; should fix).
                     new NativeLibrary("Microsoft.CognitiveServices.Speech.extension.kws.dll", false),
+                    new NativeLibrary("Microsoft.CognitiveServices.Speech.extension.codec.dll", false),
                     new NativeLibrary("Microsoft.CognitiveServices.Speech.extension.silk_codec.dll", false),
                     new NativeLibrary("Microsoft.CognitiveServices.Speech.java.bindings.dll", true)
             };

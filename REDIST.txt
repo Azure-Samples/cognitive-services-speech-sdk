@@ -5,6 +5,7 @@ Microsoft.CognitiveServices.Speech.core.dll
 Microsoft.CognitiveServices.Speech.csharp.dll
 Microsoft.CognitiveServices.Speech.csharp.unix.dll
 Microsoft.CognitiveServices.Speech.extension.kws.dll
+Microsoft.CognitiveServices.Speech.extension.codec.dll
 MicrosoftCognitiveServicesSpeech.framework/MicrosoftCognitiveServicesSpeech
 client-sdk-<VERSION>.aar (or content derived from it)
 client-sdk-<VERSION>.jar
