@@ -231,7 +231,7 @@ int TransportStreamPrepare(TransportHandle transportHandle);
  * @param requestId The requestId for the given message.
  * @return A return code or zero if successful.
  */
-int TransportMessageWrite(TransportHandle transportHandle, const std::string& path, const uint8_t* buffer, size_t bufferSize, const char* requestId);
+int TransportMessageWrite(TransportHandle transportHandle, const std::string& path, const uint8_t* buffer, size_t bufferSize, const char* requestId, bool binary);
 
 /**
  * Writes to the transport stream.

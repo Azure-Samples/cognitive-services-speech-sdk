@@ -888,7 +888,7 @@ int usp::TransportRequestPrepare(TransportHandle transportHandle)
     return err;
 }
 
-int usp::TransportMessageWrite(TransportHandle transportHandle, const std::string& path, const uint8_t* buffer, size_t bufferSize, const char* requestId)
+int usp::TransportMessageWrite(TransportHandle transportHandle, const std::string& path, const uint8_t* buffer, size_t bufferSize, const char* requestId, bool binary)
 {
     TransportRequest* request = (TransportRequest*)transportHandle;
     int ret;
@@ -913,7 +913,7 @@ int usp::TransportMessageWrite(TransportHandle transportHandle, const std::strin
                          sizeof(g_timeStampHeaderName) +
                          TIME_STRING_MAX_SIZE +
                          bufferSize;
-    auto msg = std::make_unique<TransportPacket>(static_cast<uint8_t>(MetricMessageType::METRIC_MESSAGE_TYPE_DEVICECONTEXT), static_cast<unsigned char>(WS_FRAME_TYPE_TEXT), payloadSize);
+    auto msg = std::make_unique<TransportPacket>(static_cast<uint8_t>(MetricMessageType::METRIC_MESSAGE_TYPE_DEVICECONTEXT), static_cast<unsigned char>(binary?WS_FRAME_TYPE_BINARY: WS_FRAME_TYPE_TEXT), payloadSize);
 
     char timeString[TIME_STRING_MAX_SIZE];
     int timeStringLen = GetISO8601Time(timeString, TIME_STRING_MAX_SIZE);

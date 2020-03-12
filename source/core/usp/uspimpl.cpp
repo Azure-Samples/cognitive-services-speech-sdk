@@ -494,7 +494,7 @@ string Connection::Impl::ConstructConnectionUrl() const
     {
         // Parse the custom host address
         Url url = HttpUtils::ParseUrl(m_config.m_customHostUrl);
-        
+
         if (!url.path.empty())
         {
             ThrowInvalidArgumentException("Resource path is not allowed in the host URI.");
@@ -863,7 +863,7 @@ void Connection::Impl::RegisterRequestId(const string& requestId)
     m_activeRequestIds.insert(requestId);
 }
 
-void Connection::Impl::QueueMessage(const string& path, const uint8_t *data, size_t size, MessageType messageType, const string& requestId)
+void Connection::Impl::QueueMessage(const string& path, const uint8_t *data, size_t size, MessageType messageType, const string& requestId, bool binary)
 {
     throw_if_null(data, "message payload is null");
 
@@ -894,7 +894,7 @@ void Connection::Impl::QueueMessage(const string& path, const uint8_t *data, siz
             m_speechRequestId = requestId;
         }
         auto usedRequestId = requestId.empty() ? UpdateRequestId(messageType) : requestId;
-        (void)TransportMessageWrite(m_transport.get(), path.c_str(), data, size, usedRequestId.c_str());
+        (void)TransportMessageWrite(m_transport.get(), path.c_str(), data, size, usedRequestId.c_str(), binary);
     }
 
     ScheduleWork();

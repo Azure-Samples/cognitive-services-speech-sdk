@@ -47,9 +47,9 @@ void Connection::FlushAudio()
     m_impl->QueueAudioEnd();
 }
 
-void Connection::SendMessage(const string& messagePath, const uint8_t* buffer, size_t size, MessageType messageType, const string& requestId)
+void Connection::SendMessage(const string& messagePath, const uint8_t* buffer, size_t size, MessageType messageType, const string& requestId, bool binary)
 {
-    m_impl->QueueMessage(messagePath, buffer, size, messageType, requestId);
+    m_impl->QueueMessage(messagePath, buffer, size, messageType, requestId, binary);
 }
 
 void Connection::WriteTelemetryLatency(uint64_t latencyInTicks, bool isPhraseLatency)

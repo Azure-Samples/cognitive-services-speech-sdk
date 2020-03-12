@@ -174,7 +174,7 @@ public:
     *              Each message represents the start of a new request.
     * @param requestId The request ID for this turn.
     */
-    void SendMessage(const std::string& messagePath, const uint8_t* buffer, size_t size, MessageType messageType, const std::string& requestId="");
+    void SendMessage(const std::string& messagePath, const uint8_t* buffer, size_t size, MessageType messageType, const std::string& requestId="", bool binary=false);
 
     /**
     * Writes the latency value into telemetry data.

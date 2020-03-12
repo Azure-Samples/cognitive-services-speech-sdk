@@ -197,7 +197,7 @@ void CSpxUspRecoEngineAdapter::SendNetworkMessage(std::string&& path, std::vecto
     {
         return;
     }
-    UspSendMessage(path, payload.data(), payload.size(), GetMessageType(path));
+    UspSendMessage(path, payload.data(), payload.size(), GetMessageType(path), true); // true for a binary message.
 }
 
 void CSpxUspRecoEngineAdapter::SetFormat(const SPXWAVEFORMATEX* pformat)
@@ -1072,12 +1072,12 @@ void CSpxUspRecoEngineAdapter::UspSendMessage(const std::string& messagePath, co
     UspSendMessage(messagePath, (const uint8_t*)buffer.c_str(), buffer.length(), messageType);
 }
 
-void CSpxUspRecoEngineAdapter::UspSendMessage(const std::string& messagePath, const uint8_t* buffer, size_t size, USP::MessageType messageType)
+void CSpxUspRecoEngineAdapter::UspSendMessage(const std::string& messagePath, const uint8_t* buffer, size_t size, USP::MessageType messageType, bool binary)
 {
     SPX_DBG_ASSERT(m_uspConnection != nullptr || IsState(UspState::Terminating) || IsState(UspState::Zombie));
     if (!IsBadState() && m_uspConnection != nullptr)
     {
-        m_uspConnection->SendMessage(messagePath, buffer, size, messageType);
+        m_uspConnection->SendMessage(messagePath, buffer, size, messageType, "", binary); //"" is a requestId.
     }
     else
     {

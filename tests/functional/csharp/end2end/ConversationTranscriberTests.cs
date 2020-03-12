@@ -634,11 +634,68 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 pushStream.Write(fileContents);
                 pushStream.Close();
 
-                Assert.IsTrue(WaitHandle.WaitAll(new System.Threading.WaitHandle[] { transcribedEvent, canceledEvent, transcribingEvent, speechStartEvent, speechEndEvent },
-                    TimeSpan.FromSeconds(30)), "Events were not received in time");
+                Assert.IsTrue(WaitHandle.WaitAll(new System.Threading.WaitHandle[] { transcribedEvent, canceledEvent, transcribingEvent },
+                    TimeSpan.FromSeconds(3000)), "Events were not received in time");
+            }
+        }
+
+        [TestMethod]
+        public async Task TestSendMessageAsync()
+        {
+            string faceStreamUrl = "wss://transcribe.princetondev.customspeech.ai/speech/recognition/audioface";
+            var config = SpeechConfig.FromEndpoint(new Uri(faceStreamUrl), conversationTranscriptionPPEKey);
+            config.SetProperty("ConversationTranscriptionInRoomAndOnline", "true");
+            //config.SetProperty(PropertyId.Speech_LogFilename, "sendMessageSync_log.txt");
+
+            ManualResetEvent transcribedEvent = new ManualResetEvent(false);
+            ManualResetEvent transcribingEvent = new ManualResetEvent(false);
+
+            var meetingID = Guid.NewGuid().ToString();
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.CONVERSATION_BETWEEN_TWO_PERSONS_ENGLISH].FilePath.GetRootRelativePath());
+            using (var conversation = await Conversation.CreateConversationAsync(config, meetingID))
+            using (var conversationTranscriber = TrackSessionId(new ConversationTranscriber(audioInput)))
+            {
+                    await conversationTranscriber.JoinConversationAsync(conversation);
+
+                    conversationTranscriber.Transcribed += (s, e) =>
+                    {
+                        Console.WriteLine($"Recognized {e.Result.Text}");
+                        transcribedEvent.Set();
+                    };
+
+                    conversationTranscriber.Transcribing += (s, e) =>
+                    {
+                        Console.WriteLine($"Recognizing {e.Result.Text}");
+                        transcribingEvent.Set();
+                    };
+
+                    conversationTranscriber.Canceled += (s, e) =>
+                    {
+                        Assert.IsTrue(string.IsNullOrWhiteSpace(e.ErrorDetails), $"Error details were present {e.ErrorDetails}");
+                        Assert.IsTrue(e.Reason == CancellationReason.EndOfStream, $"Cancellation Reason was not EOS it was {e.Reason.ToString()} with error code ${e.ErrorCode.ToString()}");
+                        Console.WriteLine("Reached EndOfStream");
+                    };
+
+                    const string messageName = "face.stream";
+                    var connection = Connection.FromRecognizer(conversationTranscriber);
+                    // just send some binary data.
+                    var fileContents = File.ReadAllBytes(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
+                    await connection.SendMessageAsync(messageName, fileContents, (uint)fileContents.Length);
+                    Thread.Sleep((int)10);
+                    connection.MessageReceived += (s, e) =>
+                    {
+                        Console.WriteLine($"Message Received {e.Message}");
+                    };
+
+                    await conversationTranscriber.StartTranscribingAsync();
+                    await conversation.AddParticipantAsync("userID@microsoft.com");
+
+                    Assert.IsTrue(WaitHandle.WaitAll(new System.Threading.WaitHandle[] { transcribedEvent,  transcribingEvent},
+                        TimeSpan.FromSeconds(300)), "Events were not received in time");
 
             }
-
         }
     }
+
+
 }
