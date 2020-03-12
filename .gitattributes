@@ -24,6 +24,7 @@ proguard-rules.pro text
 *.java text
 *.js text
 *.json text
+*.lst text
 *.m text
 *.mat text
 *.md text
@@ -52,6 +53,7 @@ proguard-rules.pro text
 *.sh text eol=lf
 
 # Binary extensions:
+*.class binary
 *.jar binary
 *.mp3 binary
 *.pfx binary
