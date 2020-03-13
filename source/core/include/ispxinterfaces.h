@@ -1423,12 +1423,13 @@ class ISpxConversationTranscriptionResult : public ISpxInterfaceBaseFor<ISpxConv
 {
 public:
     virtual std::wstring GetUserId() = 0;
+    virtual std::wstring GetUtteranceId() = 0;
 };
 
 class ISpxConversationTranscriptionResultInit : public ISpxInterfaceBaseFor< ISpxConversationTranscriptionResultInit>
 {
 public:
-    virtual void InitConversationResult(const wchar_t* userId) = 0;
+    virtual void InitConversationResult(const wchar_t* userId, const wchar_t* utteranceId = nullptr) = 0;
 };
 
 enum class TranslationStatusCode { Success, Error };

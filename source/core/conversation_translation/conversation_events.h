@@ -131,6 +131,7 @@ namespace ConversationTranslation {
         virtual std::wstring GetText() override { return text; }
         virtual ResultReason GetReason() override { return reason; }
         virtual std::wstring GetUserId() override { return participantId; }
+        virtual std::wstring GetUtteranceId() override { return L"";}
         virtual std::wstring GetOriginalLanguage() const override { return originalLang; }
         virtual const std::map<std::wstring, std::wstring>& GetTranslationText() override { return translations; }
         virtual uint64_t GetOffset() const override { return offset; }

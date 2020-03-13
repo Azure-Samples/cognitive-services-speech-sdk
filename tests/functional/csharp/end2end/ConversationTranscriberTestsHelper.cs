@@ -61,7 +61,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             List<string> recognizedText = new List<string>();
             recognizer.Transcribed += (s, e) =>
             {
-                Console.WriteLine($"Received result '{e.ToString()}'");
+                
+                Console.WriteLine($"Received result '{e.ToString()}' 'e.Result.UserId' 'e.Result.UtteranceId'");
                 if (e.Result.Text.Length > 0)
                 {
                     recognizedText.Add(e.Result.Text);

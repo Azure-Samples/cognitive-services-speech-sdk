@@ -81,6 +81,7 @@ const char* json_properties::displayText = "DisplayText";
 const char* json_properties::context = "context";
 const char* json_properties::tag = "serviceTag";
 const char* json_properties::speaker = "SpeakerId";
+const char* json_properties::id = "ID";
 const char* json_properties::nbest = "NBest";
 const char* json_properties::confidence = "Confidence";
 const char* json_properties::display = "Display";
@@ -1292,7 +1293,7 @@ static SpeechHypothesisMsg RetrieveSpeechResult(const nlohmann::json& json)
         text = json.at(json_properties::text).get<string>();
     }
     string language = RetrievePrimaryLanguage(json, "speech.hypothesis");
-    return SpeechHypothesisMsg(PAL::ToWString(json.dump()), offset, duration, PAL::ToWString(text), L"", move(language));
+    return SpeechHypothesisMsg(PAL::ToWString(json.dump()), offset, duration, PAL::ToWString(text), L"", L"", move(language));
 }
 
 static TranslationResult RetrieveTranslationResult(const nlohmann::json& translationJson, bool expectStatus)
@@ -1568,6 +1569,11 @@ void Connection::Impl::OnTransportData(TransportResponse *response, void *contex
             {
                 speaker = json[json_properties::speaker].get<string>();
             }
+            std::string id;
+            if (json.find(json_properties::id) != json.end())
+            {
+                id = json[json_properties::id].get<string>();
+            }
             auto language = RetrievePrimaryLanguage(json, path);
             if (strncmp(path, path::speechHypothesis, strlen(path::speechHypothesis)) == 0)
             {
@@ -1577,6 +1583,7 @@ void Connection::Impl::OnTransportData(TransportResponse *response, void *contex
                                                    duration,
                                                    PAL::ToWString(text),
                                                    PAL::ToWString(speaker),
+                                                   PAL::ToWString(id),
                                                    move(language)});
                 });
             }
@@ -1588,6 +1595,7 @@ void Connection::Impl::OnTransportData(TransportResponse *response, void *contex
                                                  duration,
                                                  PAL::ToWString(text),
                                                  PAL::ToWString(speaker),
+                                                 PAL::ToWString(id),
                                                  move(language)});
                 });
             }
@@ -1932,7 +1940,10 @@ SpeechPhraseMsg Connection::Impl::RetrieveSpeechPhraseResult(const nlohmann::jso
     {
         result.speaker = PAL::ToWString(json[json_properties::speaker].get<string>());
     }
-
+    if (json.find(json_properties::id) != json.end())
+    {
+        result.id = PAL::ToWString(json[json_properties::id].get<string>());
+    }
     if (result.recognitionStatus == RecognitionStatus::Success)
     {
         if (json.find(json_properties::displayText) != json.end())

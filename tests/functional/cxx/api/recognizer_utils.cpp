@@ -475,6 +475,17 @@ std::string GetUserId(const SpeechRecognitionResult* ctr)
     return  string{};
 }
 
+std::string GetUtteranceId(const ConversationTranscriptionResult* ctr)
+{
+    return ctr ? ctr->UtteranceId : string{};
+}
+
+std::string GetUtteranceId(const SpeechRecognitionResult* ctr)
+{
+    UNUSED(ctr);
+    return  string{};
+}
+
 bool VerifyTextAndSpeaker(const RecoResultVector& phrases, const std::string& text, const std::string& speakerId)
 {
     if (phrases.empty())

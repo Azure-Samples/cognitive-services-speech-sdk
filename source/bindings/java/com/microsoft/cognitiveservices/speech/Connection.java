@@ -88,7 +88,7 @@ public final class Connection implements Closeable
         return s_executorService.submit(new java.util.concurrent.Callable<Void>() {
 
             public Void call() {
-                Runnable runnable = new Runnable() { public void run() { connectionImpl.SendMessageAsync(finalPath, finalPayload); }};
+                Runnable runnable = new Runnable() { public void run() { connectionImpl.SendMessageAsync(finalPath, finalPayload).Get(); }};
                 thisConnection.doAsyncConnectionAction(runnable);
                 return null;
         }});
@@ -168,7 +168,7 @@ public final class Connection implements Closeable
 
         if (disposing) {
             if(this.eventCounter.get() != 0 && backgroundAttempts <= 50 ) {
-                // There is an event callback in progress, closing while in an event call results in SWIG problems, so 
+                // There is an event callback in progress, closing while in an event call results in SWIG problems, so
                 // spin a thread to try again in 500ms and return.
                 Thread t = new Thread(
                     new Runnable(){

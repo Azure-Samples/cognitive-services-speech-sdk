@@ -68,6 +68,7 @@ namespace USP {
         static const char* context;
         static const char* tag;
         static const char* speaker;
+        static const char* id;
         static const char* nbest;
         static const char* confidence;
         static const char* display;

@@ -88,6 +88,9 @@ map<Callbacks, atomic_int> createCallbacksMap();
 std::string GetUserId(const ConversationTranscriptionResult* ctr);
 std::string GetUserId(const SpeechRecognitionResult* ctr);
 
+std::string GetUtteranceId(const ConversationTranscriptionResult* ctr);
+std::string GetUtteranceId(const SpeechRecognitionResult* ctr);
+
 template<typename T>
 auto ParseCancelledEvents(RecoPhrasesPtr result)
 {
@@ -121,26 +124,32 @@ auto ParseRecogEvents(RecoPhrasesPtr result)
     return [result](const T& e)
     {
         auto userId = GetUserId(e.Result.get());
+        auto utteranceId = GetUtteranceId(e.Result.get());
         if (e.Result->Reason == ResultReason::RecognizingSpeech)
         {
             ostringstream os;
             os << "Text= " << e.Result->Text
                 << " Offset= " << e.Result->Offset()
                 << " Duration= " << e.Result->Duration()
-                << " UserId= " << userId;
-
-            SPX_TRACE_VERBOSE("CXX_API_TEST RECOGNIZING: %s", os.str().c_str());
+                << " UserId= " << userId
+                << " UtteranceId= " << utteranceId;
+            auto info = os.str();
+            SPX_TRACE_VERBOSE("CXX_API_TEST RECOGNIZING: %s", info.c_str());
         }
         else if (e.Result->Reason == ResultReason::RecognizedSpeech)
         {
             ostringstream os;
             auto json = e.Result->Properties.GetProperty(PropertyId::SpeechServiceResponse_JsonResult);
+            auto latency = e.Result->Properties.GetProperty(PropertyId::SpeechServiceResponse_RecognitionLatencyMs);
             os << "Text= " << e.Result->Text
                 << " Offset= " << e.Result->Offset()
                 << " Duration= " << e.Result->Duration()
-                << " UserId= " << userId;
-
-            SPX_TRACE_VERBOSE("CXX_API_TEST RECOGNIZED: %s", os.str().c_str());
+                << " UserId= " << userId
+                << " UtteranceId= " << utteranceId
+                << " latencyMs= " << latency
+                ;
+            auto info = os.str();
+            SPX_TRACE_VERBOSE("CXX_API_TEST RECOGNIZED: %s", info.c_str());
 
             result->phrases.push_back(RecoPhrase{ e.Result->Text, userId, json, e.Result->Offset() });
         }

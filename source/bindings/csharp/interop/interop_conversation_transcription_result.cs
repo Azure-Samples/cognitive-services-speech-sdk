@@ -8,11 +8,15 @@ using System.Runtime.InteropServices;
 
 namespace Microsoft.CognitiveServices.Speech.Internal
 {
-    using SPXHR = System.IntPtr;    
+    using SPXHR = System.IntPtr;
 
     internal static class ConversationTranscriptionResult
     {
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         public static extern SPXHR conversation_transcription_result_get_user_id(InteropSafeHandle result, IntPtr userIdPtr, UInt32 userIdSize);
+
+        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        public static extern SPXHR conversation_transcription_result_get_utterance_id(InteropSafeHandle result, IntPtr utteranceIdPtr, UInt32 utteranceIdSize);
+
     }
 }

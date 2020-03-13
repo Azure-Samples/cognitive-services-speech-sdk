@@ -380,33 +380,36 @@ std::string CSpxParticipantMgrImpl::CreateSpeechEventPayload(MeetingState state)
     speech_event["name"] = name;
     speech_event["meeting"]["attendees"] = state == MeetingState::START ? m_participants_so_far : m_current_participants;
 
-    auto site = GetSite();
-    if (site == nullptr)
-    {
-        ThrowRuntimeError("conversation mgr has a invalid site!");
-    }
-    auto properties = SpxQueryService<ISpxNamedProperties>(site);
-    SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_CONVERSATION_SITE_FAILURE);
-
-    auto cal_uid = properties->GetStringValue("iCalUid");
+    auto cal_uid = GetStringValue("iCalUid", "");
     if (!cal_uid.empty())
     {
         speech_event["meeting"]["iCalUid"] = cal_uid;
     }
-    auto call_id = properties->GetStringValue("callId");
+    auto call_id = GetStringValue("callId", "");
     if (!call_id.empty())
     {
         speech_event["meeting"]["callId"] = call_id;
     }
-    auto organizer = properties->GetStringValue("organizer");
+    auto organizer = GetStringValue("organizer", "");
     if (!organizer.empty())
     {
         speech_event["meeting"]["organizer"] = organizer;
     }
-    auto recording_on = properties->GetStringValue("audiorecording");
+    auto recording_on = GetStringValue("audiorecording", "");
     speech_event["meeting"]["record"] = recording_on.compare("on") == 0 ? "true" : "false";
 
-    auto flac_encoded = properties->GetStringValue("FLAC");
+    auto mri = GetStringValue("Organizer_Mri", "");
+    if (!mri.empty())
+    {
+        speech_event["meeting"]["Organizer_Mri"] = mri;
+    }
+
+    auto threadid = GetStringValue("Threadid", "");
+    if (!threadid.empty())
+    {
+        speech_event["meeting"]["Threadid"] = threadid;
+    }
+    auto flac_encoded = GetStringValue("FLAC", "");
     if (!flac_encoded.empty())
     {
         speech_event["meeting"]["FLAC"] = 1;
@@ -426,12 +429,7 @@ void CSpxParticipantMgrImpl::HttpAddHeaders(HttpRequest& request)
     }
     else
     {
-        auto site = m_site.lock();
-        SPX_IFTRUE_THROW_HR(site == nullptr, SPXERR_UNEXPECTED_CONVERSATION_SITE_FAILURE);
-        auto properties = SpxQueryService<ISpxNamedProperties>(site);
-
-        auto authorizationToken = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceAuthorization_Token), "");
-        SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_CONVERSATION_SITE_FAILURE);
+        auto authorizationToken = GetStringValue(GetPropertyName(PropertyId::SpeechServiceAuthorization_Token), "");
         if (authorizationToken.empty())
         {
             ThrowRuntimeError("The authorization token is empty");
@@ -448,11 +446,6 @@ void CSpxParticipantMgrImpl::HttpAddHeaders(HttpRequest& request)
 
 void CSpxParticipantMgrImpl::HttpAddQueryParams(HttpRequest& request)
 {
-    auto site = GetSite();
-
-    auto properties = SpxQueryService<ISpxNamedProperties>(site);
-    SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_CONVERSATION_SITE_FAILURE);
-
     bool hasId = false;
     // we need to add both if we have them.
     if (!m_calendar_uid_value.empty())

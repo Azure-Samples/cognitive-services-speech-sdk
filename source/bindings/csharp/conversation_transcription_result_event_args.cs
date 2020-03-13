@@ -33,8 +33,8 @@ namespace Microsoft.CognitiveServices.Speech.Transcription
         /// <returns>A string that represents the conversation transcription event.</returns>
         public override string ToString()
         {
-            return string.Format(CultureInfo.InvariantCulture, "SessionId:{0} ResultId:{1} Reason:{2} UserId:<{3}> Recognized text:<{4}>.",
-                SessionId, Result.ResultId, Result.Reason, Result.UserId, Result.Text);
+            return string.Format(CultureInfo.InvariantCulture, "SessionId:{0} ResultId:{1} Reason:{2} UserId:<{3}>  UtteranceId:<{4}> Recognized text:<{5}>.",
+                SessionId, Result.ResultId, Result.Reason, Result.UserId, Result.UtteranceId, Result.Text);
         }
     }
 

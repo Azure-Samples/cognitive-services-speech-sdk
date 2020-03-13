@@ -156,16 +156,18 @@ struct SpeechMsg : public JsonMsg
 {
     SpeechMsg() = default;
     SpeechMsg(const SpeechMsg&) = default;
-    SpeechMsg(std::wstring&& content, OffsetType offset, DurationType duration, std::wstring&& speaker = L"") :
+    SpeechMsg(std::wstring&& content, OffsetType offset, DurationType duration, std::wstring&& speaker = L"", std::wstring&& id = L"") :
         JsonMsg(std::move(content)),
         offset(offset),
         duration(duration),
-        speaker(std::move(speaker))
+        speaker(std::move(speaker)),
+        id(std::move(id))
     {}
 
     OffsetType offset{ 0 };
     DurationType duration{ 0 };
     std::wstring speaker{ L"" };
+    std::wstring id{ L"" };
 };
 
 /**
@@ -179,8 +181,9 @@ struct SpeechHypothesisMsg : public SpeechMsg
         DurationType duration,
         std::wstring&& text,
         std::wstring&& speaker = L"",
+        std::wstring&& id = L"",
         std::string&& language = "") :
-        SpeechMsg(std::move(content), offset, duration, std::move(speaker)),
+        SpeechMsg(std::move(content), offset, duration, std::move(speaker), std::move(id)),
         text(std::move(text)),
         language(std::move(language))
     {}
@@ -200,8 +203,9 @@ struct SpeechFragmentMsg : public SpeechMsg
         DurationType duration,
         std::wstring&& text,
         std::wstring&& speaker = L"",
+        std::wstring&& id = L"",
         std::string language="") :
-        SpeechMsg(std::move(content), offset, duration, std::move(speaker)),
+        SpeechMsg(std::move(content), offset, duration, std::move(speaker), std::move(id)),
         text(std::move(text)),
         language(std::move(language))
     {}
@@ -268,7 +272,7 @@ struct TranslationHypothesisMsg : public SpeechHypothesisMsg
         std::wstring&& text,
         TranslationResult&& translation,
         std::string&& language = "") :
-        SpeechHypothesisMsg(std::move(content), offset, duration, std::move(text), L"", std::move(language)),
+        SpeechHypothesisMsg(std::move(content), offset, duration, std::move(text), L"", L"", std::move(language)),
         translation(translation)
     {}
 

@@ -76,11 +76,12 @@ public:
     // --- ISpxIntentRecognitionResultInit ---
     void InitIntentResult(const wchar_t* intentId, const wchar_t* jsonPayload) override;
 
-    // --- ISpxConversationTranscriberResult ---
+    // --- ISpxConversationTranscriptionResult ---
     std::wstring GetUserId() override;
+    std::wstring GetUtteranceId() override;
 
     // --- ISpxConversationTranscriptionResultInit ---
-    void InitConversationResult(const wchar_t* userId) override;
+    void InitConversationResult(const wchar_t* userId, const wchar_t* utteranceId) override;
 
     // --- ISpxTranslationRecognitionResult ---
     const std::map<std::wstring, std::wstring>& GetTranslationText() override;
@@ -116,6 +117,7 @@ private:
     double m_confidence;
 
     std::wstring m_userId;
+    std::wstring m_utteranceId;
 
     std::wstring m_intentId;
 

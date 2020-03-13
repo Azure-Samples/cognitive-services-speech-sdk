@@ -124,6 +124,11 @@ wstring CSpxRecognitionResult::GetUserId()
     return m_userId;
 }
 
+wstring CSpxRecognitionResult::GetUtteranceId()
+{
+    return m_utteranceId;
+}
+
 void CSpxRecognitionResult::InitIntentResult(const wchar_t* intentId, const wchar_t* jsonPayload)
 {
     SPX_DBG_TRACE_FUNCTION();
@@ -212,9 +217,10 @@ void CSpxRecognitionResult::InitTranslationRecognitionResult(TranslationStatusCo
     }
 }
 
-void CSpxRecognitionResult::InitConversationResult(const wchar_t* userId)
+void CSpxRecognitionResult::InitConversationResult(const wchar_t* userId, const wchar_t* utteranceId)
 {
     m_userId = (userId != nullptr) ? userId : L"";
+    m_utteranceId = (utteranceId != nullptr) ? utteranceId : L"";
 }
 
 const uint8_t* CSpxRecognitionResult::GetAudio() const

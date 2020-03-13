@@ -29,3 +29,22 @@ SPXAPI conversation_transcription_result_get_user_id(SPXRESULTHANDLE hresult, ch
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
+
+SPXAPI conversation_transcription_result_get_utterance_id(SPXRESULTHANDLE hresult, char* pszUtteranceId, uint32_t cchUtteranceId)
+{
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, cchUtteranceId == 0);
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, pszUtteranceId == nullptr);
+
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
+        auto result = (*resulthandles)[hresult];
+
+        auto conversationTranscriberResult = SpxQueryInterface<ISpxConversationTranscriptionResult>(result);
+
+        auto strActual = PAL::ToString(conversationTranscriberResult->GetUtteranceId());
+        auto pszActual = strActual.c_str();
+        PAL::strcpy(pszUtteranceId, cchUtteranceId, pszActual, strActual.size(), true);
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}

@@ -453,6 +453,7 @@ TEST_CASE("conversation_online_pull_stream", "[api][cxx][transcriber]")
     REQUIRE(!SubscriptionsRegionsMap[CONVERSATION_TRANSCRIPTION_PPE_SUBSCRIPTION].Key.empty());
     auto config = SpeechConfig::FromEndpoint(DefaultSettingsMap[ONLINE_AUDIO_ENDPOINT], SubscriptionsRegionsMap[CONVERSATION_TRANSCRIPTION_PPE_SUBSCRIPTION].Key);
     config->SetProperty("ConversationTranscriptionInRoomAndOnline", "true");
+    config->SetProperty("iCalUid", "asdf");
     auto fs = OpenWaveFile(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
 
     // Create the "pull stream" object with C++ lambda callbacks
@@ -508,6 +509,12 @@ TEST_CASE("conversation_online_pull_stream", "[api][cxx][transcriber]")
 
         // turn on audio recording
         conversation->Properties.SetProperty("audiorecording", "on");
+
+        conversation->Properties.SetProperty("Organizer_Mri", "orgid:25b32c46-26a6-4c7a-993a-b4a3a8e164e0");
+
+        conversation->Properties.SetProperty("Threadid", "meeting_ZDQ0NDEzNzItYWJjZC00NWYyLWFmN2ItYmEyZWU0MDdjZDZh");
+
+        transcriber->Properties.SetProperty("iCalUid", "This_iCalUid_is_from_transcriber");
 
         transcriber->StartTranscribingAsync().get();
         WaitForResult(result->ready.get_future(), 15min);

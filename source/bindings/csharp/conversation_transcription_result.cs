@@ -18,6 +18,7 @@ namespace Microsoft.CognitiveServices.Speech.Transcription
             : base(resultPtr)
         {
             UserId = SpxFactory.GetDataFromHandleUsingDelegate(Internal.ConversationTranscriptionResult.conversation_transcription_result_get_user_id, resultHandle, maxCharCount);
+            UtteranceId = SpxFactory.GetDataFromHandleUsingDelegate(Internal.ConversationTranscriptionResult.conversation_transcription_result_get_utterance_id, resultHandle, maxCharCount);
         }
 
         /// <summary>
@@ -26,13 +27,18 @@ namespace Microsoft.CognitiveServices.Speech.Transcription
         public string UserId { get; }
 
         /// <summary>
+        /// A string that represents the utterance. This id is consistence for intermediates and final speech recognition result from one speaker.
+        /// </summary>
+        public string UtteranceId { get; }
+
+        /// <summary>
         /// Returns a string that represents the conversation transcription result.
         /// </summary>
         /// <returns>A string that represents the conversation transcription result.</returns>
         public override string ToString()
         {
-            return string.Format(CultureInfo.InvariantCulture, "ResultId:{0} Reason:{1} UserId:<{2}> Recognized text:<{3}> ",
-                ResultId, Reason, UserId, Text);
+            return string.Format(CultureInfo.InvariantCulture, "ResultId:{0} Reason:{1} UserId:<{2}> UtteranceId:<{3}> Recognized text:<{4}> ",
+                ResultId, Reason, UserId, UtteranceId, Text);
         }
     }
 }

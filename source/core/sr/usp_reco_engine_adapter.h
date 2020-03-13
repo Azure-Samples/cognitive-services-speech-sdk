@@ -270,7 +270,7 @@ private:
     bool ShouldResetBeforeFirstAudio();
     void ResetBeforeFirstAudio();
 
-    void CreateConversationResult(std::shared_ptr<ISpxRecognitionResult>& result, const std::wstring& userId);
+    void CreateConversationResult(std::shared_ptr<ISpxRecognitionResult>& result, const std::wstring& userId, const std::wstring& utteranceId);
 
 #ifdef _DEBUG
     void SetupAudioDumpFile();

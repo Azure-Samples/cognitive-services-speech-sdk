@@ -1267,7 +1267,7 @@ void CSpxUspRecoEngineAdapter::OnSpeechHypothesis(const USP::SpeechHypothesisMsg
             namedProperties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_JsonResult), PAL::ToString(message.json).c_str());
             if (!message.speaker.empty())
             {
-                CreateConversationResult(result, message.speaker);
+                CreateConversationResult(result, message.speaker, message.id);
             }
 
             if (!message.language.empty())
@@ -1362,7 +1362,7 @@ void CSpxUspRecoEngineAdapter::OnSpeechFragment(const USP::SpeechFragmentMsg& me
             namedProperties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_JsonResult), PAL::ToString(message.json).c_str());
             if (!message.speaker.empty())
             {
-                CreateConversationResult(result, message.speaker);
+                CreateConversationResult(result, message.speaker, message.id);
             }
             if (!message.language.empty())
             {
@@ -1420,14 +1420,14 @@ void CSpxUspRecoEngineAdapter::OnSpeechPhrase(const USP::SpeechPhraseMsg& messag
     }
 }
 
-void CSpxUspRecoEngineAdapter::CreateConversationResult(std::shared_ptr<ISpxRecognitionResult>& result, const std::wstring& userId)
+void CSpxUspRecoEngineAdapter::CreateConversationResult(std::shared_ptr<ISpxRecognitionResult>& result, const std::wstring& userId, const std::wstring& utteranceId)
 {
     auto initConversationResult = SpxQueryInterface<ISpxConversationTranscriptionResultInit>(result);
     if (initConversationResult == nullptr)
     {
         ThrowInvalidArgumentException("Can't get conversation result");
     }
-    initConversationResult->InitConversationResult(userId.c_str());
+    initConversationResult->InitConversationResult(userId.c_str(), utteranceId.c_str());
 
 }
 static TranslationStatusCode GetTranslationStatus(::USP::TranslationStatus uspStatus)
@@ -2262,7 +2262,7 @@ void CSpxUspRecoEngineAdapter::FireFinalResultNow(const USP::SpeechPhraseMsg& me
 
         if (!message.speaker.empty())
         {
-            CreateConversationResult(result, message.speaker);
+            CreateConversationResult(result, message.speaker, message.id);
         }
 
         if (!message.language.empty())
