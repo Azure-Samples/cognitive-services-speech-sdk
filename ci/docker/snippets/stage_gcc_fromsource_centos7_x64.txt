@@ -1,0 +1,22 @@
+ARG GCC_VERSION=5.4.0
+
+RUN yum update -y && \
+    yum install -y \
+        bzip2 \
+        gcc-c++ \
+        gmp-devel \
+        make \
+        mpfr-devel \
+        libmpc-devel \
+        wget \
+        && \
+    rm -rf /var/cache/yum/* && \
+    GCC_BASE_NAME=gcc-${GCC_VERSION} && \
+    wget --no-verbose --output-document - https://ftp.gnu.org/gnu/gcc/${GCC_BASE_NAME}/${GCC_BASE_NAME}.tar.bz2 | \
+        tar jxf - && \
+    cd ${GCC_BASE_NAME} && \
+    ./configure --enable-languages=c,c++ --disable-bootstrap --disable-multilib --prefix=/usr/local && \
+    make -j$(nproc) && \
+    make install-strip && \
+    cd .. && \
+    rm -rf ${GCC_BASE_NAME} /usr/local/lib64/*.py

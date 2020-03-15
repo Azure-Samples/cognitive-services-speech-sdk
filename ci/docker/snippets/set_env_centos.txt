@@ -1,0 +1,2 @@
+# Set SSL cert file location
+ENV SSL_CERT_FILE /etc/pki/tls/certs/ca-bundle.crt

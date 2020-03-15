@@ -1,0 +1,6 @@
+# gcc comes from the previous stage
+
+COPY --from=0 /usr/local/ /usr/local/
+
+RUN echo "/usr/local/lib64" > /etc/ld.so.conf.d/local-x86_64.conf && \
+    ldconfig

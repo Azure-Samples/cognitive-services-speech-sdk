@@ -515,7 +515,7 @@ jobs:
         displayName: Patch and build samples
       - template: get-docker-image.yml
         parameters:
-          imageBase: oobejre_ubuntu1604_x64 oobejre_ubuntu1804_x64 oobejre_debian9_x64 oobejre_centos8_x64
+          imageBase: oobejre_ubuntu1604_x64 oobejre_ubuntu1804_x64 oobejre_debian9_x64 oobejre_centos7_x64 oobejre_centos8_x64
           outvarImage: DOCKER_IMAGES
       - bash: |
           set -u -e -o pipefail
@@ -1017,7 +1017,7 @@ jobs:
         Linux/Linux-x64/Release/public/lib/libMicrosoft.CognitiveServices.Speech.core.so
   - template: get-docker-image.yml
     parameters:
-      imageBase: oobedevdnc20_ubuntu1604_x64 oobedevdnc21_ubuntu1804_x64 oobedevdnc20_debian9_x64 oobedevdnc21_mcr_x64
+      imageBase: oobedevdnc20_ubuntu1604_x64 oobedevdnc21_ubuntu1804_x64 oobedevdnc20_debian9_x64 oobedevdnc21_mcr_x64 oobedevdnc21_centos7_x64 # oobedevdnc21_centos8_x64 is skipped for now
       outvarImage: DOCKER_IMAGES
   - bash: |
       set -u -e -x -o pipefail
@@ -1977,7 +1977,7 @@ jobs:
       itemPattern: '**/*linux*_x86_64.whl'
   - template: get-docker-image.yml
     parameters:
-      imageBase: oobedevpy35_ubuntu1604_x64 oobedevpy36_ubuntu1804_x64 oobedevpy35_debian9_x64 oobedevpy37_debian9py37_x64 oobedevpy36_centos8_x64
+      imageBase: oobedevpy35_ubuntu1604_x64 oobedevpy36_ubuntu1804_x64 oobedevpy35_debian9_x64 oobedevpy37_debian9py37_x64 oobedevpy36_centos7_x64 oobedevpy36_centos8_x64
       outvarImage: DOCKER_IMAGES
   - bash: |
       set -u -e -x -o pipefail
@@ -2127,7 +2127,7 @@ jobs:
     displayName: Create release drop
   - template: get-docker-image.yml
     parameters:
-      imageBase: oobedevcpp_ubuntu1604_x64 oobedevcpp_ubuntu1604_x86 oobedevcpp_ubuntu1804_x64 oobedevcpp_ubuntu1804_x86 oobedevcpp_debian9_x64 oobedevcpp_debian9_x86
+      imageBase: oobedevcpp_ubuntu1604_x64 oobedevcpp_ubuntu1604_x86 oobedevcpp_ubuntu1804_x64 oobedevcpp_ubuntu1804_x86 oobedevcpp_debian9_x64 oobedevcpp_debian9_x86 oobedevcpp_centos7_x64 oobedevcpp_centos8_x64
       outvarImage: DOCKER_IMAGES
   - bash: |
       . ci/functions.sh &&

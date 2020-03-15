@@ -1,0 +1,5 @@
+# dotnet comes from the previous stage
+
+COPY --from=0 /usr/local/ /usr/local/
+
+ENV DOTNET_ROOT /usr/local/dotnet

@@ -115,7 +115,7 @@ checkEmptyStdout \
 # Note: test only lists the files, not the actual matches.
 # Meant to be a cheap check, nothign water-proof (which should be client-side anyway).
 checkEmptyStdout \
-  "git grep -l -i -I -P '[^a-f0-9][a-f0-9]{32}[^a-f0-9]' $gitTree | egrep -e docs/articles/usp-translation.md \
+  "git grep -l -i -I -P '[^a-f0-9][a-f0-9]{32}[^a-f0-9]' $gitTree | egrep -e docs/articles/usp-translation.md -e ci/docker/snippets/stage_dotnet_binary_centos8_x64.txt \
   -e 'public_samples.*(asset|mat|table)$' -e 'ci/latency.*(run-latency-test.py)$' -e 'docs.*(usp-translation.md)$' -e 'public_samples.*(HelloWorld.unity)$' -e 'public_samples.*(IntentRecognition.unity)$' -e 'public_samples.*(SpeechRecognition.unity)$' -e 'public_samples.*(SampleDialogServiceConnector.unity)$' -e 'public_samples.*(KwsSample.unity)$'\
   -v | cut -d: -f2-" \
   "Potentially subscription key checked in? Double check, if necessary modify white-list in this script: git grep -i -I -P '[^a-f0-9][a-f0-9]{32}[^a-f0-9]'"

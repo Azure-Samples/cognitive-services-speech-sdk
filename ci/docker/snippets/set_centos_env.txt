@@ -1,2 +1,0 @@
-# Set SSL cert file location
-RUN echo "export SSL_CERT_FILE=/etc/pki/tls/cert.pem" >> /root/.bashrc

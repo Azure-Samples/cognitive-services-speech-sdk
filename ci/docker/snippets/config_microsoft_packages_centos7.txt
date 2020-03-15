@@ -1,0 +1,1 @@
+RUN rpm -Uv https://packages.microsoft.com/config/centos/7/packages-microsoft-prod.rpm
