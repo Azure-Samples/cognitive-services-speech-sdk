@@ -274,7 +274,32 @@ void CSpxAudioStreamSession::InitFromStream(std::shared_ptr<ISpxAudioStream> str
             [=](uint8_t* buffer, uint32_t size) { return reader->Read(buffer, size); },
             [=]() { { reader->Close(); } });
 
+        initCallbacks->SetPropertyCallback2(
+            [=](PropertyId propertyId) {
+            return reader->GetProperty(propertyId);
+        });
+
         auto adapterAsSetFormat = SpxQueryInterface<ISpxAudioStreamInitFormat>(m_codecAdapter);
+
+        string numChannelsString = GetStringValue("OutputPCMChannelCount", "1");
+        string numBitsPerSampleString = GetStringValue("OutputPCMNumBitsPerSample", "16");
+        string sampleRateString = GetStringValue("OutputPCMSamplerate", "16000");
+
+        try
+        {
+            waveformat->nChannels = (uint16_t)std::stoi(numChannelsString);
+            waveformat->wBitsPerSample = (uint16_t)std::stoi(numBitsPerSampleString);
+            waveformat->nSamplesPerSec = (uint32_t)std::stoi(sampleRateString);
+        }
+        catch (const std::exception& e)
+        {
+            SPX_DBG_TRACE_VERBOSE("Error Parsing %s", e.what());
+            SPX_DBG_TRACE_VERBOSE("Setting default output format samplerate = 16000, bitspersample = 16 and numchannels = 1");
+            waveformat->nChannels = 1;
+            waveformat->wBitsPerSample = 16;
+            waveformat->nSamplesPerSec = 16000;
+        }
+
         adapterAsSetFormat->SetFormat(waveformat.get());
     }
 

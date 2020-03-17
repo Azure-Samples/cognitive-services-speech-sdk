@@ -14,7 +14,7 @@ namespace CognitiveServices {
 namespace Speech {
 namespace Impl {
 
-AudioDecoder::AudioDecoder(ISpxAudioStreamReaderInitCallbacks::ReadCallbackFunction_Type readCallback, CodecsTypeInternal codecType) :
+AudioDecoder::AudioDecoder(ISpxAudioStreamReaderInitCallbacks::ReadCallbackFunction_Type readCallback, CodecsTypeInternal codecType, uint16_t bitsPerSample, uint16_t numChannels, uint32_t sampleRate) :
     BaseGstreamer(readCallback)
 {
 
@@ -92,10 +92,14 @@ AudioDecoder::AudioDecoder(ISpxAudioStreamReaderInitCallbacks::ReadCallbackFunct
         }
     }
 
+    UNUSED(bitsPerSample);
+    // The following setting is for signed 16 bit little endian
+    std::string numBitsPerSampleString = "S16LE";
+
     GstCaps *caps = gst_caps_new_simple("audio/x-raw",
-        "format", G_TYPE_STRING, "S16LE",
-        "rate", G_TYPE_INT, 16000,
-        "channels", G_TYPE_INT, 1,
+        "format", G_TYPE_STRING, numBitsPerSampleString.c_str(),
+        "rate", G_TYPE_INT, sampleRate,
+        "channels", G_TYPE_INT, numChannels,
         NULL);
 
     ThrowAfterCleanLocal(caps == nullptr, SPXERR_GSTREAMER_INTERNAL_ERROR,

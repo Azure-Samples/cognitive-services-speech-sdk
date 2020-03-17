@@ -31,7 +31,7 @@ CSpxCodecAdapter::~CSpxCodecAdapter()
     }
 }
 
-void CSpxCodecAdapter::Open(AudioStreamContainerFormat containerFormat)
+void CSpxCodecAdapter::Open(AudioStreamContainerFormat containerFormat, uint16_t bitsPerSample, uint16_t numChannels, uint32_t sampleRate)
 {
     SPX_DBG_TRACE_VERBOSE("%s", __FUNCTION__);
 
@@ -43,32 +43,32 @@ void CSpxCodecAdapter::Open(AudioStreamContainerFormat containerFormat)
     switch (containerFormat)
     {
     case AudioStreamContainerFormat::OGG_OPUS:
-        m_gstObject = std::make_shared<OpusDecoder>(m_readCallback);
+        m_gstObject = std::make_shared<OpusDecoder>(m_readCallback, bitsPerSample, numChannels, sampleRate);
         break;
 
     case AudioStreamContainerFormat::MP3:
-        m_gstObject = std::make_shared<AudioDecoder>(m_readCallback, CodecsTypeInternal::MP3);
+        m_gstObject = std::make_shared<AudioDecoder>(m_readCallback, CodecsTypeInternal::MP3, bitsPerSample, numChannels, sampleRate);
         break;
 
     case AudioStreamContainerFormat::FLAC:
-        m_gstObject = std::make_shared<AudioDecoder>(m_readCallback, CodecsTypeInternal::FLAC);
+        m_gstObject = std::make_shared<AudioDecoder>(m_readCallback, CodecsTypeInternal::FLAC, bitsPerSample, numChannels, sampleRate);
         break;
 
     case AudioStreamContainerFormat::ALAW:
-        m_gstObject = std::make_shared<AudioDecoder>(m_readCallback, CodecsTypeInternal::ALAW);
+        m_gstObject = std::make_shared<AudioDecoder>(m_readCallback, CodecsTypeInternal::ALAW, bitsPerSample, numChannels, sampleRate);
         break;
 
     case AudioStreamContainerFormat::MULAW:
-        m_gstObject = std::make_shared<AudioDecoder>(m_readCallback, CodecsTypeInternal::MULAW);
+        m_gstObject = std::make_shared<AudioDecoder>(m_readCallback, CodecsTypeInternal::MULAW, bitsPerSample, numChannels, sampleRate);
         break;
 
     case AudioStreamContainerFormat::AMRNB:
-        //m_gstObject = std::make_shared<AudioDecoder>(m_readCallback, CodecsTypeInternal::AMRNB);
+        //m_gstObject = std::make_shared<AudioDecoder>(m_readCallback, CodecsTypeInternal::AMRNB, bitsPerSample, numChannels, sampleRate);
         SPX_IFTRUE_THROW_HR(true, SPXERR_CONTAINER_FORMAT_NOT_SUPPORTED_ERROR);
         break;
 
     case AudioStreamContainerFormat::AMRWB:
-        //m_gstObject = std::make_shared<AudioDecoder>(m_readCallback, CodecsTypeInternal::AMRWB);
+        //m_gstObject = std::make_shared<AudioDecoder>(m_readCallback, CodecsTypeInternal::AMRWB, bitsPerSample, numChannels, sampleRate);
         SPX_IFTRUE_THROW_HR(true, SPXERR_CONTAINER_FORMAT_NOT_SUPPORTED_ERROR);
         break;
 
@@ -89,7 +89,7 @@ void CSpxCodecAdapter::SetFormat(SPXWAVEFORMATEX* format)
     // Copy the format
     memcpy(m_format.get(), format, formatSize);
     AudioStreamContainerFormat containerFormat = static_cast<AudioStreamContainerFormat>(m_format->wFormatTag);
-    Open(containerFormat);
+    Open(containerFormat, m_format->wBitsPerSample, m_format->nChannels, m_format->nSamplesPerSec);
 }
 
 uint16_t CSpxCodecAdapter::GetFormat(SPXWAVEFORMATEX* format, uint16_t formatSize)
@@ -98,11 +98,11 @@ uint16_t CSpxCodecAdapter::GetFormat(SPXWAVEFORMATEX* format, uint16_t formatSiz
     if (format != nullptr)
     {
         format->wFormatTag = WAVE_FORMAT_PCM;
-        format->nChannels = 1;
-        format->nSamplesPerSec = 16000;
-        format->nAvgBytesPerSec = 16000 * (16 / 8) * 1;
-        format->nBlockAlign = (1 * 16) / 8;
-        format->wBitsPerSample = 16;
+        format->nChannels = m_format->nChannels;
+        format->nSamplesPerSec = m_format->nSamplesPerSec;
+        format->nAvgBytesPerSec = m_format->nSamplesPerSec * (m_format->wBitsPerSample >> 3) * m_format->nChannels;
+        format->nBlockAlign = m_format->nChannels * (m_format->wBitsPerSample >> 3);
+        format->wBitsPerSample = m_format->wBitsPerSample;
         format->cbSize = 0;
     }
     return sizeof(SPXWAVEFORMATEX);
@@ -151,6 +151,16 @@ void CSpxCodecAdapter::SetCallbacks(ReadCallbackFunction_Type readCallback, Clos
 {
     m_readCallback = readCallback;
     m_closeCallback = closeCallback;
+}
+
+void CSpxCodecAdapter::SetPropertyCallback2(GetPropertyCallbackFunction_Type2 getPropertyCallBack)
+{
+    m_getPropertyCallback = getPropertyCallBack;
+}
+
+SPXSTRING CSpxCodecAdapter::GetProperty(PropertyId propertyId)
+{
+    return m_getPropertyCallback(propertyId);
 }
 
 } } } } // Microsoft::CognitiveServices::Speech::Impl

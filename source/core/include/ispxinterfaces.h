@@ -385,10 +385,12 @@ public:
     using ReadCallbackFunction_Type = std::function<int(uint8_t*, uint32_t)>;
     using CloseCallbackFunction_Type = std::function<void()>;
     using GetPropertyCallbackFunction_Type = std::function<void(PropertyId, uint8_t*, uint32_t)>;
+    using GetPropertyCallbackFunction_Type2 = std::function<SPXSTRING(PropertyId)>;
 
     virtual void SetCallbacks(ReadCallbackFunction_Type readCallback, CloseCallbackFunction_Type closeCallback) = 0;
 
     virtual void SetPropertyCallback(GetPropertyCallbackFunction_Type getPropertyCallBack) { UNUSED(getPropertyCallBack); }
+    virtual void SetPropertyCallback2(GetPropertyCallbackFunction_Type2 getPropertyCallBack) { UNUSED(getPropertyCallBack); }
 };
 
 class ISpxAudioStreamWriterInitCallbacks : public ISpxInterfaceBaseFor<ISpxAudioStreamWriterInitCallbacks>

@@ -14,7 +14,7 @@ namespace CognitiveServices {
 namespace Speech {
 namespace Impl {
 
-OpusDecoder::OpusDecoder(ISpxAudioStreamReaderInitCallbacks::ReadCallbackFunction_Type readCallback) :
+OpusDecoder::OpusDecoder(ISpxAudioStreamReaderInitCallbacks::ReadCallbackFunction_Type readCallback, uint16_t bitsPerSample, uint16_t numChannels, uint32_t sampleRate) :
     BaseGstreamer(readCallback)
 {
     m_oggDemux = gst_element_factory_make("oggdemux", "oggdemux");
@@ -51,10 +51,14 @@ OpusDecoder::OpusDecoder(ISpxAudioStreamReaderInitCallbacks::ReadCallbackFunctio
         m_audioResampler, NULL), SPXERR_GSTREAMER_INTERNAL_ERROR,
         "Failed **gst_element_link_many**. Gstreamer linking 'opusparse ! opusdec ! audioconvert ! audioresample' failed");
 
+    UNUSED(bitsPerSample);
+    // The following setting is for signed 16 bit little endian
+    std::string numBitsPerSampleString = "S16LE";
+
     GstCaps *caps = gst_caps_new_simple("audio/x-raw",
-        "format", G_TYPE_STRING, "S16LE",
-        "rate", G_TYPE_INT, 16000,
-        "channels", G_TYPE_INT, 1,
+        "format", G_TYPE_STRING, numBitsPerSampleString.c_str(),
+        "rate", G_TYPE_INT, sampleRate,
+        "channels", G_TYPE_INT, numChannels,
         NULL);
 
     ThrowAfterCleanLocal(caps == nullptr, SPXERR_GSTREAMER_INTERNAL_ERROR, "Failed **gst_caps_new_simple**. Gstreamer caps cannot be created");

@@ -16,7 +16,7 @@ namespace Impl {
 class OpusDecoder : public BaseGstreamer
 {
 public:
-    OpusDecoder(ISpxAudioStreamReaderInitCallbacks::ReadCallbackFunction_Type readCallback);
+    OpusDecoder(ISpxAudioStreamReaderInitCallbacks::ReadCallbackFunction_Type readCallback, uint16_t bitsPerSample, uint16_t numChannels, uint32_t sampleRate);
     virtual ~OpusDecoder();
 
 private:

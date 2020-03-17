@@ -42,24 +42,26 @@ public:
     // --- ISpxAudioStreamReader ---
     uint16_t GetFormat(SPXWAVEFORMATEX* format, uint16_t formatSize) override;
     uint32_t Read(uint8_t* pbuffer, uint32_t cbBuffer) override;
+    SPXSTRING GetProperty(PropertyId propertyId) override;
     void Close() override;
     // --- ISpxAudioStreamInitFormat ---
     void SetFormat(SPXWAVEFORMATEX* format) override;
     // --- ISpxAudioStreamReaderInitCallbacks ---
     void SetCallbacks(ISpxAudioStreamReaderInitCallbacks::ReadCallbackFunction_Type readCallback, ISpxAudioStreamReaderInitCallbacks::CloseCallbackFunction_Type closeCallback) override;
+    void SetPropertyCallback2(GetPropertyCallbackFunction_Type2 getPropertyCallBack) override;
 
 private:
     CSpxCodecAdapter(const CSpxCodecAdapter&) = delete;
     CSpxCodecAdapter(const CSpxCodecAdapter&&) = delete;
 
     CSpxCodecAdapter& operator=(const CSpxCodecAdapter&) = delete;
-    void Open(AudioStreamContainerFormat containerFormat);
+    void Open(AudioStreamContainerFormat containerFormat, uint16_t bitsPerSample, uint16_t numChannels, uint32_t sampleRate);
     std::shared_ptr<BaseGstreamer> m_gstObject = nullptr;
     std::shared_ptr<SPXWAVEFORMATEX> m_format;
 
     ReadCallbackFunction_Type m_readCallback;
     CloseCallbackFunction_Type m_closeCallback;
-
+    GetPropertyCallbackFunction_Type2 m_getPropertyCallback;
     std::mutex m_mutex;
     std::shared_ptr<ISpxAudioStreamReader> m_reader;
     bool m_streamStarted = false;
