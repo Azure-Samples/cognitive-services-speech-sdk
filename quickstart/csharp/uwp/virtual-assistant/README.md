@@ -1,7 +1,7 @@
 # Quickstart: Create a voice-first virtual assistant with the Speech SDK in C# UWP
 
 This quickstart will connect to a previously authored and configured bot to enable a voice-first virtual assistant experience from the client application.
-See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-virtual-assistant-csharp-uwp) on the SDK documentation page which describes how to build this sample from scratch in Visual Studio.
+See the [accompanying article](https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/quickstart-voice-assistant-csharp-uwp) on the SDK documentation page which describes how to build this sample from scratch in Visual Studio.
 
 ## Prerequisites
 
