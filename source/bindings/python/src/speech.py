@@ -7,6 +7,7 @@ Classes related to recognizing text from speech, synthesizing speech from text, 
 
 from . import speech_py_impl as impl
 from . import audio
+from . import languageconfig
 
 from .speech_py_impl import (
     CancellationDetails,
@@ -48,7 +49,7 @@ class SpeechConfig():
     """
     def __init__(self, subscription: OptionalStr = None, region: OptionalStr = None,
             endpoint: OptionalStr = None, host: OptionalStr = None, auth_token: OptionalStr = None,
-            speech_recognition_language: str = ''):
+            speech_recognition_language: OptionalStr = None):
 
         self._impl = self._get_impl(impl.SpeechConfig, subscription, region, endpoint, host, auth_token,
                 speech_recognition_language)
@@ -158,8 +159,9 @@ class SpeechConfig():
                 _impl = config_type._from_host(host)
 
         if _impl is not None:
-            _impl.set_speech_recognition_language(speech_recognition_language)
             _impl.set_property("SPEECHSDK-SPEECH-CONFIG-SYSTEM-LANGUAGE", "Python")
+            if speech_recognition_language is not None:
+                _impl.set_speech_recognition_language(speech_recognition_language)
             return _impl
 
         raise ValueError(generic_error_message)
@@ -477,7 +479,6 @@ class SpeechRecognitionResult(RecognitionResult):
         """
         super().__init__(impl_result)
 
-
 class ResultFuture():
     """
     The result of an asynchronous operation.
@@ -495,6 +496,24 @@ class ResultFuture():
         """
         return self._wrapped_type(self._impl.get())
 
+class AutoDetectSourceLanguageResult():
+    """
+    Represents auto detection source language result
+    
+    The result can be initialized from a speech recognition result
+
+    :param speechRecognitionResult: The speech recognition result
+    """
+    def __init__(self, speechRecognitionResult: SpeechRecognitionResult):        
+        self._language = speechRecognitionResult.properties.get(PropertyId.SpeechServiceConnection_AutoDetectSourceLanguageResult)
+    
+    @property
+    def language(self) -> str:
+        """
+        The language value
+        If this is None, it means the system fails to detect the source language automatically
+        """
+        return self._language
 
 class EventSignal():
     """
@@ -750,15 +769,31 @@ class Recognizer():
 class SpeechRecognizer(Recognizer):
     """
     A speech recognizer.
-
-    :param speech_config: The config for the speech recognizer
+    If need to specify source language information, please only specify one of these three parameters, language, source_language_config or auto_detect_source_language_config
+    :param speech_config: The config for the speech recognizer 
     :param audio_config: The config for the audio input
+    :param language: The source language
+    :param source_language_config: The source language config
+    :param auto_detect_source_language_config: The auto detection source language config
     """
-    def __init__(self, speech_config: SpeechConfig, audio_config: Optional[audio.AudioConfig] = None):
+    def __init__(self, speech_config: SpeechConfig, audio_config: Optional[audio.AudioConfig] = None, language: OptionalStr = None, 
+            source_language_config: Optional[languageconfig.SourceLanguageConfig] = None, auto_detect_source_language_config: Optional[languageconfig.AutoDetectSourceLanguageConfig] = None):
         if not isinstance(speech_config, SpeechConfig):
             raise ValueError('speech_config must be a SpeechConfig instance')
+        languageConfigNum = 0
+        if language is not None: 
+            if language == "":
+                raise ValueError('language cannot be an empty string')
+            languageConfigNum = languageConfigNum + 1
+        if source_language_config is not None:
+            languageConfigNum = languageConfigNum + 1
+        if auto_detect_source_language_config is not None:
+            languageConfigNum = languageConfigNum + 1
+        if languageConfigNum > 1:
+            raise ValueError('cannot construct SpeechRecognizer with more than one language configurations, please only specify one of these three parameters: language, source_language_config or auto_detect_source_language_config')
 
-        self._impl = self._get_impl(impl.SpeechRecognizer, speech_config, audio_config)
+        
+        self._impl = self._get_impl(impl.SpeechRecognizer, speech_config, audio_config, language, source_language_config, auto_detect_source_language_config)
 
     def recognize_once(self) -> SpeechRecognitionResult:
         """
@@ -816,6 +851,26 @@ class SpeechRecognizer(Recognizer):
         """
         return EventSignal(self._impl.canceled, SpeechRecognitionCanceledEventArgs)
 
+    @staticmethod
+    def _get_impl(reco_type, speech_config, audio_config, language, source_language_config, auto_detect_source_language_config):
+        if language is None and source_language_config is None and auto_detect_source_language_config is None:
+            if audio_config is None:
+                return reco_type._from_config(speech_config._impl)
+            return reco_type._from_config(speech_config._impl,  audio_config._impl)
+        if language is not None:
+            if audio_config is None:
+                return reco_type._from_config(speech_config._impl, language)
+            return reco_type._from_config(speech_config._impl, language, audio_config._impl)
+        
+        if source_language_config is not None:            
+            if audio_config is None:
+                return reco_type._from_config(speech_config._impl, source_language_config._impl)
+            return reco_type._from_config(speech_config._impl, source_language_config._impl, audio_config._impl)
+        
+        # auto_detect_source_language_config must not be None if we arrive this code
+        if audio_config is None:
+            return reco_type._from_config(speech_config._impl, auto_detect_source_language_config._impl)
+        return reco_type._from_config(speech_config._impl, auto_detect_source_language_config._impl, audio_config._impl)
 
 class SessionEventArgs():
     """

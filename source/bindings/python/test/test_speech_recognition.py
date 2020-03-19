@@ -6,7 +6,7 @@ import pytest
 
 import azure.cognitiveservices.speech as msspeech
 
-from .utils import (_TestCallback, _check_callbacks, _check_sr_result, _wait_for_event)
+from .utils import (_TestCallback, _check_callbacks, _check_sr_result, _wait_for_event, _setup_callbacks)
 
 speech_config_types = (msspeech.SpeechConfig, msspeech.translation.SpeechTranslationConfig)
 recognizer_types = (msspeech.SpeechRecognizer, msspeech.translation.TranslationRecognizer,
@@ -356,9 +356,6 @@ def test_speech_recognizer_properties(speech_input):
 def test_speech_config_properties_setters():
     speech_config = msspeech.SpeechConfig(subscription="some_key", region="some_region")
 
-    speech_config.speech_recognition_language = "de_de"
-    assert "de_de" == speech_config.speech_recognition_language
-
     speech_config.endpoint_id = "x"
     assert "x" == speech_config.endpoint_id
 
@@ -648,3 +645,74 @@ def test_speech_config_properties_direct_set_and_get(speech_input):
     assert "true" == config.get_property(PropertyId.SpeechServiceResponse_RequestWordLevelTimestamps)
     assert "true" == recognizer.properties.get_property(PropertyId.SpeechServiceResponse_RequestWordLevelTimestamps)
 
+@pytest.mark.parametrize('speech_input,', ['weather'], indirect=True)
+def test_recognize_once_with_language_detection(default_speech_auth, speech_input, speech_region):
+    endpoint = default_speech_auth['endpoint'] or "wss://{}.stt.speech.microsoft.com/speech/" \
+            "recognition/interactive/cognitiveservices/v1".format(speech_region)
+    speech_config = msspeech.SpeechConfig(subscription=default_speech_auth['subscription'],
+            endpoint=endpoint)
+
+    audio_config = msspeech.audio.AudioConfig(filename=speech_input.path)
+    autoDetectSourceLanguageConfig = msspeech.languageconfig.AutoDetectSourceLanguageConfig(languages=["de-DE", "en-US"])    
+    reco = msspeech.SpeechRecognizer(speech_config, auto_detect_source_language_config=autoDetectSourceLanguageConfig, audio_config=audio_config)
+    callbacks = _setup_callbacks(reco)
+    result = reco.recognize_once()
+    _check_sr_result(result, speech_input, 0)
+    _wait_for_event(callbacks, 'session_stopped')
+    _check_callbacks(callbacks)
+
+    desired_result_str = 'SpeechRecognitionResult(' \
+            'result_id={}, text="{}", reason=ResultReason.RecognizedSpeech)'.format(
+                    result.result_id, speech_input.transcription[0])
+
+    assert str(result) == desired_result_str
+    autoDetectSourceLanguageResult = msspeech.AutoDetectSourceLanguageResult(result)
+    assert "en-US" == autoDetectSourceLanguageResult.language
+
+
+@pytest.mark.parametrize('speech_input,', ['weather'], indirect=True)
+def test_recognize_once_no_language_detection_result(default_speech_auth, speech_input, speech_region):
+    endpoint = default_speech_auth['endpoint'] or "wss://{}.stt.speech.microsoft.com/speech/" \
+            "recognition/interactive/cognitiveservices/v1".format(speech_region)
+    speech_config = msspeech.SpeechConfig(subscription=default_speech_auth['subscription'],
+            endpoint=endpoint)
+
+    audio_config = msspeech.audio.AudioConfig(filename=speech_input.path)    
+    reco = msspeech.SpeechRecognizer(speech_config, audio_config=audio_config)    
+    result = reco.recognize_once()
+    autoDetectSourceLanguageResult = msspeech.AutoDetectSourceLanguageResult(result)
+    assert None == autoDetectSourceLanguageResult.language
+
+def test_create_recognizer_invalid_language_config_parameters():    
+    speech_config = msspeech.SpeechConfig(subscription="subscription", endpoint="endpoint")
+    audio_config = msspeech.audio.AudioConfig(filename="file")    
+    sourceLanguageConfig = msspeech.languageconfig.SourceLanguageConfig("de-DE")
+    autoDetectSourceLanguageConfig = msspeech.languageconfig.AutoDetectSourceLanguageConfig(languages=["de-DE", "en-US"])
+
+    errFound = None
+    try:
+        reco = msspeech.SpeechRecognizer(speech_config, language="", source_language_config=sourceLanguageConfig)
+    except ValueError as err:
+        errFound = err
+    assert None != errFound
+    assert "language cannot be an empty string" == str(errFound)
+
+    errFound = None
+    expectedErr = "cannot construct SpeechRecognizer with more than one language configurations, please only specify one of these three parameters: language, source_language_config or auto_detect_source_language_config"
+    try:
+        reco = msspeech.SpeechRecognizer(speech_config, language="en-US", source_language_config=sourceLanguageConfig)
+    except ValueError as err:
+        errFound = err
+    assert None != errFound
+    assert expectedErr == str(errFound)
+
+    errFound = None
+    try:
+        reco = msspeech.SpeechRecognizer(speech_config, source_language_config=sourceLanguageConfig, auto_detect_source_language_config=autoDetectSourceLanguageConfig)
+    except ValueError as err:
+        errFound = err
+    assert None != errFound
+    assert expectedErr == str(errFound)
+
+
+    

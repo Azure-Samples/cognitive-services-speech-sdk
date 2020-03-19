@@ -9,6 +9,7 @@ from .speech import *
 from . import audio
 from . import intent
 from . import translation
+from . import languageconfig
 
 try:
     from .version import __version__
@@ -30,10 +31,15 @@ from .speech_py_impl import (
 )
 
 from .audio import AudioConfig
+from .languageconfig import (
+    AutoDetectSourceLanguageConfig,
+    SourceLanguageConfig,
+)
 
 # override __module__ for correct docs generation
 root_namespace_classes = (
     AudioDataStream,
+    AutoDetectSourceLanguageResult,
     CancellationDetails,
     CancellationErrorCode,
     CancellationReason,

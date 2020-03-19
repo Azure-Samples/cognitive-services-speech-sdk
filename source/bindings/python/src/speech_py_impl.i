@@ -155,6 +155,13 @@ from typing import Optional
     %}
 }
 
+%extend Microsoft::CognitiveServices::Speech::PropertyCollection {
+    %pythoncode %{
+    def get_property_by_name(self, property_name: str):
+        return _speech_py_impl.PropertyCollection_get_property(self, property_name)
+    %}
+}
+
 // hide factories. %feature("shadow") doesn't work for static methods, so need to
 // rename the original factory to a private one and then extend with the new one.
 %rename ("_from_default_microphone_input") Microsoft::CognitiveServices::Speech::Audio::AudioConfig::FromDefaultMicrophoneInput;
@@ -186,7 +193,11 @@ from typing import Optional
 %rename ("_from_subscription") Microsoft::CognitiveServices::Speech::Translation::SpeechTranslationConfig::FromSubscription;
 %rename ("_from_config") Microsoft::CognitiveServices::Speech::Translation::TranslationRecognizer::FromConfig;
 %rename ("from_recognizer") Microsoft::CognitiveServices::Speech::PhraseListGrammar::FromRecognizer;
- 
+%rename ("_from_language") Microsoft::CognitiveServices::Speech::SourceLanguageConfig::FromLanguage;
+%rename ("_from_languages") Microsoft::CognitiveServices::Speech::AutoDetectSourceLanguageConfig::FromLanguages;
+%rename ("_from_source_language_configs") Microsoft::CognitiveServices::Speech::AutoDetectSourceLanguageConfig::FromSourceLanguageConfigs;
+%rename ("_from_result") Microsoft::CognitiveServices::Speech::AutoDetectSourceLanguageResult::FromResult;
+
 // return synthesized audio as bytes object
 %rename ("_audio") Microsoft::CognitiveServices::Speech::Translation::TranslationSynthesisResult::Audio;
 %extend Microsoft::CognitiveServices::Speech::Translation::TranslationSynthesisResult {

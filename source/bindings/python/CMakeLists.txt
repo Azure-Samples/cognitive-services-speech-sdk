@@ -144,6 +144,7 @@ set(PYTHON_SOURCES
   audio.py
   translation.py
   intent.py
+  languageconfig.py
   )
 
 foreach(INPUT_FILE IN ITEMS ${PYTHON_SOURCES})
