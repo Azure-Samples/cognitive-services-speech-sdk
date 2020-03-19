@@ -502,8 +502,7 @@ public:
     public:
 
         static const char* hostname;
-        static const char* pathPrefix1;
-        static const char* pathPrefix2;
+        static const char* pathPrefix;
         static const char* pathSuffix;
 
         static const std::vector<std::string> queryParameters;

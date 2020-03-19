@@ -518,7 +518,7 @@ public class SpeechConfigTests {
         System.out.println("ErrorCode:" + errorDetails.getErrorCode());
         assertEquals(ResultReason.Canceled, res.getReason());
         // Intent service returns Authentication failure for invalid language.
-        assertEquals(CancellationErrorCode.AuthenticationFailure, errorDetails.getErrorCode());
+        assertEquals(CancellationErrorCode.ConnectionFailure, errorDetails.getErrorCode());
         r.close();
         s.close();
     }

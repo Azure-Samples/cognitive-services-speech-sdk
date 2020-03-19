@@ -190,9 +190,8 @@ const std::vector<std::string> endpoint::translation::queryParameters = {
     endpoint::translation::stableTranslationQueryParam
 };
 
-const char* endpoint::luis::hostname = "speech.platform.bing.com";
-const char* endpoint::luis::pathPrefix1 = "/speech/";
-const char* endpoint::luis::pathPrefix2 = "/recognition/";
+const char* endpoint::luis::hostname = ".sr.speech.microsoft.com";
+const char* endpoint::luis::pathPrefix = "/speech/recognition/";
 const char* endpoint::luis::pathSuffix = "/cognitiveservices/v1";
 
 const std::vector<std::string> endpoint::luis::queryParameters = {
@@ -538,15 +537,14 @@ string Connection::Impl::ConstructConnectionUrl() const
         case EndpointType::Intent:
             if (!customHost)
             {
-                oss << endpoint::luis::hostname;
+                oss << intentRegion
+                    << endpoint::luis::hostname;
             }
             if (m_config.m_recoMode != USP::RecognitionMode::Interactive)
             {
                 ThrowInvalidArgumentException("Invalid reco mode for intent recognition.");
             }
-            oss << endpoint::luis::pathPrefix1
-                << intentRegion
-                << endpoint::luis::pathPrefix2
+            oss << endpoint::luis::pathPrefix
                 << g_recoModeStrings[recoMode]
                 << endpoint::luis::pathSuffix;
             break;

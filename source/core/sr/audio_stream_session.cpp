@@ -2189,53 +2189,53 @@ std::string CSpxAudioStreamSession::SpeechRegionFromIntentRegion(const std::stri
 {
     static std::pair<const char*, const char*> intentToSpeechRegion[] = {
 
-        std::make_pair("West US",          "uswest"),
-        std::make_pair("US West",          "uswest"),
-        std::make_pair("westus",           "uswest"),
+        std::make_pair("West US",          "westus"),
+        std::make_pair("US West",          "westus"),
+        std::make_pair("uswest",           "westus"),
 
-        std::make_pair("West US 2",        "uswest2"),
-        std::make_pair("US West 2",        "uswest2"),
-        std::make_pair("westus2",          "uswest2"),
+        std::make_pair("West US 2",        "westus2"),
+        std::make_pair("US West 2",        "westus2"),
+        std::make_pair("uswest2",          "westus2"),
 
-        std::make_pair("South Central US", "ussouthcentral"),
-        std::make_pair("US South Central", "ussouthcentral"),
-        std::make_pair("southcentralus",   "ussouthcentral"),
+        std::make_pair("South Central US", "southcentralus"),
+        std::make_pair("US South Central", "southcentralus"),
+        std::make_pair("ussouthcentral",   "southcentralus"),
 
-        std::make_pair("West Central US",  "uswestcentral"),
-        std::make_pair("US West Central",  "uswestcentral"),
-        std::make_pair("westcentralus",    "uswestcentral"),
+        std::make_pair("West Central US",  "westcentralus"),
+        std::make_pair("US West Central",  "westcentralus"),
+        std::make_pair("uswestcentral",    "westcentralus"),
 
-        std::make_pair("East US",          "useast"),
-        std::make_pair("US East",          "useast"),
-        std::make_pair("eastus",           "useast"),
+        std::make_pair("East US",          "eastus"),
+        std::make_pair("US East",          "eastus"),
+        std::make_pair("useast",           "eastus"),
 
-        std::make_pair("East US 2",        "useast2"),
-        std::make_pair("US East 2",        "useast2"),
-        std::make_pair("eastus2",          "useast2"),
+        std::make_pair("East US 2",        "eastus2"),
+        std::make_pair("US East 2",        "eastus2"),
+        std::make_pair("useast2",          "eastus2"),
 
-        std::make_pair("West Europe",      "europewest"),
-        std::make_pair("Europe West",      "europewest"),
-        std::make_pair("westeurope",       "europewest"),
+        std::make_pair("West Europe",      "westeurope"),
+        std::make_pair("Europe West",      "westeurope"),
+        std::make_pair("europewest",       "westeurope"),
 
-        std::make_pair("North Europe",     "europenorth"),
-        std::make_pair("Europe North",     "europenorth"),
-        std::make_pair("northeurope",      "europenorth"),
+        std::make_pair("North Europe",     "northeurope"),
+        std::make_pair("Europe North",     "northeurope"),
+        std::make_pair("europenorth",      "northeurope"),
 
-        std::make_pair("Brazil South",     "brazilsouth"),
-        std::make_pair("South Brazil",     "brazilsouth"),
-        std::make_pair("southbrazil",      "brazilsouth"),
+        std::make_pair("Brazil South",     "southbrazil"),
+        std::make_pair("South Brazil",     "southbrazil"),
+        std::make_pair("brazilsouth",      "southbrazil"),
 
-        std::make_pair("Australia East",   "australiaeast"),
-        std::make_pair("East Australia",   "australiaeast"),
-        std::make_pair("eastaustralia",    "australiaeast"),
+        std::make_pair("Australia East",   "eastaustralia"),
+        std::make_pair("East Australia",   "eastaustralia"),
+        std::make_pair("australiaeast",    "eastaustralia"),
 
-        std::make_pair("Southeast Asia",   "asiasoutheast"),
-        std::make_pair("Asia Southeast",   "asiasoutheast"),
-        std::make_pair("southeastasia",    "asiasoutheast"),
+        std::make_pair("Southeast Asia",   "southeastasia"),
+        std::make_pair("Asia Southeast",   "southeastasia"),
+        std::make_pair("asiasoutheast",    "southeastasia"),
 
-        std::make_pair("East Asia",        "asiaeast"),
-        std::make_pair("Asia East",        "asiaeast"),
-        std::make_pair("eastasia",         "asiaeast"),
+        std::make_pair("East Asia",        "eastasia"),
+        std::make_pair("Asia East",        "eastasia"),
+        std::make_pair("asiaeast",         "eastasia"),
     };
 
     for (auto item : intentToSpeechRegion)
