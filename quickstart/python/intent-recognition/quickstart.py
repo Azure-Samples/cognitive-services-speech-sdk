@@ -9,7 +9,9 @@ print("Say something...")
 """performs one-shot intent recognition from input from the default microphone"""
 
 # Set up the config for the intent recognizer (remember that this uses the Language Understanding key, not the Speech Services key)!
-intent_config = speechsdk.SpeechConfig(subscription="YourLanguageUnderstandingSubscriptionKey", region="YourLanguageUnderstandingServiceRegion")
+intent_config = speechsdk.SpeechConfig(
+    subscription="YourLanguageUnderstandingSubscriptionKey",
+    region="YourLanguageUnderstandingServiceRegion")
 
 # Set up the intent recognizer
 intent_recognizer = speechsdk.intent.IntentRecognizer(speech_config=intent_config)
@@ -25,6 +27,9 @@ intents = [
     ("what's the weather like", "weather"),
 ]
 intent_recognizer.add_intents(intents)
+
+# To add all of the possible intents from a LUIS model to the recognizer, uncomment the line below:
+# intent_recognizer.add_all_intents(model);
 
 # Starts intent recognition, and returns after a single utterance is recognized. The end of a
 # single utterance is determined by listening for silence at the end or until a maximum of 15
