@@ -1821,6 +1821,24 @@ void CSpxAudioStreamSession::UpdateAdapterResult_JsonResult(shared_ptr<ISpxRecog
         }
     }
 
+    if (!namedProperties->HasStringValue("Lexical"))
+    {
+        auto iteratorLexical = root.find(JSON_KEY_LEXICAL);
+        if (iteratorLexical != root.end())
+        {
+            namedProperties->SetStringValue("Lexical", iteratorLexical->get<string>().c_str());
+        }
+    }
+
+    if (!namedProperties->HasStringValue("ITN"))
+    {
+        auto iteratorItn = root.find(JSON_KEY_ITN);
+        if (iteratorItn != root.end())
+        {
+            namedProperties->SetStringValue("ITN", iteratorItn->get<string>().c_str());
+        }
+    }
+
     if (valueChanged)
     {
         string updatedJsonStr = root.dump();
