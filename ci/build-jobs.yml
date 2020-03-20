@@ -1786,7 +1786,7 @@ jobs:
     inputs:
       type: FilePath
       scriptPath: './ci/drop/bindrop.sh'
-      args: '"" $(BuildConfiguration) $(Build.ArtifactStagingDirectory)/Linux-x64/$(BuildConfiguration) false'
+      args: '"Linux-x64" $(BuildConfiguration) $(Build.ArtifactStagingDirectory)/Linux-x64/$(BuildConfiguration) false'
   - task: PublishBuildArtifacts@1
     displayName: Publish drop
     inputs:

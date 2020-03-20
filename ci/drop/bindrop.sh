@@ -18,7 +18,7 @@ print_vars = PLATFORM CONFIG DEST TARGET =
 set -x
 
 # Ensure Unix paths on Windows from here on
-if [[ $OS = "Windows_NT" ]]; then
+if [[ $OS == "Windows_NT" ]]; then
   DEST="$(cygpath --unix --absolute "$DEST")"
   SCRIPT_DIR="$(cygpath --unix --absolute "$SCRIPT_DIR")"
 fi
@@ -36,7 +36,7 @@ if [[ $TARGET == UWP ]]; then
   JAVASUPPORTED=false
 fi
 
-if [[ $OS = "Windows_NT" ]]; then
+if [[ $OS == "Windows_NT" ]]; then
   case $TARGET in
     UNKNOWN|UWP) LIBPREFIX=Microsoft.CognitiveServices.Speech.
              DYNLIBSUFFIX=.dll
@@ -70,7 +70,7 @@ else
   SRCDYNLIB="$BUILD_ROOT/lib"
 
   LIBPREFIX=libMicrosoft.CognitiveServices.Speech.
-  if [[ $(uname) = Linux ]]; then
+  if [[ $(uname) == Linux ]]; then
     DYNLIBSUFFIX=.so
     SRCJAVABINDINGS="$SRCBIN/libMicrosoft.CognitiveServices.Speech.java.bindings.so"
   else # OSX
@@ -128,7 +128,7 @@ shopt -s extglob
 cp $CPOPT "$SRCDYNLIB"/$LIBPREFIX!(*.unstripped)$DYNLIBSUFFIX "$DESTPUBLIB"
 
 # On Windows and not Android, copy import libraries, XMLDoc, and PDBs.
-if [[ $OS = "Windows_NT" ]]; then
+if [[ $OS == "Windows_NT" ]]; then
   if [[ $TARGET != Android-* ]]; then
     cp $CPOPT "$SRCLIB"/$LIBPREFIX*.lib "$DESTPUBLIB"
     cp $CPOPT "$SRCDYNLIB"/$LIBPREFIX*.pdb "$DESTPUBLIB"
@@ -153,18 +153,21 @@ fi
 
 # Linux: strip shipping binaries, but keep the unstripped version around.
 # N.B. there's an .so in disguise with the .dll extension
-if [[ $(uname) = Linux ]]; then
-  echo "ISCROSS IS $ISCROSS"
+echo "uname is set to $uname"
+if [[ $(uname) == Linux ]]; then
+  echo "ISCROSS IS $ISCROSS, copying unstripped artifacts"
   cp $CPOPT -R "$DESTPUBLIB" "$DESTPRIVLIBUNSTRIPPED"
-  if [ $ISCROSS ]; then
-    echo "This is Crosscompiling!!!"
-    if [ $PLATFORM = Linux-arm32 ]; then
+  if [[ $ISCROSS == true ]]; then
+    echo "This is Crosscompiling for $PLATFORM!!!"
+    if [[ $PLATFORM == Linux-arm32 ]]; then
       echo "Trying to use arm-linux-gneabihf-strip!"
       find "$DESTPUBLIB" \( -name \*.so -or -name \*.dll \) -print0 | xargs -0 arm-linux-gnueabihf-strip
-    fi
-    if [ $PLATFORM = Linux-arm64 ]; then
+    elif [[ $PLATFORM == Linux-arm64 ]]; then
       echo "Trying to use aarch64-linux-gnu-strip!"
       find "$DESTPUBLIB" \( -name \*.so -or -name \*.dll \) -print0 | xargs -0 aarch64-linux-gnu-strip
+    elif [[ $PLATFORM =~ Windows-(x86|x64) ]]; then
+      echo "Platform is $PLATFORM using strip!!!!"
+      find "$DESTPUBLIB" \( -name \*.so -or -name \*.dll \) -print0 | xargs -0 strip
     fi
   else
     echo "Trying to use strip!"
@@ -173,15 +176,15 @@ if [[ $(uname) = Linux ]]; then
 fi
 
 # Android: strip shipping binaries, but keep the unstripped version around.
-if [[ $TARGET = Android-* ]]; then
+if [[ $TARGET == Android-* ]]; then
   cp $CPOPT -R "$DESTPUBLIB" "$DESTPRIVLIBUNSTRIPPED"
-  if [[ $TARGET = Android-arm64 ]]; then
+  if [[ $TARGET == Android-arm64 ]]; then
     STRIP=$ANDROID_NDK/toolchains/aarch64-linux-android-4.9/prebuilt/windows-x86_64/aarch64-linux-android/bin/strip.exe
-  elif [[ $TARGET = Android-arm32 ]]; then
+  elif [[ $TARGET == Android-arm32 ]]; then
     STRIP=$ANDROID_NDK/toolchains/arm-linux-androideabi-4.9/prebuilt/windows-x86_64/arm-linux-androideabi/bin/strip.exe
-  elif [[ $TARGET = Android-x86 ]]; then
+  elif [[ $TARGET == Android-x86 ]]; then
     STRIP=$ANDROID_NDK/toolchains/x86-4.9/prebuilt/windows-x86_64/i686-linux-android/bin/strip.exe
-  elif [[ $TARGET = Android-x64 ]]; then
+  elif [[ $TARGET == Android-x64 ]]; then
     STRIP=$ANDROID_NDK/toolchains/x86_64-4.9/prebuilt/windows-x86_64/x86_64-linux-android/bin/strip.exe
   else
     echo Unsupported architecture $TARGET.
