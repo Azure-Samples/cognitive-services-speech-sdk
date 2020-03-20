@@ -371,6 +371,7 @@ namespace Microsoft.CognitiveServices.Speech.Intent
 
         // Defines private methods to raise a C# event for intermediate/final result when a corresponding callback is invoked by the native layer.
         [MonoPInvokeCallback(typeof(CallbackFunctionDelegate))]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031", Justification = "All exceptions are catched and logged inside callback handlers")]
         private static void FireEvent_Recognizing(IntPtr hreco, IntPtr hevent, IntPtr pvContext)
         {
             try
@@ -383,13 +384,14 @@ namespace Microsoft.CognitiveServices.Speech.Intent
                 var resultEventArg = new IntentRecognitionEventArgs(hevent);
                 recognizer._Recognizing?.Invoke(recognizer, resultEventArg);
             }
-            catch (InvalidOperationException)
+            catch (Exception e)
             {
-                LogError(Internal.SpxError.InvalidHandle);
+                LogError(e.Message);
             }
         }
 
         [MonoPInvokeCallback(typeof(CallbackFunctionDelegate))]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031", Justification = "All exceptions are catched and logged inside callback handlers")]
         private static void FireEvent_Recognized(IntPtr hreco, IntPtr hevent, IntPtr pvContext)
         {
             try
@@ -402,13 +404,14 @@ namespace Microsoft.CognitiveServices.Speech.Intent
                 var resultEventArg = new IntentRecognitionEventArgs(hevent);
                 recognizer._Recognized?.Invoke(recognizer, resultEventArg);
             }
-            catch (InvalidOperationException)
+            catch (Exception e)
             {
-                LogError(Internal.SpxError.InvalidHandle);
+                LogError(e.Message);
             }
         }
 
         [MonoPInvokeCallback(typeof(CallbackFunctionDelegate))]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031", Justification = "All exceptions are catched and logged inside callback handlers")]
         private static void FireEvent_Canceled(IntPtr hreco, IntPtr hevent, IntPtr pvContext)
         {
             try
@@ -421,9 +424,9 @@ namespace Microsoft.CognitiveServices.Speech.Intent
                 var resultEventArg = new IntentRecognitionCanceledEventArgs(hevent);
                 recognizer._Canceled?.Invoke(recognizer, resultEventArg);
             }
-            catch (InvalidOperationException)
+            catch (Exception e)
             {
-                LogError(Internal.SpxError.InvalidHandle);
+                LogError(e.Message);
             }
         }
     }

@@ -319,6 +319,7 @@ namespace Microsoft.CognitiveServices.Speech.Audio
         }
 
         [MonoPInvokeCallback(typeof(PullAudioStreamReadDelegate))]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031", Justification = "All exceptions are catched and logged inside callback handlers")]
         private static int StreamReadCallback(IntPtr context, IntPtr buffer, uint size)
         {
             int result = 0;
@@ -344,19 +345,16 @@ namespace Microsoft.CognitiveServices.Speech.Audio
                     Marshal.Copy(srcBuffer, 0, buffer, result);
                 }
             }
-            catch (InvalidOperationException)
+            catch (Exception e)
             {
-                LogError(SpxError.InvalidHandle);
-            }
-            catch (ApplicationException ex)
-            {
-                LogError(nameof(ApplicationException) + ": " + ex.Message);
+                LogError(e.Message);
             }
 
             return result;
         }
 
         [MonoPInvokeCallback(typeof(PullAudioStreamCloseDelegate))]        
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031", Justification = "All exceptions are catched and logged inside callback handlers")]
         private static void StreamCloseCallback(IntPtr context)
         {
             try
@@ -372,17 +370,14 @@ namespace Microsoft.CognitiveServices.Speech.Audio
                 ThrowIfNull(callback);
                 callback.Close();
             }
-            catch (InvalidOperationException)
+            catch (Exception e)
             {
-                LogError(SpxError.InvalidHandle);
-            }
-            catch (ApplicationException ex)
-            {
-                LogError(nameof(ApplicationException) + ": " + ex.Message);
+                LogError(e.Message);
             }
         }
 
         [MonoPInvokeCallback(typeof(PullAudioStreamGetPropertyDelegate))]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031", Justification = "All exceptions are catched and logged inside callback handlers")]
         private static void StreamGetPropertyCallback(IntPtr context, Internal.PropertyId id, IntPtr buffer, uint size)
         {
             IntPtr rePtr = IntPtr.Zero;
@@ -408,11 +403,7 @@ namespace Microsoft.CognitiveServices.Speech.Audio
                     Marshal.Copy(srcBuffer, 0, buffer, (int)srcBuffer.Length);
                 }
             }
-            catch (InvalidOperationException)
-            {
-                LogError(SpxError.InvalidHandle);
-            }
-            catch (ApplicationException e)
+            catch (Exception e)
             {
                 LogError(e.Message);
             }

@@ -214,6 +214,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// </summary>
         ///
         [MonoPInvokeCallback(typeof(CallbackFunctionDelegate))]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031", Justification = "All exceptions are catched and logged inside callback handlers")]
         private static void FireEvent_SetSessionStarted(IntPtr hreco, IntPtr hevent, IntPtr pvContext)
         {
             try
@@ -226,13 +227,14 @@ namespace Microsoft.CognitiveServices.Speech
                 var resultEventArg = new SessionEventArgs(hevent);
                 recognizer._SessionStarted?.Invoke(recognizer, resultEventArg);
             }
-            catch (InvalidOperationException)
+            catch (Exception e)
             {
-                LogError(SpxError.InvalidHandle);
+                LogError(e.Message);
             }
         }
 
         [MonoPInvokeCallback(typeof(CallbackFunctionDelegate))]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031", Justification = "All exceptions are catched and logged inside callback handlers")]
         private static void FireEvent_SetSessionStopped(IntPtr hreco, IntPtr hevent, IntPtr pvContext)
         {
             try
@@ -245,13 +247,14 @@ namespace Microsoft.CognitiveServices.Speech
                 var resultEventArg = new SessionEventArgs(hevent);
                 recognizer._SessionStopped?.Invoke(recognizer, resultEventArg);
             }
-            catch (InvalidOperationException)
+            catch (Exception e)
             {
-                LogError(SpxError.InvalidHandle);
+                LogError(e.Message);
             }
         }
 
         [MonoPInvokeCallback(typeof(CallbackFunctionDelegate))]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031", Justification = "All exceptions are catched and logged inside callback handlers")]
         private static void FireEvent_SpeechStartDetected(IntPtr hreco, IntPtr hevent, IntPtr pvContext)
         {
             try
@@ -264,13 +267,14 @@ namespace Microsoft.CognitiveServices.Speech
                 var resultEventArg = new RecognitionEventArgs(hevent);
                 recognizer._SpeechStartDetected?.Invoke(recognizer, resultEventArg);
             }
-            catch (InvalidOperationException)
+            catch (Exception e)
             {
-                LogError(SpxError.InvalidHandle);
+                LogError(e.Message);
             }
         }
 
         [MonoPInvokeCallback(typeof(CallbackFunctionDelegate))]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031", Justification = "All exceptions are catched and logged inside callback handlers")]
         private static void FireEvent_SpeechEndDetected(IntPtr hreco, IntPtr hevent, IntPtr pvContext)
         {
             try
@@ -283,9 +287,9 @@ namespace Microsoft.CognitiveServices.Speech
                 var resultEventArg = new RecognitionEventArgs(hevent);
                 recognizer._SpeechEndDetected?.Invoke(recognizer, resultEventArg);
             }
-            catch (InvalidOperationException)
+            catch (Exception e)
             {
-                LogError(SpxError.InvalidHandle);
+                LogError(e.Message);
             }
         }
 

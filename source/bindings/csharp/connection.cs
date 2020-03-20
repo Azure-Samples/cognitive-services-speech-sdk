@@ -299,6 +299,7 @@ namespace Microsoft.CognitiveServices.Speech
         ///
 
         [MonoPInvokeCallback(typeof(ConnectionCallbackFunctionDelegate))]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031", Justification = "All exceptions are catched and logged inside callback handlers")]
         private static void FireEvent_Connected(IntPtr hevent, IntPtr pvContext)
         {
             try
@@ -309,13 +310,14 @@ namespace Microsoft.CognitiveServices.Speech
                 var resultEventArg = new ConnectionEventArgs(hevent);
                 connection._Connected?.Invoke(connection, resultEventArg);
             }
-            catch (InvalidOperationException)
+            catch (Exception e)
             {
-                LogError(Internal.SpxError.InvalidHandle);
+                LogError(e.Message);
             }
         }
 
         [MonoPInvokeCallback(typeof(ConnectionCallbackFunctionDelegate))]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031", Justification = "All exceptions are catched and logged inside callback handlers")]
         private static void FireEvent_Disconnected(IntPtr hevent, IntPtr pvContext)
         {
             try
@@ -326,13 +328,14 @@ namespace Microsoft.CognitiveServices.Speech
                 var resultEventArg = new ConnectionEventArgs(hevent);
                 connection._Disconnected?.Invoke(connection, resultEventArg);
             }
-            catch (InvalidOperationException)
+            catch (Exception e)
             {
-                LogError(Internal.SpxError.InvalidHandle);
+                LogError(e.Message);
             }
         }
 
         [MonoPInvokeCallback(typeof(ConnectionCallbackFunctionDelegate))]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031", Justification = "All exceptions are catched and logged inside callback handlers")]
         private static void FireEvent_MessageReceived(IntPtr hevent, IntPtr pvContext)
         {
             try
@@ -343,9 +346,9 @@ namespace Microsoft.CognitiveServices.Speech
                 var eventArgs = new ConnectionMessageEventArgs(hevent);
                 connection._MessageReceived?.Invoke(connection, eventArgs);
             }
-            catch (InvalidOperationException)
+            catch (Exception e)
             {
-                LogError(Internal.SpxError.InvalidHandle);
+                LogError(e.Message);
             }
         }
 

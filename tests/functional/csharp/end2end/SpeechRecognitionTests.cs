@@ -1067,6 +1067,82 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
+        public async Task TestExceptionsDuringEventsRecognizeOnceAsync()
+        {
+            SpeechConfig config = SpeechConfig.FromSubscription(subscriptionKey, region);
+            Assert.IsNotNull(config);
+            using (SpeechRecognizer recognizer = new SpeechRecognizer(config, AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath())))
+            {
+                Assert.IsNotNull(recognizer);
+                using (Connection connection = Connection.FromRecognizer(recognizer))
+                {
+                    var tcs = new TaskCompletionSource<int>();
+
+                    connection.Connected += (s, e) =>
+                    {
+                        Console.WriteLine("Now connected. Preparing throw exception");
+                        throw new Exception("Connected");
+                    };
+
+                    connection.Disconnected += (s, e) =>
+                    {
+                        Console.WriteLine("Now disconnected. Preparing throw exception");
+                        throw new Exception("Disconnected");
+                    };
+                    recognizer.Recognized += (s, e) =>
+                    {
+                        Console.WriteLine("Now recognized. Preparing throw exception");
+                        throw new Exception("Recognized");
+                    };
+
+                    recognizer.Recognizing += (s, e) =>
+                    {
+                        Console.WriteLine("Now recognizing. Preparing throw exception");
+                        throw new Exception("Recognizing");
+                    };
+
+                    recognizer.Canceled += (s, e) =>
+                    {
+                        Console.WriteLine("Now canceled. Preparing throw exception");
+                        throw new Exception("Canceled");
+                    };
+
+                    recognizer.SpeechStartDetected += (s, e) =>
+                    {
+                        Console.WriteLine("Now speechstartdetected. Preparing throw exception");
+                        throw new Exception("SpeechStartDetected");
+                    };
+
+                    recognizer.SpeechEndDetected += (s, e) =>
+                    {
+                        Console.WriteLine("Now speechenddetected. Preparing throw exception");
+                        throw new Exception("SpeechEndDetected");
+                    };
+
+                    recognizer.SessionStarted += (s, e) =>
+                    {
+                        Console.WriteLine("Now sessionstarted. Preparing throw exception");
+                        throw new Exception("SessionStarted");
+                    };
+
+                    recognizer.SessionStopped += (s, e) =>
+                    {
+                        Console.WriteLine("Now sessionstopped. Preparing throw exception");
+                        tcs.TrySetResult(0);
+                        throw new Exception("SessionStopped");
+                    };
+
+
+                    var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+                    Assert.IsNotNull(result);
+                    Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
+                    AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text, result.Text);
+                    await Task.WhenAny(tcs.Task, Task.Delay(TimeSpan.FromMinutes(1)));
+                }
+            }
+        }
+
+        [TestMethod]
         public async Task DictationRecognition()
         {
             this.defaultConfig.EnableDictation();

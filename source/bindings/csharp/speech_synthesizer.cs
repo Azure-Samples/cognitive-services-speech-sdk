@@ -492,6 +492,7 @@ namespace Microsoft.CognitiveServices.Speech
 
         // Defines private methods to raise a C# event for speech synthesis result when a corresponding callback is invoked by the native layer.
         [MonoPInvokeCallback(typeof(TtsCallbackFunctionDelegate))]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031", Justification = "All exceptions are catched and logged inside callback handlers")]
         private static void FireEvent_SynthesisStarted(IntPtr hsynth, IntPtr hevent, IntPtr pvContext)
         {
             try
@@ -507,13 +508,14 @@ namespace Microsoft.CognitiveServices.Speech
                     synthesizer._SynthesisStarted?.Invoke(synthesizer, resultEventArg);
                 }
             }
-            catch (InvalidOperationException)
+            catch (Exception e)
             {
-                LogError(Internal.SpxError.InvalidHandle);
+                LogError(e.Message);
             }
         }
 
         [MonoPInvokeCallback(typeof(TtsCallbackFunctionDelegate))]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031", Justification = "All exceptions are catched and logged inside callback handlers")]
         private static void FireEvent_Synthesizing(IntPtr hsynth, IntPtr hevent, IntPtr pvContext)
         {
             try
@@ -529,13 +531,14 @@ namespace Microsoft.CognitiveServices.Speech
                     synthesizer._Synthesizing?.Invoke(synthesizer, resultEventArg);
                 }
             }
-            catch (InvalidOperationException)
+            catch (Exception e)
             {
-                LogError(Internal.SpxError.InvalidHandle);
+                LogError(e.Message);
             }
         }
 
         [MonoPInvokeCallback(typeof(TtsCallbackFunctionDelegate))]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031", Justification = "All exceptions are catched and logged inside callback handlers")]
         private static void FireEvent_SynthesisCompleted(IntPtr hsynth, IntPtr hevent, IntPtr pvContext)
         {
             try
@@ -551,13 +554,14 @@ namespace Microsoft.CognitiveServices.Speech
                     synthesizer._SynthesisCompleted?.Invoke(synthesizer, resultEventArg);
                 }
             }
-            catch (InvalidOperationException)
+            catch (Exception e)
             {
-                LogError(Internal.SpxError.InvalidHandle);
+                LogError(e.Message);
             }
         }
 
         [MonoPInvokeCallback(typeof(TtsCallbackFunctionDelegate))]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031", Justification = "All exceptions are catched and logged inside callback handlers")]
         private static void FireEvent_SynthesisCanceled(IntPtr hsynth, IntPtr hevent, IntPtr pvContext)
         {
             try
@@ -573,13 +577,14 @@ namespace Microsoft.CognitiveServices.Speech
                     synthesizer._SynthesisCanceled?.Invoke(synthesizer, resultEventArg);
                 }
             }
-            catch (InvalidOperationException)
+            catch (Exception e)
             {
-                LogError(Internal.SpxError.InvalidHandle);
+                LogError(e.Message);
             }
         }
 
         [MonoPInvokeCallback(typeof(TtsCallbackFunctionDelegate))]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031", Justification = "All exceptions are catched and logged inside callback handlers")]
         private static void FireEvent_WordBoundary(IntPtr hsynth, IntPtr hevent, IntPtr pvContext)
         {
             try
@@ -595,9 +600,9 @@ namespace Microsoft.CognitiveServices.Speech
                     synthesizer._WordBoundary?.Invoke(synthesizer, wordBoundaryEventArg);
                 }
             }
-            catch (InvalidOperationException)
+            catch (Exception e)
             {
-                LogError(Internal.SpxError.InvalidHandle);
+                LogError(e.Message);
             }
         }
     }

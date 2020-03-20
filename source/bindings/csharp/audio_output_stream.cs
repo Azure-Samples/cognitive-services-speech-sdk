@@ -222,6 +222,7 @@ namespace Microsoft.CognitiveServices.Speech.Audio
         }
 
         [MonoPInvokeCallback(typeof(PushAudioStreamWriteDelegate))]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031", Justification = "All exceptions are catched and logged inside callback handlers")]
         private static uint StreamWriteCallback(IntPtr context, IntPtr buffer, uint size)
         {
             uint result = 0;
@@ -247,15 +248,16 @@ namespace Microsoft.CognitiveServices.Speech.Audio
 
                 result = callback.Write(dstBuffer);
             }
-            catch (InvalidOperationException)
+            catch (Exception e)
             {
-                LogError(SpxError.InvalidHandle);
+                LogError(e.Message);
             }
 
             return result;
         }
 
         [MonoPInvokeCallback(typeof(PushAudioStreamCloseDelegate))]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031", Justification = "All exceptions are catched and logged inside callback handlers")]
         private static void StreamCloseCallback(IntPtr context)
         {
             try
@@ -272,9 +274,9 @@ namespace Microsoft.CognitiveServices.Speech.Audio
                 ThrowIfNull(callback);
                 callback.Close();
             }
-            catch (InvalidOperationException)
+            catch (Exception e)
             {
-                LogError(SpxError.InvalidHandle);
+                LogError(e.Message);
             }
         }
 
