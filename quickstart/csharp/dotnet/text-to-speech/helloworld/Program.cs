@@ -53,9 +53,9 @@ namespace helloworld
             }
         }
 
-        static void Main()
+        static async Task Main()
         {
-            SynthesisToSpeakerAsync().Wait();
+            await SynthesisToSpeakerAsync();
         }
     }
 }

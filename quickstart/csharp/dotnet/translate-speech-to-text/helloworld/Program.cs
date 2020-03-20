@@ -77,7 +77,7 @@ namespace helloworld
 
                 // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
                 Console.WriteLine("Say something...");
-                await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
+                await recognizer.StartContinuousRecognitionAsync();
 
                 do
                 {
@@ -85,13 +85,13 @@ namespace helloworld
                 } while (Console.ReadKey().Key != ConsoleKey.Enter);
 
                 // Stops continuous recognition.
-                await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
+                await recognizer.StopContinuousRecognitionAsync();
             }
         }
 
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
-            TranslationContinuousRecognitionAsync().Wait();
+            await TranslationContinuousRecognitionAsync();
         }
     }
 }
