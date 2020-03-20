@@ -114,6 +114,12 @@
     <file src="$WindowsDropDir$\x64\Release\public\lib\UnixOS\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.dll" target="runtimes\linux-x64\lib\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.dll" />
     <file src="$WindowsDropDir$\x64\Release\public\lib\UnixOS\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.pdb" target="runtimes\linux-x64\lib\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.pdb" />
     <file src="$WindowsDropDir$\x64\Release\public\lib\UnixOS\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.xml" target="runtimes\linux-x64\lib\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.xml" />
+    <file src="$WindowsDropDir$\Win32\Release\public\lib\UnixOS\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.dll" target="runtimes\linux-arm\lib\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.dll" />
+    <file src="$WindowsDropDir$\Win32\Release\public\lib\UnixOS\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.pdb" target="runtimes\linux-arm\lib\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.pdb" />
+    <file src="$WindowsDropDir$\Win32\Release\public\lib\UnixOS\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.xml" target="runtimes\linux-arm\lib\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.xml" />
+    <file src="$WindowsDropDir$\x64\Release\public\lib\UnixOS\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.dll" target="runtimes\linux-arm64\lib\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.dll" />
+    <file src="$WindowsDropDir$\x64\Release\public\lib\UnixOS\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.pdb" target="runtimes\linux-arm64\lib\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.pdb" />
+    <file src="$WindowsDropDir$\x64\Release\public\lib\UnixOS\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.xml" target="runtimes\linux-arm64\lib\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.xml" />
 
     <!-- .NET standard dlls, built on Windows, used on Xamarin Android -->
     <file src="$WindowsDropDir$\x64\Release\public\lib\UnixOS\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.dll" target="lib\monoandroid\Microsoft.CognitiveServices.Speech.csharp.dll" />
@@ -124,6 +130,9 @@
     <file src="$LinuxDropDir$\Linux-x64\Release\public\lib\libMicrosoft.CognitiveServices.Speech.extension.kws.so" target="runtimes\linux-x64\native\libMicrosoft.CognitiveServices.Speech.extension.kws.so" />
     <file src="$LinuxDropDir$\Linux-x64\Release\public\lib\libMicrosoft.CognitiveServices.Speech.extension.codec.so" target="runtimes\linux-x64\native\libMicrosoft.CognitiveServices.Speech.extension.codec.so" />
     <file src="$LinuxDropDir$\Linux-x64\Release\public\lib\libMicrosoft.CognitiveServices.Speech.core.so" target="runtimes\linux-x64\native\libMicrosoft.CognitiveServices.Speech.core.so" />
+    <file src="$LinuxDropDir$\Linux-arm32\Release\public\lib\libMicrosoft.CognitiveServices.Speech.extension.kws.so" target="runtimes\linux-arm\native\libMicrosoft.CognitiveServices.Speech.extension.kws.so" />
+    <file src="$LinuxDropDir$\Linux-arm32\Release\public\lib\libMicrosoft.CognitiveServices.Speech.extension.codec.so" target="runtimes\linux-arm\native\libMicrosoft.CognitiveServices.Speech.extension.codec.so" />
+    <file src="$LinuxDropDir$\Linux-arm32\Release\public\lib\libMicrosoft.CognitiveServices.Speech.core.so" target="runtimes\linux-arm\native\libMicrosoft.CognitiveServices.Speech.core.so" />
     <file src="$LinuxDropDir$\Linux-arm64\Release\public\lib\libMicrosoft.CognitiveServices.Speech.extension.kws.so" target="runtimes\linux-arm64\native\libMicrosoft.CognitiveServices.Speech.extension.kws.so" />
     <file src="$LinuxDropDir$\Linux-arm64\Release\public\lib\libMicrosoft.CognitiveServices.Speech.extension.codec.so" target="runtimes\linux-arm64\native\libMicrosoft.CognitiveServices.Speech.extension.codec.so" />
     <file src="$LinuxDropDir$\Linux-arm64\Release\public\lib\libMicrosoft.CognitiveServices.Speech.core.so" target="runtimes\linux-arm64\native\libMicrosoft.CognitiveServices.Speech.core.so" />

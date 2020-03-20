@@ -36,7 +36,7 @@ docker run --rm --interactive \
   "$IMAGE_TAG" \
   bash - <<SCRIPT
 set -u -x -e -o pipefail
-dotnet restore --no-cache --source $NUGET_SOURCE_REL_ESCAPED $CSPROJ_REL_ESCAPED
+dotnet restore --no-cache --source /test/$NUGET_SOURCE_REL_ESCAPED --source https://api.nuget.org/v3/index.json /test/$CSPROJ_REL_ESCAPED
 dotnet build $CSPROJ_REL_ESCAPED
 ./ci/samples/wrap-pulseaudio.sh $TESTCMD_ESCAPED
 SCRIPT

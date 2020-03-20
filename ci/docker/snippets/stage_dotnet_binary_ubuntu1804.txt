@@ -1,0 +1,12 @@
+RUN export DEBIAN_FRONTEND=noninteractive && \
+    apt-get update --quiet || true && \
+    apt-get install --quiet --yes --no-install-recommends \
+        wget \
+        ca-certificates && \
+    mkdir /usr/local/dotnet && \
+    wget --no-verbose --output-document - $DOTNET_PACKAGE | \
+        tar zxf - --directory /usr/local/dotnet && \
+    chown -R root.root /usr/local/dotnet && \
+    ln -s /usr/local/dotnet/dotnet /usr/local/bin/dotnet && \
+    apt-get autoremove --quiet --yes && \
+    rm -rf /var/lib/apt/lists/*

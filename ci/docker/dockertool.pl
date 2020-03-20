@@ -206,20 +206,35 @@ my %images = (
     version => 3,
     spec => ['from-ubuntu1804-x64', aptInstallWith(qw/oobe_ubuntu1604_deps oobe_ubuntu_gstreamer_deps test_deps_ubuntu1804/), 'oobedevdnc21_ubuntu1804_x64_deps', 'builduser'],
   },
+  oobedevdnc21_ubuntu1804_arm32 => { # Not used yet due to various qemu errors with dotnet
+    version => 2,
+    urls => [qw(https://github.com/multiarch/qemu-user-static/releases/download/v4.2.0-6/qemu-arm-static.tar.gz)],
+    spec => [
+        # Stage 0
+        qw/from-ubuntu1804-arm32v7 stage_dotnet_binary_ubuntu1804_arm32v7 stage_dotnet_binary_ubuntu1804/,
+        # Image
+        qw/from-ubuntu1804-arm32v7 copy-layer-0-dotnet-usr-local/,
+        aptInstallWith(qw/oobe_ubuntu1804_deps oobe_ubuntu_gstreamer_deps test_deps_ubuntu1804/),
+        'builduser'],
+  },
+  oobedevdnc31_ubuntu1804_arm64 => { # Not used yet due to "shared memfd open() failed: Function not implemented" and netcoreapp3.0 req.
+    version => 2,
+    urls => [qw(https://github.com/multiarch/qemu-user-static/releases/download/v4.2.0-6/qemu-aarch64-static.tar.gz)],
+    spec => [
+        # Stage 0
+        qw/from-ubuntu1804-arm64v8 stage_dotnet_binary_ubuntu1804_arm64v8 stage_dotnet_binary_ubuntu1804/,
+        # Image
+        qw/from-ubuntu1804-arm64v8 copy-layer-0-dotnet-usr-local/,
+        aptInstallWith(qw/oobe_ubuntu1804_deps oobe_ubuntu_gstreamer_deps test_deps_ubuntu1804/),
+        'builduser'],
+  },
   oobedevdnc20_debian9_x64 => {
     version => 1,
     spec => ['from-debian9-x64', aptInstallWith(qw/oobe_debian9_deps oobe_ubuntu_gstreamer_deps test_deps/), 'oobedevdnc20_debian9_x64_deps', 'builduser'],
   },
   oobedevdnc21_centos8_x64 => {
     version => 3,
-    spec => [
-        # Stage 0
-        qw/from-centos8-x64 stage_dotnet_binary_centos8_x64/,
-        # Image
-        qw/from-centos8-x64 copy-layer-0-dotnet-usr-local/,
-        yumInstallWith(qw/oobe_centos_deps oobedevdnc21_centos8_deps oobe_centos_gstreamer_deps test_deps/),
-        'builduser',
-        'set_env_centos'],
+    spec => ['from-centos8-x64', yumInstallWith(qw/oobe_centos_deps oobedevdnc21_centos_deps oobe_centos_gstreamer_deps test_deps/), 'builduser', 'set_env_centos'],
   },
   oobedevdnc21_centos7_x64 => {
     version => 1,
@@ -229,7 +244,7 @@ my %images = (
         # Image
         qw/from-centos7-x64 copy-layer-0-gcc-usr-local/,
         'config_microsoft_packages_centos7',
-        yumInstallWith(qw/oobe_centos_deps oobedevdnc21_centos7_deps oobe_centos_gstreamer_deps test_deps/),
+        yumInstallWith(qw/oobe_centos_deps oobedevdnc21_centos_deps oobe_centos_gstreamer_deps test_deps/),
         'builduser',
         'set_env_centos'],
   },

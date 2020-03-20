@@ -1,0 +1,2 @@
+FROM arm32v7/ubuntu:18.04
+ADD qemu-arm-static.tar.gz /usr/bin

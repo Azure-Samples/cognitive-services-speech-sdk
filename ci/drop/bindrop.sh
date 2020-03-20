@@ -81,7 +81,7 @@ else
 
   STATLIBSUFFIX=.a
 
-  if [[ $PLATFORM == Linux-arm* || $PLATFORM == Linux-x86 ]]; then
+  if [[ $PLATFORM == Linux-x86 ]]; then
     CSHARPSUPPORTED=false
   else
     CSHARPSUPPORTED=true

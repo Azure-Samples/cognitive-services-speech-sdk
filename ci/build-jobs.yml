@@ -1015,9 +1015,12 @@ jobs:
         Linux/Linux-x64/Release/private/lib/libcarbon-mock.so
         Linux/Linux-x64/Release/private/lib/libcarbon-tts-mock.so
         Linux/Linux-x64/Release/public/lib/libMicrosoft.CognitiveServices.Speech.core.so
+        Linux/Linux-arm*/Release/private/lib/libcarbon-mock.so
+        Linux/Linux-arm*/Release/private/lib/libcarbon-tts-mock.so
+        Linux/Linux-arm*/Release/public/lib/libMicrosoft.CognitiveServices.Speech.core.so
   - template: get-docker-image.yml
     parameters:
-      imageBase: oobedevdnc20_ubuntu1604_x64 oobedevdnc21_ubuntu1804_x64 oobedevdnc20_debian9_x64 oobedevdnc21_mcr_x64 oobedevdnc21_centos7_x64 # oobedevdnc21_centos8_x64 is skipped for now
+      imageBase: oobedevdnc20_ubuntu1604_x64 oobedevdnc21_ubuntu1804_x64 oobedevdnc20_debian9_x64 oobedevdnc21_mcr_x64 oobedevdnc21_centos7_x64 oobedevdnc21_centos8_x64
       outvarImage: DOCKER_IMAGES
   - bash: |
       set -u -e -x -o pipefail
@@ -1077,12 +1080,6 @@ jobs:
       mkdir localnuget
       cp --verbose "$(System.ArtifactsDirectory)/In/Windows/"Microsoft.CognitiveServices.Speech.*.nupkg localnuget
 
-      # Supply mock and dependencies for running the test suite
-      mkdir private_lib
-      cp --verbose "$(System.ArtifactsDirectory)/In/Linux/Linux-x64/Release/private/lib/libcarbon-mock.so" private_lib
-      cp --verbose "$(System.ArtifactsDirectory)/In/Linux/Linux-x64/Release/private/lib/libcarbon-tts-mock.so" private_lib
-      cp --verbose "$(System.ArtifactsDirectory)/In/Linux/Linux-x64/Release/public/lib/libMicrosoft.CognitiveServices.Speech.core.so" private_lib
-
       mkdir -p "tests/functional/csharp/end2end/bin/Debug/netcoreapp2.0"
       perl ci/generateTestSettingsJson.pl\
           --OutputDirectory "tests/functional/csharp/end2end/bin/Debug/netcoreapp2.0" \
@@ -1121,9 +1118,20 @@ jobs:
       cp -r tests/input tests/functional/csharp/end2end/bin/Debug/netcoreapp2.0
       ERRORS=0
       for i in $(DOCKER_IMAGES); do
+        [[ $i =~ _([^_]*): ]] || exitWithError "Cannot parse out architecture from %s" "$i"
+        architecture="${BASH_REMATCH[1]}"
+        private_lib="private_lib-$architecture"
+        if [ ! -d $private_lib ]; then
+          # Supply mock and dependencies for running the test suite
+          mkdir $private_lib
+          cp --verbose "$(System.ArtifactsDirectory)/In/Linux/Linux-$architecture/Release/private/lib/libcarbon-mock.so" $private_lib
+          cp --verbose "$(System.ArtifactsDirectory)/In/Linux/Linux-$architecture/Release/private/lib/libcarbon-tts-mock.so" $private_lib
+          cp --verbose "$(System.ArtifactsDirectory)/In/Linux/Linux-$architecture/Release/public/lib/libMicrosoft.CognitiveServices.Speech.core.so" $private_lib
+        fi
+
         # Run the unit tests (skip non-Ubuntu 16.04 in dev builds)
         [[ $SPEECHSDK_BUILD_TYPE = dev && $i != *_ubuntu1604_* ]] ||
-          docker run --rm -i --volume "$(Build.Repository.LocalPath):/test" --env LD_LIBRARY_PATH=/test/private_lib --workdir /test "$i" bash - <<SCRIPT || \
+          docker run --rm -i --volume "$(Build.Repository.LocalPath):/test" --env LD_LIBRARY_PATH=/test/$private_lib --workdir /test "$i" bash - <<SCRIPT || \
           { ((++ERRORS)); vsts_logissue error "Running tests/functional/csharp/end2end for image $i failed."; }
             set -e -x -o pipefail
             if dotnet test --help | grep -q -- --blame; then

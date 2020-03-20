@@ -180,7 +180,9 @@ elseif(SPEECHSDK_OS STREQUAL "Linux")
   set(OPENSSL_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/external/linux-openssl/${CMAKE_OPENSSL_TARGET}/usr/local" CACHE STRING "")
   option(BUILD_PYTHON "Build Python SWIG module" OFF)
   option(BUILD_JAVA "Build Java/Android SWIG module" ON)
-  if(SPEECHSDK_ARCH STREQUAL "x64")
+  if((SPEECHSDK_ARCH STREQUAL "x64") OR
+     (SPEECHSDK_ARCH STREQUAL "arm32") OR
+     (SPEECHSDK_ARCH STREQUAL "arm64"))
     option(BUILD_CSHARP "Build C# module" ON)
   else()
     option(BUILD_CSHARP "Build C# module" OFF)

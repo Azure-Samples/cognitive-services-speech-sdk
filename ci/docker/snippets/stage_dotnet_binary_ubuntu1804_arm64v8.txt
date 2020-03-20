@@ -1,0 +1,2 @@
+# Linux ARM64 is properly supported from .NET Core 3.0 onwards
+ARG DOTNET_PACKAGE=https://dotnetcli.azureedge.net/dotnet/Sdk/3.1.200/dotnet-sdk-3.1.200-linux-arm64.tar.gz

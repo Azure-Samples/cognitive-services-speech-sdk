@@ -1,0 +1,2 @@
+FROM arm64v8/ubuntu:18.04
+ADD qemu-aarch64-static.tar.gz /usr/bin

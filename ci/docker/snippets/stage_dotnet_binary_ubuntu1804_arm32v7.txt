@@ -1,0 +1,1 @@
+ARG DOTNET_PACKAGE=https://dotnetcli.azureedge.net/dotnet/Sdk/2.1.804/dotnet-sdk-2.1.804-linux-arm.tar.gz

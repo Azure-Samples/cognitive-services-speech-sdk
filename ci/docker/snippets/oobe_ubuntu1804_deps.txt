@@ -1,0 +1,3 @@
+      # Native dependencies
+      libssl1.1 \
+      libasound2 \
