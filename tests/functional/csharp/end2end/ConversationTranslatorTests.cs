@@ -326,12 +326,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
             // Join room
             var bobAudioConfig = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_CHINESE].FilePath.GetRootRelativePath());
+            SetParticipantConfig(bobAudioConfig, false);
             SPX_TRACE_INFO("Creating bob ConversationTranslator");
             var bobTranslator = new ConversationTranslator(bobAudioConfig);
             var bobEvents = new ConversationTranslatorCallbacks(bobTranslator);
             SPX_TRACE_INFO("Bob joining {0}", conversation.ConversationId);
             await bobTranslator.JoinConversationAsync(conversation.ConversationId, bobName, bobLang);
-            SetParticipantConfig(bobTranslator, false);
 
 
             // do audio playback
@@ -857,15 +857,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
 
             config.SetProperty(PropertyId.Speech_SessionId, $"IntegrationTest:{Guid.NewGuid().ToString()}");
+            config.SetSystemProxy();
 
-            SetCommonConfig(
-                (id, val) => config.SetProperty(id, val),
-                (h, p, u, w) => config.SetProxy(h, p, u, w));
-
+            SetCommonConfig(config.SetProperty);
             return config;
         }
 
-        public void SetCommonConfig(Action<string, string> setter, Action<string, int, string, string> setProxy)
+        public void SetCommonConfig(Action<string, string> setter)
         {
             if (ManagementEndpoint != null)
             {
@@ -891,40 +889,19 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 setter("ConversationTranslator_ClientId", DefaultSettingsMap[DefaultSettingKeys.CONVERSATION_TRANSLATOR_CLIENTID]);
             }
-
-            Uri proxy;
-            string proxyName;
-            string proxyPass;
-            if (ConversationTranslatorExtensionMethods.TryGetDefaultSystemProxy(out proxy, out proxyName, out proxyPass))
-            {
-                setProxy(proxy.IdnHost, proxy.Port, proxyName, proxyPass);
-            }
         }
 
-        public void SetParticipantConfig(ConversationTranslator convTrans, bool setEndpoint)
+        public void SetParticipantConfig(AudioConfig audioConfig, bool setEndpoint)
         {
             if (setEndpoint && !string.IsNullOrWhiteSpace(DefaultSettingsMap[DefaultSettingKeys.CONVERSATION_TRANSLATOR_SPEECH_ENDPOINT]))
             {
-                convTrans.Properties.SetProperty(PropertyId.SpeechServiceConnection_Endpoint, DefaultSettingsMap[DefaultSettingKeys.CONVERSATION_TRANSLATOR_SPEECH_ENDPOINT]);
+                audioConfig.SetProperty(PropertyId.SpeechServiceConnection_Endpoint, DefaultSettingsMap[DefaultSettingKeys.CONVERSATION_TRANSLATOR_SPEECH_ENDPOINT]);
             }
 
-            convTrans.Properties.SetProperty(PropertyId.Speech_SessionId, $"IntegrationTest:{Guid.NewGuid().ToString()}");
+            audioConfig.SetProperty(PropertyId.Speech_SessionId, $"IntegrationTest:{Guid.NewGuid().ToString()}");
+            audioConfig.SetSystemProxy();
 
-            SetCommonConfig(
-                (id, val) => convTrans.Properties.SetProperty(id, val),
-                (host, port, username, pwd) =>
-                {
-                    convTrans.Properties.SetProperty(PropertyId.SpeechServiceConnection_ProxyHostName, host);
-                    convTrans.Properties.SetProperty(PropertyId.SpeechServiceConnection_ProxyPort, port.ToString(CultureInfo.InvariantCulture));
-                    if (!string.IsNullOrWhiteSpace(username))
-                    {
-                        convTrans.Properties.SetProperty(PropertyId.SpeechServiceConnection_ProxyUserName, username);
-                        if (!string.IsNullOrWhiteSpace(pwd))
-                        {
-                            convTrans.Properties.SetProperty(PropertyId.SpeechServiceConnection_ProxyPassword, pwd);
-                        }
-                    }
-                });
+            SetCommonConfig(audioConfig.SetProperty);
         }
 
         #endregion

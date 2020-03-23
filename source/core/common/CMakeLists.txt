@@ -53,6 +53,10 @@ set(HEADERS
     "${INC_DIR}/proxy_server_info.h"
     "${INC_DIR}/http_headers.h"
     "${INC_DIR}/http_endpoint_info.h"
+    "${INC_DIR}/web_socket.h"
+    "${INC_DIR}/i_web_socket.h"
+    "${INC_DIR}/i_telemetry.h"
+    "${INC_DIR}/no_op_telemetry.h"
     )
 
 set(HEADERS_PRIVATE
@@ -86,6 +90,7 @@ set(SOURCES
     "${SRC_DIR}/dynamic_module.cpp"
     "${SRC_DIR}/module_factory.cpp"
     "${SRC_DIR}/http_endpoint_info.cpp"
+    "${SRC_DIR}/web_socket.cpp"
     )
 
 if(CMAKE_SYSTEM_NAME STREQUAL "WindowsStore")

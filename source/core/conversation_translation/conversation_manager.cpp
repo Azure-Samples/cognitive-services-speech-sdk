@@ -7,6 +7,7 @@
 
 #include <ctime>
 #include <azure_c_shared_utility_urlencode_wrapper.h>
+#include <azure_c_shared_utility_xlogging_wrapper.h>
 #include <json.h>
 #include <http_request.h>
 #include <http_response.h>
@@ -14,7 +15,6 @@
 #include "common.h"
 #include "conversation_manager.h"
 #include "conversation_utils.h"
-#include "azure_c_shared_utility/xlogging.h"
 
 #define SPX_DBG_TRACE_CONVERSATION_ROOM_MANAGER 0
 
@@ -189,7 +189,7 @@ ConversationArgs ConversationManager::CreateOrJoin(const CreateConversationArgs&
     {
         std::string error("Server response to create/join conversation is malformed. Details: ");
         error += ex.what();
-        LogError(error.c_str());
+        LogError("%s", error.c_str());
         ThrowRuntimeError(error);
     }
 

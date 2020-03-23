@@ -111,11 +111,8 @@ namespace ConversationTranslation {
             switch (m_webSocket->GetState())
             {
                 case WebSocketState::CONNECTED:
-                case WebSocketState::NETWORK_CHECK:
-                case WebSocketState::NETWORK_CHECKING:
-                case WebSocketState::NETWORK_CHECK_COMPLETE:
+                case WebSocketState::INITIAL:
                 case WebSocketState::OPENING:
-                case WebSocketState::RESETTING:
                     // the web socket is open, or in the process of opening. We just need to make sure
                     // we have received the participant list
                     WaitForConnect(m_connectionOpen);
@@ -142,14 +139,12 @@ namespace ConversationTranslation {
             m_callbackIds.push_back(m_webSocket->OnBinaryData.add(ptr, &ConversationConnection::HandleBinaryData));
             m_callbackIds.push_back(m_webSocket->OnError.add(ptr, &ConversationConnection::HandleError));
 
-            // TODO: right now the USP code doesn't allow you to set the web socket headers directly. Instead, we can use the
-            //       query parameters to set the same values
-
             m_webSocketEndpoint.SetQueryParameter(ConversationQueryParameters::ApiVersion, ConversationConstants::ApiVersion);
-            m_webSocketEndpoint.SetQueryParameter(ConversationQueryParameters::AuthTokenHeader, conversationToken);
+
+            m_webSocketEndpoint.SetHeader(ConversationQueryParameters::AuthTokenHeader, conversationToken);
             if (!m_sessionId.empty())
             {
-                m_webSocketEndpoint.SetQueryParameter(ConversationConstants::ClientTraceIdHeader, m_sessionId);
+                m_webSocketEndpoint.SetHeader(ConversationConstants::ClientTraceIdHeader, m_sessionId);
             }
 
             m_currentParticipantId = StringUtils::ToUpper(participantId);
@@ -206,11 +201,8 @@ namespace ConversationTranslation {
                 break;
 
             case WebSocketState::CONNECTED:
-            case WebSocketState::NETWORK_CHECK:
-            case WebSocketState::NETWORK_CHECKING:
-            case WebSocketState::NETWORK_CHECK_COMPLETE:
+            case WebSocketState::INITIAL:
             case WebSocketState::OPENING:
-            case WebSocketState::RESETTING:
             default:
                 m_webSocket->Disconnect();
                 break;
@@ -334,7 +326,7 @@ namespace ConversationTranslation {
         auto state = m_webSocket->GetState();
         if (state != WebSocketState::CONNECTED)
         {
-            ThrowLogicError("You are not connected. Current state: " + to_string(state));
+            ThrowLogicError("You are not connected. Current state: " + to_string((int)state));
         }
 
         if (!m_receivedParticipantsList)
@@ -455,7 +447,7 @@ namespace ConversationTranslation {
         // TODO ralphe: parse TTS data here
     }
 
-    void ConversationConnection::HandleError(USP::WebSocketError error, int code, const std::string & message)
+    void ConversationConnection::HandleError(WebSocketError error, int code, const std::string & message)
     {
         LogError("WebSocketError received. ConversationConnection: %p, Error: %d, Code: %d, Message: %s",
             this, error, code, message.c_str());
@@ -466,19 +458,19 @@ namespace ConversationTranslation {
 
         switch (error)
         {
-            case REMOTE_CLOSED:
+            case WebSocketError::REMOTE_CLOSED:
                 conversationErrorCode = ConversationErrorCode::ConnectionError;
                 errorDescription = "Connection was closed by the remote host. Error code: " + errorCodeInString + ". Error details: " + message;
                 break;
 
-            case CONNECTION_FAILURE:
+            case WebSocketError::CONNECTION_FAILURE:
                 conversationErrorCode = ConversationErrorCode::ConnectionError;
                 errorDescription = "Connection failed (no connection to the remote host). Internal error: " + errorCodeInString
                     + ". Error details: " + message
                     + ". Please check network connection, firewall setting, and the region name used.";
                 break;
 
-            case WEBSOCKET_UPGRADE:
+            case WebSocketError::WEBSOCKET_UPGRADE:
                 switch (static_cast<HttpStatusCode>(code))
                 {
                     case HttpStatusCode::BAD_REQUEST:
@@ -515,25 +507,25 @@ namespace ConversationTranslation {
                 }
                 break;
 
-            case WEBSOCKET_SEND_FRAME:
+            case WebSocketError::WEBSOCKET_SEND_FRAME:
                 conversationErrorCode = ConversationErrorCode::ConnectionError;
                 errorDescription = "Failure while sending a frame over the WebSocket connection. Internal error: " + errorCodeInString
                     + ". Error details: " + message;
                 break;
 
-            case WEBSOCKET_ERROR:
+            case WebSocketError::WEBSOCKET_ERROR:
                 conversationErrorCode = ConversationErrorCode::ConnectionError;
                 errorDescription = "WebSocket operation failed. Internal error: " + errorCodeInString
                     + ". Error details: " + message;
                 break;
 
-            case DNS_FAILURE:
+            case WebSocketError::DNS_FAILURE:
                 conversationErrorCode = ConversationErrorCode::ConnectionError;
                 errorDescription = "DNS connection failed (the remote host did not respond). Internal error: " + errorCodeInString;
                 break;
 
             default:
-            case UNKNOWN:
+            case WebSocketError::UNKNOWN:
                 conversationErrorCode = ConversationErrorCode::ConnectionError;
                 errorDescription = "Unknown transport error. ErrorDetails: " + message;
                 break;

@@ -19,21 +19,17 @@ set(HEADERS
 set(HEADERS_PRIVATE
     "${SRC_DIR}/uspcommon.h"
     "${SRC_DIR}/uspinternal.h"
-    "${SRC_DIR}/dnscache.h"
-    "${SRC_DIR}/metricids.h"
-    "${SRC_DIR}/metrics.h"
-    "${SRC_DIR}/tokenstore.h"
-    "${SRC_DIR}/transport.h"
+    "${SRC_DIR}/usp_metrics.h"
     "${SRC_DIR}/stdafx.h"
+    "${SRC_DIR}/usp_web_socket.h"
     )
 
 set(SOURCES
-    "${SRC_DIR}/dnscache.c"
-    "${SRC_DIR}/metrics.cpp"
-    "${SRC_DIR}/transport.cpp"
+    "${SRC_DIR}/usp_metrics.cpp"
     "${SRC_DIR}/usp.cpp"
     "${SRC_DIR}/uspimpl.cpp"
     "${SRC_DIR}/stdafx.cpp"
+    "${SRC_DIR}/usp_web_socket.cpp"
     )
 
 source_group("Header Files (public)" FILES ${HEADERS})

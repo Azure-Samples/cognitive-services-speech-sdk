@@ -5,14 +5,15 @@
 // WebSocket.cpp: A web socket C++ implementation using the Azure C shared library
 //
 
-#include "common.h"
-#include <ispxinterfaces.h>
+#include "stdafx.h"
 #include <azure_c_shared_utility_includes.h>
 #include <azure_c_shared_utility_macro_utils.h>
 #include <proxy_server_info.h>
-#include "web_socket.h"
-#include "exception.h"
-#include "../usp/dnscache.h"
+#include <web_socket.h>
+#include <exception.h>
+
+DEFINE_ENUM_STRINGS(WS_OPEN_RESULT, WS_OPEN_RESULT_VALUES)
+DEFINE_ENUM_STRINGS(WS_ERROR, WS_ERROR_VALUES)
 
 // uncomment the line below to see all non-binary protocol messages in the log
 // #define LOG_TEXT_MESSAGES
@@ -24,27 +25,9 @@ namespace CognitiveServices {
 namespace Speech {
 namespace USP {
 
-    // USP: This is the unknown value for telemetry. Switch to passing correct USP value
-    constexpr uint8_t METRIC_MESSAGE_TYPE_INVALID = 0xff;
-
     // The maximum number of send requests to process per cycle in the background web socket thread.
     // This prevents us blocking for a long time if the rate of send requests is too high
     constexpr size_t MAX_SEND_PER_CYCLE = 20;
-
-    struct TransportPacket
-    {
-        inline TransportPacket(uint8_t msgtype, uint8_t wstype, size_t buffer_size)
-            : msgtype{ msgtype }, wstype{ wstype }, length{ buffer_size }, buffer{ std::make_unique<uint8_t[]>(buffer_size) }
-        {}
-
-        TransportPacket(const TransportPacket&) = delete;
-        TransportPacket(TransportPacket&&) = default;
-
-        uint8_t                    msgtype;
-        uint8_t                    wstype;
-        size_t                     length;
-        std::unique_ptr<uint8_t[]> buffer;
-    };
 
     template<typename TInstance, typename TValue>
     struct InstanceAndValue
@@ -100,17 +83,19 @@ namespace USP {
     WebSocket::WebSocket(
             shared_ptr<Microsoft::CognitiveServices::Speech::Impl::ISpxThreadService> threadService,
             Microsoft::CognitiveServices::Speech::Impl::ISpxThreadService::Affinity affinity,
-            const chrono::milliseconds& pollingIntervalMs) :
+            const chrono::milliseconds& pollingIntervalMs,
+            ITelemetry& telemetry) :
+        m_valid(false),
+        m_open(false),
+        m_telemetry(telemetry),
+        m_connectionId(),
         m_threadService(threadService),
         m_affinity(affinity),
         m_pollingIntervalMs(pollingIntervalMs),
-        m_valid(false),
         m_creationTime(get_epoch_time()),
         m_connectionTime(),
-        m_dnsCache(nullptr, DnsCacheDestroy),
         m_webSocketEndpoint(),
         m_WSHandle(),
-        m_open(),
         m_state(WebSocketState::CLOSED),
         m_queue(),
         m_queue_lock()
@@ -134,7 +119,6 @@ namespace USP {
         m_open = false;
 
         m_threadService.reset();
-        m_dnsCache.reset();
 
         if (m_WSHandle)
         {
@@ -145,19 +129,27 @@ namespace USP {
         swap(m_queue, empty);
     }
 
-    void WebSocket::Connect(const Impl::HttpEndpointInfo& endpoint)
+    void WebSocket::Connect(const Impl::HttpEndpointInfo & endpoint, const std::string& connectionId)
     {
         if (m_open)
         {
             Impl::ThrowLogicError("Web socket is already connected.");
         }
 
+        if (!m_connectionId.empty() && NO_DASH_UUID_LEN < connectionId.size() + 1)
+        {
+            Impl::ThrowInvalidArgumentException("Invalid size of connection Id. Please use a valid GUID with dashes removed.");
+        }
+
+        m_connectionId = connectionId;
+
         // copy and validate the connection parameters. This is needed to keep valid c_strings pointers in memory
         m_webSocketEndpoint = endpoint.GetInternals();
 
-        // USP: This is where the original transport code used the protocol header value to add
-        //      additional headers. The latest version of the UWS Azure C shared code includes
-        //      a proper way to set headers
+        if (endpoint.Scheme() != Impl::UriScheme::WS && endpoint.Scheme() != Impl::UriScheme::WSS)
+        {
+            Impl::ThrowInvalidArgumentException("You must specify a WS or WSS scheme for the endpoint");
+        }
 
         WS_PROTOCOL wsProto;
         wsProto.protocol = m_webSocketEndpoint.webSocketProtcols.c_str();
@@ -223,53 +215,51 @@ namespace USP {
             return;
         }
 
-        // TODO: Once we have updated to the latest Azure IoT shared library code, we should be able to set headers without hacks
+        // set the headers
+        for (const auto& entry : m_webSocketEndpoint.headers)
+        {
+            int ret = uws_client_set_request_header(m_WSHandle, entry.first.c_str(), entry.second.c_str());
+            if (ret)
+            {
+                Impl::ThrowRuntimeError(std::string("Failed to set the web socket request header. Error: ") + std::to_string(ret));
+            }
+        }
 
 #ifdef SPEECHSDK_USE_OPENSSL
-        int tls_version = OPTION_TLS_VERSION_1_2;
-        if (uws_client_set_option(m_WSHandle, OPTION_TLS_VERSION, &tls_version) != HTTPAPI_OK)
-        {
-            throw std::runtime_error("Could not set TLS 1.2 option");
-        }
+        if (m_webSocketEndpoint.isSecure()) {
+            int tls_version = OPTION_TLS_VERSION_1_2;
+            if (uws_client_set_option(m_WSHandle, OPTION_TLS_VERSION, &tls_version) != HTTPAPI_OK)
+            {
+                throw std::runtime_error("Could not set TLS 1.2 option");
+            }
 
-        uws_client_set_option(m_WSHandle, OPTION_DISABLE_DEFAULT_VERIFY_PATHS, &(m_webSocketEndpoint.disableDefaultVerifyPaths));
-        if (!m_webSocketEndpoint.singleTrustedCert.empty())
-        {
-            uws_client_set_option(m_WSHandle, OPTION_TRUSTED_CERT, m_webSocketEndpoint.singleTrustedCert.c_str());
-            uws_client_set_option(m_WSHandle, OPTION_DISABLE_CRL_CHECK, &(m_webSocketEndpoint.disableCrlChecks));
+            uws_client_set_option(m_WSHandle, OPTION_DISABLE_DEFAULT_VERIFY_PATHS, &(m_webSocketEndpoint.disableDefaultVerifyPaths));
+            if (!m_webSocketEndpoint.singleTrustedCert.empty())
+            {
+                uws_client_set_option(m_WSHandle, OPTION_TRUSTED_CERT, m_webSocketEndpoint.singleTrustedCert.c_str());
+                uws_client_set_option(m_WSHandle, OPTION_DISABLE_CRL_CHECK, &(m_webSocketEndpoint.disableCrlChecks));
+            }
         }
 #endif
 
-#ifdef __linux__
-        m_dnsCache = DnsCachePtr(DnsCacheCreate(), DnsCacheDestroy);
-        if (!m_dnsCache)
-        {
-            Impl::ThrowRuntimeError("Failed to create DNS cache.");
-        }
-#else
-        m_dnsCache = nullptr;
-#endif
-
-        // USP: In the original transport code, this is this is deferred until you call TransportRequestPrepare
-        //      but we will do this now
-        ChangeState(WebSocketState::CLOSED, WebSocketState::NETWORK_CHECK);
+        ChangeState(WebSocketState::CLOSED, WebSocketState::INITIAL);
 
         m_valid = true;
         WorkLoop(shared_from_this());
     }
 
-    static void PumpWebSocketInBackground(UWS_CLIENT_HANDLE handle, std::shared_ptr<Impl::ISpxThreadService> threadService, Impl::ISpxThreadService::Affinity affinity)
+    static void PumpWebSocketInBackground(UWS_CLIENT_HANDLE handle)
     {
         // Helper method to pump the Azure C shared library web socket code on a background thread. This
         // prevents situations where disconnecting can trigger event callbacks on the same thread as
         // disconnect was called on. This is problematic if you are using the thread service ExecuteSync
         // in other code.
-        std::packaged_task<void()> task([handle]()
+        auto ignored = std::async(std::launch::async, [handle]()
         {
             uws_client_dowork(handle);
         });
 
-        threadService->ExecuteSync(std::move(task), affinity);
+        // NOTE: the destructor of the async future will block here until the call to uws_client_dowork completes
     }
 
     void WebSocket::Disconnect()
@@ -306,11 +296,6 @@ namespace USP {
         // stop background thread
         m_valid = false;
 
-        if (m_dnsCache != nullptr)
-        {
-            DnsCacheRemoveContextMatches(m_dnsCache.get(), this);
-        }
-
         if (m_WSHandle != nullptr)
         {
             if (m_open)
@@ -320,18 +305,21 @@ namespace USP {
 
                 int result = uws_client_close_handshake_async(
                     m_WSHandle,
-                    WebSocketDisconnectReason::Normal,
+                    static_cast<uint16_t>(WebSocketDisconnectReason::Normal),
                     "" /* not used */,
                     [](void *ctxt) { cast_and_invoke(ctxt, &WebSocket::OnWebSocketClosed); },
                     this);
                 if (result == 0)
                 {
+                    // first wait for the poll period to give the background worker a chance to terminate
+                    std::this_thread::sleep_for(m_pollingIntervalMs);
+
                     // waits for close.
                     int retries = 0;
                     while (m_open && retries++ < MAX_WAIT_RETRIES)
                     {
                         LogInfo("%s: Continue to pump while waiting for close frame response (%d/%d).", __FUNCTION__, retries, MAX_WAIT_RETRIES);
-                        PumpWebSocketInBackground(m_WSHandle, m_threadService, m_affinity);
+                        PumpWebSocketInBackground(m_WSHandle);
                         std::this_thread::sleep_for(SLEEP_INTERVAL);
                     }
 
@@ -350,7 +338,7 @@ namespace USP {
                     // wait for force close.
                     while (m_open)
                     {
-                        PumpWebSocketInBackground(m_WSHandle, m_threadService, m_affinity);
+                        PumpWebSocketInBackground(m_WSHandle);
                         std::this_thread::sleep_for(SLEEP_INTERVAL);
                     }
 
@@ -363,21 +351,18 @@ namespace USP {
             m_WSHandle = nullptr;
         }
 
-        // USP: sends telemetry: MetricsTransportClosed();
+        MetricsTransportClosed();
     }
 
     void WebSocket::SendTextData(const string & text)
     {
         size_t payloadSize = text.length();
 
-        // std::string.length() returns the number of raw bytes in the string but rather than the number of UTF-8 code points
+        // std::string.length() returns the number of raw bytes in the string rather than the number of UTF-8 code points
         auto msg = make_unique<TransportPacket>(
             static_cast<uint8_t>(METRIC_MESSAGE_TYPE_INVALID), 
             static_cast<uint8_t>(WS_FRAME_TYPE_TEXT),
             payloadSize);
-
-        // USP: Token handling stuff here for USP goes here. E.g. ret = usp::TransportRequestPrepare(request);
-        // USP: The transport code computes header sizes here, and adds time stamp, request ID headers, etc..
 
         memcpy(msg->buffer.get(), text.c_str(), payloadSize);
 
@@ -395,9 +380,6 @@ namespace USP {
             static_cast<uint8_t>(METRIC_MESSAGE_TYPE_INVALID),
             static_cast<uint8_t>(WS_FRAME_TYPE_TEXT),
             size);
-
-        // USP: Does some audio processing/fiddling here
-        // USP: Computes header sizes here, and adds time stamp, request ID headers, etc..
 
         memcpy(msg->buffer.get(), data, size);
 
@@ -418,7 +400,7 @@ namespace USP {
         {
             LogInfo(R"(Start to open websocket. WebSocket: 0x%x, wsio handle: 0x%x)", this, m_WSHandle);
 
-            // USP: Sends telemetry here: MetricsTransportStart(*request->telemetry, request->connectionId);
+            MetricsTransportStart(m_telemetry, m_connectionId);
 
             const int result = uws_client_open_async(
                 m_WSHandle,
@@ -459,7 +441,7 @@ namespace USP {
         {
             LogError("Trying to send on a previously closed socket");
 
-            // USP: Sends telemetry here: MetricsTransportInvalidStateError();
+            MetricsTransportInvalidStateError();
 
             return;
         }
@@ -480,8 +462,6 @@ namespace USP {
     int WebSocket::SendPacket(unique_ptr<TransportPacket> packet)
     {
         int err = 0;
-
-        // USP: Changes the header time stamp value. It then updates the binary data present
 
         auto context = make_unique<InstanceAndValue<WebSocket, TransportPacket>>(this->shared_from_this(), std::move(packet));
 
@@ -531,22 +511,12 @@ namespace USP {
 
     void WebSocket::HandleTextData(const string & data)
     {
-        // USP: This is where the "headers" are parsed out of the received packets
-
-        if (m_valid && m_open)
-        {
-            OnTextData(data);
-        }
+        OnTextData(data);
     }
 
     void WebSocket::HandleBinaryData(const uint8_t * data, const size_t size)
     {
-        // USP: This is where the "headers" are parsed out of the received packets
-
-        if (m_valid && m_open)
-        {
-            OnBinaryData(data, size);
-        }
+        OnBinaryData(data, size);
     }
 
     void WebSocket::HandleError(WebSocketError reason, int errorCode, const std::string& errorMessage)
@@ -565,19 +535,36 @@ namespace USP {
     void WebSocket::HandleWebSocketFrameSent(WS_SEND_FRAME_RESULT result, uint8_t msgType, uint8_t wsType)
     {
         UNUSED(result);
-        UNUSED(msgType);
         UNUSED(wsType);
 
-        // USP: Sends telemetry here:
-        //      if (msgType != METRIC_MESSAGE_TYPE_INVALID) MetricsTransportStateEnd(msgType);
+        if (msgType != METRIC_MESSAGE_TYPE_INVALID)
+        {
+            MetricsTransportStateEnd(msgType);
+        }
     }
 
     void WebSocket::WorkLoop(weak_ptr<WebSocket> weakPtr)
     {
+        /* NOTE:
+           To prevent being invoked on a destroyed instance, this uses a weak pointer to check
+           that the web socket instance has not been destroyed. However, if the timing is just
+           right you could end up with a scenario where the ptr at line 556 becomes the last
+           remaining reference to the web socket instance. An example of this is if an error
+           callback causes the main thread (and the expected owner of the web socket instance)
+           to exit before the body of the packaged task below completes. This has the subtle
+           side effect of moving the destructor of the web socket instance to the
+           CSpxThreadService thread instead of where you expect leading to an exception being
+           thrown.
+
+           In normal usage this does not seem to happen. However some integration tests (e.g.
+           "Port specification" in core tests) will trigger this if you don't add a delay after
+           waiting for the cancelled event.
+        */
+
         packaged_task<void()> task([weakPtr]() -> void
         {
             auto ptr = weakPtr.lock();
-            if (ptr == nullptr || !ptr->m_valid)
+            if (ptr == nullptr || !ptr->m_valid || ptr->GetState() == WebSocketState::CLOSED)
             {
                 return;
             }
@@ -612,7 +599,7 @@ namespace USP {
         });
 
         auto ptr = weakPtr.lock();
-        if (ptr == nullptr || !ptr->m_valid)
+        if (ptr == nullptr || !ptr->m_valid || ptr->GetState() == WebSocketState::CLOSED)
         {
             return;
         }
@@ -632,61 +619,21 @@ namespace USP {
                 }
                 break;
 
-            case WebSocketState::RESETTING:
-                // Do nothing -- we're waiting for WSOnCloseForReset to be invoked.
-                break;
-
             case WebSocketState::DESTROYING:
                 // Do nothing. We are waiting for closing the transport request.
                 break;
 
-            case WebSocketState::NETWORK_CHECKING:
-                DnsCacheDoWork(m_dnsCache.get(), this);
-                return;
-
-            case WebSocketState::NETWORK_CHECK:
-                if (nullptr == m_dnsCache)
-                {
-                    // skip DNS checks
-                    ChangeState(WebSocketState::NETWORK_CHECK, WebSocketState::NETWORK_CHECK_COMPLETE);
-                }
-                else
-                {
-                    ChangeState(WebSocketState::NETWORK_CHECK, WebSocketState::NETWORK_CHECKING);
-                    const char* host = m_webSocketEndpoint.host.c_str();
-                    LogInfo("Start network check %s", host);
-
-                    // USP: Sends telemetry here: MetricsTransportStateStart(MetricMessageType::METRIC_TRANSPORT_STATE_DNS);
-
-                    int result = DnsCacheGetAddr(
-                        m_dnsCache.get(),
-                        host,
-                        [](DnsCacheHandle handle, int error, DNS_RESULT_HANDLE result, void *context)
-                        {
-                            cast_and_invoke(context, &WebSocket::DnsComplete, handle, error, result);
-                        },
-                        this);
-
-                    if (result)
-                    {
-                        LogError("DnsCacheGetAddr failed");
-                        ChangeState(WebSocketState::NETWORK_CHECK, WebSocketState::NETWORK_CHECK_COMPLETE);
-                    }
-                }
-
-                return;
-
-            case NETWORK_CHECK_COMPLETE:
+            case WebSocketState::INITIAL:
                 LogInfo("%s: open transport.", __FUNCTION__);
                 if (Connect())
                 {
-                    ChangeState(WebSocketState::NETWORK_CHECK_COMPLETE, WebSocketState::CLOSED);
+                    ChangeState(WebSocketState::INITIAL, WebSocketState::CLOSED);
                     LogError("Failed to open transport");
                     return;
                 }
                 else
                 {
-                    ChangeState(WebSocketState::NETWORK_CHECK_COMPLETE, WebSocketState::OPENING);
+                    ChangeState(WebSocketState::INITIAL, WebSocketState::OPENING);
                 }
                 break;
 
@@ -716,8 +663,14 @@ namespace USP {
 
                     if (packet)
                     {
-                        // USP: Sends telemetry here:
-                        //      if (packet->msgtype != METRIC_MESSAGE_TYPE_INVALID) MetricsTransportStateStart(packet->msgtype);
+                        if (packet->msgtype != METRIC_MESSAGE_TYPE_INVALID)
+                        {
+                            try
+                            {
+                                MetricsTransportStateStart(packet->msgtype);
+                            }
+                            catch (...) { /* don't care */ }
+                        }
 
                         int res = SendPacket(std::move(packet));
                         if (res != 0)
@@ -731,32 +684,6 @@ namespace USP {
         }
 
         uws_client_dowork(m_WSHandle);
-    }
-
-    void WebSocket::DnsComplete(DnsCacheHandle handle, int error, DNS_RESULT_HANDLE result)
-    {
-        assert(GetState() == WebSocketState::NETWORK_CHECKING);
-
-        (void)handle;
-        (void)result;
-
-        // USP: Sends telemetry here: MetricsTransportStateEnd(MetricMessageType::METRIC_TRANSPORT_STATE_DNS);
-
-        if (error != 0)
-        {
-            LogError("Network Check failed %d", error);
-
-            // The network instance has not been connected yet so it is not
-            // open, and it's safe to call OnTransportError.  We do the DNS
-            // check before opening the connection.  We assert about this with
-            // the WebSocketState::NETWORK_CHECKING check above.
-            HandleError(WebSocketError::DNS_FAILURE, error, std::string{});
-        }
-        else
-        {
-            LogInfo("Network Check completed");
-            ChangeState(WebSocketState::NETWORK_CHECKING, WebSocketState::NETWORK_CHECK_COMPLETE);
-        }
     }
 
     void WebSocket::OnWebSocketOpened(WS_OPEN_RESULT_DETAILED open_result_detailed)
@@ -777,7 +704,7 @@ namespace USP {
 
             LogInfo("Opening websocket completed. TransportRequest: 0x%x, wsio handle: 0x%x", this, m_WSHandle);
 
-            // USP: Sends telemetry here: MetricsTransportConnected(*request->telemetry, request->connectionId);
+            MetricsTransportConnected(m_telemetry, m_connectionId);
 
             HandleConnected();
         }
@@ -788,7 +715,7 @@ namespace USP {
             // reasons described in OnTransportError.
             ChangeState(WebSocketState::CLOSED);
 
-            // USP: Sends telemetry here: MetricsTransportDropped();
+            MetricsTransportDropped();
 
             LogError("WS open operation failed with result=%d(%s), code=%d[0x%08x]",
                 open_result,
@@ -812,6 +739,12 @@ namespace USP {
         if (GetState() == WebSocketState::DESTROYING)
         {
             LogInfo("%s: request is in destroying state, ignore OnWSFrameReceived().", __FUNCTION__);
+            return;
+        }
+
+        if (!m_valid || !m_open)
+        {
+            LogError("%s: request is not valid and/or not open", __FUNCTION__);
             return;
         }
 
@@ -845,7 +778,7 @@ namespace USP {
         m_open = false;
         ChangeState(WebSocketState::CLOSED);
 
-        // USP: Sends telemetry: MetricsTransportDropped();
+        MetricsTransportDropped();
 
         auto reason = static_cast<WebSocketDisconnectReason>(closeCode != nullptr ? *closeCode : -1);
         std::string cause;
@@ -864,7 +797,7 @@ namespace USP {
         m_open = false;
         ChangeState(WebSocketState::CLOSED);
 
-        // USP: Sends telemetry: MetricsTransportDropped();
+        MetricsTransportDropped();
 
         HandleError(WebSocketError::WEBSOCKET_ERROR, errorCode, ENUM_TO_STRING(WS_ERROR, errorCode));
     }
@@ -874,22 +807,9 @@ namespace USP {
         LogInfo("%s: context=%p", __FUNCTION__, this);
 
         m_open = false;
-
-        if (GetState() == WebSocketState::RESETTING)
-        {
-            HandleDisconnected(WebSocketDisconnectReason::Normal, "Web socket connection is resetting", false);
-
-            // Re-open the connection.
-            ChangeState(WebSocketState::RESETTING, WebSocketState::NETWORK_CHECK);
-        }
-        else
-        {
-            ChangeState(WebSocketState::CLOSED);
-
-            // USP: Sends telemetry: MetricsTransportClosed();
-
-            HandleDisconnected(WebSocketDisconnectReason::Normal, "", false);
-        }
+        ChangeState(WebSocketState::CLOSED);
+        MetricsTransportClosed();
+        HandleDisconnected(WebSocketDisconnectReason::Normal, "", false);
     }
 
     uint64_t WebSocket::GetTimestamp() const
