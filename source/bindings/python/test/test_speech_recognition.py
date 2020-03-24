@@ -653,8 +653,8 @@ def test_recognize_once_with_language_detection(default_speech_auth, speech_inpu
             endpoint=endpoint)
 
     audio_config = msspeech.audio.AudioConfig(filename=speech_input.path)
-    autoDetectSourceLanguageConfig = msspeech.languageconfig.AutoDetectSourceLanguageConfig(languages=["de-DE", "en-US"])    
-    reco = msspeech.SpeechRecognizer(speech_config, auto_detect_source_language_config=autoDetectSourceLanguageConfig, audio_config=audio_config)
+    auto_detect_source_language_config = msspeech.languageconfig.AutoDetectSourceLanguageConfig(languages=["de-DE", "en-US"])
+    reco = msspeech.SpeechRecognizer(speech_config, auto_detect_source_language_config=auto_detect_source_language_config, audio_config=audio_config)
     callbacks = _setup_callbacks(reco)
     result = reco.recognize_once()
     _check_sr_result(result, speech_input, 0)
@@ -666,8 +666,8 @@ def test_recognize_once_with_language_detection(default_speech_auth, speech_inpu
                     result.result_id, speech_input.transcription[0])
 
     assert str(result) == desired_result_str
-    autoDetectSourceLanguageResult = msspeech.AutoDetectSourceLanguageResult(result)
-    assert "en-US" == autoDetectSourceLanguageResult.language
+    auto_detect_source_language_result = msspeech.AutoDetectSourceLanguageResult(result)
+    assert "en-US" == auto_detect_source_language_result.language
 
 
 @pytest.mark.parametrize('speech_input,', ['weather'], indirect=True)
@@ -680,18 +680,18 @@ def test_recognize_once_no_language_detection_result(default_speech_auth, speech
     audio_config = msspeech.audio.AudioConfig(filename=speech_input.path)    
     reco = msspeech.SpeechRecognizer(speech_config, audio_config=audio_config)    
     result = reco.recognize_once()
-    autoDetectSourceLanguageResult = msspeech.AutoDetectSourceLanguageResult(result)
-    assert None == autoDetectSourceLanguageResult.language
+    auto_detect_source_language_result = msspeech.AutoDetectSourceLanguageResult(result)
+    assert None == auto_detect_source_language_result.language
 
 def test_create_recognizer_invalid_language_config_parameters():    
     speech_config = msspeech.SpeechConfig(subscription="subscription", endpoint="endpoint")
-    audio_config = msspeech.audio.AudioConfig(filename="file")    
-    sourceLanguageConfig = msspeech.languageconfig.SourceLanguageConfig("de-DE")
-    autoDetectSourceLanguageConfig = msspeech.languageconfig.AutoDetectSourceLanguageConfig(languages=["de-DE", "en-US"])
+    audio_config = msspeech.audio.AudioConfig(filename="file")
+    source_language_config = msspeech.languageconfig.SourceLanguageConfig("de-DE")
+    auto_detect_source_language_config = msspeech.languageconfig.AutoDetectSourceLanguageConfig(languages=["de-DE", "en-US"])
 
     errFound = None
     try:
-        reco = msspeech.SpeechRecognizer(speech_config, language="", source_language_config=sourceLanguageConfig)
+        reco = msspeech.SpeechRecognizer(speech_config, language="", source_language_config=source_language_config)
     except ValueError as err:
         errFound = err
     assert None != errFound
@@ -700,7 +700,7 @@ def test_create_recognizer_invalid_language_config_parameters():
     errFound = None
     expectedErr = "cannot construct SpeechRecognizer with more than one language configurations, please only specify one of these three parameters: language, source_language_config or auto_detect_source_language_config"
     try:
-        reco = msspeech.SpeechRecognizer(speech_config, language="en-US", source_language_config=sourceLanguageConfig)
+        reco = msspeech.SpeechRecognizer(speech_config, language="en-US", source_language_config=source_language_config)
     except ValueError as err:
         errFound = err
     assert None != errFound
@@ -708,7 +708,7 @@ def test_create_recognizer_invalid_language_config_parameters():
 
     errFound = None
     try:
-        reco = msspeech.SpeechRecognizer(speech_config, source_language_config=sourceLanguageConfig, auto_detect_source_language_config=autoDetectSourceLanguageConfig)
+        reco = msspeech.SpeechRecognizer(speech_config, source_language_config=source_language_config, auto_detect_source_language_config=auto_detect_source_language_config)
     except ValueError as err:
         errFound = err
     assert None != errFound

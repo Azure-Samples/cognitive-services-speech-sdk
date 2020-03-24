@@ -13,12 +13,12 @@ def test_speech_recognition_with_source_language(speech_input, default_speech_au
     endpoint = default_speech_auth['endpoint'] or "wss://{}.stt.speech.microsoft.com/speech/" \
             "recognition/interactive/cognitiveservices/v1".format(speech_region)
 
-    speechConfig = msspeech.SpeechConfig(subscription=default_speech_auth['subscription'],
+    speech_config = msspeech.SpeechConfig(subscription=default_speech_auth['subscription'],
             endpoint=endpoint)
-    audioConfig = msspeech.audio.AudioConfig(filename=speech_input.path)
+    audio_config = msspeech.audio.AudioConfig(filename=speech_input.path)
     # Creates a speech recognizer using a file as audio input and specifies source language
     speechLanguage = "de-DE"
-    reco = msspeech.SpeechRecognizer(speechConfig, language=speechLanguage, audio_config=audioConfig)
+    reco = msspeech.SpeechRecognizer(speech_config, language=speechLanguage, audio_config=audio_config)
     assert speechLanguage == reco.properties.get_property(PropertyId.SpeechServiceConnection_RecoLanguage)
     reco.recognize_once()    
     connectionUrl = reco.properties.get_property(PropertyId.SpeechServiceConnection_Url)
@@ -32,13 +32,13 @@ def test_speech_recognition_with_source_language_config(speech_input, default_sp
     endpoint = default_speech_auth['endpoint'] or "wss://{}.stt.speech.microsoft.com/speech/" \
             "recognition/interactive/cognitiveservices/v1".format(speech_region)
 
-    speechConfig = msspeech.SpeechConfig(subscription=default_speech_auth['subscription'],
+    speech_config = msspeech.SpeechConfig(subscription=default_speech_auth['subscription'],
             endpoint=endpoint)
-    audioConfig = msspeech.audio.AudioConfig(filename=speech_input.path)
+    audio_config = msspeech.audio.AudioConfig(filename=speech_input.path)
     # Creates a speech recognizer using a file as audio input and specifies source language config
     speechLanguage = "de-DE"
-    sourceLanguageConfig = msspeech.languageconfig.SourceLanguageConfig(speechLanguage)
-    reco = msspeech.SpeechRecognizer(speechConfig, source_language_config=sourceLanguageConfig, audio_config=audioConfig)
+    source_language_config = msspeech.languageconfig.SourceLanguageConfig(speechLanguage)
+    reco = msspeech.SpeechRecognizer(speech_config, source_language_config=source_language_config, audio_config=audio_config)
     assert speechLanguage == reco.properties.get_property(PropertyId.SpeechServiceConnection_RecoLanguage)
     reco.recognize_once()
     connectionUrl = reco.properties.get_property(PropertyId.SpeechServiceConnection_Url)
@@ -46,35 +46,35 @@ def test_speech_recognition_with_source_language_config(speech_input, default_sp
 
     # Creates a speech recognizer using a file as audio input and specifies source language config with endpointId
     endpointId="myendpointId"
-    sourceLanguageConfig = msspeech.languageconfig.SourceLanguageConfig(speechLanguage, endpointId)
-    reco = msspeech.SpeechRecognizer(speechConfig, source_language_config=sourceLanguageConfig, audio_config=audioConfig)
+    source_language_config = msspeech.languageconfig.SourceLanguageConfig(speechLanguage, endpointId)
+    reco = msspeech.SpeechRecognizer(speech_config, source_language_config=source_language_config, audio_config=audio_config)
     assert speechLanguage == reco.properties.get_property(PropertyId.SpeechServiceConnection_RecoLanguage)
     assert endpointId == reco.properties.get_property(PropertyId.SpeechServiceConnection_EndpointId)
 
 @pytest.mark.parametrize('speech_input,', ['weather'], indirect=True)
 def test_speech_recognition_with_auto_source_language_config(speech_input):
     from azure.cognitiveservices.speech import PropertyId     
-    speechConfig = msspeech.SpeechConfig(subscription="subsription", endpoint="endpoint")
-    audioConfig = msspeech.audio.AudioConfig(filename=speech_input.path)
+    speech_config = msspeech.SpeechConfig(subscription="subsription", endpoint="endpoint")
+    audio_config = msspeech.audio.AudioConfig(filename=speech_input.path)
 
-    autoDetectSourceLanguageConfig = msspeech.languageconfig.AutoDetectSourceLanguageConfig(languages=["de-DE", "en-US"])
-    reco = msspeech.SpeechRecognizer(speechConfig, auto_detect_source_language_config=autoDetectSourceLanguageConfig, audio_config=audioConfig)
+    auto_detect_source_language_config = msspeech.languageconfig.AutoDetectSourceLanguageConfig(languages=["de-DE", "en-US"])
+    reco = msspeech.SpeechRecognizer(speech_config, auto_detect_source_language_config=auto_detect_source_language_config, audio_config=audio_config)
     assert "de-DE,en-US" == reco.properties.get_property(PropertyId.SpeechServiceConnection_AutoDetectSourceLanguages)
     assert "" == reco.properties.get_property_by_name("de-DESPEECH-ModelId")
     assert "" == reco.properties.get_property_by_name("en-USSPEECH-ModelId")
     
-    sourceLanguageConfig1 = msspeech.languageconfig.SourceLanguageConfig("de-DE")    
-    sourceLanguageConfig2 = msspeech.languageconfig.SourceLanguageConfig("zh-CN", "myendpointId")
-    autoDetectSourceLanguageConfig = msspeech.languageconfig.AutoDetectSourceLanguageConfig(sourceLanguageConfigs=[sourceLanguageConfig1, sourceLanguageConfig2])
-    reco = msspeech.SpeechRecognizer(speechConfig, auto_detect_source_language_config=autoDetectSourceLanguageConfig, audio_config=audioConfig)
+    source_language_config1 = msspeech.languageconfig.SourceLanguageConfig("de-DE")
+    source_language_config2 = msspeech.languageconfig.SourceLanguageConfig("zh-CN", "myendpointId")
+    auto_detect_source_language_config = msspeech.languageconfig.AutoDetectSourceLanguageConfig(sourceLanguageConfigs=[source_language_config1, source_language_config2])
+    reco = msspeech.SpeechRecognizer(speech_config, auto_detect_source_language_config=auto_detect_source_language_config, audio_config=audio_config)
     assert "de-DE,zh-CN" == reco.properties.get_property(PropertyId.SpeechServiceConnection_AutoDetectSourceLanguages)
     assert "" == reco.properties.get_property_by_name("de-DESPEECH-ModelId")
     assert "myendpointId" == reco.properties.get_property_by_name("zh-CNSPEECH-ModelId")
     
-def test_creation_source_language_config_bad_parameter(speech_input):
+def test_creation_source_language_config_bad_parameter():
     errFound = None
     try:
-        sourceLanguageConfig = msspeech.languageconfig.SourceLanguageConfig("")
+        source_language_config = msspeech.languageconfig.SourceLanguageConfig("")
     except ValueError as err:
         errFound = err
     assert None != errFound
@@ -82,26 +82,26 @@ def test_creation_source_language_config_bad_parameter(speech_input):
 
     errFound = None
     try:
-        sourceLanguageConfig = msspeech.languageconfig.SourceLanguageConfig("en-US", "")
+        source_language_config = msspeech.languageconfig.SourceLanguageConfig("en-US", "")
     except ValueError as err:
         errFound = err
     assert None != errFound
     assert "endpointId cannot be an empty string" == str(errFound)
 
-def test_creation_auto_detect_source_language_config_bad_parameter(speech_input):
+def test_creation_auto_detect_source_language_config_bad_parameter():
     errFound = None
     try:
-        autoDetectSourceLanguageConfig = msspeech.languageconfig.AutoDetectSourceLanguageConfig()
+        auto_detect_source_language_config = msspeech.languageconfig.AutoDetectSourceLanguageConfig()
     except ValueError as err:
         errFound = err
     assert None != errFound
     assert "either languages or sourceLanguageConfigs has to be specified to create AutoDetectSourceLanguageConfig" == str(errFound)
 
-    sourceLanguageConfig1 = msspeech.languageconfig.SourceLanguageConfig("de-DE")
-    sourceLanguageConfig2 = msspeech.languageconfig.SourceLanguageConfig("fr-FR", "endpointId1")
+    source_language_config1 = msspeech.languageconfig.SourceLanguageConfig("de-DE")
+    source_language_config2 = msspeech.languageconfig.SourceLanguageConfig("fr-FR", "endpointId1")
     errFound = None
     try:
-        autoDetectSourceLanguageConfig = msspeech.languageconfig.AutoDetectSourceLanguageConfig(languages=["en-US", "de-DE"], sourceLanguageConfigs=[sourceLanguageConfig1, sourceLanguageConfig2])
+        auto_detect_source_language_config = msspeech.languageconfig.AutoDetectSourceLanguageConfig(languages=["en-US", "de-DE"], sourceLanguageConfigs=[source_language_config1, source_language_config2])
     except ValueError as err:
         errFound = err
     assert None != errFound
@@ -109,7 +109,7 @@ def test_creation_auto_detect_source_language_config_bad_parameter(speech_input)
 
     errFound = None
     try:
-        autoDetectSourceLanguageConfig = msspeech.languageconfig.AutoDetectSourceLanguageConfig(languages=[])
+        auto_detect_source_language_config = msspeech.languageconfig.AutoDetectSourceLanguageConfig(languages=[])
     except ValueError as err:
         errFound = err
     assert None != errFound
@@ -117,7 +117,7 @@ def test_creation_auto_detect_source_language_config_bad_parameter(speech_input)
 
     errFound = None
     try:
-        autoDetectSourceLanguageConfig = msspeech.languageconfig.AutoDetectSourceLanguageConfig(sourceLanguageConfigs=[])
+        auto_detect_source_language_config = msspeech.languageconfig.AutoDetectSourceLanguageConfig(sourceLanguageConfigs=[])
     except ValueError as err:
         errFound = err
     assert None != errFound
