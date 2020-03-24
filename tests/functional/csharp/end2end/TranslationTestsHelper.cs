@@ -39,10 +39,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 config.EndpointId = endpointId;
             }
-
-            // Set proxy if one is defined
-            config.SetSystemProxy();
-
             return config;
         }
 

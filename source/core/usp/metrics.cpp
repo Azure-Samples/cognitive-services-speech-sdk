@@ -2,10 +2,9 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
-// usp_metrics.h: send and process telemetry messages using the USP web socket connection.
+// metrics.h: send and process telemetry messages.
 //
-
-#include "usp_metrics.h"
+#include "metrics.h"
 #include "uspcommon.h"
 
 #if defined(_MSC_VER)
@@ -17,12 +16,49 @@
 #include <tuple>
 #include <time.h>
 
+#include "azure_c_shared_utility_tickcounter_wrapper.h"
 #include "azure_c_shared_utility_xlogging_wrapper.h"
 
 namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
 namespace USP {
+
+namespace event
+{
+    // Top level Array keys for events
+    const char* keys::array::ReceivedMessages = "ReceivedMessages";
+    const char* keys::array::Metrics = "Metrics";
+
+    // Received Message event Keys
+    const char* keys::received::Audio = "audio";
+    const char* keys::received::AudioMetadata = "audio.metadata";
+    const char* keys::received::Response = "response";
+
+    const char* keys::Value = "value";
+    const char* keys::EventType = "EventType";
+    const char* keys::Name = "name";
+    const char* keys::Start = "Start";
+    const char* keys::End = "End";
+    const char* keys::DeviceId = "DeviceId";
+    const char* keys::Id = "Id";
+    const char* keys::Memory = "Memory";
+    const char* keys::CPU = "CPU";
+    const char* keys::Error = "Error";
+    const char* keys::Status = "Status";
+
+    // Metric event name keys
+    const char* name::AudioPlayback = "audio:playback";
+    const char* name::AudioStart = "AudioStart";
+    const char* name::Microphone = "Microphone";
+    const char* name::ListeningTrigger = "ListeningTrigger";
+    const char* name::Connection = "Connection";
+    const char* name::Device = "device";
+    const char* name::Notification = "notification";
+    const char* name::SDK = "sdk";
+    const char* name::PhraseLatency = "PhraseLatencyMs";
+    const char* name::FirstHypothesisLatency = "FirstHypothesisLatencyMs";
+}
 
 constexpr std::size_t MaxMessagesToRecord{ 50 };
 
@@ -45,8 +81,6 @@ const std::array<std::tuple<IncomingMsgType, const char*>, static_cast<size_t>(c
     std::make_tuple(audioStart, path::audioStart),
     std::make_tuple(audioEnd, path::audioEnd)
 } };
-
-
 
 const char* get_message_name(const IncomingMsgType type)
 {
@@ -213,7 +247,7 @@ static nlohmann::json telemetry_add_metricevents(const TELEMETRY_DATA& telemetry
         push_if_not_null(json_array, telemetry_object.deviceJson);
 
         // we can return here because when we have a connectionJson we know
-        // all of the JSON besides deviceJson and connectionJson are not relevant
+       // all of the jsons besides deviceJson and connectionJson are not relevant
         return json_array;
     }
 

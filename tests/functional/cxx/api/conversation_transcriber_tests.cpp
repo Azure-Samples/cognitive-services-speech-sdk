@@ -204,7 +204,7 @@ TEST_CASE("conversation bad connection", "[api][cxx]")
     WaitForResult(result->ready.get_future(), 5min);
     transcriber->StopTranscribingAsync().get();
 
-    SPXTEST_REQUIRE(result->phrases[0].Text.find("Runtime error: Url protocol prefix not recognized") != string::npos);
+    SPXTEST_REQUIRE(result->phrases[0].Text.find("Runtime error: Failed to create transport request.") != string::npos);
 }
 
 TEST_CASE("conversation_inroom_8_channel_file", "[api][cxx]")

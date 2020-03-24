@@ -310,7 +310,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             Assert.IsTrue(connectedEventCount == disconnectedEventCount || connectedEventCount == disconnectedEventCount + 1, AssertOutput.ConnectedDisconnectedEventUnmatch);
         }
 
-        public static async Task AssertConnectionError(SpeechConfig speechConfig, CancellationErrorCode expectedErrorCode, string expectedErrorMessage, StringComparison comparison = StringComparison.Ordinal)
+        public static async Task AssertConnectionError(SpeechConfig speechConfig, CancellationErrorCode expectedErrorCode, string expectedErrorMessage)
         {
             var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
             int connectedEventCount = 0;
@@ -327,7 +327,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 var cancellation = CancellationDetails.FromResult(result);
                 Assert.AreEqual(CancellationReason.Error, cancellation.Reason);
                 Assert.AreEqual(expectedErrorCode, cancellation.ErrorCode);
-                AssertHelpers.AssertStringContains(cancellation.ErrorDetails, expectedErrorMessage, comparison);
+                AssertHelpers.AssertStringContains(cancellation.ErrorDetails, expectedErrorMessage);
             }
         }
 

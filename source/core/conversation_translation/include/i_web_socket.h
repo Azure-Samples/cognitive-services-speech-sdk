@@ -8,7 +8,7 @@
 #pragma once
 
 #include <http_endpoint_info.h>
-#include <event.h>
+#include "event.h"
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -18,14 +18,14 @@ namespace USP {
     /// <summary>
     /// Possible web socket errors
     /// </summary>
-    enum class WebSocketError
+    typedef enum _WebSocketError
     {
         /// <summary>
         /// An unknown error was encountered (e.g. unexpected exception)
         /// </summary>
         UNKNOWN,
         /// <summary>
-        /// The server we are connected to closed the connection
+        /// The server we are connected to closed the connection. This is never used
         /// </summary>
         REMOTE_CLOSED,
         /// <summary>
@@ -53,13 +53,13 @@ namespace USP {
         /// using a DNS cache. The error code will be the DNS cache error value
         /// </summary>
         DNS_FAILURE
-    };
+    } WebSocketError;
 
 
     /// <summary>
     /// Possible HTTP status codes returned by the service for upgrade requests
     /// </summary>
-    enum class HttpStatusCode
+    typedef enum _HttpStatusCode
     {
         /// <summary>
         /// Success response
@@ -95,22 +95,32 @@ namespace USP {
         /// The service is down or unavailable. You should retry again
         /// </summary>
         SERVICE_UNAVAILABLE = 503
-    };
+    } HttpStatusCode;
 
 
     /// <summary>
     /// Possible states for the web socket connection
     /// </summary>
-    enum class WebSocketState
+    typedef enum _WebSocketState
     {
         /// <summary>
         /// The web socket is closed
         /// </summary>
         CLOSED = 0,
         /// <summary>
-        /// We start opening in the web socket connection here
+        /// We are opening the web socket connection but first we need to do a network check.
+        /// If you are not using a DNS cache, you will go directly to the OPENING state from
+        /// here.
         /// </summary>
-        INITIAL,
+        NETWORK_CHECK,
+        /// <summary>
+        /// (DNS cache only) The DNS cache is doing work
+        /// </summary>
+        NETWORK_CHECKING,
+        /// <summary>
+        /// The network check has completed. We start opening in the web socket connection here
+        /// </summary>
+        NETWORK_CHECK_COMPLETE,
         /// <summary>
         /// The web socket connection is opening
         /// </summary>
@@ -120,22 +130,28 @@ namespace USP {
         /// </summary>
         CONNECTED,
         /// <summary>
+        /// The web socket is disconnecting temporarily to reconnect. This can happen if e.g.
+        /// your token has expired in token based authentication and you are reconnecting with
+        /// a new one
+        /// </summary>
+        RESETTING,
+        /// <summary>
         /// The web socket connection is being closed
         /// </summary>
         DESTROYING
-    };
+    } WebSocketState;
 
 
     /// <summary>
     /// Enumerations of reasons why the web socket was disconnected. These are as defined in RFC 6455
     /// section 7.4.1
     /// </summary>
-    enum class WebSocketDisconnectReason : uint16_t
+    typedef enum _WebSocketDisconnectReason
     {
         /// <summary>
         /// Unknown disconnect reason
         /// </summary>
-        Unknown = UINT16_MAX,
+        Unknown = -1,
         /// <summary>
         /// Normal closure. This could be requested by the client or the server
         /// </summary>
@@ -176,7 +192,7 @@ namespace USP {
         /// The connection will be closed by the server because of an error on the server.
         /// </summary>
         InternalServerError = 1011
-    };
+    } WebSocketDisconnectReason;
 
 
 
@@ -197,8 +213,7 @@ namespace USP {
         /// Connects to the web socket connection
         /// </summary>
         /// <param name="params">The connection parameters to use</param>
-        /// <param name="connectionId">(Optional) The connection ID associated with this web socket connection which is used for telemetry</param>
-        virtual void Connect(const Impl::HttpEndpointInfo& webSocketEndpoint, const std::string& connectionId = "") = 0;
+        virtual void Connect(const Impl::HttpEndpointInfo& webSocketEndpoint) = 0;
 
         /// <summary>
         /// Disconnects the web socket connection

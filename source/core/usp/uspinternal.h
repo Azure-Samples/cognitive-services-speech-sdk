@@ -34,8 +34,8 @@
 #include <sstream>
 
 #include "usp.h"
-#include "usp_web_socket.h"
-#include "usp_metrics.h"
+#include "transport.h"
+#include "metrics.h"
 
 #ifndef ARRAYSIZE
 #define ARRAYSIZE(__a) (sizeof(__a) / sizeof(__a[0]))
@@ -120,8 +120,16 @@ public:
     std::string GetConnectionUrl();
 
 private:
-    void Invoke(std::function<void(CallbacksPtr)> callback);
+    void Invoke(std::function<void()> callback);
 
+    using DnsCachePtr = deleted_unique_ptr<std::remove_pointer<DnsCacheHandle>::type>;
+
+    void ScheduleWork();
+
+    static void DoWork(std::weak_ptr<Connection::Impl> ptr);
+    static void WorkLoop(std::shared_ptr<Connection::Impl> ptr);
+
+    std::string EncodeParameterString(const std::string& parameter) const;
     std::string ConstructConnectionUrl() const;
 
     void BuildQueryParameters(const std::vector<std::string>& parameterList, const std::unordered_map<std::string, std::string>& valueMap, bool isCustomEndpoint, std::ostringstream& oss) const;
@@ -140,25 +148,16 @@ private:
     bool m_speechContextMessageAllowed;
     std::string m_connectionUrl;
     size_t m_audioOffset;
+    DnsCachePtr m_dnsCache;
     std::unique_ptr<Telemetry> m_telemetry;
-    std::shared_ptr<UspWebSocket> m_transport;
+    std::unique_ptr<TransportRequest> m_transport;
     const uint64_t m_creationTime;
 
-    void OnTelemetryData(const uint8_t* buffer, size_t bytesToWrite, const char *requestId);
-    void OnTransportOpened();
-    void OnTransportClosed(WebSocketDisconnectReason reason, const std::string& details, bool serverRequested);
-    void OnTransportError(WebSocketError reason, int errorCode, const std::string& errorString);
-    void OnTransportData(bool isBinary, const UspHeaders& headers, const unsigned char* buffer, size_t bufferSize);
-
-    void OnTransportTextData(const UspHeaders& headers, const std::string& data)
-    {
-        OnTransportData(false, headers, reinterpret_cast<const unsigned char *>(data.c_str()), data.size());
-    }
-
-    void OnTransportBinaryData(const UspHeaders& headers, const uint8_t* data, size_t size)
-    {
-        OnTransportData(true, headers, reinterpret_cast<const unsigned char *>(data), size);
-    }
+    static void OnTelemetryData(const uint8_t* buffer, size_t bytesToWrite, void *context, const char *requestId);
+    static void OnTransportOpened(void* context);
+    static void OnTransportClosed(void* context);
+    static void OnTransportError(TransportErrorInfo* errorInfo, void* context);
+    static void OnTransportData(TransportResponse* response, void* context);
 
     void InvokeRecognitionErrorCallback(RecognitionStatus status, const std::string& response);
 
@@ -167,7 +166,7 @@ private:
     bool isErrorRecognitionStatus(RecognitionStatus status);
     std::shared_ptr<Microsoft::CognitiveServices::Speech::Impl::ISpxThreadService> m_threadService;
 
-    void FillLanguageForAudioOutputChunkMsg(const std::string& streamId, const std::string& messagePath, AudioOutputChunkMsg& msg);
+    void FillLanguageForAudioOutputChunkMsg(const char* streamId, const std::string& messagePath, AudioOutputChunkMsg& msg);
     std::unordered_map<std::string, std::string> m_streamIdLangMap;
 };
 

@@ -4,16 +4,14 @@
 //
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
 
 namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils
 {
     class AssertHelpers
     {
-        static public void AssertStringContains(string inputString, string searchString, StringComparison compare = StringComparison.Ordinal)
+        static public void AssertStringContains(string inputString, string searchString)
         {
-            Assert.IsTrue(
-                inputString?.IndexOf(searchString, compare) >= 0,
+            Assert.IsTrue(inputString.Contains(searchString),
                 $"Input string does not contain '{searchString}': '{inputString}'");
         }
     }

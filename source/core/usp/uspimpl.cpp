@@ -23,7 +23,9 @@
 #include "uspcommon.h"
 #include "uspinternal.h"
 
-#include "usp_metrics.h"
+#include "transport.h"
+#include "dnscache.h"
+#include "metrics.h"
 
 #include "exception.h"
 
@@ -51,8 +53,6 @@ namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
 namespace USP {
-
-constexpr auto HEADER_PATH = "Path";
 
 const char* path::speechHypothesis = "speech.hypothesis";
 const char* path::speechPhrase = "speech.phrase";
@@ -244,27 +244,6 @@ static void throw_if_null(const T* ptr, const string& name)
     }
 }
 
-/// <summary>
-/// Helper method to read a value from constant the USP headers unordered map and return a default
-/// empty string instead of an exception. Using [] would require a non-constant header, and .at
-/// throws exceptions for missing keys
-/// </summary>
-/// <param name="headers">The headers to retrieve the value from</param>
-/// <param name="key">The key to retrieve</param>
-/// <returns>The value of that header, or an empty string if the key is not found</returns>
-static std::string TryGet(const UspHeaders& headers, const char * key)
-{
-    auto iter = headers.find(key);
-    if (iter == headers.end())
-    {
-        return std::string{};
-    }
-    else
-    {
-        return iter->second;
-    }
-}
-
 inline bool contains(const string& content, const string& name)
 {
     return (content.find(name) != string::npos) ? true : false;
@@ -273,13 +252,12 @@ inline bool contains(const string& content, const string& name)
 const string g_recoModeStrings[] = { "interactive", "conversation", "dictation" };
 
 // This is called from telemetry_flush, invoked on a worker thread in turn-end.
-void Connection::Impl::OnTelemetryData(const uint8_t* buffer, size_t bytesToWrite, const char *requestId)
+void Connection::Impl::OnTelemetryData(const uint8_t* buffer, size_t bytesToWrite, void *context, const char *requestId)
 {
-    if (m_transport != nullptr)
-    {
-        m_transport->SendTelemetryData(buffer, bytesToWrite, requestId);
-    }
+    Connection::Impl *connection = (Connection::Impl*)context;
+    TransportWriteTelemetry(connection->m_transport.get(), buffer, bytesToWrite, requestId);
 }
+
 
 Connection::Impl::Impl(const Client& config)
     : m_config(config),
@@ -309,15 +287,81 @@ uint64_t Connection::Impl::getTimestamp()
     return telemetry_gettime() - m_creationTime;
 }
 
-void Connection::Impl::Invoke(function<void(CallbacksPtr)> callback)
+void Connection::Impl::Invoke(function<void()> callback)
 {
-    auto callbacks = m_config.m_callbacks;
-    if (callbacks == nullptr || !m_valid)
+    if (!m_valid)
     {
         return;
     }
 
-    callback(callbacks);
+    callback();
+}
+
+void Connection::Impl::ScheduleWork()
+{
+    // Reschedule to make sure we do not reenter the transport
+    // from one of its callbacks.
+    auto keepAlive = shared_from_this();
+    packaged_task<void()> task([keepAlive]() { DoWork(keepAlive); });
+    m_threadService->ExecuteAsync(move(task));
+}
+
+void Connection::Impl::WorkLoop(shared_ptr<Connection::Impl> ptr)
+{
+    packaged_task<void()> task([ptr]()
+    {
+        if (!ptr->m_valid)
+            return;
+
+        DoWork(ptr);
+
+        packaged_task<void()> task([ptr]() { WorkLoop(ptr); });
+        ptr->m_threadService->ExecuteAsync(move(task), chrono::milliseconds(ptr->m_config.m_pollingIntervalms));
+
+    });
+
+    ptr->m_threadService->ExecuteAsync(move(task));
+}
+
+void Connection::Impl::DoWork(weak_ptr<Connection::Impl> ptr)
+{
+    try
+    {
+        auto connection = ptr.lock();
+        if (connection == nullptr)
+        {
+            return;
+        }
+
+        if (!connection->m_valid)
+        {
+            return;
+        }
+
+        auto callbacks = connection->m_config.m_callbacks;
+
+        try
+        {
+            TransportDoWork(connection->m_transport.get());
+        }
+        catch (const exception& e)
+        {
+            connection->Invoke([&] { callbacks->OnError(false, ErrorCode::RuntimeError, e.what()); });
+        }
+        catch (...)
+        {
+            connection->Invoke([&] { callbacks->OnError(false, ErrorCode::RuntimeError, "Unhandled exception in the USP layer."); });
+        }
+    }
+    catch (const exception& ex)
+    {
+        (void)ex; // release builds
+        LogError("%s Unexpected Exception %s. Thread terminated", __FUNCTION__, ex.what());
+    }
+    catch (...)
+    {
+        LogError("%s Unexpected Exception. Thread terminated", __FUNCTION__);
+    }
 }
 
 void Connection::Impl::Shutdown()
@@ -335,6 +379,14 @@ bool Connection::Impl::IsConnected()
 std::string Connection::Impl::GetConnectionUrl()
 {
     return m_connectionUrl;
+}
+
+string Connection::Impl::EncodeParameterString(const string& parameter) const
+{
+    STRING_HANDLE encodedHandle = URL_EncodeString(parameter.c_str());
+    string encodedStr(STRING_c_str(encodedHandle));
+    STRING_delete(encodedHandle);
+    return encodedStr;
 }
 
 NetworkType GetNetworkType(std::string region)
@@ -590,14 +642,14 @@ string Connection::Impl::ConstructConnectionUrl() const
                         auto langVector = PAL::split(entry->second, CommaDelim);
                         for (auto item : langVector)
                         {
-                            oss << queryParameterDelim << endpoint::translation::toQueryParam << HttpUtils::UrlEscape(item);
+                            oss << queryParameterDelim << endpoint::translation::toQueryParam << EncodeParameterString(item);
                         }
                     }
                     // Voice need 2 query parameters.
                     else if (queryParameterName == endpoint::translation::voiceQueryParam)
                     {
                         oss << queryParameterDelim << endpoint::translation::featuresQueryParam << endpoint::translation::requireVoice;
-                        oss << queryParameterDelim << endpoint::translation::voiceQueryParam << HttpUtils::UrlEscape(entry->second);
+                        oss << queryParameterDelim << endpoint::translation::voiceQueryParam << EncodeParameterString(entry->second);
                     }
                     else
                     {
@@ -650,11 +702,20 @@ void Connection::Impl::Connect()
         ThrowLogicError("USP connection already created.");
     }
 
-    HttpEndpointInfo endpoint;
+    using HeadersPtr = deleted_unique_ptr<remove_pointer<HTTP_HEADERS_HANDLE>::type>;
+
+    HeadersPtr connectionHeaders(HTTPHeaders_Alloc(), HTTPHeaders_Free);
+
+    if (connectionHeaders == nullptr)
+    {
+        ThrowRuntimeError("Failed to create connection headers.");
+    }
+
+    auto headersPtr = connectionHeaders.get();
 
     if (!m_config.m_audioResponseFormat.empty())
     {
-        endpoint.SetHeader(headers::audioResponseFormat, m_config.m_audioResponseFormat);
+        HTTPHeaders_ReplaceHeaderNameValuePair(headersPtr, headers::audioResponseFormat, m_config.m_audioResponseFormat.c_str());
     }
 
     // Set authentication headers.
@@ -662,20 +723,29 @@ void Connection::Impl::Connect()
     if (!authStr.empty())
     {
         LogInfo("Adding subscription key headers");
-        endpoint.SetHeader(headers::ocpApimSubscriptionKey, authStr);
+        if (HTTPHeaders_ReplaceHeaderNameValuePair(headersPtr, headers::ocpApimSubscriptionKey, authStr.c_str()) != 0)
+        {
+            ThrowRuntimeError("Failed to set authentication using subscription key.");
+        }
     }
     authStr = m_config.m_authData[static_cast<size_t>(AuthenticationType::AuthorizationToken)];
     if (!authStr.empty())
     {
         LogInfo("Adding authorization token headers");
         auto token = "Bearer " + authStr;
-        endpoint.SetHeader(headers::authorization, token);
+        if (HTTPHeaders_ReplaceHeaderNameValuePair(headersPtr, headers::authorization, token.c_str()) != 0)
+        {
+            ThrowRuntimeError("Failed to set authentication using authorization token.");
+        }
     }
     authStr = m_config.m_authData[static_cast<size_t>(AuthenticationType::SearchDelegationRPSToken)];
     if (!authStr.empty())
     {
         LogInfo("Adding search delegation RPS token.");
-        endpoint.SetHeader(headers::searchDelegationRPSToken, authStr);
+        if (HTTPHeaders_ReplaceHeaderNameValuePair(headersPtr, headers::searchDelegationRPSToken, authStr.c_str()) != 0)
+        {
+            ThrowRuntimeError("Failed to set authentication using Search-DelegationRPSToken.");
+        }
     }
     authStr = m_config.m_authData[static_cast<size_t>(AuthenticationType::DialogApplicationId)];
     if (!authStr.empty())
@@ -687,14 +757,20 @@ void Connection::Impl::Connect()
         if (headerName != nullptr)
         {
             LogInfo("Adding Dialog auth header.");
-            endpoint.SetHeader(headerName, authStr);
+            if (HTTPHeaders_ReplaceHeaderNameValuePair(headersPtr, headerName, authStr.c_str()) != 0)
+            {
+                ThrowRuntimeError("Failed to set authentication using Dialog auth header.");
+            }
         }
     }
     authStr = m_config.m_authData[static_cast<size_t>(AuthenticationType::ConversationToken)];
     if (!authStr.empty())
     {
         LogInfo("Adding conversation token.");
-        endpoint.SetHeader(headers::capitoConversationToken, authStr);
+        if (HTTPHeaders_ReplaceHeaderNameValuePair(headersPtr, headers::capitoConversationToken, authStr.c_str()) != 0)
+        {
+            ThrowRuntimeError("Failed to set the conversation token header.");
+        }
     }
 
     if (m_config.m_endpointType == EndpointType::Dialog)
@@ -703,27 +779,17 @@ void Connection::Impl::Connect()
         if (!region.empty())
         {
             LogInfo("Adding region header");
-            endpoint.SetHeader(headers::region, region);
+            if (HTTPHeaders_ReplaceHeaderNameValuePair(headersPtr, headers::region, region.c_str()) != 0)
+            {
+                ThrowRuntimeError("Failed to set region.");
+            }
         }
     }
 
-    // TODO ralphe: should probably update the ConstructConnectionUrl to set the scheme, host, path and query parameters
-    //              directly on the endpoint instance
     m_connectionUrl = ConstructConnectionUrl();
-    endpoint.EndpointUrl(m_connectionUrl);
-    LogInfo("connectionUrl=%s", endpoint.EndpointUrl().c_str());
+    LogInfo("connectionUrl=%s", m_connectionUrl.c_str());
 
-    m_telemetry = make_unique<Telemetry>(
-        [weak = std::weak_ptr<Connection::Impl>(shared_from_this())](auto buffer, auto bytesToWrite, auto, auto requestId)
-        {
-            auto instance = weak.lock();
-            if (instance != nullptr)
-            {
-                instance->OnTelemetryData(buffer, bytesToWrite, requestId);
-            }
-        },
-        nullptr);
-
+    m_telemetry = make_unique<Telemetry>(Connection::Impl::OnTelemetryData, this);
     if (m_telemetry == nullptr)
     {
         ThrowRuntimeError("Failed to create telemetry instance.");
@@ -734,37 +800,50 @@ void Connection::Impl::Connect()
     // Log the device uuid
     MetricsDeviceStartup(*m_telemetry, connectionId, PAL::DeviceUuid());
 
+    bool disable_default_verify_paths = false;
+    const char *trustedCert = nullptr;
+    bool disable_crl_check = false;
+
 #ifdef SPEECHSDK_USE_OPENSSL
     if (!m_config.m_trustedCert.empty())
     {
-        endpoint
-            .DisableDefaultVerifyPaths(true)
-            .SingleTrustedCertificate(m_config.m_trustedCert, m_config.m_disable_crl_check);
+        disable_default_verify_paths = true;
+        trustedCert = m_config.m_trustedCert.c_str();
+        disable_crl_check = m_config.m_disable_crl_check;
     }
 #endif
 
-    m_transport = UspWebSocket::Create(
-        m_threadService,
-        ISpxThreadService::Affinity::Background,
-        std::chrono::milliseconds{ m_config.m_pollingIntervalms },
-        *(m_telemetry.get()));
+    m_transport = TransportRequestCreate(
+        m_connectionUrl,
+        this,
+        m_telemetry.get(),
+        headersPtr,
+        connectionId,
+        m_config.m_proxyServerInfo.get(),
+        disable_default_verify_paths,
+        trustedCert,
+        disable_crl_check);
 
-    std::shared_ptr<USP::Connection::Impl> shared(shared_from_this());
+    if (m_transport == nullptr)
+    {
+        ThrowRuntimeError("Failed to create transport request.");
+    }
 
-    m_transport->OnConnected.add(shared, &Connection::Impl::OnTransportOpened);
-    m_transport->OnDisconnected.add(shared, &Connection::Impl::OnTransportClosed);
-    m_transport->OnError.add(shared, &Connection::Impl::OnTransportError);
-    m_transport->OnUspBinaryData.add(shared, &Connection::Impl::OnTransportBinaryData);
-    m_transport->OnUspTextData.add(shared, &Connection::Impl::OnTransportTextData);
+#ifdef __linux__
+    m_dnsCache = DnsCachePtr(DnsCacheCreate(), DnsCacheDestroy);
+    if (!m_dnsCache)
+    {
+        ThrowRuntimeError("Failed to create DNS cache.");
+    }
+#else
+    m_dnsCache = nullptr;
+#endif
 
-    // set the connection ID header and protocol
-    endpoint
-        .SetHeader("X-ConnectionId", connectionId)
-        .AddWebSocketProtocol("USP");
+    TransportSetDnsCache(m_transport.get(), m_dnsCache.get());
+    TransportSetCallbacks(m_transport.get(), OnTransportError, OnTransportData, OnTransportOpened, OnTransportClosed);
 
-    // open the web socket connection
     m_valid = true;
-    m_transport->Connect(endpoint, connectionId);
+    WorkLoop(shared_from_this());
 }
 
 string Connection::Impl::CreateRequestId()
@@ -809,18 +888,15 @@ void Connection::Impl::QueueMessage(const string& path, const uint8_t *data, siz
                 m_speechContextMessageAllowed = false;
             }
         }
-
         if (!requestId.empty() && path == "synthesis.context")
         {
             m_speechRequestId = requestId;
         }
-
         auto usedRequestId = requestId.empty() ? UpdateRequestId(messageType) : requestId;
-        if (m_transport)
-        {
-            m_transport->SendData(path, data, size, usedRequestId, binary);
-        }
+        (void)TransportMessageWrite(m_transport.get(), path.c_str(), data, size, usedRequestId.c_str(), binary);
     }
+
+    ScheduleWork();
 }
 
 string Connection::Impl::UpdateRequestId(const MessageType messageType)
@@ -851,7 +927,7 @@ string Connection::Impl::UpdateRequestId(const MessageType messageType)
         }
         else
         {
-            // For other services, speech.event must be associated to an ongoing speech turn. Only speech.context or audio can kick-off a new turn.
+            // For other services, speech.event must be associated to an ongoing speech trun. Only speech.context or audio can kick-off a new turn.
             // And speech.context must be sent before audio, so m_speechRequestId must be empty at this time.
             if (!m_speechRequestId.empty())
             {
@@ -932,8 +1008,9 @@ void Connection::Impl::QueueAudioSegment(const Microsoft::CognitiveServices::Spe
 
     MetricsAudioStreamData(size);
 
-    bool newTurn = m_audioOffset == 0;
-    if (newTurn)
+    int ret = 0;
+
+    if (m_audioOffset == 0)
     {
         // The service uses the first audio message that contains a unique request identifier to signal the start of a new request/response cycle or turn.
         // After receiving an audio message with a new request identifier, the service discards any queued or unsent messages
@@ -943,14 +1020,22 @@ void Connection::Impl::QueueAudioSegment(const Microsoft::CognitiveServices::Spe
 
         MetricsAudioStreamInit();
         MetricsAudioStart(*m_telemetry, m_speechRequestId);
+
+        ret = TransportStreamPrepare(m_transport.get());
+        if (ret != 0)
+        {
+            ThrowRuntimeError("TransportStreamPrepare failed. error=" + to_string(ret));
+        }
     }
 
-    if (m_transport)
+    ret = TransportStreamWrite(m_transport.get(), path::audio, audioChunk, m_speechRequestId.c_str());
+    if (ret != 0)
     {
-        m_transport->SendAudioData(path::audio, audioChunk, m_speechRequestId, newTurn);
+        ThrowRuntimeError("TransportStreamWrite failed. error=" + to_string(ret));
     }
 
     m_audioOffset += size;
+    ScheduleWork();
 }
 
 void Connection::Impl::QueueAudioEnd()
@@ -968,31 +1053,18 @@ void Connection::Impl::QueueAudioEnd()
         m_speechContextMessageAllowed = false;
     }
 
-    std::exception_ptr ex;
-    try
-    {
-        if (m_transport)
-        {
-            m_transport->SendAudioData(path::audio, std::make_shared<DataChunk>(nullptr, 0), m_speechRequestId);
-        }
-    }
-    catch (const std::exception& innerEx)
-    {
-        ex = std::make_exception_ptr(ExceptionWithCallStack{ std::string("QueueAudioEnd failed with an exception: ") + innerEx.what(), SPXERR_RUNTIME_ERROR });
-    }
-    catch (...)
-    {
-        ex = std::make_exception_ptr(ExceptionWithCallStack{ "QueueAudioEnd failed with an unknown throwable", SPXERR_RUNTIME_ERROR });
-    }
+    auto ret = TransportStreamFlush(m_transport.get(), path::audio, m_speechRequestId.c_str());
 
     m_audioOffset = 0;
     MetricsAudioStreamFlush();
     MetricsAudioEnd(*m_telemetry, m_speechRequestId);
 
-    if (ex)
+    if (ret != 0)
     {
-        std::rethrow_exception(ex);
+        ThrowRuntimeError("Returns failure, reason: TransportStreamFlush returned " + to_string(ret));
     }
+
+    ScheduleWork();
 }
 
 void Connection::Impl::WriteTelemetryLatency(uint64_t latencyInTicks, bool isPhraseLatency)
@@ -1008,77 +1080,91 @@ void Connection::Impl::WriteTelemetryLatency(uint64_t latencyInTicks, bool isPhr
 }
 
 // Callback for transport opened
-void Connection::Impl::OnTransportOpened()
+void Connection::Impl::OnTransportOpened(void* context)
 {
-    if (m_connected)
+    Connection::Impl *connection = static_cast<Connection::Impl*>(context);
+    if (connection == nullptr)
     {
-        LogError("TS:%" PRIu64 ", connection:0x%x is already connected!!!", getTimestamp(), this);
+        ThrowRuntimeError("Invalid USP connection.");
     }
-
-    assert(m_connected == false);
-    m_connected = true;
-    LogInfo("TS:%" PRIu64 ", OnConnected: connection:0x%x", getTimestamp(), this);
-    Invoke([&](auto callbacks) {
-        callbacks->OnConnected();
+    if (connection->m_connected)
+    {
+        LogError("TS:%" PRIu64 ", connection:0x%x is already connected!!!", connection->getTimestamp(), connection);
+    }
+    assert(connection->m_connected == false);
+    connection->m_connected = true;
+    LogInfo("TS:%" PRIu64 ", OnConnected: connection:0x%x", connection->getTimestamp(), connection);
+    auto callbacks = connection->m_config.m_callbacks;
+    connection->Invoke([&] {
+            callbacks->OnConnected();
     });
 }
 
 // Callback for transport closed
-void Connection::Impl::OnTransportClosed(WebSocketDisconnectReason reason, const std::string& details, bool serverRequested)
+void Connection::Impl::OnTransportClosed(void* context)
 {
-    if (m_connected)
+    Connection::Impl *connection = static_cast<Connection::Impl*>(context);
+    if (connection == nullptr)
     {
-        m_connected = false;
-        LogInfo("TS:%" PRIu64 ", OnDisconnected: connection:0x%x, Reason: %d, Server Requested: %d, Details: %s",
-            getTimestamp(), this, reason, serverRequested, details.c_str());
-
-        auto callbacks = m_config.m_callbacks;
-        Invoke([&](auto callbacks) {
+        ThrowRuntimeError("Invalid USP connection.");
+    }
+    if (connection->m_connected)
+    {
+        connection->m_connected = false;
+        LogInfo("TS:%" PRIu64 ", OnDisconnected: connection:0x%x", connection->getTimestamp(), connection);
+        auto callbacks = connection->m_config.m_callbacks;
+        connection->Invoke([&] {
             callbacks->OnDisconnected();
         });
     }
-    }
+}
 
 // Callback for transport errors
-void Connection::Impl::OnTransportError(WebSocketError reason, int errorCode, const std::string& errorString)
+void Connection::Impl::OnTransportError(TransportErrorInfo* errorInfo, void* context)
 {
-    LogInfo("TS:%" PRIu64 ", TransportError: connection:0x%x, reason=%d, code=%d [0x%08x], string=%s",
-        getTimestamp(), this, reason, errorCode, errorCode, errorString.c_str());
+    throw_if_null(context, "context");
 
+    Connection::Impl *connection = static_cast<Connection::Impl*>(context);
+
+    auto errorStr = (errorInfo->errorString != nullptr) ? errorInfo->errorString : "";
+    LogInfo("TS:%" PRIu64 ", TransportError: connection:0x%x, reason=%d, code=%d [0x%08x], string=%s",
+        connection->getTimestamp(), connection, errorInfo->reason, errorInfo->errorCode, errorInfo->errorCode, errorStr);
+
+    auto callbacks = connection->m_config.m_callbacks;
     USP::ErrorCode uspErrorCode = ErrorCode::ConnectionError;
     string errorMessage;
-    auto errorCodeInString = to_string(errorCode);
+    auto errorCodeInString = to_string(errorInfo->errorCode);
 
-    switch (reason)
+    switch (errorInfo->reason)
     {
-    case WebSocketError::REMOTE_CLOSED:
+    case TRANSPORT_ERROR_REMOTE_CLOSED:
         uspErrorCode = ErrorCode::ConnectionError;
-        errorMessage = "Connection was closed by the remote host. Error code: " + errorCodeInString + ". Error details: " + errorString;
+        errorMessage = "Connection was closed by the remote host. Error code: " + errorCodeInString + ". Error details: " + errorStr;
         break;
 
-    case WebSocketError::CONNECTION_FAILURE:
+    case TRANSPORT_ERROR_CONNECTION_FAILURE:
         uspErrorCode = ErrorCode::ConnectionError;
         errorMessage = "Connection failed (no connection to the remote host). Internal error: " + errorCodeInString
-            + ". Error details: " + errorString
+            + ". Error details: " + errorStr
             + ". Please check network connection, firewall setting, and the region name used to create speech factory.";
         break;
 
-    case WebSocketError::WEBSOCKET_UPGRADE:
-        switch ((HttpStatusCode)errorCode)
+    case TRANSPORT_ERROR_WEBSOCKET_UPGRADE:
+        switch (errorInfo->errorCode)
         {
-        case HttpStatusCode::BAD_REQUEST:
+        case HTTP_BADREQUEST:
             uspErrorCode = ErrorCode::BadRequest;
             errorMessage = "WebSocket Upgrade failed with a bad request (400). Please check the language name and endpoint id (if used) are correctly associated with the provided subscription key.";
             break;
-        case HttpStatusCode::UNAUTHORIZED:
+        case HTTP_UNAUTHORIZED:
             uspErrorCode = ErrorCode::AuthenticationError;
             errorMessage = "WebSocket Upgrade failed with an authentication error (401). Please check for correct subscription key (or authorization token) and region name.";
             break;
-        case HttpStatusCode::FORBIDDEN:
+        case HTTP_FORBIDDEN:
             uspErrorCode = ErrorCode::AuthenticationError;
             errorMessage = "WebSocket Upgrade failed with an authentication error (403). Please check for correct subscription key (or authorization token) and region name.";
             break;
-        case HttpStatusCode::TOO_MANY_REQUESTS:
+        case HTTP_TOO_MANY_REQUESTS:
             uspErrorCode = ErrorCode::TooManyRequests;
             errorMessage = "WebSocket Upgrade failed with too many requests error (429). Please check for correct subscription key (or authorization token) and region name.";
             break;
@@ -1089,45 +1175,43 @@ void Connection::Impl::OnTransportError(WebSocketError reason, int errorCode, co
         }
         break;
 
-    case WebSocketError::WEBSOCKET_SEND_FRAME:
+    case TRANSPORT_ERROR_WEBSOCKET_SEND_FRAME:
         uspErrorCode = ErrorCode::ConnectionError;
         errorMessage = "Failure while sending a frame over the WebSocket connection. Internal error: " + errorCodeInString
-            + ". Error details: " + errorString;
+            + ". Error details: " + errorStr;
         break;
 
-    case WebSocketError::WEBSOCKET_ERROR:
+    case TRANSPORT_ERROR_WEBSOCKET_ERROR:
         uspErrorCode = ErrorCode::ConnectionError;
         errorMessage = "WebSocket operation failed. Internal error: " + errorCodeInString
-            + ". Error details: " + errorString;
+            + ". Error details: " + errorStr;
         break;
 
-    case WebSocketError::DNS_FAILURE:
+    case TRANSPORT_ERROR_DNS_FAILURE:
         uspErrorCode = ErrorCode::ConnectionError;
         errorMessage = "DNS connection failed (the remote host did not respond). Internal error: " + errorCodeInString;
         break;
 
     default:
-    case WebSocketError::UNKNOWN:
+    case TRANSPORT_ERROR_UNKNOWN:
         uspErrorCode = ErrorCode::ConnectionError;
         errorMessage = "Unknown transport error.";
         break;
     }
 
-    if (m_connected)
+    if (connection->m_connected)
     {
-        m_connected = false;
-        LogInfo("TS:%" PRIu64 ", OnDisconnected: connection:0x%x", getTimestamp(), this);
-        Invoke([&](auto callbacks) {
+        connection->m_connected = false;
+        LogInfo("TS:%" PRIu64 ", OnDisconnected: connection:0x%x", connection->getTimestamp(), connection);
+        connection->Invoke([&] {
             callbacks->OnDisconnected();
         });
     }
 
     assert(!errorMessage.empty());
-    Invoke([&](auto callbacks) {
-        callbacks->OnError(true, uspErrorCode, errorMessage);
-    });
+    connection->Invoke([&] { callbacks->OnError(true, uspErrorCode, errorMessage); });
 
-    m_valid = false;
+    connection->m_valid = false;
 }
 
 static RecognitionStatus ToRecognitionStatus(const string& str)
@@ -1271,163 +1355,190 @@ static TranslationResult RetrieveTranslationResult(const nlohmann::json& transla
     }
 }
 
-std::string GetHeadersAsString(const UspHeaders& headers)
+std::string GetHeadersAsString(HTTP_HEADERS_HANDLE responseHeader)
 {
-    std::ostringstream oss;
-    for (const auto& entry : headers)
+    size_t headersCount;
+
+    if (HTTPHeaders_GetHeaderCount(responseHeader, &headersCount) != HTTP_HEADERS_OK)
     {
-        // NOTE: for consistency with the previous implementation, I left the extra new line at the beginning
-        //       of the headers string
+        LogError("HTTPHeaders_GetHeaderCount failed.");
+        return std::string{};
+    }
+
+    std::ostringstream oss;
+    for (size_t i = 0; i < headersCount; i++)
+    {
+        char *temp;
         oss << "\r\n";
-        oss << entry.first << ": " << entry.second;
+        if (HTTPHeaders_GetHeader(responseHeader, i, &temp) == HTTP_HEADERS_OK)
+        {
+            oss << temp;
+            free(temp);
+        }
+        else
+        {
+            LogError("HTTPHeaders_GetHeader failed");
+            return std::string{};
+        }
     }
 
     return oss.str();
 }
 
 // Callback for data available on transport
-void Connection::Impl::OnTransportData(bool isBinary, const UspHeaders& headers, const unsigned char* buffer, size_t bufferSize)
+void Connection::Impl::OnTransportData(TransportResponse *response, void *context)
 {
-    if (buffer == nullptr)
+    throw_if_null(context, "context");
+    if (response == nullptr)
     {
         return;
     }
 
-    auto path = TryGet(headers, HEADER_PATH);
-    if (path.empty())
+    Connection::Impl *connection = static_cast<Connection::Impl *>(context);
+
+    if (response->frameType == FRAME_TYPE_UNKNOWN)
     {
-        PROTOCOL_VIOLATION("response missing '%s' header", HEADER_PATH);
+        LogError("Response frame type is unknown.");
         return;
     }
 
-    try
+    if (response->responseHeader == NULL)
     {
-        // TODO ralphe: Should we update the message received to take the parsed unordered map of headers instead?
-        Invoke([&](auto callbacks)
-        {
-            callbacks->OnMessageReceived({ GetHeadersAsString(headers), path, buffer, (uint32_t)bufferSize, isBinary });
-        });
-    }
-    catch (const std::exception& ex)
-    {
-        // shouldn't fail because of a bad callback
-        LogError("OnMessageReceived callback failed with exception: '%s'", ex.what());
+        LogError("ResponseHeader is NULL.");
+        return;
     }
 
-    string requestId = TryGet(headers, headers::requestId);
-    if (!m_activeRequestIds.count(requestId))
+    auto path = HTTPHeaders_FindHeaderValue(response->responseHeader, KEYWORD_PATH);
+    if (path == NULL)
     {
-        if (requestId.empty() || path != path::turnStart)
+        PROTOCOL_VIOLATION("response missing '%s' header", KEYWORD_PATH);
+        return;
+    }
+
+    auto callbacks = connection->m_config.m_callbacks;
+    if (response->frameType == FRAME_TYPE_TEXT || response->frameType == FRAME_TYPE_BINARY)
+    {
+        connection->Invoke([&] { callbacks->OnMessageReceived({
+            GetHeadersAsString(response->responseHeader), path,
+            response->buffer, (uint32_t)response->bufferSize,
+            response->frameType == FRAME_TYPE_BINARY }); });
+    }
+
+    string requestId = HTTPHeaders_FindHeaderValue(response->responseHeader, headers::requestId);
+    if (!connection->m_activeRequestIds.count(requestId))
+    {
+        if (requestId.empty() || strncmp(path, path::turnStart, strlen(path::turnStart)) != 0)
         {
-            PROTOCOL_VIOLATION("Unexpected request id '%s', Path: %s", requestId.c_str(), path.c_str());
+            PROTOCOL_VIOLATION("Unexpected request id '%s', Path: %s", requestId.c_str(), path);
             MetricsUnexpectedRequestId(requestId);
             return;
         }
         else
         {
             LogInfo("Service originated request received with requestId: %s", requestId.c_str());
-            RegisterRequestId(requestId);
+            connection->RegisterRequestId(requestId);
         }
     }
 
-    std::string contentType;
-    if (bufferSize != 0)
+    const char *contentType = NULL;
+    if (response->bufferSize != 0)
     {
-        contentType = TryGet(headers, headers::contentType);
-        if (contentType.empty())
+        contentType = HTTPHeaders_FindHeaderValue(response->responseHeader, headers::contentType);
+        if (contentType == NULL)
         {
-            LogInfo("response '%s' contains body with no content-type", path.c_str());
+            LogInfo("response '%s' contains body with no content-type", path);
         }
         else
         {
-            LogInfo("Response Message: content type: %s.", contentType.c_str());
+            LogInfo("Response Message: content type: %s.", contentType);
         }
     }
 
-    MetricsReceivedMessage(*m_telemetry, requestId, path);
+    MetricsReceivedMessage(*connection->m_telemetry, requestId, path);
 
-    LogInfo("TS:%" PRIu64 " Response Message: path: %s, size: %zu.", getTimestamp(), path.c_str(), bufferSize);
+    LogInfo("TS:%" PRIu64 " Response Message: path: %s, size: %zu.", connection->getTimestamp(), path, response->bufferSize);
 
-    if (isBinary)
+    if (response->frameType == FRAME_TYPE_BINARY)
     {
-        if (path == path::translationSynthesis || path == path::audio)
+        if (strncmp(path, path::translationSynthesis, strlen(path::translationSynthesis)) == 0 ||
+            strncmp(path, path::audio, strlen(path::audio)) == 0)
         {
             // streamId is optional
-            auto streamId = TryGet(headers, headers::streamId);
+            auto streamId = HTTPHeaders_FindHeaderValue(response->responseHeader, headers::streamId);
 
             AudioOutputChunkMsg msg;
-            if (path == path::audio && m_streamIdLangMap.size() > 0)
+            if (strncmp(path, path::audio, strlen(path::audio)) == 0 && connection->m_streamIdLangMap.size() > 0)
             {
                 SPX_DBG_TRACE_VERBOSE("m_streamIdLangMap has data, will FillLanguageForAudioOutputChunkMsg");
-                FillLanguageForAudioOutputChunkMsg(streamId, path, msg);
+                connection->FillLanguageForAudioOutputChunkMsg(streamId, path, msg);
             }
             msg.requestId = requestId;
-            msg.audioBuffer = (uint8_t *)buffer;
-            msg.audioLength = bufferSize;
-
-            Invoke([&](auto callbacks) { callbacks->OnAudioOutputChunk(msg); });
+            msg.audioBuffer = (uint8_t *)response->buffer;
+            msg.audioLength = response->bufferSize;
+            connection->Invoke([&] { callbacks->OnAudioOutputChunk(msg); });
         }
         else
         {
-            PROTOCOL_VIOLATION("Binary frame received with unexpected path: %s", path.c_str());
+            PROTOCOL_VIOLATION("Binary frame received with unexpected path: %s", path);
         }
     }
-    else
+    else if (response->frameType == FRAME_TYPE_TEXT)
     {
-        auto json = (bufferSize > 0) ? nlohmann::json::parse(buffer, buffer + bufferSize) : nlohmann::json();
-        if (path ==  path::speechStartDetected || path == path::speechEndDetected)
+        auto json = (response->bufferSize > 0) ? nlohmann::json::parse(response->buffer, response->buffer + response->bufferSize) : nlohmann::json();
+        if (strncmp(path, path::speechStartDetected, strlen(path::speechStartDetected)) == 0 ||
+            strncmp(path, path::speechEndDetected, strlen(path::speechEndDetected)) == 0)
         {
             auto offsetObj = json[json_properties::offset];
             // For whatever reason, offset is sometimes missing on the end detected message.
             auto offset = offsetObj.is_null() ? 0 : offsetObj.get<OffsetType>();
 
-            if (path == path::speechStartDetected)
+            if (strncmp(path, path::speechStartDetected, strlen(path::speechStartDetected)) == 0)
             {
-                Invoke([&](auto callbacks) { callbacks->OnSpeechStartDetected({PAL::ToWString(json.dump()), offset}); });
+                connection->Invoke([&] { callbacks->OnSpeechStartDetected({PAL::ToWString(json.dump()), offset}); });
             }
             else
             {
-                Invoke([&](auto callbacks) { callbacks->OnSpeechEndDetected({PAL::ToWString(json.dump()), offset}); });
+                connection->Invoke([&] { callbacks->OnSpeechEndDetected({PAL::ToWString(json.dump()), offset}); });
             }
         }
-        else if (path == path::turnStart)
+        else if (strncmp(path, path::turnStart, strlen(path::turnStart)) == 0)
         {
             auto tag = json[json_properties::context][json_properties::tag].get<string>();
-            if (requestId == m_speechRequestId)
+            if (requestId == connection->m_speechRequestId)
             {
                 /* We know this request id is related to a speech turn */
-                Invoke([&](auto callbacks) { callbacks->OnTurnStart({ PAL::ToWString(json.dump()), tag, requestId }); });
+                connection->Invoke([&] { callbacks->OnTurnStart({ PAL::ToWString(json.dump()), tag, requestId }); });
             }
             else
             {
                 /* We know this request id is a server initiated request */
-                Invoke([&](auto callbacks) { callbacks->OnMessageStart({ PAL::ToWString(json.dump()), tag, requestId }); });
+                connection->Invoke([&] { callbacks->OnMessageStart({ PAL::ToWString(json.dump()), tag, requestId }); });
             }
         }
-        else if (path == path::turnEnd)
+        else if (strncmp(path, path::turnEnd, strlen(path::turnEnd)) == 0)
         {
             {
-                m_activeRequestIds.erase(requestId);
+                connection->m_activeRequestIds.erase(requestId);
                 SPX_DBG_TRACE_VERBOSE("Got turn end, clear m_streamIdLangMap.");
-                m_streamIdLangMap.clear();
+                connection->m_streamIdLangMap.clear();
             }
 
             // flush the telemetry before invoking the onTurnEnd callback.
             // TODO: 1164154
-            m_telemetry->Flush(requestId);
+            connection->m_telemetry->Flush(requestId);
 
-            if (requestId == m_speechRequestId)
+            if (requestId == connection->m_speechRequestId)
             {
-                m_speechRequestId.clear();
-                m_speechContextMessageAllowed = true;
-                Invoke([&](auto callbacks) { callbacks->OnTurnEnd({ requestId }); });
+                connection->m_speechRequestId.clear();
+                connection->m_speechContextMessageAllowed = true;
+                connection->Invoke([&] { callbacks->OnTurnEnd({ requestId }); });
             }
             else
             {
-                Invoke([&](auto callbacks) { callbacks->OnMessageEnd({ requestId }); });
+                connection->Invoke([&] { callbacks->OnMessageEnd({ requestId }); });
             }
         }
-        else if (path == path::speechKeyword)
+        else if (strncmp(path, path::speechKeyword, strlen(path::speechKeyword)) == 0)
         {
             auto status = ToKeywordVerificationStatus(json[json_properties::status].get<string>());
             auto offsetObj = json[json_properties::offset];
@@ -1437,15 +1548,16 @@ void Connection::Impl::OnTransportData(bool isBinary, const UspHeaders& headers,
             auto textObj = json[json_properties::text];
             auto text = textObj.is_null()? "" : textObj.get<string>();
 
-            Invoke([&](auto callbacks) {
+            connection->Invoke([&] {
                 callbacks->OnSpeechKeywordDetected({PAL::ToWString(json.dump()),
-                                                    offset,
-                                                    duration,
-                                                    status,
-                                                    PAL::ToWString(text)});
+                                            offset,
+                                            duration,
+                                            status,
+                                            PAL::ToWString(text) });
             });
         }
-        else if (path == path::speechHypothesis || path == path::speechFragment)
+        else if (strncmp(path, path::speechHypothesis, strlen(path::speechHypothesis)) == 0 ||
+                 strncmp(path, path::speechFragment, strlen(path::speechFragment)) == 0)
         {
             auto offset = json[json_properties::offset].get<OffsetType>();
             auto duration = json[json_properties::duration].get<DurationType>();
@@ -1461,9 +1573,9 @@ void Connection::Impl::OnTransportData(bool isBinary, const UspHeaders& headers,
                 id = json[json_properties::id].get<string>();
             }
             auto language = RetrievePrimaryLanguage(json, path);
-            if (path == path::speechHypothesis)
+            if (strncmp(path, path::speechHypothesis, strlen(path::speechHypothesis)) == 0)
             {
-                Invoke([&](auto callbacks) {
+                connection->Invoke([&] {
                     callbacks->OnSpeechHypothesis({PAL::ToWString(json.dump()),
                                                    offset,
                                                    duration,
@@ -1475,7 +1587,7 @@ void Connection::Impl::OnTransportData(bool isBinary, const UspHeaders& headers,
             }
             else
             {
-                Invoke([&](auto callbacks) {
+                connection->Invoke([&] {
                     callbacks->OnSpeechFragment({ PAL::ToWString(json.dump()),
                                                  offset,
                                                  duration,
@@ -1486,26 +1598,26 @@ void Connection::Impl::OnTransportData(bool isBinary, const UspHeaders& headers,
                 });
             }
         }
-        else if (path == path::speechPhrase)
+        else if (strncmp(path, path::speechPhrase, strlen(path::speechPhrase)) == 0)
         {
-            SpeechPhraseMsg result = RetrieveSpeechPhraseResult(json);
-            if (isErrorRecognitionStatus(result.recognitionStatus))
+            SpeechPhraseMsg result = connection->RetrieveSpeechPhraseResult(json);
+            if (connection->isErrorRecognitionStatus(result.recognitionStatus))
             {
-                InvokeRecognitionErrorCallback(result.recognitionStatus, json.dump());
+                connection->InvokeRecognitionErrorCallback(result.recognitionStatus, json.dump());
             }
             else
             {
-                Invoke([&](auto callbacks) { callbacks->OnSpeechPhrase(result); });
+                connection->Invoke([&] { callbacks->OnSpeechPhrase(result); });
             }
         }
-        else if (path == path::translationHypothesis)
+        else if (strncmp(path, path::translationHypothesis, strlen(path::translationHypothesis)) == 0)
         {
             auto speechResult = RetrieveSpeechResult(json);
             auto translationResult = RetrieveTranslationResult(json[json_properties::translation], false);
             // TranslationStatus is always success for translation.hypothesis
             translationResult.translationStatus = TranslationStatus::Success;
 
-            Invoke([&](auto callbacks) {
+            connection->Invoke([&] {
                 callbacks->OnTranslationHypothesis({move(speechResult.json),
                                                     speechResult.offset,
                                                     speechResult.duration,
@@ -1513,13 +1625,13 @@ void Connection::Impl::OnTransportData(bool isBinary, const UspHeaders& headers,
                                                     move(translationResult)});
             });
         }
-        else if (path == path::translationPhrase)
+        else if (strncmp(path, path::translationPhrase, strlen(path::translationPhrase)) == 0)
         {
             auto status = ToRecognitionStatus(json.at(json_properties::recoStatus));
-            if (isErrorRecognitionStatus(status))
+            if (connection->isErrorRecognitionStatus(status))
             {
                 // There is an error in speech recognition, fire an error event.
-                InvokeRecognitionErrorCallback(status, json.dump());
+                connection->InvokeRecognitionErrorCallback(status, json.dump());
             }
             else
             {
@@ -1534,7 +1646,7 @@ void Connection::Impl::OnTransportData(bool isBinary, const UspHeaders& headers,
                     translationResult.translationStatus = TranslationStatus::Success;
                 }
                 // There is no speech recognition error, we fire a translation phrase event.
-                Invoke([&](auto callbacks) {
+                connection->Invoke([&] {
                     callbacks->OnTranslationPhrase({move(speechResult.json),
                                                     speechResult.offset,
                                                     speechResult.duration,
@@ -1544,7 +1656,7 @@ void Connection::Impl::OnTransportData(bool isBinary, const UspHeaders& headers,
                 });
             }
         }
-        else if (path == path::translationSynthesisEnd)
+        else if (strncmp(path, path::translationSynthesisEnd, strlen(path::translationSynthesisEnd)) == 0)
         {
             string failureReason;
             bool synthesisSuccess = false;
@@ -1582,14 +1694,14 @@ void Connection::Impl::OnTransportData(bool isBinary, const UspHeaders& headers,
                 msg.audioBuffer = NULL;
                 msg.audioLength = 0;
                 msg.requestId = requestId;
-                Invoke([&](auto callbacks) { callbacks->OnAudioOutputChunk(msg); });
+                connection->Invoke([&] { callbacks->OnAudioOutputChunk(msg); });
             }
             else
             {
-                Invoke([&](auto callbacks) { callbacks->OnError(false, ErrorCode::ServiceError, failureReason.c_str()); });
+                connection->Invoke([&] { callbacks->OnError(false, ErrorCode::ServiceError, failureReason.c_str()); });
             }
         }
-        else if (path == path::translationResponse)
+        else if (strncmp(path, path::translationResponse, strlen(path::translationResponse)) == 0)
         {
             if (json.find(json_properties::speechHypothesis) != json.end())
             {
@@ -1603,7 +1715,7 @@ void Connection::Impl::OnTransportData(bool isBinary, const UspHeaders& headers,
                 }
                 else
                 {
-                    Invoke([&](auto callbacks) {
+                    connection->Invoke([&] {
                         callbacks->OnTranslationHypothesis({PAL::ToWString(json.dump()),
                                                             speechHypothesisMsg.offset,
                                                             speechHypothesisMsg.duration,
@@ -1618,14 +1730,14 @@ void Connection::Impl::OnTransportData(bool isBinary, const UspHeaders& headers,
                 SPX_DBG_TRACE_INFO("Got translation response for %s.", json_properties::speechPhrase);
                 auto speechPhraseJson = json[json_properties::speechPhrase];
                 auto status = ToRecognitionStatus(speechPhraseJson.at(json_properties::recoStatus));
-                if (isErrorRecognitionStatus(status))
+                if (connection->isErrorRecognitionStatus(status))
                 {
                     // There is an error in speech recognition, fire an error event.
-                    InvokeRecognitionErrorCallback(status, json.dump());
+                    connection->InvokeRecognitionErrorCallback(status, json.dump());
                 }
                 else
                 {
-                    auto speechPhraseMsg = RetrieveSpeechPhraseResult(speechPhraseJson);
+                    auto speechPhraseMsg = connection->RetrieveSpeechPhraseResult(speechPhraseJson);
                     TranslationResult translationResult;
                     if (status == RecognitionStatus::Success)
                     {
@@ -1636,7 +1748,7 @@ void Connection::Impl::OnTransportData(bool isBinary, const UspHeaders& headers,
                         translationResult.translationStatus = TranslationStatus::Success;
                     }
                     // There is no speech recognition error, we fire a translation phrase event.
-                    Invoke([&](auto callbacks) {
+                    connection->Invoke([&] {
                         callbacks->OnTranslationPhrase({PAL::ToWString(json.dump()),
                                                         speechPhraseMsg.offset,
                                                         speechPhraseMsg.duration,
@@ -1656,11 +1768,11 @@ void Connection::Impl::OnTransportData(bool isBinary, const UspHeaders& headers,
                      json.dump().c_str());
             }
         }
-        else if (path == path::audioMetaData)
+        else if (strncmp(path, path::audioMetaData, strlen(path::audioMetaData)) == 0)
         {
             AudioOutputMetadataMsg msg;
             msg.requestId = requestId;
-            msg.size = bufferSize;
+            msg.size = response->bufferSize;
 
             auto metadatas = json[json_properties::metadata];
             if (metadatas.is_array())
@@ -1695,14 +1807,14 @@ void Connection::Impl::OnTransportData(bool isBinary, const UspHeaders& headers,
                 }
             }
 
-            Invoke([&](auto callbacks) { callbacks->OnAudioOutputMetadata(msg); });
+            connection->Invoke([&] { callbacks->OnAudioOutputMetadata(msg); });
         }
-        else if (path == path::audioStart)
+        else if (strncmp(path, path::audioStart, strlen(path::audioStart)) == 0)
         {
-            auto streamId = TryGet(headers, headers::streamId);
-            if (streamId.empty())
+            auto streamId = HTTPHeaders_FindHeaderValue(response->responseHeader, headers::streamId);
+            if (streamId == nullptr)
             {
-                 PROTOCOL_VIOLATION("No stream id in %s header", path.c_str());
+                 PROTOCOL_VIOLATION("No stream id in %s header", path);
             }
             else if (json.find(json_properties::translationLanguage) == json.end())
             {
@@ -1712,22 +1824,22 @@ void Connection::Impl::OnTransportData(bool isBinary, const UspHeaders& headers,
             else
             {
                 auto language = json[json_properties::translationLanguage].get<string>();
-                LogInfo("Got streamId %s to language %s map.  current m_streamIdLangMap size = %d", streamId.c_str(), language.c_str(), m_streamIdLangMap.size());
+                LogInfo("Got streamId %s to language %s map.  current m_streamIdLangMap size = %d", streamId, language.c_str(), connection->m_streamIdLangMap.size());
                 // This is a protection logic to avoid memory usage increases due to service error.
                 // So far we haven't any scenario that needs more than 10 synthesising languages
                 // TODO: remove this protection code after the new service endpoint is stable
                 const int MaxLanguages = 10;
-                if (m_streamIdLangMap.size() > MaxLanguages)
+                if (connection->m_streamIdLangMap.size() > MaxLanguages)
                 {
-                    PROTOCOL_VIOLATION("We have got more than % audio.start messages for different languages, service is sending too many such messages.", MaxLanguages);
+                    PROTOCOL_VIOLATION("We have got more than % audio.start messages for different languges, service is sending too many such messages.", MaxLanguages);
                 }
                 else
                 {
-                    m_streamIdLangMap[streamId] = language;
+                    connection->m_streamIdLangMap[streamId] = language;
                 }
             }
         }
-        else if (path == path::audioEnd)
+        else if (strncmp(path, path::audioEnd, strlen(path::audioEnd)) == 0)
         {
             string failureReason;
             auto status = json[json_properties::status].get<string>();
@@ -1743,24 +1855,24 @@ void Connection::Impl::OnTransportData(bool isBinary, const UspHeaders& headers,
                 msg.audioBuffer = NULL;
                 msg.audioLength = 0;
                 msg.requestId = requestId;
-                auto streamId = TryGet(headers, headers::streamId);
-                FillLanguageForAudioOutputChunkMsg(streamId, path, msg);
-                Invoke([&](auto callbacks) { callbacks->OnAudioOutputChunk(msg); });
+                auto streamId = HTTPHeaders_FindHeaderValue(response->responseHeader, headers::streamId);
+                connection->FillLanguageForAudioOutputChunkMsg(streamId, path, msg);
+                connection->Invoke([&] { callbacks->OnAudioOutputChunk(msg); });
             }
             else
             {
                 failureReason = failureReason + json[json_properties::failureReason].get<string>();
-                Invoke([&](auto callbacks) { callbacks->OnError(false, ErrorCode::ServiceError, failureReason.c_str()); });
+                connection->Invoke([&] { callbacks->OnError(false, ErrorCode::ServiceError, failureReason.c_str()); });
             }
         }
         else
         {
-            Invoke([&](auto callbacks) {
-                callbacks->OnUserMessage({path,
-                                          contentType,
+            connection->Invoke([&] {
+                callbacks->OnUserMessage({string(path),
+                                          string(contentType == nullptr ? "" : contentType),
                                           requestId,
-                                          buffer,
-                                          bufferSize});
+                                          response->buffer,
+                                          response->bufferSize});
             });
         }
     }
@@ -1812,7 +1924,7 @@ void Connection::Impl::InvokeRecognitionErrorCallback(RecognitionStatus status, 
         break;
     }
 
-    this->Invoke([&](auto callbacks) { callbacks->OnError(false, error, msg.c_str()); });
+    this->Invoke([&] { callbacks->OnError(false, error, msg.c_str()); });
 }
 
 SpeechPhraseMsg Connection::Impl::RetrieveSpeechPhraseResult(const nlohmann::json& json)
@@ -1886,25 +1998,25 @@ bool Connection::Impl::isErrorRecognitionStatus(RecognitionStatus status)
     }
 }
 
-void Connection::Impl::FillLanguageForAudioOutputChunkMsg(const std::string& streamId, const std::string& messagePath, AudioOutputChunkMsg& msg)
+void Connection::Impl::FillLanguageForAudioOutputChunkMsg(const char* streamId, const std::string& messagePath, AudioOutputChunkMsg& msg)
 {
-    if (streamId.empty())
+    if (streamId == nullptr)
     {
-        PROTOCOL_VIOLATION("%s message is received but doesn't have streamId in header.", messagePath.c_str());
+        PROTOCOL_VIOLATION("%s message is recieved but doesn't have streamId in header.", messagePath.c_str());
     }
     else if (m_streamIdLangMap.count(streamId) == 0)
     {
         PROTOCOL_VIOLATION(
-            "%s message is received but cannot find streamId %s from streamId to language map, may be caused by audio.start message not being received before this message.",
+            "%s message is recieved but cannot find streamId %s from streamId to language map, may be caused by audio.start message not being receieved before this message.",
             messagePath.c_str(),
-            streamId.c_str());
+            streamId);
     }
     else
     {
         msg.language = m_streamIdLangMap.at(streamId);
         if (messagePath == path::audioEnd)
         {
-            SPX_DBG_TRACE_VERBOSE("Got audio end, remove %s from m_streamIdLangMap.", streamId.c_str());
+            SPX_DBG_TRACE_VERBOSE("Got audio end, remove %s from m_streamIdLangMap.", streamId);
             m_streamIdLangMap.erase(streamId);
         }
     }

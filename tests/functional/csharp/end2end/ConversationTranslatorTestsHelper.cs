@@ -20,7 +20,6 @@ using System.Threading.Tasks;
 
 namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 {
-    using System.Globalization;
     using static CatchUtils;
 
     public static class ConversationTranslatorExtensionMethods
@@ -57,7 +56,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public static IntPtr StartLogging(this RecognitionTestBase _, string logFile) => _startLogging.Value(logFile, false, null, 0, null);
         public static IntPtr StopLogging(this RecognitionTestBase _) => _stopLogging.Value();
 
-        private static bool TryGetDefaultSystemProxy(out Uri server, out string username, out string password)
+        public static bool TryGetDefaultSystemProxy(out Uri server, out string username, out string password)
         {
             server = null;
             username = null;
@@ -93,49 +92,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 password = null;
                 return false;
             }
-        }
-
-        /// <summary>
-        /// Sets the current system proxy
-        /// </summary>
-        /// <param name="config">The speech config to set the proxy on</param>
-        public static SpeechConfig SetSystemProxy(this SpeechConfig config)
-        {
-            Uri proxy;
-            string username;
-            string password;
-            if (config != null && TryGetDefaultSystemProxy(out proxy, out username, out password))
-            {
-                config.SetProxy(proxy.IdnHost, proxy.Port, username, password);
-            }
-
-            return config;
-        }
-
-        /// <summary>
-        /// Sets the current system proxy
-        /// </summary>
-        /// <param name="config">The audio config to set the proxy on</param>
-        public static AudioConfig SetSystemProxy(this AudioConfig config)
-        {
-            Uri proxy;
-            string username;
-            string password;
-            if (config != null && TryGetDefaultSystemProxy(out proxy, out username, out password))
-            {
-                config.SetProperty(PropertyId.SpeechServiceConnection_ProxyHostName, proxy.IdnHost);
-                config.SetProperty(PropertyId.SpeechServiceConnection_ProxyPort, proxy.Port.ToString(CultureInfo.InvariantCulture));
-                if (!string.IsNullOrWhiteSpace(username))
-                {
-                    config.SetProperty(PropertyId.SpeechServiceConnection_ProxyUserName, username);
-                    if (!string.IsNullOrWhiteSpace(password))
-                    {
-                        config.SetProperty(PropertyId.SpeechServiceConnection_ProxyPassword, password);
-                    }
-                }
-            }
-
-            return config;
         }
 
         public static async Task ThrowsException<TException>(this Task task, string match = null)
@@ -504,7 +460,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
     public class TestConversationParticipant : Internal.DisposableBase
     {
         private SpeechConfig m_config;
-        private Action<AudioConfig, bool> m_setConfig;
+        private Action<ConversationTranslator, bool> m_setConfig;
 
         public TestConversationParticipant(SpeechConfig config, string nickname)
         {
@@ -514,7 +470,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             IsHost = true;
         }
 
-        public TestConversationParticipant(string nickname, string lang, TestConversationParticipant other, Action<AudioConfig, bool> setConfig)
+        public TestConversationParticipant(string nickname, string lang, TestConversationParticipant other, Action<ConversationTranslator, bool> setConfig)
         {
             ConversationId = other.Conversation.ConversationId;
             IsHost = false;
@@ -553,7 +509,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 await Conversation.StartConversationAsync();
 
                 SPX_TRACE_INFO(">> [{0}] Creating conversation translator", Name);
-                Translator = new ConversationTranslator(audioConfig);
+                Translator = audioConfig == null
+                    ? new ConversationTranslator()
+                    : new ConversationTranslator(audioConfig);
                 Events = new ConversationTranslatorCallbacks(Translator);
 
                 SPX_TRACE_INFO(">> [{0}] Creating connection", Name);
@@ -567,8 +525,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 SPX_TRACE_INFO(">> [{0}] Creating conversation translator", Name);
 
-                m_setConfig(audioConfig, true);
-                Translator = new ConversationTranslator(audioConfig);
+                Translator = audioConfig == null
+                    ? new ConversationTranslator()
+                    : new ConversationTranslator(audioConfig);
                 Events = new ConversationTranslatorCallbacks(Translator);
 
                 SPX_TRACE_INFO(">> [{0}] Creating connection", Name);
@@ -577,6 +536,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 SPX_TRACE_INFO(">> [{0}] Joining conversation '{1}'", Name, ConversationId);
                 await Translator.JoinConversationAsync(ConversationId, Name, Lang);
+                m_setConfig(Translator, true);
             }
         }
 
