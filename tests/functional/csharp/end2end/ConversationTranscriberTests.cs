@@ -269,6 +269,15 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var meetingID = Guid.NewGuid().ToString();
             using (var conversation = await Conversation.CreateConversationAsync(config, meetingID))
             {
+                conversation.Properties.SetProperty("MTUri", "MTUri_value");
+                conversation.Properties.SetProperty("DifferenciateGuestSpeakers", "true");
+                conversation.Properties.SetProperty("iCalUId", "iCalUId_value");
+                conversation.Properties.SetProperty("callId", "callId_value");
+                conversation.Properties.SetProperty("organizer", "organizer_value");
+                conversation.Properties.SetProperty("audiorecording", "on");
+                conversation.Properties.SetProperty("Threadid", "Threadid_value");
+                conversation.Properties.SetProperty("Organizer_Mri", "Organizer_Mri_vaulue");
+
                 using (var conversationTranscriber = TrackSessionId(new ConversationTranscriber(audioInput)))
                 {
                     await conversationTranscriber.JoinConversationAsync(conversation);

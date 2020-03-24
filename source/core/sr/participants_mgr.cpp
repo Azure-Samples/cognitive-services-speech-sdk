@@ -25,6 +25,8 @@ namespace Impl {
 
 using json = nlohmann::json;
 
+const std::array<std::string, 9> CSpxParticipantMgrImpl::m_meeting_properties = {{"iCalUId", "callId", "organizer", "FLAC", "MTUri", "DifferenciateGuestSpeakers", "audiorecording", "Threadid",  "Organizer_Mri" }};
+
 CSpxParticipantMgrImpl::CSpxParticipantMgrImpl(std::shared_ptr<ISpxThreadService> thread_service, std::shared_ptr<ISpxRecognizerSite> site_in)
     :m_action{ ActionType::NONE },
     m_threadService{ thread_service },
@@ -380,39 +382,18 @@ std::string CSpxParticipantMgrImpl::CreateSpeechEventPayload(MeetingState state)
     speech_event["name"] = name;
     speech_event["meeting"]["attendees"] = state == MeetingState::START ? m_participants_so_far : m_current_participants;
 
-    auto cal_uid = GetStringValue("iCalUid", "");
-    if (!cal_uid.empty())
+    for(const auto& p : m_meeting_properties)
     {
-        speech_event["meeting"]["iCalUid"] = cal_uid;
-    }
-    auto call_id = GetStringValue("callId", "");
-    if (!call_id.empty())
-    {
-        speech_event["meeting"]["callId"] = call_id;
-    }
-    auto organizer = GetStringValue("organizer", "");
-    if (!organizer.empty())
-    {
-        speech_event["meeting"]["organizer"] = organizer;
-    }
-    auto recording_on = GetStringValue("audiorecording", "");
-    speech_event["meeting"]["record"] = recording_on.compare("on") == 0 ? "true" : "false";
-
-    auto mri = GetStringValue("Organizer_Mri", "");
-    if (!mri.empty())
-    {
-        speech_event["meeting"]["Organizer_Mri"] = mri;
-    }
-
-    auto threadid = GetStringValue("Threadid", "");
-    if (!threadid.empty())
-    {
-        speech_event["meeting"]["Threadid"] = threadid;
-    }
-    auto flac_encoded = GetStringValue("FLAC", "");
-    if (!flac_encoded.empty())
-    {
-        speech_event["meeting"]["FLAC"] = 1;
+        auto value = GetStringValue(p.c_str(), "");
+        if (!value.empty())
+        {
+            // audio recording has "on" for true.
+            if (p == "audiorecording")
+            {
+                value = value.compare("on") == 0 ? "true" : "false";
+            }
+            speech_event["meeting"][p.c_str()] = value;
+        }
     }
 
     return speech_event.dump();

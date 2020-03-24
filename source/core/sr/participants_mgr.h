@@ -148,6 +148,8 @@ private:
     std::string m_calendar_uid_value;
     std::string m_call_id_value;
 
+    static const std::array<std::string, 9> m_meeting_properties;
+
     DISABLE_COPY_AND_MOVE(CSpxParticipantMgrImpl);
 };
 }}}}

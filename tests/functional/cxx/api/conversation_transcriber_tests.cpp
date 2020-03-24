@@ -128,7 +128,7 @@ TEST_CASE("conversation transcriber leave conversation", "[api][cxx]")
     SPXTEST_REQUIRE((sessionStoppedReceived||canceledReceived)) ;
 }
 
-TEST_CASE("conversation transcriber reco", "[api][cxx]")
+TEST_CASE("conversation transcriber reco", "[api][cxx][reco]")
 {
     auto config = CreateSpeechConfigForCTSInRoom();
 
@@ -136,6 +136,15 @@ TEST_CASE("conversation transcriber reco", "[api][cxx]")
     auto myId = PAL::CreateGuidWithDashesUTF8();
     INFO(myId);
     auto conversation = Conversation::CreateConversationAsync(config, myId).get();
+    conversation->Properties.SetProperty("MTUri", "MTUri_value");
+    conversation->Properties.SetProperty("DifferenciateGuestSpeakers", "true");
+    conversation->Properties.SetProperty("iCalUId", "iCalUId_value");
+    conversation->Properties.SetProperty("callId", "callId_value");
+    conversation->Properties.SetProperty("organizer", "organizer_value");
+    conversation->Properties.SetProperty("audiorecording", "on");
+    conversation->Properties.SetProperty("Threadid", "Threadid_value");
+    conversation->Properties.SetProperty("Organizer_Mri", "Organizer_Mri_vaulue");
+    //conversation->Properties.SetProperty("FLAC", "1");
 
     auto transcriber = ConversationTranscriber::FromConfig(audioInput);
 
@@ -152,8 +161,8 @@ TEST_CASE("conversation transcriber reco", "[api][cxx]")
     SPXTEST_REQUIRE(!result->phrases.empty());
     SPXTEST_REQUIRE(FindTheRef(result->phrases, AudioUtterancesMap[CONVERSATION_BETWEEN_TWO_PERSONS_ENGLISH].Utterances["en-US"][0].Text));
 }
-
-//TEST_CASE("conversation add while pumping", "[api][cxx]")
+//
+//TEST_CASE("conversation add while pumping", "[api][cxx][add_participant_while_pumping]")
 //{
 //    auto config = CreateSpeechConfigForCTSInRoom();
 //    auto myId = PAL::CreateGuidWithDashesUTF8();
