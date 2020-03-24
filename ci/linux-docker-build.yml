@@ -68,18 +68,17 @@ jobs:
         JAVA_DEV_TARGET: arm64
         JAVA_ARCH_TARGET: aarch64
       # More configurations in 'int' and 'prod' builds (cf. set-variables.sh)
-      ${{ if in(parameters.buildType, 'int', 'prod') }}:
-        Debian9 OpenSSL 1.1 x64 Debug:
-          SPEECHSDK_TARGET_PLATFORM: Linux-x64
-          SPEECHSDK_BUILD_CONFIGURATION: Debug
-          DOCKER_BUILD_BASE: dev_debian9_x64
-          DOCKER_TEST_BASE: dev_debian9_x64
-          # Do not publish; this is just checking we can build on Debian 9 with
-          # OpenSSL 1.1, and run tests during build.
-          OPENSSL_TARGET: linux-x64
-          JAVA_DEV_TARGET: x64
-          JAVA_ARCH_TARGET: amd64   
-          Publish: false
+      Debian9 OpenSSL 1.1 x64 Debug:
+        SPEECHSDK_TARGET_PLATFORM: Linux-x64
+        SPEECHSDK_BUILD_CONFIGURATION: Debug
+        DOCKER_BUILD_BASE: dev_debian9_x64
+        DOCKER_TEST_BASE: dev_debian9_x64
+        # Do not publish; this is just checking we can build on Debian 9 with
+        # OpenSSL 1.1, and run tests during build.
+        OPENSSL_TARGET: linux-x86_64
+        JAVA_DEV_TARGET: amd64
+        JAVA_ARCH_TARGET: amd64   
+        Publish: false
   steps:
   - bash: |
       set -x -e -o pipefail
@@ -141,7 +140,7 @@ jobs:
           ./ci/build-linux-openssl.sh $(OPENSSL_TARGET)
           apt-get install -y default-jre-headless default-jre default-jdk
           mkdir /linux-openssl
-          ln -s /csspeech/external/linux-openssl/linux-x86 /linux-openssl/linux-x86
+          ln -s /csspeech/external/linux-openssl/$(OPENSSL_TARGET) /linux-openssl/$(OPENSSL_TARGET)
         fi
         if [[ $(SPEECHSDK_TARGET_PLATFORM) =~ Linux-(arm32|arm64) ]]; then
           # For some reason this is necessary to prevent errors
