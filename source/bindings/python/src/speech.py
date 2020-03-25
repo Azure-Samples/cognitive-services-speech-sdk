@@ -498,10 +498,10 @@ class ResultFuture():
 
 class AutoDetectSourceLanguageResult():
     """
-    Represents auto detection source language result
+    Represents auto detection source language result.
     
-    The result can be initialized from a speech recognition result
-
+    The result can be initialized from a speech recognition result.
+    
     :param speechRecognitionResult: The speech recognition result
     """
     def __init__(self, speechRecognitionResult: SpeechRecognitionResult):        
@@ -769,7 +769,8 @@ class Recognizer():
 class SpeechRecognizer(Recognizer):
     """
     A speech recognizer.
-    If need to specify source language information, please only specify one of these three parameters, language, source_language_config or auto_detect_source_language_config
+    If you need to specify source language information, please only specify one of these three parameters, language, source_language_config or auto_detect_source_language_config.
+
     :param speech_config: The config for the speech recognizer 
     :param audio_config: The config for the audio input
     :param language: The source language
