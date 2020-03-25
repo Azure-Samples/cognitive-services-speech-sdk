@@ -164,11 +164,11 @@ std::shared_ptr<ISpxSynthesisResult> CSpxRestTtsEngineAdapter::Speak(const std::
 
     std::shared_ptr<ISpxSynthesisResult> result;
 
-    InvokeOnSite([this, requestId, ssml, subscriptionKey, token, outputFormatString, outputFormat, hasHeader, &result](const SitePtr& p) {
+    InvokeOnSite([this, properties, requestId, ssml, subscriptionKey, token, outputFormatString, outputFormat, hasHeader, &result](const SitePtr& p) {
         result = SpxCreateObjectWithSite<ISpxSynthesisResult>("CSpxSynthesisResult", p->QueryInterface<ISpxGenericSite>());
         auto resultInit = SpxQueryInterface<ISpxSynthesisResultInit>(result);
 
-        EnsureHttpConnection();
+        EnsureHttpConnection(properties);
 
         RestTtsRequest request;
         request.requestId = requestId;
@@ -195,7 +195,7 @@ std::shared_ptr<ISpxSynthesisResult> CSpxRestTtsEngineAdapter::Speak(const std::
                 if (result->GetAudioData()->empty() && request.response.body.empty())
                 {
                     // Re-connect and re-send the request if disconnection happened and no data was received
-                    EnsureHttpConnection();
+                    EnsureHttpConnection(properties);
                     resultInit->Reset();
                     SpxQueryInterface<ISpxNamedProperties>(resultInit)->SetStringValue(GetPropertyName(PropertyId::CancellationDetails_ReasonDetailedText), "");
                     PostTtsRequest(m_httpConnect, request, resultInit);
@@ -229,7 +229,7 @@ void CSpxRestTtsEngineAdapter::GetProxySetting()
     m_proxyPassword = ISpxPropertyBagImpl::GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_ProxyPassword), "");
 }
 
-void CSpxRestTtsEngineAdapter::EnsureHttpConnection()
+void CSpxRestTtsEngineAdapter::EnsureHttpConnection(std::shared_ptr<ISpxNamedProperties> properties)
 {
     // If the connection is already setup, skip this
     if (m_httpConnect != nullptr)
@@ -239,8 +239,8 @@ void CSpxRestTtsEngineAdapter::EnsureHttpConnection()
 
     // Create the connection
     auto url = HttpUtils::ParseUrl(m_endpoint);
-    m_httpConnect = HTTPAPI_CreateConnection_Advanced(url.host.data(), url.port, url.isSecure(),
-        m_proxyHost.data(), m_proxyPort, m_proxyUsername.data(), m_proxyPassword.data());
+    m_httpConnect = HTTPAPI_CreateConnection_Advanced(url.host.c_str(), url.port, url.isSecure(),
+        m_proxyHost.c_str(), m_proxyPort, m_proxyUsername.c_str(), m_proxyPassword.c_str());
     if (!m_httpConnect)
     {
         SPX_TRACE_ERROR("Could not create HTTP connection");
@@ -254,6 +254,18 @@ void CSpxRestTtsEngineAdapter::EnsureHttpConnection()
         m_httpConnect = nullptr;
         SPX_TRACE_ERROR("Could not set TLS 1.2 option");
     }
+
+    auto singleTrustedCert = properties->GetStringValue("OPENSSL_SINGLE_TRUSTED_CERT");
+    if (!singleTrustedCert.empty())
+    {
+        bool disableDefaultVerifyPaths = true;
+        bool disableCrlCheck = properties->GetStringValue("OPENSSL_SINGLE_TRUSTED_CERT_CRL_CHECK") == "false";
+        HTTPAPI_SetOption(m_httpConnect, OPTION_DISABLE_DEFAULT_VERIFY_PATHS, &disableDefaultVerifyPaths);
+        HTTPAPI_SetOption(m_httpConnect, OPTION_TRUSTED_CERT, singleTrustedCert.c_str());
+        HTTPAPI_SetOption(m_httpConnect, OPTION_DISABLE_CRL_CHECK, &disableCrlCheck);
+    }
+#else
+    UNUSED(properties);
 #endif
 }
 

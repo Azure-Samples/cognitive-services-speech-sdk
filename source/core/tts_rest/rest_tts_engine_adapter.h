@@ -84,7 +84,7 @@ private:
     CSpxRestTtsEngineAdapter& operator=(const CSpxRestTtsEngineAdapter&) = delete;
 
     void GetProxySetting();
-    void EnsureHttpConnection();
+    void EnsureHttpConnection(std::shared_ptr<ISpxNamedProperties> properties);
     SpxWAVEFORMATEX_Type GetOutputFormat(std::shared_ptr<ISpxAudioOutput> output, bool* hasHeader);
     std::string GetOutputFormatString(std::shared_ptr<ISpxAudioOutput> output);
 

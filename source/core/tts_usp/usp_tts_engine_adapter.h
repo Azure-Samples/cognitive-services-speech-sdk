@@ -89,6 +89,7 @@ private:
     void UspTerminate();
 
     USP::Client& SetUspEndpoint(const std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client) const;
+    USP::Client& SetUspSingleTrustedCert(const std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client) const;
 
     void OnTurnStart(const USP::TurnStartMsg& message) override;
     void OnAudioOutputChunk(const USP::AudioOutputChunkMsg& message) override;

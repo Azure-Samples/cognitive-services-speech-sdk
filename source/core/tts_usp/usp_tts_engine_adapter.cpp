@@ -336,6 +336,8 @@ void CSpxUspTtsEngineAdapter::UspInitialize()
         client.SetProxyServerInfo(m_proxyHost.data(), m_proxyPort, m_proxyUsername.data(), m_proxyPassword.data());
     }
 
+    SetUspSingleTrustedCert(properties, client);
+
     // Try to connect
     USP::ConnectionPtr uspConnection;
 
@@ -423,6 +425,24 @@ USP::Client& CSpxUspTtsEngineAdapter::SetUspEndpoint(const std::shared_ptr<ISpxN
     return client;
 }
 
+USP::Client& CSpxUspTtsEngineAdapter::SetUspSingleTrustedCert(const std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client) const
+{
+#if SPEECHSDK_USE_OPENSSL
+    // N.B. the names of the options below have been shared with a customer. Do
+    // not change them without consulting with them.
+    auto singleTrustedCert = properties->GetStringValue("OPENSSL_SINGLE_TRUSTED_CERT");
+    if (!singleTrustedCert.empty())
+    {
+        bool disable_crl_check = properties->GetStringValue("OPENSSL_SINGLE_TRUSTED_CERT_CRL_CHECK") == "false";
+        return client.SetSingleTrustedCert(singleTrustedCert, disable_crl_check);
+    }
+#else
+    UNUSED(properties);
+#endif
+
+    return client;
+}
+
 void CSpxUspTtsEngineAdapter::OnTurnStart(const USP::TurnStartMsg& message)
 {
     UNUSED(message);
@@ -458,7 +478,7 @@ void CSpxUspTtsEngineAdapter::OnAudioOutputChunk(const USP::AudioOutputChunkMsg&
     }
     else if ( m_uspState != UspState::ReceivingData)
     {
-        SPX_TRACE_ERROR("Recieved chunck data in unexpected state, ingoring. Current state: %d", UspState(m_uspState));
+        SPX_TRACE_ERROR("Received chunk data in unexpected state, ingore. Current state: %d", UspState(m_uspState));
         return;
     }
     
