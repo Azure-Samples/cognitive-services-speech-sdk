@@ -100,6 +100,13 @@ TEST_CASE("conversation create participant", "[api][cxx]")
     REQUIRE_NOTHROW(Participant::From("secondparticipant"));
     REQUIRE_NOTHROW(Participant::From("secondparticipant", "en-us"));
     REQUIRE_THROWS(Participant::From("secondparticipant", "en-us", "voiceSignature"));
+    REQUIRE_NOTHROW(Participant::From("participant_name", "en-us",  R"(
+        {
+         "Tag" : "VtZQ7sJp8np3AxQC+87WYyBHWsZohWFBN0zgWzzOnpw=",
+         "Data" : "asd+",
+         "XXXX" : "YYY"
+        }
+        )"));
 }
 
 TEST_CASE("conversation add_remove participant by user id", "[api][cxx]")

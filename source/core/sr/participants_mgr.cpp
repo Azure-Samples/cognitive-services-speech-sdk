@@ -327,14 +327,9 @@ int CSpxParticipantMgrImpl::GetMaxAllowedParticipants()
     return max_allowed_participants;
 }
 
-void to_json(json& j, const CSpxParticipantMgrImpl::CSpxVoiceSignature& voice)
-{
-    j = json{ {"Version", voice.Version}, {"Tag", voice.Tag}, {"Data", voice.Data} };
-}
-
 void to_json(json& j, const CSpxParticipantMgrImpl::Participant& p)
 {
-    j = json{ {"id", p.id}, {"preferredLanguage", p.preferred_language},  {"voice", p.voice} };
+    j = json{ {"id", p.id}, {"preferredLanguage", p.preferred_language},  {"voice", p.voice_signature} };
 }
 
 std::string CSpxParticipantMgrImpl::CreateSpeechEventPayload(MeetingState state)

@@ -20,15 +20,6 @@ class HttpRequest;
 class CSpxParticipantMgrImpl : public ISpxConversation, public ISpxPropertyBagImpl
 {
 public:
-    struct CSpxVoiceSignature
-    {
-        CSpxVoiceSignature() : Version("-1"), Tag(std::string{}), Data(std::string{})
-        {}
-
-        std::string Version;
-        std::string Tag;
-        std::string Data;
-    };
 
     struct Participant
     {
@@ -40,35 +31,18 @@ public:
             }
             id = participant->GetId();
             preferred_language = participant->GetPreferredLanguage();
-            auto voice_raw_string = participant->GetVoiceSignature();
-            ParseVoiceSignature(voice_raw_string);
+            voice_signature = participant->GetVoiceSignature();
         }
 
         Participant(const std::string& id, const std::string& language, const std::string& voice_raw_string)
-            :id{ id }, preferred_language{ language }
+            :id{ id }, preferred_language{ language }, voice_signature{voice_raw_string}
         {
-            ParseVoiceSignature(voice_raw_string);
-        }
-
-        void ParseVoiceSignature(const std::string& voice_raw_string)
-        {
-            if (!voice_raw_string.empty())
+            // just make sure voice_raw_string is a json string.
+            if (!voice_signature.empty())
             {
                 try
                 {
-                    auto voice_json = nlohmann::json::parse(voice_raw_string);
-                    auto version = voice_json["Version"];
-                    if (version.type() == nlohmann::json::value_t::number_unsigned)
-                    {
-                        voice.Version = std::to_string(version.get<int>());
-                    }
-                    else
-                    {
-                        voice.Version = version.get<std::string>();
-                    }
-
-                    voice.Tag = voice_json["Tag"].get<std::string>();
-                    voice.Data = voice_json["Data"].get<std::string>();
+                    auto voice_json = nlohmann::json::parse(voice_signature);
                 }
                 catch (nlohmann::json::parse_error& e)
                 {
@@ -80,7 +54,7 @@ public:
 
         std::string id;
         std::string preferred_language;
-        CSpxVoiceSignature voice;
+        std::string voice_signature;
     };
 
     CSpxParticipantMgrImpl(std::shared_ptr<ISpxThreadService> thread_service, std::shared_ptr<ISpxRecognizerSite> site);

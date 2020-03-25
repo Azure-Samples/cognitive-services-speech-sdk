@@ -26,7 +26,7 @@ std::shared_ptr<SpeechConfig> CreateSpeechConfigForCTSInRoom()
 {
     auto audioEndpoint = DefaultSettingsMap[INROOM_AUDIO_ENDPOINT];
     audioEndpoint += "/multiaudio";
-    auto config = SpeechConfig::FromSubscription(SubscriptionsRegionsMap[CONVERSATION_TRANSCRIPTION_PPE_SUBSCRIPTION].Key, SubscriptionsRegionsMap[CONVERSATION_TRANSCRIPTION_PROD_SUBSCRIPTION].Region);
+    auto config = SpeechConfig::FromSubscription(SubscriptionsRegionsMap[CONVERSATION_TRANSCRIPTION_PROD_SUBSCRIPTION].Key, SubscriptionsRegionsMap[CONVERSATION_TRANSCRIPTION_PROD_SUBSCRIPTION].Region);
     // this is the clue for Carbon to tell go to CTSInRoom service by using CSpxParticipantMgrImpl.
     config->SetProperty("ConversationTranscriptionInRoomAndOnline", "true");
     return config;

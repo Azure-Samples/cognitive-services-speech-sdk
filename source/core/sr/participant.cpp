@@ -12,10 +12,6 @@ namespace CognitiveServices {
 namespace Speech {
 namespace Impl {
 
-static constexpr char versionName[] = "Version";
-static constexpr char tagName[] = "Tag";
-static constexpr char dataName[] = "Data";
-
 CSpxParticipant::CSpxParticipant()
 {
     SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
@@ -43,19 +39,6 @@ void CSpxParticipant::SetVoiceSignature(std::string&& voiceSignature)
     {
         std::string message = "Voice signature does not parse as JSON object: " + voiceSignature;
         ThrowInvalidArgumentException(message);
-    }
-
-    if (j.find(versionName) == j.end())
-    {
-        ThrowInvalidArgumentException("Could not find Version in voice signature!");
-    }
-    if (j.find(tagName) == j.end())
-    {
-        ThrowInvalidArgumentException("Could not find Tag in voice signature!");
-    }
-    if (j.find(dataName) == j.end())
-    {
-        ThrowInvalidArgumentException("Could not find Data in voice signature!");
     }
 
     m_voice = voiceSignature;
