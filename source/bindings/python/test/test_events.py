@@ -196,27 +196,27 @@ def test_speech_recognition_events(speech_input: SpeechInput, from_file_speech_r
     _check_sr_result(recognized_result, speech_input, 0)
 
 
-# @pytest.mark.parametrize('intent_input,', ['lamp'], indirect=True)
-# def test_intent_recognition_events(intent_input: IntentInput, from_file_intent_reco_with_callbacks):
-#     intent_recognizer, callbacks = from_file_intent_reco_with_callbacks(
-#             setup_callback_handle=_setup_callbacks_for_event_check)
+@pytest.mark.parametrize('intent_input,', ['lamp'], indirect=True)
+def test_intent_recognition_events(intent_input: IntentInput, from_file_intent_reco_with_callbacks):
+    intent_recognizer, callbacks = from_file_intent_reco_with_callbacks(
+            setup_callback_handle=_setup_callbacks_for_event_check)
 
-#     intent_recognizer.start_continuous_recognition()
+    intent_recognizer.start_continuous_recognition()
 
-#     _wait_for_event(callbacks, 'session_stopped')
-#     _check_bad_callback(callbacks)
-#     _check_callbacks(callbacks, check_num_recognized=False)
-#     _check_events(callbacks)
+    _wait_for_event(callbacks, 'session_stopped')
+    _check_bad_callback(callbacks)
+    _check_callbacks(callbacks, check_num_recognized=False)
+    _check_events(callbacks)
 
-#     # TODO remove workaround once intent is fixed and delivers only a single valid result
-#     # recognized_events = [evt for (evt, _) in callbacks['recognized'].events]
-#     recognized_events = [evt for (evt, _) in callbacks['recognized'].events if
-#             evt.result.reason == msspeech.ResultReason.RecognizedIntent]
+    # TODO remove workaround once intent is fixed and delivers only a single valid result
+    # recognized_events = [evt for (evt, _) in callbacks['recognized'].events]
+    recognized_events = [evt for (evt, _) in callbacks['recognized'].events if
+            evt.result.reason == msspeech.ResultReason.RecognizedIntent]
 
-#     assert 1 == len(recognized_events)
-#     recognized_result = recognized_events[-1].result
+    assert 1 == len(recognized_events)
+    recognized_result = recognized_events[-1].result
 
-#     _check_intent_result(recognized_result, intent_input, 0)
+    _check_intent_result(recognized_result, intent_input, 0)
 
 @pytest.mark.parametrize('speech_input,', ['weather'], indirect=True)
 def test_translation_recognition_events(speech_input: SpeechInput,

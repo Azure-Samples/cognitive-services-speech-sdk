@@ -193,7 +193,7 @@ if [[ $TARGET == Android-* ]]; then
   find "$DESTPUBLIB" -name \*.so -print0 | xargs -0 $STRIP
 fi
 
-if [[ $PLATFORM = OSX-* ]]; then
+if [[ $PLATFORM == OSX-* ]]; then
   # osx: copy the unstripped dylib
   mkdir -p "$DESTPRIVLIBUNSTRIPPED"
   cp $CPOPT "$SRCDYNLIB"/$LIBPREFIX*.unstripped$DYNLIBSUFFIX "$DESTPRIVLIBUNSTRIPPED"
