@@ -1,7 +1,7 @@
-# Quickstart: Using virtual assistant (Preview) in Java on Windows or Linux
+# Quickstart: Using Voice Assistant in Java on Windows or Linux
 
-This sample demonstrates how to recognize speech for custom voice-first virtual assistants (Preview) and receive activity responses.
-See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-virtual-assistant-java-jre) on the SDK documentation page which describes how to build this sample from scratch in Eclipse.
+This sample demonstrates how to recognize speech for custom voice assistants and receive activity responses.
+See the [accompanying article](https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/quickstart-voice-assistant-java-jre) on the SDK documentation page which describes how to build this sample from scratch in Eclipse.
 
 > **Note:**
 > the Speech SDK for the JRE currently supports only the Windows x64 platform, macOS 10.13 or later, and Linux x64 (Ubuntu 16.04, Ubuntu 18.04, Debian 9, RHEL 8, CentOS 8) and ARM64 (Ubuntu 16.04, Ubuntu 18.04, Debian 9).
@@ -45,9 +45,7 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 * Create an empty workspace in Eclipse and import the folder containing this sample as a project into your workspace.
 * Edit the `Main` source:
   * Replace the string `YourSubscriptionKey` with your own subscription key.
-  * Replace the string `YourServiceRegion` with the service region of your subscription.
-    > **Note:** In preview, the Direct Line Speech channel currently supports only the `westus2` region.
-  * Replace the string `YourChannelSecret` with the secret created when you subscribed your bot to the Direct Line Speech channel.    
+  * Replace the string `YourServiceRegion` with the service region of your subscription.   
 * Save the modified file.
 
 ## Run the sample
@@ -56,5 +54,5 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 
 ## References
 
-* [Quickstart article on the SDK documentation site](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-virtual-assistant-java-jre)
-* [Speech SDK API reference for Java](https://aka.ms/csspeech/javaref)
+* [Quickstart article on the SDK documentation site](https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/quickstart-voice-assistant-java-jre)
+* [Speech SDK API reference for Java](https://docs.microsoft.com/en-us/java/api/com.microsoft.cognitiveservices.speech.dialog?view=azure-java-stable)
