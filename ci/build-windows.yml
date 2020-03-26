@@ -244,7 +244,7 @@ jobs:
     inputs:
       ConnectedServiceName: 'Speech SDK ESRP Signing Alternate'
       FolderPath: 'build/bin'
-      Pattern: 'Microsoft.CognitiveServices.Speech.core${{ parameters.suffix }}.dll,Microsoft.CognitiveServices.Speech.extension.kws${{ parameters.suffix }}.dll,Microsoft.CognitiveServices.Speech.csharp.dll,Microsoft.CognitiveServices.Speech.java.bindings.dll'
+      Pattern: 'Microsoft.CognitiveServices.Speech.core${{ parameters.suffix }}.dll,Microsoft.CognitiveServices.Speech.extension.kws${{ parameters.suffix }}.dll,Microsoft.CognitiveServices.Speech.csharp.dll,Microsoft.CognitiveServices.Speech.java.bindings.dll,Microsoft.CognitiveServices.Speech.extension.codec.dll,Microsoft.CognitiveServices.Speech.extension.silk_codec.dll'
       signConfigType: inlineSignParams
       inlineOperation: $(SIGN_PARAMS_DLL)
     condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
