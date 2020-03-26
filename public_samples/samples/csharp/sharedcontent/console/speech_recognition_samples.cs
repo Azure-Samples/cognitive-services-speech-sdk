@@ -254,7 +254,7 @@ namespace MicrosoftSpeechSDKSamples
             // Replace with your own audio file name.
 
             using (var audioInput = AudioConfig.FromStreamInput(new PullAudioInputStream(new BinaryAudioStreamReader(
-                                    new BinaryReader(File.Open(@"whatstheweatherlike.mp3", FileMode.Open))),
+                                    new BinaryReader(File.OpenRead(@"whatstheweatherlike.mp3"))),
                                     AudioStreamFormat.GetCompressedFormat(AudioStreamContainerFormat.MP3))))
             {
                 // Creates a speech recognizer using audio stream input.
