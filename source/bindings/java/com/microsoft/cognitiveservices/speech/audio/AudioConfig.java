@@ -45,7 +45,7 @@ public final class AudioConfig
 
     /**
      * Creates an AudioConfig object representing the specified file.
-     * @param fileName Specifies the audio input file. Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported. When used with Conversation Transcription, eight channels are supported.
+     * @param fileName Specifies the audio input file. 
      * @return The audio input configuration being created.
      */
     public static com.microsoft.cognitiveservices.speech.audio.AudioConfig fromWavFileInput(String fileName) {
@@ -54,7 +54,7 @@ public final class AudioConfig
 
     /**
      * Creates an AudioConfig object representing the specified stream.
-     * @param audioStream Specifies the custom audio input stream. Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported. When used with Conversation Transcription, eight channels are supported.
+     * @param audioStream Specifies the custom audio input stream. 
      * @return The audio input configuration being created.
      */
     public static com.microsoft.cognitiveservices.speech.audio.AudioConfig fromStreamInput(AudioInputStream audioStream) {
@@ -63,7 +63,7 @@ public final class AudioConfig
 
     /**
      * Creates an AudioConfig object representing the specified stream.
-     * @param callback Specifies the pull audio input stream callback. Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported. When used with Conversation Transcription, eight channels are supported.
+     * @param callback Specifies the pull audio input stream callback. 
      * @return The audio input configuration being created.
      */
     public static com.microsoft.cognitiveservices.speech.audio.AudioConfig fromStreamInput(PullAudioInputStreamCallback callback) {

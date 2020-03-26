@@ -67,7 +67,7 @@ public:
     /// <summary>
     /// Creates an AudioConfig object representing the specified file.
     /// </summary>
-    /// <param name="fileName">Specifies the audio input file. Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported. When used with Conversation Transcription, eight channels are supported.</param>
+    /// <param name="fileName">Specifies the audio input file.</param>
     /// <returns>A shared pointer to the AudioConfig object</returns>
     static std::shared_ptr<AudioConfig> FromWavFileInput(const SPXSTRING& fileName)
     {
@@ -81,7 +81,7 @@ public:
     /// <summary>
     /// Creates an AudioConfig object representing the specified stream.
     /// </summary>
-    /// <param name="stream">Specifies the custom audio input stream. Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported. When used with Conversation Transcription, eight channels are supported.</param>
+    /// <param name="stream">Specifies the custom audio input stream.</param>
     /// <returns>A shared pointer to the AudioConfig object</returns>
     static std::shared_ptr<AudioConfig> FromStreamInput(std::shared_ptr<AudioInputStream> stream)
     {

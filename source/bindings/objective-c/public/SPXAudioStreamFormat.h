@@ -65,7 +65,6 @@ SPX_EXPORT
 
 /**
  * Initialize the audio stream format object with the specified PCM waveformat characteristics.
- * Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported.
  *
  * @param samplesPerSecond sample rate, in samples per second (Hertz).
  * @param bitsPerSample bits per sample.

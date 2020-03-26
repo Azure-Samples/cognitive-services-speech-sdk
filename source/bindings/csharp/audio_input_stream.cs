@@ -27,7 +27,6 @@ namespace Microsoft.CognitiveServices.Speech.Audio
 
         /// <summary>
         /// Creates a memory backed PushAudioInputStream with the specified audio format.
-        /// Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported. When used with Conversation Transcription, eight channels are supported.
         /// </summary>
         /// <param name="format">The audio data format in which audio will be written to the push audio stream's write() method.</param>
         /// <returns>The push audio input stream being created.</returns>
@@ -48,7 +47,6 @@ namespace Microsoft.CognitiveServices.Speech.Audio
 
         /// <summary>
         /// Creates a PullAudioInputStream that delegates to the specified callback interface for read() and close() methods.
-        /// Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported. When used with Conversation Transcription, eight channels are supported.
         /// </summary>
         /// <param name="callback">The custom audio input object, derived from PullAudioInputStreamCallback.</param>
         /// <param name="format">The audio data format in which audio will be returned from the callback's read() method.</param>
@@ -125,7 +123,6 @@ namespace Microsoft.CognitiveServices.Speech.Audio
 
         /// <summary>
         /// Creates a memory backed PushAudioInputStream with the specified audio format.
-        /// Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported. When used with Conversation Transcription, eight channels are supported.
         /// </summary>
         /// <param name="format">The audio data format in which audio will be written to the push audio stream's write() method.</param>
         public PushAudioInputStream(AudioStreamFormat format) :
@@ -253,7 +250,6 @@ namespace Microsoft.CognitiveServices.Speech.Audio
 
         /// <summary>
         /// Creates a PullAudioInputStream that delegates to the specified callback interface for read() and close() methods.
-        /// Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported. When used with Conversation Transcription, eight channels are supported.
         /// </summary>
         /// <param name="callback">The custom audio input object, derived from PullAudioInputStreamCallback.</param>
         /// <param name="format">The audio data format in which audio will be returned from the callback's read() method.</param>

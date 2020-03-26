@@ -35,7 +35,6 @@ SPX_EXPORT
 
 /**
  * Initializes a memory-backed SPXPushAudioInputStream with the specified audio format.
- * Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported.
  *
  * @param format The audio data format in which audio will be written to the push audio stream's write() method.
  * @return an instance of push audio input stream.
@@ -74,7 +73,6 @@ SPX_EXPORT
 
 /**
  * Initializes an SPXPullAudioInputStream that delegates to the specified callback functions for read() and close() methods, with the specified audio format.
- * Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported.
  *
  * @param format The audio data format in which audio will be written to the push audio stream's write() method.
  * @param readHandler handler which will be called in order to read data from the audio input stream. If no data is currently available in the stream, the readHandler should wait until data is available. It returns the number of bytes that have been read. It returns 0 when stream should be closed. The data returned by read() should not contain any audio header.

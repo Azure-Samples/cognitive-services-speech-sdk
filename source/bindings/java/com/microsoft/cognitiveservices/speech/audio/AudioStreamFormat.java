@@ -36,7 +36,6 @@ public final class AudioStreamFormat
 
     /**
      * Creates an audio stream format object with the specified pcm waveformat characteristics.
-     * Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported. When used with Conversation Transcription, eight channels are supported.
      * @param samplesPerSecond Sample rate, in samples per second (Hertz).
      * @param bitsPerSample Bits per sample.
      * @param channels Number of channels in the waveform-audio data.
