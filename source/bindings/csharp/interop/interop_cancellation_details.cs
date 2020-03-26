@@ -13,9 +13,9 @@ namespace Microsoft.CognitiveServices.Speech.Internal
 
     internal static class CancellationDetails
     {
-        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR result_get_reason_canceled(InteropSafeHandle result, out CancellationReason reason);
-        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR result_get_canceled_error_code(InteropSafeHandle result, out CancellationErrorCode errorCode);
     }
 }

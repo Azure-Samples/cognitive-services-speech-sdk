@@ -14,11 +14,11 @@ namespace Microsoft.CognitiveServices.Speech.Internal
 
     internal static class KeywordRecognitionModel
     {
-        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern bool keyword_recognition_model_handle_is_valid(SPXKEYWORDHANDLE keyword);
-        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR keyword_recognition_model_handle_release(SPXKEYWORDHANDLE keyword);
-        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR keyword_recognition_model_create_from_file(
             [MarshalAs(UnmanagedType.LPStr)] string fileName,
             out SPXKEYWORDHANDLE kwmodel);

@@ -50,16 +50,16 @@ namespace Microsoft.CognitiveServices.Speech.Internal
             SpxExceptionThrower.ThrowIfFail(error_release(errorHandle));
         }
 
-        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention, CharSet = CharSet.Ansi)]
         private static extern IntPtr error_get_message(SPXERRORHANDLE errorHandle);
 
-        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention, CharSet = CharSet.Ansi)]
         private static extern IntPtr error_get_call_stack(SPXERRORHANDLE errorHandle);
 
-        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         private static extern SPXHR error_get_error_code(SPXERRORHANDLE errorHandle);
 
-        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         private static extern SPXHR error_release(SPXERRORHANDLE errorHandle);
 
     }

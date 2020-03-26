@@ -13,10 +13,10 @@ namespace Microsoft.CognitiveServices.Speech.Internal
 
     internal static class EventArgs
     {
-        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern bool recognizer_event_handle_is_valid(SPXEVENTHANDLE eventHandle);
 
-        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR recognizer_event_handle_release(SPXEVENTHANDLE eventHandle);
     }
 }

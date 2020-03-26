@@ -20,15 +20,20 @@ namespace Microsoft.CognitiveServices.Speech.Internal
     {
 #if IOS
         public const string NativeDllName = "__Internal";
+        public const CallingConvention NativeCallConvention = CallingConvention.Cdecl;
 #elif OSX
         public const string NativeDllName = "libMicrosoft.CognitiveServices.Speech.core.dylib";
+        public const CallingConvention NativeCallConvention = CallingConvention.Cdecl;
 #elif UNIX
         public const string NativeDllName = "libMicrosoft.CognitiveServices.Speech.core.so";
+        public const CallingConvention NativeCallConvention = CallingConvention.Cdecl;
 #else
 #if OS_BUILD
         public const string NativeDllName = "Microsoft.CognitiveServices.Speech.core.os.dll";
+        public const CallingConvention NativeCallConvention = CallingConvention.StdCall;
 #else
         public const string NativeDllName = "Microsoft.CognitiveServices.Speech.core.dll";
+        public const CallingConvention NativeCallConvention = CallingConvention.StdCall;
 #endif
 #endif
     }
@@ -102,31 +107,31 @@ namespace Microsoft.CognitiveServices.Speech.Internal
             return resultTextStr;
         }
 
-        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR recognizer_create_speech_recognizer_from_config(out SPXRECOHANDLE recoHandle, InteropSafeHandle speechconfig, InteropSafeHandle audioInput);
 
-        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR recognizer_create_speech_recognizer_from_source_lang_config(out SPXRECOHANDLE recoHandle, InteropSafeHandle speechconfig, InteropSafeHandle sourceLangConfig, InteropSafeHandle audioInput);
 
-        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR recognizer_create_speech_recognizer_from_auto_detect_source_lang_config(out SPXRECOHANDLE recoHandle, InteropSafeHandle speechconfig, InteropSafeHandle autoDetectSourceLangConfig, InteropSafeHandle audioInput);
 
-        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR recognizer_create_translation_recognizer_from_config(out SPXRECOHANDLE recoHandle, InteropSafeHandle speechconfig, InteropSafeHandle audioInput);
 
-        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR recognizer_create_intent_recognizer_from_config(out SPXRECOHANDLE recoHandle, InteropSafeHandle speechconfig, InteropSafeHandle audioInput);
 
-        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR synthesizer_create_speech_synthesizer_from_config(out SPXSYNTHHANDLE synthHandle, InteropSafeHandle speechconfig, InteropSafeHandle audioOutput);
 
-        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR dialog_service_connector_create_dialog_service_connector_from_config(out SPXCONNECTORHANDLE recoHandle, InteropSafeHandle speechconfig, InteropSafeHandle audioInput);
 
-        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR conversation_create_from_config(out SPXCONVERSATIONHANDLE recoHandle, InteropSafeHandle speechconfig, Utf8StringHandle id);
 
-        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR recognizer_create_conversation_transcriber_from_config(out SPXRECOHANDLE recoHandle, InteropSafeHandle audioInput);
 
     }

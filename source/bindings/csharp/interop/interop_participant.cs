@@ -16,24 +16,24 @@ namespace Microsoft.CognitiveServices.Speech.Internal
 
     internal static class Participant
     {
-        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention, CharSet = CharSet.Ansi)]
         public static extern SPXHR participant_set_preferred_langugage(InteropSafeHandle participant,
             [MarshalAs(UnmanagedType.LPStr)] string value);
 
-        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention, CharSet = CharSet.Ansi)]
         public static extern SPXHR participant_set_voice_signature(InteropSafeHandle participant,
             [MarshalAs(UnmanagedType.LPStr)] string value, int size);
 
-        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention, CharSet = CharSet.Ansi)]
         public static extern SPXHR participant_create_handle(out SPXPARTICIPANTHANDLE participant,
             Utf8StringHandle userId,
             string preferredLanguage,
             string voice);
 
-        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR participant_release_handle(SPXPARTICIPANTHANDLE participant);
 
-        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR participant_get_property_bag(InteropSafeHandle participant, out SPXPROPERTYBAGHANDLE hpropbag);
     }
 }

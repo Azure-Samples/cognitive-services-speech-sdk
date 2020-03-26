@@ -76,10 +76,10 @@ namespace Microsoft.CognitiveServices.Speech.Internal
         /// <returns>The status code indicating success or the failure cause.</returns>
         public static SPXHR StopLogging() => diagnostics_log_stop_logging();
 
-        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         private static extern SPXHR diagnostics_log_apply_properties(InteropSafeHandle speechconfig, IntPtr reserved);
 
-        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         private static extern SPXHR diagnostics_log_stop_logging();
     }
 }

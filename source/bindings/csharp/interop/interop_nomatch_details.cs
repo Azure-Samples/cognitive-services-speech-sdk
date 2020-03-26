@@ -14,7 +14,7 @@ namespace Microsoft.CognitiveServices.Speech.Internal
 
     internal static class NoMatchDetails
     {
-        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR result_get_no_match_reason(InteropSafeHandle result, ref NoMatchReason reason);
     }
 }

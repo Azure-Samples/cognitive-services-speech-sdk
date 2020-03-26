@@ -62,17 +62,17 @@ namespace Microsoft.CognitiveServices.Speech.Internal
             return new IntentTrigger(triggerHandle);
         }
 
-        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern bool intent_trigger_handle_is_valid(SPXTRIGGERHANDLE trigger);
 
-        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR intent_trigger_create_from_phrase(out SPXTRIGGERHANDLE trigger, IntPtr phrase);
 
-        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR intent_trigger_create_from_language_understanding_model(out SPXTRIGGERHANDLE trigger, InteropSafeHandle lumodel,
             IntPtr intentName);
 
-        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR intent_trigger_handle_release(SPXTRIGGERHANDLE trigger);
     }
 }

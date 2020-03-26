@@ -112,98 +112,98 @@ namespace Microsoft.CognitiveServices.Speech.Internal
 
         #region ConversationTranslator P/Invoke
 
-        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR conversation_translator_create_from_config(out SPXCONVERSATIONTRANSLATORHANDLE conversationTranslatorHandle, InteropSafeHandle audioinputHandle);
 
-        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR conversation_translator_get_property_bag(InteropSafeHandle conversationTranslatorHandle, out SPXPROPERTYBAGHANDLE propertyBagHandle);
 
-        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR conversation_translator_join(InteropSafeHandle conversationTranslatorHandle, InteropSafeHandle conversationHandle, Utf8StringHandle nickname);
 
-        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR conversation_translator_join_with_id(InteropSafeHandle conversationTranslatorHandle, Utf8StringHandle conversationid, Utf8StringHandle nickname, Utf8StringHandle lang);
 
-        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR conversation_translator_start_transcribing(InteropSafeHandle conversationTranslatorHandle);
 
-        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR conversation_translator_stop_transcribing(InteropSafeHandle conversationTranslatorHandle);
 
-        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR conversation_translator_send_text_message(InteropSafeHandle conversationTranslatorHandle, Utf8StringHandle message);
 
-        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR conversation_translator_leave(InteropSafeHandle conversationTranslatorHandle);
 
-        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern bool conversation_translator_handle_is_valid(SPXCONVERSATIONTRANSLATORHANDLE handle);
 
-        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR conversation_translator_handle_release(SPXHANDLE handle);
 
-        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR conversation_translator_session_started_set_callback(InteropSafeHandle conversationTranslatorHandle, CallbackFunctionDelegate callback, IntPtr context);
 
-        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR conversation_translator_session_stopped_set_callback(InteropSafeHandle conversationTranslatorHandle, CallbackFunctionDelegate callback, IntPtr context);
 
-        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR conversation_translator_canceled_set_callback(InteropSafeHandle conversationTranslatorHandle, CallbackFunctionDelegate callback, IntPtr context);
 
-        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR conversation_translator_participants_changed_set_callback(InteropSafeHandle conversationTranslatorHandle, CallbackFunctionDelegate callback, IntPtr context);
 
-        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR conversation_translator_conversation_expiration_set_callback(InteropSafeHandle conversationTranslatorHandle, CallbackFunctionDelegate callback, IntPtr context);
 
-        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR conversation_translator_transcribing_set_callback(InteropSafeHandle conversationTranslatorHandle, CallbackFunctionDelegate callback, IntPtr context);
 
-        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR conversation_translator_transcribed_set_callback(InteropSafeHandle conversationTranslatorHandle, CallbackFunctionDelegate callback, IntPtr context);
 
-        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR conversation_translator_text_message_recevied_set_callback(InteropSafeHandle conversationTranslatorHandle, CallbackFunctionDelegate callback, IntPtr context);
 
         #endregion
 
         #region ConversationTranslator events P/Invoke
 
-        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern bool conversation_translator_event_handle_is_valid(SPXEVENTHANDLE handle);
 
-        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR conversation_translator_event_handle_release(SPXEVENTHANDLE handle);
 
-        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR conversation_translator_event_get_expiration_time(SPXEVENTHANDLE eventHandle, out int expirationInMinutes);
 
-        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR conversation_translator_event_get_participant_changed_reason(SPXEVENTHANDLE eventHandle, out Transcription.ParticipantChangedReason reason);
 
-        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR conversation_translator_event_get_participant_changed_at_index(SPXEVENTHANDLE eventHandle, int index, out SPXPARTICIPANTHANDLE participantHandle);
 
-        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR conversation_translator_result_get_original_lang(SPXRESULTHANDLE resultHandle, Utf8StringHandle stringhandle, ref uint length);
 
-        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR conversation_translator_participant_get_avatar(InteropSafeHandle eventHandle, Utf8StringHandle stringhandle, ref uint length);
 
-        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR conversation_translator_participant_get_displayname(InteropSafeHandle eventHandle, Utf8StringHandle stringhandle, ref uint length);
 
-        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR conversation_translator_participant_get_id(InteropSafeHandle eventHandle, Utf8StringHandle stringhandle, ref uint length);
 
-        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR conversation_translator_participant_get_is_muted(InteropSafeHandle eventHandle, out bool muted);
 
-        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR conversation_translator_participant_get_is_host(InteropSafeHandle eventHandle, out bool isHost);
 
-        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR conversation_translator_participant_get_is_using_tts(InteropSafeHandle eventHandle, out bool tts);
 
         #endregion

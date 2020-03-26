@@ -13,13 +13,13 @@ namespace Microsoft.CognitiveServices.Speech.Internal
 
     internal static class User
     {
-        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR user_get_id(InteropSafeHandle user, IntPtr text, UInt32 size);
 
-        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR user_create_from_id(IntPtr text, out SPXUSERHANDLE user);
 
-        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR user_release_handle(SPXUSERHANDLE user);
     }
 }
