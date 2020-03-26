@@ -111,11 +111,10 @@ set_target_properties(kws_wrapper PROPERTIES
     FOLDER "extensions/kws"
     )
 
-target_link_libraries(kws_wrapper PRIVATE
-    ${CARBON_COMMON_LIB}
-    ${CARBON_CORE_LIB}
-    kwsapi
-    )
+target_link_libraries(kws_wrapper
+  PRIVATE common
+  PRIVATE kwsapi
+  )
 
 if(STATIC_KWS_EXTENSION)
     target_link_libraries(kws_wrapper PRIVATE logging)
