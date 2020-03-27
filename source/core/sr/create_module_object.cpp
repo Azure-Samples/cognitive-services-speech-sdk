@@ -29,6 +29,7 @@
 #include "connection_message_event_args.h"
 #include "usp_reco_engine_adapter.h"
 #include "dialog_service_connector.h"
+#include "speech_audio_processor.h"
 #include "connection.h"
 #include "user.h"
 #include "participant.h"
@@ -69,6 +70,7 @@ SPX_EXTERN_C void* SRLib_CreateModuleObject(const char* className, const char* i
     SPX_FACTORY_MAP_ENTRY(CSpxUspRecoEngineAdapter, ISpxRecoEngineAdapter);
     SPX_FACTORY_MAP_ENTRY(CSpxUspCallbackWrapper, ISpxUspCallbacks);
     SPX_FACTORY_MAP_ENTRY(CSpxLuisDirectEngineAdapter, ISpxLuEngineAdapter);
+    SPX_FACTORY_MAP_ENTRY(CSpxSpeechAudioProcessor, ISpxSpeechAudioProcessorAdapter);
     SPX_FACTORY_MAP_ENTRY(CSpxConnection, ISpxConnection);
     SPX_FACTORY_MAP_ENTRY(CSpxConnectionEventArgs, ISpxConnectionEventArgs);
     SPX_FACTORY_MAP_ENTRY(CSpxConnectionMessage, ISpxConnectionMessage);
