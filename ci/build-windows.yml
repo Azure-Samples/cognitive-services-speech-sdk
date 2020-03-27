@@ -121,17 +121,17 @@ jobs:
       echo $pwd\gstreamer
       If($plat -Match "x64")
       {
-        msiexec /passive INSTALLDIR=$pwd\gstreamer /i gstreamer-1.0-x86_64-1.14.5.msi
-        Start-Sleep -Seconds 15
-        msiexec /passive INSTALLDIR=$pwd\gstreamer /i gstreamer-1.0-devel-x86_64-1.14.5.msi
+        msiexec /passive INSTALLDIR=$pwd\gstreamer /i gstreamer-1.0-x86_64-1.14.5.msi | Out-String
+        Start-Sleep -Seconds 30
+        msiexec /passive INSTALLDIR=$pwd\gstreamer /i gstreamer-1.0-devel-x86_64-1.14.5.msi | Out-String
       }
       If($plat -Match "Win32")
       {
-        msiexec /passive INSTALLDIR=$pwd\gstreamer /i gstreamer-1.0-x86-1.14.5.msi
-        Start-Sleep -Seconds 15
-        msiexec /passive INSTALLDIR=$pwd\gstreamer /i gstreamer-1.0-devel-x86-1.14.5.msi
+        msiexec /passive INSTALLDIR=$pwd\gstreamer /i gstreamer-1.0-x86-1.14.5.msi | Out-String
+        Start-Sleep -Seconds 30
+        msiexec /passive INSTALLDIR=$pwd\gstreamer /i gstreamer-1.0-devel-x86-1.14.5.msi | Out-String
       }
-      Start-Sleep -Seconds 15
+      Start-Sleep -Seconds 30
       dir $pwd\gstreamer
     displayName: msiexec gstreamer
   - bash: |
