@@ -37,6 +37,8 @@
     static_assert((int)SPXSpeechServiceConnectionInitialSilenceTimeoutMs == (int)SpeechImpl::PropertyId::SpeechServiceConnection_InitialSilenceTimeoutMs, "inconsistent enum definition of property id");
     static_assert((int)SPXSpeechServiceConnectionEndSilenceTimeoutMs == (int)SpeechImpl::PropertyId::SpeechServiceConnection_EndSilenceTimeoutMs, "inconsistent enum definition of property id");
     static_assert((int)SPXSpeechServiceConnectionEnableAudioLogging == (int)SpeechImpl::PropertyId::SpeechServiceConnection_EnableAudioLogging, "inconsistent enum definition of property id");
+    static_assert((int)SPXSpeechServiceConnectionAutoDetectSourceLanguages == (int)SpeechImpl::PropertyId::SpeechServiceConnection_AutoDetectSourceLanguages, "inconsistent enum definition of property id");
+    static_assert((int)SPXSpeechServiceConnectionAutoDetectSourceLanguageResult == (int)SpeechImpl::PropertyId::SpeechServiceConnection_AutoDetectSourceLanguageResult, "inconsistent enum definition of property id");
     static_assert((int)SPXSpeechServiceResponseRequestDetailedResultTrueFalse == (int)SpeechImpl::PropertyId::SpeechServiceResponse_RequestDetailedResultTrueFalse, "inconsistent enum definition of property id");
     static_assert((int)SPXSpeechServiceResponseRequestProfanityFilterTrueFalse == (int)SpeechImpl::PropertyId::SpeechServiceResponse_RequestProfanityFilterTrueFalse, "inconsistent enum definition of property id");
     static_assert((int)SPXSpeechServiceResponseProfanityOption == (int)SpeechImpl::PropertyId::SpeechServiceResponse_ProfanityOption, "inconsistent enum definition of property id");

@@ -5,6 +5,8 @@
 
 #import "SPXFoundation.h"
 #import "SPXAudioConfiguration.h"
+#import "SPXAutoDetectSourceLanguageConfiguration.h"
+#import "SPXSourceLanguageConfiguration.h"
 #import "SPXSpeechConfiguration.h"
 #import "SPXSpeechRecognizer.h"
 #import "SPXSpeechRecognitionResult.h"
@@ -74,6 +76,179 @@ NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.");
  * @return an instance of speech recognizer.
  */
 - (nullable instancetype)initWithSpeechConfiguration:(nonnull SPXSpeechConfiguration *)speechConfiguration audioConfiguration:(nonnull SPXAudioConfiguration *)audioConfiguration error:(NSError * _Nullable * _Nullable)outError;
+
+/**
+ * Initializes a new instance of speech recognizer using the specified source language.
+ *
+ * Added in version 1.12.0.
+
+ * @param speechConfiguration speech recognition configuration.
+ * @param language source language.
+ * @return an instance of speech recognizer.
+ */
+- (nullable instancetype)initWithSpeechConfiguration:(nonnull SPXSpeechConfiguration *)speechConfiguration language:(nonnull NSString *)language
+NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.");
+
+/**
+ * Initializes a new instance of speech recognizer using the specified source language.
+ *
+ * Added in version 1.12.0.
+
+ * @param speechConfiguration speech recognition configuration.
+ * @param language source language.
+ * @param outError error information.
+ * @return an instance of speech recognizer.
+ */
+- (nullable instancetype)initWithSpeechConfiguration:(nonnull SPXSpeechConfiguration *)speechConfiguration
+                                            language:(nonnull NSString *)language
+                                               error:(NSError * _Nullable * _Nullable)outError;
+
+/**
+ * Initializes a new instance of speech recognizer using the specified source language and audio configuration.
+ *
+ * Added in version 1.12.0.
+
+ * @param speechConfiguration speech recognition configuration.
+ * @param language source language.
+ * @param audioConfiguration audio configuration.
+ * @return an instance of speech recognizer.
+ */
+- (nullable instancetype)initWithSpeechConfiguration:(nonnull SPXSpeechConfiguration *)speechConfiguration 
+                                            language:(nonnull NSString *)language
+                                  audioConfiguration:(nonnull SPXAudioConfiguration *)audioConfiguration
+NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.");
+
+/**
+ * Initializes a new instance of speech recognizer using the specified source language and audio configuration.
+ *
+ * Added in version 1.12.0.
+
+ * @param speechConfiguration speech recognition configuration.
+ * @param language source language.
+ * @param audioConfiguration audio configuration.
+ * @param outError error information.
+ * @return an instance of speech recognizer.
+ */
+- (nullable instancetype)initWithSpeechConfiguration:(nonnull SPXSpeechConfiguration *)speechConfiguration
+                                            language:(nonnull NSString *)language
+                                  audioConfiguration:(nonnull SPXAudioConfiguration *)audioConfiguration
+                                               error:(NSError * _Nullable * _Nullable)outError;
+
+/**
+ * Initializes a new instance of speech recognizer using the specified source language configuration.
+ *
+ * Added in version 1.12.0.
+
+ * @param speechConfiguration speech recognition configuration.
+ * @param sourceLanguageConfiguration the source language configuration.
+ * @return an instance of speech recognizer.
+ */
+- (nullable instancetype)initWithSpeechConfiguration:(nonnull SPXSpeechConfiguration *)speechConfiguration
+                         sourceLanguageConfiguration:(nonnull SPXSourceLanguageConfiguration *)sourceLanguageConfiguration
+NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.");
+
+/**
+ * Initializes a new instance of speech recognizer using the specified source language configuration.
+ *
+ * Added in version 1.12.0.
+
+ * @param speechConfiguration speech recognition configuration.
+ * @param sourceLanguageConfiguration the source language configuration.
+ * @param outError error information.
+ * @return an instance of speech recognizer.
+ */
+- (nullable instancetype)initWithSpeechConfiguration:(nonnull SPXSpeechConfiguration *)speechConfiguration
+                         sourceLanguageConfiguration:(nonnull SPXSourceLanguageConfiguration *)sourceLanguageConfiguration
+                                               error:(NSError * _Nullable * _Nullable)outError;
+
+/**
+ * Initializes a new instance of speech recognizer using the specified source language configuration and audio configuration.
+ *
+ * Added in version 1.12.0.
+
+ * @param speechConfiguration speech recognition configuration.
+ * @param sourceLanguageConfiguration the source language configuration.
+ * @param audioConfiguration audio configuration.
+ * @return an instance of speech recognizer.
+ */
+- (nullable instancetype)initWithSpeechConfiguration:(nonnull SPXSpeechConfiguration *)speechConfiguration
+                         sourceLanguageConfiguration:(nonnull SPXSourceLanguageConfiguration *)sourceLanguageConfiguration
+                                  audioConfiguration:(nonnull SPXAudioConfiguration *)audioConfiguration
+NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.");
+
+/**
+ * Initializes a new instance of speech recognizer using the specified source language configuration and audio configuration.
+ *
+ * Added in version 1.12.0.
+
+ * @param speechConfiguration speech recognition configuration.
+ * @param sourceLanguageConfiguration the source language configuration.
+ * @param audioConfiguration audio configuration.
+ * @param outError error information.
+ * @return an instance of speech recognizer.
+ */
+- (nullable instancetype)initWithSpeechConfiguration:(nonnull SPXSpeechConfiguration *)speechConfiguration 
+                         sourceLanguageConfiguration:(nonnull SPXSourceLanguageConfiguration *)sourceLanguageConfiguration
+                                  audioConfiguration:(nonnull SPXAudioConfiguration *)audioConfiguration
+                                               error:(NSError * _Nullable * _Nullable)outError;
+
+/**
+ * Initializes a new instance of speech recognizer using the specified configuration for auto language detection.
+ *
+ * Added in version 1.12.0.
+
+ * @param speechConfiguration speech recognition configuration.
+ * @param autoDetectSourceLanguageConfiguration the configuration for auto language detection.
+ * @return an instance of speech recognizer.
+ */
+- (nullable instancetype)initWithSpeechConfiguration:(nonnull SPXSpeechConfiguration *)speechConfiguration
+               autoDetectSourceLanguageConfiguration:(nonnull SPXAutoDetectSourceLanguageConfiguration *)autoDetectSourceLanguageConfiguration
+NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.");
+
+/**
+ * Initializes a new instance of speech recognizer using the specified configuration for auto language detection.
+ *
+ * Added in version 1.12.0.
+
+ * @param speechConfiguration speech recognition configuration.
+ * @param autoDetectSourceLanguageConfiguration the configuration for auto language detection.
+ * @param outError error information.
+ * @return an instance of speech recognizer.
+ */
+- (nullable instancetype)initWithSpeechConfiguration:(nonnull SPXSpeechConfiguration *)speechConfiguration
+               autoDetectSourceLanguageConfiguration:(nonnull SPXAutoDetectSourceLanguageConfiguration *)autoDetectSourceLanguageConfiguration
+                                               error:(NSError * _Nullable * _Nullable)outError;
+
+/**
+ * Initializes a new instance of speech recognizer using the specified configuration for auto language detection and audio configuration.
+ *
+ * Added in version 1.12.0.
+
+ * @param speechConfiguration speech recognition configuration.
+ * @param autoDetectSourceLanguageConfiguration the configuration for auto language detection.
+ * @param audioConfiguration audio configuration.
+ * @return an instance of speech recognizer.
+ */
+- (nullable instancetype)initWithSpeechConfiguration:(nonnull SPXSpeechConfiguration *)speechConfiguration
+               autoDetectSourceLanguageConfiguration:(nonnull SPXAutoDetectSourceLanguageConfiguration *)autoDetectSourceLanguageConfiguration
+                                  audioConfiguration:(nonnull SPXAudioConfiguration *)audioConfiguration
+NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.");
+
+/**
+ * Initializes a new instance of speech recognizer using the specified configuration for auto language detection and audio configuration.
+ *
+ * Added in version 1.12.0.
+
+ * @param speechConfiguration speech recognition configuration.
+ * @param autoDetectSourceLanguageConfiguration the configuration for auto language detection.
+ * @param audioConfiguration audio configuration.
+ * @param outError error information.
+ * @return an instance of speech recognizer.
+ */
+- (nullable instancetype)initWithSpeechConfiguration:(nonnull SPXSpeechConfiguration *)speechConfiguration
+               autoDetectSourceLanguageConfiguration:(nonnull SPXAutoDetectSourceLanguageConfiguration *)autoDetectSourceLanguageConfiguration
+                                  audioConfiguration:(nonnull SPXAudioConfiguration *)audioConfiguration
+                                               error:(NSError * _Nullable * _Nullable)outError;
 
 /**
  * Starts speech recognition, and returns after a single utterance is recognized. The end of a

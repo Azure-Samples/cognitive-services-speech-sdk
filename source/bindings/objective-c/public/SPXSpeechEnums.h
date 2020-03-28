@@ -51,9 +51,7 @@ typedef NS_ENUM(NSUInteger, SPXPropertyId)
     SPXSpeechServiceAuthorizationType = 1004,
 
     /**
-     * The Cognitive Services Custom Speech Service endpoint id. Under normal circumstances, you shouldn't
-     * have to use this property directly.
-     * Instead use SPXSpeechConfiguration.endpointId.
+     * The Cognitive Services Custom Speech Service endpoint id.
      *
      * NOTE: The endpoint id is available in the Custom Speech Portal, listed under Endpoint Details.
      */
@@ -138,8 +136,7 @@ typedef NS_ENUM(NSUInteger, SPXPropertyId)
     SPXSpeechServiceConnectionRecognitionMode = 3000,
 
     /**
-     * The spoken language to be recognized (in BCP-47 format). Under normal circumstances, you shouldn't have to use this property directly.
-     * Instead, use SPXSpeechConfiguration.speechRecognitionLanguage.
+     * The spoken language to be recognized (in BCP-47 format).
      */
     SPXSpeechServiceConnectionRecognitionLanguage = 3001,
 
@@ -183,6 +180,18 @@ typedef NS_ENUM(NSUInteger, SPXPropertyId)
      * Added in version 1.5.0
      */
     SPXSpeechServiceConnectionEnableAudioLogging = 3202,
+
+    /**
+     * The source language candidates used for auto language detection
+     * Added in version 1.12.0
+     */
+    SPXSpeechServiceConnectionAutoDetectSourceLanguages = 3300,
+
+    /**
+     * The auto language detection result
+     * Added in version 1.12.0
+     */
+    SPXSpeechServiceConnectionAutoDetectSourceLanguageResult = 3301,
 
     /**
      * The requested Cognitive Services Speech Service response output format (simple or detailed). Not implemented yet.

@@ -152,6 +152,10 @@
 		A2AB0BB92152F72A00171A08 /* intent_recognizer_private.h in Headers */ = {isa = PBXBuildFile; fileRef = 3CF8204A21463792001970FB /* intent_recognizer_private.h */; };
 		A2AB0BBA2152F73000171A08 /* util_private.h in Headers */ = {isa = PBXBuildFile; fileRef = 3C159966214BC6B800AAE1E3 /* util_private.h */; };
 		A2AB0BBB2152F73500171A08 /* recognizer_private.h in Headers */ = {isa = PBXBuildFile; fileRef = 3C1F5462214277EF00456DFE /* recognizer_private.h */; };
+		EB21A8EE2429C8AA0056703C /* auto_detect_source_language_config_private.h in Headers */ = {isa = PBXBuildFile; fileRef = EB21A8EC2429C8AA0056703C /* auto_detect_source_language_config_private.h */; };
+		EB21A8EF2429C8AA0056703C /* auto_detect_source_language_config.mm in Sources */ = {isa = PBXBuildFile; fileRef = EB21A8ED2429C8AA0056703C /* auto_detect_source_language_config.mm */; };
+		EB21A8F5242B29860056703C /* source_language_config.mm in Sources */ = {isa = PBXBuildFile; fileRef = EB21A8F3242B29860056703C /* source_language_config.mm */; };
+		EB21A8F6242B29860056703C /* source_language_config_private.h in Headers */ = {isa = PBXBuildFile; fileRef = EB21A8F4242B29860056703C /* source_language_config_private.h */; };
 		F3C9ED832152566F00BB13CD /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F3C9ED822152566E00BB13CD /* AudioToolbox.framework */; };
 /* End PBXBuildFile section */
 
@@ -291,6 +295,10 @@
 		A2A1CB6421503754003D9B93 /* nsstring_stdstring.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = nsstring_stdstring.mm; path = ../../src/nsstring_stdstring.mm; sourceTree = "<group>"; };
 		A2A1CB6521503754003D9B93 /* speech_recognition_event_args.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = speech_recognition_event_args.mm; path = ../../src/speech_recognition_event_args.mm; sourceTree = "<group>"; };
 		A2A1CB69215037BC003D9B93 /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
+		EB21A8EC2429C8AA0056703C /* auto_detect_source_language_config_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = auto_detect_source_language_config_private.h; path = ../../src/auto_detect_source_language_config_private.h; sourceTree = "<group>"; };
+		EB21A8ED2429C8AA0056703C /* auto_detect_source_language_config.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = auto_detect_source_language_config.mm; path = ../../src/auto_detect_source_language_config.mm; sourceTree = "<group>"; };
+		EB21A8F3242B29860056703C /* source_language_config.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = source_language_config.mm; path = ../../src/source_language_config.mm; sourceTree = "<group>"; };
+		EB21A8F4242B29860056703C /* source_language_config_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = source_language_config_private.h; path = ../../src/source_language_config_private.h; sourceTree = "<group>"; };
 		F3C9ED822152566E00BB13CD /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
@@ -403,6 +411,10 @@
 		3C0A9131214152C0005325E2 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				EB21A8F4242B29860056703C /* source_language_config_private.h */,
+				EB21A8F3242B29860056703C /* source_language_config.mm */,
+				EB21A8EC2429C8AA0056703C /* auto_detect_source_language_config_private.h */,
+				EB21A8ED2429C8AA0056703C /* auto_detect_source_language_config.mm */,
 				3C5D94032147E7C5000C7129 /* audio_config_private.h */,
 				3C5D94042147E7C5000C7129 /* audio_config.mm */,
 				3C2EA2CA22E99B0E006DA6A8 /* audio_data_stream_private.h */,
@@ -565,9 +577,11 @@
 				3CF8205221463792001970FB /* intent_recognition_event_args_private.h in Headers */,
 				3CF8205321463792001970FB /* translation_synthesis_result_event_args_private.h in Headers */,
 				3C5D94072147E7C5000C7129 /* audio_stream_private.h in Headers */,
+				EB21A8EE2429C8AA0056703C /* auto_detect_source_language_config_private.h in Headers */,
 				3C0A916F21415460005325E2 /* handle_helpers.h in Headers */,
 				3C0A916C21415460005325E2 /* try_catch_helpers.h in Headers */,
 				3CC674C721454954001007EF /* translation_text_result_private.h in Headers */,
+				EB21A8F6242B29860056703C /* source_language_config_private.h in Headers */,
 				3CF8205521463792001970FB /* intent_recognition_result_private.h in Headers */,
 				3C71F32E214AE6490016CEAC /* recognition_result_property_collection_private.h in Headers */,
 				3C0A917321415460005325E2 /* stdafx.h in Headers */,
@@ -728,6 +742,7 @@
 				3C2EA2D122E99B10006DA6A8 /* audio_data_stream.mm in Sources */,
 				3C0A9144214152DA005325E2 /* (null) in Sources */,
 				3C0A916D21415460005325E2 /* speechapi_c_translation_result.cpp in Sources */,
+				EB21A8F5242B29860056703C /* source_language_config.mm in Sources */,
 				3C0A916621415460005325E2 /* speechapi_c_error.cpp in Sources */,
 				3C5D940A2147E7C5000C7129 /* audio_config.mm in Sources */,
 				3CF8205421463792001970FB /* translation_text_result_event_args.mm in Sources */,
@@ -738,6 +753,7 @@
 				3C2B03D1214243D80074206C /* recognition_event_args.mm in Sources */,
 				3C5D93F42146A87D000C7129 /* speechapi_c_audio_config.cpp in Sources */,
 				3CC674C121454954001007EF /* translation_recognizer.mm in Sources */,
+				EB21A8EF2429C8AA0056703C /* auto_detect_source_language_config.mm in Sources */,
 				3CF8205021463792001970FB /* translation_synthesis_result_event_args.mm in Sources */,
 				3CC674C021454954001007EF /* translation_text_result.mm in Sources */,
 				3C5D94052147E7C5000C7129 /* audio_stream_format.mm in Sources */,

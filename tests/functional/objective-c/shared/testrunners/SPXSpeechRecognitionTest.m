@@ -490,6 +490,43 @@
     XCTAssertNil(err);
 }
 
+- (void)testRecognizeWithoutAutoLanguageDetection {
+    [self speechInit];
+    SPXSpeechRecognitionResult *result = [self.speechRecognizer recognizeOnce];
+    NSLog(@"recognition result:%@. Status %ld. offset %llu duration %llu resultid:%@",
+          result.text, (long)result.reason, result.offset, result.duration, result.resultId);
+    NSAssert(nil != result, @"nil");
+    SPXAutoDetectSourceLanguageResult *lidResult = [[SPXAutoDetectSourceLanguageResult alloc] init:result];
+    XCTAssertEqualObjects(@"", [lidResult language]);
+}
+
+- (void)testRecognizeWithAutoLanguageDetection {
+    [self speechInit];
+    SPXSpeechConfiguration *speechConfig = [[SPXSpeechConfiguration alloc] initWithSubscription:self.speechKey region:self.serviceRegion];
+    NSAssert(nil != speechConfig, @"nil");
+    NSArray *languages = @[@"zh-CN", @"en-US"];    
+    SPXAutoDetectSourceLanguageConfiguration* autoDetectSourceLanguageConfig = [[SPXAutoDetectSourceLanguageConfiguration alloc]init:languages];
+    SPXSpeechRecognizer* recognizer = [[SPXSpeechRecognizer alloc] initWithSpeechConfiguration:speechConfig
+                                                                         autoDetectSourceLanguageConfiguration:autoDetectSourceLanguageConfig
+                                                                         audioConfiguration:self.audioConfig];    
+    NSAssert(nil != recognizer, @"nil");
+
+    SPXSpeechRecognitionResult *result = [recognizer recognizeOnce];
+    NSLog(@"recognition result:%@. Status %ld. offset %llu duration %llu resultid:%@  language:%@",
+          result.text, (long)result.reason, result.offset, result.duration, result.resultId, [result.properties getPropertyById:SPXSpeechServiceConnectionAutoDetectSourceLanguageResult]);
+    
+    NSAssert(nil != result, @"nil");
+
+    XCTAssertEqualObjects(result.text, weatherTextEnglish);
+    XCTAssertEqual(result.reason, SPXResultReason_RecognizedSpeech);
+    XCTAssertGreaterThan(result.duration, 0);
+    XCTAssertGreaterThan(result.offset, 0);
+    XCTAssertGreaterThan([result.resultId length], 0);
+
+    SPXAutoDetectSourceLanguageResult *lidResult = [[SPXAutoDetectSourceLanguageResult alloc] init:result];
+    XCTAssertEqualObjects(@"en-US", [lidResult language]);
+}
+
 @end
 
 
@@ -704,9 +741,8 @@
     SPXAudioConfiguration *weatherAudioSource = [[SPXAudioConfiguration alloc] initWithWavFileInput:weatherFile];
     SPXSpeechConfiguration *speechConfig = [[SPXSpeechConfiguration alloc] initWithHost:host subscription:self.speechKey];
     XCTAssertNotNil(speechConfig);
-    [speechConfig setSpeechRecognitionLanguage:@"en-us"];
     
-    SPXSpeechRecognizer *recognizer = [[SPXSpeechRecognizer alloc] initWithSpeechConfiguration:speechConfig audioConfiguration:weatherAudioSource];
+    SPXSpeechRecognizer *recognizer = [[SPXSpeechRecognizer alloc] initWithSpeechConfiguration:speechConfig language:@"en-us" audioConfiguration:weatherAudioSource];
     SPXSpeechRecognitionResult *result = [recognizer recognizeOnce];
     XCTAssertEqual(result.reason, SPXResultReason_RecognizedSpeech);
 }
@@ -718,9 +754,8 @@
     NSString *weatherFile = [bundle pathForResource: weatherFileName ofType:@"wav"];
     SPXAudioConfiguration* weatherAudioSource = [[SPXAudioConfiguration alloc] initWithWavFileInput:weatherFile];
     SPXSpeechConfiguration *speechConfig = [[SPXSpeechConfiguration alloc] initWithSubscription:self.speechKey region:self.serviceRegion];
-    speechConfig.speechRecognitionLanguage = @"Invalid";
     [speechConfig setServicePropertyTo:@"en-us" byName:@"language" usingChannel:SPXServicePropertyChannel_UriQueryParameter];
-    SPXSpeechRecognizer* r = [[SPXSpeechRecognizer alloc] initWithSpeechConfiguration:speechConfig audioConfiguration:weatherAudioSource];
+    SPXSpeechRecognizer* r = [[SPXSpeechRecognizer alloc] initWithSpeechConfiguration:speechConfig language:@"Invalid" audioConfiguration:weatherAudioSource];
 
     SPXSpeechRecognitionResult *result = [r recognizeOnce];
     XCTAssertEqual(result.reason, SPXResultReason_RecognizedSpeech);
@@ -741,8 +776,7 @@
 
     [speechConfig setPropertyTo:filePath byId:SPXSpeechLogFilename];
 
-    speechConfig.speechRecognitionLanguage = @"en-us";
-    SPXSpeechRecognizer* r = [[SPXSpeechRecognizer alloc] initWithSpeechConfiguration:speechConfig audioConfiguration:weatherAudioSource];
+    SPXSpeechRecognizer* r = [[SPXSpeechRecognizer alloc] initWithSpeechConfiguration:speechConfig language:@"en-us" audioConfiguration:weatherAudioSource];
     XCTAssertNotNil(r);
 
     SPXSpeechRecognitionResult *result = [r recognizeOnce];

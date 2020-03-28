@@ -52,3 +52,6 @@
 #import "grammar_private.h"
 #import "grammar_phrase_private.h"
 #import "phrase_list_grammar_private.h"
+
+#import "auto_detect_source_language_config_private.h"
+#import "source_language_config_private.h"

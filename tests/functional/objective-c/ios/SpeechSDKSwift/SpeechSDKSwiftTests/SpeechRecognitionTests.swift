@@ -356,4 +356,33 @@ class SpeechRecognitionEndToEndTests: XCTestCase {
 
         XCTAssertEqual(self.counts["connectedCount"]!, self.counts["disconnectedCount"]!);
     }
+
+    func testSpeechRecognitionWithAutoLanguageDetection() {
+        super.setUp()
+        speechKey = ProcessInfo.processInfo.environment["subscriptionKey"]
+        serviceRegion = ProcessInfo.processInfo.environment["serviceRegion"]
+        let filePath = Bundle.main.url(forResource: weatherFileName, withExtension: "wav")!
+        let audioConfig = SPXAudioConfiguration(wavFileInput: filePath.path)
+        let speechConfig = try! SPXSpeechConfiguration(subscription:self.speechKey, region:self.serviceRegion)
+        var autoDetectSrcLanguageConfig: SPXAutoDetectSourceLanguageConfiguration? = nil
+        autoDetectSrcLanguageConfig = try! SPXAutoDetectSourceLanguageConfiguration(["en-US", "zh-CN"])
+        XCTAssertNotNil(autoDetectSrcLanguageConfig)
+        let recognizer = try! SPXSpeechRecognizer(speechConfiguration: speechConfig, autoDetectSourceLanguageConfiguration: autoDetectSrcLanguageConfig!, audioConfiguration: audioConfig!)
+        let transcription = try? recognizer.recognizeOnce()
+        XCTAssertNotNil(transcription)
+        XCTAssertEqual(transcription!.text, weatherTextEnglish)
+        XCTAssertEqual(transcription!.reason, SPXResultReason.recognizedSpeech)
+        XCTAssertGreaterThan(transcription!.duration, 0)
+        XCTAssertGreaterThan(transcription!.offset, 0)
+        XCTAssertGreaterThan(transcription!.resultId.count, 0)
+        let autoDetectSrcLanguageResult = SPXAutoDetectSourceLanguageResult(transcription!)
+        XCTAssertEqual("en-US", autoDetectSrcLanguageResult.language)
+    }
+
+    func testSpeechRecognitionWithoutAutoLanguageDetection() {
+        let transcription = try? self.reco!.recognizeOnce()
+        XCTAssertNotNil(transcription)
+        let autoDetectSrcLanguageResult = SPXAutoDetectSourceLanguageResult(transcription!)
+        XCTAssertEqual("", autoDetectSrcLanguageResult.language)
+    }
 }

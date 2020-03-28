@@ -18,6 +18,7 @@
 		DCCDCF3522B27D0D00E00B87 /* SpeechRecognitionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCCDCF3222B27D0D00E00B87 /* SpeechRecognitionTests.swift */; };
 		DCF107B422A7F06A00EF5F80 /* silenceshort.wav in Resources */ = {isa = PBXBuildFile; fileRef = DCF107B322A7F06A00EF5F80 /* silenceshort.wav */; };
 		DCF107B522A7F06A00EF5F80 /* silenceshort.wav in Resources */ = {isa = PBXBuildFile; fileRef = DCF107B322A7F06A00EF5F80 /* silenceshort.wav */; };
+		EB21A8F8242C34A50056703C /* LanguageConfigurationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB21A8F7242C34A50056703C /* LanguageConfigurationTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -46,6 +47,7 @@
 		DCCDCF3122B27D0D00E00B87 /* TranslationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TranslationTests.swift; sourceTree = "<group>"; };
 		DCCDCF3222B27D0D00E00B87 /* SpeechRecognitionTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpeechRecognitionTests.swift; sourceTree = "<group>"; };
 		DCF107B322A7F06A00EF5F80 /* silenceshort.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = silenceshort.wav; path = ../../../../input/audio/silenceshort.wav; sourceTree = "<group>"; };
+		EB21A8F7242C34A50056703C /* LanguageConfigurationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LanguageConfigurationTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -109,6 +111,7 @@
 		DCB84E48228C734F00FE7617 /* SpeechSDKSwiftTests */ = {
 			isa = PBXGroup;
 			children = (
+				EB21A8F7242C34A50056703C /* LanguageConfigurationTests.swift */,
 				DCB84E4B228C734F00FE7617 /* Info.plist */,
 				DCCDCF3022B27D0D00E00B87 /* IntentTests.swift */,
 				DCCDCF3222B27D0D00E00B87 /* SpeechRecognitionTests.swift */,
@@ -233,6 +236,7 @@
 				DCCDCF3522B27D0D00E00B87 /* SpeechRecognitionTests.swift in Sources */,
 				DCCDCF3322B27D0D00E00B87 /* IntentTests.swift in Sources */,
 				DCCDCF3422B27D0D00E00B87 /* TranslationTests.swift in Sources */,
+				EB21A8F8242C34A50056703C /* LanguageConfigurationTests.swift in Sources */,
 				3C740C5E22EFE6FB00BA9D95 /* SpeechSynthesisTests.swift in Sources */,
 				DC0E472522E1E0B0005012F7 /* TestHelpers.swift in Sources */,
 			);

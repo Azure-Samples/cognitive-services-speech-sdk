@@ -39,6 +39,7 @@
 		DCC9A0A722672F7D007939A0 /* GStreamerWrapper.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = DCC9A0A22267260C007939A0 /* GStreamerWrapper.framework */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		DCC9A0A922672FFE007939A0 /* GStreamerWrapper.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DCC9A0A22267260C007939A0 /* GStreamerWrapper.framework */; };
 		DCF1E29222E1CC4E00FA9F3E /* SPXTestHelpers.m in Sources */ = {isa = PBXBuildFile; fileRef = DCF1E29122E1CC4E00FA9F3E /* SPXTestHelpers.m */; };
+		EB21A8EB2429674B0056703C /* SPXLanguageConfigurationTest.m in Sources */ = {isa = PBXBuildFile; fileRef = EB21A8EA2429674B0056703C /* SPXLanguageConfigurationTest.m */; };
 		F342D645216794C600B6B2FC /* MicrosoftCognitiveServicesSpeech.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F342D644216794C600B6B2FC /* MicrosoftCognitiveServicesSpeech.framework */; };
 		F3C06E37216E3AE2003989B2 /* SPXDummyTestRunner.m in Sources */ = {isa = PBXBuildFile; fileRef = F3C06E36216E3AE2003989B2 /* SPXDummyTestRunner.m */; };
 		F3C06E38216E4148003989B2 /* dummytest.m in Sources */ = {isa = PBXBuildFile; fileRef = 3CCD06D22157F71E00A348DB /* dummytest.m */; };
@@ -107,6 +108,7 @@
 		DCC9A0A22267260C007939A0 /* GStreamerWrapper.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GStreamerWrapper.framework; path = "../../../../xcode-build-output/GStreamerWrapper.framework"; sourceTree = "<group>"; };
 		DCF1E29122E1CC4E00FA9F3E /* SPXTestHelpers.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = SPXTestHelpers.m; path = ../../shared/testrunners/SPXTestHelpers.m; sourceTree = "<group>"; };
 		DCF1E29322E1CC8100FA9F3E /* SPXTestHelpers.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SPXTestHelpers.h; path = ../../shared/testrunners/SPXTestHelpers.h; sourceTree = "<group>"; };
+		EB21A8EA2429674B0056703C /* SPXLanguageConfigurationTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = SPXLanguageConfigurationTest.m; path = ../../shared/testrunners/SPXLanguageConfigurationTest.m; sourceTree = "<group>"; };
 		F342D644216794C600B6B2FC /* MicrosoftCognitiveServicesSpeech.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MicrosoftCognitiveServicesSpeech.framework; path = "../../../../xcode-build-output/MicrosoftCognitiveServicesSpeech.framework"; sourceTree = "<group>"; };
 		F3C06E36216E3AE2003989B2 /* SPXDummyTestRunner.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = SPXDummyTestRunner.m; path = ../../shared/testrunners/SPXDummyTestRunner.m; sourceTree = "<group>"; };
 		F3EABABD2163887500BA4B2C /* SPXTranslationRecognitionTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = SPXTranslationRecognitionTest.m; path = ../../shared/testrunners/SPXTranslationRecognitionTest.m; sourceTree = "<group>"; };
@@ -198,6 +200,7 @@
 		F3EABAC421639F5700BA4B2C /* SpeechSDK_iOSUnitTests */ = {
 			isa = PBXGroup;
 			children = (
+				EB21A8EA2429674B0056703C /* SPXLanguageConfigurationTest.m */,
 				3C740C5B22EFDC6A00BA9D95 /* SPXSpeechSynthesisTest.m */,
 				DCC1352E225E182E00194047 /* SPXSpeechRecognitionEndtoEndTest.h */,
 				3CA6CFA2211F471600CD2768 /* SPXSpeechRecognitionTest.m */,
@@ -346,6 +349,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				EB21A8EB2429674B0056703C /* SPXLanguageConfigurationTest.m in Sources */,
 				F3C06E37216E3AE2003989B2 /* SPXDummyTestRunner.m in Sources */,
 				DC419444225B6F2300F95B2F /* CompressedStreamsTest.m in Sources */,
 				3C740C5C22EFDC6A00BA9D95 /* SPXSpeechSynthesisTest.m in Sources */,

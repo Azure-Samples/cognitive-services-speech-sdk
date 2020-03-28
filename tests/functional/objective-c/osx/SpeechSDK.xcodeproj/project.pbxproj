@@ -31,6 +31,7 @@
 		DCC36FFC224D71B3009E274B /* microphone_test.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C676487214EA6CA00FCB533 /* microphone_test.m */; };
 		DCF107B722A8268C00EF5F80 /* silenceshort.wav in Resources */ = {isa = PBXBuildFile; fileRef = DCF107B622A8268C00EF5F80 /* silenceshort.wav */; };
 		DCF107B822A8272200EF5F80 /* silenceshort.wav in Resources */ = {isa = PBXBuildFile; fileRef = DCF107B622A8268C00EF5F80 /* silenceshort.wav */; };
+		EB21A8F1242B1BB10056703C /* SPXLanguageConfigurationTest.m in Sources */ = {isa = PBXBuildFile; fileRef = EB21A8F0242B1BB10056703C /* SPXLanguageConfigurationTest.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -85,6 +86,7 @@
 		DCB56301224285E300662DC3 /* SPXTranslationRecognitionTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SPXTranslationRecognitionTest.m; path = ../../shared/testrunners/SPXTranslationRecognitionTest.m; sourceTree = "<group>"; };
 		DCBDE1ED225E3F0D00BBA2CE /* SPXSpeechRecognitionEndtoEndTest.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SPXSpeechRecognitionEndtoEndTest.h; path = ../../shared/testrunners/SPXSpeechRecognitionEndtoEndTest.h; sourceTree = "<group>"; };
 		DCF107B622A8268C00EF5F80 /* silenceshort.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = silenceshort.wav; path = ../../../input/audio/silenceshort.wav; sourceTree = "<group>"; };
+		EB21A8F0242B1BB10056703C /* SPXLanguageConfigurationTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SPXLanguageConfigurationTest.m; path = ../../shared/testrunners/SPXLanguageConfigurationTest.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -152,6 +154,7 @@
 		3CBD7F21211CD69C00F72336 /* SpeechSDKTests */ = {
 			isa = PBXGroup;
 			children = (
+				EB21A8F0242B1BB10056703C /* SPXLanguageConfigurationTest.m */,
 				3CBD7F24211CD69C00F72336 /* Info.plist */,
 				DCB562FF224285E300662DC3 /* SPXDummyTestRunner.m */,
 				DCBDE1ED225E3F0D00BBA2CE /* SPXSpeechRecognitionEndtoEndTest.h */,
@@ -297,6 +300,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				3C740C5822EFDB6700BA9D95 /* SPXSpeechSynthesisTest.m in Sources */,
+				EB21A8F1242B1BB10056703C /* SPXLanguageConfigurationTest.m in Sources */,
 				DCADF54B2245375700DD94FE /* test.m in Sources */,
 				DCB56303224285E300662DC3 /* SPXDummyTestRunner.m in Sources */,
 				DC0E471F22E1DA27005012F7 /* SPXTestHelpers.m in Sources */,

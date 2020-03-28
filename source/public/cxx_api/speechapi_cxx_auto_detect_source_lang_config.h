@@ -40,11 +40,14 @@ public:
     /// <returns>A shared pointer to the new AutoDetectSourceLanguageConfig instance.</returns>
     static std::shared_ptr<AutoDetectSourceLanguageConfig> FromLanguages(const std::vector<SPXSTRING>& languages)
     {
+        SPX_THROW_HR_IF(SPXERR_INVALID_ARG, languages.size() == 0);
         SPXAUTODETECTSOURCELANGCONFIGHANDLE hconfig = SPXHANDLE_INVALID;
+
         std::string languagesStr;
         bool isFirst = true;
         for (const SPXSTRING& language : languages)
         {
+            SPX_THROW_HR_IF(SPXERR_INVALID_ARG, language.empty());
             if (!isFirst)
             {
                 languagesStr += ",";

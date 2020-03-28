@@ -1,0 +1,13 @@
+//
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+//
+#import "SPXSourceLanguageConfiguration.h"
+#import "common_private.h"
+
+@interface SPXSourceLanguageConfiguration (Private)
+
+- (instancetype)initWithImpl:(std::shared_ptr<SpeechImpl::SourceLanguageConfig>)configImpl;
+- (std::shared_ptr<SpeechImpl::SourceLanguageConfig>)getHandle;
+
+@end

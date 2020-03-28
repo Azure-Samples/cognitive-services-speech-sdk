@@ -16,42 +16,17 @@
 }
 
 - (instancetype)init:(SPXSpeechConfiguration *)speechConfiguration {
-     try {
-        auto recoImpl = SpeechImpl::SpeechRecognizer::FromConfig([speechConfiguration getHandle]);
-        if (recoImpl == nullptr)
-            return nil;
-        return [self initWithImpl:recoImpl];
-    }
-    catch (const std::exception &e) {
-        NSLog(@"Exception caught in core: %s", e.what());
-        NSException *exception = [NSException exceptionWithName:@"SPXException"
-                                                         reason:[NSString StringWithStdString:e.what()]
-                                                       userInfo:nil];
-        [exception raise];
-    }
-    catch (const SPXHR &hr) {
-        auto e = SpeechImpl::Impl::ExceptionWithCallStack(hr);
-        NSLog(@"Exception with error code in core: %s", e.what());
-        NSException *exception = [NSException exceptionWithName:@"SPXException"
-                                                         reason:[NSString StringWithStdString:e.what()]
-                                                       userInfo:nil];
-        [exception raise];
-    }
-    catch (...) {
-        NSLog(@"Exception caught when creating SPXSpeechRecognizer in core.");
-        NSException *exception = [NSException exceptionWithName:@"SPXException"
-                                                         reason:@"Runtime Exception"
-                                                       userInfo:nil];
-        [exception raise];
-    }
-    return nil;
+     return [self initWithSpeechConfiguration:speechConfiguration
+                                     language:nil
+                  sourceLanguageConfiguration:nil
+        autoDetectSourceLanguageConfiguration:nil
+                           audioConfiguration:nil];
 }
 
 - (nullable instancetype)init:(nonnull SPXSpeechConfiguration *)speechConfiguration error:(NSError * _Nullable * _Nullable)outError
 {
     try {
-        self = [self init:speechConfiguration];
-        return self;
+        return [self init:speechConfiguration];
     }
     catch (NSException *exception) {
         NSMutableDictionary *errorDict = [NSMutableDictionary dictionary];
@@ -63,8 +38,213 @@
 }
 
 - (instancetype)initWithSpeechConfiguration:(SPXSpeechConfiguration *)speechConfiguration audioConfiguration:(SPXAudioConfiguration *)audioConfiguration {
+    return [self initWithSpeechConfiguration:speechConfiguration
+                                    language:nil
+                 sourceLanguageConfiguration:nil
+       autoDetectSourceLanguageConfiguration:nil
+                          audioConfiguration:audioConfiguration];
+}
+
+- (nullable instancetype)initWithSpeechConfiguration:(nonnull SPXSpeechConfiguration *)speechConfiguration 
+                                  audioConfiguration:(nonnull SPXAudioConfiguration *)audioConfiguration 
+                                               error:(NSError * _Nullable * _Nullable)outError
+{
     try {
-        auto recoImpl = SpeechImpl::SpeechRecognizer::FromConfig([speechConfiguration getHandle], [audioConfiguration getHandle]);
+        return [self initWithSpeechConfiguration:speechConfiguration audioConfiguration:audioConfiguration];
+    }
+    catch (NSException *exception) {
+        NSMutableDictionary *errorDict = [NSMutableDictionary dictionary];
+        [errorDict setObject:[NSString stringWithFormat:@"Error: %@", [exception reason]] forKey:NSLocalizedDescriptionKey];
+        *outError = [[NSError alloc] initWithDomain:@"SPXErrorDomain"
+                                               code:[Util getErrorNumberFromExceptionReason:[exception reason]] userInfo:errorDict];
+    }
+    return nil;
+}
+
+- (instancetype)initWithSpeechConfiguration:(SPXSpeechConfiguration *)speechConfiguration language:(NSString *)language {
+    return [self initWithSpeechConfiguration:speechConfiguration
+                                    language:language
+                 sourceLanguageConfiguration:nil
+       autoDetectSourceLanguageConfiguration:nil
+                          audioConfiguration:nil];
+}
+
+- (nullable instancetype)initWithSpeechConfiguration:(nonnull SPXSpeechConfiguration *)speechConfiguration 
+                                            language:(nonnull NSString *)language 
+                                               error:(NSError * _Nullable * _Nullable)outError {
+    try {
+        return [self initWithSpeechConfiguration:speechConfiguration language:language];
+    }
+    catch (NSException *exception) {
+        NSMutableDictionary *errorDict = [NSMutableDictionary dictionary];
+        [errorDict setObject:[NSString stringWithFormat:@"Error: %@", [exception reason]] forKey:NSLocalizedDescriptionKey];
+        *outError = [[NSError alloc] initWithDomain:@"SPXErrorDomain"
+                                               code:[Util getErrorNumberFromExceptionReason:[exception reason]] userInfo:errorDict];
+    }
+    return nil;
+}
+
+- (instancetype)initWithSpeechConfiguration:(SPXSpeechConfiguration *)speechConfiguration
+                                   language:(NSString *)language 
+                         audioConfiguration:(SPXAudioConfiguration *)audioConfiguration {
+    return [self initWithSpeechConfiguration:speechConfiguration 
+                                    language:language
+                 sourceLanguageConfiguration:nil
+       autoDetectSourceLanguageConfiguration:nil
+                          audioConfiguration:audioConfiguration];
+}
+
+- (nullable instancetype)initWithSpeechConfiguration:(nonnull SPXSpeechConfiguration *)speechConfiguration 
+                                            language:(nonnull NSString *)language 
+                                  audioConfiguration:(nonnull SPXAudioConfiguration *)audioConfiguration
+                                               error:(NSError * _Nullable * _Nullable)outError {
+    try {
+        return [self initWithSpeechConfiguration:speechConfiguration language:language audioConfiguration:audioConfiguration];
+    }
+    catch (NSException *exception) {
+        NSMutableDictionary *errorDict = [NSMutableDictionary dictionary];
+        [errorDict setObject:[NSString stringWithFormat:@"Error: %@", [exception reason]] forKey:NSLocalizedDescriptionKey];
+        *outError = [[NSError alloc] initWithDomain:@"SPXErrorDomain"
+                                               code:[Util getErrorNumberFromExceptionReason:[exception reason]] userInfo:errorDict];
+    }
+    return nil;
+}
+
+- (instancetype)initWithSpeechConfiguration:(SPXSpeechConfiguration *)speechConfiguration
+                sourceLanguageConfiguration:(SPXSourceLanguageConfiguration *)sourceLanguageConfiguration {
+    return [self initWithSpeechConfiguration:speechConfiguration 
+                                    language:nil
+                 sourceLanguageConfiguration:sourceLanguageConfiguration
+       autoDetectSourceLanguageConfiguration:nil
+                          audioConfiguration:nil];
+}
+
+- (nullable instancetype)initWithSpeechConfiguration:(nonnull SPXSpeechConfiguration *)speechConfiguration 
+                         sourceLanguageConfiguration:(nonnull SPXSourceLanguageConfiguration *)sourceLanguageConfiguration 
+                                               error:(NSError * _Nullable * _Nullable)outError {
+    try {
+        return [self initWithSpeechConfiguration:speechConfiguration sourceLanguageConfiguration:sourceLanguageConfiguration];
+    }
+    catch (NSException *exception) {
+        NSMutableDictionary *errorDict = [NSMutableDictionary dictionary];
+        [errorDict setObject:[NSString stringWithFormat:@"Error: %@", [exception reason]] forKey:NSLocalizedDescriptionKey];
+        *outError = [[NSError alloc] initWithDomain:@"SPXErrorDomain"
+                                               code:[Util getErrorNumberFromExceptionReason:[exception reason]] userInfo:errorDict];
+    }
+    return nil;
+}
+
+- (instancetype)initWithSpeechConfiguration:(SPXSpeechConfiguration *)speechConfiguration
+                sourceLanguageConfiguration:(SPXSourceLanguageConfiguration *)sourceLanguageConfiguration
+                         audioConfiguration:(SPXAudioConfiguration *)audioConfiguration {
+    return [self initWithSpeechConfiguration:speechConfiguration
+                                    language:nil
+                 sourceLanguageConfiguration:sourceLanguageConfiguration
+       autoDetectSourceLanguageConfiguration:nil
+                          audioConfiguration:audioConfiguration];
+}
+
+- (nullable instancetype)initWithSpeechConfiguration:(nonnull SPXSpeechConfiguration *)speechConfiguration
+                         sourceLanguageConfiguration:(nonnull SPXSourceLanguageConfiguration *)sourceLanguageConfiguration 
+                                  audioConfiguration:(nonnull SPXAudioConfiguration *)audioConfiguration
+                                               error:(NSError * _Nullable * _Nullable)outError {
+    try {
+        return [self initWithSpeechConfiguration:speechConfiguration
+                     sourceLanguageConfiguration:sourceLanguageConfiguration
+                              audioConfiguration:audioConfiguration];
+    }
+    catch (NSException *exception) {
+        NSMutableDictionary *errorDict = [NSMutableDictionary dictionary];
+        [errorDict setObject:[NSString stringWithFormat:@"Error: %@", [exception reason]] forKey:NSLocalizedDescriptionKey];
+        *outError = [[NSError alloc] initWithDomain:@"SPXErrorDomain"
+                                               code:[Util getErrorNumberFromExceptionReason:[exception reason]] userInfo:errorDict];
+    }
+    return nil;
+}
+
+- (instancetype)initWithSpeechConfiguration:(SPXSpeechConfiguration *)speechConfiguration
+                autoDetectSourceLanguageConfiguration:(SPXAutoDetectSourceLanguageConfiguration *)autoDetectSourceLanguageConfiguration {
+    return [self initWithSpeechConfiguration:speechConfiguration
+                                    language:nil
+                 sourceLanguageConfiguration:nil
+       autoDetectSourceLanguageConfiguration:autoDetectSourceLanguageConfiguration
+                          audioConfiguration:nil];
+}
+
+- (nullable instancetype)initWithSpeechConfiguration:(nonnull SPXSpeechConfiguration *)speechConfiguration 
+               autoDetectSourceLanguageConfiguration:(nonnull SPXAutoDetectSourceLanguageConfiguration *)autoDetectSourceLanguageConfiguration
+                                               error:(NSError * _Nullable * _Nullable)outError {
+    try {
+        return [self initWithSpeechConfiguration:speechConfiguration autoDetectSourceLanguageConfiguration:autoDetectSourceLanguageConfiguration];
+    }
+    catch (NSException *exception) {
+        NSMutableDictionary *errorDict = [NSMutableDictionary dictionary];
+        [errorDict setObject:[NSString stringWithFormat:@"Error: %@", [exception reason]] forKey:NSLocalizedDescriptionKey];
+        *outError = [[NSError alloc] initWithDomain:@"SPXErrorDomain"
+                                               code:[Util getErrorNumberFromExceptionReason:[exception reason]] userInfo:errorDict];
+    }
+    return nil;
+}
+
+- (instancetype)initWithSpeechConfiguration:(SPXSpeechConfiguration *)speechConfiguration
+      autoDetectSourceLanguageConfiguration:(SPXAutoDetectSourceLanguageConfiguration *)autoDetectSourceLanguageConfiguration
+                         audioConfiguration:(SPXAudioConfiguration *)audioConfiguration {
+    return [self initWithSpeechConfiguration:speechConfiguration
+                                    language:nil
+                 sourceLanguageConfiguration:nil
+       autoDetectSourceLanguageConfiguration:autoDetectSourceLanguageConfiguration
+                          audioConfiguration:audioConfiguration];
+}
+
+- (nullable instancetype)initWithSpeechConfiguration:(nonnull SPXSpeechConfiguration *)speechConfiguration
+               autoDetectSourceLanguageConfiguration:(nonnull SPXAutoDetectSourceLanguageConfiguration *)autoDetectSourceLanguageConfiguration
+                                  audioConfiguration:(nonnull SPXAudioConfiguration *)audioConfiguration
+                                               error:(NSError * _Nullable * _Nullable)outError {
+    try {
+        return [self initWithSpeechConfiguration:speechConfiguration 
+           autoDetectSourceLanguageConfiguration:autoDetectSourceLanguageConfiguration
+                              audioConfiguration:audioConfiguration];
+    }
+    catch (NSException *exception) {
+        NSMutableDictionary *errorDict = [NSMutableDictionary dictionary];
+        [errorDict setObject:[NSString stringWithFormat:@"Error: %@", [exception reason]] forKey:NSLocalizedDescriptionKey];
+        *outError = [[NSError alloc] initWithDomain:@"SPXErrorDomain"
+                                               code:[Util getErrorNumberFromExceptionReason:[exception reason]] userInfo:errorDict];
+    }
+    return nil;
+}
+
+- (instancetype)initWithSpeechConfiguration:(SPXSpeechConfiguration *)speechConfiguration 
+                                   language:(NSString *)language
+                sourceLanguageConfiguration:(SPXSourceLanguageConfiguration *)sourceLanguageConfiguration
+      autoDetectSourceLanguageConfiguration:(SPXAutoDetectSourceLanguageConfiguration *)autoDetectSourceLanguageConfiguration
+                         audioConfiguration:(SPXAudioConfiguration *)audioConfiguration {
+    try {
+        SpeechRecoSharedPtr recoImpl = nil;
+        if (language) {
+            if (audioConfiguration)
+                recoImpl= SpeechImpl::SpeechRecognizer::FromConfig([speechConfiguration getHandle], [language toSpxString], [audioConfiguration getHandle]);
+            else
+                recoImpl= SpeechImpl::SpeechRecognizer::FromConfig([speechConfiguration getHandle], [language toSpxString]);
+        }
+        else if (sourceLanguageConfiguration) {
+            if (audioConfiguration)
+                recoImpl= SpeechImpl::SpeechRecognizer::FromConfig([speechConfiguration getHandle], [sourceLanguageConfiguration getHandle], [audioConfiguration getHandle]);
+            else            
+                recoImpl= SpeechImpl::SpeechRecognizer::FromConfig([speechConfiguration getHandle], [sourceLanguageConfiguration getHandle]);
+        }
+        else if (autoDetectSourceLanguageConfiguration) {
+            if (audioConfiguration)
+                recoImpl= SpeechImpl::SpeechRecognizer::FromConfig([speechConfiguration getHandle], [autoDetectSourceLanguageConfiguration getHandle], [audioConfiguration getHandle]);
+            else            
+                recoImpl= SpeechImpl::SpeechRecognizer::FromConfig([speechConfiguration getHandle], [autoDetectSourceLanguageConfiguration getHandle]);
+        }
+        else {
+            if (audioConfiguration)
+                recoImpl= SpeechImpl::SpeechRecognizer::FromConfig([speechConfiguration getHandle], [audioConfiguration getHandle]);
+            else
+                recoImpl= SpeechImpl::SpeechRecognizer::FromConfig([speechConfiguration getHandle]);
+        }
         if (recoImpl == nullptr)
             return nil;
         return [self initWithImpl:recoImpl];
@@ -90,21 +270,6 @@
                                                          reason:@"Runtime Exception"
                                                        userInfo:nil];
         [exception raise];
-    }
-    return nil;
-}
-
-- (nullable instancetype)initWithSpeechConfiguration:(nonnull SPXSpeechConfiguration *)speechConfiguration audioConfiguration:(nonnull SPXAudioConfiguration *)audioConfiguration error:(NSError * _Nullable * _Nullable)outError
-{
-    try {
-        self = [self initWithSpeechConfiguration:speechConfiguration audioConfiguration:audioConfiguration];
-        return self;
-    }
-    catch (NSException *exception) {
-        NSMutableDictionary *errorDict = [NSMutableDictionary dictionary];
-        [errorDict setObject:[NSString stringWithFormat:@"Error: %@", [exception reason]] forKey:NSLocalizedDescriptionKey];
-        *outError = [[NSError alloc] initWithDomain:@"SPXErrorDomain"
-                                               code:[Util getErrorNumberFromExceptionReason:[exception reason]] userInfo:errorDict];
     }
     return nil;
 }

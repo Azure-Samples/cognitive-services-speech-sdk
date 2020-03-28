@@ -9,5 +9,10 @@
 @interface SPXSpeechRecognizer (Private)
 
 - (instancetype)initWithImpl:(SpeechRecoSharedPtr)recoHandle;
+- (instancetype)initWithSpeechConfiguration:(SPXSpeechConfiguration *)speechConfiguration 
+                language:(NSString *)language
+                sourceLanguageConfiguration:(SPXSourceLanguageConfiguration *)sourceLanguageConfiguration
+                autoDetectSourceLanguageConfiguration:(SPXAutoDetectSourceLanguageConfiguration *)autoDetectSourceLanguageConfiguration  
+                audioConfiguration:(SPXAudioConfiguration *)audioConfiguration;
 
 @end
