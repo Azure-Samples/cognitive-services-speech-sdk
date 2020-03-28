@@ -1051,6 +1051,11 @@ class Connection():
         """
         return EventSignal(self._impl.disconnected, ConnectionEventArgs)
 
+    def set_message_property(self, path: str, property_name: str, property_value: str):
+        """
+        Appends a parameter in a message to service.
+        """
+        return self._impl.set_message_property(path, property_name, property_value)
 
 class PhraseListGrammar():
     """
