@@ -66,9 +66,9 @@ def speech_recognize_once_from_file():
     # <SpeechRecognitionWithFile>
     speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
     audio_config = speechsdk.audio.AudioConfig(filename=weatherfilename)
-    # Creates a speech recognizer using a file as audio input.
-    # The default language is "en-us".
-    speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, audio_config=audio_config)
+    # Creates a speech recognizer using a file as audio input, also specify the speech language
+    speech_recognizer = speechsdk.SpeechRecognizer(
+        speech_config=speech_config, language="de-DE", audio_config=audio_config)
 
     # Starts speech recognition, and returns after a single utterance is recognized. The end of a
     # single utterance is determined by listening for silence at the end or until a maximum of 15
@@ -97,14 +97,14 @@ def speech_recognize_once_from_file_with_customized_model():
     # <SpeechRecognitionUsingCustomizedModel>
     speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
 
-    # Set the endpoint ID of your customized model
-    # Replace with your own CRIS endpoint ID.
-    speech_config.endpoint_id = "YourEndpointId"
+    # Create source language configuration with the speech language and the endpoint ID of your customized model
+    # Replace with your speech language and CRIS endpoint ID.
+    source_language_config = speechsdk.languageconfig.SourceLanguageConfig("zh-CN", "YourEndpointId")
 
     audio_config = speechsdk.audio.AudioConfig(filename=weatherfilename)
-    # Creates a speech recognizer using a file as audio input.
-    # The default language is "en-us".
-    speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, audio_config=audio_config)
+    # Creates a speech recognizer using a file as audio input and specify the source language config
+    speech_recognizer = speechsdk.SpeechRecognizer(
+        speech_config=speech_config, source_language_config=source_language_config, audio_config=audio_config)
 
     # Starts speech recognition, and returns after a single utterance is recognized. The end of a
     # single utterance is determined by listening for silence at the end or until a maximum of 15
@@ -395,3 +395,60 @@ def speech_recognition_with_push_stream():
         stream.close()
         speech_recognizer.stop_continuous_recognition()
 
+def speech_recognize_once_with_auto_language_detection_from_mic():
+    """performs one-shot speech recognition from the default microphone with auto language detection"""
+    speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
+
+    # create the auto detection language configuration with the potential source language candidates
+    auto_detect_source_language_config = \
+        speechsdk.languageconfig.AutoDetectSourceLanguageConfig(languages=["de-DE", "en-US"])
+    speech_recognizer = speechsdk.SpeechRecognizer(
+        speech_config=speech_config, auto_detect_source_language_config=auto_detect_source_language_config)
+    result = speech_recognizer.recognize_once()
+
+    # Check the result
+    if result.reason == speechsdk.ResultReason.RecognizedSpeech:
+        auto_detect_source_language_result = speechsdk.AutoDetectSourceLanguageResult(result)
+        print("Recognized: {} in language {}".format(result.text, auto_detect_source_language_result.language))
+    elif result.reason == speechsdk.ResultReason.NoMatch:
+        print("No speech could be recognized")
+    elif result.reason == speechsdk.ResultReason.Canceled:
+        cancellation_details = result.cancellation_details
+        print("Speech Recognition canceled: {}".format(cancellation_details.reason))
+        if cancellation_details.reason == speechsdk.CancellationReason.Error:
+            print("Error details: {}".format(cancellation_details.error_details))
+
+def speech_recognize_with_auto_language_detection_UsingCustomizedModel():
+    """performs speech recognition from the audio file with auto language detection, using customized model"""
+    speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
+    audio_config = speechsdk.audio.AudioConfig(filename=weatherfilename)
+
+    # Replace the languages with your languages in BCP-47 format, e.g. fr-FR.
+    # Please see https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support
+    # for all supported languages
+    en_language_config = speechsdk.languageconfig.SourceLanguageConfig("en-US")
+    # Replace the languages with your languages in BCP-47 format, e.g. zh-CN.
+    # Set the endpoint ID of your customized mode that will be used for fr-FR.
+    # Replace with your own CRIS endpoint ID.
+    fr_language_config = speechsdk.languageconfig.SourceLanguageConfig("fr-FR", "myendpointId")
+    # create the auto detection language configuration with the source language configurations
+    auto_detect_source_language_config = speechsdk.languageconfig.AutoDetectSourceLanguageConfig(
+        sourceLanguageConfigs=[en_language_config, fr_language_config])
+
+    speech_recognizer = speechsdk.SpeechRecognizer(
+        speech_config=speech_config,
+        auto_detect_source_language_config=auto_detect_source_language_config,
+        audio_config=audio_config)
+    result = speech_recognizer.recognize_once()
+
+    # Check the result
+    if result.reason == speechsdk.ResultReason.RecognizedSpeech:
+        auto_detect_source_language_result = speechsdk.AutoDetectSourceLanguageResult(result)
+        print("Recognized: {} in language {}".format(result.text, auto_detect_source_language_result.language))
+    elif result.reason == speechsdk.ResultReason.NoMatch:
+        print("No speech could be recognized")
+    elif result.reason == speechsdk.ResultReason.Canceled:
+        cancellation_details = result.cancellation_details
+        print("Speech Recognition canceled: {}".format(cancellation_details.reason))
+        if cancellation_details.reason == speechsdk.CancellationReason.Error:
+            print("Error details: {}".format(cancellation_details.error_details))
