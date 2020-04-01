@@ -13,6 +13,7 @@
 #include "conversation_impl.h"
 #include "conversation_manager.h"
 #include "conversation_utils.h"
+#include "conversation_translator_logging.h"
 
 
 using namespace std;
@@ -74,12 +75,12 @@ namespace ConversationTranslation {
         : ThreadingHelpers(ISpxThreadService::Affinity::User),
         m_conversationId(), m_args(), m_manager(), m_connection(), m_canRejoin(false), m_permanentRoom(false)
     {
-        SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+        CT_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
     }
 
     CSpxConversationImpl::~CSpxConversationImpl()
     {
-        SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+        CT_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
         try
         {
@@ -91,35 +92,30 @@ namespace ConversationTranslation {
         }
         catch (const ExceptionWithCallStack& ex)
         {
-            SPX_TRACE_ERROR("Caught exception in CSpxConversationImpl disposer. Message: '%s'. Stack: %s", ex.what(), ex.GetCallStack());
+            CT_I_LOG_ERROR("Caught exception in CSpxConversationImpl disposer. Message: '%s'. Stack: %s", ex.what(), ex.GetCallStack());
         }
         catch (const std::exception& ex)
         {
-            SPX_TRACE_ERROR("Caught exception in CSpxConversationImpl disposer. Message: '%s'", ex.what());
+            CT_I_LOG_ERROR("Caught exception in CSpxConversationImpl disposer. Message: '%s'", ex.what());
         }
         catch (...)
         {
-            SPX_TRACE_ERROR("Caught a non-exception item thrown in CSpxConversationImpl disposer.");
+            CT_I_LOG_ERROR("Caught a non-exception item thrown in CSpxConversationImpl disposer.");
         }
     }
 
     void CSpxConversationImpl::Init()
     {
-        SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+        CT_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
         ThreadingHelpers::Init();
         
         std::shared_ptr<ISpxRecognizerSite> site = GetSite();
 
         auto properties = SpxQueryService<ISpxNamedProperties>(site);
-        SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_CONVERSATION_SITE_FAILURE);
+        CT_I_THROW_HR_IF(properties == nullptr, SPXERR_UNEXPECTED_CONVERSATION_SITE_FAILURE);
 
         // Initialize logging
-        std::string unset("<<NOT_SET>>");
-        std::string logFile = NamedPropertiesHelper::GetString(properties, PropertyId::Speech_LogFilename, unset.c_str());
-        if (logFile != unset)
-        {
-            SpxDiagLogSetProperties(properties);
-        }
+        SpxDiagLogSetProperties(properties);
 
         // Initialize websocket platform
         USP::PlatformInit(nullptr, 0, nullptr, nullptr);
@@ -193,7 +189,7 @@ namespace ConversationTranslation {
     {
         RunSynchronously([this, conversationId]
         {
-            SPX_IFTRUE_THROW_HR(m_args != nullptr, SPXERR_INVALID_STATE);
+            CT_I_THROW_HR_IF(m_args != nullptr, SPXERR_INVALID_STATE);
             m_conversationId = std::move(conversationId);
         });
     }
@@ -208,7 +204,7 @@ namespace ConversationTranslation {
                 return;
             }
 
-            SPX_IFTRUE_THROW_HR(m_manager == nullptr, SPXERR_UNINITIALIZED);
+            CT_I_THROW_HR_IF(m_manager == nullptr, SPXERR_UNINITIALIZED);
             auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
 
             // first create the room
@@ -234,9 +230,14 @@ namespace ConversationTranslation {
             create.TtsFormat = TextToSpeechFormat::Wav; // TODO ralphe: parse the PropertyId::SpeechServiceConnection_SynthOutputFormat?
             create.ClientAppId = properties->GetStringValue(ConversationKeys::Conversation_ClientId, ConversationConstants::ClientAppId);
 
-            std::string roomPin = properties->GetStringValue(ConversationKeys::Conversation_RoomPin);
+            create.HostCode = NamedPropertiesHelper::GetString(properties,
+            {
+                ConversationKeys::Conversation_HostCode,
+                "ConversationTranslator_RoomPin" // for backwards compatibility with the previous value
+            });
+            create.ParticipantCode = properties->GetStringValue(ConversationKeys::Conversation_ParticipantCode);
 
-            m_args = make_unique<ConversationArgs>(m_manager->CreateOrJoin(create, m_conversationId, roomPin));
+            m_args = make_unique<ConversationArgs>(m_manager->CreateOrJoin(create, m_conversationId));
 
             m_canRejoin = true;
 
@@ -254,14 +255,14 @@ namespace ConversationTranslation {
     {
         RunSynchronously([this]()
         {
-            SPX_IFTRUE_THROW_HR(
+            CT_I_THROW_HR_IF(
                 m_args == nullptr || m_args->RoomCode.empty() || m_args->SessionToken.empty() || m_args->ParticipantId.empty(),
                 SPXERR_INVALID_STATE);
-            SPX_IFTRUE_THROW_HR(m_connection == nullptr, SPXERR_UNINITIALIZED);
+            CT_I_THROW_HR_IF(m_connection == nullptr, SPXERR_UNINITIALIZED);
 
             m_connection->Connect(m_args->ParticipantId, m_args->SessionToken);
 
-            SPX_TRACE_INFO("CSpxConversationImpl::StartConversationAsync has completed");
+            CT_I_LOG_INFO("CSpxConversationImpl::StartConversationAsync has completed");
         });
     }
 
@@ -274,7 +275,7 @@ namespace ConversationTranslation {
     {
         RunSynchronously([this]()
         {
-            SPX_IFTRUE_THROW_HR(m_manager == nullptr, SPXERR_UNINITIALIZED);
+            CT_I_THROW_HR_IF(m_manager == nullptr, SPXERR_UNINITIALIZED);
             m_canRejoin = false;
             this->DeleteConversationInternal();
         });
@@ -365,11 +366,11 @@ namespace ConversationTranslation {
                 {
                     // This response usually means the service has already deleted the room on your behalf.
                     // This can happen for example if you are a participant and the host deletes the room.
-                    SPX_TRACE_INFO("Got a HTTP 404 response when trying to delete the conversation. Ignoring");
+                    CT_I_LOG_INFO("Got a HTTP 404 response when trying to delete the conversation. Ignoring");
                 }
                 else
                 {
-                    SPX_TRACE_ERROR("Failed to delete the conversation. '%s'", ex.what());
+                    CT_I_LOG_ERROR("Failed to delete the conversation. '%s'", ex.what());
                     throw;
                 }
             }

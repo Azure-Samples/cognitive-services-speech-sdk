@@ -136,23 +136,26 @@ namespace Impl {
                 throw std::runtime_error("Creating the HTTP request failed");
             }
         }
-
+        
 #ifdef SPEECHSDK_USE_OPENSSL
-        int tls_version = OPTION_TLS_VERSION_1_2;
-        if (HTTPAPI_SetOption(m_handle, OPTION_TLS_VERSION, &tls_version) != HTTPAPI_OK)
+        if (m_endpoint.IsSecure())
         {
-            throw std::runtime_error("Could not set TLS 1.2 option");
-        }
+            int tls_version = OPTION_TLS_VERSION_1_2;
+            if (HTTPAPI_SetOption(m_handle, OPTION_TLS_VERSION, &tls_version) != HTTPAPI_OK)
+            {
+                throw std::runtime_error("Could not set TLS 1.2 option");
+            }
 
-        bool disableDefaultVerifyPaths = m_endpoint.DisableDefaultVerifyPaths();
-        bool disableCrlChecks = m_endpoint.DisableCrlChecks();
-        std::string singleCert = m_endpoint.SingleTrustedCertificate();
+            bool disableDefaultVerifyPaths = m_endpoint.DisableDefaultVerifyPaths();
+            bool disableCrlChecks = m_endpoint.DisableCrlChecks();
+            std::string singleCert = m_endpoint.SingleTrustedCertificate();
 
-        HTTPAPI_SetOption(m_handle, OPTION_DISABLE_DEFAULT_VERIFY_PATHS, &disableDefaultVerifyPaths);
-        if (!singleCert.empty())
-        {
-            HTTPAPI_SetOption(m_handle, OPTION_TRUSTED_CERT, singleCert.c_str());
-            HTTPAPI_SetOption(m_handle, OPTION_DISABLE_CRL_CHECK, &disableCrlChecks);
+            HTTPAPI_SetOption(m_handle, OPTION_DISABLE_DEFAULT_VERIFY_PATHS, &disableDefaultVerifyPaths);
+            if (!singleCert.empty())
+            {
+                HTTPAPI_SetOption(m_handle, OPTION_TRUSTED_CERT, singleCert.c_str());
+                HTTPAPI_SetOption(m_handle, OPTION_DISABLE_CRL_CHECK, &disableCrlChecks);
+            }
         }
 #endif
 

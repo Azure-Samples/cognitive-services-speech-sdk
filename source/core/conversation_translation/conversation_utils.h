@@ -42,8 +42,9 @@ namespace ConversationTranslation {
         constexpr auto Conversation_Region = "ConversationTranslator_Region";
         constexpr auto ConversationServiceConnection_Key = "ConversationTranslator_SubscriptionKey";
         constexpr auto Conversation_ClientId = "ConversationTranslator_ClientId";
-        constexpr auto Conversation_RoomPin = "ConversationTranslator_RoomPin";
         constexpr auto Conversation_MultiChannelAudio = "ConversationTranslator_MultiChannelAudio";
+        constexpr auto Conversation_HostCode = "ConversationTranslator_HostCode";
+        constexpr auto Conversation_ParticipantCode = "ConversationTranslator_ParticipantCode";
     }
 
     namespace ConversationQueryParameters

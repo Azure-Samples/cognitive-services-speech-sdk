@@ -24,7 +24,7 @@ using namespace Microsoft::CognitiveServices::Speech::Impl;
 using namespace Microsoft::CognitiveServices::Speech::IntegrationTests;
 using namespace Microsoft::CognitiveServices::Speech::Transcription;
 
-TEST_CASE("Conversation host without translations", "[api][cxx][conversation_translator][cxx_conversation][no_translate]")
+TEST_CASE("[CT] Conversation host without translations", "[api][cxx][conversation_translator][cxx_conversation][no_translate]")
 {
     CT_INTEGRATION_TEST_INIT;
     auto speechConfig = CreateConfig("en-US", {});
@@ -32,7 +32,7 @@ TEST_CASE("Conversation host without translations", "[api][cxx][conversation_tra
     conversation->DeleteConversationAsync().get();
 }
 
-TEST_CASE("Conversation host with translations", "[api][cxx][conversation_translator][cxx_conversation][translate]")
+TEST_CASE("[CT] Conversation host with translations", "[api][cxx][conversation_translator][cxx_conversation][translate]")
 {
     CT_INTEGRATION_TEST_INIT;
     auto speechConfig = CreateConfig("en-US", { "fr" });
@@ -40,7 +40,7 @@ TEST_CASE("Conversation host with translations", "[api][cxx][conversation_transl
     conversation->DeleteConversationAsync().get();
 }
 
-TEST_CASE("Conversation host destructor", "[api][cxx][conversation_translator][cxx_conversation][destructor]")
+TEST_CASE("[CT] Conversation host destructor", "[api][cxx][conversation_translator][cxx_conversation][destructor]")
 {
     CT_INTEGRATION_TEST_INIT;
     auto speechConfig = CreateConfig("en-US", { "fr", "ar" });
@@ -49,7 +49,7 @@ TEST_CASE("Conversation host destructor", "[api][cxx][conversation_translator][c
     conversation.reset();
 }
 
-TEST_CASE("Conversation destructor after start", "[api][cxx][conversation_translator][cxx_conversation][start_destructor]")
+TEST_CASE("[CT] Conversation destructor after start", "[api][cxx][conversation_translator][cxx_conversation][start_destructor]")
 {
     CT_INTEGRATION_TEST_INIT;
     auto speechConfig = CreateConfig("en-US", { "fr", "ar" });
@@ -59,7 +59,7 @@ TEST_CASE("Conversation destructor after start", "[api][cxx][conversation_transl
     conversation.reset();
 }
 
-TEST_CASE("Conversation call while not joined", "[api][cxx][conversation_translator][cxx_conversation][not_started]")
+TEST_CASE("[CT] Conversation call while not joined", "[api][cxx][conversation_translator][cxx_conversation][not_started]")
 {
     CT_INTEGRATION_TEST_INIT;
     auto speechConfig = CreateConfig("en-US", { "fr", "ar" });
@@ -68,37 +68,37 @@ TEST_CASE("Conversation call while not joined", "[api][cxx][conversation_transla
     REQUIRE_THROWS_MATCHES(
         conversation->LockConversationAsync().get(),
         std::runtime_error,
-        HasHR(SPXERR_INVALID_STATE));
+        Catch::HasHR(SPXERR_INVALID_STATE));
 
     REQUIRE_THROWS_MATCHES(
         conversation->UnlockConversationAsync().get(),
         std::runtime_error,
-        HasHR(SPXERR_INVALID_STATE));
+        Catch::HasHR(SPXERR_INVALID_STATE));
 
     REQUIRE_THROWS_MATCHES(
         conversation->MuteParticipantAsync("userId").get(),
         std::runtime_error,
-        HasHR(SPXERR_INVALID_STATE));
+        Catch::HasHR(SPXERR_INVALID_STATE));
 
     REQUIRE_THROWS_MATCHES(
         conversation->UnmuteParticipantAsync("userId").get(),
         std::runtime_error,
-        HasHR(SPXERR_INVALID_STATE));
+        Catch::HasHR(SPXERR_INVALID_STATE));
 
     REQUIRE_THROWS_MATCHES(
         conversation->MuteAllParticipantsAsync().get(),
         std::runtime_error,
-        HasHR(SPXERR_INVALID_STATE));
+        Catch::HasHR(SPXERR_INVALID_STATE));
 
     REQUIRE_THROWS_MATCHES(
         conversation->UnmuteAllParticipantsAsync().get(),
         std::runtime_error,
-        HasHR(SPXERR_INVALID_STATE));
+        Catch::HasHR(SPXERR_INVALID_STATE));
 
     REQUIRE_THROWS_MATCHES(
         conversation->RemoveParticipantAsync("userId").get(),
         std::runtime_error,
-        HasHR(SPXERR_INVALID_STATE));
+        Catch::HasHR(SPXERR_INVALID_STATE));
 
     REQUIRE_NOTHROW(conversation->GetAuthorizationToken());
     REQUIRE_NOTHROW(conversation->GetConversationId());
@@ -108,7 +108,7 @@ TEST_CASE("Conversation call while not joined", "[api][cxx][conversation_transla
     REQUIRE_NOTHROW(conversation->DeleteConversationAsync().get());
 }
 
-TEST_CASE("Conversation call unsupported methods", "[api][cxx][conversation_translator][cxx_conversation][unsupported]")
+TEST_CASE("[CT] Conversation call unsupported methods", "[api][cxx][conversation_translator][cxx_conversation][unsupported]")
 {
     CT_INTEGRATION_TEST_INIT;
     auto speechConfig = CreateConfig("en-US", { "fr", "ar" });
@@ -124,17 +124,17 @@ TEST_CASE("Conversation call unsupported methods", "[api][cxx][conversation_tran
         REQUIRE_THROWS_MATCHES(
             conversation->AddParticipantAsync(u).get(),
             std::runtime_error,
-            HasHR(SPXERR_UNSUPPORTED_API_ERROR));
+            Catch::HasHR(SPXERR_UNSUPPORTED_API_ERROR));
 
         REQUIRE_THROWS_MATCHES(
             conversation->AddParticipantAsync(p).get(),
             std::runtime_error,
-            HasHR(SPXERR_UNSUPPORTED_API_ERROR));
+            Catch::HasHR(SPXERR_UNSUPPORTED_API_ERROR));
 
         REQUIRE_THROWS_MATCHES(
             conversation->AddParticipantAsync("userId").get(),
             std::runtime_error,
-            HasHR(SPXERR_UNSUPPORTED_API_ERROR));
+            Catch::HasHR(SPXERR_UNSUPPORTED_API_ERROR));
 
         conversation->EndConversationAsync().get();
         conversation->DeleteConversationAsync().get();
@@ -150,41 +150,41 @@ TEST_CASE("Conversation call unsupported methods", "[api][cxx][conversation_tran
         REQUIRE_THROWS_MATCHES(
             cts->StartConversationAsync().get(),
             std::runtime_error,
-            HasHR(SPXERR_UNSUPPORTED_API_ERROR));
+            Catch::HasHR(SPXERR_UNSUPPORTED_API_ERROR));
 
         REQUIRE_THROWS_MATCHES(
             cts->LockConversationAsync().get(),
             std::runtime_error,
-            HasHR(SPXERR_UNSUPPORTED_API_ERROR));
+            Catch::HasHR(SPXERR_UNSUPPORTED_API_ERROR));
 
         REQUIRE_THROWS_MATCHES(
             cts->UnlockConversationAsync().get(),
             std::runtime_error,
-            HasHR(SPXERR_UNSUPPORTED_API_ERROR));
+            Catch::HasHR(SPXERR_UNSUPPORTED_API_ERROR));
 
         REQUIRE_THROWS_MATCHES(
             cts->MuteAllParticipantsAsync().get(),
             std::runtime_error,
-            HasHR(SPXERR_UNSUPPORTED_API_ERROR));
+            Catch::HasHR(SPXERR_UNSUPPORTED_API_ERROR));
 
         REQUIRE_THROWS_MATCHES(
             cts->UnmuteAllParticipantsAsync().get(),
             std::runtime_error,
-            HasHR(SPXERR_UNSUPPORTED_API_ERROR));
+            Catch::HasHR(SPXERR_UNSUPPORTED_API_ERROR));
 
         REQUIRE_THROWS_MATCHES(
             cts->MuteParticipantAsync("userId").get(),
             std::runtime_error,
-            HasHR(SPXERR_UNSUPPORTED_API_ERROR));
+            Catch::HasHR(SPXERR_UNSUPPORTED_API_ERROR));
 
         REQUIRE_THROWS_MATCHES(
             cts->UnmuteParticipantAsync("userId").get(),
             std::runtime_error,
-            HasHR(SPXERR_UNSUPPORTED_API_ERROR));
+            Catch::HasHR(SPXERR_UNSUPPORTED_API_ERROR));
     }
 }
 
-TEST_CASE("Conversation Translator Host Audio", "[api][cxx][conversation_translator][cxx_conversation_translator][audio][host]")
+TEST_CASE("[CT] Conversation Translator Host Audio", "[api][cxx][conversation_translator][cxx_conversation_translator][audio][host]")
 {
     CT_INTEGRATION_TEST_INIT;
     REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
@@ -209,7 +209,7 @@ TEST_CASE("Conversation Translator Host Audio", "[api][cxx][conversation_transla
     SPX_TRACE_INFO("Start transcribing");
     conversationTranslator->StartTranscribingAsync().get();
 
-    eventHandlers->WaitForAudioStreamCompletion(15000ms, 2000ms);
+    eventHandlers->WaitForAudioStreamCompletion(MAX_WAIT_FOR_AUDIO_TO_COMPLETE, WAIT_AFTER_AUDIO_COMPLETE);
 
     SPX_TRACE_INFO("Stop Transcribing");
     conversationTranslator->StopTranscribingAsync().get();
@@ -232,7 +232,7 @@ TEST_CASE("Conversation Translator Host Audio", "[api][cxx][conversation_transla
     });
 }
 
-TEST_CASE("Join a conversation with translation", "[api][cxx][conversation_translator][cxx_conversation_translator][audio][join]")
+TEST_CASE("[CT] Join a conversation with translation", "[api][cxx][conversation_translator][cxx_conversation_translator][audio][join]")
 {
     CT_INTEGRATION_TEST_INIT;
     REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
@@ -272,8 +272,8 @@ TEST_CASE("Join a conversation with translation", "[api][cxx][conversation_trans
     hostTranslator->StartTranscribingAsync().get();
     bobTranslator->StartTranscribingAsync().get();
 
-    hostEvents->WaitForAudioStreamCompletion(15000ms);
-    bobEvents->WaitForAudioStreamCompletion(15000ms, 2000ms);
+    hostEvents->WaitForAudioStreamCompletion(MAX_WAIT_FOR_AUDIO_TO_COMPLETE);
+    bobEvents->WaitForAudioStreamCompletion(MAX_WAIT_FOR_AUDIO_TO_COMPLETE, WAIT_AFTER_AUDIO_COMPLETE);
 
     bobTranslator->StopTranscribingAsync().get();
     hostTranslator->StopTranscribingAsync().get();
@@ -305,7 +305,7 @@ TEST_CASE("Join a conversation with translation", "[api][cxx][conversation_trans
     });
 }
 
-TEST_CASE("Host sends an instant message", "[api][cxx][conversation_translator][cxx_conversation_translator][im][host]")
+TEST_CASE("[CT] Host sends an instant message", "[api][cxx][conversation_translator][cxx_conversation_translator][im][host]")
 {
     CT_INTEGRATION_TEST_INIT;
     REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
@@ -329,7 +329,7 @@ TEST_CASE("Host sends an instant message", "[api][cxx][conversation_translator][
     });
 }
 
-TEST_CASE("Host and participants send an instant messages", "[api][cxx][conversation_translator][cxx_conversation_translator][im][join]")
+TEST_CASE("[CT] Host and participants send an instant messages", "[api][cxx][conversation_translator][cxx_conversation_translator][im][join]")
 {
     CT_INTEGRATION_TEST_INIT;
     REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
@@ -350,7 +350,7 @@ TEST_CASE("Host and participants send an instant messages", "[api][cxx][conversa
     this_thread::sleep_for(1s);
     alice.ConvTrans->SendTextMessageAsync("C'est un test").get();
 
-    this_thread::sleep_for(2s);
+    this_thread::sleep_for(3s);
 
     alice.Leave();
     host.Leave();
@@ -369,7 +369,7 @@ TEST_CASE("Host and participants send an instant messages", "[api][cxx][conversa
     host.VerifyIms(expectedIms);
 }
 
-TEST_CASE("Join locked room", "[api][cxx][conversation_translator][cxx_conversation_translator][join_locked]")
+TEST_CASE("[CT] Join locked room", "[api][cxx][conversation_translator][cxx_conversation_translator][join_locked]")
 {
     CT_INTEGRATION_TEST_INIT;
     REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
@@ -395,7 +395,7 @@ TEST_CASE("Join locked room", "[api][cxx][conversation_translator][cxx_conversat
     host.VerifyBasicEvents(false);
 }
 
-TEST_CASE("ConversationTranslator Host disconnects room", "[api][cxx][conversation_translator][cxx_conversation_translator][host_disconnect]")
+TEST_CASE("[CT] ConversationTranslator Host disconnects room", "[api][cxx][conversation_translator][cxx_conversation_translator][host_disconnect]")
 {
     CT_INTEGRATION_TEST_INIT;
     REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
@@ -426,7 +426,7 @@ TEST_CASE("ConversationTranslator Host disconnects room", "[api][cxx][conversati
     alice.VerifyBasicEvents(true);
 }
 
-TEST_CASE("Conversation Translator call methods when not joined", "[api][cxx][conversation_translator][cxx_conversation_translator][not_joined]")
+TEST_CASE("[CT] Conversation Translator call methods when not joined", "[api][cxx][conversation_translator][cxx_conversation_translator][not_joined]")
 {
     CT_INTEGRATION_TEST_INIT;
 
@@ -441,17 +441,17 @@ TEST_CASE("Conversation Translator call methods when not joined", "[api][cxx][co
         REQUIRE_THROWS_MATCHES(
             translator->StartTranscribingAsync().get(),
             std::runtime_error,
-            HasHR(SPXERR_UNINITIALIZED));
+            Catch::HasHR(SPXERR_UNINITIALIZED));
 
         REQUIRE_THROWS_MATCHES(
             translator->StopTranscribingAsync().get(),
             std::runtime_error,
-            HasHR(SPXERR_UNINITIALIZED));
+            Catch::HasHR(SPXERR_UNINITIALIZED));
 
         REQUIRE_THROWS_MATCHES(
             translator->SendTextMessageAsync("This is a test").get(),
             std::runtime_error,
-            HasHR(SPXERR_UNINITIALIZED));
+            Catch::HasHR(SPXERR_UNINITIALIZED));
 
         REQUIRE_NOTHROW(translator->LeaveConversationAsync().get());
     }
@@ -463,23 +463,23 @@ TEST_CASE("Conversation Translator call methods when not joined", "[api][cxx][co
         REQUIRE_THROWS_MATCHES(
             translator->StartTranscribingAsync().get(),
             std::runtime_error,
-            HasHR(SPXERR_UNINITIALIZED));
+            Catch::HasHR(SPXERR_UNINITIALIZED));
 
         REQUIRE_THROWS_MATCHES(
             translator->StopTranscribingAsync().get(),
             std::runtime_error,
-            HasHR(SPXERR_UNINITIALIZED));
+            Catch::HasHR(SPXERR_UNINITIALIZED));
 
         REQUIRE_THROWS_MATCHES(
             translator->SendTextMessageAsync("This is a test").get(),
             std::runtime_error,
-            HasHR(SPXERR_UNINITIALIZED));
+            Catch::HasHR(SPXERR_UNINITIALIZED));
 
         REQUIRE_NOTHROW(translator->LeaveConversationAsync().get());
     }
 }
 
-TEST_CASE("Double join should fail", "[api][cxx][conversation_translator][cxx_conversation_translator][double_join]")
+TEST_CASE("[CT] Double join should fail", "[api][cxx][conversation_translator][cxx_conversation_translator][double_join]")
 {
     CT_INTEGRATION_TEST_INIT;
 
@@ -497,7 +497,7 @@ TEST_CASE("Double join should fail", "[api][cxx][conversation_translator][cxx_co
     REQUIRE_THROWS_MATCHES(
         host.ConvTrans->JoinConversationAsync(host.Conv, host.Name).get(),
         std::runtime_error,
-        HasHR(SPXERR_INVALID_STATE));
+        Catch::HasHR(SPXERR_INVALID_STATE));
 
     TestConversationParticipant alice("Alice", "zh-CN", host);
     alice.Join(aliceAudioConfig);
@@ -506,13 +506,13 @@ TEST_CASE("Double join should fail", "[api][cxx][conversation_translator][cxx_co
     REQUIRE_THROWS_MATCHES(
         alice.ConvTrans->JoinConversationAsync(host.ConversationId, alice.Name, alice.Lang).get(),
         std::runtime_error,
-        HasHR(SPXERR_INVALID_STATE));
+        Catch::HasHR(SPXERR_INVALID_STATE));
 
     alice.Leave();
     host.Leave();
 }
 
-TEST_CASE("Conversation Translator Connection Before Join", "[api][cxx][conversation_translator][cxx_conversation_translator][connection][before_join]")
+TEST_CASE("[CT] Conversation Translator Connection Before Join", "[api][cxx][conversation_translator][cxx_conversation_translator][connection][before_join]")
 {
     CT_INTEGRATION_TEST_INIT;
 
@@ -526,20 +526,20 @@ TEST_CASE("Conversation Translator Connection Before Join", "[api][cxx][conversa
     REQUIRE_THROWS_MATCHES(
         connection->Open(false),
         std::runtime_error,
-        HasHR(SPXERR_INVALID_STATE)
+        Catch::HasHR(SPXERR_INVALID_STATE)
     );
 
     REQUIRE_THROWS_MATCHES(
         connection->Open(true),
         std::runtime_error,
-        HasHR(SPXERR_INVALID_STATE)
+        Catch::HasHR(SPXERR_INVALID_STATE)
     );
 
     // Close should not throw exceptions
     REQUIRE_NOTHROW(connection->Close());
 }
 
-TEST_CASE("Conversation Translator Connection After Leave", "[api][cxx][conversation_translator][cxx_conversation_translator][connection][after_leave]")
+TEST_CASE("[CT] Conversation Translator Connection After Leave", "[api][cxx][conversation_translator][cxx_conversation_translator][connection][after_leave]")
 {
     CT_INTEGRATION_TEST_INIT;
 
@@ -558,20 +558,20 @@ TEST_CASE("Conversation Translator Connection After Leave", "[api][cxx][conversa
     REQUIRE_THROWS_MATCHES(
         host.Conn->Open(false),
         std::runtime_error,
-        HasHR(SPXERR_INVALID_STATE)
+        Catch::HasHR(SPXERR_INVALID_STATE)
     );
 
     REQUIRE_THROWS_MATCHES(
         host.Conn->Open(true),
         std::runtime_error,
-        HasHR(SPXERR_INVALID_STATE)
+        Catch::HasHR(SPXERR_INVALID_STATE)
     );
 
     // Close should not throw exceptions
     REQUIRE_NOTHROW(host.Conn->Close());
 }
 
-TEST_CASE("Conversation Translator Connection Recognizer events/methods", "[api][cxx][conversation_translator][cxx_conversation_translator][connection][recognizer]")
+TEST_CASE("[CT] Conversation Translator Connection Recognizer events/methods", "[api][cxx][conversation_translator][cxx_conversation_translator][connection][recognizer]")
 {
     CT_INTEGRATION_TEST_INIT;
 
@@ -601,7 +601,7 @@ TEST_CASE("Conversation Translator Connection Recognizer events/methods", "[api]
     SPXTEST_REQUIRE(evts.size() > 0);
 }
 
-TEST_CASE("Conversation Translator Host Leave Rejoin", "[api][cxx][conversation_translator][cxx_conversation_translator][connection][host][rejoin]")
+TEST_CASE("[CT] Conversation Translator Host Leave Rejoin", "[api][cxx][conversation_translator][cxx_conversation_translator][connection][host][rejoin]")
 {
     CT_INTEGRATION_TEST_INIT;
     REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
@@ -644,7 +644,7 @@ TEST_CASE("Conversation Translator Host Leave Rejoin", "[api][cxx][conversation_
     SPX_TRACE_INFO("Send text message after reconnect");
     conversationTranslator->SendTextMessageAsync("This is a test").get();
 
-    eventHandlers->WaitForAudioStreamCompletion(15000ms, 2000ms);
+    eventHandlers->WaitForAudioStreamCompletion(MAX_WAIT_FOR_AUDIO_TO_COMPLETE, WAIT_AFTER_AUDIO_COMPLETE);
 
     SPX_TRACE_INFO("Stop Transcribing");
     conversationTranslator->StopTranscribingAsync().get();
@@ -672,7 +672,7 @@ TEST_CASE("Conversation Translator Host Leave Rejoin", "[api][cxx][conversation_
         });
 }
 
-TEST_CASE("Conversation Translator can't call methods after disconnect", "[api][cxx][conversation_translator][cxx_conversation_translator][connection][after_disconnect]")
+TEST_CASE("[CT] Conversation Translator can't call methods after disconnect", "[api][cxx][conversation_translator][cxx_conversation_translator][connection][after_disconnect]")
 {
     CT_INTEGRATION_TEST_INIT;
 
@@ -692,22 +692,22 @@ TEST_CASE("Conversation Translator can't call methods after disconnect", "[api][
     REQUIRE_THROWS_MATCHES(
         host.ConvTrans->StartTranscribingAsync().get(),
         std::runtime_error,
-        HasHR(SPXERR_INVALID_STATE));
+        Catch::HasHR(SPXERR_INVALID_STATE));
 
     REQUIRE_THROWS_MATCHES(
         host.ConvTrans->StopTranscribingAsync().get(),
         std::runtime_error,
-        HasHR(SPXERR_INVALID_STATE));
+        Catch::HasHR(SPXERR_INVALID_STATE));
 
     REQUIRE_THROWS_MATCHES(
         host.ConvTrans->SendTextMessageAsync("This is a short test").get(),
         std::runtime_error,
-        HasHR(SPXERR_INVALID_STATE));
+        Catch::HasHR(SPXERR_INVALID_STATE));
 
     host.Leave();
 }
 
-TEST_CASE("Conversation Translator Participant Rejoin", "[api][cxx][conversation_translator][cxx_conversation_translator][connection][participant][rejoin]")
+TEST_CASE("[CT] Conversation Translator Participant Rejoin", "[api][cxx][conversation_translator][cxx_conversation_translator][connection][participant][rejoin]")
 {
     CT_INTEGRATION_TEST_INIT;
 
@@ -742,6 +742,8 @@ TEST_CASE("Conversation Translator Participant Rejoin", "[api][cxx][conversation
     host.WaitForAudioToFinish();
     alice.WaitForAudioToFinish();
 
+    std::this_thread::sleep_for(2s);
+
     // Disconnect both
     alice.Leave();
     host.Leave();
@@ -766,7 +768,7 @@ TEST_CASE("Conversation Translator Participant Rejoin", "[api][cxx][conversation
     alice.VerifyTranscriptions(expectedTranscriptions);
 }
 
-TEST_CASE("Conversation Translator Participant Rejoin After Delete", "[api][cxx][conversation_translator][cxx_conversation_translator][connection][participant][rejoin_after_delete]")
+TEST_CASE("[CT] Conversation Translator Participant Rejoin After Delete", "[api][cxx][conversation_translator][cxx_conversation_translator][connection][participant][rejoin_after_delete]")
 {
     CT_INTEGRATION_TEST_INIT;
 
@@ -799,7 +801,7 @@ TEST_CASE("Conversation Translator Participant Rejoin After Delete", "[api][cxx]
     REQUIRE_THROWS_MATCHES(
         alice.Conn->Open(false),
         std::runtime_error,
-        MessageContains("BadRequest") && MessageContains("WebSocket Upgrade failed"));
+        Catch::MessageContains("BadRequest") && Catch::MessageContains("WebSocket Upgrade failed"));
 
     std::this_thread::sleep_for(200ms);
 
@@ -813,17 +815,17 @@ TEST_CASE("Conversation Translator Participant Rejoin After Delete", "[api][cxx]
     REQUIRE_THROWS_MATCHES(
         alice.Conn->Open(false),
         std::runtime_error,
-        HasHR(SPXERR_INVALID_STATE)
+        Catch::HasHR(SPXERR_INVALID_STATE)
     );
 
     REQUIRE_THROWS_MATCHES(
         alice.Conn->Open(true),
         std::runtime_error,
-        HasHR(SPXERR_INVALID_STATE)
+        Catch::HasHR(SPXERR_INVALID_STATE)
     );
 }
 
-TEST_CASE("Conversation Translator SpeechRecognizer Connection Still Works", "[api][cxx][conversation_translator][cxx_conversation_translator][connection][trans_recognizer]")
+TEST_CASE("[CT] Conversation Translator SpeechRecognizer Connection Still Works", "[api][cxx][conversation_translator][cxx_conversation_translator][connection][trans_recognizer]")
 {
     auto utterance = AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH];
 
@@ -838,7 +840,7 @@ TEST_CASE("Conversation Translator SpeechRecognizer Connection Still Works", "[a
     evts->AddConnectionCallbacks(connection);
 
     recognizer->StartContinuousRecognitionAsync().get();
-    evts->WaitForAudioStreamCompletion(15s, 2s);
+    evts->WaitForAudioStreamCompletion(MAX_WAIT_FOR_AUDIO_TO_COMPLETE, WAIT_AFTER_AUDIO_COMPLETE);
     recognizer->StopContinuousRecognitionAsync().get();
 
     connection->Close();
@@ -847,12 +849,12 @@ TEST_CASE("Conversation Translator SpeechRecognizer Connection Still Works", "[a
 
     evts->VerifySessionAndConnectEvents(true);
     SPXTEST_REQUIRE(evts->Transcribed.size() > 0);
-    SPXTEST_REQUIRE_THAT(evts->Transcribed[0].Text, Catch::Equals(utterance.Utterances["en-US"][0].Text));
+    SPXTEST_REQUIRE_THAT(evts->Transcribed[0].Text, Catch::FuzzyMatch(utterance.Utterances["en-US"][0].Text));
 }
 
 
 
-TEST_CASE("Conversation Translator Sweden demo", "[!hide][cxx_conversation_translator][Sweden]")
+TEST_CASE("[CT] Conversation Translator Sweden demo", "[!hide][cxx_conversation_translator][Sweden]")
 {
     CT_INTEGRATION_TEST_INIT;
 
@@ -892,7 +894,7 @@ TEST_CASE("Conversation Translator Sweden demo", "[!hide][cxx_conversation_trans
     SPX_TRACE_INFO("Start transcribing");
     conversationTranslator->StartTranscribingAsync().get();
 
-    //eventHandlers.WaitForAudioStreamCompletion(15000ms, 2000ms);
+    //eventHandlers->WaitForAudioStreamCompletion(MAX_WAIT_FOR_AUDIO_TO_COMPLETE, WAIT_AFTER_AUDIO_COMPLETE);
     std::this_thread::sleep_for(15s);
 
     SPX_TRACE_INFO("Stop Transcribing");

@@ -381,8 +381,8 @@ namespace ConversationTranslation {
         RunSynchronously([this, conversation, nickname, endConversationOnLeave]()
         {
             CT_GET_AND_LOG_STATE(
-                "JoinConversation 0x%p, nickname: %s, endOnLeave: %d",
-                P_FORMAT_POINTER(conversation.get()), nickname.c_str(), endConversationOnLeave);
+                "JoinConversation 0x%p, ConverastionId: %s, nickname: %s, endOnLeave: %d",
+                P_FORMAT_POINTER(conversation.get()), conversation->GetConversationId().c_str(), nickname.c_str(), endConversationOnLeave);
 
             switch (state)
             {
@@ -514,7 +514,7 @@ namespace ConversationTranslation {
     {
         RunSynchronously([this]()
         {
-            CT_GET_AND_LOG_STATE("Start Transcribing");
+            CT_GET_AND_LOG_STATE("Stop Transcribing");
             if (false == IsConsideredOpen(state))
             {
                 CT_I_THROW_HR(SPXERR_INVALID_STATE);
@@ -1454,6 +1454,8 @@ namespace ConversationTranslation {
 
     void CSpxConversationTranslator::ToClosedState()
     {
+        CT_I_LOG_INFO("Transition to closed state");
+
         auto evt = GetStateExitEvents();
         evt.sessionStopped = true;
 
@@ -1470,6 +1472,8 @@ namespace ConversationTranslation {
 
     void CSpxConversationTranslator::ToClosingState()
     {
+        CT_I_LOG_INFO("Transition to closing state");
+
         auto evt = GetStateExitEvents();
 
         SetState(ConversationState::Closing);
@@ -1488,6 +1492,8 @@ namespace ConversationTranslation {
 
     void CSpxConversationTranslator::ToCreatingOrJoiningState()
     {
+        CT_I_LOG_INFO("Transition to creating or joining state");
+
         auto evt = GetStateExitEvents();
         SetState(ConversationState::CreatingOrJoining);
         // This state does nothing at the moment since the logic here is part of CSpxConversationImpl
@@ -1527,6 +1533,8 @@ namespace ConversationTranslation {
 
     void CSpxConversationTranslator::ToOpeningState()
     {
+        CT_I_LOG_INFO("Transition to opening state");
+
         auto evt = GetStateExitEvents();
 
         SetState(ConversationState::Opening);
@@ -1560,6 +1568,8 @@ namespace ConversationTranslation {
 
     void CSpxConversationTranslator::ToOpenState()
     {
+        CT_I_LOG_INFO("Transition to open state");
+
         auto evt = GetStateExitEvents();
 
         evt.connected = true;
@@ -1574,7 +1584,7 @@ namespace ConversationTranslation {
         RunAsynchronously([this, args]()
         {
             bool wasConnected = m_recognizerConnected.exchange(true);
-            CT_GET_AND_LOG_STATE("Recognizer session started. Was connected: %d", wasConnected);
+            CT_GET_AND_LOG_STATE("Recognizer session started. Was connected: %d, Session ID: %ls", wasConnected, args->GetSessionId().c_str());
 
             switch (state)
             {
@@ -1610,7 +1620,7 @@ namespace ConversationTranslation {
         RunAsynchronously([this, args]()
         {
             bool wasConnected = m_recognizerConnected.exchange(false);
-            CT_GET_AND_LOG_STATE("Recognizer session stopped. Was connected: %d", wasConnected);
+            CT_GET_AND_LOG_STATE("Recognizer session stopped. Was connected: %d, Session ID: %ls", wasConnected, args->GetSessionId().c_str());
 
             switch (state)
             {
@@ -1648,7 +1658,7 @@ namespace ConversationTranslation {
         RunAsynchronously([this, args]()
         {
             bool wasConnected = m_recognizerConnected.exchange(true);
-            CT_GET_AND_LOG_STATE("Recognizer connected. Was connected: %d", wasConnected);
+            CT_GET_AND_LOG_STATE("Recognizer connected. Was connected: %d, Session ID: %ls", wasConnected, args->GetSessionId().c_str());
 
             switch (state)
             {
@@ -1684,7 +1694,7 @@ namespace ConversationTranslation {
         RunAsynchronously([this, args]()
         {
             bool wasConnected = m_recognizerConnected.exchange(false);
-            CT_GET_AND_LOG_STATE("Recognizer disconnected. Was connected: %d", wasConnected);
+            CT_GET_AND_LOG_STATE("Recognizer disconnected. Was connected: %d, Session ID: %ls", wasConnected, args->GetSessionId().c_str());
 
             switch (state)
             {
@@ -1735,8 +1745,8 @@ namespace ConversationTranslation {
             }
 
             CT_GET_AND_LOG_STATE(
-                "Recognizer result. Reason: %d, %zu chars, NoMatchReason: %d, Offset: %llu",
-                result->GetReason(), result->GetText().length(), result->GetNoMatchReason(), result->GetOffset());
+                "Recognizer result. Reason: %d, %zu chars, NoMatchReason: %d, Offset: %llu, CancellationError: %d",
+                result->GetReason(), result->GetText().length(), result->GetNoMatchReason(), result->GetOffset(), result->GetCancellationErrorCode());
 
 
             if (!IsConsideredOpen(state))
@@ -1755,13 +1765,19 @@ namespace ConversationTranslation {
 
             switch (result->GetReason())
             {
+                // normally we expect a TranslatingSpeech or TranslatedSpeech event. If we get a RecognizedSpeech event
+                // instead that means that the translation failed and so we need to log the failure reason
                 case ResultReason::RecognizedSpeech:
+                    LogTranslationError(result);
+                    // fall through
                 case ResultReason::TranslatedSpeech:
                     isFinal = true;
                     reason = ResultReason::TranslatedSpeech;
                     break;
 
                 case ResultReason::RecognizingSpeech:
+                    LogTranslationError(result);
+                    // fall through
                 case ResultReason::TranslatingSpeech:
                     isFinal = false;
                     reason = ResultReason::TranslatingSpeech;
@@ -1913,6 +1929,26 @@ namespace ConversationTranslation {
                 RaiseEvent<ConversationTranslationEventArgs>(Canceled, GetSessionId(), eventArgs);
             }
         });
+    }
+
+    void CSpxConversationTranslator::LogTranslationError(shared_ptr<ISpxRecognitionResult> recoResult)
+    {
+        try
+        {
+            // let's log why the translation failed
+            string translateError;
+            auto namedProps = recoResult->QueryInterface<ISpxNamedProperties>();
+            if (namedProps != nullptr)
+            {
+                translateError = NamedPropertiesHelper::GetString(namedProps, PropertyId::SpeechServiceResponse_JsonErrorDetails);
+            }
+
+            CT_I_LOG_ERROR("Translation failed. Reason: '%s'", translateError.c_str());
+        }
+        catch (const std::exception& ex)
+        {
+            CT_I_LOG_ERROR("Translation failed. Also failed to retrieve error due to '%s'", ex.what());
+        }
     }
 
 }}}}} // Microsoft::CognitiveServices::Speech::Impl::Conversation

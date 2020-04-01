@@ -12,6 +12,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils
     /// </summary>
     public static class CatchUtils
     {
+        public static void FAIL(string msg = null, [CallerMemberName]string caller = null, [CallerLineNumber]int line = 0, [CallerFilePath]string file = null)
+        {
+            Assert.Fail("[{0}:{1}] FAIL: {2}", caller, line, msg);
+        }
+
         public static void REQUIRE(bool cond, [CallerMemberName]string caller = null, [CallerLineNumber]int line = 0, [CallerFilePath]string file = null)
         {
             Assert.IsTrue(cond, "[{0}:{1}] Condition is false", caller, line);
@@ -41,6 +46,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils
         {
             Assert.IsTrue(matcher.IsMatch(text), "[{0}:{1}] Expected '{2}'. Got '{3}'", caller, line, matcher.ToString(), text);
         }
+
+        public static void SPXTEST_REQUIRE_THAT(string text, Catch.IMatcher matcher, [CallerMemberName]string caller = null, [CallerLineNumber]int line = 0, [CallerFilePath]string file = null)
+            => REQUIRE_THAT(text, matcher, caller, line, file);
 
         public static void REQUIRE_NOTHROW(Task t, [CallerMemberName]string caller = null, [CallerLineNumber]int line = 0, [CallerFilePath]string file = null)
         {
@@ -270,6 +278,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils
             private string _v;
             private StringComparison _c;
             private string _op;
+
             public StringEqualityMatcher(string val, CaseSensitive cs)
                 : this(val, cs, "==")
             {
@@ -326,6 +335,26 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils
                 => "Exception with message " + base.ToString();
         }
 
+        public class FuzzyStringMatcher : MatcherBase
+        {
+            private string _expected;
+            private int _deltaPercentage;
+            private int _minMismatch;
+
+            public FuzzyStringMatcher(string expected, int deltaPercentage, int minAllowedMismatchCount)
+            {
+                _expected = expected;
+                _deltaPercentage = deltaPercentage;
+                _minMismatch = minAllowedMismatchCount;
+            }
+
+            public override bool IsMatch(object other)
+                => SpeechRecognitionTestsHelper.IsWithinStringWordEditPercentage(_expected, (other as string) ?? string.Empty, _deltaPercentage, _minMismatch);
+
+            public override string ToString()
+                => $"fuzzy match against '{_expected}' with {_deltaPercentage}% and {_minMismatch} minimum mismatches";
+        }
+
         public static MatcherBase Equals(string str, CaseSensitive cs)
         {
             return new StringEqualityMatcher(str, cs);
@@ -334,6 +363,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils
         public static MatcherBase Contains(string str, CaseSensitive cs)
         {
             return new StringContainsMatcher(str, cs);
+        }
+
+        public static MatcherBase FuzzyMatch(string str, int deltaPercentage = 10, int minAllowedMismatchCount = 1)
+        {
+            return new FuzzyStringMatcher(str, deltaPercentage, minAllowedMismatchCount);
         }
     }
 }

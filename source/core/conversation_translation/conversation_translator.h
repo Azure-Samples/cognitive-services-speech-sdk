@@ -212,7 +212,7 @@ namespace ConversationTranslation {
         void OnRecognizerResult(shared_ptr<ISpxRecognitionEventArgs>);
         void OnRecognizerCanceled(shared_ptr<ISpxRecognitionEventArgs>);
 
-        
+        void LogTranslationError(shared_ptr<ISpxRecognitionResult> recoResult);
 
         template<typename I>
         inline static shared_ptr<I> SafeQueryInterface(std::shared_ptr<ISpxInterfaceBase> ptr)

@@ -39,6 +39,10 @@ namespace IntegrationTests {
     using namespace Microsoft::CognitiveServices::Speech::Impl::ConversationTranslation;
 
 
+    constexpr std::chrono::milliseconds MAX_WAIT_FOR_AUDIO_TO_COMPLETE(20s);
+    constexpr std::chrono::milliseconds WAIT_AFTER_AUDIO_COMPLETE(2s);
+
+
 #ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable: 6237)
@@ -405,16 +409,35 @@ namespace IntegrationTests {
 
                 // find an utterance that matches the expected string
                 ConversationTranslatorCallbacks::_Reco match;
-                SPXTEST_REQUIRE_NOTHROW((match = First(f, [y = e.text](auto x) { return x.Text == y; })));
+                try
+                {
+                    match = First(f, [y = e.text](auto x)
+                    {
+                        return x.Text == y
+                            || PAL::stricmp(x.Text.c_str(), y.c_str()) == 0
+                            || StringComparisions::AssertFuzzyMatch(x.Text, y);
+                    });
+                }
+                catch (const std::exception&)
+                {
+                    std::ostringstream oss;
+                    oss << "Could not find final that matches '" << e.text << "'" << std::endl;
+                    oss << "Finals found:" << std::endl;
+                    for (const auto& t : f)
+                    {
+                        oss << "  [" << t.ParticipantId << "] '" << t.Text << "'" << std::endl;
+                    }
 
-                SPXTEST_REQUIRE_THAT(match.Text, Catch::Equals(e.text, Catch::CaseSensitive::No));
+                    FAIL(oss.str().c_str());
+                }
+
                 SPXTEST_REQUIRE(match.OriginalLang == e.lang);
                 SPXTEST_REQUIRE_THAT(match.ParticipantId, Catch::Equals(e.participantId, Catch::CaseSensitive::No));
                 SPXTEST_REQUIRE(match.Reason == expectedFinalReason);
                 SPXTEST_REQUIRE(match.Translations.size() >= e.translations.size());
                 for (const auto& expectedEntry : e.translations)
                 {
-                    SPXTEST_REQUIRE_THAT(match.Translations[expectedEntry.first], Catch::Equals(expectedEntry.second, Catch::CaseSensitive::No));
+                    SPXTEST_REQUIRE_THAT(match.Translations[expectedEntry.first], Catch::FuzzyMatch(expectedEntry.second));
                 }
 
                 int numPartials = 0;
@@ -450,16 +473,35 @@ namespace IntegrationTests {
 
                 // find an IM that matches the expected string
                 ConversationTranslatorCallbacks::_Reco match;
-                SPXTEST_REQUIRE_NOTHROW((match = First(receivedFromUser, [y = expected.text](auto x) { return x.Text == y; })));
+                try
+                {
+                    match = First(receivedFromUser, [y = expected.text](auto x)
+                    {
+                        return x.Text == y
+                            || PAL::stricmp(x.Text.c_str(), y.c_str()) == 0
+                            || StringComparisions::AssertFuzzyMatch(x.Text, y);
+                    });
+                }
+                catch (const std::exception&)
+                {
+                    std::ostringstream oss;
+                    oss << "Could not find instant message that matches '" << expected.text << "'" << std::endl;
+                    oss << "Finals found:" << std::endl;
+                    for (const auto& im : receivedFromUser)
+                    {
+                        oss << "  [" << im.ParticipantId << "] '" << im.Text << "'" << std::endl;
+                    }
 
-                SPXTEST_REQUIRE_THAT(match.Text, Catch::Equals(expected.text, Catch::CaseSensitive::No));
+                    FAIL(oss.str().c_str());
+                }
+
                 SPXTEST_REQUIRE(match.OriginalLang == expected.lang);
                 SPXTEST_REQUIRE_THAT(match.ParticipantId, Catch::Equals(expected.participantId, Catch::CaseSensitive::No));
                 SPXTEST_REQUIRE(match.Reason == expectedReason);
                 SPXTEST_REQUIRE(match.Translations.size() >= expected.translations.size());
                 for (const auto& expectedEntry : expected.translations)
                 {
-                    SPXTEST_REQUIRE_THAT(match.Translations[expectedEntry.first], Catch::Equals(expectedEntry.second, Catch::CaseSensitive::No));
+                    SPXTEST_REQUIRE_THAT(match.Translations[expectedEntry.first], Catch::FuzzyMatch(expectedEntry.second));
                 }
             }
         }
@@ -662,10 +704,10 @@ namespace IntegrationTests {
             ConvTrans->StartTranscribingAsync().get();
         }
 
-        void WaitForAudioToFinish(std::chrono::milliseconds maxWait = 15000ms)
+        void WaitForAudioToFinish(std::chrono::milliseconds maxWait = MAX_WAIT_FOR_AUDIO_TO_COMPLETE)
         {
             SPX_TRACE_INFO(">> [%s] Waiting for audio to complete", Name.c_str());
-            Events->WaitForAudioStreamCompletion(maxWait, 2000ms);
+            Events->WaitForAudioStreamCompletion(maxWait, WAIT_AFTER_AUDIO_COMPLETE);
             SPX_TRACE_INFO(">> [%s] Audio has completed", Name.c_str());
         }
 

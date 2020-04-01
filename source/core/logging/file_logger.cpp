@@ -14,15 +14,21 @@
 
 void FileLogger::SetFileOptions(std::shared_ptr<Microsoft::CognitiveServices::Speech::Impl::ISpxNamedProperties> properties)
 {
-    std::lock_guard<std::mutex> lock(mtx);
-
     auto name = properties->GetStringValue("SPEECH-LogFilename", "");
     auto filter = properties->GetStringValue("SPEECH-FileLogFilters", "");
     auto fileDuration = std::stoul(properties->GetStringValue("SPEECH-FileLogDurationSeconds", "0"));
     auto fileDurationSize = std::stoul(properties->GetStringValue("SPEECH-FileLogSizeMB", "0"));
     auto appendToFile = std::stoul(properties->GetStringValue("SPEECH-AppendToLogFile", "0"));
 
-    append = 0 != appendToFile;
+    SetFileOptions(name, filter, fileDuration, fileDurationSize, 0 != appendToFile);
+}
+
+void FileLogger::SetFileOptions(const std::string& logFile, const std::string& filter, uint32_t fileDuration, uint32_t fileDurationSize, bool appendToFile)
+{
+    std::lock_guard<std::mutex> lock(mtx);
+
+    std::string name(logFile);
+    append = appendToFile;
 
     if (((!filtersRaw[0]) && filter.empty()) || // Current filter has something, but we're being asked to clear it.
         ((filtersRaw[0]) && !filter.empty()) || // Current is empty, and the new one is not.

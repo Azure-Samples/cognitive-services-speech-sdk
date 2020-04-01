@@ -21,6 +21,13 @@ using System.Threading.Tasks;
 namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 {
     using static CatchUtils;
+    using static ConversationTranslatorTestConstants;
+
+    public static class ConversationTranslatorTestConstants
+    {
+        public static TimeSpan MAX_WAIT_FOR_AUDIO_TO_COMPLETE => TimeSpan.FromSeconds(20);
+        public static TimeSpan WAIT_AFTER_AUDIO_COMPLETE => TimeSpan.FromSeconds(2);
+    }
 
     public static class ConversationTranslatorExtensionMethods
     {
@@ -39,12 +46,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             DateFormatString = "o"
         };
 
-        private static readonly Lazy<Func<string, bool, string, uint, TimeSpan?, IntPtr>> _startLogging =
-            new Lazy<Func<string, bool, string, uint, TimeSpan?, IntPtr>>(() =>
-                (Func<string, bool, string, uint, TimeSpan?, IntPtr>)GetStaticInternalMethod(
+        private static readonly Lazy<Func<string, IntPtr>> _startLogging =
+            new Lazy<Func<string, IntPtr>>(() =>
+                (Func<string, IntPtr>)GetStaticInternalMethod(
                     FileLoggerClassName,
                     "StartLogging",
-                    typeof(Func<string, bool, string, uint, TimeSpan?, IntPtr>)));
+                    typeof(Func<string, IntPtr>)));
 
         private static Lazy<Func<IntPtr>> _stopLogging =
             new Lazy<Func<IntPtr>>(() =>
@@ -53,8 +60,16 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     "StopLogging",
                     typeof(Func<IntPtr>)));
 
-        public static IntPtr StartLogging(this RecognitionTestBase _, string logFile) => _startLogging.Value(logFile, false, null, 0, null);
+        private static Lazy<Func<IntPtr>> _resetLogging =
+            new Lazy<Func<IntPtr>>(() =>
+                (Func<IntPtr>)GetStaticInternalMethod(
+                    FileLoggerClassName,
+                    "ResetLogging",
+                    typeof(Func<IntPtr>)));
+
+        public static IntPtr StartLogging(this RecognitionTestBase _, string logFile) => _startLogging.Value(logFile);
         public static IntPtr StopLogging(this RecognitionTestBase _) => _stopLogging.Value();
+        public static IntPtr ResetLogging() => _resetLogging.Value();
 
         public static bool TryGetDefaultSystemProxy(out Uri server, out string username, out string password)
         {
@@ -151,27 +166,20 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             return FILE_NAME_SANITIZER.Replace(s, "_");
         }
 
-        public static T DumpToDebugOutput<T>(this T obj, string message = null, [CallerMemberName]string caller = null, [CallerLineNumber]int line = 0)
+        public static T Dump<T>(this T obj, string message = null, [CallerMemberName]string caller = null, [CallerLineNumber]int line = 0)
         {
-            Debug.Write($"({DateTime.UtcNow.ToString("yyyy-MM-dd HH::mm::ss.ff")}) [{caller}:{line}] ");
-            try
-            {
-                Debug.Indent();
-                if (message != null)
-                {
-                    Debug.Write($"{message} ");
-                }
+            Console.Write($"({DateTime.UtcNow.ToString("yyyy-MM-dd HH::mm::ss.ff")}) [{caller}:{line}] ");
 
-                string json = JsonConvert.SerializeObject(obj, SERIALIZER_SETTINGS);
-                json = System.Text.RegularExpressions.Regex.Replace(json, "^", "    ", System.Text.RegularExpressions.RegexOptions.Multiline);
-                Debug.WriteLine(json);
-
-                return obj;
-            }
-            finally
+            if (message != null)
             {
-                Debug.Unindent();
+                Console.Write($"{message} ");
             }
+
+            string json = JsonConvert.SerializeObject(obj, SERIALIZER_SETTINGS);
+            json = Regex.Replace(json, "^", "    ", RegexOptions.Multiline);
+            Console.WriteLine(json);
+
+            return obj;
         }
 
         /// <summary>
@@ -232,26 +240,17 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             _audioStreamCompleted = new TaskCompletionSource<bool>();
 
-            SessionStarted = new List<SessionEventArgs>();
-            SessionStopped = new List<SessionEventArgs>();
-            Canceled = new List<ConversationTranslationCanceledEventArgs>();
-            ParticipantsChanged = new List<ConversationParticipantsChangedEventArgs>();
-            ConversationExpiration = new List<ConversationExpirationEventArgs>();
-            Transcribing = new List<ConversationTranslationResult>();
-            Transcribed = new List<ConversationTranslationResult>();
-            TextMessageReceived = new List<ConversationTranslationResult>();
-
-            convTrans.SessionStarted += (s, e) => SessionStarted.Add(e.DumpToDebugOutput("SessionStarted"));
-            convTrans.SessionStopped += (s, e) => SessionStopped.Add(e.DumpToDebugOutput("SessionStopped"));
-            convTrans.ParticipantsChanged += (s, e) => ParticipantsChanged.Add(e.DumpToDebugOutput("ParticipantsChanged"));
-            convTrans.ConversationExpiration += (s, e) => ConversationExpiration.Add(e.DumpToDebugOutput("ConversationExpiration"));
-            convTrans.Transcribing += (s, e) => Transcribing.Add(e.Result.DumpToDebugOutput("Transcribing"));
-            convTrans.Transcribed += (s, e) => Transcribed.Add(e.Result.DumpToDebugOutput("Transcribed"));
-            convTrans.TextMessageReceived += (s, e) => TextMessageReceived.Add(e.Result.DumpToDebugOutput("TextMessageReceived"));
+            convTrans.SessionStarted += (s, e) => SessionStarted.Add(e.Dump("SessionStarted"));
+            convTrans.SessionStopped += (s, e) => SessionStopped.Add(e.Dump("SessionStopped"));
+            convTrans.ParticipantsChanged += (s, e) => ParticipantsChanged.Add(e.Dump("ParticipantsChanged"));
+            convTrans.ConversationExpiration += (s, e) => ConversationExpiration.Add(e.Dump("ConversationExpiration"));
+            convTrans.Transcribing += (s, e) => Transcribing.Add(e.Result.Dump("Transcribing"));
+            convTrans.Transcribed += (s, e) => Transcribed.Add(e.Result.Dump("Transcribed"));
+            convTrans.TextMessageReceived += (s, e) => TextMessageReceived.Add(e.Result.Dump("TextMessageReceived"));
 
             convTrans.Canceled += (s, e) =>
             {
-                Canceled.Add(e.DumpToDebugOutput("Canceled"));
+                Canceled.Add(e.Dump("Canceled"));
 
                 try
                 {
@@ -268,27 +267,25 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             };
         }
 
-        public IList<SessionEventArgs> SessionStarted { get; }
-        public IList<SessionEventArgs> SessionStopped { get; }
+        public IList<SessionEventArgs> SessionStarted { get; } = new List<SessionEventArgs>();
+        public IList<SessionEventArgs> SessionStopped { get; } = new List<SessionEventArgs>();
         public IList<ConnectionEventArgs> Connected { get; } = new List<ConnectionEventArgs>();
         public IList<ConnectionEventArgs> Disconnected { get; } = new List<ConnectionEventArgs>();
-        public IList<ConversationTranslationCanceledEventArgs> Canceled { get; }
-        public IList<ConversationParticipantsChangedEventArgs> ParticipantsChanged { get; }
-        public IList<ConversationExpirationEventArgs> ConversationExpiration { get; }
-        public IList<ConversationTranslationResult> Transcribing { get; }
-        public IList<ConversationTranslationResult> Transcribed { get; }
-        public IList<ConversationTranslationResult> TextMessageReceived { get; }
+        public IList<ConversationTranslationCanceledEventArgs> Canceled { get; } = new List<ConversationTranslationCanceledEventArgs>();
+        public IList<ConversationParticipantsChangedEventArgs> ParticipantsChanged { get; } = new List<ConversationParticipantsChangedEventArgs>();
+        public IList<ConversationExpirationEventArgs> ConversationExpiration { get; } = new List<ConversationExpirationEventArgs>();
+        public IList<ConversationTranslationResult> Transcribing { get; } = new List<ConversationTranslationResult>();
+        public IList<ConversationTranslationResult> Transcribed { get; } = new List<ConversationTranslationResult>();
+        public IList<ConversationTranslationResult> TextMessageReceived { get; } = new List<ConversationTranslationResult>();
 
         public void AddConnectionCallbacks(Connection connection)
         {
-            connection.Connected += (s, e) => Connected.Add(e.DumpToDebugOutput("Connected"));
-            connection.Disconnected += (s, e) => Disconnected.Add(e.DumpToDebugOutput("Disconnected"));
+            connection.Connected += (s, e) => Connected.Add(e.Dump("Connected"));
+            connection.Disconnected += (s, e) => Disconnected.Add(e.Dump("Disconnected"));
 
             _hasConnection = true;
         }
 
-        public Task WaitForAudioStreamCompletion(int maxWaitMs, int waitAfter = 0)
-            => WaitForAudioStreamCompletion(TimeSpan.FromMilliseconds(maxWaitMs), TimeSpan.FromMilliseconds(waitAfter));
         public Task WaitForAudioStreamCompletion(TimeSpan maxWait, TimeSpan waitAfter = default(TimeSpan))
         {
             return Task.Run(() =>
@@ -316,7 +313,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             });
         }
 
-        public void VerifyBasicEvents(bool expectEndOfStream, string name, bool isHost, out string participantId)
+        public void VerifySessionAndConnectEvents(bool expectEndOfStream)
         {
             SPXTEST_REQUIRE(SessionStarted.Count > 0);
             SPXTEST_REQUIRE(SessionStopped.Count > 0);
@@ -337,6 +334,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 SPXTEST_REQUIRE(Canceled.Count == 0);
             }
+        }
+
+        public void VerifyBasicEvents(bool expectEndOfStream, string name, bool isHost, out string participantId)
+        {
+            VerifySessionAndConnectEvents(expectEndOfStream);
 
             SPXTEST_REQUIRE(ParticipantsChanged.Count >= 2);
             SPXTEST_REQUIRE(ParticipantsChanged[0].Reason == Transcription.ParticipantChangedReason.JoinedConversation);
@@ -396,17 +398,22 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     : ResultReason.TranslatedParticipantSpeech;
 
                 // find an utterance that matches the expected string
-                ConversationTranslationResult match = null;
-                REQUIRE_NOTHROW(() => match = f.First(x => string.Equals(x.Text, e.Text, StringComparison.InvariantCultureIgnoreCase)));
+                ConversationTranslationResult match = f.FirstOrDefault(x =>
+                    string.Equals(x.Text, e.Text, StringComparison.InvariantCultureIgnoreCase)
+                    || SpeechRecognitionTestsHelper.IsWithinStringWordEditPercentage(e.Text, x.Text));
+                if (match == null)
+                {
+                    FAIL($"Could not final that matches '{e.Text}'\nFinals found:\n"
+                        + string.Join("\n", f.Select(t => $"  [{t.ParticipantId}] '{t.Text}'")));
+                }
 
-                REQUIRE_THAT(match.Text, Catch.Equals(e.Text, Catch.CaseSensitive.No));
                 REQUIRE(match.OriginalLang == e.Lang);
                 REQUIRE_THAT(match.ParticipantId, Catch.Equals(e.ParticipantId, Catch.CaseSensitive.No));
                 REQUIRE(match.Reason == expectedFinalReason);
                 REQUIRE(match.Translations.Count >= e.Translations.Count);
                 foreach (var expectedEntry in e.Translations)
                 {
-                    REQUIRE_THAT(match.Translations[expectedEntry.Key], Catch.Equals(expectedEntry.Value, Catch.CaseSensitive.No));
+                    REQUIRE_THAT(match.Translations[expectedEntry.Key], Catch.FuzzyMatch(expectedEntry.Value));
                 }
 
                 int numPartials = 0;
@@ -441,17 +448,22 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     : ResultReason.TranslatedParticipantInstantMessage;
 
                 // find an IM that matches the expected string
-                ConversationTranslationResult match = null;
-                REQUIRE_NOTHROW(() => match = receivedFromUser.First(x => string.Equals(expected.Text, x.Text, StringComparison.InvariantCultureIgnoreCase)));
+                ConversationTranslationResult match = receivedFromUser.FirstOrDefault(x =>
+                    string.Equals(expected.Text, x.Text, StringComparison.InvariantCultureIgnoreCase)
+                    || SpeechRecognitionTestsHelper.IsWithinStringWordEditPercentage(expected.Text, x.Text));
+                if (match == null)
+                {
+                    FAIL($"Could not instant message that matches '{expected.Text}'\nFinals found:\n"
+                        + string.Join("\n", receivedFromUser.Select(im => $"  [{im.ParticipantId}] '{im.Text}'")));
+                }
 
-                REQUIRE_THAT(match.Text, Catch.Equals(expected.Text, Catch.CaseSensitive.No));
                 REQUIRE(match.OriginalLang == expected.Lang);
                 REQUIRE_THAT(match.ParticipantId, Catch.Equals(expected.ParticipantId, Catch.CaseSensitive.No));
                 REQUIRE(match.Reason == expectedReason);
                 REQUIRE(match.Translations.Count >= expected.Translations.Count);
                 foreach (var expectedEntry in expected.Translations)
                 {
-                    REQUIRE_THAT(match.Translations[expectedEntry.Key], Catch.Equals(expectedEntry.Value, Catch.CaseSensitive.No));
+                    REQUIRE_THAT(match.Translations[expectedEntry.Key], Catch.FuzzyMatch(expectedEntry.Value));
                 }
             }
         }
@@ -550,11 +562,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             if (maxWait == null)
             {
-                maxWait = TimeSpan.FromSeconds(15);
+                maxWait = MAX_WAIT_FOR_AUDIO_TO_COMPLETE;
             }
 
             SPX_TRACE_INFO(">> [{0}] Waiting up to {1} for audio to complete", Name, maxWait);
-            await Events.WaitForAudioStreamCompletion(maxWait.Value, TimeSpan.FromSeconds(2));
+            await Events.WaitForAudioStreamCompletion(maxWait.Value, WAIT_AFTER_AUDIO_COMPLETE);
             SPX_TRACE_INFO(">> [{0}] Audio has completed", Name);
         }
 

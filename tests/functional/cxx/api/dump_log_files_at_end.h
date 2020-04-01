@@ -33,22 +33,9 @@ namespace IntegrationTests {
     class LogToFileAndDumpAtEnd__
     {
     public:
-        LogToFileAndDumpAtEnd__(const std::string& logFile) : LogToFileAndDumpAtEnd__(logFile, {})
-        { }
-
-        LogToFileAndDumpAtEnd__(const std::string& logFile, initializer_list<string> additionalFilesToDump)
-            : m_logFiles()
+        LogToFileAndDumpAtEnd__(const std::string& logFile)
+            : m_logFile(logFile)
         {
-            if (!logFile.empty())
-            {
-                m_logFiles.push_back(logFile);
-            }
-
-            for (const auto& additionalFile : additionalFilesToDump)
-            {
-                m_logFiles.push_back(additionalFile);
-            }
-
             // try to start logging. Since we are dynamically linking to the Microsoft.CognitiveServices.Speech.core
             // library here, we need to call the undocumented exported C functions to turn on logging
             if (!logFile.empty())
@@ -63,85 +50,67 @@ namespace IntegrationTests {
             SPXHR hr = diagnostics_log_stop_logging();
             if (hr != SPX_NOERROR)
             {
-                cout << "ERROR: Failed to stop logging with HR 0x" << hex << hr << endl;
+                cerr << "ERROR: Failed to stop logging with HR 0x" << hex << hr << endl;
+                return;
             }
 
-            string line;
-            for (const auto& filename : m_logFiles)
+            try
             {
-                cout << ">>********   " << filename << "   *************************************************" << endl
-                     << ">>**********************************************************************************" << endl;
+                string line;
 
-                try
+                ifstream logFile(m_logFile);
+                if (logFile.is_open())
                 {
-                    ifstream logFile(filename);
-                    if (logFile.is_open())
+                    while (getline(logFile, line))
                     {
-                        while (getline(logFile, line))
-                        {
-                            cout << line << endl;
-                        }
-
-                        logFile.close();
+                        cerr << line << endl;
                     }
-                    else
-                    {
-                        cout << "ERROR: Failed to open '" << filename << "' for reading" << endl;
-                    }
-                }
-                catch (const exception& ex)
-                {
-                    cout << "ERROR: Failed to open '" << filename << "' for reading. Cause: " << ex.what() << endl;
-                }
-                catch (...)
-                {
-                    cout << "ERROR: Failed to open '" << filename << "' for reading with unknown throwable" << endl;
-                }
 
-                cout << ">>**********************************************************************************"
-                     << endl << endl;
+                    logFile.close();
+                }
+                else
+                {
+                    cerr << "ERROR: Failed to open '" << m_logFile << "' for reading" << endl;
+                }
             }
+            catch (const exception& ex)
+            {
+                cerr << "ERROR: Failed to read from '" << m_logFile << "'. Cause: " << ex.what() << endl;
+            }
+            catch (...)
+            {
+                cerr << "ERROR: Failed to read from '" << m_logFile << "' due to an unknown throwable" << endl;
+            }
+
+            cerr << ">>**********************************************************************************"
+                 << endl << endl;
         }
 
         private:
-            static inline void ThrowOnFail(SPXHR hr)
-            {
-                if (SPX_FAILED(hr)) throw hr;
-            }
-
             SPXHR StartLogging(const std::string& logFile)
             {
-                SPXSPEECHCONFIGHANDLE speechConfig = SPXHANDLE_INVALID;
-                SPXPROPERTYBAGHANDLE propertyBag = SPXHANDLE_INVALID;
-
-                SPXHR hr = SPX_NOERROR;
                 try
                 {
-                    // create a fake speech config instance to set the logging properties we need
-                    ThrowOnFail(speech_config_from_subscription(&speechConfig, "not_real", "not_real"));
-                    ThrowOnFail(speech_config_get_property_bag(speechConfig, &propertyBag));
-                    ThrowOnFail(property_bag_set_string(propertyBag, (int)PropertyId::Speech_LogFilename, nullptr, logFile.c_str()));
+                    // Set on the root site so everyone inherits the settings
+                    SPX_RETURN_ON_FAIL(property_bag_set_string(SPXFACTORYHANDLE_ROOTSITEPARAMETERS_MOCK, (int)PropertyId::Speech_LogFilename, nullptr, logFile.c_str()));
 
-                    // call the C API to enable file logging
-                    ThrowOnFail(diagnostics_log_start_logging(speechConfig, nullptr));
+                    SPX_RETURN_ON_FAIL(diagnostics_log_start_logging(SPXFACTORYHANDLE_ROOTSITEPARAMETERS_MOCK, nullptr));
+                    return SPX_NOERROR;
                 }
-                catch (SPXHR error)
+                catch (const std::exception& ex)
                 {
-                    hr = error;
+                    SPX_TRACE_ERROR("Failed to start logging. Reason: %s", ex.what());
                 }
                 catch (...)
                 {
-                    hr = SPXERR_UNHANDLED_EXCEPTION;
+                    SPX_TRACE_ERROR("Failed to start logging due to unknown throwable");
                 }
 
-                if (propertyBag != SPXHANDLE_INVALID) property_bag_release(propertyBag);
-                if (speechConfig != SPXHANDLE_INVALID) speech_config_release(speechConfig);
-
-                return hr;
+                return SPXERR_UNHANDLED_EXCEPTION;
             }
 
         private:
-            vector<string> m_logFiles;
+            std::string m_logFile;
     };
 
 }}}}

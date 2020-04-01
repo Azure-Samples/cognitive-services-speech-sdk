@@ -7,6 +7,7 @@
 
 #include <ctime>
 #include <azure_c_shared_utility_urlencode_wrapper.h>
+#include <azure_c_shared_utility_xlogging_wrapper.h>
 #include <json.h>
 #include <http_request.h>
 #include <http_response.h>
@@ -14,9 +15,9 @@
 #include "common.h"
 #include "conversation_manager.h"
 #include "conversation_utils.h"
-#include "azure_c_shared_utility/xlogging.h"
+#include "conversation_translator_logging.h"
 
-#define SPX_DBG_TRACE_CONVERSATION_ROOM_MANAGER 0
+#define CT_DBG_TRACE_CONVERSATION_ROOM_MANAGER 0
 
 #define ADD_API_VERSION(request) request.AddQueryParameter(ConversationQueryParameters::ApiVersion, ConversationConstants::ApiVersion)
 
@@ -61,7 +62,7 @@ static std::string GetUtcTimeString()
 ConversationManager::ConversationManager(const HttpEndpointInfo& endpointInfo) :
     m_endpointInfo(endpointInfo)
 {
-    SPX_DBG_TRACE_VERBOSE_IF(SPX_DBG_TRACE_CONVERSATION_ROOM_MANAGER, __FUNCTION__);
+    CT_LOG_VERBOSE_IF(CT_DBG_TRACE_CONVERSATION_ROOM_MANAGER, __FUNCTION__);
 
     if (!m_endpointInfo.IsValid())
     {
@@ -71,18 +72,18 @@ ConversationManager::ConversationManager(const HttpEndpointInfo& endpointInfo) :
 
 ConversationManager::~ConversationManager()
 {
-    SPX_DBG_TRACE_VERBOSE_IF(SPX_DBG_TRACE_CONVERSATION_ROOM_MANAGER, __FUNCTION__);
+    CT_LOG_VERBOSE_IF(CT_DBG_TRACE_CONVERSATION_ROOM_MANAGER, __FUNCTION__);
 }
 
-ConversationArgs ConversationManager::CreateOrJoin(const CreateConversationArgs& args, const std::string& roomCode, const std::string& roomPin)
+ConversationArgs ConversationManager::CreateOrJoin(const CreateConversationArgs& args, const std::string& roomCode)
 {
-    SPX_DBG_TRACE_VERBOSE_IF(SPX_DBG_TRACE_CONVERSATION_ROOM_MANAGER, __FUNCTION__);
+    CT_LOG_VERBOSE_IF(CT_DBG_TRACE_CONVERSATION_ROOM_MANAGER, __FUNCTION__);
 
     HttpRequest request(m_endpointInfo);
 
     ADD_API_VERSION(request);
     request.AddQueryParameter("language", args.LanguageCode);
-
+    
     if (!args.Nickname.empty())
     {
         request.AddQueryParameter("nickname", args.Nickname);
@@ -98,9 +99,14 @@ ConversationArgs ConversationManager::CreateOrJoin(const CreateConversationArgs&
         request.AddQueryParameter("roomId", roomCode);
     }
 
-    if (!roomPin.empty())
+    if (!args.HostCode.empty())
     {
-        request.AddQueryParameter("hostCode", roomPin);
+        request.AddQueryParameter("hostCode", args.HostCode);
+    }
+
+    if (!args.ParticipantCode.empty())
+    {
+        request.AddQueryParameter("participantCode", args.ParticipantCode);
     }
 
     if (!args.TtsVoiceCode.empty())
@@ -153,15 +159,17 @@ ConversationArgs ConversationManager::CreateOrJoin(const CreateConversationArgs&
         request.SetRequestHeader(ConversationConstants::ClientAppIdHeader, args.ClientAppId);
     }
 
-    SPX_TRACE_INFO("Sending create/join room request to '%s'", m_endpointInfo.EndpointUrl().c_str());
+    CT_LOG_INFO("Sending create/join room request to '%s'", m_endpointInfo.EndpointUrl().c_str());
     auto response = request.SendRequest(HTTPAPI_REQUEST_POST);
 
-    SPX_TRACE_ERROR_IF(
-        !response->IsSuccess(),
-        "Creating/Joining room failed with HTTP %u [%s] at '%s'",
-        response->GetStatusCode(),
-        response->GetHeader(ConversationConstants::RequestIdHeader).c_str(),
-        GetUtcTimeString().c_str());
+    if (!response->IsSuccess())
+    {
+        CT_LOG_ERROR(
+            "Creating/Joining room failed with HTTP %u [%s] at '%s'",
+            response->GetStatusCode(),
+            response->GetHeader(ConversationConstants::RequestIdHeader).c_str(),
+            GetUtcTimeString().c_str());
+    }
 
     // throws an HttpException on non success status codes
     response->EnsureSuccess();
@@ -187,13 +195,16 @@ ConversationArgs ConversationManager::CreateOrJoin(const CreateConversationArgs&
     }
     catch (exception& ex)
     {
-        std::string error("Server response to create/join conversation is malformed. Details: ");
+        std::string error("Server response to create/join conversation is malformed. RequestId: ");
+        error += response->GetHeader(ConversationConstants::RequestIdHeader);
+        error += ". Details: ";
         error += ex.what();
-        LogError(error.c_str());
+
+        CT_LOG_ERROR(error.c_str());
         ThrowRuntimeError(error);
     }
 
-    SPX_TRACE_INFO(
+    CT_LOG_INFO(
         "Successfully created conversation '%s' [%s] at '%s'",
         roomArgs.RoomCode.c_str(),
         roomArgs.RequestId.c_str(),
@@ -204,7 +215,7 @@ ConversationArgs ConversationManager::CreateOrJoin(const CreateConversationArgs&
 
 void ConversationManager::Leave(const std::string& sessionToken)
 {
-    SPX_DBG_TRACE_VERBOSE_IF(SPX_DBG_TRACE_CONVERSATION_ROOM_MANAGER, __FUNCTION__);
+    CT_LOG_VERBOSE_IF(CT_DBG_TRACE_CONVERSATION_ROOM_MANAGER, __FUNCTION__);
 
     HttpRequest request(m_endpointInfo);
 

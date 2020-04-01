@@ -226,17 +226,20 @@ namespace USP {
         // TODO: Once we have updated to the latest Azure IoT shared library code, we should be able to set headers without hacks
 
 #ifdef SPEECHSDK_USE_OPENSSL
-        int tls_version = OPTION_TLS_VERSION_1_2;
-        if (uws_client_set_option(m_WSHandle, OPTION_TLS_VERSION, &tls_version) != HTTPAPI_OK)
+        if (m_webSocketEndpoint.isSecure())
         {
-            throw std::runtime_error("Could not set TLS 1.2 option");
-        }
+            int tls_version = OPTION_TLS_VERSION_1_2;
+            if (uws_client_set_option(m_WSHandle, OPTION_TLS_VERSION, &tls_version) != HTTPAPI_OK)
+            {
+                throw std::runtime_error("Could not set TLS 1.2 option");
+            }
 
-        uws_client_set_option(m_WSHandle, OPTION_DISABLE_DEFAULT_VERIFY_PATHS, &(m_webSocketEndpoint.disableDefaultVerifyPaths));
-        if (!m_webSocketEndpoint.singleTrustedCert.empty())
-        {
-            uws_client_set_option(m_WSHandle, OPTION_TRUSTED_CERT, m_webSocketEndpoint.singleTrustedCert.c_str());
-            uws_client_set_option(m_WSHandle, OPTION_DISABLE_CRL_CHECK, &(m_webSocketEndpoint.disableCrlChecks));
+            uws_client_set_option(m_WSHandle, OPTION_DISABLE_DEFAULT_VERIFY_PATHS, &(m_webSocketEndpoint.disableDefaultVerifyPaths));
+            if (!m_webSocketEndpoint.singleTrustedCert.empty())
+            {
+                uws_client_set_option(m_WSHandle, OPTION_TRUSTED_CERT, m_webSocketEndpoint.singleTrustedCert.c_str());
+                uws_client_set_option(m_WSHandle, OPTION_DISABLE_CRL_CHECK, &(m_webSocketEndpoint.disableCrlChecks));
+            }
         }
 #endif
 
@@ -577,7 +580,7 @@ namespace USP {
         packaged_task<void()> task([weakPtr]() -> void
         {
             auto ptr = weakPtr.lock();
-            if (ptr == nullptr || !ptr->m_valid)
+            if (ptr == nullptr || !ptr->m_valid || ptr->GetState() == WebSocketState::CLOSED)
             {
                 return;
             }
@@ -612,7 +615,7 @@ namespace USP {
         });
 
         auto ptr = weakPtr.lock();
-        if (ptr == nullptr || !ptr->m_valid)
+        if (ptr == nullptr || !ptr->m_valid || ptr->GetState() == WebSocketState::CLOSED)
         {
             return;
         }

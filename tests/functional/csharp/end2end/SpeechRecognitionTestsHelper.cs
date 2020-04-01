@@ -342,24 +342,30 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         /// <param name="absoluteAllowedErrorCount">an absolute lower limit on the number of allowed errors</param>
         /// <remarks>The actual number of allowed errors is the higher number of the relative or the absolute counts.</remarks>
         static public void AssertStringWordEditPercentage(string expectedString, string comparisonString, int deltaPercentage, int absoluteAllowedErrorCount = 1)
-
         {
-            String[] wordsExpected = expectedString.Split(' ');
-            String[] wordsComparison = comparisonString.Split(' ');
+            string[] wordsExpected = expectedString.Split(' ');
 
             int allowedEdits = Math.Max(deltaPercentage * wordsExpected.Length / 100, absoluteAllowedErrorCount);
             AssertStringWordEditCount(expectedString, comparisonString, allowedEdits);
         }
 
-
-        static public void AssertStringWordEditCount(string expectedString, string comparisonString, int allowedEdits)
-        // Using standard implementation for Levenshtein distance. Caveat: not optimized for memory consumption
-        //   but sufficient for our test case and the string length we are expecting (less 10000 words)
-        // 
-        // expectedString - normalized expected string
-        // comparisonString - the normalized comparison string
-        // allowedEdits - number of word-edits which are tollerated
+        public static bool IsWithinStringWordEditPercentage(string expectedString, string comparisonString, int deltaPercentage = 10, int absoluteAllowedErrorCount = 1)
         {
+            string[] wordsExpected = expectedString.Split(' ');
+
+            int allowedEdits = Math.Max(deltaPercentage * wordsExpected.Length / 100, absoluteAllowedErrorCount);
+            return GetStringWordEditCount(expectedString, comparisonString) <= allowedEdits;
+        }
+
+        public static int GetStringWordEditCount(string expectedString, string comparisonString)
+        {
+            // Using standard implementation for Levenshtein distance. Caveat: not optimized for memory consumption
+            //   but sufficient for our test case and the string length we are expecting (less 10000 words)
+            // 
+            // expectedString - normalized expected string
+            // comparisonString - the normalized comparison string
+            // allowedEdits - number of word-edits which are tolerated
+
             String[] wordsExpected = expectedString.Split(' ');
             String[] wordsComparison = comparisonString.Split(' ');
 
@@ -401,9 +407,15 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 }
             }
 
-            int edits = matrix[wordsExpected.Length][wordsComparison.Length];
+            return matrix[wordsExpected.Length][wordsComparison.Length];
+        }
 
-            Assert.IsTrue(edits <= allowedEdits, $"Number of edit operations '{edits}' exceeding allowed edits '{allowedEdits}'\ninput:   '{expectedString}'\ncompare: '{comparisonString}'\n");
+        static public void AssertStringWordEditCount(string expectedString, string comparisonString, int allowedEdits)
+        {
+            int edits = GetStringWordEditCount(expectedString, comparisonString);
+            Assert.IsTrue(
+                edits <= allowedEdits,
+                $"Number of edit operations '{edits}' exceeding allowed edits '{allowedEdits}'\ninput:   '{expectedString}'\ncompare: '{comparisonString}'\n");
         }
 
         public static void AssertDetailedResult(SpeechRecognitionResult result)

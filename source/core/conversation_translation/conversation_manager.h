@@ -34,6 +34,8 @@ namespace ConversationTranslation {
         std::string CognitiveSpeechRegion;
         std::string CognitiveSpeechAuthenticationToken;
         std::string ClientAppId;
+        std::string HostCode;
+        std::string ParticipantCode;
     };
 
     struct ConversationArgs
@@ -62,7 +64,7 @@ namespace ConversationTranslation {
 
         virtual ~ConversationManager();
 
-        ConversationArgs CreateOrJoin(const CreateConversationArgs& args, const std::string& roomCode, const std::string& roomPin = "");
+        ConversationArgs CreateOrJoin(const CreateConversationArgs& args, const std::string& roomCode);
         void Leave(const std::string& sessionToken);
 
     private:

@@ -111,7 +111,7 @@ bool TEST_PAL_Get_Default_Proxy(TEST_PAL_Proxy_Info& info)
     catch (...)
     {
         free_ie_proxy_config(proxyInfo);
-        return true;
+        return false;
     }
 }
 

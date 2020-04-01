@@ -77,6 +77,7 @@ public:
     FileLogger(FileLogger const&) = delete;
     void operator=(FileLogger const&) = delete;
 
+    void SetFileOptions(const std::string& name, const std::string& filter, uint32_t fileDuration, uint32_t fileDurationSize, bool appendToFile);
     void SetFileOptions(std::shared_ptr<Microsoft::CognitiveServices::Speech::Impl::ISpxNamedProperties> properties);
     std::string GetFilename();
     bool IsFileLoggingEnabled();

@@ -62,6 +62,16 @@ namespace ConversationTranslation {
 
 
 
+#ifdef SPX_CONFIG_DBG_TRACE_VERBOSE
+#define CT_LOG_VERBOSE(msg, ...)          __SPX_TRACE_VERBOSE("[CONV_TRANS][VERBOSE]: ", __FILE__, __LINE__, msg, ##__VA_ARGS__)
+#define CT_LOG_VERBOSE_IF(cond, msg, ...) __SPX_TRACE_VERBOSE_IF(cond, "[CONV_TRANS][VERBOSE]: ", __FILE__, __LINE__, msg, ##__VA_ARGS__)
+#else
+#define CT_LOG_VERBOSE(...)
+#define CT_LOG_VERBOSE_IF(...)
+#endif
+
+
+
 #ifdef SPX_CONFIG_DBG_TRACE_SCOPE
 #define CT_DBG_TRACE_SCOPE(x, y) __SPX_TRACE_SCOPE("[CONV_TRANS][VERBOSE_SCOPE_ENTER]: ", __FILE__, __LINE__, "[CONV_TRANS][VERBOSE_SCOPE_EXIT]: ", x, y)
 #else

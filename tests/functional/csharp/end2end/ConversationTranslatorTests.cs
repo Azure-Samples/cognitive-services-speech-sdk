@@ -17,6 +17,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 {
     using static CatchUtils;
     using static Config;
+    using static ConversationTranslatorTestConstants;
     using TRANS = Dictionary<string, string>;
 
     [TestClass]
@@ -31,6 +32,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public static void TestClassInitialize(TestContext context)
         {
             BaseClassInit(context);
+        }
+
+        [ClassCleanup]
+        public static void TestClassCleanup()
+        {
+            ConversationTranslatorExtensionMethods.ResetLogging();
         }
 
         [TestInitialize]
@@ -102,7 +109,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        public async Task Conversation_WithoutTranslations()
+        public async Task CT_Conversation_WithoutTranslations()
         {
             var speechConfig = CreateConfig(Language.EN);
             using (var conversation = await Conversation.CreateConversationAsync(speechConfig))
@@ -114,7 +121,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        public async Task Conversation_WithTranslations()
+        public async Task CT_Conversation_WithTranslations()
         {
             var speechConfig = CreateConfig(Language.EN, Language.FR);
             using (var conversation = await Conversation.CreateConversationAsync(speechConfig))
@@ -127,7 +134,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        public async Task Conversation_Dispose()
+        public async Task CT_Conversation_Dispose()
         {
             var speechConfig = CreateConfig(Language.EN, Language.FR, "ar");
             using (var conversation = await Conversation.CreateConversationAsync(speechConfig))
@@ -140,7 +147,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        public async Task Conversation_DisposeAfterStart()
+        public async Task CT_Conversation_DisposeAfterStart()
         {
             var speechConfig = CreateConfig(Language.EN, Language.FR, "ar");
             using (var conversation = await Conversation.CreateConversationAsync(speechConfig))
@@ -154,7 +161,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        public async Task Conversation_MethodsWhileNotStarted()
+        public async Task CT_Conversation_MethodsWhileNotStarted()
         {
             var speechConfig = CreateConfig(Language.EN, Language.FR, "ar");
             using (var conversation = await Conversation.CreateConversationAsync(speechConfig))
@@ -191,7 +198,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        public async Task Conversation_CallUnsupportedMethods()
+        public async Task CT_Conversation_CallUnsupportedMethods()
         {
             WriteLine($"Checking methods on Conversation instance for the ConversationTranslator");
             var speechConfig = CreateConfig(Language.EN, Language.FR, "ar");
@@ -247,7 +254,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        public async Task ConversationTranslator_HostAudio()
+        public async Task CT_ConversationTranslator_HostAudio()
         {
             var audioUtterance = AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH];
 
@@ -272,7 +279,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             SPX_TRACE_INFO("Start transcribing");
             await conversationTranslator.StartTranscribingAsync();
 
-            await eventHandlers.WaitForAudioStreamCompletion(15000, 2000);
+            await eventHandlers.WaitForAudioStreamCompletion(MAX_WAIT_FOR_AUDIO_TO_COMPLETE, WAIT_AFTER_AUDIO_COMPLETE);
 
 
             SPX_TRACE_INFO("Stop Transcribing");
@@ -296,7 +303,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        public async Task ConversationTranslator_JoinWithTranslation()
+        public async Task CT_ConversationTranslator_JoinWithTranslation()
         {
             string hostLang = Language.EN;
             string hostName = "TheHost";
@@ -341,9 +348,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             await bobTranslator.StartTranscribingAsync();
 
             SPX_TRACE_INFO("Waiting for host audio to complete");
-            await hostEvents.WaitForAudioStreamCompletion(15000);
+            await hostEvents.WaitForAudioStreamCompletion(MAX_WAIT_FOR_AUDIO_TO_COMPLETE);
             SPX_TRACE_INFO("Waiting for bob host audio to complete");
-            await bobEvents.WaitForAudioStreamCompletion(15000, 2000);
+            await bobEvents.WaitForAudioStreamCompletion(MAX_WAIT_FOR_AUDIO_TO_COMPLETE, WAIT_AFTER_AUDIO_COMPLETE);
 
             SPX_TRACE_INFO("Stopping host audio");
             await bobTranslator.StopTranscribingAsync();
@@ -380,7 +387,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        public async Task ConversationTranslator_HostSendsIm()
+        public async Task CT_ConversationTranslator_HostSendsIm()
         {
             var speechConfig = CreateConfig(Language.EN, "ja", "ar");
             var host = new TestConversationParticipant(speechConfig, "Host");
@@ -401,7 +408,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        public async Task ConversationTranslator_HostAndParticipantSendIms()
+        public async Task CT_ConversationTranslator_HostAndParticipantSendIms()
         {
             var speechConfig = CreateConfig(Language.EN);
 
@@ -417,7 +424,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             SPX_TRACE_INFO($">> [{alice.Name}] Sends IM in French");
             await alice.Translator.SendTextMessageAsync("C'est un test");
 
-            await Task.Delay(TimeSpan.FromSeconds(2));
+            await Task.Delay(TimeSpan.FromSeconds(3));
 
             await alice.LeaveAsync();
             await host.LeaveAsync();
@@ -437,7 +444,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        public async Task ConversationTranslator_JoinLockedRoom()
+        public async Task CT_ConversationTranslator_JoinLockedRoom()
         {
             var speechConfig = CreateConfig(Language.EN);
 
@@ -456,7 +463,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        public async Task ConversationTranslator_CallMethodsWhenNotJoined()
+        public async Task CT_ConversationTranslator_CallMethodsWhenNotJoined()
         {
             SPX_TRACE_INFO("========== Host ==========");
             {
@@ -508,7 +515,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        public async Task ConversationTranslator_DoubleJoinShouldFail()
+        public async Task CT_ConversationTranslator_DoubleJoinShouldFail()
         {
             var hostSpeechConfig = CreateConfig(Language.EN);
 
@@ -560,7 +567,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        public async Task ConversationTranslator_ConnectionAfterLeave()
+        public async Task CT_ConversationTranslator_ConnectionAfterLeave()
         {
             var speechConfig = CreateConfig(Language.EN);
 
@@ -589,7 +596,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        public async Task ConversationTranslator_RecognizerEventsAndMethods()
+        public async Task CT_ConversationTranslator_RecognizerEventsAndMethods()
         {
             var speechConfig = CreateConfig(Language.EN);
             var audioConfig = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
@@ -601,7 +608,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
             host.Connection.MessageReceived += (s, e) =>
             {
-                evts.Add(e.Message.DumpToDebugOutput("Recognizer message received"));
+                evts.Add(e.Message.Dump("Recognizer message received"));
             };
 
             await host.StartAudioAsync();
@@ -617,7 +624,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        public async Task ConversationTranslator_HostLeaveRejoin()
+        public async Task CT_ConversationTranslator_HostLeaveRejoin()
         {
             var audioFile = AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH];
 
@@ -660,7 +667,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             SPX_TRACE_INFO("Send text message after reconnect");
             await conversationTranslator.SendTextMessageAsync("This is a test");
 
-            await eventHandlers.WaitForAudioStreamCompletion(15000, 2000);
+            await eventHandlers.WaitForAudioStreamCompletion(MAX_WAIT_FOR_AUDIO_TO_COMPLETE, WAIT_AFTER_AUDIO_COMPLETE);
 
             SPX_TRACE_INFO("Stop Transcribing");
             await conversationTranslator.StopTranscribingAsync();
@@ -687,7 +694,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        public async Task ConversationTranslator_CantCallMethodsAfterDisconnected()
+        public async Task CT_ConversationTranslator_CantCallMethodsAfterDisconnected()
         {
             var speechConfig = CreateConfig("en-US");
 
@@ -719,7 +726,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        public async Task ConversationTranslator_ParticipantRejoin()
+        public async Task CT_ConversationTranslator_ParticipantRejoin()
         {
             var hostUtterance = AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH];
             var hostSpeechConfig = CreateConfig("en-US");
@@ -752,6 +759,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             await host.WaitForAudioToFinish();
             await alice.WaitForAudioToFinish();
 
+            await Task.Delay(TimeSpan.FromSeconds(2));
+
             // Disconnect both
             await alice.LeaveAsync();
             await host.LeaveAsync();
@@ -777,7 +786,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        public async Task ConversationTranslator_RejoinAfterDelete()
+        public async Task CT_ConversationTranslator_RejoinAfterDelete()
         {
             var hostUtterance = AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH];
             var hostSpeechConfig = CreateConfig("en-US");

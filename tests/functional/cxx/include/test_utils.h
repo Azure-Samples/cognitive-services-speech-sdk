@@ -197,51 +197,11 @@ inline void GetKeyValue(const char* key, std::string &value, nlohmann::json &dat
     }
 }
 
-/// <summary>
-/// Helper class to match ExceptionWithCallStack for testing using Catch framework
-/// </summary>
-class ExceptionWithCallStackMatcher : public Catch::MatcherBase<std::exception>
+class StringComparisions
 {
-private:
-    std::string m_expectedString;
-
 public:
-    ExceptionWithCallStackMatcher(SPXHR hr)
-        : m_expectedString(Microsoft::CognitiveServices::Speech::Impl::stringify(hr))
+    static bool AssertFuzzyMatch(const std::string recieved, const std::string expected, size_t deltaPercentage = 10, size_t minAllowedMismatchCount = 1)
     {
-    }
-
-    ExceptionWithCallStackMatcher(const std::string& contains)
-        : m_expectedString(contains)
-    {}
-
-    bool match(const std::exception& ex) const override
-    {
-        size_t pos = std::string(ex.what()).find(m_expectedString, 0);
-        return pos != std::string::npos;
-    }
-
-    virtual std::string describe() const override
-    {
-        std::ostringstream ss;
-        ss << "Exception with HR " << m_expectedString;
-        return ss.str();
-    }
-};
-
-inline ExceptionWithCallStackMatcher HasHR(SPXHR hr)
-{
-    return ExceptionWithCallStackMatcher(hr);
-}
-
-inline ExceptionWithCallStackMatcher MessageContains(const std::string& str)
-{
-    return ExceptionWithCallStackMatcher(str);
-}
-
-class StringComparisions {
-public:
-    static bool AssertFuzzyMatch(const std::string recieved, const std::string expected, size_t deltaPercentage = 10, size_t minAllowedMismatchCount = 1) {
         size_t errors, totalWords;
 
         CalculateWordErrorRate(recieved, expected, &errors, &totalWords);
@@ -279,6 +239,95 @@ private:
         *words = words1.size();
     }
 };
+
+namespace Catch
+{
+    /// <summary>
+    /// Helper class to match ExceptionWithCallStack for testing using Catch framework
+    /// </summary>
+    class ExceptionWithCallStackMatcher : public Catch::MatcherBase<std::exception>
+    {
+    private:
+        std::string m_expectedString;
+
+    public:
+        ExceptionWithCallStackMatcher(SPXHR hr)
+            : m_expectedString(Microsoft::CognitiveServices::Speech::Impl::stringify(hr))
+        {}
+
+        ExceptionWithCallStackMatcher(const std::string& contains)
+            : m_expectedString(contains)
+        {}
+
+        virtual bool match(const std::exception& ex) const override
+        {
+            size_t pos = std::string(ex.what()).find(m_expectedString, 0);
+            return pos != std::string::npos;
+        }
+
+        virtual std::string describe() const override
+        {
+            std::ostringstream ss;
+            ss << "exception with HR " << m_expectedString;
+            return ss.str();
+        }
+    };
+
+    inline ExceptionWithCallStackMatcher HasHR(SPXHR hr)
+    {
+        return ExceptionWithCallStackMatcher(hr);
+    }
+
+    inline ExceptionWithCallStackMatcher MessageContains(const std::string& str)
+    {
+        return ExceptionWithCallStackMatcher(str);
+    }
+
+    /// <summary>
+    /// Helper class to integrate fuzzy string matcher into the Catch framework. This integrates with the Catch
+    /// framework and gives you richer error messages in case of assertion failures
+    /// </summary>
+    class FuzzyStringMatcher : public Catch::MatcherBase<std::string>
+    {
+    private:
+        const std::string m_expectedString;
+        const size_t m_deltaPercentage;
+        const size_t m_minMismatachCount;
+
+    public:
+        FuzzyStringMatcher(const std::string& expected, size_t deltaPercentage, size_t minAllowedMismatchCount)
+            : m_expectedString(expected), m_deltaPercentage(deltaPercentage), m_minMismatachCount(minAllowedMismatchCount)
+        {}
+
+        virtual bool match(const std::string& str) const override
+        {
+            return ::StringComparisions::AssertFuzzyMatch(str, m_expectedString, m_deltaPercentage, m_minMismatachCount);
+        }
+
+        virtual std::string describe() const override
+        {
+            std::ostringstream oss;
+            oss << "fuzzy string match against '" << m_expectedString << "' "
+                << "with " << m_deltaPercentage << "% and "
+                << m_minMismatachCount << " allowed mismatch";
+            return oss.str();
+        }
+    };
+
+    /// <summary>
+    /// Helper method to make working with the fuzzy matcher easier. This allows you do assert like this:
+    /// REQUIRE_THAT(finalRecognition, Catch::FuzzyMatch("This is a short test"));
+    /// Should this fail, the Catch framework will automatically show you a string describing the error
+    /// </summary>
+    /// <param name="expected">The expected string</param>
+    /// <param name="deltaPercentage">(Optional) The percentage difference allowed (0-100)</param>
+    /// <param name="minAllowedMismatchCount">(Optional) The minimum allowed mismatch count</param>
+    /// <returns>An instance of the fuzzy matcher</returns>
+    inline FuzzyStringMatcher FuzzyMatch(const std::string& expected, size_t deltaPercentage = 10, size_t minAllowedMismatchCount = 1)
+    {
+        return FuzzyStringMatcher(expected, deltaPercentage, minAllowedMismatchCount);
+    }
+}
 
 inline void to_json(nlohmann::json& jsonString, const SubscriptionRegion& subscriptionRegion)
 {
