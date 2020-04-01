@@ -25,7 +25,7 @@ namespace Impl {
 
 using json = nlohmann::json;
 
-const std::array<std::string, 9> CSpxParticipantMgrImpl::m_meeting_properties = {{"iCalUId", "callId", "organizer", "FLAC", "MTUri", "DifferenciateGuestSpeakers", "audiorecording", "Threadid",  "Organizer_Mri" }};
+const char* const CSpxParticipantMgrImpl::m_meeting_properties[] = { "iCalUId", "callId", "organizer", "FLAC", "MTUri", "DifferenciateGuestSpeakers", "audiorecording", "Threadid", "OrganizerMri", "OrganizerTenantId"};
 
 CSpxParticipantMgrImpl::CSpxParticipantMgrImpl(std::shared_ptr<ISpxThreadService> thread_service, std::shared_ptr<ISpxRecognizerSite> site_in)
     :m_action{ ActionType::NONE },
@@ -377,9 +377,10 @@ std::string CSpxParticipantMgrImpl::CreateSpeechEventPayload(MeetingState state)
     speech_event["name"] = name;
     speech_event["meeting"]["attendees"] = state == MeetingState::START ? m_participants_so_far : m_current_participants;
 
-    for(const auto& p : m_meeting_properties)
+    for (size_t i = 0; i < sizeof(m_meeting_properties) / sizeof(char*); i++)
     {
-        auto value = GetStringValue(p.c_str(), "");
+        std::string p{ m_meeting_properties[i] };
+        auto value = GetStringValue(m_meeting_properties[i], "");
         if (!value.empty())
         {
             // audio recording has "on" for true.
