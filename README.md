@@ -23,6 +23,11 @@ This project hosts the **samples** for the Microsoft Cognitive Services Speech S
 ## News
 
 Please check [here](https://aka.ms/csspeech/whatsnew) for release notes and older releases.
+
+* Speech SDK Release 1.11.0
+
+  March 2020 we released version 1.11.0 of the Speech SDK
+
 * Speech SDK Release 1.10.0
 
   February 2020 we released version 1.10.0 of the Speech SDK
