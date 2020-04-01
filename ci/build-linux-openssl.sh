@@ -18,6 +18,7 @@ else
 fi
 
 OPENSSL_VERSION=1.1.1b
+OPENSSL_URL=https://www.openssl.org/source/old/1.1.1
 OPENSSL_BASE=openssl-$OPENSSL_VERSION
 OPENSSL_FILE=$OPENSSL_BASE.tar.gz
 OPENSSL_SHA256SUM=5c557b023230413dfb0756f3137a13e6d726838ccd1430888ad15bfb2b43ea4b
@@ -28,7 +29,7 @@ echo cleaning outputs from $BASE_INSTALL_DIR
 rm -rf "$BASE_INSTALL_DIR"
 
 [[ -f $OPENSSL_FILE ]] ||
-  wget --no-verbose "https://www.openssl.org/source/$OPENSSL_FILE"
+  wget --no-verbose "$OPENSSL_URL/$OPENSSL_FILE"
 echo "$OPENSSL_SHA256SUM  $OPENSSL_FILE" | sha256sum --check --strict -
 tar -xzf "$OPENSSL_FILE"
 cd "$OPENSSL_BASE"
