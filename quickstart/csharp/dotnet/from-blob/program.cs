@@ -17,48 +17,60 @@ namespace BatchClient
     class Program
     {
         // Replace with your subscription key
-        private const string SubscriptionKey = "key";
+        const string SubscriptionKey = "YourSubscriptionKey";
 
         // Update with your service region
-        private const string Region = "region";
-        private const int Port = 443;
+        const string Region = "YourServiceRegion";
+        const int Port = 443;
 
-        // recordings and locale
-        private const string Locale = "en-US";
-        private const string RecordingsBlobUri = "SAS URI";
+        // Recordings and locale
+        const string Locale = "en-US";
+        const string RecordingsBlobUri = "YourFileUrl";
 
-        //name and description
-        private const string Name = "Simple transcription";
-        private const string Description = "Simple transcription description";
+        // Name and description
+        const string Name = "Simple transcription";
+        const string Description = "Simple transcription description";
 
-        private const string speechToTextBasePath = "api/speechtotext/v2.0/";
+        const string SpeechToTextBasePath = "api/speechtotext/v2.0/";
 
-        static void Main(string[] args)
+        static async Task Main()
         {
-            TranscribeAsync().Wait();
+            // Cognitive Services follows security best practices.
+            // If you experience connectivity issues, see:
+            // https://docs.microsoft.com/en-us/dotnet/framework/network-programming/tls
+
+            await TranscribeAsync();
         }
 
         static async Task TranscribeAsync()
         {
             Console.WriteLine("Starting transcriptions client...");
 
-            // create the client object and authenticate
-            var client = new HttpClient();
-            client.Timeout = TimeSpan.FromMinutes(25);
-            client.BaseAddress = new UriBuilder(Uri.UriSchemeHttps, $"{Region}.cris.ai", Port).Uri;
+            // Create the client object and authenticate
+            var client = new HttpClient
+            {
+                Timeout = TimeSpan.FromMinutes(25),
+                BaseAddress = new UriBuilder(Uri.UriSchemeHttps, $"{Region}.cris.ai", Port).Uri,
+                DefaultRequestHeaders =
+                {
+                    { "Ocp-Apim-Subscription-Key", SubscriptionKey }
+                }
+            };
 
-            client.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", SubscriptionKey);
+            var transcriptionDefinition =
+                TranscriptionDefinition.Create(
+                    Name,
+                    Description,
+                    Locale,
+                    new Uri(RecordingsBlobUri));
 
-            var path = $"{speechToTextBasePath}Transcriptions/";
-            var transcriptionDefinition = TranscriptionDefinition.Create(Name, Description, Locale, new Uri(RecordingsBlobUri));
-
-            string res = JsonConvert.SerializeObject(transcriptionDefinition);
-            StringContent sc = new StringContent(res);
+            var res = JsonConvert.SerializeObject(transcriptionDefinition);
+            var sc = new StringContent(res);
             sc.Headers.ContentType = JsonMediaTypeFormatter.DefaultMediaType;
 
             Uri transcriptionLocation = null;
 
-            using (var response = await client.PostAsync(path, sc))
+            using (var response = await client.PostAsync($"{SpeechToTextBasePath}Transcriptions/", sc))
             {
                 if (!response.IsSuccessStatusCode)
                 {
@@ -70,54 +82,47 @@ namespace BatchClient
             }
 
             Console.WriteLine($"Created transcription at location {transcriptionLocation}.");
-
             Console.WriteLine("Checking status.");
 
-            bool completed = false;
-            Transcription transcription = null;
+            var completed = false;
 
-            // check for the status of our transcriptions periodically
+            // Check for the status of our transcriptions periodically
             while (!completed)
             {
-                // get all transcriptions for the user
-                using (var response = await client.GetAsync(transcriptionLocation.AbsolutePath).ConfigureAwait(false))
+                Transcription transcription = null;
+
+                // Get all transcriptions for the user
+                using (var response = await client.GetAsync(transcriptionLocation.AbsolutePath))
                 {
                     var contentType = response.Content.Headers.ContentType;
-
-                    if (response.IsSuccessStatusCode && string.Equals(contentType.MediaType, "application/json", StringComparison.OrdinalIgnoreCase))
+                    if (response.IsSuccessStatusCode &&
+                        string.Equals(contentType.MediaType, "application/json", StringComparison.OrdinalIgnoreCase))
                     {
-                        transcription = await response.Content.ReadAsAsync<Transcription>().ConfigureAwait(false);
+                        transcription = await response.Content.ReadAsAsync<Transcription>();
                     }
                     else
                     {
                         Console.WriteLine("Error with status {0} getting transcription result", response.StatusCode);
                         continue;
                     }
-
                 }
 
-                // for each transcription in the list we check the status
+                // For each transcription in the list we check the status
                 switch (transcription.Status)
                 {
                     case "Failed":
                         completed = true;
                         Console.WriteLine("Transcription failed. Status: {0}", transcription.StatusMessage);
                         break;
+
                     case "Succeeded":
                         completed = true;
-
-                        var resultsUri0 = transcription.ResultsUrls["channel_0"];
-
-                        WebClient webClient = new WebClient();
-
+                        var webClient = new WebClient();
                         var filename = Path.GetTempFileName();
-                        webClient.DownloadFile(resultsUri0, filename);
-                        var results0 = File.ReadAllText(filename);
-                        var resultObject0 = JsonConvert.DeserializeObject<RootObject>(results0);
-                        Console.WriteLine(results0);
-
-                        Console.WriteLine("Transcription succeeded. Results: ");
-                        Console.WriteLine(results0);
+                        webClient.DownloadFile(transcription.ResultsUrls["channel_0"], filename);
+                        var results = File.ReadAllText(filename);
+                        Console.WriteLine($"Transcription succeeded. Results: {Environment.NewLine}{results}");
+                        File.Delete(filename);
                         break;
 
                     case "Running":
@@ -128,8 +133,8 @@ namespace BatchClient
                         Console.WriteLine("Transcription has not started.");
                         break;
                 }
-                
-                await Task.Delay(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
+
+                await Task.Delay(TimeSpan.FromSeconds(5));
             }
 
             Console.WriteLine("Press any key...");
@@ -137,141 +142,100 @@ namespace BatchClient
         }
     }
 
-    public sealed class ModelIdentity
+    public class ModelIdentity
     {
-        private ModelIdentity(Guid id)
-        {
-            this.Id = id;
-        }
+        ModelIdentity(Guid id) => Id = id;
 
         public Guid Id { get; private set; }
 
-        public static ModelIdentity Create(Guid Id)
-        {
-            return new ModelIdentity(Id);
-        }
+        public static ModelIdentity Create(Guid Id) => new ModelIdentity(Id);
     }
 
-    public sealed class Transcription
+    public class Transcription
     {
         [JsonConstructor]
-        private Transcription(Guid id, string name, string description, string locale, DateTime createdDateTime, DateTime lastActionDateTime, string status, Uri recordingsUrl, IReadOnlyDictionary<string, string> resultsUrls)
+        Transcription(
+            Guid id,
+            string name,
+            string description,
+            string locale,
+            DateTime createdDateTime,
+            DateTime lastActionDateTime,
+            string status,
+            Uri recordingsUrl,
+            IReadOnlyDictionary<string, string> resultsUrls)
         {
-            this.Id = id;
-            this.Name = name;
-            this.Description = description;
-            this.CreatedDateTime = createdDateTime;
-            this.LastActionDateTime = lastActionDateTime;
-            this.Status = status;
-            this.Locale = locale;
-            this.RecordingsUrl = recordingsUrl;
-            this.ResultsUrls = resultsUrls;
+            Id = id;
+            Name = name;
+            Description = description;
+            CreatedDateTime = createdDateTime;
+            LastActionDateTime = lastActionDateTime;
+            Status = status;
+            Locale = locale;
+            RecordingsUrl = recordingsUrl;
+            ResultsUrls = resultsUrls;
         }
 
-        /// <inheritdoc />
         public string Name { get; set; }
 
-        /// <inheritdoc />
         public string Description { get; set; }
 
-        /// <inheritdoc />
         public string Locale { get; set; }
 
-        /// <inheritdoc />
         public Uri RecordingsUrl { get; set; }
 
-        /// <inheritdoc />
         public IReadOnlyDictionary<string, string> ResultsUrls { get; set; }
 
         public Guid Id { get; set; }
 
-        /// <inheritdoc />
         public DateTime CreatedDateTime { get; set; }
 
-        /// <inheritdoc />
         public DateTime LastActionDateTime { get; set; }
 
-        /// <inheritdoc />
         public string Status { get; set; }
 
         public string StatusMessage { get; set; }
     }
 
-    public sealed class TranscriptionDefinition
+    public class TranscriptionDefinition
     {
-        private TranscriptionDefinition(string name, string description, string locale, Uri recordingsUrl, IEnumerable<ModelIdentity> models)
-        {
-            this.Name = name;
-            this.Description = description;
-            this.RecordingsUrl = recordingsUrl;
-            this.Locale = locale;
-            this.Models = models;
-            this.properties = new Dictionary<string, string>();
-            this.properties.Add("PunctuationMode", "DictatedAndAutomatic");
-            this.properties.Add("ProfanityFilterMode", "Masked");
-            this.properties.Add("AddWordLevelTimestamps", "True");
-        }
-
-        /// <inheritdoc />
-        public string Name { get; set; }
-
-        /// <inheritdoc />
-        public string Description { get; set; }
-
-        /// <inheritdoc />
-        public Uri RecordingsUrl { get; set; }
-
-        public string Locale { get; set; }
-
-        public IEnumerable<ModelIdentity> Models { get; set; }
-
-        public IDictionary<string, string> properties { get; set; }
-
-        public static TranscriptionDefinition Create(
-            string name,
-            string description,
-            string locale,
-            Uri recordingsUrl)
-        {
-            return TranscriptionDefinition.Create(name, description, locale, recordingsUrl, new ModelIdentity[0]);
-        }
-
-        public static TranscriptionDefinition Create(
+        TranscriptionDefinition(
             string name,
             string description,
             string locale,
             Uri recordingsUrl,
             IEnumerable<ModelIdentity> models)
         {
-            return new TranscriptionDefinition(name, description, locale, recordingsUrl, models);
+            Name = name;
+            Description = description;
+            RecordingsUrl = recordingsUrl;
+            Locale = locale;
+            Models = models;
+            Properties = new Dictionary<string, string>
+            {
+                ["PunctuationMode"] = "DictatedAndAutomatic",
+                ["ProfanityFilterMode"] = "Masked",
+                ["AddWordLevelTimestamps"] = "True"
+            };
         }
-    }
 
-    public class AudioFileResult
-    {
-        public string AudioFileName { get; set; }
-        public List<SegmentResult> SegmentResults { get; set; }
-    }
+        public string Name { get; set; }
 
-    public class RootObject
-    {
-        public List<AudioFileResult> AudioFileResults { get; set; }
-    }
+        public string Description { get; set; }
 
-    public class NBest
-    {
-        public double Confidence { get; set; }
-        public string Lexical { get; set; }
-        public string ITN { get; set; }
-        public string MaskedITN { get; set; }
-        public string Display { get; set; }
-    }
+        public Uri RecordingsUrl { get; set; }
 
-    public class SegmentResult
-    {
-        public string RecognitionStatus { get; set; }
-        public string Offset { get; set; }
-        public string Duration { get; set; }
-        public List<NBest> NBest { get; set; }
+        public string Locale { get; set; }
+
+        public IEnumerable<ModelIdentity> Models { get; set; }
+
+        public IDictionary<string, string> Properties { get; set; }
+
+        public static TranscriptionDefinition Create(
+            string name,
+            string description,
+            string locale,
+            Uri recordingsUrl)
+            => new TranscriptionDefinition(name, description, locale, recordingsUrl, new ModelIdentity[0]);
     }
 }

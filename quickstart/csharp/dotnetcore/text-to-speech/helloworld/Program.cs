@@ -48,9 +48,9 @@ namespace helloworld
             }
         }
 
-        static void Main()
+        static async Task Main()
         {
-            SynthesisToSpeakerAsync().Wait();
+            await SynthesisToSpeakerAsync();
             Console.WriteLine("Press any key to exit...");
             Console.ReadKey();
         }
