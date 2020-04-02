@@ -176,7 +176,7 @@ public:
     }
 
     /// <summary>
-    /// Set the language of the speech synthesizer.
+    /// Sets the language of the speech synthesizer.
     /// Added in version 1.4.0
     /// </summary>
     /// <param name="lang">Specifies the name of language (e.g. en-US)</param>
@@ -216,7 +216,7 @@ public:
     }
 
     /// <summary>
-    /// Set the speech synthesis output format (e.g. Riff16Khz16BitMonoPcm).
+    /// Sets the speech synthesis output format (e.g. Riff16Khz16BitMonoPcm).
     /// Added in version 1.4.0
     /// </summary>
     /// <param name="formatId">Specifies the output format ID</param>

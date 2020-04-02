@@ -96,7 +96,8 @@ BEGIN {
       quickstart/javascript/browser/index.html#quickstartcode
       quickstart/javascript/browser/index.html#speechsdkref
       quickstart/javascript/browser/index.html#uidiv
-      quickstart/javascript/node/index.js#code
+      quickstart/javascript/node/from-file/index.js#code
+      quickstart/javascript/node/text-to-speech/index.js#code
       quickstart/objectivec/ios/from-microphone/helloworld/helloworld/ViewController.m#code
       quickstart/objectivec/ios/text-to-speech/helloworld/helloworld/AppDelegate.m#code
       quickstart/objectivec/ios/text-to-speech/helloworld/helloworld/ViewController.m#code
