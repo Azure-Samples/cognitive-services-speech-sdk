@@ -1,8 +1,8 @@
 {
   "private": true,
-  "name": "speech-sdk-samples-node",
+  "name": "speech-sdk-quickstart-node-tts",
   "version": "1.0.0",
-  "description": "Samples for the Microsoft Speech SDK on Node.js",
+  "description": "Text-to-speech quickstart for the Microsoft Speech SDK on Node.js",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
