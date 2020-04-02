@@ -25,7 +25,7 @@
 #define MAGIC_TAG_fmt       0x20746d66
 
 // MAX_DEVICES is the maximum amount of PCM output instances we can have per device.
-#define MAX_DEVICES 6
+#define MAX_DEVICES 1
 #define HISTORY_BUFFER_SIZE 32
 #define FAST_LOOP_MAX_COUNT        10
 #define FAST_LOOP_THRESHOLD_MS     10
@@ -470,7 +470,7 @@ static int init_alsa_pcm_device(snd_pcm_t** pcmHandle, snd_pcm_stream_t streamTy
     {
         // Get speaker device
         if (0 == Alsa_GetDevice(pcmHandle, streamType, Mic_InputOutput) ||
-            !Alsa_GetDevice(pcmHandle, streamType, Speaker_Comparator))
+            0 == Alsa_GetDevice(pcmHandle, streamType, Speaker_Comparator))
         {
             deviceFound = true;
         }
@@ -568,13 +568,15 @@ static int open_wave_data(AUDIO_SYS_DATA* audioData, snd_pcm_stream_t streamType
     case SND_PCM_STREAM_PLAYBACK:
         for (size_t index = 0; index < MAX_DEVICES; index++)
         {
-            int err = init_alsa_pcm_device(&audioData->audioDevices[index].pcmHandle, SND_PCM_STREAM_PLAYBACK, OUTPUT_FRAME_COUNT, audioData);
-            if (err != 0)
+            if (!audioData->audioDevices[index].pcmHandle)
             {
-                result = __LINE__;
-                break;
+                if (init_alsa_pcm_device(&audioData->audioDevices[index].pcmHandle, SND_PCM_STREAM_PLAYBACK, OUTPUT_FRAME_COUNT, audioData) != 0)
+                {
+                    result = __LINE__;
+                    break;
+                }
             }
-            err = snd_pcm_prepare(audioData->audioDevices[index].pcmHandle);
+            int err = snd_pcm_prepare(audioData->audioDevices[index].pcmHandle);
             if (err < 0)
             {
                 LogError("Failure calling snd_pcm_prepare %s.", snd_strerror(err));
@@ -669,11 +671,16 @@ AUDIO_SYS_HANDLE audio_output_create_with_parameters(AUDIO_SETTINGS_HANDLE forma
     }
 
     // try to open the audio playback device
-    if (init_alsa_pcm_device(&result->pcmHandle, SND_PCM_STREAM_PLAYBACK, OUTPUT_FRAME_COUNT, result) != 0)
+    for (size_t index = 0; index < MAX_DEVICES; index++)
     {
-        LogError("Error opening audio playback device");
-        audio_destroy(result);
-        result = NULL;
+        int err = init_alsa_pcm_device(&result->audioDevices[index].pcmHandle, SND_PCM_STREAM_PLAYBACK, OUTPUT_FRAME_COUNT, result);
+        if (err != 0)
+        {
+            LogError("Error opening audio playback device %d", index);
+            audio_destroy(result);
+            result = NULL;
+            break;
+        }
     }
 
     return result;
@@ -1629,4 +1636,3 @@ AUDIO_RESULT audio_output_get_volume(AUDIO_SYS_HANDLE handle, long* volume)
 
     return result;
 }
-
