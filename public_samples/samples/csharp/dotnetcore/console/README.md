@@ -37,7 +37,7 @@ It runs under .NET Core 2.0 on Windows or Linux (Ubuntu 16.04 x64, Ubuntu 18.04 
 ## Build the sample
 
 * **By building this sample you will download the Microsoft Cognitive Services Speech SDK. By downloading you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license201809).**
-* [Download the sample code to your development PC.](../../README.md#get-the-samples)
+* [Download the sample code to your development PC.](../../../../README.md#get-the-samples)
 
   > **Note:** make sure to download the complete set of samples, not just this directory.
   > This sample references code in the directory [../../sharedcontent/console](../../sharedcontent/console), which is shared across samples.
@@ -59,7 +59,7 @@ It runs under .NET Core 2.0 on Windows or Linux (Ubuntu 16.04 x64, Ubuntu 18.04 
   * The following settings apply to keyword-triggered recognition:
     * `YourKeywordRecognitionModelFile.table`: replace with the location of your keyword recognition model file.
     * `YourKeyword`: replace with the phrase your keyword recognition model triggers on.
-* If you are using Microsoft Visual Studio 2017 on Windows, press Ctrl+Shift+B, or select **Build** \> **Build Solution**.
+* If you are using Microsoft Visual Studio 2017 on Windows, press <kbd>Ctrl+Shift+B</kbd>, or select **Build** \> **Build Solution**.
 * If you are using the .NET Core CLI, run the following command from the directory that contains this sample:
 
   ```bash
@@ -70,7 +70,7 @@ It runs under .NET Core 2.0 on Windows or Linux (Ubuntu 16.04 x64, Ubuntu 18.04 
 
 ### Using Visual Studio 2017
 
-To debug the app and then run it, press F5 or use **Debug** \> **Start Debugging**. To run the app without debugging, press Ctrl+F5 or use **Debug** \> **Start Without Debugging**.
+To debug the app and then run it, press <kbd>F5</kbd> or use **Debug** \> **Start Debugging**. To run the app without debugging, press <kbd>Ctrl+F5</kbd> or use **Debug** \> **Start Without Debugging**.
 
 The app displays a menu that you can navigate using your keyboard.
 Choose the scenarios that you're interested in.
@@ -78,7 +78,7 @@ Choose the scenarios that you're interested in.
 ### Using the .NET Core CLI
 
 Run the following command below from the directory that contains this sample.
-(We assume we did you performed a Debug build earlier)
+(We assume you performed a Debug build earlier)
 
 ```bash
 cd samples/bin/Debug/netcoreapp2.0
