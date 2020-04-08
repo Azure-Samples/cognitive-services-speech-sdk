@@ -78,7 +78,6 @@ CSpxAudioStreamSession::CSpxAudioStreamSession() :
     m_turnEndStopKind(RecognitionKind::Idle),
     m_isKwsProcessor{ false },
     m_isReliableDelivery{ false },
-    m_lastErrorGlobalOffset{ -1 },
     m_currentTurnGlobalOffset{ 0 },
     m_bytesTransited(0)
 {
@@ -1945,8 +1944,9 @@ void CSpxAudioStreamSession::Error(ISpxRecoEngineAdapter* adapter, ErrorPayload_
     }
     // If it is a transport error and the connection was successfully before, we retry in continuous mode.
     // Otherwise report the error to the user, so that he can recreate a recognizer.
-    else if (IsKind(RecognitionKind::Continuous) && payload->IsTransportError() &&
-        static_cast<int>(m_audioBuffer->GetAbsoluteOffset()) > m_lastErrorGlobalOffset ) // There was progress...
+    else if (IsKind(RecognitionKind::Continuous) &&
+             payload->IsTransportError() &&
+             m_expectAdapterStoppedTurn ) // We are in a turn.
     {
         SPX_DBG_TRACE_VERBOSE("%s: Trying to reset the engine adapter", __FUNCTION__);
         auto finalResult = DiscardAudioUnderTransportErrors();
@@ -1954,7 +1954,7 @@ void CSpxAudioStreamSession::Error(ISpxRecoEngineAdapter* adapter, ErrorPayload_
         {
             FireResultEvent(GetSessionId(), finalResult);
         }
-        m_lastErrorGlobalOffset = static_cast<int>(m_audioBuffer->GetAbsoluteOffset());
+        
         StartResetEngineAdapter();
     }
     else if (IsKind(RecognitionKind::Keyword) && payload->IsTransportError())

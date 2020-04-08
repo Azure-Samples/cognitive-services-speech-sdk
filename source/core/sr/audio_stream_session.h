@@ -398,7 +398,6 @@ private:
     mutable std::mutex m_conversationLock;
 
     bool m_isReliableDelivery;
-    int64_t m_lastErrorGlobalOffset;
     uint64_t m_currentTurnGlobalOffset;
 
     uint64_t m_bytesTransited;
