@@ -30,7 +30,7 @@
       <Link>Microsoft.CognitiveServices.Speech.extension.kws.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="$(SpeechPackageRoot)runtimes\win-x64\native\Microsoft.CognitiveServices.Speech.extension.codec.dll">
+    <None Condition="'$(TargetPlatformIdentifier)' != 'UAP'" Include="$(SpeechPackageRoot)runtimes\win-x64\native\Microsoft.CognitiveServices.Speech.extension.codec.dll">
       <Link>Microsoft.CognitiveServices.Speech.extension.codec.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
