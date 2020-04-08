@@ -920,10 +920,10 @@ public class TranslationRecognizerTests {
         s.close();
     }
 
-    @Test
-    public void testRecognizeOnceAsyncWithLanguageId() throws InterruptedException, ExecutionException, TimeoutException {
-        testRecognizeWithLanguageId(true /*testRecognizeAsync*/);
-    }
+    // @Test
+    // public void testRecognizeOnceAsyncWithLanguageId() throws InterruptedException, ExecutionException, TimeoutException {
+    //     testRecognizeWithLanguageId(true /*testRecognizeAsync*/);
+    // }
 
     @Test
     public void testRecognizeOnceContinouslyWithLanguageId() throws InterruptedException, ExecutionException, TimeoutException {

@@ -268,3 +268,8 @@ function getLatest() {
   sorted=($(printf '%s\n' "$@" | sort --version-sort))
   echo ${sorted[-1]}
 }
+
+function getSetting() {
+  set -x
+  echo $(python -c "import jsonsettings; jsonsettings.get(\"$1\", \"$2\")")
+}

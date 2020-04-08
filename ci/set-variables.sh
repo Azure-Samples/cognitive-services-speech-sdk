@@ -225,7 +225,7 @@ if $PR_MARKDOWN_ONLY; then
   # Run just Doxygen phase for PRs changing only Markdown.
   SPEECHSDK_BUILD_PHASES=" Doxygen "
 else
-  SPEECHSDK_BUILD_PHASES=" WindowsBuild WindowsUwpBuild NuGet NuGetLinuxTest NuGetOsxTest LinuxBuild LinuxDockerBuild LinuxDrop macOSBuild macOSUnitTests IosBuild IosUnitTests AndroidBuild AndroidPackage Doxygen DocFX JavaJrePackage RemoteConversationTranscriberJavaBuild JavaJrePackageLinuxTest JavaJrePackageOsxUnitTest WindowsSdlBuild LinuxPythonOobeTest BuildPythonDocs UnityBuild "
+  SPEECHSDK_BUILD_PHASES=" WindowsBuild WindowsUwpBuild NuGet NuGetLinuxTest NuGetOsxTest LinuxBuild LinuxDockerBuild LinuxDrop macOSBuild macOSUnitTests IosBuild IosUnitTests AndroidBuild AndroidPackage Doxygen DocFX JavaJrePackage RemoteConversationTranscriberJavaBuild JavaJrePackageLinuxTest JavaJrePackageOsxUnitTest WindowsSdlBuild LinuxPythonOobeTest BuildPythonDocs UnityBuild AndroidAppcenterTest "
 fi
 
 # Running tests is default
@@ -245,7 +245,7 @@ case $SPEECHSDK_BUILD_TYPE in
   int)
     # For Nightly add some additional jobs.
     if [[ $BUILD_REASON == Schedule ]]; then
-      SPEECHSDK_BUILD_PHASES+="TsaUpload WindowsSDLFortifyJava WackTest IosMultiPlatformTests DocFX AndroidAppcenterTest LinuxProxyTest macOSProxyBuild JavaJrePackageMacOSProxy macOSProxyTest "
+      SPEECHSDK_BUILD_PHASES+="TsaUpload WindowsSDLFortifyJava WackTest IosMultiPlatformTests DocFX LinuxProxyTest macOSProxyBuild JavaJrePackageMacOSProxy macOSProxyTest "
     fi
     PRERELEASE_VERSION=-beta.0.$_BUILD_ID
     META=+$_BUILD_COMMIT
@@ -255,7 +255,7 @@ case $SPEECHSDK_BUILD_TYPE in
     ;;
   prod)
     # Additional jobs for production builds.
-    SPEECHSDK_BUILD_PHASES+="WackTest IosMultiPlatformTests AndroidAppcenterTest LinuxProxyTest "
+    SPEECHSDK_BUILD_PHASES+="WackTest IosMultiPlatformTests LinuxProxyTest "
     # Prod builds take exactly the version from version.txt, no extra
     # pre-release or meta.
     PRERELEASE_VERSION=

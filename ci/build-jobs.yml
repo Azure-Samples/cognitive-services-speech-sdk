@@ -1516,38 +1516,24 @@ jobs:
         echo ##vso[task.setvariable variable=SPEECHSDK_SASTOKEN;issecret=true]!TOKEN!
         set TOKEN=
   - bash: |
-      set -u -x -e -o pipefail
+      set -u -e -o pipefail
+      rm -rf ./tests/test.subscriptions.regions.json
+      cat > ./tests/test.subscriptions.regions.json << HEREDOC
+        $(KEYS_AND_REGIONS)
+      HEREDOC
+    displayName: 'Update subscriptions and regions'
+  - bash: |
+      set -u -e -o pipefail
+      cp -f ./ci/jsonsettings.py .
+      . ./ci/functions.sh
       FAKE_BUILD=buildfromrelease
       mkdir -p "$FAKE_BUILD"{/bin,/lib}
       DROP_DIR=$(cygpath -au "$(System.ArtifactsDirectory)/In/Android/Android-arm32/Release")
-      eval $(perl ci/evaluate-test-config.pl --verbose --format bash-variable --input ci/test-config.json \
-        -D luis-key=$(luis-westus-s0-201809-key1) \
-        -D speech-key=$(NorthEuropeKeySkyman) \
-        -D virtualassistant-region=$(DialogRegion) \
-        -D virtualassistant-subscription=$(DialogSubscriptionKey) \
-        -D virtualassistant-testbot=$(DialogFunctionalTestBot) \
-        -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
-        -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
-        -D long-running=false)
-      cat > "$FAKE_BUILD/MainActivity.properties" <<EOF
-      SpeechSubscriptionKey=$SPEECHSDK_SPEECH_KEY
-      SpeechRegion=$SPEECHSDK_SPEECH_REGION
-      LuisSubscriptionKey=$SPEECHSDK_LUIS_KEY
-      LuisRegion=$SPEECHSDK_LUIS_REGION
-      LuisAppId=$SPEECHSDK_LUIS_HOMEAUTOMATION_APPID
-      Keyword=Computer
-      KeywordModel=kws-computer.zip
-      SpeechSubscriptionKeyForVirtualAssistant=$SPEECHSDK_BOT_SUBSCRIPTION
-      SpeechRegionForVirtualAssistant=$SPEECHSDK_BOT_REGION
-      SpeechChannelSecretForVirtualAssistant=$SPEECHSDK_BOT_FUNCTIONALTESTBOT
-      ConversationTranscriptionEndpoint=$SPEECHSDK_PRINCETON_INROOM_ENDPOINT
-      ConversationTranscriptionPPEKey=$SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_PPE_KEY
-      ConversationTranscriptionPRODKey=$SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_PROD_KEY
-      SpeechRegionForConversationTranscription=$SPEECHSDK_PRINCETON_REGION
-      SasToken=$(SPEECHSDK_SASTOKEN)
-      SasContainerPrefix=$(SPEECHSDK_TEST_APPCENTERUPLOAD)
-      EOF
-      cat "$FAKE_BUILD/MainActivity.properties"
+      cat > "$FAKE_BUILD/MainActivity.properties" <<HEREDOC
+        SampleAudioInput=$( getSetting './tests/test.defaults.json' 'InputDir' )/$( getSetting './tests/test.audio.utterances.json' 'SingleUtteranceEnglish.FilePath' )
+        SasToken=$(SPEECHSDK_SASTOKEN)
+        SasContainerPrefix=$(SPEECHSDK_TEST_APPCENTERUPLOAD)
+      HEREDOC
       cp --preserve "$DROP_DIR/public/lib/com.microsoft.cognitiveservices.speech.jar" "$FAKE_BUILD/lib"
       cp --preserve "$DROP_DIR/private/bin/com.microsoft.cognitiveservices.speech.tests.jar" "$FAKE_BUILD/bin"
       cp --preserve "$DROP_DIR/public/lib/libMicrosoft.CognitiveServices.Speech.core.so" "$FAKE_BUILD/lib"

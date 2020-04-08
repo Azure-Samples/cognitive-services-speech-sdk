@@ -4,9 +4,7 @@
 //
 package com.microsoft.cognitiveservices.speech.samples.sdsdkstarterapp;
 
-import android.content.res.AssetManager;
 import android.content.Context;
-import android.support.annotation.NonNull;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.LargeTest;
 import android.support.test.rule.ActivityTestRule;
@@ -23,15 +21,9 @@ import org.junit.runner.RunWith;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Calendar;
-import java.util.Properties;
-
-import tests.Settings;
-
-import java.io.InputStream;
 
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
@@ -39,13 +31,8 @@ import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
 import static org.junit.Assert.*;
 
-import com.microsoft.azure.storage.CloudStorageAccount;
-import com.microsoft.azure.storage.StorageCredentials;
 import com.microsoft.azure.storage.StorageCredentialsSharedAccessSignature;
-import com.microsoft.azure.storage.blob.CloudBlobClient;
-import com.microsoft.azure.storage.blob.CloudBlobContainer;
 import com.microsoft.azure.storage.blob.CloudBlockBlob;
-import com.microsoft.azure.storage.blob.ListBlobItem;
 
 /**
  * Instrumented test, which will execute on an Android device.
@@ -78,8 +65,11 @@ public class SpeechSdkInstrumentedTest {
     @Test
     public void runSpeechSDKtests() throws ClassNotFoundException, IOException {
         reportHelper.label("Properties loading");
-        prepareTestEnvironment("MainActivity.properties");
-        reportHelper.label("Expecting wave file at " + Settings.WavFile);
+        prepareTestEnvironment();
+
+        Settings.LoadSettings();
+
+        reportHelper.label("Expecting wave file at " + Settings.DefaultSettingsMap.get(DefaultSettingsKeys.WavFile));
         reportHelper.label("Properties loaded");
 
         // note: this property, if set, is picked up by the junit results
@@ -95,13 +85,13 @@ public class SpeechSdkInstrumentedTest {
         // Note: the results output is used as exception message in
         //       case some test failed. That way, appcenter records the
         //       data as part of its logging.
-        String errMessage = "";
+        StringBuilder errMessage = new StringBuilder();
         String line;
         while ((line = br.readLine()) != null && (line.length() > 0)){
-            errMessage += "\r\n" + line;
+            errMessage.append("\r\n").append(line);
         }
 
-        if (System.getProperty("SasToken", "unconfigured") != "unconfigured") {
+        if (!System.getProperty("SasToken", "unconfigured").equals("unconfigured")) {
             // When upload is configured, it needs to succeeed.
             try {
                 reportHelper.label("Unit tests executed, uploading results " + successful);
@@ -109,14 +99,14 @@ public class SpeechSdkInstrumentedTest {
             }
             catch(Exception ex) {
                 reportHelper.label("Unit tests uploading results failed with " + ex);
-                errMessage += "\r\n" + ex;
+                errMessage.append("\r\n").append(ex);
                 successful = false;
             }
         }
 
         reportHelper.label("Unit tests executed, state " + successful);
         if (!successful) {
-            throw new IOException(errMessage);
+            throw new IOException(errMessage.toString());
         }
     }
 
@@ -126,79 +116,33 @@ public class SpeechSdkInstrumentedTest {
         onView(withText("Speech SDK Test Shell")).check(matches(isDisplayed()));
     }
 
-    @NonNull
-    private static void prepareTestEnvironment(String filename) {
+    private static void prepareTestEnvironment() {
         String tempDir = System.getProperty("java.io.tmpdir", "/data/local/tmp/");
-        File file = new File(tempDir, "whatstheweatherlike.wav");
-        String waveFileDefault = file.getPath();
+        File file = new File(tempDir, "audio/whatstheweatherlike.wav");
+        String waveFileDefault;
 
-        try {
-            // Note: updating system properties from a provided asset, if available.
+        if (System.getProperty("TestOutputFilename", null) == null) {
             try {
-                Context targetContext = InstrumentationRegistry.getTargetContext();
-                AssetManager assets = targetContext.getAssets();
-
-                InputStream inputStream = assets.open(filename);
-                Properties properties = new Properties();
-                properties.load(inputStream);
-                inputStream.close();
-
-                for (Object name: properties.keySet()) {
-                    String key = name.toString();
-                    System.setProperty(key, properties.getProperty(key));
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            if (System.getProperty("TestOutputFilename", null) == null) {
                 String unitTestsResults = new File(tempDir, "test-java-unittests.xml").getCanonicalPath();
                 System.setProperty("TestOutputFilename", unitTestsResults);
+            } catch(IOException ex) {
+                System.out.println("getCanonicalPath threw an IO exception: " + ex.getMessage());
             }
+        }
 
+        try {
             waveFileDefault = file.getCanonicalPath();
-        } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("Setting waveFileDefault to " + waveFileDefault);
+        } catch(IOException ex) {
+            System.out.println("getCanonicalPath threw an IO exception: " + ex.getMessage());
         }
-
-        if (!new File(waveFileDefault).exists()) {
-            try {
-                Context targetContext = InstrumentationRegistry.getTargetContext();
-                AssetManager assets = targetContext.getAssets();
-
-                InputStream inputStream = assets.open("whatstheweatherlike.wav");
-                FileOutputStream os = new FileOutputStream(waveFileDefault);
-
-                byte buf[]= new byte[1024];
-                int len;
-                while ((len = inputStream.read(buf, 0, buf.length))> 0) {
-                    os.write(buf, 0, len);
-                }
-
-                os.close();
-                inputStream.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        Settings.SpeechSubscriptionKey = System.getProperty("SpeechSubscriptionKey", "<enter your subscription info here>");
-        Settings.SpeechRegion = System.getProperty("SpeechRegion", "westus");
-        Settings.LuisSubscriptionKey = System.getProperty("LuisSubscriptionKey", "<enter your subscription info here>");
-        Settings.LuisRegion = System.getProperty("LuisRegion", "westus2");
-        Settings.LuisAppId = System.getProperty("LuisAppId", "<enter your LUIS AppId>");
-        Settings.Keyword = System.getProperty("Keyword", "Computer");
-        Settings.KeywordModel = System.getProperty("KeywordModel", "kws-computer.zip");
-
-        Settings.AudioInputDirectory =  System.getProperty("AudioInputDirectory", tempDir);
-        Settings.WavFile = System.getProperty("SampleAudioInput", waveFileDefault);
 
         directoryPrefix = System.getProperty("SasContainerPrefix", "unconfigured");
         sasToken = System.getProperty("SasToken", "unconfigured");
     }
 
-    public static String directoryPrefix = "unconfigured";
-    public static String sasToken = "unconfigured";
+    private static String directoryPrefix = "unconfigured";
+    private static String sasToken = "unconfigured";
 
     public String uploadTestResults() throws Exception {
         String androidId = android.os.Build.DEVICE + "-" + android.os.Build.VERSION.RELEASE + "-" + Calendar.getInstance().getTimeInMillis();

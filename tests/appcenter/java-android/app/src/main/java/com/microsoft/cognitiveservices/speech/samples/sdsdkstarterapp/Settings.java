@@ -1,20 +1,15 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 
-package tests;
+package com.microsoft.cognitiveservices.speech.samples.sdsdkstarterapp;
 
-import java.io.*;
-import java.lang.reflect.Type;
+import com.microsoft.cognitiveservices.speech.SpeechConfig;
+
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
-
-import com.google.gson.*;
-import com.google.gson.reflect.TypeToken;
-import com.microsoft.cognitiveservices.speech.SpeechConfig;
 
 public class Settings {
     private static SpeechConfig config;
@@ -36,71 +31,14 @@ public class Settings {
         // throwing away any custom setting value..
         s_settingsClassLock = new Settings();
 
-        try {
-            LoadSettings();
-        } catch (JsonIOException | JsonSyntaxException | FileNotFoundException e) {
-            e.printStackTrace();
-        }
+        Settings.LoadSettings();
     };
 
     public static Map<String, String> DefaultSettingsMap;
     public static Map<String, SubscriptionRegion> SubscriptionsRegionsMap;
     public static Map<String, AudioEntry> AudioUtterancesMap;
 
-    private static void LoadSettingsJson() throws JsonIOException, JsonSyntaxException, FileNotFoundException {
-        if (isSettingsInitialized) {
-            return;
-        }
-
-        String cwd = System.getProperty("user.dir");
-        System.out.println("Current working directory: " + cwd);
-
-        Gson gson = new Gson();
-        Type defaultSettingsType = new TypeToken<Map<String, String>>(){}.getType();
-        Type subscriptionsRegionsType = new TypeToken<Map<String, SubscriptionRegion>>(){}.getType();
-        Type audioEntryType = new TypeToken<Map<String, AudioEntry>>(){}.getType();
-
-        File defaultSettingsFile = new File("test.defaults.json");
-
-        if(defaultSettingsFile.exists()) {
-            Map<String, String> defaultSettingsMap = gson.fromJson(new FileReader("test.defaults.json"), defaultSettingsType);
-
-            defaultSettingsMap.forEach((key, value) -> DefaultSettingsMap.merge(key, value, (v1, v2) -> v2));
-        } else {
-            String defaultSettings = System.getProperty("defaultSettings");
-            Map<String, String> defaultSettingsMap = gson.fromJson(defaultSettings, defaultSettingsType);
-
-            defaultSettingsMap.forEach((key, value) -> DefaultSettingsMap.merge(key, value, (v1, v2) -> v2));
-        }
-
-        File subscriptionsRegionsFile = new File("test.subscriptions.regions.json");
-
-        if(subscriptionsRegionsFile.exists()) {
-            Map<String, SubscriptionRegion> subscriptionsRegionsMap = gson.fromJson(new FileReader("test.subscriptions.regions.json"), subscriptionsRegionsType);
-
-            subscriptionsRegionsMap.forEach((key, value) -> SubscriptionsRegionsMap.merge(key, value, (v1, v2) -> v2));
-        } else {
-            String subscriptionsRegions = System.getProperty("subscriptionsRegions");
-            Map<String, SubscriptionRegion> subscriptionsRegionsMap = gson.fromJson(subscriptionsRegions, subscriptionsRegionsType);
-
-            subscriptionsRegionsMap.forEach((key, value) -> SubscriptionsRegionsMap.merge(key, value, (v1, v2) -> v2));
-        }
-
-        File audioUtterancesFile = new File("test.audio.utterances.json");
-
-        if(audioUtterancesFile.exists()) {
-            Map<String, AudioEntry> audioUtterancesMap = gson.fromJson(new FileReader("test.audio.utterances.json"), audioEntryType);
-
-            audioUtterancesMap.forEach((key, value) -> AudioUtterancesMap.merge(key, value, (v1, v2) -> v2));
-        } else {
-            String audioUtterances = System.getProperty("audioUtterances");
-            Map<String, AudioEntry> audioUtterancesMap = gson.fromJson(audioUtterances, audioEntryType);
-
-            audioUtterancesMap.forEach((key, value) -> AudioUtterancesMap.merge(key, value, (v1, v2) -> v2));
-        }
-    }
-
-    public static void LoadSettings() throws JsonIOException, JsonSyntaxException, FileNotFoundException {
+    public static void LoadSettings() {
         if(!isSettingsInitialized)
         {
             DefaultSettingsMap = new HashMap<String,String>();
@@ -108,7 +46,6 @@ public class Settings {
             AudioUtterancesMap = new HashMap<String,AudioEntry>();
 
             LoadSettingsProperties();
-            LoadSettingsJson();
 
             isSettingsInitialized = true;
         }
@@ -170,6 +107,8 @@ public class Settings {
 
         DefaultSettingsMap.put("Keyword", System.getProperty("Keyword"));
         DefaultSettingsMap.put("KeywordModel", System.getProperty("KeywordModel"));
+
+        DefaultSettingsMap.put("WaveFile", System.getProperty("SampleAudioInput"));
     }
 
     public static SpeechConfig getSpeechConfig() {
@@ -210,29 +149,6 @@ public class Settings {
     }
 
     public static String GetRootRelativePath(String input) {
-        String rrPath = input;
-
-        System.out.println("Fetching root relative path for " + input);
-        try {
-            rrPath = Paths.get(DefaultSettingsMap.get(DefaultSettingsKeys.INPUT_DIR), input).toString();
-            File tempFile = new File(rrPath);
-            
-            if(!tempFile.exists()) {
-                System.out.println("Android detected using base path " + System.getProperty("JsonConfigPath", "/data/local/tmp/"));
-                System.out.println("Setting rrPath to " + Paths.get(System.getProperty("JsonConfigPath", "/data/local/tmp/"), input).toString());
-                rrPath = Paths.get(System.getProperty("JsonConfigPath", "/data/local/tmp/"), input).toString();
-
-                tempFile = new File(rrPath);
-                if(!tempFile.exists())
-                {
-                    System.out.println("Failed to find a root path");
-                    return input;
-                }
-            }
-        } catch (Exception ex) {
-            System.out.println("Failed to construct Root Relative Path");
-        }
-
-        return rrPath;
+        return Paths.get(DefaultSettingsMap.get(DefaultSettingsKeys.INPUT_DIR), input).toString();
     }
 }
