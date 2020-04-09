@@ -14,6 +14,12 @@
 #define SPX_CONFIG_TRACE_ALL 1
 #endif
 
+// Disable LNK4049 (caused by importing diagnostics_log_message)
+#ifdef _WIN32
+#define SPXAPI_EXPORT
+#endif
+
+
 #include <speechapi_c_diagnostics.h>
 #define __SPX_DO_TRACE_IMPL diagnostics_log_trace_message
 

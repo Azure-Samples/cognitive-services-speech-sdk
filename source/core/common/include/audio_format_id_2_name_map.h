@@ -7,7 +7,6 @@
 
 #pragma once
 
-#include "../stdafx.h"
 #include "speechapi_cxx_enums.h"
 
 

@@ -19,6 +19,12 @@
 #define SPX_CONFIG_TRACE_ALL 1
 #endif
 
+
+// rest_tts module does not need to __declspec(dllimport) or __declspec(dllexport)
+#ifdef _WIN32
+#define SPXAPI_EXPORT
+#endif
+
 #include "speechapi_c_diagnostics.h"
 #define __SPX_DO_TRACE_IMPL diagnostics_log_trace_message
 
