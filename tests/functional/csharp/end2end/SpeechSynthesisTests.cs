@@ -988,7 +988,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        [Ignore]
         public async Task SynthesisAllChunkTimeoutUsp()
         {
             using (var synthesizer = new SpeechSynthesizer(uspConfig, null))

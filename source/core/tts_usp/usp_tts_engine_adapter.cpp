@@ -464,24 +464,24 @@ void CSpxUspTtsEngineAdapter::OnTurnStart(const USP::TurnStartMsg& message)
 
 void CSpxUspTtsEngineAdapter::OnAudioOutputChunk(const USP::AudioOutputChunkMsg& message)
 {
-    InvokeOnSite([this, message](const SitePtr& p) {
-        if (message.audioLength > 0)
-        {
-            p->Write(this, m_currentRequestId, (uint8_t *)message.audioBuffer, (uint32_t)message.audioLength);
-        }
-    });
-
     std::unique_lock<std::mutex> lock(m_mutex);
     if (m_uspState == UspState::TurnStarted)
     {
         m_uspState = UspState::ReceivingData;
     }
-    else if ( m_uspState != UspState::ReceivingData)
+    else if (m_uspState != UspState::ReceivingData)
     {
         SPX_TRACE_ERROR("Received chunk data in unexpected state, ingore. Current state: %d", UspState(m_uspState));
         return;
     }
-    
+
+    InvokeOnSite([this, message](const SitePtr& p) {
+        if (message.audioLength > 0)
+        {
+            p->Write(this, m_currentRequestId, const_cast<uint8_t *>(message.audioBuffer), static_cast<uint32_t>(message.audioLength));
+        }
+    });
+
     const auto originalSize = m_currentReceivedData.size();
     m_currentReceivedData.resize(originalSize + message.audioLength);
     memcpy(m_currentReceivedData.data() + originalSize, message.audioBuffer, message.audioLength);
