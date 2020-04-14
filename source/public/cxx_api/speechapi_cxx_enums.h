@@ -593,7 +593,19 @@ enum class CancellationErrorCode
     /// <summary>
     /// Indicates an unexpected runtime error.
     /// </summary>
-    RuntimeError = 9
+    RuntimeError = 9,
+
+    /// <summary>
+    /// Indicates the Speech Service is temporarily requesting a reconnect to a different endpoint.
+    /// </summary>
+    /// <remarks>Used internally</remarks>
+    ServiceRedirectTemporary = 10,
+
+    /// <summary>
+    /// Indicates the Speech Service is permanently requesting a reconnect to a different endpoint.
+    /// </summary>
+    /// <remarks>Used internally</remarks>
+    ServiceRedirectPermanent = 11,
 };
 
 /// <summary>

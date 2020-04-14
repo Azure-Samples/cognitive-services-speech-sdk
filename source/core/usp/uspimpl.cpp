@@ -1168,6 +1168,15 @@ void Connection::Impl::OnTransportError(TransportErrorInfo* errorInfo, void* con
             uspErrorCode = ErrorCode::TooManyRequests;
             errorMessage = "WebSocket Upgrade failed with too many requests error (429). Please check for correct subscription key (or authorization token) and region name.";
             break;
+        case HTTP_MOVED:
+        case HTTP_PERM_REDIRECT:
+            uspErrorCode = ErrorCode::ServiceRetirectPermanent;
+            errorMessage = errorInfo->errorString != NULL ? errorInfo->errorString : "Redirect Location Unknown";
+            break;
+        case HTTP_TEMP_REDIRECT:
+            uspErrorCode = ErrorCode::ServiceRedirectTemprary;
+            errorMessage = errorInfo->errorString != NULL ? errorInfo->errorString : "Redirect Location Unknown";
+            break;
         default:
             uspErrorCode = ErrorCode::ConnectionError;
             errorMessage = "WebSocket Upgrade failed with HTTP status code: " + errorCodeInString;

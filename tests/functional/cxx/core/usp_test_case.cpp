@@ -180,14 +180,14 @@ TEST_CASE("USP is properly functioning", "[usp]")
 
 class TlsCheck : public USP::Callbacks
 {
-    void OnError(bool /*transport*/, USP::ErrorCode /*errorCode*/, const std::string& errorMessage) override
+    void OnError(bool /*transport*/, USP::ErrorCode errorCode, const std::string& /*errorMessage*/) override
     {
 #ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable: 6237)
         // Disable: (<zero> && <expression>) is always zero.  <expression> is never evaluated and might have side effects.
 #endif
-        REQUIRE(errorMessage == "WebSocket Upgrade failed with HTTP status code: 301");
+        REQUIRE(errorCode == USP::ErrorCode::ServiceRetirectPermanent);
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif

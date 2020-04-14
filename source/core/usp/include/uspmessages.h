@@ -67,7 +67,9 @@ enum class ErrorCode : int
     ConnectionError,
     ServiceUnavailable,
     ServiceError,
-    RuntimeError
+    RuntimeError,
+    ServiceRedirectTemprary,
+    ServiceRetirectPermanent
 };
 
 /**

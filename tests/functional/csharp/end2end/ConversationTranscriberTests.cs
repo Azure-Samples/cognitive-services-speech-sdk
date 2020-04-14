@@ -565,9 +565,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             return config;
         }
 
-        private SpeechConfig CreateCTSTeamsSpeechConfig()
+        private SpeechConfig CreateCTSTeamsSpeechConfig(string endpointKey, string extraParams = "")
         {
-            var config = SpeechConfig.FromEndpoint(new Uri(DefaultSettingsMap[DefaultSettingKeys.ONLINE_AUDIO_ENDPOINT]), conversationTranscriptionPPEKey);
+            var config = SpeechConfig.FromEndpoint(new Uri(endpointKey + extraParams), conversationTranscriptionPPEKey);
             config.SetProperty("ConversationTranscriptionInRoomAndOnline", "true");
             return config;
         }
@@ -575,7 +575,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public async Task TestDelayedAudio()
         {
-            var config = CreateCTSTeamsSpeechConfig();
+            var config = CreateCTSTeamsSpeechConfig(DefaultSettingsMap[DefaultSettingKeys.ONLINE_AUDIO_ENDPOINT]);
             config.OutputFormat = OutputFormat.Detailed;
 
             ManualResetEvent transcribedEvent = new ManualResetEvent(false);
@@ -649,6 +649,167 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
+        public async Task TestTempRedirect()
+        {
+            var config = CreateCTSTeamsSpeechConfig(DefaultSettingsMap[DefaultSettingKeys.RECONNECT_AUDIO_ENDPOINT], "?forceTemporaryRedirect=true");
+            config.SetServiceProperty("maxConnectionDurationSecs", "5", ServicePropertyChannel.UriQueryParameter);
+
+            ManualResetEvent reconnectEvent = new ManualResetEvent(false);
+            ManualResetEvent canceledEvent = new ManualResetEvent(false);
+
+            int successfulConnections = 0;
+
+            var pushStream = AudioInputStream.CreatePushStream();
+            var audioInput = AudioConfig.FromStreamInput(pushStream);
+            var fileContents = File.ReadAllBytes(AudioUtterancesMap[AudioUtteranceKeys.MULTIPLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
+
+            pushStream.Write(fileContents);
+            pushStream.Close();
+
+            var meetingID = Guid.NewGuid().ToString();
+
+            using (var conversation = await Conversation.CreateConversationAsync(config, meetingID))
+            using (var conversationTranscriber = TrackSessionId(new ConversationTranscriber(audioInput)))
+            {
+                await conversationTranscriber.JoinConversationAsync(conversation);
+                var recoLanguage = conversationTranscriber.Properties.GetProperty(PropertyId.SpeechServiceConnection_RecoLanguage);
+                Assert.IsTrue(String.IsNullOrEmpty(recoLanguage), "RecoLanguage should not be set here. RecoLanguage: " + recoLanguage);
+
+                conversationTranscriber.Transcribed += (s, e) =>
+                {
+                    Console.WriteLine($"Recognized {e.Result.Text}");
+                };
+
+                conversationTranscriber.Canceled += (s, e) =>
+                {
+                    Assert.IsTrue(string.IsNullOrWhiteSpace(e.ErrorDetails), $"Error details were present {e.ErrorDetails}");
+                    Assert.IsTrue(e.Reason == CancellationReason.EndOfStream, $"Cancellation Reason was not EOS it was {e.Reason.ToString()} with error code ${e.ErrorCode.ToString()}");
+                    Console.WriteLine("Reached EndOfStream");
+                    canceledEvent.Set();
+                };
+
+                var con = Connection.FromRecognizer(conversationTranscriber);
+
+                con.Connected += (s, e) =>
+                {
+                    Console.WriteLine("Connected");
+
+                    Assert.IsTrue(conversationTranscriber.Properties.GetProperty(PropertyId.SpeechServiceConnection_Url).ToLowerInvariant().Contains("forcetemporaryredirect=false"));
+                    Assert.IsTrue(conversationTranscriber.Properties.GetProperty(PropertyId.SpeechServiceConnection_Endpoint).ToLowerInvariant().Contains("forcetemporaryredirect=true"));
+                    successfulConnections++;
+                    if (successfulConnections == 2)
+                    {
+                        reconnectEvent.Set();
+                    }
+                };
+
+                await conversationTranscriber.StartTranscribingAsync();
+
+                Assert.IsTrue(reconnectEvent.WaitOne(TimeSpan.FromSeconds(60)), "Events were not received in time");
+            }
+        }
+
+        [TestMethod]
+        public async Task TestPermRedirect()
+        {
+            var config = CreateCTSTeamsSpeechConfig(DefaultSettingsMap[DefaultSettingKeys.RECONNECT_AUDIO_ENDPOINT], "?forcePermanentRedirect=true");
+            config.SetServiceProperty("maxConnectionDurationSecs", "5", ServicePropertyChannel.UriQueryParameter);
+
+            ManualResetEvent reconnectEvent = new ManualResetEvent(false);
+            ManualResetEvent canceledEvent = new ManualResetEvent(false);
+
+            int successfulConnections = 0;
+
+            var pushStream = AudioInputStream.CreatePushStream();
+            var audioInput = AudioConfig.FromStreamInput(pushStream);
+            var fileContents = File.ReadAllBytes(AudioUtterancesMap[AudioUtteranceKeys.MULTIPLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
+
+            pushStream.Write(fileContents);
+            pushStream.Close();
+
+            var meetingID = Guid.NewGuid().ToString();
+
+            using (var conversation = await Conversation.CreateConversationAsync(config, meetingID))
+            using (var conversationTranscriber = TrackSessionId(new ConversationTranscriber(audioInput)))
+            {
+                await conversationTranscriber.JoinConversationAsync(conversation);
+                var recoLanguage = conversationTranscriber.Properties.GetProperty(PropertyId.SpeechServiceConnection_RecoLanguage);
+                Assert.IsTrue(String.IsNullOrEmpty(recoLanguage), "RecoLanguage should not be set here. RecoLanguage: " + recoLanguage);
+
+                conversationTranscriber.Transcribed += (s, e) =>
+                {
+                    Console.WriteLine($"Recognized {e.Result.Text}");
+                };
+
+                conversationTranscriber.Canceled += (s, e) =>
+                {
+                    Assert.IsTrue(string.IsNullOrWhiteSpace(e.ErrorDetails), $"Error details were present {e.ErrorDetails}");
+                    Assert.IsTrue(e.Reason == CancellationReason.EndOfStream, $"Cancellation Reason was not EOS it was {e.Reason.ToString()} with error code ${e.ErrorCode.ToString()}");
+                    Console.WriteLine("Reached EndOfStream");
+                    canceledEvent.Set();
+                };
+
+                var con = Connection.FromRecognizer(conversationTranscriber);
+
+                con.Connected += (s, e) =>
+                {
+                    Console.WriteLine("Connected");
+
+                    Assert.IsTrue(conversationTranscriber.Properties.GetProperty(PropertyId.SpeechServiceConnection_Url).ToLowerInvariant().Contains("forcepermanentredirect=false"), conversationTranscriber.Properties.GetProperty(PropertyId.SpeechServiceConnection_Url));
+                    Assert.IsTrue(conversationTranscriber.Properties.GetProperty(PropertyId.SpeechServiceConnection_Endpoint).ToLowerInvariant().Contains("forcepermanentredirect=false"), conversationTranscriber.Properties.GetProperty(PropertyId.SpeechServiceConnection_Endpoint));
+                    successfulConnections++;
+                    if (successfulConnections == 2)
+                    {
+                        reconnectEvent.Set();
+                    }
+                };
+
+                await conversationTranscriber.StartTranscribingAsync();
+
+                Assert.IsTrue(reconnectEvent.WaitOne(TimeSpan.FromSeconds(60)), "Events were not received in time");
+            }
+        }
+
+        [TestMethod]
+        public async Task TestTooManyParticipants()
+        {
+            var config = CreateCTSTeamsSpeechConfig(DefaultSettingsMap[DefaultSettingKeys.ONLINE_AUDIO_ENDPOINT]);
+            config.OutputFormat = OutputFormat.Detailed;
+
+            var pushStream = AudioInputStream.CreatePushStream();
+            var audioInput = AudioConfig.FromStreamInput(pushStream);
+            var meetingID = Guid.NewGuid().ToString();
+
+            config.SetProperty("Conversation-MaximumAllowedParticipants", "100");
+
+            using (var conversation = await Conversation.CreateConversationAsync(config, meetingID))
+            using (var conversationTranscriber = TrackSessionId(new ConversationTranscriber(audioInput)))
+            {
+                await conversationTranscriber.JoinConversationAsync(conversation);
+                var recoLanguage = conversationTranscriber.Properties.GetProperty(PropertyId.SpeechServiceConnection_RecoLanguage);
+                Assert.IsTrue(String.IsNullOrEmpty(recoLanguage), "RecoLanguage should not be set here. RecoLanguage: " + recoLanguage);
+
+                bool threw = false;
+                int participants = 0;
+                while (!threw)
+                {
+                    try
+                    {
+                        await conversation.AddParticipantAsync(Guid.NewGuid().ToString());
+                        ++participants;
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e.ToString());
+                        threw = true;
+                        Assert.IsTrue(participants == 100);
+                    }
+                }
+            }
+        }
+
+
+        [TestMethod]
         public async Task TestSendMessageAsync()
         {
             string faceStreamUrl = "wss://transcribe.princetondev.customspeech.ai/speech/recognition/audioface";
@@ -664,43 +825,43 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var conversation = await Conversation.CreateConversationAsync(config, meetingID))
             using (var conversationTranscriber = TrackSessionId(new ConversationTranscriber(audioInput)))
             {
-                    await conversationTranscriber.JoinConversationAsync(conversation);
+                await conversationTranscriber.JoinConversationAsync(conversation);
 
-                    conversationTranscriber.Transcribed += (s, e) =>
-                    {
-                        Console.WriteLine($"Recognized {e.Result.Text}");
-                        transcribedEvent.Set();
-                    };
+                conversationTranscriber.Transcribed += (s, e) =>
+                {
+                    Console.WriteLine($"Recognized {e.Result.Text}");
+                    transcribedEvent.Set();
+                };
 
-                    conversationTranscriber.Transcribing += (s, e) =>
-                    {
-                        Console.WriteLine($"Recognizing {e.Result.Text}");
-                        transcribingEvent.Set();
-                    };
+                conversationTranscriber.Transcribing += (s, e) =>
+                {
+                    Console.WriteLine($"Recognizing {e.Result.Text}");
+                    transcribingEvent.Set();
+                };
 
-                    conversationTranscriber.Canceled += (s, e) =>
-                    {
-                        Assert.IsTrue(string.IsNullOrWhiteSpace(e.ErrorDetails), $"Error details were present {e.ErrorDetails}");
-                        Assert.IsTrue(e.Reason == CancellationReason.EndOfStream, $"Cancellation Reason was not EOS it was {e.Reason.ToString()} with error code ${e.ErrorCode.ToString()}");
-                        Console.WriteLine("Reached EndOfStream");
-                    };
+                conversationTranscriber.Canceled += (s, e) =>
+                {
+                    Assert.IsTrue(string.IsNullOrWhiteSpace(e.ErrorDetails), $"Error details were present {e.ErrorDetails}");
+                    Assert.IsTrue(e.Reason == CancellationReason.EndOfStream, $"Cancellation Reason was not EOS it was {e.Reason.ToString()} with error code ${e.ErrorCode.ToString()}");
+                    Console.WriteLine("Reached EndOfStream");
+                };
 
-                    const string messageName = "face.stream";
-                    var connection = Connection.FromRecognizer(conversationTranscriber);
-                    // just send some binary data.
-                    var fileContents = File.ReadAllBytes(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
-                    await connection.SendMessageAsync(messageName, fileContents, (uint)fileContents.Length);
-                    Thread.Sleep((int)10);
-                    connection.MessageReceived += (s, e) =>
-                    {
-                        Console.WriteLine($"Message Received {e.Message}");
-                    };
+                const string messageName = "face.stream";
+                var connection = Connection.FromRecognizer(conversationTranscriber);
+                // just send some binary data.
+                var fileContents = File.ReadAllBytes(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
+                await connection.SendMessageAsync(messageName, fileContents, (uint)fileContents.Length);
+                Thread.Sleep((int)10);
+                connection.MessageReceived += (s, e) =>
+                {
+                    Console.WriteLine($"Message Received {e.Message}");
+                };
 
-                    await conversationTranscriber.StartTranscribingAsync();
-                    await conversation.AddParticipantAsync("userID@microsoft.com");
+                await conversationTranscriber.StartTranscribingAsync();
+                await conversation.AddParticipantAsync("userID@microsoft.com");
 
-                    Assert.IsTrue(WaitHandle.WaitAll(new System.Threading.WaitHandle[] { transcribedEvent,  transcribingEvent},
-                        TimeSpan.FromSeconds(300)), "Events were not received in time");
+                Assert.IsTrue(WaitHandle.WaitAll(new System.Threading.WaitHandle[] { transcribedEvent, transcribingEvent },
+                    TimeSpan.FromSeconds(300)), "Events were not received in time");
 
             }
         }

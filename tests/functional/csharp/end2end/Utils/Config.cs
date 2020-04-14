@@ -62,6 +62,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils
         public static string LONG_RUNNING => "LongRunning";
         public static string DEPLOYMENT_ID => "DeploymentId";
         public static string ONLINE_AUDIO_ENDPOINT => "OnlineAudioEndpoint";
+        public static string RECONNECT_AUDIO_ENDPOINT => "ReconnectAudioEndpoint";
         public static string INPUT_DIR => "InputDir";
         public static string CONVERSATION_TRANSLATOR_HOST => "ConversationTranslatorHost";
         public static string CONVERSATION_TRANSLATOR_SPEECH_ENDPOINT => "ConversationTranslatorSpeechEndpoint";

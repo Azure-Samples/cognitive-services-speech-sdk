@@ -1946,8 +1946,18 @@ void CSpxAudioStreamSession::Error(ISpxRecoEngineAdapter* adapter, ErrorPayload_
     // Otherwise report the error to the user, so that he can recreate a recognizer.
     else if (IsKind(RecognitionKind::Continuous) &&
              payload->IsTransportError() &&
-             m_expectAdapterStoppedTurn ) // We are in a turn.
+             ( m_expectAdapterStoppedTurn || payload->ErrorCode() == CancellationErrorCode::ServiceRedirectTemporary || payload->ErrorCode() == CancellationErrorCode::ServiceRedirectPermanent) ) // We are in a turn.
     {
+        if (payload->ErrorCode() == CancellationErrorCode::ServiceRedirectPermanent)
+        {
+            SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Endpoint), payload->Info().c_str());
+        }
+
+        if (payload->ErrorCode() == CancellationErrorCode::ServiceRedirectTemporary)
+        {
+            SetStringValue("SPEECH-SingleUseEndpoint", payload->Info().c_str());
+        }
+
         SPX_DBG_TRACE_VERBOSE("%s: Trying to reset the engine adapter", __FUNCTION__);
         auto finalResult = DiscardAudioUnderTransportErrors();
         if (finalResult != nullptr)

@@ -51,6 +51,9 @@ typedef enum _TransportError
 
 typedef enum _HttpStatusCode
 {
+    HTTP_MOVED = 301,
+    HTTP_TEMP_REDIRECT = 307,
+    HTTP_PERM_REDIRECT = 308,
     HTTP_BADREQUEST = 400,
     HTTP_UNAUTHORIZED = 401,
     HTTP_FORBIDDEN = 403,

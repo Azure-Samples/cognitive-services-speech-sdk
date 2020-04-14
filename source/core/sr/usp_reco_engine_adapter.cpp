@@ -411,7 +411,19 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpoint(const std::shared_ptr<ISpx
 
     // set endpoint url if this is provided.
     auto endpoint = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Endpoint));
-    if (!endpoint.empty())
+
+    // See if we have a single use endpoint saved. This is used to redirect in response to a HTTP 307 and must be cleared if set after use.
+    auto singleUseEndpoint = properties->GetStringValue("SPEECH-SingleUseEndpoint");
+    if (!singleUseEndpoint.empty())
+    {
+        SPX_DBG_TRACE_VERBOSE("%s: Using single use redirect endpoint: %s", __FUNCTION__, endpoint.c_str());
+        m_customEndpoint = true;
+        client.SetEndpointUrl(singleUseEndpoint);
+
+        // Set it to the default of empty.
+        properties->SetStringValue("SPEECH-SingleUseEndpoint", "");
+    }
+    else if (!endpoint.empty())
     {
         SPX_DBG_TRACE_VERBOSE("%s: Using Custom endpoint: %s", __FUNCTION__, endpoint.c_str());
         m_customEndpoint = true;
@@ -1833,6 +1845,12 @@ void CSpxUspRecoEngineAdapter::OnError(bool isTransport, USP::ErrorCode errorCod
             break;
         case USP::ErrorCode::ServiceUnavailable:
             cancellationErrorCode = CancellationErrorCode::ServiceUnavailable;
+            break;
+        case USP::ErrorCode::ServiceRedirectTemprary:
+            cancellationErrorCode = CancellationErrorCode::ServiceRedirectTemporary;
+            break;
+        case USP::ErrorCode::ServiceRetirectPermanent:
+            cancellationErrorCode = CancellationErrorCode::ServiceRedirectPermanent;
             break;
         default:
             cancellationErrorCode = CancellationErrorCode::RuntimeError;

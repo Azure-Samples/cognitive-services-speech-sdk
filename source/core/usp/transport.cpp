@@ -35,16 +35,16 @@ using namespace usp;
 
 constexpr char g_keywordPTStimeStampName[] = "PTS";
 constexpr char g_keywordSpeakerIdName[] = "SpeakerId";
-constexpr char g_KeywordStreamId[]       = "X-StreamId";
-constexpr char g_keywordRequestId[]      = "X-RequestId";
+constexpr char g_KeywordStreamId[] = "X-StreamId";
+constexpr char g_keywordRequestId[] = "X-RequestId";
 constexpr char g_keywordContentType[] = "Content-Type";
-constexpr char g_messageHeader[]         = "%s:%s\r\nPath:%s\r\nContent-Type:application/json\r\n%s:%s\r\n\r\n";
+constexpr char g_messageHeader[] = "%s:%s\r\nPath:%s\r\nContent-Type:application/json\r\n%s:%s\r\n\r\n";
 constexpr char g_messageHeaderSsml[] = "%s:%s\r\nPath:%s\r\nContent-Type:application/ssml+xml\r\n%s:%s\r\n\r\n";
 constexpr char g_messageHeaderWithoutRequestId[] = "%s:%s\r\nPath:%s\r\nContent-Type:application/json\r\n\r\n";
 
 constexpr char g_wavheaderFormat[] = "%s:%s\r\nPath:%s\r\n%s:%d\r\n%s:%s\r\n%s:%s\r\n";
 // this is for audio and video data USP message
-constexpr char g_requestFormat[]  = "%s:%s\r\nPath:%s\r\n%s:%d\r\n%s:%s\r\n";
+constexpr char g_requestFormat[] = "%s:%s\r\nPath:%s\r\n%s:%d\r\n%s:%s\r\n";
 // compared to g_requestFormat2, has one more field PTStimestamp or userId
 constexpr char g_requestFormat2[] = "%s:%s\r\nPath:%s\r\n%s:%d\r\n%s:%s\r\n%s:%s\r\n";
 // compared to g_requestFormat3, has two more fields: PTStimestamp and userId
@@ -127,7 +127,7 @@ usp::TransportRequest::~TransportRequest()
 }
 
 /*
- * Gets content type for the first audio chunk of a stream. 
+ * Gets content type for the first audio chunk of a stream.
  */
 size_t GetContentTypeForAudioChunk(const Microsoft::CognitiveServices::Speech::Impl::DataChunkPtr& audioChunk, const char*& contentType);
 
@@ -135,13 +135,13 @@ size_t GetContentTypeForAudioChunk(const Microsoft::CognitiveServices::Speech::I
 *  Helper function.
 */
 int TransportCreateDataHeader(
-        TransportHandle transportHandle,
-        const char* requestId,
-        char* buffer,
-        size_t payloadSize,
-        const std::string& psttimeStamp,
-        const std::string& userId,
-        const char* contentType);
+    TransportHandle transportHandle,
+    const char* requestId,
+    char* buffer,
+    size_t payloadSize,
+    const std::string& psttimeStamp,
+    const std::string& userId,
+    const char* contentType);
 
 int ParseHttpHeaders(HTTP_HEADERS_HANDLE headersHandle, const unsigned char* buffer, size_t size)
 {
@@ -377,12 +377,46 @@ static void OnWSOpened(void* context, WS_OPEN_RESULT_DETAILED open_result_detail
         TransportErrorCallback callback = request->onTransportError;
         if (callback)
         {
+            HTTP_HEADERS_HANDLE responseHeadersHandle = NULL;
+
             TransportErrorInfo errorInfo;
             if (open_result == WS_OPEN_ERROR_BAD_RESPONSE_STATUS)
             {
                 errorInfo.reason = TRANSPORT_ERROR_WEBSOCKET_UPGRADE;
                 errorInfo.errorCode = open_result_detailed.code; // HTTP status
                 errorInfo.errorString = NULL;
+
+                if (errorInfo.errorCode == HTTP_MOVED ||
+                    errorInfo.errorCode == HTTP_TEMP_REDIRECT ||
+                    errorInfo.errorCode == HTTP_PERM_REDIRECT)
+                {
+                    size_t crOffset = 0;
+                    size_t buffSize = open_result_detailed.buffSize;
+
+                    for (crOffset = 0; crOffset < buffSize; crOffset++)
+                    {
+                        if (open_result_detailed.buffer[crOffset] == '\n')
+                        {
+                            break;
+                        }
+                    }
+                    const unsigned char *headers = open_result_detailed.buffer + crOffset + 1;
+                    buffSize -= crOffset;
+
+                    responseHeadersHandle = HTTPHeaders_Alloc();
+                    if (responseHeadersHandle)
+                    {
+                        ParseHttpHeaders(responseHeadersHandle, headers, buffSize);
+                        errorInfo.errorString = HTTPHeaders_FindHeaderValue(responseHeadersHandle, "location");
+
+                        // The http header library is case sensitive, and while it shouldn't be changing the underlying map it uses to be
+                        // case insensitive looks to have a pretty wide scope.
+                        if (NULL == errorInfo.errorString)
+                        {
+                            errorInfo.errorString = HTTPHeaders_FindHeaderValue(responseHeadersHandle, "Location");
+                        }
+                    }
+                }
             }
             else
             {
@@ -393,6 +427,7 @@ static void OnWSOpened(void* context, WS_OPEN_RESULT_DETAILED open_result_detail
                     open_result_detailed.code);
             }
             callback(&errorInfo, request->context);
+            HTTPHeaders_Free(responseHeadersHandle);
         }
     }
 }
@@ -490,9 +525,9 @@ static void OnWSFrameReceived(void* context, unsigned char frame_type, const uns
 
         Exit:
             HTTPHeaders_Free(responseHeadersHandle);
+            }
         }
     }
-}
 
 static void DnsComplete(DnsCacheHandle handle, int error, DNS_RESULT_HANDLE resultHandle, void *context)
 {
@@ -572,7 +607,7 @@ static void WsioQueue(TransportRequest* request, std::unique_ptr<TransportPacket
         LogError("Trying to send on a previously closed socket");
         MetricsTransportInvalidStateError();
         return;
-    }
+}
 #ifdef LOG_TEXT_MESSAGES
     if (packet->wstype == WS_TEXT_FRAME)
     {
@@ -907,13 +942,13 @@ int usp::TransportMessageWrite(TransportHandle transportHandle, const std::strin
     bool includeRequestId = requestId != NULL && requestId[0] != '\0';
 
     size_t payloadSize = sizeof(g_messageHeader) +
-                         path.size() +
-                         (includeRequestId ? sizeof(g_keywordRequestId) : 0) +
-                         (includeRequestId ? NO_DASH_UUID_LEN : 0) +
-                         sizeof(g_timeStampHeaderName) +
-                         TIME_STRING_MAX_SIZE +
-                         bufferSize;
-    auto msg = std::make_unique<TransportPacket>(static_cast<uint8_t>(MetricMessageType::METRIC_MESSAGE_TYPE_DEVICECONTEXT), static_cast<unsigned char>(binary?WS_FRAME_TYPE_BINARY: WS_FRAME_TYPE_TEXT), payloadSize);
+        path.size() +
+        (includeRequestId ? sizeof(g_keywordRequestId) : 0) +
+        (includeRequestId ? NO_DASH_UUID_LEN : 0) +
+        sizeof(g_timeStampHeaderName) +
+        TIME_STRING_MAX_SIZE +
+        bufferSize;
+    auto msg = std::make_unique<TransportPacket>(static_cast<uint8_t>(MetricMessageType::METRIC_MESSAGE_TYPE_DEVICECONTEXT), static_cast<unsigned char>(binary ? WS_FRAME_TYPE_BINARY : WS_FRAME_TYPE_TEXT), payloadSize);
 
     char timeString[TIME_STRING_MAX_SIZE];
     int timeStringLen = GetISO8601Time(timeString, TIME_STRING_MAX_SIZE);
@@ -928,34 +963,34 @@ int usp::TransportMessageWrite(TransportHandle transportHandle, const std::strin
         if (0 == strcmp(path.data(), "ssml"))
         {
             msg->length = sprintf_s(reinterpret_cast<char*>(msg->buffer.get()),
-                                    payloadSize,
-                                    g_messageHeaderSsml,
-                                    g_timeStampHeaderName,
-                                    timeString,
-                                    path.c_str(),
-                                    g_keywordRequestId,
-                                    requestId);
+                payloadSize,
+                g_messageHeaderSsml,
+                g_timeStampHeaderName,
+                timeString,
+                path.c_str(),
+                g_keywordRequestId,
+                requestId);
         }
         else
         {
             msg->length = sprintf_s(reinterpret_cast<char*>(msg->buffer.get()),
-                                    payloadSize,
-                                    g_messageHeader,
-                                    g_timeStampHeaderName,
-                                    timeString,
-                                    path.c_str(),
-                                    g_keywordRequestId,
-                                    requestId);
+                payloadSize,
+                g_messageHeader,
+                g_timeStampHeaderName,
+                timeString,
+                path.c_str(),
+                g_keywordRequestId,
+                requestId);
         }
     }
     else
     {
         msg->length = sprintf_s(reinterpret_cast<char*>(msg->buffer.get()),
-                                payloadSize,
-                                g_messageHeaderWithoutRequestId,
-                                g_timeStampHeaderName,
-                                timeString,
-                                path.c_str());
+            payloadSize,
+            g_messageHeaderWithoutRequestId,
+            g_timeStampHeaderName,
+            timeString,
+            path.c_str());
     }
 
     // add body
@@ -1051,13 +1086,13 @@ int usp::TransportStreamWrite(TransportHandle transportHandle, const std::string
 
     // fill the msg->buffer with the header content
     auto headerLen = TransportCreateDataHeader(
-                                    request,
-                                    requestId,
-                                    reinterpret_cast<char *>(msg->buffer.get()),
-                                    payloadSize,
-                                    pstTimeStamp,
-                                    userId,
-                                    contentType);
+        request,
+        requestId,
+        reinterpret_cast<char *>(msg->buffer.get()),
+        payloadSize,
+        pstTimeStamp,
+        userId,
+        contentType);
 
     if (headerLen < 0)
     {
@@ -1099,13 +1134,13 @@ size_t GetContentTypeForAudioChunk(const Microsoft::CognitiveServices::Speech::I
 }
 
 int TransportCreateDataHeader(
-        TransportHandle transportHandle,
-        const char* requestId,
-        char* buffer,
-        size_t payloadSize,
-        const std::string& psttimeStamp,
-        const std::string& userId,
-        const char* contentType)
+    TransportHandle transportHandle,
+    const char* requestId,
+    char* buffer,
+    size_t payloadSize,
+    const std::string& psttimeStamp,
+    const std::string& userId,
+    const char* contentType)
 {
     bool addContentTypeHeader = contentType != nullptr;
     TransportRequest* request = (TransportRequest*)transportHandle;
@@ -1141,14 +1176,14 @@ int TransportCreateDataHeader(
     else if (psttimeStamp.empty() && userId.empty())
     {
         headerLen = sprintf_s(buffer + WS_MESSAGE_HEADER_SIZE,
-        payloadSize - WS_MESSAGE_HEADER_SIZE,
-        g_requestFormat,  // "%s:%s\r\nPath:%s\r\n%s:%d\r\n%s:%s\r\n";
-        g_timeStampHeaderName,  //"X-Timestamp";
+            payloadSize - WS_MESSAGE_HEADER_SIZE,
+            g_requestFormat,  // "%s:%s\r\nPath:%s\r\n%s:%d\r\n%s:%s\r\n";
+            g_timeStampHeaderName,  //"X-Timestamp";
             timeString,
-        path.c_str(),
-        g_KeywordStreamId,  //"X-StreamId";
-        request->streamId,  // %d, streamId is uint32_t
-        g_keywordRequestId, //"X-RequestId";
+            path.c_str(),
+            g_KeywordStreamId,  //"X-StreamId";
+            request->streamId,  // %d, streamId is uint32_t
+            g_keywordRequestId, //"X-RequestId";
             requestId);
     }
     else if (!psttimeStamp.empty() && userId.empty())

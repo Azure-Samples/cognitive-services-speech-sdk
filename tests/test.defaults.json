@@ -7,6 +7,7 @@
   "LongRunning": "false",
   "DeploymentId": "ec3432b2-8584-4736-865a-556213b9f6fd",
   "OnlineAudioEndpoint": "wss://westus2.online.princetondev.customspeech.ai/recognition/onlinemeeting/v1",
+  "ReconnectAudioEndpoint": "wss://westus2.online.princetondev.customspeech.ai/recognition/onlinemeeting/v1",
   "InputDir": "input",
   "ConversationTranslatorHost": "",
   "ConversationTranslatorSpeechEndpoint": "",
@@ -17,8 +18,3 @@
   "CustomVoiceDeploymentId": "6b231818-6b8c-4452-9a69-2009355d5d7a",
   "CustomVoiceVoiceName": "sdk-test"
 }
-
-
-
-
-
