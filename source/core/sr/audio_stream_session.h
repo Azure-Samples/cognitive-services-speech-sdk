@@ -110,6 +110,7 @@ public:
     CSpxAsyncOp<void> StartContinuousRecognitionAsync() override;
     CSpxAsyncOp<void> StopContinuousRecognitionAsync() override;
 
+    CSpxAsyncOp<std::shared_ptr<ISpxRecognitionResult>> RecognizeAsync(std::shared_ptr<ISpxKwsModel> model) final;
     CSpxAsyncOp<void> StartKeywordRecognitionAsync(std::shared_ptr<ISpxKwsModel> model) override;
     CSpxAsyncOp<void> StopKeywordRecognitionAsync() override;
 
@@ -203,14 +204,18 @@ private:
 
     DISABLE_COPY_AND_MOVE(CSpxAudioStreamSession);
 
-    enum class RecognitionKind {
+    enum class RecognitionKind
+    {
         Idle = 0,
         Keyword = 1,
         KwsSingleShot = 2,
         SingleShot = 3,
-        Continuous = 4 };
+        Continuous = 4,
+        KeywordOnce = 5
+    };
 
-    enum class SessionState {
+    enum class SessionState
+    {
         Idle = 0,
         WaitForPumpSetFormatStart = 1,
         ProcessingAudio = 2,
@@ -276,7 +281,18 @@ private:
     enum AdapterDoneProcessingAudio { Keyword, Speech };
     void AdapterCompletedSetFormatStop(AdapterDoneProcessingAudio doneAdapter);
 
-    bool IsKind(RecognitionKind kind);
+    bool IsKind(RecognitionKind kind) const;
+
+    inline bool IsKeywordKind() const
+    {
+        return IsKind(RecognitionKind::Keyword) || IsKind(RecognitionKind::KeywordOnce);
+    }
+
+    inline static bool IsKindKeyword(RecognitionKind kind)
+    {
+        return kind == RecognitionKind::Keyword || kind == RecognitionKind::KeywordOnce;
+    }
+
     bool IsState(SessionState state);
     bool ChangeState(SessionState sessionStateFrom, SessionState sessionStateTo);
     bool ChangeState(SessionState sessionStateFrom, RecognitionKind recoKindTo, SessionState sessionStateTo);
@@ -293,7 +309,7 @@ private:
 
     void WaitForIdle(std::chrono::milliseconds timeout);
     void Ensure16kHzSampleRate();
-    void CancelPendingSingleShot();
+    void CancelPendingSingleShot(RecognitionKind kind);
     void SlowDownThreadIfNecessary(uint32_t size);
     void DispatchEvent(const std::list<std::weak_ptr<ISpxRecognizer>>& weakRecognizers,
                        const std::wstring& sessionId, EventType sessionType, uint64_t offset,
@@ -301,7 +317,7 @@ private:
                        std::string activity, std::shared_ptr<ISpxAudioOutput> audio);
 
     struct Operation;
-    void RecognizeOnceAsync(const std::shared_ptr<Operation>& singleShot);
+    void RecognizeOnceAsync(const std::shared_ptr<Operation>& singleShot, std::shared_ptr<ISpxKwsModel> model = nullptr);
 
     void SetAudioConfigurationInProperties();
     void WriteTracingEvent();
@@ -367,7 +383,40 @@ private:
     // together with its audio buffer. Otherwise data can be processed by a stale processor
     std::shared_ptr<ISpxAudioProcessor> m_audioProcessor;
     std::shared_ptr<ISpxAudioProcessor> m_speechProcessor;
-    bool m_isKwsProcessor;
+
+    /*
+     * Since we are adding the KeywordOnce kind, we are expanding this variable to give us
+     * information on the source kind so we can go back to it after a KWSSingleShot
+     */
+    enum class KWSProcessorMode
+    {
+        None = 0,
+        Continuous,
+        SingleShot
+    };
+
+    inline static KWSProcessorMode KWSProcessorModeFromKind(RecognitionKind kind) noexcept
+    {
+        if (kind == RecognitionKind::Keyword)
+        {
+            return KWSProcessorMode::Continuous;
+        }
+        else if (kind == RecognitionKind::KeywordOnce)
+        {
+            return KWSProcessorMode::SingleShot;
+        }
+        return KWSProcessorMode::None;
+
+    }
+    inline static RecognitionKind OriginKindFromKWSMode(KWSProcessorMode mode) noexcept
+    {
+        /* This is not totally accurate as we return Keyword for anything that is not single shot
+         * but given that this is only called in the context of keyword it will be ok
+         */
+        return mode == KWSProcessorMode::SingleShot ? RecognitionKind::KeywordOnce : RecognitionKind::Keyword;
+    }
+
+    KWSProcessorMode m_kwsProcessorMode;
     AudioBufferPtr m_audioBuffer;
     DataChunkPtr m_spottedKeyword;
 
@@ -431,6 +480,7 @@ private:
 
     // Single shot in flight operation.
     std::shared_ptr<Operation> m_singleShotInFlight;
+    std::shared_ptr<Operation> m_singleShotKeywordInFlight;
 };
 
 

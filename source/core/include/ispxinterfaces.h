@@ -725,6 +725,7 @@ public:
     virtual CSpxAsyncOp<void> StartContinuousRecognitionAsync() = 0;
     virtual CSpxAsyncOp<void> StopContinuousRecognitionAsync() = 0;
 
+    virtual CSpxAsyncOp<std::shared_ptr<ISpxRecognitionResult>> RecognizeAsync(std::shared_ptr<ISpxKwsModel> model) = 0;
     virtual CSpxAsyncOp<void> StartKeywordRecognitionAsync(std::shared_ptr<ISpxKwsModel> model) = 0;
     virtual CSpxAsyncOp<void> StopKeywordRecognitionAsync() = 0;
 
@@ -1088,6 +1089,7 @@ public:
     virtual CSpxAsyncOp<void> StartContinuousRecognitionAsync() = 0;
     virtual CSpxAsyncOp<void> StopContinuousRecognitionAsync() = 0;
 
+    virtual CSpxAsyncOp<std::shared_ptr<ISpxRecognitionResult>> RecognizeAsync(std::shared_ptr<ISpxKwsModel> model) = 0;
     virtual CSpxAsyncOp<void> StartKeywordRecognitionAsync(std::shared_ptr<ISpxKwsModel> model) = 0;
     virtual CSpxAsyncOp<void> StopKeywordRecognitionAsync() = 0;
 

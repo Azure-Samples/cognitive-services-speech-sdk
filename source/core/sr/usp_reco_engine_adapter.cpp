@@ -2028,7 +2028,7 @@ json CSpxUspRecoEngineAdapter::GetKeywordDetectionJson()
     auto site = GetSite();
     auto properties = SpxQueryService<ISpxNamedProperties>(site);
     SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_USP_SITE_FAILURE);
-    auto keywordVerificationEnabled = PAL::ToBool(properties->GetStringValue(KeywordConfig_EnableKeywordVerification, PAL::BoolToString(false).c_str()));
+    auto keywordVerificationEnabled = PAL::ToBool(properties->GetStringValue(KeywordConfig_EnableKeywordVerification, PAL::BoolToString(false)));
     json keywordDetectionJson;
     if (keywordVerificationEnabled)
     {

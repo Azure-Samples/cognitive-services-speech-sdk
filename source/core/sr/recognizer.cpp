@@ -182,6 +182,17 @@ CSpxAsyncOp<void> CSpxRecognizer::StartKeywordRecognitionAsync(std::shared_ptr<I
     return m_defaultSession->StartKeywordRecognitionAsync(model);
 }
 
+CSpxAsyncOp<std::shared_ptr<ISpxRecognitionResult>> CSpxRecognizer::RecognizeAsync(std::shared_ptr<ISpxKwsModel> model)
+{
+    constexpr auto recoModePropertyName = GetPropertyName(PropertyId::SpeechServiceConnection_RecoMode);
+    auto currentRecoMode = GetStringValueFromProperties(recoModePropertyName, "");
+    if (currentRecoMode.empty())
+    {
+        SetStringValueInProperties(recoModePropertyName, g_recoModeInteractive);
+    }
+    return m_defaultSession->RecognizeAsync(model);
+}
+
 CSpxAsyncOp<void> CSpxRecognizer::StopKeywordRecognitionAsync()
 {
     return m_defaultSession->StopKeywordRecognitionAsync();

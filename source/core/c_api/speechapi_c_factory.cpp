@@ -28,26 +28,38 @@ using namespace std;
 static_assert((int)OutputFormat::Simple == (int)SpeechOutputFormat_Simple, "OutputFormat should match between C and C++ layers");
 static_assert((int)OutputFormat::Detailed == (int)SpeechOutputFormat_Detailed, "OutputFormat should match between C and C++ layers");
 
+/*
+ * In the end there will only be once instance of this template as all the functions have
+ * the same signature and all the handle types are aliases of SPXHANDLE
+ */
+template<typename T, typename Function, typename Handle>
+std::shared_ptr<T> ObjectOrEmptyIfInvalid(Function fn, Handle handle)
+{
+    return fn(handle) ? CSpxSharedPtrHandleTableManager::GetPtr<T, Handle>(handle) : nullptr;
+}
+
+std::shared_ptr<ISpxSpeechConfig> SpeechConfigFromHandleOrEmptyIfInvalid(SPXSPEECHCONFIGHANDLE hconfig)
+{
+    return ObjectOrEmptyIfInvalid<ISpxSpeechConfig>(speech_config_is_handle_valid, hconfig);
+}
 
 std::shared_ptr<ISpxAudioConfig> AudioConfigFromHandleOrEmptyIfInvalid(SPXAUDIOCONFIGHANDLE haudioConfig)
 {
-    return audio_config_is_handle_valid(haudioConfig)
-        ? CSpxSharedPtrHandleTableManager::GetPtr<ISpxAudioConfig, SPXAUDIOCONFIGHANDLE>(haudioConfig)
-        : nullptr;
+    return ObjectOrEmptyIfInvalid<ISpxAudioConfig>(audio_config_is_handle_valid, haudioConfig);
 }
 
 std::shared_ptr<ISpxAutoDetectSourceLangConfig> AutoDetectSourceLangConfigFromHandleOrEmptyIfInvalid(SPXAUTODETECTSOURCELANGCONFIGHANDLE hautoDetectSourceLangConfig)
 {
-    return auto_detect_source_lang_config_is_handle_valid(hautoDetectSourceLangConfig)
-        ? CSpxSharedPtrHandleTableManager::GetPtr<ISpxAutoDetectSourceLangConfig, SPXAUTODETECTSOURCELANGCONFIGHANDLE>(hautoDetectSourceLangConfig)
-        : nullptr;
+    return ObjectOrEmptyIfInvalid<ISpxAutoDetectSourceLangConfig>(
+        auto_detect_source_lang_config_is_handle_valid,
+        hautoDetectSourceLangConfig);
 }
 
 std::shared_ptr<ISpxSourceLanguageConfig> SourceLangConfigFromHandleOrEmptyIfInvalid(SPXSOURCELANGCONFIGHANDLE hSourceLangConfig)
 {
-    return source_lang_config_is_handle_valid(hSourceLangConfig)
-        ? CSpxSharedPtrHandleTableManager::GetPtr<ISpxSourceLanguageConfig, SPXSOURCELANGCONFIGHANDLE>(hSourceLangConfig)
-        : nullptr;
+    return ObjectOrEmptyIfInvalid<ISpxSourceLanguageConfig>(
+        source_lang_config_is_handle_valid,
+        hSourceLangConfig);
 }
 
 template<typename FactoryMethod>
@@ -56,19 +68,20 @@ auto create_from_config(SPXHANDLE hspeechconfig, SPXHANDLE hautoDetectSourceLang
     auto factory = SpxCreateObjectWithSite<ISpxSpeechApiFactory>("CSpxSpeechApiFactory", SpxGetRootSite());
     SPX_IFTRUE_THROW_HR(factory == nullptr, SPXERR_RUNTIME_ERROR);
 
-    // get the input parameters from the hspeechconfig
-    auto config_handles = CSpxSharedPtrHandleTableManager::Get<ISpxSpeechConfig, SPXSPEECHCONFIGHANDLE>();
-
-    auto config = (*config_handles)[hspeechconfig];
-    auto config_property_bag = SpxQueryInterface<ISpxNamedProperties>(config);
     auto factory_property_bag = SpxQueryInterface<ISpxNamedProperties>(factory);
 
-    Memory::CheckObjectCount(hspeechconfig);
+    auto config = SpeechConfigFromHandleOrEmptyIfInvalid(hspeechconfig);
+    auto config_property_bag = SpxQueryInterface<ISpxNamedProperties>(config);
 
-    //copy the properties from the speech config into the factory
-    if (config_property_bag != nullptr)
+    if (config != nullptr)
     {
-        factory_property_bag->Copy(config_property_bag.get());
+        Memory::CheckObjectCount(hspeechconfig);
+
+        //copy the properties from the speech config into the factory
+        if (config_property_bag != nullptr)
+        {
+            factory_property_bag->Copy(config_property_bag.get());
+        }
     }
 
     auto audio_input = AudioConfigFromHandleOrEmptyIfInvalid(haudioConfig);
@@ -92,7 +105,7 @@ auto create_from_config(SPXHANDLE hspeechconfig, SPXHANDLE hautoDetectSourceLang
         factory_property_bag->Copy(auto_detect_source_lang_config_properties.get());
     }
 
-     auto source_lang_config = SourceLangConfigFromHandleOrEmptyIfInvalid(hSourceLangConfig);
+    auto source_lang_config = SourceLangConfigFromHandleOrEmptyIfInvalid(hSourceLangConfig);
     // copy the source language config properties into the factory, if any.
     auto source_lang_config_properties = SpxQueryInterface<ISpxNamedProperties>(source_lang_config);
     if (source_lang_config_properties != nullptr)
@@ -245,6 +258,25 @@ SPXAPI recognizer_create_intent_recognizer_from_config(SPXRECOHANDLE* phreco, SP
         *phreco = SPXHANDLE_INVALID;
         auto recognizer = create_from_config(hspeechconfig, SPXHANDLE_INVALID, SPXHANDLE_INVALID, haudioInput, &ISpxSpeechApiFactory::CreateIntentRecognizerFromConfig);
 
+        // track the reco handle
+        auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
+        *phreco = recohandles->TrackHandle(recognizer);
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
+SPXAPI recognizer_create_keyword_recognizer_from_audio_config(SPXRECOHANDLE* phreco, SPXAUDIOCONFIGHANDLE haudio)
+{
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, phreco == nullptr);
+
+    SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        *phreco = SPXHANDLE_INVALID;
+        auto recognizer = create_from_config(SPXHANDLE_INVALID, SPXHANDLE_INVALID, SPXHANDLE_INVALID, haudio, &ISpxSpeechApiFactory::CreateSpeechRecognizerFromConfig);
+        auto properties = SpxQueryInterface<ISpxNamedProperties>(recognizer);
+        properties->SetStringValue(g_keyword_KeywordOnly, "true");
         // track the reco handle
         auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
         *phreco = recohandles->TrackHandle(recognizer);

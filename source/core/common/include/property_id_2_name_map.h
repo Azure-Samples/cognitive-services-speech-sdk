@@ -89,7 +89,9 @@ constexpr auto g_audioSourceStream = "Stream";
 constexpr auto g_audioSourceFile = "File";
 
 constexpr auto KeywordConfig_EnableKeywordVerification = "KeywordConfig_EnableKeywordVerification";
+constexpr auto g_keyword_KeywordOnly = "IsKeywordRecognizer";
 
 constexpr auto g_dialogType_BotFramework = "bot_framework";
 constexpr auto g_dialogType_CustomCommands = "custom_commands";
+
 }}}}

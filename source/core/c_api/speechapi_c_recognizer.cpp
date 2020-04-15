@@ -10,6 +10,7 @@
 #include "handle_helpers.h"
 #include "platform.h"
 #include "string_utils.h"
+#include "async_helpers.h"
 
 using namespace Microsoft::CognitiveServices::Speech::Impl;
 
@@ -170,34 +171,7 @@ SPXAPI recognizer_recognize_once_async(SPXRECOHANDLE hreco, SPXASYNCHANDLE* phas
 
 SPXAPI recognizer_recognize_once_async_wait_for(SPXASYNCHANDLE hasync, uint32_t milliseconds, SPXRESULTHANDLE* phresult)
 {
-    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, phresult == nullptr);
-
-    SPXAPI_INIT_HR_TRY(hr)
-    {
-        *phresult = SPXHANDLE_INVALID;
-
-        auto asynchandles = CSpxSharedPtrHandleTableManager::Get<CSpxAsyncOp<std::shared_ptr<ISpxRecognitionResult>>, SPXASYNCHANDLE>();
-        auto asyncop = (*asynchandles)[hasync];
-
-        hr = SPXERR_TIMEOUT;
-        auto completed = asyncop->WaitFor(milliseconds);
-
-        if (completed)
-        {
-            auto result = asyncop->Future.get();
-            if (result == nullptr)
-            {
-                hr = SPXERR_TIMEOUT;
-            }
-            else
-            {
-                auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
-                *phresult = resulthandles->TrackHandle(result);
-                hr = SPX_NOERROR;
-            }
-        }
-    }
-    SPXAPI_CATCH_AND_RETURN_HR(hr);
+    return async_operation_wait_for<ISpxRecognitionResult>(hasync, milliseconds, phresult);
 }
 
 SPXAPI recognizer_start_continuous_recognition(SPXRECOHANDLE hreco)
@@ -251,21 +225,7 @@ SPXAPI recognizer_start_continuous_recognition_async(SPXRECOHANDLE hreco, SPXASY
 
 SPXAPI recognizer_start_continuous_recognition_async_wait_for(SPXASYNCHANDLE hasync, uint32_t milliseconds)
 {
-    SPXAPI_INIT_HR_TRY(hr)
-    {
-        auto asynchandles = CSpxSharedPtrHandleTableManager::Get<CSpxAsyncOp<void>, SPXASYNCHANDLE>();
-        auto asyncop = (*asynchandles)[hasync];
-        SPX_IFTRUE_THROW_HR(asyncop == nullptr, SPXERR_INVALID_ARG);
-
-        hr = SPXERR_TIMEOUT;
-        auto completed = asyncop->WaitFor(milliseconds);
-        if (completed)
-        {
-            asyncop->Future.get();
-            hr = SPX_NOERROR;
-        }
-    }
-    SPXAPI_CATCH_AND_RETURN_HR(hr);
+    return async_operation_wait_for(hasync, milliseconds);
 }
 
 SPXAPI recognizer_stop_continuous_recognition(SPXRECOHANDLE hreco)
@@ -318,48 +278,16 @@ SPXAPI recognizer_stop_continuous_recognition_async(SPXRECOHANDLE hreco, SPXASYN
 
 SPXAPI recognizer_stop_continuous_recognition_async_wait_for(SPXASYNCHANDLE hasync, uint32_t milliseconds)
 {
-    SPXAPI_INIT_HR_TRY(hr)
-    {
-        auto asynchandles = CSpxSharedPtrHandleTableManager::Get<CSpxAsyncOp<void>, SPXASYNCHANDLE>();
-        auto asyncop = (*asynchandles)[hasync];
-
-        hr = SPXERR_TIMEOUT;
-        auto completed = asyncop->WaitFor(milliseconds);
-        if (completed)
-        {
-            asyncop->Future.get();
-            hr = SPX_NOERROR;
-        }
-    }
-    SPXAPI_CATCH_AND_RETURN_HR(hr);
+    return async_operation_wait_for(hasync, milliseconds);
 }
 
 SPXAPI recognizer_start_keyword_recognition(SPXRECOHANDLE hreco, SPXKEYWORDHANDLE hkeyword)
 {
-    SPX_INIT_HR(hr);
-
-    SPXASYNCHANDLE hasync = SPXHANDLE_INVALID;
-    if (SPX_SUCCEEDED(hr))
-    {
-        hr = recognizer_start_keyword_recognition_async(hreco, hkeyword, &hasync);
-        SPX_REPORT_ON_FAIL(hr);
-    }
-
-    if (SPX_SUCCEEDED(hr))
-    {
-        hr = recognizer_start_keyword_recognition_async_wait_for(hasync, UINT32_MAX);
-        SPX_REPORT_ON_FAIL(hr);
-    }
-
-    if (hasync != SPXHANDLE_INVALID)
-    {
-        // Don't overwrite error code from earlier function calls when cleaning up async handles
-        auto releaseHr = recognizer_async_handle_release(hasync);
-        SPX_REPORT_ON_FAIL(releaseHr);
-        hasync = SPXHANDLE_INVALID;
-    }
-
-    SPX_RETURN_HR(hr);
+    return async_to_sync(
+        hreco,
+        recognizer_start_keyword_recognition_async,
+        recognizer_start_keyword_recognition_async_wait_for,
+        hkeyword);
 }
 
 SPXAPI recognizer_start_keyword_recognition_async(SPXRECOHANDLE hreco, SPXKEYWORDHANDLE hkeyword, SPXASYNCHANDLE* phasync)
@@ -387,48 +315,48 @@ SPXAPI recognizer_start_keyword_recognition_async(SPXRECOHANDLE hreco, SPXKEYWOR
 
 SPXAPI recognizer_start_keyword_recognition_async_wait_for(SPXASYNCHANDLE hasync, uint32_t milliseconds)
 {
+    return async_operation_wait_for(hasync, milliseconds);
+}
+
+SPXAPI recognizer_recognize_keyword_once(SPXRECOHANDLE hreco, SPXKEYWORDHANDLE hkeyword, SPXRESULTHANDLE* phresult)
+{
+    return async_to_sync_with_result(
+        hreco,
+        phresult,
+        recognizer_recognize_keyword_once_async,
+        recognizer_recognize_keyword_once_async_wait_for,
+        hkeyword
+    );
+}
+
+SPXAPI recognizer_recognize_keyword_once_async(SPXRECOHANDLE hreco, SPXKEYWORDHANDLE hkeyword, SPXASYNCHANDLE* phasync)
+{
+    using ResultPtr = std::shared_ptr<ISpxRecognitionResult>;
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, phasync == nullptr);
+
     SPXAPI_INIT_HR_TRY(hr)
     {
-        auto asynchandles = CSpxSharedPtrHandleTableManager::Get<CSpxAsyncOp<void>, SPXASYNCHANDLE>();
-        auto asyncop = (*asynchandles)[hasync];
+        *phasync = SPXHANDLE_INVALID;
 
-        hr = SPXERR_TIMEOUT;
-        auto completed = asyncop->WaitFor(milliseconds);
-        if (completed)
-        {
-            asyncop->Future.get();
-            hr = SPX_NOERROR;
-        }
+        auto recognizer = GetInstance<ISpxRecognizer>(hreco);
+        auto model = GetInstance<ISpxKwsModel>(hkeyword);
+
+        auto async_operation = recognizer->RecognizeAsync(model);
+        auto ptr = std::make_shared<CSpxAsyncOp<ResultPtr>>(std::move(async_operation));
+
+        auto asynchandles = CSpxSharedPtrHandleTableManager::Get<CSpxAsyncOp<ResultPtr>, SPXASYNCHANDLE>();
+        *phasync = asynchandles->TrackHandle(ptr);
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+SPXAPI recognizer_recognize_keyword_once_async_wait_for(SPXASYNCHANDLE hasync, uint32_t milliseconds, SPXRESULTHANDLE* phresult)
+{
+    return async_operation_wait_for<ISpxRecognitionResult>(hasync, milliseconds, phresult);
 }
 
 SPXAPI recognizer_stop_keyword_recognition(SPXRECOHANDLE hreco)
 {
-    SPX_INIT_HR(hr);
-
-    SPXASYNCHANDLE hasync = SPXHANDLE_INVALID;
-    if (SPX_SUCCEEDED(hr))
-    {
-        hr = recognizer_stop_keyword_recognition_async(hreco, &hasync);
-        SPX_REPORT_ON_FAIL(hr);
-    }
-
-    if (SPX_SUCCEEDED(hr))
-    {
-        hr = recognizer_stop_keyword_recognition_async_wait_for(hasync, UINT32_MAX);
-        SPX_REPORT_ON_FAIL(hr);
-    }
-
-    if (hasync != SPXHANDLE_INVALID)
-    {
-        // Don't overwrite error code from earlier function calls when cleaning up async handles
-        auto releaseHr = recognizer_async_handle_release(hasync);
-        SPX_REPORT_ON_FAIL(releaseHr);
-        hasync = SPXHANDLE_INVALID;
-    }
-
-    SPX_RETURN_HR(hr);
+    return async_to_sync(hreco, recognizer_stop_continuous_recognition_async, recognizer_stop_keyword_recognition_async_wait_for);
 }
 
 SPXAPI recognizer_stop_keyword_recognition_async(SPXRECOHANDLE hreco, SPXASYNCHANDLE* phasync)
@@ -453,20 +381,7 @@ SPXAPI recognizer_stop_keyword_recognition_async(SPXRECOHANDLE hreco, SPXASYNCHA
 
 SPXAPI recognizer_stop_keyword_recognition_async_wait_for(SPXASYNCHANDLE hasync, uint32_t milliseconds)
 {
-    SPXAPI_INIT_HR_TRY(hr)
-    {
-        auto asynchandles = CSpxSharedPtrHandleTableManager::Get<CSpxAsyncOp<void>, SPXASYNCHANDLE>();
-        auto asyncop = (*asynchandles)[hasync];
-
-        hr = SPXERR_TIMEOUT;
-        auto completed = asyncop->WaitFor(milliseconds);
-        if (completed)
-        {
-            asyncop->Future.get();
-            hr = SPX_NOERROR;
-        }
-    }
-    SPXAPI_CATCH_AND_RETURN_HR(hr);
+    return async_operation_wait_for(hasync, milliseconds);
 }
 
 SPXAPI recognizer_session_started_set_callback(SPXRECOHANDLE hreco, PSESSION_CALLBACK_FUNC pCallback, void* pvContext)

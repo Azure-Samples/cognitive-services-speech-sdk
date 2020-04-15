@@ -48,7 +48,7 @@ void SpxSetMockParameterBool(const char* name, bool value)
 
 bool SpxGetMockParameterBool(const char* name, bool defaultValue)
 {
-    return PAL::ToBool(MockParameterValue().GetProperty(name, PAL::BoolToString(defaultValue)).c_str());
+    return PAL::ToBool(MockParameterValue().GetProperty(name, PAL::BoolToString(defaultValue)));
 }
 
 void SpxSetMockParameterNumber(const char* name, int32_t value)

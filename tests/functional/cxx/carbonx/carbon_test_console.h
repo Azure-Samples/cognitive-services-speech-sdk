@@ -168,7 +168,7 @@ private:
 
     bool ToBool(const char* psz);
 
-    std::string BoolToString(bool f);
+    const char *BoolToString(bool f);
     std::string ToString(ResultReason reason);
     std::string ToString(CancellationReason reason);
     std::string ToString(CancellationErrorCode error);
@@ -230,7 +230,7 @@ private:
     void Sample_HelloWorld_File();
     void Sample_HelloWorld_PushStream();
     void Sample_HelloWorld_PullStream();
-    
+
     void Sample_HelloWorld_WithEvents();
     void Sample_HelloWorld_In_C();
 

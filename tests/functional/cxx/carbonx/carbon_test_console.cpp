@@ -270,7 +270,7 @@ bool CarbonTestConsole::ParseConsoleArgs(const std::vector<std::string>& args, C
         }
         else if (pstrNextArg != NULL)
         {
-            // We may get here even if fNextArgRequired is set to false. In this case pstrNextArg will not be null but may be populated with a default which will be overwritten. 
+            // We may get here even if fNextArgRequired is set to false. In this case pstrNextArg will not be null but may be populated with a default which will be overwritten.
             *pstrNextArg = pszArg;
             pstrNextArg = NULL;
             fNextArgRequired = false;
@@ -1075,7 +1075,7 @@ std::shared_ptr<SpeechConfig> CarbonTestConsole::SpeechRecognizerConfig()
         // Test offline speech recognition without public API
         SpxSetMockParameterString(R"(CARBON-INTERNAL-UseRecoEngine-Unidec)", "true");
         SpxSetMockParameterString(R"(CARBON-INTERNAL-SPEECH-RecoLocalModelPathRoot)", m_offlineModelPathRoot.c_str());
-        
+
         if (!m_offlineModelPathRoot.empty())
         {
             SpxSetMockParameterString(R"(CARBON-INTERNAL-SPEECH-RecoLocalModelLanguage)", m_offlineModelLanguage.c_str());
@@ -1099,7 +1099,7 @@ void CarbonTestConsole::recognizer_is_enabled(std::shared_ptr<T>& recognizer)
     auto name = PAL::GetTypeName(*recognizer.get());
     ConsoleWrite("\n%s.IsEnabled == ", name.c_str());
     bool enabled = recognizer->IsEnabled();
-    ConsoleWriteLine("%s\n", BoolToString(enabled).c_str());
+    ConsoleWriteLine("%s\n", BoolToString(enabled));
 }
 
 template <class T>
@@ -1111,7 +1111,7 @@ void CarbonTestConsole::recognizer_enable(std::shared_ptr<T>& recognizer)
     ConsoleWriteLine("Enabling %s... Done!\n", name.c_str());
 
     bool enabled = recognizer->IsEnabled();
-    ConsoleWriteLine("%s.IsEnabled == %s\n", name.c_str(), BoolToString(enabled).c_str());
+    ConsoleWriteLine("%s.IsEnabled == %s\n", name.c_str(), BoolToString(enabled));
 }
 
 template <class T>
@@ -1123,7 +1123,7 @@ void CarbonTestConsole::recognizer_disable(std::shared_ptr<T>& recognizer)
     ConsoleWriteLine("Disabling %s... Done!\n", name.c_str());
 
     bool enabled = recognizer->IsEnabled();
-    ConsoleWriteLine("%s.IsEnabled == %s\n", name.c_str(), BoolToString(enabled).c_str());
+    ConsoleWriteLine("%s.IsEnabled == %s\n", name.c_str(), BoolToString(enabled));
 }
 
 template <class T>
@@ -1375,7 +1375,7 @@ bool CarbonTestConsole::ToBool(const char* psz)
     return PAL::ToBool(psz);
 }
 
-std::string CarbonTestConsole::BoolToString(bool f)
+const char* CarbonTestConsole::BoolToString(bool f)
 {
     return PAL::BoolToString(f);
 }

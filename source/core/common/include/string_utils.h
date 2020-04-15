@@ -43,7 +43,11 @@ int strnicmp(const char *a, const char *b, size_t n);
 std::string ToString(const std::wstring& wstring);
 std::wstring ToWString(const std::string& string);
 
-std::string BoolToString(bool b);
+inline constexpr const char* BoolToString(bool b)
+{
+    return b ? "true" : "false";
+}
+
 bool ToBool(const std::string& str);
 
 std::vector<std::string> split(const std::string& str, const char delim);

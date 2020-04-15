@@ -4,7 +4,6 @@
 //
 // speechapi_cxx_utils.h: General utility classes and functions.
 //
-
 #pragma once
 
 namespace Microsoft {
@@ -64,6 +63,47 @@ struct NonMovable
     /// </summary>
     /// <returns>Reference to the object.</returns>
     NonMovable& operator=(NonMovable &&) = delete;
+};
+
+template<typename F, typename... Args>
+SPXHANDLE CallFactoryMethodRight(F method, Args&&... args)
+{
+    SPXHANDLE handle;
+    auto hr = method(std::forward<Args>(args)..., &handle);
+    SPX_THROW_ON_FAIL(hr);
+    return handle;
+}
+
+template<typename F, typename... Args>
+SPXHANDLE CallFactoryMethodLeft(F method, Args&&... args)
+{
+    SPXHANDLE handle;
+    auto hr = method(&handle, std::forward<Args>(args)...);
+    SPX_THROW_ON_FAIL(hr);
+    return handle;
+}
+
+template<typename T, typename U, typename F>
+std::function<void(const EventSignal<const T&>&)> Callback(U* callee, F f)
+{
+    return [=](const EventSignal<const T&>& evt)
+    {
+        (callee->*f)(evt);
+    };
+}
+
+class ScopeGuard
+{
+public:
+    explicit ScopeGuard(std::function<void()> f): fn{ f }
+    {}
+    ~ScopeGuard()
+    {
+        fn();
+    }
+
+private:
+    std::function<void()> fn;
 };
 
 /// <summary>

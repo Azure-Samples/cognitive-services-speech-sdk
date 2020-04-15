@@ -22,6 +22,7 @@ namespace Speech {
 class Connection;
 template<class, class, class> class AsyncRecognizer;
 class SpeechSynthesizer;
+class KeywordRecognizer;
 namespace Translation { class TranslationRecognizer; }
 namespace Dialog { class DialogServiceConnector; }
 namespace Transcription { class ConversationTranscriber; class ConversationTranslator; }
@@ -228,6 +229,7 @@ private:
     friend class ::Microsoft::CognitiveServices::Speech::Transcription::ConversationTranslator;
     template <class, class, class> friend class ::Microsoft::CognitiveServices::Speech::AsyncRecognizer;
     friend class ::Microsoft::CognitiveServices::Speech::SpeechSynthesizer;
+    friend class ::Microsoft::CognitiveServices::Speech::KeywordRecognizer;
 
     /// <summary>
     /// Type for callbacks used when any client connects to the signal (the number of connected clients changes from zero to one) or

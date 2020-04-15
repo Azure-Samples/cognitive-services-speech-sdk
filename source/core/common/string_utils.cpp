@@ -142,11 +142,6 @@ std::wstring ToWString(const std::string& string)
     return converter.from_bytes(string);
 }
 
-std::string BoolToString(bool b)
-{
-    return b ? "true" : "false";
-}
-
 bool ToBool(const std::string& str)
 {
     return stricmp(str.c_str(), "true") == 0;

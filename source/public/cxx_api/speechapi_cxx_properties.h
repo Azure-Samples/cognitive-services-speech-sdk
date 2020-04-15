@@ -13,6 +13,7 @@ namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
 
+class KeywordRecognizer;
 
 /// <summary>
 /// Class to retrieve or set a property value from a property collection.
@@ -80,6 +81,7 @@ public:
     }
 
 protected:
+    friend class KeywordRecognizer;
 
     /*! \cond PROTECTED */
 

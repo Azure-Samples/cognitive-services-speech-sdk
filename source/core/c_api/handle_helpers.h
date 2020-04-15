@@ -42,7 +42,7 @@ SPXHR Handle_Close(handle_type handle)
 }
 
 
-template<typename TInterface, typename THandle>
+template<typename TInterface, typename THandle = SPXHANDLE>
 std::shared_ptr<TInterface> GetInstance(THandle handle)
 {
     SPX_IFTRUE_THROW_HR(handle == SPXHANDLE_INVALID, SPXERR_INVALID_HANDLE);
@@ -54,7 +54,7 @@ std::shared_ptr<TInterface> GetInstance(THandle handle)
     return ptr;
 }
 
-template<typename TInterface, typename THandle>
+template<typename TInterface, typename THandle = SPXHANDLE>
 std::shared_ptr<TInterface> TryGetInstance(THandle handle)
 {
     if (handle == SPXHANDLE_INVALID)
