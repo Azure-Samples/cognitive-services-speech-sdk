@@ -92,10 +92,14 @@ BEGIN {
       quickstart/java/jre/virtual-assistant/pom.xml#dependencies
       quickstart/java/jre/virtual-assistant/src/com/speechsdk/quickstart/ActivityAudioStream.java#code
       quickstart/java/jre/virtual-assistant/src/com/speechsdk/quickstart/Main.java#code
-      quickstart/javascript/browser/index.html#authorizationfunction
-      quickstart/javascript/browser/index.html#quickstartcode
-      quickstart/javascript/browser/index.html#speechsdkref
-      quickstart/javascript/browser/index.html#uidiv
+      quickstart/javascript/browser/from-microphone/index.html#authorizationfunction
+      quickstart/javascript/browser/from-microphone/index.html#quickstartcode
+      quickstart/javascript/browser/from-microphone/index.html#speechsdkref
+      quickstart/javascript/browser/from-microphone/index.html#uidiv
+      quickstart/javascript/browser/text-to-speech/index.html#authorizationfunction
+      quickstart/javascript/browser/text-to-speech/index.html#quickstartcode
+      quickstart/javascript/browser/text-to-speech/index.html#speechsdkref
+      quickstart/javascript/browser/text-to-speech/index.html#uidiv
       quickstart/javascript/node/from-file/index.js#code
       quickstart/javascript/node/text-to-speech/index.js#code
       quickstart/objectivec/ios/from-microphone/helloworld/helloworld/ViewController.m#code
