@@ -892,14 +892,14 @@ void Connection::Impl::QueueMessage(const string& path, const uint8_t *data, siz
         {
             m_speechRequestId = requestId;
         }
-        auto usedRequestId = requestId.empty() ? UpdateRequestId(messageType) : requestId;
+        auto usedRequestId = requestId.empty() ? UpdateRequestId(messageType, binary) : requestId;
         (void)TransportMessageWrite(m_transport.get(), path.c_str(), data, size, usedRequestId.c_str(), binary);
     }
 
     ScheduleWork();
 }
 
-string Connection::Impl::UpdateRequestId(const MessageType messageType)
+string Connection::Impl::UpdateRequestId(const MessageType messageType, bool binary)
 {
     // The config message does not require a X-RequestId header, because this message is not associated with a particular request.
     // Other messages, such as speech.event, speech.context etc need a request id.
@@ -974,7 +974,20 @@ string Connection::Impl::UpdateRequestId(const MessageType messageType)
         break;
 
     default:
-        requestId = CreateRequestId();
+        // Unknown messages that are binary will get an existing request ID if one is available.
+        if (binary)
+        {
+            if (!m_speechRequestId.empty())
+            {
+                m_speechRequestId = CreateRequestId();
+            }
+
+            requestId = m_speechRequestId;
+        }
+        else
+        {
+            requestId = CreateRequestId();
+        }
         break;
     }
 

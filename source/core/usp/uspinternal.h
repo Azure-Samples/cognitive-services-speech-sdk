@@ -136,7 +136,7 @@ private:
 
     std::string CreateRequestId();
     void RegisterRequestId(const std::string& requestId);
-    std::string UpdateRequestId(const MessageType messageType);
+    std::string UpdateRequestId(const MessageType messageType, bool isBinary);
 
     const char queryParameterDelim = '&';
 
