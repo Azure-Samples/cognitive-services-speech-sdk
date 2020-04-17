@@ -102,7 +102,7 @@ namespace Impl {
         {
             throw std::invalid_argument("Host name cannot be empty");
         }
-        else if (hostname.length() > MAX_HOSTNAME_LEN)
+        else if (hostname.length() > MAX_HOSTNAME_FQDN_LEN)
         {
             throw std::out_of_range("Host name is too long");
         }

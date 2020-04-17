@@ -5,6 +5,8 @@
 
 #pragma once
 
+#define MAX_HOSTNAME_FQDN_LEN 253 // The maximum length of a host's FQDN in ASCII. See https://devblogs.microsoft.com/oldnewthing/20120412-00/?p=7873
+
 #include <memory>
 #include <string>
 #include <vector>
