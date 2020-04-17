@@ -166,6 +166,7 @@ void CSpxAudioPump::PumpThread(std::shared_ptr<CSpxAudioPump> keepAlive, std::sh
 
         auto bytesPerFrame = samplesPerSec / framesPerSec * bytesPerSample * channels;
 
+        uint64_t skipduration = 0;
         auto processorProperties = SpxQueryService<ISpxNamedProperties>(pISpxAudioProcessor);
         if (processorProperties)
         {
@@ -174,6 +175,17 @@ void CSpxAudioPump::PumpThread(std::shared_ptr<CSpxAudioPump> keepAlive, std::sh
             {
                 bytesPerFrame = stoi(overrideBytesPerFrame);
                 SPX_TRACE_INFO("%s -- BytesPerFrame override used, %d bytes will be pulled for each frame", __FUNCTION__, bytesPerFrame);
+            }
+
+            try {
+                std::string durationString = processorProperties->GetStringValue("SPEECH-SkipAudioDurationHNS", "0");
+                skipduration = stoll(durationString);
+            }
+            catch (const std::exception& e)
+            {
+                SPX_DBG_TRACE_VERBOSE("Error Parsing for SPEECH-SkipAudioDurationHNS: %s", e.what());
+                SPX_DBG_TRACE_VERBOSE("No audio data will be skipped");
+                skipduration = 0;
             }
         }
 
@@ -215,6 +227,17 @@ void CSpxAudioPump::PumpThread(std::shared_ptr<CSpxAudioPump> keepAlive, std::sh
             waveformat->wBitsPerSample,
             waveformat->cbSize);
 
+        uint64_t skipSize = (skipduration*(uint64_t)(waveformat->nAvgBytesPerSec)) / (uint64_t)10000000;
+
+        uint64_t extraBytes = skipSize % waveformat->nBlockAlign;
+
+        if (extraBytes != 0)
+        {
+            skipSize = skipSize - extraBytes;
+        }
+
+        uint64_t totalSkip = 0;
+
         while (checkAndChangeState())
         {
             // Ensure we have an unencumbered data buffer to use for this Read/ProcessAudio iteration
@@ -228,17 +251,22 @@ void CSpxAudioPump::PumpThread(std::shared_ptr<CSpxAudioPump> keepAlive, std::sh
 
             // Read audio buffer, and send it to the processor
             auto cbRead = m_reader->Read(data.get(), bytesPerFrame);
-            auto readCallDuration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - start);
-            SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioPump::PumpThread(): read frame duration: %" PRIu64 " ms => sending audio buffer size %u", (void*)this, (uint64_t)readCallDuration.count(), cbRead);
-            UNUSED(readCallDuration); // unused in release builds
-            std::string capturedTime, userId;
-            if (cbRead != 0)
-            {
-                capturedTime = m_reader->GetProperty(PropertyId::DataBuffer_TimeStamp);
-                userId = m_reader->GetProperty(PropertyId::DataBuffer_UserId);
-            }
+            totalSkip += (uint64_t)cbRead;
 
-            pISpxAudioProcessor->ProcessAudio(std::make_shared<DataChunk>(data, cbRead, std::move(capturedTime), std::move(userId)));
+            if (totalSkip > skipSize || cbRead == 0)
+            {
+                auto readCallDuration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - start);
+                SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioPump::PumpThread(): read frame duration: %" PRIu64 " ms => sending audio buffer size %u", (void*)this, (uint64_t)readCallDuration.count(), cbRead);
+                UNUSED(readCallDuration); // unused in release builds
+                std::string capturedTime, userId;
+                if (cbRead != 0)
+                {
+                    capturedTime = m_reader->GetProperty(PropertyId::DataBuffer_TimeStamp);
+                    userId = m_reader->GetProperty(PropertyId::DataBuffer_UserId);
+                }
+
+                pISpxAudioProcessor->ProcessAudio(std::make_shared<DataChunk>(data, cbRead, std::move(capturedTime), std::move(userId)));
+            }
 
             // If we didn't read any data, move to the 'Idle' state
             if (cbRead == 0)

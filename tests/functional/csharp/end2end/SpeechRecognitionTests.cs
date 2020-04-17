@@ -228,6 +228,26 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
+        [DataTestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
+        public async Task ContinuousValidSkipAudioRecognition(bool usingPreConnection)
+        {
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
+            this.defaultConfig.SetProperty("SPEECH-SkipAudioDurationHNS", "5000000");
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
+            {
+                string plainActualText = Normalize(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text);
+                string plainExpectedText = Normalize(await helper.GetFirstRecognizerResult(recognizer));
+
+                plainActualText = plainActualText.Remove(0, 6);
+
+                Assert.IsTrue(
+                        plainExpectedText.Equals(plainActualText),
+                            $"'{plainExpectedText}' (expected)\n is not equals \n'{plainActualText}' (actual)");
+            }
+        }
+
         [TestMethod]
         public async Task InvalidKeyHandledProperly()
         {
