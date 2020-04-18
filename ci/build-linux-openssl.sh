@@ -18,7 +18,7 @@ else
 fi
 
 OPENSSL_VERSION=1.1.1b
-OPENSSL_URL=https://www.openssl.org/source/old/1.1.1
+OPENSSL_URL=https://csspeechstorage.blob.core.windows.net/drop/openssl
 OPENSSL_BASE=openssl-$OPENSSL_VERSION
 OPENSSL_FILE=$OPENSSL_BASE.tar.gz
 OPENSSL_SHA256SUM=5c557b023230413dfb0756f3137a13e6d726838ccd1430888ad15bfb2b43ea4b
