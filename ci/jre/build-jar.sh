@@ -73,7 +73,7 @@ for platformString in "${platforms[@]}"; do
       dropPrefix+="/${MAC_ARTIFACT_DIR}/$flavor"
       libPrefix=lib
       libSuffix=.dylib
-      jnilibSuffix=.jnilib
+      jnilibSuffix=.dylib
       assetDir+=/mac
       bitness="$([[ $arch == x86 ]] && echo 32 || echo 64)"
       assetDir+="$bitness"

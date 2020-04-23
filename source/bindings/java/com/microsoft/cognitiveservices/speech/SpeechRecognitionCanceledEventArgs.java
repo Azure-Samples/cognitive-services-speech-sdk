@@ -14,31 +14,30 @@ import com.microsoft.cognitiveservices.speech.SpeechRecognitionResult;
  */
 public final class SpeechRecognitionCanceledEventArgs extends SpeechRecognitionEventArgs {
 
+    /*! \cond INTERNAL */
+
     /**
      * Constructs an instance of a SpeechRecognitionCanceledEventArgs object.
-     * @param arg internal recognition canceled event args object.
+     * @param eventArgs recognition canceled event args object.
      */
-    public SpeechRecognitionCanceledEventArgs(com.microsoft.cognitiveservices.speech.internal.SpeechRecognitionCanceledEventArgs arg) {
-        super(arg);
-
-        Contracts.throwIfNull(arg, "arg");
-        this._eventArgImpl = arg;
-        
-        this._SessionId = arg.getSessionId();
-        Contracts.throwIfNull(this._SessionId, "SessionId");
-
-        com.microsoft.cognitiveservices.speech.internal.CancellationDetails cancellation = arg.GetCancellationDetails();
-        this._cancellationReason  = com.microsoft.cognitiveservices.speech.CancellationReason.values()[cancellation.getReason().swigValue() - 1]; // Native CancellationReason enum starts at 1!!
-        this._errorCode = com.microsoft.cognitiveservices.speech.CancellationErrorCode.values()[cancellation.getErrorCode().swigValue()];
-        this._errorDetails = cancellation.getErrorDetails();
+    public SpeechRecognitionCanceledEventArgs(long eventArgs) {
+        super(eventArgs);
+        storeEventData(false);
     }
+
+    public SpeechRecognitionCanceledEventArgs(long eventArgs, boolean dispose) {
+        super(eventArgs);
+        storeEventData(dispose);
+    }
+
+    /*! \endcond */
 
     /**
      * The reason the recognition was canceled.
      * @return Specifies the reason canceled.
      */
     public CancellationReason getReason() {
-        return this._cancellationReason ;
+        return this.cancellationReason;
     }
 
     /**
@@ -47,7 +46,7 @@ public final class SpeechRecognitionCanceledEventArgs extends SpeechRecognitionE
      * @return An error code that represents the error reason.
      */
     public CancellationErrorCode getErrorCode() {
-        return this._errorCode;
+        return this.errorCode;
     }
 
     /**
@@ -55,7 +54,7 @@ public final class SpeechRecognitionCanceledEventArgs extends SpeechRecognitionE
      * @return A String that represents the error details.
      */
     public String getErrorDetails() {
-        return this._errorDetails;
+        return this.errorDetails;
     }
 
     /**
@@ -64,17 +63,25 @@ public final class SpeechRecognitionCanceledEventArgs extends SpeechRecognitionE
      */
     @Override
     public String toString() {
-        return "SessionId:" + _SessionId +
+        return "SessionId:" + getSessionId() +
                 " ResultId:" + getResult().getResultId() +
-                " CancellationReason:" + _cancellationReason  +
-                " CancellationErrorCode:" + _errorCode +
-                " Error details:<" + _errorDetails;
+                " CancellationReason:" + cancellationReason  +
+                " CancellationErrorCode:" + errorCode +
+                " Error details:<" + errorDetails;
     }
 
-    @SuppressWarnings("unused")
-    private com.microsoft.cognitiveservices.speech.internal.SpeechRecognitionCanceledEventArgs _eventArgImpl;
-    private String _SessionId;
-    private CancellationReason _cancellationReason;
-    private CancellationErrorCode _errorCode;
-    private String _errorDetails;
+    private void storeEventData(boolean disposeNativeResources) {
+        Contracts.throwIfNull(eventHandle, "eventHandle");        
+        CancellationDetails cancellation = CancellationDetails.fromResult(getResult());
+        this.cancellationReason  = cancellation.getReason();
+        this.errorCode = cancellation.getErrorCode();
+        this.errorDetails = cancellation.getErrorDetails();
+        if (disposeNativeResources == true) {
+            super.close();
+        }
+    }
+
+    private CancellationReason cancellationReason;
+    private CancellationErrorCode errorCode;
+    private String errorDetails;
 }

@@ -78,7 +78,7 @@ public class ConversationTranscriberTests {
 
         Conversation conversation = CreateConversation(s, myConversationId);
         assertNotNull(conversation);
-        assertNotNull(conversation.getConversationImpl());
+        assertNotNull(conversation.getImpl());
 
         String gotId = conversation.getConversationId();
         assertEquals(myConversationId, gotId);
@@ -130,7 +130,7 @@ public class ConversationTranscriberTests {
 
         Conversation conversation = CreateConversation(s, conversationId);
         assertNotNull(conversation);
-        assertNotNull(conversation.getConversationImpl());
+        assertNotNull(conversation.getImpl());
 
         ConversationTranscriber ct = new ConversationTranscriber(AudioConfig.fromStreamInput(ais));
         assertNotNull(ct);
@@ -185,7 +185,7 @@ public class ConversationTranscriberTests {
 
         Conversation conversation = CreateConversation(s, conversationId);
         assertNotNull(conversation);
-        assertNotNull(conversation.getConversationImpl());
+        assertNotNull(conversation.getImpl());
 
         ConversationTranscriber ct = new ConversationTranscriber(AudioConfig.fromStreamInput(ais));
         assertNotNull(ct);
@@ -249,7 +249,7 @@ public class ConversationTranscriberTests {
 
         Conversation conversation = CreateConversation(s, conversationId);
         assertNotNull(conversation);
-        assertNotNull(conversation.getConversationImpl());
+        assertNotNull(conversation.getImpl());
 
         ConversationTranscriber ct = new ConversationTranscriber(AudioConfig.fromStreamInput(ais));
         assertNotNull(ct);
@@ -304,7 +304,7 @@ public class ConversationTranscriberTests {
 
         Conversation conversation = Conversation.createConversationAsync(speech_config, id).get();
         assertNotNull(conversation);
-        assertNotNull(conversation.getConversationImpl());
+        assertNotNull(conversation.getImpl());
 
         return conversation;
     }

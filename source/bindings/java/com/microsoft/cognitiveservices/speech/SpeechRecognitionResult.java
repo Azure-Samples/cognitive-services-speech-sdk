@@ -13,8 +13,8 @@ public class SpeechRecognitionResult extends RecognitionResult {
 
     /*! \cond PROTECTED */
 
-    protected SpeechRecognitionResult(com.microsoft.cognitiveservices.speech.internal.RecognitionResult result) {
-        super(result);
+    protected SpeechRecognitionResult(long resultHandle) {
+        super(resultHandle);
     }
 
     /*! \endcond */

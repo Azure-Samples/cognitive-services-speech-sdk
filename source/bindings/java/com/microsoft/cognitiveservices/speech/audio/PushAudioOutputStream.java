@@ -5,6 +5,9 @@
 package com.microsoft.cognitiveservices.speech.audio;
 
 import com.microsoft.cognitiveservices.speech.SpeechConfig;
+import com.microsoft.cognitiveservices.speech.util.Contracts;
+import com.microsoft.cognitiveservices.speech.util.IntRef;
+import com.microsoft.cognitiveservices.speech.util.SafeHandle;
 
 /**
  * Represents audio output stream used for custom audio output configurations.
@@ -12,8 +15,6 @@ import com.microsoft.cognitiveservices.speech.SpeechConfig;
  */
 public final class PushAudioOutputStream extends com.microsoft.cognitiveservices.speech.audio.AudioOutputStream
 {
-    @SuppressWarnings("unused")
-    private PushAudioOutputStreamCallback _callbackKeepAlive;
 
     // load the native library.
     static {
@@ -32,26 +33,27 @@ public final class PushAudioOutputStream extends com.microsoft.cognitiveservices
      * @return The push audio output stream being created.
      */
     public static PushAudioOutputStream create(PushAudioOutputStreamCallback callback) {
-        return new PushAudioOutputStream(com.microsoft.cognitiveservices.speech.internal.AudioOutputStream.CreatePushStream(callback.getAdapter()), callback);
-    }
-
-    /**
-     * Explicitly frees any external resource attached to the object
-     */
-    @Override
-    public void close() {
-        if (this._streamImpl != null) {
-            this._streamImpl.delete();
-        }
-        this._streamImpl = null;
+        IntRef audioStreamHandle = new IntRef(0);
+        Contracts.throwIfFail(createPushAudioOutputStream(audioStreamHandle));
+        return new PushAudioOutputStream(audioStreamHandle, callback);
     }
 
     /*! \cond PROTECTED */
 
-    protected PushAudioOutputStream(com.microsoft.cognitiveservices.speech.internal.PushAudioOutputStream stream, PushAudioOutputStreamCallback callback) {
+    protected PushAudioOutputStream(IntRef stream, PushAudioOutputStreamCallback callback) {
         super(stream);
-        _callbackKeepAlive = callback;
+        callbackHandle = callback;
+        Contracts.throwIfFail(setStreamCallbacks(streamHandle));
     }
 
      /*! \endcond */
+
+     private PushAudioOutputStreamCallback getCallbackHandle() {
+        return callbackHandle;
+    }
+
+     private final static native long createPushAudioOutputStream(IntRef audioStreamHandle);
+     private final native long setStreamCallbacks(SafeHandle streamHandle);
+
+     private PushAudioOutputStreamCallback callbackHandle;
 }

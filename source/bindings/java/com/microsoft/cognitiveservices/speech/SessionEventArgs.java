@@ -3,36 +3,45 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 package com.microsoft.cognitiveservices.speech;
-
 import com.microsoft.cognitiveservices.speech.util.Contracts;
+import com.microsoft.cognitiveservices.speech.util.SafeHandle;
+import com.microsoft.cognitiveservices.speech.util.StringRef;
+import com.microsoft.cognitiveservices.speech.util.SafeHandleType;
 
+import java.io.Closeable;
 
 /**
  * Defines payload for SessionStarted/Stopped events.
  */
 public class SessionEventArgs // extends EventArgs
 {
+    /*! \cond INTERNAL */
+
     /**
      * Constructs a SessionEventArgs object.
-     * @param arg The native SessionEventArgs
+     * @param eventArgs The native SessionEventArgs
      */
-    public SessionEventArgs(com.microsoft.cognitiveservices.speech.internal.SessionEventArgs arg) {
-        Contracts.throwIfNull(arg, "arg");
-
-        this._sessionId = arg.getSessionId();
-
-        Contracts.throwIfNull(this._sessionId, "SessionId");
+    public SessionEventArgs(long eventArgs) {
+        Contracts.throwIfNull(eventArgs, "eventArgs");
+        eventHandle = new SafeHandle(eventArgs, SafeHandleType.Event);
+        storeEventData(false);
     }
+
+    public SessionEventArgs(long eventArgs, boolean dispose) {
+        Contracts.throwIfNull(eventArgs, "eventArgs");
+        eventHandle = new SafeHandle(eventArgs, SafeHandleType.Event);
+        storeEventData(dispose);
+    }
+    
+    /*! \endcond */
 
     /**
      * Represents the session identifier.
      * @return Represents the session identifier.
      */
     public String getSessionId() {
-        return _sessionId;
+        return sessionId;
     }
-
-    private final String _sessionId;
 
     /**
      * Returns a String that represents the session event.
@@ -40,6 +49,39 @@ public class SessionEventArgs // extends EventArgs
      */
     @Override
     public String toString() {
-        return "SessionId: " + _sessionId.toString() + ".";
+        return "SessionId: " + sessionId + ".";
     }
+
+    /*! \cond PROTECTED */
+    /**
+     * Explicitly frees any external resource attached to the object
+     */
+    protected void close() {
+        if(eventHandle != null) {
+            eventHandle.close();
+            eventHandle = null;    
+        }
+    }
+    /*! \endcond */
+
+    private void storeEventData(boolean disposeNativeResources) {
+        StringRef sessionIdRef = new StringRef("");       
+        Contracts.throwIfFail(getSessionId(eventHandle, sessionIdRef, maxSessionID));
+        sessionId = sessionIdRef.getValue();
+        Contracts.throwIfNull(this.sessionId, "SessionId");
+        if (disposeNativeResources == true)
+        {
+            close();
+        }
+    }
+    
+    /*! \cond PROTECTED */
+    protected SafeHandle eventHandle = null;
+    /*! \endcond */
+
+    private String sessionId;
+    private final int maxUUID = 36;
+    private final int maxSessionID = maxUUID + 1;
+
+    private final native long getSessionId(SafeHandle eventHandle, StringRef sessionIdStr, int maxSessionIDValue);
 }

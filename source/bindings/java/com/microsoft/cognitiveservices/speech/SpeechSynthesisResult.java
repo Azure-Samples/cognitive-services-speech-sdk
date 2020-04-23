@@ -7,28 +7,38 @@ package com.microsoft.cognitiveservices.speech;
 import java.io.Closeable;
 
 import com.microsoft.cognitiveservices.speech.util.Contracts;
+import com.microsoft.cognitiveservices.speech.util.SafeHandle;
+import com.microsoft.cognitiveservices.speech.util.SafeHandleType;
+import com.microsoft.cognitiveservices.speech.util.StringRef;
+import com.microsoft.cognitiveservices.speech.util.IntRef;
+import com.microsoft.cognitiveservices.speech.PropertyCollection;
 
 /**
  * Contains detailed information about result of a speech synthesis operation.
  * Added in version 1.7.0
  */
 public class SpeechSynthesisResult implements Closeable {
-    private String resultId;
-    private ResultReason reason;
-    private byte[] audioData;
-    private PropertyCollection properties;
-    private com.microsoft.cognitiveservices.speech.internal.SpeechSynthesisResult _resultImpl;
 
     /*! \cond PROTECTED */
 
-    protected SpeechSynthesisResult(com.microsoft.cognitiveservices.speech.internal.SpeechSynthesisResult result) {
+    protected SpeechSynthesisResult(IntRef result) {
         Contracts.throwIfNull(result, "result");
 
-        this._resultImpl = result;
-        this.resultId = result.getResultId();
-        this.reason = ResultReason.values()[result.getReason().swigValue()];
+        this.resultHandle = new SafeHandle(result.getValue(), SafeHandleType.SynthesisResult);
+
+        StringRef stringRef = new StringRef("");
+        Contracts.throwIfFail(getResultId(resultHandle, stringRef));
+        this.resultId = stringRef.getValue();
+
+        IntRef intRef = new IntRef(0);
+        Contracts.throwIfFail(getResultReason(resultHandle, intRef));
+        this.reason = ResultReason.values()[(int)intRef.getValue()];
+
         this.audioData = null;
-        this.properties = new PropertyCollection(result.getProperties());
+
+        IntRef propertyRef = new IntRef(0);
+        Contracts.throwIfFail(getPropertyBagFromResult(resultHandle, propertyRef));
+        this.properties = new PropertyCollection(propertyRef);
     }
 
     /*! \endcond */
@@ -54,7 +64,9 @@ public class SpeechSynthesisResult implements Closeable {
       * @return Length of synthesized audio.
       */
     public long getAudioLength() {
-        return _resultImpl.GetAudioLength();
+        IntRef audioLengthRef = new IntRef(0);
+        Contracts.throwIfFail(getAudioLength(resultHandle, audioLengthRef));
+        return audioLengthRef.getValue();
     }
 
     /**
@@ -63,13 +75,9 @@ public class SpeechSynthesisResult implements Closeable {
       */
     public byte[] getAudioData() {
         if (audioData == null) {
-            com.microsoft.cognitiveservices.speech.internal.UInt8Vector audio = _resultImpl.GetAudioData();
-            int size = (int)audio.size();
-            audioData = new byte[size];
-
-            for(int n=0; n<size; n++) {
-                audioData[n] = (byte)audio.get(n);
-            }
+            IntRef hr = new IntRef(0);
+            audioData = getAudio(resultHandle, hr);
+            Contracts.throwIfFail(hr.getValue());
         }
         return audioData;
     }
@@ -86,22 +94,38 @@ public class SpeechSynthesisResult implements Closeable {
      * Explicitly frees any external resource attached to the object
      */
     public void close() {
-        if (this._resultImpl != null) {
-            this._resultImpl.delete();
+        if (this.resultHandle != null) {
+            this.resultHandle.close();
+            this.resultHandle = null;
         }
-        this._resultImpl = null;
 
         if (this.properties != null) {
             this.properties.close();
+            this.properties = null;
         }
-        this.properties = null;
     }
+
+    /*! \cond INTERNAL */
 
     /**
      * Returns the synthesis result implementation.
      * @return The implementation of the result.
      */
-    public com.microsoft.cognitiveservices.speech.internal.SpeechSynthesisResult getResultImpl() {
-        return this._resultImpl;
+    public SafeHandle getImpl() {
+        return this.resultHandle;
     }
+
+    /*! \endcond */
+    
+    private final native long getResultId(SafeHandle resultHandle, StringRef propertyRef);
+    private final native long getResultReason(SafeHandle resultHandle, IntRef propertyRef);
+    private final native long getPropertyBagFromResult(SafeHandle resultHandle, IntRef propertyRef);
+    private final native long getAudioLength(SafeHandle resultHandle, IntRef audioLengthRef);    
+    private final native byte[] getAudio(SafeHandle resultHandle, IntRef hr);
+
+    private String resultId;
+    private ResultReason reason;
+    private byte[] audioData;
+    private PropertyCollection properties;
+    private SafeHandle resultHandle = null;
 }

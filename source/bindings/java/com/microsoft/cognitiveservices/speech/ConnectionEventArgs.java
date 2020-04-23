@@ -16,10 +16,22 @@ public final class ConnectionEventArgs extends SessionEventArgs
 
     /**
      * Constructs an instance of a ConnectionEventArgs object.
-     * @param arg internal connection event args object.
+     * @param eventArgs internal connection event handle.
      */
-    public ConnectionEventArgs(com.microsoft.cognitiveservices.speech.internal.ConnectionEventArgs arg) {
-        super(arg);
+    public ConnectionEventArgs(long eventArgs) {
+        super(eventArgs);
+        storeEventData(false);
+    }
+
+    ConnectionEventArgs(long eventArgs, boolean dispose) {
+        super(eventArgs);
+        storeEventData(dispose);
+    }
+
+    private void storeEventData(boolean disposeNativeResources) {
+        if (disposeNativeResources == true) {
+            super.close();
+        }
     }
 
     /*! \endcond */

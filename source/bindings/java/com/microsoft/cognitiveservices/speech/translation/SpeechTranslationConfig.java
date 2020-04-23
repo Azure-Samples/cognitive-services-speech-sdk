@@ -7,8 +7,12 @@ package com.microsoft.cognitiveservices.speech.translation;
 import java.io.Closeable;
 import java.util.ArrayList;
 
+import com.microsoft.cognitiveservices.speech.PropertyId;
 import com.microsoft.cognitiveservices.speech.SpeechConfig;
 import com.microsoft.cognitiveservices.speech.util.Contracts;
+import com.microsoft.cognitiveservices.speech.util.IntRef;
+import com.microsoft.cognitiveservices.speech.util.SafeHandle;
+import com.microsoft.cognitiveservices.speech.util.SafeHandleType;
 
 /**
  * Speech translation configuration.
@@ -29,12 +33,8 @@ public final class SpeechTranslationConfig extends SpeechConfig implements Close
     /**
      * Creates an instance of recognizer config.
      */
-    private SpeechTranslationConfig(com.microsoft.cognitiveservices.speech.internal.SpeechTranslationConfig configImpl) {
-        super(configImpl);
-
-        Contracts.throwIfNull(configImpl, "configImpl");
-
-        this.translatorConfigImpl = configImpl;
+    private SpeechTranslationConfig(long handleValue) {
+        super(handleValue);
     }
 
     /**
@@ -46,8 +46,9 @@ public final class SpeechTranslationConfig extends SpeechConfig implements Close
     public static SpeechTranslationConfig fromSubscription(String subscriptionKey, String region) {
         Contracts.throwIfIllegalSubscriptionKey(subscriptionKey, "subscriptionKey");
         Contracts.throwIfNullOrWhitespace(region, "region");
-
-        return new SpeechTranslationConfig(com.microsoft.cognitiveservices.speech.internal.SpeechTranslationConfig.FromSubscription(subscriptionKey, region));
+        IntRef configRef = new IntRef(0);
+        Contracts.throwIfFail(fromSubscription(configRef, subscriptionKey, region));
+        return new SpeechTranslationConfig(configRef.getValue());
     }
 
     /**
@@ -62,8 +63,9 @@ public final class SpeechTranslationConfig extends SpeechConfig implements Close
     public static SpeechTranslationConfig fromAuthorizationToken(String authorizationToken, String region) {
         Contracts.throwIfNullOrWhitespace(authorizationToken, "authorizationToken");
         Contracts.throwIfNullOrWhitespace(region, "region");
-
-        return new SpeechTranslationConfig(com.microsoft.cognitiveservices.speech.internal.SpeechTranslationConfig.FromAuthorizationToken(authorizationToken, region));
+        IntRef configRef = new IntRef(0);
+        Contracts.throwIfFail(fromAuthorizationToken(configRef, authorizationToken, region));
+        return new SpeechTranslationConfig(configRef.getValue());
     }
 
     /**
@@ -84,8 +86,9 @@ public final class SpeechTranslationConfig extends SpeechConfig implements Close
         if(subscriptionKey == null) {
             throw new NullPointerException("subscriptionKey");
         }
-
-        return new SpeechTranslationConfig(com.microsoft.cognitiveservices.speech.internal.SpeechTranslationConfig.FromEndpoint(endpoint.toString(), subscriptionKey));
+        IntRef configRef = new IntRef(0);
+        Contracts.throwIfFail(fromEndpoint(configRef, endpoint.toString(), subscriptionKey));
+        return new SpeechTranslationConfig(configRef.getValue());
     }
 
     /**
@@ -106,7 +109,9 @@ public final class SpeechTranslationConfig extends SpeechConfig implements Close
     public static SpeechTranslationConfig fromEndpoint(java.net.URI endpoint) {
         Contracts.throwIfNull(endpoint, "endpoint");
 
-        return new SpeechTranslationConfig(com.microsoft.cognitiveservices.speech.internal.SpeechTranslationConfig.FromEndpoint(endpoint.toString()));
+        IntRef configRef = new IntRef(0);
+        Contracts.throwIfFail(fromEndpoint(configRef, endpoint.toString(), null));
+        return new SpeechTranslationConfig(configRef.getValue());
     }
 
     /**
@@ -127,7 +132,9 @@ public final class SpeechTranslationConfig extends SpeechConfig implements Close
             throw new NullPointerException("subscriptionKey");
         }
 
-        return new SpeechTranslationConfig(com.microsoft.cognitiveservices.speech.internal.SpeechTranslationConfig.FromHost(host.toString(), subscriptionKey));
+        IntRef configRef = new IntRef(0);
+        Contracts.throwIfFail(fromHost(configRef, host.toString(), subscriptionKey));
+        return new SpeechTranslationConfig(configRef.getValue());
     }
 
     /**
@@ -146,7 +153,9 @@ public final class SpeechTranslationConfig extends SpeechConfig implements Close
     public static SpeechTranslationConfig fromHost(java.net.URI host) {
         Contracts.throwIfNull(host, "host");
 
-        return new SpeechTranslationConfig(com.microsoft.cognitiveservices.speech.internal.SpeechTranslationConfig.FromHost(host.toString()));
+        IntRef configRef = new IntRef(0);
+        Contracts.throwIfFail(fromHost(configRef, host.toString(), null));
+        return new SpeechTranslationConfig(configRef.getValue());
     }
 
     /**
@@ -156,7 +165,7 @@ public final class SpeechTranslationConfig extends SpeechConfig implements Close
     public void addTargetLanguage(String value) {
         Contracts.throwIfNullOrWhitespace(value, "value");
 
-        translatorConfigImpl.AddTargetLanguage(value);
+        Contracts.throwIfFail(addTargetLanguage(speechConfigHandle, value));
     }
 
     /**
@@ -167,7 +176,7 @@ public final class SpeechTranslationConfig extends SpeechConfig implements Close
     public void removeTargetLanguage(String value) {
         Contracts.throwIfNullOrWhitespace(value, "value");
 
-        translatorConfigImpl.RemoveTargetLanguage(value);
+        Contracts.throwIfFail(removeTargetLanguage(speechConfigHandle, value));
     }
 
     /**
@@ -177,10 +186,11 @@ public final class SpeechTranslationConfig extends SpeechConfig implements Close
     public ArrayList<String> getTargetLanguages() {
 
         ArrayList<String> result = new ArrayList<String>();
-        com.microsoft.cognitiveservices.speech.internal.StringVector v = translatorConfigImpl.GetTargetLanguages();
-        for (int i = 0; i < v.size(); ++i)
+        String plainStr = propertyHandle.getProperty(PropertyId.SpeechServiceConnection_TranslationToLanguages);
+        String[] values = plainStr.split(",");
+        for (int i = 0; i < values.length; ++i)
         {
-            result.add(v.get(i));
+            result.add(values[i]);
         }
 
         return result;
@@ -191,7 +201,7 @@ public final class SpeechTranslationConfig extends SpeechConfig implements Close
      * @return The voice name.
      */
     public String getVoiceName() {
-        return  translatorConfigImpl.GetVoiceName();
+        return propertyHandle.getProperty(PropertyId.SpeechServiceConnection_TranslationVoice);
     }
 
     /**
@@ -201,7 +211,7 @@ public final class SpeechTranslationConfig extends SpeechConfig implements Close
     public void setVoiceName(String value) {
         Contracts.throwIfNullOrWhitespace(value, "value");
 
-        translatorConfigImpl.SetVoiceName(value);
+        propertyHandle.setProperty(PropertyId.SpeechServiceConnection_TranslationVoice, value);
     }
 
     /**
@@ -213,7 +223,7 @@ public final class SpeechTranslationConfig extends SpeechConfig implements Close
             return;
         }
 
-        translatorConfigImpl.delete();
+        super.close();
         disposed = true;
     }
 
@@ -224,12 +234,18 @@ public final class SpeechTranslationConfig extends SpeechConfig implements Close
      * @return The implementation of the speech translation config.
      */
     @Override
-    public com.microsoft.cognitiveservices.speech.internal.SpeechTranslationConfig getImpl() {
-        return translatorConfigImpl;
+    public SafeHandle getImpl() {
+        return super.getImpl();
     }
 
     /*! \endcond */
 
-    private com.microsoft.cognitiveservices.speech.internal.SpeechTranslationConfig translatorConfigImpl;
+    private final static native long fromSubscription(IntRef configHandle, String subscriptionKey, String region);
+    private final static native long fromAuthorizationToken(IntRef configHandle, String authorizationToken, String region);
+    private final static native long fromEndpoint(IntRef configHandle, String endpoint, String subscriptionKey);
+    private final static native long fromHost(IntRef configHandle, String host, String subscriptionKey);
+    private final native long addTargetLanguage(SafeHandle configHandle, String value);
+    private final native long removeTargetLanguage(SafeHandle configHandle, String value);
+
     private boolean disposed = false;
 }

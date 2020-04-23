@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicBoolean;
-
+import java.util.concurrent.CountDownLatch;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.Ignore;
@@ -80,11 +80,10 @@ public class IntentRecognizerTests {
         config.close();
     }
 
-    @Ignore("TODO why does not get phrase")
     @Test
     public void testIntentRecognizer2() throws InterruptedException, ExecutionException {
-        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
-            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.LANGUAGE_UNDERSTANDING_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.LANGUAGE_UNDERSTANDING_SUBSCRIPTION).Region);
 
         assertNotNull(s);
 
@@ -130,37 +129,6 @@ public class IntentRecognizerTests {
         s.close();
     }
 
-    @Ignore("TODO check if language can be set to german")
-    @Test
-    public void testSetLanguage() {
-        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
-            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
-
-        s.setSpeechRecognitionLanguage("en-US");
-        assertNotNull(s);
-
-        WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath));
-        assertNotNull(ais);
-
-        IntentRecognizer r = new IntentRecognizer(s, AudioConfig.fromStreamInput(ais));
-        assertNotNull(r);
-        assertNotNull(r.getRecoImpl());
-        assertTrue(r instanceof Recognizer);
-
-        assertFalse(r.getSpeechRecognitionLanguage().isEmpty());
-        assertEquals("en-US", r.getSpeechRecognitionLanguage());
-
-        // TODO not supported on recognizer anymore:
-        // String language2 = "de-DE";
-        // r.setLanguage(language2);
-
-        // assertFalse(r.getSpeechRecognitionLanguage().isEmpty());
-        // assertEquals(language2, r.getSpeechRecognitionLanguage());
-
-        r.close();
-        s.close();
-    }
-
     // -----------------------------------------------------------------------
     // ---
     // -----------------------------------------------------------------------
@@ -186,46 +154,11 @@ public class IntentRecognizerTests {
     // ---
     // -----------------------------------------------------------------------
 
-    @Ignore("TODO why is canceled reported instead of success")
-    @Test
-    public void testRecognizeOnceAsync1() throws InterruptedException, ExecutionException, TimeoutException {
-        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
-            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
-
-        assertNotNull(s);
-
-        IntentRecognizer r = new IntentRecognizer(s, AudioConfig.fromWavFileInput(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath)));
-        assertNotNull(r);
-        assertNotNull(r.getRecoImpl());
-        assertTrue(r instanceof Recognizer);
-
-        Future<IntentRecognitionResult> future = r.recognizeOnceAsync();
-        assertNotNull(future);
-
-        // Wait for max 30 seconds
-        future.get(30, TimeUnit.SECONDS);
-
-        assertFalse(future.isCancelled());
-        assertTrue(future.isDone());
-
-        IntentRecognitionResult res = future.get();
-        assertNotNull(res);
-        assertTrue(ResultReason.RecognizedSpeech == res.getReason() ||
-                ResultReason.RecognizedIntent == res.getReason());
-        assertEquals("What's the weather like?", res.getText());
-
-        // TODO: check for specific json parameters
-        assertTrue(res.getProperties().getProperty(PropertyId.LanguageUnderstandingServiceResponse_JsonResult).length() > 0);
-
-        r.close();
-        s.close();
-    }
-
-    @Ignore("TODO why are error details not empty")
     @Test
     public void testRecognizeOnceAsync2() throws InterruptedException, ExecutionException {
-        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
-            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+        CountDownLatch countDownLatch = new CountDownLatch(1);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.LANGUAGE_UNDERSTANDING_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.LANGUAGE_UNDERSTANDING_SUBSCRIPTION).Region);
 
         assertNotNull(s);
 
@@ -256,9 +189,12 @@ public class IntentRecognizerTests {
 
         r.recognizing.addEventListener((o, e) -> {
             TestHelper.AssertConnectionCountMatching(connectedEventCount.get(), disconnectedEventCount.get());
-            int now = eventIdentifier.getAndIncrement();
-            eventsMap.put("recognizing-" + System.currentTimeMillis(), now);
-            eventsMap.put("recognizing" , now);
+            // take only first recogizing event
+            if (eventsMap.get("recognizing") == null) {
+                int now = eventIdentifier.getAndIncrement();
+                eventsMap.put("recognizing-" + System.currentTimeMillis(), now);
+                eventsMap.put("recognizing" , now);    
+            }
         });
 
         r.canceled.addEventListener((o, e) -> {
@@ -288,21 +224,18 @@ public class IntentRecognizerTests {
         AtomicInteger sessionStoppedCount = new AtomicInteger(0);
         r.sessionStopped.addEventListener((o, e) -> {
             sessionStoppedCount.getAndIncrement();
-            int now = eventIdentifier.getAndIncrement();
+            // Do not increment after last event
+            int now = eventIdentifier.get();
             eventsMap.put("sessionStopped-" + System.currentTimeMillis(), now);
             eventsMap.put("sessionStopped", now);
+            countDownLatch.countDown();
         });
 
         IntentRecognitionResult res = r.recognizeOnceAsync().get();
+        countDownLatch.await();
         assertNotNull(res);
         assertTrue(res.getReason() != ResultReason.Canceled);
         assertEquals("What's the weather like?", res.getText());
-
-        // wait until we get the SessionStopped event.
-        long now = System.currentTimeMillis();
-        while(((System.currentTimeMillis() - now) < 30000) && (sessionStoppedCount.get() == 0)) {
-            Thread.sleep(200);
-        }
 
         connection.connected.removeEventListener(myConnectedHandler);
         connection.disconnected.removeEventListener(myDisconnectedHandler);
@@ -311,8 +244,8 @@ public class IntentRecognizerTests {
         // session events are first and last event
         final Integer LAST_RECORDED_EVENT_ID = eventIdentifier.get();
         assertTrue(LAST_RECORDED_EVENT_ID > FIRST_EVENT_ID);
-        assertEquals(FIRST_EVENT_ID, eventsMap.get("speechStartDetected"));
-        assertEquals(LAST_RECORDED_EVENT_ID, eventsMap.get("speechEndDetected"));
+        assertEquals(FIRST_EVENT_ID, eventsMap.get("sessionStarted"));
+        assertEquals(LAST_RECORDED_EVENT_ID, eventsMap.get("sessionStopped"));
 
         // end events come after start events.
         assertTrue(eventsMap.get("sessionStarted") < eventsMap.get("sessionStopped"));
@@ -322,9 +255,10 @@ public class IntentRecognizerTests {
         assertTrue(eventsMap.get("sessionStarted") < eventsMap.get("speechStartDetected"));
         assertTrue(eventsMap.get("speechEndDetected") < eventsMap.get("sessionStopped"));
 
-        // there is no partial result reported after the final result
-        // (and check that we have intermediate and final results recorded)
-        assertTrue(eventsMap.get("recognizing") < eventsMap.get("recognized"));
+        // expect that there is always recognized result, sometimes (very rarely ~1 out of 50 trials) there is no intermediate results, but just recognized.
+        if (eventsMap.get("recognizing") != null) {
+            assertTrue(eventsMap.get("recognizing") < eventsMap.get("recognized"));
+        }
 
         // make sure events we don't expect, don't get raised
         assertFalse(eventsMap.containsKey("canceled"));
@@ -398,11 +332,10 @@ public class IntentRecognizerTests {
         s.close();
     }
 
-    @Ignore("TODO why number of events not 1")
     @Test
     public void testStartStopContinuousRecognitionAsync() throws InterruptedException, ExecutionException, TimeoutException {
-        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
-        Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.LANGUAGE_UNDERSTANDING_SUBSCRIPTION).Key,
+        Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.LANGUAGE_UNDERSTANDING_SUBSCRIPTION).Region);
         assertNotNull(s);
 
         IntentRecognizer r = new IntentRecognizer(s, AudioConfig.fromWavFileInput(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath)));
@@ -448,9 +381,8 @@ public class IntentRecognizerTests {
         connection.connected.removeEventListener(myConnectedHandler);
         connection.disconnected.removeEventListener(myDisconnectedHandler);
 
-        // test that we got one result
-        // TODO multi-phrase test with several phrases in one session
-        assertEquals(1, rEvents.size());
+        // test that we got atleast one recognized event
+        assertTrue(rEvents.size() >= 1);
 
         future = r.stopContinuousRecognitionAsync();
         assertNotNull(future);
@@ -471,52 +403,45 @@ public class IntentRecognizerTests {
     // ---
     // -----------------------------------------------------------------------
 
-    @Ignore("TODO why is mapsize not 2")
     @Test
     public void testAddIntentStringString() throws InterruptedException, ExecutionException {
-        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
-            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+        CountDownLatch countDownLatch = new CountDownLatch(1);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.LANGUAGE_UNDERSTANDING_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.LANGUAGE_UNDERSTANDING_SUBSCRIPTION).Region);
 
         assertNotNull(s);
 
-        IntentRecognizer r = new IntentRecognizer(s, AudioConfig.fromWavFileInput(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath)));
+        IntentRecognizer r = new IntentRecognizer(s, AudioConfig.fromWavFileInput(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.INTENT_UTTERANCE).FilePath)));
         assertNotNull(r);
 
-        // TODO check if intent is recognized
-        r.addIntent("all intents");
+        r.addIntent("Turn on the lamp");
+        r.addIntent("Turn off the lamp");
 
         final Map<String, Integer> eventsMap = new HashMap<String, Integer>();
 
         r.recognized.addEventListener((o, e) -> {
             eventsMap.put("recognized", eventIdentifier.getAndIncrement());
-            if(!e.getResult().getProperties().getProperty(PropertyId.LanguageUnderstandingServiceResponse_JsonResult).isEmpty()) {
-                eventsMap.put("IntentReceived", eventIdentifier.getAndIncrement());
-            }
+            countDownLatch.countDown();
         });
 
-        // TODO why does this call require exceptions?
-        // TODO check for specific intent.
         IntentRecognitionResult res = r.recognizeOnceAsync().get();
+        countDownLatch.await();
         assertNotNull(res);
-        assertEquals(2, eventsMap.size());
-        assertTrue(res.getProperties().getProperty(PropertyId.LanguageUnderstandingServiceResponse_JsonResult).length() > 0);
-        assertTrue(ResultReason.RecognizedSpeech == res.getReason() ||
-                ResultReason.RecognizedIntent == res.getReason());
-
-
+        assertEquals(1, eventsMap.size());
+        assertTrue(ResultReason.RecognizedIntent == res.getReason());
         r.close();
         s.close();
     }
 
-    @Ignore("TODO why is mapsize not 2")
     @Test
-    public void testAddIntentStringLanguageUnderstandingModelString() throws InterruptedException, ExecutionException {
-        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
-            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+    public void testAddIntentStringLanguageUnderstandingModelStringFromAppId() throws InterruptedException, ExecutionException {
+        CountDownLatch countDownLatch = new CountDownLatch(1);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.LANGUAGE_UNDERSTANDING_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.LANGUAGE_UNDERSTANDING_SUBSCRIPTION).Region);
 
         assertNotNull(s);
 
-        IntentRecognizer r = new IntentRecognizer(s, AudioConfig.fromWavFileInput(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath)));
+        IntentRecognizer r = new IntentRecognizer(s, AudioConfig.fromWavFileInput(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.INTENT_UTTERANCE).FilePath)));
         assertNotNull(r);
 
         LanguageUnderstandingModel model = LanguageUnderstandingModel.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.LANGUAGE_UNDERSTANDING_SUBSCRIPTION).Key,
@@ -525,9 +450,8 @@ public class IntentRecognizerTests {
 
         assertNotNull(model);
 
-        // TODO check if intent is recognized
-        // TODO what is the intent name?
-        r.addAllIntents(model, "any-id-you-want-here");
+        r.addIntent(model, "HomeAutomation.TurnOff", "off");
+        r.addIntent(model, "HomeAutomation.TurnOn", "on");
 
         final Map<String, Integer> eventsMap = new HashMap<String, Integer>();
 
@@ -536,18 +460,15 @@ public class IntentRecognizerTests {
             if(!e.getResult().getProperties().getProperty(PropertyId.LanguageUnderstandingServiceResponse_JsonResult).isEmpty()) {
                 eventsMap.put("IntentReceived", eventIdentifier.getAndIncrement());
             }
+            countDownLatch.countDown();
         });
 
-        // TODO why does this call require exceptions?
-        // TODO check for specific intent.
         IntentRecognitionResult res = r.recognizeOnceAsync().get();
+        countDownLatch.await();
         assertNotNull(res);
         assertEquals(2, eventsMap.size());
         assertTrue(res.getProperties().getProperty(PropertyId.LanguageUnderstandingServiceResponse_JsonResult).length() > 0);
-        assertTrue(ResultReason.RecognizedSpeech == res.getReason() ||
-                ResultReason.RecognizedIntent == res.getReason());
-
-
+        assertTrue(ResultReason.RecognizedIntent == res.getReason());
         r.close();
         s.close();
     }

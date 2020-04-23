@@ -174,7 +174,7 @@ class NativeLibraryLoader {
             // Note: currently no KWS on macOS
             return new NativeLibrary[] {
                     new NativeLibrary("libMicrosoft.CognitiveServices.Speech.core.dylib", true),
-                    new NativeLibrary("libMicrosoft.CognitiveServices.Speech.java.bindings.jnilib", true)
+                    new NativeLibrary("libMicrosoft.CognitiveServices.Speech.java.bindings.dylib", true)
             };
         }
 

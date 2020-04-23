@@ -5,9 +5,10 @@ package com.microsoft.cognitiveservices.speech.audio;
 //
 
 import com.microsoft.cognitiveservices.speech.util.Contracts;
+import com.microsoft.cognitiveservices.speech.util.IntRef;
+import com.microsoft.cognitiveservices.speech.util.SafeHandle;
+import com.microsoft.cognitiveservices.speech.util.SafeHandleType;
 import com.microsoft.cognitiveservices.speech.SpeechConfig;
-import com.microsoft.cognitiveservices.speech.internal.AudioStreamContainerFormat;
-
 
 /**
  * Represents audio stream format used for custom audio input configurations.
@@ -31,7 +32,9 @@ public final class AudioStreamFormat
      * @return The audio stream format being created.
      */
     public static AudioStreamFormat getDefaultInputFormat() {
-        return new AudioStreamFormat(com.microsoft.cognitiveservices.speech.internal.AudioStreamFormat.GetDefaultInputFormat());
+        SafeHandle streamFormatHandle = new SafeHandle(0, SafeHandleType.AudioStreamFormat);
+        Contracts.throwIfFail(createFromDefaultInput(streamFormatHandle));
+        return new AudioStreamFormat(streamFormatHandle);
     }
 
     /**
@@ -42,7 +45,9 @@ public final class AudioStreamFormat
      * @return The audio stream format being created.
      */
     public static AudioStreamFormat getWaveFormatPCM(long samplesPerSecond, short bitsPerSample, short channels) {
-        return new AudioStreamFormat(com.microsoft.cognitiveservices.speech.internal.AudioStreamFormat.GetWaveFormatPCM(samplesPerSecond, bitsPerSample, channels));
+        SafeHandle streamFormatHandle = new SafeHandle(0, SafeHandleType.AudioStreamFormat);
+        Contracts.throwIfFail(createFromWaveFormatPCM(streamFormatHandle, samplesPerSecond, bitsPerSample, channels));        
+        return new AudioStreamFormat(streamFormatHandle);
     }
 
     /**
@@ -52,26 +57,28 @@ public final class AudioStreamFormat
      * @return The audio stream format being created.
      */
     public static AudioStreamFormat getCompressedFormat(AudioStreamContainerFormat compressedFormat) {
-        return new AudioStreamFormat(com.microsoft.cognitiveservices.speech.internal.AudioStreamFormat.GetCompressedFormat(compressedFormat));
+        SafeHandle streamFormatHandle = new SafeHandle(0, SafeHandleType.AudioStreamFormat);
+        Contracts.throwIfFail(createFromCompressedFormat(streamFormatHandle, compressedFormat.ordinal()));       
+        return new AudioStreamFormat(streamFormatHandle);
     }
 
     /**
      * Explicitly frees any external resource attached to the object
      */
     public void close() {
-        if (this._formatImpl != null) {
-            this._formatImpl.delete();
+        if (this.formatHandle != null) {
+            this.formatHandle.close();
+            this.formatHandle = null;
         }
-        this._formatImpl = null;
     }
 
-    AudioStreamFormat(com.microsoft.cognitiveservices.speech.internal.AudioStreamFormat format)
+    AudioStreamFormat(SafeHandle format)
     {
         Contracts.throwIfNull(format, "format");
-        this._formatImpl = format;
+        this.formatHandle = format;
     }
 
-    private com.microsoft.cognitiveservices.speech.internal.AudioStreamFormat _formatImpl;
+    private SafeHandle formatHandle = null;
 
     /*! \cond INTERNAL */
 
@@ -79,9 +86,14 @@ public final class AudioStreamFormat
      * Returns the audio stream format.
      * @return The implementation of the format.
      */
-    public com.microsoft.cognitiveservices.speech.internal.AudioStreamFormat getFormatImpl() {
-        return this._formatImpl;
+    public SafeHandle getImpl() {
+        return this.formatHandle;
     }
-
+    
     /*! \endcond */
+
+    private final static native long createFromDefaultInput(SafeHandle streamFormatHandle);
+    private final static native long createFromWaveFormatPCM(SafeHandle streamFormatHandle, long samplesPerSecond, short bitsPerSample, short channels);
+    private final static native long createFromCompressedFormat(SafeHandle streamFormatHandle, int compressedFormat);
+
 }

@@ -127,11 +127,11 @@ jobs:
   - bash: |
       set -u -x -e -o pipefail
       dylibname="build/lib/libMicrosoft.CognitiveServices.Speech.core.dylib"
-      jnilibname="build/bin/libMicrosoft.CognitiveServices.Speech.java.bindings.jnilib"
+      jnilibname="build/bin/libMicrosoft.CognitiveServices.Speech.java.bindings.dylib"
       [[ -f ${dylibname} ]]
       [[ -f ${jnilibname} ]]
       cp "${dylibname}" "${dylibname%%dylib}"unstripped.dylib
-      cp "${jnilibname}" "${jnilibname%%jnilib}"unstripped.jnilib
+      cp "${jnilibname}" "${jnilibname%%dylib}"unstripped.dylib
       strip -x "${dylibname}"
       strip -x "${jnilibname}"
       if [[ $SPEECHSDK_SIGN == true ]]; then
@@ -163,7 +163,7 @@ jobs:
       unzip -o "${archive}"
       # simple signing check, this will fail if not signed
       shopt -s extglob
-      ls build/**/libMicrosoft!(*unstripped).{dylib,jnilib} | xargs -n1 codesign --display --verbose=4
+      ls build/**/libMicrosoft!(*unstripped).{dylib} | xargs -n1 codesign --display --verbose=4
     displayName: "Unpack archive with signed dylib"
     condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
   - template: test-during-build.yml

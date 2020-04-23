@@ -5,14 +5,21 @@ package com.microsoft.cognitiveservices.speech.audio;
 //
 
 import com.microsoft.cognitiveservices.speech.util.Contracts;
+import com.microsoft.cognitiveservices.speech.util.IntRef;
+import com.microsoft.cognitiveservices.speech.util.SafeHandle;
+import com.microsoft.cognitiveservices.speech.util.SafeHandleType;
+
+import java.io.Closeable;
+import java.io.IOException;
+
 import com.microsoft.cognitiveservices.speech.SpeechConfig;
 
 /**
  * Represents audio input configuration used for specifying what type of input to use (microphone, file, stream).
  * Updated in version 1.7.0
  */
-public final class AudioConfig
-{
+public final class AudioConfig implements Closeable {
+
     // load the native library.
     static {
         // trigger loading of native library
@@ -29,7 +36,9 @@ public final class AudioConfig
      * @return The audio input configuration being created.
      */
     public static com.microsoft.cognitiveservices.speech.audio.AudioConfig fromDefaultMicrophoneInput() {
-        return new AudioConfig(com.microsoft.cognitiveservices.speech.internal.AudioConfig.FromDefaultMicrophoneInput());
+        IntRef configHandle = new IntRef(0);
+        Contracts.throwIfFail(createAudioInputFromDefaultMicrophone(configHandle));
+        return new AudioConfig(configHandle);
     }
 
     /**
@@ -40,7 +49,10 @@ public final class AudioConfig
      * @return The audio input configuration being created.
      */
     public static com.microsoft.cognitiveservices.speech.audio.AudioConfig fromMicrophoneInput(String deviceName) {
-        return new AudioConfig(com.microsoft.cognitiveservices.speech.internal.AudioConfig.FromMicrophoneInput(deviceName));
+        Contracts.throwIfNull(deviceName, "deviceName");
+        IntRef configHandle = new IntRef(0);
+        Contracts.throwIfFail(createAudioInputFromMicrophoneInput(configHandle, deviceName));
+        return new AudioConfig(configHandle);
     }
 
     /**
@@ -49,7 +61,10 @@ public final class AudioConfig
      * @return The audio input configuration being created.
      */
     public static com.microsoft.cognitiveservices.speech.audio.AudioConfig fromWavFileInput(String fileName) {
-        return new AudioConfig(com.microsoft.cognitiveservices.speech.internal.AudioConfig.FromWavFileInput(fileName));
+        Contracts.throwIfNull(fileName, "fileName");
+        IntRef configHandle = new IntRef(0);
+        Contracts.throwIfFail(createAudioInputFromWavFileName(configHandle, fileName));
+        return new AudioConfig(configHandle);
     }
 
     /**
@@ -58,7 +73,10 @@ public final class AudioConfig
      * @return The audio input configuration being created.
      */
     public static com.microsoft.cognitiveservices.speech.audio.AudioConfig fromStreamInput(AudioInputStream audioStream) {
-        return new AudioConfig(com.microsoft.cognitiveservices.speech.internal.AudioConfig.FromStreamInput(audioStream.getStreamImpl()), audioStream);
+        Contracts.throwIfNull(audioStream, "audioStream");
+        IntRef configHandle = new IntRef(0);
+        Contracts.throwIfFail(createAudioInputFromStream(configHandle, audioStream.getImpl()));        
+        return new AudioConfig(configHandle, audioStream);
     }
 
     /**
@@ -67,8 +85,11 @@ public final class AudioConfig
      * @return The audio input configuration being created.
      */
     public static com.microsoft.cognitiveservices.speech.audio.AudioConfig fromStreamInput(PullAudioInputStreamCallback callback) {
+        Contracts.throwIfNull(callback, "callback");
         PullAudioInputStream pullStream = PullAudioInputStream.create(callback);
-        AudioConfig config =  new AudioConfig(com.microsoft.cognitiveservices.speech.internal.AudioConfig.FromStreamInput(pullStream.getStreamImpl()), pullStream);
+        IntRef configHandle = new IntRef(0);
+        Contracts.throwIfFail(createAudioInputFromStream(configHandle, pullStream.getImpl()));
+        AudioConfig config = new AudioConfig(configHandle, pullStream);
         config.closeKeepAliveOnClose = true;
         return config;
     }
@@ -79,7 +100,9 @@ public final class AudioConfig
      * @return The audio output configuration being created.
      */
     public static com.microsoft.cognitiveservices.speech.audio.AudioConfig fromDefaultSpeakerOutput() {
-        return new AudioConfig(com.microsoft.cognitiveservices.speech.internal.AudioConfig.FromDefaultSpeakerOutput());
+        IntRef configHandle = new IntRef(0);
+        Contracts.throwIfFail(createAudioOutputFromDefaultSpeaker(configHandle));
+        return new AudioConfig(configHandle);
     }
 
     /**
@@ -89,7 +112,10 @@ public final class AudioConfig
      * @return The audio output configuration being created.
      */
     public static com.microsoft.cognitiveservices.speech.audio.AudioConfig fromWavFileOutput(String fileName) {
-        return new AudioConfig(com.microsoft.cognitiveservices.speech.internal.AudioConfig.FromWavFileOutput(fileName));
+        Contracts.throwIfNull(fileName, "fileName");
+        IntRef configHandle = new IntRef(0);
+        Contracts.throwIfFail(createAudioOutputFromWavFileName(configHandle, fileName));
+        return new AudioConfig(configHandle);
     }
 
     /**
@@ -99,47 +125,45 @@ public final class AudioConfig
      * @return The audio output configuration being created.
      */
     public static com.microsoft.cognitiveservices.speech.audio.AudioConfig fromStreamOutput(AudioOutputStream audioStream) {
-        return new AudioConfig(com.microsoft.cognitiveservices.speech.internal.AudioConfig.FromStreamOutput(audioStream.getStreamImpl()), audioStream);
+        IntRef configHandle = new IntRef(0);
+        Contracts.throwIfFail(createAudioOutputFromStream(configHandle, audioStream.streamHandle));
+        return new AudioConfig(configHandle, audioStream);
     }
 
     /**
      * Explicitly frees any external resource attached to the object
      */
+    @Override
     public void close() {
-        if(this._inputStreamKeepAlive != null && this.closeKeepAliveOnClose)
-        {
-            this._inputStreamKeepAlive.close();
+        if(this.inputStreamKeepAlive != null && this.closeKeepAliveOnClose) {
+            this.inputStreamKeepAlive.close();
         }
+        this.inputStreamKeepAlive = null;
 
-        if (this._configImpl != null) {
-            this._configImpl.delete();
+        if (this.audioConfigHandle != null) {
+            this.audioConfigHandle.close();
+            this.audioConfigHandle = null;
         }
-        this._configImpl = null;
     }
 
-    AudioConfig(com.microsoft.cognitiveservices.speech.internal.AudioConfig config) {
+    AudioConfig(IntRef config) {
         Contracts.throwIfNull(config, "config");
-        this._configImpl = config;
-        this._inputStreamKeepAlive = null;
-        this._outputStreamKeepAlive = null;
+        this.audioConfigHandle = new SafeHandle(config.getValue(), SafeHandleType.AudioConfig);
+        this.inputStreamKeepAlive = null;
+        this.outputStreamKeepAlive = null;
     }
 
-    AudioConfig(com.microsoft.cognitiveservices.speech.internal.AudioConfig config, com.microsoft.cognitiveservices.speech.audio.AudioInputStream audioStream) {
+    AudioConfig(IntRef config, AudioInputStream audioStream) {
         Contracts.throwIfNull(config, "config");
-        this._configImpl = config;
-        this._inputStreamKeepAlive = audioStream;
+        this.audioConfigHandle = new SafeHandle(config.getValue(), SafeHandleType.AudioConfig);
+        this.inputStreamKeepAlive = audioStream;
     }
 
-    AudioConfig(com.microsoft.cognitiveservices.speech.internal.AudioConfig config, com.microsoft.cognitiveservices.speech.audio.AudioOutputStream audioStream) {
+    AudioConfig(IntRef config, AudioOutputStream audioStream) {
         Contracts.throwIfNull(config, "config");
-        this._configImpl = config;
-        this._outputStreamKeepAlive = audioStream;
+        this.audioConfigHandle = new SafeHandle(config.getValue(), SafeHandleType.AudioConfig);
+        this.outputStreamKeepAlive = audioStream;
     }
-
-    private com.microsoft.cognitiveservices.speech.internal.AudioConfig _configImpl;
-    @SuppressWarnings("unused")
-    private AudioInputStream _inputStreamKeepAlive;
-    private AudioOutputStream _outputStreamKeepAlive;
 
     /*! \cond INTERNAL */
 
@@ -147,11 +171,23 @@ public final class AudioConfig
      * Returns the audio input configuration.
      * @return The implementation of the config.
      */
-    public com.microsoft.cognitiveservices.speech.internal.AudioConfig getConfigImpl() {
-        return this._configImpl;
+    public SafeHandle getImpl() {
+        return this.audioConfigHandle;
     }
+    
+    /*! \endcond */
 
+    private SafeHandle audioConfigHandle = null;
+    private AudioInputStream inputStreamKeepAlive = null;
+    private AudioOutputStream outputStreamKeepAlive = null;
     private boolean closeKeepAliveOnClose = false;
 
-    /*! \endcond */
+    private final static native long createAudioInputFromWavFileName(IntRef audioConfigHandle, String fileName);
+    private final static native long createAudioInputFromDefaultMicrophone(IntRef configHandle);
+    private final static native long createAudioInputFromMicrophoneInput(IntRef configHandle, String deviceName);
+    private final static native long createAudioInputFromStream(IntRef configHandle, SafeHandle streamHandle);
+    private final static native long createAudioOutputFromDefaultSpeaker(IntRef configHandle);
+    private final static native long createAudioOutputFromWavFileName(IntRef configHandle, String fileName);
+    private final static native long createAudioOutputFromStream(IntRef configHandle, SafeHandle streamHandle);
+
 }

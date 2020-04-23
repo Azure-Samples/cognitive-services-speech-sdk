@@ -5,6 +5,9 @@
 package com.microsoft.cognitiveservices.speech.transcription;
 
 import com.microsoft.cognitiveservices.speech.util.Contracts;
+import com.microsoft.cognitiveservices.speech.util.SafeHandle;
+import com.microsoft.cognitiveservices.speech.util.SafeHandleType;
+import com.microsoft.cognitiveservices.speech.util.IntRef;
 import com.microsoft.cognitiveservices.speech.SpeechConfig;
 import com.microsoft.cognitiveservices.speech.PropertyCollection;
 
@@ -37,7 +40,10 @@ public final class Participant
         Contracts.throwIfNullOrWhitespace(userId, "userId");
         Contracts.throwIfNullOrWhitespace(preferredLanguage, "preferredLanguage");
         Contracts.throwIfNull(voiceSignature, "voiceSignature");
-        return new Participant(com.microsoft.cognitiveservices.speech.internal.Participant.From(userId, preferredLanguage, voiceSignature));
+
+        IntRef participantRef = new IntRef(0);
+        Contracts.throwIfFail(createParticipantHandle(participantRef, userId, preferredLanguage, voiceSignature));
+        return new Participant(participantRef.getValue());
     }
 
     /**
@@ -49,7 +55,9 @@ public final class Participant
     public static Participant from(String userId, String preferredLanguage) {
         Contracts.throwIfNullOrWhitespace(userId, "userId");
         Contracts.throwIfNullOrWhitespace(preferredLanguage, "preferredLanguage");
-        return new Participant(com.microsoft.cognitiveservices.speech.internal.Participant.From(userId, preferredLanguage));
+        IntRef participantRef = new IntRef(0);
+        Contracts.throwIfFail(createParticipantHandle(participantRef, userId, preferredLanguage, null));
+        return new Participant(participantRef.getValue());
     }
 
     /**
@@ -59,28 +67,31 @@ public final class Participant
      */
     public static Participant from(String userId) {
         Contracts.throwIfNullOrWhitespace(userId, "userId");
-        return new Participant(com.microsoft.cognitiveservices.speech.internal.Participant.From(userId));
+        IntRef participantRef = new IntRef(0);
+        Contracts.throwIfFail(createParticipantHandle(participantRef, userId, null, null));
+        return new Participant(participantRef.getValue());
     }
 
     /**
      * Explicitly frees any external resource attached to the object
      */
     public void close() {
-        if (this._participantImpl != null) {
-            this._participantImpl.delete();
+        if (this.participantHandle != null) {
+            this.participantHandle.close();
         }
-        this._participantImpl = null;
+        this.participantHandle = null;
 
-        if (this._parameters != null) {
-            this._parameters.close();
+        if (this.propertyHandle != null) {
+            this.propertyHandle.close();
         }
-        this._parameters = null;
+        this.propertyHandle = null;
     }
 
-    Participant(com.microsoft.cognitiveservices.speech.internal.Participant participant) {
-        Contracts.throwIfNull(participant, "participant");
-        this._participantImpl = participant;
-        _parameters = new PrivatePropertyCollection(_participantImpl.getProperties());
+    Participant(long handleValue) {
+        this.participantHandle = new SafeHandle(handleValue, SafeHandleType.Participant);
+        IntRef propbagRef = new IntRef(0);
+        Contracts.throwIfFail(getPropertyBag(participantHandle, propbagRef));
+        propertyHandle = new PropertyCollection(propbagRef);
     }
 
     /**
@@ -89,7 +100,7 @@ public final class Participant
      */
     public void setPreferredLanguage(String preferredLanguage) {
         Contracts.throwIfNullOrWhitespace(preferredLanguage, "preferredLanguage");
-        _participantImpl.SetPreferredLanguage(preferredLanguage);
+        Contracts.throwIfFail(setPreferredLanguage(participantHandle, preferredLanguage));
     }
 
     /**
@@ -99,7 +110,7 @@ public final class Participant
      */
     public void setVoiceSignature(String voiceSignature) {
         Contracts.throwIfNull(voiceSignature, "voiceSignature");
-        _participantImpl.SetVoiceSignature(voiceSignature);
+        Contracts.throwIfFail(setVoiceSignature(participantHandle, voiceSignature));
     }
 
     /**
@@ -107,17 +118,11 @@ public final class Participant
      * @return the properties of participant.
      */
     public PropertyCollection getProperties() {
-        return _parameters;
+        return propertyHandle;
     }
 
-    private class PrivatePropertyCollection extends com.microsoft.cognitiveservices.speech.PropertyCollection {
-        public PrivatePropertyCollection(com.microsoft.cognitiveservices.speech.internal.PropertyCollection collection) {
-            super(collection);
-        }
-    }
-
-    private com.microsoft.cognitiveservices.speech.internal.Participant _participantImpl;
-    private com.microsoft.cognitiveservices.speech.PropertyCollection _parameters;
+    private SafeHandle participantHandle = null;
+    private com.microsoft.cognitiveservices.speech.PropertyCollection propertyHandle;
 
     /*! \cond INTERNAL */
 
@@ -125,9 +130,14 @@ public final class Participant
      * Returns the participant implementation.
      * @return The implementation of the participant.
      */
-    public com.microsoft.cognitiveservices.speech.internal.Participant getParticipantImpl() {
-        return this._participantImpl;
+    public SafeHandle getImpl() {
+        return this.participantHandle;
     }
 
     /*! \endcond */
+
+    private final static native long createParticipantHandle(IntRef participantRef, String userId, String preferredLanguage, String voiceSignature);
+    private final native long getPropertyBag(SafeHandle handle, IntRef propbagHandle);
+    private final native long setPreferredLanguage(SafeHandle handle, String preferredLanguage);
+    private final native long setVoiceSignature(SafeHandle handle, String voiceSignature);
 }

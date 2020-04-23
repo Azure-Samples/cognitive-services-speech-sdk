@@ -5,6 +5,9 @@ package com.microsoft.cognitiveservices.speech.audio;
 //
 
 import com.microsoft.cognitiveservices.speech.SpeechConfig;
+import com.microsoft.cognitiveservices.speech.util.Contracts;
+import com.microsoft.cognitiveservices.speech.util.IntRef;
+import com.microsoft.cognitiveservices.speech.util.SafeHandle;
 
 /**
  * Represents memory backed push audio output stream used for custom audio output configurations.
@@ -27,7 +30,9 @@ public final class PullAudioOutputStream extends com.microsoft.cognitiveservices
      * @return The pull audio output stream being created.
      */
     public static PullAudioOutputStream create() {
-        return new PullAudioOutputStream(com.microsoft.cognitiveservices.speech.internal.AudioOutputStream.CreatePullStream());
+        IntRef audioStreamHandle = new IntRef(0);
+        Contracts.throwIfFail(createPullAudioOutputStream(audioStreamHandle));
+        return new PullAudioOutputStream(audioStreamHandle);
     }
 
     /**
@@ -37,15 +42,17 @@ public final class PullAudioOutputStream extends com.microsoft.cognitiveservices
      * @return The number of bytes filled, or 0 in case the stream hits its end and there is no more data available.
      */
     public long read(byte[] dataBuffer) {
-        return this._pullStreamImpl.Read(dataBuffer);
+        IntRef filledSize = new IntRef(0);
+        Contracts.throwIfFail(pullAudioOutputStreamRead(streamHandle, dataBuffer, filledSize));
+        return filledSize.getValue();
     }
 
     /*! \cond PROTECTED */
-    public PullAudioOutputStream(com.microsoft.cognitiveservices.speech.internal.PullAudioOutputStream stream) {
+    public PullAudioOutputStream(IntRef stream) {
         super(stream);
-        this._pullStreamImpl = stream;
-    }
+    }    
      /*! \endcond */
-
-    private com.microsoft.cognitiveservices.speech.internal.PullAudioOutputStream _pullStreamImpl;
+     
+     private final static native long createPullAudioOutputStream(IntRef audioStreamHandle);
+     private final native long pullAudioOutputStreamRead(SafeHandle streamHandle, byte[] dataBuffer, IntRef filledSize);
 }

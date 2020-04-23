@@ -16,7 +16,9 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import com.microsoft.cognitiveservices.speech.util.Contracts;
-
+import com.microsoft.cognitiveservices.speech.util.SafeHandle;
+import com.microsoft.cognitiveservices.speech.util.SafeHandleType;
+import com.microsoft.cognitiveservices.speech.util.IntRef;
 
 /**
  * Represents a keyword recognition model for recognizing when
@@ -61,7 +63,9 @@ public class KeywordRecognitionModel implements Closeable
             else {
                 // if not zipped, just take the original file.
                 inputStream.close();
-                ret = new KeywordRecognitionModel(com.microsoft.cognitiveservices.speech.internal.KeywordRecognitionModel.FromFile(f.getCanonicalPath()));
+                IntRef keywordModelHandle = new IntRef(0);
+                Contracts.throwIfFail(createKeywordRecognitionModelFromFile(f.getCanonicalPath(), keywordModelHandle));
+                ret = new KeywordRecognitionModel(keywordModelHandle);
             }
 
             return ret;
@@ -177,42 +181,44 @@ public class KeywordRecognitionModel implements Closeable
         if (!kwsTableFile.exists() || !kwsTableFile.isFile()) {
             throw new IllegalArgumentException("zip did not contain kws.table");
         }
-
-        return new KeywordRecognitionModel(com.microsoft.cognitiveservices.speech.internal.KeywordRecognitionModel.FromFile(kwsTableFile.getCanonicalPath()));
+        IntRef keywordModelHandle = new IntRef(0);
+        Contracts.throwIfFail(createKeywordRecognitionModelFromFile(kwsTableFile.getCanonicalPath(), keywordModelHandle));
+        return new KeywordRecognitionModel(keywordModelHandle);
     }
 
     /**
      * Dispose of associated resources.
      */
     @Override
-    public void close()
-    {
-        if (disposed)
-        {
+    public void close() {
+        if (disposed) {
             return;
         }
-
+        if (keywordModelHandle != null) {
+            keywordModelHandle.close();
+            keywordModelHandle = null;    
+        }
         disposed = true;
     }
 
     private boolean disposed = false;
 
-    KeywordRecognitionModel(com.microsoft.cognitiveservices.speech.internal.KeywordRecognitionModel model)
-    {
-        Contracts.throwIfNull(model, "model");
-
-        modelImpl = model;
+    KeywordRecognitionModel(IntRef modelHandle) {
+        Contracts.throwIfNull(modelHandle, "modelHandle");
+        keywordModelHandle = new SafeHandle(modelHandle.getValue(), SafeHandleType.KeywordModel);
     }
 
-    private com.microsoft.cognitiveservices.speech.internal.KeywordRecognitionModel modelImpl;
+    /*! \cond INTERNAL */
+
     /**
      * Returns the keyword recognition model.
      * @return The implementation of the model.
      */
-    public com.microsoft.cognitiveservices.speech.internal.KeywordRecognitionModel getModelImpl()
-    {
-        return modelImpl;
+    public SafeHandle getImpl() {
+        return keywordModelHandle;
     }
+    
+    /*! \endcond */
 
     private static void safeClose(Closeable is) {
         if (is != null) {
@@ -223,4 +229,7 @@ public class KeywordRecognitionModel implements Closeable
             }
         }
     }
+
+    private SafeHandle keywordModelHandle = null;
+    private final static native long createKeywordRecognitionModelFromFile(String fileName, IntRef keywordModelHandle);
 }

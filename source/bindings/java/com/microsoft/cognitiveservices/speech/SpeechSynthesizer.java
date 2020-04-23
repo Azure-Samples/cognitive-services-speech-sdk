@@ -5,6 +5,7 @@
 package com.microsoft.cognitiveservices.speech;
 
 import java.io.Closeable;
+import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -12,6 +13,9 @@ import java.util.concurrent.Future;
 
 import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.util.EventHandlerImpl;
+import com.microsoft.cognitiveservices.speech.util.SafeHandle;
+import com.microsoft.cognitiveservices.speech.util.SafeHandleType;
+import com.microsoft.cognitiveservices.speech.util.IntRef;
 import com.microsoft.cognitiveservices.speech.util.Contracts;
 
 /**
@@ -58,19 +62,14 @@ public class SpeechSynthesizer implements Closeable
      */
     private static java.util.Set<SpeechSynthesizer> s_speechSynthesizerObjects = java.util.Collections.synchronizedSet(new java.util.HashSet<SpeechSynthesizer>());
 
-    private com.microsoft.cognitiveservices.speech.internal.SpeechSynthesizer synthImpl;
+    private SafeHandle synthHandle = null;
 
-    private ResultHandlerImpl synthesisStartedHandler;
-    private ResultHandlerImpl synthesizingHandler;
-    private ResultHandlerImpl synthesisCompletedHandler;
-    private ResultHandlerImpl synthesisCanceledHandler;
-    private WordBoundaryHandlerImpl wordBoundaryHandler;
-
-    private com.microsoft.cognitiveservices.speech.PropertyCollection parameters;
+    private com.microsoft.cognitiveservices.speech.PropertyCollection propertyHandle;
 
     private boolean disposed = false;
     private final Object synthesizerLock = new Object();
     private int activeAsyncSynthesisCounter = 0;
+    private AudioConfig audioOutputKeepAlive = null;
 
     /**
      * Initializes a new instance of Speech Synthesizer.
@@ -78,7 +77,9 @@ public class SpeechSynthesizer implements Closeable
      */
     public SpeechSynthesizer(SpeechConfig speechConfig) {
         Contracts.throwIfNull(speechConfig, "speechConfig");
-        this.synthImpl = com.microsoft.cognitiveservices.speech.internal.SpeechSynthesizer.FromConfig(speechConfig.getImpl());
+        synthHandle = new SafeHandle(0, SafeHandleType.Synthesizer);
+        Contracts.throwIfFail(createSpeechSynthesizerFromConfig(synthHandle, speechConfig.getImpl(), null));
+        Contracts.throwIfNull(synthHandle.getValue(), "synthHandle");
         initialize();
     }
 
@@ -90,9 +91,10 @@ public class SpeechSynthesizer implements Closeable
     public SpeechSynthesizer(SpeechConfig speechConfig, AudioConfig audioConfig) {
         Contracts.throwIfNull(speechConfig, "speechConfig");
 
-        com.microsoft.cognitiveservices.speech.internal.AudioConfig audioConfigImpl = audioConfig == null ? null : audioConfig.getConfigImpl();
-        this.synthImpl = com.microsoft.cognitiveservices.speech.internal.SpeechSynthesizer.FromConfig(speechConfig.getImpl(), audioConfigImpl);
-
+        synthHandle = new SafeHandle(0, SafeHandleType.Synthesizer);
+        Contracts.throwIfFail(createSpeechSynthesizerFromConfig(synthHandle, speechConfig.getImpl(), audioConfig == null ? null : audioConfig.getImpl()));
+        Contracts.throwIfNull(synthHandle.getValue(), "synthHandle");
+        audioOutputKeepAlive = audioConfig;
         initialize();
     }
 
@@ -102,7 +104,9 @@ public class SpeechSynthesizer implements Closeable
      * @return The synthesis result.
      */
     public SpeechSynthesisResult SpeakText(String text) {
-        return new SpeechSynthesisResult(this.synthImpl.SpeakText(text));
+        IntRef resultRef = new IntRef(0);
+        Contracts.throwIfFail(speakText(synthHandle, text, resultRef));
+        return new SpeechSynthesisResult(resultRef);
     }
 
     /**
@@ -111,7 +115,9 @@ public class SpeechSynthesizer implements Closeable
      * @return The synthesis result.
      */
     public SpeechSynthesisResult SpeakSsml(String ssml) {
-        return new SpeechSynthesisResult(this.synthImpl.SpeakSsml(ssml));
+        IntRef resultRef = new IntRef(0);
+        Contracts.throwIfFail(speakSsml(synthHandle, ssml, resultRef));
+        return new SpeechSynthesisResult(resultRef);
     }
 
     /**
@@ -129,7 +135,11 @@ public class SpeechSynthesizer implements Closeable
                 // The compiler treats an array initialized once as an effectively final.
                 final SpeechSynthesisResult[] result = new SpeechSynthesisResult[1];
 
-                Runnable runnable = new Runnable() { public void run() { result[0] = new SpeechSynthesisResult(synthImpl.SpeakText(finalText)); }};
+                Runnable runnable = new Runnable() { public void run() { 
+                    IntRef resultRef = new IntRef(0);
+                    Contracts.throwIfFail(speakText(synthHandle, finalText, resultRef));
+                    result[0] = new SpeechSynthesisResult(resultRef);
+                }};
                 thisSynth.doAsyncSynthesisAction(runnable);
 
                 return result[0];
@@ -151,7 +161,11 @@ public class SpeechSynthesizer implements Closeable
                 // The compiler treats an array initialized once as an effectively final.
                 final SpeechSynthesisResult[] result = new SpeechSynthesisResult[1];
 
-                Runnable runnable = new Runnable() { public void run() { result[0] = new SpeechSynthesisResult(synthImpl.SpeakSsml(finalSsml)); }};
+                Runnable runnable = new Runnable() { public void run() {
+                    IntRef resultRef = new IntRef(0);
+                    Contracts.throwIfFail(speakSsml(synthHandle, finalSsml, resultRef));
+                    result[0] = new SpeechSynthesisResult(resultRef);
+                }};
                 thisSynth.doAsyncSynthesisAction(runnable);
 
                 return result[0];
@@ -164,7 +178,9 @@ public class SpeechSynthesizer implements Closeable
      * @return The synthesis result.
      */
     public SpeechSynthesisResult StartSpeakingText(String text) {
-        return new SpeechSynthesisResult(this.synthImpl.StartSpeakingText(text));
+        IntRef resultRef = new IntRef(0);
+        Contracts.throwIfFail(startSpeakingText(synthHandle, text, resultRef));
+        return new SpeechSynthesisResult(resultRef);
     }
 
     /**
@@ -173,7 +189,9 @@ public class SpeechSynthesizer implements Closeable
      * @return The synthesis result.
      */
     public SpeechSynthesisResult StartSpeakingSsml(String ssml) {
-        return new SpeechSynthesisResult(this.synthImpl.StartSpeakingSsml(ssml));
+        IntRef resultRef = new IntRef(0);
+        Contracts.throwIfFail(startSpeakingSsml(synthHandle, ssml, resultRef));
+        return new SpeechSynthesisResult(resultRef);
     }
 
     /**
@@ -191,7 +209,11 @@ public class SpeechSynthesizer implements Closeable
                 // The compiler treats an array initialized once as an effectively final.
                 final SpeechSynthesisResult[] result = new SpeechSynthesisResult[1];
 
-                Runnable runnable = new Runnable() { public void run() { result[0] = new SpeechSynthesisResult(synthImpl.StartSpeakingText(finalText)); }};
+                Runnable runnable = new Runnable() { public void run() {
+                    IntRef resultRef = new IntRef(0);
+                    Contracts.throwIfFail(startSpeakingText(synthHandle, finalText, resultRef));
+                    result[0] = new SpeechSynthesisResult(resultRef);
+                }};
                 thisSynth.doAsyncSynthesisAction(runnable);
 
                 return result[0];
@@ -213,7 +235,11 @@ public class SpeechSynthesizer implements Closeable
                 // The compiler treats an array initialized once as an effectively final.
                 final SpeechSynthesisResult[] result = new SpeechSynthesisResult[1];
 
-                Runnable runnable = new Runnable() { public void run() { result[0] = new SpeechSynthesisResult(synthImpl.StartSpeakingSsml(finalSsml)); }};
+                Runnable runnable = new Runnable() { public void run() {
+                    IntRef resultRef = new IntRef(0);
+                    Contracts.throwIfFail(startSpeakingSsml(synthHandle, finalSsml, resultRef));
+                    result[0] = new SpeechSynthesisResult(resultRef);
+                }};
                 thisSynth.doAsyncSynthesisAction(runnable);
 
                 return result[0];
@@ -225,7 +251,7 @@ public class SpeechSynthesizer implements Closeable
      * @return The collection of properties and their values defined for this SpeechSynthesizer.
      */
     public PropertyCollection getProperties() {
-        return this.parameters;
+        return this.propertyHandle;
     }
 
     /**
@@ -237,7 +263,7 @@ public class SpeechSynthesizer implements Closeable
      */
     public void setAuthorizationToken(String token) {
         Contracts.throwIfNullOrWhitespace(token, "token");
-        synthImpl.SetAuthorizationToken(token);
+        propertyHandle.setProperty(PropertyId.SpeechServiceAuthorization_Token, token);
     }
 
     /**
@@ -245,7 +271,7 @@ public class SpeechSynthesizer implements Closeable
      * @return Authorization token.
      */
     public String getAuthorizationToken() {
-        return synthImpl.GetAuthorizationToken();
+        return propertyHandle.getProperty(PropertyId.SpeechServiceAuthorization_Token);
     }
 
     /**
@@ -264,52 +290,49 @@ public class SpeechSynthesizer implements Closeable
     private void initialize() {
         final SpeechSynthesizer _this = this;
 
-        this.synthesisStartedHandler = new ResultHandlerImpl(this, this.SynthesisStarted);
         this.SynthesisStarted.updateNotificationOnConnected(new Runnable(){
             @Override
             public void run() {
                 s_speechSynthesizerObjects.add(_this);
-                synthImpl.getSynthesisStarted().AddEventListener(synthesisStartedHandler);
+                Contracts.throwIfFail(synthesisStartedSetCallback(_this.synthHandle));
             }
         });
 
-        this.synthesizingHandler = new ResultHandlerImpl(this, this.Synthesizing);
         this.Synthesizing.updateNotificationOnConnected(new Runnable(){
             @Override
             public void run() {
                 s_speechSynthesizerObjects.add(_this);
-                synthImpl.getSynthesizing().AddEventListener(synthesizingHandler);
+                Contracts.throwIfFail(synthesizingSetCallback(_this.synthHandle));
             }
         });
 
-        this.synthesisCompletedHandler = new ResultHandlerImpl(this, this.SynthesisCompleted);
         this.SynthesisCompleted.updateNotificationOnConnected(new Runnable(){
             @Override
             public void run() {
                 s_speechSynthesizerObjects.add(_this);
-                synthImpl.getSynthesisCompleted().AddEventListener(synthesisCompletedHandler);
+                Contracts.throwIfFail(synthesisCompletedSetCallback(_this.synthHandle));
             }
         });
 
-        this.synthesisCanceledHandler = new ResultHandlerImpl(this, this.SynthesisCanceled);
         this.SynthesisCanceled.updateNotificationOnConnected(new Runnable(){
             @Override
             public void run() {
                 s_speechSynthesizerObjects.add(_this);
-                synthImpl.getSynthesisCanceled().AddEventListener(synthesisCanceledHandler);
+                Contracts.throwIfFail(synthesisCanceledSetCallback(_this.synthHandle));
             }
         });
 
-        this.wordBoundaryHandler = new WordBoundaryHandlerImpl(this, this.WordBoundary);
         this.WordBoundary.updateNotificationOnConnected(new Runnable(){
             @Override
             public void run() {
                 s_speechSynthesizerObjects.add(_this);
-                synthImpl.getWordBoundary().AddEventListener(wordBoundaryHandler);
+                Contracts.throwIfFail(wordBoundarySetCallback(_this.synthHandle));
             }
         });
 
-        this.parameters = new PrivatePropertyCollection(this.synthImpl.getProperties());
+        IntRef propHandle = new IntRef(0);
+        Contracts.throwIfFail(getPropertyBagFromSynthesizerHandle(_this.synthHandle, propHandle));
+        propertyHandle = new PropertyCollection(propHandle);
     }
 
     private void doAsyncSynthesisAction(Runnable synthImplAction) {
@@ -353,93 +376,105 @@ public class SpeechSynthesizer implements Closeable
                 t.start();
             }
             else {
-                if (this.SynthesisStarted.isUpdateNotificationOnConnectedFired())
-                    this.synthImpl.getSynthesisStarted().RemoveEventListener(this.synthesisStartedHandler);
-                if (this.Synthesizing.isUpdateNotificationOnConnectedFired())
-                    this.synthImpl.getSynthesizing().RemoveEventListener(this.synthesizingHandler);
-                if (this.SynthesisCompleted.isUpdateNotificationOnConnectedFired())
-                    this.synthImpl.getSynthesisCompleted().RemoveEventListener(this.synthesisCompletedHandler);
-                if (this.SynthesisCanceled.isUpdateNotificationOnConnectedFired())
-                    this.synthImpl.getSynthesisCanceled().RemoveEventListener(this.synthesisCanceledHandler);
-                if (this.WordBoundary.isUpdateNotificationOnConnectedFired())
-                    this.synthImpl.getWordBoundary().RemoveEventListener(this.wordBoundaryHandler);
-
-                this.synthesisStartedHandler.delete();
-                this.synthesizingHandler.delete();
-                this.synthesisCompletedHandler.delete();
-                this.synthesisCanceledHandler.delete();
-                this.wordBoundaryHandler.delete();
-                this.synthImpl.delete();
-                this.parameters.close();
+                if (this.propertyHandle != null) {
+                    this.propertyHandle.close();
+                    this.propertyHandle = null;
+                }
+                if (this.synthHandle != null) {
+                    this.synthHandle.close();
+                    this.synthHandle = null;
+                }
+                audioOutputKeepAlive = null;
                 s_speechSynthesizerObjects.remove(this);
                 this.disposed = true;
             }
         }
     }
 
-    private class PrivatePropertyCollection extends com.microsoft.cognitiveservices.speech.PropertyCollection {
-        public PrivatePropertyCollection(com.microsoft.cognitiveservices.speech.internal.PropertyCollection collection) {
-            super(collection);
-        }
-    }
-
-    // Defines a private class to raise an event for synthesis result when a corresponding callback is invoked by the native layer.
-    private class ResultHandlerImpl extends com.microsoft.cognitiveservices.speech.internal.SpeechSynthesisEventListener {
-
-        private SpeechSynthesizer synthesizer;
-        private EventHandlerImpl<SpeechSynthesisEventArgs> synthesisHandler;
-
-        ResultHandlerImpl(SpeechSynthesizer synthesizer, EventHandlerImpl<SpeechSynthesisEventArgs> synthesisHandler) {
-            Contracts.throwIfNull(synthesizer, "synthesizer");
-
-            this.synthesizer = synthesizer;
-            this.synthesisHandler = synthesisHandler;
-        }
-
-        @Override
-        public void Execute(com.microsoft.cognitiveservices.speech.internal.SpeechSynthesisEventArgs eventArgs) {
-            Contracts.throwIfNull(eventArgs, "eventArgs");
-
-            if (this.synthesizer.disposed) {
+    private void synthesisStartedEventCallback(long eventArgs)
+    {
+        try {
+            Contracts.throwIfNull(this, "synthesizer");
+            if (this.disposed) {
                 return;
             }
-
             SpeechSynthesisEventArgs resultEventArg = new SpeechSynthesisEventArgs(eventArgs);
-            EventHandlerImpl<SpeechSynthesisEventArgs> handler = this.synthesisHandler;
+            EventHandlerImpl<SpeechSynthesisEventArgs> handler = this.SynthesisStarted;
             if (handler != null) {
-                handler.fireEvent(this.synthesizer, resultEventArg);
+                handler.fireEvent(this, resultEventArg);
             }
-
-            resultEventArg.close();
-        }
+        } catch (Exception e) {}
     }
 
-    // Defines a private class to raise an event for word boundary when a corresponding callback is invoked by the native layer.
-    private class WordBoundaryHandlerImpl extends com.microsoft.cognitiveservices.speech.internal.SpeechSynthesisWordBoundaryEventListener {
-
-        private SpeechSynthesizer synthesizer;
-        private EventHandlerImpl<SpeechSynthesisWordBoundaryEventArgs> wordBoundaryHandler;
-
-        WordBoundaryHandlerImpl(SpeechSynthesizer synthesizer, EventHandlerImpl<SpeechSynthesisWordBoundaryEventArgs> wordBoundaryHandler) {
-            Contracts.throwIfNull(synthesizer, "synthesizer");
-
-            this.synthesizer = synthesizer;
-            this.wordBoundaryHandler = wordBoundaryHandler;
-        }
-
-        @Override
-        public void Execute(com.microsoft.cognitiveservices.speech.internal.SpeechSynthesisWordBoundaryEventArgs eventArgs) {
-            Contracts.throwIfNull(eventArgs, "eventArgs");
-
-            if (this.synthesizer.disposed) {
+    private void synthesizingEventCallback(long eventArgs)
+    {
+        try {
+            Contracts.throwIfNull(this, "synthesizer");
+            if (this.disposed) {
                 return;
             }
-
-            SpeechSynthesisWordBoundaryEventArgs wordBoundaryEventArgs = new SpeechSynthesisWordBoundaryEventArgs(eventArgs);
-            EventHandlerImpl<SpeechSynthesisWordBoundaryEventArgs> handler = this.wordBoundaryHandler;
+            SpeechSynthesisEventArgs resultEventArg = new SpeechSynthesisEventArgs(eventArgs);
+            EventHandlerImpl<SpeechSynthesisEventArgs> handler = this.Synthesizing;
             if (handler != null) {
-                handler.fireEvent(this.synthesizer, wordBoundaryEventArgs);
+                handler.fireEvent(this, resultEventArg);
             }
-        }
+        } catch (Exception e) {}
     }
+
+    private void synthesisCompletedEventCallback(long eventArgs)
+    {
+        try {
+            Contracts.throwIfNull(this, "synthesizer");
+            if (this.disposed) {
+                return;
+            }
+            SpeechSynthesisEventArgs resultEventArg = new SpeechSynthesisEventArgs(eventArgs);
+            EventHandlerImpl<SpeechSynthesisEventArgs> handler = this.SynthesisCompleted;
+            if (handler != null) {
+                handler.fireEvent(this, resultEventArg);
+            }
+        } catch (Exception e) {}
+    }
+
+    private void synthesisCanceledEventCallback(long eventArgs)
+    {
+        try {
+            Contracts.throwIfNull(this, "synthesizer");
+            if (this.disposed) {
+                return;
+            }
+            SpeechSynthesisEventArgs resultEventArg = new SpeechSynthesisEventArgs(eventArgs);
+            EventHandlerImpl<SpeechSynthesisEventArgs> handler = this.SynthesisCanceled;
+            if (handler != null) {
+                handler.fireEvent(this, resultEventArg);
+            }    
+        } catch (Exception e) {}
+    }
+
+    private void wordBoundaryEventCallback(long eventArgs)
+    {
+        try {
+            Contracts.throwIfNull(this, "synthesizer");
+            if (this.disposed) {
+                return;
+            }
+            SpeechSynthesisWordBoundaryEventArgs resultEventArg = new SpeechSynthesisWordBoundaryEventArgs(eventArgs);
+            EventHandlerImpl<SpeechSynthesisWordBoundaryEventArgs> handler = this.WordBoundary;
+            if (handler != null) {
+                handler.fireEvent(this, resultEventArg);
+            }    
+        } catch (Exception e) {}
+    }
+
+    private final native long createSpeechSynthesizerFromConfig(SafeHandle synthHandle, SafeHandle speechConfig, SafeHandle audioConfig);
+    private final native long speakText(SafeHandle synthHandle, String text, IntRef resultRef);
+    private final native long speakSsml(SafeHandle synthHandle, String ssml, IntRef resultRef);
+    private final native long startSpeakingText(SafeHandle synthHandle,String text, IntRef resultRef);
+    private final native long startSpeakingSsml(SafeHandle synthHandle,String ssml, IntRef resultRef);    
+    private final native long synthesisStartedSetCallback(SafeHandle synthHandle);
+    private final native long synthesizingSetCallback(SafeHandle synthHandle);
+    private final native long synthesisCompletedSetCallback(SafeHandle synthHandle);
+    private final native long synthesisCanceledSetCallback(SafeHandle synthHandle);
+    private final native long wordBoundarySetCallback(SafeHandle synthHandle);
+    private final native long getPropertyBagFromSynthesizerHandle(SafeHandle synthHandle, IntRef propHandle);
 }

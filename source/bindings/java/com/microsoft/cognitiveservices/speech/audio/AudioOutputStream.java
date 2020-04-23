@@ -5,14 +5,18 @@
 package com.microsoft.cognitiveservices.speech.audio;
 
 import com.microsoft.cognitiveservices.speech.util.Contracts;
+import com.microsoft.cognitiveservices.speech.util.SafeHandle;
+import com.microsoft.cognitiveservices.speech.util.SafeHandleType;
+import com.microsoft.cognitiveservices.speech.util.IntRef;
 import com.microsoft.cognitiveservices.speech.SpeechConfig;
+import java.io.Closeable;
 
 /**
  * Represents audio output stream used for custom audio output configurations.
  * Note: close() must be called in order to relinquish underlying resources held by the object.
  * Updated in version 1.7.0
  */
-public class AudioOutputStream
+public class AudioOutputStream implements Closeable
 {
     // load the native library.
     static {
@@ -47,21 +51,22 @@ public class AudioOutputStream
      * Explicitly frees any external resource attached to the object
      * Note: close() must be called in order to relinquish underlying resources held by the object.
      */
+    @Override
     public void close() {
-        if (this._streamImpl != null) {
-            this._streamImpl.delete();
+        if (this.streamHandle != null) {
+            this.streamHandle.close();
         }
-        this._streamImpl = null;
+        this.streamHandle = null;
     }
 
     /*! \cond PROTECTED */
 
-    protected AudioOutputStream(com.microsoft.cognitiveservices.speech.internal.AudioOutputStream stream) {
+    protected AudioOutputStream(IntRef stream) {
         Contracts.throwIfNull(stream, "stream");
-        this._streamImpl = stream;
+        this.streamHandle = new SafeHandle(stream.getValue(), SafeHandleType.AudioOutputStream);
     }
 
-    protected com.microsoft.cognitiveservices.speech.internal.AudioOutputStream _streamImpl;
+    protected SafeHandle streamHandle;
 
     /*! \endcond */
 
@@ -71,8 +76,8 @@ public class AudioOutputStream
      * Returns the audio output configuration.
      * @return The implementation of the stream.
      */
-    public com.microsoft.cognitiveservices.speech.internal.AudioOutputStream getStreamImpl() {
-        return this._streamImpl;
+    public SafeHandle getImpl() {
+        return this.streamHandle;
     }
 
     /*! \endcond */

@@ -12,19 +12,19 @@ public enum ProfanityOption {
     /**
      * Replaces profanity with asterisks.
      */
-    Masked (com.microsoft.cognitiveservices.speech.internal.ProfanityOption.Masked),
+    Masked (0),
 
     /**
      * Removes all profanity from the result.
      */
-    Removed (com.microsoft.cognitiveservices.speech.internal.ProfanityOption.Removed),
+    Removed (1),
 
     /**
      * Includes the profanity in the result.
      */
-    Raw (com.microsoft.cognitiveservices.speech.internal.ProfanityOption.Raw);
+    Raw (2);
 
-    private ProfanityOption(com.microsoft.cognitiveservices.speech.internal.ProfanityOption profanity) {
+    private ProfanityOption(int profanity) {
         this.profanity = profanity;
     }
 
@@ -33,7 +33,7 @@ public enum ProfanityOption {
      *
      * @return the internal profanity value.
      */
-    public com.microsoft.cognitiveservices.speech.internal.ProfanityOption getValue() { return this.profanity; }
+    public int getValue() { return this.profanity; }
 
-    private final com.microsoft.cognitiveservices.speech.internal.ProfanityOption profanity;
+    private final int profanity;
 }

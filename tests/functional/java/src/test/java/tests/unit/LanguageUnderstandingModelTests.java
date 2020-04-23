@@ -90,7 +90,7 @@ public class LanguageUnderstandingModelTests {
         LanguageUnderstandingModel s = LanguageUnderstandingModel.fromAppId(Settings.DefaultSettingsMap.get(DefaultSettingsKeys.LANGUAGE_UNDERSTANDING_HOME_AUTOMATION_APP_ID));
 
         assertNotNull(s);
-        assertNotNull(s.getModelImpl());
+        assertNotNull(s.getImpl());
     }
 
     @Test
@@ -98,7 +98,7 @@ public class LanguageUnderstandingModelTests {
         LanguageUnderstandingModel s = LanguageUnderstandingModel.fromEndpoint("https://www.example.com/api/v1");
 
         assertNotNull(s);
-        assertNotNull(s.getModelImpl());
+        assertNotNull(s.getImpl());
     }
 
     @Test
@@ -108,7 +108,7 @@ public class LanguageUnderstandingModelTests {
             Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.LANGUAGE_UNDERSTANDING_SUBSCRIPTION).Region);
 
         assertNotNull(s);
-        assertNotNull(s.getModelImpl());
+        assertNotNull(s.getImpl());
     }
 
 }

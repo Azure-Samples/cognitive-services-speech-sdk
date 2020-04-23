@@ -5,6 +5,9 @@
 package com.microsoft.cognitiveservices.speech.translation;
 
 import com.microsoft.cognitiveservices.speech.util.Contracts;
+import com.microsoft.cognitiveservices.speech.util.IntRef;
+import com.microsoft.cognitiveservices.speech.util.SafeHandle;
+import com.microsoft.cognitiveservices.speech.util.SafeHandleType;
 import com.microsoft.cognitiveservices.speech.ResultReason;
 
 /**
@@ -12,33 +15,38 @@ import com.microsoft.cognitiveservices.speech.ResultReason;
  */
 public final class TranslationSynthesisResult
 {
-    private com.microsoft.cognitiveservices.speech.internal.TranslationSynthesisResult _resultImpl;
-    private ResultReason _reason;
 
-    TranslationSynthesisResult(com.microsoft.cognitiveservices.speech.internal.TranslationSynthesisResult result) {
-        Contracts.throwIfNull(result, "result");
+    /*! \cond INTERNAL */
 
-        _resultImpl = result;
-        _AudioData = null;
-        _reason = ResultReason.values()[result.getReason().swigValue()];
+    TranslationSynthesisResult(long result) {
+        Contracts.throwIfNull(result, "result");        
+        resultHandle = new SafeHandle(result, SafeHandleType.RecognitionResult);
+        IntRef intVal = new IntRef(0);
+        Contracts.throwIfFail(getResultReason(resultHandle, intVal));
+        this.reason = ResultReason.values()[(int)intVal.getValue()];
+        IntRef hr = new IntRef(0);
+        audioData = getAudio(resultHandle, hr);
+        Contracts.throwIfFail(hr.getValue());
     }
+
+    /*! \endcond */
 
     /**
      * Explicitly frees any external resource attached to the object
      */
     public void close() {
-        if (this._resultImpl != null) {
-            this._resultImpl.delete();
+        if (this.resultHandle != null) {
+            this.resultHandle.close();
         }
-        this._resultImpl = null;
+        this.resultHandle = null;
     }
 
     /**
-      * Specifies reason the result was created.
-      * @return Specifies reason of the result.
-      */
-      public ResultReason getReason() {
-        return this._reason;
+     * Specifies reason the result was created.
+     * @return Specifies reason of the result.
+     */
+    public ResultReason getReason() {
+        return this.reason;
     }
 
     /**
@@ -46,18 +54,8 @@ public final class TranslationSynthesisResult
       * @return Translated text in the target language.
       */
     public byte[] getAudio() {
-        if (_AudioData == null) {
-            com.microsoft.cognitiveservices.speech.internal.UInt8Vector audio = _resultImpl.getAudio();
-            int size = (int)audio.size();
-            _AudioData = new byte[size];
-
-            for(int n=0; n<size; n++) {
-                _AudioData[n] = (byte)audio.get(n);
-            }
-        }
-        return _AudioData;
+        return audioData;
     }
-    private byte[] _AudioData;
 
     /**
      * Returns a String that represents the speech recognition result.
@@ -66,8 +64,15 @@ public final class TranslationSynthesisResult
     @Override
     public String toString() {
         return "TranslationSynthesisResult" + 
-               " Reason:" + this._reason +
-               " Audio.length:" + this._AudioData.length +
+               " Reason:" + this.reason +
+               " Audio.length:" + this.audioData.length +
                ".";
     }
+    
+    private final native long getResultReason(SafeHandle resultHandle, IntRef reasonVal);
+    private final native byte[] getAudio(SafeHandle resultHandle, IntRef hr);
+
+    private byte[] audioData;
+    private SafeHandle resultHandle;
+    private ResultReason reason;
 }

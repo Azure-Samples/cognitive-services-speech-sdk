@@ -8,8 +8,9 @@ import java.io.Closeable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import com.microsoft.cognitiveservices.speech.util.EventHandlerImpl;
 import com.microsoft.cognitiveservices.speech.util.Contracts;
+import com.microsoft.cognitiveservices.speech.util.IntRef;
+import com.microsoft.cognitiveservices.speech.util.SafeHandle;
 import com.microsoft.cognitiveservices.speech.Recognizer;
 
 /**
@@ -19,34 +20,31 @@ import com.microsoft.cognitiveservices.speech.Recognizer;
  * to the speech service.
  * Added in version 1.5.0.
  */
-public final class PhraseListGrammar implements Closeable
-{
+public final class PhraseListGrammar extends Grammar implements Closeable {
     /**
      * Creates a PhraseListGrammar from a given speech recognizer. Will accept any recognizer that derives from Recognizer.
      * @param recognizer The recognizer to add phrase lists to.
      * @return PhraseListGrammar associated to the recognizer.
      */
-    public static PhraseListGrammar fromRecognizer(Recognizer recognizer)
-    {
-        com.microsoft.cognitiveservices.speech.internal.PhraseListGrammar phraseListGrammarImpl = com.microsoft.cognitiveservices.speech.internal.PhraseListGrammar.FromRecognizer(recognizer.getRecognizerImpl());
-        return new PhraseListGrammar(phraseListGrammarImpl);
+    public static PhraseListGrammar fromRecognizer(Recognizer recognizer) {
+        IntRef grammarRef = new IntRef(0);
+        Contracts.throwIfFail(fromRecognizer(grammarRef, recognizer.getImpl()));
+        return new PhraseListGrammar(grammarRef.getValue());
     }
 
     /**
      * Adds a single phrase to the current recognizer.
      * @param phrase Phrase to add.
      */
-    public void addPhrase(String phrase)
-    {
-        phraseListGrammarImpl.AddPhrase(phrase);
+    public void addPhrase(String phrase) {
+        Contracts.throwIfFail(addPhrase(getImpl(), phrase));
     }
 
     /**
      * Clears all phrases added to the current recognizer.
      */
-     public void clear()
-     {
-        phraseListGrammarImpl.Clear();
+     public void clear() {
+        Contracts.throwIfFail(clear(getImpl()));
      }
 
     /**
@@ -70,21 +68,20 @@ public final class PhraseListGrammar implements Closeable
             return;
         }
 
-        if (disposing) {
-            phraseListGrammarImpl.delete();
-        }
+        super.dispose(disposing);
 
         disposed = true;
     }
 
     /*! \endcond */
 
-    private com.microsoft.cognitiveservices.speech.internal.PhraseListGrammar phraseListGrammarImpl;
     private boolean disposed = false;
 
-    private PhraseListGrammar(com.microsoft.cognitiveservices.speech.internal.PhraseListGrammar phraseListGrammarImpl)
-    {
-        Contracts.throwIfNull(phraseListGrammarImpl, "RecognizerInternalImplementation");
-        this.phraseListGrammarImpl = phraseListGrammarImpl;
+    private PhraseListGrammar(long handleValue) {
+        super(handleValue);
     }
+
+    private final static native long fromRecognizer(IntRef grammarHandleRef, SafeHandle recoHandle);
+    private final native long clear(SafeHandle grammarHandle);
+    private final native long addPhrase(SafeHandle grammarHandle, String phrase);
 }

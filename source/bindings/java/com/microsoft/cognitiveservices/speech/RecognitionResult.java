@@ -5,32 +5,44 @@
 package com.microsoft.cognitiveservices.speech;
 
 import java.math.BigInteger;
-
 import com.microsoft.cognitiveservices.speech.util.Contracts;
+import com.microsoft.cognitiveservices.speech.util.IntRef;
+import com.microsoft.cognitiveservices.speech.util.SafeHandle;
+import com.microsoft.cognitiveservices.speech.util.StringRef;
+import com.microsoft.cognitiveservices.speech.util.SafeHandleType;
 
 /**
  * Contains detailed information about result of a recognition operation.
  */
 public class RecognitionResult {
-    private String resultId;
-    private ResultReason reason;
-    private String text;
-    private BigInteger duration;
-    private BigInteger offset;
-    private PropertyCollection properties;
-    private com.microsoft.cognitiveservices.speech.internal.RecognitionResult _resultImpl;
 
     /*! \cond PROTECTED */
 
-    protected RecognitionResult(com.microsoft.cognitiveservices.speech.internal.RecognitionResult result) {
-        if(result != null) {
-            this._resultImpl = result;
-            this.resultId = result.getResultId();
-            this.reason = ResultReason.values()[result.getReason().swigValue()];
-            this.text = result.getText();
-            this.duration = result.Duration();
-            this.offset = result.Offset();
-            this.properties = new PropertyCollection(result.getProperties());
+    protected RecognitionResult(long result) {
+
+        if (result != 0) {
+            this.resultHandle = new SafeHandle(result, SafeHandleType.RecognitionResult);
+
+            StringRef stringVal = new StringRef("");
+            Contracts.throwIfFail(getResultId(resultHandle, stringVal));
+            this.resultId = stringVal.getValue();
+                
+            IntRef intVal = new IntRef(0);
+            Contracts.throwIfFail(getResultReason(resultHandle, intVal));
+            this.reason = ResultReason.values()[(int)intVal.getValue()];
+    
+            Contracts.throwIfFail(getResultText(resultHandle, stringVal));
+            this.text = stringVal.getValue();
+    
+            this.duration = getResultDuration(resultHandle, intVal);
+            Contracts.throwIfFail(intVal.getValue());
+    
+            this.offset = getResultOffset(resultHandle, intVal);
+            Contracts.throwIfFail(intVal.getValue());
+    
+            IntRef propertyHandle = new IntRef(0);
+            Contracts.throwIfFail(getPropertyBagFromResult(resultHandle, propertyHandle));
+            this.properties = new PropertyCollection(propertyHandle);
         }
     }
 
@@ -40,8 +52,7 @@ public class RecognitionResult {
      * Specifies the result identifier.
      * @return Specifies the result identifier.
      */
-    public String getResultId() {
-        Contracts.throwIfNull(this._resultImpl, "result");
+    public String getResultId() {  
         return this.resultId;
     }
 
@@ -50,7 +61,6 @@ public class RecognitionResult {
      * @return Specifies reason of the result.
      */
     public ResultReason getReason() {
-        Contracts.throwIfNull(this._resultImpl, "result");
         return this.reason;
     }
 
@@ -59,7 +69,6 @@ public class RecognitionResult {
      * @return Presents the recognized text in the result.
      */
     public String getText() {
-        Contracts.throwIfNull(this._resultImpl, "result");
         return this.text;
     }
 
@@ -68,7 +77,6 @@ public class RecognitionResult {
      * @return Duration of recognized speech in 100nsec increments.
      */
     public BigInteger getDuration() {
-        Contracts.throwIfNull(this._resultImpl, "result");
         return this.duration;
     }
 
@@ -77,7 +85,6 @@ public class RecognitionResult {
      * @return Offset of recognized speech in 100nsec increments.
      */
     public BigInteger getOffset() {
-        Contracts.throwIfNull(this._resultImpl, "result");
         return this.offset;
     }
 
@@ -86,7 +93,6 @@ public class RecognitionResult {
      * @return The set of properties exposed in the result.
      */
     public PropertyCollection getProperties() {
-        Contracts.throwIfNull(this._resultImpl, "result");
         return this.properties;
     }
 
@@ -94,23 +100,43 @@ public class RecognitionResult {
      * Explicitly frees any external resource attached to the object
      */
     public void close() {
-        if (this._resultImpl != null) {
-            this._resultImpl.delete();
+        if (this.resultHandle != null) {
+            resultHandle.close();
+            this.resultHandle = null;
         }
-        this._resultImpl = null;
 
         if (this.properties != null) {
             this.properties.close();
+            this.properties = null;
         }
-        this.properties = null;
     }
-
+    
+    /*! \cond INTERNAL */
     /**
      * Returns the recognition result implementation.
      * @return The implementation of the result.
      */
-    public com.microsoft.cognitiveservices.speech.internal.RecognitionResult getResultImpl() {
-        Contracts.throwIfNull(this._resultImpl, "result");
-        return this._resultImpl;
+    public SafeHandle getImpl() {
+        Contracts.throwIfNull(this.resultHandle, "result");
+        return this.resultHandle;
     }
+    /*! \endcond */
+
+    /*! \cond PROTECTED */
+    protected SafeHandle resultHandle = null;
+    /*! \endcond */
+
+    private PropertyCollection properties = null;
+    private String resultId;
+    private ResultReason reason;
+    private String text;
+    private BigInteger duration;
+    private BigInteger offset;
+
+    private final native long getResultId(SafeHandle resultHandle, StringRef resultId);
+    private final native long getResultReason(SafeHandle resultHandle, IntRef reasonVal);
+    private final native long getResultText(SafeHandle resultHandle, StringRef resultText);
+    private final native BigInteger getResultDuration(SafeHandle resultHandle, IntRef errorHandle);
+    private final native BigInteger getResultOffset(SafeHandle resultHandle, IntRef errorHandle);
+    private final native long getPropertyBagFromResult(SafeHandle resultHandle, IntRef propertyHandle);
 }

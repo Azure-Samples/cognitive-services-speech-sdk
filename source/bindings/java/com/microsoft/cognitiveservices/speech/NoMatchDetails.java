@@ -5,15 +5,15 @@
 package com.microsoft.cognitiveservices.speech;
 
 import com.microsoft.cognitiveservices.speech.util.Contracts;
-
+import com.microsoft.cognitiveservices.speech.util.IntRef;
+import com.microsoft.cognitiveservices.speech.util.SafeHandle;
 
 /**
  * Contains detailed information for NoMatch recognition results.
  */
 public class NoMatchDetails {
 
-    private com.microsoft.cognitiveservices.speech.NoMatchReason _reason;
-    private com.microsoft.cognitiveservices.speech.internal.NoMatchDetails _noMatchImpl;
+    private com.microsoft.cognitiveservices.speech.NoMatchReason reason;
 
     /**
      * Creates an instance of NoMatchDetails object for the NoMatch SpeechRecognitionResults.
@@ -21,17 +21,17 @@ public class NoMatchDetails {
      * @return The NoMatchDetails object being created.
      */
     public static com.microsoft.cognitiveservices.speech.NoMatchDetails fromResult(RecognitionResult result) {
-        com.microsoft.cognitiveservices.speech.internal.NoMatchDetails noMatchImpl = com.microsoft.cognitiveservices.speech.internal.NoMatchDetails.FromResult(result.getResultImpl());
-        return new NoMatchDetails(noMatchImpl);
+        return new NoMatchDetails(result);
     }
 
     /*! \cond PROTECTED */
 
-    protected NoMatchDetails(com.microsoft.cognitiveservices.speech.internal.NoMatchDetails noMatch) {
-        Contracts.throwIfNull(noMatch, "noMatch");
+    protected NoMatchDetails(RecognitionResult result) {
+        Contracts.throwIfNull(result, "result");
 
-        this._noMatchImpl = noMatch;
-        this._reason = com.microsoft.cognitiveservices.speech.NoMatchReason.values()[noMatch.getReason().swigValue() - 1]; // Native NoMatchReason enum starts at 1!!
+        IntRef intVal = new IntRef(0);
+        Contracts.throwIfFail(getResultReason(result.getImpl(), intVal));
+        this.reason = NoMatchReason.values()[(int)intVal.getValue() - 1]; // Native NoMatchReason enum starts at 1!!
     }
 
     /*! \endcond */
@@ -40,10 +40,6 @@ public class NoMatchDetails {
      * Explicitly frees any external resource attached to the object
      */
     public void close() {
-        if (this._noMatchImpl != null) {
-            this._noMatchImpl.delete();
-        }
-        this._noMatchImpl = null;
     }
 
     /**
@@ -51,7 +47,7 @@ public class NoMatchDetails {
      * @return Specifies the reason for NoMatch.
      */
     public com.microsoft.cognitiveservices.speech.NoMatchReason getReason() {
-        return this._reason;
+        return this.reason;
     }
 
     /**
@@ -60,6 +56,8 @@ public class NoMatchDetails {
      */
     @Override
     public String toString() {
-        return "NoMatchReason:" + this._reason;
+        return "NoMatchReason:" + this.reason;
     }
+
+    private final native long getResultReason(SafeHandle resultHandle, IntRef reasonVal);
 }

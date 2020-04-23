@@ -915,6 +915,50 @@ public class SpeechRecognizerTests {
         s.close();
     }
 
+    @Test
+    public void testStartStopContinuousRecognitionMultipleUtterancesAsync() throws InterruptedException, ExecutionException, TimeoutException {
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+
+        assertNotNull(s);
+
+        SpeechRecognizer r = new SpeechRecognizer(s, AudioConfig.fromWavFileInput(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.MULTIPLE_UTTERANCE_ENGLISH).FilePath)));
+        Connection connection = Connection.fromRecognizer(r);
+        assertNotNull(r);
+        assertNotNull(r.getRecoImpl());
+        assertTrue(r instanceof Recognizer);
+
+        final ArrayList<String> rEvents = new ArrayList<>();
+
+        AtomicInteger connectedEventCount = new AtomicInteger(0);;
+        AtomicInteger disconnectedEventCount = new AtomicInteger(0);;
+        connection.connected.addEventListener((o, connectionEventArgs) -> {
+            connectedEventCount.getAndIncrement();
+        });
+        connection.disconnected.addEventListener((o, connectionEventArgs) -> {
+            disconnectedEventCount.getAndIncrement();
+        });
+
+        r.recognized.addEventListener((o, e) -> {
+            System.out.println("recognized event!");
+            rEvents.add("Result@" + System.currentTimeMillis());
+        });
+
+        Future<?> future = r.startContinuousRecognitionAsync();
+             
+        // wait 60s
+        long now = System.currentTimeMillis();
+        while(((System.currentTimeMillis() - now) < 60000)) {
+            Thread.sleep(200);
+        }
+        
+        future = r.stopContinuousRecognitionAsync();
+        assertTrue(rEvents.size() > 1);
+
+        r.close();
+        s.close();
+    }
+
     // -----------------------------------------------------------------------
     // ---
     // -----------------------------------------------------------------------

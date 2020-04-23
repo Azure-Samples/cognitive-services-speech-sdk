@@ -58,7 +58,7 @@ public class KeywordRecognitionModelTests {
 
         s.close();
 
-        assertNull(s.getModelImpl());
+        assertNull(s.getImpl());
     }
 
 
@@ -72,7 +72,7 @@ public class KeywordRecognitionModelTests {
         KeywordRecognitionModel s = KeywordRecognitionModel.fromFile(Settings.KeywordModel);
 
         assertNotNull(s);
-        assertNotNull(s.getModelImpl());
+        assertNotNull(s.getImpl());
     }
 
 }

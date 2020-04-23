@@ -11,6 +11,9 @@ import java.util.concurrent.Executors;
 
 import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.util.EventHandlerImpl;
+import com.microsoft.cognitiveservices.speech.util.IntRef;
+import com.microsoft.cognitiveservices.speech.util.SafeHandle;
+import com.microsoft.cognitiveservices.speech.util.SafeHandleType;
 import com.microsoft.cognitiveservices.speech.util.Contracts;
 
 /**
@@ -50,9 +53,6 @@ public class Recognizer implements Closeable
      */
     final public EventHandlerImpl<RecognitionEventArgs> speechEndDetected = new EventHandlerImpl<RecognitionEventArgs>(eventCounter);
 
-    @SuppressWarnings("unused")
-    private AudioConfig audioInputKeepAlive;
-
     /*! \cond PROTECTED */
 
     /**
@@ -60,12 +60,9 @@ public class Recognizer implements Closeable
      * @param audioInput An optional audio input configuration associated with the recognizer
      */
     protected Recognizer(AudioConfig audioInput) {
+        recoHandle = new SafeHandle(0, SafeHandleType.Recognizer);
         // Note: Since ais is optional, no test for null reference
         audioInputKeepAlive = audioInput;
-        sessionStartedHandler = new SessionEventHandlerImpl(this, true); // SessionEventType.SessionStartedEvent
-        sessionStoppedHandler = new SessionEventHandlerImpl(this, false); // SessionEventType.SessionStoppedEvent
-        speechStartDetectedHandler = new RecognitionEventHandlerImpl(this, true); // RecognitionEventType.SpeechStartDetectedEvent
-        speechEndDetectedHandler = new RecognitionEventHandlerImpl(this, false); // RecognitionEventType.SpeechEndDetectedEvent
     }
 
     /*! \endcond */
@@ -84,17 +81,17 @@ public class Recognizer implements Closeable
         }
     }
 
+    /*! \cond INTERNAL */
     /**
      * Returns the internal recognizer instance
      * @return The internal recognizer instance
      */
-    public com.microsoft.cognitiveservices.speech.internal.Recognizer getRecognizerImpl()
-    {
-        return internalRecognizerImpl;
+    public SafeHandle getImpl() {
+        return recoHandle;
     }
-
+    /*! \endcond */
+    
     /*! \cond PROTECTED */
-
     /**
      * This method performs cleanup of resources.
      * The Boolean parameter disposing indicates whether the method is called from Dispose (if disposing is true) or from the finalizer (if disposing is false).
@@ -123,103 +120,11 @@ public class Recognizer implements Closeable
                 t.start();
             }
             else {
-                // disconnect
-                sessionStartedHandler.delete();
-                sessionStoppedHandler.delete();
-                speechStartDetectedHandler.delete();
-                speechEndDetectedHandler.delete();
-                internalRecognizerImpl.delete();
             }
         }
-
+        audioInputKeepAlive = null;
         disposed = true;
     }
-
-    protected com.microsoft.cognitiveservices.speech.internal.Recognizer internalRecognizerImpl;
-
-    protected SessionEventHandlerImpl sessionStartedHandler;
-    protected SessionEventHandlerImpl sessionStoppedHandler;
-    protected RecognitionEventHandlerImpl speechStartDetectedHandler;
-    protected RecognitionEventHandlerImpl speechEndDetectedHandler;
-
-    /*! \endcond */
-
-    private boolean disposed = false;
-    private final Object recognizerLock = new Object();
-    private int activeAsyncRecognitionCounter = 0;
-
-    /**
-     * Define a private class which raises an event when a corresponding callback is invoked from the native layer.
-     */
-    class SessionEventHandlerImpl extends com.microsoft.cognitiveservices.speech.internal.SessionEventListener {
-
-        public SessionEventHandlerImpl(Recognizer recognizer, Boolean sessionStartedEvent) {
-            Contracts.throwIfNull(recognizer, "recognizer");
-
-            this.recognizer = recognizer;
-            this.sessionStartedEvent = sessionStartedEvent;
-        }
-
-        @Override
-        public void Execute(com.microsoft.cognitiveservices.speech.internal.SessionEventArgs eventArgs) {
-            Contracts.throwIfNull(eventArgs, "eventArgs");
-
-            if (recognizer.disposed) {
-                return;
-            }
-
-            SessionEventArgs arg = new SessionEventArgs(eventArgs);
-            EventHandlerImpl<SessionEventArgs>  handler = this.sessionStartedEvent ?
-                    this.recognizer.sessionStarted : this.recognizer.sessionStopped;
-
-            if (handler != null) {
-                handler.fireEvent(this.recognizer, arg);
-            }
-        }
-
-        private Recognizer recognizer;
-        private Boolean sessionStartedEvent;
-
-    }
-
-    /**
-     * Define a private class which raises an event when a corresponding callback is invoked from the native layer.
-     */
-    class RecognitionEventHandlerImpl extends com.microsoft.cognitiveservices.speech.internal.RecognitionEventListener
-    {
-        public RecognitionEventHandlerImpl(Recognizer recognizer, Boolean recognitionEventStarted)
-        {
-            Contracts.throwIfNull(recognizer, "recognizer");
-
-            this.recognizer = recognizer;
-            this.recognitionEventStarted = recognitionEventStarted;
-        }
-
-        @Override
-        public void Execute(com.microsoft.cognitiveservices.speech.internal.RecognitionEventArgs eventArgs)
-        {
-            Contracts.throwIfNull(eventArgs, "eventArgs");
-
-            if (recognizer.disposed)
-            {
-                return;
-            }
-
-            RecognitionEventArgs arg = new RecognitionEventArgs(eventArgs);
-            EventHandlerImpl<RecognitionEventArgs>  handler = this.recognitionEventStarted ?
-                    this.recognizer.speechStartDetected : this.recognizer.speechEndDetected;
-
-            if (handler != null)
-            {
-                handler.fireEvent(this.recognizer, arg);
-            }
-        }
-
-        private Recognizer recognizer;
-        private Boolean recognitionEventStarted;
-    }
-
-    /*! \cond PROTECTED */
 
     protected void doAsyncRecognitionAction(Runnable recoImplAction) {
         synchronized (recognizerLock) {
@@ -237,5 +142,96 @@ public class Recognizer implements Closeable
         }
     }
 
+    protected long recognize()
+    {
+        Contracts.throwIfNull(recoHandle, "Invalid recognizer handle");
+        IntRef result = new IntRef(0);
+        Contracts.throwIfFail(recognizeOnce(recoHandle, result));
+        return result.getValue();
+    }
+
     /*! \endcond */
+
+    private void sessionStartedEventCallback(long eventArgs)
+    {
+        try {
+            Contracts.throwIfNull(this, "recognizer");
+            if (this.disposed) {
+                return;
+            }
+            SessionEventArgs arg = new SessionEventArgs(eventArgs, true);
+            EventHandlerImpl<SessionEventArgs> handler = this.sessionStarted;
+            if (handler != null) {
+                handler.fireEvent(this, arg);
+            }    
+        } catch (Exception e) {}
+    }
+
+    private void sessionStoppedEventCallback(long eventArgs)
+    {
+        try {
+            Contracts.throwIfNull(this, "recognizer");
+            if (this.disposed) {
+                return;
+            }
+            SessionEventArgs arg = new SessionEventArgs(eventArgs, true);
+            EventHandlerImpl<SessionEventArgs> handler = this.sessionStopped;
+            if (handler != null) {
+                handler.fireEvent(this, arg);
+            }    
+        } catch (Exception e) {}
+    }
+
+    private void speechStartDetectedEventCallback(long eventArgs)
+    {
+        try {
+            Contracts.throwIfNull(this, "recognizer");
+            if (this.disposed) {
+                return;
+            }
+            RecognitionEventArgs arg = new RecognitionEventArgs(eventArgs, true);
+            EventHandlerImpl<RecognitionEventArgs> handler = this.speechStartDetected;
+            if (handler != null) {
+                handler.fireEvent(this, arg);
+            }    
+        } catch (Exception e) {}
+    }
+
+    private void speechEndDetectedEventCallback(long eventArgs)
+    {
+        try {
+            Contracts.throwIfNull(this, "recognizer");
+            if (this.disposed) {
+                return;
+            }
+            RecognitionEventArgs arg = new RecognitionEventArgs(eventArgs, true);
+            EventHandlerImpl<RecognitionEventArgs> handler = this.speechEndDetected;
+            if (handler != null) {
+                handler.fireEvent(this, arg);
+            }    
+        } catch (Exception e) {}
+    }
+
+    /*! \cond PROTECTED */
+    protected SafeHandle recoHandle = null;
+    protected final native long startContinuousRecognition(SafeHandle recoHandle);
+    protected final native long stopContinuousRecognition(SafeHandle recoHandle);
+    protected final native long startKeywordRecognition(SafeHandle recoHandle, SafeHandle keywordModelHandle);
+    protected final native long stopKeywordRecognition(SafeHandle recoHandle);
+    protected final native long recognizingSetCallback(long recoHandle);
+    protected final native long recognizedSetCallback(long recoHandle);
+    protected final native long canceledSetCallback(long recoHandle);
+    protected final native long sessionStartedSetCallback(long recoHandle);
+    protected final native long sessionStoppedSetCallback(long recoHandle);
+    protected final native long speechStartDetectedSetCallback(long recoHandle);
+    protected final native long speechEndDetectedSetCallback(long recoHandle);
+    protected final native long getPropertyBagFromRecognizerHandle(SafeHandle recoHandle, IntRef propertyHandle);
+    /*! \endcond */
+
+    private final native long recognizeOnce(SafeHandle recoHandle, IntRef resultHandle);
+
+    private AudioConfig audioInputKeepAlive = null;
+    private boolean disposed = false;
+    private final Object recognizerLock = new Object();
+    private int activeAsyncRecognitionCounter = 0;
 }

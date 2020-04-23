@@ -7,6 +7,9 @@ package com.microsoft.cognitiveservices.speech;
 import java.io.Closeable;
 
 import com.microsoft.cognitiveservices.speech.util.Contracts;
+import com.microsoft.cognitiveservices.speech.util.IntRef;
+import com.microsoft.cognitiveservices.speech.util.SafeHandle;
+import com.microsoft.cognitiveservices.speech.util.SafeHandleType;
 
 /**
  * Speech configuration.
@@ -66,9 +69,6 @@ public class SpeechConfig implements Closeable {
             System.loadLibrary("Microsoft.CognitiveServices.Speech.java.bindings");
         }
 
-        // setup native tmpdir
-        com.microsoft.cognitiveservices.speech.internal.carbon_javaJNI.SetTempDirectory(System.getProperty("java.io.tmpdir"));
-
         // prevent classgc from freeing this class
         speechConfigClass = SpeechConfig.class;
     }
@@ -78,11 +78,14 @@ public class SpeechConfig implements Closeable {
     /**
      * Creates an instance of speech config.
      */
-    protected SpeechConfig(com.microsoft.cognitiveservices.speech.internal.SpeechConfig configImpl) {
-        Contracts.throwIfNull(configImpl, "configImpl");
+    protected SpeechConfig(long handleValue) {
+        Contracts.throwIfNull(handleValue, "handleValue");
 
-        this.speechConfigImpl = configImpl;
-        speechConfigImpl.SetProperty("SPEECHSDK-SPEECH-CONFIG-SYSTEM-LANGUAGE", "Java");
+        this.speechConfigHandle = new SafeHandle(handleValue, SafeHandleType.SpeechConfig);
+        IntRef propHandle = new IntRef(0);
+        Contracts.throwIfFail(getPropertyBag(speechConfigHandle, propHandle));
+        this.propertyHandle = new PropertyCollection(propHandle);
+        this.propertyHandle.setProperty("SPEECHSDK-SPEECH-CONFIG-SYSTEM-LANGUAGE", "Java");
     }
 
     /*! \endcond */
@@ -96,8 +99,9 @@ public class SpeechConfig implements Closeable {
     public static SpeechConfig fromSubscription(String subscriptionKey, String region) {
         Contracts.throwIfIllegalSubscriptionKey(subscriptionKey, "subscriptionKey");
         Contracts.throwIfNullOrWhitespace(region, "region");
-
-        return new SpeechConfig(com.microsoft.cognitiveservices.speech.internal.SpeechConfig.FromSubscription(subscriptionKey, region));
+        IntRef configRef = new IntRef(0);
+        Contracts.throwIfFail(fromSubscription(configRef, subscriptionKey, region));
+        return new SpeechConfig(configRef.getValue());
     }
 
     /**
@@ -114,8 +118,9 @@ public class SpeechConfig implements Closeable {
     public static SpeechConfig fromAuthorizationToken(String authorizationToken, String region) {
         Contracts.throwIfNullOrWhitespace(authorizationToken, "authorizationToken");
         Contracts.throwIfNullOrWhitespace(region, "region");
-
-        return new SpeechConfig(com.microsoft.cognitiveservices.speech.internal.SpeechConfig.FromAuthorizationToken(authorizationToken, region));
+        IntRef configRef = new IntRef(0);
+        Contracts.throwIfFail(fromAuthorizationToken(configRef, authorizationToken, region));
+        return new SpeechConfig(configRef.getValue());
     }
 
     /**
@@ -136,8 +141,9 @@ public class SpeechConfig implements Closeable {
         if(subscriptionKey == null) {
             throw new NullPointerException("subscriptionKey");
         }
-
-        return new SpeechConfig(com.microsoft.cognitiveservices.speech.internal.SpeechConfig.FromEndpoint(endpoint.toString(), subscriptionKey));
+        IntRef configRef = new IntRef(0);
+        Contracts.throwIfFail(fromEndpoint(configRef, endpoint.toString(), subscriptionKey));
+        return new SpeechConfig(configRef.getValue());
     }
 
     /**
@@ -158,7 +164,9 @@ public class SpeechConfig implements Closeable {
     public static SpeechConfig fromEndpoint(java.net.URI endpoint) {
         Contracts.throwIfNull(endpoint, "endpoint");
 
-        return new SpeechConfig(com.microsoft.cognitiveservices.speech.internal.SpeechConfig.FromEndpoint(endpoint.toString()));
+        IntRef configRef = new IntRef(0);
+        Contracts.throwIfFail(fromEndpoint(configRef, endpoint.toString(), null));
+        return new SpeechConfig(configRef.getValue());
     }
 
     /**
@@ -179,7 +187,9 @@ public class SpeechConfig implements Closeable {
             throw new NullPointerException("subscriptionKey");
         }
 
-        return new SpeechConfig(com.microsoft.cognitiveservices.speech.internal.SpeechConfig.FromHost(host.toString(), subscriptionKey));
+        IntRef configRef = new IntRef(0);
+        Contracts.throwIfFail(fromHost(configRef, host.toString(), subscriptionKey));
+        return new SpeechConfig(configRef.getValue());
     }
 
     /**
@@ -198,7 +208,9 @@ public class SpeechConfig implements Closeable {
     public static SpeechConfig fromHost(java.net.URI host) {
         Contracts.throwIfNull(host, "host");
 
-        return new SpeechConfig(com.microsoft.cognitiveservices.speech.internal.SpeechConfig.FromHost(host.toString()));
+        IntRef configRef = new IntRef(0);
+        Contracts.throwIfFail(fromHost(configRef, host.toString(), null));
+        return new SpeechConfig(configRef.getValue());
     }
 
     /**
@@ -213,7 +225,7 @@ public class SpeechConfig implements Closeable {
     public void setAuthorizationToken(String value) {
         Contracts.throwIfNullOrWhitespace(value, "value");
 
-        speechConfigImpl.SetAuthorizationToken(value);
+        propertyHandle.setProperty(PropertyId.SpeechServiceAuthorization_Token, value);
     }
 
     /**
@@ -221,7 +233,7 @@ public class SpeechConfig implements Closeable {
      * @return The authorization token.
      */
     public String getAuthorizationToken() {
-        return speechConfigImpl.GetAuthorizationToken();
+        return propertyHandle.getProperty(PropertyId.SpeechServiceAuthorization_Token);
     }
 
     /**
@@ -231,7 +243,7 @@ public class SpeechConfig implements Closeable {
     public void setSpeechRecognitionLanguage(String value) {
         Contracts.throwIfNullOrWhitespace(value, "value");
 
-        speechConfigImpl.SetSpeechRecognitionLanguage(value);
+        propertyHandle.setProperty(PropertyId.SpeechServiceConnection_RecoLanguage, value);
     }
 
     /**
@@ -239,7 +251,7 @@ public class SpeechConfig implements Closeable {
      * @return Returns the recognition language.
      */
     public String getSpeechRecognitionLanguage() {
-        return speechConfigImpl.GetSpeechRecognitionLanguage();
+        return propertyHandle.getProperty(PropertyId.SpeechServiceConnection_RecoLanguage);
     }
 
     /**
@@ -252,7 +264,7 @@ public class SpeechConfig implements Closeable {
         if(format == OutputFormat.Detailed) {
             value = "true";
         }
-        speechConfigImpl.SetProperty(com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceResponse_RequestDetailedResultTrueFalse, value);
+        propertyHandle.setProperty(PropertyId.SpeechServiceResponse_RequestDetailedResultTrueFalse, value);
     }
 
     /**
@@ -261,7 +273,7 @@ public class SpeechConfig implements Closeable {
      * @return Returns the speech recognition output format.
      */
     public OutputFormat getOutputFormat() {
-        String result = speechConfigImpl.GetProperty(com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceResponse_RequestDetailedResultTrueFalse);
+        String result = propertyHandle.getProperty(PropertyId.SpeechServiceResponse_RequestDetailedResultTrueFalse);
         return (result.equals("true") ? OutputFormat.Detailed : OutputFormat.Simple);
     }
 
@@ -271,8 +283,7 @@ public class SpeechConfig implements Closeable {
      */
     public void setEndpointId(String value) {
         Contracts.throwIfNullOrWhitespace(value, "value");
-
-        speechConfigImpl.SetEndpointId(value);
+        propertyHandle.setProperty(PropertyId.SpeechServiceConnection_EndpointId, value);
     }
 
     /**
@@ -280,7 +291,7 @@ public class SpeechConfig implements Closeable {
      * @return The endpoint ID.
      */
     public String getEndpointId() {
-        return speechConfigImpl.GetEndpointId();
+        return propertyHandle.getProperty(PropertyId.SpeechServiceConnection_EndpointId);
     }
 
     /**
@@ -290,8 +301,7 @@ public class SpeechConfig implements Closeable {
      */
     public void setSpeechSynthesisLanguage(String value) {
         Contracts.throwIfNullOrWhitespace(value, "value");
-
-        speechConfigImpl.SetSpeechSynthesisLanguage(value);
+        propertyHandle.setProperty(PropertyId.SpeechServiceConnection_SynthLanguage, value);
     }
 
     /**
@@ -300,7 +310,7 @@ public class SpeechConfig implements Closeable {
      * @return Returns the synthesis language.
      */
     public String getSpeechSynthesisLanguage() {
-        return speechConfigImpl.GetSpeechSynthesisLanguage();
+        return propertyHandle.getProperty(PropertyId.SpeechServiceConnection_SynthLanguage);
     }
 
     /**
@@ -310,8 +320,7 @@ public class SpeechConfig implements Closeable {
      */
     public void setSpeechSynthesisVoiceName(String value) {
         Contracts.throwIfNullOrWhitespace(value, "value");
-
-        speechConfigImpl.SetSpeechSynthesisVoiceName(value);
+        propertyHandle.setProperty(PropertyId.SpeechServiceConnection_SynthVoice, value);
     }
 
     /**
@@ -320,7 +329,7 @@ public class SpeechConfig implements Closeable {
      * @return Returns the synthesis voice name.
      */
     public String getSpeechSynthesisVoiceName() {
-        return speechConfigImpl.GetSpeechSynthesisVoiceName();
+        return propertyHandle.getProperty(PropertyId.SpeechServiceConnection_SynthVoice);
     }
 
     /**
@@ -329,8 +338,7 @@ public class SpeechConfig implements Closeable {
      * @param value The synthesis output format ID (e.g. Riff16Khz16BitMonoPcm).
      */
     public void setSpeechSynthesisOutputFormat(SpeechSynthesisOutputFormat value) {
-        com.microsoft.cognitiveservices.speech.internal.SpeechSynthesisOutputFormat format = com.microsoft.cognitiveservices.speech.internal.SpeechSynthesisOutputFormat.swigToEnum(value.ordinal() + 1); // Native SpeechSynthesisOutputFormat enum starts at 1!!
-        speechConfigImpl.SetSpeechSynthesisOutputFormat(format);
+        Contracts.throwIfFail(setAudioOutputFormat(speechConfigHandle, value.ordinal() + 1)); // Native SpeechSynthesisOutputFormat enum starts at 1!!
     }
 
     /**
@@ -339,7 +347,7 @@ public class SpeechConfig implements Closeable {
      * @return Returns the synthesis output format.
      */
     String getSpeechSynthesisOutputFormat() {
-        return speechConfigImpl.GetSpeechSynthesisOutputFormat();
+        return propertyHandle.getProperty(PropertyId.SpeechServiceConnection_SynthOutputFormat);
     }
 
     /**
@@ -358,7 +366,14 @@ public class SpeechConfig implements Closeable {
         if (proxyPort <= 0) {
             throw new IllegalArgumentException("invalid proxy port");
         }
-        speechConfigImpl.SetProxy(proxyHostName, proxyPort, proxyUserName, proxyPassword);
+        propertyHandle.setProperty(PropertyId.SpeechServiceConnection_ProxyHostName, proxyHostName);
+        propertyHandle.setProperty(PropertyId.SpeechServiceConnection_ProxyPort, Integer.toString(proxyPort));
+        if (proxyUserName != "") {
+            propertyHandle.setProperty(PropertyId.SpeechServiceConnection_ProxyUserName, proxyUserName);
+        }
+        if (proxyPassword != "") {
+            propertyHandle.setProperty(PropertyId.SpeechServiceConnection_ProxyPassword, proxyPassword);
+        }
     }
 
     /**
@@ -367,9 +382,10 @@ public class SpeechConfig implements Closeable {
      * @param value the value.
      */
     public void setProperty(String name, String value) {
+        Contracts.throwIfNullOrWhitespace(name, "name");
         Contracts.throwIfNullOrWhitespace(value, "value");
 
-        speechConfigImpl.SetProperty(name, value);
+        propertyHandle.setProperty(name, value);
     }
 
     /**
@@ -381,7 +397,7 @@ public class SpeechConfig implements Closeable {
     public void setProperty(PropertyId id, String value) {
         Contracts.throwIfNullOrWhitespace(value, "value");
 
-        speechConfigImpl.SetProperty(id.getValue(), value);
+        propertyHandle.setProperty(id, value);
     }
 
     /**
@@ -390,7 +406,7 @@ public class SpeechConfig implements Closeable {
      * @return The value.
      */
     public String getProperty(String name) {
-        return speechConfigImpl.GetProperty(name);
+        return propertyHandle.getProperty(name);
     }
 
     /**
@@ -400,7 +416,7 @@ public class SpeechConfig implements Closeable {
      * @return The value.
      */
     public String getProperty(PropertyId id) {
-        return speechConfigImpl.GetProperty(id.getValue());
+        return propertyHandle.getProperty(id);
     }
 
     /**
@@ -411,7 +427,9 @@ public class SpeechConfig implements Closeable {
      *  @param channel the channel used to pass the specified property to service.
      */
     public void setServiceProperty(String name, String value, ServicePropertyChannel channel) {
-        speechConfigImpl.SetServiceProperty(name, value, channel.getValue());
+        Contracts.throwIfNullOrWhitespace(name, "name");
+        Contracts.throwIfNullOrWhitespace(value, "value");
+        Contracts.throwIfFail(setServiceProperty(speechConfigHandle, name, value, channel.getValue()));
     }
 
     /**
@@ -421,7 +439,7 @@ public class SpeechConfig implements Closeable {
      */
     public void setProfanity(ProfanityOption profanity)
     {
-        speechConfigImpl.SetProfanity(profanity.getValue());
+        Contracts.throwIfFail(setProfanity(speechConfigHandle, profanity.getValue()));
     }
 
     /**
@@ -430,7 +448,7 @@ public class SpeechConfig implements Closeable {
      */
     public void enableAudioLogging()
     {
-        speechConfigImpl.EnableAudioLogging();
+        propertyHandle.setProperty(PropertyId.SpeechServiceConnection_EnableAudioLogging, "true");
     }
 
     /**
@@ -439,7 +457,7 @@ public class SpeechConfig implements Closeable {
      */
     public void requestWordLevelTimestamps()
     {
-        speechConfigImpl.RequestWordLevelTimestamps();
+        propertyHandle.setProperty(PropertyId.SpeechServiceResponse_RequestWordLevelTimestamps, "true");
     }
 
     /**
@@ -448,7 +466,7 @@ public class SpeechConfig implements Closeable {
      */
     public void enableDictation()
     {
-        speechConfigImpl.EnableDictation();
+        propertyHandle.setProperty(PropertyId.SpeechServiceConnection_RecoMode, "DICTATION");
     }
 
     /**
@@ -460,18 +478,39 @@ public class SpeechConfig implements Closeable {
             return;
         }
 
-        speechConfigImpl.delete();
+        if (propertyHandle != null)
+        {
+            propertyHandle.close();
+            propertyHandle = null;
+        }
+        if (speechConfigHandle != null)
+        {
+            speechConfigHandle.close();            
+            speechConfigHandle = null;
+        }
         disposed = true;
     }
 
-    /**
-     * Returns the Speech Config
-     * @return The implementation of the Speech Config
-     */
-    public com.microsoft.cognitiveservices.speech.internal.SpeechConfig getImpl()
-    {
-        return speechConfigImpl;
+
+    /*! \cond INTERNAL */
+    public SafeHandle getImpl() {
+        return speechConfigHandle;
     }
-    private com.microsoft.cognitiveservices.speech.internal.SpeechConfig speechConfigImpl;
+    /*! \endcond */
+
+    /*! \cond PROTECTED */
+    protected SafeHandle speechConfigHandle = null;
+    protected PropertyCollection propertyHandle = null;
+    /*! \endcond */
+        
+    private final static native long fromSubscription(IntRef configHandle, String subscriptionKey, String region);
+    private final static native long fromAuthorizationToken(IntRef configHandle, String authorizationToken, String region);
+    private final static native long fromEndpoint(IntRef configHandle, String endpoint, String subscriptionKey);
+    private final static native long fromHost(IntRef configHandle, String host, String subscriptionKey);
+    private final native long getPropertyBag(SafeHandle configHandle, IntRef propHandle);
+    private final native long setProfanity(SafeHandle configHandle, int profanity);
+    private final native long setServiceProperty(SafeHandle configHandle, String name, String value, int channel);
+    private final native long setAudioOutputFormat(SafeHandle configHandle, int value);
+
     private boolean disposed = false;
 }

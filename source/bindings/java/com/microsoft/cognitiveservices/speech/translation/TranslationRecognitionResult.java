@@ -9,20 +9,23 @@ import java.util.Map;
 
 import com.microsoft.cognitiveservices.speech.RecognitionResult;
 import com.microsoft.cognitiveservices.speech.util.Contracts;
+import com.microsoft.cognitiveservices.speech.util.SafeHandle;
+import com.microsoft.cognitiveservices.speech.util.SafeHandleType;
+import com.microsoft.cognitiveservices.speech.util.StringMapRef;
 
 /**
   * Defines translation recognition result.
   */
 public final class TranslationRecognitionResult extends RecognitionResult {
-    TranslationRecognitionResult(com.microsoft.cognitiveservices.speech.internal.TranslationRecognitionResult result) {
+
+    TranslationRecognitionResult(long result) {
         super(result);
-
-        Contracts.throwIfNull(result, "result");
-        this._Translations = new HashMap<String, String>();
-
-        com.microsoft.cognitiveservices.speech.internal.StdMapStringString imap = result.getTranslations();
-        for (String key : imap) {
-            this._Translations.put(key, imap.get(key));
+        Contracts.throwIfNull(resultHandle, "resultHandle");
+        StringMapRef translationsRef = new StringMapRef();
+        Contracts.throwIfFail(getTranslations(resultHandle, translationsRef));
+        this.translations = new HashMap<String, String>(); 
+        if (!translationsRef.getValue().isEmpty()) {
+            this.translations.putAll(translationsRef.getValue());
         }
     }
 
@@ -32,13 +35,12 @@ public final class TranslationRecognitionResult extends RecognitionResult {
      * @return the current translation map.
      */
     public final Map<String, String> getTranslations() {
-        return this._Translations;
+        return this.translations;
     }
-    private Map<String, String> _Translations;
 
     /**
-     * Returns a String that represents the speech recognition result.
-     * @return A String that represents the speech recognition result.
+     * Returns a String that represents the translation recognition result.
+     * @return A String that represents the translation recognition result.
      */
     @Override
     public String toString() {
@@ -46,10 +48,14 @@ public final class TranslationRecognitionResult extends RecognitionResult {
                 " Reason:" + this.getReason()  +
                 ", Recognized text:<" + this.getText() + ">.\n";
 
-        for(String key : this._Translations.keySet()) {
-            text += "    Translation in " + key + ": <" + this._Translations.get(key) + ">.\n";
+        for(String key : this.translations.keySet()) {
+            text += "    Translation in " + key + ": <" + this.translations.get(key) + ">.\n";
         }
 
         return text;
     }
+
+    private final native long getTranslations(SafeHandle resultHandle, StringMapRef translations);
+
+    private Map<String, String> translations;
 }

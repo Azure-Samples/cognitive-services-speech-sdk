@@ -5,6 +5,7 @@
 package com.microsoft.cognitiveservices.speech.transcription;
 
 import com.microsoft.cognitiveservices.speech.util.Contracts;
+import com.microsoft.cognitiveservices.speech.CancellationDetails;
 import com.microsoft.cognitiveservices.speech.CancellationReason;
 import com.microsoft.cognitiveservices.speech.CancellationErrorCode;
 import com.microsoft.cognitiveservices.speech.transcription.ConversationTranscriptionResult;
@@ -15,28 +16,30 @@ import com.microsoft.cognitiveservices.speech.transcription.ConversationTranscri
  */
 public final class ConversationTranscriptionCanceledEventArgs extends ConversationTranscriptionEventArgs {
 
-    ConversationTranscriptionCanceledEventArgs(com.microsoft.cognitiveservices.speech.internal.ConversationTranscriptionCanceledEventArgs e) {
-        super(e);
+    /*! \cond INTERNAL */
 
-        Contracts.throwIfNull(e, "e");
-        this._eventArgImpl = e;
-        this._Result = new ConversationTranscriptionResult(e.GetResult());
-
-        this._SessionId = e.getSessionId();
-        Contracts.throwIfNull(this._SessionId, "SessionId");
-
-        com.microsoft.cognitiveservices.speech.internal.CancellationDetails cancellation = e.GetCancellationDetails();
-        this._cancellationReason  = com.microsoft.cognitiveservices.speech.CancellationReason.values()[cancellation.getReason().swigValue() - 1]; // Native CancellationReason enum starts at 1!!
-        this._errorCode = com.microsoft.cognitiveservices.speech.CancellationErrorCode.values()[cancellation.getErrorCode().swigValue()];
-        this._errorDetails = cancellation.getErrorDetails();
+    /**
+     * Constructs an instance of a IntentRecognitionCanceledEventArgs object.
+     * @param eventArgs recognition canceled event args object.
+     */
+    ConversationTranscriptionCanceledEventArgs(long eventArgs) {
+        super(eventArgs);
+        storeEventData(false);
     }
+
+    ConversationTranscriptionCanceledEventArgs(long eventArgs, boolean dispose) {
+        super(eventArgs);
+        storeEventData(dispose);
+    }
+    
+    /*! \endcond */
 
     /**
      * The reason the recognition was canceled.
      * @return Specifies the reason canceled.
      */
     public CancellationReason getReason() {
-        return this._cancellationReason ;
+        return this.cancellationReason;
     }
 
     /**
@@ -44,7 +47,7 @@ public final class ConversationTranscriptionCanceledEventArgs extends Conversati
      * @return An error code that represents the error reason.
      */
     public CancellationErrorCode getErrorCode() {
-        return this._errorCode;
+        return this.errorCode;
     }
 
     /**
@@ -52,7 +55,7 @@ public final class ConversationTranscriptionCanceledEventArgs extends Conversati
      * @return A String that represents the error details.
      */
     public String getErrorDetails() {
-        return this._errorDetails;
+        return this.errorDetails;
     }
 
     /**
@@ -61,18 +64,29 @@ public final class ConversationTranscriptionCanceledEventArgs extends Conversati
      */
     @Override
     public String toString() {
-        return "SessionId:" + _SessionId +
-                " ResultId:" + _Result.getResultId() +
-                " CancellationReason:" + _cancellationReason  +
-                " CancellationErrorCode:" + _errorCode +
-                " Error details:<" + _errorDetails;
+        return "SessionId:" + sessionId +
+                " ResultId:" + getResult().getResultId() +
+                " CancellationReason:" + cancellationReason  +
+                " CancellationErrorCode:" + errorCode +
+                " Error details:<" + errorDetails;
     }
 
-    @SuppressWarnings("unused")
-    private com.microsoft.cognitiveservices.speech.internal.ConversationTranscriptionCanceledEventArgs _eventArgImpl;
-    private String _SessionId;
-    private ConversationTranscriptionResult _Result;
-    private CancellationReason _cancellationReason;
-    private CancellationErrorCode _errorCode;
-    private String _errorDetails;
+    private void storeEventData(boolean disposeNativeResources) {
+        Contracts.throwIfNull(eventHandle, "eventHandle");
+        this.sessionId = getSessionId();
+        Contracts.throwIfNull(this.sessionId, "SessionId");
+
+        CancellationDetails cancellation = CancellationDetails.fromResult(getResult());
+        this.cancellationReason  = cancellation.getReason();
+        this.errorCode = cancellation.getErrorCode();
+        this.errorDetails = cancellation.getErrorDetails();
+        if (disposeNativeResources == true) {
+            super.close();
+        }
+    }
+
+    private String sessionId;
+    private CancellationReason cancellationReason;
+    private CancellationErrorCode errorCode;
+    private String errorDetails;
 }

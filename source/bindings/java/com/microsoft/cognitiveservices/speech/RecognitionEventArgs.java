@@ -6,24 +6,32 @@ package com.microsoft.cognitiveservices.speech;
 
 import java.math.*;
 import com.microsoft.cognitiveservices.speech.util.Contracts;
+import com.microsoft.cognitiveservices.speech.util.IntRef;
+import com.microsoft.cognitiveservices.speech.util.SafeHandle;
 
 /**
  * Defines payload for recognition events like Speech Start/End Detected
  */
-public class RecognitionEventArgs extends SessionEventArgs
-{
+public class RecognitionEventArgs extends SessionEventArgs {
 
     /*! \cond INTERNAL */
 
     /**
      * Constructs an instance of a RecognitionEventArgs object.
-     * @param arg internal recognition event args object.
+     * @param eventArgs recognition event args object.
      */
-    public RecognitionEventArgs(com.microsoft.cognitiveservices.speech.internal.RecognitionEventArgs arg) {
-        super(arg);
+    public RecognitionEventArgs(long eventArgs) {
+        super(eventArgs);
+        storeEventData(false);
+    }
 
-        Contracts.throwIfNull(arg, "arg");
-        this.offset = arg.getOffset();
+    /**
+     * Constructs an instance of a RecognitionEventArgs object.
+     * @param eventArgs recognition event args object.
+     */
+    RecognitionEventArgs(long eventArgs, boolean dispose) {
+        super(eventArgs);
+        storeEventData(dispose);
     }
 
     /*! \endcond */
@@ -31,7 +39,7 @@ public class RecognitionEventArgs extends SessionEventArgs
     /**
      * Represents the message offset in 100nsec increments.
      */
-    public final BigInteger offset;
+    public BigInteger offset;
 
     /**
      * Returns a String that represents the recognition event payload.
@@ -41,4 +49,21 @@ public class RecognitionEventArgs extends SessionEventArgs
     public String toString() {
         return "SessionId: " + this.getSessionId() + " Offset: " + offset.toString() + ".";
     }
+
+    private void storeEventData(boolean disposeNativeResources) {
+        Contracts.throwIfNull(eventHandle, "eventHandle");
+        IntRef errorHandle = new IntRef(0);
+        offset = getOffset(eventHandle, errorHandle);
+        Contracts.throwIfFail(errorHandle.getValue());
+        if (disposeNativeResources == true)
+        {
+            super.close();
+        }
+    }
+
+    /*! \cond PROTECTED */
+    protected final native long getRecognitionResult(SafeHandle eventHandle, IntRef resultHandle);
+    /*! \endcond */
+    
+    private final native BigInteger getOffset(SafeHandle eventHandle, IntRef errorHandle);
 }

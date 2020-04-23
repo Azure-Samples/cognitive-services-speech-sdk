@@ -6,20 +6,22 @@ package com.microsoft.cognitiveservices.speech.intent;
 
 import com.microsoft.cognitiveservices.speech.util.Contracts;
 import com.microsoft.cognitiveservices.speech.PropertyId;
+import com.microsoft.cognitiveservices.speech.SpeechRecognitionResult;
+import com.microsoft.cognitiveservices.speech.util.StringRef;
+import com.microsoft.cognitiveservices.speech.util.SafeHandle;
 
 /**
  * Defines result of intent recognition.
  */
 public final class IntentRecognitionResult extends com.microsoft.cognitiveservices.speech.SpeechRecognitionResult {
-    private com.microsoft.cognitiveservices.speech.internal.IntentRecognitionResult _resultImpl;
 
-    IntentRecognitionResult(com.microsoft.cognitiveservices.speech.internal.IntentRecognitionResult result) {
+    IntentRecognitionResult(long result) {
         super(result);
-        Contracts.throwIfNull(result, "result");
-
-        this._resultImpl = result;
-        this._intentId = result.getIntentId();
-        Contracts.throwIfNull(this._intentId, "IntentId");
+        Contracts.throwIfNull(resultHandle, "resultHandle");
+        StringRef intentIdStr = new StringRef("");
+        Contracts.throwIfFail(getIntentId(resultHandle, intentIdStr));
+        this.intentId = intentIdStr.getValue();
+        Contracts.throwIfNull(this.intentId, "IntentId");
     }
 
     /**
@@ -27,11 +29,6 @@ public final class IntentRecognitionResult extends com.microsoft.cognitiveservic
      */
     @Override
     public void close() {
-        if (this._resultImpl != null) {
-            this._resultImpl.delete();
-        }
-        this._resultImpl = null;
-
         super.close();
     }
 
@@ -40,9 +37,10 @@ public final class IntentRecognitionResult extends com.microsoft.cognitiveservic
      * @return A String that represents the intent identifier being recognized.
      */
     public String getIntentId() {
-        return _intentId;
+        return intentId;
     }
-    private String _intentId;
+
+    private String intentId;
 
     /**
      * Returns a String that represents the intent recognition result.
@@ -52,10 +50,12 @@ public final class IntentRecognitionResult extends com.microsoft.cognitiveservic
     public String toString() {
         return "ResultId:" + getResultId() +
                 " Reason:" + getReason() +
-                " IntentId:<" + _intentId +
+                " IntentId:<" + intentId +
                 "> Recognized text:<" + getText() +
                 "> Recognized json:<" + getProperties().getProperty(PropertyId.SpeechServiceResponse_JsonResult) +
                 "> LanguageUnderstandingJson <" + getProperties().getProperty(PropertyId.LanguageUnderstandingServiceResponse_JsonResult) +
                 ">.";
     }
+
+    private final native long getIntentId(SafeHandle resultHandle, StringRef intentId);
 }

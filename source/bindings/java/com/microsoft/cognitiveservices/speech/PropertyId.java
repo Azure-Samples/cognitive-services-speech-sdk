@@ -16,7 +16,7 @@ public enum PropertyId {
      * have to use this property directly.
      * Instead, use <see cref="SpeechConfig.fromSubscription"/>.
      */
-    SpeechServiceConnection_Key (com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceConnection_Key),
+    SpeechServiceConnection_Key (1000),
 
     /**
      * The Cognitive Services Speech Service endpoint (url). Under normal circumstances, you shouldn't
@@ -24,7 +24,7 @@ public enum PropertyId {
      * Instead, use <see cref="SpeechConfig.fromEndpoint"/>.
      * NOTE: This endpoint is not the same as the endpoint used to obtain an access token.
      */
-    SpeechServiceConnection_Endpoint (com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceConnection_Endpoint),
+    SpeechServiceConnection_Endpoint (1001),
 
     /**
      * The Cognitive Services Speech Service region. Under normal circumstances, you shouldn't have to
@@ -32,7 +32,7 @@ public enum PropertyId {
      * Instead, use <see cref="SpeechConfig.fromSubscription"/>, <see cref="SpeechConfig.fromEndpoint"/>, <see cref="SpeechConfig.fromHost"/>,
      * <see cref="SpeechConfig.fromAuthorizationToken"/>.
      */
-    SpeechServiceConnection_Region (com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceConnection_Region),
+    SpeechServiceConnection_Region (1002),
 
     /**
      * The Cognitive Services Speech Service authorization token (aka access token). Under normal circumstances,
@@ -41,12 +41,12 @@ public enum PropertyId {
      * <see cref="SpeechRecognizer.setAuthorizationToken"/>, <see cref="IntentRecognizer.setAuthorizationToken"/>,
      * <see cref="TranslationRecognizer.setAuthorizationToken"/>.
      */
-    SpeechServiceAuthorization_Token (com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceAuthorization_Token),
+    SpeechServiceAuthorization_Token (1003),
 
     /**
      * The Cognitive Services Speech Service authorization type. Currently unused.
      */
-    SpeechServiceAuthorization_Type (com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceAuthorization_Type),
+    SpeechServiceAuthorization_Type (1004),
 
     /**
      * The Cognitive Services Custom Speech Service endpoint id. Under normal circumstances, you shouldn't
@@ -54,14 +54,14 @@ public enum PropertyId {
      * Instead use <see cref="SpeechConfig.setEndpointId"/>.
      * NOTE: The endpoint id is available in the Custom Speech Portal, listed under Endpoint Details.
      */
-    SpeechServiceConnection_EndpointId (com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceConnection_EndpointId),
+    SpeechServiceConnection_EndpointId (1005),
 
     /**
      * The Cognitive Services Speech Service host (url). Under normal circumstances, you shouldn't
      * have to use this property directly.
      * Instead, use <see cref="SpeechConfig.fromHost"/>.
      */
-    SpeechServiceConnection_Host (com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceConnection_Host),
+    SpeechServiceConnection_Host (1006),
 
     /**
      * The host name of the proxy server used to connect to the Cognitive Services Speech Service. Under normal circumstances,
@@ -69,7 +69,7 @@ public enum PropertyId {
      * Instead, use <see cref="SpeechConfig.setProxy"/>.
      * NOTE: This property id was added in version 1.1.0.
      */
-    SpeechServiceConnection_ProxyHostName (com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceConnection_ProxyHostName),
+    SpeechServiceConnection_ProxyHostName (1100),
 
     /**
      * The port of the proxy server used to connect to the Cognitive Services Speech Service. Under normal circumstances,
@@ -77,7 +77,7 @@ public enum PropertyId {
      * Instead, use <see cref="SpeechConfig.setProxy"/>.
      * NOTE: This property id was added in version 1.1.0.
      */
-    SpeechServiceConnection_ProxyPort (com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceConnection_ProxyPort),
+    SpeechServiceConnection_ProxyPort (1101),
 
     /**
      * The user name of the proxy server used to connect to the Cognitive Services Speech Service. Under normal circumstances,
@@ -85,7 +85,7 @@ public enum PropertyId {
      * Instead, use <see cref="SpeechConfig.setProxy"/>.
      * NOTE: This property id was added in version 1.1.0.
      */
-    SpeechServiceConnection_ProxyUserName (com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceConnection_ProxyUserName),
+    SpeechServiceConnection_ProxyUserName (1102),
 
     /**
      * The password of the proxy server used to connect to the Cognitive Services Speech Service. Under normal circumstances,
@@ -93,14 +93,14 @@ public enum PropertyId {
      * Instead, use <see cref="SpeechConfig.setProxy"/>.
      * NOTE: This property id was added in version 1.1.0.
      */
-    SpeechServiceConnection_ProxyPassword (com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceConnection_ProxyPassword),
+    SpeechServiceConnection_ProxyPassword (1103),
 
     /**
      * The URL string built from speech configuration.
      * This property is intended to be read-only. The SDK is using it internally.
      * NOTE: Added in version 1.5.0.
      */
-    SpeechServiceConnection_Url (com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceConnection_Url),
+    SpeechServiceConnection_Url (1104),
 
     /**
      * The list of comma separated languages (BCP-47 format) used as target translation languages. Under normal circumstances,
@@ -108,37 +108,37 @@ public enum PropertyId {
      * Instead, use <see cref="SpeechTranslationConfig.addTargetLanguage"/>,
      * <see cref="SpeechTranslationConfig.getTargetLanguages"/>, <see cref="TranslationRecognizer.getTargetLanguages"/>.
      */
-    SpeechServiceConnection_TranslationToLanguages (com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceConnection_TranslationToLanguages),
+    SpeechServiceConnection_TranslationToLanguages (2000),
 
     /**
      * The name of the Cognitive Service Text to Speech Service voice. Under normal circumstances, you shouldn't have to use this
      * property directly. Instead use <see cref="SpeechTranslationConfig.setVoiceName"/>.
      * NOTE: Valid voice names can be found <a href="https://aka.ms/csspeech/voicenames">here</a>.
      */
-    SpeechServiceConnection_TranslationVoice (com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceConnection_TranslationVoice),
+    SpeechServiceConnection_TranslationVoice (2001),
 
     /**
      * Translation features. For internal use.
      */
-    SpeechServiceConnection_TranslationFeatures (com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceConnection_TranslationFeatures),
+    SpeechServiceConnection_TranslationFeatures (2002),
 
     /**
      * The Language Understanding Service region. Under normal circumstances, you shouldn't have to use this property directly.
      * Instead, use <see cref="LanguageUnderstandingModel"/>.
      */
-    SpeechServiceConnection_IntentRegion (com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceConnection_IntentRegion),
+    SpeechServiceConnection_IntentRegion (2003),
 
     /**
      * The Cognitive Services Speech Service recognition mode. Can be "INTERACTIVE", "CONVERSATION", "DICTATION".
      * This property is intended to be read-only. The SDK is using it internally.
      */
-    SpeechServiceConnection_RecoMode (com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceConnection_RecoMode),
+    SpeechServiceConnection_RecoMode (3000),
 
     /**
      * The spoken language to be recognized (in BCP-47 format). Under normal circumstances, you shouldn't have to use this property directly.
      * Instead, use <see cref="SpeechConfig.setSpeechRecognitionLanguage"/>.
      */
-    SpeechServiceConnection_RecoLanguage ( com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceConnection_RecoLanguage),
+    SpeechServiceConnection_RecoLanguage (3001),
 
     /**
      * The session id. This id is a universally unique identifier (aka UUID) representing a specific binding of an audio input stream
@@ -146,105 +146,105 @@ public enum PropertyId {
      * property directly.
      * Instead use <see cref="SessionEventArgs.getSessionId"/>.
      */
-    Speech_SessionId ( com.microsoft.cognitiveservices.speech.internal.PropertyId.Speech_SessionId),
+    Speech_SessionId (3002),
 
     /**
      * The spoken language to be synthesized (e.g. en-US)
      * Added in version 1.7.0
      */
-    SpeechServiceConnection_SynthLanguage ( com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceConnection_SynthLanguage),
+    SpeechServiceConnection_SynthLanguage (3100),
 
     /**
      * The name of the TTS voice to be used for speech synthesis
      * Added in version 1.7.0
      */
-    SpeechServiceConnection_SynthVoice ( com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceConnection_SynthVoice),
+    SpeechServiceConnection_SynthVoice (3101),
 
     /**
      * The string to specify TTS output audio format (e.g. riff-16khz-16bit-mono-pcm)
      * Added in version 1.7.0
      */
-    SpeechServiceConnection_SynthOutputFormat ( com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceConnection_SynthOutputFormat),
+    SpeechServiceConnection_SynthOutputFormat (3102),
 
     /**
      *  The initial silence timeout value (in milliseconds) used by the service.
      *  Added in version 1.5.0
      */
-    SpeechServiceConnection_InitialSilenceTimeoutMs ( com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceConnection_InitialSilenceTimeoutMs),
+    SpeechServiceConnection_InitialSilenceTimeoutMs (3200),
 
     /**
      *  The end silence timeout value (in milliseconds) used by the service.
      *  Added in version 1.5.0
      */
-    SpeechServiceConnection_EndSilenceTimeoutMs ( com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceConnection_EndSilenceTimeoutMs),
+    SpeechServiceConnection_EndSilenceTimeoutMs (3201),
 
     /**
      *  A boolean value specifying whether audio logging is enabled in the service or not.
      *  Added in version 1.5.0
      */
-    SpeechServiceConnection_EnableAudioLogging ( com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceConnection_EnableAudioLogging),
+    SpeechServiceConnection_EnableAudioLogging (3202),
 
     /**
      * The requested Cognitive Services Speech Service response output format (simple or detailed). Under normal circumstances, you shouldn't have
      * to use this property directly.
      * Instead use <see cref="SpeechConfig.setOutputFormat"/>.
      */
-    SpeechServiceResponse_RequestDetailedResultTrueFalse (com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceResponse_RequestDetailedResultTrueFalse),
+    SpeechServiceResponse_RequestDetailedResultTrueFalse (4000),
 
     /**
      * The requested Cognitive Services Speech Service response output profanity level. Currently unused.
      */
-    SpeechServiceResponse_RequestProfanityFilterTrueFalse (com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceResponse_RequestProfanityFilterTrueFalse),
+    SpeechServiceResponse_RequestProfanityFilterTrueFalse (4001),
 
     /**
      *  The requested Cognitive Services Speech Service response output profanity setting.
      *  Allowed values are "masked", "removed", and "raw".
      *  Added in version 1.5.0.
      */
-    SpeechServiceResponse_ProfanityOption ( com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceResponse_ProfanityOption),
+    SpeechServiceResponse_ProfanityOption (4002),
 
     /**
      *  A string value specifying which post processing option should be used by service.
      *  Allowed values are "TrueText".
      *  Added in version 1.5.0
      */
-    SpeechServiceResponse_PostProcessingOption ( com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceResponse_PostProcessingOption),
+    SpeechServiceResponse_PostProcessingOption (4003),
 
     /**
      *  A boolean value specifying whether to include word-level timestamps in the response result.
      *  Added in version 1.5.0
      */
-    SpeechServiceResponse_RequestWordLevelTimestamps ( com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceResponse_RequestWordLevelTimestamps),
+    SpeechServiceResponse_RequestWordLevelTimestamps (4004),
 
     /**
      *  The number of times a word has to be in partial results to be returned.
      *  Added in version 1.5.0
      */
-    SpeechServiceResponse_StablePartialResultThreshold ( com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceResponse_StablePartialResultThreshold),
+    SpeechServiceResponse_StablePartialResultThreshold (4005),
 
     /**
      *  A string value specifying the output format option in the response result. Internal use only.
      *  Added in version 1.5.0.
      */
-    SpeechServiceResponse_OutputFormatOption ( com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceResponse_OutputFormatOption),
+    SpeechServiceResponse_OutputFormatOption (4006),
 
     /**
      *  A boolean value to request for stabilizing translation partial results by omitting words in the end.
      *  Added in version 1.5.0.
      */
-    SpeechServiceResponse_TranslationRequestStablePartialResult ( com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceResponse_TranslationRequestStablePartialResult),
+    SpeechServiceResponse_TranslationRequestStablePartialResult (4100),
 
     /**
      * The Cognitive Services Speech Service response output (in JSON format). This property is available on recognition result objects only.
      */
-    SpeechServiceResponse_JsonResult ( com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceResponse_JsonResult),
+    SpeechServiceResponse_JsonResult (5000),
 
     /**
      * The Cognitive Services Speech Service error details (in JSON format). Under normal circumstances, you shouldn't have to
      * use this property directly.
      * Instead, use <see cref="CancellationDetails.getErrorDetails"/>.
      */
-    SpeechServiceResponse_JsonErrorDetails ( com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceResponse_JsonErrorDetails),
+    SpeechServiceResponse_JsonErrorDetails (5001),
 
     /**
      * The recognition latency in milliseconds. Read-only, available on final speech/translation/intent results.
@@ -252,93 +252,93 @@ public enum PropertyId {
      * The SDK computes the time difference between the last audio fragment from the audio input that is contributing to the final result, and the time the final result is received from the speech service.
      * Added in version 1.3.0.
      */
-    SpeechServiceResponse_RecognitionLatencyMs ( com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceResponse_RecognitionLatencyMs),
+    SpeechServiceResponse_RecognitionLatencyMs (5002),
 
     /**
      * The cancellation reason. Currently unused.
      */
-    CancellationDetails_Reason ( com.microsoft.cognitiveservices.speech.internal.PropertyId.CancellationDetails_Reason),
+    CancellationDetails_Reason (6000),
 
     /**
      * The cancellation text. Currently unused.
      */
-    CancellationDetails_ReasonText ( com.microsoft.cognitiveservices.speech.internal.PropertyId.CancellationDetails_ReasonText),
+    CancellationDetails_ReasonText (6001),
 
     /**
      * The cancellation detailed text. Currently unused.
      */
-    CancellationDetails_ReasonDetailedText ( com.microsoft.cognitiveservices.speech.internal.PropertyId.CancellationDetails_ReasonDetailedText),
+    CancellationDetails_ReasonDetailedText (6002),
 
     /**
      * The Language Understanding Service response output (in JSON format). Available via <see cref="IntentRecognitionResult.Properties"/>.
      */
-    LanguageUnderstandingServiceResponse_JsonResult ( com.microsoft.cognitiveservices.speech.internal.PropertyId.LanguageUnderstandingServiceResponse_JsonResult),
+    LanguageUnderstandingServiceResponse_JsonResult (7000),
 
     /**
      * The file name to write logs.
      * Added in version 1.4.0.
      */
-    Speech_LogFilename ( com.microsoft.cognitiveservices.speech.internal.PropertyId.Speech_LogFilename),
+    Speech_LogFilename (9001),
 
     /**
      * Identifier used to connect to the backend service.
      * Added in version 1.5.0.
      */
-    Conversation_ApplicationId ( com.microsoft.cognitiveservices.speech.internal.PropertyId.Conversation_ApplicationId),
+    Conversation_ApplicationId (10000),
 
     /**
      * Type of dialog backend to connect to.
      * Added in version 1.7.0.
      */
-    Conversation_DialogType ( com.microsoft.cognitiveservices.speech.internal.PropertyId.Conversation_DialogType),
+    Conversation_DialogType (10001),
 
     /**
      * Silence timeout for listening
      * Added in version 1.5.0.
      */
-    Conversation_Initial_Silence_Timeout ( com.microsoft.cognitiveservices.speech.internal.PropertyId.Conversation_Initial_Silence_Timeout),
+    Conversation_Initial_Silence_Timeout (10002),
 
     /**
      * From id to be used on speech recognition activities
      * Added in version 1.5.0.
      */
-    Conversation_From_Id ( com.microsoft.cognitiveservices.speech.internal.PropertyId.Conversation_From_Id),
+    Conversation_From_Id (10003),
 
     /**
      * ConversationId for the session.
      * Added in version 1.8.0.
      */
-    Conversation_Conversation_Id ( com.microsoft.cognitiveservices.speech.internal.PropertyId.Conversation_Conversation_Id),
+    Conversation_Conversation_Id (10004),
 
     /**
      * Comma separated list of custom voice deployment ids.
      * Added in version 1.8.0.
      */
-    Conversation_Custom_Voice_Deployment_Ids ( com.microsoft.cognitiveservices.speech.internal.PropertyId.Conversation_Custom_Voice_Deployment_Ids ),
+    Conversation_Custom_Voice_Deployment_Ids (10005),
 
     /**
      * Speech activity template, stamp properties in the template on the activity generated by the service for speech.
      * Added in version 1.10.0.
      */
-    Conversation_Speech_Activity_Template ( com.microsoft.cognitiveservices.speech.internal.PropertyId.Conversation_Speech_Activity_Template ),
+    Conversation_Speech_Activity_Template (10006),
 
     /**
      *  The auto detect source languages
      * Added in version 1.8.0.
      */
-    SpeechServiceConnection_AutoDetectSourceLanguages ( com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceConnection_AutoDetectSourceLanguages),
+    SpeechServiceConnection_AutoDetectSourceLanguages (3300),
 
     /**
      * The auto detect source language result
      * Added in version 1.8.0.
      */
-    SpeechServiceConnection_AutoDetectSourceLanguageResult ( com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceConnection_AutoDetectSourceLanguageResult),
+    SpeechServiceConnection_AutoDetectSourceLanguageResult (3301),
 
     /**
      * The user id associated to data buffer written by client when using Pull/Push audio mode streams.
      * Added in version 1.5.0.
      */
-    DataBuffer_UserId ( com.microsoft.cognitiveservices.speech.internal.PropertyId.DataBuffer_UserId),
+    DataBuffer_UserId (11002),
 
     /**
      * The time stamp associated to data buffer written by client when using Pull/Push audio mode streams.
@@ -346,9 +346,9 @@ public enum PropertyId {
      * See https://en.wikipedia.org/wiki/Presentation_timestamp.
      * Added in version 1.5.0.
      */
-    DataBuffer_TimeStamp ( com.microsoft.cognitiveservices.speech.internal.PropertyId.DataBuffer_TimeStamp);
+    DataBuffer_TimeStamp (11001);
 
-    private PropertyId(com.microsoft.cognitiveservices.speech.internal.PropertyId id) {
+    private PropertyId(int id) {
         this.id = id;
     }
 
@@ -357,7 +357,7 @@ public enum PropertyId {
      *
      * @return the speech property id
      */
-    public com.microsoft.cognitiveservices.speech.internal.PropertyId getValue() { return this.id; }
+    public int getValue() { return this.id; }
 
-    private final com.microsoft.cognitiveservices.speech.internal.PropertyId id;
+    private final int id;
 }

@@ -101,7 +101,7 @@ class IntentEndToEndTests: XCTestCase {
 
         XCTAssertEqual(intentResult!.text, weatherTextEnglish)
         XCTAssertEqual(intentResult!.intentId, "weather")
-        XCTAssertEqual(intentResult!.reason, SPXResultReason.recognizedSpeech)
+        XCTAssertEqual(intentResult!.reason, SPXResultReason.recognizedIntent)
         XCTAssertGreaterThan(intentResult!.duration, 0)
         XCTAssertGreaterThan(intentResult!.offset, 0)
         XCTAssertGreaterThan(intentResult!.resultId.count, 0)
@@ -115,7 +115,7 @@ class IntentEndToEndTests: XCTestCase {
 
         XCTAssertEqual(self.result["finalText"], self.weatherTextEnglish);
         XCTAssertEqual(self.result["intentId"], "weather")
-        XCTAssertEqual(self.result["reason"], "\(SPXResultReason.recognizedSpeech.rawValue)")
+        XCTAssertEqual(self.result["reason"], "\(SPXResultReason.recognizedIntent.rawValue)")
         XCTAssertEqual(self.counts["finalResultCount"], 1);
         XCTAssertGreaterThan(self.counts["connectedCount"]!, 0);
 

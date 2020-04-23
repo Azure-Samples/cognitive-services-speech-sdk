@@ -11,6 +11,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import com.microsoft.cognitiveservices.speech.util.EventHandlerImpl;
+import com.microsoft.cognitiveservices.speech.util.IntRef;
+import com.microsoft.cognitiveservices.speech.util.SafeHandle;
+import com.microsoft.cognitiveservices.speech.util.SafeHandleType;
 import com.microsoft.cognitiveservices.speech.util.Contracts;
 import com.microsoft.cognitiveservices.speech.Recognizer;
 
@@ -44,8 +47,9 @@ public final class Connection implements Closeable
      */
     public static Connection fromRecognizer(Recognizer recognizer)
     {
-        com.microsoft.cognitiveservices.speech.internal.Connection connectionImpl = com.microsoft.cognitiveservices.speech.internal.Connection.FromRecognizer(recognizer.getRecognizerImpl());
-        return new Connection(connectionImpl);
+        IntRef handle = new IntRef(0);
+        Contracts.throwIfFail(connectionFromRecognizer(recognizer.getImpl(), handle));
+        return new Connection(handle);
     }
 
     /**
@@ -59,7 +63,7 @@ public final class Connection implements Closeable
      */
     public void openConnection(boolean forContinuousRecognition)
     {
-        connectionImpl.Open(forContinuousRecognition);
+        Contracts.throwIfFail(openConnection(connectionHandle, forContinuousRecognition));
     }
 
     /**
@@ -70,7 +74,7 @@ public final class Connection implements Closeable
      */
     public void closeConnection()
     {
-        connectionImpl.Close();
+        Contracts.throwIfFail(closeConnection(connectionHandle));
     }
 
     /**
@@ -88,7 +92,7 @@ public final class Connection implements Closeable
         return s_executorService.submit(new java.util.concurrent.Callable<Void>() {
 
             public Void call() {
-                Runnable runnable = new Runnable() { public void run() { connectionImpl.SendMessageAsync(finalPath, finalPayload).Get(); }};
+                Runnable runnable = new Runnable() { public void run() { Contracts.throwIfFail(connectionSendMessage(connectionHandle, finalPath, finalPayload)); }};
                 thisConnection.doAsyncConnectionAction(runnable);
                 return null;
         }});
@@ -102,7 +106,7 @@ public final class Connection implements Closeable
      * @param propertyValue The value of the property that you want to set.
      */
     public void setMessageProperty(String path, String propertyName, String propertyValue) {
-        connectionImpl.SetMessageProperty(path, propertyName, propertyValue);
+        Contracts.throwIfFail(connectionSetMessageProperty(connectionHandle, path, propertyName, propertyValue));
     }
 
     private void doAsyncConnectionAction(Runnable connectionImplAction) {
@@ -184,14 +188,12 @@ public final class Connection implements Closeable
             }
             else {
                 // disconnect
-                if (this.connected.isUpdateNotificationOnConnectedFired())
-                    connectionImpl.getConnected().DisconnectAll();
-                if (this.disconnected.isUpdateNotificationOnConnectedFired())
-                    connectionImpl.getDisconnected().DisconnectAll();
 
-                connectedHandler.delete();
-                disconnectedHandler.delete();
-                connectionImpl.delete();
+                if (connectionHandle != null)
+                {
+                    connectionHandle.close();
+                    connectionHandle = null;
+                }
                 _connectionObjects.remove(this);
                 disposed = true;
             }
@@ -205,17 +207,15 @@ public final class Connection implements Closeable
      */
     static java.util.Set<Connection> _connectionObjects = java.util.Collections.synchronizedSet(new java.util.HashSet<Connection>());
 
-    private com.microsoft.cognitiveservices.speech.internal.Connection connectionImpl;
-    private ConnectionEventHandlerImpl connectedHandler;
-    private ConnectionEventHandlerImpl disconnectedHandler;
+    private SafeHandle connectionHandle;
     private boolean disposed = false;
     private final Object connectionLock = new Object();
     private int activeAsyncConnectionCounter = 0;
 
-    private Connection(com.microsoft.cognitiveservices.speech.internal.Connection connectionImpl)
+    private Connection(IntRef handle)
     {
-        Contracts.throwIfNull(connectionImpl, "RecognizerInternalImplementation");
-        this.connectionImpl = connectionImpl;
+        Contracts.throwIfNull(handle, "Connection");
+        this.connectionHandle = new SafeHandle(handle.getValue(), SafeHandleType.Connection);
         initialize();
     }
 
@@ -223,57 +223,60 @@ public final class Connection implements Closeable
     {
         final Connection _this = this;
 
-        this.connectedHandler = new ConnectionEventHandlerImpl(this, true);
         this.connected.updateNotificationOnConnected(new Runnable(){
             @Override
             public void run() {
                 _connectionObjects.add(_this);
-                connectionImpl.getConnected().AddEventListener(connectedHandler);
+                connectionConnectedSetCallback(connectionHandle.getValue());
             }
         });
 
-        this.disconnectedHandler = new ConnectionEventHandlerImpl(this,false);
         this.disconnected.updateNotificationOnConnected(new Runnable(){
             @Override
             public void run() {
                 _connectionObjects.add(_this);
-                connectionImpl.getDisconnected().AddEventListener(disconnectedHandler);
+                connectionDisconnectedSetCallback(connectionHandle.getValue());
             }
         });
     }
 
-    /**
-     * Define a private class which raises an event when a corresponding callback is invoked from the native layer.
-     */
-    private class ConnectionEventHandlerImpl extends com.microsoft.cognitiveservices.speech.internal.ConnectionEventListener {
-
-        public ConnectionEventHandlerImpl(Connection connection, Boolean isConnectedEvent) {
-            Contracts.throwIfNull(connection, "connection");
-
-            this.connection = connection;
-            this.isConnectedEvent= isConnectedEvent;
-        }
-
-        @Override
-        public void Execute(com.microsoft.cognitiveservices.speech.internal.ConnectionEventArgs eventArgs) {
-            Contracts.throwIfNull(eventArgs, "eventArgs");
-
-            if (connection.disposed) {
+    private void connectedEventCallback(long eventArgs)
+    {
+        try {
+            Contracts.throwIfNull(this, "connection");
+            if (this.disposed) {
                 return;
             }
-
-            ConnectionEventArgs arg = new ConnectionEventArgs(eventArgs);
-            EventHandlerImpl<ConnectionEventArgs>  handler = this.isConnectedEvent ?
-                    this.connection.connected : this.connection.disconnected;
-
+            ConnectionEventArgs args = new ConnectionEventArgs(eventArgs, true);
+            EventHandlerImpl<ConnectionEventArgs> handler = this.connected;
             if (handler != null) {
-                handler.fireEvent(this.connection, arg);
+                handler.fireEvent(this, args);
             }
-        }
-
-        private Connection connection;
-        private Boolean isConnectedEvent;
+        } catch (Exception e) {}
     }
+
+    private void disconnectedEventCallback(long eventArgs)
+    {
+        try {
+            Contracts.throwIfNull(this, "connection");
+            if (this.disposed) {
+                return;
+            }
+            ConnectionEventArgs args = new ConnectionEventArgs(eventArgs, true);
+            EventHandlerImpl<ConnectionEventArgs> handler = this.disconnected;
+            if (handler != null) {
+                handler.fireEvent(this, args);
+            }
+        } catch (Exception e) {}        
+    }
+
+    private final native static long connectionFromRecognizer(SafeHandle recoHandle, IntRef handle);
+    private final native long openConnection(SafeHandle connectionHandle, boolean forContinuousRecognition);
+    private final native long closeConnection(SafeHandle connectionHandle);
+    private final native long connectionSendMessage(SafeHandle connectionHandle, String path, String payload);
+    private final native long connectionSetMessageProperty(SafeHandle connectionHandle, String path, String propertyName, String propertyValue);
+    private final native long connectionConnectedSetCallback(long connectionHandle);
+    private final native long connectionDisconnectedSetCallback(long connectionHandle);
 }
 
 

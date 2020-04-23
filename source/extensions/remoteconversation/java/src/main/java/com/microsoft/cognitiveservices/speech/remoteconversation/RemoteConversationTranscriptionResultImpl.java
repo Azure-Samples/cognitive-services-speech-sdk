@@ -11,7 +11,7 @@ import java.math.BigInteger;
 
 class RemoteConversationTranscriptionResultImpl extends ConversationTranscriptionResult {
     public RemoteConversationTranscriptionResultImpl() {
-        super(null);
+        super(0);
     }
 
     /**

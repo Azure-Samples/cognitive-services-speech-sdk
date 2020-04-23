@@ -131,7 +131,7 @@ elseif(SPEECHSDK_OS STREQUAL "OSX")
 elseif(SPEECHSDK_OS STREQUAL "Android")
   option(BUILD_PYTHON "Build Python SWIG module" OFF)
   option(BUILD_CSHARP "Build C# module" OFF)
-  option(BUILD_JAVA "Build Java/Android SWIG module" ON)
+  option(BUILD_JAVA "Build Java/Android module" ON)
   set(use_default_uuid ON CACHE BOOL "")
   add_compile_definitions("USING_DEFAULT_UUID")
   set(CMAKE_SYSTEM_NAME Android)
@@ -160,7 +160,7 @@ elseif(SPEECHSDK_OS STREQUAL "Android")
 elseif(SPEECHSDK_OS STREQUAL "Windows")
   option(BUILD_PYTHON "Build Python SWIG module" OFF)
   option(BUILD_CSHARP "Build C# module" ON)
-  option(BUILD_JAVA "Build Java/Android SWIG module" ON)
+  option(BUILD_JAVA "Build Java/Android module" ON)
 elseif(SPEECHSDK_OS STREQUAL "Linux")
   # Note: the API levels below are also matched in the Linux OpenSSL build,
   # cf. ci/build-linux-openssl.sh.
@@ -179,7 +179,7 @@ elseif(SPEECHSDK_OS STREQUAL "Linux")
   set(use_openssl ON CACHE BOOL "")
   set(OPENSSL_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/external/linux-openssl/${CMAKE_OPENSSL_TARGET}/usr/local" CACHE STRING "")
   option(BUILD_PYTHON "Build Python SWIG module" OFF)
-  option(BUILD_JAVA "Build Java/Android SWIG module" ON)
+  option(BUILD_JAVA "Build Java/Android module" ON)
   if((SPEECHSDK_ARCH STREQUAL "x64") OR
      (SPEECHSDK_ARCH STREQUAL "arm32") OR
      (SPEECHSDK_ARCH STREQUAL "arm64"))
@@ -374,6 +374,8 @@ elseif((CMAKE_SYSTEM_NAME STREQUAL "Windows") AND (SPEECHSDK_CRT STREQUAL "OS_UC
 else()
   set(SPEECHSDK_CORE_LIBRARY "Microsoft.CognitiveServices.Speech.core")
 endif()
+
+set(JAVA_JNI_LIBRARY Microsoft.CognitiveServices.Speech.java.bindings)
 
 file(GLOB SPEECH_C_API_HEADERS "${CARBON_C_API}/*.h")
 file(GLOB SPEECH_CXX_API_HEADERS "${CARBON_CXX_API}/*.h")

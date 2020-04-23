@@ -9,7 +9,12 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import com.microsoft.cognitiveservices.speech.SpeechConfig;
+import com.microsoft.cognitiveservices.speech.PropertyId;
 import com.microsoft.cognitiveservices.speech.util.Contracts;
+import com.microsoft.cognitiveservices.speech.util.SafeHandle;
+import com.microsoft.cognitiveservices.speech.util.SafeHandleType;
+import com.microsoft.cognitiveservices.speech.util.IntRef;
+import com.microsoft.cognitiveservices.speech.util.StringRef;
 import com.microsoft.cognitiveservices.speech.PropertyCollection;
 import com.microsoft.cognitiveservices.speech.transcription.Participant;
 import com.microsoft.cognitiveservices.speech.transcription.User;
@@ -39,11 +44,9 @@ public final class Conversation implements Closeable
 
         return s_executorService.submit(new java.util.concurrent.Callable<Conversation>() {
             public Conversation call() {
-                com.microsoft.cognitiveservices.speech.internal.Conversation impl = 
-                    com.microsoft.cognitiveservices.speech.internal.Conversation.CreateConversationAsync(finalSpeechConfig.getImpl(), finalConversationId)
-                    .Get();
-                    
-                return new Conversation(impl);
+                IntRef handleRef = new IntRef(0);
+                Contracts.throwIfFail(createConversationFromConfig(handleRef, finalSpeechConfig.getImpl(), finalConversationId));
+                return new Conversation(handleRef.getValue());
             }
         });
     }
@@ -63,11 +66,9 @@ public final class Conversation implements Closeable
 
         return s_executorService.submit(new java.util.concurrent.Callable<Conversation>() {
             public Conversation call() {
-                com.microsoft.cognitiveservices.speech.internal.Conversation impl = 
-                    com.microsoft.cognitiveservices.speech.internal.Conversation.CreateConversationAsync(finalSpeechConfig.getImpl(), finalConversationId)
-                    .Get();
-                    
-                return new Conversation(impl);
+                IntRef handleRef = new IntRef(0);
+                Contracts.throwIfFail(createConversationFromConfig(handleRef, finalSpeechConfig.getImpl(), finalConversationId));
+                return new Conversation(handleRef.getValue());
             }
         });
     }
@@ -91,7 +92,10 @@ public final class Conversation implements Closeable
      * @return the conversation Id.
      */
     public String getConversationId() {
-        return conversationImpl.GetConversationId();
+
+        StringRef conversationIdRef = new StringRef("");
+        Contracts.throwIfFail(getConversationId(conversationHandle, conversationIdRef));
+        return conversationIdRef.getValue();
     }
 
     /**
@@ -103,7 +107,7 @@ public final class Conversation implements Closeable
      */
     public void setAuthorizationToken(String token) {
         Contracts.throwIfNullOrWhitespace(token, "token");
-        conversationImpl.SetAuthorizationToken(token);
+        propertyHandle.setProperty(PropertyId.SpeechServiceAuthorization_Token, token);
     }
 
     /**
@@ -111,7 +115,7 @@ public final class Conversation implements Closeable
      * @return Authorization token.
      */
     public String getAuthorizationToken() {
-        return conversationImpl.GetAuthorizationToken();
+        return propertyHandle.getProperty(PropertyId.SpeechServiceAuthorization_Token);
     }
 
     /**
@@ -119,10 +123,8 @@ public final class Conversation implements Closeable
      * @return The collection of properties and their values defined for this Conversation.
      */
     public PropertyCollection getProperties() {
-        return this.parameters;
+        return this.propertyHandle;
     }
-
-    private com.microsoft.cognitiveservices.speech.PropertyCollection _Parameters;
 
     /**
      *   Add a participant to a conversation using a participant object.
@@ -136,7 +138,7 @@ public final class Conversation implements Closeable
 
         return s_executorService.submit(new java.util.concurrent.Callable<Participant>() {
             public Participant call() {
-                Runnable runnable = new Runnable() { public void run() { conversationImpl.AddParticipantAsync(finalParticipant.getParticipantImpl()).Get(); }};
+                Runnable runnable = new Runnable() { public void run() { Contracts.throwIfFail(addParticipant(conversationHandle, finalParticipant.getImpl())); }};
                 thisConv.doAsyncConversationAction(runnable);
                 return finalParticipant;
         }});
@@ -155,7 +157,9 @@ public final class Conversation implements Closeable
             public Participant call() {
                 final Participant[] result = new Participant[1];
                 Runnable runnable = new Runnable() { public void run() {
-                result[0] = new Participant(conversationImpl.AddParticipantAsync(userId).Get());
+                Participant participant = Participant.from(userId);
+                Contracts.throwIfFail(addParticipant(conversationHandle, participant.getImpl()));
+                result[0] = participant;
                 }};
                 thisConv.doAsyncConversationAction(runnable);
                 return result[0];
@@ -173,7 +177,7 @@ public final class Conversation implements Closeable
 
         return s_executorService.submit(new java.util.concurrent.Callable<User>() {
             public User call() {
-                Runnable runnable = new Runnable() { public void run() { conversationImpl.AddParticipantAsync(user.getUserImpl()).Get(); }};
+                Runnable runnable = new Runnable() { public void run() { Contracts.throwIfFail(addParticipantByUser(conversationHandle, user.getImpl())); }};
                 thisConv.doAsyncConversationAction(runnable);
                 return user;
         }});
@@ -191,7 +195,7 @@ public final class Conversation implements Closeable
 
         return s_executorService.submit(new java.util.concurrent.Callable<Void>() {
             public Void call() {
-                Runnable runnable = new Runnable() { public void run() { conversationImpl.RemoveParticipantAsync(finalUser.getUserImpl()).Get(); }};
+                Runnable runnable = new Runnable() { public void run() { Contracts.throwIfFail(removeParticipantByUser(conversationHandle, finalUser.getImpl())); }};
                 thisConv.doAsyncConversationAction(runnable);
                 return null;
         }});
@@ -209,7 +213,7 @@ public final class Conversation implements Closeable
 
         return s_executorService.submit(new java.util.concurrent.Callable<Void>() {
             public Void call() {
-                Runnable runnable = new Runnable() { public void run() { conversationImpl.RemoveParticipantAsync(finalParticipant.getParticipantImpl()).Get(); }};
+                Runnable runnable = new Runnable() { public void run() { Contracts.throwIfFail(removeParticipant(conversationHandle, finalParticipant.getImpl())); }};
                 thisConv.doAsyncConversationAction(runnable);
                 return null;
         }});
@@ -227,7 +231,7 @@ public final class Conversation implements Closeable
 
         return s_executorService.submit(new java.util.concurrent.Callable<Void>() {
             public Void call() {
-                Runnable runnable = new Runnable() { public void run() { conversationImpl.RemoveParticipantAsync(finalUserId).Get(); }};
+                Runnable runnable = new Runnable() { public void run() { Contracts.throwIfFail(removeParticipantByUserId(conversationHandle, finalUserId)); }};
                 thisConv.doAsyncConversationAction(runnable);
                 return null;
         }});
@@ -243,19 +247,23 @@ public final class Conversation implements Closeable
 
         return s_executorService.submit(new java.util.concurrent.Callable<Void>() {
             public Void call() {
-                Runnable runnable = new Runnable() { public void run() { conversationImpl.EndConversationAsync().Get(); }};
+                Runnable runnable = new Runnable() { public void run() { Contracts.throwIfFail(endConversation(conversationHandle)); }};
                 thisConv.doAsyncConversationAction(runnable);
                 return null;
         }});
     }
 
+    /*! \cond INTERNAL */
+
     /**
      * Returns the comversation implementation.
      * @return The implementation of the conversation.
      */
-    public com.microsoft.cognitiveservices.speech.internal.Conversation getConversationImpl() {
-        return conversationImpl;
+    public SafeHandle getImpl() {
+        return conversationHandle;
     }
+    
+    /*! \endcond */
 
     /*! \cond PROTECTED */
 
@@ -266,8 +274,15 @@ public final class Conversation implements Closeable
         }
 
         if (disposing) {
-            conversationImpl.delete();
-            parameters.close();
+            if (conversationHandle != null) {
+                conversationHandle.close();
+                conversationHandle = null;
+            }
+
+            if (propertyHandle != null) {
+                propertyHandle.close();
+                propertyHandle = null;
+            }
             disposed = true;
         }
     }
@@ -276,10 +291,11 @@ public final class Conversation implements Closeable
     * Protected constructor.
     * @param conversation Internal conversation implementation
     */
-    protected Conversation(com.microsoft.cognitiveservices.speech.internal.Conversation conversation) {
-        Contracts.throwIfNull(conversation, "conversation");
-        this.conversationImpl = conversation;
-        parameters = new PrivatePropertyCollection(conversationImpl.getProperties());
+    protected Conversation(long handleValue) {
+        this.conversationHandle = new SafeHandle(handleValue, SafeHandleType.Conversation);
+        IntRef propbagRef = new IntRef(0);
+        Contracts.throwIfFail(getPropertyBag(conversationHandle, propbagRef));
+        propertyHandle = new PropertyCollection(propbagRef);
     }
 
     /*! \endcond */
@@ -301,19 +317,19 @@ public final class Conversation implements Closeable
     }
 
 
-    private com.microsoft.cognitiveservices.speech.internal.Conversation conversationImpl;
+    private SafeHandle conversationHandle;
     private boolean disposed = false;
     private final Object conversationLock = new Object();
     private int activeAsyncConversationCounter = 0;
-    private com.microsoft.cognitiveservices.speech.PropertyCollection parameters;
+    private com.microsoft.cognitiveservices.speech.PropertyCollection propertyHandle;
 
-    private class PrivatePropertyCollection extends com.microsoft.cognitiveservices.speech.PropertyCollection {
-        public PrivatePropertyCollection(com.microsoft.cognitiveservices.speech.internal.PropertyCollection collection) {
-            super(collection);
-        }
-    }
-
-    private void initialize() {
-       this.parameters = new PrivatePropertyCollection(this.conversationImpl.getProperties());
-    }
+    private final static native long createConversationFromConfig(IntRef convHandle, SafeHandle speechConfigHandle, String id);
+    private final native long getConversationId(SafeHandle convHandle, StringRef conversationIdRef);
+    private final native long addParticipant(SafeHandle convHandle, SafeHandle participantHandle);
+    private final native long addParticipantByUser(SafeHandle convHandle, SafeHandle userHandle);
+    private final native long removeParticipant(SafeHandle convHandle, SafeHandle participantHandle);
+    private final native long removeParticipantByUser(SafeHandle convHandle, SafeHandle userHandle);
+    private final native long removeParticipantByUserId(SafeHandle convHandle, String userId);
+    private final native long endConversation(SafeHandle convHandle);
+    private final native long getPropertyBag(SafeHandle convHandle, IntRef propbagHandle);
 }

@@ -8,13 +8,14 @@ import java.io.Closeable;
 
 import com.microsoft.cognitiveservices.speech.PropertyId;
 import com.microsoft.cognitiveservices.speech.util.Contracts;
+import com.microsoft.cognitiveservices.speech.util.IntRef;
 
 /**
  * Class that defines configurations for the dialog service connector object for using a CustomCommands backend.
  */
 public final class CustomCommandsConfig extends DialogServiceConfig {
-    private CustomCommandsConfig(com.microsoft.cognitiveservices.speech.internal.CustomCommandsConfig customCommandsConfigImpl) {
-        super(customCommandsConfigImpl);
+    private CustomCommandsConfig(long handleValue) {
+        super(handleValue);
     }
 
     /**
@@ -28,7 +29,9 @@ public final class CustomCommandsConfig extends DialogServiceConfig {
         Contracts.throwIfNull(appId, "appId");
         Contracts.throwIfNull(subscription, "subscription");
         Contracts.throwIfNull(region, "region");
-        return new CustomCommandsConfig(com.microsoft.cognitiveservices.speech.internal.CustomCommandsConfig.FromSubscription(appId, subscription, region));
+        IntRef configRef = new IntRef(0);
+        Contracts.throwIfFail(fromSubscription(configRef, appId, subscription, region));
+        return new CustomCommandsConfig(configRef.getValue());
     }
 
     /**
@@ -47,7 +50,9 @@ public final class CustomCommandsConfig extends DialogServiceConfig {
         Contracts.throwIfNull(appId, "appId");
         Contracts.throwIfNullOrWhitespace(authorizationToken, "authorizationToken");
         Contracts.throwIfNullOrWhitespace(region, "region");
-        return new CustomCommandsConfig(com.microsoft.cognitiveservices.speech.internal.CustomCommandsConfig.FromAuthorizationToken(appId, authorizationToken, region));
+        IntRef configRef = new IntRef(0);
+        Contracts.throwIfFail(fromAuthorizationToken(configRef, appId, authorizationToken, region));
+        return new CustomCommandsConfig(configRef.getValue());
     }
 
     /**
@@ -66,6 +71,9 @@ public final class CustomCommandsConfig extends DialogServiceConfig {
     public String getApplicationId() {
         return this.getProperty(PropertyId.Conversation_ApplicationId);
     }
+
+    private final static native long fromSubscription(IntRef configRef, String appId, String subscription, String region);
+    private final static native long fromAuthorizationToken(IntRef configRef, String appId, String authorizationToken, String region);
 }
 
 

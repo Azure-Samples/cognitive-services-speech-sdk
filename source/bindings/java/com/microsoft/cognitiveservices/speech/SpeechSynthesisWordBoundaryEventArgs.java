@@ -7,6 +7,9 @@ package com.microsoft.cognitiveservices.speech;
 import java.io.Closeable;
 
 import com.microsoft.cognitiveservices.speech.util.Contracts;
+import com.microsoft.cognitiveservices.speech.util.SafeHandle;
+import com.microsoft.cognitiveservices.speech.util.SafeHandleType;
+import com.microsoft.cognitiveservices.speech.util.IntRef;
 
 /**
  * Defines contents of speech synthesis word boundary event.
@@ -14,18 +17,24 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
  */
 public class SpeechSynthesisWordBoundaryEventArgs {
 
-    private long audioOffset;
-    private long textOffset;
-    private long wordLength;
+    /*! \cond INTERNAL */
 
-    SpeechSynthesisWordBoundaryEventArgs(com.microsoft.cognitiveservices.speech.internal.SpeechSynthesisWordBoundaryEventArgs e) {
-
-        Contracts.throwIfNull(e, "e");
-        this.audioOffset = e.getAudioOffset().longValue();
-        this.textOffset = e.getTextOffset();
-        this.wordLength = e.getWordLength();
+    SpeechSynthesisWordBoundaryEventArgs(long eventArgs) {
+        Contracts.throwIfNull(eventArgs, "eventArgs");
+        
+        SafeHandle eventHandle = new SafeHandle(eventArgs, SafeHandleType.SynthesisEvent);
+        IntRef audioOffsetRef = new IntRef(0);
+        IntRef textOffsetRef = new IntRef(0);
+        IntRef wordLengthRef = new IntRef(0);
+        Contracts.throwIfFail(getWordBoundaryEventValues(eventHandle, audioOffsetRef, textOffsetRef, wordLengthRef));
+        this.audioOffset = audioOffsetRef.getValue();
+        this.textOffset = textOffsetRef.getValue();
+        this.wordLength = wordLengthRef.getValue();
+        eventHandle.close();
     }
 
+    /*! \endcond */
+    
     /**
      * Specifies current word's binary offset in output audio, by ticks (100ns).
      * @return Current word's binary offset in output audio, by ticks (100ns).
@@ -49,4 +58,11 @@ public class SpeechSynthesisWordBoundaryEventArgs {
     public long getWordLength() {
         return this.wordLength;
     }
+
+    private final native long getWordBoundaryEventValues(SafeHandle eventHandle, IntRef audioOffset, IntRef textOffset, IntRef wordLength);
+
+    private long audioOffset;
+    private long textOffset;
+    private long wordLength;
+
 }

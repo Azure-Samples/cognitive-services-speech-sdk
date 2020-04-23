@@ -4,33 +4,41 @@
 //
 package com.microsoft.cognitiveservices.speech.intent;
 
+import com.microsoft.cognitiveservices.speech.CancellationDetails;
 import com.microsoft.cognitiveservices.speech.CancellationReason;
 import com.microsoft.cognitiveservices.speech.CancellationErrorCode;
 import com.microsoft.cognitiveservices.speech.util.Contracts;
+import com.microsoft.cognitiveservices.speech.intent.IntentRecognitionResult;
 
 /**
  * Define payload of intent recognition canceled result events.
  */
 public final class IntentRecognitionCanceledEventArgs extends IntentRecognitionEventArgs {
 
-    IntentRecognitionCanceledEventArgs(com.microsoft.cognitiveservices.speech.internal.IntentRecognitionCanceledEventArgs e) {
-        super(e);
-        Contracts.throwIfNull(e, "e");
+    /*! \cond INTERNAL */
 
-        this._eventArgImpl = e;
-
-        com.microsoft.cognitiveservices.speech.internal.CancellationDetails cancellation = e.GetCancellationDetails();
-        this._cancellationReason  = CancellationReason.values()[cancellation.getReason().swigValue() - 1]; // Native CancellationReason enum starts at 1!!
-        this._errorCode = com.microsoft.cognitiveservices.speech.CancellationErrorCode.values()[cancellation.getErrorCode().swigValue()];
-        this._errorDetails = cancellation.getErrorDetails();
+    /**
+     * Constructs an instance of a IntentRecognitionCanceledEventArgs object.
+     * @param eventArgs recognition canceled event args object.
+     */
+    IntentRecognitionCanceledEventArgs(long eventArgs) {
+        super(eventArgs);
+        storeEventData(false);
     }
+
+    IntentRecognitionCanceledEventArgs(long eventArgs, boolean dispose) {
+        super(eventArgs);
+        storeEventData(dispose);
+    }
+
+    /*! \endcond */
 
     /**
      * The reason the recognition was canceled.
      * @return Specifies the reason canceled.
      */
     public CancellationReason getReason() {
-        return this._cancellationReason ;
+        return this.cancellationReason;
     }
 
     /**
@@ -39,7 +47,7 @@ public final class IntentRecognitionCanceledEventArgs extends IntentRecognitionE
      * @return An error code that represents the error reason.
      */
     public CancellationErrorCode getErrorCode() {
-        return this._errorCode;
+        return this.errorCode;
     }
 
     /**
@@ -47,7 +55,7 @@ public final class IntentRecognitionCanceledEventArgs extends IntentRecognitionE
      * @return A String that represents the error details.
      */
     public String getErrorDetails() {
-        return this._errorDetails;
+        return this.errorDetails;
     }
 
     /**
@@ -59,14 +67,23 @@ public final class IntentRecognitionCanceledEventArgs extends IntentRecognitionE
         return "SessionId:" + this.getSessionId() +
                 " ResultId:" + this.getResult().getResultId() +
                 " IntentId:" + this.getResult().getIntentId() +
-                " CancellationReason:" + _cancellationReason  +
-                " CancellationErrorCode:" + _errorCode +
-                " Error details:" + _errorDetails;
+                " CancellationReason:" + cancellationReason  +
+                " CancellationErrorCode:" + errorCode +
+                " Error details:" + errorDetails;
     }
 
-    @SuppressWarnings("unused")
-    private com.microsoft.cognitiveservices.speech.internal.IntentRecognitionCanceledEventArgs _eventArgImpl;
-    private CancellationReason _cancellationReason;
-    private CancellationErrorCode _errorCode;
-    private String _errorDetails;
+    private void storeEventData(boolean disposeNativeResources) {
+        Contracts.throwIfNull(eventHandle, "eventHandle");
+        CancellationDetails cancellation = CancellationDetails.fromResult(getResult());
+        this.cancellationReason  = cancellation.getReason();
+        this.errorCode = cancellation.getErrorCode();
+        this.errorDetails = cancellation.getErrorDetails();
+        if (disposeNativeResources == true) {
+            super.close();
+        }
+    }
+
+    private CancellationReason cancellationReason;
+    private CancellationErrorCode errorCode;
+    private String errorDetails;
 }

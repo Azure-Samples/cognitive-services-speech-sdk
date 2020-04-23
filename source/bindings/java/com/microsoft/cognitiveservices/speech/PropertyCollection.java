@@ -6,6 +6,9 @@ package com.microsoft.cognitiveservices.speech;
 
 import java.io.Closeable;
 import com.microsoft.cognitiveservices.speech.util.Contracts;
+import com.microsoft.cognitiveservices.speech.util.IntRef;
+import com.microsoft.cognitiveservices.speech.util.SafeHandle;
+import com.microsoft.cognitiveservices.speech.util.SafeHandleType;
 import com.microsoft.cognitiveservices.speech.PropertyId;
 
 /**
@@ -15,9 +18,9 @@ public class PropertyCollection implements Closeable {
 
     /*! \cond PROTECTED */
 
-    protected PropertyCollection(com.microsoft.cognitiveservices.speech.internal.PropertyCollection collection) {
-        if(collection != null) {
-            collectionImpl = collection;
+    public PropertyCollection(IntRef propHandle) {
+        if(propHandle != null) {
+            propertyHandle = new SafeHandle(propHandle.getValue(), SafeHandleType.PropertyCollection);
         }
     }
 
@@ -30,8 +33,8 @@ public class PropertyCollection implements Closeable {
      * @param name The property name.
      * @return value of the property.
      */
-    public String getProperty(String name) {
-        return getProperty(name, "");
+    public String getProperty(String name) {   
+        return getPropertyString(propertyHandle, -1, name, "");
     }
 
     /**
@@ -43,9 +46,9 @@ public class PropertyCollection implements Closeable {
      * @return value of the property.
      */
     public String getProperty(String name, String defaultValue) {
-        Contracts.throwIfNull(collectionImpl, "collection");
+        Contracts.throwIfNull(propertyHandle, "collection");
         Contracts.throwIfNullOrWhitespace(name, "name");
-        return collectionImpl.GetProperty(name, defaultValue);
+        return getPropertyString(propertyHandle, -1, name, defaultValue);
     }
 
     /**
@@ -55,8 +58,8 @@ public class PropertyCollection implements Closeable {
      * @return The value of the property.
      */
     public String getProperty(PropertyId id) {
-        Contracts.throwIfNull(collectionImpl, "collection");
-        return collectionImpl.GetProperty(id.getValue());
+        Contracts.throwIfNull(propertyHandle, "collection");
+        return getPropertyString(propertyHandle, id.getValue(), null, "");
     }
 
     /**
@@ -66,9 +69,10 @@ public class PropertyCollection implements Closeable {
      * @param value The value of the property.
      */
     public void setProperty(String name, String value) {
-        Contracts.throwIfNull(collectionImpl, "collection");
+        Contracts.throwIfNull(propertyHandle, "collection");
         Contracts.throwIfNullOrWhitespace(name, "name");
-        collectionImpl.SetProperty(name, value);
+        Contracts.throwIfNull(value, "value");
+        Contracts.throwIfFail(setPropertyString(propertyHandle, -1, name, value));
     }
 
     /**
@@ -78,9 +82,9 @@ public class PropertyCollection implements Closeable {
      * @param value The value of the parameter.
      */
     public void setProperty(PropertyId id, String value) {
-        Contracts.throwIfNull(collectionImpl, "collection");
+        Contracts.throwIfNull(propertyHandle, "collection");
         Contracts.throwIfNull(value, "value");
-        collectionImpl.SetProperty(id.getValue(), value);
+        Contracts.throwIfFail(setPropertyString(propertyHandle, id.getValue(), null, value));
     }
 
     /**
@@ -89,12 +93,14 @@ public class PropertyCollection implements Closeable {
     @Override
     public void close() {
 
-        if (collectionImpl != null) {
-            collectionImpl.delete();
+        if (propertyHandle != null) {
+            propertyHandle.close();            
+            propertyHandle = null;
         }
-
-        collectionImpl = null;
     }
 
-    private com.microsoft.cognitiveservices.speech.internal.PropertyCollection collectionImpl;
+    private final native long setPropertyString(SafeHandle propertyHandle, int id, String name, String defaultValue);
+    private final native String getPropertyString(SafeHandle propertyHandle, int id, String name, String defaultValue);
+
+    private SafeHandle propertyHandle = null;
 }

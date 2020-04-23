@@ -21,6 +21,18 @@ public class Contracts {
     }
 
     /**
+     * Checks if the long address argument is zero, if yes, throws a NullPointerException
+     * @param address The address to test for null.
+     * @param message The error message in case address is null.
+     * @return
+     */
+    public static void throwIfNull(long address, String message) {
+        if(address == 0) {
+            throw new NullPointerException(message);
+        }
+    }
+
+    /**
      * Checks if the argument is null or whitespace, if yes, throws a IllegalArgumentException
      * or NullPointerException.
      * @param obj The object to test for null.
@@ -92,4 +104,42 @@ public class Contracts {
             throw new IllegalArgumentException(message);
         }
     }
+
+     /**
+     * Checks if fail, throws an exception based on the error code or error message.
+     * @param hr The error handle
+     * @return
+     */
+    public static void throwIfFail(long hr) {
+        if (hr != 0) {
+            int error = getErrorCode(hr);
+            String message = getErrorMessage(hr);
+            if (message == "") {
+                message = "Exception with an error code:" + Integer.toString(error);
+            }
+            releaseErrorHandle(hr);
+            throw new IllegalArgumentException(message);
+        }
+    }
+
+    /**
+     * Logs error if fail.
+     * @param hr The error handle
+     * @return
+     */
+    public static void logErrorIfFail(long hr) {
+        if (hr != 0) {
+            int error = getErrorCode(hr);
+            String message = getErrorMessage(hr);
+            if (message == "") {
+                message = "Exception with an error code:" + Integer.toString(error);
+            }
+            releaseErrorHandle(hr);
+        }
+    }
+
+    private final static native String getErrorMessage(long errorHandle);
+    private final static native String getErrorCallStack(long errorHandle);
+    private final static native int getErrorCode(long errorHandle);
+    private final static native long releaseErrorHandle(long errorHandle);
 }

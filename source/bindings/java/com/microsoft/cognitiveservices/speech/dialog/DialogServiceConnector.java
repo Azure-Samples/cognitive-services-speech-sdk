@@ -11,9 +11,14 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import com.microsoft.cognitiveservices.speech.PropertyId;
 import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.util.EventHandlerImpl;
 import com.microsoft.cognitiveservices.speech.util.Contracts;
+import com.microsoft.cognitiveservices.speech.util.SafeHandle;
+import com.microsoft.cognitiveservices.speech.util.SafeHandleType;
+import com.microsoft.cognitiveservices.speech.util.IntRef;
+import com.microsoft.cognitiveservices.speech.util.StringRef;
 import com.microsoft.cognitiveservices.speech.SpeechRecognitionResult;
 import com.microsoft.cognitiveservices.speech.KeywordRecognitionModel;
 import com.microsoft.cognitiveservices.speech.SessionEventArgs;
@@ -32,7 +37,8 @@ public class DialogServiceConnector implements Closeable {
     private ExecutorService executorService;
     private AtomicInteger eventCounter = new AtomicInteger(0);
     protected Integer backgroundAttempts = 0;
-    
+    private AudioConfig audioInputKeepAlive = null;
+
     // load the native library.
     static {
         // trigger loading of native library
@@ -63,11 +69,13 @@ public class DialogServiceConnector implements Closeable {
     public DialogServiceConnector(DialogServiceConfig config, AudioConfig audioConfig) {
         Contracts.throwIfNull(config, "config");
         if (audioConfig == null) {
-            this.dialogServiceConnectorImpl = com.microsoft.cognitiveservices.speech.internal.DialogServiceConnector.FromConfig(config.getConfigImpl());
+            this.dialogServiceConnectorHandle = new SafeHandle(0, SafeHandleType.DialogServiceConnector);
+            Contracts.throwIfFail(createDialogServiceConnectorFomConfig(this.dialogServiceConnectorHandle, config.getImpl(), null));
         } else {
-            this.dialogServiceConnectorImpl = com.microsoft.cognitiveservices.speech.internal.DialogServiceConnector.FromConfig(config.getConfigImpl(), audioConfig.getConfigImpl());
+            this.dialogServiceConnectorHandle = new SafeHandle(0, SafeHandleType.DialogServiceConnector);
+            Contracts.throwIfFail(createDialogServiceConnectorFomConfig(this.dialogServiceConnectorHandle, config.getImpl(), audioConfig.getImpl()));
         }
-
+        audioInputKeepAlive = audioConfig;
         initialize();
     }
 
@@ -80,7 +88,7 @@ public class DialogServiceConnector implements Closeable {
      */
     public void setAuthorizationToken(String token) {
         Contracts.throwIfNullOrWhitespace(token, "token");
-        dialogServiceConnectorImpl.SetAuthorizationToken(token);
+        propertyHandle.setProperty(PropertyId.SpeechServiceAuthorization_Token, token);
     }
 
     /**
@@ -88,7 +96,7 @@ public class DialogServiceConnector implements Closeable {
      * @return Authorization token.
      */
     public String getAuthorizationToken() {
-        return dialogServiceConnectorImpl.GetAuthorizationToken();
+        return propertyHandle.getProperty(PropertyId.SpeechServiceAuthorization_Token);
     }
 
      /**
@@ -96,10 +104,10 @@ public class DialogServiceConnector implements Closeable {
      * @return The collection of properties and their values defined for this DialogServiceConnector.
      */
     public PropertyCollection getProperties() {
-        return _Parameters;
+        return propertyHandle;
     }
 
-    private com.microsoft.cognitiveservices.speech.PropertyCollection _Parameters;
+    private com.microsoft.cognitiveservices.speech.PropertyCollection propertyHandle;
 
     /**
      * Connects with the service.
@@ -108,7 +116,7 @@ public class DialogServiceConnector implements Closeable {
     public Future<Void> connectAsync() {
         return executorService.submit(new java.util.concurrent.Callable<Void>() {
             public Void call() {
-                dialogServiceConnectorImpl.ConnectAsync().Get();
+                Contracts.throwIfFail(connect(dialogServiceConnectorHandle));
                 return null;
             }
         });
@@ -121,7 +129,7 @@ public class DialogServiceConnector implements Closeable {
     public Future<Void> disconnectAsync() {
         return executorService.submit(new java.util.concurrent.Callable<Void>() {
             public Void call() {
-                dialogServiceConnectorImpl.DisconnectAsync().Get();
+                Contracts.throwIfFail(disconnect(dialogServiceConnectorHandle));
                 return null;
             }
         });
@@ -136,7 +144,9 @@ public class DialogServiceConnector implements Closeable {
         Contracts.throwIfNull(activity, "activity");
         return executorService.submit(new java.util.concurrent.Callable<String>() {
             public String call() {
-                return dialogServiceConnectorImpl.SendActivityAsync(activity).Get();
+                StringRef stringRef = new StringRef("");
+                Contracts.throwIfFail(sendActivity(dialogServiceConnectorHandle, stringRef, activity));
+                return stringRef.getValue();
             }
         });
     }
@@ -144,9 +154,8 @@ public class DialogServiceConnector implements Closeable {
     /* This class exists only to sidestep the package protected restriction on the Result constructor */
     private class DialogSpeechRecognitionResult extends SpeechRecognitionResult
     {
-        DialogSpeechRecognitionResult(com.microsoft.cognitiveservices.speech.internal.RecognitionResult result)
-        {
-            super(result);
+        DialogSpeechRecognitionResult(long resultHandle) {
+            super(resultHandle);
         }
     }
 
@@ -157,7 +166,9 @@ public class DialogServiceConnector implements Closeable {
     public Future<SpeechRecognitionResult> listenOnceAsync() {
         return executorService.submit(new java.util.concurrent.Callable<SpeechRecognitionResult>() {
             public SpeechRecognitionResult  call() {
-                return new DialogSpeechRecognitionResult(dialogServiceConnectorImpl.ListenOnceAsync().Get());
+                IntRef result = new IntRef(0);
+                Contracts.throwIfFail(listenOnce(dialogServiceConnectorHandle, result));
+                return new DialogSpeechRecognitionResult(result.getValue());
             }
         });
     }
@@ -170,7 +181,7 @@ public class DialogServiceConnector implements Closeable {
     public Future<Void> startKeywordRecognitionAsync(final KeywordRecognitionModel model) {
         return executorService.submit(new java.util.concurrent.Callable<Void>() {
             public Void call() {
-                dialogServiceConnectorImpl.StartKeywordRecognitionAsync(model.getModelImpl()).Get();
+                Contracts.throwIfFail(startKeywordRecognition(dialogServiceConnectorHandle, model.getImpl()));
                 return null;
             }
         });
@@ -183,7 +194,7 @@ public class DialogServiceConnector implements Closeable {
     public Future<Void> stopKeywordRecognitionAsync() {
         return executorService.submit(new java.util.concurrent.Callable<Void>() {
             public Void call() {
-                dialogServiceConnectorImpl.StopKeywordRecognitionAsync().Get();
+                Contracts.throwIfFail(stopKeywordRecognition(dialogServiceConnectorHandle));
                 return null;
             }
         });
@@ -226,178 +237,155 @@ public class DialogServiceConnector implements Closeable {
 
         executorService = Executors.newCachedThreadPool();
 
-        recognizingHandler = new RecoEventHandlerImpl(this, /* isRecognizedHandler */ false);
         this.recognizing.updateNotificationOnConnected(new Runnable(){
             @Override
             public void run() {
-                _dialogServiceConnectorObjects.add(_this);
-                dialogServiceConnectorImpl.getRecognizing().AddEventListener(recognizingHandler);
+                dialogServiceConnectorObjects.add(_this);
+                Contracts.throwIfFail(recognizingSetCallback(_this.dialogServiceConnectorHandle.getValue()));
             }
         });
 
-        recognizedHandler = new RecoEventHandlerImpl(this, /* isRecognizedHandler */ true);
         this.recognized.updateNotificationOnConnected(new Runnable(){
             @Override
             public void run() {
-                _dialogServiceConnectorObjects.add(_this);
-                dialogServiceConnectorImpl.getRecognized().AddEventListener(recognizedHandler);
+                dialogServiceConnectorObjects.add(_this);
+                Contracts.throwIfFail(recognizedSetCallback(_this.dialogServiceConnectorHandle.getValue()));
             }
         });
 
-        sessionStartedHandler = new SessionEventHandlerImpl(this, /* isSessionStart */ true);
         this.sessionStarted.updateNotificationOnConnected(new Runnable(){
             @Override
             public void run() {
-                _dialogServiceConnectorObjects.add(_this);
-                dialogServiceConnectorImpl.getSessionStarted().AddEventListener(sessionStartedHandler);
+                dialogServiceConnectorObjects.add(_this);
+                Contracts.throwIfFail(sessionStartedSetCallback(_this.dialogServiceConnectorHandle.getValue()));
             }
         });
 
-        sessionStoppedHandler = new SessionEventHandlerImpl(this, /* isSessionStopped */ false);
         this.sessionStopped.updateNotificationOnConnected(new Runnable(){
             @Override
             public void run() {
-                _dialogServiceConnectorObjects.add(_this);
-                dialogServiceConnectorImpl.getSessionStopped().AddEventListener(sessionStoppedHandler);
+                dialogServiceConnectorObjects.add(_this);
+                Contracts.throwIfFail(sessionStoppedSetCallback(_this.dialogServiceConnectorHandle.getValue()));
             }
         });
 
-        canceledHandler = new CanceledEventHandlerImpl(this);
         this.canceled.updateNotificationOnConnected(new Runnable(){
             @Override
             public void run() {
-                _dialogServiceConnectorObjects.add(_this);
-                dialogServiceConnectorImpl.getCanceled().AddEventListener(canceledHandler);
+                dialogServiceConnectorObjects.add(_this);
+                Contracts.throwIfFail(canceledSetCallback(_this.dialogServiceConnectorHandle.getValue()));
             }
         });
 
-        activityReceivedHandler = new ActivityReceivedEventHandlerImpl(this);
         this.activityReceived.updateNotificationOnConnected(new Runnable(){
             @Override
             public void run() {
-                _dialogServiceConnectorObjects.add(_this);
-                dialogServiceConnectorImpl.getActivityReceived().AddEventListener(activityReceivedHandler);
+                dialogServiceConnectorObjects.add(_this);
+                Contracts.throwIfFail(activityReceivedSetCallback(_this.dialogServiceConnectorHandle.getValue()));
             }
         });
 
-        _Parameters = new PrivatePropertyCollection(dialogServiceConnectorImpl.getProperties());
+        IntRef propHandle = new IntRef(0);
+        Contracts.throwIfFail(getPropertyBagFromDialogServiceConnectorHandle(_this.dialogServiceConnectorHandle, propHandle));
+        propertyHandle = new PropertyCollection(propHandle);
     }
 
     /**
      * This is used to keep any instance of this class alive that is subscribed to downstream events.
      */
-    static java.util.Set<DialogServiceConnector> _dialogServiceConnectorObjects = java.util.Collections.synchronizedSet(new java.util.HashSet<DialogServiceConnector>());
+    static java.util.Set<DialogServiceConnector> dialogServiceConnectorObjects = java.util.Collections.synchronizedSet(new java.util.HashSet<DialogServiceConnector>());
 
-    private RecoEventHandlerImpl recognizingHandler;
-    private RecoEventHandlerImpl recognizedHandler;
-    private SessionEventHandlerImpl sessionStartedHandler;
-    private SessionEventHandlerImpl sessionStoppedHandler;
-    private CanceledEventHandlerImpl canceledHandler;
-    private ActivityReceivedEventHandlerImpl activityReceivedHandler;
-
-    private class PrivatePropertyCollection extends com.microsoft.cognitiveservices.speech.PropertyCollection {
-        public PrivatePropertyCollection(com.microsoft.cognitiveservices.speech.internal.PropertyCollection collection) {
-            super(collection);
-        }
-    }
-
-    private class RecoEventHandlerImpl extends com.microsoft.cognitiveservices.speech.internal.SpeechRecognitionEventListener {
-
-        RecoEventHandlerImpl(DialogServiceConnector connector, boolean isRecognizedHandler) {
-            Contracts.throwIfNull(connector, "connector");
-            this.connector = connector;
-            this.isRecognizedHandler = isRecognizedHandler;
-        }
-
-        @Override
-        public void Execute(com.microsoft.cognitiveservices.speech.internal.SpeechRecognitionEventArgs eventArgs) {
-            Contracts.throwIfNull(eventArgs, "eventArgs");
-            if (connector.disposed) {
+    private void recognizingEventCallback(long eventArgs)
+    {
+        try {
+            Contracts.throwIfNull(this, "connector");
+            if (this.disposed) {
                 return;
             }
-            SpeechRecognitionEventArgs resultEventArg = new SpeechRecognitionEventArgs(eventArgs);
-            EventHandlerImpl<SpeechRecognitionEventArgs> handler = this.isRecognizedHandler ? this.connector.recognized : this.connector.recognizing;
+            SpeechRecognitionEventArgs resultEventArg = new SpeechRecognitionEventArgs(eventArgs, true);
+            EventHandlerImpl<SpeechRecognitionEventArgs> handler = this.recognizing;
             if (handler != null) {
-                handler.fireEvent(this.connector, resultEventArg);
-            }
-        }
-
-        private DialogServiceConnector connector;
-        private boolean isRecognizedHandler;
+                handler.fireEvent(this, resultEventArg);
+            }    
+        } catch (Exception e) {}
     }
 
-    private class SessionEventHandlerImpl extends com.microsoft.cognitiveservices.speech.internal.SessionEventListener {
-
-        SessionEventHandlerImpl(DialogServiceConnector connector, boolean isSessionStart) {
-            Contracts.throwIfNull(connector, "connector");
-            this.connector = connector;
-            this.isSessionStart = isSessionStart;
-        }
-
-        @Override
-        public void Execute(com.microsoft.cognitiveservices.speech.internal.SessionEventArgs eventArgs) {
-            Contracts.throwIfNull(eventArgs, "eventArgs");
-            if (connector.disposed) {
+    private void recognizedEventCallback(long eventArgs)
+    {
+        try {
+            Contracts.throwIfNull(this, "connector");
+            if (this.disposed) {
                 return;
             }
-            SessionEventArgs resultEventArg = new SessionEventArgs(eventArgs);
-            EventHandlerImpl<SessionEventArgs> handler = this.isSessionStart ? this.connector.sessionStarted : this.connector.sessionStopped;
+            SpeechRecognitionEventArgs resultEventArg = new SpeechRecognitionEventArgs(eventArgs, true);
+            EventHandlerImpl<SpeechRecognitionEventArgs> handler = this.recognized;
             if (handler != null) {
-                handler.fireEvent(this.connector, resultEventArg);
+                handler.fireEvent(this, resultEventArg);
             }
-        }
-
-        private DialogServiceConnector connector;
-        private boolean isSessionStart;
+        } catch (Exception e) {}
     }
 
-    private class CanceledEventHandlerImpl extends com.microsoft.cognitiveservices.speech.internal.SpeechRecognitionCanceledEventListener {
-
-        CanceledEventHandlerImpl(DialogServiceConnector connector) {
-            Contracts.throwIfNull(connector, "connector");
-            this.connector = connector;
-        }
-
-        @Override
-        public void Execute(com.microsoft.cognitiveservices.speech.internal.SpeechRecognitionCanceledEventArgs eventArgs) {
-            Contracts.throwIfNull(eventArgs, "eventArgs");
-            if (connector.disposed) {
+    private void sessionStartedEventCallback(long eventArgs)
+    {
+        try {
+            Contracts.throwIfNull(this, "connector");
+            if (this.disposed) {
                 return;
             }
-            SpeechRecognitionCanceledEventArgs resultEventArg = new SpeechRecognitionCanceledEventArgs(eventArgs);
-            EventHandlerImpl<SpeechRecognitionCanceledEventArgs> handler = this.connector.canceled;
+            SessionEventArgs arg = new SessionEventArgs(eventArgs, true);
+            EventHandlerImpl<SessionEventArgs> handler = this.sessionStarted;
             if (handler != null) {
-                handler.fireEvent(this.connector, resultEventArg);
-            }
-        }
-
-        private DialogServiceConnector connector;
+                handler.fireEvent(this, arg);
+            }    
+        } catch (Exception e) {}
     }
 
-    private class ActivityReceivedEventHandlerImpl extends com.microsoft.cognitiveservices.speech.internal.ActivityReceivedEventListener {
+    private void sessionStoppedEventCallback(long eventArgs)
+    {
+        try {
+            Contracts.throwIfNull(this, "connector");
+            if (this.disposed) {
+                return;
+            }
+            SessionEventArgs arg = new SessionEventArgs(eventArgs, true);
+            EventHandlerImpl<SessionEventArgs> handler = this.sessionStopped;
+            if (handler != null) {
+                handler.fireEvent(this, arg);
+            }    
+        } catch (Exception e) {}
+    }
 
-        ActivityReceivedEventHandlerImpl(DialogServiceConnector connector) {
-            Contracts.throwIfNull(connector, "connector");
-            this.connector = connector;
-        }
+    private void canceledEventCallback(long eventArgs)
+    {
+        try {
+            Contracts.throwIfNull(this, "connector");
+            if (this.disposed) {
+                return;
+            }
+            SpeechRecognitionCanceledEventArgs resultEventArg = new SpeechRecognitionCanceledEventArgs(eventArgs, true);
+            EventHandlerImpl<SpeechRecognitionCanceledEventArgs> handler = this.canceled;
+            if (handler != null) {
+                handler.fireEvent(this, resultEventArg);
+            }    
+        } catch (Exception e) {}
+    }
 
-        @Override
-        public void Execute(com.microsoft.cognitiveservices.speech.internal.ActivityReceivedEventArgs eventArgs) {
-            Contracts.throwIfNull(eventArgs, "eventArgs");
-            if (connector.disposed) {
+    private void activityReceivedEventCallback(long eventArgs)
+    {
+        try {
+            Contracts.throwIfNull(this, "connector");
+            if (this.disposed) {
                 return;
             }
             ActivityReceivedEventArgs resultEventArg = new ActivityReceivedEventArgs(eventArgs);
-            EventHandlerImpl<ActivityReceivedEventArgs> handler = this.connector.activityReceived;
+            EventHandlerImpl<ActivityReceivedEventArgs> handler = this.activityReceived;
             if (handler != null) {
-                handler.fireEvent(this.connector, resultEventArg);
-            }
-        }
-
-        private DialogServiceConnector connector;
+                handler.fireEvent(this, resultEventArg);
+            }    
+        } catch (Exception e) {}
     }
 
-    private com.microsoft.cognitiveservices.speech.internal.DialogServiceConnector dialogServiceConnectorImpl;
+    private SafeHandle dialogServiceConnectorHandle = null;
     /*! \endcond */
 
     /**
@@ -433,37 +421,22 @@ public class DialogServiceConnector implements Closeable {
                 t.start();
             }
             else {
-
                 // Trigger graceful shutdown of executor service
                 executorService.shutdown();
 
-                if (this.recognizing.isUpdateNotificationOnConnectedFired()) {
-                    dialogServiceConnectorImpl.getRecognizing().RemoveEventListener(recognizingHandler);
+                if (propertyHandle != null)
+                {
+                    propertyHandle.close();
+                    propertyHandle = null;
                 }
-                if (this.recognized.isUpdateNotificationOnConnectedFired()) {
-                    dialogServiceConnectorImpl.getRecognized().RemoveEventListener(recognizedHandler);
-                }
-                if (this.sessionStarted.isUpdateNotificationOnConnectedFired()) {
-                    dialogServiceConnectorImpl.getSessionStarted().RemoveEventListener(sessionStartedHandler);
-                }
-                if (this.sessionStopped.isUpdateNotificationOnConnectedFired()) {
-                    dialogServiceConnectorImpl.getSessionStopped().RemoveEventListener(sessionStoppedHandler);
-                }
-                if (this.canceled.isUpdateNotificationOnConnectedFired()) {
-                    dialogServiceConnectorImpl.getCanceled().RemoveEventListener(canceledHandler);
-                }
-                if (this.activityReceived.isUpdateNotificationOnConnectedFired()) {
-                    dialogServiceConnectorImpl.getActivityReceived().RemoveEventListener(activityReceivedHandler);
+                if (dialogServiceConnectorHandle != null)
+                {
+                    dialogServiceConnectorHandle.close();
+                    dialogServiceConnectorHandle = null;
                 }
 
-                recognizingHandler.delete();
-                recognizedHandler.delete();
-                sessionStartedHandler.delete();
-                sessionStoppedHandler.delete();
-                canceledHandler.delete();
-                activityReceivedHandler.delete();
-                dialogServiceConnectorImpl.delete();
-                _dialogServiceConnectorObjects.remove(this);
+                audioInputKeepAlive = null;
+                dialogServiceConnectorObjects.remove(this);
 
                 // If the executor service has not been shut down, force shut down
                 if (!executorService.isShutdown()) {
@@ -474,4 +447,20 @@ public class DialogServiceConnector implements Closeable {
         }
     }
     /*! \endcond */
+
+    private final static native long createDialogServiceConnectorFomConfig(SafeHandle dialogServiceConnectorHandle, SafeHandle configHandle, SafeHandle audioConfigHandle);
+    private final native long connect(SafeHandle dialogServiceConnectorHandle);
+    private final native long disconnect(SafeHandle dialogServiceConnectorHandle);
+    private final native long sendActivity(SafeHandle dialogServiceConnectorHandle, StringRef stringRef, String activity);
+    private final native long listenOnce(SafeHandle dialogServiceConnectorHandle, IntRef result);
+    private final native long startKeywordRecognition(SafeHandle dialogServiceConnectorHandle, SafeHandle modelHandle);
+    private final native long stopKeywordRecognition(SafeHandle dialogServiceConnectorHandle);
+    private final native long recognizingSetCallback(long dialogServiceConnectorHandle);
+    private final native long recognizedSetCallback(long dialogServiceConnectorHandle);
+    private final native long sessionStartedSetCallback(long dialogServiceConnectorHandle);
+    private final native long sessionStoppedSetCallback(long dialogServiceConnectorHandle);
+    private final native long canceledSetCallback(long dialogServiceConnectorHandle);
+    private final native long activityReceivedSetCallback(long dialogServiceConnectorHandle);
+    private final native long getPropertyBagFromDialogServiceConnectorHandle(SafeHandle dialogServiceConnectorHandle, IntRef propHandle);
+
 }

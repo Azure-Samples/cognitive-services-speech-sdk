@@ -13,9 +13,9 @@ public enum ServicePropertyChannel
     /**
      * Uses URI query parameter to pass property settings to service.
      */
-    UriQueryParameter(com.microsoft.cognitiveservices.speech.internal.ServicePropertyChannel.UriQueryParameter);
+    UriQueryParameter(0);
 
-    private ServicePropertyChannel(com.microsoft.cognitiveservices.speech.internal.ServicePropertyChannel id) {
+    private ServicePropertyChannel(int id) {
         this.id = id;
     }
 
@@ -24,7 +24,7 @@ public enum ServicePropertyChannel
      *
      * @return the channel value
      */
-    public com.microsoft.cognitiveservices.speech.internal.ServicePropertyChannel getValue() { return this.id; }
+    public int getValue() { return this.id; }
 
-    private final com.microsoft.cognitiveservices.speech.internal.ServicePropertyChannel id;
+    private final int id;
 }

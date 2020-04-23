@@ -5,6 +5,10 @@ package com.microsoft.cognitiveservices.speech.audio;
 //
 
 import com.microsoft.cognitiveservices.speech.SpeechConfig;
+import com.microsoft.cognitiveservices.speech.util.SafeHandle;
+import com.microsoft.cognitiveservices.speech.util.SafeHandleType;
+import com.microsoft.cognitiveservices.speech.audio.AudioStreamFormat;
+import com.microsoft.cognitiveservices.speech.util.Contracts;
 
 /**
  * Represents audio input stream used for custom audio input configurations.
@@ -29,7 +33,9 @@ public final class PullAudioInputStream extends com.microsoft.cognitiveservices.
      * @return The push audio input stream being created.
      */
     public static PullAudioInputStream create(PullAudioInputStreamCallback callback) {
-        return new PullAudioInputStream(com.microsoft.cognitiveservices.speech.internal.AudioInputStream.CreatePullStream(callback.getAdapter()), callback);
+        SafeHandle audioStreamHandle = new SafeHandle(0, SafeHandleType.AudioInputStream);
+        Contracts.throwIfFail(createPullAudioInputStream(audioStreamHandle, null));
+        return new PullAudioInputStream(audioStreamHandle, callback);
     }
 
     /**
@@ -39,7 +45,9 @@ public final class PullAudioInputStream extends com.microsoft.cognitiveservices.
      * @return The push audio input stream being created.
      */
     public static PullAudioInputStream create(PullAudioInputStreamCallback callback, AudioStreamFormat format) {
-        return new PullAudioInputStream(com.microsoft.cognitiveservices.speech.internal.AudioInputStream.CreatePullStream(format.getFormatImpl(), callback.getAdapter()), callback);
+        SafeHandle audioStreamHandle = new SafeHandle(0, SafeHandleType.AudioInputStream);
+        Contracts.throwIfFail(createPullAudioInputStream(audioStreamHandle, format.getImpl()));
+        return new PullAudioInputStream(audioStreamHandle, callback);
     }
 
     /**
@@ -48,21 +56,27 @@ public final class PullAudioInputStream extends com.microsoft.cognitiveservices.
      */
     @Override
     public void close() {
-        if (this._streamImpl != null) {
-            this._streamImpl.delete();
-        }
-        this._streamImpl = null;
+        callbackHandle = null;
+        super.close();
     }
 
     /*! \cond PROTECTED */
 
-    protected PullAudioInputStream(com.microsoft.cognitiveservices.speech.internal.PullAudioInputStream stream, PullAudioInputStreamCallback callback) {
+    protected PullAudioInputStream(SafeHandle stream, PullAudioInputStreamCallback callback) {
         super(stream);
-        _callbackKeepAlive = callback;
+        Contracts.throwIfNull(streamHandle, "streamHandle");
+        callbackHandle = callback;
+        Contracts.throwIfFail(setStreamCallbacks(streamHandle));
     }
 
     /*! \endcond */
 
-    @SuppressWarnings("unused")
-    private PullAudioInputStreamCallback _callbackKeepAlive;
+    private PullAudioInputStreamCallback getCallbackHandle() {
+        return callbackHandle;
+    }
+
+    private final static native long createPullAudioInputStream(SafeHandle audioStreamHandle, SafeHandle formatHandle);
+    private final native long setStreamCallbacks(SafeHandle streamHandle);
+
+    private PullAudioInputStreamCallback callbackHandle;
 }

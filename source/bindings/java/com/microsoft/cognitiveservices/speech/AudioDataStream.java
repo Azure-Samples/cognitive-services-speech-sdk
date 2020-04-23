@@ -11,6 +11,9 @@ import java.util.concurrent.Future;
 
 import com.microsoft.cognitiveservices.speech.SpeechSynthesisResult;
 import com.microsoft.cognitiveservices.speech.util.Contracts;
+import com.microsoft.cognitiveservices.speech.util.IntRef;
+import com.microsoft.cognitiveservices.speech.util.SafeHandle;
+import com.microsoft.cognitiveservices.speech.util.SafeHandleType;
 
 /**
  * Represents audio data stream used for operating audio data as a stream.
@@ -24,9 +27,9 @@ public final class AudioDataStream implements Closeable
         s_executorService = Executors.newCachedThreadPool();
     }
 
-    private com.microsoft.cognitiveservices.speech.internal.AudioDataStream streamImpl;
+    private SafeHandle streamHandle = null;
 
-    private com.microsoft.cognitiveservices.speech.PropertyCollection parameters;
+    private com.microsoft.cognitiveservices.speech.PropertyCollection propertyHandle;
 
     private boolean disposed = false;
     private final Object streamLock = new Object();
@@ -39,7 +42,10 @@ public final class AudioDataStream implements Closeable
      */
     public static AudioDataStream fromResult(SpeechSynthesisResult result) {
         Contracts.throwIfNull(result, "result");
-        return new AudioDataStream(result);
+
+        IntRef streamRef = new IntRef(0);
+        Contracts.throwIfFail(createFromResult(streamRef, result.getImpl()));
+        return new AudioDataStream(streamRef);
     }
 
     /**
@@ -47,7 +53,9 @@ public final class AudioDataStream implements Closeable
      * @return Current status.
      */
     public StreamStatus getStatus() {
-        return StreamStatus.values()[this.streamImpl.GetStatus().swigValue()];
+        IntRef statusRef = new IntRef(0);
+        Contracts.throwIfFail(getStatus(streamHandle, statusRef));
+        return StreamStatus.values()[(int)statusRef.getValue()];
     }
 
     /**
@@ -55,8 +63,8 @@ public final class AudioDataStream implements Closeable
      * @param bytesRequested The requested data size in bytes.
      * @return A bool indicating the result.
      */
-    public boolean canReadData(long bytesRequested) {
-        return this.streamImpl.CanReadData(bytesRequested);
+    public boolean canReadData(long bytesRequested) {        
+        return canReadData(streamHandle, bytesRequested);
     }
 
     /**
@@ -66,7 +74,7 @@ public final class AudioDataStream implements Closeable
      * @return A bool indicating the result.
      */
     public boolean canReadData(long pos, long bytesRequested) {
-        return this.streamImpl.CanReadData(pos, bytesRequested);
+        return canReadData(streamHandle, pos, bytesRequested);
     }
 
     /**
@@ -77,7 +85,9 @@ public final class AudioDataStream implements Closeable
      * @return The number of bytes filled, or 0 in case the stream hits its end and there is no more data available.
      */
     public long readData(byte[] dataBuffer) {
-        return this.streamImpl.ReadData(dataBuffer);
+        IntRef filledSizeRef = new IntRef(0);
+        Contracts.throwIfFail(readData(streamHandle, dataBuffer, filledSizeRef));
+        return filledSizeRef.getValue();
     }
 
     /**
@@ -89,7 +99,9 @@ public final class AudioDataStream implements Closeable
      * @return The number of bytes filled, or 0 in case the stream hits its end and there is no more data available.
      */
     public long readData(long pos, byte[] dataBuffer) {
-        return this.streamImpl.ReadData(pos, dataBuffer);
+        IntRef filledSizeRef = new IntRef(0);
+        Contracts.throwIfFail(readData(streamHandle, dataBuffer, pos, filledSizeRef));
+        return filledSizeRef.getValue();
     }
 
     /**
@@ -97,7 +109,7 @@ public final class AudioDataStream implements Closeable
      * @param fileName The file name with full path.
      */
     public void saveToWavFile(String fileName) {
-        this.streamImpl.SaveToWavFile(fileName);
+        Contracts.throwIfFail(saveToWaveFile(streamHandle, fileName));
     }
 
     /**
@@ -111,7 +123,7 @@ public final class AudioDataStream implements Closeable
 
         return s_executorService.submit(new java.util.concurrent.Callable<Void>() {
             public Void  call() {
-                Runnable runnable = new Runnable() { public void run() { streamImpl.SaveToWavFile(finalFileName); }};
+                Runnable runnable = new Runnable() { public void run() { Contracts.throwIfFail(saveToWaveFile(thisStream.streamHandle, finalFileName)); }};
                 thisStream.doAsyncAction(runnable);
                 return null;
             }});
@@ -122,7 +134,9 @@ public final class AudioDataStream implements Closeable
      * @return Current position.
      */
     public long getPosition() {
-        return this.streamImpl.GetPosition();
+        IntRef posRef = new IntRef(0);
+        Contracts.throwIfFail(getPosition(streamHandle, posRef));
+        return posRef.getValue();
     }
 
     /**
@@ -130,7 +144,7 @@ public final class AudioDataStream implements Closeable
      * @param pos Position to be set.
      */
     public void setPosition(long pos) {
-        this.streamImpl.SetPosition(pos);
+        Contracts.throwIfFail(setPosition(streamHandle, pos));
     }
 
     /**
@@ -138,16 +152,20 @@ public final class AudioDataStream implements Closeable
      * @return The collection of properties and their values defined for this audio data stream.
      */
     public PropertyCollection getProperties() {
-        return this.parameters;
+        return this.propertyHandle;
     }
 
+    /*! \cond INTERNAL */
+        
     /**
      * Returns the audio data stream implementation.
      * @return The implementation of the stream.
      */
-    public com.microsoft.cognitiveservices.speech.internal.AudioDataStream getImpl() {
-        return this.streamImpl;
+    public SafeHandle getImpl() {
+        return this.streamHandle;
     }
+
+    /*! \endcond */
 
     /**
      * Dispose of associated resources.
@@ -162,9 +180,13 @@ public final class AudioDataStream implements Closeable
         }
     }
 
-    private AudioDataStream(SpeechSynthesisResult result) {
-        this.streamImpl = com.microsoft.cognitiveservices.speech.internal.AudioDataStream.FromResult(result.getResultImpl());
-        this.parameters = new PrivatePropertyCollection(this.streamImpl.getProperties());
+    private AudioDataStream(IntRef stream) {
+        Contracts.throwIfNull(stream, "stream");
+
+        streamHandle = new SafeHandle(stream.getValue(), SafeHandleType.AudioDataStream);
+        IntRef propertyHandleRef = new IntRef(0);
+        Contracts.throwIfFail(getPropertyBagFromStreamHandle(streamHandle, propertyHandleRef));
+        propertyHandle = new PropertyCollection(propertyHandleRef);
     }
 
     private void doAsyncAction(Runnable action) {
@@ -190,15 +212,26 @@ public final class AudioDataStream implements Closeable
         }
 
         if (disposing) {
-            this.streamImpl.delete();
-            this.parameters.close();
+            if (streamHandle != null) {
+                streamHandle.close();
+                streamHandle = null;
+            }
+            if (propertyHandle != null) {
+                propertyHandle.close();
+                propertyHandle = null;
+            }
             this.disposed = true;
         }
     }
 
-    private class PrivatePropertyCollection extends com.microsoft.cognitiveservices.speech.PropertyCollection {
-        public PrivatePropertyCollection(com.microsoft.cognitiveservices.speech.internal.PropertyCollection collection) {
-            super(collection);
-        }
-    }
+    private final static native long createFromResult(IntRef streamRef, SafeHandle resultHandle);
+    private final native long getStatus(SafeHandle streamHandle, IntRef statusRef);
+    private final native boolean canReadData(SafeHandle streamHandle, long bytesRequested);
+    private final native boolean canReadData(SafeHandle streamHandle, long pos, long bytesRequested);
+    private final native long readData(SafeHandle streamHandle, byte[] dataBuffer, IntRef filledSizeRef);
+    private final native long readData(SafeHandle streamHandle, byte[] dataBuffer, long pos, IntRef filledSizeRef);
+    private final native long saveToWaveFile(SafeHandle streamHandle, String fileName);
+    private final native long getPosition(SafeHandle streamHandle, IntRef posRef);
+    private final native long setPosition(SafeHandle streamHandle, long pos);
+    private final native long getPropertyBagFromStreamHandle(SafeHandle streamHandle, IntRef propertyHandleRef);
 }

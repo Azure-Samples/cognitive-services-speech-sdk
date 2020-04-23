@@ -5,13 +5,16 @@ package com.microsoft.cognitiveservices.speech.audio;
 //
 
 import com.microsoft.cognitiveservices.speech.util.Contracts;
+import com.microsoft.cognitiveservices.speech.util.SafeHandle;
+import com.microsoft.cognitiveservices.speech.util.SafeHandleType;
 import com.microsoft.cognitiveservices.speech.SpeechConfig;
+import java.io.Closeable;
 
 /**
  * Represents audio input stream used for custom audio input configurations.
  * Note: close() must be called in order to relinquish underlying resources held by the object.
  */
-public class AudioInputStream
+public class AudioInputStream implements Closeable
 {
     // load the native library.
     static {
@@ -64,21 +67,22 @@ public class AudioInputStream
      * Explicitly frees any external resource attached to the object
      * Note: close() must be called in order to relinquish underlying resources held by the object.
      */
+    @Override
     public void close() {
-        if (this._streamImpl != null) {
-            this._streamImpl.delete();
+        if (this.streamHandle != null) {
+            this.streamHandle.close();
+            this.streamHandle = null;
         }
-        this._streamImpl = null;
     }
 
     /*! \cond PROTECTED */
 
-    protected AudioInputStream(com.microsoft.cognitiveservices.speech.internal.AudioInputStream stream) {
+    protected AudioInputStream(SafeHandle stream) {
         Contracts.throwIfNull(stream, "stream");
-        this._streamImpl = stream;
+        this.streamHandle = stream;
     }
 
-    protected com.microsoft.cognitiveservices.speech.internal.AudioInputStream _streamImpl;
+    protected SafeHandle streamHandle = null;
 
     /*! \endcond */
 
@@ -88,8 +92,8 @@ public class AudioInputStream
      * Returns the audio input configuration.
      * @return The implementation of the stream.
      */
-    public com.microsoft.cognitiveservices.speech.internal.AudioInputStream getStreamImpl() {
-        return this._streamImpl;
+    public SafeHandle getImpl() {
+        return this.streamHandle;
     }
 
     /*! \endcond */

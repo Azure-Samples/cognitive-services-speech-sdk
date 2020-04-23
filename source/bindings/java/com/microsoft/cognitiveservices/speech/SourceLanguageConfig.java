@@ -7,6 +7,9 @@ package com.microsoft.cognitiveservices.speech;
 import java.io.Closeable;
 import com.microsoft.cognitiveservices.speech.SpeechConfig;
 import com.microsoft.cognitiveservices.speech.util.Contracts;
+import com.microsoft.cognitiveservices.speech.util.SafeHandle;
+import com.microsoft.cognitiveservices.speech.util.SafeHandleType;
+import com.microsoft.cognitiveservices.speech.util.IntRef;
 
 /**
  * Represents source language configuration used for specifying recognition source language
@@ -33,7 +36,9 @@ public final class SourceLanguageConfig implements Closeable
      */
     public static SourceLanguageConfig fromLanguage(String language) {
         Contracts.throwIfIllegalLanguage(language, "invalid language value");
-        return new SourceLanguageConfig(com.microsoft.cognitiveservices.speech.internal.SourceLanguageConfig.FromLanguage(language));
+        IntRef langConfigRef = new IntRef(0);
+        Contracts.throwIfFail(fromLanguage(langConfigRef, language));
+        return new SourceLanguageConfig(langConfigRef.getValue());
     }
 
      /**
@@ -46,7 +51,9 @@ public final class SourceLanguageConfig implements Closeable
     public static SourceLanguageConfig fromLanguage(String language, String endpointId) {
         Contracts.throwIfIllegalLanguage(language, "invalid language value");
         Contracts.throwIfNullOrWhitespace(endpointId, "endpointId cannot be empty");
-        return new SourceLanguageConfig(com.microsoft.cognitiveservices.speech.internal.SourceLanguageConfig.FromLanguage(language, endpointId));
+        IntRef langConfigRef = new IntRef(0);
+        Contracts.throwIfFail(fromLanguageAndEndpointId(langConfigRef, language, endpointId));
+        return new SourceLanguageConfig(langConfigRef.getValue());
     }
 
     /**
@@ -57,26 +64,35 @@ public final class SourceLanguageConfig implements Closeable
         if (disposed) {
             return;
         }
-        this._configImpl.delete();
+        if (configHandle != null){
+            this.configHandle.close();
+            this.configHandle = null;
+        }
+
         disposed = true;
     }
 
     /*! \cond INTERNAL */
+
     /**
      * Returns the implementation of source language config object
      * @return The implementation of the source language Config
      */
-    public com.microsoft.cognitiveservices.speech.internal.SourceLanguageConfig getImpl()
+    public SafeHandle getImpl()
     {
-        return this._configImpl;
+        return this.configHandle;
     }
+
     /*! \endcond */
 
-    private SourceLanguageConfig(com.microsoft.cognitiveservices.speech.internal.SourceLanguageConfig config) {
-        Contracts.throwIfNull(config, "config");
-        this._configImpl = config;
+    private SourceLanguageConfig(long handleValue) {
+        Contracts.throwIfNull(handleValue, "handleValue");
+        this.configHandle = new SafeHandle(handleValue, SafeHandleType.SourceLanguageConfig);
     }
 
-    private com.microsoft.cognitiveservices.speech.internal.SourceLanguageConfig _configImpl;
+    private final static native long fromLanguage(IntRef langConfigRef, String language);
+    private final static native long fromLanguageAndEndpointId(IntRef langConfigRef, String language, String endpointId);
+
+    private SafeHandle configHandle = null;
     private boolean disposed = false;
 }

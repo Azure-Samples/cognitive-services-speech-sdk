@@ -6,6 +6,7 @@ package com.microsoft.cognitiveservices.speech.transcription;
 
 import com.microsoft.cognitiveservices.speech.util.Contracts;
 import com.microsoft.cognitiveservices.speech.RecognitionEventArgs;
+import com.microsoft.cognitiveservices.speech.util.IntRef;
 
 /**
  * Class that defines conversation transcription event arguments.
@@ -13,23 +14,32 @@ import com.microsoft.cognitiveservices.speech.RecognitionEventArgs;
  */
 public class ConversationTranscriptionEventArgs extends RecognitionEventArgs {
 
-    ConversationTranscriptionEventArgs(com.microsoft.cognitiveservices.speech.internal.ConversationTranscriptionEventArgs e) {
-        super(e);
-
-        Contracts.throwIfNull(e, "e");
-        this._Result = new ConversationTranscriptionResult(e.GetResult());
-
-        Contracts.throwIfNull(this.getSessionId(), "SessionId");
-    }
+    /*! \cond INTERNAL */
 
     /**
-     * Specifies the conversation transcription result.
-     * @return the conversation transcription result.
+     * Constructs an instance of a ConversationTranscriptionEventArgs object.
+     * @param eventArgs recognition event args object.
+     */
+    ConversationTranscriptionEventArgs(long eventArgs) {
+        super(eventArgs);
+        storeEventData(false);
+
+    }
+    
+    ConversationTranscriptionEventArgs(long eventArgs, boolean dispose) {
+        super(eventArgs);
+        storeEventData(dispose);
+    }
+    
+    /*! \endcond */
+
+    /**
+     * Represents the conversation transcription result.
+     * @return The conversation transcription result.
      */
     public final ConversationTranscriptionResult getResult() {
-        return _Result;
+        return result;
     }
-    private ConversationTranscriptionResult _Result;
 
     /**
      * Returns a String that represents the conversation transcription result event.
@@ -38,9 +48,22 @@ public class ConversationTranscriptionEventArgs extends RecognitionEventArgs {
     @Override
     public String toString() {
         return "SessionId:" + this.getSessionId() +
-                " ResultId:" + _Result.getResultId() +
-                " Reason:" + _Result.getReason() +
-                " UserId:" + _Result.getUserId() +
-                " Recognized text:<" + _Result.getText() + ">.";
+                " ResultId:" + result.getResultId() +
+                " Reason:" + result.getReason() +
+                " UserId:" + result.getUserId() +
+                " Recognized text:<" + result.getText() + ">.";
     }
+
+    private void storeEventData(boolean disposeNativeResources) {
+        Contracts.throwIfNull(eventHandle, "eventHandle");
+        IntRef resultHandle = new IntRef(0);
+        Contracts.throwIfFail(getRecognitionResult(eventHandle, resultHandle));
+        this.result = new ConversationTranscriptionResult(resultHandle.getValue());
+        Contracts.throwIfNull(this.getSessionId(), "SessionId");
+        if (disposeNativeResources == true) {
+            super.close();
+        }
+    }
+    
+    private ConversationTranscriptionResult result;
 }

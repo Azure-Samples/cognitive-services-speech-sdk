@@ -76,7 +76,7 @@ else
   else # OSX
     DOTNET_LIBPREFIX=Microsoft.CognitiveServices.Speech.
     DYNLIBSUFFIX=.dylib
-    SRCJAVABINDINGS="$SRCBIN/libMicrosoft.CognitiveServices.Speech.java.bindings.jnilib"
+    SRCJAVABINDINGS="$SRCBIN/libMicrosoft.CognitiveServices.Speech.java.bindings.dylib"
   fi
 
   STATLIBSUFFIX=.a
@@ -197,7 +197,7 @@ if [[ $PLATFORM == OSX-* ]]; then
   # osx: copy the unstripped dylib
   mkdir -p "$DESTPRIVLIBUNSTRIPPED"
   cp $CPOPT "$SRCDYNLIB"/$LIBPREFIX*.unstripped$DYNLIBSUFFIX "$DESTPRIVLIBUNSTRIPPED"
-  cp $CPOPT "${SRCJAVABINDINGS%%jnilib}"unstripped.jnilib "$DESTPRIVLIBUNSTRIPPED"
+  cp $CPOPT "${SRCJAVABINDINGS%%dylib}"unstripped.dylib "$DESTPRIVLIBUNSTRIPPED"
 
   # copy dotnet dll
   SRCDYNLIB_DOTNETCORE="${SRCBIN}/${CONFIG}MacOS"

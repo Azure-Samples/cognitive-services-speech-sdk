@@ -211,10 +211,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     recognizer.AddIntent(phrase, someId);
                 }
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
-                // TODO cannot enable below assertion yet, RecognizedIntent is not returned - VSO:1594523
-                //Assert.AreEqual(
-                //    string.IsNullOrEmpty(expectedId) ? ResultReason.RecognizedSpeech : ResultReason.RecognizedIntent,
-                //    result.Reason);
+                Assert.AreEqual(string.IsNullOrEmpty(expectedId) ? ResultReason.RecognizedSpeech : ResultReason.RecognizedIntent, result.Reason);
                 Assert.AreEqual(AudioUtterancesMap[AudioUtteranceKeys.INTENT_UTTERANCE].Utterances[Language.EN][0].Text, result.Text);
                 Assert.AreEqual(expectedId, result.IntentId,
                     $"Unexpected intent ID for singleArgument={singleArgument} matchingPhrase={matchingPhrase}: is {result.IntentId}, expected {expectedId}");
@@ -345,9 +342,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
 
-                // TODO cannot enable below assertion yet, RecognizedIntent is not returned - VSO:1594523
-                // Assert.AreEqual(ResultReason.RecognizedIntent, result.Reason);
-                Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
+                Assert.AreEqual(ResultReason.RecognizedIntent, result.Reason);
                 AssertFuzzyMatching(phrase, result.Text);
                 Assert.AreEqual(phrase, result.IntentId, $"Unexpected intent ID: actual: {result.IntentId}, expected {phrase}");
 

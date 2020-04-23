@@ -9,8 +9,9 @@ import java.util.ArrayList;
 import java.util.List;
 import com.microsoft.cognitiveservices.speech.SpeechConfig;
 import com.microsoft.cognitiveservices.speech.util.Contracts;
-import com.microsoft.cognitiveservices.speech.internal.StringVector;
-import com.microsoft.cognitiveservices.speech.internal.SourceLanguageConfigPtrVector;
+import com.microsoft.cognitiveservices.speech.util.IntRef;
+import com.microsoft.cognitiveservices.speech.util.SafeHandle;
+import com.microsoft.cognitiveservices.speech.util.SafeHandleType;
 
 /**
  * Represents auto detect source language configuration used for specifying the possible source language candidates
@@ -40,13 +41,9 @@ public final class AutoDetectSourceLanguageConfig implements Closeable
             throw new IllegalArgumentException("languages cannot be null or empty");
         }
 
-        StringVector languageVector = new StringVector();
-        for (String language : languages) {
-            Contracts.throwIfIllegalLanguage(language, "invalid language value");
-            languageVector.add(language);
-        }
-
-        return new AutoDetectSourceLanguageConfig(com.microsoft.cognitiveservices.speech.internal.AutoDetectSourceLanguageConfig.FromLanguages(languageVector));
+        IntRef langConfigRef = new IntRef(0);
+        Contracts.throwIfFail(fromLanguages(langConfigRef, String.join(",", languages)));
+        return new AutoDetectSourceLanguageConfig(langConfigRef.getValue());
     }
 
      /**
@@ -60,12 +57,22 @@ public final class AutoDetectSourceLanguageConfig implements Closeable
             throw new IllegalArgumentException("sourceLanguageConfigs cannot be null or empty");
         }
 
-        SourceLanguageConfigPtrVector sourceLanguageConfigPtrVector = new SourceLanguageConfigPtrVector();
+        boolean isFirst = true;
+        IntRef autoDetectLangConfigRef = new IntRef(0);
         for (SourceLanguageConfig sourceLanguageConfig : sourceLanguageConfigs) {
             Contracts.throwIfNull(sourceLanguageConfig, "sourceLanguageConfig cannot be null");
-            sourceLanguageConfigPtrVector.add(sourceLanguageConfig.getImpl());
+            if (isFirst == true)
+            {
+                Contracts.throwIfFail(createFromSourceLangConfig(autoDetectLangConfigRef, sourceLanguageConfig.getImpl()));
+                isFirst = false;
+            }
+            else
+            {
+                Contracts.throwIfFail(addSourceLangConfigToAutoDetectSourceLangConfig(autoDetectLangConfigRef, sourceLanguageConfig.getImpl()));
+            }
         }
-        return new AutoDetectSourceLanguageConfig(com.microsoft.cognitiveservices.speech.internal.AutoDetectSourceLanguageConfig.FromSourceLanguageConfigs(sourceLanguageConfigPtrVector));
+        
+        return new AutoDetectSourceLanguageConfig(autoDetectLangConfigRef.getValue());
     }
 
     /**
@@ -76,7 +83,10 @@ public final class AutoDetectSourceLanguageConfig implements Closeable
         if (disposed) {
             return;
         }
-        this._configImpl.delete();
+        if (configHandle != null){
+            this.configHandle.close();
+            this.configHandle = null;
+        }
         disposed = true;
     }
 
@@ -85,17 +95,21 @@ public final class AutoDetectSourceLanguageConfig implements Closeable
      * Returns the AutoDetectSourceLanguageConfig
      * @return The implementation of the AutoDetectSourceLanguageConfig object
      */
-    public com.microsoft.cognitiveservices.speech.internal.AutoDetectSourceLanguageConfig getImpl()
+    public SafeHandle getImpl()
     {
-        return _configImpl;
+        return configHandle;
     }
     /*! \endcond */
 
-    private AutoDetectSourceLanguageConfig(com.microsoft.cognitiveservices.speech.internal.AutoDetectSourceLanguageConfig config) {
-        Contracts.throwIfNull(config, "config");
-        this._configImpl = config;
+    private AutoDetectSourceLanguageConfig(long handleValue) {
+        Contracts.throwIfNull(handleValue, "handleValue");
+        this.configHandle = new SafeHandle(handleValue, SafeHandleType.SourceLanguageConfig);
     }
 
-    private com.microsoft.cognitiveservices.speech.internal.AutoDetectSourceLanguageConfig _configImpl;
+    private final static native long fromLanguages(IntRef langConfigRef, String languages);
+    private final static native long createFromSourceLangConfig(IntRef autoDetectLangConfigRef, SafeHandle sourceLanguageConfig);
+    private final static native long addSourceLangConfigToAutoDetectSourceLangConfig(IntRef autoDetectLangConfigRef, SafeHandle sourceLanguageConfig);
+
+    private SafeHandle configHandle = null;
     private boolean disposed = false;
 }

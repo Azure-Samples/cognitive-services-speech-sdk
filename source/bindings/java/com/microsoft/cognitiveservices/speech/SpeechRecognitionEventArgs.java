@@ -5,33 +5,38 @@
 package com.microsoft.cognitiveservices.speech;
 
 import com.microsoft.cognitiveservices.speech.util.Contracts;
+import com.microsoft.cognitiveservices.speech.util.IntRef;
 
 /**
  * Defines contents of speech recognizing/recognized event.
  */
 public class SpeechRecognitionEventArgs extends RecognitionEventArgs {
 
+    /*! \cond INTERNAL */
+
     /**
      * Constructs an instance of a SpeechRecognitionEventArgs object.
-     * @param arg internal recognition event args object.
+     * @param eventArgs recognition event args object.
      */
-    public SpeechRecognitionEventArgs(com.microsoft.cognitiveservices.speech.internal.SpeechRecognitionEventArgs arg) {
-        super(arg);
-
-        Contracts.throwIfNull(arg, "arg");
-        this._Result = new SpeechRecognitionResult(arg.GetResult());
-
-        Contracts.throwIfNull(this.getSessionId(), "SessionId");
+    public SpeechRecognitionEventArgs(long eventArgs) {
+        super(eventArgs);
+        storeEventData(false);
     }
+
+    public SpeechRecognitionEventArgs(long eventArgs, boolean dispose) {
+        super(eventArgs);
+        storeEventData(dispose);
+    }
+
+    /*! \endcond */
 
     /**
      * Specifies the recognition result.
      * @return the recognition result.
      */
     public final SpeechRecognitionResult getResult() {
-        return _Result;
+        return this.result;
     }
-    private SpeechRecognitionResult _Result;
 
     /**
      * Returns a String that represents the speech recognition result event.
@@ -40,8 +45,21 @@ public class SpeechRecognitionEventArgs extends RecognitionEventArgs {
     @Override
     public String toString() {
         return "SessionId:" + this.getSessionId() +
-                " ResultId:" + _Result.getResultId() +
-                " Reason:" + _Result.getReason() +
-                " Recognized text:<" + _Result.getText() + ">.";
+                " ResultId:" + this.result.getResultId() +
+                " Reason:" + this.result.getReason() +
+                " Recognized text:<" + this.result.getText() + ">.";
     }
+
+    private void storeEventData(boolean disposeNativeResources) {
+        Contracts.throwIfNull(eventHandle, "eventHandle");
+        IntRef resultHandle = new IntRef(0);
+        Contracts.throwIfFail(getRecognitionResult(eventHandle, resultHandle));
+        this.result = new SpeechRecognitionResult(resultHandle.getValue());
+        Contracts.throwIfNull(this.getSessionId(), "SessionId");
+        if (disposeNativeResources == true) {
+            super.close();
+        }
+    }
+    
+    private SpeechRecognitionResult result;
 }

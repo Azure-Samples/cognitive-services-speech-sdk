@@ -4,19 +4,15 @@
 //
 package com.microsoft.cognitiveservices.speech;
 
-
 import com.microsoft.cognitiveservices.speech.util.Contracts;
 import com.microsoft.cognitiveservices.speech.CancellationErrorCode;
+import com.microsoft.cognitiveservices.speech.util.IntRef;
+import com.microsoft.cognitiveservices.speech.util.SafeHandle;
 
 /**
  * Contains detailed information about why a result was canceled.
  */
 public class CancellationDetails {
-
-    private CancellationReason reason;
-    private String errorDetails;
-    private CancellationErrorCode errorCode;
-    private com.microsoft.cognitiveservices.speech.internal.CancellationDetails _cancellationImpl;
 
     /**
      * Creates an instance of CancellationDetails object for the canceled RecognitionResult.
@@ -24,19 +20,20 @@ public class CancellationDetails {
      * @return The cancellation details object being created.
      */
     public static com.microsoft.cognitiveservices.speech.CancellationDetails fromResult(RecognitionResult result) {
-        com.microsoft.cognitiveservices.speech.internal.CancellationDetails cancellation = com.microsoft.cognitiveservices.speech.internal.CancellationDetails.FromResult(result.getResultImpl());
-        return new com.microsoft.cognitiveservices.speech.CancellationDetails(cancellation);
+        return new com.microsoft.cognitiveservices.speech.CancellationDetails(result);
     }
 
     /*! \cond PROTECTED */
 
-    protected CancellationDetails(com.microsoft.cognitiveservices.speech.internal.CancellationDetails cancellation) {
-        Contracts.throwIfNull(cancellation, "cancellation");
-
-        this._cancellationImpl = cancellation;
-        this.reason = CancellationReason.values()[cancellation.getReason().swigValue() - 1]; // Native CancellationReason enum starts at 1!!
-        this.errorCode = CancellationErrorCode.values()[cancellation.getErrorCode().swigValue()];
-        this.errorDetails = cancellation.getErrorDetails();
+    protected CancellationDetails(RecognitionResult result) {
+        Contracts.throwIfNull(result, "result");
+        Contracts.throwIfNull(result.getImpl(), "result.resultHandle");        
+        IntRef value = new IntRef(0);
+        Contracts.throwIfFail(getCanceledReason(result.getImpl(), value));
+        this.reason = CancellationReason.values()[(int)value.getValue() - 1]; // Native CancellationReason enum starts at 1!!
+        Contracts.throwIfFail(getCanceledErrorCode(result.getImpl(), value));
+        this.errorCode = CancellationErrorCode.values()[(int)value.getValue()];
+        this.errorDetails = result.getProperties().getProperty(PropertyId.SpeechServiceResponse_JsonErrorDetails);
     }
 
     /*! \endcond */
@@ -45,10 +42,6 @@ public class CancellationDetails {
      * Explicitly frees any external resource attached to the object
      */
     public void close() {
-        if (this._cancellationImpl != null) {
-            this._cancellationImpl.delete();
-        }
-        this._cancellationImpl = null;
     }
 
     /**
@@ -86,4 +79,11 @@ public class CancellationDetails {
                 " ErrorCode: " + this.errorCode +
                 " ErrorDetails:" + this.errorDetails;
     }
+
+    private CancellationReason reason;
+    private String errorDetails;
+    private CancellationErrorCode errorCode;
+    
+    private final native long getCanceledReason(SafeHandle resultHandle, IntRef value);
+    private final native long getCanceledErrorCode(SafeHandle resultHandle, IntRef value);
 }

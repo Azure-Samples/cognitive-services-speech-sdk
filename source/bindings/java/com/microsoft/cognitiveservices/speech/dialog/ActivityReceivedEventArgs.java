@@ -7,29 +7,40 @@ package com.microsoft.cognitiveservices.speech.dialog;
 import java.io.Closeable;
 
 import com.microsoft.cognitiveservices.speech.util.Contracts;
+import com.microsoft.cognitiveservices.speech.util.SafeHandle;
+import com.microsoft.cognitiveservices.speech.util.IntRef;
+import com.microsoft.cognitiveservices.speech.util.StringRef;
+import com.microsoft.cognitiveservices.speech.util.SafeHandleType;
 import com.microsoft.cognitiveservices.speech.audio.PullAudioOutputStream;
-import com.microsoft.cognitiveservices.speech.internal.PullAudioInputStream;
 
 /**
  * Class that describes the events of a activity received event.
  */
 public class ActivityReceivedEventArgs {
 
+    /*! \cond INTERNAL */
+
     /**
      * Constructs an ActivityReceivedEventArgs object.
      * @param args The native ActivityReceivedEventArgs
      */
-    public ActivityReceivedEventArgs(com.microsoft.cognitiveservices.speech.internal.ActivityReceivedEventArgs args) {
-        Contracts.throwIfNull(args, "args");
-        activityReceivedEventArgs = args;
+    public ActivityReceivedEventArgs(long eventArgs) {
+        Contracts.throwIfNull(eventArgs, "eventArgs");
+        activityReceivedEventHandle = new SafeHandle(eventArgs, SafeHandleType.DialogServiceConnectorEvent);
+        StringRef activityRef = new StringRef("");
+        Contracts.throwIfFail(getActivity(activityReceivedEventHandle, activityRef));
+        activity = activityRef.getValue();
+        hasAudio = hasAudio(activityReceivedEventHandle);
     }
+    
+    /*! \endcond */
 
     /**
      * Gets the activity received.
      * @return The activity associated with the event.
      */
     public String getActivity() {
-        return activityReceivedEventArgs.GetActivity();
+        return activity;
     }
 
     /**
@@ -37,7 +48,7 @@ public class ActivityReceivedEventArgs {
      * @return True if the event has audio associated, false otherwise.
      */
     public boolean hasAudio() {
-        return activityReceivedEventArgs.HasAudio();
+        return hasAudio;
     }
 
     /**
@@ -45,10 +56,16 @@ public class ActivityReceivedEventArgs {
      * @return The associated audio stream.
      */
     public PullAudioOutputStream getAudio() {
-        return new PullAudioOutputStream(activityReceivedEventArgs.GetAudio());
+        IntRef audioRef = new IntRef(0);
+        Contracts.throwIfFail(getAudio(activityReceivedEventHandle, audioRef));
+        return new PullAudioOutputStream(audioRef);
     }
 
-    /*! \cond PROTECTED */
-    private com.microsoft.cognitiveservices.speech.internal.ActivityReceivedEventArgs activityReceivedEventArgs;
-    /*! \endcond */
+    private SafeHandle activityReceivedEventHandle = null;
+    private String activity = "";
+    private boolean hasAudio = false;
+
+    private final native long getAudio(SafeHandle activityReceivedEventHandle, IntRef audioRef);
+    private final native long getActivity(SafeHandle activityReceivedEventHandle, StringRef activityRef);
+    private final native boolean hasAudio(SafeHandle activityReceivedEventHandle);
 }

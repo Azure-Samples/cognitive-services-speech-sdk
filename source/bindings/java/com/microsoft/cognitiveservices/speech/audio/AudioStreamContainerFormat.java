@@ -12,39 +12,39 @@ public enum AudioStreamContainerFormat {
     /**
      * Stream ContainerFormat definition for OGG OPUS.
     */
-    OGG_OPUS(com.microsoft.cognitiveservices.speech.internal.AudioStreamContainerFormat.OGG_OPUS),
+    OGG_OPUS(0x101),
 
     /**
      * Stream ContainerFormat definition for MP3.
     */
-    MP3(com.microsoft.cognitiveservices.speech.internal.AudioStreamContainerFormat.MP3),
+    MP3(0x102),
 
     /**
      * Stream ContainerFormat definition for FLAC. Added in version 1.7.0.
     */
-    FLAC(com.microsoft.cognitiveservices.speech.internal.AudioStreamContainerFormat.FLAC),
+    FLAC(0x103),
 
     /**
      * Stream ContainerFormat definition for ALAW. Added in version 1.7.0.
     */
-    ALAW(com.microsoft.cognitiveservices.speech.internal.AudioStreamContainerFormat.ALAW),
+    ALAW(0x104),
 
     /**
      * Stream ContainerFormat definition for MULAW. Added in version 1.7.0.
     */
-    MULAW(com.microsoft.cognitiveservices.speech.internal.AudioStreamContainerFormat.MULAW),
+    MULAW(0x105),
 
     /**
      * Stream ContainerFormat definition for AMRNB. Currently not supported.
     */
-    AMRNB(com.microsoft.cognitiveservices.speech.internal.AudioStreamContainerFormat.AMRNB),
+    AMRNB(0x106),
 
     /**
      * Stream ContainerFormat definition for AMRWB. Currently not supported.
     */
-    AMRWB(com.microsoft.cognitiveservices.speech.internal.AudioStreamContainerFormat.AMRWB);
+    AMRWB(0x107);
 
-    private AudioStreamContainerFormat(com.microsoft.cognitiveservices.speech.internal.AudioStreamContainerFormat id) {
+    private AudioStreamContainerFormat(int id) {
         this.id = id;
     }
 
@@ -53,7 +53,7 @@ public enum AudioStreamContainerFormat {
      *
      * @return the Audio Stream Container Format
     */
-    public com.microsoft.cognitiveservices.speech.internal.AudioStreamContainerFormat getValue() { return this.id; }
+    public int getValue() { return this.id; }
 
-    private final com.microsoft.cognitiveservices.speech.internal.AudioStreamContainerFormat id;
+    private final int id;
 }

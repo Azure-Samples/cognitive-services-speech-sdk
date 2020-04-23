@@ -12,25 +12,25 @@ public enum NoMatchReason {
     /**
      * Indicates that speech was detected, but not recognized.
      */
-    NotRecognized(com.microsoft.cognitiveservices.speech.internal.NoMatchReason.NotRecognized),
+    NotRecognized(1),
 
     /**
      * Indicates that the start of the audio stream contained only silence, and the service timed out waiting for speech.
      */
-    InitialSilenceTimeout(com.microsoft.cognitiveservices.speech.internal.NoMatchReason.InitialSilenceTimeout),
+    InitialSilenceTimeout(2),
 
     /**
      * Indicates that the start of the audio stream contained only noise, and the service timed out waiting for speech.
      */
-    InitialBabbleTimeout(com.microsoft.cognitiveservices.speech.internal.NoMatchReason.InitialBabbleTimeout),
+    InitialBabbleTimeout(3),
 
     /**
      * Indicates that the spotted keyword has been rejected by the keyword verification service.
      * Added in version 1.5.0.
      */
-    KeywordNotRecognized(com.microsoft.cognitiveservices.speech.internal.NoMatchReason.KeywordNotRecognized);
+    KeywordNotRecognized(4);
 
-    private NoMatchReason(com.microsoft.cognitiveservices.speech.internal.NoMatchReason id) {
+    private NoMatchReason(int id) {
         this.id = id;
     }
 
@@ -39,7 +39,7 @@ public enum NoMatchReason {
      *
      * @return the speech property id
      */
-    public com.microsoft.cognitiveservices.speech.internal.NoMatchReason getValue() { return this.id; }
+    public int getValue() { return this.id; }
 
-    private final com.microsoft.cognitiveservices.speech.internal.NoMatchReason id;
+    private final int id;
 }

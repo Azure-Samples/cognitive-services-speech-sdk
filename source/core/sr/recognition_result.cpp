@@ -135,7 +135,7 @@ void CSpxRecognitionResult::InitIntentResult(const wchar_t* intentId, const wcha
 
     m_intentId = (intentId != nullptr) ? intentId : L"";
 
-    if (jsonPayload != nullptr && jsonPayload[0] != '\0')
+    if ((jsonPayload != nullptr && jsonPayload[0] != '\0') || !m_intentId.empty())
     {
         switch (m_reason)
         {

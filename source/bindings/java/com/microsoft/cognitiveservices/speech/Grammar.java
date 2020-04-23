@@ -9,13 +9,16 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import com.microsoft.cognitiveservices.speech.util.EventHandlerImpl;
+import com.microsoft.cognitiveservices.speech.util.IntRef;
+import com.microsoft.cognitiveservices.speech.util.SafeHandle;
+import com.microsoft.cognitiveservices.speech.util.SafeHandleType;
 import com.microsoft.cognitiveservices.speech.util.Contracts;
 
 /**
  * Represents a generic grammar used to assist in improving speech recogniton accuracy.
  */
-public class Grammar implements Closeable
-{
+public class Grammar implements Closeable {
+    
     /**
      * Creates a Grammar from its storage Id.
      *
@@ -24,10 +27,10 @@ public class Grammar implements Closeable
      * @param id The Id of the grammar
      * @return Grammar associated with the given Id.
      */
-    public static Grammar fromStorageId(String id)
-    {
-        com.microsoft.cognitiveservices.speech.internal.Grammar grammarImpl = com.microsoft.cognitiveservices.speech.internal.Grammar.FromStorageId(id);
-        return new Grammar(grammarImpl);
+    public static Grammar fromStorageId(String id) {
+        IntRef grammarRef = new IntRef(0);
+        Contracts.throwIfFail(fromStorageId(grammarRef, id));
+        return new Grammar(grammarRef.getValue());
     }
 
     /**
@@ -38,16 +41,19 @@ public class Grammar implements Closeable
         dispose(true);
     }
 
-    /*! \cond PROTECTED */
-
+    /*! \cond INTERNAL */
+    
     /**
      * Returns the internal grammar instance
      * @return The internal grammar instance
      */
-    public com.microsoft.cognitiveservices.speech.internal.Grammar getGrammarImpl()
-    {
-        return grammarImpl;
+    public SafeHandle getImpl() {
+        return grammarHandle;
     }
+    
+    /*! \endcond */
+
+    /*! \cond PROTECTED */
 
     /**
      * This method performs cleanup of resources.
@@ -61,24 +67,27 @@ public class Grammar implements Closeable
         }
 
         if (disposing) {
-            grammarImpl.delete();
+            if (grammarHandle != null) {
+                grammarHandle.close();
+                grammarHandle = null;
+            }
         }
 
         disposed = true;
     }
 
-    /*! \endcond */
-
    /**
     * Protected constructor.
     * @param grammarImpl Underlying grammar implementation
     */
-    protected Grammar(com.microsoft.cognitiveservices.speech.internal.Grammar grammarImpl)
-    {
-        Contracts.throwIfNull(grammarImpl, "GrammarInternalImplementation");
-        this.grammarImpl = grammarImpl;
+    protected Grammar(long grammarHandleValue) {
+        Contracts.throwIfNull(grammarHandleValue, "grammarHandleValue");
+        this.grammarHandle = new SafeHandle(grammarHandleValue, SafeHandleType.Grammar);
     }
+    
+    /*! \endcond */
 
-    private com.microsoft.cognitiveservices.speech.internal.Grammar grammarImpl;
+    private final static native long fromStorageId(IntRef grammarHandleRef, String id);
+    private SafeHandle grammarHandle = null;
     private boolean disposed = false;
 }

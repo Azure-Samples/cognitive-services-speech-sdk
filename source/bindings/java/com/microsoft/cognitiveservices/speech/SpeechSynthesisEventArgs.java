@@ -7,6 +7,9 @@ package com.microsoft.cognitiveservices.speech;
 import java.io.Closeable;
 
 import com.microsoft.cognitiveservices.speech.util.Contracts;
+import com.microsoft.cognitiveservices.speech.util.SafeHandle;
+import com.microsoft.cognitiveservices.speech.util.SafeHandleType;
+import com.microsoft.cognitiveservices.speech.util.IntRef;
 
 /**
  * Defines contents of speech synthesis related event.
@@ -14,13 +17,18 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
  */
 public class SpeechSynthesisEventArgs implements Closeable {
 
-    private SpeechSynthesisResult result;
+    /*! \cond INTERNAL */
 
-    SpeechSynthesisEventArgs(com.microsoft.cognitiveservices.speech.internal.SpeechSynthesisEventArgs e) {
+    SpeechSynthesisEventArgs(long eventArgs) {
 
-        Contracts.throwIfNull(e, "e");
-        this.result = new SpeechSynthesisResult(e.getResult());
+        Contracts.throwIfNull(eventArgs, "eventArgs");
+        eventHandle = new SafeHandle(eventArgs, SafeHandleType.SynthesisEvent);
+        IntRef resultRef = new IntRef(0);
+        Contracts.throwIfFail(getSynthesisResult(eventHandle, resultRef));
+        this.result = new SpeechSynthesisResult(resultRef);
     }
+    
+    /*! \endcond */
 
     /**
      * Specifies the speech synthesis result.
@@ -34,9 +42,18 @@ public class SpeechSynthesisEventArgs implements Closeable {
      * Explicitly frees any external resource attached to the object
      */
     public void close() {
+        if (this.eventHandle != null) {
+            eventHandle.close();
+            this.eventHandle = null;
+        }
         if (this.result != null) {
             this.result.close();
+            this.result = null;
         }
-        this.result = null;
     }
+
+    private final native long getSynthesisResult(SafeHandle eventHandle, IntRef resultRef);
+
+    private SpeechSynthesisResult result;
+    private SafeHandle eventHandle;
 }

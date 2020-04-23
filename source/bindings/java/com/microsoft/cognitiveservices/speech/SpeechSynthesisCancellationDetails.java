@@ -6,6 +6,8 @@ package com.microsoft.cognitiveservices.speech;
 
 
 import com.microsoft.cognitiveservices.speech.util.Contracts;
+import com.microsoft.cognitiveservices.speech.util.IntRef;
+import com.microsoft.cognitiveservices.speech.util.SafeHandle;
 import com.microsoft.cognitiveservices.speech.CancellationErrorCode;
 
 /**
@@ -17,7 +19,6 @@ public class SpeechSynthesisCancellationDetails {
     private CancellationReason reason;
     private String errorDetails;
     private CancellationErrorCode errorCode;
-    private com.microsoft.cognitiveservices.speech.internal.SpeechSynthesisCancellationDetails _cancellationImpl;
 
     /**
      * Creates an instance of SpeechSynthesisCancellationDetails object for the canceled SpeechSynthesisResult.
@@ -25,8 +26,7 @@ public class SpeechSynthesisCancellationDetails {
      * @return The cancellation details object being created.
      */
     public static com.microsoft.cognitiveservices.speech.SpeechSynthesisCancellationDetails fromResult(SpeechSynthesisResult result) {
-        com.microsoft.cognitiveservices.speech.internal.SpeechSynthesisCancellationDetails cancellation = com.microsoft.cognitiveservices.speech.internal.SpeechSynthesisCancellationDetails.FromResult(result.getResultImpl());
-        return new com.microsoft.cognitiveservices.speech.SpeechSynthesisCancellationDetails(cancellation);
+        return new com.microsoft.cognitiveservices.speech.SpeechSynthesisCancellationDetails(result);
     }
 
     /**
@@ -35,27 +35,37 @@ public class SpeechSynthesisCancellationDetails {
      * @return The cancellation details object being created.
      */
     public static com.microsoft.cognitiveservices.speech.SpeechSynthesisCancellationDetails fromStream(AudioDataStream stream) {
-        com.microsoft.cognitiveservices.speech.internal.SpeechSynthesisCancellationDetails cancellation = com.microsoft.cognitiveservices.speech.internal.SpeechSynthesisCancellationDetails.FromStream(stream.getImpl());
-        return new com.microsoft.cognitiveservices.speech.SpeechSynthesisCancellationDetails(cancellation);
+        return new com.microsoft.cognitiveservices.speech.SpeechSynthesisCancellationDetails(stream);
     }
 
-    private SpeechSynthesisCancellationDetails(com.microsoft.cognitiveservices.speech.internal.SpeechSynthesisCancellationDetails cancellation) {
-        Contracts.throwIfNull(cancellation, "cancellation");
+    private SpeechSynthesisCancellationDetails(SpeechSynthesisResult result) {
+        Contracts.throwIfNull(result, "result");
+        Contracts.throwIfNull(result.getImpl(), "resultHandle");
 
-        this._cancellationImpl = cancellation;
-        this.reason = CancellationReason.values()[cancellation.getReason().swigValue() - 1]; // Native CancellationReason enum starts at 1!!
-        this.errorCode = CancellationErrorCode.values()[cancellation.getErrorCode().swigValue()];
-        this.errorDetails = cancellation.getErrorDetails();
+        IntRef valueRef = new IntRef(0);
+        Contracts.throwIfFail(getCanceledReasonFromSynthResult(result.getImpl(), valueRef));
+        this.reason = CancellationReason.values()[(int)valueRef.getValue() - 1]; // Native CancellationReason enum starts at 1!!
+        Contracts.throwIfFail(getCanceledErrorCodeFromSynthResult(result.getImpl(), valueRef));
+        this.errorCode = CancellationErrorCode.values()[(int)valueRef.getValue()];
+        this.errorDetails = result.getProperties().getProperty(PropertyId.CancellationDetails_ReasonDetailedText);
+    }
+
+    private SpeechSynthesisCancellationDetails(AudioDataStream stream) {
+        Contracts.throwIfNull(stream, "stream");
+        Contracts.throwIfNull(stream.getImpl(), "streamHandle");
+        
+        IntRef valueRef = new IntRef(0);
+        Contracts.throwIfFail(getCanceledReasonFromStream(stream.getImpl(), valueRef));
+        this.reason = CancellationReason.values()[(int)valueRef.getValue() - 1]; // Native CancellationReason enum starts at 1!!
+        Contracts.throwIfFail(getCanceledErrorCodeFromStream(stream.getImpl(), valueRef));
+        this.errorCode = CancellationErrorCode.values()[(int)valueRef.getValue()];
+        this.errorDetails = stream.getProperties().getProperty(PropertyId.CancellationDetails_ReasonDetailedText);
     }
 
     /**
      * Explicitly frees any external resource attached to the object
      */
     public void close() {
-        if (this._cancellationImpl != null) {
-            this._cancellationImpl.delete();
-        }
-        this._cancellationImpl = null;
     }
 
     /**
@@ -93,4 +103,9 @@ public class SpeechSynthesisCancellationDetails {
                 " ErrorCode: " + this.errorCode +
                 " ErrorDetails:" + this.errorDetails;
     }
+
+    private final native long getCanceledReasonFromSynthResult(SafeHandle resultHandle, IntRef valueRef);
+    private final native long getCanceledErrorCodeFromSynthResult(SafeHandle resultHandle, IntRef valueRef);
+    private final native long getCanceledReasonFromStream(SafeHandle streamHandle, IntRef valueRef);
+    private final native long getCanceledErrorCodeFromStream(SafeHandle streamHandle, IntRef valueRef);
 }

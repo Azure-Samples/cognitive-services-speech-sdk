@@ -7,11 +7,15 @@ package com.microsoft.cognitiveservices.speech.translation;
 import java.util.ArrayList;
 import java.util.concurrent.Future;
 
-import com.microsoft.cognitiveservices.speech.PropertyCollection;
-import com.microsoft.cognitiveservices.speech.PropertyId;
 import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
-import com.microsoft.cognitiveservices.speech.util.Contracts;
+import com.microsoft.cognitiveservices.speech.translation.SpeechTranslationConfig;
 import com.microsoft.cognitiveservices.speech.util.EventHandlerImpl;
+import com.microsoft.cognitiveservices.speech.util.Contracts;
+import com.microsoft.cognitiveservices.speech.util.IntRef;
+import com.microsoft.cognitiveservices.speech.util.SafeHandle;
+import com.microsoft.cognitiveservices.speech.util.SafeHandleType;
+import com.microsoft.cognitiveservices.speech.PropertyId;
+import com.microsoft.cognitiveservices.speech.PropertyCollection;
 
 /**
  * Performs translation on the speech input.
@@ -38,6 +42,19 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
      * The event synthesizing signals that a translation synthesis result is received.
      */
     public final EventHandlerImpl<TranslationSynthesisEventArgs> synthesizing = new EventHandlerImpl<TranslationSynthesisEventArgs>(eventCounter);
+    
+    /**
+     * Constructs an instance of a translation recognizer.
+     * @param stc speech translation config.
+     */
+    public TranslationRecognizer(com.microsoft.cognitiveservices.speech.translation.SpeechTranslationConfig stc) {
+        super(null);
+
+        Contracts.throwIfNull(stc, "stc");
+        Contracts.throwIfNull(recoHandle, "recoHandle");
+        Contracts.throwIfFail(createTranslationRecognizerFromConfig(recoHandle, stc.getImpl(), null));
+        initialize();
+    }
 
     /**
      * Constructs an instance of a translation recognizer.
@@ -49,24 +66,10 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
 
         Contracts.throwIfNull(stc, "stc");
         if (audioConfig == null) {
-            this.recoImpl = com.microsoft.cognitiveservices.speech.internal.TranslationRecognizer.FromConfig(stc.getImpl());
+            Contracts.throwIfFail(createTranslationRecognizerFromConfig(recoHandle, stc.getImpl(), null));
+        } else {
+            Contracts.throwIfFail(createTranslationRecognizerFromConfig(recoHandle, stc.getImpl(), audioConfig.getImpl()));
         }
-        else {
-            this.recoImpl = com.microsoft.cognitiveservices.speech.internal.TranslationRecognizer.FromConfig(stc.getImpl(), audioConfig.getConfigImpl());
-        }
-
-        initialize();
-    }
-
-    /**
-     * Constructs an instance of a translation recognizer.
-     * @param stc speech translation config.
-     */
-    public TranslationRecognizer(com.microsoft.cognitiveservices.speech.translation.SpeechTranslationConfig stc) {
-        super(null);
-
-        Contracts.throwIfNull(stc, "stc");
-        this.recoImpl = com.microsoft.cognitiveservices.speech.internal.TranslationRecognizer.FromConfig(stc.getImpl());
         initialize();
     }
 
@@ -75,7 +78,7 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
      * @return The spoken language of recognition.
      */
     public String getSpeechRecognitionLanguage() {
-        return _Parameters.getProperty(PropertyId.SpeechServiceConnection_RecoLanguage);
+        return propertyHandle.getProperty(PropertyId.SpeechServiceConnection_RecoLanguage);
     }
 
     /**
@@ -85,7 +88,7 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
      */
     public void addTargetLanguage(String value) {
         Contracts.throwIfNullOrWhitespace(value, "value");
-        recoImpl.AddTargetLanguage(value);
+        Contracts.throwIfFail(addTargetLanguage(recoHandle, value));
     }
 
     /**
@@ -95,7 +98,7 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
      */
     public void removeTargetLanguage(String value) {
         Contracts.throwIfNullOrWhitespace(value, "value");
-        recoImpl.RemoveTargetLanguage(value);
+        Contracts.throwIfFail(removeTargetLanguage(recoHandle, value));
     }
 
     /**
@@ -105,10 +108,11 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
     public ArrayList<String> getTargetLanguages() {
 
         ArrayList<String> result = new ArrayList<String>();
-        com.microsoft.cognitiveservices.speech.internal.StringVector v = recoImpl.GetTargetLanguages();
-        for (int i = 0; i < v.size(); ++i)
+        String plainStr = propertyHandle.getProperty(PropertyId.SpeechServiceConnection_TranslationToLanguages);
+        String[] values = plainStr.split(",");
+        for (int i = 0; i < values.length; ++i)
         {
-            result.add(v.get(i));
+            result.add(values[i]);
         }
 
         return result;
@@ -119,7 +123,7 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
      * @return the name of output voice.
      */
     public String getVoiceName() {
-        return _Parameters.getProperty(PropertyId.SpeechServiceConnection_TranslationVoice);
+        return propertyHandle.getProperty(PropertyId.SpeechServiceConnection_TranslationVoice);
     }
 
     /**
@@ -131,7 +135,7 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
      */
     public void setAuthorizationToken(String token) {
         Contracts.throwIfNullOrWhitespace(token, "token");
-        recoImpl.SetAuthorizationToken(token);
+        propertyHandle.setProperty(PropertyId.SpeechServiceAuthorization_Token, token);
     }
 
     /**
@@ -139,7 +143,7 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
      * @return Authorization token.
      */
     public String getAuthorizationToken() {
-        return recoImpl.GetAuthorizationToken();
+        return propertyHandle.getProperty(PropertyId.SpeechServiceAuthorization_Token);
     }
 
     /**
@@ -147,10 +151,8 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
      * @return The collection of properties and their values defined for this TranslationRecognizer.
      */
     public PropertyCollection getProperties() {
-        return _Parameters;
+        return propertyHandle;
     }
-
-    private PropertyCollection _Parameters;
 
     /**
      * Starts recognition and translation, and stops after the first utterance is recognized. The task returns the translation text as result.
@@ -166,7 +168,7 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
                 // The compiler treats an array initialized once as an effectively final.
                 final TranslationRecognitionResult[] result = new TranslationRecognitionResult[1];
 
-                Runnable runnable = new Runnable() { public void run() { result[0] = new TranslationRecognitionResult(recoImpl.Recognize()); }};
+                Runnable runnable = new Runnable() { public void run() { result[0] = new TranslationRecognitionResult(thisReco.recognize()); }};
                 thisReco.doAsyncRecognitionAction(runnable);
 
                 return result[0];
@@ -183,7 +185,7 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
 
         return s_executorService.submit(new java.util.concurrent.Callable<Void>() {
             public Void call() {
-                Runnable runnable = new Runnable() { public void run() { recoImpl.StartContinuousRecognition(); }};
+                Runnable runnable = new Runnable() { public void run() { thisReco.startContinuousRecognition(recoHandle); }};
                 thisReco.doAsyncRecognitionAction(runnable);
                 return null;
         }});
@@ -198,7 +200,7 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
 
         return s_executorService.submit(new java.util.concurrent.Callable<Void>() {
             public Void call() {
-                Runnable runnable = new Runnable() { public void run() { recoImpl.StopContinuousRecognition(); }};
+                Runnable runnable = new Runnable() { public void run() { thisReco.stopContinuousRecognition(recoHandle); }};
                 thisReco.doAsyncRecognitionAction(runnable);
                 return null;
         }});
@@ -207,10 +209,9 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
     /*! \cond PROTECTED */
 
     @Override
-    protected void dispose(final boolean disposing)
-    {
-        if (disposed)
-        {
+    protected void dispose(final boolean disposing) {
+
+        if (disposed) {
             return;
         }
 
@@ -230,32 +231,24 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
                         }
                     });
                 t.start();
-            }
-            else {
-                if (this.recognizing.isUpdateNotificationOnConnectedFired())
-                    recoImpl.getRecognizing().RemoveEventListener(recognizingHandler);
-                if (this.recognized.isUpdateNotificationOnConnectedFired())
-                    recoImpl.getRecognized().RemoveEventListener(recognizedHandler);
-                if (this.synthesizing.isUpdateNotificationOnConnectedFired())
-                    recoImpl.getSynthesizing().RemoveEventListener(synthesisResultHandler);
-                if (this.canceled.isUpdateNotificationOnConnectedFired())
-                    recoImpl.getCanceled().RemoveEventListener(errorHandler);
-                if (this.sessionStarted.isUpdateNotificationOnConnectedFired())
-                    recoImpl.getSessionStarted().RemoveEventListener(sessionStartedHandler);
-                if (this.sessionStopped.isUpdateNotificationOnConnectedFired())
-                    recoImpl.getSessionStopped().RemoveEventListener(sessionStoppedHandler);
-                if (this.speechStartDetected.isUpdateNotificationOnConnectedFired())
-                    recoImpl.getSpeechStartDetected().RemoveEventListener(speechStartDetectedHandler);
-                if (this.speechEndDetected.isUpdateNotificationOnConnectedFired())
-                    recoImpl.getSpeechEndDetected().RemoveEventListener(speechEndDetectedHandler);
-
-                recognizingHandler.delete();
-                recognizedHandler.delete();
-                errorHandler.delete();
-                recoImpl.delete();
-                _Parameters.close();
-
-                _translationRecognizerObjects.remove(this);
+            } 
+            else {                
+                if (propertyHandle != null)
+                {
+                    propertyHandle.close();
+                    propertyHandle = null;
+                }
+                if (translationSynthesisHandle != null)
+                {
+                    translationSynthesisHandle.close();
+                    translationSynthesisHandle = null;
+                }
+                if (recoHandle != null)
+                {
+                    recoHandle.close();
+                    recoHandle = null;
+                }
+                translationRecognizerObjects.remove(this);
                 disposed = true;
                 super.dispose(disposing);
             }
@@ -269,190 +262,153 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
    /**
      * This is used to keep any instance of this class alive that is subscribed to downstream events.
      */
-    static java.util.Set<TranslationRecognizer> _translationRecognizerObjects = java.util.Collections.synchronizedSet(new java.util.HashSet<TranslationRecognizer>());
+    static java.util.Set<TranslationRecognizer> translationRecognizerObjects = java.util.Collections.synchronizedSet(new java.util.HashSet<TranslationRecognizer>());
 
     // TODO Remove this... After tests are updated to no longer depend upon this
-    public com.microsoft.cognitiveservices.speech.internal.TranslationRecognizer getRecoImpl() {
-        return recoImpl;
+    public SafeHandle getRecoImpl() {
+        return recoHandle;
     }
 
     /*! \endcond */
 
     private void initialize() {
-        super.internalRecognizerImpl = this.recoImpl;
-
         final TranslationRecognizer _this = this;
+        translationSynthesisHandle = new SafeHandle(_this.recoHandle.getValue(), SafeHandleType.TranslationSynthesis);
 
-        recognizingHandler = new ResultHandlerImpl(this, /*isRecognizedHandler:*/ false);
         this.recognizing.updateNotificationOnConnected(new Runnable(){
             @Override
             public void run() {
-                _translationRecognizerObjects.add(_this);
-                recoImpl.getRecognizing().AddEventListener(recognizingHandler);
+                translationRecognizerObjects.add(_this);
+                Contracts.throwIfFail(recognizingSetCallback(_this.recoHandle.getValue()));
             }
         });
 
-        recognizedHandler = new ResultHandlerImpl(this, /*isRecognizedHandler:*/ true);
         this.recognized.updateNotificationOnConnected(new Runnable(){
             @Override
             public void run() {
-                _translationRecognizerObjects.add(_this);
-                recoImpl.getRecognized().AddEventListener(recognizedHandler);
+                translationRecognizerObjects.add(_this);
+                Contracts.throwIfFail(recognizedSetCallback(_this.recoHandle.getValue()));                
             }
         });
 
-        synthesisResultHandler = new SynthesisHandlerImpl(this);
         this.synthesizing.updateNotificationOnConnected(new Runnable(){
             @Override
             public void run() {
-                _translationRecognizerObjects.add(_this);
-                recoImpl.getSynthesizing().AddEventListener(synthesisResultHandler);
+                translationRecognizerObjects.add(_this);
+                Contracts.throwIfFail(synthesizingSetCallback(_this.recoHandle.getValue()));
             }
         });
 
-        errorHandler = new CanceledHandlerImpl(this);
         this.canceled.updateNotificationOnConnected(new Runnable(){
             @Override
             public void run() {
-                _translationRecognizerObjects.add(_this);
-                recoImpl.getCanceled().AddEventListener(errorHandler);
+                translationRecognizerObjects.add(_this);
+                Contracts.throwIfFail(canceledSetCallback(_this.recoHandle.getValue()));                
             }
         });
 
         this.sessionStarted.updateNotificationOnConnected(new Runnable(){
             @Override
             public void run() {
-                _translationRecognizerObjects.add(_this);
-                recoImpl.getSessionStarted().AddEventListener(sessionStartedHandler);
+                translationRecognizerObjects.add(_this);
+                Contracts.throwIfFail(sessionStartedSetCallback(_this.recoHandle.getValue()));
             }
         });
 
         this.sessionStopped.updateNotificationOnConnected(new Runnable(){
             @Override
             public void run() {
-                _translationRecognizerObjects.add(_this);
-                recoImpl.getSessionStopped().AddEventListener(sessionStoppedHandler);
+                translationRecognizerObjects.add(_this);
+                Contracts.throwIfFail(sessionStoppedSetCallback(_this.recoHandle.getValue()));                
             }
         });
 
         this.speechStartDetected.updateNotificationOnConnected(new Runnable(){
             @Override
             public void run() {
-                _translationRecognizerObjects.add(_this);
-                recoImpl.getSpeechStartDetected().AddEventListener(speechStartDetectedHandler);
+                translationRecognizerObjects.add(_this);
+                Contracts.throwIfFail(speechStartDetectedSetCallback(_this.recoHandle.getValue()));
             }
         });
 
         this.speechEndDetected.updateNotificationOnConnected(new Runnable(){
             @Override
             public void run() {
-                _translationRecognizerObjects.add(_this);
-                recoImpl.getSpeechEndDetected().AddEventListener(speechEndDetectedHandler);
+                translationRecognizerObjects.add(_this);
+                Contracts.throwIfFail(speechEndDetectedSetCallback(_this.recoHandle.getValue()));                
             }
         });
 
-        _Parameters = new PrivatePropertyCollection(recoImpl.getProperties());
+        IntRef propHandle = new IntRef(0);
+        Contracts.throwIfFail(getPropertyBagFromRecognizerHandle(_this.recoHandle, propHandle));
+        propertyHandle = new PropertyCollection(propHandle);
     }
 
-    private final com.microsoft.cognitiveservices.speech.internal.TranslationRecognizer recoImpl;
-    private ResultHandlerImpl recognizingHandler;
-    private ResultHandlerImpl recognizedHandler;
-    private SynthesisHandlerImpl synthesisResultHandler;
-    private CanceledHandlerImpl errorHandler;
-    private boolean disposed = false;
-
-    private class PrivatePropertyCollection extends com.microsoft.cognitiveservices.speech.PropertyCollection {
-        public PrivatePropertyCollection(com.microsoft.cognitiveservices.speech.internal.PropertyCollection collection) {
-            super(collection);
-        }
-    }
-
-    // Defines a private class to raise an event for intermediate/final result when a corresponding callback is invoked by the native layer.
-    private class ResultHandlerImpl extends com.microsoft.cognitiveservices.speech.internal.TranslationTexEventListener
+    private void recognizingEventCallback(long eventArgs)
     {
-        public ResultHandlerImpl(TranslationRecognizer recognizer, boolean isRecognizedHandler)
-        {
-            Contracts.throwIfNull(recognizer, "recognizer");
-
-            this.recognizer = recognizer;
-            this.isRecognizedHandler = isRecognizedHandler;
-        }
-
-        @Override
-        public void Execute(com.microsoft.cognitiveservices.speech.internal.TranslationRecognitionEventArgs eventArgs)
-        {
-            Contracts.throwIfNull(eventArgs, "eventArgs");
-
-            if (recognizer.disposed)
-            {
+        try {
+            Contracts.throwIfNull(this, "recognizer");
+            if (this.disposed) {
                 return;
             }
-
-            TranslationRecognitionEventArgs resultEventArg = new TranslationRecognitionEventArgs(eventArgs);
-            EventHandlerImpl<TranslationRecognitionEventArgs>  handler = isRecognizedHandler ? recognizer.recognized : recognizer.recognizing;
-            if (handler != null)
-            {
-                handler.fireEvent(this.recognizer, resultEventArg);
-            }
-        }
-
-        private TranslationRecognizer recognizer;
-        private boolean isRecognizedHandler;
-    }
-
-    // Defines a private class to raise an event for error during recognition when a corresponding callback is invoked by the native layer.
-    private class CanceledHandlerImpl extends com.microsoft.cognitiveservices.speech.internal.TranslationTexCanceledEventListener {
-        public CanceledHandlerImpl(TranslationRecognizer recognizer) {
-            Contracts.throwIfNull(recognizer, "recognizer");
-            this.recognizer = recognizer;
-        }
-
-        @Override
-        public void Execute(com.microsoft.cognitiveservices.speech.internal.TranslationRecognitionCanceledEventArgs eventArgs) {
-            Contracts.throwIfNull(eventArgs, "eventArgs");
-            if (recognizer.disposed) {
-                return;
-            }
-
-            TranslationRecognitionCanceledEventArgs resultEventArg = new TranslationRecognitionCanceledEventArgs(eventArgs);
-            EventHandlerImpl<TranslationRecognitionCanceledEventArgs> handler = this.recognizer.canceled;
-
+            TranslationRecognitionEventArgs resultEventArg = new TranslationRecognitionEventArgs(eventArgs, true);
+            EventHandlerImpl<TranslationRecognitionEventArgs> handler = this.recognizing;
             if (handler != null) {
-                handler.fireEvent(this.recognizer, resultEventArg);
-            }
-        }
-
-        private TranslationRecognizer recognizer;
+                handler.fireEvent(this, resultEventArg);
+            }    
+        } catch (Exception e) {}
     }
 
-    // Defines a private class to raise an event for intermediate/final result when a corresponding callback is invoked by the native layer.
-    private class SynthesisHandlerImpl extends com.microsoft.cognitiveservices.speech.internal.TranslationSynthesisEventListener
+    private void recognizedEventCallback(long eventArgs)
     {
-        public SynthesisHandlerImpl(TranslationRecognizer recognizer)
-        {
-            Contracts.throwIfNull(recognizer, "recognizer");
-
-            this.recognizer = recognizer;
-        }
-
-        @Override
-        public void Execute(com.microsoft.cognitiveservices.speech.internal.TranslationSynthesisEventArgs eventArgs)
-        {
-            Contracts.throwIfNull(eventArgs, "eventArgs");
-
-            if (recognizer.disposed)
-            {
+        try {
+            Contracts.throwIfNull(this, "recognizer");
+            if (this.disposed) {
                 return;
             }
-
-            TranslationSynthesisEventArgs resultEventArg = new TranslationSynthesisEventArgs(eventArgs);
-            EventHandlerImpl<TranslationSynthesisEventArgs> handler = recognizer.synthesizing;
-            if (handler != null)
-            {
-                handler.fireEvent(this.recognizer, resultEventArg);
+            TranslationRecognitionEventArgs resultEventArg = new TranslationRecognitionEventArgs(eventArgs, true);
+            EventHandlerImpl<TranslationRecognitionEventArgs> handler = this.recognized;
+            if (handler != null) {
+                handler.fireEvent(this, resultEventArg);
             }
-        }
-
-        private TranslationRecognizer recognizer;
+        } catch (Exception e) {}
     }
+
+    private void canceledEventCallback(long eventArgs)
+    {
+        try {
+            Contracts.throwIfNull(this, "recognizer");
+            if (this.disposed) {
+                return;
+            }
+            TranslationRecognitionCanceledEventArgs resultEventArg = new TranslationRecognitionCanceledEventArgs(eventArgs, true);
+            EventHandlerImpl<TranslationRecognitionCanceledEventArgs> handler = this.canceled;
+            if (handler != null) {
+                handler.fireEvent(this, resultEventArg);
+            }    
+        } catch (Exception e) {}
+    }
+    
+    private void synthesizingEventCallback(long eventArgs)
+    {
+        try {
+            Contracts.throwIfNull(this, "recognizer");
+            if (this.disposed) {
+                return;
+            }
+            TranslationSynthesisEventArgs resultEventArg = new TranslationSynthesisEventArgs(eventArgs, true);
+            EventHandlerImpl<TranslationSynthesisEventArgs> handler = this.synthesizing;
+            if (handler != null) {
+                handler.fireEvent(this, resultEventArg);
+            }    
+        } catch (Exception e) {}
+    }
+
+    private final native long createTranslationRecognizerFromConfig(SafeHandle recoHandle, SafeHandle speechConfigHandle, SafeHandle audioConfigHandle);
+    private final native long synthesizingSetCallback(long recoHandle);
+    private final native long addTargetLanguage(SafeHandle recoHandle, String value);
+    private final native long removeTargetLanguage(SafeHandle recoHandle, String value);
+    private PropertyCollection propertyHandle = null;
+    SafeHandle translationSynthesisHandle = null;
+    private boolean disposed = false;
 }

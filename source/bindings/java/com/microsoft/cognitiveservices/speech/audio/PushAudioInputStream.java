@@ -6,6 +6,9 @@ package com.microsoft.cognitiveservices.speech.audio;
 
 import com.microsoft.cognitiveservices.speech.SpeechConfig;
 import com.microsoft.cognitiveservices.speech.util.CloseGuard;
+import com.microsoft.cognitiveservices.speech.util.SafeHandle;
+import com.microsoft.cognitiveservices.speech.util.SafeHandleType;
+import com.microsoft.cognitiveservices.speech.util.Contracts;
 
 /**
  * Represents memory backed push audio input stream used for custom audio input configurations.
@@ -29,7 +32,9 @@ public final class PushAudioInputStream extends com.microsoft.cognitiveservices.
      * @return The push audio input stream being created.
      */
     public static PushAudioInputStream create() {
-        return new PushAudioInputStream(com.microsoft.cognitiveservices.speech.internal.AudioInputStream.CreatePushStream());
+        SafeHandle audioStreamHandle = new SafeHandle(0, SafeHandleType.AudioInputStream);
+        Contracts.throwIfFail(createPushAudioInputStream(audioStreamHandle, null));
+        return new PushAudioInputStream(audioStreamHandle);
     }
 
     /**
@@ -38,7 +43,9 @@ public final class PushAudioInputStream extends com.microsoft.cognitiveservices.
      * @return The push audio input stream being created.
      */
     public static PushAudioInputStream create(AudioStreamFormat format) {
-        return new PushAudioInputStream(com.microsoft.cognitiveservices.speech.internal.AudioInputStream.CreatePushStream(format.getFormatImpl()));
+        SafeHandle audioStreamHandle = new SafeHandle(0, SafeHandleType.AudioInputStream);
+        Contracts.throwIfFail(createPushAudioInputStream(audioStreamHandle, format.getImpl()));
+        return new PushAudioInputStream(audioStreamHandle);
     }
 
     /**
@@ -49,7 +56,7 @@ public final class PushAudioInputStream extends com.microsoft.cognitiveservices.
     public void write(byte[] dataBuffer) {
         cg.enterUseObject();
         try {
-            this._pushStreamImpl.Write(dataBuffer);
+            Contracts.throwIfFail(pushAudioInputStreamWrite(streamHandle, dataBuffer, dataBuffer.length));
         } finally {
             cg.exitUseObject();
         }
@@ -63,24 +70,23 @@ public final class PushAudioInputStream extends com.microsoft.cognitiveservices.
     public void close() {
         cg.closeObject();
 
-        com.microsoft.cognitiveservices.speech.internal.PushAudioInputStream tempStream = this._pushStreamImpl;
-        this._pushStreamImpl = null;
-
-        if (tempStream != null) {
-            tempStream.Close();
-            tempStream.delete();
+        if (streamHandle != null) {
+            Contracts.throwIfFail(pushAudioInputStreamClose(streamHandle));
         }
+        super.close();
     }
 
     /*! \cond PROTECTED */
 
-    protected PushAudioInputStream(com.microsoft.cognitiveservices.speech.internal.PushAudioInputStream stream) {
+    protected PushAudioInputStream(SafeHandle stream) {
         super(stream);
-        this._pushStreamImpl = stream;
     }
 
     /*! \endcond */
 
-    private com.microsoft.cognitiveservices.speech.internal.PushAudioInputStream _pushStreamImpl;
     private CloseGuard cg = new CloseGuard();
+
+    private final static native long createPushAudioInputStream(SafeHandle audioStreamHandle, SafeHandle formatHandle);
+    private final native long pushAudioInputStreamWrite(SafeHandle audioStreamHandle, byte[] dataBuffer, int length);
+    private final native long pushAudioInputStreamClose(SafeHandle audioStreamHandle);
 }

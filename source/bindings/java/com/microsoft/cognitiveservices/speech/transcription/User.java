@@ -5,6 +5,10 @@
 package com.microsoft.cognitiveservices.speech.transcription;
 
 import com.microsoft.cognitiveservices.speech.util.Contracts;
+import com.microsoft.cognitiveservices.speech.util.SafeHandle;
+import com.microsoft.cognitiveservices.speech.util.SafeHandleType;
+import com.microsoft.cognitiveservices.speech.util.IntRef;
+import com.microsoft.cognitiveservices.speech.util.StringRef;
 import com.microsoft.cognitiveservices.speech.SpeechConfig;
 
 /**
@@ -30,22 +34,24 @@ public final class User
      * @return
      */
     public static com.microsoft.cognitiveservices.speech.transcription.User fromUserId(String userId) {
-        return new User(com.microsoft.cognitiveservices.speech.internal.User.FromUserId(userId));
+
+        IntRef userRef = new IntRef(0);
+        Contracts.throwIfFail(createFromUserId(userId, userRef));
+        return new User(userRef.getValue());
     }
 
     /**
      * Explicitly frees any external resource attached to the object
      */
     public void close() {
-        if (this._userImpl != null) {
-            this._userImpl.delete();
+        if (this.userHandle != null) {
+            this.userHandle.close();
         }
-        this._userImpl = null;
+        this.userHandle = null;
     }
 
-    User(com.microsoft.cognitiveservices.speech.internal.User user) {
-        Contracts.throwIfNull(user, "user");
-        this._userImpl = user;
+    User(long handle) {
+        this.userHandle = new SafeHandle(handle, SafeHandleType.User);
     }
 
     /**
@@ -53,10 +59,12 @@ public final class User
      * @return the user ID of a conversation transcribing session.
      */
     public String getId() {
-        return _userImpl.GetId();
+        StringRef id = new StringRef("");
+        Contracts.throwIfFail(getId(userHandle, id));
+        return id.getValue();
     }
 
-    private com.microsoft.cognitiveservices.speech.internal.User _userImpl;
+    private SafeHandle userHandle;
 
     /*! \cond INTERNAL */
 
@@ -64,9 +72,12 @@ public final class User
      * Returns the user configuration.
      * @return The implementation of the user.
      */
-    public com.microsoft.cognitiveservices.speech.internal.User getUserImpl() {
-        return this._userImpl;
+    public SafeHandle getImpl() {
+        return this.userHandle;
     }
 
     /*! \endcond */
+
+    private final static native long createFromUserId(String userId, IntRef userRef);
+    private final native long getId(SafeHandle userHandle, StringRef idRef);
 }

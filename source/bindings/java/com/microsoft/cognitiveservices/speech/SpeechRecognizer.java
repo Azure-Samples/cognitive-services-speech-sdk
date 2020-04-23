@@ -11,17 +11,19 @@ import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.SpeechRecognitionCanceledEventArgs;
 import com.microsoft.cognitiveservices.speech.util.EventHandlerImpl;
 import com.microsoft.cognitiveservices.speech.util.Contracts;
+import com.microsoft.cognitiveservices.speech.util.IntRef;
+import com.microsoft.cognitiveservices.speech.util.SafeHandle;
+import com.microsoft.cognitiveservices.speech.util.SafeHandleType;
 import com.microsoft.cognitiveservices.speech.PropertyId;
 import com.microsoft.cognitiveservices.speech.PropertyCollection;
-
+import com.microsoft.cognitiveservices.speech.KeywordRecognitionModel;
 
 /**
  * Performs speech recognition from microphone, file, or other audio input streams, and gets transcribed text as result.
  * Note: close() must be called in order to relinquish underlying resources held by the object.
  *
  */
-public final class SpeechRecognizer extends com.microsoft.cognitiveservices.speech.Recognizer
-{
+public final class SpeechRecognizer extends com.microsoft.cognitiveservices.speech.Recognizer {
     /**
      * The event recognizing signals that an intermediate recognition result is received.
      */
@@ -43,9 +45,9 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
      */
     public SpeechRecognizer(SpeechConfig speechConfig) {
         super(null);
-
         Contracts.throwIfNull(speechConfig, "speechConfig");
-        this.recoImpl = com.microsoft.cognitiveservices.speech.internal.SpeechRecognizer.FromConfig(speechConfig.getImpl());
+        Contracts.throwIfNull(recoHandle, "recoHandle");
+        Contracts.throwIfFail(createSpeechRecognizerFromConfig(recoHandle, speechConfig.getImpl(), null));
         initialize();
     }
 
@@ -59,9 +61,9 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
 
         Contracts.throwIfNull(speechConfig, "speechConfig");
         if (audioConfig == null) {
-            this.recoImpl = com.microsoft.cognitiveservices.speech.internal.SpeechRecognizer.FromConfig(speechConfig.getImpl());
+            Contracts.throwIfFail(createSpeechRecognizerFromConfig(recoHandle, speechConfig.getImpl(), null));
         } else {
-            this.recoImpl = com.microsoft.cognitiveservices.speech.internal.SpeechRecognizer.FromConfig(speechConfig.getImpl(), audioConfig.getConfigImpl());
+            Contracts.throwIfFail(createSpeechRecognizerFromConfig(recoHandle, speechConfig.getImpl(), audioConfig.getImpl()));
         }
         initialize();
     }
@@ -76,7 +78,7 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
 
         Contracts.throwIfNull(speechConfig, "speechConfig");
         Contracts.throwIfNull(autoDetectSourceLangConfig, "autoDetectSourceLangConfig");
-        this.recoImpl = com.microsoft.cognitiveservices.speech.internal.SpeechRecognizer.FromConfig(speechConfig.getImpl(), autoDetectSourceLangConfig.getImpl());
+        Contracts.throwIfFail(createSpeechRecognizerFromAutoDetectSourceLangConfig(super.recoHandle, speechConfig.getImpl(), autoDetectSourceLangConfig.getImpl(), null));
         initialize();
     }
 
@@ -92,9 +94,9 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
         Contracts.throwIfNull(speechConfig, "speechConfig");
         Contracts.throwIfNull(autoDetectSourceLangConfig, "autoDetectSourceLangConfig");
         if (audioConfig == null) {
-            this.recoImpl = com.microsoft.cognitiveservices.speech.internal.SpeechRecognizer.FromConfig(speechConfig.getImpl(), autoDetectSourceLangConfig.getImpl());
+            Contracts.throwIfFail(createSpeechRecognizerFromAutoDetectSourceLangConfig(super.recoHandle, speechConfig.getImpl(), autoDetectSourceLangConfig.getImpl(), null));
         } else {
-            this.recoImpl = com.microsoft.cognitiveservices.speech.internal.SpeechRecognizer.FromConfig(speechConfig.getImpl(), autoDetectSourceLangConfig.getImpl(), audioConfig.getConfigImpl());
+            Contracts.throwIfFail(createSpeechRecognizerFromAutoDetectSourceLangConfig(super.recoHandle, speechConfig.getImpl(), autoDetectSourceLangConfig.getImpl(), audioConfig.getImpl()));
         }
         initialize();
     }
@@ -109,7 +111,7 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
 
         Contracts.throwIfNull(speechConfig, "speechConfig");
         Contracts.throwIfNull(sourceLanguageConfig, "sourceLanguageConfig");
-        this.recoImpl = com.microsoft.cognitiveservices.speech.internal.SpeechRecognizer.FromConfig(speechConfig.getImpl(), sourceLanguageConfig.getImpl());
+        Contracts.throwIfFail(createSpeechRecognizerFromSourceLangConfig(super.recoHandle, speechConfig.getImpl(), sourceLanguageConfig.getImpl(), null));
         initialize();
     }
 
@@ -125,14 +127,14 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
         Contracts.throwIfNull(speechConfig, "speechConfig");
         Contracts.throwIfNull(sourceLanguageConfig, "sourceLanguageConfig");
         if (audioConfig == null) {
-            this.recoImpl = com.microsoft.cognitiveservices.speech.internal.SpeechRecognizer.FromConfig(speechConfig.getImpl(), sourceLanguageConfig.getImpl());
+            Contracts.throwIfFail(createSpeechRecognizerFromSourceLangConfig(super.recoHandle, speechConfig.getImpl(), sourceLanguageConfig.getImpl(), null));
         } else {
-            this.recoImpl = com.microsoft.cognitiveservices.speech.internal.SpeechRecognizer.FromConfig(speechConfig.getImpl(), sourceLanguageConfig.getImpl(), audioConfig.getConfigImpl());
+            Contracts.throwIfFail(createSpeechRecognizerFromSourceLangConfig(super.recoHandle, speechConfig.getImpl(), sourceLanguageConfig.getImpl(), audioConfig.getImpl()));
         }
         initialize();
     }
 
-        /**
+    /**
      * Initializes a new instance of Speech Recognizer.
      * @param speechConfig speech configuration.
      * @param sourceLanguage the recognition source language
@@ -142,7 +144,7 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
 
         Contracts.throwIfNull(speechConfig, "speechConfig");
         Contracts.throwIfIllegalLanguage(sourceLanguage, "invalid language value");
-        this.recoImpl = com.microsoft.cognitiveservices.speech.internal.SpeechRecognizer.FromConfig(speechConfig.getImpl(), sourceLanguage);
+        Contracts.throwIfFail(createSpeechRecognizerFromSourceLangConfig(super.recoHandle, speechConfig.getImpl(), SourceLanguageConfig.fromLanguage(sourceLanguage).getImpl(), null));
         initialize();
     }
 
@@ -158,9 +160,9 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
         Contracts.throwIfNull(speechConfig, "speechConfig");
         Contracts.throwIfIllegalLanguage(sourceLanguage, "invalid language value");
         if (audioConfig == null) {
-            this.recoImpl = com.microsoft.cognitiveservices.speech.internal.SpeechRecognizer.FromConfig(speechConfig.getImpl(), sourceLanguage);
+            Contracts.throwIfFail(createSpeechRecognizerFromSourceLangConfig(super.recoHandle, speechConfig.getImpl(), SourceLanguageConfig.fromLanguage(sourceLanguage).getImpl(), null));
         } else {
-            this.recoImpl = com.microsoft.cognitiveservices.speech.internal.SpeechRecognizer.FromConfig(speechConfig.getImpl(), sourceLanguage, audioConfig.getConfigImpl());
+            Contracts.throwIfFail(createSpeechRecognizerFromSourceLangConfig(super.recoHandle, speechConfig.getImpl(), SourceLanguageConfig.fromLanguage(sourceLanguage).getImpl(), audioConfig.getImpl()));
         }
         initialize();
     }
@@ -170,7 +172,7 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
      * @return the endpoint ID of a customized speech model that is used for speech recognition.
      */
     public String getEndpointId() {
-        return recoImpl.GetEndpointId();
+        return propertyHandle.getProperty(PropertyId.SpeechServiceConnection_EndpointId);
     }
 
     /**
@@ -182,7 +184,7 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
      */
     public void setAuthorizationToken(String token) {
         Contracts.throwIfNullOrWhitespace(token, "token");
-        recoImpl.SetAuthorizationToken(token);
+        propertyHandle.setProperty(PropertyId.SpeechServiceAuthorization_Token, token);
     }
 
     /**
@@ -190,7 +192,7 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
      * @return Authorization token.
      */
     public String getAuthorizationToken() {
-        return recoImpl.GetAuthorizationToken();
+        return propertyHandle.getProperty(PropertyId.SpeechServiceAuthorization_Token);
     }
 
     /**
@@ -198,7 +200,7 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
      * @return The spoken language of recognition.
      */
     public String getSpeechRecognitionLanguage() {
-        return _Parameters.getProperty(PropertyId.SpeechServiceConnection_RecoLanguage);
+        return propertyHandle.getProperty(PropertyId.SpeechServiceConnection_RecoLanguage);
     }
 
     /**
@@ -206,7 +208,7 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
      * @return The output format of recognition.
      */
     public OutputFormat getOutputFormat() {
-        if (_Parameters.getProperty(PropertyId.SpeechServiceResponse_RequestDetailedResultTrueFalse).equals("true")) {
+        if (propertyHandle.getProperty(PropertyId.SpeechServiceResponse_RequestDetailedResultTrueFalse).equals("true")) {
             return OutputFormat.Detailed;
         } else {
             return OutputFormat.Simple;
@@ -218,10 +220,8 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
      * @return The collection of properties and their values defined for this SpeechRecognizer.
      */
     public PropertyCollection getProperties() {
-        return _Parameters;
+        return propertyHandle;
     }
-
-    private com.microsoft.cognitiveservices.speech.PropertyCollection _Parameters;
 
     /**
      * Starts speech recognition, and returns after a single utterance is recognized. The end of a
@@ -241,7 +241,7 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
                 // The compiler treats an array initialized once as an effectively final.
                 final SpeechRecognitionResult[] result = new SpeechRecognitionResult[1];
 
-                Runnable runnable = new Runnable() { public void run() { result[0] = new SpeechRecognitionResult(recoImpl.Recognize()); }};
+                Runnable runnable = new Runnable() { public void run() { result[0] = new SpeechRecognitionResult(thisReco.recognize()); }};
                 thisReco.doAsyncRecognitionAction(runnable);
 
                 return result[0];
@@ -258,7 +258,7 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
 
         return s_executorService.submit(new java.util.concurrent.Callable<Void>() {
             public Void call() {
-                Runnable runnable = new Runnable() { public void run() { recoImpl.StartContinuousRecognition(); }};
+                Runnable runnable = new Runnable() { public void run() { thisReco.startContinuousRecognition(recoHandle); }};
                 thisReco.doAsyncRecognitionAction(runnable);
                 return null;
         }});
@@ -273,7 +273,7 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
 
         return s_executorService.submit(new java.util.concurrent.Callable<Void>() {
             public Void call() {
-                Runnable runnable = new Runnable() { public void run() { recoImpl.StopContinuousRecognition(); }};
+                Runnable runnable = new Runnable() { public void run() { thisReco.stopContinuousRecognition(recoHandle); }};
                 thisReco.doAsyncRecognitionAction(runnable);
                 return null;
         }});
@@ -293,7 +293,7 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
         final KeywordRecognitionModel model2 = model;
         return s_executorService.submit(new java.util.concurrent.Callable<Void>() {
             public Void call() {
-                Runnable runnable = new Runnable() { public void run() { recoImpl.StartKeywordRecognition(model2.getModelImpl()); }};
+                Runnable runnable = new Runnable() { public void run() { thisReco.startKeywordRecognition(recoHandle, model2.getImpl()); }};
                 thisReco.doAsyncRecognitionAction(runnable);
                 return null;
         }});
@@ -309,7 +309,7 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
 
         return s_executorService.submit(new java.util.concurrent.Callable<Void>() {
             public Void call() {
-                Runnable runnable = new Runnable() { public void run() { recoImpl.StopKeywordRecognition(); }};
+                Runnable runnable = new Runnable() { public void run() { thisReco.stopKeywordRecognition(recoHandle); }};
                 thisReco.doAsyncRecognitionAction(runnable);
                 return null;
         }});
@@ -340,29 +340,19 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
                         }
                     });
                 t.start();
-            } else {
-                if (this.recognizing.isUpdateNotificationOnConnectedFired())
-                    recoImpl.getRecognizing().RemoveEventListener(recognizingHandler);
-                if (this.recognized.isUpdateNotificationOnConnectedFired())
-                    recoImpl.getRecognized().RemoveEventListener(recognizedHandler);
-                if (this.canceled.isUpdateNotificationOnConnectedFired())
-                    recoImpl.getCanceled().RemoveEventListener(errorHandler);
-                if (this.sessionStarted.isUpdateNotificationOnConnectedFired())
-                    recoImpl.getSessionStarted().RemoveEventListener(sessionStartedHandler);
-                if (this.sessionStopped.isUpdateNotificationOnConnectedFired())
-                    recoImpl.getSessionStopped().RemoveEventListener(sessionStoppedHandler);
-                if (this.speechStartDetected.isUpdateNotificationOnConnectedFired())
-                    recoImpl.getSpeechStartDetected().RemoveEventListener(speechStartDetectedHandler);
-                if (this.speechEndDetected.isUpdateNotificationOnConnectedFired())
-                    recoImpl.getSpeechEndDetected().RemoveEventListener(speechEndDetectedHandler);
-
-                recognizingHandler.delete();
-                recognizedHandler.delete();
-                errorHandler.delete();
-                recoImpl.delete();
-                _Parameters.close();
-
-                _speechRecognizerObjects.remove(this);
+            } 
+            else {                
+                if (propertyHandle != null)
+                {
+                    propertyHandle.close();
+                    propertyHandle = null;
+                }
+                if (recoHandle != null)
+                {
+                    recoHandle.close();
+                    recoHandle = null;
+                }
+                speechRecognizerObjects.remove(this);
                 disposed = true;
                 super.dispose(disposing);                
             }    
@@ -376,146 +366,128 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
     /**
      * This is used to keep any instance of this class alive that is subscribed to downstream events.
      */
-    static java.util.Set<SpeechRecognizer> _speechRecognizerObjects = java.util.Collections.synchronizedSet(new java.util.HashSet<SpeechRecognizer>());
+    static java.util.Set<SpeechRecognizer> speechRecognizerObjects = java.util.Collections.synchronizedSet(new java.util.HashSet<SpeechRecognizer>());
 
     // TODO Remove this... After tests are updated to no longer depend upon this
-    public com.microsoft.cognitiveservices.speech.internal.SpeechRecognizer getRecoImpl() {
-        return recoImpl;
+    public SafeHandle getRecoImpl() {
+        return recoHandle;
     }
 
     /*! \endcond */
 
     private void initialize() {
-        super.internalRecognizerImpl = this.recoImpl;
-
         final SpeechRecognizer _this = this;
 
-        recognizingHandler = new ResultHandlerImpl(this, /*isRecognizedHandler:*/ false);
         this.recognizing.updateNotificationOnConnected(new Runnable(){
             @Override
             public void run() {
-                _speechRecognizerObjects.add(_this);
-                recoImpl.getRecognizing().AddEventListener(recognizingHandler);
+                speechRecognizerObjects.add(_this);
+                Contracts.throwIfFail(recognizingSetCallback(_this.recoHandle.getValue()));
             }
         });
 
-        recognizedHandler = new ResultHandlerImpl(this, /*isRecognizedHandler:*/ true);
         this.recognized.updateNotificationOnConnected(new Runnable(){
             @Override
             public void run() {
-                _speechRecognizerObjects.add(_this);
-                recoImpl.getRecognized().AddEventListener(recognizedHandler);
+                speechRecognizerObjects.add(_this);
+                Contracts.throwIfFail(recognizedSetCallback(_this.recoHandle.getValue()));                
             }
         });
 
-        errorHandler = new CanceledHandlerImpl(this);
         this.canceled.updateNotificationOnConnected(new Runnable(){
             @Override
             public void run() {
-                _speechRecognizerObjects.add(_this);
-                recoImpl.getCanceled().AddEventListener(errorHandler);
+                speechRecognizerObjects.add(_this);
+                Contracts.throwIfFail(canceledSetCallback(_this.recoHandle.getValue()));                
             }
         });
 
         this.sessionStarted.updateNotificationOnConnected(new Runnable(){
             @Override
             public void run() {
-                _speechRecognizerObjects.add(_this);
-                recoImpl.getSessionStarted().AddEventListener(sessionStartedHandler);
+                speechRecognizerObjects.add(_this);
+                Contracts.throwIfFail(sessionStartedSetCallback(_this.recoHandle.getValue()));
             }
         });
 
         this.sessionStopped.updateNotificationOnConnected(new Runnable(){
             @Override
             public void run() {
-                _speechRecognizerObjects.add(_this);
-                recoImpl.getSessionStopped().AddEventListener(sessionStoppedHandler);
+                speechRecognizerObjects.add(_this);
+                Contracts.throwIfFail(sessionStoppedSetCallback(_this.recoHandle.getValue()));                
             }
         });
 
         this.speechStartDetected.updateNotificationOnConnected(new Runnable(){
             @Override
             public void run() {
-                _speechRecognizerObjects.add(_this);
-                recoImpl.getSpeechStartDetected().AddEventListener(speechStartDetectedHandler);
+                speechRecognizerObjects.add(_this);
+                Contracts.throwIfFail(speechStartDetectedSetCallback(_this.recoHandle.getValue()));
             }
         });
 
         this.speechEndDetected.updateNotificationOnConnected(new Runnable(){
             @Override
             public void run() {
-                _speechRecognizerObjects.add(_this);
-                recoImpl.getSpeechEndDetected().AddEventListener(speechEndDetectedHandler);
+                speechRecognizerObjects.add(_this);
+                Contracts.throwIfFail(speechEndDetectedSetCallback(_this.recoHandle.getValue()));
             }
         });
 
-        _Parameters = new PrivatePropertyCollection(recoImpl.getProperties());
+        IntRef propHandle = new IntRef(0);
+        Contracts.throwIfFail(getPropertyBagFromRecognizerHandle(_this.recoHandle, propHandle));
+        propertyHandle = new PropertyCollection(propHandle);
     }
 
-    private com.microsoft.cognitiveservices.speech.internal.SpeechRecognizer recoImpl;
-    private ResultHandlerImpl recognizingHandler;
-    private ResultHandlerImpl recognizedHandler;
-    private CanceledHandlerImpl errorHandler;
+    private void recognizingEventCallback(long eventArgs)
+    {
+        try {
+            Contracts.throwIfNull(this, "recognizer");
+            if (this.disposed) {
+                return;
+            }
+            SpeechRecognitionEventArgs resultEventArg = new SpeechRecognitionEventArgs(eventArgs, true);
+            EventHandlerImpl<SpeechRecognitionEventArgs> handler = this.recognizing;
+            if (handler != null) {
+                handler.fireEvent(this, resultEventArg);
+            }
+        } catch (Exception e) {}
+    }
+
+    private void recognizedEventCallback(long eventArgs)
+    {
+        try {
+            Contracts.throwIfNull(this, "recognizer");
+            if (this.disposed) {
+                return;
+            }
+            SpeechRecognitionEventArgs resultEventArg = new SpeechRecognitionEventArgs(eventArgs, true);
+            EventHandlerImpl<SpeechRecognitionEventArgs> handler = this.recognized;
+            if (handler != null) {
+                handler.fireEvent(this, resultEventArg);
+            }
+        } catch (Exception e) {}
+    }
+
+    private void canceledEventCallback(long eventArgs)
+    {
+        try {
+            Contracts.throwIfNull(this, "recognizer");
+            if (this.disposed) {
+                return;
+            }
+            SpeechRecognitionCanceledEventArgs resultEventArg = new SpeechRecognitionCanceledEventArgs(eventArgs, true);
+            EventHandlerImpl<SpeechRecognitionCanceledEventArgs> handler = this.canceled;
+            if (handler != null) {
+                handler.fireEvent(this, resultEventArg);
+            }
+        } catch (Exception e) {}
+    }
+
+    private final native long createSpeechRecognizerFromConfig(SafeHandle recoHandle, SafeHandle speechConfigHandle, SafeHandle audioConfigHandle);
+    private final native long createSpeechRecognizerFromAutoDetectSourceLangConfig(SafeHandle recoHandle, SafeHandle speechConfigHandle, SafeHandle autoDetectSourceLangConfigHandle, SafeHandle audioConfigHandle);      
+    private final native long createSpeechRecognizerFromSourceLangConfig(SafeHandle recoHandle, SafeHandle speechConfigHandle, SafeHandle SourceLangConfigHandle, SafeHandle audioConfigHandle);
+
+    private PropertyCollection propertyHandle = null;
     private boolean disposed = false;
-
-    private class PrivatePropertyCollection extends com.microsoft.cognitiveservices.speech.PropertyCollection {
-        public PrivatePropertyCollection(com.microsoft.cognitiveservices.speech.internal.PropertyCollection collection) {
-            super(collection);
-        }
-    }
-
-    // Defines a private class to raise an event for intermediate/final result when a corresponding callback is invoked by the native layer.
-    private class ResultHandlerImpl extends com.microsoft.cognitiveservices.speech.internal.SpeechRecognitionEventListener {
-
-        ResultHandlerImpl(SpeechRecognizer recognizer, boolean isRecognizedHandler) {
-            Contracts.throwIfNull(recognizer, "recognizer");
-
-            this.recognizer = recognizer;
-            this.isRecognizedHandler = isRecognizedHandler;
-        }
-
-        @Override
-        public void Execute(com.microsoft.cognitiveservices.speech.internal.SpeechRecognitionEventArgs eventArgs) {
-            Contracts.throwIfNull(eventArgs, "eventArgs");
-
-            if (recognizer.disposed) {
-                return;
-            }
-
-            SpeechRecognitionEventArgs resultEventArg = new SpeechRecognitionEventArgs(eventArgs);
-            EventHandlerImpl<SpeechRecognitionEventArgs> handler = isRecognizedHandler ? recognizer.recognized : recognizer.recognizing;
-            if (handler != null) {
-                handler.fireEvent(this.recognizer, resultEventArg);
-            }
-        }
-
-        private SpeechRecognizer recognizer;
-        private boolean isRecognizedHandler;
-    }
-
-    // Defines a private class to raise an event for error during recognition when a corresponding callback is invoked by the native layer.
-    private class CanceledHandlerImpl extends com.microsoft.cognitiveservices.speech.internal.SpeechRecognitionCanceledEventListener {
-
-        CanceledHandlerImpl(SpeechRecognizer recognizer ) {
-            Contracts.throwIfNull(recognizer, "recognizer");
-            this.recognizer = recognizer;
-        }
-
-        @Override
-        public void Execute(com.microsoft.cognitiveservices.speech.internal.SpeechRecognitionCanceledEventArgs eventArgs) {
-            Contracts.throwIfNull(eventArgs, "eventArgs");
-            if (recognizer.disposed) {
-                return;
-            }
-
-            SpeechRecognitionCanceledEventArgs resultEventArg = new SpeechRecognitionCanceledEventArgs(eventArgs);
-            EventHandlerImpl<SpeechRecognitionCanceledEventArgs> handler = this.recognizer.canceled;
-
-            if (handler != null) {
-                handler.fireEvent(this.recognizer, resultEventArg);
-            }
-        }
-
-        private SpeechRecognizer recognizer;
-    }
 }
