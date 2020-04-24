@@ -361,3 +361,18 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_util_SafeHan
     SPXHR hr = translator_synthesizing_audio_set_callback((SPXRECOHANDLE)handle, nullptr, nullptr);
     return (jlong)hr;
 }
+
+/*
+ * Class:     com_microsoft_cognitiveservices_speech_util_SafeHandle
+ * Method:    releaseKeywordRecognizerHandle
+ * Signature: (J)J
+ */
+JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_util_SafeHandle_releaseKeywordRecognizerHandle
+(JNIEnv* env, jobject obj, jlong handle)
+{
+    recognizer_recognized_set_callback((SPXRECOHANDLE)handle, nullptr, nullptr);
+    recognizer_canceled_set_callback((SPXRECOHANDLE)handle, nullptr, nullptr);
+    SPXHR hr = recognizer_handle_release((SPXRECOHANDLE)handle);
+    RemoveGlobalReferenceFromHandle(env, (SPXHANDLE)handle);
+    return (jlong)hr;
+}

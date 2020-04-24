@@ -44,6 +44,7 @@ set(JAVA_SOURCES_TESTS
     tests/unit/TranslationRecognizerTests.java
     tests/unit/WavFileAudioInputStream.java
     tests/unit/CloseGuardTests.java
+    tests/unit/KeywordRecognizerTests.java
 )
 
 set(CMAKE_JAVA_COMPILE_FLAGS ${CMAKE_JAVA_COMPILE_FLAGS} "-encoding" "utf-8")

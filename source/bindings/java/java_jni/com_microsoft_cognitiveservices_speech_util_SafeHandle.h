@@ -215,6 +215,14 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_util_SafeHan
 JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_util_SafeHandle_releaseTranslationSynthesisHandle
 (JNIEnv*, jobject, jlong);
 
+/*
+ * Class:     com_microsoft_cognitiveservices_speech_util_SafeHandle
+ * Method:    releaseKeywordRecognizerHandle
+ * Signature: (J)J
+ */
+JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_util_SafeHandle_releaseKeywordRecognizerHandle
+(JNIEnv*, jobject, jlong);
+
 #ifdef __cplusplus
 }
 #endif

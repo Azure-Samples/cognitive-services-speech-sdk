@@ -26,12 +26,17 @@ import com.microsoft.cognitiveservices.speech.intent.IntentRecognizer;
 import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
 
 import tests.Settings;
+import tests.DefaultSettingsKeys;
 
 @SuppressWarnings("unused")
 public class KeywordRecognitionModelTests {
 
     @BeforeClass
     static public void setUpBeforeClass() throws Exception {
+        String operatingSystem = ("" + System.getProperty("os.name")).toLowerCase();
+        System.out.println("Current operation system: " + operatingSystem);
+        boolean isMac = operatingSystem.contains("mac") || operatingSystem.contains("darwin");
+        org.junit.Assume.assumeFalse(isMac);
         Settings.LoadSettings();
     }
 
@@ -39,10 +44,9 @@ public class KeywordRecognitionModelTests {
     // ---
     // -----------------------------------------------------------------------
 
-    @Ignore("TODO: requires android/ARM")
     @Test
     public void testFromFile() {
-        KeywordRecognitionModel s = KeywordRecognitionModel.fromFile(Settings.KeywordModel);
+        KeywordRecognitionModel s = KeywordRecognitionModel.fromFile(Settings.GetRootRelativePath(Settings.DefaultSettingsMap.get(DefaultSettingsKeys.KEYWORD_MODEL)));
         assertNotNull(s);
     }
 
@@ -50,10 +54,9 @@ public class KeywordRecognitionModelTests {
     // ---
     // -----------------------------------------------------------------------
 
-    @Ignore("TODO: requires android/ARM")
     @Test
     public void testClose() {
-        KeywordRecognitionModel s = KeywordRecognitionModel.fromFile(Settings.KeywordModel);
+        KeywordRecognitionModel s = KeywordRecognitionModel.fromFile(Settings.GetRootRelativePath(Settings.DefaultSettingsMap.get(DefaultSettingsKeys.KEYWORD_MODEL)));
         assertNotNull(s);
 
         s.close();
@@ -66,10 +69,9 @@ public class KeywordRecognitionModelTests {
     // ---
     // -----------------------------------------------------------------------
 
-    @Ignore("TODO: requires android/ARM")
     @Test
     public void testGetmodelImpl() {
-        KeywordRecognitionModel s = KeywordRecognitionModel.fromFile(Settings.KeywordModel);
+        KeywordRecognitionModel s = KeywordRecognitionModel.fromFile(Settings.GetRootRelativePath(Settings.DefaultSettingsMap.get(DefaultSettingsKeys.KEYWORD_MODEL)));
 
         assertNotNull(s);
         assertNotNull(s.getImpl());

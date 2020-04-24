@@ -36,21 +36,24 @@ public class MainActivity extends AppCompatActivity {
         prepareEnvironment(assets, "MainActivity.properties");
     }
 
-    private static void extractAll(InputStream zipStream, String outputBaseFolder) throws IOException {
+    private static void extractAll(InputStream zipStream, String outputBaseFolder, String folderName) throws IOException {
         byte buf[] = new byte[1024];
-        String baseDir = Paths.get(new File(outputBaseFolder).getCanonicalPath(), "audio").toString();
+        String baseDir = Paths.get(new File(outputBaseFolder).getCanonicalPath(), folderName).toString();
 
         new File(baseDir).mkdir();
 
         ZipInputStream zis = new ZipInputStream(zipStream);
-        ZipEntry ze = zis.getNextEntry();
-        while(ze != null) {
+        ZipEntry ze = null;
+        while((ze = zis.getNextEntry()) != null) {
             String filename = ze.getName();
 
             // work-around non-standards conforming .zip created with older .NET versions.
             // See [https://docs.microsoft.com/dotnet/framework/migration-guide/mitigation-ziparchiveentry-fullname-path-separator](https://docs.microsoft.com/dotnet/framework/migration-guide/mitigation-ziparchiveentry-fullname-path-separator)
             if (filename != null) {
                 filename = filename.replace('\\', '/');
+
+                if (filename.contains(".zip")) continue;
+                if (filename.contains("/")) continue;
 
                 File outFile = new File(baseDir, filename);
                 String fullPathName = outFile.getCanonicalPath();
@@ -78,8 +81,6 @@ public class MainActivity extends AppCompatActivity {
                 while ((len = zis.read(buf)) > 0) {
                 }
             }
-
-            ze = zis.getNextEntry();
         }
     }
 
@@ -107,15 +108,22 @@ public class MainActivity extends AppCompatActivity {
         System.setProperty("JsonConfigPath", tempDir);
 
         String AudioInputDirectory =  System.getProperty("AudioInputDirectory", tempDir);
-        String SampleAudioInput = System.getProperty("SampleAudioInput", AudioInputDirectory + "/kws-computer.wav");
+        String SampleAudioInput = System.getProperty("SampleAudioInput", AudioInputDirectory + "/whatstheweatherlike.wav");
         if (!new File(SampleAudioInput).exists()) {
             System.setProperty("AudioInputDirectory", tempDir);
 
             try {
-                InputStream inputStream = assets.open("testassets.zip");
+                InputStream inputStream = assets.open("audiotestassets.zip");
 
                 if (inputStream != null) {
-                    extractAll(inputStream, tempDir);
+                    extractAll(inputStream, tempDir, "audio");
+                    inputStream.close();
+                }
+
+                inputStream = assets.open("kwstestassets.zip");
+
+                if (inputStream != null) {
+                    extractAll(inputStream, tempDir, "kws");
                     inputStream.close();
                 }
             } catch (IOException e) {

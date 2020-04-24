@@ -37,7 +37,8 @@ public enum SafeHandleType {
     AudioDataStream,
     Synthesizer,
     Grammar,
-    TranslationSynthesis
+    TranslationSynthesis,
+    KeywordRecognizer
 }
 
 /*! \endcond */

@@ -1537,6 +1537,7 @@ jobs:
       cp --preserve "$DROP_DIR/public/lib/com.microsoft.cognitiveservices.speech.jar" "$FAKE_BUILD/lib"
       cp --preserve "$DROP_DIR/private/bin/com.microsoft.cognitiveservices.speech.tests.jar" "$FAKE_BUILD/bin"
       cp --preserve "$DROP_DIR/public/lib/libMicrosoft.CognitiveServices.Speech.core.so" "$FAKE_BUILD/lib"
+      cp --preserve "$DROP_DIR/public/lib/libMicrosoft.CognitiveServices.Speech.extension.kws.so" "$FAKE_BUILD/lib"
       cp --preserve "$DROP_DIR/public/lib/libMicrosoft.CognitiveServices.Speech.java.bindings.so" "$FAKE_BUILD/bin"
       find "$FAKE_BUILD" -ls
     displayName: 'Prepare (fake) build dir for kicking off AppCenter tests'

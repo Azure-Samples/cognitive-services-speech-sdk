@@ -13,9 +13,15 @@ public class DefaultSettingsKeys
     public static final String LONG_RUNNING = "LongRunning";
     public static final String DEPLOYMENT_ID = "DeploymentId";
     public static final String ONLINE_AUDIO_ENDPOINT = "OnlineAudioEndpoint";
+    public static final String RECONNECT_AUDIO_ENDPOINT = "ReconnectAudioEndpoint";
     public static final String INPUT_DIR = "InputDir";
     public static final String CONVERSATION_TRANSLATOR_HOST = "ConversationTranslatorHost";
     public static final String CONVERSATION_TRANSLATOR_SPEECH_ENDPOINT = "ConversationTranslatorSpeechEndpoint";
     public static final String CONVERSATION_TRANSLATOR_CLIENTID = "ConversationTranslatorClientId";
+    public static final String HOST= "Host";
     public static final String SERIALIZED_SPEECH_ACTIVITY_FILE = "SerializedSpeechActivityFile";
+    public static final String KEYWORD = "Keyword";
+    public static final String KEYWORD_MODEL = "KeywordModel";
+    public static final String CUSTOM_VOICE_DEPLOYMENT_ID = "CustomVoiceDeploymentId";
+    public static final String CUSTOM_VOICE_VOICE_NAME = "CustomVoiceVoiceName";
 }

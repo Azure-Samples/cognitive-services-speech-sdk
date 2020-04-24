@@ -134,7 +134,10 @@ public class SafeHandle implements Closeable {
             }
             else if (handleType == SafeHandleType.TranslationSynthesis) {
                 releaseTranslationSynthesisHandle(value);
-            }            
+            }
+            else if (handleType == SafeHandleType.KeywordRecognizer) {
+                releaseKeywordRecognizerHandle(value);
+            }
             else {
                 System.out.println("Java SafeHandle close, invalid handle value: " + String.valueOf(value));
             }
@@ -169,6 +172,7 @@ public class SafeHandle implements Closeable {
     private final native long releaseSynthesizerHandle(long handle);
     private final native long releaseGrammarHandle(long handle);
     private final native long releaseTranslationSynthesisHandle(long handle);
+    private final native long releaseKeywordRecognizerHandle(long handle);
 
     private long value = 0;
     private SafeHandleType handleType = SafeHandleType.UnInitialized;

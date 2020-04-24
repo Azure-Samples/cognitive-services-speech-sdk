@@ -15,6 +15,7 @@
   "Host": "",
   "SerializedSpeechActivityFile": "audio/activityWithSpeech.json",
   "Keyword": "Computer",
+  "KeywordModel": "kws/kws.table",
   "CustomVoiceDeploymentId": "6b231818-6b8c-4452-9a69-2009355d5d7a",
   "CustomVoiceVoiceName": "sdk-test"
 }

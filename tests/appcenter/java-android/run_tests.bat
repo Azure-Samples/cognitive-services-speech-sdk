@@ -77,8 +77,8 @@ if NOT EXIST "%SPEECHSDK_BUILD_ROOT%\MainActivity.properties" (
 echo.
 echo Copying audio test files to test application
 if not exist "%SPEECHSDK_TEST_ROOT%\app\src\main\assets\" mkdir "%SPEECHSDK_TEST_ROOT%\app\src\main\assets" && ^
-powershell -NoProfile -NoLogo -ExecutionPolicy Bypass -NonInteractive Add-Type -Assembly System.IO.Compression.FileSystem; $compressionLevel = [System.IO.Compression.CompressionLevel]::Optimal; [System.IO.Compression.ZipFile]::CreateFromDirectory('%SPEECHSDK_ROOT%\tests\input\audio', '%SPEECHSDK_TEST_ROOT%\app\src\main\assets\testassets.zip', $compressionLevel, $false) && ^
-copy /Y "%SPEECHSDK_ROOT%\tests\input\kws\Computer\kws-computer.zip"     "%SPEECHSDK_TEST_ROOT%\app\src\main\assets\" && ^
+powershell -NoProfile -NoLogo -ExecutionPolicy Bypass -NonInteractive Add-Type -Assembly System.IO.Compression.FileSystem; $compressionLevel = [System.IO.Compression.CompressionLevel]::Optimal; [System.IO.Compression.ZipFile]::CreateFromDirectory('%SPEECHSDK_ROOT%\tests\input\audio', '%SPEECHSDK_TEST_ROOT%\app\src\main\assets\audiotestassets.zip', $compressionLevel, $false) && ^
+powershell -NoProfile -NoLogo -ExecutionPolicy Bypass -NonInteractive Add-Type -Assembly System.IO.Compression.FileSystem; $compressionLevel = [System.IO.Compression.CompressionLevel]::Optimal; [System.IO.Compression.ZipFile]::CreateFromDirectory('%SPEECHSDK_ROOT%\tests\input\kws', '%SPEECHSDK_TEST_ROOT%\app\src\main\assets\kwstestassets.zip', $compressionLevel, $false) && ^
 copy /Y "%SPEECHSDK_BUILD_ROOT%\MainActivity.properties"                 "%SPEECHSDK_TEST_ROOT%\app\src\main\assets\" && ^
 copy /Y "%SPEECHSDK_ROOT%\tests\test.defaults.json"                "%SPEECHSDK_TEST_ROOT%\app\src\main\assets\" && ^
 copy /Y "%SPEECHSDK_ROOT%\tests\test.subscriptions.regions.json"   "%SPEECHSDK_TEST_ROOT%\app\src\main\assets\" && ^
