@@ -2945,25 +2945,37 @@ void CSpxAudioStreamSession::SendSpeechEventMessage(std::string&& payload)
     m_recoAdapter->SendSpeechEventMessage(std::move(payload));
 }
 
-void CSpxAudioStreamSession::SendNetworkMessage(std::string&& path, std::string&& payload)
+void CSpxAudioStreamSession::SendNetworkMessage(std::string&& path, std::string&& payload, bool alwaysSend)
 {
     SPX_DBG_TRACE_FUNCTION();
     auto keepAlive = SpxSharedPtrFromThis<ISpxSession>(this);
-    auto task = CreateTask([this, keepAlive, path, payload] () mutable {
-        EnsureInitRecoEngineAdapter();
-        m_recoAdapter->SendNetworkMessage(std::move(path), std::move(payload));
+    auto task = CreateTask([this, keepAlive, path, payload, alwaysSend]() mutable {
+        // when we want to send network messsage only when we are connected we should call this function with
+        // always send as false. Here we had made sure that the message will go to the service even though
+        // we are not connected. Look at the AddTargetLanguage and RemoveTargetLanguage of translation_recognizer
+        if (alwaysSend || IsStreaming())
+        {
+            EnsureInitRecoEngineAdapter();
+            m_recoAdapter->SendNetworkMessage(std::move(path), std::move(payload));
+        }
     });
 
     m_threadService->ExecuteAsync(move(task));
 }
 
-void CSpxAudioStreamSession::SendNetworkMessage(std::string&& path, std::vector<uint8_t>&& payload)
+void CSpxAudioStreamSession::SendNetworkMessage(std::string&& path, std::vector<uint8_t>&& payload, bool alwaysSend)
 {
     SPX_DBG_TRACE_FUNCTION();
     auto keepAlive = SpxSharedPtrFromThis<ISpxSession>(this);
-    auto task = CreateTask([this, keepAlive, path, payload] () mutable {
-        EnsureInitRecoEngineAdapter();
-        m_recoAdapter->SendNetworkMessage(std::move(path), std::move(payload));
+    auto task = CreateTask([this, keepAlive, path, payload, alwaysSend]() mutable {
+        // when we want to send network messsage only when we are connected we should call this function with
+        // always send as false. Here we had made sure that the message will go to the service even though
+        // we are not connected. Look at the AddTargetLanguage and RemoveTargetLanguage of translation_recognizer
+        if (alwaysSend || IsStreaming())
+        {
+            EnsureInitRecoEngineAdapter();
+            m_recoAdapter->SendNetworkMessage(std::move(path), std::move(payload));
+        }
     });
 
     m_threadService->ExecuteAsync(move(task));

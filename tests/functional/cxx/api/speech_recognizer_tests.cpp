@@ -591,6 +591,7 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
         SPXTEST_REQUIRE(recognizer->GetAuthorizationToken() == token);
     }
 
+#if 0
     SPXTEST_SECTION("Check that recognizer does not crash while async op is in progress")
     {
         UseMocks(true);
@@ -637,6 +638,7 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
             }
         }
     }
+#endif
 
     GIVEN("Mocks for USP, Microphone, WavFilePump and Reader, and then USP ...")
     {

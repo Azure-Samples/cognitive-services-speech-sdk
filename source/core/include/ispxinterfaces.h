@@ -1100,8 +1100,8 @@ public:
 
     virtual void WriteTelemetryLatency(uint64_t latencyInTicks, bool isPhraseLatency) = 0;
     virtual void SendSpeechEventMessage(std::string&& payload) = 0;
-    virtual void SendNetworkMessage(std::string&& path, std::string&& payload) = 0;
-    virtual void SendNetworkMessage(std::string&& path, std::vector<uint8_t>&& payload) = 0;
+    virtual void SendNetworkMessage(std::string&& path, std::string&& payload, bool alwaysSend = true) = 0;
+    virtual void SendNetworkMessage(std::string&& path, std::vector<uint8_t>&& payload, bool alwaysSend = true) = 0;
 
     virtual void SetConversation(std::shared_ptr<ISpxConversation> conversation) = 0;
 };
