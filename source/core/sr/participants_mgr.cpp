@@ -25,7 +25,7 @@ namespace Impl {
 
 using json = nlohmann::json;
 
-const char* const CSpxParticipantMgrImpl::m_meeting_properties[] = { "iCalUId", "callId", "organizer", "FLAC", "MTUri", "DifferenciateGuestSpeakers", "audiorecording", "Threadid", "OrganizerMri", "OrganizerTenantId"};
+const char* const CSpxParticipantMgrImpl::m_meeting_properties[] = { "iCalUid", "callId", "organizer", "FLAC", "MTUri", "DifferenciateGuestSpeakers", "audiorecording", "Threadid", "OrganizerMri", "OrganizerTenantId"};
 
 CSpxParticipantMgrImpl::CSpxParticipantMgrImpl(std::shared_ptr<ISpxThreadService> thread_service, std::shared_ptr<ISpxRecognizerSite> site_in)
     :m_action{ ActionType::NONE },
@@ -387,8 +387,12 @@ std::string CSpxParticipantMgrImpl::CreateSpeechEventPayload(MeetingState state)
             if (p == "audiorecording")
             {
                 value = value.compare("on") == 0 ? "true" : "false";
+                speech_event["meeting"]["record"] = value;
             }
-            speech_event["meeting"][p.c_str()] = value;
+            else
+            {
+                speech_event["meeting"][p.c_str()] = value;
+            }
         }
     }
 
