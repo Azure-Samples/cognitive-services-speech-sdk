@@ -87,7 +87,7 @@ void CSpxTranslationRecognizer::UpdateTargetLanguages(const std::string& targetL
     {
         ThrowRuntimeError("UpdateTargetLanguages: the session object is nullptr.");
     }
-    session->SendNetworkMessage("event", eventPayload.dump());
+    session->SendNetworkMessage("event", eventPayload.dump(), false);
 }
 
 } } } } // Microsoft::CognitiveServices::Speech::Impl
