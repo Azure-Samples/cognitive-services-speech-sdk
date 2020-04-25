@@ -14,6 +14,7 @@ import com.microsoft.appcenter.espresso.Factory;
 import com.microsoft.appcenter.espresso.ReportHelper;
 
 import org.junit.After;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -110,6 +111,7 @@ public class SpeechSdkInstrumentedTest {
         }
     }
 
+    @Ignore("This test will fail occasionally, due to screen is shut down etc.")
     @Test
     public void makeSureWeTestTheExpectedApp() {
         // Make sure, our testing app is on the screen.
