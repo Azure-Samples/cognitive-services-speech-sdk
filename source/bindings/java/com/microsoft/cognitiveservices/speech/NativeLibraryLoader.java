@@ -90,11 +90,6 @@ class NativeLibraryLoader {
                             throw new UnsatisfiedLinkError(
                             String.format("Could not load a required Speech SDK library because of the following error: %s", e.getMessage()));
                         }
-                        // Optional library; just print a message
-                        else {
-                            System.err.println(
-                            String.format("Could not load an optional Speech SDK library because of the following error: %s", e.getMessage()));
-                        }
                     }
                 }
             }
