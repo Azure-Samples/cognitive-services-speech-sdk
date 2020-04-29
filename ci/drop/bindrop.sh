@@ -173,6 +173,14 @@ if [[ $(uname) == Linux ]]; then
     echo "Trying to use strip!"
     find "$DESTPUBLIB" \( -name \*.so -or -name \*.dll \) -print0 | xargs -0 strip
   fi
+  # Verify that the run-time search path in each shared library contains $ORIGIN
+  for i in $(find "$DESTPUBLIB" \( -name \*.so -or -name \*.dll \)); do
+    RPATH=$(readelf -d $i | grep -E "RPATH|RUNPATH")
+    if [[ ! $RPATH =~ '$ORIGIN' ]]; then
+      echo "Invalid RPATH in $i ($RPATH)"
+      exit 1
+    fi
+  done
 fi
 
 # Android: strip shipping binaries, but keep the unstripped version around.

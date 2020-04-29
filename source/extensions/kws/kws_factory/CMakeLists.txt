@@ -38,6 +38,12 @@ else()
         )
 endif()
 
+if(APPLE)
+    set_target_properties(${PROJECT_NAME} PROPERTIES BUILD_RPATH "@loader_path")
+elseif(UNIX)
+    set_target_properties(${PROJECT_NAME} PROPERTIES BUILD_RPATH "$ORIGIN")
+endif()
+
 # Set USE_NON_CORE_ROOT_SITE based on if we are building extensions or unit tests
 add_compile_definitions(USE_NON_CORE_ROOT_SITE)
 

@@ -44,6 +44,12 @@ endif()
 
 add_library(unidec SHARED ${HEADERS} ${HEADERS_PRIVATE} ${SOURCES})
 
+if(APPLE)
+    set_target_properties(${PROJECT_NAME} PROPERTIES BUILD_RPATH "@loader_path")
+elseif(UNIX)
+    set_target_properties(${PROJECT_NAME} PROPERTIES BUILD_RPATH "$ORIGIN")
+endif()
+
 if(WIN32 AND SPECTRE_MITIGATION)
     set_property(TARGET unidec PROPERTY VS_GLOBAL_SpectreMitigation "Spectre")
 endif()
