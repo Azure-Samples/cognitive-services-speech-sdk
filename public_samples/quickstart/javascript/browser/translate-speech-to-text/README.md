@@ -1,9 +1,9 @@
-# Quickstart: Using the Speech Service in JavaScript on a Web Browser.
+# Quickstart: Using the Speech Service to Translate Speech in JavaScript on a Web Browser.
 
-This sample shows how to use the Speech Service using the Speech SDK for JavaScript on a web browser, like Microsoft Edge, or Chrome. It illustrates how the SDK can be used to synthesize speech to speaker output.
+This sample shows how to translate speech with the Speech Service using the Speech SDK for JavaScript on a web browser, like Microsoft Edge, or Chrome. It illustrates how the SDK can be used to translate speech in one language to text in a different language.
 
-* See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-text-to-speech-js-browser) on the SDK documentation page for step-by-step instructions.
-* See the [overview article](https://docs.microsoft.com/azure/cognitive-services/speech-service/text-to-speech) on the SDK documentation page to learn more about Text to Speech.
+* See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-translate-speech-to-text-js-browser) on the SDK documentation page for step-by-step instructions.
+* See the [overview article](https://docs.microsoft.com/azure/cognitive-services/speech-service/speech-translation) on the SDK documentation page to learn more about translation using the Speech Service.
 
 ## Prerequisites
 
@@ -36,8 +36,8 @@ If you want to host the sample on a web server:
 
 * In case you are running the sample from your local computer, open `index.html` from the location where you have downloaded this quickstart with a JavaScript capable browser.
 * Use the input fields to set your `subscription key` and `service region`.
-* Enter the text to process in the `Input Text` field.
-* Press the `Start Text to Speech` button to start parsing text.
+* Select the source and target languages from the `Source Language` and `Target Language` dropdowns.
+* Press the `Start recognition` button to start recognizing speech from your microphone.
   
 ## Running .html samples
 * In case you are hosting the sample on a web server, open a web browser and navigate to the full URL where you host the sample.
@@ -48,4 +48,4 @@ If you want to host the sample on a web server:
 
 * [Quickstart article on the SDK documentation site](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-js-browser)
 * [Speech SDK API reference for JavaScript](https://aka.ms/csspeech/javascriptref)
-* [Speech SDK Text to Speech](https://docs.microsoft.com/azure/cognitive-services/speech-service/text-to-speech)
+* [Speech SDK Speech Translation](https://docs.microsoft.com/azure/cognitive-services/speech-service/speech-translation)
