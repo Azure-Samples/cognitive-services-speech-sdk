@@ -37,6 +37,7 @@ void CSpxRecognitionEventArgs::Init(const std::wstring& sessionId, std::shared_p
 
     m_sessionId = sessionId;
     m_result = result;
+    m_offset = m_result->GetOffset();
 }
 
 void CSpxRecognitionEventArgs::Init(const std::wstring& sessionId, uint64_t offset)

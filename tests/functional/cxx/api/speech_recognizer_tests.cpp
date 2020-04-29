@@ -442,6 +442,9 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
         {
             if (e.Result->Reason == ResultReason::RecognizedSpeech)
             {
+                SPXTEST_REQUIRE(e.Offset > 0);
+                SPXTEST_REQUIRE(e.Offset == e.Result->Offset());
+
                 result = e.Result->Text;
                 SPX_TRACE_VERBOSE("RECOGNIZED: Text= %s, Offset= %" PRIu64 ", Duration= %" PRIu64, e.Result->Text.c_str(), e.Result->Offset(), e.Result->Duration());
             }
