@@ -163,7 +163,7 @@ namespace Microsoft.CognitiveServices.Speech
         public SpeechRecognizer(SpeechConfig speechConfig, Audio.AudioConfig audioConfig)
             : this(FromConfig(SpxFactory.recognizer_create_speech_recognizer_from_config, speechConfig, audioConfig))
         {
-            this.audioConfig = audioConfig;
+            this.audioInputKeepAlive = audioConfig;
         }
 
         /// <summary>
@@ -187,7 +187,7 @@ namespace Microsoft.CognitiveServices.Speech
         public SpeechRecognizer(SpeechConfig speechConfig, string language, Audio.AudioConfig audioConfig)
             : this(speechConfig, SourceLanguageConfig.FromLanguage(language), audioConfig)
         {
-            this.audioConfig = audioConfig;
+            this.audioInputKeepAlive = audioConfig;
         }
 
         /// <summary>
@@ -211,7 +211,7 @@ namespace Microsoft.CognitiveServices.Speech
         public SpeechRecognizer(SpeechConfig speechConfig, SourceLanguageConfig sourceLanguageConfig, Audio.AudioConfig audioConfig)
             : this(FromConfig(SpxFactory.recognizer_create_speech_recognizer_from_source_lang_config, speechConfig, sourceLanguageConfig, audioConfig))
         {
-            this.audioConfig = audioConfig;
+            this.audioInputKeepAlive = audioConfig;
         }
 
         /// <summary>
@@ -235,7 +235,7 @@ namespace Microsoft.CognitiveServices.Speech
         public SpeechRecognizer(SpeechConfig speechConfig, AutoDetectSourceLanguageConfig autoDetectSourceLanguageConfig, Audio.AudioConfig audioConfig)
             : this(FromConfig(SpxFactory.recognizer_create_speech_recognizer_from_auto_detect_source_lang_config, speechConfig, autoDetectSourceLanguageConfig, audioConfig))
         {
-            this.audioConfig = audioConfig;
+            this.audioInputKeepAlive = audioConfig;
         }
 
         internal SpeechRecognizer(InteropSafeHandle recoHandle) : base(recoHandle)
@@ -456,12 +456,6 @@ namespace Microsoft.CognitiveServices.Speech
                 return;
             }
 
-            if (disposing)
-            {
-                // This will make Properties unaccessible.
-                Properties.Close();
-            }
-
             if (recoHandle != null)
             {
                 LogErrorIfFail(Internal.Recognizer.recognizer_recognizing_set_callback(recoHandle, null, IntPtr.Zero));
@@ -471,17 +465,25 @@ namespace Microsoft.CognitiveServices.Speech
                 LogErrorIfFail(Internal.Recognizer.recognizer_session_stopped_set_callback(recoHandle, null, IntPtr.Zero));
                 LogErrorIfFail(Internal.Recognizer.recognizer_speech_start_detected_set_callback(recoHandle, null, IntPtr.Zero));
                 LogErrorIfFail(Internal.Recognizer.recognizer_speech_end_detected_set_callback(recoHandle, null, IntPtr.Zero));
-                recoHandle.Dispose();
+            }
+
+            // Dispose of managed resources
+            if (disposing)
+            {
+                recoHandle?.Dispose();
+                // This will make Properties unaccessible.
+                Properties?.Close();
             }
 
             recognizingCallbackDelegate = null;
             recognizedCallbackDelegate = null;
             canceledCallbackDelegate = null;
+            audioInputKeepAlive = null;
 
             base.Dispose(disposing);
         }
 
-        private readonly Audio.AudioConfig audioConfig;
+        private Audio.AudioConfig audioInputKeepAlive;
 
         // Defines private methods to raise a C# event for intermediate/final result when a corresponding callback is invoked by the native layer.
         [MonoPInvokeCallback(typeof(CallbackFunctionDelegate))]

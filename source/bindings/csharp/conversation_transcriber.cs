@@ -106,6 +106,7 @@ namespace Microsoft.CognitiveServices.Speech.Transcription
         public ConversationTranscriber(Audio.AudioConfig audioConfig)
             : this(FromConfig(SpxFactory.recognizer_create_conversation_transcriber_from_config, audioConfig))
         {
+            this.audioInputKeepAlive = audioConfig;
         }
 
         internal delegate IntPtr GetTranscriberFromConfigDelegate(out IntPtr phreco, InteropSafeHandle audioInput);
@@ -267,12 +268,6 @@ namespace Microsoft.CognitiveServices.Speech.Transcription
                 return;
             }
 
-            if (disposing)
-            {
-                // This will make Properties unaccessible.
-                Properties.Close();
-            }
-
             if (recoHandle != null)
             {
                 LogErrorIfFail(Internal.Recognizer.recognizer_recognizing_set_callback(recoHandle, null, IntPtr.Zero));
@@ -282,19 +277,28 @@ namespace Microsoft.CognitiveServices.Speech.Transcription
                 LogErrorIfFail(Internal.Recognizer.recognizer_session_stopped_set_callback(recoHandle, null, IntPtr.Zero));
                 LogErrorIfFail(Internal.Recognizer.recognizer_speech_start_detected_set_callback(recoHandle, null, IntPtr.Zero));
                 LogErrorIfFail(Internal.Recognizer.recognizer_speech_end_detected_set_callback(recoHandle, null, IntPtr.Zero));
-                recoHandle.Dispose();
+            }
+
+            // Dispose of managed resources
+            if (disposing)
+            {
+                recoHandle?.Dispose();
+                // This will make Properties unaccessible.
+                Properties?.Close();
             }
 
             recognizingCallbackDelegate = null;
             recognizedCallbackDelegate = null;
             canceledCallbackDelegate = null;
-
+            audioInputKeepAlive = null;
             base.Dispose(disposing);
         }
 
         private Internal.CallbackFunctionDelegate recognizingCallbackDelegate;
         private Internal.CallbackFunctionDelegate recognizedCallbackDelegate;
         private Internal.CallbackFunctionDelegate canceledCallbackDelegate;
+
+        private Audio.AudioConfig audioInputKeepAlive;
 
         [MonoPInvokeCallback(typeof(CallbackFunctionDelegate))]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031", Justification = "All exceptions are catched and logged inside callback handlers")]

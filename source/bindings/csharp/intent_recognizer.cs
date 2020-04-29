@@ -107,7 +107,7 @@ namespace Microsoft.CognitiveServices.Speech.Intent
         public IntentRecognizer(SpeechConfig speechConfig, Audio.AudioConfig audioConfig)
             : this(FromConfig(SpxFactory.recognizer_create_intent_recognizer_from_config, speechConfig, audioConfig))
         {
-            this.audioConfig = audioConfig;
+            this.audioInputKeepAlive = audioConfig;
         }
 
         internal IntentRecognizer(InteropSafeHandle recoHandle) : base(recoHandle)
@@ -339,12 +339,6 @@ namespace Microsoft.CognitiveServices.Speech.Intent
                 return;
             }
 
-            if (disposing)
-            {
-                // This will make Properties unaccessible.
-                Properties.Close();
-            }
-
             if (recoHandle != null)
             {
                 LogErrorIfFail(Internal.Recognizer.recognizer_recognizing_set_callback(recoHandle, null, IntPtr.Zero));
@@ -356,10 +350,18 @@ namespace Microsoft.CognitiveServices.Speech.Intent
                 LogErrorIfFail(Internal.Recognizer.recognizer_speech_end_detected_set_callback(recoHandle, null, IntPtr.Zero));
             }
 
+            // Dispose of managed resources
+            if (disposing)
+            {
+                recoHandle?.Dispose();
+                // This will make Properties unaccessible.
+                Properties?.Close();
+            }
+
             recognizingCallbackDelegate = null;
             recognizedCallbackDelegate = null;
             canceledCallbackDelegate = null;
-
+            audioInputKeepAlive = null;
             base.Dispose(disposing);
         }
 
@@ -367,7 +369,7 @@ namespace Microsoft.CognitiveServices.Speech.Intent
         private CallbackFunctionDelegate recognizedCallbackDelegate;
         private CallbackFunctionDelegate canceledCallbackDelegate;
 
-        private readonly Audio.AudioConfig audioConfig;
+        private Audio.AudioConfig audioInputKeepAlive;
 
         // Defines private methods to raise a C# event for intermediate/final result when a corresponding callback is invoked by the native layer.
         [MonoPInvokeCallback(typeof(CallbackFunctionDelegate))]

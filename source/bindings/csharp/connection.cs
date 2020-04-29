@@ -95,11 +95,18 @@ namespace Microsoft.CognitiveServices.Speech
             {
                 return;
             }
+
             if (connectionHandle != null)
             {
                 LogErrorIfFail(Internal.Connection.connection_connected_set_callback(connectionHandle, null, IntPtr.Zero));
                 LogErrorIfFail(Internal.Connection.connection_disconnected_set_callback(connectionHandle, null, IntPtr.Zero));
                 LogErrorIfFail(Internal.Connection.connection_message_received_set_callback(connectionHandle, null, IntPtr.Zero));
+            }
+
+            // Dispose of managed resources
+            if (disposing)
+            {
+                connectionHandle?.Dispose();
             }
 
             if (gch.IsAllocated)

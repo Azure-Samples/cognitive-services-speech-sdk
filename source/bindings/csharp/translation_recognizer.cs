@@ -211,7 +211,7 @@ namespace Microsoft.CognitiveServices.Speech.Translation
         public TranslationRecognizer(SpeechTranslationConfig config, Audio.AudioConfig audioConfig)
             : this(FromConfig(SpxFactory.recognizer_create_translation_recognizer_from_config, config, audioConfig))
         {
-            this.audioConfig = audioConfig;
+            this.audioInputKeepAlive = audioConfig;
         }
 
         internal TranslationRecognizer(InteropSafeHandle recoHandle) : base(recoHandle)
@@ -443,12 +443,6 @@ namespace Microsoft.CognitiveServices.Speech.Translation
                 return;
             }
 
-            if (disposing)
-            {
-                // This will make Properties unaccessible.
-                Properties.Close();
-            }
-
             if (recoHandle != null)
             {
                 LogErrorIfFail(Internal.Recognizer.recognizer_recognizing_set_callback(recoHandle, null, IntPtr.Zero));
@@ -461,10 +455,19 @@ namespace Microsoft.CognitiveServices.Speech.Translation
                 LogErrorIfFail(Internal.Recognizer.recognizer_speech_end_detected_set_callback(recoHandle, null, IntPtr.Zero));
             }
 
+            // Dispose of managed resources
+            if (disposing)
+            {
+                recoHandle?.Dispose();
+                // This will make Properties unaccessible.
+                Properties?.Close();
+            }
+
             recognizingCallbackDelegate = null;
             recognizedCallbackDelegate = null;
             canceledCallbackDelegate = null;
             translationSynthesisCallbackDelegate = null;
+            audioInputKeepAlive = null;
 
             base.Dispose(disposing);
         }
@@ -474,7 +477,7 @@ namespace Microsoft.CognitiveServices.Speech.Translation
         private CallbackFunctionDelegate canceledCallbackDelegate;
         private CallbackFunctionDelegate translationSynthesisCallbackDelegate;
 
-        private readonly Audio.AudioConfig audioConfig;
+        private Audio.AudioConfig audioInputKeepAlive;
 
         // Defines private methods to raise a C# event for intermediate/final result when a corresponding callback is invoked by the native layer.
         [MonoPInvokeCallback(typeof(CallbackFunctionDelegate))]

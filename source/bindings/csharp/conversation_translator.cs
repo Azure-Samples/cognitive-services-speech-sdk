@@ -33,6 +33,8 @@ namespace Microsoft.CognitiveServices.Speech.Transcription
         private InteropEvent<ConversationTranslationEventArgs> _transcribed;
         private InteropEvent<ConversationTranslationEventArgs> _textMessageReceived;
 
+        private Audio.AudioConfig _audioInputKeepAlive;
+
         /// <summary>
         /// Creates a new instance of the Conversation Translator using the default microphone input.
         /// </summary>
@@ -49,6 +51,7 @@ namespace Microsoft.CognitiveServices.Speech.Transcription
         public ConversationTranslator(Audio.AudioConfig audioConfig)
             : this(Create(audioConfig, true))
         {
+            _audioInputKeepAlive = audioConfig;
         }
 
         /// <summary>
@@ -295,7 +298,7 @@ namespace Microsoft.CognitiveServices.Speech.Transcription
                 // This will make Properties unaccessible.
                 Properties.Close();
             }
-
+            _audioInputKeepAlive = null;
             _nativeHandle?.Dispose();
         }
 
