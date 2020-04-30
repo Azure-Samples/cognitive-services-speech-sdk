@@ -49,7 +49,9 @@ public:
     // -- ISpxSpeechAudioProcessorAdapter
 
     void SetSpeechDetectionThreshold(uint32_t threshold) override;
-    void SetSpeechDetectionSilenceCount(uint32_t count) override;
+    void SetSpeechDetectionSilenceMs(uint32_t duration) override;
+    void SetSpeechDetectionSkipMs(uint32_t duration) override;
+    void SetSpeechDetectionBaselineMs(uint32_t duration) override;
 
 private:
 
@@ -72,10 +74,16 @@ private:
 
     bool m_bSpeechStarted;
 
-    uint32_t m_cbSilenceChunkCount;
-    uint32_t m_cbSilenceChunkCountMax;
+    uint32_t m_cbSilence;
+    uint32_t m_cbSilenceMax;
     uint32_t m_energyThreshold;
-    uint64_t m_cbAudioProcessed;
+    uint32_t m_cbAudioProcessed;
+    uint32_t m_cbWarmup;
+    uint32_t m_cbWarmupMax;
+    uint32_t m_cbSkip;
+    uint32_t m_cbSkipMax;
+    uint16_t m_baselineCount;
+    double m_baselineMean;
 };
 
 

@@ -2570,13 +2570,17 @@ void CSpxAudioStreamSession::StartAudioPump(RecognitionKind startKind, std::shar
     if (PAL::ToBool(GetStringValue("UseLocalSpeechDetection", PAL::BoolToString(false))))
     {
         uint32_t energy = stoul(GetStringValue("LocalSpeechDetectionThreshold", "180").c_str());
-        uint32_t count = stoul(GetStringValue("LocalSpeechDetectionSilenceCount", "10").c_str());
+        uint32_t silence = stoul(GetStringValue("LocalSpeechDetectionSilenceMs", "600").c_str());
+        uint32_t skip = stoul(GetStringValue("LocalSpeechDetectionSkipMs", "200").c_str());
+        uint32_t base = stoul(GetStringValue("LocalSpeechDetectionBaseMs", "300").c_str());
 
         std::shared_ptr<ISpxSpeechAudioProcessorAdapter> speechAdapter = EnsureInitSpeechProcessor();
         if (speechAdapter)
         {
             speechAdapter->SetSpeechDetectionThreshold(energy);
-            speechAdapter->SetSpeechDetectionSilenceCount(count);
+            speechAdapter->SetSpeechDetectionSilenceMs(silence);
+            speechAdapter->SetSpeechDetectionSkipMs(skip);
+            speechAdapter->SetSpeechDetectionBaselineMs(base);
         }
     }
 

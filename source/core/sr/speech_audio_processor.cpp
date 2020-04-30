@@ -17,13 +17,18 @@ namespace CognitiveServices {
 namespace Speech {
 namespace Impl {
 
-
 CSpxSpeechAudioProcessor::CSpxSpeechAudioProcessor() :
     m_bSpeechStarted(false),
-    m_cbSilenceChunkCount(0),
-    m_cbSilenceChunkCountMax(10),
+    m_cbSilence(0),
+    m_cbSilenceMax(19200),
     m_energyThreshold(180),
-    m_cbAudioProcessed(0)
+    m_cbAudioProcessed(0),
+    m_cbWarmup(0),
+    m_cbWarmupMax(9600),
+    m_cbSkip(0),
+    m_cbSkipMax(6400),
+    m_baselineCount(0),
+    m_baselineMean(0.0f)
 {
     SPX_DBG_TRACE_FUNCTION();
 }
@@ -81,35 +86,69 @@ void CSpxSpeechAudioProcessor::ProcessAudio(const DataChunkPtr& audioChunk)
     }
 
     double sum = 0;
-    uint16_t sample = 0;
-    uint32_t size = audioChunk->size;
-    uint8_t* data = audioChunk->data.get();
+    int16_t sample = 0;
+    uint32_t size = audioChunk->size / 2;
+    uint32_t osize = size;
+    int16_t* data = reinterpret_cast<int16_t*>(audioChunk->data.get());
 
-    m_cbAudioProcessed += size;
+    m_cbAudioProcessed += size * 2;
 
-    // simple energy detection algorithm used by office for the detection of speech
+    // manage skipped data
+    if (m_cbSkip < m_cbSkipMax)
+    {
+        uint32_t skipbytes = m_cbSkipMax - m_cbSkip;
+        if (skipbytes >= size * 2)
+        {
+            m_cbSkip += size * 2;
+            return;
+        }
+        else
+        {
+            m_cbSkip += skipbytes;
+            size -= skipbytes / 2;
+            data += skipbytes / 2;
+            osize -= size;
+        }
+    }
 
+    // loop the samples
     while (size > 0)
     {
-        sample = static_cast<uint16_t>(*data);
-        sum += pow(sample, 2);
-        size -= 2;
-        data += 2;
+        sample = *data;
+        sum += sample*sample;
+        size--;
+        data++;
     }
 
-    double mean = sqrt(sum / (audioChunk->size / 2));
-    if (!m_bSpeechStarted && (mean > m_energyThreshold))
+    //calculate the mean for this chunk of data
+    double chunkmean = sqrt(sum / osize);
+
+    // dont use the weighted mean - treat all chunks the same independent of their size
+    // for now, if the base duration is set to the middle of the chunk, the full chunk is used.
+    // however the silence duration can take part of the first chunk
+    if (m_cbWarmup < m_cbWarmupMax)
     {
-        m_cbSilenceChunkCount = 0;
-        m_bSpeechStarted = true;
-        NotifySiteSpeechStart();
+        m_baselineMean = (m_baselineMean + chunkmean) / ++m_baselineCount;
+        m_cbWarmup += osize*2;
+        return;
+    } 
+
+    if (chunkmean > (m_baselineMean + m_energyThreshold))
+    {
+        m_cbSilence = 0;
+        if (!m_bSpeechStarted)
+        {
+            m_bSpeechStarted = true;
+            NotifySiteSpeechStart();
+        }
     }
-    else if (m_bSpeechStarted && m_cbSilenceChunkCount < 10)
+    else if (m_bSpeechStarted)
     {
-        m_cbSilenceChunkCount += 1;
+        m_cbSilence += osize*2;
     }
 
-    if (m_bSpeechStarted && m_cbSilenceChunkCount >= 10)
+    // fire at the end of the chunk processing, doesnt matter if duration was in the middle of the block
+    if (m_bSpeechStarted && m_cbSilence >= m_cbSilenceMax)
     {
         m_bSpeechStarted = false;
         NotifySiteSpeechEnd();
@@ -121,9 +160,19 @@ void CSpxSpeechAudioProcessor::SetSpeechDetectionThreshold(uint32_t threshold)
     m_energyThreshold = threshold;
 }
 
-void CSpxSpeechAudioProcessor::SetSpeechDetectionSilenceCount(uint32_t count)
+void CSpxSpeechAudioProcessor::SetSpeechDetectionSilenceMs(uint32_t duration)
 {
-    m_cbSilenceChunkCountMax = count;
+    m_cbSilenceMax = duration * 32;
+}
+
+void CSpxSpeechAudioProcessor::SetSpeechDetectionSkipMs(uint32_t duration)
+{
+    m_cbSkipMax = duration * 32;
+}
+
+void CSpxSpeechAudioProcessor::SetSpeechDetectionBaselineMs(uint32_t duration)
+{
+    m_cbWarmupMax = duration * 32;
 }
 
 void CSpxSpeechAudioProcessor::InitFormat(const SPXWAVEFORMATEX* pformat)

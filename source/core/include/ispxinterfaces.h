@@ -1310,7 +1310,9 @@ class ISpxSpeechAudioProcessorAdapter :
 {
 public:
     virtual void SetSpeechDetectionThreshold(uint32_t threshold) = 0;
-    virtual void SetSpeechDetectionSilenceCount(uint32_t count) = 0;
+    virtual void SetSpeechDetectionSilenceMs(uint32_t duration) = 0;
+    virtual void SetSpeechDetectionSkipMs(uint32_t duration) = 0;
+    virtual void SetSpeechDetectionBaselineMs(uint32_t duration) = 0;
 };
 
 class ISpxSpeechAudioProcessorAdapterSite : public ISpxInterfaceBaseFor<ISpxSpeechAudioProcessorAdapterSite>
