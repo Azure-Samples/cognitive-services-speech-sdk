@@ -163,7 +163,7 @@ public:
     // --- ISpxRecoResultFactory
     std::shared_ptr<ISpxRecognitionResult> CreateIntermediateResult(const wchar_t* resultId, const wchar_t* text, uint64_t offset, uint64_t duration) override;
     std::shared_ptr<ISpxRecognitionResult> CreateFinalResult(const wchar_t* resultId, ResultReason reason, NoMatchReason noMatchReason, CancellationReason cancellation, CancellationErrorCode errorCode, const wchar_t* text, uint64_t offset, uint64_t duration, const wchar_t* userId = nullptr) override;
-    std::shared_ptr<ISpxRecognitionResult> CreateKeywordResult(const double confidence, const uint64_t offset, const uint64_t duration, const wchar_t* keyword, ResultReason reason) override;
+    std::shared_ptr<ISpxRecognitionResult> CreateKeywordResult(const double confidence, const uint64_t offset, const uint64_t duration, const wchar_t* keyword, ResultReason reason, std::shared_ptr<ISpxAudioDataStream> stream) final;
 
     // --- ISpxRecoEngineAdapterSite (second part...)
     void FireAdapterResult_Intermediate(ISpxRecoEngineAdapter* adapter, uint64_t offset, std::shared_ptr<ISpxRecognitionResult> result) override;
@@ -211,7 +211,8 @@ private:
         KwsSingleShot = 2,
         SingleShot = 3,
         Continuous = 4,
-        KeywordOnce = 5
+        KeywordOnce = 5,
+        KWSOnceSingleShot = 6
     };
 
     enum class SessionState
@@ -255,6 +256,8 @@ private:
 private:
     std::packaged_task<void()> CreateTask(std::function<void()> func, bool catchAll = true);
     std::shared_ptr<ISpxRecoEngineAdapter> EnsureInitRecoEngineAdapter();
+    std::shared_ptr<ISpxRecoEngineAdapter> EnsureInitOutputEngineAdapter();
+    void EnsureResetOutputEngineAdapter();
     std::shared_ptr<ISpxSpeechAudioProcessorAdapter> EnsureInitSpeechProcessor();
     void InitRecoEngineAdapter();
 
@@ -286,6 +289,11 @@ private:
     inline bool IsKeywordKind() const
     {
         return IsKind(RecognitionKind::Keyword) || IsKind(RecognitionKind::KeywordOnce);
+    }
+
+    inline bool IsKWSOnceShotKind() const
+    {
+        return IsKind(RecognitionKind::KwsSingleShot) || IsKind(RecognitionKind::KWSOnceSingleShot);
     }
 
     inline static bool IsKindKeyword(RecognitionKind kind)

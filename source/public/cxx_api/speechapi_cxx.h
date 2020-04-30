@@ -59,10 +59,16 @@
 #include <speechapi_cxx_connection.h>
 #include <speechapi_cxx_connection_eventargs.h>
 
+#include <speechapi_cxx_audio_data_stream.h>
+
 #include <speechapi_cxx_speech_synthesis_result.h>
 #include <speechapi_cxx_speech_synthesis_eventargs.h>
 #include <speechapi_cxx_speech_synthesis_word_boundary_eventargs.h>
 #include <speechapi_cxx_speech_synthesizer.h>
+
+#include <speechapi_cxx_keyword_recognition_result.h>
+#include <speechapi_cxx_keyword_recognition_eventargs.h>
+#include <speechapi_cxx_keyword_recognizer.h>
 
 #include <speechapi_cxx_conversation.h>
 #include <speechapi_cxx_conversation_transcriber.h>

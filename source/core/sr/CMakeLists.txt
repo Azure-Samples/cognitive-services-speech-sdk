@@ -59,6 +59,7 @@ set(HEADERS_PRIVATE
     "${SRC_DIR}/participants_mgr.h"
     "${SRC_DIR}/audio_file_logger.h"
     "${SRC_DIR}/speech_audio_processor.h"
+    "${SRC_DIR}/output_reco_adapter.h"
     )
 
 set(SOURCES
@@ -101,6 +102,7 @@ set(SOURCES
     "${SRC_DIR}/participants_mgr.cpp"
     "${SRC_DIR}/audio_file_logger.cpp"
     "${SRC_DIR}/speech_audio_processor.cpp"
+    "${SRC_DIR}/output_reco_adapter.cpp"
     )
 
 source_group("Header Files (public)" FILES ${HEADERS})

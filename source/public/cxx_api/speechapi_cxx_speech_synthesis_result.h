@@ -11,17 +11,15 @@
 #include <speechapi_cxx_string_helpers.h>
 #include <speechapi_cxx_enums.h>
 #include <speechapi_cxx_properties.h>
+#include <speechapi_cxx_audio_data_stream.h>
 #include <speechapi_c_result.h>
 #include <speechapi_c_synthesizer.h>
-#include <speechapi_c_audio_stream.h>
-
 
 #define AUDIO_OUTPUT_BUFFER_SIZE 0x1000000
 
 namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
-
 
 /// <summary>
 /// Contains information about result from text-to-speech synthesis.
@@ -179,196 +177,6 @@ private:
 
 
 /// <summary>
-/// Represents audio data stream used for operating audio data as a stream.
-/// Added in version 1.4.0
-/// </summary>
-class AudioDataStream : public std::enable_shared_from_this<AudioDataStream>
-{
-private:
-
-    /// <summary>
-    /// Internal member variable that holds the smart handle.
-    /// </summary>
-    SmartHandle<SPXAUDIOSTREAMHANDLE, &audio_data_stream_release> m_haudioStream;
-
-    /*! \cond PRIVATE */
-
-    class PrivatePropertyCollection : public PropertyCollection
-    {
-    public:
-        PrivatePropertyCollection(SPXAUDIOSTREAMHANDLE hstream) :
-            PropertyCollection(
-                [=]() {
-            SPXPROPERTYBAGHANDLE hpropbag = SPXHANDLE_INVALID;
-            audio_data_stream_get_property_bag(hstream, &hpropbag);
-            return hpropbag;
-        }())
-        {
-        }
-    };
-
-    /// <summary>
-    /// Internal member variable that holds the properties associating to the audio data stream.
-    /// </summary>
-    PrivatePropertyCollection m_properties;
-
-    /*! \endcond */
-
-public:
-
-    /// <summary>
-    /// Creates a memory backed AudioDataStream from given speech synthesis result.
-    /// </summary>
-    /// <param name="result">The speech synthesis result.</param>
-    /// <returns>A shared pointer to AudioDataStream</returns>
-    static std::shared_ptr<AudioDataStream> FromResult(std::shared_ptr<SpeechSynthesisResult> result)
-    {
-        SPXRESULTHANDLE hresult = SPXHANDLE_INVALID;
-        if (result != nullptr)
-        {
-            hresult = (SPXRESULTHANDLE)(*result.get());
-        }
-
-        SPXAUDIOSTREAMHANDLE hstream = SPXHANDLE_INVALID;
-        SPX_THROW_ON_FAIL(audio_data_stream_create_from_result(&hstream, hresult));
-
-        auto stream = new AudioDataStream(hstream);
-        return std::shared_ptr<AudioDataStream>(stream);
-    }
-
-    /// <summary>
-    /// Get current status of the audio data stream.
-    /// </summary>
-    /// <returns>Current status</returns>
-    StreamStatus GetStatus()
-    {
-        Stream_Status status;
-        SPX_THROW_ON_FAIL(audio_data_stream_get_status(m_haudioStream, &status));
-        return (StreamStatus)status;
-    }
-
-    /// <summary>
-    /// Check whether the stream has enough data to be read.
-    /// </summary>
-    /// <param name="bytesRequested">The requested data size in bytes.</param>
-    /// <returns>A bool indicating whether the stream has enough data to be read.</returns>
-    bool CanReadData(uint32_t bytesRequested)
-    {
-        return audio_data_stream_can_read_data(m_haudioStream, bytesRequested);
-    }
-
-    /// <summary>
-    /// Check whether the stream has enough data to be read, starting from the specified position.
-    /// </summary>
-    /// <param name="pos">The position counting from start of the stream.</param>
-    /// <param name="bytesRequested">The requested data size in bytes.</param>
-    /// <returns>A bool indicating whether the stream has enough data to be read.</returns>
-    bool CanReadData(uint32_t pos, uint32_t bytesRequested)
-    {
-        return audio_data_stream_can_read_data_from_position(m_haudioStream, bytesRequested, pos);
-    }
-
-    /// <summary>
-    /// Reads a chunk of the audio data and fill it to given buffer
-    /// </summary>
-    /// <param name="buffer">A buffer to receive read data.</param>
-    /// <param name="bufferSize">Size of the buffer.</param>
-    /// <returns>Size of data filled to the buffer, 0 means end of stream</returns>
-    uint32_t ReadData(uint8_t* buffer, uint32_t bufferSize)
-    {
-        uint32_t filledSize = 0;
-        SPX_THROW_ON_FAIL(audio_data_stream_read(m_haudioStream, buffer, bufferSize, &filledSize));
-
-        return filledSize;
-    }
-
-    /// <summary>
-    /// Reads a chunk of the audio data and fill it to given buffer, starting from the specified position.
-    /// </summary>
-    /// <param name="pos">The position counting from start of the stream.</param>
-    /// <param name="buffer">A buffer to receive read data.</param>
-    /// <param name="bufferSize">Size of the buffer.</param>
-    /// <returns>Size of data filled to the buffer, 0 means end of stream</returns>
-    uint32_t ReadData(uint32_t pos, uint8_t* buffer, uint32_t bufferSize)
-    {
-        uint32_t filledSize = 0;
-        SPX_THROW_ON_FAIL(audio_data_stream_read_from_position(m_haudioStream, buffer, bufferSize, pos, &filledSize));
-
-        return filledSize;
-    }
-
-    /// <summary>
-    /// Save the audio data to a file, synchronously.
-    /// </summary>
-    /// <param name="fileName">The file name with full path.</param>
-    void SaveToWavFile(const SPXSTRING& fileName)
-    {
-        SPX_THROW_ON_FAIL(audio_data_stream_save_to_wave_file(m_haudioStream, Utils::ToUTF8(fileName).c_str()));
-    }
-
-    /// <summary>
-    /// Save the audio data to a file, asynchronously.
-    /// </summary>
-    /// <param name="fileName">The file name with full path.</param>
-    /// <returns>An asynchronous operation representing the saving.</returns>
-    std::future<void> SaveToWavFileAsync(const SPXSTRING& fileName)
-    {
-        auto keepAlive = this->shared_from_this();
-
-        auto future = std::async(std::launch::async, [keepAlive, this, fileName]() -> void {
-            SPX_THROW_ON_FAIL(audio_data_stream_save_to_wave_file(m_haudioStream, Utils::ToUTF8(fileName).c_str()));
-        });
-
-        return future;
-    }
-
-    /// <summary>
-    /// Get current position of the audio data stream.
-    /// </summary>
-    /// <returns>Current position</returns>
-    uint32_t GetPosition()
-    {
-        uint32_t position = 0;
-        SPX_THROW_ON_FAIL(audio_data_stream_get_position(m_haudioStream, &position));
-        return position;
-    }
-
-    /// <summary>
-    /// Set current position of the audio data stream.
-    /// </summary>
-    /// <param name="pos">Position to be set.</param>
-    void SetPosition(uint32_t pos)
-    {
-        SPX_THROW_ON_FAIL(audio_data_stream_set_position(m_haudioStream, pos));
-    }
-
-    /// <summary>
-    /// Explicit conversion operator.
-    /// </summary>
-    /// <returns>A handle.</returns>
-    explicit operator SPXAUDIOSTREAMHANDLE() { return m_haudioStream; }
-
-    /// <summary>
-    /// Collection of additional SpeechSynthesisResult properties.
-    /// </summary>
-    const PropertyCollection& Properties;
-
-private:
-
-    /// <summary>
-    /// Internal constructor. Creates a new instance using the provided handle.
-    /// </summary>
-    explicit AudioDataStream(SPXAUDIOSTREAMHANDLE haudioStream) :
-        m_haudioStream(haudioStream),
-        m_properties(haudioStream),
-        Properties(m_properties)
-    {
-        SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
-    }
-};
-
-
-/// <summary>
 /// Contains detailed information about why a result was canceled.
 /// Added in version 1.4.0
 /// </summary>
@@ -484,5 +292,19 @@ private:
     }
 };
 
+inline std::shared_ptr<AudioDataStream> AudioDataStream::FromResult(std::shared_ptr<SpeechSynthesisResult> result)
+{
+    SPXRESULTHANDLE hresult = SPXHANDLE_INVALID;
+    if (result != nullptr)
+    {
+        hresult = (SPXRESULTHANDLE)(*result.get());
+    }
+
+    SPXAUDIOSTREAMHANDLE hstream = SPXHANDLE_INVALID;
+    SPX_THROW_ON_FAIL(audio_data_stream_create_from_result(&hstream, hresult));
+
+    auto stream = new AudioDataStream(hstream);
+    return std::shared_ptr<AudioDataStream>(stream);
+}
 
 } } } // Microsoft::CognitiveServices::Speech

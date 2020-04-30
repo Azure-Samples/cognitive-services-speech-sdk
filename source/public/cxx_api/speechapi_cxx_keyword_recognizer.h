@@ -17,6 +17,7 @@
 #include <speechapi_cxx_utils.h>
 #include <speechapi_cxx_properties.h>
 
+#ifndef SWIG
 namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
@@ -108,6 +109,7 @@ public:
         {
             SPX_THROW_ON_FAIL(recognizer_stop_keyword_recognition(m_handle));
         });
+        return future;
     }
 
     /// <summary>
@@ -119,11 +121,6 @@ public:
     /// Signal for events relating to the cancellation of an interaction. The event indicates if the reason is a direct cancellation or an error.
     /// </summary>
     EventSignal<const SpeechRecognitionCanceledEventArgs&> Canceled;
-
-    /// <summary>
-    /// A collection of properties and their values defined for this <see cref="KeywordRecognizer"/>.
-    /// </summary>
-    const PropertyCollection& Properties;
 
 private:
     /*! \cond PROTECTED */
@@ -176,15 +173,22 @@ private:
         Canceled{ Utils::Callback<SpeechRecognitionCanceledEventArgs>(this, &KeywordRecognizer::CanceledEventConnectionChanged),
                   Utils::Callback<SpeechRecognitionCanceledEventArgs>(this, &KeywordRecognizer::CanceledEventConnectionChanged), false },
         m_properties{ Utils::CallFactoryMethodRight(recognizer_get_property_bag, handle) },
-        Properties { m_properties },
-        m_handle{ handle }
+        m_handle{ handle },
+        Properties { m_properties }
     {
     }
 
     PropertyCollection m_properties;
     SPXRECOHANDLE m_handle;
     /*! \endcond */
+
+public:
+    /// <summary>
+    /// A collection of properties and their values defined for this <see cref="KeywordRecognizer"/>.
+    /// </summary>
+    const PropertyCollection& Properties;
 };
 
 
 } } }
+#endif

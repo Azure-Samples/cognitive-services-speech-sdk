@@ -40,6 +40,7 @@ set(SOURCES
     "${SRC_DIR}/dialog_service_connector_tests.cpp"
     "${SRC_DIR}/language_config_tests.cpp"
     "${SRC_DIR}/conversation_tests.cpp"
+    "${SRC_DIR}/keyword_recognizer_tests.cpp"
     )
 
 if(EXTENSION_AUDIOCOMPRESSION_ENABLED)
@@ -47,7 +48,7 @@ if(EXTENSION_AUDIOCOMPRESSION_ENABLED)
     "${SRC_DIR}/wire_compression_tests.cpp"
   )
 endif()
- 
+
 if(WIN32 AND (NOT SPEECHSDK_OS STREQUAL "WindowsUwp"))
     include_directories("${SRC_DIR}/Windows")
     list(APPEND SOURCES

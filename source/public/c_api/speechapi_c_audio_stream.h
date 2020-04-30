@@ -50,6 +50,7 @@ SPXAPI push_audio_output_stream_set_callbacks(SPXAUDIOSTREAMHANDLE haudioStream,
 // audio data stream
 SPXAPI_(bool) audio_data_stream_is_handle_valid(SPXAUDIOSTREAMHANDLE haudioStream);
 SPXAPI audio_data_stream_create_from_result(SPXAUDIOSTREAMHANDLE* haudioStream, SPXRESULTHANDLE hresult);
+SPXAPI audio_data_stream_create_from_keyword_result(SPXAUDIOSTREAMHANDLE* audioStreamHandle, SPXRESULTHANDLE resultHandle);
 SPXAPI audio_data_stream_get_status(SPXAUDIOSTREAMHANDLE haudioStream, Stream_Status* status);
 SPXAPI audio_data_stream_get_reason_canceled(SPXAUDIOSTREAMHANDLE haudioStream, Result_CancellationReason* reason);
 SPXAPI audio_data_stream_get_canceled_error_code(SPXAUDIOSTREAMHANDLE haudioStream, Result_CancellationErrorCode* errorCode);
@@ -60,5 +61,6 @@ SPXAPI audio_data_stream_read_from_position(SPXAUDIOSTREAMHANDLE haudioStream, u
 SPXAPI audio_data_stream_save_to_wave_file(SPXAUDIOSTREAMHANDLE haudioStream, const char* fileName);
 SPXAPI audio_data_stream_get_position(SPXAUDIOSTREAMHANDLE haudioStream, uint32_t* position);
 SPXAPI audio_data_stream_set_position(SPXAUDIOSTREAMHANDLE haudioStream, uint32_t position);
+SPXAPI audio_data_stream_detach_input(SPXAUDIOSTREAMHANDLE audioStreamHandle);
 SPXAPI audio_data_stream_get_property_bag(SPXAUDIOSTREAMHANDLE haudioStream, SPXPROPERTYBAGHANDLE* hpropbag);
 SPXAPI audio_data_stream_release(SPXAUDIOSTREAMHANDLE haudioStream);

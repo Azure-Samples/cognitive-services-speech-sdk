@@ -154,7 +154,7 @@ void CSpxRecognitionResult::InitIntentResult(const wchar_t* intentId, const wcha
     SetStringValue(GetPropertyName(PropertyId::LanguageUnderstandingServiceResponse_JsonResult), jsonPayload ? PAL::ToString(jsonPayload).c_str() : "");
 }
 
-void CSpxRecognitionResult::InitKeywordResult(const double confidence, const uint64_t offset, const uint64_t duration, const wchar_t* keyword, ResultReason reason)
+void CSpxRecognitionResult::InitKeywordResult(const double confidence, const uint64_t offset, const uint64_t duration, const wchar_t* keyword, ResultReason reason, std::shared_ptr<ISpxAudioDataStream> stream)
 {
     SPX_DBG_TRACE_FUNCTION();
 
@@ -169,6 +169,8 @@ void CSpxRecognitionResult::InitKeywordResult(const double confidence, const uin
 
     m_resultId = PAL::CreateGuidWithoutDashes();
     m_text = keyword;
+
+    m_stream = stream;
 
     SPX_TRACE_VERBOSE("%s: resultId=%ls", __FUNCTION__, m_resultId.c_str());
 }

@@ -50,7 +50,7 @@ public:
         {
             m_result = make_shared<CSpxRecognitionResult>();
         }
-        m_result->InitKeywordResult(confidence, offset, duration, keyword.c_str(), ResultReason::RecognizedIntent);
+        m_result->InitKeywordResult(confidence, offset, duration, keyword.c_str(), ResultReason::RecognizedIntent, nullptr);
         auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
         properties->SetStringValue(KeywordConfig_EnableKeywordVerification, "true");
     }

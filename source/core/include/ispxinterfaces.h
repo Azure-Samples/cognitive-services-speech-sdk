@@ -632,6 +632,8 @@ public:
     virtual std::wstring GetFileName() const = 0;
 };
 
+class ISpxAudioDataStream;
+
 #define REASON_CANCELED_NONE static_cast<CancellationReason>(0)
 #define NO_MATCH_REASON_NONE static_cast<NoMatchReason>(0)
 
@@ -651,6 +653,8 @@ public:
     virtual uint64_t GetDuration() const = 0;
 
     virtual void SetLatency(uint64_t) = 0;
+
+    virtual std::shared_ptr<ISpxAudioDataStream> GetAudioDataStream() = 0;
 };
 
 class ISpxRecognitionResultInit : public ISpxInterfaceBaseFor<ISpxRecognitionResultInit>
@@ -663,11 +667,10 @@ public:
 class ISpxKeywordRecognitionResultInit : public ISpxInterfaceBaseFor<ISpxKeywordRecognitionResultInit>
 {
 public:
-    virtual void InitKeywordResult(const double confidence, const uint64_t offset, const uint64_t duration, const wchar_t* keyword, ResultReason reason) = 0;
+    virtual void InitKeywordResult(const double confidence, const uint64_t offset, const uint64_t duration, const wchar_t* keyword, ResultReason reason, std::shared_ptr<ISpxAudioDataStream> stream) = 0;
 };
 
 class ISpxSynthesizerEvents;
-class ISpxAudioDataStream;
 
 class ISpxSynthesisResult : public ISpxInterfaceBaseFor<ISpxSynthesisResult>
 {
@@ -702,7 +705,8 @@ class ISpxAudioDataStream : public ISpxInterfaceBaseFor<ISpxAudioDataStream>
 {
 public:
     virtual void InitFromSynthesisResult(std::shared_ptr<ISpxSynthesisResult> result) = 0;
-    virtual StreamStatus GetStatus() = 0;
+    virtual void InitFromFormat(const SPXWAVEFORMATEX& format, bool hasHeader) = 0;
+    virtual StreamStatus GetStatus() noexcept = 0;
     virtual CancellationReason GetCancellationReason() = 0;
     virtual CancellationErrorCode GetCancellationErrorCode() = 0;
     virtual bool CanReadData(uint32_t requestedSize) = 0;
@@ -712,6 +716,7 @@ public:
     virtual void SaveToWaveFile(const wchar_t* fileName) = 0;
     virtual uint32_t GetPosition() = 0;
     virtual void SetPosition(uint32_t pos) = 0;
+    virtual void DetachInput() = 0;
 };
 
 class ISpxRecognizer : public ISpxInterfaceBaseFor<ISpxRecognizer>
@@ -1333,7 +1338,7 @@ class ISpxRecoResultFactory : public ISpxInterfaceBaseFor<ISpxRecoResultFactory>
 public:
     virtual std::shared_ptr<ISpxRecognitionResult> CreateIntermediateResult(const wchar_t* resultId, const wchar_t* text, uint64_t offset, uint64_t duration) = 0;
     virtual std::shared_ptr<ISpxRecognitionResult> CreateFinalResult(const wchar_t* resultId, ResultReason reason, NoMatchReason noMatchReason, CancellationReason cancellation, CancellationErrorCode errorCode, const wchar_t* text, uint64_t offset, uint64_t duration, const wchar_t* userId = nullptr) = 0;
-    virtual std::shared_ptr<ISpxRecognitionResult> CreateKeywordResult(const double confidence, const uint64_t offset, const uint64_t duration, const wchar_t* keyword, ResultReason reason) = 0;
+    virtual std::shared_ptr<ISpxRecognitionResult> CreateKeywordResult(const double confidence, const uint64_t offset, const uint64_t duration, const wchar_t* keyword, ResultReason reason, std::shared_ptr<ISpxAudioDataStream> stream) = 0;
 };
 
 class ISpxKeywordRecognitionResult : public ISpxInterfaceBaseFor<ISpxKeywordRecognitionResult>
@@ -1679,6 +1684,13 @@ public:
 
     // Cancels all tasks.
     virtual void CancelAllTasks() = 0;
+};
+
+class ISpxRetrievable: public ISpxInterfaceBaseFor<ISpxRetrievable>
+{
+public:
+    virtual void MarkAsRetrieved() noexcept = 0;
+    virtual bool WasRetrieved() const noexcept = 0;
 };
 
 } } } } // Microsoft::CognitiveServices::Speech::Impl

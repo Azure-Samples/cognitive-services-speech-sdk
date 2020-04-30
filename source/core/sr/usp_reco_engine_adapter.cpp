@@ -1310,7 +1310,7 @@ void CSpxUspRecoEngineAdapter::OnSpeechKeywordDetected(const USP::SpeechKeywordD
         InvokeOnSite([&](const SitePtr& site)
         {
             auto factory = SpxQueryService<ISpxRecoResultFactory>(site);
-            auto result = factory->CreateKeywordResult(1.0, message.offset, message.duration, message.text.c_str(), ResultReason::RecognizedKeyword);
+            auto result = factory->CreateKeywordResult(1.0, message.offset, message.duration, message.text.c_str(), ResultReason::RecognizedKeyword, nullptr);
             auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
             namedProperties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_JsonResult), PAL::ToString(message.json).c_str());
             site->FireAdapterResult_KeywordResult(this, message.offset, result, true);
@@ -1323,7 +1323,7 @@ void CSpxUspRecoEngineAdapter::OnSpeechKeywordDetected(const USP::SpeechKeywordD
         InvokeOnSite([&](const SitePtr& site)
         {
             auto factory = SpxQueryService<ISpxRecoResultFactory>(site);
-            auto result = factory->CreateKeywordResult(1.0, message.offset, message.duration, message.text.c_str(), ResultReason::NoMatch);
+            auto result = factory->CreateKeywordResult(1.0, message.offset, message.duration, message.text.c_str(), ResultReason::NoMatch, nullptr);
             auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
             namedProperties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_JsonResult), PAL::ToString(message.json).c_str());
             site->FireAdapterResult_KeywordResult(this, message.offset, result, false);

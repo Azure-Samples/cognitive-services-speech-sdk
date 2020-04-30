@@ -153,7 +153,13 @@ void CSpxAudioDataStream::InitFromSynthesisResult(std::shared_ptr<ISpxSynthesisR
     }
 }
 
-StreamStatus CSpxAudioDataStream::GetStatus()
+void CSpxAudioDataStream::InitFromFormat(const SPXWAVEFORMATEX& format, bool hasHeader)
+{
+    m_format = SpxCopyWAVEFORMATEX(format);
+    m_hasHeader = hasHeader;
+}
+
+StreamStatus CSpxAudioDataStream::GetStatus() noexcept
 {
     auto status = StreamStatus::Unknown;
     switch(m_latestReason)

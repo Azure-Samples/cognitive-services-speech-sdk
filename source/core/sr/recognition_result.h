@@ -60,12 +60,17 @@ public:
 
     void SetLatency(uint64_t latency) override;
 
+    inline std::shared_ptr<ISpxAudioDataStream> GetAudioDataStream() final
+    {
+        return m_stream;
+    }
+
     // --- ISpxRecognitionResultInit ---
     void InitIntermediateResult(const wchar_t* resultId, const wchar_t* text, uint64_t offset, uint64_t duration) override;
     void InitFinalResult(const wchar_t* resultId, ResultReason reason, NoMatchReason noMatchReason, CancellationReason cancellation, CancellationErrorCode errorCode, const wchar_t* text, uint64_t offset, uint64_t duration) override;
 
     // --- ISpxKeywordRecognitionResultInit ---
-    void InitKeywordResult(const double confidence, const uint64_t offset, const uint64_t duration, const wchar_t* keyword, ResultReason reason) override;
+    void InitKeywordResult(const double confidence, const uint64_t offset, const uint64_t duration, const wchar_t* keyword, ResultReason reason, std::shared_ptr<ISpxAudioDataStream> stream) override;
 
     // --- ISpxKeywordRecognitionResult ---
     double GetConfidence() override;
@@ -113,6 +118,7 @@ private:
     CancellationReason m_cancellationReason;
     CancellationErrorCode m_cancellationErrorCode;
     NoMatchReason m_noMatchReason;
+    std::shared_ptr<ISpxAudioDataStream> m_stream;
 
     double m_confidence;
 

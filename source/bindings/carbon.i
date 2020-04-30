@@ -788,6 +788,7 @@
 %template(ActivityReceivedEventListener) CallbackWrapper<const Microsoft::CognitiveServices::Speech::Dialog::ActivityReceivedEventArgs&>;
 %template(ActivityReceivedEventSignal) Microsoft::CognitiveServices::Speech::EventSignal<const Microsoft::CognitiveServices::Speech::Dialog::ActivityReceivedEventArgs&>;
 
+%include <speechapi_cxx_audio_data_stream.h>
 %include <speechapi_cxx_speech_synthesis_result.h>
 %include <speechapi_cxx_speech_synthesis_eventargs.h>
 %include <speechapi_cxx_speech_synthesis_word_boundary_eventargs.h>

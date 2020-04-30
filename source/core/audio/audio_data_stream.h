@@ -47,7 +47,8 @@ public:
 
     // --- ISpxAudioDataStream ---
     void InitFromSynthesisResult(std::shared_ptr<ISpxSynthesisResult> result) override;
-    StreamStatus GetStatus() override;
+    void InitFromFormat(const SPXWAVEFORMATEX& format, bool hasHeader) final;
+    StreamStatus GetStatus() noexcept final;
     CancellationReason GetCancellationReason() override;
     CancellationErrorCode GetCancellationErrorCode() override;
     bool CanReadData(uint32_t requestedSize) override;
@@ -57,6 +58,7 @@ public:
     void SaveToWaveFile(const wchar_t* fileName) override;
     uint32_t GetPosition() override;
     void SetPosition(uint32_t pos) override;
+    inline void DetachInput() final {}
 
     // --- CSpxPullAudioOutputStream ---
     uint32_t Write(uint8_t* buffer, uint32_t size) override;

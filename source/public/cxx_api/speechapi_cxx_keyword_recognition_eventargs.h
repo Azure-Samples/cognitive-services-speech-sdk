@@ -12,7 +12,7 @@
 #include <speechapi_cxx_recognition_eventargs.h>
 #include <speechapi_cxx_keyword_recognition_result.h>
 
-
+#ifndef SWIG
 namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
@@ -85,3 +85,4 @@ private:
 };
 
 } } } // Microsoft::CognitiveServices::Speech
+#endif

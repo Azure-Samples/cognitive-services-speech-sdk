@@ -63,6 +63,8 @@ namespace ConversationTranslation {
     public:
         using HandleType = SPXRESULTHANDLE;
         using HandleInterfaceType = ISpxRecognitionResult;
+        
+        std::shared_ptr<ISpxAudioDataStream> GetAudioDataStream() override { return nullptr;  }
 
         /// <summary>
         /// Gets the language that the original recognition or text message is in

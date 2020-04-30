@@ -9,7 +9,9 @@
 
 #include <speechapi_cxx_common.h>
 #include <speechapi_cxx_recognition_result.h>
+#include <speechapi_cxx_audio_data_stream.h>
 
+#ifndef SWIG
 namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
@@ -33,4 +35,12 @@ private:
     DISABLE_DEFAULT_CTORS(KeywordRecognitionResult);
 };
 
+inline std::shared_ptr<AudioDataStream> AudioDataStream::FromResult(std::shared_ptr<KeywordRecognitionResult> result)
+{
+    auto resultHandle = result != nullptr ? static_cast<SPXRESULTHANDLE>(*result) : SPXHANDLE_INVALID;
+    auto streamHandle = Utils::CallFactoryMethodLeft(audio_data_stream_create_from_keyword_result, resultHandle);
+    return std::shared_ptr<AudioDataStream>{ new AudioDataStream(streamHandle) };
+}
+
 } } } // Microsoft::CognitiveServices::Speech
+#endif
