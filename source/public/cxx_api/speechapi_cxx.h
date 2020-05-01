@@ -80,3 +80,14 @@
 #include <speechapi_cxx_conversation_translator_events.h>
 
 #include <speechapi_cxx_auto_detect_source_lang_result.h>
+
+#include <speechapi_cxx_speaker_recognizer.h>
+#include <speechapi_cxx_speaker_verification_model.h>
+#include <speechapi_cxx_speaker_identification_model.h>
+#include <speechapi_cxx_voice_profile_client.h>
+#include <speechapi_cxx_voice_profile.h>
+#include <speechapi_cxx_voice_profile_result.h>
+#include <speechapi_cxx_voice_profile_enrollment_result.h>
+#include <speechapi_cxx_speaker_recognition_result.h>
+
+

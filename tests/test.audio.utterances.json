@@ -36,6 +36,17 @@
       ]
     }
   },
+  "MultipleUtteranceChinese": {
+    "FilePath": "audio/20secondsChinese.wav",
+    "NativeLanguage": "zh-CN",
+    "Utterances": {
+      "zh-CN": [
+        {
+          "Text": "最近新冠病毒在西雅图闹的很凶。人人都在家。 孩子们在家上学。大人在家工作。"
+        }
+      ]
+    }
+  },
   "SingleUtteranceChinese": {
     "FilePath": "audio/weatherInChinese.wav",
     "NativeLanguage": "zh-CN",

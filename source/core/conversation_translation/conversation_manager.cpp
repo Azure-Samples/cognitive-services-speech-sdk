@@ -4,7 +4,7 @@
 //
 // conversation_manager.cpp: Implementation for CSpxConversationManager C++ class
 //
-
+#include "common.h"
 #include <ctime>
 #include <azure_c_shared_utility_urlencode_wrapper.h>
 #include <azure_c_shared_utility_xlogging_wrapper.h>
@@ -12,7 +12,6 @@
 #include <http_request.h>
 #include <http_response.h>
 #include <http_headers.h>
-#include "common.h"
 #include "conversation_manager.h"
 #include "conversation_utils.h"
 #include "conversation_translator_logging.h"

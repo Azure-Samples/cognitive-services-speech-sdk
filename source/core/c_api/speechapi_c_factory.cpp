@@ -319,6 +319,32 @@ SPXAPI synthesizer_create_speech_synthesizer_from_config(SPXSYNTHHANDLE* phsynth
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
+std::shared_ptr<ISpxSpeechApiFactory> create_factory_from_speech_config(SPXSPEECHCONFIGHANDLE hspeechconfig)
+{
+    if (!speech_config_is_handle_valid(hspeechconfig))
+    {
+        throw std::runtime_error("Invalid speechconfig handle.");
+    }
+
+    Memory::CheckObjectCount(hspeechconfig);
+
+    // get the input parameters from the hspeechconfig
+    auto confighandles = CSpxSharedPtrHandleTableManager::Get<ISpxSpeechConfig, SPXSPEECHCONFIGHANDLE>();
+    auto speechconfig = (*confighandles)[hspeechconfig];
+    auto speechconfig_propertybag = SpxQueryInterface<ISpxNamedProperties>(speechconfig);
+    auto factory = SpxCreateObjectWithSite<ISpxSpeechApiFactory>("CSpxSpeechApiFactory", SpxGetRootSite());
+    SPX_IFTRUE_THROW_HR(factory == nullptr, SPXERR_RUNTIME_ERROR);
+
+    //copy the properties from the speech config into the factory
+    auto fbag = SpxQueryInterface<ISpxNamedProperties>(factory);
+    if (speechconfig_propertybag != nullptr)
+    {
+        fbag->Copy(speechconfig_propertybag.get());
+    }
+
+    return factory;
+}
+
 SPXAPI conversation_create_from_config(SPXCONVERSATIONHANDLE* pconversation, SPXSPEECHCONFIGHANDLE hspeechconfig, const char* id)
 {
     SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
@@ -332,21 +358,7 @@ SPXAPI conversation_create_from_config(SPXCONVERSATIONHANDLE* pconversation, SPX
     {
         *pconversation = SPXHANDLE_INVALID;
 
-        Memory::CheckObjectCount(hspeechconfig);
-
-        // get the input parameters from the hspeechconfig
-        auto confighandles = CSpxSharedPtrHandleTableManager::Get<ISpxSpeechConfig, SPXSPEECHCONFIGHANDLE>();
-        auto speechconfig = (*confighandles)[hspeechconfig];
-        auto speechconfig_propertybag = SpxQueryInterface<ISpxNamedProperties>(speechconfig);
-        auto factory = SpxCreateObjectWithSite<ISpxSpeechApiFactory>("CSpxSpeechApiFactory", SpxGetRootSite());
-        SPX_IFTRUE_THROW_HR(factory == nullptr, SPXERR_RUNTIME_ERROR);
-
-        //copy the properties from the speech config into the factory
-        auto fbag = SpxQueryInterface<ISpxNamedProperties>(factory);
-        if (speechconfig_propertybag != nullptr)
-        {
-            fbag->Copy(speechconfig_propertybag.get());
-        }
+        auto factory = create_factory_from_speech_config(hspeechconfig);
 
         auto conversation = factory->CreateConversationFromConfig(id);
 
@@ -410,14 +422,14 @@ SPXAPI recognizer_join_conversation(SPXCONVERSATIONHANDLE hconv, SPXRECOHANDLE h
         auto session = SpxQueryService<ISpxSession>(conversation);
         SPX_IFTRUE_THROW_HR(session == nullptr, SPXERR_RUNTIME_ERROR);
 
-        auto session_as_site = SpxQueryInterface<ISpxGenericSite>(session); //ISpxRecognizerSite
+        auto session_as_site = SpxQueryInterface<ISpxGenericSite>(session);
 
         auto conversation_transcriber_set_site = SpxQueryInterface<ISpxObjectWithSite>(conversation_transcriber);
         conversation_transcriber_set_site->SetSite(session_as_site);
 
         // hook audio input to session
         auto audio_input = SpxQueryInterface<ISpxObjectWithAudioConfig>(conversation_transcriber);
-        factory->InitSessionFromAudioInputConfig(session, audio_input->GetAudioConfig());
+        factory->InitSessionFromAudioInputConfig(SpxQueryInterface<ISpxAudioStreamSessionInit>(session), audio_input->GetAudioConfig());
 
         // hook conversation to conversation transcriber, so that I can get the participant list later
         auto transcriber_ptr = SpxQueryInterface<ISpxConversationTranscriber>(conversation_transcriber);
@@ -474,12 +486,54 @@ SPXAPI conversation_translator_create_from_config(SPXCONVERSATIONTRANSLATORHANDL
         has_audio_config->SetAudioConfig(audioInput);
 
         // NOTE:
-        // Don't initialise the conversation translator here. We need the site from the conversation
+        // Don't initialize the conversation translator here. We need the site from the conversation
         // object (the audio stream instance) which will be passed as part of the join call.
 
         // track the conversation translator handle
         auto translators = CSpxSharedPtrHandleTableManager::Get<ConversationTranslation::ISpxConversationTranslator, SPXCONVERSATIONTRANSLATORHANDLE>();
         *phandle = translators->TrackHandle(conversation_translator);
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
+SPXAPI create_voice_profile_client_from_config(SPXVOICEPROFILECLIENTHANDLE* pclient, SPXSPEECHCONFIGHANDLE hspeechconfig)
+{
+    SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, pclient == nullptr);
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, !speech_config_is_handle_valid(hspeechconfig));
+
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        *pclient = SPXHANDLE_INVALID;
+
+        auto factory = create_factory_from_speech_config(hspeechconfig);
+
+        auto client = factory->CreateVoiceProfileClientFromConfig();
+
+        // track the conversation handle
+        auto clients = CSpxSharedPtrHandleTableManager::Get<ISpxVoiceProfileClient, SPXVOICEPROFILECLIENTHANDLE>();
+        *pclient = clients->TrackHandle(client);
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
+SPXAPI recognizer_create_speaker_recognizer_from_config(SPXSPEAKERIDHANDLE* phreco, SPXSPEECHCONFIGHANDLE hspeechconfig, SPXAUDIOCONFIGHANDLE haudioInput)
+{
+    SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, phreco == nullptr);
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, !speech_config_is_handle_valid(hspeechconfig));
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, !audio_config_is_handle_valid(haudioInput));
+
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        *phreco = SPXHANDLE_INVALID;
+        auto recognizer = create_from_config(hspeechconfig, SPXHANDLE_INVALID, SPXHANDLE_INVALID, haudioInput, &ISpxSpeechApiFactory::CreateSpeakerRecognizerFromConfig);
+
+        // track the reco handle
+        auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxVoiceProfileClient, SPXSPEAKERIDHANDLE>();
+        *phreco = recohandles->TrackHandle(recognizer);
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }

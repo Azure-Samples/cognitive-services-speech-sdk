@@ -516,7 +516,39 @@ enum class ResultReason
     /// in the conversation and corresponding translation(s).
     /// Added in version 1.8.0
     /// </summary>
-    TranslatedParticipantInstantMessage = 16
+    TranslatedParticipantInstantMessage = 16,
+
+    /// <summary>
+    /// Indicates the voice profile is being enrolling and customers need to send more audio to create a voice profile.
+    /// Added in version 1.12.0
+    /// </summary>
+    EnrollingVoiceProfile = 17,
+
+    /// <summary>
+    /// The voice profile has been created.
+    /// Added in version 1.12.0
+    /// </summary>
+    EnrolledVoiceProfile = 18,
+
+    /// <summary>
+    /// Indicates successfully identify some speakers.
+    /// </summary>
+    RecognizedSpeakers = 19,
+
+    /// <summary>
+    /// Indicates successfully verified one speaker.
+    /// </summary>
+    RecognizedSpeaker = 20,
+
+    /// <summary>
+    /// Indicates a voice profile has being reset successfully.
+    /// </summary>
+    ResetVoiceProfile = 21,
+
+    /// <summary>
+    /// Indicates a voice profile has being deleted successfully.
+    /// </summary>
+    DeletedVoiceProfile = 22
 };
 
 /// <summary>
@@ -791,23 +823,6 @@ enum class ServicePropertyChannel
 namespace Transcription
 {
     /// <summary>
-    /// Defines how the service handles allocated resource after the conversation transcriber is stopped.
-    /// Added in version 1.7.0.
-    /// </summary>
-    enum class ResourceHandling
-    {
-        /// <summary>
-        /// The service destroys allocated resources, such as adapted language models.
-        /// </summary>
-        DestroyResources = 0,
-
-        /// <summary>
-        /// The service keeps allocated resources.
-        /// </summary>
-        KeepResources = 1
-    };
-
-    /// <summary>
     /// Why the participant changed event was raised
     /// Added in version 1.8.0
     /// </summary>
@@ -830,5 +845,31 @@ namespace Transcription
         Updated
     };
 }
+
+/// <summary>
+/// Defines voice profile types
+/// </summary>
+enum class VoiceProfileType
+{
+    /// <summary>
+    /// Text independent speaker identification.
+    /// </summary>
+    TextIndepdentIdentification = 1,
+
+    /// <summary>
+    ///  Text dependent speaker verification.
+    /// </summary>
+    TextDependentVerification = 2,
+
+    /// <summary>
+    /// Text independent verification.
+    /// </summary>
+    TextIndependentVerification = 3,
+
+    /// <summary>
+    ///  Conversation Diarization.
+    /// </summary>
+    ConversationDiarization = 4
+};
 
 } } } // Microsoft::CognitiveServices::Speech

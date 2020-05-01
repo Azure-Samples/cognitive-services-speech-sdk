@@ -66,5 +66,4 @@ std::shared_ptr<TInterface> TryGetInstance(THandle handle)
     return (*handles)[handle];
 }
 
-
 } } } } // Microsoft::CognitiveServices::Speech::Impl

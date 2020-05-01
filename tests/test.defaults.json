@@ -1,4 +1,5 @@
 {
+  "SpeakerRecognitionEndpoint": "https://dev.spr-frontend.speech.microsoft.com",
   "Endpoint": "",
   "DialogFunctionalTestBot": "5c88db3d-64a2-404b-b0c0-5d3e50ae36e4",
   "LanguageUnderstandingHomeAutomationAppId": "b687b851-56c5-4d31-816f-35a741a3f0be",

@@ -289,7 +289,7 @@ static void ConversationTranslatorJoin(std::shared_ptr<ISpxConversationTranslato
 
     // hook audio input to session
     auto audio_input = SpxQueryInterface<ISpxObjectWithAudioConfig>(conv_translator_with_site);
-    factory->InitSessionFromAudioInputConfig(session, audio_input->GetAudioConfig());
+    factory->InitSessionFromAudioInputConfig(SpxQueryInterface<ISpxAudioStreamSessionInit>(session), audio_input->GetAudioConfig());
 
     // Call the implementation join method
     convTranslator->JoinConversation(conv, psznickname, endOnLeave);

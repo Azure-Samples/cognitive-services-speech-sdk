@@ -86,6 +86,7 @@ namespace Config
 #define CONVERSATION_TRANSLATOR_CLIENTID "ConversationTranslatorClientId"
 #define CUSTOM_VOICE_DEPLOYMENT_ID "CustomVoiceDeploymentId"
 #define CUSTOM_VOICE_VOICE_NAME "CustomVoiceVoiceName"
+#define SPEAKER_RECOGNITION_ENDPOINT "SpeakerRecognitionEndpoint"
 
 // Audio file and utterances keys
 #define FILE_PATH "FilePath"
@@ -107,6 +108,7 @@ namespace Config
 
 #define SINGLE_UTTERANCE_ENGLISH "SingleUtteranceEnglish"
 #define SINGLE_UTTERANCE_CHINESE "SingleUtteranceChinese"
+#define MULTIPLE_UTTERANCE_CHINESE "MultipleUtteranceChinese"
 #define SINGLE_UTTERANCE_MP3 "SingleUtteranceMP3"
 #define SINGLE_UTTERANCE_OPUS "SingleUtteranceOPUS"
 #define SINGLE_UTTERANCE_A_LAW "SingleUtteranceALaw"

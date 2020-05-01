@@ -636,6 +636,7 @@ class ISpxAudioDataStream;
 
 #define REASON_CANCELED_NONE static_cast<CancellationReason>(0)
 #define NO_MATCH_REASON_NONE static_cast<NoMatchReason>(0)
+#define VOICE_PROFILE_TYPE_NONE static_cast<VoiceProfileType>(0)
 
 class ISpxRecognitionResult : public ISpxInterfaceBaseFor<ISpxRecognitionResult>
 {
@@ -656,6 +657,8 @@ public:
 
     virtual std::shared_ptr<ISpxAudioDataStream> GetAudioDataStream() = 0;
 };
+
+using RecognitionResultPtr = std::shared_ptr<ISpxRecognitionResult>;
 
 class ISpxRecognitionResultInit : public ISpxInterfaceBaseFor<ISpxRecognitionResultInit>
 {
@@ -1366,6 +1369,53 @@ public:
     virtual std::shared_ptr<ISpxSession> GetDefaultSession() = 0;
 };
 
+class ISpxVoiceProfile : public ISpxInterfaceBaseFor<ISpxVoiceProfile>
+{
+public:
+    virtual void SetProfileId(std::string&& id) = 0;
+    virtual std::string GetProfileId() const = 0;
+
+    virtual VoiceProfileType GetType() const = 0;
+};
+
+class ISpxSIModel : public ISpxInterfaceBaseFor<ISpxSIModel>
+{
+public:
+    virtual void AddProfile(const std::shared_ptr<ISpxVoiceProfile>& profile) = 0;
+    virtual std::vector<std::shared_ptr<ISpxVoiceProfile>> GetProfiles() const = 0;
+};
+
+class ISpxSVModel : public ISpxInterfaceBaseFor<ISpxSVModel>
+{
+public:
+    virtual void InitModel(const std::shared_ptr<ISpxVoiceProfile>& profile) = 0;
+    virtual std::shared_ptr<ISpxVoiceProfile> GetProfile() const = 0;
+};
+
+//todo:
+class ISpxVoiceProfileResult
+{
+public:
+
+};
+
+class ISpxVoiceProfileClient :public ISpxInterfaceBaseFor<ISpxVoiceProfileClient>
+{
+public:
+    enum class Action {Verify, Delete, Reset, Enroll};
+    virtual std::shared_ptr<ISpxVoiceProfile> Create(VoiceProfileType voiceProfileType, std::string&& locale) = 0;
+    virtual RecognitionResultPtr Identify(std::vector<std::shared_ptr<ISpxVoiceProfile>>&& profileIds) = 0;
+    virtual RecognitionResultPtr ProcessProfileAction(Action action, VoiceProfileType type, std::string&& profileId) = 0;
+};
+
+class ISpxHttpAudioStreamSession :public ISpxInterfaceBaseFor<ISpxHttpAudioStreamSession>
+{
+public:
+    virtual std::string CreateVoiceProfile(VoiceProfileType type, std::string&& locale) = 0;
+    virtual RecognitionResultPtr StartStreamingAudioAndWaitForResult(bool enroll, VoiceProfileType type, std::vector<std::string>&& ids) = 0;
+    virtual RecognitionResultPtr ModifyVoiceProfile(bool reset, VoiceProfileType type, std::string&& id) = 0;
+};
+
 class ISpxSpeechApiFactory : public ISpxInterfaceBaseFor<ISpxSpeechApiFactory>
 {
 public:
@@ -1374,7 +1424,9 @@ public:
     virtual std::shared_ptr<ISpxDialogServiceConnector> CreateDialogServiceConnectorFromConfig(std::shared_ptr<ISpxAudioConfig> audioInput) = 0;
     virtual std::shared_ptr<ISpxRecognizer> CreateTranslationRecognizerFromConfig(std::shared_ptr<ISpxAudioConfig> audioInput) = 0;
     virtual std::shared_ptr<ISpxConversation> CreateConversationFromConfig(const char* id) = 0;
-    virtual void InitSessionFromAudioInputConfig(std::shared_ptr<ISpxSession> session, std::shared_ptr<ISpxAudioConfig> audioInput) = 0;
+    virtual void InitSessionFromAudioInputConfig(std::shared_ptr<ISpxAudioStreamSessionInit> session, std::shared_ptr<ISpxAudioConfig> audioInput) = 0;
+    virtual std::shared_ptr<ISpxVoiceProfileClient> CreateVoiceProfileClientFromConfig() = 0;
+    virtual std::shared_ptr<ISpxVoiceProfileClient> CreateSpeakerRecognizerFromConfig(std::shared_ptr<ISpxAudioConfig> audioInput) = 0;
 };
 
 class ISpxSpeechSynthesisApiFactory : public ISpxInterfaceBaseFor<ISpxSpeechSynthesisApiFactory>
@@ -1618,6 +1670,21 @@ public:
     virtual void InitAuthorizationToken(const char * authToken, const char * region) = 0;
     virtual void SetServiceProperty(std::string name, std::string value, ServicePropertyChannel channel) = 0;
     virtual void SetProfanity(ProfanityOption profanity) = 0;
+};
+
+class ISpxHttpRecoEngineAdapter : public ISpxInterfaceBaseFor<ISpxHttpRecoEngineAdapter>
+{
+public:
+    virtual std::string CreateVoiceProfile(VoiceProfileType type, std::string&& locale) const = 0;
+    virtual RecognitionResultPtr ModifyVoiceProfile(bool reset, VoiceProfileType type, std::string&& id) const = 0;
+    virtual void SetFormat(const SPXWAVEFORMATEX* pformat, VoiceProfileType type, std::vector<std::string>&& profileIds, bool enroll) = 0;
+    virtual void ProcessAudio(const DataChunkPtr& audioChunk) = 0;
+    virtual void FlushAudio() = 0;
+    virtual RecognitionResultPtr GetResult() = 0;
+};
+
+class ISpxHttpRecoEngineAdapterSite : public ISpxInterfaceBaseFor<ISpxHttpRecoEngineAdapterSite>
+{
 };
 
 class ISpxSpeechTranslationConfig : public ISpxInterfaceBaseFor<ISpxSpeechTranslationConfig>

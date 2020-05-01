@@ -11,6 +11,8 @@
 #include <vector>
 #include <unordered_map>
 
+#include "speechapi_cxx_enums.h"
+
 namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
@@ -143,5 +145,7 @@ private:
     static constexpr auto WS = "ws://";
     static constexpr auto WSS = "wss://";
 };
+
+CancellationErrorCode HttpStatusCodeToCancellationErrorCode(int httpStatusCode);
 
 } } } } // Microsoft::CognitiveServices::Speech::Impl

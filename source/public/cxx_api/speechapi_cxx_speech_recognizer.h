@@ -47,7 +47,7 @@ public:
         SPXRECOHANDLE hreco;
         SPX_THROW_ON_FAIL(::recognizer_create_speech_recognizer_from_config(
             &hreco,
-            HandleOrInvalid<SPXAUDIOCONFIGHANDLE,SpeechConfig>(speechconfig),
+            HandleOrInvalid<SPXSPEECHCONFIGHANDLE, SpeechConfig>(speechconfig),
             HandleOrInvalid<SPXAUDIOCONFIGHANDLE, Audio::AudioConfig>(nullptr)));
         return std::make_shared<SpeechRecognizer>(hreco);
     }
@@ -103,7 +103,7 @@ public:
         std::shared_ptr<SpeechConfig> speechconfig,
         std::shared_ptr<SourceLanguageConfig> sourceLanguageConfig,
         std::shared_ptr<Audio::AudioConfig> audioInput = nullptr)
-    {   
+    {
         SPXRECOHANDLE hreco;
         SPX_THROW_ON_FAIL(::recognizer_create_speech_recognizer_from_source_lang_config(
             &hreco,
@@ -125,7 +125,7 @@ public:
         std::shared_ptr<SpeechConfig> speechconfig,
         const SPXSTRING& sourceLanguage,
         std::shared_ptr<Audio::AudioConfig> audioInput = nullptr)
-    {   
+    {
         return FromConfig(speechconfig, SourceLanguageConfig::FromLanguage(sourceLanguage), audioInput);
     }
 

@@ -68,7 +68,7 @@ namespace Impl {
         /// Gets whether or not the connection should be secure
         /// </summary>
         bool IsSecure() const;
-        
+
         /// <summary>
         /// Gets the host name only (e.g. www.contoso.com)
         /// </summary>
@@ -214,7 +214,7 @@ namespace Impl {
         /// </summary>
         /// <returns>The trusted cert, or an empty string if none was set.</returns>
         std::string SingleTrustedCertificate() const;
-        
+
         /// <summary>
         /// When using OpenSSL only: sets a single trusted cert, optionally w/o Certificate
         /// Revocation List (CRL) checks. This is meant to be used in a firewall setting with

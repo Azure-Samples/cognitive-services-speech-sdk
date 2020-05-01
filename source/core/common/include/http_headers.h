@@ -13,6 +13,7 @@ namespace USP {
     namespace headers {
         constexpr auto userAgent = "User-Agent";
         constexpr auto ocpApimSubscriptionKey = "Ocp-Apim-Subscription-Key";
+        constexpr auto apimSubscriptionKey = "apim-subscription-id";
         constexpr auto authorization = "Authorization";
         constexpr auto searchDelegationRPSToken = "X-Search-DelegationRPSToken";
         constexpr auto audioResponseFormat = "X-Output-AudioCodec";

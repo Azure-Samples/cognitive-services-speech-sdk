@@ -14,8 +14,6 @@ namespace CognitiveServices {
 namespace Speech {
 namespace Impl {
 
-
-
 class CSpxConversation :
     public ISpxConversation,
     public ISpxConversationWithImpl,

@@ -1,4 +1,5 @@
 {
+  "SpeakerRecognitionEndpoint": "https://dev.spr-frontend.speech.microsoft.com",
   "Endpoint": "",
   "TurnOnTheLampAudio": "TurnOnTheLamp.wav",
   "TwoSpeakersAudioUtterance": "good morning steve",

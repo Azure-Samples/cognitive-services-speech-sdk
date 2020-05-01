@@ -41,6 +41,7 @@ set(SOURCES
     "${SRC_DIR}/language_config_tests.cpp"
     "${SRC_DIR}/conversation_tests.cpp"
     "${SRC_DIR}/keyword_recognizer_tests.cpp"
+    "${SRC_DIR}/speaker_recognition_tests.cpp"
     )
 
 if(EXTENSION_AUDIOCOMPRESSION_ENABLED)

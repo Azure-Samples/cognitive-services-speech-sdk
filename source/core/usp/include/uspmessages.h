@@ -10,6 +10,7 @@
 #include <stddef.h>
 #include <string>
 #include <map>
+#include <list>
 
 namespace Microsoft {
 namespace CognitiveServices {

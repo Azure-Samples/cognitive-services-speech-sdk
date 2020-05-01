@@ -51,5 +51,6 @@ target_link_libraries(factory
                       PRIVATE tts_usp
                       PRIVATE conversation_translation
                       PRIVATE common
+                      PRIVATE speaker_recognition
                       PRIVATE ${CMAKE_DL_LIBS})
 

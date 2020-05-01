@@ -18,6 +18,7 @@ set(HEADERS_PRIVATE
     "${SRC_DIR}/stdafx.h"
     "${SRC_DIR}/event_helpers.h"
     "${SRC_DIR}/handle_helpers.h"
+    "${SRC_DIR}/speechapi_c_utils.h"
     "${SRC_DIR}/async_helpers.h"
     )
 
@@ -54,6 +55,7 @@ set(SOURCES
     "${SRC_DIR}/speechapi_c_participant.cpp"
     "${SRC_DIR}/speechapi_c_auto_detect_source_lang_config.cpp"
     "${SRC_DIR}/speechapi_c_source_lang_config.cpp"
+    "${SRC_DIR}/speechapi_c_speaker_recognition.cpp"
     "${SRC_DIR}/stdafx.cpp"
     )
 
