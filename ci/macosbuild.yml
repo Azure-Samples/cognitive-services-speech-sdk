@@ -8,7 +8,7 @@ parameters:
 jobs:
 - job: ${{ parameters.jobName }}
   dependsOn: Pre
-  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' ${{ parameters.jobName }} '))
+  condition: and(succeeded('Pre'), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' ${{ parameters.jobName }} '))
   pool:
     name: Hosted macOS
   timeoutInMinutes: 240

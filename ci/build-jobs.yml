@@ -37,7 +37,7 @@ jobs:
 
 - job: WindowsSdlBuild
   dependsOn: Pre
-  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' WindowsSdlBuild '))
+  condition: and(succeeded('Pre'), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' WindowsSdlBuild '))
   pool:
     name: Hosted VS2017
   timeoutInMinutes: 120
@@ -186,7 +186,7 @@ jobs:
 # Phase responsible to upload to TSA database
 - job: TsaUpload
   dependsOn: [Pre, WindowsSdlBuild, WindowsSDLFortifyJava]
-  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' TsaUpload '))
+  condition: and(succeeded('Pre', 'WindowsSdlBuild', 'WindowsSDLFortifyJava'), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' TsaUpload '))
   pool:
     name: Hosted VS2017
   timeoutInMinutes: 30
@@ -239,7 +239,7 @@ jobs:
 # For now, it is triggered by a separate build definition in AzureDevOps: "CompEval Test"
 - job: CompEvalTest
   dependsOn: [Pre, WindowsBuild]
-  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' CompEvalTest '))
+  condition: and(succeeded('Pre', 'WindowsBuild'), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' CompEvalTest '))
   pool:
     name: Hosted VS2017
   timeoutInMinutes: 400
@@ -298,7 +298,7 @@ jobs:
 
 - job: WindowsUwpBuild
   dependsOn: Pre
-  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' WindowsUwpBuild '))
+  condition: and(succeeded('Pre'), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' WindowsUwpBuild '))
   pool:
     name: Hosted VS2017
   timeoutInMinutes: 30
@@ -779,7 +779,7 @@ jobs:
 
 - job: WackTest
   dependsOn: [Pre, NuGet]
-  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' WackTest '))
+  condition: and(succeeded('Pre', 'NuGet'), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' WackTest '))
   pool:
     name: Hosted VS2017
   timeoutInMinutes: 30
@@ -827,7 +827,7 @@ jobs:
 
 - job: RemoteConversationTranscriberJavaBuild
   dependsOn: [Pre, JavaJrePackage]
-  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' RemoteConversationTranscriberJavaBuild '))
+  condition: and(succeeded('Pre', 'JavaJrePackage'), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' RemoteConversationTranscriberJavaBuild '))
   pool:
     name: Hosted Ubuntu 1604
   timeoutInMinutes: 240
@@ -922,7 +922,7 @@ jobs:
 
 - job: RemoteConversationTranscriberJavaMavenBuild
   dependsOn: [Pre]
-  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' RemoteConversationTranscriberJavaMavenBuild '))
+  condition: and(succeeded('Pre'), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' RemoteConversationTranscriberJavaMavenBuild '))
   pool:
     name: Hosted Ubuntu 1604
   timeoutInMinutes: 240
@@ -990,7 +990,7 @@ jobs:
 
 - job: NuGetLinuxTest
   dependsOn: [Pre, NuGet, WindowsBuild, LinuxBuild]
-  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' NuGetLinuxTest '))
+  condition: and(succeeded('Pre', 'NuGet', 'WindowsBuild', 'LinuxBuild'), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' NuGetLinuxTest '))
   pool:
     name: Hosted Ubuntu 1604
   timeoutInMinutes: 240
@@ -1020,7 +1020,8 @@ jobs:
         Linux/Linux-arm*/Release/public/lib/libMicrosoft.CognitiveServices.Speech.core.so
   - template: get-docker-image.yml
     parameters:
-      imageBase: oobedevdnc20_ubuntu1604_x64 oobedevdnc21_ubuntu1804_x64 oobedevdnc20_debian9_x64 oobedevdnc21_mcr_x64 oobedevdnc21_centos7_x64 oobedevdnc21_centos8_x64
+      #imageBase: oobedevdnc20_ubuntu1604_x64 oobedevdnc21_ubuntu1804_x64 oobedevdnc20_debian9_x64 oobedevdnc21_mcr_x64 oobedevdnc21_centos7_x64 oobedevdnc21_centos8_x64
+      imageBase: oobedevdnc21_ubuntu1804_x64 oobedevdnc21_centos7_x64 oobedevdnc21_centos8_x64
       outvarImage: DOCKER_IMAGES
   - bash: |
       set -u -e -x -o pipefail
@@ -1177,7 +1178,7 @@ jobs:
 
 - job: NuGetOsxTest
   dependsOn: [Pre, NuGet, WindowsBuild]
-  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' NuGetOsxTest '))
+  condition: and(succeeded('Pre', 'NuGet', 'WindowsBuild'), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' NuGetOsxTest '))
   pool:
     name: Hosted macOS
   timeoutInMinutes: 240
@@ -1288,7 +1289,7 @@ jobs:
     ANDROID_NDK: $(System.ArtifactsDirectory)\ndk-r16b
     ANDROID_GST: $(Build.SourcesDirectory)\external\gstreamer-android
   dependsOn: Pre
-  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' AndroidBuild '))
+  condition: and(succeeded('Pre'), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' AndroidBuild '))
   pool:
     name: Hosted VS2017
   timeoutInMinutes: 30
@@ -1461,7 +1462,7 @@ jobs:
 
 - job: AndroidAppcenterTest
   dependsOn: [Pre, AndroidBuild]
-  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' AndroidAppcenterTest '))
+  condition: and(succeeded('Pre', 'AndroidBuild'), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' AndroidAppcenterTest '))
   pool:
     name: Hosted VS2017
   timeoutInMinutes: 60
@@ -1592,7 +1593,7 @@ jobs:
 
 - job: AndroidPackage
   dependsOn: [Pre, AndroidBuild]
-  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' AndroidPackage '))
+  condition: and(succeeded('Pre', 'AndroidBuild'), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' AndroidPackage '))
   pool:
     name: Hosted VS2017
   timeoutInMinutes: 30
@@ -1706,7 +1707,7 @@ jobs:
 
 - job: LinuxBuild
   dependsOn: Pre
-  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' LinuxBuild '))
+  condition: and(succeeded('Pre'), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' LinuxBuild '))
   pool:
     name: Hosted Ubuntu 1604
   timeoutInMinutes: 240
@@ -1799,7 +1800,7 @@ jobs:
 
 - job: LinuxProxyTest
   dependsOn: [Pre, LinuxBuild]
-  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' LinuxProxyTest '))
+  condition: and(succeeded('Pre', 'LinuxBuild'), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' LinuxProxyTest '))
   pool:
     name: Hosted Ubuntu 1604
   steps:
@@ -1833,7 +1834,7 @@ jobs:
 
 - job: macOSProxyTest
   dependsOn: [Pre, macOSProxyBuild, JavaJrePackageMacOSProxy]
-  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' macOSProxyTest '))
+  condition: and(succeeded('Pre', 'macOSProxyBuild', 'JavaJrePackageMacOSProxy'), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' macOSProxyTest '))
   pool:
     name: Hosted macOS
   variables:
@@ -1954,7 +1955,7 @@ jobs:
 
 - job: LinuxPythonOobeTest
   dependsOn: [Pre, LinuxBuild]
-  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' LinuxPythonOobeTest '))
+  condition: and(succeeded('Pre', 'LinuxBuild'), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' LinuxPythonOobeTest '))
   pool:
     name: Hosted Ubuntu 1604
   timeoutInMinutes: 70
@@ -2029,7 +2030,7 @@ jobs:
 
 - job: BuildPythonDocs
   dependsOn: [Pre, LinuxBuild]
-  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' BuildPythonDocs '))
+  condition: and(succeeded('Pre', 'LinuxBuild'), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' BuildPythonDocs '))
   pool:
     name: Hosted Ubuntu 1604
   timeoutInMinutes: 30
@@ -2103,7 +2104,7 @@ jobs:
 
 - job: LinuxDrop
   dependsOn: [Pre, LinuxBuild, LinuxDockerBuild]
-  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' LinuxDrop '))
+  condition: and(succeeded('Pre', 'LinuxBuild', 'LinuxDockerBuild'), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' LinuxDrop '))
   pool:
     name: Hosted Ubuntu 1604
   timeoutInMinutes: 150
@@ -2219,7 +2220,7 @@ jobs:
 
 - job: IosBuild
   dependsOn: Pre
-  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' IosBuild '))
+  condition: and(succeeded('Pre'), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' IosBuild '))
   pool:
     name: Hosted macOS
   timeoutInMinutes: 90
@@ -2650,7 +2651,7 @@ jobs:
 
 - job: Doxygen
   dependsOn: Pre
-  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' Doxygen '))
+  condition: and(succeeded('Pre'), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' Doxygen '))
   pool:
     name: Hosted macOS
   timeoutInMinutes: 30
@@ -2748,7 +2749,7 @@ jobs:
 
 - job: WindowsSDLFortifyJava
   dependsOn: [Pre, WindowsBuild]
-  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' WindowsSDLFortifyJava '))
+  condition: and(succeeded('Pre', 'WindowsBuild'), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' WindowsSDLFortifyJava '))
   pool:
     name: Carbon
     demands: FORTIFY
@@ -2798,7 +2799,7 @@ jobs:
 
 - job: CheckSignatures
   dependsOn: [Pre, NuGet, AndroidPackage, JavaJrePackage, WindowsBuild, UnityBuild]
-  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' CheckSignatures '))
+  condition: and(succeeded('Pre', 'NuGet', 'AndroidPackage', 'JavaJrePackage', 'WindowsBuild', 'UnityBuild'), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' CheckSignatures '))
   pool:
     name: Hosted VS2017
   timeoutInMinutes: 60
@@ -2845,7 +2846,7 @@ jobs:
 
 - job: UnityBuild
   dependsOn: [Pre, AndroidBuild, WindowsBuild, WindowsUwpBuild, IosBuild]
-  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' UnityBuild '))
+  condition: and(succeeded('Pre', 'AndroidBuild', 'WindowsBuild', 'WindowsUwpBuild', 'IosBuild'), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' UnityBuild '))
   pool:
     # The "Skyman Unity On-Prem" agent pool currently contains a single build
     # agent called "Skyman". It has three licensed Unity versions installed
@@ -2927,7 +2928,7 @@ jobs:
 
 - job: DocFX
   dependsOn: Pre
-  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' DocFX '))
+  condition: and(succeeded('Pre'), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' DocFX '))
   pool:
     name: Hosted VS2017
   steps:

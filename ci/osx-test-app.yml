@@ -6,7 +6,7 @@ jobs:
   dependsOn: [Pre, macOSBuild]
   condition: |
     and(
-      succeeded(),
+      succeeded(Pre, macOSBuild),
       contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' macOSBuildSampleApp '),
       eq(dependencies.Pre.outputs['var.SPEECHSDK_SIGN'], 'true')
     )
