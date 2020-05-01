@@ -123,6 +123,9 @@ namespace Microsoft.CognitiveServices.Speech.Internal
         public static extern SPXHR recognizer_create_intent_recognizer_from_config(out SPXRECOHANDLE recoHandle, InteropSafeHandle speechconfig, InteropSafeHandle audioInput);
 
         [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
+        public static extern SPXHR recognizer_create_keyword_recognizer_from_audio_config(out SPXRECOHANDLE recoHandle, InteropSafeHandle audioInput);
+
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR synthesizer_create_speech_synthesizer_from_config(out SPXSYNTHHANDLE synthHandle, InteropSafeHandle speechconfig, InteropSafeHandle audioOutput);
 
         [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]

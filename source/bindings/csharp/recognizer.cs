@@ -301,7 +301,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// The purpose of this method is to prevent possible race condition if async recognitions are not awaited.
         /// </summary>
         /// <param name="recoImplAction">Actual implementation.</param>
-        protected void DoAsyncRecognitionAction(Action recoImplAction)
+        internal void DoAsyncRecognitionAction(Action recoImplAction)
         {
             lock (recognizerLock)
             {
@@ -400,6 +400,7 @@ namespace Microsoft.CognitiveServices.Speech
 
         internal delegate IntPtr GetRecognizerFromConfigDelegate(out IntPtr phreco, InteropSafeHandle speechconfig, InteropSafeHandle audioInput);
         internal delegate IntPtr GetRecognizerFromConfigWithLanguageConfigDelegate(out IntPtr phreco, InteropSafeHandle speechconfig, InteropSafeHandle sourceLanguageConfig, InteropSafeHandle audioInput);
+        internal delegate IntPtr GetRecognizerFromAudioConfigDelegate(out IntPtr reco, InteropSafeHandle audioConfig);
 
         internal static InteropSafeHandle FromConfig(GetRecognizerFromConfigDelegate fromConfig, SpeechConfig speechConfig, Audio.AudioConfig audioConfig)
         {
@@ -454,6 +455,19 @@ namespace Microsoft.CognitiveServices.Speech
             InteropSafeHandle recoHandle = new InteropSafeHandle(recoHandlePtr, Internal.Recognizer.recognizer_handle_release);
             GC.KeepAlive(speechConfig);
             GC.KeepAlive(autoDetectSourceLanguageConfig);
+            if (audioConfig != null)
+            {
+                GC.KeepAlive(audioConfig);
+            }
+            return recoHandle;
+        }
+
+        internal static InteropSafeHandle FromConfig(GetRecognizerFromAudioConfigDelegate fromConfig, Audio.AudioConfig audioConfig)
+        {
+            IntPtr recoHandlePtr = IntPtr.Zero;
+            var audioHandle = audioConfig?.configHandle;
+            ThrowIfFail(fromConfig(out recoHandlePtr, audioHandle));
+            InteropSafeHandle recoHandle = new InteropSafeHandle(recoHandlePtr, Internal.Recognizer.recognizer_handle_release);
             if (audioConfig != null)
             {
                 GC.KeepAlive(audioConfig);

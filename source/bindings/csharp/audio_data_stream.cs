@@ -31,6 +31,18 @@ namespace Microsoft.CognitiveServices.Speech
             return new AudioDataStream(streamHandle);
         }
 
+        /// <summary>
+        /// Obtains the memory backed AudioDataStream associated with a given KeywordRecognition result.
+        /// </summary>
+        /// <param name="result">The keyword recognition result.</param>
+        /// <returns>An audio stream with the input to the KeywordRecognizer starting from right before the Keyword.</returns>
+        public static AudioDataStream FromResult(KeywordRecognitionResult result)
+        {
+            IntPtr streamHandle = IntPtr.Zero;
+            ThrowIfFail(Internal.AudioDataStream.audio_data_stream_create_from_keyword_result(out streamHandle, result.resultHandle));
+            return new AudioDataStream(streamHandle);
+        }
+
         internal AudioDataStream(IntPtr streamHandlePtr)
         {
             ThrowIfNull(streamHandlePtr);
@@ -172,6 +184,15 @@ namespace Microsoft.CognitiveServices.Speech
             uint pos;
             ThrowIfFail(Internal.AudioDataStream.audio_data_stream_get_position(streamHandle, out pos));
             return pos;
+        }
+
+        /// <summary>
+        /// Stops any more data from getting to the stream.
+        /// </summary>
+        public void DetachInput()
+        {
+            ThrowIfNull(streamHandle, "Invalid stream handle.");
+            ThrowIfFail(Internal.AudioDataStream.audio_data_stream_detach_input(streamHandle));
         }
 
         /// <summary>

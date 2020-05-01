@@ -53,7 +53,7 @@ public:
 private:
 #endif
     /// <summary>
-    /// Speech recognition event result.
+    /// Keyword recognition event result.
     /// </summary>
     std::shared_ptr<KeywordRecognitionResult> Result;
 

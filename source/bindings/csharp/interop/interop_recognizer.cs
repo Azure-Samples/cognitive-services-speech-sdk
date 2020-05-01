@@ -74,6 +74,14 @@ namespace Microsoft.CognitiveServices.Speech.Internal
         public static extern SPXHR recognizer_start_keyword_recognition_async(InteropSafeHandle recoHandle, InteropSafeHandle hkeyword, out SPXASYNCHANDLE asyncHandle);
         [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR recognizer_start_keyword_recognition_async_wait_for(SPXASYNCHANDLE asyncHandle, UInt32 milliseconds);
+
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
+        public static extern SPXHR recognizer_recognize_keyword_once(InteropSafeHandle recoHandle, InteropSafeHandle keyword, out SPXRESULTHANDLE result);
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
+        public static extern SPXHR recognizer_recognize_keyword_once_async(SPXRECOHANDLE recoHandle, InteropSafeHandle keyword, out SPXASYNCHANDLE asyncHandle);
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
+        public static extern SPXHR recognizer_recognize_keyword_once_async_wait_for(SPXASYNCHANDLE asyncHandle, UInt32 milliseconds, out SPXRESULTHANDLE phresult);
+
         [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR recognizer_stop_keyword_recognition(SPXRECOHANDLE recoHandle);
         [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]

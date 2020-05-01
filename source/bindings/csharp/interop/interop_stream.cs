@@ -20,6 +20,8 @@ namespace Microsoft.CognitiveServices.Speech.Internal
         [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR audio_data_stream_create_from_result(out SPXAUDIOSTREAMHANDLE audioStream, InteropSafeHandle result);
         [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
+        public static extern SPXHR audio_data_stream_create_from_keyword_result(out SPXAUDIOSTREAMHANDLE audioStream, InteropSafeHandle result);
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR audio_data_stream_get_status(InteropSafeHandle audioStream, out StreamStatus status);
         [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR audio_data_stream_get_reason_canceled(InteropSafeHandle audioStream, out CancellationReason reason);
@@ -39,6 +41,8 @@ namespace Microsoft.CognitiveServices.Speech.Internal
         public static extern SPXHR audio_data_stream_get_position(InteropSafeHandle audioStream, out UInt32 position);
         [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR audio_data_stream_set_position(InteropSafeHandle audioStream, UInt32 position);
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
+        public static extern SPXHR audio_data_stream_detach_input(InteropSafeHandle audioStream);
         [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR audio_data_stream_get_property_bag(InteropSafeHandle audioStream, out SPXPROPERTYBAGHANDLE propbag);
         [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
