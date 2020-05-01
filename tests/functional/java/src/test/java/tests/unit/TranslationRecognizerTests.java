@@ -41,6 +41,7 @@ import tests.TestHelper;
 public class TranslationRecognizerTests {
     private final Integer FIRST_EVENT_ID = 1;
     private static String authorizationToken;
+    private double similarityScoreThresholdTranslation = 0.80;
 
     @BeforeClass
     static public void setUpBeforeClass() throws Exception {
@@ -241,6 +242,7 @@ public class TranslationRecognizerTests {
 
         assertNotNull(s);
 
+        String englishTranslation = Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).Utterances.get("en-US")[0].Text;
         String language = "en-US";
         s.setSpeechRecognitionLanguage(language);
         s.addTargetLanguage(language);
@@ -272,11 +274,14 @@ public class TranslationRecognizerTests {
         assertNotNull(res);
         TestHelper.OutputResult(res);
         assertTrue(ResultReason.TranslatedSpeech == res.getReason());
-        assertEquals("What's the weather like?", res.getText());
 
         assertNotNull(res.getProperties());
         assertEquals(1, res.getTranslations().size());
-        assertEquals("What's the weather like?", res.getTranslations().get("en")); // translated text
+        String translationResult = res.getTranslations().get("en");
+        System.out.println("translationResult: " + translationResult);
+        double similarityRatio = TestHelper.LevenshteinRatio(englishTranslation.toLowerCase(), translationResult.toLowerCase());
+        System.out.println("similarityRatio: " + String.valueOf(similarityRatio));
+        assertTrue(similarityRatio > similarityScoreThresholdTranslation);
 
         // wait until we get the SessionStopped event.
         long now = System.currentTimeMillis();
@@ -367,7 +372,6 @@ public class TranslationRecognizerTests {
         assertNotNull(res);
         TestHelper.OutputResult(res);
         assertTrue(res.getReason() == ResultReason.TranslatedSpeech);
-        assertEquals("What's the weather like?", res.getText());
 
         // wait until we get the SessionStopped event.
         long now = System.currentTimeMillis();
@@ -548,6 +552,7 @@ public class TranslationRecognizerTests {
         SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
             Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
 
+        String germanTranslation = Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).Utterances.get("de")[0].Text;
         s.setSpeechRecognitionLanguage("en-US");
         s.addTargetLanguage("de");
         s.setVoiceName("Microsoft Server Speech Text to Speech Voice (de-DE, Hedda)");
@@ -574,9 +579,12 @@ public class TranslationRecognizerTests {
         assertTrue(audioLength.get() > 0);
         assertEquals(1, sessionStoppedCount.get());
         assertEquals(ResultReason.TranslatedSpeech, res.getReason());
-        assertEquals("What's the weather like?", res.getText());
         assertEquals(1, res.getTranslations().size());
-        assertEquals("Wie ist das Wetter?", res.getTranslations().get("de")); // translated text
+        String translationResult = res.getTranslations().get("de");
+        System.out.println("translationResult: " + translationResult);
+        double similarityRatio = TestHelper.LevenshteinRatio(germanTranslation.toLowerCase(), translationResult.toLowerCase());
+        System.out.println("similarityRatio: " + String.valueOf(similarityRatio));
+        assertTrue(similarityRatio > similarityScoreThresholdTranslation);
         r.close();
         s.close();
     }
@@ -664,6 +672,7 @@ public class TranslationRecognizerTests {
         SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
             Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
 
+        String germanTranslation = Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).Utterances.get("de")[0].Text;
         s.setServiceProperty("from", "en-US", ServicePropertyChannel.UriQueryParameter);
         s.setServiceProperty("to", "de", ServicePropertyChannel.UriQueryParameter);
 
@@ -672,9 +681,12 @@ public class TranslationRecognizerTests {
         TranslationRecognitionResult res = r.recognizeOnceAsync().get();
 
         assertEquals(ResultReason.TranslatedSpeech, res.getReason());
-        assertEquals("What's the weather like?", res.getText());
         assertEquals(1, res.getTranslations().size());
-        assertEquals("Wie ist das Wetter?", res.getTranslations().get("de")); // translated text
+        String translationResult = res.getTranslations().get("de");
+        System.out.println("translationResult: " + translationResult);
+        double similarityRatio = TestHelper.LevenshteinRatio(germanTranslation.toLowerCase(), translationResult.toLowerCase());
+        System.out.println("similarityRatio: " + String.valueOf(similarityRatio));
+        assertTrue(similarityRatio > similarityScoreThresholdTranslation);
 
         r.close();
         s.close();
@@ -935,6 +947,7 @@ public class TranslationRecognizerTests {
         String endpointUrl = "wss://northeurope.sr.speech.microsoft.com/speech/translation/" + mode + "/mstranslator/v1?language=en-US";
         SpeechTranslationConfig configFromEndpoint = SpeechTranslationConfig.fromEndpoint(URI.create(endpointUrl), Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key);
         assertNotNull(configFromEndpoint);
+        String germanTranslation = Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).Utterances.get("de")[0].Text;
         String autoDetectSrcLanguageProperty = "Auto-Detect-Source-Languages";
         String sourceLanguages = "en-US,de-DE";
         configFromEndpoint.setProperty(autoDetectSrcLanguageProperty, sourceLanguages);
@@ -1030,12 +1043,15 @@ public class TranslationRecognizerTests {
         assertNotNull(recognizedResult);
         TestHelper.OutputResult(recognizedResult);
         assertTrue(ResultReason.TranslatedSpeech == recognizedResult.getReason());
-        assertEquals("What's the weather like?", recognizedResult.getText());
 
         assertNotNull(recognizedResult.getProperties());
         assertEquals("en-US", recognizedResult.getProperties().getProperty("Auto-Detect-Source-Language-Result"));
         assertEquals(1, recognizedResult.getTranslations().size());
-        assertEquals("Wie ist das Wetter?", recognizedResult.getTranslations().get("de-DE")); // translated text
+        String translationResult = recognizedResult.getTranslations().get("de-DE");
+        System.out.println("translationResult: " + translationResult);
+        double similarityRatio = TestHelper.LevenshteinRatio(germanTranslation.toLowerCase(), translationResult.toLowerCase());
+        System.out.println("similarityRatio: " + String.valueOf(similarityRatio));
+        assertTrue(similarityRatio > similarityScoreThresholdTranslation);
         recognizedResult.close();
         // assertTrue(recognizingResults.size() > 0);
         for (TranslationRecognitionResult recognizingResult : recognizingResults)

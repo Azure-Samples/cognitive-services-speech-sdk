@@ -8,6 +8,8 @@
 
 @interface SPXTestHelpers : NSObject
 + (NSString *) normalizeText:(NSString *) input;
++ (double) levenshteinSimilarityRatio:(NSString *)stringA withString:(NSString *)stringB;
++ (NSUInteger) levenshteinDistance:(NSString *)stringA to:(NSString *)stringB;
 
 @end
 #endif /* SPXTestHelpers_h */

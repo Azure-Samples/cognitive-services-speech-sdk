@@ -25,6 +25,7 @@
 
 
     double timeoutInSeconds;
+    double similarityScoreThresholdTranslation;
 }
     @property (nonatomic, assign) NSString* speechKey;
     @property (nonatomic, assign) NSString* serviceRegion;
@@ -37,6 +38,7 @@
 - (void)setUp {
     [super setUp];
     timeoutInSeconds = 20.;
+    similarityScoreThresholdTranslation = 0.80;
     weatherTextEnglish = @"What's the weather like?";
     weatherTextGerman = @"Wie ist das Wetter?";
     weatherTextChinese =  @"天气怎么样?";
@@ -112,14 +114,17 @@
 
     translationDictionary = result.translations;
 
-    id germanTranslation = [SPXTestHelpers normalizeText:[translationDictionary valueForKey:@"de"]];
-    id chineseTranslation = [SPXTestHelpers normalizeText:[translationDictionary valueForKey:@"zh-Hans"]];
+    NSString *germanTranslation = (NSString *)[SPXTestHelpers normalizeText:[translationDictionary valueForKey:@"de"]];
+    NSString *chineseTranslation = (NSString *)[SPXTestHelpers normalizeText:[translationDictionary valueForKey:@"zh-Hans"]];
 
     NSLog(@"German Translation: %@", germanTranslation);
     NSLog(@"Chinese Translation: %@", chineseTranslation);
 
-    XCTAssertEqualObjects(germanTranslation, normalizedWeatherTextGerman);
-    XCTAssertEqualObjects(chineseTranslation, normalizedWeatherTextChinese);
+    double similarity = [SPXTestHelpers levenshteinSimilarityRatio:germanTranslation withString:normalizedWeatherTextGerman];
+    XCTAssertTrue(similarity > similarityScoreThresholdTranslation);
+    similarity = [SPXTestHelpers levenshteinSimilarityRatio:chineseTranslation withString:normalizedWeatherTextChinese];
+    XCTAssertTrue(similarity > similarityScoreThresholdTranslation);
+
     XCTAssertTrue(connectedEventCount > 0, @"The connected event count must be greater than 0. connectedEventCount=%d", connectedEventCount);
     XCTAssertTrue(connectedEventCount == disconnectedEventCount + 1 || connectedEventCount == disconnectedEventCount, @"The connected event count (%d) does not match the disconnected event count (%d)", connectedEventCount, disconnectedEventCount);
 }
@@ -139,13 +144,16 @@
 
     [self.translationRecognizer stopContinuousRecognition];
 
-    id germanTranslation = [SPXTestHelpers normalizeText:[translationDictionary valueForKey:@"de"]];
-    id chineseTranslation = [SPXTestHelpers normalizeText:[translationDictionary valueForKey:@"zh-Hans"]];
+    NSString *germanTranslation = (NSString *)[SPXTestHelpers normalizeText:[translationDictionary valueForKey:@"de"]];
+    NSString *chineseTranslation = (NSString *)[SPXTestHelpers normalizeText:[translationDictionary valueForKey:@"zh-Hans"]];
     NSLog(@"German Translation: %@", germanTranslation);
     NSLog(@"Chinese Translation: %@", chineseTranslation);
 
-    XCTAssertEqualObjects(germanTranslation, normalizedWeatherTextGerman);
-    XCTAssertEqualObjects(chineseTranslation, normalizedWeatherTextChinese);
+    double similarity = [SPXTestHelpers levenshteinSimilarityRatio:germanTranslation withString:normalizedWeatherTextGerman];
+    XCTAssertTrue(similarity > similarityScoreThresholdTranslation);
+    similarity = [SPXTestHelpers levenshteinSimilarityRatio:chineseTranslation withString:normalizedWeatherTextChinese];
+    XCTAssertTrue(similarity > similarityScoreThresholdTranslation);
+
     XCTAssertTrue(connectedEventCount > 0, @"The connected event count must be greater than 0. connectedEventCount=%d", connectedEventCount);
     XCTAssertTrue(connectedEventCount == disconnectedEventCount + 1 || connectedEventCount == disconnectedEventCount, @"The connected event count (%d) does not match the disconnected event count (%d)", connectedEventCount, disconnectedEventCount);
 }
@@ -159,13 +167,15 @@
 
     [self expectationForPredicate:sessionStoppedCountPred evaluatedWithObject:result handler:nil];
     [self waitForExpectationsWithTimeout:timeoutInSeconds handler:nil];
-    id germanTranslation = [SPXTestHelpers normalizeText:[asyncResult.translations valueForKey:@"de"]];
-    id chineseTranslation = [SPXTestHelpers normalizeText:[asyncResult.translations valueForKey:@"zh-Hans"]];
+    NSString *germanTranslation = (NSString *)[SPXTestHelpers normalizeText:[asyncResult.translations valueForKey:@"de"]];
+    NSString *chineseTranslation = (NSString *)[SPXTestHelpers normalizeText:[asyncResult.translations valueForKey:@"zh-Hans"]];
     NSLog(@"German Translation: %@", germanTranslation);
     NSLog(@"Chinese Translation: %@", chineseTranslation);
 
-    XCTAssertEqualObjects(germanTranslation, normalizedWeatherTextGerman);
-    XCTAssertEqualObjects(chineseTranslation, normalizedWeatherTextChinese);
+    double similarity = [SPXTestHelpers levenshteinSimilarityRatio:germanTranslation withString:normalizedWeatherTextGerman];
+    XCTAssertTrue(similarity > similarityScoreThresholdTranslation);
+    similarity = [SPXTestHelpers levenshteinSimilarityRatio:chineseTranslation withString:normalizedWeatherTextChinese];
+    XCTAssertTrue(similarity > similarityScoreThresholdTranslation);
 
     XCTAssertTrue(self->connectedEventCount > 0, @"The connected event count must be greater than 0. connectedEventCount=%d", self->connectedEventCount);
     XCTAssertTrue(self->connectedEventCount == self->disconnectedEventCount + 1 || self->connectedEventCount == self->disconnectedEventCount, @"The connected event count (%d) does not match the disconnected event count (%d)", self->connectedEventCount, self->disconnectedEventCount);
@@ -187,11 +197,15 @@
     [self expectationForPredicate:sessionStoppedCountPred evaluatedWithObject:result handler:nil];
     [self waitForExpectationsWithTimeout:timeoutInSeconds handler:nil];
 
-    XCTAssertEqualObjects([self->result valueForKey:@"finalText"], self->weatherTextEnglish);
     XCTAssertEqualObjects([self->result valueForKey:@"finalResultCount"], @1);
 
-    XCTAssertEqualObjects([SPXTestHelpers normalizeText:[translationDictionary valueForKey:@"de"]], normalizedWeatherTextGerman);
-    XCTAssertEqualObjects([SPXTestHelpers normalizeText:[translationDictionary valueForKey:@"zh-Hans"]], normalizedWeatherTextChinese);
+    NSString *germanTranslation = (NSString *)[SPXTestHelpers normalizeText:[translationDictionary valueForKey:@"de"]];
+    NSString *chineseTranslation = (NSString *)[SPXTestHelpers normalizeText:[translationDictionary valueForKey:@"zh-Hans"]];
+
+    double similarity = [SPXTestHelpers levenshteinSimilarityRatio:germanTranslation withString:normalizedWeatherTextGerman];
+    XCTAssertTrue(similarity > similarityScoreThresholdTranslation);
+    similarity = [SPXTestHelpers levenshteinSimilarityRatio:chineseTranslation withString:normalizedWeatherTextChinese];
+    XCTAssertTrue(similarity > similarityScoreThresholdTranslation);
 
     XCTAssertGreaterThan(connectedEventCount, 0);
     XCTAssertTrue(connectedEventCount == disconnectedEventCount + 1 || connectedEventCount == disconnectedEventCount,
@@ -216,11 +230,14 @@
     [self expectationForPredicate:sessionStoppedCountPred evaluatedWithObject:result handler:nil];
     [self waitForExpectationsWithTimeout:timeoutInSeconds handler:nil];
 
-    id germanTranslation = [SPXTestHelpers normalizeText:[asyncResult.translations valueForKey:@"de"]];
-    id chineseTranslation = [SPXTestHelpers normalizeText:[asyncResult.translations valueForKey:@"zh-Hans"]];
+    NSString *germanTranslation = (NSString *)[SPXTestHelpers normalizeText:[asyncResult.translations valueForKey:@"de"]];
+    NSString *chineseTranslation = (NSString *)[SPXTestHelpers normalizeText:[asyncResult.translations valueForKey:@"zh-Hans"]];
 
-    XCTAssertEqualObjects(germanTranslation, normalizedWeatherTextGerman);
-    XCTAssertEqualObjects(chineseTranslation, normalizedWeatherTextChinese);
+    double similarity = [SPXTestHelpers levenshteinSimilarityRatio:germanTranslation withString:normalizedWeatherTextGerman];
+    XCTAssertTrue(similarity > similarityScoreThresholdTranslation);
+    similarity = [SPXTestHelpers levenshteinSimilarityRatio:chineseTranslation withString:normalizedWeatherTextChinese];
+    XCTAssertTrue(similarity > similarityScoreThresholdTranslation);
+
 }
 
 - (void)testRecognizeOnceWithError {
@@ -232,9 +249,14 @@
     NSLog(@"recognition result:%@. Status %ld. offset %llu duration %llu resultid:%@",
           result.text, (long)result.reason, result.offset, result.duration, result.resultId);
 
-    XCTAssertEqualObjects(result.text, weatherTextEnglish);
-    XCTAssertEqualObjects([SPXTestHelpers normalizeText:[result.translations valueForKey:@"de"]], normalizedWeatherTextGerman);
-    XCTAssertEqualObjects([SPXTestHelpers normalizeText:[result.translations valueForKey:@"zh-Hans"]], normalizedWeatherTextChinese);
+    NSString *germanTranslation = (NSString *)[SPXTestHelpers normalizeText:[result.translations valueForKey:@"de"]];
+    NSString *chineseTranslation = (NSString *)[SPXTestHelpers normalizeText:[result.translations valueForKey:@"zh-Hans"]];
+
+    double similarity = [SPXTestHelpers levenshteinSimilarityRatio:germanTranslation withString:normalizedWeatherTextGerman];
+    XCTAssertTrue(similarity > similarityScoreThresholdTranslation);
+    similarity = [SPXTestHelpers levenshteinSimilarityRatio:chineseTranslation withString:normalizedWeatherTextChinese];
+    XCTAssertTrue(similarity > similarityScoreThresholdTranslation);
+
     XCTAssertEqual(result.reason, SPXResultReason_TranslatedSpeech);
     XCTAssertGreaterThan(result.duration, 0);
     XCTAssertGreaterThan(result.offset, 0);
@@ -245,6 +267,7 @@
 
 
 @interface SPXSpeechTranslationTest : XCTestCase {
+    double similarityScoreThresholdTranslation;
 }
 @property (nonatomic, assign) NSString * speechKey;
 @property (nonatomic, assign) NSString * serviceRegion;
@@ -258,6 +281,7 @@
 
     self.speechKey = [[[NSProcessInfo processInfo] environment] objectForKey:@"subscriptionKey"];
     self.serviceRegion = [[[NSProcessInfo processInfo] environment] objectForKey:@"serviceRegion"];
+    similarityScoreThresholdTranslation = 0.80;
 }
 
 - (void)testInvalidSubscriptionKey {
@@ -400,8 +424,8 @@
 
 - (void)testSetServicePropertyTranslation {
     NSString *weatherFileName = @"whatstheweatherlike";
-    NSString *weatherTextEnglish = @"What's the weather like?";
     NSString *weatherTextGerman = @"Wie ist das Wetter?";
+    weatherTextGerman = [SPXTestHelpers normalizeText:weatherTextGerman];
     NSBundle *bundle = [NSBundle bundleForClass:[self class]];
     NSString *weatherFile = [bundle pathForResource: weatherFileName ofType:@"wav"];
     SPXAudioConfiguration* weatherAudioSource = [[SPXAudioConfiguration alloc] initWithWavFileInput:weatherFile];
@@ -412,16 +436,17 @@
     SPXTranslationRecognizer *translationRecognizer = [[SPXTranslationRecognizer alloc] initWithSpeechTranslationConfiguration:translationConfig audioConfiguration:weatherAudioSource];
     SPXTranslationRecognitionResult *result = [translationRecognizer recognizeOnce];
     XCTAssertTrue(result.reason == SPXResultReason_TranslatedSpeech);
-    XCTAssertTrue([result.text isEqualToString:weatherTextEnglish], "Final Result Text does not match");
     NSDictionary* translationDictionary = result.translations;
-    id germanTranslation = [translationDictionary valueForKey:@"de"];
+    NSString *germanTranslation = (NSString *)[translationDictionary valueForKey:@"de"];
+    germanTranslation = [SPXTestHelpers normalizeText:germanTranslation];
     NSLog(@"German Translation: %@", germanTranslation);
-    XCTAssertTrue([germanTranslation isEqualToString:weatherTextGerman], "German translation does not match");
+    double similarity = [SPXTestHelpers levenshteinSimilarityRatio:germanTranslation withString:weatherTextGerman];
+    XCTAssertTrue(similarity > similarityScoreThresholdTranslation);
+
 }
 
 - (void)testChangeTargetLanguages {
     NSString *weatherFileName = @"whatstheweatherlike";
-    NSString *weatherTextEnglish = @"What's the weather like?";
     NSBundle *bundle = [NSBundle bundleForClass:[self class]];
     NSString *weatherFile = [bundle pathForResource: weatherFileName ofType:@"wav"];
     SPXAudioConfiguration* weatherAudioSource = [[SPXAudioConfiguration alloc] initWithWavFileInput:weatherFile];
