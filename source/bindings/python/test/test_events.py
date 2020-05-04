@@ -196,7 +196,7 @@ def test_speech_recognition_events(speech_input: SpeechInput, from_file_speech_r
     _check_sr_result(recognized_result, speech_input, 0)
 
 
-@pytest.mark.parametrize('intent_input,', ['lamp'], indirect=True)
+@pytest.mark.skip(reason="Due to test is instable, currently skipped")
 def test_intent_recognition_events(intent_input: IntentInput, from_file_intent_reco_with_callbacks):
     intent_recognizer, callbacks = from_file_intent_reco_with_callbacks(
             setup_callback_handle=_setup_callbacks_for_event_check)

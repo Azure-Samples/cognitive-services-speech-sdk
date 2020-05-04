@@ -14,8 +14,6 @@ import android.view.WindowManager;
 import java.io.*;
 import java.util.Properties;
 import java.util.zip.*;
-import java.nio.file.Paths;
-import java.nio.charset.StandardCharsets;
 
 import com.microsoft.appcenter.AppCenter;
 import com.microsoft.appcenter.analytics.Analytics;
@@ -38,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static void extractAll(InputStream zipStream, String outputBaseFolder, String folderName) throws IOException {
         byte buf[] = new byte[1024];
-        String baseDir = Paths.get(new File(outputBaseFolder).getCanonicalPath(), folderName).toString();
+        String baseDir = new File(outputBaseFolder).getCanonicalPath() + "/" + folderName;
 
         new File(baseDir).mkdir();
 

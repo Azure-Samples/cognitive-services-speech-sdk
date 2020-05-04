@@ -15,7 +15,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
     using static Config;
 
     [TestClass]
-    public class KeywordRecognizerTests : RecognitionTestBase
+    public class KwsRecognizerTests : RecognitionTestBase
     {
 
         [TestMethod]

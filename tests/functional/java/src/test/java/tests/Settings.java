@@ -5,7 +5,6 @@ package tests;
 
 import java.io.*;
 import java.lang.reflect.Type;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -214,13 +213,13 @@ public class Settings {
 
         System.out.println("Fetching root relative path for " + input);
         try {
-            rrPath = Paths.get(DefaultSettingsMap.get(DefaultSettingsKeys.INPUT_DIR), input).toString();
+            rrPath = (DefaultSettingsMap.get(DefaultSettingsKeys.INPUT_DIR) + "/" + input).toString();
             File tempFile = new File(rrPath);
             
             if(!tempFile.exists()) {
                 System.out.println("Android detected using base path " + System.getProperty("JsonConfigPath", "/data/local/tmp/"));
-                System.out.println("Setting rrPath to " + Paths.get(System.getProperty("JsonConfigPath", "/data/local/tmp/"), input).toString());
-                rrPath = Paths.get(System.getProperty("JsonConfigPath", "/data/local/tmp/"), input).toString();
+                System.out.println("Setting rrPath to " + (System.getProperty("JsonConfigPath", "/data/local/tmp/") + "/" + input).toString());
+                rrPath = (System.getProperty("JsonConfigPath", "/data/local/tmp/") + "/" + input).toString();
 
                 tempFile = new File(rrPath);
                 if(!tempFile.exists())

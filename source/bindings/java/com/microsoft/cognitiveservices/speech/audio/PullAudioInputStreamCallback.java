@@ -49,9 +49,9 @@ public abstract class PullAudioInputStreamCallback
       */
     public abstract void close();
 
-    /*! \cond INTERNAL */
+    /*! \cond PROTECTED */
 
-    private PropertyId getPropertyId(int id) {
+    protected PropertyId getPropertyId(int id) {
         PropertyId pArr[] = PropertyId.values();
         for (PropertyId pId: pArr){
             if (id == pId.getValue())

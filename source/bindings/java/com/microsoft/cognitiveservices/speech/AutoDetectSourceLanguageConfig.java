@@ -40,9 +40,16 @@ public final class AutoDetectSourceLanguageConfig implements Closeable
         if (languages == null || languages.size() == 0) {
             throw new IllegalArgumentException("languages cannot be null or empty");
         }
-
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < languages.size(); i++) {
+            sb.append(languages.get(i));
+            // if not the last item
+            if (i != languages.size() - 1) {
+                sb.append(",");
+            }
+        }
         IntRef langConfigRef = new IntRef(0);
-        Contracts.throwIfFail(fromLanguages(langConfigRef, String.join(",", languages)));
+        Contracts.throwIfFail(fromLanguages(langConfigRef, sb.toString()));
         return new AutoDetectSourceLanguageConfig(langConfigRef.getValue());
     }
 

@@ -150,9 +150,7 @@ public class Recognizer implements Closeable
         return result.getValue();
     }
 
-    /*! \endcond */
-
-    private void sessionStartedEventCallback(long eventArgs)
+    protected void sessionStartedEventCallback(long eventArgs)
     {
         try {
             Contracts.throwIfNull(this, "recognizer");
@@ -167,7 +165,7 @@ public class Recognizer implements Closeable
         } catch (Exception e) {}
     }
 
-    private void sessionStoppedEventCallback(long eventArgs)
+    protected void sessionStoppedEventCallback(long eventArgs)
     {
         try {
             Contracts.throwIfNull(this, "recognizer");
@@ -182,7 +180,7 @@ public class Recognizer implements Closeable
         } catch (Exception e) {}
     }
 
-    private void speechStartDetectedEventCallback(long eventArgs)
+    protected void speechStartDetectedEventCallback(long eventArgs)
     {
         try {
             Contracts.throwIfNull(this, "recognizer");
@@ -197,7 +195,7 @@ public class Recognizer implements Closeable
         } catch (Exception e) {}
     }
 
-    private void speechEndDetectedEventCallback(long eventArgs)
+    protected void speechEndDetectedEventCallback(long eventArgs)
     {
         try {
             Contracts.throwIfNull(this, "recognizer");
@@ -212,7 +210,6 @@ public class Recognizer implements Closeable
         } catch (Exception e) {}
     }
 
-    /*! \cond PROTECTED */
     protected SafeHandle recoHandle = null;
     protected final native long startContinuousRecognition(SafeHandle recoHandle);
     protected final native long stopContinuousRecognition(SafeHandle recoHandle);

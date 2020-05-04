@@ -1261,7 +1261,7 @@ jobs:
       set +e
       for retry in {0..3}; do
         dotnet test --blame --verbosity detailed --filter \
-          "TestCategory!=LongTest&TestCategory!=SpeechSynthesisMockTest&ClassName!=Microsoft.CognitiveServices.Speech.Tests.EndToEnd.KwsRecognitionTests&TestCategory!=CompressedStreamTest&TestCategory!=OfflineUnidec" \
+          "TestCategory!=LongTest&TestCategory!=SpeechSynthesisMockTest&ClassName!=Microsoft.CognitiveServices.Speech.Tests.EndToEnd.KwsRecognitionTests&ClassName!=Microsoft.CognitiveServices.Speech.Tests.EndToEnd.KwsRecognizerTests&TestCategory!=CompressedStreamTest&TestCategory!=OfflineUnidec" \
           --framework netcoreapp2.0 --settings csharp.runsettings --logger "trx;LogFileName=test-csharp_osx_unit_tests_$retry.trx"
         exitCode=$?
         if [[ $exitCode == 0 ]]; then
