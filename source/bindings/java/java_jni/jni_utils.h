@@ -18,9 +18,13 @@ jlong GetObjectHandle(JNIEnv *env, jobject objHandle);
 
 jstring GetStringObjectHandle(JNIEnv *env, jobject objHandle);
 
-jint SetStringObjectHandle(JNIEnv *env, jobject objHandle, std::string value);
+SPXHR SetStringObjectHandle(JNIEnv *env, jobject objHandle, const char* value);
 
-jint SetStringMapObjectHandle(JNIEnv* env, jobject objHandle, std::string key, std::string value);
+SPXHR SetStringMapObjectHandle(JNIEnv *env, jobject objHandle, const char *key, const char *value);
+
+const char* GetStringUTFChars(JNIEnv *env, jstring jString);
+
+void ReleaseStringUTFChars(JNIEnv *env, jstring jString, const char *cString);
 
 jobject AsBigInteger(JNIEnv *env, uint64_t value);
 
@@ -35,6 +39,8 @@ void CallbackEventMethod(void* context, const char *method, SPXEVENTHANDLE event
 JNIEnv* GetJNIEnvAndAttach(bool& needToDetach);
 
 void DetachJNIEnv(JNIEnv* env);
+
+bool CheckException(JNIEnv* env);
 
 void RecognizingCallback(SPXRECOHANDLE recoHandle, SPXEVENTHANDLE eventHandle, void* context);
 

@@ -23,9 +23,7 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_SessionEvent
     SPXHR hr = recognizer_session_event_get_session_id((SPXEVENTHANDLE) handle, sessionId, cchMaxSessionId);
     if (SPX_SUCCEEDED(hr))
     {
-        std::string value = std::string(sessionId);
-        SetStringObjectHandle(env, sessionIdStrRef, value.c_str());
+        hr = SetStringObjectHandle(env, sessionIdStrRef, sessionId);
     }
     return (jlong)hr;
 }
-

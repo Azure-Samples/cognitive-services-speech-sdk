@@ -126,9 +126,9 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_AudioDataStr
   (JNIEnv *env, jobject obj, jobject streamHandle, jstring fileName)
 {
     jlong audioStream = GetObjectHandle(env, streamHandle);
-    const char* file = env->GetStringUTFChars(fileName, 0);
+    const char* file = GetStringUTFChars(env, fileName);
     SPXHR hr = audio_data_stream_save_to_wave_file((SPXAUDIOSTREAMHANDLE)audioStream, file);
-    env->ReleaseStringUTFChars(fileName, file);
+    ReleaseStringUTFChars(env, fileName, file);
     return (jlong)hr;
 }
 

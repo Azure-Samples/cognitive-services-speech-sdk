@@ -54,9 +54,9 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_translation_
   (JNIEnv* env, jobject obj, jobject recognizerHandle, jstring value)
 {
     jlong recoHandle = GetObjectHandle(env, recognizerHandle);
-    const char* language = env->GetStringUTFChars(value, 0);
+    const char* language = GetStringUTFChars(env, value);
     SPXHR hr = translator_add_target_language((SPXRECOHANDLE) recoHandle, language);
-    env->ReleaseStringUTFChars(value, language);
+    ReleaseStringUTFChars(env, value, language);
     return (jlong)hr;
 }
 
@@ -69,8 +69,8 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_translation_
   (JNIEnv *env, jobject obj, jobject recognizerHandle, jstring value)
 {
     jlong recoHandle = GetObjectHandle(env, recognizerHandle);
-    const char* language = env->GetStringUTFChars(value, 0);
+    const char* language = GetStringUTFChars(env, value);
     SPXHR hr = translator_remove_target_language((SPXRECOHANDLE)recoHandle, language);
-    env->ReleaseStringUTFChars(value, language);
+    ReleaseStringUTFChars(env, value, language);
     return (jlong)hr;
 }

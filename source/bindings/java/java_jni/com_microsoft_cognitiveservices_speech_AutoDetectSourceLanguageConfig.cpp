@@ -16,13 +16,13 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_AutoDetectSo
   (JNIEnv *env, jclass cls, jobject autoDetectSourceLanguageConfigHandle, jstring languages)
 {
     SPXAUTODETECTSOURCELANGCONFIGHANDLE configHandle = SPXHANDLE_INVALID;
-    const char* langs = env->GetStringUTFChars(languages, 0);
+    const char* langs = GetStringUTFChars(env, languages);
     SPXHR hr = create_auto_detect_source_lang_config_from_languages(&configHandle, langs);
     if (SPX_SUCCEEDED(hr))
     {
         SetObjectHandle(env, autoDetectSourceLanguageConfigHandle, (jlong)configHandle);
     }
-    env->ReleaseStringUTFChars(languages, langs);
+    ReleaseStringUTFChars(env, languages, langs);
     return (jlong)hr;
 }
 

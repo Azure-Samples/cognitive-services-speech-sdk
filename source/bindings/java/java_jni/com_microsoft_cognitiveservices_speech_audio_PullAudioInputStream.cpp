@@ -14,16 +14,20 @@ jobject GetPullAudioInputStreamCallbackObject(JNIEnv* env, jobject streamObject)
 {
     // Get PullAudioInputStreamCallback object from stream handle
     jclass cl = env->GetObjectClass(streamObject);
-    if (cl == NULL)
+    if (CheckException(env))
     {
         return NULL;
     }
     jmethodID m = env->GetMethodID(cl, "getCallbackHandle", "()Lcom/microsoft/cognitiveservices/speech/audio/PullAudioInputStreamCallback;");
-    if (m == NULL)
+    if (CheckException(env))
     {
         return NULL;
     }
     jobject callbackObj = env->CallObjectMethod(streamObject, m);
+    if (CheckException(env))
+    {
+        return NULL;
+    }
     return callbackObj;
 }
 
@@ -45,23 +49,30 @@ int StreamReadCallback(void* context, uint8_t* buffer, uint32_t size)
     {
         jdataBuffer = env->NewByteArray((jsize)size);
         if (!jdataBuffer) return 0;
-        //env->SetByteArrayRegion(jdataBuffer, 0, (jsize)size, (jbyte *)buffer);
     }
 
     jclass cl = env->GetObjectClass(callbackObj);
-    if (cl == NULL)
+    if (CheckException(env))
     {
         return 0;
     }
     jmethodID m = env->GetMethodID(cl, "read", "([B)I");
-    if (m == NULL)
+    if (CheckException(env))
     {
         return 0;
     }
     result = env->CallIntMethod(callbackObj, m, jdataBuffer);
+    if (CheckException(env))
+    {
+        return 0;
+    }
     if (jdataBuffer && buffer)
     {
         env->GetByteArrayRegion(jdataBuffer, 0, (jsize)size, (jbyte *)buffer);
+        if (CheckException(env))
+        {
+            return 0;
+        }
     }
     if (detach)
     {
@@ -83,17 +94,20 @@ void StreamCloseCallback(void* context)
     if (!callbackObj) return;
 
     jclass cl = env->GetObjectClass(callbackObj);
-    if (cl == NULL)
+    if (CheckException(env))
     {
         return;
     }
     jmethodID m = env->GetMethodID(cl, "close", "()V");
-    if (m == NULL)
+    if (CheckException(env))
     {
         return;
     }
     env->CallVoidMethod(callbackObj, m);
-
+    if (CheckException(env))
+    {
+        return;
+    }
     if (detach)
     {
         DetachJNIEnv(env);
@@ -116,43 +130,50 @@ void StreamGetPropertyCallback(void* context, int id, uint8_t* result, uint32_t 
 
     // Get propertyId from PullAudioInputStreamCallback
     jclass cl = env->GetObjectClass(callbackObj);
-    if (cl == NULL)
+    if (CheckException(env))
     {
         return;
     }
 
     jmethodID m = env->GetMethodID(cl, "getPropertyId", "(I)Lcom/microsoft/cognitiveservices/speech/PropertyId;");
-    if (m == NULL)
+    if (CheckException(env))
     {
         return;
     }
 
     jobject propertyId = env->CallObjectMethod(callbackObj, m, id);
-    if (propertyId == NULL)
+    if (CheckException(env))
     {
         return;
     }
 
     m = env->GetMethodID(cl, "getProperty", "(Lcom/microsoft/cognitiveservices/speech/PropertyId;)Ljava/lang/String;");
-    if (m == NULL)
+    if (CheckException(env))
     {
         return;
     }
 
     jstring propertyJstring = (jstring)(env->CallObjectMethod(callbackObj, m, propertyId));
-    const char* propertyString = env->GetStringUTFChars(propertyJstring, 0);
+    if (CheckException(env))
+    {
+        return;
+    }
+    const char* propertyString = GetStringUTFChars(env, propertyJstring);
+    if (CheckException(env))
+    {
+        return;
+    }
     auto propertyStringSize = strlen(propertyString) + 1;
     if (propertyStringSize <= size)
     {
         std::memcpy(result, propertyString, propertyStringSize);
     }
-    env->ReleaseStringUTFChars(propertyJstring, propertyString);
+    ReleaseStringUTFChars(env, propertyJstring, propertyString);
 
     if (detach)
     {
         DetachJNIEnv(env);
     }
-
     return;
 }
 

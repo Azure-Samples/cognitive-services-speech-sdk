@@ -19,13 +19,13 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_transcriptio
 {
     SPXCONVERSATIONHANDLE convHandle = SPXHANDLE_INVALID;
     jlong speechConfig = GetObjectHandle(env, speechConfigHandle);
-    const char* id = env->GetStringUTFChars(conversationId, 0);
+    const char* id = GetStringUTFChars(env, conversationId);
     SPXHR hr = conversation_create_from_config(&convHandle, (SPXSPEECHCONFIGHANDLE)speechConfig, id);
     if (SPX_SUCCEEDED(hr))
     {
         SetObjectHandle(env, conversationHandle, (jlong)convHandle);
     }
-    env->ReleaseStringUTFChars(conversationId, id);
+    ReleaseStringUTFChars(env, conversationId, id);
     return (jlong)hr;
 }
 
@@ -42,8 +42,7 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_transcriptio
     SPXHR hr = conversation_get_conversation_id((SPXCONVERSATIONHANDLE)convHandle, sz, maxCharCount);
     if (SPX_SUCCEEDED(hr))
     {
-        std::string value = std::string(sz);
-        SetStringObjectHandle(env, conversationIdStr, value.c_str());
+        hr = SetStringObjectHandle(env, conversationIdStr, sz);
     }
     return (jlong)hr;
 }
@@ -113,9 +112,9 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_transcriptio
   (JNIEnv *env, jobject obj, jobject conversationHandle, jstring userId)
 {
     jlong convHandle = GetObjectHandle(env, conversationHandle);
-    const char* id = env->GetStringUTFChars(userId, 0);
+    const char* id = GetStringUTFChars(env, userId);
     SPXHR hr = conversation_update_participant_by_user_id((SPXCONVERSATIONHANDLE)convHandle, false, id);
-    env->ReleaseStringUTFChars(userId, id);
+    ReleaseStringUTFChars(env, userId, id);
     return (jlong)hr;
 }
 

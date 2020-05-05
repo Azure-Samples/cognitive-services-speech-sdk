@@ -37,8 +37,8 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_intent_Inten
 {
     jlong recoHandle = GetObjectHandle(env, recognizerHandle);
     jlong trigger = GetObjectHandle(env, triggerHandle);
-    const char* id = env->GetStringUTFChars(intentId, 0);
+    const char* id = GetStringUTFChars(env, intentId);
     SPXHR hr = intent_recognizer_add_intent((SPXRECOHANDLE) recoHandle, id, (SPXTRIGGERHANDLE)trigger);
-    env->ReleaseStringUTFChars(intentId, id);
+    ReleaseStringUTFChars(env, intentId, id);
     return (jlong)hr;
 }

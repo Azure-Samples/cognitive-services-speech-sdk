@@ -16,12 +16,12 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_Grammar_from
   (JNIEnv *env, jclass cls, jobject grammarHandle, jstring storageId)
 {
     SPXGRAMMARHANDLE grammar = SPXHANDLE_INVALID;
-    const char* id = env->GetStringUTFChars(storageId, 0);
+    const char* id = GetStringUTFChars(env, storageId);
     SPXHR hr = grammar_create_from_storage_id(&grammar, id);
     if (SPX_SUCCEEDED(hr))
     {
         SetObjectHandle(env, grammarHandle, (jlong)grammar);
     }
-    env->ReleaseStringUTFChars(storageId, id);
+    ReleaseStringUTFChars(env, storageId, id);
     return (jlong)hr;
 }

@@ -16,15 +16,15 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_SpeechConfig
   (JNIEnv *env, jclass cls, jobject objHandle, jstring subsriptionKey, jstring serviceRegion)
 {
     SPXSPEECHCONFIGHANDLE configHandle = SPXHANDLE_INVALID;
-    const char *subscription = env->GetStringUTFChars(subsriptionKey, 0);
-    const char *region = env->GetStringUTFChars(serviceRegion, 0);
+    const char *subscription = GetStringUTFChars(env, subsriptionKey);
+    const char *region = GetStringUTFChars(env, serviceRegion);
     SPXHR hr = speech_config_from_subscription(&configHandle, subscription, region);
     if (SPX_SUCCEEDED(hr))
     {
         SetObjectHandle(env, objHandle, (jlong)configHandle);
     }
-    env->ReleaseStringUTFChars(subsriptionKey, subscription);
-    env->ReleaseStringUTFChars(serviceRegion, region);
+    ReleaseStringUTFChars(env, subsriptionKey, subscription);
+    ReleaseStringUTFChars(env, serviceRegion, region);
     return (jlong)hr;
 }
 
@@ -37,15 +37,15 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_SpeechConfig
   (JNIEnv *env, jclass cls, jobject objHandle, jstring authToken, jstring serviceRegion)
 {
     SPXSPEECHCONFIGHANDLE configHandle = SPXHANDLE_INVALID;
-    const char *authorizationToken = env->GetStringUTFChars(authToken, 0);
-    const char *region = env->GetStringUTFChars(serviceRegion, 0);
+    const char *authorizationToken = GetStringUTFChars(env, authToken);
+    const char *region = GetStringUTFChars(env, serviceRegion);
     SPXHR hr = speech_config_from_authorization_token(&configHandle, authorizationToken, region);
     if (SPX_SUCCEEDED(hr))
     {
         SetObjectHandle(env, objHandle, (jlong)configHandle);
     }
-    env->ReleaseStringUTFChars(authToken, authorizationToken);
-    env->ReleaseStringUTFChars(serviceRegion, region);
+    ReleaseStringUTFChars(env, authToken, authorizationToken);
+    ReleaseStringUTFChars(env, serviceRegion, region);
     return (jlong)hr;
 }
 
@@ -58,22 +58,15 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_SpeechConfig
   (JNIEnv *env, jclass cls, jobject objHandle, jstring serviceEndpoint, jstring subscriptionKey)
 {
     SPXSPEECHCONFIGHANDLE configHandle = SPXHANDLE_INVALID;
-    const char *subscription = NULL;
-    if (subscriptionKey != NULL)
-    {
-        subscription = env->GetStringUTFChars(subscriptionKey, 0);
-    }
-    const char *endpoint = env->GetStringUTFChars(serviceEndpoint, 0);
+    const char *subscription = GetStringUTFChars(env, subscriptionKey);
+    const char *endpoint = GetStringUTFChars(env, serviceEndpoint);
     SPXHR hr = speech_config_from_endpoint(&configHandle, endpoint, subscription);
     if (SPX_SUCCEEDED(hr))
     {
         SetObjectHandle(env, objHandle, (jlong)configHandle);
     }
-    if (subscriptionKey != NULL)
-    {
-        env->ReleaseStringUTFChars(subscriptionKey, subscription);
-    }
-    env->ReleaseStringUTFChars(serviceEndpoint, endpoint);
+    ReleaseStringUTFChars(env, subscriptionKey, subscription);
+    ReleaseStringUTFChars(env, serviceEndpoint, endpoint);
     return (jlong)hr;
 }
 
@@ -86,22 +79,15 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_SpeechConfig
   (JNIEnv *env, jclass cls, jobject objHandle, jstring hostName, jstring subscriptionKey)
 {
     SPXSPEECHCONFIGHANDLE configHandle = SPXHANDLE_INVALID;
-    const char *subscription = NULL;
-    if (subscriptionKey != NULL)
-    {
-        subscription = env->GetStringUTFChars(subscriptionKey, 0);
-    }
-    const char *host = env->GetStringUTFChars(hostName, 0);
+    const char *subscription = GetStringUTFChars(env, subscriptionKey);
+    const char *host = GetStringUTFChars(env, hostName);
     SPXHR hr = speech_config_from_host(&configHandle, host, subscription);
     if (SPX_SUCCEEDED(hr))
     {
         SetObjectHandle(env, objHandle, (jlong)configHandle);
     }
-    if (subscriptionKey != NULL)
-    {
-        env->ReleaseStringUTFChars(subscriptionKey, subscription);
-    }
-    env->ReleaseStringUTFChars(hostName, host);
+    ReleaseStringUTFChars(env, subscriptionKey, subscription);
+    ReleaseStringUTFChars(env, hostName, host);
     return (jlong)hr;
 }
 
@@ -144,12 +130,12 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_SpeechConfig
 JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_SpeechConfig_setServiceProperty
   (JNIEnv *env, jobject obj, jobject objHandle, jstring propName, jstring propValue, jint channel)
 {
-    const char *propertyName = env->GetStringUTFChars(propName, 0);
-    const char *propertyValue = env->GetStringUTFChars(propValue, 0);
+    const char *propertyName = GetStringUTFChars(env, propName);
+    const char *propertyValue = GetStringUTFChars(env, propValue);
     jlong configHandle = GetObjectHandle(env, objHandle);
     SPXHR hr = speech_config_set_service_property((SPXSPEECHCONFIGHANDLE)configHandle, propertyName, propertyValue, (SpeechConfig_ServicePropertyChannel)channel);   
-    env->ReleaseStringUTFChars(propName, propertyName);
-    env->ReleaseStringUTFChars(propValue, propertyValue);
+    ReleaseStringUTFChars(env, propName, propertyName);
+    ReleaseStringUTFChars(env, propValue, propertyValue);
     return (jlong)hr;
 }
 

@@ -70,11 +70,11 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_Connection_c
   (JNIEnv *env, jobject obj, jobject connectionHandle, jstring path, jstring payload)
 {
     jlong handle = GetObjectHandle(env, connectionHandle);
-    const char *pathCStr = env->GetStringUTFChars(path, 0);
-    const char *payloadCStr = env->GetStringUTFChars(payload, 0);
+    const char *pathCStr = GetStringUTFChars(env, path);
+    const char *payloadCStr = GetStringUTFChars(env, payload);
     SPXHR hr = connection_send_message((SPXCONNECTIONHANDLE)handle, pathCStr, payloadCStr);
-    env->ReleaseStringUTFChars(path, pathCStr);
-    env->ReleaseStringUTFChars(payload, payloadCStr);
+    ReleaseStringUTFChars(env, path, pathCStr);
+    ReleaseStringUTFChars(env, payload, payloadCStr);
     return hr;
 }
 
@@ -87,13 +87,13 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_Connection_c
 (JNIEnv *env, jobject obj, jobject connectionHandle, jstring path, jstring propertyName, jstring propertyValue)
 {
     jlong handle = GetObjectHandle(env, connectionHandle);
-    const char *pathCStr = env->GetStringUTFChars(path, 0);
-    const char *propertyNameCStr = env->GetStringUTFChars(propertyName, 0);
-    const char *propertyValueCStr = env->GetStringUTFChars(propertyValue, 0);
+    const char *pathCStr = GetStringUTFChars(env, path);
+    const char *propertyNameCStr = GetStringUTFChars(env, propertyName);
+    const char *propertyValueCStr = GetStringUTFChars(env, propertyValue);
     SPXHR hr = connection_set_message_property((SPXCONNECTIONHANDLE)handle, pathCStr, propertyNameCStr, propertyValueCStr);
-    env->ReleaseStringUTFChars(path, pathCStr);
-    env->ReleaseStringUTFChars(propertyName, propertyNameCStr);
-    env->ReleaseStringUTFChars(propertyValue, propertyValueCStr);
+    ReleaseStringUTFChars(env, path, pathCStr);
+    ReleaseStringUTFChars(env, propertyName, propertyNameCStr);
+    ReleaseStringUTFChars(env, propertyValue, propertyValueCStr);
     return hr;
 }
 

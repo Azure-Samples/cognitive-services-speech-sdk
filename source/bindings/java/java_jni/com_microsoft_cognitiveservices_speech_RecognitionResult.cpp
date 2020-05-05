@@ -22,8 +22,7 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_RecognitionR
     SPXHR hr = result_get_result_id((SPXRESULTHANDLE)handle, sz, maxCharCount);
     if (SPX_SUCCEEDED(hr))
     {
-        std::string value = std::string(sz);
-        SetStringObjectHandle(env, resultIdStrRef, value.c_str());
+        hr = SetStringObjectHandle(env, resultIdStrRef, sz);
     }
     return (jlong)hr;
 }
@@ -59,8 +58,7 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_RecognitionR
     SPXHR hr = result_get_text((SPXRESULTHANDLE)handle, sz, maxCharCount);
     if (SPX_SUCCEEDED(hr))
     {
-        std::string value = std::string(sz);
-        SetStringObjectHandle(env, resultTextStrRef, value.c_str());
+        hr = SetStringObjectHandle(env, resultTextStrRef, sz);
     }
     return (jlong)hr;
 }

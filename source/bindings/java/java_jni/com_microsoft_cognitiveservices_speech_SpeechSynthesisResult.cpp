@@ -24,8 +24,7 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_SpeechSynthe
     SPXHR hr = synth_result_get_result_id((SPXRESULTHANDLE)handle, sz, maxCharCount);
     if (SPX_SUCCEEDED(hr))
     {
-        std::string value = std::string(sz);
-        SetStringObjectHandle(env, resultIdRef, value.c_str());
+        hr = SetStringObjectHandle(env, resultIdRef, sz);
     }
     return (jlong)hr;
 }

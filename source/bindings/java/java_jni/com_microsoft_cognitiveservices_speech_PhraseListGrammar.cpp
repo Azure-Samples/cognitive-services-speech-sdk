@@ -47,13 +47,13 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_PhraseListGr
   (JNIEnv *env, jobject obj, jobject grammarHandle, jstring phrase)
 {
     SPXPHRASEHANDLE phraseHandle = SPXHANDLE_INVALID;
-    const char* phraseText = env->GetStringUTFChars(phrase, 0);
+    const char* phraseText = GetStringUTFChars(env, phrase);
     SPXHR hr = grammar_phrase_create_from_text(&phraseHandle, phraseText);
     if (SPX_SUCCEEDED(hr))
     {
         jlong grammar = GetObjectHandle(env, grammarHandle);
         hr = phrase_list_grammar_add_phrase((SPXGRAMMARHANDLE)grammar, phraseHandle);
     }
-    env->ReleaseStringUTFChars(phrase, phraseText);
+    ReleaseStringUTFChars(env, phrase, phraseText);
     return (jlong)hr;
 }

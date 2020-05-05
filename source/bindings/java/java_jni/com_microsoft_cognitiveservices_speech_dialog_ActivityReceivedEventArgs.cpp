@@ -44,7 +44,7 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_dialog_Activ
     }
     if (SPX_SUCCEEDED(hr))
     {
-        SetStringObjectHandle(env, activityStr, activity.get());
+        hr = SetStringObjectHandle(env, activityStr, activity.get());
     }
     return (jlong)hr;
 }

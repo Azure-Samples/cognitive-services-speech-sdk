@@ -16,31 +16,17 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_transcriptio
   (JNIEnv *env, jclass cls, jobject participantHandle, jstring userId, jstring preferredLanguage, jstring voiceSignature)
 {
     SPXPARTICIPANTHANDLE participant = SPXHANDLE_INVALID;
-    const char* id = env->GetStringUTFChars(userId, 0);
-    const char* language = NULL;
-    const char* voice_signature = NULL;
-    if (preferredLanguage != NULL)
-    {
-        language = env->GetStringUTFChars(preferredLanguage, 0);
-    }
-    if (voiceSignature != NULL)
-    {
-        voice_signature = env->GetStringUTFChars(voiceSignature, 0);
-    }
+    const char* id = GetStringUTFChars(env, userId);
+    const char* language = GetStringUTFChars(env, preferredLanguage);
+    const char* voice_signature = GetStringUTFChars(env, voiceSignature);
     SPXHR hr = participant_create_handle(&participant, id, language, voice_signature);
     if (SPX_SUCCEEDED(hr))
     {
         SetObjectHandle(env, participantHandle, (jlong)participant);
     }
-    env->ReleaseStringUTFChars(userId, id);
-    if (preferredLanguage != NULL)
-    {
-        env->ReleaseStringUTFChars(preferredLanguage, language);
-    }
-    if (voiceSignature != NULL)
-    {
-        env->ReleaseStringUTFChars(voiceSignature, voice_signature);
-    }
+    ReleaseStringUTFChars(env, userId, id);
+    ReleaseStringUTFChars(env, preferredLanguage, language);
+    ReleaseStringUTFChars(env, voiceSignature, voice_signature);
     return (jlong)hr;
 }
 
@@ -71,9 +57,9 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_transcriptio
   (JNIEnv *env, jobject obj, jobject participantHandle, jstring preferredLanguage)
 {
     jlong participant = GetObjectHandle(env, participantHandle);
-    const char* language = env->GetStringUTFChars(preferredLanguage, 0);
+    const char* language = GetStringUTFChars(env, preferredLanguage);
     SPXHR hr = participant_set_preferred_langugage((SPXPARTICIPANTHANDLE)participant, language);
-    env->ReleaseStringUTFChars(preferredLanguage, language);
+    ReleaseStringUTFChars(env, preferredLanguage, language);
     return (jlong)hr;
 }
 
@@ -86,8 +72,8 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_transcriptio
   (JNIEnv *env, jobject obj, jobject participantHandle, jstring voiceSignature)
 {
     jlong participant = GetObjectHandle(env, participantHandle);
-    const char* voice_signature = env->GetStringUTFChars(voiceSignature, 0);
+    const char* voice_signature = GetStringUTFChars(env, voiceSignature);
     SPXHR hr = participant_set_voice_signature((SPXPARTICIPANTHANDLE) participant, voice_signature);
-    env->ReleaseStringUTFChars(voiceSignature, voice_signature);
+    ReleaseStringUTFChars(env, voiceSignature, voice_signature);
     return (jlong)hr;
 }

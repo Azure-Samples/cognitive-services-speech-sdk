@@ -46,6 +46,24 @@ JNIEXPORT void JNICALL JNI_OnUnload(JavaVM*, void*)
 }
 
 /*
+ * Method:    CheckException
+ * Description: CheckException method is checks if JNI call has pending exception, reports and clears it.
+ *              It is important to handle expections from JNI calls. Calling arbitrary JNI functions with
+ *              a pending exception may lead to unexpected results.
+ *              TODO: Consider throwing exception back to Java side.
+ */
+bool CheckException(JNIEnv* env)
+{
+    if (env->ExceptionCheck())
+    {
+        env->ExceptionDescribe();
+        env->ExceptionClear();
+        return true;
+    }
+    return false;
+}
+
+/*
  * Method:    GetJNIEnvAndAttach
  * Description: Gets Jni environment and attach to current thread if it is not already attached
  *
@@ -92,10 +110,6 @@ void DetachJNIEnv(JNIEnv* env)
 {
     if (g_jvm && env)
     {
-        if (env->ExceptionCheck())
-        {
-            env->ExceptionDescribe();
-        }
         g_jvm->DetachCurrentThread();
     }
 }
@@ -115,17 +129,23 @@ void CallbackEventMethod(void *context, const char *method, SPXEVENTHANDLE event
     if (env && obj)
     {
         jclass cl = env->GetObjectClass(obj);
-        if (cl == NULL)
+        if (CheckException(env))
         {
-            return;
+            goto Exit;
         }
         jmethodID m = env->GetMethodID(cl, method, "(J)V");
-        if (m == NULL)
+        if (CheckException(env))
         {
-            return;
+            goto Exit;
         }
         env->CallVoidMethod(obj, m, (jlong)eventHandle);
+        if (CheckException(env))
+        {
+            goto Exit;
+        }
     }
+
+Exit:
     if (detach)
     {
         DetachJNIEnv(env);
@@ -206,16 +226,20 @@ void SetProcessState(bool state)
 jint SetObjectHandle(JNIEnv *env, jobject objHandle, jlong handleValue)
 {
     jclass cl = env->GetObjectClass(objHandle);
-    if (cl == NULL)
+    if (CheckException(env))
     {
         return -1;
     }
     jmethodID m = env->GetMethodID(cl, "setValue", "(J)V");
-    if (m == NULL)
+    if (CheckException(env))
     {
         return -1;
     }
     env->CallVoidMethod(objHandle, m, handleValue);
+    if (CheckException(env))
+    {
+        return -1;
+    }
     return 0;
 }
 
@@ -231,16 +255,20 @@ jlong GetObjectHandle(JNIEnv *env, jobject objHandle)
         return 0;
     }
     jclass cl = env->GetObjectClass(objHandle);
-    if (cl == NULL)
+    if (CheckException(env))
     {
         return 0;
     }
     jmethodID m = env->GetMethodID(cl, "getValue", "()J");
-    if (m == NULL)
+    if (CheckException(env))
     {
         return 0;
     }
     jlong handle = env->CallLongMethod(objHandle, m);
+    if (CheckException(env))
+    {
+        return 0;
+    }
     return handle;
 }
 
@@ -253,16 +281,20 @@ jstring GetStringObjectHandle(JNIEnv *env, jobject objHandle)
 {
     std::string result = "";
     jclass cl = env->GetObjectClass(objHandle);
-    if (cl == NULL)
+    if (CheckException(env))
     {
         return env->NewStringUTF(result.c_str());
     }
     jmethodID m = env->GetMethodID(cl, "getValue", "()Ljava/lang/String;");
-    if (m == NULL)
+    if (CheckException(env))
     {
         return env->NewStringUTF(result.c_str());
     }
     jstring handle = (jstring)env->CallObjectMethod(objHandle, m);
+    if (CheckException(env))
+    {
+        return env->NewStringUTF(result.c_str());
+    }
     return handle;
 }
 
@@ -271,22 +303,29 @@ jstring GetStringObjectHandle(JNIEnv *env, jobject objHandle)
  * Description: SetStringObjectHandle sets the value (string) of StringRef Java object.
  *
  */
-jint SetStringObjectHandle(JNIEnv *env, jobject objHandle, std::string value)
+SPXHR SetStringObjectHandle(JNIEnv *env, jobject objHandle, const char *value)
 {
     jclass cl = env->GetObjectClass(objHandle);
-    if (cl == NULL)
+    if (CheckException(env))
     {
-        return -1;
+        return SPXERR_RUNTIME_ERROR;
     }
     jmethodID m = env->GetMethodID(cl, "setValue", "(Ljava/lang/String;)V");
-    if (m == NULL)
+    if (CheckException(env))
     {
-        return -1;
+        return SPXERR_RUNTIME_ERROR;
     }
-
-    jstring val = env->NewStringUTF(value.c_str());
+    jstring val = env->NewStringUTF(value);
+    if (val == NULL)
+    {
+        return SPXERR_OUT_OF_MEMORY;
+    }
     env->CallVoidMethod(objHandle, m, val);
-    return 0;
+    if (CheckException(env))
+    {
+        return SPXERR_RUNTIME_ERROR;
+    }
+    return SPX_NOERROR;
 }
 
 /*
@@ -294,23 +333,71 @@ jint SetStringObjectHandle(JNIEnv *env, jobject objHandle, std::string value)
  * Description: SetStringMapObjectHandle sets the value (Map<string key, string value>) of Java object.
  *
  */
-jint SetStringMapObjectHandle(JNIEnv* env, jobject objHandle, std::string key, std::string value)
+SPXHR SetStringMapObjectHandle(JNIEnv* env, jobject objHandle, const char* key, const char* value)
 {
     jclass cl = env->GetObjectClass(objHandle);
-    if (cl == NULL)
+    if (CheckException(env))
     {
-        return -1;
+        return SPXERR_RUNTIME_ERROR;
     }
     jmethodID m = env->GetMethodID(cl, "setValue", "(Ljava/lang/String;Ljava/lang/String;)V");
-    if (m == NULL)
+    if (CheckException(env))
     {
-        return -1;
+        return SPXERR_RUNTIME_ERROR;
     }
-
-    jstring k = env->NewStringUTF(key.c_str());
-    jstring val = env->NewStringUTF(value.c_str());
+    jstring k = env->NewStringUTF(key);
+    if (k == NULL)
+    {
+        return SPXERR_OUT_OF_MEMORY;
+    }
+    jstring val = env->NewStringUTF(value);
+    if (val == NULL)
+    {
+        return SPXERR_OUT_OF_MEMORY;
+    }
     env->CallVoidMethod(objHandle, m, k, val);
-    return 0;
+    if (CheckException(env))
+    {
+        return SPXERR_RUNTIME_ERROR;
+    }
+    return SPX_NOERROR;
+}
+
+/*
+ * Method:    GetStringUTFChars
+ * Description: GetStringUTFChars gets the const char string from jstring object.
+ *              ReleaseStringUTFChars needs to be called to release the string.
+ *
+ */
+const char* GetStringUTFChars(JNIEnv* env, jstring jString)
+{
+    const char* result = NULL;
+    if (jString != NULL)
+    {
+        result = env->GetStringUTFChars(jString, 0);
+        if (CheckException(env))
+        {
+            if (result != NULL)
+            {
+                env->ReleaseStringUTFChars(jString, result);
+            }
+            return NULL;
+        }
+    }
+    return result;
+}
+
+/*
+ * Method:    ReleaseStringUTFChars
+ * Description: ReleaseStringUTFChars releases the string.
+ *
+ */
+void ReleaseStringUTFChars(JNIEnv* env, jstring jString, const char *cString)
+{
+    if (jString != NULL && cString != NULL)
+    {
+        env->ReleaseStringUTFChars(jString, cString);
+    }
 }
 
 /*
@@ -320,20 +407,44 @@ jint SetStringMapObjectHandle(JNIEnv* env, jobject objHandle, std::string key, s
  */
 jobject AsBigInteger(JNIEnv *env, uint64_t value)
 {
-    jobject jresult = 0;
+    jobject jresult = NULL;
+    jbyte* bae = NULL;
+    jclass clazz = NULL;
+    jmethodID mid = NULL;
     jbyteArray ba = env->NewByteArray(9);
-    jbyte* bae = env->GetByteArrayElements(ba, 0);
-    jclass clazz = env->FindClass("java/math/BigInteger");
-    jmethodID mid = env->GetMethodID(clazz, "<init>", "([B)V");
-
+    if (CheckException(env))
+    {
+        goto Exit;
+    }
+    bae = env->GetByteArrayElements(ba, 0);
+    if (CheckException(env))
+    {
+        goto Exit;
+    }
+    clazz = env->FindClass("java/math/BigInteger");
+    if (CheckException(env))
+    {
+        goto Exit;
+    }
+    mid = env->GetMethodID(clazz, "<init>", "([B)V");
+    if (CheckException(env))
+    {
+        goto Exit;
+    }
     bae[0] = 0;
     for (int i = 1; i < 9; i++)
     {
         bae[i] = (jbyte)(value >> 8 * (8 - i));
     }
-    env->ReleaseByteArrayElements(ba, bae, 0);
     jresult = env->NewObject(clazz, mid, ba);
-    env->DeleteLocalRef(ba);
+    if (CheckException(env))
+    {
+        goto Exit;
+    }
+
+Exit:
+    if (ba != NULL && bae != NULL) env->ReleaseByteArrayElements(ba, bae, 0);
+    if (ba != NULL) env->DeleteLocalRef(ba);
     return jresult;
 }
 

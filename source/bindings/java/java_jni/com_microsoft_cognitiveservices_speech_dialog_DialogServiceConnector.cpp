@@ -70,14 +70,13 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_dialog_Dialo
 {
     char interaction_id[maxCharCount + 1] = {};
     jlong connector = GetObjectHandle(env, dialogServiceHandle);
-    const char* activity = env->GetStringUTFChars(activityStr, 0);
+    const char* activity = GetStringUTFChars(env, activityStr);
     SPXHR hr = dialog_service_connector_send_activity((SPXRECOHANDLE)connector, activity, interaction_id);
     if (SPX_SUCCEEDED(hr))
     {
-        std::string value = std::string(interaction_id);
-        SetStringObjectHandle(env, interactionId, value.c_str());
+        hr = SetStringObjectHandle(env, interactionId, interaction_id);
     }
-    env->ReleaseStringUTFChars(activityStr, activity);
+    ReleaseStringUTFChars(env, activityStr, activity);
     return (jlong)hr;
 }
 

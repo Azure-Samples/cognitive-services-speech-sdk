@@ -16,15 +16,15 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_translation_
   (JNIEnv *env, jclass cls, jobject translationConfigHandle, jstring subscriptionKey, jstring serviceRegion)
 {
     SPXSPEECHCONFIGHANDLE configHandle = SPXHANDLE_INVALID;
-    const char* subscription = env->GetStringUTFChars(subscriptionKey, 0);
-    const char* region = env->GetStringUTFChars(serviceRegion, 0);
+    const char* subscription = GetStringUTFChars(env, subscriptionKey);
+    const char* region = GetStringUTFChars(env, serviceRegion);
     SPXHR hr = speech_translation_config_from_subscription(&configHandle, subscription, region);
     if (SPX_SUCCEEDED(hr))
     {
         SetObjectHandle(env, translationConfigHandle, (jlong)configHandle);
     }
-    env->ReleaseStringUTFChars(subscriptionKey, subscription);
-    env->ReleaseStringUTFChars(serviceRegion, region);
+    ReleaseStringUTFChars(env, subscriptionKey, subscription);
+    ReleaseStringUTFChars(env, serviceRegion, region);
     return (jlong)hr;
 }
 
@@ -37,15 +37,15 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_translation_
   (JNIEnv *env, jclass cls, jobject translationConfigHandle, jstring authToken, jstring serviceRegion)
 {
     SPXSPEECHCONFIGHANDLE configHandle = SPXHANDLE_INVALID;
-    const char* authorizationToken = env->GetStringUTFChars(authToken, 0);
-    const char* region = env->GetStringUTFChars(serviceRegion, 0);
+    const char* authorizationToken = GetStringUTFChars(env, authToken);
+    const char* region = GetStringUTFChars(env, serviceRegion);
     SPXHR hr = speech_translation_config_from_authorization_token(&configHandle, authorizationToken, region);
     if (SPX_SUCCEEDED(hr))
     {
         SetObjectHandle(env, translationConfigHandle, (jlong)configHandle);
     }
-    env->ReleaseStringUTFChars(authToken, authorizationToken);
-    env->ReleaseStringUTFChars(serviceRegion, region);
+    ReleaseStringUTFChars(env, authToken, authorizationToken);
+    ReleaseStringUTFChars(env, serviceRegion, region);
     return (jlong)hr;
 }
 
@@ -58,22 +58,15 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_translation_
   (JNIEnv *env, jclass cls, jobject translationConfigHandle, jstring serviceEndpoint, jstring subscriptionKey)
 {
     SPXSPEECHCONFIGHANDLE configHandle = SPXHANDLE_INVALID;
-    const char* subscription = NULL;
-    if (subscriptionKey != NULL)
-    {
-        subscription = env->GetStringUTFChars(subscriptionKey, 0);
-    }
-    const char* endpoint = env->GetStringUTFChars(serviceEndpoint, 0);
+    const char* subscription = GetStringUTFChars(env, subscriptionKey);
+    const char* endpoint = GetStringUTFChars(env, serviceEndpoint);
     SPXHR hr = speech_translation_config_from_endpoint(&configHandle, endpoint, subscription);
     if (SPX_SUCCEEDED(hr))
     {
         SetObjectHandle(env, translationConfigHandle, (jlong)configHandle);
     }
-    if (subscriptionKey != NULL)
-    {
-        env->ReleaseStringUTFChars(subscriptionKey, subscription);
-    }
-    env->ReleaseStringUTFChars(serviceEndpoint, endpoint);
+    ReleaseStringUTFChars(env, subscriptionKey, subscription);
+    ReleaseStringUTFChars(env, serviceEndpoint, endpoint);
     return (jlong)hr;
 }
 
@@ -86,22 +79,15 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_translation_
   (JNIEnv *env, jclass cls, jobject translationConfigHandle, jstring hostName, jstring subscriptionKey)
 {
     SPXSPEECHCONFIGHANDLE configHandle = SPXHANDLE_INVALID;
-    const char* subscription = NULL;
-    if (subscriptionKey != NULL)
-    {
-        subscription = env->GetStringUTFChars(subscriptionKey, 0);
-    }
-    const char* host = env->GetStringUTFChars(hostName, 0);
+    const char* subscription = GetStringUTFChars(env, subscriptionKey);
+    const char* host = GetStringUTFChars(env, hostName);
     SPXHR hr = speech_translation_config_from_host(&configHandle, host, subscription);
     if (SPX_SUCCEEDED(hr))
     {
         SetObjectHandle(env, translationConfigHandle, (jlong)configHandle);
     }
-    if (subscriptionKey != NULL)
-    {
-        env->ReleaseStringUTFChars(subscriptionKey, subscription);
-    }
-    env->ReleaseStringUTFChars(hostName, host);
+    ReleaseStringUTFChars(env, subscriptionKey, subscription);
+    ReleaseStringUTFChars(env, hostName, host);
     return (jlong)hr;
 }
 
@@ -114,9 +100,9 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_translation_
   (JNIEnv *env, jobject obj, jobject translationConfigHandle, jstring targetLanguage)
 {
     jlong configHandle = GetObjectHandle(env, translationConfigHandle);
-    const char* language = env->GetStringUTFChars(targetLanguage, 0);
+    const char* language = GetStringUTFChars(env, targetLanguage);
     SPXHR hr = speech_translation_config_add_target_language((SPXSPEECHCONFIGHANDLE)configHandle, language);
-    env->ReleaseStringUTFChars(targetLanguage, language);
+    ReleaseStringUTFChars(env, targetLanguage, language);
     return (jlong)hr;
 }
 
@@ -129,8 +115,8 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_translation_
   (JNIEnv *env, jobject obj, jobject translationConfigHandle, jstring targetLanguage)
 {
     jlong configHandle = GetObjectHandle(env, translationConfigHandle);
-    const char* language = env->GetStringUTFChars(targetLanguage, 0);
+    const char* language = GetStringUTFChars(env, targetLanguage);
     SPXHR hr = speech_translation_config_remove_target_language((SPXSPEECHCONFIGHANDLE)configHandle, language);
-    env->ReleaseStringUTFChars(targetLanguage, language);
+    ReleaseStringUTFChars(env, targetLanguage, language);
     return (jlong)hr;
 }

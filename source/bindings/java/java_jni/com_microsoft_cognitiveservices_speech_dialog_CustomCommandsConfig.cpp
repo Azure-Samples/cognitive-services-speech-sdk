@@ -16,17 +16,17 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_dialog_Custo
   (JNIEnv* env, jclass cls, jobject customConfigHandle, jstring appId, jstring subscriptionKey, jstring serviceRegion)
 {
     SPXSPEECHCONFIGHANDLE configHandle = SPXHANDLE_INVALID;
-    const char* app_id = env->GetStringUTFChars(appId, 0);
-    const char* subscription = env->GetStringUTFChars(subscriptionKey, 0);
-    const char* region = env->GetStringUTFChars(serviceRegion, 0);
+    const char* app_id = GetStringUTFChars(env, appId);
+    const char* subscription = GetStringUTFChars(env, subscriptionKey);
+    const char* region = GetStringUTFChars(env, serviceRegion);
     SPXHR hr = custom_commands_config_from_subscription(&configHandle, app_id, subscription, region);
     if (SPX_SUCCEEDED(hr))
     {
         SetObjectHandle(env, customConfigHandle, (jlong)configHandle);
     }
-    env->ReleaseStringUTFChars(appId, app_id);
-    env->ReleaseStringUTFChars(subscriptionKey, subscription);
-    env->ReleaseStringUTFChars(serviceRegion, region);
+    ReleaseStringUTFChars(env, appId, app_id);
+    ReleaseStringUTFChars(env, subscriptionKey, subscription);
+    ReleaseStringUTFChars(env, serviceRegion, region);
     return (jlong)hr;
 }
 /*
@@ -38,16 +38,16 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_dialog_Custo
   (JNIEnv *env, jclass cls, jobject customConfigHandle, jstring appId, jstring authToken, jstring serviceRegion)
 {
     SPXSPEECHCONFIGHANDLE configHandle = SPXHANDLE_INVALID;
-    const char* app_id = env->GetStringUTFChars(appId, 0);
-    const char* authorizationToken = env->GetStringUTFChars(authToken, 0);
-    const char* region = env->GetStringUTFChars(serviceRegion, 0);
+    const char* app_id = GetStringUTFChars(env, appId);
+    const char* authorizationToken = GetStringUTFChars(env, authToken);
+    const char* region = GetStringUTFChars(env, serviceRegion);
     SPXHR hr = custom_commands_config_from_authorization_token(&configHandle, app_id, authorizationToken, region);
     if (SPX_SUCCEEDED(hr))
     {
         SetObjectHandle(env, customConfigHandle, (jlong)configHandle);
     }
-    env->ReleaseStringUTFChars(appId, app_id);
-    env->ReleaseStringUTFChars(authToken, authorizationToken);
-    env->ReleaseStringUTFChars(serviceRegion, region);
+    ReleaseStringUTFChars(env, appId, app_id);
+    ReleaseStringUTFChars(env, authToken, authorizationToken);
+    ReleaseStringUTFChars(env, serviceRegion, region);
     return (jlong)hr;
 }

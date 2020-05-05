@@ -16,24 +16,17 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_dialog_BotFr
   (JNIEnv *env, jclass cls, jobject botConfigHandle, jstring subscriptionKey, jstring serviceRegion, jstring botIdStr)
 {
     SPXSPEECHCONFIGHANDLE configHandle = SPXHANDLE_INVALID;
-    const char* subscription = env->GetStringUTFChars(subscriptionKey, 0);
-    const char* region = env->GetStringUTFChars(serviceRegion, 0);
-    const char* botId = NULL;
-    if (botIdStr != NULL)
-    {
-        botId = env->GetStringUTFChars(botIdStr, 0);
-    }
+    const char* subscription = GetStringUTFChars(env, subscriptionKey);
+    const char* region = GetStringUTFChars(env, serviceRegion);
+    const char* botId = GetStringUTFChars(env, botIdStr);
     SPXHR hr = bot_framework_config_from_subscription(&configHandle, subscription, region, botId);
     if (SPX_SUCCEEDED(hr))
     {
         SetObjectHandle(env, botConfigHandle, (jlong)configHandle);
     }
-    env->ReleaseStringUTFChars(subscriptionKey, subscription);
-    env->ReleaseStringUTFChars(serviceRegion, region);
-    if (botIdStr != NULL)
-    {
-        env->ReleaseStringUTFChars(botIdStr, botId);
-    }
+    ReleaseStringUTFChars(env, subscriptionKey, subscription);
+    ReleaseStringUTFChars(env, serviceRegion, region);
+    ReleaseStringUTFChars(env, botIdStr, botId);
     return (jlong)hr;
 }
 
@@ -46,23 +39,16 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_dialog_BotFr
   (JNIEnv* env, jclass cls, jobject botConfigHandle, jstring authToken, jstring serviceRegion, jstring botIdStr)
 {
     SPXSPEECHCONFIGHANDLE configHandle = SPXHANDLE_INVALID;
-    const char* authorizationToken = env->GetStringUTFChars(authToken, 0);
-    const char* region = env->GetStringUTFChars(serviceRegion, 0);
-    const char* botId = NULL;
-    if (botIdStr != NULL)
-    {
-        botId = env->GetStringUTFChars(botIdStr, 0);
-    }
+    const char* authorizationToken = GetStringUTFChars(env, authToken);
+    const char* region = GetStringUTFChars(env, serviceRegion);
+    const char* botId = GetStringUTFChars(env, botIdStr);
     SPXHR hr = bot_framework_config_from_authorization_token(&configHandle, authorizationToken, region, botId);
     if (SPX_SUCCEEDED(hr))
     {
         SetObjectHandle(env, botConfigHandle, (jlong)configHandle);
     }
-    env->ReleaseStringUTFChars(authToken, authorizationToken);
-    env->ReleaseStringUTFChars(serviceRegion, region);
-    if (botIdStr != NULL)
-    {
-        env->ReleaseStringUTFChars(botIdStr, botId);
-    }
+    ReleaseStringUTFChars(env, authToken, authorizationToken);
+    ReleaseStringUTFChars(env, serviceRegion, region);
+    ReleaseStringUTFChars(env, botIdStr, botId);
     return (jlong)hr;
 }

@@ -62,7 +62,7 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_SpeechSynthe
   (JNIEnv *env, jobject obj, jobject synthesizerHandle, jstring textStr, jobject resultRef)
 {
     jlong synthHandle = GetObjectHandle(env, synthesizerHandle);
-    const char* text = env->GetStringUTFChars(textStr, 0);
+    const char* text = GetStringUTFChars(env, textStr);
     SPXRESULTHANDLE result = SPXHANDLE_INVALID;
     uint32_t textLength = (uint32_t) std::string(text).length();
     SPXHR hr = synthesizer_speak_text((SPXSYNTHHANDLE)synthHandle, text, textLength, &result);
@@ -70,7 +70,7 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_SpeechSynthe
     {
         SetObjectHandle(env, resultRef, (jlong)result);
     }
-    env->ReleaseStringUTFChars(textStr, text);
+    ReleaseStringUTFChars(env, textStr, text);
     return (jlong)hr;
 }
 
@@ -83,7 +83,7 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_SpeechSynthe
   (JNIEnv *env, jobject obj, jobject synthesizerHandle, jstring ssmlStr, jobject resultRef)
 {
     jlong synthHandle = GetObjectHandle(env, synthesizerHandle);
-    const char* ssml = env->GetStringUTFChars(ssmlStr, 0);
+    const char* ssml = GetStringUTFChars(env, ssmlStr);
     SPXRESULTHANDLE result = SPXHANDLE_INVALID;
     uint32_t ssmlLength = (uint32_t)std::string(ssml).length();
     SPXHR hr = synthesizer_speak_ssml((SPXSYNTHHANDLE)synthHandle, ssml, ssmlLength, &result);
@@ -91,7 +91,7 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_SpeechSynthe
     {
         SetObjectHandle(env, resultRef, (jlong)result);
     }
-    env->ReleaseStringUTFChars(ssmlStr, ssml);
+    ReleaseStringUTFChars(env, ssmlStr, ssml);
     return (jlong)hr;
 }
 
@@ -104,7 +104,7 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_SpeechSynthe
   (JNIEnv *env, jobject obj, jobject synthesizerHandle, jstring textStr, jobject resultRef)
 {
     jlong synthHandle = GetObjectHandle(env, synthesizerHandle);
-    const char* text = env->GetStringUTFChars(textStr, 0);
+    const char* text = GetStringUTFChars(env, textStr);
     SPXRESULTHANDLE result = SPXHANDLE_INVALID;
     uint32_t textLength = (uint32_t)std::string(text).length();
     SPXHR hr = synthesizer_start_speaking_text((SPXSYNTHHANDLE)synthHandle, text, textLength, &result);
@@ -112,7 +112,7 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_SpeechSynthe
     {
         SetObjectHandle(env, resultRef, (jlong)result);
     }
-    env->ReleaseStringUTFChars(textStr, text);
+    ReleaseStringUTFChars(env, textStr, text);
     return (jlong)hr;
 }
 
@@ -125,7 +125,7 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_SpeechSynthe
   (JNIEnv *env, jobject obj, jobject synthesizerHandle, jstring ssmlStr, jobject resultRef)
 {
     jlong synthHandle = GetObjectHandle(env, synthesizerHandle);
-    const char* ssml = env->GetStringUTFChars(ssmlStr, 0);
+    const char* ssml = GetStringUTFChars(env, ssmlStr);
     SPXRESULTHANDLE result = SPXHANDLE_INVALID;
     uint32_t ssmlLength = (uint32_t)std::string(ssml).length();
     SPXHR hr = synthesizer_start_speaking_ssml((SPXSYNTHHANDLE)synthHandle, ssml, ssmlLength, &result);
@@ -133,7 +133,7 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_SpeechSynthe
     {
         SetObjectHandle(env, resultRef, (jlong)result);
     }
-    env->ReleaseStringUTFChars(ssmlStr, ssml);
+    ReleaseStringUTFChars(env, ssmlStr, ssml);
     return (jlong)hr;
 }
 

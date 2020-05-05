@@ -16,13 +16,13 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_SourceLangua
   (JNIEnv*env, jclass cls, jobject sourceLangConfigHandle, jstring language)
 {
     SPXSOURCELANGCONFIGHANDLE configHandle = SPXHANDLE_INVALID;
-    const char* lang = env->GetStringUTFChars(language, 0);
+    const char* lang = GetStringUTFChars(env, language);
     SPXHR hr = source_lang_config_from_language(&configHandle, lang);
     if (SPX_SUCCEEDED(hr))
     {
         SetObjectHandle(env, sourceLangConfigHandle, (jlong)configHandle);
     }
-    env->ReleaseStringUTFChars(language, lang);
+    ReleaseStringUTFChars(env, language, lang);
     return (jlong)hr;
 }
 
@@ -35,14 +35,14 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_SourceLangua
   (JNIEnv *env, jclass cls, jobject sourceLangConfigHandle, jstring language, jstring endpointId)
 {
     SPXSOURCELANGCONFIGHANDLE configHandle = SPXHANDLE_INVALID;
-    const char* lang = env->GetStringUTFChars(language, 0);
-    const char* endpoint = env->GetStringUTFChars(endpointId, 0);
+    const char* lang = GetStringUTFChars(env, language);
+    const char* endpoint = GetStringUTFChars(env, endpointId);
     SPXHR hr = source_lang_config_from_language_and_endpointId(&configHandle, lang, endpoint);
     if (SPX_SUCCEEDED(hr))
     {
         SetObjectHandle(env, sourceLangConfigHandle, (jlong)configHandle);
     }
-    env->ReleaseStringUTFChars(language, lang);
-    env->ReleaseStringUTFChars(endpointId, endpoint);
+    ReleaseStringUTFChars(env, language, lang);
+    ReleaseStringUTFChars(env, endpointId, endpoint);
     return (jlong)hr;
 }

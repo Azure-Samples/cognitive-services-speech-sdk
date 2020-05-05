@@ -16,13 +16,13 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_intent_Inten
   (JNIEnv *env, jclass cls, jobject triggerHandle, jstring phraseStr)
 {
     SPXTRIGGERHANDLE trigger = SPXHANDLE_INVALID;
-    const char* phrase = env->GetStringUTFChars(phraseStr, 0);
+    const char* phrase = GetStringUTFChars(env, phraseStr);
     SPXHR hr = intent_trigger_create_from_phrase(&trigger, phrase);
     if (SPX_SUCCEEDED(hr))
     {
         SetObjectHandle(env, triggerHandle, (jlong)trigger);
     }
-    env->ReleaseStringUTFChars(phraseStr, phrase);
+    ReleaseStringUTFChars(env, phraseStr, phrase);
     return (jlong)hr;
 }
 
@@ -36,12 +36,12 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_intent_Inten
 {
     SPXTRIGGERHANDLE trigger = SPXHANDLE_INVALID;
     jlong luModel = GetObjectHandle(env, luModelHandle);
-    const char* intentName = env->GetStringUTFChars(intentNameStr, 0);
+    const char* intentName = GetStringUTFChars(env, intentNameStr);
     SPXHR hr = intent_trigger_create_from_language_understanding_model(&trigger, (SPXLUMODELHANDLE)luModel, intentName);
     if (SPX_SUCCEEDED(hr))
     {
         SetObjectHandle(env, triggerHandle, (jlong)trigger);
     }
-    env->ReleaseStringUTFChars(intentNameStr, intentName);
+    ReleaseStringUTFChars(env, intentNameStr, intentName);
     return (jlong)hr;
 }

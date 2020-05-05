@@ -16,19 +16,12 @@
 JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_PropertyCollection_setPropertyString
   (JNIEnv *env, jobject obj, jobject objHandle, jint id, jstring name, jstring defaultValue)
 {
-    const char *propertyName = NULL;
-    if (name != NULL)
-    {
-        propertyName = env->GetStringUTFChars(name, 0);
-    }
-    const char *value = env->GetStringUTFChars(defaultValue, 0);
+    const char *propertyName = GetStringUTFChars(env, name);
+    const char *value = GetStringUTFChars(env, defaultValue);
     jlong propertyHandle = GetObjectHandle(env, objHandle);
     SPXHR hr = property_bag_set_string((SPXPROPERTYBAGHANDLE)propertyHandle, (int) id, propertyName, value);
-    if (name != NULL)
-    {
-        env->ReleaseStringUTFChars(name, propertyName);
-    }
-    env->ReleaseStringUTFChars(defaultValue, value);
+    ReleaseStringUTFChars(env, name, propertyName);
+    ReleaseStringUTFChars(env, defaultValue, value);
     return (jlong)hr;
 }
 
@@ -41,12 +34,8 @@ JNIEXPORT jstring JNICALL Java_com_microsoft_cognitiveservices_speech_PropertyCo
   (JNIEnv *env, jobject obj, jobject objHandle, jint id, jstring name, jstring defaultValue)
 {
     jstring result;
-    const char *propertyName = NULL;
-    if (name != NULL)
-    {
-        propertyName = env->GetStringUTFChars(name, 0);
-    }
-    const char *value = env->GetStringUTFChars(defaultValue, 0);
+    const char *propertyName = GetStringUTFChars(env, name);
+    const char *value = GetStringUTFChars(env, defaultValue);
     jlong propertyHandle = GetObjectHandle(env, objHandle);
     const char* str = property_bag_get_string((SPXPROPERTYBAGHANDLE)propertyHandle, (int)id, propertyName, value);
     result = str ? env->NewStringUTF(str) : env->NewStringUTF("");
@@ -54,10 +43,7 @@ JNIEXPORT jstring JNICALL Java_com_microsoft_cognitiveservices_speech_PropertyCo
     {
         property_bag_free_string(str);
     }
-    if (name != NULL)
-    {
-        env->ReleaseStringUTFChars(name, propertyName);
-    }
-    env->ReleaseStringUTFChars(defaultValue, value);
+    ReleaseStringUTFChars(env, name, propertyName);
+    ReleaseStringUTFChars(env, defaultValue, value);
     return result;
 }

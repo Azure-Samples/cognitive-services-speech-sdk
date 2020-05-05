@@ -16,13 +16,13 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_audio_AudioC
   (JNIEnv *env, jclass cls, jobject audioConfigHandle, jstring fileName)
 {
     SPXAUDIOCONFIGHANDLE configHandle = SPXHANDLE_INVALID;
-    const char *filename = env->GetStringUTFChars(fileName, 0);
+    const char *filename = GetStringUTFChars(env, fileName);
     SPXHR hr = audio_config_create_audio_input_from_wav_file_name(&configHandle, filename);
     if (SPX_SUCCEEDED(hr))
     {
         SetObjectHandle(env, audioConfigHandle, (jlong)configHandle);
     }
-    env->ReleaseStringUTFChars(fileName, filename);
+    ReleaseStringUTFChars(env, fileName, filename);
     return (jlong)hr;
 }
 
@@ -52,13 +52,13 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_audio_AudioC
   (JNIEnv *env, jclass cls, jobject audioConfigHandle, jstring micDeviceName)
 {
     SPXAUDIOCONFIGHANDLE configHandle = SPXHANDLE_INVALID;
-    const char *deviceName = env->GetStringUTFChars(micDeviceName, 0);
+    const char *deviceName = GetStringUTFChars(env, micDeviceName);
     SPXHR hr = audio_config_create_audio_input_from_a_microphone(&configHandle, deviceName);
     if (SPX_SUCCEEDED(hr))
     {
         SetObjectHandle(env, audioConfigHandle, (jlong)configHandle);
     }
-    env->ReleaseStringUTFChars(micDeviceName, deviceName);
+    ReleaseStringUTFChars(env, micDeviceName, deviceName);
     return (jlong)hr;
 }
 
@@ -106,13 +106,13 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_audio_AudioC
   (JNIEnv *env, jclass cls, jobject audioConfigHandle, jstring fileName)
 {
     SPXAUDIOCONFIGHANDLE configHandle = SPXHANDLE_INVALID;
-    const char* file = env->GetStringUTFChars(fileName, 0);
+    const char* file = GetStringUTFChars(env, fileName);
     SPXHR hr = audio_config_create_audio_output_from_wav_file_name(&configHandle, file);
     if (SPX_SUCCEEDED(hr))
     {
         SetObjectHandle(env, audioConfigHandle, (jlong)configHandle);
     }
-    env->ReleaseStringUTFChars(fileName, file);
+    ReleaseStringUTFChars(env, fileName, file);
     return (jlong)hr;
 }
 

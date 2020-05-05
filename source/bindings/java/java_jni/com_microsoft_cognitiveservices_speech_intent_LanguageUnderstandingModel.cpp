@@ -16,13 +16,13 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_intent_Langu
   (JNIEnv *env, jclass cls, jobject luModelHandle, jstring uriStr)
 {
     SPXLUMODELHANDLE luModel = SPXHANDLE_INVALID;
-    const char* uri = env->GetStringUTFChars(uriStr, 0);
+    const char* uri = GetStringUTFChars(env, uriStr);
     SPXHR hr = language_understanding_model_create_from_uri(&luModel, uri);
     if (SPX_SUCCEEDED(hr))
     {
         SetObjectHandle(env, luModelHandle, (jlong)luModel);
     }
-    env->ReleaseStringUTFChars(uriStr, uri);
+    ReleaseStringUTFChars(env, uriStr, uri);
     return (jlong)hr;
 }
 
@@ -35,13 +35,13 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_intent_Langu
   (JNIEnv *env, jclass cls, jobject luModelHandle, jstring appId)
 {
     SPXLUMODELHANDLE luModel = SPXHANDLE_INVALID;
-    const char* app_id = env->GetStringUTFChars(appId, 0);
+    const char* app_id = GetStringUTFChars(env, appId);
     SPXHR hr = language_understanding_model_create_from_app_id(&luModel, app_id);
     if (SPX_SUCCEEDED(hr))
     {
         SetObjectHandle(env, luModelHandle, (jlong)luModel);
     }
-    env->ReleaseStringUTFChars(appId, app_id);
+    ReleaseStringUTFChars(env, appId, app_id);
     return (jlong)hr;
 }
 
@@ -54,16 +54,16 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_intent_Langu
   (JNIEnv *env, jclass cls, jobject luModelHandle, jstring subscriptionKey, jstring appId, jstring region)
 {
     SPXLUMODELHANDLE luModel = SPXHANDLE_INVALID;
-    const char* key = env->GetStringUTFChars(subscriptionKey, 0);
-    const char* app_id = env->GetStringUTFChars(appId, 0);
-    const char* reg = env->GetStringUTFChars(region, 0);
+    const char* key = GetStringUTFChars(env, subscriptionKey);
+    const char* app_id = GetStringUTFChars(env, appId);
+    const char* reg = GetStringUTFChars(env, region);
     SPXHR hr = language_understanding_model_create_from_subscription(&luModel, key, app_id, reg);
     if (SPX_SUCCEEDED(hr))
     {
         SetObjectHandle(env, luModelHandle, (jlong)luModel);
     }
-    env->ReleaseStringUTFChars(subscriptionKey, key);
-    env->ReleaseStringUTFChars(appId, app_id);
-    env->ReleaseStringUTFChars(region, reg);
+    ReleaseStringUTFChars(env, subscriptionKey, key);
+    ReleaseStringUTFChars(env, appId, app_id);
+    ReleaseStringUTFChars(env, region, reg);
     return (jlong)hr;
 }

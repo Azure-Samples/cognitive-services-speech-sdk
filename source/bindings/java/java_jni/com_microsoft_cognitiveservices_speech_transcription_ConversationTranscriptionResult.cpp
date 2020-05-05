@@ -22,8 +22,7 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_transcriptio
     SPXHR hr = conversation_transcription_result_get_user_id((SPXRESULTHANDLE)result, sz, maxCharCount);
     if (SPX_SUCCEEDED(hr))
     {
-        std::string value = std::string(sz);
-        SetStringObjectHandle(env, userIdStr, value.c_str());
+        hr = SetStringObjectHandle(env, userIdStr, sz);
     }
     return (jlong)hr;
 }

@@ -18,13 +18,13 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_transcriptio
   (JNIEnv *env, jclass cls, jstring userId, jobject userHandle)
 {
     SPXUSERHANDLE user = SPXHANDLE_INVALID;
-    const char* id = env->GetStringUTFChars(userId, 0);
+    const char* id = GetStringUTFChars(env, userId);
     SPXHR hr = user_create_from_id(id, &user);
     if (SPX_SUCCEEDED(hr))
     {
         SetObjectHandle(env, userHandle, (jlong)user);
     }
-    env->ReleaseStringUTFChars(userId, id);
+    ReleaseStringUTFChars(env, userId, id);
     return (jlong)hr;
 }
 
@@ -41,8 +41,7 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_transcriptio
     SPXHR hr = user_get_id((SPXUSERHANDLE)user, sz, maxCharCount);
     if (SPX_SUCCEEDED(hr))
     {
-        std::string value = std::string(sz);
-        SetStringObjectHandle(env, idRef, value.c_str());
+        hr = SetStringObjectHandle(env, idRef, sz);
     }
     return (jlong)hr;
 }

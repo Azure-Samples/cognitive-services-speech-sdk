@@ -16,12 +16,12 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_KeywordRecog
   (JNIEnv *env, jclass cls, jstring modelFile, jobject keywordModelHandle)
 {
     SPXKEYWORDHANDLE kwmodel = SPXHANDLE_INVALID;
-    const char* fileName = env->GetStringUTFChars(modelFile, 0);
+    const char* fileName = GetStringUTFChars(env, modelFile);
     SPXHR hr = keyword_recognition_model_create_from_file(fileName, &kwmodel);
     if (SPX_SUCCEEDED(hr))
     {
         SetObjectHandle(env, keywordModelHandle, (jlong)kwmodel);
     }
-    env->ReleaseStringUTFChars(modelFile, fileName);
+    ReleaseStringUTFChars(env, modelFile, fileName);
     return (jlong)hr;
 }

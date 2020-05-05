@@ -33,9 +33,9 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_translation_
     }
     if (SPX_SUCCEEDED(hr))
     {
-        for (size_t i = 0; i < phraseBuffer->numberEntries; i++)
+        for (size_t i = 0; i < phraseBuffer->numberEntries && SPX_SUCCEEDED(hr); i++)
         {
-            SetStringMapObjectHandle(env, translationsStringMapRef, phraseBuffer->targetLanguages[i], phraseBuffer->translationTexts[i]);
+            hr = SetStringMapObjectHandle(env, translationsStringMapRef, phraseBuffer->targetLanguages[i], phraseBuffer->translationTexts[i]);
         }
     }
     return (jlong)hr;

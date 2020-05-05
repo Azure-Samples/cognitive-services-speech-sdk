@@ -16,13 +16,13 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_ClassLanguag
   (JNIEnv* env, jclass cls, jobject grammarHandle, jstring storageId)
 {
     SPXGRAMMARHANDLE grammar = SPXHANDLE_INVALID;
-    const char* id = env->GetStringUTFChars(storageId, 0);
+    const char* id = GetStringUTFChars(env, storageId);
     SPXHR hr = class_language_model_from_storage_id(&grammar, id);
     if (SPX_SUCCEEDED(hr))
     {
         SetObjectHandle(env, grammarHandle, (jlong)grammar);
     }
-    env->ReleaseStringUTFChars(storageId, id);
+    ReleaseStringUTFChars(env, storageId, id);
     return (jlong)hr;
 }
 
@@ -36,8 +36,8 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_ClassLanguag
 {
     jlong clm = GetObjectHandle(env, clmHandle);
     jlong grammar = GetObjectHandle(env, grammarToAssign);
-    const char* clsName = env->GetStringUTFChars(className, 0);
+    const char* clsName = GetStringUTFChars(env, className);
     SPXHR hr = class_language_model_assign_class((SPXGRAMMARHANDLE)clm, clsName, (SPXGRAMMARHANDLE)grammar);
-    env->ReleaseStringUTFChars(className, clsName);
+    ReleaseStringUTFChars(env, className, clsName);
     return (jlong)hr;
 }

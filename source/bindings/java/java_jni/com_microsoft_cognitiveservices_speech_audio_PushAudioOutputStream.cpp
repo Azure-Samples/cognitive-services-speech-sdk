@@ -11,16 +11,20 @@ jobject GetPushAudioOutputStreamCallbackObject(JNIEnv* env, jobject streamObject
 {
     // Get PushAudioOutputStreamCallback object from stream handle
     jclass cl = env->GetObjectClass(streamObject);
-    if (cl == NULL)
+    if (CheckException(env))
     {
         return NULL;
     }
     jmethodID m = env->GetMethodID(cl, "getCallbackHandle", "()Lcom/microsoft/cognitiveservices/speech/audio/PushAudioOutputStreamCallback;");
-    if (m == NULL)
+    if (CheckException(env))
     {
         return NULL;
     }
     jobject callbackObj = env->CallObjectMethod(streamObject, m);
+    if (CheckException(env))
+    {
+        return NULL;
+    }
     return callbackObj;
 }
 
@@ -40,6 +44,10 @@ int OutputStreamWriteCallback(void* context, uint8_t* buffer, uint32_t size)
         jdataBuffer = env->NewByteArray((jsize)size);
         if (!jdataBuffer) return 0;
         env->SetByteArrayRegion(jdataBuffer, 0, (jsize)size, (jbyte*)buffer);
+        if (CheckException(env))
+        {
+            return 0;
+        }
     }
 
     jobject callbackObj = GetPushAudioOutputStreamCallbackObject(env, streamObject);
@@ -47,23 +55,24 @@ int OutputStreamWriteCallback(void* context, uint8_t* buffer, uint32_t size)
 
     // Call method write on PushAudioOutputStreamCallback object
     jclass cl = env->GetObjectClass(callbackObj);
-    if (cl == NULL)
+    if (CheckException(env))
     {
         return 0;
     }
-
     jmethodID m = env->GetMethodID(cl, "write", "([B)I");
-    if (m == NULL)
+    if (CheckException(env))
     {
         return 0;
     }
     result = env->CallIntMethod(callbackObj, m, jdataBuffer);
-
+    if (CheckException(env))
+    {
+        return 0;
+    }
     if (detach)
     {
         DetachJNIEnv(env);
     }
-
     return (int)result;
 }
 
@@ -80,16 +89,20 @@ void OutputStreamCloseCallback(void* context)
     if (!callbackObj) return;
 
     jclass cl = env->GetObjectClass(callbackObj);
-    if (cl == NULL)
+    if (CheckException(env))
     {
         return;
     }
     jmethodID m = env->GetMethodID(cl, "close", "()V");
-    if (m == NULL)
+    if (CheckException(env))
     {
         return;
     }
     env->CallVoidMethod(callbackObj, m);
+    if (CheckException(env))
+    {
+        return;
+    }
     if (detach)
     {
         DetachJNIEnv(env);
