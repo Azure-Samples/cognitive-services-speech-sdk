@@ -1229,6 +1229,11 @@ public:
         return m_isTransportError;
     }
 
+    bool IsAuthError() const
+    {
+        return m_errorCode == CancellationErrorCode::AuthenticationFailure || m_errorCode == CancellationErrorCode::Forbidden;
+    }
+
     const std::string& Info() const
     {
         return m_info;

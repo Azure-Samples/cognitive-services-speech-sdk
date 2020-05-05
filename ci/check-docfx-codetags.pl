@@ -133,10 +133,13 @@ BEGIN {
       samples/csharp/sharedcontent/console/intent_recognition_samples.cs#intentRecognitionWithMicrophone
       samples/csharp/sharedcontent/console/intent_recognition_samples.cs#toplevel
       samples/csharp/sharedcontent/console/speech_recognition_samples.cs#recognitionContinuousWithFile
+      samples/csharp/sharedcontent/console/speech_recognition_samples.cs#recognitionWithCompressedInputPullStreamAudio
+      samples/csharp/sharedcontent/console/speech_recognition_samples.cs#recognitionWithCompressedInputPushStreamAudio
       samples/csharp/sharedcontent/console/speech_recognition_samples.cs#recognitionCustomized
       samples/csharp/sharedcontent/console/speech_recognition_samples.cs#recognitionWithMicrophone
       samples/csharp/sharedcontent/console/speech_recognition_samples.cs#toplevel
       samples/csharp/sharedcontent/console/translation_samples.cs#TranslationWithFileAsync
+      samples/csharp/sharedcontent/console/translation_samples.cs#TranslationWithFileCompressedInputAsync
       samples/csharp/sharedcontent/console/translation_samples.cs#TranslationWithMicrophoneAsync
       samples/csharp/sharedcontent/console/translation_samples.cs#toplevel
       samples/java/jre/console/src/com/microsoft/cognitiveservices/speech/samples/console/IntentRecognitionSamples.java#IntentContinuousRecognitionWithFile

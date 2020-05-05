@@ -336,9 +336,12 @@ private:
     void UpdateAdapterResult_JsonResult(std::shared_ptr<ISpxRecognitionResult> result);
 
     void ForEachRecognizer(std::function<void(std::shared_ptr<ISpxRecognizer>)> fn);
-
+    void SetUSPRetriesParams();
 private:
 
+    uint16_t m_numMaxRetries = 3;
+    uint16_t m_retryDurationMS = 10;
+    uint32_t m_retriesDone = 0;
     std::shared_ptr<ISpxGenericSite> m_siteKeepAlive;
 
     // Unique identifier of the session, used mostly for diagnostics.
@@ -455,6 +458,7 @@ private:
     mutable std::mutex m_conversationLock;
 
     bool m_isReliableDelivery;
+    uint64_t m_lastErrorGlobalOffset;
     uint64_t m_currentTurnGlobalOffset;
 
     uint64_t m_bytesTransited;

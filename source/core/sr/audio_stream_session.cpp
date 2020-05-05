@@ -78,6 +78,7 @@ CSpxAudioStreamSession::CSpxAudioStreamSession() :
     m_turnEndStopKind(RecognitionKind::Idle),
     m_kwsProcessorMode{ KWSProcessorMode::None },
     m_isReliableDelivery{ false },
+    m_lastErrorGlobalOffset{ 0 },
     m_currentTurnGlobalOffset{ 0 },
     m_bytesTransited(0)
 {
@@ -230,6 +231,7 @@ void CSpxAudioStreamSession::InitFromFile(const wchar_t* pszFileName)
 
     SetStringValue(GetPropertyName(PropertyId::AudioConfig_AudioSource), g_audioSourceFile);
     SetAudioConfigurationInProperties();
+    SetUSPRetriesParams();
 
     m_isReliableDelivery = true;
 }
@@ -247,7 +249,7 @@ void CSpxAudioStreamSession::InitFromMicrophone()
 
     SetStringValue(GetPropertyName(PropertyId::AudioConfig_AudioSource), g_audioSourceMicrophone);
     SetAudioConfigurationInProperties();
-
+    SetUSPRetriesParams();
     // Write microphone device name and session id
     WriteTracingEvent();
 }
@@ -324,8 +326,27 @@ void CSpxAudioStreamSession::InitFromStream(std::shared_ptr<ISpxAudioStream> str
 
     SetStringValue(GetPropertyName(PropertyId::AudioConfig_AudioSource), g_audioSourceStream);
     SetAudioConfigurationInProperties();
-
+    SetUSPRetriesParams();
     m_isReliableDelivery = true;
+}
+
+void CSpxAudioStreamSession::SetUSPRetriesParams()
+{
+    string numMaxRetriesString = GetStringValue("SPEECH-Error-MaxRetryCount", "3");
+    string retryDurationMSString = GetStringValue("SPEECH-Error-RetryDurationMS", "10");
+
+    try
+    {
+        m_numMaxRetries = (uint16_t)std::stoi(numMaxRetriesString);
+        m_retryDurationMS = (uint16_t)std::stoi(retryDurationMSString);
+    }
+    catch (const std::exception& e)
+    {
+        SPX_DBG_TRACE_VERBOSE("Error Parsing %s", e.what());
+        SPX_DBG_TRACE_VERBOSE("Setting default number of retries to 3 and retry duration to 10ms");
+        m_numMaxRetries = (uint16_t)3;
+        m_retryDurationMS = (uint16_t)10;
+    }
 }
 
 void CSpxAudioStreamSession::SetAudioConfigurationInProperties()
@@ -948,7 +969,8 @@ void CSpxAudioStreamSession::StartRecognizing(RecognitionKind startKind, std::sh
         HotSwapAdaptersWhilePaused(startKind, model);
     }
     else if (m_resetRecoAdapter != nullptr && startKind == RecognitionKind::Continuous &&
-            ChangeState(RecognitionKind::Continuous, SessionState::ProcessingAudio, RecognitionKind::Continuous, SessionState::HotSwapPaused))
+            (ChangeState(RecognitionKind::Continuous, SessionState::ProcessingAudio, RecognitionKind::Continuous, SessionState::HotSwapPaused) ||
+                ChangeState(RecognitionKind::Continuous, SessionState::HotSwapPaused, RecognitionKind::Continuous, SessionState::HotSwapPaused)))
     {
         SPX_DBG_TRACE_WARNING("[%p]CSpxAudioStreamSession::StartRecognizing: Resetting adapter via HotSwap (ProcessingAudio -> HotSwapPaused) ... attempting to stay in continuous mode!!! ...", (void*)this);
 
@@ -2013,6 +2035,12 @@ void CSpxAudioStreamSession::CheckError(const string& error)
 
 void CSpxAudioStreamSession::Error(ISpxRecoEngineAdapter* adapter, ErrorPayload_Type payload)
 {
+    // We will reset the retry counter if we are in the new phrase and we get the error.
+    if (static_cast<uint64_t>(m_audioBuffer->GetAbsoluteOffset()) > m_lastErrorGlobalOffset)
+    {
+        m_retriesDone = 0;
+    }
+
     if (IsState(SessionState::Idle))
     {
         if (adapter != m_recoAdapter.get())
@@ -2036,12 +2064,13 @@ void CSpxAudioStreamSession::Error(ISpxRecoEngineAdapter* adapter, ErrorPayload_
             FireResultEvent(GetSessionId(), error);
         }
     }
-    // If it is a transport error and the connection was successfully before, we retry in continuous mode.
+    // If it is a transport error, we retry in continuous mode. We retry for m_numMaxRetries for the same error offset.
+    // The retry will be delayed by m_retryDurationMS milliseconds
     // Otherwise report the error to the user, so that he can recreate a recognizer.
-    else if (IsKind(RecognitionKind::Continuous) &&
-             payload->IsTransportError() &&
-             ( m_expectAdapterStoppedTurn || payload->ErrorCode() == CancellationErrorCode::ServiceRedirectTemporary || payload->ErrorCode() == CancellationErrorCode::ServiceRedirectPermanent) ) // We are in a turn.
+    else if (IsKind(RecognitionKind::Continuous) && (payload->IsTransportError() && !payload->IsAuthError()) && (m_retriesDone < m_numMaxRetries))
     {
+        m_retriesDone++;
+        std::this_thread::sleep_for(std::chrono::milliseconds(m_retryDurationMS));
         if (payload->ErrorCode() == CancellationErrorCode::ServiceRedirectPermanent)
         {
             SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Endpoint), payload->Info().c_str());
@@ -2059,6 +2088,7 @@ void CSpxAudioStreamSession::Error(ISpxRecoEngineAdapter* adapter, ErrorPayload_
             FireResultEvent(GetSessionId(), finalResult);
         }
 
+        m_lastErrorGlobalOffset = static_cast<uint64_t>(m_audioBuffer->GetAbsoluteOffset());
         StartResetEngineAdapter();
     }
     else if (IsKind(RecognitionKind::Keyword) && payload->IsTransportError())
