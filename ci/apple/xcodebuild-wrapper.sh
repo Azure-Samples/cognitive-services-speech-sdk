@@ -79,6 +79,8 @@ function redact {
 
 runXcodeTest() {
   local i=0
+  . ./ci/functions.sh
+
   while [[ -f "${OUTPUTDIRECTORY}/logs/${TESTNAME}-${i}.log" ]]; do
     i=$(( i + 1 ))
   done

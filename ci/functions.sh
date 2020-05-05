@@ -8,39 +8,38 @@
 # https://github.com/Microsoft/vsts-tasks/blob/master/docs/authoring/commands.md
 
 # Ensure now logging of commands to not confuse the agent...
-
-vsts_setvar() (
+vsts_setvar() {
   set +x
   echo Setting Build Variable $1=$2
   echo "##vso[task.setvariable variable=$1]$2"
-)
+}
 
-vsts_setvars_by_ref() (
+vsts_setvars_by_ref() {
   set +x
   for i in "$@"; do
     vsts_setvar "$i" "${!i}"
   done
-)
+}
 
-vsts_setoutvar() (
+vsts_setoutvar() {
   set +x
   echo Setting Build Output Variable $1=$2
   echo "##vso[task.setvariable variable=$1;isOutput=true]$2"
-)
+}
 
-vsts_updatebuildnumber() (
+vsts_updatebuildnumber() {
   set +x
   echo Updating build number to $1
   echo "##vso[build.updatebuildnumber]$1"
-)
+}
 
-vsts_addbuildtag() (
+vsts_addbuildtag() {
   set +x
   echo Adding build tag $1
   echo "##vso[build.addbuildtag]$1"
-)
+}
 
-vsts_logissue() (
+vsts_logissue() {
   set +x
   local type="$1"
   local message="$2"
@@ -53,7 +52,7 @@ vsts_logissue() (
   out+="]$message"
 
   echo "$out"
-)
+}
 
 function existsExactlyOneDir {
   [[ $# -eq 1 && -d $1 ]]
@@ -180,31 +179,30 @@ function crisWebSocketsEndpoint {
   echo "wss://$region.stt.speech.microsoft.com/speech/recognition/$mode/cognitiveservices/v1?cid=$endpointId"
 }
 
-function patchSamplesFromTestConfig() (
+function patchSample() {
   # N.B. subshell.
   set -u -e -o pipefail
-  local usage samplesDir testConfig vars
-  usage="Usage: ${FUNCNAME[0]} <samples-dir> <test-config> [<additional evaluate-test-config.pl parameters, e.g., -D>]"
+  local usage samplesDir
+  usage="Usage: ${FUNCNAME[0]} <samples-dir>"
   samplesDir="${1?$usage}"
-  testConfig="${2?$usage}"
-  shift 2
+  shift 1
   scriptDir="$(dirname "${BASH_SOURCE[0]}")"
-  vars="$(perl "$scriptDir/evaluate-test-config.pl" --input "$testConfig" --format bash-variable "$@")" ||
-    exitWithError "Error: could not evaluate test config '%s'.\n" "$testConfig"
-  eval -- "$vars"
-  perl "$scriptDir/patch-samples-config.pl" "$samplesDir" "$SPEECHSDK_INPUTDIR/audio/whatstheweatherlike.wav" \
-    $SPEECHSDK_SPEECH_KEY \
-    $SPEECHSDK_SPEECH_REGION \
-    $SPEECHSDK_SPEECH_ENDPOINTID_ENUS \
-    $SPEECHSDK_LUIS_KEY \
-    $SPEECHSDK_LUIS_REGION \
-    $SPEECHSDK_LUIS_HOMEAUTOMATION_APPID \
+
+  perl "$scriptDir/patch-samples-config.pl" \
+    "$samplesDir" \
+    "$( getSetting './tests/test.defaults.json' 'InputDir' )/audio/whatstheweatherlike.wav" \
+    $( getSetting './tests/test.subscriptions.regions.json' 'UnifiedSpeechSubscription.Key' ) \
+    $( getSetting './tests/test.subscriptions.regions.json' 'UnifiedSpeechSubscription.Region' ) \
+    $( getSetting './tests/test.defaults.json' 'InRoomAudioEndpoint' ) \
+    $( getSetting './tests/test.subscriptions.regions.json' 'LanguageUnderstandingSubscription.Key' ) \
+    $( getSetting './tests/test.subscriptions.regions.json' 'LanguageUnderstandingSubscription.Region' ) \
+    $( getSetting './tests/test.defaults.json' 'LanguageUnderstandingHomeAutomationAppId' ) \
     HomeAutomation.TurnOn \
     another-intent \
     yet-another-intent \
-    "$SPEECHSDK_INPUTDIR/kws/Computer/kws.table" \
+    "$( getSetting './tests/test.defaults.json' 'InputDir' )/kws/Computer/kws.table" \
     Computer
-)
+}
 
 function retry() {
   local maxRetries retry usage
@@ -273,3 +271,15 @@ function getSetting() {
   set -x
   echo $(python -c "import jsonsettings; jsonsettings.get(\"$1\", \"$2\")")
 }
+
+SPEECHSDK_SPEECH_KEY=$( getSetting './tests/test.subscriptions.regions.json' 'UnifiedSpeechSubscription.Key' )
+SPEECHSDK_SPEECH_REGION=$( getSetting './tests/test.subscriptions.regions.json' 'UnifiedSpeechSubscription.Region' )
+SPEECHSDK_LUIS_KEY=$( getSetting './tests/test.subscriptions.regions.json' 'LanguageUnderstandingSubscription.Key' )
+SPEECHSDK_LUIS_REGION=$( getSetting './tests/test.subscriptions.regions.json' 'LanguageUnderstandingSubscription.Region' )
+SPEECHSDK_LUIS_HOMEAUTOMATION_APPID=$( getSetting './tests/test.defaults.json' 'LanguageUnderstandingHomeAutomationAppId' )
+SPEECHSDK_BOT_SUBSCRIPTION=$( getSetting './tests/test.subscriptions.regions.json' 'DialogSubscription.Key' )
+SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_PPE_KEY=$( getSetting './tests/test.subscriptions.regions.json' 'ConversationTranscriptionPPESubscription.Key' )
+SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_PROD_KEY=$( getSetting './tests/test.subscriptions.regions.json' 'ConversationTranscriptionPRODSubscription.Key' )
+SPEECHSDK_INPUTDIR=$( getSetting './tests/test.defaults.json' 'InputDir' )
+SPEECHSDK_SPEECH_ENDPOINTID_ENUS=""
+

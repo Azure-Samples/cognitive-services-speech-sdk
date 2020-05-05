@@ -1,0 +1,144 @@
+# Note: using build template expressions we are conditionally extending the
+#   matrix of this job based on build types. Those expressions replicate
+#   existing code in set-variables.sh; both instances should be kept in sync.
+
+parameters:
+  continueOnTestFailure: false
+  buildType: dev
+
+jobs:
+- job: NugetLinuxTesting
+  dependsOn: [Pre, NuGet, WindowsBuild, LinuxBuild]
+  condition: and(succeeded('Pre', 'NuGet', 'WindowsBuild', 'LinuxBuild'), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' NuGetLinuxTest '))
+  pool:
+    name: Hosted Ubuntu 1604
+  timeoutInMinutes: 240
+  variables:
+    # Whether to publish binaries for the specific flavor.
+    Publish: true
+  strategy:
+    maxParallel: 7
+    matrix:
+      Ubuntu 16.04 x64:
+        DOCKER_BASE: oobedevdnc20_ubuntu1604_x64
+      Ubuntu 18.04 x64:
+        DOCKER_BASE: oobedevdnc21_ubuntu1804_x64
+      Debian 9 x64:
+        DOCKER_BASE: oobedevdnc20_debian9_x64
+      Microsoft Dotnet Core v2.1:
+        DOCKER_BASE: oobedevdnc21_mcr_x64
+      CentOS v7 x64:
+        DOCKER_BASE: oobedevdnc21_centos7_x64
+      CentOS v8 x64:
+        DOCKER_BASE: oobedevdnc21_centos8_x64
+  steps:
+  - bash: |
+      set -x -e -o pipefail
+      . ci/functions.sh
+      ./ci/set-variables.sh
+    displayName: Set variables
+  - task: DownloadBuildArtifacts@0
+    displayName: Downloading Windows artifacts
+    inputs:
+      artifactName: Windows
+      downloadPath: $(System.ArtifactsDirectory)/In
+      itemPattern: '**/*.nupkg'
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Download libraries for running C# unit test'
+    inputs:
+      artifactName: Linux
+      downloadPath: $(System.ArtifactsDirectory)/In
+      itemPattern: |
+        Linux/Linux-x64/Release/private/lib/libcarbon-mock.so
+        Linux/Linux-x64/Release/private/lib/libcarbon-tts-mock.so
+        Linux/Linux-x64/Release/public/lib/libMicrosoft.CognitiveServices.Speech.core.so
+        Linux/Linux-arm*/Release/private/lib/libcarbon-mock.so
+        Linux/Linux-arm*/Release/private/lib/libcarbon-tts-mock.so
+        Linux/Linux-arm*/Release/public/lib/libMicrosoft.CognitiveServices.Speech.core.so
+  - template: get-docker-image.yml
+    parameters:
+      imageBase: $(DOCKER_BASE)
+      outvarImage: DOCKER_IMAGE
+  - bash: |
+      rm -f ./tests/test.subscriptions.regions.json
+      cp ./tests/test.settings.json ./
+      cp ./tests/test.defaults.json ./
+      cp ./tests/test.audio.utterances.json ./
+      cat > ./tests/test.subscriptions.regions.json <<HEREDOC
+        $(KEYS_AND_REGIONS)
+      HEREDOC
+      cp ./tests/test.subscriptions.regions.json ./
+      cp -rf ./tests/input .
+    displayName: Write Subscriptions Regions Data
+  - bash: |
+      set -u -e -x -o pipefail
+      . ci/functions.sh
+      perl ci/patch-samples-pkg.pl "$(SPEECHSDK_SEMVER2NOMETA)" public_samples
+      perl ci/patch-samples-pkg.pl "$(SPEECHSDK_SEMVER2NOMETA)" tests/functional/csharp/end2end/
+      # dotnet test does not allow to supply TestRunParameters from command-line?!
+      cp ci/jsonsettings.py .
+      patchSample public_samples/quickstart/csharp/dotnetcore/from-microphone
+      patchSample public_samples/quickstart/csharp/dotnetcore/text-to-speech
+      patchSample public_samples/quickstart/csharp/dotnetcore/translate-speech-to-text
+      patchSample public_samples/samples/csharp/sharedcontent/console
+      mkdir localnuget
+      cp --verbose "$(System.ArtifactsDirectory)/In/Windows/"Microsoft.CognitiveServices.Speech.*.nupkg localnuget
+      #
+      mkdir -p "tests/functional/csharp/end2end/bin/Debug/netcoreapp2.0"
+      cp tests/test.defaults.json tests/functional/csharp/end2end/bin/Debug/netcoreapp2.0
+      cp tests/test.audio.utterances.json tests/functional/csharp/end2end/bin/Debug/netcoreapp2.0
+      cp tests/test.subscriptions.regions.json tests/functional/csharp/end2end/bin/Debug/netcoreapp2.0
+      cp -r tests/input tests/functional/csharp/end2end/bin/Debug/netcoreapp2.0
+      ERRORS=0
+
+      # [[ $DOCKER_IMAGE =~ _([^_]*): ]] || exitWithError "Cannot parse out architecture from %s" "$DOCKER_IMAGE"
+      architecture="x64"
+      private_lib="private_lib-$architecture"
+      if [ ! -d $private_lib ]; then
+        # Supply mock and dependencies for running the test suite
+        mkdir $private_lib
+        cp --verbose "$(System.ArtifactsDirectory)/In/Linux/Linux-$architecture/Release/private/lib/libcarbon-mock.so" $private_lib
+        cp --verbose "$(System.ArtifactsDirectory)/In/Linux/Linux-$architecture/Release/private/lib/libcarbon-tts-mock.so" $private_lib
+        cp --verbose "$(System.ArtifactsDirectory)/In/Linux/Linux-$architecture/Release/public/lib/libMicrosoft.CognitiveServices.Speech.core.so" $private_lib
+      fi
+
+      docker run --rm -i --volume "$(Build.Repository.LocalPath):/test" --env LD_LIBRARY_PATH=/test/$private_lib --workdir /test "$DOCKER_IMAGE" bash - <<HERE_DOC || \
+      { ((++ERRORS)); vsts_logissue error "Running tests/functional/csharp/end2end for image $DOCKER_IMAGE failed."; }
+        set -e -x -o pipefail
+        if dotnet test --help | grep -q -- --blame; then
+          EXTRA_OPT=--blame
+        fi
+        if [[ $DOCKER_IMAGE =~ centos7 ]]; then
+          # Opus audio coding format is not supported on RHEL/CentOS 7
+          EXTRA_SKIP="&Name!=SimpleRecognitionCompressedOPUS"
+        fi
+        cd tests/functional/csharp/end2end
+        dotnet restore --no-cache --source https://api.nuget.org/v3/index.json --source /test/localnuget Microsoft.CognitiveServices.Speech.Tests.EndToEnd.csproj
+        # set +e to allow captureing exit codes and retry loop, rather than blindly exiting the bash shell on error.
+        set +e
+        for retry in {0..3}; do
+          dotnet test \$EXTRA_OPT --verbosity detailed --filter "TestCategory!=LongTest&TestCategory!=OfflineUnidec\$EXTRA_SKIP" --framework netcoreapp2.0 --settings csharp.runsettings --logger "trx;LogFileName=test-csharp_unit_tests-$(basename "$DOCKER_BASE")_\$retry.trx"
+          exitCode=\$?
+          if [[ \$exitCode == 0 ]]; then
+          echo "Test suite passed( \$retry )."
+            break
+          else
+            echo "Test suite failed during retry( \$retry )."
+            vsts_logissue warning "Test suite failed during retry( \$retry )."
+            sleep 2s
+          fi
+        done
+        set -e
+        exit \$exitCode
+      HERE_DOC
+
+        ./ci/samples/test-quickstart-csharp-dotnetcore.sh "$DOCKER_IMAGE" localnuget ||
+          { ((++ERRORS)); vsts_logissue error "Running quickstart/csharp-dotnetcore for image $DOCKER_IMAGE failed."; }
+
+        # Skip other samples on non-Ubuntu 16.04 in dev builds
+        [[ $SPEECHSDK_BUILD_TYPE = dev && $DOCKER_IMAGE != *_ubuntu1604_* ]] ||
+          ./ci/samples/test-samples-csharp-dotnetcore-console.sh "$DOCKER_IMAGE" localnuget ||
+            { ((++ERRORS)); vsts_logissue error "Running samples/csharp/dotnetcore/console for image $DOCKER_IMAGE failed."; }
+
+      [[ $ERRORS == 0 ]] || exitWithError "Not all samples/tests ran successfully."
+    displayName: Run tests

@@ -1,0 +1,10 @@
+# dotnet-sdk-2.1 from CentOS 8 AppStream is an old version and incompatible with NuGetLinuxTest
+
+RUN yum update -y && \
+    yum install -y wget && \
+    rm -rf /var/cache/yum/* && \
+    mkdir /usr/local/dotnet && \
+    wget --no-verbose --output-document - \
+        https://download.visualstudio.microsoft.com/download/pr/e730fe40-e2ea-42e5-a5d0-f86830d75849/571e5a2f4ebf9f8117878eeaad5cb19b/dotnet-sdk-2.1.805-linux-x64.tar.gz | \
+        tar zxf - --directory /usr/local/dotnet && \
+    ln -s /usr/local/dotnet/dotnet /usr/local/bin/dotnet

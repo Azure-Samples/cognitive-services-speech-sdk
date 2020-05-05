@@ -36,19 +36,22 @@ jobs:
       rm -rf "$(OutputDirectory)"
     displayName: Unpack the framework and place in link directory for test app
   - bash: |
+      rm -f ./tests/test.subscriptions.regions.json
+      cp ./tests/test.settings.json ./
+      cp ./tests/test.defaults.json ./
+      cp ./tests/test.audio.utterances.json ./
+      cat > ./tests/test.subscriptions.regions.json <<HEREDOC
+        $(KEYS_AND_REGIONS)
+      HEREDOC
+      cp ./tests/test.subscriptions.regions.json ./
+      cp -rf ./tests/input .
+    displayName: Write Subscriptions Regions Data
+  - bash: |
       set -u -x -e -o pipefail
       . ci/functions.sh
       ./ci/set-variables.sh
-      patchSamplesFromTestConfig tests/functional/objective-c/osx/SpeechSDK/ \
-        ci/test-config.json \
-        -D luis-key=$(luis-westus-s0-201809-key1) \
-        -D speech-key=$(NorthEuropeKeySkyman) \
-        -D virtualassistant-region=$(DialogRegion) \
-        -D virtualassistant-subscription=$(DialogSubscriptionKey) \
-        -D virtualassistant-testbot=$(DialogFunctionalTestBot) \
-        -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
-        -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
-        -D long-running=false
+      cp ./ci/jsonsettings.py .
+      patchSample tests/functional/objective-c/osx/SpeechSDK/
     displayName: Patch the sample app
   - bash: |
       set -u -x -e -o pipefail

@@ -95,7 +95,6 @@ def test_speech_recognition_with_custom_host(speech_input, default_speech_auth, 
     assert msspeech.ResultReason.NoMatch == result.reason
     assert msspeech.NoMatchReason.InitialSilenceTimeout == result.no_match_details.reason
 
-
 @pytest.mark.xfail(reason='flaky')
 @pytest.mark.parametrize('speech_input,', ['batman'], indirect=True)
 def test_recognize_once_multiple(from_file_speech_reco_with_callbacks, speech_input):
@@ -104,7 +103,6 @@ def test_recognize_once_multiple(from_file_speech_reco_with_callbacks, speech_in
     for utterance_index in range(2):
         result = reco.recognize_once()
         _check_sr_result(result, speech_input, utterance_index)
-
 
 @pytest.mark.parametrize('speech_input,', ['weather'], indirect=True)
 def test_multiple_callbacks(from_file_speech_reco_with_callbacks, speech_input):

@@ -21,7 +21,7 @@ runCatchSuite \
   TESTRUNNER \
   "test-$T-$PLATFORM-$RANDOM" \
   "$PLATFORM" \
-  "$SPEECHSDK_SPEECH_KEY" \
+  "" \
   "$T" \
   240 \
   "" \

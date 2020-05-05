@@ -18,12 +18,14 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
     public class KwsRecognizerTests : RecognitionTestBase
     {
 
+        [Ignore]
         [TestMethod]
         public async Task TestKeywordFound()
         {
             var tcs = new TaskCompletionSource<bool>();
             var cancellation = new TaskCompletionSource<bool>();
 
+            Console.WriteLine($"Setting keyword file path to {AudioUtterancesMap[AudioUtteranceKeys.SECRET_KEYWORDS].FilePath.GetRootRelativePath()}");
             var str = AudioUtterancesMap[AudioUtteranceKeys.SECRET_KEYWORDS].FilePath.GetRootRelativePath();
             var audioInput = AudioConfig.FromStreamInput(new PullAudioInputStream(new RealTimeAudioInputStream(str)));
 

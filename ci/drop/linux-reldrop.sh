@@ -24,7 +24,7 @@ BASE_NAME="SpeechSDK-Linux-$VERSION"
 
 cd "$DROP_DIR"
 
-mkdir "$BASE_NAME"
+[[ -d $BASE_NAME ]] || mkdir -p "$BASE_NAME"
 cp -p "$REPO_DIR/"{REDIST.txt,license.md,ThirdPartyNotices.md} "$BASE_NAME"
 
 echo ::: List of files

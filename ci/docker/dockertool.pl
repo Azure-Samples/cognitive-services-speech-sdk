@@ -67,7 +67,7 @@ sub yumInstallWith {
 
 my %images = (
   dev_debian9_x64 => { # Only used for source build (OpenSSL 1.1)
-    version => 1,
+    version => 2,
     spec => [
         # Stage 0
         qw/from-debian9-x64 stage_cmake_binary_ubuntu1604_x64/,
@@ -233,8 +233,15 @@ my %images = (
     spec => ['from-debian9-x64', aptInstallWith(qw/oobe_debian9_deps oobe_ubuntu_gstreamer_deps test_deps/), 'oobedevdnc20_debian9_x64_deps', 'builduser'],
   },
   oobedevdnc21_centos8_x64 => {
-    version => 3,
-    spec => ['from-centos8-x64', yumInstallWith(qw/oobe_centos_deps oobedevdnc21_centos_deps oobe_centos_gstreamer_deps test_deps/), 'builduser', 'set_env_centos'],
+    version => 4,
+    spec => [
+        # Stage 0
+        qw/from-centos8-x64 stage_dotnet_binary_centos8_x64/,
+        # Image
+        qw/from-centos8-x64 copy-layer-0-dotnet-usr-local/,
+        yumInstallWith(qw/oobe_centos_deps oobedevdnc21_centos8_deps oobe_centos_gstreamer_deps test_deps/),
+        'builduser',
+        'set_env_centos'],
   },
   oobedevdnc21_centos7_x64 => {
     version => 1,

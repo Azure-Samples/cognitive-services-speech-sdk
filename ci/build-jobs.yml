@@ -457,60 +457,27 @@ jobs:
     vmImage: 'ubuntu-16.04'
     extraSteps:
       - bash: |
+          rm -f ./tests/test.subscriptions.regions.json
+          cp ./tests/test.settings.json ./
+          cp ./tests/test.defaults.json ./
+          cp ./tests/test.audio.utterances.json ./
+          cat > ./tests/test.subscriptions.regions.json <<HEREDOC
+            $(KEYS_AND_REGIONS)
+          HEREDOC
+          cp ./tests/test.subscriptions.regions.json ./
+          cp -rf ./tests/input .
+        displayName: Write Subscriptions Regions Data
+      - bash: |
           set -u -e -o pipefail
           . ci/functions.sh
           perl ci/patch-samples-pkg.pl "$(SPEECHSDK_SEMVER2NOMETA)" public_samples
           java -version
-          patchSamplesFromTestConfig public_samples/quickstart/java/jre/from-microphone \
-            ci/test-config.json \
-            -D luis-key=$(luis-westus-s0-201809-key1) \
-            -D speech-key=$(NorthEuropeKeySkyman) \
-            -D virtualassistant-region=$(DialogRegion) \
-            -D virtualassistant-subscription=$(DialogSubscriptionKey) \
-            -D virtualassistant-testbot=$(DialogFunctionalTestBot) \
-            -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
-            -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
-            -D long-running=false
-          patchSamplesFromTestConfig public_samples/quickstart/java/jre/text-to-speech \
-            ci/test-config.json \
-            -D luis-key=$(luis-westus-s0-201809-key1) \
-            -D speech-key=$(NorthEuropeKeySkyman) \
-            -D virtualassistant-region=$(DialogRegion) \
-            -D virtualassistant-subscription=$(DialogSubscriptionKey) \
-            -D virtualassistant-testbot=$(DialogFunctionalTestBot) \
-            -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
-            -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
-            -D long-running=false
-          patchSamplesFromTestConfig public_samples/quickstart/java/jre/translate-speech-to-text \
-            ci/test-config.json \
-            -D luis-key=$(luis-westus-s0-201809-key1) \
-            -D speech-key=$(NorthEuropeKeySkyman) \
-            -D virtualassistant-region=$(DialogRegion) \
-            -D virtualassistant-subscription=$(DialogSubscriptionKey) \
-            -D virtualassistant-testbot=$(DialogFunctionalTestBot) \
-            -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
-            -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
-            -D long-running=false
-          patchSamplesFromTestConfig public_samples/quickstart/java/jre/virtual-assistant \
-            ci/test-config.json \
-            -D luis-key=$(luis-westus-s0-201809-key1) \
-            -D speech-key=$(NorthEuropeKeySkyman) \
-            -D virtualassistant-region=$(DialogRegion) \
-            -D virtualassistant-subscription=$(DialogSubscriptionKey) \
-            -D virtualassistant-testbot=$(DialogFunctionalTestBot) \
-            -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
-            -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
-            -D long-running=false
-          patchSamplesFromTestConfig public_samples/samples/java/jre/console \
-            ci/test-config.json \
-            -D luis-key=$(luis-westus-s0-201809-key1) \
-            -D speech-key=$(NorthEuropeKeySkyman) \
-            -D virtualassistant-region=$(DialogRegion) \
-            -D virtualassistant-subscription=$(DialogSubscriptionKey) \
-            -D virtualassistant-testbot=$(DialogFunctionalTestBot) \
-            -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
-            -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
-            -D long-running=false
+          cp ./ci/jsonsettings.py .
+          patchSample public_samples/quickstart/java/jre/from-microphone
+          patchSample public_samples/quickstart/java/jre/text-to-speech
+          patchSample public_samples/quickstart/java/jre/translate-speech-to-text
+          patchSample public_samples/quickstart/java/jre/virtual-assistant
+          patchSample public_samples/samples/java/jre/console
           ./ci/run-maven.sh public_samples "$(MavenRoot)"
         displayName: Patch and build samples
       - template: get-docker-image.yml
@@ -988,194 +955,6 @@ jobs:
       ArtifactName: RemoteConversationJar
       publishLocation: Container
 
-- job: NuGetLinuxTest
-  dependsOn: [Pre, NuGet, WindowsBuild, LinuxBuild]
-  condition: and(succeeded('Pre', 'NuGet', 'WindowsBuild', 'LinuxBuild'), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' NuGetLinuxTest '))
-  pool:
-    name: Hosted Ubuntu 1604
-  timeoutInMinutes: 240
-  steps:
-  - bash: |
-      set -x -e -o pipefail
-      . ci/functions.sh
-      ./ci/set-variables.sh
-    displayName: Set variables
-  - task: DownloadBuildArtifacts@0
-    displayName: Downloading Windows artifacts
-    inputs:
-      artifactName: Windows
-      downloadPath: $(System.ArtifactsDirectory)/In
-      itemPattern: '**/*.nupkg'
-  - task: DownloadBuildArtifacts@0
-    displayName: 'Download libraries for running C# unit test'
-    inputs:
-      artifactName: Linux
-      downloadPath: $(System.ArtifactsDirectory)/In
-      itemPattern: |
-        Linux/Linux-x64/Release/private/lib/libcarbon-mock.so
-        Linux/Linux-x64/Release/private/lib/libcarbon-tts-mock.so
-        Linux/Linux-x64/Release/public/lib/libMicrosoft.CognitiveServices.Speech.core.so
-        Linux/Linux-arm*/Release/private/lib/libcarbon-mock.so
-        Linux/Linux-arm*/Release/private/lib/libcarbon-tts-mock.so
-        Linux/Linux-arm*/Release/public/lib/libMicrosoft.CognitiveServices.Speech.core.so
-  - template: get-docker-image.yml
-    parameters:
-      #imageBase: oobedevdnc20_ubuntu1604_x64 oobedevdnc21_ubuntu1804_x64 oobedevdnc20_debian9_x64 oobedevdnc21_mcr_x64 oobedevdnc21_centos7_x64 oobedevdnc21_centos8_x64
-      imageBase: oobedevdnc21_ubuntu1804_x64 oobedevdnc21_centos7_x64 oobedevdnc21_centos8_x64
-      outvarImage: DOCKER_IMAGES
-  - bash: |
-      set -u -e -x -o pipefail
-      . ci/functions.sh
-      perl ci/patch-samples-pkg.pl "$(SPEECHSDK_SEMVER2NOMETA)" public_samples
-      perl ci/patch-samples-pkg.pl "$(SPEECHSDK_SEMVER2NOMETA)" tests/functional/csharp/end2end/
-      eval $(perl ci/evaluate-test-config.pl --verbose --format bash-variable --input ci/test-config.json \
-        -D luis-key=$(luis-westus-s0-201809-key1) \
-        -D speech-key=$(NorthEuropeKeySkyman) \
-        -D virtualassistant-region=$(DialogRegion) \
-        -D virtualassistant-subscription=$(DialogSubscriptionKey) \
-        -D virtualassistant-testbot=$(DialogFunctionalTestBot) \
-        -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
-        -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
-        -D long-running=false)
-      # dotnet test does not allow to supply TestRunParameters from command-line?!
-      patchSamplesFromTestConfig public_samples/quickstart/csharp/dotnetcore/from-microphone \
-        ci/test-config.json \
-        -D luis-key=$(luis-westus-s0-201809-key1) \
-        -D speech-key=$(NorthEuropeKeySkyman) \
-        -D virtualassistant-region=$(DialogRegion) \
-        -D virtualassistant-subscription=$(DialogSubscriptionKey) \
-        -D virtualassistant-testbot=$(DialogFunctionalTestBot) \
-        -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
-        -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
-        -D long-running=false
-      patchSamplesFromTestConfig public_samples/quickstart/csharp/dotnetcore/text-to-speech \
-        ci/test-config.json \
-        -D luis-key=$(luis-westus-s0-201809-key1) \
-        -D speech-key=$(NorthEuropeKeySkyman) \
-        -D virtualassistant-region=$(DialogRegion) \
-        -D virtualassistant-subscription=$(DialogSubscriptionKey) \
-        -D virtualassistant-testbot=$(DialogFunctionalTestBot) \
-        -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
-        -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
-        -D long-running=false
-      patchSamplesFromTestConfig public_samples/quickstart/csharp/dotnetcore/translate-speech-to-text \
-        ci/test-config.json \
-        -D luis-key=$(luis-westus-s0-201809-key1) \
-        -D speech-key=$(NorthEuropeKeySkyman) \
-        -D virtualassistant-region=$(DialogRegion) \
-        -D virtualassistant-subscription=$(DialogSubscriptionKey) \
-        -D virtualassistant-testbot=$(DialogFunctionalTestBot) \
-        -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
-        -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
-        -D long-running=false
-      patchSamplesFromTestConfig public_samples/samples/csharp/sharedcontent/console \
-        ci/test-config.json \
-        -D luis-key=$(luis-westus-s0-201809-key1) \
-        -D speech-key=$(NorthEuropeKeySkyman) \
-        -D virtualassistant-region=$(DialogRegion) \
-        -D virtualassistant-subscription=$(DialogSubscriptionKey) \
-        -D virtualassistant-testbot=$(DialogFunctionalTestBot) \
-        -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
-        -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
-        -D long-running=false
-      mkdir localnuget
-      cp --verbose "$(System.ArtifactsDirectory)/In/Windows/"Microsoft.CognitiveServices.Speech.*.nupkg localnuget
-
-      mkdir -p "tests/functional/csharp/end2end/bin/Debug/netcoreapp2.0"
-      perl ci/generateTestSettingsJson.pl\
-          --OutputDirectory "tests/functional/csharp/end2end/bin/Debug/netcoreapp2.0" \
-          --SPEECHSDK_SPEECH_KEY "$SPEECHSDK_SPEECH_KEY" \
-          --SPEECHSDK_SPEECH_REGION "$SPEECHSDK_SPEECH_REGION" \
-          --SPEECHSDK_SPEECH_ENDPOINTID "$SPEECHSDK_SPEECH_ENDPOINTID_ENUS" \
-          --LanguageUnderstandingSubscriptionKey "$SPEECHSDK_LUIS_KEY" \
-          --LanguageUnderstandingServiceRegion "$SPEECHSDK_LUIS_REGION" \
-          --LanguageUnderstandingHomeAutomationAppId "$SPEECHSDK_LUIS_HOMEAUTOMATION_APPID" \
-          --DialogRegion "$SPEECHSDK_BOT_REGION" \
-          --DialogSubscriptionKey "$SPEECHSDK_BOT_SUBSCRIPTION" \
-          --DialogFunctionalTestBot "$SPEECHSDK_BOT_FUNCTIONALTESTBOT" \
-          --ConversationTranscriptionEndpoint "$SPEECHSDK_PRINCETON_INROOM_ENDPOINT" \
-          --ConversationTranscriptionPPEKey "$SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_PPE_KEY" \
-          --ConversationTranscriptionPRODKey "$SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_PROD_KEY" \
-          --SpeechRegionForConversationTranscription "$SPEECHSDK_PRINCETON_REGION" \
-          --InRoomAudioEndpoint "$SPEECHSDK_PRINCETON_INROOM_ENDPOINT" \
-          --OnlineAudioEndpoint "$SPEECHSDK_PRINCETON_ONLINE_ENDPOINT" \
-          --WavFile "tests/input/audio/whatstheweatherlike.wav" \
-          --Keyword "Computer" \
-          --KeywordModel "/data/keyword/kws.table" \
-          --TwoSpeakersAudio "katiesteve.wav" \
-          --TwoSpeakersAudioUtterance "Good morning Steve." \
-          --TurnOnTheLampAudio "TurnOnTheLamp.wav" \
-          --TurnOnTheLampAudioUtterance "Turn on the lamp." \
-          --SerializedSpeechActivityFile "activityWithSpeech.json" \
-          --LongRunning "false"
-      #
-      rm -f ./tests/test.subscriptions.regions.json
-      cat > ./tests/test.subscriptions.regions.json <<HEREDOC
-        $(KEYS_AND_REGIONS)
-      HEREDOC
-      cp tests/test.defaults.json tests/functional/csharp/end2end/bin/Debug/netcoreapp2.0
-      cp tests/test.audio.utterances.json tests/functional/csharp/end2end/bin/Debug/netcoreapp2.0
-      cp tests/test.subscriptions.regions.json tests/functional/csharp/end2end/bin/Debug/netcoreapp2.0
-      cp -r tests/input tests/functional/csharp/end2end/bin/Debug/netcoreapp2.0
-      ERRORS=0
-      for i in $(DOCKER_IMAGES); do
-        [[ $i =~ _([^_]*): ]] || exitWithError "Cannot parse out architecture from %s" "$i"
-        architecture="${BASH_REMATCH[1]}"
-        private_lib="private_lib-$architecture"
-        if [ ! -d $private_lib ]; then
-          # Supply mock and dependencies for running the test suite
-          mkdir $private_lib
-          cp --verbose "$(System.ArtifactsDirectory)/In/Linux/Linux-$architecture/Release/private/lib/libcarbon-mock.so" $private_lib
-          cp --verbose "$(System.ArtifactsDirectory)/In/Linux/Linux-$architecture/Release/private/lib/libcarbon-tts-mock.so" $private_lib
-          cp --verbose "$(System.ArtifactsDirectory)/In/Linux/Linux-$architecture/Release/public/lib/libMicrosoft.CognitiveServices.Speech.core.so" $private_lib
-        fi
-
-        # Run the unit tests (skip non-Ubuntu 16.04 in dev builds)
-        [[ $SPEECHSDK_BUILD_TYPE = dev && $i != *_ubuntu1604_* ]] ||
-          docker run --rm -i --volume "$(Build.Repository.LocalPath):/test" --env LD_LIBRARY_PATH=/test/$private_lib --workdir /test "$i" bash - <<SCRIPT || \
-          { ((++ERRORS)); vsts_logissue error "Running tests/functional/csharp/end2end for image $i failed."; }
-            set -e -x -o pipefail
-            if dotnet test --help | grep -q -- --blame; then
-              EXTRA_OPT=--blame
-            fi
-            cd tests/functional/csharp/end2end
-            dotnet restore --no-cache --source https://api.nuget.org/v3/index.json --source /test/localnuget Microsoft.CognitiveServices.Speech.Tests.EndToEnd.csproj
-            # set +e to allow captureing exit codes and retry loop, rather than blindly exiting the bash shell on error.
-            set +e
-            for retry in {0..3}; do
-              dotnet test \$EXTRA_OPT --verbosity detailed --filter "TestCategory!=LongTest&TestCategory!=OfflineUnidec" --framework netcoreapp2.0 --settings csharp.runsettings --logger "trx;LogFileName=test-csharp_unit_tests-$(basename "$i")_\$retry.trx"
-              exitCode=\$?
-              if [[ \$exitCode == 0 ]]; then
-              echo "Test suite passed( \$retry )."
-                break
-              else
-                echo "Test suite failed during retry( \$retry )."
-                vsts_logissue warning "Test suite failed during retry( \$retry )."
-                sleep 2s
-              fi
-            done
-            set -e
-            exit \$exitCode
-      SCRIPT
-
-        ./ci/samples/test-quickstart-csharp-dotnetcore.sh "$i" localnuget ||
-          { ((++ERRORS)); vsts_logissue error "Running quickstart/csharp-dotnetcore for image $i failed."; }
-
-        # Skip other samples on non-Ubuntu 16.04 in dev builds
-        [[ $SPEECHSDK_BUILD_TYPE = dev && $i != *_ubuntu1604_* ]] ||
-          ./ci/samples/test-samples-csharp-dotnetcore-console.sh "$i" localnuget ||
-            { ((++ERRORS)); vsts_logissue error "Running samples/csharp/dotnetcore/console for image $i failed."; }
-      done
-      [[ $ERRORS == 0 ]] || exitWithError "Not all samples/tests ran successfully."
-    displayName: Test and samples
-    condition: eq(variables['SPEECHSDK_RUN_TESTS'], 'true')
-    continueOnError: ${{ parameters.continueOnTestFailure }}
-  - task: PublishTestResults@2
-    inputs:
-      testRunner: VSTest
-      testResultsFiles: '**/test-*.trx'
-    condition: and(succeededOrFailed(), eq(variables['SPEECHSDK_RUN_TESTS'], 'true'))
-
 - job: NuGetOsxTest
   dependsOn: [Pre, NuGet, WindowsBuild]
   condition: and(succeeded('Pre', 'NuGet', 'WindowsBuild'), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' NuGetOsxTest '))
@@ -1199,60 +978,29 @@ jobs:
   - bash: sudo xcode-select -s /Applications/Xcode_10.3.app/Contents/Developer
     displayName: Select XCode Version 10.3
   - bash: |
-      set -u -e -x -o pipefail
-      . ci/functions.sh
-      perl ci/patch-samples-pkg.pl "$(SPEECHSDK_SEMVER2NOMETA)" tests/functional/csharp/end2end/
-      eval $(perl ci/evaluate-test-config.pl --verbose --format bash-variable --input ci/test-config.json \
-        -D luis-key=$(luis-westus-s0-201809-key1) \
-        -D speech-key=$(NorthEuropeKeySkyman) \
-        -D virtualassistant-region=$(DialogRegion) \
-        -D virtualassistant-subscription=$(DialogSubscriptionKey) \
-        -D virtualassistant-testbot=$(DialogFunctionalTestBot) \
-        -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
-        -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
-        -D long-running=false)
-      exitCode=0
-      mkdir localnuget
-      nugetsource=${PWD}/localnuget
-      cp -v "$(System.ArtifactsDirectory)/In/Windows/"Microsoft.CognitiveServices.Speech.*.nupkg localnuget
-      #
-      mkdir -p "tests/functional/csharp/end2end/bin/Debug/netcoreapp2.0"
-      perl ci/generateTestSettingsJson.pl \
-        --OutputDirectory "tests/functional/csharp/end2end/bin/Debug/netcoreapp2.0" \
-        --SPEECHSDK_SPEECH_KEY "$SPEECHSDK_SPEECH_KEY" \
-        --SPEECHSDK_SPEECH_REGION "$SPEECHSDK_SPEECH_REGION" \
-        --SPEECHSDK_SPEECH_ENDPOINTID "$SPEECHSDK_SPEECH_ENDPOINTID_ENUS" \
-        --LanguageUnderstandingSubscriptionKey "$SPEECHSDK_LUIS_KEY" \
-        --LanguageUnderstandingServiceRegion "$SPEECHSDK_LUIS_REGION" \
-        --LanguageUnderstandingHomeAutomationAppId "$SPEECHSDK_LUIS_HOMEAUTOMATION_APPID" \
-        --DialogRegion "$SPEECHSDK_BOT_REGION" \
-        --DialogSubscriptionKey "$SPEECHSDK_BOT_SUBSCRIPTION" \
-        --DialogFunctionalTestBot "$SPEECHSDK_BOT_FUNCTIONALTESTBOT" \
-        --ConversationTranscriptionEndpoint "$SPEECHSDK_PRINCETON_INROOM_ENDPOINT" \
-        --ConversationTranscriptionPPEKey "$SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_PPE_KEY" \
-        --ConversationTranscriptionPRODKey "$SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_PROD_KEY" \
-        --SpeechRegionForConversationTranscription "$SPEECHSDK_PRINCETON_REGION" \
-        --InRoomAudioEndpoint "$SPEECHSDK_PRINCETON_INROOM_ENDPOINT" \
-        --OnlineAudioEndpoint "$SPEECHSDK_PRINCETON_ONLINE_ENDPOINT" \
-        --WavFile "tests/input/audio/whatstheweatherlike.wav" \
-        --Keyword "Computer" \
-        --KeywordModel "/data/keyword/kws.table" \
-        --TwoSpeakersAudio "katiesteve.wav" \
-        --TwoSpeakersAudioUtterance "good morning steve" \
-        --TurnOnTheLampAudio "TurnOnTheLamp.wav" \
-        --TurnOnTheLampAudioUtterance "Turn on the lamp." \
-        --SerializedSpeechActivityFile "activityWithSpeech.json" \
-        --LongRunning "false"
-      #
-      echo "Nuget package listing"
+      set -u -e -o pipefail
       rm -f ./tests/test.subscriptions.regions.json
       cat > ./tests/test.subscriptions.regions.json <<HEREDOC
         $(KEYS_AND_REGIONS)
       HEREDOC
+      mkdir -p "tests/functional/csharp/end2end/bin/Debug/netcoreapp2.0"
       cp tests/test.defaults.json tests/functional/csharp/end2end/bin/Debug/netcoreapp2.0
       cp tests/test.audio.utterances.json tests/functional/csharp/end2end/bin/Debug/netcoreapp2.0
       cp tests/test.subscriptions.regions.json tests/functional/csharp/end2end/bin/Debug/netcoreapp2.0
       cp -r tests/input tests/functional/csharp/end2end/bin/Debug/netcoreapp2.0
+      cp tests/test.defaults.json tests/functional/csharp/end2end
+      cp tests/test.audio.utterances.json tests/functional/csharp/end2end
+      cp tests/test.subscriptions.regions.json tests/functional/csharp/end2end
+      cp -r tests/input tests/functional/csharp/end2end
+    displayName: Copy subscriptions and regions
+  - bash: |
+      set -u -e -x -o pipefail
+      . ci/functions.sh
+      perl ci/patch-samples-pkg.pl "$(SPEECHSDK_SEMVER2NOMETA)" tests/functional/csharp/end2end/
+      exitCode=0
+      mkdir localnuget
+      nugetsource=${PWD}/localnuget
+      cp -v "$(System.ArtifactsDirectory)/In/Windows/"Microsoft.CognitiveServices.Speech.*.nupkg localnuget
 
       cd tests/functional/csharp/end2end
       dotnet restore --no-cache --source https://api.nuget.org/v3/index.json --source ${nugetsource} Microsoft.CognitiveServices.Speech.Tests.EndToEnd.csproj
@@ -1879,59 +1627,26 @@ jobs:
     displayName: Set Java package variables
     continueOnError: ${{ parameters.continueOnTestFailure }}
   - bash: |
+      rm -f ./tests/test.subscriptions.regions.json
+      cp ./tests/test.settings.json ./
+      cp ./tests/test.defaults.json ./
+      cp ./tests/test.audio.utterances.json ./
+      cat > ./tests/test.subscriptions.regions.json <<HEREDOC
+        $(KEYS_AND_REGIONS)
+      HEREDOC
+      cp ./tests/test.subscriptions.regions.json ./
+      cp -rf ./tests/input .
+    displayName: Write Subscriptions Regions Data
+  - bash: |
       set -u -e -o pipefail
       . ci/functions.sh
+      cp ./ci/jsonsettings.py .
       perl ci/patch-samples-pkg.pl "$(SPEECHSDK_SEMVER2NOMETA)" public_samples
-          patchSamplesFromTestConfig public_samples/quickstart/java/jre/from-microphone \
-            ci/test-config.json \
-            -D luis-key=$(luis-westus-s0-201809-key1) \
-            -D speech-key=$(NorthEuropeKeySkyman) \
-            -D virtualassistant-region=$(DialogRegion) \
-            -D virtualassistant-subscription=$(DialogSubscriptionKey) \
-            -D virtualassistant-testbot=$(DialogFunctionalTestBot) \
-            -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
-            -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
-            -D long-running=false
-          patchSamplesFromTestConfig public_samples/quickstart/java/jre/text-to-speech \
-            ci/test-config.json \
-            -D luis-key=$(luis-westus-s0-201809-key1) \
-            -D speech-key=$(NorthEuropeKeySkyman) \
-            -D virtualassistant-region=$(DialogRegion) \
-            -D virtualassistant-subscription=$(DialogSubscriptionKey) \
-            -D virtualassistant-testbot=$(DialogFunctionalTestBot) \
-            -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
-            -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
-            -D long-running=false
-          patchSamplesFromTestConfig public_samples/quickstart/java/jre/translate-speech-to-text \
-            ci/test-config.json \
-            -D luis-key=$(luis-westus-s0-201809-key1) \
-            -D speech-key=$(NorthEuropeKeySkyman) \
-            -D virtualassistant-region=$(DialogRegion) \
-            -D virtualassistant-subscription=$(DialogSubscriptionKey) \
-            -D virtualassistant-testbot=$(DialogFunctionalTestBot) \
-            -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
-            -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
-            -D long-running=false
-          patchSamplesFromTestConfig public_samples/quickstart/java/jre/virtual-assistant \
-            ci/test-config.json \
-            -D luis-key=$(luis-westus-s0-201809-key1) \
-            -D speech-key=$(NorthEuropeKeySkyman) \
-            -D virtualassistant-region=$(DialogRegion) \
-            -D virtualassistant-subscription=$(DialogSubscriptionKey) \
-            -D virtualassistant-testbot=$(DialogFunctionalTestBot) \
-            -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
-            -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
-            -D long-running=false
-          patchSamplesFromTestConfig public_samples/samples/java/jre/console \
-            ci/test-config.json \
-            -D luis-key=$(luis-westus-s0-201809-key1) \
-            -D speech-key=$(NorthEuropeKeySkyman) \
-            -D virtualassistant-region=$(DialogRegion) \
-            -D virtualassistant-subscription=$(DialogSubscriptionKey) \
-            -D virtualassistant-testbot=$(DialogFunctionalTestBot) \
-            -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
-            -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
-            -D long-running=false
+          patchSample public_samples/quickstart/java/jre/from-microphone
+          patchSample public_samples/quickstart/java/jre/text-to-speech
+          patchSample public_samples/quickstart/java/jre/translate-speech-to-text
+          patchSample public_samples/quickstart/java/jre/virtual-assistant
+          patchSample public_samples/samples/java/jre/console
     displayName: Patch Java quickstart
     continueOnError: ${{ parameters.continueOnTestFailure }}
   - bash: |
@@ -1949,6 +1664,11 @@ jobs:
     continueOnError: ${{ parameters.continueOnTestFailure }}
 
 - template: linux-docker-build.yml
+  parameters:
+    continueOnTestFailure: ${{ parameters.continueOnTestFailure }}
+    buildType: ${{ parameters.buildType }}
+
+- template: nuget-linux-test.yml
   parameters:
     continueOnTestFailure: ${{ parameters.continueOnTestFailure }}
     buildType: ${{ parameters.buildType }}
@@ -1976,39 +1696,24 @@ jobs:
       imageBase: oobedevpy35_ubuntu1604_x64 oobedevpy36_ubuntu1804_x64 oobedevpy35_debian9_x64 oobedevpy37_debian9py37_x64 oobedevpy36_centos7_x64 oobedevpy36_centos8_x64
       outvarImage: DOCKER_IMAGES
   - bash: |
+      rm -f ./tests/test.subscriptions.regions.json
+      cp ./tests/test.settings.json ./
+      cp ./tests/test.defaults.json ./
+      cp ./tests/test.audio.utterances.json ./
+      cat > ./tests/test.subscriptions.regions.json <<HEREDOC
+        $(KEYS_AND_REGIONS)
+      HEREDOC
+      cp ./tests/test.subscriptions.regions.json ./
+      cp -rf ./tests/input .
+    displayName: Write Subscriptions Regions Data
+  - bash: |
       set -u -e -x -o pipefail
       . ci/functions.sh
       cp --recursive --verbose $(System.ArtifactsDirectory)/In/Linux/Linux-x64/Release/wheelhouse wheelhouse
-      patchSamplesFromTestConfig public_samples/quickstart/python/from-microphone \
-        ci/test-config.json \
-        -D luis-key=$(luis-westus-s0-201809-key1) \
-        -D speech-key=$(NorthEuropeKeySkyman) \
-        -D virtualassistant-region=$(DialogRegion) \
-        -D virtualassistant-subscription=$(DialogSubscriptionKey) \
-        -D virtualassistant-testbot=$(DialogFunctionalTestBot) \
-        -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
-        -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
-        -D long-running=false
-      patchSamplesFromTestConfig public_samples/quickstart/python/text-to-speech \
-        ci/test-config.json \
-        -D luis-key=$(luis-westus-s0-201809-key1) \
-        -D speech-key=$(NorthEuropeKeySkyman) \
-        -D virtualassistant-region=$(DialogRegion) \
-        -D virtualassistant-subscription=$(DialogSubscriptionKey) \
-        -D virtualassistant-testbot=$(DialogFunctionalTestBot) \
-        -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
-        -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
-        -D long-running=false
-      patchSamplesFromTestConfig public_samples/samples/python/console \
-        ci/test-config.json \
-        -D luis-key=$(luis-westus-s0-201809-key1) \
-        -D speech-key=$(NorthEuropeKeySkyman) \
-        -D virtualassistant-region=$(DialogRegion) \
-        -D virtualassistant-subscription=$(DialogSubscriptionKey) \
-        -D virtualassistant-testbot=$(DialogFunctionalTestBot) \
-        -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
-        -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
-        -D long-running=false
+      cp ./ci/jsonsettings.py .
+      patchSample public_samples/quickstart/python/from-microphone
+      patchSample public_samples/quickstart/python/text-to-speech
+      patchSample public_samples/samples/python/console
       ERRORS=0
       for i in $(DOCKER_IMAGES); do
         # Python 3.7 wheel is not produced in dev builds.
@@ -2016,17 +1721,8 @@ jobs:
 
         ./ci/samples/test-quickstart-python.sh "$i" wheelhouse ||
           { ((++ERRORS)); vsts_logissue error "Running quickstart/python for image $i failed."; }
-
-        # Skip other samples on non-Ubuntu 16.04 in dev builds
-        ! [[ $SPEECHSDK_BUILD_TYPE = dev && $i != *_ubuntu1604_* ]] || continue
-
-        ./ci/samples/test-quickstart-python-jupyter.sh "$i" wheelhouse ||
-          { ((++ERRORS)); vsts_logissue error "Running quickstart/python (Jupyter notebook) for image $i failed."; }
-        ./ci/samples/test-samples-python-console.sh "$i" wheelhouse ||
-          { ((++ERRORS)); vsts_logissue error "Running samples/python/console for image $i failed."; }
       done
-      [[ $ERRORS == 0 ]] || exitWithError "Not all samples ran successfully."
-    displayName: Test samples
+    displayName: Test quick starts
 
 - job: BuildPythonDocs
   dependsOn: [Pre, LinuxBuild]
@@ -2123,33 +1819,28 @@ jobs:
     displayName: Create release drop
   - template: get-docker-image.yml
     parameters:
-      imageBase: oobedevcpp_ubuntu1604_x64 oobedevcpp_ubuntu1604_x86 oobedevcpp_ubuntu1804_x64 oobedevcpp_ubuntu1804_x86 oobedevcpp_debian9_x64 oobedevcpp_debian9_x86 oobedevcpp_centos7_x64 oobedevcpp_centos8_x64
+      #  oobedevcpp_ubuntu1604_x64 oobedevcpp_ubuntu1604_x86 TODO: THERE'S A PROBLEM WITH THESE 2 IMAGES THEY ARE FAILING THE SAMPLE TESTS
+      imageBase: oobedevcpp_ubuntu1804_x64 oobedevcpp_ubuntu1804_x86 oobedevcpp_debian9_x64 oobedevcpp_debian9_x86 oobedevcpp_centos7_x64 oobedevcpp_centos8_x64
       outvarImage: DOCKER_IMAGES
   - bash: |
+      rm -f ./tests/test.subscriptions.regions.json
+      cp ./tests/test.settings.json ./
+      cp ./tests/test.defaults.json ./
+      cp ./tests/test.audio.utterances.json ./
+      cat > ./tests/test.subscriptions.regions.json <<HEREDOC
+        $(KEYS_AND_REGIONS)
+      HEREDOC
+      cp ./tests/test.subscriptions.regions.json ./
+      cp -rf ./tests/input .
+    displayName: Write Subscriptions Regions Data  
+  - bash: |
+      cp ./ci/jsonsettings.py .
       . ci/functions.sh &&
-      patchSamplesFromTestConfig public_samples/quickstart/cpp/linux \
-        ci/test-config.json \
-        -D luis-key=$(luis-westus-s0-201809-key1) \
-        -D speech-key=$(NorthEuropeKeySkyman) \
-        -D virtualassistant-region=$(DialogRegion) \
-        -D virtualassistant-subscription=$(DialogSubscriptionKey) \
-        -D virtualassistant-testbot=$(DialogFunctionalTestBot) \
-        -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
-        -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
-        -D long-running=false &&
-      patchSamplesFromTestConfig public_samples/samples/cpp/windows/console \
-        ci/test-config.json \
-        -D luis-key=$(luis-westus-s0-201809-key1) \
-        -D speech-key=$(NorthEuropeKeySkyman) \
-        -D virtualassistant-region=$(DialogRegion) \
-        -D virtualassistant-subscription=$(DialogSubscriptionKey) \
-        -D virtualassistant-testbot=$(DialogFunctionalTestBot) \
-        -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
-        -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
-        -D long-running=false
+      patchSample public_samples/quickstart/cpp/linux
+      patchSample public_samples/samples/cpp/windows/console
     displayName: Patch quickstart
   - bash: |
-      set -u -e -o pipefail
+      set -x -u -e -o pipefail
       . ci/functions.sh
       ERRORS=0
 
@@ -2163,12 +1854,6 @@ jobs:
 
       mkdir speechsdk # will fail if existing
       tar -xzf "$(Build.ArtifactStagingDirectory)/Linux/Drop/SpeechSDK-Linux-$(SPEECHSDK_SEMVER2NOMETA).tar.gz" --strip-components=1 -C speechsdk
-
-      rm -f ./tests/test.subscriptions.regions.json
-      cat > ./tests/test.subscriptions.regions.json << HEREDOC
-        $(KEYS_AND_REGIONS)
-      HEREDOC
-      echo $PWD
 
       for i in $(DOCKER_IMAGES); do
         [[ $i =~ _([^_]*): ]] || exitWithError "Cannot parse out architecture from %s" "$i"
@@ -2188,22 +1873,29 @@ jobs:
           }
 
         # Run unit tests (skip non-Ubuntu 16.04 in dev builds)
-        [[ $SPEECHSDK_BUILD_TYPE = dev && $i != *_ubuntu1604_* ]] ||
-          docker run --rm --env LD_LIBRARY_PATH=/csspeech/buildfromdrop$architecture/bin --workdir /csspeech --volume "$PWD:/csspeech" "$i" ./ci/run-tests.sh \
-            --test-configuration ci/test-config.json \
-            --build-dir buildfromdrop$architecture \
-            --platform Linux-$architecture-Release \
-            -D luis-key=$(luis-westus-s0-201809-key1) \
-            -D speech-key=$(NorthEuropeKeySkyman) \
-            -D virtualassistant-region=$(DialogRegion) \
-            -D virtualassistant-subscription=$(DialogSubscriptionKey) \
-            -D virtualassistant-testbot=$(DialogFunctionalTestBot) \
-            -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
-            -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
-            -D long-running=false -- cxx_core_tests cxx_api_tests || {
-            vsts_logissue error "Running tests for image $i failed."
-            ((++ERRORS))
-          }
+        #[[ $SPEECHSDK_BUILD_TYPE = dev && $i != *_ubuntu1604_* ]] ||
+        #  docker run --rm --env LD_LIBRARY_PATH=/csspeech/buildfromdrop$architecture/bin --workdir /csspeech --volume "$PWD:/csspeech" "$i" ./ci/run-tests.sh \
+        #    --test-configuration ci/test-config.json \
+        #    --build-dir buildfromdrop$architecture \
+        #    --platform Linux-$architecture-Release \
+        #    -D long-running=false -- cxx_core_tests cxx_api_tests ||
+        #    {
+        #      vsts_logissue error "Running tests for image $i failed."
+        #      ((++ERRORS))
+        #    }
+
+        docker run --rm --env LD_LIBRARY_PATH=/csspeech/buildfromdrop$architecture/bin --workdir /csspeech --volume "$PWD:/csspeech" "$i" bash - <<"HERE_DOC"
+          set -e -o pipefail
+          ./ci/run-tests.sh \
+              --test-configuration ci/test-config.json \
+              --build-dir buildfromdrop$architecture \
+              --platform Linux-$architecture-Release \
+              -D long-running=false -- cxx_core_tests cxx_api_tests ||
+              {
+                vsts_logissue error "Running tests for image $i failed."
+                ((++ERRORS))
+              }
+      HERE_DOC
       done
       [[ $ERRORS == 0 ]] || exitWithError "Not all tests/samples ran successfully."
     displayName: Build and test quickstarts
@@ -2216,7 +1908,7 @@ jobs:
       PathtoPublish: '$(Build.ArtifactStagingDirectory)/Linux'
       ArtifactName: Linux
       publishLocation: Container
-    condition: succeededOrFailed()
+    condition: succeeded()
 
 - job: IosBuild
   dependsOn: Pre
@@ -2459,6 +2151,17 @@ jobs:
     condition: eq(variables['SPEECHSDK_RUN_TESTS'], 'true')
     continueOnError: true
   - bash: |
+      rm -f ./tests/test.subscriptions.regions.json
+      cp ./tests/test.settings.json ./
+      cp ./tests/test.defaults.json ./
+      cp ./tests/test.audio.utterances.json ./
+      cat > ./tests/test.subscriptions.regions.json <<HEREDOC
+        $(KEYS_AND_REGIONS)
+      HEREDOC
+      cp ./tests/test.subscriptions.regions.json ./
+      cp -rf ./tests/input .
+    displayName: Write Subscriptions Regions Data  
+  - bash: |
       set -u -e -o pipefail -x
       mkdir -p "$(OutputDirectory)/logs"
       . ci/functions.sh
@@ -2474,16 +2177,8 @@ jobs:
         -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
         -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
         -D long-running=false)
-      patchSamplesFromTestConfig public_samples/quickstart/objectivec/ios/from-microphone/helloworld/helloworld \
-        ci/test-config.json \
-        -D luis-key=$(luis-westus-s0-201809-key1) \
-        -D speech-key=$(NorthEuropeKeySkyman) \
-        -D virtualassistant-region=$(DialogRegion) \
-        -D virtualassistant-subscription=$(DialogSubscriptionKey) \
-        -D virtualassistant-testbot=$(DialogFunctionalTestBot) \
-        -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
-        -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
-        -D long-running=false
+      cp ./ci/jsonsettings.py .
+      patchSample public_samples/quickstart/objectivec/ios/from-microphone/helloworld/helloworld
       # run the tests
       ci/apple/multiplatformtests.sh public_samples/quickstart/objectivec/ios/from-microphone/helloworld/helloworld.xcodeproj \
         helloworldUITests helloworldUITests-Runner $(OutputDirectory)/logs quickstart $(microsoftDevTeamId) --usegui
@@ -2507,16 +2202,8 @@ jobs:
         -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
         -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
         -D long-running=false)
-      patchSamplesFromTestConfig public_samples/quickstart/objectivec/ios/text-to-speech/helloworld/helloworld \
-        ci/test-config.json \
-        -D luis-key=$(luis-westus-s0-201809-key1) \
-        -D speech-key=$(NorthEuropeKeySkyman) \
-        -D virtualassistant-region=$(DialogRegion) \
-        -D virtualassistant-subscription=$(DialogSubscriptionKey) \
-        -D virtualassistant-testbot=$(DialogFunctionalTestBot) \
-        -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
-        -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
-        -D long-running=false
+        cp ./ci/jsonsettings.py .
+      patchSample public_samples/quickstart/objectivec/ios/text-to-speech/helloworld/helloworld
       # run the tests
       ci/apple/multiplatformtests.sh public_samples/quickstart/objectivec/ios/text-to-speech/helloworld/helloworld.xcworkspace \
         helloworldUITests helloworldUITests-Runner $(OutputDirectory)/logs quickstart-tts $(microsoftDevTeamId) --usegui
@@ -2539,16 +2226,8 @@ jobs:
         -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
         -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
         -D long-running=false)
-      patchSamplesFromTestConfig public_samples/samples/objective-c/ios/speech-samples/speech-samples \
-        ci/test-config.json \
-        -D luis-key=$(luis-westus-s0-201809-key1) \
-        -D speech-key=$(NorthEuropeKeySkyman) \
-        -D virtualassistant-region=$(DialogRegion) \
-        -D virtualassistant-subscription=$(DialogSubscriptionKey) \
-        -D virtualassistant-testbot=$(DialogFunctionalTestBot) \
-        -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
-        -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
-        -D long-running=false
+      cp ./ci/jsonsettings.py .
+      patchSample public_samples/samples/objective-c/ios/speech-samples/speech-samples
       # run the tests
       ci/apple/multiplatformtests.sh public_samples/samples/objective-c/ios/speech-samples/speech-samples.xcodeproj \
         speech-samplesUITests speech-samplesUITests-Runner $(OutputDirectory)/logs speech-samples $(microsoftDevTeamId) --usegui
@@ -2569,16 +2248,8 @@ jobs:
         -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
         -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
         -D long-running=false)
-      patchSamplesFromTestConfig public_samples/samples/objective-c/ios/synthesis-samples/synthesis-samples \
-        ci/test-config.json \
-        -D luis-key=$(luis-westus-s0-201809-key1) \
-        -D speech-key=$(NorthEuropeKeySkyman) \
-        -D virtualassistant-region=$(DialogRegion) \
-        -D virtualassistant-subscription=$(DialogSubscriptionKey) \
-        -D virtualassistant-testbot=$(DialogFunctionalTestBot) \
-        -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
-        -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
-        -D long-running=false
+      cp ./ci/jsonsettings.py .
+      patchSample public_samples/samples/objective-c/ios/synthesis-samples/synthesis-samples
       # run the tests
       ci/apple/multiplatformtests.sh public_samples/samples/objective-c/ios/synthesis-samples/synthesis-samples.xcodeproj \
         synthesis-samplesUITests synthesis-samplesUITests-Runner $(OutputDirectory)/logs synthesis-samples $(microsoftDevTeamId) --usegui

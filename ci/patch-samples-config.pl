@@ -15,6 +15,7 @@ BEGIN {
 
   our ($samplesDir, $audioFile, $speechKey, $speechRegion, $speechEndpointId, $luisKey, $luisRegion, $luisAppId, $luisIntent1, $luisIntent2, $luisIntent3, $keywordRecognitionModelFile, $keyword) = splice @ARGV;
 
+  warn "At ARGV is now @ARGV";
   -d $samplesDir or die "Cannot find $samplesDir\n";
 
   # Translate to full native path (i.e., Windows path on Cygwin / Git Bash),
@@ -44,9 +45,9 @@ BEGIN {
   @ARGV = ();
   find(sub {
     m(\.(?:cpp|cs|html|ipynb|java|js|m|md|php|py)$) &&
-    push @ARGV, $File::Find::name
-  }, $samplesDir);
+    push @ARGV, $File::Find::name }, $samplesDir);
 }
+
 if ($ARGV ne $oldargv) {
   warn "Patching $ARGV\n";
   $oldargv = $ARGV;

@@ -18,6 +18,9 @@ TEST_CODE="$BINARY_DIR/uspclientconsole"
 
 . "$SCRIPT_DIR/../test-harness.sh" || exit 1
 
+# Apparently need to override the normally blank endpointid
+SPEECHSDK_SPEECH_ENDPOINTID_ENUS=$( getSetting './tests/test.defaults.json' 'OnlineAudioEndpoint' )
+
 speechEndpoint="$(speechWebSocketsEndpoint "$SPEECHSDK_SPEECH_REGION" interactive simple en-us)"
 crisEndpoint="$(crisWebSocketsEndpoint "$SPEECHSDK_SPEECH_REGION" interactive "$SPEECHSDK_SPEECH_ENDPOINTID_ENUS")"
 audioFile="$SPEECHSDK_INPUTDIR/audio/whatstheweatherlike.wav"

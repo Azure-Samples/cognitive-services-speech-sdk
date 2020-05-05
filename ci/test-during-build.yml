@@ -10,22 +10,26 @@ steps:
   condition: or(failed(), canceled())
   displayName: Skip tests on build failure.
 - bash: |
+    rm -f ./tests/test.subscriptions.regions.json
+    cp ./tests/test.settings.json ./
+    cp ./tests/test.defaults.json ./
+    cp ./tests/test.audio.utterances.json ./
+    cat > ./tests/test.subscriptions.regions.json <<HEREDOC
+      $(KEYS_AND_REGIONS)
+    HEREDOC
+    cp ./tests/test.subscriptions.regions.json ./
+    cp -rf ./tests/input .
+  displayName: Write Subscriptions Regions Data
+- bash: |
     set -u -e -x -o pipefail
     . ci/functions.sh
-    patchSamplesFromTestConfig public_samples/samples/python/console \
-      ci/test-config.json \
-      -D luis-key=$(luis-westus-s0-201809-key1) \
-      -D speech-key=$(NorthEuropeKeySkyman) \
-      -D virtualassistant-region=$(DialogRegion) \
-      -D virtualassistant-subscription=$(DialogSubscriptionKey) \
-      -D virtualassistant-testbot=$(DialogFunctionalTestBot) \
-      -D long-running=false \
-      -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
-      -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509)
+    cp ./ci/jsonsettings.py .
+    patchSample public_samples/samples/python/console
     cp tests/input/audio/*.wav public_samples/samples/python/console
   displayName: Prepare Python samples for testing (as part of python_unittests)
   condition: eq(variables['SPEECHSDK_RUN_TESTS'], 'true')
 - bash: |
+    set -x 
     if [[ -n $dockerImage ]]; then
       wrapMe=(docker run --rm --workdir /csspeech --env LD_LIBRARY_PATH=/csspeech/build/lib --volume "$PWD:/csspeech" "$dockerImage")
     else
@@ -37,14 +41,6 @@ steps:
       --build-dir build \
       --platform $(SPEECHSDK_TARGET_PLATFORM)-$(SPEECHSDK_BUILD_CONFIGURATION) \
       --test-set $(SPEECHSDK_TEST_SET) \
-      -D luis-key=$(luis-westus-s0-201809-key1) \
-      -D speech-key=$(NorthEuropeKeySkyman) \
-      -D virtualassistant-region=$(DialogRegion) \
-      -D virtualassistant-subscription=$(DialogSubscriptionKey) \
-      -D virtualassistant-testbot=$(DialogFunctionalTestBot) \
-      -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
-      -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
-      -D long-running=false \
       ${{ parameters.runTestArgs }} -- ${{ parameters.testsToRun }}
   env:
     dockerImage: ${{ parameters.dockerImage }}
@@ -52,18 +48,6 @@ steps:
   continueOnError: ${{ parameters.continueOnTestFailure }}
   timeoutInMinutes: 180
   displayName: Run tests
-# Note: the following step is only for the convenience of extraTests, of which we currently do not have any.
-- bash: |
-    perl ci/evaluate-test-config.pl --verbose --format azuredevops-variable --input ci/test-config.json \
-      -D luis-key=$(luis-westus-s0-201809-key1) \
-      -D speech-key=$(NorthEuropeKeySkyman) \
-      -D virtualassistant-region=$(DialogRegion) \
-      -D virtualassistant-subscription=$(DialogSubscriptionKey) \
-      -D virtualassistant-testbot=$(DialogFunctionalTestBot) \
-      -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
-      -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
-      -D long-running=false
-  displayName: Set test variables
 - ${{ parameters.extraTests }}
 - task: PublishTestResults@2
   inputs:

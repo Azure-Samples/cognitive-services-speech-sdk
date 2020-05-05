@@ -31,31 +31,6 @@ runSettings=csharp.runsettings
 
 SPEECHSDK_INPUTDIR_WINDOWS="$(cygpath -aw "$SPEECHSDK_INPUTDIR")"
 
-perl -p - \
-  UnifiedSpeechSubscriptionKey "$SPEECHSDK_SPEECH_KEY" \
-  Region "$SPEECHSDK_SPEECH_REGION" \
-  DeploymentId "$SPEECHSDK_SPEECH_ENDPOINTID_ENUS" \
-  InputDir "$SPEECHSDK_INPUTDIR_WINDOWS" \
-  LanguageUnderstandingSubscriptionKey "$SPEECHSDK_LUIS_KEY" \
-  LanguageUnderstandingServiceRegion "$SPEECHSDK_LUIS_REGION" \
-  LanguageUnderstandingHomeAutomationAppId "$SPEECHSDK_LUIS_HOMEAUTOMATION_APPID" \
-  DialogRegion "$SPEECHSDK_BOT_REGION" \
-  DialogSubscriptionKey "$SPEECHSDK_BOT_SUBSCRIPTION" \
-  DialogFunctionalTestBot "$SPEECHSDK_BOT_FUNCTIONALTESTBOT" \
-  ConversationTranscriptionEndpoint "$SPEECHSDK_PRINCETON_INROOM_ENDPOINT" \
-  ConversationTranscriptionPPEKey "$SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_PPE_KEY" \
-  ConversationTranscriptionPRODKey "$SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_PROD_KEY" \
-  SpeechRegionForConversationTranscription "$SPEECHSDK_PRINCETON_REGION" \
-  tests/functional/csharp/end2end/csharp.runsettings \
-  > "$runSettings" <<"SCRIPT"
-  BEGIN {
-    %A = splice(@ARGV, 0, $#ARGV);
-    $keysRe = "(?:\\b" . (join "\\b|\\b", keys %A) . "\\b)";
-    $keysRe = qr/$keysRe/;
-  }
-  s/(<Parameter name="($keysRe)" value=")([^"]*)/$1.$A{$2}/ge
-SCRIPT
-
 RUN_OFFLINE_UNIDEC_TESTS=false
 case $PLATFORM in
   Windows-x64*)

@@ -35,6 +35,9 @@ macOS)
     ;;
 esac
 
+. ./ci/functions.sh
+cp ./ci/jsonsettings.py .
+
 xcodebuild build -workspace ${PROJECT_DIR}/${QUICKSTART_NAME}.xcworkspace \
     -scheme ${QUICKSTART_NAME} \
     "${extra_args[@]}" \

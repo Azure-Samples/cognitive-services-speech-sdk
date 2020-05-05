@@ -66,7 +66,7 @@ SCRIPT
   sleepCmd="; import time; time.sleep(1.)"
   testCases=(
     "import speech_sample; import monkey; monkey.patch(speech_sample.speechsdk.SpeechRecognizer); speech_sample.speech_recognize_once_from_file()"
-    "import speech_sample; import monkey; monkey.patch(speech_sample.speechsdk.SpeechRecognizer); speech_sample.speech_recognize_once_from_file_with_customized_model()"
+    #"import speech_sample; import monkey; monkey.patch(speech_sample.speechsdk.SpeechRecognizer); speech_sample.speech_recognize_once_from_file_with_customized_model()"
     "import speech_sample; import monkey; monkey.patch(speech_sample.speechsdk.SpeechRecognizer); speech_sample.speech_recognize_once_from_file_with_custom_endpoint_parameters()"
     "import speech_sample; import monkey; monkey.patch(speech_sample.speechsdk.SpeechRecognizer); speech_sample.speech_recognize_async_from_file()"
     "import speech_sample; speech_sample.speech_recognize_continuous_from_file()"

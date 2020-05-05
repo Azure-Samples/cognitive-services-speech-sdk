@@ -11,3 +11,4 @@
         gstreamer1.0-plugins-bad \
         # mpg123audiodec is in ugly plugin
         gstreamer1.0-plugins-ugly \
+        python \

@@ -131,15 +131,12 @@ public class MainActivity extends AppCompatActivity {
 
         // Read in the json settings
         String defaultSettings = loadJson(assets, "test.defaults.json");
-        System.out.println("Loaded defaultSettings with: " + defaultSettings);
         System.setProperty("defaultSettings", defaultSettings);
 
         String audioUtterances = loadJson(assets, "test.audio.utterances.json");
-        System.out.println("Loaded audioUtterances with: " + audioUtterances);
         System.setProperty("audioUtterances", audioUtterances);
 
         String subscriptionsRegions = loadJson(assets, "test.subscriptions.regions.json");
-        System.out.println("Loaded subscriptionsRegions with: " + subscriptionsRegions);
         System.setProperty("subscriptionsRegions", subscriptionsRegions);
     }
 
