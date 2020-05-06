@@ -2,11 +2,12 @@
 // Copyright (c) Microsoft. All rights reserved.
 // See https://aka.ms/csspeech/license201809 for the full license information.
 //
-// speechapi_c_conversation_tranlator.h: Public API declarations for conversation translator related C methods and typedefs
+// speechapi_c_conversation_translator.h: Public API declarations for conversation translator related C methods and typedefs
 //
 
 #pragma once
 #include <speechapi_c_common.h>
+#include <speechapi_c_connection.h>
 
 #ifdef __cplusplus
 #include <speechapi_cxx_enums.h>

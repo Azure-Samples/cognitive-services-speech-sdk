@@ -24,6 +24,7 @@
 #include "speechapi_c_audio_stream.h"
 #include "speechapi_c_grammar.h"
 #include "speechapi_c_translation_recognizer.h"
+#include "speechapi_c_conversation_translator.h"
 #include "jni_utils.h"
 
 /*
@@ -57,6 +58,31 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_util_SafeHan
     RemoveGlobalReferenceFromHandle(env, (SPXHANDLE)handle);
     return (jlong)hr;    
 }
+
+
+/*
+ * Class:     com_microsoft_cognitiveservices_speech_util_SafeHandle
+ * Method:    releaseConversationTranslatorHandle
+ * Signature: (J)J
+ */
+JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_util_SafeHandle_releaseConversationTranslatorHandle
+(JNIEnv *env, jobject obj, jlong handle)
+{
+    conversation_translator_session_started_set_callback((SPXCONVERSATIONTRANSLATORHANDLE)handle, nullptr, nullptr);
+    conversation_translator_session_stopped_set_callback((SPXCONVERSATIONTRANSLATORHANDLE)handle, nullptr, nullptr);
+    conversation_translator_canceled_set_callback((SPXCONVERSATIONTRANSLATORHANDLE)handle, nullptr, nullptr);
+    conversation_translator_participants_changed_set_callback((SPXCONVERSATIONTRANSLATORHANDLE)handle, nullptr, nullptr);
+    conversation_translator_conversation_expiration_set_callback((SPXCONVERSATIONTRANSLATORHANDLE)handle, nullptr, nullptr);
+    conversation_translator_transcribing_set_callback((SPXCONVERSATIONTRANSLATORHANDLE)handle, nullptr, nullptr);
+    conversation_translator_transcribed_set_callback((SPXCONVERSATIONTRANSLATORHANDLE)handle, nullptr, nullptr);
+    conversation_translator_text_message_recevied_set_callback((SPXCONVERSATIONTRANSLATORHANDLE)handle, nullptr, nullptr);
+    conversation_translator_connection_connected_set_callback((SPXCONVERSATIONTRANSLATORHANDLE)handle, nullptr, nullptr);
+    conversation_translator_connection_disconnected_set_callback((SPXCONVERSATIONTRANSLATORHANDLE)handle, nullptr, nullptr);
+    SPXHR hr = conversation_translator_handle_release((SPXCONVERSATIONTRANSLATORHANDLE)handle);
+    RemoveGlobalReferenceFromHandle(env, (SPXHANDLE)handle);
+    return (jlong)hr;
+}
+
 
 /*
  * Class:     com_microsoft_cognitiveservices_speech_util_SafeHandle

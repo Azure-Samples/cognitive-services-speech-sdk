@@ -131,6 +131,74 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_transcriptio
     return (jlong)hr;
 }
 
+JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_transcription_Conversation_startConversation
+  (JNIEnv *env, jobject obj, jobject conversationHandle)
+{
+    jlong convHandle = GetObjectHandle(env, conversationHandle);
+    SPXHR hr = conversation_start_conversation((SPXCONVERSATIONHANDLE)convHandle);
+    return (jlong)hr;
+}
+
+JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_transcription_Conversation_deleteConversation
+  (JNIEnv *env, jobject obj, jobject conversationHandle)
+{
+    jlong convHandle = GetObjectHandle(env, conversationHandle);
+    SPXHR hr = conversation_delete_conversation((SPXCONVERSATIONHANDLE)convHandle);
+    return (jlong)hr;
+}
+
+JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_transcription_Conversation_lockConversation
+  (JNIEnv *env, jobject obj, jobject conversationHandle)
+{
+    jlong convHandle = GetObjectHandle(env, conversationHandle);
+    SPXHR hr = conversation_lock_conversation((SPXCONVERSATIONHANDLE)convHandle);
+    return (jlong)hr;
+}
+
+JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_transcription_Conversation_unlockConversation
+  (JNIEnv *env, jobject obj, jobject conversationHandle)
+{
+    jlong convHandle = GetObjectHandle(env, conversationHandle);
+    SPXHR hr = conversation_unlock_conversation((SPXCONVERSATIONHANDLE)convHandle);
+    return (jlong)hr;
+}
+
+JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_transcription_Conversation_muteAll
+  (JNIEnv *env, jobject obj, jobject conversationHandle)
+{
+    jlong convHandle = GetObjectHandle(env, conversationHandle);
+    SPXHR hr = conversation_mute_all_participants((SPXCONVERSATIONHANDLE)convHandle);
+    return (jlong)hr;
+}
+
+JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_transcription_Conversation_unmuteAll
+  (JNIEnv *env, jobject obj, jobject conversationHandle)
+{
+    jlong convHandle = GetObjectHandle(env, conversationHandle);
+    SPXHR hr = conversation_unmute_all_participants((SPXCONVERSATIONHANDLE)convHandle);
+    return (jlong)hr;
+}
+
+JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_transcription_Conversation_muteParticipant
+  (JNIEnv *env, jobject obj, jobject conversationHandle, jstring userId)
+{
+    jlong convHandle = GetObjectHandle(env, conversationHandle);
+    const char* id = GetStringUTFChars(env, userId);
+    SPXHR hr = conversation_mute_participant((SPXCONVERSATIONHANDLE)convHandle, id);
+    ReleaseStringUTFChars(env, userId, id);
+    return (jlong)hr;
+}
+
+JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_transcription_Conversation_unmuteParticipant
+  (JNIEnv *env, jobject obj, jobject conversationHandle, jstring userId)
+{
+    jlong convHandle = GetObjectHandle(env, conversationHandle);
+    const char* id = GetStringUTFChars(env, userId);
+    SPXHR hr = conversation_unmute_participant((SPXCONVERSATIONHANDLE)convHandle, id);
+    ReleaseStringUTFChars(env, userId, id);
+    return (jlong)hr;
+}
+
 /*
  * Class:     com_microsoft_cognitiveservices_speech_transcription_Conversation
  * Method:    getPropertyBag

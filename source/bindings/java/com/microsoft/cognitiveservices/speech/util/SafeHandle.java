@@ -135,6 +135,9 @@ public class SafeHandle implements Closeable {
             else if (handleType == SafeHandleType.TranslationSynthesis) {
                 releaseTranslationSynthesisHandle(value);
             }
+            else if (handleType == SafeHandleType.ConversationTranslator) {
+                releaseConversationTranslatorHandle(value);
+            }
             else if (handleType == SafeHandleType.KeywordRecognizer) {
                 releaseKeywordRecognizerHandle(value);
             }
@@ -172,6 +175,7 @@ public class SafeHandle implements Closeable {
     private final native long releaseSynthesizerHandle(long handle);
     private final native long releaseGrammarHandle(long handle);
     private final native long releaseTranslationSynthesisHandle(long handle);
+    private final native long releaseConversationTranslatorHandle(long handle);
     private final native long releaseKeywordRecognizerHandle(long handle);
 
     private long value = 0;

@@ -517,3 +517,28 @@ void SpeechEndDetectedCallback(SPXRECOHANDLE recoHandle, SPXEVENTHANDLE eventHan
 {
     CallbackEventMethod(context, "speechEndDetectedEventCallback", eventHandle);
 }
+
+void ParticipantsChangedCallback(SPXCONVERSATIONTRANSLATORHANDLE conversationTranslatorHandle, SPXEVENTHANDLE eventHandle, void* context)
+{
+    CallbackEventMethod(context, "participantsChangedEventCallback", eventHandle);
+}
+
+void ConversationExpireCallback(SPXCONVERSATIONTRANSLATORHANDLE conversationTranslatorHandle, SPXEVENTHANDLE eventHandle, void* context)
+{
+    CallbackEventMethod(context, "conversationExpireEventCallback", eventHandle);
+}
+
+void TranscribingCallback(SPXCONVERSATIONTRANSLATORHANDLE conversationTranslatorHandle, SPXEVENTHANDLE eventHandle, void* context)
+{
+    CallbackEventMethod(context, "transcribingEventCallback", eventHandle);
+}
+
+void TranscribedCallback(SPXCONVERSATIONTRANSLATORHANDLE conversationTranslatorHandle, SPXEVENTHANDLE eventHandle, void* context)
+{
+    CallbackEventMethod(context, "transcribedEventCallback", eventHandle);
+}
+
+void TextMessageCallback(SPXCONVERSATIONTRANSLATORHANDLE conversationTranslatorHandle, SPXEVENTHANDLE eventHandle, void* context)
+{
+    CallbackEventMethod(context, "textMessageEventCallback", eventHandle);
+}

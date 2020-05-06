@@ -41,6 +41,7 @@ else()
 endif()
 
 include_directories(${CARBON_C_API})
+include_directories(${CARBON_CXX_API})
 include_directories(${CARBON_JAVA_JNI})
 include_directories(${JAVA_INCLUDE_PATH})
 if(WIN32)
@@ -99,8 +100,12 @@ set(HEADERS
     "${SRC_DIR}/com_microsoft_cognitiveservices_speech_translation_TranslationRecognizer.h"
     "${SRC_DIR}/com_microsoft_cognitiveservices_speech_translation_TranslationRecognitionResult.h"
     "${SRC_DIR}/com_microsoft_cognitiveservices_speech_transcription_Conversation.h"
+    "${SRC_DIR}/com_microsoft_cognitiveservices_speech_transcription_ConversationExpirationEventArgs.h"
+    "${SRC_DIR}/com_microsoft_cognitiveservices_speech_transcription_ConversationParticipantsChangedEventArgs.h"
     "${SRC_DIR}/com_microsoft_cognitiveservices_speech_transcription_ConversationTranscriber.h"
     "${SRC_DIR}/com_microsoft_cognitiveservices_speech_transcription_ConversationTranscriptionResult.h"
+    "${SRC_DIR}/com_microsoft_cognitiveservices_speech_transcription_ConversationTranslationResult.h"
+    "${SRC_DIR}/com_microsoft_cognitiveservices_speech_transcription_ConversationTranslator.h"
     "${SRC_DIR}/com_microsoft_cognitiveservices_speech_transcription_User.h"
     "${SRC_DIR}/com_microsoft_cognitiveservices_speech_transcription_Participant.h"
     "${SRC_DIR}/jni_utils.h"
@@ -153,8 +158,12 @@ set(SOURCES
     "${SRC_DIR}/com_microsoft_cognitiveservices_speech_translation_TranslationRecognizer.cpp"
     "${SRC_DIR}/com_microsoft_cognitiveservices_speech_translation_TranslationRecognitionResult.cpp"
     "${SRC_DIR}/com_microsoft_cognitiveservices_speech_transcription_Conversation.cpp"
+    "${SRC_DIR}/com_microsoft_cognitiveservices_speech_transcription_ConversationExpirationEventArgs.cpp"
+    "${SRC_DIR}/com_microsoft_cognitiveservices_speech_transcription_ConversationParticipantsChangedEventArgs.cpp"
     "${SRC_DIR}/com_microsoft_cognitiveservices_speech_transcription_ConversationTranscriber.cpp"
     "${SRC_DIR}/com_microsoft_cognitiveservices_speech_transcription_ConversationTranscriptionResult.cpp"
+    "${SRC_DIR}/com_microsoft_cognitiveservices_speech_transcription_ConversationTranslationResult.cpp"
+    "${SRC_DIR}/com_microsoft_cognitiveservices_speech_transcription_ConversationTranslator.cpp"
     "${SRC_DIR}/com_microsoft_cognitiveservices_speech_transcription_User.cpp"
     "${SRC_DIR}/com_microsoft_cognitiveservices_speech_transcription_Participant.cpp"
     "${SRC_DIR}/jni_utils.cpp"

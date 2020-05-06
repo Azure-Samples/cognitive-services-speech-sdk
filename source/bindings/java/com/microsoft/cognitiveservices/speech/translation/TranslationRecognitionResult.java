@@ -16,9 +16,15 @@ import com.microsoft.cognitiveservices.speech.util.StringMapRef;
 /**
   * Defines translation recognition result.
   */
-public final class TranslationRecognitionResult extends RecognitionResult {
+//FIXME is this ok to make not final?
+public class TranslationRecognitionResult extends RecognitionResult {
 
-    TranslationRecognitionResult(long result) {
+    //FIXME is this ok to make public?
+    /**
+     * Constructor
+     * @param result
+     */
+    public TranslationRecognitionResult(long result) {
         super(result);
         Contracts.throwIfNull(resultHandle, "resultHandle");
         StringMapRef translationsRef = new StringMapRef();

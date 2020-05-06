@@ -39,6 +39,54 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_transcriptio
 JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_transcription_Participant_setVoiceSignature
   (JNIEnv *, jobject, jobject, jstring);
 
+/*
+ * Class:     com_microsoft_cognitiveservices_speech_transcription_Participant
+ * Method:    getUserId
+ * Signature: (Lcom/microsoft/cognitiveservices/speech/util/SafeHandle;Lcom/microsoft/cognitiveservices/speech/util/StringRef;)J
+ */
+JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_transcription_Participant_getUserId
+  (JNIEnv *, jobject, jobject, jobject);
+
+/*
+ * Class:     com_microsoft_cognitiveservices_speech_transcription_Participant
+ * Method:    getDisplayName
+ * Signature: (Lcom/microsoft/cognitiveservices/speech/util/SafeHandle;Lcom/microsoft/cognitiveservices/speech/util/StringRef;)J
+ */
+JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_transcription_Participant_getDisplayName
+  (JNIEnv *, jobject, jobject, jobject);
+
+/*
+ * Class:     com_microsoft_cognitiveservices_speech_transcription_Participant
+ * Method:    getAvatar
+ * Signature: (Lcom/microsoft/cognitiveservices/speech/util/SafeHandle;Lcom/microsoft/cognitiveservices/speech/util/StringRef;)J
+ */
+JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_transcription_Participant_getAvatar
+  (JNIEnv *, jobject, jobject, jobject);
+
+/*
+ * Class:     com_microsoft_cognitiveservices_speech_transcription_Participant
+ * Method:    getIsHost
+ * Signature: (Lcom/microsoft/cognitiveservices/speech/util/SafeHandle;)Z
+ */
+JNIEXPORT jboolean JNICALL Java_com_microsoft_cognitiveservices_speech_transcription_Participant_getIsHost
+  (JNIEnv *, jobject, jobject);
+
+/*
+ * Class:     com_microsoft_cognitiveservices_speech_transcription_Participant
+ * Method:    getIsMuted
+ * Signature: (Lcom/microsoft/cognitiveservices/speech/util/SafeHandle;)Z
+ */
+JNIEXPORT jboolean JNICALL Java_com_microsoft_cognitiveservices_speech_transcription_Participant_getIsMuted
+  (JNIEnv *, jobject, jobject);
+
+/*
+ * Class:     com_microsoft_cognitiveservices_speech_transcription_Participant
+ * Method:    getIsUsingTts
+ * Signature: (Lcom/microsoft/cognitiveservices/speech/util/SafeHandle;)Z
+ */
+JNIEXPORT jboolean JNICALL Java_com_microsoft_cognitiveservices_speech_transcription_Participant_getIsUsingTts
+  (JNIEnv *, jobject, jobject);
+
 #ifdef __cplusplus
 }
 #endif

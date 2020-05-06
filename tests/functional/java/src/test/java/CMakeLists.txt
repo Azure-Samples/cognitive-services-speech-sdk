@@ -28,6 +28,8 @@ set(JAVA_SOURCES_TESTS
     tests/unit/AllUnitTests.java
     tests/unit/AudioInputStreamTests.java
     tests/unit/ConversationTranscriberTests.java
+    tests/unit/ConversationTranslatorTests.java
+    tests/unit/ConversationTranslatorHelper.java
     tests/unit/IntentRecognizerTests.java
     tests/unit/KeywordRecognitionModelTests.java
     tests/unit/LanguageUnderstandingModelTests.java

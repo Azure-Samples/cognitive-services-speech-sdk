@@ -56,4 +56,14 @@ void SpeechStartDetectedCallback(SPXRECOHANDLE recoHandle, SPXEVENTHANDLE eventH
 
 void SpeechEndDetectedCallback(SPXRECOHANDLE recoHandle, SPXEVENTHANDLE eventHandle, void* context);
 
+void ParticipantsChangedCallback(SPXCONVERSATIONTRANSLATORHANDLE conversationTranslatorHandle, SPXEVENTHANDLE eventHandle, void* context);
+
+void ConversationExpireCallback(SPXCONVERSATIONTRANSLATORHANDLE conversationTranslatorHandle, SPXEVENTHANDLE eventHandle, void* context);
+
+void TranscribingCallback(SPXCONVERSATIONTRANSLATORHANDLE conversationTranslatorHandle, SPXEVENTHANDLE eventHandle, void* context);
+
+void TranscribedCallback(SPXCONVERSATIONTRANSLATORHANDLE conversationTranslatorHandle, SPXEVENTHANDLE eventHandle, void* context);
+
+void TextMessageCallback(SPXCONVERSATIONTRANSLATORHANDLE conversationTranslatorHandle, SPXEVENTHANDLE eventHandle, void* context);
+
 void SetProcessState(bool state);

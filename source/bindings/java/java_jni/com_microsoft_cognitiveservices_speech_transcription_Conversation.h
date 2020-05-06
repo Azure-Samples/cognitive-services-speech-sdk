@@ -71,6 +71,30 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_transcriptio
 JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_transcription_Conversation_endConversation
   (JNIEnv *, jobject, jobject);
 
+JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_transcription_Conversation_startConversation
+  (JNIEnv *env, jobject obj, jobject conversationHandle);
+
+JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_transcription_Conversation_deleteConversation
+  (JNIEnv *env, jobject obj, jobject conversationHandle);
+
+JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_transcription_Conversation_lockConversation
+  (JNIEnv *env, jobject obj, jobject conversationHandle);
+
+JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_transcription_Conversation_unlockConversation
+  (JNIEnv *env, jobject obj, jobject conversationHandle);
+
+JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_transcription_Conversation_muteAll
+  (JNIEnv *env, jobject obj, jobject conversationHandle);
+
+JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_transcription_Conversation_unmuteAll
+  (JNIEnv *env, jobject obj, jobject conversationHandle);
+
+JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_transcription_Conversation_muteParticipant
+  (JNIEnv *env, jobject obj, jobject conversationHandle, jstring userId);
+
+JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_transcription_Conversation_unmuteParticipant
+  (JNIEnv *env, jobject obj, jobject conversationHandle, jstring userId);
+
 /*
  * Class:     com_microsoft_cognitiveservices_speech_transcription_Conversation
  * Method:    getPropertyBag

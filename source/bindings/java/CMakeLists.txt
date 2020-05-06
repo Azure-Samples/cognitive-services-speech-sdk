@@ -54,6 +54,14 @@ set(JAVA_SOURCES
     ${PACKAGE_DIR}/transcription/Participant.java
     ${PACKAGE_DIR}/transcription/User.java
 
+    ${PACKAGE_DIR}/transcription/ConversationExpirationEventArgs.java
+    ${PACKAGE_DIR}/transcription/ConversationParticipantsChangedEventArgs.java
+    ${PACKAGE_DIR}/transcription/ConversationTranslationCanceledEventArgs.java
+    ${PACKAGE_DIR}/transcription/ConversationTranslationEventArgs.java
+    ${PACKAGE_DIR}/transcription/ConversationTranslationResult.java
+    ${PACKAGE_DIR}/transcription/ConversationTranslator.java
+    ${PACKAGE_DIR}/transcription/ParticipantChangedReason.java
+
     ${PACKAGE_DIR}/AudioDataStream.java
     ${PACKAGE_DIR}/SpeechSynthesisEventArgs.java
     ${PACKAGE_DIR}/SpeechSynthesisWordBoundaryEventArgs.java

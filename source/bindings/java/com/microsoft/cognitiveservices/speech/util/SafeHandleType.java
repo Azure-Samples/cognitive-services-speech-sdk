@@ -38,6 +38,7 @@ public enum SafeHandleType {
     Synthesizer,
     Grammar,
     TranslationSynthesis,
+    ConversationTranslator,
     KeywordRecognizer
 }
 

@@ -240,7 +240,7 @@ public final class Conversation implements Closeable
     /**
      *   End a conversation.
      *
-     * @return Am empty task representing the asynchronous operation that ending a conversation.
+     * @return An empty task representing the asynchronous operation that ending a conversation.
      */
     public Future<Void> endConversationAsync() {
         final Conversation thisConv = this;
@@ -248,6 +248,138 @@ public final class Conversation implements Closeable
         return s_executorService.submit(new java.util.concurrent.Callable<Void>() {
             public Void call() {
                 Runnable runnable = new Runnable() { public void run() { Contracts.throwIfFail(endConversation(conversationHandle)); }};
+                thisConv.doAsyncConversationAction(runnable);
+                return null;
+        }});
+    }
+
+    /**
+     * Start a conversation.
+     *
+     * @return An asynchronous operation representing starting a conversation.
+     */
+    public Future<Void> startConversationAsync() {
+        final Conversation thisConv = this;
+
+        return s_executorService.submit(new java.util.concurrent.Callable<Void>() {
+            public Void call() {
+                Runnable runnable = new Runnable() { public void run() { Contracts.throwIfFail(startConversation(conversationHandle)); }};
+                thisConv.doAsyncConversationAction(runnable);
+                return null;
+        }});
+    }
+
+    /**
+     * Delete a conversation. After this no one will be able to join the conversation.
+     *
+     * @return An asynchronous operation representing deleting a conversation.
+     */
+    public Future<Void> deleteConversationAsync() {
+        final Conversation thisConv = this;
+
+        return s_executorService.submit(new java.util.concurrent.Callable<Void>() {
+            public Void call() {
+                Runnable runnable = new Runnable() { public void run() { Contracts.throwIfFail(deleteConversation(conversationHandle)); }};
+                thisConv.doAsyncConversationAction(runnable);
+                return null;
+        }});
+    }
+
+    /**
+     * Lock a conversation. This will prevent new participants from joining.
+     *
+     * @return An asynchronous operation representing locking a conversation.
+     */
+    public Future<Void> lockConversationAsync() {
+        final Conversation thisConv = this;
+
+        return s_executorService.submit(new java.util.concurrent.Callable<Void>() {
+            public Void call() {
+                Runnable runnable = new Runnable() { public void run() { Contracts.throwIfFail(lockConversation(conversationHandle)); }};
+                thisConv.doAsyncConversationAction(runnable);
+                return null;
+        }});
+    }
+
+    /**
+     * Unlocks a conversation.
+     *
+     * @return An asynchronous operation representing unlocking a conversation.
+     */
+    public Future<Void> unlockConversationAsync() {
+        final Conversation thisConv = this;
+
+        return s_executorService.submit(new java.util.concurrent.Callable<Void>() {
+            public Void call() {
+                Runnable runnable = new Runnable() { public void run() { Contracts.throwIfFail(unlockConversation(conversationHandle)); }};
+                thisConv.doAsyncConversationAction(runnable);
+                return null;
+        }});
+    }
+
+    /**
+     * Mute all other participants in the conversation. After this no other participants will have their speech recognitions broadcast, nor be able to send text messages.
+     *
+     * @return An asynchronous operation representing muting all participants.
+     */
+    public Future<Void> muteAllParticipantsAsync() {
+        final Conversation thisConv = this;
+
+        return s_executorService.submit(new java.util.concurrent.Callable<Void>() {
+            public Void call() {
+                Runnable runnable = new Runnable() { public void run() { Contracts.throwIfFail(muteAll(conversationHandle)); }};
+                thisConv.doAsyncConversationAction(runnable);
+                return null;
+        }});
+    }
+
+    /**
+     * Unmute all other participants in the conversation.
+     *
+     * @return An asynchronous operation representing un-muting all participants.
+     */
+    public Future<Void> unmuteAllParticipantsAsync() {
+        final Conversation thisConv = this;
+
+        return s_executorService.submit(new java.util.concurrent.Callable<Void>() {
+            public Void call() {
+                Runnable runnable = new Runnable() { public void run() { Contracts.throwIfFail(unmuteAll(conversationHandle)); }};
+                thisConv.doAsyncConversationAction(runnable);
+                return null;
+        }});
+    }
+
+    /**
+     * Mute a participant.
+     *
+     * @param userId A user identifier.
+     * @return An asynchronous operation representing muting a particular participant.
+     */
+    public Future<Void> muteParticipantAsync(String userId) {
+        final String finalUserId = userId;
+        final Conversation thisConv = this;
+
+        return s_executorService.submit(new java.util.concurrent.Callable<Void>() {
+            public Void call() {
+                Runnable runnable = new Runnable() { public void run() { Contracts.throwIfFail(muteParticipant(conversationHandle, finalUserId)); }};
+                thisConv.doAsyncConversationAction(runnable);
+                return null;
+        }});
+    }
+
+    /**
+     * Unmute a participant.
+     *
+     * @param userId A user identifier.
+     * @return An asynchronous operation representing un-muting a particular participant.
+     */
+    public Future<Void> unmuteParticipantAsync(String userId) {
+        final String finalUserId = userId;
+        final Conversation thisConv = this;
+
+        return s_executorService.submit(new java.util.concurrent.Callable<Void>() {
+            public Void call() {
+                Runnable runnable = new Runnable() { public void run() { Contracts.throwIfFail(unmuteParticipant(conversationHandle, finalUserId)); }};
                 thisConv.doAsyncConversationAction(runnable);
                 return null;
         }});
@@ -330,6 +462,14 @@ public final class Conversation implements Closeable
     private final native long removeParticipant(SafeHandle convHandle, SafeHandle participantHandle);
     private final native long removeParticipantByUser(SafeHandle convHandle, SafeHandle userHandle);
     private final native long removeParticipantByUserId(SafeHandle convHandle, String userId);
+    private final native long startConversation(SafeHandle convHandle);
     private final native long endConversation(SafeHandle convHandle);
+    private final native long deleteConversation(SafeHandle convHandle);
+    private final native long lockConversation(SafeHandle convHandle);
+    private final native long unlockConversation(SafeHandle convHandle);
+    private final native long muteParticipant(SafeHandle convHandle, String userId);
+    private final native long muteAll(SafeHandle convHandle);
+    private final native long unmuteParticipant(SafeHandle convHandle, String userId);
+    private final native long unmuteAll(SafeHandle convHandle);
     private final native long getPropertyBag(SafeHandle convHandle, IntRef propbagHandle);
 }
