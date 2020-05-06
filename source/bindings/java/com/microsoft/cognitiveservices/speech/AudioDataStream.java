@@ -10,6 +10,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import com.microsoft.cognitiveservices.speech.SpeechSynthesisResult;
+import com.microsoft.cognitiveservices.speech.KeywordRecognitionResult;
 import com.microsoft.cognitiveservices.speech.util.Contracts;
 import com.microsoft.cognitiveservices.speech.util.IntRef;
 import com.microsoft.cognitiveservices.speech.util.SafeHandle;
@@ -49,6 +50,19 @@ public final class AudioDataStream implements Closeable
     }
 
     /**
+     * Obtains the memory backed AudioDataStream associated with a given KeywordRecognition result.
+     * @param result The keyword recognition result.
+     * @return An audio stream with the input to the KeywordRecognizer starting from right before the Keyword.
+     */
+    public static AudioDataStream fromResult(KeywordRecognitionResult result) {
+        Contracts.throwIfNull(result, "result");
+
+        IntRef streamRef = new IntRef(0);
+        Contracts.throwIfFail(createFromKeywordResult(streamRef, result.getImpl()));
+        return new AudioDataStream(streamRef);
+    }
+
+    /**
      * Get current status of the audio data stream.
      * @return Current status.
      */
@@ -63,7 +77,7 @@ public final class AudioDataStream implements Closeable
      * @param bytesRequested The requested data size in bytes.
      * @return A bool indicating the result.
      */
-    public boolean canReadData(long bytesRequested) {        
+    public boolean canReadData(long bytesRequested) {
         return canReadData(streamHandle, bytesRequested);
     }
 
@@ -148,6 +162,13 @@ public final class AudioDataStream implements Closeable
     }
 
     /**
+     * Stops any more data from getting to the stream.
+     */
+    public void detachInput() {
+        Contracts.throwIfFail(detachInput(streamHandle));
+    }
+
+    /**
      * The collection of properties and their values defined for this audio data stream.
      * @return The collection of properties and their values defined for this audio data stream.
      */
@@ -156,7 +177,7 @@ public final class AudioDataStream implements Closeable
     }
 
     /*! \cond INTERNAL */
-        
+
     /**
      * Returns the audio data stream implementation.
      * @return The implementation of the stream.
@@ -225,6 +246,7 @@ public final class AudioDataStream implements Closeable
     }
 
     private final static native long createFromResult(IntRef streamRef, SafeHandle resultHandle);
+    private final static native long createFromKeywordResult(IntRef streamRef, SafeHandle resultHandle);
     private final native long getStatus(SafeHandle streamHandle, IntRef statusRef);
     private final native boolean canReadData(SafeHandle streamHandle, long bytesRequested);
     private final native boolean canReadData(SafeHandle streamHandle, long pos, long bytesRequested);
@@ -233,5 +255,6 @@ public final class AudioDataStream implements Closeable
     private final native long saveToWaveFile(SafeHandle streamHandle, String fileName);
     private final native long getPosition(SafeHandle streamHandle, IntRef posRef);
     private final native long setPosition(SafeHandle streamHandle, long pos);
+    private final native long detachInput(SafeHandle streamHandle);
     private final native long getPropertyBagFromStreamHandle(SafeHandle streamHandle, IntRef propertyHandleRef);
 }

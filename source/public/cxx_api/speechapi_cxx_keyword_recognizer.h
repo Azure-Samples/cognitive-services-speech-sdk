@@ -4,6 +4,8 @@
 //
 // speechapi_cxx_keyword_recognizer.h: Public API declarations for KeywordRecognizer C++ class
 //
+#pragma once
+
 #include <future>
 #include <memory>
 

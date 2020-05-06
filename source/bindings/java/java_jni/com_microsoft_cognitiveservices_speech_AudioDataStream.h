@@ -17,6 +17,14 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_AudioDataStr
 
 /*
  * Class:     com_microsoft_cognitiveservices_speech_AudioDataStream
+ * Method:    createFromKeywordResult
+ * Signature: (Lcom/microsoft/cognitiveservices/speech/util/IntRef;Lcom/microsoft/cognitiveservices/speech/util/SafeHandle;)J
+ */
+JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_AudioDataStream_createFromKeywordResult
+  (JNIEnv *, jclass, jobject, jobject);
+
+/*
+ * Class:     com_microsoft_cognitiveservices_speech_AudioDataStream
  * Method:    getStatus
  * Signature: (Lcom/microsoft/cognitiveservices/speech/util/SafeHandle;Lcom/microsoft/cognitiveservices/speech/util/IntRef;)J
  */
@@ -78,6 +86,14 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_AudioDataStr
  */
 JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_AudioDataStream_setPosition
   (JNIEnv *, jobject, jobject, jlong);
+
+/*
+ * Class:     com_microsoft_cognitiveservices_speech_AudioDataStream
+ * Method:    detachInput
+ * Signature: (Lcom/microsoft/cognitiveservices/speech/util/SafeHandle)J
+ */
+JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_AudioDataStream_detachInput
+  (JNIEnv *env, jobject obj, jobject streamHandle);
 
 /*
  * Class:     com_microsoft_cognitiveservices_speech_AudioDataStream

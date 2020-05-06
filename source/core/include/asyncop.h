@@ -15,6 +15,23 @@ template<class T>
 class CSpxAsyncOp
 {
 public:
+    template<typename U = T, typename = std::enable_if_t<!std::is_void<U>::value>>
+    static CSpxAsyncOp<U> FromResult(U&& result)
+    {
+        std::promise<U> promise;
+        std::shared_future<U> future{ promise.get_future() };
+        promise.set_value(std::forward<U>(result));
+        return CSpxAsyncOp{ future, AOS_Completed };
+    }
+
+    template<typename U = T, typename = std::enable_if_t<std::is_void<U>::value>>
+    static CSpxAsyncOp<U> FromResult()
+    {
+        std::promise<U> promise;
+        std::shared_future<U> future{ promise.get_future() };
+        promise.set_value();
+        return CSpxAsyncOp{ future, AOS_Completed };
+    }
 
     CSpxAsyncOp(CSpxAsyncOp&& other) = default;
 
@@ -53,6 +70,5 @@ public:
     std::shared_future<T> Future;
     AsyncOpState State;
 };
-
 
 } } } } // Microsoft::CognitiveServices::Speech::Impl

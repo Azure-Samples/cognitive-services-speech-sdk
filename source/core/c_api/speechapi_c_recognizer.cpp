@@ -356,7 +356,7 @@ SPXAPI recognizer_recognize_keyword_once_async_wait_for(SPXASYNCHANDLE hasync, u
 
 SPXAPI recognizer_stop_keyword_recognition(SPXRECOHANDLE hreco)
 {
-    return async_to_sync(hreco, recognizer_stop_continuous_recognition_async, recognizer_stop_keyword_recognition_async_wait_for);
+    return async_to_sync(hreco, recognizer_stop_keyword_recognition_async, recognizer_stop_keyword_recognition_async_wait_for);
 }
 
 SPXAPI recognizer_stop_keyword_recognition_async(SPXRECOHANDLE hreco, SPXASYNCHANDLE* phasync)

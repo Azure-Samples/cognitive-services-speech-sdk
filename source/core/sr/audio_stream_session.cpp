@@ -146,8 +146,6 @@ void CSpxAudioStreamSession::Term()
 
     // Make sure there is nobody waiting on a single shot.
     CancelPendingSingleShot(RecognitionKind::SingleShot);
-    CancelPendingSingleShot(RecognitionKind::KeywordOnce);
-
     {
         unique_lock<mutex> lock(m_recognizersLock);
         m_recognizers.clear();
@@ -164,12 +162,11 @@ void CSpxAudioStreamSession::Term()
     m_audioBuffer = nullptr;
 }
 
-void CSpxAudioStreamSession::CancelPendingSingleShot(RecognitionKind kind)
+void CSpxAudioStreamSession::CancelPendingSingleShot(RecognitionKind)
 {
     SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::CancelPendingSingleShot", (void*)this);
 
-    auto& currentSingleShot = kind == RecognitionKind::KeywordOnce ?
-        m_singleShotKeywordInFlight : m_singleShotInFlight;
+    auto& currentSingleShot = m_singleShotInFlight;
 
     // Make sure there is nobody waiting on a single shot.
     if (currentSingleShot &&
@@ -776,8 +773,7 @@ void CSpxAudioStreamSession::RecognizeOnceAsync(const shared_ptr<Operation>& sin
 {
     SPX_DBG_TRACE_SCOPE("*** CSpxAudioStreamSession::RecognizeAsync kicked-off THREAD started ***", "*** CSpxAudioStreamSession::RecognizeAsync kicked-off THREAD stopped ***");
 
-    auto& currentSingleShot = singleShot->m_kind == RecognitionKind::KeywordOnce ?
-        m_singleShotKeywordInFlight : m_singleShotInFlight;
+    auto& currentSingleShot = m_singleShotInFlight;
 
     // Keep track of the fact that we have a thread pending waiting to hear
     // what the final recognition result is, and then start/stop recognizing...
@@ -874,7 +870,22 @@ CSpxAsyncOp<void> CSpxAudioStreamSession::StartKeywordRecognitionAsync(std::shar
 
 CSpxAsyncOp<void> CSpxAudioStreamSession::StopKeywordRecognitionAsync()
 {
-    return StopRecognitionAsync(RecognitionKind::Keyword);
+    auto kind = RecognitionKind::Keyword;
+    if (IsKind(RecognitionKind::KWSOnceSingleShot))
+    {
+        /* For KWSOnceSingleShot stopping is equivalent to Detaching the input */
+        auto stream = m_recoAdapter->QueryInterface<ISpxAudioDataStream>();
+        if (stream != nullptr)
+        {
+            stream->DetachInput();
+            return CSpxAsyncOp<void>::FromResult();
+        }
+    }
+    if (IsKind(RecognitionKind::KeywordOnce))
+    {
+        kind = RecognitionKind::KeywordOnce;
+    }
+    return StopRecognitionAsync(kind);
 }
 
 CSpxAsyncOp<void> CSpxAudioStreamSession::StartRecognitionAsync(RecognitionKind startKind, std::shared_ptr<ISpxKwsModel> model)
@@ -1014,7 +1025,7 @@ void CSpxAudioStreamSession::StopRecognizing(RecognitionKind stopKind)
 
     SPX_DBG_ASSERT(stopKind != RecognitionKind::Idle);
 
-    if (m_kwsModel != nullptr && stopKind != RecognitionKind::Keyword && IsState(SessionState::ProcessingAudio) &&
+    if (m_kwsModel != nullptr && !IsKindKeyword(stopKind) && IsState(SessionState::ProcessingAudio) &&
         ChangeState(stopKind, SessionState::ProcessingAudio, RecognitionKind::Keyword, SessionState::HotSwapPaused))
     {
         // We've got a keyword, we're not trying to stop keyword spotting, and we're currently procesing audio...
@@ -1382,12 +1393,11 @@ void CSpxAudioStreamSession::KeywordDetected(ISpxKwsEngineAdapter* adapter, uint
         spottedKeywordResult = factory->CreateKeywordResult(confidence, offset, duration, PAL::ToWString(keyword).c_str(), ResultReason::RecognizedKeyword, stream);
         FireResultEvent(GetSessionId(), spottedKeywordResult);
 
-        if (m_singleShotKeywordInFlight)
+        if (m_singleShotInFlight && (m_singleShotInFlight->m_kind == RecognitionKind::KeywordOnce))
         {
-            /* We only clean this when the output reco engine adapter gets cleaned */
-            m_singleShotKeywordInFlight->m_promise.set_value(spottedKeywordResult);
-            /* Since we need a non empty operation here, we create a mock one */
-            m_singleShotKeywordInFlight = std::make_shared<Operation>(RecognitionKind::Idle);
+            /* This means the single shot was a kws single shot */
+            m_singleShotInFlight->m_promise.set_value(spottedKeywordResult);
+            m_singleShotInFlight = nullptr;
         }
 
         // Set spottedKeywordResult to null since KWV is off and there is no need to verify KWS spotted keyword
@@ -2222,8 +2232,6 @@ void CSpxAudioStreamSession::EnsureResetOutputEngineAdapter()
 
     m_recoAdapter = nullptr;
     m_audioProcessor = nullptr;
-    /* We clean this operation as now are done with the single shot */
-    m_singleShotKeywordInFlight = nullptr;
 }
 
 std::shared_ptr < ISpxSpeechAudioProcessorAdapter> CSpxAudioStreamSession::EnsureInitSpeechProcessor()

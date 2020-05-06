@@ -27,6 +27,24 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_AudioDataStr
 
 /*
  * Class:     com_microsoft_cognitiveservices_speech_AudioDataStream
+ * Method:    createFromKeywordResult
+ * Signature: (Lcom/microsoft/cognitiveservices/speech/util/IntRef;Lcom/microsoft/cognitiveservices/speech/util/SafeHandle;)J
+ */
+JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_AudioDataStream_createFromKeywordResult
+  (JNIEnv *env, jclass cls, jobject streamHandle, jobject resultHandle)
+{
+    SPXAUDIOSTREAMHANDLE audioStream = SPXHANDLE_INVALID;
+    jlong result = GetObjectHandle(env, resultHandle);
+    SPXHR hr = audio_data_stream_create_from_keyword_result(&audioStream, (SPXRESULTHANDLE)result);
+    if (SPX_SUCCEEDED(hr))
+    {
+        SetObjectHandle(env, streamHandle, (jlong)audioStream);
+    }
+    return (jlong)hr;
+}
+
+/*
+ * Class:     com_microsoft_cognitiveservices_speech_AudioDataStream
  * Method:    getStatus
  * Signature: (Lcom/microsoft/cognitiveservices/speech/util/SafeHandle;Lcom/microsoft/cognitiveservices/speech/util/IntRef;)J
  */
@@ -160,6 +178,19 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_AudioDataStr
 {
     jlong audioStream = GetObjectHandle(env, streamHandle);
     SPXHR hr = audio_data_stream_set_position((SPXAUDIOSTREAMHANDLE)audioStream, (uint32_t)position);
+    return (jlong)hr;
+}
+
+/*
+ * Class:     com_microsoft_cognitiveservices_speech_AudioDataStream
+ * Method:    detachInput
+ * Signature: (Lcom/microsoft/cognitiveservices/speech/util/SafeHandle)J
+ */
+JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_AudioDataStream_detachInput
+  (JNIEnv *env, jobject obj, jobject streamHandle)
+{
+    jlong audioStream = GetObjectHandle(env, streamHandle);
+    SPXHR hr = audio_data_stream_detach_input((SPXAUDIOSTREAMHANDLE)audioStream);
     return (jlong)hr;
 }
 

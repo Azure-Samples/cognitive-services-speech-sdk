@@ -18,7 +18,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
     public class KwsRecognizerTests : RecognitionTestBase
     {
 
-        [Ignore]
         [TestMethod]
         public async Task TestKeywordFound()
         {

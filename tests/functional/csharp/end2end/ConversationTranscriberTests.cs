@@ -809,8 +809,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
 
-        [Ignore]
-        [TestMethod]
+        [TestMethod, Ignore]
         public async Task TestSendMessageAsync()
         {
             string faceStreamUrl = "wss://transcribe.princetondev.customspeech.ai/speech/recognition/audioface";

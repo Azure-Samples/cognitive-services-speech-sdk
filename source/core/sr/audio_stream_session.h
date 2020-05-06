@@ -492,7 +492,6 @@ private:
 
     // Single shot in flight operation.
     std::shared_ptr<Operation> m_singleShotInFlight;
-    std::shared_ptr<Operation> m_singleShotKeywordInFlight;
 };
 
 
