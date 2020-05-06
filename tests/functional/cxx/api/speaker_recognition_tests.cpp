@@ -54,7 +54,7 @@ TEST_CASE("text independent identication enrollment", "[api][cxx][speaker_id][en
     auto config = SpeechConfig::FromEndpoint(DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT], SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
     auto client = VoiceProfileClient::FromConfig(config);
 
-    auto profile = client->CreateProfileAsync(VoiceProfileType::TextIndepdentIdentification, "en-us").get();
+    auto profile = client->CreateProfileAsync(VoiceProfileType::TextIndependentIdentification, "en-us").get();
     SPXTEST_REQUIRE(!profile->GetId().empty());
 
     //auto audioInput = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
@@ -141,7 +141,7 @@ TEST_CASE("reset voice profile text independent identification", "[api][speaker_
 
     auto client = VoiceProfileClient::FromConfig(config);
 
-    auto profile = client->CreateProfileAsync(VoiceProfileType::TextIndepdentIdentification, "en-us").get();
+    auto profile = client->CreateProfileAsync(VoiceProfileType::TextIndependentIdentification, "en-us").get();
     SPXTEST_REQUIRE(!profile->GetId().empty());
 
     auto result = client->ResetProfileAsync(profile).get();
@@ -174,7 +174,7 @@ TEST_CASE("delete voice profile text independent identification", "[api][cxx][sp
     auto config = SpeechConfig::FromEndpoint(DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT], SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
     auto client = VoiceProfileClient::FromConfig(config);
 
-    auto profile = client->CreateProfileAsync(VoiceProfileType::TextIndepdentIdentification, "en-us").get();
+    auto profile = client->CreateProfileAsync(VoiceProfileType::TextIndependentIdentification, "en-us").get();
     SPXTEST_REQUIRE(!profile->GetId().empty());
 
     auto result = client->DeleteProfileAsync(profile).get();
@@ -229,12 +229,12 @@ TEST_CASE("speaker identification", "[api][cxx][speaker_id][identification]")
     auto recognizer = SpeakerRecognizer::FromConfig(config, audioInput);
 
     auto client = VoiceProfileClient::FromConfig(config);
-    auto profile1 = client->CreateProfileAsync(VoiceProfileType::TextIndepdentIdentification, "en-us").get();
+    auto profile1 = client->CreateProfileAsync(VoiceProfileType::TextIndependentIdentification, "en-us").get();
     SPXTEST_REQUIRE(!profile1->GetId().empty());
     auto enrollResult = client->EnrollProfileAsync(profile1, audioInput).get();
     SPXTEST_REQUIRE(enrollResult->Reason == ResultReason::EnrolledVoiceProfile);
 
-    auto profile2 = client->CreateProfileAsync(VoiceProfileType::TextIndepdentIdentification, "en-us").get();
+    auto profile2 = client->CreateProfileAsync(VoiceProfileType::TextIndependentIdentification, "en-us").get();
     SPXTEST_REQUIRE(!profile2->GetId().empty());
     auto enrollResult2 = client->EnrollProfileAsync(profile2, audioInput).get();
     SPXTEST_REQUIRE(enrollResult2->Reason == ResultReason::EnrolledVoiceProfile);

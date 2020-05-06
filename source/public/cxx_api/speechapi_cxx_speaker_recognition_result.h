@@ -20,6 +20,7 @@ namespace Speech {
 
 /// <summary>
 /// Represents speaker recognition result.
+/// Added in 1.12.0
 /// </summary>
 class SpeakerRecognitionResult
 {
@@ -109,9 +110,9 @@ public:
     const PropertyCollection& Properties;
 
     /// <summary>
-    /// The profile id of the first verified/identified speaker. The rest of recognized speakers can be retrieved by parsing the json result string in the Properties.
+    /// Returns a similarity score.
     /// </summary>
-    /// <returns>A float number indicating the similarity between input audio and targeted voice profile.This number is between 0 and 1. A higher number means higher similarity.< / returns>
+    /// <returns> A float number indicating the similarity between input audio and targeted voice profile.This number is between 0 and 1. A higher number means higher similarity.< / returns>
     double GetScore() const
     {
         return m_score;

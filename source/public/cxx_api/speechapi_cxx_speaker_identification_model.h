@@ -19,6 +19,7 @@ namespace Speech {
 
 /// <summary>
 /// Represents speaker identification model used with speaker recognition class.
+/// Added in version 1.12.0
 /// </summary>
 class SpeakerIdentificationModel : public std::enable_shared_from_this<SpeakerIdentificationModel>
 {

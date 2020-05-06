@@ -19,13 +19,14 @@ namespace Speech {
 
 /// <summary>
 /// Represents speaker verification model used with speaker recognition class.
+/// Added in version 1.12.0
 /// </summary>
 class SpeakerVerificationModel : public std::enable_shared_from_this<SpeakerVerificationModel>
 {
 public:
 
     /// <summary>
-    /// Creates a speaker verification model using the voice profile file.
+    /// Creates a speaker verification model using the voice profile.
     /// </summary>
     /// <param name="profile">The voice profile.</param>
     /// <returns>A shared pointer to speaker verification model.</returns>

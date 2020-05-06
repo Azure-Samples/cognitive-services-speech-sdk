@@ -70,6 +70,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils
         public static string CUSTOM_VOICE_DEPLOYMENT_ID => "CustomVoiceDeploymentId";
         public static string CUSTOM_VOICE_VOICE_NAME => "CustomVoiceVoiceName";
         public static string SERIALIZED_SPEECH_ACTIVITY_FILE => "SerializedSpeechActivityFile";
+        public static string SPEAKER_RECOGNITION_ENDPOINT => "SpeakerRecognitionEndpoint";
     }
 
     // Audio file and utterances keys
@@ -77,6 +78,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils
     {
         public static string SINGLE_UTTERANCE_ENGLISH => "SingleUtteranceEnglish";
         public static string SINGLE_UTTERANCE_CHINESE => "SingleUtteranceChinese";
+        public static string MULTIPLE_UTTERANCE_CHINESE => "MultipleUtteranceChinese";
         public static string SINGLE_UTTERANCE_MP3 => "SingleUtteranceMP3";
         public static string SINGLE_UTTERANCE_OPUS => "SingleUtteranceOPUS";
         public static string SINGLE_UTTERANCE_A_LAW => "SingleUtteranceALaw";

@@ -525,28 +525,32 @@ enum class ResultReason
     EnrollingVoiceProfile = 17,
 
     /// <summary>
-    /// The voice profile has been created.
+    /// The voice profile has been enrolled.
     /// Added in version 1.12.0
     /// </summary>
     EnrolledVoiceProfile = 18,
 
     /// <summary>
-    /// Indicates successfully identify some speakers.
+    /// Indicates successful identification of some speakers.
+    /// Added in version 1.12.0
     /// </summary>
     RecognizedSpeakers = 19,
 
     /// <summary>
     /// Indicates successfully verified one speaker.
+    /// Added in version 1.12.0
     /// </summary>
     RecognizedSpeaker = 20,
 
     /// <summary>
-    /// Indicates a voice profile has being reset successfully.
+    /// Indicates a voice profile has been reset successfully.
+    /// Added in version 1.12.0
     /// </summary>
     ResetVoiceProfile = 21,
 
     /// <summary>
-    /// Indicates a voice profile has being deleted successfully.
+    /// Indicates a voice profile has been deleted successfully.
+    /// Added in version 1.12.0
     /// </summary>
     DeletedVoiceProfile = 22
 };
@@ -854,7 +858,7 @@ enum class VoiceProfileType
     /// <summary>
     /// Text independent speaker identification.
     /// </summary>
-    TextIndepdentIdentification = 1,
+    TextIndependentIdentification = 1,
 
     /// <summary>
     ///  Text dependent speaker verification.

@@ -23,7 +23,7 @@ class VoiceProfileClient;
 
 /// <summary>
 /// Class for VoiceProfile.
-/// This class creates voice profile
+/// Added in version 1.12.0
 /// </summary>
 class VoiceProfile : public std::enable_shared_from_this<VoiceProfile>
 {
@@ -47,6 +47,10 @@ public:
         m_hVoiceProfile = SPXHANDLE_INVALID;
     }
 
+    /// <summary>
+    /// a voice profile id.
+    /// </summary>
+    /// <returns> the voice profile id.</returns>
     const SPXSTRING GetId() const
     {
         // query the string length

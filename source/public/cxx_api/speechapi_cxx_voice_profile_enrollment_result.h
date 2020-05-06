@@ -107,7 +107,7 @@ public:
     }
 
     /// <summary>
-    /// The profile id of the speaker who has the most similar score to the audio input.
+    /// The profile id of the speaker in the enrollment.
     /// </summary>
     const SPXSTRING& ProfileId;
 

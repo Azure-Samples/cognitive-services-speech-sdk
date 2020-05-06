@@ -96,7 +96,7 @@ RecognitionResultPtr CSpxVoiceProfileClient::Identify(std::vector<std::shared_pt
         {
             ids.emplace_back(profile->GetProfileId());
         }
-        result = site->StartStreamingAudioAndWaitForResult(false, VoiceProfileType::TextIndepdentIdentification, std::move(ids));
+        result = site->StartStreamingAudioAndWaitForResult(false, VoiceProfileType::TextIndependentIdentification, std::move(ids));
     });
 
     return result;

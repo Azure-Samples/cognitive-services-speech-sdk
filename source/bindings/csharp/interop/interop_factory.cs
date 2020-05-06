@@ -15,6 +15,7 @@ namespace Microsoft.CognitiveServices.Speech.Internal
     using SPXSYNTHHANDLE = System.IntPtr;
     using SPXCONNECTORHANDLE = System.IntPtr;
     using SPXCONVERSATIONHANDLE = System.IntPtr;
+    using SPXVOICEPROFILECLIENTHANDLE = System.IntPtr;
 
     internal static class Import
     {
@@ -137,5 +138,10 @@ namespace Microsoft.CognitiveServices.Speech.Internal
         [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR recognizer_create_conversation_transcriber_from_config(out SPXRECOHANDLE recoHandle, InteropSafeHandle audioInput);
 
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
+        public static extern SPXHR recognizer_create_speaker_recognizer_from_config(out SPXRECOHANDLE recoHandle, InteropSafeHandle speechConfig, InteropSafeHandle audioInput);
+
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
+        public static extern SPXHR create_voice_profile_client_from_config(out SPXVOICEPROFILECLIENTHANDLE clientHandle, InteropSafeHandle speechConfig);
     }
 }

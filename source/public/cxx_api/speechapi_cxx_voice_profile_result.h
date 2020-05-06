@@ -20,6 +20,7 @@ namespace Speech {
 /// <summary>
 /// Class for VoiceProfileResult.
 /// This class represents the result of processing voice profiles.
+/// Added in version 1.12.0
 /// </summary>
 class VoiceProfileResult
 {

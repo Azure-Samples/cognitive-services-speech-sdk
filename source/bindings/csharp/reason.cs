@@ -108,6 +108,42 @@ namespace Microsoft.CognitiveServices.Speech
         /// in the conversation and corresponding translation(s).
         /// Added in version 1.9.0
         /// </summary>
-        TranslatedParticipantInstantMessage = 16
+        TranslatedParticipantInstantMessage = 16,
+
+        /// <summary>
+        /// Indicates the voice profile is being enrolled and customers need to send more audio to create a voice profile.
+        /// Added in version 1.12.0
+        /// </summary>
+        EnrollingVoiceProfile = 17,
+
+        /// <summary>
+        /// Indicates the voice profile has been enrolled.
+        /// Added in version 1.12.0
+        /// </summary>
+        EnrolledVoiceProfile = 18,
+
+        /// <summary>
+        /// Indicates successful identification of some speakers.
+        /// Added in version 1.12.0
+        /// </summary>
+        RecognizedSpeakers = 19,
+
+        /// <summary>
+        /// Indicates successfully verified one speaker.
+        /// Added in version 1.12.0
+        /// </summary>
+        RecognizedSpeaker = 20,
+
+        /// <summary>
+        /// Indicates a voice profile has been reset successfully.
+        /// Added in version 1.12.0
+        /// </summary>
+        ResetVoiceProfile = 21,
+
+        /// <summary>
+        /// Indicates a voice profile has been deleted successfully.
+        /// Added in version 1.12.0
+        /// </summary>
+        DeletedVoiceProfile = 22
     }
 }

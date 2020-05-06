@@ -25,8 +25,8 @@ namespace Speech {
 /// <summary>
 /// Class for VoiceProfileClient.
 /// This class creates voice profile client for creating, doing enrollment, deleting and reseting a voice profile.
+/// Added in version 1.12.0
 /// </summary>
-
 class VoiceProfileClient : public std::enable_shared_from_this<VoiceProfileClient>
 {
 private:

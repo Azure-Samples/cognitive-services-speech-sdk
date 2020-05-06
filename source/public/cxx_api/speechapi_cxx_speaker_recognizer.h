@@ -22,14 +22,15 @@ namespace CognitiveServices {
 namespace Speech {
 
 /// <summary>
-/// Class for speaker recognizers.
+/// Perform speaker recognition.
+/// Added in version 1.12.0
 /// </summary>
 class SpeakerRecognizer : public std::enable_shared_from_this<SpeakerRecognizer>
 {
 public:
 
     /// <summary>
-    /// Create a speaker recognizer from a speech config and audio
+    /// Create a speaker recognizer from a speech config and audio config.
     /// </summary>
     /// <param name="speechconfig">A shared smart pointer of a speech config.</param>
     /// <param name="audioInput">A shared smart pointer of a audio config.</param>

@@ -35,7 +35,7 @@ void CSpxHttpRecoEngineAdapter::Init()
 
     Microsoft::CognitiveServices::Speech::USP::PlatformInit(nullptr, 0, nullptr, nullptr);
 
-    m_speakerIdPaths[VoiceProfileType::TextIndepdentIdentification] = "/speaker/identification/v2.0/text-independent/profiles";
+    m_speakerIdPaths[VoiceProfileType::TextIndependentIdentification] = "/speaker/identification/v2.0/text-independent/profiles";
     m_speakerIdPaths[VoiceProfileType::TextIndependentVerification] = "/speaker/verification/v2.0/text-independent/profiles";
     m_speakerIdPaths[VoiceProfileType::TextDependentVerification] = "/speaker/verification/v2.0/text-dependent/profiles";
     m_speakerIdPaths[VoiceProfileType::ConversationDiarization] = "";
@@ -170,7 +170,7 @@ void CSpxHttpRecoEngineAdapter::SetFormat(const SPXWAVEFORMATEX* pformat, VoiceP
             profileId = profileIds[0];
             fullPath = m_speakerIdPaths.at(type) + "/" + profileId + "/verify?ignoreMinLength=True";
         }
-        else if (type == VoiceProfileType::TextIndepdentIdentification)
+        else if (type == VoiceProfileType::TextIndependentIdentification)
         {
             SPX_DBG_ASSERT(profileIds.size() >= 1);
             ostringstream oss;
@@ -580,7 +580,7 @@ RecognitionResultPtr  CSpxHttpRecoEngineAdapter::GetResult()
     }
     else
     {
-        if (m_voiceProfileType == VoiceProfileType::TextIndepdentIdentification)
+        if (m_voiceProfileType == VoiceProfileType::TextIndependentIdentification)
         {
             factory = make_unique<IdentifyResultFactory>(move(m_response));
         }
