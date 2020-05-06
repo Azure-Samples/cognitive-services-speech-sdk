@@ -45,3 +45,8 @@ set_target_properties (tts_usp PROPERTIES
 )
 
 target_link_libraries(tts_usp usp)
+
+if (MSVC)
+   set_target_properties(tts_usp PROPERTIES COMPILE_FLAGS "/Yustdafx.h")
+   set_source_files_properties(stdafx.cpp PROPERTIES COMPILE_FLAGS "/Ycstdafx.h")
+endif(MSVC)

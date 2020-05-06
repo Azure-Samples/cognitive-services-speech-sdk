@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
-
+#include "common.h"
 #include "spxdebug.h"
 #include "conversation_messages.h"
 #include "string_utils.h"
@@ -345,7 +345,7 @@ namespace ConversationTranslation {
     {
         bool success = true;
 
-        // Type is set in the ConversationMessageBase::ParseJsonString 
+        // Type is set in the ConversationMessageBase::ParseJsonString
         success &= TryReadString(json, KEY_ROOM_ID, RoomId);
 
         return RoomId.empty() == false;

@@ -27,7 +27,7 @@ public:
         SPX_INTERFACE_MAP_ENTRY(ISpxObjectWithSite)
         SPX_INTERFACE_MAP_ENTRY(ISpxObjectInit)
         SPX_INTERFACE_MAP_ENTRY(ISpxVoiceProfile)
-        SPX_INTERFACE_MAP_END()
+   SPX_INTERFACE_MAP_END()
 
     CSpxVoiceProfile() : m_profile_type(VOICE_PROFILE_TYPE_NONE) {};
     virtual ~CSpxVoiceProfile() = default;
@@ -45,20 +45,11 @@ public:
     }
 
     // --- ISpxVoiceProfile
-    void SetProfileId(std::string&& id) override
-    {
-        m_profile_id = id;
-    }
+    void SetProfileId(std::string&& id) override;
 
-    std::string GetProfileId() const override
-    {
-        return m_profile_id;
-    }
+    std::string GetProfileId() const override;
 
-    VoiceProfileType GetType() const override
-    {
-        return m_profile_type;
-    }
+    VoiceProfileType GetType() const override;
 
 private:
 

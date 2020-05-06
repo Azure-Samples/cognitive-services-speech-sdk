@@ -4,9 +4,9 @@
 //
 // audio_stream_session.cpp: Implementation definitions for CSpxAudioStreamSession C++ class
 //
+#include "stdafx.h"
 
 #define NOMINMAX
-#include "stdafx.h"
 #include <future>
 #include <list>
 #include <memory>

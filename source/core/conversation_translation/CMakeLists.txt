@@ -67,3 +67,9 @@ set_target_properties (${PROJECT_NAME} PROPERTIES
 target_link_libraries(${PROJECT_NAME}
                       PRIVATE usp
                       PRIVATE common)
+
+if (MSVC)
+   set_target_properties(${PROJECT_NAME} PROPERTIES COMPILE_FLAGS "/Yucommon.h")
+   set_source_files_properties(stdafx.cpp PROPERTIES COMPILE_FLAGS "/Yccommon.h")   
+endif(MSVC)
+

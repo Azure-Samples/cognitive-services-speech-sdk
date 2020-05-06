@@ -41,3 +41,8 @@ target_link_libraries(${PROJECT_NAME}
                       PRIVATE logging
                       PRIVATE audio
                       PRIVATE common)
+
+if (MSVC)
+   set_target_properties(${PROJECT_NAME} PROPERTIES COMPILE_FLAGS "/Yustdafx.h")
+   set_source_files_properties(stdafx.cpp PROPERTIES COMPILE_FLAGS "/Ycstdafx.h")   
+endif(MSVC)

@@ -10,3 +10,24 @@
 
 #include "voice_profile.h"
 
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
+namespace Impl {
+
+void CSpxVoiceProfile::SetProfileId(std::string&& id)
+{
+    m_profile_id = id;
+}
+
+std::string CSpxVoiceProfile::GetProfileId() const
+{
+    return m_profile_id;
+}
+
+VoiceProfileType CSpxVoiceProfile::GetType() const
+{
+    return m_profile_type;
+}
+
+ }}}}

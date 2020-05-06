@@ -5,9 +5,8 @@
 // http_recog_engine_adapter.cpp: Private implementation declarations for CSpxHttpRecoEngineAdapter
 //
 
-#include <sstream>
-
 #include "stdafx.h"
+#include <sstream>
 #include <usp.h>
 #include "http_recog_engine_adapter.h"
 #include "property_id_2_name_map.h"
