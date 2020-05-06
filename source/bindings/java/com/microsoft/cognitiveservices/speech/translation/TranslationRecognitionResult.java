@@ -16,10 +16,8 @@ import com.microsoft.cognitiveservices.speech.util.StringMapRef;
 /**
   * Defines translation recognition result.
   */
-//FIXME is this ok to make not final?
 public class TranslationRecognitionResult extends RecognitionResult {
 
-    //FIXME is this ok to make public?
     /**
      * Constructor
      * @param result
