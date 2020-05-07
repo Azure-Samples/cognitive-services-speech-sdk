@@ -194,6 +194,7 @@ SPXAPI audio_data_stream_create_from_keyword_result(SPXAUDIOSTREAMHANDLE* audioS
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto result = CSpxSharedPtrHandleTableManager::GetPtr<ISpxRecognitionResult, SPXRESULTHANDLE>(keywordResultHandle);
+        SPX_RETURN_HR_IF(SPXERR_INVALID_RESULT_REASON, ResultReason::RecognizedKeyword != result->GetReason());
         auto audioDataStream = result->GetAudioDataStream();
         SPX_RETURN_HR_IF(SPXERR_INVALID_RECOGNIZER, audioDataStream == nullptr);
         auto retrievable = SpxQueryInterface<ISpxRetrievable>(audioDataStream);

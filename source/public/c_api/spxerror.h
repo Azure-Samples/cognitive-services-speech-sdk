@@ -322,3 +322,9 @@ typedef uintptr_t SPXHR;
 /// Added in version 1.10.0.
 /// </summary>
 #define SPXERR_DATA_NOT_AVAILABLE    __SPX_ERRCODE_FAILED(0x034)
+
+/// <summary>
+/// Invalid result reason.
+/// Added in version 1.12.0
+/// </summary>
+#define SPXERR_INVALID_RESULT_REASON   __SPX_ERRCODE_FAILED(0x035)

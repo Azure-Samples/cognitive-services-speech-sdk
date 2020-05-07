@@ -48,7 +48,7 @@ public final class KeywordRecognizer implements Closeable {
     final public EventHandlerImpl<SpeechRecognitionCanceledEventArgs> canceled = new EventHandlerImpl<SpeechRecognitionCanceledEventArgs>(eventCounter);
 
     /**
-     * Creates a new instance of a keyword recognizer. If no audio config is provided as input parameter, it will be equivalent to calling with a config 
+     * Creates a new instance of a keyword recognizer. If no audio config is provided as input parameter, it will be equivalent to calling with a config
      * constructed with AudioConfig::FromDefaultMicrophoneInput.
      * @param audioConfig audio configuration.
      * @return a new instance of a keyword recognizer.
@@ -56,7 +56,8 @@ public final class KeywordRecognizer implements Closeable {
     public KeywordRecognizer(com.microsoft.cognitiveservices.speech.audio.AudioConfig audioConfig) {
 
         this.recoHandle = new SafeHandle(0, SafeHandleType.KeywordRecognizer);
-        Contracts.throwIfFail(createKeywordRecognizerFromConfig(recoHandle, audioConfig.getImpl()));
+        SafeHandle audioConfigHandle = audioConfig == null ? null : audioConfig.getImpl();
+        Contracts.throwIfFail(createKeywordRecognizerFromConfig(recoHandle, audioConfigHandle));
         audioInputKeepAlive = audioConfig;
         initialize();
     }
@@ -102,7 +103,7 @@ public final class KeywordRecognizer implements Closeable {
                 return null;
         }});
     }
-    
+
     /**
      * Dispose of associated resources.
      * Note: close() must be called in order to relinquish underlying resources held by the object.
@@ -121,9 +122,9 @@ public final class KeywordRecognizer implements Closeable {
 
         if (disposing) {
             if(this.eventCounter.get() != 0 && backgroundAttempts <= 50 ) {
-                // There is an event callback in progress, closing while in an event call results in SWIG problems, so 
+                // There is an event callback in progress, closing while in an event call results in SWIG problems, so
                 // spin a thread to try again in 500ms and return.
-                getProperties().getProperty("Backgrounding release " + backgroundAttempts.toString() + " " + this.eventCounter.get(), ""); 
+                getProperties().getProperty("Backgrounding release " + backgroundAttempts.toString() + " " + this.eventCounter.get(), "");
                 Thread t = new Thread(
                     new Runnable(){
                         @Override
@@ -135,8 +136,8 @@ public final class KeywordRecognizer implements Closeable {
                         }
                     });
                 t.start();
-            } 
-            else {             
+            }
+            else {
                 // Trigger graceful shutdown of executor service
                 executorService.shutdown();
 
@@ -151,7 +152,7 @@ public final class KeywordRecognizer implements Closeable {
                 // Deref audioInputKeepAlive by setting to null, this will trigger finalizer if only reference.
                 audioInputKeepAlive = null;
                 keywordRecognizerObjects.remove(this);
-                
+
                 // If the executor service has not been shut down, force shut down
                 if (!executorService.isShutdown()) {
                     executorService.shutdownNow();
@@ -186,7 +187,7 @@ public final class KeywordRecognizer implements Closeable {
             @Override
             public void run() {
                 keywordRecognizerObjects.add(_this);
-                Contracts.throwIfFail(recognizedSetCallback(_this.recoHandle.getValue()));                
+                Contracts.throwIfFail(recognizedSetCallback(_this.recoHandle.getValue()));
             }
         });
 
@@ -194,7 +195,7 @@ public final class KeywordRecognizer implements Closeable {
             @Override
             public void run() {
                 keywordRecognizerObjects.add(_this);
-                Contracts.throwIfFail(canceledSetCallback(_this.recoHandle.getValue()));                
+                Contracts.throwIfFail(canceledSetCallback(_this.recoHandle.getValue()));
             }
         });
 
@@ -214,7 +215,7 @@ public final class KeywordRecognizer implements Closeable {
             EventHandlerImpl<KeywordRecognitionEventArgs> handler = this.recognized;
             if (handler != null) {
                 handler.fireEvent(this, resultEventArg);
-            }    
+            }
         } catch (Exception e) {}
     }
 
@@ -229,7 +230,7 @@ public final class KeywordRecognizer implements Closeable {
             EventHandlerImpl<SpeechRecognitionCanceledEventArgs> handler = this.canceled;
             if (handler != null) {
                 handler.fireEvent(this, resultEventArg);
-            }    
+            }
         } catch (Exception e) {}
     }
 

@@ -59,7 +59,8 @@ namespace Microsoft.CognitiveServices.Speech
         /// </remarks>
         public KeywordRecognizer(Audio.AudioConfig audioConfig)
         {
-            recognizer = new SpeechRecognizer(Recognizer.FromConfig(SpxFactory.recognizer_create_keyword_recognizer_from_audio_config, audioConfig));
+            var config = audioConfig == null ? Audio.AudioConfig.FromDefaultMicrophoneInput() : audioConfig;
+            recognizer = new SpeechRecognizer(Recognizer.FromConfig(SpxFactory.recognizer_create_keyword_recognizer_from_audio_config, config));
             recognizedCallbackDelegate = FireEvent_Recognized;
             gch = GCHandle.Alloc(this, GCHandleType.Weak);
         }

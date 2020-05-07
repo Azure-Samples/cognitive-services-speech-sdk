@@ -47,6 +47,7 @@ namespace MicrosoftSpeechSDKSamples
             Console.WriteLine("T. Speech recognition with compressed input pull audio stream.");
             Console.WriteLine("U. Speech recognition with compressed input push audio stream.");
             Console.WriteLine("V. Translation with compressed input push audio stream.");
+            Console.WriteLine("W. Keyword recognizer.");
 
             Console.Write(prompt);
 
@@ -150,6 +151,11 @@ namespace MicrosoftSpeechSDKSamples
                     case ConsoleKey.V:
                         TranslationSamples.TranslationWithFileCompressedInputAsync().Wait();
                         break;
+
+                    case ConsoleKey.W:
+                        SpeechRecognitionSamples.KeywordRecognizer().Wait();
+                        break;
+
                     case ConsoleKey.D0:
                         Console.WriteLine("Exiting...");
                         break;

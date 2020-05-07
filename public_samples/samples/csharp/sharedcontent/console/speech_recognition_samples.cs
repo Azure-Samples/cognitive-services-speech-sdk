@@ -32,9 +32,9 @@ namespace MicrosoftSpeechSDKSamples
 
                 // Starts speech recognition, and returns after a single utterance is recognized. The end of a
                 // single utterance is determined by listening for silence at the end or until a maximum of 15
-                // seconds of audio is processed.  The task returns the recognition text as result. 
+                // seconds of audio is processed.  The task returns the recognition text as result.
                 // Note: Since RecognizeOnceAsync() returns only a single utterance, it is suitable only for single
-                // shot recognition like command or query. 
+                // shot recognition like command or query.
                 // For long-running multi-utterance recognition, use StartContinuousRecognitionAsync() instead.
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
 
@@ -83,9 +83,9 @@ namespace MicrosoftSpeechSDKSamples
 
                 // Starts speech recognition, and returns after a single utterance is recognized. The end of a
                 // single utterance is determined by listening for silence at the end or until a maximum of 15
-                // seconds of audio is processed.  The task returns the recognition text as result. 
+                // seconds of audio is processed.  The task returns the recognition text as result.
                 // Note: Since RecognizeOnceAsync() returns only a single utterance, it is suitable only for single
-                // shot recognition like command or query. 
+                // shot recognition like command or query.
                 // For long-running multi-utterance recognition, use StartContinuousRecognitionAsync() instead.
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
 
@@ -137,9 +137,9 @@ namespace MicrosoftSpeechSDKSamples
 
                 // Starts speech recognition, and returns after a single utterance is recognized. The end of a
                 // single utterance is determined by listening for silence at the end or until a maximum of 15
-                // seconds of audio is processed.  The task returns the recognition text as result. 
+                // seconds of audio is processed.  The task returns the recognition text as result.
                 // Note: Since RecognizeOnceAsync() returns only a single utterance, it is suitable only for single
-                // shot recognition like command or query. 
+                // shot recognition like command or query.
                 // For long-running multi-utterance recognition, use StartContinuousRecognitionAsync() instead.
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
 
@@ -913,6 +913,33 @@ namespace MicrosoftSpeechSDKSamples
 
                     // Stops recognition.
                     await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
+                }
+            }
+        }
+
+        public static async Task KeywordRecognizer()
+        {
+            Console.WriteLine("say something ...");
+            using (var audioInput = AudioConfig.FromDefaultMicrophoneInput())
+            {
+                using (var recognizer = new KeywordRecognizer(audioInput))
+                {
+                    var model = KeywordRecognitionModel.FromFile("YourKeywordModelFilename.");
+                    var result = await recognizer.RecognizeOnceAsync(model).ConfigureAwait(false);
+                    Console.WriteLine($"got result reason as {result.Reason}");
+                    if(result.Reason == ResultReason.RecognizedKeyword)
+                    {
+                        var stream = AudioDataStream.FromResult(result);
+
+                        await Task.Delay(2000);
+
+                        stream.DetachInput();
+                        await stream.SaveToWaveFileAsync("AudioFromRecognizedKeyword.wav");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"got result reason as {result.Reason}. You can't get audio when no keyword is recognized.");
+                    }
                 }
             }
         }
