@@ -88,7 +88,7 @@ namespace helloworld
 
             if (recognizer == null)
             {
-                recognizer= new KeywordRecognizer(AudioConfig.FromDefaultMicrophoneInput());
+                recognizer = new KeywordRecognizer(AudioConfig.FromDefaultMicrophoneInput());
             }
             if (model == null)
             {
