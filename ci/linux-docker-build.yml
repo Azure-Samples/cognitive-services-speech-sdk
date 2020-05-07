@@ -119,7 +119,6 @@ jobs:
       outvarImage: DOCKER_BUILD_IMAGE
   - bash: |
       rm -f ./tests/test.subscriptions.regions.json
-      cp ./tests/test.settings.json ./bin
       cp ./tests/test.defaults.json ./bin
       cp ./tests/test.audio.utterances.json ./bin
       cat > ./tests/test.subscriptions.regions.json <<HEREDOC

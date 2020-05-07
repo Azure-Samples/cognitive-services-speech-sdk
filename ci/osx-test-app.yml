@@ -37,7 +37,6 @@ jobs:
     displayName: Unpack the framework and place in link directory for test app
   - bash: |
       rm -f ./tests/test.subscriptions.regions.json
-      cp ./tests/test.settings.json ./
       cp ./tests/test.defaults.json ./
       cp ./tests/test.audio.utterances.json ./
       cat > ./tests/test.subscriptions.regions.json <<HEREDOC

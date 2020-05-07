@@ -458,7 +458,6 @@ jobs:
     extraSteps:
       - bash: |
           rm -f ./tests/test.subscriptions.regions.json
-          cp ./tests/test.settings.json ./
           cp ./tests/test.defaults.json ./
           cp ./tests/test.audio.utterances.json ./
           cat > ./tests/test.subscriptions.regions.json <<HEREDOC
@@ -517,7 +516,6 @@ jobs:
           Pattern: '*.jar'
       - bash: |
           rm -f ./tests/test.subscriptions.regions.json
-          cp ./tests/test.settings.json ./
           cp ./tests/test.defaults.json ./
           cp ./tests/test.audio.utterances.json ./
           cat > ./tests/test.subscriptions.regions.json <<HEREDOC
@@ -1657,7 +1655,6 @@ jobs:
     continueOnError: ${{ parameters.continueOnTestFailure }}
   - bash: |
       rm -f ./tests/test.subscriptions.regions.json
-      cp ./tests/test.settings.json ./
       cp ./tests/test.defaults.json ./
       cp ./tests/test.audio.utterances.json ./
       cat > ./tests/test.subscriptions.regions.json <<HEREDOC
@@ -1726,7 +1723,6 @@ jobs:
       outvarImage: DOCKER_IMAGES
   - bash: |
       rm -f ./tests/test.subscriptions.regions.json
-      cp ./tests/test.settings.json ./
       cp ./tests/test.defaults.json ./
       cp ./tests/test.audio.utterances.json ./
       cat > ./tests/test.subscriptions.regions.json <<HEREDOC
@@ -1853,7 +1849,6 @@ jobs:
       outvarImage: DOCKER_IMAGES
   - bash: |
       rm -f ./tests/test.subscriptions.regions.json
-      cp ./tests/test.settings.json ./
       cp ./tests/test.defaults.json ./
       cp ./tests/test.audio.utterances.json ./
       cat > ./tests/test.subscriptions.regions.json <<HEREDOC
@@ -2181,7 +2176,6 @@ jobs:
     continueOnError: true
   - bash: |
       rm -f ./tests/test.subscriptions.regions.json
-      cp ./tests/test.settings.json ./
       cp ./tests/test.defaults.json ./
       cp ./tests/test.audio.utterances.json ./
       cat > ./tests/test.subscriptions.regions.json <<HEREDOC
