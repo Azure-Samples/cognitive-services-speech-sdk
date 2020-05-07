@@ -8,7 +8,6 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 * A Windows PC with Windows 10 Fall Creators Update (10.0; Build 16299) or later and with a working microphone.
 * [Microsoft Visual Studio 2017](https://www.visualstudio.com/), Community Edition or higher.
 * The **Universal Windows Platform development** workload in Visual Studio.
-* Note: processor target ARM or ARM64 is not yet supported.
 
   You can enable it in **Tools** \> **Get Tools and Features**.
 
