@@ -8,8 +8,6 @@
 #include "speechapi_c_conversation_translator.h"
 #include "jni_utils.h"
 
-const size_t maxCharCount = 1024;
-
 /*
  * Class:     com_microsoft_cognitiveservices_speech_transcription_Participant
  * Method:    createParticipantHandle

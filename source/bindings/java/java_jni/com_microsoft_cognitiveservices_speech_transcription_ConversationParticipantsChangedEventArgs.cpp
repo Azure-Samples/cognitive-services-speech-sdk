@@ -15,7 +15,6 @@
 JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_transcription_ConversationParticipantsChangedEventArgs_getParticipantAt
   (JNIEnv *env, jobject obj, jobject eventHandle, jint jindex, jobject participantHandle)
 {
-    int32_t offset = 0;
     SPXRESULTHANDLE participant = SPXHANDLE_INVALID;
     jlong handle = GetObjectHandle(env, eventHandle);
     SPXHR hr = conversation_translator_event_get_participant_changed_at_index((SPXEVENTHANDLE) handle, jindex, &participant);
