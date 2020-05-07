@@ -339,8 +339,8 @@ private:
     void SetUSPRetriesParams();
 private:
 
-    uint16_t m_numMaxRetries = 3;
-    uint16_t m_retryDurationMS = 10;
+    uint16_t m_numMaxRetries = 4;
+    uint16_t m_retryDurationMS = 250;
     uint32_t m_retriesDone = 0;
     std::shared_ptr<ISpxGenericSite> m_siteKeepAlive;
 

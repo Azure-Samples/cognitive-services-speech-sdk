@@ -329,8 +329,8 @@ void CSpxAudioStreamSession::InitFromStream(std::shared_ptr<ISpxAudioStream> str
 
 void CSpxAudioStreamSession::SetUSPRetriesParams()
 {
-    string numMaxRetriesString = GetStringValue("SPEECH-Error-MaxRetryCount", "3");
-    string retryDurationMSString = GetStringValue("SPEECH-Error-RetryDurationMS", "10");
+    string numMaxRetriesString = GetStringValue("SPEECH-Error-MaxRetryCount", "4");
+    string retryDurationMSString = GetStringValue("SPEECH-Error-RetryDurationMS", "250");
 
     try
     {
@@ -340,9 +340,9 @@ void CSpxAudioStreamSession::SetUSPRetriesParams()
     catch (const std::exception& e)
     {
         SPX_DBG_TRACE_VERBOSE("Error Parsing %s", e.what());
-        SPX_DBG_TRACE_VERBOSE("Setting default number of retries to 3 and retry duration to 10ms");
-        m_numMaxRetries = (uint16_t)3;
-        m_retryDurationMS = (uint16_t)10;
+        SPX_DBG_TRACE_VERBOSE("Setting default number of retries to 4 and retry duration to 250ms");
+        m_numMaxRetries = (uint16_t)4;
+        m_retryDurationMS = (uint16_t)250;
     }
 }
 
