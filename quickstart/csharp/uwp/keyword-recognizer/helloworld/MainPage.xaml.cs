@@ -1,4 +1,8 @@
-﻿using System;
+﻿//
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+//
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -81,7 +85,7 @@ namespace helloworld
         private async void RecognizeKeywordButton_Click(object sender, RoutedEventArgs e)
         {
             RecognizeKeywordButton.IsEnabled = false;
-            
+
             if (recognizer == null)
             {
                 recognizer= new KeywordRecognizer(AudioConfig.FromDefaultMicrophoneInput());
@@ -90,12 +94,12 @@ namespace helloworld
             {
                 await InitializeKeywordModel();
             }
-                
+
             NotifyUser("Say \"Computer\"", NotifyType.StatusMessage);
             result = await recognizer.RecognizeOnceAsync(model);
             NotifyUser("Got a keyword, now you can keep talking...", NotifyType.StatusMessage);
             SaveToFileButton.IsEnabled = true;
-            
+
         }
 
         private async void SaveToFileButton_Click(object sender, RoutedEventArgs e)
@@ -106,7 +110,7 @@ namespace helloworld
             SaveToFileButton.IsEnabled = false;
             var savePicker = new FileSavePicker();
             savePicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
-            savePicker.FileTypeChoices.Add("WAV File", new List<string>() { ".wav" });            
+            savePicker.FileTypeChoices.Add("WAV File", new List<string>() { ".wav" });
             savePicker.SuggestedFileName = "audio";
             var file = await savePicker.PickSaveFileAsync();
             if (file != null)
@@ -114,7 +118,7 @@ namespace helloworld
                 var tempFilePath = $"{ApplicationData.Current.TemporaryFolder.Path}\\audio.wav";
                 await stream.SaveToWaveFileAsync(tempFilePath);
                 var tempFile = await StorageFile.GetFileFromPathAsync(tempFilePath);
-                await tempFile.MoveAndReplaceAsync(file);                
+                await tempFile.MoveAndReplaceAsync(file);
             }
         }
 

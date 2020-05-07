@@ -8,14 +8,14 @@
 
   <Identity
     Name="63fcf322-b0b3-40e7-a235-0ba65ecb0f8e"
-    Publisher="CN=Gerardo"
+    Publisher="CN=speechsdksample"
     Version="1.0.0.0" />
 
   <mp:PhoneIdentity PhoneProductId="63fcf322-b0b3-40e7-a235-0ba65ecb0f8e" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
     <DisplayName>helloworld</DisplayName>
-    <PublisherDisplayName>Gerardo</PublisherDisplayName>
+    <PublisherDisplayName>speechsdksample</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
 
