@@ -11,7 +11,7 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 
 * A PC (Windows, Linux, Mac) capable to run Android Studio.
 * Version 3.1 of [Android Studio](https://developer.android.com/studio/).
-* An ARM-based Android device (API 23: Android 6.0 Marshmallow or higher) [enabled for development](https://developer.android.com/studio/debug/dev-options) with a working microphone.
+* Android device or emulator (API 23: Android 6.0 Marshmallow or higher) [enabled for development](https://developer.android.com/studio/debug/dev-options) with a working microphone.
 
 ## Build the sample
 
