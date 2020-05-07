@@ -30,7 +30,7 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 
 ## Note on Android permission handling
 
-Please note that the Speech SDK requires two permissions, i.e., the INTERNET as well as the RECORD_AUDIO permission. As for Android API levels up to 22, requesting the permissions is handled at installation time but from API level 23 users are able to grant/revoke permissions at any time.
+Please note that this Speech SDK sample requires the RECORD_AUDIO permissions. As for Android API levels up to 22, requesting the permissions is handled at installation time but from API level 23 users are able to grant/revoke permissions at any time.
 
 Note that this quickstart targets minSdkVersion 23.
 
