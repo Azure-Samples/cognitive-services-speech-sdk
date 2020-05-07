@@ -12,6 +12,8 @@ import com.microsoft.cognitiveservices.speech.util.SafeHandleType;
 import java.io.Closeable;
 import java.io.IOException;
 
+import com.microsoft.cognitiveservices.speech.PropertyCollection;
+import com.microsoft.cognitiveservices.speech.PropertyId;
 import com.microsoft.cognitiveservices.speech.SpeechConfig;
 
 /**
@@ -140,10 +142,38 @@ public final class AudioConfig implements Closeable {
         }
         this.inputStreamKeepAlive = null;
 
+        if (propertyHandle != null)
+        {
+            propertyHandle.close();
+            propertyHandle = null;
+        }
         if (this.audioConfigHandle != null) {
             this.audioConfigHandle.close();
             this.audioConfigHandle = null;
         }
+    }
+
+    /**
+     * Sets a named property as value.
+     * @param name the name of the property.
+     * @param value the value.
+     */
+    public void setProperty(String name, String value) {
+        Contracts.throwIfNullOrWhitespace(name, "name");
+        Contracts.throwIfNullOrWhitespace(value, "value");
+
+        propertyHandle.setProperty(name, value);
+    }
+
+    /**
+     * Sets the property by propertyId.
+     * @param id PropertyId of the property.
+     * @param value The value.
+     */
+    public void setProperty(PropertyId id, String value) {
+        Contracts.throwIfNullOrWhitespace(value, "value");
+
+        propertyHandle.setProperty(id, value);
     }
 
     AudioConfig(IntRef config) {
@@ -151,17 +181,19 @@ public final class AudioConfig implements Closeable {
         this.audioConfigHandle = new SafeHandle(config.getValue(), SafeHandleType.AudioConfig);
         this.inputStreamKeepAlive = null;
         this.outputStreamKeepAlive = null;
+
+        IntRef propHandle = new IntRef(0);
+        Contracts.throwIfFail(getPropertyBag(audioConfigHandle, propHandle));
+        this.propertyHandle = new PropertyCollection(propHandle);
     }
 
     AudioConfig(IntRef config, AudioInputStream audioStream) {
-        Contracts.throwIfNull(config, "config");
-        this.audioConfigHandle = new SafeHandle(config.getValue(), SafeHandleType.AudioConfig);
+        this(config);
         this.inputStreamKeepAlive = audioStream;
     }
 
     AudioConfig(IntRef config, AudioOutputStream audioStream) {
-        Contracts.throwIfNull(config, "config");
-        this.audioConfigHandle = new SafeHandle(config.getValue(), SafeHandleType.AudioConfig);
+        this(config);
         this.outputStreamKeepAlive = audioStream;
     }
 
@@ -181,6 +213,7 @@ public final class AudioConfig implements Closeable {
     private AudioInputStream inputStreamKeepAlive = null;
     private AudioOutputStream outputStreamKeepAlive = null;
     private boolean closeKeepAliveOnClose = false;
+    private PropertyCollection propertyHandle = null;
 
     private final static native long createAudioInputFromWavFileName(IntRef audioConfigHandle, String fileName);
     private final static native long createAudioInputFromDefaultMicrophone(IntRef configHandle);
@@ -189,5 +222,6 @@ public final class AudioConfig implements Closeable {
     private final static native long createAudioOutputFromDefaultSpeaker(IntRef configHandle);
     private final static native long createAudioOutputFromWavFileName(IntRef configHandle, String fileName);
     private final static native long createAudioOutputFromStream(IntRef configHandle, SafeHandle streamHandle);
+    private final native long getPropertyBag(SafeHandle configHandle, IntRef propHandle);
 
 }

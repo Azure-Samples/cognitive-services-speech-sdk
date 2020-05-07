@@ -99,8 +99,8 @@ public class ConversationTranslator implements Closeable {
                         Runnable runnable =
                                 new Runnable() {
                                     public void run() {
-                                        thisReco.joinConversation(
-                                                translatorHandle, thisConv.getImpl(), nickname);
+                                        Contracts.throwIfFail(thisReco.joinConversation(
+                                                translatorHandle, thisConv.getImpl(), nickname));
                                     }
                                 };
                         thisReco.doAsyncRecognitionAction(runnable);
@@ -128,8 +128,8 @@ public class ConversationTranslator implements Closeable {
                         Runnable runnable =
                                 new Runnable() {
                                     public void run() {
-                                        thisReco.joinConversationId(
-                                                translatorHandle, conversationId, nickname, language);
+                                        Contracts.throwIfFail(thisReco.joinConversationId(
+                                                translatorHandle, conversationId, nickname, language));
                                     }
                                 };
                         thisReco.doAsyncRecognitionAction(runnable);
@@ -152,7 +152,7 @@ public class ConversationTranslator implements Closeable {
                         Runnable runnable =
                                 new Runnable() {
                                     public void run() {
-                                        thisReco.leaveConversation(translatorHandle);
+                                        Contracts.throwIfFail(thisReco.leaveConversation(translatorHandle));
                                     }
                                 };
                         thisReco.doAsyncRecognitionAction(runnable);
@@ -177,7 +177,7 @@ public class ConversationTranslator implements Closeable {
                         Runnable runnable =
                                 new Runnable() {
                                     public void run() {
-                                        thisReco.sendText(translatorHandle, message);
+                                        Contracts.throwIfFail(thisReco.sendText(translatorHandle, message));
                                     }
                                 };
                         thisReco.doAsyncRecognitionAction(runnable);
@@ -201,7 +201,7 @@ public class ConversationTranslator implements Closeable {
                         Runnable runnable =
                                 new Runnable() {
                                     public void run() {
-                                        thisReco.startTranscribing(translatorHandle);
+                                        Contracts.throwIfFail(thisReco.startTranscribing(translatorHandle));
                                     }
                                 };
                         thisReco.doAsyncRecognitionAction(runnable);
@@ -224,7 +224,7 @@ public class ConversationTranslator implements Closeable {
                         Runnable runnable =
                                 new Runnable() {
                                     public void run() {
-                                        thisReco.stopTranscribing(translatorHandle);
+                                        Contracts.throwIfFail(thisReco.stopTranscribing(translatorHandle));
                                     }
                                 };
                         thisReco.doAsyncRecognitionAction(runnable);

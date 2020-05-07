@@ -72,7 +72,7 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_transcriptio
     const char* conversationId = GetStringUTFChars(env, conversationIdValue);
     const char* nickname = GetStringUTFChars(env, nameValue);
     const char* language = GetStringUTFChars(env, langValue);
-    SPXHR hr = conversation_translator_join_with_id((SPXCONVERSATIONHANDLE)convTransHandle, conversationId, nickname, language);
+    SPXHR hr = conversation_translator_join_with_id((SPXCONVERSATIONTRANSLATORHANDLE)convTransHandle, conversationId, nickname, language);
     ReleaseStringUTFChars(env, conversationIdValue, conversationId);
     ReleaseStringUTFChars(env, nameValue, nickname);
     ReleaseStringUTFChars(env, langValue, language);

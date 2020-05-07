@@ -16,6 +16,7 @@ import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.transcription.*;
 import com.microsoft.cognitiveservices.speech.transcription.Conversation;
 import com.microsoft.cognitiveservices.speech.translation.*;
+import com.microsoft.cognitiveservices.speech.PropertyId;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeoutException;
@@ -39,6 +40,134 @@ public class ConversationTranslatorTests {
     // -----------------------------------------------------------------------
     // ---
     // -----------------------------------------------------------------------
+
+    @Test
+    public void testJoinFailure() {
+        log("testJoinFailure()");
+        AudioConfig audioConfig = getAudioConfig();
+
+        //audioConfig.setProperty(PropertyId.Speech_LogFilename, "carbonlog.txt");
+
+        ConversationTranslator ct = new ConversationTranslator(audioConfig);
+        ConversationTranslatorHelper cth = ConversationTranslatorHelper.instance(ct);
+        int callbackCount = 0;
+
+        try {
+            ct.joinConversationAsync("_", "testJoinFailure", "en-US").get();
+
+            log("testJoinFailure no exception. ");
+            assertTrue("didn't get an exception when joining invalid room code", false);
+
+        } catch (InterruptedException ex) {
+            ex.printStackTrace();
+            assertTrue("interrupted exception " + ex.getMessage(), false);
+        } catch (ExecutionException ex) {
+            ex.printStackTrace();
+            //expecting a message like HTTP 400: {"error":{"code":400027,"message":"The room parameter is not valid."}}
+            assertTrue("unexpected execution exception " + ex.getMessage(), ex.getMessage().contains("400027"));
+        } finally {
+            ct.close();
+            audioConfig.close();
+        }
+        log("testJoinFailure complete. ");
+
+    }
+
+    @Test
+    public void testSendFailure() {
+        log("testSendFailure()");
+        AudioConfig audioConfig = getAudioConfig();
+
+        //audioConfig.setProperty(PropertyId.Speech_LogFilename, "carbonlog.txt");
+
+        ConversationTranslator ct = new ConversationTranslator(audioConfig);
+        ConversationTranslatorHelper cth = ConversationTranslatorHelper.instance(ct);
+        int callbackCount = 0;
+
+        try {
+            ct.sendTextMessageAsync("a message").get();
+
+            log("testSendFailure no exception. ");
+            assertTrue("didn't get an exception when sending message to uninitialized", false);
+
+        } catch (InterruptedException ex) {
+            ex.printStackTrace();
+            assertTrue("interrupted exception " + ex.getMessage(), false);
+        } catch (ExecutionException ex) {
+            //ex.printStackTrace();
+            //expecting a message like: Exception with an error code: 0x1 (SPXERR_UNINITIALIZED)
+            assertTrue("unexpected execution exception " + ex.getMessage(), ex.getMessage().contains("SPXERR_UNINITIALIZED"));
+        } finally {
+            ct.close();
+            audioConfig.close();
+        }
+        log("testSendFailure complete. ");
+
+    }
+
+    @Test
+    public void testStartTranscribeFailure() {
+        log("testStartTranscribeFailure()");
+        AudioConfig audioConfig = getAudioConfig();
+
+        //audioConfig.setProperty(PropertyId.Speech_LogFilename, "carbonlog.txt");
+
+        ConversationTranslator ct = new ConversationTranslator(audioConfig);
+        ConversationTranslatorHelper cth = ConversationTranslatorHelper.instance(ct);
+        int callbackCount = 0;
+
+        try {
+            ct.startTranscribingAsync().get();
+
+            log("testStartTranscribeFailure no exception. ");
+            assertTrue("didn't get an exception when starting transcribing uninitialized", false);
+
+        } catch (InterruptedException ex) {
+            ex.printStackTrace();
+            assertTrue("interrupted exception " + ex.getMessage(), false);
+        } catch (ExecutionException ex) {
+            //ex.printStackTrace();
+            //expecting a message like: Exception with an error code: 0x1 (SPXERR_UNINITIALIZED)
+            assertTrue("unexpected execution exception " + ex.getMessage(), ex.getMessage().contains("SPXERR_UNINITIALIZED"));
+        } finally {
+            ct.close();
+            audioConfig.close();
+        }
+        log("testStartTranscribeFailure complete. ");
+
+    }
+
+    @Test
+    public void testStopTranscribeFailure() {
+        log("testStopTranscribeFailure()");
+        AudioConfig audioConfig = getAudioConfig();
+
+        //audioConfig.setProperty(PropertyId.Speech_LogFilename, "carbonlog.txt");
+
+        ConversationTranslator ct = new ConversationTranslator(audioConfig);
+        ConversationTranslatorHelper cth = ConversationTranslatorHelper.instance(ct);
+        int callbackCount = 0;
+
+        try {
+            ct.stopTranscribingAsync().get();
+
+            log("testStopTranscribeFailure no exception. ");
+            assertTrue("didn't get an exception when stopping transcribing uninitialized", false);
+
+        } catch (InterruptedException ex) {
+            ex.printStackTrace();
+            assertTrue("interrupted exception " + ex.getMessage(), false);
+        } catch (ExecutionException ex) {
+            //ex.printStackTrace();
+            //expecting a message like: Exception with an error code: 0x1 (SPXERR_UNINITIALIZED)
+            assertTrue("unexpected execution exception " + ex.getMessage(), ex.getMessage().contains("SPXERR_UNINITIALIZED"));
+        } finally {
+            ct.close();
+            audioConfig.close();
+        }
+        log("testStopTranscribeFailure complete. ");
+
+    }
 
     @Test
     public void testCreateSendTextTranscribe()

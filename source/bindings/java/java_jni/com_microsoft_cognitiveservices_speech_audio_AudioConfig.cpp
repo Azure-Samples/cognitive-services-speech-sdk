@@ -133,3 +133,21 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_audio_AudioC
     }
     return (jlong)hr;
 }
+
+/*
+ * Class:     com_microsoft_cognitiveservices_speech_audio_AudioConfig
+ * Method:    getPropertyBag
+ * Signature: (Lcom/microsoft/cognitiveservices/speech/util/SafeHandle;Lcom/microsoft/cognitiveservices/speech/util/IntRef;)J
+ */
+JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_audio_AudioConfig_getPropertyBag
+  (JNIEnv *env, jobject obj, jobject confHandle, jobject propHandle)
+{
+    jlong configHandle = GetObjectHandle(env, confHandle);
+    SPXPROPERTYBAGHANDLE propertyHandle = SPXHANDLE_INVALID;
+    SPXHR hr = audio_config_get_property_bag((SPXSPEECHCONFIGHANDLE)configHandle, &propertyHandle);
+    if (SPX_SUCCEEDED(hr))
+    {
+        SetObjectHandle(env, propHandle, (jlong)propertyHandle);
+    }
+    return (jlong)hr;
+}

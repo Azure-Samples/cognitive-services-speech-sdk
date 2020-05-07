@@ -63,6 +63,14 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_audio_AudioC
 JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_audio_AudioConfig_createAudioOutputFromStream
   (JNIEnv *, jclass, jobject, jobject);
 
+/*
+ * Class:     com_microsoft_cognitiveservices_speech_audio_AudioConfig
+ * Method:    getPropertyBag
+ * Signature: (Lcom/microsoft/cognitiveservices/speech/util/SafeHandle;Lcom/microsoft/cognitiveservices/speech/util/IntRef;)J
+ */
+JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_audio_AudioConfig_getPropertyBag
+  (JNIEnv *, jobject, jobject, jobject);
+
 #ifdef __cplusplus
 }
 #endif
