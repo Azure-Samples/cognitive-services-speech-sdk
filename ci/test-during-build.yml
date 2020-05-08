@@ -36,7 +36,6 @@ steps:
       wrapMe=()
     fi
     "${wrapMe[@]}" ./ci/run-tests.sh \
-      --test-configuration ci/test-config.json \
       --build-dir build \
       --platform $(SPEECHSDK_TARGET_PLATFORM)-$(SPEECHSDK_BUILD_CONFIGURATION) \
       --test-set $(SPEECHSDK_TEST_SET) \

@@ -20,12 +20,6 @@ do
   key="$1"
 
   case $key in
-    --test-configuration)
-      [[ -r $2 ]] ||
-        exitWithError "Error: test configuration '%s' non-existing or not readable.\n" "$2"
-      options[${key:2}]="$2"
-      shift
-      ;;
     --build-dir)
       [[ -d $2 ]] ||
         exitWithError "Error: argument '%s' to %s is not a directory\n" "$2" "$key"
@@ -108,14 +102,6 @@ fi
 testsToRun=()
 for t in "${tests[@]}"; do
   isOneOf "$t" "${skips[@]}" || testsToRun+=("$t")
-done
-
-# Check for required options
-for k in test-configuration build-dir platform; do
-  [[ -n ${options[$k]} ]] || {
-    echo Error: missing --$k option.
-    exit 1
-  }
 done
 
 # Binary directory, with flavor appended for multi-config generators.

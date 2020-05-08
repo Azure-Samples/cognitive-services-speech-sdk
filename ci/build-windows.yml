@@ -254,17 +254,9 @@ jobs:
       extraTests:
         - bash: |
             ./ci/run-tests.sh \
-              --test-configuration ci/test-config.json \
               --build-dir build \
               --platform Windows-x64-Release \
               --timeout 120m \
-              -D luis-key=$(luis-westus-s0-201809-key1) \
-              -D speech-key=$(NorthEuropeKeySkyman) \
-              -D virtualassistant-region=$(DialogRegion) \
-              -D virtualassistant-subscription=$(DialogSubscriptionKey) \
-              -D virtualassistant-testbot=$(DialogFunctionalTestBot) \
-              -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
-              -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
               -D long-running=true \
               -- csharp_unit_tests
           displayName: Run LongRunning tests

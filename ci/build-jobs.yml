@@ -272,12 +272,9 @@ jobs:
   - bash: |
       # --build-dir is used as a drop directory here
       ./ci/run-tests.sh \
-        --test-configuration ci/test-config-compeval.json \
         --build-dir "$(cygpath -au "$(Build.ArtifactStagingDirectory)")"/In \
         --platform Windows-x64-Release \
         --timeout 400m \
-        -D compeval-key="$(NorthEuropeKeySkyman)" \
-        -D input_dir=CompEvalRun \
         -D output_dir=CompEvalRun -- compeval_tests
     displayName: 'Transcription'
 
@@ -526,15 +523,6 @@ jobs:
         displayName: Write Subscriptions Regions Data
       - bash: |
           set -e
-          eval $(perl ci/evaluate-test-config.pl --verbose --format bash-variable --input ci/test-config.json \
-            -D luis-key=$(luis-westus-s0-201809-key1) \
-            -D speech-key=$(NorthEuropeKeySkyman) \
-            -D virtualassistant-region=$(DialogRegion) \
-            -D virtualassistant-subscription=$(DialogSubscriptionKey) \
-            -D virtualassistant-testbot=$(DialogFunctionalTestBot) \
-            -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
-            -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
-            -D long-running=false)
           . ci/functions.sh
           testJarFile="$(Build.ArtifactStagingDirectory)/In/macOS/Release/private/bin/com.microsoft.cognitiveservices.speech.tests.jar"
           [[ -f ${testJarFile} ]]
@@ -1594,15 +1582,6 @@ jobs:
       imageBase: dev_ubuntu1604_x64
       outvarImage: DOCKER_IMAGES
   - bash: |
-      eval $(perl ci/evaluate-test-config.pl --verbose --format bash-environment --input ci/test-config.json \
-        -D luis-key=$(luis-westus-s0-201809-key1) \
-        -D speech-key=$(NorthEuropeKeySkyman) \
-        -D virtualassistant-region=$(DialogRegion) \
-        -D virtualassistant-subscription=$(DialogSubscriptionKey) \
-        -D virtualassistant-testbot=$(DialogFunctionalTestBot) \
-        -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
-        -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
-        -D long-running=false)
       ./ci/build/proxy-test.sh $(System.ArtifactsDirectory)
     continueOnError: ${{ parameters.continueOnTestFailure }}
     displayName: Run the proxy test
@@ -1676,15 +1655,6 @@ jobs:
     displayName: Patch Java quickstart
     continueOnError: ${{ parameters.continueOnTestFailure }}
   - bash: |
-      eval $(perl ci/evaluate-test-config.pl --verbose --format bash-environment --input ci/test-config.json \
-        -D luis-key=$(luis-westus-s0-201809-key1) \
-        -D speech-key=$(NorthEuropeKeySkyman) \
-        -D virtualassistant-region=$(DialogRegion) \
-        -D virtualassistant-subscription=$(DialogSubscriptionKey) \
-        -D virtualassistant-testbot=$(DialogFunctionalTestBot) \
-        -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
-        -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
-        -D long-running=false)
       ./ci/build/osx-proxy-test.sh $(System.ArtifactsDirectory) $(PathToJar)
     displayName: Run proxy tests
     continueOnError: ${{ parameters.continueOnTestFailure }}
@@ -1899,7 +1869,6 @@ jobs:
         # Run unit tests (skip non-Ubuntu 16.04 in dev builds)
         #[[ $SPEECHSDK_BUILD_TYPE = dev && $i != *_ubuntu1604_* ]] ||
         #  docker run --rm --env LD_LIBRARY_PATH=/csspeech/buildfromdrop$architecture/bin --workdir /csspeech --volume "$PWD:/csspeech" "$i" ./ci/run-tests.sh \
-        #    --test-configuration ci/test-config.json \
         #    --build-dir buildfromdrop$architecture \
         #    --platform Linux-$architecture-Release \
         #    -D long-running=false -- cxx_core_tests cxx_api_tests ||
@@ -1911,7 +1880,6 @@ jobs:
         docker run --rm --env LD_LIBRARY_PATH=/csspeech/buildfromdrop$architecture/bin --workdir /csspeech --volume "$PWD:/csspeech" "$i" bash - <<"HERE_DOC"
           set -e -o pipefail
           ./ci/run-tests.sh \
-              --test-configuration ci/test-config.json \
               --build-dir buildfromdrop$architecture \
               --platform Linux-$architecture-Release \
               -D long-running=false -- cxx_core_tests cxx_api_tests ||
@@ -2159,15 +2127,6 @@ jobs:
   - bash: |
       set -e -o pipefail -x
       mkdir -p "$(OutputDirectory)/logs"
-      eval $(perl ci/evaluate-test-config.pl --verbose --format bash-environment --input ci/test-config.json \
-        -D luis-key=$(luis-westus-s0-201809-key1) \
-        -D speech-key=$(NorthEuropeKeySkyman) \
-        -D virtualassistant-region=$(DialogRegion) \
-        -D virtualassistant-subscription=$(DialogSubscriptionKey) \
-        -D virtualassistant-testbot=$(DialogFunctionalTestBot) \
-        -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
-        -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
-        -D long-running=false)
       # run the tests
       ci/apple/multiplatformtests.sh tests/functional/objective-c/ios/SpeechSDK_iOS.xcodeproj \
         SpeechSDK_iOS SpeechSDK_iOS $(OutputDirectory)/logs unittests $(microsoftDevTeamId)
@@ -2191,15 +2150,6 @@ jobs:
       # set up framework in the correct position - the Xcode project expects the framework here
       ln -s '$(Build.Repository.LocalPath)/xcode-build-output/$(FrameworkName).framework' public_samples/quickstart/objectivec/ios/from-microphone
       # fix the keys
-      eval $(perl ci/evaluate-test-config.pl --verbose --format bash-environment --input ci/test-config.json \
-        -D luis-key=$(luis-westus-s0-201809-key1) \
-        -D speech-key=$(NorthEuropeKeySkyman) \
-        -D virtualassistant-region=$(DialogRegion) \
-        -D virtualassistant-subscription=$(DialogSubscriptionKey) \
-        -D virtualassistant-testbot=$(DialogFunctionalTestBot) \
-        -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
-        -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
-        -D long-running=false)
       cp ./ci/jsonsettings.py .
       patchSample public_samples/quickstart/objectivec/ios/from-microphone/helloworld/helloworld
       # run the tests
@@ -2216,16 +2166,7 @@ jobs:
       sed -i '' "s/'~> 1.[[:digit:]]'/path: \"{{{PODSPEC_PATH}}}\"/" ${PROJECT_DIR}/Podfile
       ci/apple/prepare-pods-for-swift-test.sh ${PROJECT_DIR} "$(Build.Repository.LocalPath)/xcode-build-output"
       # fix the keys
-      eval $(perl ci/evaluate-test-config.pl --verbose --format bash-environment --input ci/test-config.json \
-        -D luis-key=$(luis-westus-s0-201809-key1) \
-        -D speech-key=$(NorthEuropeKeySkyman) \
-        -D virtualassistant-region=$(DialogRegion) \
-        -D virtualassistant-subscription=$(DialogSubscriptionKey) \
-        -D virtualassistant-testbot=$(DialogFunctionalTestBot) \
-        -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
-        -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
-        -D long-running=false)
-        cp ./ci/jsonsettings.py .
+      cp ./ci/jsonsettings.py .
       patchSample public_samples/quickstart/objectivec/ios/text-to-speech/helloworld/helloworld
       # run the tests
       ci/apple/multiplatformtests.sh public_samples/quickstart/objectivec/ios/text-to-speech/helloworld/helloworld.xcworkspace \
@@ -2240,15 +2181,6 @@ jobs:
       # set up framework in the correct position - the Xcode project expects the framework here
       ln -s '$(Build.Repository.LocalPath)/xcode-build-output/$(FrameworkName).framework' public_samples/samples/objective-c/ios/
       # fix the keys
-      eval $(perl ci/evaluate-test-config.pl --verbose --format bash-environment --input ci/test-config.json \
-        -D luis-key=$(luis-westus-s0-201809-key1) \
-        -D speech-key=$(NorthEuropeKeySkyman) \
-        -D virtualassistant-region=$(DialogRegion) \
-        -D virtualassistant-subscription=$(DialogSubscriptionKey) \
-        -D virtualassistant-testbot=$(DialogFunctionalTestBot) \
-        -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
-        -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
-        -D long-running=false)
       cp ./ci/jsonsettings.py .
       patchSample public_samples/samples/objective-c/ios/speech-samples/speech-samples
       # run the tests
@@ -2262,15 +2194,6 @@ jobs:
       mkdir -p "$(OutputDirectory)/logs"
       . ci/functions.sh
       # fix the keys
-      eval $(perl ci/evaluate-test-config.pl --verbose --format bash-environment --input ci/test-config.json \
-        -D luis-key=$(luis-westus-s0-201809-key1) \
-        -D speech-key=$(NorthEuropeKeySkyman) \
-        -D virtualassistant-region=$(DialogRegion) \
-        -D virtualassistant-subscription=$(DialogSubscriptionKey) \
-        -D virtualassistant-testbot=$(DialogFunctionalTestBot) \
-        -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
-        -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
-        -D long-running=false)
       cp ./ci/jsonsettings.py .
       patchSample public_samples/samples/objective-c/ios/synthesis-samples/synthesis-samples
       # run the tests
