@@ -5,6 +5,7 @@
 // guid_utils.cpp: Utility classes/functions dealing with GUIDs
 //
 #include <cctype>
+#include <mutex>
 
 #define _CRT_SECURE_NO_WARNINGS
 #include "stdafx.h"
@@ -21,6 +22,8 @@
 namespace PAL
 {
     namespace PAL = Microsoft::CognititveServices::Speech::PAL;
+
+    std::mutex s_lock;
 
     std::wstring CreateGuidWithoutDashes()
     {
@@ -52,6 +55,8 @@ namespace PAL
         // Only for roobo make this stable for device.
         static std::string uuidStr(UUID_LENGTH, char{ 0 });
         static int uuidStrValid = 0;
+
+        std::lock_guard<std::mutex> lock{ s_lock };
 
         if (!uuidStrValid)
         {
