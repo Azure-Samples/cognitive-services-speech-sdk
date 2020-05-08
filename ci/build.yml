@@ -135,7 +135,7 @@ jobs:
 
 - template: build-jobs.yml
   parameters:
-    # Note: these template expressions match the expressions for build types in set-variables.sh
+    #Note: these template expressions match the expressions for build types in set-variables.sh
     ${{ if and(eq(variables['System.CollectionId'], '19422243-19b9-4d85-9ca6-bc961861d287'), eq(variables['System.DefinitionId'], '4833'), and(or(eq(variables['Build.Reason'], 'Schedule'), eq(variables['Build.Reason'], 'Manual')), eq(variables['Build.SourceBranch'], 'refs/heads/master'))) }}:
       buildType: int
       continueOnTestFailure: true

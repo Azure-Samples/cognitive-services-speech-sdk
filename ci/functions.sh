@@ -193,7 +193,7 @@ function patchSample() {
     "$( getSetting './tests/test.defaults.json' 'InputDir' )/audio/whatstheweatherlike.wav" \
     $( getSetting './tests/test.subscriptions.regions.json' 'UnifiedSpeechSubscription.Key' ) \
     $( getSetting './tests/test.subscriptions.regions.json' 'UnifiedSpeechSubscription.Region' ) \
-    $( getSetting './tests/test.defaults.json' 'InRoomAudioEndpoint' ) \
+    $( getSetting './tests/test.defaults.json' 'DeploymentId' ) \
     $( getSetting './tests/test.subscriptions.regions.json' 'LanguageUnderstandingSubscription.Key' ) \
     $( getSetting './tests/test.subscriptions.regions.json' 'LanguageUnderstandingSubscription.Region' ) \
     $( getSetting './tests/test.defaults.json' 'LanguageUnderstandingHomeAutomationAppId' ) \

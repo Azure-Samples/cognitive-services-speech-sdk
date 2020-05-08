@@ -116,7 +116,6 @@ if $IN_VSTS; then
 
   if $SPEECHSDK_MAIN_BUILD; then
     # Non-draft build definition
-
     if [[ $BUILD_SOURCEBRANCH == refs/heads/release/* ]]; then
       SPEECHSDK_BUILD_TYPE=prod
     elif [[ $BUILD_SOURCEBRANCH == refs/heads/master && ( $BUILD_REASON == Schedule || $BUILD_REASON == Manual ) ]]; then

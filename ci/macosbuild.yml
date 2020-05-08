@@ -163,7 +163,7 @@ jobs:
       unzip -o "${archive}"
       # simple signing check, this will fail if not signed
       shopt -s extglob
-      ls build/**/libMicrosoft!(*unstripped).{dylib} | xargs -n1 codesign --display --verbose=4
+      ls build/**/libMicrosoft!(*unstripped).dylib | xargs -n1 codesign --display --verbose=4
     displayName: "Unpack archive with signed dylib"
     condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
   - template: test-during-build.yml

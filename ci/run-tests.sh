@@ -80,6 +80,17 @@ do
   shift # past argument or value
 done
 
+LONG_RUNNING_FLAG="long-running"
+for define_key in "${defines[@]}"; do
+  if [[ "$define_key" == *"$LONG_RUNNING_FLAG"* ]] ; then
+    SPEECHSDK_LONG_RUNNING=${define_key:13}
+  fi
+done
+
+if [[ "$SPEECHSDK_LONG_RUNNING" != "true" ]] ; then
+  LONG_RUNNING_FLAG=""
+fi
+
 verbose_switch=
 [[ -z ${options[verbose]} ]] ||
   verbose_switch=--verbose
@@ -156,9 +167,9 @@ for testfile in "${testsToRun[@]}"; do
   T="$(basename "$testfile" .sh)"
   echo Starting $T with timeout ${options[timeout]}
   START_SECONDS=$(get_time)
-  consolelogfilename=consolelog-$T-${options[platform]}.txt
+  consolelogfilename=consolelog-$LONG_RUNNING_FLAG-$T-${options[platform]}.txt
   $cmdTimeout -k 5s "${options[timeout]}" ${callStdbuf[@]} \
-  "$testfile" "${options[build-dir]}" "${options[platform]}" "$binaryDir" "${options[test-set]}" &> ./vstsconsolelog/$consolelogfilename &
+  "$testfile" "${options[build-dir]}" "${options[platform]}" "$binaryDir" "${options[test-set]}" $SPEECHSDK_LONG_RUNNING &> ./vstsconsolelog/$consolelogfilename &
   pid=$!
   pid_test_map[$pid]=$T
   pid_log_map[$pid]=$consolelogfilename

@@ -12,7 +12,7 @@
   [string]$OutputDir     # location where the extracted and pruned jar subtree out of the source file will reside
 )
 $ErrorActionPreference = 'Stop'
-$Hierarchy = "com\microsoft\cognitiveservices\speech\internal"
+$Hierarchy = "com\microsoft\cognitiveservices\speech"
 
 # we need an empty OutputDir
 Remove-Item $OutputDir -Recurse -Force -ErrorAction SilentlyContinue | Out-Null

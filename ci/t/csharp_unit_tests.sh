@@ -3,6 +3,7 @@ T="$(basename "$0" .sh)"
 BUILD_DIR="$1"
 PLATFORM="$2"
 BINARY_DIR="$3"
+SPEECHSDK_LONG_RUNNING="$5"
 
 SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
 
@@ -51,7 +52,7 @@ fi
 
 if [[ $SPEECHSDK_LONG_RUNNING = true ]]; then
   TEST_CASE_FILTER="TestCategory=LongTest&TestCategory!=CompressedStreamTest${OFFLINE_UNIDEC_FILTER}"
-  ACTUAL_LOG_FILE_NAME=test-$T-$PLATFORM-long-running.trx
+  ACTUAL_LOG_FILE_NAME=test-$T-$PLATFORM-$RANDOM-long-running.trx
   LOG_FILE_NAME=LogFileName=$ACTUAL_LOG_FILE_NAME
 else
   TEST_CASE_FILTER="TestCategory!=LongTest&TestCategory!=CompressedStreamTest${OFFLINE_UNIDEC_FILTER}"

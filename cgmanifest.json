@@ -219,7 +219,7 @@
     // Usage: Downloaded by maven during build time
     {
       "component": {
-        "type": "git",
+        "type": "other",
         "other": {
           "name": "azure-core-1.0.0.jar",
           "version": "1.0",
