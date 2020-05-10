@@ -33,7 +33,14 @@ TEST_CASE("text independent verification enrollment", "[api][cxx][speaker_id][en
 
     auto profile = client->CreateProfileAsync(VoiceProfileType::TextIndependentVerification, "en-us").get();
     SPXTEST_REQUIRE(!profile->GetId().empty());
-
+    // always delete the profile even when there are exceptions in following code. The lambda is called at when exits this test case.
+    auto finish = std::shared_ptr<void>(nullptr, [&](void*) {
+        if (!profile->GetId().empty())
+        {
+            auto deleteResult = client->DeleteProfileAsync(profile).get();
+            SPXTEST_REQUIRE(deleteResult->Reason == ResultReason::DeletedVoiceProfile);
+        }
+        });
     auto audioInput = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(MULTIPLE_UTTERANCE_CHINESE));
     auto result = client->EnrollProfileAsync(profile, audioInput).get();
     auto json_string = result->Properties.GetProperty(PropertyId::SpeechServiceResponse_JsonResult);
@@ -56,7 +63,14 @@ TEST_CASE("text independent identication enrollment", "[api][cxx][speaker_id][en
 
     auto profile = client->CreateProfileAsync(VoiceProfileType::TextIndependentIdentification, "en-us").get();
     SPXTEST_REQUIRE(!profile->GetId().empty());
-
+    // always delete the profile even when there are exceptions in following code. The lambda is called at when exits this test case.
+    auto finish = std::shared_ptr<void>(nullptr, [&](void*) {
+        if (!profile->GetId().empty())
+        {
+            auto deleteResult = client->DeleteProfileAsync(profile).get();
+            SPXTEST_REQUIRE(deleteResult->Reason == ResultReason::DeletedVoiceProfile);
+        }
+        });
     //auto audioInput = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
     auto audioInput = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(MULTIPLE_UTTERANCE_CHINESE));
     auto result = client->EnrollProfileAsync(profile, audioInput).get();
@@ -70,7 +84,7 @@ TEST_CASE("text independent identication enrollment", "[api][cxx][speaker_id][en
     INFO(length);
     SPXTEST_REQUIRE(result->Reason == ResultReason::EnrolledVoiceProfile);
     INFO(DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT]);
-    INFO(SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
+    INFO(SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);    
 }
 
 TEST_CASE("text dependent verification enrollment bad request", "[api][cxx][speaker_id][enrollment_td_verfication_bad_request]")
@@ -82,7 +96,14 @@ TEST_CASE("text dependent verification enrollment bad request", "[api][cxx][spea
 
     auto profile = client->CreateProfileAsync(VoiceProfileType::TextDependentVerification, "en-us").get();
     SPXTEST_REQUIRE(!profile->GetId().empty());
-
+    // always delete the profile even when there are exceptions in following code.
+    auto finish = std::shared_ptr<void>(nullptr, [&](void*) {
+        if (!profile->GetId().empty())
+        {
+            auto deleteResult = client->DeleteProfileAsync(profile).get();
+            SPXTEST_REQUIRE(deleteResult->Reason == ResultReason::DeletedVoiceProfile);
+        }
+        });
     auto audioInput = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(MULTIPLE_UTTERANCE_CHINESE));
     auto result = client->EnrollProfileAsync(profile, audioInput).get();
     INFO(result->ProfileId);
@@ -107,7 +128,14 @@ TEST_CASE("reset voice profile text dependent verification", "[api][cxx][speaker
 
     auto profile = client->CreateProfileAsync(VoiceProfileType::TextDependentVerification, "en-us").get();
     SPXTEST_REQUIRE(!profile->GetId().empty());
-
+    // always delete the profile even when there are exceptions in following code.
+    auto finish = std::shared_ptr<void>(nullptr, [&](void*) {
+        if (!profile->GetId().empty())
+        {
+            auto deleteResult = client->DeleteProfileAsync(profile).get();
+            SPXTEST_REQUIRE(deleteResult->Reason == ResultReason::DeletedVoiceProfile);
+        }
+        });
     auto result = client->ResetProfileAsync(profile).get();
     SPXTEST_REQUIRE(result->Reason == ResultReason::ResetVoiceProfile);
     INFO(DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT]);
@@ -123,7 +151,14 @@ TEST_CASE("reset voice profile text independent verification", "[api][cxx][speak
 
     auto profile = client->CreateProfileAsync(VoiceProfileType::TextIndependentVerification, "en-us").get();
     SPXTEST_REQUIRE(!profile->GetId().empty());
-
+    // always delete the profile even when there are exceptions in following code.
+    auto finish = std::shared_ptr<void>(nullptr, [&](void*) {
+        if (!profile->GetId().empty())
+        {
+            auto deleteResult = client->DeleteProfileAsync(profile).get();
+            SPXTEST_REQUIRE(deleteResult->Reason == ResultReason::DeletedVoiceProfile);
+        }
+        });
     auto result = client->ResetProfileAsync(profile).get();
     SPXTEST_REQUIRE(result->Reason == ResultReason::ResetVoiceProfile);
     //note: when reset is successful, the content buffer in the response is empty. So, SpeechServiceResponse_JsonResult is empty.
@@ -199,6 +234,14 @@ TEST_CASE("speaker verification", "[api][cxx][speaker_id][verification]")
     auto client = VoiceProfileClient::FromConfig(config);
     auto profile = client->CreateProfileAsync(VoiceProfileType::TextIndependentVerification, "en-us").get();
     SPXTEST_REQUIRE(!profile->GetId().empty());
+    // always delete the profile even when there are exceptions in following code.
+    auto finish = std::shared_ptr<void>(nullptr, [&](void*) {
+        if (!profile->GetId().empty())
+        {
+            auto deleteResult = client->DeleteProfileAsync(profile).get();
+            SPXTEST_REQUIRE(deleteResult->Reason == ResultReason::DeletedVoiceProfile);
+        }
+        });
     auto enrollResult = client->EnrollProfileAsync(profile, audioInput).get();
     SPXTEST_REQUIRE(enrollResult->Reason == ResultReason::EnrolledVoiceProfile);
     auto model = SpeakerVerificationModel::FromProfile(profile);
@@ -231,11 +274,27 @@ TEST_CASE("speaker identification", "[api][cxx][speaker_id][identification]")
     auto client = VoiceProfileClient::FromConfig(config);
     auto profile1 = client->CreateProfileAsync(VoiceProfileType::TextIndependentIdentification, "en-us").get();
     SPXTEST_REQUIRE(!profile1->GetId().empty());
+    // always delete the profile even when there are exceptions in following code.
+    auto finish1 = std::shared_ptr<void>(nullptr, [&](void*) {
+        if (!profile1->GetId().empty())
+        {
+            auto deleteResult = client->DeleteProfileAsync(profile1).get();
+            SPXTEST_REQUIRE(deleteResult->Reason == ResultReason::DeletedVoiceProfile);
+        }
+        });
     auto enrollResult = client->EnrollProfileAsync(profile1, audioInput).get();
     SPXTEST_REQUIRE(enrollResult->Reason == ResultReason::EnrolledVoiceProfile);
 
     auto profile2 = client->CreateProfileAsync(VoiceProfileType::TextIndependentIdentification, "en-us").get();
     SPXTEST_REQUIRE(!profile2->GetId().empty());
+    // always delete the profile even when there are exceptions in following code.
+    auto finish2 = std::shared_ptr<void>(nullptr, [&](void*) {
+        if (!profile2->GetId().empty())
+        {
+            auto deleteResult = client->DeleteProfileAsync(profile2).get();
+            SPXTEST_REQUIRE(deleteResult->Reason == ResultReason::DeletedVoiceProfile);
+        }
+        });
     auto enrollResult2 = client->EnrollProfileAsync(profile2, audioInput).get();
     SPXTEST_REQUIRE(enrollResult2->Reason == ResultReason::EnrolledVoiceProfile);
 

@@ -98,17 +98,24 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var client = new VoiceProfileClient(config))
             using (var profile = await client.CreateProfileAsync(VoiceProfileType.TextIndependentVerification, "en-us"))
             {
-                SPXTEST_REQUIRE(!String.IsNullOrEmpty(profile.Id));
-
-                using (var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.MULTIPLE_UTTERANCE_CHINESE].FilePath.GetRootRelativePath()))
+                try
                 {
-                    var result = await client.EnrollProfileAsync(profile, audioInput);
-                    var json_string = result.Properties.GetProperty(PropertyId.SpeechServiceResponse_JsonResult);
-                    SPXTEST_REQUIRE(!String.IsNullOrEmpty(json_string));
-                    SPXTEST_REQUIRE(result.ProfileId == profile.Id);
-                    SPXTEST_REQUIRE(result.EnrollmentsCount == 1);
-                    SPXTEST_REQUIRE(result.EnrollmentsSpeechLength >= new TimeSpan((long)239200000));
-                    SPXTEST_REQUIRE(result.Reason == ResultReason.EnrolledVoiceProfile);
+                    SPXTEST_REQUIRE(!String.IsNullOrEmpty(profile.Id));
+
+                    using (var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.MULTIPLE_UTTERANCE_CHINESE].FilePath.GetRootRelativePath()))
+                    {
+                        var result = await client.EnrollProfileAsync(profile, audioInput);
+                        var json_string = result.Properties.GetProperty(PropertyId.SpeechServiceResponse_JsonResult);
+                        SPXTEST_REQUIRE(!String.IsNullOrEmpty(json_string));
+                        SPXTEST_REQUIRE(result.ProfileId == profile.Id);
+                        SPXTEST_REQUIRE(result.EnrollmentsCount == 1);
+                        SPXTEST_REQUIRE(result.EnrollmentsSpeechLength >= new TimeSpan((long)239200000));
+                        SPXTEST_REQUIRE(result.Reason == ResultReason.EnrolledVoiceProfile);
+                    }
+                }
+                finally
+                {
+                    await client.DeleteProfileAsync(profile);
                 }
             }
 
@@ -121,18 +128,25 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var client = new VoiceProfileClient(config))
             using (var profile = await client.CreateProfileAsync(VoiceProfileType.TextIndependentVerification, "en-us"))
             {
-                SPXTEST_REQUIRE(!String.IsNullOrEmpty(profile.Id));
-
-                using (var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.MULTIPLE_UTTERANCE_CHINESE].FilePath.GetRootRelativePath()))
+                try
                 {
-                    var result = await client.EnrollProfileAsync(profile, audioInput);
-                    var json_string = result.Properties.GetProperty(PropertyId.SpeechServiceResponse_JsonResult);
-                    SPXTEST_REQUIRE(!String.IsNullOrEmpty(json_string));
-                    SPXTEST_REQUIRE(result.ProfileId == profile.Id);
-                    SPXTEST_REQUIRE(result.EnrollmentsCount == 1);
-                    SPXTEST_REQUIRE(result.EnrollmentsSpeechLength >= new TimeSpan((long)239200000));
-                    SPXTEST_REQUIRE(result.RemainingEnrollmentsCount == 5);
-                    SPXTEST_REQUIRE(result.Reason == ResultReason.EnrolledVoiceProfile);
+                    SPXTEST_REQUIRE(!String.IsNullOrEmpty(profile.Id));
+
+                    using (var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.MULTIPLE_UTTERANCE_CHINESE].FilePath.GetRootRelativePath()))
+                    {
+                        var result = await client.EnrollProfileAsync(profile, audioInput);
+                        var json_string = result.Properties.GetProperty(PropertyId.SpeechServiceResponse_JsonResult);
+                        SPXTEST_REQUIRE(!String.IsNullOrEmpty(json_string));
+                        SPXTEST_REQUIRE(result.ProfileId == profile.Id);
+                        SPXTEST_REQUIRE(result.EnrollmentsCount == 1);
+                        SPXTEST_REQUIRE(result.EnrollmentsSpeechLength >= new TimeSpan((long)239200000));
+                        SPXTEST_REQUIRE(result.RemainingEnrollmentsCount == 5);
+                        SPXTEST_REQUIRE(result.Reason == ResultReason.EnrolledVoiceProfile);
+                    }
+                }
+                finally
+                {
+                    await client.DeleteProfileAsync(profile);
                 }
             }
         }
@@ -144,17 +158,24 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var client = new VoiceProfileClient(config))
             using (var profile = await client.CreateProfileAsync(VoiceProfileType.TextDependentVerification, "en-us"))
             {
-                SPXTEST_REQUIRE(!String.IsNullOrEmpty(profile.Id));
-
-                using (var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.MULTIPLE_UTTERANCE_CHINESE].FilePath.GetRootRelativePath()))
+                try
                 {
-                    var result = await client.EnrollProfileAsync(profile, audioInput);
-                    var json_string = result.Properties.GetProperty(PropertyId.SpeechServiceResponse_JsonResult);
-                    SPXTEST_REQUIRE(!String.IsNullOrEmpty(json_string));
-                    SPXTEST_REQUIRE(result.Reason == ResultReason.Canceled);
-                    var details = VoiceProfileEnrollmentCancellationDetails.FromResult(result);
-                    SPXTEST_REQUIRE(details.ErrorCode == CancellationErrorCode.BadRequest);
-                    SPXTEST_REQUIRE(details.Reason == CancellationReason.Error);
+                    SPXTEST_REQUIRE(!String.IsNullOrEmpty(profile.Id));
+
+                    using (var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.MULTIPLE_UTTERANCE_CHINESE].FilePath.GetRootRelativePath()))
+                    {
+                        var result = await client.EnrollProfileAsync(profile, audioInput);
+                        var json_string = result.Properties.GetProperty(PropertyId.SpeechServiceResponse_JsonResult);
+                        SPXTEST_REQUIRE(!String.IsNullOrEmpty(json_string));
+                        SPXTEST_REQUIRE(result.Reason == ResultReason.Canceled);
+                        var details = VoiceProfileEnrollmentCancellationDetails.FromResult(result);
+                        SPXTEST_REQUIRE(details.ErrorCode == CancellationErrorCode.BadRequest);
+                        SPXTEST_REQUIRE(details.Reason == CancellationReason.Error);
+                    }
+                }
+                finally
+                {
+                    await client.DeleteProfileAsync(profile);
                 }
             }
         }
@@ -166,12 +187,19 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var client = new VoiceProfileClient(config))
             using (var profile = await client.CreateProfileAsync(VoiceProfileType.TextDependentVerification, "en-us"))
             {
-                var result = await client.ResetProfileAsync(profile);
-                SPXTEST_REQUIRE(result.Reason == ResultReason.ResetVoiceProfile);
+                try
+                {
+                    var result = await client.ResetProfileAsync(profile);
+                    SPXTEST_REQUIRE(result.Reason == ResultReason.ResetVoiceProfile);
 
-                var details = VoiceProfileCancellationDetails.FromResult(result);
-                SPXTEST_REQUIRE(details.ErrorCode == CancellationErrorCode.NoError);
-            }
+                    var details = VoiceProfileCancellationDetails.FromResult(result);
+                    SPXTEST_REQUIRE(details.ErrorCode == CancellationErrorCode.NoError);
+                }
+                finally
+                {
+                    await client.DeleteProfileAsync(profile);
+                }
+        }
         }
 
         [TestMethod]
@@ -181,11 +209,18 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var client = new VoiceProfileClient(config))
             using (var profile = await client.CreateProfileAsync(VoiceProfileType.TextIndependentVerification, "en-us"))
             {
-                var result = await client.ResetProfileAsync(profile);
-                SPXTEST_REQUIRE(result.Reason == ResultReason.ResetVoiceProfile);
-                SPXTEST_REQUIRE(String.IsNullOrEmpty(result.Properties.GetProperty(PropertyId.SpeechServiceResponse_JsonResult)));
-                var details = VoiceProfileCancellationDetails.FromResult(result);
-                SPXTEST_REQUIRE(details.ErrorCode == CancellationErrorCode.NoError);
+                try
+                {
+                    var result = await client.ResetProfileAsync(profile);
+                    SPXTEST_REQUIRE(result.Reason == ResultReason.ResetVoiceProfile);
+                    SPXTEST_REQUIRE(String.IsNullOrEmpty(result.Properties.GetProperty(PropertyId.SpeechServiceResponse_JsonResult)));
+                    var details = VoiceProfileCancellationDetails.FromResult(result);
+                    SPXTEST_REQUIRE(details.ErrorCode == CancellationErrorCode.NoError);
+                }
+                finally
+                {
+                    await client.DeleteProfileAsync(profile);
+                }
             }
         }
 
@@ -196,16 +231,23 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var client = new VoiceProfileClient(config))
             using (var profile = await client.CreateProfileAsync(VoiceProfileType.TextIndependentIdentification, "en-us"))
             {
-                var result = await client.ResetProfileAsync(profile);
-                SPXTEST_REQUIRE(result.Reason == ResultReason.ResetVoiceProfile);
+                try
+                {
+                    var result = await client.ResetProfileAsync(profile);
+                    SPXTEST_REQUIRE(result.Reason == ResultReason.ResetVoiceProfile);
 
-                result = await client.DeleteProfileAsync(profile);
-                SPXTEST_REQUIRE(result.Reason == ResultReason.DeletedVoiceProfile);
+                    result = await client.DeleteProfileAsync(profile);
+                    SPXTEST_REQUIRE(result.Reason == ResultReason.DeletedVoiceProfile);
 
-                result = await client.DeleteProfileAsync(profile);
-                SPXTEST_REQUIRE(result.Reason == ResultReason.Canceled);
-                var details = VoiceProfileCancellationDetails.FromResult(result);
-                SPXTEST_REQUIRE(details.ErrorDetails.Contains("profile doesn't exist"));
+                    result = await client.DeleteProfileAsync(profile);
+                    SPXTEST_REQUIRE(result.Reason == ResultReason.Canceled);
+                    var details = VoiceProfileCancellationDetails.FromResult(result);
+                    SPXTEST_REQUIRE(details.ErrorDetails.Contains("profile doesn't exist"));
+                }
+                finally
+                {
+                    await client.DeleteProfileAsync(profile);
+                }
             }
         }
 
@@ -216,33 +258,40 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var client = new VoiceProfileClient(config))
             using (var profile = await client.CreateProfileAsync(VoiceProfileType.TextIndependentVerification, "en-us"))
             {
-                SPXTEST_REQUIRE(!String.IsNullOrEmpty(profile.Id));
-
-                using (var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.MULTIPLE_UTTERANCE_CHINESE].FilePath.GetRootRelativePath()))
+                try
                 {
-                    var result = await client.EnrollProfileAsync(profile, audioInput);
-                    var json_string = result.Properties.GetProperty(PropertyId.SpeechServiceResponse_JsonResult);
-                    SPXTEST_REQUIRE(!String.IsNullOrEmpty(json_string));
-                    SPXTEST_REQUIRE(result.Reason == ResultReason.EnrolledVoiceProfile);
+                    SPXTEST_REQUIRE(!String.IsNullOrEmpty(profile.Id));
 
-                    using (var speakerRecognizer = new SpeakerRecognizer(config, audioInput))
-                    using (var model = SpeakerVerificationModel.FromProfile(profile))
+                    using (var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.MULTIPLE_UTTERANCE_CHINESE].FilePath.GetRootRelativePath()))
                     {
-                        var result2 = await speakerRecognizer.RecognizeOnceAsync(model);
-                        SPXTEST_REQUIRE(result2.Score > 0.5);
-                        SPXTEST_REQUIRE(result2.Reason == ResultReason.RecognizedSpeaker);
-                        SPXTEST_REQUIRE(result2.ProfileId == profile.Id);
-                        using (var wrongAudioFile = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath()))
-                        using (var recognizer2 = new SpeakerRecognizer(config, wrongAudioFile))
-                        {
-                            var result3 = await recognizer2.RecognizeOnceAsync(model);
-                            SPXTEST_REQUIRE(result3.Reason == ResultReason.Canceled);
-                            var details3 = SpeakerRecognitionCancellationDetails.FromResult(result3);
+                        var result = await client.EnrollProfileAsync(profile, audioInput);
+                        var json_string = result.Properties.GetProperty(PropertyId.SpeechServiceResponse_JsonResult);
+                        SPXTEST_REQUIRE(!String.IsNullOrEmpty(json_string));
+                        SPXTEST_REQUIRE(result.Reason == ResultReason.EnrolledVoiceProfile);
 
-                            SPXTEST_REQUIRE(details3.Reason == CancellationReason.Error);
-                            SPXTEST_REQUIRE(details3.ErrorDetails.IndexOf("reject", StringComparison.OrdinalIgnoreCase) >= 0);
+                        using (var speakerRecognizer = new SpeakerRecognizer(config, audioInput))
+                        using (var model = SpeakerVerificationModel.FromProfile(profile))
+                        {
+                            var result2 = await speakerRecognizer.RecognizeOnceAsync(model);
+                            SPXTEST_REQUIRE(result2.Score > 0.5);
+                            SPXTEST_REQUIRE(result2.Reason == ResultReason.RecognizedSpeaker);
+                            SPXTEST_REQUIRE(result2.ProfileId == profile.Id);
+                            using (var wrongAudioFile = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath()))
+                            using (var recognizer2 = new SpeakerRecognizer(config, wrongAudioFile))
+                            {
+                                var result3 = await recognizer2.RecognizeOnceAsync(model);
+                                SPXTEST_REQUIRE(result3.Reason == ResultReason.Canceled);
+                                var details3 = SpeakerRecognitionCancellationDetails.FromResult(result3);
+
+                                SPXTEST_REQUIRE(details3.Reason == CancellationReason.Error);
+                                SPXTEST_REQUIRE(details3.ErrorDetails.IndexOf("reject", StringComparison.OrdinalIgnoreCase) >= 0);
+                            }
                         }
                     }
+                }
+                finally
+                {
+                    await client.DeleteProfileAsync(profile);
                 }
             }
         }
@@ -255,31 +304,38 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var client = new VoiceProfileClient(speechConfig))
             using (var profile = await client.CreateProfileAsync(VoiceProfileType.TextIndependentIdentification, "en-us"))
             {
-                SPXTEST_REQUIRE(!String.IsNullOrEmpty(profile.Id));
-
-                using (var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.MULTIPLE_UTTERANCE_CHINESE].FilePath.GetRootRelativePath()))
+                try
                 {
-                    var result = await client.EnrollProfileAsync(profile, audioInput);
-                    var json_string = result.Properties.GetProperty(PropertyId.SpeechServiceResponse_JsonResult);
-                    SPXTEST_REQUIRE(!String.IsNullOrEmpty(json_string));
-                    SPXTEST_REQUIRE(result.Reason == ResultReason.EnrolledVoiceProfile);
+                    SPXTEST_REQUIRE(!String.IsNullOrEmpty(profile.Id));
 
-                    using (var profile2 = await client.CreateProfileAsync(VoiceProfileType.TextIndependentIdentification, "en-us"))
+                    using (var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.MULTIPLE_UTTERANCE_CHINESE].FilePath.GetRootRelativePath()))
                     {
-                        SPXTEST_REQUIRE(!string.IsNullOrEmpty(profile2.Id));
-                        var enrollResult2 = await client.EnrollProfileAsync(profile2, audioInput);
-                        SPXTEST_REQUIRE(enrollResult2.Reason == ResultReason.EnrolledVoiceProfile);
+                        var result = await client.EnrollProfileAsync(profile, audioInput);
+                        var json_string = result.Properties.GetProperty(PropertyId.SpeechServiceResponse_JsonResult);
+                        SPXTEST_REQUIRE(!String.IsNullOrEmpty(json_string));
+                        SPXTEST_REQUIRE(result.Reason == ResultReason.EnrolledVoiceProfile);
 
-                        var profiles = new List<VoiceProfile>();
-                        profiles.Add(profile);
-                        profiles.Add(profile2);
-                        using (var model = SpeakerIdentificationModel.FromProfiles(profiles))
+                        using (var profile2 = await client.CreateProfileAsync(VoiceProfileType.TextIndependentIdentification, "en-us"))
                         {
-                            var recognizer = new SpeakerRecognizer(speechConfig, audioInput);
-                            var result3 = await recognizer.RecognizeOnceAsync(model);
-                            SPXTEST_REQUIRE(result3.Reason == ResultReason.RecognizedSpeakers);
+                            SPXTEST_REQUIRE(!string.IsNullOrEmpty(profile2.Id));
+                            var enrollResult2 = await client.EnrollProfileAsync(profile2, audioInput);
+                            SPXTEST_REQUIRE(enrollResult2.Reason == ResultReason.EnrolledVoiceProfile);
+
+                            var profiles = new List<VoiceProfile>();
+                            profiles.Add(profile);
+                            profiles.Add(profile2);
+                            using (var model = SpeakerIdentificationModel.FromProfiles(profiles))
+                            {
+                                var recognizer = new SpeakerRecognizer(speechConfig, audioInput);
+                                var result3 = await recognizer.RecognizeOnceAsync(model);
+                                SPXTEST_REQUIRE(result3.Reason == ResultReason.RecognizedSpeakers);
+                            }
                         }
                     }
+                }
+                finally
+                {
+                    await client.DeleteProfileAsync(profile);
                 }
             }
         }
