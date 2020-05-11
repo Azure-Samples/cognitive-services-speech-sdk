@@ -54,6 +54,7 @@ for img in $DOCKER_IMAGES; do
         --rm ${img} \
             bash - <<SCRIPT 2>&1 | tee $carbonlog
             set -x -e
+            . ci/functions.sh
             apt update -y
             apt install iptables -y
             iptables -A OUTPUT -p tcp --dport 80 -j REJECT
