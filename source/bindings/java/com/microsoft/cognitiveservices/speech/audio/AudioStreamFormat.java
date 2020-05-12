@@ -58,7 +58,8 @@ public final class AudioStreamFormat
      */
     public static AudioStreamFormat getCompressedFormat(AudioStreamContainerFormat compressedFormat) {
         SafeHandle streamFormatHandle = new SafeHandle(0, SafeHandleType.AudioStreamFormat);
-        Contracts.throwIfFail(createFromCompressedFormat(streamFormatHandle, compressedFormat.ordinal()));       
+        int value = AudioStreamContainerFormat.values()[(int)compressedFormat.ordinal()].getValue();
+        Contracts.throwIfFail(createFromCompressedFormat(streamFormatHandle, value));
         return new AudioStreamFormat(streamFormatHandle);
     }
 
