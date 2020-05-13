@@ -72,19 +72,21 @@ public class SpeechSynthesizer implements Closeable
     private AudioConfig audioOutputKeepAlive = null;
 
     /**
-     * Initializes a new instance of Speech Synthesizer.
+     * Creates a new instance of Speech Synthesizer. Uses the default speaker on the system for audio output.
      * @param speechConfig speech configuration.
      */
     public SpeechSynthesizer(SpeechConfig speechConfig) {
         Contracts.throwIfNull(speechConfig, "speechConfig");
         synthHandle = new SafeHandle(0, SafeHandleType.Synthesizer);
-        Contracts.throwIfFail(createSpeechSynthesizerFromConfig(synthHandle, speechConfig.getImpl(), null));
+        AudioConfig audioConfig = AudioConfig.fromDefaultSpeakerOutput();
+        Contracts.throwIfFail(createSpeechSynthesizerFromConfig(synthHandle, speechConfig.getImpl(), audioConfig.getImpl()));
         Contracts.throwIfNull(synthHandle.getValue(), "synthHandle");
+        audioConfig.close();
         initialize();
     }
 
     /**
-     * Initializes a new instance of Speech Synthesizer.
+     * Creates a new instance of Speech Synthesizer. If audioConfig is null, there is no audio output.
      * @param speechConfig speech configuration.
      * @param audioConfig audio configuration.
      */
