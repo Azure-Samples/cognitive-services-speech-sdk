@@ -78,62 +78,10 @@ jobs:
         $(KEYS_AND_REGIONS)
       HEREDOC
     displayName: Write Subscriptions Regions Data
-  - bash: |
-      set -u -e -o pipefail
-      . ci/functions.sh
-      echo external/gstreamer-windows/build_id_$(SPEECHSDK_TARGET_PLATFORM).txt
-      build_id=$( cat  external/gstreamer-windows/build_id_$(SPEECHSDK_TARGET_PLATFORM).txt )
-      build_id_devel=$( cat  external/gstreamer-windows/build_id_devel_$(SPEECHSDK_TARGET_PLATFORM).txt )
-      vsts_setvar GSTREAMER_WINDOWS_PREBUILT_ARTIFACT_BUILD_ID "$build_id"
-      vsts_setvar GSTREAMER_WINDOWS_PREBUILT_ARTIFACT_DEVEL_BUILD_ID "$build_id_devel"
-      gst_path="$(cygpath -pw $(pwd)/gstreamer)"
-      gst_path_win=${gst_path//[\\]//}
-      vsts_setvar GSTREAMER_INSTALL_PATH "$gst_path_win"
-    displayName: Get Gstreamer Windows build ID
-  - task: DownloadBuildArtifacts@0
-    displayName: Download gstreamer-windows devel package
-    inputs:
-      buildType: specific
-      project: 'e71f1362-9c7d-488b-99c7-3376db8d3302'
-      pipeline: 9377
-      buildVersionToDownload: specific
-      buildId: $(GSTREAMER_WINDOWS_PREBUILT_ARTIFACT_DEVEL_BUILD_ID)
-      downloadType: specific
-      itemPattern: |
-        gstreamer-windows/**
-      downloadPath: external
-  - task: DownloadBuildArtifacts@0
-    displayName: Download gstreamer-android runtime package
-    inputs:
-      buildType: specific
-      project: 'e71f1362-9c7d-488b-99c7-3376db8d3302'
-      pipeline: 9377
-      buildVersionToDownload: specific
-      buildId: $(GSTREAMER_WINDOWS_PREBUILT_ARTIFACT_BUILD_ID)
-      downloadType: specific
-      itemPattern: |
-        gstreamer-windows/**
-      downloadPath: external
-  - powershell: |
-      $plat = "$(BuildPlatform)"
-      move .\external\gstreamer-windows\* .
-      dir
-      echo $pwd\gstreamer
-      If($plat -Match "x64")
-      {
-        msiexec /passive INSTALLDIR=$pwd\gstreamer /i gstreamer-1.0-x86_64-1.14.5.msi | Out-String
-        Start-Sleep -Seconds 30
-        msiexec /passive INSTALLDIR=$pwd\gstreamer /i gstreamer-1.0-devel-x86_64-1.14.5.msi | Out-String
-      }
-      If($plat -Match "Win32")
-      {
-        msiexec /passive INSTALLDIR=$pwd\gstreamer /i gstreamer-1.0-x86-1.14.5.msi | Out-String
-        Start-Sleep -Seconds 30
-        msiexec /passive INSTALLDIR=$pwd\gstreamer /i gstreamer-1.0-devel-x86-1.14.5.msi | Out-String
-      }
-      Start-Sleep -Seconds 30
-      dir $pwd\gstreamer
-    displayName: msiexec gstreamer
+  - template: install-gstreamer-windows.yml
+    parameters:
+      speechsdkTargetPlatfrom: $(SPEECHSDK_TARGET_PLATFORM)
+      buildPlatform: $(BuildPlatform)
   - bash: |
       find ./ -type d -print | sed -e 's;[^/]*/; /;g;s;/ ;    ;g;s;^ /$;.;;s; /;|-- ;g'
     displayName: some logging

@@ -1,0 +1,59 @@
+parameters:
+  speechsdkTargetPlatfrom: "Windows-x64"
+  buildPlatform: "x64"
+steps:
+  - bash: |
+      set -u -e -o pipefail
+      . ci/functions.sh
+      echo external/gstreamer-windows/build_id_${{ parameters.speechsdkTargetPlatfrom }}.txt
+      build_id=$( cat  external/gstreamer-windows/build_id_${{ parameters.speechsdkTargetPlatfrom }}.txt )
+      build_id_devel=$( cat  external/gstreamer-windows/build_id_devel_${{ parameters.speechsdkTargetPlatfrom }}.txt )
+      vsts_setvar GSTREAMER_WINDOWS_PREBUILT_ARTIFACT_BUILD_ID "$build_id"
+      vsts_setvar GSTREAMER_WINDOWS_PREBUILT_ARTIFACT_DEVEL_BUILD_ID "$build_id_devel"
+      gst_path="$(cygpath -pw $(pwd)/gstreamer)"
+      gst_path_win=${gst_path//[\\]//}
+      vsts_setvar GSTREAMER_INSTALL_PATH "$gst_path_win"
+    displayName: Get Gstreamer Windows build ID
+  - task: DownloadBuildArtifacts@0
+    displayName: Download gstreamer-windows devel package
+    inputs:
+      buildType: specific
+      project: 'e71f1362-9c7d-488b-99c7-3376db8d3302'
+      pipeline: 9377
+      buildVersionToDownload: specific
+      buildId: $(GSTREAMER_WINDOWS_PREBUILT_ARTIFACT_DEVEL_BUILD_ID)
+      downloadType: specific
+      itemPattern: |
+        gstreamer-windows/**
+      downloadPath: external
+  - task: DownloadBuildArtifacts@0
+    displayName: Download gstreamer-windows runtime package
+    inputs:
+      buildType: specific
+      project: 'e71f1362-9c7d-488b-99c7-3376db8d3302'
+      pipeline: 9377
+      buildVersionToDownload: specific
+      buildId: $(GSTREAMER_WINDOWS_PREBUILT_ARTIFACT_BUILD_ID)
+      downloadType: specific
+      itemPattern: |
+        gstreamer-windows/**
+      downloadPath: external
+  - powershell: |
+      echo "${{ parameters.buildPlatform }}"
+      move .\external\gstreamer-windows\* .
+      dir
+      echo $pwd\gstreamer
+      If("${{ parameters.buildPlatform }}" -Match "x64")
+      {
+        echo "installing x64 gstreamer"
+        msiexec /passive INSTALLDIR=$pwd\gstreamer /i gstreamer-1.0-x86_64-1.14.5.msi | Out-String
+        msiexec /passive INSTALLDIR=$pwd\gstreamer /i gstreamer-1.0-devel-x86_64-1.14.5.msi | Out-String
+      }
+      If("${{ parameters.buildPlatform }}" -Match "Win32")
+      {
+        echo "installing x86 gstreamer"
+        msiexec /passive INSTALLDIR=$pwd\gstreamer /i gstreamer-1.0-x86-1.14.5.msi | Out-String
+        msiexec /passive INSTALLDIR=$pwd\gstreamer /i gstreamer-1.0-devel-x86-1.14.5.msi | Out-String
+      }
+      dir $pwd\gstreamer
+    displayName: msiexec gstreamer

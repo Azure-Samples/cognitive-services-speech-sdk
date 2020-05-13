@@ -30,6 +30,7 @@ import org.junit.runners.Suite.SuiteClasses;
     ConversationTranslatorTests.class,
     CloseGuardTests.class,
     KeywordRecognizerTests.class,
+    CompressedInputStreamTests.class
     })
 public class AllUnitTests {
 

@@ -5,6 +5,7 @@
 
 package tests.unit;
 
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -21,13 +22,13 @@ import java.net.URI;
 
 import static org.junit.Assert.*;
 
+import com.microsoft.cognitiveservices.speech.audio.*;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.rules.ExpectedException;
 
-import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.CancellationReason;
 import com.microsoft.cognitiveservices.speech.ResultReason;
 import com.microsoft.cognitiveservices.speech.ServicePropertyChannel;
@@ -945,13 +946,13 @@ public class SpeechRecognizerTests {
         });
 
         Future<?> future = r.startContinuousRecognitionAsync();
-             
+
         // wait 60s
         long now = System.currentTimeMillis();
         while(((System.currentTimeMillis() - now) < 60000)) {
             Thread.sleep(200);
         }
-        
+
         future = r.stopContinuousRecognitionAsync();
         assertTrue(rEvents.size() > 1);
 
@@ -1516,7 +1517,7 @@ public class SpeechRecognizerTests {
 
     @Rule
     public ExpectedException exceptionRule = ExpectedException.none();
- 
+
     @Test
     public void verifySetEndpointIdNotAllowedForLanguageId() throws ExecutionException {
         SpeechConfig speechConfig = SpeechConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
@@ -1552,7 +1553,7 @@ public class SpeechRecognizerTests {
             Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
 
         assertNotNull(speechConfig);
-        
+
         List sourceLanguageConfigs = new ArrayList<SourceLanguageConfig>();
         String customEndpoint1 = "6264ab43-c854-4d9f-84fc-5f33621935f3";
         String customEndpoint2 = "6264ab43-c854-4d9f-84fc-5f33621935f7";

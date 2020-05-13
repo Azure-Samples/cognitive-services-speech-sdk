@@ -40,6 +40,10 @@ jobs:
       MavenPackageDirWindows="$MavenRootWindows/$relativeMavenPackageDir"
       vsts_setvars_by_ref PublishArtifactName Artifact{Out{,Windows},Basename} Maven{Root,PackageDir}{,Windows}
     displayName: Set package variables
+  - template: install-gstreamer-windows.yml
+    parameters:
+      speechsdkTargetPlatfrom: Windows-x64
+      buildPlatform: x64
   - task: DownloadBuildArtifacts@0
     displayName: 'Downloading Windows artifacts'
     inputs:
@@ -99,6 +103,8 @@ jobs:
       set -x -e
       . ci/functions.sh
       # set +e to allow capturing exit codes
+      GSTREAMER_RUNTIME_PATH="$(pwd)/gstreamer/1.0/x86_64/bin"
+      PATH="${GSTREAMER_RUNTIME_PATH}:$PATH"
       set +e
       for retry in {0..3}; do
          java \
