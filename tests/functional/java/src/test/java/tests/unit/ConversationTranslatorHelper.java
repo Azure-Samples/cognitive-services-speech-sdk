@@ -13,9 +13,21 @@ import java.util.ArrayList;
 public class ConversationTranslatorHelper {
 
     ArrayList<String> items;
+    private String tag = "";
 
     ConversationTranslatorHelper() {
         items = new ArrayList<String>();
+    }
+
+    ConversationTranslatorHelper(String tag) {
+        items = new ArrayList<String>();
+        this.tag = tag;
+    }
+
+    static ConversationTranslatorHelper instance(ConversationTranslator ct, String tag) {
+        ConversationTranslatorHelper cth = new ConversationTranslatorHelper(tag);
+        cth.logEvents(ct);
+        return cth;
     }
 
     static ConversationTranslatorHelper instance(ConversationTranslator ct) {
@@ -57,7 +69,7 @@ public class ConversationTranslatorHelper {
                     items.add("participantsChanged:" + e.toString());
                     int i = 0;
                     for (Participant p : e.getParticipants()) {
-                        log(String.format("[%d]: Participant %s, disp %s, host %b, muted %b, tts %b, avatar %s",
+                        log(String.format("   Participant[%d]:  %s, disp %s, host %b, muted %b, tts %b, avatar %s",
                          i, p.getId(), p.getDisplayName(), p.isHost(), p.isMuted(), p.isUsingTts(), p.getAvatar()));
                         i++;
                     }
@@ -86,11 +98,11 @@ public class ConversationTranslatorHelper {
         items.clear();
     }
 
-    public ArrayList<String> getItems() {
-        return items;
+    public int size() {
+        return items.size();
     }
 
-    private void log(String s) {
-        System.out.println("ConversationTranslatorHelper : " + s);
+    private void log(String message) {
+        System.out.format("%s ConversationTranslatorHelper[%2d]: %s\n", tag, items.size(), message);
     }
 }

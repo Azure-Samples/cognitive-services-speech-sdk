@@ -572,7 +572,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             return config;
         }
 
-        [TestMethod]
+        [TestMethod, Ignore]
         public async Task TestDelayedAudio()
         {
             var config = CreateCTSTeamsSpeechConfig(DefaultSettingsMap[DefaultSettingKeys.ONLINE_AUDIO_ENDPOINT]);

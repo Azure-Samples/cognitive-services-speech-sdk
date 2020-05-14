@@ -221,7 +221,7 @@ public class ConversationTranslatorTests {
 
         sleep(5000);
 
-        log("testCreateSendTextTranscribe complete. " + cth.getItems().size());
+        log("testCreateSendTextTranscribe complete. " + cth.size());
 
         cleanup();
     }
@@ -254,7 +254,7 @@ public class ConversationTranslatorTests {
         ct.close();
         conv.close();
 
-        log("testSpeechRecogLanguage complete. " + cth.getItems().size());
+        log("testSpeechRecogLanguage complete. " + cth.size());
 
         cleanup();
     }
@@ -288,7 +288,7 @@ public class ConversationTranslatorTests {
         ct.close();
         conv.close();
 
-        log("testSpeechRecogLanguage2 complete. " + cth.getItems().size());
+        log("testSpeechRecogLanguage2 complete. " + cth.size());
 
         cleanup();
     }
@@ -415,7 +415,118 @@ public class ConversationTranslatorTests {
                 cth.items.size() > callbackCount);
         callbackCount = cth.items.size();
 
-        log("testJoinLeaveExisting complete. " + cth.getItems().size());
+        log("testJoinLeaveExisting complete. " + cth.size());
+    }
+
+    @Test
+    public void testCallbacks2Participants()
+            throws InterruptedException, ExecutionException, TimeoutException {
+        log("testCallbacks2Participants()");
+
+        String arch = System.getProperty("os.arch");
+
+        if (!"amd64".equalsIgnoreCase(arch)) {
+            log("skipping test, not sure if "+arch + "is supported");
+            return;
+        }
+
+        AudioConfig audioConfig1 = getAudioConfig();
+        Conversation conv = createConversation(getDefaultConfig());
+
+        ConversationTranslator ct1 = new ConversationTranslator(audioConfig1);
+
+        ConversationTranslatorHelper cth1 = ConversationTranslatorHelper.instance(ct1, "host  ");
+        int callbackCount1 = 0;
+
+        ct1.joinConversationAsync(conv, "CallbackHost").get();
+
+        sleep(3000);
+
+        assertTrue("no host callbacks received after join " + cth1.size(), cth1.size() > callbackCount1);
+        callbackCount1 = cth1.size();
+
+        String conversationId = conv.getConversationId();
+        log("created conversation is " + conversationId + " trying to join with 2nd participant, callback count " + cth1.size());
+        AudioConfig audioConfig2 = getAudioConfig();
+
+        ConversationTranslator ct2 = new ConversationTranslator(audioConfig2);
+        ConversationTranslatorHelper cth2 = ConversationTranslatorHelper.instance(ct2, "guest ");
+
+        ct2.joinConversationAsync(conversationId, "SecondParticipant", "en-US").get();
+        sleep(3000);
+
+        assertTrue("no host callbacks received after 'SecondParticipant' join " + cth1.size(), cth1.size() > callbackCount1);
+        callbackCount1 = cth1.size();
+
+        ct2.sendTextMessageAsync("text from participant.").get();
+
+        sleep(3000);
+
+        assertTrue("no host callbacks received after 'SecondParticipant' text sent " + cth1.size(), cth1.size() > callbackCount1);
+        callbackCount1 = cth1.size();
+
+        ct2.startTranscribingAsync().get();
+
+        sleep(5000);
+
+        ct2.stopTranscribingAsync().get();
+
+        sleep(3000);
+
+        assertTrue("no host callbacks received after 'SecondParticipant' transcribe " + cth1.size(), cth1.size() > callbackCount1);
+        callbackCount1 = cth1.size();
+
+        int callbackCount2 = cth2.items.size();
+
+        ct1.sendTextMessageAsync("can you see this text message?").get();
+
+        sleep(3000);
+
+        assertTrue("no guest callbacks on second participant after 'host' sent text" + cth2.items.size(), cth2.items.size() > callbackCount2);
+        callbackCount2 = cth2.items.size();
+
+        log("host callbacks received after sent text " + cth1.size());
+        callbackCount1 = cth1.size();
+
+        ct1.startTranscribingAsync().get();
+
+        sleep(5000);
+
+        log("host callbacks received after start transcribing host " + cth1.size());
+        log("guest callbacks received after start transcribing host " + cth2.size());
+
+        ct1.stopTranscribingAsync().get();
+
+        sleep(3000);
+
+        log("host callbacks received after stop transcribing host " + cth1.size());
+        log("guest callbacks received after start transcribing host " + cth2.size());
+
+        assertTrue(
+                "no host callbacks received after transcribing host audio " + cth1.size(),
+                cth1.size() > callbackCount1);
+        callbackCount1 = cth1.size();
+
+        assertTrue(
+            "no guest callbacks received after transcribing host audio " + cth2.size(),
+            cth2.size() > callbackCount2);
+
+        ct1.leaveConversationAsync().get();
+
+        ct1.close();
+        conv.close();
+        audioConfig1.close();
+
+        ct2.close();
+        audioConfig2.close();
+
+        sleep(3000);
+
+        log("testCallbacks2Participants complete. " + cth1.size());
+
+        cleanup();
+
+        sleep(2000);
     }
 
     // -----------------------------------------------------------------------

@@ -295,12 +295,12 @@ my %images = (
         'set_env_centos'],
   },
   ubuntu1604_arm64cc => {
-    version => 1,
+    version => 2,
     # Note: libssl1.0.2 is already in this specific image...
     spec => ['from-python37-x64', aptInstallWith(qw/oobe_debian9_deps test_deps/), 'oobepython_jupyter', 'builduser'],
     },
   ubuntu1604_arm32cc => {
-    version => 1,
+    version => 2,
     # Note: cross-compile toolsand OpenSSL 1.1.1b is already in this specific image...
     spec => ['from-debian9-x86', aptInstallWith(qw/oobedevcpp_ubuntu1604_deps oobe_debian9_deps oobe_ubuntu_gstreamer_deps test_deps/), 'builduser'],
   },
