@@ -1196,6 +1196,8 @@ jobs:
       export NDK_PROJECT_PATH=$ANDROID_NDK
       ndk-build.cmd -C ./ci/android/gstreamer "NDK_APPLICATION_MK=Application.mk" APP_ABI=$(GstAbiFilter) NDK_LIBS_OUT=.
       cp ./ci/android/gstreamer/$(GstAbiFilter)/libgstreamer_android.so "$(ANDROID_GST)\$(GstBuildPlatform)"
+      mkdir -p "$(cygpath -au "$(Build.ArtifactStagingDirectory)")"/Out/GstLibOnlyForTesting/$(GstAbiFilter)
+      cp ./ci/android/gstreamer/$(GstAbiFilter)/libgstreamer_android.so "$(cygpath -au "$(Build.ArtifactStagingDirectory)")"/Out/GstLibOnlyForTesting/$(GstAbiFilter)/
     displayName: Generate gstreamer shared object
   - task: BatchScript@1
     displayName: Build
@@ -1259,6 +1261,7 @@ jobs:
       itemPattern: |
         **/Android-arm32/Release/**/com.microsoft.cognitiveservices.speech.*jar
         **/Android-arm32/Release/**/libMicrosoft.CognitiveServices.Speech.*.so
+        **/GstLibOnlyForTesting/armeabi-v7a/libgstreamer_android.so
   - bash: |
       . ci/functions.sh &&
       vsts_setvar SPEECHSDK_SASTOKENEXPIRYUTC $(date -u -d "2 hours" +"%Y-%m-%dT%H:%M:%SZ")
@@ -1288,11 +1291,13 @@ jobs:
     displayName: 'Update subscriptions and regions'
   - bash: |
       set -u -e -o pipefail
+      set -x
       cp -f ./ci/jsonsettings.py .
       . ./ci/functions.sh
       FAKE_BUILD=buildfromrelease
       mkdir -p "$FAKE_BUILD"{/bin,/lib}
       DROP_DIR=$(cygpath -au "$(System.ArtifactsDirectory)/In/Android/Android-arm32/Release")
+      GST_LIB_DIR=$(cygpath -au "$(System.ArtifactsDirectory)/In/Android/GstLibOnlyForTesting")
       cat > "$FAKE_BUILD/MainActivity.properties" <<HEREDOC
         SampleAudioInput=$( getSetting './tests/test.defaults.json' 'InputDir' )/$( getSetting './tests/test.audio.utterances.json' 'SingleUtteranceEnglish.FilePath' )
         SasToken=$(SPEECHSDK_SASTOKEN)
@@ -1302,7 +1307,9 @@ jobs:
       cp --preserve "$DROP_DIR/private/bin/com.microsoft.cognitiveservices.speech.tests.jar" "$FAKE_BUILD/bin"
       cp --preserve "$DROP_DIR/public/lib/libMicrosoft.CognitiveServices.Speech.core.so" "$FAKE_BUILD/lib"
       cp --preserve "$DROP_DIR/public/lib/libMicrosoft.CognitiveServices.Speech.extension.kws.so" "$FAKE_BUILD/lib"
+      cp --preserve "$DROP_DIR/public/lib/libMicrosoft.CognitiveServices.Speech.extension.codec.so" "$FAKE_BUILD/lib"
       cp --preserve "$DROP_DIR/public/lib/libMicrosoft.CognitiveServices.Speech.java.bindings.so" "$FAKE_BUILD/bin"
+      cp --preserve "$GST_LIB_DIR/armeabi-v7a/libgstreamer_android.so" "$FAKE_BUILD/lib"
       find "$FAKE_BUILD" -ls
     displayName: 'Prepare (fake) build dir for kicking off AppCenter tests'
   - script: |

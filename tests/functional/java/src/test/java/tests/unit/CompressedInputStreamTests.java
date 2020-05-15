@@ -55,8 +55,9 @@ public class CompressedInputStreamTests {
     static public void setUpBeforeClass() throws Exception {
         String operatingSystem = ("" + System.getProperty("os.name")).toLowerCase();
         System.out.println("Current operation system: " + operatingSystem);
-        boolean isWindows = operatingSystem.contains("windows");
-        org.junit.Assume.assumeFalse(!isWindows);
+        // "linux" covers Android also because on android the underlined os is linux
+        boolean isWindowsOrLinux = operatingSystem.contains("windows") || operatingSystem.contains("linux");
+        org.junit.Assume.assumeFalse(!isWindowsOrLinux);
         Settings.LoadSettings();
     }
 

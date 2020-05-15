@@ -55,6 +55,9 @@ echo Found Carbon native libraries (these are needed until we use the AAR librar
 echo     bin directory "%SPEECHSDK_BUILD_BIN%"
 echo     lib directory "%SPEECHSDK_BUILD_LIB%"
 
+dir %SPEECHSDK_BUILD_BIN%
+dir %SPEECHSDK_BUILD_LIB%
+
 if NOT EXIST "%SPEECHSDK_BUILD_ROOT%\MainActivity.properties" (
     echo You need a file "%SPEECHSDK_BUILD_ROOT%"\MainActivity.properties with the subscription keys and other settings.
     echo Put in the following data:
@@ -94,6 +97,8 @@ md "%SPEECHSDK_TEST_ROOT%\app\src\main\jniLibs\armeabi" && ^
 copy /Y "%SPEECHSDK_BUILD_LIB%\com.microsoft.cognitiveservices.speech.jar"             "%SPEECHSDK_TEST_ROOT%\app\src\main\jniLibs\"          && ^
 copy /Y "%SPEECHSDK_BUILD_BIN%\com.microsoft.cognitiveservices.speech.tests.jar"       "%SPEECHSDK_TEST_ROOT%\app\src\main\jniLibs\"          && ^
 copy /Y "%SPEECHSDK_BUILD_LIB%\libMicrosoft.CognitiveServices.Speech.core.so"          "%SPEECHSDK_TEST_ROOT%\app\src\main\jniLibs\armeabi\"  && ^
+copy /Y "%SPEECHSDK_BUILD_LIB%\libMicrosoft.CognitiveServices.Speech.extension.codec.so" "%SPEECHSDK_TEST_ROOT%\app\src\main\jniLibs\armeabi\"  && ^
+copy /Y "%SPEECHSDK_BUILD_LIB%\libgstreamer_android.so"                                 "%SPEECHSDK_TEST_ROOT%\app\src\main\jniLibs\armeabi\"  && ^
 copy /Y "%SPEECHSDK_BUILD_BIN%\libMicrosoft.CognitiveServices.Speech.java.bindings.so" "%SPEECHSDK_TEST_ROOT%\app\src\main\jniLibs\armeabi\"
 if errorlevel 1 (
     echo Could not copy necessary native libs.
