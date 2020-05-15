@@ -7,13 +7,10 @@ import java.io.*;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
 
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
-import com.microsoft.cognitiveservices.speech.SpeechConfig;
+import com.microsoft.cognitiveservices.speech.*;
 
 public class Settings {
     private static SpeechConfig config;
@@ -26,9 +23,9 @@ public class Settings {
 
     static {
         try {
-            Class.forName("com.microsoft.cognitiveservices.speech.SpeechConfig");
+             Class.forName("com.microsoft.cognitiveservices.speech.SpeechConfig");
         } catch (ClassNotFoundException e) {
-            throw new UnsatisfiedLinkError(e.toString());
+             throw new UnsatisfiedLinkError(e.toString());
         }
 
         // prevent classgc from reclaiming the settings class, thus
@@ -59,43 +56,87 @@ public class Settings {
         Type subscriptionsRegionsType = new TypeToken<Map<String, SubscriptionRegion>>(){}.getType();
         Type audioEntryType = new TypeToken<Map<String, AudioEntry>>(){}.getType();
 
+        // Default Settings
         File defaultSettingsFile = new File("test.defaults.json");
+        Map<String, String> defaultSettingsMap;
 
+        String defaultSettingsProperties = System.getProperty("defaultSettings");
+        if(defaultSettingsProperties!= null) {
+            DefaultSettingsMap = gson.fromJson(defaultSettingsProperties, defaultSettingsType);
+        }
+        System.out.println("Opening defaultSettingsFile");
         if(defaultSettingsFile.exists()) {
-            Map<String, String> defaultSettingsMap = gson.fromJson(new FileReader("test.defaults.json"), defaultSettingsType);
+            System.out.println("Reading test.defaults.json");
+            defaultSettingsMap = gson.fromJson(new FileReader("test.defaults.json"), defaultSettingsType);
 
-            defaultSettingsMap.forEach((key, value) -> DefaultSettingsMap.merge(key, value, (v1, v2) -> v2));
-        } else {
-            String defaultSettings = System.getProperty("defaultSettings");
-            Map<String, String> defaultSettingsMap = gson.fromJson(defaultSettings, defaultSettingsType);
-
-            defaultSettingsMap.forEach((key, value) -> DefaultSettingsMap.merge(key, value, (v1, v2) -> v2));
+            for (String key : defaultSettingsMap.keySet()) {
+                System.out.println("Processing map key: " + key);
+                // If the master map has this key registered
+                if (DefaultSettingsMap.containsKey(key)) {
+                    // And there is no value set for this key
+                    System.out.println("The master map had a entry for " + key + ", checking if there's a value");
+                    if (DefaultSettingsMap.get(key) == null) {
+                        // Set this keys value
+                        System.out.println("The master map had no value for " + key + ", setting it to " + defaultSettingsMap.get(key));
+                        DefaultSettingsMap.put(key, defaultSettingsMap.get(key));
+                    }
+                } else {
+                    // This key didn't exist in the master
+                    System.out.println("Key " + key + ", did not exist in the master map, adding it with the value " + defaultSettingsMap.get(key));
+                    DefaultSettingsMap.put(key, defaultSettingsMap.get(key));
+                }
+                System.out.println("Key " + key + " is set with value " + DefaultSettingsMap.get(key));
+            }
         }
-
+        // Subscriptions and regions
         File subscriptionsRegionsFile = new File("test.subscriptions.regions.json");
+        Map<String, SubscriptionRegion> subscriptionsRegionsMap;
 
+        String subscriptionsRegionsProperties = System.getProperty("subscriptionsRegions");
+        if(subscriptionsRegionsProperties != null) {
+            SubscriptionsRegionsMap = gson.fromJson(subscriptionsRegionsProperties, subscriptionsRegionsType);
+        }
+        System.out.println("Opening subscriptionsRegionsFile");
         if(subscriptionsRegionsFile.exists()) {
-            Map<String, SubscriptionRegion> subscriptionsRegionsMap = gson.fromJson(new FileReader("test.subscriptions.regions.json"), subscriptionsRegionsType);
+            System.out.println("Reading test.subscriptions.regions.json");
+            subscriptionsRegionsMap = gson.fromJson(new FileReader("test.subscriptions.regions.json"), subscriptionsRegionsType);
 
-            subscriptionsRegionsMap.forEach((key, value) -> SubscriptionsRegionsMap.merge(key, value, (v1, v2) -> v2));
-        } else {
-            String subscriptionsRegions = System.getProperty("subscriptionsRegions");
-            Map<String, SubscriptionRegion> subscriptionsRegionsMap = gson.fromJson(subscriptionsRegions, subscriptionsRegionsType);
+            for (String key : subscriptionsRegionsMap.keySet()) {
+                System.out.println("Processing map key: " + key);
+                SubscriptionRegion subscriptionRegion = subscriptionsRegionsMap.get(key);
 
-            subscriptionsRegionsMap.forEach((key, value) -> SubscriptionsRegionsMap.merge(key, value, (v1, v2) -> v2));
+                // If the master map has this key registered
+                if (!SubscriptionsRegionsMap.containsKey(key) || SubscriptionsRegionsMap.get(key).Key == null || SubscriptionsRegionsMap.get(key).Region == null) {
+                    // And there is no value set for this key
+                    SubscriptionsRegionsMap.put(key, subscriptionRegion);
+                    System.out.println("SubscriptionsRegionsMap has added Key " + key + " with key " + SubscriptionsRegionsMap.get(key).Key + " and Region " + SubscriptionsRegionsMap.get(key).Region);
+                }
+            }
         }
 
+        // Audio utterances
         File audioUtterancesFile = new File("test.audio.utterances.json");
+        Map<String, AudioEntry> audioUtterancesMap;
 
+        String audioUtterancesProperties = System.getProperty("audioUtterances");
+        if(audioUtterancesProperties != null) {
+            AudioUtterancesMap = gson.fromJson(audioUtterancesProperties, audioEntryType);
+        }
+        System.out.println("Opening audioUtterancesFile");
         if(audioUtterancesFile.exists()) {
-            Map<String, AudioEntry> audioUtterancesMap = gson.fromJson(new FileReader("test.audio.utterances.json"), audioEntryType);
+            System.out.println("Reading test.audio.utterances.json");
+            audioUtterancesMap = gson.fromJson(new FileReader("test.audio.utterances.json"), audioEntryType);
 
-            audioUtterancesMap.forEach((key, value) -> AudioUtterancesMap.merge(key, value, (v1, v2) -> v2));
-        } else {
-            String audioUtterances = System.getProperty("audioUtterances");
-            Map<String, AudioEntry> audioUtterancesMap = gson.fromJson(audioUtterances, audioEntryType);
+            for (String key : audioUtterancesMap.keySet()) {
+                System.out.println("Processing map key: " + key);
+                AudioEntry audioEntry = audioUtterancesMap.get(key);
 
-            audioUtterancesMap.forEach((key, value) -> AudioUtterancesMap.merge(key, value, (v1, v2) -> v2));
+                // If the master map has this key registered
+                if (!AudioUtterancesMap.containsKey("key") || AudioUtterancesMap.get(key).FilePath == null) {
+                    AudioUtterancesMap.put(key, audioEntry);
+                    System.out.println("AudioUtterancesMap has added Key " + key + " with value " + AudioUtterancesMap.get(key));
+                }
+            }
         }
     }
 
@@ -109,6 +150,8 @@ public class Settings {
             LoadSettingsProperties();
             LoadSettingsJson();
 
+            System.out.println("In LoadSettings using key " + SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key);
+            System.out.println("In LoadSettings using key " + SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
             isSettingsInitialized = true;
         }
     }
@@ -195,17 +238,6 @@ public class Settings {
         for (StackTraceElement item : ex.getStackTrace()) {
             System.out.println(item.toString());
         }
-    }
-
-    public static <T> void setOnTaskCompletedListener(final Future<T> task, final OnTaskCompletedListener<T> listener) {
-        new FutureTask<Object>(() -> {
-            listener.onCompleted(task.get());
-            return true;
-        }).run();
-    }
-
-    public interface OnTaskCompletedListener<T> {
-        public void onCompleted(T taskResult);
     }
 
     public static String GetRootRelativePath(String input) {

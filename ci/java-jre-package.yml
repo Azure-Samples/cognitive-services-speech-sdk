@@ -90,7 +90,6 @@ jobs:
     displayName: Build Maven-based samples
   - bash: |
       rm -f ./tests/test.subscriptions.regions.json
-      cp ./tests/test.settings.json ./
       cp ./tests/test.defaults.json ./
       cp ./tests/test.audio.utterances.json ./
       cat > ./tests/test.subscriptions.regions.json <<HEREDOC
@@ -98,6 +97,7 @@ jobs:
       HEREDOC
       cp ./tests/test.subscriptions.regions.json ./
       cp -r tests/input ./
+      cp ./ci/jsonsettings.py .
     displayName: Write Subscriptions Regions Data
   - bash: |
       set -x -e
