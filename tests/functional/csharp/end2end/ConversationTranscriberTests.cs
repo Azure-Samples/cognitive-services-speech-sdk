@@ -579,7 +579,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             config.OutputFormat = OutputFormat.Detailed;
 
             ManualResetEvent transcribedEvent = new ManualResetEvent(false);
-            ManualResetEvent transcribingEvent = new ManualResetEvent(false);
             ManualResetEvent speechStartEvent = new ManualResetEvent(false);
             ManualResetEvent speechEndEvent = new ManualResetEvent(false);
             ManualResetEvent canceledEvent = new ManualResetEvent(false);
@@ -599,12 +598,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 {
                     Console.WriteLine($"Recognized {e.Result.Text}");
                     transcribedEvent.Set();
-                };
-
-                conversationTranscriber.Transcribing += (s, e) =>
-                {
-                    Console.WriteLine($"Recognizing {e.Result.Text}");
-                    transcribingEvent.Set();
                 };
 
                 conversationTranscriber.SpeechStartDetected += (s, e) =>
@@ -643,7 +636,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 pushStream.Write(fileContents);
                 pushStream.Close();
 
-                Assert.IsTrue(WaitHandle.WaitAll(new System.Threading.WaitHandle[] { transcribedEvent, canceledEvent, transcribingEvent },
+                Assert.IsTrue(WaitHandle.WaitAll(new System.Threading.WaitHandle[] { transcribedEvent, canceledEvent },
                     TimeSpan.FromSeconds(3000)), "Events were not received in time");
             }
         }
