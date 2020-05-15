@@ -1037,6 +1037,7 @@ jobs:
           break
         fi
       done
+      set -e
       exit ${exitCode}
     displayName: Run C# unit tests
     condition: eq(variables['SPEECHSDK_RUN_TESTS'], 'true')

@@ -115,16 +115,46 @@ jobs:
         dotnet restore --no-cache --source https://api.nuget.org/v3/index.json --source /test/localnuget Microsoft.CognitiveServices.Speech.Tests.EndToEnd.csproj
         # set +e to allow captureing exit codes and retry loop, rather than blindly exiting the bash shell on error.
         set +e
-        for retry in {0..3}; do
-          dotnet test \$EXTRA_OPT --verbosity detailed --filter "TestCategory!=LongTest&TestCategory!=OfflineUnidec\$EXTRA_SKIP" --framework netcoreapp2.0 --settings csharp.runsettings --logger "trx;LogFileName=test-csharp_unit_tests-$(basename "$DOCKER_BASE")_\$retry.trx"
-          exitCode=\$?
-          if [[ \$exitCode == 0 ]]; then
-          echo "Test suite passed( \$retry )."
-            break
+
+        ACTUAL_LOG_FILE_NAME="test-csharp_unit_tests-$(basename "$DOCKER_BASE")"
+        LOG_FILE_NAME=LogFileName="\$ACTUAL_LOG_FILE_NAME.trx"
+        dotnet test \$EXTRA_OPT --verbosity detailed --filter \
+          "TestCategory!=LongTest&TestCategory!=OfflineUnidec\$EXTRA_SKIP" \
+          --framework netcoreapp2.0 --settings csharp.runsettings --logger "trx;\$LOG_FILE_NAME"
+
+        exitCode=\$?
+
+        ACTUAL_LOG_FILE_NAME_RETRY=\$ACTUAL_LOG_FILE_NAME
+
+        for i in {1..4}; do
+          if [[ \$exitCode != 0 ]]; then
+            echo Parsing the trx file "./TestResults/\$ACTUAL_LOG_FILE_NAME_RETRY.trx"
+            tests=""
+            FAILED="outcome=\"Failed\""
+            TESTNAME="testName"
+            while read p; do
+              if [[ \$p == *\$FAILED* ]] && [[ \$p != *parentExecutionId* ]]; then
+                words=( \$p )
+                for q in \${words[@]}; do
+                  if [[ \$q == *\$TESTNAME* ]] ; then
+                    test=\${q:10}
+                    test=\${test::-1}
+                    tests="\$tests | (Name=\$test)"
+                  fi
+                done
+              fi
+            done <"./TestResults/\$ACTUAL_LOG_FILE_NAME_RETRY.trx"
+            tests=\${tests:3}
+
+            ACTUAL_LOG_FILE_NAME_RETRY="\$ACTUAL_LOG_FILE_NAME-retry\$i"
+            LOG_FILE_NAME_RETRY="LogFileName=\$ACTUAL_LOG_FILE_NAME_RETRY.trx"
+
+            echo "Rerunning the following failed test "
+            echo \${tests[*]}
+            dotnet test \$EXTRA_OPT --verbosity detailed --filter \$tests --framework netcoreapp2.0 --settings csharp.runsettings --logger "trx;\$LOG_FILE_NAME_RETRY"
+            exitCode=\$?
           else
-            echo "Test suite failed during retry( \$retry )."
-            vsts_logissue warning "Test suite failed during retry( \$retry )."
-            sleep 2s
+            break
           fi
         done
         set -e
