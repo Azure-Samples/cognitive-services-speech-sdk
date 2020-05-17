@@ -12,6 +12,7 @@
     var speech = require("./speech");
     var intent = require("./intent");
     var translate = require("./translation");
+    var synthesis = require("./synthesis");
     
     function openPushStream(filename) {
         // create the push stream we need for the speech sdk.
@@ -42,6 +43,11 @@
                 console.log("Now translating from: " + settings.filename);
                 translate.main(settings, openPushStream(settings.filename));
                 break;
+
+            case "synthesis":
+                console.log("Now synthesizing to: " + settings.filename);
+                synthesis.main(settings, settings.filename);
+                break;
     
             case "speech":
             default:
@@ -51,7 +57,7 @@
         }
     }
     else {
-        console.log("usage: index.js [speech|intent|translate] {filename}");
+        console.log("usage: index.js [speech|intent|translate|synthesis] {filename}");
     }
 }());
     

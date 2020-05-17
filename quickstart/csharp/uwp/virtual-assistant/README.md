@@ -1,11 +1,11 @@
 # Quickstart: Create a Voice Assistant with the Speech SDK in C# UWP
 
 This quickstart will connect to a previously authored and configured bot to enable a voice assistant experience from the client application.
-See the [accompanying article](https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/quickstart-voice-assistant-csharp-uwp) on the SDK documentation page which describes how to build this sample from scratch in Visual Studio.
+See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-voice-assistant-csharp-uwp) on the SDK documentation page which describes how to build this sample from scratch in Visual Studio.
 
 ## Prerequisites
 
-* A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/get-started).
+* A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
 * A previously created bot configured with the [Direct Line Speech channel](https://docs.microsoft.com/azure/bot-service/bot-service-channel-connect-directlinespeech)
 * A Windows PC with Windows 10 Fall Creators Update (10.0; Build 16299) or later, with a working microphone.
 * [Microsoft Visual Studio 2017](https://www.visualstudio.com/), Community Edition or higher.
@@ -35,4 +35,4 @@ When you see the `Enable microphone` button, click it. Then select the `Listen` 
 ## References
 
 * [Quickstart article on the SDK documentation site](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-voice-assistant-csharp-uwp)
-* [Speech SDK API reference for C#](https://docs.microsoft.com/en-us/dotnet/api/microsoft.cognitiveservices.speech.dialog?view=azure-dotnet)
+* [Speech SDK API reference for C#](https://docs.microsoft.com/dotnet/api/microsoft.cognitiveservices.speech.dialog?view=azure-dotnet)

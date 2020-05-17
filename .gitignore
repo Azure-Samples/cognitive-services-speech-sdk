@@ -306,3 +306,6 @@ samples/cpp/windows/console/samples/sample
 # macOS executables
 quickstart/cpp-macos/helloworld
 quickstart/text-to-speech/cpp-macos/helloworld
+
+# synthesized audio
+quickstart/**/text-to-speech/*.wav
