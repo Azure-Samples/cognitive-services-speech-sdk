@@ -72,11 +72,14 @@ BEGIN {
       quickstart/csharp/unity/text-to-speech/Assets/Scripts/HelloWorld.cs#code
       quickstart/csharp/uwp/from-microphone/helloworld/MainPage.xaml#StackPanel
       quickstart/csharp/uwp/from-microphone/helloworld/MainPage.xaml.cs#code
+      quickstart/csharp/uwp/keyword-recognizer/helloworld/MainPage.xaml#StackPanel
+      quickstart/csharp/uwp/keyword-recognizer/helloworld/MainPage.xaml.cs#code
       quickstart/csharp/uwp/text-to-speech/helloworld/MainPage.xaml#StackPanel
       quickstart/csharp/uwp/text-to-speech/helloworld/MainPage.xaml.cs#code
       quickstart/csharp/uwp/translate-speech-to-text/helloworld/MainPage.xaml#StackPanel
       quickstart/csharp/uwp/translate-speech-to-text/helloworld/MainPage.xaml.cs#code
       quickstart/java/android/from-microphone/app/src/main/java/com/microsoft/cognitiveservices/speech/samples/quickstart/MainActivity.java#code
+      quickstart/java/android/keyword-recognizer/app/src/main/java/com/microsoft/cognitiveservices/speech/samples/quickstart/MainActivity.java#code
       quickstart/java/android/text-to-speech/app/src/main/java/com/microsoft/cognitiveservices/speech/samples/quickstart/MainActivity.java#code
       quickstart/java/android/text-to-speech/app/src/main/java/com/microsoft/cognitiveservices/speech/samples/quickstart/SpeakerStream.java#code
       quickstart/java/jre/from-microphone/pom.xml#dependencies
