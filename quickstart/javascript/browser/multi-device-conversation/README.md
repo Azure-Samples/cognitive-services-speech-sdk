@@ -1,7 +1,6 @@
 # Quickstart: Recognize speech in JavaScript on a Web Browser.
 
 These samples demonstrate how to recognize speech, and how to create or join a multi-device conversation with real-time transcriptions and translations, using the Speech SDK for JavaScript on a web browser, like Microsoft Edge, or Chrome.
-* See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-js-browser) on the SDK documentation page which describes how to build this sample from scratch in your favorite editor.
 * See the [overview article](https://docs.microsoft.com/azure/cognitive-services/speech-service/multi-device-conversation) on the SDK documentation page to learn more about Multi-device Conversation (Preview).
 
 ## Prerequisites
@@ -27,15 +26,9 @@ If you want to host the sample on a web server:
   * Replace the string `YourServiceRegion` with the service region of your subscription.
     For example, replace with `westus` if you are using the 30-day free trial subscription.
   * Replace the string `YourSubscriptionKey` with your own subscription key.
-* Edit the `index.html` or `multi-device-conversation.html` source:
+* Edit the  `multi-device-conversation.html` source:
   * Replace the value for the variable `authorizationEndpoint` with the full URL where you can access the token.php resource.
 * Deploy all files to your web server.
-
-## Run the `index.html` sample
-
-* In case you are running the sample from your local computer, open `index.html` from the location where you have downloaded this quickstart with a JavaScript capable browser.
-* Use the input fields to set your `subscription key` and `service region`.
-* Press the `Start recognition` button to start recognizing speech.
   
 ## Run the `multi-device-conversation.html` sample
 
@@ -66,7 +59,6 @@ If you want to host the sample on a web server:
 
 ## References
 
-* [Quickstart article on the SDK documentation site](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-js-browser)
 * [Speech SDK API reference for JavaScript](https://aka.ms/csspeech/javascriptref)
 * [Speech SDK Multi-device Conversation (Preview)](https://docs.microsoft.com/azure/cognitive-services/speech-service/multi-device-conversation)
 * [Language support for Multi-device conversation (Preview)](https://docs.microsoft.com/azure/cognitive-services/speech-service/multi-device-conversation#language-support)

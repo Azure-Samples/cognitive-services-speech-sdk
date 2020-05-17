@@ -37,7 +37,7 @@ namespace BatchClient
         {
             // Cognitive Services follows security best practices.
             // If you experience connectivity issues, see:
-            // https://docs.microsoft.com/en-us/dotnet/framework/network-programming/tls
+            // https://docs.microsoft.com/dotnet/framework/network-programming/tls
 
             await TranscribeAsync();
         }
