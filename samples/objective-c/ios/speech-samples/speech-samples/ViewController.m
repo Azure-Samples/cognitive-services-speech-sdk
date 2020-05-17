@@ -17,6 +17,7 @@
 @property (strong, nonatomic) IBOutlet UIButton *recognizeWithPhraseHintButton;
 @property (strong, nonatomic) IBOutlet UIButton *recognizeWithPushStreamButton;
 @property (strong, nonatomic) IBOutlet UIButton *recognizeWithPullStreamButton;
+@property (strong, nonatomic) IBOutlet UIButton *recognizeWithAutoLanguageDetectionButton;
 
 @property (strong, nonatomic) IBOutlet UILabel *recognitionResultLabel;
 
@@ -25,6 +26,7 @@
 - (IBAction)recognizeWithPhraseHintButtonTapped:(UIButton *)sender;
 - (IBAction)recognizeWithPushStreamButtonTapped:(UIButton *)sender;
 - (IBAction)recognizeWithPullStreamButtonTapped:(UIButton *)sender;
+- (IBAction)recognizeWithAutoLanguageDetectionButtonTapped:(UIButton *)sender;
 @end
 
 @implementation ViewController
@@ -71,6 +73,13 @@
     self.recognizeWithPullStreamButton.accessibilityIdentifier = @"recognize_pull_stream_button";
     [self.view addSubview:self.recognizeWithPullStreamButton];
 
+    self.recognizeWithAutoLanguageDetectionButton = [UIButton buttonWithType:UIButtonTypeSystem];
+    [self.recognizeWithAutoLanguageDetectionButton addTarget:self action:@selector(recognizeWithAutoLanguageDetectionButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
+    [self.recognizeWithAutoLanguageDetectionButton setTitle:@"Start rec with auto language detection" forState:UIControlStateNormal];
+    [self.recognizeWithAutoLanguageDetectionButton setFrame:CGRectMake(50.0, 350.0, 300.0, 50.0)];
+    self.recognizeWithAutoLanguageDetectionButton.accessibilityIdentifier = @"recognize_language_detection_button";
+    [self.view addSubview:self.recognizeWithAutoLanguageDetectionButton];
+
     self.recognitionResultLabel = [[UILabel alloc] initWithFrame:CGRectMake(50.0, 350.0, 300.0, 400.0)];
     self.recognitionResultLabel.lineBreakMode = NSLineBreakByWordWrapping;
     self.recognitionResultLabel.numberOfLines = 0;
@@ -107,6 +116,12 @@
 - (IBAction)recognizeWithPullStreamButtonTapped:(UIButton *)sender {
     dispatch_async(dispatch_get_global_queue(QOS_CLASS_DEFAULT, 0), ^{
         [self recognizeWithPullStream];
+    });
+}
+
+- (IBAction)recognizeWithAutoLanguageDetectionButtonTapped:(UIButton *)sender {
+    dispatch_async(dispatch_get_global_queue(QOS_CLASS_DEFAULT, 0), ^{
+        [self recognizeWithAutoLanguageDetection];
     });
 }
 
@@ -471,6 +486,63 @@
     while (end == false)
         [NSThread sleepForTimeInterval:1.0f];
     [speechRecognizer stopContinuousRecognition];
+}
+
+/*
+ * Performs speech recognition with auto source language detection
+ */
+- (void)recognizeWithAutoLanguageDetection {
+    NSBundle *mainBundle = [NSBundle mainBundle];
+    NSString *weatherFile = [mainBundle pathForResource: @"whatstheweatherlike" ofType:@"wav"];
+    NSLog(@"weatherFile path: %@", weatherFile);
+    if (!weatherFile) {
+        NSLog(@"Cannot find audio file!");
+        [self updateRecognitionErrorText:(@"Cannot find audio file")];
+        return;
+    }
+
+    SPXAudioConfiguration* weatherAudioSource = [[SPXAudioConfiguration alloc] initWithWavFileInput:weatherFile];
+    if (!weatherAudioSource) {
+        NSLog(@"Loading audio file failed!");
+        [self updateRecognitionErrorText:(@"Audio Error")];
+        return;
+    }
+
+    SPXSpeechConfiguration *speechConfig = [[SPXSpeechConfiguration alloc] initWithSubscription:speechKey region:serviceRegion];
+    if (!speechConfig) {
+        NSLog(@"Could not load speech config");
+        [self updateRecognitionErrorText:(@"Speech Config Error")];
+        return;
+    }
+
+    NSArray *languages = @[@"zh-CN", @"en-US"];
+    SPXAutoDetectSourceLanguageConfiguration* autoDetectSourceLanguageConfig = [[SPXAutoDetectSourceLanguageConfiguration alloc]init:languages];
+
+    [self updateRecognitionStatusText:(@"Recognizing...")];
+
+    SPXSpeechRecognizer* speechRecognizer = [[SPXSpeechRecognizer alloc] initWithSpeechConfiguration:speechConfig
+                                                               autoDetectSourceLanguageConfiguration:autoDetectSourceLanguageConfig
+                                                                                  audioConfiguration:weatherAudioSource];
+    if (!speechRecognizer) {
+        NSLog(@"Could not create speech recognizer");
+        [self updateRecognitionResultText:(@"Speech Recognition Error")];
+        return;
+    }
+
+    SPXSpeechRecognitionResult *speechResult = [speechRecognizer recognizeOnce];
+    if (SPXResultReason_Canceled == speechResult.reason) {
+        SPXCancellationDetails *details = [[SPXCancellationDetails alloc] initFromCanceledRecognitionResult:speechResult];
+        NSLog(@"Speech recognition was canceled: %@. Did you pass the correct key/region combination?", details.errorDetails);
+        [self updateRecognitionErrorText:([NSString stringWithFormat:@"Canceled: %@", details.errorDetails ])];
+    } else if (SPXResultReason_RecognizedSpeech == speechResult.reason) {
+        SPXAutoDetectSourceLanguageResult *languageResult = [[SPXAutoDetectSourceLanguageResult alloc] init:speechResult];
+        NSLog(@"Speech recognition result received: %@ in language %@", speechResult.text, [languageResult language]);
+        NSString *resultText = [NSString stringWithFormat:@"Language: %@, %@", [languageResult language], speechResult.text];
+        [self updateRecognitionResultText:(resultText)];
+    } else {
+        NSLog(@"There was an error.");
+        [self updateRecognitionErrorText:(@"Speech Recognition Error")];
+    }
 }
 
 - (void)updateRecognitionResultText:(NSString *) resultText {

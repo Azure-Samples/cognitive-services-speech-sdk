@@ -15,21 +15,21 @@ using System.Linq;
 namespace MicrosoftSpeechSDKSamples
 {
     // For server scenario synthesizing with high concurrency, we recommend two methods to reduce the latency.
-    // Firstly, reuse the synthesizers (e.g. use a synthesizer pool )to reduce the connection establish latency;
+    // Firstly, reuse the synthesizers (e.g. use a synthesizer pool ) to reduce the connection establish latency;
     // secondly, use AudioOutputStream or synthesizing event to streaming receive the synthesized audio to lower the first byte latency.
 
     public class SynthesizerPool : IDisposable
     {
         private readonly Func<SpeechSynthesizer> _synthesizerGenerator; 
 
-        private readonly ConcurrentBag<SpeechSynthesizer> _synthesizerBag;
+        private readonly ConcurrentStack<SpeechSynthesizer> _synthesizerStack;
         private readonly int _initialCapacity;
         private readonly int _maximumRetainedCapacity;
 
         public SynthesizerPool(Func<SpeechSynthesizer> synthesizerGenerator, int initialCapacity = 2, int maximumRetainedCapacity = 64)
         {
             _synthesizerGenerator = synthesizerGenerator;
-            _synthesizerBag = new ConcurrentBag<SpeechSynthesizer>();
+            _synthesizerStack = new ConcurrentStack<SpeechSynthesizer>();
             _initialCapacity = initialCapacity;
             _maximumRetainedCapacity = maximumRetainedCapacity;
             for (var i = 0; i < initialCapacity; i++)
@@ -40,7 +40,7 @@ namespace MicrosoftSpeechSDKSamples
 
         public void Dispose()
         {
-            foreach (var synthesizer in _synthesizerBag)
+            foreach (var synthesizer in _synthesizerStack)
             {
                 synthesizer.Dispose();
             }
@@ -48,14 +48,14 @@ namespace MicrosoftSpeechSDKSamples
 
         public SpeechSynthesizer Get()
         {
-            return _synthesizerBag.TryTake(out SpeechSynthesizer item) ? item : _synthesizerGenerator();
+            return _synthesizerStack.TryPop(out SpeechSynthesizer item) ? item : _synthesizerGenerator();
         }
 
         public void Put(SpeechSynthesizer item)
         {
-            if (_synthesizerBag.Count < _maximumRetainedCapacity)
+            if (_synthesizerStack.Count < _maximumRetainedCapacity)
             {
-                _synthesizerBag.Add(item);
+                _synthesizerStack.Push(item);
             }
             else
             {
