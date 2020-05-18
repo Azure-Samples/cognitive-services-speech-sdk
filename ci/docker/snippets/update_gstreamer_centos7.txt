@@ -1,0 +1,5 @@
+RUN yum install -y epel-release && \
+    rpm -Uv http://awel.domblogger.net/7/media/x86_64/awel-media-release-7-6.noarch.rpm && \
+    yum clean all && \
+    yum update -y && \
+    rm -rf /var/cache/yum/*

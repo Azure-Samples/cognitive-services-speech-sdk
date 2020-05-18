@@ -107,10 +107,6 @@ jobs:
         if dotnet test --help | grep -q -- --blame; then
           EXTRA_OPT=--blame
         fi
-        if [[ $DOCKER_IMAGE =~ centos7 ]]; then
-          # Opus audio coding format is not supported on RHEL/CentOS 7
-          EXTRA_SKIP="&Name!=SimpleRecognitionCompressedOPUS"
-        fi
         cd tests/functional/csharp/end2end
         dotnet restore --no-cache --source https://api.nuget.org/v3/index.json --source /test/localnuget Microsoft.CognitiveServices.Speech.Tests.EndToEnd.csproj
         # set +e to allow captureing exit codes and retry loop, rather than blindly exiting the bash shell on error.
@@ -119,7 +115,7 @@ jobs:
         ACTUAL_LOG_FILE_NAME="test-csharp_unit_tests-$(basename "$DOCKER_BASE")"
         LOG_FILE_NAME=LogFileName="\$ACTUAL_LOG_FILE_NAME.trx"
         dotnet test \$EXTRA_OPT --verbosity detailed --filter \
-          "TestCategory!=LongTest&TestCategory!=OfflineUnidec\$EXTRA_SKIP" \
+          "TestCategory!=LongTest&TestCategory!=OfflineUnidec" \
           --framework netcoreapp2.0 --settings csharp.runsettings --logger "trx;\$LOG_FILE_NAME"
 
         exitCode=\$?

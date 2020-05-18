@@ -149,13 +149,14 @@ my %images = (
     spec => ['from-centos8-x64', yumInstallWith(qw/oobe_centos_deps oobedevcpp_centos_deps oobe_centos_gstreamer_deps test_deps/), 'builduser', 'set_env_centos'],
   },
   oobedevcpp_centos7_x64 => {
-    version => 1,
+    version => 2,
     spec => [
         # Stage 0
         qw/from-centos7-x64 stage_gcc_fromsource_centos7_x64/,
         # Image
         qw/from-centos7-x64 copy-layer-0-gcc-usr-local/,
         yumInstallWith(qw/oobe_centos_deps oobedevcpp_centos_deps oobedevcpp_centos7_deps oobe_centos_gstreamer_deps test_deps/),
+        'update_gstreamer_centos7',
         'builduser',
         'set_env_centos'],
   },
@@ -188,13 +189,14 @@ my %images = (
     spec => ['from-centos8-x64', yumInstallWith(qw/oobe_centos_deps oobejre_centos_deps oobe_centos_gstreamer_deps test_deps/), 'builduser', 'set_env_centos'],
   },
   oobejre_centos7_x64 => {
-    version => 1,
+    version => 2,
     spec => [
         # Stage 0
         qw/from-centos7-x64 stage_gcc_fromsource_centos7_x64/,
         # Image
         qw/from-centos7-x64 copy-layer-0-gcc-usr-local/,
         yumInstallWith(qw/oobe_centos_deps oobejre_centos_deps oobe_centos_gstreamer_deps test_deps/),
+        'update_gstreamer_centos7',
         'builduser',
         'set_env_centos'],
   },
@@ -244,7 +246,7 @@ my %images = (
         'set_env_centos'],
   },
   oobedevdnc21_centos7_x64 => {
-    version => 1,
+    version => 2,
     spec => [
         # Stage 0
         qw/from-centos7-x64 stage_gcc_fromsource_centos7_x64/,
@@ -252,6 +254,7 @@ my %images = (
         qw/from-centos7-x64 copy-layer-0-gcc-usr-local/,
         'config_microsoft_packages_centos7',
         yumInstallWith(qw/oobe_centos_deps oobedevdnc21_centos_deps oobe_centos_gstreamer_deps test_deps/),
+        'update_gstreamer_centos7',
         'builduser',
         'set_env_centos'],
   },
@@ -283,13 +286,14 @@ my %images = (
     spec => ['from-centos8-x64', yumInstallWith(qw/oobe_centos_deps oobepython_centos_deps oobe_centos_gstreamer_deps test_deps/), 'oobepython_jupyter', 'builduser', 'set_env_centos'],
   },
   oobedevpy36_centos7_x64 => {
-    version => 1,
+    version => 2,
     spec => [
         # Stage 0
         qw/from-centos7-x64 stage_gcc_fromsource_centos7_x64/,
         # Image
         qw/from-centos7-x64 copy-layer-0-gcc-usr-local/,
         yumInstallWith(qw/oobe_centos_deps oobepython_centos_deps oobe_centos_gstreamer_deps test_deps/),
+        'update_gstreamer_centos7',
         'oobepython_jupyter',
         'builduser',
         'set_env_centos'],
