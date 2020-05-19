@@ -977,7 +977,7 @@ string Connection::Impl::UpdateRequestId(const MessageType messageType, bool bin
         // Unknown messages that are binary will get an existing request ID if one is available.
         if (binary)
         {
-            if (!m_speechRequestId.empty())
+            if (m_speechRequestId.empty())
             {
                 m_speechRequestId = CreateRequestId();
             }

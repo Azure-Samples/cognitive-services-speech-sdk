@@ -39,6 +39,7 @@ constexpr char g_KeywordStreamId[] = "X-StreamId";
 constexpr char g_keywordRequestId[] = "X-RequestId";
 constexpr char g_keywordContentType[] = "Content-Type";
 constexpr char g_messageHeader[] = "%s:%s\r\nPath:%s\r\nContent-Type:application/json\r\n%s:%s\r\n\r\n";
+constexpr char g_messageHeaderBinaryMessage[] = "%s:%s\r\nPath:%s\r\n%s:%s\r\n";
 constexpr char g_messageHeaderSsml[] = "%s:%s\r\nPath:%s\r\nContent-Type:application/ssml+xml\r\n%s:%s\r\n\r\n";
 constexpr char g_messageHeaderWithoutRequestId[] = "%s:%s\r\nPath:%s\r\nContent-Type:application/json\r\n\r\n";
 
@@ -871,6 +872,35 @@ static int add_auth_headers(TokenStore tokenStore, HTTP_HEADERS_HANDLE headers, 
     return tokenChanged;
 }
 
+int TransportCreateDataHeaderBinaryMessage(
+    char* buffer,
+    size_t payloadSize,
+    const char* timeString,
+    const char* path,
+    const char* requestId)
+{
+    auto headerLen = sprintf_s(buffer + WS_MESSAGE_HEADER_SIZE,
+        payloadSize - WS_MESSAGE_HEADER_SIZE,
+        g_messageHeaderBinaryMessage,
+        g_timeStampHeaderName,
+        timeString,
+        path,
+        g_keywordRequestId,
+        requestId);
+
+    if (headerLen < 0)
+    {
+        return -1;
+    }
+
+    // two bytes length
+    buffer[0] = static_cast<uint8_t>((headerLen >> 8) & 0xff);
+    buffer[1] = static_cast<uint8_t>((headerLen >> 0) & 0xff);
+    headerLen = headerLen + WS_MESSAGE_HEADER_SIZE;
+
+    return static_cast<int>(headerLen);
+}
+
 int usp::TransportRequestPrepare(TransportHandle transportHandle)
 {
     TransportRequest* request = (TransportRequest*)transportHandle;
@@ -941,13 +971,14 @@ int usp::TransportMessageWrite(TransportHandle transportHandle, const std::strin
 
     bool includeRequestId = requestId != NULL && requestId[0] != '\0';
 
-    size_t payloadSize = sizeof(g_messageHeader) +
+    size_t payloadSize = (binary ? sizeof(g_messageHeaderBinaryMessage) : sizeof(g_messageHeader)) +
         path.size() +
         (includeRequestId ? sizeof(g_keywordRequestId) : 0) +
         (includeRequestId ? NO_DASH_UUID_LEN : 0) +
         sizeof(g_timeStampHeaderName) +
         TIME_STRING_MAX_SIZE +
-        bufferSize;
+        bufferSize +
+        (binary ? 2 : 0);
     auto msg = std::make_unique<TransportPacket>(static_cast<uint8_t>(MetricMessageType::METRIC_MESSAGE_TYPE_DEVICECONTEXT), static_cast<unsigned char>(binary ? WS_FRAME_TYPE_BINARY : WS_FRAME_TYPE_TEXT), payloadSize);
 
     char timeString[TIME_STRING_MAX_SIZE];
@@ -969,6 +1000,15 @@ int usp::TransportMessageWrite(TransportHandle transportHandle, const std::strin
                 timeString,
                 path.c_str(),
                 g_keywordRequestId,
+                requestId);
+        }
+        else if (binary)
+        {
+            msg->length = TransportCreateDataHeaderBinaryMessage(
+                reinterpret_cast<char*>(msg->buffer.get()),
+                payloadSize,
+                timeString,
+                path.c_str(),
                 requestId);
         }
         else
