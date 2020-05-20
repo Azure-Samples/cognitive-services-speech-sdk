@@ -67,12 +67,11 @@ public class RemoteConversationTranscriptionTest {
 
     @Before
     public void readSystemProperties() {
-        speechKey = Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key;
-        speechRegion = Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region;
+        speechKey = Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.CONVERSATION_TRANSCRIPTION_PROD_SUBSCRIPTION).Key;
+        speechRegion = Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.CONVERSATION_TRANSCRIPTION_PROD_SUBSCRIPTION).Region;
         inputDirectory = Settings.DefaultSettingsMap.get(DefaultSettingsKeys.INPUT_DIR);
     }
 
-    @Ignore("TODO Fix this test!!!!")
     @Test
     public void simpleRemoteConversationTest() {
         SpeechConfig config = null;
