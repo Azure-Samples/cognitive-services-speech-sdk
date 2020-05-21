@@ -79,6 +79,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils
         public static string SINGLE_UTTERANCE_ENGLISH => "SingleUtteranceEnglish";
         public static string SINGLE_UTTERANCE_CHINESE => "SingleUtteranceChinese";
         public static string MULTIPLE_UTTERANCE_CHINESE => "MultipleUtteranceChinese";
+        public static string SPEAKER_VERIFYCATION_ENGLISH => "MyVoiceIsMyPassportVerifyMe";
         public static string SINGLE_UTTERANCE_MP3 => "SingleUtteranceMP3";
         public static string SINGLE_UTTERANCE_OPUS => "SingleUtteranceOPUS";
         public static string SINGLE_UTTERANCE_A_LAW => "SingleUtteranceALaw";

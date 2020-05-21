@@ -36,8 +36,14 @@ namespace Microsoft.CognitiveServices.Speech
             EnrollmentsCount = Convert.ToInt32(Properties.GetProperty("enrollment.enrollmentsCount", "0"), provider);
             EnrollmentsLength = TimeSpan.FromTicks((long)Convert.ToUInt64(Properties.GetProperty("enrollment.enrollmentsLength", "0"), provider));
             EnrollmentsSpeechLength = TimeSpan.FromTicks((long)Convert.ToUInt64(Properties.GetProperty("enrollment.enrollmentsSpeechLength", "0"), provider));
-            RemainingEnrollmentsCount = Convert.ToInt32(Properties.GetProperty("remainingEnrollmentsCount", "5"), provider);
-            RemainingEnrollmentsSpeechLength = TimeSpan.FromTicks((long)Convert.ToUInt64(Properties.GetProperty("enrollment.remainingEnrollmentsSpeechLength", "0"), provider));
+            if(Int32.TryParse(Properties.GetProperty("enrollment.remainingEnrollmentsCount"), out int count))
+            {
+                RemainingEnrollmentsCount = count;
+            }
+            if(UInt64.TryParse(Properties.GetProperty("enrollment.remainingEnrollmentsSpeechLength"), out ulong length))
+            {
+                RemainingEnrollmentsSpeechLength = TimeSpan.FromTicks((long)length);
+            }            
             AudioLength = TimeSpan.FromTicks((long)Convert.ToUInt64(Properties.GetProperty("enrollment.audioLength", "0"), provider));
             AudioSpeechLength = TimeSpan.FromTicks((long)Convert.ToUInt64(Properties.GetProperty("enrollment.audioSpeechLength", "0"), provider));
         }
@@ -70,12 +76,12 @@ namespace Microsoft.CognitiveServices.Speech
         /// <summary>
         /// Number of enrollment audios needed to complete profile enrollment.
         /// </summary>
-        public Int32 RemainingEnrollmentsCount { get; private set; }
+        public Int32? RemainingEnrollmentsCount { get; private set; }
 
         /// <summary>
         /// The amount of pure speech (which is the amount of audio after removing silence and non-speech segments) needed to complete profile enrollment in hundred nanoseconds.
         /// </summary>
-        public TimeSpan RemainingEnrollmentsSpeechLength { get; private set; }
+        public TimeSpan? RemainingEnrollmentsSpeechLength { get; private set; }
 
         /// <summary>
         /// The summation of pure speech(which is the amount of audio after removing silence and non - speech segments) across all profile enrollments in hundred nanoseconds.

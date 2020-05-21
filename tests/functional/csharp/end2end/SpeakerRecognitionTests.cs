@@ -118,7 +118,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     await client.DeleteProfileAsync(profile);
                 }
             }
-
         }
 
         [TestMethod]
@@ -126,7 +125,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             var config = SpeechConfig.FromHost(new Uri(DefaultSettingsMap[DefaultSettingKeys.SPEAKER_RECOGNITION_ENDPOINT]), SubscriptionsRegionsMap[SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION].Key);
             using (var client = new VoiceProfileClient(config))
-            using (var profile = await client.CreateProfileAsync(VoiceProfileType.TextIndependentVerification, "en-us"))
+            using (var profile = await client.CreateProfileAsync(VoiceProfileType.TextIndependentIdentification, "en-us"))
             {
                 try
                 {
@@ -139,8 +138,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                         SPXTEST_REQUIRE(!String.IsNullOrEmpty(json_string));
                         SPXTEST_REQUIRE(result.ProfileId == profile.Id);
                         SPXTEST_REQUIRE(result.EnrollmentsCount == 1);
+                        SPXTEST_REQUIRE(result.RemainingEnrollmentsCount == null);
+                        SPXTEST_REQUIRE(result.RemainingEnrollmentsSpeechLength >= new TimeSpan((long)0));
                         SPXTEST_REQUIRE(result.EnrollmentsSpeechLength >= new TimeSpan((long)239200000));
-                        SPXTEST_REQUIRE(result.RemainingEnrollmentsCount == 5);
                         SPXTEST_REQUIRE(result.Reason == ResultReason.EnrolledVoiceProfile);
                     }
                 }
@@ -171,6 +171,34 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                         var details = VoiceProfileEnrollmentCancellationDetails.FromResult(result);
                         SPXTEST_REQUIRE(details.ErrorCode == CancellationErrorCode.BadRequest);
                         SPXTEST_REQUIRE(details.Reason == CancellationReason.Error);
+                    }
+                }
+                finally
+                {
+                    await client.DeleteProfileAsync(profile);
+                }
+            }
+        }
+
+        [TestMethod]
+        public async Task text_dependent_verification_enrollment_good_case()
+        {
+            var config = SpeechConfig.FromHost(new Uri(DefaultSettingsMap[DefaultSettingKeys.SPEAKER_RECOGNITION_ENDPOINT]), SubscriptionsRegionsMap[SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION].Key);
+            using (var client = new VoiceProfileClient(config))
+            using (var profile = await client.CreateProfileAsync(VoiceProfileType.TextDependentVerification, "en-us"))
+            {
+                try
+                {
+                    SPXTEST_REQUIRE(!String.IsNullOrEmpty(profile.Id));
+
+                    using (var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SPEAKER_VERIFYCATION_ENGLISH].FilePath.GetRootRelativePath()))
+                    {
+                        var result = await client.EnrollProfileAsync(profile, audioInput);
+                        var json_string = result.Properties.GetProperty(PropertyId.SpeechServiceResponse_JsonResult);
+                        SPXTEST_REQUIRE(!String.IsNullOrEmpty(json_string));
+                        SPXTEST_REQUIRE(result.Reason == ResultReason.EnrollingVoiceProfile);
+                        SPXTEST_REQUIRE(result.RemainingEnrollmentsCount >= 0);
+                        SPXTEST_REQUIRE(result.RemainingEnrollmentsSpeechLength == null);
                     }
                 }
                 finally
@@ -280,11 +308,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                             using (var recognizer2 = new SpeakerRecognizer(config, wrongAudioFile))
                             {
                                 var result3 = await recognizer2.RecognizeOnceAsync(model);
-                                SPXTEST_REQUIRE(result3.Reason == ResultReason.Canceled);
-                                var details3 = SpeakerRecognitionCancellationDetails.FromResult(result3);
-
-                                SPXTEST_REQUIRE(details3.Reason == CancellationReason.Error);
-                                SPXTEST_REQUIRE(details3.ErrorDetails.IndexOf("reject", StringComparison.OrdinalIgnoreCase) >= 0);
+                                SPXTEST_REQUIRE(result3.Reason == ResultReason.NoMatch);
+                                var rawJsonStringFromService = result3.Properties.GetProperty(PropertyId.SpeechServiceResponse_JsonResult);
+                                SPXTEST_REQUIRE(rawJsonStringFromService.IndexOf("reject", StringComparison.OrdinalIgnoreCase) >= 0);
                             }
                         }
                     }

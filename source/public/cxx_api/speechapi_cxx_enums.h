@@ -868,12 +868,7 @@ enum class VoiceProfileType
     /// <summary>
     /// Text independent verification.
     /// </summary>
-    TextIndependentVerification = 3,
-
-    /// <summary>
-    ///  Conversation Diarization.
-    /// </summary>
-    ConversationDiarization = 4
+    TextIndependentVerification = 3
 };
 
 } } } // Microsoft::CognitiveServices::Speech

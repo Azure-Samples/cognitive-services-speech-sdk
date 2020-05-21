@@ -102,8 +102,8 @@ public:
     virtual RecognitionResultPtr CreateResult(CreateFinalResultFuncPtr func) override;
 
 private:
-    bool GetReasons(ResultReason& resultReason, CancellationReason& cancelReason);
-    std::string GetErrorMesssage(bool rejected);
+    virtual ResultReason GetResultReason() override;
+    std::string GetErrorMesssage(ResultReason resultReason);
 
     ResponsePtr m_response;
     std::string m_profileId;
@@ -175,6 +175,7 @@ private:
     VoiceProfileType m_voiceProfileType;
     bool m_enroll;
     std::string m_profileIdForVerification;
+    bool m_audioFlushed = false;
 
     std::unique_ptr<ISpxHttpDataClient> m_httpData;
     std::unique_ptr<HttpResponse> m_response;

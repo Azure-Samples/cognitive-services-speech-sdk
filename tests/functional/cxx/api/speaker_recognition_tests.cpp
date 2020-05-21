@@ -28,6 +28,7 @@ TEST_CASE("text independent verification enrollment", "[api][cxx][speaker_id][en
 {
     // create a profile using a speech config
     SPXTEST_REQUIRE(!DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT].empty());
+    REQUIRE(exists(ROOT_RELATIVE_PATH(MULTIPLE_UTTERANCE_CHINESE)));
     auto config = SpeechConfig::FromHost(DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT], SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
     auto client = VoiceProfileClient::FromConfig(config);
 
@@ -58,6 +59,7 @@ TEST_CASE("text independent identication enrollment", "[api][cxx][speaker_id][en
 {
     // create a profile using a speech config
     SPXTEST_REQUIRE(!DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT].empty());
+    REQUIRE(exists(ROOT_RELATIVE_PATH(MULTIPLE_UTTERANCE_CHINESE)));
     auto config = SpeechConfig::FromEndpoint(DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT], SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
     auto client = VoiceProfileClient::FromConfig(config);
 
@@ -84,13 +86,14 @@ TEST_CASE("text independent identication enrollment", "[api][cxx][speaker_id][en
     INFO(length);
     SPXTEST_REQUIRE(result->Reason == ResultReason::EnrolledVoiceProfile);
     INFO(DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT]);
-    INFO(SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);    
+    INFO(SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
 }
 
 TEST_CASE("text dependent verification enrollment bad request", "[api][cxx][speaker_id][enrollment_td_verfication_bad_request]")
 {
     // create a profile using a speech config
     SPXTEST_REQUIRE(!DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT].empty());
+    REQUIRE(exists(ROOT_RELATIVE_PATH(MULTIPLE_UTTERANCE_CHINESE)));
     auto config = SpeechConfig::FromEndpoint(DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT], SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
     auto client = VoiceProfileClient::FromConfig(config);
 
@@ -225,9 +228,11 @@ TEST_CASE("delete voice profile text independent identification", "[api][cxx][sp
     INFO(SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
 }
 
-TEST_CASE("speaker verification", "[api][cxx][speaker_id][verification]")
+TEST_CASE("speaker verification accept and reject speaker", "[api][cxx][speaker_id][verification]")
 {
     SPXTEST_REQUIRE(!DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT].empty());
+    REQUIRE(exists(ROOT_RELATIVE_PATH(MULTIPLE_UTTERANCE_CHINESE)));
+    REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
     auto config = SpeechConfig::FromEndpoint(DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT], SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
     auto audioInput = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(MULTIPLE_UTTERANCE_CHINESE));
 
@@ -255,11 +260,8 @@ TEST_CASE("speaker verification", "[api][cxx][speaker_id][verification]")
     auto wrongAudio = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
     auto recognizer2 = SpeakerRecognizer::FromConfig(config, wrongAudio);
     auto result2 = recognizer2->RecognizeOnceAsync(model).get();
-    SPXTEST_REQUIRE(result2->Reason == ResultReason::Canceled);
-    auto details = SpeakerRecognitionCancellationDetails::FromResult(result2);
+    SPXTEST_REQUIRE(result2->Reason == ResultReason::NoMatch);
 
-    SPXTEST_REQUIRE(details->Reason == CancellationReason::Error);
-    SPXTEST_REQUIRE(PAL::StringUtils::ToLower(details->ErrorDetails).find("reject") != std::string::npos);
     INFO(DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT]);
     INFO(SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
 }
@@ -267,6 +269,7 @@ TEST_CASE("speaker verification", "[api][cxx][speaker_id][verification]")
 TEST_CASE("speaker identification", "[api][cxx][speaker_id][identification]")
 {
     SPXTEST_REQUIRE(!DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT].empty());
+    REQUIRE(exists(ROOT_RELATIVE_PATH(MULTIPLE_UTTERANCE_CHINESE)));
     auto config = SpeechConfig::FromEndpoint(DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT], SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
     auto audioInput = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(MULTIPLE_UTTERANCE_CHINESE));
     auto recognizer = SpeakerRecognizer::FromConfig(config, audioInput);
@@ -306,3 +309,139 @@ TEST_CASE("speaker identification", "[api][cxx][speaker_id][identification]")
     INFO(DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT]);
     INFO(SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
 }
+
+TEST_CASE("Text Dependent Verify", "[api][cxx][speaker_id][td_good_case]")
+{
+    SPXTEST_REQUIRE(!DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT].empty());
+    REQUIRE(exists(ROOT_RELATIVE_PATH(SPEAKER_VERIFICATION_ENGLISH)));
+    SPXTEST_REQUIRE(!DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT].empty());
+    auto config = SpeechConfig::FromEndpoint(DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT], SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
+    auto audioInput = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SPEAKER_VERIFICATION_ENGLISH));
+
+    auto client = VoiceProfileClient::FromConfig(config);
+    auto profile1 = client->CreateProfileAsync(VoiceProfileType::TextDependentVerification, "en-us").get();
+    SPXTEST_REQUIRE(!profile1->GetId().empty());
+    // always delete the profile even when there are exceptions in following code. The lambda is called when exits this test case.
+    auto finish = std::shared_ptr<void>(nullptr, [&](void*) {
+        if (!profile1->GetId().empty())
+        {
+            auto deleteResult = client->DeleteProfileAsync(profile1).get();
+            SPXTEST_REQUIRE(deleteResult->Reason == ResultReason::DeletedVoiceProfile);
+        }
+        });
+    // passphrase is my voice is my passport verify me.
+    auto enrollResult = client->EnrollProfileAsync(profile1, audioInput).get();
+    SPXTEST_REQUIRE(enrollResult->Reason == ResultReason::EnrollingVoiceProfile);
+    SPXTEST_REQUIRE(enrollResult->GetEnrollmentInfo(EnrollmentInfoType::RemainingEnrollmentsCount) == 2);
+    SPXTEST_REQUIRE(enrollResult->GetEnrollmentInfo(EnrollmentInfoType::EnrollmentsCount) == 1);
+
+    enrollResult = client->EnrollProfileAsync(profile1, audioInput).get();
+    SPXTEST_REQUIRE(enrollResult->Reason == ResultReason::EnrollingVoiceProfile);
+
+    enrollResult = client->EnrollProfileAsync(profile1, audioInput).get();
+    SPXTEST_REQUIRE(enrollResult->Reason == ResultReason::EnrolledVoiceProfile);
+
+    auto model = SpeakerVerificationModel::FromProfile(profile1);
+    auto recognizer = SpeakerRecognizer::FromConfig(config, audioInput);
+    auto result = recognizer->RecognizeOnceAsync(model).get();
+    SPXTEST_REQUIRE(result->Reason == ResultReason::RecognizedSpeaker);
+    INFO(DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT]);
+    INFO(SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
+}
+
+TEST_CASE("Text Dependent Verify wrong passphrase", "[api][cxx][speaker_id][td_wrong_case]")
+{
+    SPXTEST_REQUIRE(!DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT].empty());
+    REQUIRE(exists(ROOT_RELATIVE_PATH(SPEAKER_VERIFICATION_ENGLISH)));
+    auto config = SpeechConfig::FromEndpoint(DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT], SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
+    auto verifymeFile = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SPEAKER_VERIFICATION_ENGLISH));
+
+    auto client = VoiceProfileClient::FromConfig(config);
+    auto profile1 = client->CreateProfileAsync(VoiceProfileType::TextDependentVerification, "en-us").get();
+    SPXTEST_REQUIRE(!profile1->GetId().empty());
+    // always delete the profile even when there are exceptions in following code. The lambda is called when exits this test case.
+    auto finish = std::shared_ptr<void>(nullptr, [&](void*) {
+        if (!profile1->GetId().empty())
+        {
+            auto deleteResult = client->DeleteProfileAsync(profile1).get();
+            SPXTEST_REQUIRE(deleteResult->Reason == ResultReason::DeletedVoiceProfile);
+        }
+        });
+    // passphrase is my voice is my passport verify me.
+    auto enrollResult = client->EnrollProfileAsync(profile1, verifymeFile).get();
+    SPXTEST_REQUIRE(enrollResult->Reason == ResultReason::EnrollingVoiceProfile);
+
+    // feed a audio not containing the passphrase, expecting invalid passphrase in the error detail and BadRequest.
+    // this is to test switching audio input between two EnrollProfileAsync.
+    auto weatherFile = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
+    enrollResult = client->EnrollProfileAsync(profile1, weatherFile).get();
+    SPXTEST_REQUIRE(enrollResult->Reason == ResultReason::Canceled);
+    auto details = VoiceProfileEnrollmentCancellationDetails::FromResult(enrollResult);
+    SPXTEST_REQUIRE(details->ErrorCode == CancellationErrorCode::BadRequest);
+    SPXTEST_REQUIRE(PAL::StringUtils::ToLower(details->ErrorDetails).find("invalid passphrase") != string::npos);
+
+    INFO(DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT]);
+    INFO(SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
+}
+
+TEST_CASE("enroll and delete in parallel", "[api][cxx][speaker_id][parallel]")
+{
+    SPXTEST_REQUIRE(!DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT].empty());
+    REQUIRE(exists(ROOT_RELATIVE_PATH(SPEAKER_VERIFICATION_ENGLISH)));
+    auto config = SpeechConfig::FromEndpoint(DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT], SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
+    auto verifymeFile = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SPEAKER_VERIFICATION_ENGLISH));
+    auto weatherFile = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
+
+    auto client = VoiceProfileClient::FromConfig(config);
+    auto profile1 = client->CreateProfileAsync(VoiceProfileType::TextDependentVerification, "en-us").get();
+    SPXTEST_REQUIRE(!profile1->GetId().empty());
+    // always delete the profile even when there are exceptions in following code. The lambda is called when exits this test case.
+    auto finish = std::shared_ptr<void>(nullptr, [&](void*) {
+        if (!profile1->GetId().empty())
+        {
+            auto deleteResult = client->DeleteProfileAsync(profile1).get();
+        }});
+    auto profile2 = client->CreateProfileAsync(VoiceProfileType::TextDependentVerification, "en-us").get();
+    // always delete the profile even when there are exceptions in following code. The lambda is called when exits this test case.
+    auto finish2 = std::shared_ptr<void>(nullptr, [&](void*) {
+        if (!profile2->GetId().empty())
+        {
+            auto deleteResult = client->DeleteProfileAsync(profile2).get();
+        }});
+
+    // not waiting is an user error, we won't render a result but we should not crash.
+    auto enrollFuture1 = client->EnrollProfileAsync(profile1, verifymeFile);
+    auto enrollFuture2 = client->EnrollProfileAsync(profile2, weatherFile);
+    auto deleteFuture3 = client->DeleteProfileAsync(profile2);
+}
+#if 0
+TEST_CASE("Microphone Text Dependent Verify", "[api][cxx][speaker_id][microphone]")
+{
+    SPXTEST_REQUIRE(!DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT].empty());
+
+    auto config = SpeechConfig::FromEndpoint(DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT], SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
+    auto audioInput = AudioConfig::FromDefaultMicrophoneInput();
+    //config->SetProperty("SPEECH-MicrophoneTimeoutInSpeakerRecognitionInMilliseconds", "thisis ");
+    auto client = VoiceProfileClient::FromConfig(config);
+    auto profile1 = client->CreateProfileAsync(VoiceProfileType::TextDependentVerification, "en-us").get();
+    SPXTEST_REQUIRE(!profile1->GetId().empty());
+    // always delete the profile even when there are exceptions in following code. The lambda is called when exits this test case.
+    auto finish = std::shared_ptr<void>(nullptr, [&](void*) {
+        if (!profile1->GetId().empty())
+        {
+            auto deleteResult = client->DeleteProfileAsync(profile1).get();
+            SPXTEST_REQUIRE(deleteResult->Reason == ResultReason::DeletedVoiceProfile);
+        }
+        });
+    //REQUIRE_THROWS(client->EnrollProfileAsync(profile1, audioInput).get());
+
+    auto enrollResult = client->EnrollProfileAsync(profile1, audioInput).get();
+    SPXTEST_REQUIRE(enrollResult->Reason == ResultReason::EnrollingVoiceProfile);
+
+    enrollResult = client->EnrollProfileAsync(profile1, audioInput).get();
+    SPXTEST_REQUIRE(enrollResult->Reason == ResultReason::EnrollingVoiceProfile);
+
+    enrollResult = client->EnrollProfileAsync(profile1, audioInput).get();
+    SPXTEST_REQUIRE(enrollResult->Reason == ResultReason::EnrolledVoiceProfile);
+}
+#endif

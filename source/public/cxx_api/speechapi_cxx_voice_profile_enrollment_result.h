@@ -89,7 +89,7 @@ public:
         enrollmentsCount(std::stoi(Properties.GetProperty("enrollment.enrollmentsCount", "0"))),
         enrollmentsLength(static_cast<uint64_t>(std::stoll(Properties.GetProperty("enrollment.enrollmentsLength", "0")))),
         enrollmentsSpeechLength(static_cast<uint64_t>(std::stoll(Properties.GetProperty("enrollment.enrollmentsSpeechLength", "0")))),
-        remainingEnrollmentsCount(std::stoi(Properties.GetProperty("enrollment.remainingEnrollmentsCount", "5"))),
+        remainingEnrollmentsCount(std::stoi(Properties.GetProperty("enrollment.remainingEnrollmentsCount", "0"))),
         remainingEnrollmentsSpeechLength(std::stoll(Properties.GetProperty("enrollment.remainingEnrollmentsSpeechLength", "0"))),
         audioLength(static_cast<uint64_t>(std::stoll(Properties.GetProperty("enrollment.audioLength", "0")))),
         audioSpeechLength(static_cast<uint64_t>(std::stoll(Properties.GetProperty("enrollment.audioSpeechLength", "0")))),

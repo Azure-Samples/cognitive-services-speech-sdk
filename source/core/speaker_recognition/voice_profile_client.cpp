@@ -7,6 +7,7 @@
 #include "stdafx.h"
 #include "voice_profile_client.h"
 #include "voice_profile.h"
+#include "create_object_helpers.h"
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -16,6 +17,8 @@ namespace Impl {
 CSpxVoiceProfileClient::~CSpxVoiceProfileClient()
 {
     SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+    SpxTermAndClear(m_keepSiteAlive);
+    m_keepSiteAlive = nullptr;
 }
 
 CSpxVoiceProfileClient::CSpxVoiceProfileClient()
@@ -31,8 +34,7 @@ void CSpxVoiceProfileClient::Init()
 
 void CSpxVoiceProfileClient::Term()
 {
-    SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
-    m_keepSiteAlive = nullptr;
+    SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);    
 }
 
 std::shared_ptr<ISpxVoiceProfile> CSpxVoiceProfileClient::Create(VoiceProfileType voice_profile_type, std::string&& locale)

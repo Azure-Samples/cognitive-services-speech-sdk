@@ -38,7 +38,6 @@ void CSpxHttpRecoEngineAdapter::Init()
     m_speakerIdPaths[VoiceProfileType::TextIndependentIdentification] = "/speaker/identification/v2.0/text-independent/profiles";
     m_speakerIdPaths[VoiceProfileType::TextIndependentVerification] = "/speaker/verification/v2.0/text-independent/profiles";
     m_speakerIdPaths[VoiceProfileType::TextDependentVerification] = "/speaker/verification/v2.0/text-dependent/profiles";
-    m_speakerIdPaths[VoiceProfileType::ConversationDiarization] = "";
 
     auto endpointUrl = GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Endpoint), "");
     auto hostUrl = GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Host), "");
@@ -53,6 +52,7 @@ void CSpxHttpRecoEngineAdapter::Init()
     m_uriScheme = url.scheme;
     m_speakerRecognitionHostName = url.host;
     m_devEndpoint = (m_speakerRecognitionHostName.find("dev.spr-frontend") != string::npos) ? true : false;
+    m_audioFlushed = false;
 }
 
 void CSpxHttpRecoEngineAdapter::Term()
@@ -199,12 +199,13 @@ void CSpxHttpRecoEngineAdapter::SetFormat(const SPXWAVEFORMATEX* pformat, VoiceP
     m_enroll = enroll;
     m_voiceProfileType = type;
     m_profileIdForVerification = profileId;
+    m_audioFlushed = false;
 }
 
 void CSpxHttpRecoEngineAdapter::ProcessAudio(const DataChunkPtr& audioChunk)
 {
     SPX_DBG_ASSERT(m_httpData != nullptr);
-    if (m_httpData)
+    if (m_httpData && !m_audioFlushed)
     {
         m_httpData->ProcessAudio(audioChunk);
     }
@@ -217,6 +218,7 @@ void CSpxHttpRecoEngineAdapter::FlushAudio()
     {
         m_response = m_httpData->FlushAudio();
     }
+    m_audioFlushed = true;
 }
 
 RecognitionResultPtr CSpxHttpRecoEngineAdapter::ModifyVoiceProfile(bool reset, VoiceProfileType type, std::string&& id) const
@@ -354,15 +356,14 @@ RecognitionResultPtr IdentifyResultFactory::CreateResult(CreateFinalResultFuncPt
     return result;
 }
 
-bool VerifyResultFactory::GetReasons(ResultReason& resultReason, CancellationReason& cancelReason)
+ResultReason VerifyResultFactory::GetResultReason()
 {
-    bool rejected = false;
+    ResultReason resultReason = ResultReason::Canceled;
     if (m_response == nullptr)
     {
-        return rejected;
+        return resultReason;
     }
 
-    cancelReason = GetCancellationReason(m_response->IsSuccess());
     if (m_response->IsSuccess())
     {
         auto json = json::parse(m_response->ReadContentAsString());
@@ -371,29 +372,26 @@ bool VerifyResultFactory::GetReasons(ResultReason& resultReason, CancellationRea
         {
             resultReason = ResultReason::RecognizedSpeaker;
         }
+
         if (PAL::StringUtils::ToLower(recoResult) == "reject")
         {
-            rejected = true;
-            cancelReason = CancellationReason::Error;
+            resultReason = ResultReason::NoMatch;
         }
     }
-    return rejected;
+    return resultReason;
 }
 
-string VerifyResultFactory::GetErrorMesssage(bool rejected)
+string VerifyResultFactory::GetErrorMesssage(ResultReason resultReason)
 {
     if (m_response == nullptr)
     {
         return string{};
     }
+    bool rejected = resultReason == ResultReason::NoMatch ? true: false;
     string errorMessage;
     if (!m_response->IsSuccess() && !rejected)
     {
         errorMessage = GetErrorMessageInJson(m_response->ReadContentAsString(), m_response->GetStatusCode());
-    }
-    if (rejected)
-    {
-        errorMessage = m_response->ReadContentAsString();
     }
 
     return errorMessage;
@@ -406,12 +404,10 @@ RecognitionResultPtr VerifyResultFactory::CreateResult(CreateFinalResultFuncPtr 
         return CreateErrorResult(func, "Error in verifying a voice profile.");
     }
 
-    ResultReason resultReason{ ResultReason::Canceled };
-    CancellationReason cancelReason{ CancellationReason::Error };
-    auto rejected = GetReasons(resultReason, cancelReason);
-    auto errorMessage = GetErrorMesssage(rejected);
+    auto resultReason = GetResultReason();
+    auto errorMessage = GetErrorMesssage(resultReason);
     auto result = func(resultReason,
-                       cancelReason,
+                       GetCancellationReason(m_response->IsSuccess()),
                        GetNoMatchReason(),
                        GetCancellationErrorCode(m_response->GetStatusCode()),
                        PAL::ToWString(errorMessage).c_str());

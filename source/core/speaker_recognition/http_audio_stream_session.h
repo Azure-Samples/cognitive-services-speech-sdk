@@ -6,10 +6,12 @@
 //
 #pragma once
 
+#include <chrono>
 #include "ispxinterfaces.h"
 #include "service_helpers.h"
 #include "interface_helpers.h"
 #include "property_bag_impl.h"
+
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -17,8 +19,8 @@ namespace Speech {
 namespace Impl {
 
 // forward declare of CSpxThreadService.
-
 class CSpxThreadService;
+
 class CSpxHttpAudioStreamSession :
     public ISpxObjectWithSiteInitImpl<ISpxGenericSite>,
     public ISpxAudioStreamSessionInit,
@@ -26,7 +28,7 @@ class CSpxHttpAudioStreamSession :
     public ISpxServiceProvider,
     public ISpxGenericSite,
     public ISpxHttpRecoEngineAdapterSite,
-    public ISpxAudioPumpSite,  // babble up Error from pump to session
+    public ISpxAudioPumpSite,
     public ISpxRecoResultFactory,
     public ISpxPropertyBagImpl,
     public ISpxHttpAudioStreamSession
@@ -88,20 +90,28 @@ public:
 private:
 
     std::shared_ptr<ISpxNamedProperties> GetParentProperties() const override;
+    static uint32_t FromBytesToMilisecond(uint32_t bytes, uint32_t bytesPerSecond);
+    void StopPump();
+    std::chrono::milliseconds GetMicrophoneTimeout();
 
     std::shared_ptr<ISpxAudioPump> m_audioPump;
     std::shared_ptr<ISpxGenericSite> m_keepFactoryAlive;
 
-    std::future<RecognitionResultPtr> m_future; // future for signaling audio pumping is done.
     std::shared_ptr<std::promise<RecognitionResultPtr>> m_audioIsDone;
 
     std::shared_ptr<CSpxThreadService> m_threadService;
     std::shared_ptr<ISpxAudioStreamReader> m_codecAdapter;
-    bool m_enroll;
+    bool m_fromMicrophone;
 
+    std::chrono::milliseconds m_microphoneTimeoutInMS = (std::chrono::milliseconds)7000;
     std::shared_ptr<ISpxHttpRecoEngineAdapter> m_reco;
-    void CreateRecoEngineAdapter();
 
+    std::packaged_task<void()> CreateTask(std::function<void()> func);
+    RecognitionResultPtr CreateErrorResult(const std::string& msg);
+    void CleanupAfterEachAudioPumping();
+
+    uint32_t m_avgBytesPerSecond = 16000*2;
+    uint32_t m_totalAudioinMS = 0;
     std::mutex m_mutex;
 };
 

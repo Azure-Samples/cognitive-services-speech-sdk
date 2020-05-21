@@ -106,6 +106,7 @@ namespace Config
 #define SSML_OFFSETS "SsmlOffsets"
 #define WORD_LENGTHS "WordLengths"
 
+#define SPEAKER_VERIFICATION_ENGLISH "MyVoiceIsMyPassportVerifyMe"
 #define SINGLE_UTTERANCE_ENGLISH "SingleUtteranceEnglish"
 #define SINGLE_UTTERANCE_CHINESE "SingleUtteranceChinese"
 #define MULTIPLE_UTTERANCE_CHINESE "MultipleUtteranceChinese"

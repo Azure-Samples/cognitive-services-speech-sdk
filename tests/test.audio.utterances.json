@@ -47,6 +47,17 @@
       ]
     }
   },
+  "MyVoiceIsMyPassportVerifyMe": {
+    "FilePath": "audio/MyVoiceIsMyPassportVerifyMe.wav",
+    "NativeLanguage": "en-US",
+    "Utterances": {
+      "en-US": [
+        {
+          "Text": "My voice is my passport verify me"
+        }
+      ]
+    }
+  },  
   "SingleUtteranceChinese": {
     "FilePath": "audio/weatherInChinese.wav",
     "NativeLanguage": "zh-CN",

@@ -24,7 +24,7 @@ void CSpxHttpClient::ProcessAudio(const DataChunkPtr& audioChunk)
 {
     size_t bufferSize = (size_t)audioChunk->size;
     auto buffer = audioChunk->data.get();
-    //SPX_TRACE_INFO("copy %lu data into http client buffer", bufferSize);
+    SPX_TRACE_INFO("copy %lu data into http client buffer", bufferSize);
 
     std::copy(buffer, buffer + bufferSize, back_inserter(m_audioData));
 }
@@ -60,7 +60,7 @@ std::unique_ptr<HttpResponse> CSpxHttpClient::FlushAudio()
 
     if (response)
     {
-        SPX_TRACE_ERROR_IF(!response->IsSuccess(), "CreateVoiceProfile failed with HTTP %u [%s] url:'%s'",
+        SPX_TRACE_ERROR_IF(!response->IsSuccess(), "flush audio failed with HTTP %u [%s] url:'%s'",
             response->GetStatusCode(),
             response->ReadContentAsString().c_str(),
             m_endPoint.EndpointUrl().c_str());
