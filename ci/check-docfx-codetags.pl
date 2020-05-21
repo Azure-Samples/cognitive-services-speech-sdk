@@ -81,6 +81,7 @@ BEGIN {
       quickstart/java/android/from-microphone/app/src/main/java/com/microsoft/cognitiveservices/speech/samples/quickstart/MainActivity.java#code
       quickstart/java/android/keyword-recognizer/app/src/main/java/com/microsoft/cognitiveservices/speech/samples/quickstart/MainActivity.java#code
       quickstart/java/android/text-to-speech/app/src/main/java/com/microsoft/cognitiveservices/speech/samples/quickstart/MainActivity.java#code
+      quickstart/java/android/intent-recognition/app/src/main/java/com/microsoft/cognitiveservices/speech/samples/quickstart/MainActivity.java#code
       quickstart/java/android/text-to-speech/app/src/main/java/com/microsoft/cognitiveservices/speech/samples/quickstart/SpeakerStream.java#code
       quickstart/java/jre/from-microphone/pom.xml#dependencies
       quickstart/java/jre/from-microphone/pom.xml#repositories
