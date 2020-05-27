@@ -123,6 +123,9 @@ jobs:
         ACTUAL_LOG_FILE_NAME_RETRY=\$ACTUAL_LOG_FILE_NAME
 
         for i in {1..4}; do
+          if [ ! -f ./TestResults/\$ACTUAL_LOG_FILE_NAME_RETRY.trx ]; then
+            mv ./TestResults/\$ACTUAL_LOG_FILE_NAME_RETRY*.trx ./TestResults/\$ACTUAL_LOG_FILE_NAME_RETRY.trx
+          fi  
           if [[ \$exitCode != 0 ]]; then
             echo Parsing the trx file "./TestResults/\$ACTUAL_LOG_FILE_NAME_RETRY.trx"
             tests=""
