@@ -598,7 +598,7 @@ namespace ConversationTranslation {
             return;
         }
 
-        const ConversationParticipant & existing = m_participants[StringUtils::ToUpper(command->ParticipantId)];
+        const ConversationParticipant existing = m_participants[StringUtils::ToUpper(command->ParticipantId)];
 
         ConversationParticipant participant;
         participant.Avatar = ValueOrDefault(command->Avatar, existing.Avatar);

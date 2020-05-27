@@ -670,12 +670,16 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                         Console.WriteLine("Final result EXPECTED: " + e.Result.Text.ToString());
 
                         if (Interlocked.Increment(ref count) == 2)
+                        {
                             tcs.TrySetResult(true);
+                            return;
+                        }
                     }
                     else
                     {
                         Console.WriteLine("Final result UNEXPECTED : " + e.Result.Text.ToString());
                         tcs.TrySetResult(false);
+                        return;
                     }
 
                     stream.NextFile();
@@ -732,6 +736,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                             if (!e.Result.Text.Contains("old"))
                                 error = "text did not contain old";
                             tcs.TrySetResult(true);
+                            return;
                         }
                         else
                         {
@@ -743,6 +748,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     {
                         Console.WriteLine("Final result UNEXPECTED : " + e.Result.Text.ToString());
                         tcs.TrySetResult(false);
+                        return;
                     }
 
                     stream.NextFile();
@@ -976,6 +982,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                             if (!e.Result.Text.Contains("old"))
                                 error = "text does not contain old - " + e.Result.Text;
                             tcs.TrySetResult(true);
+                            return;
                         }
                         else
                         {
@@ -987,6 +994,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     {
                         Console.WriteLine("Final result UNEXPECTED : " + e.Result.Text.ToString() + ", " + e.Result.IntentId);
                         tcs.TrySetResult(false);
+                        return;
                     }
 
                     stream.NextFile();
@@ -1236,6 +1244,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                             }
 
                             tcs.TrySetResult(true);
+                            return;
                         }
                         else
                         {
@@ -1249,6 +1258,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     {
                         Console.WriteLine("Final result UNEXPECTED : " + e.Result.Text.ToString());
                         tcs.TrySetResult(false);
+                        return;
                     }
 
                     stream.NextFile();

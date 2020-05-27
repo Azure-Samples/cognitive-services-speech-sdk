@@ -385,7 +385,15 @@ void CSpxAudioStreamSession::WriteTracingEvent()
 
 void CSpxAudioStreamSession::SetFormat(const SPXWAVEFORMATEX* pformat)
 {
-    auto format = pformat ? make_shared<SPXWAVEFORMATEX>(*pformat) : nullptr;
+    uint16_t sizeOfFormat = 0;
+    SpxWAVEFORMATEX_Type format = nullptr;
+    if (pformat)
+    {
+        sizeOfFormat = sizeof(SPXWAVEFORMATEX) + pformat->cbSize;
+        format = SpxAllocWAVEFORMATEX(sizeOfFormat);
+        memcpy(format.get(), pformat, sizeOfFormat);
+    }
+
     auto task = CreateTask([this, format]() {
         SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::SetFormat: format %s nullptr", (void*)this, format == nullptr ? "==" : "!=");
 
