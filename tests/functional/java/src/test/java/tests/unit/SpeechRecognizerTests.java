@@ -1570,4 +1570,59 @@ public class SpeechRecognizerTests {
         assertEquals(customEndpoint2, recognizer.getProperties().getProperty("zh-CNSPEECH-ModelId"));
         assertEquals("en-US,zh-CN", recognizer.getProperties().getProperty(PropertyId.SpeechServiceConnection_AutoDetectSourceLanguages));
     }
+
+        @Test
+        public void verifyKeywordVerficationPropertiesRejectMissingKeyword() throws InterruptedException, ExecutionException, TimeoutException {
+        SpeechConfig speechConfig = SpeechConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+
+        assertNotNull(speechConfig);
+
+        speechConfig.setProperty("SPEECH-KeywordsToDetect", "Computer;Hey Cortana");        
+        
+        SpeechRecognizer recognizer = new SpeechRecognizer(speechConfig, AudioConfig.fromWavFileInput(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath)));
+        assertNotNull(recognizer);
+        assertNotNull(recognizer.getRecoImpl());
+        assertTrue(recognizer instanceof Recognizer);
+
+        Future<SpeechRecognitionResult> future = recognizer.recognizeOnceAsync();
+        // Wait for max 30 seconds
+        SpeechRecognitionResult result = future.get(30, TimeUnit.SECONDS);
+
+        assertFalse("future is canceled.", future.isCancelled());
+        assertTrue("future is not done.", future.isDone());
+        assertNotNull("future is null.", future);
+
+        assertNotNull(result);
+        TestHelper.OutputResult(result);
+        assertEquals(ResultReason.NoMatch, result.getReason());
+    }
+
+    @Test
+        public void verifyKeywordVerficationPropertiesFindKeyword() throws InterruptedException, ExecutionException, TimeoutException {
+        SpeechConfig speechConfig = SpeechConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+
+        assertNotNull(speechConfig);
+
+        speechConfig.setProperty("SPEECH-KeywordsToDetect", "Computer;Hey Cortana");        
+        
+        SpeechRecognizer recognizer = new SpeechRecognizer(speechConfig, AudioConfig.fromWavFileInput(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.COMPUTER_KEYWORD_WITH_SINGLE_UTTERANCE_1).FilePath)));
+        assertNotNull(recognizer);
+        assertNotNull(recognizer.getRecoImpl());
+        assertTrue(recognizer instanceof Recognizer);
+
+        Future<SpeechRecognitionResult> future = recognizer.recognizeOnceAsync();
+        // Wait for max 30 seconds
+        SpeechRecognitionResult result = future.get(30, TimeUnit.SECONDS);
+
+        assertFalse("future is canceled.", future.isCancelled());
+        assertTrue("future is not done.", future.isDone());
+        assertNotNull("future is null.", future);
+
+        assertNotNull(result);
+        TestHelper.OutputResult(result);
+        assertEquals(ResultReason.RecognizedSpeech, result.getReason());
+    }
+
 }

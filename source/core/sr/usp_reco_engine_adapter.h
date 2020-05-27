@@ -25,6 +25,8 @@
 #include <shared_mutex>
 #endif // _MSC_VER
 
+#define KEYWORDS_PROPERTY_NAME "SPEECH-KeywordsToDetect"
+
 class CSpxUspRecoEngineAdapterTest;
 
 namespace Microsoft {

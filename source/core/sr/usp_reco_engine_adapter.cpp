@@ -13,6 +13,7 @@
 #include "file_utils.h"
 #include <inttypes.h>
 #include <cstring>
+#include <sstream>
 #include <chrono>
 #include "service_helpers.h"
 #include "create_object_helpers.h"
@@ -924,6 +925,29 @@ void CSpxUspRecoEngineAdapter::SetSpeechConfigMessage(const ISpxNamedProperties&
     speechConfig["context"]["audio"]["source"]["samplerate"] = properties.GetStringValue(GetPropertyName(PropertyId::AudioConfig_SampleRateForCapture));
     speechConfig["context"]["audio"]["source"]["bitspersample"] = properties.GetStringValue(GetPropertyName(PropertyId::AudioConfig_BitsPerSampleForCapture));
     speechConfig["context"]["audio"]["source"]["channelcount"] = properties.GetStringValue(GetPropertyName(PropertyId::AudioConfig_NumberOfChannelsForCapture));
+
+    auto keywords = properties.GetStringValue(KEYWORDS_PROPERTY_NAME);
+    if (keywords != "")
+    {
+        json keywordsJSON;
+
+        auto keywordsVector = PAL::split(keywords, ';');
+
+        for (auto oneKeyword : keywordsVector)
+        {
+            json oneKeywordJSON;
+            oneKeywordJSON = { { "text", oneKeyword }, { "triggerThreshold", "Medium" }, { "timeout", 5000 } };
+
+            keywordsJSON.push_back(oneKeywordJSON);
+        }
+
+        json keywordRegistry;
+        keywordRegistry = keywordRegistry.array({ json({{"type", "startTrigger" },
+                                                {"keywords", keywordsJSON } }) });
+
+        speechConfig["context"]["keywordRegistry"] = keywordRegistry;
+        
+    }
 
     auto userDefinedParams = GetParametersFromUser("speech.config");
     for (const auto& item : userDefinedParams)
@@ -2048,6 +2072,35 @@ json CSpxUspRecoEngineAdapter::GetKeywordDetectionJson()
             } };
         }
     }
+    else if (properties->HasStringValue(KEYWORDS_PROPERTY_NAME))
+    {
+        auto keywords = properties->GetStringValue(KEYWORDS_PROPERTY_NAME);
+        if (keywords != "")
+        {
+            json keywordsJSON;
+
+            auto keywordsVector = PAL::split(keywords, ';');
+
+            for(auto oneKeyword: keywordsVector)
+            {
+                json oneKeywordJSON;
+                oneKeywordJSON = { { "text", oneKeyword } };
+
+                keywordsJSON.push_back(oneKeywordJSON);
+            }
+
+            keywordDetectionJson = { {
+                {"type", "startTrigger"},
+                {"clientDetectedKeywords", 
+                        keywordsJSON
+                },
+                {"onReject", {
+                    {"action", "EndOfTurn"}
+                }}
+            } };
+        }
+    }
+
     return keywordDetectionJson;
 }
 
@@ -2079,6 +2132,16 @@ json CSpxUspRecoEngineAdapter::GetSpeechContextJson()
     {
         contextJson["invocationSource"] = "VoiceActivationWithKeyword";
         contextJson["keywordDetection"] = keywordDetectionJson;
+
+        auto site = GetSite();
+        auto properties = SpxQueryService<ISpxNamedProperties>(site);
+        SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_USP_SITE_FAILURE);
+        auto removeKeyword = PAL::ToBool(properties->GetStringValue("SPEECH-RemoveKeyword", PAL::BoolToString(false)));
+        if (removeKeyword)
+        {
+            contextJson["phraseEnrichment"]["stripStartTriggerKeyword"] = true;
+        }
+
     }
 
     auto leftAndRight = GetLeftRightContext();
