@@ -8,7 +8,7 @@ import com.azure.core.annotation.ServiceClient;
 import com.azure.core.exception.HttpRequestException;
 import com.azure.core.http.*;
 import com.azure.core.http.rest.Response;
-import com.azure.core.implementation.RestProxy;
+import com.azure.core.http.rest.RestProxy;
 import com.azure.core.util.polling.LongRunningOperationStatus;
 import com.azure.core.util.polling.PollResponse;
 import com.azure.core.util.polling.PollerFlux;
@@ -24,7 +24,8 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
-import static com.azure.core.implementation.util.FluxUtil.withContext;
+
+import static com.azure.core.util.FluxUtil.withContext;
 
 @ServiceClient(builder = RemoteConversationTranscriptionClientBuilder.class, isAsync = true, serviceInterfaces = RemoteConversationTranscriptionService.class)
 class RemoteConversationTranscriptionClientImpl {

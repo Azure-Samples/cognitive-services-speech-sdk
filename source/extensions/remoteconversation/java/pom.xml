@@ -36,17 +36,17 @@
         <dependency>
             <groupId>com.microsoft.cognitiveservices.speech</groupId>
             <artifactId>client-sdk</artifactId>
-            <version>buildVersion1234</version>
+          <version>buildVersion1234</version>
         </dependency>
         <dependency>
             <groupId>com.azure</groupId>
             <artifactId>azure-core</artifactId>
-            <version>1.0.0</version>
+            <version>1.5.0</version>
         </dependency>
         <dependency>
             <groupId>com.azure</groupId>
             <artifactId>azure-core-http-netty</artifactId>
-            <version>1.0.0</version>
+            <version>1.5.0</version>
         </dependency>
     </dependencies>
     <repositories>
