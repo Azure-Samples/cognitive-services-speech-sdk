@@ -483,9 +483,9 @@ RecognitionResultPtr EnrollmentResultFactory::PopulateEnrollmentDurations(Create
 
 RecognitionResultPtr EnrollmentResultFactory::CreateResult(CreateFinalResultFuncPtr func)
 {
-    if (m_response == nullptr || func == nullptr)
+    if (m_response == nullptr)
     {
-        return CreateErrorResult(func, "Error in enrolling a voice profile.");
+        return CreateErrorResult(func, "HTTP response is null in enrolling a voice profile. This might due to data receive timeout.");
     }
 
     ResultReason reason{ ResultReason::Canceled };

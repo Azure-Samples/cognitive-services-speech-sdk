@@ -70,6 +70,7 @@ namespace Config
 #define CONVERSATION_TRANSCRIPTION_PPE_SUBSCRIPTION "ConversationTranscriptionPPESubscription"
 #define CONVERSATION_TRANSLATOR_SUBSCRIPTION "ConversationTranslatorSubscription"
 #define CUSTOM_VOICE_SUBSCRIPTION "CustomVoiceSubscription"
+#define SPEAKER_RECOGNITION_SUBSCRIPTION "SpeakerRecognitionSubscription"
 
 // Default settings keys
 #define ENDPOINT "Endpoint"

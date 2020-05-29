@@ -30,5 +30,9 @@
   "MooncakeSubscription": {
     "Key": "",
     "Region": "chinaeast2"
+  },
+  "SpeakerRecognitionSubscription": {
+    "Key": "",
+    "Region": "westus"
   }
 }

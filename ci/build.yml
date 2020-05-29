@@ -121,6 +121,10 @@ variables:
       "MooncakeSubscription": {
         "Key": "$(KeyChinaEast2Speech)",
         "Region": "chinaeast2"
+      },
+      "SpeakerRecognitionSubscription": {
+        "Key": "$(SpeakerRecognition-WestUS-Key)",
+        "Region": "westus"
       }
     }
   SPEECHSDK_MAVEN_ARTIFACT_ID: client-sdk

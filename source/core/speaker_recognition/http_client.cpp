@@ -52,7 +52,7 @@ std::unique_ptr<HttpResponse> CSpxHttpClient::FlushAudio()
     }
     catch (const HttpException& e)
     {
-        SPX_DBG_TRACE_ERROR("Error in a HTTP POST with audio data. '%d'", (int)e.statusCode());
+        SPX_DBG_TRACE_ERROR("Error in a HTTP POST with audio data. '%s'", e.what());
     }
     catch (...)
     {

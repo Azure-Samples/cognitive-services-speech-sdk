@@ -414,6 +414,35 @@ TEST_CASE("enroll and delete in parallel", "[api][cxx][speaker_id][parallel]")
     auto enrollFuture2 = client->EnrollProfileAsync(profile2, weatherFile);
     auto deleteFuture3 = client->DeleteProfileAsync(profile2);
 }
+
+TEST_CASE("speaker recognition from the official endpoint", "[api][cxx][speaker_id][official_endpoint]")
+{
+    SPXTEST_REQUIRE(!DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT].empty());
+     auto config = SpeechConfig::FromSubscription(SubscriptionsRegionsMap[SPEAKER_RECOGNITION_SUBSCRIPTION].Key, SubscriptionsRegionsMap[SPEAKER_RECOGNITION_SUBSCRIPTION].Region);
+
+    auto audioInput = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SPEAKER_VERIFICATION_ENGLISH));
+    auto client = VoiceProfileClient::FromConfig(config);
+    auto profile1 = client->CreateProfileAsync(VoiceProfileType::TextDependentVerification, "en-us").get();
+    SPXTEST_REQUIRE(!profile1->GetId().empty());
+    // always delete the profile even when there are exceptions in following code. The lambda is called when exits this test case.
+    auto finish = std::shared_ptr<void>(nullptr, [&](void*) {
+        if (!profile1->GetId().empty())
+        {
+            auto deleteResult = client->DeleteProfileAsync(profile1).get();
+            SPXTEST_REQUIRE(deleteResult->Reason == ResultReason::DeletedVoiceProfile);
+        }
+        });
+
+    auto enrollResult = client->EnrollProfileAsync(profile1, audioInput).get();
+    SPXTEST_REQUIRE(enrollResult->Reason == ResultReason::EnrollingVoiceProfile);
+
+    enrollResult = client->EnrollProfileAsync(profile1, audioInput).get();
+    SPXTEST_REQUIRE(enrollResult->Reason == ResultReason::EnrollingVoiceProfile);
+
+    enrollResult = client->EnrollProfileAsync(profile1, audioInput).get();
+    SPXTEST_REQUIRE(enrollResult->Reason == ResultReason::EnrolledVoiceProfile);
+}
+
 #if 0
 TEST_CASE("Microphone Text Dependent Verify", "[api][cxx][speaker_id][microphone]")
 {
