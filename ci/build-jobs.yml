@@ -81,6 +81,23 @@ jobs:
     displayName: Generate solution
     inputs:
       cmakeArgs: '-G "$(SPEECHSDK_CMAKE_GENERATOR)" -DEXTENSION_UNIDEC_ENABLED=$(SPEECHSDK_ENABLE_UNIDEC) -DSPEECHSDK_TARGET_PLATFORM=$(SPEECHSDK_TARGET_PLATFORM) -DSPEECHSDK_BUILD_TYPE=$(SPEECHSDK_BUILD_TYPE) -DSPEECHSDK_VERSION=$(SPEECHSDK_SEMVER2NOMETA) -DSPECTRE_MITIGATION=$(SPEECHSDK_SPECTRE_MITIGATION) ..'
+  ## We have to build inside Semmle, not with the build task, so Semmle can do log scanning.
+  - task: Semmle@0
+    displayName: 'Run Semmle for Java'
+    timeoutInMinutes: 40
+    continueOnError: false
+    inputs:
+      sourceCodeDirectory: '$(Build.SourcesDirectory)\source'
+      cleanupBuildCommands: 'cd $(Build.SourcesDirectory)\build && "C:\Program Files\CMake\bin\cmake.exe" --clean .'
+      #buildCommands: '"%ProgramFiles(x86)%\Microsoft Visual Studio\2017\Enterprise\Common7\Tools\VsMSBuildCmd.bat" && msbuild $(BUILD.SourcesDirectory)\build\source\bindings\java\com.microsoft.cognitiveservices.speech.sln /nologo /t:Clean /maxcpucount /p:platform=$(BuildPlatform) /p:configuration=$(BuildConfiguration)'
+      buildCommands: 'cd $(Build.SourcesDirectory)\build && "C:\Program Files\CMake\bin\cmake.exe" --build .'
+      language: 'java'
+      includeNodeModules: false
+      querySuite: 'Required'
+      timeout: '3000'
+      ram: '16384'
+      addProjectDirToScanningExclusionList: true
+  ## We have to build with VSBuild@1 in order t make Roslyn happy.
   - task: VSBuild@1
     displayName: Build solution
     inputs:
@@ -171,12 +188,6 @@ jobs:
     inputs:
       AllTools: true
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-postanalysis.PostAnalysis@1
-    displayName: 'SDL: Post Analysis (w/o TsaUpload)'
-    inputs:
-      AllTools: true
-    continueOnError: false
-    condition: not(contains(variables['SPEECHSDK_BUILD_PHASES'], ' TsaUpload '))
-  - task: securedevelopmentteam.vss-secure-development-tools.build-task-postanalysis.PostAnalysis@1
     displayName: 'SDL: Post Analysis (w/ TsaUpload)'
     inputs:
       AllTools: true
@@ -185,8 +196,9 @@ jobs:
 
 # Phase responsible to upload to TSA database
 - job: TsaUpload
-  dependsOn: [Pre, WindowsSdlBuild, WindowsSDLFortifyJava]
-  condition: and(succeeded('Pre', 'WindowsSdlBuild', 'WindowsSDLFortifyJava'), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' TsaUpload '))
+  dependsOn: [Pre, WindowsSdlBuild]
+  condition: and(succeeded('Pre', 'WindowsSdlBuild'), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' TsaUpload '))
+
   pool:
     name: Hosted VS2017
   timeoutInMinutes: 30
@@ -203,11 +215,6 @@ jobs:
     inputs:
       artifactName: CodeAnalysisLogs
       downloadPath: $(System.ArtifactsDirectory)/In
-  - task: DownloadBuildArtifacts@0
-    displayName: 'Download FortifySDL logs Artifacts'
-    inputs:
-      artifactName: 'sca_artifacts'
-      downloadPath: '$(System.ArtifactsDirectory)'
   - powershell: |
      $logDir = "$(Agent.BuildDirectory)/_sdt/logs"
      if (Test-Path $logDir) {
@@ -2303,56 +2310,6 @@ jobs:
       PathtoPublish: $(ArtifactOut)
       ArtifactName: Doxygen
       publishLocation: Container
-
-- job: WindowsSDLFortifyJava
-  dependsOn: [Pre, WindowsBuild]
-  condition: and(succeeded('Pre', 'WindowsBuild'), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' WindowsSDLFortifyJava '))
-  pool:
-    name: Carbon
-    demands: FORTIFY
-  timeoutInMinutes: 30
-  steps:
-  - task: DownloadBuildArtifacts@0
-    displayName: 'Download JAR Build Artifacts'
-    inputs:
-      artifactName: Windows
-      itemPattern: '**/*.jar'
-  - task: PowerShell@2
-    displayName: 'Extract internal classes from JAR SDK Artifacts'
-    inputs:
-      type: FilePath
-      filePath: './ci/sdl/PruneJar.ps1'
-      arguments: '-InputJarName $(System.ArtifactsDirectory)\Windows\x64\Release\public\lib\com.microsoft.cognitiveservices.speech.jar -OutputDir $(Build.BinariesDirectory)\PruneJar'
-  - task: ArchiveFiles@2
-    displayName: 'Create internal.JAR'
-    inputs:
-      rootFolderOrFile: '$(Build.BinariesDirectory)\PruneJar'
-      includeRootFolder: false
-      archiveFile: '$(Build.ArtifactStagingDirectory)/class/internal.jar'
-  - task: fortifyvsts.hpe-security-fortify-vsts.build-task-fortify-sca.FortifySCA@1
-    displayName: 'Run Fortify on JAVA source files'
-    inputs:
-      applicationType: java
-      buildClasspath: '$(Build.ArtifactStagingDirectory)/class/internal.jar'
-      buildSourceVersion: 1.8
-      fortifySourceTranslate: 'source/bindings/java/**/*.java'
-      fortifyBuildId: 1.2.3
-      scaVerbose: true
-  - task: PublishBuildArtifacts@1
-    displayName: 'Publish Artifacts from Fortify'
-    inputs:
-      PathtoPublish: '$(Build.ArtifactStagingDirectory)/sca_artifacts'
-      ArtifactName: sca_artifacts
-      condition: succeededOrFailed()
-  - task: securedevelopmentteam.vss-secure-development-tools.build-task-postanalysis.PostAnalysis@1
-    displayName: 'SDL Fortify Post Analysis'
-    inputs:
-      FortifySCA: true
-      VstsConsole: false
-    # Currently disabled, we know we have false-positives.
-    # Once we can solve the problem of the false-positives we can change this.
-    # In that case we should move this part of the build also into the WindowsSdlBuild phase.
-    enabled: false
 
 - job: CheckSignatures
   dependsOn: [Pre, NuGet, AndroidPackage, JavaJrePackage, WindowsBuild, UnityBuild]
