@@ -292,7 +292,22 @@ jobs:
     kws: true
     continueOnTestFailure: ${{ parameters.continueOnTestFailure }}
 
+- template: test-windows.yml
+  parameters:
+    crt: PUBLIC_VCRT
+    name: Windows
+    kws: true
+    continueOnTestFailure: ${{ parameters.continueOnTestFailure }}
+
 - template: build-windows.yml
+  parameters:
+    crt: OS_UCRT
+    name: WindowsOS
+    kws: false
+    suffix: .os
+    continueOnTestFailure: ${{ parameters.continueOnTestFailure }}
+
+- template: test-windows.yml
   parameters:
     crt: OS_UCRT
     name: WindowsOS

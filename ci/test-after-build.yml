@@ -1,0 +1,71 @@
+parameters:
+  extraTests: []
+  dockerImage: ""
+  testsToRun: ""
+  runTestArgs: "-s objectivec_unittests"
+  continueOnTestFailure: false
+steps:
+# If we failed until here, don't try to run tests:
+- bash: . ci/functions.sh && vsts_setvar SPEECHSDK_RUN_TESTS false
+  condition: or(failed(), canceled())
+  displayName: Skip tests on build failure.
+- bash: |
+    rm -f ./tests/test.subscriptions.regions.json
+    cp ./tests/test.defaults.json ./
+    cp ./tests/test.audio.utterances.json ./
+    cat > ./tests/test.subscriptions.regions.json <<HEREDOC
+      $(KEYS_AND_REGIONS)
+    HEREDOC
+    cp ./tests/test.subscriptions.regions.json ./
+    cp -rf ./tests/input .
+  displayName: Write Subscriptions Regions Data
+- bash: |
+    set -u -e -x -o pipefail
+    . ci/functions.sh
+    cp ./ci/jsonsettings.py .
+    patchSample public_samples/samples/python/console
+    cp tests/input/audio/*.wav public_samples/samples/python/console
+  displayName: Prepare Python samples for testing (as part of python_unittests)
+  condition: eq(variables['SPEECHSDK_RUN_TESTS'], 'true')
+- bash: |
+    set -x 
+    if [[ -n $dockerImage ]]; then
+      wrapMe=(docker run --rm --workdir /csspeech --env LD_LIBRARY_PATH=/d/a/1/a/In/lib --volume "$PWD:/csspeech" "$dockerImage")
+    else
+      export LD_LIBRARY_PATH=/d/a/1/a/In/lib
+      wrapMe=()
+    fi
+    echo "Current directory: $PWD"
+    ls -alr /d/a/1/a
+
+    "${wrapMe[@]}" ./ci/run-tests-after-build.sh \
+      --build-dir /d/a/1/a/In \
+      --platform $(SPEECHSDK_TARGET_PLATFORM)-$(SPEECHSDK_BUILD_CONFIGURATION) \
+      --test-set $(SPEECHSDK_TEST_SET) \
+      ${{ parameters.runTestArgs }} -- ${{ parameters.testsToRun }}
+  env:
+    dockerImage: ${{ parameters.dockerImage }}
+  condition: eq(variables['SPEECHSDK_RUN_TESTS'], 'true')
+  continueOnError: ${{ parameters.continueOnTestFailure }}
+  timeoutInMinutes: 180
+  displayName: Run tests
+- ${{ parameters.extraTests }}
+- task: PublishTestResults@2
+  inputs:
+    testResultsFiles: '**/test-*.xml'
+  condition: eq(variables['SPEECHSDK_RUN_TESTS'], 'true')
+  displayName: Publish test results (.xml)
+- task: PublishTestResults@2
+  inputs:
+    testRunner: VSTest
+    testResultsFiles: '**/test-*trx'
+  condition: eq(variables['SPEECHSDK_RUN_TESTS'], 'true')
+  displayName: Publish test results (.trx)
+- task: PublishBuildArtifacts@1
+  condition: or(failed(), ${{ parameters.continueOnTestFailure }})
+  displayName: 'Publish test console and debug artifacts'
+  inputs:
+    PathtoPublish: 'vstsconsolelog'
+    ArtifactName: TestLog_$(SPEECHSDK_TARGET_PLATFORM)-$(SPEECHSDK_BUILD_CONFIGURATION)
+    publishLocation: Container
+

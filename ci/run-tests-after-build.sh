@@ -116,7 +116,7 @@ for t in "${tests[@]}"; do
 done
 
 # Binary directory, with flavor appended for multi-config generators.
-binaryDir="${options[buisold-dir]}/bin"
+binaryDir="${options[buisold-dir]}"
 [[ $os != Windows* ]] || binaryDir+=/$flavor
 
 # For Python, these entries need to be in the root
