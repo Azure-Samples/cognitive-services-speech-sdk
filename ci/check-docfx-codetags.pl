@@ -61,6 +61,7 @@ BEGIN {
       quickstart/cpp/windows/intent-recognition/helloworld/helloworld.cpp#code
       quickstart/cpp/windows/text-to-speech/helloworld/helloworld.cpp#code
       quickstart/cpp/windows/translate-speech-to-text/helloworld/helloworld.cpp#code
+      quickstart/cpp/windows/speaker-recognition/helloworld/helloworld.cpp#code
       quickstart/csharp/dotnet/from-microphone/helloworld/Program.cs#code
       quickstart/csharp/dotnet/intent-recognition/helloworld/Program.cs#code
       quickstart/csharp/dotnet/text-to-speech/helloworld/Program.cs#code
