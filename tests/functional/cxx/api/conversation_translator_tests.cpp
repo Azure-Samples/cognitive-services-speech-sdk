@@ -305,7 +305,7 @@ TEST_CASE("[CT] Join a conversation with translation", "[api][cxx][conversation_
     });
 }
 
-TEST_CASE("[CT] Host sends an instant message", "[api][cxx][conversation_translator][cxx_conversation_translator][im][host]")
+TEST_CASE("[CT] Host sends an instant message", "[!hide][api][cxx][conversation_translator][cxx_conversation_translator][im][host]")
 {
     CT_INTEGRATION_TEST_INIT;
     REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
@@ -329,7 +329,7 @@ TEST_CASE("[CT] Host sends an instant message", "[api][cxx][conversation_transla
     });
 }
 
-TEST_CASE("[CT] Host and participants send an instant messages", "[api][cxx][conversation_translator][cxx_conversation_translator][im][join]")
+TEST_CASE("[CT] Host and participants send an instant messages", "[!hide][api][cxx][conversation_translator][cxx_conversation_translator][im][join]")
 {
     CT_INTEGRATION_TEST_INIT;
     REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
@@ -601,7 +601,7 @@ TEST_CASE("[CT] Conversation Translator Connection Recognizer events/methods", "
     SPXTEST_REQUIRE(evts.size() > 0);
 }
 
-TEST_CASE("[CT] Conversation Translator Host Leave Rejoin", "[api][cxx][conversation_translator][cxx_conversation_translator][connection][host][rejoin]")
+TEST_CASE("[CT] Conversation Translator Host Leave Rejoin", "[!hide][api][cxx][conversation_translator][cxx_conversation_translator][connection][host][rejoin]")
 {
     CT_INTEGRATION_TEST_INIT;
     REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));

@@ -9,11 +9,11 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -211,7 +211,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             this.ParticipantId = id;
             this.Text = text;
-            this.Lang = lang;
+            this.Lang = TranslatorTextLanguage.Parse(lang);
             this.MinPartials = Math.Max(0, min);
 
             if (translations != null)
@@ -226,7 +226,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
         public string ParticipantId { get; }
         public string Text { get; }
-        public string Lang { get; }
+        public TranslatorTextLanguage Lang { get; }
         public int MinPartials { get; }
         public IReadOnlyDictionary<string, string> Translations { get; }
     }
@@ -407,13 +407,25 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                         + string.Join("\n", f.Select(t => $"  [{t.ParticipantId}] '{t.Text}'")));
                 }
 
-                REQUIRE(match.OriginalLang == e.Lang);
+                REQUIRE(TranslatorTextLanguage.Parse(match.OriginalLang).Equals(e.Lang));
                 REQUIRE_THAT(match.ParticipantId, Catch.Equals(e.ParticipantId, Catch.CaseSensitive.No));
                 REQUIRE(match.Reason == expectedFinalReason);
                 REQUIRE(match.Translations.Count >= e.Translations.Count);
                 foreach (var expectedEntry in e.Translations)
                 {
-                    REQUIRE_THAT(match.Translations[expectedEntry.Key], Catch.FuzzyMatch(expectedEntry.Value));
+                    TranslatorTextLanguage transLang = TranslatorTextLanguage.Parse(expectedEntry.Key);
+                    string actualTranslation;
+
+                    // First lookup the full language code (e.g. zh-Hans-CH), then just the language code
+                    // and script (zh-Hans), and finally just the language code (e.g. zh)
+                    if (!match.Translations.TryGetValue(transLang.ToString(), out actualTranslation)
+                        && !match.Translations.TryGetValue($"{transLang.Code}-{transLang.Script}", out actualTranslation)
+                        && !match.Translations.TryGetValue(transLang.Code, out actualTranslation))
+                    {
+                        actualTranslation = "<NO MATCH FOUND FOR LANGUAGE CODE>";
+                    }
+
+                    REQUIRE_THAT(actualTranslation, Catch.FuzzyMatch(expectedEntry.Value));
                 }
 
                 int numPartials = 0;
@@ -457,13 +469,25 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                         + string.Join("\n", receivedFromUser.Select(im => $"  [{im.ParticipantId}] '{im.Text}'")));
                 }
 
-                REQUIRE(match.OriginalLang == expected.Lang);
+                REQUIRE(TranslatorTextLanguage.Parse(match.OriginalLang) == expected.Lang);
                 REQUIRE_THAT(match.ParticipantId, Catch.Equals(expected.ParticipantId, Catch.CaseSensitive.No));
                 REQUIRE(match.Reason == expectedReason);
                 REQUIRE(match.Translations.Count >= expected.Translations.Count);
                 foreach (var expectedEntry in expected.Translations)
                 {
-                    REQUIRE_THAT(match.Translations[expectedEntry.Key], Catch.FuzzyMatch(expectedEntry.Value));
+                    TranslatorTextLanguage transLang = TranslatorTextLanguage.Parse(expectedEntry.Key);
+                    string actualTranslation;
+
+                    // First lookup the full language code (e.g. zh-Hans-CH), then just the language code
+                    // and script (zh-Hans), and finally just the language code (e.g. zh)
+                    if (!match.Translations.TryGetValue(transLang.ToString(), out actualTranslation)
+                        && !match.Translations.TryGetValue($"{transLang.Code}-{transLang.Script}", out actualTranslation)
+                        && !match.Translations.TryGetValue(transLang.Code, out actualTranslation))
+                    {
+                        actualTranslation = "<NO MATCH FOUND FOR LANGUAGE CODE>";
+                    }
+
+                    REQUIRE_THAT(actualTranslation, Catch.FuzzyMatch(expectedEntry.Value));
                 }
             }
         }
@@ -624,6 +648,271 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
     };
 
+    public abstract class TranslatorLanguageBase : IEquatable<TranslatorLanguageBase>, IComparable<TranslatorLanguageBase>
+    {
+        protected TranslatorLanguageBase(string code, string script = null, string region = null)
+        {
+            if (string.IsNullOrWhiteSpace(code))
+            {
+                throw new ArgumentException(nameof(code) + " cannot be null, empty or consist only of white space");
+            }
 
-    
+            this.Code = code;
+            this.Script = string.IsNullOrWhiteSpace(script) ? string.Empty : script?.Trim();
+            this.Region = string.IsNullOrWhiteSpace(region) ? string.Empty : region?.Trim();
+        }
+
+        public string Code { get; }
+
+        public string Script { get; set; }
+
+        public string Region { get; set; }
+
+        public override bool Equals(object obj) => this.Equals(obj as TranslatorLanguageBase);
+
+        public abstract bool Equals(TranslatorLanguageBase lang);
+
+        public static bool operator ==(TranslatorLanguageBase left, TranslatorLanguageBase right)
+        {
+            if (object.ReferenceEquals(left, null))
+            {
+                return object.ReferenceEquals(right, null);
+            }
+
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(TranslatorLanguageBase left, TranslatorLanguageBase right)
+        {
+            return !(left == right);
+        }
+
+        public override int GetHashCode()
+        {
+            // a bit of hack. In .net standard we could just do HashCode.Combine(...)
+            var tuple = new Tuple<string, string, string>(Code, Script ?? string.Empty, Region ?? string.Empty);
+            return tuple.GetHashCode();
+        }
+
+        public abstract int CompareTo(TranslatorLanguageBase other);
+
+        public override string ToString()
+        {
+            var builder = new StringBuilder((Code?.Length + Script?.Length + Region?.Length) ?? 0 + 2);
+            builder.Append(this.Code);
+
+            if (!string.IsNullOrEmpty(Script))
+            {
+                builder.Append("-");
+                builder.Append(Script);
+            }
+
+            if (!string.IsNullOrEmpty(Region))
+            {
+                builder.Append("-");
+                builder.Append(Region);
+            }
+
+            return builder.ToString();
+        }
+
+        internal static bool TryParseRawLanguageCode(string rawLangCode, out string lang, out string script, out string region)
+        {
+            lang = null;
+            script = null;
+            region = null;
+
+            if (string.IsNullOrWhiteSpace(rawLangCode))
+            {
+                return false;
+            }
+
+            string[] parts = rawLangCode.Split('-');
+
+            // the first part should always be the language
+            lang = parts[0].Trim().ToLowerInvariant();
+            if (string.IsNullOrWhiteSpace(lang))
+            {
+                lang = null;
+                return false;
+            }
+
+            // now extract the region codes and scripts. Please note that this uses
+            // VERY simplified parsing that may not be accurate in all cases but is
+            // sufficient for our needs
+            for (var i = 1; i < parts.Length && script == null && region == null; i++)
+            {
+                if (parts[i].Length == 2)
+                {
+                    // this is the region code
+                    region = parts[i].ToUpperInvariant();
+
+                    if (lang == "zh" && region == "CN")
+                    {
+                        script = "Hans";
+                    }
+                    else if (lang == "zh" && region == "TW")
+                    {
+                        script = "Hant";
+                    }
+                }
+                else if (parts[i].Length == 3 && region == null)
+                {
+                    // special case for us to handle zh-CHS and zh-CHT which are non-standard.
+                    // Script should always come before the region code
+                    if (parts[i].ToUpperInvariant() == "CHS")
+                    {
+                        script = "Hans";
+                    }
+                    else if (parts[i] == "CHT")
+                    {
+                        script = "Hant";
+                    }
+                }
+                else if (parts[i].Length == 4 && region == null)
+                {
+                    // We found the script. This should always come before the region code
+                    script = char.ToUpperInvariant(parts[i][0]) + parts[i].Substring(1).ToLowerInvariant();
+                }
+            }
+
+            // Text translation is using the V2 APIs
+            // Speech translation is using the V4 APIs
+            // Different language codes are returned for Norwegian and Bosnian from each API
+            if (lang == "no")
+            {
+                lang = "nb";
+            }
+            else if (lang == "bs-Latn")
+            {
+                lang = "bs";
+            }
+
+            return true;
+        }
+
+        protected int CompareTo(TranslatorLanguageBase other, string comparisons)
+        {
+            if (other == null)
+            {
+                return -1;
+            }
+
+            int comp = string.CompareOrdinal(this.Code, other.Code);
+            if (comp != 0)
+            {
+                return comp;
+            }
+
+            foreach (var c in comparisons)
+            {
+                switch (c)
+                {
+                    case 's':
+                    case 'S':
+                        comp = string.CompareOrdinal(this.Script, other.Script);
+                        break;
+
+                    case 'r':
+                    case 'R':
+                        comp = string.CompareOrdinal(this.Region, other.Region);
+                        break;
+
+                    default:
+                        throw new ArgumentException(nameof(comparisons));
+                }
+
+                if (comp != 0)
+                {
+                    return comp;
+                }
+            }
+
+            return comp;
+        }
+    }
+
+    public class TranslatorTextLanguage : TranslatorLanguageBase
+    {
+        public static bool TryParse(string rawLangCode, out TranslatorTextLanguage lang)
+        {
+            string code, script, region;
+
+            if (TryParseRawLanguageCode(rawLangCode, out code, out script, out region))
+            {
+                lang = new TranslatorTextLanguage(code, script, region);
+                return true;
+            }
+
+            lang = null;
+            return false;
+        }
+
+        public static TranslatorTextLanguage Parse(string rawLangCode)
+        {
+            TranslatorTextLanguage lang;
+            if (TryParse(rawLangCode, out lang))
+            {
+                return lang;
+            }
+
+            throw new ArgumentException("Invalid language code");
+        }
+
+        private TranslatorTextLanguage(string code, string script, string region)
+            : base(code, script, region)
+        {
+        }
+
+        public override bool Equals(TranslatorLanguageBase other)
+        {
+            return other != null
+                && this.Code == other.Code
+                && this.Script == other.Script;
+        }
+
+        public override int CompareTo(TranslatorLanguageBase other) => this.CompareTo(other, "S");
+    }
+
+    public class TranslatorSpeechLanguage : TranslatorLanguageBase
+    {
+        public static bool TryParse(string rawLangCode, out TranslatorSpeechLanguage lang)
+        {
+            string code, script, region;
+
+            if (TryParseRawLanguageCode(rawLangCode, out code, out script, out region))
+            {
+                lang = new TranslatorSpeechLanguage(code, script, region);
+                return true;
+            }
+
+            lang = null;
+            return false;
+        }
+
+        public static TranslatorSpeechLanguage Parse(string rawLangCode)
+        {
+            TranslatorSpeechLanguage lang;
+            if (TryParse(rawLangCode, out lang))
+            {
+                return lang;
+            }
+
+            throw new ArgumentException("Invalid language code");
+        }
+
+        private TranslatorSpeechLanguage(string code, string script, string region)
+            : base(code, script, region)
+        {
+        }
+
+        public override bool Equals(TranslatorLanguageBase other)
+        {
+            return other != null
+                && this.Code == other.Code
+                && this.Region == other.Region;
+        }
+
+        public override int CompareTo(TranslatorLanguageBase other) => this.CompareTo(other, "R");
+    }
 }
