@@ -164,7 +164,7 @@ namespace Impl {
         HTTPAPI_RESULT result = HTTPAPI_ExecuteRequest(
             m_handle,
             type,
-            httpPath.data(),
+            httpPath.c_str(),
             m_requestHeaders,
             (const unsigned char *)content,
             contentSize,

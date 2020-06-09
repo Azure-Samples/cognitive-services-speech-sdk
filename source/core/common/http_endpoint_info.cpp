@@ -34,6 +34,7 @@ namespace Impl {
     {
         m_endpoint.scheme = UriScheme::HTTPS;
         m_endpoint.port = m_endpoint.isSecure() ? HTTP_SECURE_PORT : HTTP_NON_SECURE_PORT;
+        m_endpoint.path = "/";
     }
 
     bool HttpEndpointInfo::IsValid() const
@@ -98,16 +99,18 @@ namespace Impl {
 
     HttpEndpointInfo & HttpEndpointInfo::Host(const std::string & hostname)
     {
-        if (hostname.empty())
+        std::string trimmed = StringUtils::Trim(hostname);
+
+        if (trimmed.empty())
         {
             throw std::invalid_argument("Host name cannot be empty");
         }
-        else if (hostname.length() > MAX_HOSTNAME_FQDN_LEN)
+        else if (trimmed.length() > MAX_HOSTNAME_FQDN_LEN)
         {
             throw std::out_of_range("Host name is too long");
         }
 
-        m_endpoint.host = hostname;
+        m_endpoint.host = std::move(trimmed);
         return *this;
     }
 
@@ -151,7 +154,13 @@ namespace Impl {
 
     HttpEndpointInfo & HttpEndpointInfo::Path(const std::string & path)
     {
-        m_endpoint.path = path;
+        // make sure to add the / at the start if not already there
+        std::ostringstream oss;
+        oss << '/';
+
+        StringUtils::Trim(path, oss, [](char c, bool atStart) { return atStart && c == '/'; });
+
+        m_endpoint.path = oss.str();
         return *this;
     }
 

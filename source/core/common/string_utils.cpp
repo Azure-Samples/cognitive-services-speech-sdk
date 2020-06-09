@@ -17,6 +17,7 @@
 #include <algorithm>
 #include <vector>
 #include <cstring>
+#include <sstream>
 #include "string_utils.h"
 
 namespace PAL {
@@ -323,6 +324,57 @@ std::u16string ToU16String(const std::wstring& string)
         // the new string may be shorter than the previous one so let's resize it
         pascal.resize(o);
         return pascal;
+    }
+
+    static void TrimDetermineStartEnd(const std::string& str, size_t& startIndex, size_t& endIndex, bool(*predicate)(const char, bool))
+    {
+        startIndex = 0;
+        endIndex = str.length();
+
+        // determine where to start the trimmed string from
+        for (size_t i = 0; i < str.length(); i++)
+        {
+            char c = str[i];
+            if (isspace(static_cast<int>(c)) || (predicate != nullptr && predicate(c, true)))
+            {
+                startIndex++;
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        // determine where to end the trimmed string
+        if (str.length() > 0)
+        {
+            for (size_t i = str.length() - 1; i > startIndex; i--)
+            {
+                char c = str[i];
+                if (isspace(static_cast<int>(str[i])) || (predicate != nullptr && predicate(c, false)))
+                {
+                    endIndex--;
+                }
+                else
+                {
+                    break;
+                }
+            }
+        }
+    }
+
+    const std::string StringUtils::Trim(const std::string& str)
+    {
+        size_t startIndex, endIndex;
+        TrimDetermineStartEnd(str, startIndex, endIndex, nullptr);
+        return std::string(str, startIndex, endIndex - startIndex);
+    }
+
+    void StringUtils::Trim(const std::string& str, std::ostringstream& oss, bool(*predicate)(const char, bool))
+    {
+        size_t startIndex, endIndex;
+        TrimDetermineStartEnd(str, startIndex, endIndex, predicate);
+        oss.write(str.c_str() + startIndex, endIndex - startIndex);
     }
 
 } // PAL

@@ -852,6 +852,44 @@ TEST_CASE("[CT] Conversation Translator SpeechRecognizer Connection Still Works"
     SPXTEST_REQUIRE_THAT(evts->Transcribed[0].Text, Catch::FuzzyMatch(utterance.Utterances["en-US"][0].Text));
 }
 
+TEST_CASE("[CT] Conversation Translator INT endpoint", "[!hide][cxx_conversation_translator][int]")
+{
+    const auto hostName = "host";
+    const auto speechLang = "en-US";
+
+    auto utterance = AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH];
+    REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
+    auto audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
+
+    auto speechConfig = CreateConfig(speechLang, {});
+    speechConfig->SetProperty("ConversationTranslator_RestEndpoint", "https://dev.microsofttranslator-int.com/capito/room");
+    speechConfig->SetProperty("ConversationTranslator_Endpoint", "wss://dev.microsofttranslator-int.com/capito/translate");
+
+    auto conv = Conversation::CreateConversationAsync(speechConfig).get();
+    conv->StartConversationAsync().get();
+
+    auto convTrans = ConversationTranslator::FromConfig(audioConfig);
+    auto evts = ConversationTranslatorCallbacks::From(convTrans);
+
+    convTrans->JoinConversationAsync(conv, hostName).get();
+    convTrans->StartTranscribingAsync().get();
+
+    evts->WaitForAudioStreamCompletion(MAX_WAIT_FOR_AUDIO_TO_COMPLETE, WAIT_AFTER_AUDIO_COMPLETE);
+
+    convTrans->StopTranscribingAsync().get();
+    convTrans->LeaveConversationAsync().get();
+
+    conv->EndConversationAsync().get();
+    conv->DeleteConversationAsync().get();
+
+    std::string participantId;
+    evts->VerifyBasicEvents(true, hostName, true, participantId);
+    evts->VerifyTranscriptions(participantId,
+    {
+        ExpectedTranscription(participantId, AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH].Utterances[speechLang][0].Text, speechLang)
+    });
+}
+
 
 
 TEST_CASE("[CT] Conversation Translator Sweden demo", "[!hide][cxx_conversation_translator][Sweden]")
