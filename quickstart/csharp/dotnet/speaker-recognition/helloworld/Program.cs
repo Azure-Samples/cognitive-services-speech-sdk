@@ -68,7 +68,7 @@ namespace helloworld
                     Console.WriteLine($"CANCELED {profile.Id}: ErrorDetails={cancellation.ErrorDetails}");
                 }
                 Console.WriteLine($"Summation of pure speech across all enrollments in seconds is {result.EnrollmentsSpeechLength.TotalSeconds}.");
-                Console.WriteLine($"The remaining enrollments speech length in seconds is {result.RemainingEnrollmentsSpeechLength.TotalSeconds}.");
+                Console.WriteLine($"The remaining enrollments speech length in seconds is {result.RemainingEnrollmentsSpeechLength?.TotalSeconds}.");
             }
         }
 
