@@ -52,7 +52,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.CognitiveServices.Speech">
-      <Version>1.12.0</Version>
+      <Version>1.12.1</Version>
     </PackageReference>
     <PackageReference Include="Xamarin.Forms" Version="4.1.0.555618" />
     <PackageReference Include="Xamarin.Android.Support.Design" Version="28.0.0.1" />
