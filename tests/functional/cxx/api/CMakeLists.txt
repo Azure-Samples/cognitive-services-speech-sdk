@@ -21,6 +21,7 @@ set(HEADERS_PRIVATE
     "${TEST_INCLUDE}/test_PAL.h"
     "${SRC_DIR}/conversation_translator_utils.h"
     "${SRC_DIR}/dump_log_files_at_end.h"
+    "${SRC_DIR}/translator_languages.h"
     )
 
 set(SOURCES
@@ -42,6 +43,7 @@ set(SOURCES
     "${SRC_DIR}/conversation_tests.cpp"
     "${SRC_DIR}/keyword_recognizer_tests.cpp"
     "${SRC_DIR}/speaker_recognition_tests.cpp"
+    "${SRC_DIR}/translator_languages.cpp"
     )
 
 if(EXTENSION_AUDIOCOMPRESSION_ENABLED)

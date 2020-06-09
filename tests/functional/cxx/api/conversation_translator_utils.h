@@ -21,6 +21,7 @@
 #include <string_utils.h>
 #include "test_PAL.h"
 #include "conversation_utils.h"
+#include "translator_languages.h"
 
 #define SPX_CONFIG_TRACE_INTERFACE_MAP
 using json = nlohmann::json;
@@ -155,7 +156,7 @@ namespace IntegrationTests {
         {
         }
         ExpectedTranscription(const string& id, const string& text, const string& lang, int min = 0, std::initializer_list<std::pair<string, string>> tran = {})
-            : participantId(id), text(text), lang(lang), minPartials(min), translations()
+            : participantId(id), text(text), lang(TranslatorTextLanguage::Parse(lang)), minPartials(min), translations()
         {
             for (const auto& pair : tran)
             {
@@ -165,7 +166,7 @@ namespace IntegrationTests {
 
         string participantId;
         string text;
-        string lang;
+        TranslatorTextLanguage lang;
         int minPartials;
         unordered_map<string, string> translations;
     };
@@ -431,13 +432,17 @@ namespace IntegrationTests {
                     FAIL(oss.str().c_str());
                 }
 
-                SPXTEST_REQUIRE(match.OriginalLang == e.lang);
+                SPXTEST_REQUIRE(TranslatorSpeechLanguage::Parse(match.OriginalLang).Equals(e.lang));
                 SPXTEST_REQUIRE_THAT(match.ParticipantId, Catch::Equals(e.participantId, Catch::CaseSensitive::No));
                 SPXTEST_REQUIRE(match.Reason == expectedFinalReason);
                 SPXTEST_REQUIRE(match.Translations.size() >= e.translations.size());
+
+
                 for (const auto& expectedEntry : e.translations)
                 {
-                    SPXTEST_REQUIRE_THAT(match.Translations[expectedEntry.first], Catch::FuzzyMatch(expectedEntry.second));
+                    auto textLang = TranslatorSpeechLanguage::Parse(expectedEntry.first).TextLanguage();
+
+                    SPXTEST_REQUIRE_THAT(match.Translations[textLang.Code()], Catch::FuzzyMatch(expectedEntry.second));
                 }
 
                 int numPartials = 0;
@@ -495,13 +500,15 @@ namespace IntegrationTests {
                     FAIL(oss.str().c_str());
                 }
 
-                SPXTEST_REQUIRE(match.OriginalLang == expected.lang);
+                SPXTEST_REQUIRE(TranslatorSpeechLanguage::Parse(match.OriginalLang).Equals(expected.lang));
                 SPXTEST_REQUIRE_THAT(match.ParticipantId, Catch::Equals(expected.participantId, Catch::CaseSensitive::No));
                 SPXTEST_REQUIRE(match.Reason == expectedReason);
                 SPXTEST_REQUIRE(match.Translations.size() >= expected.translations.size());
                 for (const auto& expectedEntry : expected.translations)
                 {
-                    SPXTEST_REQUIRE_THAT(match.Translations[expectedEntry.first], Catch::FuzzyMatch(expectedEntry.second));
+                    auto textLang = TranslatorSpeechLanguage::Parse(expectedEntry.first).TextLanguage();
+
+                    SPXTEST_REQUIRE_THAT(match.Translations[textLang.Code()], Catch::FuzzyMatch(expectedEntry.second));
                 }
             }
         }

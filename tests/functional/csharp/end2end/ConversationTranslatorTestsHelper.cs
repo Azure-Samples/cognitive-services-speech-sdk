@@ -764,7 +764,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     {
                         script = "Hans";
                     }
-                    else if (parts[i] == "CHT")
+                    else if (parts[i].ToUpperInvariant() == "CHT")
                     {
                         script = "Hant";
                     }
@@ -783,9 +783,10 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 lang = "nb";
             }
-            else if (lang == "bs-Latn")
+            else if (lang == "bs" && script == "Latn")
             {
                 lang = "bs";
+                script = string.Empty;
             }
 
             return true;
