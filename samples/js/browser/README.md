@@ -1,4 +1,4 @@
-# JavaScript Speech Recongition, Syntheis, and Translation Sample for the Web Browser
+# JavaScript Speech Recongition, Synthesis, and Translation Sample for the Web Browser
 
 This sample demonstrates how to recognize, synthesize, and translate speech with the Speech SDK for JavaScript on a web browser, like Microsoft Edge, or Chrome.
 See [this article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-js-browser) for introductory information on the Speech SDK for JavaScript.
