@@ -63,6 +63,9 @@ namespace Microsoft.CognitiveServices.Speech.Internal
         public static extern SPXHR grammar_list_add_grammar(InteropSafeHandle hgrammarlist, InteropSafeHandle hgrammar);
 
         [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
+        public static extern SPXHR grammar_list_set_recognition_factor(InteropSafeHandle hgrammarlist, double factor, RecognitionFactorScope scope);
+
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR class_language_model_from_storage_id(out SPXGRAMMARHANDLE hclm, IntPtr storageid);
 
         [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]

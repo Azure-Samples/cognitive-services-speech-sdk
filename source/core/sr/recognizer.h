@@ -64,7 +64,8 @@ public:
     // --- ISpxGrammarList
     std::shared_ptr<ISpxGrammar> GetPhraseListGrammar(const wchar_t* name) override;
     void AddGrammar(std::shared_ptr<ISpxGrammar> grammar) override;
-
+    void SetRecognitionFactor(double factor) override;
+    
     // --- ISpxGrammar
     std::list<std::string> GetListenForList() override;
 

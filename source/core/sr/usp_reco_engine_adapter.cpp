@@ -1970,6 +1970,7 @@ json CSpxUspRecoEngineAdapter::GetDgiJsonFromListenForList(std::list<std::string
 {
     SPX_DBG_ASSERT(GetSite() != nullptr);
     auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
+    SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_USP_SITE_FAILURE);
     auto noDGI = PAL::ToBool(properties->GetStringValue("CARBON-INTERNAL-USP-NoDGI"));
     json dgiJson;
 
@@ -2009,6 +2010,16 @@ json CSpxUspRecoEngineAdapter::GetDgiJsonFromListenForList(std::list<std::string
         auto groupsArray = json::array();
         groupsArray.push_back(std::move(group));
         dgiJson["Groups"] = groupsArray;
+
+        // Check and see if a word level factor has been set.
+        if (properties->HasStringValue("SPEECH-WordLevelRecognitionFactor"))
+        {
+            auto recognitionFactor = properties->GetStringValue("SPEECH-WordLevelRecognitionFactor");
+            auto val = std::stod(recognitionFactor);
+            SPX_IFTRUE_THROW_HR(0 > val, SPXERR_INVALID_ARG);
+
+            dgiJson["bias"] = recognitionFactor;
+        }
     }
 
     if (grammars.size() > 0)

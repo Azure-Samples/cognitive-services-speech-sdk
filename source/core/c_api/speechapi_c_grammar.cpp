@@ -160,6 +160,25 @@ SPXAPI grammar_list_add_grammar(SPXGRAMMARHANDLE hgrammarlist, SPXGRAMMARHANDLE 
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
+SPXAPI grammar_list_set_recognition_factor(SPXGRAMMARHANDLE hgrammarlist, double factor, GrammarList_RecognitionFactorScope scope)
+{
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, hgrammarlist == nullptr);
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, factor < 0);
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, scope != GrammarList_RecognitionFactorScope::PartialPhrase);
+
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        auto glg = CSpxSharedPtrHandleTableManager::GetPtr<ISpxGrammar, SPXGRAMMARHANDLE>(hgrammarlist);
+        SPX_RETURN_HR_IF(SPXERR_INVALID_HANDLE, glg == nullptr);
+
+        auto gl = SpxQueryInterface<ISpxGrammarList>(glg);
+        SPX_RETURN_HR_IF(SPXERR_INVALID_HANDLE, gl == nullptr);
+
+        gl->SetRecognitionFactor(factor);
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
 SPXAPI class_language_model_from_storage_id(SPXGRAMMARHANDLE* hclm, const char *storageid)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, hclm == nullptr);

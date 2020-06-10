@@ -18,6 +18,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
     {
         private static string unifiedRegion;
         private static string unifiedKey;
+        private static string officeEndpoint;
 
         private SpeechConfig config;
         private static Config _config;
@@ -29,6 +30,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
             unifiedRegion = SubscriptionsRegionsMap[SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION].Region;
             unifiedKey = SubscriptionsRegionsMap[SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION].Key;
+            officeEndpoint = DefaultSettingsMap[DefaultSettingKeys.OFFICE_PRODUCTION_ENDPOINT];
+
+            var officeFlight = DefaultSettingsMap[DefaultSettingKeys.OFFICE_FLIGHT];
+            if (!string.IsNullOrEmpty(officeFlight))
+            {
+                officeEndpoint += (officeEndpoint.Contains("?") ? "&" : "?") + "setflight=" + officeFlight;
+            }
 
             Console.WriteLine("unifiedRegion: " + unifiedRegion);
             Console.WriteLine("input directory: " + DefaultSettingsMap[DefaultSettingKeys.INPUT_DIR]);
@@ -84,7 +92,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     {
                         AssertMatching(recoTextExpected, result.Text);
                         break;
-                    } catch (Exception)
+                    }
+                    catch (Exception)
                     {
                         // We'll allow a 2nd attempt to work around failures caused by service bug
                         // https://msasg.visualstudio.com/Skyman/_workitems/edit/1893773
@@ -97,6 +106,97 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                         triedOnce = true;
                     }
                 }
+            }
+        }
+
+        [TestMethod]
+        [Ignore]
+        public async Task TestSetRecognitionFactor()
+        {
+            var defaultRecoText = TestData.DgiWreckANiceBeach.DefaultRecoText;
+            var correctRecoText = AudioUtterancesMap[AudioUtteranceKeys.AMBIGUOUS_SPEECH].Utterances[Language.EN][0].Text;
+            var speechConfig = SpeechConfig.FromEndpoint(new Uri(officeEndpoint));
+            speechConfig.AuthorizationToken = "token";
+
+            speechConfig.SpeechRecognitionLanguage = Language.EN;
+
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.AMBIGUOUS_SPEECH].FilePath.GetRootRelativePath());
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(speechConfig, audioInput)))
+            {
+                PhraseListGrammar phraselist = PhraseListGrammar.FromRecognizer(recognizer);
+                phraselist.AddPhrase("wreck a large nice beach");
+
+                var gl = GrammarList.FromRecognizer(recognizer);
+                gl.SetRecognitionFactor(700, RecognitionFactorScope.PartialPhrase);
+
+                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+                AssertMatching(defaultRecoText, result.Text);
+            }
+        }
+
+        [TestMethod]
+        public void TestSetRecognitionFactorError()
+        {
+            var defaultRecoText = TestData.DgiWreckANiceBeach.DefaultRecoText;
+            var correctRecoText = AudioUtterancesMap[AudioUtteranceKeys.AMBIGUOUS_SPEECH].Utterances[Language.EN][0].Text;
+
+            config.SpeechRecognitionLanguage = Language.EN;
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.AMBIGUOUS_SPEECH].FilePath.GetRootRelativePath());
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
+            {
+                PhraseListGrammar phraselist = PhraseListGrammar.FromRecognizer(recognizer);
+                phraselist.AddPhrase(correctRecoText);
+
+                var gl = GrammarList.FromRecognizer(recognizer);
+                Assert.ThrowsException<ApplicationException>(() => gl.SetRecognitionFactor(-1, RecognitionFactorScope.PartialPhrase));
+            }
+        }
+
+        [TestMethod]
+        public async Task TestSetRecognitionFactorStringErrorRange()
+        {
+            var defaultRecoText = TestData.DgiWreckANiceBeach.DefaultRecoText;
+            var correctRecoText = AudioUtterancesMap[AudioUtteranceKeys.AMBIGUOUS_SPEECH].Utterances[Language.EN][0].Text;
+
+            config.SpeechRecognitionLanguage = Language.EN;
+            config.SetProperty("SPEECH-WordLevelRecognitionFactor", "-1");
+
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.AMBIGUOUS_SPEECH].FilePath.GetRootRelativePath());
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
+            {
+                PhraseListGrammar phraselist = PhraseListGrammar.FromRecognizer(recognizer);
+                phraselist.AddPhrase(correctRecoText);
+
+                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+                Assert.IsTrue(result.Reason == ResultReason.Canceled);
+
+                var canceled = CancellationDetails.FromResult(result);
+                Assert.IsTrue(canceled.Reason == CancellationReason.Error);
+                Assert.IsTrue(canceled.ErrorCode == CancellationErrorCode.RuntimeError);
+            }
+        }
+
+        [TestMethod]
+        public async Task TestSetRecognitionFactorStringError()
+        {
+            var defaultRecoText = TestData.DgiWreckANiceBeach.DefaultRecoText;
+            var correctRecoText = AudioUtterancesMap[AudioUtteranceKeys.AMBIGUOUS_SPEECH].Utterances[Language.EN][0].Text;
+
+            config.SpeechRecognitionLanguage = Language.EN;
+            config.SetProperty("SPEECH-WordLevelRecognitionFactor", "NotANumber");
+
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.AMBIGUOUS_SPEECH].FilePath.GetRootRelativePath());
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
+            {
+                PhraseListGrammar phraselist = PhraseListGrammar.FromRecognizer(recognizer);
+                phraselist.AddPhrase(correctRecoText);
+
+                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+                Assert.IsTrue(result.Reason == ResultReason.Canceled);
+
+                var canceled = CancellationDetails.FromResult(result);
+                Assert.IsTrue(canceled.Reason == CancellationReason.Error);
+                Assert.IsTrue(canceled.ErrorCode == CancellationErrorCode.RuntimeError);
             }
         }
 

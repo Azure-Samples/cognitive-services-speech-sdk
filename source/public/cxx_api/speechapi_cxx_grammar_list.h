@@ -69,6 +69,21 @@ public:
         SPX_THROW_ON_FAIL(grammar_list_add_grammar(m_hgrammar.get(), (SPXGRAMMARHANDLE)(*grammar.get())));
     }
 
+    /// <summary>
+    /// Sets the Recognition Factor applied to all grammars in a recognizer's GrammarList
+    /// </summary>
+    /// <param name="factor">The RecognitionFactor to apply</param>
+    /// <param name="scope">The scope for the Recognition Factor being set</param>
+    /// <remarks>
+    /// The Recognition Factor is a numerical value greater than 0 modifies the default weight applied to supplied grammars.
+    /// Setting the Recognition Factor to 0 will disable the supplied grammars.
+    /// The default Recognition Factor is 1.
+    /// </remarks>
+    void SetRecognitionFactor(double factor, RecognitionFactorScope scope)
+    {
+        SPX_THROW_ON_FAIL(grammar_list_set_recognition_factor(m_hgrammar.get(), factor, (GrammarList_RecognitionFactorScope)scope));
+    }
+
 private:
     DISABLE_COPY_AND_MOVE(GrammarList);
 };

@@ -67,6 +67,12 @@ void CSpxRecognizer::AddGrammar(std::shared_ptr<ISpxGrammar> grammar)
     m_grammarlist.push_back(grammar);
 }
 
+void CSpxRecognizer::SetRecognitionFactor(double factor)
+{
+    // For now we only support one factor.
+    SetStringValue("SPEECH-WordLevelRecognitionFactor", std::to_string(factor).c_str());
+}
+
 std::list<std::string> CSpxRecognizer::GetListenForList()
 {
     auto retVal = std::list<std::string>();

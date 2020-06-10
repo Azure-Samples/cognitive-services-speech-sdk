@@ -871,4 +871,18 @@ enum class VoiceProfileType
     TextIndependentVerification = 3
 };
 
+/// <summary>
+/// Defines the scope that a Recognition Factor is applied to.
+/// </summary>
+enum class RecognitionFactorScope
+{
+    /// <summary>
+    /// A Recognition Factor will apply to grammars that can be referenced as individual partial phrases.
+    /// </summary>
+    /// <remarks>
+    /// Currently only applies to PhraseListGrammars
+    /// </remarks>
+    PartialPhrase = 1,
+};
+
 } } } // Microsoft::CognitiveServices::Speech

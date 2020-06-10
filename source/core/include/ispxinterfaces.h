@@ -1575,6 +1575,7 @@ public:
 
     virtual std::shared_ptr<ISpxGrammar> GetPhraseListGrammar(const wchar_t* name) = 0;
     virtual void AddGrammar(std::shared_ptr<ISpxGrammar> grammar) = 0;
+    virtual void SetRecognitionFactor(double factor) = 0;
 };
 
 class ISpxLanguageUnderstandingModel : public ISpxInterfaceBaseFor<ISpxLanguageUnderstandingModel>

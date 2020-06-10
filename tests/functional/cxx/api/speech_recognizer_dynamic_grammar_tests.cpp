@@ -65,6 +65,31 @@ TEST_CASE("Dynamic Grammar Basics", "[api][cxx][dgi]")
         }
     };
 
+    // Need an endpoint deployed.
+    //SPXTEST_SECTION("Recognition Factor")
+    //{
+    //    auto beachHint = "Wreck a nice beach"; // DGI currently doesn't strip away punctuation
+    //    auto correctRecoText = AudioUtterancesMap[AMBIGUOUS_SPEECH].Utterances["en-US"][0].Text;
+    //    auto defaultRecoText = "Recognize speech.";
+
+    //    auto recognizer = getRecognizer();
+
+    //    auto phraselist = PhraseListGrammar::FromRecognizer(recognizer);
+    //    SPXTEST_REQUIRE(phraselist != nullptr);
+
+    //    phraselist->AddPhrase(beachHint);
+
+    //    auto grammarList = GrammarList::FromRecognizer(recognizer);
+    //    grammarList->SetRecognitionFactor(1e-7, RecognitionFactorScope::PartialPhrase);
+
+    //    auto result = recognizer->RecognizeOnceAsync().get();
+    //    SPXTEST_REQUIRE(result != nullptr);
+    //    SPXTEST_REQUIRE(result->Reason == ResultReason::RecognizedSpeech);
+
+    //    SPXTEST_REQUIRE(!result->Text.empty());
+    //    SPXTEST_REQUIRE(correctRecoText == result->Text);
+    //}
+
     SPXTEST_SECTION("PhraseListGrammar")
     {
         auto beachHint = "Wreck a nice beach"; // DGI currently doesn't strip away punctuation

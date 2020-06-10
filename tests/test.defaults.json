@@ -18,5 +18,7 @@
   "Keyword": "Computer",
   "KeywordModel": "kws/kws.table",
   "CustomVoiceDeploymentId": "6b231818-6b8c-4452-9a69-2009355d5d7a",
-  "CustomVoiceVoiceName": "sdk-test"
+  "CustomVoiceVoiceName": "sdk-test",
+  "OfficeProductionEndpoint": "wss://officespeech.platform.bing.com/speech/recognition/dictation/office/v1",
+  "OfficeFlight": "xonlineinterp"
 }
