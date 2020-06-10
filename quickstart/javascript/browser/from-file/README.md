@@ -15,7 +15,7 @@ These samples demonstrate how to recognize speech from a file using the Speech S
 > Note: more detailed step-by-step instructions are available [here](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstarts/speech-to-text-from-file?pivots=programming-language-javascript).
 
 * **By downloading the Microsoft Cognitive Services Speech SDK when building this sample, you acknowledge its license, see [Speech SDK license agreement](https://docs.microsoft.com/azure/cognitive-services/speech-service/license).**
-* [Download the sample code to your development PC.](../../../README.md#get-the-samples)
+* [Download the sample code to your development PC.](/README.md#get-the-samples)
 * From the [Speech SDK for JavaScript .zip package](https://aka.ms/csspeech/jsbrowserpackage) extract the file
   `microsoft.cognitiveservices.speech.sdk.bundle.js` and place it into the folder that contains this quickstart.
 

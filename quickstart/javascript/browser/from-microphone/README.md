@@ -12,7 +12,7 @@ These samples demonstrate how to synthesize speech using the Speech SDK for Java
 ## Build the sample
 
 * **By downloading the Microsoft Cognitive Services Speech SDK when building this sample, you acknowledge its license, see [Speech SDK license agreement](https://docs.microsoft.com/azure/cognitive-services/speech-service/license).**
-* [Download the sample code to your development PC.](../../../README.md#get-the-samples)
+* [Download the sample code to your development PC.](/README.md#get-the-samples)
 * From the [Speech SDK for JavaScript .zip package](https://aka.ms/csspeech/jsbrowserpackage) extract the file
   `microsoft.cognitiveservices.speech.sdk.bundle.js` and place it into the folder that contains this quickstart.
 
