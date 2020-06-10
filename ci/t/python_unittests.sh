@@ -197,17 +197,7 @@ for PYTHON in ${PYTHONS[@]}; do
   ${VIRTUALENV_PYTHON} -m pip install pytest==4.2.0 requests==2.21.0 attrs==19.1.0 python-levenshtein
 
   # try installing the azure-cognitiveservices-speech wheel
-  buildType="x64"
-  if [[ ${arch} == "x86" ]]; then
-    buildType="win32"
-  fi
-  wheel=(${BUILD_DIR}/${os}/${buildType}/${flavor}/wheelhouse/*cp$MAJORMINOR*.whl)
-  if [[ ${os} == *Linux* ]]; then
-    wheel=(${BUILD_DIR}/*cp$MAJORMINOR*.whl)
-  fi
-  if [[ ${os} == "OSX" ]]; then
-    wheel=(${BUILD_DIR}/*cp$MAJORMINOR*.whl)
-  fi
+  wheel=(${BUILD_DIR}/*cp$MAJORMINOR*.whl)
   echo "Installing ${wheel}"
   ${VIRTUALENV_PYTHON} -m pip install ${wheel}
 

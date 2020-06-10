@@ -196,6 +196,20 @@ jobs:
       signConfigType: inlineSignParams
       inlineOperation: $(SIGN_PARAMS_DLL)
     condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
+  - template: test-during-build.yml
+    parameters:
+      continueOnTestFailure: ${{ parameters.continueOnTestFailure }}
+      extraTests:
+        - bash: |
+            ./ci/run-tests.sh \
+              --build-dir build \
+              --platform Windows-x64-Release \
+              --timeout 120m \
+              -D long-running=true \
+              -- csharp_unit_tests
+          displayName: Run LongRunning tests
+          condition: and(eq(variables['SPEECHSDK_RUN_TESTS'], 'true'), eq(variables['SPEECHSDK_BUILD_TYPE'], 'int'), eq(variables['BuildPlatform'], 'x64'), eq(variables['BuildConfiguration'], 'Release'))
+          continueOnError: ${{ parameters.continueOnTestFailure }}
   - bash: |
       ./ci/drop/bindrop.sh $(BuildPlatform) $(BuildConfiguration) "$(cygpath -au "$(Build.ArtifactStagingDirectory)/$(BuildPlatform)/$(BuildConfiguration)")" false
     displayName: Create drop files
