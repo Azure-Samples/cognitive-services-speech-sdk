@@ -1,18 +1,12 @@
-# Quickstart: Create a voice-first virtual assistant with the Speech SDK in C# UWP
+# Quickstart: Create a Voice Assistant with the Speech SDK in C# UWP
 
-This quickstart will connect to a previously authored and configured bot to enable a voice-first virtual assistant experience from the client application.
-See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-virtual-assistant-csharp-uwp) on the SDK documentation page which describes how to build this sample from scratch in Visual Studio.
+This quickstart will connect to a previously authored and configured bot to enable a voice assistant experience from the client application.
+See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-voice-assistant-csharp-uwp) on the SDK documentation page which describes how to build this sample from scratch in Visual Studio.
 
 ## Prerequisites
 
-* An Azure subscription key for the Speech Services in the `westus2` region. Create this subscription on the [Azure portal](https://portal.azure.com/).
+* A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
 * A previously created bot configured with the [Direct Line Speech channel](https://docs.microsoft.com/azure/bot-service/bot-service-channel-connect-directlinespeech)
-    > **Note:**
-    > In preview, the Direct Line Speech channel currently supports only the `westus2` region.
-
-    > **Note:**
-    > The 30-day trial for the standard pricing tier described in [Try Speech Services for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started) is restricted to westus (not westus2) and is thus not compatible with Direct Line Speech. Free and standard tier westus2 subscriptions are compatible.
-
 * A Windows PC with Windows 10 Fall Creators Update (10.0; Build 16299) or later, with a working microphone.
 * [Microsoft Visual Studio 2017](https://www.visualstudio.com/), Community Edition or higher.
 * The **Universal Windows Platform development** workload in Visual Studio.
@@ -40,5 +34,5 @@ When you see the `Enable microphone` button, click it. Then select the `Listen` 
 
 ## References
 
-* [Quickstart article on the SDK documentation site](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-virtual-assistant-csharp-uwp)
-* [Speech SDK API reference for C#](https://aka.ms/csspeech/csharpref)
+* [Quickstart article on the SDK documentation site](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-voice-assistant-csharp-uwp)
+* [Speech SDK API reference for C#](https://docs.microsoft.com/dotnet/api/microsoft.cognitiveservices.speech.dialog?view=azure-dotnet)

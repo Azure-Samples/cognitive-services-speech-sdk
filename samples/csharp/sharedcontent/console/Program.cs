@@ -44,6 +44,10 @@ namespace MicrosoftSpeechSDKSamples
             Console.WriteLine("Q. Speech synthesis word boundary event.");
             Console.WriteLine("R. Speech synthesis using authorization token.");
             Console.WriteLine("S. Speech synthesis in server scenario.");
+            Console.WriteLine("T. Speech recognition with compressed input pull audio stream.");
+            Console.WriteLine("U. Speech recognition with compressed input push audio stream.");
+            Console.WriteLine("V. Translation with compressed input push audio stream.");
+            Console.WriteLine("W. Keyword recognizer.");
 
             Console.Write(prompt);
 
@@ -138,6 +142,20 @@ namespace MicrosoftSpeechSDKSamples
                     case ConsoleKey.S:
                         SpeechSynthesisServerScenarioSample.SpeechSynthesizeWithPool();
                         break;
+                    case ConsoleKey.T:
+                        SpeechRecognitionSamples.SpeechRecognitionWithCompressedInputPullStreamAudio().Wait();
+                        break;
+                    case ConsoleKey.U:
+                        SpeechRecognitionSamples.SpeechRecognitionWithCompressedInputPushStreamAudio().Wait();
+                        break;
+                    case ConsoleKey.V:
+                        TranslationSamples.TranslationWithFileCompressedInputAsync().Wait();
+                        break;
+
+                    case ConsoleKey.W:
+                        SpeechRecognitionSamples.KeywordRecognizer().Wait();
+                        break;
+
                     case ConsoleKey.D0:
                         Console.WriteLine("Exiting...");
                         break;
