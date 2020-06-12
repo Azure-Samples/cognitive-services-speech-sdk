@@ -9,7 +9,7 @@ This sample demonstrates how to create a macOS app in Objective-C using the Cogn
 
 ## Get the Code for the Sample App
 
-* [Download the sample code to your development PC.](../../../README.md#get-the-samples)
+* [Download the sample code to your development PC.](/README.md#get-the-samples)
 
 ## Get the Speech SDK for macOS
 

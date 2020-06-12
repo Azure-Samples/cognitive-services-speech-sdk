@@ -10,7 +10,7 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 
 ## Get the Code for the Sample App
 
-* [Download the sample code to your development PC.](../../README.md#get-the-samples)
+* [Download the sample code to your development PC.](/README.md#get-the-samples)
 
 ## Get the Speech SDK for iOS
 

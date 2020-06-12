@@ -56,7 +56,14 @@ void recognizeSpeechFromWavFile()
 
 int wmain()
 {
-    recognizeSpeechFromWavFile();
+    try
+    {
+        recognizeSpeechFromWavFile();
+    }
+    catch (exception e)
+    {
+        cout << e.what();
+    }
     cout << "Please press a key to continue.\n";
     cin.get();
     return 0;

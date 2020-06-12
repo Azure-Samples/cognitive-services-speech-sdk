@@ -24,7 +24,9 @@ public class Main {
             // and service region. Replace with your own subscription (endpoint) key
             // and service region (e.g., "westus2").
             // The default language is "en-us".
-            SpeechConfig config = SpeechConfig.fromSubscription("YourLanguageUnderstandingSubscriptionKey", "YourLanguageUnderstandingServiceRegion");
+            SpeechConfig config = SpeechConfig.fromSubscription(
+                "YourLanguageUnderstandingSubscriptionKey",
+                "YourLanguageUnderstandingServiceRegion");
 
             // Creates an intent recognizer using microphone as audio input.
             IntentRecognizer recognizer = new IntentRecognizer(config);
@@ -34,6 +36,9 @@ public class Main {
             recognizer.addIntent(model, "YourLanguageUnderstandingIntentName1", "id1");
             recognizer.addIntent(model, "YourLanguageUnderstandingIntentName2", "id2");
             recognizer.addIntent(model, "YourLanguageUnderstandingIntentName3", "any-IntentId-here");
+
+            // To add all of the possible intents from a LUIS model to the recognizer, uncomment the line below:
+            // recognizer.addAllIntents(model);
 
             System.out.println("Say something...");
 

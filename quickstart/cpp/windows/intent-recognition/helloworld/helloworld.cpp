@@ -22,8 +22,10 @@ void recognizeIntent()
     // Once you've obtained it, replace with below with your own Language Understanding subscription key
     // and service region (e.g., "westus").
     // The default recognition language is "en-us".
-    auto config = SpeechConfig::FromSubscription("YourLanguageUnderstandingSubscriptionKey", "YourLanguageUnderstandingServiceRegion");
-    
+    auto config = SpeechConfig::FromSubscription(
+        "YourLanguageUnderstandingSubscriptionKey",
+        "YourLanguageUnderstandingServiceRegion");
+
     // Creates an intent recognizer using microphone as audio input.
     auto recognizer = IntentRecognizer::FromConfig(config);
 
@@ -32,6 +34,9 @@ void recognizeIntent()
     recognizer->AddIntent(model, "YourLanguageUnderstandingIntentName1", "id1");
     recognizer->AddIntent(model, "YourLanguageUnderstandingIntentName2", "id2");
     recognizer->AddIntent(model, "YourLanguageUnderstandingIntentName3", "any-IntentId-here");
+
+    // To add all of the possible intents from a LUIS model to the recognizer, uncomment the line below:
+    // recognizer->AddAllIntents(model);
 
     cout << "Say something...\n";
 
@@ -74,7 +79,14 @@ void recognizeIntent()
 
 int wmain()
 {
-    recognizeIntent();
+    try
+    {
+        recognizeIntent();
+    }
+    catch (exception e)
+    {
+        cout << e.what();
+    }
     cout << "Please press a key to continue.\n";
     cin.get();
     return 0;

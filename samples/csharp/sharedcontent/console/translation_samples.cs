@@ -233,6 +233,131 @@ namespace MicrosoftSpeechSDKSamples
             // </TranslationWithFileAsync>
         }
 
+        // Translation using compressed file input.
+        public static async Task TranslationWithFileCompressedInputAsync()
+        {
+            // <TranslationWithFileCompressedInputAsync>
+            // Translation source language with compressed format.
+            // Replace with a language of your choice.
+            string fromLanguage = "en-US";
+
+            // Creates an instance of a speech translation config with specified subscription key and service region.
+            // Replace with your own subscription key and service region (e.g., "westus").
+            var config = SpeechTranslationConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+            config.SpeechRecognitionLanguage = fromLanguage;
+
+            // Translation target language(s).
+            // Replace with language(s) of your choice.
+            config.AddTargetLanguage("de");
+            config.AddTargetLanguage("fr");
+
+            var stopTranslation = new TaskCompletionSource<int>();
+
+            // Creates a translation recognizer using file as audio input.
+            using (var pushStream = AudioInputStream.CreatePushStream(AudioStreamFormat.GetCompressedFormat(AudioStreamContainerFormat.MP3)))
+            {
+                using (var audioInput = AudioConfig.FromStreamInput(pushStream))
+                {
+                    using (var recognizer = new TranslationRecognizer(config, audioInput))
+                    {
+                        // Subscribes to events.
+                        recognizer.Recognizing += (s, e) =>
+                        {
+                            Console.WriteLine($"RECOGNIZING in '{fromLanguage}': Text={e.Result.Text}");
+                            foreach (var element in e.Result.Translations)
+                            {
+                                Console.WriteLine($"    TRANSLATING into '{element.Key}': {element.Value}");
+                            }
+                        };
+
+                        recognizer.Recognized += (s, e) =>
+                        {
+                            if (e.Result.Reason == ResultReason.TranslatedSpeech)
+                            {
+                                Console.WriteLine($"RECOGNIZED in '{fromLanguage}': Text={e.Result.Text}");
+                                foreach (var element in e.Result.Translations)
+                                {
+                                    Console.WriteLine($"    TRANSLATED into '{element.Key}': {element.Value}");
+                                }
+                            }
+                            else if (e.Result.Reason == ResultReason.RecognizedSpeech)
+                            {
+                                Console.WriteLine($"RECOGNIZED: Text={e.Result.Text}");
+                                Console.WriteLine($"    Speech not translated.");
+                            }
+                            else if (e.Result.Reason == ResultReason.NoMatch)
+                            {
+                                Console.WriteLine($"NOMATCH: Speech could not be recognized.");
+                            }
+                        };
+
+                        recognizer.Canceled += (s, e) =>
+                        {
+                            Console.WriteLine($"CANCELED: Reason={e.Reason}");
+
+                            if (e.Reason == CancellationReason.Error)
+                            {
+                                Console.WriteLine($"CANCELED: ErrorCode={e.ErrorCode}");
+                                Console.WriteLine($"CANCELED: ErrorDetails={e.ErrorDetails}");
+                                Console.WriteLine($"CANCELED: Did you update the subscription info?");
+                            }
+
+                            stopTranslation.TrySetResult(0);
+                        };
+
+                        recognizer.SpeechStartDetected += (s, e) =>
+                        {
+                            Console.WriteLine("\nSpeech start detected event.");
+                        };
+
+                        recognizer.SpeechEndDetected += (s, e) =>
+                        {
+                            Console.WriteLine("\nSpeech end detected event.");
+                        };
+
+                        recognizer.SessionStarted += (s, e) =>
+                        {
+                            Console.WriteLine("\nSession started event.");
+                        };
+
+                        recognizer.SessionStopped += (s, e) =>
+                        {
+                            Console.WriteLine("\nSession stopped event.");
+                            Console.WriteLine($"\nStop translation.");
+                            stopTranslation.TrySetResult(0);
+                        };
+
+                        // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
+                        Console.WriteLine("Start translation...");
+                        await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
+
+                        // Replace with your own audio file name.
+                        using (BinaryAudioStreamReader reader = Helper.CreateBinaryFileReader(@"whatstheweatherlike.mp3"))
+                        {
+                            byte[] buffer = new byte[1000];
+                            while (true)
+                            {
+                                var readSamples = reader.Read(buffer, (uint)buffer.Length);
+                                if (readSamples == 0)
+                                {
+                                    break;
+                                }
+                                pushStream.Write(buffer, readSamples);
+                            }
+                        }
+                        pushStream.Close();
+                        // Waits for completion.
+                        // Use Task.WaitAny to keep the task rooted.
+                        Task.WaitAny(new[] { stopTranslation.Task });
+
+                        // Stops translation.
+                        await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
+                    }
+                }
+            }
+            // </TranslationWithFileCompressedInputAsync>
+        }
+
         // Translation using audio stream.
         public static async Task TranslationWithAudioStreamAsync()
         {

@@ -7,7 +7,7 @@ package com.speechsdk.quickstart;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.joda.JodaModule;
-import com.microsoft.bot.schema.models.Activity;
+import com.microsoft.bot.schema.Activity;
 import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.audio.PullAudioOutputStream;
 import com.microsoft.cognitiveservices.speech.dialog.BotFrameworkConfig;
@@ -146,10 +146,10 @@ public class Main {
 
             try {
                 Activity activity = mapper.readValue(act, Activity.class);
-                if (StringUtils.isNotBlank(activity.text()) || StringUtils.isNotBlank(activity.speak())) {
+                if (StringUtils.isNotBlank(activity.getText()) || StringUtils.isNotBlank(activity.getSpeak())) {
                     receivedResponse = true;
                     System.out.println(String.format("Response: \n\t Text: %s \n\t Speech: %s",
-                            activity.text(), activity.speak()));
+                            activity.getText(), activity.getSpeak()));
                 }
             } catch (IOException e) {
                 log.error("IO exception thrown when deserializing the bot response. ErrorMessage:", e.getMessage(), e);

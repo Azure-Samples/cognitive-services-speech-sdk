@@ -1,4 +1,4 @@
-# Quickstart: Synthesize speech in C++ for Linux (Ubuntu 16.04, Ubuntu 18.04, Debian 9)
+# Quickstart: Synthesize speech in C++ for Linux (Ubuntu 16.04, Ubuntu 18.04, Debian 9, RHEL 8, CentOS 8)
 
 This sample demonstrates how to synthesize speech with C++ using the Speech SDK for Linux.
 See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-text-to-speech-cpp-linux) on the SDK documentation page for step-by-step instructions.
@@ -6,7 +6,7 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 ## Prerequisites
 
 * A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
-* An Ubuntu 16.04, Ubuntu 18.04, or Debian 9 PC with a working speaker or headset.
+* An Ubuntu 16.04, Ubuntu 18.04, Debian 9, RHEL 8, or CentOS 8 PC with a working speaker or headset.
 * On Ubuntu, install these packages to build and run this sample:
 
   ```sh
@@ -20,9 +20,17 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
   sudo apt-get install build-essential libssl1.0.2 libasound2 wget
   ```
 
+* On RHEL 8 or CentOS 8, install these packages to build and run this sample:
+
+  ```sh
+  sudo yum update
+  sudo yum groupinstall "Development tools"
+  sudo yum install alsa-lib openssl wget
+  ```
+
 ## Build the sample
 
-* [Download the sample code to your development PC.](../../README.md#get-the-samples)
+* [Download the sample code to your development PC.](/README.md#get-the-samples)
 * Download and extract the Speech SDK
   * **By downloading the Microsoft Cognitive Services Speech SDK, you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license201809).**
   * Run the following commands after replacing the string `/your/path` with a directory (absolute path) of your choice:

@@ -19,7 +19,7 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 > Note: more detailed step-by-step instructions are available [here](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-java-android).
 
 * **By building this sample you will download the Microsoft Cognitive Services Speech SDK. By downloading you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license201809).**
-* [Download the sample code to your development PC.](../../README.md#get-the-samples)
+* [Download the sample code to your development PC.](/README.md#get-the-samples)
 * Open this folder as a project in Android Studio.
 * Edit the `MainActivity` source:
   * Replace the string `YourSubscriptionKey` with your own subscription key.

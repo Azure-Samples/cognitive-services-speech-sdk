@@ -1,5 +1,5 @@
 {
-  "luis_schema_version": "3.2.0",
+  "luis_schema_version": "4.0.0",
   "versionId": "0.1",
   "name": "Unity-FunWithShapes",
   "desc": "Sample Unity app showcasing how to manipulate 3D shapes with speech.",
@@ -37,7 +37,6 @@
         {
           "canonicalForm": "Increase",
           "list": [
-            "Increase",
             "Enlarge",
             "Larger",
             "Bigger",
@@ -45,10 +44,9 @@
             "boost",
             "bigly",
             "bigger",
-            "bigger",
             "larger",
-            "bigger",
-            "bigger"
+            "huge",
+            "huger"
           ]
         },
         {
@@ -119,9 +117,78 @@
       ]
     },
     {
+      "text": "after well with green i have to go re program that actually i notice a green has an issue for some reason i don't think i've trained enough for round green",
+      "intent": "None",
+      "entities": [
+        {
+          "entity": "Color",
+          "startPos": 16,
+          "endPos": 20
+        },
+        {
+          "entity": "Color",
+          "startPos": 71,
+          "endPos": 75
+        },
+        {
+          "entity": "Color",
+          "startPos": 150,
+          "endPos": 154
+        }
+      ]
+    },
+    {
       "text": "amazing how fast is considering this is doing a round trip to a cloud server",
       "intent": "None",
       "entities": []
+    },
+    {
+      "text": "and finally please change the ball color to yellow",
+      "intent": "ChangeColor",
+      "entities": [
+        {
+          "entity": "Target",
+          "startPos": 30,
+          "endPos": 33
+        },
+        {
+          "entity": "Color",
+          "startPos": 44,
+          "endPos": 49
+        }
+      ]
+    },
+    {
+      "text": "and i can just keep talking and then say please make the box blue",
+      "intent": "ChangeColor",
+      "entities": [
+        {
+          "entity": "Target",
+          "startPos": 57,
+          "endPos": 59
+        },
+        {
+          "entity": "Color",
+          "startPos": 61,
+          "endPos": 64
+        }
+      ]
+    },
+    {
+      "text": "and now the ball i would like it in a red",
+      "intent": "ChangeColor",
+      "entities": [
+        {
+          "entity": "Target",
+          "startPos": 12,
+          "endPos": 15
+        },
+        {
+          "entity": "Color",
+          "startPos": 38,
+          "endPos": 40
+        }
+      ]
     },
     {
       "text": "and now the ball should be yellow",
@@ -143,6 +210,22 @@
       "text": "and then get your top scoring intent",
       "intent": "None",
       "entities": []
+    },
+    {
+      "text": "and then i would like the cylindered to be read",
+      "intent": "ChangeColor",
+      "entities": [
+        {
+          "entity": "Target",
+          "startPos": 26,
+          "endPos": 35
+        },
+        {
+          "entity": "Color",
+          "startPos": 43,
+          "endPos": 46
+        }
+      ]
     },
     {
       "text": "are you done",
@@ -206,6 +289,22 @@
       "text": "can you change department",
       "intent": "None",
       "entities": []
+    },
+    {
+      "text": "can you dear pretty please make the cube green",
+      "intent": "ChangeColor",
+      "entities": [
+        {
+          "entity": "Target",
+          "startPos": 36,
+          "endPos": 39
+        },
+        {
+          "entity": "Color",
+          "startPos": 41,
+          "endPos": 45
+        }
+      ]
     },
     {
       "text": "can you help me?",
@@ -464,11 +563,6 @@
       ]
     },
     {
-      "text": "dungeons and dragons",
-      "intent": "None",
-      "entities": []
-    },
-    {
       "text": "everything we don't have to",
       "intent": "None",
       "entities": []
@@ -477,6 +571,17 @@
       "text": "excellent",
       "intent": "None",
       "entities": []
+    },
+    {
+      "text": "excellent and finally please make the cylinder a little smaller",
+      "intent": "Transform",
+      "entities": [
+        {
+          "entity": "Target",
+          "startPos": 38,
+          "endPos": 45
+        }
+      ]
     },
     {
       "text": "great now is it",
@@ -490,16 +595,6 @@
     },
     {
       "text": "hello",
-      "intent": "None",
-      "entities": []
-    },
-    {
-      "text": "help children health lonely",
-      "intent": "None",
-      "entities": []
-    },
-    {
-      "text": "help children help ok",
       "intent": "None",
       "entities": []
     },
@@ -530,7 +625,7 @@
       "entities": []
     },
     {
-      "text": "hi now make this sphere yellow",
+      "text": "hi now make this fear yellow",
       "intent": "ChangeColor",
       "entities": [
         {
@@ -650,9 +745,20 @@
       ]
     },
     {
-      "text": "i was sorry i was flipping intense no it's fine",
-      "intent": "None",
-      "entities": []
+      "text": "i would like the box to be yellow",
+      "intent": "ChangeColor",
+      "entities": [
+        {
+          "entity": "Target",
+          "startPos": 17,
+          "endPos": 19
+        },
+        {
+          "entity": "Color",
+          "startPos": 27,
+          "endPos": 32
+        }
+      ]
     },
     {
       "text": "i'd like the cylinder to be smaller",
@@ -669,6 +775,22 @@
       "text": "i'm just gonna keep talking",
       "intent": "None",
       "entities": []
+    },
+    {
+      "text": "in change the cylinder color to blue",
+      "intent": "ChangeColor",
+      "entities": [
+        {
+          "entity": "Target",
+          "startPos": 14,
+          "endPos": 21
+        },
+        {
+          "entity": "Color",
+          "startPos": 32,
+          "endPos": 35
+        }
+      ]
     },
     {
       "text": "in reduce the size of the box",
@@ -818,6 +940,11 @@
       "entities": []
     },
     {
+      "text": "make",
+      "intent": "None",
+      "entities": []
+    },
+    {
       "text": "make the cube bigger",
       "intent": "Transform",
       "entities": [
@@ -825,6 +952,39 @@
           "entity": "Target",
           "startPos": 9,
           "endPos": 12
+        }
+      ]
+    },
+    {
+      "text": "make the cube wrapped",
+      "intent": "ChangeColor",
+      "entities": [
+        {
+          "entity": "Target",
+          "startPos": 9,
+          "endPos": 12
+        }
+      ]
+    },
+    {
+      "text": "make the cube wreck",
+      "intent": "ChangeColor",
+      "entities": [
+        {
+          "entity": "Target",
+          "startPos": 9,
+          "endPos": 12
+        }
+      ]
+    },
+    {
+      "text": "make the screen bigger",
+      "intent": "Transform",
+      "entities": [
+        {
+          "entity": "Target",
+          "startPos": 9,
+          "endPos": 14
         }
       ]
     },
@@ -897,6 +1057,22 @@
       ]
     },
     {
+      "text": "no you didn't pick up the color there please change the box color to blue",
+      "intent": "ChangeColor",
+      "entities": [
+        {
+          "entity": "Target",
+          "startPos": 56,
+          "endPos": 58
+        },
+        {
+          "entity": "Color",
+          "startPos": 69,
+          "endPos": 72
+        }
+      ]
+    },
+    {
       "text": "now change the color to purple",
       "intent": "ChangeColor",
       "entities": [
@@ -938,6 +1114,17 @@
       "entities": []
     },
     {
+      "text": "ok and now it like this cylinder to be a little bigger",
+      "intent": "Transform",
+      "entities": [
+        {
+          "entity": "Target",
+          "startPos": 24,
+          "endPos": 31
+        }
+      ]
+    },
+    {
       "text": "ok can i please have the box in blue",
       "intent": "ChangeColor",
       "entities": [
@@ -971,6 +1158,22 @@
           "entity": "Color",
           "startPos": 22,
           "endPos": 26
+        }
+      ]
+    },
+    {
+      "text": "ok i would like the box to be yellow",
+      "intent": "ChangeColor",
+      "entities": [
+        {
+          "entity": "Target",
+          "startPos": 20,
+          "endPos": 22
+        },
+        {
+          "entity": "Color",
+          "startPos": 30,
+          "endPos": 35
         }
       ]
     },
@@ -1096,17 +1299,12 @@
         {
           "entity": "Target",
           "startPos": 17,
-          "endPos": 20
+          "endPos": 22
         }
       ]
     },
     {
       "text": "right now",
-      "intent": "None",
-      "entities": []
-    },
-    {
-      "text": "say again this spirit disfear is this sphere",
       "intent": "None",
       "entities": []
     },
@@ -1153,14 +1351,67 @@
       "entities": []
     },
     {
+      "text": "siri where now",
+      "intent": "None",
+      "entities": []
+    },
+    {
       "text": "so",
       "intent": "None",
       "entities": []
     },
     {
+      "text": "so ok now i would like the box to be turned green",
+      "intent": "ChangeColor",
+      "entities": [
+        {
+          "entity": "Target",
+          "startPos": 27,
+          "endPos": 29
+        },
+        {
+          "entity": "Color",
+          "startPos": 44,
+          "endPos": 48
+        }
+      ]
+    },
+    {
+      "text": "so please make the box red",
+      "intent": "ChangeColor",
+      "entities": [
+        {
+          "entity": "Target",
+          "startPos": 19,
+          "endPos": 21
+        },
+        {
+          "entity": "Color",
+          "startPos": 23,
+          "endPos": 25
+        }
+      ]
+    },
+    {
       "text": "so you basically check to see what type of entity you got back and then you look at the value so it's more like this is the key in the value",
       "intent": "None",
       "entities": []
+    },
+    {
+      "text": "so you better switch recognize the word you said make the q blue",
+      "intent": "ChangeColor",
+      "entities": [
+        {
+          "entity": "Target",
+          "startPos": 58,
+          "endPos": 58
+        },
+        {
+          "entity": "Color",
+          "startPos": 60,
+          "endPos": 63
+        }
+      ]
     },
     {
       "text": "start",
@@ -1226,6 +1477,22 @@
       "entities": []
     },
     {
+      "text": "that's fine but now i can just ask can you please make the box blue",
+      "intent": "ChangeColor",
+      "entities": [
+        {
+          "entity": "Target",
+          "startPos": 59,
+          "endPos": 61
+        },
+        {
+          "entity": "Color",
+          "startPos": 63,
+          "endPos": 66
+        }
+      ]
+    },
+    {
       "text": "that's good",
       "intent": "None",
       "entities": []
@@ -1285,17 +1552,33 @@
       ]
     },
     {
-      "text": "the fact that it's a stronger cpu yeah probably his helping yeah so will have to test it to see how it goes on hollins yeah",
-      "intent": "None",
-      "entities": []
-    },
-    {
       "text": "the stars are yes",
       "intent": "None",
       "entities": []
     },
     {
+      "text": "there you go and finally the spear should be read",
+      "intent": "ChangeColor",
+      "entities": [
+        {
+          "entity": "Target",
+          "startPos": 29,
+          "endPos": 33
+        },
+        {
+          "entity": "Color",
+          "startPos": 45,
+          "endPos": 48
+        }
+      ]
+    },
+    {
       "text": "this is so what",
+      "intent": "None",
+      "entities": []
+    },
+    {
+      "text": "this is you get recognize other things",
       "intent": "None",
       "entities": []
     },
@@ -1328,6 +1611,11 @@
     },
     {
       "text": "unbelievable",
+      "intent": "None",
+      "entities": []
+    },
+    {
+      "text": "very impressive oh yeah",
       "intent": "None",
       "entities": []
     },
@@ -1383,6 +1671,17 @@
       "entities": []
     },
     {
+      "text": "yeah but i think the box should actually be bigger",
+      "intent": "Transform",
+      "entities": [
+        {
+          "entity": "Target",
+          "startPos": 21,
+          "endPos": 23
+        }
+      ]
+    },
+    {
       "text": "yeah but then again",
       "intent": "None",
       "entities": []
@@ -1433,6 +1732,38 @@
       "text": "yes",
       "intent": "None",
       "entities": []
+    },
+    {
+      "text": "yes so please make the ball red",
+      "intent": "ChangeColor",
+      "entities": [
+        {
+          "entity": "Target",
+          "startPos": 23,
+          "endPos": 26
+        },
+        {
+          "entity": "Color",
+          "startPos": 28,
+          "endPos": 30
+        }
+      ]
+    },
+    {
+      "text": "yo software can you change the color of the box to pink",
+      "intent": "ChangeColor",
+      "entities": [
+        {
+          "entity": "Target",
+          "startPos": 44,
+          "endPos": 46
+        },
+        {
+          "entity": "Color",
+          "startPos": 51,
+          "endPos": 54
+        }
+      ]
     },
     {
       "text": "you know what i think the box would be better in green",

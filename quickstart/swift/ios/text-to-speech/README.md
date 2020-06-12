@@ -9,7 +9,7 @@ This sample demonstrates how to create an iOS app in Swift using the Cognitive S
 
 ## Get the code for the sample app
 
-* [Download the sample code to your development machine.](../../../README.md#get-the-samples)
+* [Download the sample code to your development machine.](/README.md#get-the-samples)
 
 ## Get the Speech SDK for iOS
 
