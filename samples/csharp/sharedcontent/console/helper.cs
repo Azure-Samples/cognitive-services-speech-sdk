@@ -34,6 +34,12 @@ namespace MicrosoftSpeechSDKSamples
             return new BinaryAudioStreamReader(reader);
         }
 
+        public static BinaryAudioStreamReader CreateBinaryFileReader(string filename)
+        {
+            BinaryReader reader = new BinaryReader(File.OpenRead(filename));
+            return new BinaryAudioStreamReader(reader);
+        }
+
         public static AudioStreamFormat readWaveHeader(BinaryReader reader)
         {
             // Tag "RIFF"

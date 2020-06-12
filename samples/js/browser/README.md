@@ -1,6 +1,6 @@
-# JavaScript Speech Recongition and Translation Sample for the Web Browser
+# JavaScript Speech Recongition, Syntheis, and Translation Sample for the Web Browser
 
-This sample demonstrates how to recognize speech with the Speech SDK for JavaScript on a web browser, like Microsoft Edge, or Chrome.
+This sample demonstrates how to recognize, synthesize, and translate speech with the Speech SDK for JavaScript on a web browser, like Microsoft Edge, or Chrome.
 See [this article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-js-browser) for introductory information on the Speech SDK for JavaScript.
 
 ## Prerequisites
@@ -26,11 +26,13 @@ If you want to host the sample on a web server:
   * Replace the string `YourSubscriptionKey` with your own subscription key.
 * Edit the `index.html` source:
   * Replace the value for the variable `authorizationEndpoint` with the full URL where you can access the token.php resource.
+* For synthesis, edit the `synthesis.html` source:
+  * Replace the value for the variable `authorizationEndpoint` with the full URL where you can access the token.php resource.
 * Deploy all files to your web server.
 
 ## Run the sample
 
-* In case you are running the sample from your local computer, open index.html from the location where you have downloaded this sample with a JavaScript capable browser.
+* In case you are running the sample from your local computer, open `index.html` or `synthesis.html` from the location where you have downloaded this sample with a JavaScript capable browser.
   Use the input fields to set your subscription key and service region.
 * In case you are hosting the sample on a web server, open a web browser and navigate to the full URL where you host the sample.
 

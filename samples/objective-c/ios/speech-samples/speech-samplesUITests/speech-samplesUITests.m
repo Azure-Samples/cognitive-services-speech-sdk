@@ -107,4 +107,22 @@
     [self waitForExpectationsWithTimeout:20 handler:nil];
 }
 
+- (void)testRecognizeWithLanguageDetection {
+    // sleep to make sure elements are there
+    [NSThread sleepForTimeInterval:1];
+    XCUIElement * reco_button = app.buttons[@"recognize_language_detection_button"];
+    XCTAssert(reco_button.exists);
+
+    XCUIElement * result_label = app.staticTexts[@"result_label"];
+    XCTAssert(result_label.exists);
+
+    NSPredicate *pred = [NSPredicate predicateWithFormat:@"label == Language: en-US, %@", weatherText];
+
+    [self expectationForPredicate:pred evaluatedWithObject:result_label handler:nil];
+
+    [reco_button tap];
+
+    [self waitForExpectationsWithTimeout:20 handler:nil];
+}
+
 @end
