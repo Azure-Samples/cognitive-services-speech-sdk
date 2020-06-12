@@ -1,7 +1,7 @@
 # Quickstart: Using Voice Assistant in Java on Windows or Linux
 
 This sample demonstrates how to recognize speech for custom voice assistants and receive activity responses.
-See the [accompanying article](https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/quickstart-voice-assistant-java-jre) on the SDK documentation page which describes how to build this sample from scratch in Eclipse.
+See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-voice-assistant-java-jre) on the SDK documentation page which describes how to build this sample from scratch in Eclipse.
 
 > **Note:**
 > the Speech SDK for the JRE currently supports only the Windows x64 platform, macOS 10.13 or later, and Linux x64 (Ubuntu 16.04, Ubuntu 18.04, Debian 9, RHEL 8, CentOS 8) and ARM64 (Ubuntu 16.04, Ubuntu 18.04, Debian 9).
@@ -54,5 +54,5 @@ See the [accompanying article](https://docs.microsoft.com/en-us/azure/cognitive-
 
 ## References
 
-* [Quickstart article on the SDK documentation site](https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/quickstart-voice-assistant-java-jre)
-* [Speech SDK API reference for Java](https://docs.microsoft.com/en-us/java/api/com.microsoft.cognitiveservices.speech.dialog?view=azure-java-stable)
+* [Quickstart article on the SDK documentation site](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-voice-assistant-java-jre)
+* [Speech SDK API reference for Java](https://docs.microsoft.com/java/api/com.microsoft.cognitiveservices.speech.dialog?view=azure-java-stable)

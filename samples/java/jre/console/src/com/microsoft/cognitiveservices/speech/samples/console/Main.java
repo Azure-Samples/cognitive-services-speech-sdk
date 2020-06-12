@@ -125,6 +125,7 @@ public class Main {
                     break;
                 case "q":
                     SpeechSynthesisScenarioSamples.synthesisServerScenarioAsync();
+                    break;
                 case "0":
                     System.out.println("Exiting...");
                     break;
