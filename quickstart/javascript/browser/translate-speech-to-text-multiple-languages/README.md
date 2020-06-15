@@ -24,6 +24,7 @@ This sample shows how to translate speech into multiple languages with the Speec
 If you want to host the sample on a web server:
 
 * The web server must be secure (HTTPS).
+* The web server must support PHP with curl enabled.
 * Edit the `token.php` source:
   * Replace the string `YourServiceRegion` with the service region of your subscription.
     For example, replace with `westus` if you are using the 30-day free trial subscription.
