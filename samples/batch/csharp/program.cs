@@ -22,8 +22,8 @@ namespace BatchClient
         // recordings and locale
         private const string Locale = "en-US";
         private static Uri RecordingsBlobUri = new Uri("<SAS URI pointing to an audio file stored in Azure Blob Storage>");
-        //private static Uri ContentContainer = new Uri("<SAS URI pointing to an container in Azure Blob Storage>");
-        
+        //private static Uri ContentAzureBlobContainer = new Uri("<SAS URI pointing to an container in Azure Blob Storage>");
+
         // For use of custom trained model:
         private static EntityReference CustomModel = null;
         //private static EntityReference CustomModel =
@@ -43,28 +43,28 @@ namespace BatchClient
             var client = BatchClient.CreateApiV3Client(SubscriptionKey, $"{Region}.api.cognitive.microsoft.com");
 
             Console.WriteLine("Deleting all existing completed transcriptions.");
-            
+
             // get all transcriptions for the subscription
             var paginatedTranscriptions = await client.GetTranscriptionsAsync().ConfigureAwait(false);
             do
             {
                 // delete all pre-existing completed transcriptions. If transcriptions are still running or not started, they will not be deleted
-                foreach (var _ in paginatedTranscriptions.Values)
+                foreach (var transcriptionToDelete in paginatedTranscriptions.Values)
                 {
                     // delete a transcription
-                    await client.DeleteTranscriptionAsync(_.Self).ConfigureAwait(false);
+                    await client.DeleteTranscriptionAsync(transcriptionToDelete.Self).ConfigureAwait(false);
                 }
 
                 paginatedTranscriptions = await client.GetTranscriptionsAsync().ConfigureAwait(false);
             }
             while (paginatedTranscriptions.NextLink != null);
 
-            var transcription = new Transcription
+            var newTranscription = new Transcription
             {
                 Name = Name, 
                 Locale = Locale, 
                 ContentUrls = new[] { RecordingsBlobUri },
-                //ContentContainerUrl = ContentContainer,
+                //ContentContainerUrl = ContentAzureBlobContainer,
                 Model = CustomModel,
                 Properties = new TranscriptionProperties
                     {
@@ -73,13 +73,11 @@ namespace BatchClient
                     }
             };
 
-            transcription = await client.PostTranscriptionAsync(transcription).ConfigureAwait(false);
+            newTranscription = await client.PostTranscriptionAsync(newTranscription).ConfigureAwait(false);
+            Console.WriteLine($"Created transcription {newTranscription.Self}.");
 
             // get the transcription Id from the location URI
-            var createdTranscriptions = new List<Uri>();
-            createdTranscriptions.Add(transcription.Self);
-
-            Console.WriteLine($"Created transcription {transcription.Self}.");
+            var createdTranscriptions = new List<Uri> { newTranscription.Self };
 
             Console.WriteLine("Checking status.");
 
@@ -95,14 +93,14 @@ namespace BatchClient
                 do
                 {
                     // delete all pre-existing completed transcriptions. If transcriptions are still running or not started, they will not be deleted
-                    foreach (var _ in paginatedTranscriptions.Values)
+                    foreach (var transcription in paginatedTranscriptions.Values)
                     {
-                        switch (_.Status)
+                        switch (transcription.Status)
                         {
                             case "Failed":
                             case "Succeeded":
                                 // we check to see if it was one of the transcriptions we created from this client.
-                                if (!createdTranscriptions.Contains(_.Self))
+                                if (!createdTranscriptions.Contains(transcription.Self))
                                 {
                                     // not created form here, continue
                                     continue;
@@ -110,9 +108,9 @@ namespace BatchClient
                                 completed++;
 
                                 // if the transcription was successful, check the results
-                                if (_.Status == "Succeeded")
+                                if (transcription.Status == "Succeeded")
                                 {
-                                    var paginatedfiles = await client.GetTranscriptionFilesAsync(_.Links.Files).ConfigureAwait(false);
+                                    var paginatedfiles = await client.GetTranscriptionFilesAsync(transcription.Links.Files).ConfigureAwait(false);
 
                                     var resultFile = paginatedfiles.Values.FirstOrDefault(f => f.Kind == ArtifactKind.Transcription);
                                     var result = await client.GetTranscriptionResultAsync(new Uri(resultFile.Links.ContentUrl)).ConfigureAwait(false);
@@ -121,7 +119,7 @@ namespace BatchClient
                                 }
                                 else
                                 {
-                                    Console.WriteLine("Transcription failed. Status: {0}", _.Properties.Error.Message);
+                                    Console.WriteLine("Transcription failed. Status: {0}", transcription.Properties.Error.Message);
                                 }
                                 break;
 
@@ -138,7 +136,7 @@ namespace BatchClient
 
                     Console.WriteLine(string.Format("Transcriptions status: {0} completed, {1} running, {2} not started yet", completed, running, notStarted));
                     
-                    // check again after 5 seconds (can also be 1, 2, 5 min depending on usage).
+                    // check again after 1 minute
                     await Task.Delay(TimeSpan.FromMinutes(1)).ConfigureAwait(false);
 
                     paginatedTranscriptions = await client.GetTranscriptionsAsync().ConfigureAwait(false);
