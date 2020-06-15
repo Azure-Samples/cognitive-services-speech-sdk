@@ -9,7 +9,6 @@ namespace BatchClient
     using Polly;
     using Polly.Retry;
     using System;
-    using System.Data.Common;
     using System.Net;
     using System.Net.Http;
     using System.Net.Http.Formatting;
