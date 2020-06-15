@@ -6,87 +6,59 @@
 namespace BatchClient
 {
     using Newtonsoft.Json;
+    using Polly;
+    using Polly.Retry;
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
+    using System.Data.Common;
     using System.Net;
     using System.Net.Http;
     using System.Net.Http.Formatting;
-    using System.Net.Http.Headers;
     using System.Threading.Tasks;
 
     public class BatchClient
     {
-        private const int MinRetryBackoffInMilliseconds = 10;
-        private const int MaxRetryBackoffInMilliseconds = 100;
         private const int MaxNumberOfRetries = 5;
-        private const string OneAPIOperationLocationHeaderKey = "Operation-Location";
 
         private readonly HttpClient client;
         private readonly string speechToTextBasePath;
 
+        private static AsyncRetryPolicy<HttpResponseMessage> transientFailureRetryingPolicy = Policy
+            .Handle<HttpRequestException>()
+            .Or<TaskCanceledException>()
+            .OrResult<HttpResponseMessage>(x => !x.IsSuccessStatusCode && (int)x.StatusCode == 429)
+            .WaitAndRetryAsync(MaxNumberOfRetries, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)));
+
         private BatchClient(HttpClient client)
         {
             this.client = client;
-            speechToTextBasePath = "api/speechtotext/v2.0/";
+            speechToTextBasePath = "speechtotext/v3.0/";
         }
 
-        public static async Task<BatchClient> CreateApiV1ClientAsync(string username, string key, string hostName, int port)
+        public static BatchClient CreateApiV3Client(string key, string hostName)
         {
             var client = new HttpClient();
             client.Timeout = TimeSpan.FromMinutes(25);
-            client.BaseAddress = new UriBuilder(Uri.UriSchemeHttps, hostName, port).Uri;
-
-            var tokenProviderPath = "/oauth/ctoken";
-            var clientToken = await CreateClientTokenAsync(client, hostName, port, tokenProviderPath, username, key).ConfigureAwait(false);
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", clientToken.AccessToken);
-
-            return new BatchClient(client);
-        }
-
-        public static BatchClient CreateApiV2Client(string key, string hostName, int port)
-        {
-            var client = new HttpClient();
-            client.Timeout = TimeSpan.FromMinutes(25);
-            client.BaseAddress = new UriBuilder(Uri.UriSchemeHttps, hostName, port).Uri;
+            client.BaseAddress = new UriBuilder(Uri.UriSchemeHttps, hostName).Uri;
 
             client.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", key);
 
             return new BatchClient(client);
         }
 
-        public Task<IEnumerable<Transcription>> GetTranscriptionsAsync()
+        public Task<PaginatedTranscriptions> GetTranscriptionsAsync()
         {
-            var path = $"{this.speechToTextBasePath}Transcriptions";
-            return this.GetAsync<IEnumerable<Transcription>>(path);
+            var path = $"{this.speechToTextBasePath}transcriptions";
+            return this.GetAsync<PaginatedTranscriptions>(path);
         }
 
-        public Task<Transcription> GetTranscriptionAsync(Guid id)
+        public Task<PaginatedFiles> GetTranscriptionFilesAsync(Uri location)
         {
-            var path = $"{this.speechToTextBasePath}Transcriptions/{id}";
-            return this.GetAsync<Transcription>(path);
-        }
-
-        public Task<Uri> PostTranscriptionAsync(string name, string description, string locale, Uri recordingsUrl)
-        {
-            var path = $"{this.speechToTextBasePath}Transcriptions/";
-            var transcriptionDefinition = TranscriptionDefinition.Create(name, description, locale, recordingsUrl);
-
-            return this.PostAsJsonAsync<TranscriptionDefinition>(path, transcriptionDefinition);
-        }
-
-        public Task<Uri> PostTranscriptionAsync(string name, string description, string locale, Uri recordingsUrl, IEnumerable<Guid> modelIds)
-        {
-            if (! modelIds.Any())
+            if (location == null)
             {
-                return this.PostTranscriptionAsync(name, description, locale, recordingsUrl);
+                throw new ArgumentNullException(nameof(location));
             }
-            
-            var models = modelIds.Select(m => ModelIdentity.Create(m)).ToList();
-            var path = $"{this.speechToTextBasePath}Transcriptions/";
 
-            var transcriptionDefinition = TranscriptionDefinition.Create(name, description, locale, recordingsUrl, models);
-            return this.PostAsJsonAsync<TranscriptionDefinition>(path, transcriptionDefinition);
+            return this.GetAsync<PaginatedFiles>(location.PathAndQuery);
         }
 
         public Task<Transcription> GetTranscriptionAsync(Uri location)
@@ -96,105 +68,98 @@ namespace BatchClient
                 throw new ArgumentNullException(nameof(location));
             }
 
-            return this.GetAsync<Transcription>(location.AbsolutePath);
+            return this.GetAsync<Transcription>(location.PathAndQuery);
         }
 
-        public Task DeleteTranscriptionAsync(Guid id)
+        public async Task<RecognitionResults> GetTranscriptionResultAsync(Uri location)
         {
-            var path = $"{this.speechToTextBasePath}Transcriptions/{id}";
-            return this.client.DeleteAsync(path);
-        }
+            if (location == null)
+            {
+                throw new ArgumentNullException(nameof(location));
+            }
 
-        private static async Task<Token> CreateClientTokenAsync(HttpClient client, string hostName, int port, string tokenProviderPath, string username, string key)
-        {
-            var uriBuilder = new UriBuilder("https", hostName, port, tokenProviderPath);
+            var response = await transientFailureRetryingPolicy
+                .ExecuteAsync(async () => await this.client.GetAsync(location).ConfigureAwait(false))
+                .ConfigureAwait(false);
 
-            var form = new Dictionary<string, string>
+            if (response.IsSuccessStatusCode)
+            {
+                var result = await response.Content.ReadAsAsync<RecognitionResults>(new[]
                     {
-                        { "grant_type", "client_credentials" },
-                        { "client_id", "cris" },
-                        { "client_secret", key },
-                        { "username", username }
-                    };
+                        new JsonMediaTypeFormatter
+                        {
+                            SerializerSettings = SpeechJsonContractResolver.ReaderSettings
+                        }
+                    }).ConfigureAwait(false);
 
-            var rand = new Random();
+                return result;
+            }
 
-            for (var retries = 0; retries < MaxNumberOfRetries; retries++)
+            throw await CreateExceptionAsync(response);
+        }
+
+        public Task<Transcription> PostTranscriptionAsync(Transcription transcription)
+        {
+            if (transcription == null)
             {
-                HttpResponseMessage response = null;
-                try
-                {
-                    response = await client.PostAsync(uriBuilder.Uri, new FormUrlEncodedContent(form)).ConfigureAwait(false);
-                    var token = await response.Content.ReadAsAsync<Token>().ConfigureAwait(false);
+                throw new ArgumentNullException(nameof(transcription));
+            }
 
-                    if (string.IsNullOrEmpty(token.Error))
+            var path = $"{this.speechToTextBasePath}transcriptions/";
+
+            return this.PostAsJsonAsync<Transcription, Transcription>(path, transcription);
+        }
+
+        public Task DeleteTranscriptionAsync(Uri location)
+        {
+            if (location == null)
+            {
+                throw new ArgumentNullException(nameof(location));
+            }
+
+            return transientFailureRetryingPolicy
+                .ExecuteAsync(() => this.client.DeleteAsync(location.PathAndQuery));
+        }
+
+        private async Task<TResponse> PostAsJsonAsync<TPayload, TResponse>(string path, TPayload payload)
+        {
+            string json = JsonConvert.SerializeObject(payload, SpeechJsonContractResolver.WriterSettings);
+            StringContent content = new StringContent(json);
+            content.Headers.ContentType = JsonMediaTypeFormatter.DefaultMediaType;
+
+            var response = await transientFailureRetryingPolicy
+                .ExecuteAsync(() => this.client.PostAsync(path, content))
+                .ConfigureAwait(false);
+
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadAsAsync<TResponse>(
+                    new[]
                     {
-                        return token;
-                    }
-                }
-                catch (HttpRequestException)
-                {
-                    // Didn't work. Too bad. Try again.
-                }
-                finally
-                {
-                    response?.Dispose();
-                }
-
-                await Task.Delay(TimeSpan.FromMilliseconds(rand.Next(MinRetryBackoffInMilliseconds, MaxRetryBackoffInMilliseconds)))
-                    .ConfigureAwait(false);
+                        new JsonMediaTypeFormatter
+                        {
+                            SerializerSettings = SpeechJsonContractResolver.ReaderSettings
+                        }
+                    }).ConfigureAwait(false);
             }
 
-            throw new InvalidOperationException("Exceeded maximum number of retries for getting a token.");
-        }
-
-        private static async Task<Uri> GetLocationFromPostResponseAsync(HttpResponseMessage response)
-        {
-            if (!response.IsSuccessStatusCode)
-            {
-                throw await CreateExceptionAsync(response).ConfigureAwait(false);
-            }
-
-            IEnumerable<string> headerValues;
-            if (response.Headers.TryGetValues(OneAPIOperationLocationHeaderKey, out headerValues))
-            {
-                if (headerValues.Any())
-                {
-                    return new Uri(headerValues.First());
-                }
-            }
-
-            return response.Headers.Location;
-        }
-
-        private async Task<Uri> PostAsJsonAsync<TPayload>(string path, TPayload payload)
-        {
-
-            string res = Newtonsoft.Json.JsonConvert.SerializeObject(payload);
-            StringContent sc = new StringContent(res);
-            sc.Headers.ContentType = JsonMediaTypeFormatter.DefaultMediaType;
-
-            using (var response = await client.PostAsync(path, sc))
-            {
-                return await GetLocationFromPostResponseAsync(response).ConfigureAwait(false);
-            }
+            throw await CreateExceptionAsync(response).ConfigureAwait(false);
         }
 
         private async Task<TResponse> GetAsync<TResponse>(string path)
         {
-            using (var response = await this.client.GetAsync(path).ConfigureAwait(false))
+            var response = await transientFailureRetryingPolicy
+                .ExecuteAsync(async () => await this.client.GetAsync(path).ConfigureAwait(false))
+                .ConfigureAwait(false);
+
+            if (response.IsSuccessStatusCode)
             {
-                var contentType = response.Content.Headers.ContentType;
+                var result = await response.Content.ReadAsAsync<TResponse>().ConfigureAwait(false);
 
-                if (response.IsSuccessStatusCode && string.Equals(contentType.MediaType, "application/json", StringComparison.OrdinalIgnoreCase))
-                {
-                    var result = await response.Content.ReadAsAsync<TResponse>().ConfigureAwait(false);
-
-                    return result;
-                }
-
-                throw new NotImplementedException();
+                return result;
             }
+
+            throw await CreateExceptionAsync(response);
         }
 
         private static async Task<FailedHttpClientRequestException> CreateExceptionAsync(HttpResponseMessage response)

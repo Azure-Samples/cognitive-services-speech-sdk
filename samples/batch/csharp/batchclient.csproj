@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -35,10 +35,16 @@
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>packages\Newtonsoft.Json.12.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
+    <Reference Include="Polly, Version=7.0.0.0, Culture=neutral, PublicKeyToken=c8a3ffc3f8f825cc, processorArchitecture=MSIL">
+      <HintPath>packages\Polly.7.2.1\lib\net461\Polly.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Net.Http.Formatting, Version=5.2.4.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>packages\Microsoft.AspNet.WebApi.Client.5.2.4\lib\net45\System.Net.Http.Formatting.dll</HintPath>
+    <Reference Include="System.Net.Http.Formatting, Version=5.2.7.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.AspNet.WebApi.Client.5.2.7\lib\net45\System.Net.Http.Formatting.dll</HintPath>
+    </Reference>
+    <Reference Include="System.ValueTuple, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>packages\System.ValueTuple.4.5.0\lib\net461\System.ValueTuple.dll</HintPath>
     </Reference>
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -48,15 +54,30 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="failed_http_client_request_exception.cs" />
+    <Compile Include="artifactkind.cs" />
+    <Compile Include="combinedresults.cs" />
+    <Compile Include="entityerror.cs" />
+    <Compile Include="entityreference.cs" />
+    <Compile Include="failedhttpclientrequestexception.cs" />
     <Compile Include="batchclient.cs" />
-    <Compile Include="model_identity.cs" />
+    <Compile Include="file.cs" />
+    <Compile Include="filelinks.cs" />
+    <Compile Include="fileproperties.cs" />
+    <Compile Include="links.cs" />
+    <Compile Include="nbest.cs" />
+    <Compile Include="paginatedfiles.cs" />
+    <Compile Include="paginatedtranscriptions.cs" />
+    <Compile Include="recognitionresult.cs" />
+    <Compile Include="recognitionresults.cs" />
+    <Compile Include="speechjsoncontractresolver.cs" />
+    <Compile Include="profanityfiltermode.cs" />
     <Compile Include="program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="token.cs" />
+    <Compile Include="punctuationmode.cs" />
+    <Compile Include="timespanconverter.cs" />
     <Compile Include="transcription.cs" />
-    <Compile Include="transcription_definition.cs" />
-    <Compile Include="transcription_result.cs" />
+    <Compile Include="transcriptionproperties.cs" />
+    <Compile Include="worddetails.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
