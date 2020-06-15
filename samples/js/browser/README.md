@@ -18,7 +18,7 @@ See [this article](https://docs.microsoft.com/azure/cognitive-services/speech-se
 * From the [Speech SDK for JavaScript .zip package](https://aka.ms/csspeech/jsbrowserpackage) extract the file
   `microsoft.cognitiveservices.speech.sdk.bundle.js` and place it into the folder that contains this sample.
 
-If you want to host the sample on a web server:
+If you want to host the sample on a web server, the web server must support PHP with curl enabled. Follow these steps:
 
 * Edit the `token.php` source:
   * Replace the string `YourServiceRegion` with the service region of your subscription.
