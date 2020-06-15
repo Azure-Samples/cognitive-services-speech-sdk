@@ -1,4 +1,4 @@
-# Quickstart: Using the Speech Service to Translate Speech in JavaScript on a Web Browser.
+# Quickstart: Using the Speech Service to Translate Speech in JavaScript on a Web Browser
 
 This sample shows how to translate speech with the Speech Service using the Speech SDK for JavaScript on a web browser, like Microsoft Edge, or Chrome. It illustrates how the SDK can be used to translate speech in one language to text in a different language.
 
