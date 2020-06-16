@@ -397,6 +397,8 @@ jobs:
       enableVariable: SPEECHSDK_ENABLE_KWS
       os: Windows
   - bash: |
+      set -x
+      cp ./ci/jsonsettings.py .
       rm -f ./tests/test.subscriptions.regions.json
       cat > ./tests/test.subscriptions.regions.json <<HEREDOC
         $(KEYS_AND_REGIONS)
@@ -1465,6 +1467,7 @@ jobs:
       type: FilePath
       scriptPath: './ci/check-gcc-parse.sh'
   - bash: |
+      cp ./ci/jsonsettings.py .
       rm -f ./tests/test.subscriptions.regions.json
       cat > ./tests/test.subscriptions.regions.json << HEREDOC
         $(KEYS_AND_REGIONS)

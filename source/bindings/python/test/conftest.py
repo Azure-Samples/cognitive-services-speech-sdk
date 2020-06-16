@@ -181,7 +181,7 @@ speech_input_data_raw = {'weather':
                          ('whatstheweatherlike.wav',
                           ["What's the weather like?"], (200000, ),
                           (16000000, ), 'en-US',
-                          {'fr': "Quel temps fait-il ?",
+                          {'fr': "Comment fait le temps ?",
                            'de': "Wie ist das Wetter?"}
                           ),
                          'lamp': ('TurnOnTheLamp.wav',
