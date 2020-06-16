@@ -29,7 +29,7 @@ The [synthesis sample app](./synthesis-samples) shows various other techniques t
 
 ## Get the code for the samples
 
-- [Download the sample code to your development machine.](../../../README.md#get-the-samples)
+- [Download the sample code to your development machine.](/README.md#get-the-samples)
 
 ## Get the Speech SDK for iOS
 
