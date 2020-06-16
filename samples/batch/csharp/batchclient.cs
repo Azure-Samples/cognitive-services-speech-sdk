@@ -50,6 +50,11 @@ namespace BatchClient
             return this.GetAsync<PaginatedTranscriptions>(path);
         }
 
+        public Task<PaginatedTranscriptions> GetTranscriptionsAsync(Uri location)
+        {
+            return this.GetAsync<PaginatedTranscriptions>(location.PathAndQuery);
+        }
+
         public Task<PaginatedFiles> GetTranscriptionFilesAsync(Uri location)
         {
             if (location == null)

@@ -45,20 +45,29 @@ namespace BatchClient
             Console.WriteLine("Deleting all existing completed transcriptions.");
 
             // get all transcriptions for the subscription
-            var paginatedTranscriptions = await client.GetTranscriptionsAsync().ConfigureAwait(false);
+            PaginatedTranscriptions paginatedTranscriptions = null;
             do
             {
+                if (paginatedTranscriptions == null)
+                {
+                    paginatedTranscriptions = await client.GetTranscriptionsAsync().ConfigureAwait(false);
+                }
+                else
+                {
+                    paginatedTranscriptions = await client.GetTranscriptionsAsync(paginatedTranscriptions.NextLink).ConfigureAwait(false);
+                }
+
                 // delete all pre-existing completed transcriptions. If transcriptions are still running or not started, they will not be deleted
                 foreach (var transcriptionToDelete in paginatedTranscriptions.Values)
                 {
                     // delete a transcription
+                    Console.WriteLine($"Deleting transcription {transcriptionToDelete.Self}...");
                     await client.DeleteTranscriptionAsync(transcriptionToDelete.Self).ConfigureAwait(false);
                 }
-
-                paginatedTranscriptions = await client.GetTranscriptionsAsync().ConfigureAwait(false);
             }
             while (paginatedTranscriptions.NextLink != null);
 
+            // <transcriptiondefinition>
             var newTranscription = new Transcription
             {
                 Name = Name, 
@@ -75,6 +84,7 @@ namespace BatchClient
 
             newTranscription = await client.PostTranscriptionAsync(newTranscription).ConfigureAwait(false);
             Console.WriteLine($"Created transcription {newTranscription.Self}.");
+            // </transcriptiondefinition>
 
             // get the transcription Id from the location URI
             var createdTranscriptions = new List<Uri> { newTranscription.Self };
@@ -87,11 +97,20 @@ namespace BatchClient
             {
                 completed = 0; running = 0; notStarted = 0;
 
-                // <batchstatus>
                 // get all transcriptions for the user
-                paginatedTranscriptions = await client.GetTranscriptionsAsync().ConfigureAwait(false);
+                paginatedTranscriptions = null;
                 do
                 {
+                    // <transcriptionstatus>
+                    if (paginatedTranscriptions == null)
+                    {
+                        paginatedTranscriptions = await client.GetTranscriptionsAsync().ConfigureAwait(false);
+                    }
+                    else
+                    {
+                        paginatedTranscriptions = await client.GetTranscriptionsAsync(paginatedTranscriptions.NextLink).ConfigureAwait(false);
+                    }
+
                     // delete all pre-existing completed transcriptions. If transcriptions are still running or not started, they will not be deleted
                     foreach (var transcription in paginatedTranscriptions.Values)
                     {
@@ -132,18 +151,16 @@ namespace BatchClient
                                 break;
                         }
                     }
-                    // </batchstatus>
 
+                    // for each transcription in the list we check the status
                     Console.WriteLine(string.Format("Transcriptions status: {0} completed, {1} running, {2} not started yet", completed, running, notStarted));
-                    
-                    // check again after 1 minute
-                    await Task.Delay(TimeSpan.FromMinutes(1)).ConfigureAwait(false);
-
-                    paginatedTranscriptions = await client.GetTranscriptionsAsync().ConfigureAwait(false);
                 }
                 while (paginatedTranscriptions.NextLink != null);
+                
+                // </transcriptionstatus>
+                // check again after 1 minute
+                await Task.Delay(TimeSpan.FromMinutes(1)).ConfigureAwait(false);
 
-                // for each transcription in the list we check the status
             }
 
             Console.WriteLine("Press any key...");
