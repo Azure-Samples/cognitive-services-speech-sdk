@@ -170,3 +170,5 @@ jobs:
 
       [[ $ERRORS == 0 ]] || exitWithError "Not all samples/tests ran successfully."
     displayName: Run tests
+    condition: eq(variables['SPEECHSDK_RUN_TESTS'], 'true')
+    continueOnError: ${{ parameters.continueOnTestFailure }}

@@ -1169,7 +1169,7 @@ jobs:
 
 - job: AndroidAppcenterTest
   dependsOn: [Pre, AndroidBuild]
-  condition: and(succeeded('Pre', 'AndroidBuild'), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' AndroidAppcenterTest '))
+  condition: and(succeeded('Pre', 'AndroidBuild'), eq(variables['SPEECHSDK_RUN_TESTS'], 'true'), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' AndroidAppcenterTest '))
   pool:
     name: Hosted VS2017
   timeoutInMinutes: 60
@@ -1513,7 +1513,7 @@ jobs:
 
 - job: LinuxProxyTest
   dependsOn: [Pre, LinuxBuild]
-  condition: and(succeeded('Pre', 'LinuxBuild'), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' LinuxProxyTest '))
+  condition: and(succeeded('Pre', 'LinuxBuild'), eq(variables['SPEECHSDK_RUN_TESTS'], 'true'), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' LinuxProxyTest '))
   pool:
     name: Hosted Ubuntu 1604
   steps:

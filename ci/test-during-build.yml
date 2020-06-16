@@ -59,7 +59,7 @@ steps:
   condition: eq(variables['SPEECHSDK_RUN_TESTS'], 'true')
   displayName: Publish test results (.trx)
 - task: PublishBuildArtifacts@1
-  condition: or(failed(), ${{ parameters.continueOnTestFailure }})
+  condition: and(eq(variables['SPEECHSDK_RUN_TESTS'], 'true'), or(failed(), ${{ parameters.continueOnTestFailure }}))
   displayName: 'Publish test console and debug artifacts'
   inputs:
     PathtoPublish: 'vstsconsolelog'
