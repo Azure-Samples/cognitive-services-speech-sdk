@@ -5,8 +5,8 @@
 
 namespace BatchClient
 {
-    using Newtonsoft.Json;
     using System;
+    using Newtonsoft.Json;
 
     public class WordDetails
     {

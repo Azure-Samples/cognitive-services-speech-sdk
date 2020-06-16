@@ -3,14 +3,14 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
-using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
 namespace BatchClient
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading.Tasks;
+    using Newtonsoft.Json;
+
     class Program
     {
         // Replace with your subscription key
@@ -30,7 +30,9 @@ namespace BatchClient
         //    new EntityReference { Self = new Uri($"https://{Region}.api.cognitive.microsoft.com/speechtotext/v3.0/models/<id of custom model>")};
         private const string DisplayName = "Simple transcription";
 
+#pragma warning disable UseAsyncSuffix // Use Async suffix
         static async Task Main(string[] args)
+#pragma warning restore UseAsyncSuffix // Use Async suffix
         {
             Console.WriteLine("Starting transcriptions client...");
 
@@ -86,7 +88,7 @@ namespace BatchClient
 
             Console.WriteLine("Checking status.");
 
-            // check for the status of our transcriptions periodically
+            // get the status of our transcriptions periodically and log results
             int completed = 0, running = 0, notStarted = 0;
             while (completed < 1)
             {
@@ -119,6 +121,7 @@ namespace BatchClient
                                     // not created form here, continue
                                     continue;
                                 }
+
                                 completed++;
 
                                 // if the transcription was successful, check the results
@@ -135,6 +138,7 @@ namespace BatchClient
                                 {
                                     Console.WriteLine("Transcription failed. Status: {0}", transcription.Properties.Error.Message);
                                 }
+
                                 break;
 
                             case "Running":

@@ -5,14 +5,14 @@
 
 namespace BatchClient
 {
-    using Newtonsoft.Json;
-    using Polly;
-    using Polly.Retry;
     using System;
     using System.Net;
     using System.Net.Http;
     using System.Net.Http.Formatting;
     using System.Threading.Tasks;
+    using Newtonsoft.Json;
+    using Polly;
+    using Polly.Retry;
 
     public class BatchClient
     {
