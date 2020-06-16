@@ -177,7 +177,7 @@
       a.send("");
       a.onload = function() {
           var token = JSON.parse(atob(this.responseText.split(".")[1]));
-          serviceRegion.value = token.region;
+          regionOptions.value = token.region;
           authorizationToken = this.responseText;
           subscriptionKey.disabled = true;
           subscriptionKey.value = "using authorization token (hit F5 to refresh)";
@@ -314,7 +314,7 @@
         // if we got an authorization token, use the token. Otherwise use the provided subscription key
         var speechConfig;
         if (authorizationToken) {
-          speechConfig = SpeechSDK.SpeechConfig.fromAuthorizationToken(authorizationToken, serviceRegion.value);
+          speechConfig = SpeechSDK.SpeechConfig.fromAuthorizationToken(authorizationToken, regionOptions.value);
         } else {
           if (subscriptionKey.value === "" || subscriptionKey.value === "subscription") {
             alert("Please enter your Microsoft Cognitive Services Speech subscription key!");
@@ -324,9 +324,7 @@
         }
 
         speechConfig.speechSynthesisVoiceName = voiceOptions.value;
-        // The SDK uses Media Source Extensions (https://www.w3.org/TR/media-source/) for playback.
-        // Mp3 format is supported in most browsers.
-        speechConfig.speechSynthesisOutputFormat = SpeechSDK.SpeechSynthesisOutputFormat.Audio16Khz32KBitRateMonoMp3;
+
         player = new SpeechSDK.SpeakerAudioDestination();
         player.onAudioEnd = function (_) {
           window.console.log("playback finished");
