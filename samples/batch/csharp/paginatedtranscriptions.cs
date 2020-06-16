@@ -11,9 +11,9 @@ namespace BatchClient
 
     public class PaginatedTranscriptions
     {
-        public IEnumerable<Transcription> Values { get; private set; }
+        public IEnumerable<Transcription> Values { get; set; }
 
         [JsonProperty(PropertyName = "@nextLink")]
-        public Uri NextLink { get; private set; }
+        public Uri NextLink { get; set; }
     }
 }

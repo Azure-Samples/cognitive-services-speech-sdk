@@ -25,10 +25,12 @@ namespace BatchClient
 
         public ProfanityFilterMode ProfanityFilterMode { get; set; }
 
+        [JsonConverter(typeof(TimeSpanConverter))]
         public TimeSpan Duration { get; set; }
 
         public Uri DestinationContainerUrl { get; set; }
 
+        [JsonConverter(typeof(TimeSpanConverter))]
         public TimeSpan TimeToLive { get; set; }
 
         public EntityError Error { get; set; }

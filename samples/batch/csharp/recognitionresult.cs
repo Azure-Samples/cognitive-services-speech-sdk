@@ -6,6 +6,7 @@
 namespace BatchClient
 {
     using System;
+    using System.Collections.Generic;
     using Newtonsoft.Json;
 
     public class RecognitionResult
@@ -14,16 +15,18 @@ namespace BatchClient
 
         public int Channel { get; set; }
 
-        [JsonConverter(typeof(TimespanConverter))]
+        public int? Speaker { get; set; }
+
+        [JsonConverter(typeof(TimeSpanConverter))]
         public TimeSpan Offset { get; set; }
 
-        [JsonConverter(typeof(TimespanConverter))]
+        [JsonConverter(typeof(TimeSpanConverter))]
         public TimeSpan Duration { get; set; }
 
         public long OffsetInTicks { get; set; }
 
         public long DurationInTicks { get; set; }
 
-        public NBest NBest { get; set; }
+        public IEnumerable<NBest> NBest { get; set; }
     }
 }

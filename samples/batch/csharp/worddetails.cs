@@ -12,10 +12,10 @@ namespace BatchClient
     {
         public string Word { get; set; }
 
-        [JsonConverter(typeof(TimespanConverter))]
+        [JsonConverter(typeof(TimeSpanConverter))]
         public TimeSpan Offset { get; set; }
 
-        [JsonConverter(typeof(TimespanConverter))]
+        [JsonConverter(typeof(TimeSpanConverter))]
         public TimeSpan Duration { get; set; }
 
         public double OffsetInTicks { get; set; }

@@ -13,12 +13,12 @@ namespace BatchClient
 
         public string Name { get; set; }
 
-        public ArtifactKind Kind { get; private set; }
+        public ArtifactKind Kind { get; set; }
 
         public FileProperties Properties { get; set; }
 
-        public DateTime CreatedDateTime { get; private set; }
+        public DateTime CreatedDateTime { get; set; }
 
-        public FileLinks Links { get; private set; }
+        public FileLinks Links { get; set; }
     }
 }

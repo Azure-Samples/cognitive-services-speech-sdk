@@ -11,7 +11,7 @@ namespace BatchClient
 
     public class PaginatedFiles
     {
-        public IEnumerable<File> Values { get; private set; }
+        public IEnumerable<File> Values { get; set; }
 
         [JsonProperty(PropertyName = "@nextLink")]
         public Uri NextLink { get; set; }

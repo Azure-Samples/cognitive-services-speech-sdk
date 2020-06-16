@@ -28,14 +28,9 @@ namespace BatchClient
         private static EntityReference CustomModel = null;
         //private static EntityReference CustomModel =
         //    new EntityReference { Self = new Uri($"https://{Region}.api.cognitive.microsoft.com/speechtotext/v3.0/models/<id of custom model>")};
-        private const string Name = "Simple transcription";
+        private const string DisplayName = "Simple transcription";
 
         static async Task Main(string[] args)
-        {
-            await TranscribeAsync().ConfigureAwait(false);
-        }
-
-        static async Task TranscribeAsync()
         {
             Console.WriteLine("Starting transcriptions client...");
 
@@ -61,8 +56,8 @@ namespace BatchClient
                 foreach (var transcriptionToDelete in paginatedTranscriptions.Values)
                 {
                     // delete a transcription
-                    Console.WriteLine($"Deleting transcription {transcriptionToDelete.Self}...");
                     await client.DeleteTranscriptionAsync(transcriptionToDelete.Self).ConfigureAwait(false);
+                    Console.WriteLine($"Deleted transcription {transcriptionToDelete.Self}");
                 }
             }
             while (paginatedTranscriptions.NextLink != null);
@@ -70,20 +65,20 @@ namespace BatchClient
             // <transcriptiondefinition>
             var newTranscription = new Transcription
             {
-                Name = Name, 
+                DisplayName = DisplayName, 
                 Locale = Locale, 
                 ContentUrls = new[] { RecordingsBlobUri },
                 //ContentContainerUrl = ContentAzureBlobContainer,
                 Model = CustomModel,
                 Properties = new TranscriptionProperties
-                    {
-                        IsWordLevelTimestampsEnabled = true,
-                        TimeToLive = TimeSpan.FromDays(1)
-                    }
+                {
+                    IsWordLevelTimestampsEnabled = true,
+                    TimeToLive = TimeSpan.FromDays(1)
+                }
             };
 
             newTranscription = await client.PostTranscriptionAsync(newTranscription).ConfigureAwait(false);
-            Console.WriteLine($"Created transcription {newTranscription.Self}.");
+            Console.WriteLine($"Created transcription {newTranscription.Self}");
             // </transcriptiondefinition>
 
             // get the transcription Id from the location URI
@@ -156,11 +151,10 @@ namespace BatchClient
                     Console.WriteLine(string.Format("Transcriptions status: {0} completed, {1} running, {2} not started yet", completed, running, notStarted));
                 }
                 while (paginatedTranscriptions.NextLink != null);
-                
+
                 // </transcriptionstatus>
                 // check again after 1 minute
                 await Task.Delay(TimeSpan.FromMinutes(1)).ConfigureAwait(false);
-
             }
 
             Console.WriteLine("Press any key...");

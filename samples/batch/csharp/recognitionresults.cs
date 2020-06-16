@@ -11,17 +11,17 @@ namespace BatchClient
 
     public class RecognitionResults
     {
-        public string Source { get; private set; }
+        public string Source { get; set; }
 
-        public DateTime Timestamp { get; private set; }
+        public DateTime Timestamp { get; set; }
 
-        public long DurationInTicks { get; private set; }
+        public long DurationInTicks { get; set; }
 
-        [JsonConverter(typeof(TimespanConverter))]
-        public TimeSpan Duration { get; private set; }
+        [JsonConverter(typeof(TimeSpanConverter))]
+        public TimeSpan Duration { get; set; }
 
-        public IEnumerable<CombinedResults> CombinedRecognizedPhrases { get; private set; }
+        public IEnumerable<CombinedResults> CombinedRecognizedPhrases { get; set; }
 
-        public IEnumerable<RecognitionResult> RecognizedPhrases { get; private set; }
+        public IEnumerable<RecognitionResult> RecognizedPhrases { get; set; }
     }
 }

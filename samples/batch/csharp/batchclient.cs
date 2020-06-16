@@ -25,7 +25,10 @@ namespace BatchClient
             .Handle<HttpRequestException>()
             .Or<TaskCanceledException>()
             .OrResult<HttpResponseMessage>(x => !x.IsSuccessStatusCode && (int)x.StatusCode == 429)
-            .WaitAndRetryAsync(MaxNumberOfRetries, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)));
+            .WaitAndRetryAsync(MaxNumberOfRetries, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)), (result, timeSpan, retryCount, context) =>
+            {
+                Console.WriteLine($"Request failed with {result.Exception?.ToString() ?? result.Result?.StatusCode.ToString()}. Waiting {timeSpan} before next retry. Retry attempt {retryCount}");
+            });
 
         private BatchClient(HttpClient client)
         {
@@ -88,15 +91,8 @@ namespace BatchClient
 
             if (response.IsSuccessStatusCode)
             {
-                var result = await response.Content.ReadAsAsync<RecognitionResults>(new[]
-                    {
-                        new JsonMediaTypeFormatter
-                        {
-                            SerializerSettings = SpeechJsonContractResolver.ReaderSettings
-                        }
-                    }).ConfigureAwait(false);
-
-                return result;
+                var json = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                return JsonConvert.DeserializeObject<RecognitionResults>(json, SpeechJsonContractResolver.ReaderSettings);
             }
 
             throw await CreateExceptionAsync(response);
