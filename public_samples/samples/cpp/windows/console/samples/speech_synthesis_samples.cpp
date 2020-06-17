@@ -114,7 +114,7 @@ void SpeechSynthesisWithVoice()
     auto config = SpeechConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
     // Sets the voice name.
-    // e.g. "Microsoft Server Speech Text to Speech Voice (en-US, JessaRUS)".
+    // e.g. "Microsoft Server Speech Text to Speech Voice (en-US, AriaRUS)".
     // The full list of supported voices can be found here:
     // https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support
     auto voice = "Microsoft Server Speech Text to Speech Voice (en-US, BenjaminRUS)";

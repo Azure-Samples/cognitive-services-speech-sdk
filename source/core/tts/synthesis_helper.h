@@ -117,7 +117,7 @@ public:
             { "en-GB", "Microsoft Server Speech Text to Speech Voice (en-GB, HazelRUS)" },
             { "en-IE", "Microsoft Server Speech Text to Speech Voice (en-IE, Sean)" },
             { "en-IN", "Microsoft Server Speech Text to Speech Voice (en-IN, PriyaRUS)" },
-            { "en-US", "Microsoft Server Speech Text to Speech Voice (en-US, JessaRUS)" },
+            { "en-US", "Microsoft Server Speech Text to Speech Voice (en-US, AriaRUS)" },
             { "es-ES", "Microsoft Server Speech Text to Speech Voice (es-ES, HelenaRUS)" },
             { "es-MX", "Microsoft Server Speech Text to Speech Voice (es-MX, HildaRUS)" },
             { "fi-FI", "Microsoft Server Speech Text to Speech Voice (fi-FI, HeidiRUS)" },
@@ -164,7 +164,7 @@ public:
         if (chosenVoice.empty())
         {
             // If it's not found, use en-US default voice
-            chosenVoice = "Microsoft Server Speech Text to Speech Voice (en-US, JessaRUS)";
+            chosenVoice = "Microsoft Server Speech Text to Speech Voice (en-US, AriaRUS)";
 
             // Set default voice based on language
             for (auto item : languageToDefaultVoice)

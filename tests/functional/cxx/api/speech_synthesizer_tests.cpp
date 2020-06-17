@@ -181,8 +181,8 @@ TEST_CASE("Synthesis with multi voices - REST", "[api][cxx]")
     auto synthesizer = SpeechSynthesizer::FromConfig(config, nullptr);
 
     const std::string ssmlWithMultiVoices = "<speak version='1.0' xmlns='https://www.w3.org/2001/10/synthesis' xml:lang='en-US'>" \
-        "<voice  name='en-US-JessaRUS'>Good morning!</voice>" \
-        "<voice  name='en-US-BenjaminRUS'>Good morning to you too Jessa!</voice></speak>";
+        "<voice  name='en-US-AriaRUS'>Good morning!</voice>" \
+        "<voice  name='en-US-BenjaminRUS'>Good morning to you too Aria!</voice></speak>";
     auto result = synthesizer->SpeakSsmlAsync(ssmlWithMultiVoices).get();
     SPXTEST_REQUIRE(result->Reason == ResultReason::SynthesizingAudioCompleted);
     SPXTEST_REQUIRE(!result->GetAudioData()->empty());
@@ -194,7 +194,7 @@ TEST_CASE("Synthesis with recorded audio - REST", "[api][cxx]")
     auto synthesizer = SpeechSynthesizer::FromConfig(config, nullptr);
 
     const std::string ssmlWithRecordedAudio = "<speak version='1.0' xml:lang='en-US' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts'>" \
-        "<voice name='Microsoft Server Speech Text to Speech Voice (en-US, JessaRUS)'>" \
+        "<voice name='Microsoft Server Speech Text to Speech Voice (en-US, AriaRUS)'>" \
         "<audio src='https://speechprobesstorage.blob.core.windows.net/ttsaudios/pcm16.wav'/>text</voice></speak>";
     auto result = synthesizer->SpeakSsmlAsync(ssmlWithRecordedAudio).get();
     SPXTEST_REQUIRE(result->Reason == ResultReason::SynthesizingAudioCompleted);
@@ -623,8 +623,8 @@ TEST_CASE("Synthesis with multi voices - USP", "[api][cxx]")
     auto synthesizer = SpeechSynthesizer::FromConfig(config, nullptr);
 
     const std::string ssmlWithMultiVoices = "<speak version='1.0' xmlns='https://www.w3.org/2001/10/synthesis' xml:lang='en-US'>" \
-        "<voice  name='en-US-JessaRUS'>Good morning!</voice>" \
-        "<voice  name='en-US-BenjaminRUS'>Good morning to you too Jessa!</voice></speak>";
+        "<voice  name='en-US-AriaRUS'>Good morning!</voice>" \
+        "<voice  name='en-US-BenjaminRUS'>Good morning to you too Aria!</voice></speak>";
     auto result = synthesizer->SpeakSsmlAsync(ssmlWithMultiVoices).get();
     SPXTEST_REQUIRE(result->Reason == ResultReason::SynthesizingAudioCompleted);
     SPXTEST_REQUIRE(!result->GetAudioData()->empty());
@@ -636,7 +636,7 @@ TEST_CASE("Synthesis with recorded audio - USP", "[api][cxx]")
     auto synthesizer = SpeechSynthesizer::FromConfig(config, nullptr);
 
     const std::string ssmlWithRecordedAudio = "<speak version='1.0' xml:lang='en-US' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts'>" \
-        "<voice name='Microsoft Server Speech Text to Speech Voice (en-US, JessaRUS)'>" \
+        "<voice name='Microsoft Server Speech Text to Speech Voice (en-US, AriaRUS)'>" \
         "<audio src='https://speechprobesstorage.blob.core.windows.net/ttsaudios/pcm16.wav'/>text</voice></speak>";
     auto result = synthesizer->SpeakSsmlAsync(ssmlWithRecordedAudio).get();
     SPXTEST_REQUIRE(result->Reason == ResultReason::SynthesizingAudioCompleted);

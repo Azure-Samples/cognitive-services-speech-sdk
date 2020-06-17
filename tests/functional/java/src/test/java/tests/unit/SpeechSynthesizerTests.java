@@ -64,7 +64,7 @@ public class SpeechSynthesizerTests {
 
     private final String DEFAULT_LANGUAGE = "en-US";
 
-    private final String DEFAULT_VOICE = "Microsoft Server Speech Text to Speech Voice (en-US, JessaRUS)";
+    private final String DEFAULT_VOICE = "Microsoft Server Speech Text to Speech Voice (en-US, AriaRUS)";
 
     private static ExecutorService s_executorService;
 
@@ -158,7 +158,7 @@ public class SpeechSynthesizerTests {
         SpeechSynthesizer synthesizer = new SpeechSynthesizer(speechConfig, null);
         assertNotNull(synthesizer);
 
-        String ssmlWithMultiVoices = "<speak version='1.0' xmlns='https://www.w3.org/2001/10/synthesis' xml:lang='en-US'><voice name='en-US-JessaRUS'>Good morning!</voice><voice name='en-US-BenjaminRUS'>Good morning to you too Jessa!</voice></speak>";
+        String ssmlWithMultiVoices = "<speak version='1.0' xmlns='https://www.w3.org/2001/10/synthesis' xml:lang='en-US'><voice name='en-US-AriaRUS'>Good morning!</voice><voice name='en-US-BenjaminRUS'>Good morning to you too Aria!</voice></speak>";
         SpeechSynthesisResult result = synthesizer.SpeakSsmlAsync(ssmlWithMultiVoices).get(); 
 
         assertTrue(result.getReason() == ResultReason.SynthesizingAudioCompleted);
@@ -176,7 +176,7 @@ public class SpeechSynthesizerTests {
         SpeechSynthesizer synthesizer = new SpeechSynthesizer(speechConfig, null);
         assertNotNull(synthesizer);
 
-        String ssmlWithRecordedAudio = "<speak version='1.0' xml:lang='en-US' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts'><voice name='Microsoft Server Speech Text to Speech Voice (en-US, JessaRUS)'><audio src='https://speechprobesstorage.blob.core.windows.net/ttsaudios/pcm16.wav'/>text</voice></speak>";
+        String ssmlWithRecordedAudio = "<speak version='1.0' xml:lang='en-US' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts'><voice name='Microsoft Server Speech Text to Speech Voice (en-US, AriaRUS)'><audio src='https://speechprobesstorage.blob.core.windows.net/ttsaudios/pcm16.wav'/>text</voice></speak>";
         SpeechSynthesisResult result = synthesizer.SpeakSsmlAsync(ssmlWithRecordedAudio).get(); 
 
         assertTrue(result.getReason() == ResultReason.SynthesizingAudioCompleted);

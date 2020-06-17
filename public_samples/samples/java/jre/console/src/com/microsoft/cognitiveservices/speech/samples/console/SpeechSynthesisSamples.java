@@ -121,7 +121,7 @@ public class SpeechSynthesisSamples {
         SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
         // Sets the voice name.
-        // e.g. "Microsoft Server Speech Text to Speech Voice (en-US, JessaRUS)"
+        // e.g. "Microsoft Server Speech Text to Speech Voice (en-US, AriaRUS)"
         // The full list of supported voices can be found here:
         // https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support
         String voice = "Microsoft Server Speech Text to Speech Voice (en-US, BenjaminRUS)";

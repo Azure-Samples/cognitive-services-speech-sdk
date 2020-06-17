@@ -16,7 +16,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public long EmptyWaveFileSize => 46;
         public int GuidLength => 32;
         public string DefaultLanguage => Language.EN;
-        public string DefaultVoice => "Microsoft Server Speech Text to Speech Voice (en-US, JessaRUS)";
+        public string DefaultVoice => "Microsoft Server Speech Text to Speech Voice (en-US, AriaRUS)";
         public int MockAudioSize => 32000;
         public int MockAudioChunkSize => 3200;
         public string SsmlTemplate => "<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts' xmlns:emo='http://www.w3.org/2009/10/emotionml' xml:lang='{0}'><voice name='{1}'>{2}</voice></speak>";

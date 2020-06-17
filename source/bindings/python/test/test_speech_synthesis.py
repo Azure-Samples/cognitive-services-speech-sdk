@@ -81,8 +81,8 @@ def tests_synthesis_with_multi_voices(subscription, speech_region):
 
     synthesizer = msspeech.SpeechSynthesizer(config, None)
     ssml_with_multi_voices = ("<speak version='1.0' xmlns='https://www.w3.org/2001/10/synthesis' xml:lang='en-US'>"
-                              "<voice name='en-US-JessaRUS'>Good morning!</voice>"
-                              "<voice name='en-US-BenjaminRUS'>Good morning to you too Jessa!</voice></speak>")
+                              "<voice name='en-US-AriaRUS'>Good morning!</voice>"
+                              "<voice name='en-US-BenjaminRUS'>Good morning to you too Aria!</voice></speak>")
 
     result = synthesizer.speak_ssml_async(ssml_with_multi_voices).get()
     assert result.reason == msspeech.ResultReason.SynthesizingAudioCompleted
@@ -93,7 +93,7 @@ def tests_synthesis_with_recorded_audio(subscription, speech_region):
 
     synthesizer = msspeech.SpeechSynthesizer(config, None)
     ssml_with_recorded_audio = ("<speak version='1.0' xml:lang='en-US' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts'>"
-                                "<voice name='Microsoft Server Speech Text to Speech Voice (en-US, JessaRUS)'>"
+                                "<voice name='Microsoft Server Speech Text to Speech Voice (en-US, AriaRUS)'>"
                                 "<audio src='https://speechprobesstorage.blob.core.windows.net/ttsaudios/pcm16.wav'/>text</voice></speak>")
 
     result = synthesizer.speak_ssml_async(ssml_with_recorded_audio).get()

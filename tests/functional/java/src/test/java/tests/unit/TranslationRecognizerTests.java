@@ -951,7 +951,7 @@ public class TranslationRecognizerTests {
         String autoDetectSrcLanguageProperty = "Auto-Detect-Source-Languages";
         String sourceLanguages = "en-US,de-DE";
         configFromEndpoint.setProperty(autoDetectSrcLanguageProperty, sourceLanguages);
-        configFromEndpoint.setProperty("en-USTRANSLATION-Voice", "Microsoft Server Speech Text to Speech Voice (en-US, JessaRUS)");
+        configFromEndpoint.setProperty("en-USTRANSLATION-Voice", "Microsoft Server Speech Text to Speech Voice (en-US, AriaRUS)");
         configFromEndpoint.setProperty("de-DETRANSLATION-Voice", "Microsoft Server Speech Text to Speech Voice (de-DE, Hedda)");
         configFromEndpoint.addTargetLanguage("en-US");
         configFromEndpoint.addTargetLanguage("de-DE");
