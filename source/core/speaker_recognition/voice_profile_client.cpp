@@ -8,6 +8,8 @@
 #include "voice_profile_client.h"
 #include "voice_profile.h"
 #include "create_object_helpers.h"
+#include "service_helpers.h"
+#include "log_helpers.h"
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -30,11 +32,18 @@ void CSpxVoiceProfileClient::Init()
 {
     SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
     m_keepSiteAlive = GetSite();
+    CheckLogFilename();
+}
+
+void CSpxVoiceProfileClient::CheckLogFilename()
+{
+    auto namedProperties = SpxQueryService<ISpxNamedProperties>(m_keepSiteAlive);
+    SpxDiagLogSetProperties(namedProperties);
 }
 
 void CSpxVoiceProfileClient::Term()
 {
-    SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);    
+    SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 }
 
 std::shared_ptr<ISpxVoiceProfile> CSpxVoiceProfileClient::Create(VoiceProfileType voice_profile_type, std::string&& locale)

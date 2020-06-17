@@ -60,6 +60,8 @@ private:
 
     std::shared_ptr<ISpxHttpAudioStreamSession> InternalQueryService(const char* serviceName);
 
+    // enable logging.
+    void CheckLogFilename();
     // --- provide a way to get parent's site's properties.
     std::shared_ptr<ISpxNamedProperties> GetParentProperties() const override;
     std::shared_ptr<ISpxHttpAudioStreamSession> m_keepSiteAlive;
