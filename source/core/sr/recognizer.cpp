@@ -440,7 +440,7 @@ void CSpxRecognizer::SetParameter(std::string&& path, std::string&& name, std::s
         }
         else
         {
-            existing->second.insert({ {name,value} });
+            existing->second[name] = move(value);
         }
     }
 }
