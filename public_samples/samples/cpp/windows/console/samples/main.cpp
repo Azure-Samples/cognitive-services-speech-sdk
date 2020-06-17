@@ -38,6 +38,11 @@ extern void SpeechSynthesisWordBoundaryEvent();
 extern void ConversationWithPullAudioStream();
 extern void ConversationWithPushAudioStream();
 
+extern void SpeakerVerificationWithMicrophone();
+extern void SpeakerVerificationWithPushStream();
+extern void SpeakerIdentificationWithPullStream();
+extern void SpeakerIdentificationWithMicrophone();
+
 void SpeechSamples()
 {
     string input;
@@ -54,7 +59,7 @@ void SpeechSamples()
         cout << "\nChoice (0 for MAIN MENU): ";
         cout.flush();
 
-        input.empty();
+        input.clear();
         getline(cin, input);
 
         switch (input[0])
@@ -98,7 +103,7 @@ void IntentSamples()
         cout << "\nChoice (0 for MAIN MENU): ";
         cout.flush();
 
-        input.empty();
+        input.clear();
         getline(cin, input);
 
         switch (input[0])
@@ -129,7 +134,7 @@ void TranslationSamples()
         cout << "\nChoice (0 for MAIN MENU): ";
         cout.flush();
 
-        input.empty();
+        input.clear();
         getline(cin, input);
 
         switch (input[0])
@@ -166,7 +171,7 @@ void SpeechSynthesisSamples()
         cout << "\nChoice (0 for MAIN MENU): ";
         cout.flush();
 
-        input.empty();
+        input.clear();
         getline(cin, input);
 
         switch (input[0])
@@ -223,7 +228,7 @@ void ConversationTranscriberSamples()
         cout << "\nChoice (0 for MAIN MENU): ";
         cout.flush();
 
-        input.empty();
+        input.clear();
         getline(cin, input);
 
         switch (input[0])
@@ -234,6 +239,46 @@ void ConversationTranscriberSamples()
         case '2':
             ConversationWithPushAudioStream();
             break;
+        case '0':
+            break;
+        }
+    } while (input[0] != '0');
+}
+
+void SpeakerRecognitionSamples()
+{
+    string input;
+    do
+    {
+        cout << "\nSpeakerRecognition SAMPLES:\n";
+        cout << "1.) Speaker verification with microphone input.\n";
+        cout << "2.) Speaker verification with push audio stream input.\n";
+        cout << "3.) Speaker identification with pull audio stream input.\n";
+        cout << "4.) Speaker identification with microphone input.\n";
+        cout << "\nChoice (0 for MAIN MENU): ";
+        cout.flush();
+
+        input.clear();
+        getline(cin, input);
+
+        switch (input[0])
+        {
+        case '1':
+            SpeakerVerificationWithMicrophone();
+            break;
+
+        case '2':
+            SpeakerVerificationWithPushStream();
+            break;
+
+        case '3':
+            SpeakerIdentificationWithPullStream();
+            break;
+
+        case '4':
+            SpeakerIdentificationWithMicrophone();
+            break;
+
         case '0':
             break;
         }
@@ -255,10 +300,11 @@ int main(int argc, char **argv)
         cout << "3.) Translation samples.\n";
         cout << "4.) Speech synthesis samples.\n";
         cout << "5.) Conversation transcriber samples.\n";
+        cout << "6.) Speaker Recognition samples.\n";
         cout << "\nChoice (0 to Exit): ";
         cout.flush();
 
-        input.empty();
+        input.clear();
         getline(cin, input);
 
         switch (input[0])
@@ -278,6 +324,8 @@ int main(int argc, char **argv)
         case '5':
             ConversationTranscriberSamples();
             break;
+        case '6':
+            SpeakerRecognitionSamples();
         case '0':
             break;
         }

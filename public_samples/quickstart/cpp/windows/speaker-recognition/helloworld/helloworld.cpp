@@ -78,7 +78,7 @@ void identifySpeakers(const shared_ptr<SpeechConfig>& config, const vector<share
     auto result = speakerRecognizer->RecognizeOnceAsync(model).get();
     if (result->Reason == ResultReason::RecognizedSpeakers)
     {
-        cout << "The most similiar voice profile is " << result->ProfileId << " with similiarity score " << result->GetScore() << endl;
+        cout << "The most similar voice profile is " << result->ProfileId << " with similarity score " << result->GetScore() << endl;
         auto raw = result->Properties.GetProperty(PropertyId::SpeechServiceResponse_JsonResult);
         cout << "The raw json from the service is " << raw << endl;
     }

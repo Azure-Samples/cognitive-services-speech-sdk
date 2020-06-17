@@ -134,6 +134,11 @@ BEGIN {
       samples/cpp/windows/console/samples/speech_recognition_samples.cpp#toplevel
       samples/cpp/windows/console/samples/translation_samples.cpp#TranslationWithMicrophone
       samples/cpp/windows/console/samples/translation_samples.cpp#toplevel
+      samples/cpp/windows/console/samples/speaker_recognition_samples.cpp#toplevel
+      samples/cpp/windows/console/samples/speaker_recognition_samples.cpp#SpeakerVerificationWithMicrophone
+      samples/cpp/windows/console/samples/speaker_recognition_samples.cpp#SpeakerVerificationWithPushStream
+      samples/cpp/windows/console/samples/speaker_recognition_samples.cpp#SpeakerIdentificationWithPullStream
+      samples/cpp/windows/console/samples/speaker_recognition_samples.cpp#SpeakerIdentificationWithMicrophone
       samples/csharp/sharedcontent/console/intent_recognition_samples.cs#intentContinuousRecognitionWithFile
       samples/csharp/sharedcontent/console/intent_recognition_samples.cs#intentRecognitionWithMicrophone
       samples/csharp/sharedcontent/console/intent_recognition_samples.cs#toplevel
