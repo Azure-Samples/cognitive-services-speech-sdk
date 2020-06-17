@@ -26,7 +26,7 @@ namespace BatchClient
         Tags,
 
         /// <summary>
-        /// Mask the profanity with * except of the first letter, e.g., f***
+        /// Mask the profanity with * except for the first letter, e.g., f***
         /// </summary>
         Masked
     }
