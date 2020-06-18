@@ -32,12 +32,6 @@ public:
     CSpxVoiceProfile() : m_profile_type(VOICE_PROFILE_TYPE_NONE) {};
     virtual ~CSpxVoiceProfile() = default;
 
-    CSpxVoiceProfile(CSpxVoiceProfile&&) = default;
-    CSpxVoiceProfile& operator=(CSpxVoiceProfile&&) = default;
-
-    CSpxVoiceProfile(const CSpxVoiceProfile&) = default;
-    CSpxVoiceProfile& operator=(const CSpxVoiceProfile&) = default;
-
     CSpxVoiceProfile(std::string&& profile_id, VoiceProfileType type) :
         m_profile_id{ std::move(profile_id) },
         m_profile_type {type}

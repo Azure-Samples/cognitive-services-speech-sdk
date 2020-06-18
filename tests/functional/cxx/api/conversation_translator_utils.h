@@ -150,7 +150,6 @@ namespace IntegrationTests {
 
     struct ExpectedTranscription
     {
-        ExpectedTranscription() = default;
         ExpectedTranscription(const string& id, const string& text, const string& lang, std::initializer_list<std::pair<string, string>> tran)
             : ExpectedTranscription(id, text, lang, 0, tran)
         {
