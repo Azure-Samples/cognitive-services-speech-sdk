@@ -37,7 +37,7 @@ It runs under .NET Core 2.0 on Windows or Linux (Ubuntu 16.04 x64, Ubuntu 18.04 
 ## Build the sample
 
 * **By building this sample you will download the Microsoft Cognitive Services Speech SDK. By downloading you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license201809).**
-* [Download the sample code to your development PC.](../../../../README.md#get-the-samples)
+* [Download the sample code to your development PC.](/README.md#get-the-samples)
 
   > **Note:** make sure to download the complete set of samples, not just this directory.
   > This sample references code in the directory [../../sharedcontent/console](../../sharedcontent/console), which is shared across samples.
