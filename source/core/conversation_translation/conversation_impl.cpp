@@ -187,10 +187,10 @@ namespace ConversationTranslation {
 
     void CSpxConversationImpl::SetConversationId(const std::string & conversationId)
     {
-        RunSynchronously([this, conversationId]
+        RunSynchronously([this, cid = conversationId]() mutable
         {
             CT_I_THROW_HR_IF(m_args != nullptr, SPXERR_INVALID_STATE);
-            m_conversationId = std::move(conversationId);
+            m_conversationId = std::move(cid);
         });
     }
 
@@ -209,23 +209,28 @@ namespace ConversationTranslation {
 
             // first create the room
             CreateConversationArgs create;
-            create.CognitiveSpeechAuthenticationToken = NamedPropertiesHelper::GetString(properties, PropertyId::SpeechServiceAuthorization_Token);
             create.CognitiveSpeechRegion = NamedPropertiesHelper::GetString(properties,
             {
                 ConversationKeys::Conversation_Region,
                 GetPropertyName(PropertyId::SpeechServiceConnection_Region)
             });
-            create.CognitiveSpeechSubscriptionKey = NamedPropertiesHelper::GetString(properties,
+
+            create.CognitiveSpeechAuthenticationToken = NamedPropertiesHelper::GetString(properties, PropertyId::SpeechServiceAuthorization_Token);
+            if (create.CognitiveSpeechAuthenticationToken.empty())
             {
-                ConversationKeys::ConversationServiceConnection_Key,
-                GetPropertyName(PropertyId::SpeechServiceConnection_Key)
-            });
+                create.CognitiveSpeechSubscriptionKey = NamedPropertiesHelper::GetString(properties,
+                {
+                    ConversationKeys::ConversationServiceConnection_Key,
+                    GetPropertyName(PropertyId::SpeechServiceConnection_Key)
+                });
+            }
+            
             create.CorrelationId = NamedPropertiesHelper::GetString(properties, PropertyId::Speech_SessionId);
             create.LanguageCode = NamedPropertiesHelper::GetString(properties, PropertyId::SpeechServiceConnection_RecoLanguage);
             create.Nickname = nickname;
             create.TranslateTo = StringUtils::Tokenize(
                 NamedPropertiesHelper::GetString(properties, PropertyId::SpeechServiceConnection_TranslationToLanguages),
-                    ", ");
+                ", ");
             create.TtsVoiceCode = NamedPropertiesHelper::GetString(properties, PropertyId::SpeechServiceConnection_SynthVoice);
             create.TtsFormat = TextToSpeechFormat::Wav; // TODO ralphe: parse the PropertyId::SpeechServiceConnection_SynthOutputFormat?
             create.ClientAppId = properties->GetStringValue(ConversationKeys::Conversation_ClientId, ConversationConstants::ClientAppId);
@@ -240,6 +245,17 @@ namespace ConversationTranslation {
             m_args = make_unique<ConversationArgs>(m_manager->CreateOrJoin(create, m_conversationId));
 
             m_canRejoin = true;
+
+            // Update the properties based on the service response
+            if (!m_args->CognitiveSpeechAuthToken.empty())
+            {
+                NamedPropertiesHelper::SetString(properties, PropertyId::SpeechServiceAuthorization_Token, m_args->CognitiveSpeechAuthToken);
+            }
+
+            if (!m_args->ParticipantId.empty())
+            {
+                NamedPropertiesHelper::SetString(properties, PropertyId::Conversation_ParticipantId, m_args->ParticipantId);
+            }
 
             // set the region to match what the conversation translator service tells us to use when joining a room
             // except when the full endpoint URL is specified as that causes issues with the USP code

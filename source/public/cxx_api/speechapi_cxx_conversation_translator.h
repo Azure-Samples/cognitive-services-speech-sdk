@@ -200,6 +200,37 @@ namespace Transcription {
             return RunAsync(::conversation_translator_leave);
         }
 
+        /// <summary>
+        /// Sets the Cognitive Speech authorization token that will be used for connecting to the server.
+        /// </summary>
+        /// <param name="authToken">The authorization token.</param>
+        /// <param name="region">(Optional) The Azure region for this token.</param>
+        void SetAuthorizationToken(const SPXSTRING& authToken, const SPXSTRING& region = "")
+        {
+            SPX_THROW_ON_FAIL(::conversation_translator_set_authorization_token(
+                m_handle,
+                Utils::ToUTF8(authToken).c_str(),
+                Utils::ToUTF8(region).c_str()));
+        }
+
+        /// <summary>
+        /// Gets the authorization token.
+        /// </summary>
+        /// <returns>Authorization token</returns>
+        SPXSTRING GetAuthorizationToken()
+        {
+            return m_properties.GetProperty(PropertyId::SpeechServiceAuthorization_Token);
+        }
+
+        /// <summary>
+        /// Gets your participant identifier
+        /// </summary>
+        /// <returns>Participant ID</returns>
+        SPXSTRING GetParticipantId()
+        {
+            return m_properties.GetProperty(PropertyId::Conversation_ParticipantId);
+        }
+
     protected:
         explicit ConversationTranslator(SPXCONVERSATIONTRANSLATORHANDLE handle) :
             SessionStarted(BindHandler(&ConversationTranslator::OnSessionEventChanged)),
@@ -340,13 +371,13 @@ namespace Transcription {
         class PrivatePropertyCollection : public PropertyCollection
         {
         public:
-            PrivatePropertyCollection(SPXRECOHANDLE hreco) :
-                PropertyCollection(
-                    [=]() {
-                SPXPROPERTYBAGHANDLE hpropbag = SPXHANDLE_INVALID;
-                recognizer_get_property_bag(hreco, &hpropbag);
-                return hpropbag;
-            }())
+            PrivatePropertyCollection(SPXCONVERSATIONHANDLE hconvtrans) :
+                PropertyCollection([hconvtrans]()
+                {
+                    SPXPROPERTYBAGHANDLE hpropbag = SPXHANDLE_INVALID;
+                    conversation_translator_get_property_bag(hconvtrans, &hpropbag);
+                    return hpropbag;
+                }())
             {
             }
         };

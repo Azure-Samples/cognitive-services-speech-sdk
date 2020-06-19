@@ -120,6 +120,21 @@ namespace ConversationTranslation {
             (void)error;
             (void)message;
         }
+
+        /// <summary>
+        /// A callback function invoked when we receive an updated Cognitive Speech authorization
+        /// token to use from the conversation service
+        /// </summary>
+        /// <param name="authToken">Authorization token</param>
+        /// <param name="region">The Azure region (e.g. westus)</param>
+        /// <param name="expiredAt">When the authorization token expires</param>
+        virtual void OnUpdatedAuthorizationToken(
+            const std::string& authToken, const std::string& region, const std::chrono::system_clock::time_point& expiresAt)
+        {
+            (void)authToken;
+            (void)region;
+            (void)expiresAt;
+        }
     };
 
 
@@ -231,6 +246,14 @@ namespace ConversationTranslation {
         void SetNickname(const std::string& nickname);
 
         /// <summary>
+        /// [HOST ONLY] Updates the Cognitive Speech authorization token for all participants
+        /// in the conversation
+        /// </summary>
+        /// <param name="authToken">The authorization token</param>
+        /// <param name="region">The Azure region (e.g. westus)</param>
+        void SetAuthorizationToken(const std::string& authToken, const std::string& region);
+
+        /// <summary>
         /// Sets the callback functions to use
         /// </summary>
         /// <param name="callbacks">The new callbacks to use</param>
@@ -261,6 +284,7 @@ namespace ConversationTranslation {
         void HandleBinaryData(const uint8_t* data, const size_t length);
         void HandleError(USP::WebSocketError error, int code, const std::string& message);
 
+        void HandleInfoMessage(const ConversationInfoMessage* info);
         void HandleParticipantList(const ConversationParticipantListMessage* participantList);
         void HandleCommand(const ConversationCommandMessage* command);
         void HandleRecognition(const ConversationSpeechRecognitionMessage* reco);

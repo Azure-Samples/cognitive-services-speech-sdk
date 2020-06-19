@@ -2,7 +2,9 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
+
 #include "common.h"
+#include <time_utils.h>
 #include "spxdebug.h"
 #include "conversation_messages.h"
 #include "string_utils.h"
@@ -40,6 +42,8 @@ namespace ConversationTranslation {
     const char* KEY_TRANSLATION_TRANSLATION = "translation";
     const char* KEY_RECOGNITION = "recognition";
     const char* KEY_TEXT = "text";
+    const char* KEY_REGION = "region";
+    const char* KEY_VALID_TO = "validTo";
 
     /// <summary>
     /// Reads a string value from the specified key in JSON without throwing exceptions on nulls.
@@ -86,6 +90,29 @@ namespace ConversationTranslation {
         {
             return false;
         }
+    }
+
+    /// <summary>
+    /// Reads a UTC time string from the specified key in JSON, and parses the string value into
+    /// a local time
+    /// </summary>
+    /// <param name="json">The JSON object</param>
+    /// <param name="key">The key to read</param>
+    /// <aparm name="format">The expected time format string. Please refer to the std::get_time documentation
+    //  for possible values</param>
+    /// <param name="time">The local time struct to set</param>
+    /// <returns>True if the value existed and we were able to successfully parse it into a local
+    /// time, false otherwise</returns>
+    static bool TryReadUtcTime(json& json, const char * key, const char* format, std::chrono::system_clock::time_point& time)
+    {
+        std::string timeString;
+        if (!TryReadString(json, key, timeString))
+        {
+            return false;
+        }
+
+        // Attempt to parse the date time string
+        return PAL::TryParseUtcTimeString(timeString, format, time);
     }
 
     ParticipantCommandValue::ParticipantCommandValue()
@@ -206,8 +233,8 @@ namespace ConversationTranslation {
         }
     }
 
-    ConversationMessageBase::ConversationMessageBase(const string& roomId, const MessageType type)
-        : RoomId(roomId), Type(type)
+    ConversationMessageBase::ConversationMessageBase(const string& conversationId, const MessageType type)
+        : ConversationId(conversationId), Type(type)
     {
     }
 
@@ -258,8 +285,7 @@ namespace ConversationTranslation {
                     break;
 
                 case MessageType::Info:
-                    // only one type of info message at the moment
-                    ptr.reset(new ConversationParticipantListMessage());
+                    ptr.reset(new ConversationInfoMessage());
                     break;
 
                 case MessageType::InstantMessage:
@@ -281,11 +307,23 @@ namespace ConversationTranslation {
                     return nullptr;
             }
 
+            SPX_DBG_ASSERT(ptr != nullptr);
+
             if (ptr != nullptr)
             {
-                ptr->Type = msgType;
-                if (ptr->TryParse(json))
+                unique_ptr<ConversationMessageBase> newType(nullptr);
+                bool success = ptr->TryParse(json, newType);
+                if (!success && newType != nullptr)
                 {
+                    ptr.reset();
+                    ptr.swap(newType);
+
+                    success = ptr->TryParse(json, newType);
+                }
+
+                if (success)
+                {
+                    ptr->Type = msgType;
                     return ptr;
                 }
                 else
@@ -346,24 +384,28 @@ namespace ConversationTranslation {
         bool success = true;
 
         // Type is set in the ConversationMessageBase::ParseJsonString
-        success &= TryReadString(json, KEY_ROOM_ID, RoomId);
+        success &= TryReadString(json, KEY_ROOM_ID, ConversationId);
 
-        return RoomId.empty() == false;
+        return ConversationId.empty() == false;
     }
 
     void ConversationMessageBase::Serialize(json & json) const
     {
         json[KEY_TYPE] = StringUtils::PascalCaseToSnakeCase(MessageTypeStrings(Type));
-        json[KEY_ROOM_ID] = RoomId;
+
+        if (!ConversationId.empty())
+        {
+            json[KEY_ROOM_ID] = ConversationId;
+        }
     }
 
-    ConversationNicknameMessageBase::ConversationNicknameMessageBase(const string& roomId, const MessageType type, const string& nickname, const string& participantId)
-        : ConversationMessageBase(roomId, type), Nickname(nickname), ParticipantId(participantId), Avatar()
+    ConversationNicknameMessageBase::ConversationNicknameMessageBase(const string& conversationId, const MessageType type, const string& nickname, const string& participantId)
+        : ConversationMessageBase(conversationId, type), Nickname(nickname), ParticipantId(participantId), Avatar()
     {
     }
 
-    ConversationNicknameMessageBase::ConversationNicknameMessageBase(const string& roomId, const MessageType type, const string& nickname, const string& participantId, const string& avatar)
-        : ConversationMessageBase(roomId, type), Nickname(nickname), ParticipantId(participantId), Avatar(avatar)
+    ConversationNicknameMessageBase::ConversationNicknameMessageBase(const string& conversationId, const MessageType type, const string& nickname, const string& participantId, const string& avatar)
+        : ConversationMessageBase(conversationId, type), Nickname(nickname), ParticipantId(participantId), Avatar(avatar)
     {
     }
 
@@ -414,26 +456,26 @@ namespace ConversationTranslation {
         return success;
     }
 
-    ConversationParticipantCommandMessage::ConversationParticipantCommandMessage(const string & roomId, const string & nickname, const string & participantId, ParticipantCommandType command, bool value)
-        : ConversationNicknameMessageBase(roomId, MessageType::ParticipantCommand, nickname, participantId),
+    ConversationParticipantCommandMessage::ConversationParticipantCommandMessage(const string & conversationId, const string & nickname, const string & participantId, ParticipantCommandType command, bool value)
+        : ConversationNicknameMessageBase(conversationId, MessageType::ParticipantCommand, nickname, participantId),
         Command(command), Value(value)
     {
     }
 
-    ConversationParticipantCommandMessage::ConversationParticipantCommandMessage(const string & roomId, const string & nickname, const string & participantId, ParticipantCommandType command, int32_t value)
-        : ConversationNicknameMessageBase(roomId, MessageType::ParticipantCommand, nickname, participantId),
+    ConversationParticipantCommandMessage::ConversationParticipantCommandMessage(const string & conversationId, const string & nickname, const string & participantId, ParticipantCommandType command, int32_t value)
+        : ConversationNicknameMessageBase(conversationId, MessageType::ParticipantCommand, nickname, participantId),
         Command(command), Value(value)
     {
     }
 
-    ConversationParticipantCommandMessage::ConversationParticipantCommandMessage(const string & roomId, const string & nickname, const string & participantId, ParticipantCommandType command, const std::string & value)
-        : ConversationNicknameMessageBase(roomId, MessageType::ParticipantCommand, nickname, participantId),
+    ConversationParticipantCommandMessage::ConversationParticipantCommandMessage(const string & conversationId, const string & nickname, const string & participantId, ParticipantCommandType command, const std::string & value)
+        : ConversationNicknameMessageBase(conversationId, MessageType::ParticipantCommand, nickname, participantId),
         Command(command), Value(value)
     {
     }
 
-    ConversationParticipantCommandMessage::ConversationParticipantCommandMessage(const string & roomId, const string & nickname, const string & participantId, ParticipantCommandType command, const char * value, const size_t valueLength)
-        : ConversationNicknameMessageBase(roomId, MessageType::ParticipantCommand, nickname, participantId),
+    ConversationParticipantCommandMessage::ConversationParticipantCommandMessage(const string & conversationId, const string & nickname, const string & participantId, ParticipantCommandType command, const char * value, const size_t valueLength)
+        : ConversationNicknameMessageBase(conversationId, MessageType::ParticipantCommand, nickname, participantId),
         Command(command), Value(value, valueLength)
     {
     }
@@ -441,6 +483,11 @@ namespace ConversationTranslation {
     bool ConversationParticipantCommandMessage::TryParse(json & json)
     {
         bool success = ConversationNicknameMessageBase::TryParse(json);
+
+        // Room ID is optional for info messages but mandatory for the participant list
+        // messages. Let's validate the value has been set here
+        success &= !ConversationId.empty();
+
         string commandStr;
 
         success &= TryReadString(json, KEY_COMMAND, commandStr);
@@ -478,18 +525,82 @@ namespace ConversationTranslation {
         Value.Serialize(json, KEY_VALUE);
     }
 
-    ConversationInfoMessage::ConversationInfoMessage(const string & roomId, const string & command)
-        : ConversationMessageBase(roomId, MessageType::Info), Command(command)
+    ConversationInfoMessage::ConversationInfoMessage(const string & conversationId, const string & command)
+        : ConversationMessageBase(conversationId, MessageType::Info), Command(command)
     {
     }
 
-    bool ConversationInfoMessage::TryParse(json & json)
+    bool ConversationInfoMessage::TryParse(json& json, unique_ptr<ConversationMessageBase>& ptr)
     {
-        bool success = ConversationMessageBase::TryParse(json);
+        bool success = TryParse(json);
 
-        success &= TryReadString(json, KEY_COMMAND, Command);
+        if (success)
+        {
+            if (Command == "token")
+            {
+                ptr.reset(new ConversationAuthorizationTokenMessage());
+                return false;
+            }
+            else
+            {
+                ptr.reset(new ConversationParticipantListMessage());
+                return false;
+            }
+        }
 
         return success;
+    }
+
+    bool ConversationInfoMessage::TryParse(json& json)
+    {
+        // the room ID is optional for some info messages
+        ConversationMessageBase::TryParse(json);
+
+        std::string command;
+        bool success = TryReadString(json, KEY_COMMAND, command);
+        Command = StringUtils::ToLower(command);
+
+        return success;
+    }
+
+    void ConversationInfoMessage::Serialize(json& json) const
+    {
+        ConversationMessageBase::Serialize(json);
+
+        json[KEY_COMMAND] = Command;
+    }
+
+    ConversationAuthorizationTokenMessage::ConversationAuthorizationTokenMessage(const string& authToken, const string& region)
+        : ConversationInfoMessage({}, "token"), AuthToken(authToken), Region(region)
+    {
+    }
+
+    bool ConversationAuthorizationTokenMessage::TryParse(json& json)
+    {
+        bool success = ConversationInfoMessage::TryParse(json);
+
+        if (!json.is_object())
+        {
+            return false;
+        }
+
+        success &= TryReadString(json, KEY_TOKEN, AuthToken);
+        success &= TryReadString(json, KEY_REGION, Region);
+
+        // optionally try to parse the validTo
+        TryReadUtcTime(json, KEY_VALID_TO, "%Y-%m-%dT%H:%M:%SZ", ValidUntil);
+
+        success &= Command == "token";
+
+        return success;
+    }
+
+    void ConversationAuthorizationTokenMessage::Serialize(json& json) const
+    {
+        ConversationInfoMessage::Serialize(json);
+
+        json[KEY_TOKEN] = AuthToken;
+        json[KEY_REGION] = Region;
     }
 
     bool ConversationParticipant::TryParse(json & json)
@@ -593,8 +704,8 @@ namespace ConversationTranslation {
         return success;
     }
 
-    ConversationInstantMessage::ConversationInstantMessage(const string & roomId, const string & nickname, const string & participantId, const string & text)
-        : ConversationNicknameMessageBase(roomId, MessageType::InstantMessage, nickname, participantId), Text(text)
+    ConversationInstantMessage::ConversationInstantMessage(const string & conversationId, const string & nickname, const string & participantId, const string & text)
+        : ConversationNicknameMessageBase(conversationId, MessageType::InstantMessage, nickname, participantId), Text(text)
     {
     }
 

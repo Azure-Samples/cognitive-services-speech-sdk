@@ -4,6 +4,8 @@
 //
 
 #include <inttypes.h>
+#include <sstream>
+#include <iomanip>
 #include "time_utils.h"
 
 using namespace std::chrono;
@@ -46,6 +48,38 @@ namespace PAL
         constexpr uint64_t nanosecondsInTick = 100;
         nanoseconds durationInNanoseconds = t;
         return durationInNanoseconds.count() / nanosecondsInTick ;
+    }
+
+    bool TryParseUtcTimeString(const std::string& timeString, const char* format, system_clock::time_point& localTime)
+    {
+        // Attempt to parse the date time string
+        std::tm utc_tm;
+
+        std::istringstream ss(timeString);
+        ss.imbue(std::locale("")); // force to C locale for consistent parsing
+        ss >> std::get_time(&utc_tm, format);
+
+        if (ss.fail())
+        {
+            return false;
+        }
+
+        std::time_t t;
+
+#ifdef _MSC_VER
+        t = _mkgmtime(&utc_tm);
+#else
+        t = timegm(&utc_tm);
+#endif
+
+        if (t == static_cast<time_t>(-1))
+        {
+            // failed to convert to a time_t
+            return false;
+        }
+
+        localTime = system_clock::from_time_t(t);
+        return true;
     }
 }
 

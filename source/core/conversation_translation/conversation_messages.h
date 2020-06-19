@@ -174,12 +174,23 @@ namespace ConversationTranslation {
     /// </summary>
     struct ConversationMessageBase
     {
-        ConversationMessageBase(const string& roomId, const MessageType type);
+        /// <summary>
+        /// Initializes a new instance
+        /// </summary>
+        /// <param name="conversationId">The identifier for the conversation</param>
+        /// <param name="type">The type of the message</param>
+        /// <returns></returns>
+        ConversationMessageBase(const string& conversationId, const MessageType type);
+
+        /// <summary>
+        /// Type destructor
+        /// </summary>
+        virtual ~ConversationMessageBase() = default;
 
         /// <summary>
         /// The identifier for the conversation
         /// </summary>
-        string RoomId;
+        string ConversationId;
 
         /// <summary>
         /// The type of message. You can use this to determine what child class to cast this into
@@ -210,6 +221,19 @@ namespace ConversationTranslation {
         /// Attempts to parse the JSON object passed in to deserialise into the class properties
         /// </summary>
         /// <param name="json">The JSON to deserialise from</param>
+        /// <param name="ptr">The reference to the unique pointer we are returning. This can be
+        /// helpful in cases you determine you need a more specific child instance while parsing</param>
+        /// <returns>True if we parsed successfully, false otherwise</returns>
+        virtual bool TryParse(json& json, unique_ptr<ConversationMessageBase>& ptr)
+        {
+            (void)ptr;
+            return TryParse(json);
+        }
+
+        /// <summary>
+        /// Attempts to parse the JSON object passed in to deserialise into the class properties
+        /// </summary>
+        /// <param name="json">The JSON to deserialise from</param>
         /// <returns>True if we parsed successfully, false otherwise</returns>
         virtual bool TryParse(json& json);
 
@@ -228,21 +252,21 @@ namespace ConversationTranslation {
         /// <summary>
         /// Creates new instance
         /// </summary>
-        /// <param name="roomId">The room identifier</param>
+        /// <param name="conversationId">The conversation identifier</param>
         /// <param name="type">The message type</param>
         /// <param name="nickname">The user's nickname</param>
         /// <param name="participantId">The user's unique identifier</param>
-        ConversationNicknameMessageBase(const string& roomId, const MessageType type, const string& nickname, const string& participantId);
+        ConversationNicknameMessageBase(const string& conversationId, const MessageType type, const string& nickname, const string& participantId);
 
         /// <summary>
         /// Creates new instance
         /// </summary>
-        /// <param name="roomId">The room identifier</param>
+        /// <param name="conversationId">The conversation identifier</param>
         /// <param name="type">The message type</param>
         /// <param name="nickname">The user's nickname</param>
         /// <param name="participantId">The user's unique identifier</param>
         /// <param name="avatar">The user's avatar colour</param>
-        ConversationNicknameMessageBase(const string& roomId, const MessageType type, const string& nickname, const string& participantId, const string& avatar);
+        ConversationNicknameMessageBase(const string& conversationId, const MessageType type, const string& nickname, const string& participantId, const string& avatar);
 
         /// <summary>
         /// The participant's nickname. Please note that there may be more than one participant with
@@ -333,43 +357,43 @@ namespace ConversationTranslation {
         /// <summary>
         /// Creates a new instance for participant commands with a boolean value (e.g. mute/unmute)
         /// </summary>
-        /// <param name="roomId">The room identifier</param>
+        /// <param name="conversationId">The conversation identifier</param>
         /// <param name="nickname">The user's nickname</param>
         /// <param name="participantId">The user's unique identifier</param>
         /// <param name="command">The participant command</param>
         /// <param name="value">The value for the command</param>
-        ConversationParticipantCommandMessage(const string& roomId, const string& nickname, const string& participantId, ParticipantCommandType command, bool value);
+        ConversationParticipantCommandMessage(const string& conversationId, const string& nickname, const string& participantId, ParticipantCommandType command, bool value);
 
         /// <summary>
         /// Creates a new instance for participant commands with an integer value (e.g. room expiration warning)
         /// </summary>
-        /// <param name="roomId">The room identifier</param>
+        /// <param name="conversationId">The conversation identifier</param>
         /// <param name="nickname">The user's nickname</param>
         /// <param name="participantId">The user's unique identifier</param>
         /// <param name="command">The participant command</param>
         /// <param name="value">The value for the command</param>
-        ConversationParticipantCommandMessage(const string& roomId, const string& nickname, const string& participantId, ParticipantCommandType command, int32_t value);
+        ConversationParticipantCommandMessage(const string& conversationId, const string& nickname, const string& participantId, ParticipantCommandType command, int32_t value);
 
         /// <summary>
         /// Creates a new instance for participant commands with a string value (e.g. ejecting a user from a conversation)
         /// </summary>
-        /// <param name="roomId">The room identifier</param>
+        /// <param name="conversationId">The conversation identifier</param>
         /// <param name="nickname">The user's nickname</param>
         /// <param name="participantId">The user's unique identifier</param>
         /// <param name="command">The participant command</param>
         /// <param name="value">The value for the command</param>
-        ConversationParticipantCommandMessage(const string& roomId, const string& nickname, const string& participantId, ParticipantCommandType command, const std::string& value);
+        ConversationParticipantCommandMessage(const string& conversationId, const string& nickname, const string& participantId, ParticipantCommandType command, const std::string& value);
 
         /// <summary>
         /// Creates a new instance for participant commands with a string value (e.g. ejecting a user from a conversation)
         /// </summary>
-        /// <param name="roomId">The room identifier</param>
+        /// <param name="conversationId">The conversation identifier</param>
         /// <param name="nickname">The user's nickname</param>
         /// <param name="participantId">The user's unique identifier</param>
         /// <param name="command">The participant command</param>
         /// <param name="value">The value for the command</param>
         /// <param name="valueLength">The length of the string value</param>
-        ConversationParticipantCommandMessage(const string& roomId, const string& nickname, const string& participantId, ParticipantCommandType command, const char * value, const size_t valueLength);
+        ConversationParticipantCommandMessage(const string& conversationId, const string& nickname, const string& participantId, ParticipantCommandType command, const char * value, const size_t valueLength);
 
         /// <summary>
         /// The type of the participant command we are issuing
@@ -409,9 +433,9 @@ namespace ConversationTranslation {
         /// <summary>
         /// Creates a new instance
         /// </summary>
-        /// <param name="roomId">The room identifier</param>
+        /// <param name="conversationId">The conversation identifier</param>
         /// <param name="command">The info command</param>
-        ConversationInfoMessage(const string& roomId, const string& command);
+        ConversationInfoMessage(const string& conversationId, const string& command);
 
         /// <summary>
         /// The informational command
@@ -423,8 +447,85 @@ namespace ConversationTranslation {
         /// Attempts to parse the JSON object passed in to deserialise into the class properties
         /// </summary>
         /// <param name="json">The JSON to deserialise from</param>
+        /// <param name="ptr">The reference to the unique pointer we are returning. This can be
+        /// helpful in cases you determine you need a more specific child instance while parsing</param>
+        /// <returns>True if we parsed successfully, false otherwise</returns>
+        virtual bool TryParse(json& json, unique_ptr<ConversationMessageBase>& ptr) override;
+
+        /// <summary>
+        /// Attempts to parse the JSON object passed in to deserialise into the class properties
+        /// </summary>
+        /// <param name="json">The JSON to deserialise from</param>
         /// <returns>True if we parsed successfully, false otherwise</returns>
         virtual bool TryParse(json& json) override;
+
+        /// <summary>
+        /// Attempts to serialise the current instance to the intermediate JSON object
+        /// </summary>
+        /// <param name="json">The JSON instance to serialise to</param>
+        virtual void Serialize(json& json) const override;
+    };
+
+    /// <summary>
+    /// A informational message that is broadcast to all participants when the Cognitive Speech
+    /// authorization token to use changes. This can also be sent from the host to the Conversation
+    /// service to set the new authorization token to use.
+    /// </summary>
+    struct ConversationAuthorizationTokenMessage : public ConversationInfoMessage
+    {
+        /// <summary>
+        /// Default constructor
+        /// </summary>
+        ConversationAuthorizationTokenMessage() = default;
+
+        /// <summary>
+        /// Creates a new instance
+        /// </summary>
+        /// <param name="authToken">The authentication token to use</param>
+        /// <param name="region">The region for this authorization token</param>
+        ConversationAuthorizationTokenMessage(const string & authToken, const string & region);
+
+        /// <summary>
+        /// The Cognitive Services Speech authorization token
+        /// </summary>
+        string AuthToken;
+
+        /// <summary>
+        /// The Azure region for this authorization token
+        /// </summary>
+        string Region;
+
+        /// <summary>
+        /// The local time at which the authorization token becomes invalid
+        /// </summary>
+        std::chrono::system_clock::time_point ValidUntil;
+
+    protected:
+        /// <summary>
+        /// Attempts to parse the JSON object passed in to deserialise into the class properties
+        /// </summary>
+        /// <param name="json">The JSON to deserialise from</param>
+        /// <param name="ptr">The reference to the unique pointer we are returning. This can be
+        /// helpful in cases you determine you need a more specific child instance while parsing</param>
+        /// <returns>True if we parsed successfully, false otherwise</returns>
+        virtual bool TryParse(json& json, unique_ptr<ConversationMessageBase>& ptr) override
+        {
+            (void)ptr;
+            return TryParse(json);
+        }
+
+        /// <summary>
+        /// Attempts to parse the JSON object passed in to deserialise into the class properties
+        /// </summary>
+        /// <param name="json">The JSON to deserialise from</param>
+        /// <returns>True if we parsed successfully, false otherwise</returns>
+        virtual bool TryParse(json& json) override;
+
+        /// <summary>
+        /// Attempts to serialise the current instance to the intermediate JSON object
+        /// </summary>
+        /// <param name="json">The JSON instance to serialise to</param>
+        virtual void Serialize(json& json) const override;
     };
 
     /// <summary>
@@ -496,6 +597,19 @@ namespace ConversationTranslation {
         string Token;
 
     protected:
+        /// <summary>
+        /// Attempts to parse the JSON object passed in to deserialise into the class properties
+        /// </summary>
+        /// <param name="json">The JSON to deserialise from</param>
+        /// <param name="ptr">The reference to the unique pointer we are returning. This can be
+        /// helpful in cases you determine you need a more specific child instance while parsing</param>
+        /// <returns>True if we parsed successfully, false otherwise</returns>
+        virtual bool TryParse(json& json, unique_ptr<ConversationMessageBase>& ptr) override
+        {
+            (void)ptr;
+            return TryParse(json);
+        }
+
         /// <summary>
         /// Attempts to parse the JSON object passed in to deserialise into the class properties
         /// </summary>
@@ -597,11 +711,11 @@ namespace ConversationTranslation {
         /// <summary>
         /// Creates an instance
         /// </summary>
-        /// <param name="roomId">The room identifier</param>
+        /// <param name="conversationId">The conversation identifier</param>
         /// <param name="nickname">The user's nickname</param>
         /// <param name="participantId">The user's unique identifier</param>
         /// <param name="text">The instant message text</param>
-        ConversationInstantMessage(const string& roomId, const string& nickname, const string& participantId, const string& text);
+        ConversationInstantMessage(const string& conversationId, const string& nickname, const string& participantId, const string& text);
 
         /// <summary>
         /// The instant message text

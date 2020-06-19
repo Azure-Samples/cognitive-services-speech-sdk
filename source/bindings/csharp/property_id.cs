@@ -335,6 +335,12 @@ namespace Microsoft.CognitiveServices.Speech
         Conversation_Speech_Activity_Template = Internal.PropertyId.Conversation_Speech_Activity_Template,
 
         /// <summary>
+        /// Gets your identifier in the conversation.
+        /// Added in version 1.13.0
+        /// </summary>
+        Conversation_ParticipantId = Internal.PropertyId.Conversation_ParticipantId,
+
+        /// <summary>
         /// The user id associated to data buffer written by client when using Pull/Push audio mode streams.
         /// Added in version 1.5.0.
         /// </summary>

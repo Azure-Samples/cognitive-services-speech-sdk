@@ -114,7 +114,10 @@ namespace ConversationTranslation {
 
         // --- ISpxConversationTranslator
         const std::vector<std::shared_ptr<ISpxConversationParticipant>> GetParticipants() override;
-        void JoinConversation(std::shared_ptr<ISpxConversation> conversation, const std::string& nickname, bool endConversationOnLeave) override;
+        std::string GetAuthorizationToken() const override;
+        void SetAuthorizationToken(const std::string& authToken, const std::string& region = "") override;
+
+        void JoinConversation(std::shared_ptr<ISpxConversation> conversation, const std::string& nickname, bool isHost) override;
         void Connect() override;
         void StartTranscribing() override;
         void StopTranscribing() override;
@@ -153,6 +156,8 @@ namespace ConversationTranslation {
         virtual void OnParticipantChanged(const ConversationParticipantAction action, const std::vector<ConversationParticipant>& participants) override;
         virtual void OnRoomExpirationWarning(const int32_t minutesLeft) override;
         virtual void OnError(const bool isWebSocket, const ConversationErrorCode error, const std::string& message) override;
+        virtual void OnUpdatedAuthorizationToken(
+            const std::string& authToken, const std::string& region, const std::chrono::system_clock::time_point& expiresAt) override;
 
     protected:
         ConversationState SetState(const ConversationState next)
@@ -214,6 +219,8 @@ namespace ConversationTranslation {
 
         void LogTranslationError(shared_ptr<ISpxRecognitionResult> recoResult);
 
+        void SetAuthorizationTokenInternal(const std::string& authToken, const std::string& region);
+
         template<typename I>
         inline static shared_ptr<I> SafeQueryInterface(std::shared_ptr<ISpxInterfaceBase> ptr)
         {
@@ -236,7 +243,7 @@ namespace ConversationTranslation {
         std::atomic<ConversationState> m_state_;
         std::shared_ptr<ISpxConversation> _m_conv;
         std::weak_ptr<ISpxConversationInternals> m_convInternals;
-        bool m_endConversationOnLeave;
+        bool m_isHost;
         std::shared_ptr<ISpxRecognizer> m_recognizer;
         std::atomic_bool m_recognizerConnected;
         std::string m_speechLang;

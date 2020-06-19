@@ -27,6 +27,7 @@ SPXAPI conversation_translator_start_transcribing(SPXCONVERSATIONTRANSLATORHANDL
 SPXAPI conversation_translator_stop_transcribing(SPXCONVERSATIONTRANSLATORHANDLE hconvtranslator);
 SPXAPI conversation_translator_send_text_message(SPXCONVERSATIONTRANSLATORHANDLE hconvtranslator, const char *pszmessage);
 SPXAPI conversation_translator_leave(SPXCONVERSATIONTRANSLATORHANDLE hconvtranslator);
+SPXAPI conversation_translator_set_authorization_token(SPXCONVERSATIONTRANSLATORHANDLE hconvtranslator, const char* pszAuthToken, const char* pszRegion);
 
 SPXAPI_(bool) conversation_translator_handle_is_valid(SPXCONVERSATIONTRANSLATORHANDLE handle);
 SPXAPI conversation_translator_handle_release(SPXHANDLE handle);

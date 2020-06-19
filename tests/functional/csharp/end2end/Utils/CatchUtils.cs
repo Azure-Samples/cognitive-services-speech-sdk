@@ -187,11 +187,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils
             // prefix with timestamp
             System.Diagnostics.Debug.WriteLine("({0}) {1}", DateTime.UtcNow.ToString("yyyy-MM-dd HH::mm::ss.ff"), formatted);
         }
-
-        public static Catch.MatcherBase HasHR(string hrString)
-        {
-            return new Catch.ExceptionMessageContainsMatcher(hrString, Catch.CaseSensitive.Yes);
-        }
     }
 
     /// <summary>
@@ -224,7 +219,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils
                 => new LogicalMatcher(LogicalMatcher.Operation.Not, a, null);
         }
 
-        public class LogicalMatcher : MatcherBase
+        internal class LogicalMatcher : MatcherBase
         {
             private IMatcher _a;
             private IMatcher _b;
@@ -273,7 +268,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils
             }
         }
 
-        public class StringEqualityMatcher : MatcherBase
+        internal class StringEqualityMatcher : MatcherBase
         {
             private string _v;
             private StringComparison _c;
@@ -306,7 +301,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils
             }
         }
 
-        public class StringContainsMatcher : StringEqualityMatcher
+        internal class StringContainsMatcher : StringEqualityMatcher
         {
             public StringContainsMatcher(string val, CaseSensitive cs)
                 : base(val, cs, "contains")
@@ -321,7 +316,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils
             }
         }
 
-        public class ExceptionMessageContainsMatcher : StringContainsMatcher
+        internal class ExceptionMessageContainsMatcher : StringContainsMatcher
         {
             public ExceptionMessageContainsMatcher(string val, CaseSensitive cs)
                 : base(val, cs)
@@ -335,7 +330,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils
                 => "Exception with message " + base.ToString();
         }
 
-        public class FuzzyStringMatcher : MatcherBase
+        internal class FuzzyStringMatcher : MatcherBase
         {
             private string _expected;
             private int _deltaPercentage;
@@ -368,6 +363,16 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils
         public static MatcherBase FuzzyMatch(string str, int deltaPercentage = 10, int minAllowedMismatchCount = 1)
         {
             return new FuzzyStringMatcher(str, deltaPercentage, minAllowedMismatchCount);
+        }
+
+        public static Catch.MatcherBase HasHR(string hrString)
+        {
+            return new Catch.ExceptionMessageContainsMatcher(hrString, Catch.CaseSensitive.Yes);
+        }
+
+        public static Catch.MatcherBase ExceptionMessageContains(string message, Catch.CaseSensitive cs = Catch.CaseSensitive.Yes)
+        {
+            return new Catch.ExceptionMessageContainsMatcher(message, cs);
         }
     }
 }

@@ -496,7 +496,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
     public class TestConversationParticipant : Internal.DisposableBase
     {
         private SpeechConfig m_config;
-        private Action<ConversationTranslator, bool> m_setConfig;
+        private Action<AudioConfig> m_setConfig;
 
         public TestConversationParticipant(SpeechConfig config, string nickname)
         {
@@ -506,7 +506,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             IsHost = true;
         }
 
-        public TestConversationParticipant(string nickname, string lang, TestConversationParticipant other, Action<ConversationTranslator, bool> setConfig)
+        public TestConversationParticipant(string nickname, string lang, TestConversationParticipant other, Action<AudioConfig> setConfig)
         {
             ConversationId = other.Conversation.ConversationId;
             IsHost = false;
@@ -561,9 +561,10 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 SPX_TRACE_INFO(">> [{0}] Creating conversation translator", Name);
 
-                Translator = audioConfig == null
-                    ? new ConversationTranslator()
-                    : new ConversationTranslator(audioConfig);
+                // Apply configuration before connecting
+                m_setConfig(audioConfig);
+
+                Translator = new ConversationTranslator(audioConfig);
                 Events = new ConversationTranslatorCallbacks(Translator);
 
                 SPX_TRACE_INFO(">> [{0}] Creating connection", Name);
@@ -572,7 +573,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 SPX_TRACE_INFO(">> [{0}] Joining conversation '{1}'", Name, ConversationId);
                 await Translator.JoinConversationAsync(ConversationId, Name, Lang);
-                m_setConfig(Translator, true);
             }
         }
 

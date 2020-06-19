@@ -247,15 +247,27 @@ namespace ConversationTranslation {
         virtual const std::vector<std::shared_ptr<ISpxConversationParticipant>> GetParticipants() = 0;
 
         /// <summary>
+        /// Gets the authorization token that will be used to connect to the conversation service
+        /// </summary>
+        /// <returns>The authorization token</returns>
+        virtual std::string GetAuthorizationToken() const = 0;
+
+        /// <summary>
+        /// Sets the authorization token that will be used to connect to the conversation service
+        /// </summary>
+        /// <param name="authToken">The authorization token to use</param>
+        /// <param name="region">(Optional) The Azure region (e.g. westus)</param>
+        virtual void SetAuthorizationToken(const std::string& authToken, const std::string& region = "") = 0;
+
+        /// <summary>
         /// Joins a conversation
         /// </summary>
         /// <param name="conversation">The conversation instance to use. This instance can be used by the
         /// host to manage the conversation</param>
         /// <param name="nickname">The display name to use for the current participant in the conversation</param>
-        /// <param name="endConversationOnLeave">Flag indicating whether or not we should call conversation->EndConversation()
-        /// method on the passed in conversation instance when user's call the LeaveConversationAsync() method</param>
+        /// <param name="isHost">Flag indicating whether or not this conversation translator instance is for the host</param>
         /// <returns>Asynchronous operation</returns>
-        virtual void JoinConversation(std::shared_ptr<ISpxConversation> conversation, const std::string& nickname, bool endConversationOnLeave) = 0;
+        virtual void JoinConversation(std::shared_ptr<ISpxConversation> conversation, const std::string& nickname, bool isHost) = 0;
 
         /// <summary>
         /// Connects and/or reconnects to the conversation service

@@ -72,6 +72,7 @@ constexpr const char* GetPropertyName(const PropertyId id)
     case PropertyId::Conversation_Conversation_Id: return "DIALOG-ConversationId";
     case PropertyId::Conversation_Custom_Voice_Deployment_Ids: return "DIALOG-CustomVoiceDeploymentIds";
     case PropertyId::Conversation_Speech_Activity_Template: return "DIALOG-SpeechActivityTemplate";
+    case PropertyId::Conversation_ParticipantId: return "CONVERSATION-ParticipantId";
     case PropertyId::DataBuffer_TimeStamp: return "DataBuffer_TimeStamp";
     case PropertyId::DataBuffer_UserId: return "DataBuffer_UserId";
 

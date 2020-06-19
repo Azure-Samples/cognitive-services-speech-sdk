@@ -17,6 +17,15 @@
 namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
+namespace USP {
+
+    extern void PlatformInit(const char* proxyHost, int proxyPort, const char* proxyUsername, const char* proxyPassword);
+
+}}}} // Microsoft::CognitiveServices::Speech::USP
+
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
 namespace Impl {
 
     HttpRequest::HttpRequest(const std::string& host, int port, bool isSecure) :
@@ -109,6 +118,9 @@ namespace Impl {
 
     std::unique_ptr<HttpResponse> HttpRequest::SendRequest(HTTPAPI_REQUEST_TYPE type, const void *content, size_t contentSize)
     {
+        // check and init the Platform if not already done
+        USP::PlatformInit(nullptr, 0, nullptr, nullptr);
+
         std::string httpPath = m_endpoint.Path() + m_endpoint.QueryString();
 
         for (const auto& h : m_endpoint.Headers())

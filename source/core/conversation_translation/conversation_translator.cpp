@@ -12,6 +12,7 @@
 #include <site_helpers.h>
 #include <thread_service.h>
 #include <guid_utils.h>
+#include <time_utils.h>
 #include "conversation_manager.h"
 #include "translation_recognizer.h"
 #include "conversation_translator.h"
@@ -284,7 +285,7 @@ namespace ConversationTranslation {
         m_state_(ConversationState::Initial),
         _m_conv(),
         m_convInternals(),
-        m_endConversationOnLeave(false),
+        m_isHost(true),
         m_recognizer(),
         m_recognizerConnected(false),
         m_speechLang(),
@@ -371,18 +372,83 @@ namespace ConversationTranslation {
         });
     }
 
-    void CSpxConversationTranslator::JoinConversation(shared_ptr<ISpxConversation> conversation, const string & nickname, bool endConversationOnLeave)
+    std::string CSpxConversationTranslator::GetAuthorizationToken() const
+    {
+        auto properties = SafeQueryInterface<ISpxNamedProperties>(GetSite());
+        if (properties == nullptr)
+        {
+            return std::string{};
+        }
+
+        return NamedPropertiesHelper::GetString(properties, PropertyId::SpeechServiceAuthorization_Token);
+    }
+
+    void CSpxConversationTranslator::SetAuthorizationToken(const std::string& authToken, const std::string& region)
+    {
+        RunAsynchronously([this, authToken, region]
+        {
+            CT_GET_AND_LOG_STATE(
+                "Changing authorization token. Token: '%zu', Region: '%s'",
+                authToken.size(), region.c_str());
+
+            switch (state)
+            {
+            default:
+                CT_HANDLE_UNSUPPORTED_STATE();
+                return;
+
+            case ConversationState::Initial:
+            case ConversationState::Failed:
+            case ConversationState::Closed:
+            case ConversationState::Closing:
+                // Ignore this
+                return;
+
+            case ConversationState::CreatingOrJoining:
+            case ConversationState::CreatedOrJoined:
+            case ConversationState::Opening:
+            case ConversationState::Open:
+                SetAuthorizationTokenInternal(authToken, region);
+
+                // if you are the host, also broadcast this to all other participants in the conversation
+                if (m_isHost)
+                {
+                    auto convInternals = m_convInternals.lock();
+                    if (convInternals != nullptr)
+                    {
+                        auto connection = convInternals->GetConversationConnection();
+
+                        try
+                        {
+                            connection->SetAuthorizationToken(authToken, region);
+                        }
+                        catch (exception& ex)
+                        {
+                            CT_I_LOG_ERROR("Failed to send the update authorization token message. Cause: %s", ex.what());
+                        }
+                        catch (...)
+                        {
+                            CT_I_LOG_ERROR("Failed to send the update authorization token message");
+                        }
+                    }
+                }
+                break;
+            }
+        });
+    }
+
+    void CSpxConversationTranslator::JoinConversation(shared_ptr<ISpxConversation> conversation, const string & nickname, bool isHost)
     {
         CT_DBG_TRACE_FUNCTION();
 
         CT_I_THROW_HR_IF(GetSite() == nullptr || m_threadService == nullptr, SPXERR_UNINITIALIZED);
         CT_I_THROW_HR_IF(conversation == nullptr, SPXERR_INVALID_ARG);
 
-        RunSynchronously([this, conversation, nickname, endConversationOnLeave]()
+        RunSynchronously([this, conversation, nickname, isHost]()
         {
             CT_GET_AND_LOG_STATE(
-                "JoinConversation 0x%p, ConverastionId: %s, nickname: %s, endOnLeave: %d",
-                P_FORMAT_POINTER(conversation.get()), conversation->GetConversationId().c_str(), nickname.c_str(), endConversationOnLeave);
+                "JoinConversation 0x%p, ConversationId: %s, nickname: %s, isHost: %d",
+                P_FORMAT_POINTER(conversation.get()), conversation->GetConversationId().c_str(), nickname.c_str(), isHost);
 
             switch (state)
             {
@@ -407,7 +473,7 @@ namespace ConversationTranslation {
             }
 
             // Hook up to this conversation to start receiving events
-            ConnectConversation(conversation, endConversationOnLeave);
+            ConnectConversation(conversation, isHost);
 
             auto convInternals = m_convInternals.lock();
             CT_I_THROW_HR_IF(convInternals == nullptr, SPXERR_UNINITIALIZED);
@@ -815,7 +881,7 @@ namespace ConversationTranslation {
                     // closed state
                     if (reason == USP::WebSocketDisconnectReason::Normal
                         && serverRequested
-                        && m_endConversationOnLeave)
+                        && !m_isHost)
                     {
                         CT_I_LOG_INFO("The host has most likely deleted the conversation. Will go to closed state");
                         ToClosedState();
@@ -850,7 +916,7 @@ namespace ConversationTranslation {
                 // events
             }
 
-            if (StringUtils::ToUpper(reco.ParticipantId) == StringUtils::ToUpper(GetParticipantId()))
+            if (reco.ParticipantId == GetParticipantId())
             {
                 // This is your own speech recognition. For best latency, we are sending the results
                 // from the translation recognizer directly so we don't send it here to avoid duplicate
@@ -866,7 +932,7 @@ namespace ConversationTranslation {
 
             // TODO ralphe: how to compute the offset and duration for other people's recognitions?
             auto result = CreateShared<ConversationRecognitionResult>(
-                StringUtils::ToUpper(reco.Id),
+                reco.Id,
                 reco.Recognition,
                 reco.OriginalLanguage,
                 reason,
@@ -899,7 +965,7 @@ namespace ConversationTranslation {
                 // events
             }
 
-            ResultReason reason = StringUtils::ToUpper(im.ParticipantId) == GetParticipantId()
+            ResultReason reason = im.ParticipantId == GetParticipantId()
                 ? ResultReason::TranslatedInstantMessage
                 : ResultReason::TranslatedParticipantInstantMessage;
 
@@ -923,11 +989,11 @@ namespace ConversationTranslation {
 
     void CSpxConversationTranslator::OnParticipantChanged(const ConversationParticipantAction action, const vector<ConversationParticipant>& participants)
     {
-        RunAsynchronously([this, action, participants]()
+        RunAsynchronously([this, action, partCopy = participants]() mutable
         {
             CT_GET_AND_LOG_STATE(
                 "Conversation participant changed event. Action: %u, Participants changed: %zu",
-                action, participants.size());
+                action, partCopy.size());
 
             if (!IsConsideredOpen(state))
             {
@@ -940,7 +1006,7 @@ namespace ConversationTranslation {
             }
 
             auto eventArgs = CreateShared<ConversationParticipantChangedEventArgs>(GetSessionId(), ToReason(action));
-            for (auto& p : participants)
+            for (auto& p : partCopy)
             {
                 auto part = CreateShared<CSpxConversationParticipant>(move(p));
                 eventArgs->AddParticipant(part);
@@ -1027,6 +1093,38 @@ namespace ConversationTranslation {
         });
     }
 
+    void CSpxConversationTranslator::OnUpdatedAuthorizationToken(
+        const std::string& authToken, const std::string& region, const std::chrono::system_clock::time_point& expiresAt)
+    {
+        RunAsynchronously([this, authToken, region, expiresAt]()
+        {
+            CT_GET_AND_LOG_STATE(
+                "Updated authorization token. Token: '%zu', Region: '%s', Expires at: '%s'",
+                authToken.size(), region.c_str(), PAL::GetTimeInString(expiresAt).c_str());
+
+            switch (state)
+            {
+            default:
+                CT_HANDLE_UNSUPPORTED_STATE();
+                return;
+
+            case ConversationState::Initial:
+            case ConversationState::Failed:
+            case ConversationState::Closed:
+            case ConversationState::Closing:
+                // Ignore this
+                return;
+
+            case ConversationState::CreatingOrJoining:
+            case ConversationState::CreatedOrJoined:
+            case ConversationState::Opening:
+            case ConversationState::Open:
+                SetAuthorizationTokenInternal(authToken, region);
+                break;
+            }
+        });
+    }
+
     void CSpxConversationTranslator::OnConversationDeleted()
     {
         // In order to ensure we move to the correct state, we need to run this synchronously
@@ -1062,7 +1160,7 @@ namespace ConversationTranslation {
         });
     }
 
-    void CSpxConversationTranslator::ConnectConversation(shared_ptr<ISpxConversation> conversation, bool endConversationOnLeave)
+    void CSpxConversationTranslator::ConnectConversation(shared_ptr<ISpxConversation> conversation, bool isHost)
     {
         std::shared_ptr<ISpxConversation> internalConv = conversation;
 
@@ -1089,7 +1187,7 @@ namespace ConversationTranslation {
         // (it calls Term() on it). We would then be left holding onto a zombie.
         _m_conv = conversation; // shared_ptr
         m_convInternals = internals; // weak_ptr
-        m_endConversationOnLeave = endConversationOnLeave;
+        m_isHost = isHost;
 
         // register event handlers
         internals->GetConversationConnection()->SetCallbacks(
@@ -1103,7 +1201,12 @@ namespace ConversationTranslation {
         // service to service call from the speech service to the Capito service for relaying
         // recognitions.
         SetStringValue(ConversationKeys::Conversation_Token, internals->GetConversationArgs()->SessionToken.c_str());
-        SetStringValue(PropertyId::SpeechServiceAuthorization_Token, internals->GetConversationArgs()->CognitiveSpeechAuthToken.c_str());
+
+        std::string speechAuthToken = internals->GetConversationArgs()->CognitiveSpeechAuthToken;
+        if (!speechAuthToken.empty())
+        {
+            SetStringValue(PropertyId::SpeechServiceAuthorization_Token, speechAuthToken.c_str());
+        }
 
         if (IsMultiChannelAudio())
         {
@@ -1322,7 +1425,7 @@ namespace ConversationTranslation {
             auto args = convInternals->GetConversationArgs();
             if (args != nullptr)
             {
-                return StringUtils::ToUpper(args->ParticipantId);
+                return args->ParticipantId;
             }
         }
 
@@ -1482,7 +1585,7 @@ namespace ConversationTranslation {
         DisconnectRecognizer(true);
 
         // Disconnect and end the conversation if needed (e.g. joined as a participant)
-        if (m_endConversationOnLeave)
+        if (!m_isHost)
         {
             DisconnectConversation(true);
         }
@@ -1794,7 +1897,7 @@ namespace ConversationTranslation {
             string resultId = m_utteranceId;
             if (isFinal || resultId.empty())
             {
-                m_utteranceId = StringUtils::ToUpper(PAL::CreateGuidWithDashesUTF8());
+                m_utteranceId = PAL::CreateGuidWithDashesUTF8();
                 if (resultId.empty())
                 {
                     resultId = m_utteranceId;
@@ -1948,6 +2051,25 @@ namespace ConversationTranslation {
         catch (const std::exception& ex)
         {
             CT_I_LOG_ERROR("Translation failed. Also failed to retrieve error due to '%s'", ex.what());
+        }
+    }
+
+    void CSpxConversationTranslator::SetAuthorizationTokenInternal(const std::string& authToken, const std::string& region)
+    {
+        std::string trimmedAuthToken = StringUtils::Trim(authToken);
+        SPX_THROW_HR_IF(SPXERR_INVALID_ARG, trimmedAuthToken.empty());
+        SetStringValue(PropertyId::SpeechServiceAuthorization_Token, trimmedAuthToken.c_str());
+
+        std::string trimmedRegion = StringUtils::Trim(region);
+        if (!trimmedRegion.empty())
+        {
+            SetStringValue(ConversationKeys::Conversation_Region, trimmedRegion.c_str());
+
+            // If you are using a custom endpoint URL, you don't need to set the region for the speech connection
+            if (GetStringValue(PropertyId::SpeechServiceConnection_Endpoint).empty())
+            {
+                SetStringValue(PropertyId::SpeechServiceConnection_Region, trimmedRegion.c_str());
+            }
         }
     }
 

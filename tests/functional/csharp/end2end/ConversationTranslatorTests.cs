@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
@@ -333,12 +334,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
             // Join room
             var bobAudioConfig = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_CHINESE].FilePath.GetRootRelativePath());
+            SetParticipantConfig(bobAudioConfig);
             SPX_TRACE_INFO("Creating bob ConversationTranslator");
             var bobTranslator = new ConversationTranslator(bobAudioConfig);
             var bobEvents = new ConversationTranslatorCallbacks(bobTranslator);
             SPX_TRACE_INFO("Bob joining {0}", conversation.ConversationId);
             await bobTranslator.JoinConversationAsync(conversation.ConversationId, bobName, bobLang);
-            SetParticipantConfig(bobTranslator, false);
 
 
             // do audio playback
@@ -476,17 +477,17 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 REQUIRE_THROWS_MATCHES(
                     translator.StartTranscribingAsync(),
                     typeof(ApplicationException),
-                    HasHR("SPXERR_UNINITIALIZED"));
+                    Catch.HasHR("SPXERR_UNINITIALIZED"));
 
                 REQUIRE_THROWS_MATCHES(
                     translator.StopTranscribingAsync(),
                     typeof(ApplicationException),
-                    HasHR("SPXERR_UNINITIALIZED"));
+                    Catch.HasHR("SPXERR_UNINITIALIZED"));
 
                 REQUIRE_THROWS_MATCHES(
                     translator.SendTextMessageAsync("This is a test"),
                     typeof(ApplicationException),
-                    HasHR("SPXERR_UNINITIALIZED"));
+                    Catch.HasHR("SPXERR_UNINITIALIZED"));
 
                 REQUIRE_NOTHROW(translator.LeaveConversationAsync());
             }
@@ -498,17 +499,17 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 REQUIRE_THROWS_MATCHES(
                     translator.StartTranscribingAsync(),
                     typeof(ApplicationException),
-                    HasHR("SPXERR_UNINITIALIZED"));
+                    Catch.HasHR("SPXERR_UNINITIALIZED"));
 
                 REQUIRE_THROWS_MATCHES(
                     translator.StopTranscribingAsync(),
                     typeof(ApplicationException),
-                    HasHR("SPXERR_UNINITIALIZED"));
+                    Catch.HasHR("SPXERR_UNINITIALIZED"));
 
                 REQUIRE_THROWS_MATCHES(
                     translator.SendTextMessageAsync("This is a test"),
                     typeof(ApplicationException),
-                    HasHR("SPXERR_UNINITIALIZED"));
+                    Catch.HasHR("SPXERR_UNINITIALIZED"));
 
                 REQUIRE_NOTHROW(translator.LeaveConversationAsync());
             }
@@ -526,7 +527,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             REQUIRE_THROWS_MATCHES(
                 host.Translator.JoinConversationAsync(host.Conversation, host.Name),
                 typeof(ApplicationException),
-                HasHR("SPXERR_INVALID_STATE"));
+                Catch.HasHR("SPXERR_INVALID_STATE"));
 
             var alice = new TestConversationParticipant("Alice", Language.ZH_CN, host, SetParticipantConfig);
             await alice.JoinAsync(null);
@@ -535,7 +536,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             REQUIRE_THROWS_MATCHES(
                 alice.Translator.JoinConversationAsync(host.ConversationId, alice.Name, alice.Lang),
                 typeof(ApplicationException),
-                HasHR("SPXERR_INVALID_STATE"));
+                Catch.HasHR("SPXERR_INVALID_STATE"));
 
             await alice.LeaveAsync();
             await host.LeaveAsync();
@@ -553,13 +554,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             REQUIRE_THROWS_MATCHES(
                 () => connection.Open(false),
                 typeof(ApplicationException),
-                HasHR("SPXERR_INVALID_STATE")
+                Catch.HasHR("SPXERR_INVALID_STATE")
             );
 
             REQUIRE_THROWS_MATCHES(
                 () => connection.Open(true),
                 typeof(ApplicationException),
-                HasHR("SPXERR_INVALID_STATE")
+                Catch.HasHR("SPXERR_INVALID_STATE")
             );
 
             // Close should not throw exceptions
@@ -582,13 +583,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             REQUIRE_THROWS_MATCHES(
                 () => host.Connection.Open(false),
                 typeof(ApplicationException),
-                HasHR("SPXERR_INVALID_STATE")
+                Catch.HasHR("SPXERR_INVALID_STATE")
             );
 
             REQUIRE_THROWS_MATCHES(
                 () => host.Connection.Open(true),
                 typeof(ApplicationException),
-                HasHR("SPXERR_INVALID_STATE")
+                Catch.HasHR("SPXERR_INVALID_STATE")
             );
 
             // Close should not throw exceptions
@@ -710,17 +711,17 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             REQUIRE_THROWS_MATCHES(
                 host.Translator.StartTranscribingAsync(),
                 typeof(ApplicationException),
-                HasHR("SPXERR_INVALID_STATE"));
+                Catch.HasHR("SPXERR_INVALID_STATE"));
 
             REQUIRE_THROWS_MATCHES(
                 host.Translator.StopTranscribingAsync(),
                 typeof(ApplicationException),
-                HasHR("SPXERR_INVALID_STATE"));
+                Catch.HasHR("SPXERR_INVALID_STATE"));
 
             REQUIRE_THROWS_MATCHES(
                 host.Translator.SendTextMessageAsync("This is a short test"),
                 typeof(ApplicationException),
-                HasHR("SPXERR_INVALID_STATE"));
+                Catch.HasHR("SPXERR_INVALID_STATE"));
 
             await host.LeaveAsync();
         }
@@ -817,7 +818,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             REQUIRE_THROWS_MATCHES(
                 () => alice.Connection.Open(false),
                 typeof(ApplicationException),
-                HasHR("BadRequest") & HasHR("WebSocket Upgrade failed"));
+                Catch.HasHR("BadRequest") & Catch.HasHR("WebSocket Upgrade failed"));
 
             await Task.Delay(TimeSpan.FromMilliseconds(200));
 
@@ -831,23 +832,150 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             REQUIRE_THROWS_MATCHES(
                 () => alice.Connection.Open(false),
                 typeof(ApplicationException),
-                HasHR("SPXERR_INVALID_STATE")
+                Catch.HasHR("SPXERR_INVALID_STATE")
             );
 
             REQUIRE_THROWS_MATCHES(
                 () => alice.Connection.Open(true),
                 typeof(ApplicationException),
-                HasHR("SPXERR_INVALID_STATE")
+                Catch.HasHR("SPXERR_INVALID_STATE")
             );
+        }
+
+        [TestMethod]
+        [Ignore] // code is not yet live in PROD
+        public async Task CT_ConversationTranslator_SetInvalidAuthorizationToken()
+        {
+            var speechConfig = await CreateAuthTokenConfigAsync(TimeSpan.FromMinutes(10), "en-US");
+
+            var host = new TestConversationParticipant(speechConfig, "Host");
+            await host.JoinAsync(null);
+
+            REQUIRE_THROWS_MATCHES(
+                () => host.Translator.SetAuthorizationToken(""),
+                typeof(ArgumentException),
+                Catch.ExceptionMessageContains("authToken")
+                    & Catch.ExceptionMessageContains("null")
+                    & Catch.ExceptionMessageContains("empty")
+            );
+
+            REQUIRE_THROWS_MATCHES(
+                () => host.Translator.SetAuthorizationToken("    "),
+                typeof(ArgumentException),
+                Catch.ExceptionMessageContains("authToken")
+                    & Catch.ExceptionMessageContains("null")
+                    & Catch.ExceptionMessageContains("empty")
+            );
+
+            await host.LeaveAsync();
+        }
+
+        [TestMethod]
+        [Ignore] // code is not yet live in PROD
+        public async Task CT_ConversationTranslator_HostUpdatesAuthorizationToken()
+        {
+            var authTokenValidity = TimeSpan.FromSeconds(15);
+            string speechLang = "en-US";
+
+            var speechConfig = await CreateAuthTokenConfigAsync(authTokenValidity, speechLang);
+
+            var utterance = AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH];
+            var audioConfig = AudioConfig.FromWavFileInput(utterance.FilePath.GetRootRelativePath());
+
+            var host = new TestConversationParticipant(speechConfig, "Host");
+            await host.JoinAsync(audioConfig);
+
+            REQUIRE_THAT(host.Translator.AuthorizationToken, Catch.Equals(speechConfig.AuthorizationToken, Catch.CaseSensitive.Yes));
+            REQUIRE(!string.IsNullOrWhiteSpace(host.Translator.ParticipantId));
+
+            // wait for the current authentication token to expire, and then generate a new one
+            await Task.Delay(authTokenValidity + TimeSpan.FromSeconds(5));
+
+            var subsKey = GetSubscriptionKey();
+            var region = GetRegion();
+            var longAuthToken = await AzureSubscription.GenerateAuthorizationTokenAsync(
+                subsKey, region, TimeSpan.FromSeconds(120));
+
+
+            // update the authentication token and validate it was set properly
+            host.Translator.SetAuthorizationToken(longAuthToken, region);
+            await Task.Delay(TimeSpan.FromSeconds(5));
+
+            REQUIRE_THAT(host.Translator.AuthorizationToken, Catch.Equals(longAuthToken, Catch.CaseSensitive.Yes));
+
+            // now try to send audio and validate the transcriptions
+            await host.StartAudioAsync();
+            await host.WaitForAudioToFinish();
+            await host.StopAudioAsync();
+
+            await host.LeaveAsync();
+            await Task.Delay(TimeSpan.FromSeconds(2));
+
+            host.VerifyBasicEvents(true);
+            host.VerifyTranscriptions(
+                new ExpectedTranscription(host.ParticipantId, utterance.Utterances[speechLang][0].Text, speechLang)
+            );
+        }
+
+        [TestMethod]
+        [Ignore] // code is not yet live in PROD
+        public async Task CT_ConversationTranslator_ParticipantReceivesUpdatedAuthToken()
+        {
+            var authTokenValidity = TimeSpan.FromSeconds(15);
+            string speechLang = "en-US";
+
+            var speechConfig = await CreateAuthTokenConfigAsync(authTokenValidity, speechLang);
+
+            var utterance = AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH];
+            var audioConfig = AudioConfig.FromWavFileInput(utterance.FilePath.GetRootRelativePath());
+
+            var host = new TestConversationParticipant(speechConfig, "Host");
+            await host.JoinAsync(audioConfig);
+
+            var participant = new TestConversationParticipant("Participant", speechLang, host, SetParticipantConfig);
+            await participant.JoinAsync(audioConfig);
+
+            REQUIRE_THAT(participant.Translator.AuthorizationToken, Catch.Equals(speechConfig.AuthorizationToken, Catch.CaseSensitive.Yes));
+            REQUIRE(!string.IsNullOrWhiteSpace(participant.Translator.ParticipantId));
+
+            // wait for the current authentication token to expire, and then generate a new one
+            await Task.Delay(authTokenValidity + TimeSpan.FromSeconds(5));
+
+            var subsKey = GetSubscriptionKey();
+            var region = GetRegion();
+            var longAuthToken = await AzureSubscription.GenerateAuthorizationTokenAsync(
+                subsKey, region, TimeSpan.FromSeconds(120));
+
+            // update the authentication token and validate it was set properly
+            host.Translator.SetAuthorizationToken(longAuthToken, region);
+            await Task.Delay(TimeSpan.FromSeconds(5));
+
+            REQUIRE_THAT(participant.Translator.AuthorizationToken, Catch.Equals(longAuthToken, Catch.CaseSensitive.Yes));
+
+            // now try to send audio and validate the transcriptions
+            await participant.StartAudioAsync();
+            await participant.WaitForAudioToFinish();
+            await participant.StopAudioAsync();
+
+            await participant.LeaveAsync();
+            await host.LeaveAsync();
+            await Task.Delay(TimeSpan.FromSeconds(2));
+
+            participant.VerifyBasicEvents(true);
+            participant.VerifyTranscriptions(
+                new ExpectedTranscription(participant.ParticipantId, utterance.Utterances[speechLang][0].Text, speechLang)
+            );
+
+            host.VerifyBasicEvents(false);
         }
 
 
         #region helper methods
 
-        public SpeechTranslationConfig CreateConfig(string speechLang, params string[] translateTo)
+            public SpeechTranslationConfig CreateConfig(string speechLang, params string[] translateTo)
         {
-            string key = new[] { SubscriptionsRegionsMap[SubscriptionsRegionsKeys.CONVERSATION_TRANSLATOR].Key, subscriptionKey }.FirstOrDefault(x => !string.IsNullOrWhiteSpace(x));
-            string reg = new[] { SubscriptionsRegionsMap[SubscriptionsRegionsKeys.CONVERSATION_TRANSLATOR].Region, region }.FirstOrDefault(x => !string.IsNullOrWhiteSpace(x));
+            string key = GetSubscriptionKey();
+            string reg = GetRegion();
 
             SpeechTranslationConfig config;
             if (string.IsNullOrWhiteSpace(DefaultSettingsMap[DefaultSettingKeys.CONVERSATION_TRANSLATOR_SPEECH_ENDPOINT]))
@@ -866,6 +994,39 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
 
             config.SetProperty(PropertyId.Speech_SessionId, $"IntegrationTest:{Guid.NewGuid().ToString()}");
+
+            SetCommonConfig(
+                (id, val) => config.SetProperty(id, val),
+                (h, p, u, w) => config.SetProxy(h, p, u, w));
+
+            return config;
+        }
+
+        public async Task<SpeechTranslationConfig> CreateAuthTokenConfigAsync(TimeSpan authTokenValidity, string lang, params string[] translateTo)
+        {
+            string subsKey = GetSubscriptionKey();
+            string region = GetRegion();
+
+            string authToken = await AzureSubscription.GenerateAuthorizationTokenAsync(
+                subsKey, region, authTokenValidity, CancellationToken.None);
+
+            SpeechTranslationConfig config;
+            if (string.IsNullOrWhiteSpace(DefaultSettingsMap[DefaultSettingKeys.CONVERSATION_TRANSLATOR_SPEECH_ENDPOINT]))
+            {
+                config = SpeechTranslationConfig.FromAuthorizationToken(authToken, region);
+            }
+            else
+            {
+                config = SpeechTranslationConfig.FromEndpoint(
+                    new Uri(DefaultSettingsMap[DefaultSettingKeys.CONVERSATION_TRANSLATOR_SPEECH_ENDPOINT]));
+                config.AuthorizationToken = authToken;
+            }
+
+            config.SpeechRecognitionLanguage = lang;
+            for (int i = 0; i < translateTo?.Length; i++)
+            {
+                config.AddTargetLanguage(translateTo[i]);
+            }
 
             SetCommonConfig(
                 (id, val) => config.SetProperty(id, val),
@@ -910,30 +1071,50 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        public void SetParticipantConfig(ConversationTranslator convTrans, bool setEndpoint)
+        public void SetParticipantConfig(AudioConfig audioConfig)
         {
-            if (setEndpoint && !string.IsNullOrWhiteSpace(DefaultSettingsMap[DefaultSettingKeys.CONVERSATION_TRANSLATOR_SPEECH_ENDPOINT]))
+            if (!string.IsNullOrWhiteSpace(DefaultSettingsMap[DefaultSettingKeys.CONVERSATION_TRANSLATOR_SPEECH_ENDPOINT]))
             {
-                convTrans.Properties.SetProperty(PropertyId.SpeechServiceConnection_Endpoint, DefaultSettingsMap[DefaultSettingKeys.CONVERSATION_TRANSLATOR_SPEECH_ENDPOINT]);
+                audioConfig.SetProperty(PropertyId.SpeechServiceConnection_Endpoint, DefaultSettingsMap[DefaultSettingKeys.CONVERSATION_TRANSLATOR_SPEECH_ENDPOINT]);
             }
 
-            convTrans.Properties.SetProperty(PropertyId.Speech_SessionId, $"IntegrationTest:{Guid.NewGuid().ToString()}");
+            audioConfig.SetProperty(PropertyId.Speech_SessionId, $"IntegrationTest:{Guid.NewGuid().ToString()}");
 
             SetCommonConfig(
-                (id, val) => convTrans.Properties.SetProperty(id, val),
-                (host, port, username, pwd) =>
+                (id, val) => audioConfig.SetProperty(id, val),
+                (host, port, username, password) =>
                 {
-                    convTrans.Properties.SetProperty(PropertyId.SpeechServiceConnection_ProxyHostName, host);
-                    convTrans.Properties.SetProperty(PropertyId.SpeechServiceConnection_ProxyPort, port.ToString(CultureInfo.InvariantCulture));
+                    audioConfig.SetProperty(PropertyId.SpeechServiceConnection_ProxyHostName, host);
+                    audioConfig.SetProperty(PropertyId.SpeechServiceConnection_ProxyPort, port.ToString(CultureInfo.InvariantCulture));
                     if (!string.IsNullOrWhiteSpace(username))
                     {
-                        convTrans.Properties.SetProperty(PropertyId.SpeechServiceConnection_ProxyUserName, username);
-                        if (!string.IsNullOrWhiteSpace(pwd))
+                        audioConfig.SetProperty(PropertyId.SpeechServiceConnection_ProxyUserName, username);
+                        if (!string.IsNullOrWhiteSpace(password))
                         {
-                            convTrans.Properties.SetProperty(PropertyId.SpeechServiceConnection_ProxyPassword, pwd);
+                            audioConfig.SetProperty(PropertyId.SpeechServiceConnection_ProxyPassword, password);
                         }
                     }
                 });
+        }
+
+        private static string GetSubscriptionKey()
+        {
+            return new[]
+            {
+                SubscriptionsRegionsMap[SubscriptionsRegionsKeys.CONVERSATION_TRANSLATOR].Key,
+                subscriptionKey
+            }
+            .FirstOrDefault(x => !string.IsNullOrWhiteSpace(x));
+        }
+
+        private static string GetRegion()
+        {
+            return new[]
+            {
+                SubscriptionsRegionsMap[SubscriptionsRegionsKeys.CONVERSATION_TRANSLATOR].Region,
+                region
+            }
+            .FirstOrDefault(x => !string.IsNullOrWhiteSpace(x));
         }
 
         #endregion

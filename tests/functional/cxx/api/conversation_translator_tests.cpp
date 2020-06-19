@@ -890,6 +890,125 @@ TEST_CASE("[CT] Conversation Translator INT endpoint", "[!hide][cxx_conversation
     });
 }
 
+TEST_CASE("[CT] Set invalid authorization token", "[!hide][api][cxx][conversation_translator][cxx_conversation_translator][authToken][invalid]")
+{
+    auto speechConfig = CreateAuthTokenConfig(10min, "en-US", {});
+
+    TestConversationParticipant host(speechConfig, "Host");
+    host.Join(nullptr);
+
+    REQUIRE_THROWS_MATCHES(
+        host.ConvTrans->SetAuthorizationToken(""),
+        std::runtime_error,
+        Catch::HasHR(SPXERR_INVALID_ARG)
+    );
+
+    REQUIRE_THROWS_MATCHES(
+        host.ConvTrans->SetAuthorizationToken("    "),
+        std::runtime_error,
+        Catch::HasHR(SPXERR_INVALID_ARG)
+    );
+
+    host.Leave();
+}
+
+TEST_CASE("[CT] Host updates authorization token", "[!hide][api][cxx][conversation_translator][cxx_conversation_translator][authToken][host]")
+{
+    auto authTokenValidity = 15s;
+    const auto speechLang = "en-US";
+
+    auto speechConfig = CreateAuthTokenConfig(authTokenValidity, speechLang, {});
+
+    auto utterance = AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH];
+    REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
+    auto audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
+
+    TestConversationParticipant host(speechConfig, "Host");
+    host.Join(audioConfig);
+
+    REQUIRE_THAT(host.ConvTrans->GetAuthorizationToken(), Catch::Equals(speechConfig->GetAuthorizationToken()));
+    REQUIRE(host.ConvTrans->GetParticipantId().empty() == false);
+
+    // wait for the current authentication token to expire, and then generate a new one
+    this_thread::sleep_for(authTokenValidity + 5s);
+
+    auto subsKey = GetSubscriptionKey();
+    auto region = GetRegion();
+    auto longAuthToken = GenerateAuthorizationToken(subsKey, region, 120s);
+
+    // update the authentication token and validate it was set properly
+    host.ConvTrans->SetAuthorizationToken(longAuthToken);
+    this_thread::sleep_for(5s);
+
+    REQUIRE_THAT(host.ConvTrans->GetAuthorizationToken(), Catch::Equals(longAuthToken));
+
+    // now try to send audio and validate the transcriptions
+    host.StartAudio();
+    host.WaitForAudioToFinish();
+    host.StopAudio();
+
+    host.Leave();
+    this_thread::sleep_for(2s);
+
+    host.VerifyBasicEvents(true);
+    host.VerifyTranscriptions(
+    {
+        ExpectedTranscription(host.ParticipantId, utterance.Utterances[speechLang][0].Text, speechLang, {})
+    });
+}
+
+TEST_CASE("[CT] Participant receives updated authorization token", "[!hide][api][cxx][conversation_translator][cxx_conversation_translator][authToken][join]")
+{
+    auto authTokenValidity = 15s;
+    const auto speechLang = "en-US";
+
+    auto speechConfig = CreateAuthTokenConfig(authTokenValidity, speechLang, {});
+
+    auto utterance = AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH];
+    REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
+    auto audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
+
+    TestConversationParticipant host(speechConfig, "Host");
+    host.Join(audioConfig);
+
+    TestConversationParticipant participant("Participant", speechLang, host);
+    SetCommonConfig(audioConfig);
+    participant.Join(audioConfig);
+
+    REQUIRE_THAT(participant.ConvTrans->GetAuthorizationToken(), Catch::Equals(speechConfig->GetAuthorizationToken()));
+    REQUIRE(participant.ConvTrans->GetParticipantId().empty() == false);
+
+    // wait for the current authentication token to expire, and then generate a new one
+    this_thread::sleep_for(authTokenValidity + 5s);
+
+    auto subsKey = GetSubscriptionKey();
+    auto region = GetRegion();
+    auto longAuthToken = GenerateAuthorizationToken(subsKey, region, 120s);
+
+    // update the authentication token and validate it was set properly
+    host.ConvTrans->SetAuthorizationToken(longAuthToken, region);
+    this_thread::sleep_for(5s);
+
+    REQUIRE_THAT(participant.ConvTrans->GetAuthorizationToken(), Catch::Equals(longAuthToken));
+
+    // now try to send audio and validate the transcriptions
+    participant.StartAudio();
+    participant.WaitForAudioToFinish();
+    participant.StopAudio();
+
+    participant.Leave();
+    host.Leave();
+    this_thread::sleep_for(2s);
+
+    participant.VerifyBasicEvents(true);
+    participant.VerifyTranscriptions(
+    {
+        ExpectedTranscription(participant.ParticipantId, utterance.Utterances[speechLang][0].Text, speechLang, {})
+    });
+
+    host.VerifyBasicEvents(false);
+}
+
 
 
 TEST_CASE("[CT] Conversation Translator Sweden demo", "[!hide][cxx_conversation_translator][Sweden]")

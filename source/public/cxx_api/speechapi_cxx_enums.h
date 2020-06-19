@@ -387,6 +387,12 @@ enum class PropertyId
     Conversation_Speech_Activity_Template = 10006,
 
     /// <summary>
+    /// Your participant identifier in the current conversation.
+    /// Added in version 1.13.0
+    /// </summary>
+    Conversation_ParticipantId = 10007,
+
+    /// <summary>
     /// The time stamp associated to data buffer written by client when using Pull/Push audio input streams.
     /// The time stamp is a 64-bit value with a resolution of 90 kHz. It is the same as the presentation timestamp in an MPEG transport stream. See https://en.wikipedia.org/wiki/Presentation_timestamp
     /// Added in version 1.5.0.

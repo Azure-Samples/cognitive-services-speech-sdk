@@ -134,6 +134,9 @@ namespace Microsoft.CognitiveServices.Speech.Internal
         public static extern SPXHR conversation_translator_send_text_message(InteropSafeHandle conversationTranslatorHandle, Utf8StringHandle message);
 
         [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
+        public static extern SPXHR conversation_translator_set_authorization_token(InteropSafeHandle conversationTranslatorHandle, Utf8StringHandle authToken, Utf8StringHandle region);
+
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR conversation_translator_leave(InteropSafeHandle conversationTranslatorHandle);
 
         [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]

@@ -19,6 +19,8 @@
 #include <speechapi_cxx_speech_recognition_eventargs.h>
 #include <speechapi_cxx_speech_recognizer.h>
 #include <string_utils.h>
+#include <http_request.h>
+#include <http_response.h>
 #include "test_PAL.h"
 #include "conversation_utils.h"
 #include "translator_languages.h"
@@ -75,6 +77,62 @@ namespace IntegrationTests {
         return string();
     }
 
+    static std::string GetSubscriptionKey()
+    {
+        return FirstOrDefault(
+        {
+            SubscriptionsRegionsMap[CONVERSATION_TRANSLATOR_SUBSCRIPTION].Key,
+            SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key
+        });
+    }
+
+    static std::string GetRegion()
+    {
+        return FirstOrDefault(
+        {
+            SubscriptionsRegionsMap[CONVERSATION_TRANSLATOR_SUBSCRIPTION].Region,
+            SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Region
+        });
+    }
+
+    /// <summary>
+    /// Generates a Cognitive authorization token from a subscription key and region
+    /// </summary>
+    /// <param name="subscriptionKey">The Cognitive subscription key</param>
+    /// <param name="region">The Azure region for this subscription key</param>
+    /// <param name="validity">How long the authorization token is valid for</param>
+    /// <returns>The authorization token</returns>
+    static std::string GenerateAuthorizationToken(
+        const std::string& subscriptionKey, const std::string& region, std::chrono::seconds validity)
+    {
+        if (subscriptionKey.empty())
+        {
+            throw std::invalid_argument("You must specify a subscription key");
+        }
+        else if (region.empty())
+        {
+            throw std::invalid_argument("You must specify a region");
+        }
+        else if (validity <= 0s)
+        {
+            throw std::invalid_argument("You must specify a validity greater than 0 seconds");
+        }
+
+        HttpEndpointInfo authTokenEndpoint;
+        authTokenEndpoint
+            .Scheme(UriScheme::HTTPS)
+            .Host(region + ".api.cognitive.microsoft.com")
+            .Path("/sts/v1.0/issueToken")
+            .AddQueryParameter("expiredTime", std::to_string(validity.count()))
+            .SetHeader("Ocp-Apim-Subscription-Key", subscriptionKey);
+
+        HttpRequest request(authTokenEndpoint);
+        auto response = request.SendRequest(HTTPAPI_REQUEST_POST);
+        response->EnsureSuccess();
+
+        return response->ReadContentAsString();
+    }
+
     template<typename I>
     static void SetCommonConfig(std::shared_ptr<I> config)
     {
@@ -115,8 +173,8 @@ namespace IntegrationTests {
     {
         shared_ptr<SpeechTranslationConfig> config;
 
-        string subscriptionKey = FirstOrDefault({ SubscriptionsRegionsMap[CONVERSATION_TRANSLATOR_SUBSCRIPTION].Key, SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key });
-        string region = FirstOrDefault({ SubscriptionsRegionsMap[CONVERSATION_TRANSLATOR_SUBSCRIPTION].Region, SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Region });
+        string subscriptionKey = GetSubscriptionKey();
+        string region = GetRegion();
 
         if (DefaultSettingsMap[CONVERSATION_TRANSLATOR_SPEECH_ENDPOINT].empty())
         {
@@ -125,6 +183,35 @@ namespace IntegrationTests {
         else
         {
             config = SpeechTranslationConfig::FromEndpoint(DefaultSettingsMap[CONVERSATION_TRANSLATOR_SPEECH_ENDPOINT], subscriptionKey);
+        }
+
+        config->SetSpeechRecognitionLanguage(lang);
+        for (auto t : to)
+        {
+            config->AddTargetLanguage(t);
+        }
+
+        SetCommonConfig(config);
+        return config;
+    }
+
+    static std::shared_ptr<SpeechTranslationConfig> CreateAuthTokenConfig(std::chrono::seconds authTokenValidity, const string& lang, const vector<string> to)
+    {
+        shared_ptr<SpeechTranslationConfig> config;
+
+        string subscriptionKey = GetSubscriptionKey();
+        string region = GetRegion();
+
+        string authToken = GenerateAuthorizationToken(subscriptionKey, region, authTokenValidity);
+
+        if (DefaultSettingsMap[CONVERSATION_TRANSLATOR_SPEECH_ENDPOINT].empty())
+        {
+            config = SpeechTranslationConfig::FromAuthorizationToken(authToken, region);
+        }
+        else
+        {
+            config = SpeechTranslationConfig::FromEndpoint(DefaultSettingsMap[CONVERSATION_TRANSLATOR_SPEECH_ENDPOINT]);
+            config->SetAuthorizationToken(authToken);
         }
 
         config->SetSpeechRecognitionLanguage(lang);
@@ -352,11 +439,11 @@ namespace IntegrationTests {
             SPXTEST_REQUIRE(ParticipantsChanged[1].Reason == Transcription::ParticipantChangedReason::Updated);
 
             // get the participant ID from the name changed event
-            participantId = StringUtils::ToUpper(
+            participantId =
                 First(
                     ParticipantsChanged[1].Participants,
                     [&name](auto ptr) { return ptr->DisplayName == name; })
-                ->Id);
+                ->Id;
 
             if (isHost)
             {
@@ -366,7 +453,7 @@ namespace IntegrationTests {
             else
             {
                 SPXTEST_REQUIRE(ParticipantsChanged[0].Participants.size() >= 2);
-                SPXTEST_REQUIRE_NOTHROW(First(ParticipantsChanged[0].Participants, [participantId](auto ptr) { return StringUtils::ToUpper(ptr->Id) == participantId; }));
+                SPXTEST_REQUIRE_NOTHROW(First(ParticipantsChanged[0].Participants, [participantId](auto ptr) { return ptr->Id == participantId; }));
             }
 
             SPXTEST_REQUIRE(ParticipantsChanged[1].Participants.size() == 1);
@@ -386,17 +473,17 @@ namespace IntegrationTests {
 
             for (const auto& evt : Transcribing)
             {
-                partials[StringUtils::ToUpper(evt.ParticipantId)].push_back(evt);
+                partials[evt.ParticipantId].push_back(evt);
             }
 
             for (const auto& evt : Transcribed)
             {
-                finals[StringUtils::ToUpper(evt.ParticipantId)].push_back(evt);
+                finals[evt.ParticipantId].push_back(evt);
             }
 
             for (const auto& e : expectedTranscriptions)
             {
-                auto expectedParticipantId = StringUtils::ToUpper(e.participantId);
+                auto expectedParticipantId = e.participantId;
                 auto p = partials[expectedParticipantId];
                 auto f = finals[expectedParticipantId];
 
@@ -463,12 +550,12 @@ namespace IntegrationTests {
             std::unordered_map<std::string, std::vector<ConversationTranslatorCallbacks::_Reco>> ims;
             for (const auto& evt : TextMessageReceived)
             {
-                ims[StringUtils::ToUpper(evt.ParticipantId)].push_back(evt);
+                ims[evt.ParticipantId].push_back(evt);
             }
 
             for (const auto& expected : expectedIms)
             {
-                auto expectedParticipantId = StringUtils::ToUpper(expected.participantId);
+                auto expectedParticipantId = expected.participantId;
                 auto receivedFromUser = ims[expectedParticipantId];
 
                 auto expectedReason = expectedParticipantId == participantId
@@ -667,6 +754,13 @@ namespace IntegrationTests {
 
         void Join(std::shared_ptr<AudioConfig> audioConfig)
         {
+            if (audioConfig == nullptr)
+            {
+                auto utterance = AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH];
+                REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
+                audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
+            }
+
             if (IsHost)
             {
                 SPX_TRACE_INFO(">> [%s] Creating conversation", Name.c_str());

@@ -152,7 +152,7 @@ namespace ConversationTranslation {
                 m_webSocketEndpoint.SetQueryParameter(ConversationConstants::ClientTraceIdHeader, m_sessionId);
             }
 
-            m_currentParticipantId = StringUtils::ToUpper(participantId);
+            m_currentParticipantId = participantId;
         }
 
         m_connectionOpenPromise = std::promise<bool>();
@@ -283,7 +283,7 @@ namespace ConversationTranslation {
 
         ConversationParticipantCommandMessage msg(
             m_roomId,
-            m_participants[StringUtils::ToUpper(participantId)].Nickname,
+            m_participants[participantId].Nickname,
             participantId,
             ParticipantCommandType::SetMute,
             mute);
@@ -315,6 +315,15 @@ namespace ConversationTranslation {
             CurrentParticipant().ParticipantId,
             ParticipantCommandType::ChangeNickname,
             nickname);
+
+        m_webSocket->SendTextData(msg.ToJsonString());
+    }
+
+    void ConversationConnection::SetAuthorizationToken(const std::string& authToken, const std::string& region)
+    {
+        CheckHostCanSend();
+
+        ConversationAuthorizationTokenMessage msg(authToken, region);
 
         m_webSocket->SendTextData(msg.ToJsonString());
     }
@@ -415,7 +424,7 @@ namespace ConversationTranslation {
                 break;
 
             case MessageType::Info:
-                HandleParticipantList(dynamic_cast<const ConversationParticipantListMessage*>(parsed.get()));
+                HandleInfoMessage(dynamic_cast<const ConversationInfoMessage*>(parsed.get()));
                 break;
 
             case MessageType::Final:
@@ -560,6 +569,31 @@ namespace ConversationTranslation {
         }
     }
 
+    void ConversationConnection::HandleInfoMessage(const ConversationInfoMessage* info)
+    {
+        if (info == nullptr)
+        {
+            return;
+        }
+
+        if (info->Command == "token")
+        {
+            auto tokenMessage = dynamic_cast<const ConversationAuthorizationTokenMessage*>(info);
+
+            if (tokenMessage != nullptr && m_callbacks != nullptr)
+            {
+                m_callbacks->OnUpdatedAuthorizationToken(
+                    tokenMessage->AuthToken,
+                    tokenMessage->Region,
+                    tokenMessage->ValidUntil);
+            }
+        }
+        else
+        {
+            HandleParticipantList(dynamic_cast<const ConversationParticipantListMessage*>(info));
+        }
+    }
+
     void ConversationConnection::HandleParticipantList(const ConversationParticipantListMessage * participantList)
     {
         if (participantList == nullptr)
@@ -570,7 +604,7 @@ namespace ConversationTranslation {
         // This message is always received when we first connect so send out an "Joined" event.
         // We cannot send messages to the service until we have received this message.
         bool oldReceived = m_receivedParticipantsList.exchange(true);
-        m_roomId = participantList->RoomId;
+        m_roomId = participantList->ConversationId;
         m_connectionOpenPromise.set_value(true);
 
         // Send out the connected event
@@ -582,7 +616,7 @@ namespace ConversationTranslation {
         // update existing participants list
         for (const ConversationParticipant& p : participantList->Participants)
         {
-            m_participants[StringUtils::ToUpper(p.ParticipantId)] = p;
+            m_participants[p.ParticipantId] = p;
         }
 
         if (m_callbacks != nullptr)
@@ -598,7 +632,7 @@ namespace ConversationTranslation {
             return;
         }
 
-        const ConversationParticipant existing = m_participants[StringUtils::ToUpper(command->ParticipantId)];
+        const ConversationParticipant existing = m_participants[command->ParticipantId];
 
         ConversationParticipant participant;
         participant.Avatar = ValueOrDefault(command->Avatar, existing.Avatar);
@@ -619,7 +653,7 @@ namespace ConversationTranslation {
 
             case CommandType::LeaveSession:
                 action = ConversationParticipantAction::Leave;
-                m_participants.erase(StringUtils::ToUpper(participant.ParticipantId));
+                m_participants.erase(participant.ParticipantId);
 
                 // some fields are not set so use the values from the existing one (if any)
                 participant.IsMuted = existing.IsMuted;
@@ -628,7 +662,7 @@ namespace ConversationTranslation {
 
             case CommandType::JoinSession:
                 action = ConversationParticipantAction::Join;
-                m_participants[StringUtils::ToUpper(participant.ParticipantId)] = participant;
+                m_participants[participant.ParticipantId] = participant;
                 break;
 
             default:
@@ -672,7 +706,7 @@ namespace ConversationTranslation {
                 {
                     // since the message doesn't have the full details for the participant, we'll need to retrieve the existing
                     // one (if any)
-                    string participantId = StringUtils::ToUpper(command->ParticipantId);
+                    string participantId = command->ParticipantId;
 
                     const auto iter = m_participants.find(participantId);
                     if (iter == m_participants.end())

@@ -166,6 +166,17 @@ namespace Microsoft.CognitiveServices.Speech.Transcription
             => Properties.GetProperty(PropertyId.SpeechServiceConnection_RecoLanguage);
 
         /// <summary>
+        /// Gets your participant identifier
+        /// </summary>
+        public string ParticipantId
+            => Properties.GetProperty(PropertyId.Conversation_ParticipantId);
+
+        /// <summary>
+        /// Gets or sets the authorization token used to connect to the conversation service
+        /// </summary>
+        public string AuthorizationToken => Properties.GetProperty(PropertyId.SpeechServiceAuthorization_Token);
+
+        /// <summary>
         /// Gets the collection of properties and their values defined for this <see cref="ConversationTranslator"/>.
         /// </summary>
         public PropertyCollection Properties { get; internal set; }
@@ -263,6 +274,25 @@ namespace Microsoft.CognitiveServices.Speech.Transcription
                         h, messageHandle);
                 }
             });
+        }
+
+        /// <summary>
+        /// Sets the Cognitive Speech authorization token that will be used for connecting to the server.
+        /// </summary>
+        /// <param name="authToken">The authorization token.</param>
+        /// <param name="region">(Optional) The Azure region for this token.</param>
+        public void SetAuthorizationToken(string authToken, string region = null)
+        {
+            if (string.IsNullOrWhiteSpace(authToken))
+            {
+                throw new ArgumentException(nameof(authToken) + " cannot be null, empty or consist only of white space");
+            }
+
+            using (var authTokenHandle = new Utf8StringHandle(authToken))
+            using (var regionHandle = new Utf8StringHandle(region))
+            {
+                ThrowIfFail(Internal.ConversationTranslator.conversation_translator_set_authorization_token(_nativeHandle, authTokenHandle, regionHandle));
+            }
         }
 
         /// <summary>

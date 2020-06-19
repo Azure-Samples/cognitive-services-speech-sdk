@@ -262,7 +262,7 @@ static inline SPXHR TryRetrieveStringValue(THandle handle, char * psz, uint32_t 
     }
 }
 
-static void ConversationTranslatorJoin(std::shared_ptr<ISpxConversationTranslator> convTranslator, SPXCONVERSATIONHANDLE hconv, const char* psznickname, bool endOnLeave)
+static void ConversationTranslatorJoin(std::shared_ptr<ISpxConversationTranslator> convTranslator, SPXCONVERSATIONHANDLE hconv, const char* psznickname, bool isHost)
 {
     SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
@@ -292,7 +292,7 @@ static void ConversationTranslatorJoin(std::shared_ptr<ISpxConversationTranslato
     factory->InitSessionFromAudioInputConfig(SpxQueryInterface<ISpxAudioStreamSessionInit>(session), audio_input->GetAudioConfig());
 
     // Call the implementation join method
-    convTranslator->JoinConversation(conv, psznickname, endOnLeave);
+    convTranslator->JoinConversation(conv, psznickname, isHost);
 }
 
 SPXAPI conversation_translator_get_property_bag(SPXCONVERSATIONTRANSLATORHANDLE hconvtranslator, SPXPROPERTYBAGHANDLE * phpropertyBag)
@@ -322,7 +322,7 @@ SPXAPI conversation_translator_join(SPXCONVERSATIONTRANSLATORHANDLE hconvtransla
         // protect against calling join twice and accidentally destroying internal state
         SPX_IFTRUE_THROW_HR(!instance->CanJoin(), SPXERR_INVALID_STATE);
 
-        ConversationTranslatorJoin(instance, hconv, psznickname, false);
+        ConversationTranslatorJoin(instance, hconv, psznickname, true);
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
@@ -383,7 +383,7 @@ SPXAPI conversation_translator_join_with_id(SPXCONVERSATIONTRANSLATORHANDLE hcon
         SPX_THROW_ON_FAIL(conversation_start_conversation(h_converation));
 
         // now join the conversation instance
-        ConversationTranslatorJoin(instance, h_converation, psznickname, true);
+        ConversationTranslatorJoin(instance, h_converation, psznickname, false);
 
         SPX_REPORT_ON_FAIL(conversation_release_handle(h_converation));
         h_converation = SPXHANDLE_INVALID;
@@ -422,6 +422,15 @@ SPXAPI conversation_translator_send_text_message(SPXCONVERSATIONTRANSLATORHANDLE
     SPXAPI_INIT_HR_TRY(hr)
     {
         GetTranslator(hconvtranslator)->SendTextMsg(pszmessage);
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
+SPXAPI conversation_translator_set_authorization_token(SPXCONVERSATIONTRANSLATORHANDLE hconvtranslator, const char* pszAuthToken, const char* pszRegion)
+{
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        GetTranslator(hconvtranslator)->SetAuthorizationToken(pszAuthToken, pszRegion);
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
