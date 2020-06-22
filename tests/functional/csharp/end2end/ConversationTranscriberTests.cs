@@ -646,6 +646,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             var config = CreateCTSTeamsSpeechConfig(DefaultSettingsMap[DefaultSettingKeys.RECONNECT_AUDIO_ENDPOINT], "?forceTemporaryRedirect=true");
             config.SetServiceProperty("maxConnectionDurationSecs", "5", ServicePropertyChannel.UriQueryParameter);
+            config.SetSystemProxy();
 
             ManualResetEvent reconnectEvent = new ManualResetEvent(false);
             ManualResetEvent canceledEvent = new ManualResetEvent(false);
@@ -707,6 +708,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             var config = CreateCTSTeamsSpeechConfig(DefaultSettingsMap[DefaultSettingKeys.RECONNECT_AUDIO_ENDPOINT], "?forcePermanentRedirect=true");
             config.SetServiceProperty("maxConnectionDurationSecs", "5", ServicePropertyChannel.UriQueryParameter);
+            config.SetSystemProxy();
 
             ManualResetEvent reconnectEvent = new ManualResetEvent(false);
             ManualResetEvent canceledEvent = new ManualResetEvent(false);

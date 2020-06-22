@@ -49,11 +49,35 @@ void CSpxConversation::Init()
 
     m_keepSessionAlive = site;
 
-    // Initialize websocket platform
-    Microsoft::CognitiveServices::Speech::USP::PlatformInit(nullptr, 0, nullptr, nullptr);
-
     auto properties = SpxQueryService<ISpxNamedProperties>(site);
     SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_CONVERSATION_SITE_FAILURE);
+
+    // Initialize websocket platform
+    auto proxyHost = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_ProxyHostName));
+    auto proxyPortString = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_ProxyPort));
+    auto proxyUserName = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_ProxyUserName));
+    auto proxyPassword = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_ProxyPassword));
+    int proxyPort = 0;
+
+    if (!proxyHost.empty())
+    {
+        try
+        {
+            proxyPort = std::stol(proxyPortString);
+            SPX_IFTRUE_THROW_HR(proxyPort <= 0, SPXERR_OUT_OF_RANGE);
+        }
+        catch (std::exception&)
+        {
+            // proxy port was invalid or out of range
+            SPX_THROW_HR(SPXERR_OUT_OF_RANGE);
+        }
+    }
+    
+    Microsoft::CognitiveServices::Speech::USP::PlatformInit(
+        proxyHost.empty() ? nullptr : proxyHost.c_str(),
+        proxyPort,
+        proxyUserName.empty() ? nullptr : proxyUserName.c_str(),
+        proxyPassword.empty() ? nullptr : proxyPassword.c_str());
 
     auto need_participant_mgr = properties->GetStringValue("ConversationTranscriptionInRoomAndOnline");
     if (PAL::ToBool(need_participant_mgr))

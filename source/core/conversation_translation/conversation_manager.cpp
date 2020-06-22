@@ -82,7 +82,7 @@ ConversationArgs ConversationManager::CreateOrJoin(const CreateConversationArgs&
 
     ADD_API_VERSION(request);
     request.AddQueryParameter("language", args.LanguageCode);
-    
+
     if (!args.Nickname.empty())
     {
         request.AddQueryParameter("nickname", args.Nickname);

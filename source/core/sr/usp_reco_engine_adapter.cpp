@@ -1870,7 +1870,7 @@ void CSpxUspRecoEngineAdapter::OnError(bool isTransport, USP::ErrorCode errorCod
         case USP::ErrorCode::ServiceUnavailable:
             cancellationErrorCode = CancellationErrorCode::ServiceUnavailable;
             break;
-        case USP::ErrorCode::ServiceRedirectTemprary:
+        case USP::ErrorCode::ServiceRedirectTemporary:
             cancellationErrorCode = CancellationErrorCode::ServiceRedirectTemporary;
             break;
         case USP::ErrorCode::ServiceRetirectPermanent:

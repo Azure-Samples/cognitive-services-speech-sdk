@@ -994,10 +994,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
 
             config.SetProperty(PropertyId.Speech_SessionId, $"IntegrationTest:{Guid.NewGuid().ToString()}");
+            config.SetSystemProxy();
 
-            SetCommonConfig(
-                (id, val) => config.SetProperty(id, val),
-                (h, p, u, w) => config.SetProxy(h, p, u, w));
+            SetCommonConfig(config.SetProperty);
 
             return config;
         }
@@ -1028,14 +1027,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 config.AddTargetLanguage(translateTo[i]);
             }
 
-            SetCommonConfig(
-                (id, val) => config.SetProperty(id, val),
-                (h, p, u, w) => config.SetProxy(h, p, u, w));
+            config.SetSystemProxy();
+            SetCommonConfig(config.SetProperty);
 
             return config;
         }
 
-        public void SetCommonConfig(Action<string, string> setter, Action<string, int, string, string> setProxy)
+        public void SetCommonConfig(Action<string, string> setter)
         {
             if (ManagementEndpoint != null)
             {
@@ -1061,14 +1059,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 setter("ConversationTranslator_ClientId", DefaultSettingsMap[DefaultSettingKeys.CONVERSATION_TRANSLATOR_CLIENTID]);
             }
-
-            Uri proxy;
-            string proxyName;
-            string proxyPass;
-            if (ConversationTranslatorExtensionMethods.TryGetDefaultSystemProxy(out proxy, out proxyName, out proxyPass))
-            {
-                setProxy(proxy.IdnHost, proxy.Port, proxyName, proxyPass);
-            }
         }
 
         public void SetParticipantConfig(AudioConfig audioConfig)
@@ -1079,22 +1069,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
 
             audioConfig.SetProperty(PropertyId.Speech_SessionId, $"IntegrationTest:{Guid.NewGuid().ToString()}");
+            audioConfig.SetSystemProxy();
 
-            SetCommonConfig(
-                (id, val) => audioConfig.SetProperty(id, val),
-                (host, port, username, password) =>
-                {
-                    audioConfig.SetProperty(PropertyId.SpeechServiceConnection_ProxyHostName, host);
-                    audioConfig.SetProperty(PropertyId.SpeechServiceConnection_ProxyPort, port.ToString(CultureInfo.InvariantCulture));
-                    if (!string.IsNullOrWhiteSpace(username))
-                    {
-                        audioConfig.SetProperty(PropertyId.SpeechServiceConnection_ProxyUserName, username);
-                        if (!string.IsNullOrWhiteSpace(password))
-                        {
-                            audioConfig.SetProperty(PropertyId.SpeechServiceConnection_ProxyPassword, password);
-                        }
-                    }
-                });
+            SetCommonConfig(audioConfig.SetProperty);
         }
 
         private static string GetSubscriptionKey()

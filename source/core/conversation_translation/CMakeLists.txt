@@ -16,8 +16,6 @@ include_directories("${COMMON_GENERATED_INCLUDE}")
 
 set(HEADERS
     "${INC_DIR}/ISpxConversationInterfaces.h"
-    "${INC_DIR}/i_web_socket.h"
-    "${INC_DIR}/web_socket.h"
     "${INC_DIR}/create_module_object.h"
     )
 
@@ -42,7 +40,6 @@ set(SOURCES
     "${SRC_DIR}/conversation_messages.cpp"
     "${SRC_DIR}/conversation_connection.cpp"
     "${SRC_DIR}/conversation_translator.cpp"
-    "${SRC_DIR}/web_socket.cpp"
     "${SRC_DIR}/conversation_translator_connection.cpp"
     )
 

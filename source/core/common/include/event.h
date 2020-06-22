@@ -157,6 +157,12 @@ namespace Impl {
             }
         }
 
+        void clear()
+        {
+            std::lock_guard<std::mutex> lock(m_lock);
+            m_handlers.clear();
+        }
+
         inline size_t operator +=(const event_handler<Args...>& handler) { return add(handler); }
         inline size_t operator +=(const typename event_handler<Args...>::handler_func_type& handler) { return add(handler); }
         inline void operator -=(const event_handler<Args...>& handler) { remove(handler); }

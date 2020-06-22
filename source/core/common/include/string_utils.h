@@ -150,6 +150,20 @@ public:
     /// <param name="predicate">(Optional) An additional filter. If this returns true the character is skipped.
     /// The first argument is the character, and the second is true if we are trimming at the start</param>
     static void Trim(const std::string& str, std::ostringstream& oss, bool (*predicate)(const char, bool) = nullptr);
+
+    /// <summary>
+    /// Removes whitespace from the start of the string
+    /// </summary>
+    /// <param name="str">The string to trim</param>
+    /// <returns>The trimmed string</returns>
+    static const std::string TrimStart(const std::string& str);
+
+    /// <summary>
+    /// Removes whitespace from the start of the string
+    /// </summary>
+    /// <param name="str">The string to trim</param>
+    /// <returns>The trimmed string</returns>
+    static const std::string TrimEnd(const std::string& str);
 };
 
 } // PAL

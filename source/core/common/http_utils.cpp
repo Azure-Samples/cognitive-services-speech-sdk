@@ -25,16 +25,17 @@ namespace Impl {
     const int16_t HTTP_NON_SECURE_PORT = 80;
 
 
-    Url HttpUtils::ParseUrl(const std::string& urlStr)
+    Url HttpUtils::ParseUrl(const std::string& rawUrlStr)
     {
         Url url;
+        std::string urlStr = StringUtils::Trim(rawUrlStr);
 
         if (urlStr.length() < MIN_URL_PARSABLE_LENGTH)
         {
             ThrowRuntimeError("Invalid url (unexpected length)");
         }
 
-        url.scheme = HttpUtils::ParseScheme(urlStr.data());
+        url.scheme = HttpUtils::ParseScheme(urlStr.c_str());
 
         size_t host_begin;
 

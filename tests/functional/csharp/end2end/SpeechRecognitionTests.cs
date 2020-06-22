@@ -275,7 +275,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public async Task InvalidRegionHandledProperly()
         {
             var configWithInvalidRegion = SpeechConfig.FromSubscription(subscriptionKey, "invalidRegion");
-            await AssertConnectionError(configWithInvalidRegion, CancellationErrorCode.ConnectionFailure, "Connection failed");
+
+            // we use case insensitive comparison here since on Linux the error message is: "DNS connection failed (the remote host did not respond)"
+            await AssertConnectionError(configWithInvalidRegion, CancellationErrorCode.ConnectionFailure, "Connection failed", StringComparison.OrdinalIgnoreCase);
         }
 
         [TestMethod]

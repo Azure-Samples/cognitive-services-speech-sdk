@@ -220,14 +220,50 @@ TEST_CASE("USP uses TLS12", "[usp]")
 
 class PortCheck : public USP::Callbacks
 {
-    void OnError(bool /*transport*/, USP::ErrorCode errorCode, const std::string& errorMessage) override
+public:
+    PortCheck() : m_promise()
     {
-        REQUIRE(errorCode == USP::ErrorCode::ConnectionError);
-        REQUIRE(errorMessage.find("Connection failed") != std::string::npos);
     }
 
-public:
     virtual ~PortCheck() = default;
+
+    void OnError(bool /*transport*/, USP::ErrorCode errorCode, const std::string& errorMessage) override
+    {
+        std::exception_ptr exPtr;
+
+        try
+        {
+            REQUIRE(errorCode == USP::ErrorCode::ConnectionError);
+            REQUIRE_THAT(errorMessage, Catch::Contains("Connection failed", Catch::CaseSensitive::No));
+            m_promise.set_value();
+        }
+        catch (std::exception&)
+        {
+            m_promise.set_exception(std::current_exception());
+        }
+        catch (...)
+        {
+            // Trying to rethrow something that isn't an exception can cause asserts.
+            // Let's create an arbitrary exception to rethrow instead
+            m_promise.set_exception(make_exception_ptr(std::runtime_error("Unknown failure on error callback")));
+        }
+    }
+
+    void WaitForErrorCallback(std::chrono::seconds maxWait = 10s, std::chrono::seconds additionalWaitTime = 2s)
+    {
+        auto future = m_promise.get_future();
+        auto res = future.wait_for(maxWait);
+
+        if (additionalWaitTime.count() > 0)
+        {
+            std::this_thread::sleep_for(additionalWaitTime);
+        }
+
+        SPXTEST_REQUIRE(res == std::future_status::ready);
+    }
+
+private:
+    std::promise<void> m_promise;
 };
 
 TEST_CASE("Port specification", "[usp]")
@@ -249,7 +285,7 @@ TEST_CASE("Port specification", "[usp]")
         auto data = new uint8_t[dataSize]{ 1, 2, 3, 4, 5, 6, 7 };
         std::shared_ptr<uint8_t> buffer(data, [](uint8_t* p) { delete[] p; });
         connection->WriteAudio(std::make_shared<DataChunk>(buffer, dataSize));
-        this_thread::sleep_for(5s);
+        callbacks->WaitForErrorCallback();
     }
 
     SECTION("Valid port specification 2")
@@ -269,9 +305,8 @@ TEST_CASE("Port specification", "[usp]")
         auto data = new uint8_t[dataSize]{ 1, 2, 3, 4, 5, 6, 7 };
         std::shared_ptr<uint8_t> buffer(data, [](uint8_t* p) { delete[] p; });
         connection->WriteAudio(std::make_shared<DataChunk>(buffer, dataSize));
-        this_thread::sleep_for(5s);
+        callbacks->WaitForErrorCallback();
     }
-
 
     SECTION("Invalid port specification")
     {
@@ -285,6 +320,6 @@ TEST_CASE("Port specification", "[usp]")
             .SetEndpointUrl("ws://127.0.0.1:abc/mytest")  // Invalid port specification, should fail on connect.
             .SetAuthentication(authData);
 
-        REQUIRE_THROWS_WITH(client.Connect(), "Runtime error: Failed to create transport request.");
+        REQUIRE_THROWS_WITH(client.Connect(), "Port is not valid");
     }
 }

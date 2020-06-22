@@ -69,7 +69,7 @@ enum class ErrorCode : int
     ServiceUnavailable,
     ServiceError,
     RuntimeError,
-    ServiceRedirectTemprary,
+    ServiceRedirectTemporary,
     ServiceRetirectPermanent
 };
 

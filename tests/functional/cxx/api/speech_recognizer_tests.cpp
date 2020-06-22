@@ -544,7 +544,7 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
         SPXTEST_REQUIRE(cancellation->Reason == CancellationReason::Error);
         SPXTEST_REQUIRE(cancellation->ErrorCode == CancellationErrorCode::ConnectionFailure);
         CAPTURE(cancellation->ErrorDetails);
-        SPXTEST_REQUIRE(cancellation->ErrorDetails.find("Failed to create transport request.") != std::string::npos);
+        SPXTEST_REQUIRE(cancellation->ErrorDetails.find("Url protocol prefix not recognized") != std::string::npos);
     }
     SPXTEST_SECTION("return canceled in StartContinuousRecognitionAsync given an invalid endpoint")
     {
@@ -573,7 +573,7 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
 
         SPXTEST_REQUIRE(errorCode == CancellationErrorCode::ConnectionFailure);
         CAPTURE(errorDetails);
-        SPXTEST_REQUIRE(errorDetails.find("Failed to create transport request.") != std::string::npos);
+        SPXTEST_REQUIRE(errorDetails.find("Url protocol prefix not recognized") != std::string::npos);
     }
     SPXTEST_SECTION("Check that recognition can set authorization token")
     {

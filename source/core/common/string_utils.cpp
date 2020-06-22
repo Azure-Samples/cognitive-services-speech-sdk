@@ -326,13 +326,12 @@ std::u16string ToU16String(const std::wstring& string)
         return pascal;
     }
 
-    static void TrimDetermineStartEnd(const std::string& str, size_t& startIndex, size_t& endIndex, bool(*predicate)(const char, bool))
+    static void TrimDetermineStart(const std::string& str, size_t& startIndex, const size_t endIndex, bool(*predicate)(const char, bool))
     {
         startIndex = 0;
-        endIndex = str.length();
 
         // determine where to start the trimmed string from
-        for (size_t i = 0; i < str.length(); i++)
+        for (size_t i = 0; i < endIndex; i++)
         {
             char c = str[i];
             if (isspace(static_cast<int>(c)) || (predicate != nullptr && predicate(c, true)))
@@ -344,6 +343,11 @@ std::u16string ToU16String(const std::wstring& string)
                 break;
             }
         }
+    }
+
+    static void TrimDetermineEnd(const std::string& str, const size_t startIndex, size_t& endIndex, bool(*predicate)(const char, bool))
+    {
+        endIndex = str.length();
 
         // determine where to end the trimmed string
         if (str.length() > 0)
@@ -363,6 +367,15 @@ std::u16string ToU16String(const std::wstring& string)
         }
     }
 
+    static void TrimDetermineStartEnd(const std::string& str, size_t& startIndex, size_t& endIndex, bool(*predicate)(const char, bool))
+    {
+        startIndex = 0;
+        endIndex = str.length();
+
+        TrimDetermineStart(str, startIndex, endIndex, predicate);
+        TrimDetermineEnd(str, startIndex, endIndex, predicate);
+    }
+
     const std::string StringUtils::Trim(const std::string& str)
     {
         size_t startIndex, endIndex;
@@ -375,6 +388,20 @@ std::u16string ToU16String(const std::wstring& string)
         size_t startIndex, endIndex;
         TrimDetermineStartEnd(str, startIndex, endIndex, predicate);
         oss.write(str.c_str() + startIndex, endIndex - startIndex);
+    }
+
+    const std::string StringUtils::TrimStart(const std::string& str)
+    {
+        size_t startIndex = 0, endIndex = str.length();
+        TrimDetermineStart(str, startIndex, endIndex, nullptr);
+        return std::string(str, startIndex, endIndex - startIndex);
+    }
+
+    const std::string StringUtils::TrimEnd(const std::string& str)
+    {
+        size_t startIndex = 0, endIndex = str.length();
+        TrimDetermineEnd(str, startIndex, endIndex, nullptr);
+        return std::string(str, startIndex, endIndex - startIndex);
     }
 
 } // PAL

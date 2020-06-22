@@ -249,11 +249,11 @@ def test_canceled_result(speech_input):
 
     cancellation_details = result.cancellation_details
     assert msspeech.CancellationReason.Error == cancellation_details.reason
-    assert 'Runtime error: Failed to create transport request.' in cancellation_details.error_details
+    assert 'Url protocol prefix not recognized' in cancellation_details.error_details
 
     assert "ResultReason.Canceled" == str(result.reason)
     assert 'reason=CancellationReason.Error, error_details="Runtime error: ' \
-            'Failed to create transport request.' in str(result.cancellation_details)
+            'Url protocol prefix not recognized' in str(result.cancellation_details)
 
 
 @pytest.mark.parametrize('speech_input,', ['weather'], indirect=True)
@@ -271,7 +271,7 @@ def test_bad_language_config(subscription, speech_input, speech_region):
 
     cancellation_details = result.cancellation_details
     assert msspeech.CancellationReason.Error == cancellation_details.reason
-    assert 'WebSocket Upgrade failed with HTTP status code: 505' in cancellation_details.error_details
+    assert 'WebSocket Upgrade failed with a bad request (400)' in cancellation_details.error_details
 
 
 @pytest.mark.parametrize('speech_input,', ['silence'], indirect=True)
