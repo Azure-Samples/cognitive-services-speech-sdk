@@ -35,7 +35,7 @@ target_link_libraries(${PROJECT_NAME} usp audio factory common)
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "WindowsStore")
 if (${use_openssl})
-        set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "/ignore:4099")
+        set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "/ignore:4099 /INCREMENTAL:NO")
 endif()
 endif()
 

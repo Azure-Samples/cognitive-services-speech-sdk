@@ -136,7 +136,7 @@ jobs:
       softwareVersionNum: 1.0
       isLargeApp: false
     enabled: false
-  - task: securedevelopmentteam.vss-secure-development-tools.build-task-credscan.CredScan@2
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-credscan.CredScan@3
     displayName: 'CredScan (source-scan, dir: all)'
     inputs:
       suppressionsFile: 'ci/sdl/LocalSuppression.json'
@@ -1776,7 +1776,7 @@ jobs:
       HEREDOC
       cp ./tests/test.subscriptions.regions.json ./
       cp -rf ./tests/input .
-    displayName: Write Subscriptions Regions Data  
+    displayName: Write Subscriptions Regions Data
   - bash: |
       cp ./ci/jsonsettings.py .
       . ci/functions.sh &&
@@ -2092,7 +2092,7 @@ jobs:
       HEREDOC
       cp ./tests/test.subscriptions.regions.json ./
       cp -rf ./tests/input .
-    displayName: Write Subscriptions Regions Data  
+    displayName: Write Subscriptions Regions Data
   - bash: |
       set -u -e -o pipefail -x
       mkdir -p "$(OutputDirectory)/logs"

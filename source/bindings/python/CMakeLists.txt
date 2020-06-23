@@ -126,7 +126,7 @@ endif()
 if(MSVC)
    set_target_properties(${SWIG_MODULE_${PROJECT_NAME}_REAL_NAME} PROPERTIES
      COMPILE_FLAGS "/bigobj /wd4101"
-     LINK_FLAGS "/DEBUG /OPT:REF /OPT:ICF")
+     LINK_FLAGS "/DEBUG /OPT:REF /INCREMENTAL:NO /OPT:ICF")
 endif()
 
 # copy the python source files to the staging area for the Python wheel

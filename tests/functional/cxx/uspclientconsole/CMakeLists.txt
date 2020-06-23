@@ -18,7 +18,7 @@ target_link_libraries(${PROJECT_NAME} audio sr usp ${SPEECHSDK_CORE_LIBRARY})
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "WindowsStore")
 if (${use_openssl})
-        set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "/ignore:4099")
+        set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "/ignore:4099 /INCREMENTAL:NO")
 endif()
 endif()
 

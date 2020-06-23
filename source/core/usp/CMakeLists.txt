@@ -28,7 +28,6 @@ set(SOURCES
     "${SRC_DIR}/usp_metrics.cpp"
     "${SRC_DIR}/usp.cpp"
     "${SRC_DIR}/uspimpl.cpp"
-    "${SRC_DIR}/stdafx.cpp"
     "${SRC_DIR}/usp_web_socket.cpp"
     )
 

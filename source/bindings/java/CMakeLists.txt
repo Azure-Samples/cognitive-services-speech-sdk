@@ -18,7 +18,7 @@ set(JAVA_SOURCES
     ${PACKAGE_DIR}/KeywordRecognitionModel.java
     ${PACKAGE_DIR}/PropertyCollection.java
     ${PACKAGE_DIR}/RecognitionEventArgs.java
-    ${PACKAGE_DIR}/RecognitionResult.java    
+    ${PACKAGE_DIR}/RecognitionResult.java
     ${PACKAGE_DIR}/ResultReason.java
     ${PACKAGE_DIR}/CancellationReason.java
     ${PACKAGE_DIR}/CancellationErrorCode.java
@@ -105,7 +105,7 @@ set(JAVA_SOURCES
     ${PACKAGE_DIR}/translation/TranslationRecognitionCanceledEventArgs.java
     ${PACKAGE_DIR}/translation/SpeechTranslationConfig.java
     ${PACKAGE_DIR}/PropertyId.java
-    
+
     ${PACKAGE_DIR}/util/EventHandler.java
     ${PACKAGE_DIR}/util/EventHandlerImpl.java
     ${PACKAGE_DIR}/util/Contracts.java
