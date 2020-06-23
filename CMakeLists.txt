@@ -242,6 +242,10 @@ if(MSVC)
 
   # enable multiprocessor optimizations
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
+  
+  # enable Just My Code debugging to avoid stepping into external code while while debugging
+  # (e.g. std::shared_ptr or std::string). https://docs.microsoft.com/cpp/build/reference/jmc
+  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /JMC")
 
   # The code below are changes for the version that is included in the Windows OS. In the OS we don't want to dynamically depend on
   # vcruntime*.dll so we create a version of the library that is statically linked agains the UCRT.
