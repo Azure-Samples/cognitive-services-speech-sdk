@@ -92,19 +92,37 @@ std::function<void(const EventSignal<const T&>&)> Callback(U* callee, F f)
     };
 }
 
+/// <summary>
+/// Helper class implementing the scope guard idiom.
+/// (The given function will be executed on destruction)
+/// </summary>
+template<typename F>
 class ScopeGuard
 {
 public:
-    explicit ScopeGuard(std::function<void()> f): fn{ f }
+    ScopeGuard(ScopeGuard&&) = default;
+    ScopeGuard(const ScopeGuard&) = delete;
+
+    explicit ScopeGuard(F f): m_fn{ f }
     {}
+
     ~ScopeGuard()
     {
-        fn();
+        m_fn();
     }
 
 private:
-    std::function<void()> fn;
+    F m_fn;
 };
+
+/// <summary>
+/// Creates a scope guard with the given function.
+/// </summary>
+template<typename F>
+ScopeGuard<F> MakeScopeGuard(F fn)
+{
+    return ScopeGuard<F>{ fn };
+}
 
 /// <summary>
 /// Function that converts a handle to its underlying type.

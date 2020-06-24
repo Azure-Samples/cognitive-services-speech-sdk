@@ -57,6 +57,7 @@ set(HEADERS
     "${INC_DIR}/i_web_socket.h"
     "${INC_DIR}/i_telemetry.h"
     "${INC_DIR}/no_op_telemetry.h"
+    "${INC_DIR}/function_helpers.h"
     )
 
 set(HEADERS_PRIVATE

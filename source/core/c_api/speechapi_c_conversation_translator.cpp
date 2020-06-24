@@ -257,7 +257,7 @@ static inline SPXHR TryRetrieveStringValue(THandle handle, char * psz, uint32_t 
         {
             *psz = '\0';
         }
-        
+
         return SPX_NOERROR;
     }
 }

@@ -63,10 +63,10 @@ inline SPXHR async_to_sync(SPXHANDLE handle, OperationFn operationFn, WaitFn wai
 {
     SPX_INIT_HR(hr);
     SPXHANDLE async_handle = SPXHANDLE_INVALID;
-    Utils::ScopeGuard guard{ [&]()
+    auto guard = Utils::MakeScopeGuard([&]()
     {
         SPX_REPORT_ON_FAIL(recognizer_async_handle_release(async_handle));
-    } };
+    });
     hr = operationFn(handle, std::forward<Args&&>(args)..., &async_handle);
     SPX_RETURN_ON_FAIL(hr);
     hr = waitFn(async_handle, UINT32_MAX);
@@ -75,19 +75,30 @@ inline SPXHR async_to_sync(SPXHANDLE handle, OperationFn operationFn, WaitFn wai
 }
 
 template<typename OperationFn, typename WaitFn, typename... Args>
-inline SPXHR async_to_sync_with_result(SPXHANDLE handle, SPXHANDLE* resultHandle, OperationFn operationFn, WaitFn waitFn, Args&&... args)
+SPXHR async_to_sync_with_result(SPXHANDLE handle, SPXHANDLE* resultHandle, OperationFn operationFn, WaitFn waitFn, Args&&... args)
 {
     SPX_INIT_HR(hr);
     SPXHANDLE async_handle = SPXHANDLE_INVALID;
-    Utils::ScopeGuard guard{ [&]()
+    auto guard = Utils::MakeScopeGuard([&]()
     {
         SPX_REPORT_ON_FAIL(recognizer_async_handle_release(async_handle));
-    } };
+    });
     hr = operationFn(handle, std::forward<Args&&>(args)..., &async_handle);
     SPX_RETURN_ON_FAIL(hr);
     hr = waitFn(async_handle, UINT32_MAX, resultHandle);
     SPX_RETURN_ON_FAIL(hr);
     SPX_RETURN_HR(hr);
+}
+
+
+template<typename I, typename F, typename... Args>
+void launch_async_op(I& obj, F I::* member, SPXASYNCHANDLE *asyncHandle, Args&&... args)
+{
+    *asyncHandle = SPXHANDLE_INVALID;
+    using async_type = decltype((std::declval<I>().*member)(std::declval<Args>()...));
+    auto asyncOp = std::make_shared<async_type>((obj.*member)(std::forward<Args>(args)...));
+    auto asyncTable = CSpxSharedPtrHandleTableManager::Get<async_type, SPXASYNCHANDLE>();
+    *asyncHandle = asyncTable->TrackHandle(asyncOp);
 }
 
 } } } }

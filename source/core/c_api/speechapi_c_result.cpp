@@ -8,6 +8,7 @@
 #include "stdafx.h"
 #include "string_utils.h"
 #include "handle_table.h"
+#include "handle_helpers.h"
 
 #include "ispxinterfaces.h" // for SpxQueryInterface
 
@@ -53,8 +54,7 @@ SPXAPI result_get_result_id(SPXRESULTHANDLE hresult, char* pszResultId, uint32_t
 
     SPXAPI_INIT_HR_TRY(hr)
     {
-        auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
-        auto result = (*resulthandles)[hresult];
+        auto result = GetInstance<ISpxRecognitionResult>(hresult);
 
         auto strActual = PAL::ToString(result->GetResultId());
         auto pszActual = strActual.c_str();
@@ -68,9 +68,8 @@ SPXAPI result_get_reason(SPXRESULTHANDLE hresult, Result_Reason* reason)
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, reason == nullptr);
     SPXAPI_INIT_HR_TRY(hr)
     {
-        auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
-        auto result = (*resulthandles)[hresult];
-        *reason = (Result_Reason)result->GetReason();
+        auto result = GetInstance<ISpxRecognitionResult>(hresult);
+        *reason = static_cast<Result_Reason>(result->GetReason());
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
@@ -80,9 +79,8 @@ SPXAPI result_get_reason_canceled(SPXRESULTHANDLE hresult, Result_CancellationRe
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, reason == nullptr);
     SPXAPI_INIT_HR_TRY(hr)
     {
-        auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
-        auto result = (*resulthandles)[hresult];
-        *reason = (Result_CancellationReason)result->GetCancellationReason();
+        auto result = GetInstance<ISpxRecognitionResult>(hresult);
+        *reason = static_cast<Result_CancellationReason>(result->GetCancellationReason());
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
@@ -92,9 +90,8 @@ SPXAPI result_get_canceled_error_code(SPXRESULTHANDLE hresult, Result_Cancellati
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, errorCode == nullptr);
     SPXAPI_INIT_HR_TRY(hr)
     {
-        auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
-        auto result = (*resulthandles)[hresult];
-        *errorCode = (Result_CancellationErrorCode)result->GetCancellationErrorCode();
+        auto result = GetInstance<ISpxRecognitionResult>(hresult);
+        *errorCode = static_cast<Result_CancellationErrorCode>(result->GetCancellationErrorCode());
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
@@ -104,9 +101,8 @@ SPXAPI result_get_no_match_reason(SPXRESULTHANDLE hresult, Result_NoMatchReason*
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, reason == nullptr);
     SPXAPI_INIT_HR_TRY(hr)
     {
-        auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
-        auto result = (*resulthandles)[hresult];
-        *reason = (Result_NoMatchReason)result->GetNoMatchReason();
+        auto result = GetInstance<ISpxRecognitionResult>(hresult);
+        *reason = static_cast<Result_NoMatchReason>(result->GetNoMatchReason());
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
@@ -118,8 +114,7 @@ SPXAPI result_get_text(SPXRESULTHANDLE hresult, char* pszText, uint32_t cchText)
 
     SPXAPI_INIT_HR_TRY(hr)
     {
-        auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
-        auto result = (*resulthandles)[hresult];
+        auto result = GetInstance<ISpxRecognitionResult>(hresult);
 
         auto strActual = PAL::ToString(result->GetText());
         auto pszActual = strActual.c_str();
@@ -133,8 +128,7 @@ SPXAPI result_get_offset(SPXRESULTHANDLE hresult, uint64_t* offset)
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, offset == nullptr);
     SPXAPI_INIT_HR_TRY(hr)
     {
-        auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
-        auto result = (*resulthandles)[hresult];
+        auto result = GetInstance<ISpxRecognitionResult>(hresult);
         *offset = result->GetOffset();
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
@@ -145,8 +139,7 @@ SPXAPI result_get_duration(SPXRESULTHANDLE hresult, uint64_t* duration)
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, duration == nullptr);
     SPXAPI_INIT_HR_TRY(hr)
     {
-        auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
-        auto result = (*resulthandles)[hresult];
+        auto result = GetInstance<ISpxRecognitionResult>(hresult);
         *duration = result->GetDuration();
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
@@ -157,8 +150,7 @@ SPXAPI result_get_property_bag(SPXRESULTHANDLE hresult, SPXPROPERTYBAGHANDLE* hp
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, hpropbag == nullptr);
     SPXAPI_INIT_HR_TRY(hr)
     {
-        auto resultshandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
-        auto result = (*resultshandles)[hresult];
+        auto result = GetInstance<ISpxRecognitionResult>(hresult);
         auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
 
         auto baghandle = CSpxSharedPtrHandleTableManager::Get<ISpxNamedProperties, SPXPROPERTYBAGHANDLE>();
@@ -172,8 +164,7 @@ SPXAPI synth_result_get_result_id(SPXRESULTHANDLE hresult, char* resultId, uint3
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, resultId == 0);
     SPXAPI_INIT_HR_TRY(hr)
     {
-        auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxSynthesisResult, SPXRESULTHANDLE>();
-        auto result = (*resulthandles)[hresult];
+        auto result = GetInstance<ISpxSynthesisResult>(hresult);
 
         auto resultIdStr = PAL::ToString(result->GetResultId());
         PAL::strcpy(resultId, resultIdLength, resultIdStr.c_str(), resultIdStr.size(), true);
@@ -186,9 +177,8 @@ SPXAPI synth_result_get_reason(SPXRESULTHANDLE hresult, Result_Reason* reason)
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, reason == nullptr);
     SPXAPI_INIT_HR_TRY(hr)
     {
-        auto resultshandles = CSpxSharedPtrHandleTableManager::Get<ISpxSynthesisResult, SPXRESULTHANDLE>();
-        auto result = (*resultshandles)[hresult];
-        *reason = (Result_Reason)result->GetReason();
+        auto result = GetInstance<ISpxSynthesisResult>(hresult);
+        *reason = static_cast<Result_Reason>(result->GetReason());
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
@@ -198,9 +188,8 @@ SPXAPI synth_result_get_reason_canceled(SPXRESULTHANDLE hresult, Result_Cancella
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, reason == nullptr);
     SPXAPI_INIT_HR_TRY(hr)
     {
-        auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxSynthesisResult, SPXRESULTHANDLE>();
-        auto result = (*resulthandles)[hresult];
-        *reason = (Result_CancellationReason)result->GetCancellationReason();
+        auto result = GetInstance<ISpxSynthesisResult>(hresult);
+        *reason = static_cast<Result_CancellationReason>(result->GetCancellationReason());
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
@@ -210,9 +199,8 @@ SPXAPI synth_result_get_canceled_error_code(SPXRESULTHANDLE hresult, Result_Canc
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, errorCode == nullptr);
     SPXAPI_INIT_HR_TRY(hr)
     {
-        auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxSynthesisResult, SPXRESULTHANDLE>();
-        auto result = (*resulthandles)[hresult];
-        *errorCode = (Result_CancellationErrorCode)result->GetCancellationErrorCode();
+        auto result = GetInstance<ISpxSynthesisResult>(hresult);
+        *errorCode = static_cast<Result_CancellationErrorCode>(result->GetCancellationErrorCode());
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
@@ -222,8 +210,7 @@ SPXAPI synth_result_get_audio_length(SPXRESULTHANDLE hresult, uint32_t* length)
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, length == nullptr);
     SPXAPI_INIT_HR_TRY(hr)
     {
-        auto resultshandles = CSpxSharedPtrHandleTableManager::Get<ISpxSynthesisResult, SPXRESULTHANDLE>();
-        auto result = (*resultshandles)[hresult];
+        auto result = GetInstance<ISpxSynthesisResult>(hresult);
         *length = result->GetAudioLength();
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
@@ -235,11 +222,10 @@ SPXAPI synth_result_get_audio_data(SPXRESULTHANDLE hresult, uint8_t* buffer, uin
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, filledSize == nullptr);
     SPXAPI_INIT_HR_TRY(hr)
     {
-        auto resultshandles = CSpxSharedPtrHandleTableManager::Get<ISpxSynthesisResult, SPXRESULTHANDLE>();
-        auto result = (*resultshandles)[hresult];
+        auto result = GetInstance<ISpxSynthesisResult>(hresult);
         auto audiodata = result->GetAudioData();
 
-        uint32_t audioSize = (uint32_t)(audiodata->size());
+        uint32_t audioSize = static_cast<uint32_t>(audiodata->size());
         *filledSize = audioSize < bufferSize ? audioSize : bufferSize;
         memcpy(buffer, audiodata->data(), *filledSize);
     }
@@ -251,8 +237,7 @@ SPXAPI synth_result_get_audio_format(SPXRESULTHANDLE hresult, SPXAUDIOSTREAMFORM
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, hformat == nullptr);
     SPXAPI_INIT_HR_TRY(hr)
     {
-        auto resultshandles = CSpxSharedPtrHandleTableManager::Get<ISpxSynthesisResult, SPXRESULTHANDLE>();
-        auto result = (*resultshandles)[hresult];
+        auto result = GetInstance<ISpxSynthesisResult>(hresult);
 
         auto formatSize = result->GetFormat(nullptr, 0);
         auto format = SpxAllocWAVEFORMATEX(formatSize);
@@ -268,8 +253,7 @@ SPXAPI synth_result_get_property_bag(SPXRESULTHANDLE hresult, SPXPROPERTYBAGHAND
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, hpropbag == nullptr);
     SPXAPI_INIT_HR_TRY(hr)
     {
-        auto resultshandles = CSpxSharedPtrHandleTableManager::Get<ISpxSynthesisResult, SPXRESULTHANDLE>();
-        auto result = (*resultshandles)[hresult];
+        auto result = GetInstance<ISpxSynthesisResult>(hresult);
         auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
 
         auto baghandle = CSpxSharedPtrHandleTableManager::Get<ISpxNamedProperties, SPXPROPERTYBAGHANDLE>();

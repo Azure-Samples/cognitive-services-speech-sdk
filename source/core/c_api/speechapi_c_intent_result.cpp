@@ -8,6 +8,7 @@
 #include "stdafx.h"
 #include "string_utils.h"
 #include "handle_table.h"
+#include "handle_helpers.h"
 
 using namespace Microsoft::CognitiveServices::Speech::Impl;
 
@@ -18,8 +19,7 @@ SPXAPI intent_result_get_intent_id(SPXRESULTHANDLE hresult, char* pszIntentId, u
 
     SPXAPI_INIT_HR_TRY(hr)
     {
-        auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
-        auto result = (*resulthandles)[hresult];
+        auto result = GetInstance<ISpxRecognitionResult>(hresult);
 
         auto intentResult = SpxQueryInterface<ISpxIntentRecognitionResult>(result);
 

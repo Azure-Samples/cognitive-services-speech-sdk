@@ -61,8 +61,12 @@ std::shared_ptr<TInterface> TryGetInstance(THandle handle)
     {
         return nullptr;
     }
-
     auto handles = CSpxSharedPtrHandleTableManager::Get<TInterface, THandle>();
+    if (!handles->IsTracked(handle))
+    {
+        return nullptr;
+    }
+    /* Since this will throw if handle is not tracked, we need to check that beforehand */
     return (*handles)[handle];
 }
 

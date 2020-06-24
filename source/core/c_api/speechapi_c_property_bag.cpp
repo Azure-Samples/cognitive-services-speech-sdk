@@ -12,6 +12,7 @@
 #include "mock_controller.h"
 #include "property_id_2_name_map.h"
 #include "ispxinterfaces.h"
+#include "handle_helpers.h"
 
 using namespace Microsoft::CognitiveServices::Speech::Impl;
 
@@ -24,10 +25,7 @@ std::shared_ptr<ISpxNamedProperties> property_bag_from_handle(SPXPROPERTYBAGHAND
     }
     else
     {
-        auto propbaghandles = CSpxSharedPtrHandleTableManager::Get<ISpxNamedProperties, SPXPROPERTYBAGHANDLE>();
-        auto propbag = (*propbaghandles)[hpropbag];
-
-        namedProperties = SpxQueryInterface<ISpxNamedProperties>(propbag);
+        namedProperties = GetInstance<ISpxNamedProperties>(hpropbag);
     }
     return namedProperties;
 }
