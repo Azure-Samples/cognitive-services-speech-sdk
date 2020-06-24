@@ -461,9 +461,6 @@ TEST_CASE("Dialog Service Connector basics", "[api][cxx][dialog_service_connecto
 
     }
 
-#if 0
-/* Disabling as the bot does not seem to be responding (these are the only tests not using autoreply) */
-/* https://msasg.visualstudio.com/DefaultCollection/Skyman/_workitems/edit/2424596/ */
     SECTION("Listen Once, no bot ID provided")
     {
         REQUIRE(exists(ROOT_RELATIVE_PATH(INTENT_UTTERANCE)));
@@ -545,7 +542,6 @@ TEST_CASE("Dialog Service Connector basics", "[api][cxx][dialog_service_connecto
         INFO(message);
         //REQUIRE(success);
     }
-#endif
 }
 
 TEST_CASE("Dialog Service Connector extended", "[api][cxx][dialog_service_connector][adv][!hide]")
