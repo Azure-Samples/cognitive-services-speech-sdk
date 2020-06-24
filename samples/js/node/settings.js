@@ -13,7 +13,7 @@
     language:          "en-US",
   
     // Replace with the full path to a wav file you want to recognize or overwrite.
-    filename:          "C:/t/wavs/normalized/stank.wav", // 16000 Hz, Mono
+    filename:          "YourAudioFile.wav", // 16000 Hz, Mono
   
     // Replace with your own Language Understanding subscription key (endpoint
     // key), region, and app ID in case you want to run the intent sample.
