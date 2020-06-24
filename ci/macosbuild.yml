@@ -127,15 +127,19 @@ jobs:
   - bash: |
       set -u -x -e -o pipefail
       dylibname="build/lib/libMicrosoft.CognitiveServices.Speech.core.dylib"
+      convdylibname="build/lib/libMicrosoft.CognitiveServices.Speech.extension.conversation.dylib"
       jnilibname="build/bin/libMicrosoft.CognitiveServices.Speech.java.bindings.dylib"
       [[ -f ${dylibname} ]]
+      [[ -f ${convdylibname} ]]
       [[ -f ${jnilibname} ]]
       cp "${dylibname}" "${dylibname%%dylib}"unstripped.dylib
+      cp "${convdylibname}" "${convdylibname%%dylib}"unstripped.dylib
       cp "${jnilibname}" "${jnilibname%%dylib}"unstripped.dylib
       strip -x "${dylibname}"
+      strip -x "${convdylibname}"
       strip -x "${jnilibname}"
       if [[ $SPEECHSDK_SIGN == true ]]; then
-        mkdir tosign && zip tosign/libs.zip "${dylibname}" "${jnilibname}"
+        mkdir tosign && zip tosign/libs.zip "${dylibname}" "${convdylibname}" "${jnilibname}"
       fi
     displayName: "Strip dylib and create archive for signing dylib if necessary"
   - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1

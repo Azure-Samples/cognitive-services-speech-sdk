@@ -38,7 +38,7 @@ add_executable(${PROJECT_NAME} ${SOURCES} ${TEST_HEADERS})
 # unit tests against modules other than common: they still need to be linked with factory since SpxGetCoreRootSite is defined in factory.
 add_compile_definitions(USE_NON_CORE_ROOT_SITE)
 
-target_link_libraries(${PROJECT_NAME} sr conversation_translation factory common audio usp ${TEST_LIBS})
+target_link_libraries(${PROJECT_NAME} sr factory common audio usp ${TEST_LIBS})
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "WindowsStore")
 if (${use_openssl})

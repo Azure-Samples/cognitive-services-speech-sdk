@@ -15,7 +15,6 @@
 
 DEFINE_ENUM_STRINGS(WS_OPEN_RESULT, WS_OPEN_RESULT_VALUES)
 DEFINE_ENUM_STRINGS(WS_ERROR, WS_ERROR_VALUES)
-
 // uncomment the line below to see all non-binary protocol messages in the log
 // #define LOG_TEXT_MESSAGES
 
@@ -664,6 +663,11 @@ namespace USP {
 
     void WebSocket::DoWork()
     {
+        // We first want to read the packets we received from the service. In case of turn.end we make sure
+        // we enqueue the telemetry packets inside the request->queue and by the end of this function we will
+        // be sure that the packets has reached the azure_c_lib.
+        uws_client_dowork(m_WSHandle);
+
         switch (GetState())
         {
             case WebSocketState::CLOSED:
@@ -737,8 +741,6 @@ namespace USP {
 
                 break;
         }
-
-        uws_client_dowork(m_WSHandle);
     }
 
     void WebSocket::OnWebSocketOpened(WS_OPEN_RESULT_DETAILED open_result_detailed)

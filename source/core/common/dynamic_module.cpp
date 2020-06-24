@@ -71,7 +71,13 @@ CSpxDynamicModule::SPX_MODULE_FUNC CSpxDynamicModule::GetModuleFunctionPointer(
     }
 #else
 
-    void* handle = dlopen(filename.c_str(), RTLD_LOCAL | RTLD_LAZY);
+#if defined(__linux__) && !defined(ANDROID) && !defined(__ANDROID__) && !defined(__APPLE__)
+    auto dlopen_flags = RTLD_LOCAL | RTLD_LAZY | RTLD_DEEPBIND;
+#else
+    auto dlopen_flags = RTLD_LOCAL | RTLD_LAZY;
+#endif
+
+    void* handle = dlopen(filename.c_str(), dlopen_flags);
     SPX_TRACE_VERBOSE_IF(handle != NULL, "dlopen('%s') returned non-NULL", filename.c_str());
     SPX_TRACE_VERBOSE_IF(handle == NULL, "dlopen('%s') returned NULL: %s", filename.c_str(), dlerror());
 

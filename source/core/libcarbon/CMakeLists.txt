@@ -81,7 +81,6 @@ target_link_libraries(${PROJECT_NAME}
     PRIVATE logging
     PRIVATE factory
     PRIVATE speaker_recognition
-    PRIVATE conversation_translation
     PRIVATE usp
   )
 

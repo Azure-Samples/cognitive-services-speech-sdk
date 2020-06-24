@@ -14,7 +14,7 @@ namespace CognitiveServices {
 namespace Speech {
 namespace Impl {
 
-class CSpxDynamicModule // : public ISpxModule
+class CSpxDynamicModule : public std::enable_shared_from_this<CSpxDynamicModule>
 {
 private:
 

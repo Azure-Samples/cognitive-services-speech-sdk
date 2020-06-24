@@ -88,10 +88,11 @@ void CSpxConversation::Init()
     else
     {
         m_impl = SpxCreateObjectWithSite<ISpxConversation>("CSpxConversationImpl", genericSite);
-        SPX_DBG_TRACE_INFO("Created a CSpxParticipantMgrImpl for the conversation translator service.");
+        SPX_IFTRUE_THROW_HR(m_impl == nullptr, SPXERR_EXTENSION_LIBRARY_NOT_FOUND);
+        SPX_DBG_TRACE_INFO("Created a CSpxConversationImpl for the conversation translator service.");
     }
 
-    SPX_DBG_ASSERT(m_impl != nullptr);
+    SPX_IFTRUE_THROW_HR(m_impl == nullptr, SPXERR_UNEXPECTED_CONVERSATION_SITE_FAILURE);
     SetRecoMode();
 }
 

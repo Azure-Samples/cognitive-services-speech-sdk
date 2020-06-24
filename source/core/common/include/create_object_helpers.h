@@ -39,6 +39,7 @@ std::shared_ptr<I> SpxCreateObjectWithSite(const char* className, std::shared_pt
         return nullptr;
     }
     auto ptr = factory->CreateObject<I>(className);
+    SPX_TRACE_WARNING_IF(ptr == nullptr, "%s: Failed to create instance of '%s'", __FUNCTION__, className);
 
     // set its site if appropriate
     auto objectWithSite = SpxQueryInterface<ISpxObjectWithSite>(ptr);

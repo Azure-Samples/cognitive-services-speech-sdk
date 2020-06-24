@@ -103,7 +103,7 @@ TEST_CASE("conversation transcriber leave conversation", "[api][cxx]")
     });
 
     transcriber->SessionStarted.DisconnectAll();
-    transcriber->SessionStarted.Connect([&ready, &sessionStartedReceived](const SessionEventArgs& e)
+    transcriber->SessionStarted.Connect([&sessionStartedReceived](const SessionEventArgs& e)
     {
         UNUSED(e);
         sessionStartedReceived = true;
@@ -628,7 +628,7 @@ TEST_CASE("conversation_online_pull_stream_internal_error", "[api][cxx][transcri
     });
 
     transcriber->SessionStarted.DisconnectAll();
-    transcriber->SessionStarted.Connect([&ready, &sessionStartedReceived](const SessionEventArgs& e)
+    transcriber->SessionStarted.Connect([&sessionStartedReceived](const SessionEventArgs& e)
     {
         UNUSED(e);
         sessionStartedReceived = true;

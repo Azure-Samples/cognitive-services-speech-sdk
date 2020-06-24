@@ -27,7 +27,7 @@ namespace ConversationTranslation {
         constexpr auto RequestIdHeader = "X-RequestId";
         constexpr auto ClientAppIdHeader = "X-ClientAppId";
         constexpr auto ClientAppId = "F8E43FCD-AB42-4215-9D16-8C5FA34E780D";
-        constexpr uint32_t MaxWaitTimeMs = 500;
+        constexpr auto MaxHttpRequestWaitTime = 60s;
     }
 
     namespace ConversationKeys
@@ -76,7 +76,7 @@ namespace ConversationTranslation {
         {
         }
 
-        ~ThreadingHelpers()
+        virtual ~ThreadingHelpers()
         {
             SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
             SpxTermAndClear(m_keepSessionAlive);

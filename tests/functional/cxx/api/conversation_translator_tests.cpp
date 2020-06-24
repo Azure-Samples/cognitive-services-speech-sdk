@@ -17,7 +17,7 @@
 
 #define CT_INTEGRATION_TEST_INIT \
     UseMocks(false); \
-    LogToFileAndDumpAtEnd("ct_integration_test_log.txt")
+    LogToFileAndDumpAtEnd("integration_test_log.txt")
 
 using namespace std;
 using namespace Microsoft::CognitiveServices::Speech::Impl;
@@ -785,7 +785,7 @@ TEST_CASE("[CT] Conversation Translator Participant Rejoin After Delete", "[api]
     TestConversationParticipant alice("Alice", "zh-CN", host);
     alice.Join(aliceAudioConfig);
 
-    std::this_thread::sleep_for(200ms);
+    std::this_thread::sleep_for(400ms);
 
     // Alice disconnects. This prevents the conversation translator from detecting the conversation
     // has been deleted since we no longer have an active web socket connection
@@ -803,7 +803,7 @@ TEST_CASE("[CT] Conversation Translator Participant Rejoin After Delete", "[api]
         std::runtime_error,
         Catch::MessageContains("BadRequest") && Catch::MessageContains("WebSocket Upgrade failed"));
 
-    std::this_thread::sleep_for(200ms);
+    std::this_thread::sleep_for(400ms);
 
     // Make sure we got the correct cancelled event
     SPXTEST_REQUIRE(alice.Events->Canceled.size() > 0);

@@ -325,7 +325,7 @@ inline uint16_t SpxCopyWAVEFORMATEX(SpxWAVEFORMATEX_Type source, SPXWAVEFORMATEX
     auto sourceSize = uint16_t(sizeof(SPXWAVEFORMATEX) + source->cbSize);
     if (dest != nullptr)
     {
-        auto copySize = std::min(destSize, sourceSize);
+        auto copySize = std::min<uint16_t>(destSize, sourceSize);
         memcpy(dest, source.get(), copySize);
         return copySize;
     }

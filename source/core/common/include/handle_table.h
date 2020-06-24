@@ -15,7 +15,6 @@
 #include <platform.h>
 #include <spxdebug.h>
 #include <mutex>
-#include "debug_utils.h"
 
 #ifdef _MSC_VER
 #include <shared_mutex>

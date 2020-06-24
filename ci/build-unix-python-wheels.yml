@@ -56,8 +56,10 @@ steps:
     declare -A dylibExtByPlatform=([Linux-x64]="so" [OSX-x64]="dylib")
     coreLib=repack/azure/cognitiveservices/speech/libMicrosoft.CognitiveServices.Speech.core.${dylibExtByPlatform[$(SPEECHSDK_TARGET_PLATFORM)]}
     coreHash=($(md5sum ${coreLib//repack/build}))
+    conversationLib=repack/azure/cognitiveservices/speech/libMicrosoft.CognitiveServices.Speech.extension.conversation.${dylibExtByPlatform[$(SPEECHSDK_TARGET_PLATFORM)]}
+    conversationHash=($(md5sum ${conversationLib//repack/build}))
     pythonExtension=repack/azure/cognitiveservices/speech/_speech_py_impl.so # extension is .so on Linux and OSX
-    libs=($coreLib $pythonExtension)
+    libs=($coreLib $conversationLib $pythonExtension)
     if [[ $(SPEECHSDK_ENABLE_KWS) == true ]]; then
       kwsLib=repack/azure/cognitiveservices/speech/libMicrosoft.CognitiveServices.Speech.extension.kws.${dylibExtByPlatform[$(SPEECHSDK_TARGET_PLATFORM)]}
       libs+=($kwsLib)
@@ -76,6 +78,7 @@ steps:
         unzip -d repack "${wheel}"
         # check that the core & kws lib are identical in all wheels
         [[ $(md5sum "$coreLib") == ${coreHash[0]}* ]] || exitWithError "core lib changed between Python builds"
+        [[ $(md5sum "$conversationLib") == ${conversationHash[0]}* ]] || exitWithError "conversation lib changed between Python builds"
         if [[ $(SPEECHSDK_ENABLE_KWS) == true ]]; then
           [[ $(md5sum "$kwsLib") == ${kwsHash[0]}* ]] || exitWithError "kws lib changed between Python builds"
         fi

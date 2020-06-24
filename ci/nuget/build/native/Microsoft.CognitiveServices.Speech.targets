@@ -20,9 +20,11 @@
       <Implementation>Microsoft.CognitiveServices.Speech.core.uwp.dll</Implementation>
     </Reference>
     <ReferenceCopyLocalPaths Include="$(SpeechNativeDllDir)\Microsoft.CognitiveServices.Speech.core.dll" />
+    <ReferenceCopyLocalPaths Include="$(SpeechNativeDllDir)\Microsoft.CognitiveServices.Speech.extension.conversation.dll" />
   </ItemGroup>
   <Target Name="SpeechRedistAfterBuild" AfterTargets="AfterBuild" >
     <Copy SourceFiles="$(SpeechNativeDllDir)\Microsoft.CognitiveServices.Speech.core.dll" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="$(SpeechNativeDllDir)\Microsoft.CognitiveServices.Speech.extension.conversation.dll" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" />
     <Copy SourceFiles="$(SpeechNativeDllDir)\Microsoft.CognitiveServices.Speech.extension.kws.dll" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" />
     <Copy Condition="'$(TargetPlatformIdentifier)' != 'UAP'" SourceFiles="$(SpeechNativeDllDir)\Microsoft.CognitiveServices.Speech.extension.codec.dll" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" />
   </Target>

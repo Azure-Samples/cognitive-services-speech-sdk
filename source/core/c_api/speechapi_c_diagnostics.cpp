@@ -10,6 +10,7 @@
 #include "trace_message.h"
 
 using namespace Microsoft::CognitiveServices::Speech::Impl;
+std::shared_ptr<ISpxNamedProperties> property_bag_from_handle(SPXPROPERTYBAGHANDLE hpropbag);
 
 /// <summary>
 /// Defined in speechapi_c_property_bag.cpp
@@ -77,13 +78,23 @@ SPXAPI diagnostics_log_stop_logging()
 
 SPXAPI_(void) diagnostics_log_trace_message(int level, const char* pszTitle, const char* fileName, const int lineNumber, const char* pszFormat, ...)
 {
-    UNUSED(level);
     try
     {
         va_list argptr;
         va_start(argptr, pszFormat);
         SpxTraceMessage2(level, pszTitle, fileName, lineNumber, pszFormat, argptr);
         va_end(argptr);
+    }
+    catch(...)
+    {
+    }
+}
+
+SPXAPI_(void) diagnostics_log_trace_message2(int level, const char* pszTitle, const char* fileName, const int lineNumber, const char* pszFormat, va_list argptr)
+{
+    try
+    {
+        SpxTraceMessage2(level, pszTitle, fileName, lineNumber, pszFormat, argptr);
     }
     catch(...)
     {

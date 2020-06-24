@@ -75,7 +75,7 @@ namespace ConversationTranslation {
 
     private:
         void EndConversationInternal();
-        void DeleteConversationInternal();
+        void DeleteConversationInternal(bool waitForDeletion);
 
         template<class... TArgs>
         inline void SendSynchronously(void (ConversationConnection::* func)(TArgs...), TArgs&&... args)

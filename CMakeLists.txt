@@ -129,6 +129,7 @@ elseif(SPEECHSDK_OS STREQUAL "OSX")
   set(use_openssl OFF CACHE BOOL "")
   set(MACOSX ON)
   set(DISABLE_KWS_TESTS ON)
+  add_compile_definitions("UNDER_OSX_ONLY")
 elseif(SPEECHSDK_OS STREQUAL "Android")
   option(BUILD_PYTHON "Build Python SWIG module" OFF)
   option(BUILD_CSHARP "Build C# module" OFF)
@@ -382,6 +383,17 @@ endif()
 
 set(JAVA_JNI_LIBRARY Microsoft.CognitiveServices.Speech.java.bindings)
 
+if(CMAKE_SYSTEM_NAME STREQUAL "WindowsStore")
+  set(SPEECHSDK_CONVERSATION_LIBRARY "Microsoft.CognitiveServices.Speech.extension.conversation")
+elseif(APPLE)
+  set(SPEECHSDK_CONVERSATION_LIBRARY "Microsoft.CognitiveServices.Speech.extension.conversation")
+  set(SPEECHSDK_CORE_FRAMEWORK "MicrosoftCognitiveServicesSpeech")
+elseif((CMAKE_SYSTEM_NAME STREQUAL "Windows") AND (SPEECHSDK_CRT STREQUAL "OS_UCRT"))
+  set(SPEECHSDK_CONVERSATION_LIBRARY "Microsoft.CognitiveServices.Speech.extension.conversation.os")
+else()
+  set(SPEECHSDK_CONVERSATION_LIBRARY "Microsoft.CognitiveServices.Speech.extension.conversation")
+endif()
+
 file(GLOB SPEECH_C_API_HEADERS "${CARBON_C_API}/*.h")
 file(GLOB SPEECH_CXX_API_HEADERS "${CARBON_CXX_API}/*.h")
 
@@ -402,6 +414,7 @@ set(USP "${CARBON_CORE}/usp")
 set(MOCK "${CARBON_CORE}/mock")
 set(CONVERSATION_TRANSLATION "${CARBON_CORE}/conversation_translation")
 set(SPEAKER_RECOGNITION "${CARBON_CORE}/speaker_recognition")
+set(LIB_CONVERSATION_TRANSLATION "${CARBON_EXTENSIONS}/conversation")
 
 # Enable Unidec build with 'cmake -DEXTENSION_UNIDEC_ENABLED=true'
 if(EXTENSION_UNIDEC_ENABLED AND
@@ -469,6 +482,7 @@ add_subdirectory(${SPEAKER_RECOGNITION})
 add_subdirectory(${MOCK})
 
 add_subdirectory(${LIBCARBON})
+add_subdirectory(${LIB_CONVERSATION_TRANSLATION})
 
 if(BUILD_UNIDEC)
   add_subdirectory(${UNIDEC})

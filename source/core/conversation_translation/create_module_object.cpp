@@ -19,6 +19,12 @@ namespace Impl {
 
     using namespace Microsoft::CognitiveServices::Speech::Impl::ConversationTranslation;
 
+    /// <summary>
+    /// Use this method when statically linking
+    /// </summary>
+    /// <param name="className">The name of the class we want to instantiate</param>
+    /// <param name="interfaceName">The interface of the class we want to instantiate</param>
+    /// <returns>The instantiated instance, or a nullptr</returns>
     SPX_EXTERN_C void* ConversationTranslationLib_CreateModuleObject(const char *className, const char* interfaceName)
     {
         SPX_FACTORY_MAP_BEGIN();

@@ -1932,35 +1932,4 @@ void Connection::Impl::FillLanguageForAudioOutputChunkMsg(const std::string& str
     }
 }
 
-void PlatformInit(const char* proxyHost, int proxyPort, const char* proxyUsername, const char* proxyPassword)
-{
-    static once_flag initOnce;
-
-    call_once(initOnce, [&] {
-        if (platform_init() != 0) {
-            ThrowRuntimeError("Failed to initialize platform (azure-c-shared)");
-        }
-
-        // Set proxy if needed.
-        if (proxyHost != nullptr && *proxyHost != '\0')
-        {
-            if (proxyPort <= 0)
-            {
-                ThrowRuntimeError("Invalid port of the proxy server.");
-            }
-            string hostAndPort = proxyHost + string(":") + to_string(proxyPort);
-            string userNameAndPassword;
-            if (proxyUsername != nullptr)
-            {
-                if (proxyPassword == nullptr)
-                {
-                    ThrowRuntimeError("Invalid password of the proxy service. It should not be null if user name is specified");
-                }
-                userNameAndPassword = proxyUsername + string(":") + proxyPassword;
-            }
-            platform_set_http_proxy(hostAndPort.c_str(), userNameAndPassword.empty() ? nullptr : userNameAndPassword.c_str());
-        }
-    });
-}
-
 }}}}

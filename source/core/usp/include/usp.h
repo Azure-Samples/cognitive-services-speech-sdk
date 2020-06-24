@@ -13,6 +13,7 @@
 #include <unordered_map>
 #include <array>
 
+#include <platform_init.h>
 #include "uspmessages.h"
 #include "ispxinterfaces.h"
 #include "audio_chunk.h"
@@ -416,8 +417,6 @@ private:
 
     DialogBackend m_dialogBackend = DialogBackend::NotSet;
 };
-
-extern void PlatformInit(const char* proxyHost, int proxyPort, const char* proxyUsername, const char* proxyPassword);
 
 class endpoint
 {

@@ -102,11 +102,13 @@ target_include_directories(${SWIG_MODULE_${PROJECT_NAME}_REAL_NAME}
 if(MSVC)
     target_link_libraries(${SWIG_MODULE_${PROJECT_NAME}_REAL_NAME}
         PRIVATE ${SPEECHSDK_CORE_LIBRARY}
+        PRIVATE ${SPEECHSDK_CONVERSATION_LIBRARY}
         PRIVATE ${PYTHON_LIBRARIES}
         )
 else()
     target_link_libraries(${SWIG_MODULE_${PROJECT_NAME}_REAL_NAME}
         PRIVATE ${SPEECHSDK_CORE_LIBRARY}
+        PRIVATE ${SPEECHSDK_CONVERSATION_LIBRARY}
         )
 endif()
 
@@ -159,6 +161,14 @@ add_custom_command(
   ${SPEECH_PY_OUTDIR}
   )
 
+# set up the conversation library in the correct place
+add_custom_command(
+  TARGET ${SWIG_MODULE_${PROJECT_NAME}_REAL_NAME} POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy
+  "$<TARGET_FILE:${SPEECHSDK_CONVERSATION_LIBRARY}>"
+  ${SPEECH_PY_OUTDIR}
+  )
+
 if(EXTENSION_KWS_ENABLED)
   # TODO needs cmake 3.13 for out-of-dir targets:
   # install(TARGETS kws_factory DESTINATION ${module_dir})
@@ -180,7 +190,7 @@ add_custom_command(OUTPUT ${SETUP_PY}
     -DPYTHON_DOTTED_NAME=${PYTHON_DOTTED_NAME}
     -DPYTHON_PACKAGE_NAME=${PYTHON_PACKAGE_NAME}
     -DPYTHON_PACKAGE_REL_PATH=${PYTHON_PACKAGE_REL_PATH}
-    -DPYTHON_LIBS="$<TARGET_FILE_NAME:${SPEECHSDK_CORE_LIBRARY}>","$<TARGET_FILE_NAME:_speech_py_impl>",$<$<BOOL:${EXTENSION_KWS_ENABLED}>:"$<TARGET_FILE_NAME:$<IF:$<BOOL:${EXTENSION_KWS_ENABLED}>,kws_factory,_speech_py_impl>>">
+    -DPYTHON_LIBS="$<TARGET_FILE_NAME:${SPEECHSDK_CORE_LIBRARY}>","$<TARGET_FILE_NAME:${SPEECHSDK_CONVERSATION_LIBRARY}>","$<TARGET_FILE_NAME:_speech_py_impl>",$<$<BOOL:${EXTENSION_KWS_ENABLED}>:"$<TARGET_FILE_NAME:$<IF:$<BOOL:${EXTENSION_KWS_ENABLED}>,kws_factory,_speech_py_impl>>">
     -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/write_setup_py.cmake
   DEPENDS
     ${CMAKE_CURRENT_SOURCE_DIR}/cmake/write_setup_py.cmake

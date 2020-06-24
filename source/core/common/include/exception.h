@@ -9,7 +9,6 @@
 #include <string>
 #include <spxerror.h>
 #include <spx_namespace.h>
-#include <exception.h>
 
 #ifndef _Analysis_noreturn_
 #define _Analysis_noreturn_

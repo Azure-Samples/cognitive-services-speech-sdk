@@ -107,6 +107,7 @@ namespace ConversationTranslation {
     void CSpxConversationImpl::Init()
     {
         CT_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+
         ThreadingHelpers::Init();
         
         std::shared_ptr<ISpxRecognizerSite> site = GetSite();
@@ -167,7 +168,7 @@ namespace ConversationTranslation {
         // has gone out of scope
         if (false == m_permanentRoom)
         {
-            DeleteConversationInternal();
+            DeleteConversationInternal(false);
         }
     }
 
@@ -293,7 +294,7 @@ namespace ConversationTranslation {
         {
             CT_I_THROW_HR_IF(m_manager == nullptr, SPXERR_UNINITIALIZED);
             m_canRejoin = false;
-            this->DeleteConversationInternal();
+            this->DeleteConversationInternal(true);
         });
     }
 
@@ -368,32 +369,74 @@ namespace ConversationTranslation {
         }
     }
 
-    void CSpxConversationImpl::DeleteConversationInternal()
+    void CSpxConversationImpl::DeleteConversationInternal(bool waitForDeletion)
     {
         if (m_manager != nullptr && m_args != nullptr && !m_args->SessionToken.empty())
         {
-            try
-            {
-                m_manager->Leave(m_args->SessionToken);
-            }
-            catch (HttpException& ex)
-            {
-                if (ex.statusCode() == 404)
+            // Since this can be called from the destructor, let's move the deletion call to a separate thread. Throwing
+            // exceptions in a destructor could lead to the entire process being aborted if the destructor was called
+            // because we are unwinding the stack of another exception
+            std::promise<void> promise;
+            auto future = promise.get_future();
+
+            // We cannot use std::async here since its destructor blocks until the execution is complete.
+            auto deleteThread = std::thread(
+                [manager = m_manager, conversationToken = m_args->SessionToken](std::promise<void>&& promise)
                 {
-                    // This response usually means the service has already deleted the room on your behalf.
-                    // This can happen for example if you are a participant and the host deletes the room.
-                    CT_I_LOG_INFO("Got a HTTP 404 response when trying to delete the conversation. Ignoring");
-                }
-                else
+                    try
+                    {
+                        manager->Leave(conversationToken);
+                        promise.set_value();
+                    }
+                    catch (HttpException& ex)
+                    {
+                        if (ex.statusCode() == 404)
+                        {
+                            // This response usually means the service has already deleted the room on your behalf.
+                            // This can happen for example if you are a participant and the host deletes the room.
+                            CT_LOG_INFO("Got a HTTP 404 response when trying to delete the conversation. Ignoring");
+                            promise.set_value();
+                        }
+                        else
+                        {
+                            CT_LOG_ERROR("Failed to delete the conversation. '%s'", ex.what());
+                            promise.set_exception(std::current_exception());
+                        }
+                    }
+                    catch (...)
+                    {
+                        CT_LOG_ERROR("Failed to delete the conversation. Unhandled exception.");
+                        promise.set_exception(std::current_exception());
+                    }
+                },
+                std::move(promise));
+
+            deleteThread.detach();
+
+            if (waitForDeletion)
+            {
+                auto status = future.wait_for(ConversationConstants::MaxHttpRequestWaitTime);
+                switch (status)
                 {
-                    CT_I_LOG_ERROR("Failed to delete the conversation. '%s'", ex.what());
-                    throw;
+                    case std::future_status::timeout:
+                        CT_I_LOG_ERROR("Timed out while trying to delete the conversation");
+                        ThrowWithCallstack(SPXERR_TIMEOUT);
+                        break;
+
+                    case std::future_status::ready:
+                        // observe exceptions
+                        future.get();
+                        break;
+
+                    default:
+                    case std::future_status::deferred:
+                        CT_I_LOG_ERROR("Unexpected future status: %d", status);
+                        break;
                 }
             }
 
             ConversationDeleted.raise();
-
-            m_args->SessionToken = "";
+            m_args->SessionToken.clear();
         }
     }
 

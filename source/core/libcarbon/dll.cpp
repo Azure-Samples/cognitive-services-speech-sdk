@@ -15,7 +15,6 @@ TRACELOGGING_DECLARE_PROVIDER(tracingEventProvider);
 #endif
 
 #include "stdafx.h"
-#include "debug_utils.h"
 #include "handle_table.h"
 #include "trace_message.h"
 #include "create_module_object.h"

@@ -58,7 +58,14 @@ set(HEADERS
     "${INC_DIR}/i_telemetry.h"
     "${INC_DIR}/no_op_telemetry.h"
     "${INC_DIR}/function_helpers.h"
+    "${INC_DIR}/platform_init.h"
     )
+
+if(SPEECHSDK_OS STREQUAL "OSX")
+  list(APPEND HEADERS
+    "${INC_DIR}/thread_stack_pcs.h"
+  )
+endif()
 
 set(HEADERS_PRIVATE
     "${INC_DIR}/azure_c_shared_utility_urlencode_wrapper.h"
@@ -92,7 +99,15 @@ set(SOURCES
     "${SRC_DIR}/module_factory.cpp"
     "${SRC_DIR}/http_endpoint_info.cpp"
     "${SRC_DIR}/web_socket.cpp"
+    "${SRC_DIR}/platform_init.cpp"
     )
+
+if(SPEECHSDK_OS STREQUAL "OSX")
+  list(APPEND SOURCES
+    "${SRC_DIR}/thread_stack_pcs.cpp"
+    "${SRC_DIR}/backtrace.cpp"
+  )
+endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "WindowsStore")
     list(APPEND SOURCES

@@ -9,8 +9,6 @@ include_directories(${CARBON_INCLUDE})
 include_directories("${CARBON_EXTERNAL}/json")
 
 include_directories(${INC_DIR})
-include_directories(${SR})
-include_directories("${USP}/include")
 include_directories("${COMMON}/include")
 include_directories("${COMMON_GENERATED_INCLUDE}")
 
@@ -61,12 +59,28 @@ set_target_properties (${PROJECT_NAME} PROPERTIES
     FOLDER core
 )
 
+if (DEFINED STATIC_CONVERSATION_LIB)
+    target_compile_definitions(${PROJECT_NAME} PUBLIC STATIC_CONVERSATION_LIB)
+else()
+    add_compile_definitions(USE_NON_CORE_ROOT_SITE)
+endif()
+
+if(SPEECHSDK_OS STREQUAL "Linux")
+    set(http_LIBS ${AZURE_SHARED_LIB} -lz -ldl)
+else()
+    set(http_LIBS ${AZURE_SHARED_LIB})
+endif()
+
+if(WIN32)
+    list(APPEND http_LIBS rpcrt4.lib)
+endif()
+
 target_link_libraries(${PROJECT_NAME}
-                      PRIVATE usp
-                      PRIVATE common)
+                      PRIVATE common
+                      PRIVATE ${http_LIBS})
 
 if (MSVC)
    set_target_properties(${PROJECT_NAME} PROPERTIES COMPILE_FLAGS "/Yucommon.h")
-   set_source_files_properties(stdafx.cpp PROPERTIES COMPILE_FLAGS "/Yccommon.h")   
+   set_source_files_properties(stdafx.cpp PROPERTIES COMPILE_FLAGS "/Yccommon.h")
 endif(MSVC)
 

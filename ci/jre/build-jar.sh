@@ -84,7 +84,7 @@ for platformString in "${platforms[@]}"; do
 
   mkdir -p "$JAR_DIR/$assetDir"
   if [[ $os == "Windows" ]] || [[ $os == "Linux" ]] || [[ $os == "OSX" ]]; then
-    cp --verbose "$dropPrefix/${libPrefix}Microsoft.CognitiveServices.Speech"{.core$libSuffix,.java.bindings$jnilibSuffix} "$JAR_DIR/$assetDir"
+    cp --verbose "$dropPrefix/${libPrefix}Microsoft.CognitiveServices.Speech"{.core$libSuffix,.extension.conversation$libSuffix,.java.bindings$jnilibSuffix} "$JAR_DIR/$assetDir"
   fi
 
   # Copy KWS extension if available

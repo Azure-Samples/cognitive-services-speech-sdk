@@ -5,10 +5,11 @@
 
 #pragma once
 
-#include "ISpxConversationInterfaces.h"
 #include <string_utils.h>
 #include <exception.h>
 #include <interface_helpers.h>
+#include <property_bag_impl.h>
+#include "ISpxConversationInterfaces.h"
 #include "conversation_connection.h"
 
 #ifdef _MSC_VER

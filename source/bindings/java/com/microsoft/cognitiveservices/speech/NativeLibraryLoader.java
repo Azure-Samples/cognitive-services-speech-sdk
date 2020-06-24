@@ -147,6 +147,7 @@ class NativeLibraryLoader {
         if (operatingSystem.contains("linux")) {
             return new NativeLibrary[] {
                     new NativeLibrary("libMicrosoft.CognitiveServices.Speech.core.so", true),
+                    new NativeLibrary("libMicrosoft.CognitiveServices.Speech.extension.conversation.so", false),
                     new NativeLibrary("libMicrosoft.CognitiveServices.Speech.extension.kws.so", false),
                     new NativeLibrary("libMicrosoft.CognitiveServices.Speech.extension.codec.so", false),
                     new NativeLibrary("libMicrosoft.CognitiveServices.Speech.java.bindings.so", true)
@@ -159,6 +160,7 @@ class NativeLibraryLoader {
                     // relative to its location, so this one is currently only
                     // needed for extraction (TODO however due to 'loadAll ==
                     // true' below, we'll still load it later; should fix).
+                    new NativeLibrary("Microsoft.CognitiveServices.Speech.extension.conversation.dll", false),
                     new NativeLibrary("Microsoft.CognitiveServices.Speech.extension.kws.dll", false),
                     new NativeLibrary("Microsoft.CognitiveServices.Speech.extension.codec.dll", false),
                     new NativeLibrary("Microsoft.CognitiveServices.Speech.extension.silk_codec.dll", false),
@@ -169,6 +171,7 @@ class NativeLibraryLoader {
             // Note: currently no KWS on macOS
             return new NativeLibrary[] {
                     new NativeLibrary("libMicrosoft.CognitiveServices.Speech.core.dylib", true),
+                    new NativeLibrary("libMicrosoft.CognitiveServices.Speech.extension.conversation.dylib", false),
                     new NativeLibrary("libMicrosoft.CognitiveServices.Speech.java.bindings.dylib", true)
             };
         }

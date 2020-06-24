@@ -472,6 +472,8 @@ SPXAPI conversation_translator_create_from_config(SPXCONVERSATIONTRANSLATORHANDL
         auto conversation_translator = SpxCreateObject<ConversationTranslation::ISpxConversationTranslator>(
             "CSpxConversationTranslator", SpxGetRootSite());
 
+        SPX_RETURN_HR_IF(SPXERR_EXTENSION_LIBRARY_NOT_FOUND, conversation_translator == nullptr);
+
         // copy the audio input properties into the conversation transcriber
         auto audioInput = AudioConfigFromHandleOrEmptyIfInvalid(haudioinput);
         auto audioInput_propertybag = SpxQueryInterface<ISpxNamedProperties>(audioInput);

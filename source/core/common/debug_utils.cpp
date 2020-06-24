@@ -53,7 +53,6 @@ static _Unwind_Reason_Code AndroidUnwindCallback(struct _Unwind_Context* context
     }
     return _URC_NO_REASON;
 }
-
 #else
 #include <execinfo.h>
 #include <cxxabi.h>
@@ -153,10 +152,15 @@ static void CollectCallStack(size_t skipLevels, const std::function<void(std::st
 
 #elif !defined(ANDROID) && !defined(__ANDROID__)
 
-    const unsigned int MAX_NUM_FRAMES = 1024;
+    const unsigned int MAX_NUM_FRAMES = 20;
     void* backtraceAddresses[MAX_NUM_FRAMES];
+#if defined(UNDER_OSX_ONLY)
+    unsigned int numFrames = Debug::carbon_backtrace(backtraceAddresses, MAX_NUM_FRAMES);
+    char** symbolList = Debug::carbon_backtrace_symbols(backtraceAddresses, numFrames);
+#else
     unsigned int numFrames = backtrace(backtraceAddresses, MAX_NUM_FRAMES);
     char** symbolList = backtrace_symbols(backtraceAddresses, numFrames);
+#endif
 
     for (size_t i = skipLevels; i < numFrames; i++)
     {
@@ -303,5 +307,5 @@ void HookSignalHandlers()
 
     std::set_terminate(SignalHandler);
 }
- 
+
 }

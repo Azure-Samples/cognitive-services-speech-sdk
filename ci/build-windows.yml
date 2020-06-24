@@ -120,8 +120,10 @@ jobs:
       pythonBasePath=C:/hostedtoolcache/windows/Python
       coreLib=build/bin/$(BuildConfiguration)/Microsoft.CognitiveServices.Speech.core.pdb
       coreHash=($(md5sum ${coreLib}))
+      conversationLib=build/bin/$(BuildConfiguration)/Microsoft.CognitiveServices.Speech.extension.conversation.pdb
+      conversationHash=($(md5sum ${conversationLib}))
       pythonExtension=build/azure/cognitiveservices/speech/_speech_py_impl.pdb # extension is .so on Linux and OSX
-      libs=($coreLib $pythonExtension)
+      libs=($coreLib $conversationLib $pythonExtension)
       if [[ $(SPEECHSDK_ENABLE_KWS) == true ]]; then
         kwsLib=build/bin/$(BuildConfiguration)/Microsoft.CognitiveServices.Speech.extension.kws.pdb
         libs+=($kwsLib)
@@ -144,6 +146,7 @@ jobs:
         cmake --build build --target bdist -j 4 --config $(BuildConfiguration)
         # check that the core & kws lib are identical in all wheels
         [[ $(md5sum $coreLib) == ${coreHash[0]}* ]] || exitWithError "core lib changed between Python builds"
+        [[ $(md5sum $conversationLib) == ${conversationHash[0]}* ]] || exitWithError "conversation lib changed between Python builds"
         if [[ $(SPEECHSDK_ENABLE_KWS) == true ]]; then
           [[ $(md5sum $kwsLib) == ${kwsHash[0]}* ]] || exitWithError "kws lib changed between Python builds"
         fi
@@ -169,7 +172,7 @@ jobs:
     inputs:
       ConnectedServiceName: Speech SDK ESRP Signing Alternate
       FolderPath: repack
-      Pattern: '*.pyd,Microsoft.CognitiveServices.Speech.core.dll,Microsoft.CognitiveServices.Speech.extension.kws.dll'
+      Pattern: '*.pyd,Microsoft.CognitiveServices.Speech.core.dll,Microsoft.CognitiveServices.Speech.extension.conversation.dll,Microsoft.CognitiveServices.Speech.extension.kws.dll'
       signConfigType: inlineSignParams
       inlineOperation: $(SIGN_PARAMS_DLL)
     condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
@@ -192,7 +195,7 @@ jobs:
     inputs:
       ConnectedServiceName: 'Speech SDK ESRP Signing Alternate'
       FolderPath: 'build/bin'
-      Pattern: 'Microsoft.CognitiveServices.Speech.core${{ parameters.suffix }}.dll,Microsoft.CognitiveServices.Speech.extension.kws${{ parameters.suffix }}.dll,Microsoft.CognitiveServices.Speech.csharp.dll,Microsoft.CognitiveServices.Speech.java.bindings.dll,Microsoft.CognitiveServices.Speech.extension.codec.dll,Microsoft.CognitiveServices.Speech.extension.silk_codec.dll'
+      Pattern: 'Microsoft.CognitiveServices.Speech.core${{ parameters.suffix }}.dll,Microsoft.CognitiveServices.Speech.extension.conversation${{ parameters.suffix }}.dll,Microsoft.CognitiveServices.Speech.extension.kws${{ parameters.suffix }}.dll,Microsoft.CognitiveServices.Speech.csharp.dll,Microsoft.CognitiveServices.Speech.java.bindings.dll,Microsoft.CognitiveServices.Speech.extension.codec.dll,Microsoft.CognitiveServices.Speech.extension.silk_codec.dll'
       signConfigType: inlineSignParams
       inlineOperation: $(SIGN_PARAMS_DLL)
     condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))

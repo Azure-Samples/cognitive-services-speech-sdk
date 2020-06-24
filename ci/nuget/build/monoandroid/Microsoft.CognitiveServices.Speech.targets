@@ -4,6 +4,10 @@
       <Abi>arm64-v8a</Abi>
       <Link>libs\arm64-v8a\libMicrosoft.CognitiveServices.Speech.core.so</Link>
     </AndroidNativeLibrary>
+    <AndroidNativeLibrary Include="$(MSBuildThisFileDirectory)\libs\arm64-v8a\libMicrosoft.CognitiveServices.Speech.extension.conversation.so">
+      <Abi>arm64-v8a</Abi>
+      <Link>libs\arm64-v8a\libMicrosoft.CognitiveServices.Speech.extension.conversation.so</Link>
+    </AndroidNativeLibrary>
     <AndroidNativeLibrary Include="$(MSBuildThisFileDirectory)\libs\arm64-v8a\libMicrosoft.CognitiveServices.Speech.extension.kws.so">
       <Abi>arm64-v8a</Abi>
       <Link>libs\arm64-v8a\libMicrosoft.CognitiveServices.Speech.extension.kws.so</Link>
@@ -12,6 +16,10 @@
       <Abi>armeabi-v7a</Abi>
       <Link>libs\armeabi-v7a\libMicrosoft.CognitiveServices.Speech.core.so</Link>
     </AndroidNativeLibrary>
+    <AndroidNativeLibrary Include="$(MSBuildThisFileDirectory)\libs\armeabi-v7a\libMicrosoft.CognitiveServices.Speech.extension.conversation.so">
+      <Abi>armeabi-v7a</Abi>
+      <Link>libs\armeabi-v7a\libMicrosoft.CognitiveServices.Speech.extension.conversation.so</Link>
+    </AndroidNativeLibrary>
     <AndroidNativeLibrary Include="$(MSBuildThisFileDirectory)\libs\armeabi-v7a\libMicrosoft.CognitiveServices.Speech.extension.kws.so">
       <Abi>armeabi-v7a</Abi>
       <Link>libs\armeabi-v7a\libMicrosoft.CognitiveServices.Speech.extension.kws.so</Link>
@@ -19,6 +27,10 @@
     <AndroidNativeLibrary Include="$(MSBuildThisFileDirectory)\libs\x86\libMicrosoft.CognitiveServices.Speech.core.so">
       <Abi>x86</Abi>
       <Link>libs\x86\libMicrosoft.CognitiveServices.Speech.core.so</Link>
+    </AndroidNativeLibrary>
+    <AndroidNativeLibrary Include="$(MSBuildThisFileDirectory)\libs\x86\libMicrosoft.CognitiveServices.Speech.extension.conversation.so">
+      <Abi>x86</Abi>
+      <Link>libs\x86\libMicrosoft.CognitiveServices.Speech.extension.conversation.so</Link>
     </AndroidNativeLibrary>
     <AndroidNativeLibrary Include="$(MSBuildThisFileDirectory)\libs\x86\libMicrosoft.CognitiveServices.Speech.extension.kws.so">
       <Abi>x86</Abi>

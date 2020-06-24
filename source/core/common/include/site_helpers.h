@@ -19,10 +19,6 @@ std::shared_ptr<ISpxGenericSite> SpxSiteFromThis(T* ptr)
     return SpxSharedPtrFromThis<ISpxGenericSite>(ptr);
 }
 
-// SpxGetRootSite is mapped into different function based on USE_NON_CORE_ROOT_SITE.
-// Extensions(Unit Tests) should define USE_NON_CORE_ROOT_SITE in its CMakeLists.txt.
-std::shared_ptr<ISpxGenericSite> SpxGetRootSite();
-
 // USE_NON_CORE_ROOT_SITE is defined in the CMakeLists.txt in extensions or unit tests.
 #ifdef USE_NON_CORE_ROOT_SITE
 std::shared_ptr<ISpxGenericSite> SpxGetNonCoreRootSite();  // this is for extensions and unit tests.

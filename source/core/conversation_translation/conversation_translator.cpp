@@ -10,11 +10,9 @@
 #include <spxdebug.h>
 #include <http_utils.h>
 #include <site_helpers.h>
-#include <thread_service.h>
 #include <guid_utils.h>
 #include <time_utils.h>
 #include "conversation_manager.h"
-#include "translation_recognizer.h"
 #include "conversation_translator.h"
 #include "conversation_utils.h"
 #include "conversation_events.h"
@@ -385,7 +383,7 @@ namespace ConversationTranslation {
 
     void CSpxConversationTranslator::SetAuthorizationToken(const std::string& authToken, const std::string& region)
     {
-        RunAsynchronously([this, authToken, region]
+        RunSynchronously([this, authToken, region]
         {
             CT_GET_AND_LOG_STATE(
                 "Changing authorization token. Token: '%zu', Region: '%s'",

@@ -42,6 +42,11 @@ set_target_properties (factory PROPERTIES
     FOLDER core
 )
 
+if (DEFINED STATIC_CONVERSATION_LIB)
+    list(APPEND additional_static_libs conversation_translation)
+    target_compile_definitions(${PROJECT_NAME} PUBLIC STATIC_CONVERSATION_LIB)
+endif()
+
 target_link_libraries(factory
                       PRIVATE sr
                       PRIVATE tts
@@ -49,8 +54,8 @@ target_link_libraries(factory
                       PRIVATE usp
                       PRIVATE tts_rest
                       PRIVATE tts_usp
-                      PRIVATE conversation_translation
                       PRIVATE common
                       PRIVATE speaker_recognition
-                      PRIVATE ${CMAKE_DL_LIBS})
+                      PRIVATE ${CMAKE_DL_LIBS}
+                      PRIVATE ${additional_static_libs})
 
