@@ -181,6 +181,9 @@ done
 echo Total number of test are $total
 
 for pid in "${pids[@]}"; do
+  echo
+  echo "-----------------------------Dump of the file ${pid_log_map[$pid]} starts------------------------------------------"
+
   wait $pid
   exitCode=$?
   if [[ $exitCode == 0 ]]; then
@@ -189,6 +192,13 @@ for pid in "${pids[@]}"; do
   else
     echo Failed: ${pid_test_map[$pid]}. The console log file is: ${pid_log_map[$pid]}
   fi
+
+  echo
+  cat ./vstsconsolelog/${pid_log_map[$pid]}
+  echo
+  echo "-----------------------------Dump of the file ${pid_log_map[$pid]} ends------------------------------------------"
+  echo 
+
 done
 
 echo Pass '(including skip)' $pass / $total.
