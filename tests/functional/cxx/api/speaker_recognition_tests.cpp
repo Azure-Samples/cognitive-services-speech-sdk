@@ -24,7 +24,7 @@ using namespace std::chrono_literals;
 using namespace std;
 using namespace Microsoft::CognitiveServices::Speech;
 
-TEST_CASE("text independent verification enrollment", "[api][cxx][speaker_id][enrollment_ti_verification]")
+TEST_CASE("text independent verification enrollment", "[api][cxx][speaker_id][enrollment_ti_verification][!hide]")
 {
     // create a profile using a speech config
     SPXTEST_REQUIRE(!DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT].empty());
@@ -55,7 +55,7 @@ TEST_CASE("text independent verification enrollment", "[api][cxx][speaker_id][en
     INFO(SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
 }
 
-TEST_CASE("text independent identication enrollment", "[api][cxx][speaker_id][enrollment_ti_identication]")
+TEST_CASE("text independent identication enrollment", "[api][cxx][speaker_id][enrollment_ti_identication][!hide]")
 {
     // create a profile using a speech config
     SPXTEST_REQUIRE(!DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT].empty());
@@ -89,7 +89,7 @@ TEST_CASE("text independent identication enrollment", "[api][cxx][speaker_id][en
     INFO(SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
 }
 
-TEST_CASE("text dependent verification enrollment bad request", "[api][cxx][speaker_id][enrollment_td_verfication_bad_request]")
+TEST_CASE("text dependent verification enrollment bad request", "[api][cxx][speaker_id][enrollment_td_verfication_bad_request][!hide]")
 {
     // create a profile using a speech config
     SPXTEST_REQUIRE(!DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT].empty());
@@ -228,7 +228,7 @@ TEST_CASE("delete voice profile text independent identification", "[api][cxx][sp
     INFO(SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
 }
 
-TEST_CASE("speaker verification accept and reject speaker", "[api][cxx][speaker_id][verification]")
+TEST_CASE("speaker verification accept and reject speaker", "[api][cxx][speaker_id][verification][!hide]")
 {
     SPXTEST_REQUIRE(!DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT].empty());
     REQUIRE(exists(ROOT_RELATIVE_PATH(MULTIPLE_UTTERANCE_CHINESE)));
@@ -266,7 +266,7 @@ TEST_CASE("speaker verification accept and reject speaker", "[api][cxx][speaker_
     INFO(SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
 }
 
-TEST_CASE("speaker identification", "[api][cxx][speaker_id][identification]")
+TEST_CASE("speaker identification", "[api][cxx][speaker_id][identification][!hide]")
 {
     SPXTEST_REQUIRE(!DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT].empty());
     REQUIRE(exists(ROOT_RELATIVE_PATH(MULTIPLE_UTTERANCE_CHINESE)));

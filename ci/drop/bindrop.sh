@@ -220,15 +220,10 @@ done
 # N.B. no long option for -R (recursive) on OSX.
 cp $CPOPT -R "$SRCINC"/* "$DESTPUBINC"
 
-# # N.B. Using '-I -n 1' and replacement instead of "cp --target" since --target
-# # is not available on OSX.
-# find "$SRCLIB" -type f -name \*$STATLIBSUFFIX -not -name $LIBPREFIX\* -print0 |
-#   xargs -n 1 -0 -I % cp % "$DESTPRIVLIB"
-
-# xargs is asserting on many hosted agents right now, so replacing it with a CP command.
-# This will result in an extra two lib files in the private lib build artifacts, but I don't see any down side to that right now.
-cp $CPOPT "$SRCLIB"/*$STATLIBSUFFIX "$DESTPRIVLIB"
-
+# N.B. Using '-I -n 1' and replacement instead of "cp --target" since --target
+# is not available on OSX.
+find "$SRCLIB" -type f -name \*$STATLIBSUFFIX -not -name $LIBPREFIX\* -print0 |
+  xargs -n 1 -0 -I % cp % "$DESTPRIVLIB"
 cp $CPOPT "$SRCLIB"/*carbon-mock* "$DESTPRIVLIB"
 cp $CPOPT "$SRCLIB"/*carbon-tts-mock* "$DESTPRIVLIB"
 
