@@ -76,6 +76,16 @@ public:
     }
 
     /// <summary>
+    /// Destructor.
+    /// </summary>
+    ~KeywordRecognizer()
+    {
+        Canceled.DisconnectAll();
+        Recognized.DisconnectAll();
+        recognizer_handle_release(m_handle);
+    }
+
+    /// <summary>
     /// Starts a keyword recognition session. This session will last until the first keyword is recognized. When this happens,
     /// a <see cref="Recognized" /> event will be raised and the session will end. To rearm the keyword, the method needs to be called
     /// again after the event is emitted.

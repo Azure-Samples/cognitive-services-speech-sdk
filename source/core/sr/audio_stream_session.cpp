@@ -2562,7 +2562,7 @@ void CSpxAudioStreamSession::StartAudioPump(RecognitionKind startKind, std::shar
     SPX_DBG_ASSERT(IsState(SessionState::WaitForPumpSetFormatStart));
 
     // Tell everyone we're starting...
-    if (startKind != RecognitionKind::Keyword)
+    if (!IsKindKeyword(startKind))
     {
         FireSessionStartedEvent();
     }
