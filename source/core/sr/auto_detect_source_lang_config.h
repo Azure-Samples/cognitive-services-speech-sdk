@@ -36,6 +36,7 @@ public:
     SPX_INTERFACE_MAP_END()
 
     // --- ISpxAutoDetectSourceLangConfig ---
+    virtual void InitFromOpenRange() override;
     virtual void InitFromLanguages(const char* languages) override;
     virtual void AddSourceLanguageConfig(std::shared_ptr<ISpxSourceLanguageConfig> sourceLanguageConfigs) override;
 

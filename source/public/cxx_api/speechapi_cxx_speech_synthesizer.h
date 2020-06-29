@@ -13,6 +13,8 @@
 #include <speechapi_c.h>
 #include <speechapi_cxx_properties.h>
 #include <speechapi_cxx_speech_config.h>
+#include <speechapi_cxx_auto_detect_source_lang_config.h>
+#include <speechapi_cxx_utils.h>
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -20,7 +22,7 @@ namespace Speech {
 
 /// <summary>
 /// Class for speech synthesizer.
-/// Updated in version 1.9.0
+/// Updated in version 1.13.0
 /// </summary>
 class SpeechSynthesizer : public std::enable_shared_from_this<SpeechSynthesizer>
 {
@@ -63,23 +65,14 @@ public:
     /// </summary>
     /// <param name="speechconfig">Speech configuration.</param>
     /// <returns>A smart pointer wrapped speech synthesizer pointer.</returns>
-    static std::shared_ptr<SpeechSynthesizer> FromConfig(std::shared_ptr<SpeechConfig> speechconfig)
+    static std::shared_ptr<SpeechSynthesizer> FromConfig(std::shared_ptr<SpeechConfig> speechconfig, std::nullptr_t)
     {
         SPXSYNTHHANDLE hsynth = SPXHANDLE_INVALID;
 
-        SPXSPEECHCONFIGHANDLE hspeechconfig = SPXHANDLE_INVALID;
-        if (speechconfig != nullptr)
-        {
-            hspeechconfig = static_cast<SPXSPEECHCONFIGHANDLE>(*speechconfig.get());
-        }
-
-        // Use default speaker as default audio output
-        SPXAUDIOCONFIGHANDLE haudioconfig = SPXHANDLE_INVALID;
-        SPX_THROW_ON_FAIL(::audio_config_create_audio_output_from_default_speaker(&haudioconfig));
-
-        SPX_THROW_ON_FAIL(::synthesizer_create_speech_synthesizer_from_config(&hsynth, hspeechconfig, haudioconfig));
-
-        SPX_THROW_ON_FAIL(::audio_config_release(haudioconfig));
+        SPX_THROW_ON_FAIL(::synthesizer_create_speech_synthesizer_from_config(
+            &hsynth,
+            Utils::HandleOrInvalid<SPXSPEECHCONFIGHANDLE, SpeechConfig>(speechconfig),
+            SPXHANDLE_INVALID));
 
         auto ptr = new SpeechSynthesizer(hsynth);
         return std::shared_ptr<SpeechSynthesizer>(ptr);
@@ -91,23 +84,44 @@ public:
     /// <param name="speechconfig">Speech configuration.</param>
     /// <param name="audioconfig">Audio configuration.</param>
     /// <returns>A smart pointer wrapped speech synthesizer pointer.</returns>
-    static std::shared_ptr<SpeechSynthesizer> FromConfig(std::shared_ptr<SpeechConfig> speechconfig, std::shared_ptr<Audio::AudioConfig> audioconfig)
+    static std::shared_ptr<SpeechSynthesizer> FromConfig(
+        std::shared_ptr<SpeechConfig> speechconfig,
+        std::shared_ptr<Audio::AudioConfig> audioconfig = Audio::AudioConfig::FromDefaultSpeakerOutput())
     {
         SPXSYNTHHANDLE hsynth = SPXHANDLE_INVALID;
 
-        SPXSPEECHCONFIGHANDLE hspeechconfig = SPXHANDLE_INVALID;
-        if (speechconfig != nullptr)
-        {
-            hspeechconfig = static_cast<SPXSPEECHCONFIGHANDLE>(*speechconfig.get());
-        }
+        SPX_THROW_ON_FAIL(::synthesizer_create_speech_synthesizer_from_config(
+            &hsynth,
+            Utils::HandleOrInvalid<SPXSPEECHCONFIGHANDLE, SpeechConfig>(speechconfig),
+            Utils::HandleOrInvalid<SPXAUDIOCONFIGHANDLE, Audio::AudioConfig>(audioconfig)));
 
-        SPXAUDIOCONFIGHANDLE haudioconfig = SPXHANDLE_INVALID;
-        if (audioconfig != nullptr)
-        {
-            haudioconfig = static_cast<SPXAUDIOCONFIGHANDLE>(*audioconfig.get());
-        }
+        auto ptr = new SpeechSynthesizer(hsynth);
+        auto synthesizer = std::shared_ptr<SpeechSynthesizer>(ptr);
+        synthesizer->m_audioConfig = audioconfig;
+        return synthesizer;
+    }
 
-        SPX_THROW_ON_FAIL(::synthesizer_create_speech_synthesizer_from_config(&hsynth, hspeechconfig, haudioconfig));
+    /// <summary>
+    /// Create a speech synthesizer from a speech config, auto detection source language config and audio config
+    /// Added in 1.13.0
+    /// </summary>
+    /// <param name="speechconfig">Speech configuration.</param>
+    /// <param name="autoDetectSourceLangConfig">Auto detection source language config.</param>
+    /// <param name="audioconfig">Audio configuration.</param>
+    /// <returns>A smart pointer wrapped speech synthesizer pointer.</returns>
+    static std::shared_ptr<SpeechSynthesizer> FromConfig(
+        std::shared_ptr<SpeechConfig> speechconfig,
+        std::shared_ptr<AutoDetectSourceLanguageConfig> autoDetectSourceLangConfig,
+        std::shared_ptr<Audio::AudioConfig> audioconfig = Audio::AudioConfig::FromDefaultSpeakerOutput())
+    {
+        SPXSYNTHHANDLE hsynth;
+
+        SPX_THROW_ON_FAIL(::synthesizer_create_speech_synthesizer_from_auto_detect_source_lang_config(
+            &hsynth,
+            Utils::HandleOrInvalid<SPXSPEECHCONFIGHANDLE, SpeechConfig>(speechconfig),
+            Utils::HandleOrInvalid<SPXAUTODETECTSOURCELANGCONFIGHANDLE, AutoDetectSourceLanguageConfig>(autoDetectSourceLangConfig),
+            Utils::HandleOrInvalid<SPXAUDIOCONFIGHANDLE, Audio::AudioConfig>(audioconfig)));
+
         auto ptr = new SpeechSynthesizer(hsynth);
         auto synthesizer = std::shared_ptr<SpeechSynthesizer>(ptr);
         synthesizer->m_audioConfig = audioconfig;

@@ -16,6 +16,13 @@ namespace Impl {
 
 using namespace std;
 
+void CSpxAutoDetectSourceLangConfig::InitFromOpenRange()
+{
+    SPX_IFTRUE_THROW_HR(m_init, SPXERR_ALREADY_INITIALIZED);
+    m_init = true;
+    SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_AutoDetectSourceLanguages), g_autoDetectSourceLang_OpenRange);
+}
+
 void CSpxAutoDetectSourceLangConfig::InitFromLanguages(const char* languages)
 {
     SPX_IFTRUE_THROW_HR(m_init, SPXERR_ALREADY_INITIALIZED);

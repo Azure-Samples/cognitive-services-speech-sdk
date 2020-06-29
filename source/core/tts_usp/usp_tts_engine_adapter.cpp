@@ -104,9 +104,8 @@ std::shared_ptr<ISpxSynthesisResult> CSpxUspTtsEngineAdapter::SpeakInternal(cons
     auto ssml = text;
     if (!isSsml)
     {
-        auto language = ISpxPropertyBagImpl::GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_SynthLanguage), "");
-        auto voice = ISpxPropertyBagImpl::GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_SynthVoice), "");
-        ssml = CSpxSynthesisHelper::BuildSsml(text, language, voice);
+        const auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
+        ssml = CSpxSynthesisHelper::BuildSsml(text, properties);
     }
 
     SPX_DBG_TRACE_VERBOSE("SSML sent to TTS cognitive service: %s", ssml.data());
@@ -245,11 +244,15 @@ void CSpxUspTtsEngineAdapter::UspSendSynthesisContext(const std::string& request
 {
     constexpr auto messagePath = "synthesis.context";
 
+    const auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
+
     // Set synthesis context data.
     nlohmann::json synthesisContext;
     synthesisContext["synthesis"]["audio"]["outputFormat"] = GetOutputFormatString(m_audioOutput);
     synthesisContext["synthesis"]["audio"]["metadataOptions"]["wordBoundaryEnabled"] = PAL::BoolToString(WordBoundaryEnabled());
-    synthesisContext["synthesis"]["audio"]["metadataOptions"]["sentenceBoundaryEnabled"] = ISpxPropertyBagImpl::GetStringValue("SpeechServiceResponse_Synthesis_SentenceBoundaryEnabled", "false");
+    synthesisContext["synthesis"]["audio"]["metadataOptions"]["sentenceBoundaryEnabled"] = properties->GetStringValue("SpeechServiceResponse_Synthesis_SentenceBoundaryEnabled", "false");
+
+    synthesisContext["synthesis"]["language"]["autoDetection"] = CSpxSynthesisHelper::LanguageAutoDetectionEnabled(properties);
 
     UspSendMessage(messagePath, synthesisContext.dump(), USP::MessageType::Context, requestId);
 }

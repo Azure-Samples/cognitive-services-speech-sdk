@@ -178,6 +178,19 @@ namespace Microsoft.CognitiveServices.Speech
             streamKeepAlive = audioConfig?.MoveStreamOwnerShip();
         }
 
+        /// <summary>
+        /// Creates a new instance of SpeechSynthesizer.
+        /// Added in 1.13.0
+        /// </summary>
+        /// <param name="speechConfig">Speech configuration</param>
+        /// <param name="autoDetectSourceLanguageConfig">The auto detect source language config</param>
+        /// <param name="audioConfig">Audio configuration</param>
+        public SpeechSynthesizer(SpeechConfig speechConfig, AutoDetectSourceLanguageConfig autoDetectSourceLanguageConfig, Audio.AudioConfig audioConfig)
+            : this(FromConfig(speechConfig, autoDetectSourceLanguageConfig, audioConfig))
+        {
+            streamKeepAlive = audioConfig?.MoveStreamOwnerShip();
+        }
+
         internal SpeechSynthesizer(InteropSafeHandle synthHandle)
         {
             ThrowIfNull(synthHandle, "Invalid synthesizer handle");
@@ -235,6 +248,38 @@ namespace Microsoft.CognitiveServices.Speech
             ThrowIfFail(SpxFactory.synthesizer_create_speech_synthesizer_from_config(out synthHandlePtr, speechConfig.configHandle, audioConfigHandle));
             InteropSafeHandle synthHandle = new InteropSafeHandle(synthHandlePtr, Internal.Synthesizer.synthesizer_handle_release);
             GC.KeepAlive(speechConfig);
+            GC.KeepAlive(audioConfig);
+
+            return synthHandle;
+        }
+
+        internal static InteropSafeHandle FromConfig(SpeechConfig speechConfig, AutoDetectSourceLanguageConfig autoDetectSourceLanguageConfig, Audio.AudioConfig audioConfig)
+        {
+            if (speechConfig == null)
+            {
+                throw new ArgumentNullException(nameof(speechConfig));
+            }
+
+            if (autoDetectSourceLanguageConfig == null)
+            {
+                throw new ArgumentNullException(nameof(autoDetectSourceLanguageConfig));
+            }
+
+            InteropSafeHandle audioConfigHandle;
+            if (audioConfig == null)
+            {
+                audioConfigHandle = new InteropSafeHandle(IntPtr.Zero, null);
+            }
+            else
+            {
+                audioConfigHandle = audioConfig.configHandle;
+            }
+
+            IntPtr synthHandlePtr = IntPtr.Zero;
+            ThrowIfFail(SpxFactory.synthesizer_create_speech_synthesizer_from_auto_detect_source_lang_config(out synthHandlePtr, speechConfig.configHandle, autoDetectSourceLanguageConfig.configHandle, audioConfigHandle));
+            InteropSafeHandle synthHandle = new InteropSafeHandle(synthHandlePtr, Internal.Synthesizer.synthesizer_handle_release);
+            GC.KeepAlive(speechConfig);
+            GC.KeepAlive(autoDetectSourceLanguageConfig);
             GC.KeepAlive(audioConfig);
 
             return synthHandle;

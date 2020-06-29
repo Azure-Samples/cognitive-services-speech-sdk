@@ -26,10 +26,10 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils
         public string ProfanityMaskedPattern { get; set; }
         public string ProfanityRemoved { get; set; }
         public string ProfanityTagged { get; set; }
-        public int? AudioOffset { get; set; }
+        public int[] AudioOffsets { get; set; }
         public int? AudioDuration { get; set; }
-        public int? TextOffset { get; set; }
-        public int? SsmlOffset { get; set; }
+        public int[] TextOffsets { get; set; }
+        public int[] SsmlOffsets { get; set; }
     }
 
     public struct AudioEntry
@@ -111,6 +111,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils
         public static string SINGLE_UTTERANCE_WITH_PUNCTUATION => "SingleUtteranceWithPunctuation";
         public static string PROFANTITY_SINGLE_UTTERANCE_ENGLISH_1 => "ProfanitySingleUtteranceEnglish1";
         public static string PROFANITY_SINGLE_UTTERANCE_ENGLISH_2 => "ProfanitySingleUtteranceEnglish2";
+        public static string SYNTHESIS_UTTERANCE_CHINESE_1 => "SynthesisUtteranceChinese1";
+        public static string SYNTHESIS_UTTERANCE_CHINESE_2 => "SynthesisUtteranceChinese1";
     }
     internal class Config
     {

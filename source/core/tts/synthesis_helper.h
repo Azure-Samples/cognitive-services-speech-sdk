@@ -12,15 +12,12 @@
 #include "stdafx.h"
 #include "string_utils.h"
 #include "http_utils.h"
-
+#include "property_id_2_name_map.h"
 
 
 #define TTS_COGNITIVE_SERVICE_HOST_SUFFIX ".tts.speech.microsoft.com"
 #define TTS_COGNITIVE_SERVICE_URL_PATH "/cognitiveservices/v1"
 #define USER_AGENT "SpeechSDK"
-
-#define SSML_TEMPLATE "<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts' xmlns:emo='http://www.w3.org/2009/10/emotionml' xml:lang='%s'><voice name='%s'>%s</voice></speak>"
-#define SSML_BUFFER_SIZE 0x10000
 
 #define BUFFERWRITE(buf, value) for (size_t i = 0; i < sizeof(value); ++i) { *buf = (uint8_t)((value >> (i * 8)) & 0xff); ++buf; }
 
@@ -99,7 +96,7 @@ public:
         return ss.str();
     };
 
-    static std::string BuildSsml(const std::string& text, const std::string& language, const std::string& voice)
+    static std::string BuildSsml(const std::string& text, const std::shared_ptr<ISpxNamedProperties>& properties)
     {
         std::map<const char*, const char*> languageToDefaultVoice = {
             { "ar-EG", "Microsoft Server Speech Text to Speech Voice (ar-EG, Hoda)" },
@@ -153,21 +150,21 @@ public:
             { "zh-TW", "Microsoft Server Speech Text to Speech Voice (zh-TW, HanHanRUS)" }
         };
 
-        std::string chosenLanguage = language;
-        std::string chosenVoice = voice;
+        // Set default language to en-US
+        std::string chosenLanguage = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_SynthLanguage), "en-US");
+        std::string chosenVoice = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_SynthVoice), "");
 
-        if (chosenLanguage.empty())
+        if (LanguageAutoDetectionEnabled(properties))
         {
-            chosenLanguage = "en-US"; // Set default language to en-US
+            chosenLanguage = "en-US";
         }
-
-        if (chosenVoice.empty())
+        else if (chosenVoice.empty())
         {
             // If it's not found, use en-US default voice
             chosenVoice = "Microsoft Server Speech Text to Speech Voice (en-US, AriaRUS)";
 
             // Set default voice based on language
-            for (auto item : languageToDefaultVoice)
+            for (const auto item : languageToDefaultVoice)
             {
                 if (PAL::stricmp(item.first, chosenLanguage.c_str()) == 0)
                 {
@@ -177,20 +174,28 @@ public:
             }
         }
 
-        char* ssmlBuf = new char[SSML_BUFFER_SIZE];
-        int ssmlLength = snprintf(ssmlBuf, SSML_BUFFER_SIZE, SSML_TEMPLATE, chosenLanguage.data(), chosenVoice.data(), XmlEncode(text).data());
-        auto ssml = std::string(ssmlBuf, ssmlLength);
-        delete[] ssmlBuf;
+        std::ostringstream oss;
+        oss << "<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts' xmlns:emo='http://www.w3.org/2009/10/emotionml' xml:lang='";
+        oss << chosenLanguage << "'>";
+        if (!chosenVoice.empty())
+        {
+            oss << "<voice name='" << chosenVoice << "'>";
+        }
+        oss << XmlEncode(text);
+        if (!chosenVoice.empty())
+        {
+            oss << "</voice>";
+        }
+        oss << "</speak>";
 
-        return ssml;
+        return oss.str();
     };
 
     static std::string XmlEncode(const std::string& text)
     {
         std::stringstream ss;
-        for (size_t i = 0; i < text.length(); ++i)
+        for (char c : text)
         {
-            char c = text[i];
             if (c == '&')
             {
                 ss << "&amp;";
@@ -337,6 +342,12 @@ public:
         BUFFERWRITE(p, dataHdr._len);
 
         return std::make_shared<std::vector<uint8_t>>(tmpBuf, p);
+    }
+
+    static bool LanguageAutoDetectionEnabled(const std::shared_ptr<ISpxNamedProperties>& properties)
+    {
+        const auto autoDetectSourceLanguages = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_AutoDetectSourceLanguages));
+        return g_autoDetectSourceLang_OpenRange == autoDetectSourceLanguages;
     }
 };
 

@@ -1712,6 +1712,7 @@ public:
 class ISpxAutoDetectSourceLangConfig : public ISpxInterfaceBaseFor<ISpxAutoDetectSourceLangConfig>
 {
 public:
+    virtual void InitFromOpenRange() = 0;
     virtual void InitFromLanguages(const char* languages) = 0;
     virtual void AddSourceLanguageConfig(std::shared_ptr<ISpxSourceLanguageConfig> sourceLanguageConfig) = 0;
 };

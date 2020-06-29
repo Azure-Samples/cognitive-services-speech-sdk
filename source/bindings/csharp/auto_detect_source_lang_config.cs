@@ -12,7 +12,7 @@ namespace Microsoft.CognitiveServices.Speech
 {
     /// <summary>
     /// Auto Detect Source Language configuration.
-    /// Added in 1.9.0
+    /// Updated in 1.13.0
     /// </summary>
     public class AutoDetectSourceLanguageConfig
     {
@@ -22,6 +22,20 @@ namespace Microsoft.CognitiveServices.Speech
         {
             ThrowIfNull(configPtr);
             configHandle = new InteropSafeHandle(configPtr, Internal.AutoDetectSourceLanguageConfig.auto_detect_source_lang_config_release);
+        }
+
+        /// <summary>
+        /// Creates an instance of the AutoDetectSourceLanguageConfig with open range
+        /// Note: only <see cref="SpeechSynthesizer"/> supports source language auto detection from open range,
+        /// for <see cref="Recognizer"/>, please use AutoDetectSourceLanguageConfig with specific source languages.
+        /// Added in 1.13.0
+        /// </summary>
+        /// <returns>A new AutoDetectSourceLanguageConfig instance.</returns>
+        public static AutoDetectSourceLanguageConfig FromOpenRange()
+        {
+            IntPtr autoDetectSourceLanguageConfigHandle = IntPtr.Zero;
+            ThrowIfFail(Internal.AutoDetectSourceLanguageConfig.create_auto_detect_source_lang_config_from_open_range(out autoDetectSourceLanguageConfigHandle));
+            return new AutoDetectSourceLanguageConfig(autoDetectSourceLanguageConfigHandle);
         }
 
         /// <summary>

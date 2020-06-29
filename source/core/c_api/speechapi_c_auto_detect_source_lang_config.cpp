@@ -16,6 +16,23 @@
 
 using namespace Microsoft::CognitiveServices::Speech::Impl;
 
+SPXAPI create_auto_detect_source_lang_config_from_open_range(SPXAUTODETECTSOURCELANGCONFIGHANDLE* hAutoDetectSourceLanguageconfig)
+{
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, hAutoDetectSourceLanguageconfig == nullptr);
+
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        *hAutoDetectSourceLanguageconfig = SPXHANDLE_INVALID;
+
+        auto autoDetectSourceLangConfig = SpxCreateObjectWithSite<ISpxAutoDetectSourceLangConfig>("CSpxAutoDetectSourceLangConfig", SpxGetRootSite());
+        autoDetectSourceLangConfig->InitFromOpenRange();
+
+        auto autoDetectSourceLangConfigs = CSpxSharedPtrHandleTableManager::Get<ISpxAutoDetectSourceLangConfig, SPXAUTODETECTSOURCELANGCONFIGHANDLE>();
+        *hAutoDetectSourceLanguageconfig = autoDetectSourceLangConfigs->TrackHandle(autoDetectSourceLangConfig);
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
 SPXAPI create_auto_detect_source_lang_config_from_languages(SPXAUTODETECTSOURCELANGCONFIGHANDLE* hAutoDetectSourceLanguageconfig, const char* languages)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, languages == nullptr || !(*languages));

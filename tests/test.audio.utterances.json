@@ -490,5 +490,33 @@
         }
       ]
     }
+  },
+  "SynthesisUtteranceChinese1": {
+    "FilePath": "null",
+    "NativeLanguage": "zh-CN",
+    "Utterances": {
+      "zh-CN": [
+        {
+          "Text": "你好世界。",
+          "Ssml": "<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts' xmlns:emo='http://www.w3.org/2009/10/emotionml' xml:lang='zh-CN'><voice name='Microsoft Server Speech Text to Speech Voice (zh-CN, HuihuiRUS)'>你好世界。</voice></speak>",
+          "VoiceName": "Microsoft Server Speech Text to Speech Voice (zh-CN, HuihuiRUS)",
+          "TextOffsets": [0, 2]
+        }
+      ]
+    }
+  },
+  "SynthesisUtteranceChinese2": {
+    "FilePath": "null",
+    "NativeLanguage": "zh-CN",
+    "Utterances": {
+      "zh-CN": [
+        {
+          "Text": "今天天气很好。",
+          "Ssml": "<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts' xmlns:emo='http://www.w3.org/2009/10/emotionml' xml:lang='zh-CN'><voice name='Microsoft Server Speech Text to Speech Voice (zh-CN, HuihuiRUS)'>今天天气很好。</voice></speak>",
+          "VoiceName": "Microsoft Server Speech Text to Speech Voice (zh-CN, HuihuiRUS)",
+          "TextOffsets": [0, 2, 4, 5]
+        }
+      ]
+    }
   }
 }

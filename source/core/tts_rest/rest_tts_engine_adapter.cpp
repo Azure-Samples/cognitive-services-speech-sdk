@@ -151,9 +151,7 @@ std::shared_ptr<ISpxSynthesisResult> CSpxRestTtsEngineAdapter::Speak(const std::
     auto ssml = text;
     if (!isSsml)
     {
-        auto language = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_SynthLanguage));
-        auto voice = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_SynthVoice));
-        ssml = CSpxSynthesisHelper::BuildSsml(text, language, voice);
+        ssml = CSpxSynthesisHelper::BuildSsml(text, properties);
     }
 
     SPX_DBG_TRACE_VERBOSE("SSML sent to TTS cognitive service: %s", ssml.data());

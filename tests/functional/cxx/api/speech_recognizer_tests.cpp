@@ -1847,6 +1847,14 @@ TEST_CASE("Verify auto detect source language config in SpeechRecognizer", "[api
         REQUIRE_THROWS_WITH(SpeechRecognizer::FromConfig(speechConfig, autoDetectSourceLanguageConfig, audioConfig),
             Catch::Contains("EndpointId on SpeechConfig is unsupported for auto detection source language scenario."));
     }
+
+    SPXTEST_SECTION("auto detect source language scenario doesn't support open range")
+    {
+        auto autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig::FromOpenRange();
+        auto speechConfig = CurrentSpeechConfig();
+        REQUIRE_THROWS_WITH(SpeechRecognizer::FromConfig(speechConfig, autoDetectSourceLanguageConfig, audioConfig),
+            Catch::Contains("doesn't support auto detection source language from open range."));
+    }
 }
 
 TEST_CASE("Verify source language config in SpeechRecognizer", "[api][cxx]")

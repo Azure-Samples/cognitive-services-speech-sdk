@@ -143,6 +143,8 @@ namespace Config
 
 #define SYNTHESIS_WORD_BOUNDARY_UTTERANCE_CHINESE "SynthesisWordBoundaryUtteranceChinese"
 #define SYNTHESIS_SHORT_UTTERANCE_CHINESE "SynthesisShortUtteranceChinese"
+#define SYNTHESIS_UTTERANCE_CHINESE_1 "SynthesisUtteranceChinese1"
+#define SYNTHESIS_UTTERANCE_CHINESE_2 "SynthesisUtteranceChinese2"
 
 struct SubscriptionRegion
 {

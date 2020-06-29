@@ -77,9 +77,8 @@ std::shared_ptr<ISpxSynthesisResult> CSpxMockTtsEngineAdapter::Speak(const std::
         auto ssml = text;
         if (!isSsml)
         {
-            auto language = ISpxPropertyBagImpl::GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_SynthLanguage), "");
-            auto voice = ISpxPropertyBagImpl::GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_SynthVoice), "");
-            ssml = CSpxSynthesisHelper::BuildSsml(text, language, voice);
+            const auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
+            ssml = CSpxSynthesisHelper::BuildSsml(text, properties);
         }
 
         p->Write(this, requestId, (uint8_t *)(ssml.data()), (uint32_t)(ssml.length()));

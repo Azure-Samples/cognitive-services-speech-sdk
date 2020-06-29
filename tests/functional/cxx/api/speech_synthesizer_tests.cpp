@@ -1047,6 +1047,48 @@ TEST_CASE("Check word boundary events - USP", "[api][cxx]")
     SPXTEST_REQUIRE(order > 0);
 }
 
+TEST_CASE("Synthesis with language auto detection - USP", "[api][cxx]")
+{
+    auto config = UspSpeechConfig();
+    SPXTEST_SECTION("auto detect source language in synthesizer from open range")
+    {
+        auto autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig::FromOpenRange();
+        auto synthesizer = SpeechSynthesizer::FromConfig(config, autoDetectSourceLanguageConfig, nullptr);
+
+        auto text1 = AudioUtterancesMap[SYNTHESIS_UTTERANCE_CHINESE_1].Utterances["zh-CN"][0].Text;
+        auto text2 = AudioUtterancesMap[SYNTHESIS_UTTERANCE_CHINESE_2].Utterances["zh-CN"][0].Text;
+
+        // TODO: check synthesis.context sent to service.
+        // we will get very short audio when language auto detection is disabled as the en-US voices are not mix-lingual
+
+        auto lastTextOffset = 0;
+        synthesizer->WordBoundary += [&lastTextOffset](const SpeechSynthesisWordBoundaryEventArgs& e) {
+            lastTextOffset = e.TextOffset;
+        };
+
+        auto result1 = synthesizer->SpeakText(text1);
+        SPXTEST_REQUIRE(result1->Reason == ResultReason::SynthesizingAudioCompleted);
+        SPXTEST_REQUIRE(result1->GetAudioLength() > 32000); // should longer than 1s
+        SPXTEST_REQUIRE(lastTextOffset >= AudioUtterancesMap[SYNTHESIS_UTTERANCE_CHINESE_1].Utterances["zh-CN"][0].TextOffsets.back());
+
+        lastTextOffset = 0;
+        auto result2 = synthesizer->SpeakText(text2);
+        SPXTEST_REQUIRE(result2->Reason == ResultReason::SynthesizingAudioCompleted);
+        SPXTEST_REQUIRE(result2->GetAudioLength() > 32000); // should longer than 1s
+        SPXTEST_REQUIRE(lastTextOffset >= AudioUtterancesMap[SYNTHESIS_UTTERANCE_CHINESE_2].Utterances["zh-CN"][0].TextOffsets.back());
+    }
+    
+
+    SPXTEST_SECTION("auto detect source language in synthesizer doesn't support specific languages range")
+    {
+        auto autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig::FromLanguages({ "de-DE", "fr-FR" });
+        auto speechConfig = CurrentSpeechConfig();
+        speechConfig->SetEndpointId("CustomEndpoint1");
+        REQUIRE_THROWS_WITH(SpeechSynthesizer::FromConfig(speechConfig, autoDetectSourceLanguageConfig, nullptr),
+            Catch::Contains("Auto detection source languages in SpeechSynthesizer doesn't support language range specification."));
+    }
+}
+
 TEST_CASE("Check word boundary events - USP [manual]", "[manual][api][cxx]") // manual test for AudioOffset of Word Boundary events
 {
     auto config = UspSpeechConfig();

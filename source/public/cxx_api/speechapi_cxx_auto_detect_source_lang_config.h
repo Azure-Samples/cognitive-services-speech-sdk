@@ -22,7 +22,7 @@ namespace Speech {
 
 /// <summary>
 /// Class that defines auto detection source configuration
-/// Added in 1.8.0
+/// Updated in 1.13.0
 /// </summary>
 class AutoDetectSourceLanguageConfig
 {
@@ -34,13 +34,29 @@ public:
     explicit operator SPXAUTODETECTSOURCELANGCONFIGHANDLE() const { return m_hconfig; }
 
     /// <summary>
+    /// Creates an instance of the AutoDetectSourceLanguageConfig with open range as source languages
+    /// Note: only <see cref="SpeechSynthesizer"/> supports source language auto detection from open range,
+    /// for <see cref="Recognizer"/>, please use AutoDetectSourceLanguageConfig with specific source languages.
+    /// Added in 1.13.0
+    /// </summary>
+    /// <returns>A shared pointer to the new AutoDetectSourceLanguageConfig instance.</returns>
+    static std::shared_ptr<AutoDetectSourceLanguageConfig> FromOpenRange()
+    {
+        SPXAUTODETECTSOURCELANGCONFIGHANDLE hconfig = SPXHANDLE_INVALID;
+
+        SPX_THROW_ON_FAIL(create_auto_detect_source_lang_config_from_open_range(&hconfig));
+        auto ptr = new AutoDetectSourceLanguageConfig(hconfig);
+        return std::shared_ptr<AutoDetectSourceLanguageConfig>(ptr);
+    }
+
+    /// <summary>
     /// Creates an instance of the AutoDetectSourceLanguageConfig with source languages
     /// </summary>
     /// <param name="languages">The list of source languages.</param>
     /// <returns>A shared pointer to the new AutoDetectSourceLanguageConfig instance.</returns>
     static std::shared_ptr<AutoDetectSourceLanguageConfig> FromLanguages(const std::vector<SPXSTRING>& languages)
     {
-        SPX_THROW_HR_IF(SPXERR_INVALID_ARG, languages.size() == 0);
+        SPX_THROW_HR_IF(SPXERR_INVALID_ARG, languages.empty());
         SPXAUTODETECTSOURCELANGCONFIGHANDLE hconfig = SPXHANDLE_INVALID;
 
         std::string languagesStr;
@@ -67,7 +83,7 @@ public:
     /// <returns>A shared pointer to the new AutoDetectSourceLanguageConfig instance.</returns>
     static std::shared_ptr<AutoDetectSourceLanguageConfig> FromSourceLanguageConfigs(std::vector<std::shared_ptr<Microsoft::CognitiveServices::Speech::SourceLanguageConfig>> configList)
     {
-        SPX_THROW_HR_IF(SPXERR_INVALID_ARG, configList.size() == 0);
+        SPX_THROW_HR_IF(SPXERR_INVALID_ARG, configList.empty());
         SPXAUTODETECTSOURCELANGCONFIGHANDLE hconfig = SPXHANDLE_INVALID;
 
         bool isFirst = true;

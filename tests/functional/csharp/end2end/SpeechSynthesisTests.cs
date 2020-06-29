@@ -8,6 +8,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -1075,6 +1076,27 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
+        [TestMethod]
+        public async Task SynthesisWithLanguageAutoDetectionUsp()
+        {
+            var autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig.FromOpenRange();
+            using (var synthesizer = new SpeechSynthesizer(uspConfig, autoDetectSourceLanguageConfig, null as AudioConfig))
+            {
+                uint lastTextOffset = 0;
+                synthesizer.WordBoundary += (s, e) => { lastTextOffset = e.TextOffset; };
+                using (var result1 = await synthesizer.SpeakTextAsync(AudioUtterancesMap[AudioUtteranceKeys.SYNTHESIS_UTTERANCE_CHINESE_1].Utterances["zh-CN"][0].Text))
+                {
+                    CheckSynthesisResult(result1, 32000); // should longer than 1s
+                    Assert.IsTrue(lastTextOffset >= AudioUtterancesMap[AudioUtteranceKeys.SYNTHESIS_UTTERANCE_CHINESE_1].Utterances["zh-CN"][0].TextOffsets.Last());
+                }
+                lastTextOffset = 0;
+                using (var result2 = await synthesizer.SpeakTextAsync(AudioUtterancesMap[AudioUtteranceKeys.SYNTHESIS_UTTERANCE_CHINESE_2].Utterances["zh-CN"][0].Text))
+                {
+                    CheckSynthesisResult(result2, 32000); // should longer than 1s
+                    Assert.IsTrue(lastTextOffset >= AudioUtterancesMap[AudioUtteranceKeys.SYNTHESIS_UTTERANCE_CHINESE_2].Utterances["zh-CN"][0].TextOffsets.Last());
+                }
+            }
+        }
 
         [TestMethod]
         [TestCategory("SpeechSynthesisMockTest")]
@@ -1760,7 +1782,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        public static void CheckSynthesisResult(SpeechSynthesisResult result)
+        public static void CheckSynthesisResult(SpeechSynthesisResult result, int minimumSize = -1)
         {
             string cancellationDetails = string.Empty;
             if (result.Reason == ResultReason.Canceled)
@@ -1769,6 +1791,10 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
 
             Assert.AreNotEqual(ResultReason.Canceled, result.Reason, $"The synthesis was canceled unexpectedly, with request id = [{result.ResultId}], cancellation details = [{cancellationDetails}].");
+            if (minimumSize > 0)
+            {
+                Assert.IsTrue(result.AudioData.Length >= minimumSize, $"Audio size should be greater than {minimumSize}, but actually it's {result.AudioData.Length}.");
+            }
         }
 
         private void DoSomethingWithAudioInPullStream(PullAudioOutputStream stream, bool[] canceled)

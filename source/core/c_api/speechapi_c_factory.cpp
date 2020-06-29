@@ -63,7 +63,7 @@ std::shared_ptr<ISpxSourceLanguageConfig> SourceLangConfigFromHandleOrEmptyIfInv
 }
 
 template<typename FactoryMethod>
-auto create_from_config(SPXHANDLE hspeechconfig, SPXHANDLE hautoDetectSourceLangConfig,  SPXHANDLE hSourceLangConfig, SPXHANDLE haudioConfig, FactoryMethod fm)
+auto create_from_config(SPXHANDLE hspeechconfig, SPXHANDLE hautoDetectSourceLangConfig, SPXHANDLE hSourceLangConfig, SPXHANDLE haudioConfig, FactoryMethod fm)
 {
     auto factory = SpxCreateObjectWithSite<ISpxSpeechApiFactory>("CSpxSpeechApiFactory", SpxGetRootSite());
     SPX_IFTRUE_THROW_HR(factory == nullptr, SPXERR_RUNTIME_ERROR);
@@ -101,6 +101,13 @@ auto create_from_config(SPXHANDLE hspeechconfig, SPXHANDLE hautoDetectSourceLang
         {
             ThrowInvalidArgumentException("EndpointId on SpeechConfig is unsupported for auto detection source language scenario. "
                 "Please set per language endpointId through SourceLanguageConfig and use it to construct AutoDetectSourceLanguageConfig.");
+        }
+
+        if (auto_detect_source_lang_config_properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_AutoDetectSourceLanguages))
+            == g_autoDetectSourceLang_OpenRange)
+        {
+            ThrowInvalidArgumentException("Recognizer doesn't support auto detection source language from open range. "
+                "Please set specific languages using AutoDetectSourceLanguageConfig::FromLanguages() or AutoDetectSourceLanguageConfig::FromSourceLanguageConfigs()");
         }
         factory_property_bag->Copy(auto_detect_source_lang_config_properties.get());
     }
@@ -284,7 +291,53 @@ SPXAPI recognizer_create_keyword_recognizer_from_audio_config(SPXRECOHANDLE* phr
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI synthesizer_create_speech_synthesizer_from_config(SPXSYNTHHANDLE* phsynth, SPXSPEECHCONFIGHANDLE hspeechconfig, SPXAUDIOCONFIGHANDLE haudioconfig)
+template<typename FactoryMethod>
+auto create_synthesizer_from_config(SPXHANDLE hspeechconfig, SPXHANDLE hautoDetectSourceLangConfig, SPXHANDLE haudioConfig, FactoryMethod fm)
+{
+    const auto factory = SpxCreateObjectWithSite<ISpxSpeechSynthesisApiFactory>("CSpxSpeechSynthesisApiFactory", SpxGetRootSite());
+    SPX_IFTRUE_THROW_HR(factory == nullptr, SPXERR_RUNTIME_ERROR);
+
+    auto factory_property_bag = SpxQueryInterface<ISpxNamedProperties>(factory);
+
+    const auto config = SpeechConfigFromHandleOrEmptyIfInvalid(hspeechconfig);
+    const auto config_property_bag = SpxQueryInterface<ISpxNamedProperties>(config);
+
+    if (config != nullptr)
+    {
+        Memory::CheckObjectCount(hspeechconfig);
+
+        //copy the properties from the speech config into the factory
+        if (config_property_bag != nullptr)
+        {
+            factory_property_bag->Copy(config_property_bag.get());
+        }
+    }
+
+    auto audio_output = AudioConfigFromHandleOrEmptyIfInvalid(haudioConfig);
+    // copy the audio output properties into the factory, if any.
+    const auto audio_output_properties = SpxQueryInterface<ISpxNamedProperties>(audio_output);
+    if (audio_output_properties != nullptr)
+    {
+        factory_property_bag->Copy(audio_output_properties.get());
+    }
+
+    const auto auto_detect_source_lang_config = AutoDetectSourceLangConfigFromHandleOrEmptyIfInvalid(hautoDetectSourceLangConfig);
+    // copy the auto detect source language config properties into the factory, if any.
+    const auto auto_detect_source_lang_config_properties = SpxQueryInterface<ISpxNamedProperties>(auto_detect_source_lang_config);
+    if (auto_detect_source_lang_config_properties != nullptr)
+    {
+        if (auto_detect_source_lang_config_properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_AutoDetectSourceLanguages), "") != g_autoDetectSourceLang_OpenRange)
+        {
+            ThrowInvalidArgumentException("Auto detection source languages in SpeechSynthesizer doesn't support language range specification. "
+                "Please use FromOpenRange to construct AutoDetectSourceLanguageConfig.");
+        }
+        factory_property_bag->Copy(auto_detect_source_lang_config_properties.get());
+    }
+
+    return ((*factory).*fm)(audio_output);
+}
+
+SPXAPI synthesizer_create_speech_synthesizer_from_config(SPXSYNTHHANDLE* phsynth, SPXSPEECHCONFIGHANDLE hspeechconfig, SPXAUDIOCONFIGHANDLE haudioOutput)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, phsynth == nullptr);
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, !speech_config_is_handle_valid(hspeechconfig));
@@ -294,24 +347,26 @@ SPXAPI synthesizer_create_speech_synthesizer_from_config(SPXSYNTHHANDLE* phsynth
     SPXAPI_INIT_HR_TRY(hr)
     {
         *phsynth = SPXHANDLE_INVALID;
+        const auto synthesizer = create_synthesizer_from_config(hspeechconfig, SPXHANDLE_INVALID, haudioOutput, &ISpxSpeechSynthesisApiFactory::CreateSpeechSynthesizerFromConfig);
+        // track the synth handle
+        auto synthhandles = CSpxSharedPtrHandleTableManager::Get<ISpxSynthesizer, SPXSYNTHHANDLE>();
+        *phsynth = synthhandles->TrackHandle(synthesizer);
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
 
-        Memory::CheckObjectCount(hspeechconfig);
+SPXAPI synthesizer_create_speech_synthesizer_from_auto_detect_source_lang_config(SPXSYNTHHANDLE* phsynth, SPXSPEECHCONFIGHANDLE hspeechconfig, SPXAUTODETECTSOURCELANGCONFIGHANDLE hautoDetectSourceLangConfig, SPXAUDIOCONFIGHANDLE haudioOutput)
+{
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, phsynth == nullptr);
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, !speech_config_is_handle_valid(hspeechconfig));
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, !auto_detect_source_lang_config_is_handle_valid(hautoDetectSourceLangConfig));
 
-        // get the speech synthesis related parameters from the hspeechconfig
-        auto confighandles = CSpxSharedPtrHandleTableManager::Get<ISpxSpeechConfig, SPXSPEECHCONFIGHANDLE>();
-        auto speechconfig = (*confighandles)[hspeechconfig];
-        auto speechconfig_propertybag = SpxQueryInterface<ISpxNamedProperties>(speechconfig);
-        auto factory = SpxCreateObjectWithSite<ISpxSpeechSynthesisApiFactory>("CSpxSpeechSynthesisApiFactory", SpxGetRootSite());
-        SPX_IFTRUE_THROW_HR(factory == nullptr, SPXERR_RUNTIME_ERROR);
+    SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
-        // copy the properties from the speech config into the factory
-        auto fbag = SpxQueryInterface<ISpxNamedProperties>(factory);
-        fbag->Copy(speechconfig_propertybag.get());
-
-        auto audioOutput = AudioConfigFromHandleOrEmptyIfInvalid(haudioconfig);
-
-        auto synthesizer = factory->CreateSpeechSynthesizerFromConfig(audioOutput);
-
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        *phsynth = SPXHANDLE_INVALID;
+        const auto synthesizer = create_synthesizer_from_config(hspeechconfig, hautoDetectSourceLangConfig, haudioOutput, &ISpxSpeechSynthesisApiFactory::CreateSpeechSynthesizerFromConfig);
         // track the synth handle
         auto synthhandles = CSpxSharedPtrHandleTableManager::Get<ISpxSynthesizer, SPXSYNTHHANDLE>();
         *phsynth = synthhandles->TrackHandle(synthesizer);

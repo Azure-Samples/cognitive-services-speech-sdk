@@ -132,6 +132,9 @@ namespace Microsoft.CognitiveServices.Speech.Internal
     internal static class AutoDetectSourceLanguageConfig
     {
         [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention, CharSet = CharSet.Ansi)]
+        public static extern SPXHR create_auto_detect_source_lang_config_from_open_range(out SPXAUTODETECTSOURCELANGCONFIGHANDLE hAutoDetectSourceLanguageconfig);
+
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention, CharSet = CharSet.Ansi)]
         public static extern SPXHR create_auto_detect_source_lang_config_from_languages(out SPXAUTODETECTSOURCELANGCONFIGHANDLE hAutoDetectSourceLanguageconfig, [MarshalAs(UnmanagedType.LPStr)] string languages);
 
         [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
