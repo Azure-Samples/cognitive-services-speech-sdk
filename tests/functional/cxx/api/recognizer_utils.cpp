@@ -529,6 +529,7 @@ bool FindTheRef(RecoResultVector phrases, const std::string& reference)
 {
     sort(begin(phrases), end(phrases), [](const RecoPhrase& lhs, const RecoPhrase& rhs) { return lhs.Offset < rhs.Offset; });
     int index = 0;
+    bool same = false;
     for (auto& phrase : phrases)
     {
         // there are empty strings coming from CTSInRoom service.
@@ -541,17 +542,19 @@ bool FindTheRef(RecoResultVector phrases, const std::string& reference)
 
         // remove punctuation
         text.erase(std::remove_if(text.begin(), text.end(), [](unsigned char x) { return std::ispunct(x) ; }), text.end());
-
+        ref.erase(std::remove_if(ref.begin(), ref.end(), [](unsigned char x) { return std::ispunct(x); }), ref.end());
         index++;
+
         transform(text.begin(), text.end(), text.begin(), [](char c) ->char { return std::tolower(c, std::locale("")); });
         transform(ref.begin(), ref.end(), ref.begin(), [](char c) ->char { return std::tolower(c, std::locale("")); });
         if (text == ref)
         {
+            same = true;
             break;
         }
     }
 
-    return index >= 1;
+    return index >= 1 && same;
 }
 
 std::string GetText(const RecoResultVector& phrases)

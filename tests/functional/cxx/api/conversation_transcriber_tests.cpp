@@ -45,7 +45,7 @@ TEST_CASE("conversation transcriber no join", "[api][cxx]")
 
     REQUIRE_THROWS(transcriber->StartTranscribingAsync().get());
 }
-
+#if 0
 TEST_CASE("conversation transcriber leave conversation", "[api][cxx]")
 {
     auto config = CreateSpeechConfigForCTSInRoom();
@@ -162,7 +162,7 @@ TEST_CASE("conversation transcriber reco", "[api][cxx][reco]")
     SPXTEST_REQUIRE(!result->phrases.empty());
     SPXTEST_REQUIRE(FindTheRef(result->phrases, AudioUtterancesMap[CONVERSATION_BETWEEN_TWO_PERSONS_ENGLISH].Utterances["en-US"][0].Text));
 }
-//
+
 //TEST_CASE("conversation add while pumping", "[api][cxx][add_participant_while_pumping]")
 //{
 //    auto config = CreateSpeechConfigForCTSInRoom();
@@ -192,6 +192,7 @@ TEST_CASE("conversation transcriber reco", "[api][cxx][reco]")
 //    bool res = VerifyTextAndSpeaker(result->phrases, "123.", "Unidentified") || VerifyTextAndSpeaker(result->phrases, "123", "Unidentified");
 //    SPXTEST_REQUIRE(res == true);
 //}
+#endif
 
 TEST_CASE("conversation bad connection", "[api][cxx]")
 {
@@ -216,7 +217,7 @@ TEST_CASE("conversation bad connection", "[api][cxx]")
 
     SPXTEST_REQUIRE(result->phrases[0].Text.find("Runtime error: Url protocol prefix not recognized") != string::npos);
 }
-
+#if 0
 TEST_CASE("conversation_inroom_8_channel_file", "[api][cxx]")
 {
     auto config = CreateSpeechConfigForCTSInRoom();
@@ -237,7 +238,7 @@ TEST_CASE("conversation_inroom_8_channel_file", "[api][cxx]")
     SPXTEST_REQUIRE(result->phrases.empty() == false);
     SPXTEST_REQUIRE(FindTheRef(result->phrases, AudioUtterancesMap[CONVERSATION_BETWEEN_TWO_PERSONS_ENGLISH].Utterances["en-US"][0].Text));
 }
-
+#endif
 TEST_CASE("conversation_inroom_8_channel_audio_pull", "[api][cxx]")
 {
     auto config = CreateSpeechConfigForCTSInRoom();

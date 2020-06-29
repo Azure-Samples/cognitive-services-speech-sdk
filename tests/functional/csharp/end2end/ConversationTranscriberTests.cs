@@ -202,6 +202,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             Assert.AreEqual(exception, true);
         }
 
+        [Ignore("Temporarily Disabled see task 2854191")]
         [TestMethod, TestCategory(TestCategory.LongRunning)]
         public async Task ConversationAddParticipant()
         {
@@ -230,6 +231,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
+        [Ignore("Temporarily Disabled see task 2854191")]
         [TestMethod, TestCategory(TestCategory.LongRunning)]
         public async Task ConversationAddParticipantFromSubscription()
         {
@@ -261,6 +263,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
+        [Ignore("Temporarily Disabled see task 2854191")]
         [TestMethod, TestCategory(TestCategory.LongRunning)]
         public async Task ConversationRemoveParticipant()
         {
@@ -572,7 +575,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             return config;
         }
 
-        [TestMethod, Ignore]
+        [TestMethod]
         public async Task TestDelayedAudio()
         {
             var config = CreateCTSTeamsSpeechConfig(DefaultSettingsMap[DefaultSettingKeys.ONLINE_AUDIO_ENDPOINT]);
@@ -646,7 +649,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             var config = CreateCTSTeamsSpeechConfig(DefaultSettingsMap[DefaultSettingKeys.RECONNECT_AUDIO_ENDPOINT], "?forceTemporaryRedirect=true");
             config.SetServiceProperty("maxConnectionDurationSecs", "5", ServicePropertyChannel.UriQueryParameter);
-            config.SetSystemProxy();
 
             ManualResetEvent reconnectEvent = new ManualResetEvent(false);
             ManualResetEvent canceledEvent = new ManualResetEvent(false);
@@ -708,7 +710,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             var config = CreateCTSTeamsSpeechConfig(DefaultSettingsMap[DefaultSettingKeys.RECONNECT_AUDIO_ENDPOINT], "?forcePermanentRedirect=true");
             config.SetServiceProperty("maxConnectionDurationSecs", "5", ServicePropertyChannel.UriQueryParameter);
-            config.SetSystemProxy();
 
             ManualResetEvent reconnectEvent = new ManualResetEvent(false);
             ManualResetEvent canceledEvent = new ManualResetEvent(false);
