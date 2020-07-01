@@ -194,6 +194,7 @@ from typing import Optional
 %rename ("_from_config") Microsoft::CognitiveServices::Speech::Translation::TranslationRecognizer::FromConfig;
 %rename ("from_recognizer") Microsoft::CognitiveServices::Speech::PhraseListGrammar::FromRecognizer;
 %rename ("_from_language") Microsoft::CognitiveServices::Speech::SourceLanguageConfig::FromLanguage;
+%rename ("_from_open_range") Microsoft::CognitiveServices::Speech::AutoDetectSourceLanguageConfig::FromOpenRange;
 %rename ("_from_languages") Microsoft::CognitiveServices::Speech::AutoDetectSourceLanguageConfig::FromLanguages;
 %rename ("_from_source_language_configs") Microsoft::CognitiveServices::Speech::AutoDetectSourceLanguageConfig::FromSourceLanguageConfigs;
 %rename ("_from_result") Microsoft::CognitiveServices::Speech::AutoDetectSourceLanguageResult::FromResult;

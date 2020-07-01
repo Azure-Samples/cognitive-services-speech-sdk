@@ -1337,13 +1337,15 @@ class SpeechSynthesizer:
         If it is not provided, the default speaker device will be used for audio output.
         If it is None, the output audio will be dropped.
         None can be used for scenarios like performance test.
+    :param auto_detect_source_language_config: The auto detection source language config
     """
     def __init__(self, speech_config: SpeechConfig,
-                audio_config: Optional[audio.AudioOutputConfig] = 'None'):
+                audio_config: Optional[audio.AudioOutputConfig] = 'None',
+                auto_detect_source_language_config: Optional[languageconfig.AutoDetectSourceLanguageConfig] = None):
         if not isinstance(speech_config, SpeechConfig):
             raise ValueError('speech_config must be a SpeechConfig instance')
 
-        self._impl = self._get_impl(impl.SpeechSynthesizer, speech_config, audio_config)
+        self._impl = self._get_impl(impl.SpeechSynthesizer, speech_config, audio_config, auto_detect_source_language_config)
 
     def speak_text(self, text: str) -> SpeechSynthesisResult:
         """
@@ -1410,13 +1412,18 @@ class SpeechSynthesizer:
         return ResultFuture(self._impl.start_speaking_ssml_async(ssml), SpeechSynthesisResult)
 
     @staticmethod
-    def _get_impl(synth_type, speech_config, audio_config):
-        if isinstance(audio_config, str) and audio_config == 'None':
+    def _get_impl(synth_type, speech_config, audio_config, auto_detect_source_language_config):
+        if auto_detect_source_language_config is not None:
+            if isinstance(audio_config, str) and audio_config == 'None':
+                _impl = synth_type._from_config(speech_config._impl, auto_detect_source_language_config._impl)
+            else:
+                _impl = synth_type._from_config(speech_config._impl,
+                                                auto_detect_source_language_config._impl,
+                                                None if audio_config is None else audio_config._impl)
+        elif isinstance(audio_config, str) and audio_config == 'None':
             _impl = synth_type._from_config(speech_config._impl)
-        elif audio_config is None:
-            _impl = synth_type._from_config(speech_config._impl, None)
         else:
-            _impl = synth_type._from_config(speech_config._impl, audio_config._impl)
+            _impl = synth_type._from_config(speech_config._impl, None if audio_config is None else audio_config._impl)
 
         return _impl
 

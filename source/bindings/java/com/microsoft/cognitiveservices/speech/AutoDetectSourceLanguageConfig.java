@@ -15,7 +15,7 @@ import com.microsoft.cognitiveservices.speech.util.SafeHandleType;
 
 /**
  * Represents auto detect source language configuration used for specifying the possible source language candidates
- * Added in version 1.8.0
+ * Updated in version 1.13.0
  */
 public final class AutoDetectSourceLanguageConfig implements Closeable
 {
@@ -28,6 +28,19 @@ public final class AutoDetectSourceLanguageConfig implements Closeable
         catch (ClassNotFoundException ex) {
             throw new IllegalStateException(ex);
         }
+    }
+
+    /**
+     * Creates an instance of the AutoDetectSourceLanguageConfig with open range
+     * Note: only <see cref="SpeechSynthesizer"/> supports source language auto detection from open range,
+     * for <see cref="Recognizer"/>, please use AutoDetectSourceLanguageConfig with specific source languages.
+     * Added in 1.13.0
+     * @return The auto detect source language configuration being created.
+     */
+    public static AutoDetectSourceLanguageConfig fromOpenRange() {
+        IntRef autoDetectLangConfigRef = new IntRef(0);
+        Contracts.throwIfFail(fromOpenRange(autoDetectLangConfigRef));
+        return new AutoDetectSourceLanguageConfig(autoDetectLangConfigRef.getValue());
     }
  
      /**
@@ -110,9 +123,10 @@ public final class AutoDetectSourceLanguageConfig implements Closeable
 
     private AutoDetectSourceLanguageConfig(long handleValue) {
         Contracts.throwIfNull(handleValue, "handleValue");
-        this.configHandle = new SafeHandle(handleValue, SafeHandleType.SourceLanguageConfig);
+        this.configHandle = new SafeHandle(handleValue, SafeHandleType.AutoDetectSourceLanguageConfig);
     }
 
+    private final static native long fromOpenRange(IntRef langConfigRef);
     private final static native long fromLanguages(IntRef langConfigRef, String languages);
     private final static native long createFromSourceLangConfig(IntRef autoDetectLangConfigRef, SafeHandle sourceLanguageConfig);
     private final static native long addSourceLangConfigToAutoDetectSourceLangConfig(IntRef autoDetectLangConfigRef, SafeHandle sourceLanguageConfig);

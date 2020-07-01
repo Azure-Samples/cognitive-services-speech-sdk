@@ -38,19 +38,18 @@ class SourceLanguageConfig():
 
 class AutoDetectSourceLanguageConfig():
     """
-    Represents auto detection source language configuration, allowing specifying the potential source languages and corresponding customized endpoint
+    Represents auto detection source language configuration, allowing open range, specifying the potential source languages and corresponding customized endpoint
     
     The configuration can be initialized in different ways:
 
-    - from languages: pass a list of potential source languages.
-    - from sourceLanguageConfigs: pass a list of source language configurations
+    - from open range: pass nothing, for source language auto detection in synthesis.
+    - from languages: pass a list of potential source languages, for source language auto detection in recognition.
+    - from sourceLanguageConfigs: pass a list of source language configurations, for source language auto detection in recognition.
     
     :param languages: The list of potential source languages. The language is specified in BCP-47 format
     :param sourceLanguageConfigs: The list of source language configurations  
     """
     def __init__(self, languages: List[str] = None, sourceLanguageConfigs: List[SourceLanguageConfig] = None):
-        if languages is None and sourceLanguageConfigs is None:
-            raise ValueError("either languages or sourceLanguageConfigs has to be specified to create AutoDetectSourceLanguageConfig")        
         if languages is not None and sourceLanguageConfigs is not None:
             raise ValueError("languages and sourceLanguageConfigs cannot be both specified to create AutoDetectSourceLanguageConfig")
         self._impl = self._get_impl(impl.AutoDetectSourceLanguageConfig, languages, sourceLanguageConfigs)
@@ -62,9 +61,12 @@ class AutoDetectSourceLanguageConfig():
                  raise ValueError("languages list cannot be empty")            
             return config_type._from_languages(languages)
         
-        if len(sourceLanguageConfigs) == 0:
-            raise ValueError("source language config list cannot be empty")
-        configs = []
-        for config in sourceLanguageConfigs:
-            configs.append(config._impl)
-        return config_type._from_source_language_configs(configs)
+        if sourceLanguageConfigs is not None:
+            if len(sourceLanguageConfigs) == 0:
+                raise ValueError("source language config list cannot be empty")
+            configs = []
+            for config in sourceLanguageConfigs:
+                configs.append(config._impl)
+            return config_type._from_source_language_configs(configs)
+
+        return config_type._from_open_range()

@@ -7,6 +7,7 @@ package tests.runner;
 
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
+import org.junit.runner.Request;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -44,8 +45,16 @@ public class Runner {
         AntPrintRunListener printWriter = new AntPrintRunListener(System.out);
         junitCoreRunner.addListener(printWriter);
 
-        Class[] classes = resolveTestClasses(args);
-        Result result = junitCoreRunner.run(classes);
+        Result result;
+        if (args[0].contains("#")) {    // run a single test method
+            String[] classAndMethod = args[0].split("#");
+            Request request = Request.method(Class.forName(classAndMethod[0]),
+                    classAndMethod[1]);
+            result = junitCoreRunner.run(request);
+        } else {
+            Class[] classes = resolveTestClasses(args);
+            result = junitCoreRunner.run(classes);
+        }
 
         if (outputStream != null) {
             outputStream.close();

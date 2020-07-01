@@ -1532,6 +1532,19 @@ public class SpeechRecognizerTests {
         SpeechRecognizer recognizer = new SpeechRecognizer(speechConfig, autoDetectSourceLanguageConfig, AudioConfig.fromWavFileInput(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath)));
     }
 
+    @Test
+    public void verifyFromOpenRangeNotAllowedForLanguageId() throws ExecutionException {
+        SpeechConfig speechConfig = SpeechConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+            Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+
+        assertNotNull(speechConfig);
+        AutoDetectSourceLanguageConfig autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig.fromOpenRange();
+
+        exceptionRule.expect(RuntimeException.class);
+        exceptionRule.expectMessage("Invalid argument exception: Recognizer doesn't support auto detection source language from open range. Please set specific languages using AutoDetectSourceLanguageConfig::FromLanguages() or AutoDetectSourceLanguageConfig::FromSourceLanguageConfigs()");
+        SpeechRecognizer recognizer = new SpeechRecognizer(speechConfig, autoDetectSourceLanguageConfig, AudioConfig.fromWavFileInput(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath)));
+    }
+
     @Test(expected = NullPointerException.class)
     public void verifyNullSourceLanguageConfig()  throws ExecutionException {
         SpeechConfig speechConfig = SpeechConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,

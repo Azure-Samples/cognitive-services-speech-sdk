@@ -1083,7 +1083,6 @@ TEST_CASE("Synthesis with language auto detection - USP", "[api][cxx]")
     {
         auto autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig::FromLanguages({ "de-DE", "fr-FR" });
         auto speechConfig = CurrentSpeechConfig();
-        speechConfig->SetEndpointId("CustomEndpoint1");
         REQUIRE_THROWS_WITH(SpeechSynthesizer::FromConfig(speechConfig, autoDetectSourceLanguageConfig, nullptr),
             Catch::Contains("Auto detection source languages in SpeechSynthesizer doesn't support language range specification."));
     }

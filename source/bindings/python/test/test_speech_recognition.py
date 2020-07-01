@@ -712,5 +712,28 @@ def test_create_recognizer_invalid_language_config_parameters():
     assert None != errFound
     assert expectedErr == str(errFound)
 
+def test_create_recognizer_invalid_language_detection_config_parameters():
+    speech_config = msspeech.SpeechConfig(subscription="subscription", endpoint="endpoint")
+    audio_config = msspeech.audio.AudioConfig(filename="file")
+    auto_detect_source_language_config = msspeech.languageconfig.AutoDetectSourceLanguageConfig()
+
+    errFound = None
+    try:
+        reco = msspeech.SpeechRecognizer(speech_config, audio_config=audio_config, auto_detect_source_language_config=auto_detect_source_language_config)
+    except RuntimeError as err:
+        errFound = err
+    assert None != errFound
+    assert "Recognizer doesn't support auto detection source language from open range" in str(errFound)
+
+    auto_detect_source_language_config = msspeech.languageconfig.AutoDetectSourceLanguageConfig(languages=["de-DE", "en-US"])
+    speech_config.set_property(msspeech.PropertyId.SpeechServiceConnection_EndpointId, "customEndpoint")
+
+    errFound = None
+    try:
+        reco = msspeech.SpeechRecognizer(speech_config, audio_config=audio_config, auto_detect_source_language_config=auto_detect_source_language_config)
+    except RuntimeError as err:
+        errFound = err
+    assert None != errFound
+    assert "EndpointId on SpeechConfig is unsupported for auto detection source language scenario." in str(errFound)
 
     

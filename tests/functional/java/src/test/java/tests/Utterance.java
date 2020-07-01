@@ -11,9 +11,10 @@ public class Utterance
     public String ProfanityMaskedPattern;
     public String ProfanityRemoved;
     public String ProfanityTagged;
-    public Integer AudioOffset;
+    public String Ssml;
+    public Long[] AudioOffsets;
     public Integer AudioDuration;
-    public Integer TextOffset;
-    public Integer SsmlOffset;
+    public Long[] TextOffsets;
+    public Long[] SsmlOffsets;
 }
 

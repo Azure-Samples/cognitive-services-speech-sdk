@@ -9,6 +9,23 @@
 
 /*
  * Class:     com_microsoft_cognitiveservices_speech_AutoDetectSourceLanguageConfig
+ * Method:    fromOpenRange
+ * Signature: (Lcom/microsoft/cognitiveservices/speech/util/IntRef;)J
+ */
+JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_AutoDetectSourceLanguageConfig_fromOpenRange
+  (JNIEnv *env, jclass cls, jobject autoDetectSourceLanguageConfigHandle)
+{
+    SPXAUTODETECTSOURCELANGCONFIGHANDLE configHandle = SPXHANDLE_INVALID;
+    SPXHR hr = create_auto_detect_source_lang_config_from_open_range(&configHandle);
+    if (SPX_SUCCEEDED(hr))
+    {
+        SetObjectHandle(env, autoDetectSourceLanguageConfigHandle, (jlong)configHandle);
+    }
+    return (jlong)hr;
+}
+
+/*
+ * Class:     com_microsoft_cognitiveservices_speech_AutoDetectSourceLanguageConfig
  * Method:    fromLanguages
  * Signature: (Lcom/microsoft/cognitiveservices/speech/util/IntRef;Ljava/lang/String;)J
  */

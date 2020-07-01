@@ -33,7 +33,7 @@ def pytest_addoption(parser):
 def default_settings(request):
     fileName = os.path.abspath(os.path.join(os.getcwd(), "test.defaults.json"))
     try:
-        with open(fileName) as data_file:
+        with open(fileName, encoding='utf-8') as data_file:
             return json.load(data_file)
     except:
         return None
@@ -42,7 +42,7 @@ def default_settings(request):
 def subscriptions_regions_settings(request):
     fileName = os.path.abspath(os.path.join(os.getcwd(), "test.subscriptions.regions.json"))
     try:
-        with open(fileName) as data_file:
+        with open(fileName, encoding='utf-8') as data_file:
             return json.load(data_file)
     except:
         return None
@@ -51,7 +51,7 @@ def subscriptions_regions_settings(request):
 def audio_utterances_settings(request):
     fileName = os.path.abspath(os.path.join(os.getcwd(), "test.audio.utterances.json"))
     try:
-        with open(fileName) as data_file:
+        with open(fileName, encoding='utf-8') as data_file:
             return json.load(data_file)
     except:
         return None

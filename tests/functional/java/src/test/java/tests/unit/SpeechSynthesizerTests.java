@@ -6,6 +6,7 @@
 package tests.unit;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.ExecutorService;
@@ -27,6 +28,8 @@ import static org.junit.Assert.*;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.Ignore;
+import org.junit.Rule;
+import org.junit.rules.ExpectedException;
 
 import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.audio.AudioOutputStream;
@@ -34,6 +37,7 @@ import com.microsoft.cognitiveservices.speech.audio.PullAudioOutputStream;
 import com.microsoft.cognitiveservices.speech.audio.PushAudioOutputStream;
 import com.microsoft.cognitiveservices.speech.audio.PushAudioOutputStreamCallback;
 import com.microsoft.cognitiveservices.speech.AudioDataStream;
+import com.microsoft.cognitiveservices.speech.AutoDetectSourceLanguageConfig;
 import com.microsoft.cognitiveservices.speech.CancellationErrorCode;
 import com.microsoft.cognitiveservices.speech.CancellationReason;
 import com.microsoft.cognitiveservices.speech.ResultReason;
@@ -45,6 +49,7 @@ import com.microsoft.cognitiveservices.speech.StreamStatus;
 import com.microsoft.cognitiveservices.speech.SpeechSynthesisCancellationDetails;
 import com.microsoft.cognitiveservices.speech.util.EventHandler;
 
+import tests.AudioUtterancesKeys;
 import tests.Settings;
 import tests.SubscriptionsRegionsKeys;
 import tests.TestHelper;
@@ -632,6 +637,68 @@ public class SpeechSynthesizerTests {
         result2.close();
         synthesizer.close();
         speechConfig.close();
+    }
+
+    @Test
+    public void testSynthesisWithLanguageAutoDetection() throws URISyntaxException, InterruptedException, ExecutionException {
+        SpeechConfig speechConfig = CreateSpeechConfig();
+        assertNotNull(speechConfig);
+        AutoDetectSourceLanguageConfig autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig.fromOpenRange();
+        assertNotNull(autoDetectSourceLanguageConfig);
+
+        SpeechSynthesizer synthesizer = new SpeechSynthesizer(speechConfig, autoDetectSourceLanguageConfig, null);
+        assertNotNull(synthesizer);
+
+        String text1 = Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SYNTHESIS_UTTERANCE_CHINESE_1).Utterances.get("zh-CN")[0].Text;
+        String text2 = Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SYNTHESIS_UTTERANCE_CHINESE_2).Utterances.get("zh-CN")[0].Text;
+
+        Long[] textOffsets1 = Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SYNTHESIS_UTTERANCE_CHINESE_1).Utterances.get("zh-CN")[0].TextOffsets;
+        Long[] textOffsets2 = Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SYNTHESIS_UTTERANCE_CHINESE_2).Utterances.get("zh-CN")[0].TextOffsets;
+
+        // we will get very short audio when language auto detection is disabled as the en-US voices are not mix-lingual
+
+        final long[] lastTextOffset = new long[1];
+        lastTextOffset[0] = 0;
+        EventHandler<SpeechSynthesisWordBoundaryEventArgs> wordBoundaryEventHandler = new EventHandler<SpeechSynthesisWordBoundaryEventArgs>() {
+            @Override
+            public void onEvent(Object o, SpeechSynthesisWordBoundaryEventArgs e) {
+                lastTextOffset[0] = e.getTextOffset();
+            }
+        };
+
+        synthesizer.WordBoundary.addEventListener(wordBoundaryEventHandler);
+        SpeechSynthesisResult result1 = synthesizer.SpeakTextAsync(text1).get();
+
+        assertTrue(result1.getReason() == ResultReason.SynthesizingAudioCompleted);
+        assertTrue(result1.getAudioLength() > 32000); // longer than 1s
+        assertTrue(lastTextOffset[0] >= textOffsets1[textOffsets1.length - 1]);
+
+        lastTextOffset[0] = 0;
+        SpeechSynthesisResult result2 = synthesizer.SpeakTextAsync(text2).get();
+
+        assertTrue(result2.getReason() == ResultReason.SynthesizingAudioCompleted);
+        assertTrue(result2.getAudioLength() > 32000); // longer than 1s
+        assertTrue(lastTextOffset[0] >= textOffsets2[textOffsets2.length - 1]);
+
+        result1.close();
+        result2.close();
+        synthesizer.close();
+        speechConfig.close();
+        autoDetectSourceLanguageConfig.close();
+    }
+
+    @Rule
+    public ExpectedException exceptionRule = ExpectedException.none();
+
+    @Test
+    public void verifyFromLanguagesNotAllowedForLanguageId() throws URISyntaxException, ExecutionException {
+        SpeechConfig speechConfig = CreateSpeechConfig();
+        assertNotNull(speechConfig);
+        AutoDetectSourceLanguageConfig autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig.fromLanguages(Arrays.asList("en-US", "de-DE"));
+
+        exceptionRule.expect(RuntimeException.class);
+        exceptionRule.expectMessage("Auto detection source languages in SpeechSynthesizer doesn't support language range specification. Please use FromOpenRange to construct AutoDetectSourceLanguageConfig.");
+        SpeechSynthesizer synthesizer = new SpeechSynthesizer(speechConfig, autoDetectSourceLanguageConfig, null);
     }
 
     @Ignore("TODO not supported by current CI")

@@ -9,6 +9,14 @@ extern "C" {
 #endif
 /*
  * Class:     com_microsoft_cognitiveservices_speech_AutoDetectSourceLanguageConfig
+ * Method:    fromOpenRange
+ * Signature: (Lcom/microsoft/cognitiveservices/speech/util/IntRef;)J
+ */
+JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_AutoDetectSourceLanguageConfig_fromOpenRange
+  (JNIEnv *, jclass, jobject);
+
+/*
+ * Class:     com_microsoft_cognitiveservices_speech_AutoDetectSourceLanguageConfig
  * Method:    fromLanguages
  * Signature: (Lcom/microsoft/cognitiveservices/speech/util/IntRef;Ljava/lang/String;)J
  */

@@ -101,6 +101,23 @@ public class SpeechSynthesizer implements Closeable
     }
 
     /**
+     * Creates a new instance of Speech Synthesizer.
+     * @param speechConfig speech configuration.
+     * @param autoDetectSourceLangConfig the configuration for auto detecting source language
+     * @param audioConfig audio configuration.
+     */
+    public SpeechSynthesizer(SpeechConfig speechConfig, AutoDetectSourceLanguageConfig autoDetectSourceLangConfig, AudioConfig audioConfig) {
+        Contracts.throwIfNull(speechConfig, "speechConfig");
+        Contracts.throwIfNull(autoDetectSourceLangConfig, "autoDetectSourceLangConfig");
+
+        synthHandle = new SafeHandle(0, SafeHandleType.Synthesizer);
+        Contracts.throwIfFail(createSpeechSynthesizerFromAutoDetectSourceLangConfig(synthHandle, speechConfig.getImpl(), autoDetectSourceLangConfig.getImpl(), audioConfig == null ? null : audioConfig.getImpl()));
+        Contracts.throwIfNull(synthHandle.getValue(), "synthHandle");
+        audioOutputKeepAlive = audioConfig;
+        initialize();
+    }
+
+    /**
      * Execute the speech synthesis on plain text, synchronously.
      * @param text The plain text for synthesis.
      * @return The synthesis result.
@@ -468,7 +485,8 @@ public class SpeechSynthesizer implements Closeable
         } catch (Exception e) {}
     }
 
-    private final native long createSpeechSynthesizerFromConfig(SafeHandle synthHandle, SafeHandle speechConfig, SafeHandle audioConfig);
+    private final native long createSpeechSynthesizerFromConfig(SafeHandle synthHandle, SafeHandle speechConfigHandle, SafeHandle audioConfigHandle);
+    private final native long createSpeechSynthesizerFromAutoDetectSourceLangConfig(SafeHandle synthHandle, SafeHandle speechConfigHandle, SafeHandle autoDetectSourceLangConfigHandle, SafeHandle audioConfigHandle);
     private final native long speakText(SafeHandle synthHandle, String text, IntRef resultRef);
     private final native long speakSsml(SafeHandle synthHandle, String ssml, IntRef resultRef);
     private final native long startSpeakingText(SafeHandle synthHandle,String text, IntRef resultRef);

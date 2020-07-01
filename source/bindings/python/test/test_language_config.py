@@ -89,13 +89,6 @@ def test_creation_source_language_config_bad_parameter():
     assert "endpointId cannot be an empty string" == str(errFound)
 
 def test_creation_auto_detect_source_language_config_bad_parameter():
-    errFound = None
-    try:
-        auto_detect_source_language_config = msspeech.languageconfig.AutoDetectSourceLanguageConfig()
-    except ValueError as err:
-        errFound = err
-    assert None != errFound
-    assert "either languages or sourceLanguageConfigs has to be specified to create AutoDetectSourceLanguageConfig" == str(errFound)
 
     source_language_config1 = msspeech.languageconfig.SourceLanguageConfig("de-DE")
     source_language_config2 = msspeech.languageconfig.SourceLanguageConfig("fr-FR", "endpointId1")

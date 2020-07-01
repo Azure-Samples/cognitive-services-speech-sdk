@@ -55,6 +55,26 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_SpeechSynthe
 
 /*
  * Class:     com_microsoft_cognitiveservices_speech_SpeechSynthesizer
+ * Method:    createSpeechSynthesizerFromFromAutoDetectSourceLangConfig
+ * Signature: (Lcom/microsoft/cognitiveservices/speech/util/SafeHandle;Lcom/microsoft/cognitiveservices/speech/util/SafeHandle;Lcom/microsoft/cognitiveservices/speech/util/SafeHandle;Lcom/microsoft/cognitiveservices/speech/util/SafeHandle;)J
+ */
+JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_SpeechSynthesizer_createSpeechSynthesizerFromAutoDetectSourceLangConfig
+  (JNIEnv *env, jobject obj, jobject synthesizerHandle, jobject speechConfigHandle, jobject autoDetectHandle, jobject audioConfigHandle)
+{
+    SPXSYNTHHANDLE synthHandle = SPXHANDLE_INVALID;
+    jlong speechConfig = GetObjectHandle(env, speechConfigHandle);
+    jlong autoDetectLangConfig = GetObjectHandle(env, autoDetectHandle);
+    jlong audioConfig = GetObjectHandle(env, audioConfigHandle);
+    SPXHR hr = synthesizer_create_speech_synthesizer_from_auto_detect_source_lang_config(&synthHandle, (SPXSPEECHCONFIGHANDLE)speechConfig, (SPXAUTODETECTSOURCELANGCONFIGHANDLE)autoDetectLangConfig, (SPXAUDIOCONFIGHANDLE)audioConfig);
+    if (SPX_SUCCEEDED(hr))
+    {
+        SetObjectHandle(env, synthesizerHandle, (jlong)synthHandle);
+    }
+    return (jlong)hr;
+}
+
+/*
+ * Class:     com_microsoft_cognitiveservices_speech_SpeechSynthesizer
  * Method:    speakText
  * Signature: (Lcom/microsoft/cognitiveservices/speech/util/SafeHandle;Ljava/lang/String;Lcom/microsoft/cognitiveservices/speech/util/IntRef;)J
  */

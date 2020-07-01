@@ -1,6 +1,8 @@
 # Copyright (c) Microsoft. All rights reserved.
 # See https://aka.ms/csspeech/license201809 for the full license information.
 
+import requests
+
 import azure.cognitiveservices.speech as msspeech
 
 from concurrent.futures import ThreadPoolExecutor
@@ -30,15 +32,18 @@ class _PushAudioOutputStreamTestCallback(msspeech.audio.PushAudioOutputStreamCal
     def get_audio_size(self) -> int:
         return len(self._audio_data)
 
+
 def _create_speech_config(subscription, speech_region):
     endpoint = 'wss://{}.tts.speech.microsoft.com/cognitiveservices/websocket/v1?TrafficType=Test'.format(speech_region)
     config = msspeech.SpeechConfig(subscription=subscription, endpoint=endpoint)
     return config
 
+
 def _create_speech_config_from_host(subscription, speech_region):
     host = 'https://{}.tts.speech.microsoft.com'.format(speech_region)
     config = msspeech.SpeechConfig(subscription=subscription, host=host)
     return config
+
 
 def _do_something_with_audio_in_push_stream(callback, canceled):
     if not canceled:
@@ -139,7 +144,7 @@ def _synthesis_canceled_counter(e, counter):
 
 
 def _synthesis_word_boundary_event_check(e, counter,
-    expected_text_offsets, expected_word_lengths):
+                                         expected_text_offsets, expected_word_lengths):
     assert counter['_word_boundary_events'] < len(expected_word_lengths)
     assert e.audio_offset > 0
     assert expected_text_offsets[counter['_word_boundary_events']] == e.text_offset
@@ -157,3 +162,11 @@ def _do_something_with_audio_in_result_in_background(future_result, after_synthe
     executor = ThreadPoolExecutor()
     return executor.submit(_do_something_with_audio_in_result, future_result, after_synthesis_done)
 
+
+def _get_token(subscription, region):
+    fetch_token_url = "https://{}.api.cognitive.microsoft.com/sts/v1.0/issueToken".format(region)
+    headers = {
+        'Ocp-Apim-Subscription-Key': subscription
+    }
+    response = requests.post(fetch_token_url, headers=headers)
+    return str(response.text)
