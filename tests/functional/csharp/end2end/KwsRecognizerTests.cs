@@ -17,6 +17,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
     [TestClass]
     public class KwsRecognizerTests : RecognitionTestBase
     {
+        [ClassInitialize]
+        public static void TestClassinitialize(TestContext context)
+        {
+            BaseClassInit(context);
+        }
 
         [TestMethod]
         public async Task TestKeywordFound()
