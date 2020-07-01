@@ -67,3 +67,22 @@ void TranscribedCallback(SPXCONVERSATIONTRANSLATORHANDLE conversationTranslatorH
 void TextMessageCallback(SPXCONVERSATIONTRANSLATORHANDLE conversationTranslatorHandle, SPXEVENTHANDLE eventHandle, void* context);
 
 void SetProcessState(bool state);
+
+/*! \cond PRIVATE */
+struct LocalRefGuard
+{
+    inline LocalRefGuard(JNIEnv* env, jobject obj): m_env{env}, m_obj{obj}
+    {}
+
+    inline ~LocalRefGuard()
+    {
+        if (m_obj != nullptr)
+        {
+            m_env->DeleteLocalRef(m_obj);
+        }
+    }
+private:
+    JNIEnv* m_env;
+    jobject m_obj;
+};
+/*! \endcond */

@@ -4,8 +4,11 @@
 //
 //
 #include <stdio.h>
+#include <cstring>
 #include "jni_utils.h"
 #include <string>
+#include <algorithm>
+#include <array>
 #include <vector>
 #include <mutex>
 #include <map>
@@ -407,44 +410,35 @@ void ReleaseStringUTFChars(JNIEnv* env, jstring jString, const char *cString)
  */
 jobject AsBigInteger(JNIEnv *env, uint64_t value)
 {
-    jobject jresult = NULL;
-    jbyte* bae = NULL;
-    jclass clazz = NULL;
-    jmethodID mid = NULL;
-    jbyteArray ba = env->NewByteArray(9);
+    auto ba = env->NewByteArray(sizeof(uint64_t));
+    auto guard = LocalRefGuard(env, ba);
     if (CheckException(env))
     {
-        goto Exit;
+        return nullptr;
     }
-    bae = env->GetByteArrayElements(ba, 0);
+    std::array<jbyte, sizeof(uint64_t)> buffer{};
+    std::memcpy(buffer.data(), reinterpret_cast<int8_t*>(&value), sizeof(uint64_t));
+    std::reverse(buffer.begin(), buffer.end());
+    env->SetByteArrayRegion(ba, 0, sizeof(uint64_t), buffer.data());
     if (CheckException(env))
     {
-        goto Exit;
+        return nullptr;
     }
-    clazz = env->FindClass("java/math/BigInteger");
+    auto clazz = env->FindClass("java/math/BigInteger");
     if (CheckException(env))
     {
-        goto Exit;
+        return nullptr;
     }
-    mid = env->GetMethodID(clazz, "<init>", "([B)V");
+    auto mid = env->GetMethodID(clazz, "<init>", "([B)V");
     if (CheckException(env))
     {
-        goto Exit;
+        return nullptr;
     }
-    bae[0] = 0;
-    for (int i = 1; i < 9; i++)
-    {
-        bae[i] = (jbyte)(value >> 8 * (8 - i));
-    }
-    jresult = env->NewObject(clazz, mid, ba);
+    auto jresult = env->NewObject(clazz, mid, ba);
     if (CheckException(env))
     {
-        goto Exit;
+        return nullptr;
     }
-
-Exit:
-    if (ba != NULL && bae != NULL) env->ReleaseByteArrayElements(ba, bae, 0);
-    if (ba != NULL) env->DeleteLocalRef(ba);
     return jresult;
 }
 
