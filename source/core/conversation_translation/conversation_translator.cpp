@@ -1291,7 +1291,6 @@ namespace ConversationTranslation {
             // remove callbacks
             convInternals->GetConversationConnection()->SetCallbacks(nullptr);
             convInternals->ConversationDeleted.remove(m_convDeletedEvtHandlerId);
-            m_convDeletedEvtHandlerId = 0;
         }
     }
 

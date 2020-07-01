@@ -38,6 +38,7 @@ namespace Microsoft.CognitiveServices.Speech
         {
             eventHandle.Dispose();
             Result.Dispose();
+            GC.SuppressFinalize(this);
         }
     }
 }

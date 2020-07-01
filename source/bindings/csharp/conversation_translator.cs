@@ -212,6 +212,7 @@ namespace Microsoft.CognitiveServices.Speech.Transcription
         /// <param name="nickname">The display name to use for the current participant.</param>
         /// <param name="lang">The speech language to use for the current participant.</param>
         /// <returns>An asynchronous operation.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303", Justification = "exceptions not localized")]
         public Task JoinConversationAsync(string conversationId, string nickname, string lang)
         {
             if (string.IsNullOrWhiteSpace(conversationId))
@@ -259,6 +260,7 @@ namespace Microsoft.CognitiveServices.Speech.Transcription
         /// </summary>
         /// <param name="message">The message to send.</param>
         /// <returns>An asynchronous operation.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303", Justification = "exceptions not localized")]
         public Task SendTextMessageAsync(string message)
         {
             if (string.IsNullOrWhiteSpace(message))
@@ -281,6 +283,7 @@ namespace Microsoft.CognitiveServices.Speech.Transcription
         /// </summary>
         /// <param name="authToken">The authorization token.</param>
         /// <param name="region">(Optional) The Azure region for this token.</param>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303", Justification = "exceptions not localized")]
         public void SetAuthorizationToken(string authToken, string region = null)
         {
             if (string.IsNullOrWhiteSpace(authToken))
@@ -307,6 +310,7 @@ namespace Microsoft.CognitiveServices.Speech.Transcription
         /// </summary>
         /// <param name="disposeManaged">True to dispose managed resources</param>
         /// <returns></returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303", Justification = "exceptions not localized")]
         protected override void Dispose(bool disposeManaged)
         {
             if (disposeManaged)
@@ -332,6 +336,7 @@ namespace Microsoft.CognitiveServices.Speech.Transcription
             _nativeHandle?.Dispose();
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope", Justification = "We may not always own audioConfig, so we can't always call Dispose() on it.")]
         private static InteropSafeHandle Create(Audio.AudioConfig audioConfig, bool validateConfig)
         {
             if (validateConfig && audioConfig == null)
@@ -339,11 +344,8 @@ namespace Microsoft.CognitiveServices.Speech.Transcription
                 throw new ArgumentNullException(nameof(audioConfig));
             }
 
+            InteropSafeHandle audioConfigHandle = Recognizer.getAudioConfigHandle(audioConfig);
             IntPtr handle = Internal.ConversationTranslator.SPXHANDLE_INVALID;
-            InteropSafeHandle audioConfigHandle = audioConfig == null
-                ? new InteropSafeHandle(new IntPtr(-1), null)
-                : audioConfig.configHandle;
-
             ThrowIfFail(Internal.ConversationTranslator.conversation_translator_create_from_config(
                 out handle, audioConfigHandle));
 

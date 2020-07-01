@@ -104,8 +104,10 @@ namespace Microsoft.CognitiveServices.Speech.Audio
         /// </summary>
         /// <param name="buffer">The buffer to receive the audio data</param>
         /// <returns>The number of bytes filled, or 0 in case the stream hits its end and there is no more data available.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303", Justification = "exceptions not localized")]
         public uint Read(byte[] buffer)
         {
+            ThrowIfNull(buffer, "buffer can't be null.");
             ThrowIfNull(streamHandle, "Invalid stream handle.");
 
             IntPtr nativeBuffer = Marshal.AllocHGlobal(buffer.Length);

@@ -20,9 +20,11 @@ namespace Microsoft.CognitiveServices.Speech
         /// </summary>
         /// <param name="profiles">a collection of voice profiles.</param>
         /// <returns>The speaker identification model being created.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303", Justification = "exceptions not localized")]
         public static SpeakerIdentificationModel FromProfiles(IEnumerable<VoiceProfile> profiles)
         {
             IntPtr modelHandle = IntPtr.Zero;
+            ThrowIfNull(profiles, "profiles cannot be null");
             ThrowIfFail(Internal.SpeakerRecognition.speaker_identification_model_create(out modelHandle));
 
             InteropSafeHandle handle = new InteropSafeHandle(modelHandle, Internal.SpeakerRecognition.speaker_identification_model_release_handle);

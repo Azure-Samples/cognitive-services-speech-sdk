@@ -33,6 +33,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// </summary>
         /// <param name="recognizer">The recognizer associated with the connection.</param>
         /// <returns>The Connection instance of the recognizer.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303", Justification = "exceptions not localized")]
         public static Connection FromRecognizer(Recognizer recognizer)
         {
             ThrowIfNull(recognizer, "null recognizer");
@@ -46,6 +47,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// </summary>
         /// <param name="convTrans">The conversation translator associated with the connection.</param>
         /// <returns>The Connection instance of the conversation translator.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303", Justification = "exceptions not localized")]
         public static Connection FromConversationTranslator(ConversationTranslator convTrans)
         {
             ThrowIfNull(convTrans, "null conversation translator");
@@ -63,6 +65,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <summary>
         /// Dispose of associated resources.
         /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303", Justification = "exceptions not localized")]
         public void Dispose()
         {
             try
@@ -121,6 +124,7 @@ namespace Microsoft.CognitiveServices.Speech
             messageReceivedCallbackDelegate = null;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303", Justification = "exceptions not localized")]
         internal Connection(IntPtr connectionPtr)
         {
             ThrowIfNull(connectionPtr, "Invalid connectionPtr.");

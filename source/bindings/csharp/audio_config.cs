@@ -192,11 +192,12 @@ namespace Microsoft.CognitiveServices.Speech.Audio
         /// </summary>
         /// <param name="name">Name of the property</param>
         /// <param name="value">Value of the property</param>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1303:Do not pass literals as localized parameters", Justification = "exceptions not localized")]
         public void SetProperty(string name, string value)
         {
             if (value == null)
             {
-                throw new ArgumentNullException("Invalid property value.");
+                throw new ArgumentNullException(name, "Invalid property value.");
             }
 
             propBag.SetProperty(name, value);
@@ -208,11 +209,12 @@ namespace Microsoft.CognitiveServices.Speech.Audio
         /// </summary>
         /// <param name="id">PropertyId of the property</param>
         /// <param name="value">Value of the property</param>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1303:Do not pass literals as localized parameters", Justification = "exceptions not localized")]
         public void SetProperty(PropertyId id, string value)
         {
             if (value == null)
             {
-                throw new ArgumentNullException("Invalid property value.");
+                throw new ArgumentNullException(id.ToString(), "Invalid property value.");
             }
 
             propBag.SetProperty(id, value);

@@ -39,7 +39,7 @@ jobs:
   dependsOn: Pre
   condition: and(succeeded('Pre'), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' WindowsSdlBuild '))
   pool:
-    name: Hosted VS2017
+    vmImage: 'windows-2019'
   timeoutInMinutes: 120
   variables:
     BuildPlatform: x64
@@ -61,10 +61,10 @@ jobs:
         . ci/functions.sh
         if [[ "$(BuildPlatform)" == Win32 ]]; then
           vsts_setvar SPEECHSDK_TARGET_PLATFORM "Windows-x86"
-          vsts_setvar SPEECHSDK_CMAKE_GENERATOR "Visual Studio 15"
+          vsts_setvar SPEECHSDK_CMAKE_GENERATOR "Visual Studio 16 2019"
         else
           vsts_setvar SPEECHSDK_TARGET_PLATFORM "Windows-x64"
-          vsts_setvar SPEECHSDK_CMAKE_GENERATOR "Visual Studio 15 Win64"
+          vsts_setvar SPEECHSDK_CMAKE_GENERATOR "Visual Studio 16 2019"
         fi
         vsts_setvar SPEECHSDK_BUILD_CONFIGURATION "$(BuildConfiguration)"
         vsts_setvar SPEECHSDK_ENABLE_UNIDEC true
@@ -176,11 +176,6 @@ jobs:
     inputs:
       ApplyRules: All
       ExternalRelease: true
-  # Currently we do not have TypeScript source in this repository. Keeping the task here with default options.
-  - task: securedevelopmentteam.vss-secure-development-tools.build-task-tslint.TSLint@1
-    displayName: 'Run TSLint'
-  - task: securedevelopmentteam.vss-secure-development-tools.build-task-prefast.SDLNativeRules@2
-    displayName: 'Run the PREfast SDL Native Rules for MSBuild'
   # Checks END
   # Publish artifact and fail the build if necessary
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-publishsecurityanalysislogs.PublishSecurityAnalysisLogs@2
@@ -200,7 +195,7 @@ jobs:
   condition: and(succeeded('Pre', 'WindowsSdlBuild'), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' TsaUpload '))
 
   pool:
-    name: Hosted VS2017
+    vmImage: 'windows-2019'
   timeoutInMinutes: 30
   steps:
   - script: |
@@ -248,7 +243,7 @@ jobs:
   dependsOn: [Pre, WindowsBuild]
   condition: and(succeeded('Pre', 'WindowsBuild'), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' CompEvalTest '))
   pool:
-    name: Hosted VS2017
+    vmImage: 'windows-2019'
   timeoutInMinutes: 400
   steps:
   - script: |
@@ -292,19 +287,11 @@ jobs:
     kws: true
     continueOnTestFailure: ${{ parameters.continueOnTestFailure }}
 
-- template: build-windows.yml
-  parameters:
-    crt: OS_UCRT
-    name: WindowsOS
-    kws: false
-    suffix: .os
-    continueOnTestFailure: ${{ parameters.continueOnTestFailure }}
-
 - job: WindowsUwpBuild
   dependsOn: Pre
   condition: and(succeeded('Pre'), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' WindowsUwpBuild '))
   pool:
-    name: Hosted VS2017
+    vmImage: 'windows-2019'
   timeoutInMinutes: 30
   strategy:
     maxParallel: 8
@@ -341,6 +328,21 @@ jobs:
     displayName: Work around for recent broken system path on Hosted VS2017 build agents.
     # see ICM https://icm.ad.msft.net/imp/v3/incidents/details/171621867/home
     # see PR  https://github.com/actions/virtual-environments/pull/211/files that broke many bash commands on Hosted VS2017 build agents.
+  - powershell: |
+      echo "downloading WindowsSDK Installer."
+      Invoke-WebRequest -OutFile winsdksetup.exe https://go.microsoft.com/fwlink/p/?linkid=2120843
+      echo "starting the installer."
+      Start-Process -Wait cmd -Verb runas -ArgumentList /c, cd, (Get-Location), '&&', start, /wait, .\winsdksetup.exe, /quiet, /norestart, /log, WinSDKSetup.log
+      sleep -Seconds 5
+      echo "waiting for installer to finish."
+      while ( $logTail = get-content .\WinSDKSetup.log -Tail 3 ) {
+        echo $logTail
+        if ( $logTail -Match "Exit code:" ) {
+          break
+          } 
+        sleep -Seconds 10
+        }
+    displayName: download and Install Microsoft.VisualStudio.Component.Windows10SDK.19041
   - bash: |
       set -u -e -o pipefail
       . ci/functions.sh
@@ -359,6 +361,7 @@ jobs:
       buildVersionToDownload: specific
       buildId: $(SPEECHSDK_UWP_OPENSSL_BUILD_ID)
       artifactName: speechsdk-static-release
+    # TODO detect installation failures, export diagnostics. For now, we'll fail in msbuild a little bit down.  
   - script: |
       move $(System.ArtifactsDirectory)\speechsdk-static-release\include external\uwp_ssl\include && ^
       move $(System.ArtifactsDirectory)\speechsdk-static-release\lib external\uwp_ssl\lib && ^
@@ -379,7 +382,7 @@ jobs:
         else
           vsts_setvar SPEECHSDK_TARGET_PLATFORM "WindowsUwp-x64"
         fi
-        vsts_setvar SPEECHSDK_CMAKE_GENERATOR "Visual Studio 15"
+        vsts_setvar SPEECHSDK_CMAKE_GENERATOR "Visual Studio 16 2019"
         vsts_setvar SPEECHSDK_BUILD_CONFIGURATION "$(BuildConfiguration)"
         vsts_setvar SPEECHSDK_ENABLE_KWS true
         vsts_setvar SPEECHSDK_ENABLE_UNIDEC true
@@ -572,20 +575,14 @@ jobs:
         displayName: Publish test results
 
 - job: NuGet
-  variables:
-    HAS_OS_BUILD: $[contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' WindowsOSBuild ')]
-  dependsOn: [Pre, LinuxBuild, LinuxDockerBuild, WindowsBuild, WindowsOSBuild, WindowsUwpBuild, macOSBuild, AndroidBuild, IosBuild]
+  dependsOn: [Pre, LinuxBuild, LinuxDockerBuild, WindowsBuild, WindowsUwpBuild, macOSBuild, AndroidBuild, IosBuild]
   condition: |
     and(
       succeeded('Pre', 'LinuxBuild', 'LinuxDockerBuild', 'WindowsBuild', 'WindowsUwpBuild', 'macOSBuild', 'AndroidBuild', 'IosBuild'),
-      xor(
-        succeeded('WindowsOSBuild'),
-        not(contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' WindowsOSBuild '))
-      ),
       contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' NuGet ')
     )
   pool:
-    name: Hosted VS2017
+    vmImage: 'windows-2019'
   timeoutInMinutes: 30
   steps:
   - script: |
@@ -743,7 +740,7 @@ jobs:
   dependsOn: [Pre, NuGet]
   condition: and(succeeded('Pre', 'NuGet'), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' WackTest '))
   pool:
-    name: Hosted VS2017
+    vmImage: 'windows-2019'
   timeoutInMinutes: 30
   variables:
     UwpSampleDir: public_samples/quickstart/csharp/uwp/from-microphone
@@ -996,7 +993,7 @@ jobs:
   dependsOn: Pre
   condition: and(succeeded('Pre'), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' AndroidBuild '))
   pool:
-    name: Hosted VS2017
+    vmImage: 'windows-2019'
   timeoutInMinutes: 30
   strategy:
     maxParallel: 8
@@ -1171,7 +1168,7 @@ jobs:
   dependsOn: [Pre, AndroidBuild]
   condition: and(succeeded('Pre', 'AndroidBuild'), eq(variables['SPEECHSDK_RUN_TESTS'], 'true'), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' AndroidAppcenterTest '))
   pool:
-    name: Hosted VS2017
+    vmImage: 'windows-2019'
   timeoutInMinutes: 60
   variables:
     SPEECHSDK_TEST_STORAGEACCOUNTNAME: csspeechtestdata
@@ -1307,7 +1304,7 @@ jobs:
   dependsOn: [Pre, AndroidBuild]
   condition: and(succeeded('Pre', 'AndroidBuild'), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' AndroidPackage '))
   pool:
-    name: Hosted VS2017
+    vmImage: 'windows-2019'
   timeoutInMinutes: 30
   steps:
   - script: |
@@ -2318,7 +2315,7 @@ jobs:
   dependsOn: [Pre, NuGet, AndroidPackage, JavaJrePackage, WindowsBuild, UnityBuild]
   condition: and(succeeded('Pre', 'NuGet', 'AndroidPackage', 'JavaJrePackage', 'WindowsBuild', 'UnityBuild'), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' CheckSignatures '))
   pool:
-    name: Hosted VS2017
+    vmImage: 'windows-2019'
   timeoutInMinutes: 60
   steps:
   - script: |
@@ -2447,7 +2444,7 @@ jobs:
   dependsOn: Pre
   condition: and(succeeded('Pre'), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' DocFX '))
   pool:
-    name: Hosted VS2017
+    vmImage: 'windows-2019'
   steps:
   - script: |
       echo ##vso[task.prependpath]C:\Program Files\Git\mingw64\bin

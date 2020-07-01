@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Runtime.Serialization.Json;
+using static Microsoft.CognitiveServices.Speech.Internal.SpxExceptionThrower;
 
 namespace Microsoft.CognitiveServices.Speech
 {
@@ -25,6 +26,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <returns>A collection of best recognitions.</returns>
         public static IEnumerable<DetailedSpeechRecognitionResult> Best(this SpeechRecognitionResult result)
         {
+            ThrowIfNull(result);
             var json = result.Properties.GetProperty(PropertyId.SpeechServiceResponse_JsonResult);
             using (var stream = new MemoryStream())
             using (var writer = new StreamWriter(stream))

@@ -110,6 +110,7 @@ namespace Microsoft.CognitiveServices.Speech.Intent
             this.audioInputKeepAlive = audioConfig;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303", Justification = "exceptions not localized")]
         internal IntentRecognizer(InteropSafeHandle recoHandle) : base(recoHandle)
         {
             recognizingCallbackDelegate = FireEvent_Recognizing;
@@ -267,6 +268,7 @@ namespace Microsoft.CognitiveServices.Speech.Intent
         /// <remarks>Once recognized, the IntentRecognitionResult's IntentId property will contain the intentName specified here.</remarks>
         public void AddIntent(LanguageUnderstandingModel model, string intentName)
         {
+            ThrowIfNull(model);
             var intentTrigger = IntentTrigger.From(model, intentName);
             AddIntent(intentTrigger, intentName);
         }
@@ -279,6 +281,7 @@ namespace Microsoft.CognitiveServices.Speech.Intent
         /// <param name="intentId">A custom id string to be returned in the IntentRecognitionResult's IntentId property.</param>
         public void AddIntent(LanguageUnderstandingModel model, string intentName, string intentId)
         {
+            ThrowIfNull(model);
             var intentTrigger = IntentTrigger.From(model, intentName);
             AddIntent(intentTrigger, intentId);
         }
@@ -290,6 +293,7 @@ namespace Microsoft.CognitiveServices.Speech.Intent
         /// <param name="intentId">A custom string id to be returned in the IntentRecognitionResult's IntentId property.</param>
         public void AddAllIntents(LanguageUnderstandingModel model, string intentId)
         {
+            ThrowIfNull(model);
             var intentTrigger = IntentTrigger.From(model);
             AddIntent(intentTrigger, intentId);
         }
@@ -300,10 +304,12 @@ namespace Microsoft.CognitiveServices.Speech.Intent
         /// <param name="model">The language understanding model from Language Understanding service.</param>
         public void AddAllIntents(LanguageUnderstandingModel model)
         {
+            ThrowIfNull(model);
             var intentTrigger = IntentTrigger.From(model);
             AddIntent(intentTrigger, "");
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303", Justification = "exceptions not localized")]
         private void AddIntent(IntentTrigger intentTrigger, string intentId)
         {
             ThrowIfNull(recoHandle, "Invalid recognizer handle");

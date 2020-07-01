@@ -19,103 +19,21 @@ namespace Speech {
 namespace Impl {
 
     template<typename ...Args>
-    class event_handler
-    {
-    public:
-        typedef std::function<void(Args...)> handler_func_type;
-
-        event_handler() = default;
-
-        event_handler(handler_func_type handler)
-            : m_id(0), m_function(handler)
-        {
-            m_id = ++m_nextId;
-        }
-
-        event_handler(const event_handler& other)
-            : m_id(other.m_id), m_function(other.m_function)
-        {
-        }
-
-        event_handler(event_handler&& other)
-            : m_id(other.m_id), m_function(std::move(other.m_function))
-        {
-        }
-
-        event_handler& operator =(const event_handler& other)
-        {
-            m_id = other.m_id;
-            m_function = other.m_function;
-            return *this;
-        }
-
-        event_handler& operator =(event_handler&& other)
-        {
-            m_id = other.m_id;
-            m_function = std::move(other.m_function);
-            return *this;
-        }
-
-        size_t id() const
-        {
-            return m_id;
-        }
-
-        void operator()(Args... args) const
-        {
-            if (m_function)
-            {
-                m_function(args...);
-            }
-        }
-
-        bool operator ==(const event_handler& other) const
-        {
-            return m_id == other.id;
-        }
-
-    private:
-        size_t m_id;
-        handler_func_type m_function;
-        static std::atomic<size_t> m_nextId;
-    };
-
-    // init the static members
-    template<typename ...Args> std::atomic<size_t> event_handler<Args...>::m_nextId(0);
-
-
-
-    template<typename ...Args>
     class event
     {
     public:
         event() = default;
 
-        size_t add(const typename event_handler<Args...>::handler_func_type& handler)
-        {
-            return add(event_handler<Args...>(handler));
-        }
-
-        size_t add(const event_handler<Args...>& handler)
+        size_t add(const std::function<void(Args...)>& callback)
         {
             std::lock_guard<std::mutex> lock(m_lock);
+            event_handler handler(m_nextId++, callback);
             m_handlers.push_back(handler);
-            return handler.id();
+            return handler.id;
         }
 
         template<typename C>
-        size_t addUnsafe(C* instance, void (C::*callback)(Args...))
-        {
-            std::function<void(Args...)> boundCallback = [instance, callback](Args... args)
-            {
-                (instance->*callback)(args...);
-            };
-
-            return add(event_handler<Args...>(boundCallback));
-        }
-
-        template<typename C>
-        size_t add(std::shared_ptr<C> instance, void (C::*callback)(Args...))
+        size_t add(std::shared_ptr<C> instance, void (C::* callback)(Args...))
         {
             std::weak_ptr<C> weak(instance);
             std::function<void(Args...)> boundCallback = [weak, callback](Args... args)
@@ -127,34 +45,14 @@ namespace Impl {
                 }
             };
 
-            return add(event_handler<Args...>(boundCallback));
+            return add(boundCallback);
         }
 
-        void remove(size_t id)
+        void remove(const size_t id)
         {
             std::lock_guard<std::mutex> lock(m_lock);
             m_handlers.remove_if(
-                [id](const event_handler<Args...>& handler) { return id == handler.id(); });
-        }
-
-        void remove(const event_handler<Args...>& handler)
-        {
-            std::lock_guard<std::mutex> lock(m_lock);
-            m_handlers.remove(handler);
-        }
-
-        void raise(Args... params)
-        {
-            std::list<event_handler<Args...>> allHandlers;
-            {
-                std::lock_guard<std::mutex> lock(m_lock);
-                allHandlers = m_handlers; // copy list
-            }
-
-            for (const event_handler<Args...>& handler : allHandlers)
-            {
-                handler(params...);
-            }
+                [id](const auto& handler) { return handler.id == id; });
         }
 
         void clear()
@@ -163,9 +61,21 @@ namespace Impl {
             m_handlers.clear();
         }
 
-        inline size_t operator +=(const event_handler<Args...>& handler) { return add(handler); }
-        inline size_t operator +=(const typename event_handler<Args...>::handler_func_type& handler) { return add(handler); }
-        inline void operator -=(const event_handler<Args...>& handler) { remove(handler); }
+        void raise(Args... params)
+        {
+            std::list<event_handler> allHandlers;
+            {
+                std::lock_guard<std::mutex> lock(m_lock);
+                allHandlers = m_handlers; // copy list
+            }
+
+            for (const auto& handler : allHandlers)
+            {
+                handler.callback(params...);
+            }
+        }
+
+        inline size_t operator +=(const std::function<void(Args...)>& handler) { return add(handler); }
         inline void operator ()(Args... params) { raise(params...); }
 
         event(const event& other) = delete;
@@ -174,9 +84,24 @@ namespace Impl {
         event& operator =(event&& other) = delete;
 
     private:
-        std::mutex m_lock;
-        std::list<event_handler<Args...>> m_handlers;
-    };
+        struct event_handler
+        {
+            event_handler(size_t id, std::function<void(Args...)> callback)
+                : id(id), callback(callback)
+            {}
 
+            size_t id;
+            std::function<void(Args...)> callback;
+
+            inline bool operator==(const event_handler& other) const
+            {
+                return id == other.id;
+            }
+        };
+
+        size_t m_nextId = 0;
+        std::mutex m_lock;
+        std::list<event_handler> m_handlers;
+    };
 
 } } } } // Microsoft::CognitiveServices::Speech::Impl

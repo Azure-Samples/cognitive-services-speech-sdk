@@ -76,6 +76,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <returns>A speech config instance.</returns>
         public static SpeechConfig FromEndpoint(Uri endpoint, string subscriptionKey)
         {
+            ThrowIfNull(endpoint);
             IntPtr speechConfigHandle = IntPtr.Zero;
             ThrowIfFail(Internal.SpeechConfig.speech_config_from_endpoint(out speechConfigHandle, Uri.EscapeUriString(endpoint.ToString()), subscriptionKey));
             return new SpeechConfig(speechConfigHandle);
@@ -98,6 +99,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <returns>A speech config instance.</returns>
         public static SpeechConfig FromEndpoint(Uri endpoint)
         {
+            ThrowIfNull(endpoint);
             IntPtr speechConfigHandle = IntPtr.Zero;
             ThrowIfFail(Internal.SpeechConfig.speech_config_from_endpoint(out speechConfigHandle, Uri.EscapeUriString(endpoint.ToString()), null));
             return new SpeechConfig(speechConfigHandle);
@@ -117,6 +119,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <returns>A speech config instance.</returns>
         public static SpeechConfig FromHost(Uri host, string subscriptionKey)
         {
+            ThrowIfNull(host);
             IntPtr speechConfigHandle = IntPtr.Zero;
             ThrowIfFail(Internal.SpeechConfig.speech_config_from_host(out speechConfigHandle, Uri.EscapeUriString(host.ToString()), subscriptionKey));
             return new SpeechConfig(speechConfigHandle);
@@ -137,6 +140,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <returns>A speech config instance.</returns>
         public static SpeechConfig FromHost(Uri host)
         {
+            ThrowIfNull(host);            
             IntPtr speechConfigHandle = IntPtr.Zero;
             ThrowIfFail(Internal.SpeechConfig.speech_config_from_host(out speechConfigHandle, Uri.EscapeUriString(host.ToString()), null));
             return new SpeechConfig(speechConfigHandle);
@@ -307,6 +311,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <param name="proxyPort">The port number of the proxy server.</param>
         /// <param name="proxyUserName">The user name of the proxy server.</param>
         /// <param name="proxyPassword">The password of the proxy server.</param>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303", Justification = "exceptions not localized")]
         public void SetProxy(string proxyHostName, int proxyPort, string proxyUserName, string proxyPassword)
         {
             if (string.IsNullOrWhiteSpace(proxyHostName))
@@ -356,6 +361,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// </summary>
         /// <param name="id">PropertyId of the property</param>
         /// <param name="value">Value of the property</param>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303", Justification = "exceptions not localized")]
         public void SetProperty(PropertyId id, string value)
         {
             if (String.IsNullOrWhiteSpace(value))

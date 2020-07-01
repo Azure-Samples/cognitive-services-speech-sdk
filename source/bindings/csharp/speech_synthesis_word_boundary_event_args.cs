@@ -63,12 +63,38 @@ namespace Microsoft.CognitiveServices.Speech
 
         private UInt32 wordLength;
 
+        internal volatile bool disposed = false;
+
         /// <summary>
         /// Dispose of associated resources.
         /// </summary>
         public void Dispose()
         {
-            eventHandle.Dispose();
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// This method performs cleanup of resources.
+        /// The Boolean parameter <paramref name="disposing"/> indicates whether the method is called from <see cref="IDisposable.Dispose"/> (if <paramref name="disposing"/> is true) or from the finalizer (if <paramref name="disposing"/> is false).
+        /// Derived classes should override this method to dispose resource if needed.
+        /// </summary>
+        /// <param name="disposing">Flag to request disposal.</param>
+        /// <returns></returns>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposed)
+            {
+                return;
+            }
+
+            if (disposing)
+            {
+                // free managed resources
+                eventHandle?.Dispose();
+            }
+            // free native resources if there are any.
+            disposed = true;
         }
     }
 }

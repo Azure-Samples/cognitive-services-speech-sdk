@@ -44,6 +44,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <param name="authorizationToken">The authorization token.</param>
         /// <param name="region">The region name (see the <a href="https://aka.ms/csspeech/region">region page</a>).</param>
         /// <returns>A speech config instance.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303", Justification = "exceptions not localized")]
         public new static SpeechTranslationConfig FromAuthorizationToken(string authorizationToken, string region)
         {
             IntPtr config = IntPtr.Zero;
@@ -66,6 +67,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <returns>A SpeechTranslationConfig instance.</returns>
         public new static SpeechTranslationConfig FromEndpoint(Uri endpoint, string subscriptionKey)
         {
+            ThrowIfNull(endpoint);
             IntPtr config = IntPtr.Zero;
             ThrowIfFail(Internal.SpeechTranslationConfig.speech_translation_config_from_endpoint(out config, Uri.EscapeUriString(endpoint.ToString()), subscriptionKey));
             return new SpeechTranslationConfig(config);
@@ -86,8 +88,10 @@ namespace Microsoft.CognitiveServices.Speech
         /// </summary>
         /// <param name="endpoint">The service endpoint to connect to.</param>
         /// <returns>A SpeechTranslationConfig instance.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303", Justification = "exceptions not localized")]
         public new static SpeechTranslationConfig FromEndpoint(Uri endpoint)
         {
+            ThrowIfNull(endpoint);
             IntPtr config = IntPtr.Zero;
             ThrowIfFail(Internal.SpeechTranslationConfig.speech_translation_config_from_endpoint(out config, Uri.EscapeUriString(endpoint.ToString()), null));
             return new SpeechTranslationConfig(config);
@@ -105,8 +109,10 @@ namespace Microsoft.CognitiveServices.Speech
         /// <param name="host">The service host to connect to. Format is "protocol://host:port" where ":port" is optional.</param>
         /// <param name="subscriptionKey">The subscription key.</param>
         /// <returns>A SpeechTranslationConfig instance.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303", Justification = "exceptions not localized")]
         public new static SpeechTranslationConfig FromHost(Uri host, string subscriptionKey)
         {
+            ThrowIfNull(host);
             IntPtr config = IntPtr.Zero;
             ThrowIfFail(Internal.SpeechTranslationConfig.speech_translation_config_from_host(out config, Uri.EscapeUriString(host.ToString()), subscriptionKey));
             return new SpeechTranslationConfig(config);
@@ -125,8 +131,10 @@ namespace Microsoft.CognitiveServices.Speech
         /// </summary>
         /// <param name="host">The service host to connect to. Format is "protocol://host:port" where ":port" is optional.</param>
         /// <returns>A SpeechTranslationConfig instance.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303", Justification = "exceptions not localized")]
         public new static SpeechTranslationConfig FromHost(Uri host)
         {
+            ThrowIfNull(host);
             IntPtr config = IntPtr.Zero;
             ThrowIfFail(Internal.SpeechTranslationConfig.speech_translation_config_from_host(out config, Uri.EscapeUriString(host.ToString()), null));
             return new SpeechTranslationConfig(config);

@@ -116,6 +116,7 @@ namespace Microsoft.CognitiveServices.Speech.Audio
         /// <summary>
         /// Creates a memory backed PushAudioInputStream using the default format (16 kHz, 16 bit, mono PCM).
         /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope")]
         public PushAudioInputStream() :
             this(CreateStreamHandle(UseDefaultFormatIfNull(null)))
         {
@@ -125,8 +126,8 @@ namespace Microsoft.CognitiveServices.Speech.Audio
         /// Creates a memory backed PushAudioInputStream with the specified audio format.
         /// </summary>
         /// <param name="format">The audio data format in which audio will be written to the push audio stream's write() method.</param>
-        public PushAudioInputStream(AudioStreamFormat format) :
-            this(CreateStreamHandle(UseDefaultFormatIfNull(format)))
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062", Justification = "Null is OK, we have a default.")]
+        public PushAudioInputStream(AudioStreamFormat format) : base(CreateStreamHandle(format))
         {
             GC.KeepAlive(format);
         }
@@ -136,8 +137,10 @@ namespace Microsoft.CognitiveServices.Speech.Audio
         /// Note: The dataBuffer should not contain any audio header.
         /// </summary>
         /// <param name="dataBuffer">The audio buffer of which this function will make a copy.</param>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303", Justification = "exceptions not localized")]
         public void Write(byte[] dataBuffer)
         {
+            ThrowIfNull(dataBuffer, "dataBuffer can not be Null.");
             ThrowIfNull(StreamHandle, "Invalid stream handle.");
             ThrowIfFail(Internal.PushAudioInputStream.push_audio_input_stream_write(StreamHandle, dataBuffer, (uint)dataBuffer.Length));
         }
@@ -147,6 +150,7 @@ namespace Microsoft.CognitiveServices.Speech.Audio
         /// </summary>
         /// <param name="dataBuffer">The audio buffer of which this function will make a copy.</param>
         /// <param name="size">The size of the data in the audio buffer. Note the size could be smaller than dataBuffer.Length</param>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303", Justification = "exceptions not localized")]
         public void Write(byte[] dataBuffer, int size)
         {
             ThrowIfNull(StreamHandle, "Invalid stream handle.");
@@ -180,6 +184,7 @@ namespace Microsoft.CognitiveServices.Speech.Audio
         /// <summary>
         /// Closes the stream.
         /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303", Justification = "exceptions not localized")]
         public void Close()
         {
             ThrowIfNull(StreamHandle, "Invalid stream handle.");
@@ -237,6 +242,7 @@ namespace Microsoft.CognitiveServices.Speech.Audio
     /// Represents audio input stream used for custom audio input configurations.
     /// </summary>
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2213", MessageId = "callback", Justification = "callback is passed in by the caller, and should not be disposed as that could cause the owner problems.")]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope")]
     public sealed class PullAudioInputStream : AudioInputStream
     {
         /// <summary>
@@ -253,6 +259,7 @@ namespace Microsoft.CognitiveServices.Speech.Audio
         /// </summary>
         /// <param name="callback">The custom audio input object, derived from PullAudioInputStreamCallback.</param>
         /// <param name="format">The audio data format in which audio will be returned from the callback's read() method.</param>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062", Justification = "Null is OK, checked in constructor.")]
         public PullAudioInputStream(PullAudioInputStreamCallback callback, AudioStreamFormat format) :
             this(Create(UseDefaultFormatIfNull(format)), callback)
         {

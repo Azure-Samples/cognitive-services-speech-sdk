@@ -87,13 +87,16 @@ namespace ConversationTranslation {
     ConversationConnection::~ConversationConnection()
     {
         // prevent callbacks to this code by removing event handlers
-        for (const size_t callbackId : m_callbackIds)
+        if (m_webSocket)
         {
-            m_webSocket->OnConnected.remove(callbackId);
-            m_webSocket->OnDisconnected.remove(callbackId);
-            m_webSocket->OnTextData.remove(callbackId);
-            m_webSocket->OnBinaryData.remove(callbackId);
-            m_webSocket->OnError.remove(callbackId);
+            for (const size_t callbackId : m_callbackIds)
+            {
+                m_webSocket->OnConnected.remove(callbackId);
+                m_webSocket->OnDisconnected.remove(callbackId);
+                m_webSocket->OnTextData.remove(callbackId);
+                m_webSocket->OnBinaryData.remove(callbackId);
+                m_webSocket->OnError.remove(callbackId);
+            }
         }
 
         m_callbacks = nullptr;
@@ -133,11 +136,16 @@ namespace ConversationTranslation {
             auto ptr = shared_from_this();
 
             // register handlers
-            m_callbackIds.push_back(m_webSocket->OnConnected.add(ptr, &ConversationConnection::HandleConnected));
-            m_callbackIds.push_back(m_webSocket->OnDisconnected.add(ptr, &ConversationConnection::HandleDisconnected));
-            m_callbackIds.push_back(m_webSocket->OnTextData.add(ptr, &ConversationConnection::HandleTextData));
-            m_callbackIds.push_back(m_webSocket->OnBinaryData.add(ptr, &ConversationConnection::HandleBinaryData));
-            m_callbackIds.push_back(m_webSocket->OnError.add(ptr, &ConversationConnection::HandleError));
+            //m_callbackIds.push_back(m_webSocket->OnConnected.add(ptr, &ConversationConnection::HandleConnected));
+            //m_callbackIds.push_back(m_webSocket->OnDisconnected.add(ptr, &ConversationConnection::HandleDisconnected));
+            //m_callbackIds.push_back(m_webSocket->OnTextData.add(ptr, &ConversationConnection::HandleTextData));
+            //m_callbackIds.push_back(m_webSocket->OnBinaryData.add(ptr, &ConversationConnection::HandleBinaryData));
+            //m_callbackIds.push_back(m_webSocket->OnError.add(ptr, &ConversationConnection::HandleError));
+            m_webSocket->OnConnected.add(ptr, &ConversationConnection::HandleConnected);
+            m_webSocket->OnDisconnected.add(ptr, &ConversationConnection::HandleDisconnected);
+            m_webSocket->OnTextData.add(ptr, &ConversationConnection::HandleTextData);
+            m_webSocket->OnBinaryData.add(ptr, &ConversationConnection::HandleBinaryData);
+            m_webSocket->OnError.add(ptr, &ConversationConnection::HandleError);
 
             m_webSocketEndpoint.SetQueryParameter(ConversationQueryParameters::ApiVersion, ConversationConstants::ApiVersion);
 

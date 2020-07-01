@@ -121,10 +121,9 @@ namespace Microsoft.CognitiveServices.Speech.Transcription
             GC.KeepAlive(audioConfig);
             return recoHandle;
         }
-
-        internal static InteropSafeHandle FromConfig(GetTranscriberFromConfigDelegate fromConfig )
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope", Justification = "We may not always own audioConfig, so we can't always call Dispose() on it.")]
+        internal static InteropSafeHandle FromConfig(GetTranscriberFromConfigDelegate fromConfig)
         {
-
             IntPtr recoHandlePtr = IntPtr.Zero;
             IntPtr audioConfigPtr = IntPtr.Zero;
             InteropSafeHandle audioConfigHandle = new InteropSafeHandle(audioConfigPtr, null);
@@ -164,6 +163,7 @@ namespace Microsoft.CognitiveServices.Speech.Transcription
             });
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303", Justification = "exceptions not localized")]
         internal ConversationTranscriber(InteropSafeHandle  recoHandle) : base(recoHandle)
         {
             recognizingCallbackDelegate = FireEvent_Recognizing;

@@ -21,6 +21,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <returns>The speaker verification model being created.</returns>
         public static SpeakerVerificationModel FromProfile(VoiceProfile profile)
         {
+            ThrowIfNull(profile);
             IntPtr modelHandle = IntPtr.Zero;
             ThrowIfFail(Internal.SpeakerRecognition.speaker_verification_model_create(out modelHandle, profile.voiceProfileHandle));
             return new SpeakerVerificationModel(modelHandle);

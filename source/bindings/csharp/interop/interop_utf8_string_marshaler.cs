@@ -20,6 +20,7 @@ namespace Microsoft.CognitiveServices.Speech.Internal
         /// <summary>Converts the unmanaged data to managed data.</summary>
         /// <param name="native">A pointer to the unmanaged data to be wrapped.</param>
         /// <returns>An object that represents the managed view of the COM data.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303", Justification = "exceptions not localized")]
         public static string MarshalNativeToManaged(IntPtr native)
         {
             // Identifying the length of the UTF8 string by searching for 0 byte.
@@ -96,6 +97,7 @@ namespace Microsoft.CognitiveServices.Speech.Internal
         /// Creates a new instance
         /// </summary>
         /// <param name="maxLength">The maximum string length including the terminating \0</param>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303", Justification = "exceptions not localized")]
         public Utf8StringHandle(uint maxLength) : base(IntPtr.Zero, true)
         {
             if (maxLength < 0)

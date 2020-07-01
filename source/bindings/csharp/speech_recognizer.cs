@@ -238,6 +238,7 @@ namespace Microsoft.CognitiveServices.Speech
             this.audioInputKeepAlive = audioConfig;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303", Justification = "exceptions not localized")]
         internal SpeechRecognizer(InteropSafeHandle recoHandle) : base(recoHandle)
         {
             ThrowIfNull(recoHandle, "Invalid recognizer handle");

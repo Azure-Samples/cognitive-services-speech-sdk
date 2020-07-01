@@ -191,6 +191,7 @@ namespace Microsoft.CognitiveServices.Speech
             streamKeepAlive = audioConfig?.MoveStreamOwnerShip();
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303", Justification = "exceptions not localized")]
         internal SpeechSynthesizer(InteropSafeHandle synthHandle)
         {
             ThrowIfNull(synthHandle, "Invalid synthesizer handle");
@@ -209,6 +210,7 @@ namespace Microsoft.CognitiveServices.Speech
             Properties = new PropertyCollection(propertyHandle);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303", Justification = "exceptions not localized")]
         internal static InteropSafeHandle FromConfig(SpeechConfig speechConfig)
         {
             if (speechConfig == null)
@@ -221,12 +223,20 @@ namespace Microsoft.CognitiveServices.Speech
             IntPtr synthHandlePtr = IntPtr.Zero;
             ThrowIfFail(SpxFactory.synthesizer_create_speech_synthesizer_from_config(out synthHandlePtr, speechConfig.configHandle, audioConfig.configHandle));
             InteropSafeHandle synthHandle = new InteropSafeHandle(synthHandlePtr, Internal.Synthesizer.synthesizer_handle_release);
+            audioConfig.Dispose();
             GC.KeepAlive(speechConfig);
             GC.KeepAlive(audioConfig);
 
             return synthHandle;
         }
 
+        internal static InteropSafeHandle getAudioConfigHandle(Audio.AudioConfig audioConfig)
+        {
+            return audioConfig == null ? new InteropSafeHandle(IntPtr.Zero, null) : audioConfig.configHandle;
+        }
+        
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303", Justification = "exceptions not localized")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope")]
         internal static InteropSafeHandle FromConfig(SpeechConfig speechConfig, Audio.AudioConfig audioConfig)
         {
             if (speechConfig == null)
@@ -234,16 +244,7 @@ namespace Microsoft.CognitiveServices.Speech
                 throw new ArgumentNullException(nameof(speechConfig));
             }
 
-            InteropSafeHandle audioConfigHandle;
-            if (audioConfig == null)
-            {
-                audioConfigHandle = new InteropSafeHandle(IntPtr.Zero, null);
-            }
-            else
-            {
-                audioConfigHandle = audioConfig.configHandle;
-            }
-
+            InteropSafeHandle audioConfigHandle = getAudioConfigHandle(audioConfig);
             IntPtr synthHandlePtr = IntPtr.Zero;
             ThrowIfFail(SpxFactory.synthesizer_create_speech_synthesizer_from_config(out synthHandlePtr, speechConfig.configHandle, audioConfigHandle));
             InteropSafeHandle synthHandle = new InteropSafeHandle(synthHandlePtr, Internal.Synthesizer.synthesizer_handle_release);
@@ -253,6 +254,8 @@ namespace Microsoft.CognitiveServices.Speech
             return synthHandle;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303", Justification = "exceptions not localized")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope")]
         internal static InteropSafeHandle FromConfig(SpeechConfig speechConfig, AutoDetectSourceLanguageConfig autoDetectSourceLanguageConfig, Audio.AudioConfig audioConfig)
         {
             if (speechConfig == null)
@@ -265,15 +268,7 @@ namespace Microsoft.CognitiveServices.Speech
                 throw new ArgumentNullException(nameof(autoDetectSourceLanguageConfig));
             }
 
-            InteropSafeHandle audioConfigHandle;
-            if (audioConfig == null)
-            {
-                audioConfigHandle = new InteropSafeHandle(IntPtr.Zero, null);
-            }
-            else
-            {
-                audioConfigHandle = audioConfig.configHandle;
-            }
+            InteropSafeHandle audioConfigHandle = getAudioConfigHandle(audioConfig);
 
             IntPtr synthHandlePtr = IntPtr.Zero;
             ThrowIfFail(SpxFactory.synthesizer_create_speech_synthesizer_from_auto_detect_source_lang_config(out synthHandlePtr, speechConfig.configHandle, autoDetectSourceLanguageConfig.configHandle, audioConfigHandle));
@@ -447,6 +442,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <summary>
         /// Dispose of associated resources.
         /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303", Justification = "exceptions not localized")]
         public void Dispose()
         {
             try

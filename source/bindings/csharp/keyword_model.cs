@@ -32,6 +32,7 @@ namespace Microsoft.CognitiveServices.Speech
         public void Dispose()
         {
             Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
         private void Dispose(bool disposing)
@@ -44,10 +45,10 @@ namespace Microsoft.CognitiveServices.Speech
             if (disposing)
             {
                 // dispose managed resources
+                keywordHandle?.Dispose();
             }
             // dispose unmanaged resources
             disposed = true;
-            GC.SuppressFinalize(this);
         }
 
         private KeywordRecognitionModel(IntPtr keywordHandlePtr)

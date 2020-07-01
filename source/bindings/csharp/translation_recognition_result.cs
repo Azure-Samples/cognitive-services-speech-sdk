@@ -42,6 +42,7 @@ namespace Microsoft.CognitiveServices.Speech.Translation
             return text;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303", Justification = "exceptions not localized")]
         private void GetTranslationTexts()
         {
             ThrowIfNull(resultHandle, "Invalid result handle");

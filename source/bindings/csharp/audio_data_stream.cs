@@ -26,6 +26,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <returns>The audio data stream being created.</returns>
         public static AudioDataStream FromResult(SpeechSynthesisResult result)
         {
+            ThrowIfNull(result);
             IntPtr streamHandle = IntPtr.Zero;
             ThrowIfFail(Internal.AudioDataStream.audio_data_stream_create_from_result(out streamHandle, result.resultHandle));
             return new AudioDataStream(streamHandle);
@@ -38,6 +39,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <returns>An audio stream with the input to the KeywordRecognizer starting from right before the Keyword.</returns>
         public static AudioDataStream FromResult(KeywordRecognitionResult result)
         {
+            ThrowIfNull(result);
             IntPtr streamHandle = IntPtr.Zero;
             ThrowIfFail(Internal.AudioDataStream.audio_data_stream_create_from_keyword_result(out streamHandle, result.resultHandle));
             return new AudioDataStream(streamHandle);
@@ -57,6 +59,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// Get current status of the audio data stream.
         /// </summary>
         /// <returns>Current status.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303", Justification = "exceptions not localized")]
         public StreamStatus GetStatus()
         {
             ThrowIfNull(streamHandle, "Invalid stream handle.");
@@ -71,6 +74,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// </summary>
         /// <param name="bytesRequested">The requested data size in bytes.</param>
         /// <returns>A bool indicating whether the stream has enough data to be read.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303", Justification = "exceptions not localized")]
         public bool CanReadData(uint bytesRequested)
         {
             ThrowIfNull(streamHandle, "Invalid stream handle.");
@@ -84,6 +88,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <param name="pos">The position counting from start of the stream.</param>
         /// <param name="bytesRequested">The requested data size in bytes.</param>
         /// <returns>A bool indicating whether the stream has enough data to be read.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303", Justification = "exceptions not localized")]
         public bool CanReadData(uint pos, uint bytesRequested)
         {
             ThrowIfNull(streamHandle, "Invalid stream handle.");
@@ -98,8 +103,10 @@ namespace Microsoft.CognitiveServices.Speech
         /// </summary>
         /// <param name="buffer">The buffer to receive the audio data.</param>
         /// <returns>The number of bytes filled, or 0 in case the stream hits its end and there is no more data available.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303", Justification = "exceptions not localized")]
         public uint ReadData(byte[] buffer)
         {
+            ThrowIfNull(buffer, "buffer can not be Null.");
             ThrowIfNull(streamHandle, "Invalid stream handle.");
 
             uint filledSize;
@@ -127,8 +134,10 @@ namespace Microsoft.CognitiveServices.Speech
         /// <param name="pos">The position counting from start of the stream.</param>
         /// <param name="buffer">The buffer to receive the audio data.</param>
         /// <returns>The number of bytes filled, or 0 in case the stream hits its end and there is no more data available.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303", Justification = "exceptions not localized")]
         public uint ReadData(uint pos, byte[] buffer)
         {
+            ThrowIfNull(buffer, "buffer can not be Null.");
             ThrowIfNull(streamHandle, "Invalid stream handle.");
 
             uint filledSize;
@@ -153,6 +162,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// </summary>
         /// <param name="fileName">Name of the file for saving.</param>
         /// <returns>An asynchronous operation representing the saving.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303", Justification = "exceptions not localized")]
         public Task SaveToWaveFileAsync(string fileName)
         {
             ThrowIfNull(streamHandle, "Invalid stream handle.");
@@ -166,6 +176,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// Set current position of the audio data stream.
         /// </summary>
         /// <param name="pos">Position to be set.</param>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303", Justification = "exceptions not localized")]
         public void SetPosition(uint pos)
         {
             ThrowIfNull(streamHandle, "Invalid stream handle.");
@@ -177,6 +188,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// Get current position of the audio data stream.
         /// </summary>
         /// <returns>Current position.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303", Justification = "exceptions not localized")]
         public uint GetPosition()
         {
             ThrowIfNull(streamHandle, "Invalid stream handle.");
@@ -189,6 +201,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <summary>
         /// Stops any more data from getting to the stream.
         /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303", Justification = "exceptions not localized")]
         public void DetachInput()
         {
             ThrowIfNull(streamHandle, "Invalid stream handle.");
@@ -200,15 +213,39 @@ namespace Microsoft.CognitiveServices.Speech
         /// </summary>
         public void Dispose()
         {
-            Properties.Close();
-            streamHandle.Dispose();
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// This method performs cleanup of resources.
+        /// The Boolean parameter <paramref name="disposing"/> indicates whether the method is called from <see cref="IDisposable.Dispose"/> (if <paramref name="disposing"/> is true) or from the finalizer (if <paramref name="disposing"/> is false).
+        /// Derived classes should override this method to dispose resource if needed.
+        /// </summary>
+        /// <param name="disposing">Flag to request disposal.</param>
+        /// <returns></returns>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposed)
+            {
+                return;
+            }
+
+            if (disposing)
+            {
+                // free managed resources
+                Properties?.Close();
+                streamHandle?.Dispose();
+            }
+            // free native resources if there are any.
+            disposed = true;
         }
 
         /// <summary>
         /// Contains properties of the audio data stream.
         /// </summary>
         public PropertyCollection Properties { get; private set; }
-
+        internal volatile bool disposed = false;
         internal InteropSafeHandle streamHandle;
     }
 }

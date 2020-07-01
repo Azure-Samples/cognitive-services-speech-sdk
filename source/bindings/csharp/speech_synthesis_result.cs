@@ -61,8 +61,32 @@ namespace Microsoft.CognitiveServices.Speech
         /// </summary>
         public void Dispose()
         {
-            Properties.Close();
-            resultHandle.Dispose();
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// This method performs cleanup of resources.
+        /// The Boolean parameter <paramref name="disposing"/> indicates whether the method is called from <see cref="IDisposable.Dispose"/> (if <paramref name="disposing"/> is true) or from the finalizer (if <paramref name="disposing"/> is false).
+        /// Derived classes should override this method to dispose resource if needed.
+        /// </summary>
+        /// <param name="disposing">Flag to request disposal.</param>
+        /// <returns></returns>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposed)
+            {
+                return;
+            }
+
+            if (disposing)
+            {
+                // free managed resources
+                Properties?.Close();
+                resultHandle?.Dispose();
+            }
+            // free native resources if there are any.
+            disposed = true;
         }
 
         private byte[] GetAudioData()
@@ -92,6 +116,7 @@ namespace Microsoft.CognitiveServices.Speech
 
         internal InteropSafeHandle resultHandle;
         internal const Int32 maxCharCount = 1024;
+        internal volatile bool disposed = false;
     }
 
     /// <summary>
@@ -105,7 +130,8 @@ namespace Microsoft.CognitiveServices.Speech
         /// </summary>
         /// <param name="result">The result that was canceled.</param>
         /// <returns>The CancellationDetails object being created.</returns>
-        public static SpeechSynthesisCancellationDetails FromResult(SpeechSynthesisResult result)
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062", Justification = "validated in internal constructor")]
+         public static SpeechSynthesisCancellationDetails FromResult(SpeechSynthesisResult result)
         {
             return new SpeechSynthesisCancellationDetails(result);
         }
@@ -115,11 +141,13 @@ namespace Microsoft.CognitiveServices.Speech
         /// </summary>
         /// <param name="stream">The stream that was canceled</param>
         /// <returns>The CancellationDetails object being created.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062", Justification = "validated in internal constructor")]
         public static SpeechSynthesisCancellationDetails FromStream(AudioDataStream stream)
         {
             return new SpeechSynthesisCancellationDetails(stream);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303", Justification = "exceptions not localized")]
         internal SpeechSynthesisCancellationDetails(SpeechSynthesisResult result)
         {
             ThrowIfNull(result);
@@ -136,6 +164,7 @@ namespace Microsoft.CognitiveServices.Speech
             this.ErrorDetails = result.Properties.GetProperty(PropertyId.CancellationDetails_ReasonDetailedText);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303", Justification = "exceptions not localized")]
         internal SpeechSynthesisCancellationDetails(AudioDataStream stream)
         {
             ThrowIfNull(stream);

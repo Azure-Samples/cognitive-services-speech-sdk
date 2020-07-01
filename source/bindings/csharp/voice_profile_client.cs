@@ -23,6 +23,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <param name="speechConfig">The speech configuration to use.</param>
         /// <returns></returns>
         ///
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303", Justification = "exceptions not localized")]
         public VoiceProfileClient(SpeechConfig speechConfig)
         {
             if (speechConfig == null) throw new ArgumentException(nameof(speechConfig));
@@ -121,6 +122,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// </summary>
         /// <param name="disposeManaged"></param>
         /// <returns></returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303", Justification = "exceptions not localized")]
         override protected void Dispose(bool disposeManaged)
         {
             if (disposeManaged)

@@ -67,6 +67,7 @@ namespace Microsoft.CognitiveServices.Speech
         public void AssignClass(string className, Grammar grammar)
         {
 
+            ThrowIfNull(grammar);
             IntPtr textPtr = Utf8StringMarshaler.MarshalManagedToNative(className);
             try
             {

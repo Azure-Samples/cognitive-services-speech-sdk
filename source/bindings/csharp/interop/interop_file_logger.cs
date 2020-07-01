@@ -24,6 +24,7 @@ namespace Microsoft.CognitiveServices.Speech.Internal
         /// </summary>
         /// <param name="logFile">The file to log to.</param>
         /// <returns>The status code indicating success or the failure cause.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303", Justification = "exceptions not localized")]
         public static SPXHR StartLogging(string logFile)
         {
             if (string.IsNullOrWhiteSpace(logFile))

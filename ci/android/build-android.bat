@@ -1,6 +1,6 @@
 @REM Pull in nmake
 set VSCMD_START_DIR=%CD%
-call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\VC\Auxiliary\Build\vcvars64.bat" || exit /b 1
+call "c:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat" || exit /b 1
 
 set SOURCE_ROOT=%~dp0\..\..
 

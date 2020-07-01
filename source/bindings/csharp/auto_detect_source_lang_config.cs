@@ -43,6 +43,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// </summary>
         /// <param name="languages">The list of source languages.</param>
         /// <returns>A new AutoDetectSourceLanguageConfig instance.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1303:Do not pass literals as localized parameters", Justification = "exceptions not localized")]
         public static AutoDetectSourceLanguageConfig FromLanguages(string[] languages)
         {
             if (languages == null || languages.Length == 0)
@@ -54,7 +55,7 @@ namespace Microsoft.CognitiveServices.Speech
             {
                 if (string.IsNullOrEmpty(language))
                 {
-                    throw new ArgumentNullException("language in languages cannot be null or empty");
+                    throw new ArgumentNullException(language, "language in languages cannot be null or empty");
                 }
             }
             IntPtr autoDetectSourceLanguageConfigHandle = IntPtr.Zero;
@@ -67,6 +68,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// </summary>
         /// <param name="sourceLanguageConfigs">The list of source languages config</param>
         /// <returns>A new AutoDetectSourceLanguageConfig instance.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2208:Instantiate argument exceptions correctly", Justification = "the exception message has the information needed.")]
         public static AutoDetectSourceLanguageConfig FromSourceLanguageConfigs(SourceLanguageConfig[] sourceLanguageConfigs)
         {
             if (sourceLanguageConfigs == null || sourceLanguageConfigs.Length == 0)

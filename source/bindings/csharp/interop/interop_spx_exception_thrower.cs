@@ -51,6 +51,7 @@ namespace Microsoft.CognitiveServices.Speech.Internal
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303", Justification = "exceptions not localized")]
         internal static void ThrowIfFail(bool item)
         {
             if (item == false)

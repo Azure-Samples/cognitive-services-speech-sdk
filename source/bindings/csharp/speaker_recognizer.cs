@@ -24,6 +24,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <param name="audioConfig">The audio config to use.</param>
         /// <returns></returns>
         ///
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303", Justification = "exceptions not localized")]
         public SpeakerRecognizer(SpeechConfig speechConfig, Audio.AudioConfig audioConfig)
         {
             if (audioConfig == null) throw new ArgumentNullException(nameof(audioConfig));
@@ -87,6 +88,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// </summary>
         /// <param name="disposeManaged"></param>
         /// <returns></returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303", Justification = "exceptions not localized")]
         override protected void Dispose(bool disposeManaged)
         {
             if (disposeManaged)

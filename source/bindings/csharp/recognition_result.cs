@@ -102,11 +102,13 @@ namespace Microsoft.CognitiveServices.Speech
         /// </summary>
         /// <param name="result">The result that was canceled.</param>
         /// <returns>The CancellationDetails object being created.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062", Justification = "validated in internal constructor")]
         public static CancellationDetails FromResult(RecognitionResult result)
         {
             return new CancellationDetails(result);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303", Justification = "exceptions not localized")]
         internal CancellationDetails(RecognitionResult result)
         {
             ThrowIfNull(result);
@@ -163,11 +165,13 @@ namespace Microsoft.CognitiveServices.Speech
         /// </summary>
         /// <param name="result">The recognition result that was not recognized.</param>
         /// <returns>The NoMatchDetails object being created.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062", Justification = "validated in internal constructor")]
         public static NoMatchDetails FromResult(RecognitionResult result)
         {
             return new NoMatchDetails(result);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303", Justification = "exceptions not localized")]
         internal NoMatchDetails(RecognitionResult result)
         {
             ThrowIfNull(result);

@@ -21,6 +21,7 @@ set(SOURCES
     "${SRC_DIR}/mic_test_case.cpp"
     "${SRC_DIR}/sr_test_case.cpp"
     "${SRC_DIR}/speech_context_json_test.cpp"
+    "${SRC_DIR}/event.cpp"
     )
 
 if(EXTENSION_AUDIOCOMPRESSION_ENABLED)

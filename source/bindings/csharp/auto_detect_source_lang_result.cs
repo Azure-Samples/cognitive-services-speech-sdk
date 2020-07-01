@@ -27,6 +27,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// </summary>
         /// <param name="result">The speech recongition result.</param>
         /// <returns>A new AutoDetectSourceLanguageResult instance</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062", Justification = "Validated in internal constructor.")]
         public static AutoDetectSourceLanguageResult FromResult(SpeechRecognitionResult result)
         {
             return new AutoDetectSourceLanguageResult(result);

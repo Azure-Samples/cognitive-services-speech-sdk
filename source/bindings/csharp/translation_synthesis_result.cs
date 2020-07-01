@@ -54,6 +54,7 @@ namespace Microsoft.CognitiveServices.Speech.Translation
             return text;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303", Justification = "exceptions not localized")]
         private void GetAudioData(InteropSafeHandle resultHandle)
         {
             ThrowIfNull(resultHandle, "Invalid synthesis result handle.");
@@ -80,7 +81,7 @@ namespace Microsoft.CognitiveServices.Speech.Translation
             }
         }
 
-        private byte[] audio = new byte[0];
+        private byte[] audio = Array.Empty<byte>();
         private InteropSafeHandle resultHandle;
     }
 }

@@ -26,6 +26,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// </summary>
         /// <param name="recognizer">The recognizer from which to obtain the phrase list grammar.</param>
         /// <returns>The phrase list grammar.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062", Justification = "validated in internal constructor")]
         public static PhraseListGrammar FromRecognizer(Recognizer recognizer)
         {
             return FromRecognizer(recognizer, "");
@@ -61,6 +62,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <param name="recognizer">The recognizer from which to obtain the phrase list grammar.</param>
         /// <param name="name">The name of the phrase list grammar to create.</param>
         /// <returns>The phrase list grammar.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303", Justification = "exceptions not localized")]
         internal static PhraseListGrammar FromRecognizer(Recognizer recognizer, string name)
         {
             ThrowIfNull(recognizer, "null recognizer");

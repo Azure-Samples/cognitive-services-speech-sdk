@@ -214,6 +214,7 @@ namespace Microsoft.CognitiveServices.Speech.Translation
             this.audioInputKeepAlive = audioConfig;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303", Justification = "exceptions not localized")]
         internal TranslationRecognizer(InteropSafeHandle recoHandle) : base(recoHandle)
 
         {

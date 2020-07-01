@@ -128,11 +128,13 @@ namespace Microsoft.CognitiveServices.Speech
         /// </summary>
         /// <param name="result">a voice profile enrollment result object.</param>
         /// <returns>a voice profile enrollment cancellation details object.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062", Justification = "Null is OK, checked in constructor.")]
         public static VoiceProfileEnrollmentCancellationDetails FromResult(VoiceProfileEnrollmentResult result)
         {
             return new VoiceProfileEnrollmentCancellationDetails(result);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303", Justification = "exceptions not localized")]
         internal VoiceProfileEnrollmentCancellationDetails(VoiceProfileEnrollmentResult result)
         {
             ThrowIfNull(result);

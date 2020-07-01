@@ -132,6 +132,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <summary>
         /// Dispose of associated resources.
         /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303", Justification = "exceptions not localized")]
         public void Dispose()
         {
             try
@@ -313,6 +314,7 @@ namespace Microsoft.CognitiveServices.Speech
             }
             try
             {
+                ThrowIfNull(recoImplAction);
                 recoImplAction();
             }
             finally
@@ -324,6 +326,7 @@ namespace Microsoft.CognitiveServices.Speech
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303", Justification = "exceptions not localized")]
         internal IntPtr RecognizeOnce()
         {
             IntPtr hresult = IntPtr.Zero;
@@ -332,6 +335,7 @@ namespace Microsoft.CognitiveServices.Speech
             return hresult;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303", Justification = "exceptions not localized")]
         internal void StartContinuousRecognition()
         {
             if (asyncStartContinuousHandle != IntPtr.Zero)
@@ -345,6 +349,7 @@ namespace Microsoft.CognitiveServices.Speech
             asyncStartContinuousHandle = IntPtr.Zero;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303", Justification = "exceptions not localized")]
         internal void StopContinuousRecognition()
         {
             if (asyncStopContinuousHandle != IntPtr.Zero)
@@ -358,6 +363,8 @@ namespace Microsoft.CognitiveServices.Speech
             asyncStopContinuousHandle = IntPtr.Zero;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303", Justification = "exceptions not localized")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA1801:Review unused parameters", Justification = "<Pending>")]
         internal void StopTranscribing(bool destroyResource)
         {
             if (asyncStopContinuousHandle != IntPtr.Zero)
@@ -371,6 +378,7 @@ namespace Microsoft.CognitiveServices.Speech
             asyncStopContinuousHandle = IntPtr.Zero;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303", Justification = "exceptions not localized")]
         internal void StartKeywordRecognition(KeywordRecognitionModel model)
         {
             if (asyncStartKeywordHandle != IntPtr.Zero)
@@ -385,6 +393,7 @@ namespace Microsoft.CognitiveServices.Speech
             asyncStartKeywordHandle = IntPtr.Zero;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303", Justification = "exceptions not localized")]
         internal void StopKeywordRecognition()
         {
             if (asyncStopKeywordHandle != IntPtr.Zero)
@@ -419,22 +428,26 @@ namespace Microsoft.CognitiveServices.Speech
         {
             if (speechConfig == null) throw new ArgumentNullException(nameof(speechConfig));
 
-            IntPtr recoHandlePtr = IntPtr.Zero;
             IntPtr audioConfigPtr = IntPtr.Zero;
-            InteropSafeHandle audioConfigHandle = new InteropSafeHandle(audioConfigPtr, null);
-            ThrowIfFail(fromConfig(out recoHandlePtr, speechConfig.configHandle, audioConfigHandle));
-            InteropSafeHandle recoHandle = new InteropSafeHandle(recoHandlePtr, Internal.Recognizer.recognizer_handle_release);
-            GC.KeepAlive(speechConfig);
-            return recoHandle;
+            using (InteropSafeHandle audioConfigHandle = new InteropSafeHandle(audioConfigPtr, null))
+            {
+                IntPtr recoHandlePtr = IntPtr.Zero;
+                ThrowIfFail(fromConfig(out recoHandlePtr, speechConfig.configHandle, audioConfigHandle));
+                InteropSafeHandle recoHandle = new InteropSafeHandle(recoHandlePtr, Internal.Recognizer.recognizer_handle_release);
+                GC.KeepAlive(speechConfig);
+                return recoHandle;
+            }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope", Justification = "We may not always own audioConfig, so we can't always call Dispose() on it.")]
         internal static InteropSafeHandle FromConfig(GetRecognizerFromConfigWithLanguageConfigDelegate fromConfig, SpeechConfig speechConfig, SourceLanguageConfig sourceLanguageConfig, Audio.AudioConfig audioConfig)
         {
             if (speechConfig == null) throw new ArgumentNullException(nameof(speechConfig));
             if (sourceLanguageConfig == null) throw new ArgumentNullException(nameof(sourceLanguageConfig));
 
             IntPtr recoHandlePtr = IntPtr.Zero;
-            ThrowIfFail(fromConfig(out recoHandlePtr, speechConfig.configHandle, sourceLanguageConfig.configHandle, getAudioConfigHandle(audioConfig)));
+            InteropSafeHandle audioConfigHandle = getAudioConfigHandle(audioConfig);
+            ThrowIfFail(fromConfig(out recoHandlePtr, speechConfig.configHandle, sourceLanguageConfig.configHandle, audioConfigHandle));
             InteropSafeHandle recoHandle = new InteropSafeHandle(recoHandlePtr, Internal.Recognizer.recognizer_handle_release);
             GC.KeepAlive(speechConfig);
             GC.KeepAlive(sourceLanguageConfig);
@@ -445,13 +458,15 @@ namespace Microsoft.CognitiveServices.Speech
             return recoHandle;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope", Justification = "We may not always own audioConfig, so we can't always call Dispose() on it.")]
         internal static InteropSafeHandle FromConfig(GetRecognizerFromConfigWithLanguageConfigDelegate fromConfig, SpeechConfig speechConfig, AutoDetectSourceLanguageConfig autoDetectSourceLanguageConfig, Audio.AudioConfig audioConfig)
         {
             if (speechConfig == null) throw new ArgumentNullException(nameof(speechConfig));
             if (autoDetectSourceLanguageConfig == null) throw new ArgumentNullException(nameof(autoDetectSourceLanguageConfig));
 
             IntPtr recoHandlePtr = IntPtr.Zero;
-            ThrowIfFail(fromConfig(out recoHandlePtr, speechConfig.configHandle, autoDetectSourceLanguageConfig.configHandle, getAudioConfigHandle(audioConfig)));
+            InteropSafeHandle audioConfigHandle = getAudioConfigHandle(audioConfig);
+            ThrowIfFail(fromConfig(out recoHandlePtr, speechConfig.configHandle, autoDetectSourceLanguageConfig.configHandle, audioConfigHandle));
             InteropSafeHandle recoHandle = new InteropSafeHandle(recoHandlePtr, Internal.Recognizer.recognizer_handle_release);
             GC.KeepAlive(speechConfig);
             GC.KeepAlive(autoDetectSourceLanguageConfig);

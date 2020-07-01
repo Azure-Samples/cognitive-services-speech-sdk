@@ -19,7 +19,7 @@ TEST_CODE="$BINARY_DIR/Microsoft.CognitiveServices.Speech.Tests.EndToEnd.dll"
 SOURCE_ROOT="$SCRIPT_DIR/../.."
 
 VSWHERE="/c/Program Files (x86)/Microsoft Visual Studio/Installer/vswhere.exe"
-VSDIR_WINDOWS="$("$VSWHERE" -version '[15.0,16.0)' -latest -products '*' -requires Microsoft.VisualStudio.PackageGroup.TestTools.Core -property installationPath)"
+VSDIR_WINDOWS="$("$VSWHERE" -version '[15.0,19.0)' -latest -products '*' -requires Microsoft.VisualStudio.PackageGroup.TestTools.Core -property installationPath)"
 [[ $? == 0 ]] || {
   echo Error: cannot run \"$VSWHERE\"
   exit 1

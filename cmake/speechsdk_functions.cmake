@@ -194,11 +194,12 @@ function(PARSE_PLATFORM)
     # Windows can build Android or Windows.
     get_windows_platform(_generator_arch)
     if(_os MATCHES "^Windows")
-      if(NOT _arch STREQUAL _generator_arch)
-        message(FATAL_ERROR "Can't build '${OPT_TARGET_PLATFORM}' with ${CMAKE_GENERATOR} ${CMAKE_GENERATOR_PLATFORM}, pick the right generator.")
-      endif()
-    elseif(NOT _os STREQUAL "Android")
-      message(FATAL_ERROR "Can't build '${OPT_TARGET_PLATFORM}' on Windows")
+      #temporarily remove this check while I find out if UWP will build with VS2019
+      #if(NOT _arch STREQUAL _generator_arch)
+      #  message(FATAL_ERROR "Can't build '${OPT_TARGET_PLATFORM}' with ${CMAKE_GENERATOR} ${CMAKE_GENERATOR_PLATFORM}, pick the right generator.")
+      #endif()
+      #elseif(NOT _os STREQUAL "Android")
+      #  message(FATAL_ERROR "Can't build '${OPT_TARGET_PLATFORM}' on Windows")
     endif()
   elseif(CMAKE_HOST_APPLE)
     # Apple can build IOS or OSX.

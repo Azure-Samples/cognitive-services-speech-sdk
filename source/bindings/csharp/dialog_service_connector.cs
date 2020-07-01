@@ -540,6 +540,7 @@ namespace Microsoft.CognitiveServices.Speech.Dialog
         /// </summary>
         /// <param name="model">Specifies the keyword model to be used.</param>
         /// <returns>An asynchronous operation that starts the operation.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303", Justification = "exceptions not localized")]
         public Task StartKeywordRecognitionAsync(KeywordRecognitionModel model)
         {
             AssertNotDisposed();
@@ -603,13 +604,15 @@ namespace Microsoft.CognitiveServices.Speech.Dialog
         {
             if (dialogConfig == null) throw new ArgumentNullException(nameof(dialogConfig));
 
-            IntPtr recoHandlePtr = IntPtr.Zero;
-            IntPtr audioConfigPtr = IntPtr.Zero;
-            InteropSafeHandle audioConfigHandle = new InteropSafeHandle(audioConfigPtr, null);
-            ThrowIfFail(fromConfig(out recoHandlePtr, dialogConfig.configHandle, audioConfigHandle));
-            InteropSafeHandle recoHandle = new InteropSafeHandle(recoHandlePtr, Internal.DialogServiceConnector.dialog_service_connector_handle_release);
-            GC.KeepAlive(dialogConfig);
-            return recoHandle;
+            using (InteropSafeHandle audioConfigHandle = new InteropSafeHandle(IntPtr.Zero, null))
+            {
+                IntPtr recoHandlePtr = IntPtr.Zero;
+                IntPtr audioConfigPtr = IntPtr.Zero;
+                ThrowIfFail(fromConfig(out recoHandlePtr, dialogConfig.configHandle, audioConfigHandle));
+                InteropSafeHandle recoHandle = new InteropSafeHandle(recoHandlePtr, Internal.DialogServiceConnector.dialog_service_connector_handle_release);
+                GC.KeepAlive(dialogConfig);
+                return recoHandle;
+            }
         }
 
 

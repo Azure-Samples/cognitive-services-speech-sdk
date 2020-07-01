@@ -88,9 +88,11 @@ namespace Microsoft.CognitiveServices.Speech
         /// <returns>The CancellationDetails object being created.</returns>
         public static SpeakerRecognitionCancellationDetails FromResult(SpeakerRecognitionResult result)
         {
+            ThrowIfNull(result);
             return new SpeakerRecognitionCancellationDetails(result);
         }
-
+        
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303", Justification = "exceptions not localized")]
         internal SpeakerRecognitionCancellationDetails(SpeakerRecognitionResult result)
         {
             ThrowIfNull(result);

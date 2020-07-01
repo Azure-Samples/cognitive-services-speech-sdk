@@ -46,6 +46,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <remarks>
         /// Creating a grammar list from a recognizer is only usable in specific scenarios and is not generally available.
         /// </remarks>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303", Justification = "exceptions not localized")]
         public static GrammarList FromRecognizer(Recognizer recognizer)
         {
             ThrowIfNull(recognizer, "null recognizer");
@@ -74,6 +75,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// </remarks>
         public void Add(Grammar grammar)
         {
+            ThrowIfNull(grammar);
             SPX_THROW_ON_FAIL(grammar_list_add_grammar(this.NativeHandle, grammar.NativeHandle));
         }
 

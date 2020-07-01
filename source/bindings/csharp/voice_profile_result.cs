@@ -71,11 +71,13 @@ namespace Microsoft.CognitiveServices.Speech
         /// </summary>
         /// <param name="result">The result that was canceled.</param>
         /// <returns>The CancellationDetails object being created.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062", Justification = "Null is OK, checked in constructor.")]
         public static VoiceProfileCancellationDetails FromResult(VoiceProfileResult result)
         {
             return new VoiceProfileCancellationDetails(result);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303", Justification = "exceptions not localized")]
         internal VoiceProfileCancellationDetails(VoiceProfileResult result)
         {
             ThrowIfNull(result);
