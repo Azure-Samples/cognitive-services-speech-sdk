@@ -12,6 +12,14 @@ namespace BatchClient
 
     public class SpeechJsonContractResolver : CamelCasePropertyNamesContractResolver
     {
+        public SpeechJsonContractResolver()
+        {
+            this.NamingStrategy = new CamelCaseNamingStrategy
+            {
+                ProcessDictionaryKeys = true
+            };
+        }
+
         public static readonly SpeechJsonContractResolver ContractResolver = new SpeechJsonContractResolver();
 
         public static JsonSerializerSettings WriterSettings { get; } = new JsonSerializerSettings

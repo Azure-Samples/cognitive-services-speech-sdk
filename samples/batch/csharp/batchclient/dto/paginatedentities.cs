@@ -9,9 +9,9 @@ namespace BatchClient
     using System.Collections.Generic;
     using Newtonsoft.Json;
 
-    public class PaginatedTranscriptions
+    public class PaginatedEntities<T>
     {
-        public IEnumerable<Transcription> Values { get; set; }
+        public IEnumerable<T> Values { get; set; }
 
         [JsonProperty(PropertyName = "@nextLink")]
         public Uri NextLink { get; set; }

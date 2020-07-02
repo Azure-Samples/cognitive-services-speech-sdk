@@ -14,7 +14,7 @@ namespace BatchClient
     using Polly;
     using Polly.Retry;
 
-    public class BatchClient
+    public partial class BatchClient : IDisposable
     {
         private const int MaxNumberOfRetries = 5;
 
@@ -45,80 +45,6 @@ namespace BatchClient
             client.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", key);
 
             return new BatchClient(client);
-        }
-
-        public Task<PaginatedTranscriptions> GetTranscriptionsAsync()
-        {
-            var path = $"{this.speechToTextBasePath}transcriptions";
-            return this.GetAsync<PaginatedTranscriptions>(path);
-        }
-
-        public Task<PaginatedTranscriptions> GetTranscriptionsAsync(Uri location)
-        {
-            return this.GetAsync<PaginatedTranscriptions>(location.PathAndQuery);
-        }
-
-        public Task<PaginatedFiles> GetTranscriptionFilesAsync(Uri location)
-        {
-            if (location == null)
-            {
-                throw new ArgumentNullException(nameof(location));
-            }
-
-            return this.GetAsync<PaginatedFiles>(location.PathAndQuery);
-        }
-
-        public Task<Transcription> GetTranscriptionAsync(Uri location)
-        {
-            if (location == null)
-            {
-                throw new ArgumentNullException(nameof(location));
-            }
-
-            return this.GetAsync<Transcription>(location.PathAndQuery);
-        }
-
-        public async Task<RecognitionResults> GetTranscriptionResultAsync(Uri location)
-        {
-            if (location == null)
-            {
-                throw new ArgumentNullException(nameof(location));
-            }
-
-            var response = await transientFailureRetryingPolicy
-                .ExecuteAsync(async () => await this.client.GetAsync(location).ConfigureAwait(false))
-                .ConfigureAwait(false);
-
-            if (response.IsSuccessStatusCode)
-            {
-                var json = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                return JsonConvert.DeserializeObject<RecognitionResults>(json, SpeechJsonContractResolver.ReaderSettings);
-            }
-
-            throw await CreateExceptionAsync(response);
-        }
-
-        public Task<Transcription> PostTranscriptionAsync(Transcription transcription)
-        {
-            if (transcription == null)
-            {
-                throw new ArgumentNullException(nameof(transcription));
-            }
-
-            var path = $"{this.speechToTextBasePath}transcriptions/";
-
-            return this.PostAsJsonAsync<Transcription, Transcription>(path, transcription);
-        }
-
-        public Task DeleteTranscriptionAsync(Uri location)
-        {
-            if (location == null)
-            {
-                throw new ArgumentNullException(nameof(location));
-            }
-
-            return transientFailureRetryingPolicy
-                .ExecuteAsync(() => this.client.DeleteAsync(location.PathAndQuery));
         }
 
         private async Task<TResponse> PostAsJsonAsync<TPayload, TResponse>(string path, TPayload payload)
@@ -190,6 +116,11 @@ namespace BatchClient
                 default:
                     return new FailedHttpClientRequestException(response.StatusCode, response.ReasonPhrase);
             }
+        }
+
+        public void Dispose()
+        {
+            this.client?.Dispose();
         }
     }
 }
