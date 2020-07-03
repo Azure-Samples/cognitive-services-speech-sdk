@@ -5,10 +5,8 @@
 
 namespace BatchClient
 {
-    using System;
-
-    public class EntityReference
+    public class WebHookNotification : EntityReference
     {
-        public Uri Self { get; set; }
+        public string InvocationId { get; }
     }
 }

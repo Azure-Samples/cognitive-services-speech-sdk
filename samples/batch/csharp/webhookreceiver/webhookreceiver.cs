@@ -78,13 +78,16 @@ namespace WebHookReceiver
                 }
             }
 
-            var entityReference = JsonConvert.DeserializeObject<EntityReference>(requestBody);
+            var webHookNotification = JsonConvert.DeserializeObject<WebHookNotification>(requestBody);
+
+            // invocationId can be used for deduplication, it's unique per notification event
+            logger.LogInformation($"Processing notification {webHookNotification.InvocationId}.");
 
             using (var client = BatchClient.CreateApiV3Client(Program.SubscriptionKey, $"{Program.Region}.api.cognitive.microsoft.com"))
             {
                 if (eventKind == WebHookEventKind.TranscriptionCompletion)
                 {
-                    var transcription = await client.GetTranscriptionAsync(entityReference.Self).ConfigureAwait(false);
+                    var transcription = await client.GetTranscriptionAsync(webHookNotification.Self).ConfigureAwait(false);
                     var paginatedfiles = await client.GetTranscriptionFilesAsync(transcription.Links.Files).ConfigureAwait(false);
                     var resultFile = paginatedfiles.Values.FirstOrDefault(f => f.Kind == ArtifactKind.Transcription);
                     var result = await client.GetTranscriptionResultAsync(new Uri(resultFile.Links.ContentUrl)).ConfigureAwait(false);
@@ -92,7 +95,7 @@ namespace WebHookReceiver
                     logger.LogInformation("Transcription succeeded. Results: ");
                     logger.LogInformation(JsonConvert.SerializeObject(result, SpeechJsonContractResolver.WriterSettings));
 
-                    await client.DeleteTranscriptionAsync(entityReference.Self).ConfigureAwait(false);
+                    await client.DeleteTranscriptionAsync(webHookNotification.Self).ConfigureAwait(false);
                 }
             }
 
