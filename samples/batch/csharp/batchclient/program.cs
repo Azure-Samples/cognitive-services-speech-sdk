@@ -38,7 +38,12 @@ namespace BatchClient
         private const string DisplayName = "Simple transcription";
 
 
-        static async Task Main(string[] args)
+        static void Main(string[] args)
+        {
+            RunAsync().Wait();
+        }
+
+        private static async Task RunAsync()
         {
             // create the client object and authenticate
             using (var client = BatchClient.CreateApiV3Client(SubscriptionKey, $"{Region}.api.cognitive.microsoft.com"))
