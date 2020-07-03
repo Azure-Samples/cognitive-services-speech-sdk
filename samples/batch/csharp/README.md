@@ -13,5 +13,6 @@ To successfully run this example you require
 and optionally
 
 - the references of any custom models your want to apply.
+- deploy the Azure function
 
 With this information, change the definitions of the appropriate constants in `program.cs`.

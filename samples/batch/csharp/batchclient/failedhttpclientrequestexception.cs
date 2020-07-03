@@ -1,7 +1,7 @@
 ﻿//	
 // Copyright (c) Microsoft. All rights reserved.	
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.	
-//	
+//
 
 namespace BatchClient
 {
@@ -45,15 +45,13 @@ namespace BatchClient
 
         public string ReasonPhrase => this.Message;
 
-        /// <inheritdoc />	
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             if (info != null)
             {
                 info.AddValue(nameof(this.StatusCode), this.StatusCode);
+                base.GetObjectData(info, context);
             }
-
-            base.GetObjectData(info, context);
         }
     }
 }

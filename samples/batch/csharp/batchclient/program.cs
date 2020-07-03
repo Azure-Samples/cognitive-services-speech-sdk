@@ -48,8 +48,12 @@ namespace BatchClient
             // create the client object and authenticate
             using (var client = BatchClient.CreateApiV3Client(SubscriptionKey, $"{Region}.api.cognitive.microsoft.com"))
             {
+                // uncomment next line when using web hooks
                 // await SetupWebHookAsync(client).ConfigureAwait(false);
+                
                 await TranscribeAsync(client).ConfigureAwait(false);
+
+                // uncomment next line when using web hooks
                 // await DeleteAllWebHooksAsync(client).ConfigureAwait(false);
             }
         }
