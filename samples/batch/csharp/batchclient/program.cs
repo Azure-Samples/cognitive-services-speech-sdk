@@ -14,7 +14,7 @@ namespace BatchClient
     public class Program
     {
         // Replace with your subscription key
-        private const string SubscriptionKey = "YourSubscriptionKey";
+        public const string SubscriptionKey = "YourSubscriptionKey";
 
         // Update with your service region
         public const string Region = "YourServiceRegion";
