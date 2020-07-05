@@ -98,7 +98,7 @@ Please see the description of each individual sample for instructions on how to 
 ### Speech recognition quickstarts
 
 The following quickstarts demonstrate how to perform one-shot speech recognition using a microphone.
-If you want to build them from scratch, please follow the articles in the Quickstart section on our [documentation page](https://aka.ms/csspeech).
+If you want to build them from scratch, please follow the quickstart or basics articles on our [documentation page](https://aka.ms/csspeech).
 
 | Quickstart | Platform | Description |
 | ---------- | -------- | ----------- |
@@ -122,7 +122,7 @@ If you want to build them from scratch, please follow the articles in the Quicks
 ### Speech translation quickstarts
 
 The following quickstarts demonstrate how to perform one-shot speech translation using a microphone.
-If you want to build them from scratch, please follow the articles in the Quickstart section on our [documentation page](https://aka.ms/csspeech).
+If you want to build them from scratch, please follow the quickstart or basics articles on our [documentation page](https://aka.ms/csspeech).
 
 | Quickstart | Platform | Description |
 | ---------- | -------- | ----------- |
@@ -135,7 +135,7 @@ If you want to build them from scratch, please follow the articles in the Quicks
 ### Speech synthesis quickstarts
 
 The following quickstarts demonstrate how to perform one-shot speech synthesis to a speaker.
-If you want to build them from scratch, please follow the articles in the Quickstart section on our [documentation page](https://aka.ms/csspeech).
+If you want to build them from scratch, please follow the quickstart or basics articles on our [documentation page](https://aka.ms/csspeech).
 
 | Quickstart | Platform | Description |
 | ---------- | -------- | ----------- |
@@ -158,7 +158,7 @@ If you want to build them from scratch, please follow the articles in the Quicks
 
 The following quickstarts demonstrate how to create a custom voice assistant.
 The applications will connect to a previously authored bot configured to use the Direct Line Speech channel, send a voice request, and return a voice response activity (if configured).
-If you want to build these quickstarts from scratch, please follow the articles in the Quickstart section on our [documentation page](https://aka.ms/csspeech).
+If you want to build these quickstarts from scratch, please follow the quickstart or basics articles on our [documentation page](https://aka.ms/csspeech).
 
 | Quickstart | Platform | Description |
 | ---------- | -------- | ----------- |
