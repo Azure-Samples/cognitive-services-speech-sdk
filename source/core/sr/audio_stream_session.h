@@ -337,6 +337,10 @@ private:
 
     void ForEachRecognizer(std::function<void(std::shared_ptr<ISpxRecognizer>)> fn);
     void SetUSPRetriesParams();
+
+    template<typename T>
+    void SendMessageToService(std::string&& path, T&& payload, bool alwaysSend);
+
 private:
 
     uint16_t m_numMaxRetries = 4;

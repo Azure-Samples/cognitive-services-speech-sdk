@@ -54,8 +54,8 @@ namespace USP {
     protected:
         struct TransportPacket
         {
-            inline TransportPacket(uint8_t msgtype, uint8_t wstype, size_t buffer_size)
-                : msgtype{ msgtype }, wstype{ wstype }, length{ buffer_size }, buffer{ std::make_unique<uint8_t[]>(buffer_size) }
+            inline TransportPacket(uint8_t msgtype, uint8_t wstype, size_t buffer_size, std::promise<bool>&& send_promise = std::promise<bool>())
+                : msgtype{ msgtype }, wstype{ wstype }, length{ buffer_size }, buffer{ std::make_unique<uint8_t[]>(buffer_size) }, sent{ std::move(send_promise) }
             {}
 
             TransportPacket(const TransportPacket&) = delete;
@@ -65,6 +65,7 @@ namespace USP {
             uint8_t                    wstype;
             size_t                     length;
             std::unique_ptr<uint8_t[]> buffer;
+            std::promise<bool>         sent;
         };
 
         /// <summary>
@@ -121,7 +122,7 @@ namespace USP {
         virtual void HandleBinaryData(const uint8_t* data, const size_t size);
         virtual void HandleError(WebSocketError reason, int errorCode, const std::string& errorMessage);
         virtual void HandleWebSocketStateChanged(WebSocketState oldState, WebSocketState newState);
-        virtual void HandleWebSocketFrameSent(WS_SEND_FRAME_RESULT result, uint8_t msgType, uint8_t wsType);
+        virtual void HandleWebSocketFrameSent(TransportPacket* packet, WS_SEND_FRAME_RESULT result);
 
     private:
         DISABLE_DEFAULT_CTORS(WebSocket);

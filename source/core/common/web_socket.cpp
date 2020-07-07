@@ -15,6 +15,7 @@
 
 DEFINE_ENUM_STRINGS(WS_OPEN_RESULT, WS_OPEN_RESULT_VALUES)
 DEFINE_ENUM_STRINGS(WS_ERROR, WS_ERROR_VALUES)
+
 // uncomment the line below to see all non-binary protocol messages in the log
 // #define LOG_TEXT_MESSAGES
 
@@ -414,7 +415,7 @@ namespace USP {
 
         // std::string.length() returns the number of raw bytes in the string rather than the number of UTF-8 code points
         auto msg = make_unique<TransportPacket>(
-            static_cast<uint8_t>(METRIC_MESSAGE_TYPE_INVALID), 
+            static_cast<uint8_t>(METRIC_MESSAGE_TYPE_INVALID),
             static_cast<uint8_t>(WS_FRAME_TYPE_TEXT),
             payloadSize);
 
@@ -516,7 +517,6 @@ namespace USP {
     int WebSocket::SendPacket(unique_ptr<TransportPacket> packet)
     {
         int err = 0;
-
         auto context = make_unique<InstanceAndValue<WebSocket, TransportPacket>>(this->shared_from_this(), std::move(packet));
 
         // TODO: This does not handle breaking up large payloads into multiple chunks
@@ -532,7 +532,7 @@ namespace USP {
                 if (context != nullptr)
                 {
                     auto packet = context->value();
-                    context->invoke(&WebSocket::HandleWebSocketFrameSent, result, packet->msgtype, packet->wstype);
+                    context->invoke(&WebSocket::HandleWebSocketFrameSent, packet, result);
                 }
             },
             context.get());
@@ -586,15 +586,18 @@ namespace USP {
         OnStateChanged(oldState, newState);
     }
 
-    void WebSocket::HandleWebSocketFrameSent(WS_SEND_FRAME_RESULT result, uint8_t msgType, uint8_t wsType)
+    void WebSocket::HandleWebSocketFrameSent(TransportPacket* packet, WS_SEND_FRAME_RESULT sendResult)
     {
-        UNUSED(result);
-        UNUSED(wsType);
-
+        if (packet == nullptr)
+        {
+            return;
+        }
+        auto msgType = packet->msgtype;
         if (msgType != METRIC_MESSAGE_TYPE_INVALID)
         {
             MetricsTransportStateEnd(msgType);
         }
+        packet->sent.set_value(sendResult == WS_SEND_FRAME_OK? true : false);
     }
 
     void WebSocket::WorkLoop(weak_ptr<WebSocket> weakPtr)
@@ -671,12 +674,12 @@ namespace USP {
         switch (GetState())
         {
             case WebSocketState::CLOSED:
-                {
-                    lock_guard<mutex> lock(m_queue_lock);
-                    queue<unique_ptr<TransportPacket>> empty;
-                    std::swap(m_queue, empty);
-                }
-                break;
+            {
+                lock_guard<mutex> lock(m_queue_lock);
+                queue<unique_ptr<TransportPacket>> empty;
+                std::swap(m_queue, empty);
+            }
+            break;
 
             case WebSocketState::DESTROYING:
                 // Do nothing. We are waiting for closing the transport request.
@@ -740,7 +743,7 @@ namespace USP {
                 }
 
                 break;
-        }
+            }
     }
 
     void WebSocket::OnWebSocketOpened(WS_OPEN_RESULT_DETAILED open_result_detailed)

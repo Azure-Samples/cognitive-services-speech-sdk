@@ -118,8 +118,8 @@ public:
     void WriteTelemetryLatency(uint64_t latencyInTicks, bool isPhraseLatency) override;
     void SendAgentMessage(const std::string &buffer) final;
     void SendSpeechEventMessage(std::string&& msg) override;
-    void SendNetworkMessage(std::string&& path, std::string&& msg) override;
-    void SendNetworkMessage(std::string&& path, std::vector<uint8_t>&& msg) override;
+    std::future<bool> SendNetworkMessage(std::string&& path, std::string&& msg) override;
+    std::future<bool> SendNetworkMessage(std::string&& path, std::vector<uint8_t>&& msg) override;
 
     // --- ISpxAudioProcessor
     void SetFormat(const SPXWAVEFORMATEX* pformat) override;
@@ -166,8 +166,9 @@ private:
     void UspSendSpeechContext();
     void UspSendSpeechEvent();
     void UspSendSpeechAgentContext();
-    void UspSendMessage(const std::string& messagePath, const std::string &buffer, USP::MessageType messageType);
-    void UspSendMessage(const std::string& messagePath, const uint8_t* buffer, size_t size, USP::MessageType messageType, bool binary=false);
+    std::future<bool> UspSendMessage(const std::string& messagePath, const std::string &buffer, USP::MessageType messageType);
+    std::future<bool> UspSendMessage(const std::string& messagePath, const uint8_t* buffer, size_t size, USP::MessageType messageType, bool binary=false);
+    std::future<bool> GetFalseFuture();
     void UspWriteActual(const DataChunkPtr& audioChunk);
     void FlushAudio(bool flushCodec = false);
 

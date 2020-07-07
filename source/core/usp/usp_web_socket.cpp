@@ -47,7 +47,6 @@ namespace USP {
 
     constexpr int WS_MESSAGE_HEADER_SIZE = 2;
 
-
     size_t GetContentTypeForAudioChunk(const Impl::DataChunkPtr& audioChunk, const char*& contentType)
     {
         size_t contentTypeSize = audioChunk->contentType.size();
@@ -121,7 +120,7 @@ namespace USP {
         return static_cast<int>(headerLen);
     }
 
-    void UspWebSocket::SendData(const std::string & path, const uint8_t * buffer, size_t bufferSize, const std::string & requestId, bool binary)
+    std::future<bool> UspWebSocket::SendData(const std::string & path, const uint8_t * buffer, size_t bufferSize, const std::string & requestId, bool binary)
     {
         bool includeRequestId = !requestId.empty();
 
@@ -133,10 +132,14 @@ namespace USP {
             TIME_STRING_MAX_SIZE +
             bufferSize;
 
+        std::promise<bool> sent;
+        std::future<bool> sent_future = sent.get_future();
+
         auto msg = std::make_unique<TransportPacket>(
             static_cast<uint8_t>(MetricMessageType::METRIC_MESSAGE_TYPE_DEVICECONTEXT),
             static_cast<unsigned char>(binary ? WS_FRAME_TYPE_BINARY : WS_FRAME_TYPE_TEXT),
-            payloadSize);
+            payloadSize,
+            std::move(sent));
 
         char timeString[TIME_STRING_MAX_SIZE];
         int timeStringLen = GetISO8601Time(timeString, TIME_STRING_MAX_SIZE);
@@ -195,6 +198,8 @@ namespace USP {
         msg->length += bufferSize;
 
         QueuePacket(std::move(msg));
+
+        return sent_future;
     }
 
     void UspWebSocket::SendAudioData(const std::string & path, const Impl::DataChunkPtr & audioChunk, const std::string & requestId, bool newStream)

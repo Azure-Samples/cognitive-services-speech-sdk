@@ -1208,8 +1208,12 @@ public:
 
     virtual void WriteTelemetryLatency(uint64_t, bool) {};
     virtual void SendSpeechEventMessage(std::string&&) {};
-    virtual void SendNetworkMessage(std::string&&, std::string&&) {};
-    virtual void SendNetworkMessage(std::string&&, std::vector<uint8_t>&&) {};
+    virtual std::future<bool> SendNetworkMessage(std::string&&, std::string&&) {
+        std::promise<bool> p; p.set_value(false); return p.get_future();
+    }
+    virtual std::future<bool> SendNetworkMessage(std::string&&, std::vector<uint8_t>&&) {
+        std::promise<bool> p; p.set_value(false); return p.get_future();
+    }
 };
 
 class SpxRecoEngineAdapterError

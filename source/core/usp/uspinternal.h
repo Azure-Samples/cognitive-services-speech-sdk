@@ -94,7 +94,7 @@ public:
     * @param messageType The type of message to be sent.
     * @param requestId The request ID of this turn.
     */
-    void QueueMessage(const std::string& path, const uint8_t* data, size_t size, MessageType messageType, const std::string& requestId, bool binary = false);
+    std::future<bool> QueueMessage(const std::string& path, const uint8_t* data, size_t size, MessageType messageType, const std::string& requestId, bool binary = false);
 
     /**
     * Writes latency value into telemetry data.

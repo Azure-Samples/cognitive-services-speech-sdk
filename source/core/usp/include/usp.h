@@ -174,8 +174,9 @@ public:
     *  3. Agent:   Agent messages are meant for communicating with a back end agent.
     *              Each message represents the start of a new request.
     * @param requestId The request ID for this turn.
+    * @return a future contains the whether the message is being sent or not. True for being sent over socket successfully. False for not.
     */
-    void SendMessage(const std::string& messagePath, const uint8_t* buffer, size_t size, MessageType messageType, const std::string& requestId="", bool binary=false);
+    std::future<bool> SendMessage(const std::string& messagePath, const uint8_t* buffer, size_t size, MessageType messageType, const std::string& requestId="", bool binary=false);
 
     /**
     * Writes the latency value into telemetry data.

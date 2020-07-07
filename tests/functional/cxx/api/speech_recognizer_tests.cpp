@@ -1661,6 +1661,42 @@ TEST_CASE("Dictation Corrections", "[api][cxx]")
     auto audioInput = AudioConfig::FromStreamInput(pushStream);
     string endpoint{ "wss://officespeech.platform.bing.com/speech/recognition/dictation/office/v1" };
 
+    SPXTEST_SECTION("send_event_without_audio")
+    {
+        auto config = SpeechConfig::FromEndpoint(endpoint, SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
+        config->EnableDictation();
+        config->SetProperty(PropertyId::Speech_LogFilename, "carbon_event_log.txt");
+
+        auto recognizer = SpeechRecognizer::FromConfig(config, audioInput);
+        recognizer->SetAuthorizationToken("abc");
+        string data = R"(
+                       {
+                "Id": "Corrections",
+                "Name": "Telemetry",
+                "ClientSessionId": "DADAAAC4-019C-4D23-9301-7FD619BE68AB",
+                "CorrectionEvents": [
+                    {
+                        "PhraseId": "AEDC2194-019C-4D23-9301-7FD619BE68A9",
+                        "CorrectionId": 0,
+                        "AlternateId": 1,
+                        "TreatedInUX": "true",
+                        "TriggerType": "click",
+                        "EditType": "alternate"
+                    },
+                    {
+                        "PhraseId": "BEDC2194-019C-4D23-9301-7FD619BE68AA",
+                        "CorrectionId": 0,
+                        "AlternateId": 2,
+                        "TriggerType": "hover",
+                        "TreatedInUX": "false",
+                        "EditType": "alternate"
+                    }
+                    ] } )";
+        auto connection = Connection::FromRecognizer(recognizer);
+
+        SPXTEST_REQUIRE_NOTHROW(connection->SendMessageAsync("event", data).get());
+    }
+
     SPXTEST_SECTION("send_event")
     {
         auto config = SpeechConfig::FromEndpoint(endpoint, SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);

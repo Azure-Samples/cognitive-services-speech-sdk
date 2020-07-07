@@ -451,7 +451,7 @@ string Connection::Impl::ConstructConnectionUrl() const
         {
             ThrowInvalidArgumentException("Query parameters are not allowed in the host URI.");
         }
-        
+
         oss << HttpUtils::SchemePrefix(url.scheme) << url.host << ':' << url.port;
         customHost = true;
     }
@@ -783,44 +783,39 @@ void Connection::Impl::RegisterRequestId(const string& requestId)
     m_activeRequestIds.insert(requestId);
 }
 
-void Connection::Impl::QueueMessage(const string& path, const uint8_t *data, size_t size, MessageType messageType, const string& requestId, bool binary)
+std::future<bool> Connection::Impl::QueueMessage(const string& path, const uint8_t *data, size_t size, MessageType messageType, const string& requestId, bool binary)
 {
     throw_if_null(data, "message payload is null");
 
-    if (path.empty())
+    if (path.empty() || !m_valid || m_transport == nullptr)
     {
         ThrowInvalidArgumentException("The path is null or empty.");
     }
 
-    if (m_valid)
+    // According to USP protocol, speech.context must be sent before any audio in a turn, and
+    // only one speech.context message is allowed in the same turn.
+    if (messageType == MessageType::Context)
     {
-        // According to USP protocol, speech.context must be sent before any audio in a turn, and
-        // only one speech.context message is allowed in the same turn.
-        if (messageType == MessageType::Context)
+        // QueueMessage() is serialized by ThreadService, no lock is needed.
+        if (!m_speechContextMessageAllowed)
         {
-            // QueueMessage() is serialized by ThreadService, no lock is needed.
-            if (!m_speechContextMessageAllowed)
-            {
-                ThrowLogicError("Error trying to send a context message while in the middle of a speech turn.");
-            }
-            else
-            {
-                // Only one speech.context in the same turn.
-                m_speechContextMessageAllowed = false;
-            }
+            ThrowLogicError("Error trying to send a context message while in the middle of a speech turn.");
         }
-
-        if (!requestId.empty() && path == "synthesis.context")
+        else
         {
-            m_speechRequestId = requestId;
-        }
-
-        auto usedRequestId = requestId.empty() ? UpdateRequestId(messageType,binary) : requestId;
-        if (m_transport)
-        {
-            m_transport->SendData(path, data, size, usedRequestId, binary);
+            // Only one speech.context in the same turn.
+            m_speechContextMessageAllowed = false;
         }
     }
+
+    if (!requestId.empty() && path == "synthesis.context")
+    {
+        m_speechRequestId = requestId;
+    }
+
+    auto usedRequestId = requestId.empty() ? UpdateRequestId(messageType, binary) : requestId;
+
+    return m_transport->SendData(path, data, size, usedRequestId, binary);
 }
 
 string Connection::Impl::UpdateRequestId(const MessageType messageType, bool binary)

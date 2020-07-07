@@ -32,7 +32,7 @@ namespace USP {
             const std::chrono::milliseconds& pollingIntervalMs,
             ITelemetry& telemetry);
 
-        void SendData(const std::string& path, const uint8_t* buffer, size_t bufferSize, const std::string& requestId = "", bool binary = false);
+        std::future<bool> SendData(const std::string& path, const uint8_t* buffer, size_t bufferSize, const std::string& requestId = "", bool binary = false);
 
         void SendAudioData(const std::string& path, const Impl::DataChunkPtr& audioChunk, const std::string& requestId = "", bool newStream = false);
 

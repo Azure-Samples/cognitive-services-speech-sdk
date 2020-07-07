@@ -3036,38 +3036,12 @@ void CSpxAudioStreamSession::SendSpeechEventMessage(std::string&& payload)
 
 void CSpxAudioStreamSession::SendNetworkMessage(std::string&& path, std::string&& payload, bool alwaysSend)
 {
-    SPX_DBG_TRACE_FUNCTION();
-    auto keepAlive = SpxSharedPtrFromThis<ISpxSession>(this);
-    auto task = CreateTask([this, keepAlive, path, payload, alwaysSend]() mutable {
-        // when we want to send network messsage only when we are connected we should call this function with
-        // always send as false. Here we had made sure that the message will go to the service even though
-        // we are not connected. Look at the AddTargetLanguage and RemoveTargetLanguage of translation_recognizer
-        if (alwaysSend || IsStreaming())
-        {
-            EnsureInitRecoEngineAdapter();
-            m_recoAdapter->SendNetworkMessage(std::move(path), std::move(payload));
-        }
-    });
-
-    m_threadService->ExecuteAsync(move(task));
+    SendMessageToService(std::move(path), payload, alwaysSend);
 }
 
-void CSpxAudioStreamSession::SendNetworkMessage(std::string&& path, std::vector<uint8_t>&& payload, bool alwaysSend)
+void CSpxAudioStreamSession::SendNetworkMessage(std::string&& path, std::vector<uint8_t>&& payload,  bool alwaysSend)
 {
-    SPX_DBG_TRACE_FUNCTION();
-    auto keepAlive = SpxSharedPtrFromThis<ISpxSession>(this);
-    auto task = CreateTask([this, keepAlive, path, payload, alwaysSend]() mutable {
-        // when we want to send network messsage only when we are connected we should call this function with
-        // always send as false. Here we had made sure that the message will go to the service even though
-        // we are not connected. Look at the AddTargetLanguage and RemoveTargetLanguage of translation_recognizer
-        if (alwaysSend || IsStreaming())
-        {
-            EnsureInitRecoEngineAdapter();
-            m_recoAdapter->SendNetworkMessage(std::move(path), std::move(payload));
-        }
-    });
-
-    m_threadService->ExecuteAsync(move(task));
+    SendMessageToService(std::move(path), payload, alwaysSend);
 }
 
 bool CSpxAudioStreamSession::IsStreaming()
@@ -3137,4 +3111,65 @@ void CSpxAudioStreamSession::ForEachRecognizer(std::function<void(std::shared_pt
     SPXAPI_CATCH_ONLY()
 }
 
+template<typename T>
+void CSpxAudioStreamSession::SendMessageToService(std::string&& path, T&& payload, bool alwaysSend)
+{
+    SPX_DBG_TRACE_SCOPE("SendMessageToService", "SendMessageToService");
+    auto keepAlive = SpxSharedPtrFromThis<ISpxSession>(this);
+    std::future<bool> message_is_sent;
+    auto task = CreateTask([this, keepAlive, path, payload, alwaysSend, &message_is_sent]() mutable {
+        // alwaysSend is set to true by default. It is only set to false in CSpxTranslationRecognizer::UpdateTargetLanguages.
+        // This is because CSpxTranslationRecognizer::UpdateTargetLanguages can be called before streaming audio and
+        // core throws a "reco mode" not set exception due to reco mode is only set after start streaming data. Adding "alwaysSend||IsStreaming" if statement to avoid the exception.
+        if (alwaysSend || IsStreaming())
+        {
+            EnsureInitRecoEngineAdapter();
+            message_is_sent = m_recoAdapter->SendNetworkMessage(std::move(path), std::move(payload));
+        }
+        });
+
+    m_threadService->ExecuteSync(move(task));
+
+    auto status = std::future_status::timeout;
+
+    // if we bypass sending the message, no point in waiting its result.
+    if (!message_is_sent.valid())
+    {
+        return;
+    }
+
+    try
+    {
+        // wait for maximum 90 seconds for the message to be sent over socket.
+        constexpr std::chrono::seconds timeout = std::chrono::seconds(90);
+        status = message_is_sent.wait_for(timeout);
+    }
+    catch (const std::future_error& e)
+    {
+        std::string msg{ "SendNetworkMessage error in sending '" };
+        msg += path;
+        msg += "' The future error is ";
+        msg += e.what();
+
+        ThrowRuntimeError(msg);
+    }
+    catch (...)
+    {
+    }
+
+    if (status != std::future_status::ready)
+    {
+        std::string message{ "Timeout waiting for SendMessageAsync to be done for " };
+        message += path;
+        ThrowRuntimeError(message);
+    }
+
+    if (false == message_is_sent.get())
+    {
+        std::string message{ "Message " };
+        message += path;
+        message += "is not sent.";
+        ThrowRuntimeError(message);
+    }
+}
 } } } } // Microsoft::CognitiveServices::Speech::Impl

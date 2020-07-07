@@ -177,28 +177,31 @@ USP::MessageType CSpxUspRecoEngineAdapter::GetMessageType(const std::string& pat
     return m_message_name_to_type_map.find(path) == m_message_name_to_type_map.end() ? USP::MessageType::Unknown : m_message_name_to_type_map[path];
 }
 
-void CSpxUspRecoEngineAdapter::SendNetworkMessage(std::string&& path, std::string&& payload)
+std::future<bool> CSpxUspRecoEngineAdapter::SendNetworkMessage(std::string&& path, std::string&& payload)
 {
     // Establish the connection to service.
     EnsureUspInit();
+
     // for some reason, no connection is established
     if (m_uspConnection == nullptr || IsState(UspState::Error))
     {
-        return;
+        std::string error_message{ "Invalid state in USP adapter when sending " };
+        error_message += path;
+        return GetFalseFuture();
     }
-    UspSendMessage(path, payload, GetMessageType(path));
+    return UspSendMessage(path, payload, GetMessageType(path));
 }
 
-void CSpxUspRecoEngineAdapter::SendNetworkMessage(std::string&& path, std::vector<uint8_t>&& payload)
+std::future<bool> CSpxUspRecoEngineAdapter::SendNetworkMessage(std::string&& path, std::vector<uint8_t>&& payload)
 {
     // Establish the connection to service.
     EnsureUspInit();
     // for some reason, no connection is established
     if (m_uspConnection == nullptr || IsState(UspState::Error))
     {
-        return;
+        ThrowRuntimeError("No usp connection.");
     }
-    UspSendMessage(path, payload.data(), payload.size(), GetMessageType(path), true); // true for a binary message.
+    return UspSendMessage(path, payload.data(), payload.size(), GetMessageType(path), true); // true for a binary message.
 }
 
 void CSpxUspRecoEngineAdapter::SetFormat(const SPXWAVEFORMATEX* pformat)
@@ -1043,7 +1046,6 @@ void CSpxUspRecoEngineAdapter::UspSendAgentConfig()
     }
 }
 
-
 void CSpxUspRecoEngineAdapter::UspSendSpeechAgentContext()
 {
     // The Dialog Service Connector is responsible for generating an interaction ID here, so we send it as a speech.agent.context message
@@ -1102,29 +1104,36 @@ void CSpxUspRecoEngineAdapter::UspSendSpeechContext()
     }
  }
 
-void CSpxUspRecoEngineAdapter::UspSendMessage(const std::string& messagePath, const std::string &buffer, USP::MessageType messageType)
+std::future<bool> CSpxUspRecoEngineAdapter::UspSendMessage(const std::string& messagePath, const std::string &buffer, USP::MessageType messageType)
 {
     SPX_DBG_TRACE_VERBOSE("%s='%s'", messagePath.c_str(), buffer.c_str());
-    UspSendMessage(messagePath, (const uint8_t*)buffer.c_str(), buffer.length(), messageType);
+    return UspSendMessage(messagePath, (const uint8_t*)buffer.c_str(), buffer.length(), messageType);
 }
 
-void CSpxUspRecoEngineAdapter::UspSendMessage(const std::string& messagePath, const uint8_t* buffer, size_t size, USP::MessageType messageType, bool binary)
+std::future<bool> CSpxUspRecoEngineAdapter::UspSendMessage(const std::string& messagePath, const uint8_t* buffer, size_t size, USP::MessageType messageType, bool binary)
 {
     SPX_DBG_ASSERT(m_uspConnection != nullptr || IsState(UspState::Terminating) || IsState(UspState::Zombie));
-    if (!IsBadState() && m_uspConnection != nullptr)
-    {
-        m_uspConnection->SendMessage(messagePath, buffer, size, messageType, "", binary); //"" is a requestId.
-    }
-    else
+    if (IsBadState() || m_uspConnection == nullptr)
     {
         /* Notify user there was an error */
         InvokeOnSite([this](const SitePtr& p)
-        {
-            p->Error(this, std::make_shared<SpxRecoEngineAdapterError>(true, CancellationReason::Error, CancellationErrorCode::ConnectionFailure, "Connection is in a bad state."));
-        });
+            {
+                p->Error(this, std::make_shared<SpxRecoEngineAdapterError>(true, CancellationReason::Error, CancellationErrorCode::ConnectionFailure, "Connection is in a bad state."));
+            });
         SPX_TRACE_ERROR("no connection established or in bad USP state. m_uspConnection %s nullptr, m_uspState:%d.", m_uspConnection == nullptr ? "is" : "is not", m_uspState);
-        return;
+
+        return GetFalseFuture();
     }
+    return m_uspConnection->SendMessage(messagePath, buffer, size, messageType, "", binary); //"" is a requestId.
+}
+
+std::future<bool> CSpxUspRecoEngineAdapter::GetFalseFuture()
+{
+    promise<bool> promiseForTheMessage;
+    future<bool> future = promiseForTheMessage.get_future();
+    // false for not sending the message.
+    promiseForTheMessage.set_value(false);
+    return future;
 }
 
 //
