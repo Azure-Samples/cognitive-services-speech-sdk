@@ -99,7 +99,7 @@ struct codec_c_interface
 * @return A codec object
 */
 
-SPX_EXTERN_C SPXDLL_EXPORT SPXCODECCTYPE codec_create(const char* codecid, void* context, SPX_CODEC_CLIENT_GET_PROPERTY property_read_func);
+SPX_EXTERN_C SPXDLL_EXPORT SPXCODECCTYPE codec_create(const char* codecid, void* codecContext, SPX_CODEC_CLIENT_GET_PROPERTY property_read_func);
 typedef SPXCODECCTYPE (SPXAPI_CALLTYPE* PCODEC_CREATE_FUNC)(const char* codecid, void* codecContext, SPX_CODEC_CLIENT_GET_PROPERTY property_read_func);
 
 /*! \endcond */

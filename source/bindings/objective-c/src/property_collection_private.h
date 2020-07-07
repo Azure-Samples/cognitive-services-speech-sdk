@@ -22,3 +22,15 @@
 -(instancetype)initWithPropertyCollection :(SpeechImpl::PropertyCollection *)propertiesHandle from:(SpeechSynthSharedPtr)speechSynthHandle;
 
 @end
+
+@interface ConversationPropertyCollection : PropertyCollection
+
+-(instancetype)initWithPropertyCollection :(SpeechImpl::PropertyCollection *)propertiesHandle from:(ConversationSharedPtr)conversationHandle;
+
+@end
+
+@interface ParticipantPropertyCollection : PropertyCollection
+
+-(instancetype)initWithPropertyCollection :(SpeechImpl::PropertyCollection *)propertiesHandle from:(ParticipantSharedPtr)participantHandle;
+
+@end

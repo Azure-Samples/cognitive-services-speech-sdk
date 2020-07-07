@@ -5,6 +5,7 @@
 
 #import "SPXFoundation.h"
 #import "SPXRecognizer.h"
+#import "SPXConversationTranslator.h"
 #import "SPXConnectionEventArgs.h"
 
 /**
@@ -46,6 +47,26 @@ NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.");
  * @param outError error information.
  */
 - (nullable instancetype)initFromRecognizer:(nonnull SPXRecognizer *)recognizer error:(NSError * _Nullable * _Nullable)outError;
+
+/**
+ * Gets the Connection instance from the specified conversation translator.
+ *
+ * @param translator The conversation translator associated with the connection.
+ * @return The Connection instance of the conversation translator.
+ */
+- (nullable instancetype)initFromConversationTranslator:(nonnull SPXConversationTranslator *)translator
+NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.");
+
+/**
+ * Gets the Connection instance from the specified conversation translator.
+ *
+ * Added in version 1.13.0.
+ *
+ * @param translator The conversation translator associated with the connection.
+ * @return The Connection instance of the conversation translator.
+ * @param outError error information.
+ */
+- (nullable instancetype)initFromConversationTranslator:(nonnull SPXConversationTranslator *)translator error:(NSError * _Nullable * _Nullable)outError;
 
 /**
  * Starts to set up connection to the service.

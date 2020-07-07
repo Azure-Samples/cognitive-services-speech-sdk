@@ -103,7 +103,37 @@
     return [self initWithImpl:pullImpl];
 }
 
-- (instancetype)initWithAudioFormat:(SPXAudioStreamFormat *)format readHandler:(SPXPullAudioInputStreamReadHandler)readHandler closeHandler:(SPXPullAudioInputStreamCloseHandler)closeHandler
+- (instancetype)initWithReadHandler:(SPXPullAudioInputStreamReadHandler)readHandler getPropertyHandler:(SPXPullAudioInputStreamGetPropertyHandler)getPropertyHandler closeHandler:(SPXPullAudioInputStreamCloseHandler)closeHandler
+{
+    auto pullImpl = AudioImpl::PullAudioInputStream::Create(
+        [=](uint8_t* buffer, uint32_t size) -> int {
+            NSMutableData* data = [[NSMutableData alloc] initWithCapacity: size];
+            NSInteger ret = readHandler(data, (NSUInteger)size);
+            if (ret > 0) {
+                if (ret > [data length]) {
+                    LogDebug(@"The length of data is less than return value.");
+                    ret = [data length];
+                }
+                std::memcpy(buffer, [data bytes], ret);
+            }
+            return (int)ret;
+        },
+        [=]() -> void {
+        closeHandler();
+        },
+        [=](SpeechImpl::PropertyId propertyId) -> std::string {
+            NSString * result = getPropertyHandler((SPXPropertyId) propertyId);
+            return [result toSpxString];
+        });
+
+    if (pullImpl == nullptr) {
+        NSLog(@"Unable to create pull audio input stream in core");
+        return nil;
+    }
+    return [self initWithImpl:pullImpl];
+}
+
+- (instancetype)initWithAudioFormat:(SPXAudioStreamFormat *)format readHandler:(SPXPullAudioInputStreamReadHandler)readHandler  closeHandler:(SPXPullAudioInputStreamCloseHandler)closeHandler
 {
     auto pullImpl = AudioImpl::PullAudioInputStream::Create(
         [format getHandle],
@@ -121,6 +151,37 @@
         },
         [=]() -> void {
             closeHandler();
+        });
+
+    if (pullImpl == nullptr) {
+        NSLog(@"Unable to create pull audio input stream in core");
+        return nil;
+    }
+    return [self initWithImpl:pullImpl];
+}
+
+- (instancetype)initWithAudioFormat:(SPXAudioStreamFormat *)format readHandler:(SPXPullAudioInputStreamReadHandler)readHandler getPropertyHandler:(SPXPullAudioInputStreamGetPropertyHandler)getPropertyHandler closeHandler:(SPXPullAudioInputStreamCloseHandler)closeHandler
+{
+    auto pullImpl = AudioImpl::PullAudioInputStream::Create(
+        [format getHandle],
+        [=](uint8_t* buffer, uint32_t size) -> int {
+            NSMutableData* data = [[NSMutableData alloc] initWithCapacity: size];
+            NSInteger ret = readHandler(data, (NSUInteger)size);
+            if (ret > 0) {
+                if (ret > [data length]) {
+                    LogDebug(@"The length of data is less than return value.");
+                    ret = [data length];
+                }
+                std::memcpy(buffer, [data bytes], ret);
+            }
+            return (int)ret;
+        },
+        [=]() -> void {
+            closeHandler();
+        },
+        [=](SpeechImpl::PropertyId propertyId) -> std::string {
+            NSString * result = getPropertyHandler((SPXPropertyId) propertyId);
+            return [result toSpxString];
         });
 
     if (pullImpl == nullptr) {

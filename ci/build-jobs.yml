@@ -1886,6 +1886,7 @@ jobs:
       vsts_setvar SPEECHSDK_BUILD_CONFIGURATION "$(BuildConfiguration)"
       vsts_setvar SPEECHSDK_ENABLE_CODEC true
       vsts_setvar SPEECHSDK_ENABLE_KWS true
+      vsts_setvar SPEECHSDK_ENABLE_CONVERSATION_TRANSLATOR true
     displayName: Set iOS target platform
   - bash: ./ci/set-variables.sh
     displayName: Set variables
@@ -1930,7 +1931,7 @@ jobs:
     displayName: Build GStreamer wrapper
   - bash: |
       mkdir build_ios_simulator64 && cd build_ios_simulator64 &&
-      cmake $(JointCmakeArgs) -DSPEECHSDK_TARGET_PLATFORM=IOSSIMULATOR-x64 -DEXTENSION_CODEC_ENABLED="$(SPEECHSDK_ENABLE_CODEC)" -DEXTENSION_KWS_ENABLED="$(SPEECHSDK_ENABLE_KWS)" ..
+      cmake $(JointCmakeArgs) -DSPEECHSDK_TARGET_PLATFORM=IOSSIMULATOR-x64 -DEXTENSION_CODEC_ENABLED="$(SPEECHSDK_ENABLE_CODEC)" -DEXTENSION_KWS_ENABLED="$(SPEECHSDK_ENABLE_KWS)" -DSTATIC_CONVERSATION_LIB="$(SPEECHSDK_ENABLE_CONVERSATION_TRANSLATOR)" ..
     displayName: Generate makefiles for iOS simulator (64bit)
   - bash: |
       cd build_ios_simulator64 &&
@@ -1938,7 +1939,7 @@ jobs:
     displayName: CMake build for iOS simulator (64bit)
   - bash: |
       mkdir build_ios_device && cd build_ios_device &&
-      cmake $(JointCmakeArgs) -DSPEECHSDK_TARGET_PLATFORM=IOS-all -DEXTENSION_CODEC_ENABLED="$(SPEECHSDK_ENABLE_CODEC)" -DEXTENSION_KWS_ENABLED="$(SPEECHSDK_ENABLE_KWS)" ..
+      cmake $(JointCmakeArgs) -DSPEECHSDK_TARGET_PLATFORM=IOS-all -DEXTENSION_CODEC_ENABLED="$(SPEECHSDK_ENABLE_CODEC)" -DEXTENSION_KWS_ENABLED="$(SPEECHSDK_ENABLE_KWS)" -DSTATIC_CONVERSATION_LIB="$(SPEECHSDK_ENABLE_CONVERSATION_TRANSLATOR)" ..
     displayName: Generate makefiles for iOS device
   - bash: |
       cd build_ios_device &&

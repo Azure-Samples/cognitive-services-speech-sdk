@@ -125,3 +125,35 @@
 }
 
 @end
+
+@implementation ConversationPropertyCollection
+{
+    // We have to keep the conversation instance alive in order to make sure the propertyHandle is valid
+    ConversationSharedPtr conversationImpl;
+}
+
+-(instancetype)initWithPropertyCollection :(SpeechImpl::PropertyCollection *)propertiesHandle from:(ConversationSharedPtr)conversationHandle
+{
+    self = [super initWithPropertyCollection:propertiesHandle];
+    if (self)
+        self->conversationImpl = conversationHandle;
+    return self;
+}
+
+@end
+
+@implementation ParticipantPropertyCollection
+{
+    // We have to keep the participant instance alive in order to make sure the propertyHandle is valid
+    ParticipantSharedPtr participantImpl;
+}
+
+-(instancetype)initWithPropertyCollection :(SpeechImpl::PropertyCollection *)propertiesHandle from:(ParticipantSharedPtr)participantHandle
+{
+    self = [super initWithPropertyCollection:propertiesHandle];
+    if (self)
+        self->participantImpl = participantHandle;
+    return self;
+}
+
+@end

@@ -13,7 +13,9 @@
 + (SPXCancellationReason) fromCancellationReasonImpl:(SpeechImpl::CancellationReason)reasonImpl;
 + (SPXCancellationErrorCode) fromCancellationErrorCodeImpl:(SpeechImpl::CancellationErrorCode)errorCodeImpl;
 + (SPXNoMatchReason) fromNoMatchReasonImpl:(SpeechImpl::NoMatchReason)reasonImpl;
++ (SPXParticipantChangedReason) fromParticipantChangedReasonImpl:(TranscriptionImpl::ParticipantChangedReason)reasonImpl;
 + (SPXOutputFormat) fromOutputFormatImpl:(SpeechImpl::OutputFormat)outputFormatImpl;
-+ (int) getErrorNumberFromExceptionReason:(NSString *)message;
++ (int) getErrorNumberFromExceptionReason:(NSString * _Nonnull)message;
++ (NSError * _Nonnull) getErrorFromException:(NSException * _Nonnull)exception;
 
 @end

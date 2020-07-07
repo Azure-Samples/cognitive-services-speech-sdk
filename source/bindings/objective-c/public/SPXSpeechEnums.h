@@ -286,7 +286,23 @@ typedef NS_ENUM(NSUInteger, SPXPropertyId)
      *
      * NOTE: Added in version 1.4.0.
      */
-    SPXSpeechLogFilename = 9001
+    SPXSpeechLogFilename = 9001,
+
+    /**
+     * The timestamp associated to data buffer written by client when using Pull/Push audio mode streams.
+     * The timestamp is a 64-bit value with resolution of 90kHz. The same as the presentation timestamp in
+     * MPEG transfrom stream.
+     * See https://en.wikipedia.org/wiki/Presentation_timestamp.
+     * NOTE: Added in version 1.13.0.
+     */
+    SPXDataBuffer_TimeStamp = 11001,
+
+    /**
+     * The user id associated to data buffer written by client when using Pull/Push audio mode streams.
+     *
+     * NOTE: Added in version 1.13.0.
+     */
+    SPXDataBuffer_UserId = 11002,
 };
 
 /**
@@ -631,4 +647,26 @@ typedef NS_ENUM(NSUInteger, SPXStreamStatus)
      * The audio data stream was cancelled
      */
     SPXStreamStatus_Canceled = 4
+};
+
+/**
+  * Defines the possible reasons why the participant changed event was raised.
+  * Added in version 1.13.0
+  */
+typedef NS_ENUM(NSUInteger, SPXParticipantChangedReason)
+{
+    /**
+     * Indicates that a participant has joined the conversation.
+     */
+    SPXParticipantChangedReason_JoinedConversation = 0,
+
+    /**
+     * Indicates that a participant has left the conversation. This could be voluntary, or involuntary.
+     */
+    SPXParticipantChangedReason_LeftConversation = 1,
+
+    /**
+     * Indicates that a participants' state has changed (e.g. they became muted, changed their nickname).
+     */
+    SPXParticipantChangedReason_Updated = 2
 };

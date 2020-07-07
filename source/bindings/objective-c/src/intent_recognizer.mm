@@ -258,24 +258,46 @@
 
 - (void)recognizeOnceAsync:(void (^)(SPXIntentRecognitionResult *))resultReceivedHandler
 {
+    NSException * exception = nil;
+    if (intentRecoImpl == nullptr) {
+        auto result = [[SPXIntentRecognitionResult alloc] initWithError: @"SPXRecognizer has been closed."];
+        resultReceivedHandler(result);
+        NSLog(@"SPXRecognizer handle is null");
+        exception = [NSException exceptionWithName:@"SPXException"
+                                            reason:@"SPXRecognizer handle is null"
+                                          userInfo:nil];
+        [exception raise];
+    }
+    
+    __block std::future<std::shared_ptr<IntentImpl::IntentRecognitionResult>> futureObj;
+    try {
+        futureObj = intentRecoImpl->RecognizeOnceAsync();
+    }
+    catch (const std::exception &e) {
+        NSLog(@"Exception caught in core: %s", e.what());
+        exception = [NSException exceptionWithName:@"SPXException"
+                                            reason:[NSString StringWithStdString:e.what()]
+                                          userInfo:nil];
+    }
+    catch (...) {
+        NSLog(@"%@: Exception caught", NSStringFromSelector(_cmd));
+        exception = [NSException exceptionWithName:@"SPXException"
+                                            reason:@"Runtime exception"
+                                          userInfo:nil];
+    }
+    if (exception != nil) {
+        auto result = [[SPXIntentRecognitionResult alloc] initWithError: @"Runtime Exception"];
+        resultReceivedHandler(result);
+        [exception raise];
+    }
+
     dispatch_async(dispatchQueue, ^{
-        NSException * exception;
-        if (intentRecoImpl == nullptr) {
-            auto result = [[SPXIntentRecognitionResult alloc] initWithError: @"SPXRecognizer has been closed."];
-            resultReceivedHandler(result);
-            NSLog(@"SPXRecognizer handle is null");
-            exception = [NSException exceptionWithName:@"SPXException"
-                                                         reason:@"SPXRecognizer handle is null"
-                                                       userInfo:nil];
-            [exception raise];
-        }
+        NSString * errorString;
         try {
-            std::shared_ptr<IntentImpl::IntentRecognitionResult> resultImpl = intentRecoImpl->RecognizeOnceAsync().get();
+            std::shared_ptr<IntentImpl::IntentRecognitionResult> resultImpl = futureObj.get();
             if (resultImpl == nullptr) {
                 NSLog(@"No result is available");
-                exception = [NSException exceptionWithName:@"SPXException"
-                                                             reason:@"No result available"
-                                                             userInfo:nil];
+                errorString = @"No result is available";
             }
             else {
                 auto result = [[SPXIntentRecognitionResult alloc] init: resultImpl];
@@ -285,27 +307,20 @@
         }
         catch (const std::exception &e) {
             NSLog(@"Exception caught in core: %s", e.what());
-            exception = [NSException exceptionWithName:@"SPXException"
-                                                         reason:[NSString StringWithStdString:e.what()]
-                                                         userInfo:nil];
+            errorString = [NSString StringWithStdString:e.what()];
         }
         catch (const SPXHR &hr) {
             auto e = SpeechImpl::Impl::ExceptionWithCallStack(hr);
             NSLog(@"Exception with error code in core: %s", e.what());
-            exception = [NSException exceptionWithName:@"SPXException"
-                                                         reason:[NSString StringWithStdString:e.what()]
-                                                         userInfo:nil];
+            errorString = [NSString StringWithStdString:e.what()];
         }
         catch (...) {
             NSLog(@"%@: Exception caught", NSStringFromSelector(_cmd));
-            exception = [NSException exceptionWithName:@"SPXException"
-                                                         reason:@"Runtime exception"
-                                                         userInfo:nil];
+            errorString = @"Runtime exception";
         }
-
-        auto result = [[SPXIntentRecognitionResult alloc] initWithError: @"Runtime Exception"];
+        
+        auto result = [[SPXIntentRecognitionResult alloc] initWithError: errorString];
         resultReceivedHandler(result);
-        [exception raise];
     });
 }
 

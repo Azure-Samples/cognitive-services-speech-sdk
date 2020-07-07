@@ -4,6 +4,7 @@
 //
 
 #import "speechapi_private.h"
+#import "exception.h"
 
 @implementation Util
 
@@ -144,6 +145,28 @@
     return reason;
 }
 
++ (SPXParticipantChangedReason) fromParticipantChangedReasonImpl:(TranscriptionImpl::ParticipantChangedReason)reasonImpl
+{
+    SPXParticipantChangedReason reason;
+    switch (reasonImpl)
+    {
+        case TranscriptionImpl::ParticipantChangedReason::JoinedConversation:
+            reason = SPXParticipantChangedReason_JoinedConversation;
+            break;
+        case TranscriptionImpl::ParticipantChangedReason::LeftConversation:
+            reason = SPXParticipantChangedReason_LeftConversation;
+            break;
+        case TranscriptionImpl::ParticipantChangedReason::Updated:
+            reason = SPXParticipantChangedReason_Updated;
+            break;
+        default:
+            // Todo error handling.
+            NSLog(@"Unknown ParticipantChangedReason value: %d.", (int)reasonImpl);
+            break;
+    }
+    return reason;
+}
+
 + (SPXOutputFormat) fromOutputFormatImpl:(SpeechImpl::OutputFormat)outputFormatImpl
 {
     SPXOutputFormat outputFormat;
@@ -164,7 +187,7 @@
     return outputFormat;
 }
 
-+ (int) getErrorNumberFromExceptionReason:(NSString *)message
++ (int) getErrorNumberFromExceptionReason:(NSString * _Nonnull)message
 {
     NSRange  searchedRange = NSMakeRange(0, [message length]);
     NSString * pattern = @"error code: (0x\\d+)";
@@ -182,6 +205,18 @@
     }
 
     return errorNo;
+}
+
++ (NSError * _Nonnull) getErrorFromException:(NSException * _Nonnull)exception
+{
+    NSLog(@"Util: getErrorFromException enter");
+    NSError * error = nil;
+    NSMutableDictionary *errorDict = [NSMutableDictionary dictionary];
+    [errorDict setObject:[NSString stringWithFormat:@"Error: %@", [exception reason]] forKey:NSLocalizedDescriptionKey];
+    error = [[NSError alloc] initWithDomain:@"SPXErrorDomain"
+                                           code:[Util getErrorNumberFromExceptionReason:[exception reason]] userInfo:errorDict];
+    NSLog(@"Util: getErrorFromException exit");
+    return error;
 }
 
 @end

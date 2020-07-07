@@ -47,6 +47,8 @@
 		F3EABACD21639F6000BA4B2C /* SPXSpeechRecognitionTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 3CA6CFA2211F471600CD2768 /* SPXSpeechRecognitionTest.m */; };
 		F3EABACE21639F6300BA4B2C /* SPXTranslationRecognitionTest.m in Sources */ = {isa = PBXBuildFile; fileRef = F3EABABD2163887500BA4B2C /* SPXTranslationRecognitionTest.m */; };
 		F3EABAD22163B3E200BA4B2C /* whatstheweatherlike.wav in Resources */ = {isa = PBXBuildFile; fileRef = 3CC3789B2121CFD600F07A66 /* whatstheweatherlike.wav */; };
+		FC4C1DD424AF16DE00B3D799 /* SPXConversationTranslatorTest.m in Sources */ = {isa = PBXBuildFile; fileRef = FC4C1DD324AF16DE00B3D799 /* SPXConversationTranslatorTest.m */; };
+		FC4C1DD624AF1B4300B3D799 /* SPXConversationTranscriberTest.m in Sources */ = {isa = PBXBuildFile; fileRef = FC4C1DD524AF1B4200B3D799 /* SPXConversationTranscriberTest.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -114,6 +116,8 @@
 		F3EABABD2163887500BA4B2C /* SPXTranslationRecognitionTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = SPXTranslationRecognitionTest.m; path = ../../shared/testrunners/SPXTranslationRecognitionTest.m; sourceTree = "<group>"; };
 		F3EABAC321639F5600BA4B2C /* SpeechSDK_iOSUnitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SpeechSDK_iOSUnitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		F3EABAC721639F5700BA4B2C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		FC4C1DD324AF16DE00B3D799 /* SPXConversationTranslatorTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SPXConversationTranslatorTest.m; path = ../../shared/testrunners/SPXConversationTranslatorTest.m; sourceTree = "<group>"; };
+		FC4C1DD524AF1B4200B3D799 /* SPXConversationTranscriberTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SPXConversationTranscriberTest.m; path = ../../shared/testrunners/SPXConversationTranscriberTest.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -200,6 +204,8 @@
 		F3EABAC421639F5700BA4B2C /* SpeechSDK_iOSUnitTests */ = {
 			isa = PBXGroup;
 			children = (
+				FC4C1DD524AF1B4200B3D799 /* SPXConversationTranscriberTest.m */,
+				FC4C1DD324AF16DE00B3D799 /* SPXConversationTranslatorTest.m */,
 				EB21A8EA2429674B0056703C /* SPXLanguageConfigurationTest.m */,
 				3C740C5B22EFDC6A00BA9D95 /* SPXSpeechSynthesisTest.m */,
 				DCC1352E225E182E00194047 /* SPXSpeechRecognitionEndtoEndTest.h */,
@@ -349,11 +355,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FC4C1DD624AF1B4300B3D799 /* SPXConversationTranscriberTest.m in Sources */,
 				EB21A8EB2429674B0056703C /* SPXLanguageConfigurationTest.m in Sources */,
 				F3C06E37216E3AE2003989B2 /* SPXDummyTestRunner.m in Sources */,
 				DC419444225B6F2300F95B2F /* CompressedStreamsTest.m in Sources */,
 				3C740C5C22EFDC6A00BA9D95 /* SPXSpeechSynthesisTest.m in Sources */,
 				F3EABACE21639F6300BA4B2C /* SPXTranslationRecognitionTest.m in Sources */,
+				FC4C1DD424AF16DE00B3D799 /* SPXConversationTranslatorTest.m in Sources */,
 				DCF1E29222E1CC4E00FA9F3E /* SPXTestHelpers.m in Sources */,
 				F3C06E38216E4148003989B2 /* dummytest.m in Sources */,
 				F3EABACD21639F6000BA4B2C /* SPXSpeechRecognitionTest.m in Sources */,

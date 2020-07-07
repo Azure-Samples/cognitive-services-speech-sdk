@@ -58,6 +58,53 @@
     return nil;
 }
 
+- (instancetype)initFromConversationTranslator:(SPXConversationTranslator *)translator {
+     try {
+        auto connectionImpl = SpeechImpl::Connection::FromConversationTranslator([translator getHandle]);
+        if (connectionImpl == nullptr)
+            return nil;
+        return [self initWithImpl:connectionImpl];
+    }
+    catch (const std::exception &e) {
+        NSLog(@"Exception caught in core: %s", e.what());
+        NSException *exception = [NSException exceptionWithName:@"SPXException"
+                                                         reason:[NSString StringWithStdString:e.what()]
+                                                       userInfo:nil];
+        [exception raise];
+    }
+    catch (const SPXHR &hr) {
+        auto e = SpeechImpl::Impl::ExceptionWithCallStack(hr);
+        NSLog(@"Exception with error code in core: %s", e.what());
+        NSException *exception = [NSException exceptionWithName:@"SPXException"
+                                                         reason:[NSString StringWithStdString:e.what()]
+                                                       userInfo:nil];
+        [exception raise];
+    }
+    catch (...) {
+        NSLog(@"Exception caught when creating SPXConnection in core.");
+        NSException *exception = [NSException exceptionWithName:@"SPXException"
+                                                         reason:@"Runtime Exception"
+                                                       userInfo:nil];
+        [exception raise];
+    }
+    return nil;
+}
+
+- (nullable instancetype)initFromConversationTranslator:(nonnull SPXConversationTranslator *)translator error:(NSError * _Nullable * _Nullable)outError {
+    try {
+        self = [self initFromConversationTranslator:translator];
+        return self;
+    }
+    catch (NSException *exception) {
+        NSMutableDictionary *errorDict = [NSMutableDictionary dictionary];
+        [errorDict setObject:[NSString stringWithFormat:@"Error: %@", [exception reason]] forKey:NSLocalizedDescriptionKey];
+        *outError = [[NSError alloc] initWithDomain:@"SPXErrorDomain"
+                                               code:[Util getErrorNumberFromExceptionReason:[exception reason]]
+                                               userInfo:errorDict];
+    }
+    return nil;
+}
+
 - (instancetype)initWithImpl:(ConnectionSharedPtr)connectionImpl
 {
     self = [super init];

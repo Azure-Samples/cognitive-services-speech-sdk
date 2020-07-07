@@ -55,3 +55,14 @@
 
 #import "auto_detect_source_language_config_private.h"
 #import "source_language_config_private.h"
+
+#import "conversation_private.h"
+#import "conversation_event_args_private.h"
+#import "conversation_transcriber_private.h"
+#import "conversation_transcription_event_args_private.h"
+#import "conversation_transcription_result_private.h"
+#import "conversation_translation_event_args_private.h"
+#import "conversation_translation_result_private.h"
+#import "conversation_translator_private.h"
+#import "participant_private.h"
+#import "user_private.h"
