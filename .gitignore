@@ -150,3 +150,13 @@ __pycache__/
 
 # JetBrains
 .idea/
+/source/extensions/remoteconversation/java/.idea
+/source/extensions/remoteconversation/csharp/remoteconversation/remoteconversation/bin/Release
+/source/extensions/remoteconversation/csharp/remoteconversation/remoteconversation/obj
+/source/extensions/remoteconversation/csharp/remoteconversation/RemoteConversationTest/bin/Release/netcoreapp3.1
+/source/extensions/remoteconversation/csharp/remoteconversation/RemoteConversationTest/obj
+/source/extensions/remoteconversation/csharp/remoteconversation/RemoteConversationTestConsole/bin
+/source/extensions/remoteconversation/csharp/remoteconversation/RemoteConversationTestConsole/obj
+/source/extensions/remoteconversation/csharp/remoteconversation/remoteconversation/bin/Debug/netcoreapp3.1
+/source/extensions/remoteconversation/csharp/remoteconversation/RemoteConversationTest/bin/Debug/netcoreapp3.1
+/source/extensions/remoteconversation/csharp/remoteconversation/remoteconversation/bin/Debug/netstandard2.0

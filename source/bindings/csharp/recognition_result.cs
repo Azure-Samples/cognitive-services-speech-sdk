@@ -18,49 +18,53 @@ namespace Microsoft.CognitiveServices.Speech
     {
         internal RecognitionResult(IntPtr resultHandlePtr)
         {
-            ThrowIfNull(resultHandlePtr);
-            resultHandle = new InteropSafeHandle(resultHandlePtr, Internal.RecognitionResult.recognizer_result_handle_release);
-            this.ResultId = SpxFactory.GetDataFromHandleUsingDelegate(Internal.RecognitionResult.result_get_result_id, resultHandle, maxCharCount);
-            this.Text = SpxFactory.GetDataFromHandleUsingDelegate(Internal.RecognitionResult.result_get_text, resultHandle, maxCharCount);
+            // Added for the remote conversation transcription result creation
+            // For creating RemoteConversationTranscription resultHandlePtr is always zero and we still wants to create the object
+            if(resultHandlePtr != IntPtr.Zero)
+            {
+                resultHandle = new InteropSafeHandle(resultHandlePtr, Internal.RecognitionResult.recognizer_result_handle_release);
+                this.ResultId = SpxFactory.GetDataFromHandleUsingDelegate(Internal.RecognitionResult.result_get_result_id, resultHandle, maxCharCount);
+                this.Text = SpxFactory.GetDataFromHandleUsingDelegate(Internal.RecognitionResult.result_get_text, resultHandle, maxCharCount);
 
-            ResultReason resultReason = ResultReason.NoMatch;
-            ThrowIfFail(Internal.RecognitionResult.result_get_reason(resultHandle, ref resultReason));
-            this.Reason = resultReason;
+                ResultReason resultReason = ResultReason.NoMatch;
+                ThrowIfFail(Internal.RecognitionResult.result_get_reason(resultHandle, ref resultReason));
+                this.Reason = resultReason;
 
-            IntPtr propertyHandle = IntPtr.Zero;
-            ThrowIfFail(Internal.RecognitionResult.result_get_property_bag(resultHandle, out propertyHandle));
-            Properties = new PropertyCollection(propertyHandle);
+                IntPtr propertyHandle = IntPtr.Zero;
+                ThrowIfFail(Internal.RecognitionResult.result_get_property_bag(resultHandle, out propertyHandle));
+                Properties = new PropertyCollection(propertyHandle);
+            }
         }
 
         /// <summary>
         /// Specifies the result identifier.
         /// </summary>
-        public string ResultId { get; }
+        public virtual string ResultId { get; }
 
         /// <summary>
         /// Specifies status of speech recognition result.
         /// </summary>
-        public ResultReason Reason { get; }
+        public virtual ResultReason Reason { get; }
 
         /// <summary>
         /// Presents the recognized text in the result.
         /// </summary>
-        public string Text { get; }
+        public virtual string Text { get; }
 
         /// <summary>
         /// Duration of the recognized speech.
         /// </summary>
-        public TimeSpan Duration => TimeSpan.FromTicks((long)GetDuration());
+        public virtual TimeSpan Duration => TimeSpan.FromTicks((long)GetDuration());
 
         /// <summary>
         /// Offset of the recognized speech in ticks. A single tick represents one hundred nanoseconds or one ten-millionth of a second.
         /// </summary>
-        public long OffsetInTicks => (long) GetOffset();
+        public virtual long OffsetInTicks => (long) GetOffset();
             
         /// <summary>
         /// Contains properties of the results.
         /// </summary>
-        public PropertyCollection Properties { get; private set; }
+        public virtual PropertyCollection Properties { get; private set; }
 
         /// <summary>
         /// Returns a string that represents the speech recognition result.

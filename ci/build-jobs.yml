@@ -784,6 +784,96 @@ jobs:
     condition: succeededOrFailed()
     displayName: 'Publish WACK report'
 
+- job: RemoteConversationTranscriberCsharpBuild
+  dependsOn: [Pre, NuGet]
+  condition: and(succeeded('Pre', 'NuGet'), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' RemoteConversationTranscriberCsharpBuild '))
+  pool:
+    name: Hosted VS2017
+  timeoutInMinutes: 240
+  steps:
+  - bash: |
+      set -e -o pipefail
+      . ci/functions.sh
+      ./ci/set-variables.sh
+    displayName: Set variables
+  - task: DownloadBuildArtifacts@0
+    inputs:
+      artifactName: Windows
+      downloadPath: $(System.ArtifactsDirectory)/In
+      itemPattern: '**/*.nupkg'
+    displayName: Download client-sdk Nuget artifacts
+  - bash: |
+      set -e -o pipefail
+      set -x
+      cd source/extensions/remoteconversation/csharp/remoteconversation/remoteconversation
+      sed -i "s/buildVersion1234/$SPEECHSDK_SEMVER2NOMETA/g" RemoteConversation.csproj
+      cat RemoteConversation.csproj
+      dotnet restore --no-cache --source https://api.nuget.org/v3/index.json --source "$(System.ArtifactsDirectory)/In/Windows/" RemoteConversation.csproj
+      dotnet build --configuration Release
+      dotnet pack --configuration release
+    displayName: Create remote conversation transcription package for csharp
+  - bash: |
+      set -e -o pipefail
+      rm -f ./tests/test.subscriptions.regions.json
+      cat > ./tests/test.subscriptions.regions.json <<HEREDOC
+        $(KEYS_AND_REGIONS)
+      HEREDOC
+      cp ./tests/test.subscriptions.regions.json ./tests/functional/csharp/RemoteConversationTest/
+      cp ./tests/input/audio/katiesteve.wav ./tests/functional/csharp/RemoteConversationTest/
+      cd ./tests/functional/csharp/RemoteConversationTest/
+      dotnet restore --no-cache --source https://api.nuget.org/v3/index.json  RemoteConversationTest.csproj
+      dotnet build
+      cp *.json ./bin/Debug/netcoreapp3.1/
+      cp *.wav ./bin/Debug/netcoreapp3.1/
+      dotnet test
+    displayName: Test RemoteConversation
+  - bash: |
+      set -e -o pipefail
+      set -x
+      rm -rf "$(System.ArtifactsDirectory)/In/Windows/"
+      mkdir -p "$(System.ArtifactsDirectory)/In/Windows/"
+      cp source/extensions/remoteconversation/csharp/remoteconversation/remoteconversation/bin/Release/*.nupkg "$(System.ArtifactsDirectory)/In/Windows/"
+    displayName: Copy artifacts to a directory
+  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
+    inputs:
+      ConnectedServiceName: 'Speech SDK ESRP Signing Alternate'
+      FolderPath: '$(System.ArtifactsDirectory)/In/Windows'
+      Pattern: '*.nupkg'
+      signConfigType: inlineSignParams
+      inlineOperation: |
+        [
+          {
+            "keyCode": "CP-401405",
+            "operationSetCode": "NuGetSign",
+            "parameters": [ ],
+            "toolName": "sign",
+            "toolVersion": "1.0"
+          },
+          {
+            "keyCode": "CP-401405",
+            "operationSetCode": "NuGetVerify",
+            "parameters": [ ],
+            "toolName": "sign",
+            "toolVersion": "1.0"
+          }
+        ]
+    condition: eq(variables['SPEECHSDK_SIGN'], 'true')
+  - task: NuGetCommand@2
+    displayName: NuGet push to VSTS feed
+    inputs:
+      command: push
+      publishVstsFeed: $(SPEECHSDK_VSTS_FEED)
+      packagesToPush: '$(System.ArtifactsDirectory)/In/Windows/**/*.nupkg'
+      includeSymbols: true
+    condition: eq(variables['SPEECHSDK_NUGET_VSTS_PUSH'],'true')
+  - task: PublishBuildArtifacts@1
+    inputs:
+      PathtoPublish: '$(System.ArtifactsDirectory)/In/Windows/'
+      ArtifactName: Windows
+      publishLocation: Container
+    condition: succeededOrFailed()
+    displayName: 'Publish .zip and .nupkg'
+
 - job: RemoteConversationTranscriberJavaBuild
   dependsOn: [Pre, JavaJrePackage]
   condition: and(succeeded('Pre', 'JavaJrePackage'), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' RemoteConversationTranscriberJavaBuild '))

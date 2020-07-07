@@ -1,0 +1,30 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30011.22
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RemoteConversation", "remoteconversation\RemoteConversation.csproj", "{6C31AD88-F1A7-4F82-B259-6D748816E85E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RemoteConversationTest", "..\..\..\..\..\tests\functional\csharp\RemoteConversationTest\RemoteConversationTest.csproj", "{6B12ADA4-9A95-47C8-AB14-78C7E13BBC6A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6C31AD88-F1A7-4F82-B259-6D748816E85E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6C31AD88-F1A7-4F82-B259-6D748816E85E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6C31AD88-F1A7-4F82-B259-6D748816E85E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6C31AD88-F1A7-4F82-B259-6D748816E85E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6B12ADA4-9A95-47C8-AB14-78C7E13BBC6A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6B12ADA4-9A95-47C8-AB14-78C7E13BBC6A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6B12ADA4-9A95-47C8-AB14-78C7E13BBC6A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6B12ADA4-9A95-47C8-AB14-78C7E13BBC6A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6F209BE8-F99D-4A8C-8966-759D24B69EA4}
+	EndGlobalSection
+EndGlobal

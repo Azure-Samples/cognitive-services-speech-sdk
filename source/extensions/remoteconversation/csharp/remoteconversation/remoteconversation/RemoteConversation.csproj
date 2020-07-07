@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <AssemblyName>Microsoft.CognitiveServices.Speech.Remoteconversation</AssemblyName>
+    <RootNamespace>Microsoft.CognitiveServices.Speech.RemoteConversation</RootNamespace>
+    <Version>buildVersion1234</Version>
+    <Description>This SDK allows you to use the Microsoft Cognitive Speech Service for remote conversation. See https://aka.ms/csspeech for more information.</Description>
+    <PackageLicenseExpression></PackageLicenseExpression>
+    <Copyright>Microsoft Software License Terms for Microsoft Cognitive Services Speech SDK. https://aka.ms/csspeech/license201809</Copyright>
+    <PackageProjectUrl>https://aka.ms/csspeech</PackageProjectUrl>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <PackageTags>async conversation remote speech sdk</PackageTags>
+    <Authors>Microsoft Corporation</Authors>
+    <Company>Microsoft Corporation</Company>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Azure.Core" Version="1.2.2" />
+    <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="buildVersion1234" />
+    <PackageReference Include="System.Text.Json" Version="4.7.2" />
+  </ItemGroup>
+
+</Project>

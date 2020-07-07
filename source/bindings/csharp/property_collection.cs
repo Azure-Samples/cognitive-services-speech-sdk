@@ -15,13 +15,22 @@ namespace Microsoft.CognitiveServices.Speech
     public class PropertyCollection
     {
         private InteropSafeHandle propbagHandle;
-
-        internal PropertyCollection(IntPtr propertyBagPtr)
+        /// <summary>
+        /// Constructor to create PropertyCollection
+        /// </summary>
+        /// <param name="propertyBagPtr">The property bag handle.</param>
+        protected internal PropertyCollection(IntPtr propertyBagPtr)
         {
-            propbagHandle = new InteropSafeHandle(propertyBagPtr, Internal.PropertyCollection.property_bag_release);
+            if(propertyBagPtr != IntPtr.Zero)
+            {
+                propbagHandle = new InteropSafeHandle(propertyBagPtr, Internal.PropertyCollection.property_bag_release);
+            }
         }
 
-        internal void Close()
+        /// <summary>
+        /// Dispose the property bag
+        /// </summary>
+        public virtual void Close()
         {
             propbagHandle.Dispose();
         }
@@ -32,7 +41,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// </summary>
         /// <param name="id">The ID of property. See <see cref="PropertyId"/></param>
         /// <returns>value of the property</returns>
-        public string GetProperty(PropertyId id)
+        public virtual string GetProperty(PropertyId id)
         {
             ThrowIfNull(propbagHandle);
             return GetPropertyString(propbagHandle, (int)id, null, "");
@@ -44,7 +53,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// </summary>
         /// <param name="propertyName">The name of property</param>
         /// <returns>value of the property</returns>
-        public string GetProperty(string propertyName)
+        public virtual string GetProperty(string propertyName)
         {
             ThrowIfNull(propbagHandle);
             return GetPropertyString(propbagHandle, -1, propertyName, "");
@@ -57,7 +66,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <param name="id">The id of property. See <see cref="PropertyId"/></param>
         /// <param name="defaultValue">The default value which is returned if no value is defined for the property.</param>
         /// <returns>value of the property.</returns>
-        public string GetProperty(PropertyId id, string defaultValue)
+        public virtual string GetProperty(PropertyId id, string defaultValue)
         {
             ThrowIfNull(propbagHandle);
             return GetPropertyString(propbagHandle, (int)id, null, defaultValue);
@@ -70,7 +79,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <param name="propertyName">The name of property.</param>
         /// <param name="defaultValue">The default value which is returned if no value is defined for the property.</param>
         /// <returns>value of the property.</returns>
-        public string GetProperty(string propertyName, string defaultValue)
+        public virtual string GetProperty(string propertyName, string defaultValue)
         {
             ThrowIfNull(propbagHandle);
             return GetPropertyString(propbagHandle, -1, propertyName, defaultValue);
@@ -81,7 +90,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// </summary>
         /// <param name="id">The id of property. See <see cref="PropertyId"/></param>
         /// <param name="value">value to set</param>
-        public void SetProperty(PropertyId id, string value)
+        public virtual void SetProperty(PropertyId id, string value)
         {
             ThrowIfNull(propbagHandle);
             IntPtr valuePtr = Utf8StringMarshaler.MarshalManagedToNative(value);
@@ -100,7 +109,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// </summary>
         /// <param name="propertyName">The name of property.</param>
         /// <param name="value">value to set</param>
-        public void SetProperty(string propertyName, string value)
+        public virtual void SetProperty(string propertyName, string value)
         {
             ThrowIfNull(propbagHandle);
             IntPtr valuePtr = Utf8StringMarshaler.MarshalManagedToNative(value);

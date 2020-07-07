@@ -12,24 +12,31 @@ namespace Microsoft.CognitiveServices.Speech.Transcription
     /// Class that defines the result of conversation transcriber.
     /// Added in version 1.5.0
     /// </summary>
-    public sealed class ConversationTranscriptionResult : SpeechRecognitionResult
+    public class ConversationTranscriptionResult : SpeechRecognitionResult
     {
-        internal ConversationTranscriptionResult(IntPtr resultPtr)
+        /// <summary>
+        /// Constructor to create ConversationTranscriptionResult
+        /// </summary>
+        /// <param name="resultPtr">The result handle.</param>
+        protected internal ConversationTranscriptionResult(IntPtr resultPtr)
             : base(resultPtr)
         {
-            UserId = SpxFactory.GetDataFromHandleUsingDelegate(Internal.ConversationTranscriptionResult.conversation_transcription_result_get_user_id, resultHandle, maxCharCount);
-            UtteranceId = SpxFactory.GetDataFromHandleUsingDelegate(Internal.ConversationTranscriptionResult.conversation_transcription_result_get_utterance_id, resultHandle, maxCharCount);
+            if(resultPtr != IntPtr.Zero)
+            {
+                UserId = SpxFactory.GetDataFromHandleUsingDelegate(Internal.ConversationTranscriptionResult.conversation_transcription_result_get_user_id, resultHandle, maxCharCount);
+                UtteranceId = SpxFactory.GetDataFromHandleUsingDelegate(Internal.ConversationTranscriptionResult.conversation_transcription_result_get_utterance_id, resultHandle, maxCharCount);
+            }
         }
 
         /// <summary>
         /// A string that represents the user id.
         /// </summary>
-        public string UserId { get; }
+        public virtual string UserId { get; }
 
         /// <summary>
         /// A string that represents the utterance. This id is consistence for intermediates and final speech recognition result from one speaker.
         /// </summary>
-        public string UtteranceId { get; }
+        public virtual string UtteranceId { get; }
 
         /// <summary>
         /// Returns a string that represents the conversation transcription result.
