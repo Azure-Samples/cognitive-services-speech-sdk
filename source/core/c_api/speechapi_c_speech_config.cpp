@@ -140,10 +140,10 @@ SPXAPI speech_config_set_audio_output_format(SPXSPEECHCONFIGHANDLE hconfig, Spee
 {
     SPXAPI_INIT_HR_TRY(hr)
     {
-        SPXPROPERTYBAGHANDLE hpropbag = SPXHANDLE_INVALID;
-        SPX_THROW_ON_FAIL(speech_config_get_property_bag(hconfig, &hpropbag));
-        auto formatName = GetAudioFormatName(static_cast<SpeechSynthesisOutputFormat>(formatId));
-        SPX_THROW_ON_FAIL(property_bag_set_string(hpropbag, static_cast<int>(PropertyId::SpeechServiceConnection_SynthOutputFormat), nullptr, formatName));
+        auto configs = CSpxSharedPtrHandleTableManager::Get<ISpxSpeechConfig, SPXSPEECHCONFIGHANDLE>();
+        auto config = (*configs)[hconfig];
+        auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(config);
+        namedProperties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_SynthOutputFormat), GetAudioFormatName(static_cast<SpeechSynthesisOutputFormat>(formatId)));
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
