@@ -66,6 +66,7 @@ public:
 
     inline void InitFromFormat(const SPXWAVEFORMATEX& format, bool hasHeader) final
     {
+        m_bytesPerSecond = (format.wBitsPerSample * format.nChannels * format.nSamplesPerSec) / 8;
         m_stream->InitFromFormat(format, hasHeader);
     }
 
@@ -155,6 +156,8 @@ private:
 
     std::atomic<bool> m_detaching{ false };
     bool m_retrieved{ false };
+    uint32_t m_bytesPerSecond{ 1 };
+    size_t m_size{ 0 };
     mutable std::condition_variable m_cv;
     mutable std::mutex m_stateMutex;
 

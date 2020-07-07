@@ -308,7 +308,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             string hostLang = Language.EN;
             string hostName = "TheHost";
-            var hostToLangs = new[] { Language.DE };
+            var hostToLangs = new[] { Language.DE_DE };
             string bobLang = Language.ZH_CN;
             string bobName = "Bob";
             string hostId;
@@ -382,15 +382,15 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 new ExpectedTranscription(hostId, AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text, hostLang)
             );
             hostEvents.VerifyTranscriptions(hostId,
-                new ExpectedTranscription(bobId, AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.ZH_CN][0].Text, bobLang, 0, new TRANS() { { Language.EN, "Weather." }, { Language.DE, "wetter." } }),
-                new ExpectedTranscription(hostId, AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text, hostLang, 0, new TRANS() { { Language.DE, "Wie ist das Wetter?" } })
+                new ExpectedTranscription(bobId, AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.ZH_CN][0].Text, bobLang, 0, new TRANS() { { Language.EN, "Weather." }, { Language.DE_DE, "wetter." } }),
+                new ExpectedTranscription(hostId, AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text, hostLang, 0, new TRANS() { { Language.DE_DE, "Wie ist das Wetter?" } })
             );
         }
 
         [TestMethod]
         public async Task CT_ConversationTranslator_HostSendsIm()
         {
-            var speechConfig = CreateConfig(Language.EN, "ja", "ar");
+            var speechConfig = CreateConfig(Language.EN, Language.JA, Language.AR_SA);
             var host = new TestConversationParticipant(speechConfig, "Host");
 
             await host.JoinAsync(null);
@@ -404,7 +404,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             // verify events
             host.VerifyBasicEvents(false);
             host.VerifyIms(
-                new ExpectedTranscription(host.ParticipantId, "This is a test", host.Lang, 1, new TRANS() { { "ja", "これはテストです" }, { "ar", "هذا اختبار" } })
+                new ExpectedTranscription(host.ParticipantId, "This is a test", host.Lang, 1, new TRANS() { { Language.JA_JP, "これはテストです" }, { Language.AR_SA, "هذا اختبار" } })
             );
         }
 
@@ -416,7 +416,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var host = new TestConversationParticipant(speechConfig, "Host");
             await host.JoinAsync(null);
 
-            var alice = new TestConversationParticipant("Alice", Language.FR, host, SetParticipantConfig);
+            var alice = new TestConversationParticipant("Alice", Language.FR_FR, host, SetParticipantConfig);
             await alice.JoinAsync(null);
 
             SPX_TRACE_INFO($">> [{host.Name}] Sends IM");
@@ -632,7 +632,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var speechLang = Language.EN;
             var hostname = "TheHost";
 
-            var toLangs = new[] { "fr", "de" };
+            var toLangs = new[] { Language.FR_FR, Language.DE_DE };
             var speechConfig = CreateConfig(speechLang, toLangs);
 
             SPX_TRACE_INFO("Creating conversation");
@@ -690,7 +690,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 new ExpectedTranscription(participantId, audioFile.Utterances["en-US"][0].Text, speechLang)
             );
             eventHandlers.VerifyIms(participantId,
-                new ExpectedTranscription(participantId, "This is a test", speechLang, new TRANS() { { "fr", "C'est un test" }, { "de", "Dies ist ein Test" } })
+                new ExpectedTranscription(participantId, "This is a test", speechLang, new TRANS() { { Language.FR_FR, "C'est un test" }, { Language.DE_DE, "Dies ist ein Test" } })
             );
         }
 

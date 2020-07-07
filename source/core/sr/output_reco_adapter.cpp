@@ -9,6 +9,7 @@
 #include "service_helpers.h"
 #include "create_object_helpers.h"
 #include "site_helpers.h"
+#include "buffer_helpers.h"
 
 using namespace Microsoft::CognitiveServices::Speech::Impl;
 
@@ -54,11 +55,13 @@ void CSpxOutputRecoEngineAdapter::ProcessAudio(const DataChunkPtr& audioChunk)
     {
         return;
     }
+    m_size += audioChunk->size;
     m_sink->Write(audioChunk->data.get(), audioChunk->size);
 }
 
 void CSpxOutputRecoEngineAdapter::DetachInput()
 {
+    using tick = std::chrono::duration<uint64_t, std::ratio<1, 10000000>>;
     if (m_detaching.exchange(true))
     {
         return;
@@ -67,9 +70,10 @@ void CSpxOutputRecoEngineAdapter::DetachInput()
     WaitForState(StreamStatus::PartialData);
     InvokeOnSite([this](const SitePtr& site)
     {
+        auto duration = BytesToDuration<tick>(m_size, m_bytesPerSecond);
         auto factory = SpxQueryService<ISpxRecoResultFactory>(site);
         auto result = factory->CreateFinalResult(nullptr, ResultReason::RecognizedSpeech, NO_MATCH_REASON_NONE, REASON_CANCELED_NONE, CancellationErrorCode::NoError, L"", 0, 0);
-        site->FireAdapterResult_FinalResult(this, 0, result);
+        site->FireAdapterResult_FinalResult(this, duration.count(), result);
         site->AdapterStoppedTurn(this);
     });
     WaitForState(StreamStatus::AllData);

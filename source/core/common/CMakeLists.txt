@@ -59,6 +59,7 @@ set(HEADERS
     "${INC_DIR}/no_op_telemetry.h"
     "${INC_DIR}/function_helpers.h"
     "${INC_DIR}/platform_init.h"
+    "${INC_DIR}/buffer_helpers.h"
     )
 
 if(SPEECHSDK_OS STREQUAL "OSX")

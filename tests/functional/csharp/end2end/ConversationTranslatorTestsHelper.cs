@@ -413,6 +413,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             SPXTEST_REQUIRE(Disconnected.Count == expectedDisconnections);
         }
 
+        private static bool TryGetValueLower(IReadOnlyDictionary<string, string> dict, string key, out string val)
+        {
+            return dict.TryGetValue(key, out val) || dict.TryGetValue(key.ToLower(), out val);
+        }
+
         public void VerifyTranscriptions(string participantId, params ExpectedTranscription[] expectedTranscriptions)
         {
             Dictionary<string, IList<ConversationTranslationResult>> partials = new Dictionary<string, IList<ConversationTranslationResult>>(StringComparer.OrdinalIgnoreCase);
@@ -462,9 +467,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                     // First lookup the full language code (e.g. zh-Hans-CH), then just the language code
                     // and script (zh-Hans), and finally just the language code (e.g. zh)
-                    if (!match.Translations.TryGetValue(transLang.ToString(), out actualTranslation)
-                        && !match.Translations.TryGetValue($"{transLang.Code}-{transLang.Script}", out actualTranslation)
-                        && !match.Translations.TryGetValue(transLang.Code, out actualTranslation))
+                    if (!TryGetValueLower(match.Translations, transLang.ToString(), out actualTranslation)
+                        && !TryGetValueLower(match.Translations, $"{transLang.Code}-{transLang.Script}", out actualTranslation)
+                        && !TryGetValueLower(match.Translations, transLang.Code, out actualTranslation))
                     {
                         actualTranslation = "<NO MATCH FOUND FOR LANGUAGE CODE>";
                     }
@@ -524,9 +529,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                     // First lookup the full language code (e.g. zh-Hans-CH), then just the language code
                     // and script (zh-Hans), and finally just the language code (e.g. zh)
-                    if (!match.Translations.TryGetValue(transLang.ToString(), out actualTranslation)
-                        && !match.Translations.TryGetValue($"{transLang.Code}-{transLang.Script}", out actualTranslation)
-                        && !match.Translations.TryGetValue(transLang.Code, out actualTranslation))
+                    if (!TryGetValueLower(match.Translations, transLang.ToString(), out actualTranslation)
+                        && !TryGetValueLower(match.Translations, $"{transLang.Code}-{transLang.Script}", out actualTranslation)
+                        && !TryGetValueLower(match.Translations, transLang.Code, out actualTranslation))
                     {
                         actualTranslation = "<NO MATCH FOUND FOR LANGUAGE CODE>";
                     }

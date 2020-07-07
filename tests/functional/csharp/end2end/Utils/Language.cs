@@ -8,15 +8,21 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils
 {
     sealed class Language
     {
-        public static string EN => "en-US";
-        public static string FR => "fr";
-        public static string TR => "tr";
-        public static string ES => "es";
-        public static string DE => "de";
-        public static string ZH => "zh-Hans";
-        public static string DE_DE => "de-DE";
-        public static string CA_ES => "ca-ES";
-        public static string ZH_CN => "zh-CN";
+        public const string EN = "en-US";
+        public const string FR = "fr";
+        public const string TR = "tr";
+        public const string ES = "es";
+        public const string DE = "de";
+        public const string AR = "ar";
+        public const string JA = "ja";
+        public const string ZH = "zh-Hans";
+        public const string DE_DE = "de-DE";
+        public const string CA_ES = "ca-ES";
+        public const string ZH_CN = "zh-CN";
+        public const string FR_FR = "fr-FR";
+        public const string AR_SA = "ar-SA";
+        public const string JA_JP = "ja-JP";
+
 
         // List of speech-to-text codes are copied from https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support [7 dec 2018]
         public static readonly string[] Speech2TextAll =
