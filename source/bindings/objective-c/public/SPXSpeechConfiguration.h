@@ -24,7 +24,7 @@ SPX_EXPORT
 
 /**
  * The output format of the speech recognition result.
- * 
+ *
  * Note: This output format is for speech recognition result, use SPXSpeechConfiguration.speechSynthesisOutputFormat 
  * and SPXSpeechConfiguration.setSpeechSynthesisOutputFormat to get/set the systhesized audio output format.
  */
@@ -53,21 +53,21 @@ SPX_EXPORT
 
 /**
  * Speech synthesis language.
- * 
+ *
  * Added in version 1.7.0
  */
 @property (nonatomic, copy, nullable)NSString *speechSynthesisLanguage;
 
 /**
  * Speech synthesis voice.
- * 
+ *
  * Added in version 1.7.0
  */
 @property (nonatomic, copy, nullable)NSString *speechSynthesisVoiceName;
 
 /**
  * Speech synthesis optput format.
- * 
+ *
  * Added in version 1.7.0
  */
 @property (nonatomic, copy, readonly, nullable)NSString* speechSynthesisOutputFormat;

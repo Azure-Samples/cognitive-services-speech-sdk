@@ -13,6 +13,53 @@
     std::shared_ptr<SpeechImpl::AutoDetectSourceLanguageConfig> autoDetectSourceLanguageConfigImpl;
 }
 
+- (instancetype)initWithOpenRange
+{
+    std::shared_ptr<SpeechImpl::AutoDetectSourceLanguageConfig> configImpl = nil;
+
+    try {
+        configImpl = SpeechImpl::AutoDetectSourceLanguageConfig::FromOpenRange();
+    }
+    catch (const std::exception &e) {
+        NSLog(@"Exception caught in core: %s", e.what());
+        NSException *exception = [NSException exceptionWithName:@"SPXException"
+                                                         reason:[NSString StringWithStdString:e.what()]
+                                                       userInfo:nil];
+        [exception raise];
+    }
+    catch (const SPXHR &hr) {
+        auto e = SpeechImpl::Impl::ExceptionWithCallStack(hr);
+        NSLog(@"Exception with error code in core: %s", e.what());
+        NSException *exception = [NSException exceptionWithName:@"SPXException"
+                                                         reason:[NSString StringWithStdString:e.what()]
+                                                       userInfo:nil];
+        [exception raise];
+    }
+    catch (...) {
+        NSLog(@"Exception caught in creating SPXAutoDetectSourceLanguageConfiguration in core");
+        NSException *exception = [NSException exceptionWithName:@"SPXException"
+                                                         reason:@"Runtime exception"
+                                                       userInfo:nil];
+        [exception raise];
+    }
+    if (configImpl == nullptr)
+        return nil;
+    return [self initWithImpl:configImpl];
+}
+
+- (nullable instancetype)initWithOpenRange:(NSError * _Nullable * _Nullable)outError {
+    try {
+        return [self initWithOpenRange];
+    }
+    catch (NSException *exception) {
+        NSMutableDictionary *errorDict = [NSMutableDictionary dictionary];
+        [errorDict setObject:[NSString stringWithFormat:@"Error: %@", [exception reason]] forKey:NSLocalizedDescriptionKey];
+        *outError = [[NSError alloc] initWithDomain:@"SPXErrorDomain"
+                                               code:[Util getErrorNumberFromExceptionReason:[exception reason]] userInfo:errorDict];
+    }
+    return nil;
+}
+
 - (instancetype)init:(NSArray<NSString *> *)languages
 {
     std::shared_ptr<SpeechImpl::AutoDetectSourceLanguageConfig> configImpl = nil;

@@ -84,4 +84,21 @@ class SpeechSynthesisEndToEndTests: XCTestCase {
         synthesizer = nil
         XCTAssertTrue(isClosed)
     }
+
+    func testSpeechRecognitionWithAutoLanguageDetection() {
+        let autoDetectSrcLanguageConfig: SPXAutoDetectSourceLanguageConfiguration? = try! SPXAutoDetectSourceLanguageConfiguration(openRange: ())
+        let synthesizer: SPXSpeechSynthesizer? = try! SPXSpeechSynthesizer(speechConfiguration: self.speechConfig!,
+                                                                           autoDetectSourceLanguageConfiguration: autoDetectSrcLanguageConfig!,
+                                                                           audioConfiguration: nil)
+
+        var lastTextOffset: UInt = 0
+        synthesizer?.addSynthesisWordBoundaryEventHandler({ (synt, evt) in
+            lastTextOffset = evt.textOffset
+        })
+
+        let result = try! synthesizer?.speakText("你好世界。")
+        XCTAssertNotEqual(result!.reason, SPXResultReason.canceled)
+        XCTAssertGreaterThan((result!.audioData?.count)!, 32000)  // longer than 1s
+        XCTAssertGreaterThanOrEqual(lastTextOffset, 2)
+    }
 }

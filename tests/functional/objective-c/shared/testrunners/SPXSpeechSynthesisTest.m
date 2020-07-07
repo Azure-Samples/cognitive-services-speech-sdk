@@ -418,6 +418,25 @@
     XCTAssertEqualObjects(@"InvalidToken2", synthesizer.authorizationToken);
 }
 
+- (void)_testSynthesisWithAutoLanguageDetection {
+    SPXAutoDetectSourceLanguageConfiguration* autoDetectSourceLanguageConfig = [[SPXAutoDetectSourceLanguageConfiguration alloc]initWithOpenRange];
+    SPXSpeechSynthesizer* synthesizer = [[SPXSpeechSynthesizer alloc] initWithSpeechConfiguration:self.speechConfig
+                                                            autoDetectSourceLanguageConfiguration:autoDetectSourceLanguageConfig
+                                                                               audioConfiguration:nil];
+    NSAssert(nil != synthesizer, @"nil");
+
+    __block NSUInteger lastTextOffset = 0;
+
+    [synthesizer addSynthesisWordBoundaryEventHandler: ^ (SPXSpeechSynthesizer *synthesizer, SPXSpeechSynthesisWordBoundaryEventArgs *eventArgs) {
+        lastTextOffset = eventArgs.textOffset;
+    }];
+
+    SPXSpeechSynthesisResult* result = [synthesizer speakText:@"你好世界。"];
+    [self checkResult:result];
+    XCTAssertGreaterThanOrEqual(result.audioData.length, 32000); // longer than 1s
+    XCTAssertGreaterThanOrEqual(lastTextOffset, 2);
+}
+
 @end
 
 @interface SPXSpeechSynthesisEndtoEndTestRest : SPXSpeechSynthesisEndtoEndTestBase {
@@ -528,12 +547,16 @@
     return [self _testSpeakOutputInStreamsBeforeDoneQueued];
 }
 
+- (void)testCheckWordBoundaryEvents {
+    return [self _testCheckWordBoundaryEvents];
+}
+
 - (void)testAuthorizationToken {
     return [self _testAuthorizationToken];
 }
 
-- (void)testCheckWordBoundaryEvents {
-    return [self _testCheckWordBoundaryEvents];
+- (void)testSynthesisWithAutoLanguageDetection {
+    return [self _testSynthesisWithAutoLanguageDetection];
 }
 
 @end

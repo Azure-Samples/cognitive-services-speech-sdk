@@ -8,10 +8,37 @@
 
 /**
  * Represents auto detection source language configuration
- * Added in version 1.12.0
+ * Updated in version 1.13.0
  */
 SPX_EXPORT
 @interface SPXAutoDetectSourceLanguageConfiguration : NSObject
+
+/**
+ * Initializes an SPXAutoDetectSourceLanguageConfiguration object with open range.
+ *
+ * Note: only SPXSpeechSynthesizer supports source language auto detection from open range,
+ * for SPXRecognizer, please use SPXAutoDetectSourceLanguageConfig with specific source languages.
+ *
+ * Added in version 1.13.0
+ *
+ * @return an instance of auto detection source language configuration.
+ */
+- (nullable instancetype)initWithOpenRange
+NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.");
+
+/**
+ * Initializes an SPXAutoDetectSourceLanguageConfiguration object with open range
+ *
+ * Note: only SPXSpeechSynthesizer supports source language auto detection from open range,
+ * for SPXRecognizer, please use SPXAutoDetectSourceLanguageConfig with specific source languages.
+ *
+ * Added in version 1.13.0
+ *
+ * @param outError error information.
+ *
+ * @return an instance of auto detection source language configuration.
+ */
+- (nullable instancetype)initWithOpenRange:(NSError * _Nullable * _Nullable)outError;
 
 /**
  * Initializes an SPXAutoDetectSourceLanguageConfiguration object using languages.

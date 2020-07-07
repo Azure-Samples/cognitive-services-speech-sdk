@@ -89,11 +89,16 @@ public_samples/**/bin
 public_samples/**/obj
 public_samples/**/objd
 
-# generated pods directory
-tests/functional/objective-c/*/Pods/
+# generated pods directory and xcode workspace
+tests/functional/objective-c/**/Pods/
+tests/functional/objective-c/**/Podfile.lock
+tests/functional/objective-c/**/*.xcworkspace/
 
 # objective-c frameworks
 MicrosoftCognitiveServicesSpeech.framework/
+
+# xcode output directory
+xcode-build-output/
 
 # VoiceActivation KWS artifact
 external/KWS/*/

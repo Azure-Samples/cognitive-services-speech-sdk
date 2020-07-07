@@ -110,6 +110,115 @@
     return nil;
 }
 
+- (instancetype)initWithSpeechConfiguration:(SPXSpeechConfiguration *)speechConfiguration
+                autoDetectSourceLanguageConfiguration:(SPXAutoDetectSourceLanguageConfiguration *)autoDetectSourceLanguageConfiguration
+{
+    try {
+        self = [super init];
+        speechSynthImpl = SpeechImpl::SpeechSynthesizer::FromConfig([speechConfiguration getHandle], [autoDetectSourceLanguageConfiguration getHandle]);
+        if (speechSynthImpl == nullptr)
+            return nil;
+        _properties = [[SpeechSynthesizerPropertyCollection alloc] initWithPropertyCollection:&speechSynthImpl->Properties from:speechSynthImpl];
+        return self;
+    }
+    catch (const std::exception &e) {
+        NSLog(@"Exception caught in core: %s", e.what());
+        NSException *exception = [NSException exceptionWithName:@"SPXException"
+                                                         reason:[NSString StringWithStdString:e.what()]
+                                                       userInfo:nil];
+        [exception raise];
+    }
+    catch (const SPXHR &hr) {
+        auto e = SpeechImpl::Impl::ExceptionWithCallStack(hr);
+        NSLog(@"Exception with error code in core: %s", e.what());
+        NSException *exception = [NSException exceptionWithName:@"SPXException"
+                                                         reason:[NSString StringWithStdString:e.what()]
+                                                       userInfo:nil];
+        [exception raise];
+    }
+    catch (...) {
+        NSLog(@"Exception caught when creating SPXSpeechSynthesizer in core.");
+        NSException *exception = [NSException exceptionWithName:@"SPXException"
+                                                         reason:@"Runtime Exception"
+                                                       userInfo:nil];
+        [exception raise];
+    }
+    return nil;
+}
+
+- (nullable instancetype)initWithSpeechConfiguration:(nonnull SPXSpeechConfiguration *)speechConfiguration
+               autoDetectSourceLanguageConfiguration:(nonnull SPXAutoDetectSourceLanguageConfiguration *)autoDetectSourceLanguageConfiguration
+                                               error:(NSError * _Nullable * _Nullable)outError {
+    try {
+        return [self initWithSpeechConfiguration:speechConfiguration autoDetectSourceLanguageConfiguration:autoDetectSourceLanguageConfiguration];
+    }
+    catch (NSException *exception) {
+        NSMutableDictionary *errorDict = [NSMutableDictionary dictionary];
+        [errorDict setObject:[NSString stringWithFormat:@"Error: %@", [exception reason]] forKey:NSLocalizedDescriptionKey];
+        *outError = [[NSError alloc] initWithDomain:@"SPXErrorDomain"
+                                               code:[Util getErrorNumberFromExceptionReason:[exception reason]] userInfo:errorDict];
+    }
+    return nil;
+}
+
+- (instancetype)initWithSpeechConfiguration:(SPXSpeechConfiguration *)speechConfiguration
+      autoDetectSourceLanguageConfiguration:(SPXAutoDetectSourceLanguageConfiguration *)autoDetectSourceLanguageConfiguration
+                         audioConfiguration:(SPXAudioConfiguration *)audioConfiguration
+{
+    try {
+        self = [super init];
+        speechSynthImpl = SpeechImpl::SpeechSynthesizer::FromConfig([speechConfiguration getHandle],
+                                                                    [autoDetectSourceLanguageConfiguration getHandle],
+                                                                    [audioConfiguration getHandle]);
+        if (speechSynthImpl == nullptr)
+            return nil;
+        _properties = [[SpeechSynthesizerPropertyCollection alloc] initWithPropertyCollection:&speechSynthImpl->Properties from:speechSynthImpl];
+        return self;
+    }
+    catch (const std::exception &e) {
+        NSLog(@"Exception caught in core: %s", e.what());
+        NSException *exception = [NSException exceptionWithName:@"SPXException"
+                                                         reason:[NSString StringWithStdString:e.what()]
+                                                       userInfo:nil];
+        [exception raise];
+    }
+    catch (const SPXHR &hr) {
+        auto e = SpeechImpl::Impl::ExceptionWithCallStack(hr);
+        NSLog(@"Exception with error code in core: %s", e.what());
+        NSException *exception = [NSException exceptionWithName:@"SPXException"
+                                                         reason:[NSString StringWithStdString:e.what()]
+                                                       userInfo:nil];
+        [exception raise];
+    }
+    catch (...) {
+        NSLog(@"Exception caught when creating SPXSpeechSynthesizer in core.");
+        NSException *exception = [NSException exceptionWithName:@"SPXException"
+                                                         reason:@"Runtime Exception"
+                                                       userInfo:nil];
+        [exception raise];
+    }
+    return nil;
+}
+
+- (nullable instancetype)initWithSpeechConfiguration:(nonnull SPXSpeechConfiguration *)speechConfiguration
+               autoDetectSourceLanguageConfiguration:(nonnull SPXAutoDetectSourceLanguageConfiguration *)autoDetectSourceLanguageConfiguration
+                                  audioConfiguration:(nullable SPXAudioConfiguration *)audioConfiguration
+                                               error:(NSError * _Nullable * _Nullable)outError
+{
+    try {
+        return [self initWithSpeechConfiguration:speechConfiguration
+           autoDetectSourceLanguageConfiguration:autoDetectSourceLanguageConfiguration
+                              audioConfiguration:audioConfiguration];
+    }
+    catch (NSException *exception) {
+        NSMutableDictionary *errorDict = [NSMutableDictionary dictionary];
+        [errorDict setObject:[NSString stringWithFormat:@"Error: %@", [exception reason]] forKey:NSLocalizedDescriptionKey];
+        *outError = [[NSError alloc] initWithDomain:@"SPXErrorDomain"
+                                               code:[Util getErrorNumberFromExceptionReason:[exception reason]] userInfo:errorDict];
+    }
+    return nil;
+}
+
 - (void)setAuthorizationToken: (NSString *)token
 {
     speechSynthImpl->SetAuthorizationToken([token toSpxString]);

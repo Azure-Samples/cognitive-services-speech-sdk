@@ -88,6 +88,9 @@ class AutoDetectSourceLanguageConfigTests: XCTestCase {
         let zhSrcLanguageConfig = try! SPXSourceLanguageConfiguration("zh-CN")
         autoDetectSrcLanguageConfig = try! SPXAutoDetectSourceLanguageConfiguration(sourceLanguageConfigurations:[enSrcLanguageConfig, zhSrcLanguageConfig])
         XCTAssertNotNil(autoDetectSrcLanguageConfig)
+
+        autoDetectSrcLanguageConfig = try! SPXAutoDetectSourceLanguageConfiguration(openRange: ())
+        XCTAssertNotNil(autoDetectSrcLanguageConfig)
     }
 
     func testInitSpeechReconginzer() {
@@ -117,5 +120,11 @@ class AutoDetectSourceLanguageConfigTests: XCTestCase {
         XCTAssertEqual("fr-FR,de-DE", languages)
         XCTAssertEqual("", reco?.properties?.getPropertyByName("de-DESPEECH-ModelId"))
         XCTAssertEqual("myEndpointId", reco?.properties?.getPropertyByName("fr-FRSPEECH-ModelId"))
+
+        autoDetectSrcLanguageConfig = try! SPXAutoDetectSourceLanguageConfiguration(openRange: ())
+        XCTAssertNotNil(autoDetectSrcLanguageConfig)
+        var synthesizer: SPXSpeechSynthesizer? = nil
+        synthesizer  = try! SPXSpeechSynthesizer(speechConfiguration: speechConfig, autoDetectSourceLanguageConfiguration: autoDetectSrcLanguageConfig!, audioConfiguration: nil)
+        XCTAssertEqual("open_range", synthesizer?.properties?.getPropertyBy(SPXPropertyId.speechServiceConnectionAutoDetectSourceLanguages))
     }
 }

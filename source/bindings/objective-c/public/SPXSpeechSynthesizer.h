@@ -12,7 +12,7 @@
 /**
  * Performs speech synthesis from a text to a specified audio output.
  * 
- * Added in version 1.7.0
+ * Updated in version 1.13.0
  */
 SPX_EXPORT
 @interface SPXSpeechSynthesizer : NSObject
@@ -21,7 +21,7 @@ typedef void (^SPXSpeechSynthesisEventHandler)(SPXSpeechSynthesizer * _Nonnull, 
 typedef void (^SPXSpeechSynthesisWordBoundaryEventHandler)(SPXSpeechSynthesizer * _Nonnull, SPXSpeechSynthesisWordBoundaryEventArgs * _Nonnull);
 
 /**
-  * The collection of properties and their values defined for this SPXSpeechRecognizer.
+  * The collection of properties and their values defined for this SPXSpeechSynthesizer.
   */
 @property (readonly, nullable)id <SPXPropertyCollection> properties;
 
@@ -40,7 +40,7 @@ typedef void (^SPXSpeechSynthesisWordBoundaryEventHandler)(SPXSpeechSynthesizer 
  * Please use initWithSpeechConfiguration(speechConfiguration, nil) if you just need the SPXSynthesisResult or SPXAudioDataStream.
  *
  * @param speechConfiguration speech recognition configuration.
- * @return an instance of speech recognizer.
+ * @return an instance of speech synthesizer.
  */
 - (nullable instancetype)init:(nonnull SPXSpeechConfiguration *)speechConfiguration
 NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.");
@@ -52,7 +52,7 @@ NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.");
  *
  * @param speechConfiguration speech recognition configuration.
  * @param outError error information.
- * @return an instance of speech recognizer.
+ * @return an instance of speech synthesizer.
  */
 - (nullable instancetype)init:(nonnull SPXSpeechConfiguration *)speechConfiguration error:(NSError * _Nullable * _Nullable)outError;
 
@@ -75,6 +75,65 @@ NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.");
  * @return an instance of speech synthesizer.
  */
 - (nullable instancetype)initWithSpeechConfiguration:(nonnull SPXSpeechConfiguration *)speechConfiguration audioConfiguration:(nullable SPXAudioConfiguration *)audioConfiguration error:(NSError * _Nullable * _Nullable)outError;
+
+/**
+ * Initializes a new instance of speech synthesizer using the specified configuration for auto language detection.
+ *
+ * Added in version 1.13.0.
+
+ * @param speechConfiguration speech recognition configuration.
+ * @param autoDetectSourceLanguageConfiguration the configuration for auto language detection.
+ * @return an instance of speech synthesizer
+ */
+- (nullable instancetype)initWithSpeechConfiguration:(nonnull SPXSpeechConfiguration *)speechConfiguration
+               autoDetectSourceLanguageConfiguration:(nonnull SPXAutoDetectSourceLanguageConfiguration *)autoDetectSourceLanguageConfiguration
+NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.");
+
+/**
+ * Initializes a new instance of speech synthesizer using the specified configuration for auto language detection.
+ *
+ * Added in version 1.13.0.
+
+ * @param speechConfiguration speech recognition configuration.
+ * @param autoDetectSourceLanguageConfiguration the configuration for auto language detection.
+ * @param outError error information.
+ * @return an instance of speech synthesizer.
+ */
+- (nullable instancetype)initWithSpeechConfiguration:(nonnull SPXSpeechConfiguration *)speechConfiguration
+               autoDetectSourceLanguageConfiguration:(nonnull SPXAutoDetectSourceLanguageConfiguration *)autoDetectSourceLanguageConfiguration
+                                               error:(NSError * _Nullable * _Nullable)outError;
+
+/**
+ * Initializes a new instance of speech synthesizer using the specified configuration for auto language detection and audio configuration.
+ *
+ * Added in version 1.13.0.
+
+ * @param speechConfiguration speech recognition configuration.
+ * @param autoDetectSourceLanguageConfiguration the configuration for auto language detection.
+ * @param audioConfiguration audio configuration.
+ * @return an instance of speech synthesizer.
+ */
+- (nullable instancetype)initWithSpeechConfiguration:(nonnull SPXSpeechConfiguration *)speechConfiguration
+               autoDetectSourceLanguageConfiguration:(nonnull SPXAutoDetectSourceLanguageConfiguration *)autoDetectSourceLanguageConfiguration
+                                  audioConfiguration:(nullable SPXAudioConfiguration *)audioConfiguration
+NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.");
+
+/**
+ * Initializes a new instance of speech synthesizer using the specified configuration for auto language detection and audio configuration.
+ *
+ * Added in version 1.13.0.
+
+ * @param speechConfiguration speech recognition configuration.
+ * @param autoDetectSourceLanguageConfiguration the configuration for auto language detection.
+ * @param audioConfiguration audio configuration.
+ * @param outError error information.
+ * @return an instance of speech synthesizer.
+ */
+- (nullable instancetype)initWithSpeechConfiguration:(nonnull SPXSpeechConfiguration *)speechConfiguration
+               autoDetectSourceLanguageConfiguration:(nonnull SPXAutoDetectSourceLanguageConfiguration *)autoDetectSourceLanguageConfiguration
+                                  audioConfiguration:(nullable SPXAudioConfiguration *)audioConfiguration
+                                               error:(NSError * _Nullable * _Nullable)outError;
+
 
 /**
  * Execute the speech synthesis on plain text.

@@ -56,7 +56,7 @@
     XCTAssertEqualObjects(testEndpointId, [speechRecognizer.properties getPropertyById:SPXSpeechServiceConnectionEndpointId]);
 }
 
-- (void)testCreateAutoDetectSourceLanguageConfig {    
+- (void)testCreateAutoDetectSourceLanguageConfig {
     NSArray *languages = @[@"zh-CN", @"de-DE"];
     SPXAutoDetectSourceLanguageConfiguration* autoDetectSourceLanguageConfig = [[SPXAutoDetectSourceLanguageConfiguration alloc]init:languages];
     SPXSpeechRecognizer* speechRecognizer = [[SPXSpeechRecognizer alloc] initWithSpeechConfiguration:self.speechConfig 
@@ -82,6 +82,13 @@
     XCTAssertEqualObjects(@"zh-CN,de-DE", [speechRecognizer.properties getPropertyById:SPXSpeechServiceConnectionAutoDetectSourceLanguages]);
     XCTAssertEqualObjects(@"", [speechRecognizer.properties getPropertyByName:@"zh-CNSPEECH-ModelId"]);
     XCTAssertEqualObjects(@"myendpoint", [speechRecognizer.properties getPropertyByName:@"de-DESPEECH-ModelId"]);
+
+    autoDetectSourceLanguageConfig = [[SPXAutoDetectSourceLanguageConfiguration alloc]initWithOpenRange];
+    SPXSpeechSynthesizer* speechSynthesizer = [[SPXSpeechSynthesizer alloc] initWithSpeechConfiguration:self.speechConfig
+                                                                         autoDetectSourceLanguageConfiguration:autoDetectSourceLanguageConfig
+                                                                         audioConfiguration:nil];
+    XCTAssertNotNil(speechSynthesizer);
+    XCTAssertEqualObjects(@"open_range", [speechSynthesizer.properties getPropertyById:SPXSpeechServiceConnectionAutoDetectSourceLanguages]);
 }
 
 - (void)testCreateSrcLangConfigDifferentParams {
