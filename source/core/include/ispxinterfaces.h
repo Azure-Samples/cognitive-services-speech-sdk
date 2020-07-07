@@ -520,6 +520,13 @@ public:
     virtual void ProcessAudio(const DataChunkPtr& audioChunk) = 0;
 };
 
+class ISpxAudioProcessorMinInput :
+    public ISpxInterfaceBaseFor<ISpxAudioProcessorMinInput>
+{
+public:
+    virtual void SetMinInputSize(const uint64_t sizeInTicks) = 0;
+};
+
 class ISpxInternalAudioCodecAdapter : public ISpxInterfaceBaseFor <ISpxInternalAudioCodecAdapter>
 {
 public:

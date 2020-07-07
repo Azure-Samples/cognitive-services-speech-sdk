@@ -49,4 +49,16 @@ namespace Impl {
     };
 
 
+template <typename I, typename F>
+inline bool TryQueryInterface(std::shared_ptr<ISpxInterfaceBase> obj, F fn)
+{
+    auto ptr = SpxQueryInterface<I>(obj);
+    if (ptr)
+    {
+        fn(*ptr);
+        return true;
+    }
+    return false;
+}
+
 } } } } // Microsoft::CognitiveServices::Speech::Impl

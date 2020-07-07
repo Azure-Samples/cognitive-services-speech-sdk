@@ -5,6 +5,8 @@
 
 #include "stdafx.h"
 
+#include <algorithm>
+
 #include "output_reco_adapter.h"
 #include "service_helpers.h"
 #include "create_object_helpers.h"
@@ -32,9 +34,12 @@ void CSpxOutputRecoEngineAdapter::SetFormat(const SPXWAVEFORMATEX* format)
             site->AdapterStartingTurn(this);
             site->AdapterStartedTurn(this, "");
         });
-        std::lock_guard<std::mutex> lk{ m_stateMutex };
-        m_status = StreamStatus::PartialData;
-        m_cv.notify_all();
+        if (m_expectedInTicks == 0)
+        {
+            std::lock_guard<std::mutex> lk{ m_stateMutex };
+            m_status = StreamStatus::PartialData;
+            m_cv.notify_all();
+        }
     }
     else
     {
@@ -49,6 +54,15 @@ void CSpxOutputRecoEngineAdapter::SetFormat(const SPXWAVEFORMATEX* format)
 
 }
 
+void CSpxOutputRecoEngineAdapter::SetMinInputSize(const uint64_t sizeInTicks)
+{
+    std::lock_guard<std::mutex> lk{ m_stateMutex };
+    if (m_status == StreamStatus::NoData)
+    {
+        m_expectedInTicks = sizeInTicks;
+    }
+}
+
 void CSpxOutputRecoEngineAdapter::ProcessAudio(const DataChunkPtr& audioChunk)
 {
     if (m_status == StreamStatus::AllData)
@@ -57,11 +71,18 @@ void CSpxOutputRecoEngineAdapter::ProcessAudio(const DataChunkPtr& audioChunk)
     }
     m_size += audioChunk->size;
     m_sink->Write(audioChunk->data.get(), audioChunk->size);
+    if (m_expectedInTicks != 0)
+    {
+        std::lock_guard<std::mutex> lk{ m_stateMutex };
+        uint64_t sizeInTicks = BytesToDuration<tick>(audioChunk->size, m_bytesPerSecond).count();
+        m_expectedInTicks -= std::min(m_expectedInTicks, sizeInTicks);
+        m_status = StreamStatus::PartialData;
+        m_cv.notify_all();
+    }
 }
 
 void CSpxOutputRecoEngineAdapter::DetachInput()
 {
-    using tick = std::chrono::duration<uint64_t, std::ratio<1, 10000000>>;
     if (m_detaching.exchange(true))
     {
         return;

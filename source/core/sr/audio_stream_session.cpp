@@ -1395,6 +1395,19 @@ void CSpxAudioStreamSession::KeywordDetected(ISpxKwsEngineAdapter* adapter, uint
         if (keywordOnly)
         {
             auto object = SpxCreateObjectWithSite<ISpxRecoEngineAdapter>("CSpxOutputRecoEngineAdapter", this);
+            auto didSetDuration = TryQueryInterface<ISpxAudioProcessorMinInput>(object, [duration](ISpxAudioProcessorMinInput& processor)
+            {
+                processor.SetMinInputSize(duration);
+            });
+            if (didSetDuration)
+            {
+                InvokeOnServiceIfAvailable<ISpxNamedProperties>(ISpxServiceProvider::shared_from_this(), [duration](ISpxNamedProperties& properties)
+                {
+                    auto durationMs = duration / 10000;
+                    auto durationStr = std::to_string(durationMs);
+                    properties.SetStringValue("SPEECH-TransmitLengthBeforeThrottleMs", durationStr.c_str());
+                });
+            }
             m_recoAdapter = object;
             stream = SpxQueryInterface<ISpxAudioDataStream>(object);
         }

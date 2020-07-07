@@ -21,10 +21,13 @@ namespace Impl {
 class CSpxOutputRecoEngineAdapter final:
     public ISpxObjectWithSiteInitImpl<ISpxRecoEngineAdapterSite>,
     public ISpxRecoEngineAdapter,
+    public ISpxAudioProcessorMinInput,
     public ISpxAudioDataStream,
     public ISpxRetrievable
 {
 public:
+    using tick = std::chrono::duration<uint64_t, std::ratio<1, 10000000>>;
+
     CSpxOutputRecoEngineAdapter() = default;
     ~CSpxOutputRecoEngineAdapter() = default;
 
@@ -35,6 +38,7 @@ public:
         SPX_INTERFACE_MAP_ENTRY(ISpxAudioProcessor)
         SPX_INTERFACE_MAP_ENTRY(ISpxAudioDataStream)
         SPX_INTERFACE_MAP_ENTRY(ISpxRetrievable)
+        SPX_INTERFACE_MAP_ENTRY(ISpxAudioProcessorMinInput)
     SPX_INTERFACE_MAP_END()
 
     // --- ISpxObject
@@ -48,6 +52,8 @@ public:
     /* For tomorrow... SetFormat should init the stream, term should let the site know that we are done */
     void SetFormat(const SPXWAVEFORMATEX* format) final;
     void ProcessAudio(const DataChunkPtr& audioChunk) final;
+
+    void SetMinInputSize(const uint64_t sizeInTicks) final;
 
     // -- ISpxRetrievable
     inline void MarkAsRetrieved() noexcept final
@@ -157,7 +163,8 @@ private:
     std::atomic<bool> m_detaching{ false };
     bool m_retrieved{ false };
     uint32_t m_bytesPerSecond{ 1 };
-    size_t m_size{ 0 };
+    uint64_t m_size{ 0 };
+    uint64_t m_expectedInTicks{ 0 };
     mutable std::condition_variable m_cv;
     mutable std::mutex m_stateMutex;
 
