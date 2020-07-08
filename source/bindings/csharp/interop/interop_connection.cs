@@ -52,8 +52,8 @@ namespace Microsoft.CognitiveServices.Speech.Internal
         [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR connection_set_message_property(InteropSafeHandle connection,
                                                                        [MarshalAs(UnmanagedType.LPStr)] string path,
-                                                                       [MarshalAs(UnmanagedType.LPStr)] string name,
-                                                                       [MarshalAs(UnmanagedType.LPStr)] string value);
+                                                                       IntPtr name,
+                                                                       IntPtr value);
 
         [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR connection_send_message(InteropSafeHandle connection,

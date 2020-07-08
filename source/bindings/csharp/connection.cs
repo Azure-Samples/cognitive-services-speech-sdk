@@ -205,7 +205,9 @@ namespace Microsoft.CognitiveServices.Speech
         public void SetMessageProperty(string path, string propertyName, string propertyValue)
         {
            ThrowIfFail(connectionHandle != null, SpxError.InvalidHandle.ToInt32());
-           ThrowIfFail(Internal.Connection.connection_set_message_property(connectionHandle, path, propertyName, propertyValue));
+           IntPtr propertyNamePtr = Utf8StringMarshaler.MarshalManagedToNative(propertyName);
+           IntPtr propertyValuePtr = Utf8StringMarshaler.MarshalManagedToNative(propertyValue);
+           ThrowIfFail(Internal.Connection.connection_set_message_property(connectionHandle, path, propertyNamePtr, propertyValuePtr));
         }
 
         private event EventHandler<ConnectionEventArgs> _Connected;
