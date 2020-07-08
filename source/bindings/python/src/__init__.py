@@ -73,6 +73,7 @@ root_namespace_classes = (
     SpeechSynthesisWordBoundaryEventArgs,
     SpeechSynthesizer,
     StreamStatus,
+    AudioStreamContainerFormat,
 )
 for cls in root_namespace_classes:
     cls.__module__ = __name__

@@ -634,6 +634,7 @@ inject_enum('ServicePropertyChannel')
 inject_enum('ProfanityOption')
 inject_enum('StreamStatus')
 inject_enum('SpeechSynthesisOutputFormat')
+inject_enum('AudioStreamContainerFormat')
 
 # clean up the exported names
 del inject_enum

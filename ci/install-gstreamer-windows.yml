@@ -46,8 +46,8 @@ steps:
       If("${{ parameters.buildPlatform }}" -Match "x64")
       {
         echo "installing x64 gstreamer"
-        msiexec /passive INSTALLDIR=$pwd\gstreamer /i gstreamer-1.0-x86_64-1.14.5.msi | Out-String
-        msiexec /passive INSTALLDIR=$pwd\gstreamer /i gstreamer-1.0-devel-x86_64-1.14.5.msi | Out-String
+        msiexec /passive INSTALLDIR=$pwd\gstreamer /i gstreamer-1.0-x86_64-1.15.1.msi | Out-String
+        msiexec /passive INSTALLDIR=$pwd\gstreamer /i gstreamer-1.0-devel-x86_64-1.15.1.msi | Out-String
       }
       If("${{ parameters.buildPlatform }}" -Match "Win32")
       {

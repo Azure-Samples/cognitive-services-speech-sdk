@@ -6,6 +6,11 @@ Classes that are concerned with the handling of audio input to the various recog
 
 from . import speech_py_impl as impl
 
+from .speech_py_impl import (
+    AudioStreamContainerFormat,
+)
+
+
 from typing import Optional
 OptionalStr = Optional[str]
 
@@ -23,8 +28,12 @@ class AudioStreamFormat():
     """
 
     def __init__(self, samples_per_second: int = None, bits_per_sample: int = 16,
-                 channels: int = 1):
-        if samples_per_second is None:
+                 channels: int = 1, compressed_stream_format: AudioStreamContainerFormat = None):
+        if compressed_stream_format is not None:
+            if not isinstance(compressed_stream_format, AudioStreamContainerFormat):
+                raise TypeError('wrong type, must be AudioStreamContainerFormat')
+            self._impl = impl.AudioStreamFormat_get_compressed_format(compressed_stream_format.value)
+        elif samples_per_second is None:
             self._impl = impl.AudioStreamFormat_get_default_input_format()
         else:
             self._impl = impl.AudioStreamFormat_get_wave_format_pcm(samples_per_second,

@@ -896,4 +896,41 @@ DocstringForSpeechSynthesisOutputFormat = """
 
       raw-8khz-16bit-mono-pcm
     """
+
+DocstringForAudioStreamContainerFormat = """
+   Supported audio input container formats.
+
+   .. note::
+     Added in version 1.13.0.
+
+   *Values:*
+
+   .. py:attribute:: OGG_OPUS
+
+      Stream ContainerFormat definition for OGG OPUS.
+ 
+   .. py:attribute:: MP3
+
+      Stream ContainerFormat definition for MP3.
+ 
+   .. py:attribute:: FLAC
+
+      Stream ContainerFormat definition for FLAC.
+ 
+   .. py:attribute:: ALAW
+
+      Stream ContainerFormat definition for ALAW.
+ 
+   .. py:attribute:: MULAW
+
+      Stream ContainerFormat definition for MULAW.
+ 
+   .. py:attribute:: AMRNB
+
+      Stream ContainerFormat definition for AMRNB.
+ 
+   .. py:attribute:: AMRWB
+ 
+      Stream ContainerFormat definition for AMRWB.
+    """
 %}

@@ -169,6 +169,18 @@ add_custom_command(
   ${SPEECH_PY_OUTDIR}
   )
 
+if(EXTENSION_CODEC_ENABLED)
+  # TODO needs cmake 3.13 for out-of-dir targets:
+  add_dependencies(${SWIG_MODULE_${PROJECT_NAME}_REAL_NAME} codec)
+  # set up the codec library in the correct place
+  add_custom_command(
+    TARGET ${SWIG_MODULE_${PROJECT_NAME}_REAL_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy
+    "$<TARGET_FILE:codec>"
+    ${SPEECH_PY_OUTDIR}
+    )
+endif()
+
 if(EXTENSION_KWS_ENABLED)
   # TODO needs cmake 3.13 for out-of-dir targets:
   # install(TARGETS kws_factory DESTINATION ${module_dir})
@@ -184,7 +196,8 @@ endif()
 
 set(SETUP_PY "${MODULE_ROOT}/setup.py")
 
-add_custom_command(OUTPUT ${SETUP_PY}
+if(APPLE)
+  add_custom_command(OUTPUT ${SETUP_PY}
   COMMAND ${CMAKE_COMMAND}
     -DSETUP_PY=${SETUP_PY}
     -DPYTHON_DOTTED_NAME=${PYTHON_DOTTED_NAME}
@@ -197,6 +210,21 @@ add_custom_command(OUTPUT ${SETUP_PY}
     ${SETUP_PY}.in
   VERBATIM
   )
+else()
+  add_custom_command(OUTPUT ${SETUP_PY}
+  COMMAND ${CMAKE_COMMAND}
+    -DSETUP_PY=${SETUP_PY}
+    -DPYTHON_DOTTED_NAME=${PYTHON_DOTTED_NAME}
+    -DPYTHON_PACKAGE_NAME=${PYTHON_PACKAGE_NAME}
+    -DPYTHON_PACKAGE_REL_PATH=${PYTHON_PACKAGE_REL_PATH}
+    -DPYTHON_LIBS="$<TARGET_FILE_NAME:${SPEECHSDK_CORE_LIBRARY}>","$<TARGET_FILE_NAME:${SPEECHSDK_CONVERSATION_LIBRARY}>","$<TARGET_FILE_NAME:_speech_py_impl>",$<$<BOOL:${EXTENSION_KWS_ENABLED}>:"$<TARGET_FILE_NAME:$<IF:$<BOOL:${EXTENSION_KWS_ENABLED}>,kws_factory,_speech_py_impl>>">,$<$<BOOL:${EXTENSION_CODEC_ENABLED}>:"$<TARGET_FILE_NAME:$<IF:$<BOOL:${EXTENSION_CODEC_ENABLED}>,codec,_speech_py_impl>>">
+    -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/write_setup_py.cmake
+  DEPENDS
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/write_setup_py.cmake
+    ${SETUP_PY}.in
+  VERBATIM
+  )
+endif()
 
 search_python_module(wheel 0.33.6)
 search_python_module(strip_hints 0.1.4)

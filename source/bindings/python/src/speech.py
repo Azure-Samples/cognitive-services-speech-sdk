@@ -21,6 +21,7 @@ from .speech_py_impl import (
     StreamStatus,
     SpeechSynthesisCancellationDetails,
     SpeechSynthesisOutputFormat,
+    AudioStreamContainerFormat,
 )
 
 from typing import Optional, Dict, Union, Callable

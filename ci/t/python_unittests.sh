@@ -8,6 +8,8 @@ PLATFORM="$2"
 BINARY_DIR="$3" # unused
 TESTSET="${4:-dev}"
 
+GSTREAMER_INSTALL_PATH=$(pwd)/gstreamer
+
 # needs to point to <repo root>/ci, will be overwritten by scripts that are sourced below
 SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"/..
 
@@ -129,6 +131,25 @@ if [[ $PLATFORM == Windows* ]]; then
 else
   GLOBALPYTHON=python3
 fi
+
+case $PLATFORM in
+  Windows-x64*)
+    GSTREAMER_RUNTIME_PATH="$GSTREAMER_INSTALL_PATH/1.0/x86_64/bin"
+    if [[ -d "$GSTREAMER_RUNTIME_PATH" ]]; then
+      PATH="${GSTREAMER_RUNTIME_PATH}:$PATH"
+    else
+      exitWithError "Gstreamer runtime path $GSTREAMER_RUNTIME_PATH not found.\n"
+    fi
+    ;;
+  Windows-x86*)
+    GSTREAMER_RUNTIME_PATH="$GSTREAMER_INSTALL_PATH/1.0/x86/bin"
+    if [[ -d "$GSTREAMER_RUNTIME_PATH" ]]; then
+      PATH="${GSTREAMER_RUNTIME_PATH}:$PATH"
+    else
+      exitWithError "Gstreamer runtime path $GSTREAMER_RUNTIME_PATH not found.\n"
+    fi
+    ;;
+esac
 
 if [[ ! $IN_VSTS ]]; then
   echo "Running outside VSTS; using system Python interpreter."
