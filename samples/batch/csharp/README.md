@@ -12,6 +12,7 @@ To successfully run this example you require
 
 and optionally
 
-- the IDs of any acoustic or language models your want to apply.
+- the references of any custom models your want to apply.
+- deploy the Azure function
 
 With this information, change the definitions of the appropriate constants in `program.cs`.
