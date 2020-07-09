@@ -353,7 +353,7 @@ namespace Transcription {
             if (!ValidateHandle(m_handle, __FUNCTION__)) return;
 
             PCONV_TRANS_CALLBACK callback = nullptr;
-            if (Transcribing.IsConnected())
+            if (TextMessageReceived.IsConnected())
             {
                 callback = [](auto, auto b, auto c) { FireEvent(b, c, &ConversationTranslator::TextMessageReceived); };
             }

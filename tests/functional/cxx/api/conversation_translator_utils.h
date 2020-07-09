@@ -351,7 +351,12 @@ namespace IntegrationTests {
             {
                 for (auto&kvp : args.Result->Translations)
                 {
-                    Translations[kvp.first] = kvp.second;
+                    auto textLang = TranslatorTextLanguage::Parse(kvp.first);
+                    Translations[textLang.Code()] = kvp.second;
+                    Translations[textLang.Lang()] = kvp.second;
+
+                    auto speechLang = TranslatorSpeechLanguage::Parse(kvp.first);
+                    Translations[speechLang.Code()] = kvp.second;
                 }
             }
 

@@ -21,6 +21,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeoutException;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import tests.AudioUtterancesKeys;
 import tests.Settings;
@@ -550,7 +551,7 @@ public class ConversationTranslatorTests {
     }
 
     SpeechTranslationConfig getDefaultConfig() {
-        return getConfig(SubscriptionsRegionsKeys.CONVERSATION_TRANSCRIPTION_PROD_SUBSCRIPTION);
+        return getConfig(SubscriptionsRegionsKeys.CONVERSATION_TRANSLATOR_SUBSCRIPTION);
     }
 
     SpeechTranslationConfig getConfig(String type) {

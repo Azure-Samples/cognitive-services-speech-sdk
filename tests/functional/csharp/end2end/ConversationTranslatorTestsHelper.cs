@@ -288,9 +288,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             convTrans.SessionStopped += (s, e) => SessionStopped.Add(e.Dump("SessionStopped"));
             convTrans.ParticipantsChanged += (s, e) => ParticipantsChanged.Add(e.Dump("ParticipantsChanged"));
             convTrans.ConversationExpiration += (s, e) => ConversationExpiration.Add(e.Dump("ConversationExpiration"));
-            convTrans.Transcribing += (s, e) => Transcribing.Add(e.Result.Dump("Transcribing"));
-            convTrans.Transcribed += (s, e) => Transcribed.Add(e.Result.Dump("Transcribed"));
-            convTrans.TextMessageReceived += (s, e) => TextMessageReceived.Add(e.Result.Dump("TextMessageReceived"));
+            convTrans.Transcribing += (s, e) => Transcribing.Add(new ConvTransResult(e.Result.Dump("Transcribing")));
+            convTrans.Transcribed += (s, e) => Transcribed.Add(new ConvTransResult(e.Result.Dump("Transcribed")));
+            convTrans.TextMessageReceived += (s, e) => TextMessageReceived.Add(new ConvTransResult(e.Result.Dump("TextMessageReceived")));
 
             convTrans.Canceled += (s, e) =>
             {
@@ -318,9 +318,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public IList<ConversationTranslationCanceledEventArgs> Canceled { get; } = new List<ConversationTranslationCanceledEventArgs>();
         public IList<ConversationParticipantsChangedEventArgs> ParticipantsChanged { get; } = new List<ConversationParticipantsChangedEventArgs>();
         public IList<ConversationExpirationEventArgs> ConversationExpiration { get; } = new List<ConversationExpirationEventArgs>();
-        public IList<ConversationTranslationResult> Transcribing { get; } = new List<ConversationTranslationResult>();
-        public IList<ConversationTranslationResult> Transcribed { get; } = new List<ConversationTranslationResult>();
-        public IList<ConversationTranslationResult> TextMessageReceived { get; } = new List<ConversationTranslationResult>();
+        public IList<ConvTransResult> Transcribing { get; } = new List<ConvTransResult>();
+        public IList<ConvTransResult> Transcribed { get; } = new List<ConvTransResult>();
+        public IList<ConvTransResult> TextMessageReceived { get; } = new List<ConvTransResult>();
 
         public void AddConnectionCallbacks(Connection connection)
         {
@@ -413,15 +413,10 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             SPXTEST_REQUIRE(Disconnected.Count == expectedDisconnections);
         }
 
-        private static bool TryGetValueLower(IReadOnlyDictionary<string, string> dict, string key, out string val)
-        {
-            return dict.TryGetValue(key, out val) || dict.TryGetValue(key.ToLower(), out val);
-        }
-
         public void VerifyTranscriptions(string participantId, params ExpectedTranscription[] expectedTranscriptions)
         {
-            Dictionary<string, IList<ConversationTranslationResult>> partials = new Dictionary<string, IList<ConversationTranslationResult>>(StringComparer.OrdinalIgnoreCase);
-            Dictionary<string, IList<ConversationTranslationResult>> finals = new Dictionary<string, IList<ConversationTranslationResult>>(StringComparer.OrdinalIgnoreCase);
+            Dictionary<string, IList<ConvTransResult>> partials = new Dictionary<string, IList<ConvTransResult>>(StringComparer.OrdinalIgnoreCase);
+            Dictionary<string, IList<ConvTransResult>> finals = new Dictionary<string, IList<ConvTransResult>>(StringComparer.OrdinalIgnoreCase);
 
             foreach (var evt in Transcribing)
             {
@@ -436,8 +431,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             foreach (var e in expectedTranscriptions)
             {
                 var expectedParticipantId = e.ParticipantId;
-                var p = partials.GetOrDefault(expectedParticipantId) ?? new ConversationTranslationResult[0];
-                var f = finals.GetOrDefault(expectedParticipantId) ?? new ConversationTranslationResult[0];
+                var p = partials.GetOrDefault(expectedParticipantId) ?? new ConvTransResult[0];
+                var f = finals.GetOrDefault(expectedParticipantId) ?? new ConvTransResult[0];
 
                 var expectedPartialReason = expectedParticipantId == participantId
                     ? ResultReason.TranslatingSpeech
@@ -447,7 +442,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     : ResultReason.TranslatedParticipantSpeech;
 
                 // find an utterance that matches the expected string
-                ConversationTranslationResult match = f.FirstOrDefault(x =>
+                ConvTransResult match = f.FirstOrDefault(x =>
                     string.Equals(x.Text, e.Text, StringComparison.InvariantCultureIgnoreCase)
                     || SpeechRecognitionTestsHelper.IsWithinStringWordEditPercentage(e.Text, x.Text));
                 if (match == null)
@@ -467,9 +462,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                     // First lookup the full language code (e.g. zh-Hans-CH), then just the language code
                     // and script (zh-Hans), and finally just the language code (e.g. zh)
-                    if (!TryGetValueLower(match.Translations, transLang.ToString(), out actualTranslation)
-                        && !TryGetValueLower(match.Translations, $"{transLang.Code}-{transLang.Script}", out actualTranslation)
-                        && !TryGetValueLower(match.Translations, transLang.Code, out actualTranslation))
+                    if (!match.Translations.TryGetValue(transLang.Code, out actualTranslation)
+                        && !match.Translations.TryGetValue($"{transLang.Language}-{transLang.Script}", out actualTranslation)
+                        && !match.Translations.TryGetValue(transLang.Language, out actualTranslation))
                     {
                         actualTranslation = "<NO MATCH FOUND FOR LANGUAGE CODE>";
                     }
@@ -493,7 +488,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
         public void VerifyIms(string participantId, params ExpectedTranscription[] expectedIms)
         {
-            var ims = new Dictionary<string, IList<ConversationTranslationResult>>(StringComparer.OrdinalIgnoreCase);
+            var ims = new Dictionary<string, IList<ConvTransResult>>(StringComparer.OrdinalIgnoreCase);
             foreach (var evt in TextMessageReceived)
             {
                 ims.Add(evt.ParticipantId, evt);
@@ -502,14 +497,14 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             foreach (var expected in expectedIms)
             {
                 var expectedParticipantId = expected.ParticipantId;
-                var receivedFromUser = ims.GetOrDefault(expectedParticipantId) ?? new ConversationTranslationResult[0];
+                var receivedFromUser = ims.GetOrDefault(expectedParticipantId) ?? new ConvTransResult[0];
 
                 var expectedReason = expectedParticipantId == participantId
                     ? ResultReason.TranslatedInstantMessage
                     : ResultReason.TranslatedParticipantInstantMessage;
 
                 // find an IM that matches the expected string
-                ConversationTranslationResult match = receivedFromUser.FirstOrDefault(x =>
+                ConvTransResult match = receivedFromUser.FirstOrDefault(x =>
                     string.Equals(expected.Text, x.Text, StringComparison.InvariantCultureIgnoreCase)
                     || SpeechRecognitionTestsHelper.IsWithinStringWordEditPercentage(expected.Text, x.Text));
                 if (match == null)
@@ -529,9 +524,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                     // First lookup the full language code (e.g. zh-Hans-CH), then just the language code
                     // and script (zh-Hans), and finally just the language code (e.g. zh)
-                    if (!TryGetValueLower(match.Translations, transLang.ToString(), out actualTranslation)
-                        && !TryGetValueLower(match.Translations, $"{transLang.Code}-{transLang.Script}", out actualTranslation)
-                        && !TryGetValueLower(match.Translations, transLang.Code, out actualTranslation))
+                    if (!match.Translations.TryGetValue(transLang.Code, out actualTranslation)
+                        && !match.Translations.TryGetValue($"{transLang.Language}-{transLang.Script}", out actualTranslation)
+                        && !match.Translations.TryGetValue(transLang.Language, out actualTranslation))
                     {
                         actualTranslation = "<NO MATCH FOUND FOR LANGUAGE CODE>";
                     }
@@ -539,6 +534,48 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     REQUIRE_THAT(actualTranslation, Catch.FuzzyMatch(expectedEntry.Value));
                 }
             }
+        }
+
+        public class ConvTransResult
+        {
+            public ConvTransResult(ConversationTranslationResult result)
+            {
+                if (result == null)
+                {
+                    throw new ArgumentNullException(nameof(result));
+                }
+
+                Duration = result.Duration;
+                OffsetInTicks = result.OffsetInTicks;
+                OriginalLang = result.OriginalLang;
+                ParticipantId = result.ParticipantId;
+                Reason = result.Reason;
+                ResultId = result.ResultId;
+                Text = result.Text;
+
+                var dict = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                foreach (var kvp in result.Translations)
+                {
+                    var textLang = TranslatorTextLanguage.Parse(kvp.Key);
+                    dict[textLang.Code] = kvp.Value;
+                    dict[textLang.Language] = kvp.Value;
+
+                    var speechLang = TranslatorSpeechLanguage.Parse(kvp.Key);
+                    dict[textLang.Code] = kvp.Value;
+                }
+
+                this.Translations = dict;
+            }
+
+            public TimeSpan Duration { get; }
+            public long OffsetInTicks { get; }
+            public string OriginalLang { get; }
+            public string ParticipantId { get; }
+            public ResultReason Reason { get; }
+            public string ResultId { get; }
+            public string Text { get; }
+            public IReadOnlyDictionary<string, string> Translations { get; }
+            
         }
     }
 
@@ -697,19 +734,32 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
     public abstract class TranslatorLanguageBase : IEquatable<TranslatorLanguageBase>, IComparable<TranslatorLanguageBase>
     {
-        protected TranslatorLanguageBase(string code, string script = null, string region = null)
+        protected TranslatorLanguageBase(string lang, string script = null, string region = null)
         {
-            if (string.IsNullOrWhiteSpace(code))
+            if (string.IsNullOrWhiteSpace(lang))
             {
-                throw new ArgumentException(nameof(code) + " cannot be null, empty or consist only of white space");
+                throw new ArgumentException(nameof(lang) + " cannot be null, empty or consist only of white space");
             }
 
-            this.Code = code;
+            this.Language = lang.Trim();
             this.Script = string.IsNullOrWhiteSpace(script) ? string.Empty : script?.Trim();
             this.Region = string.IsNullOrWhiteSpace(region) ? string.Empty : region?.Trim();
+
+            this.Code = this.Language;
+            if (this.Script.Length > 0)
+            {
+                this.Code += "-" + this.Script;
+            }
+
+            if (this.Region.Length > 0)
+            {
+                this.Code += "-" + this.Region;
+            }
         }
 
         public string Code { get; }
+
+        public string Language { get; set; }
 
         public string Script { get; set; }
 
@@ -734,34 +784,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             return !(left == right);
         }
 
-        public override int GetHashCode()
-        {
-            // a bit of hack. In .net standard we could just do HashCode.Combine(...)
-            var tuple = new Tuple<string, string, string>(Code, Script ?? string.Empty, Region ?? string.Empty);
-            return tuple.GetHashCode();
-        }
+        public override int GetHashCode() => Code?.GetHashCode() ?? 0;
 
         public abstract int CompareTo(TranslatorLanguageBase other);
 
-        public override string ToString()
-        {
-            var builder = new StringBuilder((Code?.Length + Script?.Length + Region?.Length) ?? 0 + 2);
-            builder.Append(this.Code);
-
-            if (!string.IsNullOrEmpty(Script))
-            {
-                builder.Append("-");
-                builder.Append(Script);
-            }
-
-            if (!string.IsNullOrEmpty(Region))
-            {
-                builder.Append("-");
-                builder.Append(Region);
-            }
-
-            return builder.ToString();
-        }
+        public override string ToString() => this.Code;
 
         internal static bool TryParseRawLanguageCode(string rawLangCode, out string lang, out string script, out string region)
         {
@@ -846,7 +873,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 return -1;
             }
 
-            int comp = string.CompareOrdinal(this.Code, other.Code);
+            int comp = string.CompareOrdinal(this.Language, other.Language);
             if (comp != 0)
             {
                 return comp;
@@ -907,15 +934,15 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             throw new ArgumentException("Invalid language code");
         }
 
-        private TranslatorTextLanguage(string code, string script, string region)
-            : base(code, script, region)
+        private TranslatorTextLanguage(string lang, string script, string region)
+            : base(lang, script, region)
         {
         }
 
         public override bool Equals(TranslatorLanguageBase other)
         {
             return other != null
-                && this.Code == other.Code
+                && this.Language == other.Language
                 && this.Script == other.Script;
         }
 
@@ -949,15 +976,15 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             throw new ArgumentException("Invalid language code");
         }
 
-        private TranslatorSpeechLanguage(string code, string script, string region)
-            : base(code, script, region)
+        private TranslatorSpeechLanguage(string lang, string script, string region)
+            : base(lang, script, region)
         {
         }
 
         public override bool Equals(TranslatorLanguageBase other)
         {
             return other != null
-                && this.Code == other.Code
+                && this.Language == other.Language
                 && this.Region == other.Region;
         }
 

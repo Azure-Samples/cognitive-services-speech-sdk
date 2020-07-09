@@ -10,5 +10,5 @@ public class SubscriptionsRegionsKeys
     public static final String LANGUAGE_UNDERSTANDING_SUBSCRIPTION = "LanguageUnderstandingSubscription";
     public static final String CONVERSATION_TRANSCRIPTION_PROD_SUBSCRIPTION = "ConversationTranscriptionPRODSubscription";
     public static final String CONVERSATION_TRANSCRIPTION_PPE_SUBSCRIPTION = "ConversationTranscriptionPPESubscription";
-    public static final String CONVERSATION_TRANSLATOR = "ConversationTranslatorSubscription";
+    public static final String CONVERSATION_TRANSLATOR_SUBSCRIPTION = "ConversationTranslatorSubscription";
 }

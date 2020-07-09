@@ -107,6 +107,7 @@ namespace RemoteConversationTest
     {
 
         [TestMethod]
+        [Ignore]
         public void BasicRemoteConversationTest()
         {
             // Load the keys from json

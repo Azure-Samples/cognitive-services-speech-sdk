@@ -117,6 +117,7 @@ public class ConversationTranscriberTests {
         assertEquals(exception, true);
     }
 
+    @Ignore("ralphe: test is failing with HTTP 401 errors. Temporarily disabling")
     @Test
     public void testConversationAddParticipant() throws InterruptedException, ExecutionException, TimeoutException {
         SpeechConfig s = SpeechConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.CONVERSATION_TRANSCRIPTION_PROD_SUBSCRIPTION).Key,
@@ -172,6 +173,7 @@ public class ConversationTranscriberTests {
         conversation.close();
     }
 
+    @Ignore("ralphe: test is failing with HTTP 401 errors. Temporarily disabling")
     @Test
     public void testRemoveParticipant() throws InterruptedException, ExecutionException, TimeoutException {
         SpeechConfig s = SpeechConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.CONVERSATION_TRANSCRIPTION_PROD_SUBSCRIPTION).Key,
