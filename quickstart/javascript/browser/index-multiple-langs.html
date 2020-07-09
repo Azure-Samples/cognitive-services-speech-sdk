@@ -41,47 +41,47 @@
           <option value="pt-BR">Portuguese - BR</option>
           <option value="ru-RU">Russian - RU</option>
           <option value="sv-SE">Swedish - SE</option>
-          <option value="zh-CN">Chinese - CN</option>
+          <option value="zh-Hans">Chinese - Simplified</option>
         </select></td>
       </tr>
       <tr>
         <td align="right">Target Language 1</td>
         <td><select id="languageTargetOptions1">
-          <option value="ar-EG">Arabic - EG</option>
-          <option selected="selected" value="de-DE">German - DE</option>
-          <option value="en-US">English - US</option>
-          <option value="es-ES">Spanish - ES</option>
-          <option value="fi-FI">Finnish - FI</option>
-          <option value="fr-FR">French - FR</option>
-          <option value="hi-IN">Hindi - IN</option>
-          <option value="it-IT">Italian - IT</option>
-          <option value="ja-JP">Japanese - JP</option>
-          <option value="ko-KR">Korean - KR</option>
-          <option value="pl-PL">Polish - PL</option>
-          <option value="pt-BR">Portuguese - BR</option>
-          <option value="ru-RU">Russian - RU</option>
-          <option value="sv-SE">Swedish - SE</option>
-          <option value="zh-CN">Chinese - CN</option>
+          <option value="ar">Arabic</option>
+          <option selected="selected" value="de">German</option>
+          <option value="en">English</option>
+          <option value="es">Spanish</option>
+          <option value="fi">Finnish</option>
+          <option value="fr">French</option>
+          <option value="hi">Hindi</option>
+          <option value="it">Italian</option>
+          <option value="ja">Japanese</option>
+          <option value="ko">Korean</option>
+          <option value="pl">Polish</option>
+          <option value="pt">Portuguese</option>
+          <option value="ru">Russian</option>
+          <option value="sv">Swedish</option>
+          <option value="zh-Hans">Chinese - Simplified</option>
         </select></td>
       </tr>
       <tr>
         <td align="right">Target Language 2</td>
         <td><select id="languageTargetOptions2">
-          <option value="ar-EG">Arabic - EG</option>
-          <option selected="selected" value="de-DE">German - DE</option>
-          <option value="en-US">English - US</option>
-          <option value="es-ES">Spanish - ES</option>
-          <option value="fi-FI">Finnish - FI</option>
-          <option value="fr-FR">French - FR</option>
-          <option value="hi-IN">Hindi - IN</option>
-          <option value="it-IT">Italian - IT</option>
-          <option value="ja-JP">Japanese - JP</option>
-          <option value="ko-KR">Korean - KR</option>
-          <option value="pl-PL">Polish - PL</option>
-          <option value="pt-BR">Portuguese - BR</option>
-          <option value="ru-RU">Russian - RU</option>
-          <option value="sv-SE">Swedish - SE</option>
-          <option value="zh-CN">Chinese - CN</option>
+          <option value="ar">Arabic</option>
+          <option selected="selected" value="de">German</option>
+          <option value="en">English</option>
+          <option value="es">Spanish</option>
+          <option value="fi">Finnish</option>
+          <option value="fr">French</option>
+          <option value="hi">Hindi</option>
+          <option value="it">Italian</option>
+          <option value="ja">Japanese</option>
+          <option value="ko">Korean</option>
+          <option value="pl">Polish</option>
+          <option value="pt">Portuguese</option>
+          <option value="ru">Russian</option>
+          <option value="sv">Swedish</option>
+          <option value="zh-Hans">Chinese - Simplified</option>
         </select></td>
       </tr>
       <tr>
@@ -181,7 +181,7 @@
 				var languageKeys = {};
 				languageTargetOptions.forEach(function (langElem, index) {
 					var language = langElem.value;
-					languageKeys[language.substring(0, 2)] = resultsDivs[index];
+					languageKeys[language] = resultsDivs[index];
 					speechConfig.addTargetLanguage(language);
 				});
 
