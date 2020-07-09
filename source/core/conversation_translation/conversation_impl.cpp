@@ -168,7 +168,7 @@ namespace ConversationTranslation {
         // has gone out of scope
         if (false == m_permanentRoom)
         {
-            DeleteConversationInternal(false);
+            DeleteConversationInternal();
         }
     }
 
@@ -294,7 +294,7 @@ namespace ConversationTranslation {
         {
             CT_I_THROW_HR_IF(m_manager == nullptr, SPXERR_UNINITIALIZED);
             m_canRejoin = false;
-            this->DeleteConversationInternal(true);
+            this->DeleteConversationInternal();
         });
     }
 
@@ -369,69 +369,26 @@ namespace ConversationTranslation {
         }
     }
 
-    void CSpxConversationImpl::DeleteConversationInternal(bool waitForDeletion)
+    void CSpxConversationImpl::DeleteConversationInternal()
     {
         if (m_manager != nullptr && m_args != nullptr && !m_args->SessionToken.empty())
         {
-            // Since this can be called from the destructor, let's move the deletion call to a separate thread. Throwing
-            // exceptions in a destructor could lead to the entire process being aborted if the destructor was called
-            // because we are unwinding the stack of another exception
-            std::promise<void> promise;
-            auto future = promise.get_future();
-
-            // We cannot use std::async here since its destructor blocks until the execution is complete.
-            auto deleteThread = std::thread(
-                [manager = m_manager, conversationToken = m_args->SessionToken](std::promise<void>&& promise)
-                {
-                    try
-                    {
-                        manager->Leave(conversationToken);
-                        promise.set_value();
-                    }
-                    catch (HttpException& ex)
-                    {
-                        if (ex.statusCode() == 404)
-                        {
-                            // This response usually means the service has already deleted the room on your behalf.
-                            // This can happen for example if you are a participant and the host deletes the room.
-                            CT_LOG_INFO("Got a HTTP 404 response when trying to delete the conversation. Ignoring");
-                            promise.set_value();
-                        }
-                        else
-                        {
-                            CT_LOG_ERROR("Failed to delete the conversation. '%s'", ex.what());
-                            promise.set_exception(std::current_exception());
-                        }
-                    }
-                    catch (...)
-                    {
-                        CT_LOG_ERROR("Failed to delete the conversation. Unhandled exception.");
-                        promise.set_exception(std::current_exception());
-                    }
-                },
-                std::move(promise));
-
-            deleteThread.detach();
-
-            if (waitForDeletion)
+            try
             {
-                auto status = future.wait_for(ConversationConstants::MaxHttpRequestWaitTime);
-                switch (status)
+                m_manager->Leave(m_args->SessionToken);
+            }
+            catch (HttpException& ex)
+            {
+                if (ex.statusCode() == 404)
                 {
-                    case std::future_status::timeout:
-                        CT_I_LOG_ERROR("Timed out while trying to delete the conversation");
-                        ThrowWithCallstack(SPXERR_TIMEOUT);
-                        break;
-
-                    case std::future_status::ready:
-                        // observe exceptions
-                        future.get();
-                        break;
-
-                    default:
-                    case std::future_status::deferred:
-                        CT_I_LOG_ERROR("Unexpected future status: %d", status);
-                        break;
+                    // This response usually means the service has already deleted the room on your behalf.
+                    // This can happen for example if you are a participant and the host deletes the room.
+                    CT_I_LOG_INFO("Got a HTTP 404 response when trying to delete the conversation. Ignoring");
+                }
+                else
+                {
+                    CT_I_LOG_ERROR("Failed to delete the conversation. '%s'", ex.what());
+                    throw;
                 }
             }
 

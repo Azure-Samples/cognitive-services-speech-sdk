@@ -82,6 +82,7 @@ target_link_libraries(${PROJECT_NAME}
   PRIVATE common
   PRIVATE factory
   PRIVATE logging
+  PRIVATE conversation_translation
   )
 
 if(EXTENSION_CODEC_ENABLED)

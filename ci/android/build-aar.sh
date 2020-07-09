@@ -74,19 +74,19 @@ for micpermission in false true; do
     # Note: KWS currently not shipping in the AAR.
 
     cp --verbose --preserve \
-      "$DROP_DIR"/Android-arm32/$flavor/public/lib/libMicrosoft.CognitiveServices.Speech.{core,extension.conversation,java.bindings,extension.codec,extension.kws,extension.silk_codec}.so \
+      "$DROP_DIR"/Android-arm32/$flavor/public/lib/libMicrosoft.CognitiveServices.Speech.{core,java.bindings,extension.codec,extension.kws,extension.silk_codec}.so \
       "$AAR_DIR"/jni/armeabi-v7a
 
     cp --verbose --preserve \
-      "$DROP_DIR"/Android-arm64/$flavor/public/lib/libMicrosoft.CognitiveServices.Speech.{core,extension.conversation,java.bindings,extension.codec,extension.kws,extension.silk_codec}.so \
+      "$DROP_DIR"/Android-arm64/$flavor/public/lib/libMicrosoft.CognitiveServices.Speech.{core,java.bindings,extension.codec,extension.kws,extension.silk_codec}.so \
       "$AAR_DIR"/jni/arm64-v8a
 
     cp --verbose --preserve \
-      "$DROP_DIR"/Android-x86/$flavor/public/lib/libMicrosoft.CognitiveServices.Speech.{core,extension.conversation,java.bindings,extension.codec,extension.kws,extension.silk_codec}.so \
+      "$DROP_DIR"/Android-x86/$flavor/public/lib/libMicrosoft.CognitiveServices.Speech.{core,java.bindings,extension.codec,extension.kws,extension.silk_codec}.so \
       "$AAR_DIR"/jni/x86
 
     cp --verbose --preserve \
-      "$DROP_DIR"/Android-x64/$flavor/public/lib/libMicrosoft.CognitiveServices.Speech.{core,extension.conversation,java.bindings,extension.codec,extension.kws,extension.silk_codec}.so \
+      "$DROP_DIR"/Android-x64/$flavor/public/lib/libMicrosoft.CognitiveServices.Speech.{core,java.bindings,extension.codec,extension.kws,extension.silk_codec}.so \
       "$AAR_DIR"/jni/x86_64
 
     cp --verbose "$SCRIPT_DIR/../../"{REDIST.txt,license.md,ThirdPartyNotices.md} "$AAR_DIR"

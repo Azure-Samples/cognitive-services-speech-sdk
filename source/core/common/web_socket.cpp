@@ -743,7 +743,7 @@ namespace USP {
                 }
 
                 break;
-            }
+        }
     }
 
     void WebSocket::OnWebSocketOpened(WS_OPEN_RESULT_DETAILED open_result_detailed)

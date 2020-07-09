@@ -40,7 +40,6 @@ CSpxResourceManager::CSpxResourceManager()
     m_moduleFactories.push_back(CSpxModuleFactory::Get("libMicrosoft.CognitiveServices.Speech.extension.codec.so"));
 
     m_moduleFactories.push_back(CSpxModuleFactory::Get(PrimaryCarbon_CreateModuleObject));
-    m_moduleFactories.push_back(CSpxModuleFactory::Get("libMicrosoft.CognitiveServices.Speech.extension.conversation.so"));
     m_moduleFactories.push_back(CSpxModuleFactory::Get("libMicrosoft.CognitiveServices.Speech.extension.embedded.sr.so"));
 #elif __MACH__
     // N.B. dynamic loading of libraries during runtime is not allowed for iOS apps by the App Store.
@@ -52,7 +51,6 @@ CSpxResourceManager::CSpxResourceManager()
     m_moduleFactories.push_back(CSpxModuleFactory::Get("libMicrosoft.CognitiveServices.Speech.extension.kws.dylib"));
 
     m_moduleFactories.push_back(CSpxModuleFactory::Get(PrimaryCarbon_CreateModuleObject));
-    m_moduleFactories.push_back(CSpxModuleFactory::Get("libMicrosoft.CognitiveServices.Speech.extension.conversation.dylib"));
 #else
     m_moduleFactories.push_back(CSpxModuleFactory::Get("carbon-mock.dll"));
 
@@ -63,7 +61,6 @@ CSpxResourceManager::CSpxResourceManager()
     m_moduleFactories.push_back(CSpxModuleFactory::Get("Microsoft.CognitiveServices.Speech.extension.codec.dll"));
 
     m_moduleFactories.push_back(CSpxModuleFactory::Get(PrimaryCarbon_CreateModuleObject));
-    m_moduleFactories.push_back(CSpxModuleFactory::Get("Microsoft.CognitiveServices.Speech.extension.conversation.dll"));
     m_moduleFactories.push_back(CSpxModuleFactory::Get("Microsoft.CognitiveServices.Speech.extension.embedded.sr.dll"));
     m_moduleFactories.push_back(CSpxModuleFactory::Get("carbon-tts-mock.dll"));
     m_moduleFactories.push_back(CSpxModuleFactory::Get("carbon-tts-local.dll"));

@@ -10,7 +10,6 @@
 #include "trace_message.h"
 
 using namespace Microsoft::CognitiveServices::Speech::Impl;
-std::shared_ptr<ISpxNamedProperties> property_bag_from_handle(SPXPROPERTYBAGHANDLE hpropbag);
 
 /// <summary>
 /// Defined in speechapi_c_property_bag.cpp

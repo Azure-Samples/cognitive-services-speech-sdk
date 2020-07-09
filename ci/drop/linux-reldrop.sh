@@ -40,11 +40,9 @@ tar \
   "$BASE_NAME" \
   Linux-x86/Release/public/include/* \
   Linux-x*/Release/public/lib/libMicrosoft.CognitiveServices.Speech.core.so \
-  Linux-x*/Release/public/lib/libMicrosoft.CognitiveServices.Speech.extension.conversation.so \
   Linux-x*/Release/public/lib/libMicrosoft.CognitiveServices.Speech.extension.codec.so \
   Linux-x64/Release/public/lib/libMicrosoft.CognitiveServices.Speech.extension.kws.so \
   Linux-arm*/Release/public/lib/libMicrosoft.CognitiveServices.Speech.core.so \
-  Linux-arm*/Release/public/lib/libMicrosoft.CognitiveServices.Speech.extension.conversation.so \
   Linux-arm*/Release/public/lib/libMicrosoft.CognitiveServices.Speech.extension.codec.so \
   Linux-arm*/Release/public/lib/libMicrosoft.CognitiveServices.Speech.extension.kws.so
   # KWS does not ship for Linux-x86 currently

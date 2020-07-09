@@ -88,7 +88,6 @@ void CSpxConversation::Init()
     else
     {
         m_impl = SpxCreateObjectWithSite<ISpxConversation>("CSpxConversationImpl", genericSite);
-        SPX_IFTRUE_THROW_HR(m_impl == nullptr, SPXERR_EXTENSION_LIBRARY_NOT_FOUND);
         SPX_DBG_TRACE_INFO("Created a CSpxConversationImpl for the conversation translator service.");
     }
 

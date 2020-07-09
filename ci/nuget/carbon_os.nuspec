@@ -37,16 +37,10 @@
     <file src="$WindowsOSDropDir$\Win32\Release\public\lib\Microsoft.CognitiveServices.Speech.core.os.lib" target="build\native\Win32\Release\Microsoft.CognitiveServices.Speech.core.os.lib" />
     <file src="$WindowsOSDropDir$\Win32\Release\public\lib\Microsoft.CognitiveServices.Speech.core.os.dll" target="build\native\Win32\Release\Microsoft.CognitiveServices.Speech.core.os.dll" />
     <file src="$WindowsOSDropDir$\Win32\Release\public\lib\Microsoft.CognitiveServices.Speech.core.os.pdb" target="build\native\Win32\Release\Microsoft.CognitiveServices.Speech.core.os.pdb" />
-    <file src="$WindowsOSDropDir$\Win32\Release\public\lib\Microsoft.CognitiveServices.Speech.extension.conversation.os.lib" target="build\native\Win32\Release\Microsoft.CognitiveServices.Speech.extension.conversation.os.lib" />
-    <file src="$WindowsOSDropDir$\Win32\Release\public\lib\Microsoft.CognitiveServices.Speech.extension.conversation.os.dll" target="build\native\Win32\Release\Microsoft.CognitiveServices.Speech.extension.conversation.os.dll" />
-    <file src="$WindowsOSDropDir$\Win32\Release\public\lib\Microsoft.CognitiveServices.Speech.extension.conversation.os.pdb" target="build\native\Win32\Release\Microsoft.CognitiveServices.Speech.extension.conversation.os.pdb" />
     
     <file src="$WindowsOSDropDir$\x64\Release\public\lib\Microsoft.CognitiveServices.Speech.core.os.lib" target="build\native\x64\Release\Microsoft.CognitiveServices.Speech.core.os.lib" />
     <file src="$WindowsOSDropDir$\x64\Release\public\lib\Microsoft.CognitiveServices.Speech.core.os.dll" target="build\native\x64\Release\Microsoft.CognitiveServices.Speech.core.os.dll" />
-    <file src="$WindowsOSDropDir$\x64\Release\public\lib\Microsoft.CognitiveServices.Speech.core.os.pdb" target="build\native\x64\Release\Microsoft.CognitiveServices.Speech.core.os.pdb" />
-    <file src="$WindowsOSDropDir$\x64\Release\public\lib\Microsoft.CognitiveServices.Speech.extension.conversation.os.lib" target="build\native\x64\Release\Microsoft.CognitiveServices.Speech.extension.conversation.os.lib" />
-    <file src="$WindowsOSDropDir$\x64\Release\public\lib\Microsoft.CognitiveServices.Speech.extension.conversation.os.dll" target="build\native\x64\Release\Microsoft.CognitiveServices.Speech.extension.conversation.os.dll" />
-    <file src="$WindowsOSDropDir$\x64\Release\public\lib\Microsoft.CognitiveServices.Speech.extension.conversation.os.pdb" target="build\native\x64\Release\Microsoft.CognitiveServices.Speech.extension.conversation.os.pdb" />            
+    <file src="$WindowsOSDropDir$\x64\Release\public\lib\Microsoft.CognitiveServices.Speech.core.os.pdb" target="build\native\x64\Release\Microsoft.CognitiveServices.Speech.core.os.pdb" />        
 
     <!-- .NET dlls -->
     <file src="$WindowsOSDropDir$\Win32\Release\public\lib\net461\Microsoft.CognitiveServices.Speech.csharp.dll" target="lib\net461\Microsoft.CognitiveServices.Speech.csharp.dll" />
@@ -63,22 +57,14 @@
 
     <!-- .NET standard Windows native dlls -->
     <file src="$WindowsOSDropDir$\Win32\Release\public\lib\Microsoft.CognitiveServices.Speech.core.os.dll" target="runtimes\win-x86\native\Microsoft.CognitiveServices.Speech.core.os.dll" />
-    <file src="$WindowsOSDropDir$\Win32\Release\public\lib\Microsoft.CognitiveServices.Speech.core.os.pdb" target="runtimes\win-x86\native\Microsoft.CognitiveServices.Speech.core.os.pdb" />
-    <file src="$WindowsOSDropDir$\Win32\Release\public\lib\Microsoft.CognitiveServices.Speech.extension.conversation.os.dll" target="runtimes\win-x86\native\Microsoft.CognitiveServices.Speech.extension.conversation.os.dll" />
-    <file src="$WindowsOSDropDir$\Win32\Release\public\lib\Microsoft.CognitiveServices.Speech.extension.conversation.os.pdb" target="runtimes\win-x86\native\Microsoft.CognitiveServices.Speech.extension.conversation.os.pdb" />
+    <file src="$WindowsOSDropDir$\Win32\Release\public\lib\Microsoft.CognitiveServices.Speech.core.os.pdb" target="runtimes\win-x86\native\Microsoft.CognitiveServices.Speech.core.os.pdb" />    
 
     <file src="$WindowsOSDropDir$\x64\Release\public\lib\Microsoft.CognitiveServices.Speech.core.os.dll" target="runtimes\win-x64\native\Microsoft.CognitiveServices.Speech.core.os.dll" />
-    <file src="$WindowsOSDropDir$\x64\Release\public\lib\Microsoft.CognitiveServices.Speech.core.os.pdb" target="runtimes\win-x64\native\Microsoft.CognitiveServices.Speech.core.os.pdb" />
-    <file src="$WindowsOSDropDir$\x64\Release\public\lib\Microsoft.CognitiveServices.Speech.extension.conversation.os.dll" target="runtimes\win-x64\native\Microsoft.CognitiveServices.Speech.extension.conversation.os.dll" />
-    <file src="$WindowsOSDropDir$\x64\Release\public\lib\Microsoft.CognitiveServices.Speech.extension.conversation.os.pdb" target="runtimes\win-x64\native\Microsoft.CognitiveServices.Speech.extension.conversation.os.pdb" />
+    <file src="$WindowsOSDropDir$\x64\Release\public\lib\Microsoft.CognitiveServices.Speech.core.os.pdb" target="runtimes\win-x64\native\Microsoft.CognitiveServices.Speech.core.os.pdb" />    
 
     <file src="$WindowsUwpDropDir$\Win32\Release\public\lib\Microsoft.CognitiveServices.Speech.core.dll" target="runtimes\win-x86\nativeassets\uap\Microsoft.CognitiveServices.Speech.core.dll" />
     <file src="$WindowsUwpDropDir$\Win32\Release\public\lib\Microsoft.CognitiveServices.Speech.core.pdb" target="runtimes\win-x86\nativeassets\uap\Microsoft.CognitiveServices.Speech.core.pdb" />
-    <file src="$WindowsUwpDropDir$\Win32\Release\public\lib\Microsoft.CognitiveServices.Speech.extension.conversation.dll" target="runtimes\win-x86\nativeassets\uap\Microsoft.CognitiveServices.Speech.extension.conversation.dll" />
-    <file src="$WindowsUwpDropDir$\Win32\Release\public\lib\Microsoft.CognitiveServices.Speech.extension.conversation.pdb" target="runtimes\win-x86\nativeassets\uap\Microsoft.CognitiveServices.Speech.extension.conversation.pdb" />
     <file src="$WindowsUwpDropDir$\x64\Release\public\lib\Microsoft.CognitiveServices.Speech.core.dll" target="runtimes\win-x64\nativeassets\uap\Microsoft.CognitiveServices.Speech.core.dll" />
     <file src="$WindowsUwpDropDir$\x64\Release\public\lib\Microsoft.CognitiveServices.Speech.core.pdb" target="runtimes\win-x64\nativeassets\uap\Microsoft.CognitiveServices.Speech.core.pdb" />
-    <file src="$WindowsUwpDropDir$\x64\Release\public\lib\Microsoft.CognitiveServices.Speech.extension.conversation.dll" target="runtimes\win-x64\nativeassets\uap\Microsoft.CognitiveServices.Speech.extension.conversation.dll" />
-    <file src="$WindowsUwpDropDir$\x64\Release\public\lib\Microsoft.CognitiveServices.Speech.extension.conversation.pdb" target="runtimes\win-x64\nativeassets\uap\Microsoft.CognitiveServices.Speech.extension.conversation.pdb" />
   </files>
 </package>

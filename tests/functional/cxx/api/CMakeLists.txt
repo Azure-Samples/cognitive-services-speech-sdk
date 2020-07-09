@@ -74,7 +74,7 @@ source_group("Source Files" FILES ${SOURCES})
 source_group("Header Files" FILES ${TEST_HEADERS} ${HEADERS_PRIVATE})
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${TEST_HEADERS} ${HEADERS_PRIVATE})
-target_link_libraries(${PROJECT_NAME} ${SPEECHSDK_CORE_LIBRARY} ${SPEECHSDK_CONVERSATION_LIBRARY} audio common ${TEST_LIBS})
+target_link_libraries(${PROJECT_NAME} ${SPEECHSDK_CORE_LIBRARY} audio common ${TEST_LIBS})
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 if(${use_openssl})
@@ -102,7 +102,7 @@ if(EXTENSION_KWS_ENABLED AND STATIC_KWS_EXTENSION)
 endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "WindowsStore")
-  if(use_openssl)
+if(use_openssl)
     set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "/ignore:4099 /INCREMENTAL:NO")
-  endif()
+endif()
 endif()

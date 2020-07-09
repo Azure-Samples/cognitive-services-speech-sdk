@@ -1976,7 +1976,7 @@ jobs:
       vsts_setvar SPEECHSDK_BUILD_CONFIGURATION "$(BuildConfiguration)"
       vsts_setvar SPEECHSDK_ENABLE_CODEC true
       vsts_setvar SPEECHSDK_ENABLE_KWS true
-      vsts_setvar SPEECHSDK_ENABLE_CONVERSATION_TRANSLATOR true
+      vsts_setvar SPEECHSDK_ENABLE_CONVERSATION_TRANSLATOR false
     displayName: Set iOS target platform
   - bash: ./ci/set-variables.sh
     displayName: Set variables

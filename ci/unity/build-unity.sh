@@ -37,7 +37,6 @@ for flavor in Release; do # no Debug for now
     "$UNITY_DIR"/Assets/SpeechSDK/Plugins/Android/libs/armeabi-v7a
 
   cp --verbose --preserve \
-    "$DROP_DIR"/Android/Android-arm32/$flavor/public/lib/libMicrosoft.CognitiveServices.Speech.extension.conversation.so \
     "$DROP_DIR"/Android/Android-arm32/$flavor/public/lib/libMicrosoft.CognitiveServices.Speech.extension.kws.so \
     "$UNITY_DIR"/Assets/SpeechSDK/Plugins/Android/libs/armeabi-v7a
 
@@ -50,7 +49,6 @@ for flavor in Release; do # no Debug for now
     "$UNITY_DIR"/Assets/SpeechSDK/Plugins/Android/libs/arm64-v8a
 
   cp --verbose --preserve \
-    "$DROP_DIR"/Android/Android-arm64/$flavor/public/lib/libMicrosoft.CognitiveServices.Speech.extension.conversation.so \
     "$DROP_DIR"/Android/Android-arm64/$flavor/public/lib/libMicrosoft.CognitiveServices.Speech.extension.kws.so \
     "$UNITY_DIR"/Assets/SpeechSDK/Plugins/Android/libs/arm64-v8a
 
@@ -63,7 +61,6 @@ for flavor in Release; do # no Debug for now
     "$UNITY_DIR"/Assets/SpeechSDK/Plugins/Android/libs/x86
 
   cp --verbose --preserve \
-    "$DROP_DIR"/Android/Android-x86/$flavor/public/lib/libMicrosoft.CognitiveServices.Speech.extension.conversation.so \
     "$DROP_DIR"/Android/Android-x86/$flavor/public/lib/libMicrosoft.CognitiveServices.Speech.extension.kws.so \
     "$UNITY_DIR"/Assets/SpeechSDK/Plugins/Android/libs/x86
 
@@ -76,7 +73,6 @@ for flavor in Release; do # no Debug for now
     "$UNITY_DIR"/Assets/SpeechSDK/Plugins/WSA/x86
 
   cp --verbose --preserve \
-    "$DROP_DIR"/WindowsUwp/Win32/$flavor/public/lib/Microsoft.CognitiveServices.Speech.extension.conversation.dll \
     "$DROP_DIR"/WindowsUwp/Win32/$flavor/public/lib/Microsoft.CognitiveServices.Speech.extension.kws.dll \
     "$UNITY_DIR"/Assets/SpeechSDK/Plugins/WSA/x86
 
@@ -89,7 +85,6 @@ for flavor in Release; do # no Debug for now
     "$UNITY_DIR"/Assets/SpeechSDK/Plugins/WSA/x64
 
   cp --verbose --preserve \
-    "$DROP_DIR"/WindowsUwp/x64/$flavor/public/lib/Microsoft.CognitiveServices.Speech.extension.conversation.dll \
     "$DROP_DIR"/WindowsUwp/x64/$flavor/public/lib/Microsoft.CognitiveServices.Speech.extension.kws.dll \
     "$UNITY_DIR"/Assets/SpeechSDK/Plugins/WSA/x64
 
@@ -102,7 +97,6 @@ for flavor in Release; do # no Debug for now
     "$UNITY_DIR"/Assets/SpeechSDK/Plugins/WSA/ARM
 
   cp --verbose --preserve \
-    "$DROP_DIR"/WindowsUwp/ARM/$flavor/public/lib/Microsoft.CognitiveServices.Speech.extension.conversation.dll \
     "$DROP_DIR"/WindowsUwp/ARM/$flavor/public/lib/Microsoft.CognitiveServices.Speech.extension.kws.dll \
     "$UNITY_DIR"/Assets/SpeechSDK/Plugins/WSA/ARM
 
@@ -115,7 +109,6 @@ for flavor in Release; do # no Debug for now
     "$UNITY_DIR"/Assets/SpeechSDK/Plugins/WSA/ARM64
 
   cp --verbose --preserve \
-    "$DROP_DIR"/WindowsUwp/ARM64/$flavor/public/lib/Microsoft.CognitiveServices.Speech.extension.conversation.dll \
     "$DROP_DIR"/WindowsUwp/ARM64/$flavor/public/lib/Microsoft.CognitiveServices.Speech.extension.kws.dll \
     "$UNITY_DIR"/Assets/SpeechSDK/Plugins/WSA/ARM64
 
@@ -128,7 +121,6 @@ for flavor in Release; do # no Debug for now
     "$UNITY_DIR"/Assets/SpeechSDK/Plugins/x86
 
   cp --verbose --preserve \
-    "$DROP_DIR"/Windows/Win32/$flavor/public/lib/Microsoft.CognitiveServices.Speech.extension.conversation.dll \
     "$DROP_DIR"/Windows/Win32/$flavor/public/lib/Microsoft.CognitiveServices.Speech.extension.kws.dll \
     "$UNITY_DIR"/Assets/SpeechSDK/Plugins/x86
 
@@ -141,7 +133,6 @@ for flavor in Release; do # no Debug for now
     "$UNITY_DIR"/Assets/SpeechSDK/Plugins/x86_64
 
   cp --verbose --preserve \
-    "$DROP_DIR"/Windows/x64/$flavor/public/lib/Microsoft.CognitiveServices.Speech.extension.conversation.dll \
     "$DROP_DIR"/Windows/x64/$flavor/public/lib/Microsoft.CognitiveServices.Speech.extension.kws.dll \
     "$UNITY_DIR"/Assets/SpeechSDK/Plugins/x86_64
 

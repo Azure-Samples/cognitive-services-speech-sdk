@@ -4,7 +4,6 @@ subject to the license (https://aka.ms/csspeech/license201809).
 Microsoft.CognitiveServices.Speech.core.dll
 Microsoft.CognitiveServices.Speech.csharp.dll
 Microsoft.CognitiveServices.Speech.csharp.unix.dll
-Microsoft.CognitiveServices.Speech.extension.conversation.dll
 Microsoft.CognitiveServices.Speech.extension.kws.dll
 Microsoft.CognitiveServices.Speech.extension.codec.dll
 MicrosoftCognitiveServicesSpeech.framework/MicrosoftCognitiveServicesSpeech
@@ -13,8 +12,6 @@ client-sdk-<VERSION>.jar
 libMicrosoft.CognitiveServices.Speech.core.a
 libMicrosoft.CognitiveServices.Speech.core.dylib
 libMicrosoft.CognitiveServices.Speech.core.so
-libMicrosoft.CognitiveServices.Speech.extension.conversation.so
-libMicrosoft.CognitiveServices.Speech.extension.conversation.dylib
 libMicrosoft.CognitiveServices.Speech.extension.codec.so
 libMicrosoft.CognitiveServices.Speech.extension.kws.so
 libMicrosoft.CognitiveServices.Speech.java.bindings.jnilib

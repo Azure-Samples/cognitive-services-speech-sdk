@@ -555,9 +555,7 @@ namespace ConversationTranslation {
         {
             std::ostringstream oss;
             oss << "Web socket error '" << ConversationErrorCodeStrings(conversationErrorCode) << "': " << errorDescription;
-
-            std::string exceptionString = oss.str();
-            auto ex_ptr = std::make_exception_ptr(ExceptionWithCallStack(exceptionString, SPXERR_RUNTIME_ERROR));
+            auto ex_ptr = std::make_exception_ptr(ExceptionWithCallStack(oss.str(), SPXERR_RUNTIME_ERROR));
             m_connectionOpenPromise.set_exception(ex_ptr);
         }
         catch (std::future_error&)
