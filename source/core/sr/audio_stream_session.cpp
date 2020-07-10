@@ -2067,7 +2067,7 @@ void CSpxAudioStreamSession::CheckError(const string& error)
 void CSpxAudioStreamSession::Error(ISpxRecoEngineAdapter* adapter, ErrorPayload_Type payload)
 {
     // We will reset the retry counter if we are in the new phrase and we get the error.
-    if (static_cast<uint64_t>(m_audioBuffer->GetAbsoluteOffset()) > m_lastErrorGlobalOffset)
+    if (m_audioBuffer != nullptr && static_cast<uint64_t>(m_audioBuffer->GetAbsoluteOffset()) > m_lastErrorGlobalOffset)
     {
         m_retriesDone = 0;
     }
