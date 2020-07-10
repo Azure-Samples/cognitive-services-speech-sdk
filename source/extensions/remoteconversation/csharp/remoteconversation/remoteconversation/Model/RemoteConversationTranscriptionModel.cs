@@ -28,6 +28,7 @@ namespace Microsoft.CognitiveServices.Speech.RemoteConversation
         internal RemoteConversationTranscriptionModel()
         {
             Transcriptions = new List<RemoteTranscriptionModel>();
+            ProcessingStatus = RemoteTaskStatusModel.Deleted;
         }
 
         public void ReadProperties(JsonElement json)

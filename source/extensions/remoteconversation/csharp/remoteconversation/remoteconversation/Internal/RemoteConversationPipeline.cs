@@ -25,7 +25,10 @@ namespace Microsoft.CognitiveServices.Speech.RemoteConversation
         internal Response<T> CreateResponse<T>(T result, Response response)
             where T : IJsonDeserializable
         {
-            result.Deserialize(response.ContentStream);
+            if (response.ContentStream.Length != 0)
+            {
+                result.Deserialize(response.ContentStream);
+            }
             return Response.FromValue(result, response);
         }
 

@@ -107,7 +107,6 @@ namespace RemoteConversationTest
     {
 
         [TestMethod]
-        [Ignore]
         public void BasicRemoteConversationTest()
         {
             // Load the keys from json
@@ -156,9 +155,9 @@ namespace RemoteConversationTest
         {
             while (!operation.HasCompleted)
             {
+                Thread.Sleep(TimeSpan.FromSeconds(10));
                 Response response = await operation.UpdateStatusAsync();
                 Console.WriteLine(response.Status);
-                Thread.Sleep(TimeSpan.FromSeconds(10));
             }
 
             await operation.WaitForCompletionAsync(TimeSpan.FromSeconds(10), CancellationToken.None);

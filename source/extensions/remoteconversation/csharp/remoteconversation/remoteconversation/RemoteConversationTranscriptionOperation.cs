@@ -159,6 +159,7 @@ namespace Microsoft.CognitiveServices.Speech.RemoteConversation
                     {
                         m_completed = true;
                     }
+                    m_resultModel.Id = Id;
                 }
             }
             return GetRawResponse();
