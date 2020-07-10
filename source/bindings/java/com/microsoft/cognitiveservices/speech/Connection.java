@@ -16,6 +16,7 @@ import com.microsoft.cognitiveservices.speech.util.SafeHandle;
 import com.microsoft.cognitiveservices.speech.util.SafeHandleType;
 import com.microsoft.cognitiveservices.speech.util.Contracts;
 import com.microsoft.cognitiveservices.speech.Recognizer;
+import com.microsoft.cognitiveservices.speech.transcription.ConversationTranslator;
 
 /**
  * Connection is a proxy class for managing connection to the speech service of the specified Recognizer.
@@ -38,6 +39,18 @@ public final class Connection implements Closeable
 
     static {
         s_executorService = Executors.newCachedThreadPool();
+    }
+
+    /**
+     * Gets the Connection instance from the conversation translator.
+     * @param conversationTranslator The conversationTranslator associated with the connection.
+     * @return The Connection instance of the recognizer.
+     */
+    public static Connection fromConversationTranslator(ConversationTranslator conversationTranslator)
+    {
+        IntRef handle = new IntRef(0);
+        Contracts.throwIfFail(connectionFromConversationTranslator(conversationTranslator.getImpl(), handle));
+        return new Connection(handle);
     }
 
     /**
@@ -267,9 +280,10 @@ public final class Connection implements Closeable
             if (handler != null) {
                 handler.fireEvent(this, args);
             }
-        } catch (Exception e) {}        
+        } catch (Exception e) {}
     }
 
+    private final native static long connectionFromConversationTranslator(SafeHandle convTransHandle, IntRef handle);
     private final native static long connectionFromRecognizer(SafeHandle recoHandle, IntRef handle);
     private final native long openConnection(SafeHandle connectionHandle, boolean forContinuousRecognition);
     private final native long closeConnection(SafeHandle connectionHandle);

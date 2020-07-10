@@ -19,6 +19,24 @@ void DisconnectedCallback(SPXEVENTHANDLE event, void* context)
 
 /*
  * Class:     com_microsoft_cognitiveservices_speech_Connection
+ * Method:    connectionFromConversationTranslator
+ * Signature: (Lcom/microsoft/cognitiveservices/speech/util/SafeHandle;Lcom/microsoft/cognitiveservices/speech/util/IntRef;)J
+ */
+JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_Connection_connectionFromConversationTranslator
+  (JNIEnv *env, jclass cls, jobject convTransHandle, jobject connectionHandle)
+{
+    SPXCONNECTIONHANDLE result = SPXHANDLE_INVALID;
+    jlong handle = GetObjectHandle(env, convTransHandle);
+    SPXHR hr = connection_from_conversation_translator((SPXCONVERSATIONTRANSLATORHANDLE)handle, &result);
+    if (SPX_SUCCEEDED(hr))
+    {
+        SetObjectHandle(env, connectionHandle, (jlong)result);
+    }
+    return hr;
+}
+
+/*
+ * Class:     com_microsoft_cognitiveservices_speech_Connection
  * Method:    connectionFromRecognizer
  * Signature: (Lcom/microsoft/cognitiveservices/speech/util/SafeHandle;Lcom/microsoft/cognitiveservices/speech/util/IntRef;)J
  */

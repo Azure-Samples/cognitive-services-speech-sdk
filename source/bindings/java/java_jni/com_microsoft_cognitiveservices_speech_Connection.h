@@ -7,6 +7,15 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/*
+ * Class:     com_microsoft_cognitiveservices_speech_Connection
+ * Method:    connectionFromConversationTranslator
+ * Signature: (Lcom/microsoft/cognitiveservices/speech/util/SafeHandle;Lcom/microsoft/cognitiveservices/speech/util/IntRef;)J
+ */
+JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_Connection_connectionFromConversationTranslator
+  (JNIEnv *, jclass, jobject, jobject);
+
 /*
  * Class:     com_microsoft_cognitiveservices_speech_Connection
  * Method:    connectionFromRecognizer

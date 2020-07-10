@@ -289,6 +289,16 @@ public class ConversationTranslator implements Closeable {
         }
     }
 
+    /*! \cond INTERNAL */
+    /**
+     * Returns the internal conversation translator instance
+     * @return The internal conversation translator instance
+     */
+    public SafeHandle getImpl() {
+        return translatorHandle;
+    }
+    /*! \endcond */
+
     private void dispose(final boolean disposing) {
         if (disposed) {
             return;
