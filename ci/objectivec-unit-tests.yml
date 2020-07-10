@@ -46,6 +46,7 @@ jobs:
         . ci/functions.sh
         vsts_setvar SPEECHSDK_TARGET_PLATFORM $(BuildPlatform)-x64
         vsts_setvar SPEECHSDK_BUILD_CONFIGURATION "$(BuildConfiguration)"
+        vsts_setvar SPEECHSDK_ENABLE_CODEC false
   - task: DownloadBuildArtifacts@0
     displayName: Download build products
     inputs:
@@ -60,8 +61,10 @@ jobs:
       # set up framework in the correct position - the Xcode project expects the framework here
       mkdir -p '$(Build.Repository.LocalPath)/xcode-build-output'
       unzip "$(Build.ArtifactStagingDirectory)/$(BuildPlatform)/$(BuildConfiguration)/$(VersionedFrameworkName).zip" -d '$(Build.Repository.LocalPath)/xcode-build-output'
-      [[ $(buildPlatform) != iOS ]] || \
+      if [[ $(SPEECHSDK_ENABLE_CODEC) == true ]]; then
+        [[ $(buildPlatform) != iOS ]] || \
         unzip "$(Build.ArtifactStagingDirectory)/$(BuildPlatform)/$(BuildConfiguration)/$(GStreamerWrapper).zip" -d '$(Build.Repository.LocalPath)/xcode-build-output'
+      fi
       # runtests.sh requires the build directory to exist
       mkdir -p build/bin/$(BuildConfiguration)
     condition: eq(variables['SPEECHSDK_RUN_TESTS'], 'true')

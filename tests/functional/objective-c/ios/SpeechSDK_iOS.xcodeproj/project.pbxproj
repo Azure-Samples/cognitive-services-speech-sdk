@@ -36,8 +36,6 @@
 		DC828F6222F1AE71007903CA /* whatstheweatherlike.alaw in Resources */ = {isa = PBXBuildFile; fileRef = DC828F5C22F19D16007903CA /* whatstheweatherlike.alaw */; };
 		DC828F6322F1AE74007903CA /* whatstheweatherlike.flac in Resources */ = {isa = PBXBuildFile; fileRef = DC828F5D22F19D16007903CA /* whatstheweatherlike.flac */; };
 		DC828F6422F1AE79007903CA /* whatstheweatherlike.mulaw in Resources */ = {isa = PBXBuildFile; fileRef = DC828F5E22F19D16007903CA /* whatstheweatherlike.mulaw */; };
-		DCC9A0A722672F7D007939A0 /* GStreamerWrapper.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = DCC9A0A22267260C007939A0 /* GStreamerWrapper.framework */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		DCC9A0A922672FFE007939A0 /* GStreamerWrapper.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DCC9A0A22267260C007939A0 /* GStreamerWrapper.framework */; };
 		DCF1E29222E1CC4E00FA9F3E /* SPXTestHelpers.m in Sources */ = {isa = PBXBuildFile; fileRef = DCF1E29122E1CC4E00FA9F3E /* SPXTestHelpers.m */; };
 		EB21A8EB2429674B0056703C /* SPXLanguageConfigurationTest.m in Sources */ = {isa = PBXBuildFile; fileRef = EB21A8EA2429674B0056703C /* SPXLanguageConfigurationTest.m */; };
 		F342D645216794C600B6B2FC /* MicrosoftCognitiveServicesSpeech.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F342D644216794C600B6B2FC /* MicrosoftCognitiveServicesSpeech.framework */; };
@@ -68,7 +66,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				DCC9A0A722672F7D007939A0 /* GStreamerWrapper.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -107,7 +104,6 @@
 		DC828F5D22F19D16007903CA /* whatstheweatherlike.flac */ = {isa = PBXFileReference; lastKnownFileType = file; name = whatstheweatherlike.flac; path = ../../../input/audio/whatstheweatherlike.flac; sourceTree = "<group>"; };
 		DC828F5E22F19D16007903CA /* whatstheweatherlike.mulaw */ = {isa = PBXFileReference; lastKnownFileType = file; name = whatstheweatherlike.mulaw; path = ../../../input/audio/whatstheweatherlike.mulaw; sourceTree = "<group>"; };
 		DCC1352E225E182E00194047 /* SPXSpeechRecognitionEndtoEndTest.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SPXSpeechRecognitionEndtoEndTest.h; path = ../../shared/testrunners/SPXSpeechRecognitionEndtoEndTest.h; sourceTree = "<group>"; };
-		DCC9A0A22267260C007939A0 /* GStreamerWrapper.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GStreamerWrapper.framework; path = "../../../../xcode-build-output/GStreamerWrapper.framework"; sourceTree = "<group>"; };
 		DCF1E29122E1CC4E00FA9F3E /* SPXTestHelpers.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = SPXTestHelpers.m; path = ../../shared/testrunners/SPXTestHelpers.m; sourceTree = "<group>"; };
 		DCF1E29322E1CC8100FA9F3E /* SPXTestHelpers.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SPXTestHelpers.h; path = ../../shared/testrunners/SPXTestHelpers.h; sourceTree = "<group>"; };
 		EB21A8EA2429674B0056703C /* SPXLanguageConfigurationTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = SPXLanguageConfigurationTest.m; path = ../../shared/testrunners/SPXLanguageConfigurationTest.m; sourceTree = "<group>"; };
@@ -133,7 +129,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				F342D645216794C600B6B2FC /* MicrosoftCognitiveServicesSpeech.framework in Frameworks */,
-				DCC9A0A922672FFE007939A0 /* GStreamerWrapper.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -195,7 +190,6 @@
 		A2AB0BC02152FB9800171A08 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				DCC9A0A22267260C007939A0 /* GStreamerWrapper.framework */,
 				F342D644216794C600B6B2FC /* MicrosoftCognitiveServicesSpeech.framework */,
 			);
 			name = Frameworks;

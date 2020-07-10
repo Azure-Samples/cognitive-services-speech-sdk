@@ -32,31 +32,31 @@ SPXAudioStreamContainerFormat compressedStreamFormat;
     self.audioConfig  = [[SPXAudioConfiguration alloc] initWithStreamInput:self->stream];
 }
 
-- (void)testContinuousRecognitionFromMP3FileWithPushStream {
+- (void)skipped_testContinuousRecognitionFromMP3FileWithPushStream {
     self->compressedStreamFormat = SPXAudioStreamContainerFormat_MP3;
     [self speechInit];
     [self pushFile:@"mp3"];
 }
 
-- (void)testContinuousRecognitionFromOpusFileWithPushStream {
+- (void)skipped_testContinuousRecognitionFromOpusFileWithPushStream {
     self->compressedStreamFormat = SPXAudioStreamContainerFormat_OGG_OPUS;
     [self speechInit];
     [self pushFile:@"opus"];
 }
 
-- (void)testContinuousRecognitionFromFlacFileWithPushStream {
+- (void)skipped_testContinuousRecognitionFromFlacFileWithPushStream {
     self->compressedStreamFormat = SPXAudioStreamContainerFormat_FLAC;
     [self speechInit];
     [self pushFile:@"flac"];
 }
 
-- (void)testContinuousRecognitionFromAlawFileWithPushStream {
+- (void)skipped_testContinuousRecognitionFromAlawFileWithPushStream {
     self->compressedStreamFormat = SPXAudioStreamContainerFormat_ALAW;
     [self speechInit];
     [self pushFile:@"alaw"];
 }
 
-- (void)testContinuousRecognitionFromMulawFileWithPushStream {
+- (void)skipped_testContinuousRecognitionFromMulawFileWithPushStream {
     self->compressedStreamFormat = SPXAudioStreamContainerFormat_MULAW;
     [self speechInit];
     [self pushFile:@"mulaw"];
@@ -222,31 +222,31 @@ SPXAudioStreamContainerFormat compressedStreamFormat;
     self.audioConfig = [[SPXAudioConfiguration alloc] initWithStreamInput:self->stream];
 }
 
-- (void) testRecognizeOnceMP3 {
+- (void) skipped_testRecognizeOnceMP3 {
     self->compressedStreamFormat = SPXAudioStreamContainerFormat_MP3;
     [self speechInit];
     [self _testRecognizeOnce];
 }
 
-- (void) testRecognizeOnceOPUS {
+- (void) skipped_testRecognizeOnceOPUS {
     self->compressedStreamFormat = SPXAudioStreamContainerFormat_OGG_OPUS;
     [self speechInit];
     [self _testRecognizeOnce];
 }
 
-- (void) testRecognizeOnceFLAC {
+- (void) skipped_testRecognizeOnceFLAC {
     self->compressedStreamFormat = SPXAudioStreamContainerFormat_FLAC;
     [self speechInit];
     [self _testRecognizeOnce];
 }
 
-- (void) testRecognizeOnceALAW {
+- (void) skipped_testRecognizeOnceALAW {
     self->compressedStreamFormat = SPXAudioStreamContainerFormat_ALAW;
     [self speechInit];
     [self _testRecognizeOnce];
 }
 
-- (void) testRecognizeOnceMULAW {
+- (void) skipped_testRecognizeOnceMULAW {
     self->compressedStreamFormat = SPXAudioStreamContainerFormat_MULAW;
     [self speechInit];
     [self _testRecognizeOnce];
