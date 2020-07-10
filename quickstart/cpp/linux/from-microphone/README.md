@@ -5,7 +5,7 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 
 ## Prerequisites
 
-* A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
+* A subscription key for the Speech service. See [Try the Speech service by creating an Azure resource](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
 * An Ubuntu 16.04, Ubuntu 18.04, Debian 9, RHEL 8, or CentOS 8 PC with a working microphone.
 * On Ubuntu, install these packages to build and run this sample:
 
@@ -49,8 +49,7 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
   * If you are running on Linux ARM64 (64-bit), change the line `TARGET_PLATFORM:=x64` to `TARGET_PLATFORM:=arm64`.
 * Edit the `helloworld.cpp` source:
   * Replace the string `YourSubscriptionKey` with your own subscription key.
-  * Replace the string `YourServiceRegion` with the service region of your subscription.
-    For example, replace with `westus` if you are using the 30-day free trial subscription.
+  * Replace the string `YourServiceRegion` with the service region of your subscription (for example, `westus`.)
 * Run the command `make` to build the sample, the resulting executable will be called `helloworld`.
 
 ## Run the sample
