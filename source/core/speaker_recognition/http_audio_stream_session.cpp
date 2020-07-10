@@ -71,94 +71,106 @@ void CSpxHttpAudioStreamSession::Term()
 
 void CSpxHttpAudioStreamSession::InitFromFile(const wchar_t* pszFileName)
 {
-    SPX_THROW_HR_IF(SPXERR_ALREADY_INITIALIZED, m_audioPump.get() != nullptr);
-    // Create the wav file pump
-    auto audio_file_pump = SpxCreateObjectWithSite<ISpxAudioFile>("CSpxWavFilePump", this);
-    m_audioPump = SpxQueryInterface<ISpxAudioPump>(audio_file_pump);
+    auto keepAlive = SpxSharedPtrFromThis<ISpxAudioProcessor>(this);
+    wstring filename = pszFileName;
+    auto task = CreateTask([this, keepAlive, filename]() {
+        SPX_THROW_HR_IF(SPXERR_ALREADY_INITIALIZED, m_audioPump.get() != nullptr);
+        // Create the wav file pump
+        auto audio_file_pump = SpxCreateObjectWithSite<ISpxAudioFile>("CSpxWavFilePump", this);
+        m_audioPump = SpxQueryInterface<ISpxAudioPump>(audio_file_pump);
 
-    // Open the WAV file
-    audio_file_pump->Open(pszFileName);
-    SPX_DBG_TRACE_VERBOSE("[%p]CSpxHttpAudioStreamSession::InitFromFile Pump from file:[%p]", (void*)this, (void*)m_audioPump.get());
+        // Open the WAV file
+        audio_file_pump->Open(filename.c_str());
+        SPX_DBG_TRACE_VERBOSE("[%p]InitFromFile Pump from file:[%p]", (void*)this, (void*)m_audioPump.get());
+        });
+    m_threadService->ExecuteAsync(move(task));
 }
 
 void CSpxHttpAudioStreamSession::InitFromMicrophone()
 {
-    SPX_THROW_HR_IF(SPXERR_ALREADY_INITIALIZED, m_audioPump.get() != nullptr);
-    // Create the microphone pump
-    auto site = SpxSiteFromThis(this);
-    m_audioPump = SpxCreateObjectWithSite<ISpxAudioPump>("CSpxInteractiveMicrophone", site);
-    SPX_DBG_TRACE_VERBOSE("[%p]CSpxHttpAudioStreamSession::InitFromMicrophone: Pump from microphone:[%p]", (void*)this, (void*)m_audioPump.get());
-    m_fromMicrophone = true;
+    auto keepAlive = SpxSharedPtrFromThis<ISpxAudioProcessor>(this);
+    auto task = CreateTask([this, keepAlive]() {
+        SPX_THROW_HR_IF(SPXERR_ALREADY_INITIALIZED, m_audioPump.get() != nullptr);
+        // Create the microphone pump
+        auto site = SpxSiteFromThis(this);
+        m_audioPump = SpxCreateObjectWithSite<ISpxAudioPump>("CSpxInteractiveMicrophone", site);
+        SPX_DBG_TRACE_VERBOSE("[%p]InitFromMicrophone: Pump from microphone:[%p]", (void*)this, (void*)m_audioPump.get());
+        m_fromMicrophone = true;
+        });
+    m_threadService->ExecuteAsync(move(task));
 }
 
 void CSpxHttpAudioStreamSession::InitFromStream(shared_ptr<ISpxAudioStream> stream)
 {
-    SPX_THROW_HR_IF(SPXERR_ALREADY_INITIALIZED, m_audioPump.get() != nullptr);
+    auto keepAlive = SpxSharedPtrFromThis<ISpxAudioProcessor>(this);
+    auto task = CreateTask([this, keepAlive, stream = stream]() {
+        SPX_THROW_HR_IF(SPXERR_ALREADY_INITIALIZED, m_audioPump.get() != nullptr);
 
-    shared_ptr<ISpxAudioPumpInit> audioPump;
-    shared_ptr<ISpxAudioStreamReader> reader;
+        shared_ptr<ISpxAudioPumpInit> audioPump;
+        shared_ptr<ISpxAudioStreamReader> reader;
 
-    // Create the stream pump
-    auto cbFormat = stream->GetFormat(nullptr, 0);
-    auto waveformat = SpxAllocWAVEFORMATEX(cbFormat);
-    stream->GetFormat(waveformat.get(), cbFormat);
+        // Create the stream pump
+        auto cbFormat = stream->GetFormat(nullptr, 0);
+        auto waveformat = SpxAllocWAVEFORMATEX(cbFormat);
+        stream->GetFormat(waveformat.get(), cbFormat);
 
-    if (waveformat->wFormatTag != WAVE_FORMAT_PCM)
-    {
-        m_codecAdapter = SpxCreateObjectWithSite<ISpxAudioStreamReader>("CSpxCodecAdapter", GetSite());
-        SPX_IFTRUE_THROW_HR(m_codecAdapter == nullptr, SPXERR_GSTREAMER_NOT_FOUND_ERROR);
-
-        reader = SpxQueryInterface<ISpxAudioStreamReader>(stream);
-
-        auto initCallbacks = SpxQueryInterface<ISpxAudioStreamReaderInitCallbacks>(m_codecAdapter);
-        initCallbacks->SetCallbacks(
-            [=](uint8_t* buffer, uint32_t size) { return reader->Read(buffer, size); },
-            [=]() { { reader->Close(); } });
-
-        initCallbacks->SetPropertyCallback2(
-            [=](PropertyId propertyId) {
-                return reader->GetProperty(propertyId);
-            });
-
-        auto adapterAsSetFormat = SpxQueryInterface<ISpxAudioStreamInitFormat>(m_codecAdapter);
-
-        auto numChannelsString = GetStringValue("OutputPCMChannelCount", "1");
-        auto numBitsPerSampleString = GetStringValue("OutputPCMNumBitsPerSample", "16");
-        auto sampleRateString = GetStringValue("OutputPCMSamplerate", "16000");
-
-        try
+        if (waveformat->wFormatTag != WAVE_FORMAT_PCM)
         {
-            waveformat->nChannels = (uint16_t)stoi(numChannelsString);
-            waveformat->wBitsPerSample = (uint16_t)stoi(numBitsPerSampleString);
-            waveformat->nSamplesPerSec = (uint32_t)stoi(sampleRateString);
+            m_codecAdapter = SpxCreateObjectWithSite<ISpxAudioStreamReader>("CSpxCodecAdapter", GetSite());
+            SPX_IFTRUE_THROW_HR(m_codecAdapter == nullptr, SPXERR_GSTREAMER_NOT_FOUND_ERROR);
+
+            reader = SpxQueryInterface<ISpxAudioStreamReader>(stream);
+
+            auto initCallbacks = SpxQueryInterface<ISpxAudioStreamReaderInitCallbacks>(m_codecAdapter);
+            initCallbacks->SetCallbacks(
+                [=](uint8_t* buffer, uint32_t size) { return reader->Read(buffer, size); },
+                [=]() { { reader->Close(); } });
+
+            initCallbacks->SetPropertyCallback2(
+                [=](PropertyId propertyId) {
+                    return reader->GetProperty(propertyId);
+                });
+
+            auto adapterAsSetFormat = SpxQueryInterface<ISpxAudioStreamInitFormat>(m_codecAdapter);
+
+            auto numChannelsString = GetStringValue("OutputPCMChannelCount", "1");
+            auto numBitsPerSampleString = GetStringValue("OutputPCMNumBitsPerSample", "16");
+            auto sampleRateString = GetStringValue("OutputPCMSamplerate", "16000");
+
+            try
+            {
+                waveformat->nChannels = (uint16_t)stoi(numChannelsString);
+                waveformat->wBitsPerSample = (uint16_t)stoi(numBitsPerSampleString);
+                waveformat->nSamplesPerSec = (uint32_t)stoi(sampleRateString);
+            }
+            catch (const exception& e)
+            {
+                SPX_DBG_TRACE_VERBOSE("Error Parsing %s", e.what());
+                SPX_DBG_TRACE_VERBOSE("Setting default output format samplerate = 16000, bitspersample = 16 and numchannels = 1");
+                waveformat->nChannels = 1;
+                waveformat->wBitsPerSample = 16;
+                waveformat->nSamplesPerSec = 16000;
+            }
+
+            adapterAsSetFormat->SetFormat(waveformat.get());
         }
-        catch (const exception& e)
+
+        audioPump = SpxCreateObjectWithSite<ISpxAudioPumpInit>("CSpxAudioPump", this);
+
+        m_audioPump = SpxQueryInterface<ISpxAudioPump>(audioPump);
+
+        // Attach the stream to the pump
+        if (m_codecAdapter == nullptr)
         {
-            SPX_DBG_TRACE_VERBOSE("Error Parsing %s", e.what());
-            SPX_DBG_TRACE_VERBOSE("Setting default output format samplerate = 16000, bitspersample = 16 and numchannels = 1");
-            waveformat->nChannels = 1;
-            waveformat->wBitsPerSample = 16;
-            waveformat->nSamplesPerSec = 16000;
+            reader = SpxQueryInterface<ISpxAudioStreamReader>(stream);
         }
-
-        adapterAsSetFormat->SetFormat(waveformat.get());
-    }
-
-    audioPump = SpxCreateObjectWithSite<ISpxAudioPumpInit>("CSpxAudioPump", this);
-
-    m_audioPump = SpxQueryInterface<ISpxAudioPump>(audioPump);
-
-    // Attach the stream to the pump
-    if (m_codecAdapter == nullptr)
-    {
-        reader = SpxQueryInterface<ISpxAudioStreamReader>(stream);
-    }
-    else
-    {
-        reader = SpxQueryInterface<ISpxAudioStreamReader>(m_codecAdapter);
-    }
-
-    audioPump->SetReader(reader);
+        else
+        {
+            reader = SpxQueryInterface<ISpxAudioStreamReader>(m_codecAdapter);
+        }
+        audioPump->SetReader(reader);
+        });
+    m_threadService->ExecuteAsync(move(task));
 }
 
 RecognitionResultPtr CSpxHttpAudioStreamSession::StartStreamingAudioAndWaitForResult(bool enroll, VoiceProfileType type, vector<string>&& profileIds)
@@ -330,6 +342,7 @@ RecognitionResultPtr CSpxHttpAudioStreamSession::ModifyVoiceProfile(bool reset, 
         auto site = SpxSiteFromThis(this);
         auto reco = SpxCreateObjectWithSite<ISpxHttpRecoEngineAdapter>("CSpxHttpRecoEngineAdapter", site);
         result = reco->ModifyVoiceProfile(reset, type, move(id));
+        SpxTermAndClear(reco);
         });
     m_threadService->ExecuteSync(move(task));
 
