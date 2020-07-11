@@ -333,6 +333,56 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 await recognizer.StopKeywordRecognitionAsync().ConfigureAwait(false);
             }
         }
+        
+        [TestMethod]
+        public async Task TestSpeechKeywordspotterComputer2PassFoundFromWavFile()
+        {
+            var tcs = new TaskCompletionSource<bool>();
+
+            var str = AudioUtterancesMap[AudioUtteranceKeys.COMPUTER_KEYWORD_WITH_SINGLE_UTTERANCE_1].FilePath.GetRootRelativePath();
+            var audioInput = AudioConfig.FromWavFileInput(str);
+
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
+            {
+                recognizer.Recognizing += (s, e) =>
+                {
+                    Console.WriteLine("Intermediate result: " + e.ToString());
+                };
+
+                recognizer.Recognized += (s, e) =>
+                {
+                    Console.WriteLine("Final result: " + e.ToString());
+
+                    if (e.Result.Reason == ResultReason.RecognizedKeyword)
+                        return; // ignore keyword events
+
+                    if (e.Result.Text.ToLowerInvariant().StartsWith(TestData.Kws.Computer2Pass.ModelKeyword))
+                    {
+                        Console.WriteLine("Final result EXPECTED: " + e.Result.Text.ToString());
+                        tcs.TrySetResult(true);
+                    }
+                    else
+                    {
+                        Console.WriteLine("Final result UNEXPECTED : " + e.Result.Text.ToString());
+                        tcs.TrySetResult(false);
+                    }
+                };
+
+                recognizer.Canceled += (s, e) =>
+                {
+                    Console.WriteLine("Canceled: " + e.ToString());
+                };
+
+                var model = KeywordRecognitionModel.FromFile(TestData.Kws.Computer2Pass.ModelFile);
+                await recognizer.StartKeywordRecognitionAsync(model).ConfigureAwait(false);
+
+                var hasCompleted = Task.WaitAny(tcs.Task, Task.Delay(60000));
+                Assert.AreEqual(0, hasCompleted, "keyword not detected within timeout");
+                Assert.IsTrue(tcs.Task.Result, "keyword not detected within timeout");
+
+                await recognizer.StopKeywordRecognitionAsync().ConfigureAwait(false);
+            }
+        }
 
         [TestMethod]
         public async Task TestSpeechKeywordspotterEventsFound()

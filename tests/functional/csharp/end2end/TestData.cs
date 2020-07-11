@@ -30,6 +30,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 public static string ModelFile => "kws/Secret/kws.table".GetRootRelativePath();
                 public static string ModelKeyword => "secret";
             }
+
+            public static class Computer2Pass
+            {
+                public static string ModelFile => "kws/Computer2Pass/kws.table".GetRootRelativePath();
+                public static string ModelKeyword => "computer";
+            }
         }
 
         public static class DgiWreckANiceBeach
