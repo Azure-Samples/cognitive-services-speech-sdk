@@ -155,8 +155,7 @@
         recognizer.recognizeOnceAsync(
           function (result) {
             startRecognizeOnceAsyncButton.disabled = false;
-            let languageKey = language.substring(0,2)
-            let translation = result.translations.get(languageKey);
+            let translation = result.translations.get(language);
             window.console.log(translation);
             phraseDiv.innerHTML += translation;
 
