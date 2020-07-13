@@ -1,7 +1,7 @@
 # Quickstart: Recognize speech in C# under Universal Windows Platform
 
 This sample demonstrates how to recognize speech with C# under the Universal Windows Platform using the Speech SDK.
-See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-csharp-uwp) on the SDK documentation page which describes how to build this sample from scratch in Visual Studio 2017.
+See the [accompanying article](https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/quickstarts/speech-to-text-from-microphone?tabs=uwp%2Cx-android%2Clinux%2Candroid%2Cwindowsinstall&pivots=programming-language-csharp) on the SDK documentation page which describes how to build this sample from scratch in Visual Studio 2017.
 
 ## Prerequisites
 

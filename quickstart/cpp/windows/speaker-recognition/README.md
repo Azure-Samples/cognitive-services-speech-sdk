@@ -1,7 +1,7 @@
 # Quickstart: Speaker Recognition using wave file in C++ for Windows
 
 In this quickstart, you'll learn how to do speaker recognition, including creating a voice profile, enrollment training and speaker verification and identification with C++ using the Speech SDK for Windows.
-See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-cpp-windows&pivots=programming-language-cpp ) on the SDK documentation page which describes how to build corresponding sample from scratch in Visual Studio 2019.
+See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-cpp-windows&pivots=programming-language-cpp) on the SDK documentation page which describes how to build corresponding sample from scratch in Visual Studio 2019.
 
 ## Prerequisites
 

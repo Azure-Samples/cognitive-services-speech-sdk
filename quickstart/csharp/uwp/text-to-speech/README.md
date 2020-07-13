@@ -1,7 +1,7 @@
 # Quickstart: Synthesize speech in C# under Universal Windows Platform
 
 This sample demonstrates how to synthesize speech with C# under the Universal Windows Platform using the Speech SDK.
-See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-text-to-speech-csharp-uwp) on the SDK documentation page which describes how to build this sample from scratch in Visual Studio 2017.
+See the [accompanying article](https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/quickstarts/text-to-speech-audio-file?tabs=ubuntu%2Cwindowsinstall&pivots=programming-language-csharp) on the SDK documentation page which describes how to build this sample from scratch in Visual Studio 2017.
 
 ## Prerequisites
 
