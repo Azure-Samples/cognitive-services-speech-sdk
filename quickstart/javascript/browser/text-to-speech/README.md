@@ -1,4 +1,4 @@
-# Quickstart: Using the Speech Service in JavaScript on a Web Browser.
+# Quickstart: Synthesize speech in JavaScript on a Web Browser.
 
 This sample shows how to use the Speech Service using the Speech SDK for JavaScript on a web browser, like Microsoft Edge, or Chrome. It illustrates how the SDK can be used to synthesize speech to speaker output.
 

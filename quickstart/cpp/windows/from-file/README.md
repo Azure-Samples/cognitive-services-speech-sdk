@@ -1,4 +1,4 @@
-# Quickstart: Recognize speech using wave file in C++ for Windows
+# Quickstart: Recognize speech from a file in C++ for Windows
 
 This sample demonstrates how to recognize speech using wave file as an input with C++ using the Speech SDK for Windows.
 See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-cpp-windows) on the SDK documentation page which describes how to build corresponding sample from scratch in Visual Studio 2017.

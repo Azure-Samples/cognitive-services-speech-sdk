@@ -1,4 +1,4 @@
-# Quickstart: Speaker Recognition, C# (.Net Framework Windows) - Speech Service
+# Quickstart: Recognize speakers in C# (.Net Framework Windows) - Speech Service
 
 In this quickstart, you'll learn how to do speaker recognition, including creating a voice profile, enrollment training and speaker verification and identification with C# under the .NET Framework (version 4.6.1 or above) using the Speech SDK for Windows.
 See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-csharp-dotnet-windows) on the SDK documentation page which describes how to build this sample from scratch in Visual Studio 2017.

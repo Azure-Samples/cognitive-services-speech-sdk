@@ -1,4 +1,4 @@
-# Quickstart: Recognize speech in C# under .NET Framework for Windows
+# Quickstart: Recognize speech from a file in C# under .NET Framework for Windows
 
 This sample demonstrates how to recognize speech with C# under the .NET Framework (version 4.6.1 or above) using the Speech SDK for Windows.
 See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-csharp-dotnet-windows) on the SDK documentation page which describes how to build this sample from scratch in Visual Studio 2017.
