@@ -1,7 +1,7 @@
 # Quickstart: Recognize speech in JavaScript on Node.js.
 
 This sample demonstrates how to recognize speech with the Speech SDK for JavaScript on Node.js.
-See the [accompanying article](https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/quickstarts/speech-to-text-from-file?tabs=linux%2Cbrowser%2Cwindowsinstall&pivots=programming-language-javascript) on the SDK documentation page which describes how to build this sample from scratch in your favourite editor.
+See the [accompanying article](https://docs.microsoft.com//azure/cognitive-services/speech-service/quickstarts/speech-to-text-from-file?tabs=linux%2Cbrowser%2Cwindowsinstall&pivots=programming-language-javascript) on the SDK documentation page which describes how to build this sample from scratch in your favourite editor.
 
 ## Prerequisites
 

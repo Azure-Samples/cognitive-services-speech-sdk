@@ -2,7 +2,7 @@
 
 This sample shows how to use the Speech Service through the Speech SDK for Python. It illustrates how the SDK can be used to synthesize speech to speaker output.
 
-See the [accompanying article](https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/quickstarts/text-to-speech?tabs=dotnet%2Clinux%2Cjre%2Cwindowsinstall&pivots=programming-language-python) on the SDK documentation page for step-by-step instructions.
+See the [accompanying article](https://docs.microsoft.com//azure/cognitive-services/speech-service/quickstarts/text-to-speech?tabs=dotnet%2Clinux%2Cjre%2Cwindowsinstall&pivots=programming-language-python) on the SDK documentation page for step-by-step instructions.
 
 ## Prerequisites
 
