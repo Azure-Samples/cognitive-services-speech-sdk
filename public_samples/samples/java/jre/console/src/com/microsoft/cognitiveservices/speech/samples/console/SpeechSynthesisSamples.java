@@ -231,7 +231,7 @@ public class SpeechSynthesisSamples {
         // The full list of supported format can be found here:
         // https://docs.microsoft.com/azure/cognitive-services/speech-service/rest-text-to-speech#audio-outputs
         config.setSpeechSynthesisOutputFormat(SpeechSynthesisOutputFormat.Audio16Khz32KBitRateMonoMp3);
-        
+
         // Creates a speech synthesizer using file as audio output.
         // Replace with your own audio file name.
         String fileName = "outputaudio.mp3";
@@ -353,7 +353,7 @@ public class SpeechSynthesisSamples {
 
         // Creates an instance of a customer class inherited from PushAudioOutputStreamCallback
         PushAudioOutputStreamSampleCallback callback = new PushAudioOutputStreamSampleCallback();
-        
+
         // Creates an audio out stream from the callback.
         PushAudioOutputStream stream = AudioOutputStream.createPushStream(callback);
 
@@ -483,12 +483,12 @@ public class SpeechSynthesisSamples {
                 if (result.getReason() == ResultReason.SynthesizingAudioCompleted) {
                     System.out.println("Speech synthesized for text [" + text + "].");
                     AudioDataStream audioDataStream = AudioDataStream.fromResult(result);
-                    
+
                     // You can save all the data in the audio data stream to a file
                     String fileName = "outputaudio.wav";
                     audioDataStream.saveToWavFileAsync(fileName).get();
                     System.out.println("Audio data for text [" + text + "] was saved to [" + fileName + "].");
-                    
+
                     // You can also read data from audio data stream and process it in memory
                     // Reset the stream position to the beginning since saving to file puts the position to end
                     audioDataStream.setPosition(0);
@@ -625,6 +625,59 @@ public class SpeechSynthesisSamples {
                     System.out.println("Speech synthesized for text [" + text + "].");
                     byte[] audioData = result.getAudioData();
                     System.out.println(audioData.length + " bytes of audio data received for text [" + text + "]");
+                }
+                else if (result.getReason() == ResultReason.Canceled) {
+                    SpeechSynthesisCancellationDetails cancellation = SpeechSynthesisCancellationDetails.fromResult(result);
+                    System.out.println("CANCELED: Reason=" + cancellation.getReason());
+
+                    if (cancellation.getReason() == CancellationReason.Error) {
+                        System.out.println("CANCELED: ErrorCode=" + cancellation.getErrorCode());
+                        System.out.println("CANCELED: ErrorDetails=" + cancellation.getErrorDetails());
+                        System.out.println("CANCELED: Did you update the subscription info?");
+                    }
+                }
+
+                result.close();
+            }
+        }
+
+        synthesizer.close();
+    }
+
+    // Speech synthesis with auto detection for source language.
+    // Note: this is a preview feature, which might be updated in future versions.
+    public static void synthesisWithSourceLanguageAutoDetectionAsync() throws InterruptedException, ExecutionException
+    {
+        // Creates an instance of a speech config with specified
+        // subscription key and service region. Replace with your own subscription key
+        // and service region (e.g., "westus").
+        SpeechConfig speechConfig = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+
+        AutoDetectSourceLanguageConfig autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig.fromOpenRange();
+
+        // Creates a speech synthesizer with auto detection for source language
+        SpeechSynthesizer synthesizer = new SpeechSynthesizer(speechConfig,
+            autoDetectSourceLanguageConfig,
+            AudioConfig.fromDefaultSpeakerOutput());
+        {
+            while (true)
+            {
+                // Receives a text from console input and synthesize it to speaker.
+                // For example, you can input "Bonjour le monde. Hello world.", then you will hear "Bonjour le monde."
+                // spoken in a French voice and "Hello world." in an English voice.
+                System.out.println("Enter some multi lingual text that you want to speak, or enter empty text to exit.");
+                System.out.print("> ");
+                String text = new Scanner(System.in).nextLine();
+                if (text.isEmpty())
+                {
+                    break;
+                }
+
+                SpeechSynthesisResult result = synthesizer.SpeakTextAsync(text).get();
+
+                // Checks result.
+                if (result.getReason() == ResultReason.SynthesizingAudioCompleted) {
+                    System.out.println("Speech synthesized to speaker for text [" + text + "]");
                 }
                 else if (result.getReason() == ResultReason.Canceled) {
                     SpeechSynthesisCancellationDetails cancellation = SpeechSynthesisCancellationDetails.fromResult(result);

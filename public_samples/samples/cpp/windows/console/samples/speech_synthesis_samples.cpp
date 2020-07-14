@@ -673,3 +673,46 @@ void SpeechSynthesisWordBoundaryEvent()
         }
     }
 }
+
+// Speech synthesis with auto detection for source language
+// Note: this is a preview feature, which might be updated in future versions.
+void SpeechSynthesisWithSourceLanguageAutoDetection()
+{
+    // Creates an instance of a speech config with specified subscription key and service region.
+    // Replace with your own subscription key and service region (e.g., "westus").
+    const auto speechConfig = SpeechConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+
+    // Currently this feature only supports open languages range
+    const auto autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig::FromOpenRange();
+
+    // Creates a speech synthesizer with auto detection for source language, using the default speaker as audio output.
+    auto synthesizer = SpeechSynthesizer::FromConfig(speechConfig, autoDetectSourceLanguageConfig);
+
+    while (true)
+    {
+        std::string frText = "Bonjour le monde.";
+        std::string enText = "Hello world.";
+        auto text = frText + " " + enText;
+        cout << "Trying to synthesize [" << text << "], you will hear [" << frText << "] spoken in a French voice and ["
+            << enText << "] in an English voice." << endl;
+        const auto result = synthesizer->SpeakTextAsync(text).get();
+
+        // Checks result.
+        if (result->Reason == ResultReason::SynthesizingAudioCompleted)
+        {
+            cout << "Speech synthesized to speaker for text [" << text << "] with auto detection for source language." << std::endl;
+        }
+        else if (result->Reason == ResultReason::Canceled)
+        {
+            auto cancellation = SpeechSynthesisCancellationDetails::FromResult(result);
+            cout << "CANCELED: Reason=" << static_cast<int>(cancellation->Reason) << std::endl;
+
+            if (cancellation->Reason == CancellationReason::Error)
+            {
+                cout << "CANCELED: ErrorCode=" << static_cast<int>(cancellation->ErrorCode) << std::endl;
+                cout << "CANCELED: ErrorDetails=[" << cancellation->ErrorDetails << "]" << std::endl;
+                cout << "CANCELED: Did you update the subscription info?" << std::endl;
+            }
+        }
+    }
+}

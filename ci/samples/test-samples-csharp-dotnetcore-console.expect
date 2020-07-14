@@ -47,7 +47,7 @@ foreach scenario [list \
         }
 
         InvalidInput {
-          send x
+          send z
           expect {
             timeout {
               send_user "### TIMEOUT waiting for Invalid input.\n"

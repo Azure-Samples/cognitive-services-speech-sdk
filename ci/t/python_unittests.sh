@@ -89,6 +89,7 @@ SCRIPT
     "import speech_synthesis_sample; import mock_input; mock_input.Mock().run_with_mock_input(speech_synthesis_sample.speech_synthesis_to_audio_data_stream)"
     "import speech_synthesis_sample; import mock_input; mock_input.Mock().run_with_mock_input(speech_synthesis_sample.speech_synthesis_events)"
     "import speech_synthesis_sample; import mock_input; mock_input.Mock().run_with_mock_input(speech_synthesis_sample.speech_synthesis_word_boundary_event)"
+    "import speech_synthesis_sample; import mock_input; mock_input.Mock().run_with_mock_input(speech_synthesis_sample.speech_synthesis_with_auto_language_detection_to_speaker)"
   )
   # sleep a bit at the end of each sample to make sure the interpreter is still alive during cleanup
   testCases=( "${testCases[@]/%/"${sleepCmd}"}" )
