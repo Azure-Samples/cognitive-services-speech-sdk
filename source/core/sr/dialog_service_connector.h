@@ -37,6 +37,7 @@ public:
         SPX_INTERFACE_MAP_ENTRY(ISpxObjectInit)
         SPX_INTERFACE_MAP_ENTRY(ISpxServiceProvider)
         SPX_INTERFACE_MAP_ENTRY(ISpxSessionFromRecognizer)
+        SPX_INTERFACE_MAP_ENTRY(ISpxConnectionFromRecognizer)
         SPX_INTERFACE_MAP_ENTRY(ISpxRecognizerEvents)
         SPX_INTERFACE_MAP_ENTRY(ISpxDialogServiceConnectorEvents)
         SPX_INTERFACE_MAP_ENTRY(ISpxDialogServiceConnector)

@@ -386,6 +386,18 @@ public class DialogServiceConnector implements Closeable {
     }
 
     private SafeHandle dialogServiceConnectorHandle = null;
+
+    /*! \endcond */
+
+    /*! \cond INTERNAL */
+    /**
+     * Returns the internal conversation translator instance
+     * @return The internal conversation translator instance
+     */
+    public SafeHandle getImpl() {
+        return dialogServiceConnectorHandle;
+    }
+
     /*! \endcond */
 
     /**

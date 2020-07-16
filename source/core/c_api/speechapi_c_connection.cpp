@@ -67,6 +67,30 @@ SPXAPI connection_from_conversation_translator(SPXCONVERSATIONTRANSLATORHANDLE c
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
+SPXAPI connection_from_dialog_service_connector(SPXRECOHANDLE dialogServiceConnectorHandle, SPXCONNECTIONHANDLE* connectionHandle)
+{
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, connectionHandle == nullptr);
+    SPX_RETURN_HR_IF(SPXERR_INVALID_HANDLE, dialogServiceConnectorHandle == SPXHANDLE_INVALID);
+
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        *connectionHandle = SPXHANDLE_INVALID;
+
+        auto recoHandleTable = CSpxSharedPtrHandleTableManager::Get<ISpxDialogServiceConnector, SPXRECOHANDLE>();
+        auto dialogServiceConnector = (*recoHandleTable)[dialogServiceConnectorHandle];
+        SPX_IFTRUE_THROW_HR(dialogServiceConnector == nullptr, SPXERR_INVALID_HANDLE);
+
+        auto recoForConnection = SpxQueryInterface<ISpxConnectionFromRecognizer>(dialogServiceConnector);
+        SPX_IFTRUE_THROW_HR(recoForConnection == nullptr, SPXERR_EXPLICIT_CONNECTION_NOT_SUPPORTED_BY_RECOGNIZER);
+        auto connection = recoForConnection->GetConnection();
+
+        auto connectionHandleTable = CSpxSharedPtrHandleTableManager::Get<ISpxConnection, SPXCONNECTIONHANDLE>();
+        SPX_IFTRUE_THROW_HR(connectionHandleTable == nullptr, SPXERR_RUNTIME_ERROR);
+        *connectionHandle = connectionHandleTable->TrackHandle(connection);
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
 SPXAPI_(bool) connection_handle_is_valid(SPXCONNECTIONHANDLE handle)
 {
     return Handle_IsValid<SPXCONNECTIONHANDLE, ISpxConnection>(handle);

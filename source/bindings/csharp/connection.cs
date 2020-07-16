@@ -8,6 +8,7 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Microsoft.CognitiveServices.Speech.Internal;
 using ConversationTranslator = Microsoft.CognitiveServices.Speech.Transcription.ConversationTranslator;
+using DialogServiceConnector = Microsoft.CognitiveServices.Speech.Dialog.DialogServiceConnector;
 using static Microsoft.CognitiveServices.Speech.Internal.SpxExceptionThrower;
 
 namespace Microsoft.CognitiveServices.Speech
@@ -53,6 +54,22 @@ namespace Microsoft.CognitiveServices.Speech
             ThrowIfNull(convTrans, "null conversation translator");
             IntPtr handle = IntPtr.Zero;
             ThrowIfFail(Internal.Connection.connection_from_conversation_translator(convTrans._nativeHandle, out handle));
+            return new Connection(handle);
+        }
+
+
+        /// <summary>
+        /// Gets the Connection instance from the specified dialog service connector, used for observing and managing
+        /// connection and disconnection from the speech service.
+        /// </summary>
+        /// <param name="dialogServiceConnector">The dialog service connector associated with the connection.</param>
+        /// <returns>The Connection instance of the dialog service connector.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303", Justification = "exceptions not localized")]
+        public static Connection FromDialogServiceConnector(DialogServiceConnector dialogServiceConnector)
+        {
+            ThrowIfNull(dialogServiceConnector, "null dialog service connector");
+            IntPtr handle = IntPtr.Zero;
+            ThrowIfFail(Internal.Connection.connection_from_dialog_service_connector(dialogServiceConnector.dialogServiceConnectorHandle, out handle));
             return new Connection(handle);
         }
 

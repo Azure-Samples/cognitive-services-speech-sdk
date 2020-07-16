@@ -17,6 +17,7 @@ import com.microsoft.cognitiveservices.speech.util.SafeHandleType;
 import com.microsoft.cognitiveservices.speech.util.Contracts;
 import com.microsoft.cognitiveservices.speech.Recognizer;
 import com.microsoft.cognitiveservices.speech.transcription.ConversationTranslator;
+import com.microsoft.cognitiveservices.speech.dialog.DialogServiceConnector;
 
 /**
  * Connection is a proxy class for managing connection to the speech service of the specified Recognizer.
@@ -42,6 +43,18 @@ public final class Connection implements Closeable
     }
 
     /**
+     * Gets the Connection instance from the specified recognizer.
+     * @param recognizer The recognizer associated with the connection.
+     * @return The Connection instance of the recognizer.
+     */
+    public static Connection fromRecognizer(Recognizer recognizer)
+    {
+        IntRef handle = new IntRef(0);
+        Contracts.throwIfFail(connectionFromRecognizer(recognizer.getImpl(), handle));
+        return new Connection(handle);
+    }
+
+    /**
      * Gets the Connection instance from the conversation translator.
      * @param conversationTranslator The conversationTranslator associated with the connection.
      * @return The Connection instance of the recognizer.
@@ -54,14 +67,15 @@ public final class Connection implements Closeable
     }
 
     /**
-     * Gets the Connection instance from the specified recognizer.
-     * @param recognizer The recognizer associated with the connection.
-     * @return The Connection instance of the recognizer.
+     * Gets the Connection instance from the dialog service connector.
+     * @param dialogServiceConnector The dialog service connector associated with the connection, used for observing
+     * and managing connection state with the speech service.
+     * @return The Connection instance of the dialog service connector.
      */
-    public static Connection fromRecognizer(Recognizer recognizer)
+    public static Connection fromDialogServiceConnector(DialogServiceConnector dialogServiceConnector)
     {
         IntRef handle = new IntRef(0);
-        Contracts.throwIfFail(connectionFromRecognizer(recognizer.getImpl(), handle));
+        Contracts.throwIfFail(connectionFromDialogServiceConnector(dialogServiceConnector.getImpl(), handle));
         return new Connection(handle);
     }
 
@@ -283,8 +297,9 @@ public final class Connection implements Closeable
         } catch (Exception e) {}
     }
 
-    private final native static long connectionFromConversationTranslator(SafeHandle convTransHandle, IntRef handle);
     private final native static long connectionFromRecognizer(SafeHandle recoHandle, IntRef handle);
+    private final native static long connectionFromConversationTranslator(SafeHandle convTransHandle, IntRef handle);
+    private final native static long connectionFromDialogServiceConnector(SafeHandle recoHandle, IntRef handle);
     private final native long openConnection(SafeHandle connectionHandle, boolean forContinuousRecognition);
     private final native long closeConnection(SafeHandle connectionHandle);
     private final native long connectionSendMessage(SafeHandle connectionHandle, String path, String payload);

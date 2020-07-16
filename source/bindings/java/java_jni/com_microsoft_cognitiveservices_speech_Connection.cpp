@@ -19,6 +19,24 @@ void DisconnectedCallback(SPXEVENTHANDLE event, void* context)
 
 /*
  * Class:     com_microsoft_cognitiveservices_speech_Connection
+ * Method:    connectionFromRecognizer
+ * Signature: (Lcom/microsoft/cognitiveservices/speech/util/SafeHandle;Lcom/microsoft/cognitiveservices/speech/util/IntRef;)J
+ */
+JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_Connection_connectionFromRecognizer
+  (JNIEnv *env, jclass cls, jobject recoHandle, jobject connectionHandle)
+{
+    SPXCONNECTIONHANDLE result = SPXHANDLE_INVALID;
+    jlong handle = GetObjectHandle(env, recoHandle);
+    SPXHR hr = connection_from_recognizer((SPXRECOHANDLE)handle, &result);
+    if (SPX_SUCCEEDED(hr))
+    {
+        SetObjectHandle(env, connectionHandle, (jlong)result);
+    }
+    return hr;
+}
+
+/*
+ * Class:     com_microsoft_cognitiveservices_speech_Connection
  * Method:    connectionFromConversationTranslator
  * Signature: (Lcom/microsoft/cognitiveservices/speech/util/SafeHandle;Lcom/microsoft/cognitiveservices/speech/util/IntRef;)J
  */
@@ -37,22 +55,21 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_Connection_c
 
 /*
  * Class:     com_microsoft_cognitiveservices_speech_Connection
- * Method:    connectionFromRecognizer
+ * Method:    connectionFromDialogServiceConnector
  * Signature: (Lcom/microsoft/cognitiveservices/speech/util/SafeHandle;Lcom/microsoft/cognitiveservices/speech/util/IntRef;)J
  */
-JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_Connection_connectionFromRecognizer
-  (JNIEnv *env, jclass cls, jobject recoHandle, jobject connectionHandle)
+JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_Connection_connectionFromDialogServiceConnector
+  (JNIEnv *env, jclass cls, jobject dialogServiceConnectorHandle, jobject connectionHandle)
 {
     SPXCONNECTIONHANDLE result = SPXHANDLE_INVALID;
-    jlong handle = GetObjectHandle(env, recoHandle);
-    SPXHR hr = connection_from_recognizer((SPXRECOHANDLE)handle, &result);
+    jlong handle = GetObjectHandle(env, dialogServiceConnectorHandle);
+    SPXHR hr = connection_from_dialog_service_connector((SPXRECOHANDLE)handle, &result);
     if (SPX_SUCCEEDED(hr))
     {
         SetObjectHandle(env, connectionHandle, (jlong)result);
     }
     return hr;
 }
-
 /*
  * Class:     com_microsoft_cognitiveservices_speech_Connection
  * Method:    openConnection

@@ -27,6 +27,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
         public int DisconnectedEventCount { get; set; }
 
+        private Connection connectorConnection;
         private TaskCompletionSource<int> taskCompletionSource;
         private TimeSpan timeout = TimeSpan.FromMinutes(6);
 
@@ -48,6 +49,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             string activityReceived = null;
             string canceled = string.Empty;
 
+            connectorConnection = Connection.FromDialogServiceConnector(dialogServiceConnector);
+            Assert.IsTrue(connectorConnection != null);
+            connectorConnection.Connected += (_, e) => this.ConnectedEventCounter(null, e);
+
+            dialogServiceConnector.SessionStarted += (_, e) => this.SessionStartedEventCounter(null, e);
+            dialogServiceConnector.SessionStopped += (_, e) => this.SessionStoppedEventCounter(null, e);
             dialogServiceConnector.ActivityReceived += (s, e) =>
             {
                 ActivityReceivedEventCounter(s, e);
@@ -67,7 +74,16 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
             await Task.WhenAny(taskCompletionSource.Task, Task.Delay(timeout));
 
-            Assert.IsTrue(SessionStoppedEventCount == 1 || ErrorEventCount == 1 || ActivityReceivedEventCount == 1);
+            Assert.IsTrue(SessionStoppedEventCount == 1 || ErrorEventCount == 1 || ActivityReceivedEventCount == 1,
+                String.Format("Expected stop, error, or activity; actual counts: {0} | {1} | {2}",
+                    this.SessionStoppedEventCount,
+                    this.ErrorEventCount,
+                    this.ActivityReceivedEventCount));
+            Assert.IsTrue(this.SessionStartedEventCount == 0 ^ this.ConnectedEventCount > 0,
+                String.Format("Expected 0 sessions or >0 connections. Actual: {0}, {1}",
+                    this.SessionStartedEventCount,
+                    this.ConnectedEventCount));
+            
             if (!string.IsNullOrEmpty(canceled))
             {
                 Assert.Fail($"Dialog interaction canceled: {canceled}");

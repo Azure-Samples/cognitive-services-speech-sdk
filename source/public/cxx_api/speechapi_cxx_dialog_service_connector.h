@@ -408,6 +408,8 @@ private:
     {
     }
 
+private:
+    friend class Microsoft::CognitiveServices::Speech::Connection;
     SPXRECOHANDLE m_handle;
     PrivatePropertyCollection m_properties;
     /*! \endcond */

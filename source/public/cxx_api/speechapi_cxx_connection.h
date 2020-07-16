@@ -66,6 +66,22 @@ public:
     }
 
     /// <summary>
+    /// Gets the Connection instance from the specified dialog service connector, used for observing and managing
+    /// connection and disconnection from the speech service.
+    /// </summary>
+    /// <param name="dialogServiceConnector">The dialog service connector associated with the connection.</param>
+    /// <returns>The Connection instance of the dialog service connector.</returns>
+    static std::shared_ptr<Connection> FromDialogServiceConnector(std::shared_ptr<Dialog::DialogServiceConnector> dialogServiceConnector)
+    {
+        SPX_IFTRUE_THROW_HR(dialogServiceConnector == nullptr, SPXERR_INVALID_ARG);
+
+        SPXCONNECTIONHANDLE handle = SPXHANDLE_INVALID;
+        SPX_THROW_ON_FAIL(::connection_from_dialog_service_connector(dialogServiceConnector->m_handle, &handle));
+
+        return std::make_shared<Connection>(handle);
+    }
+
+    /// <summary>
     /// Starts to set up connection to the service.
     /// Users can optionally call Open() to manually set up a connection in advance before starting recognition on the
     /// Recognizer associated with this Connection. After starting recognition, calling Open() might fail, depending on
