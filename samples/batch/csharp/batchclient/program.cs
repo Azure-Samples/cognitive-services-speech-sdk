@@ -37,6 +37,7 @@ namespace BatchClient
         //    new EntityReference { Self = new Uri($"https://{Region}.api.cognitive.microsoft.com/speechtotext/v3.0/models/<id of custom model>")};
         private const string DisplayName = "Simple transcription";
 
+        private static bool UseWebhooks = false;
 
         static void Main(string[] args)
         {
@@ -48,13 +49,17 @@ namespace BatchClient
             // create the client object and authenticate
             using (var client = BatchClient.CreateApiV3Client(SubscriptionKey, $"{Region}.api.cognitive.microsoft.com"))
             {
-                // uncomment next line when using web hooks
-                // await SetupWebHookAsync(client).ConfigureAwait(false);
-                
+                if (UseWebhooks)
+                {
+                    await SetupWebHookAsync(client).ConfigureAwait(false);
+                }
+
                 await TranscribeAsync(client).ConfigureAwait(false);
 
-                // uncomment next line when using web hooks
-                // await DeleteAllWebHooksAsync(client).ConfigureAwait(false);
+                if (UseWebhooks)
+                {
+                    await DeleteAllWebHooksAsync(client).ConfigureAwait(false);
+                }
             }
         }
 
@@ -148,12 +153,19 @@ namespace BatchClient
                                 // if the transcription was successful, check the results
                                 if (transcription.Status == "Succeeded")
                                 {
-                                    var paginatedfiles = await client.GetTranscriptionFilesAsync(transcription.Links.Files).ConfigureAwait(false);
+                                    if (transcription.Properties.DestinationContainerUrl == null)
+                                    {
+                                        var paginatedfiles = await client.GetTranscriptionFilesAsync(transcription.Links.Files).ConfigureAwait(false);
 
-                                    var resultFile = paginatedfiles.Values.FirstOrDefault(f => f.Kind == ArtifactKind.Transcription);
-                                    var result = await client.GetTranscriptionResultAsync(new Uri(resultFile.Links.ContentUrl)).ConfigureAwait(false);
-                                    Console.WriteLine("Transcription succeeded. Results: ");
-                                    Console.WriteLine(JsonConvert.SerializeObject(result, SpeechJsonContractResolver.WriterSettings));
+                                        var resultFile = paginatedfiles.Values.FirstOrDefault(f => f.Kind == ArtifactKind.Transcription);
+                                        var result = await client.GetTranscriptionResultAsync(new Uri(resultFile.Links.ContentUrl)).ConfigureAwait(false);
+                                        Console.WriteLine("Transcription succeeded. Results: ");
+                                        Console.WriteLine(JsonConvert.SerializeObject(result, SpeechJsonContractResolver.WriterSettings));
+                                    }
+                                    else
+                                    {
+                                        Console.WriteLine("Transcription succeeded. Find the result on the given destination container.");
+                                    }
                                 }
                                 else
                                 {

@@ -72,6 +72,31 @@ namespace BatchClient
             throw await CreateExceptionAsync(response).ConfigureAwait(false);
         }
 
+        private async Task<TResponse> PatchAsJsonAsync<TPayload, TResponse>(string path, TPayload payload)
+        {
+            string json = JsonConvert.SerializeObject(payload, SpeechJsonContractResolver.WriterSettings);
+            StringContent content = new StringContent(json);
+            content.Headers.ContentType = JsonMediaTypeFormatter.DefaultMediaType;
+
+            var response = await transientFailureRetryingPolicy
+                .ExecuteAsync(() => this.client.PatchAsync(path, content))
+                .ConfigureAwait(false);
+
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadAsAsync<TResponse>(
+                    new[]
+                    {
+                        new JsonMediaTypeFormatter
+                        {
+                            SerializerSettings = SpeechJsonContractResolver.ReaderSettings
+                        }
+                    }).ConfigureAwait(false);
+            }
+
+            throw await CreateExceptionAsync(response).ConfigureAwait(false);
+        }
+
         private async Task<TResponse> GetAsync<TResponse>(string path)
         {
             var response = await transientFailureRetryingPolicy

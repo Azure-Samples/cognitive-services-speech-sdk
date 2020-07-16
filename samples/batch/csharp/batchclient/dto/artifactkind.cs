@@ -7,7 +7,7 @@ namespace BatchClient
 {
     public enum ArtifactKind
     {
-        DatasetReport,
+        DatasetReport = 1,
         Audio,
         LanguageData,
         PronunciationData,
