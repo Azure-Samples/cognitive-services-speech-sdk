@@ -1,7 +1,6 @@
 # Quickstart: Recognize speech in C# under .NET Core (Windows, macOS, or Linux)
 
 This sample demonstrates how to recognize speech with C# under .NET Core 2.0 (Windows, macOS, or Linux) using the Speech SDK.
-See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-cpp-dotnetcore-windows) on the SDK documentation page which describes how to build this sample from scratch in Visual Studio 2017.
 
 > **Note:**
 > on Linux, we currently only support x64 with the Ubuntu 16.04, Ubuntu 18.04, Debian 9, RHEL 8, or CentOS 8 distribution.
@@ -73,5 +72,4 @@ dotnet helloworld/bin/Debug/netcoreapp2.0/helloworld.dll
 
 ## References
 
-* [Quickstart article on the SDK documentation site (Windows)](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-cpp-dotnetcore-windows)
 * [Speech SDK API reference for C#](https://aka.ms/csspeech/csharpref)
