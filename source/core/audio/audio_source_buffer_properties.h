@@ -9,6 +9,7 @@
 
 #pragma once
 #include "spxcore_common.h"
+#include "service_helpers.h"
 #include "blocking_read_write_ring_buffer.h"
 
 namespace Microsoft {
@@ -19,7 +20,8 @@ namespace Impl {
 class CSpxAudioSourceBufferProperties :
     public ISpxObjectWithSiteInitImpl<ISpxAudioSourceBufferData>,
     public ISpxGenericSite,
-    public ISpxAudioSourceBufferProperties
+    public ISpxAudioSourceBufferProperties,
+    public ISpxServiceProvider
 {
 public:
 
@@ -31,7 +33,12 @@ public:
         SPX_INTERFACE_MAP_ENTRY(ISpxObjectWithSite)
         SPX_INTERFACE_MAP_ENTRY(ISpxGenericSite)
         SPX_INTERFACE_MAP_ENTRY(ISpxAudioSourceBufferProperties)
+        SPX_INTERFACE_MAP_ENTRY(ISpxServiceProvider)
     SPX_INTERFACE_MAP_END()
+
+    SPX_SERVICE_MAP_BEGIN()
+        SPX_SERVICE_MAP_ENTRY_SITE(GetSite())
+    SPX_SERVICE_MAP_END()
 
     // --- ISpxObjectInit (overrides)
     void Term() override;
@@ -40,10 +47,10 @@ public:
     void SetBufferProperty(const char* name, const char* value) override;
 
     PropertyValue_Type GetBufferProperty(const char* name, const char* defaultValue = nullptr) override;
-    PropertyValue_Type GetBufferProperty(const char* name, PropertyOffset_Type offset, int direction = -1, PropertyOffset_Type* foundAtOffset = nullptr) override;
+    PropertyValue_Type GetBufferProperty(const char* name, OffsetType offset, int direction = -1, OffsetType* foundAtOffset = nullptr) override;
 
-    std::list<FoundPropertyData_Type> GetBufferProperties(PropertyOffset_Type offsetBegin, PropertyOffset_Type offsetEnd) override;
-    std::list<FoundPropertyData_Type> GetBufferProperties(const char* name, PropertyOffset_Type offsetBegin, PropertyOffset_Type offsetEnd) override;
+    std::list<FoundPropertyData_Type> GetBufferProperties(OffsetType offsetBegin, OffsetType offsetEnd) override;
+    std::list<FoundPropertyData_Type> GetBufferProperties(const char* name, OffsetType offsetBegin, OffsetType offsetEnd) override;
 
 private:
 
@@ -59,10 +66,10 @@ private:
     void InitPropertyValuesBuffer();
     void TermPropertyValuesBuffer();
 
-    size_t GetPropertyDataBufferSize();
-    size_t GetDefaultPropertyDataBufferSize();
-    size_t GetPropertyValueBufferSize();
-    size_t GetDefaultPropertyValueBufferSize();
+    SizeType GetPropertyDataBufferSize();
+    SizeType GetDefaultPropertyDataBufferSize() const;
+    SizeType GetPropertyValueBufferSize();
+    SizeType GetDefaultPropertyValueBufferSize() const;
 
     uint64_t OffsetFromSite();
 
@@ -75,7 +82,7 @@ private:
     void WritePropertyData(uint64_t nameId, uint64_t offset, uint64_t valueId);
     void ReadPropertyData(uint64_t dataPos, uint64_t* nameId, uint64_t* offset, uint64_t* valueId);
 
-    PropertyValue_Type FindPropertyDataValue(uint64_t nameId, uint64_t offset, int direction = -1, PropertyOffset_Type* foundAtOffset = nullptr);
+    PropertyValue_Type FindPropertyDataValue(uint64_t nameId, uint64_t offset, int direction = -1, OffsetType* foundAtOffset = nullptr);
 
     std::list<FoundPropertyData_Type> FindPropertyData(uint64_t nameId, uint64_t offsetBegin, uint64_t offsetEnd);
 
@@ -85,7 +92,7 @@ private:
 
 private:
 
-    static const size_t itemSize = sizeof(uint64_t) * 3;
+    static constexpr size_t itemSize = sizeof(uint64_t) * 3;
 
     std::map<std::string, uint64_t> m_nameIds;
     std::map<uint64_t, std::string> m_nameFromId;

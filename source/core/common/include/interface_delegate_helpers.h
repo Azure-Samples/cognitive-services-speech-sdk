@@ -18,7 +18,6 @@ namespace CognitiveServices {
 namespace Speech {
 namespace Impl {
 
-
 template <class T>
 class CSpxDelegateToSharedPtrHelper
 {
@@ -30,7 +29,7 @@ public:
     bool IsZombie() const { return m_zombie; }
     void Zombie(bool zombie = true) { m_zombie = zombie; }
 
-    bool IsClear() { return !m_ptr; }
+    bool IsClear() const { return !m_ptr; }
     void Clear() { m_ptr = nullptr; }
 
     bool IsReady() { return !IsZombie() && !IsClear(); }
@@ -39,6 +38,7 @@ protected:
 
     using Ptr_Type = std::shared_ptr<T>;
     using Delegate_Type = std::shared_ptr<T>;
+    using Const_Delegate_Type = std::shared_ptr<T>;
 
     void SetDelegate(Delegate_Type ptr)
     {
@@ -52,6 +52,11 @@ protected:
             InitDelegatePtr(m_ptr);
         }
 
+        return m_zombie ? nullptr : m_ptr;
+    }
+
+    Const_Delegate_Type GetConstDelegate() const
+    {
         return m_zombie ? nullptr : m_ptr;
     }
 
@@ -84,6 +89,7 @@ protected:
 
     using Ptr_Type = std::weak_ptr<T>;
     using Delegate_Type = std::shared_ptr<T>;
+    using Const_Delegate_Type = std::shared_ptr<T>;
 
     void SetDelegate(Delegate_Type ptr)
     {
@@ -97,6 +103,13 @@ protected:
             InitDelegatePtr(m_ptr);
         }
 
+        return (m_zombie || m_ptr == nullptr || m_ptr.expired())
+            ? nullptr
+            : m_ptr.lock();
+    }
+
+    Const_Delegate_Type GetConstDelegate() const
+    {
         return (m_zombie || m_ptr == nullptr || m_ptr.expired())
             ? nullptr
             : m_ptr.lock();
@@ -130,5 +143,32 @@ private:
         return SpxQueryInterface<T>(site);
     }
 };
+
+#define SPX_DELEGATE_ACCESSORS(Name, Helper, I)                                             \
+    using Delegate_Type = std::shared_ptr< I >;                                     \
+    using Const_Delegate_Type = std::shared_ptr<I>;                                 \
+    inline Delegate_Type Get ## Name ## Delegate () { return Helper::GetDelegate(); }       \
+    inline Const_Delegate_Type Get ## Name ## ConstDelegate () const { return Helper::GetConstDelegate(); } \
+    inline void Set ## Name ## Delegate (Delegate_Type ptr) { Helper::SetDelegate(ptr); }   \
+    inline bool Is ## Name ## DelegateZombie() { return Helper::IsZombie(); }               \
+    inline void Zombie ## Name ## Delegate(bool zombie = true) { Helper::Zombie(zombie); }  \
+    inline bool Is ## Name ## DelegateClear() { return Helper::IsClear(); }                 \
+    inline void Clear ## Name ## Delegate() { Helper::Clear(); }                            \
+    inline bool Is ## Name ## DelegateReady() { return Helper::IsReady(); }
+
+template<typename T, typename F, typename... Ts>
+void InvokeOnDelegate(const std::shared_ptr<T>& ptr, F f, Ts&&... args)
+{
+    SPX_IFTRUE(ptr, ((ptr.get())->*f)(std::forward<Ts>(args)...));
+}
+
+template<typename T, typename F, typename... Ts, typename U>
+auto InvokeOnDelegateR(const std::shared_ptr<T>& ptr, F f, U default_value, Ts&&... args) -> decltype(((std::declval<T*>())->*f)(std::forward<Ts>(args)...))
+{
+    using return_type = decltype(((std::declval<T*>())->*f)(std::forward<Ts>(args)...));
+    /* When we have c++17 we could collapse these 2 functions */
+    SPX_IFTRUE_RETURN_X(ptr, ((ptr.get())->*f)(std::forward<Ts>(args)...));
+    return static_cast<return_type>(default_value);
+}
 
 } } } } // Microsoft::CognitiveServices::Speech::Impl

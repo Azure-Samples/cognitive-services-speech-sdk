@@ -263,13 +263,16 @@ public:
     virtual void AddService(const char* serviceName, std::shared_ptr<ISpxInterfaceBase> service) = 0;
 };
 
-template <class I, class ...Is>
-class ISpxNotifyMeSP : public ISpxInterfaceBaseFor<ISpxNotifyMeSP<I, Is...>>
+template <typename... Ts>
+class ISpxNotifyMe : public ISpxInterfaceBaseFor<ISpxNotifyMe<Ts...>>
 {
 public:
 
-    virtual void NotifyMe(const std::shared_ptr<I>&, const std::shared_ptr<Is>& ...) = 0;
+    virtual void NotifyMe(Ts...) = 0;
 };
+
+template <class I, class ...Is>
+using ISpxNotifyMeSP = ISpxNotifyMe<const std::shared_ptr<I>&, const std::shared_ptr<Is>&...>;
 
 #pragma pack (push, 1)
 struct SPXWAVEFORMAT
@@ -293,6 +296,45 @@ struct SPXWAVEFORMATEX
     uint16_t cbSize;            /* The count in bytes of the size of extra information (after cbSize) */
 };
 #pragma pack (pop)
+
+template<typename T>
+struct BufferContainer
+{
+public:
+    BufferContainer(std::size_t size) : m_data{ SpxAllocUniqueBuffer<T>(size) }, m_size{ size }
+    {}
+
+    T* get() const noexcept
+    {
+        return m_data.get();
+    }
+
+    std::size_t size() const noexcept
+    {
+        return m_size;
+    }
+
+    T& operator*() const
+    {
+        return *m_data;
+    }
+
+    T* operator->() const noexcept
+    {
+        return m_data.get();
+    }
+
+    explicit operator T* ()
+    {
+        return m_data.get();
+    }
+private:
+    buffer_unique_ptr_t<T> m_data;
+    std::size_t m_size;
+};
+
+using SpxWaveFormatEx = BufferContainer<SPXWAVEFORMATEX>;
+
 using SpxWAVEFORMATEX_Type = std::shared_ptr<SPXWAVEFORMATEX>;
 inline SpxWAVEFORMATEX_Type SpxAllocWAVEFORMATEX(size_t sizeInBytes)
 {
@@ -613,7 +655,7 @@ public:
 class ISpxAudioPump : public ISpxInterfaceBaseFor<ISpxAudioPump>
 {
 public:
-    virtual uint16_t GetFormat(SPXWAVEFORMATEX* pformat, uint16_t cbFormat) = 0;
+    virtual uint16_t GetFormat(SPXWAVEFORMATEX* pformat, uint16_t cbFormat) const = 0;
     virtual void SetFormat(const SPXWAVEFORMATEX* pformat, uint16_t cbFormat) = 0;
 
     virtual void StartPump(std::shared_ptr<ISpxAudioProcessor> pISpxAudioProcessor) = 0;
@@ -621,7 +663,7 @@ public:
     virtual void StopPump() = 0;
 
     enum class State { NoInput, Idle, Paused, Processing };
-    virtual State GetState() = 0;
+    virtual State GetState() const = 0;
 
     virtual std::string GetPropertyValue(const std::string& key) const = 0;
 };
@@ -1133,8 +1175,9 @@ class ISpxAudioSource : public ISpxInterfaceBaseFor<ISpxAudioSource>
 {
 public:
 
-    enum State { Idle = 0, Started = 1, DataAvailable = 2, EndOfStream = 3 };
+    enum class State { Idle = 0, Started = 1, DataAvailable = 2, EndOfStream = 3 };
     virtual State GetState() const = 0;
+    virtual SpxWaveFormatEx GetFormat() const = 0;
 };
 
 class ISpxAudioSourceInit : public ISpxInterfaceBaseFor<ISpxAudioSourceInit>
@@ -1172,29 +1215,32 @@ public:
 class ISpxAudioSourceBufferProperties : public ISpxInterfaceBaseFor<ISpxAudioSourceBufferProperties>
 {
 public:
+    using OffsetType = uint64_t;
+    using SizeType = size_t;
 
-    using PropertyOffset_Type = uint64_t;
     using PropertyName_Type = std::shared_ptr<const char>;
     using PropertyValue_Type = std::shared_ptr<const char>;
-    using FoundPropertyData_Type = std::tuple<PropertyOffset_Type, PropertyName_Type, PropertyValue_Type>;
+    using FoundPropertyData_Type = std::tuple<OffsetType, PropertyName_Type, PropertyValue_Type>;
 
     virtual void SetBufferProperty(const char* name, const char* value) = 0;
 
     virtual PropertyValue_Type GetBufferProperty(const char* name, const char* defaultValue = nullptr) = 0;
-    virtual PropertyValue_Type GetBufferProperty(const char* name, PropertyOffset_Type offset, int direction = -1, PropertyOffset_Type * foundAtOffset = nullptr) = 0;
+    virtual PropertyValue_Type GetBufferProperty(const char* name, OffsetType offset, int direction = -1, OffsetType* foundAtOffset = nullptr) = 0;
 
-    virtual std::list<FoundPropertyData_Type> GetBufferProperties(const char* name, PropertyOffset_Type begin, PropertyOffset_Type end) = 0;
-    virtual std::list<FoundPropertyData_Type> GetBufferProperties(PropertyOffset_Type begin, PropertyOffset_Type end) = 0;
+    virtual std::list<FoundPropertyData_Type> GetBufferProperties(const char* name, OffsetType begin, OffsetType end) = 0;
+    virtual std::list<FoundPropertyData_Type> GetBufferProperties(OffsetType begin, OffsetType end) = 0;
 };
 
-#define ISpxAudioProcessorNotifyMe ISpxNotifyMeSP<ISpxAudioProcessor>
+using ISpxAudioProcessorNotifyMe = ISpxNotifyMeSP<ISpxAudioProcessor>;
 
-// #define ISpxAudioSourceNotifyMe ISpxNotifyMeSP<ISpxAudioSource, ISpxAudioSourceBufferData>
-class ISpxAudioSourceNotifyMe : public ISpxInterfaceBaseFor<ISpxAudioSourceNotifyMe>
+using ISpxAudioSourceNotifyMe = ISpxNotifyMeSP<ISpxAudioSource, ISpxAudioSourceBufferData>;
+
+class ISpxAudioSourceControl : public ISpxInterfaceBaseFor<ISpxAudioSourceControl>
 {
 public:
 
-    virtual void NotifyMe(const std::shared_ptr<ISpxAudioSource>& source, const std::shared_ptr<ISpxAudioSourceBufferData>& data) = 0;
+    virtual void StartAudio(std::shared_ptr<ISpxAudioSourceNotifyMe> target) = 0;
+    virtual void StopAudio() = 0;
 };
 
 class ISpxSessionFromRecognizer : public ISpxInterfaceBaseFor<ISpxSessionFromRecognizer>
@@ -1771,6 +1817,15 @@ public:
 
     // Cancels all tasks.
     virtual void CancelAllTasks() = 0;
+};
+
+
+class ISpxAudioSessionShim: public ISpxInterfaceBaseFor<ISpxAudioSessionShim>
+{
+public:
+    virtual void StartAudio() = 0;
+    virtual void StopAudio() = 0;
+    virtual SpxWaveFormatEx GetFormat() = 0;
 };
 
 class ISpxRetrievable: public ISpxInterfaceBaseFor<ISpxRetrievable>

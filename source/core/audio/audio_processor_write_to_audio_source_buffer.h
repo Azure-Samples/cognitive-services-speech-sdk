@@ -11,6 +11,7 @@
 #include "spxcore_common.h"
 #include "audio_processor_simple_impl.h"
 #include "interface_helpers.h"
+#include "service_helpers.h"
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -18,8 +19,10 @@ namespace Speech {
 namespace Impl {
 
 class CSpxAudioProcessorWriteToAudioSourceBuffer :
+    public ISpxGenericSite,
     public ISpxObjectWithSiteInitImpl<ISpxGenericSite>,
     public ISpxSetErrorInfo,
+    public ISpxServiceProvider,
     public ISpxAudioProcessorSimpleImpl
 {
 protected:
@@ -32,11 +35,17 @@ public:
     virtual ~CSpxAudioProcessorWriteToAudioSourceBuffer();
 
     SPX_INTERFACE_MAP_BEGIN()
+        SPX_INTERFACE_MAP_ENTRY(ISpxGenericSite)
         SPX_INTERFACE_MAP_ENTRY(ISpxObjectWithSite)
         SPX_INTERFACE_MAP_ENTRY(ISpxObjectInit)
         SPX_INTERFACE_MAP_ENTRY(ISpxAudioProcessor)
         SPX_INTERFACE_MAP_ENTRY(ISpxSetErrorInfo)
+        SPX_INTERFACE_MAP_ENTRY(ISpxServiceProvider)
     SPX_INTERFACE_MAP_END()
+
+    SPX_SERVICE_MAP_BEGIN()
+        SPX_SERVICE_MAP_ENTRY_SITE(GetSite())
+    SPX_SERVICE_MAP_END()
 
     // --- ISpxObjectInit (overrides)
     void Term() override;
@@ -54,10 +63,13 @@ private:
 
     DISABLE_COPY_AND_MOVE(CSpxAudioProcessorWriteToAudioSourceBuffer);
 
-    void InitFromSite(bool init);
+    void InitFromSite();
+    void Clean();
 
-    void InitNotifyTargetFromSite(bool init);
-    void InitBufferDataAndPropertiesFromSite(bool init);
+    void InitNotifyTargetFromSite();
+    void CleanNotifyTarget();
+    void InitBufferDataAndPropertiesFromSite();
+    void CleanBufferDataAndProperties();
 
     void SetProperty(PropertyId id, const std::string& value);
 

@@ -39,6 +39,7 @@
 #include "speech_translation_config.h"
 #include "auto_detect_source_lang_config.h"
 #include "source_lang_config.h"
+#include "audio_session_shim.h"
 #include "output_reco_adapter.h"
 
 namespace Microsoft {
@@ -82,6 +83,7 @@ SPX_EXTERN_C void* SRLib_CreateModuleObject(const char* className, const char* i
     SPX_FACTORY_MAP_ENTRY(CSpxSpeechTranslationConfig, ISpxSpeechConfig);
     SPX_FACTORY_MAP_ENTRY(CSpxAutoDetectSourceLangConfig, ISpxAutoDetectSourceLangConfig);
     SPX_FACTORY_MAP_ENTRY(CSpxSourceLanguageConfig, ISpxSourceLanguageConfig);
+    SPX_FACTORY_MAP_ENTRY(CSpxAudioSessionShim, ISpxAudioSessionShim);
     SPX_FACTORY_MAP_ENTRY(CSpxOutputRecoEngineAdapter, ISpxRecoEngineAdapter)
     SPX_FACTORY_MAP_END();
 }

@@ -161,4 +161,10 @@ uint64_t CSpxAudioSourceBufferData::GetAudioSourceBufferDataInitPos()
     return GetOffset();
 }
 
+void CSpxAudioSourceBufferData::InitDelegatePtr(std::shared_ptr<ISpxAudioSourceBufferProperties>& ptr)
+{
+    auto site = ISpxInterfaceBase::QueryInterface<ISpxGenericSite>();
+    ptr = SpxCreateObjectWithSite<ISpxAudioSourceBufferProperties>("CSpxAudioSourceBufferProperties", site);
+}
+
 } } } } // Microsoft::CognitiveServices::Speech::Impl

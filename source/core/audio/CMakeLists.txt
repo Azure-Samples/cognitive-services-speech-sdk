@@ -40,6 +40,10 @@ set(HEADERS_PRIVATE
     "${SRC_DIR}/wav_file_writer.h"
     "${SRC_DIR}/default_speaker.h"
     "${SRC_DIR}/null_audio_output.h"
+    "${SRC_DIR}/audio_source_wrapper.h"
+    "${SRC_DIR}/microphone_audio_source_adapter.h"
+    "${SRC_DIR}/file_audio_source_adapter.h"
+    "${SRC_DIR}/stream_audio_source_adapter.h"
     )
 
 set(SOURCES
@@ -68,6 +72,10 @@ set(SOURCES
     "${SRC_DIR}/wav_file_writer.cpp"
     "${SRC_DIR}/default_speaker.cpp"
     "${SRC_DIR}/null_audio_output.cpp"
+    "${SRC_DIR}/audio_source_wrapper.cpp"
+    "${SRC_DIR}/microphone_audio_source_adapter.cpp"
+    "${SRC_DIR}/file_audio_source_adapter.cpp"
+    "${SRC_DIR}/stream_audio_source_adapter.cpp"
     )
 
 set(AUDIO_LIBS common)

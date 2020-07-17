@@ -46,6 +46,11 @@ namespace Impl {
     {                                                                                   \
         SPX_DBG_TRACE_SERVICE_MAP_BEGIN();
 
+#define SPX_SERVICE_MAP_BEGIN_NAMED(x)                                                  \
+    std::shared_ptr<ISpxInterfaceBase> x(const char* serviceName)                       \
+    {                                                                                   \
+        SPX_DBG_TRACE_SERVICE_MAP_BEGIN();
+
 #define SPX_SERVICE_MAP_ENTRY(x)                                                        \
         if (PAL::stricmp(SpxTypeName(x), serviceName) == 0)                             \
         {                                                                               \
@@ -120,13 +125,26 @@ std::shared_ptr<I> SpxQueryService(std::shared_ptr<T> serviceProvider)
 }
 
 template <typename I, typename T, typename F>
-inline void InvokeOnServiceIfAvailable(std::shared_ptr<T> serviceProvider, F fn)
+void InvokeOnServiceIfAvailable(std::shared_ptr<T> serviceProvider, F&& fn)
 {
     auto ptr = SpxQueryService<I>(serviceProvider);
     if (ptr)
     {
         fn(*ptr);
     }
+}
+
+template<typename I, typename T, typename F>
+std::enable_if_t<
+    std::is_same<
+        std::shared_ptr<ISpxServiceProvider>,
+        decltype(std::declval<T>()->template QueryInterface<ISpxServiceProvider>())
+    >::value,
+void> InvokeOnService(T serviceProvider, F&& fn)
+{
+    auto ptr = serviceProvider->template QueryInterface<ISpxServiceProvider>();
+    SPX_DBG_ASSERT(ptr != nullptr);
+    InvokeOnServiceIfAvailable<I>(ptr, std::forward<F>(fn));
 }
 
 } } } } // Microsoft::CognitiveServices::Speech::Impl

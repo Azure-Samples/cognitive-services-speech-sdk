@@ -44,10 +44,10 @@ public:
     SPX_INTERFACE_MAP_END()
 
     // ISpxAudioPump interface
-    virtual uint16_t GetFormat(SPXWAVEFORMATEX* format, uint16_t size) override;
+    virtual uint16_t GetFormat(SPXWAVEFORMATEX* format, uint16_t size) const override;
     virtual void StartPump(SinkType processor) override;
     virtual void StopPump() override;
-    virtual State GetState() override;
+    virtual State GetState() const override;
     virtual void SetFormat(const SPXWAVEFORMATEX* format, uint16_t size) override
     {
         UNUSED(format);
@@ -98,7 +98,7 @@ protected:
     SPXWAVEFORMATEX m_format;
     AUDIO_SYS_HANDLE m_audioHandle;
     SinkType m_sink;
-    std::mutex m_mutex;
+    mutable std::mutex m_mutex;
     std::condition_variable m_cv;
     const int m_waitMsStartPumpRequestTimeout = 5000;
     const int m_waitMsStopPumpRequestTimeout = 5000;

@@ -17,7 +17,7 @@ namespace Impl {
 
 
 template <class I>
-std::shared_ptr<I> SpxCreateObjectWithSite(const char* className, ISpxGenericSite* site)
+inline std::shared_ptr<I> SpxCreateObjectWithSite(const char* className, ISpxGenericSite* site)
 {
     // convert the argument to a shared pointer to the base site interface
     auto sharedSitePtr = site->shared_from_this();
@@ -27,7 +27,7 @@ std::shared_ptr<I> SpxCreateObjectWithSite(const char* className, ISpxGenericSit
 }
 
 template <class I>
-std::shared_ptr<I> SpxCreateObjectWithSite(const char* className, std::shared_ptr<ISpxGenericSite> site)
+inline std::shared_ptr<I> SpxCreateObjectWithSite(const char* className, std::shared_ptr<ISpxGenericSite> site)
 {
     // create the object
 
@@ -55,6 +55,13 @@ std::shared_ptr<I> SpxCreateObjectWithSite(const char* className, std::shared_pt
     }
 
     return ptr;
+}
+
+template <class I>
+inline std::shared_ptr<I> SpxCreateObjectWithSite(const char* className, ISpxInterfaceBase* site)
+{
+    auto genericSite = site->QueryInterface<ISpxGenericSite>();
+    return SpxCreateObjectWithSite<I>(className, genericSite);
 }
 
 template <class I>

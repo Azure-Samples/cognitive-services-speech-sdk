@@ -28,6 +28,10 @@
 #include "audio_source_buffer_properties.h"
 #include "blocking_read_write_ring_buffer.h"
 #include "read_write_ring_buffer.h"
+#include "audio_source_wrapper.h"
+#include "microphone_audio_source_adapter.h"
+#include "file_audio_source_adapter.h"
+#include "stream_audio_source_adapter.h"
 #include "internal_audio_codec_adapter.h"
 
 namespace Microsoft {
@@ -40,6 +44,7 @@ SPX_EXTERN_C void* AudioLib_CreateModuleObject(const char* className, const char
 {
     SPX_FACTORY_MAP_BEGIN();
     SPX_FACTORY_MAP_ENTRY(CSpxAudioPump, ISpxAudioPumpInit);
+    SPX_FACTORY_MAP_ENTRY(CSpxAudioPump, ISpxAudioPump);
     SPX_FACTORY_MAP_ENTRY(CSpxMicrophonePump, ISpxAudioPump);
     SPX_FACTORY_MAP_ENTRY(CSpxAudioConfig, ISpxAudioConfig);
     SPX_FACTORY_MAP_ENTRY(CSpxPushAudioInputStream, ISpxAudioStreamInitFormat);
@@ -60,6 +65,10 @@ SPX_EXTERN_C void* AudioLib_CreateModuleObject(const char* className, const char
     SPX_FACTORY_MAP_ENTRY(CSpxAudioSourceBufferData, ISpxAudioSourceBufferData);
     SPX_FACTORY_MAP_ENTRY(CSpxAudioSourceBufferProperties, ISpxAudioSourceBufferProperties);
     SPX_FACTORY_MAP_ENTRY(CSpxAudioProcessorWriteToAudioSourceBuffer, ISpxAudioProcessor);
+    SPX_FACTORY_MAP_ENTRY(CSpxAudioSourceWrapper, ISpxAudioSourceInit);
+    SPX_FACTORY_MAP_ENTRY(CSpxMicrophoneAudioSourceAdapter, ISpxAudioSourceInit);
+    SPX_FACTORY_MAP_ENTRY(CSpxFileAudioSourceAdapter, ISpxAudioSourceInit);
+    SPX_FACTORY_MAP_ENTRY(CSpxStreamAudioSourceAdapter, ISpxAudioSourceInit);
     SPX_FACTORY_MAP_ENTRY(CSpxInternalAudioCodecAdapter, ISpxInternalAudioCodecAdapter);
     SPX_FACTORY_MAP_END();
 }

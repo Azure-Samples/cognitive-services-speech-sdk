@@ -38,8 +38,15 @@ void CSpxAudioProcessorWriteToAudioSourceBuffer::Term()
 void CSpxAudioProcessorWriteToAudioSourceBuffer::SetFormat(const SPXWAVEFORMATEX* format)
 {
     AudioProcessor_Base::SetFormat(format);
-    InitFromSite(format != nullptr);
+    if (format != nullptr)
+    {
+        InitFromSite();
+    }
     NotifyTarget();
+    if (format == nullptr)
+    {
+        Clean();
+    }
 }
 
 void CSpxAudioProcessorWriteToAudioSourceBuffer::ProcessAudio(const DataChunkPtr& audioChunk)
@@ -55,37 +62,48 @@ void CSpxAudioProcessorWriteToAudioSourceBuffer::ProcessAudio(const DataChunkPtr
 
 void CSpxAudioProcessorWriteToAudioSourceBuffer::SetError(const std::string&)
 {
-    InitFromSite(false);
     NotifyTarget();
+    Clean();
 }
 
-void CSpxAudioProcessorWriteToAudioSourceBuffer::InitFromSite(bool init)
+void CSpxAudioProcessorWriteToAudioSourceBuffer::InitFromSite()
 {
-    if (!init && m_bufferData != nullptr)
+    InitNotifyTargetFromSite();
+    InitBufferDataAndPropertiesFromSite();
+}
+
+void CSpxAudioProcessorWriteToAudioSourceBuffer::Clean()
+{
+    if (m_bufferData != nullptr)
     {
         m_bufferData->Write(nullptr, 0);
     }
-
-    InitNotifyTargetFromSite(init);
-    InitBufferDataAndPropertiesFromSite(init);
+    CleanNotifyTarget();
+    CleanBufferDataAndProperties();
 }
 
-void CSpxAudioProcessorWriteToAudioSourceBuffer::InitNotifyTargetFromSite(bool init)
+void CSpxAudioProcessorWriteToAudioSourceBuffer::InitNotifyTargetFromSite()
 {
-    m_notifyTarget = init ? SpxQueryService<ISpxAudioProcessorNotifyMe>(GetSite()) : nullptr;
-    m_notifySource = init ? SpxSharedPtrFromThis<ISpxAudioProcessor>(this) : nullptr;
-
-    SPX_IFFALSE(init, SPX_DBG_ASSERT(m_notifyTarget == nullptr));
-    SPX_IFFALSE(init, SPX_DBG_ASSERT(m_notifySource == nullptr));
+    m_notifyTarget = SpxQueryService<ISpxAudioProcessorNotifyMe>(GetSite());
+    m_notifySource = SpxSharedPtrFromThis<ISpxAudioProcessor>(this);
 }
 
-void CSpxAudioProcessorWriteToAudioSourceBuffer::InitBufferDataAndPropertiesFromSite(bool init)
+void CSpxAudioProcessorWriteToAudioSourceBuffer::CleanNotifyTarget()
 {
-    m_bufferData = init ? SpxQueryService<ISpxAudioSourceBufferDataWriter>(GetSite(), "AudioSourceBufferData") : nullptr;
-    m_bufferProperties = init ? SpxQueryService<ISpxAudioSourceBufferProperties>(GetSite(), "AudioSourceBufferProperties") : nullptr;
+    m_notifyTarget = nullptr;
+    m_notifySource = nullptr;
+}
 
-    SPX_IFFALSE(init, SPX_DBG_ASSERT(m_bufferData == nullptr));
-    SPX_IFFALSE(init, SPX_DBG_ASSERT(m_bufferProperties == nullptr));
+void CSpxAudioProcessorWriteToAudioSourceBuffer::InitBufferDataAndPropertiesFromSite()
+{
+    m_bufferData = SpxQueryService<ISpxAudioSourceBufferDataWriter>(GetSite(), "AudioSourceBufferData");
+    m_bufferProperties = SpxQueryService<ISpxAudioSourceBufferProperties>(GetSite(), "AudioSourceBufferProperties");
+}
+
+void CSpxAudioProcessorWriteToAudioSourceBuffer::CleanBufferDataAndProperties()
+{
+    m_bufferData = nullptr;
+    m_bufferProperties = nullptr;
 }
 
 void CSpxAudioProcessorWriteToAudioSourceBuffer::SetProperty(PropertyId id, const std::string& value)
@@ -100,7 +118,7 @@ void CSpxAudioProcessorWriteToAudioSourceBuffer::NotifyTarget()
     // TODO: Who needs to catch this info?
     if (m_notifyTarget != nullptr)
     {
-        m_notifyTarget->NotifyMe(m_notifySource);
+        m_notifyTarget->NotifyMe(m_format != nullptr ? m_notifySource : nullptr);
     }
 }
 

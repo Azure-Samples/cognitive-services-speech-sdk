@@ -40,14 +40,14 @@ public:
 
     // --- ISpxAudioPump
 
-    uint16_t GetFormat(SPXWAVEFORMATEX* pformat, uint16_t cbFormat) override;
+    uint16_t GetFormat(SPXWAVEFORMATEX* pformat, uint16_t cbFormat) const override;
     void SetFormat(const SPXWAVEFORMATEX* pformat, uint16_t cbFormat) override;
 
     void StartPump(std::shared_ptr<ISpxAudioProcessor> pISpxAudioProcessor) override;
     void PausePump() override;
     void StopPump() override;
 
-    State GetState() override;
+    State GetState() const override;
 
     virtual std::string GetPropertyValue(const std::string& key) const override;
 
@@ -64,7 +64,7 @@ private:
     void WaitForPumpStart(std::unique_lock<std::mutex>& lock);
     void WaitForPumpIdle(std::unique_lock<std::mutex>& lock);
 
-    std::mutex m_mutex;
+    mutable std::mutex m_mutex;
     std::condition_variable m_cv;
 
     std::shared_ptr<ISpxAudioStreamReader> m_reader;

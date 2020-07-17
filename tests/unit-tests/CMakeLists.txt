@@ -16,6 +16,8 @@ include_directories("${CARBON_EXTERNAL}/json")
 
 set (HEADERS_PRIVATE
     "${SRC_DIR}/sequence_generator_audio_stream_reader.h"
+    "${SRC_DIR}/unit_test_utils.h"
+    "${SRC_DIR}/mocks.h"
     )
 
 set(SOURCES
@@ -24,12 +26,15 @@ set(SOURCES
     "${SRC_DIR}/sequence_generator_audio_stream_reader.cpp"
     "${SRC_DIR}/read_write_ring_buffer_test_case.cpp"
     "${SRC_DIR}/string_utils_test.cpp"
+    "${SRC_DIR}/audio_processor_write_to_audio_source_buffer_test.cpp"
+    "${SRC_DIR}/audio_source_adapter_test.cpp"
     )
 
 source_group("Source Files" FILES ${SOURCES})
 source_group("Header Files" FILES ${TEST_HEADERS})
+source_group("Header Files (Private)" FILES ${HEADERS_PRIVATE})
 
-add_executable(${PROJECT_NAME} ${SOURCES} ${TEST_HEADERS})
+add_executable(${PROJECT_NAME} ${SOURCES} ${TEST_HEADERS} ${HEADERS_PRIVATE})
 
 target_link_libraries(${PROJECT_NAME} usp audio factory common)
 

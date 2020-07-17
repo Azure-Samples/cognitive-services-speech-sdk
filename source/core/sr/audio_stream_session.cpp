@@ -119,26 +119,22 @@ void CSpxAudioStreamSession::Term()
     // Let's check to see if we're still processing audio ...
     // We can be here in some extreme cases where the StartPump did not complete yet so we are waiting for that case.
 
-    // The pump start was called in both of these states so we force the issue and stop it regardless if the transition to processing was complete
     if (ChangeState(SessionState::WaitForPumpSetFormatStart, SessionState::StoppingPump)
         || ChangeState(SessionState::ProcessingAudio, SessionState::StoppingPump))
     {
         // We're terminating, and we were still processing audio ... So ... Let's shut down the pump
         SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::Term: Now StoppingPump ...", (void*)this);
-        if (m_audioPump)
+
+        if (InvokeMemberIfNotNull(m_audioShim, &ISpxAudioSessionShim::StopAudio))
         {
-            SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::Term: StopPump[%p]", (void*)this, (void*)m_audioPump.get());
-            m_audioPump->StopPump();
+            SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::Term: StopPump[%p]", (void*)this, (void*)m_audioShim.get());
         }
 
-        if (m_codecAdapter)
-        {
-            m_codecAdapter->Close();
-        }
+        InvokeMemberIfNotNull(m_codecAdapter, &ISpxAudioStreamReader::Close);
     }
     else
     {
-        SPX_DBG_TRACE_WARNING("[%p]CSpxAudioStreamSession::Term: **NOT CALLED** StopPump[%p] - state: %d", (void*)this, (void*)m_audioPump.get(), (int)m_sessionState);
+        SPX_DBG_TRACE_WARNING("[%p]CSpxAudioStreamSession::Term: **NOT CALLED** StopPump[%p] - state: %d", (void*)this, (void*)m_audioShim.get(), (int)m_sessionState);
     }
 
     // Stopping all threads.
@@ -151,7 +147,7 @@ void CSpxAudioStreamSession::Term()
         m_recognizers.clear();
     }
 
-    SpxTermAndClear(m_audioPump);
+    SpxTermAndClear(m_audioShim);
     SpxTermAndClear(m_kwsAdapter);
     SpxTermAndClear(m_recoAdapter);
     SpxTermAndClear(m_luAdapter);
@@ -213,18 +209,15 @@ packaged_task<void()> CSpxAudioStreamSession::CreateTask(function<void()> func, 
     }
 }
 
-void CSpxAudioStreamSession::InitFromFile(const wchar_t* pszFileName)
+void CSpxAudioStreamSession::InitFromFile(const wchar_t* filename)
 {
-    SPX_THROW_HR_IF(SPXERR_ALREADY_INITIALIZED, m_audioPump.get() != nullptr);
+    SPX_THROW_HR_IF(SPXERR_ALREADY_INITIALIZED, m_audioShim != nullptr);
     SPX_DBG_ASSERT(IsKind(RecognitionKind::Idle) && IsState(SessionState::Idle));
     SPX_DBG_TRACE_VERBOSE("%s: Now Idle ...", __FUNCTION__);
 
-    // Create the wav file pump
-    auto audioFilePump = SpxCreateObjectWithSite<ISpxAudioFile>("CSpxWavFilePump", this);
-    m_audioPump = SpxQueryInterface<ISpxAudioPump>(audioFilePump);
+    m_audioShim = SpxCreateObjectWithSite<ISpxAudioSessionShim>("CSpxAudioSessionShim", this);
 
-    // Open the WAV file
-    audioFilePump->Open(pszFileName);
+    QueryAndInvokeMember<ISpxAudioSourceInit>(m_audioShim, &ISpxAudioSourceInit::InitFromFile, filename);
 
     SetStringValue(GetPropertyName(PropertyId::AudioConfig_AudioSource), g_audioSourceFile);
     SetAudioConfigurationInProperties();
@@ -235,14 +228,16 @@ void CSpxAudioStreamSession::InitFromFile(const wchar_t* pszFileName)
 
 void CSpxAudioStreamSession::InitFromMicrophone()
 {
-    SPX_THROW_HR_IF(SPXERR_ALREADY_INITIALIZED, m_audioPump.get() != nullptr);
+    SPX_THROW_HR_IF(SPXERR_ALREADY_INITIALIZED, m_audioShim != nullptr);
     SPX_DBG_ASSERT(IsKind(RecognitionKind::Idle) && IsState(SessionState::Idle));
     SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::InitFromMicrophone: Now Idle", (void*)this);
 
     // Create the microphone pump
     auto site = SpxSiteFromThis(this);
-    m_audioPump = SpxCreateObjectWithSite<ISpxAudioPump>("CSpxInteractiveMicrophone", site);
-    SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::InitFromMicrophone: Pump from microphone:[%p]", (void*)this, (void*)m_audioPump.get());
+    m_audioShim = SpxCreateObjectWithSite<ISpxAudioSessionShim>("CSpxAudioSessionShim", this);
+    SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::InitFromMicrophone: Pump from microphone:[%p]", (void*)this, (void*)m_audioShim.get());
+
+    QueryAndInvokeMember<ISpxAudioSourceInit>(m_audioShim, &ISpxAudioSourceInit::InitFromMicrophone);
 
     SetStringValue(GetPropertyName(PropertyId::AudioConfig_AudioSource), g_audioSourceMicrophone);
     SetAudioConfigurationInProperties();
@@ -253,23 +248,28 @@ void CSpxAudioStreamSession::InitFromMicrophone()
 
 void CSpxAudioStreamSession::InitFromStream(std::shared_ptr<ISpxAudioStream> stream)
 {
-    SPX_THROW_HR_IF(SPXERR_ALREADY_INITIALIZED, m_audioPump.get() != nullptr);
+    SPX_THROW_HR_IF(SPXERR_ALREADY_INITIALIZED, m_audioShim != nullptr);
     SPX_DBG_ASSERT(IsKind(RecognitionKind::Idle) && IsState(SessionState::Idle));
     SPX_DBG_TRACE_VERBOSE("%s: Now Idle ...", __FUNCTION__);
-    std::shared_ptr<ISpxAudioPumpInit> audioPump;
-    std::shared_ptr<ISpxAudioStreamReader> reader;
 
     // Create the stream pump
-    auto cbFormat = stream->GetFormat(nullptr, 0);
-    auto waveformat = SpxAllocWAVEFORMATEX(cbFormat);
-    stream->GetFormat(waveformat.get(), cbFormat);
+    auto site = SpxSiteFromThis(this);
+    m_audioShim = SpxCreateObjectWithSite<ISpxAudioSessionShim>("CSpxAudioSessionShim", this);
+    /* TODO: We could change the Stream interface to return SpxWaveFormatEx */
+    auto waveFormat = [](auto& stream)
+    {
+        auto size = stream->GetFormat(nullptr, 0);
+        auto waveFormat = SpxAllocWAVEFORMATEX(size);
+        stream->GetFormat(waveFormat.get(), size);
+        return waveFormat;
+    }(stream);
 
-    if (waveformat->wFormatTag != WAVE_FORMAT_PCM)
+    if (waveFormat->wFormatTag != WAVE_FORMAT_PCM)
     {
         m_codecAdapter = SpxCreateObjectWithSite<ISpxAudioStreamReader>("CSpxCodecAdapter", GetSite());
         SPX_IFTRUE_THROW_HR(m_codecAdapter == nullptr, SPXERR_GSTREAMER_NOT_FOUND_ERROR);
 
-        reader = SpxQueryInterface<ISpxAudioStreamReader>(stream);
+        auto reader = SpxQueryInterface<ISpxAudioStreamReader>(stream);
 
         auto initCallbacks = SpxQueryInterface<ISpxAudioStreamReaderInitCallbacks>(m_codecAdapter);
         initCallbacks->SetCallbacks(
@@ -283,43 +283,40 @@ void CSpxAudioStreamSession::InitFromStream(std::shared_ptr<ISpxAudioStream> str
 
         auto adapterAsSetFormat = SpxQueryInterface<ISpxAudioStreamInitFormat>(m_codecAdapter);
 
-        string numChannelsString = GetStringValue("OutputPCMChannelCount", "1");
-        string numBitsPerSampleString = GetStringValue("OutputPCMNumBitsPerSample", "16");
-        string sampleRateString = GetStringValue("OutputPCMSamplerate", "16000");
+        auto numChannelsString = GetStringValue("OutputPCMChannelCount", "1");
+        auto numBitsPerSampleString = GetStringValue("OutputPCMNumBitsPerSample", "16");
+        auto sampleRateString = GetStringValue("OutputPCMSamplerate", "16000");
 
         try
         {
-            waveformat->nChannels = (uint16_t)std::stoi(numChannelsString);
-            waveformat->wBitsPerSample = (uint16_t)std::stoi(numBitsPerSampleString);
-            waveformat->nSamplesPerSec = (uint32_t)std::stoi(sampleRateString);
+            waveFormat->nChannels = static_cast<uint16_t>(std::stoi(numChannelsString) & 0xFFFF);
+            waveFormat->wBitsPerSample = static_cast<uint16_t>(std::stoi(numBitsPerSampleString) & 0xFFFF);
+            waveFormat->nSamplesPerSec = static_cast<uint16_t>(std::stoi(sampleRateString) & 0xFFFF);
         }
         catch (const std::exception& e)
         {
             SPX_DBG_TRACE_VERBOSE("Error Parsing %s", e.what());
             SPX_DBG_TRACE_VERBOSE("Setting default output format samplerate = 16000, bitspersample = 16 and numchannels = 1");
-            waveformat->nChannels = 1;
-            waveformat->wBitsPerSample = 16;
-            waveformat->nSamplesPerSec = 16000;
+            waveFormat->nChannels = 1;
+            waveFormat->wBitsPerSample = 16;
+            waveFormat->nSamplesPerSec = 16000;
         }
 
-        adapterAsSetFormat->SetFormat(waveformat.get());
+        adapterAsSetFormat->SetFormat(waveFormat.get());
     }
 
-    audioPump = SpxCreateObjectWithSite<ISpxAudioPumpInit>("CSpxAudioPump", this);
-
-    m_audioPump = SpxQueryInterface<ISpxAudioPump>(audioPump);
+    /* Select which stream to use (use codec if available) */
+    auto streamToUse = [&]()
+    {
+        if (m_codecAdapter)
+        {
+            return SpxQueryInterface<ISpxAudioStream>(m_codecAdapter);
+        }
+        return stream;
+    }();
 
     // Attach the stream to the pump
-    if (m_codecAdapter == nullptr)
-    {
-        reader = SpxQueryInterface<ISpxAudioStreamReader>(stream);
-    }
-    else
-    {
-        reader = SpxQueryInterface<ISpxAudioStreamReader>(m_codecAdapter);
-    }
-
-    audioPump->SetReader(reader);
+    QueryAndInvokeMember<ISpxAudioSourceInit>(m_audioShim, &ISpxAudioSourceInit::InitFromStream, streamToUse);
 
     SetStringValue(GetPropertyName(PropertyId::AudioConfig_AudioSource), g_audioSourceStream);
     SetAudioConfigurationInProperties();
@@ -348,26 +345,21 @@ void CSpxAudioStreamSession::SetUSPRetriesParams()
 
 void CSpxAudioStreamSession::SetAudioConfigurationInProperties()
 {
-    auto cbFormat = m_audioPump->GetFormat(nullptr, 0);
-    auto waveformat = SpxAllocWAVEFORMATEX(cbFormat);
-    m_audioPump->GetFormat(waveformat.get(), cbFormat);
+    auto waveFormat = m_audioShim->GetFormat();
 
     // Make sure channel count is consistent if it has been set.
     auto channelCountInProperty = GetStringValue(GetPropertyName(PropertyId::AudioConfig_NumberOfChannelsForCapture), "");
     if (channelCountInProperty.empty())
     {
-        SetStringValue(GetPropertyName(PropertyId::AudioConfig_NumberOfChannelsForCapture), to_string(waveformat->nChannels).c_str());
+        SetStringValue(GetPropertyName(PropertyId::AudioConfig_NumberOfChannelsForCapture), to_string(waveFormat->nChannels).c_str());
     }
     else
     {
-        SPX_THROW_HR_IF(SPXERR_RUNTIME_ERROR, std::stoi(channelCountInProperty) != waveformat->nChannels);
+        SPX_THROW_HR_IF(SPXERR_RUNTIME_ERROR, std::stoi(channelCountInProperty) != waveFormat->nChannels);
     }
 
-    SetStringValue(GetPropertyName(PropertyId::AudioConfig_SampleRateForCapture), to_string(waveformat->nSamplesPerSec).c_str());
-    SetStringValue(GetPropertyName(PropertyId::AudioConfig_BitsPerSampleForCapture), to_string(waveformat->wBitsPerSample).c_str());
-
-    // copy input audio device name retrieved from system
-    SetStringValue("SPEECH-MicrophoneNiceName", m_audioPump->GetPropertyValue("SPEECH-MicrophoneNiceName").c_str());
+    SetStringValue(GetPropertyName(PropertyId::AudioConfig_SampleRateForCapture), to_string(waveFormat->nSamplesPerSec).c_str());
+    SetStringValue(GetPropertyName(PropertyId::AudioConfig_BitsPerSampleForCapture), to_string(waveFormat->wBitsPerSample).c_str());
 }
 
 void CSpxAudioStreamSession::WriteTracingEvent()
@@ -1055,16 +1047,9 @@ void CSpxAudioStreamSession::StopRecognizing(RecognitionKind stopKind)
         m_kwsModel.reset();
 
         // And we'll stop the pump
-        auto audioPump = m_audioPump;
-        SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::StopRecognizing: Now StoppingPump[%p] ...", (void*)this, (void*)audioPump.get());
-        if (audioPump)
-        {
-            audioPump->StopPump();
-        }
-        if (m_codecAdapter)
-        {
-            m_codecAdapter->Close();
-        }
+        SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::StopRecognizing: Now StoppingPump[%p] ...", (void*)this, (void*)m_audioShim.get());
+        InvokeMemberIfNotNull(m_audioShim, &ISpxAudioSessionShim::StopAudio);
+        InvokeMemberIfNotNull(m_codecAdapter, &ISpxAudioStreamReader::Close);
 
     }
     else if (stopKind == RecognitionKind::Keyword && !IsKind(RecognitionKind::Keyword))
@@ -1093,21 +1078,13 @@ void CSpxAudioStreamSession::StopRecognizing(RecognitionKind stopKind)
         // So ... Let's stop the pump
         SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::StopRecognizing: We've been asked to stop whatever it is we're doing, while we're actively processing audio ...", (void*)this);
 
-        auto audioPump = m_audioPump;
-        SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::StopRecognizing: Now StoppingPump[%p] ...", (void*)this, (void*)audioPump.get());
-        if (audioPump)
-        {
-            audioPump->StopPump();
-        }
-        else
+        auto audioShim = m_audioShim;
+        SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::StopRecognizing: Now StoppingPump[%p] ...", (void*)this, (void*)audioShim.get());
+        if(!InvokeMemberIfNotNull(m_audioShim, &ISpxAudioSessionShim::StopAudio))
         {
             SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::StopRecognizing: Pump has already been released", (void*)this);
         }
-        if (m_codecAdapter)
-        {
-            m_codecAdapter->Close();
-        }
-
+        InvokeMemberIfNotNull(m_codecAdapter, &ISpxAudioStreamReader::Close);
     }
     else if (IsState(SessionState::WaitForAdapterCompletedSetFormatStop))
     {
@@ -2067,7 +2044,7 @@ void CSpxAudioStreamSession::CheckError(const string& error)
 void CSpxAudioStreamSession::Error(ISpxRecoEngineAdapter* adapter, ErrorPayload_Type payload)
 {
     // We will reset the retry counter if we are in the new phrase and we get the error.
-    if (m_audioBuffer != nullptr && static_cast<uint64_t>(m_audioBuffer->GetAbsoluteOffset()) > m_lastErrorGlobalOffset)
+    if ((m_audioBuffer != nullptr) && (static_cast<uint64_t>(m_audioBuffer->GetAbsoluteOffset()) > m_lastErrorGlobalOffset))
     {
         m_retriesDone = 0;
     }
@@ -2551,19 +2528,17 @@ void CSpxAudioStreamSession::HotSwapToKwsSingleShotWhilePaused(std::shared_ptr<I
 
 void CSpxAudioStreamSession::Ensure16kHzSampleRate()
 {
-    SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::Ensure16kHzSampleRate:  Pump: %p", (void*)this, (void*)m_audioPump.get());
+    SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::Ensure16kHzSampleRate:  Pump: %p", (void*)this, (void*)m_audioShim.get());
 
-    if (m_audioPump)
+    if (m_audioShim)
     {
-        auto cbFormat = m_audioPump->GetFormat(nullptr, 0);
-        auto waveformat = SpxAllocWAVEFORMATEX(cbFormat);
-        m_audioPump->GetFormat(waveformat.get(), cbFormat);
+        auto waveFormat = m_audioShim->GetFormat();
 
         // we only support 16kHz sampling rate for Keyword spot for now.
-        if (waveformat->nSamplesPerSec != SAMPLES_PER_SECOND)
+        if (waveFormat->nSamplesPerSec != SAMPLES_PER_SECOND)
         {
             SPX_TRACE_ERROR("going to throw wrong sampling rate runtime_error");
-            ThrowRuntimeError("Sampling rate '" + std::to_string(waveformat->nSamplesPerSec) + "' is not supported. 16kHz is the only sampling rate that is supported.");
+            ThrowRuntimeError("Sampling rate '" + std::to_string(waveFormat->nSamplesPerSec) + "' is not supported. 16kHz is the only sampling rate that is supported.");
         }
     }
 }
@@ -2571,7 +2546,7 @@ void CSpxAudioStreamSession::Ensure16kHzSampleRate()
 void CSpxAudioStreamSession::StartAudioPump(RecognitionKind startKind, std::shared_ptr<ISpxKwsModel> model)
 {
     SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
-    SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::StartAudioPump:  RecognitionKind %d | m_audioPump [%p]", (void*)this, (int)startKind, (void*)m_audioPump.get());
+    SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::StartAudioPump:  RecognitionKind %d | m_audioPump [%p]", (void*)this, (int)startKind, (void*)m_audioShim.get());
     SPX_DBG_ASSERT(IsState(SessionState::WaitForPumpSetFormatStart));
 
     // Tell everyone we're starting...
@@ -2591,22 +2566,19 @@ void CSpxAudioStreamSession::StartAudioPump(RecognitionKind startKind, std::shar
         }
     }
 
-    if (!m_audioPump)
+    if (!m_audioShim)
     {
         // The session was terminated, exiting.
         SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::StartAudioPump: Audio pump was shutdown, exiting...", (void*)this);
         return;
     }
 
-    auto cbFormat = m_audioPump->GetFormat(nullptr, 0);
-    auto waveformat = SpxAllocWAVEFORMATEX(cbFormat);
-    m_audioPump->GetFormat(waveformat.get(), cbFormat);
-
     if (!m_audioBuffer)
     {
-        SetThrottleVariables(waveformat.get());
+        auto format = m_audioShim->GetFormat();
+        SetThrottleVariables(format.get());
 
-        m_audioBuffer = std::make_shared<PcmAudioBuffer>(*waveformat);
+        m_audioBuffer = std::make_shared<PcmAudioBuffer>(*format);
     }
     m_audioBuffer->NewTurn();
     m_currentTurnGlobalOffset = m_audioBuffer->GetAbsoluteOffset();
@@ -2647,13 +2619,10 @@ void CSpxAudioStreamSession::StartAudioPump(RecognitionKind startKind, std::shar
     auto ptr = (ISpxAudioProcessor*)this;
     auto pISpxAudioProcessor = ptr->shared_from_this();
 
-    auto audioPump = m_audioPump;
-    SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::StartAudioPump: Starting pump[%p]...", (void*)this, (void*)audioPump.get());
+    // auto audioPump = m_audioPump;
+    SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::StartAudioPump: Starting pump[%p]...", (void*)this, (void*)m_audioShim.get());
 
-    if (audioPump)
-    {
-        audioPump->StartPump(pISpxAudioProcessor);
-    }
+    InvokeMemberIfNotNull(m_audioShim, &ISpxAudioSessionShim::StartAudio);
     // The call to StartPump (immediately above) will initiate calls from the pump to this::SetFormat() and then this::ProcessAudio()...
 }
 
@@ -2664,7 +2633,7 @@ void CSpxAudioStreamSession::HotSwapAdaptersWhilePaused(RecognitionKind startKin
     SPX_DBG_ASSERT(IsKind(startKind) && IsState(SessionState::HotSwapPaused));
 
     auto oldAudioProcessor = m_audioProcessor;
-    if (!m_audioPump)
+    if (!m_audioShim)
     {
         // The session was terminated, exiting.
         SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::HotSwapAdaptersWhilePaused: Audio pump was shutdown, exiting...", (void*)this);
@@ -2672,9 +2641,7 @@ void CSpxAudioStreamSession::HotSwapAdaptersWhilePaused(RecognitionKind startKin
     }
 
     // Get the format in which the pump is currently sending audio data to the Session
-    auto cbFormat = m_audioPump->GetFormat(nullptr, 0);
-    auto waveformat = SpxAllocWAVEFORMATEX(cbFormat);
-    m_audioPump->GetFormat(waveformat.get(), cbFormat);
+    auto waveformat = m_audioShim->GetFormat();
 
     auto keywordOnly = PAL::ToBool(GetStringValue(g_keyword_KeywordOnly, PAL::BoolToString(false)));
 

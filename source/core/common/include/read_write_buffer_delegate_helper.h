@@ -22,40 +22,40 @@ class CSpxReadWriteBufferDelegateHelper : public DelegateToHelperT
 public:
 
     using Base_Type = DelegateToHelperT;
-    using Delegate_Type = std::shared_ptr<ISpxReadWriteBuffer>;                        
-    inline Delegate_Type GetReadWriteBufferDelegate () 
-    { 
-        return Base_Type::GetDelegate(); 
-    }       
+    using Delegate_Type = std::shared_ptr<ISpxReadWriteBuffer>;
+    inline Delegate_Type GetReadWriteBufferDelegate ()
+    {
+        return Base_Type::GetDelegate();
+    }
 
-    inline void SetReadWriteBufferDelegate (Delegate_Type ptr) 
-    { 
-        Base_Type::SetDelegate(ptr); 
-    }   
+    inline void SetReadWriteBufferDelegate (Delegate_Type ptr)
+    {
+        Base_Type::SetDelegate(ptr);
+    }
 
-    inline bool IsReadWriteBufferDelegateZombie() 
-    { 
-        return Base_Type::IsZombie(); 
-    }   
+    inline bool IsReadWriteBufferDelegateZombie()
+    {
+        return Base_Type::IsZombie();
+    }
 
-    inline void ZombieReadWriteBufferDelegate(bool zombie = true) 
-    { 
-        Base_Type::Zombie(zombie); 
-    }  
+    inline void ZombieReadWriteBufferDelegate(bool zombie = true)
+    {
+        Base_Type::Zombie(zombie);
+    }
 
-    inline bool IsReadWriteBufferDelegateClear() 
-    { 
-        return Base_Type::IsClear(); 
-    }                 
+    inline bool IsReadWriteBufferDelegateClear()
+    {
+        return Base_Type::IsClear();
+    }
 
-    inline void ClearReadWriteBufferDelegate() 
-    { 
-        Base_Type::Clear(); 
-    }   
+    inline void ClearReadWriteBufferDelegate()
+    {
+        Base_Type::Clear();
+    }
 
-    inline bool IsReadWriteBufferDelegateReady() 
-    { 
-        return Base_Type::IsReady(); 
+    inline bool IsReadWriteBufferDelegateReady()
+    {
+        return Base_Type::IsReady();
     }
 
     size_t DelegateGetSize()

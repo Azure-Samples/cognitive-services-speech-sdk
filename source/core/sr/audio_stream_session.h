@@ -50,6 +50,7 @@ public:
     virtual ~CSpxAudioStreamSession();
 
     SPX_INTERFACE_MAP_BEGIN()
+        SPX_INTERFACE_MAP_ENTRY(ISpxInterfaceBase)
         SPX_INTERFACE_MAP_ENTRY(ISpxSession)
         SPX_INTERFACE_MAP_ENTRY(ISpxObjectWithSite)
         SPX_INTERFACE_MAP_ENTRY(ISpxObjectInit)
@@ -361,7 +362,7 @@ private:
 
     SpxWAVEFORMATEX_Type m_format;
     std::mutex m_formatMutex;
-    std::shared_ptr<ISpxAudioPump> m_audioPump;
+    std::shared_ptr<ISpxAudioSessionShim> m_audioShim;
 
     std::shared_ptr<ISpxKwsEngineAdapter> m_kwsAdapter;
     std::shared_ptr<ISpxKwsModel> m_kwsModel;

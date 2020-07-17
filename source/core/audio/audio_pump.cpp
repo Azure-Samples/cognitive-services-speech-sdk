@@ -52,9 +52,9 @@ void CSpxAudioPump::SetReader(std::shared_ptr<ISpxAudioStreamReader> reader)
     m_state = reader.get() != nullptr ? State::Idle : State::NoInput;
 }
 
-uint16_t CSpxAudioPump::GetFormat(SPXWAVEFORMATEX* pformat, uint16_t cbFormat)
+uint16_t CSpxAudioPump::GetFormat(SPXWAVEFORMATEX* pformat, uint16_t cbFormat) const
 {
-    SPX_IFTRUE_THROW_HR(m_reader.get() == nullptr, SPXERR_UNINITIALIZED);
+    SPX_IFTRUE_THROW_HR(!m_reader, SPXERR_UNINITIALIZED);
     return m_reader->GetFormat(pformat, cbFormat);
 }
 
@@ -122,7 +122,7 @@ void CSpxAudioPump::StopPump()
     }
 }
 
-ISpxAudioPump::State CSpxAudioPump::GetState()
+ISpxAudioPump::State CSpxAudioPump::GetState() const
 {
     std::unique_lock<std::mutex> lock(m_mutex);
     return m_state;

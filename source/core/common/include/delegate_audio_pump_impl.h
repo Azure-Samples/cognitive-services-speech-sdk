@@ -14,19 +14,18 @@ namespace CognitiveServices {
 namespace Speech {
 namespace Impl {
 
-
 class ISpxDelegateAudioPumpImpl : public ISpxAudioPump
 {
     // --- ISpxAudioPump
 
-    uint16_t GetFormat(SPXWAVEFORMATEX* pformat, uint16_t cbFormat) override { return m_delegateToAudioPump->GetFormat(pformat, cbFormat); }
+    uint16_t GetFormat(SPXWAVEFORMATEX* pformat, uint16_t cbFormat) const override { return m_delegateToAudioPump->GetFormat(pformat, cbFormat); }
     void SetFormat(const SPXWAVEFORMATEX* pformat, uint16_t cbFormat) override { m_delegateToAudioPump->SetFormat(pformat, cbFormat); }
 
     void StartPump(std::shared_ptr<ISpxAudioProcessor> pISpxAudioProcessor) override { m_delegateToAudioPump->StartPump(pISpxAudioProcessor); }
     void PausePump() override { m_delegateToAudioPump->PausePump(); }
     void StopPump() override { m_delegateToAudioPump->StopPump(); }
 
-    State GetState() override { return m_delegateToAudioPump->GetState(); }
+    State GetState() const override { return m_delegateToAudioPump->GetState(); }
 
     virtual std::string GetPropertyValue(const std::string& key) const override {
         return m_delegateToAudioPump->GetPropertyValue(key);

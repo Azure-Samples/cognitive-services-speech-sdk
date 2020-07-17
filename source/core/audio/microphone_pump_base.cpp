@@ -96,7 +96,7 @@ void CSpxMicrophonePumpBase::SetOptionsAfterCreateAudioHandle()
 {
 }
 
-uint16_t CSpxMicrophonePumpBase::GetFormat(SPXWAVEFORMATEX* format, uint16_t size)
+uint16_t CSpxMicrophonePumpBase::GetFormat(SPXWAVEFORMATEX* format, uint16_t size) const
 {
     auto totalSize = uint16_t(sizeof(SPXWAVEFORMATEX) + m_format.cbSize);
     if (format != nullptr)
@@ -161,7 +161,7 @@ void CSpxMicrophonePumpBase::StopPump()
     // not release the sink may result in assert in m_resetRecoAdapter == nullptr in ~CSpxAudioStreamSession
 }
 
-ISpxAudioPump::State CSpxMicrophonePumpBase::GetState()
+ISpxAudioPump::State CSpxMicrophonePumpBase::GetState() const
 {
     SPX_DBG_TRACE_SCOPE("MicrophonePumpBase::GetState() ...", "MicrophonePumpBase::GetState ... Done");
     std::unique_lock<std::mutex> lock(m_mutex);
