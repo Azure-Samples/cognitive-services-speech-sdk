@@ -32,16 +32,16 @@ namespace BatchClient
                 .ExecuteAsync(() => this.client.DeleteAsync(location.PathAndQuery));
         }
 
-        public Task<Dataset> CreateDatasetAsync(Dataset webHook)
+        public Task<Dataset> CreateDatasetAsync(Dataset dataset)
         {
-            if (webHook == null)
+            if (dataset == null)
             {
-                throw new ArgumentNullException(nameof(webHook));
+                throw new ArgumentNullException(nameof(dataset));
             }
 
             var path = $"{this.speechToTextBasePath}datasets/";
 
-            return this.PostAsJsonAsync<Dataset, Dataset>(path, webHook);
+            return this.PostAsJsonAsync<Dataset, Dataset>(path, dataset);
         }
 
         public Task<Dataset> GetDatasetAsync(Uri location)
@@ -54,16 +54,16 @@ namespace BatchClient
             return this.GetAsync<Dataset>(location.PathAndQuery);
         }
 
-        public Task<Dataset> UpdateDatasetAsync(DatasetUpdate webHookUpdate)
+        public Task<Dataset> UpdateDatasetAsync(DatasetUpdate datasetUpdate)
         {
-            if (webHookUpdate == null)
+            if (datasetUpdate == null)
             {
-                throw new ArgumentNullException(nameof(webHookUpdate));
+                throw new ArgumentNullException(nameof(datasetUpdate));
             }
 
             var path = $"{this.speechToTextBasePath}datasets/";
 
-            return this.PatchAsJsonAsync<DatasetUpdate, Dataset>(path, webHookUpdate);
+            return this.PatchAsJsonAsync<DatasetUpdate, Dataset>(path, datasetUpdate);
         }
 
         public Task<PaginatedFiles> GetDatasetFilesAsync(Uri location)

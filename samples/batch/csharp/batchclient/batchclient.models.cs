@@ -38,16 +38,16 @@ namespace BatchClient
                 .ExecuteAsync(() => this.client.DeleteAsync(location.PathAndQuery));
         }
 
-        public Task<Model> CreateModelAsync(Model Model)
+        public Task<Model> CreateModelAsync(Model model)
         {
-            if (Model == null)
+            if (model == null)
             {
-                throw new ArgumentNullException(nameof(Model));
+                throw new ArgumentNullException(nameof(model));
             }
 
             var path = $"{this.speechToTextBasePath}models/";
 
-            return this.PostAsJsonAsync<Model, Model>(path, Model);
+            return this.PostAsJsonAsync<Model, Model>(path, model);
         }
 
         public Task<Model> GetBaseModelAsync(Uri location)
@@ -70,16 +70,16 @@ namespace BatchClient
             return this.GetAsync<Model>(location.PathAndQuery);
         }
 
-        public Task<Model> UpdateModelAsync(ModelUpdate ModelUpdate)
+        public Task<Model> UpdateModelAsync(ModelUpdate modelUpdate)
         {
-            if (ModelUpdate == null)
+            if (modelUpdate == null)
             {
-                throw new ArgumentNullException(nameof(ModelUpdate));
+                throw new ArgumentNullException(nameof(modelUpdate));
             }
 
             var path = $"{this.speechToTextBasePath}models/";
 
-            return this.PatchAsJsonAsync<ModelUpdate, Model>(path, ModelUpdate);
+            return this.PatchAsJsonAsync<ModelUpdate, Model>(path, modelUpdate);
         }
 
         public Task<Model> CopyModelAsync(Uri copyUri, ModelCopy modelCopy)
