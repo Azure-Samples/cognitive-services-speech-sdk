@@ -30,9 +30,7 @@ SPXHR connection_from_object(SPXHANDLE handle, SPXCONNECTIONHANDLE* connectionHa
     {
         *connectionHandle = SPXHANDLE_INVALID;
 
-        auto object = GetInstance<T>(handle);
-
-        auto connectionProvider = SpxQueryInterface<ISpxConnectionFromRecognizer>(object);
+        auto connectionProvider = QueryInterfaceFromHandle<T, ISpxConnectionFromRecognizer>(handle);
         SPX_IFTRUE_THROW_HR(connectionProvider == nullptr, SPXERR_EXPLICIT_CONNECTION_NOT_SUPPORTED_BY_RECOGNIZER);
         auto connection = connectionProvider->GetConnection();
 
@@ -141,9 +139,7 @@ SPXAPI connection_set_message_property(SPXCONNECTIONHANDLE handle, const char* p
 
     SPXAPI_INIT_HR_TRY(hr)
     {
-        auto connection = GetInstance<ISpxConnection>(handle);
-
-        auto setter = SpxQueryInterface<ISpxMessageParamFromUser>(connection);
+        auto setter = QueryInterfaceFromHandle<ISpxConnection, ISpxMessageParamFromUser>(handle);
         SPX_IFTRUE_THROW_HR(setter == nullptr, SPXERR_INVALID_ARG);
 
         setter->SetParameter(path, name, value);
@@ -159,9 +155,7 @@ SPXAPI connection_send_message(SPXCONNECTIONHANDLE handle, const char* path, con
 
     SPXAPI_INIT_HR_TRY(hr)
     {
-        auto connection = GetInstance<ISpxConnection>(handle);
-
-        auto setter = SpxQueryInterface<ISpxMessageParamFromUser>(connection);
+        auto setter = QueryInterfaceFromHandle<ISpxConnection, ISpxMessageParamFromUser>(handle);
         SPX_IFTRUE_THROW_HR(setter == nullptr, SPXERR_INVALID_ARG);
 
         setter->SendNetworkMessage(path, payload);
@@ -177,9 +171,7 @@ SPXAPI connection_send_message_data(SPXCONNECTIONHANDLE handle, const char* path
 
     SPXAPI_INIT_HR_TRY(hr)
     {
-        auto connection = GetInstance<ISpxConnection>(handle);
-
-        auto setter = SpxQueryInterface<ISpxMessageParamFromUser>(connection);
+        auto setter = QueryInterfaceFromHandle<ISpxConnection, ISpxMessageParamFromUser>(handle);
         SPX_IFTRUE_THROW_HR(setter == nullptr, SPXERR_INVALID_ARG);
 
         std::vector<uint8_t> payload(data, data + size);
@@ -229,8 +221,7 @@ SPXAPI connection_message_get_property_bag(SPXCONNECTIONMESSAGEHANDLE hcm, SPXPR
     {
         *hpropbag = SPXHANDLE_INVALID;
 
-        auto message = GetInstance<ISpxConnectionMessage>(hcm);
-        auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(message);
+        auto namedProperties = QueryInterfaceFromHandle<ISpxConnectionMessage, ISpxNamedProperties>(hcm);
 
         *hpropbag = CSpxSharedPtrHandleTableManager::TrackHandle<ISpxNamedProperties, SPXCONNECTIONMESSAGEHANDLE>(namedProperties);
     }

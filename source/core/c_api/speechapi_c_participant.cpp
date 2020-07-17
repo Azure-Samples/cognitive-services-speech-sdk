@@ -64,11 +64,7 @@ SPXAPI participant_set_preferred_langugage(SPXPARTICIPANTHANDLE hparticipant, co
 
     SPXAPI_INIT_HR_TRY(hr)
     {
-        auto participants = CSpxSharedPtrHandleTableManager::Get<ISpxParticipant, SPXPARTICIPANTHANDLE>();
-        auto participant_ptr = (*participants)[hparticipant];
-
-        SPX_IFTRUE_THROW_HR(participant_ptr == nullptr, SPXERR_INVALID_ARG);
-        auto participant = SpxQueryInterface<ISpxParticipant>(participant_ptr);
+        auto participant = GetInstance<ISpxParticipant>(hparticipant);
         if (participant && preferred_language)
         {
             participant->SetPreferredLanguage(preferred_language);
@@ -83,16 +79,8 @@ SPXAPI participant_set_voice_signature(SPXPARTICIPANTHANDLE hparticipant, const 
 
     SPXAPI_INIT_HR_TRY(hr)
     {
-        auto participants = CSpxSharedPtrHandleTableManager::Get<ISpxParticipant, SPXPARTICIPANTHANDLE>();
-        auto participant_ptr = (*participants)[hparticipant];
-
-        SPX_IFTRUE_THROW_HR(participant_ptr == nullptr, SPXERR_INVALID_ARG);
-        auto participant = SpxQueryInterface<ISpxParticipant>(participant_ptr);
-
-        if (participant)
-        {
-            participant->SetVoiceSignature({ voice_signature });
-        }
+        auto participant = GetInstance<ISpxParticipant>(hparticipant);
+        participant->SetVoiceSignature({ voice_signature });
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
@@ -104,10 +92,7 @@ SPXAPI participant_get_property_bag(SPXPARTICIPANTHANDLE hparticipant, SPXPROPER
     *hpropbag = SPXHANDLE_INVALID;
     SPXAPI_INIT_HR_TRY(hr)
     {
-        auto participant_handles = CSpxSharedPtrHandleTableManager::Get<ISpxParticipant, SPXPARTICIPANTHANDLE>();
-        auto participant = (*participant_handles)[hparticipant];
-        auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(participant);
-
+        auto namedProperties = QueryInterfaceFromHandle<ISpxParticipant, ISpxNamedProperties>(hparticipant);
         auto baghandle = CSpxSharedPtrHandleTableManager::Get<ISpxNamedProperties, SPXPROPERTYBAGHANDLE>();
         if (baghandle)
         {

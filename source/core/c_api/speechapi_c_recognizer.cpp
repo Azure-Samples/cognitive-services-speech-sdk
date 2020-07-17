@@ -313,27 +313,18 @@ SPXAPI recognizer_session_event_get_session_id(SPXEVENTHANDLE hevent, char* pszS
 
     SPXAPI_INIT_HR_TRY(hr)
     {
-        auto recoHandleTable = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionEventArgs, SPXEVENTHANDLE>();
-        auto sessionHandleTable = CSpxSharedPtrHandleTableManager::Get<ISpxSessionEventArgs, SPXEVENTHANDLE>();
-        auto connectionHandleTable = CSpxSharedPtrHandleTableManager::Get<ISpxConnectionEventArgs, SPXEVENTHANDLE>();
-        auto conversationHandleTable = CSpxSharedPtrHandleTableManager::Get<ISpxConversationEventArgs, SPXEVENTHANDLE>();
-
-        std::shared_ptr<ISpxSessionEventArgs> recoEvent;
-        if (recoHandleTable->IsTracked(hevent))
+        std::shared_ptr<ISpxSessionEventArgs> recoEvent = TryGetInstance<ISpxRecognitionEventArgs>(hevent);
+        if (!recoEvent)
         {
-            recoEvent = (*recoHandleTable)[hevent];
+            recoEvent = TryGetInstance<ISpxConnectionEventArgs>(hevent);
         }
-        else if (connectionHandleTable->IsTracked(hevent))
+        if (!recoEvent)
         {
-            recoEvent = (*connectionHandleTable)[hevent];
+            recoEvent = TryGetInstance<ISpxConversationEventArgs>(hevent);
         }
-        else if (conversationHandleTable->IsTracked(hevent))
+        if (!recoEvent)
         {
-            recoEvent = (*conversationHandleTable)[hevent];
-        }
-        else
-        {
-            recoEvent = (*sessionHandleTable)[hevent];
+            recoEvent = TryGetInstance<ISpxSessionEventArgs>(hevent);
         }
 
         SPX_IFTRUE_THROW_HR(recoEvent == nullptr, SPXERR_INVALID_HANDLE);

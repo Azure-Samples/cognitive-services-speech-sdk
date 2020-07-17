@@ -70,4 +70,11 @@ std::shared_ptr<TInterface> TryGetInstance(THandle handle)
     return (*handles)[handle];
 }
 
+template<typename T, typename U>
+std::shared_ptr<U> QueryInterfaceFromHandle(SPXHANDLE handle)
+{
+    auto obj = GetInstance<T>(handle);
+    return SpxQueryInterface<U>(obj);
+}
+
 } } } } // Microsoft::CognitiveServices::Speech::Impl

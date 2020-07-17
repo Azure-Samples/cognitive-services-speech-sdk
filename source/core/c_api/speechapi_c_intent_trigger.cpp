@@ -42,8 +42,7 @@ SPXAPI intent_trigger_create_from_language_understanding_model(SPXTRIGGERHANDLE*
     {
         *htrigger = SPXHANDLE_INVALID;
 
-        auto languageUnderstandingModelHandles = CSpxSharedPtrHandleTableManager::Get<ISpxLanguageUnderstandingModel, SPXLUMODELHANDLE>();
-        auto model = (*languageUnderstandingModelHandles)[hlumodel];
+        auto model = GetInstance<ISpxLanguageUnderstandingModel>(hlumodel);
 
         auto trigger = SpxCreateObjectWithSite<ISpxTrigger>("CSpxIntentTrigger", SpxGetRootSite());
         trigger->InitLanguageUnderstandingModelTrigger(model, intentName != nullptr

@@ -18,13 +18,8 @@ SPXAPI intent_recognizer_add_intent(SPXRECOHANDLE hreco, const char* intentId, S
 {
     SPXAPI_INIT_HR_TRY(hr)
     {
-        auto triggerhandles = CSpxSharedPtrHandleTableManager::Get<ISpxTrigger, SPXTRIGGERHANDLE>();
-        auto trigger = (*triggerhandles)[htrigger];
-
-        auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
-        auto recognizer = (*recohandles)[hreco];
-
-        auto intentRecognizer = SpxQueryInterface<ISpxIntentRecognizer>(recognizer);
+        auto trigger = GetInstance<ISpxTrigger>(htrigger);
+        auto intentRecognizer = QueryInterfaceFromHandle<ISpxRecognizer, ISpxIntentRecognizer>(hreco);
         SPX_IFTRUE_THROW_HR(intentRecognizer == nullptr, SPXERR_INVALID_ARG);
 
         intentRecognizer->AddIntentTrigger(intentId == nullptr ? nullptr : PAL::ToWString(intentId).c_str(), trigger);

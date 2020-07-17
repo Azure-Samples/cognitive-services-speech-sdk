@@ -13,22 +13,13 @@
 
 using namespace Microsoft::CognitiveServices::Speech::Impl;
 
-static inline std::shared_ptr<ISpxConversation> GetConversation(SPXCONVERSATIONHANDLE hconv)
-{
-    return GetInstance<ISpxConversation>(hconv);
-}
-
 SPXAPI conversation_update_participant_by_user_id(SPXCONVERSATIONHANDLE hconv, bool add, const char* userId)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, userId == nullptr);
 
     SPXAPI_INIT_HR_TRY(hr)
     {
-        auto convhandles = CSpxSharedPtrHandleTableManager::Get<ISpxConversation, SPXCONVERSATIONHANDLE>();
-        auto conversation = (*convhandles)[hconv];
-
-        SPX_IFTRUE_THROW_HR(conversation == nullptr, SPXERR_INVALID_ARG);
-
+        auto conversation = GetInstance<ISpxConversation>(hconv);
         conversation->UpdateParticipant(add, userId);
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
@@ -40,16 +31,8 @@ SPXAPI conversation_update_participant_by_user(SPXCONVERSATIONHANDLE hconv, bool
 
     SPXAPI_INIT_HR_TRY(hr)
     {
-        auto convhandles = CSpxSharedPtrHandleTableManager::Get<ISpxConversation, SPXCONVERSATIONHANDLE>();
-        auto conversation = (*convhandles)[hconv];
-
-        SPX_IFTRUE_THROW_HR(conversation == nullptr, SPXERR_INVALID_ARG);
-
-        auto userhandles = CSpxSharedPtrHandleTableManager::Get<ISpxUser, SPXPARTICIPANTHANDLE>();
-
-        auto user = SpxQueryInterface<ISpxUser>((*userhandles)[huser]);
-        SPX_IFTRUE_THROW_HR(user == nullptr, SPXERR_INVALID_ARG);
-
+        auto conversation = GetInstance<ISpxConversation>(hconv);
+        auto user = GetInstance<ISpxUser>(huser);
         conversation->UpdateParticipant(add, user->GetId());
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
@@ -61,17 +44,9 @@ SPXAPI conversation_update_participant(SPXCONVERSATIONHANDLE hconv, bool add, SP
 
     SPXAPI_INIT_HR_TRY(hr)
     {
-        auto convhandles = CSpxSharedPtrHandleTableManager::Get<ISpxConversation, SPXCONVERSATIONHANDLE>();
-        auto conversation = (*convhandles)[hconv];
-
-        SPX_IFTRUE_THROW_HR(conversation == nullptr, SPXERR_INVALID_ARG);
-
-        auto participant_handles = CSpxSharedPtrHandleTableManager::Get<ISpxParticipant, SPXPARTICIPANTHANDLE>();
-        auto participantObj = (*participant_handles)[hparticipant];
-        auto participant = SpxQueryInterface<ISpxParticipant>(participantObj);
-        SPX_IFTRUE_THROW_HR(participant == nullptr, SPXERR_INVALID_ARG);
-
-        auto user = SpxQueryInterface<ISpxUser>(participantObj);
+        auto conversation = GetInstance<ISpxConversation>(hconv);
+        auto participant = GetInstance<ISpxParticipant>(hparticipant);
+        auto user = SpxQueryInterface<ISpxUser>(participant);
         SPX_IFTRUE_THROW_HR(user == nullptr, SPXERR_INVALID_ARG);
 
         conversation->UpdateParticipant(add, user->GetId(), participant);
@@ -85,12 +60,8 @@ SPXAPI conversation_get_conversation_id(SPXCONVERSATIONHANDLE hconv, char* id, s
 
     SPXAPI_INIT_HR_TRY(hr)
     {
-        auto convhandles = CSpxSharedPtrHandleTableManager::Get<ISpxConversation, SPXCONVERSATIONHANDLE>();
-        auto conversation = (*convhandles)[hconv];
-
-        SPX_IFTRUE_THROW_HR(conversation == nullptr, SPXERR_INVALID_ARG);
-
-        std::string idStr = conversation->GetConversationId();
+        auto conversation = GetInstance<ISpxConversation>(hconv);
+        auto idStr = conversation->GetConversationId();
         SPX_IFTRUE_THROW_HR(idStr.length() >= id_size, SPXERR_INVALID_ARG);
         std::memcpy(id, idStr.c_str(), idStr.length() + 1);
     }
@@ -101,7 +72,8 @@ SPXAPI conversation_end_conversation(SPXCONVERSATIONHANDLE hconv)
 {
     SPXAPI_INIT_HR_TRY(hr)
     {
-        GetConversation(hconv)->EndConversation();
+        auto conversation = GetInstance<ISpxConversation>(hconv);
+        conversation->EndConversation();
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
@@ -113,10 +85,9 @@ SPXAPI conversation_get_property_bag(SPXCONVERSATIONHANDLE hconv, SPXPROPERTYBAG
     SPXAPI_INIT_HR_TRY(hr)
     {
         *phpropbag = SPXHANDLE_INVALID;
-        auto conversations = CSpxSharedPtrHandleTableManager::Get<ISpxConversation, SPXCONVERSATIONHANDLE>();
-        auto conversation = (*conversations)[hconv];
 
-        auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(conversation);
+        auto namedProperties = QueryInterfaceFromHandle<ISpxConversation, ISpxNamedProperties>(hconv);
+        SPX_IFTRUE_THROW_HR(namedProperties == nullptr, SPXERR_INVALID_ARG);
 
         auto baghandle = CSpxSharedPtrHandleTableManager::Get<ISpxNamedProperties, SPXPROPERTYBAGHANDLE>();
         *phpropbag = baghandle->TrackHandle(namedProperties);
@@ -128,7 +99,8 @@ SPXAPI conversation_start_conversation(SPXCONVERSATIONHANDLE hconv)
 {
     SPXAPI_INIT_HR_TRY(hr)
     {
-        GetConversation(hconv)->StartConversation();
+        auto conversation = GetInstance<ISpxConversation>(hconv);
+        conversation->StartConversation();
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
@@ -137,7 +109,8 @@ SPXAPI conversation_delete_conversation(SPXCONVERSATIONHANDLE hconv)
 {
     SPXAPI_INIT_HR_TRY(hr)
     {
-        GetConversation(hconv)->DeleteConversation();
+        auto conversation = GetInstance<ISpxConversation>(hconv);
+        conversation->DeleteConversation();
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
@@ -146,7 +119,8 @@ SPXAPI conversation_lock_conversation(SPXCONVERSATIONHANDLE hconv)
 {
     SPXAPI_INIT_HR_TRY(hr)
     {
-        GetConversation(hconv)->SetLockConversation(true);
+        auto conversation = GetInstance<ISpxConversation>(hconv);
+        conversation->SetLockConversation(true);
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
@@ -155,7 +129,8 @@ SPXAPI conversation_unlock_conversation(SPXCONVERSATIONHANDLE hconv)
 {
     SPXAPI_INIT_HR_TRY(hr)
     {
-        GetConversation(hconv)->SetLockConversation(false);
+        auto conversation = GetInstance<ISpxConversation>(hconv);
+        conversation->SetLockConversation(false);
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
@@ -164,7 +139,8 @@ SPXAPI conversation_mute_all_participants(SPXCONVERSATIONHANDLE hconv)
 {
     SPXAPI_INIT_HR_TRY(hr)
     {
-        GetConversation(hconv)->SetMuteAllParticipants(true);
+        auto conversation = GetInstance<ISpxConversation>(hconv);
+        conversation->SetMuteAllParticipants(true);
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
@@ -173,7 +149,8 @@ SPXAPI conversation_unmute_all_participants(SPXCONVERSATIONHANDLE hconv)
 {
      SPXAPI_INIT_HR_TRY(hr)
     {
-        GetConversation(hconv)->SetMuteAllParticipants(false);
+        auto conversation = GetInstance<ISpxConversation>(hconv);
+        conversation->SetMuteAllParticipants(false);
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
@@ -183,7 +160,8 @@ SPXAPI conversation_mute_participant(SPXCONVERSATIONHANDLE hconv, const char * p
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, participantId == nullptr);
     SPXAPI_INIT_HR_TRY(hr)
     {
-        GetConversation(hconv)->SetMuteParticipant(true, participantId);
+        auto conversation = GetInstance<ISpxConversation>(hconv);
+        conversation->SetMuteParticipant(true, participantId);
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
@@ -193,7 +171,8 @@ SPXAPI conversation_unmute_participant(SPXCONVERSATIONHANDLE hconv, const char *
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, participantId == nullptr);
     SPXAPI_INIT_HR_TRY(hr)
     {
-        GetConversation(hconv)->SetMuteParticipant(false, participantId);
+        auto conversation = GetInstance<ISpxConversation>(hconv);
+        conversation->SetMuteParticipant(false, participantId);
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }

@@ -19,10 +19,7 @@ SPXAPI intent_result_get_intent_id(SPXRESULTHANDLE hresult, char* pszIntentId, u
 
     SPXAPI_INIT_HR_TRY(hr)
     {
-        auto result = GetInstance<ISpxRecognitionResult>(hresult);
-
-        auto intentResult = SpxQueryInterface<ISpxIntentRecognitionResult>(result);
-
+        auto intentResult = QueryInterfaceFromHandle<ISpxRecognitionResult, ISpxIntentRecognitionResult>(hresult);
         auto strActual = PAL::ToString(intentResult->GetIntentId());
         auto pszActual = strActual.c_str();
         PAL::strcpy(pszIntentId, cchIntentId, pszActual, strActual.size(), true);
