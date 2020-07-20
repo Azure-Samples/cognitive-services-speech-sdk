@@ -162,7 +162,7 @@ protected:
     {
         auto pump = SpxCreateObjectWithSite<ISpxAudioPump>(pumpClassName, this);
         SPX_IFTRUE_THROW_HR(pump == nullptr, SPXERR_RUNTIME_ERROR);
-        m_audioPump.SetPumpDelegate(pump);
+        m_audioPump.SetDelegate(pump);
         InvokeOnService<ISpxNamedProperties>(this, [&](ISpxNamedProperties& properties)
         {
             constexpr auto micNiceNamePropName = "SPEECH-MicrophoneNiceName";
@@ -178,7 +178,7 @@ protected:
         audioFile->Open(filename);
         auto pump = audioFile->template QueryInterface<ISpxAudioPump>();
         SPX_IFTRUE_THROW_HR(pump == nullptr, SPXERR_RUNTIME_ERROR);
-        m_audioPump.SetPumpDelegate(pump);
+        m_audioPump.SetDelegate(pump);
     }
 
     inline void InitAudioStreamPump(const char* pumpClassName, std::shared_ptr<ISpxAudioStream> stream)
@@ -190,7 +190,7 @@ protected:
         auto pumpInit = pump->template  QueryInterface<ISpxAudioPumpInit>();
         SPX_IFTRUE_THROW_HR(pumpInit == nullptr, SPXERR_RUNTIME_ERROR);
         pumpInit->SetReader(reader);
-        m_audioPump.SetPumpDelegate(pump);
+        m_audioPump.SetDelegate(pump);
     }
 
     inline virtual void TermPump()
@@ -203,7 +203,7 @@ protected:
     {
         auto processor = InitAudioProcessor();
 
-        SPX_DBG_ASSERT(m_audioPump.GetPumpDelegate() != nullptr);
+        SPX_DBG_ASSERT(m_audioPump.IsReady());
         m_audioPump.DelegateStartPump(processor);
     }
 
@@ -238,17 +238,14 @@ private:
 
     inline void TermPumpInternal()
     {
-        SPX_IFTRUE_RETURN(m_audioPump.IsPumpDelegateClear());
+        SPX_IFTRUE_RETURN(m_audioPump.IsClear());
 
         auto state = m_audioPump.DelegateGetState();
         UNUSED(state); /* Asserts go away when compiling release */
         SPX_DBG_ASSERT(state != ISpxAudioPump::State::Processing);
         SPX_DBG_ASSERT(state != ISpxAudioPump::State::Paused);
 
-        auto ptr = m_audioPump.GetPumpDelegate();
-        m_audioPump.ZombiePumpDelegate(true);
-        m_audioPump.ClearPumpDelegate();
-        SpxTermAndClear(ptr);
+        SpxTermAndClearDelegate(m_audioPump);
         SPX_DBG_ASSERT(m_audioPump.IsClear());
     }
 

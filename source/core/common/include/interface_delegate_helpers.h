@@ -22,23 +22,37 @@ template <class T>
 class CSpxDelegateToSharedPtrHelper
 {
 public:
+    using Ptr_Type = std::shared_ptr<T>;
+    using Delegate_Type = std::shared_ptr<T>;
+    using Const_Delegate_Type = std::shared_ptr<T>;
 
     CSpxDelegateToSharedPtrHelper() = default;
     virtual ~CSpxDelegateToSharedPtrHelper() = default;
 
-    bool IsZombie() const { return m_zombie; }
-    void Zombie(bool zombie = true) { m_zombie = zombie; }
+    bool IsZombie() const
+    {
+        return m_zombie;
+    }
 
-    bool IsClear() const { return !m_ptr; }
-    void Clear() { m_ptr = nullptr; }
+    void Zombie(bool zombie = true)
+    {
+        m_zombie = zombie;
+    }
 
-    bool IsReady() { return !IsZombie() && !IsClear(); }
+    bool IsClear() const
+    {
+        return !m_ptr;
+    }
 
-protected:
+    void Clear()
+    {
+        m_ptr = nullptr;
+    }
 
-    using Ptr_Type = std::shared_ptr<T>;
-    using Delegate_Type = std::shared_ptr<T>;
-    using Const_Delegate_Type = std::shared_ptr<T>;
+    bool IsReady()
+    {
+        return !IsZombie() && !IsClear();
+    }
 
     void SetDelegate(Delegate_Type ptr)
     {
@@ -60,6 +74,7 @@ protected:
         return m_zombie ? nullptr : m_ptr;
     }
 
+protected:
     virtual void InitDelegatePtr(Ptr_Type& ptr) { UNUSED(ptr);  }
 
 private:
@@ -67,6 +82,29 @@ private:
     Ptr_Type m_ptr;
     bool m_zombie { false };
 };
+
+template<typename I>
+void SpxTermAndClearDelegate(CSpxDelegateToSharedPtrHelper<I>& delegateHelper)
+{
+    auto ptr = delegateHelper.GetDelegate();
+    delegateHelper.Zombie(true);
+    delegateHelper.Clear();
+    SpxTermAndClear(ptr);
+}
+
+template<typename I, typename U>
+std::shared_ptr<I> SpxQueryInterfaceFromDelegate(CSpxDelegateToSharedPtrHelper<U>& delegateHelper)
+{
+    auto ptr = delegateHelper.GetDelegate();
+    return SpxQueryInterface<I>(ptr);
+}
+
+template<typename I, typename U>
+const std::shared_ptr<I> SpxQueryInterfaceFromDelegate(const CSpxDelegateToSharedPtrHelper<U>& delegateHelper)
+{
+    auto ptr = delegateHelper.GetConstDelegate();
+    return SpxQueryInterface<I>(ptr);
+}
 
 
 template <class T>
@@ -143,18 +181,6 @@ private:
         return SpxQueryInterface<T>(site);
     }
 };
-
-#define SPX_DELEGATE_ACCESSORS(Name, Helper, I)                                             \
-    using Delegate_Type = std::shared_ptr< I >;                                     \
-    using Const_Delegate_Type = std::shared_ptr<I>;                                 \
-    inline Delegate_Type Get ## Name ## Delegate () { return Helper::GetDelegate(); }       \
-    inline Const_Delegate_Type Get ## Name ## ConstDelegate () const { return Helper::GetConstDelegate(); } \
-    inline void Set ## Name ## Delegate (Delegate_Type ptr) { Helper::SetDelegate(ptr); }   \
-    inline bool Is ## Name ## DelegateZombie() { return Helper::IsZombie(); }               \
-    inline void Zombie ## Name ## Delegate(bool zombie = true) { Helper::Zombie(zombie); }  \
-    inline bool Is ## Name ## DelegateClear() { return Helper::IsClear(); }                 \
-    inline void Clear ## Name ## Delegate() { Helper::Clear(); }                            \
-    inline bool Is ## Name ## DelegateReady() { return Helper::IsReady(); }
 
 template<typename T, typename F, typename... Ts>
 void InvokeOnDelegate(const std::shared_ptr<T>& ptr, F f, Ts&&... args)

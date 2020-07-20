@@ -73,9 +73,9 @@ void CSpxAudioSessionShim::InitDelegatePtr(std::shared_ptr<ISpxAudioSourceNotify
 void CSpxAudioSessionShim::TermAudioSource()
 {
     // Zombie and Clear the AudioSourceInit DelegatePtr
-    AudioSourceInit_Type::ZombieSourceInitDelegate();
-    AudioSourceInit_Type::ClearSourceInitDelegate();
-    SPX_DBG_ASSERT(ISpxAudioSourceInitDelegateImpl::IsClear());
+    AudioSourceInitDelegate::Zombie(true);
+    AudioSourceInitDelegate::Clear();
+    SPX_DBG_ASSERT(AudioSourceInitDelegate::IsClear());
 
     // Terminate the underlying AudioSource
     CSpxSessionAudioSourceHelper::TermAudioSource();

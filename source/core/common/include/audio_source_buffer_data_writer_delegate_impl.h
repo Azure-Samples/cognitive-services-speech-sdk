@@ -23,13 +23,12 @@ class ISpxAudioSourceBufferDataWriterDelegateImpl :
 {
 private:
     using I = ISpxAudioSourceBufferDataWriter;
-protected:
-    SPX_DELEGATE_ACCESSORS(Writer, DelegateToHelperT, I)
+    using C = ISpxAudioSourceBufferDataWriterDelegateImpl;
 public:
 
     void Write(uint8_t* buffer, uint32_t size) override
     {
-        InvokeOnDelegate(GetWriterDelegate(), &I::Write, buffer, size);
+        InvokeOnDelegate(C::GetDelegate(), &I::Write, buffer, size);
     }
 };
 

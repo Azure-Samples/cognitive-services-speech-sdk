@@ -60,44 +60,49 @@ void CSpxAudioSourceWrapper::InitDelegatePtr(std::shared_ptr<ISpxAudioSourceInit
     ptr = InitAudioSourceDelegate();
 }
 
+template<typename I>
+std::shared_ptr<I> InitDelegatePtrHelper(ISpxAudioSourceInitDelegateImpl<>& helper)
+{
+    return SpxQueryInterfaceFromDelegate<I>(helper);
+}
+
 void CSpxAudioSourceWrapper::InitDelegatePtr(std::shared_ptr<ISpxAudioSourceControl>& ptr)
 {
-    ptr = SpxQueryInterface<ISpxAudioSourceControl>(GetSourceInitDelegate());
+    ptr = InitDelegatePtrHelper<ISpxAudioSourceControl>(*this);
 }
 
 void CSpxAudioSourceWrapper::InitDelegatePtr(std::shared_ptr<ISpxAudioSourceBufferData>& ptr)
 {
-    ptr = SpxQueryInterface<ISpxAudioSourceBufferData>(GetSourceInitDelegate());
+    ptr = InitDelegatePtrHelper<ISpxAudioSourceBufferData>(*this);
 }
 
 void CSpxAudioSourceWrapper::InitDelegatePtr(std::shared_ptr<ISpxAudioSourceBufferDataWriter>& ptr)
 {
-    ptr = SpxQueryInterface<ISpxAudioSourceBufferDataWriter>(GetSourceInitDelegate());
+    ptr = InitDelegatePtrHelper<ISpxAudioSourceBufferDataWriter>(*this);
 }
 
 void CSpxAudioSourceWrapper::TermAudioSourceDelegate()
 {
-    SPX_IFTRUE_RETURN(IsSourceInitDelegateClear());
+    using SourceInitDelegate = ISpxAudioSourceInitDelegateImpl;
+    SPX_IFTRUE_RETURN(SourceInitDelegate::IsClear());
 
-    auto ptr = GetSourceInitDelegate();
+    using ControlDelegate = ISpxAudioSourceControlDelegateImpl;
+    ControlDelegate::Zombie(true);
+    ControlDelegate::Clear();
+    SPX_DBG_ASSERT(ControlDelegate::IsClear());
 
-    ZombieSourceInitDelegate(true);
-    ClearSourceInitDelegate();
+    using DataDelegate = ISpxAudioSourceBufferDataDelegateImpl;
+    DataDelegate::Zombie(true);
+    DataDelegate::Clear();
+    SPX_DBG_ASSERT(DataDelegate::IsClear());
+
+    using WriterDelegate = ISpxAudioSourceBufferDataWriterDelegateImpl;
+    WriterDelegate::Zombie(true);
+    WriterDelegate::Clear();
+    SPX_DBG_ASSERT(WriterDelegate::IsClear());
+
+    SpxTermAndClearDelegate(static_cast<SourceInitDelegate&>(*this));
     SPX_DBG_ASSERT(ISpxAudioSourceInitDelegateImpl::IsClear());
-
-    ZombieControlDelegate(true);
-    ClearControlDelegate();
-    SPX_DBG_ASSERT(ISpxAudioSourceControlDelegateImpl::IsClear());
-
-    ZombieDataDelegate(true);
-    ClearDataDelegate();
-    SPX_DBG_ASSERT(ISpxAudioSourceBufferDataDelegateImpl::IsClear());
-
-    ZombieWriterDelegate(true);
-    ClearWriterDelegate();
-    SPX_DBG_ASSERT(ISpxAudioSourceBufferDataWriterDelegateImpl::IsClear());
-
-    SpxTermAndClear(ptr);
 }
 
 void CSpxAudioSourceWrapper::InitAudioSourceClassName(const char* className)
@@ -108,7 +113,8 @@ void CSpxAudioSourceWrapper::InitAudioSourceClassName(const char* className)
 
 ISpxAudioSource::State CSpxAudioSourceWrapper::GetState() const
 {
-    auto ptr = SpxQueryInterface<ISpxAudioSource>(GetSourceInitConstDelegate());
+    using SourceInitDelegate = ISpxAudioSourceInitDelegateImpl;
+    auto ptr = SpxQueryInterfaceFromDelegate<ISpxAudioSource>(static_cast<const SourceInitDelegate&>(*this));
     if (ptr == nullptr)
     {
         return ISpxAudioSource::State::Idle;

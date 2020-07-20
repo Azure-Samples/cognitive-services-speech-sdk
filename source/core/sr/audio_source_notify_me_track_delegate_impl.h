@@ -25,14 +25,13 @@ class ISpxAudioSourceNotifyMeTrackDelegateImpl :
 {
 private:
     using I = ISpxAudioSourceNotifyMe;
-protected:
-    SPX_DELEGATE_ACCESSORS(NotifyMe, DelegateToHelperT, I)
+    using C = ISpxAudioSourceNotifyMeTrackDelegateImpl;
 public:
 
     void NotifyMe(const std::shared_ptr<ISpxAudioSource>& source, const std::shared_ptr<ISpxAudioSourceBufferData>& data)
     {
         TrackNotifyMe(source, data);
-        InvokeOnDelegate(GetNotifyMeDelegate(), &I::NotifyMe, source, data);
+        InvokeOnDelegate(C::GetDelegate(), &I::NotifyMe, source, data);
     }
 };
 

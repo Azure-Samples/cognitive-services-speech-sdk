@@ -23,43 +23,42 @@ class ISpxAudioSourceBufferDataDelegateImpl :
 {
 private:
     using I = ISpxAudioSourceBufferData;
-protected:
-    SPX_DELEGATE_ACCESSORS(Data, DelegateToHelperT, ISpxAudioSourceBufferData);
+    using C = ISpxAudioSourceBufferDataDelegateImpl;
 public:
 
     uint64_t GetOffset() override
     {
-        return InvokeOnDelegateR(GetDataDelegate(), &I::GetOffset, 0);
+        return InvokeOnDelegateR(C::GetDelegate(), &I::GetOffset, 0);
     }
 
     uint32_t Read(uint8_t* buffer, uint32_t size) override
     {
-        return InvokeOnDelegateR(GetDataDelegate(), &I::Read, 0, buffer, size);
+        return InvokeOnDelegateR(C::GetDelegate(), &I::Read, 0, buffer, size);
     }
 
     uint32_t ReadAt(uint64_t offset, uint8_t* buffer, uint32_t size) override
     {
-        return InvokeOnDelegateR(GetDataDelegate(), &I::ReadAt, 0, offset, buffer, size);
+        return InvokeOnDelegateR(C::GetDelegate(), &I::ReadAt, 0, offset, buffer, size);
     }
 
     uint64_t GetBytesDead() override
     {
-        return InvokeOnDelegateR(GetDataDelegate(), &I::GetBytesDead, 0);
+        return InvokeOnDelegateR(C::GetDelegate(), &I::GetBytesDead, 0);
     }
 
     uint64_t GetBytesRead() override
     {
-        return InvokeOnDelegateR(GetDataDelegate(), &I::GetBytesRead, 0);
+        return InvokeOnDelegateR(C::GetDelegate(), &I::GetBytesRead, 0);
     }
 
     uint64_t GetBytesReady() override
     {
-        return InvokeOnDelegateR(GetDataDelegate(), &I::GetBytesReady, 0);
+        return InvokeOnDelegateR(C::GetDelegate(), &I::GetBytesReady, 0);
     }
 
     uint64_t GetBytesReadyMax() override
     {
-        return InvokeOnDelegateR(GetDataDelegate(), &I::GetBytesReadyMax, 0);
+        return InvokeOnDelegateR(C::GetDelegate(), &I::GetBytesReadyMax, 0);
     }
 };
 

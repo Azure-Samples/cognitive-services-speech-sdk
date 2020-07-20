@@ -68,7 +68,7 @@ public:
 
     inline SpxWaveFormatEx GetFormat() const final
     {
-        auto ptr = SpxQueryInterface<ISpxAudioSource>(GetSourceInitConstDelegate());
+        auto ptr = SpxQueryInterfaceFromDelegate<ISpxAudioSource>(static_cast<const ISpxAudioSourceInitDelegateImpl&>(*this));
         return ptr->GetFormat();
     }
 

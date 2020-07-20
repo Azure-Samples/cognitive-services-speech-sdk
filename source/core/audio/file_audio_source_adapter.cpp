@@ -36,15 +36,11 @@ void CSpxFileAudioSourceAdapter::InitDelegatePtr(std::shared_ptr<ISpxAudioSource
 
 void CSpxFileAudioSourceAdapter::TermDelegatePtr()
 {
-    SPX_IFTRUE_RETURN(IsDataDelegateClear());
+    using DelegateType = ISpxAudioSourceBufferDataDelegateImpl;
+    SPX_IFTRUE_RETURN(DelegateType::IsClear());
 
-    auto ptr = GetDataDelegate();
-
-    ZombieDataDelegate(true);
-    ClearDataDelegate();
-    SPX_DBG_ASSERT(ISpxAudioSourceBufferDataDelegateImpl::IsClear());
-
-    SpxTermAndClear(ptr);
+    SpxTermAndClearDelegate(static_cast<DelegateType&>(*this));
+    SPX_DBG_ASSERT(DelegateType::IsClear());
 }
 
 } } } } // Microsoft::CognitiveServices::Speech::Impl

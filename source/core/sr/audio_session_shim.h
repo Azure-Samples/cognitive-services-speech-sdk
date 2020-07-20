@@ -115,7 +115,7 @@ private:
     void TermSiteKeepAlive();
 
     /* Audio source stuff */
-    using AudioSourceInit_Type = ISpxAudioSourceInitDelegateImpl<>;
+    using AudioSourceInitDelegate = ISpxAudioSourceInitDelegateImpl<>;
 
 
     void TermAudioSource();

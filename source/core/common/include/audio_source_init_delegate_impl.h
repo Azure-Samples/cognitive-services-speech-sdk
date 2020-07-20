@@ -23,23 +23,22 @@ class ISpxAudioSourceInitDelegateImpl :
 {
 private:
     using I = ISpxAudioSourceInit;
-protected:
-    SPX_DELEGATE_ACCESSORS(SourceInit, DelegateToHelperT, I)
+    using C = ISpxAudioSourceInitDelegateImpl;
 public:
 
     void InitFromMicrophone() override
     {
-        InvokeOnDelegate(GetSourceInitDelegate(), &I::InitFromMicrophone);
+        InvokeOnDelegate(C::GetDelegate(), &I::InitFromMicrophone);
     }
 
     void InitFromFile(const wchar_t* filename) override
     {
-        InvokeOnDelegate(GetSourceInitDelegate(), &I::InitFromFile, filename);
+        InvokeOnDelegate(C::GetDelegate(), &I::InitFromFile, filename);
     }
 
     void InitFromStream(std::shared_ptr<ISpxAudioStream> stream) override
     {
-        InvokeOnDelegate(GetSourceInitDelegate(), &I::InitFromStream, stream);
+        InvokeOnDelegate(C::GetDelegate(), &I::InitFromStream, stream);
     }
 };
 

@@ -23,19 +23,16 @@ class ISpxAudioSourceControlDelegateImpl :
 {
 private:
     using I = ISpxAudioSourceControl;
-
-protected:
-    SPX_DELEGATE_ACCESSORS(Control, DelegateToHelperT, I)
-
+    using C = ISpxAudioSourceControlDelegateImpl;
 public:
     void StartAudio(std::shared_ptr<ISpxAudioSourceNotifyMe> notify) override
     {
-        InvokeOnDelegate(GetControlDelegate(), &I::StartAudio, notify);
+        InvokeOnDelegate(C::GetDelegate(), &I::StartAudio, notify);
     }
 
     void StopAudio() override
     {
-        InvokeOnDelegate(GetControlDelegate(), &I::StopAudio);
+        InvokeOnDelegate(C::GetDelegate(), &I::StopAudio);
     }
 };
 
