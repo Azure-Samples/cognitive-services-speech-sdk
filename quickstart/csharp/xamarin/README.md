@@ -8,7 +8,7 @@ This sample demonstrates how to use Speech SDK for Universal Windows Platform (U
 
 ## Prerequisites
 
-* A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
+* A subscription key for the Speech service. [Create a new Azure account, and try Cognitive Services for free.](https://azure.microsoft.com/free/cognitive-services/)
 * Speech SDK version 1.7.0 or later.
 * A Windows PC with Windows 10 Fall Creators Update (10.0; Build 16299) or later and with a working microphone.
 * [Microsoft Visual Studio 2019](https://www.visualstudio.com/), Community Edition or higher is preferred.
@@ -35,7 +35,6 @@ This sample demonstrates how to use Speech SDK for Universal Windows Platform (U
 * Edit the `MainPage.xaml.cs` source under the main helloworld project:
   * Replace the string `YourSubscriptionKey` with your own subscription key.
   * Replace the string `YourServiceRegion` with the service region of your subscription.
-    For example, replace with `westus` if you are using the 30-day free trial subscription.
 
 ## Build and run the sample for UWP
 * Set the active solution configuration and platform to the desired values under **Build** \> **Configuration Manager**:
