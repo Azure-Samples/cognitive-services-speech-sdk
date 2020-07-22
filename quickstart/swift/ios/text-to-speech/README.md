@@ -4,7 +4,7 @@ This sample demonstrates how to create an iOS app in Swift using the Cognitive S
 
 ## Prerequisites
 
-* A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
+* A subscription key for the Speech service. [Create a new Azure account, and try Cognitive Services for free.](https://azure.microsoft.com/free/cognitive-services/)
 * A macOS machine with [Xcode](https://geo.itunes.apple.com/us/app/xcode/id497799835?mt=12) version 9.4.1 or later and [CocoaPods](https://cocoapods.org/) installed.
 
 ## Get the code for the sample app
@@ -30,7 +30,7 @@ Note that this tutorial will not work without changes for any version earlier th
 1. Open the `helloworld.xcworkspace` workspace in Xcode.
 1. Make the following changes in the `ViewController.swift` file:
     1. Replace the string `YourSubscriptionKey` with your subscription key.
-    1. Replace the string `YourServiceRegion` with the [region](https://docs.microsoft.com/azure/cognitive-services/speech-service/regions) associated with your subscription (for example, `westus` for the free trial subscription).
+    1. Replace the string `YourServiceRegion` with the [region](https://docs.microsoft.com/azure/cognitive-services/speech-service/regions) associated with your subscription.
 1. Make the debug output visible (**View** > **Debug Area** > **Activate Console**).
 1. Select the test destination (**Product** > **Destination**) to choose a device connected to your macOS machine or a iOS simulator.
 1. Build and run the example code by selecting **Product** -> **Run** from the menu or clicking the **Play** button.
