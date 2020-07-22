@@ -4,7 +4,7 @@ This sample demonstrates how to create a macOS app in Objective-C using the Cogn
 
 ## Prerequisites
 
-* A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
+* A subscription key for the Speech service. [Create a new Azure account, and try Cognitive Services for free.](https://azure.microsoft.com/free/cognitive-services/)
 * A macOS machine with [Xcode](https://geo.itunes.apple.com/us/app/xcode/id497799835?mt=12) version 9.4.1 or later and macOS 10.13 or later.
 
 ## Get the Code for the Sample App
@@ -29,7 +29,7 @@ It can be used in Xcode projects as a [CocoaPod](https://cocoapods.org/), or dow
 1. Open the `helloworld.xcworkspace` workspace in Xcode.
 1. Make the following changes in the `AppDelegate.m` file:
     1. Replace the string `YourSubscriptionKey` with your subscription key.
-    1. Replace the string `YourServiceRegion` with the [region](https://docs.microsoft.com/azure/cognitive-services/speech-service/regions) associated with your subscription (for example, `westus` for the free trial subscription).
+    1. Replace the string `YourServiceRegion` with the [region](https://docs.microsoft.com/azure/cognitive-services/speech-service/regions) associated with your subscription.
 1. Make the debug output visible (**View** > **Debug Area** > **Activate Console**).
 1. Build and run the example code by selecting **Product** -> **Run** from the menu or clicking the **Play** button.
 1. After you input some text and click the button in the app, you should hear the synthesized audio played.
