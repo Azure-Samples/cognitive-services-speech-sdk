@@ -71,8 +71,8 @@ public class SpeechRecognition : MonoBehaviour
     private void Awake()
     {
         // IMPORTANT INFO BEFORE YOU CAN USE THIS SAMPLE:
-        // Get your own Cognitive Services Speech subscription key for free at the following
-        // link: https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started.
+        // If you do not have a LUIS subscription key, you can visit the Microsoft Cognitive Services Web site
+        // at https://azure.microsoft.com/free/cognitive-services/, create a new Azure account, and try Cognitive Services for free.
         // Use the inspector fields to manually set these values with your subscription info.
         // If you prefer to manually set your Speech Service API Key and Region in code,
         // then uncomment the two lines below and set the values to your own.
