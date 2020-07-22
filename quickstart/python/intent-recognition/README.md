@@ -8,7 +8,7 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 
 Before you get started, here's a list of prerequisites:
 
-* A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
+* A subscription key for the Speech service. [Create a new Azure account, and try Cognitive Services for free.](https://azure.microsoft.com/free/cognitive-services/)
 * Python 3.5 or later needs to be installed. Downloads are available [here](https://www.python.org/downloads/).
 * The Python Speech SDK package is available for Windows (x64 and x86), Mac (macOS X version 10.12 or later), and Linux (x64; Ubuntu 16.04, Ubuntu 18.04, Debian 9, RHEL 8, CentOS 8).
 * On Ubuntu 16.04 or 18.04, run the following commands for the installation of required packages:
