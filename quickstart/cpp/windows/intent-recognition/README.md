@@ -4,7 +4,7 @@ This sample demonstrates how to recognize intent with C++ using the Speech SDK f
 
 ## Prerequisites
 
-* A LUIS account. You can get one for free through the [LUIS portal](https://www.luis.ai/home).
+* A LUIS account. [Create a new Azure account, and try Cognitive Services for free.](https://azure.microsoft.com/free/cognitive-services/)
 * A Windows PC with a working microphone.
 * [Microsoft Visual Studio 2017](https://www.visualstudio.com/), Community Edition or higher.
 * The **Desktop development with C++** workload in Visual Studio and the **NuGet package manager** component in Visual Studio.
