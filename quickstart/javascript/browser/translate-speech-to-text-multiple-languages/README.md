@@ -7,7 +7,7 @@ This sample shows how to translate speech into multiple languages with the Speec
 
 ## Prerequisites
 
-* A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
+* A subscription key for the Speech service. [Create a new Azure account, and try Cognitive Services for free.](https://azure.microsoft.com/free/cognitive-services/)
 * A PC or Mac, with a working microphone.
 * A text editor.
 * Optionally, a web server that supports hosting PHP scripts.
@@ -27,7 +27,6 @@ If you want to host the sample on a web server:
 * The web server must support PHP with curl enabled.
 * Edit the `token.php` source:
   * Replace the string `YourServiceRegion` with the service region of your subscription.
-    For example, replace with `westus` if you are using the 30-day free trial subscription.
   * Replace the string `YourSubscriptionKey` with your own subscription key.
 * Edit the `index.html` source:
   * Replace the value for the variable `authorizationEndpoint` with the full URL where you can access the token.php resource.
