@@ -8,7 +8,7 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 
 ## Prerequisites
 
-* A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
+* A subscription key for the Speech service. [Create a new Azure account, and try Cognitive Services for free.](https://azure.microsoft.com/free/cognitive-services/)
 * A PC (Windows x64, Ubuntu 16.04 x64, Ubuntu 18.04 x64, Debian 9 x64, RHEL 8 x64, or CentOS 8 x64) or Mac (macOS 10.13 or later) with a working microphone.
 * Either one of the following:
   * On Windows:
@@ -49,7 +49,6 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 * Edit the `Program.cs` source:
   * Replace the string `YourSubscriptionKey` with your own subscription key.
   * Replace the string `YourServiceRegion` with the service region of your subscription.
-    For example, replace with `westus` if you are using the 30-day free trial subscription.
 * If you are using Microsoft Visual Studio 2017 on Windows, press Ctrl+Shift+B, or select **Build** \> **Build Solution**.
 * If you are using the .NET Core CLI, run the following command from the directory that contains this sample:
 
