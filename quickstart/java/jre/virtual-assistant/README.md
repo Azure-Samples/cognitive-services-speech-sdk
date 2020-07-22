@@ -8,7 +8,7 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 
 ## Prerequisites
 
-* A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
+* A subscription key for the Speech service. [Create a new Azure account, and try Cognitive Services for free.](https://azure.microsoft.com/free/cognitive-services/)
 * A PC (Windows x64, Ubuntu 16.04/18.04 on x64 or ARM64, RHEL 8 or CentOS 8 on x64) capable to run Eclipse,[<sup>[1]</sup>](#footnote1) with a working microphone.
 * 64-bit JRE/JDK for Java 8.
 * Version 4.8 of [Eclipse](https://www.eclipse.org), 64-bit.[<sup>[1]</sup>](#footnote1)
