@@ -4,7 +4,7 @@ This sample demonstrates how to synthesize speech with the Speech SDK for JavaSc
 
 ## Prerequisites
 
-* A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
+* A subscription key for the Speech service. [Create a new Azure account, and try Cognitive Services for free.](https://azure.microsoft.com/free/cognitive-services/)
 * A [Node.js](https://nodejs.org) compatible device.
 
 ## Prepare the sample
@@ -15,7 +15,6 @@ This sample demonstrates how to synthesize speech with the Speech SDK for JavaSc
 * Update the `index.js` file with your configuration:
   * Replace the string `YourSubscriptionKey` with your own subscription key.
   * Replace the string `YourServiceRegion` with the service region of your subscription.
-    For example, replace with `westus` if you are using the 30-day free trial subscription.
   * Replace the string `YourAudioFile.wav` with a path you desire.
 
 ## Run the sample
