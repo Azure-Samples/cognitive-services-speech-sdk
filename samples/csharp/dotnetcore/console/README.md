@@ -5,7 +5,7 @@ It runs under .NET Core 2.0 on Windows or Linux (Ubuntu 16.04 x64, Ubuntu 18.04 
 
 ## Prerequisites
 
-* A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
+* A subscription key for the Speech service. [Create a new Azure account, and try Cognitive Services for free.](https://azure.microsoft.com/free/cognitive-services/)
 * A PC (Windows x64, Ubuntu 16.04 x64, Ubuntu 18.04 x64, Debian 9 x64, RHEL 8 x64, CentOS 8 x64); some sample scenarios require a working microphone.
 * Either one of the following:
   * On Windows:
