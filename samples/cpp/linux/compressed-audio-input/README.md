@@ -10,7 +10,7 @@ The compressed audio input stream should be either in MP3 or Opus format.
 
 ## Prerequisites
 
-* A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
+* A subscription key for the Speech service. [Create a new Azure account, and try Cognitive Services for free.](https://azure.microsoft.com/free/cognitive-services/)
 * An Ubuntu 16.04, Ubuntu 18.04, Debian 9, RHEL 8, or CentOS 8 PC.
 * On Ubuntu, install these packages to build and run this sample:
 
@@ -56,7 +56,6 @@ The compressed audio input stream should be either in MP3 or Opus format.
 * Edit the `compressed-audio-input.cpp` source:
   * Replace the string `YourSubscriptionKey` with your own subscription key.
   * Replace the string `YourServiceRegion` with the service region of your subscription.
-    For example, replace with `westus` if you are using the 30-day free trial subscription.
 * Run the command `make` to build the sample, the resulting executable will be called `compressed-audio-input`.
 
 ## Run the sample
