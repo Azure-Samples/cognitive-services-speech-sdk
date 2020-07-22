@@ -5,7 +5,7 @@ See [this article](https://docs.microsoft.com/azure/cognitive-services/speech-se
 
 ## Prerequisites
 
-* A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
+* A subscription key for the Speech service. [Create a new Azure account, and try Cognitive Services for free.](https://azure.microsoft.com/free/cognitive-services/)
 * For intent recognition: an *endpoint* subscription key for the [Language Understanding Intelligent Service (LUIS)](https://www.luis.ai/home), and an application ID.
 * A PC or Mac, with a working microphone.
 * A text editor.
@@ -22,7 +22,6 @@ If you want to host the sample on a web server, the web server must support PHP 
 
 * Edit the `token.php` source:
   * Replace the string `YourServiceRegion` with the service region of your subscription.
-    For example, replace with `westus` if you are using the 30-day free trial subscription.
   * Replace the string `YourSubscriptionKey` with your own subscription key.
 * Edit the `index.html` source:
   * Replace the value for the variable `authorizationEndpoint` with the full URL where you can access the token.php resource.
