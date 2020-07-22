@@ -7,7 +7,7 @@ This sample shows how to recognize intent with the Speech Service using the Spee
 
 ## Prerequisites
 
-* A LUIS account. You can get one for free through the [LUIS portal](https://www.luis.ai/home).
+* A LUIS account. [Create a new Azure account, and try Cognitive Services for free.](https://azure.microsoft.com/free/cognitive-services/)
 * A new or existing LUIS app - [create LUIS app](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstarts/intent-recognition#create-a-luis-app-for-intent-recognition)
 * A PC or Mac, with a working microphone.
 * A text editor.
@@ -28,7 +28,6 @@ If you want to host the sample on a web server:
 * The web server must support PHP with curl enabled.
 * Edit the `token.php` source:
   * Replace the string `YourServiceRegion` with the service region of your subscription.
-    For example, replace with `westus` if you are using the 30-day free trial subscription.
   * Replace the string `YourSubscriptionKey` with your own subscription key.
 * Edit the `index.html` source:
   * Replace the value for the variable `authorizationEndpoint` with the full URL where you can access the token.php resource.
