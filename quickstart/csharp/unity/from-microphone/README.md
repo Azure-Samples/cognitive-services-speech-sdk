@@ -12,7 +12,7 @@ This sample demonstrates how to recognize speech in [Unity](https://unity3d.com/
   > Note:
   > [UWP ARM64 support was only added in Unity 2019.1](https://blogs.unity3d.com/2019/04/16/introducing-unity-2019-1/#universal)
   > If you are not familiar with Unity, it is recommended to study the [Unity User Manual](https://docs.unity3d.com/Manual/UnityManual.html) before starting your app development.
-* A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
+* A subscription key for the Speech service. [Create a new Azure account, and try Cognitive Services for free.](https://azure.microsoft.com/free/cognitive-services/)
 * A Windows PC with Windows 10 Fall Creators Update (10.0; Build 16299) or later and with a working microphone.
 * A Mac device with Xcode and Unity installed for iOS development.
 * [Microsoft Visual Studio 2017](https://www.visualstudio.com/), Community Edition or higher.
@@ -49,7 +49,7 @@ This sample demonstrates how to recognize speech in [Unity](https://unity3d.com/
     Note: you can configure which code editor will be launched under **Edit** > **Preferences**, for details see [here](https://docs.unity3d.com/Manual/Preferences.html).
   * Do the following edits:
     * Replace the string `YourSubscriptionKey` with your own subscription key.
-    * Replace the string `YourServiceRegion` with the service region of your subscription. For example, replace with `westus` if you are using the 30-day free trial subscription.
+    * Replace the string `YourServiceRegion` with the service region of your subscription.
     * Save the file.
 
 > Note:
