@@ -13,7 +13,7 @@ This sample demonstrates how to use the Microsoft Cognitive Service Speech SDK i
 
 * This sample is targeted for Unity 2018.3 or later. To install, pick an appropriate option in the [Unity store](https://store.unity.com/).
   * If you are not familiar with Unity, it is recommended to consult [Unity learning resources](https://unity.com/learn) and study the [Unity User Manual](https://docs.unity3d.com/Manual/UnityManual.html) before starting your app development.
-* A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
+* A subscription key for the Speech service. [Create a new Azure account, and try Cognitive Services for free.](https://azure.microsoft.com/free/cognitive-services/)
 * A Windows PC with Windows 10 Fall Creators Update (10.0; Build 16299) or later and with a working microphone.
 * [Microsoft Visual Studio 2017](https://www.visualstudio.com/), Community Edition or higher.
 * For ARM64 support, install the [optional build tools, and Windows 10 SDK for ARM/ARM64](https://blogs.windows.com/buildingapps/2018/11/15/official-support-for-windows-10-on-arm-development/)
@@ -51,12 +51,12 @@ This sample demonstrates how to use the Microsoft Cognitive Service Speech SDK i
       * Select the `SpeechManager` game object in the scene hierarchy.
       * Enter the following values in the `Speech Recognition (Script) component in the Inspector:
         * Enter your own subscription key in the Inspector field labeled `Speech Service API Key`.
-        * Enter the service region of your subscription in the Inspector field labeled `Speech Service Region`. For example, replace with `westus` if you are using the 30-day free trial subscription.
+        * Enter the service region of your subscription in the Inspector field labeled `Speech Service Region`.
    * OPTION 2 - VIA SCRIPT:
       * In the Project Window, navigate to **Assets** > **SpeechSDKSample** > **Scripts** and double-click the `SpeechRecognition` C# script to edit it. Note: you can configure which code editor will be launched under **Edit** > **Preferences**, for details see [here](https://docs.unity3d.com/Manual/Preferences.html).
       * Perform the following edits:
         * Replace the string `YourSubscriptionKey` with your own subscription key.
-        * Replace the string `YourServiceRegion` with the service region of your subscription. For example, replace with `westus` if you are using the 30-day free trial subscription.
+        * Replace the string `YourServiceRegion` with the service region of your subscription.
         * Save the file.
 * Run the sample scene in the Unity Editor:
   * Press the **Play** button in the Unity Editor toolbar (below the menu bar).
@@ -97,13 +97,13 @@ This sample demonstrates how to use the Microsoft Cognitive Service Speech SDK i
       * Enter the following values in the `Intent Recognition (Script) component in the Inspector:
         * Enter your LUIS App Id in the Inspector field labeled `LUIS App Id`.
         * Enter your LUIS App Key in the Inspector field labeled `LUIS App Key`.
-        * Enter the service region of your subscription in the Inspector field labeled `LUIS Region`. For example, replace with `westus` if you are using the 30-day free trial subscription.
+        * Enter the service region of your subscription in the Inspector field labeled `LUIS Region`.
    * OPTION 2 - VIA SCRIPT:
       * In the Project Window, navigate to **Assets** > **SpeechSDKSample** > **Scripts** and double-click the `IntentRecognition` C# script to edit it. Note: you can configure which code editor will be launched under **Edit** > **Preferences**, for details see [here](https://docs.unity3d.com/Manual/Preferences.html).
       * Perform the following edits:
         * Replace the string `YourLUISAppId` with your own LUIS App Id.
         * Replace the string `YourLUISAppKey` with your own LUIS App Key.
-        * Replace the string `YourLUISServiceRegion` with the service region of your subscription. For example, replace with `westus` if you are using the 30-day free trial subscription.
+        * Replace the string `YourLUISServiceRegion` with the service region of your subscription.
         * Save the file.
 * Run the sample scene in the Unity Editor:
   * Press the **Play** button in the Unity Editor toolbar (below the menu bar).
