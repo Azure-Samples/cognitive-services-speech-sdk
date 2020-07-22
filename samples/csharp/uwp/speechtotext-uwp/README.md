@@ -4,7 +4,7 @@ This sample demonstrates various forms of recognizing speech with C# under the U
 
 ## Prerequisites
 
-* A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
+* A subscription key for the Speech service. [Create a new Azure account, and try Cognitive Services for free.](https://azure.microsoft.com/free/cognitive-services/)
 * A Windows PC with Windows 10 Fall Creators Update (10.0; Build 16299) or later.
   Some sample scenarios require a working microphone.
 * [Microsoft Visual Studio 2017](https://www.visualstudio.com/), Community Edition or higher.
