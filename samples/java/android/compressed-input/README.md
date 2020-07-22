@@ -4,7 +4,7 @@ This sample demonstrates how to recognize speech from compressed audio input wit
 
 ## Prerequisites
 
-* A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
+* A subscription key for the Speech service. [Create a new Azure account, and try Cognitive Services for free.](https://azure.microsoft.com/free/cognitive-services/)
 * A PC (Windows, Linux, Mac) capable to run Android Studio.
 * Version 3.1 of [Android Studio](https://developer.android.com/studio/).
 * An ARM-based Android device (API 23: Android 6.0 Marshmallow or higher) [enabled for development](https://developer.android.com/studio/debug/dev-options) with a working microphone.
