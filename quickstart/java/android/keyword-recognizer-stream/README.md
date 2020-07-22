@@ -9,7 +9,7 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 
 ## Prerequisites
 
-* A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
+* A subscription key for the Speech service. [Create a new Azure account, and try Cognitive Services for free.](https://azure.microsoft.com/free/cognitive-services/)
 * A PC (Windows, Linux, Mac) capable to run Android Studio.
 * Version 3.1 of [Android Studio](https://developer.android.com/studio/).
 * Android device or emulator (API 23: Android 6.0 Marshmallow or higher) [enabled for development](https://developer.android.com/studio/debug/dev-options) with a working microphone.
@@ -24,7 +24,6 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 * Edit the `MainActivity` source:
   * Replace the string `YourSubscriptionKey` with your own subscription key.
   * Replace the string `YourServiceRegion` with the service region of your subscription.
-    For example, replace with `westus` if you are using the 30-day free trial subscription.
 * Press Ctrl+F9, or select **Build** \> **Make Project**.
 
 ## Run the sample
