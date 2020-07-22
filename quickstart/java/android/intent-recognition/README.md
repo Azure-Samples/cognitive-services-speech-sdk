@@ -9,7 +9,7 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 
 ## Prerequisites
 
-* A LUIS account. You can get one for free through the [LUIS portal](https://www.luis.ai/home).
+* A LUIS account. [Create a new Azure account, and try Cognitive Services for free.](https://azure.microsoft.com/free/cognitive-services/)
 * A new or existing LUIS app - [create LUIS app](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstarts/intent-recognition#create-a-luis-app-for-intent-recognition)
 * A PC (Windows, Linux, Mac) capable to run Android Studio.
 * Version 3.63 (or higher) of [Android Studio](https://developer.android.com/studio/).
@@ -26,7 +26,6 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
   * Replace the string `YourSubscriptionKey` with your own LUIS subscription key.
   * Replace the string `YourServiceRegion` with the service region of your LUIS subscription.
   * Replace the string `YourApplicationKey` with your LUIS application ID.
-    For example, replace with `westus` if you are using the 30-day free trial subscription.
 * Press Ctrl+F9, or select **Build** \> **Make Project**.
 
 ## Run the sample
