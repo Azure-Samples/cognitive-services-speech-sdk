@@ -5,7 +5,7 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 
 ## Prerequisites
 
-* A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
+* A subscription key for the Speech service. [Create a new Azure account, and try Cognitive Services for free.](https://azure.microsoft.com/free/cognitive-services/)
 * A Mac with a working speaker.
 
 ## Build the sample
@@ -28,7 +28,6 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 * Edit the `helloworld.cpp` source:
   * Replace the string `YourSubscriptionKey` with your own subscription key.
   * Replace the string `YourServiceRegion` with the service region of your subscription.
-    For example, replace with `westus` if you are using the 30-day free trial subscription.
 * Run the command `make` to build the sample, the resulting executable will be called `helloworld`.
 
 ## Run the sample
