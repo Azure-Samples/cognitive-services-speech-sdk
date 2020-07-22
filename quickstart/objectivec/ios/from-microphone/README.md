@@ -5,7 +5,7 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 
 ## Prerequisites
 
-* A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
+* A subscription key for the Speech service. [Create a new Azure account, and try Cognitive Services for free.](https://azure.microsoft.com/free/cognitive-services/)
 * A Mac with [Xcode](https://geo.itunes.apple.com/us/app/xcode/id497799835?mt=12) version 9.4.1 or later installed as iOS development environment. This tutorial targets iOS versions 9.2 or later.
 
 ## Get the Code for the Sample App
@@ -26,7 +26,7 @@ Next, add your subscription details to the `helloworld/ViewController.m` file:
 
 1. Replace the string `YourSubscriptionKey` with your subscription key.
 
-1. Replace the string `YourServiceRegion` with the [region](https://docs.microsoft.com/azure/cognitive-services/speech-service/regions) associated with your subscription (for example, `westus` for the free trial subscription).
+1. Replace the string `YourServiceRegion` with the [region](https://docs.microsoft.com/azure/cognitive-services/speech-service/regions) associated with your subscription.
 
 To build the sample app and check if all the paths are set correctly, choose **Product** > **Build** from the menu.
 
