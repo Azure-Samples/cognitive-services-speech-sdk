@@ -71,9 +71,8 @@ public class IntentRecognition : MonoBehaviour {
     private void Awake()
     {
         // IMPORTANT INFO BEFORE YOU CAN USE THIS SAMPLE:
-        // Get your own Cognitive Services LUIS subscription key for free by following the
-        // instructions under the section titled 'Get LUIS key' in the article found at
-        // https://docs.microsoft.com/azure/cognitive-services/luis/luis-get-started-cs-get-intent.
+        // If you do not have a LUIS subscription key, you can visit the Microsoft Cognitive Services Web site
+        // at https://azure.microsoft.com/free/cognitive-services/, create a new Azure account, and try Cognitive Services for free.
         // Use the inspector fields to manually set these values with your subscription info.
         // If you prefer to manually set your LUIS AppId, Key and Region in code,
         // then uncomment the three lines below and set the values to your own.
