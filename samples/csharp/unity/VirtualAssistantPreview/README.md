@@ -10,7 +10,7 @@ This sample demonstrates how to connect to a BotFramework bot, send and receive 
   * See [Android documentation under Unity manual](https://docs.unity3d.com/Manual/android.html)
     >Note:
     >[UWP ARM64 support was only added in Unity 2019.1](https://blogs.unity3d.com/2019/04/16/introducing-unity-2019-1/#universal)
-* An Azure subscription key for the Speech Service. Get one for free. [Get one for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
+* An Azure subscription key for the Speech Service. [Create a new Azure account, and try Cognitive Services for free.](https://azure.microsoft.com/free/cognitive-services/)
 * A previously created bot configured with the [Direct Line Speech channel](https://docs.microsoft.com/azure/bot-service/bot-service-channel-connect-directlinespeech)
 * A Windows PC with Windows 10 Fall Creators Update (10.0; Build 16299) or later and with a working microphone.
 * [Microsoft Visual Studio 2017](https://www.visualstudio.com/), Community Edition or higher.
