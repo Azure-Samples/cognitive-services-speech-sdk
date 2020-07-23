@@ -3,6 +3,7 @@
 
 import sys
 import pytest
+import time
 
 import azure.cognitiveservices.speech as msspeech
 
@@ -436,6 +437,51 @@ def test_keyword_recognition_from_wav_file(from_file_speech_reco_with_callbacks,
     # Disable checking the result until https://msasg.visualstudio.com/Skyman/_workitems/edit/2061984 is understood.
     # _check_sr_result(valid_events[-1].result, kws_input, 0)
     assert valid_events[-1].result.text.startswith(kws_input.model_keyword)
+
+
+@pytest.mark.skipif(sys.platform == 'darwin', reason="KWS is not available on macOS")
+@pytest.mark.parametrize('kws_input,', ['computer'], indirect=True)
+def test_local_keyword_recognition_from_wav_file(from_file_keyword_reco_with_callbacks, kws_input):
+    reco, callbacks = from_file_keyword_reco_with_callbacks()
+    model = msspeech.KeywordRecognitionModel(kws_input.model_file)
+    assert model
+
+    # Recognize a keyword
+    result_future = reco.recognize_once_async(model)
+
+    _wait_for_event(callbacks, 'recognized')
+
+    result = result_future.get()
+
+    assert result.reason == msspeech.ResultReason.RecognizedKeyword
+    assert result.text == kws_input.model_keyword
+
+    # Read audio from the result stream
+    time.sleep(.5) # give some time so the stream is filled
+    result_stream = msspeech.AudioDataStream(result)
+    result_stream.detach_input() # stop any more data from input getting to the stream
+
+    num_bytes = 100
+    audio_buffer = bytes(num_bytes)
+
+    assert result_stream.can_read_data(num_bytes)
+
+    num_bytes_read = result_stream.read_data(audio_buffer)
+
+    assert num_bytes_read == num_bytes
+
+    # Continue with the same input -> canceled due to EndOfStream
+    result_future = reco.recognize_once_async(model)
+
+    _wait_for_event(callbacks, 'canceled')
+
+    result = result_future.get()
+
+    assert result.reason == msspeech.ResultReason.Canceled
+    assert result.cancellation_details.reason == msspeech.CancellationReason.EndOfStream
+
+    stop_future = reco.stop_recognition_async()
+    stopped = stop_future.get()
 
 
 @pytest.mark.parametrize('speech_input,', ['silence'], indirect=True)

@@ -19,7 +19,6 @@
 #include <speechapi_cxx_utils.h>
 #include <speechapi_cxx_properties.h>
 
-#ifndef SWIG
 namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
@@ -203,4 +202,3 @@ public:
 
 
 } } }
-#endif

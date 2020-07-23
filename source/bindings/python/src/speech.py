@@ -1211,19 +1211,20 @@ class AudioDataStream():
     """
     Represents audio data stream used for operating audio data as a stream.
 
-    Generates an audio data stream from a speech synthesis result (type SpeechSynthesisResult).
+    Generates an audio data stream from a speech synthesis result (type SpeechSynthesisResult)
+    or a keyword recognition result (type KeywordRecognitionResult).
 
-    :param result: The speech synthesis result.
+    :param result: The speech synthesis or keyword recognition result.
     """
 
-    def __init__(self, result: SpeechSynthesisResult):
+    def __init__(self, result = None):
         if result is None:
             raise ValueError('result must be provided')
 
-        if not isinstance(result, SpeechSynthesisResult):
-            raise ValueError('result must be a SpeechSynthesisResult, is "{}"'.format(result))
-
-        self._impl = impl.AudioDataStream._from_result(result._impl)
+        if isinstance(result, SpeechSynthesisResult) or isinstance(result, KeywordRecognitionResult):
+            self._impl = impl.AudioDataStream._from_result(result._impl)
+        else:
+            raise ValueError('result must be a SpeechSynthesisResult or KeywordRecognitionResult, is "{}"'.format(result))
 
     @property
     def status(self) -> "StreamStatus":
@@ -1309,6 +1310,12 @@ class AudioDataStream():
             raise ValueError('file_name must be a str, is "{}"'.format(file_name))
 
         return self._impl.save_to_wav_file_async(file_name)
+
+    def detach_input(self):
+        """
+        Stop any more data from getting to the stream.
+        """
+        self._impl.detach_input()
 
     @property
     def position(self) -> int:
@@ -1500,3 +1507,109 @@ class SpeechSynthesizer:
         instance as the single argument.
         """
         return EventSignal(self._impl.word_boundary, SpeechSynthesisWordBoundaryEventArgs)
+
+
+class KeywordRecognitionResult(RecognitionResult):
+    """
+    Result of a keyword recognition operation.
+    """
+
+    def __init__(self, impl_result):
+        """
+        Constructor for internal use.
+        """
+        super().__init__(impl_result)
+        self._impl = impl_result
+
+    def __str__(self):
+        return u'{}(result_id={}, text="{}", reason={})'.format(type(self).__name__, self.result_id, self.text, self.reason)
+
+
+class KeywordRecognitionEventArgs(RecognitionEventArgs):
+    """
+    Class for keyword recognition event arguments.
+    """
+
+    def __init__(self, evt_args):
+        """
+        Constructor for internal use.
+        """
+        super().__init__(evt_args)
+        self._result = KeywordRecognitionResult(evt_args.result)
+
+    @property
+    def result(self) -> "KeywordRecognitionResult":
+        """
+        Keyword recognition event result.
+        """
+        return self._result
+
+    def __str__(self):
+        return u'{}(result=[{}])'.format(type(self).__name__, self._result.__str__())
+
+
+class KeywordRecognizer:
+    """
+    A keyword recognizer.
+
+    :param audio_config: The config for audio input.
+        This parameter is optional.
+        If it is None or not provided, the default microphone device will be used for audio input.
+    """
+    def __init__(self, audio_config: Optional[audio.AudioConfig] = None):
+        self._impl = self._get_impl(impl.KeywordRecognizer, audio_config)
+
+    @staticmethod
+    def _get_impl(reco_type, audio_config):
+        if audio_config is not None:
+            _impl = reco_type._from_config(audio_config._impl)
+        else:
+            _impl = reco_type._from_config(None)
+
+        return _impl
+
+    def recognize_once_async(self, model: KeywordRecognitionModel) -> ResultFuture:
+        """
+        Asynchronously initiates keyword recognition operation.
+
+        :param model: The keyword recognition model that specifies the keyword to be recognized.
+
+        :return: A future that is fulfilled once recognition has been initialized.
+        """
+        return ResultFuture(self._impl.recognize_once_async(model._impl), KeywordRecognitionResult)
+
+    def stop_recognition_async(self):
+        """
+        Asynchronously terminates ongoing keyword recognition operation.
+
+        :return: A future that is fulfilled once recognition has been stopped.
+        """
+        return self._impl.stop_recognition_async()
+
+    @property
+    def properties(self) -> PropertyCollection:
+        """
+        A collection of properties and their values defined for this KeywordRecognizer.
+        """
+        return self._impl.properties
+
+    @property
+    def recognized(self) -> EventSignal:
+        """
+        Signal for events containing final keyword recognition results (indicating a successful
+        recognition attempt).
+
+        Callbacks connected to this signal are called with a
+        :class:`.KeywordRecognitionEventArgs` instance as the single argument.
+        """
+        return EventSignal(self._impl.recognized, KeywordRecognitionEventArgs)
+
+    @property
+    def canceled(self) -> EventSignal:
+        """
+        Signal for events containing canceled keyword recognition results.
+
+        Callbacks connected to this signal are called with a
+        :class:`.SpeechRecognitionCanceledEventArgs` instance as the single argument.
+        """
+        return EventSignal(self._impl.canceled, SpeechRecognitionCanceledEventArgs)

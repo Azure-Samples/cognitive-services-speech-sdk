@@ -70,6 +70,9 @@ from typing import Optional
 %rename ("$ignore", fullname=1) Microsoft::CognitiveServices::Speech::Intent::IntentRecognitionCanceledEventArgs::IntentRecognitionCanceledEventArgs;
 %rename ("$ignore", fullname=1) Microsoft::CognitiveServices::Speech::Intent::IntentRecognitionEventArgs::IntentRecognitionEventArgs;
 
+%rename ("$ignore", fullname=1) Microsoft::CognitiveServices::Speech::KeywordRecognitionResult::KeywordRecognitionResult;
+%rename ("$ignore", fullname=1) Microsoft::CognitiveServices::Speech::KeywordRecognitionEventArgs::KeywordRecognitionEventArgs;
+
 // Release GIL:
 // * when invoking a blocking Recognize/Synthesize.
 %threadallow Microsoft::CognitiveServices::Speech::SpeechRecognizer::Recognize;
@@ -87,12 +90,14 @@ from typing import Optional
 %threadallow Microsoft::CognitiveServices::Speech::SpeechSynthesizer::SpeakSsmlAsync;
 %threadallow Microsoft::CognitiveServices::Speech::SpeechSynthesizer::StartSpeakingTextAsync;
 %threadallow Microsoft::CognitiveServices::Speech::SpeechSynthesizer::StartSpeakingSsmlAsync;
+%threadallow Microsoft::CognitiveServices::Speech::KeywordRecognizer::RecognizeOnceAsync;
 // * when invoking SpeechRecognizer/SpeechSynthesizer dtor (otherwise there might be a deadlock if a
 //   callback is concurrently invoked from the speech client.)
 %threadallow Microsoft::CognitiveServices::Speech::SpeechRecognizer::~SpeechRecognizer;
 %threadallow Microsoft::CognitiveServices::Speech::Intent::IntentRecognizer::~IntentRecognizer;
 %threadallow Microsoft::CognitiveServices::Speech::Translation::TranslationRecognizer::~TranslationRecognizer;;
 %threadallow Microsoft::CognitiveServices::Speech::SpeechSynthesizer::~SpeechSynthesizer;
+%threadallow Microsoft::CognitiveServices::Speech::KeywordRecognizer::~KeywordRecognizer;
 // * when waiting on a future.
 %threadallow FutureWrapper::Get;
 // * when invoking disconnect (which involves acquiring an event signal lock) to
@@ -198,6 +203,7 @@ from typing import Optional
 %rename ("_from_languages") Microsoft::CognitiveServices::Speech::AutoDetectSourceLanguageConfig::FromLanguages;
 %rename ("_from_source_language_configs") Microsoft::CognitiveServices::Speech::AutoDetectSourceLanguageConfig::FromSourceLanguageConfigs;
 %rename ("_from_result") Microsoft::CognitiveServices::Speech::AutoDetectSourceLanguageResult::FromResult;
+%rename ("_from_config") Microsoft::CognitiveServices::Speech::KeywordRecognizer::FromConfig;
 
 // return synthesized audio as bytes object
 %rename ("_audio") Microsoft::CognitiveServices::Speech::Translation::TranslationSynthesisResult::Audio;
@@ -477,7 +483,7 @@ class PyCallback
 %py_wrap_translation_callback_connect(TranslationSynthesisEventArgs)
 %py_wrap_intent_callback_connect(IntentRecognitionEventArgs)
 %py_wrap_intent_callback_connect(IntentRecognitionCanceledEventArgs)
-
+%py_wrap_callback_connect(KeywordRecognitionEventArgs)
 
 // macro to make reason properties return Python enums
 %define %py_wrap_reason(BaseName, EnumName, Docstring)
@@ -499,6 +505,7 @@ class PyCallback
 %py_wrap_reason(Translation::TranslationSynthesisResult, ResultReason, The reason for the result)
 %py_wrap_reason(SpeechSynthesisResult, ResultReason, The speech synthesis reason)
 %py_wrap_reason(SpeechSynthesisCancellationDetails, CancellationReason, The reason the synthesis was canceled)
+%py_wrap_reason(KeywordRecognitionResult, ResultReason, The reason for the result)
 
 // macro to make stream status properties return Python enums
 %define %py_wrap_status(BaseName, EnumName, Docstring)
@@ -552,6 +559,7 @@ class PyCallback
 %py_ro_property(IntentRecognitionEventArgs, result, TranslationSynthesisResult, Contains the intent recognition result., Intent::)
 %py_ro_property(TranslationRecognitionEventArgs, result, TranslationRecognitionResult, Contains the translation recognition result., Translation::)
 %py_ro_property(TranslationSynthesisEventArgs, result, TranslationSynthesisResult, Contains the translation synthesis result., Translation::)
+%py_ro_property(KeywordRecognitionEventArgs, result, KeywordRecognitionResult, Contains the keyword recognition result.)
 
 %py_ro_property(TranslationRecognitionCanceledEventArgs, cancellation_details, CancellationDetails, Details about why translation was canceled., Translation::)
 %py_ro_property(SpeechRecognitionCanceledEventArgs, cancellation_details, CancellationDetails, Details about why speech recognition was canceled.)

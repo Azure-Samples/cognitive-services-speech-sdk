@@ -76,12 +76,14 @@ class _TestCallback(object):
 
 def _setup_callbacks(reco, setup_stop_callbacks=False):
     callbacks = {
-            'session_started': _TestCallback('SESSION_STARTED: {evt}'),
-            'session_stopped': _TestCallback('SESSION_STOPPED: {evt}'),
             'canceled': _TestCallback('CANCELED: {evt}'),
-            'recognizing': _TestCallback('RECOGNIZING: {evt}'),
             'recognized': _TestCallback('RECOGNIZED: {evt}'),
     }
+
+    if not isinstance(reco, msspeech.KeywordRecognizer):
+        callbacks['session_started'] = _TestCallback('SESSION_STARTED: {evt}')
+        callbacks['session_stopped'] = _TestCallback('SESSION_STOPPED: {evt}')
+        callbacks['recognizing'] = _TestCallback('RECOGNIZING: {evt}')
 
     for cb_name, callback in callbacks.items():
         callback.reset()

@@ -75,14 +75,12 @@ public:
     /// <returns>A shared pointer to AudioDataStream</returns>
     static std::shared_ptr<AudioDataStream> FromResult(std::shared_ptr<SpeechSynthesisResult> result);
 
-#ifndef SWIG
     /// <summary>
     /// Obtains the memory backed AudioDataStream associated with a given KeywordRecognition result.
     /// </summary>
     /// <param name="result">The keyword recognition result.</param>
     /// <returns>An audio stream with the input to the KeywordRecognizer starting from right before the Keyword.</returns>
     static std::shared_ptr<AudioDataStream> FromResult(std::shared_ptr<KeywordRecognitionResult> result);
-#endif
 
     /// <summary>
     /// Get current status of the audio data stream.

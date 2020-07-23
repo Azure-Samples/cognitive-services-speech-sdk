@@ -297,7 +297,7 @@ kws_input_data_raw = {
         (None, ),
         (None, ),
         ('Computer', 'kws.table'),
-        "",
+        "Computer",
     ),
 }
 
@@ -360,6 +360,26 @@ def from_file_speech_reco_with_callbacks(speech_input: SpeechInput,
         reco = msspeech.SpeechRecognizer(speech_config, audio_config)
         callbacks = setup_callback_handle(reco)
 
+        return (reco, callbacks)
+
+    return build_recognizer
+
+
+@pytest.fixture
+def from_file_keyword_reco_with_callbacks(kws_input: KwsInput):
+    """
+    Fixture to generate a `KeywordRecognizer` setup with
+    audio input from file as defined by `kws_input`.
+
+    @return: A function that takes a function `setup_callback_handle`
+             to setup callbacks on the recognizer. It returns a tuple
+             `(recognizer, callbacks)`.
+    """
+
+    def build_recognizer(setup_callback_handle: Callable = _setup_callbacks):
+        audio_config = msspeech.audio.AudioConfig(filename=kws_input.path)
+        reco = msspeech.KeywordRecognizer(audio_config)
+        callbacks = setup_callback_handle(reco)
         return (reco, callbacks)
 
     return build_recognizer

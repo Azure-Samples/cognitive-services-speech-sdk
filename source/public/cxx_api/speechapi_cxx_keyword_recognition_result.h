@@ -11,7 +11,6 @@
 #include <speechapi_cxx_recognition_result.h>
 #include <speechapi_cxx_audio_data_stream.h>
 
-#ifndef SWIG
 namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
@@ -43,4 +42,3 @@ inline std::shared_ptr<AudioDataStream> AudioDataStream::FromResult(std::shared_
 }
 
 } } } // Microsoft::CognitiveServices::Speech
-#endif

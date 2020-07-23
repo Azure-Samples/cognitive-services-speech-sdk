@@ -68,6 +68,8 @@
 %shared_ptr(Microsoft::CognitiveServices::Speech::Intent::IntentTrigger)
 %shared_ptr(Microsoft::CognitiveServices::Speech::Intent::LanguageUnderstandingModel)
 %shared_ptr(Microsoft::CognitiveServices::Speech::KeywordRecognitionModel)
+%shared_ptr(Microsoft::CognitiveServices::Speech::KeywordRecognitionResult)
+%shared_ptr(Microsoft::CognitiveServices::Speech::KeywordRecognizer)
 %shared_ptr(Microsoft::CognitiveServices::Speech::Translation::TranslationRecognitionResult)
 %shared_ptr(Microsoft::CognitiveServices::Speech::Translation::TranslationSynthesisResult)
 %shared_ptr(Microsoft::CognitiveServices::Speech::AsyncRecognizer<Microsoft::CognitiveServices::Speech::Translation::TranslationRecognitionResult, Microsoft::CognitiveServices::Speech::Translation::TranslationRecognitionEventArgs, Microsoft::CognitiveServices::Speech::Translation::TranslationRecognitionCanceledEventArgs>)
@@ -157,6 +159,7 @@
 
 %inline %{
     typedef std::shared_ptr<Microsoft::CognitiveServices::Speech::SpeechRecognitionResult> SpeechRecognitionResultPtr;
+    typedef std::shared_ptr<Microsoft::CognitiveServices::Speech::KeywordRecognitionResult> KeywordRecognitionResultPtr;
     typedef std::shared_ptr<Microsoft::CognitiveServices::Speech::Intent::IntentRecognitionResult> IntentRecognitionResultPtr;
     typedef std::shared_ptr<Microsoft::CognitiveServices::Speech::Translation::TranslationRecognitionResult> TranslationRecognitionResultPtr;
     typedef std::shared_ptr<Microsoft::CognitiveServices::Speech::SpeechSynthesisResult> SpeechSynthesisResultPtr;
@@ -169,6 +172,7 @@
 %}
 
 %template(SpeechRecognitionResultPtrFuture) FutureWrapper<SpeechRecognitionResultPtr>;
+%template(KeywordRecognitionResultPtrFuture) FutureWrapper<KeywordRecognitionResultPtr>;
 %template(IntentRecognitionResultPtrFuture) FutureWrapper<IntentRecognitionResultPtr>;
 %template(TranslationRecognitionResultPtrFuture) FutureWrapper<TranslationRecognitionResultPtr>;
 %template(SpeechSynthesisResultPtrFuture) FutureWrapper<SpeechSynthesisResultPtr>;
@@ -238,6 +242,20 @@
     FutureWrapper<void> StopKeywordRecognitionAsync()
     {
         auto future = ($self)->StopKeywordRecognitionAsync();
+        return FutureWrapper<void>(std::move(future));
+    }
+}
+
+%extend Microsoft::CognitiveServices::Speech::KeywordRecognizer {
+
+    FutureWrapper<KeywordRecognitionResultPtr> RecognizeOnceAsync(std::shared_ptr<KeywordRecognitionModel> model) {
+        auto future = ($self)->RecognizeOnceAsync(model);
+        return FutureWrapper<KeywordRecognitionResultPtr>(std::move(future));
+    }
+
+    FutureWrapper<void> StopRecognitionAsync()
+    {
+        auto future = ($self)->StopRecognitionAsync();
         return FutureWrapper<void>(std::move(future));
     }
 }
@@ -612,6 +630,7 @@
 %ignore Microsoft::CognitiveServices::Speech::EventSignal::operator-=;
 
 %ignore RecognizeOnceAsync;
+%ignore StopRecognitionAsync;
 %ignore StartContinuousRecognitionAsync;
 %ignore StopContinuousRecognitionAsync;
 %ignore StartKeywordRecognitionAsync;
@@ -650,6 +669,7 @@
 %ignore Microsoft::CognitiveServices::Speech::SpeechRecognizer::FromConfig(std::shared_ptr<SpeechConfig> speechconfig, std::nullptr_t);
 
 %immutable Microsoft::CognitiveServices::Speech::SpeechRecognizer::Properties;
+%immutable Microsoft::CognitiveServices::Speech::KeywordRecognizer::Properties;
 %immutable Microsoft::CognitiveServices::Speech::Intent::IntentRecognizer::Properties;
 %immutable Microsoft::CognitiveServices::Speech::Translation::TranslationRecognizer::Properties;
 %immutable Microsoft::CognitiveServices::Speech::RecognitionResult::Properties;
@@ -806,6 +826,13 @@
 %template(SpeechSynthesisWordBoundaryEventSignal) Microsoft::CognitiveServices::Speech::EventSignal<const Microsoft::CognitiveServices::Speech::SpeechSynthesisWordBoundaryEventArgs&>;
 
 %include <speechapi_cxx_speech_synthesizer.h>
+
+%include <speechapi_cxx_keyword_recognition_result.h>
+%include <speechapi_cxx_keyword_recognition_eventargs.h>
+
+%template(KeywordRecognitionEventSignal) Microsoft::CognitiveServices::Speech::EventSignal<const Microsoft::CognitiveServices::Speech::KeywordRecognitionEventArgs&>;
+
+%include <speechapi_cxx_keyword_recognizer.h>
 
 %include <speechapi_cxx_translation_recognizer.h>
 
