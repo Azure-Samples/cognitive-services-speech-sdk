@@ -3,8 +3,6 @@ project(pal)
 set(SRC_DIR "${PROJECT_SOURCE_DIR}")
 set(INC_DIR "${PROJECT_SOURCE_DIR}/include")
 
-include_directories(${INC_DIR})
-
 if(SPEECHSDK_OS STREQUAL "Android")
     set(PAL_SRC "${SRC_DIR}/android")
 elseif(SPEECHSDK_OS STREQUAL "WindowsUwp")
@@ -31,6 +29,13 @@ source_group("Header Files (private)" FILES ${HEADERS_PRIVATE})
 source_group("Source Files" FILES ${SOURCES})
 
 add_library(pal STATIC ${HEADERS} ${HEADERS_PRIVATE} ${SOURCES})
+
+target_include_directories(pal
+    PRIVATE
+        ${PAL_SRC}
+    PUBLIC
+        ${INC_DIR}
+)
 
 if(WIN32 AND SPECTRE_MITIGATION)
     set_property(TARGET pal PROPERTY VS_GLOBAL_SpectreMitigation "Spectre")

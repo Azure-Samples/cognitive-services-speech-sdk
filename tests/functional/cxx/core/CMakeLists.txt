@@ -2,19 +2,6 @@ project(core_tests)
 
 set(SRC_DIR "${PROJECT_SOURCE_DIR}")
 
-include_directories("${CARBON_CORE}/include")
-include_directories("${COMMON}/include")
-include_directories("${USP}/include")
-include_directories("${SR}")
-include_directories("${TTS_REST}")
-include_directories("${AUDIO}")
-include_directories("${AUDIO}/include")
-include_directories("${CARBON_EXTERNAL}/Catch2")
-include_directories(${CARBON_C_API})
-include_directories(${CARBON_CXX_API})
-include_directories(${TEST_INCLUDE})
-include_directories("${CARBON_EXTERNAL}/json")
-
 set(SOURCES
     "${SRC_DIR}/main.cpp"
     "${SRC_DIR}/usp_test_case.cpp"
@@ -34,6 +21,21 @@ source_group("Source Files" FILES ${SOURCES})
 source_group("Header Files" FILES ${TEST_HEADERS})
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${TEST_HEADERS})
+
+set(PRIVATE_AUDIO_HEADERS "${CARBON_CORE}/audio")
+set(PRIVATE_SR_HEADERS "${CARBON_CORE}/sr")
+
+target_include_directories(${PROJECT_NAME}
+    PRIVATE
+        ${TEST_INCLUDE}
+        ${CARBON_C_API}
+        ${CARBON_CXX_API}
+        "${CARBON_EXTERNAL}/Catch2"
+        "${CARBON_EXTERNAL}/json"
+        ${CARBON_INCLUDE}
+        ${PRIVATE_AUDIO_HEADERS}
+        ${PRIVATE_SR_HEADERS}
+)
 
 # define USE_NON_CORE_ROOT_SITE when building extensions or unit tests. This enable the extensions or unit test to use the extension root site provided by CSpxExtensionResourceManager.
 # unit tests against modules other than common: they still need to be linked with factory since SpxGetCoreRootSite is defined in factory.

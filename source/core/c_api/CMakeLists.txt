@@ -2,16 +2,6 @@ project(c_api)
 
 set(SRC_DIR "${PROJECT_SOURCE_DIR}")
 
-include_directories(${CARBON_C_API})
-include_directories(${CARBON_CXX_API})
-include_directories(${CARBON_INCLUDE})
-include_directories("${FACTORY}/include")
-include_directories("${COMMON}/include")
-include_directories("${LOGGING}/include")
-include_directories("${SR}/include")
-include_directories("${CARBON_EXTERNAL}/json")
-include_directories("${CONVERSATION_TRANSLATION}/include")
-
 set(HEADERS)
 
 set(HEADERS_PRIVATE
@@ -69,6 +59,17 @@ add_library(c_api OBJECT
     ${SPEECH_C_API_HEADERS}
     ${HEADERS} ${HEADERS_PRIVATE} ${SOURCES}
     )
+
+target_include_directories(c_api
+    PRIVATE
+        ${CARBON_C_API}
+        ${CARBON_CXX_API}
+        ${CARBON_INCLUDE}
+        "${CARBON_EXTERNAL}/json"
+
+)
+
+target_link_libraries(c_api PRIVATE factory common logging sr conversation_translation)
 
 if(WIN32 AND SPECTRE_MITIGATION)
     set_property(TARGET c_api PROPERTY VS_GLOBAL_SpectreMitigation "Spectre")

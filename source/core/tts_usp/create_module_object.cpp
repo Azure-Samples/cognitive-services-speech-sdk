@@ -20,6 +20,7 @@ namespace Impl {
 
 SPX_EXTERN_C void* TTS_USP_CreateModuleObject(const char* className, const char* interfaceName)
 {
+    using namespace USP;
     SPX_FACTORY_MAP_BEGIN();
     SPX_FACTORY_MAP_ENTRY(CSpxUspCallbackWrapper, ISpxUspCallbacks);
     SPX_FACTORY_MAP_END();

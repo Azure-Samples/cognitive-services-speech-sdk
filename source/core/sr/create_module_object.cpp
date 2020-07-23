@@ -50,6 +50,7 @@ namespace Impl {
 
 SPX_EXTERN_C void* SRLib_CreateModuleObject(const char* className, const char* interfaceName)
 {
+    using namespace USP;
     SPX_FACTORY_MAP_BEGIN();
     SPX_FACTORY_MAP_ENTRY(CSpxAudioStreamSession, ISpxSession);
     SPX_FACTORY_MAP_ENTRY(CSpxRecognitionEventArgs, ISpxRecognitionEventArgs);

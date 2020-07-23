@@ -243,7 +243,7 @@ if(MSVC)
 
   # enable multiprocessor optimizations
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
-  
+
   # enable Just My Code debugging to avoid stepping into external code while while debugging
   # (e.g. std::shared_ptr or std::string). https://docs.microsoft.com/cpp/build/reference/jmc
   set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /JMC")
@@ -386,23 +386,6 @@ set(JAVA_JNI_LIBRARY Microsoft.CognitiveServices.Speech.java.bindings)
 file(GLOB SPEECH_C_API_HEADERS "${CARBON_C_API}/*.h")
 file(GLOB SPEECH_CXX_API_HEADERS "${CARBON_CXX_API}/*.h")
 
-# individual components
-set(PAL "${CARBON_CORE}/pal")
-set(COMMON "${CARBON_CORE}/common")
-set(LOGGING "${CARBON_CORE}/logging")
-set(FACTORY "${CARBON_CORE}/factory")
-set(SR "${CARBON_CORE}/sr")
-set(TTS "${CARBON_CORE}/tts")
-set(TTS_MOCK "${CARBON_CORE}/tts_mock")
-set(TTS_REST "${CARBON_CORE}/tts_rest")
-set(TTS_USP "${CARBON_CORE}/tts_usp")
-set(LIBCARBON "${CARBON_CORE}/libcarbon")
-set(C_API "${CARBON_CORE}/c_api")
-set(AUDIO "${CARBON_CORE}/audio")
-set(USP "${CARBON_CORE}/usp")
-set(MOCK "${CARBON_CORE}/mock")
-set(CONVERSATION_TRANSLATION "${CARBON_CORE}/conversation_translation")
-set(SPEAKER_RECOGNITION "${CARBON_CORE}/speaker_recognition")
 
 # Enable Unidec build with 'cmake -DEXTENSION_UNIDEC_ENABLED=true'
 if(EXTENSION_UNIDEC_ENABLED AND
@@ -451,25 +434,9 @@ if(EXTENSION_CODEC_ENABLED)
   endif()
 endif()
 
-add_subdirectory(${PAL})
-add_subdirectory(${COMMON})
-add_subdirectory(${LOGGING})
-add_subdirectory(${FACTORY})
-add_subdirectory(${AUDIO})
-add_subdirectory(${USP})
+add_subdirectory(${CARBON_CORE})
 
-add_subdirectory(${C_API})
-add_subdirectory(${SR})
-add_subdirectory(${TTS})
-add_subdirectory(${TTS_MOCK})
-add_subdirectory(${TTS_REST})
-add_subdirectory(${TTS_USP})
-add_subdirectory(${CONVERSATION_TRANSLATION})
-add_subdirectory(${SPEAKER_RECOGNITION})
 
-add_subdirectory(${MOCK})
-
-add_subdirectory(${LIBCARBON})
 
 if(BUILD_UNIDEC)
   add_subdirectory(${UNIDEC})

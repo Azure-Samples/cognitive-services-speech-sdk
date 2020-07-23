@@ -3,15 +3,6 @@ project(logging)
 set(SRC_DIR "${PROJECT_SOURCE_DIR}")
 set(INC_DIR "${PROJECT_SOURCE_DIR}/include")
 
-include_directories(${INC_DIR})
-include_directories(${CARBON_C_API})
-include_directories(${CARBON_CXX_API})
-include_directories(${CARBON_INCLUDE})
-include_directories("${COMMON}/include")
-
-include_directories("${PAL}/include")
-include_directories("${CARBON_EXTERNAL}/json")
-
 set(HEADERS
     "${SRC_DIR}/stdafx.h"
     "${INC_DIR}/file_logger.h"
@@ -30,6 +21,18 @@ source_group("Header Files (public)" FILES ${HEADERS})
 source_group("Source Files" FILES ${SOURCES})
 
 add_library(logging STATIC ${HEADERS} ${SOURCES})
+
+target_include_directories(logging
+    PRIVATE
+        ${CARBON_C_API}
+        ${CARBON_CXX_API}
+        ${CARBON_INCLUDE}
+        "${CARBON_EXTERNAL}/json"
+    PUBLIC
+        ${INC_DIR}
+)
+
+target_link_libraries(logging PRIVATE pal common)
 
 if(WIN32 AND SPECTRE_MITIGATION)
     set_property(TARGET logging PROPERTY VS_GLOBAL_SpectreMitigation "Spectre")

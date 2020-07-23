@@ -3,13 +3,6 @@ project(common)
 set(SRC_DIR "${PROJECT_SOURCE_DIR}")
 set(INC_DIR "${PROJECT_SOURCE_DIR}/include")
 
-include_directories(${INC_DIR})
-include_directories(${CARBON_C_API})
-include_directories(${CARBON_CXX_API})
-include_directories(${CARBON_INCLUDE})
-include_directories("${PAL}/include")
-include_directories("${USP}/include")
-include_directories("${CARBON_EXTERNAL}/json")
 
 set(HEADERS
     "${SRC_DIR}/stdafx.h"
@@ -74,6 +67,8 @@ set(HEADERS
     "${INC_DIR}/function_helpers.h"
     "${INC_DIR}/platform_init.h"
     "${INC_DIR}/buffer_helpers.h"
+    "${INC_DIR}/thread_service.h"
+    "${INC_DIR}/synthesis_helper.h"
     )
 
 if(SPEECHSDK_OS STREQUAL "OSX")
@@ -115,6 +110,7 @@ set(SOURCES
     "${SRC_DIR}/http_endpoint_info.cpp"
     "${SRC_DIR}/web_socket.cpp"
     "${SRC_DIR}/platform_init.cpp"
+    "${SRC_DIR}/thread_service.cpp"
     )
 
 if(SPEECHSDK_OS STREQUAL "OSX")
@@ -147,6 +143,18 @@ source_group("Header Files (private)" FILES ${HEADERS_PRIVATE})
 source_group("Source Files" FILES ${SOURCES})
 
 add_library(common STATIC ${HEADERS} ${HEADERS_PRIVATE} ${SOURCES})
+
+
+target_include_directories(common
+    PRIVATE
+        ## TODO: These should come from target_link_libraries
+        ${CARBON_C_API}
+        ${CARBON_CXX_API}
+        ${CARBON_INCLUDE}
+        "${CARBON_EXTERNAL}/json"
+    PUBLIC
+        ${INC_DIR}
+)
 
 if(WIN32 AND SPECTRE_MITIGATION)
     set_property(TARGET common PROPERTY VS_GLOBAL_SpectreMitigation "Spectre")

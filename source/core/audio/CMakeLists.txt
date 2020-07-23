@@ -3,15 +3,6 @@ project(audio)
 set(SRC_DIR "${PROJECT_SOURCE_DIR}")
 set(INC_DIR "${PROJECT_SOURCE_DIR}/include")
 
-include_directories(${INC_DIR})
-include_directories(${CARBON_C_API})
-include_directories(${CARBON_CXX_API})
-include_directories(${CARBON_INCLUDE})
-include_directories("${CARBON_EXTERNAL}/json")
-include_directories(${TTS})
-
-include_directories("${COMMON}/include")
-
 set(HEADERS "${INC_DIR}/audio_sys.h")
 
 set(HEADERS_PRIVATE
@@ -80,7 +71,6 @@ set(SOURCES
 
 set(AUDIO_LIBS common)
 
-include_directories(${SRC_DIR}) # for "stdafx.h"
 
 if(WIN32)
     list(APPEND HEADERS_PRIVATE
@@ -159,6 +149,17 @@ source_group("Header Files (private)" FILES ${HEADERS_PRIVATE})
 source_group("Source Files" FILES ${SOURCES})
 
 add_library(audio STATIC ${HEADERS} ${HEADERS_PRIVATE} ${SOURCES})
+
+target_include_directories(audio
+    PRIVATE
+        ${CARBON_C_API}
+        ${CARBON_CXX_API}
+        ${CARBON_INCLUDE}
+        "${CARBON_EXTERNAL}/json"
+        ${SRC_DIR}
+    PUBLIC
+        ${INC_DIR}
+)
 
 if(CMAKE_SYSTEM_NAME STREQUAL "WindowsStore")
     # Need C++17 for WinRT API access via cppwinrt.

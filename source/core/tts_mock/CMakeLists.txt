@@ -2,18 +2,6 @@ project(tts_mock)
 
 set(SRC_DIR "${PROJECT_SOURCE_DIR}")
 set(INC_DIR "${PROJECT_SOURCE_DIR}/include")
-
-include_directories(${CARBON_C_API})
-include_directories(${CARBON_CXX_API})
-include_directories(${CARBON_INCLUDE})
-include_directories(${AUDIO})
-include_directories(${TTS})
-include_directories("${CARBON_EXTERNAL}/json")
-
-include_directories(${INC_DIR})
-include_directories("${COMMON}/include")
-include_directories("${COMMON_GENERATED_INCLUDE}")
-
 set(HEADERS)
 
 set(HEADERS_PRIVATE
@@ -33,6 +21,20 @@ source_group("Header Files (private)" FILES ${HEADERS_PRIVATE})
 source_group("Source Files" FILES ${SOURCES})
 
 add_library(tts_mock SHARED ${HEADERS} ${HEADERS_PRIVATE} ${SOURCES})
+
+target_include_directories(tts_mock
+    PRIVATE
+        ${SRC_DIR}
+        ${CARBON_C_API}
+        ${CARBON_CXX_API}
+        ${CARBON_INCLUDE}
+        "${CARBON_EXTERNAL}/json"
+        ${COMMON_GENERATED_INCLUDE}
+    PUBLIC
+        ${INC_DIR}
+)
+
+add_compile_definitions(USE_NON_CORE_ROOT_SITE)
 
 if(WIN32 AND SPECTRE_MITIGATION)
     set_property(TARGET tts_mock PROPERTY VS_GLOBAL_SpectreMitigation "Spectre")

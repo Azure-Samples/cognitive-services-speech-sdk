@@ -35,60 +35,13 @@ namespace Speech {
 namespace Impl {
 
 
-class ISpxUspCallbacks :
-    public ISpxInterfaceBaseFor<ISpxUspCallbacks>,
-    public USP::Callbacks
-{
-};
-
-class CSpxUspCallbackWrapper final :
-    public ISpxObjectWithSiteInitImpl<ISpxUspCallbacks>,
-    public ISpxUspCallbacks
-{
-public:
-
-    CSpxUspCallbackWrapper() = default;
-    ~CSpxUspCallbackWrapper() = default;
-
-    SPX_INTERFACE_MAP_BEGIN()
-        SPX_INTERFACE_MAP_ENTRY(ISpxObjectWithSite)
-        SPX_INTERFACE_MAP_ENTRY(ISpxObjectInit)
-        SPX_INTERFACE_MAP_ENTRY(ISpxUspCallbacks)
-    SPX_INTERFACE_MAP_END()
-
-    // --- ISpxUspCallbacks (overrides)
-    inline void OnMessageReceived(const USP::RawMsg& m) final { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnMessageReceived(m); }); }
-    inline void OnSpeechStartDetected(const USP::SpeechStartDetectedMsg& m) final { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnSpeechStartDetected(m); }); }
-    inline void OnSpeechEndDetected(const USP::SpeechEndDetectedMsg& m) final { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnSpeechEndDetected(m); }); }
-    inline void OnSpeechHypothesis(const USP::SpeechHypothesisMsg& m) final { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnSpeechHypothesis(m); }); }
-    inline void OnSpeechKeywordDetected(const USP::SpeechKeywordDetectedMsg& m) override { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnSpeechKeywordDetected(m); }); }
-    inline void OnSpeechPhrase(const USP::SpeechPhraseMsg& m) final { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnSpeechPhrase(m); }); }
-    inline void OnSpeechFragment(const USP::SpeechFragmentMsg& m) final { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnSpeechFragment(m); }); }
-    inline void OnTurnStart(const USP::TurnStartMsg& m) final { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnTurnStart(m); }); }
-    inline void OnTurnEnd(const USP::TurnEndMsg& m) final { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnTurnEnd(m); }); }
-    inline void OnMessageStart(const USP::TurnStartMsg& m) final { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnMessageStart(m); }); }
-    inline void OnMessageEnd(const USP::TurnEndMsg& m) final { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnMessageEnd(m); }); }
-    inline void OnError(bool transport, USP::ErrorCode errorCode, const std::string& errorMessage) final { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnError(transport, errorCode, errorMessage); }); }
-    inline void OnTranslationHypothesis(const USP::TranslationHypothesisMsg& m) final { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnTranslationHypothesis(m); }); }
-    inline void OnTranslationPhrase(const USP::TranslationPhraseMsg& m) final { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnTranslationPhrase(m); }); }
-    inline void OnAudioOutputChunk(const USP::AudioOutputChunkMsg& m) final { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnAudioOutputChunk(m); }); }
-    inline void OnAudioOutputMetadata(const USP::AudioOutputMetadataMsg& m) final { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnAudioOutputMetadata(m); }); }
-    inline void OnUserMessage(const USP::UserMsg& m) final { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnUserMessage(m); }); }
-    inline void OnConnected() final { InvokeOnSite([](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnConnected(); }); }
-    inline void OnDisconnected() final { InvokeOnSite([](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnDisconnected(); }); }
-
-
-private:
-
-    DISABLE_COPY_AND_MOVE(CSpxUspCallbackWrapper);
-};
 
 
 class CSpxUspRecoEngineAdapter :
     public ISpxObjectWithSiteInitImpl<ISpxRecoEngineAdapterSite>,
     public ISpxServiceProvider,
     public ISpxGenericSite,
-    public ISpxUspCallbacks,
+    public USP::ISpxUspCallbacks,
     public ISpxRecoEngineAdapter
 {
 public:
@@ -101,6 +54,7 @@ public:
         SPX_INTERFACE_MAP_ENTRY(ISpxObjectInit)
         SPX_INTERFACE_MAP_ENTRY(ISpxServiceProvider)
         SPX_INTERFACE_MAP_ENTRY(ISpxGenericSite)
+        using namespace USP;
         SPX_INTERFACE_MAP_ENTRY(ISpxUspCallbacks)
         SPX_INTERFACE_MAP_ENTRY(ISpxRecoEngineAdapter)
         SPX_INTERFACE_MAP_ENTRY(ISpxAudioProcessor)

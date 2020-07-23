@@ -3,13 +3,6 @@ project(usp)
 set(SRC_DIR "${PROJECT_SOURCE_DIR}")
 set(INC_DIR "${PROJECT_SOURCE_DIR}/include")
 
-include_directories(${INC_DIR})
-include_directories(${CARBON_C_API})
-include_directories(${CARBON_CXX_API})
-include_directories(${CARBON_INCLUDE})
-include_directories("${CARBON_EXTERNAL}/json")
-include_directories ("${COMMON}/include")
-
 set(HEADERS
     "${INC_DIR}/usp.h"
     "${INC_DIR}/usperror.h"
@@ -36,6 +29,18 @@ source_group("Header Files (private)" FILES ${HEADERS_PRIVATE})
 source_group("Source Files" FILES ${SOURCES})
 
 add_library(usp STATIC ${HEADERS} ${HEADERS_PRIVATE} ${SOURCES})
+
+target_include_directories(usp
+    PRIVATE
+        ${SRC_DIR}
+        ## TODO: These four should also come from target_link_libraries
+        ${CARBON_C_API}
+        ${CARBON_CXX_API}
+        ${CARBON_INCLUDE}
+        ${CARBON_EXTERNAL}/json
+    PUBLIC
+        ${INC_DIR}
+)
 
 if(WIN32 AND SPECTRE_MITIGATION)
     set_property(TARGET usp PROPERTY VS_GLOBAL_SpectreMitigation "Spectre")

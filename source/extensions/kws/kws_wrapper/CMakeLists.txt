@@ -1,7 +1,5 @@
 project(kws_wrapper)
 
-include_directories("${CARBON_EXTERNAL}/json")
-
 # Using a function to limit the scope of the variables
 function(create_kwsapi_ddk_target)
   set(_root "${CARBON_ROOT}/external/KWS")
@@ -101,7 +99,7 @@ target_include_directories(kws_wrapper
         ${CARBON_C_API}
         ${CARBON_CXX_API}
         ${CARBON_INCLUDE}
-        ${COMMON}/include
+        "${CARBON_EXTERNAL}/json"
     PUBLIC
         ${SDKKWS_HEADERS}
     )

@@ -2,21 +2,6 @@ project(cxx_api_tests)
 
 set(SRC_DIR "${PROJECT_SOURCE_DIR}")
 
-include_directories("${CARBON_EXTERNAL}/Catch2")
-include_directories(${CARBON_C_API})
-include_directories(${CARBON_CXX_API})
-include_directories(${CARBON_INCLUDE})
-include_directories("${COMMON}/include")
-include_directories(${TEST_INCLUDE})
-include_directories(${SRC_DIR})
-include_directories(${USP})
-include_directories(${USP}/include)
-include_directories("${SR}")
-include_directories(${AUDIO})
-include_directories("${CARBON_EXTERNAL}/json")
-include_directories(${CONVERSATION_TRANSLATION})
-include_directories(${CONVERSATION_TRANSLATION}/include)
-
 set(HEADERS_PRIVATE
     "${TEST_INCLUDE}/test_PAL.h"
     "${SRC_DIR}/conversation_translator_utils.h"
@@ -54,13 +39,11 @@ if(EXTENSION_AUDIOCOMPRESSION_ENABLED)
 endif()
 
 if(WIN32 AND (NOT SPEECHSDK_OS STREQUAL "WindowsUwp"))
-    include_directories("${SRC_DIR}/Windows")
     list(APPEND SOURCES
         "${SRC_DIR}/windows/test_PAL_windows.cpp"
     )
 else()
     #add for other platforms here
-    include_directories("${SRC_DIR}/Default")
     list(APPEND SOURCES
         "${SRC_DIR}/Default/test_PAL_default.cpp"
     )
@@ -74,6 +57,28 @@ source_group("Source Files" FILES ${SOURCES})
 source_group("Header Files" FILES ${TEST_HEADERS} ${HEADERS_PRIVATE})
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${TEST_HEADERS} ${HEADERS_PRIVATE})
+
+set(PRIVATE_AUDIO_HEADERS "${CARBON_CORE}/audio")
+set(PRIVATE_CONVERSATION_TRANSLATOR_HEADERS "${CARBON_CORE}/conversation_translation")
+
+target_include_directories(${PROJECT_NAME}
+    PRIVATE
+        "${CARBON_EXTERNAL}/Catch2"
+        "${CARBON_EXTERNAL}/json"
+        ${CARBON_INCLUDE}
+        ${TEST_INCLUDE}
+        ${CARBON_C_API}
+        ${CARBON_CXX_API}
+        ${PRIVATE_AUDIO_HEADERS}
+        ${PRIVATE_CONVERSATION_TRANSLATOR_HEADERS}
+)
+
+if(WIN32 AND (NOT SPEECHSDK_OS STREQUAL "WindowsUwp"))
+    target_include_directories(${PROJECT_NAME} PRIVATE "${SRC_DIR}/Windows")
+else()
+    target_include_directories(${PROJECT_NAME} PRIVATE "${SRC_DIR}/Default")
+endif()
+
 target_link_libraries(${PROJECT_NAME} ${SPEECHSDK_CORE_LIBRARY} audio common ${TEST_LIBS})
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")

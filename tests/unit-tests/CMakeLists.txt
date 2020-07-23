@@ -2,18 +2,6 @@ project(core_unit_tests)
 
 set(SRC_DIR "${PROJECT_SOURCE_DIR}")
 
-include_directories("${CARBON_CORE}/include")
-include_directories("${COMMON}/include")
-include_directories("${USP}/include")
-include_directories("${SR}")
-include_directories("${AUDIO}")
-include_directories("${AUDIO}/include")
-include_directories("${CARBON_EXTERNAL}/Catch2")
-include_directories(${CARBON_C_API})
-include_directories(${CARBON_CXX_API})
-include_directories(${TEST_INCLUDE})
-include_directories("${CARBON_EXTERNAL}/json")
-
 set (HEADERS_PRIVATE
     "${SRC_DIR}/sequence_generator_audio_stream_reader.h"
     "${SRC_DIR}/unit_test_utils.h"
@@ -35,6 +23,20 @@ source_group("Header Files" FILES ${TEST_HEADERS})
 source_group("Header Files (Private)" FILES ${HEADERS_PRIVATE})
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${TEST_HEADERS} ${HEADERS_PRIVATE})
+
+set(PRIVATE_AUDIO_HEADERS "${CARBON_CORE}/audio")
+
+target_include_directories(${PROJECT_NAME}
+    PRIVATE
+        ${TEST_INCLUDE}
+        "${CARBON_CORE}/include"
+        ${CARBON_C_API}
+        ${CARBON_CXX_API}
+        "${CARBON_EXTERNAL}/json"
+        "${CARBON_EXTERNAL}/Catch2"
+        # This is a unit test project, so include internals
+        ${PRIVATE_AUDIO_HEADERS}
+)
 
 target_link_libraries(${PROJECT_NAME} usp audio factory common)
 

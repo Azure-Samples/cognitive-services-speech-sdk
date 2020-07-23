@@ -2,13 +2,6 @@ project(${SPEECHSDK_CORE_LIBRARY})
 
 set(SRC_DIR "${PROJECT_SOURCE_DIR}")
 
-include_directories(${CARBON_C_API})
-include_directories(${CARBON_CXX_API})
-include_directories(${CARBON_INCLUDE})
-include_directories("${FACTORY}/include")
-include_directories("${COMMON}/include")
-include_directories("${LOGGING}/include")
-
 set(HEADERS)
 
 set(HEADERS_PRIVATE "${SRC_DIR}/stdafx.h")
@@ -48,6 +41,14 @@ source_group("Source Files" FILES ${SOURCES})
 
 add_library(${PROJECT_NAME} SHARED ${HEADERS} ${HEADERS_PRIVATE} ${SOURCES} $<TARGET_OBJECTS:c_api>)
 
+target_include_directories(${PROJECT_NAME}
+    PRIVATE
+        ${SRC_DIR}
+        ${CARBON_C_API}
+        ${CARBON_CXX_API}
+        ${CARBON_INCLUDE}
+)
+
 # Disable LNK4286 (caused by importing diagnostics_log_message)
 if(MSVC)
   set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "/ignore:4286")
@@ -55,6 +56,24 @@ endif()
 
 if(APPLE)
   add_library(${PROJECT_NAME}_static STATIC ${HEADERS} ${HEADERS_PRIVATE} ${SOURCES} $<TARGET_OBJECTS:c_api>)
+
+  target_include_directories(${PROJECT_NAME}_static
+      PRIVATE
+          ${SRC_DIR}
+          ${CARBON_C_API}
+          ${CARBON_CXX_API}
+          ${CARBON_INCLUDE}
+  )
+
+  target_link_libraries(${PROJECT_NAME}_static
+      PRIVATE common
+      PRIVATE logging
+      PRIVATE factory
+      PRIVATE speaker_recognition
+      PRIVATE conversation_translation
+      PRIVATE usp
+  )
+
   set_target_properties(${PROJECT_NAME}
     PROPERTIES BUILD_RPATH "@loader_path")
 elseif(UNIX)

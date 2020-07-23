@@ -13,21 +13,20 @@
 #include "ispxinterfaces.h"
 #include "interface_helpers.h"
 #include "property_bag_impl.h"
-#include "usp_reco_engine_adapter.h"
 #include "usp.h"
-
-#define METADATA_TYPE_WORD_BOUNDARY "WordBoundary"
+#include "service_helpers.h"
 
 namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
 namespace Impl {
 
+constexpr auto METADATA_TYPE_WORD_BOUNDARY = "WordBoundary";
 
 class CSpxUspTtsEngineAdapter :
     public ISpxGenericSite,
     public ISpxServiceProvider,
-    public ISpxUspCallbacks,
+    public USP::ISpxUspCallbacks,
     public ISpxTtsEngineAdapter,
     public ISpxPropertyBagImpl
 {
@@ -41,6 +40,7 @@ public:
         SPX_INTERFACE_MAP_ENTRY(ISpxObjectInit)
         SPX_INTERFACE_MAP_ENTRY(ISpxGenericSite)
         SPX_INTERFACE_MAP_ENTRY(ISpxServiceProvider)
+        using namespace USP;
         SPX_INTERFACE_MAP_ENTRY(ISpxUspCallbacks)
         SPX_INTERFACE_MAP_ENTRY(ISpxTtsEngineAdapter)
     SPX_INTERFACE_MAP_END()

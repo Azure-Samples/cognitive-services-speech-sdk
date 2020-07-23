@@ -3,15 +3,6 @@ project(conversation_translation)
 set(SRC_DIR "${PROJECT_SOURCE_DIR}")
 set(INC_DIR "${PROJECT_SOURCE_DIR}/include")
 
-include_directories(${CARBON_C_API})
-include_directories(${CARBON_CXX_API})
-include_directories(${CARBON_INCLUDE})
-include_directories("${CARBON_EXTERNAL}/json")
-
-include_directories(${INC_DIR})
-include_directories("${COMMON}/include")
-include_directories("${COMMON_GENERATED_INCLUDE}")
-
 set(HEADERS
     "${INC_DIR}/ISpxConversationInterfaces.h"
     "${INC_DIR}/create_module_object.h"
@@ -47,6 +38,20 @@ source_group("Source Files" FILES ${SOURCES})
 
 add_library(${PROJECT_NAME} STATIC ${HEADERS} ${HEADERS_PRIVATE} ${SOURCES})
 
+target_include_directories(${PROJECT_NAME}
+    PRIVATE
+        ${CARBON_C_API}
+        ${CARBON_CXX_API}
+        ${CARBON_INCLUDE}
+        "${CARBON_EXTERNAL}/json"
+        "${COMMON}/include"
+        ${COMMON_GENERATED_INCLUDE}
+    PUBLIC
+        ${INC_DIR}
+)
+
+
+
 if(WIN32 AND SPECTRE_MITIGATION)
     set_property(TARGET ${PROJECT_NAME} PROPERTY VS_GLOBAL_SpectreMitigation "Spectre")
 endif()
@@ -75,6 +80,6 @@ target_link_libraries(${PROJECT_NAME}
 
 if (MSVC)
    set_target_properties(${PROJECT_NAME} PROPERTIES COMPILE_FLAGS "/Yucommon.h")
-   set_source_files_properties(stdafx.cpp PROPERTIES COMPILE_FLAGS "/Yccommon.h")   
+   set_source_files_properties(stdafx.cpp PROPERTIES COMPILE_FLAGS "/Yccommon.h")
 endif(MSVC)
 

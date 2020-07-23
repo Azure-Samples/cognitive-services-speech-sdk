@@ -3,19 +3,6 @@ project(factory)
 set(SRC_DIR "${PROJECT_SOURCE_DIR}")
 set(INC_DIR "${PROJECT_SOURCE_DIR}/include")
 
-include_directories(${INC_DIR})
-include_directories(${CARBON_C_API})
-include_directories(${CARBON_CXX_API})
-include_directories(${CARBON_INCLUDE})
-include_directories("${CARBON_EXTERNAL}/json")
-
-include_directories("${COMMON}/include")
-include_directories("${SR}")
-include_directories("${TTS}")
-if(BUILD_UNIDEC)
-    include_directories("${UNIDEC}")
-endif()
-
 set(HEADERS
     "${SRC_DIR}/stdafx.h"
     "${INC_DIR}/create_module_object.h"
@@ -33,6 +20,16 @@ source_group("Header Files (public)" FILES ${HEADERS})
 source_group("Source Files" FILES ${SOURCES})
 
 add_library(factory STATIC ${HEADERS} ${HEADERS_PRIVATE} ${SOURCES})
+
+target_include_directories(factory
+    PRIVATE
+        ${CARBON_C_API}
+        ${CARBON_CXX_API}
+        ${CARBON_INCLUDE}
+        "${CARBON_EXTERNAL}/json"
+    PUBLIC
+        ${INC_DIR}
+)
 
 if(WIN32 AND SPECTRE_MITIGATION)
     set_property(TARGET factory PROPERTY VS_GLOBAL_SpectreMitigation "Spectre")
@@ -54,3 +51,6 @@ target_link_libraries(factory
                       PRIVATE speaker_recognition
                       PRIVATE ${CMAKE_DL_LIBS})
 
+if(BUILD_UNIDEC)
+    #target_link_libraries(factory INTERFACE unidec)
+endif()

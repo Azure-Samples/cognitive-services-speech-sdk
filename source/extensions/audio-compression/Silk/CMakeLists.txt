@@ -2,14 +2,6 @@ project(speechsdk_compression_silk)
 
 set(SRC_DIR "${PROJECT_SOURCE_DIR}")
 
-include_directories(${CARBON_C_API})
-include_directories(${CARBON_CXX_API})
-include_directories(${CARBON_INCLUDE})
-include_directories("${CARBON_EXTERNAL}/json")
-include_directories("${CARBON_EXTERNAL}/silk-codec")
-include_directories("${COMMON}/include")
-
-
 set(HEADERS)
 
 set(HEADERS_PRIVATE
@@ -86,16 +78,23 @@ add_compile_definitions(USE_NON_CORE_ROOT_SITE)
 target_include_directories(speechsdk_compression_silk
     PRIVATE
         ${CARBON_C_API}
+        ${CARBON_CXX_API}
         ${CARBON_INCLUDE}
         "${COMMON}/include"
+        "${CARBON_EXTERNAL}/json"
+        "${CARBON_EXTERNAL}/silk-codec"
     )
+
+target_link_libraries(speechsdk_compression_silk PRIVATE common)
 
 if(SPEECHSDK_OS MATCHES "^IOS")
     target_link_libraries(speechsdk_compression_silk
+        PRIVATE
         ${SILK_LIBRARIES}
         )
 else()
     target_link_libraries(speechsdk_compression_silk
+        PRIVATE
         ${SILK_LIBRARIES}
         )
 endif()

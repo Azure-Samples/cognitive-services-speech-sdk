@@ -2,12 +2,6 @@ project(carbon_test_console)
 
 set(SRC_DIR "${PROJECT_SOURCE_DIR}")
 
-include_directories(${CARBON_C_API})
-include_directories(${CARBON_CXX_API})
-include_directories(${CARBON_INCLUDE})
-include_directories("${COMMON}/include") # for PAL utils
-
-
 set(HEADERS)
 
 set(HEADERS_PRIVATE
@@ -24,10 +18,7 @@ set(SOURCES
     "${SRC_DIR}/stdafx.cpp"
 )
 
-include_directories("${SRC_DIR}")
-
 if(WIN32)
-    include_directories("${SRC_DIR}/windows") # for "stdafx.h"
     list(APPEND HEADERS_PRIVATE
         "${SRC_DIR}/windows/targetver.h"
     )
@@ -51,6 +42,20 @@ add_executable(carbonx
     ${SPEECH_C_API_HEADERS} ${SPEECH_CXX_API_HEADERS}
     ${HEADERS} ${HEADERS_PRIVATE} ${SOURCES}
     )
+
+target_include_directories(carbonx
+    PRIVATE
+        "${SRC_DIR}"
+        ${CARBON_C_API}
+        ${CARBON_CXX_API}
+)
+
+if(WIN32)
+    target_include_directories(carbonx
+        PRIVATE
+            "${SRC_DIR}/windows" # for "stdafx.h"
+    )
+endif()
 
 target_link_libraries(carbonx common pal conversation_translation ${SPEECHSDK_CORE_LIBRARY})
 if(CMAKE_SYSTEM_NAME STREQUAL "WindowsStore")

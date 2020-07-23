@@ -14,28 +14,40 @@
 #include "http_utils.h"
 #include "property_id_2_name_map.h"
 
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
+namespace Impl {
 
-#define TTS_COGNITIVE_SERVICE_HOST_SUFFIX ".tts.speech.microsoft.com"
-#define TTS_COGNITIVE_SERVICE_URL_PATH "/cognitiveservices/v1"
-#define USER_AGENT "SpeechSDK"
+constexpr auto TTS_COGNITIVE_SERVICE_HOST_SUFFIX = ".tts.speech.microsoft.com";
+constexpr auto TTS_COGNITIVE_SERVICE_URL_PATH = "/cognitiveservices/v1";
+constexpr auto USER_AGENT = "SpeechSDK";
 
-#define BUFFERWRITE(buf, value) for (size_t i = 0; i < sizeof(value); ++i) { *buf = (uint8_t)((value >> (i * 8)) & 0xff); ++buf; }
+constexpr uint32_t RIFF_MARKER = 0x46464952;
+constexpr uint32_t WAVE_MARKER = 0x45564157;
+constexpr uint32_t FMT_MARKER = 0x20746d66;
+constexpr uint32_t DATA_MARKER = 0x61746164;
+constexpr uint32_t EVNT_MARKER = 0x544e5645;
 
-typedef uint32_t UINT32;
-
-const UINT32 RIFF_MARKER = 0x46464952;
-const UINT32 WAVE_MARKER = 0x45564157;
-const UINT32 FMT_MARKER = 0x20746d66;
-const UINT32 DATA_MARKER = 0x61746164;
-const UINT32 EVNT_MARKER = 0x544e5645;
+template<typename T>
+void buffer_write(uint8_t** buffer_cursor, T value)
+{
+    auto buf = *buffer_cursor;
+    for (size_t i = 0; i < sizeof(T); ++i)
+    {
+        *buf = static_cast<uint8_t>((value >> (i * 8)) & 0xff);
+        ++buf;
+    }
+    *buffer_cursor = buf;
+}
 
 struct RIFFHDR
 {
-    UINT32 _id;
-    UINT32 _len;              /* file length less header */
-    UINT32 _type;            /* should be "WAVE" */
+    uint32_t _id;
+    uint32_t _len;              /* file length less header */
+    uint32_t _type;            /* should be "WAVE" */
 
-    RIFFHDR(UINT32 length)
+    RIFFHDR(uint32_t length)
     {
         _id = RIFF_MARKER;
         _type = WAVE_MARKER;
@@ -45,10 +57,10 @@ struct RIFFHDR
 
 struct BLOCKHDR
 {
-    UINT32 _id;              /* should be "fmt " or "data" */
-    UINT32 _len;              /* block size less header */
+    uint32_t _id;              /* should be "fmt " or "data" */
+    uint32_t _len;              /* block size less header */
 
-    BLOCKHDR(int length)
+    BLOCKHDR(uint32_t length)
     {
         _id = FMT_MARKER;
         _len = length;
@@ -57,10 +69,10 @@ struct BLOCKHDR
 
 struct DATAHDR
 {
-    UINT32 _id;               /* should be "fmt " or "data" */
-    UINT32 _len;              /* block size less header */
+    uint32_t _id;               /* should be "fmt " or "data" */
+    uint32_t _len;              /* block size less header */
 
-    DATAHDR(UINT32 length)
+    DATAHDR(uint32_t length)
     {
         _id = DATA_MARKER;
         _len = length;
@@ -69,21 +81,15 @@ struct DATAHDR
 
 struct EVNTHDR
 {
-    UINT32 _id;               /* should be "EVNT" */
-    UINT32 _len;              /* block size less header */
+    uint32_t _id;               /* should be "EVNT" */
+    uint32_t _len;              /* block size less header */
 
-    EVNTHDR(UINT32 length)
+    EVNTHDR(uint32_t length)
     {
         _id = EVNT_MARKER;
         _len = length;
     }
 };
-
-
-namespace Microsoft {
-namespace CognitiveServices {
-namespace Speech {
-namespace Impl {
 
 class CSpxSynthesisHelper
 {
@@ -306,40 +312,40 @@ public:
         uint8_t* p = tmpBuf;
         // Write the RIFF section
         riff._len = total + cData - 8/* - cRiff*/; // for the "WAVE" 4 characters
-        BUFFERWRITE(p, riff._id);
-        BUFFERWRITE(p, riff._len);
-        BUFFERWRITE(p, riff._type);
+        buffer_write(&p, riff._id);
+        buffer_write(&p, riff._len);
+        buffer_write(&p, riff._type);
 
         // Write the wave header section
         block._len = cWaveEx;
-        BUFFERWRITE(p, block._id);
-        BUFFERWRITE(p, block._len);
+        buffer_write(&p, block._id);
+        buffer_write(&p, block._len);
 
         // Write the FormatEx structure
-        BUFFERWRITE(p, audioFormat->wFormatTag);
-        BUFFERWRITE(p, audioFormat->nChannels);
-        BUFFERWRITE(p, audioFormat->nSamplesPerSec);
-        BUFFERWRITE(p, audioFormat->nAvgBytesPerSec);
-        BUFFERWRITE(p, audioFormat->nBlockAlign);
-        BUFFERWRITE(p, audioFormat->wBitsPerSample);
-        BUFFERWRITE(p, audioFormat->cbSize);
+        buffer_write(&p, audioFormat->wFormatTag);
+        buffer_write(&p, audioFormat->nChannels);
+        buffer_write(&p, audioFormat->nSamplesPerSec);
+        buffer_write(&p, audioFormat->nAvgBytesPerSec);
+        buffer_write(&p, audioFormat->nBlockAlign);
+        buffer_write(&p, audioFormat->wBitsPerSample);
+        buffer_write(&p, audioFormat->cbSize);
 
         if (audioFormat->wFormatTag == WAVE_FORMAT_SIREN)
         {
-            BUFFERWRITE(p, (uint16_t)320);
-            BUFFERWRITE(p, 'f');
-            BUFFERWRITE(p, 'a');
-            BUFFERWRITE(p, 'c');
-            BUFFERWRITE(p, 't');
-            BUFFERWRITE(p, (uint32_t)4);
+            buffer_write(&p, (uint16_t)320);
+            buffer_write(&p, 'f');
+            buffer_write(&p, 'a');
+            buffer_write(&p, 'c');
+            buffer_write(&p, 't');
+            buffer_write(&p, (uint32_t)4);
             uint32_t factSize = (cData * 320) / audioFormat->nBlockAlign;
-            BUFFERWRITE(p, factSize);
+            buffer_write(&p, factSize);
         }
 
         // Write the data section
         dataHdr._len = cData;
-        BUFFERWRITE(p, dataHdr._id);
-        BUFFERWRITE(p, dataHdr._len);
+        buffer_write(&p, dataHdr._id);
+        buffer_write(&p, dataHdr._len);
 
         return std::make_shared<std::vector<uint8_t>>(tmpBuf, p);
     }

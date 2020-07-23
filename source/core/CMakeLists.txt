@@ -1,0 +1,18 @@
+
+# individual components
+add_subdirectory(pal)
+add_subdirectory(common)
+add_subdirectory(logging)
+add_subdirectory(factory)
+add_subdirectory(audio)
+add_subdirectory(usp)
+add_subdirectory(c_api)
+add_subdirectory(sr)
+add_subdirectory(tts)
+add_subdirectory(tts_mock)
+add_subdirectory(tts_rest)
+add_subdirectory(tts_usp)
+add_subdirectory(conversation_translation)
+add_subdirectory(speaker_recognition)
+add_subdirectory(mock)
+add_subdirectory(libcarbon)

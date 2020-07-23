@@ -1067,7 +1067,7 @@ AUDIO_RESULT  audio_output_startasync(
     async->pfnComplete = pfnComplete;
     async->pfnBufferUnderRun = pfnBufferUnderRun;
     async->pContext = pContext;
-    ret = ThreadAPI_Create(&async->output_thread, OutputWriteAsync, async);
+    ret = (AUDIO_RESULT)ThreadAPI_Create(&async->output_thread, OutputWriteAsync, async);
 
     if (ret)
     {
@@ -1502,7 +1502,7 @@ AUDIO_RESULT audio_playwavfile(AUDIO_SYS_HANDLE handle, const char* audioFile)
     async->fp = fopen(audioFile, "rb");
     if (!async->fp) { LogError("%s not found", audioFile); goto Exit; }
 
-    ret = ThreadAPI_Create(&async->output_thread, OutputAsync, async);
+    ret = (AUDIO_RESULT)ThreadAPI_Create(&async->output_thread, OutputAsync, async);
 Exit:
 
     if (ret)

@@ -1,7 +1,5 @@
 project(kws_factory)
 
-include_directories("${CARBON_EXTERNAL}/json")
-
 set(HEADERS)
 
 set(HEADERS_PRIVATE
@@ -53,7 +51,7 @@ target_include_directories(kws_factory
         ${CARBON_C_API}
         ${CARBON_CXX_API}
         ${CARBON_INCLUDE}
-        "${COMMON}/include"
+        "${CARBON_EXTERNAL}/json"
     )
 
 if(SPEECHSDK_OS MATCHES "^IOS")
