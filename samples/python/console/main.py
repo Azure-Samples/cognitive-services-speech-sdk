@@ -46,6 +46,7 @@ samples = OrderedDict([
         speech_synthesis_sample.speech_synthesis_to_audio_data_stream,
         speech_synthesis_sample.speech_synthesis_events,
         speech_synthesis_sample.speech_synthesis_word_boundary_event,
+        speech_synthesis_sample.speech_synthesis_with_auto_language_detection_to_speaker,
     ])
 ])
 

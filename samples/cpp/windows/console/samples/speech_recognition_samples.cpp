@@ -512,7 +512,7 @@ void SpeechRecognitionWithSourceLanguageAutoDetection()
 
      // Currently this feature only supports 2 different language candidates
      // Replace the languages with your languages in BCP-47 format, e.g. fr-FR.
-     // Please see https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support for all supported langauges
+     // Please see https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support for all supported languages
      auto autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig::FromLanguages({ "en-US", "de-DE" });
 
      // The recognizer uses microphone,  to use file or stream as audio input, just construct the audioInput and pass to FromConfig API as the 3rd parameter.
