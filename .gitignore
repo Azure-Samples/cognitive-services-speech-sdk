@@ -309,3 +309,7 @@ quickstart/text-to-speech/cpp-macos/helloworld
 
 # synthesized audio
 quickstart/**/text-to-speech/*.wav
+
+# compiled JavaScript files
+quickstart/javascript/**/microsoft.cognitiveservices.speech.sdk.bundle*.js*
+samples/js/**/microsoft.cognitiveservices.speech.sdk.bundle*.js*

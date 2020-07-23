@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Microsoft Cognitive Services Speech SDK JavaScript Quickstart</title>
+  <meta charset="utf-8" />
+</head>
+<body style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:13px;">
+  <div id="warning">
+    <h1 style="font-weight:500;">Speech Recognition Speech SDK not found (microsoft.cognitiveservices.speech.sdk.bundle.js missing).</h1>
+  </div>
+  
+  <div id="content" style="display:none">
+    <table width="100%">
+      <tr>
+        <td></td>
+        <td><h1 style="font-weight:500;">Microsoft Cognitive Services Speech SDK JavaScript Quickstart</h1></td>
+      </tr>
+      <tr>
+        <td align="right"><a href="https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started" target="_blank">Subscription</a>:</td>
+        <td><input id="subscriptionKey" type="text" size="40" value=""></td>
+      </tr>
+      <tr>
+        <td align="right">Region</td>
+        <td><input id="serviceRegion" type="text" size="40" value="westus"></td>
+      </tr>
+      <tr>
+        <td align="right">Enrollment File</td>
+        <td>
+          <input type="file" id="filePicker" accept=".wav" />
+        </td>
+      </tr>
+      <tr>
+        <td align="right">Test Identification File</td>
+        <td>
+          <input type="file" id="testFilePicker" accept=".wav" />
+        </td>
+      </tr>
+      <tr>
+        <td></td>
+        <td><button id="createVoiceProfileButton">Create Voice Profile</button></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td><button id="identifySpeakerButton">Identify Speaker</button></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td><button id="deleteProfileButton">Delete Voice Profile</button></td>
+      </tr>
+      <tr>
+        <td align="right" valign="top">Result</td>
+        <td><textarea id="resultDiv" style="display: inline-block;width:500px;height:200px"></textarea></td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- Speech SDK reference sdk. -->
+  <script src="microsoft.cognitiveservices.speech.sdk.bundle.js"></script>
+
+  <!-- Speech SDK Authorization token -->
+  <script>
+  // Note: Replace the URL with a valid endpoint to retrieve
+  //       authorization tokens for your subscription.
+  var authorizationEndpoint = "token.php";
+
+  function RequestAuthorizationToken() {
+    if (authorizationEndpoint) {
+      var a = new XMLHttpRequest();
+      a.open("GET", authorizationEndpoint);
+      a.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+      a.send("");
+      a.onload = function() {
+          var token = JSON.parse(atob(this.responseText.split(".")[1]));
+          serviceRegion.value = token.region;
+          authorizationToken = this.responseText;
+          subscriptionKey.disabled = true;
+          subscriptionKey.value = "using authorization token (hit F5 to refresh)";
+          console.log("Got an authorization token: " + token);
+      }
+    }
+  }
+  </script>
+
+  <!-- Speech SDK USAGE -->
+  <script>
+    // status fields and start button in UI
+    var resultDiv;
+    var createVoiceProfileButton;
+    var identifySpeakerButton;
+    var deleteProfileButton;
+;
+
+    // subscription key and region for speech services.
+    var subscriptionKey, serviceRegion;
+    var authorizationToken;
+    var SpeechSDK;
+    var client;
+    var filePicker, testFilePicker,audioFiles, testFile;
+    var speechConfig, profile;
+
+    document.addEventListener("DOMContentLoaded", function () {
+
+      createVoiceProfileButton = document.getElementById("createVoiceProfileButton");
+      identifySpeakerButton = document.getElementById("identifySpeakerButton");
+      deleteProfileButton = document.getElementById("deleteProfileButton");
+      subscriptionKey = document.getElementById("subscriptionKey");
+      serviceRegion = document.getElementById("serviceRegion");
+      resultDiv = document.getElementById("resultDiv");
+      filePicker = document.getElementById("filePicker");
+      testFilePicker = document.getElementById("testFilePicker");
+      
+      deleteProfileButton.disabled = true;
+      identifySpeakerButton.disabled = true;
+      filePicker.addEventListener("change", function () {
+          audioFiles = filePicker.files;
+      });
+
+      testFilePicker.addEventListener("change", function () {
+          testFile = testFilePicker.files[0];
+      });
+
+      createVoiceProfileButton.addEventListener("click", function () {
+
+        createVoiceProfileButton.disabled = true;
+        resultDiv.innerHTML = "";
+
+        // if we got an authorization token, use the token. Otherwise use the provided subscription key
+        if (authorizationToken) {
+          speechConfig = SpeechSDK.SpeechConfig.fromAuthorizationToken(authorizationToken, serviceRegion.value);
+        } else {
+          if (subscriptionKey.value === "" || subscriptionKey.value === "subscription") {
+            alert("Please enter your Microsoft Cognitive Services Speech subscription key!");
+            createVoiceProfileButton.disabled = false;
+            return;
+          }
+          speechConfig = SpeechSDK.SpeechConfig.fromSubscription(subscriptionKey.value, serviceRegion.value);
+        }
+
+        speechConfig.setProperty(SpeechSDK.PropertyId.SpeechServiceConnection_TranslationVoice, "en-US");
+        client = new SpeechSDK.VoiceProfileClient(speechConfig);
+
+        client.createProfileAsync(
+          SpeechSDK.VoiceProfileType.TextIndependentIdentification,
+          "en-us",
+          function (result) {
+            profile = result;
+            window.console.log(result);
+            
+            resultDiv.innerHTML += "Profile created ProfileId: " + result.profileId;
+            resultDiv.innerHTML += "\r\n"; 
+            deleteProfileButton.disabled = false;
+            
+            let audioConfig = SpeechSDK.AudioConfig.fromWavFileInput(audioFiles[0]);
+
+            client.enrollProfileAsync(
+              profile, 
+              audioConfig,
+              function(result) {
+                resultDiv.innerHTML += "(Enrollment result) Reason: " + SpeechSDK.ResultReason[result.reason]; 
+                resultDiv.innerHTML += "\r\n"; 
+                window.console.log(result);
+                identifySpeakerButton.disabled = false;
+              },
+              function(err) {
+                window.console.log(err);
+                resultDiv.innerHTML += "ERROR: " + err; 
+              });
+            resultDiv.innerHTML += "\r\n"; 
+
+            createVoiceProfileButton.disabled = false;
+          },
+          function (err) {
+            window.console.log(err);
+            resultDiv.innerHTML += "ERROR: " + err; 
+
+            createVoiceProfileButton.disabled = false;
+          });
+      });
+
+      identifySpeakerButton.addEventListener("click", function () {
+        let testAudioConfig = SpeechSDK.AudioConfig.fromWavFileInput(testFile);
+        let recognizer = new SpeechSDK.SpeakerRecognizer(speechConfig, testAudioConfig);
+        let model = SpeechSDK.SpeakerIdentificationModel.fromProfiles([profile]);
+        recognizer.recognizeOnceAsync(
+          model,
+          function(result) {
+            window.console.log(result);
+            let reason = result.reason; 
+            resultDiv.innerHTML += "(Identification result) Reason: " + SpeechSDK.ResultReason[reason]; 
+            resultDiv.innerHTML += "\n"; 
+            if( reason === SpeechSDK.ResultReason.Canceled ) {
+              let cancellationDetails = SpeechSDK.SpeakerRecognitionCancellationDetails.fromResult(result);
+              resultDiv.innerHTML += "(Identification canceled) Error Details: " + cancellationDetails.errorDetails;
+              resultDiv.innerHTML += "\n"; 
+              resultDiv.innerHTML += "(Identification canceled) Error Code: " + cancellationDetails.errorCode;
+              resultDiv.innerHTML += "\n"; 
+            } else {
+              resultDiv.innerHTML += "(Identification result) Profile Id: " + result.profileId; 
+              resultDiv.innerHTML += "\n"; 
+              resultDiv.innerHTML += "(Identification result) Score: " + result.score; 
+              resultDiv.innerHTML += "\r\n"; 
+            }
+          },
+          function(err) {
+            window.console.log(err);
+            resultDiv.innerHTML += "ERROR: " + err; 
+          });
+      });
+
+      deleteProfileButton.addEventListener("click", function () {
+          client.deleteProfileAsync(
+            profile,
+            function(result) {
+              resultDiv.innerHTML += "(Delete profile result) Reason: " + SpeechSDK.ResultReason[result.reason]; 
+              resultDiv.innerHTML += "\r\n"; 
+              deleteProfileButton.disabled = true;
+              identifySpeakerButton.disabled = true;
+            },
+            function(err) {
+              window.console.log(err);
+              resultDiv.innerHTML += "ERROR: " + err; 
+            }
+          );
+      });
+      if (!!window.SpeechSDK) {
+        SpeechSDK = window.SpeechSDK;
+        createVoiceProfileButton.disabled = false;
+
+        document.getElementById('content').style.display = 'block';
+        document.getElementById('warning').style.display = 'none';
+
+        // in case we have a function for getting an authorization token, call it.
+        if (typeof RequestAuthorizationToken === "function") {
+            RequestAuthorizationToken();
+        }
+      }
+    });
+  </script>
+</body>
+</html>

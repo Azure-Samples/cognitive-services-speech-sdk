@@ -182,7 +182,7 @@ namespace MicrosoftSpeechSDKSamples.WpfTranslationSample
         private void InitializeVoiceMap()
         {
             voiceMap = new Dictionary<string, string>();
-            voiceMap.Add("en-US", "Microsoft Server Speech Text to Speech Voice (en-US, JessaRUS)");
+            voiceMap.Add("en-US", "Microsoft Server Speech Text to Speech Voice (en-US, AriaRUS)");
             voiceMap.Add("ar-EG", "Microsoft Server Speech Text to Speech Voice (ar-EG, Hoda)");
             voiceMap.Add("zh-CN", "Microsoft Server Speech Text to Speech Voice (zh-CN, Yaoyao, Apollo)");
             voiceMap.Add("fr-FR", "Microsoft Server Speech Text to Speech Voice (fr-FR, Julie, Apollo)");
