@@ -45,8 +45,18 @@ set_target_properties (pal PROPERTIES
     FOLDER core
 )
 
-if (SPEECHSDK_OS STREQUAL "Android")
-    target_link_libraries(pal ${AZURE_SHARED_LIB})
+if(SPEECHSDK_OS STREQUAL "Linux")
+    set(USP_LIBS ${AZURE_SHARED_LIB} -lz -ldl)
 else()
-    target_link_libraries(pal ${AZURE_SHARED_LIB})
+    set(USP_LIBS ${AZURE_SHARED_LIB})
+endif()
+
+if(WIN32)
+    list(APPEND USP_LIBS rpcrt4.lib)
+endif()
+
+if (SPEECHSDK_OS STREQUAL "Android")
+    target_link_libraries(pal ${USP_LIBS})
+else()
+    target_link_libraries(pal ${USP_LIBS})
 endif()
