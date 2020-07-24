@@ -139,7 +139,7 @@ void CSpxParticipantMgrImpl::EndConversation()
             GetQueryParams();
             // the host name and path are parsed from the endpoint. The path has /meetings appended to it.
             auto url = HttpUtils::ParseUrl(m_endpoint);
-            HttpRequest  request(url.host);
+            HttpRequest request(url.host, url.port, url.isSecure());
             auto pathStartWithForwardSlash = "/" + url.path + "/meetings";
             request.SetPath(pathStartWithForwardSlash);
 
