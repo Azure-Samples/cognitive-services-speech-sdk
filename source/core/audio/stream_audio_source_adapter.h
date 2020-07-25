@@ -19,7 +19,7 @@ class CSpxStreamAudioSourceAdapter :
     public ISpxObjectWithSiteInitImpl<ISpxGenericSite>,
     public ISpxGenericSite,
     public ISpxAudioSourceStreamPumpImpl<CSpxStreamAudioSourceAdapter>,
-    public ISpxAudioSourceBufferDataDelegateImpl<>,
+    public ISpxBufferDataDelegateImpl<>,
     public ISpxServiceProvider,
     public CSpxAudioSourceBufferServiceProviderHelper<CSpxStreamAudioSourceAdapter>
 {
@@ -34,7 +34,7 @@ public:
         SPX_INTERFACE_MAP_ENTRY(ISpxGenericSite)
         SPX_INTERFACE_MAP_ENTRY(ISpxAudioSourceInit)
         SPX_INTERFACE_MAP_ENTRY(ISpxAudioSourceControl)
-        SPX_INTERFACE_MAP_ENTRY(ISpxAudioSourceBufferData)
+        SPX_INTERFACE_MAP_ENTRY(ISpxBufferData)
         SPX_INTERFACE_MAP_ENTRY(ISpxServiceProvider)
         SPX_INTERFACE_MAP_ENTRY(ISpxAudioSource)
         SPX_INTERFACE_MAP_FUNC(QueryInterfaceStreamPumpImpl)
@@ -55,7 +55,7 @@ protected:
 
     DISABLE_COPY_AND_MOVE(CSpxStreamAudioSourceAdapter);
 
-    void InitDelegatePtr(std::shared_ptr<ISpxAudioSourceBufferData>& ptr) override;
+    void InitDelegatePtr(std::shared_ptr<ISpxBufferData>& ptr) override;
     void TermDelegatePtr();
 };
 

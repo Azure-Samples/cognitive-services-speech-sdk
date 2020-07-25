@@ -28,27 +28,27 @@ protected:
 
     std::shared_ptr<ISpxInterfaceBase> QueryServiceAudioSourceBuffer(const char* serviceName)
     {
-        if (PAL::stricmp(serviceName, "AudioSourceBufferData") == 0)
+        if (PAL::stricmp(serviceName, "BufferData") == 0)
         {
             return EnsureInitAudioSourceBufferService();
         }
-        else if (PAL::stricmp(serviceName, "AudioSourceBufferProperties") == 0)
+        else if (PAL::stricmp(serviceName, "BufferProperties") == 0)
         {
             return EnsureInitAudioSourceBufferService();
         }
         return nullptr;
     }
 
-    std::shared_ptr<ISpxAudioSourceBufferData> EnsureInitAudioSourceBufferService()
+    std::shared_ptr<ISpxBufferData> EnsureInitAudioSourceBufferService()
     {
         return m_asb != nullptr ? m_asb : InitAudioSourceBufferService();
     }
 
-    std::shared_ptr<ISpxAudioSourceBufferData> InitAudioSourceBufferService()
+    std::shared_ptr<ISpxBufferData> InitAudioSourceBufferService()
     {
         SPX_DBG_ASSERT(m_asb == nullptr);
         auto site = static_cast<T*>(this);
-        m_asb = SpxCreateObjectWithSite<ISpxAudioSourceBufferData>("CSpxAudioSourceBufferData", site);
+        m_asb = SpxCreateObjectWithSite<ISpxBufferData>("CSpxBufferData", site);
         return m_asb;
     }
 
@@ -60,7 +60,7 @@ protected:
 
 private:
 
-    std::shared_ptr<ISpxAudioSourceBufferData> m_asb;
+    std::shared_ptr<ISpxBufferData> m_asb;
 };
 
 } } } } // Microsoft::CognitiveServices::Speech::Impl

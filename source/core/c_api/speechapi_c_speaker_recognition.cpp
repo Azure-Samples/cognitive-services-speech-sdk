@@ -16,6 +16,7 @@
 #include "spxdebug.h"
 #include <assert.h>
 
+using namespace Microsoft::CognitiveServices::Speech;
 using namespace Microsoft::CognitiveServices::Speech::Impl;
 using namespace std;
 

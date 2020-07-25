@@ -9,6 +9,7 @@
 #include "file_logger.h"
 #include "trace_message.h"
 
+using namespace Microsoft::CognitiveServices::Speech;
 using namespace Microsoft::CognitiveServices::Speech::Impl;
 
 /// <summary>

@@ -25,13 +25,13 @@ TEST_CASE("CSpxAudioProcessorWriteToAudioSourceBuffer tests", "[cxx][audio][audi
     {
         auto notifyMe = std::make_shared<MockAudioProcessorNotifyMe>();
         auto proxyFactory = std::make_shared<ObjectFactoryProxy>();
-        auto bufferDataWriter = std::make_shared<MockAudioSourceBufferDataWriter>();
-        auto bufferProperties = std::make_shared<MockAudioSourceBufferProperties>();
+        auto bufferDataWriter = std::make_shared<MockBufferDataWriter>();
+        auto bufferProperties = std::make_shared<MockBufferProperties>();
         auto mockSite = std::make_shared<MockSite>();
         mockSite->AddService<Carbon::ISpxObjectFactory>(proxyFactory);
         mockSite->AddService<Carbon::ISpxAudioProcessorNotifyMe>(notifyMe);
-        mockSite->AddService("AudioSourceBufferData", bufferDataWriter);
-        mockSite->AddService("AudioSourceBufferProperties", bufferProperties);
+        mockSite->AddService("BufferData", bufferDataWriter);
+        mockSite->AddService("BufferProperties", bufferProperties);
         auto processor = Carbon::SpxCreateObjectWithSite<Carbon::ISpxAudioProcessor>("CSpxAudioProcessorWriteToAudioSourceBuffer", mockSite);
         return MakeEnvironment(notifyMe, bufferDataWriter, bufferProperties, mockSite, processor);
     };
@@ -40,8 +40,8 @@ TEST_CASE("CSpxAudioProcessorWriteToAudioSourceBuffer tests", "[cxx][audio][audi
     {
         auto env = makeBaseTestEnv();
         auto notify = env.Get<MockAudioProcessorNotifyMe>();
-        auto writer = env.Get<MockAudioSourceBufferDataWriter>();
-        auto properties = env.Get<MockAudioSourceBufferProperties>();
+        auto writer = env.Get<MockBufferDataWriter>();
+        auto properties = env.Get<MockBufferProperties>();
         auto processor = env.Get<Carbon::ISpxAudioProcessor>();
         auto mockFormat = ConstructDefaultFormat();
 
@@ -161,8 +161,8 @@ TEST_CASE("CSpxAudioProcessorWriteToAudioSourceBuffer tests", "[cxx][audio][audi
     {
         auto env = makeBaseTestEnv();
         auto notify = env.Get<MockAudioProcessorNotifyMe>();
-        auto writer = env.Get<MockAudioSourceBufferDataWriter>();
-        auto properties = env.Get<MockAudioSourceBufferProperties>();
+        auto writer = env.Get<MockBufferDataWriter>();
+        auto properties = env.Get<MockBufferProperties>();
         auto processor = env.Get<Carbon::ISpxAudioProcessor>();
         auto format = ConstructDefaultFormat();
         processor->SetFormat(format.get());

@@ -17,15 +17,10 @@ set(HEADERS_PRIVATE
     "${SRC_DIR}/single_to_many_stream_reader_adapter.h"
     "${SRC_DIR}/single_to_many_stream_reader.h"
     "${SRC_DIR}/audio_processor_write_to_audio_source_buffer.h"
-    "${SRC_DIR}/audio_source_buffer_data.h"
-    "${SRC_DIR}/audio_source_buffer_properties.h"
-    "${SRC_DIR}/blocking_read_write_buffer.h"
-    "${SRC_DIR}/blocking_read_write_ring_buffer.h"
     "${SRC_DIR}/create_module_object.h"
     "${SRC_DIR}/microphone_pump_base.h"
     "${SRC_DIR}/interactive_microphone.h"
     "${SRC_DIR}/internal_audio_codec_adapter.h"
-    "${SRC_DIR}/read_write_ring_buffer.h"
     "${SRC_DIR}/wav_file_reader.h"
     "${SRC_DIR}/wav_file_pump.h"
     "${SRC_DIR}/wav_file_writer.h"
@@ -49,15 +44,12 @@ set(SOURCES
     "${SRC_DIR}/audio_processor_write_to_audio_source_buffer.cpp"
     "${SRC_DIR}/single_to_many_stream_reader_adapter.cpp"
     "${SRC_DIR}/single_to_many_stream_reader.cpp"
-    "${SRC_DIR}/audio_source_buffer_data.cpp"
-    "${SRC_DIR}/audio_source_buffer_properties.cpp"
     "${SRC_DIR}/create_module_object.cpp"
     "${SRC_DIR}/interactive_microphone.cpp"
     "${SRC_DIR}/internal_audio_codec_adapter.cpp"
     "${SRC_DIR}/microphone_pump_base.cpp"
     "${SRC_DIR}/pull_audio_input_stream.cpp"
     "${SRC_DIR}/push_audio_input_stream.cpp"
-    "${SRC_DIR}/read_write_ring_buffer.cpp"
     "${SRC_DIR}/wav_file_pump.cpp"
     "${SRC_DIR}/wav_file_reader.cpp"
     "${SRC_DIR}/wav_file_writer.cpp"
@@ -172,7 +164,7 @@ if(WIN32 AND SPECTRE_MITIGATION)
 endif()
 
 set_target_properties (audio PROPERTIES
-    FOLDER core
+    FOLDER core/input
 )
 
 target_link_libraries(audio PRIVATE ${AUDIO_LIBS})

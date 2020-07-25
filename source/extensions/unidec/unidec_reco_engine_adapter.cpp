@@ -324,7 +324,7 @@ bool CSpxUnidecRecoEngineAdapter::NextStream(AudioStreamDescriptor** pAudioStrea
     {
         return false;
     }
- 
+
     return InitStream(pAudioStream, pCombo);
 }
 

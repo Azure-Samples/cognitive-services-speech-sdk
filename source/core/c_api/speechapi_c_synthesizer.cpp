@@ -12,6 +12,7 @@
 #include "string_utils.h"
 
 using namespace Microsoft::CognitiveServices::Speech::Impl;
+using namespace Microsoft::CognitiveServices::Speech;
 
 static_assert((int)SpeechSynthesisOutputFormat_Raw8Khz8BitMonoMULaw == (int)SpeechSynthesisOutputFormat::Raw8Khz8BitMonoMULaw, "SpeechSynthesisOutputFormat_* enum values == SpeechSynthesisOutputFormat::* enum values");
 static_assert((int)SpeechSynthesisOutputFormat_Riff16Khz16KbpsMonoSiren == (int)SpeechSynthesisOutputFormat::Riff16Khz16KbpsMonoSiren, "SpeechSynthesisOutputFormat_* enum values == SpeechSynthesisOutputFormat::* enum values");

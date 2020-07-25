@@ -16,14 +16,14 @@ namespace CognitiveServices {
 namespace Speech {
 namespace Impl {
 
-template <typename DelegateToHelperT = CSpxDelegateToSharedPtrHelper<ISpxAudioSourceBufferDataWriter>>
-class ISpxAudioSourceBufferDataWriterDelegateImpl :
+template <typename DelegateToHelperT = CSpxDelegateToSharedPtrHelper<ISpxBufferDataWriter>>
+class ISpxBufferDataWriterDelegateImpl :
     public DelegateToHelperT,
-    public ISpxAudioSourceBufferDataWriter
+    public ISpxBufferDataWriter
 {
 private:
-    using I = ISpxAudioSourceBufferDataWriter;
-    using C = ISpxAudioSourceBufferDataWriterDelegateImpl;
+    using I = ISpxBufferDataWriter;
+    using C = ISpxBufferDataWriterDelegateImpl;
 public:
 
     void Write(uint8_t* buffer, uint32_t size) override

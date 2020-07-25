@@ -75,8 +75,8 @@ private:
 
     void NotifyTarget();
 
-    std::shared_ptr<ISpxAudioSourceBufferDataWriter> m_bufferData;
-    std::shared_ptr<ISpxAudioSourceBufferProperties> m_bufferProperties;
+    std::shared_ptr<ISpxBufferDataWriter> m_bufferData;
+    std::shared_ptr<ISpxBufferProperties> m_bufferProperties;
 
     std::shared_ptr<ISpxAudioProcessor> m_notifySource;
     std::shared_ptr<ISpxAudioProcessorNotifyMe> m_notifyTarget;

@@ -19,7 +19,7 @@ CSpxFileAudioSourceAdapter::~CSpxFileAudioSourceAdapter()
 {
     SPX_DBG_ASSERT(GetSite() == nullptr);
     SPX_DBG_ASSERT(ISpxAudioSourceFilePumpImpl::GetState() == State::Idle);
-    SPX_DBG_ASSERT(ISpxAudioSourceBufferDataDelegateImpl::IsClear());
+    SPX_DBG_ASSERT(ISpxBufferDataDelegateImpl::IsClear());
 }
 
 void CSpxFileAudioSourceAdapter::Term()
@@ -29,16 +29,15 @@ void CSpxFileAudioSourceAdapter::Term()
     TermAudioSourceBufferService();
 }
 
-void CSpxFileAudioSourceAdapter::InitDelegatePtr(std::shared_ptr<ISpxAudioSourceBufferData>& ptr)
+void CSpxFileAudioSourceAdapter::InitDelegatePtr(std::shared_ptr<ISpxBufferData>& ptr)
 {
     ptr = EnsureInitAudioSourceBufferService();
 }
 
 void CSpxFileAudioSourceAdapter::TermDelegatePtr()
 {
-    using DelegateType = ISpxAudioSourceBufferDataDelegateImpl;
+    using DelegateType = ISpxBufferDataDelegateImpl;
     SPX_IFTRUE_RETURN(DelegateType::IsClear());
-
     SpxTermAndClearDelegate(static_cast<DelegateType&>(*this));
     SPX_DBG_ASSERT(DelegateType::IsClear());
 }

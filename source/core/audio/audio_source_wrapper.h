@@ -29,8 +29,8 @@ class CSpxAudioSourceWrapper :
     public ISpxAudioSource,
     public ISpxAudioSourceInitDelegateImpl<>,
     public ISpxAudioSourceControlDelegateImpl<>,
-    public ISpxAudioSourceBufferDataDelegateImpl<>,
-    public ISpxAudioSourceBufferDataWriterDelegateImpl<>
+    public ISpxBufferDataDelegateImpl<>,
+    public ISpxBufferDataWriterDelegateImpl<>
 {
 public:
 
@@ -45,8 +45,8 @@ public:
         SPX_INTERFACE_MAP_ENTRY(ISpxAudioSource)
         SPX_INTERFACE_MAP_ENTRY(ISpxAudioSourceInit)
         SPX_INTERFACE_MAP_ENTRY(ISpxAudioSourceControl)
-        SPX_INTERFACE_MAP_ENTRY(ISpxAudioSourceBufferData)
-        SPX_INTERFACE_MAP_ENTRY(ISpxAudioSourceBufferDataWriter)
+        SPX_INTERFACE_MAP_ENTRY(ISpxBufferData)
+        SPX_INTERFACE_MAP_ENTRY(ISpxBufferDataWriter)
     SPX_INTERFACE_MAP_END()
 
     // --- ISpxObjectInit (overrides)
@@ -77,8 +77,8 @@ protected:
     std::shared_ptr<ISpxAudioSourceInit> InitAudioSourceDelegate();
     void InitDelegatePtr(std::shared_ptr<ISpxAudioSourceInit>& ptr) override;
     void InitDelegatePtr(std::shared_ptr<ISpxAudioSourceControl>& ptr) override;
-    void InitDelegatePtr(std::shared_ptr<ISpxAudioSourceBufferData>& ptr) override;
-    void InitDelegatePtr(std::shared_ptr<ISpxAudioSourceBufferDataWriter>& ptr) override;
+    void InitDelegatePtr(std::shared_ptr<ISpxBufferData>& ptr) override;
+    void InitDelegatePtr(std::shared_ptr<ISpxBufferDataWriter>& ptr) override;
     void TermAudioSourceDelegate();
 
 private:

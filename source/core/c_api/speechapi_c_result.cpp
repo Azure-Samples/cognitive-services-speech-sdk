@@ -12,6 +12,7 @@
 
 #include "ispxinterfaces.h" // for SpxQueryInterface
 
+using namespace Microsoft::CognitiveServices::Speech;
 using namespace Microsoft::CognitiveServices::Speech::Impl;
 
 static_assert((int)ResultReason_NoMatch == (int)ResultReason::NoMatch, "ResultReason_* enum values == ResultReason::* enum values");

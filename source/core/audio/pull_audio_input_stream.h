@@ -17,7 +17,7 @@ namespace Speech {
 namespace Impl {
 
 
-class CSpxPullAudioInputStream : 
+class CSpxPullAudioInputStream :
     public ISpxAudioStreamReaderInitCallbacks,
     public ISpxAudioStreamInitFormat,
     public ISpxAudioStream,

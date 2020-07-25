@@ -96,8 +96,8 @@ void CSpxAudioProcessorWriteToAudioSourceBuffer::CleanNotifyTarget()
 
 void CSpxAudioProcessorWriteToAudioSourceBuffer::InitBufferDataAndPropertiesFromSite()
 {
-    m_bufferData = SpxQueryService<ISpxAudioSourceBufferDataWriter>(GetSite(), "AudioSourceBufferData");
-    m_bufferProperties = SpxQueryService<ISpxAudioSourceBufferProperties>(GetSite(), "AudioSourceBufferProperties");
+    m_bufferData = SpxQueryService<ISpxBufferDataWriter>(GetSite(), "BufferData");
+    m_bufferProperties = SpxQueryService<ISpxBufferProperties>(GetSite(), "BufferProperties");
 }
 
 void CSpxAudioProcessorWriteToAudioSourceBuffer::CleanBufferDataAndProperties()

@@ -10,6 +10,7 @@
 #include <service_helpers.h>
 #include "handle_helpers.h"
 
+using namespace Microsoft::CognitiveServices::Speech;
 using namespace Microsoft::CognitiveServices::Speech::Impl;
 using namespace Microsoft::CognitiveServices::Speech::Impl::ConversationTranslation;
 

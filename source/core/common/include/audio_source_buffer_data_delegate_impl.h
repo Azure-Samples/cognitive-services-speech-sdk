@@ -16,14 +16,14 @@ namespace CognitiveServices {
 namespace Speech {
 namespace Impl {
 
-template <typename DelegateToHelperT = CSpxDelegateToSharedPtrHelper<ISpxAudioSourceBufferData>>
-class ISpxAudioSourceBufferDataDelegateImpl :
+template <typename DelegateToHelperT = CSpxDelegateToSharedPtrHelper<ISpxBufferData>>
+class ISpxBufferDataDelegateImpl :
     public DelegateToHelperT,
-    public ISpxAudioSourceBufferData
+    public ISpxBufferData
 {
 private:
-    using I = ISpxAudioSourceBufferData;
-    using C = ISpxAudioSourceBufferDataDelegateImpl;
+    using I = ISpxBufferData;
+    using C = ISpxBufferDataDelegateImpl;
 public:
 
     uint64_t GetOffset() override

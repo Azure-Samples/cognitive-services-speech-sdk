@@ -23,7 +23,7 @@ class CSpxMicrophoneAudioSourceAdapter :
     public ISpxObjectWithSiteInitImpl<ISpxGenericSite>,
     public ISpxGenericSite,
     public ISpxAudioSourceMicrophonePumpImpl<CSpxMicrophoneAudioSourceAdapter>,
-    public ISpxAudioSourceBufferDataDelegateImpl<>,
+    public ISpxBufferDataDelegateImpl<>,
     public ISpxServiceProvider,
     public CSpxAudioSourceBufferServiceProviderHelper<CSpxMicrophoneAudioSourceAdapter>
 {
@@ -38,7 +38,7 @@ public:
         SPX_INTERFACE_MAP_ENTRY(ISpxGenericSite)
         SPX_INTERFACE_MAP_ENTRY(ISpxAudioSourceInit)
         SPX_INTERFACE_MAP_ENTRY(ISpxAudioSourceControl)
-        SPX_INTERFACE_MAP_ENTRY(ISpxAudioSourceBufferData)
+        SPX_INTERFACE_MAP_ENTRY(ISpxBufferData)
         SPX_INTERFACE_MAP_ENTRY(ISpxServiceProvider)
         SPX_INTERFACE_MAP_ENTRY(ISpxAudioSource)
         SPX_INTERFACE_MAP_FUNC(QueryInterfaceMicrophonePumpImpl)
@@ -50,11 +50,11 @@ public:
         SPX_SERVICE_MAP_ENTRY_SITE(GetSite())
     SPX_SERVICE_MAP_END()
 
-    /* ISpxAudioSourceBufferData */
+    /* ISpxBufferData */
     inline uint64_t GetOffset() final
     {
         ThrowHRIfTrue(!IsInitialized(), SPXERR_UNINITIALIZED);
-        return ISpxAudioSourceBufferDataDelegateImpl::GetOffset();
+        return ISpxBufferDataDelegateImpl::GetOffset();
     }
 
     inline uint64_t GetNewMultiReaderOffset() final
@@ -66,36 +66,36 @@ public:
     inline uint32_t Read(uint8_t* buffer, uint32_t size) final
     {
         ThrowHRIfTrue(!IsInitialized(), SPXERR_UNINITIALIZED);
-        return ISpxAudioSourceBufferDataDelegateImpl::Read(buffer, size);
+        return ISpxBufferDataDelegateImpl::Read(buffer, size);
     }
 
     inline uint32_t ReadAt(uint64_t offset, uint8_t* buffer, uint32_t size) final
     {
         ThrowHRIfTrue(!IsInitialized(), SPXERR_UNINITIALIZED);
-        return ISpxAudioSourceBufferDataDelegateImpl::ReadAt(offset, buffer, size);
+        return ISpxBufferDataDelegateImpl::ReadAt(offset, buffer, size);
     }
 
     inline uint64_t GetBytesDead() final
     {
         ThrowHRIfTrue(!IsInitialized(), SPXERR_UNINITIALIZED);
-        return ISpxAudioSourceBufferDataDelegateImpl::GetBytesDead();
+        return ISpxBufferDataDelegateImpl::GetBytesDead();
     }
 
     inline uint64_t GetBytesRead() final
     {
         ThrowHRIfTrue(!IsInitialized(), SPXERR_UNINITIALIZED);
-        return ISpxAudioSourceBufferDataDelegateImpl::GetBytesRead();
+        return ISpxBufferDataDelegateImpl::GetBytesRead();
     }
     inline uint64_t GetBytesReady() final
     {
         ThrowHRIfTrue(!IsInitialized(), SPXERR_UNINITIALIZED);
-        return ISpxAudioSourceBufferDataDelegateImpl::GetBytesReady();
+        return ISpxBufferDataDelegateImpl::GetBytesReady();
     }
 
     inline uint64_t GetBytesReadyMax() final
     {
         ThrowHRIfTrue(!IsInitialized(), SPXERR_UNINITIALIZED);
-        return ISpxAudioSourceBufferDataDelegateImpl::GetBytesReadyMax();
+        return ISpxBufferDataDelegateImpl::GetBytesReadyMax();
     }
 
     // --- ISpxObjectInit (overrides)
@@ -104,7 +104,7 @@ protected:
 
     DISABLE_COPY_AND_MOVE(CSpxMicrophoneAudioSourceAdapter);
 
-    void InitDelegatePtr(std::shared_ptr<ISpxAudioSourceBufferData>& ptr) override;
+    void InitDelegatePtr(std::shared_ptr<ISpxBufferData>& ptr) override;
     void TermDelegatePtr();
 };
 

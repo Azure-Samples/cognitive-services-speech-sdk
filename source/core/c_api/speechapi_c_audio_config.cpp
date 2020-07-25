@@ -14,8 +14,8 @@
 #include <assert.h>
 #include "property_id_2_name_map.h"
 
+using namespace Microsoft::CognitiveServices::Speech;
 using namespace Microsoft::CognitiveServices::Speech::Impl;
-
 
 SPXAPI_(bool) audio_config_is_handle_valid(SPXAUDIOCONFIGHANDLE haudioConfig)
 {

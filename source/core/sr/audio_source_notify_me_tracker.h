@@ -26,7 +26,7 @@ public:
         *this = CSpxAudioSourceNotifyMeTracker();
     }
 
-    void TrackNotifyMe(const std::shared_ptr<ISpxAudioSource>& source, const std::shared_ptr<ISpxAudioSourceBufferData>& data)
+    void TrackNotifyMe(const std::shared_ptr<ISpxAudioSource>& source, const std::shared_ptr<ISpxBufferData>& data)
     {
         m_source = source;
         m_data = data;
@@ -122,7 +122,7 @@ protected:
     uint64_t m_bytesReady { 0 };
 
     std::shared_ptr<ISpxAudioSource> m_source;
-    std::shared_ptr<ISpxAudioSourceBufferData> m_data;
+    std::shared_ptr<ISpxBufferData> m_data;
 };
 
 } } } } // Microsoft::CognitiveServices::Speech::Impl

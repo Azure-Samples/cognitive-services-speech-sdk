@@ -87,7 +87,7 @@ void CSpxSingleToManyStreamReader::Init()
     auto site = GetSite();
     auto siteReader = SpxQueryInterface<ISpxSingleToManyStreamReaderAdapterSite>(site);
 
-    // Make sure the adapter knows we are consumer again. 
+    // Make sure the adapter knows we are consumer again.
     siteReader->ReconnectClient(m_id, SpxSharedPtrFromThis<ISpxAudioStreamReader>(this));
     InitBufferDataFromSite();
 
@@ -102,7 +102,7 @@ void CSpxSingleToManyStreamReader::Term()
 
 void CSpxSingleToManyStreamReader::InitBufferDataFromSite()
 {
-    m_bufferData = SpxQueryService<ISpxAudioSourceBufferData>(GetSite(), "AudioSourceBufferData");
+    m_bufferData = SpxQueryService<ISpxBufferData>(GetSite(), "BufferData");
     SPX_DBG_ASSERT(m_bufferData != nullptr);
 
     m_bufferOffset = m_bufferData->GetNewMultiReaderOffset();

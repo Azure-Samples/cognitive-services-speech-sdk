@@ -155,7 +155,7 @@ protected:
 
     SPX_SERVICE_MAP_BEGIN_NAMED(QueryServicePumpImpl)
         SPX_SERVICE_MAP_ENTRY(ISpxAudioProcessorNotifyMe)
-        SPX_SERVICE_MAP_ENTRY_OBJECT(ISpxAudioSourceBufferDataWriter, GetAudioSourceBuffer())
+        SPX_SERVICE_MAP_ENTRY_OBJECT(ISpxBufferDataWriter, GetAudioSourceBuffer())
     SPX_SERVICE_MAP_END()
 
     inline void InitMicrophonePump(const char* pumpClassName)
@@ -230,7 +230,7 @@ private:
     inline void InitNotifySource(bool init)
     {
         m_audioSource = init ? SpxQueryInterface<ISpxAudioSource>(SpxSharedPtrFromThis<ISpxAudioSourceControl>(this)) : nullptr;
-        m_bufferData = init ? SpxQueryService<ISpxAudioSourceBufferData>(m_audioSource, "AudioSourceBufferData") : nullptr;
+        m_bufferData = init ? SpxQueryService<ISpxBufferData>(m_audioSource, "BufferData") : nullptr;
 
         SPX_IFFALSE(init, SPX_DBG_ASSERT(m_audioSource == nullptr));
         SPX_IFFALSE(init, SPX_DBG_ASSERT(m_bufferData == nullptr));
@@ -255,7 +255,7 @@ private:
         SPX_DBG_ASSERT(m_processor == nullptr);
     }
 
-    inline std::shared_ptr<ISpxAudioSourceBufferData> GetAudioSourceBuffer()
+    inline std::shared_ptr<ISpxBufferData> GetAudioSourceBuffer()
     {
         return m_bufferData;
     }
@@ -264,7 +264,7 @@ private:
     std::shared_ptr<ISpxAudioProcessor> m_processor;
 
     std::shared_ptr<ISpxAudioSource> m_audioSource;
-    std::shared_ptr<ISpxAudioSourceBufferData> m_bufferData;
+    std::shared_ptr<ISpxBufferData> m_bufferData;
     std::mutex m_stateMutex;
     std::condition_variable m_stateCV;
 };

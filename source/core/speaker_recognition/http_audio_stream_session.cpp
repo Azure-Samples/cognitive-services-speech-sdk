@@ -295,7 +295,7 @@ void CSpxHttpAudioStreamSession::SetFormat(const SPXWAVEFORMATEX* pformat)
 
 uint32_t CSpxHttpAudioStreamSession::FromBytesToMilisecond(uint32_t bytes, uint32_t bytesPerSecond)
 {
-    return static_cast<uint32_t>(bytes * 1000)/bytesPerSecond;
+    return static_cast<uint32_t>(bytes * 1000) / bytesPerSecond;
 }
 
 void CSpxHttpAudioStreamSession::ProcessAudio(const DataChunkPtr& audioChunk)

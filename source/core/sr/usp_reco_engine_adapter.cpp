@@ -949,7 +949,7 @@ void CSpxUspRecoEngineAdapter::SetSpeechConfigMessage(const ISpxNamedProperties&
                                                 {"keywords", keywordsJSON } }) });
 
         speechConfig["context"]["keywordRegistry"] = keywordRegistry;
-        
+
     }
 
     auto userDefinedParams = GetParametersFromUser("speech.config");
@@ -1475,17 +1475,17 @@ void CSpxUspRecoEngineAdapter::CreateConversationResult(std::shared_ptr<ISpxReco
     initConversationResult->InitConversationResult(userId.c_str(), utteranceId.c_str());
 
 }
-static TranslationStatusCode GetTranslationStatus(::USP::TranslationStatus uspStatus)
+static TranslationStatusCode GetTranslationStatus(USP::TranslationStatus uspStatus)
 {
     TranslationStatusCode status = TranslationStatusCode::Error;
     switch (uspStatus)
     {
-    case ::USP::TranslationStatus::Success:
+    case USP::TranslationStatus::Success:
         status = TranslationStatusCode::Success;
         break;
-    case ::USP::TranslationStatus::Error:
+    case USP::TranslationStatus::Error:
         break;
-    case ::USP::TranslationStatus::InvalidMessage:
+    case USP::TranslationStatus::InvalidMessage:
         // The failureReason contains additional error messages.
         // Todo: have better error handling for different statuses.
         break;
@@ -1612,7 +1612,7 @@ void CSpxUspRecoEngineAdapter::OnTranslationPhrase(const USP::TranslationPhraseM
         message.recognitionStatus, message.translation.translationStatus,
         message.text.c_str(), message.offset, message.duration);
 #ifdef _DEBUG
-    if (message.translation.translationStatus != ::USP::TranslationStatus::Success)
+    if (message.translation.translationStatus != USP::TranslationStatus::Success)
     {
         SPX_DBG_TRACE_VERBOSE(" FailureReason: %ls.", message.translation.failureReason.c_str());
     }
@@ -2111,7 +2111,7 @@ json CSpxUspRecoEngineAdapter::GetKeywordDetectionJson()
 
             keywordDetectionJson = { {
                 {"type", "startTrigger"},
-                {"clientDetectedKeywords", 
+                {"clientDetectedKeywords",
                         keywordsJSON
                 },
                 {"onReject", {

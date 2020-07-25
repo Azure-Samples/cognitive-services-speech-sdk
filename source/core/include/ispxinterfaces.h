@@ -22,13 +22,13 @@
 #include "shared_ptr_helpers.h"
 #include "spxdebug.h"
 
-using namespace Microsoft::CognitiveServices::Speech;
-using namespace Microsoft::CognitiveServices::Speech::Translation;
-
 namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
 namespace Impl {
+
+using OffsetType = uint64_t;
+using SizeType = size_t;
 
 class ISpxInterfaceBase : public std::enable_shared_from_this<ISpxInterfaceBase>
 {
@@ -1189,7 +1189,7 @@ public:
     virtual void InitFromStream(std::shared_ptr<ISpxAudioStream> stream) = 0;
 };
 
-class ISpxAudioSourceBufferData : public ISpxInterfaceBaseFor<ISpxAudioSourceBufferData>
+class ISpxBufferData : public ISpxInterfaceBaseFor<ISpxBufferData>
 {
 public:
 
@@ -1205,19 +1205,15 @@ public:
     virtual uint64_t GetBytesReadyMax() = 0;
 };
 
-class ISpxAudioSourceBufferDataWriter : public ISpxInterfaceBaseFor<ISpxAudioSourceBufferDataWriter>
+class ISpxBufferDataWriter : public ISpxInterfaceBaseFor<ISpxBufferDataWriter>
 {
 public:
-
     virtual void Write(uint8_t* buffer, uint32_t size) = 0;
 };
 
-class ISpxAudioSourceBufferProperties : public ISpxInterfaceBaseFor<ISpxAudioSourceBufferProperties>
+class ISpxBufferProperties : public ISpxInterfaceBaseFor<ISpxBufferProperties>
 {
 public:
-    using OffsetType = uint64_t;
-    using SizeType = size_t;
-
     using PropertyName_Type = std::shared_ptr<const char>;
     using PropertyValue_Type = std::shared_ptr<const char>;
     using FoundPropertyData_Type = std::tuple<OffsetType, PropertyName_Type, PropertyValue_Type>;
@@ -1233,7 +1229,7 @@ public:
 
 using ISpxAudioProcessorNotifyMe = ISpxNotifyMeSP<ISpxAudioProcessor>;
 
-using ISpxAudioSourceNotifyMe = ISpxNotifyMeSP<ISpxAudioSource, ISpxAudioSourceBufferData>;
+using ISpxAudioSourceNotifyMe = ISpxNotifyMeSP<ISpxAudioSource, ISpxBufferData>;
 
 class ISpxAudioSourceControl : public ISpxInterfaceBaseFor<ISpxAudioSourceControl>
 {

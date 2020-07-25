@@ -24,6 +24,7 @@ SPX_EXTERN_C void* Codec_CreateModuleObject(const char* className, const char* i
 SPX_EXTERN_C void* SDKKWS_CreateModuleObject(const char* className, const char* interfaceName);
 #endif
 SPX_EXTERN_C void* AudioLib_CreateModuleObject(const char* className, const char* interfaceName);
+SPX_EXTERN_C void* DataLib_CreateModuleObject(const char* className, const char* interfaceName);
 SPX_EXTERN_C void* SRLib_CreateModuleObject(const char* className, const char* interfaceName);
 SPX_EXTERN_C void* TTSLib_CreateModuleObject(const char* className, const char* interfaceName);
 SPX_EXTERN_C void* ConversationTranslationLib_CreateModuleObject(const char *className, const char* interfaceName);
@@ -39,6 +40,7 @@ SPX_EXTERN_C void* PrimaryCarbon_CreateModuleObject(const char* className, const
     SPX_FACTORY_MAP_ENTRY_FUNC(SDKKWS_CreateModuleObject);
 #endif
     SPX_FACTORY_MAP_ENTRY_FUNC(AudioLib_CreateModuleObject);
+    SPX_FACTORY_MAP_ENTRY_FUNC(DataLib_CreateModuleObject);
     SPX_FACTORY_MAP_ENTRY_FUNC(SRLib_CreateModuleObject);
     SPX_FACTORY_MAP_ENTRY_FUNC(TTSLib_CreateModuleObject);
     SPX_FACTORY_MAP_ENTRY_FUNC(ConversationTranslationLib_CreateModuleObject);

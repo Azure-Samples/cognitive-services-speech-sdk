@@ -2,13 +2,9 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
-// audio_source_buffer_properties.cpp: Implementation definitions for CSpxAudioSourceBufferProperties
-//
-
-// ROBCH: Introduced in AUDIO.V3
 
 #include "stdafx.h"
-#include "audio_source_buffer_properties.h"
+#include "buffer_properties.h"
 #include "create_object_helpers.h"
 
 namespace Microsoft {
@@ -16,12 +12,10 @@ namespace CognitiveServices {
 namespace Speech {
 namespace Impl {
 
-using SizeType = ISpxAudioSourceBufferProperties::SizeType;
-
 constexpr SizeType DEFAULT_AUDIO_SOURCE_BUFFER_PROPERTY_DATA_SIZE_IN_BYTES = 0x40000;
 constexpr SizeType DEFAULT_AUDIO_SOURCE_BUFFER_PROPERTY_VALUES_SIZE_IN_BYTES = 0x40000;
 
-CSpxAudioSourceBufferProperties::~CSpxAudioSourceBufferProperties()
+CSpxBufferProperties::~CSpxBufferProperties()
 {
     TermPropertyNames();
     TermPropertyDataBuffer();
@@ -32,11 +26,11 @@ CSpxAudioSourceBufferProperties::~CSpxAudioSourceBufferProperties()
     SPX_DBG_ASSERT(m_nameFromId.size() == 0);
 }
 
-void CSpxAudioSourceBufferProperties::Term()
+void CSpxBufferProperties::Term()
 {
 }
 
-void CSpxAudioSourceBufferProperties::SetBufferProperty(const char* name, const char* value)
+void CSpxBufferProperties::SetBufferProperty(const char* name, const char* value)
 {
     auto offset = OffsetFromSite();
     auto nameId = IdFromName(name);
@@ -44,7 +38,7 @@ void CSpxAudioSourceBufferProperties::SetBufferProperty(const char* name, const 
     WritePropertyData(nameId, offset, valueId);
 }
 
-std::shared_ptr<const char> CSpxAudioSourceBufferProperties::GetBufferProperty(const char* name, const char* defaultValue)
+std::shared_ptr<const char> CSpxBufferProperties::GetBufferProperty(const char* name, const char* defaultValue)
 {
     auto offset = OffsetFromSite();
     auto nameId = IdFromName(name);
@@ -52,25 +46,25 @@ std::shared_ptr<const char> CSpxAudioSourceBufferProperties::GetBufferProperty(c
     return value != nullptr ? value : std::shared_ptr<const char>(defaultValue, [](auto) {});
 }
 
-std::shared_ptr<const char> CSpxAudioSourceBufferProperties::GetBufferProperty(const char* name, OffsetType offset, int direction, OffsetType* foundAtOffset)
+std::shared_ptr<const char> CSpxBufferProperties::GetBufferProperty(const char* name, OffsetType offset, int direction, OffsetType* foundAtOffset)
 {
     auto nameId = IdFromName(name);
     return FindPropertyDataValue(nameId, offset, direction, foundAtOffset);
 }
 
-std::list<ISpxAudioSourceBufferProperties ::FoundPropertyData_Type> CSpxAudioSourceBufferProperties::GetBufferProperties(OffsetType offsetBegin, OffsetType offsetEnd)
+std::list<ISpxBufferProperties ::FoundPropertyData_Type> CSpxBufferProperties::GetBufferProperties(OffsetType offsetBegin, OffsetType offsetEnd)
 {
     auto nameId = IdFromName(nullptr);
     return FindPropertyData(nameId, offsetBegin, offsetEnd);
 }
 
-std::list<ISpxAudioSourceBufferProperties::FoundPropertyData_Type> CSpxAudioSourceBufferProperties::GetBufferProperties(const char* name, OffsetType offsetBegin, OffsetType offsetEnd)
+std::list<ISpxBufferProperties::FoundPropertyData_Type> CSpxBufferProperties::GetBufferProperties(const char* name, OffsetType offsetBegin, OffsetType offsetEnd)
 {
     auto nameId = IdFromName(name);
     return FindPropertyData(nameId, offsetBegin, offsetEnd);
 }
 
-void CSpxAudioSourceBufferProperties::TermPropertyNames()
+void CSpxBufferProperties::TermPropertyNames()
 {
     m_nameIds.clear();
     SPX_DBG_ASSERT(m_nameIds.size() == 0);
@@ -79,75 +73,75 @@ void CSpxAudioSourceBufferProperties::TermPropertyNames()
     SPX_DBG_ASSERT(m_nameFromId.size() == 0);
 }
 
-void CSpxAudioSourceBufferProperties::EnsureInitPropertyDataBuffer()
+void CSpxBufferProperties::EnsureInitPropertyDataBuffer()
 {
     SPX_IFTRUE(m_data == nullptr, InitPropertyDataBuffer());
 }
 
-void CSpxAudioSourceBufferProperties::InitPropertyDataBuffer()
+void CSpxBufferProperties::InitPropertyDataBuffer()
 {
     auto data = SpxCreateObjectWithSite<ISpxReadWriteBufferInit>("CSpxReadWriteRingBuffer", this);
-    data->SetName("AudioSourceBufferPropertyData");
+    data->SetName("BufferPropertyData");
     data->SetSize(GetPropertyDataBufferSize());
     m_data = SpxQueryInterface<ISpxReadWriteBuffer>(data);
 }
 
-void CSpxAudioSourceBufferProperties::TermPropertyDataBuffer()
+void CSpxBufferProperties::TermPropertyDataBuffer()
 {
     SpxTermAndClear(m_data);
     SPX_DBG_ASSERT(m_data == nullptr);
 }
 
-void CSpxAudioSourceBufferProperties::EnsureInitPropertyValuesBuffer()
+void CSpxBufferProperties::EnsureInitPropertyValuesBuffer()
 {
     SPX_IFTRUE(m_values == nullptr, InitPropertyValuesBuffer());
 }
 
-void CSpxAudioSourceBufferProperties::InitPropertyValuesBuffer()
+void CSpxBufferProperties::InitPropertyValuesBuffer()
 {
     auto values = SpxCreateObjectWithSite<ISpxReadWriteBufferInit>("CSpxReadWriteRingBuffer", this);
-    values->SetName("AudioSourceBufferPropertyValues");
+    values->SetName("BufferPropertyValues");
     values->SetSize(GetPropertyValueBufferSize());
     m_values = SpxQueryInterface<ISpxReadWriteBuffer>(values);
 }
 
-void CSpxAudioSourceBufferProperties::TermPropertyValuesBuffer()
+void CSpxBufferProperties::TermPropertyValuesBuffer()
 {
     SpxTermAndClear(m_values);
     SPX_DBG_ASSERT(m_values == nullptr);
 }
 
-SizeType CSpxAudioSourceBufferProperties::GetPropertyDataBufferSize()
+SizeType CSpxBufferProperties::GetPropertyDataBufferSize()
 {
     auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
-    auto size = properties->GetStringValue("AudioSourceBufferPropertyDataSizeInBytes", std::to_string(GetDefaultPropertyDataBufferSize()).c_str());
+    auto size = properties->GetStringValue("BufferPropertyDataSizeInBytes", std::to_string(GetDefaultPropertyDataBufferSize()).c_str());
     return std::stoul(size.c_str());
 }
 
-SizeType CSpxAudioSourceBufferProperties::GetDefaultPropertyDataBufferSize() const
+SizeType CSpxBufferProperties::GetDefaultPropertyDataBufferSize() const
 {
     return DEFAULT_AUDIO_SOURCE_BUFFER_PROPERTY_DATA_SIZE_IN_BYTES;
 }
 
-SizeType CSpxAudioSourceBufferProperties::GetPropertyValueBufferSize()
+SizeType CSpxBufferProperties::GetPropertyValueBufferSize()
 {
     auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
-    auto size = properties->GetStringValue("AudioSourceBufferPropertyValueSizeInBytes", std::to_string(GetDefaultPropertyValueBufferSize()).c_str());
+    auto size = properties->GetStringValue("BufferPropertyValueSizeInBytes", std::to_string(GetDefaultPropertyValueBufferSize()).c_str());
     return std::stoul(size.c_str());
 }
 
-SizeType CSpxAudioSourceBufferProperties::GetDefaultPropertyValueBufferSize() const
+SizeType CSpxBufferProperties::GetDefaultPropertyValueBufferSize() const
 {
     return DEFAULT_AUDIO_SOURCE_BUFFER_PROPERTY_VALUES_SIZE_IN_BYTES;
 }
 
-uint64_t CSpxAudioSourceBufferProperties::OffsetFromSite()
+uint64_t CSpxBufferProperties::OffsetFromSite()
 {
     auto site = GetSite();
     return site != nullptr ? site->GetOffset() : 0;
 }
 
-uint64_t CSpxAudioSourceBufferProperties::IdFromName(const char* name)
+uint64_t CSpxBufferProperties::IdFromName(const char* name)
 {
     SPX_IFTRUE_RETURN_X(name == nullptr, 0);
     SPX_IFTRUE_RETURN_X(m_nameIds.count(name) > 0, m_nameIds[name]);
@@ -157,7 +151,7 @@ uint64_t CSpxAudioSourceBufferProperties::IdFromName(const char* name)
     return id;
 }
 
-uint64_t CSpxAudioSourceBufferProperties::IdFromValue(const char* value)
+uint64_t CSpxBufferProperties::IdFromValue(const char* value)
 {
     EnsureInitPropertyValuesBuffer();
 
@@ -170,14 +164,14 @@ uint64_t CSpxAudioSourceBufferProperties::IdFromValue(const char* value)
     return id;
 }
 
-ISpxAudioSourceBufferProperties::PropertyName_Type CSpxAudioSourceBufferProperties::NameFromId(uint64_t id)
+ISpxBufferProperties::PropertyName_Type CSpxBufferProperties::NameFromId(uint64_t id)
 {
     SPX_IFTRUE_RETURN_X(m_nameFromId.count(id) != 1, nullptr);
     auto& name = m_nameFromId[id];
     return std::shared_ptr<const char>(name.c_str(), [](auto){});
 }
 
-ISpxAudioSourceBufferProperties::PropertyValue_Type CSpxAudioSourceBufferProperties::ValueFromId(uint64_t id)
+ISpxBufferProperties::PropertyValue_Type CSpxBufferProperties::ValueFromId(uint64_t id)
 {
     EnsureInitPropertyValuesBuffer();
 
@@ -191,7 +185,7 @@ ISpxAudioSourceBufferProperties::PropertyValue_Type CSpxAudioSourceBufferPropert
     return m_values->ReadSharedAtBytePos<char>(valuePos, valueSize);
 }
 
-void CSpxAudioSourceBufferProperties::WritePropertyData(uint64_t nameId, uint64_t offset, uint64_t valueId)
+void CSpxBufferProperties::WritePropertyData(uint64_t nameId, uint64_t offset, uint64_t valueId)
 {
     EnsureInitPropertyDataBuffer();
 
@@ -200,7 +194,7 @@ void CSpxAudioSourceBufferProperties::WritePropertyData(uint64_t nameId, uint64_
     m_data->Write(&valueId, sizeof(valueId));
 }
 
-void CSpxAudioSourceBufferProperties::ReadPropertyData(uint64_t dataPos, uint64_t* nameId, uint64_t* offset, uint64_t* valueId)
+void CSpxBufferProperties::ReadPropertyData(uint64_t dataPos, uint64_t* nameId, uint64_t* offset, uint64_t* valueId)
 {
     EnsureInitPropertyDataBuffer();
 
@@ -212,7 +206,7 @@ void CSpxAudioSourceBufferProperties::ReadPropertyData(uint64_t dataPos, uint64_
     if (valueId != nullptr) *valueId = data[2];
 }
 
-ISpxAudioSourceBufferProperties::PropertyValue_Type CSpxAudioSourceBufferProperties::FindPropertyDataValue(uint64_t nameId, uint64_t offset, int direction, OffsetType* foundAtOffset)
+ISpxBufferProperties::PropertyValue_Type CSpxBufferProperties::FindPropertyDataValue(uint64_t nameId, uint64_t offset, int direction, OffsetType* foundAtOffset)
 {
     const uint64_t notFound = UINT64_MAX;
     auto foundOffsetRead = notFound;
@@ -260,7 +254,7 @@ ISpxAudioSourceBufferProperties::PropertyValue_Type CSpxAudioSourceBufferPropert
     return value;
 }
 
-std::list<ISpxAudioSourceBufferProperties::FoundPropertyData_Type> CSpxAudioSourceBufferProperties::FindPropertyData(uint64_t nameId, uint64_t offsetBegin, uint64_t offsetEnd)
+std::list<ISpxBufferProperties::FoundPropertyData_Type> CSpxBufferProperties::FindPropertyData(uint64_t nameId, uint64_t offsetBegin, uint64_t offsetEnd)
 {
     std::list<FoundPropertyData_Type> list;
 
@@ -290,7 +284,7 @@ std::list<ISpxAudioSourceBufferProperties::FoundPropertyData_Type> CSpxAudioSour
     return list;
 }
 
-uint64_t CSpxAudioSourceBufferProperties::FirstFindDataPos()
+uint64_t CSpxBufferProperties::FirstFindDataPos()
 {
     EnsureInitPropertyDataBuffer();
     auto writePos = m_data->GetWritePos();
@@ -300,7 +294,7 @@ uint64_t CSpxAudioSourceBufferProperties::FirstFindDataPos()
         : (writePos - itemSize);
 }
 
-uint64_t CSpxAudioSourceBufferProperties::NextFindDataPos(uint64_t pos)
+uint64_t CSpxBufferProperties::NextFindDataPos(uint64_t pos)
 {
     SPX_IFTRUE_RETURN_X(pos == StopFindDataPos(), StopFindDataPos());
 

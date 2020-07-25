@@ -49,6 +49,7 @@ target_link_libraries(factory
                       PRIVATE conversation_translation
                       PRIVATE common
                       PRIVATE speaker_recognition
+                      PRIVATE data
                       PRIVATE ${CMAKE_DL_LIBS})
 
 if(BUILD_UNIDEC)

@@ -13,6 +13,7 @@
 #include "string_utils.h"
 
 
+using namespace Microsoft::CognitiveServices::Speech;
 using namespace Microsoft::CognitiveServices::Speech::Impl;
 
 
@@ -99,7 +100,7 @@ SPXAPI pull_audio_input_stream_set_callbacks(SPXAUDIOSTREAMHANDLE haudioStream, 
         auto stream = CSpxSharedPtrHandleTableManager::GetPtr<ISpxAudioStream, SPXAUDIOSTREAMHANDLE>(haudioStream);
         auto initCallbacks = SpxQueryInterface<ISpxAudioStreamReaderInitCallbacks>(stream);
         initCallbacks->SetCallbacks(
-            [=](uint8_t* buffer, uint32_t size) { return readCallback(pvContext, buffer, size); },
+            [=](uint8_t* buffer, uint32_t size) { return readCallback(pvContext, buffer, static_cast<uint32_t>(size)); },
             [=]() { if (closeCallback != nullptr) { closeCallback(pvContext); } } );
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
@@ -112,7 +113,7 @@ SPXAPI pull_audio_input_stream_set_getproperty_callback(SPXAUDIOSTREAMHANDLE hau
         auto stream = CSpxSharedPtrHandleTableManager::GetPtr<ISpxAudioStream, SPXAUDIOSTREAMHANDLE>(haudioStream);
         auto initCallbacks = SpxQueryInterface<ISpxAudioStreamReaderInitCallbacks>(stream);
         initCallbacks->SetPropertyCallback(
-            [=](PropertyId id, uint8_t* result, uint32_t size) { return getPropertyCallback(pvContext, static_cast<int>(id), result, size); }
+            [=](PropertyId id, uint8_t* result, uint32_t size) { return getPropertyCallback(pvContext, static_cast<int>(id), result, static_cast<uint32_t>(size)); }
         );
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);

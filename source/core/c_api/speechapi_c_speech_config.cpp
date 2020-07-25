@@ -10,6 +10,7 @@
 #include "property_id_2_name_map.h"
 #include "audio_format_id_2_name_map.h"
 
+using namespace Microsoft::CognitiveServices::Speech;
 using namespace Microsoft::CognitiveServices::Speech::Impl;
 
 SPXAPI speech_config_from_subscription_internal(SPXSPEECHCONFIGHANDLE* hconfig, const char* subscription, const char* region, const char* classname)

@@ -49,7 +49,7 @@ class CSpxSingleToManyStreamReader :
         long m_id;
         SpxWAVEFORMATEX_Type m_sourceFormat;
         bool m_streamOpened;
-        std::shared_ptr<ISpxAudioSourceBufferData> m_bufferData;
+        std::shared_ptr<ISpxBufferData> m_bufferData;
         uint64_t m_bufferOffset {0};
         std::string m_lastError;
 

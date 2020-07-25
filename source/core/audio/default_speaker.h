@@ -103,11 +103,11 @@ private:
         Playing,
         Paused
     };
-    
+
     std::atomic<PlayState> m_playState { PlayState::Stopped };
     AUDIO_SETTINGS_HANDLE m_hsetting = nullptr;
     AUDIO_SYS_HANDLE m_haudio = nullptr;
-    
+
     std::mutex m_playMutex;
     std::condition_variable m_cv;
 #endif

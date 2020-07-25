@@ -25,6 +25,7 @@ source_group("Header Files (Private)" FILES ${HEADERS_PRIVATE})
 add_executable(${PROJECT_NAME} ${SOURCES} ${TEST_HEADERS} ${HEADERS_PRIVATE})
 
 set(PRIVATE_AUDIO_HEADERS "${CARBON_CORE}/audio")
+set(PRIVATE_DATA_HEADERS "${CARBON_CORE}/data")
 
 target_include_directories(${PROJECT_NAME}
     PRIVATE
@@ -36,9 +37,10 @@ target_include_directories(${PROJECT_NAME}
         "${CARBON_EXTERNAL}/Catch2"
         # This is a unit test project, so include internals
         ${PRIVATE_AUDIO_HEADERS}
+        ${PRIVATE_DATA_HEADERS}
 )
 
-target_link_libraries(${PROJECT_NAME} usp audio factory common)
+target_link_libraries(${PROJECT_NAME} usp data audio factory common)
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "WindowsStore")
 if (${use_openssl})

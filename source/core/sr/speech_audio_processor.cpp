@@ -131,7 +131,7 @@ void CSpxSpeechAudioProcessor::ProcessAudio(const DataChunkPtr& audioChunk)
         m_baselineMean = (m_baselineMean + chunkmean) / ++m_baselineCount;
         m_cbWarmup += osize*2;
         return;
-    } 
+    }
 
     if (chunkmean > (m_baselineMean + m_energyThreshold))
     {

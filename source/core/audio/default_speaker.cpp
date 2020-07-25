@@ -100,7 +100,7 @@ uint32_t CSpxDefaultSpeaker::Write(uint8_t* buffer, uint32_t size)
     SPX_IFTRUE_THROW_HR(m_audioFormat.get() == nullptr, SPXERR_UNINITIALIZED);
 
     // Initialize audio device when data is received for the first time
-    InitializeAudio();   
+    InitializeAudio();
 
     uint32_t writtenSize = size;
     // Only send the data when audio device is initialized
@@ -142,7 +142,7 @@ uint16_t CSpxDefaultSpeaker::GetFormat(SPXWAVEFORMATEX* formatBuffer, uint16_t f
 
     if (formatBuffer != nullptr)
     {
-        size_t size = std::min(formatSize, (uint16_t)sizeof(AUDIO_WAVEFORMAT));
+        size_t size = std::min(static_cast<size_t>(formatSize), sizeof(AUDIO_WAVEFORMAT));
         memcpy(formatBuffer, m_audioFormat.get(), size);
 
         if (formatSize >= (uint16_t)sizeof(SPXWAVEFORMATEX))

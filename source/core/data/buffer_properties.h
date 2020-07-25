@@ -2,10 +2,6 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
-// audio_source_buffer_properties.h: Implementation declarations for CSpxAudioSourceBufferProperties
-//
-
-// ROBCH: Introduced in AUDIO.V3
 
 #pragma once
 #include "spxcore_common.h"
@@ -17,22 +13,22 @@ namespace CognitiveServices {
 namespace Speech {
 namespace Impl {
 
-class CSpxAudioSourceBufferProperties :
-    public ISpxObjectWithSiteInitImpl<ISpxAudioSourceBufferData>,
+class CSpxBufferProperties :
+    public ISpxObjectWithSiteInitImpl<ISpxBufferData>,
     public ISpxGenericSite,
-    public ISpxAudioSourceBufferProperties,
+    public ISpxBufferProperties,
     public ISpxServiceProvider
 {
 public:
 
-    CSpxAudioSourceBufferProperties() = default;
-    virtual ~CSpxAudioSourceBufferProperties();
+    CSpxBufferProperties() = default;
+    virtual ~CSpxBufferProperties();
 
     SPX_INTERFACE_MAP_BEGIN()
         SPX_INTERFACE_MAP_ENTRY(ISpxObjectInit)
         SPX_INTERFACE_MAP_ENTRY(ISpxObjectWithSite)
         SPX_INTERFACE_MAP_ENTRY(ISpxGenericSite)
-        SPX_INTERFACE_MAP_ENTRY(ISpxAudioSourceBufferProperties)
+        SPX_INTERFACE_MAP_ENTRY(ISpxBufferProperties)
         SPX_INTERFACE_MAP_ENTRY(ISpxServiceProvider)
     SPX_INTERFACE_MAP_END()
 
@@ -41,10 +37,10 @@ public:
     SPX_SERVICE_MAP_END()
 
     // --- ISpxObjectInit (overrides)
-    void Term() override;
+    void Term() final;
 
-    // --- ISpxAudioSourceBufferProperties (overrides)
-    void SetBufferProperty(const char* name, const char* value) override;
+    // --- ISpxBufferProperties (overrides)
+    void SetBufferProperty(const char* name, const char* value) final;
 
     PropertyValue_Type GetBufferProperty(const char* name, const char* defaultValue = nullptr) override;
     PropertyValue_Type GetBufferProperty(const char* name, OffsetType offset, int direction = -1, OffsetType* foundAtOffset = nullptr) override;
@@ -53,9 +49,6 @@ public:
     std::list<FoundPropertyData_Type> GetBufferProperties(const char* name, OffsetType offsetBegin, OffsetType offsetEnd) override;
 
 private:
-
-    DISABLE_COPY_AND_MOVE(CSpxAudioSourceBufferProperties);
-
     void TermPropertyNames();
 
     void EnsureInitPropertyDataBuffer();

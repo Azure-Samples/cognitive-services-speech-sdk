@@ -28,7 +28,7 @@ private:
     using C = ISpxAudioSourceNotifyMeTrackDelegateImpl;
 public:
 
-    void NotifyMe(const std::shared_ptr<ISpxAudioSource>& source, const std::shared_ptr<ISpxAudioSourceBufferData>& data)
+    void NotifyMe(const std::shared_ptr<ISpxAudioSource>& source, const std::shared_ptr<ISpxBufferData>& data)
     {
         TrackNotifyMe(source, data);
         InvokeOnDelegate(C::GetDelegate(), &I::NotifyMe, source, data);

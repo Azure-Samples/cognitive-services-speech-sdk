@@ -2,12 +2,9 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
-// read_write_ring_buffer.h: Implementation declarations for CSpxReadWriteRingBuffer C++ class
-//
-
-// ROBCH: Introduced in AUDIO.V3
 
 #pragma once
+
 #include "spxcore_common.h"
 #include "ispxinterfaces.h"
 #include "interface_helpers.h"
@@ -100,6 +97,5 @@ private:
     uint8_t* m_writePtr;
     uint8_t* m_readPtr;
 };
-
 
 } } } } // Microsoft::CognitiveServices::Speech::Impl

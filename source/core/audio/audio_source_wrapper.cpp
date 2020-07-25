@@ -22,8 +22,8 @@ CSpxAudioSourceWrapper::~CSpxAudioSourceWrapper()
     SPX_DBG_ASSERT(GetSite() == nullptr);
     SPX_DBG_ASSERT(ISpxAudioSourceInitDelegateImpl::IsClear());
     SPX_DBG_ASSERT(ISpxAudioSourceControlDelegateImpl::IsClear());
-    SPX_DBG_ASSERT(ISpxAudioSourceBufferDataDelegateImpl::IsClear());
-    SPX_DBG_ASSERT(ISpxAudioSourceBufferDataWriterDelegateImpl::IsClear());
+    SPX_DBG_ASSERT(ISpxBufferDataDelegateImpl::IsClear());
+    SPX_DBG_ASSERT(ISpxBufferDataWriterDelegateImpl::IsClear());
 }
 
 void CSpxAudioSourceWrapper::Term()
@@ -71,14 +71,14 @@ void CSpxAudioSourceWrapper::InitDelegatePtr(std::shared_ptr<ISpxAudioSourceCont
     ptr = InitDelegatePtrHelper<ISpxAudioSourceControl>(*this);
 }
 
-void CSpxAudioSourceWrapper::InitDelegatePtr(std::shared_ptr<ISpxAudioSourceBufferData>& ptr)
+void CSpxAudioSourceWrapper::InitDelegatePtr(std::shared_ptr<ISpxBufferData>& ptr)
 {
-    ptr = InitDelegatePtrHelper<ISpxAudioSourceBufferData>(*this);
+    ptr = InitDelegatePtrHelper<ISpxBufferData>(*this);
 }
 
-void CSpxAudioSourceWrapper::InitDelegatePtr(std::shared_ptr<ISpxAudioSourceBufferDataWriter>& ptr)
+void CSpxAudioSourceWrapper::InitDelegatePtr(std::shared_ptr<ISpxBufferDataWriter>& ptr)
 {
-    ptr = InitDelegatePtrHelper<ISpxAudioSourceBufferDataWriter>(*this);
+    ptr = InitDelegatePtrHelper<ISpxBufferDataWriter>(*this);
 }
 
 void CSpxAudioSourceWrapper::TermAudioSourceDelegate()
@@ -91,12 +91,12 @@ void CSpxAudioSourceWrapper::TermAudioSourceDelegate()
     ControlDelegate::Clear();
     SPX_DBG_ASSERT(ControlDelegate::IsClear());
 
-    using DataDelegate = ISpxAudioSourceBufferDataDelegateImpl;
+    using DataDelegate = ISpxBufferDataDelegateImpl;
     DataDelegate::Zombie(true);
     DataDelegate::Clear();
     SPX_DBG_ASSERT(DataDelegate::IsClear());
 
-    using WriterDelegate = ISpxAudioSourceBufferDataWriterDelegateImpl;
+    using WriterDelegate = ISpxBufferDataWriterDelegateImpl;
     WriterDelegate::Zombie(true);
     WriterDelegate::Clear();
     SPX_DBG_ASSERT(WriterDelegate::IsClear());

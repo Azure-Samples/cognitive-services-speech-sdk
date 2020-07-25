@@ -45,9 +45,9 @@ class CSpxSingleToManyStreamReaderAdapter :
         SPX_SERVICE_MAP_ENTRY(ISpxNamedProperties)
         SPX_SERVICE_MAP_ENTRY_SITE(GetSite())
         SPX_SERVICE_MAP_ENTRY_FUNC(QueryServiceAudioSourceBuffer)
-        SPX_SERVICE_MAP_ENTRY_OBJECT(ISpxAudioSourceBufferData, GetAudioSourceBuffer())
-        SPX_SERVICE_MAP_ENTRY_OBJECT(ISpxAudioSourceBufferDataWriter, GetAudioSourceBuffer())
-        SPX_SERVICE_MAP_ENTRY_OBJECT(ISpxAudioSourceBufferProperties, GetBufferProperties())
+        SPX_SERVICE_MAP_ENTRY_OBJECT(ISpxBufferData, GetAudioSourceBuffer())
+        SPX_SERVICE_MAP_ENTRY_OBJECT(ISpxBufferDataWriter, GetAudioSourceBuffer())
+        SPX_SERVICE_MAP_ENTRY_OBJECT(ISpxBufferProperties, GetBufferProperties())
         SPX_SERVICE_MAP_END()
 
         // ISpxSingleToManyStreamReaderAdapter
@@ -86,8 +86,8 @@ class CSpxSingleToManyStreamReaderAdapter :
         std::shared_ptr<ISpxAudioPump> m_singletonAudioPump;
 
         // Buffer shared between the readers and in which the Pump adds data.
-        std::shared_ptr<ISpxAudioSourceBufferData> m_bufferData;
-        std::shared_ptr<ISpxAudioSourceBufferProperties> m_bufferProperties;
+        std::shared_ptr<ISpxBufferData> m_bufferData;
+        std::shared_ptr<ISpxBufferProperties> m_bufferProperties;
 
         void EnsureAudioStreamStarted();
         void ClosePumpAndStream();
@@ -95,10 +95,10 @@ class CSpxSingleToManyStreamReaderAdapter :
         void InitAudioProcessing();
         void ResetAudioProcessing();
         std::shared_ptr<ISpxInterfaceBase> QueryServiceAudioSourceBuffer(const char* serviceName);
-        std::shared_ptr<ISpxAudioSourceBufferData> InitAudioSourceBuffer();
-        std::shared_ptr<ISpxAudioSourceBufferData> GetAudioSourceBuffer();
-        std::shared_ptr<ISpxAudioSourceBufferProperties> GetBufferProperties();
-        std::shared_ptr<ISpxAudioSourceBufferProperties> InitBufferProperties();
+        std::shared_ptr<ISpxBufferData> InitAudioSourceBuffer();
+        std::shared_ptr<ISpxBufferData> GetAudioSourceBuffer();
+        std::shared_ptr<ISpxBufferProperties> GetBufferProperties();
+        std::shared_ptr<ISpxBufferProperties> InitBufferProperties();
         void TermAudioSourceBuffer();
         void HandleDownstreamError(const std::string& error);
 

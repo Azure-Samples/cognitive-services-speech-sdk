@@ -90,7 +90,7 @@ void CSpxAudioSessionShim::AudioSourceDataAvailable(bool /* first */)
     {
         std::string userId{};
         std::string timestamp{};
-        TryQueryInterface<ISpxAudioSourceBufferProperties>(m_data, [&userId, &timestamp](ISpxAudioSourceBufferProperties& props)
+        TryQueryInterface<ISpxBufferProperties>(m_data, [&userId, &timestamp](ISpxBufferProperties& props)
         {
             auto propValue = props.GetBufferProperty(GetPropertyName(PropertyId::DataBuffer_UserId), "");
             userId = propValue != nullptr ? propValue.get() : "";

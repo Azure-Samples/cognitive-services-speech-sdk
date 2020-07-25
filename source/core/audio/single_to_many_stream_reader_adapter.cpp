@@ -10,39 +10,39 @@
 // stream synchrnously which may be a requirement (two recognizers in parallel) or a robustness feature (a recognizer may take longer to
 // shutdown which will cause a crash)
 //
-//  
-//    
-//    
-//                                 -------------------------------+                                                          
-//                                 | CSpxSingleToManyStreamReader |                                                          
-//                                 |                              |                                                          
-//                                 +------------------------------||                                                         
-//                                   ------------------------------+|                                                        
-//                                    ------------------------------+                                                        
-//                                                      ^                                                                    
-//    ---------------------------------------------------\-------------------------------------------+                       
-//    |  +------------------------------------+           |                                          |                       
-//    |  | CSpxSingleToManyStreamReaderAdapter            \                                          |                       
-//    |  +------------------------------------+            \                                         |                       
-//    |                                         +-----------|------------------------------|         |                       
-//    |                                         -CSpxAudioProcessorWriteToAudioSourceBuffer|         |                       
-//    |                                         -------------------------------------------+         |                       
-//    |                                                             ^                                |                       
-//    |                                                             |                                |                       
-//    |                                         +-------------------|-----------------------         |                       
-//    |                                         -              CSpxAudioPump               |         |                       
-//    |                                        --------------------------------------------+         |                       
-//    |                                                             ^                                |                       
-//    |                                                             |                                |                       
-//    +-------------------------------------------------------------|--------------------------------|                       
-//                                                                  |                                                        
-//                                                                  |                                                        
-//                                                                  |                                                        
-//                                                                  |                                                        
-//                                                      +-----------|----------|                                             
-//                                                      |ISpxAudioStreamReader |                                             
-//                                                      -----------------------+                                             
-//    
+//
+//
+//
+//                                 -------------------------------+
+//                                 | CSpxSingleToManyStreamReader |
+//                                 |                              |
+//                                 +------------------------------||
+//                                   ------------------------------+|
+//                                    ------------------------------+
+//                                                      ^
+//    ---------------------------------------------------\-------------------------------------------+
+//    |  +------------------------------------+           |                                          |
+//    |  | CSpxSingleToManyStreamReaderAdapter            \                                          |
+//    |  +------------------------------------+            \                                         |
+//    |                                         +-----------|------------------------------|         |
+//    |                                         -CSpxAudioProcessorWriteToAudioSourceBuffer|         |
+//    |                                         -------------------------------------------+         |
+//    |                                                             ^                                |
+//    |                                                             |                                |
+//    |                                         +-------------------|-----------------------         |
+//    |                                         -              CSpxAudioPump               |         |
+//    |                                        --------------------------------------------+         |
+//    |                                                             ^                                |
+//    |                                                             |                                |
+//    +-------------------------------------------------------------|--------------------------------|
+//                                                                  |
+//                                                                  |
+//                                                                  |
+//                                                                  |
+//                                                      +-----------|----------|
+//                                                      |ISpxAudioStreamReader |
+//                                                      -----------------------+
+//
 #include "stdafx.h"
 #include "create_object_helpers.h"
 #include "single_to_many_stream_reader_adapter.h"
@@ -93,7 +93,7 @@ void CSpxSingleToManyStreamReaderAdapter::InitializeServices()
 
     // We can set "AudioSourceBufferDataSizeInBytes" and "AudioSourceBufferAllowOverflow" for the ring buffer
     SetStringValue("AudioSourceBufferAllowOverflow", "true");
-    
+
     // Create an audio pump, and set the reader
     auto pumpInit = SpxCreateObjectWithSite<ISpxAudioPumpInit>("CSpxAudioPump", this);
     pumpInit->SetReader(m_sourceSingletonStreamReader);
@@ -105,7 +105,7 @@ void CSpxSingleToManyStreamReaderAdapter::InitializeServices()
     m_sourceFormat = SpxAllocWAVEFORMATEX(requiredFormatSize);
     m_sourceSingletonStreamReader->GetFormat(m_sourceFormat.get(), requiredFormatSize);
 
-    // This object retrieves the buffer and properties through the site. 
+    // This object retrieves the buffer and properties through the site.
     m_audioProcessorBufferWriter = SpxCreateObjectWithSite<ISpxAudioProcessor>("CSpxAudioProcessorWriteToAudioSourceBuffer", this);
 }
 
@@ -164,7 +164,7 @@ void CSpxSingleToManyStreamReaderAdapter::ClosePumpAndStream()
 
 void CSpxSingleToManyStreamReaderAdapter::ReconnectClient(long clientId, std::shared_ptr<ISpxAudioStreamReader>&& reader)
 {
-    // Since the object is not going away at 0 we can't use InterlockedIncrement/Decrement here 
+    // Since the object is not going away at 0 we can't use InterlockedIncrement/Decrement here
     std::lock_guard<std::mutex> lock(m_clientLifetimeLock);
     SPX_DBG_TRACE_INFO("CSpxSingleToManyStreamReaderAdapter::ReconnectClient: %d (client id: %ld)", m_clientCount, clientId);
     m_readersMap.emplace(std::make_pair(clientId, reader));
@@ -206,7 +206,7 @@ std::shared_ptr<ISpxAudioStreamReader> CSpxSingleToManyStreamReaderAdapter::Crea
 
     // lock scope
     {
-        // Initialize the audio reading before creating and returning the object. 
+        // Initialize the audio reading before creating and returning the object.
         std::lock_guard<std::mutex> lock(m_clientLifetimeLock);
         EnsureAudioStreamStarted();
     }
@@ -236,37 +236,37 @@ void CSpxSingleToManyStreamReaderAdapter::Error(const std::string& error)
 
 std::shared_ptr<ISpxInterfaceBase> CSpxSingleToManyStreamReaderAdapter::QueryServiceAudioSourceBuffer(const char* serviceName)
 {
-    if (PAL::stricmp(serviceName, "AudioSourceBufferData") == 0)
+    if (PAL::stricmp(serviceName, "BufferData") == 0)
     {
         return GetAudioSourceBuffer();
     }
-    else if (PAL::stricmp(serviceName, "AudioSourceBufferProperties") == 0)
+    else if (PAL::stricmp(serviceName, "BufferProperties") == 0)
     {
         return GetBufferProperties();
     }
     return nullptr;
 }
 
-std::shared_ptr<ISpxAudioSourceBufferData> CSpxSingleToManyStreamReaderAdapter::InitAudioSourceBuffer()
+std::shared_ptr<ISpxBufferData> CSpxSingleToManyStreamReaderAdapter::InitAudioSourceBuffer()
 {
     SPX_DBG_ASSERT(m_bufferData == nullptr);
-    return m_bufferData = SpxCreateObjectWithSite<ISpxAudioSourceBufferData>("CSpxAudioSourceBufferData", this);
+    return m_bufferData = SpxCreateObjectWithSite<ISpxBufferData>("CSpxBufferData", this);
 }
 
-std::shared_ptr<ISpxAudioSourceBufferData> CSpxSingleToManyStreamReaderAdapter::GetAudioSourceBuffer()
+std::shared_ptr<ISpxBufferData> CSpxSingleToManyStreamReaderAdapter::GetAudioSourceBuffer()
 {
     SPX_DBG_ASSERT(m_bufferData != nullptr);
     return m_bufferData;
 }
 
-std::shared_ptr<ISpxAudioSourceBufferProperties> CSpxSingleToManyStreamReaderAdapter::InitBufferProperties()
+std::shared_ptr<ISpxBufferProperties> CSpxSingleToManyStreamReaderAdapter::InitBufferProperties()
 {
     SPX_DBG_ASSERT(m_bufferProperties == nullptr);
     auto site = SpxQueryInterface<ISpxGenericSite>(GetAudioSourceBuffer());
-    return m_bufferProperties = SpxCreateObjectWithSite<ISpxAudioSourceBufferProperties>("CSpxAudioSourceBufferProperties", site);
+    return m_bufferProperties = SpxCreateObjectWithSite<ISpxBufferProperties>("CSpxBufferProperties", site);
 }
 
-std::shared_ptr<ISpxAudioSourceBufferProperties> CSpxSingleToManyStreamReaderAdapter::GetBufferProperties()
+std::shared_ptr<ISpxBufferProperties> CSpxSingleToManyStreamReaderAdapter::GetBufferProperties()
 {
     SPX_DBG_ASSERT(m_bufferProperties != nullptr);
     return m_bufferProperties;
@@ -283,11 +283,11 @@ void CSpxSingleToManyStreamReaderAdapter::HandleDownstreamError(const std::strin
         setErrorInfo->SetError(error);
     }
 
-    // Inform the audio processor of the error it will unblock readers if any. 
+    // Inform the audio processor of the error it will unblock readers if any.
     auto processorErrorInfo = SpxQueryInterface<ISpxSetErrorInfo>(m_audioProcessorBufferWriter);
     processorErrorInfo->SetError(error);
 
-    // We close the audio even if we have clients connected. 
+    // We close the audio even if we have clients connected.
     ClosePumpAndStream();
 }
 

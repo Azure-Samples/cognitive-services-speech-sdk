@@ -15,6 +15,7 @@
 #include "site_helpers.h"
 #include "property_id_2_name_map.h"
 
+using namespace Microsoft::CognitiveServices::Speech;
 using namespace Microsoft::CognitiveServices::Speech::Impl;
 
 SPXAPI bot_framework_config_from_subscription(SPXSPEECHCONFIGHANDLE* ph_dialog_service_config, const char *subscription, const char* region, const char *bot_Id = nullptr)

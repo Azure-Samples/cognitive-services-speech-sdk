@@ -14,6 +14,7 @@
 #include <service_provider_impl.h>
 #include <property_bag_impl.h>
 #include <site_helpers.h>
+#include <interface_helpers.h>
 
 #include "unit_test_utils.h"
 
@@ -59,15 +60,15 @@ public:
 
 };
 
-class MockAudioSourceBufferProperties :
-    public Carbon::ISpxAudioSourceBufferProperties
+class MockBufferProperties :
+    public Carbon::ISpxBufferProperties
 {
 public:
     SPX_INTERFACE_MAP_BEGIN()
-        SPX_INTERFACE_MAP_ENTRY(Carbon::ISpxAudioSourceBufferProperties)
+        SPX_INTERFACE_MAP_ENTRY(Carbon::ISpxBufferProperties)
     SPX_INTERFACE_MAP_END()
 
-    MockAudioSourceBufferProperties() = default;
+    MockBufferProperties() = default;
 
     inline void SetBufferProperty(const char* name, const char* value) final
     {
@@ -79,17 +80,17 @@ public:
         throw std::runtime_error{ "Not implemented" };
     }
 
-    inline PropertyValue_Type GetBufferProperty(const char*, OffsetType, int, OffsetType*) final
+    inline PropertyValue_Type GetBufferProperty(const char*, Carbon::OffsetType, int, Carbon::OffsetType*) final
     {
         throw std::runtime_error{ "Not implemented" };
     }
 
-    inline std::list<FoundPropertyData_Type> GetBufferProperties(const char*, OffsetType, OffsetType) final
+    inline std::list<FoundPropertyData_Type> GetBufferProperties(const char*, Carbon::OffsetType, Carbon::OffsetType) final
     {
         throw std::runtime_error{ "Not implemented" };
     }
 
-    inline std::list<FoundPropertyData_Type> GetBufferProperties(OffsetType, OffsetType) final
+    inline std::list<FoundPropertyData_Type> GetBufferProperties(Carbon::OffsetType, Carbon::OffsetType) final
     {
         throw std::runtime_error{ "Not implemented" };
     }
@@ -97,15 +98,15 @@ public:
     std::function<void(const char*, const char*)> SetBufferPropertyHandler;
 };
 
-class MockAudioSourceBufferDataWriter:
-    public Carbon::ISpxAudioSourceBufferDataWriter
+class MockBufferDataWriter:
+    public Carbon::ISpxBufferDataWriter
 {
 public:
     SPX_INTERFACE_MAP_BEGIN()
-        SPX_INTERFACE_MAP_ENTRY(Carbon::ISpxAudioSourceBufferDataWriter)
+        SPX_INTERFACE_MAP_ENTRY(Carbon::ISpxBufferDataWriter)
     SPX_INTERFACE_MAP_END()
 
-    MockAudioSourceBufferDataWriter() = default;
+    MockBufferDataWriter() = default;
 
     inline void Write(uint8_t* buffer, uint32_t size) final
     {
@@ -115,22 +116,22 @@ public:
     std::function<void(uint8_t*, uint32_t)> WriteHandler;
 };
 
-class MockAudioSourceBufferData :
-    public Carbon::ISpxAudioSourceBufferData
+class MockBufferData :
+    public Carbon::ISpxBufferData
 {
 public:
     SPX_INTERFACE_MAP_BEGIN()
-        SPX_INTERFACE_MAP_ENTRY(Carbon::ISpxAudioSourceBufferData)
+        SPX_INTERFACE_MAP_ENTRY(Carbon::ISpxBufferData)
     SPX_INTERFACE_MAP_END()
 
-    MockAudioSourceBufferData() = default;
+    MockBufferData() = default;
 
-    inline uint64_t GetOffset() final
+    inline Carbon::OffsetType GetOffset() final
     {
         return CallIfNotEmptyR(GetOffsetHandler, 0);
     }
 
-    inline uint64_t GetNewMultiReaderOffset() final
+    inline Carbon::OffsetType GetNewMultiReaderOffset() final
     {
         return CallIfNotEmptyR(GetNewMultiReaderOffsetHandler, 0);
     }
@@ -185,12 +186,12 @@ public:
 
     MockAudioSourceNotifyMe() = default;
 
-    inline void NotifyMe(const std::shared_ptr<Carbon::ISpxAudioSource>& source, const std::shared_ptr<Carbon::ISpxAudioSourceBufferData>& buffer) final
+    inline void NotifyMe(const std::shared_ptr<Carbon::ISpxAudioSource>& source, const std::shared_ptr<Carbon::ISpxBufferData>& buffer) final
     {
         CallIfNotEmpty(NotifyMeHandler, source, buffer);
     }
 
-    std::function<void(const std::shared_ptr<Carbon::ISpxAudioSource>&, const std::shared_ptr<Carbon::ISpxAudioSourceBufferData>&)> NotifyMeHandler;
+    std::function<void(const std::shared_ptr<Carbon::ISpxAudioSource>&, const std::shared_ptr<Carbon::ISpxBufferData>&)> NotifyMeHandler;
 };
 
 class MockNamedProperties :

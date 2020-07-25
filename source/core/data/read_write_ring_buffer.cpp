@@ -1,68 +1,9 @@
+
+
 //
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
-// read_write_ring_buffer.cpp: Implementation definitions for CSpxReadWriteRingBuffer C++ class
-//
-//      The ReadWriteRingBuffer (RB) owns and manages a conceptually infinite memory buffer
-//      into/from which clients can write/read data.
-//
-//      Data can be accessed:
-//      (1) Sequentially via an internally maintained ReadPtr/ReadPos, or
-//      (2) Randomly by caller supplied Pos, if the data is still available in the SlidingWindow.
-//      (3) Using CallerSupplied (copies the data) or CalleeManaged (view into DataStorage) DataBuffers.
-//      (4) Using ExactSize or ReducedSize DataAccess and DataStorage.
-//
-//      Additional Caller requirements/guarantees:
-//      (1) TwoPhaseInitialization required via ISpxReadWriteBufferInit::SetSize().
-//      (2) Optional TwoPhaseDestruction via ISpxObjectInit::Term().
-//      (3) Maintains a copy of the data supplied via ISpxReadWriteBuffer::Write().
-//      (4) ExactSize DataAccess invocations ThrowExceptions if not enough data available.
-//
-//      From RB's POV:
-//
-//      - DataStorage - means ISpxReadWriteBuffer:Write() method.
-//      - ExactSize/ReducedSize DataStorage
-//        - ExactSize DataStorage is indiciated by null bytesWritten pointer.
-//        - ReducedSize DataStorage is indiciated by non-null bytesWritten pointer.
-//        - Two different models of DataStorage
-//          (a) ExactSize requires that the size of data requested to be written by the caller, must
-//              fit inside the SlidingWindow. If it does not, an exception is thrown.
-//          (b) ReducedSize removes the exception, and instead always returns successfully, indicating
-//              the number of bytes actually written via the non-null bytesWritten pointer supplied
-//              in the DataStorage method by the caller. Thus the amount of data actually stored is
-//              governed by the max(0, space left in SlidingWindow) and min(amount requested, space left
-//              in the SlidingWindow).
-//
-//      - DataAccess - means ISpxReadWriteBuffer::Read*() methods.
-//      - ExactSize/ReducedSize DataAccess
-//        - ExactSize DataAccess is indiciated by null bytesRead pointer.
-//        - ReducedSize DataAccess is indiciated by non-null bytesRead pointer.
-//        - Two different models of DataAccess
-//          (a) ExactSize requires the size of data requested by caller to be available; if less
-//              data is available, an exception is thrown. If at least that much data is available,
-//              the DataAccess method returns exactly that number of bytes to the caller.
-//          (b) ReducedSize removes the exception, and instead always returns successfully, indicating
-//              the number of bytes actually read via the non-null bytesRead pointer supplied in the
-//              DataAccess method by the caller. Thus the amount of data returned is governed by the 
-//              max(0, amount available) and min(amount available, amount requested).
-//
-//      - SlidingWindow - data still available in the RB's managed buffer
-//        - "to the left of" WritePtr/WritePos
-//        - "to the right of" max(InitPos, GetWritePos() - GetSize())
-//
-//      - CallerSupplied/CalleeManaged DataBuffers
-//        (a) CallerSupplied DataBuffers - means ```data``` parameter in Read()/ReadAtBytePos() methods.
-//        (b) CalleeManaged DataBuffers - means both
-//            - SpxSharedUint8Buffer_Type RingBuffer, and/or
-//            - std::shared_ptr<uint8_t> returned from ReadShared*()
-//
-//      NOTEs:
-//      - ReadPtr/ReadPos cannot advance past WritePtr/WritePos
-//      - WritePtr/WritePos cannot advance past ReadPtr/ReadPos + GetSize()
-//
-
-// ROBCH: Introduced in AUDIO.V3
 
 #include "stdafx.h"
 #include "read_write_ring_buffer.h"
@@ -96,7 +37,7 @@ CSpxReadWriteRingBuffer::CSpxReadWriteRingBuffer() :
 /// <remarks>NO LOCK REQUIRED; by contract, no methods can be called (by external callers) after dtor starts.</remarks>
 CSpxReadWriteRingBuffer::~CSpxReadWriteRingBuffer()
 {
-    // 
+    //
     SetZeroRingSize();
 }
 
@@ -394,7 +335,7 @@ void CSpxReadWriteRingBuffer::EnsureSpaceToWrite(size_t *bytesToWrite, const siz
 
             // Make sure the condition came through at this time
             SPX_DBG_ASSERT(*bytesToWrite <= m_ringSize - (size_t)(m_writePos - m_readPos));
-            // Move m_readPos ahead so the buffer can accomodate the value to write. 
+            // Move m_readPos ahead so the buffer can accomodate the value to write.
         }
     }
 }
@@ -452,7 +393,7 @@ void CSpxReadWriteRingBuffer::InternalWriteToRing(void const* data, size_t bytes
     m_writePos += bytesToWrite;
     m_writePtr += bytesToWrite;
 
-    // If our write pointer wraps... fix it... 
+    // If our write pointer wraps... fix it...
     if (m_writePtr >= m_ptr2)
     {
         m_writePtr = m_ptr1 + (m_writePtr - m_ptr2);

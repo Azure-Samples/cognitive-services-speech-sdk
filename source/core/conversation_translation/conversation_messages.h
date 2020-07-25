@@ -533,6 +533,8 @@ namespace ConversationTranslation {
     /// </summary>
     struct ConversationParticipant
     {
+        virtual ~ConversationParticipant() = default;
+
         /// <summary>
         /// The participant's nickname. Please note that there may be more than one participant with
         /// the same nickname. You can use the <see cref="ParticipantId"/> to tell them apart
