@@ -104,57 +104,58 @@ public:
 
     static std::string BuildSsml(const std::string& text, const std::shared_ptr<ISpxNamedProperties>& properties)
     {
-        std::map<const char*, const char*> languageToDefaultVoice = {
-            { "ar-EG", "Microsoft Server Speech Text to Speech Voice (ar-EG, Hoda)" },
-            { "ar-SA", "Microsoft Server Speech Text to Speech Voice (ar-SA, Naayf)" },
-            { "bg-BG", "Microsoft Server Speech Text to Speech Voice (bg-BG, Ivan)" },
-            { "ca-ES", "Microsoft Server Speech Text to Speech Voice (ca-ES, HerenaRUS)" },
-            { "cs-CZ", "Microsoft Server Speech Text to Speech Voice (cs-CZ, Jakub)" },
-            { "da-DK", "Microsoft Server Speech Text to Speech Voice (da-DK, HelleRUS)" },
-            { "de-AT", "Microsoft Server Speech Text to Speech Voice (de-AT, Michael)" },
-            { "de-CH", "Microsoft Server Speech Text to Speech Voice (de-CH, Karsten)" },
-            { "de-DE", "Microsoft Server Speech Text to Speech Voice (de-DE, HeddaRUS)" },
-            { "el-GR", "Microsoft Server Speech Text to Speech Voice (el-GR, Stefanos)" },
-            { "en-AU", "Microsoft Server Speech Text to Speech Voice (en-AU, HayleyRUS)" },
-            { "en-CA", "Microsoft Server Speech Text to Speech Voice (en-CA, HeatherRUS)" },
-            { "en-GB", "Microsoft Server Speech Text to Speech Voice (en-GB, HazelRUS)" },
-            { "en-IE", "Microsoft Server Speech Text to Speech Voice (en-IE, Sean)" },
-            { "en-IN", "Microsoft Server Speech Text to Speech Voice (en-IN, PriyaRUS)" },
-            { "en-US", "Microsoft Server Speech Text to Speech Voice (en-US, AriaRUS)" },
-            { "es-ES", "Microsoft Server Speech Text to Speech Voice (es-ES, HelenaRUS)" },
-            { "es-MX", "Microsoft Server Speech Text to Speech Voice (es-MX, HildaRUS)" },
-            { "fi-FI", "Microsoft Server Speech Text to Speech Voice (fi-FI, HeidiRUS)" },
-            { "fr-CA", "Microsoft Server Speech Text to Speech Voice (fr-CA, HarmonieRUS)" },
-            { "fr-CH", "Microsoft Server Speech Text to Speech Voice (fr-CH, Guillaume)" },
-            { "fr-FR", "Microsoft Server Speech Text to Speech Voice (fr-FR, HortenseRUS)" },
-            { "he-IL", "Microsoft Server Speech Text to Speech Voice (he-IL, Asaf)" },
-            { "hi-IN", "Microsoft Server Speech Text to Speech Voice (hi-IN, Kalpana)" },
-            { "hr-HR", "Microsoft Server Speech Text to Speech Voice (hr-HR, Matej)" },
-            { "hu-HU", "Microsoft Server Speech Text to Speech Voice (hu-HU, Szabolcs)" },
-            { "id-ID", "Microsoft Server Speech Text to Speech Voice (id-ID, Andika)" },
-            { "it-IT", "Microsoft Server Speech Text to Speech Voice (it-IT, LuciaRUS)" },
-            { "ja-JP", "Microsoft Server Speech Text to Speech Voice (ja-JP, HarukaRUS)" },
-            { "ko-KR", "Microsoft Server Speech Text to Speech Voice (ko-KR, HeamiRUS)" },
-            { "ms-MY", "Microsoft Server Speech Text to Speech Voice (ms-MY, Rizwan)" },
-            { "nb-NO", "Microsoft Server Speech Text to Speech Voice (nb-NO, HuldaRUS)" },
-            { "nl-NL", "Microsoft Server Speech Text to Speech Voice (nl-NL, HannaRUS)" },
-            { "pl-PL", "Microsoft Server Speech Text to Speech Voice (pl-PL, PaulinaRUS)" },
-            { "pt-BR", "Microsoft Server Speech Text to Speech Voice (pt-BR, HeloisaRUS)" },
-            { "pt-PT", "Microsoft Server Speech Text to Speech Voice (pt-PT, HeliaRUS)" },
-            { "ro-RO", "Microsoft Server Speech Text to Speech Voice (ro-RO, Andrei)" },
-            { "ru-RU", "Microsoft Server Speech Text to Speech Voice (ru-RU, EkaterinaRUS)" },
-            { "sk-SK", "Microsoft Server Speech Text to Speech Voice (sk-SK, Filip)" },
-            { "sl-SI", "Microsoft Server Speech Text to Speech Voice (sl-SI, Lado)" },
-            { "sv-SE", "Microsoft Server Speech Text to Speech Voice (sv-SE, HedvigRUS)" },
-            { "ta-IN", "Microsoft Server Speech Text to Speech Voice (ta-IN, Valluvar)" },
-            { "te-IN", "Microsoft Server Speech Text to Speech Voice (te-IN, Chitra)" },
-            { "th-TH", "Microsoft Server Speech Text to Speech Voice (th-TH, Pattara)" },
-            { "tr-TR", "Microsoft Server Speech Text to Speech Voice (tr-TR, SedaRUS)" },
-            { "vi-VN", "Microsoft Server Speech Text to Speech Voice (vi-VN, An)" },
-            { "zh-CN", "Microsoft Server Speech Text to Speech Voice (zh-CN, HuihuiRUS)" },
-            { "zh-HK", "Microsoft Server Speech Text to Speech Voice (zh-HK, TracyRUS)" },
-            { "zh-TW", "Microsoft Server Speech Text to Speech Voice (zh-TW, HanHanRUS)" }
-        };
+        using tuple_type = std::tuple<const char *, const char *>;
+        constexpr std::array<tuple_type, 49> languageToDefaultVoice{ {
+            tuple_type{ "ar-EG", "(ar-EG, Hoda)" },
+            tuple_type{ "ar-SA", "(ar-SA, Naayf)" },
+            tuple_type{ "bg-BG", "(bg-BG, Ivan)" },
+            tuple_type{ "ca-ES", "(ca-ES, HerenaRUS)" },
+            tuple_type{ "cs-CZ", "(cs-CZ, Jakub)" },
+            tuple_type{ "da-DK", "(da-DK, HelleRUS)" },
+            tuple_type{ "de-AT", "(de-AT, Michael)" },
+            tuple_type{ "de-CH", "(de-CH, Karsten)" },
+            tuple_type{ "de-DE", "(de-DE, HeddaRUS)" },
+            tuple_type{ "el-GR", "(el-GR, Stefanos)" },
+            tuple_type{ "en-AU", "(en-AU, HayleyRUS)" },
+            tuple_type{ "en-CA", "(en-CA, HeatherRUS)" },
+            tuple_type{ "en-GB", "(en-GB, HazelRUS)" },
+            tuple_type{ "en-IE", "(en-IE, Sean)" },
+            tuple_type{ "en-IN", "(en-IN, PriyaRUS)" },
+            tuple_type{ "en-US", "(en-US, AriaRUS)" },
+            tuple_type{ "es-ES", "(es-ES, HelenaRUS)" },
+            tuple_type{ "es-MX", "(es-MX, HildaRUS)" },
+            tuple_type{ "fi-FI", "(fi-FI, HeidiRUS)" },
+            tuple_type{ "fr-CA", "(fr-CA, HarmonieRUS)" },
+            tuple_type{ "fr-CH", "(fr-CH, Guillaume)" },
+            tuple_type{ "fr-FR", "(fr-FR, HortenseRUS)" },
+            tuple_type{ "he-IL", "(he-IL, Asaf)" },
+            tuple_type{ "hi-IN", "(hi-IN, Kalpana)" },
+            tuple_type{ "hr-HR", "(hr-HR, Matej)" },
+            tuple_type{ "hu-HU", "(hu-HU, Szabolcs)" },
+            tuple_type{ "id-ID", "(id-ID, Andika)" },
+            tuple_type{ "it-IT", "(it-IT, LuciaRUS)" },
+            tuple_type{ "ja-JP", "(ja-JP, HarukaRUS)" },
+            tuple_type{ "ko-KR", "(ko-KR, HeamiRUS)" },
+            tuple_type{ "ms-MY", "(ms-MY, Rizwan)" },
+            tuple_type{ "nb-NO", "(nb-NO, HuldaRUS)" },
+            tuple_type{ "nl-NL", "(nl-NL, HannaRUS)" },
+            tuple_type{ "pl-PL", "(pl-PL, PaulinaRUS)" },
+            tuple_type{ "pt-BR", "(pt-BR, HeloisaRUS)" },
+            tuple_type{ "pt-PT", "(pt-PT, HeliaRUS)" },
+            tuple_type{ "ro-RO", "(ro-RO, Andrei)" },
+            tuple_type{ "ru-RU", "(ru-RU, EkaterinaRUS)" },
+            tuple_type{ "sk-SK", "(sk-SK, Filip)" },
+            tuple_type{ "sl-SI", "(sl-SI, Lado)" },
+            tuple_type{ "sv-SE", "(sv-SE, HedvigRUS)" },
+            tuple_type{ "ta-IN", "(ta-IN, Valluvar)" },
+            tuple_type{ "te-IN", "(te-IN, Chitra)" },
+            tuple_type{ "th-TH", "(th-TH, Pattara)" },
+            tuple_type{ "tr-TR", "(tr-TR, SedaRUS)" },
+            tuple_type{ "vi-VN", "(vi-VN, An)" },
+            tuple_type{ "zh-CN", "(zh-CN, HuihuiRUS)" },
+            tuple_type{ "zh-HK", "(zh-HK, TracyRUS)" },
+            tuple_type{ "zh-TW", "(zh-TW, HanHanRUS)" }
+        } };
 
         // Set default language to en-US
         std::string chosenLanguage = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_SynthLanguage), "en-US");
@@ -166,17 +167,24 @@ public:
         }
         else if (chosenVoice.empty())
         {
-            // If it's not found, use en-US default voice
-            chosenVoice = "Microsoft Server Speech Text to Speech Voice (en-US, AriaRUS)";
+            constexpr auto prefix = "Microsoft Server Speech Text to Speech Voice ";
+            chosenVoice.reserve(sizeof(prefix) + 30);
+            chosenVoice.append("Microsoft Server Speech Text to Speech Voice ");
 
             // Set default voice based on language
-            for (const auto item : languageToDefaultVoice)
+            auto it = std::find_if(languageToDefaultVoice.begin(), languageToDefaultVoice.end(), [&chosenLanguage](const tuple_type& item)
             {
-                if (PAL::stricmp(item.first, chosenLanguage.c_str()) == 0)
-                {
-                    chosenVoice = item.second;
-                    break;
-                }
+                const auto lang = std::get<0>(item);
+                return PAL::stricmp(lang, chosenLanguage.c_str()) == 0;
+            });
+            if (it != languageToDefaultVoice.end())
+            {
+                chosenVoice.append(std::get<1>(*it));
+            }
+            else
+            {
+                // If it's not found, use en-US default voice
+                chosenVoice.append("(en-US, AriaRUS)");
             }
         }
 
@@ -332,12 +340,12 @@ public:
 
         if (audioFormat->wFormatTag == WAVE_FORMAT_SIREN)
         {
-            buffer_write(&p, (uint16_t)320);
+            buffer_write(&p, static_cast<uint16_t>(320));
             buffer_write(&p, 'f');
             buffer_write(&p, 'a');
             buffer_write(&p, 'c');
             buffer_write(&p, 't');
-            buffer_write(&p, (uint32_t)4);
+            buffer_write(&p, static_cast<uint32_t>(4));
             uint32_t factSize = (cData * 320) / audioFormat->nBlockAlign;
             buffer_write(&p, factSize);
         }
