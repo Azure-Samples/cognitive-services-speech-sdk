@@ -98,9 +98,7 @@ set(SOURCES
     "${SRC_DIR}/output_reco_adapter.cpp"
     )
 
-source_group("Header Files (public)" FILES ${HEADERS})
-source_group("Header Files (private)" FILES ${HEADERS_PRIVATE})
-source_group("Source Files" FILES ${SOURCES})
+set_source_groups()
 
 add_library(sr STATIC ${HEADERS} ${HEADERS_PRIVATE} ${SOURCES})
 
@@ -109,7 +107,6 @@ target_include_directories(sr
         ## TODO
         ${CARBON_C_API}
         ${CARBON_CXX_API}
-        ${CARBON_INCLUDE}
         "${CARBON_EXTERNAL}/json"
         ${COMMON_GENERATED_INCLUDE}
     PUBLIC
@@ -124,7 +121,7 @@ set_target_properties (sr PROPERTIES
     FOLDER core
 )
 
-target_link_libraries(sr PRIVATE usp common pal)
+target_link_libraries(sr PRIVATE interfaces usp common pal)
 
 if (MSVC)
    set_target_properties(${PROJECT_NAME} PROPERTIES COMPILE_FLAGS "/Yustdafx.h")

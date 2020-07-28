@@ -27,9 +27,7 @@ set(SOURCES
     "${SRC_DIR}/word_boundary_event_args.cpp"
     )
 
-source_group("Header Files (public)" FILES ${HEADERS})
-source_group("Header Files (private)" FILES ${HEADERS_PRIVATE})
-source_group("Source Files" FILES ${SOURCES})
+set_source_groups()
 
 add_library(tts STATIC ${HEADERS} ${HEADERS_PRIVATE} ${SOURCES})
 
@@ -38,7 +36,6 @@ target_include_directories(tts
         ${SRC_DIR}
         ${CARBON_C_API}
         ${CARBON_CXX_API}
-        ${CARBON_INCLUDE}
         "${CARBON_EXTERNAL}/json"
         ${COMMON_GENERATED_INCLUDE}
     PUBLIC
@@ -50,10 +47,10 @@ if(WIN32 AND SPECTRE_MITIGATION)
 endif()
 
 set_target_properties (tts PROPERTIES
-    FOLDER core
+    FOLDER core/tts
 )
 
-target_link_libraries(tts PRIVATE common usp tts_rest tts_usp)
+target_link_libraries(tts PRIVATE interfaces common usp tts_rest tts_usp)
 
 if (MSVC)
    set_target_properties(${PROJECT_NAME} PROPERTIES COMPILE_FLAGS "/Yustdafx.h")

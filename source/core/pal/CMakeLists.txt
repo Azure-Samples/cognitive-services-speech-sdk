@@ -24,9 +24,7 @@ set(HEADERS_PRIVATE
     "${PAL_SRC}/environment.h"
 )
 
-source_group("Header Files (public)" FILES ${HEADERS})
-source_group("Header Files (private)" FILES ${HEADERS_PRIVATE})
-source_group("Source Files" FILES ${SOURCES})
+set_source_groups()
 
 add_library(pal STATIC ${HEADERS} ${HEADERS_PRIVATE} ${SOURCES})
 
@@ -42,7 +40,7 @@ if(WIN32 AND SPECTRE_MITIGATION)
 endif()
 
 set_target_properties (pal PROPERTIES
-    FOLDER core
+    FOLDER core/shared
 )
 
 if(SPEECHSDK_OS STREQUAL "Linux")

@@ -35,9 +35,7 @@ if(WIN32)
     list(APPEND SOURCES "${CMAKE_CURRENT_BINARY_DIR}/windows/version.rc")
 endif()
 
-source_group("Header Files (public)" FILES ${HEADERS})
-source_group("Header Files (private)" FILES ${HEADERS_PRIVATE})
-source_group("Source Files" FILES ${SOURCES})
+set_source_groups()
 
 add_library(${PROJECT_NAME} SHARED ${HEADERS} ${HEADERS_PRIVATE} ${SOURCES} $<TARGET_OBJECTS:c_api>)
 
@@ -46,7 +44,6 @@ target_include_directories(${PROJECT_NAME}
         ${SRC_DIR}
         ${CARBON_C_API}
         ${CARBON_CXX_API}
-        ${CARBON_INCLUDE}
 )
 
 # Disable LNK4286 (caused by importing diagnostics_log_message)
@@ -62,10 +59,10 @@ if(APPLE)
           ${SRC_DIR}
           ${CARBON_C_API}
           ${CARBON_CXX_API}
-          ${CARBON_INCLUDE}
   )
 
   target_link_libraries(${PROJECT_NAME}_static
+      PRIVATE interfaces
       PRIVATE common
       PRIVATE logging
       PRIVATE factory
@@ -96,6 +93,7 @@ set_target_properties (${PROJECT_NAME} PROPERTIES
 
 # the following list are needed to make ld producing a .core.so that can be loaded by a python wheel
 target_link_libraries(${PROJECT_NAME}
+    PRIVATE interfaces
     PRIVATE common
     PRIVATE logging
     PRIVATE factory

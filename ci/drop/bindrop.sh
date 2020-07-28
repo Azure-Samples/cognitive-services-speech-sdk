@@ -94,7 +94,7 @@ else
 fi
 
 SRCINC="$SOURCE_ROOT/source/public"
-SRCPRIVINC="$SOURCE_ROOT/source/core/include"
+SRCPRIVINC="$SOURCE_ROOT/source/core/interfaces/include"
 SRCPRIVINC2="$SOURCE_ROOT/source/core/common/include"
 SRCPRIVINCJSON="$SOURCE_ROOT/external/json"
 SRCPRIVTESTJAR="$BUILD_ROOT/bin/com.microsoft.cognitiveservices.speech.tests.jar"
@@ -136,7 +136,7 @@ if [[ $OS == "Windows_NT" ]]; then
     cp $CPOPT "$SRCDYNLIB"/net461/$LIBPREFIX*.{pdb,xml,dll} "$DESTPUBLIBNET461"
     cp $CPOPT "$SRCDYNLIB"/netstandard2.0/$LIBPREFIX*.{pdb,xml,dll} "$DESTPUBLIBNETSTANDARD20"
     cp $CPOPT "$SRCDYNLIB"UnixOS/netstandard2.0/$LIBPREFIX*.{pdb,xml,dll} "$DESTPUBLIBUNIXOSNETSTANDARD20"
-    cp $CPOPT "$SRCDYNLIB"IOS/netstandard2.0/$LIBPREFIX*.{pdb,xml,dll} "$DESTPUBLIBIOSNETSTANDARD20"    
+    cp $CPOPT "$SRCDYNLIB"IOS/netstandard2.0/$LIBPREFIX*.{pdb,xml,dll} "$DESTPUBLIBIOSNETSTANDARD20"
   fi
 fi
 

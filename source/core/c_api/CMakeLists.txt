@@ -49,9 +49,7 @@ set(SOURCES
     "${SRC_DIR}/stdafx.cpp"
     )
 
-source_group("Header Files (public)" FILES ${HEADERS})
-source_group("Header Files (private)" FILES ${HEADERS_PRIVATE})
-source_group("Source Files" FILES ${SOURCES})
+set_source_groups()
 
 source_group("Speech C API headers" FILES ${SPEECH_C_API_HEADERS})
 
@@ -64,12 +62,11 @@ target_include_directories(c_api
     PRIVATE
         ${CARBON_C_API}
         ${CARBON_CXX_API}
-        ${CARBON_INCLUDE}
         "${CARBON_EXTERNAL}/json"
 
 )
 
-target_link_libraries(c_api PRIVATE factory common logging sr conversation_translation)
+target_link_libraries(c_api PRIVATE interfaces factory common logging sr conversation_translation)
 
 if(WIN32 AND SPECTRE_MITIGATION)
     set_property(TARGET c_api PROPERTY VS_GLOBAL_SpectreMitigation "Spectre")

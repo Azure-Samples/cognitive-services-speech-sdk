@@ -53,8 +53,9 @@ if(BUILD_UNIDEC)
     list(APPEND SOURCES "${SRC_DIR}/speech_recognizer_unidec_tests.cpp")
 endif()
 
-source_group("Source Files" FILES ${SOURCES})
-source_group("Header Files" FILES ${TEST_HEADERS} ${HEADERS_PRIVATE})
+list(APPEND HEADERS_PRIVATE ${TEST_HEADERS})
+
+set_source_groups()
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${TEST_HEADERS} ${HEADERS_PRIVATE})
 
@@ -65,7 +66,6 @@ target_include_directories(${PROJECT_NAME}
     PRIVATE
         "${CARBON_EXTERNAL}/Catch2"
         "${CARBON_EXTERNAL}/json"
-        ${CARBON_INCLUDE}
         ${TEST_INCLUDE}
         ${CARBON_C_API}
         ${CARBON_CXX_API}
@@ -79,7 +79,7 @@ else()
     target_include_directories(${PROJECT_NAME} PRIVATE "${SRC_DIR}/Default")
 endif()
 
-target_link_libraries(${PROJECT_NAME} ${SPEECHSDK_CORE_LIBRARY} audio common ${TEST_LIBS})
+target_link_libraries(${PROJECT_NAME} interfaces ${SPEECHSDK_CORE_LIBRARY} audio common ${TEST_LIBS})
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 if(${use_openssl})

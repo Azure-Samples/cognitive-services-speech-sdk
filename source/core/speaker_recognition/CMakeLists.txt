@@ -2,22 +2,42 @@ project(speaker_recognition)
 
 set(SRC_DIR "${PROJECT_SOURCE_DIR}")
 
-file(GLOB HEADERS "${SRC_DIR}/*.h")
-file(GLOB SOURCES "${SRC_DIR}/*.cpp")
+set(HEADERS_PRIVATE
+    ${SRC_DIR}/create_module_object.h
+    ${SRC_DIR}/http_audio_stream_session.h
+    ${SRC_DIR}/http_client.h
+    ${SRC_DIR}/http_recog_engine_adapter.h
+    ${SRC_DIR}/speaker_identification_model.h
+    ${SRC_DIR}/speaker_verification_model.h
+    ${SRC_DIR}/stdafx.h
+    ${SRC_DIR}/voice_profile.h
+    ${SRC_DIR}/voice_profile_client.h
+ )
+
+ set(SOURCES
+    ${SRC_DIR}/create_module_object.cpp
+    ${SRC_DIR}/http_audio_stream_session.cpp
+    ${SRC_DIR}/http_client.cpp
+    ${SRC_DIR}/http_recog_engine_adapter.cpp
+    ${SRC_DIR}/speaker_identification_model.cpp
+    ${SRC_DIR}/speaker_verification_model.cpp
+    ${SRC_DIR}/stdafx.cpp
+    ${SRC_DIR}/voice_profile.cpp
+    ${SRC_DIR}/voice_profile_client.cpp
+ )
+
 
 # make this the last source file to avoid link warning LNK4221
 #list(APPEND SOURCES "${SRC_DIR}/stdafx.cpp")
 
-source_group("Header Files" FILES ${HEADERS})
-source_group("Source Files" FILES ${SOURCES})
+set_source_groups()
 
-add_library(speaker_recognition STATIC ${HEADERS} ${SOURCES})
+add_library(speaker_recognition STATIC ${HEADERS_PRIVATE} ${SOURCES})
 
 target_include_directories(speaker_recognition
     PRIVATE
         ${CARBON_C_API}
         ${CARBON_CXX_API}
-        ${CARBON_INCLUDE}
         ${SRC_DIR}
         ${CARBON_EXTERNAL}/json
 )
@@ -36,7 +56,7 @@ set_target_properties(speaker_recognition PROPERTIES
     FOLDER core
 )
 
-target_link_libraries(${PROJECT_NAME} PRIVATE logging audio common pal usp)
+target_link_libraries(${PROJECT_NAME} PRIVATE interfaces logging audio common pal usp)
 
 if (MSVC)
    set_target_properties(${PROJECT_NAME} PROPERTIES COMPILE_FLAGS "/Yustdafx.h")

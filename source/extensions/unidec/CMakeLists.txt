@@ -5,7 +5,6 @@ set(INC_DIR "${PROJECT_SOURCE_DIR}/include")
 
 include_directories(${CARBON_C_API})
 include_directories(${CARBON_CXX_API})
-include_directories(${CARBON_INCLUDE})
 
 include_directories(${INC_DIR})
 include_directories("${CARBON_EXTERNAL}/json")
@@ -25,9 +24,7 @@ set(SOURCES
     "${SRC_DIR}/stdafx.cpp"
     )
 
-source_group("Header Files (public)" FILES ${HEADERS})
-source_group("Header Files (private)" FILES ${HEADERS_PRIVATE})
-source_group("Source Files" FILES ${SOURCES})
+set_source_groups()
 
 if(SPEECHSDK_TARGET_PLATFORM STREQUAL Linux-arm64)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DXPLATFORM")
@@ -59,4 +56,4 @@ set_target_properties (unidec PROPERTIES
     FOLDER extensions
 )
 
-target_link_libraries(unidec PRIVATE ${UNIDEC_LIBS} common ${SPEECHSDK_CORE_LIBRARY})
+target_link_libraries(unidec PRIVATE interfaces ${UNIDEC_LIBS} common ${SPEECHSDK_CORE_LIBRARY})

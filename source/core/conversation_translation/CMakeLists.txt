@@ -32,9 +32,7 @@ set(SOURCES
     "${SRC_DIR}/conversation_translator_connection.cpp"
     )
 
-source_group("Header Files (public)" FILES ${HEADERS})
-source_group("Header Files (private)" FILES ${HEADERS_PRIVATE})
-source_group("Source Files" FILES ${SOURCES})
+set_source_groups()
 
 add_library(${PROJECT_NAME} STATIC ${HEADERS} ${HEADERS_PRIVATE} ${SOURCES})
 
@@ -42,7 +40,6 @@ target_include_directories(${PROJECT_NAME}
     PRIVATE
         ${CARBON_C_API}
         ${CARBON_CXX_API}
-        ${CARBON_INCLUDE}
         "${CARBON_EXTERNAL}/json"
         "${COMMON}/include"
         ${COMMON_GENERATED_INCLUDE}
@@ -75,7 +72,7 @@ if(WIN32)
 endif()
 
 target_link_libraries(${PROJECT_NAME}
-                      PRIVATE common
+                      PRIVATE interfaces common
                       PRIVATE ${http_LIBS})
 
 if (MSVC)

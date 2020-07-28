@@ -18,11 +18,11 @@ set(SOURCES
     "${SRC_DIR}/audio_source_adapter_test.cpp"
     )
 
-source_group("Source Files" FILES ${SOURCES})
-source_group("Header Files" FILES ${TEST_HEADERS})
-source_group("Header Files (Private)" FILES ${HEADERS_PRIVATE})
+list(APPEND HEADERS_PRIVATE ${TEST_HEADERS})
 
-add_executable(${PROJECT_NAME} ${SOURCES} ${TEST_HEADERS} ${HEADERS_PRIVATE})
+set_source_groups()
+
+add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS_PRIVATE})
 
 set(PRIVATE_AUDIO_HEADERS "${CARBON_CORE}/audio")
 set(PRIVATE_DATA_HEADERS "${CARBON_CORE}/data")

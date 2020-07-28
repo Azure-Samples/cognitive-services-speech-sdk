@@ -21,9 +21,7 @@ set(SOURCES
     "${SRC_DIR}/read_write_ring_buffer.cpp"
 )
 
-source_group("Header Files (public)" FILES ${HEADERS})
-source_group("Header Files (private)" FILES ${HEADERS_PRIVATE})
-source_group("Source Files" FILES ${SOURCES})
+set_source_groups()
 
 add_library(data STATIC ${HEADERS} ${HEADERS_PRIVATE} ${SOURCES})
 
@@ -31,7 +29,6 @@ target_include_directories(data
     PRIVATE
         ${CARBON_C_API}
         ${CARBON_CXX_API}
-        ${CARBON_INCLUDE}
         "${CARBON_EXTERNAL}/json"
     PUBLIC
         ${INC_DIR}
@@ -41,4 +38,4 @@ set_target_properties (data PROPERTIES
     FOLDER core/input
 )
 
-target_link_libraries(data PRIVATE common)
+target_link_libraries(data PRIVATE interfaces common)

@@ -8,7 +8,7 @@ find_package(JNI REQUIRED)
 if (JNI_FOUND)
     message (STATUS "JNI_INCLUDE_DIRS=${JNI_INCLUDE_DIRS}")
     message (STATUS "JNI_LIBRARIES=${JNI_LIBRARIES}")
-    message (STATUS "JAVA_INCLUDE_PATH=${JAVA_INCLUDE_PATH}")    
+    message (STATUS "JAVA_INCLUDE_PATH=${JAVA_INCLUDE_PATH}")
 endif()
 
 set(SRC_DIR "${PROJECT_SOURCE_DIR}")
@@ -79,7 +79,7 @@ set(HEADERS
     "${SRC_DIR}/com_microsoft_cognitiveservices_speech_Grammar.h"
     "${SRC_DIR}/com_microsoft_cognitiveservices_speech_ClassLanguageModel.h"
     "${SRC_DIR}/com_microsoft_cognitiveservices_speech_AudioDataStream.h"
-    "${SRC_DIR}/com_microsoft_cognitiveservices_speech_KeywordRecognizer.h"    
+    "${SRC_DIR}/com_microsoft_cognitiveservices_speech_KeywordRecognizer.h"
     "${SRC_DIR}/com_microsoft_cognitiveservices_speech_audio_AudioStreamFormat.h"
     "${SRC_DIR}/com_microsoft_cognitiveservices_speech_audio_PullAudioInputStream.h"
     "${SRC_DIR}/com_microsoft_cognitiveservices_speech_audio_PushAudioInputStream.h"
@@ -94,7 +94,7 @@ set(HEADERS
     "${SRC_DIR}/com_microsoft_cognitiveservices_speech_intent_IntentTrigger.h"
     "${SRC_DIR}/com_microsoft_cognitiveservices_speech_intent_LanguageUnderstandingModel.h"
     "${SRC_DIR}/com_microsoft_cognitiveservices_speech_KeywordRecognitionModel.h"
-    "${SRC_DIR}/com_microsoft_cognitiveservices_speech_translation_SpeechTranslationConfig.h"    
+    "${SRC_DIR}/com_microsoft_cognitiveservices_speech_translation_SpeechTranslationConfig.h"
     "${SRC_DIR}/com_microsoft_cognitiveservices_speech_translation_TranslationSynthesisResult.h"
     "${SRC_DIR}/com_microsoft_cognitiveservices_speech_translation_TranslationSynthesisEventArgs.h"
     "${SRC_DIR}/com_microsoft_cognitiveservices_speech_translation_TranslationRecognizer.h"
@@ -152,7 +152,7 @@ set(SOURCES
     "${SRC_DIR}/com_microsoft_cognitiveservices_speech_intent_IntentTrigger.cpp"
     "${SRC_DIR}/com_microsoft_cognitiveservices_speech_intent_LanguageUnderstandingModel.cpp"
     "${SRC_DIR}/com_microsoft_cognitiveservices_speech_KeywordRecognitionModel.cpp"
-    "${SRC_DIR}/com_microsoft_cognitiveservices_speech_translation_SpeechTranslationConfig.cpp"    
+    "${SRC_DIR}/com_microsoft_cognitiveservices_speech_translation_SpeechTranslationConfig.cpp"
     "${SRC_DIR}/com_microsoft_cognitiveservices_speech_translation_TranslationSynthesisResult.cpp"
     "${SRC_DIR}/com_microsoft_cognitiveservices_speech_translation_TranslationSynthesisEventArgs.cpp"
     "${SRC_DIR}/com_microsoft_cognitiveservices_speech_translation_TranslationRecognizer.cpp"
@@ -170,8 +170,7 @@ set(SOURCES
     "${SRC_DIR}/dll.cpp"
     )
 
-source_group("Header Files (public)" FILES ${HEADERS})
-source_group("Source Files" FILES ${SOURCES})
+set_source_groups()
 
 add_library(${JAVA_JNI_LIBRARY} SHARED ${HEADERS} ${SOURCES})
 

@@ -17,8 +17,7 @@ set(SOURCES
 # make this the last source file to avoid link warning LNK4221
 list(APPEND SOURCES "${SRC_DIR}/stdafx.cpp")
 
-source_group("Header Files (public)" FILES ${HEADERS})
-source_group("Source Files" FILES ${SOURCES})
+set_source_groups()
 
 add_library(logging STATIC ${HEADERS} ${SOURCES})
 
@@ -26,13 +25,12 @@ target_include_directories(logging
     PRIVATE
         ${CARBON_C_API}
         ${CARBON_CXX_API}
-        ${CARBON_INCLUDE}
         "${CARBON_EXTERNAL}/json"
     PUBLIC
         ${INC_DIR}
 )
 
-target_link_libraries(logging PRIVATE pal common)
+target_link_libraries(logging PRIVATE interfaces pal common)
 
 if(WIN32 AND SPECTRE_MITIGATION)
     set_property(TARGET logging PROPERTY VS_GLOBAL_SpectreMitigation "Spectre")
@@ -45,5 +43,5 @@ if(CMAKE_SYSTEM_NAME STREQUAL "WindowsStore")
 endif()
 
 set_target_properties(logging PROPERTIES
-    FOLDER core
+    FOLDER core/shared
 )

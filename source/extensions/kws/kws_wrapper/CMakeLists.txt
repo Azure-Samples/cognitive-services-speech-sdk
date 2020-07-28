@@ -88,9 +88,7 @@ set(SOURCES
     stdafx.cpp
     )
 
-source_group("Header Files (public)" FILES ${HEADERS})
-source_group("Header Files (private)" FILES ${HEADERS_PRIVATE})
-source_group("Source Files" FILES ${SOURCES})
+  set_source_groups()
 
 add_library(kws_wrapper STATIC ${HEADERS} ${HEADERS_PRIVATE} ${SOURCES})
 
@@ -98,7 +96,6 @@ target_include_directories(kws_wrapper
     PRIVATE
         ${CARBON_C_API}
         ${CARBON_CXX_API}
-        ${CARBON_INCLUDE}
         "${CARBON_EXTERNAL}/json"
     PUBLIC
         ${SDKKWS_HEADERS}
@@ -110,6 +107,7 @@ set_target_properties(kws_wrapper PROPERTIES
     )
 
 target_link_libraries(kws_wrapper
+  PRIVATE interfaces
   PRIVATE common
   PRIVATE kwsapi
   )

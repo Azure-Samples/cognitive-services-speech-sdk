@@ -16,8 +16,7 @@ set(SOURCES
     "${SRC_DIR}/stdafx.cpp"
     )
 
-source_group("Header Files (public)" FILES ${HEADERS})
-source_group("Source Files" FILES ${SOURCES})
+set_source_groups()
 
 add_library(factory STATIC ${HEADERS} ${HEADERS_PRIVATE} ${SOURCES})
 
@@ -25,7 +24,6 @@ target_include_directories(factory
     PRIVATE
         ${CARBON_C_API}
         ${CARBON_CXX_API}
-        ${CARBON_INCLUDE}
         "${CARBON_EXTERNAL}/json"
     PUBLIC
         ${INC_DIR}
@@ -40,6 +38,7 @@ set_target_properties (factory PROPERTIES
 )
 
 target_link_libraries(factory
+                      PRIVATE interfaces
                       PRIVATE sr
                       PRIVATE tts
                       PRIVATE audio

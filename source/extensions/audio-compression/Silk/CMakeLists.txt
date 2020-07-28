@@ -16,9 +16,7 @@ set(SOURCES
     "${SRC_DIR}/silk_codec_impl.cpp"
     )
 
-source_group("Header Files (public)" FILES ${HEADERS})
-source_group("Header Files (private)" FILES ${HEADERS_PRIVATE})
-source_group("Source Files" FILES ${SOURCES})
+  set_source_groups()
 
 # HINTS ${CARBON_EXTERNAL}/silk-codec/lib/${CMAKE_SYSTEM_NAME}/${PLATFORM_NAME}/${CMAKE_SYSTEM_PROCESSOR}
 
@@ -79,7 +77,6 @@ target_include_directories(speechsdk_compression_silk
     PRIVATE
         ${CARBON_C_API}
         ${CARBON_CXX_API}
-        ${CARBON_INCLUDE}
         "${COMMON}/include"
         "${CARBON_EXTERNAL}/json"
         "${CARBON_EXTERNAL}/silk-codec"
@@ -90,11 +87,13 @@ target_link_libraries(speechsdk_compression_silk PRIVATE common)
 if(SPEECHSDK_OS MATCHES "^IOS")
     target_link_libraries(speechsdk_compression_silk
         PRIVATE
+        interfaces
         ${SILK_LIBRARIES}
         )
 else()
     target_link_libraries(speechsdk_compression_silk
         PRIVATE
+        interfaces
         ${SILK_LIBRARIES}
         )
 endif()

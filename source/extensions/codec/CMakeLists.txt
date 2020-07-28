@@ -6,7 +6,6 @@ set(INC_DIR "${PROJECT_SOURCE_DIR}/include")
 include_directories(${INC_DIR})
 include_directories(${CARBON_C_API})
 include_directories(${CARBON_CXX_API})
-include_directories(${CARBON_INCLUDE})
 include_directories("${CARBON_EXTERNAL}/json")
 
 #The following include directories are in support of arm cross compile
@@ -96,9 +95,7 @@ if (NOT DEFINED APPLE)
     set(SOURCES ${SOURCES} ${STATICLIB_SOURCES})
 endif()
 
-source_group("Header Files (public)" FILES ${HEADERS})
-source_group("Header Files (private)" FILES ${HEADERS_PRIVATE})
-source_group("Source Files" FILES ${SOURCES})
+set_source_groups()
 
 if(SPEECHSDK_OS STREQUAL "Linux")
     if(${IS_CROSSCOMPILING})
@@ -142,7 +139,7 @@ else()
     set_target_properties (codec PROPERTIES
         DEFINE_SYMBOL "SPX_CONFIG_EXPORTAPIS"
         OUTPUT_NAME "Microsoft.CognitiveServices.Speech.extension.codec"
-        FOLDER core
+        FOLDER extensions
         )
 endif()
 
@@ -157,6 +154,7 @@ if(WIN32 AND SPECTRE_MITIGATION)
 endif()
 
 target_include_directories(codec PRIVATE ${GST_INCLUDE_DIRS})
+target_link_libraries(codec PRIVATE interfaces)
 if(SPEECHSDK_OS MATCHES "^IOS")
     target_link_libraries(codec
         PUBLIC "-weak_framework GStreamerWrapper -F${GSTREAMER_WRAPPER_DIR}"

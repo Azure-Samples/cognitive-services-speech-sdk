@@ -7,7 +7,6 @@ set(LIBCARBON_SRC_DIR "${PROJECT_SOURCE_DIR}/../../core/libcarbon")
 include_directories(${CARBON_C_API})
 include_directories(${CARBON_CXX_API})
 include_directories(${OBJC_PUBLIC_HEADER_DIR})
-include_directories(${CARBON_INCLUDE})
 include_directories("${COMMON}/include")
 include_directories("${LOGGING}/include")
 include_directories("${FACTORY}/include")
@@ -22,9 +21,7 @@ set(SOURCES ${OBJC_SOURCE}
   "${SRC_DIR}/../../../core/libcarbon/dll.cpp"
   )
 
-source_group("Header Files (public)" FILES ${HEADERS})
-source_group("Header Files (private)" FILES ${HEADERS_PRIVATE})
-source_group("Source Files" FILES ${SOURCES})
+set_source_groups()
 
 list(APPEND ALL_FRAMEWORK_HEADERS ${HEADERS} ${SPEECH_C_API_HEADERS} ${SPEECH_CXX_API_HEADERS})
 
@@ -76,6 +73,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 )
 
 target_link_libraries(${PROJECT_NAME}
+  PRIVATE interfaces
   PRIVATE sr
   PRIVATE audio
   PRIVATE usp

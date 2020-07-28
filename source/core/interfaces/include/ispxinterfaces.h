@@ -22,13 +22,12 @@
 #include "shared_ptr_helpers.h"
 #include "spxdebug.h"
 
+#include <interfaces/types.h>
+
 namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
 namespace Impl {
-
-using OffsetType = uint64_t;
-using SizeType = size_t;
 
 class ISpxInterfaceBase : public std::enable_shared_from_this<ISpxInterfaceBase>
 {

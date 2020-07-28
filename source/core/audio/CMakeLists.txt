@@ -61,7 +61,7 @@ set(SOURCES
     "${SRC_DIR}/stream_audio_source_adapter.cpp"
     )
 
-set(AUDIO_LIBS common)
+set(AUDIO_LIBS interfaces common)
 
 
 if(WIN32)
@@ -136,9 +136,7 @@ list(APPEND SOURCES
     "${SRC_DIR}/stdafx.cpp"
 )
 
-source_group("Header Files (public)" FILES ${HEADERS})
-source_group("Header Files (private)" FILES ${HEADERS_PRIVATE})
-source_group("Source Files" FILES ${SOURCES})
+set_source_groups()
 
 add_library(audio STATIC ${HEADERS} ${HEADERS_PRIVATE} ${SOURCES})
 
@@ -146,7 +144,6 @@ target_include_directories(audio
     PRIVATE
         ${CARBON_C_API}
         ${CARBON_CXX_API}
-        ${CARBON_INCLUDE}
         "${CARBON_EXTERNAL}/json"
         ${SRC_DIR}
     PUBLIC

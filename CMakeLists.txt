@@ -7,6 +7,20 @@ else()
   cmake_minimum_required(VERSION 3.5)
 endif()
 
+function(set_source_groups)
+  file(GLOB_RECURSE INTERFACE_HEADERS ${interfaces_SOURCE_DIR}/include/*)
+  source_group("Interface Headers" FILES ${INTERFACE_HEADERS})
+  if(HEADERS)
+    source_group("Header Files (public)" FILES ${HEADERS})
+  endif()
+  if(HEADERS_PRIVATE)
+    source_group("Header Files (private)" FILES ${HEADERS_PRIVATE})
+  endif()
+  if(SOURCES)
+    source_group("Source Files" FILES ${SOURCES})
+  endif()
+endfunction()
+
 # Only interpret ``if()`` arguments as variables or keywords when unquoted.
 # cmake --help-policy CMP0054
 cmake_policy(SET CMP0054 NEW)
@@ -368,7 +382,6 @@ set(CARBON_EXTERNAL "${CARBON_ROOT}/external")
 # include folders
 set(CARBON_C_API "${CARBON_PUBLIC}/c_api")
 set(CARBON_CXX_API "${CARBON_PUBLIC}/cxx_api")
-set(CARBON_INCLUDE "${CARBON_CORE}/include")
 
 if(CMAKE_SYSTEM_NAME STREQUAL "WindowsStore")
   set(SPEECHSDK_CORE_LIBRARY "Microsoft.CognitiveServices.Speech.core")

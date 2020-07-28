@@ -29,9 +29,7 @@ set(SOURCES
     "${SRC_DIR}/stdafx.cpp"
     )
 
-source_group("Header Files (public)" FILES ${HEADERS})
-source_group("Header Files (private)" FILES ${HEADERS_PRIVATE})
-source_group("Source Files" FILES ${SOURCES})
+    set_source_groups()
 
 add_library(mock SHARED ${HEADERS} ${HEADERS_PRIVATE} ${SOURCES})
 
@@ -39,7 +37,6 @@ target_include_directories(mock
     PRIVATE
         ${CARBON_C_API}
         ${CARBON_CXX_API}
-        ${CARBON_INCLUDE}
         "${CARBON_EXTERNAL}/json"
 )
 
@@ -53,4 +50,4 @@ set_target_properties (mock PROPERTIES
     FOLDER core
 )
 
-target_link_libraries(mock PRIVATE common ${SPEECHSDK_CORE_LIBRARY})
+target_link_libraries(mock PRIVATE interfaces common ${SPEECHSDK_CORE_LIBRARY})

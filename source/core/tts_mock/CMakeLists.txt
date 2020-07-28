@@ -16,9 +16,7 @@ set(SOURCES
     "${SRC_DIR}/mock_tts_engine_adapter.cpp"
     )
 
-source_group("Header Files (public)" FILES ${HEADERS})
-source_group("Header Files (private)" FILES ${HEADERS_PRIVATE})
-source_group("Source Files" FILES ${SOURCES})
+set_source_groups()
 
 add_library(tts_mock SHARED ${HEADERS} ${HEADERS_PRIVATE} ${SOURCES})
 
@@ -27,7 +25,6 @@ target_include_directories(tts_mock
         ${SRC_DIR}
         ${CARBON_C_API}
         ${CARBON_CXX_API}
-        ${CARBON_INCLUDE}
         "${CARBON_EXTERNAL}/json"
         ${COMMON_GENERATED_INCLUDE}
     PUBLIC
@@ -42,7 +39,7 @@ endif()
 
 set_target_properties (tts_mock PROPERTIES
     OUTPUT_NAME "carbon-tts-mock"
-    FOLDER core
+    FOLDER core/tts
 )
 
-target_link_libraries(tts_mock PRIVATE common audio ${SPEECHSDK_CORE_LIBRARY})
+target_link_libraries(tts_mock PRIVATE interfaces common audio ${SPEECHSDK_CORE_LIBRARY})

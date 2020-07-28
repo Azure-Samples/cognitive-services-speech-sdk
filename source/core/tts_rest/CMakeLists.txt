@@ -16,9 +16,7 @@ set(SOURCES
     "${SRC_DIR}/rest_tts_engine_adapter.cpp"
     )
 
-source_group("Header Files (public)" FILES ${HEADERS})
-source_group("Header Files (private)" FILES ${HEADERS_PRIVATE})
-source_group("Source Files" FILES ${SOURCES})
+set_source_groups()
 
 add_library(tts_rest STATIC ${HEADERS} ${HEADERS_PRIVATE} ${SOURCES})
 
@@ -27,7 +25,6 @@ target_include_directories(tts_rest
         ${SRC_DIR}
         ${CARBON_C_API}
         ${CARBON_CXX_API}
-        ${CARBON_INCLUDE}
         "${CARBON_EXTERNAL}/json"
         "${COMMON_GENERATED_INCLUDE}"
     PUBLIC
@@ -39,10 +36,10 @@ if(WIN32 AND SPECTRE_MITIGATION)
 endif()
 
 set_target_properties (tts_rest PROPERTIES
-    FOLDER core
+    FOLDER core/tts
 )
 
-target_link_libraries(tts_rest usp common)
+target_link_libraries(tts_rest PRIVATE interfaces usp common)
 
 if (MSVC)
    set_target_properties(tts_rest PROPERTIES COMPILE_FLAGS "/Yustdafx.h")

@@ -5,7 +5,10 @@ set(INC_DIR "${PROJECT_SOURCE_DIR}/include")
 
 
 set(HEADERS
-    "${SRC_DIR}/stdafx.h"
+    "${INC_DIR}/spxcore_common.h"
+    "${INC_DIR}/spx_namespace.h"
+    "${INC_DIR}/json.h"
+    "${INC_DIR}/asyncop.h"
     "${INC_DIR}/exception.h"
     "${INC_DIR}/create_object_helpers.h"
     "${INC_DIR}/debug_utils.h"
@@ -25,7 +28,6 @@ set(HEADERS
     "${INC_DIR}/platform.h"
     "${INC_DIR}/string_utils.h"
     "${INC_DIR}/file_utils.h"
-    "${CARBON_INCLUDE}/ispxinterfaces.h"
     "${INC_DIR}/property_id_2_name_map.h"
     "${INC_DIR}/audio_format_id_2_name_map.h"
     "${INC_DIR}/try_catch_helpers.h"
@@ -86,6 +88,7 @@ set(HEADERS_PRIVATE
     "${INC_DIR}/azure_c_shared_utility_xlogging_wrapper.h"
     "${INC_DIR}/azure_c_shared_utility_macro_utils.h"
     "${INC_DIR}/azure_c_shared_utility_includes.h"
+    "${SRC_DIR}/stdafx.h"
     )
 
 set(SOURCES
@@ -138,9 +141,7 @@ configure_file(
 # make this the last source file to avoid link warning LNK4221
 list(APPEND SOURCES "${SRC_DIR}/stdafx.cpp")
 
-source_group("Header Files (public)" FILES ${HEADERS})
-source_group("Header Files (private)" FILES ${HEADERS_PRIVATE})
-source_group("Source Files" FILES ${SOURCES})
+set_source_groups()
 
 add_library(common STATIC ${HEADERS} ${HEADERS_PRIVATE} ${SOURCES})
 
@@ -150,7 +151,6 @@ target_include_directories(common
         ## TODO: These should come from target_link_libraries
         ${CARBON_C_API}
         ${CARBON_CXX_API}
-        ${CARBON_INCLUDE}
         "${CARBON_EXTERNAL}/json"
     PUBLIC
         ${INC_DIR}
@@ -167,10 +167,13 @@ if(CMAKE_SYSTEM_NAME STREQUAL "WindowsStore")
 endif()
 
 set_target_properties(common PROPERTIES
-    FOLDER core
+    FOLDER core/shared
 )
 
-target_link_libraries(common PRIVATE pal)
+target_link_libraries(common
+    PUBLIC interfaces
+    PRIVATE pal
+)
 
 if(WIN32)
     target_link_libraries(common PRIVATE Dbghelp.lib)

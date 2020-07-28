@@ -584,7 +584,7 @@
 					"$(SRCROOT)/../../../../../source/public/cxx_api",
 					"$(SRCROOT)/../../../../../source/public/c_api",
 					"$(SRCROOT)/../../../../../source/core/common/include",
-					"$(SRCROOT)/../../../../../source/core/include",
+					"$(SRCROOT)/../../../../../source/core/interfaces/include",
 					"$(SRCROOT)/../../../../../external/azure-c-shared-utility/inc",
 				);
 				INFOPLIST_FILE = Mictest/Info.plist;
@@ -610,7 +610,7 @@
 					"$(SRCROOT)/../../../../../source/public/cxx_api",
 					"$(SRCROOT)/../../../../../source/public/c_api",
 					"$(SRCROOT)/../../../../../source/core/common/include",
-					"$(SRCROOT)/../../../../../source/core/include",
+					"$(SRCROOT)/../../../../../source/core/interfaces/include",
 					"$(SRCROOT)/../../../../../external/azure-c-shared-utility/inc",
 				);
 				INFOPLIST_FILE = Mictest/Info.plist;

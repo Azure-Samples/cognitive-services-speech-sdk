@@ -12,13 +12,14 @@ set(SOURCES
     )
 
 if(EXTENSION_AUDIOCOMPRESSION_ENABLED)
-  list(APPEND SOURCES
+    list(APPEND SOURCES
     "${SRC_DIR}/compression_codec_test.cpp"
-  )
+    )
 endif()
 
-source_group("Source Files" FILES ${SOURCES})
-source_group("Header Files" FILES ${TEST_HEADERS})
+set(HEADERS_PRIVATE ${TEST_HEADERS})
+
+set_source_groups()
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${TEST_HEADERS})
 
@@ -32,7 +33,6 @@ target_include_directories(${PROJECT_NAME}
         ${CARBON_CXX_API}
         "${CARBON_EXTERNAL}/Catch2"
         "${CARBON_EXTERNAL}/json"
-        ${CARBON_INCLUDE}
         ${PRIVATE_AUDIO_HEADERS}
         ${PRIVATE_SR_HEADERS}
 )
@@ -41,7 +41,7 @@ target_include_directories(${PROJECT_NAME}
 # unit tests against modules other than common: they still need to be linked with factory since SpxGetCoreRootSite is defined in factory.
 add_compile_definitions(USE_NON_CORE_ROOT_SITE)
 
-target_link_libraries(${PROJECT_NAME} sr conversation_translation factory common audio usp ${TEST_LIBS})
+target_link_libraries(${PROJECT_NAME} interfaces sr conversation_translation factory common audio usp ${TEST_LIBS})
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "WindowsStore")
 if (${use_openssl})

@@ -954,7 +954,7 @@
 					"$(SRCROOT)/../../../public/cxx_api",
 					"$(SRCROOT)/../../../public/c_api",
 					"$(SRCROOT)/../../../core/common/include",
-					"$(SRCROOT)/../../../core/include",
+					"$(SRCROOT)/../../../core/interfaces/include",
 					"$(SRCROOT)/../../../../external/azure-c-shared-utility/inc",
 				);
 				INFOPLIST_FILE = "$(SRCROOT)/SpeechSDK/Info.plist";
@@ -1007,7 +1007,7 @@
 					"$(SRCROOT)/../../../public/cxx_api",
 					"$(SRCROOT)/../../../public/c_api",
 					"$(SRCROOT)/../../../core/common/include",
-					"$(SRCROOT)/../../../core/include",
+					"$(SRCROOT)/../../../core/interfaces/include",
 					"$(SRCROOT)/../../../../external/azure-c-shared-utility/inc",
 				);
 				INFOPLIST_FILE = "$(SRCROOT)/SpeechSDK/Info.plist";

@@ -31,9 +31,7 @@ else()
     )
 endif()
 
-source_group("Header Files (public)" FILES ${HEADERS})
-source_group("Header Files (private)" FILES ${HEADERS_PRIVATE})
-source_group("Source Files" FILES ${SOURCES})
+set_source_groups()
 
 source_group("Speech C API headers" FILES ${SPEECH_C_API_HEADERS})
 source_group("Speech CXX API headers" FILES ${SPEECH_CXX_API_HEADERS})

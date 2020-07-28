@@ -12,9 +12,7 @@ set(SOURCES
     stdafx.cpp
     )
 
-source_group("Header Files (public)" FILES ${HEADERS})
-source_group("Header Files (private)" FILES ${HEADERS_PRIVATE})
-source_group("Source Files" FILES ${SOURCES})
+set_source_groups()
 
 if(WIN32)
   set(SPEECHSDK_ORIGINAL_FILENAME "Microsoft.CognitiveServices.Speech.extension.kws.dll")
@@ -50,21 +48,14 @@ target_include_directories(kws_factory
         ${SDKKWS_HEADERS}
         ${CARBON_C_API}
         ${CARBON_CXX_API}
-        ${CARBON_INCLUDE}
         "${CARBON_EXTERNAL}/json"
     )
 
-if(SPEECHSDK_OS MATCHES "^IOS")
-    target_link_libraries(kws_factory
+target_link_libraries(kws_factory
+     PRIVATE interfaces
      PRIVATE common
      PRIVATE kws_wrapper
-        )
-else()
-    target_link_libraries(kws_factory
-    PRIVATE common
-    PRIVATE kws_wrapper
-        )
-endif()
+)
 
 if(STATIC_KWS_EXTENSION)
     target_link_libraries(kws_factory PRIVATE logging)
