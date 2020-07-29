@@ -62,7 +62,6 @@ BEGIN {
       quickstart/cpp/windows/text-to-speech/helloworld/helloworld.cpp#code
       quickstart/cpp/windows/translate-speech-to-text/helloworld/helloworld.cpp#code
       quickstart/cpp/windows/speaker-recognition/helloworld/helloworld.cpp#code
-      quickstart/csharp/dotnet/from-microphone/helloworld/Program.cs#code
       quickstart/csharp/dotnet/intent-recognition/helloworld/Program.cs#code
       quickstart/csharp/dotnet/text-to-speech/helloworld/Program.cs#code
       quickstart/csharp/dotnet/translate-speech-to-text/helloworld/Program.cs#code
@@ -74,7 +73,6 @@ BEGIN {
       quickstart/csharp/uwp/from-microphone/helloworld/MainPage.xaml#StackPanel
       quickstart/csharp/uwp/from-microphone/helloworld/MainPage.xaml.cs#code
       quickstart/csharp/uwp/keyword-recognizer/helloworld/MainPage.xaml#StackPanel
-      quickstart/csharp/uwp/keyword-recognizer/helloworld/MainPage.xaml.cs#code
       quickstart/csharp/uwp/text-to-speech/helloworld/MainPage.xaml#StackPanel
       quickstart/csharp/uwp/text-to-speech/helloworld/MainPage.xaml.cs#code
       quickstart/csharp/uwp/translate-speech-to-text/helloworld/MainPage.xaml#StackPanel
@@ -83,7 +81,6 @@ BEGIN {
       quickstart/java/android/keyword-recognizer/app/src/main/java/com/microsoft/cognitiveservices/speech/samples/quickstart/MainActivity.java#code
       quickstart/java/android/text-to-speech/app/src/main/java/com/microsoft/cognitiveservices/speech/samples/quickstart/MainActivity.java#code
       quickstart/java/android/intent-recognition/app/src/main/java/com/microsoft/cognitiveservices/speech/samples/quickstart/MainActivity.java#code
-      quickstart/java/android/text-to-speech/app/src/main/java/com/microsoft/cognitiveservices/speech/samples/quickstart/SpeakerStream.java#code
       quickstart/java/jre/from-microphone/pom.xml#dependencies
       quickstart/java/jre/from-microphone/pom.xml#repositories
       quickstart/java/jre/intent-recognition/pom.xml#dependencies
@@ -101,10 +98,6 @@ BEGIN {
       quickstart/javascript/browser/from-microphone/index.html#quickstartcode
       quickstart/javascript/browser/from-microphone/index.html#speechsdkref
       quickstart/javascript/browser/from-microphone/index.html#uidiv
-      quickstart/javascript/browser/text-to-speech/index.html#authorizationfunction
-      quickstart/javascript/browser/text-to-speech/index.html#quickstartcode
-      quickstart/javascript/browser/text-to-speech/index.html#speechsdkref
-      quickstart/javascript/browser/text-to-speech/index.html#uidiv
       quickstart/javascript/node/from-file/index.js#code
       quickstart/javascript/node/text-to-speech/index.js#code
       quickstart/objectivec/ios/from-microphone/helloworld/helloworld/ViewController.m#code
@@ -114,16 +107,12 @@ BEGIN {
       quickstart/objectivec/macos/text-to-speech/helloworld/helloworld/AppDelegate.m#code
       quickstart/python/from-microphone/quickstart.py#code
       quickstart/python/text-to-speech/quickstart.py#code
-      quickstart/swift/ios/from-microphone/helloworld/helloworld/AppDelegate.swift#code
-      quickstart/swift/ios/from-microphone/helloworld/helloworld/MicrosoftCognitiveServicesSpeech-Bridging-Header.h#code
-      quickstart/swift/ios/from-microphone/helloworld/helloworld/ViewController.swift#code
-      quickstart/swift/ios/text-to-speech/helloworld/helloworld/AppDelegate.swift#code
       quickstart/swift/ios/text-to-speech/helloworld/helloworld/MicrosoftCognitiveServicesSpeech-Bridging-Header.h#code
-      quickstart/swift/ios/text-to-speech/helloworld/helloworld/ViewController.swift#code
-      quickstart/swift/macos/from-microphone/helloworld/helloworld/AppDelegate.swift#code
-      quickstart/swift/macos/from-microphone/helloworld/helloworld/MicrosoftCognitiveServicesSpeech-Bridging-Header.h#code
+      quickstart/java/android/keyword-recognizer-stream/app/src/main/java/com/microsoft/cognitiveservices/speech/samples/quickstart/MainActivity.java#code
       samples/batch/csharp/program.cs#batchdefinition
       samples/batch/csharp/program.cs#batchstatus
+      samples/batch/csharp/batchclient/program.cs#transcriptiondefinition
+      samples/batch/csharp/batchclient/program.cs#transcriptionstatus
       samples/cpp/windows/console/samples/intent_recognition_samples.cpp#IntentContinuousRecognitionWithFile
       samples/cpp/windows/console/samples/intent_recognition_samples.cpp#IntentRecognitionWithLanguage
       samples/cpp/windows/console/samples/intent_recognition_samples.cpp#IntentRecognitionWithMicrophone
@@ -138,7 +127,6 @@ BEGIN {
       samples/cpp/windows/console/samples/speaker_recognition_samples.cpp#SpeakerVerificationWithMicrophone
       samples/cpp/windows/console/samples/speaker_recognition_samples.cpp#SpeakerVerificationWithPushStream
       samples/cpp/windows/console/samples/speaker_recognition_samples.cpp#SpeakerIdentificationWithPullStream
-      samples/cpp/windows/console/samples/speaker_recognition_samples.cpp#SpeakerIdentificationWithMicrophone
       samples/csharp/sharedcontent/console/intent_recognition_samples.cs#intentContinuousRecognitionWithFile
       samples/csharp/sharedcontent/console/intent_recognition_samples.cs#intentRecognitionWithMicrophone
       samples/csharp/sharedcontent/console/intent_recognition_samples.cs#toplevel
@@ -163,8 +151,6 @@ BEGIN {
       samples/java/jre/console/src/com/microsoft/cognitiveservices/speech/samples/console/TranslationSamples.java#TranslationWithFileAsync
       samples/java/jre/console/src/com/microsoft/cognitiveservices/speech/samples/console/TranslationSamples.java#TranslationWithMicrophoneAsync
       samples/java/jre/console/src/com/microsoft/cognitiveservices/speech/samples/console/TranslationSamples.java#toplevel
-      samples/objective-c/ios/compressed-streams/CompressedStreamsSample/CompressedStreamsSample/ViewController.m#setup-stream
-      samples/objective-c/ios/compressed-streams/CompressedStreamsSample/CompressedStreamsSample/ViewController.m#push-compressed-stream
       samples/python/console/intent_sample.py#IntentContinuousRecognitionWithFile
       samples/python/console/intent_sample.py#IntentRecognitionOnceWithFile
       samples/python/console/intent_sample.py#IntentRecognitionOnceWithMic

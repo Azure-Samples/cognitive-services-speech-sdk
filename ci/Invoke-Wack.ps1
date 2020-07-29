@@ -39,7 +39,7 @@ $scriptDir = Split-Path -Path $MyInvocation.MyCommand.Definition -Parent
 # Define and check for required commands
 $vsInstallationPath = Get-VisualStudio2017InstallationPath
 $windowsSdkDir = Get-VisualStudioEnvironmentSetting $vsInstallationPath WindowsSdkDir
-$msbuild = "$vsInstallationPath\MSBuild\15.0\bin\MSBuild.exe"
+$msbuild = "$vsInstallationPath\MSBuild\Current\bin\MSBuild.exe"
 $signtool = "$windowsSdkDir\bin\x64\signtool.exe"
 $appCert = "$windowsSdkDir\App Certification Kit\appcert.exe"
 $null = Get-Command $msbuild, $signtool, $appcert

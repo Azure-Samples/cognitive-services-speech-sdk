@@ -21,7 +21,7 @@ This sample demonstrates how to connect to a BotFramework bot, send and receive 
 
 * **By downloading the plugin and sample you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license201809).**
 * The Speech SDK for Unity (Beta) is packaged as a Unity asset package (.unitypackage). Download it from [here](https://aka.ms/csspeech/unitypackage).
-* Also, [download the sample code to your development PC.](../../../../README.md#get-the-samples)
+* Also, [download the sample code to your development PC.](/README.md#get-the-samples)
 
 ## Prepare the sample
 

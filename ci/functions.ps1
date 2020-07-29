@@ -7,7 +7,7 @@ function Get-VisualStudio2017InstallationPath
 
   $vswhere = "c:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe"
   if (Test-Path -PathType Leaf $vswhere) {
-    $installationPath = & $vswhere -version '[15.0,16.0)' -latest -property installationPath
+    $installationPath = & $vswhere -version '[15.0,19.0)' -latest -property installationPath
     if ($LASTEXITCODE -ne 0) {
       throw "Running vswhere failed"
     }

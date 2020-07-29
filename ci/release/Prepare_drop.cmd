@@ -11,6 +11,7 @@ mkdir drop
 echo extracting needed files from windows.zip
 7z.exe e "zip\windows.zip" "Windows\Microsoft.CognitiveServices.Speech.%1.nupkg" -o"drop\"
 7z.exe e "zip\windows.zip" "Windows\Microsoft.CognitiveServices.Speech.Xamarin.iOS.%1.nupkg" -o"drop\"
+7z.exe e "zip\windows.zip" "Windows\Microsoft.CognitiveServices.Speech.Remoteconversation.%1.nupkg" -o"drop\"
 
 echo extracting needed files from unity.zip
 7z.exe e "zip\Unity.zip" "Unity\Microsoft.CognitiveServices.Speech.%1.unitypackage" -o"drop\"

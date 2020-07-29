@@ -810,8 +810,22 @@ jobs:
       cat RemoteConversation.csproj
       dotnet restore --no-cache --source https://api.nuget.org/v3/index.json --source "$(System.ArtifactsDirectory)/In/Windows/" RemoteConversation.csproj
       dotnet build --configuration Release
-      dotnet pack --configuration release
-    displayName: Create remote conversation transcription package for csharp
+    displayName: Build remote conversation transcription
+  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
+    displayName: Sign RemoteConversation dlls
+    inputs:
+      ConnectedServiceName: 'Speech SDK ESRP Signing Alternate'
+      FolderPath: 'source/extensions/remoteconversation/csharp/remoteconversation/remoteconversation/bin/Release/netstandard2.0'
+      Pattern: '*.dll'
+      signConfigType: inlineSignParams
+      inlineOperation: $(SIGN_PARAMS_DLL)
+    condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
+  - bash: |
+      set -e -o pipefail
+      set -x
+      cd source/extensions/remoteconversation/csharp/remoteconversation/remoteconversation
+      dotnet pack --no-build --configuration release
+    displayName: Create nuget package remote conversation transcription
   - bash: |
       set -e -o pipefail
       rm -f ./tests/test.subscriptions.regions.json
@@ -835,6 +849,7 @@ jobs:
       cp source/extensions/remoteconversation/csharp/remoteconversation/remoteconversation/bin/Release/*.nupkg "$(System.ArtifactsDirectory)/In/Windows/"
     displayName: Copy artifacts to a directory
   - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
+    displayName: Sign RemoteConversation Nuget Package
     inputs:
       ConnectedServiceName: 'Speech SDK ESRP Signing Alternate'
       FolderPath: '$(System.ArtifactsDirectory)/In/Windows'
@@ -2403,8 +2418,8 @@ jobs:
       publishLocation: Container
 
 - job: CheckSignatures
-  dependsOn: [Pre, NuGet, AndroidPackage, JavaJrePackage, WindowsBuild, UnityBuild]
-  condition: and(succeeded('Pre', 'NuGet', 'AndroidPackage', 'JavaJrePackage', 'WindowsBuild', 'UnityBuild'), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' CheckSignatures '))
+  dependsOn: [Pre, NuGet, AndroidPackage, JavaJrePackage, WindowsBuild, UnityBuild, RemoteConversationTranscriberCsharpBuild]
+  condition: and(succeeded('Pre', 'NuGet', 'AndroidPackage', 'JavaJrePackage', 'WindowsBuild', 'UnityBuild', 'RemoteConversationTranscriberCsharpBuild'), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' CheckSignatures '))
   pool:
     vmImage: 'windows-2019'
   timeoutInMinutes: 60
