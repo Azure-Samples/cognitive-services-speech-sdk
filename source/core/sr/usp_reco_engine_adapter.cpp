@@ -348,6 +348,7 @@ void CSpxUspRecoEngineAdapter::UspInitialize()
     // Set up the connection properties, and create the connection
     SetUspEndpoint(properties, client);
     SetUspAuthentication(properties, client);
+    SetUserDefinedHttpHeaders(client);
     SetUspProxyInfo(properties, client);
     SetUspSingleTrustedCert(properties, client);
 
@@ -761,6 +762,11 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspAuthentication(const std::shared_pt
     return client.SetAuthentication(authData);
 }
 
+USP::Client& CSpxUspRecoEngineAdapter::SetUserDefinedHttpHeaders(USP::Client& client)
+{
+    auto headers = FindPrefix("HttpHeader");
+    return client.SetUserDefinedHttpHeaders(headers);
+}
 
 void CSpxUspRecoEngineAdapter::UpdateDefaultLanguage(const std::shared_ptr<ISpxNamedProperties>& properties)
 {
@@ -2689,6 +2695,11 @@ CSpxStringMap CSpxUspRecoEngineAdapter::GetParametersFromUser(std::string&& path
     SPX_IFTRUE_THROW_HR(getter == nullptr, SPXERR_UNEXPECTED_USP_SITE_FAILURE);
 
     return getter->GetParametersFromUser(move(path));
+}
+
+std::shared_ptr<ISpxNamedProperties> CSpxUspRecoEngineAdapter::GetParentProperties() const
+{
+    return SpxQueryService<ISpxNamedProperties>(GetSite());
 }
 
 } } } } // Microsoft::CognitiveServices::Speech::Impl

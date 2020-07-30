@@ -268,6 +268,7 @@ public:
         m_endpointType(endpointType),
         m_recoMode(RecognitionMode::Interactive),
         m_authData{},
+        m_userDefinedHttpHeaders{},
         m_connectionId(connectionId),
         m_threadService(threadService)
     {
@@ -386,6 +387,21 @@ public:
     }
 
     /**
+     * Sets HTTP header values.
+     * @param headers header values passed in by end users.
+     */
+    Client& SetUserDefinedHttpHeaders(const std::unordered_map<std::string, std::string>& headers)
+    {
+        // In case, a new key has a duplicate in the existing keys, overwrites the existing one.
+        for (const auto& newHeader : headers)
+        {
+            m_userDefinedHttpHeaders[newHeader.first] = newHeader.second;
+        }
+
+        return *this;
+    }
+
+    /**
      * Sets query parameters
      */
     Client& SetQueryParameter(const std::string& name, const std::string& value);
@@ -446,6 +462,7 @@ private:
 
     std::array<std::string, static_cast<size_t>(AuthenticationType::SIZE_AUTHENTICATION_TYPE)> m_authData;
 
+    std::unordered_map<std::string, std::string> m_userDefinedHttpHeaders;
     std::wstring m_connectionId;
 
     std::string m_audioResponseFormat;

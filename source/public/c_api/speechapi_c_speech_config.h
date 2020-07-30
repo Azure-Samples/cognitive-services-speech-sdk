@@ -65,8 +65,10 @@ typedef enum
 typedef enum
 {
     // Using URI query parameter to pass property settings to service.
-    SpeechConfig_ServicePropertyChannel_UriQueryParameter = 0
+    SpeechConfig_ServicePropertyChannel_UriQueryParameter = 0,
 
+    /// Using HttpHeader to set a key/value in a HTTP header.
+    SpeechConfig_ServicePropertyChannel_HttpHeader = 1
 } SpeechConfig_ServicePropertyChannel;
 
 typedef enum

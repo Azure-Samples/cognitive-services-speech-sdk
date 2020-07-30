@@ -1525,6 +1525,7 @@ public:
     virtual void SetStringValue(const char* name, const char* value) = 0;
     virtual bool HasStringValue(const char* name) const = 0;
     virtual void Copy(ISpxNamedProperties* from) = 0;
+    virtual CSpxStringMap FindPrefix(const char* prefix) const {UNUSED(prefix); return CSpxStringMap{};}
 };
 
 class ISpxIntentRecognitionResult : public ISpxInterfaceBaseFor<ISpxIntentRecognitionResult>
@@ -1726,7 +1727,7 @@ public:
     virtual void InitFromEndpoint(const char * endpoint, const char* subscription) = 0;
     virtual void InitFromHost(const char * host, const char* subscription) = 0;
     virtual void InitAuthorizationToken(const char * authToken, const char * region) = 0;
-    virtual void SetServiceProperty(std::string name, std::string value, ServicePropertyChannel channel) = 0;
+    virtual void SetServiceProperty(const std::string& name, const std::string& value, ServicePropertyChannel channel) = 0;
     virtual void SetProfanity(ProfanityOption profanity) = 0;
 };
 

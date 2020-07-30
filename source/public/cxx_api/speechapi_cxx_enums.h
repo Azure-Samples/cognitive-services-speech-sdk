@@ -835,7 +835,12 @@ enum class ServicePropertyChannel
     /// <summary>
     /// Uses URI query parameter to pass property settings to service.
     /// </summary>
-    UriQueryParameter = 0
+    UriQueryParameter = 0,
+
+    /// <summary>
+    /// Uses HttpHeader to set a key/value in a HTTP header.
+    /// </summary>
+    HttpHeader = 1
 };
 
 namespace Transcription

@@ -42,7 +42,8 @@ class CSpxUspRecoEngineAdapter :
     public ISpxServiceProvider,
     public ISpxGenericSite,
     public USP::ISpxUspCallbacks,
-    public ISpxRecoEngineAdapter
+    public ISpxRecoEngineAdapter,
+    public ISpxPropertyBagImpl
 {
 public:
 
@@ -58,6 +59,7 @@ public:
         SPX_INTERFACE_MAP_ENTRY(ISpxUspCallbacks)
         SPX_INTERFACE_MAP_ENTRY(ISpxRecoEngineAdapter)
         SPX_INTERFACE_MAP_ENTRY(ISpxAudioProcessor)
+        SPX_INTERFACE_MAP_ENTRY(ISpxNamedProperties)
     SPX_INTERFACE_MAP_END()
 
 
@@ -102,6 +104,7 @@ private:
     USP::Client& SetUspRegion(const std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client, bool isIntentRegion);
     USP::Client& SetUspRecoMode(const std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
     USP::Client& SetUspAuthentication(const std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
+    USP::Client& SetUserDefinedHttpHeaders(USP::Client& client);
     USP::Client& SetUspProxyInfo(const std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
     USP::Client& SetUspSingleTrustedCert(const std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
     USP::Client& SetUspQueryParameters(const std::vector<std::string>& allowedParameterList, const std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
@@ -238,6 +241,8 @@ private:
     CSpxStringMap GetParametersFromUser(std::string&& path);
 
     USP::MessageType GetMessageType(const std::string& path);
+
+    std::shared_ptr<ISpxNamedProperties> GetParentProperties() const override;
 
 private:
     friend CSpxActivitySession;

@@ -60,7 +60,7 @@ void CSpxSpeechConfig::InitFromSubscription(const char* subscription, const char
     SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Region), region);
 }
 
-void CSpxSpeechConfig::SetServiceProperty(string name, string value, ServicePropertyChannel channel)
+void CSpxSpeechConfig::SetServiceProperty(const string& name, const string& value, ServicePropertyChannel channel)
 {
     // parameters have been validated at C-API.
     if (channel == ServicePropertyChannel::UriQueryParameter)
@@ -76,6 +76,11 @@ void CSpxSpeechConfig::SetServiceProperty(string name, string value, ServiceProp
             currentQueryParameters += "&" + name + "=" + value;
         }
         SetStringValue(propertyNameQueryParameters, currentQueryParameters.c_str());
+    }
+    else if (channel == ServicePropertyChannel::HttpHeader)
+    {
+        auto propertyName = string{ "HttpHeader" } + g_propertyNameSeperator + name;
+        SetStringValue(propertyName.c_str(), value.c_str());
     }
     else
     {

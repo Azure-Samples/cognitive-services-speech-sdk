@@ -154,8 +154,7 @@ static_assert((int)SpeechConfig_ServicePropertyChannel_UriQueryParameter == (int
 SPXAPI speech_config_set_service_property(SPXSPEECHCONFIGHANDLE configHandle, const char* propertyName, const char* propertyValue, SpeechConfig_ServicePropertyChannel channel)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, propertyName == nullptr || propertyName[0] == '\0');
-    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, propertyValue == nullptr || propertyValue[0] == '\0');
-    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, channel != SpeechConfig_ServicePropertyChannel_UriQueryParameter);
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, propertyValue == nullptr || propertyValue[0] == '\0');    
 
     SPXAPI_INIT_HR_TRY(hr)
     {

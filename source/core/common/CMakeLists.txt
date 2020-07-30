@@ -112,6 +112,7 @@ set(SOURCES
     "${SRC_DIR}/web_socket.cpp"
     "${SRC_DIR}/platform_init.cpp"
     "${SRC_DIR}/thread_service.cpp"
+    "${SRC_DIR}/property_bag_impl.cpp"
     )
 
 if(SPEECHSDK_OS STREQUAL "OSX")

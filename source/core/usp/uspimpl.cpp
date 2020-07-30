@@ -708,6 +708,12 @@ void Connection::Impl::Connect()
         }
     }
 
+    for (const auto& header : m_config.m_userDefinedHttpHeaders)
+    {
+        LogInfo("Set a user defined HTTP header '%s':'%s'", header.first.c_str(), header.second.c_str());
+        endpoint.SetHeader(header.first, header.second);
+    }
+
     // TODO ralphe: should probably update the ConstructConnectionUrl to set the scheme, host, path and query parameters
     //              directly on the endpoint instance
     m_connectionUrl = ConstructConnectionUrl();

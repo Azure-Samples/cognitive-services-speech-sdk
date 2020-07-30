@@ -97,5 +97,6 @@ constexpr auto g_dialogType_BotFramework = "bot_framework";
 constexpr auto g_dialogType_CustomCommands = "custom_commands";
 
 constexpr auto g_autoDetectSourceLang_OpenRange = "open_range";
+constexpr auto g_propertyNameSeperator = "#";
 
 }}}}

@@ -1662,6 +1662,30 @@ TEST_CASE("Dictation Corrections", "[api][cxx]")
     auto audioInput = AudioConfig::FromStreamInput(pushStream);
     string endpoint{ "wss://officespeech.platform.bing.com/speech/recognition/dictation/office/v1" };
 
+    SPXTEST_SECTION("send_http_header")
+    {
+        auto config = SpeechConfig::FromEndpoint(endpoint);
+
+        config->EnableDictation();
+        config->SetServiceProperty("Authorization", "FromSpeechConfig", ServicePropertyChannel::HttpHeader);
+        config->SetServiceProperty("Authorization", "FromSpeechConfig2", ServicePropertyChannel::HttpHeader);
+        config->SetServiceProperty("Accept-Language", "en-US", ServicePropertyChannel::HttpHeader);
+
+        auto recognizer = SpeechRecognizer::FromConfig(config, audioInput);
+
+        auto result = make_shared<RecoPhrases>();
+        ConnectCallbacks(recognizer.get(), result);
+        recognizer->StartContinuousRecognitionAsync().get();
+        recognizer->Properties.SetProperty("HttpHeader#Authorization", "fromRecognizer");
+
+        PushData(pushStream.get(), ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
+        WaitForResult(result->ready.get_future(), 60s);
+        recognizer->StopContinuousRecognitionAsync().get();
+
+        SPXTEST_REQUIRE(!result->phrases.empty());
+        SPXTEST_REQUIRE(result->phrases[0].Text.find("weather") != string::npos);
+    }
+
     SPXTEST_SECTION("send_event_without_audio")
     {
         auto config = SpeechConfig::FromEndpoint(endpoint, SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);

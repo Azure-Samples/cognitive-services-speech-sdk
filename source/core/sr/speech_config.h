@@ -42,7 +42,7 @@ public:
     void InitFromEndpoint(const char* endpoint, const char* subscription) override;
     void InitFromHost(const char* host, const char* subscription) override;
     void InitFromSubscription(const char* subscription, const char* region) override;
-    void SetServiceProperty(std::string name, std::string, ServicePropertyChannel channel) override;
+    void SetServiceProperty(const std::string& name, const std::string&, ServicePropertyChannel channel) override;
     void SetProfanity(ProfanityOption profanity) override;
 
     // --- IServiceProvider

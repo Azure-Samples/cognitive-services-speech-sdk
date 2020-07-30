@@ -19,74 +19,15 @@ class ISpxPropertyBagImpl : public ISpxNamedProperties
 {
 public:
     // --- ISpxNamedProperties
-    void Copy(ISpxNamedProperties* from) override
-    {
-        std::unique_lock<std::mutex> lock(m_mutexProperties);
+    void Copy(ISpxNamedProperties* from) override;
 
-        auto p = dynamic_cast<ISpxPropertyBagImpl*>(from);
-        SPX_IFTRUE_THROW_HR(p == nullptr, SPXERR_INVALID_ARG);
+    std::string GetStringValue(const char* name, const char* defaultValue) const override;
 
-        for (const auto& it : p->m_stringPropertyMap)
-        {
-            m_stringPropertyMap.insert(it);
-        }
-    }
+    void SetStringValue(const char* name, const char* value) override;
 
-    std::string GetStringValue(const char* name, const char* defaultValue) const override
-    {
-        std::unique_lock<std::mutex> lock(m_mutexProperties);
+    bool HasStringValue(const char* name) const override;
 
-        SPX_IFTRUE_THROW_HR(name == nullptr, SPXERR_INVALID_ARG);
-        SPX_IFTRUE_THROW_HR(defaultValue == nullptr, SPXERR_INVALID_ARG);
-
-        auto item = m_stringPropertyMap.find(std::string(name));
-        if (item != m_stringPropertyMap.end())
-        {
-            LogPropertyAndValue(name, item->second);
-            return item->second;
-        }
-
-        lock.unlock();
-        auto parentProperties = GetParentProperties();
-        if (parentProperties != nullptr)
-        {
-            return parentProperties->GetStringValue(name, defaultValue);
-        }
-
-        LogPropertyAndValue(name, "");
-        return std::string(defaultValue);
-    }
-
-    void SetStringValue(const char* name, const char* value) override
-    {
-        std::unique_lock<std::mutex> lock(m_mutexProperties);
-        SPX_IFTRUE_THROW_HR(name == nullptr, SPXERR_INVALID_ARG);
-        SPX_IFTRUE_THROW_HR(value == nullptr, SPXERR_INVALID_ARG);
-
-        m_stringPropertyMap[std::string(name)] = value;
-        LogPropertyAndValue(name, value);
-    }
-
-    bool HasStringValue(const char* name) const override
-    {
-        std::unique_lock<std::mutex> lock(m_mutexProperties);
-
-        SPX_IFTRUE_THROW_HR(name == nullptr, SPXERR_INVALID_ARG);
-
-        if (m_stringPropertyMap.find(name) != m_stringPropertyMap.end())
-        {
-            return true;
-        }
-
-        lock.unlock();
-        auto parentProperties = GetParentProperties();
-        if (parentProperties != nullptr)
-        {
-            return parentProperties->HasStringValue(name);
-        }
-
-        return false;
-    }
+    CSpxStringMap FindPrefix(const char* prefix_) const override;
 
 protected:
     virtual std::shared_ptr<ISpxNamedProperties> GetParentProperties() const
@@ -98,26 +39,7 @@ private:
     mutable std::mutex m_mutexProperties;
     std::map<std::string, std::string> m_stringPropertyMap;
 
-    void LogPropertyAndValue(std::string name, std::string value) const
-    {
-        constexpr auto subKeyName = GetPropertyName(PropertyId::SpeechServiceConnection_Key);
-        constexpr auto authTokenName = GetPropertyName(PropertyId::SpeechServiceAuthorization_Token);
-        constexpr auto proxyPassName = GetPropertyName(PropertyId::SpeechServiceConnection_ProxyPassword);
-        constexpr auto proxyUserName = GetPropertyName(PropertyId::SpeechServiceConnection_ProxyUserName);
-        constexpr auto applicationId = GetPropertyName(PropertyId::Conversation_ApplicationId);
-
-        // hide property value for: subscription key, authorization token, conversation secret key/dialog id, proxy password and proxy username
-        if (name == subKeyName || name == authTokenName || name == applicationId)
-        {
-            int l = value.length() > 2 ? 2 : 0;
-            value.replace(value.begin(), value.end()-l, value.length()-l, '*');
-        }
-        if ((name == proxyPassName|| name == proxyUserName) && !value.empty())
-        {
-            value = std::string("set to non-empty string");
-        }
-        SPX_DBG_TRACE_VERBOSE("%s: this=0x%p; name='%s'; value='%s'", __FUNCTION__, (void*)this, name.c_str(), value.c_str());
-    }
+    void LogPropertyAndValue(std::string name, std::string value) const;
 };
 
 
