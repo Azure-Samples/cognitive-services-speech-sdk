@@ -14,8 +14,8 @@ namespace CognitiveServices {
 namespace Speech {
 namespace Impl {
 
-OpusDecoder::OpusDecoder(ISpxAudioStreamReaderInitCallbacks::ReadCallbackFunction_Type readCallback, uint16_t bitsPerSample, uint16_t numChannels, uint32_t sampleRate) :
-    BaseGstreamer(readCallback)
+OpusDecoder::OpusDecoder(ISpxAudioStreamReaderInitCallbacks::ReadCallbackFunction_Type readCallback, BaseGstreamer::BufferType buffer, uint16_t bitsPerSample, uint16_t numChannels, uint32_t sampleRate) :
+    BaseGstreamer(readCallback, buffer)
 {
     m_oggDemux = gst_element_factory_make("oggdemux", "oggdemux");
     ThrowAfterCleanLocal(m_oggDemux == nullptr, SPXERR_GSTREAMER_INTERNAL_ERROR, "Failed **gst_element_factory_make**. Gstreamer oggdemux cannot be created");

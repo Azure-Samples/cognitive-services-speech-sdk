@@ -50,6 +50,8 @@ if(WIN32 AND SPECTRE_MITIGATION)
     set_property(TARGET unidec PROPERTY VS_GLOBAL_SpectreMitigation "Spectre")
 endif()
 
+add_compile_definitions(USE_NON_CORE_ROOT_SITE)
+
 set_target_properties (unidec PROPERTIES
     DEFINE_SYMBOL "SPX_CONFIG_EXPORTAPIS"
     OUTPUT_NAME "Microsoft.CognitiveServices.Speech.extension.embedded.sr"

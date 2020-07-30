@@ -10,6 +10,9 @@
 #include "audio_decoder.h"
 #include "opus_decoder.h"
 
+#include <create_object_helpers.h>
+#include <site_helpers.h>
+
 namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
@@ -40,26 +43,32 @@ void CSpxCodecAdapter::Open(AudioStreamContainerFormat containerFormat, uint16_t
     SPX_IFTRUE_THROW_HR(NULL == gst_fun_ptr, SPXERR_GSTREAMER_NOT_FOUND_ERROR);
 
     gst_init(NULL, NULL);
+
+    auto data = SpxCreateObjectWithSite<ISpxReadWriteBufferInit>("CSpxReadWriteRingBuffer", SpxGetRootSite());
+    data->SetName("CodecBuffer");
+    data->SetSize(BaseGstreamer::BUFFER_32KB * 2);
+    auto buffer = SpxQueryInterface<ISpxReadWriteBuffer>(data);
+
     switch (containerFormat)
     {
     case AudioStreamContainerFormat::OGG_OPUS:
-        m_gstObject = std::make_shared<OpusDecoder>(m_readCallback, bitsPerSample, numChannels, sampleRate);
+        m_gstObject = std::make_shared<OpusDecoder>(m_readCallback, buffer, bitsPerSample, numChannels, sampleRate);
         break;
 
     case AudioStreamContainerFormat::MP3:
-        m_gstObject = std::make_shared<AudioDecoder>(m_readCallback, CodecsTypeInternal::MP3, bitsPerSample, numChannels, sampleRate);
+        m_gstObject = std::make_shared<AudioDecoder>(m_readCallback, buffer, CodecsTypeInternal::MP3, bitsPerSample, numChannels, sampleRate);
         break;
 
     case AudioStreamContainerFormat::FLAC:
-        m_gstObject = std::make_shared<AudioDecoder>(m_readCallback, CodecsTypeInternal::FLAC, bitsPerSample, numChannels, sampleRate);
+        m_gstObject = std::make_shared<AudioDecoder>(m_readCallback, buffer, CodecsTypeInternal::FLAC, bitsPerSample, numChannels, sampleRate);
         break;
 
     case AudioStreamContainerFormat::ALAW:
-        m_gstObject = std::make_shared<AudioDecoder>(m_readCallback, CodecsTypeInternal::ALAW, bitsPerSample, numChannels, sampleRate);
+        m_gstObject = std::make_shared<AudioDecoder>(m_readCallback, buffer, CodecsTypeInternal::ALAW, bitsPerSample, numChannels, sampleRate);
         break;
 
     case AudioStreamContainerFormat::MULAW:
-        m_gstObject = std::make_shared<AudioDecoder>(m_readCallback, CodecsTypeInternal::MULAW, bitsPerSample, numChannels, sampleRate);
+        m_gstObject = std::make_shared<AudioDecoder>(m_readCallback, buffer, CodecsTypeInternal::MULAW, bitsPerSample, numChannels, sampleRate);
         break;
 
     case AudioStreamContainerFormat::AMRNB:

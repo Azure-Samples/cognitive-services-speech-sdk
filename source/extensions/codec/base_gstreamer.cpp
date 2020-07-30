@@ -14,7 +14,9 @@ namespace CognitiveServices {
 namespace Speech {
 namespace Impl {
 
-BaseGstreamer::BaseGstreamer(ISpxAudioStreamReaderInitCallbacks::ReadCallbackFunction_Type readCallback)
+BaseGstreamer::BaseGstreamer(ISpxAudioStreamReaderInitCallbacks::ReadCallbackFunction_Type readCallback, BufferType buffer):
+    m_readCallback{ readCallback },
+    m_buffer{ buffer }
 {
     spx_gst_init();
 
@@ -30,7 +32,6 @@ BaseGstreamer::BaseGstreamer(ISpxAudioStreamReaderInitCallbacks::ReadCallbackFun
     ThrowAfterClean(m_bufferSink == nullptr, SPXERR_GSTREAMER_INTERNAL_ERROR, "Failed **gst_element_factory_make**. Gstreamer appsink cannot be created");
 
     m_this = this;
-    m_readCallback = readCallback;
 
     ThrowAfterClean(g_signal_connect(m_bufferSource, "need-data", G_CALLBACK(StartFeed), this) <= 0,
         SPXERR_GSTREAMER_INTERNAL_ERROR,
@@ -39,8 +40,6 @@ BaseGstreamer::BaseGstreamer(ISpxAudioStreamReaderInitCallbacks::ReadCallbackFun
     ThrowAfterClean(g_signal_connect(m_bufferSink, "new-sample", G_CALLBACK(NewSamples), this) <= 0,
         SPXERR_GSTREAMER_INTERNAL_ERROR,
         "Failed **g_signal_connect**. Gstreamer appsink new-sample callback registration failed");
-
-    m_ringBuffer = std::make_shared<RingBuffer>();
 }
 
 BaseGstreamer::~BaseGstreamer()
@@ -222,9 +221,7 @@ GstFlowReturn BaseGstreamer::NewSamples(GstElement *sink, BaseGstreamer *data)
                     {
                         if (gst_buffer_map(buffer, &map, GST_MAP_READ))
                         {
-                            SpxSharedAudioBuffer_Type sharedmem = SpxAllocSharedAudioBuffer((size_t)map.size);
-                            memcpy(sharedmem.get(), map.data, map.size);
-                            obj->m_ringBuffer->AddBuffer(std::make_shared<DataChunk>(sharedmem, (uint32_t)map.size));
+                            obj->m_buffer->Write(map.data, static_cast<uint32_t>(map.size));
                             ret = GST_FLOW_OK;
                             gst_buffer_unmap(buffer, &map);
                         }
@@ -319,7 +316,11 @@ void BaseGstreamer::StartFeed(GstElement *source, guint size, BaseGstreamer *dat
     (void)size;
     while (1)
     {
-        if (data->m_ringBuffer->GetCurrentSize() < BUFFER_32KB)
+        auto& buffer = data->m_buffer;
+        auto readPos = buffer->GetReadPos();
+        auto writePos = buffer->GetWritePos();
+        auto avail = buffer->GetSize() - (writePos - readPos);
+        if (avail > (2 * CHUNK_SIZE))
         {
             PushData(data);
             break;
@@ -333,7 +334,9 @@ void BaseGstreamer::StartFeed(GstElement *source, guint size, BaseGstreamer *dat
 
 uint32_t BaseGstreamer::Read(uint8_t* buffer, uint32_t bytesToRead)
 {
-    return m_ringBuffer->GetData(buffer, bytesToRead);
+    size_t bytesRead{};
+    m_buffer->Read(buffer, bytesToRead, &bytesRead);
+    return static_cast<uint32_t>(bytesRead);
 }
 
 } } } } // Microsoft::CognitiveServices::Speech::Impl

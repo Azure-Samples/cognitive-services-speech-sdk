@@ -14,8 +14,8 @@ namespace CognitiveServices {
 namespace Speech {
 namespace Impl {
 
-AudioDecoder::AudioDecoder(ISpxAudioStreamReaderInitCallbacks::ReadCallbackFunction_Type readCallback, CodecsTypeInternal codecType, uint16_t bitsPerSample, uint16_t numChannels, uint32_t sampleRate) :
-    BaseGstreamer(readCallback)
+AudioDecoder::AudioDecoder(ISpxAudioStreamReaderInitCallbacks::ReadCallbackFunction_Type readCallback, BaseGstreamer::BufferType buffer, CodecsTypeInternal codecType, uint16_t bitsPerSample, uint16_t numChannels, uint32_t sampleRate) :
+    BaseGstreamer(readCallback, buffer)
 {
 
     std::vector<std::string> pluginNames;
@@ -47,13 +47,13 @@ AudioDecoder::AudioDecoder(ISpxAudioStreamReaderInitCallbacks::ReadCallbackFunct
         SPX_IFTRUE_THROW_HR(true, SPXERR_CONTAINER_FORMAT_NOT_SUPPORTED_ERROR);
         break;
     }
-    
+
     // m_gstElementQueue is a queue of GstElement* which holds the gstreamer pipeline from Source to Sink element
     // In the following code we parse the plugin names from pluginNames one by one and using gst_element_factory_make
     // we create GstElement and put it into m_gstElementQueue. We use the C++ iterator to parse from the begining of the
     // queue to the end of the queue.
     m_gstElementQueue.push_back(GetBaseElement(ElementType::Source));
-    
+
     for (std::vector <std::string> ::iterator i = pluginNames.begin(); i < pluginNames.end(); i++)
     {
         GstElement *temp = gst_element_factory_make(i->c_str(), i->c_str());

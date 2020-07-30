@@ -153,6 +153,8 @@ if(WIN32 AND SPECTRE_MITIGATION)
     set_property(TARGET codec PROPERTY VS_GLOBAL_SpectreMitigation "Spectre")
 endif()
 
+add_compile_definitions(USE_NON_CORE_ROOT_SITE)
+
 target_include_directories(codec PRIVATE ${GST_INCLUDE_DIRS})
 target_link_libraries(codec PRIVATE interfaces)
 if(SPEECHSDK_OS MATCHES "^IOS")

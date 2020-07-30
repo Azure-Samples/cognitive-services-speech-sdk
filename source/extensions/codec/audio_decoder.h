@@ -16,7 +16,7 @@ namespace Impl {
 class AudioDecoder : public BaseGstreamer
 {
 public:
-    AudioDecoder(ISpxAudioStreamReaderInitCallbacks::ReadCallbackFunction_Type readCallback, CodecsTypeInternal codecType, uint16_t bitsPerSample, uint16_t numChannels, uint32_t sampleRate);
+    AudioDecoder(ISpxAudioStreamReaderInitCallbacks::ReadCallbackFunction_Type readCallback, BaseGstreamer::BufferType buffer, CodecsTypeInternal codecType, uint16_t bitsPerSample, uint16_t numChannels, uint32_t sampleRate);
     virtual ~AudioDecoder();
 
 private:

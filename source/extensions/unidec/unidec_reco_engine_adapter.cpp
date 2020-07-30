@@ -14,9 +14,10 @@
 #include "guid_utils.h"
 #include "handle_table.h"
 #include "service_helpers.h"
-#include "ring_buffer.h"
 #include "property_id_2_name_map.h"
 #include "file_utils.h"
+#include <create_object_helpers.h>
+#include <site_helpers.h>
 
 #include "json.h"
 
@@ -29,17 +30,19 @@ namespace Speech {
 namespace Impl {
 
 
-const unsigned long c_ringBufferSize = (16000 * 16 * 1 * 1) / 8; // 1sec of 16bit 16kHz data
+const unsigned long c_ringBufferSize = (16000 * 16 * 1 * 30) / 8; // 1sec of 16bit 16kHz data
 const std::wstring c_modelsPath = L"%MODELSPATH%";
 
 CSpxUnidecRecoEngineAdapter::CSpxUnidecRecoEngineAdapter() :
-    m_ringBuffer(nullptr),
     m_stopImmediately(false),
     m_sentenceEndDetected(false),
     m_singleShot(false)
 {
     SPX_DBG_TRACE_VERBOSE_IF(SPX_DBG_TRACE_UNIDEC_AUDIO, __FUNCTION__);
-    m_ringBuffer = std::make_shared<RingBuffer>();
+    auto data = SpxCreateObjectWithSite<ISpxReadWriteBufferInit>("CSpxReadWriteRingBuffer", SpxGetRootSite());
+    data->SetName("CodecBuffer");
+    data->SetSize(c_ringBufferSize);
+    m_buffer = SpxQueryInterface<ISpxReadWriteBuffer>(data);
 }
 
 CSpxUnidecRecoEngineAdapter::~CSpxUnidecRecoEngineAdapter()
@@ -267,7 +270,7 @@ void CSpxUnidecRecoEngineAdapter::FlushBuffers()
 {
     SPX_DBG_TRACE_VERBOSE_IF(SPX_DBG_TRACE_UNIDEC_AUDIO, "CSpxUnidecRecoEngineAdapter::FlushBuffers enter");
     m_audioBuffer.clear();
-    m_ringBuffer->ReleaseBuffers();
+    m_buffer->ResetReadPos();
     SPX_DBG_TRACE_VERBOSE_IF(SPX_DBG_TRACE_UNIDEC_AUDIO, "CSpxUnidecRecoEngineAdapter::FlushBuffers exit");
 }
 
@@ -484,9 +487,7 @@ void CSpxUnidecRecoEngineAdapter::AudioBufferWrite(std::shared_ptr<uint8_t> buff
     SPX_DBG_TRACE_VERBOSE_IF(SPX_DBG_TRACE_UNIDEC_AUDIO, "CSpxUnidecRecoEngineAdapter::AudioBufferWrite enter, size=%d", size);
     std::unique_lock<std::mutex> lock(m_mutex);
 
-    SpxSharedAudioBuffer_Type sharedmem = SpxAllocSharedAudioBuffer(size);
-    memcpy(sharedmem.get(), buffer.get(), size);
-    m_ringBuffer->AddBuffer(std::make_shared<DataChunk>(sharedmem, (uint32_t)size));
+    m_buffer->Write(buffer.get(), size);
 
     SPX_DBG_TRACE_VERBOSE_IF(SPX_DBG_TRACE_UNIDEC_AUDIO, "CSpxUnidecRecoEngineAdapter::AudioBufferWrite exit");
 }
@@ -501,7 +502,8 @@ size_t CSpxUnidecRecoEngineAdapter::AudioBufferRead(uint8_t* buffer, size_t requ
     {
         size_t readBufferSize = requestedSize - m_audioBuffer.size();
         SpxSharedAudioBuffer_Type sharedmem = SpxAllocSharedAudioBuffer(readBufferSize);
-        uint32_t bytesReturned = m_ringBuffer->GetData(sharedmem.get(), (uint32_t)readBufferSize);
+        size_t bytesReturned{};
+        m_buffer->Read(sharedmem.get(), readBufferSize, &bytesReturned);
         if (bytesReturned > 0)
         {
             m_audioBuffer.insert(m_audioBuffer.end(), &sharedmem.get()[0], &sharedmem.get()[bytesReturned]);

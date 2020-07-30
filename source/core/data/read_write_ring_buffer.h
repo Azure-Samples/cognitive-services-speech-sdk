@@ -80,7 +80,7 @@ private:
 
 private:
 
-    std::mutex m_mutex;
+    mutable std::mutex m_mutex;
 
     size_t m_ringSize;
     std::string m_ringName;

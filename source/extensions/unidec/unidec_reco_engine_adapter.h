@@ -104,9 +104,9 @@ private:
 
 private:
 
-    std::shared_ptr<RingBuffer> m_ringBuffer;
+    std::shared_ptr<ISpxReadWriteBuffer> m_buffer;
     std::vector<unsigned char> m_audioBuffer;
-    
+
     bool m_endOfStream = false;
     bool m_turnStarted = false;
 

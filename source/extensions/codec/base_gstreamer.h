@@ -8,7 +8,6 @@
 #pragma once
 #include <gst/gst.h>
 #include "ispxinterfaces.h"
-#include "ring_buffer.h"
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -43,7 +42,11 @@ enum class CodecsTypeInternal
 class BaseGstreamer
 {
 public:
-    BaseGstreamer(ISpxAudioStreamReaderInitCallbacks::ReadCallbackFunction_Type readCallback);
+    using BufferType = std::shared_ptr<ISpxReadWriteBuffer>;
+    static constexpr uint32_t CHUNK_SIZE = 512;
+    static constexpr uint32_t BUFFER_32KB = 32*1024;
+
+    BaseGstreamer(ISpxAudioStreamReaderInitCallbacks::ReadCallbackFunction_Type readCallback, BufferType buffer);
     virtual ~BaseGstreamer();
 
     void StartReader();
@@ -67,10 +70,8 @@ private:
     GstBus *m_bus = nullptr;
 
     ISpxAudioStreamReaderInitCallbacks::ReadCallbackFunction_Type m_readCallback;
-    static const uint32_t CHUNK_SIZE = 512;
-    static const uint32_t BUFFER_32KB = 32*1024;
     void *m_this;
-    std::shared_ptr<RingBuffer> m_ringBuffer = nullptr;
+    BufferType m_buffer{};
     std::string m_gstErrorString;
     bool m_bErrorInsideGstreamer = false;
     std::mutex m_mtx;

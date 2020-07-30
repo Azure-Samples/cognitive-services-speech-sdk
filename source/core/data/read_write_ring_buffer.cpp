@@ -102,7 +102,7 @@ void CSpxReadWriteRingBuffer::Term()
 /// <remarks>LOCK REQUIRED to guard multithreaded access; ThrowsException if not already initialized. </remarks>
 size_t CSpxReadWriteRingBuffer::GetSize() const
 {
-    std::unique_lock<std::mutex> lock(const_cast<CSpxReadWriteRingBuffer*>(this)->m_mutex);
+    std::unique_lock<std::mutex> lock{ m_mutex };
     ThrowExceptionIfNotInitialized();
 
     return m_ringSize;
@@ -114,7 +114,7 @@ size_t CSpxReadWriteRingBuffer::GetSize() const
 /// <remarks>LOCK REQUIRED to guard multithreaded access; ThrowsException if not already initialized. </remarks>
 uint64_t CSpxReadWriteRingBuffer::GetInitPos() const
 {
-    std::unique_lock<std::mutex> lock(const_cast<CSpxReadWriteRingBuffer*>(this)->m_mutex);
+    std::unique_lock<std::mutex> lock{ m_mutex };
     ThrowExceptionIfNotInitialized();
 
     return m_initPos;
@@ -126,7 +126,7 @@ uint64_t CSpxReadWriteRingBuffer::GetInitPos() const
 /// <remarks>LOCK REQUIRED to guard multithreaded access; ThrowsException if not already initialized. </remarks>
 std::string CSpxReadWriteRingBuffer::GetName() const
 {
-    std::unique_lock<std::mutex> lock(const_cast<CSpxReadWriteRingBuffer*>(this)->m_mutex);
+    std::unique_lock<std::mutex> lock{ m_mutex };
     return m_ringName;
 }
 
@@ -139,7 +139,7 @@ std::string CSpxReadWriteRingBuffer::GetName() const
 /// </remarks>
 void CSpxReadWriteRingBuffer::Write(const void* data, size_t dataSizeInBytes, size_t* bytesWritten)
 {
-    std::unique_lock<std::mutex> lock(m_mutex);
+    std::unique_lock<std::mutex> lock{ m_mutex };
     ThrowExceptionIfNotInitialized();
 
     EnsureSpaceToWrite(&dataSizeInBytes, bytesWritten);
@@ -153,7 +153,7 @@ void CSpxReadWriteRingBuffer::Write(const void* data, size_t dataSizeInBytes, si
 /// <remarks>LOCK REQUIRED to guard multithreaded access. ThrowsException if not already initialized.</remarks>
 uint64_t CSpxReadWriteRingBuffer::GetWritePos() const
 {
-    std::unique_lock<std::mutex> lock(const_cast<CSpxReadWriteRingBuffer*>(this)->m_mutex);
+    std::unique_lock<std::mutex> lock{ m_mutex };
     ThrowExceptionIfNotInitialized();
 
     return m_writePos;
@@ -183,7 +183,7 @@ void CSpxReadWriteRingBuffer::Read(void* data, size_t dataSizeInBytes, size_t* b
 /// <remarks>LOCK REQUIRED to guard multithreaded access. ThrowsException if not already initialized.</remarks>
 uint64_t CSpxReadWriteRingBuffer::GetReadPos() const
 {
-    std::unique_lock<std::mutex> lock(const_cast<CSpxReadWriteRingBuffer*>(this)->m_mutex);
+    std::unique_lock<std::mutex> lock{ m_mutex };
     ThrowExceptionIfNotInitialized();
 
     return m_readPos;
