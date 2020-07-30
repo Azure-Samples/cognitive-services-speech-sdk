@@ -5,16 +5,26 @@
 
 #include <inttypes.h>
 #include <sstream>
+#include <stdio.h>
 #include <iomanip>
+#include <cmath>
 #include "time_utils.h"
 
 using namespace std::chrono;
 
 namespace PAL
 {
-    std::string GetTimeInString(const system_clock::time_point& t)
+    constexpr uint8_t MAX_MILLISECOND_DIGITS = 7;
+
+    std::string GetTimeInString(const system_clock::time_point& t, uint8_t milliSecondDigits)
     {
+        if (milliSecondDigits > MAX_MILLISECOND_DIGITS)
+        {
+            throw std::invalid_argument("Millisecond precision must be between 0 and 7 digits (inclusive)");
+        }
+
         constexpr size_t length = 128;
+        char precision[] = ".%00" PRIu64 "Z";
         char buffer[length];
         time_t rawtime;
         struct tm timeinfo;
@@ -26,18 +36,30 @@ namespace PAL
         gmtime_r(&rawtime, &timeinfo);
 #endif
 
-        size_t bytesWritten = strftime(buffer, length, "%FT%T.", &timeinfo);
+        size_t bytesWritten = strftime(buffer, length, "%FT%T", &timeinfo);
         if (bytesWritten == 0)
         {
             return "";
         }
 
-        uint64_t subSecondPeriods = t.time_since_epoch().count() * system_clock::period::num % system_clock::period::den;
-        uint64_t ticks = subSecondPeriods * 10000000 * system_clock::period::num / system_clock::period::den;
-        int ret = snprintf(buffer + bytesWritten, length - bytesWritten, "%07" PRIu64 "Z", ticks);
-        if (ret < 0)
+        if (milliSecondDigits > 0)
         {
-            return "";
+            uint64_t subSecondPeriods = t.time_since_epoch().count() * system_clock::period::num % system_clock::period::den;
+            uint64_t ticks = subSecondPeriods * 10000000 * system_clock::period::num / system_clock::period::den;
+
+            // TODO ralphe: should round here instead of truncating?
+            uint64_t truncatedTicks = ticks / static_cast<uint64_t>(std::pow(10, (MAX_MILLISECOND_DIGITS - milliSecondDigits)));
+            precision[3] = static_cast<char>(milliSecondDigits) + '0';
+            
+            int ret = snprintf(buffer + bytesWritten, length - bytesWritten, precision, truncatedTicks);
+            if (ret < 0)
+            {
+                return "";
+            }
+        }
+        else
+        {
+            bytesWritten += snprintf(buffer + bytesWritten, length - bytesWritten, "Z");
         }
 
         return buffer;

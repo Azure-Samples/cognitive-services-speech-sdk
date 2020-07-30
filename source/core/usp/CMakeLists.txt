@@ -7,6 +7,9 @@ set(HEADERS
     "${INC_DIR}/usp.h"
     "${INC_DIR}/usperror.h"
     "${INC_DIR}/uspmessages.h"
+    "${INC_DIR}/usp_message.h"
+    "${INC_DIR}/usp_text_message.h"
+    "${INC_DIR}/usp_binary_message.h"
     )
 
 set(HEADERS_PRIVATE
@@ -15,6 +18,7 @@ set(HEADERS_PRIVATE
     "${SRC_DIR}/usp_metrics.h"
     "${SRC_DIR}/stdafx.h"
     "${SRC_DIR}/usp_web_socket.h"
+    "${SRC_DIR}/usp_constants.h"
     )
 
 set(SOURCES
@@ -22,6 +26,9 @@ set(SOURCES
     "${SRC_DIR}/usp.cpp"
     "${SRC_DIR}/uspimpl.cpp"
     "${SRC_DIR}/usp_web_socket.cpp"
+    "${SRC_DIR}/usp_message.cpp"
+    "${SRC_DIR}/usp_text_message.cpp"
+    "${SRC_DIR}/usp_binary_message.cpp"
     )
 
 set_source_groups()

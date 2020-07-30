@@ -15,6 +15,8 @@
 #include <cstring>
 #include <sstream>
 #include <chrono>
+#include <usp_text_message.h>
+#include <usp_binary_message.h>
 #include "service_helpers.h"
 #include "create_object_helpers.h"
 #include "exception.h"
@@ -59,7 +61,15 @@ void CSpxUspRecoEngineAdapter::Init()
     SPX_IFTRUE_THROW_HR(m_uspConnection != nullptr, SPXERR_ALREADY_INITIALIZED);
     SPX_IFTRUE_THROW_HR(m_uspCallbacks != nullptr, SPXERR_ALREADY_INITIALIZED);
     m_message_name_to_type_map =
-    { {"speech.event", USP::MessageType::SpeechEvent}, {"event", USP::MessageType::Event}, {"speech.context", USP::MessageType::Context}, {"speech.config", USP::MessageType::Config}, {"speech.agent", USP::MessageType::Agent}, {"speech.agentcontext", USP::MessageType::AgentContext}, {"ssml", USP::MessageType::Ssml} };
+    {
+        { "speech.event", USP::MessageType::SpeechEvent },
+        { "event", USP::MessageType::Event },
+        { "speech.context", USP::MessageType::Context },
+        { "speech.config", USP::MessageType::Config },
+        { "speech.agent", USP::MessageType::Agent },
+        { "speech.agentcontext", USP::MessageType::AgentContext },
+        { "ssml", USP::MessageType::Ssml }
+    };
 
     SPX_DBG_ASSERT(IsState(AudioState::Idle) && IsState(UspState::Idle));
 }
@@ -196,12 +206,14 @@ std::future<bool> CSpxUspRecoEngineAdapter::SendNetworkMessage(std::string&& pat
 {
     // Establish the connection to service.
     EnsureUspInit();
+
     // for some reason, no connection is established
     if (m_uspConnection == nullptr || IsState(UspState::Error))
     {
         ThrowRuntimeError("No usp connection.");
     }
-    return UspSendMessage(path, payload.data(), payload.size(), GetMessageType(path), true); // true for a binary message.
+
+    return UspSendMessage(std::make_unique<USP::BinaryMessage>(move(payload), path, GetMessageType(path)));
 }
 
 void CSpxUspRecoEngineAdapter::SetFormat(const SPXWAVEFORMATEX* pformat)
@@ -1032,7 +1044,9 @@ void CSpxUspRecoEngineAdapter::UspSendSpeechConfig()
 {
     constexpr auto messagePath = "speech.config";
     SPX_DBG_TRACE_VERBOSE("%s %s", messagePath, m_speechConfig.c_str());
-    UspSendMessage(messagePath, m_speechConfig, USP::MessageType::Config);
+    UspSendMessage(
+        std::make_unique<USP::TextMessage>(
+            m_speechConfig, messagePath, "application/json", USP::MessageType::Config));
 }
 
 void CSpxUspRecoEngineAdapter::UspSendAgentConfig()
@@ -1107,10 +1121,10 @@ void CSpxUspRecoEngineAdapter::UspSendSpeechContext()
 std::future<bool> CSpxUspRecoEngineAdapter::UspSendMessage(const std::string& messagePath, const std::string &buffer, USP::MessageType messageType)
 {
     SPX_DBG_TRACE_VERBOSE("%s='%s'", messagePath.c_str(), buffer.c_str());
-    return UspSendMessage(messagePath, (const uint8_t*)buffer.c_str(), buffer.length(), messageType);
+    return UspSendMessage(std::make_unique<USP::TextMessage>(buffer, messagePath, messageType));
 }
 
-std::future<bool> CSpxUspRecoEngineAdapter::UspSendMessage(const std::string& messagePath, const uint8_t* buffer, size_t size, USP::MessageType messageType, bool binary)
+std::future<bool> CSpxUspRecoEngineAdapter::UspSendMessage(std::unique_ptr<USP::Message> message)
 {
     SPX_DBG_ASSERT(m_uspConnection != nullptr || IsState(UspState::Terminating) || IsState(UspState::Zombie));
     if (IsBadState() || m_uspConnection == nullptr)
@@ -1124,7 +1138,10 @@ std::future<bool> CSpxUspRecoEngineAdapter::UspSendMessage(const std::string& me
 
         return GetFalseFuture();
     }
-    return m_uspConnection->SendMessage(messagePath, buffer, size, messageType, "", binary); //"" is a requestId.
+
+    auto future = message->MessageSent();
+    m_uspConnection->SendMessage(move(message));
+    return future;
 }
 
 std::future<bool> CSpxUspRecoEngineAdapter::GetFalseFuture()

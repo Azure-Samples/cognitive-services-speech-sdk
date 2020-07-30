@@ -28,6 +28,7 @@
 // #include "azure_c_shared_utility/audio_sys.h"
 
 #include "usp.h"
+#include <usp_binary_message.h>
 
 #define UNUSED(x) (void)(x)
 
@@ -452,12 +453,10 @@ int main(int argc, char* argv[])
     }
     else
     {
-        vector<char> msgBuffer;
-        msgBuffer.resize(fileSize);
-        input.read(msgBuffer.data(), fileSize);
-        auto bytesToWrite = static_cast<size_t>(input.gcount());
-        connection->SendMessage(inputMessagePath.c_str(), reinterpret_cast<uint8_t*>(msgBuffer.data()), bytesToWrite, USP::MessageType::Agent);
-        totalBytesWritten += bytesToWrite;
+        auto message = std::make_unique<USP::BinaryMessage> (fileSize, inputMessagePath, USP::MessageType::Unknown);
+        input.read(reinterpret_cast<char*>(message->Data()), fileSize);
+        totalBytesWritten += message->Size();
+        connection->SendMessage(std::move(message));
     }
 
     if (totalBytesWritten != fileSize)

@@ -121,7 +121,7 @@ private:
     void UspSendSpeechEvent();
     void UspSendSpeechAgentContext();
     std::future<bool> UspSendMessage(const std::string& messagePath, const std::string &buffer, USP::MessageType messageType);
-    std::future<bool> UspSendMessage(const std::string& messagePath, const uint8_t* buffer, size_t size, USP::MessageType messageType, bool binary=false);
+    std::future<bool> UspSendMessage(std::unique_ptr<USP::Message> message);
     std::future<bool> GetFalseFuture();
     void UspWriteActual(const DataChunkPtr& audioChunk);
     void FlushAudio(bool flushCodec = false);

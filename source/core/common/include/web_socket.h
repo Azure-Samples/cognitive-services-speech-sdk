@@ -46,28 +46,13 @@ namespace USP {
 
         void SendTextData(const std::string& text) override;
         void SendBinaryData(const uint8_t *data, const size_t size) override;
+        void SendData(std::unique_ptr<IWebSocketMessage> message) override;
 
         virtual WebSocketState GetState() const override { return m_state.load(); }
 
         Impl::event<WebSocketState, WebSocketState> OnStateChanged;
 
     protected:
-        struct TransportPacket
-        {
-            inline TransportPacket(uint8_t msgtype, uint8_t wstype, size_t buffer_size, std::promise<bool>&& send_promise = std::promise<bool>())
-                : msgtype{ msgtype }, wstype{ wstype }, length{ buffer_size }, buffer{ std::make_unique<uint8_t[]>(buffer_size) }, sent{ std::move(send_promise) }
-            {}
-
-            TransportPacket(const TransportPacket&) = delete;
-            TransportPacket(TransportPacket&&) = default;
-
-            uint8_t                    msgtype;
-            uint8_t                    wstype;
-            size_t                     length;
-            std::unique_ptr<uint8_t[]> buffer;
-            std::promise<bool>         sent;
-        };
-
         /// <summary>
         /// Parses HTTP headers from the specified buffer. It interprets the first : as the separator between the header
         /// name, and the value
@@ -113,8 +98,8 @@ namespace USP {
 
         virtual int Connect();
 
-        virtual void QueuePacket(std::unique_ptr<TransportPacket> packet);
-        virtual int SendPacket(std::unique_ptr<TransportPacket> packet);
+        virtual void QueueMessage(std::unique_ptr<IWebSocketMessage> message);
+        virtual int SendMessage(std::unique_ptr<IWebSocketMessage> message);
 
         virtual void HandleConnected();
         virtual void HandleDisconnected(WebSocketDisconnectReason reason, const std::string& cause, bool serverRequested);
@@ -122,7 +107,7 @@ namespace USP {
         virtual void HandleBinaryData(const uint8_t* data, const size_t size);
         virtual void HandleError(WebSocketError reason, int errorCode, const std::string& errorMessage);
         virtual void HandleWebSocketStateChanged(WebSocketState oldState, WebSocketState newState);
-        virtual void HandleWebSocketFrameSent(TransportPacket* packet, WS_SEND_FRAME_RESULT result);
+        virtual void HandleWebSocketFrameSent(IWebSocketMessage* message, WS_SEND_FRAME_RESULT result);
 
     private:
         DISABLE_DEFAULT_CTORS(WebSocket);
@@ -154,7 +139,7 @@ namespace USP {
         Impl::HttpEndpointInfo::Internals m_webSocketEndpoint;
         UWS_CLIENT_HANDLE m_WSHandle;
         std::atomic<WebSocketState> m_state;
-        std::queue<std::unique_ptr<TransportPacket>> m_queue;
+        std::queue<std::unique_ptr<IWebSocketMessage>> m_queue;
         std::mutex m_queue_lock;
 };
 

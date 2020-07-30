@@ -88,13 +88,9 @@ public:
 
     /**
     * Adds a message to the outgoing queue.
-    * @param path The path associated with the message being sent.
-    * @param data The message payload.
-    * @param size The length of the message in bytes.
-    * @param messageType The type of message to be sent.
-    * @param requestId The request ID of this turn.
+    * @param message The message being sent.
     */
-    std::future<bool> QueueMessage(const std::string& path, const uint8_t* data, size_t size, MessageType messageType, const std::string& requestId, bool binary = false);
+    void QueueMessage(std::unique_ptr<USP::Message> message);
 
     /**
     * Writes latency value into telemetry data.
@@ -144,7 +140,7 @@ private:
     std::shared_ptr<UspWebSocket> m_transport;
     const uint64_t m_creationTime;
 
-    void OnTelemetryData(const uint8_t* buffer, size_t bytesToWrite, const char *requestId);
+    void OnTelemetryData(std::string&& data, const std::string& requestId);
     void OnTransportOpened();
     void OnTransportClosed(WebSocketDisconnectReason reason, const std::string& details, bool serverRequested);
     void OnTransportError(WebSocketError reason, int errorCode, const std::string& errorString);

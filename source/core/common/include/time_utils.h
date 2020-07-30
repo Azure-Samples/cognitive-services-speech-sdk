@@ -10,7 +10,7 @@
 
 namespace PAL
 {
-    std::string GetTimeInString(const std::chrono::system_clock::time_point& t);
+    std::string GetTimeInString(const std::chrono::system_clock::time_point& t, uint8_t milliSecondDigits = 7);
     uint64_t GetTicks(const std::chrono::system_clock::duration& t);
 
     /// <summary>

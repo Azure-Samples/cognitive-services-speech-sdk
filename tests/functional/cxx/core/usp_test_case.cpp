@@ -15,6 +15,7 @@
 #include "site_helpers.h"
 #include "usp.h"
 #include "guid_utils.h"
+#include "usp_binary_message.h"
 
 using namespace std;
 using namespace Microsoft::CognitiveServices::Speech;
@@ -322,4 +323,24 @@ TEST_CASE("Port specification", "[usp]")
 
         REQUIRE_THROWS_WITH(client.Connect(), "Port is not valid");
     }
+}
+
+TEST_CASE("USP binary message serialization optimisation", "[usp][binary_message]")
+{
+    std::string original("This is a short test");
+    USP::BinaryMessage msg(original.length() + 1, "ralph.test", USP::MessageType::Config, PAL::ToString(PAL::CreateGuidWithoutDashes()));
+    memcpy(msg.Data(), original.c_str(), original.length() + 1);
+
+    uint8_t* ptrData = msg.Data();
+    REQUIRE(ptrData != nullptr);
+    REQUIRE(ptrData[0] == 'T');
+
+    std::shared_ptr<uint8_t> serialized;
+    size_t bytes = msg.Serialize(serialized);
+    (void)bytes;
+
+    ptrData = msg.Data();
+
+    std::string afterSerialization(reinterpret_cast<char*>(ptrData), original.length());
+    REQUIRE(original == afterSerialization);
 }

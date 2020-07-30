@@ -6,6 +6,7 @@
 //
 
 #include "stdafx.h"
+#include <usp_text_message.h>
 #include "synthesis_helper.h"
 #include "usp_tts_engine_adapter.h"
 #include "create_object_helpers.h"
@@ -237,7 +238,8 @@ void CSpxUspTtsEngineAdapter::UspSendSpeechConfig()
 {
     constexpr auto messagePath = "speech.config";
     SPX_DBG_TRACE_VERBOSE("%s %s", messagePath, m_speechConfig.c_str());
-    UspSendMessage(messagePath, m_speechConfig, USP::MessageType::Config);
+
+    UspSendMessage(std::make_unique<USP::TextMessage>(m_speechConfig, messagePath, USP::MessageType::Config));
 }
 
 void CSpxUspTtsEngineAdapter::UspSendSynthesisContext(const std::string& requestId)
@@ -254,29 +256,82 @@ void CSpxUspTtsEngineAdapter::UspSendSynthesisContext(const std::string& request
 
     synthesisContext["synthesis"]["language"]["autoDetection"] = CSpxSynthesisHelper::LanguageAutoDetectionEnabled(properties);
 
-    UspSendMessage(messagePath, synthesisContext.dump(), USP::MessageType::Context, requestId);
+    UspSendMessage(
+        std::make_unique<USP::TextMessage>(
+            synthesisContext.dump(), messagePath, USP::MessageType::Context, requestId));
 }
 
 void CSpxUspTtsEngineAdapter::UspSendSsml(const std::string& ssml, const std::string& requestId)
 {
     constexpr auto messagePath = "ssml";
+    constexpr auto contentType = "application/ssml+xml";
+
     SPX_DBG_TRACE_VERBOSE("%s %s", messagePath, ssml.c_str());
-    UspSendMessage(messagePath, ssml, USP::MessageType::Ssml, requestId);
+
+    UspSendMessage(
+        std::make_unique<USP::TextMessage>(
+            ssml, messagePath, contentType, USP::MessageType::Ssml, requestId));
 }
 
-void CSpxUspTtsEngineAdapter::UspSendMessage(const std::string& messagePath, const std::string &buffer, USP::MessageType messageType, const std::string& requestId)
+void CSpxUspTtsEngineAdapter::UspSendMessage(std::unique_ptr<USP::TextMessage> message)
 {
-    SPX_DBG_TRACE_VERBOSE("%s='%s'", messagePath.c_str(), buffer.c_str());
-    std::packaged_task<void()> task([=]() { DoSendMessageWork(m_uspConnection, messagePath, buffer, messageType, requestId); });
+    if (message == nullptr)
+    {
+        SPX_TRACE_WARNING("Received a null message to send. Ignoring");
+        return;
+    }
+
+    SPX_DBG_TRACE_VERBOSE("%s='%s'", message->Path().c_str(), message->Data().c_str());
+
+    // NOTE:
+    // -----
+    // There is a bug in the Microsoft C++ compiler that prevents from creating a packaged_task
+    // from a move only lambda: https://github.com/microsoft/STL/issues/321
+    // To work around this, we'll need to pass a raw pointer (icky I know)
+
+#if _MSC_VER <= 1926
+    USP::TextMessage* ptr = nullptr;
+    try
+    {
+        ptr = message.release();
+
+        // NOTE: If the following code doesn't compile complaining about a deleted method call, increment the #IF version check value in line 292
+        std::packaged_task<void()> task([=]()
+        {
+            DoSendMessageWork(m_uspConnection, std::unique_ptr<USP::TextMessage>(ptr));
+        });
+        m_threadService->ExecuteAsync(move(task));
+
+        // successfully queued so no need to free it
+        // WARNING: There is still the potential of a memory leak here if the thread_service gets terminated
+        //          before it is able to execute the queued lambda but I can't see an easy way to prevent that
+        ptr = nullptr;
+    }
+    catch (...)
+    {
+        // Free to prevent memory leaks. This works since message uses the default deleter
+        delete ptr;
+
+        throw;
+    }
+
+    // Free to prevent memory leaks. This works since message uses the default deleter
+    delete ptr;
+#else
+    std::packaged_task<void()> task([=, message = std::move(message)]() mutable
+    {
+        DoSendMessageWork(m_uspConnection, std::move(message));
+    });
     m_threadService->ExecuteAsync(move(task));
+#endif
 }
 
-void CSpxUspTtsEngineAdapter::DoSendMessageWork(std::weak_ptr<USP::Connection> connectionPtr, const std::string& messagePath, const std::string& buffer, USP::MessageType messageType, const std::string& requestId)
+void CSpxUspTtsEngineAdapter::DoSendMessageWork(std::weak_ptr<USP::Connection> connectionPtr, std::unique_ptr<USP::TextMessage> message)
 {
     auto connection = connectionPtr.lock();
     if (connection != nullptr)
     {
-        connection->SendMessage(messagePath, reinterpret_cast<const uint8_t*>(buffer.c_str()), buffer.length(), messageType, requestId);
+        connection->SendMessage(move(message));
     }
     else
     {

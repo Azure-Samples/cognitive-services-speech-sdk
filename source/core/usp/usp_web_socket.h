@@ -13,6 +13,9 @@
 #include <web_socket.h>
 #include <audio_chunk.h>
 #include <i_telemetry.h>
+#include "usp_message.h"
+#include "usp_text_message.h"
+#include "usp_binary_message.h"
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -32,11 +35,9 @@ namespace USP {
             const std::chrono::milliseconds& pollingIntervalMs,
             ITelemetry& telemetry);
 
-        std::future<bool> SendData(const std::string& path, const uint8_t* buffer, size_t bufferSize, const std::string& requestId = "", bool binary = false);
-
         void SendAudioData(const std::string& path, const Impl::DataChunkPtr& audioChunk, const std::string& requestId = "", bool newStream = false);
 
-        void SendTelemetryData(const uint8_t* buffer, size_t bufferSize, const std::string& requestId);
+        void SendTelemetryData(std::string&& data, const std::string& requestId);
 
         Impl::event<const UspHeaders&, const std::string&> OnUspTextData;
         Impl::event<const UspHeaders&, const uint8_t*, size_t> OnUspBinaryData;
@@ -47,7 +48,7 @@ namespace USP {
             const std::chrono::milliseconds& pollingIntervalMs,
             ITelemetry& telemetry);
 
-        int SendPacket(std::unique_ptr<TransportPacket> packet) override;
+        int SendMessage(std::unique_ptr<IWebSocketMessage> message) override;
 
         void HandleTextData(const std::string& data) override;
         void HandleBinaryData(const uint8_t* data, const size_t size) override;
@@ -55,24 +56,6 @@ namespace USP {
 
     private:
         DISABLE_DEFAULT_CTORS(UspWebSocket);
-
-        /// <summary>
-        /// Writes out the USP Audio header to the specified buffer
-        /// </summary>
-        /// <param name="buffer">The buffer to write to</param>
-        /// <param name="bufferSize">The maximum size of the buffer</param>
-        /// <param name="requestId">The request identifier</param>
-        /// <param name="pstTimeStamp">The PST timestamp</param>
-        /// <param name="userId">The user ID</param>
-        /// <param name="contentType">The audio content type. This can be nullptr</param>
-        /// <returns>The number of bytes written, or a value less than 0 in the case of errors</returns>
-        int CreateAudioDataHeader(
-            char* buffer,
-            size_t bufferSize,
-            const std::string& requestId,
-            const std::string& pstTimeStamp,
-            const std::string userId,
-            const char * contentType);
 
         // Silence warnings on Android builds
         using WebSocket::SendTextData;

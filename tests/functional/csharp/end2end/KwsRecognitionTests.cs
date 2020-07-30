@@ -335,6 +335,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
         
         [TestMethod]
+        [Ignore]
         public async Task TestSpeechKeywordspotterComputer2PassFoundFromWavFile()
         {
             var tcs = new TaskCompletionSource<bool>();

@@ -9,6 +9,7 @@
 #include "test_utils.h"
 #include "file_utils.h"
 #include "recognizer_utils.h"
+#include "test_PAL.h"
 
 static void DoRecoFromCompressedPushStreamHelper(std::string fileName, std::shared_ptr<SpeechRecognizer> recognizer, std::shared_ptr<PushAudioInputStream> pushStream)
 {

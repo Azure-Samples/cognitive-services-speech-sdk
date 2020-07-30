@@ -367,7 +367,7 @@ int telemetry_serialize(nlohmann::json& root, const TELEMETRY_DATA& telemetry_ob
 }
 
 
-Telemetry::Telemetry(PTELEMETRY_WRITE callback, void* context) : m_callback{ callback }, m_context{ context }, m_current_telemetry_object{ std::make_unique<TELEMETRY_DATA>() }
+Telemetry::Telemetry(PTELEMETRY_WRITE callback) : m_callback{ callback }, m_current_telemetry_object{ std::make_unique<TELEMETRY_DATA>() }
 {
 }
 
@@ -413,21 +413,16 @@ void Telemetry::PrepareSend(const TELEMETRY_DATA& telemetryObject) const
     nlohmann::json root;
     if (telemetry_serialize(root, telemetryObject) == 0)
     {
-        auto serialized = root.dump();
-        SendSerializedTelemetry(serialized, requestId);
+        SendSerializedTelemetry(root.dump(), requestId);
     }
 }
 
-void Telemetry::SendSerializedTelemetry(const std::string& serialized, const std::string& requestId) const
+void Telemetry::SendSerializedTelemetry(std::string&& serialized, const std::string& requestId) const
 {
-    if (!serialized.empty())
+    if (!serialized.empty() && m_callback)
     {
-        // Serialize the received messages events and metric events.
-        if (m_callback)
-        {
-            LogInfo("%s: Send telemetry (requestId:%s): %s", __FUNCTION__, requestId.c_str(), serialized.c_str());
-            m_callback(reinterpret_cast<const uint8_t*>(serialized.c_str()), serialized.size(), m_context, requestId.c_str());
-        }
+        LogInfo("%s: Send telemetry (requestId:%s): %s", __FUNCTION__, requestId.c_str(), serialized.c_str());
+        m_callback(std::move(serialized), requestId);
     }
 }
 

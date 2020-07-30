@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <future>
 #include <http_endpoint_info.h>
 #include <event.h>
 
@@ -193,9 +194,87 @@ namespace USP {
         InternalServerError = 1011
     };
 
+    /// <summary>
+    /// Enumeration of message types
+    /// </summary>
+    enum class MetricMessageType : int8_t
+    {
+        INTERNAL_TRANSPORT_ERROR_PARSEERROR = -1,
+        INTERNAL_TRANSPORT_UNHANDLEDRESPONSE = -2,
+        INTERNAL_TRANSPORT_INVALIDSTATE = -3,
+        INTERNAL_CORTANA_EVENT_COALESCED = -4,
+        METRIC_MESSAGE_TYPE_INVALID = 0,
+        METRIC_MESSAGE_TYPE_DEVICECONTEXT = 1,
+        METRIC_MESSAGE_TYPE_AUDIO_START = 2,
+        METRIC_MESSAGE_TYPE_AUDIO_LAST = 3,
+        METRIC_MESSAGE_TYPE_TELEMETRY = 4,
+        METRIC_TRANSPORT_STATE_DNS = 5,
+        METRIC_TRANSPORT_STATE_DROPPED = 6,
+        METRIC_TRANSPORT_STATE_CLOSED = 7,
+        METRIC_TRANSPORT_STATE_CANCELLED = 8,
+        METRIC_TRANSPORT_STATE_RESET = 9
+    };
 
 
 
+
+
+    /// <summary>
+    /// The interface for web socket messages
+    /// </summary>
+    struct IWebSocketMessage
+    {
+        /// <summary>
+        /// Destructor
+        /// </summary>
+        virtual ~IWebSocketMessage() = default;
+
+        /// <summary>
+        /// Gets the telemetry type of the web socket message
+        /// </summary>
+        /// <returns>The message type</returns>
+        virtual USP::MetricMessageType MetricMessageType() const = 0;
+
+        /// <summary>
+        /// The type of web socket frame (e.g. text, or binary)
+        /// </summary>
+        /// <returns>The web socket frame type</returns>
+        virtual uint8_t FrameType() const = 0;
+
+        /// <summary>
+        /// The total size in bytes of the message
+        /// </summary>
+        /// <returns>The message size in bytes</returns>
+        virtual size_t Size() const = 0;
+
+        /// <summary>
+        /// Serializes this web socket message
+        /// </summary>
+        /// <param name="buffer">The buffer to initialise and write to</param>
+        /// <returns>The number of bytes written to the buffer</returns>
+        virtual size_t Serialize(std::shared_ptr<uint8_t>& buffer) = 0;
+
+        /// <summary>
+        /// Get the future that is completed when the message has been sent
+        /// </summary>
+        /// <returns>The future. A true result indicates success, false indicates failure</returns>
+        virtual std::future<bool> MessageSent() = 0;
+
+        /// <summary>
+        /// Sets that the message has been sent
+        /// </summary>
+        /// <param>True if the message was sent successfully, false otherwise</param>
+        virtual void MessageSent(bool success) = 0;
+
+    protected:
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        IWebSocketMessage() = default;
+
+    private:
+        DISABLE_COPY_AND_MOVE(IWebSocketMessage);
+    };
 
     /// <summary>
     /// The interface that web socket implementations should implement
@@ -232,6 +311,12 @@ namespace USP {
         /// <param name="data">The data to send</param>
         /// <param name="size">The size of the data to send</param>
         virtual void SendBinaryData(const uint8_t* data, const size_t size) = 0;
+
+        /// <summary>
+        /// Sends a web socket message to the server
+        /// </summary>
+        /// <param name="message">The message to send</param>
+        virtual void SendData(std::unique_ptr<IWebSocketMessage> message) = 0;
 
         /// <summary>
         /// Gets the web socket connection state

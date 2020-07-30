@@ -15,6 +15,7 @@
 
 #include <platform_init.h>
 #include "uspmessages.h"
+#include "usp_message.h"
 #include "ispxinterfaces.h"
 #include "audio_chunk.h"
 #include "exception.h"
@@ -190,8 +191,6 @@ enum class OutputFormat : unsigned int { Simple = 0, Detailed = 1 };
 
 enum class AuthenticationType: size_t { SubscriptionKey = 0, AuthorizationToken, SearchDelegationRPSToken, DialogApplicationId, ConversationToken, SIZE_AUTHENTICATION_TYPE };
 
-enum class MessageType { Config, Context, Agent, AgentContext, SpeechEvent, Event, Ssml, Unknown};
-
 template<typename T>
 using deleted_unique_ptr = std::unique_ptr<T, std::function<void(T*)>>;
 
@@ -213,20 +212,9 @@ public:
 
     /**
     * Sends a user defined message.
-    * @param messagePath The path of the user-defined message.
-    * @param buffer The message payload.
-    * @param size The length of the message in bytes.
-    * @param messageType The type of message to be sent. The USP currently has three different types of messages:
-    *  1. Config:  Config messages are not associated with a specific request. Some endpoints require that a config message is
-    *              sent as the first message after opening the connection.
-    *  2. Context: Client applications can send a context message at any time before sending the first audio chunk for a request.
-    *              You must send at most one context message for each turn.
-    *  3. Agent:   Agent messages are meant for communicating with a back end agent.
-    *              Each message represents the start of a new request.
-    * @param requestId The request ID for this turn.
-    * @return a future contains the whether the message is being sent or not. True for being sent over socket successfully. False for not.
+    * @param message The message to send.
     */
-    std::future<bool> SendMessage(const std::string& messagePath, const uint8_t* buffer, size_t size, MessageType messageType, const std::string& requestId="", bool binary=false);
+    void SendMessage(std::unique_ptr<USP::Message> message);
 
     /**
     * Writes the latency value into telemetry data.

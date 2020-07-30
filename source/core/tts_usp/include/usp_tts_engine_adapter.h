@@ -13,6 +13,7 @@
 #include "ispxinterfaces.h"
 #include "interface_helpers.h"
 #include "property_bag_impl.h"
+#include "usp_text_message.h"
 #include "usp.h"
 #include "service_helpers.h"
 
@@ -81,8 +82,8 @@ private:
     void UspSendSpeechConfig();
     void UspSendSynthesisContext(const std::string& requestId);
     void UspSendSsml(const std::string& ssml, const std::string& requestId);
-    void UspSendMessage(const std::string& messagePath, const std::string &buffer, USP::MessageType messageType, const std::string& requestId="");
-    static void DoSendMessageWork(std::weak_ptr<USP::Connection> connectionPtr, const std::string& messagePath, const std::string& buffer, USP::MessageType messageType, const std::string& requestId);
+    void UspSendMessage(std::unique_ptr<USP::TextMessage> message);
+    static void DoSendMessageWork(std::weak_ptr<USP::Connection> connectionPtr, std::unique_ptr<USP::TextMessage> message);
 
     void EnsureUspConnection();
     void UspInitialize();

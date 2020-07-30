@@ -19,11 +19,10 @@ namespace USP {
 /**
  * The PTELEMETRY_WRITE type represents an application-defined
  * callback function used to handle raw telemetry data.
- * @param pBuffer A pointer to a raw telemetry data.
- * @param byteToWrite The length of pBuffer in bytes.
- * @param pContext A pointer to the application-defined callback context.
+ * @param data The telemetry string data to write
+ * @param requestId The request ID for the current turn
  */
-using PTELEMETRY_WRITE = std::function<void(const uint8_t* pBuffer, size_t byteToWrite, void *pContext, const char* requestId)>;
+using PTELEMETRY_WRITE = std::function<void(std::string&& data, const std::string& requestId)>;
 
 
 struct TELEMETRY_DATA
@@ -53,10 +52,9 @@ struct Telemetry : public ITelemetry
     /**
     * Creates a object handle to maintain telemetry state, initializes the internal structures and
     * sets the application defined callbacks used for uploading in-band telemetry events.
-    * @param pfnCallback The callbacks used for uploading in-band telemetry events.
-    * @param pContext The callback context.
+    * @param callback The callback method to use
     */
-    Telemetry(PTELEMETRY_WRITE callback, void* context);
+    Telemetry(PTELEMETRY_WRITE callback);
     virtual ~Telemetry();
 
     /**
@@ -117,11 +115,10 @@ struct Telemetry : public ITelemetry
 
 private:
     void PrepareSend(const TELEMETRY_DATA& telemetryObject) const;
-    void SendSerializedTelemetry(const std::string& serialized, const std::string& requestId) const;
+    void SendSerializedTelemetry(std::string&& serialized, const std::string& requestId) const;
     TELEMETRY_DATA* GetTelemetryForRequestId(const std::string& request_id) const;
 
     PTELEMETRY_WRITE m_callback;
-    void* m_context;
     std::unique_ptr<TELEMETRY_DATA> m_current_telemetry_object;
 
     std::unordered_map<std::string, std::unique_ptr<TELEMETRY_DATA>> m_telemetry_object_map;

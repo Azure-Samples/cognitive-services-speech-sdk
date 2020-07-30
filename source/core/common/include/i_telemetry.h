@@ -9,6 +9,7 @@
 
 #include <string>
 #include <json.h>
+#include <i_web_socket.h>
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -38,24 +39,7 @@ enum IncomingMsgType
 };
 
 // errors that aren't the same as the 0x8XXXXXXX SDK errors
-enum class MetricMessageType : int
-{
-    INTERNAL_TRANSPORT_ERROR_PARSEERROR = -1,
-    INTERNAL_TRANSPORT_UNHANDLEDRESPONSE = -2,
-    INTERNAL_TRANSPORT_INVALIDSTATE = -3,
-    INTERNAL_CORTANA_EVENT_COALESCED = -4,
-    METRIC_MESSAGE_TYPE_DEVICECONTEXT = 1,
-    METRIC_MESSAGE_TYPE_AUDIO_START = 2,
-    METRIC_MESSAGE_TYPE_AUDIO_LAST = 3,
-    METRIC_MESSAGE_TYPE_TELEMETRY = 4,
-    METRIC_TRANSPORT_STATE_DNS = 5,
-    METRIC_TRANSPORT_STATE_DROPPED = 6,
-    METRIC_TRANSPORT_STATE_CLOSED = 7,
-    METRIC_TRANSPORT_STATE_CANCELLED = 8,
-    METRIC_TRANSPORT_STATE_RESET = 9
-};
 
-constexpr uint8_t METRIC_MESSAGE_TYPE_INVALID = 0xff;
 
 
 /**
@@ -173,7 +157,6 @@ namespace event
         constexpr auto FirstHypothesisLatency = "FirstHypothesisLatencyMs";
     }
 }
-
 
 constexpr size_t NO_DASH_UUID_LEN = 37;
 constexpr size_t TIME_STRING_MAX_SIZE = 30;

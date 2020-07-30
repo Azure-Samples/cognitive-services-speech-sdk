@@ -47,9 +47,9 @@ void Connection::FlushAudio()
     m_impl->QueueAudioEnd();
 }
 
-std::future<bool> Connection::SendMessage(const string& messagePath, const uint8_t* buffer, size_t size, MessageType messageType, const string& requestId, bool binary)
+void Connection::SendMessage(std::unique_ptr<USP::Message> message)
 {
-    return m_impl->QueueMessage(messagePath, buffer, size, messageType, requestId, binary);
+    m_impl->QueueMessage(std::move(message));
 }
 
 void Connection::WriteTelemetryLatency(uint64_t latencyInTicks, bool isPhraseLatency)

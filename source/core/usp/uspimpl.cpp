@@ -273,11 +273,11 @@ inline bool contains(const string& content, const string& name)
 const string g_recoModeStrings[] = { "interactive", "conversation", "dictation" };
 
 // This is called from telemetry_flush, invoked on a worker thread in turn-end.
-void Connection::Impl::OnTelemetryData(const uint8_t* buffer, size_t bytesToWrite, const char *requestId)
+void Connection::Impl::OnTelemetryData(std::string&& data, const std::string& requestId)
 {
     if (m_transport != nullptr)
     {
-        m_transport->SendTelemetryData(buffer, bytesToWrite, requestId);
+        m_transport->SendTelemetryData(std::move(data), requestId);
     }
 }
 
@@ -447,6 +447,7 @@ string Connection::Impl::ConstructConnectionUrl() const
         {
             ThrowInvalidArgumentException("Resource path is not allowed in the host URI.");
         }
+
         if (!url.query.empty())
         {
             ThrowInvalidArgumentException("Query parameters are not allowed in the host URI.");
@@ -714,15 +715,14 @@ void Connection::Impl::Connect()
     LogInfo("connectionUrl=%s", endpoint.EndpointUrl().c_str());
 
     m_telemetry = make_unique<Telemetry>(
-        [weak = std::weak_ptr<Connection::Impl>(shared_from_this())](auto buffer, auto bytesToWrite, auto, auto requestId)
+        [weak = std::weak_ptr<Connection::Impl>(shared_from_this())](std::string&& data, const std::string& requestId)
         {
             auto instance = weak.lock();
             if (instance != nullptr)
             {
-                instance->OnTelemetryData(buffer, bytesToWrite, requestId);
+                instance->OnTelemetryData(std::move(data), requestId);
             }
-        },
-        nullptr);
+        });
 
     if (m_telemetry == nullptr)
     {
@@ -783,18 +783,21 @@ void Connection::Impl::RegisterRequestId(const string& requestId)
     m_activeRequestIds.insert(requestId);
 }
 
-std::future<bool> Connection::Impl::QueueMessage(const string& path, const uint8_t *data, size_t size, MessageType messageType, const string& requestId, bool binary)
+void Connection::Impl::QueueMessage(std::unique_ptr<USP::Message> message)
 {
-    throw_if_null(data, "message payload is null");
-
-    if (path.empty() || !m_valid || m_transport == nullptr)
+    if (message->Path().empty())
     {
         ThrowInvalidArgumentException("The path is null or empty.");
     }
 
+    if (!m_valid || m_transport == nullptr)
+    {
+        return;
+    }
+
     // According to USP protocol, speech.context must be sent before any audio in a turn, and
     // only one speech.context message is allowed in the same turn.
-    if (messageType == MessageType::Context)
+    if (message->MessageType() == MessageType::Context)
     {
         // QueueMessage() is serialized by ThreadService, no lock is needed.
         if (!m_speechContextMessageAllowed)
@@ -807,15 +810,26 @@ std::future<bool> Connection::Impl::QueueMessage(const string& path, const uint8
             m_speechContextMessageAllowed = false;
         }
     }
-
-    if (!requestId.empty() && path == "synthesis.context")
+    
+    std::string usedRequestId = message->RequestId();
+    if (usedRequestId.empty())
     {
-        m_speechRequestId = requestId;
+        usedRequestId = UpdateRequestId(message->MessageType(), message->IsBinary());
+    }
+    else if (message->Path() == "synthesis.context")
+    {
+        // TODO ralphe: This logic feels like a hack and should be cleaned up. If we want to
+        //              set the request ID we should be explicit about it e.g. call a
+        //              SetRequestId(...) method
+        m_speechRequestId = usedRequestId;
     }
 
-    auto usedRequestId = requestId.empty() ? UpdateRequestId(messageType, binary) : requestId;
+    message->RequestId(usedRequestId);
 
-    return m_transport->SendData(path, data, size, usedRequestId, binary);
+    if (m_transport)
+    {
+        m_transport->SendData(std::move(message));
+    }
 }
 
 string Connection::Impl::UpdateRequestId(const MessageType messageType, bool binary)

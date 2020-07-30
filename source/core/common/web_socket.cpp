@@ -30,38 +30,62 @@ namespace USP {
     // This prevents us blocking for a long time if the rate of send requests is too high
     constexpr size_t MAX_SEND_PER_CYCLE = 20;
 
-    template<typename TInstance, typename TValue>
-    struct InstanceAndValue
+    struct WebSocketMessage : public IWebSocketMessage
     {
-        InstanceAndValue() : InstanceAndValue(nullptr, nullptr) {}
-        InstanceAndValue(weak_ptr<TInstance> instance, unique_ptr<TValue>&& value)
-            : m_instance(instance), m_value(std::move(value))
+        inline WebSocketMessage(size_t size, uint8_t frameType, USP::MetricMessageType metricType = USP::MetricMessageType::METRIC_MESSAGE_TYPE_INVALID)
+            : m_metricType(metricType),
+            m_frameType(frameType),
+            m_size(size),
+            m_buffer(new uint8_t[size], [](uint8_t* p) { delete[] p; }),
+            m_messageSent()
         {
         }
 
-        static inline unique_ptr<InstanceAndValue<TInstance, TValue>> from_ptr(void * ptr)
+        inline WebSocketMessage(const std::string& data)
+            : WebSocketMessage(data.length(), WS_FRAME_TYPE_TEXT)
         {
-            return std::unique_ptr<InstanceAndValue<TInstance, TValue>>(static_cast<InstanceAndValue<TInstance, TValue>*>(ptr));
+            // CAUTION: copied string will **NOT** be null terminated
+            memcpy(m_buffer.get(), data.c_str(), m_size);
         }
 
-        template<typename ...TArgs>
-        void invoke(void (TInstance::* method)(TArgs...), TArgs... args)
+        inline WebSocketMessage(const uint8_t* data, const size_t size)
+            : WebSocketMessage(size, WS_FRAME_TYPE_BINARY)
         {
-            auto instance = m_instance.lock();
-            if (instance != nullptr)
-            {
-                (instance.get()->*method)(args...);
-            }
+            // we are sending on another thread. This means that we cannot guarantee that the pointer
+            // will still be valid at the time we send so we create a copy here to be safe
+            memcpy(m_buffer.get(), data, size);
         }
 
-        TValue * value()
+        USP::MetricMessageType MetricMessageType() const override { return m_metricType; }
+        uint8_t FrameType() const override { return m_frameType; }
+        size_t Size() const override { return m_size; }
+        std::future<bool> MessageSent() override { return m_messageSent.get_future(); }
+        void MessageSent(bool success) override { m_messageSent.set_value(success); }
+
+        size_t Serialize(std::shared_ptr<uint8_t>& buffer) override
         {
-            return m_value.get();
+            buffer = m_buffer;
+            return m_size;
         }
 
     private:
-        weak_ptr<TInstance> m_instance;
-        unique_ptr<TValue> m_value;
+        USP::MetricMessageType m_metricType;
+        uint8_t m_frameType;
+        size_t m_size;
+        std::shared_ptr<uint8_t> m_buffer;
+        std::promise<bool> m_messageSent;
+    };
+
+    struct BoundMessage
+    {
+        BoundMessage(unique_ptr<IWebSocketMessage> message, weak_ptr<WebSocket> instance)
+            : message(std::move(message)), instance(instance)
+        {
+        }
+
+        std::unique_ptr<IWebSocketMessage> message;
+        std::weak_ptr<WebSocket> instance;
+        std::shared_ptr<uint8_t> buffer;
     };
 
     static uint64_t get_epoch_time()
@@ -72,7 +96,7 @@ namespace USP {
     }
 
     template<typename ...Args>
-    static void cast_and_invoke(void *context, void (WebSocket::* callback)(Args...), Args... args)
+    static inline void cast_and_invoke(void *context, void (WebSocket::* callback)(Args...), Args... args)
     {
         auto webSocket = static_cast<WebSocket*>(context);
         if (webSocket != nullptr)
@@ -179,7 +203,7 @@ namespace USP {
             uws_client_destroy(m_WSHandle);
         }
 
-        queue<unique_ptr<TransportPacket>> empty;
+        queue<unique_ptr<IWebSocketMessage>> empty;
         swap(m_queue, empty);
     }
 
@@ -411,17 +435,12 @@ namespace USP {
 
     void WebSocket::SendTextData(const string & text)
     {
-        size_t payloadSize = text.length();
+        if (text.empty())
+        {
+            return;
+        }
 
-        // std::string.length() returns the number of raw bytes in the string rather than the number of UTF-8 code points
-        auto msg = make_unique<TransportPacket>(
-            static_cast<uint8_t>(METRIC_MESSAGE_TYPE_INVALID),
-            static_cast<uint8_t>(WS_FRAME_TYPE_TEXT),
-            payloadSize);
-
-        memcpy(msg->buffer.get(), text.c_str(), payloadSize);
-
-        QueuePacket(move(msg));
+        QueueMessage(std::make_unique<WebSocketMessage>(text));
     }
 
     void WebSocket::SendBinaryData(const uint8_t * data, const size_t size)
@@ -431,14 +450,17 @@ namespace USP {
             return;
         }
 
-        auto msg = make_unique<TransportPacket>(
-            static_cast<uint8_t>(METRIC_MESSAGE_TYPE_INVALID),
-            static_cast<uint8_t>(WS_FRAME_TYPE_TEXT),
-            size);
+        QueueMessage(std::make_unique<WebSocketMessage>(data, size));
+    }
 
-        memcpy(msg->buffer.get(), data, size);
+    void WebSocket::SendData(unique_ptr<IWebSocketMessage> message)
+    {
+        if (message == nullptr)
+        {
+            return;
+        }
 
-        QueuePacket(move(msg));
+        QueueMessage(move(message));
     }
 
     int WebSocket::Connect()
@@ -485,13 +507,8 @@ namespace USP {
         }
     }
 
-    void WebSocket::QueuePacket(unique_ptr<TransportPacket> packet)
+    void WebSocket::QueueMessage(unique_ptr<IWebSocketMessage> packet)
     {
-        if (nullptr == packet)
-        {
-            return;
-        }
-
         if (GetState() == WebSocketState::CLOSED)
         {
             LogError("Trying to send on a previously closed socket");
@@ -510,32 +527,38 @@ namespace USP {
 
         {
             lock_guard<mutex> lock(m_queue_lock);
-            m_queue.push(move(packet));
+            m_queue.push(std::move(packet));
         }
     }
 
-    int WebSocket::SendPacket(unique_ptr<TransportPacket> packet)
+    int WebSocket::SendMessage(unique_ptr<IWebSocketMessage> message)
     {
         int err = 0;
-        auto context = make_unique<InstanceAndValue<WebSocket, TransportPacket>>(this->shared_from_this(), std::move(packet));
+
+        // get the serialized buffer of data to send
+        auto boundMessage = std::make_unique<BoundMessage>(std::move(message), shared_from_this());
+        size_t bytes = boundMessage->message->Serialize(boundMessage->buffer);
 
         // TODO: This does not handle breaking up large payloads into multiple chunks
         err = uws_client_send_frame_async(
             m_WSHandle,
-            static_cast<uint8_t>(context->value()->wstype == WS_FRAME_TYPE_TEXT ? WS_TEXT_FRAME : WS_BINARY_FRAME),
-            context->value()->buffer.get(),
-            context->value()->length,
+            static_cast<uint8_t>(boundMessage->message->FrameType() == WS_FRAME_TYPE_TEXT ? WS_TEXT_FRAME : WS_BINARY_FRAME),
+            boundMessage->buffer.get(),
+            bytes,
             true,
             [](void *ctxt, WS_SEND_FRAME_RESULT result)
             {
-                auto context = InstanceAndValue<WebSocket, TransportPacket>::from_ptr(ctxt);
-                if (context != nullptr)
+                std::unique_ptr<BoundMessage> boundMessage(static_cast<BoundMessage*>(ctxt));
+                if (boundMessage != nullptr)
                 {
-                    auto packet = context->value();
-                    context->invoke(&WebSocket::HandleWebSocketFrameSent, packet, result);
+                    auto instance = boundMessage->instance.lock();
+                    if (instance != nullptr)
+                    {
+                        instance->HandleWebSocketFrameSent(boundMessage->message.get(), result);
+                    }
                 }
             },
-            context.get());
+            boundMessage.get());
 
         if (err)
         {
@@ -543,8 +566,8 @@ namespace USP {
         }
         else
         {
-            // Release control of the context memory so the callback can delete it
-            context.release();
+            // Release control of the bound message memory so the callback can delete it
+            boundMessage.release();
         }
 
         return err;
@@ -586,18 +609,20 @@ namespace USP {
         OnStateChanged(oldState, newState);
     }
 
-    void WebSocket::HandleWebSocketFrameSent(TransportPacket* packet, WS_SEND_FRAME_RESULT sendResult)
+    void WebSocket::HandleWebSocketFrameSent(IWebSocketMessage* packet, WS_SEND_FRAME_RESULT result)
     {
         if (packet == nullptr)
         {
             return;
         }
-        auto msgType = packet->msgtype;
-        if (msgType != METRIC_MESSAGE_TYPE_INVALID)
+
+        auto msgType = packet->MetricMessageType();
+        if (msgType != MetricMessageType::METRIC_MESSAGE_TYPE_INVALID)
         {
             MetricsTransportStateEnd(msgType);
         }
-        packet->sent.set_value(sendResult == WS_SEND_FRAME_OK? true : false);
+
+        packet->MessageSent(result == WS_SEND_FRAME_OK);
     }
 
     void WebSocket::WorkLoop(weak_ptr<WebSocket> weakPtr)
@@ -674,12 +699,12 @@ namespace USP {
         switch (GetState())
         {
             case WebSocketState::CLOSED:
-            {
-                lock_guard<mutex> lock(m_queue_lock);
-                queue<unique_ptr<TransportPacket>> empty;
-                std::swap(m_queue, empty);
-            }
-            break;
+                {
+                    lock_guard<mutex> lock(m_queue_lock);
+                    queue<unique_ptr<IWebSocketMessage>> empty;
+                    std::swap(m_queue, empty);
+                }
+                break;
 
             case WebSocketState::DESTROYING:
                 // Do nothing. We are waiting for closing the transport request.
@@ -708,7 +733,7 @@ namespace USP {
                 // to send. Rest of queued packets will be handled in the next cycle
                 for (size_t numPackets = 0; numPackets < MAX_SEND_PER_CYCLE; numPackets++)
                 {
-                    unique_ptr<TransportPacket> packet;
+                    unique_ptr<IWebSocketMessage> packet;
                     {
                         lock_guard<mutex> lock(m_queue_lock);
 
@@ -725,16 +750,16 @@ namespace USP {
 
                     if (packet)
                     {
-                        if (packet->msgtype != METRIC_MESSAGE_TYPE_INVALID)
+                        if (packet->MetricMessageType() != MetricMessageType::METRIC_MESSAGE_TYPE_INVALID)
                         {
                             try
                             {
-                                MetricsTransportStateStart(packet->msgtype);
+                                MetricsTransportStateStart(packet->MetricMessageType());
                             }
                             catch (...) { /* don't care */ }
                         }
 
-                        int res = SendPacket(std::move(packet));
+                        int res = SendMessage(std::move(packet));
                         if (res != 0)
                         {
                             HandleError(WebSocketError::WEBSOCKET_SEND_FRAME, res, std::string{});
