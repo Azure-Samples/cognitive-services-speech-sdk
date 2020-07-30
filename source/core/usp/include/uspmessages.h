@@ -70,7 +70,8 @@ enum class ErrorCode : int
     ServiceError,
     RuntimeError,
     ServiceRedirectTemporary,
-    ServiceRetirectPermanent
+    ServiceRetirectPermanent,
+    ClientClosingConnection
 };
 
 /**

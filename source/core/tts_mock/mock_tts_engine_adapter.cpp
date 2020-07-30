@@ -102,6 +102,11 @@ std::shared_ptr<ISpxSynthesisResult> CSpxMockTtsEngineAdapter::Speak(const std::
     return result;
 }
 
+void CSpxMockTtsEngineAdapter::StopSpeaking()
+{
+    SPX_DBG_TRACE_VERBOSE_IF(SPX_DBG_TRACE_MOCK_TTS, __FUNCTION__);
+}
+
 std::shared_ptr<ISpxNamedProperties> CSpxMockTtsEngineAdapter::GetParentProperties() const
 {
     return SpxQueryService<ISpxNamedProperties>(GetSite());

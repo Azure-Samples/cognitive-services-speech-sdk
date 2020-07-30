@@ -67,6 +67,7 @@ public:
     // --- ISpxTtsEngineAdapter
     void SetOutput(std::shared_ptr<ISpxAudioOutput> output) override;
     std::shared_ptr<ISpxSynthesisResult> Speak(const std::string& text, bool isSsml, const std::wstring& requestId) override;
+    void StopSpeaking() override;
 
 
 protected:

@@ -46,6 +46,19 @@ uint32_t CSpxPullAudioOutputStream::Write(uint8_t* buffer, uint32_t size)
     return size;
 }
 
+void CSpxPullAudioOutputStream::ClearUnread()
+{
+    SPX_DBG_TRACE_VERBOSE(__FUNCTION__);
+
+    std::unique_lock<std::mutex> lock(m_mutex);
+    // clear audio queue
+    std::queue<std::pair<SpxSharedAudioBuffer_Type, uint32_t>> empty;
+    std::swap(m_audioQueue, empty);
+    m_inventorySize = 0;
+    m_frontItemPartiallyRead = false;
+    m_cv.notify_all();
+}
+
 void CSpxPullAudioOutputStream::Close()
 {
     SignalEndOfWriting();

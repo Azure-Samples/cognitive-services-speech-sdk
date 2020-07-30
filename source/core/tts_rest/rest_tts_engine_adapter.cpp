@@ -209,6 +209,11 @@ std::shared_ptr<ISpxSynthesisResult> CSpxRestTtsEngineAdapter::Speak(const std::
     return result;
 }
 
+void CSpxRestTtsEngineAdapter::StopSpeaking()
+{
+    SPX_DBG_TRACE_VERBOSE_IF(SPX_DBG_TRACE_REST_TTS, __FUNCTION__);
+}
+
 std::shared_ptr<ISpxNamedProperties> CSpxRestTtsEngineAdapter::GetParentProperties() const
 {
     return SpxQueryService<ISpxNamedProperties>(GetSite());

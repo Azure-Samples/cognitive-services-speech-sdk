@@ -58,6 +58,8 @@ public:
     CSpxAsyncOp<std::shared_ptr<ISpxSynthesisResult>> SpeakAsync(const std::string& text, bool isSsml) override;
     std::shared_ptr<ISpxSynthesisResult> StartSpeaking(const std::string& text, bool isSsml) override;
     CSpxAsyncOp<std::shared_ptr<ISpxSynthesisResult>> StartSpeakingAsync(const std::string& text, bool isSsml) override;
+    void StopSpeaking() override;
+    CSpxAsyncOp<void> StopSpeakingAsync() override;
 
     void Close() override;
 
@@ -100,9 +102,11 @@ private:
 
     void PushRequestIntoQueue(const std::wstring requestId);
     void WaitUntilRequestInFrontOfQueue(const std::wstring& requestId);
-    void PopRequestFromQueue();
+    void PopRequestFromQueue(const std::wstring& requestId = L"");
+    void ClearRequestQueueAndKeepFront();
 
-    std::shared_ptr<ISpxSynthesisResult> CreateResult(const std::wstring& requestId, ResultReason reason, uint8_t* audio_buffer, size_t audio_length);
+    std::shared_ptr<ISpxSynthesisResult> CreateResult(const std::wstring& requestId, ResultReason reason, uint8_t* audio_buffer, size_t audio_length, CancellationReason cancellationReason = REASON_CANCELED_NONE);
+    std::shared_ptr<ISpxSynthesisResult> CreateUserCancelledResult(const std::wstring& requestId);
     void FireResultEvent(std::shared_ptr<ISpxSynthesisResult> result);
     void FireSynthesisEvent(std::list<std::pair<void*, std::shared_ptr<SynthEvent_Type>>> events, std::shared_ptr<ISpxSynthesisResult> result);
 
@@ -132,6 +136,8 @@ private:
     std::mutex m_synthesizingMutex;
     std::mutex m_synthesisCompletedMutex;
     std::mutex m_synthesisCanceledMutex;
+
+    std::atomic<bool> m_shouldStop{ false };
 };
 
 

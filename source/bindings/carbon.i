@@ -562,6 +562,12 @@
         auto future = ($self)->StartSpeakingSsmlAsync(ssml);
         return FutureWrapper<SpeechSynthesisResultPtr>(std::move(future));
     }
+
+    FutureWrapper<void> StopSpeakingAsync()
+    {
+        auto future = ($self)->StopSpeakingAsync();
+        return FutureWrapper<void>(std::move(future));
+    }
 }
 
 %extend Microsoft::CognitiveServices::Speech::AudioDataStream {

@@ -41,6 +41,7 @@ public:
 
     uint32_t Write(uint8_t* buffer, uint32_t size) override;
     void WaitUntilDone() override;
+    void ClearUnread() override {}
     void Close() override;
 
     // --- ISpxAudioStream ---

@@ -53,6 +53,7 @@ public:
     // --- ISpxTtsEngineAdapter
     void SetOutput(std::shared_ptr<ISpxAudioOutput> output) override;
     std::shared_ptr<ISpxSynthesisResult> Speak(const std::string& text, bool isSsml, const std::wstring& requestId) override;
+    void StopSpeaking() override;
 
     // --- IServiceProvider ---
     SPX_SERVICE_MAP_BEGIN()
@@ -131,6 +132,7 @@ private:
     std::string m_speechConfig;
 
     std::atomic<UspState> m_uspState { UspState::Idle };
+    std::atomic<bool> m_shouldStop{ false };
     std::vector<uint8_t> m_currentReceivedData;
 
     std::wstring m_currentRequestId;

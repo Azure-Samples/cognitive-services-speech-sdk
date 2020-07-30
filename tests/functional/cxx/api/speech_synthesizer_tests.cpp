@@ -1140,6 +1140,130 @@ TEST_CASE("Synthesis with invalid voice - USP", "[api][cxx]")
     SPXTEST_REQUIRE(synthesisCanceled);
 }
 
+TEST_CASE("Stop synthesis - USP", "[api][cxx]")
+{
+    auto config = UspSpeechConfig();
+    // using a format without header for easy comparison
+    config->SetSpeechSynthesisOutputFormat(SpeechSynthesisOutputFormat::Audio16Khz32KBitRateMonoMp3);
+
+    auto synthesizer1 = SpeechSynthesizer::FromConfig(config, nullptr);
+    auto referenceResult = synthesizer1->SpeakTextAsync("reference").get();
+
+    SPXTEST_SECTION("normal stop")
+    {
+        auto synthesizer = SpeechSynthesizer::FromConfig(config, nullptr);
+
+        auto future1 = synthesizer->SpeakTextAsync("{{{text1}}}");
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        auto stopFuture = synthesizer->StopSpeakingAsync();
+        stopFuture.get();
+        // result1 should be finished now
+        SPXTEST_REQUIRE(future1.wait_for(std::chrono::milliseconds(50)) == std::future_status::ready);
+        auto future2 = synthesizer->SpeakTextAsync("reference");
+
+        auto result1 = future1.get();
+        auto result2 = future2.get();
+
+        SPXTEST_REQUIRE(ResultReason::Canceled == result1->Reason);
+        auto cancellationDetail = SpeechSynthesisCancellationDetails::FromResult(result1);
+        SPXTEST_REQUIRE(std::string::npos != cancellationDetail->ErrorDetails.find("Synthesis request cancelled by user."));
+        SPXTEST_REQUIRE(CancellationReason::CancelledByUser == cancellationDetail->Reason);
+        SPXTEST_REQUIRE(ResultReason::SynthesizingAudioCompleted == result2->Reason);
+        // ensure the synthesis after stopping works correctly (get the exactly same results with normal synthesis)
+        SPXTEST_REQUIRE(AreBinaryEqual(referenceResult->GetAudioData(), result2->GetAudioData()));
+    }
+
+    SPXTEST_SECTION("stop before speaking")
+    {
+        auto synthesizer = SpeechSynthesizer::FromConfig(config, nullptr);
+
+        synthesizer->StopSpeakingAsync();
+        auto result = synthesizer->SpeakTextAsync("reference").get();
+
+        SPXTEST_REQUIRE(ResultReason::SynthesizingAudioCompleted == result->Reason);
+        // ensure the synthesis after stopping works correctly (get the exactly same results with normal synthesis)
+        SPXTEST_REQUIRE(AreBinaryEqual(result->GetAudioData(), referenceResult->GetAudioData()));
+    }
+
+    SPXTEST_SECTION("stop multi requests")
+    {
+        auto synthesizer = SpeechSynthesizer::FromConfig(config, nullptr);
+
+        auto future1 = synthesizer->SpeakTextAsync("{{{text1}}}");
+        auto future2 = synthesizer->SpeakTextAsync("{{{text2}}}");
+        auto future3 = synthesizer->SpeakTextAsync("{{{text3}}}");
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        synthesizer->StopSpeakingAsync();
+        auto result = synthesizer->SpeakTextAsync("reference").get();
+
+        for (const auto& r : std::vector<shared_ptr<SpeechSynthesisResult>>{
+                 future1.get(), future2.get(), future3.get()
+             })
+        {
+            SPXTEST_REQUIRE(ResultReason::Canceled == r->Reason);
+            auto cancellationDetail = SpeechSynthesisCancellationDetails::FromResult(r);
+            SPXTEST_REQUIRE(std::string::npos != cancellationDetail->ErrorDetails.find("Synthesis request cancelled by user."));
+            SPXTEST_REQUIRE(CancellationReason::CancelledByUser == cancellationDetail->Reason);
+        }
+
+        SPXTEST_REQUIRE(ResultReason::SynthesizingAudioCompleted == result->Reason);
+        // ensure the synthesis after stopping works correctly (get the exactly same results with normal synthesis)
+        SPXTEST_REQUIRE(AreBinaryEqual(result->GetAudioData(), referenceResult->GetAudioData()));
+    }
+
+    SPXTEST_SECTION("stop twice")
+    {
+        auto synthesizer = SpeechSynthesizer::FromConfig(config, nullptr);
+
+        auto future1 = synthesizer->SpeakTextAsync("{{{text1}}}");
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        synthesizer->StopSpeakingAsync();
+        synthesizer->StopSpeakingAsync();
+        auto future2 = synthesizer->SpeakTextAsync("reference");
+
+        auto result1 = future1.get();
+        auto result2 = future2.get();
+
+        SPXTEST_REQUIRE(ResultReason::Canceled == result1->Reason);
+        auto cancellationDetail = SpeechSynthesisCancellationDetails::FromResult(result1);
+        SPXTEST_REQUIRE(std::string::npos != cancellationDetail->ErrorDetails.find("Synthesis request cancelled by user."));
+        SPXTEST_REQUIRE(CancellationReason::CancelledByUser == cancellationDetail->Reason);
+        SPXTEST_REQUIRE(ResultReason::SynthesizingAudioCompleted == result2->Reason);
+        // ensure the synthesis after stopping works correctly (get the exactly same results with normal synthesis)
+        SPXTEST_REQUIRE(AreBinaryEqual(referenceResult->GetAudioData(), result2->GetAudioData()));
+    }
+
+    SPXTEST_SECTION("unread pull audio output stream is cleared")
+    {
+        auto stream = Audio::AudioOutputStream::CreatePullStream();
+        auto synthesizer = SpeechSynthesizer::FromConfig(config, Audio::AudioConfig::FromStreamOutput(stream));
+
+        synthesizer->WordBoundary += [&synthesizer](const SpeechSynthesisWordBoundaryEventArgs& e) {
+            if (e.TextOffset > 10)
+            {
+                synthesizer->StopSpeakingAsync();
+            }
+        };
+
+        auto result1 = synthesizer->SpeakTextAsync(AudioUtterancesMap[SYNTHESIS_LONG_UTTERANCE].Utterances["en-US"][0].Text).get();
+
+        synthesizer->WordBoundary.DisconnectAll();
+        auto result2 = synthesizer->SpeakTextAsync("reference").get();
+
+        SPXTEST_REQUIRE(ResultReason::Canceled == result1->Reason);
+        // SPXTEST_REQUIRE(result1->GetAudioData()->size() > 0);
+        auto cancellationDetail = SpeechSynthesisCancellationDetails::FromResult(result1);
+        SPXTEST_REQUIRE(std::string::npos != cancellationDetail->ErrorDetails.find("Synthesis request cancelled by user."));
+        SPXTEST_REQUIRE(CancellationReason::CancelledByUser == cancellationDetail->Reason);
+        SPXTEST_REQUIRE(ResultReason::SynthesizingAudioCompleted == result2->Reason);
+        // ensure the synthesis after stopping works correctly (get the exactly same results with normal synthesis)
+        SPXTEST_REQUIRE(AreBinaryEqual(referenceResult->GetAudioData(), result2->GetAudioData()));
+        std::vector<uint8_t> buffer(result2->GetAudioData()->size());
+        stream->Read(buffer.data(), static_cast<uint32_t>(buffer.size()));
+        SPXTEST_REQUIRE(AreBinaryEqual(referenceResult->GetAudioData(), buffer));
+    }
+}
+
 /* Test cases based on mock TTS engine, with output audio content check */
 
 TEST_CASE("Synthesis Defaults - Mock", "[api][cxx]")

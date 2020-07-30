@@ -92,9 +92,21 @@ std::shared_ptr<ISpxSynthesisResult> CSpxSynthesizer::Speak(const std::string& t
     // Wait until current request to be in front of the queue
     WaitUntilRequestInFrontOfQueue(requestId);
 
+    if (m_requestQueue.empty() || m_requestQueue.front() != requestId)
+    {
+        return CreateUserCancelledResult(requestId);
+    }
+
     // Fire SynthesisStarted event
     auto synthesisStartedResult = CreateResult(requestId, ResultReason::SynthesizingAudioStarted, nullptr, 0);
     FireResultEvent(synthesisStartedResult);
+
+    // check if stop is called during firing synthesis started event
+    if (m_shouldStop)
+    {
+        PopRequestFromQueue(requestId);
+        return CreateUserCancelledResult(requestId);
+    }
 
     // Speak
     auto synthesisDoneResult = m_ttsAdapter->Speak(text, isSsml, requestId);
@@ -111,7 +123,7 @@ std::shared_ptr<ISpxSynthesisResult> CSpxSynthesizer::Speak(const std::string& t
     FireResultEvent(synthesisDoneResult);
 
     // Pop processed request from queue
-    PopRequestFromQueue();
+    PopRequestFromQueue(requestId);
 
     return synthesisDoneResult;
 }
@@ -138,12 +150,25 @@ std::shared_ptr<ISpxSynthesisResult> CSpxSynthesizer::StartSpeaking(const std::s
     // Wait until current request to be in front of the queue
     WaitUntilRequestInFrontOfQueue(requestId);
 
+    if (m_requestQueue.empty() || m_requestQueue.front() != requestId)
+    {
+        return CreateUserCancelledResult(requestId);
+    }
+
     // Fire SynthesisStarted event
     auto synthesisStartedResult = CreateResult(requestId, ResultReason::SynthesizingAudioStarted, nullptr, 0);
     FireResultEvent(synthesisStartedResult);
 
+    // check if stop is called during firing synthesis started event
+    if (m_shouldStop)
+    {
+        PopRequestFromQueue(requestId);
+        return CreateUserCancelledResult(requestId);
+    }
+
     auto keepAlive = SpxSharedPtrFromThis<ISpxSynthesizer>(this);
-    std::shared_future<std::shared_ptr<ISpxSynthesisResult>> waitForCompletion(std::async(std::launch::async, [this, keepAlive, requestId, text, isSsml]() {
+    std::shared_future<std::shared_ptr<ISpxSynthesisResult>> waitForCompletion(std::async(std::launch::async,
+        [this, keepAlive, requestId, text, isSsml]() {
         // Speak
         auto synthesisDoneResult = m_ttsAdapter->Speak(text, isSsml, requestId);
 
@@ -159,7 +184,7 @@ std::shared_ptr<ISpxSynthesisResult> CSpxSynthesizer::StartSpeaking(const std::s
         FireResultEvent(synthesisDoneResult);
 
         // Pop processed request from queue
-        PopRequestFromQueue();
+        PopRequestFromQueue(requestId);
 
         return synthesisDoneResult;
     }));
@@ -181,6 +206,42 @@ CSpxAsyncOp<std::shared_ptr<ISpxSynthesisResult>> CSpxSynthesizer::StartSpeaking
     }));
 
     return CSpxAsyncOp<std::shared_ptr<ISpxSynthesisResult>>(waitForSpeakStart, AOS_Started);
+}
+
+void CSpxSynthesizer::StopSpeaking()
+{
+    SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+
+    // clear request queue and push an empty request as a placeholder
+    ClearRequestQueueAndKeepFront();
+
+    m_shouldStop = true;
+
+    // call stop method of adapter
+    m_ttsAdapter->StopSpeaking();
+
+    if (m_audioOutput)
+    {
+        m_audioOutput->ClearUnread();
+    }
+
+    WaitUntilRequestInFrontOfQueue(std::wstring());
+
+    m_shouldStop = false;
+
+    // Pop the empty request from queue
+    PopRequestFromQueue();
+}
+
+CSpxAsyncOp<void> CSpxSynthesizer::StopSpeakingAsync()
+{
+    auto keepAlive = SpxSharedPtrFromThis<ISpxSynthesizer>(this);
+    std::shared_future<void> waitForSpeakStop(std::async(std::launch::async, [this, keepAlive]() {
+        // stop speaking
+        return StopSpeaking();
+    }));
+
+    return CSpxAsyncOp<void>(waitForSpeakStop, AOS_Started);
 }
 
 void CSpxSynthesizer::Close()
@@ -441,8 +502,13 @@ uint32_t CSpxSynthesizer::Write(ISpxTtsEngineAdapter* adapter, const std::wstrin
 {
     UNUSED(adapter);
 
+    if (m_shouldStop)
+    {
+        return size;
+    }
+
     // Fire Synthesizing event
-    auto result = CreateResult(requestId, ResultReason::SynthesizingAudio, buffer, size);
+    const auto result = CreateResult(requestId, ResultReason::SynthesizingAudio, buffer, size);
     FireResultEvent(result);
 
     // Write audio data to output
@@ -463,7 +529,7 @@ void CSpxSynthesizer::PushRequestIntoQueue(const std::wstring requestId)
 {
     std::unique_lock<std::mutex> lock(m_queueOperationMutex);
     m_requestQueue.emplace(requestId);
-    lock.unlock();
+    m_cv.notify_all();
 }
 
 void CSpxSynthesizer::WaitUntilRequestInFrontOfQueue(const std::wstring& requestId)
@@ -473,36 +539,55 @@ void CSpxSynthesizer::WaitUntilRequestInFrontOfQueue(const std::wstring& request
 #ifdef _DEBUG
     while (!m_cv.wait_for(lock, std::chrono::milliseconds(100), [&] {
         std::unique_lock<std::mutex> lock(m_queueOperationMutex);
-        return m_requestQueue.front() == requestId; }))
+        return m_requestQueue.empty() || m_requestQueue.front() == requestId || m_requestQueue.front().empty(); }))
     {
         SPX_DBG_TRACE_VERBOSE("%s: waiting for processing speak request ...", __FUNCTION__);
     }
 #else
     m_cv.wait(lock, [&] {
         std::unique_lock<std::mutex> lock(m_queueOperationMutex);
-        return m_requestQueue.front() == requestId; });
+        return m_requestQueue.empty() || m_requestQueue.front() == requestId || m_requestQueue.front().empty(); });
 #endif
 }
 
-void CSpxSynthesizer::PopRequestFromQueue()
+void CSpxSynthesizer::PopRequestFromQueue(const std::wstring& requestId)
 {
     std::unique_lock<std::mutex> lock(m_queueOperationMutex);
-    m_requestQueue.pop();
+    if (!m_requestQueue.empty() && m_requestQueue.front() == requestId)
+    {
+        m_requestQueue.pop();
+    }
     m_cv.notify_all();
 }
 
-std::shared_ptr<ISpxSynthesisResult> CSpxSynthesizer::CreateResult(const std::wstring& requestId, ResultReason reason, uint8_t* audio_buffer, size_t audio_length)
+void CSpxSynthesizer::ClearRequestQueueAndKeepFront()
+{
+    std::unique_lock<std::mutex> lock(m_queueOperationMutex);
+    std::queue<std::wstring> empty;
+    if (!m_requestQueue.empty())
+    {
+        empty.emplace(m_requestQueue.front());
+    }
+
+    std::swap(m_requestQueue, empty);
+    m_requestQueue.emplace(L"");
+    m_cv.notify_all();
+}
+
+std::shared_ptr<ISpxSynthesisResult> CSpxSynthesizer::CreateResult(const std::wstring& requestId, ResultReason reason,
+                                                                   uint8_t* audio_buffer, size_t audio_length,
+                                                                   CancellationReason cancellationReason)
 {
     // Get output format
     auto audioStream = SpxQueryInterface<ISpxAudioStream>(m_audioOutput);
-    auto requiredFormatSize = audioStream->GetFormat(nullptr, 0);
-    auto format = SpxAllocWAVEFORMATEX(requiredFormatSize);
+    const auto requiredFormatSize = audioStream->GetFormat(nullptr, 0);
+    const auto format = SpxAllocWAVEFORMATEX(requiredFormatSize);
     audioStream->GetFormat(format.get(), requiredFormatSize);
 
     // Build result
     auto result = SpxCreateObjectWithSite<ISpxSynthesisResult>("CSpxSynthesisResult", SpxSiteFromThis(this));
     auto resultInit = SpxQueryInterface<ISpxSynthesisResultInit>(result);
-    resultInit->InitSynthesisResult(requestId, reason, REASON_CANCELED_NONE, CancellationErrorCode::NoError,
+    resultInit->InitSynthesisResult(requestId, reason, cancellationReason, CancellationErrorCode::NoError,
         audio_buffer, audio_length, format.get(), SpxQueryInterface<ISpxAudioOutputFormat>(m_audioOutput)->HasHeader());
     auto events = this->QueryInterfaceInternal<ISpxSynthesizerEvents>();
     resultInit->SetEvents(events);
@@ -510,24 +595,32 @@ std::shared_ptr<ISpxSynthesisResult> CSpxSynthesizer::CreateResult(const std::ws
     return result;
 }
 
+std::shared_ptr<ISpxSynthesisResult> CSpxSynthesizer::CreateUserCancelledResult(const std::wstring& requestId)
+{
+    auto cancelledResult = CreateResult(requestId, ResultReason::Canceled, nullptr, 0,
+                                        CancellationReason::CancelledByUser);
+    auto resultProperties = SpxQueryInterface<ISpxNamedProperties>(cancelledResult);
+    resultProperties->SetStringValue(GetPropertyName(PropertyId::CancellationDetails_ReasonDetailedText), "Synthesis request cancelled by user.");
+    return cancelledResult;
+}
+
 void CSpxSynthesizer::FireResultEvent(std::shared_ptr<ISpxSynthesisResult> result)
 {
-    auto reason = result->GetReason();
-    switch (reason)
+    switch (result->GetReason())
     {
-    case Microsoft::CognitiveServices::Speech::ResultReason::SynthesizingAudioStarted:
+    case ResultReason::SynthesizingAudioStarted:
         FireSynthesisStarted(result);
         break;
 
-    case Microsoft::CognitiveServices::Speech::ResultReason::SynthesizingAudio:
+    case ResultReason::SynthesizingAudio:
         FireSynthesizing(result);
         break;
 
-    case Microsoft::CognitiveServices::Speech::ResultReason::SynthesizingAudioCompleted:
+    case ResultReason::SynthesizingAudioCompleted:
         FireSynthesisCompleted(result);
         break;
 
-    case Microsoft::CognitiveServices::Speech::ResultReason::Canceled:
+    case ResultReason::Canceled:
         FireSynthesisCanceled(result);
         break;
 

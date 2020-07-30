@@ -22,7 +22,7 @@ namespace Speech {
 
 /// <summary>
 /// Class for speech synthesizer.
-/// Updated in version 1.13.0
+/// Updated in version 1.14.0
 /// </summary>
 class SpeechSynthesizer : public std::enable_shared_from_this<SpeechSynthesizer>
 {
@@ -385,6 +385,28 @@ public:
 #endif
 
     /// <summary>
+    /// Stop the speech synthesis, asynchronously.
+    /// Added in version 1.14.0
+    /// </summary>
+    /// <returns>An empty future.</returns>
+    std::future<void> StopSpeakingAsync()
+    {
+        auto keepAlive = this->shared_from_this();
+
+        auto future = std::async(std::launch::async, [keepAlive, this]() -> void {
+            SPXASYNCHANDLE hasyncStop = SPXHANDLE_INVALID;
+            SPX_THROW_ON_FAIL(::synthesizer_stop_speaking_async(m_hsynth, &hasyncStop));
+            SPX_EXITFN_ON_FAIL(::synthesizer_stop_async_wait_for(hasyncStop, UINT32_MAX));
+
+        SPX_EXITFN_CLEANUP:
+            auto releaseHr = synthesizer_async_handle_release(hasyncStop);
+            SPX_REPORT_ON_FAIL(releaseHr);
+        });
+
+        return future;
+    }
+
+    /// <summary>
     /// Sets the authorization token that will be used for connecting to the service.
     /// Note: The caller needs to ensure that the authorization token is valid. Before the authorization token
     /// expires, the caller needs to refresh it by calling this setter with a new valid token.
@@ -461,7 +483,7 @@ private:
     /// Internal constructor. Creates a new instance using the provided handle.
     /// </summary>
     /// <param name="hsynth">Synthesizer handle.</param>
-    explicit SpeechSynthesizer(SPXRECOHANDLE hsynth) :
+    explicit SpeechSynthesizer(SPXSYNTHHANDLE hsynth) :
         m_hsynth(hsynth),
         m_properties(hsynth),
         Properties(m_properties),
@@ -506,7 +528,7 @@ private:
         };
     }
 
-    static void FireEvent_SynthesisStarted(SPXRECOHANDLE hsynth, SPXEVENTHANDLE hevent, void* pvContext)
+    static void FireEvent_SynthesisStarted(SPXSYNTHHANDLE hsynth, SPXEVENTHANDLE hevent, void* pvContext)
     {
         UNUSED(hsynth);
         std::unique_ptr<SpeechSynthesisEventArgs> synthEvent{ new SpeechSynthesisEventArgs(hevent) };
@@ -516,7 +538,7 @@ private:
         pThis->SynthesisStarted.Signal(*synthEvent.get());
     }
 
-    static void FireEvent_Synthesizing(SPXRECOHANDLE hsynth, SPXEVENTHANDLE hevent, void* pvContext)
+    static void FireEvent_Synthesizing(SPXSYNTHHANDLE hsynth, SPXEVENTHANDLE hevent, void* pvContext)
     {
         UNUSED(hsynth);
         std::unique_ptr<SpeechSynthesisEventArgs> synthEvent{ new SpeechSynthesisEventArgs(hevent) };
@@ -526,7 +548,7 @@ private:
         pThis->Synthesizing.Signal(*synthEvent.get());
     }
 
-    static void FireEvent_SynthesisCompleted(SPXRECOHANDLE hsynth, SPXEVENTHANDLE hevent, void* pvContext)
+    static void FireEvent_SynthesisCompleted(SPXSYNTHHANDLE hsynth, SPXEVENTHANDLE hevent, void* pvContext)
     {
         UNUSED(hsynth);
         std::unique_ptr<SpeechSynthesisEventArgs> synthEvent{ new SpeechSynthesisEventArgs(hevent) };
@@ -536,7 +558,7 @@ private:
         pThis->SynthesisCompleted.Signal(*synthEvent.get());
     }
 
-    static void FireEvent_SynthesisCanceled(SPXRECOHANDLE hsynth, SPXEVENTHANDLE hevent, void* pvContext)
+    static void FireEvent_SynthesisCanceled(SPXSYNTHHANDLE hsynth, SPXEVENTHANDLE hevent, void* pvContext)
     {
         UNUSED(hsynth);
         std::unique_ptr<SpeechSynthesisEventArgs> synthEvent{ new SpeechSynthesisEventArgs(hevent) };
@@ -546,7 +568,7 @@ private:
         pThis->SynthesisCanceled.Signal(*synthEvent.get());
     }
 
-    static void FireEvent_WordBoundary(SPXRECOHANDLE hsynth, SPXEVENTHANDLE hevent, void* pvContext)
+    static void FireEvent_WordBoundary(SPXSYNTHHANDLE hsynth, SPXEVENTHANDLE hevent, void* pvContext)
     {
         UNUSED(hsynth);
         std::unique_ptr<SpeechSynthesisWordBoundaryEventArgs> wordBoundaryEvent{ new SpeechSynthesisWordBoundaryEventArgs(hevent) };

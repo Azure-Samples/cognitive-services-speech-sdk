@@ -36,6 +36,9 @@ SPXAPI synthesizer_start_speaking_ssml(SPXSYNTHHANDLE hsynth, const char* ssml, 
 SPXAPI synthesizer_start_speaking_text_async(SPXSYNTHHANDLE hsynth, const char* text, uint32_t textLength, SPXASYNCHANDLE* phasync);
 SPXAPI synthesizer_start_speaking_ssml_async(SPXSYNTHHANDLE hsynth, const char* ssml, uint32_t ssmlLength, SPXASYNCHANDLE* phasync);
 SPXAPI synthesizer_speak_async_wait_for(SPXASYNCHANDLE hasync, uint32_t milliseconds, SPXRESULTHANDLE* phresult);
+SPXAPI synthesizer_stop_speaking(SPXSYNTHHANDLE hsynth);
+SPXAPI synthesizer_stop_speaking_async(SPXSYNTHHANDLE hsynth, SPXASYNCHANDLE* phasync);
+SPXAPI synthesizer_stop_async_wait_for(SPXASYNCHANDLE hasync, uint32_t milliseconds);
 
 typedef void(*PSYNTHESIS_CALLBACK_FUNC)(SPXSYNTHHANDLE hsynth, SPXEVENTHANDLE hevent, void* pvContext);
 SPXAPI synthesizer_started_set_callback(SPXSYNTHHANDLE hsynth, PSYNTHESIS_CALLBACK_FUNC pCallback, void* pvContext);

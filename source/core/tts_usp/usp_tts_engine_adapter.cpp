@@ -20,7 +20,7 @@
 #include "time_utils.h"
 #include "thread_service.h"
 
-#define SPX_DBG_TRACE_USP_TTS 0
+#define SPX_DBG_TRACE_USP_TTS 1
 
 #define MAX_RETRY 1
 
@@ -79,10 +79,14 @@ std::shared_ptr<ISpxSynthesisResult> CSpxUspTtsEngineAdapter::Speak(const std::s
     SPX_DBG_TRACE_VERBOSE_IF(SPX_DBG_TRACE_USP_TTS, __FUNCTION__);
     SPX_DBG_ASSERT(UspState::Idle == m_uspState || UspState::Error == m_uspState);
 
+    m_shouldStop = false;
+
     std::shared_ptr<ISpxSynthesisResult> result;
     const auto maxRetry = std::stoi(ISpxPropertyBagImpl::GetStringValue("SpeechSynthesis_MaxRetryTimes", std::to_string(MAX_RETRY).c_str()));
     for (auto tryCount = 0; tryCount <= maxRetry; ++tryCount)
     {
+        SPX_DBG_TRACE_VERBOSE_IF(SPX_DBG_TRACE_USP_TTS,
+            "%s: start to send synthesis request, request id : %s, try: %d", __FUNCTION__, PAL::ToString(requestId).c_str(), tryCount);
         result = SpeakInternal(text, isSsml, requestId);
         if (ResultReason::SynthesizingAudioCompleted == result->GetReason())
         {
@@ -91,6 +95,11 @@ std::shared_ptr<ISpxSynthesisResult> CSpxUspTtsEngineAdapter::Speak(const std::s
         else if (ResultReason::Canceled == result->GetReason() && !result->GetAudioData()->empty())
         {
             SPX_TRACE_ERROR("Synthesis cancelled with partial data received, cannot retry.");
+            break;
+        }
+        else if (m_currentErrorCode == USP::ErrorCode::ClientClosingConnection)
+        {
+            SPX_TRACE_ERROR("Synthesis cancelled by user, won't retry.");
             break;
         }
 
@@ -109,9 +118,12 @@ std::shared_ptr<ISpxSynthesisResult> CSpxUspTtsEngineAdapter::SpeakInternal(cons
         ssml = CSpxSynthesisHelper::BuildSsml(text, properties);
     }
 
-    SPX_DBG_TRACE_VERBOSE("SSML sent to TTS cognitive service: %s", ssml.data());
+    SPX_DBG_TRACE_VERBOSE("SSML sent to TTS cognitive service: %s", ssml.c_str());
 
-    EnsureUspConnection();
+    if (!m_shouldStop)
+    {
+        EnsureUspConnection();
+    }
 
     if (UspState::Error != m_uspState)
     {
@@ -183,9 +195,11 @@ std::shared_ptr<ISpxSynthesisResult> CSpxUspTtsEngineAdapter::SpeakInternal(cons
     if (m_uspState == UspState::Error)
     {
         resultInit->InitSynthesisResult(requestId, ResultReason::Canceled,
-            CancellationReason::Error, UspErrorCodeToCancellationErrorCode(m_currentErrorCode),
+            m_currentErrorCode == USP::ErrorCode::ClientClosingConnection ? CancellationReason::CancelledByUser : CancellationReason::Error,
+            UspErrorCodeToCancellationErrorCode(m_currentErrorCode),
             m_currentReceivedData.data(), m_currentReceivedData.size(), outputFormat.get(), hasHeader);
         SpxQueryInterface<ISpxNamedProperties>(resultInit)->SetStringValue(GetPropertyName(PropertyId::CancellationDetails_ReasonDetailedText), m_currentErrorMessage.data());
+        m_shouldStop = false;
     }
     else
     {
@@ -194,6 +208,13 @@ std::shared_ptr<ISpxSynthesisResult> CSpxUspTtsEngineAdapter::SpeakInternal(cons
     }
 
     return result;
+}
+
+void CSpxUspTtsEngineAdapter::StopSpeaking()
+{
+    SPX_DBG_TRACE_VERBOSE_IF(SPX_DBG_TRACE_USP_TTS, __FUNCTION__);
+    m_shouldStop = true;
+    OnError(true, USP::ErrorCode::ClientClosingConnection, "Synthesis request cancelled by user.");
 }
 
 std::shared_ptr<ISpxNamedProperties> CSpxUspTtsEngineAdapter::GetParentProperties() const
@@ -282,6 +303,7 @@ void CSpxUspTtsEngineAdapter::UspSendMessage(std::unique_ptr<USP::TextMessage> m
     }
 
     SPX_DBG_TRACE_VERBOSE("%s='%s'", message->Path().c_str(), message->Data().c_str());
+    std::weak_ptr<USP::Connection> connection(m_uspConnection);
 
     // NOTE:
     // -----
@@ -296,9 +318,10 @@ void CSpxUspTtsEngineAdapter::UspSendMessage(std::unique_ptr<USP::TextMessage> m
         ptr = message.release();
 
         // NOTE: If the following code doesn't compile complaining about a deleted method call, increment the #IF version check value in line 292
-        std::packaged_task<void()> task([=]()
+        
+        std::packaged_task<void()> task([connection, ptr]()
         {
-            DoSendMessageWork(m_uspConnection, std::unique_ptr<USP::TextMessage>(ptr));
+            DoSendMessageWork(connection, std::unique_ptr<USP::TextMessage>(ptr));
         });
         m_threadService->ExecuteAsync(move(task));
 
@@ -318,9 +341,9 @@ void CSpxUspTtsEngineAdapter::UspSendMessage(std::unique_ptr<USP::TextMessage> m
     // Free to prevent memory leaks. This works since message uses the default deleter
     delete ptr;
 #else
-    std::packaged_task<void()> task([=, message = std::move(message)]() mutable
+    std::packaged_task<void()> task([connection, message = std::move(message)]() mutable
     {
-        DoSendMessageWork(m_uspConnection, std::move(message));
+        DoSendMessageWork(connection, std::move(message));
     });
     m_threadService->ExecuteAsync(move(task));
 #endif
@@ -425,19 +448,24 @@ void CSpxUspTtsEngineAdapter::UspInitialize()
     // We're done!!
     m_uspCallbacks = uspCallbacks;
     m_uspConnection = std::move(uspConnection);
-    m_uspState = UspState::Idle;
-    m_lastConnectTime = std::chrono::system_clock::now();
 
-    // Send speech config message
-    if (m_uspConnection != nullptr)
+    if (m_uspState == UspState::Connecting)
     {
-        properties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Url), m_uspConnection->GetConnectionUrl().c_str());
+        m_uspState = UspState::Idle;
 
-        // Construct config message payload
-        SetSpeechConfigMessage();
+        m_lastConnectTime = std::chrono::system_clock::now();
 
-        // Send speech config
-        UspSendSpeechConfig();
+        // Send speech config message
+        if (m_uspConnection != nullptr)
+        {
+            properties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Url), m_uspConnection->GetConnectionUrl().c_str());
+
+            // Construct config message payload
+            SetSpeechConfigMessage();
+
+            // Send speech config
+            UspSendSpeechConfig();
+        }
     }
 }
 
@@ -587,7 +615,7 @@ void CSpxUspTtsEngineAdapter::OnError(bool transport, USP::ErrorCode errorCode, 
     UNUSED(transport);
     SPX_DBG_TRACE_VERBOSE("Response: On Error: Code:%d, Message: %s.\n", errorCode, errorMessage.c_str());
     std::unique_lock<std::mutex> lock(m_mutex);
-    if (m_uspState != UspState::Idle) // no need to raise an error if synthesis is already done.
+    if (m_uspState != UspState::Idle || m_shouldStop) // no need to raise an error if synthesis is already done.
     {
         m_currentErrorCode = errorCode;
         m_currentErrorMessage = errorMessage;
@@ -595,10 +623,13 @@ void CSpxUspTtsEngineAdapter::OnError(bool transport, USP::ErrorCode errorCode, 
         m_currentErrorMessage += " Received audio size: " + CSpxSynthesisHelper::itos(m_currentReceivedData.size()) + "bytes.";
         m_uspState = UspState::Error;
         m_cv.notify_all();
-    }
 
-    // terminate usp connection on error
-    UspTerminate();
+        if (m_uspState != UspState::Idle)
+        {
+            // terminate usp connection on error
+            UspTerminate();
+        }
+    }
 }
 
 SpxWAVEFORMATEX_Type CSpxUspTtsEngineAdapter::GetOutputFormat(std::shared_ptr<ISpxAudioOutput> output, bool* hasHeader)

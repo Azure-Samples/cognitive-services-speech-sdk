@@ -505,6 +505,7 @@ class ISpxAudioOutput : public ISpxInterfaceBaseFor<ISpxAudioOutput>
 public:
     virtual uint32_t Write(uint8_t* buffer, uint32_t size) = 0;
     virtual void WaitUntilDone() = 0;
+    virtual void ClearUnread() = 0;
     virtual void Close() = 0;
 };
 
@@ -828,6 +829,8 @@ public:
     virtual CSpxAsyncOp<std::shared_ptr<ISpxSynthesisResult>> SpeakAsync(const std::string& text, bool isSsml) = 0;
     virtual std::shared_ptr<ISpxSynthesisResult> StartSpeaking(const std::string& text, bool isSsml) = 0;
     virtual CSpxAsyncOp<std::shared_ptr<ISpxSynthesisResult>> StartSpeakingAsync(const std::string& text, bool isSsml) = 0;
+    virtual void StopSpeaking() = 0;
+    virtual CSpxAsyncOp<void> StopSpeakingAsync() = 0;
 
     virtual void Close() = 0;
 };
@@ -1350,6 +1353,7 @@ class ISpxTtsEngineAdapter : public ISpxInterfaceBaseFor<ISpxTtsEngineAdapter>, 
 public:
     virtual void SetOutput(std::shared_ptr<ISpxAudioOutput> output) = 0;
     virtual std::shared_ptr<ISpxSynthesisResult> Speak(const std::string& text, bool isSsml, const std::wstring& requestId) = 0;
+    virtual void StopSpeaking() = 0;
 };
 
 class ISpxTtsEngineAdapterSite : public ISpxInterfaceBaseFor<ISpxTtsEngineAdapterSite>

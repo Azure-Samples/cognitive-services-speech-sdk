@@ -10,6 +10,7 @@
 #include "handle_helpers.h"
 #include "platform.h"
 #include "string_utils.h"
+#include "async_helpers.h"
 
 using namespace Microsoft::CognitiveServices::Speech::Impl;
 using namespace Microsoft::CognitiveServices::Speech;
@@ -50,7 +51,9 @@ SPXAPI synthesizer_handle_release(SPXSYNTHHANDLE hsynth)
 
 SPXAPI_(bool) synthesizer_async_handle_is_valid(SPXASYNCHANDLE hasync)
 {
-    return Handle_IsValid<SPXASYNCHANDLE, CSpxAsyncOp<std::shared_ptr<ISpxSynthesisResult>>>(hasync);
+    return Handle_IsValid<SPXASYNCHANDLE, CSpxAsyncOp<void>>(hasync)
+        ? Handle_Close<SPXASYNCHANDLE, CSpxAsyncOp<void>>(hasync)
+        : Handle_Close<SPXASYNCHANDLE, CSpxAsyncOp<std::shared_ptr<ISpxSynthesisResult>>>(hasync);
 }
 
 SPXAPI synthesizer_async_handle_release(SPXASYNCHANDLE hasync)
@@ -318,6 +321,44 @@ SPXAPI synthesizer_speak_async_wait_for(SPXASYNCHANDLE hasync, uint32_t millisec
         }
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
+SPXAPI synthesizer_stop_speaking(SPXSYNTHHANDLE hsynth)
+{
+
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        auto synthhandles = CSpxSharedPtrHandleTableManager::Get<ISpxSynthesizer, SPXSYNTHHANDLE>();
+        auto synthesizer = (*synthhandles)[hsynth];
+
+        synthesizer->StopSpeaking();
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
+SPXAPI synthesizer_stop_speaking_async(SPXSYNTHHANDLE hsynth, SPXASYNCHANDLE* phasync)
+{
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, phasync == nullptr);
+
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        *phasync = SPXHANDLE_INVALID;
+
+        auto synthhandles = CSpxSharedPtrHandleTableManager::Get<ISpxSynthesizer, SPXSYNTHHANDLE>();
+        auto synthesizer = (*synthhandles)[hsynth];
+
+        auto asyncop = synthesizer->StopSpeakingAsync();
+        auto ptr = std::make_shared<CSpxAsyncOp<void>>(std::move(asyncop));
+
+        auto asynchandles = CSpxSharedPtrHandleTableManager::Get<CSpxAsyncOp<void>, SPXASYNCHANDLE>();
+        *phasync = asynchandles->TrackHandle(ptr);
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
+SPXAPI synthesizer_stop_async_wait_for(SPXASYNCHANDLE hasync, uint32_t milliseconds)
+{
+    return async_operation_wait_for(hasync, milliseconds);
 }
 
 SPXAPI synthesizer_started_set_callback(SPXSYNTHHANDLE hsynth, PSYNTHESIS_CALLBACK_FUNC pCallback, void* pvContext)

@@ -28,8 +28,7 @@ namespace TTS
     {
         auto endpoint = !DefaultSettingsMap[ENDPOINT].empty() ? DefaultSettingsMap[ENDPOINT]
             : "wss://" + SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Region + ".tts.speech.microsoft.com/cognitiveservices/websocket/v1?TrafficType=Test";
-        auto config = SpeechConfig::FromEndpoint(endpoint, SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
-        return config;
+        return SpeechConfig::FromEndpoint(endpoint, SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
     }
 
     shared_ptr<SpeechConfig> MockSpeechConfig()
@@ -187,7 +186,12 @@ namespace TTS
         return AreBinaryEqual(expectedData->data(), expectedData->size(), ActualData->data(), ActualData->size());
     }
 
-    bool AreBinaryEqual(uint8_t* expectedDataBuffer, size_t expectedDataSize, uint8_t* actualDataBuffer, size_t actualDataSize)
+    bool AreBinaryEqual(std::shared_ptr<std::vector<uint8_t>> expectedData, const std::vector<uint8_t>& ActualData)
+    {
+        return AreBinaryEqual(expectedData->data(), expectedData->size(), ActualData.data(), ActualData.size());
+    }
+
+    bool AreBinaryEqual(const uint8_t* expectedDataBuffer, size_t expectedDataSize, const uint8_t* actualDataBuffer, size_t actualDataSize)
     {
         if (expectedDataBuffer == nullptr || actualDataBuffer == nullptr || expectedDataSize != actualDataSize)
         {

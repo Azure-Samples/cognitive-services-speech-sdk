@@ -41,6 +41,7 @@ public:
     // --- ISpxAudioOutput ---
     virtual uint32_t Write(uint8_t* buffer, uint32_t size) override;
     virtual void Close() override;
+    void ClearUnread() override;
 
     // --- ISpxAudioOutputReader ---
     virtual uint32_t Read(uint8_t* buffer, uint32_t bufferSize) override;

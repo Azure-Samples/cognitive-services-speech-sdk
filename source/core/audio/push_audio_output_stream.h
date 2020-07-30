@@ -41,6 +41,7 @@ public:
     // --- ISpxAudioOutput ---
     uint32_t Write(uint8_t* buffer, uint32_t size) override;
     void Close() override;
+    void ClearUnread() override {}
 
     // --- ISpxAudioStreamReaderInitCallbacks ---
     void SetCallbacks(ISpxAudioStreamWriterInitCallbacks::WriteCallbackFunction_Type writeCallback, ISpxAudioStreamWriterInitCallbacks::CloseCallbackFunction_Type closeCallback) override;

@@ -15,10 +15,6 @@ namespace Speech {
 namespace Impl {
 
 
-CSpxDefaultSpeaker::CSpxDefaultSpeaker()
-{
-}
-
 CSpxDefaultSpeaker::~CSpxDefaultSpeaker()
 {
     Term();
@@ -62,10 +58,11 @@ void CSpxDefaultSpeaker::StartPlayback()
     // Only make playback when audio device is initialized, in order not to abort the synthesizer when audio device is not available
     if (m_audioInitialized && PlayState::Stopped == m_playState)
     {
-        auto result = audio_output_startasync(m_haudio, m_audioFormat.get(), PlayAudioReadCallback, AudioCompleteCallback, BufferUnderRunCallback, this);
+        m_playState = PlayState::Playing;
+        const auto result = audio_output_startasync(m_haudio, m_audioFormat.get(), PlayAudioReadCallback,
+                                                    AudioCompleteCallback, BufferUnderRunCallback, this);
         // Throw error if start failed. Users should ensure that the speaker is available.
         SPX_IFTRUE_THROW_HR(result != AUDIO_RESULT::AUDIO_RESULT_OK, SPXERR_RUNTIME_ERROR);
-        m_playState = PlayState::Playing;
     }
 #endif
 }
@@ -76,7 +73,7 @@ void CSpxDefaultSpeaker::PausePlayback()
     // Only make the operation when audio device is initialized, in order not to abort the synthesizer when audio device is not available
     if (m_audioInitialized && PlayState::Playing == m_playState)
     {
-        auto result = audio_output_pause(m_haudio);
+        const auto result = audio_output_pause(m_haudio);
         SPX_IFTRUE_THROW_HR(result != AUDIO_RESULT::AUDIO_RESULT_OK, SPXERR_RUNTIME_ERROR);
     }
 #endif
@@ -85,10 +82,11 @@ void CSpxDefaultSpeaker::PausePlayback()
 void CSpxDefaultSpeaker::StopPlayback()
 {
 #ifdef AUDIO_OUTPUT_DEVICE_AVAILABLE
+    SPX_DBG_TRACE_VERBOSE(__FUNCTION__);
     // Only make the operation when audio device is initialized, in order not to abort the synthesizer when audio device is not available
     if (m_audioInitialized && (PlayState::Playing == m_playState || PlayState::Paused == m_playState))
     {
-        auto result = audio_output_stop(m_haudio); // This will wait 5s for the remaining rendering to complete
+        const auto result = audio_output_stop(m_haudio); // This will wait 5s for the remaining rendering to complete
         SPX_IFTRUE_THROW_HR(result != AUDIO_RESULT::AUDIO_RESULT_OK, SPXERR_RUNTIME_ERROR);
     }
 #endif
@@ -130,6 +128,15 @@ void CSpxDefaultSpeaker::WaitUntilDone()
 #endif // AUDIO_OUTPUT_DEVICE_AVAILABLE
 }
 
+void CSpxDefaultSpeaker::ClearUnread()
+{
+    StopPlayback();
+#ifdef AUDIO_OUTPUT_DEVICE_AVAILABLE
+    std::unique_lock<std::mutex> lock(m_playMutex);
+    m_audioStream->ClearUnread();
+#endif // AUDIO_OUTPUT_DEVICE_AVAILABLE
+}
+
 void CSpxDefaultSpeaker::Close()
 {
     m_audioStream->Close();
@@ -137,12 +144,12 @@ void CSpxDefaultSpeaker::Close()
 
 uint16_t CSpxDefaultSpeaker::GetFormat(SPXWAVEFORMATEX* formatBuffer, uint16_t formatSize)
 {
-    uint16_t formatSizeRequired = sizeof(SPXWAVEFORMATEX);
+    const uint16_t formatSizeRequired = sizeof(SPXWAVEFORMATEX);
     SPX_DBG_TRACE_VERBOSE("CSpxDefaultSpeaker::GetFormat is called formatBuffer is %s formatSize=%d", formatBuffer ? "not null" : "null", formatSize);
 
     if (formatBuffer != nullptr)
     {
-        size_t size = std::min(static_cast<size_t>(formatSize), sizeof(AUDIO_WAVEFORMAT));
+        const size_t size = std::min(static_cast<size_t>(formatSize), sizeof(AUDIO_WAVEFORMAT));
         memcpy(formatBuffer, m_audioFormat.get(), size);
 
         if (formatSize >= (uint16_t)sizeof(SPXWAVEFORMATEX))
@@ -160,7 +167,7 @@ void CSpxDefaultSpeaker::SetFormat(SPXWAVEFORMATEX* pformat)
     SPX_IFTRUE_THROW_HR(m_audioFormat != nullptr, SPXERR_ALREADY_INITIALIZED);
 
     // Allocate the buffer for the format
-    auto formatSize = sizeof(AUDIO_WAVEFORMAT);
+    const auto formatSize = sizeof(AUDIO_WAVEFORMAT);
     m_audioFormat = SpxAllocSharedBuffer<AUDIO_WAVEFORMAT>(formatSize);
     SPX_DBG_TRACE_VERBOSE("CSpxDefaultSpeaker::SetFormat is called with format 0x%p", (void*)pformat);
 
@@ -215,14 +222,16 @@ void CSpxDefaultSpeaker::InitializeAudio()
 
 int CSpxDefaultSpeaker::PlayAudioReadCallback(void* pContext, uint8_t* pBuffer, uint32_t size)
 {
-    auto defaultSpeaker = (CSpxDefaultSpeaker*)pContext;
-    auto filledSize = defaultSpeaker->m_audioStream->Read(pBuffer, std::min(size, (uint32_t)CHUNK_SIZE)); // The default buffer size is 1600000, which is too long
-    return (int)filledSize;
+    auto defaultSpeaker = static_cast<CSpxDefaultSpeaker*>(pContext);
+    // The default buffer size is 1600000, which is too long
+    const auto filledSize = defaultSpeaker->m_audioStream->Read(pBuffer, std::min(size, static_cast<uint32_t>(CHUNK_SIZE)));
+    return static_cast<int>(filledSize);
 }
 
 void CSpxDefaultSpeaker::AudioCompleteCallback(void* pContext)
 {
-    auto defaultSpeaker = (CSpxDefaultSpeaker*)pContext;
+    SPX_DBG_TRACE_VERBOSE(__FUNCTION__);
+    auto defaultSpeaker = static_cast<CSpxDefaultSpeaker*>(pContext);
     std::unique_lock<std::mutex> lock(defaultSpeaker->m_playMutex);
     defaultSpeaker->m_playState = PlayState::Stopped;
     defaultSpeaker->m_cv.notify_all();

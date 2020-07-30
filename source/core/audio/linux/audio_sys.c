@@ -313,7 +313,17 @@ static AUDIO_RESULT write_audio_stream(
                 }
             }
 
-            snd_pcm_drain(audioDevice->pcmHandle);
+            Lock(audioData->lock);
+            output_canceled = audioData->output_canceled;
+            Unlock(audioData->lock);
+            if (output_canceled)
+            {
+                snd_pcm_drop(audioDevice->pcmHandle);
+            }
+            else
+            {
+                snd_pcm_drain(audioDevice->pcmHandle);
+            }
 
             if (hw_params)
             {

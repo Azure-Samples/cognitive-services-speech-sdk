@@ -145,6 +145,7 @@ namespace Config
 #define SYNTHESIS_SHORT_UTTERANCE_CHINESE "SynthesisShortUtteranceChinese"
 #define SYNTHESIS_UTTERANCE_CHINESE_1 "SynthesisUtteranceChinese1"
 #define SYNTHESIS_UTTERANCE_CHINESE_2 "SynthesisUtteranceChinese2"
+#define SYNTHESIS_LONG_UTTERANCE "SynthesisLongUtterance"
 
 struct SubscriptionRegion
 {

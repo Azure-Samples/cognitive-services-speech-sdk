@@ -518,5 +518,16 @@
         }
       ]
     }
+  },
+  "SynthesisLongUtterance": {
+    "FilePath": "null",
+    "NativeLanguage": "en-US",
+    "Utterances": {
+      "en-US": [
+        {
+          "Text": "I have a dream that one day this nation will rise up and live out the true meaning of its creed: We hold these truths to be self-evident, that all men are created equal."
+        }
+      ]
+    }
   }
 }

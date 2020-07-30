@@ -66,7 +66,9 @@ namespace TTS
 
     bool AreBinaryEqual(std::shared_ptr<std::vector<uint8_t>> expectedData, std::shared_ptr<std::vector<uint8_t>> ActualData);
 
-    bool AreBinaryEqual(uint8_t* expectedDataBuffer, size_t expectedDataSize, uint8_t* actualDataBuffer, size_t actualDataSize);
+    bool AreBinaryEqual(std::shared_ptr<std::vector<uint8_t>> expectedData, const std::vector<uint8_t>& ActualData);
+
+    bool AreBinaryEqual(const uint8_t* expectedDataBuffer, size_t expectedDataSize, const uint8_t* actualDataBuffer, size_t actualDataSize);
 
     std::shared_ptr<std::vector<uint8_t>> BuildMockSynthesizedAudio(const std::string& text, const std::string& language, const std::string& voice);
 
