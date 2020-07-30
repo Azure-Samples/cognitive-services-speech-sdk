@@ -109,6 +109,21 @@ public:
     }
 
     /// <summary>
+    /// Creates an AudioConfig object representing a specific speaker on the system.
+    /// Added in version 1.14.0.
+    /// </summary>
+    /// <param name="deviceName">Specifies the device name. Please refer to <a href="https://aka.ms/csspeech/microphone-selection">this page</a> on how to retrieve platform-specific audio device names.</param>
+    /// <returns>A shared pointer to the AudioConfig object</returns>
+    static std::shared_ptr<AudioConfig> FromSpeakerOutput(const SPXSTRING& deviceName)
+    {
+        SPXAUDIOCONFIGHANDLE haudioConfig = SPXHANDLE_INVALID;
+        SPX_THROW_ON_FAIL(audio_config_create_audio_output_from_a_speaker(&haudioConfig, Utils::ToUTF8(deviceName).c_str()));
+
+        auto config = new AudioConfig(haudioConfig);
+        return std::shared_ptr<AudioConfig>(config);
+    }
+
+    /// <summary>
     /// Creates an AudioConfig object representing the specified file for audio output.
     /// Added in version 1.4.0
     /// </summary>

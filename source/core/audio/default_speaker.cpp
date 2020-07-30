@@ -184,6 +184,18 @@ void CSpxDefaultSpeaker::InitializeAudio()
         memcpy(m_hsetting, m_audioFormat.get(), sizeof(AUDIO_WAVEFORMAT));
         m_hsetting->eDataFlow = AUDIO_RENDER;
 
+        // Select device
+        auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
+        SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_INVALID_ARG);
+
+        auto deviceName = properties->GetStringValue(GetPropertyName(PropertyId::AudioConfig_DeviceNameForRender));
+        SPX_DBG_TRACE_VERBOSE("The device name of speaker as a property is '%s'", deviceName.c_str());
+
+        if (!deviceName.empty())
+        {
+            STRING_copy(m_hsetting->hDeviceName, deviceName.c_str());
+        }
+
         // If the audio format is not PCM, this will fail with internal error code 0x88890008
         m_haudio = audio_create_with_parameters(m_hsetting);
 

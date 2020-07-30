@@ -64,6 +64,7 @@ constexpr const char* GetPropertyName(const PropertyId id)
     case PropertyId::AudioConfig_SampleRateForCapture: return "AudioConfig_SampleRateForCapture";
     case PropertyId::AudioConfig_BitsPerSampleForCapture: return "AudioConfig_BitsPerSampleForCapture";
     case PropertyId::AudioConfig_AudioSource: return "AudioConfig_AudioSource";
+    case PropertyId::AudioConfig_DeviceNameForRender: return "AudioConfig_DeviceNameForRender";
     case PropertyId::Speech_LogFilename: return "SPEECH-LogFilename";
     case PropertyId::Conversation_ApplicationId: return "DIALOG-ApplicationId";
     case PropertyId::Conversation_DialogType: return "DIALOG-DialogType";

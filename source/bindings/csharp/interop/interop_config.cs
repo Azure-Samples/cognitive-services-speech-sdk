@@ -32,6 +32,9 @@ namespace Microsoft.CognitiveServices.Speech.Internal
         [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR audio_config_create_audio_output_from_default_speaker(out SPXAUDIOCONFIGHANDLE audioConfig);
         [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention, CharSet = CharSet.Ansi)]
+        public static extern SPXHR audio_config_create_audio_output_from_a_speaker(out SPXAUDIOCONFIGHANDLE audioConfig,
+            [MarshalAs(UnmanagedType.LPStr)] string deviceName);
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention, CharSet = CharSet.Ansi)]
         public static extern SPXHR audio_config_create_audio_output_from_wav_file_name(out SPXAUDIOCONFIGHANDLE audioConfig,
             IntPtr fileName);
         [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]

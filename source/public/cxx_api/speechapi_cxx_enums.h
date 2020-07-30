@@ -339,6 +339,14 @@ enum class PropertyId
     AudioConfig_AudioSource = 8004,
 
     /// <summary>
+    /// The device name for audio render. Under normal circumstances, you shouldn't have to
+    /// use this property directly.
+    /// Instead, use <see cref="AudioConfig::FromSpeakerOutput"/>.
+    /// Added in version 1.14.0
+    /// </summary>
+    AudioConfig_DeviceNameForRender = 8005,
+
+    /// <summary>
     /// The file name to write logs.
     /// Added in version 1.4.0.
     /// </summary>

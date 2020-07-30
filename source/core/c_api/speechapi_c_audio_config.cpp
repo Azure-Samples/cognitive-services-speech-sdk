@@ -132,6 +132,23 @@ SPXAPI audio_config_create_audio_output_from_default_speaker(SPXAUDIOCONFIGHANDL
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
+SPXAPI audio_config_create_audio_output_from_a_speaker(SPXAUDIOCONFIGHANDLE* haudioConfig, const char* deviceName)
+{
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, haudioConfig == nullptr);
+
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        *haudioConfig = SPXHANDLE_INVALID;
+
+        auto config = SpxCreateObjectWithSite<ISpxAudioConfig>("CSpxAudioConfig", SpxGetRootSite());
+        auto properties = SpxQueryService<ISpxNamedProperties>(config);
+        properties->SetStringValue(GetPropertyName(PropertyId::AudioConfig_DeviceNameForRender), deviceName);
+
+        *haudioConfig = CSpxSharedPtrHandleTableManager::TrackHandle<ISpxAudioConfig, SPXAUDIOCONFIGHANDLE>(config);
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
 SPXAPI audio_config_create_audio_output_from_wav_file_name(SPXAUDIOCONFIGHANDLE* haudioConfig, const char* fileName)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, haudioConfig == nullptr);

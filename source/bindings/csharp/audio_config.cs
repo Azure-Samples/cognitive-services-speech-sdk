@@ -113,6 +113,19 @@ namespace Microsoft.CognitiveServices.Speech.Audio
         }
 
         /// <summary>
+        /// Creates an AudioConfig object representing the designated output device.
+        /// NOTE: This method was added in version 1.14.0.
+        /// </summary>
+        /// <param name="deviceName">Specifies the device name. Please refer to <a href="https://aka.ms/csspeech/microphone-selection">this page</a> on how to retrieve platform-specific audio device names.</param>
+        /// <returns>The audio output configuration being created.</returns>
+        public static AudioConfig FromSpeakerOutput(string deviceName)
+        {
+            IntPtr audioConfigHandle = IntPtr.Zero;
+            ThrowIfFail(Internal.AudioConfig.audio_config_create_audio_output_from_a_speaker(out audioConfigHandle, deviceName));
+            return new AudioConfig(audioConfigHandle);
+        }
+
+        /// <summary>
         /// Creates an AudioConfig object representing the specified file.
         /// Added in version 1.4.0
         /// </summary>

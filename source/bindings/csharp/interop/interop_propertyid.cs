@@ -57,6 +57,7 @@ namespace Microsoft.CognitiveServices.Speech.Internal
         AudioConfig_SampleRateForCapture = 8002,
         AudioConfig_BitsPerSampleForCapture = 8003,
         AudioConfig_AudioSource = 8004,
+        AudioConfig_DeviceNameForRender = 8005,
         Speech_LogFilename = 9001,
         Conversation_ApplicationId = 10000,
         Conversation_DialogType = 10001,
