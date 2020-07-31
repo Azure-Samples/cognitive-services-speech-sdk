@@ -8,6 +8,7 @@
 #pragma once
 #include "recognizer.h"
 #include "thread_service.h"
+#include <object_with_site_init_impl.h>
 
 namespace Microsoft {
 namespace CognitiveServices {

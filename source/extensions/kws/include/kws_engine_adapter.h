@@ -13,6 +13,7 @@
 #include "interface_helpers.h"
 
 #include <kws_engine.h>
+#include <object_with_site_init_impl.h>
 
 namespace Microsoft {
 namespace CognitiveServices {

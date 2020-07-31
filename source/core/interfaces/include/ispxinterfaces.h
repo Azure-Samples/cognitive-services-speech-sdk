@@ -11,9 +11,7 @@
 #include <map>
 #include <unordered_map>
 #include <chrono>
-#include <json.h>
 #include "spxcore_common.h"
-#include "audio_chunk.h"
 #include "platform.h"
 #include "asyncop.h"
 #include "speechapi_cxx_eventsignal.h"
@@ -21,106 +19,20 @@
 #include "speechapi_cxx_string_helpers.h"
 #include "shared_ptr_helpers.h"
 #include "spxdebug.h"
+#include <cstring>
 
+#include <interfaces/aggregates.h>
+#include <interfaces/audio.h>
+#include <interfaces/base.h>
+#include <interfaces/containers.h>
+#include <interfaces/data.h>
+#include <interfaces/notify_me.h>
 #include <interfaces/types.h>
 
 namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
 namespace Impl {
-
-class ISpxInterfaceBase : public std::enable_shared_from_this<ISpxInterfaceBase>
-{
-public:
-
-    virtual ~ISpxInterfaceBase() = default;
-
-    template <class I>
-    std::shared_ptr<I> QueryInterface()
-    {
-        return QueryInterfaceInternal<I>();
-    }
-
-protected:
-
-    template <class I>
-    std::shared_ptr<I> QueryInterfaceInternal()
-    {
-        // try to query for the interface via our virtual method...
-        auto ptr = QueryInterface(SpxTypeName(I));
-        if (ptr != nullptr)
-        {
-            auto interfacePtr = reinterpret_cast<I*>(ptr);
-            return interfacePtr->shared_from_this();
-        }
-
-        // if that fails, let the caller know
-        return nullptr;
-    }
-
-    virtual void* QueryInterface(const char* /*interfaceName*/) { return nullptr; }
-
-    typedef std::enable_shared_from_this<ISpxInterfaceBase> base_type;
-
-    std::shared_ptr<ISpxInterfaceBase> shared_from_this()
-    {
-        return base_type::shared_from_this();
-    }
-
-    std::shared_ptr<const ISpxInterfaceBase> shared_from_this() const
-    {
-        return base_type::shared_from_this();
-    }
-};
-
-template <class I>
-std::shared_ptr<I> SpxQueryInterface(std::shared_ptr<ISpxInterfaceBase> from)
-{
-    if (from != nullptr)
-    {
-        #if defined(_MSC_VER) && defined(_DEBUG)
-            std::shared_ptr<I> ptr1 = std::dynamic_pointer_cast<I>(from);
-            std::shared_ptr<I> ptr2 = from->QueryInterface<I>();
-            SPX_TRACE_ERROR_IF(ptr1 != nullptr && ptr2 == nullptr, "dynamic_pointer_cast() and QueryInterface() do not agree!! UNEXPECTED!");
-            SPX_TRACE_ERROR_IF(ptr1 == nullptr && ptr2 != nullptr, "dynamic_pointer_cast() and QueryInterface() do not agree!! UNEXPECTED!");
-            SPX_IFTRUE_THROW_HR(ptr1 != nullptr && ptr2 == nullptr, SPXERR_ABORT);
-            SPX_IFTRUE_THROW_HR(ptr1 == nullptr && ptr2 != nullptr, SPXERR_ABORT);
-            return ptr1;
-        #elif defined(_MSC_VER)
-            std::shared_ptr<I> ptr = std::dynamic_pointer_cast<I>(from);
-            return ptr != nullptr ? ptr : from->QueryInterface<I>();
-        #else
-            std::shared_ptr<I> ptr = from->QueryInterface<I>();
-            return ptr != nullptr ? ptr : std::dynamic_pointer_cast<I>(from);
-        #endif
-    }
-    return nullptr;
-}
-
-
-template<typename T>
-struct ISpxInterfaceBaseFor : virtual public ISpxInterfaceBase
-{
-public:
-    virtual ~ISpxInterfaceBaseFor() = default;
-
-    std::shared_ptr<T> shared_from_this()
-    {
-        std::shared_ptr<T> result(base_type::shared_from_this(), static_cast<T*>(this));
-        return result;
-    }
-
-    std::shared_ptr<const T> shared_from_this() const
-    {
-        std::shared_ptr<const T> result(base_type::shared_from_this(), static_cast<const T*>(this));
-        return result;
-    }
-
-private:
-    typedef ISpxInterfaceBase base_type;
-
-    ISpxInterfaceBaseFor&& operator =(const ISpxInterfaceBaseFor&&) = delete;
-};
 
 class ISpxObjectInit : public ISpxInterfaceBaseFor<ISpxObjectInit>
 {
@@ -147,7 +59,6 @@ std::shared_ptr<I> SpxCreateObjectInternal(Types&&... Args)
     auto it = std::dynamic_pointer_cast<I>(ptr);
     return it;
 }
-
 
 class ISpxObjectFactory : public ISpxInterfaceBaseFor<ISpxObjectFactory>
 {
@@ -183,66 +94,6 @@ public:
     virtual void* CreateObject(const char* className, const char* interfaceName) = 0;
 };
 
-template <class T>
-class ISpxObjectWithSiteInitImpl : public ISpxObjectWithSite, public ISpxObjectInit
-{
-public:
-    // --- ISpxObjectWithSite
-    void SetSite(std::weak_ptr<ISpxGenericSite> site) override
-    {
-        auto shared = site.lock();
-        auto ptr = SpxQueryInterface<T>(shared);
-        SPX_IFFALSE_THROW_HR((bool)ptr == (bool)shared, SPXERR_INVALID_ARG);
-
-        if (m_hasSite)
-        {
-            Term();
-            m_site.reset();
-            m_hasSite = false;
-        }
-
-        m_site = ptr;
-        m_hasSite = ptr.get() != nullptr;
-
-        if (m_hasSite)
-        {
-            Init();
-        }
-    }
-
-    // --- ISpxObjectInit
-    void Init() override
-    {
-    }
-
-    void Term() override
-    {
-    }
-
-protected:
-    ISpxObjectWithSiteInitImpl() : m_hasSite(false) {}
-
-    std::shared_ptr<T> GetSite() const
-    {
-        return m_site.lock();
-    }
-
-    template<class F>
-    void InvokeOnSite(F f)
-    {
-        auto site = GetSite();
-        if (site != nullptr)
-        {
-            f(site);
-        }
-    }
-
-
-private:
-    bool m_hasSite;
-    mutable std::weak_ptr<T> m_site;
-};
-
 class ISpxServiceProvider : public ISpxInterfaceBaseFor<ISpxServiceProvider>
 {
 public:
@@ -261,78 +112,6 @@ public:
 
     virtual void AddService(const char* serviceName, std::shared_ptr<ISpxInterfaceBase> service) = 0;
 };
-
-template <typename... Ts>
-class ISpxNotifyMe : public ISpxInterfaceBaseFor<ISpxNotifyMe<Ts...>>
-{
-public:
-
-    virtual void NotifyMe(Ts...) = 0;
-};
-
-template <class I, class ...Is>
-using ISpxNotifyMeSP = ISpxNotifyMe<const std::shared_ptr<I>&, const std::shared_ptr<Is>&...>;
-
-#pragma pack (push, 1)
-struct SPXWAVEFORMAT
-{
-    uint16_t wFormatTag;        /* format type */
-    uint16_t nChannels;         /* number of channels (i.e. mono, stereo...) */
-    uint32_t nSamplesPerSec;    /* sample rate */
-    uint32_t nAvgBytesPerSec;   /* for buffer estimation */
-    uint16_t nBlockAlign;       /* block size of data */
-    uint16_t wBitsPerSample;    /* Number of bits per sample of mono data */
-};
-
-struct SPXWAVEFORMATEX
-{
-    uint16_t wFormatTag;        /* format type */
-    uint16_t nChannels;         /* number of channels (i.e. mono, stereo...) */
-    uint32_t nSamplesPerSec;    /* sample rate */
-    uint32_t nAvgBytesPerSec;   /* for buffer estimation */
-    uint16_t nBlockAlign;       /* block size of data */
-    uint16_t wBitsPerSample;    /* Number of bits per sample of mono data */
-    uint16_t cbSize;            /* The count in bytes of the size of extra information (after cbSize) */
-};
-#pragma pack (pop)
-
-template<typename T>
-struct BufferContainer
-{
-public:
-    BufferContainer(std::size_t size) : m_data{ SpxAllocUniqueBuffer<T>(size) }, m_size{ size }
-    {}
-
-    T* get() const noexcept
-    {
-        return m_data.get();
-    }
-
-    std::size_t size() const noexcept
-    {
-        return m_size;
-    }
-
-    T& operator*() const
-    {
-        return *m_data;
-    }
-
-    T* operator->() const noexcept
-    {
-        return m_data.get();
-    }
-
-    explicit operator T* ()
-    {
-        return m_data.get();
-    }
-private:
-    buffer_unique_ptr_t<T> m_data;
-    std::size_t m_size;
-};
-
-using SpxWaveFormatEx = BufferContainer<SPXWAVEFORMATEX>;
 
 using SpxWAVEFORMATEX_Type = std::shared_ptr<SPXWAVEFORMATEX>;
 inline SpxWAVEFORMATEX_Type SpxAllocWAVEFORMATEX(size_t sizeInBytes)
@@ -391,17 +170,7 @@ inline SpxSharedAudioBuffer_Type SpxAllocSharedAudioBuffer(size_t sizeInBytes)
     return SpxAllocSharedUint8Buffer(sizeInBytes);
 }
 
-class ISpxAudioStream : public ISpxInterfaceBaseFor<ISpxAudioStream>
-{
-public:
-    virtual uint16_t GetFormat(SPXWAVEFORMATEX* pformat, uint16_t cbFormat) = 0;
-};
 
-class ISpxAudioStreamInitFormat : public ISpxInterfaceBaseFor<ISpxAudioStreamInitFormat>
-{
-public:
-    virtual void SetFormat(SPXWAVEFORMATEX* format) = 0;
-};
 
 class ISpxAudioOutputFormat : public ISpxInterfaceBaseFor<ISpxAudioOutputFormat>
 {
@@ -554,20 +323,7 @@ public:
     virtual std::shared_ptr<ISpxAudioStream> GetStream() = 0;
 };
 
-class ISpxAudioProcessor : public ISpxInterfaceBaseFor<ISpxAudioProcessor>
-{
-public:
 
-    virtual void SetFormat(const SPXWAVEFORMATEX* pformat) = 0;
-    virtual void ProcessAudio(const DataChunkPtr& audioChunk) = 0;
-};
-
-class ISpxAudioProcessorMinInput :
-    public ISpxInterfaceBaseFor<ISpxAudioProcessorMinInput>
-{
-public:
-    virtual void SetMinInputSize(const uint64_t sizeInTicks) = 0;
-};
 
 class ISpxInternalAudioCodecAdapter : public ISpxInterfaceBaseFor <ISpxInternalAudioCodecAdapter>
 {
@@ -1173,66 +929,6 @@ public:
     virtual void InitFromStream(std::shared_ptr<ISpxAudioStream> stream) = 0;
 };
 
-class ISpxAudioSource : public ISpxInterfaceBaseFor<ISpxAudioSource>
-{
-public:
-
-    enum class State { Idle = 0, Started = 1, DataAvailable = 2, EndOfStream = 3 };
-    virtual State GetState() const = 0;
-    virtual SpxWaveFormatEx GetFormat() const = 0;
-};
-
-class ISpxAudioSourceInit : public ISpxInterfaceBaseFor<ISpxAudioSourceInit>
-{
-public:
-
-    virtual void InitFromMicrophone() = 0;
-    virtual void InitFromFile(const wchar_t* pszFileName) = 0;
-    virtual void InitFromStream(std::shared_ptr<ISpxAudioStream> stream) = 0;
-};
-
-class ISpxBufferData : public ISpxInterfaceBaseFor<ISpxBufferData>
-{
-public:
-
-    virtual uint64_t GetOffset() = 0;
-    virtual uint64_t GetNewMultiReaderOffset() = 0;
-
-    virtual uint32_t Read(uint8_t* buffer, uint32_t size) = 0;
-    virtual uint32_t ReadAt(uint64_t offset, uint8_t* buffer, uint32_t size) = 0;
-
-    virtual uint64_t GetBytesDead() = 0;
-    virtual uint64_t GetBytesRead() = 0;
-    virtual uint64_t GetBytesReady() = 0;
-    virtual uint64_t GetBytesReadyMax() = 0;
-};
-
-class ISpxBufferDataWriter : public ISpxInterfaceBaseFor<ISpxBufferDataWriter>
-{
-public:
-    virtual void Write(uint8_t* buffer, uint32_t size) = 0;
-};
-
-class ISpxBufferProperties : public ISpxInterfaceBaseFor<ISpxBufferProperties>
-{
-public:
-    using PropertyName_Type = std::shared_ptr<const char>;
-    using PropertyValue_Type = std::shared_ptr<const char>;
-    using FoundPropertyData_Type = std::tuple<OffsetType, PropertyName_Type, PropertyValue_Type>;
-
-    virtual void SetBufferProperty(const char* name, const char* value) = 0;
-
-    virtual PropertyValue_Type GetBufferProperty(const char* name, const char* defaultValue = nullptr) = 0;
-    virtual PropertyValue_Type GetBufferProperty(const char* name, OffsetType offset, int direction = -1, OffsetType* foundAtOffset = nullptr) = 0;
-
-    virtual std::list<FoundPropertyData_Type> GetBufferProperties(const char* name, OffsetType begin, OffsetType end) = 0;
-    virtual std::list<FoundPropertyData_Type> GetBufferProperties(OffsetType begin, OffsetType end) = 0;
-};
-
-using ISpxAudioProcessorNotifyMe = ISpxNotifyMeSP<ISpxAudioProcessor>;
-
-using ISpxAudioSourceNotifyMe = ISpxNotifyMeSP<ISpxAudioSource, ISpxBufferData>;
-
 class ISpxAudioSourceControl : public ISpxInterfaceBaseFor<ISpxAudioSourceControl>
 {
 public:
@@ -1348,7 +1044,7 @@ public:
 
 class ISpxTtsEngineAdapterSite;
 
-class ISpxTtsEngineAdapter : public ISpxInterfaceBaseFor<ISpxTtsEngineAdapter>, public ISpxObjectWithSiteInitImpl<ISpxTtsEngineAdapterSite>
+class ISpxTtsEngineAdapter : public ISpxInterfaceBaseFor<ISpxTtsEngineAdapter>
 {
 public:
     virtual void SetOutput(std::shared_ptr<ISpxAudioOutput> output) = 0;
@@ -1820,13 +1516,7 @@ public:
 };
 
 
-class ISpxAudioSessionShim: public ISpxInterfaceBaseFor<ISpxAudioSessionShim>
-{
-public:
-    virtual void StartAudio() = 0;
-    virtual void StopAudio() = 0;
-    virtual SpxWaveFormatEx GetFormat() = 0;
-};
+
 
 class ISpxRetrievable: public ISpxInterfaceBaseFor<ISpxRetrievable>
 {

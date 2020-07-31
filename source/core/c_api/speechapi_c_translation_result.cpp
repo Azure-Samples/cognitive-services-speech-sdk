@@ -9,6 +9,7 @@
 #include "handle_table.h"
 #include "string_utils.h"
 #include "speechapi_cxx_translation_result.h"
+#include <interface_helpers.h>
 
 using namespace Microsoft::CognitiveServices::Speech::Impl;
 

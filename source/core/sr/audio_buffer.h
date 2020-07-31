@@ -9,10 +9,10 @@
 
 #include <memory>
 #include <list>
+#include <mutex>
 #include <deque>
 #include "spxcore_common.h"
-#include "audio_chunk.h"
-#include <mutex>
+#include <ispxinterfaces.h>
 
 namespace Microsoft {
 namespace CognitiveServices {

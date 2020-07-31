@@ -20,6 +20,7 @@
 #include "usp.h"
 #include "activity_session.h"
 #include "json.h"
+#include <object_with_site_init_impl.h>
 
 #ifdef _MSC_VER
 #include <shared_mutex>
@@ -33,9 +34,6 @@ namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
 namespace Impl {
-
-
-
 
 class CSpxUspRecoEngineAdapter :
     public ISpxObjectWithSiteInitImpl<ISpxRecoEngineAdapterSite>,

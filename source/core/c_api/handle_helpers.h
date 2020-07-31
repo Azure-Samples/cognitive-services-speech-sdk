@@ -9,7 +9,7 @@
 #include <speechapi_c_common.h>
 #include "try_catch_helpers.h"
 #include "handle_table.h"
-
+#include <interface_helpers.h>
 
 namespace Microsoft {
 namespace CognitiveServices {

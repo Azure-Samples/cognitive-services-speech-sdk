@@ -47,6 +47,7 @@ TRACELOGGING_DEFINE_PROVIDER(tracingEventProvider,
 #include "property_id_2_name_map.h"
 #include "try_catch_helpers.h"
 #include "time_utils.h"
+#include <json.h>
 
 namespace Microsoft {
 namespace CognitiveServices {

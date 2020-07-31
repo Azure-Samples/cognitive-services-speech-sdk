@@ -8,7 +8,7 @@
 #pragma once
 #include "service_helpers.h"
 #include "interface_helpers.h"
-
+#include <object_with_site_init_impl.h>
 
 namespace Microsoft {
 namespace CognitiveServices {

@@ -9,7 +9,7 @@
 #include "ispxinterfaces.h"
 #include "delegate_audio_pump_impl.h"
 #include "interface_helpers.h"
-
+#include <object_with_site_init_impl.h>
 
 namespace Microsoft {
 namespace CognitiveServices {

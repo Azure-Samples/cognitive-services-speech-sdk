@@ -5,12 +5,13 @@
 
 #include "stdafx.h"
 #include "memory_utils.h"
+#include <interface_helpers.h>
 
 using namespace Microsoft::CognitiveServices::Speech::Impl;
 
 namespace Memory
 {
-    
+
 void CheckObjectCount(SPXHANDLE hspeechconfig)
 {
     auto config_handles = CSpxSharedPtrHandleTableManager::Get<ISpxSpeechConfig, SPXSPEECHCONFIGHANDLE>();

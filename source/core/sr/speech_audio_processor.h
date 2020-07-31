@@ -11,8 +11,7 @@
 #include "spxcore_common.h"
 #include "ispxinterfaces.h"
 #include "interface_helpers.h"
-#include "audio_chunk.h"
-
+#include <object_with_site_init_impl.h>
 
 namespace Microsoft {
 namespace CognitiveServices {

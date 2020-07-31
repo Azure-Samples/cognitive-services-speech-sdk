@@ -9,7 +9,7 @@
 #include "mock_interactive_microphone.h"
 #include "create_object_helpers.h"
 #include "service_helpers.h"
-
+#include <object_with_site_init_impl.h>
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -80,7 +80,7 @@ void CSpxMockInteractiveMicrophone::InitMockAudioPump()
     {
         properties->SetStringValue("CARBON-INTERNAL-MOCK-RealTimeAudioPercentage", "100");
     }
-    
+
     // And ... We're finished
     m_delegateToAudioPump = SpxQueryInterface<ISpxAudioPump>(pumpInit);
 }
@@ -97,14 +97,14 @@ void CSpxMockInteractiveMicrophone::InitWavFilePump(const std::wstring& fileName
 
     // Set other various properties that control the mock
     auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
-    
+
     audioFilePump->SetContinuousLoop(PAL::ToBool(properties->GetStringValue("CARBON-INTERNAL-MOCK-ContinuousAudio").c_str()));
     audioFilePump->SetIterativeLoop(PAL::ToBool(properties->GetStringValue("CARBON-INTERNAL-MOCK-IterativeAudio").c_str()));
 
     // Set other various properties that control the mock
     auto maybeProperty = properties->GetStringValue("CARBON-INTERNAL-MOCK-RealTimeAudioPercentage", "100");
     properties->SetStringValue("CARBON-INTERNAL-MOCK-WaveRealTimeAudioPercentage", maybeProperty.c_str());
-    
+
     // and ... We're finished
     m_delegateToAudioPump = SpxQueryInterface<ISpxAudioPump>(audioFilePump);
 }

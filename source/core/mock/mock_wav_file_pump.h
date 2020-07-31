@@ -12,7 +12,7 @@
 #include "mock_audio_file_impl.h"
 #include "mock_audio_reader_impl.h"
 #include "delegate_audio_pump_impl.h"
-
+#include <object_with_site_init_impl.h>
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -20,7 +20,7 @@ namespace Speech {
 namespace Impl {
 
 
-class CSpxMockWavFilePump : 
+class CSpxMockWavFilePump :
     public ISpxObjectWithSiteInitImpl<ISpxGenericSite>,
     public ISpxMockAudioFileImpl,
     public ISpxDelegateAudioPumpImpl

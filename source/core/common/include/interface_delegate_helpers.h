@@ -11,7 +11,7 @@
 #include "spxcore_common.h"
 #include "shared_ptr_helpers.h"
 #include "string_utils.h"
-
+#include <interface_helpers.h>
 
 namespace Microsoft {
 namespace CognitiveServices {

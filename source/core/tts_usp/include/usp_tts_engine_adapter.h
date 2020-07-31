@@ -16,6 +16,7 @@
 #include "usp_text_message.h"
 #include "usp.h"
 #include "service_helpers.h"
+#include <object_with_site_init_impl.h>
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -25,6 +26,7 @@ namespace Impl {
 constexpr auto METADATA_TYPE_WORD_BOUNDARY = "WordBoundary";
 
 class CSpxUspTtsEngineAdapter :
+    public ISpxObjectWithSiteInitImpl<ISpxTtsEngineAdapterSite>,
     public ISpxGenericSite,
     public ISpxServiceProvider,
     public USP::ISpxUspCallbacks,

@@ -10,6 +10,7 @@
 #include <property_id_2_name_map.h>
 #include "conversation_connection.h"
 #include "conversation_manager.h"
+#include <object_with_site_init_impl.h>
 
 namespace Microsoft {
 namespace CognitiveServices {

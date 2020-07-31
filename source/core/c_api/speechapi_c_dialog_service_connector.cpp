@@ -14,6 +14,7 @@
 #include "string_utils.h"
 #include "service_helpers.h"
 #include "async_helpers.h"
+#include <json.h>
 
 using namespace Microsoft::CognitiveServices::Speech::Impl;
 

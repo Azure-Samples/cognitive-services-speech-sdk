@@ -13,6 +13,7 @@
 #include "audio_source_microphone_pump_impl.h"
 #include "audio_source_buffer_data_delegate_impl.h"
 #include "audio_source_buffer_service_provider_helper.h"
+#include <object_with_site_init_impl.h>
 
 namespace Microsoft {
 namespace CognitiveServices {

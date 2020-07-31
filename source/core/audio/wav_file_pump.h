@@ -11,7 +11,7 @@
 #include "delegate_audio_pump_impl.h"
 #include "delegate_audio_file_impl.h"
 #include "interface_helpers.h"
-
+#include <object_with_site_init_impl.h>
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -21,7 +21,7 @@ namespace Impl {
 
 class CSpxWavFilePump :
     public ISpxObjectWithSiteInitImpl<ISpxGenericSite>,
-    public ISpxDelegateAudioPumpImpl, 
+    public ISpxDelegateAudioPumpImpl,
     public ISpxDelegateAudioFileImpl
 {
 public:

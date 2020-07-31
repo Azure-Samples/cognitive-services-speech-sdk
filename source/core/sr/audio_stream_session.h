@@ -15,6 +15,7 @@
 #include "audio_buffer.h"
 #include "thread_service.h"
 #include "interaction_id_provider.h"
+#include <object_with_site_init_impl.h>
 
 #include <shared_mutex>
 #include <unordered_map>

@@ -11,7 +11,7 @@
 #include <list>
 #include <deque>
 #include "spxcore_common.h"
-#include "audio_chunk.h"
+#include <ispxinterfaces.h>
 #include <mutex>
 
 #include <audio_source_init_delegate_impl.h>
@@ -19,6 +19,7 @@
 
 #include "session_audio_source_helper.h"
 #include "audio_source_notify_me_track_delegate_impl.h"
+#include <object_with_site_init_impl.h>
 
 namespace Microsoft {
 namespace CognitiveServices {

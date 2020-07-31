@@ -15,7 +15,7 @@
 #include "UnidecRuntime.h"
 #include "AudioEndMetadata.h"
 #include "unidec_config.h"
-
+#include <object_with_site_init_impl.h>
 
 namespace Microsoft {
 namespace CognitiveServices {

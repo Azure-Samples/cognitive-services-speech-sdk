@@ -14,6 +14,7 @@
 #include "interface_helpers.h"
 #include "property_bag_impl.h"
 #include "azure_c_shared_utility_httpapi_wrapper.h"
+#include <object_with_site_init_impl.h>
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -46,6 +47,7 @@ typedef struct RestTtsRequest_Tag
 
 
 class CSpxRestTtsEngineAdapter :
+    public ISpxObjectWithSiteInitImpl<ISpxTtsEngineAdapterSite>,
     public ISpxTtsEngineAdapter,
     public ISpxPropertyBagImpl
 {

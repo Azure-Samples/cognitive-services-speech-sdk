@@ -10,7 +10,7 @@
 #include "microphone_pump_base.h"
 #include "speechapi_cxx_enums.h"
 #include "property_id_2_name_map.h"
-#include "audio_chunk.h"
+#include <ispxinterfaces.h>
 
 
 namespace Microsoft {

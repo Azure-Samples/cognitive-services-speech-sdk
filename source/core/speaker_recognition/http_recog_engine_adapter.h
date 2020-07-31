@@ -12,6 +12,8 @@
 #include "http_response.h"
 #include "http_utils.h"
 #include "http_client.h"
+#include <object_with_site_init_impl.h>
+#include <json.h>
 
 namespace Microsoft {
 namespace CognitiveServices {

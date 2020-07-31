@@ -14,8 +14,6 @@ namespace PAL {
 
 std::string demangle(const char* name);
 
-#define SpxTypeName(x)  typeid(x).name()
-
 template <class T>
 std::string GetTypeName() {
     return demangle(typeid(T).name());

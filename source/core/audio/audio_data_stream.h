@@ -12,7 +12,7 @@
 #include "property_bag_impl.h"
 #include "pull_audio_output_stream.h"
 #include <queue>
-
+#include <object_with_site_init_impl.h>
 
 namespace Microsoft {
 namespace CognitiveServices {

@@ -14,6 +14,7 @@
 #include "interface_helpers.h"
 #include "property_bag_impl.h"
 #include "service_helpers.h"
+#include <object_with_site_init_impl.h>
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -65,7 +66,7 @@ public:
     std::shared_ptr<ISpxGrammar> GetPhraseListGrammar(const wchar_t* name) override;
     void AddGrammar(std::shared_ptr<ISpxGrammar> grammar) override;
     void SetRecognitionFactor(double factor) override;
-    
+
     // --- ISpxGrammar
     std::list<std::string> GetListenForList() override;
 

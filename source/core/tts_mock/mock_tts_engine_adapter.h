@@ -13,7 +13,7 @@
 #include "ispxinterfaces.h"
 #include "interface_helpers.h"
 #include "property_bag_impl.h"
-
+#include <object_with_site_init_impl.h>
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -22,6 +22,7 @@ namespace Impl {
 
 
 class CSpxMockTtsEngineAdapter :
+    public ISpxObjectWithSiteInitImpl<ISpxTtsEngineAdapterSite>,
     public ISpxTtsEngineAdapter,
     public ISpxPropertyBagImpl
 {

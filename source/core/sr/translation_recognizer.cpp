@@ -12,6 +12,7 @@
 #include "string_utils.h"
 #include "speech_translation_config.h"
 #include "language_list_utils.h"
+#include <json.h>
 
 namespace Microsoft {
 namespace CognitiveServices {

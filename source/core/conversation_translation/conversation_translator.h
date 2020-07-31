@@ -14,6 +14,7 @@
 #include "conversation_connection.h"
 #include "conversation_manager.h"
 #include "conversation_utils.h"
+#include <object_with_site_init_impl.h>
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -25,7 +26,7 @@ namespace ConversationTranslation {
     /// A conversation translator that uses the conversation service. This enables a connected experience
     /// where participants can use their own devices to see everyone else's recognitions and IMs in their
     /// own languages, as well as speak and send IMs to others.
-    /// 
+    ///
     /// Beneath the hood, this uses a translation speech recognizer for doing speech recognitions for the
     /// local participant. We need to use the translator recognizer as this enables the backend
     /// communication between the speech recognition service and the conversation service. It will also
@@ -102,7 +103,6 @@ namespace ConversationTranslation {
             SPX_INTERFACE_MAP_ENTRY(ISpxServiceProvider)
             SPX_INTERFACE_MAP_ENTRY(ISpxNamedProperties)
             SPX_INTERFACE_MAP_ENTRY(ISpxSessionFromRecognizer)
-            SPX_INTERFACE_MAP_ENTRY(ISpxObjectWithSiteInitImpl<ISpxRecognizerSite>)
             SPX_INTERFACE_MAP_ENTRY(ISpxConnectionFromRecognizer)
             SPX_INTERFACE_MAP_ENTRY(ISpxConversationTranslator)
             SPX_INTERFACE_MAP_ENTRY(ISpxObjectWithAudioConfig)

@@ -13,6 +13,7 @@
 #include "interface_helpers.h"
 #include "service_helpers.h"
 #include "property_bag_impl.h"
+#include <object_with_site_init_impl.h>
 
 #ifdef WIN32
 #include "windows\com_init_and_uninit.h"

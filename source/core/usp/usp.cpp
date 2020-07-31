@@ -7,7 +7,7 @@
 #include "usp.h"
 #include "uspinternal.h"
 #include "uspcommon.h"
-#include "audio_chunk.h"
+#include <ispxinterfaces.h>
 
 namespace Microsoft {
 namespace CognitiveServices {

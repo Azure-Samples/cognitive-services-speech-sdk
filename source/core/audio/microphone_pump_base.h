@@ -11,6 +11,7 @@
 #include "interface_helpers.h"
 #include "service_helpers.h"
 #include "audio_sys.h"
+#include <object_with_site_init_impl.h>
 
 #ifdef WIN32
 #include "windows\com_init_and_uninit.h"

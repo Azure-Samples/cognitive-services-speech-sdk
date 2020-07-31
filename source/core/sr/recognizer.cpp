@@ -14,6 +14,7 @@
 #include "create_object_helpers.h"
 #include "property_id_2_name_map.h"
 #include "log_helpers.h"
+#include <json.h>
 
 #include "iostream"
 

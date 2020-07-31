@@ -15,6 +15,7 @@
 #include <property_bag_impl.h>
 #include <site_helpers.h>
 #include <interface_helpers.h>
+#include <object_with_site_init_impl.h>
 
 #include "unit_test_utils.h"
 

@@ -11,6 +11,7 @@
 #include "interface_helpers.h"
 #include "speechapi_cxx_audio_stream_format.h"
 #include "speechapi_c_ext_audiocompression.h"
+#include <object_with_site_init_impl.h>
 
 using namespace Microsoft::CognitiveServices::Speech::Audio;
 

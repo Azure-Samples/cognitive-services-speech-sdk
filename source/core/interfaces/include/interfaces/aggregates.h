@@ -7,6 +7,7 @@
 
 #include <chrono>
 #include <string>
+#include <memory>
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -14,6 +15,7 @@ namespace Speech {
 namespace Impl {
 
 // Data chunk interface.
+// TODO: Turn this into an aggregate
 struct DataChunk
 {
     DataChunk(std::shared_ptr<uint8_t> data, uint32_t dataSizeInBytes)
@@ -51,7 +53,30 @@ struct DataChunk
     bool isWavHeader;
 };
 
-
 using DataChunkPtr = std::shared_ptr<DataChunk>;
+
+#pragma pack (push, 1)
+/* Is this used? */
+struct SPXWAVEFORMAT
+{
+    uint16_t wFormatTag;        /* format type */
+    uint16_t nChannels;         /* number of channels (i.e. mono, stereo...) */
+    uint32_t nSamplesPerSec;    /* sample rate */
+    uint32_t nAvgBytesPerSec;   /* for buffer estimation */
+    uint16_t nBlockAlign;       /* block size of data */
+    uint16_t wBitsPerSample;    /* Number of bits per sample of mono data */
+};
+
+struct SPXWAVEFORMATEX
+{
+    uint16_t wFormatTag;        /* format type */
+    uint16_t nChannels;         /* number of channels (i.e. mono, stereo...) */
+    uint32_t nSamplesPerSec;    /* sample rate */
+    uint32_t nAvgBytesPerSec;   /* for buffer estimation */
+    uint16_t nBlockAlign;       /* block size of data */
+    uint16_t wBitsPerSample;    /* Number of bits per sample of mono data */
+    uint16_t cbSize;            /* The count in bytes of the size of extra information (after cbSize) */
+};
+#pragma pack (pop)
 
 }}}}

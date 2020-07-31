@@ -10,6 +10,7 @@
 #include "ispxinterfaces.h"
 #include "spxerror.h"
 #include "interface_helpers.h"
+#include <object_with_site_init_impl.h>
 
 namespace Microsoft {
 namespace CognitiveServices {

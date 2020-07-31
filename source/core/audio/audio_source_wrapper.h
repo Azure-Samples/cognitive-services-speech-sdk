@@ -16,6 +16,7 @@
 #include "audio_source_init_delegate_impl.h"
 #include "interface_helpers.h"
 #include "service_helpers.h"
+#include <object_with_site_init_impl.h>
 
 namespace Microsoft {
 namespace CognitiveServices {

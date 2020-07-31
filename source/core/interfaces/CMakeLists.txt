@@ -5,6 +5,12 @@ set(INC_DIR "${PROJECT_SOURCE_DIR}/include")
 
 set(HEADERS
     "${INC_DIR}/ispxinterfaces.h"
+    "${INC_DIR}/interfaces/aggregates.h"
+    "${INC_DIR}/interfaces/audio.h"
+    "${INC_DIR}/interfaces/base.h"
+    "${INC_DIR}/interfaces/containers.h"
+    "${INC_DIR}/interfaces/data.h"
+    "${INC_DIR}/interfaces/notify_me.h"
     "${INC_DIR}/interfaces/types.h"
 )
 

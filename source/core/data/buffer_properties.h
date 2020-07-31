@@ -7,6 +7,7 @@
 #include "spxcore_common.h"
 #include "service_helpers.h"
 #include "blocking_read_write_ring_buffer.h"
+#include <object_with_site_init_impl.h>
 
 namespace Microsoft {
 namespace CognitiveServices {

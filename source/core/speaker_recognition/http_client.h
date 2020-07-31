@@ -8,7 +8,7 @@
 #pragma once
 
 #include "ispxinterfaces.h"
-#include "audio_chunk.h"
+#include <ispxinterfaces.h>
 #include "http_request.h"
 
 namespace Microsoft {

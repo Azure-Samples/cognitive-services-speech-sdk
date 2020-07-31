@@ -10,6 +10,7 @@
 #include "read_write_buffer_delegate_helper.h"
 #include "function_helpers.h"
 #include "interface_delegate_helpers.h"
+#include <object_with_site_init_impl.h>
 
 namespace Microsoft {
 namespace CognitiveServices {

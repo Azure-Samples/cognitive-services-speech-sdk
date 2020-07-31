@@ -6,6 +6,7 @@
 //
 #include "stdafx.h"
 #include "participant.h"
+#include <json.h>
 
 namespace Microsoft {
 namespace CognitiveServices {

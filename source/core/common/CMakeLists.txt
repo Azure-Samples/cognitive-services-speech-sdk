@@ -32,7 +32,6 @@ set(HEADERS
     "${INC_DIR}/audio_format_id_2_name_map.h"
     "${INC_DIR}/try_catch_helpers.h"
     "${INC_DIR}/data_buffer.h"
-    "${INC_DIR}/audio_chunk.h"
     "${INC_DIR}/time_utils.h"
     "${INC_DIR}/http_exception.h"
     "${INC_DIR}/http_request.h"

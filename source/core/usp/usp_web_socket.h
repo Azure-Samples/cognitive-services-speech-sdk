@@ -11,11 +11,11 @@
 #include <map>
 #include <atomic>
 #include <web_socket.h>
-#include <audio_chunk.h>
 #include <i_telemetry.h>
 #include "usp_message.h"
 #include "usp_text_message.h"
 #include "usp_binary_message.h"
+#include <ispxinterfaces.h>
 
 namespace Microsoft {
 namespace CognitiveServices {
