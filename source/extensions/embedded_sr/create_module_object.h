@@ -31,7 +31,12 @@ namespace Speech {
 namespace Impl {
 
 
+#ifdef BUILD_RNNT
+SPX_EXTERN_C void* RNNT_CreateModuleObject(const char* className, const char* interfaceName);
+#endif
+#ifdef BUILD_UNIDEC
 SPX_EXTERN_C void* Unidec_CreateModuleObject(const char* className, const char* interfaceName);
+#endif
 
 
 } } } } // Microsoft::CognitiveServices::Speech::Impl

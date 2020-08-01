@@ -35,6 +35,8 @@ jobs:
       . ci/functions.sh
       vsts_setvar SPEECHSDK_TARGET_PLATFORM OSX-x64
       vsts_setvar SPEECHSDK_BUILD_CONFIGURATION "$(BuildConfiguration)"
+      vsts_setvar SPEECHSDK_ENABLE_RNNT true
+      vsts_setvar VSTS_TOKEN "$(System.AccessToken)"
     displayName: Set OSX-x64 target platform
   - bash: ./ci/set-variables.sh
     displayName: Set variables
@@ -52,11 +54,15 @@ jobs:
         $(KEYS_AND_REGIONS)
       HEREDOC
     displayName: Write Subscriptions Regions Data
+  - template: get-rnnt-artifact.yml
+    parameters:
+      enableVariable: SPEECHSDK_ENABLE_RNNT
   - bash: |
       cmake . -Bbuild -DBUILD_PYTHON=OFF -DSPEECHSDK_TARGET_PLATFORM=$(SPEECHSDK_TARGET_PLATFORM) \
         -DCMAKE_BUILD_TYPE=$(BuildConfiguration) \
         -DSPEECHSDK_BUILD_TYPE=$(SPEECHSDK_BUILD_TYPE) \
         -DSPEECHSDK_VERSION=$(SPEECHSDK_SEMVER2NOMETA) \
+        -DEXTENSION_RNNT_ENABLED=$(SPEECHSDK_ENABLE_RNNT) \
         ${{ parameters.extraCmakeArgs }}
     displayName: Generate makefiles
   - bash: |

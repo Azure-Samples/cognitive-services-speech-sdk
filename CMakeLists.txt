@@ -57,6 +57,12 @@ option(EXTENSION_AUDIOCOMPRESSION_ENABLED "Build the compression codec extension
 # Make the compilation of gstreamer (for decoding audio format) optional
 option(EXTENSION_CODEC_ENABLED "Build the CODEC extension based on the supported platform" OFF)
 
+# Make the compilation of RNN-T based recognizer optional
+option(EXTENSION_RNNT_ENABLED "Build RNN-T based recognizer component" OFF)
+
+# Make the compilation of Unidec optional
+option(EXTENSION_UNIDEC_ENABLED "Build Unidec offline recognizer component" OFF)
+
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Release" CACHE STRING
       "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel."
@@ -133,6 +139,10 @@ elseif(SPEECHSDK_OS MATCHES "^IOS")
   if (EXTENSION_KWS_ENABLED)
     add_compile_definitions("STATIC_KWS_EXTENSION")
     set(STATIC_KWS_EXTENSION TRUE)
+  endif()
+  if (EXTENSION_RNNT_ENABLED OR EXTENSION_UNIDEC_ENABLED)
+    add_compile_definitions("STATIC_EMBEDDEDSR_EXTENSION")
+    set(STATIC_EMBEDDEDSR_EXTENSION TRUE)
   endif()
   set(MACOSX ON)
 elseif(SPEECHSDK_OS STREQUAL "OSX")
@@ -371,6 +381,30 @@ elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   endif()
 endif()
 
+# Enable RNN-T build with 'cmake -DEXTENSION_RNNT_ENABLED=true'
+if(EXTENSION_RNNT_ENABLED)
+  set(BUILD_RNNT ON)
+  add_compile_definitions(BUILD_RNNT)
+else()
+  set(BUILD_RNNT OFF)
+endif()
+
+message(STATUS "BUILD_RNNT=${BUILD_RNNT}")
+
+# Enable Unidec build with 'cmake -DEXTENSION_UNIDEC_ENABLED=true'
+if(EXTENSION_UNIDEC_ENABLED AND
+   ((SPEECHSDK_TARGET_PLATFORM STREQUAL Linux-arm64) OR
+    (SPEECHSDK_TARGET_PLATFORM STREQUAL Linux-x64) OR
+    (SPEECHSDK_TARGET_PLATFORM STREQUAL Windows-x64) OR
+    (SPEECHSDK_TARGET_PLATFORM STREQUAL WindowsUwp-x64)))
+  set(BUILD_UNIDEC ON)
+  add_compile_definitions(BUILD_UNIDEC)
+else()
+  set(BUILD_UNIDEC OFF)
+endif()
+
+message(STATUS "BUILD_UNIDEC=${BUILD_UNIDEC}")
+
 set(CARBON_ROOT ${PROJECT_SOURCE_DIR})
 set(CARBON_SOURCE "${CARBON_ROOT}/source")
 set(CARBON_PUBLIC "${CARBON_SOURCE}/public")
@@ -399,20 +433,6 @@ set(JAVA_JNI_LIBRARY Microsoft.CognitiveServices.Speech.java.bindings)
 file(GLOB SPEECH_C_API_HEADERS "${CARBON_C_API}/*.h")
 file(GLOB SPEECH_CXX_API_HEADERS "${CARBON_CXX_API}/*.h")
 
-
-# Enable Unidec build with 'cmake -DEXTENSION_UNIDEC_ENABLED=true'
-if(EXTENSION_UNIDEC_ENABLED AND
-   ((SPEECHSDK_TARGET_PLATFORM STREQUAL Linux-arm64) OR
-    (SPEECHSDK_TARGET_PLATFORM STREQUAL Linux-x64) OR
-    (SPEECHSDK_TARGET_PLATFORM STREQUAL Windows-x64) OR
-    (SPEECHSDK_TARGET_PLATFORM STREQUAL WindowsUwp-x64)))
-  set(BUILD_UNIDEC ON)
-  set(UNIDEC "${CARBON_EXTENSIONS}/unidec")
-else()
-  set(BUILD_UNIDEC OFF)
-endif()
-
-message(STATUS "BUILD_UNIDEC=${BUILD_UNIDEC}")
 
 set(TESTS "${CARBON_ROOT}/tests")
 set(JAVA_TESTS "${TESTS}/functional/java/src/test/java")
@@ -451,10 +471,6 @@ add_subdirectory(${CARBON_CORE})
 
 
 
-if(BUILD_UNIDEC)
-  add_subdirectory(${UNIDEC})
-endif()
-
 if(EXTENSION_KWS_ENABLED)
   add_subdirectory("${CARBON_EXTENSIONS}/kws")
   add_definitions(-DSPEECHSDK_KWS_ENABLED)
@@ -463,6 +479,10 @@ endif()
 if(EXTENSION_AUDIOCOMPRESSION_ENABLED)
   add_subdirectory("${CARBON_EXTENSIONS}/audio-compression")
   add_definitions(-DSPEECHSDK_AUDIOCOMPRESSION_ENABLED)
+endif()
+
+if(BUILD_RNNT OR BUILD_UNIDEC)
+  add_subdirectory("${CARBON_EXTENSIONS}/embedded_sr")
 endif()
 
 

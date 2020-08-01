@@ -52,6 +52,10 @@ if(BUILD_UNIDEC)
     list(APPEND SOURCES "${SRC_DIR}/speech_recognizer_unidec_tests.cpp")
 endif()
 
+if(BUILD_RNNT)
+    list(APPEND SOURCES "${SRC_DIR}/speech_recognizer_rnnt_tests.cpp")
+endif()
+
 list(APPEND HEADERS_PRIVATE ${TEST_HEADERS})
 
 set_source_groups()
@@ -103,6 +107,10 @@ endif()
 
 if(EXTENSION_KWS_ENABLED AND STATIC_KWS_EXTENSION)
   target_link_libraries(${PROJECT_NAME} kws_factory)
+endif()
+
+if(EXTENSION_RNNT_ENABLED AND STATIC_EMBEDDEDSR_EXTENSION)
+  target_link_libraries(${PROJECT_NAME} embedded_sr)
 endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "WindowsStore")

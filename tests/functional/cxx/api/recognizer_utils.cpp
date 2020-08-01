@@ -65,6 +65,14 @@ void UseOfflineUnidec(std::shared_ptr<SpeechConfig> config)
     }
 }
 
+void UseOfflineRnnt(std::shared_ptr<SpeechConfig> config)
+{
+    // Test offline speech recognition without public API
+    config->SetProperty(R"(CARBON-INTERNAL-UseRecoEngine-Rnnt)", "true");
+    config->SetProperty(R"(CARBON-INTERNAL-RNNT-ModelSpec)", Config::RnntModelSpec);
+    config->SetProperty(R"(CARBON-INTERNAL-RNNT-Tokens)", Config::RnntTokens);
+}
+
 fstream OpenFile(const string& filename)
 {
     if (filename.empty())

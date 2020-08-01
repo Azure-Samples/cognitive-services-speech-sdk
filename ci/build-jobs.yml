@@ -67,6 +67,7 @@ jobs:
           vsts_setvar SPEECHSDK_CMAKE_GENERATOR "Visual Studio 16 2019"
         fi
         vsts_setvar SPEECHSDK_BUILD_CONFIGURATION "$(BuildConfiguration)"
+        vsts_setvar SPEECHSDK_ENABLE_RNNT true
         vsts_setvar SPEECHSDK_ENABLE_UNIDEC true
         vsts_setvar VSTS_TOKEN "$(System.AccessToken)"
   - bash: ./ci/set-variables.sh
@@ -77,10 +78,13 @@ jobs:
       versionSpec: $(SPEECHSDK_NUGET_VERSION)
   - bash: ./ci/install-build-dependencies.sh
     displayName: Install build dependencies
+  - template: get-rnnt-artifact.yml
+    parameters:
+      enableVariable: SPEECHSDK_ENABLE_RNNT
   - task: CMake@1
     displayName: Generate solution
     inputs:
-      cmakeArgs: '-G "$(SPEECHSDK_CMAKE_GENERATOR)" -DEXTENSION_UNIDEC_ENABLED=$(SPEECHSDK_ENABLE_UNIDEC) -DSPEECHSDK_TARGET_PLATFORM=$(SPEECHSDK_TARGET_PLATFORM) -DSPEECHSDK_BUILD_TYPE=$(SPEECHSDK_BUILD_TYPE) -DSPEECHSDK_VERSION=$(SPEECHSDK_SEMVER2NOMETA) -DSPECTRE_MITIGATION=$(SPEECHSDK_SPECTRE_MITIGATION) ..'
+      cmakeArgs: '-G "$(SPEECHSDK_CMAKE_GENERATOR)" -DEXTENSION_RNNT_ENABLED=$(SPEECHSDK_ENABLE_RNNT) -DEXTENSION_UNIDEC_ENABLED=$(SPEECHSDK_ENABLE_UNIDEC) -DSPEECHSDK_TARGET_PLATFORM=$(SPEECHSDK_TARGET_PLATFORM) -DSPEECHSDK_BUILD_TYPE=$(SPEECHSDK_BUILD_TYPE) -DSPEECHSDK_VERSION=$(SPEECHSDK_SEMVER2NOMETA) -DSPECTRE_MITIGATION=$(SPEECHSDK_SPECTRE_MITIGATION) ..'
   ## We have to build inside Semmle, not with the build task, so Semmle can do log scanning.
   - task: Semmle@0
     displayName: 'Run Semmle for Java'
@@ -385,6 +389,7 @@ jobs:
         vsts_setvar SPEECHSDK_CMAKE_GENERATOR "Visual Studio 16 2019"
         vsts_setvar SPEECHSDK_BUILD_CONFIGURATION "$(BuildConfiguration)"
         vsts_setvar SPEECHSDK_ENABLE_KWS true
+        vsts_setvar SPEECHSDK_ENABLE_RNNT true
         vsts_setvar SPEECHSDK_ENABLE_UNIDEC true
         vsts_setvar EXTENSION_AUDIOCOMPRESSION_ENABLED true
         vsts_setvar VSTS_TOKEN "$(System.AccessToken)"
@@ -399,6 +404,9 @@ jobs:
     parameters:
       enableVariable: SPEECHSDK_ENABLE_KWS
       os: Windows
+  - template: get-rnnt-artifact.yml
+    parameters:
+      enableVariable: SPEECHSDK_ENABLE_RNNT
   - bash: |
       set -x
       cp ./ci/jsonsettings.py .
@@ -416,6 +424,7 @@ jobs:
         -DSPEECHSDK_BUILD_TYPE=$(SPEECHSDK_BUILD_TYPE)
         -DSPEECHSDK_VERSION=$(SPEECHSDK_SEMVER2NOMETA)
         -DEXTENSION_KWS_ENABLED=$(SPEECHSDK_ENABLE_KWS)
+        -DEXTENSION_RNNT_ENABLED=$(SPEECHSDK_ENABLE_RNNT)
         -DEXTENSION_UNIDEC_ENABLED=$(SPEECHSDK_ENABLE_UNIDEC)
         -DEXTENSION_AUDIOCOMPRESSION_ENABLED=$(EXTENSION_AUDIOCOMPRESSION_ENABLED)
         ..
@@ -432,7 +441,7 @@ jobs:
     inputs:
       ConnectedServiceName: 'Speech SDK ESRP Signing Alternate'
       FolderPath: 'build/bin/$(BuildConfiguration)'
-      Pattern: 'Microsoft.CognitiveServices.Speech.core.dll,Microsoft.CognitiveServices.Speech.csharp.dll,Microsoft.CognitiveServices.Speech.extension.kws.dll,Microsoft.CognitiveServices.Speech.extension.silk_codec.dll'
+      Pattern: 'Microsoft.CognitiveServices.Speech.core.dll,Microsoft.CognitiveServices.Speech.csharp.dll,Microsoft.CognitiveServices.Speech.extension.kws.dll,Microsoft.CognitiveServices.Speech.extension.silk_codec.dll,Microsoft.CognitiveServices.Speech.extension.embedded.sr.dll,unimic_runtime.dll'
       signConfigType: inlineSignParams
       inlineOperation: $(SIGN_PARAMS_DLL)
     condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
@@ -1161,8 +1170,10 @@ jobs:
         vsts_setvar SPEECHSDK_BUILD_CONFIGURATION "$(BuildConfiguration)"
         vsts_setvar GST_BUILD_CONFIGURATION "$(ANDROID_GST)\$(GstBuildPlatform)"
         vsts_setvar SPEECHSDK_ENABLE_KWS true
+        vsts_setvar SPEECHSDK_ENABLE_RNNT true
         vsts_setvar EXTENSION_AUDIOCOMPRESSION_ENABLED true
         vsts_setvar SPEECHSDK_ENABLE_CODEC true
+        vsts_setvar VSTS_TOKEN "$(System.AccessToken)"
   - bash: ./ci/set-variables.sh
     displayName: Set variables
   - bash: ./ci/install-build-dependencies.sh
@@ -1191,6 +1202,9 @@ jobs:
     parameters:
       enableVariable: SPEECHSDK_ENABLE_KWS
       os: Android
+  - template: get-rnnt-artifact.yml
+    parameters:
+      enableVariable: SPEECHSDK_ENABLE_RNNT
   - bash: |
       set -u -e -o pipefail
       . ci/functions.sh
@@ -1547,6 +1561,7 @@ jobs:
         vsts_setvar SPEECHSDK_BUILD_CONFIGURATION "$(BuildConfiguration)"
         vsts_setvar SPEECHSDK_ENABLE_KWS true
         vsts_setvar SPEECHSDK_ENABLE_CODEC true
+        vsts_setvar SPEECHSDK_ENABLE_RNNT true
         vsts_setvar SPEECHSDK_ENABLE_UNIDEC true
         vsts_setvar VSTS_TOKEN "$(System.AccessToken)"
   - bash: ./ci/set-variables.sh
@@ -1557,6 +1572,9 @@ jobs:
     parameters:
       enableVariable: SPEECHSDK_ENABLE_KWS
       os: Linux
+  - template: get-rnnt-artifact.yml
+    parameters:
+      enableVariable: SPEECHSDK_ENABLE_RNNT
   - template: get-unidec-artifact.yml
     parameters:
       enableVariable: SPEECHSDK_ENABLE_UNIDEC
@@ -1585,6 +1603,7 @@ jobs:
         -DSPEECHSDK_VERSION=$(SPEECHSDK_SEMVER2NOMETA)
         -DEXTENSION_KWS_ENABLED=$(SPEECHSDK_ENABLE_KWS)
         -DEXTENSION_CODEC_ENABLED="%SPEECHSDK_ENABLE_CODEC%"
+        -DEXTENSION_RNNT_ENABLED=$(SPEECHSDK_ENABLE_RNNT)
         -DEXTENSION_UNIDEC_ENABLED=$(SPEECHSDK_ENABLE_UNIDEC)
         ..
   - task: CMake@1
@@ -1965,8 +1984,16 @@ jobs:
     matrix:
       debug:
         BuildConfiguration: Debug
+        SPEECHSDK_ENABLE_RNNT: false
       release:
         BuildConfiguration: Release
+        SPEECHSDK_ENABLE_RNNT: false
+      debug_embedded_sr:
+        BuildConfiguration: Debug
+        SPEECHSDK_ENABLE_RNNT: true
+      release_embedded_sr:
+        BuildConfiguration: Release
+        SPEECHSDK_ENABLE_RNNT: true
   variables:
     BuildPlatform: iOS
     FrameworkName: MicrosoftCognitiveServicesSpeech
@@ -1999,6 +2026,9 @@ jobs:
     parameters:
       enableVariable: SPEECHSDK_ENABLE_KWS
       os: iOS
+  - template: get-rnnt-artifact.yml
+    parameters:
+      enableVariable: SPEECHSDK_ENABLE_RNNT
   - task: DownloadBuildArtifacts@0
     displayName: Download GStreamer artifact
     inputs:
@@ -2036,7 +2066,7 @@ jobs:
     displayName: Build GStreamer wrapper
   - bash: |
       mkdir build_ios_simulator64 && cd build_ios_simulator64 &&
-      cmake $(JointCmakeArgs) -DSPEECHSDK_TARGET_PLATFORM=IOSSIMULATOR-x64 -DEXTENSION_CODEC_ENABLED="$(SPEECHSDK_ENABLE_CODEC)" -DEXTENSION_KWS_ENABLED="$(SPEECHSDK_ENABLE_KWS)" -DSTATIC_CONVERSATION_LIB="$(SPEECHSDK_ENABLE_CONVERSATION_TRANSLATOR)" ..
+      cmake $(JointCmakeArgs) -DSPEECHSDK_TARGET_PLATFORM=IOSSIMULATOR-x64 -DEXTENSION_CODEC_ENABLED="$(SPEECHSDK_ENABLE_CODEC)" -DEXTENSION_KWS_ENABLED="$(SPEECHSDK_ENABLE_KWS)" -DSTATIC_CONVERSATION_LIB="$(SPEECHSDK_ENABLE_CONVERSATION_TRANSLATOR)" -DEXTENSION_RNNT_ENABLED="$(SPEECHSDK_ENABLE_RNNT)" ..
     displayName: Generate makefiles for iOS simulator (64bit)
   - bash: |
       cd build_ios_simulator64 &&
@@ -2044,7 +2074,7 @@ jobs:
     displayName: CMake build for iOS simulator (64bit)
   - bash: |
       mkdir build_ios_device && cd build_ios_device &&
-      cmake $(JointCmakeArgs) -DSPEECHSDK_TARGET_PLATFORM=IOS-all -DEXTENSION_CODEC_ENABLED="$(SPEECHSDK_ENABLE_CODEC)" -DEXTENSION_KWS_ENABLED="$(SPEECHSDK_ENABLE_KWS)" -DSTATIC_CONVERSATION_LIB="$(SPEECHSDK_ENABLE_CONVERSATION_TRANSLATOR)" ..
+      cmake $(JointCmakeArgs) -DSPEECHSDK_TARGET_PLATFORM=IOS-all -DEXTENSION_CODEC_ENABLED="$(SPEECHSDK_ENABLE_CODEC)" -DEXTENSION_KWS_ENABLED="$(SPEECHSDK_ENABLE_KWS)" -DSTATIC_CONVERSATION_LIB="$(SPEECHSDK_ENABLE_CONVERSATION_TRANSLATOR)" -DEXTENSION_RNNT_ENABLED="$(SPEECHSDK_ENABLE_RNNT)" ..
     displayName: Generate makefiles for iOS device
   - bash: |
       cd build_ios_device &&
@@ -2062,6 +2092,11 @@ jobs:
       if [[ $(SPEECHSDK_ENABLE_KWS) == true ]]; then
         cp $(Build.SourcesDirectory)/external/KWS/iOS_arm64_Release/targets/CortanaSDK/libkwsapi.a "build_ios_device/lib"
         cp $(Build.SourcesDirectory)/external/KWS/iOS_x64_Release/targets/CortanaSDK/libkwsapi.a "build_ios_simulator64/lib"
+      fi
+
+      if [[ $(SPEECHSDK_ENABLE_RNNT) == true ]]; then
+        cp $(Build.SourcesDirectory)/external/mas/iOS/arm64/Release/libunimic_runtime_static.a "build_ios_device/lib"
+        cp $(Build.SourcesDirectory)/external/mas/iOS/x64/Release/libunimic_runtime_static.a "build_ios_simulator64/lib"
       fi
 
       # create output static library with bitcode stripped out.

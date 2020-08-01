@@ -149,6 +149,8 @@ class NativeLibraryLoader {
                     new NativeLibrary("libMicrosoft.CognitiveServices.Speech.core.so", true),
                     new NativeLibrary("libMicrosoft.CognitiveServices.Speech.extension.kws.so", false),
                     new NativeLibrary("libMicrosoft.CognitiveServices.Speech.extension.codec.so", false),
+                    // TODO: Uncomment following line when embedded.sr extension is ready to be released in jar package
+                    //new NativeLibrary("libMicrosoft.CognitiveServices.Speech.extension.embedded.sr.so", false),
                     new NativeLibrary("libMicrosoft.CognitiveServices.Speech.java.bindings.so", true)
             };
         }
@@ -162,6 +164,8 @@ class NativeLibraryLoader {
                     new NativeLibrary("Microsoft.CognitiveServices.Speech.extension.kws.dll", false),
                     new NativeLibrary("Microsoft.CognitiveServices.Speech.extension.codec.dll", false),
                     new NativeLibrary("Microsoft.CognitiveServices.Speech.extension.silk_codec.dll", false),
+                    // TODO: Uncomment following line when embedded.sr extension is ready to be released in jar package
+                    //new NativeLibrary("Microsoft.CognitiveServices.Speech.extension.embedded.sr.dll", false),
                     new NativeLibrary("Microsoft.CognitiveServices.Speech.java.bindings.dll", true)
             };
         }
@@ -169,6 +173,8 @@ class NativeLibraryLoader {
             // Note: currently no KWS on macOS
             return new NativeLibrary[] {
                     new NativeLibrary("libMicrosoft.CognitiveServices.Speech.core.dylib", true),
+                    // TODO: Uncomment following line when embedded.sr extension is ready to be released in jar package
+                    //new NativeLibrary("libMicrosoft.CognitiveServices.Speech.extension.embedded.sr.dylib", false),
                     new NativeLibrary("libMicrosoft.CognitiveServices.Speech.java.bindings.dylib", true)
             };
         }
@@ -185,7 +191,21 @@ class NativeLibraryLoader {
 
         if (operatingSystem.contains("windows")) {
             return new NativeLibrary[] {
-                    new NativeLibrary("Microsoft.CognitiveServices.Speech.extension.pma.dll", false)
+                    new NativeLibrary("Microsoft.CognitiveServices.Speech.extension.pma.dll", false),
+                    // TODO: Remove following line when embedded.sr is ready to be released in jar package
+                    new NativeLibrary("Microsoft.CognitiveServices.Speech.extension.embedded.sr.dll", false)
+            };
+        }
+        else if (operatingSystem.contains("linux")) {
+            return new NativeLibrary[] {
+                // TODO: Remove following line when embedded.sr is ready to be released in jar package
+                new NativeLibrary("libMicrosoft.CognitiveServices.Speech.extension.embedded.sr.so", false)
+            };
+        }
+        else if (operatingSystem.contains("mac") || operatingSystem.contains("darwin")) {
+            return new NativeLibrary[] {
+                // TODO: Remove following line when embedded.sr is ready to be released in jar package
+                new NativeLibrary("libMicrosoft.CognitiveServices.Speech.extension.embedded.sr.dylib", false)
             };
         }
 

@@ -6,6 +6,7 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -146,6 +147,26 @@ namespace MicrosoftSpeechSDKSamples
             config.SetProperty("CARBON-INTERNAL-UseRecoEngine-Unidec", "true");
             config.SetProperty("CARBON-INTERNAL-SPEECH-RecoLocalModelPathRoot", "external/unidec/Unidec.Model/model");
             config.SetProperty("CARBON-INTERNAL-SPEECH-RecoLocalModelLanguage", "en-US");
+            await RecognizeAsync(config, fileName, useStream, useContinuousRecognition, deviceName).ConfigureAwait(false);
+        }
+
+        public static async Task SpeechRecognitionOfflineRnntAsync(string key, string region, string lang, string fileName, bool useStream, bool useToken, bool useContinuousRecognition, string deviceName = null)
+        {
+            Console.WriteLine("Speech Recognition using offline RNN-T.");
+            SpeechConfig config = SpeechConfig.FromSubscription(key, region);
+            config.SetProperty("CARBON-INTERNAL-UseRecoEngine-Rnnt", "true");
+            string[] lines = File.ReadAllLines("external/mas/RNNT.Model/model/rnnt_test.config");
+            var settings = new Dictionary<string, string>();
+            foreach (string line in lines)
+            {
+                string[] tokens = line.Split('=');
+                settings.Add(tokens[0], tokens[1]);
+            }
+            string modelSpec = string.Format("external/mas/RNNT.Model/model/rnnt_test.model,{0},{1},{2},{3},{4},{5},{6}",
+                                             settings["matrixKind"], settings["beamWidth"], settings["insertionBoost"],
+                                             settings["recombineKind"], settings["scoreNormKind"], settings["beamSortKind"], settings["baseFeatDim"]);
+            config.SetProperty("CARBON-INTERNAL-RNNT-ModelSpec", modelSpec);
+            config.SetProperty("CARBON-INTERNAL-RNNT-Tokens", "external/mas/RNNT.Model/model/rnnt_test.token.list");
             await RecognizeAsync(config, fileName, useStream, useContinuousRecognition, deviceName).ConfigureAwait(false);
         }
 

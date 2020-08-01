@@ -12,8 +12,8 @@
 #include "ispxinterfaces.h"
 #include "interface_helpers.h"
 #include "string_utils.h"
-#include "UnidecRuntime.h"
 #include "AudioEndMetadata.h"
+#include "unidec_runtime_dll.h"
 #include "unidec_config.h"
 #include <object_with_site_init_impl.h>
 

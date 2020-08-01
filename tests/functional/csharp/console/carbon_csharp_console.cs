@@ -38,6 +38,7 @@ namespace MicrosoftSpeechSDKSamples
             bool useStream = false;
             bool useContinuousRecognition = false;
             bool useOfflineUnidec = false;
+            bool useOfflineRnnt = false;
 
             if (args.Length >= 2)
             {
@@ -222,6 +223,10 @@ namespace MicrosoftSpeechSDKSamples
                 {
                     useOfflineUnidec = true;
                 }
+                if (string.Compare(args[5], "rnnt", true) == 0)
+                {
+                    useOfflineRnnt = true;
+                }
             }
 
             if (isMemoryLeakTest)
@@ -242,8 +247,12 @@ namespace MicrosoftSpeechSDKSamples
                         Console.WriteLine("=============== Run speech recognition samples using offline Unidec. ===============");
                         SpeechRecognitionSamples.SpeechRecognitionOfflineUnidecAsync(subKey, region: region, lang: lang, fileName: fileName, useStream: useStream, useToken: useToken, useContinuousRecognition: useContinuousRecognition, deviceName: deviceName).Wait();
                     }
-                    else
-                    if (useBaseModel)
+                    else if (useOfflineRnnt)
+                    {
+                        Console.WriteLine("=============== Run speech recognition samples using offline RNN-T. ===============");
+                        SpeechRecognitionSamples.SpeechRecognitionOfflineRnntAsync(subKey, region: region, lang: lang, fileName: fileName, useStream: useStream, useToken: useToken, useContinuousRecognition: useContinuousRecognition, deviceName: deviceName).Wait();
+                    }
+                    else if (useBaseModel)
                     {
                         Console.WriteLine("=============== Run speech recognition samples using base model. ===============");
                         SpeechRecognitionSamples.SpeechRecognitionBaseModelAsync(subKey, region: region, lang: lang, fileName: fileName, useStream: useStream, useToken: useToken, useContinuousRecognition: useContinuousRecognition, deviceName: deviceName).Wait();

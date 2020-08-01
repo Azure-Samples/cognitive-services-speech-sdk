@@ -208,16 +208,16 @@ void CSpxUnidecRecoEngineAdapter::InitEngine()
         InitSearchGraphs();
         std::string modelPath = GetBaseModelPath();
         std::wstring propertiesFile = PAL::ToWString(PAL::AppendPath(modelPath, "properties.ini"));
-        IConfig* config = CreateConfig(PAL::ToWCHARString(propertiesFile).c_str());
+        IConfig* config = UnidecRuntimeDll::CreateConfig(PAL::ToWCHARString(propertiesFile).c_str());
 
-        m_unidecEngine = std::unique_ptr<IUnidecEngine, std::function<void(IUnidecEngine*)>>(CreateUnidecStreamEngine(
+        m_unidecEngine = std::unique_ptr<IUnidecEngine, std::function<void(IUnidecEngine*)>>(UnidecRuntimeDll::CreateUnidecStreamEngine(
             config,
             CSpxUnidecRecoEngineAdapter::NextStreamCallback,
             CSpxUnidecRecoEngineAdapter::IntermediateCallback,
             CSpxUnidecRecoEngineAdapter::SentenceCallback,
             CSpxUnidecRecoEngineAdapter::EndCallback,
             this),
-            DeleteUnidecEngine);
+            UnidecRuntimeDll::DeleteUnidecEngine);
     }
 }
 
@@ -229,24 +229,24 @@ void CSpxUnidecRecoEngineAdapter::InitSearchGraphs()
         wchar_string HCLGSpecBase = PAL::ToWCHARString(m_config->HCLGSpecBase);
         base_graphs =
             std::unique_ptr<IUnidecSearchGraphCombo, std::function<void(IUnidecSearchGraphCombo*)>>(
-                CreateUnidecSearchGraphCombo(HCLGSpecBase.c_str()),
-                DeleteUnidecSearchGraphCombo);
+                UnidecRuntimeDll::CreateUnidecSearchGraphCombo(HCLGSpecBase.c_str()),
+                UnidecRuntimeDll::DeleteUnidecSearchGraphCombo);
     }
 
     wchar_string HCLGSpecString = PAL::ToWCHARString(m_config->GetHCLGSpecString());
     m_graphs = std::unique_ptr<IUnidecSearchGraphCombo, std::function<void(IUnidecSearchGraphCombo*)>>(
-        CreateUnidecSearchGraphComboEx(HCLGSpecString.c_str(), base_graphs.get()),
-        DeleteUnidecSearchGraphCombo);
+        UnidecRuntimeDll::CreateUnidecSearchGraphComboEx(HCLGSpecString.c_str(), base_graphs.get()),
+        UnidecRuntimeDll::DeleteUnidecSearchGraphCombo);
 }
 
 void CSpxUnidecRecoEngineAdapter::StartEngine()
 {
     SPX_DBG_TRACE_VERBOSE_IF(SPX_DBG_TRACE_UNIDEC_AUDIO, "CSpxUnidecRecoEngineAdapter::StartEngine enter");
-    SPX_IFTRUE_THROW_HR(GetUnidecEngineStarted(m_unidecEngine.get()), SPXERR_SETFORMAT_UNEXPECTED_STATE_TRANSITION);
+    SPX_IFTRUE_THROW_HR(UnidecRuntimeDll::GetUnidecEngineStarted(m_unidecEngine.get()), SPXERR_SETFORMAT_UNEXPECTED_STATE_TRANSITION);
 
     m_stopImmediately = false;
     m_sentenceEndDetected = false;
-    StartUnidecEngine(m_unidecEngine.get());
+    UnidecRuntimeDll::StartUnidecEngine(m_unidecEngine.get());
     SPX_DBG_TRACE_VERBOSE_IF(SPX_DBG_TRACE_UNIDEC_AUDIO, "CSpxUnidecRecoEngineAdapter::StartEngine exit");
 }
 
@@ -254,13 +254,13 @@ void CSpxUnidecRecoEngineAdapter::StopEngine()
 {
     SPX_DBG_TRACE_VERBOSE_IF(SPX_DBG_TRACE_UNIDEC_AUDIO, "CSpxUnidecRecoEngineAdapter::StopEngine enter");
 
-    if (GetUnidecEngineStarted(m_unidecEngine.get()))
+    if (UnidecRuntimeDll::GetUnidecEngineStarted(m_unidecEngine.get()))
     {
         m_mutex.lock();
         m_stopImmediately = true;
         m_mutex.unlock();
         SPX_DBG_TRACE_VERBOSE("CSpxUnidecRecoEngineAdapter::StopEngine call JoinUnidecEngine");
-        JoinUnidecEngine(m_unidecEngine.get());
+        UnidecRuntimeDll::JoinUnidecEngine(m_unidecEngine.get());
         FlushBuffers();
     }
     SPX_DBG_TRACE_VERBOSE_IF(SPX_DBG_TRACE_UNIDEC_AUDIO, "CSpxUnidecRecoEngineAdapter::StopEngine exit");
@@ -373,10 +373,10 @@ void CSpxUnidecRecoEngineAdapter::Intermediate(const WCHAR* wavId, size_t senten
 
     m_sentenceEndDetected = false;
 
-    auto wordCount = GetUnidecIntermediateResultWordCount(m_graphs.get(), intermediateResult, false);
+    auto wordCount = UnidecRuntimeDll::GetUnidecIntermediateResultWordCount(m_graphs.get(), intermediateResult, false);
 
     std::vector<const WCHAR*> words(wordCount);
-    GetUnidecIntermediateResultWords(m_graphs.get(), intermediateResult, false, words.data(), wordCount);
+    UnidecRuntimeDll::GetUnidecIntermediateResultWords(m_graphs.get(), intermediateResult, false, words.data(), wordCount);
 
     auto text = TrimWords(words, _W("!sent_start"), _W("!sent_end"));
 
@@ -403,16 +403,16 @@ void CSpxUnidecRecoEngineAdapter::Sentence(const WCHAR* wavId, size_t sentenceIn
     auto offset = (uint64_t)(framePos.SentenceStartMilliseconds * 10000);
     auto duration = (uint64_t)(framePos.SpeechFramesLengthInMilliseconds * 10000);
 
-    auto nbestCount = GetUnidecNBestListSize(nbest);
+    auto nbestCount = UnidecRuntimeDll::GetUnidecNBestListSize(nbest);
     for (size_t index = 0; index < nbestCount; index++)
     {
-        auto cost = GetUnidecNBestListCost(nbest, index);
-        auto amCost = GetUnidecNBestListAMCost(nbest, index);
-        auto lmCost = GetUnidecNBestListLMCost(nbest, index);
-        auto prunedLMCost = GetUnidecNBestListPrunedLMCost(nbest, index);
-        auto confidence = GetUnidecNBestListConfidence(m_graphs.get(), nbest, index);
-        auto reserved = GetUnidecNBestListReserved(nbest, index);
-        auto wordCount = GetUnidecNBestListWordCount(m_graphs.get(), nbest, index, false);
+        auto cost = UnidecRuntimeDll::GetUnidecNBestListCost(nbest, index);
+        auto amCost = UnidecRuntimeDll::GetUnidecNBestListAMCost(nbest, index);
+        auto lmCost = UnidecRuntimeDll::GetUnidecNBestListLMCost(nbest, index);
+        auto prunedLMCost = UnidecRuntimeDll::GetUnidecNBestListPrunedLMCost(nbest, index);
+        auto confidence = UnidecRuntimeDll::GetUnidecNBestListConfidence(m_graphs.get(), nbest, index);
+        auto reserved = UnidecRuntimeDll::GetUnidecNBestListReserved(nbest, index);
+        auto wordCount = UnidecRuntimeDll::GetUnidecNBestListWordCount(m_graphs.get(), nbest, index, false);
 
         UNUSED(amCost);
         UNUSED(lmCost);
@@ -422,7 +422,7 @@ void CSpxUnidecRecoEngineAdapter::Sentence(const WCHAR* wavId, size_t sentenceIn
         UNUSED(cost);
 
         std::vector<const WCHAR*> words(wordCount);
-        GetUnidecNBestListWords(m_graphs.get(), nbest, index, false, words.data(), wordCount);
+        UnidecRuntimeDll::GetUnidecNBestListWords(m_graphs.get(), nbest, index, false, words.data(), wordCount);
 
         auto text = TrimWords(words, _W("!sent_start"), _W("!sent_end"));
 

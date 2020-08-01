@@ -112,6 +112,32 @@ DESTPRIVINC="$DEST/private/include"
 DESTPRIVINC2="$DEST/private/include.common"
 DESTPRIVINCJSON="$DEST/private/external.json"
 
+RNNTLIB=libunimic_runtime
+if [[ $OS == "Windows_NT" ]]; then
+  if [[ $TARGET == "UWP" || $TARGET == "UNKNOWN" ]]; then
+    RNNTLIBDIR=$SOURCE_ROOT/external/mas/Windows/$PLATFORM/$CONFIG
+    RNNTLIB=unimic_runtime
+  elif [[ $TARGET == Android-x86 ]]; then
+    RNNTLIBDIR=$SOURCE_ROOT/external/mas/Android/x86/$CONFIG
+  elif [[ $TARGET == Android-x64 ]]; then
+    RNNTLIBDIR=$SOURCE_ROOT/external/mas/Android/x64/$CONFIG
+  elif [[ $TARGET == Android-arm32 ]]; then
+    RNNTLIBDIR=$SOURCE_ROOT/external/mas/Android/arm/$CONFIG
+  elif [[ $TARGET == Android-arm64 ]]; then
+    RNNTLIBDIR=$SOURCE_ROOT/external/mas/Android/arm64/$CONFIG
+  fi
+elif [[ $PLATFORM == Linux-x86 ]]; then
+  RNNTLIBDIR=$SOURCE_ROOT/external/mas/Linux/x86/$CONFIG
+elif [[ $PLATFORM == Linux-x64 ]]; then
+  RNNTLIBDIR=$SOURCE_ROOT/external/mas/Linux/x64/$CONFIG
+elif [[ $PLATFORM == Linux-arm32 ]]; then
+  RNNTLIBDIR=$SOURCE_ROOT/external/mas/Linux/arm/$CONFIG
+elif [[ $PLATFORM == Linux-arm64 ]]; then
+  RNNTLIBDIR=$SOURCE_ROOT/external/mas/Linux/arm64/$CONFIG
+elif [[ $PLATFORM == OSX-x64 ]]; then
+  RNNTLIBDIR=$SOURCE_ROOT/external/mas/OSX/x64/$CONFIG
+fi
+
 printf "\nCopying files to drop location\n"
 
 # N.B. no long option for -p (parents) on OSX.
@@ -126,12 +152,15 @@ CPOPT="-v -p"
 # - unstripped and unsigned (.unstripped.dylib): copied to private destination below
 shopt -s extglob
 cp $CPOPT "$SRCDYNLIB"/$LIBPREFIX!(*.unstripped)$DYNLIBSUFFIX "$DESTPUBLIB"
+cp $CPOPT "$RNNTLIBDIR"/"$RNNTLIB""$DYNLIBSUFFIX" "$DESTPUBLIB"
 
 # On Windows and not Android, copy import libraries, XMLDoc, and PDBs.
 if [[ $OS == "Windows_NT" ]]; then
   if [[ $TARGET != Android-* ]]; then
     cp $CPOPT "$SRCLIB"/$LIBPREFIX*.lib "$DESTPUBLIB"
     cp $CPOPT "$SRCDYNLIB"/$LIBPREFIX*.pdb "$DESTPUBLIB"
+    cp $CPOPT "$RNNTLIBDIR"/"$RNNTLIB".lib "$DESTPUBLIB"
+    cp $CPOPT "$RNNTLIBDIR"/"$RNNTLIB".pdb "$DESTPUBLIB"
 
     cp $CPOPT "$SRCDYNLIB"/net461/$LIBPREFIX*.{pdb,xml,dll} "$DESTPUBLIBNET461"
     cp $CPOPT "$SRCDYNLIB"/netstandard2.0/$LIBPREFIX*.{pdb,xml,dll} "$DESTPUBLIBNETSTANDARD20"
@@ -198,7 +227,12 @@ if [[ $TARGET == Android-* ]]; then
     echo Unsupported architecture $TARGET.
     exit 1
   fi
-  find "$DESTPUBLIB" -name \*.so -print0 | xargs -0 $STRIP
+  # xargs is asserting on some hosted agents with following error:
+  # assertion "bc_ctl.arg_max >= LINE_MAX" failed: file "xargs.c", line 501, function: main
+  # From the source code of xargs, it looks like the error comes before xargs even parses the arguments. "xargs --help" or
+  # "xargs --version" will also fail. There seems to be something wrong with the environment. So, replacing it with -exec option of find command.
+  # find "$DESTPUBLIB" -name \*.so -print0 | xargs -0 $STRIP
+  find "$DESTPUBLIB" -name \*.so -exec $STRIP '{}' \+
 fi
 
 if [[ $PLATFORM == OSX-* ]]; then

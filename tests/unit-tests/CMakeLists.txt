@@ -68,4 +68,8 @@ if(EXTENSION_KWS_ENABLED AND STATIC_KWS_EXTENSION)
   target_link_libraries(${PROJECT_NAME} kws_factory)
 endif()
 
+if (EXTENSION_RNNT_ENABLED AND STATIC_EMBEDDEDSR_EXTENSION)
+  target_link_libraries(${PROJECT_NAME} embedded_sr)
+endif()
+
 target_link_libraries(${PROJECT_NAME} ${SPEECHSDK_CORE_LIBRARY})

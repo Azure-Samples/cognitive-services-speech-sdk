@@ -1,0 +1,25 @@
+parameters:
+  enableVariable: ""
+steps:
+- bash: |
+    set -u -e -o pipefail
+    . ci/functions.sh
+    IFS=$' \t\n\r' read build_id should_be_empty < external/mas/build_id.txt
+    # checks
+    [[ -z $should_be_empty ]]
+    printf '%d' "$build_id" > /dev/null
+    vsts_setvar __getMASArtifactInternal_BuildId "$build_id"
+  displayName: Get Pasco build ID
+  condition: and(succeeded(), eq(variables['${{ parameters.enableVariable }}'], 'true'))
+- task: DownloadBuildArtifacts@0
+  displayName: Download Pasco build artifacts
+  inputs:
+    buildType: specific
+    project: 'e71f1362-9c7d-488b-99c7-3376db8d3302' # Skyman
+    pipeline: 14072 # Pasco
+    buildVersionToDownload: specific
+    buildId: $(__getMASArtifactInternal_BuildId)
+    downloadType: single
+    artifactName: mas
+    downloadPath: external
+  condition: and(succeeded(), eq(variables['${{ parameters.enableVariable }}'], 'true'))

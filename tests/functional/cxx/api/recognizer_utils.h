@@ -80,6 +80,7 @@ void PushData(PushAudioInputStream* pushStream, const string& filename, bool com
 void DoContinuousReco(SpeechRecognizer * recognizer, PushAudioInputStream * pushStream);
 void DoKWS(SpeechRecognizer * recognizer, PushAudioInputStream * pushStream);
 void UseOfflineUnidec(std::shared_ptr<SpeechConfig> config);
+void UseOfflineRnnt(std::shared_ptr<SpeechConfig> config);
 
 enum class Callbacks { final_result, intermediate_result, no_match, session_started, session_stopped, speech_start_detected, speech_end_detected };
 

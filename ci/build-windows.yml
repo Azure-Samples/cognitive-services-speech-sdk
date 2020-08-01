@@ -56,6 +56,7 @@ jobs:
         fi
         vsts_setvar SPEECHSDK_BUILD_CONFIGURATION "$(BuildConfiguration)"
         vsts_setvar SPEECHSDK_ENABLE_KWS ${{ parameters.kws }}
+        vsts_setvar SPEECHSDK_ENABLE_RNNT true
         vsts_setvar SPEECHSDK_ENABLE_UNIDEC true
         vsts_setvar EXTENSION_AUDIOCOMPRESSION_ENABLED true
         vsts_setvar VSTS_TOKEN "$(System.AccessToken)"
@@ -68,6 +69,9 @@ jobs:
     parameters:
       enableVariable: SPEECHSDK_ENABLE_KWS
       os: Windows
+  - template: get-rnnt-artifact.yml
+    parameters:
+      enableVariable: SPEECHSDK_ENABLE_RNNT
   - task: NuGetToolInstaller@0
     displayName: Use NuGet $(SPEECHSDK_NUGET_VERSION)
     inputs:
@@ -100,8 +104,9 @@ jobs:
         -DEXTENSION_KWS_ENABLED=$(SPEECHSDK_ENABLE_KWS)
         -DSPEECHSDK_CRT="${{ parameters.crt }}"
         -DEXTENSION_AUDIOCOMPRESSION_ENABLED=$(EXTENSION_AUDIOCOMPRESSION_ENABLED)
+        -DEXTENSION_RNNT_ENABLED=$(SPEECHSDK_ENABLE_RNNT)
         -DEXTENSION_UNIDEC_ENABLED=$(SPEECHSDK_ENABLE_UNIDEC)
-        -DEXTENSION_CODEC_ENABLED=true        
+        -DEXTENSION_CODEC_ENABLED=true
         -DGST_ROOT=$(GSTREAMER_INSTALL_PATH)
         ..
   - task: VSBuild@1
@@ -143,6 +148,7 @@ jobs:
           -DPYTHON_EXECUTABLE:FILEPATH="${thisPythonVersionBasePath}"/$(SPEECHSDK_PYTHON_PLATFORM)/python.exe \
           -DPYTHON_LIBRARY="${thisPythonVersionBasePath}"/$(SPEECHSDK_PYTHON_PLATFORM)/libs/python${wheelPythonVersion}.lib \
           -DPYTHON_INCLUDE_DIR:PATH="${thisPythonVersionBasePath}"/$(SPEECHSDK_PYTHON_PLATFORM)/include \
+          -DEXTENSION_RNNT_ENABLED=$(SPEECHSDK_ENABLE_RNNT) \
           -DEXTENSION_UNIDEC_ENABLED=$(SPEECHSDK_ENABLE_UNIDEC)
         cmake --build build --target bdist -j 4 --config $(BuildConfiguration)
         # check that the core & kws lib are identical in all wheels
@@ -172,7 +178,7 @@ jobs:
     inputs:
       ConnectedServiceName: Speech SDK ESRP Signing Alternate
       FolderPath: repack
-      Pattern: '*.pyd,Microsoft.CognitiveServices.Speech.core.dll,Microsoft.CognitiveServices.Speech.extension.kws.dll,Microsoft.CognitiveServices.Speech.extension.codec.dll'
+      Pattern: '*.pyd,Microsoft.CognitiveServices.Speech.core.dll,Microsoft.CognitiveServices.Speech.extension.kws.dll,Microsoft.CognitiveServices.Speech.extension.codec.dll,Microsoft.CognitiveServices.Speech.extension.embedded.sr.dll,unimic_runtime.dll'
       signConfigType: inlineSignParams
       inlineOperation: $(SIGN_PARAMS_DLL)
     condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
@@ -195,7 +201,7 @@ jobs:
     inputs:
       ConnectedServiceName: 'Speech SDK ESRP Signing Alternate'
       FolderPath: 'build/bin'
-      Pattern: 'Microsoft.CognitiveServices.Speech.core${{ parameters.suffix }}.dll,Microsoft.CognitiveServices.Speech.extension.kws${{ parameters.suffix }}.dll,Microsoft.CognitiveServices.Speech.csharp.dll,Microsoft.CognitiveServices.Speech.java.bindings.dll,Microsoft.CognitiveServices.Speech.extension.codec.dll,Microsoft.CognitiveServices.Speech.extension.silk_codec.dll'
+      Pattern: 'Microsoft.CognitiveServices.Speech.core${{ parameters.suffix }}.dll,Microsoft.CognitiveServices.Speech.extension.kws${{ parameters.suffix }}.dll,Microsoft.CognitiveServices.Speech.csharp.dll,Microsoft.CognitiveServices.Speech.java.bindings.dll,Microsoft.CognitiveServices.Speech.extension.codec.dll,Microsoft.CognitiveServices.Speech.extension.silk_codec.dll,Microsoft.CognitiveServices.Speech.extension.embedded.sr.dll,unimic_runtime.dll'
       signConfigType: inlineSignParams
       inlineOperation: $(SIGN_PARAMS_DLL)
     condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))

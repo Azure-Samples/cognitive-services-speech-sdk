@@ -51,6 +51,7 @@ CSpxResourceManager::CSpxResourceManager()
     m_moduleFactories.push_back(CSpxModuleFactory::Get("libMicrosoft.CognitiveServices.Speech.extension.kws.dylib"));
 
     m_moduleFactories.push_back(CSpxModuleFactory::Get(PrimaryCarbon_CreateModuleObject));
+    m_moduleFactories.push_back(CSpxModuleFactory::Get("libMicrosoft.CognitiveServices.Speech.extension.embedded.sr.dylib"));
 #else
     m_moduleFactories.push_back(CSpxModuleFactory::Get("carbon-mock.dll"));
 

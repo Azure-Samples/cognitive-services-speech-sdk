@@ -262,7 +262,7 @@ void CarbonTestConsole::Sample_HelloWorld_WithEvents()
     auto result = recognizer->RecognizeOnceAsync().get();
 }
 
-void CarbonTestConsole::Sample_HelloWorld_PickEngine(const char* pszEngine) // L"Usp", L"Unidec", or L"Mock"
+void CarbonTestConsole::Sample_HelloWorld_PickEngine(const char* pszEngine) // L"Usp", L"Unidec", L"Rnnt" or L"Mock"
 {
     auto recognizer = SpeechRecognizer::FromConfig(
         SpeechConfig::FromSubscription(m_subscriptionKey, m_region),

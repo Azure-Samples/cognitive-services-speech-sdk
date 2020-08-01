@@ -56,6 +56,8 @@ namespace Config
     EXTERN std::string OfflineModelPathRoot;
     EXTERN std::string OfflineModelLanguage;
     EXTERN bool DoDiscover;
+    EXTERN std::string RnntModelSpec;
+    EXTERN std::string RnntTokens;
 }
 
 #define ROOT_RELATIVE_PATH(pathName) DefaultSettingsMap[INPUT_DIR] + "/" + AudioUtterancesMap[pathName].FilePath
@@ -658,6 +660,12 @@ inline int parse_cli_args(Catch::Session& session, int argc, char* argv[])
         | Opt(Config::DoDiscover)
         ["--discovery"]
     ("Perform VS Test Adaptor discovery")
+        | Opt(Config::RnntModelSpec, "RnntModelSpec")
+        ["--rnntModelSpec"]
+    ("The specification for RNN-T model used in tests.")
+        | Opt(Config::RnntTokens, "RnntTokens")
+        ["--rnntTokens"]
+    ("The path to tokens file used for RNN-T engine in tests.")
         | Opt(SubscriptionsRegionsMap[CONVERSATION_TRANSLATOR_SUBSCRIPTION].Key, "ConversationTranslatorSubscriptionKey")
         ["--keyConversationTranslator"]
     ("The subscription key to use for the conversation translator service")

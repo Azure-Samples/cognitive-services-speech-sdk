@@ -43,6 +43,7 @@ steps:
         -DPYTHON_LIBRARY="$pythonLibrary" \
         -DPYTHON_INCLUDE_DIR:PATH="${thisPythonVersionBasePath}/x64/include/python${pythonMajorMinorWithDot}${pymallocFlag}" \
         -DSPEECHSDK_PYTHON_WHEEL_ARGS=${extraCmakeArgs//%wheelPythonVersion%/${wheelPythonVersion}} \
+        -DEXTENSION_RNNT_ENABLED=$(SPEECHSDK_ENABLE_RNNT) \
         -DEXTENSION_UNIDEC_ENABLED=${enableUnidec}
       cmake --build build --target bdist -j 4
       cp -v build/dist/* dist

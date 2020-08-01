@@ -37,6 +37,10 @@ set_target_properties (factory PROPERTIES
     FOLDER core
 )
 
+if(STATIC_EMBEDDEDSR_EXTENSION)
+    list(APPEND additional_static_libs embedded_sr)
+endif()
+
 target_link_libraries(factory
                       PRIVATE interfaces
                       PRIVATE sr
@@ -49,8 +53,5 @@ target_link_libraries(factory
                       PRIVATE common
                       PRIVATE speaker_recognition
                       PRIVATE data
-                      PRIVATE ${CMAKE_DL_LIBS})
-
-if(BUILD_UNIDEC)
-    #target_link_libraries(factory INTERFACE unidec)
-endif()
+                      PRIVATE ${CMAKE_DL_LIBS}
+                      PRIVATE ${additional_static_libs})

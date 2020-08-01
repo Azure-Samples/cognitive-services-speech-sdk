@@ -3,10 +3,13 @@
 set -x -e -o pipefail
 
 SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
-UNIDEC_SOURCE_ROOT="$SCRIPT_DIR/../source/extensions/unidec"
+UNIDEC_SOURCE_ROOT="$SCRIPT_DIR/../source/extensions/embedded_sr/unidec"
 UNIDEC_EXTERNAL_ROOT="$SCRIPT_DIR/../external/unidec"
 UNIDEC_RUNTIME_NUGET_SOURCE="https://msasg.pkgs.visualstudio.com/_packaging/Bing/nuget/v3/index.json"
 UNIDEC_MODEL_NUGET_SOURCE="https://msasg.pkgs.visualstudio.com/_packaging/CarbonOfflineModel/nuget/v3/index.json"
+RNNT_SOURCE_ROOT="$SCRIPT_DIR/../source/extensions/embedded_sr/rnnt"
+RNNT_EXTERNAL_ROOT="$SCRIPT_DIR/../external/mas"
+RNNT_MODEL_NUGET_SOURCE="https://msasg.pkgs.visualstudio.com/_packaging/CarbonOfflineModel/nuget/v3/index.json"
 
 # TODO also look at target platform
 
@@ -50,6 +53,15 @@ case $SPEECHSDK_BUILD_AGENT_PLATFORM in
       nuget sources add -name UnidecModel -source $UNIDEC_MODEL_NUGET_SOURCE   -username carbon -password $VSTS_TOKEN -ConfigFile $NUGET_CONFIG
       nuget install $UNIDEC_SOURCE_ROOT/packages.config -OutputDirectory $UNIDEC_EXTERNAL_ROOT -ExcludeVersion -ConfigFile $NUGET_CONFIG
     fi
+
+    if [[ $SPEECHSDK_ENABLE_RNNT == true ]]; then
+      # For RNN-T offline model package installation
+      sudo apt-get install --yes nuget
+
+      # Install RNN-T model package
+      nuget sources add -name RNNTModel -source $RNNT_MODEL_NUGET_SOURCE -username carbon -password $VSTS_TOKEN
+      nuget install $RNNT_SOURCE_ROOT/packages.config -OutputDirectory $RNNT_EXTERNAL_ROOT -ExcludeVersion
+    fi
     ;;
 
   Windows-x64)
@@ -61,6 +73,12 @@ case $SPEECHSDK_BUILD_AGENT_PLATFORM in
       nuget.exe sources add -name UnidecModel -source $UNIDEC_MODEL_NUGET_SOURCE   -username carbon -password $VSTS_TOKEN -ConfigFile $NUGET_CONFIG
       nuget.exe install $(cygpath -aw "$UNIDEC_SOURCE_ROOT/packages.config") -OutputDirectory $(cygpath -aw "$UNIDEC_EXTERNAL_ROOT") -ExcludeVersion -ConfigFile $NUGET_CONFIG
     fi
+
+    # Install RNN-T offline model package
+    if [[ $SPEECHSDK_ENABLE_RNNT == true ]]; then
+      nuget.exe sources add -name RNNTModel -source $RNNT_MODEL_NUGET_SOURCE -username carbon -password $VSTS_TOKEN
+      nuget.exe install $(cygpath -aw "$RNNT_SOURCE_ROOT/packages.config") -OutputDirectory $(cygpath -aw "$RNNT_EXTERNAL_ROOT") -ExcludeVersion
+    fi
     ;;
 
   OSX-x64)
@@ -69,6 +87,12 @@ case $SPEECHSDK_BUILD_AGENT_PLATFORM in
     brew install pkg-config coreutils bash ninja
     # custom-install swig 3.0.12
     brew install https://raw.githubusercontent.com/Homebrew/homebrew-core/f3544543a3115023fc7ca962c21d14b443f419d0/Formula/swig.rb
+
+    if [[ $SPEECHSDK_ENABLE_RNNT == true ]]; then
+      # Install RNN-T model package
+      nuget sources add -name RNNTModel -source $RNNT_MODEL_NUGET_SOURCE -username carbon -password $VSTS_TOKEN
+      nuget install $RNNT_SOURCE_ROOT/packages.config -OutputDirectory $RNNT_EXTERNAL_ROOT -ExcludeVersion
+    fi
     ;;
 esac
 

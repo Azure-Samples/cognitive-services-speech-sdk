@@ -11,7 +11,7 @@ Note: Hosam (hosamk) and Mahadevan (masrini) are our contacts for the UnidecRunt
 
     https://msasg.visualstudio.com/Skyman/_packaging?_a=package&feed=Bing&package=Richland.Speech.UnidecRuntime&protocolType=NuGet&version=VERSION_ID
 
-	where `VERSION_ID` is the version number for package `Richland.Speech.UnidecRuntime` from the [packages.config](../../source/extensions/unidec/packages.config) file.
+	where `VERSION_ID` is the version number for package `Richland.Speech.UnidecRuntime` from the [packages.config](../../source/extensions/embedded_sr/unidec/packages.config) file.
 
 	Create a `Richland.Speech.UnidecRuntime` folder in this directory and extract the contents of the nupkg there (using e.g. 7-Zip).
 
@@ -19,7 +19,7 @@ Note: Hosam (hosamk) and Mahadevan (masrini) are our contacts for the UnidecRunt
 
     https://msasg.visualstudio.com/Skyman/_packaging?_a=package&feed=CarbonOfflineModel&package=Unidec.Model&protocolType=NuGet&version=VERSION_ID
 
-	where `VERSION_ID` is the version number for package `Unidec.Model` from the [packages.config](../../source/extensions/unidec/packages.config) file.
+	where `VERSION_ID` is the version number for package `Unidec.Model` from the [packages.config](../../source/extensions/embedded_sr/unidec/packages.config) file.
 
 	Create a `Unidec.Model` folder in this directory and extract the contents of the nupkg there.
 

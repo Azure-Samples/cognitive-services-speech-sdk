@@ -74,6 +74,70 @@ else
   OFFLINE_MODEL_LANGUAGE=""
 fi
 
+RUN_OFFLINE_RNNT_TESTS=false
+BUILD_CONFIGURATION=$(echo $PLATFORM | cut -f3 -d-)
+case $PLATFORM in
+  Linux-x86*)
+    RNNT_RUNTIME_PATH="$SCRIPT_DIR/../external/mas/Linux/x86/$BUILD_CONFIGURATION"
+    if [[ -d "$RNNT_RUNTIME_PATH" ]]; then
+      LD_LIBRARY_PATH="${RNNT_RUNTIME_PATH}:$LD_LIBRARY_PATH"
+      RUN_OFFLINE_RNNT_TESTS=true
+    fi
+    ;;
+  Linux-x64*)
+    RNNT_RUNTIME_PATH="$SCRIPT_DIR/../external/mas/Linux/x64/$BUILD_CONFIGURATION"
+    if [[ -d "$RNNT_RUNTIME_PATH" ]]; then
+      LD_LIBRARY_PATH="${RNNT_RUNTIME_PATH}:$LD_LIBRARY_PATH"
+      RUN_OFFLINE_RNNT_TESTS=true
+    fi
+    ;;
+  Windows-x86*)
+    RNNT_RUNTIME_PATH="$SCRIPT_DIR/../external/mas/Windows/Win32/$BUILD_CONFIGURATION"
+    if [[ -d "$RNNT_RUNTIME_PATH" ]]; then
+      PATH="${RNNT_RUNTIME_PATH}:$PATH"
+      RUN_OFFLINE_RNNT_TESTS=true
+    fi
+    ;;
+  Windows-x64*)
+    RNNT_RUNTIME_PATH="$SCRIPT_DIR/../external/mas/Windows/x64/$BUILD_CONFIGURATION"
+    if [[ -d "$RNNT_RUNTIME_PATH" ]]; then
+      PATH="${RNNT_RUNTIME_PATH}:$PATH"
+      RUN_OFFLINE_RNNT_TESTS=true
+    fi
+    ;;
+  OSX-x64*)
+    RNNT_RUNTIME_PATH="$SCRIPT_DIR/../external/mas/OSX/x64/$BUILD_CONFIGURATION"
+    if [[ -d "$RNNT_RUNTIME_PATH" ]]; then
+      export LD_LIBRARY_PATH="${RNNT_RUNTIME_PATH}:$LD_LIBRARY_PATH"
+      RUN_OFFLINE_RNNT_TESTS=true
+    fi
+    ;;
+esac
+
+if [[ $RUN_OFFLINE_RNNT_TESTS = true ]]; then
+  declare -A rnnt_spec
+  IFS="="
+  while read -r key value
+  do
+    rnnt_spec[$key]=$value
+  done < "external/mas/RNNT.Model/model/rnnt_test.config"
+  unset IFS
+  RNNT_MODEL_PATH="external/mas/RNNT.Model/model/rnnt_test.model"
+  RNNT_MODEL_SPEC="${RNNT_MODEL_PATH},${rnnt_spec["matrixKind"]},${rnnt_spec["beamWidth"]}"
+  RNNT_MODEL_SPEC+=",${rnnt_spec["insertionBoost"]},${rnnt_spec["recombineKind"]}"
+  RNNT_MODEL_SPEC+=",${rnnt_spec["scoreNormKind"]},${rnnt_spec["beamSortKind"]}"
+  RNNT_MODEL_SPEC+=",${rnnt_spec["baseFeatDim"]}"
+  RNNT_TOKENS="external/mas/RNNT.Model/model/rnnt_test.token.list"
+else
+  if [[ $PATTERN ]]; then
+    PATTERN="~[rnnt]$PATTERN"
+  else
+    PATTERN="~[rnnt]~[.]"
+  fi
+  RNNT_MODEL_SPEC=""
+  RNNT_TOKENS=""
+fi
+
 runCatchSuite \
   TESTRUNNER \
   "test-$T-$PLATFORM-$RANDOM" \
@@ -84,4 +148,6 @@ runCatchSuite \
   "$PATTERN" \
   "$TEST_CODE" \
     --offlineModelPathRoot="$OFFLINE_MODEL_PATH_ROOT" \
-    --offlineModelLanguage="$OFFLINE_MODEL_LANGUAGE"
+    --offlineModelLanguage="$OFFLINE_MODEL_LANGUAGE" \
+    --rnntModelSpec="$RNNT_MODEL_SPEC" \
+    --rnntTokens="$RNNT_TOKENS"

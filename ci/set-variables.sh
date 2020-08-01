@@ -324,3 +324,7 @@ do
   vsts_setoutvar $var "${overrideValue:-${!var}}"
 done
 
+if [[ $BUILDPLATFORM == iOS && $SPEECHSDK_ENABLE_RNNT == true ]]; then
+  vsts_setvar VersionedFrameworkName "$FRAMEWORKNAME-$BUILDPLATFORM-embeddedsr-$SPEECHSDK_SEMVER2NOMETA"
+fi
+

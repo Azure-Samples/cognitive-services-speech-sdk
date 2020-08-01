@@ -136,6 +136,18 @@ bool CarbonTestConsole::ParseConsoleArgs(const std::vector<std::string>& args, C
             pstrNextArg = &pconsoleArgs->m_strOfflineModelLanguage;
             fNextArgRequired = true;
         }
+        else if (PAL::strnicmp(pszArg, "--rnntModelSpec", strlen("--rnntModelSpec")) == 0)
+        {
+            fShowOptions = pconsoleArgs->m_strRnntModelSpec.length() > 0 || fNextArgRequired;
+            pstrNextArg = &pconsoleArgs->m_strRnntModelSpec;
+            fNextArgRequired = true;
+        }
+        else if (PAL::strnicmp(pszArg, "--rnntTokens", strlen("--rnntTokens")) == 0)
+        {
+            fShowOptions = pconsoleArgs->m_strRnntTokens.length() > 0 || fNextArgRequired;
+            pstrNextArg = &pconsoleArgs->m_strRnntTokens;
+            fNextArgRequired = true;
+        }
         else if (PAL::stricmp(pszArg, "--mockrecoengine") == 0)
         {
             fShowOptions = pconsoleArgs->m_strUseRecoEngineProperty.length() > 0 || fNextArgRequired;
@@ -418,10 +430,15 @@ void CarbonTestConsole::DisplayConsoleUsage()
     ConsoleWriteLine("       --region:{region}             Use {region} as the service region.");
     ConsoleWriteLine("       --customSpeechModelId:{id}    Use {id} as the Custom Speech Model ID.");
     ConsoleWriteLine("");
-    ConsoleWriteLine("     Offline speech recognition:");
+    ConsoleWriteLine("     Offline speech recognition using Unidec engine:");
     ConsoleWriteLine("");
     ConsoleWriteLine("       --offlineModelPathRoot:{path}  Use {path} as the root path for offline models.");
     ConsoleWriteLine("       --offlineModelLanguage:{lang}  Use {lang} as the language code, for example: en-US");
+    ConsoleWriteLine("");
+    ConsoleWriteLine("     Offline speech recognition using RNN-T engine:");
+    ConsoleWriteLine("");
+    ConsoleWriteLine("       --rnntModelSpec:{spec} Use {spec} as the specification for RNN-T offline model.");
+    ConsoleWriteLine("       --rnntTokens:{tokens}  Use {tokens} as the file with list of tokens for RNN-t offline model.");
     ConsoleWriteLine("");
     ConsoleWriteLine("     Additional:");
     ConsoleWriteLine("");
@@ -1090,6 +1107,18 @@ std::shared_ptr<SpeechConfig> CarbonTestConsole::SpeechRecognizerConfig()
         SpxSetMockParameterString(R"(CARBON-INTERNAL-UseRecoEngine-Unidec)", "false");
     }
 
+    if (!m_rnntModelSpec.empty())
+    {
+        // Test offline speech recognition without public API
+        SpxSetMockParameterString(R"(CARBON-INTERNAL-UseRecoEngine-Rnnt)", "true");
+        SpxSetMockParameterString(R"(CARBON-INTERNAL-RNNT-ModelSpec)", m_rnntModelSpec.c_str());
+        SpxSetMockParameterString(R"(CARBON-INTERNAL-RNNT-Tokens)", m_rnntTokens.c_str());
+    }
+    else
+    {
+        SpxSetMockParameterString(R"(CARBON-INTERNAL-UseRecoEngine-Rnnt)", "false");
+    }
+
     return sc;
 }
 
@@ -1645,6 +1674,16 @@ void CarbonTestConsole::InitGlobalParameters(ConsoleArgs* pconsoleArgs)
         m_offlineModelLanguage = pconsoleArgs->m_strOfflineModelLanguage;
     }
 
+    if (!pconsoleArgs->m_strRnntModelSpec.empty())
+    {
+        m_rnntModelSpec = pconsoleArgs->m_strRnntModelSpec;
+    }
+
+    if (!pconsoleArgs->m_strRnntTokens.empty())
+    {
+        m_rnntTokens = pconsoleArgs->m_strRnntTokens;
+    }
+
     if (!pconsoleArgs->m_kwsTable.empty())
     {
         m_kwsTable = pconsoleArgs->m_kwsTable;
@@ -2028,6 +2067,11 @@ void CarbonTestConsole::RunSample(const std::string& strSampleName)
     {
         ConsoleWriteLine("Running sample: %s\n", strSampleName.c_str());
         Sample_HelloWorld_PickEngine("Unidec");
+    }
+    else if (PAL::stricmp(strSampleName.c_str(), "helloworld rnnt") == 0)
+    {
+        ConsoleWriteLine("Running sample: %s\n", strSampleName.c_str());
+        Sample_HelloWorld_PickEngine("Rnnt");
     }
     else if (PAL::stricmp(strSampleName.c_str(), "helloworld mockengine") == 0)
     {

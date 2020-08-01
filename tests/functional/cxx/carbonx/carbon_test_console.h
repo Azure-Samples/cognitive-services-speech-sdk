@@ -58,6 +58,8 @@ private:
         std::string m_strPassthroughCertFile;
         std::string m_strOfflineModelPathRoot;
         std::string m_strOfflineModelLanguage;
+        std::string m_strRnntModelSpec;
+        std::string m_strRnntTokens;
         std::string m_strWireCompression;
 
         bool m_fRecognizeOnceAsync = false;
@@ -279,6 +281,8 @@ private:
     std::vector<std::string> m_intentNames;
     std::string m_offlineModelPathRoot;
     std::string m_offlineModelLanguage;
+    std::string m_rnntModelSpec;
+    std::string m_rnntTokens;
     std::string m_kwsTable;
     std::string m_wireCodec;
 

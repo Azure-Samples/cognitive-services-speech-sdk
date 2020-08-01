@@ -2245,14 +2245,21 @@ void CSpxAudioStreamSession::InitRecoEngineAdapter()
     SPX_DBG_TRACE_FUNCTION();
 
     // determine which type (or types) of reco engine adapters we should try creating...
+    bool tryRnnt = PAL::ToBool(GetStringValue("CARBON-INTERNAL-UseRecoEngine-Rnnt", PAL::BoolToString(false)));
     bool tryUnidec = PAL::ToBool(GetStringValue("CARBON-INTERNAL-UseRecoEngine-Unidec", PAL::BoolToString(false)));
     bool tryMock = PAL::ToBool(GetStringValue("CARBON-INTERNAL-UseRecoEngine-Mock", PAL::BoolToString(false)));
     bool tryUsp = PAL::ToBool(GetStringValue("CARBON-INTERNAL-UseRecoEngine-Usp", PAL::BoolToString(false)));
 
     // if nobody specified which type(s) of reco engine adapters this session should use, we'll use the USP
-    if (!tryUnidec && !tryMock && !tryUsp)
+    if (!tryRnnt && !tryUnidec && !tryMock && !tryUsp)
     {
         tryUsp = true;
+    }
+
+    // try to create the RNN-T adapter...
+    if (m_recoAdapter == nullptr && tryRnnt)
+    {
+        m_recoAdapter = SpxCreateObjectWithSite<ISpxRecoEngineAdapter>("CSpxRnntRecoEngineAdapter", this);
     }
 
     // try to create the Unidec adapter...

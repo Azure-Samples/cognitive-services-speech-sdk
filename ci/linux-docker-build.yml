@@ -77,7 +77,7 @@ jobs:
         # OpenSSL 1.1, and run tests during build.
         OPENSSL_TARGET: linux-x86_64
         JAVA_DEV_TARGET: amd64
-        JAVA_ARCH_TARGET: amd64   
+        JAVA_ARCH_TARGET: amd64
         Publish: false
   steps:
   - bash: |
@@ -95,13 +95,14 @@ jobs:
       else
         vsts_setvar SPEECHSDK_ENABLE_KWS false
       fi
+      vsts_setvar SPEECHSDK_ENABLE_RNNT true
       if [[ $SPEECHSDK_TARGET_PLATFORM == Linux-arm64 ]]; then
         vsts_setvar SPEECHSDK_ENABLE_UNIDEC true
-        vsts_setvar VSTS_TOKEN "$(System.AccessToken)"
       else
         vsts_setvar SPEECHSDK_ENABLE_UNIDEC false
       fi
       vsts_setvar SPEECHSDK_ENABLE_CODEC true
+      vsts_setvar VSTS_TOKEN "$(System.AccessToken)"
     displayName: Set variables
   - bash: ./ci/install-build-dependencies.sh
     displayName: Install build dependencies
@@ -109,6 +110,9 @@ jobs:
     parameters:
       enableVariable: SPEECHSDK_ENABLE_KWS
       os: Linux
+  - template: get-rnnt-artifact.yml
+    parameters:
+      enableVariable: SPEECHSDK_ENABLE_RNNT
   - template: get-unidec-artifact.yml
     parameters:
       enableVariable: SPEECHSDK_ENABLE_UNIDEC
@@ -163,6 +167,7 @@ jobs:
           -DSPEECHSDK_VERSION=$(SPEECHSDK_SEMVER2NOMETA) \
           -DEXTENSION_KWS_ENABLED=$(SPEECHSDK_ENABLE_KWS) \
           -DEXTENSION_CODEC_ENABLED=$(SPEECHSDK_ENABLE_CODEC) \
+          -DEXTENSION_RNNT_ENABLED=$(SPEECHSDK_ENABLE_RNNT) \
           -DEXTENSION_UNIDEC_ENABLED=$(SPEECHSDK_ENABLE_UNIDEC) \
           -DCMAKE_TOOLCHAIN_FILE=$SPEECHSDK_TOOL_CHAIN\
           -DOPENSSL_CRYPTO_LIBRARY=/linux-openssl/$(OPENSSL_TARGET)/usr/local/lib/libcrypto.a \
@@ -203,7 +208,7 @@ jobs:
   - template: get-docker-image.yml
     parameters:
       imageBase: $(DOCKER_TEST_BASE)
-      outvarImage: DOCKER_TEST_IMAGE    
+      outvarImage: DOCKER_TEST_IMAGE
   - template: test-during-build.yml
     parameters:
       continueOnTestFailure: ${{ parameters.continueOnTestFailure }}

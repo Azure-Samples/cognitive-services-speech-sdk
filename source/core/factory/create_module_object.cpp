@@ -23,6 +23,11 @@ SPX_EXTERN_C void* Codec_CreateModuleObject(const char* className, const char* i
 #ifdef STATIC_KWS_EXTENSION
 SPX_EXTERN_C void* SDKKWS_CreateModuleObject(const char* className, const char* interfaceName);
 #endif
+#ifdef STATIC_EMBEDDEDSR_EXTENSION
+#ifdef BUILD_RNNT
+SPX_EXTERN_C void* RNNT_CreateModuleObject(const char* className, const char* interfaceName);
+#endif
+#endif
 SPX_EXTERN_C void* AudioLib_CreateModuleObject(const char* className, const char* interfaceName);
 SPX_EXTERN_C void* DataLib_CreateModuleObject(const char* className, const char* interfaceName);
 SPX_EXTERN_C void* SRLib_CreateModuleObject(const char* className, const char* interfaceName);
@@ -38,6 +43,11 @@ SPX_EXTERN_C void* PrimaryCarbon_CreateModuleObject(const char* className, const
 #endif
 #ifdef STATIC_KWS_EXTENSION
     SPX_FACTORY_MAP_ENTRY_FUNC(SDKKWS_CreateModuleObject);
+#endif
+#ifdef STATIC_EMBEDDEDSR_EXTENSION
+#ifdef BUILD_RNNT
+    SPX_FACTORY_MAP_ENTRY_FUNC(RNNT_CreateModuleObject);
+#endif
 #endif
     SPX_FACTORY_MAP_ENTRY_FUNC(AudioLib_CreateModuleObject);
     SPX_FACTORY_MAP_ENTRY_FUNC(DataLib_CreateModuleObject);

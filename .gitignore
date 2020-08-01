@@ -81,6 +81,9 @@ build**/*
 external/unidec/Richland.Speech.UnidecRuntime
 external/unidec/Unidec.Model
 
+# RNN-T artifact
+external/mas/*/
+
 tests/end2end/csharp/TestResults
 
 public_samples/**/x64
