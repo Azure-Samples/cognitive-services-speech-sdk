@@ -1,8 +1,59 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <title>Microsoft Cognitive Services Speech SDK JavaScript Quickstart</title>
   <meta charset="utf-8" />
+  <style>
+    body {
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', 'Helvetica Neue', sans-serif;
+      font-size: 14px;
+    }
+
+    table, th, td {
+      border: 1px solid #f1f1f1;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 10px;
+    }
+
+    .mode {
+      font-size: 18px;
+    }
+
+    input:not(disabled) {
+      font-weight: bold;
+      color: black;
+    }
+
+    button {
+      padding: 4px 8px;
+      background: #0078d4;
+      color: #ffffff;
+    }
+
+    button:disabled {
+      padding: 4px 8px;
+      background: #ccc;
+      color: #666;
+    }
+
+    input[type=radio] {
+      position: relative;
+      z-index: 1;
+    }
+
+    input[type=radio] + label {
+      padding: 8px 4px 8px 30px;
+      margin-left: -30px;
+    }
+
+    input[type=radio]:checked + label {
+      background: #0078d4;
+      color: #ffffff;
+    }
+  </style>
 </head>
 <body style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:13px;">
   <div id="warning">
@@ -17,19 +68,19 @@
       </tr>
       <tr>
         <td align="right"><a href="https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started" target="_blank">Subscription</a>:</td>
-        <td><input id="subscriptionKey" type="text" size="40" value="subscription"></td>
+        <td><input id="subscriptionKey" type="text" size="40" placeholder="YourSubscriptionKey"></td>
       </tr>
       <tr>
         <td align="right">Region</td>
-        <td><input id="serviceRegion" type="text" size="40" value="YourServiceRegion"></td>
+        <td><input id="serviceRegion" type="text" size="40" placeholder="YourServiceRegion"></td>
+      </tr>
+      <tr>
+        <td align="right" valign="top">Input Text</td>
+        <td><textarea id="phraseDiv" style="display: inline-block;width:500px;height:50px"></textarea></td>
       </tr>
       <tr>
         <td></td>
         <td><button id="startSpeakTextAsyncButton">Start Text to Speech</button></td>
-      </tr>
-      <tr>
-        <td align="right" valign="top">Input Text</td>
-        <td><textarea id="phraseDiv" style="display: inline-block;width:500px;height:200px"></textarea></td>
       </tr>
       <tr>
         <td align="right" valign="top">Result</td>
@@ -86,19 +137,6 @@
       resultDiv = document.getElementById("resultDiv");
 
       startSpeakTextAsyncButton.addEventListener("click", function () {
-        let soundContext = undefined;
-        try {
-          var AudioContext = window.AudioContext || window.webkitAudioContext || false;
-          if (AudioContext) {
-              soundContext = new AudioContext();
-          } else {
-              alert("AudioContext not supported");
-          }
-        }
-        catch(e){
-          window.console.log("no sound context found, no audio output. " + e);
-        }
- 
         startSpeakTextAsyncButton.disabled = true;
         phraseDiv.innerHTML = "";
 
@@ -122,20 +160,12 @@
           inputText,
           function (result) {
             startSpeakTextAsyncButton.disabled = false;
-            resultDiv.innerHTML += "Result: ";
-            resultDiv.innerHTML += result.text;
-            resultDiv.innerHTML += "\n";
-
-            window.console.log(result);
-            if (result.audioData && soundContext) {
-              var source = soundContext.createBufferSource();
-              soundContext.decodeAudioData(result.audioData, function (newBuffer) {
-                source.buffer = newBuffer;
-                source.connect(soundContext.destination);
-                source.start(0);
-              });
+            if (result.reason === SpeechSDK.ResultReason.SynthesizingAudioCompleted) {
+              resultDiv.innerHTML += "synthesis finished for [" + inputText + "].\n";
+            } else if (result.reason === SpeechSDK.ResultReason.Canceled) {
+              resultDiv.innerHTML += "synthesis failed. Error detail: " + result.errorDetails + "\n";
             }
-
+            window.console.log(result);
             synthesizer.close();
             synthesizer = undefined;
           },
@@ -164,7 +194,6 @@
         }
       }
     });
-  
   
   </script>
 </body>

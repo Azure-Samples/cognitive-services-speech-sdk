@@ -48,6 +48,7 @@ namespace MicrosoftSpeechSDKSamples
             Console.WriteLine("U. Speech recognition with compressed input push audio stream.");
             Console.WriteLine("V. Translation with compressed input push audio stream.");
             Console.WriteLine("W. Keyword recognizer.");
+            Console.WriteLine("X. Speech synthesis with source language auto detection.");
 
             Console.Write(prompt);
 
@@ -141,6 +142,9 @@ namespace MicrosoftSpeechSDKSamples
                         break;
                     case ConsoleKey.S:
                         SpeechSynthesisServerScenarioSample.SpeechSynthesizeWithPool();
+                        break;
+                    case ConsoleKey.X:
+                        SpeechSynthesisSamples.SynthesisWithAutoDetectSourceLanguageAsync().Wait();
                         break;
                     case ConsoleKey.T:
                         SpeechRecognitionSamples.SpeechRecognitionWithCompressedInputPullStreamAudio().Wait();
