@@ -1,4 +1,4 @@
-# Quickstart: Using the Speech Service from Python
+# Quickstart: Recognize speech from a microphone from Python using the Speech Service
 
 This sample shows how to use the Speech Service through the Speech SDK for Python. It illustrates how the SDK can be used to recognize speech from microphone input.
 

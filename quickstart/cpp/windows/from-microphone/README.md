@@ -1,4 +1,4 @@
-# Quickstart: Recognize speech in C++ for Windows
+# Quickstart: Recognize speech from a microphone in C++ for Windows
 
 This sample demonstrates how to recognize speech with C++ using the Speech SDK for Windows.
 See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-cpp-windows) on the SDK documentation page which describes how to build this sample from scratch in Visual Studio 2017.

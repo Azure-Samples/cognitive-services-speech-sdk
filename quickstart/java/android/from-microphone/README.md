@@ -1,4 +1,4 @@
-# Quickstart: Recognize speech in Java on Android
+# Quickstart: Recognize speech from a microphone in Java on Android
 
 This sample demonstrates how to recognize speech with Java using the Speech SDK for Android.
 See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-java-android) on the SDK documentation page which describes how to build this sample from scratch in Android Studio.
