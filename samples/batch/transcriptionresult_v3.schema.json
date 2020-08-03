@@ -1,0 +1,399 @@
+{
+    "definitions": {},
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://speech.microsoft.com/transcriptionresult_v3.schema.json",
+    "title": "Transcription result",
+    "type": "object",
+    "required": [
+        "source",
+        "timestamp",
+        "durationInTicks",
+        "duration",
+        "combinedRecognizedPhrases",
+        "recognizedPhrases"
+    ],
+    "properties": {
+        "source": {
+            "$id": "#root/source",
+            "title": "Source",
+            "type": "string",
+            "default": "",
+            "description": "the sas url of a given contentUrl or the path relative to the root of a given container",
+            "pattern": "^.*$"
+        },
+        "timestamp": {
+            "$id": "#root/timestamp",
+            "title": "Timestamp",
+            "type": "string",
+            "default": "",
+            "description": "creation time of the transcription, ISO 8601 encoded timestamp, combined date and time",
+            "examples": [
+                "2020-06-16T09:30:21Z"
+            ],
+            "pattern": "^.*$"
+        },
+        "durationInTicks": {
+            "$id": "#root/durationInTicks",
+            "title": "Duration in ticks",
+            "type": "integer",
+            "description": "total audio duration in ticks (1 tick is 100 nanoseconds)",
+            "examples": [
+                41200000
+            ],
+            "default": 0,
+            "minimum": 0
+        },
+        "duration": {
+            "$id": "#root/duration",
+            "title": "Duration",
+            "type": "string",
+            "default": "",
+            "description": "total audio duration, ISO 8601 encoded duration",
+            "examples": [
+                "PT4.12S"
+            ],
+            "pattern": "^.*$"
+        },
+        "combinedRecognizedPhrases": {
+            "$id": "#root/combinedRecognizedPhrases",
+            "title": "Combined recognized phrases",
+            "type": "array",
+            "description": "concatenated results for simple access in single string for each channel",
+            "default": [],
+            "items": {
+                "$id": "#root/combinedRecognizedPhrases/items",
+                "title": "Items",
+                "type": "object",
+                "required": [
+                    "channel",
+                    "lexical",
+                    "itn",
+                    "maskedITN",
+                    "display"
+                ],
+                "properties": {
+                    "channel": {
+                        "$id": "#root/combinedRecognizedPhrases/items/channel",
+                        "title": "Channel",
+                        "type": "integer",
+                        "description": "channel number of the concatenated results",
+                        "examples": [
+                            0
+                        ],
+                        "default": 0,
+                        "minimum": 0
+                    },
+                    "lexical": {
+                        "$id": "#root/combinedRecognizedPhrases/items/lexical",
+                        "title": "Lexical",
+                        "type": "string",
+                        "default": "",
+                        "description": "The actual words recognized.",
+                        "examples": [
+                            "hello world"
+                        ],
+                        "pattern": "^.*$"
+                    },
+                    "itn": {
+                        "$id": "#root/combinedRecognizedPhrases/items/itn",
+                        "title": "ITN",
+                        "type": "string",
+                        "default": "",
+                        "description": "Inverse-text-normalized form of the recognized text. Abbreviations (\"doctor smith\" to \"dr smith\"), phone numbers, and other transformations are applied.",
+                        "examples": [
+                            "hello world"
+                        ],
+                        "pattern": "^.*$"
+                    },
+                    "maskedITN": {
+                        "$id": "#root/combinedRecognizedPhrases/items/maskedITN",
+                        "title": "Masked ITN",
+                        "type": "string",
+                        "default": "",
+                        "description": "The ITN form with profanity masking applied.",
+                        "examples": [
+                            "hello world"
+                        ],
+                        "pattern": "^.*$"
+                    },
+                    "display": {
+                        "$id": "#root/combinedRecognizedPhrases/items/display",
+                        "title": "Display",
+                        "type": "string",
+                        "default": "",
+                        "description": "The display form of the recognized text. Added punctuation and capitalization are included.",
+                        "examples": [
+                            "Hello world."
+                        ],
+                        "pattern": "^.*$"
+                    }
+                }
+            }
+        },
+        "recognizedPhrases": {
+            "$id": "#root/recognizedPhrases",
+            "title": "Recognized phrases",
+            "type": "array",
+            "default": [],
+            "items": {
+                "$id": "#root/recognizedPhrases/items",
+                "title": "Items",
+                "type": "object",
+                "required": [
+                    "recognitionStatus",
+                    "channel",
+                    "offset",
+                    "duration",
+                    "offsetInTicks",
+                    "durationInTicks",
+                    "nBest"
+                ],
+                "properties": {
+                    "recognitionStatus": {
+                        "$id": "#root/recognizedPhrases/items/recognitionStatus",
+                        "title": "Recognition status",
+                        "type": "string",
+                        "default": "",
+                        "description": "recognition state, e.g. \"Success\", \"Failure\"",
+                        "examples": [
+                            "Success"
+                        ],
+                        "pattern": "^.*$"
+                    },
+                    "channel": {
+                        "$id": "#root/recognizedPhrases/items/channel",
+                        "title": "Channel",
+                        "type": "integer",
+                        "description": "channel number of the result",
+                        "examples": [
+                            0
+                        ],
+                        "default": 0,
+                        "minimum": 0
+                    },
+                    "offset": {
+                        "$id": "#root/recognizedPhrases/items/offset",
+                        "title": "Offset",
+                        "type": "string",
+                        "default": "",
+                        "description": "offset in audio of this phrase, ISO 8601 encoded duration",
+                        "examples": [
+                            "PT0.07S"
+                        ],
+                        "pattern": "^.*$"
+                    },
+                    "duration": {
+                        "$id": "#root/recognizedPhrases/items/duration",
+                        "title": "Duration",
+                        "type": "string",
+                        "default": "",
+                        "description": "audio duration of this phrase, ISO 8601 encoded duration",
+                        "examples": [
+                            "PT1.59S"
+                        ],
+                        "pattern": "^.*$"
+                    },
+                    "offsetInTicks": {
+                        "$id": "#root/recognizedPhrases/items/offsetInTicks",
+                        "title": "Offset in ticks",
+                        "type": "integer",
+                        "description": "offset in audio of this phrase in ticks (1 tick is 100 nanoseconds)",
+                        "examples": [
+                            700000
+                        ],
+                        "default": 0,
+                        "minimum": 0
+                    },
+                    "durationInTicks": {
+                        "$id": "#root/recognizedPhrases/items/durationInTicks",
+                        "title": "Duration in ticks",
+                        "type": "integer",
+                        "description": "audio duration of this phrase in ticks (1 tick is 100 nanoseconds)",
+                        "examples": [
+                            15900000
+                        ],
+                        "default": 0,
+                        "minimum": 0
+                    },
+                    "nBest": {
+                        "$id": "#root/recognizedPhrases/items/nBest",
+                        "title": "NBest",
+                        "type": "array",
+                        "description": "possible transcriptions of the current phrase with confidences",
+                        "default": [],
+                        "items": {
+                            "$id": "#root/recognizedPhrases/items/nBest/items",
+                            "title": "Items",
+                            "type": "object",
+                            "required": [
+                                "confidence",
+                                "lexical",
+                                "itn",
+                                "maskedITN",
+                                "display"
+                            ],
+                            "properties": {
+                                "confidence": {
+                                    "$id": "#root/recognizedPhrases/items/nBest/items/confidence",
+                                    "title": "Confidence",
+                                    "type": "number",
+                                    "description": "confidence value for the recognition of the whole phrase",
+                                    "examples": [
+                                        0.898652852
+                                    ],
+                                    "default": 0.0,
+                                    "minimum": 0.0,
+                                    "maximum": 1.0
+                                },
+                                "speaker": {
+                                    "$id": "#root/recognizedPhrases/items/nBest/items/speaker",
+                                    "title": "Speaker",
+                                    "type": "integer",
+                                    "description": "if `diarizationEnabled` is `true`, this is the identified speaker (1 or 2), otherwise this property is not present",
+                                    "examples": [
+                                        1
+                                    ],
+                                    "default": 1,
+                                    "minimum": 1
+                                },
+                                "lexical": {
+                                    "$id": "#root/recognizedPhrases/items/nBest/items/lexical",
+                                    "title": "Lexical",
+                                    "type": "string",
+                                    "default": "",
+                                    "description": "The actual words recognized",
+                                    "examples": [
+                                        "hello world"
+                                    ],
+                                    "pattern": "^.*$"
+                                },
+                                "itn": {
+                                    "$id": "#root/recognizedPhrases/items/nBest/items/itn",
+                                    "title": "ITN",
+                                    "type": "string",
+                                    "default": "",
+                                    "description": "Inverse-text-normalized form of the recognized text. Abbreviations (\"doctor smith\" to \"dr smith\"), phone numbers, and other transformations are applied.",
+                                    "examples": [
+                                        "hello world"
+                                    ],
+                                    "pattern": "^.*$"
+                                },
+                                "maskedITN": {
+                                    "$id": "#root/recognizedPhrases/items/nBest/items/maskedITN",
+                                    "title": "Masked ITN",
+                                    "type": "string",
+                                    "default": "",
+                                    "description": "The ITN form with profanity masking applied",
+                                    "examples": [
+                                        "hello world"
+                                    ],
+                                    "pattern": "^.*$"
+                                },
+                                "display": {
+                                    "$id": "#root/recognizedPhrases/items/nBest/items/display",
+                                    "title": "Display",
+                                    "type": "string",
+                                    "default": "",
+                                    "description": "The display form of the recognized text. Added punctuation and capitalization are included",
+                                    "examples": [
+                                        "Hello world."
+                                    ],
+                                    "pattern": "^.*$"
+                                },
+                                "words": {
+                                    "$id": "#root/recognizedPhrases/items/nBest/items/words",
+                                    "title": "Words",
+                                    "type": "array",
+                                    "default": [],
+                                    "description": "if `wordLevelTimestampsEnabled` is `true`, there will be a result for each word of the phrase, otherwise this property is not present",
+                                    "items": {
+                                        "$id": "#root/recognizedPhrases/items/nBest/items/words/items",
+                                        "title": "Items",
+                                        "type": "object",
+                                        "required": [
+                                            "word",
+                                            "offset",
+                                            "duration",
+                                            "offsetInTicks",
+                                            "durationInTicks",
+                                            "confidence"
+                                        ],
+                                        "properties": {
+                                            "word": {
+                                                "$id": "#root/recognizedPhrases/items/nBest/items/words/items/word",
+                                                "title": "Word",
+                                                "type": "string",
+                                                "default": "",
+                                                "description": "the lexical form of the recognized form",
+                                                "examples": [
+                                                    "hello"
+                                                ],
+                                                "pattern": "^.*$"
+                                            },
+                                            "offset": {
+                                                "$id": "#root/recognizedPhrases/items/nBest/items/words/items/offset",
+                                                "title": "Offset",
+                                                "type": "string",
+                                                "default": "",
+                                                "description": "offset in audio of this phrase, ISO 8601 encoded duration",
+                                                "examples": [
+                                                    "PT0.09S"
+                                                ],
+                                                "pattern": "^.*$"
+                                            },
+                                            "duration": {
+                                                "$id": "#root/recognizedPhrases/items/nBest/items/words/items/duration",
+                                                "title": "Duration",
+                                                "type": "string",
+                                                "default": "",
+                                                "description": "audio duration of this phrase, ISO 8601 encoded duration",
+                                                "examples": [
+                                                    "PT0.48S"
+                                                ],
+                                                "pattern": "^.*$"
+                                            },
+                                            "offsetInTicks": {
+                                                "$id": "#root/recognizedPhrases/items/nBest/items/words/items/offsetInTicks",
+                                                "title": "Offset in ticks",
+                                                "type": "integer",
+                                                "description": "offset in audio of this phrase in ticks (1 tick is 100 nanoseconds)",
+                                                "examples": [
+                                                    900000
+                                                ],
+                                                "default": 0,
+                                                "minimum": 0
+                                            },
+                                            "durationInTicks": {
+                                                "$id": "#root/recognizedPhrases/items/nBest/items/words/items/durationInTicks",
+                                                "title": "Duration in ticks",
+                                                "type": "integer",
+                                                "description": "audio duration of this phrase in ticks (1 tick is 100 nanoseconds)",
+                                                "examples": [
+                                                    4800000
+                                                ],
+                                                "default": 0,
+                                                "minimum": 0
+                                            },
+                                            "confidence": {
+                                                "$id": "#root/recognizedPhrases/items/nBest/items/words/items/confidence",
+                                                "title": "Confidence",
+                                                "type": "number",
+                                                "description": "confidence value for the recognition of the individual word",
+                                                "examples": [
+                                                    0.987572
+                                                ],
+                                                "default": 0.0,
+                                                "minimum": 0.0,
+                                                "maximum": 1.0
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

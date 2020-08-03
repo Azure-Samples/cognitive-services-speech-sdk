@@ -39,6 +39,7 @@ public class Main {
         System.out.println("O. Speech synthesis events.");
         System.out.println("P. Speech synthesis word boundary event.");
         System.out.println("Q: Speech synthesis server scenario example.");
+        System.out.println("R: Speech synthesis with source language auto detection.");
 
         System.out.print(prompt);
 
@@ -125,6 +126,9 @@ public class Main {
                     break;
                 case "q":
                     SpeechSynthesisScenarioSamples.synthesisServerScenarioAsync();
+                    break;
+                case "r":
+                    SpeechSynthesisSamples.synthesisWithSourceLanguageAutoDetectionAsync();
                     break;
                 case "0":
                     System.out.println("Exiting...");
