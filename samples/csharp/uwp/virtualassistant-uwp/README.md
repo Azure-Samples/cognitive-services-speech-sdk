@@ -1,7 +1,6 @@
 # Quickstart: Using virtual assistant (Preview) in C# Universal Windows Platform
 
 This sample demonstrates how to recognize speech for custom voice-first virtual assistants (Preview) and receive activity responses.
-See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-virtual-assistant-csharp-uwp) on the SDK documentation page which describes how to build a similar app from scratch in Visual Studio 2017.
 
 ## Prerequisites
 
