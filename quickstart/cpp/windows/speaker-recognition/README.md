@@ -35,3 +35,4 @@ To debug the app and then run it, press F5 or use **Debug** \> **Start Debugging
 
 * [Quickstart article on the SDK documentation site](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-cpp-windows)
 * [Speech SDK API reference for C++](https://aka.ms/csspeech/cppref)
+
