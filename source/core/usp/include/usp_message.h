@@ -35,7 +35,7 @@ namespace USP {
         /// </summary>
         /// <param name="other">Message to move</param>
         Message& operator=(Message&& other) = default;
-    
+
         /// <summary>
         /// Class destructor
         /// </summary>

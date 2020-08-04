@@ -266,14 +266,16 @@ namespace USP {
         /// <param>True if the message was sent successfully, false otherwise</param>
         virtual void MessageSent(bool success) = 0;
 
-    protected:
         /// <summary>
         /// Constructor
         /// </summary>
         IWebSocketMessage() = default;
 
-    private:
-        DISABLE_COPY_AND_MOVE(IWebSocketMessage);
+        IWebSocketMessage(const IWebSocketMessage&) = delete;
+        IWebSocketMessage(IWebSocketMessage&&) = default;
+        IWebSocketMessage& operator=(const IWebSocketMessage&) = delete;
+        IWebSocketMessage& operator=(IWebSocketMessage&&) = default;
+
     };
 
     /// <summary>
@@ -336,7 +338,7 @@ namespace USP {
         /// Event raised when the web socket connects
         /// </summary>
         Impl::event<> OnConnected;
-        
+
         /// <summary>
         /// Event raised when the socket is disconnected. The first parameter will be the reason
         /// we were disconnected. The second will either be the message the server sent to, or
