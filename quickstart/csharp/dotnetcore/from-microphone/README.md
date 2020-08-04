@@ -1,4 +1,4 @@
-# Quickstart: Recognize speech in C# under .NET Core (Windows, macOS, or Linux)
+# Quickstart: Recognize speech from a microphone in C# under .NET Core (Windows, macOS, or Linux)
 
 This sample demonstrates how to recognize speech with C# under .NET Core 2.0 (Windows, macOS, or Linux) using the Speech SDK.
 

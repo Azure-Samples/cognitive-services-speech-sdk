@@ -1,4 +1,4 @@
-# Quickstart: Speaker Recognition using wave file in C++ for Windows
+# Quickstart: Recognize speakers from a file in C++ for Windows
 
 In this quickstart, you'll learn how to do speaker recognition, including creating a voice profile, enrollment training and speaker verification and identification with C++ using the Speech SDK for Windows.
 
