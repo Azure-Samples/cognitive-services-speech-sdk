@@ -7,7 +7,6 @@
 #include "common.h"
 #include "handle_helpers.h"
 #include "event_helpers.h"
-#include <ISpxConversationInterfaces.h>
 #include <speechapi_c_conversation_translator.h>
 
 using namespace Microsoft::CognitiveServices::Speech::Impl;

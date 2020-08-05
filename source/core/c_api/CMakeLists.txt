@@ -67,7 +67,7 @@ target_include_directories(c_api
 
 )
 
-target_link_libraries(c_api PRIVATE interfaces factory common logging sr conversation_translation)
+target_link_libraries(c_api PRIVATE interfaces common factory logging)
 
 if(WIN32 AND SPECTRE_MITIGATION)
     set_property(TARGET c_api PROPERTY VS_GLOBAL_SpectreMitigation "Spectre")

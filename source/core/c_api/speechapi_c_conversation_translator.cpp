@@ -7,7 +7,6 @@
 
 #include "stdafx.h"
 #include "common.h"
-#include <ISpxConversationInterfaces.h>
 #include <service_helpers.h>
 #include "handle_helpers.h"
 
@@ -15,12 +14,12 @@ using namespace Microsoft::CognitiveServices::Speech;
 using namespace Microsoft::CognitiveServices::Speech::Impl;
 using namespace Microsoft::CognitiveServices::Speech::Impl::ConversationTranslation;
 
-template<typename TInterface>
-static std::shared_ptr<TInterface> GetInstance(typename TInterface::HandleType handle)
+template<typename TInterface, typename HandleInterface = typename TInterface::HandleInterfaceType>
+static std::shared_ptr<TInterface> GetInstance(SPXHANDLE handle)
 {
     SPX_IFTRUE_THROW_HR(handle == SPXHANDLE_INVALID, SPXERR_INVALID_HANDLE);
 
-    auto handles = CSpxSharedPtrHandleTableManager::Get<typename TInterface::HandleInterfaceType, typename TInterface::HandleType>();
+    auto handles = CSpxSharedPtrHandleTableManager::Get<typename TInterface::HandleInterfaceType, SPXHANDLE>();
     auto interface = (*handles)[handle];
     auto ptr = std::dynamic_pointer_cast<TInterface>(interface);
 
@@ -28,15 +27,15 @@ static std::shared_ptr<TInterface> GetInstance(typename TInterface::HandleType h
     return ptr;
 }
 
-template<typename TInterface>
-static std::shared_ptr<TInterface> TryGetInstance(typename TInterface::HandleType handle)
+template<typename TInterface, typename HandleInterface = typename TInterface::HandleInterfaceType>
+static std::shared_ptr<TInterface> TryGetInstance(SPXHANDLE handle)
 {
     if (handle == SPXHANDLE_INVALID)
     {
         return nullptr;
     }
 
-    auto handles = CSpxSharedPtrHandleTableManager::Get<typename TInterface::HandleInterfaceType, typename TInterface::HandleType>();
+    auto handles = CSpxSharedPtrHandleTableManager::Get<typename TInterface::HandleInterfaceType, SPXHANDLE>();
     auto interface = (*handles)[handle];
     return std::dynamic_pointer_cast<TInterface>(interface);
 }
@@ -55,12 +54,12 @@ template<typename TInterface>
 static inline bool _Handle_IsValid(SPXHANDLE handle)
 {
     // NOTE: GCC gets upset by the HandleInterface Type being abstract. So just copy method contents here
-    //return Handle_IsValid<typename TInterface::HandleInterfaceType, typename TInterface::HandleType>(static_cast<typename TInterface::HandleType>(handle));
+    //return Handle_IsValid<typename TInterface::HandleInterfaceType, SPXHANDLE>(static_cast<SPXHANDLE>(handle));
 
     SPXAPI_INIT_HR_TRY(hr)
     {
-        auto handletable = CSpxSharedPtrHandleTableManager::Get<typename TInterface::HandleInterfaceType, typename TInterface::HandleType>();
-        return handletable->IsTracked(static_cast<typename TInterface::HandleType>(handle));
+        auto handletable = CSpxSharedPtrHandleTableManager::Get<typename TInterface::HandleInterfaceType, SPXHANDLE>();
+        return handletable->IsTracked(handle);
     }
     SPXAPI_CATCH_AND_RETURN(hr, false);
 }
@@ -69,13 +68,13 @@ template<typename TInterface>
 static inline SPXHR _Handle_Close(SPXHANDLE handle)
 {
     // NOTE: GCC gets upset by the HandleInterface Type being abstract. So just copy method contents here
-    //return Handle_Close<typename TInterface::HandleInterfaceType, typename TInterface::HandleType>(static_cast<typename TInterface::HandleType>(handle));
+    //return Handle_Close<typename TInterface::HandleInterfaceType, SPXHANDLE>(static_cast<SPXHANDLE>(handle));
 
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, handle == nullptr);
     SPXAPI_INIT_HR_TRY(hr)
     {
-        auto handletable = CSpxSharedPtrHandleTableManager::Get<typename TInterface::HandleInterfaceType, typename TInterface::HandleType>();
-        handletable->StopTracking(static_cast<typename TInterface::HandleType>(handle));
+        auto handletable = CSpxSharedPtrHandleTableManager::Get<typename TInterface::HandleInterfaceType, SPXHANDLE>();
+        handletable->StopTracking(handle);
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
@@ -102,7 +101,7 @@ static SPXHR SetCallback(
                 return;
             }
 
-            auto eventhandles = CSpxSharedPtrHandleTableManager::Get<typename TInterface::HandleInterfaceType, typename TInterface::HandleType>();
+            auto eventhandles = CSpxSharedPtrHandleTableManager::Get<typename TInterface::HandleInterfaceType, SPXHANDLE>();
             auto hevent = eventhandles->TrackHandle(e);
             (*pCallback)(hConvTrans, hevent, pvCtxt);
         };
@@ -138,7 +137,7 @@ static SPXHR SetCallback(
                 return;
             }
 
-            auto eventhandles = CSpxSharedPtrHandleTableManager::Get<typename TInterface::HandleInterfaceType, typename TInterface::HandleType>();
+            auto eventhandles = CSpxSharedPtrHandleTableManager::Get<typename TInterface::HandleInterfaceType, SPXHANDLE>();
             auto hevent = eventhandles->TrackHandle(e);
             (*pCallback)(hevent, pvCtxt);
         };

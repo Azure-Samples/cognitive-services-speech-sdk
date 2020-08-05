@@ -64,6 +64,7 @@ if(APPLE)
   target_link_libraries(${PROJECT_NAME}_static
       PRIVATE interfaces
       PRIVATE common
+      PRIVATE sr
       PRIVATE logging
       PRIVATE factory
       PRIVATE speaker_recognition

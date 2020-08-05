@@ -10,7 +10,6 @@
 #include <atomic>
 #include <exception.h>
 #include <property_id_2_name_map.h>
-#include "ISpxConversationInterfaces.h"
 #include "conversation_connection.h"
 #include "conversation_manager.h"
 #include "conversation_utils.h"

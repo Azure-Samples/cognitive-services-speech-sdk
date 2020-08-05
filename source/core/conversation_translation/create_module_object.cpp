@@ -7,7 +7,6 @@
 
 #include "common.h"
 #include <factory_helpers.h>
-#include "ISpxConversationInterfaces.h"
 #include "conversation_translator.h"
 #include "conversation_impl.h"
 #include "conversation_translator_connection.h"

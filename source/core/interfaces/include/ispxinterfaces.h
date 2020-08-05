@@ -4,8 +4,8 @@
 //
 // ISpxInterfaces.h: Implementation declarations for all ISpx* C++ interface classes
 //
-
 #pragma once
+
 #include <memory>
 #include <vector>
 #include <map>
@@ -25,8 +25,14 @@
 #include <interfaces/audio.h>
 #include <interfaces/base.h>
 #include <interfaces/containers.h>
+#include <interfaces/conversation.h>
+#include <interfaces/conversation_translation.h>
 #include <interfaces/data.h>
+#include <interfaces/event_args.h>
+#include <interfaces/keyword.h>
 #include <interfaces/notify_me.h>
+#include <interfaces/recognizers.h>
+#include <interfaces/results.h>
 #include <interfaces/types.h>
 
 namespace Microsoft {
@@ -299,19 +305,6 @@ public:
     virtual std::string GetId() const = 0;
 };
 
-class ISpxParticipant : public ISpxInterfaceBaseFor<ISpxParticipant>
-{
-public:
-    virtual void SetPreferredLanguage(std::string&& preferredLanguage) = 0;
-    virtual void SetVoiceSignature(std::string&& voiceSignature) = 0;
-
-    virtual std::string GetPreferredLanguage() const = 0;
-    virtual std::string GetVoiceSignature() const = 0;
-    virtual std::string GetId() const = 0;
-};
-
-using ParticipantPtr = std::shared_ptr<ISpxParticipant>;
-
 class ISpxAudioConfig : public ISpxInterfaceBaseFor<ISpxAudioConfig>
 {
 public:
@@ -322,8 +315,6 @@ public:
     virtual std::wstring GetFileName() const = 0;
     virtual std::shared_ptr<ISpxAudioStream> GetStream() = 0;
 };
-
-
 
 class ISpxInternalAudioCodecAdapter : public ISpxInterfaceBaseFor <ISpxInternalAudioCodecAdapter>
 {
@@ -430,47 +421,12 @@ public:
     virtual void SetReader(std::shared_ptr<ISpxAudioStreamReader> reader) = 0;
 };
 
-class ISpxKwsModel : public ISpxInterfaceBaseFor<ISpxKwsModel>
-{
-public:
-    virtual void InitFromFile(const wchar_t* fileName) = 0;
-    virtual std::wstring GetFileName() const = 0;
-};
-
 class ISpxAudioDataStream;
 
 #define REASON_CANCELED_NONE static_cast<CancellationReason>(0)
 #define NO_MATCH_REASON_NONE static_cast<NoMatchReason>(0)
 #define VOICE_PROFILE_TYPE_NONE static_cast<VoiceProfileType>(0)
 
-class ISpxRecognitionResult : public ISpxInterfaceBaseFor<ISpxRecognitionResult>
-{
-public:
-    virtual std::wstring GetResultId() = 0;
-    virtual std::wstring GetText() = 0;
-
-    virtual ResultReason GetReason() = 0;
-    virtual CancellationReason GetCancellationReason() = 0;
-    virtual CancellationErrorCode GetCancellationErrorCode() = 0;
-    virtual NoMatchReason GetNoMatchReason() = 0;
-
-    virtual uint64_t GetOffset() const = 0;
-    virtual void SetOffset(uint64_t) = 0;
-    virtual uint64_t GetDuration() const = 0;
-
-    virtual void SetLatency(uint64_t) = 0;
-
-    virtual std::shared_ptr<ISpxAudioDataStream> GetAudioDataStream() = 0;
-};
-
-using RecognitionResultPtr = std::shared_ptr<ISpxRecognitionResult>;
-
-class ISpxRecognitionResultInit : public ISpxInterfaceBaseFor<ISpxRecognitionResultInit>
-{
-public:
-    virtual void InitIntermediateResult(const wchar_t* resultId, const wchar_t* text, uint64_t offset, uint64_t duration) = 0;
-    virtual void InitFinalResult(const wchar_t* resultId, ResultReason reason, NoMatchReason noMatchReason, CancellationReason cancellation, CancellationErrorCode errorCode, const wchar_t* text, uint64_t offset, uint64_t duration) = 0;
-};
 
 class ISpxKeywordRecognitionResultInit : public ISpxInterfaceBaseFor<ISpxKeywordRecognitionResultInit>
 {
@@ -507,43 +463,6 @@ public:
     virtual void SetEvents(const std::shared_ptr<ISpxSynthesizerEvents>& events) = 0;
     virtual void SetFutureResult(std::shared_ptr<CSpxAsyncOp<std::shared_ptr<ISpxSynthesisResult>>> futureResult) = 0;
     virtual void Reset() = 0;
-};
-
-class ISpxAudioDataStream : public ISpxInterfaceBaseFor<ISpxAudioDataStream>
-{
-public:
-    virtual void InitFromSynthesisResult(std::shared_ptr<ISpxSynthesisResult> result) = 0;
-    virtual void InitFromFormat(const SPXWAVEFORMATEX& format, bool hasHeader) = 0;
-    virtual StreamStatus GetStatus() noexcept = 0;
-    virtual CancellationReason GetCancellationReason() = 0;
-    virtual CancellationErrorCode GetCancellationErrorCode() = 0;
-    virtual bool CanReadData(uint32_t requestedSize) = 0;
-    virtual bool CanReadData(uint32_t requestedSize, uint32_t pos) = 0;
-    virtual uint32_t Read(uint8_t* buffer, uint32_t bufferSize) = 0;
-    virtual uint32_t Read(uint8_t* buffer, uint32_t bufferSize, uint32_t pos) = 0;
-    virtual void SaveToWaveFile(const wchar_t* fileName) = 0;
-    virtual uint32_t GetPosition() = 0;
-    virtual void SetPosition(uint32_t pos) = 0;
-    virtual void DetachInput() = 0;
-};
-
-class ISpxRecognizer : public ISpxInterfaceBaseFor<ISpxRecognizer>
-{
-public:
-    virtual bool IsEnabled() = 0;
-    virtual void Enable() = 0;
-    virtual void Disable() = 0;
-
-    virtual CSpxAsyncOp<std::shared_ptr<ISpxRecognitionResult>> RecognizeAsync() = 0;
-    virtual CSpxAsyncOp<void> StartContinuousRecognitionAsync() = 0;
-    virtual CSpxAsyncOp<void> StopContinuousRecognitionAsync() = 0;
-
-    virtual CSpxAsyncOp<std::shared_ptr<ISpxRecognitionResult>> RecognizeAsync(std::shared_ptr<ISpxKwsModel> model) = 0;
-    virtual CSpxAsyncOp<void> StartKeywordRecognitionAsync(std::shared_ptr<ISpxKwsModel> model) = 0;
-    virtual CSpxAsyncOp<void> StopKeywordRecognitionAsync() = 0;
-
-    virtual void OpenConnection(bool forContinuousRecognition) = 0;
-    virtual void CloseConnection() = 0;
 };
 
 enum class InteractionIdPurpose { Speech = 0, Activity };
@@ -626,17 +545,6 @@ public:
     virtual std::shared_ptr<ISpxConnection> GetConnection() = 0;
 };
 
-class ISpxSessionEventArgs : public ISpxInterfaceBaseFor<ISpxSessionEventArgs>
-{
-public:
-    virtual const std::wstring& GetSessionId() = 0;
-};
-
-class ISpxSessionEventArgsInit : public ISpxInterfaceBaseFor<ISpxSessionEventArgsInit>
-{
-public:
-    virtual void Init(const std::wstring& sessionId) = 0;
-};
 
 class ISpxActivityEventArgsInit : public ISpxInterfaceBaseFor<ISpxActivityEventArgsInit>
 {
@@ -646,17 +554,6 @@ public:
     virtual void Init(std::string activity, std::shared_ptr<ISpxAudioOutput> audio) = 0;
 };
 
-class ISpxConnectionEventArgs :
-    public virtual ISpxSessionEventArgs,
-    public ISpxInterfaceBaseFor<ISpxConnectionEventArgs>
-{
-};
-
-class ISpxConnectionEventArgsInit : public ISpxInterfaceBaseFor<ISpxConnectionEventArgsInit>
-{
-public:
-    virtual void Init(const std::wstring& sessionId) = 0;
-};
 
 class ISpxConnectionMessage : public ISpxInterfaceBaseFor<ISpxConnectionMessage>
 {
@@ -689,24 +586,7 @@ public:
     virtual void Init(std::shared_ptr<ISpxConnectionMessage> message) = 0;
 };
 
-/// <summary>
-/// Interface for miscellaneous conversation related event arguments (e.g. expiration, participants
-/// changed, etc...)
-/// </summary>
-class ISpxConversationEventArgs :
-    public virtual ISpxSessionEventArgs,
-    public virtual ISpxInterfaceBaseFor<ISpxConversationEventArgs>
-{
-};
 
-class ISpxRecognitionEventArgs :
-    public virtual ISpxSessionEventArgs,
-    public ISpxInterfaceBaseFor<ISpxRecognitionEventArgs>
-{
-public:
-    virtual const uint64_t& GetOffset() = 0;
-    virtual std::shared_ptr<ISpxRecognitionResult> GetResult() = 0;
-};
 
 class ISpxActivityEventArgs :
     public ISpxInterfaceBaseFor<ISpxActivityEventArgs>
@@ -716,13 +596,6 @@ public:
     virtual const std::string& GetActivity() const = 0;
     virtual bool HasAudio() const = 0;
     virtual std::shared_ptr<ISpxAudioOutput> GetAudio() const = 0;
-};
-
-class ISpxRecognitionEventArgsInit : public ISpxInterfaceBaseFor<ISpxRecognitionEventArgsInit>
-{
-public:
-    virtual void Init(const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result) = 0;
-    virtual void Init(const std::wstring& sessionId, uint64_t offset) = 0;
 };
 
 
@@ -854,35 +727,6 @@ public:
     std::list<std::pair<void*, std::shared_ptr<SynthEvent_Type>>> SynthesisCanceled;
     WordBoundaryEvent_Type WordBoundary;
 };
-
-
-class ISpxConversation : public ISpxInterfaceBaseFor<ISpxConversation>
-{
-public:
-
-    enum class MeetingState
-    {
-        START,
-        ONGOING,
-        END
-    };
-
-    virtual void UpdateParticipant(bool add, const std::string& userId) = 0;
-    virtual void UpdateParticipant(bool add, const std::string& userId, std::shared_ptr<ISpxParticipant> participant) = 0;
-    virtual void UpdateParticipants(bool add, std::vector<ParticipantPtr>&& participants) = 0;
-    virtual void SetConversationId(const std::string& id) = 0;
-    virtual const std::string GetConversationId() const = 0;
-    virtual std::string GetSpeechEventPayload(MeetingState state) = 0;
-    virtual void EndConversation() = 0;
-
-    virtual void CreateConversation(const std::string& nickname = "") = 0;
-    virtual void DeleteConversation() = 0;
-    virtual void StartConversation() = 0;
-    virtual void SetLockConversation(bool locked) = 0;
-    virtual void SetMuteAllParticipants(bool mute) = 0;
-    virtual void SetMuteParticipant(bool mute, const std::string& participantId) = 0;
-};
-
 
 class ISpxConversationWithImpl : public ISpxInterfaceBaseFor<ISpxConversationWithImpl>
 {
@@ -1240,32 +1084,7 @@ public:
     virtual void InitIntentResult(const wchar_t* intentId, const wchar_t* jsonPayload) = 0;
 };
 
-class ISpxConversationTranscriptionResult : public ISpxInterfaceBaseFor<ISpxConversationTranscriptionResult>
-{
-public:
-    virtual std::wstring GetUserId() = 0;
-    virtual std::wstring GetUtteranceId() = 0;
-};
 
-class ISpxConversationTranscriptionResultInit : public ISpxInterfaceBaseFor< ISpxConversationTranscriptionResultInit>
-{
-public:
-    virtual void InitConversationResult(const wchar_t* userId, const wchar_t* utteranceId = nullptr) = 0;
-};
-
-enum class TranslationStatusCode { Success, Error };
-
-class ISpxTranslationRecognitionResult : public ISpxInterfaceBaseFor<ISpxTranslationRecognitionResult>
-{
-public:
-    virtual const std::map<std::wstring, std::wstring>& GetTranslationText() = 0;
-};
-
-class ISpxTranslationRecognitionResultInit : public ISpxInterfaceBaseFor<ISpxTranslationRecognitionResultInit>
-{
-public:
-    virtual void InitTranslationRecognitionResult(TranslationStatusCode status, const std::map<std::wstring, std::wstring>& translations, const std::wstring& failureReason) = 0;
-};
 
 class ISpxTranslationSynthesisResult : public ISpxInterfaceBaseFor<ISpxTranslationSynthesisResult>
 {

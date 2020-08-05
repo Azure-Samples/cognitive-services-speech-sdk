@@ -3,12 +3,8 @@ project(conversation_translation)
 set(SRC_DIR "${PROJECT_SOURCE_DIR}")
 set(INC_DIR "${PROJECT_SOURCE_DIR}/include")
 
-set(HEADERS
-    "${INC_DIR}/ISpxConversationInterfaces.h"
-    "${INC_DIR}/create_module_object.h"
-    )
-
 set(HEADERS_PRIVATE
+    "${SRC_DIR}/create_module_object.h"
     "${SRC_DIR}/common.h"
     "${SRC_DIR}/conversation_impl.h"
     "${SRC_DIR}/conversation_messages.h"
@@ -34,7 +30,7 @@ set(SOURCES
 
 set_source_groups()
 
-add_library(${PROJECT_NAME} STATIC ${HEADERS} ${HEADERS_PRIVATE} ${SOURCES})
+add_library(${PROJECT_NAME} STATIC ${HEADERS_PRIVATE} ${SOURCES})
 
 target_include_directories(${PROJECT_NAME}
     PRIVATE

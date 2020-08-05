@@ -7,7 +7,6 @@
 #include <property_bag_impl.h>
 #include <interface_helpers.h>
 #include <service_helpers.h>
-#include "ISpxConversationInterfaces.h"
 #include "conversation_utils.h"
 
 namespace Microsoft {

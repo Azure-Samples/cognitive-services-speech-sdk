@@ -19,7 +19,6 @@
 #include "speechapi_c_auto_detect_source_lang_config.h"
 #include "speechapi_c_source_lang_config.h"
 #include "memory_utils.h"
-#include "ISpxConversationInterfaces.h"
 
 using namespace Microsoft::CognitiveServices::Speech;
 using namespace Microsoft::CognitiveServices::Speech::Impl;

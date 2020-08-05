@@ -67,4 +67,24 @@ public:
     virtual SpxWaveFormatEx GetFormat() = 0;
 };
 
+class ISpxSynthesisResult;
+
+class ISpxAudioDataStream : public ISpxInterfaceBaseFor<ISpxAudioDataStream>
+{
+public:
+    virtual void InitFromSynthesisResult(std::shared_ptr<ISpxSynthesisResult> result) = 0;
+    virtual void InitFromFormat(const SPXWAVEFORMATEX& format, bool hasHeader) = 0;
+    virtual StreamStatus GetStatus() noexcept = 0;
+    virtual CancellationReason GetCancellationReason() = 0;
+    virtual CancellationErrorCode GetCancellationErrorCode() = 0;
+    virtual bool CanReadData(uint32_t requestedSize) = 0;
+    virtual bool CanReadData(uint32_t requestedSize, uint32_t pos) = 0;
+    virtual uint32_t Read(uint8_t* buffer, uint32_t bufferSize) = 0;
+    virtual uint32_t Read(uint8_t* buffer, uint32_t bufferSize, uint32_t pos) = 0;
+    virtual void SaveToWaveFile(const wchar_t* fileName) = 0;
+    virtual uint32_t GetPosition() = 0;
+    virtual void SetPosition(uint32_t pos) = 0;
+    virtual void DetachInput() = 0;
+};
+
 } } } }

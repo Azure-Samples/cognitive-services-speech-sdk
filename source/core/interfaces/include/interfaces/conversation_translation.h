@@ -5,12 +5,21 @@
 
 #pragma once
 
-#include <ispxinterfaces.h>
+#include <string>
+#include <memory>
+
+#include <interfaces/base.h>
+#include <interfaces/conversation.h>
+#include <interfaces/event_args.h>
+#include <interfaces/recognizers.h>
+#include <interfaces/results.h>
+#include <interfaces/types.h>
 
 namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
 namespace Impl {
+/* TODO: Do we need this namespace? (everything is prefixed Conversation so maybe it should be Translation) */
 namespace ConversationTranslation {
 
     /// <summary>
@@ -21,7 +30,6 @@ namespace ConversationTranslation {
         public virtual ISpxInterfaceBaseFor<ISpxConversationParticipant>
     {
     public:
-        using HandleType = SPXPARTICIPANTHANDLE;
         using HandleInterfaceType = ISpxParticipant;
 
         /// <summary>
@@ -61,9 +69,8 @@ namespace ConversationTranslation {
         public virtual ISpxInterfaceBaseFor<ISpxConversationTranslationResult>
     {
     public:
-        using HandleType = SPXRESULTHANDLE;
         using HandleInterfaceType = ISpxRecognitionResult;
-        
+
         std::shared_ptr<ISpxAudioDataStream> GetAudioDataStream() override { return nullptr;  }
 
         /// <summary>
@@ -80,7 +87,6 @@ namespace ConversationTranslation {
         public virtual ISpxInterfaceBaseFor<ISpxConversationSessionEventArgs>
     {
     public:
-        using HandleType = SPXEVENTHANDLE;
         using HandleInterfaceType = ISpxSessionEventArgs;
     };
 
@@ -92,7 +98,6 @@ namespace ConversationTranslation {
         public virtual ISpxInterfaceBaseFor<ISpxConversationConnectionEventArgs>
     {
     public:
-        using HandleType = SPXEVENTHANDLE;
         using HandleInterfaceType = ISpxConnectionEventArgs;
     };
 
@@ -104,7 +109,6 @@ namespace ConversationTranslation {
         public virtual ISpxInterfaceBaseFor<ISpxConversationExpirationEventArgs>
     {
     public:
-        using HandleType = SPXEVENTHANDLE;
         using HandleInterfaceType = ISpxConversationEventArgs;
 
         /// <summary>
@@ -121,7 +125,6 @@ namespace ConversationTranslation {
         public virtual ISpxInterfaceBaseFor<ISpxConversationParticipantChangedEventArgs>
     {
     public:
-        using HandleType = SPXEVENTHANDLE;
         using HandleInterfaceType = ISpxConversationEventArgs;
 
         /// <summary>
@@ -143,7 +146,6 @@ namespace ConversationTranslation {
         public virtual ISpxInterfaceBaseFor<ISpxConversationTranslationEventArgs>
     {
     public:
-        using HandleType = SPXEVENTHANDLE;
         using HandleInterfaceType = ISpxRecognitionEventArgs;
 
         /// <summary>
@@ -160,7 +162,6 @@ namespace ConversationTranslation {
     class ISpxConversationTranslator : public ISpxInterfaceBaseFor<ISpxConversationTranslator>
     {
     public:
-        using HandleType = SPXCONVERSATIONTRANSLATORHANDLE;
         using HandleInterfaceType = ISpxConversationTranslator;
 
         using SessionEvent_Type = EventSignal<std::shared_ptr<ISpxConversationSessionEventArgs>>;

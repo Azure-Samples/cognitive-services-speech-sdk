@@ -7,7 +7,6 @@
 
 #include <ispxinterfaces.h>
 #include <interface_helpers.h>
-#include "ISpxConversationInterfaces.h"
 
 namespace Microsoft {
 namespace CognitiveServices {
