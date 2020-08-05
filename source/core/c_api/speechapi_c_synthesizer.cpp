@@ -345,7 +345,7 @@ SPXAPI synthesizer_stop_speaking_async(SPXSYNTHHANDLE hsynth, SPXASYNCHANDLE* ph
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI synthesizer_stop_async_wait_for(SPXASYNCHANDLE hasync, uint32_t milliseconds)
+SPXAPI synthesizer_stop_speaking_async_wait_for(SPXASYNCHANDLE hasync, uint32_t milliseconds)
 {
     return async_operation_wait_for(hasync, milliseconds);
 }

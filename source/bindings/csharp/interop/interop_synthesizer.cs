@@ -64,6 +64,10 @@ namespace Microsoft.CognitiveServices.Speech.Internal
         [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR synthesizer_speak_async_wait_for(SPXASYNCHANDLE hasync, UInt32 milliseconds, out SPXRESULTHANDLE resultHandle);
         [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
+        public static extern SPXHR synthesizer_stop_speaking_async(InteropSafeHandle synthHandle, out SPXASYNCHANDLE asyncHandle);
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
+        public static extern SPXHR synthesizer_stop_speaking_async_wait_for(SPXASYNCHANDLE asyncHandle, UInt32 milliseconds);
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR synthesizer_started_set_callback(InteropSafeHandle synthHandle, TtsCallbackFunctionDelegate callback, IntPtr context);
         [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR synthesizer_synthesizing_set_callback(InteropSafeHandle synthHandle, TtsCallbackFunctionDelegate callback, IntPtr context);

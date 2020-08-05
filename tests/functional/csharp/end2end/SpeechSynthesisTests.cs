@@ -1099,6 +1099,28 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
+        public async Task StopSynthesisUsp()
+        {
+            using (var synthesizer = new SpeechSynthesizer(uspConfig, null as AudioConfig))
+            {
+                var task1 = synthesizer.SpeakTextAsync("text1");
+                Thread.Sleep(100);
+                await synthesizer.StopSpeakingAsync();
+                using (var result1 = task1.Result)
+                {
+                    Assert.AreEqual(ResultReason.Canceled, result1.Reason);
+                    var cancelDetails = SpeechSynthesisCancellationDetails.FromResult(result1);
+                    Assert.AreEqual(CancellationReason.CancelledByUser, cancelDetails.Reason);
+                }
+
+                using (var result2 = await synthesizer.SpeakTextAsync("text2"))
+                {
+                    CheckSynthesisResult(result2);
+                }
+            }
+        }
+
+        [TestMethod]
         [TestCategory("SpeechSynthesisMockTest")]
         public async Task SynthesisDefaultsMock()
         {

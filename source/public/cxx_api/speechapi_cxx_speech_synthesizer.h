@@ -396,7 +396,7 @@ public:
         auto future = std::async(std::launch::async, [keepAlive, this]() -> void {
             SPXASYNCHANDLE hasyncStop = SPXHANDLE_INVALID;
             SPX_THROW_ON_FAIL(::synthesizer_stop_speaking_async(m_hsynth, &hasyncStop));
-            SPX_EXITFN_ON_FAIL(::synthesizer_stop_async_wait_for(hasyncStop, UINT32_MAX));
+            SPX_EXITFN_ON_FAIL(::synthesizer_stop_speaking_async_wait_for(hasyncStop, UINT32_MAX));
 
         SPX_EXITFN_CLEANUP:
             auto releaseHr = synthesizer_async_handle_release(hasyncStop);

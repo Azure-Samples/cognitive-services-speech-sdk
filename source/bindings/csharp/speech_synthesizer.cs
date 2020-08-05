@@ -150,6 +150,8 @@ namespace Microsoft.CognitiveServices.Speech
         private TtsCallbackFunctionDelegate synthesisCanceledCallbackDelegate;
         private TtsCallbackFunctionDelegate wordBoundaryCallbackDelegate;
 
+        private IntPtr asyncStopSpeakingHandle = IntPtr.Zero;
+
         private GCHandle gch;
         private object synthesizerLock = new object();
         private int activeAsyncSynthesisCounter = 0;
@@ -440,6 +442,19 @@ namespace Microsoft.CognitiveServices.Speech
         }
 
         /// <summary>
+        /// Stop synthesis
+        /// This method will stop playback and clear the unread data in <see cref="PullAudioOutputStream"/>.
+        /// </summary>
+        /// <returns>A task representing the asynchronous operation that stops the synthesis.</returns>
+        public Task StopSpeakingAsync()
+        {
+            return Task.Run(() =>
+            {
+                DoAsyncSynthesisAction(StopSpeaking);
+            });
+        }
+
+        /// <summary>
         /// Dispose of associated resources.
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303", Justification = "exceptions not localized")]
@@ -490,6 +505,21 @@ namespace Microsoft.CognitiveServices.Speech
                     activeAsyncSynthesisCounter--;
                 }
             }
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303", Justification = "exceptions not localized")]
+        internal void StopSpeaking()
+        {
+            if (asyncStopSpeakingHandle != IntPtr.Zero)
+            {
+                ThrowIfFail(Internal.Synthesizer.synthesizer_async_handle_release(asyncStopSpeakingHandle));
+            }
+
+            ThrowIfNull(synthHandle, "Invalid synthesizer handle");
+            ThrowIfFail(Internal.Synthesizer.synthesizer_stop_speaking_async(synthHandle, out asyncStopSpeakingHandle));
+            ThrowIfFail(Internal.Synthesizer.synthesizer_stop_speaking_async_wait_for(asyncStopSpeakingHandle, UInt32.MaxValue));
+            ThrowIfFail(Internal.Synthesizer.synthesizer_async_handle_release(asyncStopSpeakingHandle));
+            asyncStopSpeakingHandle = IntPtr.Zero;
         }
 
         private void Dispose(bool disposing)
