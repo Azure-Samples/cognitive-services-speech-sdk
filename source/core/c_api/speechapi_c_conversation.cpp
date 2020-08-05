@@ -6,6 +6,7 @@
 //
 
 #include "stdafx.h"
+#include "common.h"
 #include "event_helpers.h"
 #include "handle_helpers.h"
 #include "string_utils.h"
@@ -80,19 +81,7 @@ SPXAPI conversation_end_conversation(SPXCONVERSATIONHANDLE hconv)
 
 SPXAPI conversation_get_property_bag(SPXCONVERSATIONHANDLE hconv, SPXPROPERTYBAGHANDLE* phpropbag)
 {
-    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, phpropbag == nullptr);
-
-    SPXAPI_INIT_HR_TRY(hr)
-    {
-        *phpropbag = SPXHANDLE_INVALID;
-
-        auto namedProperties = QueryInterfaceFromHandle<ISpxConversation, ISpxNamedProperties>(hconv);
-        SPX_IFTRUE_THROW_HR(namedProperties == nullptr, SPXERR_INVALID_ARG);
-
-        auto baghandle = CSpxSharedPtrHandleTableManager::Get<ISpxNamedProperties, SPXPROPERTYBAGHANDLE>();
-        *phpropbag = baghandle->TrackHandle(namedProperties);
-    }
-    SPXAPI_CATCH_AND_RETURN_HR(hr);
+    return GetTargetObjectByInterface<ISpxConversation, ISpxNamedProperties>(hconv, phpropbag);
 }
 
 SPXAPI conversation_start_conversation(SPXCONVERSATIONHANDLE hconv)

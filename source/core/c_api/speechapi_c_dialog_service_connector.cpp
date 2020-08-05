@@ -6,6 +6,7 @@
 //
 
 #include "stdafx.h"
+#include "common.h"
 #include <limits>
 #include <tuple>
 #include <type_traits>
@@ -80,19 +81,8 @@ SPXAPI dialog_service_connector_activity_received_event_release(SPXEVENTHANDLE h
 
 SPXAPI dialog_service_connector_get_property_bag(SPXRECOHANDLE h_connector, SPXPROPERTYBAGHANDLE* h_prop_bag)
 {
-    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, h_prop_bag == nullptr);
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, !dialog_service_connector_handle_is_valid(h_connector));
-
-    SPXAPI_INIT_HR_TRY(hr)
-    {
-        auto connector = GetInstance<ISpxDialogServiceConnector>(h_connector);
-
-        auto properties = SpxQueryService<ISpxNamedProperties>(connector);
-
-        auto prop_handle = CSpxSharedPtrHandleTableManager::Get<ISpxNamedProperties, SPXPROPERTYBAGHANDLE>();
-        *h_prop_bag = prop_handle->TrackHandle(properties);
-    }
-    SPXAPI_CATCH_AND_RETURN_HR(hr);
+    return GetTargetObjectByService<ISpxDialogServiceConnector, ISpxNamedProperties>(h_connector, h_prop_bag);
 }
 
 template<typename Result>

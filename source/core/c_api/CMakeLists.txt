@@ -6,6 +6,7 @@ set(HEADERS)
 
 set(HEADERS_PRIVATE
     "${SRC_DIR}/stdafx.h"
+    "${SRC_DIR}/common.h"
     "${SRC_DIR}/event_helpers.h"
     "${SRC_DIR}/handle_helpers.h"
     "${SRC_DIR}/speechapi_c_utils.h"

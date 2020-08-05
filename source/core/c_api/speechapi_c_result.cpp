@@ -6,6 +6,7 @@
 //
 
 #include "stdafx.h"
+#include "common.h"
 #include "string_utils.h"
 #include "handle_table.h"
 #include "handle_helpers.h"
@@ -148,16 +149,7 @@ SPXAPI result_get_duration(SPXRESULTHANDLE hresult, uint64_t* duration)
 
 SPXAPI result_get_property_bag(SPXRESULTHANDLE hresult, SPXPROPERTYBAGHANDLE* hpropbag)
 {
-    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, hpropbag == nullptr);
-    SPXAPI_INIT_HR_TRY(hr)
-    {
-        auto result = GetInstance<ISpxRecognitionResult>(hresult);
-        auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
-
-        auto baghandle = CSpxSharedPtrHandleTableManager::Get<ISpxNamedProperties, SPXPROPERTYBAGHANDLE>();
-        *hpropbag = baghandle->TrackHandle(namedProperties);
-    }
-    SPXAPI_CATCH_AND_RETURN_HR(hr);
+    return GetTargetObjectByInterface<ISpxRecognitionResult, ISpxNamedProperties>(hresult, hpropbag);
 }
 
 SPXAPI synth_result_get_result_id(SPXRESULTHANDLE hresult, char* resultId, uint32_t resultIdLength)
@@ -251,14 +243,5 @@ SPXAPI synth_result_get_audio_format(SPXRESULTHANDLE hresult, SPXAUDIOSTREAMFORM
 
 SPXAPI synth_result_get_property_bag(SPXRESULTHANDLE hresult, SPXPROPERTYBAGHANDLE* hpropbag)
 {
-    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, hpropbag == nullptr);
-    SPXAPI_INIT_HR_TRY(hr)
-    {
-        auto result = GetInstance<ISpxSynthesisResult>(hresult);
-        auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
-
-        auto baghandle = CSpxSharedPtrHandleTableManager::Get<ISpxNamedProperties, SPXPROPERTYBAGHANDLE>();
-        *hpropbag = baghandle->TrackHandle(namedProperties);
-    }
-    SPXAPI_CATCH_AND_RETURN_HR(hr);
+    return GetTargetObjectByInterface<ISpxSynthesisResult, ISpxNamedProperties>(hresult, hpropbag);
 }

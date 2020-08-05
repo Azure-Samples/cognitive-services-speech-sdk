@@ -5,6 +5,7 @@
 // speechapi_c_recognizer.cpp: Public API definitions for Recognizer related C methods
 
 #include "stdafx.h"
+#include "common.h"
 #include "service_helpers.h"
 #include "event_helpers.h"
 #include "handle_helpers.h"
@@ -368,17 +369,6 @@ SPXAPI recognizer_recognition_event_get_result(SPXEVENTHANDLE hevent, SPXRESULTH
 
 SPXAPI recognizer_get_property_bag(SPXRECOHANDLE hreco, SPXPROPERTYBAGHANDLE* hpropbag)
 {
-    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, hpropbag == nullptr);
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, !recognizer_handle_is_valid(hreco));
-
-    SPXAPI_INIT_HR_TRY(hr)
-    {
-        auto recognizer = GetInstance<ISpxRecognizer>(hreco);
-
-        auto namedProperties = SpxQueryService<ISpxNamedProperties>(recognizer);
-
-        auto baghandle = CSpxSharedPtrHandleTableManager::Get<ISpxNamedProperties, SPXPROPERTYBAGHANDLE>();
-        *hpropbag = baghandle->TrackHandle(namedProperties);
-    }
-    SPXAPI_CATCH_AND_RETURN_HR(hr);
+    return GetTargetObjectByService<ISpxRecognizer, ISpxNamedProperties>(hreco, hpropbag);
 }

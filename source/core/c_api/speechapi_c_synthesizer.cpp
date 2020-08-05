@@ -5,6 +5,7 @@
 // speechapi_c_synthesizer.cpp: Public API definitions for Synthesizer related C methods
 
 #include "stdafx.h"
+#include "common.h"
 #include "service_helpers.h"
 #include "event_helpers.h"
 #include "handle_helpers.h"
@@ -127,19 +128,7 @@ SPXAPI synthesizer_is_enabled(SPXSYNTHHANDLE hsynth, bool* pfEnabled)
 SPXAPI synthesizer_get_property_bag(SPXSYNTHHANDLE hsynth, SPXPROPERTYBAGHANDLE* hpropbag)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, !synthesizer_handle_is_valid(hsynth));
-    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, hpropbag == nullptr);
-
-    SPXAPI_INIT_HR_TRY(hr)
-    {
-        auto synthhandles = CSpxSharedPtrHandleTableManager::Get<ISpxSynthesizer, SPXSYNTHHANDLE>();
-        auto synthesizer = (*synthhandles)[hsynth];
-
-        auto namedProperties = SpxQueryService<ISpxNamedProperties>(synthesizer);
-
-        auto baghandle = CSpxSharedPtrHandleTableManager::Get<ISpxNamedProperties, SPXPROPERTYBAGHANDLE>();
-        *hpropbag = baghandle->TrackHandle(namedProperties);
-    }
-    SPXAPI_CATCH_AND_RETURN_HR(hr);
+    return GetTargetObjectByService<ISpxSynthesizer, ISpxNamedProperties>(hsynth, hpropbag);
 }
 
 SPXAPI synthesizer_speak_text(SPXSYNTHHANDLE hsynth, const char* text, uint32_t textLength, SPXRESULTHANDLE* phresult)

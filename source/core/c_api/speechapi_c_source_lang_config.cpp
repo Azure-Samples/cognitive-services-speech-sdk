@@ -4,6 +4,7 @@
 //
 
 #include "stdafx.h"
+#include "common.h"
 #include "create_object_helpers.h"
 #include "event_helpers.h"
 #include "handle_helpers.h"
@@ -64,18 +65,5 @@ SPXAPI source_lang_config_release(SPXSOURCELANGCONFIGHANDLE hconfig)
 
 SPXAPI source_lang_config_get_property_bag(SPXSOURCELANGCONFIGHANDLE hconfig, SPXPROPERTYBAGHANDLE* hpropbag)
 {
-    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, hpropbag == nullptr);
-
-    SPXAPI_INIT_HR_TRY(hr)
-    {
-        auto configs = CSpxSharedPtrHandleTableManager::Get<ISpxSourceLanguageConfig, SPXSOURCELANGCONFIGHANDLE>();
-        auto config = (*configs)[hconfig];
-
-        auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(config);
-
-        auto baghandle = CSpxSharedPtrHandleTableManager::Get<ISpxNamedProperties, SPXPROPERTYBAGHANDLE>();
-        *hpropbag = baghandle->TrackHandle(namedProperties);
-
-    }
-    SPXAPI_CATCH_AND_RETURN_HR(hr);
+    return GetTargetObjectByInterface<ISpxSourceLanguageConfig, ISpxNamedProperties>(hconfig, hpropbag);
 }

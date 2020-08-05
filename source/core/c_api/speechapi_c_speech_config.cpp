@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "common.h"
 #include "speechapi_c_speech_config.h"
 #include "create_object_helpers.h"
 #include "event_helpers.h"
@@ -121,20 +122,7 @@ SPXAPI speech_config_release(SPXSPEECHCONFIGHANDLE hconfig)
 
 SPXAPI speech_config_get_property_bag(SPXSPEECHCONFIGHANDLE hconfig, SPXPROPERTYBAGHANDLE* hpropbag)
 {
-    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, hpropbag == nullptr);
-
-    SPXAPI_INIT_HR_TRY(hr)
-    {
-        auto configs = CSpxSharedPtrHandleTableManager::Get<ISpxSpeechConfig, SPXSPEECHCONFIGHANDLE>();
-        auto config = (*configs)[hconfig];
-
-        auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(config);
-
-        auto baghandle = CSpxSharedPtrHandleTableManager::Get<ISpxNamedProperties, SPXPROPERTYBAGHANDLE>();
-        *hpropbag = baghandle->TrackHandle(namedProperties);
-
-    }
-    SPXAPI_CATCH_AND_RETURN_HR(hr);
+    return GetTargetObjectByInterface<ISpxSpeechConfig, ISpxNamedProperties>(hconfig, hpropbag);
 }
 
 SPXAPI speech_config_set_audio_output_format(SPXSPEECHCONFIGHANDLE hconfig, Speech_Synthesis_Output_Format formatId)
@@ -154,7 +142,7 @@ static_assert((int)SpeechConfig_ServicePropertyChannel_UriQueryParameter == (int
 SPXAPI speech_config_set_service_property(SPXSPEECHCONFIGHANDLE configHandle, const char* propertyName, const char* propertyValue, SpeechConfig_ServicePropertyChannel channel)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, propertyName == nullptr || propertyName[0] == '\0');
-    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, propertyValue == nullptr || propertyValue[0] == '\0');    
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, propertyValue == nullptr || propertyValue[0] == '\0');
 
     SPXAPI_INIT_HR_TRY(hr)
     {

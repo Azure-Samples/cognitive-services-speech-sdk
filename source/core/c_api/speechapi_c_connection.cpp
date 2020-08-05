@@ -4,6 +4,7 @@
 //
 
 #include "stdafx.h"
+#include "common.h"
 #include "handle_helpers.h"
 #include "event_helpers.h"
 #include <ISpxConversationInterfaces.h>
@@ -217,15 +218,7 @@ SPXAPI connection_message_handle_release(SPXCONNECTIONMESSAGEHANDLE handle)
 
 SPXAPI connection_message_get_property_bag(SPXCONNECTIONMESSAGEHANDLE hcm, SPXPROPERTYBAGHANDLE* hpropbag)
 {
-    SPXAPI_INIT_HR_TRY(hr)
-    {
-        *hpropbag = SPXHANDLE_INVALID;
-
-        auto namedProperties = QueryInterfaceFromHandle<ISpxConnectionMessage, ISpxNamedProperties>(hcm);
-
-        *hpropbag = CSpxSharedPtrHandleTableManager::TrackHandle<ISpxNamedProperties, SPXCONNECTIONMESSAGEHANDLE>(namedProperties);
-    }
-    SPXAPI_CATCH_AND_RETURN_HR(hr);
+    return GetTargetObjectByInterface<ISpxConnectionMessage, ISpxNamedProperties>(hcm, hpropbag);
 }
 
 SPXAPI connection_message_get_data(SPXCONNECTIONMESSAGEHANDLE hcm, uint8_t* data, uint32_t size)

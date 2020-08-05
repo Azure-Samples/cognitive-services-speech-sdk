@@ -5,6 +5,7 @@
 // speechapi_c_audio_stream.cpp: Public API definitions for audio stream related C methods and types
 
 #include "stdafx.h"
+#include "common.h"
 #include "create_object_helpers.h"
 #include "event_helpers.h"
 #include "handle_helpers.h"
@@ -326,17 +327,7 @@ SPXAPI audio_data_stream_detach_input(SPXAUDIOSTREAMHANDLE audioStreamHandle)
 
 SPXAPI audio_data_stream_get_property_bag(SPXAUDIOSTREAMHANDLE haudioStream, SPXPROPERTYBAGHANDLE* hpropbag)
 {
-    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, hpropbag == nullptr);
-    SPXAPI_INIT_HR_TRY(hr)
-    {
-        auto streamhandles = CSpxSharedPtrHandleTableManager::Get<ISpxAudioDataStream, SPXAUDIOSTREAMHANDLE>();
-        auto stream = (*streamhandles)[haudioStream];
-        auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(stream);
-
-        auto baghandle = CSpxSharedPtrHandleTableManager::Get<ISpxNamedProperties, SPXPROPERTYBAGHANDLE>();
-        *hpropbag = baghandle->TrackHandle(namedProperties);
-    }
-    SPXAPI_CATCH_AND_RETURN_HR(hr);
+    return GetTargetObjectByInterface<ISpxAudioDataStream, ISpxNamedProperties>(haudioStream, hpropbag);
 }
 
 SPXAPI audio_data_stream_release(SPXAUDIOSTREAMHANDLE haudioStream)

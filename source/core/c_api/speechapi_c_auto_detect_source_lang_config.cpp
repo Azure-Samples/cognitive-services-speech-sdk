@@ -4,6 +4,7 @@
 //
 
 #include "stdafx.h"
+#include "common.h"
 #include "speechapi_c_auto_detect_source_lang_config.h"
 #include "create_object_helpers.h"
 #include "event_helpers.h"
@@ -107,18 +108,5 @@ SPXAPI auto_detect_source_lang_config_release(SPXAUTODETECTSOURCELANGCONFIGHANDL
 
 SPXAPI auto_detect_source_lang_config_get_property_bag(SPXAUTODETECTSOURCELANGCONFIGHANDLE hAutoDetectSourceLanguageconfig, SPXPROPERTYBAGHANDLE* hpropbag)
 {
-    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, hpropbag == nullptr);
-
-    SPXAPI_INIT_HR_TRY(hr)
-    {
-        auto configs = CSpxSharedPtrHandleTableManager::Get<ISpxAutoDetectSourceLangConfig, SPXAUTODETECTSOURCELANGCONFIGHANDLE>();
-        auto config = (*configs)[hAutoDetectSourceLanguageconfig];
-
-        auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(config);
-
-        auto baghandle = CSpxSharedPtrHandleTableManager::Get<ISpxNamedProperties, SPXPROPERTYBAGHANDLE>();
-        *hpropbag = baghandle->TrackHandle(namedProperties);
-
-    }
-    SPXAPI_CATCH_AND_RETURN_HR(hr);
+    return GetTargetObjectByInterface<ISpxAutoDetectSourceLangConfig, ISpxNamedProperties>(hAutoDetectSourceLanguageconfig, hpropbag);
 }

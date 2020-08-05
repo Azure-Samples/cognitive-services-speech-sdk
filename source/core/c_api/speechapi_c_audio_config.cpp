@@ -5,6 +5,7 @@
 // speechapi_c_audio_config.cpp: Public API definitions for audio configuration C methods and types
 
 #include "stdafx.h"
+#include "common.h"
 #include "create_object_helpers.h"
 #include "event_helpers.h"
 #include "handle_helpers.h"
@@ -191,18 +192,7 @@ SPXAPI audio_config_release(SPXAUDIOCONFIGHANDLE haudioConfig)
 
 SPXAPI audio_config_get_property_bag(SPXAUDIOCONFIGHANDLE haudioConfig, SPXPROPERTYBAGHANDLE* hpropbag)
 {
-    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, hpropbag == nullptr);
-    SPXAPI_INIT_HR_TRY(hr)
-    {
-        auto audioconfigs = CSpxSharedPtrHandleTableManager::Get<ISpxAudioConfig, SPXAUDIOCONFIGHANDLE>();
-        auto audioconfig = (*audioconfigs)[haudioConfig];
-        SPX_THROW_HR_IF(SPXERR_INVALID_ARG, audioconfig == nullptr);
-        auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(audioconfig);
-
-        auto baghandle = CSpxSharedPtrHandleTableManager::Get<ISpxNamedProperties, SPXPROPERTYBAGHANDLE>();
-        *hpropbag = baghandle->TrackHandle(namedProperties);
-    }
-    SPXAPI_CATCH_AND_RETURN_HR(hr);
+    return GetTargetObjectByInterface<ISpxAudioConfig, ISpxNamedProperties>(haudioConfig, hpropbag);
 }
 
 // FUTURE DEVELOPMENT: The config method group could be extended in the future to support additional scenarios, for example:

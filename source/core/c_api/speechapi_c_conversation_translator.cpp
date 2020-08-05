@@ -6,6 +6,7 @@
 //
 
 #include "stdafx.h"
+#include "common.h"
 #include <ISpxConversationInterfaces.h>
 #include <service_helpers.h>
 #include "handle_helpers.h"
@@ -298,20 +299,7 @@ static void ConversationTranslatorJoin(std::shared_ptr<ISpxConversationTranslato
 
 SPXAPI conversation_translator_get_property_bag(SPXCONVERSATIONTRANSLATORHANDLE hconvtranslator, SPXPROPERTYBAGHANDLE * phpropertyBag)
 {
-    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, hconvtranslator == nullptr);
-    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, phpropertyBag == nullptr);
-
-    SPXAPI_INIT_HR_TRY(hr)
-    {
-        *phpropertyBag = SPXHANDLE_INVALID;
-
-        auto convTranslator = GetTranslator(hconvtranslator);
-        auto namedProperties = SpxQueryService<ISpxNamedProperties>(convTranslator);
-
-        auto handles = CSpxSharedPtrHandleTableManager::Get<ISpxNamedProperties, SPXPROPERTYBAGHANDLE>();
-        *phpropertyBag = handles->TrackHandle(namedProperties);
-    }
-    SPXAPI_CATCH_AND_RETURN_HR(hr);
+    return GetTargetObjectByService<ISpxConversationTranslator, ISpxNamedProperties>(hconvtranslator, phpropertyBag);
 }
 
 SPXAPI conversation_translator_join(SPXCONVERSATIONTRANSLATORHANDLE hconvtranslator, SPXCONVERSATIONHANDLE hconv, const char* psznickname)

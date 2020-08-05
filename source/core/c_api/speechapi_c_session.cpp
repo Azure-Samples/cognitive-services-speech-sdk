@@ -6,6 +6,7 @@
 //
 
 #include "stdafx.h"
+#include "common.h"
 #include "event_helpers.h"
 #include "handle_helpers.h"
 #include "string_utils.h"
@@ -45,18 +46,5 @@ SPXAPI session_handle_release(SPXSESSIONHANDLE hsession)
 
 SPXAPI session_get_property_bag(SPXSESSIONHANDLE hsession, SPXPROPERTYBAGHANDLE* hpropbag)
 {
-    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, hpropbag == nullptr);
-
-    SPXAPI_INIT_HR_TRY(hr)
-    {
-        auto sessionHandles = CSpxSharedPtrHandleTableManager::Get<ISpxSession, SPXRECOHANDLE>();
-        auto session = (*sessionHandles)[hsession];
-
-        auto namedProperties = SpxQueryService<ISpxNamedProperties>(session);
-
-        auto baghandle = CSpxSharedPtrHandleTableManager::Get<ISpxNamedProperties, SPXPROPERTYBAGHANDLE>();
-        *hpropbag = baghandle->TrackHandle(namedProperties);
-
-    }
-    SPXAPI_CATCH_AND_RETURN_HR(hr);
+    return GetTargetObjectByService<ISpxSession, ISpxNamedProperties>(hsession, hpropbag);
 }

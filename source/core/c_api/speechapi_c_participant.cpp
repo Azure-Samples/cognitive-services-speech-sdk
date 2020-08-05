@@ -6,6 +6,7 @@
 //
 
 #include "stdafx.h"
+#include "common.h"
 #include <speechapi_c_common.h>
 #include "create_object_helpers.h"
 #include "handle_helpers.h"
@@ -87,17 +88,5 @@ SPXAPI participant_set_voice_signature(SPXPARTICIPANTHANDLE hparticipant, const 
 
 SPXAPI participant_get_property_bag(SPXPARTICIPANTHANDLE hparticipant, SPXPROPERTYBAGHANDLE* hpropbag)
 {
-    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, hpropbag == nullptr);
-
-    *hpropbag = SPXHANDLE_INVALID;
-    SPXAPI_INIT_HR_TRY(hr)
-    {
-        auto namedProperties = QueryInterfaceFromHandle<ISpxParticipant, ISpxNamedProperties>(hparticipant);
-        auto baghandle = CSpxSharedPtrHandleTableManager::Get<ISpxNamedProperties, SPXPROPERTYBAGHANDLE>();
-        if (baghandle)
-        {
-            *hpropbag = baghandle->TrackHandle(namedProperties);
-        }
-    }
-    SPXAPI_CATCH_AND_RETURN_HR(hr);
+    return GetTargetObjectByInterface<ISpxParticipant, ISpxNamedProperties>(hparticipant, hpropbag);
 }

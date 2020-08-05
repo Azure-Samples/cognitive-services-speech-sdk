@@ -5,6 +5,7 @@
 // speechapi_c_speaker_recognition.cpp: Public API definitions for Speaker Recognition related C methods
 
 #include "stdafx.h"
+#include "common.h"
 #include <speechapi_c_common.h>
 #include "speechapi_c_utils.h"
 #include "create_object_helpers.h"
@@ -148,15 +149,7 @@ SPXAPI create_voice_profile(SPXVOICEPROFILECLIENTHANDLE hclient, int id, const c
 
 SPXAPI voice_profile_client_get_property_bag(SPXVOICEPROFILECLIENTHANDLE hclient, SPXPROPERTYBAGHANDLE *hpropbag)
 {
-    SPXAPI_INIT_HR_TRY(hr)
-    {
-        *hpropbag = SPXHANDLE_INVALID;
-        auto client = GetInstance<ISpxVoiceProfileClient>(hclient);
-        auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(client);
-
-        *hpropbag = CSpxSharedPtrHandleTableManager::TrackHandle<ISpxNamedProperties, SPXVOICEPROFILECLIENTHANDLE>(namedProperties);
-    }
-    SPXAPI_CATCH_AND_RETURN_HR(hr);
+    return GetTargetObjectByInterface<ISpxVoiceProfileClient, ISpxNamedProperties>(hclient, hpropbag);
 }
 
 SPXAPI delete_voice_profile(SPXVOICEPROFILECLIENTHANDLE hclient, SPXVOICEPROFILEHANDLE hProfileHandle, SPXRESULTHANDLE *phresult)
@@ -191,15 +184,7 @@ SPXAPI reset_voice_profile(SPXVOICEPROFILECLIENTHANDLE hclient, SPXVOICEPROFILEH
 
 SPXAPI speaker_recognizer_get_property_bag(SPXSPEAKERIDHANDLE phspeakerid, SPXPROPERTYBAGHANDLE *hpropbag)
 {
-    SPXAPI_INIT_HR_TRY(hr)
-    {
-        *hpropbag = SPXHANDLE_INVALID;
-        auto client = GetInstance<ISpxVoiceProfileClient>(phspeakerid);
-        auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(client);
-
-        *hpropbag = CSpxSharedPtrHandleTableManager::TrackHandle<ISpxNamedProperties, SPXVOICEPROFILECLIENTHANDLE>(namedProperties);
-    }
-    SPXAPI_CATCH_AND_RETURN_HR(hr);
+    return GetTargetObjectByInterface<ISpxVoiceProfileClient, ISpxNamedProperties>(phspeakerid, hpropbag);
 }
 
 SPXAPI speaker_identification_model_create(SPXSIMODELHANDLE* psimodel)
