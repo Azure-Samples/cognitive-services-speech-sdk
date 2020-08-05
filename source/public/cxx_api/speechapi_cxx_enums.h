@@ -585,7 +585,7 @@ enum class CancellationReason
     EndOfStream = 2,
 
     /// <summary>
-    /// Indicates that request is cancelled by the user.
+    /// Indicates that request was cancelled by the user.
     /// Added in version 1.14.0
     /// </summary>
     CancelledByUser = 3,

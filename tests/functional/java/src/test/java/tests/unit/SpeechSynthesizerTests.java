@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.net.URI;
@@ -699,6 +700,28 @@ public class SpeechSynthesizerTests {
         exceptionRule.expect(RuntimeException.class);
         exceptionRule.expectMessage("Auto detection source languages in SpeechSynthesizer doesn't support language range specification. Please use FromOpenRange to construct AutoDetectSourceLanguageConfig.");
         SpeechSynthesizer synthesizer = new SpeechSynthesizer(speechConfig, autoDetectSourceLanguageConfig, null);
+    }
+
+    @Test
+    public void testStopSynthesis() throws URISyntaxException, InterruptedException, ExecutionException {
+        SpeechConfig speechConfig = CreateSpeechConfig();
+        assertNotNull(speechConfig);
+        SpeechSynthesizer synthesizer = new SpeechSynthesizer(speechConfig, (AudioConfig) null);
+        Future<SpeechSynthesisResult> future1 = synthesizer.SpeakTextAsync("text1");
+        TimeUnit.MILLISECONDS.sleep(100);
+        synthesizer.StopSpeakingAsync().get();
+        SpeechSynthesisResult result2 = synthesizer.SpeakTextAsync("text2").get();
+        SpeechSynthesisResult result1 = future1.get();
+
+        assertTrue(result1.getReason() == ResultReason.Canceled);
+        SpeechSynthesisCancellationDetails cancelDetails = SpeechSynthesisCancellationDetails.fromResult(result1);
+        assertEquals(CancellationReason.CancelledByUser, cancelDetails.getReason());
+        assertTrue(result2.getReason() == ResultReason.SynthesizingAudioCompleted);
+
+        result1.close();
+        result2.close();
+        synthesizer.close();
+        speechConfig.close();
     }
 
     @Ignore("TODO not supported by current CI")

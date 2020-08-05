@@ -38,4 +38,5 @@ public class AudioUtterancesKeys
     public static final String PROFANITY_SINGLE_UTTERANCE_ENGLISH_2 = "ProfanitySingleUtteranceEnglish2";
     public static final String SYNTHESIS_UTTERANCE_CHINESE_1 = "SynthesisUtteranceChinese1";
     public static final String SYNTHESIS_UTTERANCE_CHINESE_2 = "SynthesisUtteranceChinese2";
+    public static final String SYNTHESIS_LONG_UTTERANCE = "SynthesisLongUtterance";
 }

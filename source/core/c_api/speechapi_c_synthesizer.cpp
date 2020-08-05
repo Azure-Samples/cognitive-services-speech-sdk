@@ -52,14 +52,14 @@ SPXAPI synthesizer_handle_release(SPXSYNTHHANDLE hsynth)
 
 SPXAPI_(bool) synthesizer_async_handle_is_valid(SPXASYNCHANDLE hasync)
 {
-    return Handle_IsValid<SPXASYNCHANDLE, CSpxAsyncOp<void>>(hasync)
-        ? Handle_Close<SPXASYNCHANDLE, CSpxAsyncOp<void>>(hasync)
-        : Handle_Close<SPXASYNCHANDLE, CSpxAsyncOp<std::shared_ptr<ISpxSynthesisResult>>>(hasync);
+    return Handle_IsValid<SPXASYNCHANDLE, CSpxAsyncOp<std::shared_ptr<ISpxSynthesisResult>>>(hasync);
 }
 
 SPXAPI synthesizer_async_handle_release(SPXASYNCHANDLE hasync)
 {
-    return Handle_Close<SPXASYNCHANDLE, CSpxAsyncOp<std::shared_ptr<ISpxSynthesisResult>>>(hasync);
+    return Handle_IsValid<SPXASYNCHANDLE, CSpxAsyncOp<void>>(hasync)
+        ? Handle_Close<SPXASYNCHANDLE, CSpxAsyncOp<void>>(hasync)
+        : Handle_Close<SPXASYNCHANDLE, CSpxAsyncOp<std::shared_ptr<ISpxSynthesisResult>>>(hasync);
 }
 
 SPXAPI_(bool) synthesizer_result_handle_is_valid(SPXRESULTHANDLE hresult)

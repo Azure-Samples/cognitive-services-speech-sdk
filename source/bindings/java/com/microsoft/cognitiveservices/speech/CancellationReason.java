@@ -17,7 +17,13 @@ public enum CancellationReason
     /**
      * Indicates that the end of the audio stream was reached.
      */
-    EndOfStream(2);
+    EndOfStream(2),
+
+    /**
+     * Indicates that request was cancelled by the user.
+     * Added in version 1.14.0
+     */
+    CancelledByUser(3);
 
     private CancellationReason(int id) {
         this.id = id;

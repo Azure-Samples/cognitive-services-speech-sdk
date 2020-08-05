@@ -57,6 +57,14 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_SpeechSynthe
 
 /*
  * Class:     com_microsoft_cognitiveservices_speech_SpeechSynthesizer
+ * Method:    stopSpeaking
+ * Signature: (Lcom/microsoft/cognitiveservices/speech/util/SafeHandle;)J
+ */
+JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_SpeechSynthesizer_stopSpeaking
+  (JNIEnv *, jobject, jobject);
+
+/*
+ * Class:     com_microsoft_cognitiveservices_speech_SpeechSynthesizer
  * Method:    synthesisStartedSetCallback
  * Signature: (Lcom/microsoft/cognitiveservices/speech/util/SafeHandle;)J
  */

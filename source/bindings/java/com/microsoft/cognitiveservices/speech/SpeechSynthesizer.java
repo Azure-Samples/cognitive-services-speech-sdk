@@ -20,7 +20,7 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
 
 /**
  * Performs speech synthesis to speaker, file, or other audio output streams, and gets synthesized audio as result.
- * Added in version 1.7.0
+ * Updated in version 1.14.0
  */
 public class SpeechSynthesizer implements Closeable
 {
@@ -266,6 +266,23 @@ public class SpeechSynthesizer implements Closeable
     }
 
     /**
+     * Stop the synthesis, asynchronously.
+     * This method will stop the playback and clear the unread data in <see cref="PullAudioOutputStream"/>.
+     * Added in version 1.14.0
+     * @return A task representing the asynchronous operation that stops the synthesis.
+     */
+    public Future<Void> StopSpeakingAsync() {
+        final SpeechSynthesizer thisSync = this;
+
+        return s_executorService.submit(new java.util.concurrent.Callable<Void>() {
+            public Void call() {
+                Runnable runnable = new Runnable() { public void run() { stopSpeaking(synthHandle); }};
+                thisSync.doAsyncSynthesisAction(runnable);
+                return null;
+        }});
+    }
+
+    /**
      * The collection of properties and their values defined for this SpeechSynthesizer.
      * @return The collection of properties and their values defined for this SpeechSynthesizer.
      */
@@ -489,8 +506,9 @@ public class SpeechSynthesizer implements Closeable
     private final native long createSpeechSynthesizerFromAutoDetectSourceLangConfig(SafeHandle synthHandle, SafeHandle speechConfigHandle, SafeHandle autoDetectSourceLangConfigHandle, SafeHandle audioConfigHandle);
     private final native long speakText(SafeHandle synthHandle, String text, IntRef resultRef);
     private final native long speakSsml(SafeHandle synthHandle, String ssml, IntRef resultRef);
-    private final native long startSpeakingText(SafeHandle synthHandle,String text, IntRef resultRef);
-    private final native long startSpeakingSsml(SafeHandle synthHandle,String ssml, IntRef resultRef);    
+    private final native long startSpeakingText(SafeHandle synthHandle, String text, IntRef resultRef);
+    private final native long startSpeakingSsml(SafeHandle synthHandle, String ssml, IntRef resultRef);
+    private final native long stopSpeaking(SafeHandle synthHandle);
     private final native long synthesisStartedSetCallback(SafeHandle synthHandle);
     private final native long synthesizingSetCallback(SafeHandle synthHandle);
     private final native long synthesisCompletedSetCallback(SafeHandle synthHandle);
