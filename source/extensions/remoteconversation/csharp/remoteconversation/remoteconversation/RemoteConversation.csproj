@@ -7,12 +7,13 @@
     <Version>buildVersion1234</Version>
     <Description>This SDK allows you to use the Microsoft Cognitive Speech Service for remote conversation. See https://aka.ms/csspeech for more information.</Description>
     <PackageLicenseExpression></PackageLicenseExpression>
-    <Copyright>Microsoft Software License Terms for Microsoft Cognitive Services Speech SDK. https://aka.ms/csspeech/license201809</Copyright>
+    <Copyright>© Microsoft Corporation. All rights reserved.</Copyright>
     <PackageProjectUrl>https://aka.ms/csspeech</PackageProjectUrl>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <PackageTags>async conversation remote speech sdk</PackageTags>
-    <Authors>Microsoft Corporation</Authors>
-    <Company>Microsoft Corporation</Company>
+    <Authors>Microsoft</Authors>
+    <Owners>Microsoft</Owners>
+    <LicenseUrl>https://aka.ms/csspeech/license201809</LicenseUrl>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
   </PropertyGroup>
 
