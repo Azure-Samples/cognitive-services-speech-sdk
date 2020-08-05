@@ -634,6 +634,10 @@ DocstringForCancellationReason = """
    .. py:attribute:: EndOfStream
 
       Indicates that the end of the audio stream was reached.
+
+   .. py:attribute:: CancelledByUser
+
+      Indicates that request was cancelled by the user.
     """
 
 DocstringForCancellationErrorCode = """

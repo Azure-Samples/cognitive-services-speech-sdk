@@ -1419,6 +1419,22 @@ class SpeechSynthesizer:
         """
         return ResultFuture(self._impl.start_speaking_ssml_async(ssml), SpeechSynthesisResult)
 
+    def stop_speaking_async(self):
+        """
+        Asynchronously terminates ongoing synthesis operation.
+        This method will stop playback and clear unread data in PullAudioOutputStream.
+
+        :return: A future that is fulfilled once synthesis has been stopped.
+        """
+        return self._impl.stop_speaking_async()
+
+    def stop_speaking(self):
+        """
+        Synchronously terminates ongoing synthesis operation.
+        This method will stop playback and clear unread data in PullAudioOutputStream.
+        """
+        return self._impl.stop_speaking()
+
     @staticmethod
     def _get_impl(synth_type, speech_config, audio_config, auto_detect_source_language_config):
         if auto_detect_source_language_config is not None:

@@ -571,3 +571,23 @@ def test_create_speech_synthesizer_invalid_language_detection_config_parameters(
     assert err_found is not None
     assert "Auto detection source languages in SpeechSynthesizer doesn't support language range specification" in str(
         err_found)
+
+def test_stop_synthesis(subscription, speech_region):
+    for sync in [True, False]:
+        config = _create_speech_config(subscription, speech_region)
+        synthesizer = msspeech.SpeechSynthesizer(config)
+
+        future1 = synthesizer.speak_text_async("text1")
+        time.sleep(0.1)
+        if sync:
+            synthesizer.stop_speaking()
+        else:
+            synthesizer.stop_speaking_async()
+        result1 = future1.get()
+        assert result1.reason == msspeech.ResultReason.Canceled
+        cancellation_details = result1.cancellation_details
+        assert msspeech.CancellationReason.CancelledByUser == cancellation_details.reason
+
+        result2 = synthesizer.speak_text_async("text2").get()
+        assert result2.reason == msspeech.ResultReason.SynthesizingAudioCompleted
+        assert len(result2.audio_data) > 0

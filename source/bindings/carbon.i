@@ -563,6 +563,11 @@
         return FutureWrapper<SpeechSynthesisResultPtr>(std::move(future));
     }
 
+    void StopSpeaking()
+    {
+        ($self)->StopSpeakingAsync().get();
+    }
+
     FutureWrapper<void> StopSpeakingAsync()
     {
         auto future = ($self)->StopSpeakingAsync();
@@ -645,6 +650,7 @@
 %ignore SpeakSsmlAsync;
 %ignore StartSpeakingTextAsync;
 %ignore StartSpeakingSsmlAsync;
+%ignore StopSpeakingAsync;
 %ignore SaveToWavFileAsync;
 %ignore SendMessageAsync;
 %ignore JoinConversationAsync;
