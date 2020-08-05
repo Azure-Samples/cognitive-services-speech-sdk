@@ -66,6 +66,9 @@
         case SpeechImpl::CancellationReason::EndOfStream:
             reason = SPXCancellationReason_EndOfStream;
             break;
+        case SpeechImpl::CancellationReason::CancelledByUser:
+            reason = SPXCancellationReason_CancelledByUser;
+            break;
         default:
             // Todo error handling.
             NSLog(@"Unknown CancellationReason value: %d.", (int)reasonImpl);

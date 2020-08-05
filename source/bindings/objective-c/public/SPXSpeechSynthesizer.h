@@ -208,6 +208,24 @@ NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.");
 - (nullable SPXSpeechSynthesisResult *)startSpeakingSsml:(nonnull NSString*)ssml error:(NSError * _Nullable * _Nullable)outError NS_RETURNS_RETAINED;
 
 /**
+ * Stops synthesis.
+ * This method will stop the playback and clear the unread data in SPXPullAudioOutputStream
+ * Added in version 1.14.0
+ */
+- (void)stopSpeaking
+NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.");
+
+/**
+ * Stops synthesis.
+ * This method will stop the playback and clear the unread data in SPXPullAudioOutputStream
+ *
+ * Added in version 1.14.0
+ *
+ * @param outError error information.
+ */
+- (BOOL)stopSpeaking:(NSError * _Nullable * _Nullable)outError;
+
+/**
  * Subscribes to the SynthesisStarted event which indicates that the synthesis just started.
  */
 - (void)addSynthesisStartedEventHandler:(nonnull SPXSpeechSynthesisEventHandler)eventHandler;

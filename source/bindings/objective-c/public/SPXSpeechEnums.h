@@ -398,7 +398,13 @@ typedef NS_ENUM(NSUInteger, SPXCancellationReason)
     /**
      * Indicates that the end of the audio stream was reached.
      */
-    SPXCancellationReason_EndOfStream = 2
+    SPXCancellationReason_EndOfStream = 2,
+
+    /**
+     * Indicates that request was cancelled by the user.
+     * Added in version 1.14.0
+     */
+    SPXCancellationReason_CancelledByUser = 3
 };
 
 /**

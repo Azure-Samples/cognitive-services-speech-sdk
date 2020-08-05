@@ -437,6 +437,28 @@
     XCTAssertGreaterThanOrEqual(lastTextOffset, 2);
 }
 
+- (void)_testStopSynthesis{
+    SPXSpeechSynthesizer* synthesizer = [[SPXSpeechSynthesizer alloc]initWithSpeechConfiguration:self.speechConfig audioConfiguration:nil];
+    NSAssert(nil != synthesizer, @"nil");
+
+    dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        [NSThread sleepForTimeInterval:0.1f];
+        [synthesizer stopSpeaking];
+        dispatch_semaphore_signal(semaphore);
+    });
+
+    SPXSpeechSynthesisResult* result1 = [synthesizer speakText:@"text1"];
+    SPXSpeechSynthesisResult* result2 = [synthesizer speakText:@"text2"];
+
+    XCTAssertEqual([result1 reason], SPXResultReason_Canceled, @"The reason of a stopped result should be cancelled");
+    SPXSpeechSynthesisCancellationDetails* cancellationDetails = [[SPXSpeechSynthesisCancellationDetails alloc] initFromCanceledSynthesisResult:result1];
+    XCTAssertEqual([cancellationDetails reason], SPXCancellationReason_CancelledByUser);
+    [self checkResult:result2];
+    synthesizer = nil;
+    dispatch_semaphore_wait(semaphore,DISPATCH_TIME_FOREVER);
+}
+
 @end
 
 @interface SPXSpeechSynthesisEndtoEndTestRest : SPXSpeechSynthesisEndtoEndTestBase {
@@ -557,6 +579,10 @@
 
 - (void)testSynthesisWithAutoLanguageDetection {
     return [self _testSynthesisWithAutoLanguageDetection];
+}
+
+- (void)testStopSynthesis {
+    return [self _testStopSynthesis];
 }
 
 @end
