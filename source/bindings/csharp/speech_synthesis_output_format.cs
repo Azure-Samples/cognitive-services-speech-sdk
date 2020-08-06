@@ -94,6 +94,16 @@ namespace Microsoft.CognitiveServices.Speech
         /// <summary>
         /// raw-8khz-16bit-mono-pcm
         /// </summary>
-        Raw8Khz16BitMonoPcm = 17
+        Raw8Khz16BitMonoPcm = 17,
+
+        /// <summary>
+        /// ogg-16khz-16bit-mono-opus
+        /// </summary>
+        Ogg16Khz16BitMonoOpus = 18,
+
+        /// <summary>
+        /// ogg-24khz-16bit-mono-opus
+        /// </summary>
+        Ogg24Khz16BitMonoOpus = 19
     }
 }

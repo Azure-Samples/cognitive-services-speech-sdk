@@ -899,6 +899,12 @@ DocstringForSpeechSynthesisOutputFormat = """
    .. py:attribute:: Raw8Khz16BitMonoPcm
 
       raw-8khz-16bit-mono-pcm
+   .. py:attribute:: Ogg16Khz16BitMonoOpus
+
+      ogg-16khz-16bit-mono-opus
+   .. py:attribute:: Ogg24Khz16bitMonoOpus
+
+      ogg-24khz-16bit-mono-opus
     """
 
 DocstringForAudioStreamContainerFormat = """

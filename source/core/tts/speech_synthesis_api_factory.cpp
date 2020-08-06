@@ -182,6 +182,14 @@ uint16_t CSpxSpeechSynthesisApiFactory::GetSpeechSynthesisOutputFormatFromString
     {
         formatSize = BuildSpeechSynthesisOutputFormat(format, cbFormat, WAVE_FORMAT_PCM, 1, 8000, 16000, 2, 16, 0, nullptr);
     }
+    else if (formatStr == "ogg-16khz-16bit-mono-opus")
+    {
+        formatSize = BuildSpeechSynthesisOutputFormat(format, cbFormat, WAVE_FORMAT_OPUS, 1, 16000, 8192, 2, 16, 0, nullptr);
+    }
+    else if (formatStr == "ogg-24khz-16bit-mono-opus")
+    {
+        formatSize = BuildSpeechSynthesisOutputFormat(format, cbFormat, WAVE_FORMAT_OPUS, 1, 24000, 8192, 2, 16, 0, nullptr);
+    }
     else
     {
         // Set default format to riff-16khz-16bit-mono-pcm

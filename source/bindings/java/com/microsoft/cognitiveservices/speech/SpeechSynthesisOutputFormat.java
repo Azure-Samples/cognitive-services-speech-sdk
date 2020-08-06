@@ -93,5 +93,15 @@ public enum SpeechSynthesisOutputFormat
     /**
      *  raw-8khz-16bit-mono-pcm
      */
-    Raw8Khz16BitMonoPcm
+    Raw8Khz16BitMonoPcm,
+
+    /**
+     * ogg-16khz-16bit-mono-opus
+     */
+    Ogg16Khz16BitMonoOpus,
+
+    /**
+     * ogg-24khz-16bit-mono-opus
+     */
+    Ogg24Khz16BitMonoOpus
 }

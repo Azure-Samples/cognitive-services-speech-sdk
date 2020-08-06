@@ -59,7 +59,13 @@ typedef enum
     SpeechSynthesisOutputFormat_Raw24Khz16BitMonoPcm = 16,
 
     // raw-8khz-16bit-mono-pcm
-    SpeechSynthesisOutputFormat_Raw8Khz16BitMonoPcm = 17
+    SpeechSynthesisOutputFormat_Raw8Khz16BitMonoPcm = 17,
+
+    // ogg-16khz-16bit-mono-opus
+    SpeechSynthesisOutputFormat_Ogg16khz16BitMonoOpus = 18,
+
+    // ogg-24khz-24bit-mono-opus
+    SpeechSynthesisOutputFormat_Ogg24Khz16BitMonoOpus = 19,
 } Speech_Synthesis_Output_Format;
 
 typedef enum

@@ -33,6 +33,8 @@ static_assert((int)SpeechSynthesisOutputFormat_Riff8Khz8BitMonoMULaw == (int)Spe
 static_assert((int)SpeechSynthesisOutputFormat_Raw16Khz16BitMonoPcm == (int)SpeechSynthesisOutputFormat::Raw16Khz16BitMonoPcm, "SpeechSynthesisOutputFormat_* enum values == SpeechSynthesisOutputFormat::* enum values");
 static_assert((int)SpeechSynthesisOutputFormat_Raw24Khz16BitMonoPcm == (int)SpeechSynthesisOutputFormat::Raw24Khz16BitMonoPcm, "SpeechSynthesisOutputFormat_* enum values == SpeechSynthesisOutputFormat::* enum values");
 static_assert((int)SpeechSynthesisOutputFormat_Raw8Khz16BitMonoPcm == (int)SpeechSynthesisOutputFormat::Raw8Khz16BitMonoPcm, "SpeechSynthesisOutputFormat_* enum values == SpeechSynthesisOutputFormat::* enum values");
+static_assert((int)SpeechSynthesisOutputFormat_Ogg16khz16BitMonoOpus == (int)SpeechSynthesisOutputFormat::Ogg16Khz16BitMonoOpus, "SpeechSynthesisOutputFormat_* enum values == SpeechSynthesisOutputFormat::* enum values");
+static_assert((int)SpeechSynthesisOutputFormat_Ogg24Khz16BitMonoOpus == (int)SpeechSynthesisOutputFormat::Ogg24Khz16BitMonoOpus, "SpeechSynthesisOutputFormat_* enum values == SpeechSynthesisOutputFormat::* enum values");
 
 static_assert((int)StreamStatus_Unknown == (int)StreamStatus::Unknown, "StreamStatus_* enum values == StreamStatus::* enum values");
 static_assert((int)StreamStatus_NoData == (int)StreamStatus::NoData, "StreamStatus_* enum values == StreamStatus::* enum values");

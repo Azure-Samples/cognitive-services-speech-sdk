@@ -619,7 +619,17 @@ typedef NS_ENUM(NSUInteger, SPXSpeechSynthesisOutputFormat)
     /**
      * raw-8khz-16bit-mono-pcm
      */
-    SPXSpeechSynthesisOutputFormat_Raw8Khz16BitMonoPcm = 17
+    SPXSpeechSynthesisOutputFormat_Raw8Khz16BitMonoPcm = 17,
+
+    /**
+     * ogg-16khz-16bit-mono-opus
+     */
+    SPXSpeechSynthesisOutputFormat_Ogg16khz16BitMonoOpus = 18,
+
+    /**
+     * ogg-24khz-16bit-mono-opus
+     */
+    SPXSpeechSynthesisOutputFormat_Ogg24khz16BitMonoOpus = 19
 };
 
 /**

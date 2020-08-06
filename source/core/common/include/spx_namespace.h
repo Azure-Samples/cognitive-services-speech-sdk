@@ -16,6 +16,7 @@ namespace Impl {
     static constexpr unsigned short WAVE_FORMAT_SIREN = 654;
     static constexpr unsigned short WAVE_FORMAT_MP3 = 669;
     static constexpr unsigned short WAVE_FORMAT_SILK_SKYPE = 671;
+    static constexpr unsigned short WAVE_FORMAT_OPUS = 672;
     static constexpr unsigned short BITS_PER_SAMPLE = 16;
     static constexpr unsigned short CHANNELS = 1;
     static constexpr unsigned short SAMPLES_PER_SECOND = 16000;

@@ -143,32 +143,29 @@ def test_speech_synthesizer_synthesizer_output_to_mp3_file(subscription, speech_
     synthesizer = msspeech.SpeechSynthesizer(config, file_config)
     result = synthesizer.speak_text_async("{{{text1}}}").get()
     # "{{{audiofile.wav}}}" now contains synthesized audio for "{{{text1}}}""
-    result_reason1 = result.reason
+    assert msspeech.ResultReason.SynthesizingAudioCompleted == result.reason
     synthesizer = None
     # "{{{audiofile.wav}}}" is now closed
 
     wave_file_size = os.path.getsize("audiofile.wav")
-    if result_reason1 != msspeech.ResultReason.Canceled:
-        assert wave_file_size > 46  # 46 is the minimum size of a wav file
+    assert wave_file_size > 46  # 46 is the minimum size of a wav file
 
-    config.set_speech_synthesis_output_format(msspeech.SpeechSynthesisOutputFormat.Audio16Khz32KBitRateMonoMp3)
-    assert "audio-16khz-32kbitrate-mono-mp3" == config.speech_synthesis_output_format_string
+    for fmt in [('mp3', msspeech.SpeechSynthesisOutputFormat.Audio16Khz32KBitRateMonoMp3, 'audio-16khz-32kbitrate-mono-mp3'),
+                ('ogg', msspeech.SpeechSynthesisOutputFormat.Ogg16Khz16BitMonoOpus, 'ogg-16khz-16bit-mono-opus')]:
+        config.set_speech_synthesis_output_format(fmt[1])
+        assert fmt[2] == config.speech_synthesis_output_format_string
 
-    file_config = msspeech.audio.AudioOutputConfig(filename="audiofile.mp3")
-    synthesizer = msspeech.SpeechSynthesizer(config, file_config)
-    result = synthesizer.speak_text_async("{{{text1}}}").get()
-    # "{{{audiofile.mp3}}}" now contains synthesized audio for "{{{text1}}}""
-    result_reason2 = result.reason
-    synthesizer = None
-    # "{{{audiofile.mp3}}}" is now closed
+        file_config = msspeech.audio.AudioOutputConfig(filename="audiofile.{}".format(fmt[0]))
+        synthesizer = msspeech.SpeechSynthesizer(config, file_config)
+        result = synthesizer.speak_text_async("{{{text1}}}").get()
+        # "{{{audiofile.mp3}}}" now contains synthesized audio for "{{{text1}}}""
+        assert msspeech.ResultReason.SynthesizingAudioCompleted == result.reason
+        synthesizer = None
+        # "{{{audiofile.mp3}}}" is now closed
 
-    mp3_file_size = os.path.getsize("audiofile.mp3")
-    if result_reason2 != msspeech.ResultReason.Canceled:
+        mp3_file_size = os.path.getsize("audiofile.{}".format(fmt[0]))
         assert mp3_file_size > 0
-
-    if result_reason1 != msspeech.ResultReason.Canceled:
-        if result_reason2 != msspeech.ResultReason.Canceled:
-            assert mp3_file_size < wave_file_size
+        assert mp3_file_size < wave_file_size
 
 
 def test_speech_synthesizer_synthesizer_output_to_push_stream(subscription, speech_region):
