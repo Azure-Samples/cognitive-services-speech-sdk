@@ -499,7 +499,7 @@ jobs:
         displayName: Patch and build samples
       - template: get-docker-image.yml
         parameters:
-          imageBase: oobejre_ubuntu1604_x64 oobejre_ubuntu1804_x64 oobejre_debian9_x64 oobejre_centos7_x64 oobejre_centos8_x64
+          imageBase: oobejre_ubuntu1604_x64 oobejre_ubuntu1804_x64 oobejre_ubuntu2004_x64 oobejre_debian9_x64 oobejre_debian10_x64 oobejre_centos7_x64 oobejre_centos8_x64
           outvarImage: DOCKER_IMAGES
       - bash: |
           set -u -e -o pipefail
@@ -1771,7 +1771,7 @@ jobs:
       itemPattern: '**/*linux*_x86_64.whl'
   - template: get-docker-image.yml
     parameters:
-      imageBase: oobedevpy35_ubuntu1604_x64 oobedevpy36_ubuntu1804_x64 oobedevpy35_debian9_x64 oobedevpy37_debian9py37_x64 oobedevpy36_centos7_x64 oobedevpy36_centos8_x64
+      imageBase: oobedevpy35_ubuntu1604_x64 oobedevpy36_ubuntu1804_x64 oobedevpy38_ubuntu2004_x64 oobedevpy35_debian9_x64 oobedevpy37_debian9py37_x64 oobedevpy37_debian10_x64 oobedevpy36_centos7_x64 oobedevpy36_centos8_x64
       outvarImage: DOCKER_IMAGES
   - bash: |
       rm -f ./tests/test.subscriptions.regions.json
@@ -1793,9 +1793,6 @@ jobs:
       patchSample public_samples/samples/python/console
       ERRORS=0
       for i in $(DOCKER_IMAGES); do
-        # Python 3.7 wheel is not produced in dev builds.
-        ! [[ $SPEECHSDK_BUILD_TYPE = dev && $i = *py37* ]] || continue
-
         ./ci/samples/test-quickstart-python.sh "$i" wheelhouse ||
           { ((++ERRORS)); vsts_logissue error "Running quickstart/python for image $i failed."; }
       done
@@ -1897,7 +1894,7 @@ jobs:
   - template: get-docker-image.yml
     parameters:
       #  oobedevcpp_ubuntu1604_x64 oobedevcpp_ubuntu1604_x86 TODO: THERE'S A PROBLEM WITH THESE 2 IMAGES THEY ARE FAILING THE SAMPLE TESTS
-      imageBase: oobedevcpp_ubuntu1804_x64 oobedevcpp_ubuntu1804_x86 oobedevcpp_debian9_x64 oobedevcpp_debian9_x86 oobedevcpp_centos7_x64 oobedevcpp_centos8_x64
+      imageBase: oobedevcpp_ubuntu1804_x64 oobedevcpp_ubuntu1804_x86 oobedevcpp_ubuntu2004_x64 oobedevcpp_debian9_x64 oobedevcpp_debian9_x86 oobedevcpp_debian10_x64 oobedevcpp_centos7_x64 oobedevcpp_centos8_x64
       outvarImage: DOCKER_IMAGES
   - bash: |
       rm -f ./tests/test.subscriptions.regions.json

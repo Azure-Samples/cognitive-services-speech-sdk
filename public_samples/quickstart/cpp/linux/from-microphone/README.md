@@ -1,33 +1,33 @@
-# Quickstart: Recognize speech in C++ for Linux (Ubuntu 16.04, Ubuntu 18.04, Debian 9, RHEL 8, CentOS 8)
+# Quickstart: Recognize speech in C++ for Linux
 
 This sample demonstrates how to recognize speech with C++ using the Speech SDK for Linux.
 See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-cpp-linux) on the SDK documentation page for step-by-step instructions.
 
+> **Note:**
+> We currently only support [specific Linux distributions and target architectures](https://docs.microsoft.com/azure/cognitive-services/speech-service/speech-sdk?tabs=linux).
+
 ## Prerequisites
 
 * A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
-* An Ubuntu 16.04, Ubuntu 18.04, Debian 9, RHEL 8, or CentOS 8 PC with a working microphone.
-* On Ubuntu, install these packages to build and run this sample:
+* A Linux PC with a working microphone.
+* On Ubuntu or Debian, install these packages to build and run this sample:
 
   ```sh
   sudo apt-get update
   sudo apt-get install build-essential libssl1.0.0 libasound2 wget
   ```
 
-* On Debian 9, install these packages to build and run this sample:
+  * If libssl1.0.0 is not available, install libssl1.0.x (where x is greater than 0) or libssl1.1 instead.
 
-  ```sh
-  sudo apt-get update
-  sudo apt-get install build-essential libssl1.0.2 libasound2 wget
-  ```
-
-* On RHEL 8 or CentOS 8, install these packages to build and run this sample:
+* On RHEL or CentOS, install these packages to build and run this sample:
 
   ```sh
   sudo yum update
   sudo yum groupinstall "Development tools"
   sudo yum install alsa-lib openssl wget
   ```
+
+  * See also [how to configure RHEL/CentOS 7 for Speech SDK](https://docs.microsoft.com/azure/cognitive-services/speech-service/how-to-configure-rhel-centos-7).
 
 ## Build the sample
 

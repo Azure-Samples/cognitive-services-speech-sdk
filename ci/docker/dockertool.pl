@@ -136,9 +136,17 @@ my %images = (
     version => 4,
     spec => ['from-ubuntu1604-x64', aptInstallWith(qw/oobedevcpp_ubuntu1604_deps oobe_ubuntu1604_deps oobe_ubuntu_gstreamer_deps test_deps/), 'builduser'],
   },
+  oobedevcpp_ubuntu2004_x64 => {
+    version => 1,
+    spec => ['from-ubuntu2004-x64', aptInstallWith(qw/oobedevcpp_ubuntu1604_deps oobe_ubuntu1804_deps oobe_ubuntu_gstreamer_deps test_deps_ubuntu1804/), 'builduser'],
+  },
   oobedevcpp_debian9_x64 => { # stretch
     version => 1,
     spec => ['from-debian9-x64', aptInstallWith(qw/oobedevcpp_ubuntu1604_deps oobe_debian9_deps oobe_ubuntu_gstreamer_deps test_deps/), 'builduser'],
+  },
+  oobedevcpp_debian10_x64 => {
+    version => 1,
+    spec => ['from-debian10-x64', aptInstallWith(qw/oobedevcpp_ubuntu1604_deps oobe_ubuntu1804_deps oobe_ubuntu_gstreamer_deps test_deps_ubuntu1804/), 'builduser'],
   },
   oobedevcpp_fedora27_x64 => { # Note: not used yet, not published yet; just work-in-progress.
     version => 'TESTLOCAL',
@@ -180,9 +188,17 @@ my %images = (
     version => 3,
     spec => ['from-ubuntu1804-x64', aptInstallWith(qw/oobe_ubuntu1604_deps oobejre_ubuntu1604_deps oobe_ubuntu_gstreamer_deps test_deps_ubuntu1804/), 'builduser'],
   },
+  oobejre_ubuntu2004_x64 => {
+    version => 1,
+    spec => ['from-ubuntu2004-x64', aptInstallWith(qw/oobe_ubuntu1804_deps oobejre_ubuntu2004_deps oobe_ubuntu_gstreamer_deps test_deps_ubuntu1804/), 'builduser'],
+  },
   oobejre_debian9_x64 => {
     version => 1,
     spec => ['from-debian9-x64', aptInstallWith(qw/oobe_debian9_deps oobejre_ubuntu1604_deps oobe_ubuntu_gstreamer_deps test_deps/), 'builduser'],
+  },
+  oobejre_debian10_x64 => {
+    version => 1,
+    spec => ['from-debian10-x64', aptInstallWith(qw/oobe_ubuntu1804_deps oobejre_ubuntu2004_deps oobe_ubuntu_gstreamer_deps test_deps_ubuntu1804/), 'builduser'],
   },
   oobejre_centos8_x64 => {
     version => 3,
@@ -202,11 +218,15 @@ my %images = (
   },
   oobedevdnc20_ubuntu1604_x64 => {
     version => 4,
-    spec => ['from-ubuntu1604-x64', aptInstallWith(qw/oobe_ubuntu1604_deps oobe_ubuntu_gstreamer_deps test_deps/), 'oobedevdnc20_ubuntu1604_x64_deps', 'builduser'],
+    spec => ['from-ubuntu1604-x64', aptInstallWith(qw/oobe_ubuntu1604_deps oobe_ubuntu_gstreamer_deps test_deps/), 'oobedevdnc20_ubuntu1604_version', 'oobedevdnc_ubuntu_x64_deps', 'builduser'],
   },
   oobedevdnc21_ubuntu1804_x64 => {
     version => 3,
-    spec => ['from-ubuntu1804-x64', aptInstallWith(qw/oobe_ubuntu1604_deps oobe_ubuntu_gstreamer_deps test_deps_ubuntu1804/), 'oobedevdnc21_ubuntu1804_x64_deps', 'builduser'],
+    spec => ['from-ubuntu1804-x64', aptInstallWith(qw/oobe_ubuntu1604_deps oobe_ubuntu_gstreamer_deps test_deps_ubuntu1804/), 'oobedevdnc21_ubuntu1804_version', 'oobedevdnc_ubuntu_x64_deps', 'builduser'],
+  },
+  oobedevdnc21_ubuntu2004_x64 => {
+    version => 1,
+    spec => ['from-ubuntu2004-x64', aptInstallWith(qw/oobe_ubuntu1804_deps oobe_ubuntu_gstreamer_deps test_deps_ubuntu1804/), 'oobedevdnc21_ubuntu2004_version', 'oobedevdnc_ubuntu_x64_deps', 'builduser'],
   },
   oobedevdnc21_ubuntu1804_arm32 => { # Not used yet due to various qemu errors with dotnet
     version => 2,
@@ -233,6 +253,10 @@ my %images = (
   oobedevdnc20_debian9_x64 => {
     version => 1,
     spec => ['from-debian9-x64', aptInstallWith(qw/oobe_debian9_deps oobe_ubuntu_gstreamer_deps test_deps/), 'oobedevdnc20_debian9_x64_deps', 'builduser'],
+  },
+  oobedevdnc21_debian10_x64 => {
+    version => 1,
+    spec => ['from-debian10-x64', aptInstallWith(qw/oobe_ubuntu1804_deps oobe_ubuntu_gstreamer_deps test_deps_ubuntu1804/), 'oobedevdnc21_debian10_version', 'oobedevdnc_ubuntu_x64_deps', 'builduser'],
   },
   oobedevdnc21_centos8_x64 => {
     version => 4,
@@ -268,6 +292,10 @@ my %images = (
     version => 1,
     spec => ['from-debian9-x64', aptInstallWith(qw/oobe_debian9_deps oobepython_ubuntu_deps test_deps/), 'oobepython_jupyter', 'builduser'],
   },
+  oobedevpy37_debian10_x64 => {
+    version => 1,
+    spec => ['from-debian10-x64', aptInstallWith(qw/oobe_ubuntu1804_deps oobepython_ubuntu_deps test_deps_ubuntu1804/), 'oobepython_jupyter', 'builduser'],
+  },
   oobedevpy35_ubuntu1604_x64 => {
     version => 3,
     spec => ['from-ubuntu1604-x64', aptInstallWith(qw/oobe_ubuntu1604_deps oobepython_ubuntu_deps test_deps/), 'oobepython_jupyter', 'builduser'],
@@ -275,6 +303,10 @@ my %images = (
   oobedevpy36_ubuntu1804_x64 => {
     version => 3,
     spec => ['from-ubuntu1804-x64', aptInstallWith(qw/oobe_ubuntu1604_deps oobepython_ubuntu_deps test_deps_ubuntu1804/), 'oobepython_jupyter', 'builduser'],
+  },
+  oobedevpy38_ubuntu2004_x64 => {
+    version => 1,
+    spec => ['from-ubuntu2004-x64', aptInstallWith(qw/oobe_ubuntu1804_deps oobepython_ubuntu_deps test_deps_ubuntu1804/), 'oobepython_jupyter', 'builduser'],
   },
   oobedevpy37_debian9py37_x64 => {
     version => 1,
