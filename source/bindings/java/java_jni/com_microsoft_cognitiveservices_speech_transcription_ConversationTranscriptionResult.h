@@ -15,6 +15,14 @@ extern "C" {
 JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_transcription_ConversationTranscriptionResult_getUserId
   (JNIEnv *, jobject, jobject, jobject);
 
+/*
+ * Class:     com_microsoft_cognitiveservices_speech_transcription_ConversationTranscriptionResult
+ * Method:    getUtteranceId
+ * Signature: (Lcom/microsoft/cognitiveservices/speech/util/SafeHandle;Lcom/microsoft/cognitiveservices/speech/util/StringRef;)J
+ */
+JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_transcription_ConversationTranscriptionResult_getUtteranceId
+  (JNIEnv*, jobject, jobject, jobject);
+
 #ifdef __cplusplus
 }
 #endif

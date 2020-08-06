@@ -24,7 +24,10 @@ public class ConversationTranscriptionResult extends SpeechRecognitionResult {
             StringRef userIdStr = new StringRef("");
             Contracts.throwIfFail(getUserId(resultHandle, userIdStr));
             this.userId = userIdStr.getValue();
-            Contracts.throwIfNull(this.userId, "userId");
+
+            StringRef utteranceIdStr = new StringRef("");
+            Contracts.throwIfFail(getUtteranceId(resultHandle, utteranceIdStr));
+            this.utteranceId = utteranceIdStr.getValue();
         }
     }
 
@@ -47,6 +50,14 @@ public class ConversationTranscriptionResult extends SpeechRecognitionResult {
     }
 
     /**
+     * A string that represents the utterance. This id is consistence for intermediates and final speech recognition result from one speaker.
+     * @return the utterance ID string.
+     */
+    public String getUtteranceId() {
+        return this.utteranceId;
+    }
+
+    /**
      * Returns a String that represents the conversation transcription result.
      * @return A String that represents the conversation transcription result.
      */
@@ -55,10 +66,13 @@ public class ConversationTranscriptionResult extends SpeechRecognitionResult {
         return "ResultId:" + this.getResultId()+
                 " Status:" + this.getReason() +
                 " UserId:" + this.userId +
+                " UtteranceId:" + this.utteranceId +
                 " Recognized text:<" + this.getText() + ">.";
     }
 
     private final native long getUserId(SafeHandle resultHandle, StringRef userId);
-    
+    private final native long getUtteranceId(SafeHandle resultHandle, StringRef utteranceId);
+
     private String userId;
+    private String utteranceId;
 }

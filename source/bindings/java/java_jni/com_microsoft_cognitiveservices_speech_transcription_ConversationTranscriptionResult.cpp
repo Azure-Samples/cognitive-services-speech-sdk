@@ -26,3 +26,21 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_transcriptio
     }
     return (jlong)hr;
 }
+
+/*
+ * Class:     com_microsoft_cognitiveservices_speech_transcription_ConversationTranscriptionResult
+ * Method:    getUtteranceId
+ * Signature: (Lcom/microsoft/cognitiveservices/speech/util/SafeHandle;Lcom/microsoft/cognitiveservices/speech/util/StringRef;)J
+ */
+JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_transcription_ConversationTranscriptionResult_getUtteranceId
+(JNIEnv* env, jobject obj, jobject resultHandle, jobject utteranceIdStr)
+{
+    jlong result = GetObjectHandle(env, resultHandle);
+    char sz[maxCharCount + 1] = {};
+    SPXHR hr = conversation_transcription_result_get_utterance_id((SPXRESULTHANDLE)result, sz, maxCharCount);
+    if (SPX_SUCCEEDED(hr))
+    {
+        hr = SetStringObjectHandle(env, utteranceIdStr, sz);
+    }
+    return (jlong)hr;
+}
