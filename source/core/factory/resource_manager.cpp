@@ -32,7 +32,7 @@ CSpxResourceManager::CSpxResourceManager()
 #ifdef __linux__
     m_moduleFactories.push_back(CSpxModuleFactory::Get("libcarbon-mock.so"));
     m_moduleFactories.push_back(CSpxModuleFactory::Get("libcarbon-tts-mock.so"));
-    m_moduleFactories.push_back(CSpxModuleFactory::Get("libcarbon-tts-local.so"));
+    m_moduleFactories.push_back(CSpxModuleFactory::Get("libMicrosoft.CognitiveServices.Speech.extension.embedded.tts.so"));
 
     // Note: due to new naming, removing any carbon prefix in name
     m_moduleFactories.push_back(CSpxModuleFactory::Get("libMicrosoft.CognitiveServices.Speech.extension.pma.so"));
@@ -64,7 +64,7 @@ CSpxResourceManager::CSpxResourceManager()
     m_moduleFactories.push_back(CSpxModuleFactory::Get(PrimaryCarbon_CreateModuleObject));
     m_moduleFactories.push_back(CSpxModuleFactory::Get("Microsoft.CognitiveServices.Speech.extension.embedded.sr.dll"));
     m_moduleFactories.push_back(CSpxModuleFactory::Get("carbon-tts-mock.dll"));
-    m_moduleFactories.push_back(CSpxModuleFactory::Get("carbon-tts-local.dll"));
+    m_moduleFactories.push_back(CSpxModuleFactory::Get("Microsoft.CognitiveServices.Speech.extension.embedded.tts.dll"));
 #endif
 }
 

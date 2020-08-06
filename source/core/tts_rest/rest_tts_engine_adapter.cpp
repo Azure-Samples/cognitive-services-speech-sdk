@@ -92,7 +92,7 @@ void CSpxRestTtsEngineAdapter::Init()
     if (endpoint.empty() && !hostUrl.empty())
     {
         Url url = HttpUtils::ParseUrl(hostUrl);
-        
+
         // Check FromHost restrictions
         if (!url.path.empty())
         {
@@ -138,16 +138,18 @@ void CSpxRestTtsEngineAdapter::SetOutput(std::shared_ptr<ISpxAudioOutput> output
     m_audioOutput = output;
 }
 
-std::shared_ptr<ISpxSynthesisResult> CSpxRestTtsEngineAdapter::Speak(const std::string& text, bool isSsml, const std::wstring& requestId)
+std::shared_ptr<ISpxSynthesisResult> CSpxRestTtsEngineAdapter::Speak(const std::string& text, bool isSsml, const std::wstring& requestId, bool retry)
 {
     SPX_DBG_TRACE_VERBOSE_IF(SPX_DBG_TRACE_REST_TTS, __FUNCTION__);
+
+    UNUSED(retry);
 
     auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
 
     SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_TTS_ENGINE_SITE_FAILURE);
     auto subscriptionKey = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Key));
     auto token = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceAuthorization_Token));
-     
+
     auto ssml = text;
     if (!isSsml)
     {
@@ -163,7 +165,7 @@ std::shared_ptr<ISpxSynthesisResult> CSpxRestTtsEngineAdapter::Speak(const std::
     std::shared_ptr<ISpxSynthesisResult> result;
 
     InvokeOnSite([this, properties, requestId, ssml, subscriptionKey, token, outputFormatString, outputFormat, hasHeader, &result](const SitePtr& p) {
-        result = SpxCreateObjectWithSite<ISpxSynthesisResult>("CSpxSynthesisResult", p->QueryInterface<ISpxGenericSite>());
+        result = p->CreateEmptySynthesisResult();
         auto resultInit = SpxQueryInterface<ISpxSynthesisResultInit>(result);
 
         EnsureHttpConnection(properties);
@@ -344,12 +346,12 @@ void CSpxRestTtsEngineAdapter::PostTtsRequest(HTTP_HANDLE http_connect, RestTtsR
             throw std::runtime_error("Could not add HTTP request header: User-Agent");
         }
 
-        if (HTTPHeaders_AddHeaderNameValuePair(httpRequestHeaders, "X-Microsoft-OutputFormat", request.outputFormatString.data()) != HTTP_HEADERS_OK)
+        if (HTTPHeaders_AddHeaderNameValuePair(httpRequestHeaders, "X-Microsoft-OutputFormat", request.outputFormatString.c_str()) != HTTP_HEADERS_OK)
         {
             throw std::runtime_error("Could not add HTTP request header: X-Microsoft-OutputFormat");
         }
 
-        if (HTTPHeaders_AddHeaderNameValuePair(httpRequestHeaders, "Content-Length", CSpxSynthesisHelper::itos(request.postContent.length()).data()) != HTTP_HEADERS_OK)
+        if (HTTPHeaders_AddHeaderNameValuePair(httpRequestHeaders, "Content-Length", std::to_string(request.postContent.length()).c_str()) != HTTP_HEADERS_OK)
         {
             throw std::runtime_error("Could not add HTTP request header: Content-Length");
         }
@@ -422,7 +424,7 @@ void CSpxRestTtsEngineAdapter::PostTtsRequest(HTTP_HANDLE http_connect, RestTtsR
             // Write audio to site
             unsigned char* buffer_content = BUFFER_u_char(buffer);
             size_t buffer_length = BUFFER_length(buffer);
-            request.site->Write(request.adapter, request.requestId, buffer_content, (uint32_t)buffer_length);
+            request.site->Write(request.adapter, request.requestId, buffer_content, (uint32_t)buffer_length, nullptr);
 
             // Write audio to result
             result_init->InitSynthesisResult(request.requestId, ResultReason::SynthesizingAudioCompleted, REASON_CANCELED_NONE,
@@ -481,7 +483,7 @@ void CSpxRestTtsEngineAdapter::PostTtsRequest(HTTP_HANDLE http_connect, RestTtsR
 void CSpxRestTtsEngineAdapter::OnChunkReceived(void* context, const unsigned char* buffer, size_t size)
 {
     auto request = (RestTtsRequest *)context;
-    request->site->Write(request->adapter, request->requestId, (uint8_t *)buffer, (uint32_t)size);
+    request->site->Write(request->adapter, request->requestId, (uint8_t *)buffer, (uint32_t)size, nullptr);
 
     // Append current chunk to total audio data for use of synthesis result
     std::unique_lock<std::mutex> lock(request->response.mutex);

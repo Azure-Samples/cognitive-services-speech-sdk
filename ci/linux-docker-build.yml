@@ -98,8 +98,10 @@ jobs:
       vsts_setvar SPEECHSDK_ENABLE_RNNT true
       if [[ $SPEECHSDK_TARGET_PLATFORM == Linux-arm64 ]]; then
         vsts_setvar SPEECHSDK_ENABLE_UNIDEC true
+        vsts_setvar SPEECHSDK_ENABLE_HYBRID_TTS true
       else
         vsts_setvar SPEECHSDK_ENABLE_UNIDEC false
+        vsts_setvar SPEECHSDK_ENABLE_HYBRID_TTS false
       fi
       vsts_setvar SPEECHSDK_ENABLE_CODEC true
       vsts_setvar VSTS_TOKEN "$(System.AccessToken)"
@@ -117,6 +119,10 @@ jobs:
     parameters:
       enableVariable: SPEECHSDK_ENABLE_UNIDEC
       os: linux
+  - template: get-offline-tts-artifact.yml
+    parameters:
+      enableVariable: SPEECHSDK_ENABLE_HYBRID_TTS
+      os: Linux
   - template: get-docker-image.yml
     parameters:
       imageBase: $(DOCKER_BUILD_BASE)
@@ -169,6 +175,7 @@ jobs:
           -DEXTENSION_CODEC_ENABLED=$(SPEECHSDK_ENABLE_CODEC) \
           -DEXTENSION_RNNT_ENABLED=$(SPEECHSDK_ENABLE_RNNT) \
           -DEXTENSION_UNIDEC_ENABLED=$(SPEECHSDK_ENABLE_UNIDEC) \
+          -DEXTENSION_HYBRID_TTS_ENABLED=$(SPEECHSDK_ENABLE_HYBRID_TTS) \
           -DCMAKE_TOOLCHAIN_FILE=$SPEECHSDK_TOOL_CHAIN\
           -DOPENSSL_CRYPTO_LIBRARY=/linux-openssl/$(OPENSSL_TARGET)/usr/local/lib/libcrypto.a \
           -DOPENSSL_INCLUDE_DIR=/linux-openssl/$(OPENSSL_TARGET)/usr/local/include \

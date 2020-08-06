@@ -56,6 +56,10 @@ if(BUILD_RNNT)
     list(APPEND SOURCES "${SRC_DIR}/speech_recognizer_rnnt_tests.cpp")
 endif()
 
+if(BUILD_HYBRID_TTS)
+    list(APPEND SOURCES "${SRC_DIR}/speech_synthesizer_hybrid_tests.cpp")
+endif()
+
 list(APPEND HEADERS_PRIVATE ${TEST_HEADERS})
 
 set_source_groups()

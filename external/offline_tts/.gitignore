@@ -1,0 +1,6 @@
+include/
+font/
+*.so
+*.lib
+*.dll
+*.zip

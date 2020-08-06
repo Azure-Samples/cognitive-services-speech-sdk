@@ -17,7 +17,7 @@ namespace Impl {
 
 CSpxDefaultSpeaker::~CSpxDefaultSpeaker()
 {
-    Term();
+    CSpxDefaultSpeaker::Term();
 }
 
 void CSpxDefaultSpeaker::Init()
@@ -105,9 +105,13 @@ uint32_t CSpxDefaultSpeaker::Write(uint8_t* buffer, uint32_t size)
     if (m_audioInitialized)
     {
         writtenSize = m_audioStream->Write(buffer, size);
+        m_receivedDataSize += writtenSize;
     }
 
-    StartPlayback();
+    if (m_receivedDataSize >= m_playBufferSize)
+    {
+        StartPlayback();
+    }
 
     return writtenSize;
 }
@@ -117,6 +121,7 @@ void CSpxDefaultSpeaker::WaitUntilDone()
 #ifdef AUDIO_OUTPUT_DEVICE_AVAILABLE
     std::unique_lock<std::mutex> lock(m_playMutex);
     m_audioStream->Close();
+    m_receivedDataSize = 0;
 #ifdef _DEBUG
     while (!m_cv.wait_for(lock, std::chrono::milliseconds(100), [&] { return PlayState::Stopped == m_playState; }))
     {
@@ -140,6 +145,7 @@ void CSpxDefaultSpeaker::ClearUnread()
 void CSpxDefaultSpeaker::Close()
 {
     m_audioStream->Close();
+    m_receivedDataSize = 0;
 }
 
 uint16_t CSpxDefaultSpeaker::GetFormat(SPXWAVEFORMATEX* formatBuffer, uint16_t formatSize)
@@ -152,7 +158,7 @@ uint16_t CSpxDefaultSpeaker::GetFormat(SPXWAVEFORMATEX* formatBuffer, uint16_t f
         const size_t size = std::min(static_cast<size_t>(formatSize), sizeof(AUDIO_WAVEFORMAT));
         memcpy(formatBuffer, m_audioFormat.get(), size);
 
-        if (formatSize >= (uint16_t)sizeof(SPXWAVEFORMATEX))
+        if (formatSize >= static_cast<uint16_t>(sizeof(SPXWAVEFORMATEX)))
         {
             formatBuffer->cbSize = 0;
         }
@@ -169,7 +175,7 @@ void CSpxDefaultSpeaker::SetFormat(SPXWAVEFORMATEX* pformat)
     // Allocate the buffer for the format
     const auto formatSize = sizeof(AUDIO_WAVEFORMAT);
     m_audioFormat = SpxAllocSharedBuffer<AUDIO_WAVEFORMAT>(formatSize);
-    SPX_DBG_TRACE_VERBOSE("CSpxDefaultSpeaker::SetFormat is called with format 0x%p", (void*)pformat);
+    SPX_DBG_TRACE_VERBOSE("CSpxDefaultSpeaker::SetFormat is called with format 0x%p", static_cast<void*>(pformat));
 
     // Copy the format
     memcpy(m_audioFormat.get(), pformat, formatSize);
@@ -191,10 +197,10 @@ void CSpxDefaultSpeaker::InitializeAudio()
         memcpy(m_hsetting, m_audioFormat.get(), sizeof(AUDIO_WAVEFORMAT));
         m_hsetting->eDataFlow = AUDIO_RENDER;
 
-        // Select device
         auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
         SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_INVALID_ARG);
 
+        // Select device
         auto deviceName = properties->GetStringValue(GetPropertyName(PropertyId::AudioConfig_DeviceNameForRender));
         SPX_DBG_TRACE_VERBOSE("The device name of speaker as a property is '%s'", deviceName.c_str());
 
@@ -214,6 +220,10 @@ void CSpxDefaultSpeaker::InitializeAudio()
 
         m_audioInitialized = true;
 
+        m_playBufferSize = std::stoi(
+                properties->GetStringValue(GetPropertyName(PropertyId::AudioConfig_PlaybackBufferLengthInMs), "50")) *
+            m_audioFormat->nSamplesPerSec / 1000;
+
     }
 #endif
 }
@@ -224,7 +234,9 @@ int CSpxDefaultSpeaker::PlayAudioReadCallback(void* pContext, uint8_t* pBuffer, 
 {
     auto defaultSpeaker = static_cast<CSpxDefaultSpeaker*>(pContext);
     // The default buffer size is 1600000, which is too long
-    const auto filledSize = defaultSpeaker->m_audioStream->Read(pBuffer, std::min(size, static_cast<uint32_t>(CHUNK_SIZE)));
+    const auto filledSize = defaultSpeaker->m_audioStream->Read(
+        pBuffer, std::min(size, static_cast<uint32_t>(CHUNK_SIZE)));
+    
     return static_cast<int>(filledSize);
 }
 

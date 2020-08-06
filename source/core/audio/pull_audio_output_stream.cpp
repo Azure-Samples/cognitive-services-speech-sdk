@@ -78,6 +78,13 @@ uint32_t CSpxPullAudioOutputStream::Read(uint8_t* buffer, uint32_t bufferSize)
     return FillBuffer(buffer, bufferSize);
 }
 
+uint32_t CSpxPullAudioOutputStream::AvailableSize()
+{
+    SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+    std::unique_lock<std::mutex> lock(m_mutex);
+    return m_inventorySize;
+}
+
 uint32_t CSpxPullAudioOutputStream::FillBuffer(uint8_t* buffer, uint32_t bufferSize)
 {
     std::unique_lock<std::mutex> lock(m_mutex);

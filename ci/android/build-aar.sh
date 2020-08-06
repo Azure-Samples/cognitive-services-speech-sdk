@@ -71,7 +71,7 @@ for micpermission in false true; do
     # Copy native libraries
     mkdir -p "$AAR_DIR"/jni{,/armeabi-v7a,/arm64-v8a,/x86,/x86_64}
 
-    # Note: KWS currently not shipping in the AAR.
+    # Note: KWS and embedded.tts currently not shipping in the AAR.
 
     cp --verbose --preserve \
       "$DROP_DIR"/Android-arm32/$flavor/public/lib/libMicrosoft.CognitiveServices.Speech.{core,java.bindings,extension.codec,extension.kws,extension.silk_codec}.so \

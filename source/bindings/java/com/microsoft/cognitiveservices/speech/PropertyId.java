@@ -275,6 +275,10 @@ public enum PropertyId {
     LanguageUnderstandingServiceResponse_JsonResult (7000),
 
     /**
+     * Playback buffer length, default is 50 milliseconds.
+     */
+    AudioConfig_PlaybackBufferLengthInMs (8006),
+    /**
      * The file name to write logs.
      * Added in version 1.4.0.
      */

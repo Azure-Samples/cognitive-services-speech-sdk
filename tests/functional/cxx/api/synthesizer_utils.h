@@ -40,6 +40,8 @@ namespace TTS
 
     long GetFileSize(const string& filename);
 
+    std::vector<uint8_t> ReadWavFile(const string& filename);
+
     void DoSomethingWithAudioInPullStream(std::shared_ptr<PullAudioOutputStream> stream, bool& canceled);
 
     void DoSomethingWithAudioInPullStream(std::shared_ptr<PullAudioOutputStream> stream, bool& canceled, std::shared_ptr<std::vector<uint8_t>> expectedData);

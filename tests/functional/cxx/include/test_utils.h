@@ -108,6 +108,7 @@ namespace Config
 #define TEXT_OFFSETS "TextOffsets"
 #define SSML_OFFSETS "SsmlOffsets"
 #define WORD_LENGTHS "WordLengths"
+#define OFFLINE_SYNTHESIZED_FILE_PATH "OfflineSynthesizedFilePath"
 
 #define SPEAKER_VERIFICATION_ENGLISH "MyVoiceIsMyPassportVerifyMe"
 #define SINGLE_UTTERANCE_ENGLISH "SingleUtteranceEnglish"
@@ -144,6 +145,7 @@ namespace Config
 #define PROFANITY_SINGLE_UTTERANCE_ENGLISH_2 "ProfanitySingleUtteranceEnglish2"
 
 #define SYNTHESIS_WORD_BOUNDARY_UTTERANCE_CHINESE "SynthesisWordBoundaryUtteranceChinese"
+#define SYNTHESIS_UTTERANCE_ENGLISH "SynthesisUtteranceEnglish"
 #define SYNTHESIS_SHORT_UTTERANCE_CHINESE "SynthesisShortUtteranceChinese"
 #define SYNTHESIS_UTTERANCE_CHINESE_1 "SynthesisUtteranceChinese1"
 #define SYNTHESIS_UTTERANCE_CHINESE_2 "SynthesisUtteranceChinese2"
@@ -170,6 +172,7 @@ struct Utterance
     std::vector<int> TextOffsets;
     std::vector<int> SsmlOffsets;
     std::vector<int> WordLengths;
+    std::string OfflineSynthesizedFilePath;
 };
 
 struct AudioEntry
@@ -349,14 +352,14 @@ inline void from_json(const nlohmann::json& jsonString, SubscriptionRegion& subs
     try {
         jsonString.at(KEY).get_to(subscriptionRegion.Key);
     }
-    catch (std::exception exception) {
+    catch (std::exception& exception) {
         SPX_TEST_TRACE_ERROR(__FILE__, "from_json", __LINE__, 0, "SubscriptionRegion - failed to find key, %s", exception.what());
         throw;
     }
     try {
         jsonString.at(REGION).get_to(subscriptionRegion.Region);
     }
-    catch (std::exception exception) {
+    catch (std::exception& exception) {
         SPX_TEST_TRACE_ERROR(__FILE__, "from_json", __LINE__, 0, "SubscriptionRegion - failed to find region, %s", exception.what());
         throw;
     }
@@ -472,6 +475,13 @@ inline void from_json(const nlohmann::json& jsonString, Utterance& utterance)
     else {
         utterance.WordLengths = std::vector<int>();
     }
+
+    if (jsonString.contains(OFFLINE_SYNTHESIZED_FILE_PATH)) {
+        jsonString.at(OFFLINE_SYNTHESIZED_FILE_PATH).get_to(utterance.OfflineSynthesizedFilePath);
+    }
+    else {
+        utterance.OfflineSynthesizedFilePath = "";
+    }
 }
 
 inline void to_json(nlohmann::json& jsonString, const AudioEntry& audioEntry)
@@ -518,7 +528,7 @@ private:
             try {
                 testSettingsFile >> nlohmanJson;
             }
-            catch (nlohmann::json::parse_error exception)
+            catch (nlohmann::json::parse_error& exception)
             {
                 SPX_TEST_TRACE_ERROR(__FILE__, "getJson", __LINE__, 0, "json exception from %s - %s", path.c_str(), exception.what());
             }

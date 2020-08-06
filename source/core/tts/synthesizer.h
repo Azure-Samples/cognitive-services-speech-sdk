@@ -90,8 +90,9 @@ public:
 
     // --- ISpxTtsEngineAdapterSite ---
 
-    uint32_t Write(ISpxTtsEngineAdapter* adapter, const std::wstring& requestId, uint8_t* buffer, uint32_t size) override;
-
+    uint32_t Write(ISpxTtsEngineAdapter* adapter, const std::wstring& requestId, uint8_t* buffer, uint32_t size, std::shared_ptr<std::unordered_map<std::string, std::string>> properties) override;
+    std::shared_ptr<ISpxSynthesizerEvents> GetEventsSite() override;
+    std::shared_ptr<ISpxSynthesisResult> CreateEmptySynthesisResult() override;
 
 protected:
 
@@ -106,7 +107,11 @@ private:
     void PopRequestFromQueue(const std::wstring& requestId = L"");
     void ClearRequestQueueAndKeepFront();
 
-    std::shared_ptr<ISpxSynthesisResult> CreateResult(const std::wstring& requestId, ResultReason reason, uint8_t* audio_buffer, size_t audio_length, CancellationReason cancellationReason = REASON_CANCELED_NONE);
+    std::shared_ptr<ISpxSynthesisResult> CreateResult(const std::wstring& requestId, ResultReason reason,
+                                                      uint8_t* audio_buffer, size_t audio_length,
+                                                      CancellationReason cancellationReason = REASON_CANCELED_NONE,
+                                                      std::shared_ptr<std::unordered_map<std::string, std::string>>
+                                                      properties = nullptr);
     std::shared_ptr<ISpxSynthesisResult> CreateUserCancelledResult(const std::wstring& requestId);
     void FireResultEvent(std::shared_ptr<ISpxSynthesisResult> result);
     void FireSynthesisEvent(std::list<std::pair<void*, std::shared_ptr<SynthEvent_Type>>> events, std::shared_ptr<ISpxSynthesisResult> result);

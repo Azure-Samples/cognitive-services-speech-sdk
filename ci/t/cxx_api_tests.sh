@@ -34,12 +34,20 @@ case $PLATFORM in
       LD_LIBRARY_PATH="${UNIDEC_RUNTIME_PATH}:$LD_LIBRARY_PATH"
       RUN_OFFLINE_UNIDEC_TESTS=true
     fi
+    HYBRID_TTS_RUNTIME_PATH="$SCRIPT_DIR/../external/offline_tts/Linux/arm64"
+    if [[ -d "$HYBRID_TTS_RUNTIME_PATH" ]]; then
+      LD_LIBRARY_PATH="${HYBRID_TTS_RUNTIME_PATH}:$LD_LIBRARY_PATH"
+    fi
     ;;
   Linux-x64*)
     UNIDEC_RUNTIME_PATH="$SCRIPT_DIR/../external/unidec/Richland.Speech.UnidecRuntime/linux-amd64-platform/lib"
     if [[ -d "$UNIDEC_RUNTIME_PATH" ]]; then
       LD_LIBRARY_PATH="${UNIDEC_RUNTIME_PATH}:$LD_LIBRARY_PATH"
       RUN_OFFLINE_UNIDEC_TESTS=true
+    fi
+    HYBRID_TTS_RUNTIME_PATH="$SCRIPT_DIR/../external/offline_tts/Linux/x64"
+    if [[ -d "$HYBRID_TTS_RUNTIME_PATH" ]]; then
+      LD_LIBRARY_PATH="${HYBRID_TTS_RUNTIME_PATH}:$LD_LIBRARY_PATH"
     fi
     ;;
   Windows-x64*)
@@ -51,6 +59,10 @@ case $PLATFORM in
     if [[ -d "$UNIDEC_RUNTIME_PATH" ]]; then
       PATH="${UNIDEC_RUNTIME_PATH}:$PATH"
       RUN_OFFLINE_UNIDEC_TESTS=true
+    fi
+    HYBRID_TTS_RUNTIME_PATH="$SCRIPT_DIR/../external/offline_tts/Windows/x64"
+    if [[ -d "$HYBRID_TTS_RUNTIME_PATH" ]]; then
+      PATH="${HYBRID_TTS_RUNTIME_PATH}:$PATH"
     fi
     ;;
   Windows-x86*)

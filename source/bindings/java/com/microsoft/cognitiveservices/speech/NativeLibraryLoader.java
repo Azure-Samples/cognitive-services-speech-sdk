@@ -149,6 +149,7 @@ class NativeLibraryLoader {
                     new NativeLibrary("libMicrosoft.CognitiveServices.Speech.core.so", true),
                     new NativeLibrary("libMicrosoft.CognitiveServices.Speech.extension.kws.so", false),
                     new NativeLibrary("libMicrosoft.CognitiveServices.Speech.extension.codec.so", false),
+                    new NativeLibrary("libMicrosoft.CognitiveServices.Speech.extension.embedded.tts.so", false),
                     // TODO: Uncomment following line when embedded.sr extension is ready to be released in jar package
                     //new NativeLibrary("libMicrosoft.CognitiveServices.Speech.extension.embedded.sr.so", false),
                     new NativeLibrary("libMicrosoft.CognitiveServices.Speech.java.bindings.so", true)

@@ -491,6 +491,24 @@
       ]
     }
   },
+  "SynthesisUtteranceEnglish": {
+    "FilePath": "null",
+    "NativeLanguage": "en-US",
+    "Utterances": {
+      "en-US": [
+        {
+          "Text": "Hello world.",
+          "Ssml": "<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts' xmlns:emo='http://www.w3.org/2009/10/emotionml' xml:lang='en-US'><voice name='Microsoft Server Speech Text to Speech Voice (en-US, Mark)'>Hello world.</voice></speak>",
+          "OfflineSynthesizedFilePath": "synthesis/HelloWorld.wav"
+        },
+        {
+          "Text": "Today is a nice day.",
+          "Ssml": "<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts' xmlns:emo='http://www.w3.org/2009/10/emotionml' xml:lang='en-US'><voice name='Microsoft Server Speech Text to Speech Voice (en-US, Mark)'>Today is a nice day.</voice></speak>",
+          "OfflineSynthesizedFilePath": "synthesis/NiceDay.wav"
+        }
+      ]
+    }
+  },
   "SynthesisUtteranceChinese1": {
     "FilePath": "null",
     "NativeLanguage": "zh-CN",

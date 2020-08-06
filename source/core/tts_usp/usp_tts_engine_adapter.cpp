@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
-// usp_tts_engine_adapter.cpp: Implementation definitions for CSpxMockTtsEngineAdapter C++ class
+// usp_tts_engine_adapter.cpp: Implementation definitions for CSpxUspTtsEngineAdapter C++ class
 //
 
 #include "stdafx.h"
@@ -59,13 +59,14 @@ void CSpxUspTtsEngineAdapter::Init()
 
     // Initialize websocket platform
     Microsoft::CognitiveServices::Speech::USP::PlatformInit(m_proxyHost.c_str(), m_proxyPort, m_proxyUsername.c_str(), m_proxyPassword.c_str());
-  
+
 }
 
 void CSpxUspTtsEngineAdapter::Term()
 {
+    SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
     UspTerminate();
-    SpxTerm(m_threadService);
+    SpxTermAndClear(m_threadService);
 }
 
 void CSpxUspTtsEngineAdapter::SetOutput(std::shared_ptr<ISpxAudioOutput> output)
@@ -74,16 +75,17 @@ void CSpxUspTtsEngineAdapter::SetOutput(std::shared_ptr<ISpxAudioOutput> output)
     m_audioOutput = output;
 }
 
-std::shared_ptr<ISpxSynthesisResult> CSpxUspTtsEngineAdapter::Speak(const std::string& text, bool isSsml, const std::wstring& requestId)
+std::shared_ptr<ISpxSynthesisResult> CSpxUspTtsEngineAdapter::Speak(const std::string& text, bool isSsml, const std::wstring& requestId, bool retry)
 {
     SPX_DBG_TRACE_VERBOSE_IF(SPX_DBG_TRACE_USP_TTS, __FUNCTION__);
+    SPX_DBG_TRACE_VERBOSE("%d", int(m_uspState.load()));
     SPX_DBG_ASSERT(UspState::Idle == m_uspState || UspState::Error == m_uspState);
 
     m_shouldStop = false;
 
     std::shared_ptr<ISpxSynthesisResult> result;
     const auto maxRetry = std::stoi(ISpxPropertyBagImpl::GetStringValue("SpeechSynthesis_MaxRetryTimes", std::to_string(MAX_RETRY).c_str()));
-    for (auto tryCount = 0; tryCount <= maxRetry; ++tryCount)
+    for (auto tryCount = 0; tryCount <= maxRetry * static_cast<int>(retry); ++tryCount)
     {
         SPX_DBG_TRACE_VERBOSE_IF(SPX_DBG_TRACE_USP_TTS,
             "%s: start to send synthesis request, request id : %s, try: %d", __FUNCTION__, PAL::ToString(requestId).c_str(), tryCount);
@@ -182,7 +184,7 @@ std::shared_ptr<ISpxSynthesisResult> CSpxUspTtsEngineAdapter::SpeakInternal(cons
     {
         SPX_TRACE_ERROR("USP error, timeout to get all audio data.");
         m_currentErrorMessage = "USP error, timeout to get all audio data.";
-        m_currentErrorMessage += " Received audio size: " + CSpxSynthesisHelper::itos(m_currentReceivedData.size()) + "bytes.";
+        m_currentErrorMessage += " Received audio size: " + std::to_string(m_currentReceivedData.size()) + "bytes.";
         m_uspState = UspState::Error;
         UspTerminate();
     }
@@ -190,7 +192,7 @@ std::shared_ptr<ISpxSynthesisResult> CSpxUspTtsEngineAdapter::SpeakInternal(cons
     bool hasHeader = false;
     auto outputFormat = GetOutputFormat(m_audioOutput, &hasHeader);
 
-    auto result = SpxCreateObjectWithSite<ISpxSynthesisResult>("CSpxSynthesisResult", SpxQueryInterface<ISpxGenericSite>(GetSite()));
+    auto result = GetSite()->CreateEmptySynthesisResult();
     auto resultInit = SpxQueryInterface<ISpxSynthesisResultInit>(result);
     if (m_uspState == UspState::Error)
     {
@@ -448,7 +450,6 @@ void CSpxUspTtsEngineAdapter::UspInitialize()
     // We're done!!
     m_uspCallbacks = uspCallbacks;
     m_uspConnection = std::move(uspConnection);
-
     if (m_uspState == UspState::Connecting)
     {
         m_uspState = UspState::Idle;
@@ -482,7 +483,7 @@ USP::Client& CSpxUspTtsEngineAdapter::SetUspEndpoint(const std::shared_ptr<ISpxN
     USP::Client& client) const
 {
     SPX_DBG_ASSERT(GetSite() != nullptr);
-    
+
     const auto endpoint = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Endpoint));
     const auto host = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Host));
     const auto region = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Region));
@@ -533,7 +534,7 @@ void CSpxUspTtsEngineAdapter::OnTurnStart(const USP::TurnStartMsg& message)
 {
     UNUSED(message);
     std::unique_lock<std::mutex> lock(m_mutex);
-    
+
     if (m_uspState == UspState::Sending)
     {
         m_uspState = UspState::TurnStarted;
@@ -564,7 +565,7 @@ void CSpxUspTtsEngineAdapter::OnAudioOutputChunk(const USP::AudioOutputChunkMsg&
     InvokeOnSite([this, message](const SitePtr& p) {
         if (message.audioLength > 0)
         {
-            p->Write(this, m_currentRequestId, const_cast<uint8_t *>(message.audioBuffer), static_cast<uint32_t>(message.audioLength));
+            p->Write(this, m_currentRequestId, const_cast<uint8_t *>(message.audioBuffer), static_cast<uint32_t>(message.audioLength), nullptr);
         }
     });
 
@@ -619,8 +620,8 @@ void CSpxUspTtsEngineAdapter::OnError(bool transport, USP::ErrorCode errorCode, 
     {
         m_currentErrorCode = errorCode;
         m_currentErrorMessage = errorMessage;
-        m_currentErrorMessage += " USP state: " + CSpxSynthesisHelper::itos((int)(UspState)m_uspState) + ".";
-        m_currentErrorMessage += " Received audio size: " + CSpxSynthesisHelper::itos(m_currentReceivedData.size()) + "bytes.";
+        m_currentErrorMessage += " USP state: " + std::to_string((int)(UspState)m_uspState) + ".";
+        m_currentErrorMessage += " Received audio size: " + std::to_string(m_currentReceivedData.size()) + "bytes.";
         m_uspState = UspState::Error;
         m_cv.notify_all();
 
@@ -663,7 +664,7 @@ bool CSpxUspTtsEngineAdapter::WordBoundaryEnabled() const
 {
     auto wordBoundaryEnabled = PAL::ToBool(ISpxPropertyBagImpl::GetStringValue("SpeechServiceResponse_Synthesis_WordBoundaryEnabled", "true"));
 
-    auto synthesizerEvents = SpxQueryInterface<ISpxSynthesizerEvents>(GetSite());
+    auto synthesizerEvents = GetSite()->GetEventsSite();
     auto wordBoundaryConnected = synthesizerEvents->WordBoundary.IsConnected();
 
     return wordBoundaryEnabled && wordBoundaryConnected;

@@ -17,6 +17,7 @@ cmake -G "NMake Makefiles" ^
     -DCMAKE_BUILD_TYPE="%BuildConfiguration%" ^
     -DGST_ROOT="%GST_BUILD_CONFIGURATION%" ^
     -DEXTENSION_CODEC_ENABLED="%SPEECHSDK_ENABLE_CODEC%" ^
+    -DEXTENSION_HYBRID_TTS_ENABLED="%SPEECHSDK_ENABLE_HYBRID_TTS%" ^
     .. ^
   && ^
 cmake --build .

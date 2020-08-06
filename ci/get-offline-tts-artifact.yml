@@ -1,0 +1,30 @@
+# We download per OS, across multiple artifact.
+# Could do less, but at least in multi-configuration builds (Windows).
+parameters:
+  enableVariable: ""
+  os: ""
+steps:
+- bash: |
+    set -u -e -o pipefail
+    . ci/functions.sh
+    IFS=$' \t\n\r' read build_id should_be_empty < external/offline_tts/build_id.txt
+    # checks
+    [[ -z $should_be_empty ]]
+    printf '%d' "$build_id" > /dev/null
+    vsts_setvar __getKwsArtifactInternal_BuildId "$build_id"
+  displayName: Get offline TTS build ID
+  condition: and(succeeded(), eq(variables['${{ parameters.enableVariable }}'], 'true'))
+- task: DownloadBuildArtifacts@0
+  displayName: Download offline TTS build artifact (library)
+  inputs:
+    buildType: specific
+    project: 'faed7aff-1112-4686-b747-0cde537272e2' # TextToSpeech
+    pipeline: 12307 # TextToSpeech-CI-All
+    buildVersionToDownload: specific
+    buildId: $(__getKwsArtifactInternal_BuildId)
+    downloadType: specific
+    itemPattern: |
+      include/**
+      ${{ parameters.os }}/**
+    downloadPath: external/offline_tts
+  condition: and(succeeded(), eq(variables['${{ parameters.enableVariable }}'], 'true'))

@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
-// usp_tts_engine_adapter.h: Implementation declarations for CSpxMockTtsEngineAdapter C++ class
+// usp_tts_engine_adapter.h: Implementation declarations for CSpxUspTtsEngineAdapter C++ class
 //
 
 #pragma once
@@ -54,7 +54,7 @@ public:
 
     // --- ISpxTtsEngineAdapter
     void SetOutput(std::shared_ptr<ISpxAudioOutput> output) override;
-    std::shared_ptr<ISpxSynthesisResult> Speak(const std::string& text, bool isSsml, const std::wstring& requestId) override;
+    std::shared_ptr<ISpxSynthesisResult> Speak(const std::string& text, bool isSsml, const std::wstring& requestId, bool retry) override;
     void StopSpeaking() override;
 
     // --- IServiceProvider ---

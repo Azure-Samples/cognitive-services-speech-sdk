@@ -19,7 +19,7 @@ namespace Speech {
 namespace Impl {
 
 
-class CSpxPullAudioOutputStream : 
+class CSpxPullAudioOutputStream :
     public ISpxAudioOutputReader,
     public ISpxServiceProvider,
     public CSpxNullAudioOutput
@@ -45,6 +45,7 @@ public:
 
     // --- ISpxAudioOutputReader ---
     virtual uint32_t Read(uint8_t* buffer, uint32_t bufferSize) override;
+    virtual uint32_t AvailableSize() override;
 
     // --- ISpxServiceProvider ---
     SPX_SERVICE_MAP_BEGIN()

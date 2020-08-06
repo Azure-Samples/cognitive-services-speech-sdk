@@ -37,6 +37,13 @@ constexpr const char* GetPropertyName(const PropertyId id)
     case PropertyId::SpeechServiceConnection_SynthLanguage: return "SPEECH-SynthLanguage";
     case PropertyId::SpeechServiceConnection_SynthVoice: return "SPEECH-SynthVoice";
     case PropertyId::SpeechServiceConnection_SynthOutputFormat: return "SPEECH-SynthOutputFormat";
+    // case PropertyId::SpeechServiceConnection_SynthBackend: return "SPEECH-SynthBackend";
+    // case PropertyId::SpeechServiceConnection_SynthBackendSwitchingPolicy: return "SPEECH-SynthBackendSwitchingPolicy";
+    // case PropertyId::SpeechServiceConnection_SynthOfflineDataLocation: return "SPEECH-SynthOfflineDataLocation";
+    // case PropertyId::SpeechServiceConnection_SynthBackendFallbackConnectedTimeoutMs: return "SPEECH-SynthBackendFallbackConnectedTimeoutMs";
+    // case PropertyId::SpeechServiceConnection_SynthBackendFallbackBufferLengthMs: return "SPEECH-SynthBackendFallbackBufferLengthMs";
+    // case PropertyId::SpeechServiceConnection_SynthBackendFallbackBufferTimeoutMs: return "SPEECH-SynthBackendFallbackBufferTimeoutMs";
+    // case PropertyId::SpeechServiceConnection_SynthBackendFallbackFinishedTimeoutMs: return "SPEECH-SynthBackendFallbackFinishedTimeoutMs";
     case PropertyId::SpeechServiceConnection_UserDefinedQueryParameters: return "SPEECH-UserDefinedQueryParameters";
     case PropertyId::Speech_SessionId: return "SessionId";
     case PropertyId::SpeechServiceConnection_InitialSilenceTimeoutMs: return "SPEECH-InitialSilenceTimeoutMs";
@@ -65,6 +72,7 @@ constexpr const char* GetPropertyName(const PropertyId id)
     case PropertyId::AudioConfig_BitsPerSampleForCapture: return "AudioConfig_BitsPerSampleForCapture";
     case PropertyId::AudioConfig_AudioSource: return "AudioConfig_AudioSource";
     case PropertyId::AudioConfig_DeviceNameForRender: return "AudioConfig_DeviceNameForRender";
+    case PropertyId::AudioConfig_PlaybackBufferLengthInMs: return "AudioConfig_PlaybackBufferLengthInMs";
     case PropertyId::Speech_LogFilename: return "SPEECH-LogFilename";
     case PropertyId::Conversation_ApplicationId: return "DIALOG-ApplicationId";
     case PropertyId::Conversation_DialogType: return "DIALOG-DialogType";

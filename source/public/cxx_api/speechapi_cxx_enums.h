@@ -347,6 +347,11 @@ enum class PropertyId
     AudioConfig_DeviceNameForRender = 8005,
 
     /// <summary>
+    /// Playback buffer length, default is 50 milliseconds.
+    /// </summary>
+    AudioConfig_PlaybackBufferLengthInMs = 8006,
+
+    /// <summary>
     /// The file name to write logs.
     /// Added in version 1.4.0.
     /// </summary>

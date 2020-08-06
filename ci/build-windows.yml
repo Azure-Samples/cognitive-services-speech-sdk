@@ -53,6 +53,7 @@ jobs:
           vsts_setvar SPEECHSDK_CMAKE_GENERATOR "Visual Studio 16 2019"
           vsts_setvar SPEECHSDK_CMAKE_TARGET_PLATFORM "x64"
           vsts_setvar SPEECHSDK_PYTHON_PLATFORM "x64"
+          vsts_setvar SPEECHSDK_ENABLE_HYBRID_TTS true
         fi
         vsts_setvar SPEECHSDK_BUILD_CONFIGURATION "$(BuildConfiguration)"
         vsts_setvar SPEECHSDK_ENABLE_KWS ${{ parameters.kws }}
@@ -68,6 +69,10 @@ jobs:
   - template: get-kws-artifact.yml
     parameters:
       enableVariable: SPEECHSDK_ENABLE_KWS
+      os: Windows
+  - template: get-offline-tts-artifact.yml
+    parameters:
+      enableVariable: SPEECHSDK_ENABLE_HYBRID_TTS
       os: Windows
   - template: get-rnnt-artifact.yml
     parameters:
@@ -106,7 +111,8 @@ jobs:
         -DEXTENSION_AUDIOCOMPRESSION_ENABLED=$(EXTENSION_AUDIOCOMPRESSION_ENABLED)
         -DEXTENSION_RNNT_ENABLED=$(SPEECHSDK_ENABLE_RNNT)
         -DEXTENSION_UNIDEC_ENABLED=$(SPEECHSDK_ENABLE_UNIDEC)
-        -DEXTENSION_CODEC_ENABLED=true
+        -DEXTENSION_HYBRID_TTS_ENABLED=$(SPEECHSDK_ENABLE_HYBRID_TTS)
+        -DEXTENSION_CODEC_ENABLED=true        
         -DGST_ROOT=$(GSTREAMER_INSTALL_PATH)
         ..
   - task: VSBuild@1

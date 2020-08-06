@@ -57,6 +57,9 @@ option(EXTENSION_AUDIOCOMPRESSION_ENABLED "Build the compression codec extension
 # Make the compilation of gstreamer (for decoding audio format) optional
 option(EXTENSION_CODEC_ENABLED "Build the CODEC extension based on the supported platform" OFF)
 
+# Make the compilation of hybrid tts optional
+option(EXTENSION_HYBRID_TTS_ENABLED "Build the hybrid TTS extension based on the supported platform" OFF)
+
 # Make the compilation of RNN-T based recognizer optional
 option(EXTENSION_RNNT_ENABLED "Build RNN-T based recognizer component" OFF)
 
@@ -434,6 +437,23 @@ file(GLOB SPEECH_C_API_HEADERS "${CARBON_C_API}/*.h")
 file(GLOB SPEECH_CXX_API_HEADERS "${CARBON_CXX_API}/*.h")
 
 
+# Enable hybrid TTS build with 'cmake -DEXTENSION_HYBRID_TTS_ENABLED=true'
+if(EXTENSION_HYBRID_TTS_ENABLED AND
+   (SPEECHSDK_TARGET_PLATFORM STREQUAL "Windows-x64" OR
+    SPEECHSDK_TARGET_PLATFORM STREQUAL "WindowsUwp-x64" OR
+    SPEECHSDK_TARGET_PLATFORM STREQUAL "Linux-x64" OR
+    SPEECHSDK_TARGET_PLATFORM STREQUAL "Linux-arm64" OR
+    SPEECHSDK_TARGET_PLATFORM STREQUAL "Android-arm32" OR
+    SPEECHSDK_TARGET_PLATFORM STREQUAL "Android-arm64" OR
+    SPEECHSDK_TARGET_PLATFORM STREQUAL "OSX-x64"))
+  set(BUILD_HYBRID_TTS ON)
+  set(HYBRID_TTS "${CARBON_EXTENSIONS}/hybrid_tts")
+else()
+  set (BUILD_HYBRID_TTS OFF)
+endif()
+
+message(STATUS "BUILD_HYBRID_TTS=${BUILD_HYBRID_TTS}")
+
 set(TESTS "${CARBON_ROOT}/tests")
 set(JAVA_TESTS "${TESTS}/functional/java/src/test/java")
 
@@ -467,9 +487,13 @@ if(EXTENSION_CODEC_ENABLED)
   endif()
 endif()
 
+if(BUILD_HYBRID_TTS)
+  add_subdirectory(${HYBRID_TTS})
+  # set this definition before adding CARBON_CORE directory
+  add_definitions(-DSPEECHSDK_HYBRID_TTS_ENABLED)
+endif()
+
 add_subdirectory(${CARBON_CORE})
-
-
 
 if(EXTENSION_KWS_ENABLED)
   add_subdirectory("${CARBON_EXTENSIONS}/kws")

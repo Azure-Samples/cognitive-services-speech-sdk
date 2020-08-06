@@ -41,10 +41,16 @@ namespace TTS
     long GetFileSize(const string& filename)
     {
         struct stat info;
-        stat(filename.data(), &info);
-        auto fileSize = info.st_size;
+        stat(filename.c_str(), &info);
+        return info.st_size;
+    }
 
-        return fileSize;
+    std::vector<uint8_t> ReadWavFile(const string& filename)
+    {
+        SPXTEST_REQUIRE(exists(filename));
+        std::ifstream instream(filename, std::ios::in | std::ios::binary);
+        std::vector<uint8_t> data((std::istreambuf_iterator<char>(instream)), std::istreambuf_iterator<char>());
+        return data;
     }
 
     void DoSomethingWithAudioInPullStream(shared_ptr<PullAudioOutputStream> stream, bool& canceled)

@@ -119,6 +119,8 @@ private:
     std::shared_ptr<AUDIO_WAVEFORMAT> m_audioFormat;
 
     std::shared_ptr<CSpxPullAudioOutputStream> m_audioStream; // Use this to buffer the audio data
+    std::atomic<uint32_t> m_receivedDataSize;
+    uint32_t m_playBufferSize{};
 
 #ifdef WIN32
     ComInitAndUnInit m_com;

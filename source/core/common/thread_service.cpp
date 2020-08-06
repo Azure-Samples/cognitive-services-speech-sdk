@@ -41,6 +41,7 @@ namespace Microsoft { namespace CognitiveServices { namespace Speech { namespace
 
     void CSpxThreadService::Term()
     {
+        SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
         if (m_threads.empty())
             return;
 

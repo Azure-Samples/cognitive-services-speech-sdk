@@ -109,7 +109,7 @@ std::shared_ptr<ISpxSynthesisResult> CSpxSynthesizer::Speak(const std::string& t
     }
 
     // Speak
-    auto synthesisDoneResult = m_ttsAdapter->Speak(text, isSsml, requestId);
+    auto synthesisDoneResult = m_ttsAdapter->Speak(text, isSsml, requestId, true);
 
     // Wait for audio output to be done
     m_audioOutput->WaitUntilDone();
@@ -170,7 +170,7 @@ std::shared_ptr<ISpxSynthesisResult> CSpxSynthesizer::StartSpeaking(const std::s
     std::shared_future<std::shared_ptr<ISpxSynthesisResult>> waitForCompletion(std::async(std::launch::async,
         [this, keepAlive, requestId, text, isSsml]() {
         // Speak
-        auto synthesisDoneResult = m_ttsAdapter->Speak(text, isSsml, requestId);
+        auto synthesisDoneResult = m_ttsAdapter->Speak(text, isSsml, requestId, true);
 
         // Wait for audio output to be done
         m_audioOutput->WaitUntilDone();
@@ -258,7 +258,7 @@ void CSpxSynthesizer::ConnectSynthesisStartedCallback(void* object, SynthesisCal
     auto iterator = SynthesisStarted.begin();
     while (iterator != SynthesisStarted.end() && iterator->first != object)
     {
-        iterator++;
+        ++iterator;
     }
 
     if (iterator != SynthesisStarted.end())
@@ -282,7 +282,7 @@ void CSpxSynthesizer::ConnectSynthesizingCallback(void* object, SynthesisCallbac
     auto iterator = Synthesizing.begin();
     while (iterator != Synthesizing.end() && iterator->first != object)
     {
-        iterator++;
+        ++iterator;
     }
 
     if (iterator != Synthesizing.end())
@@ -306,7 +306,7 @@ void CSpxSynthesizer::ConnectSynthesisCompletedCallback(void* object, SynthesisC
     auto iterator = SynthesisCompleted.begin();
     while (iterator != SynthesisCompleted.end() && iterator->first != object)
     {
-        iterator++;
+        ++iterator;
     }
 
     if (iterator != SynthesisCompleted.end())
@@ -330,7 +330,7 @@ void CSpxSynthesizer::ConnectSynthesisCanceledCallback(void* object, SynthesisCa
     auto iterator = SynthesisCanceled.begin();
     while (iterator != SynthesisCanceled.end() && iterator->first != object)
     {
-        iterator++;
+        ++iterator;
     }
 
     if (iterator != SynthesisCanceled.end())
@@ -354,7 +354,7 @@ void CSpxSynthesizer::DisconnectSynthesisStartedCallback(void* object, Synthesis
     auto iterator = SynthesisStarted.begin();
     while (iterator != SynthesisStarted.end() && iterator->first != object)
     {
-        iterator++;
+        ++iterator;
     }
 
     if (iterator != SynthesisStarted.end())
@@ -384,7 +384,7 @@ void CSpxSynthesizer::DisconnectSynthesizingCallback(void* object, SynthesisCall
     auto iterator = Synthesizing.begin();
     while (iterator != Synthesizing.end() && iterator->first != object)
     {
-        iterator++;
+        ++iterator;
     }
 
     if (iterator != Synthesizing.end())
@@ -414,7 +414,7 @@ void CSpxSynthesizer::DisconnectSynthesisCompletedCallback(void* object, Synthes
     auto iterator = SynthesisCompleted.begin();
     while (iterator != SynthesisCompleted.end() && iterator->first != object)
     {
-        iterator++;
+        ++iterator;
     }
 
     if (iterator != SynthesisCompleted.end())
@@ -444,7 +444,7 @@ void CSpxSynthesizer::DisconnectSynthesisCanceledCallback(void* object, Synthesi
     auto iterator = SynthesisCanceled.begin();
     while (iterator != SynthesisCanceled.end() && iterator->first != object)
     {
-        iterator++;
+        ++iterator;
     }
 
     if (iterator != SynthesisCanceled.end())
@@ -498,7 +498,8 @@ void CSpxSynthesizer::FireWordBoundary(uint64_t audioOffset, uint32_t textOffset
     WordBoundary.Signal(wordBoundaryEvent);
 }
 
-uint32_t CSpxSynthesizer::Write(ISpxTtsEngineAdapter* adapter, const std::wstring& requestId, uint8_t* buffer, uint32_t size)
+uint32_t CSpxSynthesizer::Write(ISpxTtsEngineAdapter* adapter, const std::wstring& requestId, uint8_t* buffer,
+                                uint32_t size, std::shared_ptr<std::unordered_map<std::string, std::string>> properties)
 {
     UNUSED(adapter);
 
@@ -508,11 +509,22 @@ uint32_t CSpxSynthesizer::Write(ISpxTtsEngineAdapter* adapter, const std::wstrin
     }
 
     // Fire Synthesizing event
-    const auto result = CreateResult(requestId, ResultReason::SynthesizingAudio, buffer, size);
+    const auto result = CreateResult(requestId, ResultReason::SynthesizingAudio, buffer, size, REASON_CANCELED_NONE, properties);
     FireResultEvent(result);
 
     // Write audio data to output
     return m_audioOutput->Write(buffer, size);
+}
+
+std::shared_ptr<ISpxSynthesizerEvents> CSpxSynthesizer::GetEventsSite()
+{
+    std::shared_ptr<ISpxGenericSite> site = static_cast<ISpxGenericSite*>(this)->shared_from_this();
+    return SpxQueryInterface<ISpxSynthesizerEvents>(site);
+}
+
+std::shared_ptr<ISpxSynthesisResult> CSpxSynthesizer::CreateEmptySynthesisResult()
+{
+    return SpxCreateObjectWithSite<ISpxSynthesisResult>("CSpxSynthesisResult", this);
 }
 
 std::shared_ptr<ISpxNamedProperties> CSpxSynthesizer::GetParentProperties() const
@@ -576,7 +588,8 @@ void CSpxSynthesizer::ClearRequestQueueAndKeepFront()
 
 std::shared_ptr<ISpxSynthesisResult> CSpxSynthesizer::CreateResult(const std::wstring& requestId, ResultReason reason,
                                                                    uint8_t* audio_buffer, size_t audio_length,
-                                                                   CancellationReason cancellationReason)
+                                                                   CancellationReason cancellationReason,
+                                                                   std::shared_ptr<std::unordered_map<std::string, std::string>> properties)
 {
     // Get output format
     auto audioStream = SpxQueryInterface<ISpxAudioStream>(m_audioOutput);
@@ -589,6 +602,16 @@ std::shared_ptr<ISpxSynthesisResult> CSpxSynthesizer::CreateResult(const std::ws
     auto resultInit = SpxQueryInterface<ISpxSynthesisResultInit>(result);
     resultInit->InitSynthesisResult(requestId, reason, cancellationReason, CancellationErrorCode::NoError,
         audio_buffer, audio_length, format.get(), SpxQueryInterface<ISpxAudioOutputFormat>(m_audioOutput)->HasHeader());
+
+    if (properties != nullptr)
+    {
+        auto resultProperties = SpxQueryInterface<ISpxNamedProperties>(result);
+        for (const auto &p : *properties)
+        {
+            resultProperties->SetStringValue(p.first.c_str(), p.second.c_str());
+        }
+    }
+
     auto events = this->QueryInterfaceInternal<ISpxSynthesizerEvents>();
     resultInit->SetEvents(events);
 
@@ -644,7 +667,7 @@ void CSpxSynthesizer::FireSynthesisEvent(std::list<std::pair<void*, std::shared_
             pevent->Signal(synthEvent);
         }
 
-        iterator++;
+        ++iterator;
     }
 }
 
@@ -673,8 +696,23 @@ void CSpxSynthesizer::InitializeTtsEngineAdapter()
         endpoint = hostUrl;
     }
 
-    if (!endpoint.empty())
+#ifdef SPEECHSDK_HYBRID_TTS_ENABLED
+    bool tryLocal = false, tryHybrid = false;
+
+    const auto backend = GetStringValue("SPEECH-SynthBackend", "");
+    if (backend == "hybrid")
     {
+        tryHybrid = true;
+    }
+    else if (backend == "offline")
+    {
+        tryLocal = true;
+    }
+    else if (!endpoint.empty())
+#else
+    if (!endpoint.empty())
+#endif
+     {
         auto url = HttpUtils::ParseUrl(endpoint);
         switch (url.scheme)
         {
@@ -696,11 +734,13 @@ void CSpxSynthesizer::InitializeTtsEngineAdapter()
                    PAL::ToBool(GetStringValue("CARBON-INTERNAL-UseTtsEngine-Rest", PAL::BoolToString(false)));
     tryUsp = tryUsp || PAL::ToBool(GetStringValue("SDK-INTERNAL-UseTtsEngine-Usp", PAL::BoolToString(false))) ||
                   PAL::ToBool(GetStringValue("CARBON-INTERNAL-UseTtsEngine-Usp", PAL::BoolToString(false)));
-    bool tryLocal = PAL::ToBool(GetStringValue("SDK-INTERNAL-UseTtsEngine-Local", PAL::BoolToString(false))) ||
-                    PAL::ToBool(GetStringValue("CARBON-INTERNAL-UseTtsEngine-Local", PAL::BoolToString(false)));
 
     // if nobody specified which type(s) of TTS engine adapters this session should use, we'll use the USP
-    if (!tryMock && !tryRest && !tryUsp && !tryLocal)
+#ifdef SPEECHSDK_HYBRID_TTS_ENABLED
+    if (!tryMock && !tryRest && !tryUsp && !tryLocal && !tryHybrid)
+#else
+    if (!tryMock && !tryRest && !tryUsp)
+#endif
     {
         tryUsp = true;
     }
@@ -723,11 +763,19 @@ void CSpxSynthesizer::InitializeTtsEngineAdapter()
         m_ttsAdapter = SpxCreateObjectWithSite<ISpxTtsEngineAdapter>("CSpxMockTtsEngineAdapter", this);
     }
 
+#ifdef SPEECHSDK_HYBRID_TTS_ENABLED
+    // try to create the local tts engine adapter...
+    if (m_ttsAdapter == nullptr && tryHybrid)
+    {
+        m_ttsAdapter = SpxCreateObjectWithSite<ISpxTtsEngineAdapter>("CSpxHybridTtsEngineAdapter", this);
+    }
+
     // try to create the local tts engine adapter...
     if (m_ttsAdapter == nullptr && tryLocal)
     {
         m_ttsAdapter = SpxCreateObjectWithSite<ISpxTtsEngineAdapter>("CSpxLocalTtsEngineAdapter", this);
     }
+#endif
 
     // if we still don't have an adapter... that's an exception
     SPX_IFTRUE_THROW_HR(m_ttsAdapter == nullptr, SPXERR_NOT_FOUND);

@@ -6,7 +6,7 @@
 //
 
 #include "stdafx.h"
-#include <math.h>
+#include <cmath>
 #include "synthesis_helper.h"
 #include "mock_tts_engine_adapter.h"
 #include "create_object_helpers.h"
@@ -18,7 +18,7 @@
 #include "create_object_helpers.h"
 #include "site_helpers.h"
 
-#define SPX_DBG_TRACE_MOCK_TTS 0
+#define SPX_DBG_TRACE_MOCK_TTS 1
 
 
 namespace Microsoft {
@@ -43,9 +43,11 @@ void CSpxMockTtsEngineAdapter::SetOutput(std::shared_ptr<ISpxAudioOutput> output
     m_audioOutput = output;
 }
 
-std::shared_ptr<ISpxSynthesisResult> CSpxMockTtsEngineAdapter::Speak(const std::string& text, bool isSsml, const std::wstring& requestId)
+std::shared_ptr<ISpxSynthesisResult> CSpxMockTtsEngineAdapter::Speak(const std::string& text, bool isSsml, const std::wstring& requestId, bool retry)
 {
     SPX_DBG_TRACE_VERBOSE_IF(SPX_DBG_TRACE_MOCK_TTS, __FUNCTION__);
+
+    UNUSED(retry);
 
     std::shared_ptr<ISpxSynthesisResult> result;
 
@@ -67,7 +69,7 @@ std::shared_ptr<ISpxSynthesisResult> CSpxMockTtsEngineAdapter::Speak(const std::
                 audioBuffer[j * 2 + 1] = uint8_t(uint16_t(y * 16384) / 256);
             }
 
-            p->Write(this, requestId, audioBuffer, 3200);
+            p->Write(this, requestId, audioBuffer, 3200, nullptr);
             audioOutputStream->Write(audioBuffer, 3200);
 
             delete[] audioBuffer;
@@ -81,7 +83,7 @@ std::shared_ptr<ISpxSynthesisResult> CSpxMockTtsEngineAdapter::Speak(const std::
             ssml = CSpxSynthesisHelper::BuildSsml(text, properties);
         }
 
-        p->Write(this, requestId, (uint8_t *)(ssml.data()), (uint32_t)(ssml.length()));
+        p->Write(this, requestId, (uint8_t *)(ssml.data()), (uint32_t)(ssml.length()), nullptr);
         audioOutputStream->Write((uint8_t *)(ssml.data()), (uint32_t)(ssml.length()));
 
         // Build result
@@ -93,7 +95,7 @@ std::shared_ptr<ISpxSynthesisResult> CSpxMockTtsEngineAdapter::Speak(const std::
         SPX_DBG_ASSERT(audioDataStream != nullptr);
         audioDataStream->Read(totalAudio.get(), 32000 + (uint32_t)(ssml.length()));
 
-        result = SpxCreateObjectWithSite<ISpxSynthesisResult>("CSpxSynthesisResult", p->QueryInterface<ISpxGenericSite>());
+        result = p->CreateEmptySynthesisResult();
         auto resultInit = SpxQueryInterface<ISpxSynthesisResultInit>(result);
         resultInit->InitSynthesisResult(requestId, ResultReason::SynthesizingAudioCompleted,
             REASON_CANCELED_NONE, CancellationErrorCode::NoError, totalAudio.get(), 32000 + (uint32_t)(ssml.length()), outputFormat.get(), hasHeader);

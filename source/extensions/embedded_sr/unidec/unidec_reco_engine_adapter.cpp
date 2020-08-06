@@ -21,7 +21,7 @@
 
 #include "json.h"
 
-#define SPX_DBG_TRACE_UNIDEC_AUDIO 0
+#define SPX_DBG_TRACE_UNIDEC_AUDIO 1
 
 
 namespace Microsoft {

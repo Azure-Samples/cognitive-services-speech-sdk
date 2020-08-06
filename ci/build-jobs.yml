@@ -1173,6 +1173,7 @@ jobs:
         vsts_setvar SPEECHSDK_ENABLE_RNNT true
         vsts_setvar EXTENSION_AUDIOCOMPRESSION_ENABLED true
         vsts_setvar SPEECHSDK_ENABLE_CODEC true
+        vsts_setvar SPEECHSDK_ENABLE_HYBRID_TTS true
         vsts_setvar VSTS_TOKEN "$(System.AccessToken)"
   - bash: ./ci/set-variables.sh
     displayName: Set variables
@@ -1201,6 +1202,10 @@ jobs:
   - template: get-kws-artifact.yml
     parameters:
       enableVariable: SPEECHSDK_ENABLE_KWS
+      os: Android
+  - template: get-offline-tts-artifact.yml
+    parameters:
+      enableVariable: SPEECHSDK_ENABLE_HYBRID_TTS
       os: Android
   - template: get-rnnt-artifact.yml
     parameters:
@@ -1563,6 +1568,7 @@ jobs:
         vsts_setvar SPEECHSDK_ENABLE_CODEC true
         vsts_setvar SPEECHSDK_ENABLE_RNNT true
         vsts_setvar SPEECHSDK_ENABLE_UNIDEC true
+        vsts_setvar SPEECHSDK_ENABLE_HYBRID_TTS true
         vsts_setvar VSTS_TOKEN "$(System.AccessToken)"
   - bash: ./ci/set-variables.sh
     displayName: Set variables
@@ -1579,6 +1585,10 @@ jobs:
     parameters:
       enableVariable: SPEECHSDK_ENABLE_UNIDEC
       os: linux
+  - template: get-offline-tts-artifact.yml
+    parameters:
+      enableVariable: SPEECHSDK_ENABLE_HYBRID_TTS
+      os: Linux
   - bash: sudo ./ci/build-linux-openssl.sh linux-x86_64
     displayName: Build OpenSSL 1.1.1b (target=linux-x86_64)
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
@@ -1605,6 +1615,7 @@ jobs:
         -DEXTENSION_CODEC_ENABLED="%SPEECHSDK_ENABLE_CODEC%"
         -DEXTENSION_RNNT_ENABLED=$(SPEECHSDK_ENABLE_RNNT)
         -DEXTENSION_UNIDEC_ENABLED=$(SPEECHSDK_ENABLE_UNIDEC)
+        -DEXTENSION_HYBRID_TTS_ENABLED=$(SPEECHSDK_ENABLE_HYBRID_TTS)
         ..
   - task: CMake@1
     displayName: CMake build

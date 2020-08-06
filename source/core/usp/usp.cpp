@@ -18,6 +18,8 @@ using namespace std;
 
 Connection::~Connection()
 {
+    SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+
     m_impl->Shutdown();
 }
 
