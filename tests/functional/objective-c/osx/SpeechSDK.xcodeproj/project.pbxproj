@@ -32,6 +32,8 @@
 		DCF107B722A8268C00EF5F80 /* silenceshort.wav in Resources */ = {isa = PBXBuildFile; fileRef = DCF107B622A8268C00EF5F80 /* silenceshort.wav */; };
 		DCF107B822A8272200EF5F80 /* silenceshort.wav in Resources */ = {isa = PBXBuildFile; fileRef = DCF107B622A8268C00EF5F80 /* silenceshort.wav */; };
 		EB21A8F1242B1BB10056703C /* SPXLanguageConfigurationTest.m in Sources */ = {isa = PBXBuildFile; fileRef = EB21A8F0242B1BB10056703C /* SPXLanguageConfigurationTest.m */; };
+		FC5F53E424DBDE430009EA6E /* SPXConversationTranslatorTest.m in Sources */ = {isa = PBXBuildFile; fileRef = FC5F53E324DBDE430009EA6E /* SPXConversationTranslatorTest.m */; };
+		FC5F53E624DBDE6A0009EA6E /* SPXConversationTranscriberTest.m in Sources */ = {isa = PBXBuildFile; fileRef = FC5F53E524DBDE6A0009EA6E /* SPXConversationTranscriberTest.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -87,6 +89,8 @@
 		DCBDE1ED225E3F0D00BBA2CE /* SPXSpeechRecognitionEndtoEndTest.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SPXSpeechRecognitionEndtoEndTest.h; path = ../../shared/testrunners/SPXSpeechRecognitionEndtoEndTest.h; sourceTree = "<group>"; };
 		DCF107B622A8268C00EF5F80 /* silenceshort.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = silenceshort.wav; path = ../../../input/audio/silenceshort.wav; sourceTree = "<group>"; };
 		EB21A8F0242B1BB10056703C /* SPXLanguageConfigurationTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SPXLanguageConfigurationTest.m; path = ../../shared/testrunners/SPXLanguageConfigurationTest.m; sourceTree = "<group>"; };
+		FC5F53E324DBDE430009EA6E /* SPXConversationTranslatorTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SPXConversationTranslatorTest.m; path = ../../shared/testrunners/SPXConversationTranslatorTest.m; sourceTree = "<group>"; };
+		FC5F53E524DBDE6A0009EA6E /* SPXConversationTranscriberTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SPXConversationTranscriberTest.m; path = ../../shared/testrunners/SPXConversationTranscriberTest.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -154,6 +158,8 @@
 		3CBD7F21211CD69C00F72336 /* SpeechSDKTests */ = {
 			isa = PBXGroup;
 			children = (
+				FC5F53E524DBDE6A0009EA6E /* SPXConversationTranscriberTest.m */,
+				FC5F53E324DBDE430009EA6E /* SPXConversationTranslatorTest.m */,
 				EB21A8F0242B1BB10056703C /* SPXLanguageConfigurationTest.m */,
 				3CBD7F24211CD69C00F72336 /* Info.plist */,
 				DCB562FF224285E300662DC3 /* SPXDummyTestRunner.m */,
@@ -303,10 +309,12 @@
 				EB21A8F1242B1BB10056703C /* SPXLanguageConfigurationTest.m in Sources */,
 				DCADF54B2245375700DD94FE /* test.m in Sources */,
 				DCB56303224285E300662DC3 /* SPXDummyTestRunner.m in Sources */,
+				FC5F53E424DBDE430009EA6E /* SPXConversationTranslatorTest.m in Sources */,
 				DC0E471F22E1DA27005012F7 /* SPXTestHelpers.m in Sources */,
 				DCB56305224285E300662DC3 /* SPXTranslationRecognitionTest.m in Sources */,
 				DCB56302224285E300662DC3 /* SPXSpeechRecognitionTest.m in Sources */,
 				DCB563102242AB2300662DC3 /* dummytest.m in Sources */,
+				FC5F53E624DBDE6A0009EA6E /* SPXConversationTranscriberTest.m in Sources */,
 				DCADF54C2245378200DD94FE /* microphone_test.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -457,7 +465,7 @@
 				CODE_SIGN_ENTITLEMENTS = SpeechSDK/SpeechSDK.entitlements;
 				CODE_SIGN_IDENTITY = "Mac Developer";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = 2UMNNYLVYA;
 				ENABLE_HARDENED_RUNTIME = YES;
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				HEADER_SEARCH_PATHS = "$(inherited)";
@@ -486,7 +494,7 @@
 				CODE_SIGN_ENTITLEMENTS = SpeechSDK/SpeechSDK.entitlements;
 				CODE_SIGN_IDENTITY = "Mac Developer";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = 2UMNNYLVYA;
 				ENABLE_HARDENED_RUNTIME = YES;
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				HEADER_SEARCH_PATHS = "$(inherited)";
@@ -511,7 +519,7 @@
 			buildSettings = {
 				CODE_SIGN_IDENTITY = "Mac Developer";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = 2UMNNYLVYA;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
@@ -531,7 +539,7 @@
 			buildSettings = {
 				CODE_SIGN_IDENTITY = "Mac Developer";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = 2UMNNYLVYA;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
