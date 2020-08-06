@@ -9,18 +9,19 @@
     <PackageLicenseExpression></PackageLicenseExpression>
     <Copyright>© Microsoft Corporation. All rights reserved.</Copyright>
     <PackageProjectUrl>https://aka.ms/csspeech</PackageProjectUrl>
-    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <PackageTags>async conversation remote speech sdk</PackageTags>
     <Authors>Microsoft</Authors>
     <Owners>Microsoft</Owners>
-    <LicenseUrl>https://aka.ms/csspeech/license201809</LicenseUrl>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <PackageLicenseFile>license.md</PackageLicenseFile>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Azure.Core" Version="1.2.2" />
     <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="buildVersion1234" />
     <PackageReference Include="System.Text.Json" Version="4.7.2" />
+    <None Include="..\..\..\..\..\..\license.md" Pack="true" PackagePath=""/>
   </ItemGroup>
 
 </Project>
