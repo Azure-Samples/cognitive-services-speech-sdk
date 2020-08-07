@@ -18,6 +18,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.CountDownLatch;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.io.IOException;
 import java.net.URI;
 
 import static org.junit.Assert.*;
@@ -346,6 +351,49 @@ public class SpeechRecognizerTests {
     @Test
     public void testRecognizeAsyncWithoutWithLateSubscribePreConnection() throws InterruptedException, ExecutionException, TimeoutException {
         testRecognizeOnceAsyncWithLaterSubscribe1(false);
+    }
+
+    @Test
+    public void testRecognizeOnceAsyncWithPushStream() throws InterruptedException, ExecutionException, TimeoutException, FileNotFoundException {
+        AtomicReference<String> result = new AtomicReference<>();
+        CountDownLatch countDownLatch = new CountDownLatch(1);
+        InputStream inputStream = new FileInputStream(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath));
+        PushAudioInputStream pushStream = AudioInputStream.createPushStream();
+        AudioConfig audioInput = AudioConfig.fromStreamInput(pushStream);
+
+        SpeechConfig config = SpeechConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
+        Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
+        assertNotNull(config);
+
+        SpeechRecognizer recognizer = new SpeechRecognizer(config, audioInput);
+        recognizer.recognized.addEventListener((o, e) -> {
+            if (e.getResult().getReason() == ResultReason.RecognizedSpeech) {
+                result.set(e.getResult().getText());
+                System.out.println("Recognized result " + e.getResult().getText());
+                countDownLatch.countDown();
+            }
+        });
+        Future<SpeechRecognitionResult> res = recognizer.recognizeOnceAsync();
+        System.out.println("Recognizing speech...");
+        {
+            byte[] readBuffer = new byte[320];
+            try {
+                while (inputStream.read(readBuffer) != -1) {
+                    pushStream.write(readBuffer);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            // Make EOF
+            pushStream.close();
+        }
+        countDownLatch.await();
+        // Make sure async operation is completed
+        res.get();
+        audioInput.close();
+        config.close();
+        recognizer.close();
+        assertEquals("What's the weather like?", result.get());
     }
 
     public void testRecognizeOnceAsync1(boolean usingPreConnection) throws InterruptedException, ExecutionException, TimeoutException {
