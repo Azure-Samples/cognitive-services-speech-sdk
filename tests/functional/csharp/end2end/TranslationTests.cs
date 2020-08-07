@@ -574,11 +574,44 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var config = this.translationHelper.GetConfig(Language.EN, toLanguages, "");
             var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
 
-            var logFilename = "test_filename.txt";
+            var tempPath = Path.GetTempPath();
+            var logFilename = Path.Combine(tempPath, "Speech-" + Guid.NewGuid().ToString() + ".log");
+            File.Create(logFilename + ".1");
+            Console.WriteLine($"Log file name {logFilename}");
+
             config.SetProperty(PropertyId.Speech_LogFilename, logFilename);
             Assert.AreEqual(logFilename, config.GetProperty(PropertyId.Speech_LogFilename));
-            var recognizer = new TranslationRecognizer(config, audioInput);
-            Assert.IsTrue(new FileInfo(logFilename).Length > 0, "log file must contain logs after recognizer created");
+            using (var recognizer = new TranslationRecognizer(config, audioInput))
+            { recognizer.RecognizeOnceAsync().Wait(); }
+
+            Thread.CurrentThread.Join(TimeSpan.FromSeconds(10));
+
+            var files = Directory.EnumerateFiles(tempPath);
+            try
+            {
+                var stream = new FileStream(logFilename, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                var sr = new StreamReader(stream);
+                var contents = sr.ReadToEnd();
+                Assert.IsTrue(stream.Length > 0, "log file must contain logs after recognizer created '" + contents + "'");
+                Console.WriteLine(contents);
+                stream.Dispose();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Exception {e}");
+                Console.WriteLine("Directory Contents:");
+                foreach(var file in files)
+                {
+                    Console.WriteLine(file);
+                }
+
+            }
+            
+            config.SetProperty("SPEECH-LogFilename", "");
+            using (var recognizer = new TranslationRecognizer(config, audioInput))
+            { recognizer.RecognizeOnceAsync().Wait(); }
+
+            File.Delete(logFilename);
         }
 
         [TestMethod]
@@ -614,7 +647,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_GERMAN].Utterances[Language.FR][0].Text, translationTextResult.Translations[Language.FR]);
                 var expected = AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_GERMAN].Utterances[Language.ES].Select(x => x.Text).ToArray();
                 Console.WriteLine("Expected spanish one of:");
-                foreach(string result in expected)
+                foreach (string result in expected)
                 {
                     Console.WriteLine($"     {result}");
                 }

@@ -14,91 +14,95 @@
 
 void FileLogger::SetFileOptions(std::shared_ptr<Microsoft::CognitiveServices::Speech::Impl::ISpxNamedProperties> properties)
 {
-    auto name = properties->GetStringValue("SPEECH-LogFilename", "");
-    auto filter = properties->GetStringValue("SPEECH-FileLogFilters", "");
-    auto fileDuration = std::stoul(properties->GetStringValue("SPEECH-FileLogDurationSeconds", "0"));
-    auto fileDurationSize = std::stoul(properties->GetStringValue("SPEECH-FileLogSizeMB", "0"));
-    auto appendToFile = std::stoul(properties->GetStringValue("SPEECH-AppendToLogFile", "0"));
-
-    SetFileOptions(name, filter, fileDuration, fileDurationSize, 0 != appendToFile);
-}
-
-void FileLogger::SetFileOptions(const std::string& logFile, const std::string& filter, uint32_t fileDuration, uint32_t fileDurationSize, bool appendToFile)
-{
     std::lock_guard<std::mutex> lock(mtx);
 
-    std::string name(logFile);
-    append = appendToFile;
-
-    if (((!filtersRaw[0]) && filter.empty()) || // Current filter has something, but we're being asked to clear it.
-        ((filtersRaw[0]) && !filter.empty()) || // Current is empty, and the new one is not.
-        (filter.compare(filtersRaw))) // The filter being passed is different than the current one.
+    bool nameSet = properties->HasStringValue("SPEECH-LogFilename");
+    std::string name;
+    if (nameSet)
     {
-        // We take a max size...
-        if (!filter.empty() &&
-            (filter.length() > sizeof(filtersRaw)))
-        {
-            Microsoft::CognitiveServices::Speech::Impl::ThrowRuntimeError("Length of filter criteria too large.", 0);
-        }
-
-        // Clear the existing filters
-        memset(&filters, 0, sizeof(filters));
-        memset(&filtersRaw, 0, sizeof(filtersRaw));
-        memset(&filterPointers, 0, sizeof(filterPointers));
-
-        if (!filter.empty())
-        {
-            strncpy(filtersRaw, filter.c_str(), sizeof(filtersRaw));
-            strncpy(filters, filtersRaw, sizeof(filters));
-
-            int currentFilterPointer = 0;
-            char *token = strtok(filters, ";");
-            while (token != NULL)
-            {
-                if (currentFilterPointer >= FILE_FILTER_POINTER_LENGTH)
-                {
-                    Microsoft::CognitiveServices::Speech::Impl::ThrowRuntimeError("Too many filters passed.", 0);
-                }
-
-                filterPointers[currentFilterPointer++] = token;
-
-                token = strtok(NULL, ";");
-            }
-        }
+        name = properties->GetStringValue("SPEECH-LogFilename", "");
     }
 
-    if (name.compare(baseFilename))
+    bool filterSet = properties->HasStringValue("SPEECH-LogFileFilters");
+    std::string filterValue;
+    if (filterSet)
+    {
+        filterValue = properties->GetStringValue("SPEECH-LogFileFilters", "");
+    }
+
+    bool fileDurationSet = properties->HasStringValue("SPEECH-FileLogDurationSeconds");
+    uint32_t fileDuration = 0;
+    if (fileDurationSet)
+    {
+        fileDuration = std::stoul(properties->GetStringValue("SPEECH-FileLogDurationSeconds", "0"));
+    }
+
+    bool fileDurationSizeSet = properties->HasStringValue("SPEECH-FileLogSizeMB");
+    uint32_t fileDurationSize = 0;
+    if (fileDurationSizeSet)
+    {
+        fileDurationSize = std::stoul(properties->GetStringValue("SPEECH-FileLogSizeMB", "0"));
+    }
+
+    bool appendToFileSet = properties->HasStringValue("SPEECH-AppendToLogFile");
+    uint32_t appendToFile = 0;
+    if (appendToFileSet)
+    {
+        appendToFile = std::stoul(properties->GetStringValue("SPEECH-AppendToLogFile", "0"));
+        append = 0 != appendToFile;
+    }
+
+    if (filterSet)
+    {
+        filter.SetFilter(filterValue);
+    }
+
+    if (nameSet && name.compare(baseFilename))
     {
         currentFileAppendix = 0;
         baseFilename = name;
     }
 
-    if (fileDuration > 0 && !name.empty())
+    std::string currentFileName = baseFilename;
+    bool counterIncreased = false;
+
+    if (fileDurationSet)
     {
-        auto nextTime = lastFileStartTime + std::chrono::seconds(fileDuration);
+        fileDurationSeconds = fileDuration;
+    }
+
+    if (fileDurationSeconds > 0 && !currentFileName.empty())
+    {
+        auto nextTime = lastFileStartTime + std::chrono::seconds(fileDurationSeconds);
         if (nextTime <= std::chrono::steady_clock::now())
         {
             currentFileAppendix++;
+            counterIncreased = true;
         }
-        name = BuildFileName(name);
+        currentFileName = BuildFileName(currentFileName);
     }
 
-    if (fileDurationSize > 0 && !name.empty())
+    if (fileDurationSizeSet)
     {
-        if (fileDataWritten.load() > fileDurationSize * 1024 * 1024) // MB
+        fileDurationMB = fileDurationSize;
+    }
+
+    if (fileDurationMB > 0 && !currentFileName.empty() && !counterIncreased)
+    {
+        if (fileDataWritten.load() > fileDurationMB * 1024 * 1024) // MB
         {
             currentFileAppendix++;
         }
-        name = BuildFileName(name);
+        currentFileName = BuildFileName(currentFileName);
     }
 
     // if user tries to change a filename, let them.
-    if (!name.compare(filename))
+    if (!currentFileName.compare(filename))
     {
         return;
     }
 
-    filename = name;
+    filename = currentFileName;
 
     AssignFile();
 }
@@ -121,46 +125,23 @@ void FileLogger::CloseFile()
         fclose((FILE *)file);
         file = nullptr;
     }
+
+    // Someone wanting to turn logging on can set a file name.
+    baseFilename.clear();
+
 }
 
-void FileLogger::LogToFile(std::string&& logLine)
+void FileLogger::LogToFile(const char *logLine)
 {
-    if (file != nullptr)
+    if (file != nullptr && filter.ShouldLog(logLine))
     {
-        bool log = true;
-
-        if (filterPointers[0])
+        ReadLock lock(&fileNameLock);
+        FILE *fileToUse = (FILE *)file;
+        if (fileToUse != nullptr)
         {
-            log = false;
-
-            for (int i = 0; i < FILE_FILTER_POINTER_LENGTH; i++)
-            {
-                char *currentFilter = filterPointers[i];
-                if (NULL == currentFilter)
-                {
-                    break;
-                }
-
-                if (strstr(logLine.c_str(), currentFilter))
-                {
-                    log = true;
-                    break;
-                }
-            }
-        }
-
-        if (log)
-        {
-            WriteLock lock(&fileNameLock);
-            if (file == nullptr)
-            {
-                return;
-            }
-
-            FILE *fileToUse = (FILE *)file;
-            fprintf(fileToUse, "%s", logLine.c_str());
+            fprintf(fileToUse, "%s", logLine);
             fflush(fileToUse);
-            fileDataWritten.fetch_add(logLine.length());
+            fileDataWritten.fetch_add(strlen(logLine));
         }
     }
 }
@@ -182,9 +163,8 @@ void FileLogger::AssignFile()
 
     if (!filename.empty())
     {
-        FILE *newFile;
-        errno_t err = PAL::fopen_s(&newFile, filename.c_str(), append ? "a" : "w");
-        SPX_IFFALSE_THROW_HR(err == 0, SPXERR_FILE_OPEN_FAILED);
+        FILE *newFile = PAL::fsopen(filename.c_str(), append ? "a" : "w");
+        SPX_IFFALSE_THROW_HR(newFile != NULL, SPXERR_FILE_OPEN_FAILED);
         file = (volatile FILE *)newFile;
         lastFileStartTime = std::chrono::steady_clock::now();
         fileDataWritten.store(0);
@@ -203,55 +183,4 @@ std::string FileLogger::BuildFileName(std::string fileName)
     {
         return fileName.substr(0, lastDot) + "-" + std::to_string(currentFileAppendix) + fileName.substr(lastDot);
     }
-}
-
-void ReaderWriterLock::EnterRead()
-{
-    while (writeWaiting.load()) {
-        // Yield immediately to give writer priority
-        std::this_thread::yield();
-    }
-
-    auto currentHolders = readerCount.load();
-    auto newVal = currentHolders + 1;
-    int loopCount = 0;
-    while (!readerCount.compare_exchange_weak(currentHolders, newVal))
-    {
-        if (loopCount++ == 100 || currentHolders == -1)
-        {
-            loopCount = 0;
-            std::this_thread::yield();
-        }
-
-        newVal = currentHolders + 1;
-    }
-}
-
-void ReaderWriterLock::ExitRead()
-{
-    readerCount--;
-}
-
-void ReaderWriterLock::EnterWrite()
-{
-    writeWaiting = true;
-
-    auto currentHolders = 0;
-    int loopCount = 0;
-    while (!readerCount.compare_exchange_weak(currentHolders, -1))
-    {
-        if (loopCount++ == 100)
-        {
-            loopCount = 0;
-            std::this_thread::yield();
-        }
-
-        currentHolders = 0;
-    }
-}
-
-void ReaderWriterLock::ExitWrite()
-{
-    readerCount.store(0);
-    writeWaiting.store(false);
 }

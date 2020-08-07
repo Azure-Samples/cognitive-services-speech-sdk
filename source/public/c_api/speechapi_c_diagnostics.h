@@ -4,7 +4,6 @@
 //
 
 #pragma once
-
 #include <stdarg.h>
 #include <speechapi_c_common.h>
 
@@ -14,3 +13,6 @@ SPXAPI diagnostics_log_stop_logging();
 
 SPXAPI_(void) diagnostics_log_trace_message(int level, const char* pszTitle, const char* fileName, const int lineNumber, const char* pszFormat, ...);
 SPXAPI_(void) diagnostics_log_trace_message2(int level, const char* pszTitle, const char* fileName, const int lineNumber, const char* pszFormat, va_list argptr);
+
+typedef void(*DIAGNOSTICS_CALLBACK_FUNC)(const char *logLine);
+SPXAPI diagnostics_logmessage_set_callback(DIAGNOSTICS_CALLBACK_FUNC callback);

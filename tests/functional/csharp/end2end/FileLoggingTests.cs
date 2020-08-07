@@ -98,7 +98,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             Assert.IsTrue(size < fi.Length, "File should have grown.");
         }
 
-
         [TestMethod]
         public async Task FileSizeCap()
         {
@@ -106,7 +105,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
             var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.MULTIPLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
             var baseName = Path.GetTempFileName();
-            File.Delete(baseName);
+            var query = Path.GetFileNameWithoutExtension(baseName) + "*" + Path.GetExtension(baseName);
+            foreach (var file in Directory.EnumerateFiles(Path.GetTempPath(), query))
+            {
+                File.Delete(file);
+            }
 
             this.defaultConfig.SetProperty("SPEECH-LogFilename", baseName);
             this.defaultConfig.SetProperty("SPEECH-FileLogSizeMB", "1");
@@ -115,7 +118,10 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 recognizer.SessionStopped += (o, e) => { stoppedEvent.Set(); };
                 await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
-                stoppedEvent.WaitOne();
+                if (!stoppedEvent.WaitOne(TimeSpan.FromMinutes(1)))
+                {
+                    Console.WriteLine("Failed to get session stopped event in one minute. Continuing");
+                }
             }
             audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
 
@@ -125,10 +131,37 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
 
             var tempDir = Path.GetDirectoryName(baseName);
-            var query = Path.GetFileNameWithoutExtension(baseName) + "*" + Path.GetExtension(baseName);
+
             var files = Directory.EnumerateFiles(tempDir, query);
             var fileCount = files.Count();
             Assert.IsTrue(fileCount > 1, "Not enough files created");
+        }
+
+        [TestMethod]
+        public async Task TestFileLogFilter()
+        {
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
+
+            var baseName = Path.GetTempFileName();
+
+            this.defaultConfig.SetProperty("SPEECH-LogFilename", baseName);
+            this.defaultConfig.SetProperty("SPEECH-LogFileFilters", AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text);
+
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
+            {
+                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+            }
+
+            this.defaultConfig.SetProperty("SPEECH-LogFilename", "");
+
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
+            {
+            }
+
+            foreach(var line in File.ReadAllLines(baseName))
+            {
+                Assert.IsTrue(line.Contains(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text));
+            }
         }
 
         #endregion

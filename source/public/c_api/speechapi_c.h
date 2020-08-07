@@ -37,5 +37,6 @@
 #include <speechapi_c_user.h>
 #include <speechapi_c_participant.h>
 #include <speechapi_c_conversation_translator.h>
+#include <speechapi_c_diagnostics.h>
 #include <speechapi_c_ext_audiocompression.h>
 #include <speechapi_c_speaker_recognition.h>

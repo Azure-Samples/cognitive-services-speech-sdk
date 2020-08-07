@@ -7,6 +7,7 @@
 #include <property_id_2_name_map.h>
 #include "handle_helpers.h"
 #include "file_logger.h"
+#include "event_logger.h"
 #include "trace_message.h"
 
 using namespace Microsoft::CognitiveServices::Speech;
@@ -34,22 +35,9 @@ SPXAPI diagnostics_log_start_logging(SPXPROPERTYBAGHANDLE hpropbag, void* reserv
 
     SPXAPI_INIT_HR_TRY(hr)
     {
-        auto& fileLogger = FileLogger::Instance();
-
         auto properties = GetProperties(hpropbag, reserved);
 
-        std::string logFile = properties->GetStringValue(GetPropertyName(PropertyId::Speech_LogFilename));
-        SPX_THROW_HR_IF(SPXERR_INVALID_ARG, logFile.empty());
-
-        // If the filename we are trying to use matches the one already set and file logging is disabled,
-        // reset the state by setting the log file name to an empty string first. This allows the next
-        // call to set file options to turn logging back on
-        if (fileLogger.GetFilename() == logFile && !fileLogger.IsFileLoggingEnabled())
-        {
-            fileLogger.SetFileOptions("", "", 0, 0, false);
-        }
-
-        fileLogger.SetFileOptions(properties);
+        FileLogger::Instance().SetFileOptions(properties);
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
@@ -99,4 +87,16 @@ SPXAPI_(void) diagnostics_log_trace_message2(int level, const char* pszTitle, co
     catch(...)
     {
     }
+}
+
+SPXAPI diagnostics_logmessage_set_callback(DIAGNOSTICS_CALLBACK_FUNC callback)
+{
+    EventLogger::Instance().AttachLogTarget(callback);
+    return SPX_NOERROR;
+}
+
+SPXAPI diagnostics_logmessage_set_filters(const char *filters)
+{
+    EventLogger::Instance().SetLogFilters(filters);
+    return SPX_NOERROR;
 }

@@ -12,6 +12,9 @@
 
 #ifndef _MSC_VER
 #include <unistd.h>
+#else
+#include <stdio.h>
+#include <share.h>
 #endif
 
 namespace PAL {
@@ -31,6 +34,15 @@ errno_t fopen_s(FILE** file, const char* fileName, const char* mode)
 #endif
 }
 
+FILE *fsopen(const char* fileName, const char* mode)
+{
+#ifdef _MSC_VER
+    return ::_fsopen(fileName, mode, _SH_DENYWR);
+#else
+    FILE *f = fopen(fileName, mode);
+    return f;
+#endif
+}
 
 int waccess(const wchar_t *path, int mode)
 {

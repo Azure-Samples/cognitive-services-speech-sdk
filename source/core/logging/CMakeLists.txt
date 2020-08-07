@@ -7,11 +7,15 @@ set(HEADERS
     "${SRC_DIR}/stdafx.h"
     "${INC_DIR}/file_logger.h"
     "${INC_DIR}/trace_message.h"
+    "${INC_DIR}/event_logger.h"
+    "${INC_DIR}/log_utils.h"
     )
 
 set(SOURCES
     "${SRC_DIR}/file_logger.cpp"
     "${SRC_DIR}/trace_message.cpp"
+    "${SRC_DIR}/event_logger.cpp"
+    "${SRC_DIR}/log_utils.cpp"
     )
 
 # make this the last source file to avoid link warning LNK4221

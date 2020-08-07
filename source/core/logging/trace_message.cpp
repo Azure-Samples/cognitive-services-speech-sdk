@@ -12,6 +12,7 @@
 #include "speechapi_c_diagnostics.h"
 #include "file_utils.h"
 #include "file_logger.h"
+#include "event_logger.h"
 #include "exception.h"
 #include "string_utils.h"
 #include <chrono>
@@ -57,7 +58,9 @@ SPX_EXTERN_C void SpxTraceMessage2(int level, const char* pszTitle, const char* 
 #endif
 
     bool logToFile = FileLogger::Instance().IsFileLoggingEnabled();
-    if (!logToConsole && !logToFile)
+    bool logToEvents = EventLogger::Instance().IsLoggingEnabled();
+
+    if (!logToConsole && !logToFile && !logToEvents)
     {
         return;
     }
@@ -68,7 +71,7 @@ SPX_EXTERN_C void SpxTraceMessage2(int level, const char* pszTitle, const char* 
     if (SPX_CONFIG_INCLUDE_TRACE_THREAD_ID)
     {
         auto threadHash = std::hash<std::thread::id>{}(std::this_thread::get_id());
-        format += "(" + std::to_string(threadHash % 1000) + "): ";
+        format += "(" + std::to_string(threadHash % 1000000) + "): ";
     }
 
     if (SPX_CONFIG_INCLUDE_TRACE_HIRES_CLOCK)
@@ -172,7 +175,11 @@ SPX_EXTERN_C void SpxTraceMessage2(int level, const char* pszTitle, const char* 
     }
     if (logToFile)
     {
-        FileLogger::Instance().LogToFile(std::move(sz));
+        FileLogger::Instance().LogToFile(sz);
+    }
+    if (logToEvents)
+    {
+        EventLogger::Instance().LogToEvent(sz);
     }
 #endif
 
