@@ -120,13 +120,9 @@ private:
 
     std::string ConstructConnectionUrl() const;
 
-    void BuildQueryParameters(const std::vector<std::string>& parameterList, const std::unordered_map<std::string, std::string>& valueMap, bool isCustomEndpoint, std::ostringstream& oss) const;
-
     std::string CreateRequestId();
     void RegisterRequestId(const std::string& requestId);
     std::string UpdateRequestId(const MessageType messageType, bool isBinary);
-
-    const char queryParameterDelim = '&';
 
     std::unordered_set<std::string> m_activeRequestIds;
     std::string m_speechRequestId;

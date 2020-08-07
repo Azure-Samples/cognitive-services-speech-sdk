@@ -52,6 +52,14 @@ namespace CognitiveServices {
 namespace Speech {
 namespace USP {
 
+/* TODO: This won't be needed when we move to c++17 */
+constexpr std::array<const char *, 11> endpoint::unifiedspeech::queryParameters;
+constexpr std::array<const char *, 12> endpoint::translation::queryParameters;
+constexpr std::array<const char *, 2> endpoint::luis::queryParameters;
+constexpr std::array<const char *, 2> endpoint::dialog::queryParameters;
+constexpr std::array<const char *, 2> endpoint::conversationTranscriber::queryParameters;
+constexpr std::array<const char *, 0> endpoint::speechSynthesis::queryParameters;
+
 constexpr auto HEADER_PATH = "Path";
 
 const char* path::speechHypothesis = "speech.hypothesis";
@@ -104,133 +112,13 @@ const char* json_properties::primaryLanguage = "PrimaryLanguage";
 const char* json_properties::speechHypothesis = "SpeechHypothesis";
 const char* json_properties::speechPhrase = "SpeechPhrase";
 
-const char* endpoint::protocol = "wss://";
-
-const char* endpoint::outputFormatQueryParam = "format=";
-const char* endpoint::langQueryParam = "language=";
-const char* endpoint::deploymentIdQueryParam = "cid=";
-const char* endpoint::profanityQueryParam = "profanity=";
-const char* endpoint::initialSilenceTimeoutQueryParam = "initialSilenceTimeoutMs=";
-const char* endpoint::endSilenceTimeoutQueryParam = "endSilenceTimeoutMs=";
-const char* endpoint::stableIntermediateThresholdQueryParam = "stableIntermediateThreshold=";
-const char* endpoint::storeAudioQueryParam = "storeAudio=";
-const char* endpoint::wordLevelTimestampsQueryParam = "wordLevelTimestamps=";
-
-const char* endpoint::outputFormatSimple = "simple";
-const char* endpoint::outputFormatDetailed = "detailed";
-
-const char* endpoint::postProcessingTrueText = "TrueText";
-
-const char* endpoint::profanityMasked = "masked";
-const char* endpoint::profanityRemoved = "removed";
-const char* endpoint::profanityRaw = "raw";
-
-const char* endpoint::unifiedspeech::hostnameSuffix = ".stt.speech.microsoft.com";
-const char* endpoint::unifiedspeech::pathPrefix = "/speech/recognition/";
-const char* endpoint::unifiedspeech::pathSuffix = "/cognitiveservices/v1";
-
-const char* endpoint::unifiedspeech::postprocessingQueryParam = "postprocessing=";
-const char* endpoint::unifiedspeech::lidEnabledQueryParam = "lidEnabled=";
-
-const char* endpoint::azurecnspeech::hostnameSuffix = ".stt.speech.azure.cn";
-const char* endpoint::azurecntranslation::hostnameSuffix = ".s2s.speech.azure.cn";
-const char* endpoint::azurecnspeechsynthesis::hostnameSuffix = ".tts.speech.azure.cn";
-const char* azurecnRegion = "china";
+constexpr auto azurecnRegion = "china";
 
 enum class NetworkType
 {
     Default,
     AzureCN
 };
-
-const std::vector<std::string> endpoint::unifiedspeech::queryParameters = {
-
-    endpoint::langQueryParam,
-    endpoint::deploymentIdQueryParam,
-    endpoint::initialSilenceTimeoutQueryParam,
-    endpoint::endSilenceTimeoutQueryParam,
-    endpoint::storeAudioQueryParam,
-
-    endpoint::outputFormatQueryParam,
-    endpoint::wordLevelTimestampsQueryParam,
-    endpoint::profanityQueryParam,
-    endpoint::stableIntermediateThresholdQueryParam,
-    endpoint::unifiedspeech::postprocessingQueryParam,
-
-    lidEnabledQueryParam
-};
-
-const char* endpoint::translation::hostnameSuffix = ".s2s.speech.microsoft.com";
-const char* endpoint::translation::path = "/speech/translation/cognitiveservices/v1";
-
-const char* endpoint::translation::fromQueryParam = "from=";
-const char* endpoint::translation::toQueryParam = "to=";
-const char* endpoint::translation::voiceQueryParam = "voice=";
-const char* endpoint::translation::featuresQueryParam = "features=";
-const char* endpoint::translation::stableTranslationQueryParam = "stableTranslation=";
-
-const char* endpoint::translation::requireVoice = "texttospeech";
-
-const std::vector<std::string> endpoint::translation::queryParameters = {
-
-    endpoint::translation::fromQueryParam,
-    endpoint::translation::toQueryParam,
-    endpoint::translation::voiceQueryParam,
-
-    endpoint::deploymentIdQueryParam,
-    endpoint::initialSilenceTimeoutQueryParam,
-    endpoint::endSilenceTimeoutQueryParam,
-    endpoint::storeAudioQueryParam,
-
-    endpoint::outputFormatQueryParam,
-    endpoint::wordLevelTimestampsQueryParam,
-    endpoint::profanityQueryParam,
-    endpoint::stableIntermediateThresholdQueryParam,
-
-    endpoint::translation::stableTranslationQueryParam
-};
-
-const char* endpoint::luis::hostname = ".sr.speech.microsoft.com";
-const char* endpoint::luis::pathPrefix = "/speech/recognition/";
-const char* endpoint::luis::pathSuffix = "/cognitiveservices/v1";
-
-const std::vector<std::string> endpoint::luis::queryParameters = {
-    endpoint::langQueryParam,
-    endpoint::outputFormatQueryParam
-};
-
-const char* endpoint::dialog::url = ".convai.speech.microsoft.com";
-
-const char* endpoint::dialog::resourcePath::botFramework = "";
-const char* endpoint::dialog::resourcePath::customCommands = "/commands";
-
-const char* endpoint::dialog::suffix = "/api";
-
-const char* endpoint::dialog::version::botFramework = "/v3";
-const char* endpoint::dialog::version::customCommands = "/v1";
-
-const char* endpoint::dialog::customVoiceDeploymentIdsQueryParam = "voiceDeploymentId=";
-
-const std::vector<std::string> endpoint::dialog::queryParameters = {
-    endpoint::langQueryParam,
-    endpoint::dialog::customVoiceDeploymentIdsQueryParam
-};
-
-const char* endpoint::conversationTranscriber::hostname = ".cts.speech.microsoft.com";
-const char* endpoint::conversationTranscriber::pathPrefix1 = "transcribe.";
-const char* endpoint::conversationTranscriber::pathPrefix2 = "/speech/recognition";
-const char* endpoint::conversationTranscriber::pathSuffixMultiAudio = "/multiaudio";
-
-const std::vector<std::string> endpoint::conversationTranscriber::queryParameters = {
-    endpoint::langQueryParam,
-    endpoint::outputFormatQueryParam
-};
-
-const char* endpoint::speechSynthesis::hostnameSuffix = ".tts.speech.microsoft.com";
-const char* endpoint::speechSynthesis::path = "/cognitiveservices/websocket/v1";
-
-const std::vector<std::string> endpoint::speechSynthesis::queryParameters = { };
-
 
 using namespace std;
 using namespace Microsoft::CognitiveServices::Speech::Impl;
@@ -241,6 +129,27 @@ static void throw_if_null(const T* ptr, const string& name)
     if (ptr == NULL)
     {
         ThrowInvalidArgumentException("The argument '" + name +"' is null."); \
+    }
+}
+
+inline bool contains(const string& content, const string& name)
+{
+    return (content.find(name) != string::npos) ? true : false;
+}
+
+template<size_t N>
+void BuildQueryParameters(const array<const char *, N>& parameterList, const unordered_map<string, string>& valueMap, bool isCustomEndpoint, ostringstream& oss)
+{
+    for (auto queryParameterName : parameterList)
+    {
+        if (!isCustomEndpoint || !contains(oss.str(), queryParameterName))
+        {
+            auto entry = valueMap.find(queryParameterName);
+            if (entry != valueMap.end() && !entry->second.empty())
+            {
+                oss << queryParameterDelim << queryParameterName << entry->second;
+            }
+        }
     }
 }
 
@@ -265,12 +174,7 @@ static std::string TryGet(const UspHeaders& headers, const char * key)
     }
 }
 
-inline bool contains(const string& content, const string& name)
-{
-    return (content.find(name) != string::npos) ? true : false;
-}
-
-const string g_recoModeStrings[] = { "interactive", "conversation", "dictation" };
+constexpr std::array<const char *, 3> g_recoModeStrings{{ "interactive", "conversation", "dictation" }};
 
 // This is called from telemetry_flush, invoked on a worker thread in turn-end.
 void Connection::Impl::OnTelemetryData(std::string&& data, const std::string& requestId)
@@ -586,7 +490,7 @@ string Connection::Impl::ConstructConnectionUrl() const
                 if (entry != m_config.m_queryParameters.end() && !entry->second.empty())
                 {
                     // Need to use separate parameter for each target language.
-                    if (queryParameterName == endpoint::translation::toQueryParam)
+                    if (strcmp(queryParameterName, endpoint::translation::toQueryParam) == 0)
                     {
                         auto langVector = PAL::split(entry->second, CommaDelim);
                         for (auto item : langVector)
@@ -595,7 +499,7 @@ string Connection::Impl::ConstructConnectionUrl() const
                         }
                     }
                     // Voice need 2 query parameters.
-                    else if (queryParameterName == endpoint::translation::voiceQueryParam)
+                    else if (strcmp(queryParameterName, endpoint::translation::voiceQueryParam) == 0)
                     {
                         oss << queryParameterDelim << endpoint::translation::featuresQueryParam << endpoint::translation::requireVoice;
                         oss << queryParameterDelim << endpoint::translation::voiceQueryParam << HttpUtils::UrlEscape(entry->second);
@@ -628,20 +532,7 @@ string Connection::Impl::ConstructConnectionUrl() const
     return urlStr;
 }
 
-void Connection::Impl::BuildQueryParameters(const vector<string>& parameterList, const unordered_map<string, string>& valueMap, bool isCustomEndpoint, ostringstream& oss) const
-{
-    for (auto queryParameterName : parameterList)
-    {
-        if (!isCustomEndpoint || !contains(oss.str(), queryParameterName))
-        {
-            auto entry = valueMap.find(queryParameterName);
-            if (entry != valueMap.end() && !entry->second.empty())
-            {
-                oss << queryParameterDelim << queryParameterName << entry->second;
-            }
-        }
-    }
-}
+
 
 void Connection::Impl::Connect()
 {
@@ -816,7 +707,7 @@ void Connection::Impl::QueueMessage(std::unique_ptr<USP::Message> message)
             m_speechContextMessageAllowed = false;
         }
     }
-    
+
     std::string usedRequestId = message->RequestId();
     if (usedRequestId.empty())
     {

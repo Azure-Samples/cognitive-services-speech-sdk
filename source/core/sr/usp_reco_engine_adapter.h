@@ -105,7 +105,17 @@ private:
     USP::Client& SetUserDefinedHttpHeaders(USP::Client& client);
     USP::Client& SetUspProxyInfo(const std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
     USP::Client& SetUspSingleTrustedCert(const std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
-    USP::Client& SetUspQueryParameters(const std::vector<std::string>& allowedParameterList, const std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
+    void SetUspQueryParametersInternal(const char *queryParamName, const ISpxNamedProperties *properties, USP::Client& client) const;
+
+    template<size_t N>
+    USP::Client& SetUspQueryParameters(const std::array<const char *, N>& allowedParameterList, const std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client)
+    {
+        for (auto queryParamName : allowedParameterList)
+        {
+            SetUspQueryParametersInternal(queryParamName, properties.get(), client);
+        }
+        return client;
+    }
 
     void UpdateOutputFormatOption(const std::shared_ptr<ISpxNamedProperties>& properties);
     void UpdateDefaultLanguage(const std::shared_ptr<ISpxNamedProperties>& properties);

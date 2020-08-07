@@ -616,7 +616,7 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpointDefaultSpeechService(const 
     return client;
 }
 
-USP::Client& CSpxUspRecoEngineAdapter::SetUspQueryParameters(const vector<string>& allowedParameterList, const shared_ptr<ISpxNamedProperties>& properties, USP::Client& client)
+void CSpxUspRecoEngineAdapter::SetUspQueryParametersInternal(const char *queryParamName, const ISpxNamedProperties *properties, USP::Client& client) const
 {
     enum class PropertyValueType {
         StringProperty,
@@ -624,101 +624,99 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspQueryParameters(const vector<string
         BoolProperty
     };
 
-    static const unordered_map<string, pair<string, PropertyValueType>> QueryParameterToPropertyId =
+    using TupleType = std::tuple<const char *, const char *, PropertyValueType>;
+    constexpr std::array<TupleType, 16> QueryParamInfo{{
+        TupleType{ USP::endpoint::langQueryParam, GetPropertyName(PropertyId::SpeechServiceConnection_RecoLanguage), PropertyValueType::StringProperty },
+        TupleType{ USP::endpoint::deploymentIdQueryParam, GetPropertyName(PropertyId::SpeechServiceConnection_EndpointId), PropertyValueType::StringProperty },
+        TupleType{ USP::endpoint::initialSilenceTimeoutQueryParam, GetPropertyName(PropertyId::SpeechServiceConnection_InitialSilenceTimeoutMs), PropertyValueType::IntProperty },
+        TupleType{ USP::endpoint::endSilenceTimeoutQueryParam, GetPropertyName(PropertyId::SpeechServiceConnection_EndSilenceTimeoutMs), PropertyValueType::IntProperty },
+        TupleType{ USP::endpoint::storeAudioQueryParam, GetPropertyName(PropertyId::SpeechServiceConnection_EnableAudioLogging), PropertyValueType::BoolProperty },
+        TupleType{ USP::endpoint::outputFormatQueryParam, GetPropertyName(PropertyId::SpeechServiceResponse_OutputFormatOption), PropertyValueType::StringProperty },
+        TupleType{ USP::endpoint::wordLevelTimestampsQueryParam, GetPropertyName(PropertyId::SpeechServiceResponse_RequestWordLevelTimestamps), PropertyValueType::BoolProperty },
+        TupleType{ USP::endpoint::profanityQueryParam, GetPropertyName(PropertyId::SpeechServiceResponse_ProfanityOption), PropertyValueType::StringProperty },
+        TupleType{ USP::endpoint::stableIntermediateThresholdQueryParam, GetPropertyName(PropertyId::SpeechServiceResponse_StablePartialResultThreshold), PropertyValueType::IntProperty },
+        TupleType{ USP::endpoint::unifiedspeech::postprocessingQueryParam, GetPropertyName(PropertyId::SpeechServiceResponse_PostProcessingOption), PropertyValueType::StringProperty },
+        TupleType{ USP::endpoint::unifiedspeech::lidEnabledQueryParam, GetPropertyName(PropertyId::SpeechServiceConnection_AutoDetectSourceLanguages), PropertyValueType::StringProperty },
+        TupleType{ USP::endpoint::translation::fromQueryParam, GetPropertyName(PropertyId::SpeechServiceConnection_RecoLanguage), PropertyValueType::StringProperty },
+        TupleType{ USP::endpoint::translation::toQueryParam, GetPropertyName(PropertyId::SpeechServiceConnection_TranslationToLanguages), PropertyValueType::StringProperty },
+        TupleType{ USP::endpoint::translation::voiceQueryParam, GetPropertyName(PropertyId::SpeechServiceConnection_TranslationVoice), PropertyValueType::StringProperty },
+        TupleType{ USP::endpoint::translation::stableTranslationQueryParam, GetPropertyName(PropertyId::SpeechServiceResponse_TranslationRequestStablePartialResult), PropertyValueType::BoolProperty },
+        TupleType{ USP::endpoint::dialog::customVoiceDeploymentIdsQueryParam, GetPropertyName(PropertyId::Conversation_Custom_Voice_Deployment_Ids), PropertyValueType::StringProperty }
+    }};
+
+    auto QueryParameterToPropertyId = [&](const char *queryName) -> const TupleType&
     {
-        { USP::endpoint::langQueryParam, { GetPropertyName(PropertyId::SpeechServiceConnection_RecoLanguage), PropertyValueType::StringProperty}},
-
-        { USP::endpoint::deploymentIdQueryParam, { GetPropertyName(PropertyId::SpeechServiceConnection_EndpointId), PropertyValueType::StringProperty}},
-        { USP::endpoint::initialSilenceTimeoutQueryParam, { GetPropertyName(PropertyId::SpeechServiceConnection_InitialSilenceTimeoutMs), PropertyValueType::IntProperty}},
-        { USP::endpoint::endSilenceTimeoutQueryParam, { GetPropertyName(PropertyId::SpeechServiceConnection_EndSilenceTimeoutMs), PropertyValueType::IntProperty}},
-        { USP::endpoint::storeAudioQueryParam, { GetPropertyName(PropertyId::SpeechServiceConnection_EnableAudioLogging), PropertyValueType::BoolProperty}},
-
-        { USP::endpoint::outputFormatQueryParam, { GetPropertyName(PropertyId::SpeechServiceResponse_OutputFormatOption), PropertyValueType::StringProperty}},
-        { USP::endpoint::wordLevelTimestampsQueryParam, { GetPropertyName(PropertyId::SpeechServiceResponse_RequestWordLevelTimestamps), PropertyValueType::BoolProperty}},
-        { USP::endpoint::profanityQueryParam, { GetPropertyName(PropertyId::SpeechServiceResponse_ProfanityOption), PropertyValueType::StringProperty}},
-        { USP::endpoint::stableIntermediateThresholdQueryParam, { GetPropertyName(PropertyId::SpeechServiceResponse_StablePartialResultThreshold), PropertyValueType::IntProperty}},
-
-        { USP::endpoint::unifiedspeech::postprocessingQueryParam, { GetPropertyName(PropertyId::SpeechServiceResponse_PostProcessingOption), PropertyValueType::StringProperty}},
-
-        { USP::endpoint::unifiedspeech::lidEnabledQueryParam, { GetPropertyName(PropertyId::SpeechServiceConnection_AutoDetectSourceLanguages), PropertyValueType::StringProperty}},
-
-        { USP::endpoint::translation::fromQueryParam, { GetPropertyName(PropertyId::SpeechServiceConnection_RecoLanguage), PropertyValueType::StringProperty}},
-        { USP::endpoint::translation::toQueryParam, { GetPropertyName(PropertyId::SpeechServiceConnection_TranslationToLanguages), PropertyValueType::StringProperty}},
-        { USP::endpoint::translation::voiceQueryParam, { GetPropertyName(PropertyId::SpeechServiceConnection_TranslationVoice), PropertyValueType::StringProperty}},
-
-        { USP::endpoint::translation::stableTranslationQueryParam, { GetPropertyName(PropertyId::SpeechServiceResponse_TranslationRequestStablePartialResult), PropertyValueType::BoolProperty}},
-
-        { USP::endpoint::dialog::customVoiceDeploymentIdsQueryParam, { GetPropertyName(PropertyId::Conversation_Custom_Voice_Deployment_Ids), PropertyValueType::StringProperty } }
+        for (auto& info : QueryParamInfo)
+        {
+            const auto& name = std::get<0>(info);
+            if (strcmp(name, queryName) == 0)
+            {
+                return info;
+            }
+        }
+        ThrowLogicError(std::string{ "parameter name cannot be mapped to property name: " } + queryName);
+        return QueryParamInfo[0];
     };
+    bool setValue = false;
+    auto entry =  QueryParameterToPropertyId(queryParamName);
 
-    for (auto queryParamName : allowedParameterList)
+    const auto& propertyName = std::get<1>(entry);
+    auto found = properties->HasStringValue(propertyName);
+    if (!found)
     {
-        bool setValue = false;
-        auto entry = QueryParameterToPropertyId.find(queryParamName);
-        if (entry == QueryParameterToPropertyId.end())
-        {
-            ThrowLogicError("parameter name cannot be mapped to property name: " + queryParamName);
-        }
-
-        auto propertyName = entry->second.first;
-        auto found = properties->HasStringValue(propertyName.c_str());
-        if (!found)
-        {
-            continue;
-        }
-
-        auto propertyValueStr = properties->GetStringValue(propertyName.c_str());
-        switch (entry->second.second)
-        {
-        case PropertyValueType::BoolProperty:
-            if (propertyValueStr != TrueString && propertyValueStr != FalseString)
-            {
-                ThrowInvalidArgumentException("The boolean property " + string(propertyName) + " has an invalid value: " + propertyValueStr);
-            }
-            else
-            {
-                setValue = true;
-            }
-            break;
-        case PropertyValueType::IntProperty:
-            if (stoi(propertyValueStr) >= 0)
-            {
-                setValue = true;
-            }
-            else
-            {
-                ThrowInvalidArgumentException("The property " + propertyName + " has an invalid value: " + propertyValueStr);
-            }
-            break;
-        case PropertyValueType::StringProperty:
-            if (!propertyValueStr.empty())
-            {
-                setValue = true;
-            }
-            else
-            {
-                SPX_TRACE_ERROR("The property %s has an empty value, ignored.", propertyName.c_str());
-            }
-            break;
-        default:
-            ThrowLogicError("Unexpected PropertyValueType.");
-            break;
-        }
-
-        if (setValue)
-        {
-            if( queryParamName == USP::endpoint::unifiedspeech::lidEnabledQueryParam)
-            {
-                client.SetQueryParameter(queryParamName, TrueString);
-            }
-            else
-            {
-                client.SetQueryParameter(queryParamName, propertyValueStr);
-            }
-        }
+        return;
     }
 
-    return client;
+    auto propertyValueStr = properties->GetStringValue(propertyName);
+    const auto& propertyType = std::get<2>(entry);
+    switch (propertyType)
+    {
+    case PropertyValueType::BoolProperty:
+        if (propertyValueStr != TrueString && propertyValueStr != FalseString)
+        {
+            ThrowInvalidArgumentException("The boolean property " + string(propertyName) + " has an invalid value: " + propertyValueStr);
+        }
+        else
+        {
+            setValue = true;
+        }
+        break;
+    case PropertyValueType::IntProperty:
+        if (stoi(propertyValueStr) >= 0)
+        {
+            setValue = true;
+        }
+        else
+        {
+            ThrowInvalidArgumentException(std::string{ "The property " } + propertyName + " has an invalid value: " + propertyValueStr);
+        }
+        break;
+    case PropertyValueType::StringProperty:
+        if (!propertyValueStr.empty())
+        {
+            setValue = true;
+        }
+        else
+        {
+            SPX_TRACE_ERROR("The property %s has an empty value, ignored.", propertyName);
+        }
+        break;
+    default:
+        ThrowLogicError("Unexpected PropertyValueType.");
+        break;
+    }
+
+    if (setValue)
+    {
+        if(strcmp(queryParamName, USP::endpoint::unifiedspeech::lidEnabledQueryParam) == 0)
+        {
+            client.SetQueryParameter(queryParamName, TrueString);
+        }
+        else
+        {
+            client.SetQueryParameter(queryParamName, propertyValueStr);
+        }
+    }
 }
 
 USP::Client& CSpxUspRecoEngineAdapter::SetUspRegion(const std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client, bool isIntentRegion)
