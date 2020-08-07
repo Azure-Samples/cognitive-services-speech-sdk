@@ -184,7 +184,7 @@ HRESULT audio_input_create(AUDIO_SYS_DATA* audioData)
         StringFromIID(DEVINTERFACE_AUDIO_CAPTURE, &audioCaptureGuidString);
         hr = ActivateAudioInterfaceAsync(audioCaptureGuidString, __uuidof(IAudioClient2), nullptr, audioData->spCapture.Get(), &asyncOp);
 
-        fullMicrophoneId = MediaDevice::GetDefaultAudioCaptureId(AudioDeviceRole::Communications);
+        fullMicrophoneId = MediaDevice::GetDefaultAudioCaptureId(AudioDeviceRole::Default);
     }
     else
     {
