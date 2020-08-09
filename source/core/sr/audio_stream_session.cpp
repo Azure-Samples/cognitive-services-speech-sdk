@@ -2404,13 +2404,15 @@ std::string CSpxAudioStreamSession::SpeechRegionFromIntentRegion(const std::stri
         std::make_pair("Europe North",     "northeurope"),
         std::make_pair("europenorth",      "northeurope"),
 
-        std::make_pair("Brazil South",     "southbrazil"),
-        std::make_pair("South Brazil",     "southbrazil"),
-        std::make_pair("brazilsouth",      "southbrazil"),
+        std::make_pair("Brazil South",     "brazilsouth"),
+        std::make_pair("South Brazil",     "brazilsouth"),
+        std::make_pair("brazilsouth",      "brazilsouth"),
+        std::make_pair("southbrazil",      "brazilsouth"),
 
-        std::make_pair("Australia East",   "eastaustralia"),
-        std::make_pair("East Australia",   "eastaustralia"),
-        std::make_pair("australiaeast",    "eastaustralia"),
+        std::make_pair("Australia East",   "australiaeast"),
+        std::make_pair("East Australia",   "australiaeast"),
+        std::make_pair("australiaeast",    "australiaeast"),
+        std::make_pair("eastaustralia",    "australiaeast"),
 
         std::make_pair("Southeast Asia",   "southeastasia"),
         std::make_pair("Asia Southeast",   "southeastasia"),
