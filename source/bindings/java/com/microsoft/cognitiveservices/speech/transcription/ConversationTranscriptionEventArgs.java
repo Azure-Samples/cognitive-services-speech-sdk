@@ -51,6 +51,7 @@ public class ConversationTranscriptionEventArgs extends RecognitionEventArgs {
                 " ResultId:" + result.getResultId() +
                 " Reason:" + result.getReason() +
                 " UserId:" + result.getUserId() +
+                " UtteranceId:" + result.getUtteranceId() +
                 " Recognized text:<" + result.getText() + ">.";
     }
 
