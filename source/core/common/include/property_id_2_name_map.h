@@ -84,6 +84,13 @@ constexpr const char* GetPropertyName(const PropertyId id)
     case PropertyId::Conversation_ParticipantId: return "CONVERSATION-ParticipantId";
     case PropertyId::DataBuffer_TimeStamp: return "DataBuffer_TimeStamp";
     case PropertyId::DataBuffer_UserId: return "DataBuffer_UserId";
+    case PropertyId::PronunciationAssessment_ReferenceText: return "PronunciationAssessment_ReferenceText";
+    case PropertyId::PronunciationAssessment_GradingSystem: return "PronunciationAssessment_GradingSystem";
+    case PropertyId::PronunciationAssessment_Granularity: return "PronunciationAssessment_Granularity";
+    case PropertyId::PronunciationAssessment_EnableMiscue: return "PronunciationAssessment_EnableMiscue";
+    case PropertyId::PronunciationAssessment_ScenarioId: return "PronunciationAssessment_ScenarioId";
+    case PropertyId::PronunciationAssessment_Json: return "PronunciationAssessment_Json";
+    case PropertyId::PronunciationAssessment_Params: return "PronunciationAssessment_Params";
 
     default: return nullptr;
     }

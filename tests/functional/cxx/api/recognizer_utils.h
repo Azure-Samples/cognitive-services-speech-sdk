@@ -74,6 +74,7 @@ fstream OpenWaveFile(const string& filename);
 fstream OpenFile(const string& filename);
 shared_ptr<SpeechConfig> CurrentSpeechConfig();
 shared_ptr<SpeechTranslationConfig> CurrentTranslationConfig();
+shared_ptr<SpeechConfig> CurrentSpeechConfigForPronunciationAssessment();
 void SetMockRealTimeSpeed(int value);
 void WaitForResult(future<void>&& f, std::chrono::seconds duration);
 void PushData(PushAudioInputStream* pushStream, const string& filename, bool compressed = false);

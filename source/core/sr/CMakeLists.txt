@@ -53,6 +53,7 @@ set(HEADERS_PRIVATE
     "${SRC_DIR}/audio_file_logger.h"
     "${SRC_DIR}/speech_audio_processor.h"
     "${SRC_DIR}/output_reco_adapter.h"
+    "${SRC_DIR}/pronunciation_assessment_config.h"
     )
 
 set(SOURCES
@@ -96,6 +97,7 @@ set(SOURCES
     "${SRC_DIR}/audio_file_logger.cpp"
     "${SRC_DIR}/speech_audio_processor.cpp"
     "${SRC_DIR}/output_reco_adapter.cpp"
+    "${SRC_DIR}/pronunciation_assessment_config.cpp"
     )
 
 set_source_groups()

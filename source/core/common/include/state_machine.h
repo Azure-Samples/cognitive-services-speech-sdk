@@ -118,7 +118,7 @@ struct state_machine
             t.transition_action(args...);
             current_state = new_state;
         }
-        catch (std::out_of_range)
+        catch (std::out_of_range&)
         {
             throw std::runtime_error("Illegal transition");
         }

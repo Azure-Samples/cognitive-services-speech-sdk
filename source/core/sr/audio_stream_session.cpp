@@ -1875,6 +1875,7 @@ void CSpxAudioStreamSession::FireAdapterResult_TranslationSynthesis(ISpxRecoEngi
 #define JSON_KEY_OFFSET  "Offset"
 #define JSON_KEY_ITN     "ITN"
 #define JSON_KEY_LEXICAL "Lexical"
+#define JSON_KEY_PRONUNCIATION_ASSESSMENT "PronunciationAssessment"
 
 void CSpxAudioStreamSession::UpdateAdapterResult_JsonResult(shared_ptr<ISpxRecognitionResult> result)
 {
@@ -1924,6 +1925,19 @@ void CSpxAudioStreamSession::UpdateAdapterResult_JsonResult(shared_ptr<ISpxRecog
                 if ( iteratorLexical != item.end())
                 {
                     namedProperties->SetStringValue("Lexical", iteratorLexical->get<string>().c_str());
+                }
+
+                auto iteratorPron = item.find(JSON_KEY_PRONUNCIATION_ASSESSMENT);
+                if (iteratorPron != item.end())
+                {
+                    for (auto& it : iteratorPron.value().items())
+                    {
+                        if (it.value().is_number())
+                        {
+                            namedProperties->SetStringValue(it.key().c_str(), it.value().dump().c_str());
+                        }
+                    }
+
                 }
             }
             auto iteratorWords = item.find(JSON_KEY_WORDS);

@@ -125,6 +125,10 @@ variables:
       "SpeakerRecognitionSubscription": {
         "Key": "$(SpeakerRecognition-WestUS-Key)",
         "Region": "westus"
+      },
+      "SpeechSubscriptionWestUS": {
+        "Key": "$(csspeechsdk-speech-westus-s0-201809)",
+        "Region": "westus"
       }
     }
   SPEECHSDK_MAVEN_ARTIFACT_ID: client-sdk

@@ -416,7 +416,66 @@ enum class PropertyId
     /// The user id associated to data buffer written by client when using Pull/Push audio input streams.
     /// Added in version 1.5.0.
     /// </summary>
-    DataBuffer_UserId = 11002
+    DataBuffer_UserId = 11002,
+
+    /// <summary>
+    /// The reference text of the audio for pronunciation evaluation.
+    /// For this and the following pronunciation assessment parameters, see
+    /// https://docs.microsoft.com/azure/cognitive-services/speech-service/rest-speech-to-text#pronunciation-assessment-parameters for details.
+    /// Under normal circumstances, you shouldn't have to use this property directly.
+    /// Instead, use <see cref="PronunciationAssessmentConfig::Create"/> or <see cref="PronunciationAssessmentConfig::SetReferenceText"/>.
+    /// Added in version 1.14.0
+    /// </summary>
+    PronunciationAssessment_ReferenceText = 12001,
+
+    /// <summary>
+    /// The point system for pronunciation score calibration (FivePoint or HundredMark).
+    /// Under normal circumstances, you shouldn't have to use this property directly.
+    /// Instead, use <see cref="PronunciationAssessmentConfig::Create"/>.
+    /// Added in version 1.14.0
+    /// </summary>
+    PronunciationAssessment_GradingSystem = 12002,
+
+    /// <summary>
+    /// The pronunciation evaluation granularity (Phoneme, Word, or FullText).
+    /// Under normal circumstances, you shouldn't have to use this property directly.
+    /// Instead, use <see cref="PronunciationAssessmentConfig::Create"/>.
+    /// Added in version 1.14.0
+    /// </summary>
+    PronunciationAssessment_Granularity = 12003,
+
+    /// <summary>
+    /// Defines if enable miscue calculation. 
+    /// With this enabled, the pronounced words will be compared to the reference text, 
+    /// and will be marked with omission/insertion based on the comparison. The default setting is False.
+    /// Under normal circumstances, you shouldn't have to use this property directly.
+    /// Instead, use <see cref="PronunciationAssessmentConfig::Create"/>.
+    /// Added in version 1.14.0
+    /// </summary>
+    PronunciationAssessment_EnableMiscue = 12005,
+
+    /// <summary>
+    /// A GUID indicating a customized pronunciation score system. 
+    /// Under normal circumstances, you shouldn't have to use this property directly.
+    /// Instead, use <see cref="PronunciationAssessmentConfig::Create"/>.
+    /// Added in version 1.14.0
+    /// </summary>
+    PronunciationAssessment_ScenarioId = 12006,
+
+    /// <summary>
+    /// The json string of pronunciation assessment parameters
+    /// Under normal circumstances, you shouldn't have to use this property directly.
+    /// Instead, use <see cref="PronunciationAssessmentConfig::Create"/>.
+    /// Added in version 1.14.0
+    /// </summary>
+    PronunciationAssessment_Json = 12009,
+
+    /// <summary>
+    /// Pronunciation assessment parameters.
+    /// This property is intended to be read-only. The SDK is using it internally.
+    /// Added in version 1.14.0
+    /// </summary>
+    PronunciationAssessment_Params = 12010,
 };
 
 enum class OutputFormat
@@ -923,6 +982,45 @@ enum class RecognitionFactorScope
     /// Currently only applies to PhraseListGrammars
     /// </remarks>
     PartialPhrase = 1,
+};
+
+/// <summary>
+/// Defines the point system for pronunciation score calibration; default value is FivePoint.
+/// Added in version 1.14.0
+/// </summary>
+enum class PronunciationAssessmentGradingSystem
+{
+    /// <summary>
+    /// Five point calibration
+    /// </summary>
+    FivePoint = 1,
+
+    /// <summary>
+    /// Hundred mark
+    /// </summary>
+    HundredMark = 2
+};
+
+/// <summary>
+/// Defines the pronunciation evaluation granularity; default value is Phoneme.
+/// Added in version 1.14.0
+/// </summary>
+enum class PronunciationAssessmentGranularity
+{
+    /// <summary>
+    /// shows the score on the full text, word and phoneme level
+    /// </summary>
+    Phoneme = 1,
+
+    /// <summary>
+    /// shows the score on the full text and word level
+    /// </summary>
+    Word = 2,
+
+    /// <summary>
+    /// which shows the score on the full text level only
+    /// </summary>
+    FullText = 3
 };
 
 } } } // Microsoft::CognitiveServices::Speech

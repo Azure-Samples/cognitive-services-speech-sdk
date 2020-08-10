@@ -1292,6 +1292,15 @@ public:
     virtual void AddSourceLanguageConfig(std::shared_ptr<ISpxSourceLanguageConfig> sourceLanguageConfig) = 0;
 };
 
+class ISpxPronunciationAssessmentConfig : public ISpxInterfaceBaseFor<ISpxPronunciationAssessmentConfig>
+{
+public:
+    virtual void InitWithParameters(const char* referenceText, PronunciationAssessmentGradingSystem gradingSystem,
+                      PronunciationAssessmentGranularity granularity, bool enableMiscue, const char* scenarioId) = 0;
+    virtual void InitFromJson(const char* json) = 0;
+    virtual void UpdateJson() = 0;
+};
+
 class ISpxThreadService : public ISpxInterfaceBaseFor<ISpxThreadService>
 {
 public:

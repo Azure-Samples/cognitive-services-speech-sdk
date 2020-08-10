@@ -43,7 +43,7 @@ using Microsoft::CognitiveServices::Speech::Impl::StoreException;
         SPX_REPORT_ON_FAIL(hrx);                            \
         x = hrx;                                            \
     }                                                       \
-    catch (ExceptionWithCallStack ex)                       \
+    catch (ExceptionWithCallStack& ex)                      \
     {                                                       \
        x = StoreException(std::move(ex));                   \
     }                                                       \

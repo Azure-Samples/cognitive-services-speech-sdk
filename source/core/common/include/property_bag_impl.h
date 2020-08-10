@@ -21,7 +21,7 @@ public:
     // --- ISpxNamedProperties
     void Copy(ISpxNamedProperties* from) override;
 
-    std::string GetStringValue(const char* name, const char* defaultValue) const override;
+    std::string GetStringValue(const char* name, const char* defaultValue = "") const override;
 
     void SetStringValue(const char* name, const char* value) override;
 

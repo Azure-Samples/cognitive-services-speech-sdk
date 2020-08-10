@@ -453,6 +453,28 @@
       ]
     }
   },
+  "PronunciationAssessmentBadPronunciation": {
+    "FilePath": "audio/PronunciationAssessmentBadPronunciation.wav",
+    "NativeLanguage": "en-US",
+    "Utterances": {
+      "en-US": [
+        {
+          "Text": "There is not a pear"
+        }
+      ]
+    }
+  },
+  "PronunciationAssessmentGoodPronunciationChinese": {
+    "FilePath": "audio/PronunciationAssessmentGoodPronunciationChinese.wav",
+    "NativeLanguage": "zh-CN",
+    "Utterances":{
+      "zh-CN": [
+        {
+          "Text": "您好晓晓"
+        }
+      ]
+    }
+  },
   "SynthesisWordBoundaryUtteranceChinese": {
     "FilePath": "null",
     "NativeLanguage": "zh-CN",

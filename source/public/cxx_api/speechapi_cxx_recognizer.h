@@ -22,6 +22,7 @@ namespace Speech {
 class Recognizer : public std::enable_shared_from_this<Recognizer>
 {
     friend class Connection;
+    friend class PronunciationAssessmentConfig;
 public:
 
     /// <summary>

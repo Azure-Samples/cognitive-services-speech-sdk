@@ -15,7 +15,7 @@
 std::shared_ptr<SpeechConfig> CurrentSpeechConfig()
 {
     return !DefaultSettingsMap[ENDPOINT].empty() ? SpeechConfig::FromEndpoint(DefaultSettingsMap[ENDPOINT], SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key)
-        : SpeechConfig::FromSubscription(SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key, SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Region);
+       : SpeechConfig::FromSubscription(SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key, SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Region);
 }
 
 std::shared_ptr<SpeechTranslationConfig> CurrentTranslationConfig()
@@ -23,6 +23,14 @@ std::shared_ptr<SpeechTranslationConfig> CurrentTranslationConfig()
     return !DefaultSettingsMap[ENDPOINT].empty()
         ? SpeechTranslationConfig::FromEndpoint(DefaultSettingsMap[ENDPOINT], SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key)
         : SpeechTranslationConfig::FromSubscription(SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key, SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Region);
+}
+
+// pronunciation assessment service is currently only available on westus, eastasia and centralindia regions, using a westus key for tests
+// TODO: switch to main test key after pronunciation assessment service deployed to northeurope
+std::shared_ptr<SpeechConfig> CurrentSpeechConfigForPronunciationAssessment()
+{
+    return !DefaultSettingsMap[ENDPOINT].empty() ? SpeechConfig::FromEndpoint(DefaultSettingsMap[ENDPOINT], SubscriptionsRegionsMap[SPEECH_SUBSCRIPTION_WEST_US].Key)
+       : SpeechConfig::FromSubscription(SubscriptionsRegionsMap[SPEECH_SUBSCRIPTION_WEST_US].Key, SubscriptionsRegionsMap[SPEECH_SUBSCRIPTION_WEST_US].Region);
 }
 
 void UseMocks(bool value)

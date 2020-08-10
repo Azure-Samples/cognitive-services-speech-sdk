@@ -48,6 +48,7 @@ set(SOURCES
     "${SRC_DIR}/speechapi_c_source_lang_config.cpp"
     "${SRC_DIR}/speechapi_c_diagnostics.cpp"
     "${SRC_DIR}/speechapi_c_speaker_recognition.cpp"
+    "${SRC_DIR}/speechapi_c_pronunciation_assessment_config.cpp"
     "${SRC_DIR}/stdafx.cpp"
     )
 

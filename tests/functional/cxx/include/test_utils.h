@@ -73,6 +73,7 @@ namespace Config
 #define CONVERSATION_TRANSLATOR_SUBSCRIPTION "ConversationTranslatorSubscription"
 #define CUSTOM_VOICE_SUBSCRIPTION "CustomVoiceSubscription"
 #define SPEAKER_RECOGNITION_SUBSCRIPTION "SpeakerRecognitionSubscription"
+#define SPEECH_SUBSCRIPTION_WEST_US "SpeechSubscriptionWestUS"
 
 // Default settings keys
 #define ENDPOINT "Endpoint"
@@ -143,6 +144,8 @@ namespace Config
 #define SINGLE_UTTERANCE_WITH_PUNCTUATION "SingleUtteranceWithPunctuation"
 #define PROFANTITY_SINGLE_UTTERANCE_ENGLISH_1 "ProfanitySingleUtteranceEnglish1"
 #define PROFANITY_SINGLE_UTTERANCE_ENGLISH_2 "ProfanitySingleUtteranceEnglish2"
+#define PRONUNCIATION_ASSESSMENT_BAD_PRONUNCIATION "PronunciationAssessmentBadPronunciation"
+#define PRONUNCIATION_ASSESSMENT_GOOD_PRONUNCIATION_CHINESE "PronunciationAssessmentGoodPronunciationChinese"
 
 #define SYNTHESIS_WORD_BOUNDARY_UTTERANCE_CHINESE "SynthesisWordBoundaryUtteranceChinese"
 #define SYNTHESIS_UTTERANCE_ENGLISH "SynthesisUtteranceEnglish"

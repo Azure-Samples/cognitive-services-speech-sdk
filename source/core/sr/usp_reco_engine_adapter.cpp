@@ -24,6 +24,7 @@
 #include "spx_build_information.h"
 #include "platform.h"
 #include "guid_utils.h"
+#include "pronunciation_assessment_config.h"
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -2210,7 +2211,7 @@ json CSpxUspRecoEngineAdapter::GetSpeechContextJson()
     // Language id feature need below speech context
     // Currently only 1P new translation endpoint and 3P speech endpoint support it
     // 1P users use this through FromEndpointAPI by hitting a specific endpoint
-    // 3P users use this from SpeechRecongizer FromConfig API
+    // 3P users use this from SpeechRecognizer FromConfig API
     bool isLanguageIdSupported = m_endpointType == USP::EndpointType::Translation || m_endpointType == USP::EndpointType::Speech;
     if (isLanguageIdSupported
         && properties->HasStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_AutoDetectSourceLanguages)))
@@ -2254,6 +2255,30 @@ json CSpxUspRecoEngineAdapter::GetSpeechContextJson()
         }
         contextJson[name] = json::parse(value);
         SPX_DBG_TRACE_VERBOSE("Set '%s' as '%s' in speech.context", name.c_str(), value.c_str());
+    }
+
+    auto pronunciationAssessmentParams = properties->GetStringValue(GetPropertyName(PropertyId::PronunciationAssessment_Params));
+    if (!pronunciationAssessmentParams.empty() && m_endpointType == USP::EndpointType::Speech)
+    {
+        // pronunciation assessment requires detailed format and word timings.
+        // TODO: for now, format and word timings are needed to set in speech.context, which is different from current SDK 
+        // implementation (in connection url). Need to update the logic after service update.
+        contextJson["phraseDetection"]["enrichment"]["pronunciationAssessment"] = json::parse(pronunciationAssessmentParams);
+        // set detailed format
+        contextJson["phraseOutput"]["format"] = "Detailed";
+        // enable word timings
+        if (!properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_RequestWordLevelTimestamps)).empty() ||
+            properties->GetStringValue(GetPropertyName(PropertyId::PronunciationAssessment_Granularity)) !=
+            PronunciationAssessment::pronunciationAssessmentGranularityToString.at(PronunciationAssessmentGranularity::FullText))
+        {
+            auto options = contextJson["phraseOutput"]["detailed"]["options"];
+            if (std::find(options.begin(), options.end(), "WordTimings") == options.end())
+            {
+                contextJson["phraseOutput"]["detailed"]["options"].push_back("WordTimings");
+            }
+        }
+
+        contextJson["phraseOutput"]["detailed"]["options"].push_back("PronunciationAssessment");
     }
 
     return contextJson;

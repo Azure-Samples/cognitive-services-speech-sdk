@@ -2001,11 +2001,11 @@ TEST_CASE("Verify auto detect source language result from speech recognition res
         SPXTEST_REQUIRE(autoDetectSourceLanguageResult->Language == expectedLanguage);
     }
     else {
-        SPX_TRACE_VERBOSE("cxx_api_Test result reson %d is not expected %d", speechRecognitionResult->Reason, expectedReason);
+        SPX_TRACE_VERBOSE("cxx_api_Test result reason %d is not expected %d", speechRecognitionResult->Reason, expectedReason);
     }
 }
 
-TEST_CASE("Verify language id detection for continous speech recognition", "[api][cxx]") {
+TEST_CASE("Verify language id detection for continuous speech recognition", "[api][cxx]") {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
     SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_GERMAN)));
     auto audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_GERMAN));

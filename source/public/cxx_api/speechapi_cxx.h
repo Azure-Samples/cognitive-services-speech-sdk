@@ -46,6 +46,9 @@
 #include <speechapi_cxx_auto_detect_source_lang_config.h>
 #include <speechapi_cxx_source_lang_config.h>
 
+#include <speechapi_cxx_pronunciation_assessment_config.h>
+#include <speechapi_cxx_pronunciation_assessment_result.h>
+
 #include <speechapi_cxx_grammar.h>
 #include <speechapi_cxx_grammar_phrase.h>
 #include <speechapi_cxx_phrase_list_grammar.h>

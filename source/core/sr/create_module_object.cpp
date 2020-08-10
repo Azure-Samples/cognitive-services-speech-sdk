@@ -41,6 +41,7 @@
 #include "source_lang_config.h"
 #include "audio_session_shim.h"
 #include "output_reco_adapter.h"
+#include "pronunciation_assessment_config.h"
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -84,8 +85,9 @@ SPX_EXTERN_C void* SRLib_CreateModuleObject(const char* className, const char* i
     SPX_FACTORY_MAP_ENTRY(CSpxSpeechTranslationConfig, ISpxSpeechConfig);
     SPX_FACTORY_MAP_ENTRY(CSpxAutoDetectSourceLangConfig, ISpxAutoDetectSourceLangConfig);
     SPX_FACTORY_MAP_ENTRY(CSpxSourceLanguageConfig, ISpxSourceLanguageConfig);
+    SPX_FACTORY_MAP_ENTRY(CSpxOutputRecoEngineAdapter, ISpxRecoEngineAdapter);
     SPX_FACTORY_MAP_ENTRY(CSpxAudioSessionShim, ISpxAudioSessionShim);
-    SPX_FACTORY_MAP_ENTRY(CSpxOutputRecoEngineAdapter, ISpxRecoEngineAdapter)
+    SPX_FACTORY_MAP_ENTRY(CSpxPronunciationAssessmentConfig, ISpxPronunciationAssessmentConfig);
     SPX_FACTORY_MAP_END();
 }
 
