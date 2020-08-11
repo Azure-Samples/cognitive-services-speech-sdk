@@ -18,6 +18,7 @@
 		DC70A99C22CA5F7400D051C8 /* TranslationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC70A99A22CA5F7400D051C8 /* TranslationTests.swift */; };
 		DC70A99D22CA5F7400D051C8 /* IntentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC70A99B22CA5F7400D051C8 /* IntentTests.swift */; };
 		EB21A8FA242C58F00056703C /* LanguageConfigurationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB21A8F9242C58F00056703C /* LanguageConfigurationTests.swift */; };
+		FC5F53EA24E1727D0009EA6E /* ConversationTranslationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC5F53E924E1727D0009EA6E /* ConversationTranslationTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -48,6 +49,7 @@
 		DC70A99A22CA5F7400D051C8 /* TranslationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = TranslationTests.swift; path = ../../../ios/SpeechSDKSwift/SpeechSDKSwiftTests/TranslationTests.swift; sourceTree = "<group>"; };
 		DC70A99B22CA5F7400D051C8 /* IntentTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = IntentTests.swift; path = ../../../ios/SpeechSDKSwift/SpeechSDKSwiftTests/IntentTests.swift; sourceTree = "<group>"; };
 		EB21A8F9242C58F00056703C /* LanguageConfigurationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = LanguageConfigurationTests.swift; path = ../../../ios/SpeechSDKSwift/SpeechSDKSwiftTests/LanguageConfigurationTests.swift; sourceTree = "<group>"; };
+		FC5F53E924E1727D0009EA6E /* ConversationTranslationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ConversationTranslationTests.swift; path = ../../../ios/SpeechSDKSwift/SpeechSDKSwiftTests/ConversationTranslationTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -112,6 +114,7 @@
 		DC70A98A22CA5C0900D051C8 /* SpeechSDKOsxSwiftTests */ = {
 			isa = PBXGroup;
 			children = (
+				FC5F53E924E1727D0009EA6E /* ConversationTranslationTests.swift */,
 				EB21A8F9242C58F00056703C /* LanguageConfigurationTests.swift */,
 				DC70A98D22CA5C0900D051C8 /* Info.plist */,
 				DC70A99B22CA5F7400D051C8 /* IntentTests.swift */,
@@ -235,6 +238,7 @@
 			files = (
 				DC70A99D22CA5F7400D051C8 /* IntentTests.swift in Sources */,
 				DC70A99422CA5C6000D051C8 /* SpeechRecognitionTests.swift in Sources */,
+				FC5F53EA24E1727D0009EA6E /* ConversationTranslationTests.swift in Sources */,
 				DC70A99C22CA5F7400D051C8 /* TranslationTests.swift in Sources */,
 				EB21A8FA242C58F00056703C /* LanguageConfigurationTests.swift in Sources */,
 				3C740C6022EFE75600BA9D95 /* SpeechSynthesisTests.swift in Sources */,
