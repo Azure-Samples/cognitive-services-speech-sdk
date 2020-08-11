@@ -479,13 +479,13 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
             recognitionEnd.set_value();
         });
 
-        auto fs = OpenWaveFile(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
+        auto stream = AudioDataStream::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH).c_str());
 
         std::array<uint8_t, 1000> buffer;
         recognizer->StartContinuousRecognitionAsync().get();
         while (1)
         {
-            auto readSamples = ReadBuffer(fs, buffer.data(), (uint32_t)buffer.size());
+            auto readSamples = stream->ReadData(buffer.data(), (uint32_t)buffer.size());
             if (readSamples == 0)
             {
                 break;
@@ -493,6 +493,7 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
             pushStream->Write(buffer.data(), readSamples);
         }
 
+        stream.reset();
         pushStream->Close();
         recognitionEnd.get_future().get();
         recognizer->StopContinuousRecognitionAsync().get();

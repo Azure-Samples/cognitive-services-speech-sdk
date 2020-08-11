@@ -27,13 +27,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         // false, if best effort.
         public static bool defaultIsRealtime = false;
 
-        FileStream fs;
+        AudioDataStream stream;
         DateTime notBefore;
         bool currentIsRealtime;
 
         public RealTimeAudioInputStream(string filename)
         {
-            fs = File.OpenRead(filename);
+            stream = AudioDataStream.FromWavFileInput(filename);
             notBefore = DateTime.Now;
             currentIsRealtime = defaultIsRealtime;
         }
@@ -56,7 +56,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
 
             notBefore = newNotBefore;
-            return fs.Read(dataBuffer, 0, (int)size);
+            return (int)stream.ReadData(dataBuffer);
         }
     }
 
@@ -66,7 +66,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         // false, if best effort.
         public static bool defaultIsRealtime = false;
 
-        FileStream fs;
+        AudioDataStream stream;
         DateTime notBefore;
         bool currentIsRealtime;
         string[] fileNames;
@@ -78,7 +78,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             Console.WriteLine("Trying to open " + fileNames[0]);
             currentFile = 0;
             this.fileNames = fileNames;
-            fs = File.OpenRead(fileNames[0]);
+            stream = AudioDataStream.FromWavFileInput(fileNames[0]);
             notBefore = DateTime.Now;
             currentIsRealtime = defaultIsRealtime;
         }
@@ -101,14 +101,14 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
 
             notBefore = newNotBefore;
-            int read = 0;
 
             lock (fsLock)
             {
                 // If there isn't a current file to read from, be done.
-                if (fs != null)
+                if (stream != null)
                 {
-                    read = fs.Read(dataBuffer, 0, (int)size);
+                    Assert.IsTrue(dataBuffer.Length == size, "AudioDataStream should really allow specifying size to read; in this use case this is fine.");
+                    var read = stream.ReadData(dataBuffer);
                 }
                 else
                 {
@@ -126,13 +126,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             lock (fsLock)
             {
-                fs.Dispose();
-                fs = null;
+                stream.Dispose();
+                stream = null;
 
                 // If there are more files to read from, move to the next.
                 if (++currentFile < fileNames.Length)
                 {
-                    fs = File.OpenRead(fileNames[currentFile]);
+                    stream = AudioDataStream.FromWavFileInput(fileNames[currentFile]);
                 }
             }
         }
@@ -141,6 +141,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
     [TestClass]
     public class KwsRecognitionTests : RecognitionTestBase
     {
+        private static int kwsFoundTimeoutDelay = 30000;
+
         private static string deploymentId;
         private SpeechRecognitionTestsHelper helper;
 
@@ -181,7 +183,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     stopRecognition.TrySetResult(0);
                 };
                 await recognizer.StartKeywordRecognitionAsync(model).ConfigureAwait(false);
-                Task.WaitAny(new[] { stopRecognition.Task }, 10000);
+                Task.WaitAny(new[] { stopRecognition.Task }, kwsFoundTimeoutDelay);
                 Assert.IsTrue(stopRecognition.Task.IsCompleted, "Canceled event not received");
                 await recognizer.StopKeywordRecognitionAsync().ConfigureAwait(false);
             }
@@ -276,9 +278,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 var model = KeywordRecognitionModel.FromFile(TestData.Kws.Computer.ModelFile);
                 await recognizer.StartKeywordRecognitionAsync(model).ConfigureAwait(false);
 
-                var hasCompleted = Task.WaitAny(tcs.Task, Task.Delay(30000));
-                Assert.AreEqual(0, hasCompleted, "keyword not detected within timeout");
-                Assert.IsTrue(tcs.Task.Result, "keyword not detected within timeout");
+                var hasCompleted = Task.WaitAny(tcs.Task, Task.Delay(kwsFoundTimeoutDelay));
+                Console.WriteLine();
+
+                var sessionid = recognizer.Properties.GetProperty(PropertyId.Speech_SessionId);
+                Assert.AreEqual(0, hasCompleted, $"keyword not detected within timeout ({sessionid})");
+                Assert.IsTrue(tcs.Task.Result, $"keyword not detected within timeout ({sessionid})");
 
                 await recognizer.StopKeywordRecognitionAsync().ConfigureAwait(false);
             }
@@ -326,9 +331,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 var model = KeywordRecognitionModel.FromFile(TestData.Kws.Computer.ModelFile);
                 await recognizer.StartKeywordRecognitionAsync(model).ConfigureAwait(false);
 
-                var hasCompleted = Task.WaitAny(tcs.Task, Task.Delay(30000));
-                Assert.AreEqual(0, hasCompleted, "keyword not detected within timeout");
-                Assert.IsTrue(tcs.Task.Result, "keyword not detected within timeout");
+                var hasCompleted = Task.WaitAny(tcs.Task, Task.Delay(kwsFoundTimeoutDelay));
+                Console.WriteLine();
+
+                var sessionid = recognizer.Properties.GetProperty(PropertyId.Speech_SessionId);
+                Assert.AreEqual(0, hasCompleted, $"keyword not detected within timeout ({sessionid})");
+                Assert.IsTrue(tcs.Task.Result, $"keyword not detected within timeout ({sessionid})");
 
                 await recognizer.StopKeywordRecognitionAsync().ConfigureAwait(false);
             }
@@ -377,9 +385,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 var model = KeywordRecognitionModel.FromFile(TestData.Kws.Computer2Pass.ModelFile);
                 await recognizer.StartKeywordRecognitionAsync(model).ConfigureAwait(false);
 
-                var hasCompleted = Task.WaitAny(tcs.Task, Task.Delay(60000));
-                Assert.AreEqual(0, hasCompleted, "keyword not detected within timeout");
-                Assert.IsTrue(tcs.Task.Result, "keyword not detected within timeout");
+                var hasCompleted = Task.WaitAny(tcs.Task, Task.Delay(kwsFoundTimeoutDelay * 2));
+                Console.WriteLine();
+
+                var sessionid = recognizer.Properties.GetProperty(PropertyId.Speech_SessionId);
+                Assert.AreEqual(0, hasCompleted, $"keyword not detected within timeout ({sessionid})");
+                Assert.IsTrue(tcs.Task.Result, $"keyword not detected within timeout ({sessionid})");
 
                 await recognizer.StopKeywordRecognitionAsync().ConfigureAwait(false);
             }
@@ -430,13 +441,16 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 var model = KeywordRecognitionModel.FromFile(TestData.Kws.Computer.ModelFile);
                 await recognizer.StartKeywordRecognitionAsync(model).ConfigureAwait(false);
 
-                var hasCompleted = Task.WaitAny(tcs.Task, Task.Delay(30000));
-                Assert.AreEqual(0, hasCompleted, "keyword not detected within timeout");
-                Assert.IsTrue(tcs.Task.Result, "keyword not detected within timeout");
-                Assert.AreNotEqual(-1, tcsFoundRecognizing, "tcsFoundRecognizing not detected within timeout");
-                Assert.AreNotEqual(-1, tcsFoundRecognized, "tcsFoundRecognized not detected within timeout");
-                Assert.IsTrue(tcsFoundRecognizing < tcsFoundRecognized, "tcsFoundRecognized event ordering incorrect");
-                Assert.IsTrue(error.Length == 0, error);
+                var hasCompleted = Task.WaitAny(tcs.Task, Task.Delay(kwsFoundTimeoutDelay));
+                Console.WriteLine();
+
+                var sessionid = recognizer.Properties.GetProperty(PropertyId.Speech_SessionId);
+                Assert.AreEqual(0, hasCompleted, $"keyword not detected within timeout ({sessionid})");
+                Assert.IsTrue(tcs.Task.Result, $"keyword not detected within timeout ({sessionid})");
+                Assert.AreNotEqual(-1, tcsFoundRecognizing, $"tcsFoundRecognizing not detected within timeout ({sessionid})");
+                Assert.AreNotEqual(-1, tcsFoundRecognized, $"tcsFoundRecognized not detected within timeout ({sessionid})");
+                Assert.IsTrue(tcsFoundRecognizing < tcsFoundRecognized, $"tcsFoundRecognized event ordering incorrect ({sessionid})");
+                Assert.IsTrue(error.Length == 0, $"{error} ({sessionid})");
 
                 await recognizer.StopKeywordRecognitionAsync().ConfigureAwait(false);
             }
@@ -484,9 +498,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 var model = KeywordRecognitionModel.FromFile(TestData.Kws.Secret.ModelFile);
                 await recognizer.StartKeywordRecognitionAsync(model).ConfigureAwait(false);
 
-                var hasCompleted = Task.WaitAny(tcs.Task, Task.Delay(30000));
-                Assert.AreEqual(0, hasCompleted, "keyword not detected within timeout");
-                Assert.IsTrue(tcs.Task.Result, "keyword not detected within timeout");
+                var hasCompleted = Task.WaitAny(tcs.Task, Task.Delay(kwsFoundTimeoutDelay));
+                Console.WriteLine();
+
+                var sessionid = recognizer.Properties.GetProperty(PropertyId.Speech_SessionId);
+                Assert.AreEqual(0, hasCompleted, $"keyword not detected within timeout ({sessionid})");
+                Assert.IsTrue(tcs.Task.Result, $"keyword not detected within timeout ({sessionid})");
 
                 await recognizer.StopKeywordRecognitionAsync().ConfigureAwait(false);
             }
@@ -580,9 +597,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             await taskStartRecognizerSecret.ConfigureAwait(false);
             await taskStartRecognizerComputer.ConfigureAwait(false);
 
-            var hasCompleted = Task.WaitAny(tcs.Task, Task.Delay(30000));
-            Assert.AreEqual(0, hasCompleted, "keyword not detected within timeout");
-            Assert.IsTrue(tcs.Task.Result, "keyword not detected within timeout");
+            var hasCompleted = Task.WaitAny(tcs.Task, Task.Delay(kwsFoundTimeoutDelay));
+            Console.WriteLine();
+
+            var sessionid1 = recognizerSecret.Properties.GetProperty(PropertyId.Speech_SessionId);
+            var sessionid2 = recognizerComputer.Properties.GetProperty(PropertyId.Speech_SessionId);
+            Assert.AreEqual(0, hasCompleted, $"keyword not detected within timeout ({sessionid1}, {sessionid2})");
+            Assert.IsTrue(tcs.Task.Result, $"keyword not detected within timeout ({sessionid1}, {sessionid2})");
 
             await recognizerSecret.StopKeywordRecognitionAsync().ConfigureAwait(false);
             await recognizerComputer.StopKeywordRecognitionAsync().ConfigureAwait(false);
@@ -677,7 +698,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             await taskStartRecognizerSecret.ConfigureAwait(false);
             await taskStartRecognizerComputer.ConfigureAwait(false);
 
-            var hasCompleted = Task.WaitAny(tcs.Task, tcsCanceled.Task, Task.Delay(20000));
+            var hasCompleted = Task.WaitAny(tcs.Task, tcsCanceled.Task, Task.Delay(kwsFoundTimeoutDelay));
             Assert.AreEqual(1, hasCompleted, "keyword detected within timeout is unexpected");
             Assert.IsFalse(tcs.Task.IsCompleted, "keyword detected task within timeout is unexpected");
             Assert.IsFalse(tcs.Task.IsCanceled, "keyword detected task within timeout is unexpected");
@@ -744,9 +765,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 var model = KeywordRecognitionModel.FromFile(TestData.Kws.Computer.ModelFile);
                 await recognizer.StartKeywordRecognitionAsync(model).ConfigureAwait(false);
 
-                var hasCompleted = Task.WaitAny(tcs.Task, Task.Delay(60000));
-                Assert.AreEqual(0, hasCompleted, "keyword not detected within timeout");
-                Assert.AreEqual(true, tcs.Task.Result, "2x keyword not detected within timeout");
+                var hasCompleted = Task.WaitAny(tcs.Task, Task.Delay(kwsFoundTimeoutDelay * 2));
+                Console.WriteLine();
+
+                var sessionid = recognizer.Properties.GetProperty(PropertyId.Speech_SessionId);
+                Assert.AreEqual(0, hasCompleted, $"keyword not detected within timeout ({sessionid})");
+                Assert.AreEqual(true, tcs.Task.Result, $"2x keyword not detected within timeout ({sessionid})");
 
                 await recognizer.StopKeywordRecognitionAsync().ConfigureAwait(false);
             }
@@ -813,10 +837,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 var model = KeywordRecognitionModel.FromFile(TestData.Kws.Computer.ModelFile);
                 await recognizer.StartKeywordRecognitionAsync(model).ConfigureAwait(false);
 
-                var hasCompleted = Task.WaitAny(tcs.Task, Task.Delay(60000));
-                Assert.AreEqual(0, hasCompleted, "keyword not detected within timeout");
-                Assert.AreEqual(true, tcs.Task.Result, "2x keyword not detected within timeout");
-                Assert.AreEqual(0, error.Length, error);
+                var hasCompleted = Task.WaitAny(tcs.Task, Task.Delay(kwsFoundTimeoutDelay * 2));
+                Console.WriteLine();
+
+                var sessionid = recognizer.Properties.GetProperty(PropertyId.Speech_SessionId);
+                Assert.AreEqual(0, hasCompleted, $"keyword not detected within timeout ({sessionid})");
+                Assert.AreEqual(true, tcs.Task.Result, $"2x keyword not detected within timeout ({sessionid})");
+                Assert.AreEqual(0, error.Length, $"{error} ({sessionid})");
 
                 await recognizer.StopKeywordRecognitionAsync().ConfigureAwait(false);
             }
@@ -867,7 +894,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 var model = KeywordRecognitionModel.FromFile(TestData.Kws.Computer.ModelFile);
                 await recognizer.StartKeywordRecognitionAsync(model).ConfigureAwait(false);
 
-                var hasCompleted = Task.WaitAny(tcs.Task, tcsCanceled.Task, Task.Delay(20000));
+                var hasCompleted = Task.WaitAny(tcs.Task, tcsCanceled.Task, Task.Delay(kwsFoundTimeoutDelay));
                 Assert.AreEqual(1, hasCompleted, "did expect a result (for canceled)");
                 Assert.AreEqual(1, numCanceledCalled, "unexpected num close sessions");
 
@@ -973,7 +1000,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 var model = KeywordRecognitionModel.FromFile(TestData.Kws.Computer.ModelFile);
                 await recognizer.StartKeywordRecognitionAsync(model).ConfigureAwait(false);
 
-                var hasCompleted = Task.WaitAny(tcs.Task, tcsCanceled.Task, Task.Delay(20000));
+                var hasCompleted = Task.WaitAny(tcs.Task, tcsCanceled.Task, Task.Delay(kwsFoundTimeoutDelay));
                 Assert.AreEqual(1, hasCompleted, "did expect a result (for canceled)");
                 Assert.AreEqual(1, numCanceledCalled, "unexpected num close sessions");
 
@@ -1059,12 +1086,15 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 var model = KeywordRecognitionModel.FromFile(TestData.Kws.Computer.ModelFile);
                 await recognizer.StartKeywordRecognitionAsync(model).ConfigureAwait(false);
 
-                var hasCompleted = Task.WaitAny(tcs.Task, Task.Delay(60000));
-                Assert.AreEqual(0, hasCompleted, "keyword not detected within timeout");
-                Assert.AreEqual(true, tcs.Task.Result, "2x keyword not detected within timeout");
-                Assert.AreEqual(2, tcsKeywordRecognizing, "2x tcsKeywordRecognizing not detected within timeout");
-                Assert.AreEqual(2, tcsKeywordRecognized, "2x tcsKeywordRecognized not detected within timeout");
-                Assert.AreEqual(0, error.Length, error);
+                var hasCompleted = Task.WaitAny(tcs.Task, Task.Delay(kwsFoundTimeoutDelay * 2));
+                Console.WriteLine();
+
+                var sessionid = recognizer.Properties.GetProperty(PropertyId.Speech_SessionId);
+                Assert.AreEqual(0, hasCompleted, $"keyword not detected within timeout ({sessionid})");
+                Assert.AreEqual(true, tcs.Task.Result, $"2x keyword not detected within timeout ({sessionid})");
+                Assert.AreEqual(2, tcsKeywordRecognizing, $"2x tcsKeywordRecognizing not detected within timeout ({sessionid})");
+                Assert.AreEqual(2, tcsKeywordRecognized, $"2x tcsKeywordRecognized not detected within timeout ({sessionid})");
+                Assert.AreEqual(0, error.Length, $"{error} ({sessionid})");
                 stream.Close();
                 await recognizer.StopKeywordRecognitionAsync().ConfigureAwait(false);
             }
@@ -1118,9 +1148,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 var model = KeywordRecognitionModel.FromFile(TestData.Kws.Computer.ModelFile);
                 await recognizer.StartKeywordRecognitionAsync(model).ConfigureAwait(false);
 
-                var hasCompleted = Task.WaitAny(tcs.Task, Task.Delay(30000));
-                Assert.AreEqual(0, hasCompleted, "keyword not detected within timeout");
-                Assert.IsTrue(tcs.Task.Result, "keyword not detected within timeout");
+                var hasCompleted = Task.WaitAny(tcs.Task, Task.Delay(kwsFoundTimeoutDelay));
+                Console.WriteLine();
+
+                var sessionid = recognizer.Properties.GetProperty(PropertyId.Speech_SessionId);
+                Assert.AreEqual(0, hasCompleted, $"keyword not detected within timeout ({sessionid})");
+                Assert.IsTrue(tcs.Task.Result, $"keyword not detected within timeout ({sessionid})");
 
                 await recognizer.StopKeywordRecognitionAsync().ConfigureAwait(false);
             }
@@ -1179,7 +1212,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 var model = KeywordRecognitionModel.FromFile(TestData.Kws.Computer.ModelFile);
                 await recognizer.StartKeywordRecognitionAsync(model).ConfigureAwait(false);
 
-                var hasCompleted = Task.WaitAny(tcs.Task, tcsCanceled.Task, Task.Delay(20000));
+                var hasCompleted = Task.WaitAny(tcs.Task, tcsCanceled.Task, Task.Delay(kwsFoundTimeoutDelay));
                 Assert.AreEqual(1, hasCompleted, "did expect a result (for canceled)");
                 Assert.AreEqual(1, numCanceledCalled, "unexpected num close sessions");
 
@@ -1238,9 +1271,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 var model = KeywordRecognitionModel.FromFile(TestData.Kws.Computer.ModelFile);
                 await recognizer.StartKeywordRecognitionAsync(model).ConfigureAwait(false);
 
-                var hasCompleted = Task.WaitAny(tcs.Task, Task.Delay(30000));
-                Assert.AreEqual(0, hasCompleted, "keyword not detected within timeout");
-                Assert.IsTrue(tcs.Task.Result, "keyword not detected within timeout");
+                var hasCompleted = Task.WaitAny(tcs.Task, Task.Delay(kwsFoundTimeoutDelay));
+                Console.WriteLine();
+
+                var sessionid = recognizer.Properties.GetProperty(PropertyId.Speech_SessionId);
+                Assert.AreEqual(0, hasCompleted, $"keyword not detected within timeout ({sessionid})");
+                Assert.IsTrue(tcs.Task.Result, $"keyword not detected within timeout ({sessionid})");
 
                 await recognizer.StopKeywordRecognitionAsync().ConfigureAwait(false);
             }
@@ -1324,10 +1360,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 var model = KeywordRecognitionModel.FromFile(TestData.Kws.Computer.ModelFile);
                 await recognizer.StartKeywordRecognitionAsync(model).ConfigureAwait(false);
 
-                var hasCompleted = Task.WaitAny(tcs.Task, Task.Delay(12000));
-                Assert.AreEqual(0, hasCompleted, "keyword not detected within timeout");
-                Assert.AreEqual(true, tcs.Task.Result, "2x keyword not detected within timeout");
-                Assert.AreEqual(0, error.Length, error);
+                var hasCompleted = Task.WaitAny(tcs.Task, Task.Delay(kwsFoundTimeoutDelay * 2));
+                Console.WriteLine();
+
+                var sessionid = recognizer.Properties.GetProperty(PropertyId.Speech_SessionId);
+                Assert.AreEqual(0, hasCompleted, $"keyword not detected within timeout ({sessionid})");
+                Assert.AreEqual(true, tcs.Task.Result, $"2x keyword not detected within timeout ({sessionid})");
+                Assert.AreEqual(0, error.Length, $"{error} ({sessionid})");
 
                 await recognizer.StopKeywordRecognitionAsync().ConfigureAwait(false);
             }

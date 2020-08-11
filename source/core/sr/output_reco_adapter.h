@@ -43,8 +43,8 @@ public:
     SPX_INTERFACE_MAP_END()
 
     // --- ISpxObject
-    inline void Init() final {};
-    inline void Term() final {};
+    void Init() final {};
+    void Term() final {};
 
     // --- ISpxRecoEngineAdapter
     void SetAdapterMode(bool singleShot) final;
@@ -57,66 +57,66 @@ public:
     void SetMinInputSize(const uint64_t sizeInTicks) final;
 
     // -- ISpxRetrievable
-    inline void MarkAsRetrieved() noexcept final
+    void MarkAsRetrieved() noexcept final
     {
         m_retrieved = true;
     }
 
-    inline bool WasRetrieved() const noexcept final
+    bool WasRetrieved() const noexcept final
     {
         return m_retrieved;
     }
 
     // -- ISpxAudioDataStream
-    inline void InitFromSynthesisResult(std::shared_ptr<ISpxSynthesisResult>) final
-    {}
+    void InitFromFile(const char*) final { }
+    void InitFromSynthesisResult(std::shared_ptr<ISpxSynthesisResult>) final { }
 
-    inline void InitFromFormat(const SPXWAVEFORMATEX& format, bool hasHeader) final
+    void InitFromFormat(const SPXWAVEFORMATEX& format, bool hasHeader) final
     {
         m_bytesPerSecond = (format.wBitsPerSample * format.nChannels * format.nSamplesPerSec) / 8;
         m_stream->InitFromFormat(format, hasHeader);
     }
 
-    inline StreamStatus GetStatus() noexcept final
+    StreamStatus GetStatus() noexcept final
     {
         return m_status;
     }
 
-    inline CancellationReason GetCancellationReason() final
+    CancellationReason GetCancellationReason() final
     {
         return m_stream->GetCancellationReason();
     }
 
-    inline CancellationErrorCode GetCancellationErrorCode() final
+    CancellationErrorCode GetCancellationErrorCode() final
     {
         return m_stream->GetCancellationErrorCode();
     }
 
-    inline bool CanReadData(uint32_t requestedSize) final
+    bool CanReadData(uint32_t requestedSize) final
     {
         WaitForStateNot(StreamStatus::NoData);
         return m_stream->CanReadData(requestedSize);
     }
 
-    inline bool CanReadData(uint32_t requestedSize, uint32_t pos) final
+    bool CanReadData(uint32_t requestedSize, uint32_t pos) final
     {
         WaitForStateNot(StreamStatus::NoData);
         return m_stream->CanReadData(requestedSize, pos);
     }
 
-    inline uint32_t Read(uint8_t* buffer, uint32_t bufferSize) final
+    uint32_t Read(uint8_t* buffer, uint32_t bufferSize) final
     {
         WaitForStateNot(StreamStatus::NoData);
         return m_stream->Read(buffer, bufferSize);
     }
 
-    inline uint32_t Read(uint8_t* buffer, uint32_t bufferSize, uint32_t pos) final
+    uint32_t Read(uint8_t* buffer, uint32_t bufferSize, uint32_t pos) final
     {
         WaitForStateNot(StreamStatus::NoData);
         return m_stream->Read(buffer, bufferSize, pos);
     }
 
-    inline void SaveToWaveFile(const wchar_t* fileName) final
+    void SaveToWaveFile(const wchar_t* fileName) final
     {
         if (GetStatus() != StreamStatus::AllData)
         {
@@ -125,19 +125,19 @@ public:
         m_stream->SaveToWaveFile(fileName);
     }
 
-    inline uint32_t GetPosition() final
+    uint32_t GetPosition() final
     {
         return m_stream->GetPosition();
     }
 
-    inline void SetPosition(uint32_t pos) final
+    void SetPosition(uint32_t pos) final
     {
         return m_stream->SetPosition(pos);
     }
 
     void DetachInput() final;
 private:
-    inline void WaitForState(StreamStatus status) const
+    void WaitForState(StreamStatus status) const
     {
         std::unique_lock<std::mutex> lk{ m_stateMutex };
         m_cv.wait(lk, [this, status]()
@@ -146,7 +146,7 @@ private:
         });
     }
 
-    inline void WaitForStateNot(StreamStatus status) const
+    void WaitForStateNot(StreamStatus status) const
     {
         std::unique_lock<std::mutex> lk{ m_stateMutex };
         m_cv.wait(lk, [this, status]()

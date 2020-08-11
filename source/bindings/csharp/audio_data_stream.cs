@@ -20,6 +20,20 @@ namespace Microsoft.CognitiveServices.Speech
     public class AudioDataStream : IDisposable
     {
         /// <summary>
+        /// Creates a memory backed AudioDataStream for the specified audio file.
+        /// Added in version 1.14.0
+        /// </summary>
+        /// <param name="fileName">Specifies the audio input file.</param>
+        /// <returns>The audio data stream being created.</returns>
+        public static AudioDataStream FromWavFileInput(string fileName)
+        {
+            IntPtr streamHandle = IntPtr.Zero;
+            IntPtr fileNamePtr = Utf8StringMarshaler.MarshalManagedToNative(fileName);
+            ThrowIfFail(Internal.AudioDataStream.audio_data_stream_create_from_file(out streamHandle, fileNamePtr));
+            return new AudioDataStream(streamHandle);
+        }
+
+        /// <summary>
         /// Creates a memory backed AudioDataStream from given speech synthesis result.
         /// </summary>
         /// <param name="result">The speech synthesis result.</param>

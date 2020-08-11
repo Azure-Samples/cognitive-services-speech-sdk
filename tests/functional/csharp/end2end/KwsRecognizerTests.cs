@@ -17,6 +17,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
     [TestClass]
     public class KwsRecognizerTests : RecognitionTestBase
     {
+        private static int kwsFoundTimeoutDelay = 30000;
+
         [ClassInitialize]
         public static void TestClassinitialize(TestContext context)
         {
@@ -62,10 +64,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 Assert.IsTrue(result.Reason == ResultReason.RecognizedKeyword, "Wrong result reason.");
                 Assert.IsTrue(result.Text.ToLowerInvariant().StartsWith(TestData.Kws.Secret.ModelKeyword), "Wrong result contents.");
 
-                var hasCompleted = Task.WaitAny(tcs.Task, cancellation.Task, Task.Delay(30000));
+                var hasCompleted = Task.WaitAny(tcs.Task, cancellation.Task, Task.Delay(kwsFoundTimeoutDelay));
+                Console.WriteLine();
 
-                Assert.AreEqual(0, hasCompleted, "keyword not detected within timeout");
-                Assert.IsTrue(tcs.Task.Result, "keyword not detected within timeout");
+                var sessionid = recognizer.Properties.GetProperty(PropertyId.Speech_SessionId);
+                Assert.AreEqual(0, hasCompleted, $"keyword not detected within timeout ({sessionid})");
+                Assert.IsTrue(tcs.Task.Result, $"keyword not detected within timeout ({sessionid})");
+
                 /* Give some time so the stream is filled */
                 await Task.Delay(500);
                 var stream = AudioDataStream.FromResult(result);

@@ -465,13 +465,13 @@ TEST_CASE("conversation_online_pull_stream", "[api][cxx][transcriber]")
     auto config = SpeechConfig::FromEndpoint(DefaultSettingsMap[ONLINE_AUDIO_ENDPOINT], SubscriptionsRegionsMap[CONVERSATION_TRANSCRIPTION_PPE_SUBSCRIPTION].Key);
     config->SetProperty("ConversationTranscriptionInRoomAndOnline", "true");
     config->SetProperty("iCalUid", "asdf");
-    auto fs = OpenWaveFile(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
+    auto stream = AudioDataStream::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH).c_str());
 
     // Create the "pull stream" object with C++ lambda callbacks
     auto pullStream = AudioInputStream::CreatePullStream(
         AudioStreamFormat::GetWaveFormatPCM(16000, 16, 1),
-        [&fs](uint8_t* buffer, uint32_t size) -> int { return (int)ReadBuffer(fs, buffer, size); },
-        [=]() {},
+        [&stream](uint8_t* buffer, uint32_t size) -> int { return (int)stream->ReadData(buffer, size); },
+        [&stream]() { stream.reset(); },
         [=](PropertyId propertyId) -> SPXSTRING {
         if (propertyId == PropertyId::DataBuffer_TimeStamp)
         {
@@ -543,7 +543,7 @@ TEST_CASE("conversation_online_pull_stream_internal_error", "[api][cxx][transcri
     auto config = SpeechConfig::FromEndpoint(DefaultSettingsMap[ONLINE_AUDIO_ENDPOINT], SubscriptionsRegionsMap[CONVERSATION_TRANSCRIPTION_PPE_SUBSCRIPTION].Key);
     config->SetProperty("ConversationTranscriptionInRoomAndOnline", "true");
     config->SetProperty("DiscardAudioFromIntermediateRecoResult", "true");
-    auto fs = OpenWaveFile(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
+    auto stream = AudioDataStream::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH).c_str());
 
     auto myId = PAL::CreateGuidWithDashesUTF8();
     INFO(myId);
@@ -553,10 +553,10 @@ TEST_CASE("conversation_online_pull_stream_internal_error", "[api][cxx][transcri
     // Create the "pull stream" object with C++ lambda callbacks
     auto pullStream = AudioInputStream::CreatePullStream(
         AudioStreamFormat::GetWaveFormatPCM(16000, 16, 1),
-        [&fs](uint8_t* buffer, uint32_t size) -> int {
+        [&stream](uint8_t* buffer, uint32_t size) -> int {
             sampleCount += size;
-            return (int)ReadBuffer(fs, buffer, size); },
-        [=]() {},
+            return (int)stream->ReadData(buffer, size); },
+        [&stream]() { stream.reset(); },
         [=](PropertyId propertyId) -> SPXSTRING {
         if (propertyId == PropertyId::DataBuffer_TimeStamp)
         {

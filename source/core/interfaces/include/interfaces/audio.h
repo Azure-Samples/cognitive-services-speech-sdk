@@ -72,6 +72,7 @@ class ISpxSynthesisResult;
 class ISpxAudioDataStream : public ISpxInterfaceBaseFor<ISpxAudioDataStream>
 {
 public:
+    virtual void InitFromFile(const char* fileName) = 0;
     virtual void InitFromSynthesisResult(std::shared_ptr<ISpxSynthesisResult> result) = 0;
     virtual void InitFromFormat(const SPXWAVEFORMATEX& format, bool hasHeader) = 0;
     virtual StreamStatus GetStatus() noexcept = 0;

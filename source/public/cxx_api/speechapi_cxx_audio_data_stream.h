@@ -69,6 +69,21 @@ public:
     }
 
     /// <summary>
+    /// Creates a memory backed AudioDataStream for the specified audio input file.
+    /// Added in version 1.14.0
+    /// </summary>
+    /// <param name="fileName">Specifies the audio input file.</param>
+    /// <returns>A shared pointer to AudioDataStream</returns>
+    static std::shared_ptr<AudioDataStream> FromWavFileInput(const SPXSTRING& fileName)
+    {
+        SPXAUDIOSTREAMHANDLE hstream = SPXHANDLE_INVALID;
+        SPX_THROW_ON_FAIL(audio_data_stream_create_from_file(&hstream, Utils::ToUTF8(fileName).c_str()));
+
+        auto stream = new AudioDataStream(hstream);
+        return std::shared_ptr<AudioDataStream>(stream);
+    }
+
+    /// <summary>
     /// Creates a memory backed AudioDataStream from given speech synthesis result.
     /// </summary>
     /// <param name="result">The speech synthesis result.</param>

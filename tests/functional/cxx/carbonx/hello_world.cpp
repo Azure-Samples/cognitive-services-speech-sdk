@@ -185,15 +185,13 @@ void CarbonTestConsole::Sample_HelloWorld_PushStream()
 void CarbonTestConsole::Sample_HelloWorld_PullStream()
 {
     // Prepare for the stream to be "Pulled"
-    FILE* hfile = nullptr;
-    PAL::fopen_s(&hfile, "one_one_one.wav", "rb");
-    fseek(hfile, 44, SEEK_CUR);
+    auto stream = AudioDataStream::FromWavFileInput("one_one_one.wav");
 
     // Create the "pull stream" object with C++ lambda callbacks
     auto pullStream = AudioInputStream::CreatePullStream(
         AudioStreamFormat::GetWaveFormatPCM(16000, 16, 1),
-        [=](uint8_t* buffer, uint32_t size) -> int { return (int)fread(buffer, 1, size, hfile); },
-        [=]() { fclose(hfile); });
+        [&stream](uint8_t* buffer, uint32_t size) -> int { return (int)stream->ReadData(buffer, size); },
+        [&stream]() { stream.reset(); });
 
     // Create the recognizer "with stream input" using the "pull stream"
     auto config = SpeechConfig::FromSubscription(m_subscriptionKey, m_region);

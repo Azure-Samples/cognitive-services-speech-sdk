@@ -17,6 +17,8 @@ namespace Microsoft.CognitiveServices.Speech.Internal
     {
         [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern bool audio_data_stream_is_handle_valid(SPXAUDIOSTREAMHANDLE audioStream);
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention, CharSet = CharSet.Ansi)]
+        public static extern SPXHR audio_data_stream_create_from_file(out SPXAUDIOSTREAMHANDLE audioStream, IntPtr fileName);
         [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR audio_data_stream_create_from_result(out SPXAUDIOSTREAMHANDLE audioStream, InteropSafeHandle result);
         [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]

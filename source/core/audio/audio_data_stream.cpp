@@ -25,6 +25,31 @@ CSpxAudioDataStream::~CSpxAudioDataStream()
     DisconnectSynthEvents();
 }
 
+void CSpxAudioDataStream::InitFromFile(const char* fileName)
+{
+    // open the audio file using the wav reader
+    auto audioFile = SpxCreateObjectWithSite<ISpxAudioFile>("CSpxWavFileReader", GetSite());
+    audioFile->Open(PAL::ToWString(fileName).c_str());
+
+    // get the reader interface, and the format
+    auto reader = SpxQueryInterface<ISpxAudioStreamReader>(audioFile);
+    auto formatSize = reader->GetFormat(nullptr, 0);
+    auto format = SpxAllocWAVEFORMATEX(formatSize);
+    reader->GetFormat(format.get(), formatSize);
+
+    // loop thru the audio data, 1 second at a time, copying buffers from the reader
+    auto readSize = format->nAvgBytesPerSec;
+    auto buffer = SpxAllocSharedUint8Buffer(readSize);
+    while (readSize > 0)
+    {
+        readSize = reader->Read(buffer.get(), readSize);
+        this->Write(buffer.get(), readSize);
+    }
+
+    // mark that we're done reading ... 
+    m_writingEnded = true;
+}
+
 void CSpxAudioDataStream::InitFromSynthesisResult(std::shared_ptr<ISpxSynthesisResult> result)
 {
     // Set request ID

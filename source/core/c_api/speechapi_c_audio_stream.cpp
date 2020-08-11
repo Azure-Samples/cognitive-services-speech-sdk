@@ -173,6 +173,22 @@ SPXAPI_(bool) audio_data_stream_is_handle_valid(SPXAUDIOSTREAMHANDLE haudioStrea
     return Handle_IsValid<SPXAUDIOSTREAMHANDLE, ISpxAudioDataStream>(haudioStream);
 }
 
+SPXAPI audio_data_stream_create_from_file(SPXAUDIOSTREAMHANDLE* haudioStream, const char* fileName)
+{
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, haudioStream == nullptr);
+
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        *haudioStream = SPXHANDLE_INVALID;
+
+        auto audioDataStream = SpxCreateObjectWithSite<ISpxAudioDataStream>("CSpxAudioDataStream", SpxGetRootSite());
+        audioDataStream->InitFromFile(fileName);
+
+        *haudioStream = CSpxSharedPtrHandleTableManager::TrackHandle<ISpxAudioDataStream, SPXAUDIOSTREAMHANDLE>(audioDataStream);
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
 SPXAPI audio_data_stream_create_from_result(SPXAUDIOSTREAMHANDLE* haudioStream, SPXRESULTHANDLE hresult)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, haudioStream == nullptr);

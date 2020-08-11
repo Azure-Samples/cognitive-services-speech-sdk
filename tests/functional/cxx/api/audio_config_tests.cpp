@@ -128,13 +128,13 @@ TEST_CASE("Audio Basics", "[api][cxx][audio]")
     SECTION("pull stream works")
     {
         // Prepare for the stream to be "Pulled"
-        auto fs = OpenWaveFile(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
+        auto stream = AudioDataStream::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH).c_str());
 
         // Create the "pull stream" object with C++ lambda callbacks
         auto pullStream = AudioInputStream::CreatePullStream(
             AudioStreamFormat::GetWaveFormatPCM(16000, 16, 1),
-            [&fs](uint8_t* buffer, uint32_t size) -> int { return (int)ReadBuffer(fs, buffer,size); },
-            [=]() {}
+            [&stream](uint8_t* buffer, uint32_t size) -> int { return (int)stream->ReadData(buffer, size); },
+            [&stream]() { stream.reset(); }
         );
 
         // Create the recognizer with the pull stream
@@ -164,19 +164,17 @@ TEST_CASE("Audio Basics", "[api][cxx][audio]")
             sessionId = e.SessionId;
         });
 
-        // Prepare to use the "Push stream" by opening the file, and moving to head of data chunk
-        FILE* hfile = nullptr;
-        PAL::fopen_s(&hfile, (ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)).c_str(), "rb");
-        fseek(hfile, 44, SEEK_CUR);
+        // Prepare to use the "Push stream" by opening the file
+        auto stream = AudioDataStream::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH).c_str());
 
         // Set up a lambda we'll use to push the data
-        auto pushData = [=](const int bufferSize, int sleepBetween = 0, int sleepBefore = 0, int sleepAfter = 0, bool closeStream = true) {
+        auto pushData = [=,&stream](const int bufferSize, int sleepBetween = 0, int sleepBefore = 0, int sleepAfter = 0, bool closeStream = true) {
             auto deleter = [](uint8_t * p) { delete[] p; };
             std::unique_ptr<uint8_t[], decltype(deleter)> buffer(new uint8_t[bufferSize], deleter);
             std::this_thread::sleep_for(std::chrono::milliseconds(sleepBefore));
             for (;;)
             {
-                auto size = (int)fread(buffer.get(), 1, bufferSize, hfile);
+                auto size = stream->ReadData(buffer.get(), bufferSize);
                 if (size == 0) break;
 
                 pushStream->Write(buffer.get(), size);
@@ -188,7 +186,7 @@ TEST_CASE("Audio Basics", "[api][cxx][audio]")
             {
                 pushStream->Close();
             }
-            fclose(hfile);
+            stream.reset();
         };
 
         WHEN("pushing audio data BEFORE recognition starts, 100000 byte buffer")

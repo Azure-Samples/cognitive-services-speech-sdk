@@ -49,6 +49,7 @@ SPXAPI push_audio_output_stream_set_callbacks(SPXAUDIOSTREAMHANDLE haudioStream,
 
 // audio data stream
 SPXAPI_(bool) audio_data_stream_is_handle_valid(SPXAUDIOSTREAMHANDLE haudioStream);
+SPXAPI audio_data_stream_create_from_file(SPXAUDIOSTREAMHANDLE* haudioStream, const char* fileName);
 SPXAPI audio_data_stream_create_from_result(SPXAUDIOSTREAMHANDLE* haudioStream, SPXRESULTHANDLE hresult);
 SPXAPI audio_data_stream_create_from_keyword_result(SPXAUDIOSTREAMHANDLE* audioStreamHandle, SPXRESULTHANDLE resultHandle);
 SPXAPI audio_data_stream_get_status(SPXAUDIOSTREAMHANDLE haudioStream, Stream_Status* status);

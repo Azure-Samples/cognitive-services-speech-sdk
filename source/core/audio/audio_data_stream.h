@@ -46,6 +46,7 @@ public:
     SPX_INTERFACE_MAP_END()
 
     // --- ISpxAudioDataStream ---
+    void InitFromFile(const char* fileName) override;
     void InitFromSynthesisResult(std::shared_ptr<ISpxSynthesisResult> result) override;
     void InitFromFormat(const SPXWAVEFORMATEX& format, bool hasHeader) final;
     StreamStatus GetStatus() noexcept final;
