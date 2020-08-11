@@ -1335,17 +1335,18 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public async Task DictationCorrectionsSetParameter()
         {
+            // right now, Office endpoint takes any string as authorization token.
             var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
             var config = SpeechConfig.FromEndpoint(new Uri(officeEndpointString), subscriptionKey);
             config.SetServiceProperty("format", "corrections", ServicePropertyChannel.UriQueryParameter);
+            config.SetServiceProperty("Authorization", "POPToken", ServicePropertyChannel.HttpHeader);
             config.EnableDictation();
 
             using (var recognizer = TrackSessionId(new SpeechRecognizer(config, audioInput)))
             {
+                recognizer.Properties.SetProperty("HttpHeader#Authorization", "fromRecognizer");
                 using (var connection = Connection.FromRecognizer(recognizer))
                 {
-                    recognizer.AuthorizationToken = "abc";
-
                     var phraseDetectionPayload = "{\"mode\": \"dictation\", \"grammarScenario\": \"Dictation_Office\",\"initialSilenceTimeout\": 2000,\"trailingSilenceTimeout\": 2000}";
                     connection.SetMessageProperty("speech.context", "phraseDetection", phraseDetectionPayload);
 

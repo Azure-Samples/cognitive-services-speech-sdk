@@ -13,7 +13,13 @@ public enum ServicePropertyChannel
     /**
      * Uses URI query parameter to pass property settings to service.
      */
-    UriQueryParameter(0);
+    UriQueryParameter(0),
+
+    /**
+    * Uses HttpHeader to set a key/value in a HTTP header.
+    */
+    HttpHeader(1);
+
 
     private ServicePropertyChannel(int id) {
         this.id = id;

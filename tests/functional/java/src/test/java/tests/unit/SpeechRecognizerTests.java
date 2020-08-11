@@ -1468,9 +1468,9 @@ public class SpeechRecognizerTests {
         assertNotNull(s);
         s.enableDictation();
         s.setServiceProperty("format", "corrections", ServicePropertyChannel.UriQueryParameter);
+        s.setServiceProperty("Authorization", "POPToken", ServicePropertyChannel.HttpHeader);
 
         SpeechRecognizer r = new SpeechRecognizer(s, AudioConfig.fromWavFileInput(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath)));
-        r.setAuthorizationToken("abc");
         Connection connection = Connection.fromRecognizer(r);
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
@@ -1639,8 +1639,8 @@ public class SpeechRecognizerTests {
 
         assertNotNull(speechConfig);
 
-        speechConfig.setProperty("SPEECH-KeywordsToDetect", "Computer;Hey Cortana");        
-        
+        speechConfig.setProperty("SPEECH-KeywordsToDetect", "Computer;Hey Cortana");
+
         SpeechRecognizer recognizer = new SpeechRecognizer(speechConfig, AudioConfig.fromWavFileInput(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.SINGLE_UTTERANCE_ENGLISH).FilePath)));
         assertNotNull(recognizer);
         assertNotNull(recognizer.getRecoImpl());
@@ -1666,8 +1666,8 @@ public class SpeechRecognizerTests {
 
         assertNotNull(speechConfig);
 
-        speechConfig.setProperty("SPEECH-KeywordsToDetect", "Computer;Hey Cortana");        
-        
+        speechConfig.setProperty("SPEECH-KeywordsToDetect", "Computer;Hey Cortana");
+
         SpeechRecognizer recognizer = new SpeechRecognizer(speechConfig, AudioConfig.fromWavFileInput(Settings.GetRootRelativePath(Settings.AudioUtterancesMap.get(AudioUtterancesKeys.COMPUTER_KEYWORD_WITH_SINGLE_UTTERANCE_1).FilePath)));
         assertNotNull(recognizer);
         assertNotNull(recognizer.getRecoImpl());
