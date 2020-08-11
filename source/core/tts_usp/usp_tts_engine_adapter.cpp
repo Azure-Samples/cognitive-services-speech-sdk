@@ -313,14 +313,12 @@ void CSpxUspTtsEngineAdapter::UspSendMessage(std::unique_ptr<USP::TextMessage> m
     // from a move only lambda: https://github.com/microsoft/STL/issues/321
     // To work around this, we'll need to pass a raw pointer (icky I know)
 
-#if _MSC_VER <= 1926
+#ifdef _MSC_VER
     USP::TextMessage* ptr = nullptr;
     try
     {
         ptr = message.release();
 
-        // NOTE: If the following code doesn't compile complaining about a deleted method call, increment the #IF version check value in line 292
-        
         std::packaged_task<void()> task([connection, ptr]()
         {
             DoSendMessageWork(connection, std::unique_ptr<USP::TextMessage>(ptr));
