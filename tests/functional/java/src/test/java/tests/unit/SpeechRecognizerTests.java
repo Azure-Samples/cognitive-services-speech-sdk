@@ -982,18 +982,24 @@ public class SpeechRecognizerTests {
         AtomicInteger connectedEventCount = new AtomicInteger(0);;
         AtomicInteger disconnectedEventCount = new AtomicInteger(0);;
         connection.connected.addEventListener((o, connectionEventArgs) -> {
-            connectedEventCount.getAndIncrement();
+            System.out.println(String.format(
+                "Event (@%d): connected: new count: %d",
+                System.currentTimeMillis(), connectedEventCount.incrementAndGet()));
         });
         connection.disconnected.addEventListener((o, connectionEventArgs) -> {
-            disconnectedEventCount.getAndIncrement();
+            System.out.println(String.format(
+                "Event (@%d): disconnected: new count: %d",
+                System.currentTimeMillis(), disconnectedEventCount.incrementAndGet()));
         });
-
         r.recognized.addEventListener((o, e) -> {
-            System.out.println("recognized event!");
             rEvents.add("Result@" + System.currentTimeMillis());
+            System.out.println(String.format(
+                "Event (@%d): recognized result: new count: %d text: %s",
+                System.currentTimeMillis(), rEvents.size(), e.getResult().getText()));
         });
 
         Future<?> future = r.startContinuousRecognitionAsync();
+        assertNotNull("startContinuousRecognitionAsync returned a null future", future);
 
         // wait 60s
         long now = System.currentTimeMillis();
@@ -1002,7 +1008,13 @@ public class SpeechRecognizerTests {
         }
 
         future = r.stopContinuousRecognitionAsync();
-        assertTrue(rEvents.size() > 1);
+        assertNotNull("stopContinuousRecognitionAsync returned a null future", future);
+        future.get(15, TimeUnit.SECONDS);
+        assertFalse("stopContinuousRecognitionAsync was cancelled before completion", future.isCancelled());
+        assertTrue("stopContinuousRecognitionAsync did not complete", future.isDone());
+
+        assertTrue("Expected >1 recognized events for continuous reco. Actual: " + rEvents.size(),
+            rEvents.size() > 1);
 
         r.close();
         s.close();
