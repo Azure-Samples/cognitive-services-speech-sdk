@@ -36,7 +36,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethodWindowsOnly]
         public async Task EnableLogging()
         {
-            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.MULTIPLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
 
             ConcurrentBag<string> logMessages = new ConcurrentBag<string>();
 
@@ -53,7 +53,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 }
 
-                Assert.IsTrue(logMessages.Count > 0);
+                Assert.IsTrue(logMessages.Count > 0, "No messages were logged");
             }
             finally
             {
@@ -64,7 +64,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethodWindowsOnly]
         public async Task DisableLogging()
         {
-            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.MULTIPLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
 
             ConcurrentBag<string> logMessages = new ConcurrentBag<string>();
 
@@ -82,6 +82,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             Assert.IsTrue(logMessages.Count > 0);
 
             int logMessageCount = logMessages.Count;
+            Console.WriteLine($"{logMessageCount} before clearing callback.");
 
             Diagnostics.SetLogMessageCallback(null);
 
@@ -90,13 +91,15 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
             }
 
-            Assert.IsTrue(logMessageCount == logMessages.Count);
+            Assert.IsTrue(logMessageCount == logMessages.Count, $"Log message count differ '{logMessageCount}' != '{logMessages.Count}'");
         }
 
         [TestMethodWindowsOnly]
         public async Task FilterLogging()
         {
-            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.MULTIPLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
+            var filePath = AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath();
+
+            var audioInput = AudioConfig.FromWavFileInput(filePath);
 
             ConcurrentBag<string> logMessages = new ConcurrentBag<string>();
 
@@ -108,17 +111,19 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             Diagnostics.SetLogMessageCallback(logCallback);
             try
             {
-                Diagnostics.SetLogMessageFilter(AudioUtterancesMap[AudioUtteranceKeys.MULTIPLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
+                Diagnostics.SetLogMessageFilter(filePath);
 
                 using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
                 {
                     var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+                    Console.WriteLine("Recognition done");
                 }
 
-                Assert.IsTrue(logMessages.Count > 0);
+                Assert.IsTrue(logMessages.Count > 0, "No messages were logged");
+
                 foreach (var line in logMessages)
                 {
-                    Assert.IsTrue(line.Contains(AudioUtterancesMap[AudioUtteranceKeys.MULTIPLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath()));
+                    Assert.IsTrue(line.Contains(filePath), $"Line '{line}' did not contain '{filePath}'");
                 }
             }
             finally
@@ -130,7 +135,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethodWindowsOnly]
         public async Task LambdaLogging()
         {
-            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.MULTIPLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
 
             ConcurrentBag<string> logMessages = new ConcurrentBag<string>();
 
@@ -149,7 +154,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 }
 
-                Assert.IsTrue(logMessages.Count > 0);
+                Assert.IsTrue(logMessages.Count > 0, "No messages were logged");
             }
             finally
             {
