@@ -1008,17 +1008,17 @@ enum class PronunciationAssessmentGradingSystem
 enum class PronunciationAssessmentGranularity
 {
     /// <summary>
-    /// shows the score on the full text, word and phoneme level
+    /// Shows the score on the full text, word and phoneme level
     /// </summary>
     Phoneme = 1,
 
     /// <summary>
-    /// shows the score on the full text and word level
+    /// Shows the score on the full text and word level
     /// </summary>
     Word = 2,
 
     /// <summary>
-    /// which shows the score on the full text level only
+    /// Shows the score on the full text level only
     /// </summary>
     FullText = 3
 };

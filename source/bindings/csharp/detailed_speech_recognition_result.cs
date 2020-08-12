@@ -75,6 +75,13 @@ namespace Microsoft.CognitiveServices.Speech
         public string MaskedNormalizedForm { get; private set; }
 
         /// <summary>
+        /// Sentence level pronunciation assessment result, available when pronunciation assessment is enabled.
+        /// Added in version 1.14.0
+        /// </summary>
+        [DataMember(Name = "PronunciationAssessment")]
+        internal SentenceLevelPronunciationAssessmentResult PronunciationAssessment { get; private set; }
+
+        /// <summary>
         /// Word level timing result list
         /// Added in version 1.7.0.
         /// </summary>
@@ -116,5 +123,130 @@ namespace Microsoft.CognitiveServices.Speech
         /// </summary>
         [DataMember]
         public string Word { get; private set; }
+
+        /// <summary>
+        /// Word level pronunciation assessment result, available when pronuncation assessment is enabled.
+        /// Added in version 1.14.0
+        /// </summary>
+        [DataMember(Name = "PronunciationAssessment")]
+        internal WordLevelPronunciationAssessmentResult PronunciationAssessment { get; private set; }
+
+        /// <summary>
+        /// Phoneme level timing result list.
+        /// Added in version 1.14.0.
+        /// </summary>
+        [DataMember(Name = "Phonemes")]
+        internal IEnumerable<PhonemeLevelTimingResult> Phonemes { get; private set; }
+    }
+
+    /// <summary>
+    /// Phoneme level timing result.
+    /// Added in version 1.14.0.
+    /// </summary>
+    [DataContract]
+    internal sealed class PhonemeLevelTimingResult
+    {
+        internal PhonemeLevelTimingResult()
+        { }
+
+        /// <summary>
+        /// Duration in ticks.
+        /// </summary>
+        [DataMember]
+        public int Duration { get; private set; }
+
+        /// <summary>
+        /// Offset in ticks.
+        /// </summary>
+        [DataMember]
+        public long Offset { get; private set; }
+
+        /// <summary>
+        /// Recognized Phoneme.
+        /// </summary>
+        [DataMember]
+        public string Phoneme { get; private set; }
+
+        /// <summary>
+        /// Phoneme level pronunciation assessment result, available when pronuncation assessment is enabled.
+        /// </summary>
+        [DataMember(Name = "PronunciationAssessment")]
+        public PhonemeLevelPronunciationAssessmentResult PronunciationAssessment { get; private set; }
+    }
+
+    /// <summary>
+    /// Sentence level pronunciation assessment results
+    /// Added in version 1.14.0.
+    /// </summary>
+    [DataContract]
+    internal sealed class SentenceLevelPronunciationAssessmentResult 
+    {
+        internal SentenceLevelPronunciationAssessmentResult()
+        { }
+
+        /// <summary>
+        /// Accuracy score.
+        /// </summary>
+        [DataMember]
+        public double AccuracyScore { get; private set; }
+
+        /// <summary>
+        /// Pronunciation score.
+        /// </summary>
+        [DataMember(Name = "PronScore")]
+        public double PronunciationScore { get; private set; }
+
+        /// <summary>
+        /// Completeness score.
+        /// </summary>
+        [DataMember]
+        public double CompletenessScore { get; private set; }
+
+        /// <summary>
+        /// Fluency score.
+        /// </summary>
+        [DataMember]
+        public double FluencyScore { get; private set; }
+    }
+
+    /// <summary>
+    /// Word level pronunciation assessment results
+    /// Added in version 1.14.0.
+    /// </summary>
+    [DataContract]
+    internal sealed class WordLevelPronunciationAssessmentResult
+    {
+        internal WordLevelPronunciationAssessmentResult()
+        { }
+
+        /// <summary>
+        /// Accuracy score.
+        /// </summary>
+        [DataMember]
+        public double AccuracyScore { get; private set; }
+
+        /// <summary>
+        /// Error type.
+        /// </summary>
+        [DataMember]
+        public string ErrorType { get; private set; }
+    }
+
+    /// <summary>
+    /// Phoneme level pronunciation assessment results
+    /// Added in version 1.14.0.
+    /// </summary>
+    [DataContract]
+    internal sealed class PhonemeLevelPronunciationAssessmentResult
+    {
+        internal PhonemeLevelPronunciationAssessmentResult()
+        { }
+
+        /// <summary>
+        /// Accuracy score.
+        /// </summary>
+        [DataMember]
+        public double AccuracyScore { get; private set; }
+
     }
 }

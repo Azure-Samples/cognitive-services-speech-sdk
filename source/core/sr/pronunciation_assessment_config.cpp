@@ -88,7 +88,16 @@ void CSpxPronunciationAssessmentConfig::UpdateJson()
     // always set dimension to Comprehensive
     paramsJson["dimension"] = "Comprehensive";
 
-    paramsJson["enableMiscue"] = GetStringValue(GetPropertyName(PropertyId::PronunciationAssessment_EnableMiscue)) == TrueString;
+    const auto enableMiscueString = GetStringValue(GetPropertyName(PropertyId::PronunciationAssessment_EnableMiscue));
+    if (enableMiscueString == TrueString)
+    {
+        paramsJson["enableMiscue"] = true;
+    }
+    else if (enableMiscueString == FalseString)
+    {
+        paramsJson["enableMiscue"] = false;
+    }
+
     auto scenarioId = GetStringValue(GetPropertyName(PropertyId::PronunciationAssessment_ScenarioId));
     if (!scenarioId.empty())
     {

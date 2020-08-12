@@ -81,6 +81,7 @@ enum  PropertyId
     AudioConfig_BitsPerSampleForCapture = 8003,
     AudioConfig_AudioSource = 8004,
     AudioConfig_DeviceNameForRender = 8005,
+    AudioConfig_PlaybackBufferLengthInMs = 8006,
     Speech_LogFilename = 9001,
     Conversation_ApplicationId = 10000,
     Conversation_DialogType = 10001,
@@ -91,7 +92,15 @@ enum  PropertyId
     Conversation_Speech_Activity_Template = 10006,
     Conversation_ParticipantId = 10007,
     DataBuffer_TimeStamp = 11001,
-    DataBuffer_UserId = 11002
+    DataBuffer_UserId = 11002,
+
+    PronunciationAssessment_ReferenceText = 12001,
+    PronunciationAssessment_GradingSystem = 12002,
+    PronunciationAssessment_Granularity = 12003,
+    PronunciationAssessment_EnableMiscue = 12005,
+    PronunciationAssessment_ScenarioId = 12006,
+    PronunciationAssessment_Json = 12009,
+    PronunciationAssessment_Params = 12010
 };
 
 typedef enum _ParticipantChangedReason

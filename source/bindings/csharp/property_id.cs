@@ -352,7 +352,59 @@ namespace Microsoft.CognitiveServices.Speech
         /// See https://en.wikipedia.org/wiki/Presentation_timestamp.
         /// Added in version 1.5.0.
         /// </summary>
-        ConversationTranscribingService_DataBufferTimeStamp = Internal.PropertyId.DataBuffer_TimeStamp
+        ConversationTranscribingService_DataBufferTimeStamp = Internal.PropertyId.DataBuffer_TimeStamp,
 
+        /// <summary>
+        /// The reference text of the audio for pronunciation evaluation.
+        /// For this and the following pronunciation assessment parameters, see
+        /// https://docs.microsoft.com/azure/cognitive-services/speech-service/rest-speech-to-text#pronunciation-assessment-parameters for details.
+        /// Under normal circumstances, you shouldn't have to use this property directly.
+        /// Added in version 1.14.0
+        /// </summary>
+        PronunciationAssessment_ReferenceText = Internal.PropertyId.PronunciationAssessment_ReferenceText,
+
+        /// <summary>
+        /// The point system for pronunciation score calibration (FivePoint or HundredMark).
+        /// Under normal circumstances, you shouldn't have to use this property directly.
+        /// Added in version 1.14.0
+        /// </summary>
+        PronunciationAssessment_GradingSystem = Internal.PropertyId.PronunciationAssessment_GradingSystem,
+
+        /// <summary>
+        /// The pronunciation evaluation granularity (Phoneme, Word, or FullText).
+        /// Under normal circumstances, you shouldn't have to use this property directly.
+        /// Added in version 1.14.0
+        /// </summary>
+        PronunciationAssessment_Granularity = Internal.PropertyId.PronunciationAssessment_Granularity,
+
+        /// <summary>
+        /// Defines if enable miscue calculation. 
+        /// With this enabled, the pronounced words will be compared to the reference text, 
+        /// and will be marked with omission/insertion based on the comparison. The default setting is False.
+        /// Under normal circumstances, you shouldn't have to use this property directly.
+        /// Added in version 1.14.0
+        /// </summary>
+        PronunciationAssessment_EnableMiscue = Internal.PropertyId.PronunciationAssessment_EnableMiscue,
+
+        /// <summary>
+        /// A GUID indicating a customized pronunciation score system. 
+        /// Under normal circumstances, you shouldn't have to use this property directly.
+        /// Added in version 1.14.0
+        /// </summary>
+        PronunciationAssessment_ScenarioId = Internal.PropertyId.PronunciationAssessment_ScenarioId,
+
+        /// <summary>
+        /// The json string of pronunciation assessment parameters
+        /// Under normal circumstances, you shouldn't have to use this property directly.
+        /// Added in version 1.14.0
+        /// </summary>
+        PronunciationAssessment_Json = Internal.PropertyId.PronunciationAssessment_Json,
+
+        /// <summary>
+        /// Pronunciation assessment parameters.
+        /// This property is intended to be read-only. The SDK is using it internally.
+        /// Added in version 1.14.0
+        /// </summary>
+        PronunciationAssessment_Params = Internal.PropertyId.PronunciationAssessment_Params,
     }
 }

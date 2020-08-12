@@ -111,6 +111,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils
         public static string SINGLE_UTTERANCE_WITH_PUNCTUATION => "SingleUtteranceWithPunctuation";
         public static string PROFANTITY_SINGLE_UTTERANCE_ENGLISH_1 => "ProfanitySingleUtteranceEnglish1";
         public static string PROFANITY_SINGLE_UTTERANCE_ENGLISH_2 => "ProfanitySingleUtteranceEnglish2";
+        public static string PRONUNCIATION_ASSESSMENT_BAD_PRONUNCIATION => "PronunciationAssessmentBadPronunciation";
+        public static string PRONUNCIATION_ASSESSMENT_GOOD_PRONUNCIATION_CHINESE => "PronunciationAssessmentGoodPronunciationChinese";
         public static string SYNTHESIS_UTTERANCE_CHINESE_1 => "SynthesisUtteranceChinese1";
         public static string SYNTHESIS_UTTERANCE_CHINESE_2 => "SynthesisUtteranceChinese1";
     }

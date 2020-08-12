@@ -68,6 +68,13 @@ namespace Microsoft.CognitiveServices.Speech.Internal
         Conversation_Speech_Activity_Template = 10006,
         Conversation_ParticipantId = 10007,
         DataBuffer_TimeStamp = 11001,
-        DataBuffer_UserId = 11002
+        DataBuffer_UserId = 11002,
+        PronunciationAssessment_ReferenceText = 12001,
+        PronunciationAssessment_GradingSystem = 12002,
+        PronunciationAssessment_Granularity = 12003,
+        PronunciationAssessment_EnableMiscue = 12005,
+        PronunciationAssessment_ScenarioId = 12006,
+        PronunciationAssessment_Json = 12009,
+        PronunciationAssessment_Params = 12010
     }
 }

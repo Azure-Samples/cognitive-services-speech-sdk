@@ -14,6 +14,7 @@ namespace Microsoft.CognitiveServices.Speech.Internal
     using SPXPROPERTYBAGHANDLE = System.IntPtr;
     using SPXSOURCELANGCONFIGHANDLE = System.IntPtr;
     using SPXAUTODETECTSOURCELANGCONFIGHANDLE = System.IntPtr;
+    using SPXPRONUNCIATIONASSESSMENTCONFIGHANDLE = System.IntPtr;
 
     internal static class AudioConfig
     {
@@ -149,5 +150,31 @@ namespace Microsoft.CognitiveServices.Speech.Internal
 
         [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR auto_detect_source_lang_config_release(SPXAUTODETECTSOURCELANGCONFIGHANDLE hAutoDetectSourceLanguageconfig);
+    }
+
+    internal static class PronunciationAssessmentConfig
+    {
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention, CharSet = CharSet.Ansi)]
+        public static extern SPXHR create_pronunciation_assessment_config(out SPXPRONUNCIATIONASSESSMENTCONFIGHANDLE hAutoDetectSourceLanguageconfig,
+                                                                            IntPtr referenceText,
+                                                                            Int32 gradingSystem,
+                                                                            Int32 granularity,
+                                                                            bool enableMiscue,
+                                                                            [MarshalAs(UnmanagedType.LPStr)] string scenarioId);
+
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
+        public static extern SPXHR create_pronunciation_assessment_config_from_json(out SPXPRONUNCIATIONASSESSMENTCONFIGHANDLE hAutoDetectSourceLanguageconfig, IntPtr json);
+
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
+        public static extern SPXHR pronunciation_assessment_config_release(SPXPRONUNCIATIONASSESSMENTCONFIGHANDLE hAutoDetectSourceLanguageconfig);
+
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
+        public static extern SPXHR pronunciation_assessment_config_get_property_bag(InteropSafeHandle hAutoDetectSourceLanguageconfig, out SPXPROPERTYBAGHANDLE propbag);
+
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
+        public static extern IntPtr pronunciation_assessment_config_to_json(InteropSafeHandle hPronunciationAssessmentConfig);
+
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
+        public static extern SPXHR pronunciation_assessment_config_apply_to_recognizer(InteropSafeHandle hPronunciationAssessmentConfig, InteropSafeHandle hreco);
     }
 }
