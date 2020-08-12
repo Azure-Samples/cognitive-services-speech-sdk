@@ -56,7 +56,8 @@ namespace USP {
 constexpr std::array<const char *, 11> endpoint::unifiedspeech::queryParameters;
 constexpr std::array<const char *, 12> endpoint::translation::queryParameters;
 constexpr std::array<const char *, 2> endpoint::luis::queryParameters;
-constexpr std::array<const char *, 2> endpoint::dialog::queryParameters;
+constexpr std::array<const char*, 2> endpoint::dialog::customCommands::queryParameters;
+constexpr std::array<const char *, 3> endpoint::dialog::botFramework::queryParameters;
 constexpr std::array<const char *, 2> endpoint::conversationTranscriber::queryParameters;
 constexpr std::array<const char *, 0> endpoint::speechSynthesis::queryParameters;
 
@@ -514,7 +515,14 @@ string Connection::Impl::ConstructConnectionUrl() const
         break;
 
     case EndpointType::Dialog:
-        BuildQueryParameters(endpoint::dialog::queryParameters, m_config.m_queryParameters, customEndpoint, oss);
+        if (m_config.m_dialogBackend == Client::DialogBackend::BotFramework)
+        {
+            BuildQueryParameters(endpoint::dialog::botFramework::queryParameters, m_config.m_queryParameters, customEndpoint, oss);
+        }
+        else if (m_config.m_dialogBackend == Client::DialogBackend::CustomCommands)
+        {
+            BuildQueryParameters(endpoint::dialog::customCommands::queryParameters, m_config.m_queryParameters, customEndpoint, oss);
+        }
         break;
 
     case EndpointType::SpeechSynthesis:

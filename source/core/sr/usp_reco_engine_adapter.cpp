@@ -542,7 +542,6 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpointDialog(const std::shared_pt
 
     UpdateDefaultLanguage(properties);
 
-    SetUspQueryParameters(USP::endpoint::dialog::queryParameters, properties, client);
 
     /* Set conversation id if present */
     m_dialogConversationId = properties->GetStringValue(GetPropertyName(PropertyId::Conversation_Conversation_Id));
@@ -552,10 +551,12 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpointDialog(const std::shared_pt
     if (dialogType == g_dialogType_BotFramework)
     {
         dialogBackend = USP::Client::DialogBackend::BotFramework;
+        SetUspQueryParameters(USP::endpoint::dialog::botFramework::queryParameters, properties, client);
     }
     else if (dialogType == g_dialogType_CustomCommands)
     {
         dialogBackend = USP::Client::DialogBackend::CustomCommands;
+        SetUspQueryParameters(USP::endpoint::dialog::customCommands::queryParameters, properties, client);
     }
     else
     {
@@ -626,7 +627,7 @@ void CSpxUspRecoEngineAdapter::SetUspQueryParametersInternal(const char *queryPa
     };
 
     using TupleType = std::tuple<const char *, const char *, PropertyValueType>;
-    constexpr std::array<TupleType, 16> QueryParamInfo{{
+    constexpr std::array<TupleType, 17> QueryParamInfo{{
         TupleType{ USP::endpoint::langQueryParam, GetPropertyName(PropertyId::SpeechServiceConnection_RecoLanguage), PropertyValueType::StringProperty },
         TupleType{ USP::endpoint::deploymentIdQueryParam, GetPropertyName(PropertyId::SpeechServiceConnection_EndpointId), PropertyValueType::StringProperty },
         TupleType{ USP::endpoint::initialSilenceTimeoutQueryParam, GetPropertyName(PropertyId::SpeechServiceConnection_InitialSilenceTimeoutMs), PropertyValueType::IntProperty },
@@ -642,7 +643,8 @@ void CSpxUspRecoEngineAdapter::SetUspQueryParametersInternal(const char *queryPa
         TupleType{ USP::endpoint::translation::toQueryParam, GetPropertyName(PropertyId::SpeechServiceConnection_TranslationToLanguages), PropertyValueType::StringProperty },
         TupleType{ USP::endpoint::translation::voiceQueryParam, GetPropertyName(PropertyId::SpeechServiceConnection_TranslationVoice), PropertyValueType::StringProperty },
         TupleType{ USP::endpoint::translation::stableTranslationQueryParam, GetPropertyName(PropertyId::SpeechServiceResponse_TranslationRequestStablePartialResult), PropertyValueType::BoolProperty },
-        TupleType{ USP::endpoint::dialog::customVoiceDeploymentIdsQueryParam, GetPropertyName(PropertyId::Conversation_Custom_Voice_Deployment_Ids), PropertyValueType::StringProperty }
+        TupleType{ USP::endpoint::dialog::customVoiceDeploymentIdsQueryParam, GetPropertyName(PropertyId::Conversation_Custom_Voice_Deployment_Ids), PropertyValueType::StringProperty },
+        TupleType{ USP::endpoint::dialog::botIdQueryParam, GetPropertyName(PropertyId::Conversation_ApplicationId), PropertyValueType::StringProperty }
     }};
 
     auto QueryParameterToPropertyId = [&](const char *queryName) -> const TupleType&
@@ -2261,7 +2263,7 @@ json CSpxUspRecoEngineAdapter::GetSpeechContextJson()
     if (!pronunciationAssessmentParams.empty() && m_endpointType == USP::EndpointType::Speech)
     {
         // pronunciation assessment requires detailed format and word timings.
-        // TODO: for now, format and word timings are needed to set in speech.context, which is different from current SDK 
+        // TODO: for now, format and word timings are needed to set in speech.context, which is different from current SDK
         // implementation (in connection url). Need to update the logic after service update.
         contextJson["phraseDetection"]["enrichment"]["pronunciationAssessment"] = json::parse(pronunciationAssessmentParams);
         // set detailed format

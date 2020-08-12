@@ -600,12 +600,25 @@ struct endpoint
             static constexpr const char * customCommands = "/v1";
         };
 
+        static constexpr const char * botIdQueryParam = "botId=";
         static constexpr const char * customVoiceDeploymentIdsQueryParam = "voiceDeploymentId=";
 
-        static constexpr std::array<const char *, 2> queryParameters{{
-            langQueryParam,
-            customVoiceDeploymentIdsQueryParam
-        }};
+        struct customCommands
+        {
+            static constexpr std::array<const char *, 2> queryParameters{{
+                langQueryParam,
+                customVoiceDeploymentIdsQueryParam
+            }};
+        };
+
+        struct botFramework
+        {
+            static constexpr std::array<const char *, 3> queryParameters{{
+                langQueryParam,
+                customVoiceDeploymentIdsQueryParam,
+                botIdQueryParam
+            }};
+        };
     };
 
     struct conversationTranscriber
