@@ -98,9 +98,12 @@ jobs:
       vsts_setvar SPEECHSDK_ENABLE_RNNT true
       if [[ $SPEECHSDK_TARGET_PLATFORM == Linux-arm64 ]]; then
         vsts_setvar SPEECHSDK_ENABLE_UNIDEC true
-        vsts_setvar SPEECHSDK_ENABLE_HYBRID_TTS true
       else
         vsts_setvar SPEECHSDK_ENABLE_UNIDEC false
+      fi
+      if [[ $SPEECHSDK_TARGET_PLATFORM =~ Linux-(arm32|arm64) ]]; then
+        vsts_setvar SPEECHSDK_ENABLE_HYBRID_TTS true
+      else
         vsts_setvar SPEECHSDK_ENABLE_HYBRID_TTS false
       fi
       vsts_setvar SPEECHSDK_ENABLE_CODEC true

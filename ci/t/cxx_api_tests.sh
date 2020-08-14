@@ -39,6 +39,12 @@ case $PLATFORM in
       LD_LIBRARY_PATH="${HYBRID_TTS_RUNTIME_PATH}:$LD_LIBRARY_PATH"
     fi
     ;;
+  Linux-arm32*)
+    HYBRID_TTS_RUNTIME_PATH="$SCRIPT_DIR/../external/offline_tts/Linux/arm32"
+    if [[ -d "$HYBRID_TTS_RUNTIME_PATH" ]]; then
+      LD_LIBRARY_PATH="${HYBRID_TTS_RUNTIME_PATH}:$LD_LIBRARY_PATH"
+    fi
+    ;;
   Linux-x64*)
     UNIDEC_RUNTIME_PATH="$SCRIPT_DIR/../external/unidec/Richland.Speech.UnidecRuntime/linux-amd64-platform/lib"
     if [[ -d "$UNIDEC_RUNTIME_PATH" ]]; then
