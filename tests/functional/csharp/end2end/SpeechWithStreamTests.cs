@@ -114,16 +114,16 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             string[] lexicalFormResultUtterances = result.Select(r => r.Result.Best().ToArray()[0].LexicalForm).ToArray();
             lexicalFormResultUtterances = lexicalFormResultUtterances.Select(s => Regex.Replace(s, " '", "", RegexOptions.Compiled)).ToArray();
 
-            AssertFuzzyMatching(bestResultUtterances, AudioUtterancesMap[AudioUtteranceKeys.MULTIPLE_UTTERANCE_ENGLISH].Utterances[Language.EN].Select(x => x.Text).ToArray(), 3);
-            AssertFuzzyMatching(normalizedFormResultUtterances, AudioUtterancesMap[AudioUtteranceKeys.MULTIPLE_UTTERANCE_ENGLISH].Utterances[Language.EN].Select(x => x.Text).ToArray(), 3);
-            AssertFuzzyMatching(lexicalFormResultUtterances, AudioUtterancesMap[AudioUtteranceKeys.MULTIPLE_UTTERANCE_ENGLISH].Utterances[Language.EN].Select(x => x.Text).ToArray(), 3);
+            AssertFuzzyMatching(bestResultUtterances, AudioUtterancesMap[AudioUtteranceKeys.MULTIPLE_UTTERANCE_ENGLISH].Utterances[Language.EN].Select(x => x.Text).ToArray(), 10);
+            AssertFuzzyMatching(normalizedFormResultUtterances, AudioUtterancesMap[AudioUtteranceKeys.MULTIPLE_UTTERANCE_ENGLISH].Utterances[Language.EN].Select(x => x.Text).ToArray(), 10);
+            AssertFuzzyMatching(lexicalFormResultUtterances, AudioUtterancesMap[AudioUtteranceKeys.MULTIPLE_UTTERANCE_ENGLISH].Utterances[Language.EN].Select(x => x.Text).ToArray(), 10);
 
             Assert.AreEqual(AudioUtterancesMap[AudioUtteranceKeys.MULTIPLE_UTTERANCE_ENGLISH].Utterances[Language.EN].Length, result.Count, "Unexpected number of nonempty utterances");
             var actualRecognitionTextResults = result.Select(t => t.Result.Text).ToArray();
             for (var i = 0; i < result.Count; i++)
             {
-                // allow 5 % of word error rate, or at least 2 errors (for short utterances)
-                AssertStringWordEditPercentage(Normalize(AudioUtterancesMap[AudioUtteranceKeys.MULTIPLE_UTTERANCE_ENGLISH].Utterances[Language.EN][i].Text), Normalize(actualRecognitionTextResults[i]), 5, 2);
+                // allow 10 % of word error rate, or at least 3 errors (for short utterances)
+                AssertStringWordEditPercentage(Normalize(AudioUtterancesMap[AudioUtteranceKeys.MULTIPLE_UTTERANCE_ENGLISH].Utterances[Language.EN][i].Text), Normalize(actualRecognitionTextResults[i]), 10, 3);
             }
         }
 
@@ -159,7 +159,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     }
 
                     var texts = results.Select(r => r.Text).Where(t => !string.IsNullOrEmpty(t)).ToArray();
-                    AssertFuzzyMatching(AudioUtterancesMap[AudioUtteranceKeys.MULTIPLE_UTTERANCE_ENGLISH].Utterances[Language.EN].Select(x => x.Text).ToArray(), texts, 5);
+                    AssertFuzzyMatching(AudioUtterancesMap[AudioUtteranceKeys.MULTIPLE_UTTERANCE_ENGLISH].Utterances[Language.EN].Select(x => x.Text).ToArray(), texts, 10);
                 }
             }
         }
@@ -210,7 +210,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 await recognizer.StopContinuousRecognitionAsync();
 
                 string[] resultUtterances = results.Select(r => r.Text).ToArray();
-                AssertFuzzyMatching(resultUtterances, AudioUtterancesMap[AudioUtteranceKeys.MULTIPLE_UTTERANCE_ENGLISH].Utterances[Language.EN].Select(x => x.Text).ToArray().Concat(AudioUtterancesMap[AudioUtteranceKeys.MULTIPLE_UTTERANCE_ENGLISH].Utterances[Language.EN].Select(x => x.Text).ToArray()).ToArray(), 2);
+                AssertFuzzyMatching(resultUtterances, AudioUtterancesMap[AudioUtteranceKeys.MULTIPLE_UTTERANCE_ENGLISH].Utterances[Language.EN].Select(x => x.Text).ToArray().Concat(AudioUtterancesMap[AudioUtteranceKeys.MULTIPLE_UTTERANCE_ENGLISH].Utterances[Language.EN].Select(x => x.Text).ToArray()).ToArray(), 10);
 
                 // Checking durations.
                 var offsets = results
@@ -287,7 +287,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 var actual = string.Join(" ", texts.ToArray());
                 actual = Normalize(actual);
                 // don't do a hard string comparison, we allow a small number of word edits (word insert/delete/move)
-                AssertStringWordEditCount(expected, actual, 20);
+                AssertStringWordEditCount(expected, actual, (Times * 10));
             }
         }
     }

@@ -237,10 +237,10 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             this.defaultConfig.SetProperty("SPEECH-SkipAudioDurationHNS", "5000000");
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
-                string plainActualText = Normalize(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text);
-                string plainExpectedText = Normalize(await helper.GetFirstRecognizerResult(recognizer));
+                string plainExpectedText = Normalize(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text);
+                string plainActualText = Normalize(await helper.GetFirstRecognizerResult(recognizer));
 
-                plainActualText = plainActualText.Remove(0, 6);
+                plainExpectedText = plainExpectedText.Remove(0, 10);
 
                 Assert.IsTrue(
                         plainExpectedText.Equals(plainActualText),
@@ -747,7 +747,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 Console.WriteLine($"Result2: {result2.ToString()}");
 
                 Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
-                AssertStringContains(result.Text, "detective skills");
+                AssertStringContains(result.Text.ToLower(), "detective skills");
                 Assert.IsTrue(result.Duration.Ticks > 0, $"Result duration {result.Duration.Ticks} in {result.ToString()} should be greater than 0");
 
                 Assert.AreEqual(ResultReason.RecognizedSpeech, result2.Reason);
