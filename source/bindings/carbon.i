@@ -94,6 +94,8 @@
 %shared_ptr(Microsoft::CognitiveServices::Speech::SourceLanguageConfig)
 %shared_ptr(Microsoft::CognitiveServices::Speech::AutoDetectSourceLanguageConfig)
 %shared_ptr(Microsoft::CognitiveServices::Speech::AutoDetectSourceLanguageResult)
+%shared_ptr(Microsoft::CognitiveServices::Speech::PronunciationAssessmentConfig)
+%shared_ptr(Microsoft::CognitiveServices::Speech::PronunciationAssessmentResult)
 %shared_ptr(std::vector<uint8_t>)
 
 %shared_ptr(Microsoft::CognitiveServices::Speech::Audio::AudioConfig)
@@ -154,6 +156,7 @@
 %ignore operator SPXAUTODETECTSOURCELANGCONFIGHANDLE;
 %ignore operator SPXSOURCELANGCONFIGHANDLE;
 %ignore operator SPXSCONVERSATIONHANDLE;
+%ignore operator SPXPRONUNCIATIONASSESSMENTCONFIGHANDLE;
 
 %ignore *::PropertyId;
 
@@ -859,6 +862,9 @@
 %include <speechapi_cxx_phrase_list_grammar.h>
 %include <speechapi_cxx_grammar_list.h>
 %include <speechapi_cxx_class_language_model.h>
+
+%include <speechapi_cxx_pronunciation_assessment_config.h>
+%include <speechapi_cxx_pronunciation_assessment_result.h>
 
 %template(FromRecognizer) Microsoft::CognitiveServices::Speech::PhraseListGrammar::FromRecognizer<Microsoft::CognitiveServices::Speech::Recognizer>;
 %template(FromRecognizer) Microsoft::CognitiveServices::Speech::GrammarList::FromRecognizer<Microsoft::CognitiveServices::Speech::Recognizer>;

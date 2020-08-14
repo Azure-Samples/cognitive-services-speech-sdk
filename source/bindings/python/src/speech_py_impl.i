@@ -204,6 +204,9 @@ from typing import Optional
 %rename ("_from_source_language_configs") Microsoft::CognitiveServices::Speech::AutoDetectSourceLanguageConfig::FromSourceLanguageConfigs;
 %rename ("_from_result") Microsoft::CognitiveServices::Speech::AutoDetectSourceLanguageResult::FromResult;
 %rename ("_from_config") Microsoft::CognitiveServices::Speech::KeywordRecognizer::FromConfig;
+%rename ("_create") Microsoft::CognitiveServices::Speech::PronunciationAssessmentConfig::Create;
+%rename ("_create_from_json") Microsoft::CognitiveServices::Speech::PronunciationAssessmentConfig::CreateFromJson;
+%rename ("_from_result") Microsoft::CognitiveServices::Speech::PronunciationAssessmentResult::FromResult;
 
 // return synthesized audio as bytes object
 %rename ("_audio") Microsoft::CognitiveServices::Speech::Translation::TranslationSynthesisResult::Audio;
@@ -643,6 +646,8 @@ inject_enum('ProfanityOption')
 inject_enum('StreamStatus')
 inject_enum('SpeechSynthesisOutputFormat')
 inject_enum('AudioStreamContainerFormat')
+inject_enum('PronunciationAssessmentGradingSystem')
+inject_enum('PronunciationAssessmentGranularity')
 
 # clean up the exported names
 del inject_enum

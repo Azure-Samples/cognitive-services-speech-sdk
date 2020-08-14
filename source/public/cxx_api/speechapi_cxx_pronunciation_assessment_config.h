@@ -114,7 +114,17 @@ public:
     }
 
     /// <summary>
-    /// Set the reference text.
+    /// Gets the reference text.
+    /// </summary>
+    /// <returns>The reference text.</returns>
+    SPXSTRING GetReferenceText()
+    {
+        const char* value = property_bag_get_string(m_propertybag, static_cast<int>(PropertyId::PronunciationAssessment_ReferenceText), nullptr, "");
+        return Utils::ToSPXString(Utils::CopyAndFreePropertyString(value));
+    }
+
+    /// <summary>
+    /// Sets the reference text.
     /// </summary>
     /// <param name="referenceText">The reference text.</param>
     void SetReferenceText(const std::string& referenceText)
@@ -124,7 +134,7 @@ public:
 
 #ifndef SWIG
     /// <summary>
-    /// Set the reference text.
+    /// Sets the reference text.
     /// </summary>
     /// <param name="referenceText">The reference text.</param>
     void SetReferenceText(const std::wstring& referenceText)
@@ -134,7 +144,7 @@ public:
 #endif
 
     /// <summary>
-    /// Apply the settings in this config to a Recognizer.
+    /// Applies the settings in this config to a Recognizer.
     /// </summary>
     /// <param name="recognizer">The target Recognizer.</param>
     void ApplyTo(std::shared_ptr<Recognizer> recognizer) const

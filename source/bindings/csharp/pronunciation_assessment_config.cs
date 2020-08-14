@@ -111,7 +111,7 @@ namespace Microsoft.CognitiveServices.Speech.PronunciationAssessment
         }
 
         /// <summary>
-        /// Apply the settings in this config to a recognizer.
+        /// Applies the settings in this config to a recognizer.
         /// </summary>
         /// <param name="recognizer">The target recognizer.</param>
         public void ApplyTo(Recognizer recognizer)

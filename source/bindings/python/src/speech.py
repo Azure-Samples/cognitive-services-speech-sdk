@@ -22,9 +22,13 @@ from .speech_py_impl import (
     SpeechSynthesisCancellationDetails,
     SpeechSynthesisOutputFormat,
     AudioStreamContainerFormat,
+    PronunciationAssessmentGradingSystem,
+    PronunciationAssessmentGranularity,
 )
 
-from typing import Optional, Dict, Union, Callable
+import json
+
+from typing import Optional, Dict, Union, Callable, List
 OptionalStr = Optional[str]
 
 
@@ -500,14 +504,14 @@ class ResultFuture():
 class AutoDetectSourceLanguageResult():
     """
     Represents auto detection source language result.
-    
+
     The result can be initialized from a speech recognition result.
-    
+
     :param speechRecognitionResult: The speech recognition result
     """
-    def __init__(self, speechRecognitionResult: SpeechRecognitionResult):        
+    def __init__(self, speechRecognitionResult: SpeechRecognitionResult):
         self._language = speechRecognitionResult.properties.get(PropertyId.SpeechServiceConnection_AutoDetectSourceLanguageResult)
-    
+
     @property
     def language(self) -> str:
         """
@@ -772,18 +776,18 @@ class SpeechRecognizer(Recognizer):
     A speech recognizer.
     If you need to specify source language information, please only specify one of these three parameters, language, source_language_config or auto_detect_source_language_config.
 
-    :param speech_config: The config for the speech recognizer 
+    :param speech_config: The config for the speech recognizer
     :param audio_config: The config for the audio input
     :param language: The source language
     :param source_language_config: The source language config
     :param auto_detect_source_language_config: The auto detection source language config
     """
-    def __init__(self, speech_config: SpeechConfig, audio_config: Optional[audio.AudioConfig] = None, language: OptionalStr = None, 
+    def __init__(self, speech_config: SpeechConfig, audio_config: Optional[audio.AudioConfig] = None, language: OptionalStr = None,
             source_language_config: Optional[languageconfig.SourceLanguageConfig] = None, auto_detect_source_language_config: Optional[languageconfig.AutoDetectSourceLanguageConfig] = None):
         if not isinstance(speech_config, SpeechConfig):
             raise ValueError('speech_config must be a SpeechConfig instance')
         languageConfigNum = 0
-        if language is not None: 
+        if language is not None:
             if language == "":
                 raise ValueError('language cannot be an empty string')
             languageConfigNum = languageConfigNum + 1
@@ -794,7 +798,7 @@ class SpeechRecognizer(Recognizer):
         if languageConfigNum > 1:
             raise ValueError('cannot construct SpeechRecognizer with more than one language configurations, please only specify one of these three parameters: language, source_language_config or auto_detect_source_language_config')
 
-        
+
         self._impl = self._get_impl(impl.SpeechRecognizer, speech_config, audio_config, language, source_language_config, auto_detect_source_language_config)
 
     def recognize_once(self) -> SpeechRecognitionResult:
@@ -863,12 +867,12 @@ class SpeechRecognizer(Recognizer):
             if audio_config is None:
                 return reco_type._from_config(speech_config._impl, language)
             return reco_type._from_config(speech_config._impl, language, audio_config._impl)
-        
-        if source_language_config is not None:            
+
+        if source_language_config is not None:
             if audio_config is None:
                 return reco_type._from_config(speech_config._impl, source_language_config._impl)
             return reco_type._from_config(speech_config._impl, source_language_config._impl, audio_config._impl)
-        
+
         # auto_detect_source_language_config must not be None if we arrive this code
         if audio_config is None:
             return reco_type._from_config(speech_config._impl, auto_detect_source_language_config._impl)
@@ -1629,3 +1633,207 @@ class KeywordRecognizer:
         :class:`.SpeechRecognitionCanceledEventArgs` instance as the single argument.
         """
         return EventSignal(self._impl.canceled, SpeechRecognitionCanceledEventArgs)
+
+
+class PronunciationAssessmentConfig:
+    """
+    Represents pronunciation assessment configuration
+
+    .. note::
+      Added in version 1.14.0.
+
+    The configuration can be initialized in two ways:
+
+    - from parameters: pass reference text, grading system, granularity, enable miscue and scenario id.
+    - from json: pass a json string
+
+    For the parameters details, see
+    https://docs.microsoft.com/azure/cognitive-services/speech-service/rest-speech-to-text#pronunciation-assessment-parameters
+
+    :param reference_text: The reference text for pronunciation assessment
+    :param grading_system: The point system for score calibration
+    :param granularity: The evaluation granularity
+    :param enable_miscue: If enables miscue calculation
+    :param scenario_id: A GUID indicating a customized point system
+    :param json_string: A json string representing pronunciation assessment parameters
+    """
+    def __init__(self, reference_text: str = None,
+                 grading_system: PronunciationAssessmentGradingSystem = PronunciationAssessmentGradingSystem.FivePoint,
+                 granularity: PronunciationAssessmentGranularity = PronunciationAssessmentGranularity.Phoneme,
+                 enable_miscue: bool = False,
+                 scenario_id: str = "",
+                 json_string: str = None):
+        if reference_text is not None and json_string is not None:
+            raise ValueError("reference text and json string cannot be both specified to create PronunciationAssessmentConfig")
+        self._impl = self._get_impl(impl.PronunciationAssessmentConfig, reference_text, grading_system, granularity,
+                                    enable_miscue, scenario_id, json_string)
+
+    @staticmethod
+    def _get_impl(config_type, reference_text, grading_system, granularity, enable_miscue, scenario_id, json_string):
+        if json_string is not None:
+            return config_type._create_from_json(json_string)
+
+        ref_text = "" if reference_text is None else reference_text
+
+        return config_type._create(ref_text, grading_system.value, granularity.value, enable_miscue, scenario_id)
+
+    def to_json(self) -> str:
+        """
+        Gets to json string of pronunciation assessment parameters.
+
+        :return: the json string.
+        """
+        return self._impl.to_json()
+
+    def apply_to(self, recognizer: Recognizer):
+        """
+        Apply the settings in this config to a recognizer.
+
+        :param recognizer: the target recognizer.
+        """
+        return self._impl.apply_to(recognizer._impl)
+
+    @property
+    def reference_text(self) -> str:
+        """
+        The reference text.
+        """
+        return self._impl.get_reference_text()
+
+    @reference_text.setter
+    def reference_text(self, text: str):
+        self._impl.set_reference_text(text)
+
+
+class PronunciationAssessmentPhonemeResult:
+    """
+    Contains phoneme level pronunciation assessment result
+
+    .. note::
+      Added in version 1.14.0.
+    """
+    def __init__(self, _json):
+        self._phoneme = _json['Phoneme']
+        self._accuracy_score = _json['PronunciationAssessment']['AccuracyScore']
+
+    @property
+    def phoneme(self) -> str:
+        """
+        The phoneme text.
+        """
+        return self._phoneme
+
+    @property
+    def accuracy_score(self) -> float:
+        """
+        The score indicating the pronunciation accuracy of the given speech, which indicates
+        how closely the phonemes match a native speaker's pronunciation
+        """
+        return self._accuracy_score
+
+
+class PronunciationAssessmentWordResult:
+    """
+    Contains word level pronunciation assessment result
+
+    .. note::
+      Added in version 1.14.0.
+    """
+    def __init__(self, _json):
+        self._word = _json['Word']
+        self._accuracy_score = _json['PronunciationAssessment']['AccuracyScore']
+        self._error_type = _json['PronunciationAssessment']['ErrorType']
+        if 'Phonemes' in _json:
+            self._phonemes = [PronunciationAssessmentPhonemeResult(p) for p in _json['Phonemes']]
+
+    @property
+    def word(self) -> str:
+        """
+        The word text.
+        """
+        return self._word
+
+    @property
+    def accuracy_score(self) -> float:
+        """
+        The score indicating the pronunciation accuracy of the given speech, which indicates
+        how closely the phonemes match a native speaker's pronunciation
+        """
+        return self._accuracy_score
+
+    @property
+    def error_type(self) -> str:
+        """
+        This value indicates whether a word is omitted, inserted or badly pronounced, compared to ReferenceText.
+        Possible values are None (meaning no error on this word), Omission, Insertion and Mispronunciation.
+        """
+        return self._error_type
+
+    @property
+    def phonemes(self) -> List[PronunciationAssessmentPhonemeResult]:
+        """
+        Phoneme level pronunciation assessment result
+        """
+        return self._phonemes
+
+
+class PronunciationAssessmentResult:
+    """
+    Represents pronunciation assessment result.
+
+    .. note::
+      Added in version 1.14.0.
+
+    The result can be initialized from a speech recognition result.
+
+    :param result: The speech recognition result
+    """
+    def __init__(self, result: SpeechRecognitionResult):
+        json_result = result.properties.get(PropertyId.SpeechServiceResponse_JsonResult)
+        if 'PronunciationAssessment' in json_result:
+            jo = json.loads(json_result)
+            nb = jo['NBest'][0]
+            self._accuracy_score = nb['PronunciationAssessment']['AccuracyScore']
+            self._pronunciation_score = nb['PronunciationAssessment']['PronScore']
+            self._completeness_score = nb['PronunciationAssessment']['CompletenessScore']
+            self._fluency_score = nb['PronunciationAssessment']['FluencyScore']
+            if 'Words' in nb:
+                self._words = [PronunciationAssessmentWordResult(w) for w in nb['Words']]
+
+    @property
+    def accuracy_score(self) -> float:
+        """
+        The score indicating the pronunciation accuracy of the given speech, which indicates
+        how closely the phonemes match a native speaker's pronunciation
+        """
+        return self._accuracy_score
+
+    @property
+    def pronunciation_score(self) -> float:
+        """
+        The overall score indicating the pronunciation quality of the given speech.
+        This is calculated from AccuracyScore, FluencyScore and CompletenessScore with weight.
+        """
+        return self._pronunciation_score
+
+    @property
+    def completeness_score(self) -> float:
+        """
+        The score indicating the completeness of the given speech by calculating the ratio of
+        pronounced words towards entire input.
+        """
+        return self._completeness_score
+
+    @property
+    def fluency_score(self) -> float:
+        """
+        The score indicating the fluency of the given speech.
+        """
+        return self._fluency_score
+
+    @property
+    def words(self) -> List[PronunciationAssessmentWordResult]:
+        """
+        Word level pronunciation assessment result.
+        """
+        return self._words

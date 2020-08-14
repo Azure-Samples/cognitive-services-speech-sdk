@@ -20,8 +20,8 @@ namespace Microsoft.CognitiveServices.Speech.PronunciationAssessment
     public class PronunciationAssessmentResult
     {
         /// <summary>
-        /// The score indicating the pronunciation accuracy of the given speech, which indcates
-        /// how closely the phonemes match a native speaker's pronunciation
+        /// The score indicating the pronunciation accuracy of the given speech, which indicates
+        /// how closely the phonemes match a native speaker's pronunciation.
         /// </summary>
         public double AccuracyScore { get; }
 
@@ -101,7 +101,7 @@ namespace Microsoft.CognitiveServices.Speech.PronunciationAssessment
 
         /// <summary>
         /// The score indicating the pronunciation accuracy of the given speech, which indicates
-        /// how closely the phonemes match a native speaker's pronunciation
+        /// how closely the phonemes match a native speaker's pronunciation.
         /// </summary>
         public double AccuracyScore { get; }
 
@@ -156,7 +156,7 @@ namespace Microsoft.CognitiveServices.Speech.PronunciationAssessment
 
         /// <summary>
         /// The score indicating the pronunciation accuracy of the given speech, which indicates
-        /// how closely the phonemes match a native speaker's pronunciation
+        /// how closely the phonemes match a native speaker's pronunciation.
         /// </summary>
         public double AccuracyScore { get; }
 

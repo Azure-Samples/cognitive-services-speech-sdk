@@ -590,6 +590,65 @@ DocstringForPropertyId = """
       .. note::
         This property id was added in version 1.4.0.
 
+    .. py:attribute:: PronunciationAssessment_ReferenceText
+
+      The reference text of the audio for pronunciation evaluation.
+      For this and the following pronunciation assessment parameters, see
+      https://docs.microsoft.com/azure/cognitive-services/speech-service/rest-speech-to-text#pronunciation-assessment-parameters for details.
+      Under normal circumstances, you shouldn't have to use this property directly.
+
+      .. note::
+        This property id was added in version 1.4.0.
+
+    .. py:attribute:: PronunciationAssessment_GradingSystem
+
+      The point system for pronunciation score calibration (FivePoint or HundredMark).
+      Under normal circumstances, you shouldn't have to use this property directly.
+
+      .. note::
+        This property id was added in version 1.4.0.
+
+    .. py:attribute:: PronunciationAssessment_Granularity
+
+      The pronunciation evaluation granularity (Phoneme, Word, or FullText).
+      Under normal circumstances, you shouldn't have to use this property directly.
+
+      .. note::
+        This property id was added in version 1.4.0.
+
+    .. py:attribute:: PronunciationAssessment_EnableMiscue
+
+      Defines if enable miscue calculation.
+      With this enabled, the pronounced words will be compared to the reference text,
+      and will be marked with omission/insertion based on the comparison. The default setting is False.
+      Under normal circumstances, you shouldn't have to use this property directly.
+
+      .. note::
+        This property id was added in version 1.4.0.
+
+    .. py:attribute:: PronunciationAssessment_ScenarioId
+
+      A GUID indicating a customized pronunciation score system.
+      Under normal circumstances, you shouldn't have to use this property directly.
+
+      .. note::
+        This property id was added in version 1.4.0.
+
+    .. py:attribute:: PronunciationAssessment_Json
+
+      The json string of pronunciation assessment parameters
+      Under normal circumstances, you shouldn't have to use this property directly.
+
+      .. note::
+        This property id was added in version 1.4.0.
+
+    .. py:attribute:: PronunciationAssessment_Params
+
+      Pronunciation assessment parameters.
+      This property is intended to be read-only. The SDK is using it internally.
+
+      .. note::
+        This property id was added in version 1.4.0.
     """
 
 DocstringForNoMatchReason= """
@@ -616,7 +675,7 @@ DocstringForNoMatchReason= """
 
       Indicates that the spotted keyword has been rejected by the
       keyword verification service.
-      
+
       .. note::
         This property id was added in version 1.5.0.
     """
@@ -648,7 +707,7 @@ DocstringForCancellationErrorCode = """
    .. py:attribute:: NoError
 
       No error.
-      If CancellationReason is EndOfStream, CancellationErrorCode 
+      If CancellationReason is EndOfStream, CancellationErrorCode
       is set to NoError.
 
    .. py:attribute:: AuthenticationFailure
@@ -918,29 +977,67 @@ DocstringForAudioStreamContainerFormat = """
    .. py:attribute:: OGG_OPUS
 
       Stream ContainerFormat definition for OGG OPUS.
- 
+
    .. py:attribute:: MP3
 
       Stream ContainerFormat definition for MP3.
- 
+
    .. py:attribute:: FLAC
 
       Stream ContainerFormat definition for FLAC.
- 
+
    .. py:attribute:: ALAW
 
       Stream ContainerFormat definition for ALAW.
- 
+
    .. py:attribute:: MULAW
 
       Stream ContainerFormat definition for MULAW.
- 
+
    .. py:attribute:: AMRNB
 
       Stream ContainerFormat definition for AMRNB.
- 
+
    .. py:attribute:: AMRWB
- 
+
       Stream ContainerFormat definition for AMRWB.
+    """
+
+DocstringForPronunciationAssessmentGradingSystem = """
+   Defines the point system for pronunciation score calibration; default value is FivePoint.
+
+   .. note::
+     Added in version 1.14.0.
+
+   *Values:*
+
+   .. py:attribute:: FivePoint
+
+      Five point calibration.
+
+   .. py:attribute:: HundredMark
+
+      Hundred mark.
+    """
+
+DocstringForPronunciationAssessmentGranularity = """
+   Defines the pronunciation evaluation granularity; default value is Phoneme.
+
+   .. note::
+     Added in version 1.14.0.
+
+   *Values:*
+
+   .. py:attribute:: Phoneme
+
+      Shows the score on the full text, word and phoneme level.
+
+   .. py:attribute:: Word
+
+      Shows the score on the full text and word level.
+
+   .. py:attribute:: FullText
+
+      Shows the score on the full text level only.
     """
 %}

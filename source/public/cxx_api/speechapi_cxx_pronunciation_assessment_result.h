@@ -42,7 +42,8 @@ public:
     }
 
     /// <summary>
-    /// The score indicating the pronunciation accuracy of the given speech.
+    /// The score indicating the pronunciation accuracy of the given speech, which indicates
+    /// how closely the phonemes match a native speaker's pronunciation.
     /// </summary>
     const double AccuracyScore;
 
