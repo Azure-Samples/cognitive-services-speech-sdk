@@ -5,8 +5,11 @@
 // <code>
 package com.speechsdk.quickstart;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.joda.JodaModule;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.microsoft.bot.schema.Activity;
 import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.audio.PullAudioOutputStream;
@@ -23,7 +26,9 @@ import javax.sound.sampled.DataLine;
 import javax.sound.sampled.SourceDataLine;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.concurrent.*;
+
 
 public class Main {
 
@@ -31,11 +36,17 @@ public class Main {
     public static final int WAIT_INTERVAL_IN_MILLIS = 1000;
 
     private static final Logger log = LoggerFactory.getLogger(Main.class);
-    private static final ObjectMapper mapper = new ObjectMapper();
-
-    static {
-        mapper.registerModule(new JodaModule());
-    }
+    private static final ObjectMapper mapper = new ObjectMapper()
+    {
+        {
+            this.registerModule(new JodaModule());
+            this.registerModule(new JavaTimeModule());
+            this.findAndRegisterModules();
+            this.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            this.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+            this.setDateFormat(new SimpleDateFormat());
+        }
+    };
 
     private static Boolean receivedResponse;
 
