@@ -801,7 +801,7 @@ TEST_CASE("[CT] Conversation Translator Participant Rejoin After Delete", "[api]
     REQUIRE_THROWS_MATCHES(
         alice.Conn->Open(false),
         std::runtime_error,
-        Catch::MessageContains("BadRequest") && Catch::MessageContains("WebSocket Upgrade failed"));
+        Catch::MessageContains("Bad request") && Catch::MessageContains("WebSocket Upgrade failed"));
 
     std::this_thread::sleep_for(400ms);
 

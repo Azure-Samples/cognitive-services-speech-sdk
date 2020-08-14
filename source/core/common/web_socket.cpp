@@ -12,6 +12,7 @@
 #include <web_socket.h>
 #include <exception.h>
 #include <string_utils.h>
+#include <error_info.h>
 
 DEFINE_ENUM_STRINGS(WS_OPEN_RESULT, WS_OPEN_RESULT_VALUES)
 DEFINE_ENUM_STRINGS(WS_ERROR, WS_ERROR_VALUES)
@@ -581,9 +582,9 @@ namespace USP {
         }
     }
 
-    void WebSocket::HandleDisconnected(WebSocketDisconnectReason reason, const string & cause, bool serverRequested)
+    void WebSocket::HandleDisconnected(WebSocketDisconnectReason reason, const string & cause)
     {
-        OnDisconnected(reason, cause, serverRequested);
+        OnDisconnected(reason, cause);
     }
 
     void WebSocket::HandleTextData(const string & data)
@@ -600,7 +601,8 @@ namespace USP {
     {
         if (m_valid)
         {
-            OnError(reason, errorCode, errorMessage);
+            auto error = Impl::ErrorInfo::FromWebSocket(reason, errorCode, errorMessage);
+            OnError(error);
         }
     }
 
@@ -808,9 +810,11 @@ namespace USP {
                 open_result_detailed.code,
                 open_result_detailed.code);
 
-            if (open_result == WS_OPEN_ERROR_BAD_RESPONSE_STATUS)
+            HttpStatusCode statusCode = static_cast<HttpStatusCode>(open_result_detailed.code);
+
+            if (open_result == WS_OPEN_ERROR_BAD_RESPONSE_STATUS
+                && statusCode != HttpStatusCode::OK)
             {
-                HttpStatusCode statusCode = static_cast<HttpStatusCode>(open_result_detailed.code);
                 std::string errorString;
 
                 // special case to handle redirects
@@ -846,11 +850,12 @@ namespace USP {
                     }
                 }
 
-                HandleError(WebSocketError::WEBSOCKET_UPGRADE, /* HTTP status */ open_result_detailed.code, errorString);
+                HandleError(WebSocketError::WEBSOCKET_UPGRADE, /* HTTP status */ (int)statusCode, errorString);
             }
             else
             {
-                HandleError(WebSocketError::CONNECTION_FAILURE, open_result_detailed.result, to_string(open_result_detailed.code).c_str());
+                const auto message = std::string("Code: ") + to_string(open_result_detailed.code) + ".";
+                HandleError(WebSocketError::CONNECTION_FAILURE, open_result_detailed.result, message.c_str());
             }
         }
     }
@@ -908,7 +913,7 @@ namespace USP {
             cause = std::string(reinterpret_cast<const char *>(extraData), extraDataLength);
         }
 
-        HandleDisconnected(reason, cause, true);
+        HandleDisconnected(reason, cause);
     }
 
     void WebSocket::OnWebSocketError(WS_ERROR errorCode)
@@ -930,7 +935,7 @@ namespace USP {
         m_open = false;
         ChangeState(WebSocketState::CLOSED);
         MetricsTransportClosed();
-        HandleDisconnected(WebSocketDisconnectReason::Normal, "", false);
+        HandleDisconnected(WebSocketDisconnectReason::Normal, "");
     }
 
     uint64_t WebSocket::GetTimestamp() const

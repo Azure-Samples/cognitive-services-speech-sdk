@@ -9,6 +9,7 @@
 #include "azure_c_shared_utility_urlencode_wrapper.h"
 #include "http_utils.h"
 #include "string_utils.h"
+#include "error_info.h"
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -298,61 +299,4 @@ namespace Impl {
         }
     }
 
-    CancellationErrorCode HttpStatusCodeToCancellationErrorCode(int httpStatusCode)
-    {
-        if (httpStatusCode < 400)
-        {
-            return CancellationErrorCode::NoError;
-        }
-
-        CancellationErrorCode errorCode = CancellationErrorCode::NoError;
-        switch (httpStatusCode)
-        {
-        case 401:
-            errorCode = CancellationErrorCode::AuthenticationFailure;
-            break;
-
-        case 400:
-            errorCode = CancellationErrorCode::BadRequest;
-            break;
-
-        case 429:
-            errorCode = CancellationErrorCode::TooManyRequests;
-            break;
-
-        case 403:
-            errorCode = CancellationErrorCode::Forbidden;
-            break;
-
-        case 408:
-        case 504:
-            errorCode = CancellationErrorCode::ServiceTimeout;
-            break;
-
-        case 404:
-        case 409:
-        case 415:
-        case 500:
-        case 501:
-        case 502:
-        case 505:
-        case 506:
-        case 507:
-        case 509:
-        case 510:
-        case 600:
-            errorCode = CancellationErrorCode::ServiceError;
-            break;
-
-        case 503:
-            errorCode = CancellationErrorCode::ServiceUnavailable;
-            break;
-
-        default:
-            errorCode = CancellationErrorCode::ConnectionFailure;
-            break;
-        }
-
-        return errorCode;
-    }
 } } } }

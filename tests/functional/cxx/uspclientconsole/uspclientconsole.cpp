@@ -43,18 +43,18 @@ using namespace Microsoft::CognitiveServices::Speech::Impl;
 
 bool turnEnd = false;
 
-map<USP::RecognitionStatus, string> recognitionStatusToText =
+map<RecognitionStatus, string> recognitionStatusToText =
 {
-    { USP::RecognitionStatus::Success, "Success" },
-    { USP::RecognitionStatus::NoMatch, "No Match" },
-    { USP::RecognitionStatus::InitialSilenceTimeout, "Initial Silence Timeout" },
-    { USP::RecognitionStatus::InitialBabbleTimeout, "Initial Babble Timeout" },
-    { USP::RecognitionStatus::Error, "Error" },
-    { USP::RecognitionStatus::TooManyRequests, "Too Many Requests. The number of allowed concurrent transcriptions for the subscription is exceeded." },
-    { USP::RecognitionStatus::BadRequest, "Invalid parameter or unsupported audio format." },
-    { USP::RecognitionStatus::Forbidden, "The free subscription used by the request ran out of quota." },
-    { USP::RecognitionStatus::ServiceUnavailable, "The service is unavailable." },
-    { USP::RecognitionStatus::EndOfDictation, "End of dictation" }
+    { RecognitionStatus::Success, "Success" },
+    { RecognitionStatus::NoMatch, "No Match" },
+    { RecognitionStatus::InitialSilenceTimeout, "Initial Silence Timeout" },
+    { RecognitionStatus::InitialBabbleTimeout, "Initial Babble Timeout" },
+    { RecognitionStatus::Error, "Error" },
+    { RecognitionStatus::TooManyRequests, "Too Many Requests. The number of allowed concurrent transcriptions for the subscription is exceeded." },
+    { RecognitionStatus::BadRequest, "Invalid parameter or unsupported audio format." },
+    { RecognitionStatus::Forbidden, "The free subscription used by the request ran out of quota." },
+    { RecognitionStatus::ServiceUnavailable, "The service is unavailable." },
+    { RecognitionStatus::EndOfDictation, "End of dictation" }
 };
 
 class UspCallbacks : public USP::Callbacks {
@@ -101,9 +101,9 @@ virtual void OnTurnEnd(const USP::TurnEndMsg&) override
     turnEnd = true;
 }
 
-virtual void OnError(bool /*transport*/, USP::ErrorCode errorCode, const string& errorMessage) override
+virtual void OnError(const std::shared_ptr<ISpxErrorInformation>& error) override
 {
-    printf("Response: On Error: ErrorCode: %d, ErrorMessage: %s.\n", (int)errorCode, errorMessage.c_str());
+    printf("Response: On Error: ErrorCode: %d, ErrorMessage: %s.\n", (int)error->GetCancellationCode(), error->GetDetails().c_str());
     turnEnd = true;
     exit(1);
 }

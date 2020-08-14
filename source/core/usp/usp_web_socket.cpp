@@ -182,16 +182,15 @@ namespace USP {
         WebSocket::HandleBinaryData(data + offset, size - offset);
     }
 
-    void UspWebSocket::HandleDisconnected(WebSocketDisconnectReason reason, const std::string & cause, bool serverRequested)
+    void UspWebSocket::HandleDisconnected(WebSocketDisconnectReason reason, const std::string & cause)
     {
-        if (serverRequested)
+        if (reason == WebSocketDisconnectReason::Normal)
         {
-            // For compatibility with what the old transport.cpp code did, raise this as an error instead of a disconnection
-            HandleError(WebSocketError::REMOTE_CLOSED, (int)reason, cause);
+            WebSocket::HandleDisconnected(reason, cause);
         }
         else
         {
-            WebSocket::HandleDisconnected(reason, cause, serverRequested);
+            HandleError(WebSocketError::REMOTE_CLOSED, (int)reason, cause);
         }
     }
 

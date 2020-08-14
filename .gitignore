@@ -143,6 +143,9 @@ tests/**/bin
 /tests/functional/java/test.defaults.json
 /tests/functional/java/test.subscriptions.regions.json
 
+# Test subscription information
+/tests/test.subscriptions.regions.json
+
 # Python virtual environment
 env/
 

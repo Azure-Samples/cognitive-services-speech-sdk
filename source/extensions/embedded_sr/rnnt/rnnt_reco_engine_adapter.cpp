@@ -14,6 +14,7 @@
 #include "create_object_helpers.h"
 #include "property_id_2_name_map.h"
 #include "string_utils.h"
+#include "error_info.h"
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -458,7 +459,7 @@ void CSpxRnntRecoEngineAdapter::OnSpeechHypothesis(const RNNT::SpeechHypothesisM
         InvokeOnSite([&](const SitePtr& site)
             {
                 auto factory = SpxQueryService<ISpxRecoResultFactory>(site);
-                auto result = factory->CreateIntermediateResult(nullptr, message.text.c_str(), message.offset, message.duration);
+                auto result = factory->CreateIntermediateResult(message.text.c_str(), message.offset, message.duration);
                 site->FireAdapterResult_Intermediate(this, message.offset, result);
             });
     }
@@ -600,7 +601,7 @@ void CSpxRnntRecoEngineAdapter::OnError(const std::string& errorMessage)
     else if (ChangeState(RnntState::Error))
     {
         SPX_TRACE_ERROR("%s: site->Error() ... error='%s'", __FUNCTION__, errorMessage.c_str());
-        InvokeOnSite([this, errorMessage](const SitePtr& p) { p->Error(this, std::make_shared<SpxRecoEngineAdapterError>(false, CancellationReason::Error, CancellationErrorCode::RuntimeError, errorMessage)); });
+        InvokeOnSite([this, errorMessage](const SitePtr& p) { p->Error(this, ErrorInfo::FromRuntimeMessage(errorMessage)); });
     }
     else
     {
@@ -690,7 +691,7 @@ void CSpxRnntRecoEngineAdapter::FireFinalResultNow(const RNNT::SpeechPhraseMsg& 
                 SPX_TRACE_ERROR("Unexpected recognition status %d.", message.recognitionStatus);
                 SPX_THROW_HR(SPXERR_RUNTIME_ERROR);
             }
-            auto result = factory->CreateFinalResult(nullptr, ToReason(message.recognitionStatus), ToNoMatchReason(message.recognitionStatus), cancellationReason, CancellationErrorCode::NoError, message.text.c_str(), message.offset, message.duration);
+            auto result = factory->CreateFinalResult(ToReason(message.recognitionStatus), ToNoMatchReason(message.recognitionStatus), message.text.c_str(), message.offset, message.duration);
 
             site->FireAdapterResult_FinalResult(this, message.offset, result);
         });

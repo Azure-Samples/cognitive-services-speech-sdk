@@ -15,6 +15,7 @@
 #include "property_id_2_name_map.h"
 #include "guid_utils.h"
 #include "log_helpers.h"
+#include "error_info.h"
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -509,7 +510,7 @@ uint32_t CSpxSynthesizer::Write(ISpxTtsEngineAdapter* adapter, const std::wstrin
     }
 
     // Fire Synthesizing event
-    const auto result = CreateResult(requestId, ResultReason::SynthesizingAudio, buffer, size, REASON_CANCELED_NONE, properties);
+    const auto result = CreateResult(requestId, ResultReason::SynthesizingAudio, buffer, size, properties);
     FireResultEvent(result);
 
     // Write audio data to output
@@ -588,7 +589,6 @@ void CSpxSynthesizer::ClearRequestQueueAndKeepFront()
 
 std::shared_ptr<ISpxSynthesisResult> CSpxSynthesizer::CreateResult(const std::wstring& requestId, ResultReason reason,
                                                                    uint8_t* audio_buffer, size_t audio_length,
-                                                                   CancellationReason cancellationReason,
                                                                    std::shared_ptr<std::unordered_map<std::string, std::string>> properties)
 {
     // Get output format
@@ -597,10 +597,17 @@ std::shared_ptr<ISpxSynthesisResult> CSpxSynthesizer::CreateResult(const std::ws
     const auto format = SpxAllocWAVEFORMATEX(requiredFormatSize);
     audioStream->GetFormat(format.get(), requiredFormatSize);
 
+    // Generate cancellation error information when relevant; keep it consistent with the USP version
+    std::shared_ptr<ISpxErrorInformation> errorInfo;
+    if (reason == ResultReason::Canceled)
+    {
+        errorInfo = ErrorInfo::FromHttpStatus(HttpStatusCode::CLIENT_CLOSED_REQUEST);
+    }
+
     // Build result
     auto result = SpxCreateObjectWithSite<ISpxSynthesisResult>("CSpxSynthesisResult", SpxSiteFromThis(this));
     auto resultInit = SpxQueryInterface<ISpxSynthesisResultInit>(result);
-    resultInit->InitSynthesisResult(requestId, reason, cancellationReason, CancellationErrorCode::NoError,
+    resultInit->InitSynthesisResult(requestId, reason, REASON_CANCELED_NONE, errorInfo,
         audio_buffer, audio_length, format.get(), SpxQueryInterface<ISpxAudioOutputFormat>(m_audioOutput)->HasHeader());
 
     if (properties != nullptr)
@@ -620,10 +627,8 @@ std::shared_ptr<ISpxSynthesisResult> CSpxSynthesizer::CreateResult(const std::ws
 
 std::shared_ptr<ISpxSynthesisResult> CSpxSynthesizer::CreateUserCancelledResult(const std::wstring& requestId)
 {
-    auto cancelledResult = CreateResult(requestId, ResultReason::Canceled, nullptr, 0,
-                                        CancellationReason::CancelledByUser);
+    auto cancelledResult = CreateResult(requestId, ResultReason::Canceled, nullptr, 0);
     auto resultProperties = SpxQueryInterface<ISpxNamedProperties>(cancelledResult);
-    resultProperties->SetStringValue(GetPropertyName(PropertyId::CancellationDetails_ReasonDetailedText), "Synthesis request cancelled by user.");
     return cancelledResult;
 }
 

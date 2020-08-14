@@ -1149,6 +1149,9 @@ TEST_CASE("Stop synthesis - USP", "[api][cxx]")
     auto synthesizer1 = SpeechSynthesizer::FromConfig(config, nullptr);
     auto referenceResult = synthesizer1->SpeakTextAsync("reference").get();
 
+    // Expected 499 (cancelled) message substring (from error_info.cpp)
+    constexpr auto cancelledSubstring = "Request closed by client";
+
     SPXTEST_SECTION("normal stop")
     {
         auto synthesizer = SpeechSynthesizer::FromConfig(config, nullptr);
@@ -1166,7 +1169,7 @@ TEST_CASE("Stop synthesis - USP", "[api][cxx]")
 
         SPXTEST_REQUIRE(ResultReason::Canceled == result1->Reason);
         auto cancellationDetail = SpeechSynthesisCancellationDetails::FromResult(result1);
-        SPXTEST_REQUIRE(std::string::npos != cancellationDetail->ErrorDetails.find("Synthesis request cancelled by user."));
+        SPXTEST_REQUIRE(std::string::npos != cancellationDetail->ErrorDetails.find(cancelledSubstring));
         SPXTEST_REQUIRE(CancellationReason::CancelledByUser == cancellationDetail->Reason);
         SPXTEST_REQUIRE(ResultReason::SynthesizingAudioCompleted == result2->Reason);
         // ensure the synthesis after stopping works correctly (get the exactly same results with normal synthesis)
@@ -1202,7 +1205,7 @@ TEST_CASE("Stop synthesis - USP", "[api][cxx]")
         {
             SPXTEST_REQUIRE(ResultReason::Canceled == r->Reason);
             auto cancellationDetail = SpeechSynthesisCancellationDetails::FromResult(r);
-            SPXTEST_REQUIRE(std::string::npos != cancellationDetail->ErrorDetails.find("Synthesis request cancelled by user."));
+            SPXTEST_REQUIRE(std::string::npos != cancellationDetail->ErrorDetails.find(cancelledSubstring));
             SPXTEST_REQUIRE(CancellationReason::CancelledByUser == cancellationDetail->Reason);
         }
 
@@ -1226,7 +1229,7 @@ TEST_CASE("Stop synthesis - USP", "[api][cxx]")
 
         SPXTEST_REQUIRE(ResultReason::Canceled == result1->Reason);
         auto cancellationDetail = SpeechSynthesisCancellationDetails::FromResult(result1);
-        SPXTEST_REQUIRE(std::string::npos != cancellationDetail->ErrorDetails.find("Synthesis request cancelled by user."));
+        SPXTEST_REQUIRE(std::string::npos != cancellationDetail->ErrorDetails.find(cancelledSubstring));
         SPXTEST_REQUIRE(CancellationReason::CancelledByUser == cancellationDetail->Reason);
         SPXTEST_REQUIRE(ResultReason::SynthesizingAudioCompleted == result2->Reason);
         // ensure the synthesis after stopping works correctly (get the exactly same results with normal synthesis)
@@ -1253,7 +1256,7 @@ TEST_CASE("Stop synthesis - USP", "[api][cxx]")
         SPXTEST_REQUIRE(ResultReason::Canceled == result1->Reason);
         // SPXTEST_REQUIRE(result1->GetAudioData()->size() > 0);
         auto cancellationDetail = SpeechSynthesisCancellationDetails::FromResult(result1);
-        SPXTEST_REQUIRE(std::string::npos != cancellationDetail->ErrorDetails.find("Synthesis request cancelled by user."));
+        SPXTEST_REQUIRE(std::string::npos != cancellationDetail->ErrorDetails.find(cancelledSubstring));
         SPXTEST_REQUIRE(CancellationReason::CancelledByUser == cancellationDetail->Reason);
         SPXTEST_REQUIRE(ResultReason::SynthesizingAudioCompleted == result2->Reason);
         // ensure the synthesis after stopping works correctly (get the exactly same results with normal synthesis)

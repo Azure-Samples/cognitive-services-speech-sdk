@@ -20,104 +20,27 @@ namespace CognitiveServices {
 namespace Speech {
 namespace Impl {
 
-
-using ResponsePtr = std::unique_ptr<HttpResponse>;
-using CreateFinalResultFuncPtr = std::function<RecognitionResultPtr(ResultReason, CancellationReason, NoMatchReason, CancellationErrorCode, const wchar_t*)>;
-
-class ISpxSpeakerResultFactory : public ISpxInterfaceBaseFor<ISpxSpeakerResultFactory>
-{
-public:
-    virtual RecognitionResultPtr CreateResult(CreateFinalResultFuncPtr func) = 0;
-
-protected:
-    virtual ResultReason GetResultReason() { return ResultReason::Canceled; };
-    virtual CancellationReason GetCancellationReason(bool isSuccess);
-    virtual NoMatchReason GetNoMatchReason();
-    virtual CancellationErrorCode GetCancellationErrorCode(int httpStatusCode);
-
-    RecognitionResultPtr CreateErrorResult(CreateFinalResultFuncPtr func, const std::string& error);
-    void PopulateJsonResult(RecognitionResultPtr& result, const std::string& jsonString);
-    std::string GetErrorMessageInJson(const std::string& str, int statusCode);
-    void SetInPropertyBag(ISpxNamedProperties* properties, std::string&& name, float valueInSeconds);
-};
-
-class DeleteOrResetResultFactory : public ISpxSpeakerResultFactory
-{
-public:
-    DeleteOrResetResultFactory(std::unique_ptr<HttpResponse> response, bool reset) :
-        m_response(std::move(response)), m_reset(reset)
-    {
-    }
-    virtual ~DeleteOrResetResultFactory() = default;
-    virtual RecognitionResultPtr CreateResult(CreateFinalResultFuncPtr func) override;
-
-private:
-    ResponsePtr m_response;
-    bool m_reset;
-};
-
-class EnrollmentResultFactory : public ISpxSpeakerResultFactory
-{
-public:
-
-    EnrollmentResultFactory(std::unique_ptr<HttpResponse> response) :
-        m_response(std::move(response))
-    {
-    }
-
-    virtual ~EnrollmentResultFactory() = default;
-
-    virtual RecognitionResultPtr CreateResult(CreateFinalResultFuncPtr func) override;
-
-private:
-    RecognitionResultPtr PopulateEnrollmentDurations(CreateFinalResultFuncPtr func, RecognitionResultPtr result, const nlohmann::json& json);
-
-    ResponsePtr m_response;
-};
-
-class IdentifyResultFactory : public ISpxSpeakerResultFactory
-{
-public:
-    IdentifyResultFactory(ResponsePtr response) :
-        m_response(std::move(response))
-    {
-    }
-
-    virtual ~IdentifyResultFactory() = default;
-
-    virtual RecognitionResultPtr CreateResult(CreateFinalResultFuncPtr func) override;
-
-private:
-    ResponsePtr m_response;
-};
-
-class VerifyResultFactory : public ISpxSpeakerResultFactory
-{
-public:
-    VerifyResultFactory(ResponsePtr response, std::string&& profileid) :
-        m_response(std::move(response)), m_profileId(std::move(profileid))
-    {
-    }
-
-    virtual ~VerifyResultFactory() = default;
-
-    virtual RecognitionResultPtr CreateResult(CreateFinalResultFuncPtr func) override;
-
-private:
-    virtual ResultReason GetResultReason() override;
-    std::string GetErrorMesssage(ResultReason resultReason);
-
-    ResponsePtr m_response;
-    std::string m_profileId;
-};
+using CreateFinalResultFuncPtr = std::function<RecognitionResultPtr(ResultReason, CancellationReason, NoMatchReason, const std::shared_ptr<ISpxErrorInformation>&, const wchar_t*)>;
 
 class CSpxHttpRecoEngineAdapter :
     public ISpxGenericSite,
     public ISpxObjectWithSiteInitImpl<ISpxGenericSite>,
     public ISpxServiceProvider,
     public ISpxHttpRecoEngineAdapter,
+    public ISpxRecoResultFactory,
     public ISpxPropertyBagImpl
 {
+private:
+    enum class SpeakerRecognitionOperationType
+    {
+        Unknown,
+        EnrollProfile,
+        DeleteProfile,
+        ResetProfile,
+        Identify,
+        Verify,
+    };
+
 public:
     CSpxHttpRecoEngineAdapter() = default;
     virtual ~CSpxHttpRecoEngineAdapter() = default;
@@ -128,6 +51,7 @@ public:
         SPX_INTERFACE_MAP_ENTRY(ISpxServiceProvider)
         SPX_INTERFACE_MAP_ENTRY(ISpxGenericSite)
         SPX_INTERFACE_MAP_ENTRY(ISpxHttpRecoEngineAdapter)
+        SPX_INTERFACE_MAP_ENTRY(ISpxRecoResultFactory)
     SPX_INTERFACE_MAP_END()
 
         // --- IServiceProvider ---
@@ -145,15 +69,22 @@ public:
     void ProcessAudio(const DataChunkPtr& audioChunk) override;
     void FlushAudio() override;
     RecognitionResultPtr GetResult() override;
-    RecognitionResultPtr ModifyVoiceProfile(bool reset, VoiceProfileType type, std::string&& id) const override;
+    RecognitionResultPtr ModifyVoiceProfile(bool reset, VoiceProfileType type, std::string&& id) override;
     std::string CreateVoiceProfile(VoiceProfileType type, std::string&& locale) const override;
+
+    RecognitionResultPtr GetResult(SpeakerRecognitionOperationType operationType);
+
+    // --- ISpxRecoResultFactory
+    virtual RecognitionResultPtr CreateIntermediateResult(const wchar_t* text, uint64_t offset, uint64_t duration) override;
+    virtual RecognitionResultPtr CreateFinalResult(ResultReason reason, NoMatchReason noMatchReason, const wchar_t* text, uint64_t offset, uint64_t duration, const wchar_t* userId = nullptr) override;
+    virtual std::shared_ptr<ISpxRecognitionResult> CreateKeywordResult(const double confidence, const uint64_t offset, const uint64_t duration, const wchar_t* keyword, ResultReason reason, std::shared_ptr<ISpxAudioDataStream> stream) override;
+    virtual std::shared_ptr<ISpxRecognitionResult> CreateErrorResult(const std::shared_ptr<ISpxErrorInformation>& error) override;
+    virtual std::shared_ptr<ISpxRecognitionResult> CreateEndOfStreamResult() override;
 
 private:
     DISABLE_COPY_AND_MOVE(CSpxHttpRecoEngineAdapter);
     using SitePtr = std::shared_ptr<ISpxHttpRecoEngineAdapter>;
 
-    RecognitionResultPtr CreateRecoResult(ResultReason reason, CancellationReason canReason, NoMatchReason noMatchReason, CancellationErrorCode errorCode, const wchar_t* text) const;
-    RecognitionResultPtr CreateErrorResult(const std::string& error) const;
     const std::string GetSubscriptionKey() const;
     std::unique_ptr<HttpResponse> SendRequest(const HttpEndpointInfo& endPoint, HTTPAPI_REQUEST_TYPE requestType, const void *content = nullptr, size_t contentSize = 0) const;
     HttpEndpointInfo CreateEndpoint(VoiceProfileType type) const;
@@ -178,6 +109,16 @@ private:
     bool m_enroll;
     std::string m_profileIdForVerification;
     bool m_audioFlushed = false;
+
+    inline SpeakerRecognitionOperationType GetCurrentOperationType()
+    {
+        return m_enroll ? SpeakerRecognitionOperationType::EnrollProfile
+            : m_voiceProfileType == VoiceProfileType::TextIndependentIdentification ? SpeakerRecognitionOperationType::Identify
+            : SpeakerRecognitionOperationType::Verify;
+    }
+    ResultReason GetResultReasonForResponse(SpeakerRecognitionOperationType operationType);
+
+    std::shared_ptr<ISpxErrorInformation> TryPopulateResultFromResponse(RecognitionResultPtr& result);
 
     std::unique_ptr<ISpxHttpDataClient> m_httpData;
     std::unique_ptr<HttpResponse> m_response;

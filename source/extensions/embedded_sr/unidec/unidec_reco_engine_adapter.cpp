@@ -384,7 +384,7 @@ void CSpxUnidecRecoEngineAdapter::Intermediate(const WCHAR* wavId, size_t senten
     auto offset = (uint64_t)(framePos.SentenceStartMilliseconds * 10000);
     auto duration = (uint64_t)(framePos.SpeechFramesLengthInMilliseconds * 10000);
 
-    auto result = factory->CreateIntermediateResult(nullptr, text.c_str(), offset, duration);
+    auto result = factory->CreateIntermediateResult(text.c_str(), offset, duration);
     SetServiceJsonResultProperties(result, offset, duration, PAL::ToString(text));
 
     GetSite()->FireAdapterResult_Intermediate(this, offset, result);
@@ -433,7 +433,7 @@ void CSpxUnidecRecoEngineAdapter::Sentence(const WCHAR* wavId, size_t sentenceIn
             m_sentenceEndDetected = true;
 
             auto factory = SpxQueryService<ISpxRecoResultFactory>(GetSite());
-            finalResult = factory->CreateFinalResult(nullptr, ResultReason::RecognizedSpeech, NO_MATCH_REASON_NONE, REASON_CANCELED_NONE, CancellationErrorCode::NoError, text.c_str(), offset, duration);
+            finalResult = factory->CreateFinalResult(ResultReason::RecognizedSpeech, NO_MATCH_REASON_NONE, text.c_str(), offset, duration);
             SetServiceJsonResultProperties(finalResult, offset, duration, PAL::ToString(text));
         }
     }

@@ -38,7 +38,7 @@ public:
     std::shared_ptr<CSpxAsyncOp<std::shared_ptr<ISpxSynthesisResult>>> GetFutureResult() override;
     ResultReason GetReason() override;
     CancellationReason GetCancellationReason() override;
-    CancellationErrorCode GetCancellationErrorCode() override;
+    const std::shared_ptr<ISpxErrorInformation>& GetError() override;
     uint32_t GetAudioLength() override;
     std::shared_ptr<std::vector<uint8_t>> GetAudioData() override;
     std::shared_ptr<std::vector<uint8_t>> GetRawAudioData() override;
@@ -48,7 +48,7 @@ public:
 
     // --- ISpxSynthesisResultInit ---
     void InitSynthesisResult(const std::wstring& requestId, ResultReason reason,
-        CancellationReason cancellation, CancellationErrorCode errorCode,
+        CancellationReason cancellation, const std::shared_ptr<ISpxErrorInformation>& error,
         uint8_t* audio_buffer, size_t audio_length, SPXWAVEFORMATEX* format, bool hasHeader) override;
     void SetEvents(const std::shared_ptr<ISpxSynthesizerEvents>& events) override;
     void SetFutureResult(std::shared_ptr<CSpxAsyncOp<std::shared_ptr<ISpxSynthesisResult>>> futureResult) override;
@@ -71,7 +71,7 @@ private:
     std::shared_ptr<CSpxAsyncOp<std::shared_ptr<ISpxSynthesisResult>>> m_futureResult;
     ResultReason m_reason;
     CancellationReason m_cancellationReason;
-    CancellationErrorCode m_cancellationErrorCode;
+    std::shared_ptr<ISpxErrorInformation> m_error;
     std::vector<uint8_t> m_audiodata;
     SpxWAVEFORMATEX_Type m_audioformat;
     bool m_hasHeader = true;

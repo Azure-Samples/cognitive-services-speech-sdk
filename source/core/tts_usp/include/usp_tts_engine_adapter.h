@@ -99,14 +99,12 @@ private:
     void OnAudioOutputChunk(const USP::AudioOutputChunkMsg& message) override;
     void OnAudioOutputMetadata(const USP::AudioOutputMetadataMsg& message) override;
     void OnTurnEnd(const USP::TurnEndMsg& message) override;
-    void OnError(bool transport, USP::ErrorCode errorCode, const std::string& errorMessage) override;
+    void OnError(const std::shared_ptr<ISpxErrorInformation>& error) override;
 
     SpxWAVEFORMATEX_Type GetOutputFormat(std::shared_ptr<ISpxAudioOutput> output, bool* hasHeader);
     std::string GetOutputFormatString(std::shared_ptr<ISpxAudioOutput> output);
     bool WordBoundaryEnabled() const;
     static bool InSsmlTag(size_t currentPos, const std::wstring& ssml, size_t beginningPos);
-    static CancellationErrorCode UspErrorCodeToCancellationErrorCode(USP::ErrorCode uspErrorCode);
-
 
 private:
 
@@ -142,8 +140,7 @@ private:
     bool m_currentTextIsSsml;
     uint32_t m_currentTextOffset;
 
-    USP::ErrorCode m_currentErrorCode { static_cast<USP::ErrorCode>(0) };
-    std::string m_currentErrorMessage;
+    std::shared_ptr<ISpxErrorInformation> m_currentError;
 
     std::mutex m_mutex;
     std::condition_variable m_cv;

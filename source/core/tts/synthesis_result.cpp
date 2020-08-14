@@ -20,6 +20,7 @@ namespace Impl {
 
 
 CSpxSynthesisResult::CSpxSynthesisResult()
+    : m_error{ nullptr }
 {
     SPX_DBG_TRACE_FUNCTION();
 }
@@ -59,9 +60,9 @@ CancellationReason CSpxSynthesisResult::GetCancellationReason()
     return m_cancellationReason;
 }
 
-CancellationErrorCode CSpxSynthesisResult::GetCancellationErrorCode()
+const std::shared_ptr<ISpxErrorInformation>& CSpxSynthesisResult::GetError()
 {
-    return m_cancellationErrorCode;
+    return m_error;
 }
 
 uint32_t CSpxSynthesisResult::GetAudioLength()
@@ -111,8 +112,10 @@ bool CSpxSynthesisResult::HasHeader()
     return m_hasHeader;
 }
 
-void CSpxSynthesisResult::InitSynthesisResult(const std::wstring& requestId, ResultReason reason,
-    CancellationReason cancellation, CancellationErrorCode errorCode,
+void CSpxSynthesisResult::InitSynthesisResult(const std::wstring& requestId,
+    ResultReason reason,
+    CancellationReason cancellation,
+    const std::shared_ptr<ISpxErrorInformation>& error,
     uint8_t* audio_buffer, size_t audio_length, SPXWAVEFORMATEX* format, bool hasHeader)
 {
     SPX_IFTRUE_THROW_HR(!m_audiodata.empty(), SPXERR_ALREADY_INITIALIZED);
@@ -126,8 +129,14 @@ void CSpxSynthesisResult::InitSynthesisResult(const std::wstring& requestId, Res
 
     // Set reason
     m_reason = reason;
+
+    m_error = error;
     m_cancellationReason = cancellation;
-    m_cancellationErrorCode = errorCode;
+    if (m_error != nullptr)
+    {
+        m_cancellationReason = error->GetCancellationReason();
+        SetStringValue(GetPropertyName(PropertyId::CancellationDetails_ReasonDetailedText), error->GetDetails().c_str());
+    }
 
     // Set audio format
     if (format != nullptr)
@@ -184,7 +193,7 @@ void CSpxSynthesisResult::Reset()
     m_events.reset();
     m_reason = static_cast<ResultReason>(0);
     m_cancellationReason = static_cast<CancellationReason>(0);
-    m_cancellationErrorCode = CancellationErrorCode::NoError;
+    m_error = nullptr;
     m_audiodata.clear();
     m_audioformat = nullptr;
     m_hasHeader = true;

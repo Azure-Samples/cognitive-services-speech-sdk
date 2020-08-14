@@ -267,7 +267,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 var cancellation = CancellationDetails.FromResult(result);
                 Assert.AreEqual(CancellationReason.Error, cancellation.Reason);
                 Assert.AreEqual(CancellationErrorCode.AuthenticationFailure, cancellation.ErrorCode);
-                AssertHelpers.AssertStringContains(cancellation.ErrorDetails, "WebSocket Upgrade failed with an authentication error (401)");
+                AssertHelpers.AssertStringContains(cancellation.ErrorDetails, "WebSocket upgrade failed", StringComparison.InvariantCultureIgnoreCase);
+                AssertHelpers.AssertStringContains(cancellation.ErrorDetails, "authentication error", StringComparison.InvariantCultureIgnoreCase);
                 AssertHelpers.AssertStringContains(cancellation.ErrorDetails, "SessionId");
             }
 
@@ -286,7 +287,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     var cancellation = SpeechSynthesisCancellationDetails.FromResult(result);
                     Assert.AreEqual(CancellationReason.Error, cancellation.Reason);
                     Assert.AreEqual(CancellationErrorCode.AuthenticationFailure, cancellation.ErrorCode);
-                    AssertHelpers.AssertStringContains(cancellation.ErrorDetails, "WebSocket Upgrade failed with an authentication error (401)");
+                    AssertHelpers.AssertStringContains(cancellation.ErrorDetails, "WebSocket upgrade failed", StringComparison.InvariantCultureIgnoreCase);
+                    AssertHelpers.AssertStringContains(cancellation.ErrorDetails, "authentication error", StringComparison.InvariantCultureIgnoreCase);
                 }
             }
         }

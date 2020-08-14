@@ -52,7 +52,9 @@ class SpeechRecognitionTests: XCTestCase {
 
         XCTAssertEqual(result.text, "");
         XCTAssertEqual(cancellationDetails.reason, SPXCancellationReason.error);
-        XCTAssertTrue(cancellationDetails.errorDetails!.contains("WebSocket Upgrade failed with an authentication error (401)."));
+        XCTAssertTrue(cancellationDetails.errorDetails!.range(of: "websocket upgrade failed", options: .caseInsensitive) != nil);
+        XCTAssertTrue(cancellationDetails.errorDetails!.range(of: "authentication error", options: .caseInsensitive)  != nil);
+        XCTAssertTrue(cancellationDetails.errorDetails!.range(of: "subscription", options: .caseInsensitive) != nil);
         XCTAssertEqual(result.reason, SPXResultReason.canceled);
         XCTAssertEqual(result.duration, 0);
         XCTAssertEqual(result.offset, 0);
@@ -74,9 +76,7 @@ class SpeechRecognitionTests: XCTestCase {
 
         XCTAssertEqual(result.text, "");
         XCTAssertEqual(cancellationDetails.reason, SPXCancellationReason.error);
-        XCTAssertTrue(cancellationDetails.errorDetails!.contains(
-            "Connection failed (no connection to the remote host)."),
-                      cancellationDetails.errorDetails!);
+        XCTAssertTrue(cancellationDetails.errorDetails!.range(of: "connection failed", options: .caseInsensitive) != nil);
         XCTAssertEqual(result.reason, SPXResultReason.canceled);
         XCTAssertEqual(result.duration, 0);
         XCTAssertEqual(result.offset, 0);
@@ -170,7 +170,8 @@ class TranslationRecognitionTests: XCTestCase {
 
         XCTAssertEqual(result.text, "");
         XCTAssertEqual(cancellationDetails.reason, SPXCancellationReason.error);
-        XCTAssertTrue(cancellationDetails.errorDetails!.contains("WebSocket Upgrade failed with an authentication error (401)."));
+        XCTAssertTrue(cancellationDetails.errorDetails!.range(of: "websocket upgrade failed", options: .caseInsensitive) != nil);
+        XCTAssertTrue(cancellationDetails.errorDetails!.range(of: "authentication error", options: .caseInsensitive)  != nil);
         XCTAssertEqual(result.reason, SPXResultReason.canceled);
         XCTAssertEqual(result.duration, 0);
         XCTAssertEqual(result.offset, 0);

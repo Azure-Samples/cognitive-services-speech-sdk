@@ -20,6 +20,8 @@
 #include "azure_c_shared_utility_urlencode_wrapper.h"
 #include "azure_c_shared_utility_http_proxy_io_wrapper.h"
 
+#include "error_info.h"
+
 #include "uspcommon.h"
 #include "uspinternal.h"
 
@@ -39,6 +41,7 @@
 #include "json.h"
 
 using namespace std;
+using namespace Microsoft::CognitiveServices::Speech::Impl;
 
 uint64_t telemetry_gettime()
 {
@@ -951,13 +954,13 @@ void Connection::Impl::OnTransportOpened()
 }
 
 // Callback for transport closed
-void Connection::Impl::OnTransportClosed(WebSocketDisconnectReason reason, const std::string& details, bool serverRequested)
+void Connection::Impl::OnTransportClosed(WebSocketDisconnectReason reason, const std::string& details)
 {
     if (m_connected)
     {
         m_connected = false;
-        LogInfo("TS:%" PRIu64 ", OnDisconnected: connection:0x%x, Reason: %d, Server Requested: %d, Details: %s",
-            getTimestamp(), this, reason, serverRequested, details.c_str());
+        LogInfo("TS:%" PRIu64 ", OnDisconnected: connection:0x%x, Reason: %d, Details: %s",
+            getTimestamp(), this, reason, details.c_str());
 
         auto callbacks = m_config.m_callbacks;
         Invoke([&](auto callbacks) {
@@ -967,87 +970,13 @@ void Connection::Impl::OnTransportClosed(WebSocketDisconnectReason reason, const
     }
 
 // Callback for transport errors
-void Connection::Impl::OnTransportError(WebSocketError reason, int errorCode, const std::string& errorString)
+void Connection::Impl::OnTransportError(const std::shared_ptr<ISpxErrorInformation>& error)
 {
-    LogInfo("TS:%" PRIu64 ", TransportError: connection:0x%x, reason=%d, code=%d [0x%08x], string=%s",
-        getTimestamp(), this, reason, errorCode, errorCode, errorString.c_str());
+    const auto errorCode = error != nullptr ? error->GetCancellationCode() : CancellationErrorCode::NoError;
+    const auto& errorMessage = error != nullptr ? error->GetDetails() : "";
 
-    USP::ErrorCode uspErrorCode = ErrorCode::ConnectionError;
-    string errorMessage;
-    auto errorCodeInString = to_string(errorCode);
-
-    switch (reason)
-    {
-    case WebSocketError::REMOTE_CLOSED:
-        uspErrorCode = ErrorCode::ConnectionError;
-        errorMessage = "Connection was closed by the remote host. Error code: " + errorCodeInString + ". Error details: " + errorString;
-        break;
-
-    case WebSocketError::CONNECTION_FAILURE:
-        uspErrorCode = ErrorCode::ConnectionError;
-        errorMessage = "Connection failed (no connection to the remote host). Internal error: " + errorCodeInString
-            + ". Error details: " + errorString
-            + ". Please check network connection, firewall setting, and the region name used to create speech factory.";
-        break;
-
-    case WebSocketError::WEBSOCKET_UPGRADE:
-        switch ((HttpStatusCode)errorCode)
-        {
-        case HttpStatusCode::BAD_REQUEST:
-            uspErrorCode = ErrorCode::BadRequest;
-            errorMessage = "WebSocket Upgrade failed with a bad request (400). Please check the language name and endpoint id (if used) are correctly associated with the provided subscription key.";
-            break;
-        case HttpStatusCode::UNAUTHORIZED:
-            uspErrorCode = ErrorCode::AuthenticationError;
-            errorMessage = "WebSocket Upgrade failed with an authentication error (401). Please check for correct subscription key (or authorization token) and region name.";
-            break;
-        case HttpStatusCode::FORBIDDEN:
-            uspErrorCode = ErrorCode::AuthenticationError;
-            errorMessage = "WebSocket Upgrade failed with an authentication error (403). Please check for correct subscription key (or authorization token) and region name.";
-            break;
-        case HttpStatusCode::TOO_MANY_REQUESTS:
-            uspErrorCode = ErrorCode::TooManyRequests;
-            errorMessage = "WebSocket Upgrade failed with too many requests error (429). Please check for correct subscription key (or authorization token) and region name.";
-            break;
-        case HttpStatusCode::MOVED_PERMANENTLY:
-        case HttpStatusCode::PERM_REDIRECT:
-            uspErrorCode = ErrorCode::ServiceRetirectPermanent;
-            errorMessage = errorString.empty() ? "Redirect Location Unknown" : errorString;
-            break;
-        case HttpStatusCode::TEMP_REDIRECT:
-            uspErrorCode = ErrorCode::ServiceRedirectTemporary;
-            errorMessage = errorString.empty() ? "Redirect Location Unknown" :  errorString;
-            break;
-        default:
-            uspErrorCode = ErrorCode::ConnectionError;
-            errorMessage = "WebSocket Upgrade failed with HTTP status code: " + errorCodeInString;
-            break;
-        }
-        break;
-
-    case WebSocketError::WEBSOCKET_SEND_FRAME:
-        uspErrorCode = ErrorCode::ConnectionError;
-        errorMessage = "Failure while sending a frame over the WebSocket connection. Internal error: " + errorCodeInString
-            + ". Error details: " + errorString;
-        break;
-
-    case WebSocketError::WEBSOCKET_ERROR:
-        uspErrorCode = ErrorCode::ConnectionError;
-        errorMessage = "WebSocket operation failed. Internal error: " + errorCodeInString
-            + ". Error details: " + errorString;
-        break;
-
-    case WebSocketError::DNS_FAILURE:
-        uspErrorCode = ErrorCode::ConnectionError;
-        errorMessage = "DNS connection failed (the remote host did not respond). Internal error: " + errorCodeInString;
-        break;
-
-    default:
-    case WebSocketError::UNKNOWN:
-        uspErrorCode = ErrorCode::ConnectionError;
-        errorMessage = "Unknown transport error.";
-        break;
-    }
+    LogInfo("TS:%" PRIu64 ", TransportError: connection:0x%x, code=%d, string=%s",
+        getTimestamp(), this, errorCode, errorMessage.c_str());
 
     if (m_connected)
     {
@@ -1058,9 +987,8 @@ void Connection::Impl::OnTransportError(WebSocketError reason, int errorCode, co
         });
     }
 
-    assert(!errorMessage.empty());
     Invoke([&](auto callbacks) {
-        callbacks->OnError(true, uspErrorCode, errorMessage);
+        callbacks->OnError(error);
     });
 
     m_valid = false;
@@ -1522,7 +1450,8 @@ void Connection::Impl::OnTransportData(bool isBinary, const UspHeaders& headers,
             }
             else
             {
-                Invoke([&](auto callbacks) { callbacks->OnError(false, ErrorCode::ServiceError, failureReason.c_str()); });
+                auto error = ErrorInfo::FromExplicitError(CancellationErrorCode::ServiceError, failureReason);
+                Invoke([&](auto callbacks) { callbacks->OnError(error); });
             }
         }
         else if (path == path::translationResponse)
@@ -1686,7 +1615,8 @@ void Connection::Impl::OnTransportData(bool isBinary, const UspHeaders& headers,
             else
             {
                 failureReason = failureReason + json[json_properties::failureReason].get<string>();
-                Invoke([&](auto callbacks) { callbacks->OnError(false, ErrorCode::ServiceError, failureReason.c_str()); });
+                auto error = ErrorInfo::FromExplicitError(CancellationErrorCode::ServiceError, failureReason);
+                Invoke([&](auto callbacks) { callbacks->OnError(error); });
             }
         }
         else
@@ -1705,50 +1635,9 @@ void Connection::Impl::OnTransportData(bool isBinary, const UspHeaders& headers,
 void Connection::Impl::InvokeRecognitionErrorCallback(RecognitionStatus status, const string& response)
 {
     auto callbacks = m_config.m_callbacks;
-    string msg;
-    ErrorCode error = ErrorCode::ServiceError;
+    auto error = ErrorInfo::FromRecognitionStatus(status, response);
 
-    switch (status)
-    {
-    case RecognitionStatus::Error:
-        msg = "The speech recognition service encountered an internal error and could not continue. Response text:" + response;
-        error = ErrorCode::ServiceError;
-        break;
-    case RecognitionStatus::TooManyRequests:
-        msg = "The number of parallel requests exceeded the number of allowed concurrent transcriptions. Response text:" + response;
-        error = ErrorCode::TooManyRequests;
-        break;
-    case RecognitionStatus::BadRequest:
-        msg = "Invalid parameter or unsupported audio format in the request. Response text:" + response;
-        error = ErrorCode::BadRequest;
-        break;
-    case RecognitionStatus::Forbidden:
-        msg = "The recognizer is using a free subscription that ran out of quota. Response text:" + response;
-        error = ErrorCode::Forbidden;
-        break;
-    case RecognitionStatus::ServiceUnavailable:
-        msg = "The service is currently unavailable. Response text:" + response;
-        error = ErrorCode::ServiceUnavailable;
-        break;
-    case RecognitionStatus::InvalidMessage:
-        msg = "Invalid response. Response text:" + response;
-        error = ErrorCode::ServiceError;
-        break;
-    case RecognitionStatus::Success:
-    case RecognitionStatus::EndOfDictation:
-    case RecognitionStatus::InitialSilenceTimeout:
-    case RecognitionStatus::InitialBabbleTimeout:
-    case RecognitionStatus::NoMatch:
-        msg = "Runtime Error: invoke error callback for non-error recognition status. Response text:" + response;
-        error = ErrorCode::RuntimeError;
-        break;
-    default:
-        msg = "Runtime Error: invalid recognition status. Response text:" + response;
-        error = ErrorCode::RuntimeError;
-        break;
-    }
-
-    this->Invoke([&](auto callbacks) { callbacks->OnError(false, error, msg.c_str()); });
+    this->Invoke([&](auto callbacks) { callbacks->OnError(error); });
 }
 
 SpeechPhraseMsg Connection::Impl::RetrieveSpeechPhraseResult(const nlohmann::json& json)

@@ -20,6 +20,7 @@
 #include "azure_c_shared_utility_platform_wrapper.h"
 #include "azure_c_shared_utility/shared_util_options.h"
 #include <spx_build_information.h>
+#include "error_info.h"
 
 #define SPX_DBG_TRACE_REST_TTS 0
 
@@ -204,8 +205,9 @@ std::shared_ptr<ISpxSynthesisResult> CSpxRestTtsEngineAdapter::Speak(const std::
         }
         else
         {
+            auto error = ErrorInfo::FromExplicitError(CancellationErrorCode::ConnectionFailure, "");
             resultInit->InitSynthesisResult(request.requestId, ResultReason::Canceled, CancellationReason::Error,
-                CancellationErrorCode::ConnectionFailure, nullptr, 0, request.outputFormat.get(), request.outputHasHeader);
+                error, nullptr, 0, request.outputFormat.get(), request.outputHasHeader);
         }});
 
     return result;
@@ -428,24 +430,28 @@ void CSpxRestTtsEngineAdapter::PostTtsRequest(HTTP_HANDLE http_connect, RestTtsR
 
             // Write audio to result
             result_init->InitSynthesisResult(request.requestId, ResultReason::SynthesizingAudioCompleted, REASON_CANCELED_NONE,
-                CancellationErrorCode::NoError, buffer_content, buffer_length, request.outputFormat.get(), request.outputHasHeader);
+                nullptr, buffer_content, buffer_length, request.outputFormat.get(), request.outputHasHeader);
 #else
             // Write audio to result
             result_init->InitSynthesisResult(request.requestId, ResultReason::SynthesizingAudioCompleted, REASON_CANCELED_NONE,
-                CancellationErrorCode::NoError, request.response.body.data(), request.response.body.size(), request.outputFormat.get(), request.outputHasHeader);
+                nullptr, request.response.body.data(), request.response.body.size(), request.outputFormat.get(), request.outputHasHeader);
 #endif
         }
         else
         {
             if (result != HTTPAPI_OK)
             {
+                std::stringstream errorMessage;
+                errorMessage << "Internal error: HttpAPI failed (result: " << result << ").";
+                auto error = ErrorInfo::FromExplicitError(CancellationErrorCode::RuntimeError, errorMessage.str());
                 result_init->InitSynthesisResult(request.requestId, ResultReason::Canceled, CancellationReason::Error,
-                    CancellationErrorCode::RuntimeError, nullptr, 0, request.outputFormat.get(), request.outputHasHeader);
+                    error, nullptr, 0, request.outputFormat.get(), request.outputHasHeader);
             }
             else
             {
+                auto error = ErrorInfo::FromHttpStatus((HttpStatusCode)statusCode, "TTS request failed: ", "");
                 result_init->InitSynthesisResult(request.requestId, ResultReason::Canceled, CancellationReason::Error,
-                    CSpxSynthesisHelper::HttpStatusCodeToCancellationErrorCode(statusCode), nullptr, 0, request.outputFormat.get(), request.outputHasHeader);
+                    error, nullptr, 0, request.outputFormat.get(), request.outputHasHeader);
             }
 
             // Build error message and set it to error detail string

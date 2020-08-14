@@ -571,12 +571,16 @@
     SPXCancellationDetails *details2 = [[SPXCancellationDetails alloc] initFromCanceledRecognitionResult:result error:&err];
 
     XCTAssertEqual(details2.reason, SPXCancellationReason_Error);
-    XCTAssertTrue([details2.errorDetails containsString:@"WebSocket Upgrade failed with an authentication error (401)."]);
+    XCTAssertTrue([details2.errorDetails rangeOfString:@"websocket upgrade failed" options:NSCaseInsensitiveSearch].location != NSNotFound);
+    XCTAssertTrue([details2.errorDetails rangeOfString:@"authentication error" options:NSCaseInsensitiveSearch].location != NSNotFound);
+    XCTAssertTrue([details2.errorDetails rangeOfString:@"subscription" options:NSCaseInsensitiveSearch].location != NSNotFound);    
     XCTAssertNil(err);
 
     XCTAssertTrue([result.text isEqualToString:@""], "Final Result Text does not match");
     XCTAssertEqual(details.reason, SPXCancellationReason_Error);
-    XCTAssertTrue([details.errorDetails containsString:@"WebSocket Upgrade failed with an authentication error (401)."]);
+    XCTAssertTrue([details.errorDetails rangeOfString:@"websocket upgrade failed" options:NSCaseInsensitiveSearch].location != NSNotFound);
+    XCTAssertTrue([details.errorDetails rangeOfString:@"authentication error" options:NSCaseInsensitiveSearch].location != NSNotFound);
+    XCTAssertTrue([details.errorDetails rangeOfString:@"subscription" options:NSCaseInsensitiveSearch].location != NSNotFound);
     XCTAssertEqual(result.reason, SPXResultReason_Canceled);
     XCTAssertEqual(result.duration, 0);
     XCTAssertEqual(result.offset, 0);
@@ -603,7 +607,7 @@
 
     XCTAssertTrue([result.text isEqualToString:@""], "Final Result Text does not match");
     XCTAssertEqual(details.reason, SPXCancellationReason_Error);
-    XCTAssertTrue([details.errorDetails containsString:@"Connection failed (no connection to the remote host). Internal error: 11. Error details: 0."]);
+    XCTAssertTrue([details.errorDetails rangeOfString:@"connection failed" options:NSCaseInsensitiveSearch].location != NSNotFound);
     XCTAssertEqual(result.reason, SPXResultReason_Canceled);
     XCTAssertEqual(result.duration, 0);
     XCTAssertEqual(result.offset, 0);

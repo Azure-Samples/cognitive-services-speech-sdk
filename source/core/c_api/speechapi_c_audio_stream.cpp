@@ -250,7 +250,9 @@ SPXAPI audio_data_stream_get_canceled_error_code(SPXAUDIOSTREAMHANDLE haudioStre
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto stream = GetInstance<ISpxAudioDataStream>(haudioStream);
-        *errorCode = (Result_CancellationErrorCode)stream->GetCancellationErrorCode();
+        auto error = stream->GetError();
+        auto streamErrorCode = error != nullptr ? error->GetCancellationCode() : CancellationErrorCode::NoError;
+        *errorCode = static_cast<Result_CancellationErrorCode>(streamErrorCode);
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }

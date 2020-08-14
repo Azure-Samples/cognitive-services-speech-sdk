@@ -146,6 +146,4 @@ private:
     static constexpr auto WSS = "wss://";
 };
 
-CancellationErrorCode HttpStatusCodeToCancellationErrorCode(int httpStatusCode);
-
 } } } } // Microsoft::CognitiveServices::Speech::Impl

@@ -9,10 +9,12 @@
 #include <sstream>
 #include <usp.h>
 #include "http_recog_engine_adapter.h"
+#include "http_recog_engine_response_helpers.h"
 #include "property_id_2_name_map.h"
 #include "http_client.h"
 #include "service_helpers.h"
-
+#include "create_object_helpers.h"
+#include "error_info.h"
 #include <json.h>
 #include <http_request.h>
 #include <http_response.h>
@@ -26,8 +28,6 @@ namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
 namespace Impl {
-
-#define FROM_SECOND_TO_HNS 10000000 // 7 zeros
 
 void CSpxHttpRecoEngineAdapter::Init()
 {
@@ -221,9 +221,15 @@ void CSpxHttpRecoEngineAdapter::FlushAudio()
     m_audioFlushed = true;
 }
 
-RecognitionResultPtr CSpxHttpRecoEngineAdapter::ModifyVoiceProfile(bool reset, VoiceProfileType type, std::string&& id) const
+RecognitionResultPtr CSpxHttpRecoEngineAdapter::ModifyVoiceProfile(bool reset, VoiceProfileType type, std::string&& id)
 {
-    SPX_IFTRUE_RETURN_X(type == VOICE_PROFILE_TYPE_NONE, CreateErrorResult("error in delete/reset a voice profile. Must set a voicetype."));
+    if (type == VOICE_PROFILE_TYPE_NONE)
+    {
+        constexpr auto message = "Internal error encountered while deleting or resetting a voice profile. "
+            "A voice profile type must be specified.";
+        const auto error = ErrorInfo::FromRuntimeMessage(message);
+        return CreateErrorResult(error);
+    }
 
     auto fullPath = m_speakerIdPaths.at(type) + "/" + id;
     if (reset)
@@ -233,377 +239,54 @@ RecognitionResultPtr CSpxHttpRecoEngineAdapter::ModifyVoiceProfile(bool reset, V
 
     auto endPoint = CreateEndpoint(move(fullPath));
 
-    auto response = SendRequest(endPoint, reset ? HTTPAPI_REQUEST_POST : HTTPAPI_REQUEST_DELETE);
-    if (response == nullptr)
-    {
-        return CreateErrorResult("Error in delete/reset a voice profile");
-    }
-    SPX_DBG_TRACE_INFO("Successfully %s voice profile %s", reset?"reset":"delete", id.c_str());
-    auto factory = make_unique<DeleteOrResetResultFactory>(move(response), reset);
-
-    return factory->CreateResult([=](ResultReason reason, CancellationReason canReason, NoMatchReason noMatchReason, CancellationErrorCode errorCode, const wchar_t* text) {
-        return CreateRecoResult(reason, canReason, noMatchReason, errorCode, text);
-        });
-}
-
-RecognitionResultPtr DeleteOrResetResultFactory::CreateResult(CreateFinalResultFuncPtr func)
-{
-    if (m_response == nullptr || func == nullptr)
-    {
-        return CreateErrorResult(func, "Error in Delete/Reset a voice profile");
-    }
-
-    ResultReason reason{ ResultReason::Canceled };
-    if (m_response->IsSuccess())
-    {
-        reason = m_reset ? ResultReason::ResetVoiceProfile : ResultReason::DeletedVoiceProfile;
-    }
-
-    auto cancellationReason = GetCancellationReason(m_response->IsSuccess());
-    auto noMatchReason = GetNoMatchReason();
-    auto errorCode = GetCancellationErrorCode(m_response->GetStatusCode());
-    string displayText;
-    if (!m_response->IsSuccess())
-    {
-        displayText = GetErrorMessageInJson(m_response->ReadContentAsString(), m_response->GetStatusCode());
-    }
-
-    auto result = func(reason, cancellationReason, noMatchReason, errorCode, PAL::ToWString(displayText).c_str());
-    PopulateJsonResult(result, m_response->ReadContentAsString());
-    return result;
-}
-
-CancellationReason ISpxSpeakerResultFactory::GetCancellationReason(bool isSuccess)
-{
-    return isSuccess ? REASON_CANCELED_NONE : CancellationReason::Error;
-}
-
-NoMatchReason ISpxSpeakerResultFactory::GetNoMatchReason()
-{
-    return NO_MATCH_REASON_NONE;
-}
-
-CancellationErrorCode ISpxSpeakerResultFactory::GetCancellationErrorCode(int httpStatusCode)
-{
-    return HttpStatusCodeToCancellationErrorCode(httpStatusCode);
-}
-
-RecognitionResultPtr ISpxSpeakerResultFactory::CreateErrorResult(CreateFinalResultFuncPtr func, const std::string& error)
-{
-    return func(ResultReason::Canceled, CancellationReason::Error, NO_MATCH_REASON_NONE, CancellationErrorCode::RuntimeError, PAL::ToWString(error).c_str());
-}
-
-void ISpxSpeakerResultFactory::PopulateJsonResult(RecognitionResultPtr& result, const std::string& jsonString)
-{
-    auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
-    if (jsonString.empty())
-    {
-        return;
-    }
-    // save the origin response as JsonResult.
-    namedProperties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_JsonResult), jsonString.c_str());
-}
-
-RecognitionResultPtr IdentifyResultFactory::CreateResult(CreateFinalResultFuncPtr func)
-{
-    if (m_response == nullptr || func == nullptr)
-    {
-        return CreateErrorResult(func, "Error in identifying a voice profile.");
-    }
-
-    ResultReason reason{ ResultReason::Canceled };
-    json json;
-    float score= 0.0f;
-    string profileId;
-    if (m_response->IsSuccess())
-    {
-        json = json::parse(m_response->ReadContentAsString());
-        profileId = json["identifiedProfile"]["profileId"].get<string>();
-        score = json["identifiedProfile"]["score"].get<float>();
-        if (!profileId.empty())
-        {
-            reason = ResultReason::RecognizedSpeakers;
-        }
-    }
-
-    auto errorCode = GetCancellationErrorCode(m_response->GetStatusCode());
-    string errorMessage;
-    if (!m_response->IsSuccess())
-    {
-        errorMessage = GetErrorMessageInJson(m_response->ReadContentAsString(), m_response->GetStatusCode());
-    }
-
-    auto result = func(reason,
-                       GetCancellationReason(m_response->IsSuccess()),
-                       NO_MATCH_REASON_NONE,
-                       errorCode,
-                       PAL::ToWString(errorMessage).c_str());
-    PopulateJsonResult(result, m_response->ReadContentAsString());
-    if (!m_response->IsSuccess())
-    {
-        return result;
-    }
-
-    auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
-    if (namedProperties == nullptr)
-    {
-        SPX_TRACE_ERROR("verification result does not surpport ISpxNamedProperties.");
-        SPX_THROW_HR(SPXERR_RUNTIME_ERROR);
-    }
-    namedProperties->SetStringValue("speakerrecognition.score", to_string(score).c_str());
-    namedProperties->SetStringValue("speakerrecognition.profileid", profileId.c_str());
+    m_response = SendRequest(endPoint, reset ? HTTPAPI_REQUEST_POST : HTTPAPI_REQUEST_DELETE);
+    auto operationType = reset ? SpeakerRecognitionOperationType::ResetProfile : SpeakerRecognitionOperationType::DeleteProfile;
+    auto result = GetResult(operationType);
 
     return result;
 }
 
-ResultReason VerifyResultFactory::GetResultReason()
+RecognitionResultPtr CSpxHttpRecoEngineAdapter::GetResult(SpeakerRecognitionOperationType operationType)
 {
-    ResultReason resultReason = ResultReason::Canceled;
     if (m_response == nullptr)
     {
-        return resultReason;
+        constexpr auto message = "Internal error retrieving a result: no response was present.";
+        auto error = ErrorInfo::FromRuntimeMessage(message);
+        return CreateErrorResult(error);
     }
 
-    if (m_response->IsSuccess())
+    auto errorFromResponse = ErrorFromResponse(m_response);
+    if (errorFromResponse != nullptr)
+    {
+        return CreateErrorResult(errorFromResponse);
+    }
+
+    auto resultReason = GetResultReasonForResponse(operationType);
+    if (resultReason == ResultReason::Canceled)
+    {
+        constexpr auto message = "Internal error retrieving a result: unexpected response contents.";
+        auto error = ErrorInfo::FromRuntimeMessage(message);
+        return CreateErrorResult(error);
+    }
+
+    std::string resultText;
+    if (operationType == SpeakerRecognitionOperationType::EnrollProfile)
     {
         auto json = json::parse(m_response->ReadContentAsString());
-        auto recoResult = json["recognitionResult"].get<string>();
-        if (PAL::StringUtils::ToLower(recoResult) == "accept")
+        if (json.find("passPhrase") != json.end())
         {
-            resultReason = ResultReason::RecognizedSpeaker;
-        }
-
-        if (PAL::StringUtils::ToLower(recoResult) == "reject")
-        {
-            resultReason = ResultReason::NoMatch;
-        }
-    }
-    return resultReason;
-}
-
-string VerifyResultFactory::GetErrorMesssage(ResultReason resultReason)
-{
-    if (m_response == nullptr)
-    {
-        return string{};
-    }
-    bool rejected = resultReason == ResultReason::NoMatch ? true: false;
-    string errorMessage;
-    if (!m_response->IsSuccess() && !rejected)
-    {
-        errorMessage = GetErrorMessageInJson(m_response->ReadContentAsString(), m_response->GetStatusCode());
-    }
-
-    return errorMessage;
-}
-
-RecognitionResultPtr VerifyResultFactory::CreateResult(CreateFinalResultFuncPtr func)
-{
-    if (m_response == nullptr || func == nullptr)
-    {
-        return CreateErrorResult(func, "Error in verifying a voice profile.");
-    }
-
-    auto resultReason = GetResultReason();
-    auto errorMessage = GetErrorMesssage(resultReason);
-    auto result = func(resultReason,
-                       GetCancellationReason(m_response->IsSuccess()),
-                       GetNoMatchReason(),
-                       GetCancellationErrorCode(m_response->GetStatusCode()),
-                       PAL::ToWString(errorMessage).c_str());
-    PopulateJsonResult(result, m_response->ReadContentAsString());
-    if (!m_response->IsSuccess())
-    {
-        return result;
-    }
-
-    auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
-    try
-    {
-        auto json = json::parse(m_response->ReadContentAsString());
-        auto score = json["score"].get<float>();
-        namedProperties->SetStringValue("speakerrecognition.score", to_string(score).c_str());
-        namedProperties->SetStringValue("speakerrecognition.profileid", m_profileId.c_str());
-    }
-    catch (const exception& e)
-    {
-        string error{ "exception in parsing verification result." };
-        error += e.what();
-        SPX_DBG_TRACE_ERROR("%s", error.c_str());
-        return CreateErrorResult(func, error);
-    }
-    return result;
-}
-
-RecognitionResultPtr EnrollmentResultFactory::PopulateEnrollmentDurations(CreateFinalResultFuncPtr func, RecognitionResultPtr result, const json& json)
-{
-    try
-    {
-        auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
-
-        auto enrollmentsCount = json["enrollmentsCount"].get<int>();
-        namedProperties->SetStringValue("enrollment.enrollmentsCount", to_string(enrollmentsCount).c_str());
-
-        auto enrollmentsLength = json["enrollmentsLength"].get<float>();
-        SetInPropertyBag(namedProperties.get(), "enrollment.enrollmentsLength", enrollmentsLength);
-
-        auto enrollmentsSpeechLength = json["enrollmentsSpeechLength"].get<float>();
-        SetInPropertyBag(namedProperties.get(), "enrollment.enrollmentsSpeechLength", enrollmentsSpeechLength);
-
-        if (json.find("remainingEnrollmentsCount") != json.end())
-        {
-            auto remainingEnrollmentsCount = json["remainingEnrollmentsCount"].get<int>();
-            namedProperties->SetStringValue("enrollment.remainingEnrollmentsCount", to_string(remainingEnrollmentsCount).c_str());
-        }
-
-        if (json.find("remainingEnrollmentsSpeechLength") != json.end())
-        {
-            auto remainingEnrollmentsSpeechLength = json["remainingEnrollmentsSpeechLength"].get<float>();
-            SetInPropertyBag(namedProperties.get(), "enrollment.remainingEnrollmentsSpeechLength", remainingEnrollmentsSpeechLength);
-        }
-
-        auto audioLength = json["audioLength"].get<float>();
-        SetInPropertyBag(namedProperties.get(), "enrollment.audioLength", audioLength);
-
-        auto audioSpeechLength = json["audioSpeechLength"].get<float>();
-        SetInPropertyBag(namedProperties.get(), "enrollment.audioSpeechLength", audioSpeechLength);
-
-        auto profileId = json["profileId"].get<string>();
-        namedProperties->SetStringValue("enrollment.profileId", profileId.c_str());
-    }
-    catch (const exception& e)
-    {
-        string error{ "exception in parsing enrollment result." };
-        error += e.what();
-        SPX_DBG_TRACE_ERROR("%s", error.c_str());
-        return CreateErrorResult(func, error);
-    }
-    return result;
-}
-
-RecognitionResultPtr EnrollmentResultFactory::CreateResult(CreateFinalResultFuncPtr func)
-{
-    if (m_response == nullptr)
-    {
-        return CreateErrorResult(func, "HTTP response is null in enrolling a voice profile. This might due to data receive timeout.");
-    }
-
-    ResultReason reason{ ResultReason::Canceled };
-    auto json = json::parse(m_response->ReadContentAsString());
-
-    string enrollmentStatus{};
-
-    if (!m_response->IsSuccess())
-    {
-        reason = ResultReason::Canceled;
-    }
-    else
-    {
-        enrollmentStatus = json["enrollmentStatus"].get<string>();
-        if (PAL::StringUtils::ToLower(enrollmentStatus) == "enrolling" || PAL::StringUtils::ToLower(enrollmentStatus) == "training")
-        {
-            reason = ResultReason::EnrollingVoiceProfile;
-        }
-        else if (PAL::StringUtils::ToLower(enrollmentStatus) == "enrolled")
-        {
-            reason = ResultReason::EnrolledVoiceProfile;
-        }
-        else
-        {
-            string error{ "Unexpected enrollment status %s when converting to ResultReason. enrollmentStatus = " };
-            error += enrollmentStatus;
-            SPX_TRACE_ERROR("%s", error.c_str());
-            return CreateErrorResult(func, error);
+            resultText = json["passPhrase"].get<string>();
         }
     }
 
-    auto cancellationReason = GetCancellationReason(m_response->IsSuccess());
-    auto noMatchReason = GetNoMatchReason();
-    auto errorCode = GetCancellationErrorCode(m_response->GetStatusCode());
+    auto result = CreateFinalResult(resultReason, NO_MATCH_REASON_NONE, PAL::ToWString(resultText).c_str(), 0, 0);
+    auto populateError = TryPopulateResultFromResponse(result);
 
-    auto errorMessage = GetErrorMessageInJson(m_response->ReadContentAsString(), m_response->GetStatusCode());
-    string passPhrase;
-    if (json.find("passPhrase") != json.end())
-    {
-        passPhrase = json["passPhrase"].get<string>();
-    }
-
-    auto result = func(reason, cancellationReason, noMatchReason, errorCode, m_response->IsSuccess()?PAL::ToWString(passPhrase).c_str():PAL::ToWString(errorMessage).c_str());
-
-    PopulateJsonResult(result, m_response->ReadContentAsString());
-    if (!m_response->IsSuccess())
-    {
-        return result;
-    }
-
-    return PopulateEnrollmentDurations(func, result, json);
+    return populateError != nullptr ? CreateErrorResult(populateError) : result;
 }
 
-void ISpxSpeakerResultFactory::SetInPropertyBag(ISpxNamedProperties* properties, string&& name, float valueInSeconds)
-{
-    if (properties)
-    {
-        uint64_t enrollmentsLengthInHNS = static_cast<uint64_t>(valueInSeconds * FROM_SECOND_TO_HNS);
-        properties->SetStringValue(name.c_str(), to_string(enrollmentsLengthInHNS).c_str());
-    }
-}
+RecognitionResultPtr CSpxHttpRecoEngineAdapter::GetResult() { return GetResult(GetCurrentOperationType()); }
 
-std::string ISpxSpeakerResultFactory::GetErrorMessageInJson(const std::string& str, int statusCode)
-{
-    std::string error;
-    if (str.empty())
-    {
-        error = "Error of " + std::to_string(statusCode);
-    }
-    else
-    {
-        auto json = nlohmann::json::parse(str);
-        if (json.find("error") != json.end())
-        {
-            error = json["error"]["message"].get<std::string>();
-        }
-    }
-    return error;
-}
-
-RecognitionResultPtr  CSpxHttpRecoEngineAdapter::GetResult()
-{
-    unique_ptr<ISpxSpeakerResultFactory> factory;
-
-    if (m_enroll)
-    {
-        factory = make_unique<EnrollmentResultFactory>(move(m_response));
-    }
-    else
-    {
-        if (m_voiceProfileType == VoiceProfileType::TextIndependentIdentification)
-        {
-            factory = make_unique<IdentifyResultFactory>(move(m_response));
-        }
-        else
-        {
-            factory = make_unique<VerifyResultFactory>(move(m_response), move(m_profileIdForVerification));
-        }
-    }
-
-    SPX_DBG_ASSERT(factory != nullptr);
-
-    return factory->CreateResult([=](ResultReason reason, CancellationReason canReason, NoMatchReason noMatchReason, CancellationErrorCode errorCode, const wchar_t* text) {
-            return CreateRecoResult(reason, canReason, noMatchReason, errorCode, text);
-     });
-}
-
-RecognitionResultPtr CSpxHttpRecoEngineAdapter::CreateRecoResult(ResultReason reason, CancellationReason cancellationReason, NoMatchReason noMatchReason, CancellationErrorCode errorCode, const wchar_t* text) const
-{
-    auto site = GetSite();
-    auto factory = SpxQueryService<ISpxRecoResultFactory>(site);
-    return  factory->CreateFinalResult(nullptr, reason, noMatchReason, cancellationReason, errorCode, text, 0, 0);
-}
-
-RecognitionResultPtr CSpxHttpRecoEngineAdapter::CreateErrorResult(const std::string& error) const
-{
-    return CreateRecoResult(ResultReason::Canceled, CancellationReason::Error, NO_MATCH_REASON_NONE, CancellationErrorCode::RuntimeError, PAL::ToWString(error).c_str());
-}
 shared_ptr<ISpxNamedProperties> CSpxHttpRecoEngineAdapter::GetParentProperties() const
 {
     return SpxQueryInterface<ISpxNamedProperties>(GetSite());
@@ -620,7 +303,6 @@ HttpEndpointInfo CSpxHttpRecoEngineAdapter::CreateEndpoint(VoiceProfileType type
         .Path(m_speakerIdPaths.at(type));
 }
 
-
 HttpEndpointInfo CSpxHttpRecoEngineAdapter::CreateEndpoint(string&& fullPath) const
 {
     HttpEndpointInfo endpoint;
@@ -630,6 +312,146 @@ HttpEndpointInfo CSpxHttpRecoEngineAdapter::CreateEndpoint(string&& fullPath) co
         .Scheme(m_uriScheme)
         .Host(m_speakerRecognitionHostName)
         .Path(fullPath);
+}
+
+shared_ptr<ISpxRecognitionResult> CSpxHttpRecoEngineAdapter::CreateIntermediateResult(const wchar_t*, uint64_t, uint64_t)
+{
+    SPX_DBG_ASSERT(false);
+    return nullptr;
+}
+
+std::shared_ptr<ISpxRecognitionResult> CSpxHttpRecoEngineAdapter::CreateFinalResult(ResultReason reason, NoMatchReason noMatchReason, const wchar_t* text, uint64_t offset, uint64_t duration, const wchar_t*)
+{
+    auto result = SpxCreateObjectWithSite<ISpxRecognitionResult>("CSpxRecognitionResult", this);
+    auto initResult = SpxQueryInterface<ISpxRecognitionResultInit>(result);
+    initResult->InitFinalResult(reason, noMatchReason, text, offset, duration);
+
+    return result;
+}
+
+std::shared_ptr<ISpxRecognitionResult> CSpxHttpRecoEngineAdapter::CreateKeywordResult(const double, const uint64_t, const uint64_t, const wchar_t*, ResultReason, std::shared_ptr<ISpxAudioDataStream>)
+{
+    SPX_DBG_ASSERT(false);
+    return nullptr;
+}
+
+RecognitionResultPtr CSpxHttpRecoEngineAdapter::CreateErrorResult(const std::shared_ptr<ISpxErrorInformation>& error)
+{
+    auto result = SpxCreateObjectWithSite<ISpxRecognitionResult>("CSpxRecognitionResult", this);
+    auto initResult = SpxQueryInterface<ISpxRecognitionResultInit>(result);
+    initResult->InitErrorResult(error);
+
+    // Compatibility: these results previously stored error information on the "result" key (not the "error" key); copy it
+    auto resultProps = SpxQueryInterface<ISpxNamedProperties>(result);
+    const auto& details = resultProps->GetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_JsonErrorDetails), "");
+    resultProps->SetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_JsonResult), details.c_str());
+
+    return result;
+}
+
+std::shared_ptr<ISpxRecognitionResult> CSpxHttpRecoEngineAdapter::CreateEndOfStreamResult()
+{
+    auto result = SpxCreateObjectWithSite<ISpxRecognitionResult>("CSpxRecognitionResult", this);
+    auto initResult = SpxQueryInterface<ISpxRecognitionResultInit>(result);
+    initResult->InitEndOfStreamResult();
+
+    return result;
+}
+
+ResultReason CSpxHttpRecoEngineAdapter::GetResultReasonForResponse(SpeakerRecognitionOperationType operationType)
+{
+    switch (operationType)
+    {
+    case SpeakerRecognitionOperationType::ResetProfile:
+        return ResultReason::ResetVoiceProfile;
+    case SpeakerRecognitionOperationType::DeleteProfile:
+        return ResultReason::DeletedVoiceProfile;
+    case SpeakerRecognitionOperationType::EnrollProfile:
+        return EnrollmentResultReasonFromResponse(m_response);
+    case SpeakerRecognitionOperationType::Identify:
+        return IdentificationResultReasonFromResponse(m_response);
+    case SpeakerRecognitionOperationType::Verify:
+        return VerificationResultReasonFromResponse(m_response);
+    default:
+        return ResultReason::Canceled;
+    }
+}
+
+std::shared_ptr<ISpxErrorInformation> CSpxHttpRecoEngineAdapter::TryPopulateResultFromResponse(RecognitionResultPtr& result)
+{
+    const auto responseText = m_response->ReadContentAsString();
+    if (responseText.empty()) return nullptr;
+
+    auto json = json::parse(responseText);
+    auto props = SpxQueryInterface<ISpxNamedProperties>(result);
+
+    props->SetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_JsonResult), responseText.c_str());
+
+    constexpr auto errorMessageBase{ "Exception encountered while processing " };
+
+    switch (GetCurrentOperationType())
+    {
+    case SpeakerRecognitionOperationType::EnrollProfile:
+        try
+        {
+            SetJsonProp<int>(json, "enrollmentsCount", props, "enrollment.enrollmentsCount");
+            SetJsonHNSProp(json, "enrollmentsLength", props, "enrollment.enrollmentsLength");
+            SetJsonHNSProp(json, "enrollmentsSpeechLength", props, "enrollment.enrollmentsSpeechLength");
+            SetJsonProp_NoThrow<int>(json, "remainingEnrollmentsCount", props, "enrollment.remainingEnrollmentsCount");
+            SetJsonHNSProp_NoThrow(json, "remainingEnrollmentsSpeechLength", props, "enrollment.remainingEnrollmentsSpeechLength");
+            SetJsonHNSProp(json, "audioLength", props, "enrollment.audioLength");
+            SetJsonHNSProp(json, "audioSpeechLength", props, "enrollment.audioSpeechLength");
+            SetJsonProp(json, "profileId", props, "enrollment.profileId");
+        }
+        catch (const exception& e)
+        {
+            std::stringstream errorMessageStream;
+            errorMessageStream << errorMessageBase << "enrollment result: " << e.what();
+            auto errorMessage = errorMessageStream.str();
+            SPX_DBG_TRACE_ERROR("%s", errorMessage.c_str());
+            auto error = ErrorInfo::FromRuntimeMessage(errorMessage);
+            return error;
+        }
+        break;
+    case SpeakerRecognitionOperationType::Identify:
+        try
+        {
+            auto profileId = json["identifiedProfile"]["profileId"].get<string>();
+            auto score = json["identifiedProfile"]["score"].get<float>();
+            props->SetStringValue("speakerrecognition.score", to_string(score).c_str());
+            props->SetStringValue("speakerrecognition.profileid", profileId.c_str());
+        }
+        catch (const exception& e)
+        {
+            std::stringstream errorMessageStream;
+            errorMessageStream << errorMessageBase << " identification result: " << e.what();
+            auto errorMessage = errorMessageStream.str();
+            SPX_DBG_TRACE_ERROR("%s", errorMessage.c_str());
+            return ErrorInfo::FromRuntimeMessage(errorMessage);
+        }
+        break;
+    case SpeakerRecognitionOperationType::Verify:
+        try
+        {
+            SetJsonProp<float>(json, "score", props, "speakerrecognition.score");
+            props->SetStringValue("speakerrecognition.profileid", m_profileIdForVerification.c_str());
+        }
+        catch (const exception& e)
+        {
+            std::stringstream messageStream;
+            messageStream << "Exception encountered parsing a verification result: " << e.what();
+            auto message = messageStream.str();
+            SPX_DBG_TRACE_ERROR("%s", message.c_str());
+            auto error = ErrorInfo::FromRuntimeMessage(message);
+            return error;
+        }
+        break;
+    default:
+        break;
+    }
+
+    // Population successful; no error
+    return nullptr;
 }
 
 }}}}

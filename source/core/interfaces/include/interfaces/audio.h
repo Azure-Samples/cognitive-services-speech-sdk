@@ -7,6 +7,7 @@
 #include <interfaces/base.h>
 #include <interfaces/aggregates.h>
 #include <interfaces/containers.h>
+#include <interfaces/errors.h>
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -77,7 +78,7 @@ public:
     virtual void InitFromFormat(const SPXWAVEFORMATEX& format, bool hasHeader) = 0;
     virtual StreamStatus GetStatus() noexcept = 0;
     virtual CancellationReason GetCancellationReason() = 0;
-    virtual CancellationErrorCode GetCancellationErrorCode() = 0;
+    virtual const std::shared_ptr<ISpxErrorInformation>& GetError() = 0;
     virtual bool CanReadData(uint32_t requestedSize) = 0;
     virtual bool CanReadData(uint32_t requestedSize, uint32_t pos) = 0;
     virtual uint32_t Read(uint8_t* buffer, uint32_t bufferSize) = 0;

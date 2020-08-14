@@ -163,9 +163,17 @@ public:
     std::shared_ptr<ISpxActivityEventArgs> CreateActivityEventArgs(std::string activity, std::shared_ptr<ISpxAudioOutput> audio) final;
 
     // --- ISpxRecoResultFactory
-    std::shared_ptr<ISpxRecognitionResult> CreateIntermediateResult(const wchar_t* resultId, const wchar_t* text, uint64_t offset, uint64_t duration) override;
-    std::shared_ptr<ISpxRecognitionResult> CreateFinalResult(const wchar_t* resultId, ResultReason reason, NoMatchReason noMatchReason, CancellationReason cancellation, CancellationErrorCode errorCode, const wchar_t* text, uint64_t offset, uint64_t duration, const wchar_t* userId = nullptr) override;
+    std::shared_ptr<ISpxRecognitionResult> CreateIntermediateResult(const wchar_t* text, uint64_t offset, uint64_t duration) override;
+    std::shared_ptr<ISpxRecognitionResult> CreateFinalResult(
+        ResultReason reason,
+        NoMatchReason noMatchReason,
+        const wchar_t* text,
+        uint64_t offset,
+        uint64_t duration,
+        const wchar_t* userId = nullptr) override;
     std::shared_ptr<ISpxRecognitionResult> CreateKeywordResult(const double confidence, const uint64_t offset, const uint64_t duration, const wchar_t* keyword, ResultReason reason, std::shared_ptr<ISpxAudioDataStream> stream) final;
+    std::shared_ptr<ISpxRecognitionResult> CreateErrorResult(const std::shared_ptr<ISpxErrorInformation>& error) override;
+    std::shared_ptr<ISpxRecognitionResult> CreateEndOfStreamResult() override;
 
     // --- ISpxRecoEngineAdapterSite (second part...)
     void FireAdapterResult_Intermediate(ISpxRecoEngineAdapter* adapter, uint64_t offset, std::shared_ptr<ISpxRecognitionResult> result) override;
@@ -286,27 +294,30 @@ private:
     enum AdapterDoneProcessingAudio { Keyword, Speech };
     void AdapterCompletedSetFormatStop(AdapterDoneProcessingAudio doneAdapter);
 
-    bool IsKind(RecognitionKind kind) const;
+    inline bool SessionIsIdle() const { return m_recoKind == RecognitionKind::Idle && m_sessionState == SessionState::Idle; }
+    inline bool CanChangeConnection() const { return m_recoKind == RecognitionKind::Keyword || m_sessionState == SessionState::Idle; }
 
-    inline bool IsKeywordKind() const
+    bool TryChangeState(std::initializer_list<RecognitionKind> validOriginKinds, std::initializer_list<SessionState> validOriginStates, RecognitionKind targetKind, SessionState targetState);
+    inline bool TryChangeState(std::initializer_list<SessionState> validOriginStates, SessionState targetState)
     {
-        return IsKind(RecognitionKind::Keyword) || IsKind(RecognitionKind::KeywordOnce);
+        return TryChangeState({ m_recoKind }, validOriginStates, m_recoKind, targetState);
+    }
+    inline bool TryChangeState(SessionState validOriginState, RecognitionKind targetKind, SessionState targetState)
+    {
+        return TryChangeState({ m_recoKind }, { validOriginState }, targetKind, targetState);
+    }
+    inline bool TryChangeState(SessionState validOriginState, SessionState targetState)
+    {
+        return TryChangeState({ validOriginState }, targetState);
     }
 
-    inline bool IsKWSOnceShotKind() const
+    bool CurrentStateMatches(std::initializer_list<RecognitionKind> allowedKinds, std::initializer_list<SessionState> allowedStates)
     {
-        return IsKind(RecognitionKind::KwsSingleShot) || IsKind(RecognitionKind::KWSOnceSingleShot);
+        return std::any_of(allowedKinds.begin(), allowedKinds.end(), [this](const RecognitionKind allowedKind) { return m_recoKind == allowedKind; })
+            && std::any_of(allowedStates.begin(), allowedStates.end(), [this](const SessionState allowedState) { return m_sessionState == allowedState; });
     }
-
-    inline static bool IsKindKeyword(RecognitionKind kind)
-    {
-        return kind == RecognitionKind::Keyword || kind == RecognitionKind::KeywordOnce;
-    }
-
-    bool IsState(SessionState state);
-    bool ChangeState(SessionState sessionStateFrom, SessionState sessionStateTo);
-    bool ChangeState(SessionState sessionStateFrom, RecognitionKind recoKindTo, SessionState sessionStateTo);
-    bool ChangeState(RecognitionKind recoKindFrom, SessionState sessionStateFrom, RecognitionKind recoKindTo, SessionState sessionStateTo);
+    inline bool CurrentStateMatches(std::initializer_list<RecognitionKind> allowedKinds) { return CurrentStateMatches(allowedKinds, { m_sessionState }); }
+    inline bool CurrentStateMatches(std::initializer_list<SessionState> allowedStates) { return CurrentStateMatches({ m_recoKind }, allowedStates); }
 
     void EnsureInitLuEngineAdapter();
     void InitLuEngineAdapter();
@@ -369,7 +380,6 @@ private:
     std::shared_ptr<ISpxKwsModel> m_kwsModel;
 
     std::shared_ptr<ISpxRecoEngineAdapter> m_recoAdapter;
-    std::shared_ptr<ISpxRecoEngineAdapter> m_resetRecoAdapter;
 
     std::shared_ptr<ISpxLuEngineAdapter> m_luAdapter;
     std::shared_ptr<ISpxAudioStreamReader> m_codecAdapter;
@@ -389,6 +399,7 @@ private:
     bool m_sawEndOfStream;      // Flag indicating that we have processed all data and got response from the service.
     bool m_fireEndOfStreamAtSessionStop;
 
+    bool m_adapterResetPending;
     bool m_expectAdapterStartedTurn;
     bool m_expectAdapterStoppedTurn;
     bool m_expectFirstHypothesis;

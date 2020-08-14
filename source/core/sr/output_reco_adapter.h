@@ -87,9 +87,9 @@ public:
         return m_stream->GetCancellationReason();
     }
 
-    CancellationErrorCode GetCancellationErrorCode() final
+    const std::shared_ptr<ISpxErrorInformation>& GetError() final
     {
-        return m_stream->GetCancellationErrorCode();
+        return m_stream->GetError();
     }
 
     bool CanReadData(uint32_t requestedSize) final

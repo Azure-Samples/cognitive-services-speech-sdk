@@ -12,6 +12,7 @@
 #include "thread_service.h"
 #include "try_catch_helpers.h"
 #include "shared_ptr_helpers.h"
+#include "error_info.h"
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -189,7 +190,8 @@ RecognitionResultPtr CSpxHttpAudioStreamSession::StartStreamingAudioAndWaitForRe
         auto audioPump = m_audioPump;
         if (audioPump == nullptr)
         {
-            result = CreateErrorResult("Error in accessing audio pump");
+            auto error = ErrorInfo::FromRuntimeMessage("Error accessing audio pump");
+            result = CreateErrorResult(error);
             return;
         }
 
@@ -208,7 +210,16 @@ RecognitionResultPtr CSpxHttpAudioStreamSession::StartStreamingAudioAndWaitForRe
 
         // the max time we wait for audio streaming and result back from http post is 1 minutes.
         auto status = future.wait_for(m_microphoneTimeoutInMS + (milliseconds)1min);
-        result = status == future_status::ready ? future.get() : CreateErrorResult("Bailed out due to wait more than 1 minutes for the result of enrollment or speaker recognition.");
+
+        if (status == future_status::ready)
+        {
+            result = future.get();
+        }
+        else
+        {
+            const auto error = ErrorInfo::FromRuntimeMessage("Bailed out due to wait more than 1 minutes for the result of enrollment or speaker recognition.");
+            result = CreateErrorResult(error);
+        }
 
         // each enroll or verify/identify has its own audio config, so we have to destroy the all audio input and its related member variables here.
         auto finish = shared_ptr<void>(nullptr, [this](void*) {CleanupAfterEachAudioPumping(); });
@@ -254,17 +265,13 @@ milliseconds CSpxHttpAudioStreamSession::GetMicrophoneTimeout()
 //--- ISpxAudioPumpSite
 void CSpxHttpAudioStreamSession::Error(const string& msg)
 {
-    auto result = CreateErrorResult(msg);
+    const auto error = ErrorInfo::FromRuntimeMessage(msg);
+    auto result = CreateErrorResult(error);
     auto audioIsDone = m_audioIsDone;
     if (audioIsDone)
     {
         (*audioIsDone).set_value(result);
     }
-}
-
-RecognitionResultPtr CSpxHttpAudioStreamSession::CreateErrorResult(const string& msg)
-{
-    return CreateFinalResult(nullptr, ResultReason::Canceled, NO_MATCH_REASON_NONE, CancellationReason::Error, CancellationErrorCode::RuntimeError, PAL::ToWString(msg).c_str(), 0, 0);
 }
 
 void CSpxHttpAudioStreamSession::SetFormat(const SPXWAVEFORMATEX* pformat)
@@ -374,15 +381,23 @@ shared_ptr<ISpxNamedProperties> CSpxHttpAudioStreamSession::GetParentProperties(
     return SpxQueryInterface<ISpxNamedProperties>(GetSite());
 }
 
-shared_ptr<ISpxRecognitionResult> CSpxHttpAudioStreamSession::CreateIntermediateResult(const wchar_t* resultId, const wchar_t* text, uint64_t offset, uint64_t duration)
+shared_ptr<ISpxRecognitionResult> CSpxHttpAudioStreamSession::CreateIntermediateResult(const wchar_t* text, uint64_t offset, uint64_t duration)
 {
-    UNUSED(resultId);
     UNUSED(text);
     UNUSED(offset);
     UNUSED(duration);
 
     SPX_DBG_ASSERT(false);
     return nullptr;
+}
+
+std::shared_ptr<ISpxRecognitionResult> CSpxHttpAudioStreamSession::CreateFinalResult(ResultReason reason, NoMatchReason noMatchReason, const wchar_t* text, uint64_t offset, uint64_t duration, const wchar_t*)
+{
+    auto result = SpxCreateObjectWithSite<ISpxRecognitionResult>("CSpxRecognitionResult", this);
+    auto initResult = SpxQueryInterface<ISpxRecognitionResultInit>(result);
+    initResult->InitFinalResult(reason, noMatchReason, text, offset, duration);
+
+    return result;
 }
 
 std::shared_ptr<ISpxRecognitionResult> CSpxHttpAudioStreamSession::CreateKeywordResult(const double confidence, const uint64_t offset, const uint64_t duration, const wchar_t* keyword, ResultReason reason, std::shared_ptr<ISpxAudioDataStream> stream)
@@ -398,13 +413,20 @@ std::shared_ptr<ISpxRecognitionResult> CSpxHttpAudioStreamSession::CreateKeyword
     return nullptr;
 }
 
-shared_ptr<ISpxRecognitionResult> CSpxHttpAudioStreamSession::CreateFinalResult(const wchar_t* resultId, ResultReason reason, NoMatchReason noMatchReason, CancellationReason cancellation, CancellationErrorCode errorCode, const wchar_t* text, uint64_t offset, uint64_t duration, const wchar_t* userId)
+std::shared_ptr<ISpxRecognitionResult> CSpxHttpAudioStreamSession::CreateErrorResult(const std::shared_ptr<ISpxErrorInformation>& error)
 {
-    UNUSED(userId);
     auto result = SpxCreateObjectWithSite<ISpxRecognitionResult>("CSpxRecognitionResult", this);
-
     auto initResult = SpxQueryInterface<ISpxRecognitionResultInit>(result);
-    initResult->InitFinalResult(resultId, reason, noMatchReason, cancellation, errorCode, text, offset, duration);
+    initResult->InitErrorResult(error);
+
+    return result;
+}
+
+std::shared_ptr<ISpxRecognitionResult> CSpxHttpAudioStreamSession::CreateEndOfStreamResult()
+{
+    auto result = SpxCreateObjectWithSite<ISpxRecognitionResult>("CSpxRecognitionResult", this);
+    auto initResult = SpxQueryInterface<ISpxRecognitionResultInit>(result);
+    initResult->InitEndOfStreamResult();
 
     return result;
 }

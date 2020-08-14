@@ -93,7 +93,9 @@ SPXAPI result_get_canceled_error_code(SPXRESULTHANDLE hresult, Result_Cancellati
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto result = GetInstance<ISpxRecognitionResult>(hresult);
-        *errorCode = static_cast<Result_CancellationErrorCode>(result->GetCancellationErrorCode());
+        auto error = result->GetError();
+        auto resultErrorCode = error != nullptr ? error->GetCancellationCode() : CancellationErrorCode::NoError;
+        *errorCode = static_cast<Result_CancellationErrorCode>(resultErrorCode);
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
@@ -193,7 +195,9 @@ SPXAPI synth_result_get_canceled_error_code(SPXRESULTHANDLE hresult, Result_Canc
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto result = GetInstance<ISpxSynthesisResult>(hresult);
-        *errorCode = static_cast<Result_CancellationErrorCode>(result->GetCancellationErrorCode());
+        auto error = result->GetError();
+        auto resultErrorCode = error != nullptr ? error->GetCancellationCode() : CancellationErrorCode::NoError;
+        *errorCode = static_cast<Result_CancellationErrorCode>(resultErrorCode);
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }

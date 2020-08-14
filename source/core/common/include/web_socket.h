@@ -102,7 +102,7 @@ namespace USP {
         virtual int SendMessage(std::unique_ptr<IWebSocketMessage> message);
 
         virtual void HandleConnected();
-        virtual void HandleDisconnected(WebSocketDisconnectReason reason, const std::string& cause, bool serverRequested);
+        virtual void HandleDisconnected(WebSocketDisconnectReason reason, const std::string& cause);
         virtual void HandleTextData(const std::string& data);
         virtual void HandleBinaryData(const uint8_t* data, const size_t size);
         virtual void HandleError(WebSocketError reason, int errorCode, const std::string& errorMessage);

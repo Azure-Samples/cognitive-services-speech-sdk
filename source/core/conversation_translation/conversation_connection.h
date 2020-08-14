@@ -65,13 +65,7 @@ namespace ConversationTranslation {
         /// </summary>
         /// <param name="reason">The web socket disconnect reason</param>
         /// <param name="message">Any additional message explaining the disconnect (can be an empty string)</param>
-        /// <param name="serverRequested">True if the server requested that the web socket be closed</param>
-        virtual void OnDisconnected(const USP::WebSocketDisconnectReason reason, const string& message, bool serverRequested)
-        {
-            (void)reason;
-            (void)message;
-            (void)serverRequested;
-        }
+        virtual void OnDisconnected(const USP::WebSocketDisconnectReason, const string&) { }
 
         /// <summary>
         /// A callback function that will be invoked when a partial or final recognition is received.
@@ -111,14 +105,9 @@ namespace ConversationTranslation {
         /// <summary>
         /// A callback function that will be invoked when an error occurs in handling communication with service.
         /// </summary>
-        /// <param name="isWebSocket">True if the error was caused by the web socket layer</param>
-        /// <param name="error">The error code</param>
-        /// <param name="message">(Optional) A message describing the error</param>
-        virtual void OnError(const bool isWebSocket, const ConversationErrorCode error, const std::string& message)
+        /// <param> The error raised on the connection. </param>
+        virtual void OnError(const std::shared_ptr<ISpxErrorInformation>&)
         {
-            (void)isWebSocket;
-            (void)error;
-            (void)message;
         }
 
         /// <summary>
@@ -279,10 +268,10 @@ namespace ConversationTranslation {
         inline void CheckHostCanSend();
 
         void HandleConnected();
-        void HandleDisconnected(USP::WebSocketDisconnectReason reason, const std::string& message, bool serverRequested);
+        void HandleDisconnected(USP::WebSocketDisconnectReason reason, const std::string& message);
         void HandleTextData(const std::string& text);
         void HandleBinaryData(const uint8_t* data, const size_t length);
-        void HandleError(USP::WebSocketError error, int code, const std::string& message);
+        void HandleError(const std::shared_ptr<ISpxErrorInformation>& error);
 
         void HandleInfoMessage(const ConversationInfoMessage* info);
         void HandleParticipantList(const ConversationParticipantListMessage* participantList);

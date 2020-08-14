@@ -136,11 +136,6 @@ namespace ConversationTranslation {
             auto ptr = shared_from_this();
 
             // register handlers
-            //m_callbackIds.push_back(m_webSocket->OnConnected.add(ptr, &ConversationConnection::HandleConnected));
-            //m_callbackIds.push_back(m_webSocket->OnDisconnected.add(ptr, &ConversationConnection::HandleDisconnected));
-            //m_callbackIds.push_back(m_webSocket->OnTextData.add(ptr, &ConversationConnection::HandleTextData));
-            //m_callbackIds.push_back(m_webSocket->OnBinaryData.add(ptr, &ConversationConnection::HandleBinaryData));
-            //m_callbackIds.push_back(m_webSocket->OnError.add(ptr, &ConversationConnection::HandleError));
             m_webSocket->OnConnected.add(ptr, &ConversationConnection::HandleConnected);
             m_webSocket->OnDisconnected.add(ptr, &ConversationConnection::HandleDisconnected);
             m_webSocket->OnTextData.add(ptr, &ConversationConnection::HandleTextData);
@@ -377,7 +372,7 @@ namespace ConversationTranslation {
         }
     }
 
-    void ConversationConnection::HandleDisconnected(USP::WebSocketDisconnectReason reason, const std::string & message, bool serverRequested)
+    void ConversationConnection::HandleDisconnected(USP::WebSocketDisconnectReason reason, const std::string & message)
     {
         m_receivedParticipantsList = false;
         m_mutedByHost = false;
@@ -397,7 +392,7 @@ namespace ConversationTranslation {
 
         if (m_callbacks != nullptr)
         {
-            m_callbacks->OnDisconnected(reason, message, serverRequested);
+            m_callbacks->OnDisconnected(reason, message);
         }
     }
 
@@ -464,98 +459,17 @@ namespace ConversationTranslation {
         // TODO ralphe: parse TTS data here
     }
 
-    void ConversationConnection::HandleError(WebSocketError error, int code, const std::string & message)
+    void ConversationConnection::HandleError(const std::shared_ptr<ISpxErrorInformation>& error)
     {
-        LogError("WebSocketError received. ConversationConnection: %p, Error: %d, Code: %d, Message: %s",
-            this, error, code, message.c_str());
+        const auto errorCode = (int)(error != nullptr ? error->GetCancellationCode() : CancellationErrorCode::NoError);
+        const auto& message = error != nullptr ? error->GetDetails() : "";
 
-        ConversationErrorCode conversationErrorCode = ConversationErrorCode::ConnectionError;
-        std::string errorDescription = message;
-        std::string errorCodeInString = to_string(code);
-
-        switch (error)
-        {
-            case WebSocketError::REMOTE_CLOSED:
-                conversationErrorCode = ConversationErrorCode::ConnectionError;
-                errorDescription = "Connection was closed by the remote host. Error code: " + errorCodeInString + ". Error details: " + message;
-                break;
-
-            case WebSocketError::CONNECTION_FAILURE:
-                conversationErrorCode = ConversationErrorCode::ConnectionError;
-                errorDescription = "Connection failed (no connection to the remote host). Internal error: " + errorCodeInString
-                    + ". Error details: " + message
-                    + ". Please check network connection, firewall setting, and the region name used.";
-                break;
-
-            case WebSocketError::WEBSOCKET_UPGRADE:
-                switch (static_cast<HttpStatusCode>(code))
-                {
-                    case HttpStatusCode::BAD_REQUEST:
-                        conversationErrorCode = ConversationErrorCode::BadRequest;
-                        errorDescription = "WebSocket Upgrade failed with a bad request (400). Please check the query parameters and headers are set correctly.";
-                        break;
-                    case HttpStatusCode::FORBIDDEN:
-                    case HttpStatusCode::UNAUTHORIZED:
-                        conversationErrorCode = ConversationErrorCode::AuthenticationError;
-                        errorDescription = "WebSocket Upgrade failed with an authentication error ("
-                            + errorCodeInString
-                            + "). Please check that the correct authorization query parameters and/or headers are set.";
-                        break;
-                    case HttpStatusCode::TOO_MANY_REQUESTS:
-                        conversationErrorCode = ConversationErrorCode::TooManyRequests;
-                        errorDescription = "WebSocket Upgrade failed with too many requests error (429).";
-                        break;
-                    case HttpStatusCode::INTERNAL_ERROR:
-                        conversationErrorCode = ConversationErrorCode::ServiceError;
-                        errorDescription = "WebSocket Upgrade failed with an internal error (500). If the issue persists, please contact support.";
-                        break;
-                    case HttpStatusCode::NOT_FOUND:
-                        conversationErrorCode = ConversationErrorCode::BadRequest;
-                        errorDescription = "WebSocket Upgrade failed with not found (404). Please double check that the WebSocket URL is correct.";
-                        break;
-                    case HttpStatusCode::SERVICE_UNAVAILABLE:
-                        conversationErrorCode = ConversationErrorCode::ServiceError;
-                        errorDescription = "WebSocket Upgrade failed with service unavailable (503). Please try again later.";
-                        break;
-                    default:
-                        conversationErrorCode = ConversationErrorCode::ConnectionError;
-                        errorDescription = "WebSocket Upgrade failed with HTTP status code: " + errorCodeInString;
-                        break;
-                }
-                break;
-
-            case WebSocketError::WEBSOCKET_SEND_FRAME:
-                conversationErrorCode = ConversationErrorCode::ConnectionError;
-                errorDescription = "Failure while sending a frame over the WebSocket connection. Internal error: " + errorCodeInString
-                    + ". Error details: " + message;
-                break;
-
-            case WebSocketError::WEBSOCKET_ERROR:
-                conversationErrorCode = ConversationErrorCode::ConnectionError;
-                errorDescription = "WebSocket operation failed. Internal error: " + errorCodeInString
-                    + ". Error details: " + message;
-                break;
-
-            case WebSocketError::DNS_FAILURE:
-                conversationErrorCode = ConversationErrorCode::ConnectionError;
-                errorDescription = "DNS connection failed (the remote host did not respond). Internal error: " + errorCodeInString;
-                break;
-
-            default:
-            case WebSocketError::UNKNOWN:
-                conversationErrorCode = ConversationErrorCode::ConnectionError;
-                errorDescription = "Unknown transport error. ErrorDetails: " + message;
-                break;
-        }
-
-        LogError("Parsed web socket error. ErrorCode: '%s', Description: '%s'",
-            ConversationErrorCodeStrings(conversationErrorCode), errorDescription.c_str());
+        LogError("WebSocketError received. ConversationConnection: %p, Code: %d, Message: %s",
+            this, errorCode, message.c_str());
 
         try
         {
-            std::ostringstream oss;
-            oss << "Web socket error '" << ConversationErrorCodeStrings(conversationErrorCode) << "': " << errorDescription;
-            auto ex_ptr = std::make_exception_ptr(ExceptionWithCallStack(oss.str(), SPXERR_RUNTIME_ERROR));
+            auto ex_ptr = std::make_exception_ptr(ExceptionWithCallStack(message, SPXERR_RUNTIME_ERROR));
             m_connectionOpenPromise.set_exception(ex_ptr);
         }
         catch (std::future_error&)
@@ -565,7 +479,7 @@ namespace ConversationTranslation {
 
         if (m_callbacks != nullptr)
         {
-            m_callbacks->OnError(true, conversationErrorCode, errorDescription);
+            m_callbacks->OnError(error);
         }
     }
 

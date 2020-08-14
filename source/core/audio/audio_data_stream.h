@@ -51,7 +51,7 @@ public:
     void InitFromFormat(const SPXWAVEFORMATEX& format, bool hasHeader) final;
     StreamStatus GetStatus() noexcept final;
     CancellationReason GetCancellationReason() override;
-    CancellationErrorCode GetCancellationErrorCode() override;
+    const std::shared_ptr<ISpxErrorInformation>& GetError() override;
     bool CanReadData(uint32_t requestedSize) override;
     bool CanReadData(uint32_t requestedSize, uint32_t pos) override;
     uint32_t Read(uint8_t* buffer, uint32_t bufferSize) override;
@@ -89,7 +89,7 @@ private:
     ResultReason m_beginningReason = ResultReason::SynthesizingAudioStarted;
     ResultReason m_latestReason = ResultReason::SynthesizingAudioStarted;
     CancellationReason m_cancellationReason = CancellationReason::EndOfStream;
-    CancellationErrorCode m_cancellationErrorCode = CancellationErrorCode::NoError;
+    std::shared_ptr<ISpxErrorInformation> m_error{ nullptr };
 };
 
 

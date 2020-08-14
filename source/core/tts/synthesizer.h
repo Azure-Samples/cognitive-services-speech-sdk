@@ -109,7 +109,6 @@ private:
 
     std::shared_ptr<ISpxSynthesisResult> CreateResult(const std::wstring& requestId, ResultReason reason,
                                                       uint8_t* audio_buffer, size_t audio_length,
-                                                      CancellationReason cancellationReason = REASON_CANCELED_NONE,
                                                       std::shared_ptr<std::unordered_map<std::string, std::string>>
                                                       properties = nullptr);
     std::shared_ptr<ISpxSynthesisResult> CreateUserCancelledResult(const std::wstring& requestId);

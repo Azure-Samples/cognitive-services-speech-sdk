@@ -14,7 +14,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils
         {
             Assert.IsTrue(
                 inputString?.IndexOf(searchString, compare) >= 0,
-                $"Input string does not contain '{searchString}': '{inputString}'");
+                $"Input string does not contain '{searchString}'. Actual: '{inputString}'");
         }
     }
 }

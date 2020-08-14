@@ -59,10 +59,9 @@ public:
         m_threadService->Term();
     }
 
-    virtual void OnError(bool /*transport*/, USP::ErrorCode errorCode, const std::string& errorMessage) override
+    virtual void OnError(const std::shared_ptr<ISpxErrorInformation>& error) override
     {
-        (void)errorCode;
-        FAIL(errorMessage);
+        FAIL(error->GetDetails());
     }
 
     template <class T>
@@ -181,14 +180,14 @@ TEST_CASE("USP is properly functioning", "[usp]")
 
 class TlsCheck : public USP::Callbacks
 {
-    void OnError(bool /*transport*/, USP::ErrorCode errorCode, const std::string& /*errorMessage*/) override
+    void OnError(const std::shared_ptr<ISpxErrorInformation>& error) override
     {
 #ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable: 6237)
         // Disable: (<zero> && <expression>) is always zero.  <expression> is never evaluated and might have side effects.
 #endif
-        REQUIRE(errorCode == USP::ErrorCode::ServiceRetirectPermanent);
+        REQUIRE(error->GetCancellationCode() == CancellationErrorCode::ServiceRedirectPermanent);
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif
@@ -228,14 +227,14 @@ public:
 
     virtual ~PortCheck() = default;
 
-    void OnError(bool /*transport*/, USP::ErrorCode errorCode, const std::string& errorMessage) override
+    void OnError(const std::shared_ptr<ISpxErrorInformation>& error) override
     {
         std::exception_ptr exPtr;
 
         try
         {
-            REQUIRE(errorCode == USP::ErrorCode::ConnectionError);
-            REQUIRE_THAT(errorMessage, Catch::Contains("Connection failed", Catch::CaseSensitive::No));
+            REQUIRE(error->GetCancellationCode() == CancellationErrorCode::ConnectionFailure);
+            REQUIRE_THAT(error->GetDetails(), Catch::Contains("Connection failed", Catch::CaseSensitive::No));
             m_promise.set_value();
         }
         catch (std::exception&)

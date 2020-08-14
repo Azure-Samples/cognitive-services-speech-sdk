@@ -7,192 +7,16 @@
 
 #pragma once
 
+#include <ispxinterfaces.h>
 #include <future>
 #include <http_endpoint_info.h>
 #include <event.h>
+#include <i_web_socket_state.h>
 
 namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
 namespace USP {
-
-    /// <summary>
-    /// Possible web socket errors
-    /// </summary>
-    enum class WebSocketError
-    {
-        /// <summary>
-        /// An unknown error was encountered (e.g. unexpected exception)
-        /// </summary>
-        UNKNOWN,
-        /// <summary>
-        /// The server we are connected to closed the connection
-        /// </summary>
-        REMOTE_CLOSED,
-        /// <summary>
-        /// There was an error connecting to the web server. The error code returned will
-        /// be the internal WS_OPEN_RESULT value
-        /// </summary>
-        CONNECTION_FAILURE,
-        /// <summary>
-        /// We got an HTTP error in response to our upgrade request from the server. The
-        /// error code will contain the HTTP status code returned by the server
-        /// </summary>
-        WEBSOCKET_UPGRADE,
-        /// <summary>
-        /// There was an error while trying to send text/binary data to the server over
-        /// the web socket connection
-        /// </summary>
-        WEBSOCKET_SEND_FRAME,
-        /// <summary>
-        /// There was an unexpected error while connecting to the web socket. The error
-        /// code will contain the WS_ERROR value
-        /// </summary>
-        WEBSOCKET_ERROR,
-        /// <summary>
-        /// There was an error with doing a DNS lookup. This is only happens when you are
-        /// using a DNS cache. The error code will be the DNS cache error value
-        /// </summary>
-        DNS_FAILURE
-    };
-
-
-    /// <summary>
-    /// Possible HTTP status codes returned by the service for upgrade requests
-    /// </summary>
-    enum class HttpStatusCode
-    {
-        /// <summary>
-        /// Success response
-        /// </summary>
-        OK = 200,
-        /// <summary>
-        /// This and all future requests should be directed to URL returned in the Location header in the response. HTTP method
-        /// may change here.
-        /// </summary>
-        MOVED_PERMANENTLY = 301,
-        /// <summary>
-        /// This request should directed to the URL returned in the Location header in the response. Future requests may go to the
-        /// original URL. HTTP method is not allowed to change here.
-        /// </summary>
-        TEMP_REDIRECT = 307,
-        /// <summary>
-        /// This request should directed to the URL returned in the Location header in the response. Future requests may go to the
-        /// original URL. HTTP method is not allowed to change here.
-        /// </summary>
-        PERM_REDIRECT = 308,
-        /// <summary>
-        /// The request sent is invalid. Please double check you have all the required
-        /// </summary>
-        BAD_REQUEST = 400,
-        /// <summary>
-        /// The request is not authorized. Check the server response to see what authentication headers/query
-        /// parameters are needed.
-        /// </summary>
-        UNAUTHORIZED = 401,
-        /// <summary>
-        /// The request is forbidden by the server. Please double check that you have the correct
-        /// credentials
-        /// </summary>
-        FORBIDDEN = 403,
-        /// <summary>
-        /// The path used could not be found
-        /// </summary>
-        NOT_FOUND = 404,
-        /// <summary>
-        /// You have been throttled by the service. You should wait some time and try again
-        /// </summary>
-        TOO_MANY_REQUESTS = 429,
-        /// <summary>
-        /// The server crashed while processing the upgrade request. You should retry again later
-        /// </summary>
-        INTERNAL_ERROR = 500,
-        /// <summary>
-        /// The service is down or unavailable. You should retry again
-        /// </summary>
-        SERVICE_UNAVAILABLE = 503
-    };
-
-
-    /// <summary>
-    /// Possible states for the web socket connection
-    /// </summary>
-    enum class WebSocketState
-    {
-        /// <summary>
-        /// The web socket is closed
-        /// </summary>
-        CLOSED = 0,
-        /// <summary>
-        /// We start opening in the web socket connection here
-        /// </summary>
-        INITIAL,
-        /// <summary>
-        /// The web socket connection is opening
-        /// </summary>
-        OPENING,
-        /// <summary>
-        /// The web socket is connected
-        /// </summary>
-        CONNECTED,
-        /// <summary>
-        /// The web socket connection is being closed
-        /// </summary>
-        DESTROYING
-    };
-
-
-    /// <summary>
-    /// Enumerations of reasons why the web socket was disconnected. These are as defined in RFC 6455
-    /// section 7.4.1
-    /// </summary>
-    enum class WebSocketDisconnectReason : uint16_t
-    {
-        /// <summary>
-        /// Unknown disconnect reason
-        /// </summary>
-        Unknown = UINT16_MAX,
-        /// <summary>
-        /// Normal closure. This could be requested by the client or the server
-        /// </summary>
-        Normal = 1000,
-        /// <summary>
-        /// Indicates an endpoint is being removed. Either the server or client will become unavailable.
-        /// </summary>
-        EndpointUnavailable = 1001,
-        /// <summary>
-        /// The client or server is terminating the connection because of a protocol error.
-        /// </summary>
-        ProtocolError = 1002,
-        /// <summary>
-        /// Endpoint is terminating the connection because it has received a type of data it cannot accept
-        /// (e.g., an endpoint that understands only text data MAY send this if it receives a binary message).
-        /// </summary>
-        CannotAcceptDataType = 1003,
-        /// <summary>
-        /// The client or server is terminating the connection because it has received data inconsistent with
-        /// the message type.
-        /// </summary>
-        InvalidPayloadData = 1007,
-        /// <summary>
-        /// The connection will be closed because an endpoint has received a message that violates its policy.
-        /// </summary>
-        PolicyViolation = 1008,
-        /// <summary>
-        /// Endpoint is terminating the connection because it has received a message that is too big for it
-        /// to process.
-        /// </summary>
-        MessageTooBig = 1009,
-        /// <summary>
-        /// Client is terminating the connection because it has expected the server to negotiate one or more
-        /// extensions, but the server didn't return them in the response message of the WebSocket handshake
-        /// </summary>
-        UnexpectedCondition = 1010,
-        /// <summary>
-        /// The connection will be closed by the server because of an error on the server.
-        /// </summary>
-        InternalServerError = 1011
-    };
 
     /// <summary>
     /// Enumeration of message types
@@ -214,11 +38,7 @@ namespace USP {
         METRIC_TRANSPORT_STATE_CANCELLED = 8,
         METRIC_TRANSPORT_STATE_RESET = 9
     };
-
-
-
-
-
+    
     /// <summary>
     /// The interface for web socket messages
     /// </summary>
@@ -342,10 +162,9 @@ namespace USP {
         /// <summary>
         /// Event raised when the socket is disconnected. The first parameter will be the reason
         /// we were disconnected. The second will either be the message the server sent to, or
-        /// an internally generated message in the case of errors. The third parameter is set
-        /// to true if the server requested the web socket be disconnected.
+        /// an internally generated message in the case of errors.
         /// </summary>
-        Impl::event<WebSocketDisconnectReason, const std::string&, bool> OnDisconnected;
+        Impl::event<WebSocketDisconnectReason, const std::string&> OnDisconnected;
 
         /// <summary>
         /// Event raised when we receive text data from the server
@@ -359,14 +178,9 @@ namespace USP {
         Impl::event<const uint8_t*, const size_t> OnBinaryData;
 
         /// <summary>
-        /// Event raised when we encounter an error. The parameters in order are:
-        /// * The web socket error encountered
-        /// * An additional error code
-        ///   - This can be the HTTP status code returned for the upgrade request
-        ///   - This can be the internal uws_client error code
-        /// * A string description of the error
+        /// Event raised when we encounter an error.
         /// </summary>
-        Impl::event<WebSocketError, int, const std::string&> OnError;
+        Impl::event<const std::shared_ptr<Impl::ISpxErrorInformation>&> OnError;
     };
 
 } } } }

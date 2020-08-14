@@ -11,6 +11,10 @@
 #include <string>
 #include <map>
 #include <list>
+#include "ispxinterfaces.h"
+#include "recognition_status.h"
+
+using namespace Microsoft::CognitiveServices::Speech::Impl;
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -19,24 +23,6 @@ namespace USP {
 
 typedef uint64_t OffsetType;
 typedef uint64_t DurationType;
-
-/**
- * Represents recognition status in speech phrase.
- */
-enum class RecognitionStatus : int
-{
-    Success,
-    NoMatch,
-    InitialSilenceTimeout,
-    InitialBabbleTimeout,
-    Error,
-    EndOfDictation,
-    TooManyRequests,
-    BadRequest,
-    Forbidden,
-    ServiceUnavailable,
-    InvalidMessage,
-};
 
 /**
  * Represents keyword status in speech keyword.
@@ -54,24 +40,6 @@ enum class KeywordVerificationStatus : int
 enum class TranslationStatus : int
 {
     Success, Error, InvalidMessage
-};
-
-/**
-* Represents USP error code.
- */
-enum class ErrorCode : int
-{
-    AuthenticationError = 1,
-    BadRequest,
-    TooManyRequests,
-    Forbidden,
-    ConnectionError,
-    ServiceUnavailable,
-    ServiceError,
-    RuntimeError,
-    ServiceRedirectTemporary,
-    ServiceRetirectPermanent,
-    ClientClosingConnection
 };
 
 /**

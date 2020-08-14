@@ -28,6 +28,7 @@
 #include <interfaces/conversation.h>
 #include <interfaces/conversation_translation.h>
 #include <interfaces/data.h>
+#include <interfaces/errors.h>
 #include <interfaces/event_args.h>
 #include <interfaces/keyword.h>
 #include <interfaces/notify_me.h>
@@ -446,7 +447,7 @@ public:
     virtual std::shared_ptr<CSpxAsyncOp<std::shared_ptr<ISpxSynthesisResult>>> GetFutureResult() = 0;
     virtual ResultReason GetReason() = 0;
     virtual CancellationReason GetCancellationReason() = 0;
-    virtual CancellationErrorCode GetCancellationErrorCode() = 0;
+    virtual const std::shared_ptr<ISpxErrorInformation>& GetError() = 0;
     virtual uint32_t GetAudioLength() = 0;
     virtual std::shared_ptr<std::vector<uint8_t>> GetAudioData() = 0;
     virtual std::shared_ptr<std::vector<uint8_t>> GetRawAudioData() = 0;
@@ -459,7 +460,7 @@ class ISpxSynthesisResultInit : public ISpxInterfaceBaseFor<ISpxSynthesisResultI
 {
 public:
     virtual void InitSynthesisResult(const std::wstring& requestId, ResultReason reason,
-        CancellationReason cancellation, CancellationErrorCode errorCode,
+        CancellationReason cancellation, const std::shared_ptr<ISpxErrorInformation>& error,
         uint8_t* audio_buffer, size_t audio_length, SPXWAVEFORMATEX* format, bool hasHeader) = 0;
     virtual void SetEvents(const std::shared_ptr<ISpxSynthesizerEvents>& events) = 0;
     virtual void SetFutureResult(std::shared_ptr<CSpxAsyncOp<std::shared_ptr<ISpxSynthesisResult>>> futureResult) = 0;
@@ -808,50 +809,12 @@ public:
     }
 };
 
-class SpxRecoEngineAdapterError
-{
-    bool m_isTransportError;
-    CancellationReason m_reason;
-    CancellationErrorCode m_errorCode;
-    std::string m_info;
-
-public:
-    SpxRecoEngineAdapterError(bool isTransportError, CancellationReason reason, CancellationErrorCode errorCode, const std::string& info)
-        : m_isTransportError{ isTransportError }, m_reason{ reason }, m_errorCode{ errorCode }, m_info{ info }
-    {}
-
-    bool IsTransportError() const
-    {
-        return m_isTransportError;
-    }
-
-    bool IsAuthError() const
-    {
-        return m_errorCode == CancellationErrorCode::AuthenticationFailure || m_errorCode == CancellationErrorCode::Forbidden;
-    }
-
-    const std::string& Info() const
-    {
-        return m_info;
-    }
-
-    CancellationReason Reason() const
-    {
-        return m_reason;
-    }
-
-    CancellationErrorCode ErrorCode() const
-    {
-        return m_errorCode;
-    }
-};
-
 class ISpxRecoEngineAdapterSite : public ISpxInterfaceBaseFor<ISpxRecoEngineAdapterSite>
 {
 public:
     using ResultPayload_Type = std::shared_ptr<ISpxRecognitionResult>;
     using AdditionalMessagePayload_Type = void*;
-    using ErrorPayload_Type = std::shared_ptr<SpxRecoEngineAdapterError>;
+    using ErrorPayload_Type = std::shared_ptr<ISpxErrorInformation>;
 
     virtual void GetScenarioCount(uint16_t* countSpeech, uint16_t* countIntent, uint16_t* countTranslation, uint16_t* countDialog, uint16_t* countTranscriber ) = 0;
 
@@ -945,9 +908,17 @@ public:
 class ISpxRecoResultFactory : public ISpxInterfaceBaseFor<ISpxRecoResultFactory>
 {
 public:
-    virtual std::shared_ptr<ISpxRecognitionResult> CreateIntermediateResult(const wchar_t* resultId, const wchar_t* text, uint64_t offset, uint64_t duration) = 0;
-    virtual std::shared_ptr<ISpxRecognitionResult> CreateFinalResult(const wchar_t* resultId, ResultReason reason, NoMatchReason noMatchReason, CancellationReason cancellation, CancellationErrorCode errorCode, const wchar_t* text, uint64_t offset, uint64_t duration, const wchar_t* userId = nullptr) = 0;
+    virtual std::shared_ptr<ISpxRecognitionResult> CreateIntermediateResult(const wchar_t* text, uint64_t offset, uint64_t duration) = 0;
+    virtual std::shared_ptr<ISpxRecognitionResult> CreateFinalResult(
+        ResultReason reason,
+        NoMatchReason noMatchReason,
+        const wchar_t* text,
+        uint64_t offset,
+        uint64_t duration,
+        const wchar_t* userId = nullptr) = 0;
     virtual std::shared_ptr<ISpxRecognitionResult> CreateKeywordResult(const double confidence, const uint64_t offset, const uint64_t duration, const wchar_t* keyword, ResultReason reason, std::shared_ptr<ISpxAudioDataStream> stream) = 0;
+    virtual std::shared_ptr<ISpxRecognitionResult> CreateErrorResult(const std::shared_ptr<ISpxErrorInformation>& error) = 0;
+    virtual std::shared_ptr<ISpxRecognitionResult> CreateEndOfStreamResult() = 0;
 };
 
 class ISpxKeywordRecognitionResult : public ISpxInterfaceBaseFor<ISpxKeywordRecognitionResult>
@@ -1257,7 +1228,7 @@ class ISpxHttpRecoEngineAdapter : public ISpxInterfaceBaseFor<ISpxHttpRecoEngine
 {
 public:
     virtual std::string CreateVoiceProfile(VoiceProfileType type, std::string&& locale) const = 0;
-    virtual RecognitionResultPtr ModifyVoiceProfile(bool reset, VoiceProfileType type, std::string&& id) const = 0;
+    virtual RecognitionResultPtr ModifyVoiceProfile(bool reset, VoiceProfileType type, std::string&& id) = 0;
     virtual void SetFormat(const SPXWAVEFORMATEX* pformat, VoiceProfileType type, std::vector<std::string>&& profileIds, bool enroll) = 0;
     virtual void ProcessAudio(const DataChunkPtr& audioChunk) = 0;
     virtual void FlushAudio() = 0;

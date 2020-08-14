@@ -149,12 +149,12 @@ namespace ConversationTranslation {
 
         // ConversationCallbacks
         virtual void OnConnected() override;
-        virtual void OnDisconnected(const USP::WebSocketDisconnectReason reason, const string& message, bool serverRequested) override;
+        virtual void OnDisconnected(const USP::WebSocketDisconnectReason reason, const string& message) override;
         virtual void OnSpeechRecognition(const ConversationSpeechRecognitionMessage& reco) override;
         virtual void OnInstantMessage(const ConversationTranslatedMessage& im) override;
         virtual void OnParticipantChanged(const ConversationParticipantAction action, const std::vector<ConversationParticipant>& participants) override;
         virtual void OnRoomExpirationWarning(const int32_t minutesLeft) override;
-        virtual void OnError(const bool isWebSocket, const ConversationErrorCode error, const std::string& message) override;
+        virtual void OnError(const std::shared_ptr<ISpxErrorInformation>& error) override;
         virtual void OnUpdatedAuthorizationToken(
             const std::string& authToken, const std::string& region, const std::chrono::system_clock::time_point& expiresAt) override;
 
@@ -171,11 +171,11 @@ namespace ConversationTranslation {
         void SendStateEvents(const EventsToSend& evt);
         EventsToSend GetStateExitEvents();
 
-        void ToFailedState(bool isRecognizer, CancellationErrorCode error, const std::string& message);
+        void ToFailedState(bool isRecognizer, const std::shared_ptr<ISpxErrorInformation>& error);
         void ToClosedState();
         void ToClosingState();
         void ToCreatingOrJoiningState();
-        void ToCreatedOrJoinedState(CancellationErrorCode error, const std::string& message);
+        void ToCreatedOrJoinedState(const std::shared_ptr<ISpxErrorInformation>& error);
         void ToOpeningState();
         void ToOpenState();
 

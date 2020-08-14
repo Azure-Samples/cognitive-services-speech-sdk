@@ -375,7 +375,6 @@ TEST_CASE("Single trusted root", "[api][cxx]")
             SPXTEST_REQUIRE(cancellation->Reason == CancellationReason::Error);
             SPXTEST_REQUIRE(cancellation->ErrorCode == CancellationErrorCode::ConnectionFailure);
             CAPTURE(cancellation->ErrorDetails);
-            SPXTEST_REQUIRE(cancellation->ErrorDetails.find("Internal error: 1") != std::string::npos);
         }
         SPXTEST_SECTION("pass with Baltimore CyberTrust Root as single trusted cert")
         {
@@ -400,7 +399,6 @@ TEST_CASE("Single trusted root", "[api][cxx]")
             SPXTEST_REQUIRE(cancellation->Reason == CancellationReason::Error);
             SPXTEST_REQUIRE(cancellation->ErrorCode == CancellationErrorCode::ConnectionFailure);
             CAPTURE(cancellation->ErrorDetails);
-            SPXTEST_REQUIRE(cancellation->ErrorDetails.find("Internal error: 1") != std::string::npos);
         }
         SPXTEST_SECTION("passes without CRL check")
         {
@@ -412,7 +410,6 @@ TEST_CASE("Single trusted root", "[api][cxx]")
             SPXTEST_REQUIRE(cancellation->Reason == CancellationReason::Error);
             SPXTEST_REQUIRE(cancellation->ErrorCode == CancellationErrorCode::ConnectionFailure);
             CAPTURE(cancellation->ErrorDetails);
-            SPXTEST_REQUIRE(cancellation->ErrorDetails.find("WebSocket Upgrade failed with HTTP status code:") != std::string::npos);
         }
     }
 }

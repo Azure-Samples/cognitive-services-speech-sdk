@@ -310,7 +310,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             Assert.IsTrue(connectedEventCount == disconnectedEventCount || connectedEventCount == disconnectedEventCount + 1, AssertOutput.ConnectedDisconnectedEventUnmatch);
         }
 
-        public static async Task AssertConnectionError(SpeechConfig speechConfig, CancellationErrorCode expectedErrorCode, string expectedErrorMessage, StringComparison comparison = StringComparison.Ordinal)
+        public static async Task AssertConnectionError(SpeechConfig speechConfig, CancellationErrorCode expectedErrorCode, params string[] expectedErrorSubstrings)
+            => await AssertConnectionError(speechConfig, expectedErrorCode, new List<string>(expectedErrorSubstrings));
+
+        public static async Task AssertConnectionError(SpeechConfig speechConfig, CancellationErrorCode expectedErrorCode, string expectedErrorMessage, StringComparison comparison = StringComparison.InvariantCultureIgnoreCase)
+            => await AssertConnectionError(speechConfig, expectedErrorCode, new List<string> { expectedErrorMessage }, comparison);
+
+        public static async Task AssertConnectionError(SpeechConfig speechConfig, CancellationErrorCode expectedErrorCode, IEnumerable<string> expectedErrorSubstrings, StringComparison comparison = StringComparison.InvariantCultureIgnoreCase)
         {
             var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
             int connectedEventCount = 0;
@@ -327,7 +333,10 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 var cancellation = CancellationDetails.FromResult(result);
                 Assert.AreEqual(CancellationReason.Error, cancellation.Reason);
                 Assert.AreEqual(expectedErrorCode, cancellation.ErrorCode);
-                AssertHelpers.AssertStringContains(cancellation.ErrorDetails, expectedErrorMessage, comparison);
+                foreach (var expectedSubstring in expectedErrorSubstrings)
+                {
+                    AssertHelpers.AssertStringContains(cancellation.ErrorDetails, expectedSubstring, comparison);
+                }
             }
         }
 

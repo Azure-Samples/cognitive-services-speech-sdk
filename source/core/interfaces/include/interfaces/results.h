@@ -12,6 +12,7 @@
 
 #include <interfaces/audio.h>
 #include <interfaces/base.h>
+#include <interfaces/errors.h>
 #include <interfaces/types.h>
 
 namespace Microsoft {
@@ -27,7 +28,7 @@ public:
 
     virtual ResultReason GetReason() = 0;
     virtual CancellationReason GetCancellationReason() = 0;
-    virtual CancellationErrorCode GetCancellationErrorCode() = 0;
+    virtual std::shared_ptr<ISpxErrorInformation> GetError() = 0;
     virtual NoMatchReason GetNoMatchReason() = 0;
 
     virtual uint64_t GetOffset() const = 0;
@@ -44,8 +45,10 @@ using RecognitionResultPtr = std::shared_ptr<ISpxRecognitionResult>;
 class ISpxRecognitionResultInit : public ISpxInterfaceBaseFor<ISpxRecognitionResultInit>
 {
 public:
-    virtual void InitIntermediateResult(const wchar_t* resultId, const wchar_t* text, uint64_t offset, uint64_t duration) = 0;
-    virtual void InitFinalResult(const wchar_t* resultId, ResultReason reason, NoMatchReason noMatchReason, CancellationReason cancellation, CancellationErrorCode errorCode, const wchar_t* text, uint64_t offset, uint64_t duration) = 0;
+    virtual void InitIntermediateResult(const wchar_t* text, uint64_t offset, uint64_t duration) = 0;
+    virtual void InitFinalResult(ResultReason reason, NoMatchReason noMatchReason, const wchar_t* text, uint64_t offset, uint64_t duration) = 0;
+    virtual void InitErrorResult(const std::shared_ptr<ISpxErrorInformation>& error) = 0;
+    virtual void InitEndOfStreamResult() = 0;
 };
 
 enum class TranslationStatusCode { Success, Error };

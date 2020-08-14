@@ -15,8 +15,9 @@ namespace Impl {
 
 
 CSpxRecognitionResult::CSpxRecognitionResult():
+    m_resultId { PAL::CreateGuidWithoutDashes() },
     m_cancellationReason { REASON_CANCELED_NONE },
-    m_cancellationErrorCode { CancellationErrorCode::NoError },
+    m_error{ nullptr },
     m_noMatchReason { NO_MATCH_REASON_NONE }
 {
     SPX_DBG_TRACE_FUNCTION();
@@ -47,9 +48,9 @@ CancellationReason CSpxRecognitionResult::GetCancellationReason()
     return m_cancellationReason;
 }
 
-CancellationErrorCode CSpxRecognitionResult::GetCancellationErrorCode()
+std::shared_ptr<ISpxErrorInformation> CSpxRecognitionResult::GetError()
 {
-    return m_cancellationErrorCode;
+    return m_error;
 }
 
 NoMatchReason CSpxRecognitionResult::GetNoMatchReason()
@@ -57,51 +58,53 @@ NoMatchReason CSpxRecognitionResult::GetNoMatchReason()
     return m_noMatchReason;
 }
 
-void CSpxRecognitionResult::InitIntermediateResult(const wchar_t* resultId, const wchar_t* text, uint64_t offset, uint64_t duration)
+void CSpxRecognitionResult::InitIntermediateResult(const wchar_t* text, uint64_t offset, uint64_t duration)
 {
     m_reason = ResultReason::RecognizingSpeech;
-    m_cancellationReason = REASON_CANCELED_NONE;
-    m_noMatchReason = NO_MATCH_REASON_NONE;
 
     m_offset = offset;
     m_duration = duration;
-
-    m_resultId = resultId == nullptr
-        ? PAL::CreateGuidWithoutDashes()
-        : resultId;
 
     m_text = text;
 
     SPX_TRACE_VERBOSE("%s: resultId=%ls", __FUNCTION__, m_resultId.c_str());
 }
 
-void CSpxRecognitionResult::InitFinalResult(const wchar_t* resultId, ResultReason reason, NoMatchReason noMatchReason, CancellationReason cancellation, CancellationErrorCode errorCode, const wchar_t* text, uint64_t offset, uint64_t duration)
+void CSpxRecognitionResult::InitFinalResult(
+    ResultReason reason,
+    NoMatchReason noMatchReason,
+    const wchar_t* text,
+    uint64_t offset,
+    uint64_t duration)
 {
     SPX_DBG_TRACE_FUNCTION();
 
     m_reason = reason;
-    m_cancellationReason = cancellation;
-    m_cancellationErrorCode = errorCode;
     m_noMatchReason = noMatchReason;
-
+    m_text = text;
     m_offset = offset;
     m_duration = duration;
 
-    m_resultId = resultId == nullptr
-        ? PAL::CreateGuidWithoutDashes()
-        : resultId;
+    SPX_TRACE_VERBOSE("%s: resultId=%ls reason=%d, text='%ls'", __FUNCTION__, m_resultId.c_str(), (int)m_reason, m_text.c_str());
+}
 
-    m_text = (text == nullptr || reason == ResultReason::Canceled)
-        ? L""
-        : text;
+void CSpxRecognitionResult::InitErrorResult(const std::shared_ptr<ISpxErrorInformation>& error)
+{
+    SPX_DBG_TRACE_FUNCTION();
 
-    if (reason == ResultReason::Canceled)
-    {
-        auto errorDetails = (text == nullptr) ? "" : PAL::ToString(text);
-        SetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_JsonErrorDetails), errorDetails.c_str());
-    }
+    m_reason = ResultReason::Canceled;
+    m_cancellationReason = error->GetCancellationReason();
+    m_error = error;
 
-    SPX_TRACE_VERBOSE("%s: resultId=%ls reason=%d, cancellationReason=%d, text='%ls'", __FUNCTION__, m_resultId.c_str(), (int)m_reason, (int)m_cancellationReason, m_text.c_str());
+    SetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_JsonErrorDetails), error->GetDetails().c_str());
+}
+
+void CSpxRecognitionResult::InitEndOfStreamResult()
+{
+    SPX_DBG_TRACE_FUNCTION();
+
+    m_reason = ResultReason::Canceled;
+    m_cancellationReason = CancellationReason::EndOfStream;
 }
 
 void CSpxRecognitionResult::SetLatency(uint64_t latencyInTicks)
@@ -160,7 +163,6 @@ void CSpxRecognitionResult::InitKeywordResult(const double confidence, const uin
 
     m_reason = reason;
     m_cancellationReason = REASON_CANCELED_NONE;
-    m_cancellationErrorCode = CancellationErrorCode::NoError;
     m_noMatchReason = reason == ResultReason::NoMatch ? NoMatchReason::KeywordNotRecognized : NO_MATCH_REASON_NONE;
 
     m_offset = offset;

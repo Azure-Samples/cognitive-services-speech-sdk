@@ -148,7 +148,7 @@ private:
     void OnTurnEnd(const USP::TurnEndMsg&) override;
     void OnMessageStart(const USP::TurnStartMsg&) final;
     void OnMessageEnd(const USP::TurnEndMsg&) final;
-    void OnError(bool transport, USP::ErrorCode, const std::string& error) override;
+    void OnError(const std::shared_ptr<ISpxErrorInformation>& error) override;
     void OnUserMessage(const USP::UserMsg&) override;
     void OnConnected() override;
     void OnDisconnected() override;
@@ -186,9 +186,9 @@ private:
     void FireFinalResultLater(const USP::SpeechPhraseMsg& message);
     void FireFinalResultLater_WaitingForIntentComplete(const std::  string& luisJson = "");
 
-    ResultReason ToReason(USP::RecognitionStatus uspRecognitionStatus);
-    CancellationReason ToCancellationReason(USP::RecognitionStatus uspRecognitionStatus);
-    NoMatchReason ToNoMatchReason(USP::RecognitionStatus uspRecognitionStatus);
+    ResultReason ToReason(RecognitionStatus uspRecognitionStatus);
+    CancellationReason ToCancellationReason(RecognitionStatus uspRecognitionStatus);
+    NoMatchReason ToNoMatchReason(RecognitionStatus uspRecognitionStatus);
 
     std::pair<std::string, std::string> GetLeftRightContext();
     std::pair<std::string, std::string> GetAnySpeechContext();
@@ -214,12 +214,12 @@ private:
     bool IsStateBetween(UspState state1, UspState state2) const { return m_uspState > state1 && m_uspState < state2; }
     bool IsStateBetweenIncluding(UspState state1, UspState state2) const { return m_uspState >= state1 && m_uspState < state2; }
 
-    bool ChangeState(UspState toUspState) { return ChangeState(m_audioState, m_uspState, m_audioState, toUspState); }
-    bool ChangeState(UspState fromUspState, UspState toUspState) { return ChangeState(m_audioState, fromUspState, m_audioState, toUspState); }
-    bool ChangeState(AudioState toAudioState) { return ChangeState(m_audioState, m_uspState, toAudioState, m_uspState); }
-    bool ChangeState(AudioState fromAudioState, AudioState toAudioState) { return ChangeState(fromAudioState, m_uspState, toAudioState, m_uspState); }
-    bool ChangeState(AudioState toAudioState, UspState toUspState) { return ChangeState(m_audioState, m_uspState, toAudioState, toUspState); }
-    bool ChangeState(AudioState fromAudioState, UspState fromUspState, AudioState toAudioState, UspState toUspState);
+    bool TryChangeState(UspState toUspState) { return TryChangeState(m_audioState, m_uspState, m_audioState, toUspState); }
+    bool TryChangeState(UspState fromUspState, UspState toUspState) { return TryChangeState(m_audioState, fromUspState, m_audioState, toUspState); }
+    bool TryChangeState(AudioState toAudioState) { return TryChangeState(m_audioState, m_uspState, toAudioState, m_uspState); }
+    bool TryChangeState(AudioState fromAudioState, AudioState toAudioState) { return TryChangeState(fromAudioState, m_uspState, toAudioState, m_uspState); }
+    bool TryChangeState(AudioState toAudioState, UspState toUspState) { return TryChangeState(m_audioState, m_uspState, toAudioState, toUspState); }
+    bool TryChangeState(AudioState fromAudioState, UspState fromUspState, AudioState toAudioState, UspState toUspState);
 
     SPXHR PrepareCompressionCodec(const SPXWAVEFORMATEX* format, ISpxInternalAudioCodecAdapter::SPXCompressedDataCallback dataCallback);
     void HandleCompressedAudioData(const uint8_t* outData, size_t nBytesOut);

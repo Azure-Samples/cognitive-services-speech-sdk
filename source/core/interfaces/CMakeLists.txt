@@ -12,6 +12,7 @@ set(HEADERS
     "${INC_DIR}/interfaces/conversation.h"
     "${INC_DIR}/interfaces/conversation_translation.h"
     "${INC_DIR}/interfaces/data.h"
+    "${INC_DIR}/interfaces/errors.h"
     "${INC_DIR}/interfaces/event_args.h"
     "${INC_DIR}/interfaces/keyword.h"
     "${INC_DIR}/interfaces/notify_me.h"

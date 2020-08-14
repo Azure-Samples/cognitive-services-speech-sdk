@@ -24,6 +24,7 @@
 #include "spx_build_information.h"
 #include "platform.h"
 #include "guid_utils.h"
+#include "error_info.h"
 #include "pronunciation_assessment_config.h"
 
 namespace Microsoft {
@@ -80,7 +81,7 @@ void CSpxUspRecoEngineAdapter::Term()
     SPX_DBG_TRACE_SCOPE("Terminating CSpxUspRecoEngineAdapter...", "Terminating CSpxUspRecoEngineAdapter... Done!");
     SPX_DBG_TRACE_VERBOSE("%s: this=0x%8p", __FUNCTION__, (void*)this);
 
-    if (ChangeState(UspState::Terminating))
+    if (TryChangeState(UspState::Terminating))
     {
         SPX_DBG_TRACE_VERBOSE("%s: Terminating USP Connection (0x%8p)", __FUNCTION__, (void*)m_uspConnection.get());
 #ifdef _DEBUG
@@ -88,7 +89,7 @@ void CSpxUspRecoEngineAdapter::Term()
 #endif
 
         UspTerminate();
-        ChangeState(UspState::Zombie);
+        TryChangeState(UspState::Zombie);
     }
     else
     {
@@ -247,7 +248,7 @@ void CSpxUspRecoEngineAdapter::SetFormat(const SPXWAVEFORMATEX* pformat)
             InvokeOnSite([this](const SitePtr& p) { p->AdapterCompletedSetFormatStop(this); });
         }
     }
-    else if (pformat != nullptr && IsState(UspState::Idle) && ChangeState(AudioState::Idle, AudioState::Ready))
+    else if (pformat != nullptr && IsState(UspState::Idle) && TryChangeState(AudioState::Idle, AudioState::Ready))
     {
         // we could call site when errors happen.
         // The m_audioState is Ready at this time. So, if we have two SetFormat calls in a row, the next one won't come in here
@@ -256,7 +257,7 @@ void CSpxUspRecoEngineAdapter::SetFormat(const SPXWAVEFORMATEX* pformat)
         SPX_DBG_TRACE_VERBOSE("%s: (0x%8p)->PrepareFirstAudioReadyState()", __FUNCTION__, (void*)this);
         PrepareFirstAudioReadyState(pformat);
     }
-    else if (pformat == nullptr && (ChangeState(AudioState::Idle) || IsState(UspState::Terminating)))
+    else if (pformat == nullptr && (TryChangeState(AudioState::Idle) || IsState(UspState::Terminating)))
     {
         SPX_DBG_TRACE_VERBOSE("%s: (0x%8p) site->AdapterCompletedSetFormatStop()", __FUNCTION__, (void*)this);
         InvokeOnSite([this](const SitePtr& p) { p->AdapterCompletedSetFormatStop(this); });
@@ -281,7 +282,7 @@ void CSpxUspRecoEngineAdapter::ProcessAudio(const DataChunkPtr& audioChunk)
         // In case of error there still can be some calls to ProcessAudio in flight.
         SPX_DBG_TRACE_VERBOSE("%s: (0x%8p) IGNORING... (audioState/uspState=%d/%d)", __FUNCTION__, (void*)this, m_audioState, m_uspState);
     }
-    else if (size > 0 && ChangeState(AudioState::Ready, UspState::Idle, AudioState::Sending, UspState::WaitingForTurnStart))
+    else if (size > 0 && TryChangeState(AudioState::Ready, UspState::Idle, AudioState::Sending, UspState::WaitingForTurnStart))
     {
         SPX_DBG_TRACE_VERBOSE_IF(1, "%s: (0x%8p)->PrepareUspAudioStream() ... size=%d", __FUNCTION__, (void*)this, size);
         PrepareUspAudioStream();
@@ -369,12 +370,16 @@ void CSpxUspRecoEngineAdapter::UspInitialize()
     catch (const std::exception& e)
     {
         SPX_TRACE_ERROR("Error: '%s'", e.what());
-        OnError(true, USP::ErrorCode::ConnectionError, e.what());
+        auto error = ErrorInfo::FromExplicitError(CancellationErrorCode::ConnectionFailure, e.what());
+        OnError(error);
     }
     catch (...)
     {
         SPX_TRACE_ERROR("Error: Unexpected exception in UspInitialize");
-        OnError(true, USP::ErrorCode::ConnectionError, "Error: Unexpected exception in UspInitialize");
+        auto error = ErrorInfo::FromExplicitError(
+            CancellationErrorCode::ConnectionFailure,
+            "Error: Unexpected exception in UspInitialize");
+        OnError(error);
     }
 
     // if error occurs in the above client.Connect, return.
@@ -1138,9 +1143,10 @@ std::future<bool> CSpxUspRecoEngineAdapter::UspSendMessage(std::unique_ptr<USP::
     {
         /* Notify user there was an error */
         InvokeOnSite([this](const SitePtr& p)
-            {
-                p->Error(this, std::make_shared<SpxRecoEngineAdapterError>(true, CancellationReason::Error, CancellationErrorCode::ConnectionFailure, "Connection is in a bad state."));
-            });
+        {
+            auto error = ErrorInfo::FromExplicitError(CancellationErrorCode::ConnectionFailure, "Connection is in a bad state.");
+            p->Error(this, error);
+        });
         SPX_TRACE_ERROR("no connection established or in bad USP state. m_uspConnection %s nullptr, m_uspState:%d.", m_uspConnection == nullptr ? "is" : "is not", m_uspState);
 
         return GetFalseFuture();
@@ -1287,7 +1293,7 @@ void CSpxUspRecoEngineAdapter::OnSpeechEndDetected(const USP::SpeechEndDetectedM
 {
     SPX_DBG_TRACE_VERBOSE("Response: Speech.EndDetected message. Speech ends at offset %" PRIu64 " (100ns)\n", message.offset);
 
-    auto requestMute = ChangeState(AudioState::Sending, AudioState::Mute);
+    auto requestMute = TryChangeState(AudioState::Sending, AudioState::Mute);
 
     if (IsBadState())
     {
@@ -1331,7 +1337,7 @@ void CSpxUspRecoEngineAdapter::OnSpeechHypothesis(const USP::SpeechHypothesisMsg
         InvokeOnSite([&](const SitePtr& site)
         {
             auto factory = SpxQueryService<ISpxRecoResultFactory>(site);
-            auto result = factory->CreateIntermediateResult(nullptr, message.text.c_str(), message.offset, message.duration);
+            auto result = factory->CreateIntermediateResult(message.text.c_str(), message.offset, message.duration);
             auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
             namedProperties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_JsonResult), PAL::ToString(message.json).c_str());
             if (!message.speaker.empty())
@@ -1373,7 +1379,7 @@ void CSpxUspRecoEngineAdapter::OnSpeechKeywordDetected(const USP::SpeechKeywordD
             site->FireAdapterResult_KeywordResult(this, message.offset, result, true);
         });
     }
-    else if (message.status == USP::KeywordVerificationStatus::Rejected && ChangeState(UspState::WaitingForPhrase, UspState::WaitingForTurnEnd))
+    else if (message.status == USP::KeywordVerificationStatus::Rejected && TryChangeState(UspState::WaitingForPhrase, UspState::WaitingForTurnEnd))
     {
         SPX_DBG_TRACE_VERBOSE("%s: site->FireAdapterResult_Final()", __FUNCTION__);
 
@@ -1403,12 +1409,12 @@ void CSpxUspRecoEngineAdapter::OnSpeechFragment(const USP::SpeechFragmentMsg& me
     {
         SPX_DBG_TRACE_VERBOSE("%s: (0x%8p) IGNORING... (audioState/uspState=%d/%d) %s", __FUNCTION__, (void*)this, m_audioState, m_uspState, IsState(UspState::Terminating) ? "(USP-TERMINATING)" : "********** USP-UNEXPECTED !!!!!!");
     }
-    else if (ChangeState(UspState::WaitingForIntent, UspState::WaitingForIntent2))
+    else if (TryChangeState(UspState::WaitingForIntent, UspState::WaitingForIntent2))
     {
         SPX_DBG_TRACE_VERBOSE("%s: Intent never came from service!!", __FUNCTION__);
         sendIntermediate = true;
         FireFinalResultLater_WaitingForIntentComplete();
-        ChangeState(UspState::WaitingForIntent2, UspState::WaitingForPhrase);
+        TryChangeState(UspState::WaitingForIntent2, UspState::WaitingForPhrase);
     }
     else if (IsState(UspState::WaitingForPhrase))
     {
@@ -1426,7 +1432,7 @@ void CSpxUspRecoEngineAdapter::OnSpeechFragment(const USP::SpeechFragmentMsg& me
         InvokeOnSite([&](const SitePtr& site)
         {
             auto factory = SpxQueryService<ISpxRecoResultFactory>(site);
-            auto result = factory->CreateIntermediateResult(nullptr, message.text.c_str(), message.offset, message.duration);
+            auto result = factory->CreateIntermediateResult(message.text.c_str(), message.offset, message.duration);
             auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
             namedProperties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_JsonResult), PAL::ToString(message.json).c_str());
             if (!message.speaker.empty())
@@ -1452,10 +1458,10 @@ void CSpxUspRecoEngineAdapter::OnSpeechPhrase(const USP::SpeechPhraseMsg& messag
         SPX_DBG_TRACE_VERBOSE("%s: (0x%8p) IGNORING... (audioState/uspState=%d/%d) %s", __FUNCTION__, (void*)this, m_audioState, m_uspState, IsState(UspState::Terminating) ? "(USP-TERMINATING)" : "********** USP-UNEXPECTED !!!!!!");
     }
     else if (m_expectIntentResponse &&
-             message.recognitionStatus == USP::RecognitionStatus::Success &&
-             ChangeState(UspState::WaitingForPhrase, UspState::WaitingForIntent))
+             message.recognitionStatus == RecognitionStatus::Success &&
+             TryChangeState(UspState::WaitingForPhrase, UspState::WaitingForIntent))
     {
-        if (message.recognitionStatus == USP::RecognitionStatus::EndOfDictation)
+        if (message.recognitionStatus == RecognitionStatus::EndOfDictation)
         {
             // Intent recognition is using interactive mode, so it should not receive any EndOfDictation message.
             SPX_DBG_TRACE_VERBOSE("EndOfDictation message is not expected for intent recognizer.");
@@ -1467,10 +1473,10 @@ void CSpxUspRecoEngineAdapter::OnSpeechPhrase(const USP::SpeechPhraseMsg& messag
             FireFinalResultLater(message);
         }
     }
-    else if ((m_isInteractiveMode && ChangeState(UspState::WaitingForPhrase, UspState::WaitingForTurnEnd)) ||
-        (!m_isInteractiveMode && ChangeState(UspState::WaitingForPhrase, UspState::WaitingForPhrase)))
+    else if ((m_isInteractiveMode && TryChangeState(UspState::WaitingForPhrase, UspState::WaitingForTurnEnd)) ||
+        (!m_isInteractiveMode && TryChangeState(UspState::WaitingForPhrase, UspState::WaitingForPhrase)))
     {
-        if (message.recognitionStatus == USP::RecognitionStatus::EndOfDictation)
+        if (message.recognitionStatus == RecognitionStatus::EndOfDictation)
         {
             InvokeOnSite([&](const SitePtr& site)
             {
@@ -1602,7 +1608,7 @@ void CSpxUspRecoEngineAdapter::OnTranslationHypothesis(const USP::TranslationHyp
             {
                 // Create the result
                 auto factory = SpxQueryService<ISpxRecoResultFactory>(site);
-                auto result = factory->CreateIntermediateResult(nullptr, message.text.c_str(), message.offset, message.duration);
+                auto result = factory->CreateIntermediateResult(message.text.c_str(), message.offset, message.duration);
 
                 auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
                 namedProperties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_JsonResult), PAL::ToString(message.json).c_str());
@@ -1650,11 +1656,11 @@ void CSpxUspRecoEngineAdapter::OnTranslationPhrase(const USP::TranslationPhraseM
     {
         SPX_DBG_TRACE_VERBOSE("%s: IGNORING (Err/Terminating/Zombie)... (audioState/uspState=%d/%d)", __FUNCTION__, m_audioState, m_uspState);
     }
-    else if ((m_isInteractiveMode && ChangeState(UspState::WaitingForPhrase, UspState::WaitingForTurnEnd)) ||
-             (!m_isInteractiveMode && ChangeState(UspState::WaitingForPhrase, UspState::WaitingForPhrase)))
+    else if ((m_isInteractiveMode && TryChangeState(UspState::WaitingForPhrase, UspState::WaitingForTurnEnd)) ||
+             (!m_isInteractiveMode && TryChangeState(UspState::WaitingForPhrase, UspState::WaitingForPhrase)))
     {
         SPX_DBG_TRACE_SCOPE("Fire final translation result: Creating Result", "FireFinalResul: GetSite()->FireAdapterResult_FinalResult()  complete!");
-        if (message.recognitionStatus == USP::RecognitionStatus::EndOfDictation)
+        if (message.recognitionStatus == RecognitionStatus::EndOfDictation)
         {
             InvokeOnSite([&](const SitePtr& site)
             {
@@ -1675,7 +1681,7 @@ void CSpxUspRecoEngineAdapter::OnTranslationPhrase(const USP::TranslationPhraseM
             {
                 // Create the result
                 auto factory = SpxQueryService<ISpxRecoResultFactory>(site);
-                auto result = factory->CreateFinalResult(nullptr, ToReason(message.recognitionStatus), ToNoMatchReason(message.recognitionStatus), cancellationReason, CancellationErrorCode::NoError, message.text.c_str(), message.offset, message.duration);
+                auto result = factory->CreateFinalResult(ToReason(message.recognitionStatus), ToNoMatchReason(message.recognitionStatus), message.text.c_str(), message.offset, message.duration);
 
                 auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
                 namedProperties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_JsonResult), PAL::ToString(message.json).c_str());
@@ -1719,7 +1725,7 @@ void CSpxUspRecoEngineAdapter::OnAudioOutputChunk(const USP::AudioOutputChunkMsg
     InvokeOnSite([this, &message](const SitePtr &site)
     {
         auto factory = SpxQueryService<ISpxRecoResultFactory>(site);
-        auto result = factory->CreateFinalResult(nullptr, ResultReason::SynthesizingAudio, NO_MATCH_REASON_NONE, REASON_CANCELED_NONE, CancellationErrorCode::NoError, L"", 0, 0);
+        auto result = factory->CreateFinalResult(ResultReason::SynthesizingAudio, NO_MATCH_REASON_NONE, L"", 0, 0);
 
         // Update our result to be an "TranslationSynthesis" result.
         auto initTranslationResult = SpxQueryInterface<ISpxTranslationSynthesisResultInit>(result);
@@ -1738,7 +1744,7 @@ void CSpxUspRecoEngineAdapter::OnTurnStart(const USP::TurnStartMsg& message)
     {
         SPX_DBG_TRACE_VERBOSE("%s: (0x%8p) IGNORING... (audioState/uspState=%d/%d) %s", __FUNCTION__, (void*)this, m_audioState, m_uspState, IsState(UspState::Terminating) ? "(USP-TERMINATING)" : "********** USP-UNEXPECTED !!!!!!");
     }
-    else if (ChangeState(UspState::WaitingForTurnStart, UspState::WaitingForPhrase))
+    else if (TryChangeState(UspState::WaitingForTurnStart, UspState::WaitingForPhrase))
     {
         SPX_DBG_TRACE_VERBOSE("%s: site->AdapterStartedTurn()", __FUNCTION__);
         SPX_DBG_ASSERT(GetSite());
@@ -1764,26 +1770,26 @@ void CSpxUspRecoEngineAdapter::OnTurnEnd(const USP::TurnEndMsg& message)
     auto adapterTurnStopped = false;
 
     auto prepareReady =  !m_singleShot &&
-        (ChangeState(AudioState::Sending, AudioState::Ready) ||
-         ChangeState(AudioState::Mute, AudioState::Ready));
+        (TryChangeState(AudioState::Sending, AudioState::Ready) ||
+         TryChangeState(AudioState::Mute, AudioState::Ready));
 
-    auto requestMute = m_singleShot && ChangeState(AudioState::Sending, AudioState::Mute);
+    auto requestMute = m_singleShot && TryChangeState(AudioState::Sending, AudioState::Mute);
 
     if (IsBadState())
     {
         SPX_DBG_TRACE_VERBOSE("%s: (0x%8p) IGNORING... (audioState/uspState=%d/%d) %s", __FUNCTION__, (void*)this, m_audioState, m_uspState, IsState(UspState::Terminating) ? "(USP-TERMINATING)" : "********** USP-UNEXPECTED !!!!!!");
     }
-    else if (( m_isInteractiveMode && ChangeState(UspState::WaitingForTurnEnd, UspState::Idle)) ||
-             (!m_isInteractiveMode && ChangeState(UspState::WaitingForPhrase, UspState::Idle)))
+    else if (( m_isInteractiveMode && TryChangeState(UspState::WaitingForTurnEnd, UspState::Idle)) ||
+             (!m_isInteractiveMode && TryChangeState(UspState::WaitingForPhrase, UspState::Idle)))
     {
         adapterTurnStopped = true;
     }
-    else if (ChangeState(UspState::WaitingForIntent, UspState::WaitingForIntent2))
+    else if (TryChangeState(UspState::WaitingForIntent, UspState::WaitingForIntent2))
     {
         SPX_DBG_TRACE_VERBOSE("%s: Intent never came from service!!", __FUNCTION__);
         adapterTurnStopped = true;
         FireFinalResultLater_WaitingForIntentComplete();
-        ChangeState(UspState::WaitingForIntent2, UspState::Idle);
+        TryChangeState(UspState::WaitingForIntent2, UspState::Idle);
     }
     else
     {
@@ -1858,9 +1864,9 @@ void CSpxUspRecoEngineAdapter::OnMessageEnd(const USP::TurnEndMsg& message)
     }
 }
 
-void CSpxUspRecoEngineAdapter::OnError(bool isTransport, USP::ErrorCode errorCode, const std::string& errorMessage)
+void CSpxUspRecoEngineAdapter::OnError(const std::shared_ptr<ISpxErrorInformation>& error)
 {
-    SPX_TRACE_ERROR("Response: On Error: Code:%d, Message: %s.\n", errorCode, errorMessage.c_str());
+    SPX_TRACE_ERROR("Response: On Error: Code:%d, Message: %s.\n", (int)error->GetCancellationCode(), error->GetDetails().c_str());
 
     /* If we receive an error, clear all ongoing activity sessions. */
     if (m_endpointType == USP::EndpointType::Dialog)
@@ -1872,49 +1878,10 @@ void CSpxUspRecoEngineAdapter::OnError(bool isTransport, USP::ErrorCode errorCod
     {
         SPX_TRACE_ERROR("%s: (0x%8p) IGNORING... (audioState/uspState=%d/%d) %s", __FUNCTION__, (void*)this, m_audioState, m_uspState, IsState(UspState::Terminating) ? "(USP-TERMINATING)" : "********** USP-UNEXPECTED !!!!!!");
     }
-    else if (ChangeState(UspState::Error))
+    else if (TryChangeState(UspState::Error))
     {
-        SPX_TRACE_ERROR("%s: site->Error() ... error='%s'", __FUNCTION__, errorMessage.c_str());
-        CancellationErrorCode cancellationErrorCode;
-        std::string errorInfo = errorMessage;
-        switch (errorCode)
-        {
-        case USP::ErrorCode::AuthenticationError:
-            cancellationErrorCode = CancellationErrorCode::AuthenticationFailure;
-            break;
-        case USP::ErrorCode::ConnectionError:
-            cancellationErrorCode = CancellationErrorCode::ConnectionFailure;
-            break;
-        case USP::ErrorCode::RuntimeError:
-            cancellationErrorCode = CancellationErrorCode::RuntimeError;
-            break;
-        case USP::ErrorCode::BadRequest:
-            cancellationErrorCode = CancellationErrorCode::BadRequest;
-            break;
-        case USP::ErrorCode::TooManyRequests:
-            cancellationErrorCode = CancellationErrorCode::TooManyRequests;
-            break;
-        case USP::ErrorCode::Forbidden:
-            cancellationErrorCode = CancellationErrorCode::Forbidden;
-            break;
-        case USP::ErrorCode::ServiceError:
-            cancellationErrorCode = CancellationErrorCode::ServiceError;
-            break;
-        case USP::ErrorCode::ServiceUnavailable:
-            cancellationErrorCode = CancellationErrorCode::ServiceUnavailable;
-            break;
-        case USP::ErrorCode::ServiceRedirectTemporary:
-            cancellationErrorCode = CancellationErrorCode::ServiceRedirectTemporary;
-            break;
-        case USP::ErrorCode::ServiceRetirectPermanent:
-            cancellationErrorCode = CancellationErrorCode::ServiceRedirectPermanent;
-            break;
-        default:
-            cancellationErrorCode = CancellationErrorCode::RuntimeError;
-            errorInfo = "Unknown error code:" + std::to_string((int)errorCode) + ". Error message:" + errorMessage;
-            break;
-        };
-        InvokeOnSite([this, errorInfo, isTransport, cancellationErrorCode](const SitePtr& p) { p->Error(this,  std::make_shared<SpxRecoEngineAdapterError>(isTransport, CancellationReason::Error, cancellationErrorCode, errorInfo)); });
+        SPX_TRACE_ERROR("%s: site->Error() ... error='%s'", __FUNCTION__, error->GetDetails().c_str());
+        InvokeOnSite([this, error](const SitePtr& p) { p->Error(this, error); });
     }
     else
     {
@@ -1928,12 +1895,12 @@ void CSpxUspRecoEngineAdapter::OnUserMessage(const USP::UserMsg& msg)
 
     if (msg.path == "response")
     {
-        if (ChangeState(UspState::WaitingForIntent, UspState::WaitingForIntent2))
+        if (TryChangeState(UspState::WaitingForIntent, UspState::WaitingForIntent2))
         {
             std::string luisJson((const char*)msg.buffer, msg.size);
             SPX_DBG_TRACE_VERBOSE("USP User Message: response; luisJson='%s'", luisJson.c_str());
             FireFinalResultLater_WaitingForIntentComplete(luisJson);
-            ChangeState(UspState::WaitingForIntent2, m_isInteractiveMode ? UspState::WaitingForTurnEnd : UspState::WaitingForPhrase);
+            TryChangeState(UspState::WaitingForIntent2, m_isInteractiveMode ? UspState::WaitingForTurnEnd : UspState::WaitingForPhrase);
         }
         else if (m_endpointType == USP::EndpointType::Dialog)
         {
@@ -2286,24 +2253,24 @@ json CSpxUspRecoEngineAdapter::GetSpeechContextJson()
     return contextJson;
 }
 
-ResultReason CSpxUspRecoEngineAdapter::ToReason(USP::RecognitionStatus uspRecognitionStatus)
+ResultReason CSpxUspRecoEngineAdapter::ToReason(RecognitionStatus uspRecognitionStatus)
 {
     switch (uspRecognitionStatus)
     {
-    case USP::RecognitionStatus::Success:
+    case RecognitionStatus::Success:
         return ResultReason::RecognizedSpeech;
 
-    case USP::RecognitionStatus::NoMatch:
-    case USP::RecognitionStatus::InitialSilenceTimeout:
-    case USP::RecognitionStatus::InitialBabbleTimeout:
+    case RecognitionStatus::NoMatch:
+    case RecognitionStatus::InitialSilenceTimeout:
+    case RecognitionStatus::InitialBabbleTimeout:
         return ResultReason::NoMatch;
 
-    case USP::RecognitionStatus::Error:
-    case USP::RecognitionStatus::TooManyRequests:
-    case USP::RecognitionStatus::BadRequest:
-    case USP::RecognitionStatus::Forbidden:
-    case USP::RecognitionStatus::ServiceUnavailable:
-    case USP::RecognitionStatus::InvalidMessage:
+    case RecognitionStatus::Error:
+    case RecognitionStatus::TooManyRequests:
+    case RecognitionStatus::BadRequest:
+    case RecognitionStatus::Forbidden:
+    case RecognitionStatus::ServiceUnavailable:
+    case RecognitionStatus::InvalidMessage:
         return ResultReason::Canceled;
 
     default:
@@ -2313,22 +2280,22 @@ ResultReason CSpxUspRecoEngineAdapter::ToReason(USP::RecognitionStatus uspRecogn
     }
 }
 
-CancellationReason CSpxUspRecoEngineAdapter::ToCancellationReason(USP::RecognitionStatus uspRecognitionStatus)
+CancellationReason CSpxUspRecoEngineAdapter::ToCancellationReason(RecognitionStatus uspRecognitionStatus)
 {
     switch (uspRecognitionStatus)
     {
-    case USP::RecognitionStatus::Success:
-    case USP::RecognitionStatus::NoMatch:
-    case USP::RecognitionStatus::InitialSilenceTimeout:
-    case USP::RecognitionStatus::InitialBabbleTimeout:
+    case RecognitionStatus::Success:
+    case RecognitionStatus::NoMatch:
+    case RecognitionStatus::InitialSilenceTimeout:
+    case RecognitionStatus::InitialBabbleTimeout:
         return REASON_CANCELED_NONE;
 
-    case USP::RecognitionStatus::Error:
-    case USP::RecognitionStatus::TooManyRequests:
-    case USP::RecognitionStatus::BadRequest:
-    case USP::RecognitionStatus::Forbidden:
-    case USP::RecognitionStatus::ServiceUnavailable:
-    case USP::RecognitionStatus::InvalidMessage:
+    case RecognitionStatus::Error:
+    case RecognitionStatus::TooManyRequests:
+    case RecognitionStatus::BadRequest:
+    case RecognitionStatus::Forbidden:
+    case RecognitionStatus::ServiceUnavailable:
+    case RecognitionStatus::InvalidMessage:
         return CancellationReason::Error;
 
     default:
@@ -2338,26 +2305,26 @@ CancellationReason CSpxUspRecoEngineAdapter::ToCancellationReason(USP::Recogniti
     }
 }
 
-NoMatchReason CSpxUspRecoEngineAdapter::ToNoMatchReason(USP::RecognitionStatus uspRecognitionStatus)
+NoMatchReason CSpxUspRecoEngineAdapter::ToNoMatchReason(RecognitionStatus uspRecognitionStatus)
 {
     switch (uspRecognitionStatus)
     {
-    case USP::RecognitionStatus::Success:
-    case USP::RecognitionStatus::Error:
-    case USP::RecognitionStatus::TooManyRequests:
-    case USP::RecognitionStatus::BadRequest:
-    case USP::RecognitionStatus::Forbidden:
-    case USP::RecognitionStatus::ServiceUnavailable:
-    case USP::RecognitionStatus::InvalidMessage:
+    case RecognitionStatus::Success:
+    case RecognitionStatus::Error:
+    case RecognitionStatus::TooManyRequests:
+    case RecognitionStatus::BadRequest:
+    case RecognitionStatus::Forbidden:
+    case RecognitionStatus::ServiceUnavailable:
+    case RecognitionStatus::InvalidMessage:
         return NO_MATCH_REASON_NONE;
 
-    case USP::RecognitionStatus::NoMatch:
+    case RecognitionStatus::NoMatch:
         return NoMatchReason::NotRecognized;
 
-    case USP::RecognitionStatus::InitialSilenceTimeout:
+    case RecognitionStatus::InitialSilenceTimeout:
         return NoMatchReason::InitialSilenceTimeout;
 
-    case USP::RecognitionStatus::InitialBabbleTimeout:
+    case RecognitionStatus::InitialBabbleTimeout:
         return NoMatchReason::InitialBabbleTimeout;
 
     default:
@@ -2398,7 +2365,7 @@ void CSpxUspRecoEngineAdapter::FireFinalResultNow(const USP::SpeechPhraseMsg& me
             SPX_TRACE_ERROR("Unexpected recognition status %d.", message.recognitionStatus);
             SPX_THROW_HR(SPXERR_RUNTIME_ERROR);
         }
-        auto result = factory->CreateFinalResult(nullptr, ToReason(message.recognitionStatus), ToNoMatchReason(message.recognitionStatus), cancellationReason, CancellationErrorCode::NoError, message.displayText.c_str(), message.offset, message.duration);
+        auto result = factory->CreateFinalResult(ToReason(message.recognitionStatus), ToNoMatchReason(message.recognitionStatus), message.displayText.c_str(), message.offset, message.duration);
 
         auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
         namedProperties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_JsonResult), PAL::ToString(message.json).c_str());
@@ -2429,7 +2396,7 @@ void CSpxUspRecoEngineAdapter::FireFinalResultLater_WaitingForIntentComplete(con
     m_finalResultMessageToFireLater = USP::SpeechPhraseMsg();
 }
 
-bool CSpxUspRecoEngineAdapter::ChangeState(AudioState fromAudioState, UspState fromUspState, AudioState toAudioState, UspState toUspState)
+bool CSpxUspRecoEngineAdapter::TryChangeState(AudioState fromAudioState, UspState fromUspState, AudioState toAudioState, UspState toUspState)
 {
     if (fromAudioState == m_audioState &&       // are we in correct audio state, and ...
         fromUspState == m_uspState &&           // are we in correct usp state? ... if so great! but ...

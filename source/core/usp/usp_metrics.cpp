@@ -5,6 +5,7 @@
 // usp_metrics.h: send and process telemetry messages using the USP web socket connection.
 //
 
+#include "stdafx.h"
 #include "usp_metrics.h"
 #include "uspcommon.h"
 

@@ -98,7 +98,7 @@ std::shared_ptr<ISpxSynthesisResult> CSpxMockTtsEngineAdapter::Speak(const std::
         result = p->CreateEmptySynthesisResult();
         auto resultInit = SpxQueryInterface<ISpxSynthesisResultInit>(result);
         resultInit->InitSynthesisResult(requestId, ResultReason::SynthesizingAudioCompleted,
-            REASON_CANCELED_NONE, CancellationErrorCode::NoError, totalAudio.get(), 32000 + (uint32_t)(ssml.length()), outputFormat.get(), hasHeader);
+            REASON_CANCELED_NONE, nullptr, totalAudio.get(), 32000 + (uint32_t)(ssml.length()), outputFormat.get(), hasHeader);
     });
 
     return result;

@@ -251,24 +251,39 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public async Task InvalidKeyHandledProperly()
         {
-            var configWithInvalidKey = SpeechConfig.FromSubscription("invalidKey", region);
-            await AssertConnectionError(configWithInvalidKey, CancellationErrorCode.AuthenticationFailure, "WebSocket Upgrade failed with an authentication error (401)");
+            await AssertConnectionError(
+                SpeechConfig.FromSubscription("invalidKey", region),
+                CancellationErrorCode.AuthenticationFailure,
+                "WebSocket upgrade failed", "authentication error", "401");
         }
 
         [TestMethod]
         public async Task InvalidAuthTokenHandledProperly()
         {
             var invalidToken = "InvalidToken";
-            var configWithInvalidToken = SpeechConfig.FromAuthorizationToken(invalidToken, region);
-            await AssertConnectionError(configWithInvalidToken, CancellationErrorCode.AuthenticationFailure, "WebSocket Upgrade failed with an authentication error (401)");
+            await AssertConnectionError(
+                SpeechConfig.FromAuthorizationToken(invalidToken, region),
+                CancellationErrorCode.AuthenticationFailure,
+                "WebSocket upgrade failed", "authentication error", "401");
         }
 
         [TestMethod]
         public async Task ExpiredAuthTokenHandledProperly()
         {
             var expiredToken = "eyJhbGciOiJodHRwOi8vd3d3LnczLm9yZy8yMDAxLzA0L3htbGRzaWctbW9yZSNobWFjLXNoYTI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ1cm46bXMuY29nbml0aXZlc2VydmljZXMiLCJleHAiOiIxNTU0MzE1Nzk5IiwicmVnaW9uIjoibm9ydGhldXJvcGUiLCJzdWJzY3JpcHRpb24taWQiOiIwNmZlNjU2MWVkZTM0NDdiYTg2NDY5Njc4YTIwNTNkYiIsInByb2R1Y3QtaWQiOiJTcGVlY2hTZXJ2aWNlcy5TMCIsImNvZ25pdGl2ZS1zZXJ2aWNlcy1lbmRwb2ludCI6Imh0dHBzOi8vYXBpLmNvZ25pdGl2ZS5taWNyb3NvZnQuY29tL2ludGVybmFsL3YxLjAvIiwiYXp1cmUtcmVzb3VyY2UtaWQiOiIvc3Vic2NyaXB0aW9ucy8zYTk2ZWY1Ni00MWE5LTQwYTAtYjBmMy1mYjEyNWMyYjg3OTgvcmVzb3VyY2VHcm91cHMvY3NzcGVlY2hzZGstY2FyYm9uL3Byb3ZpZGVycy9NaWNyb3NvZnQuQ29nbml0aXZlU2VydmljZXMvYWNjb3VudHMvc3BlZWNoc2Rrbm9ydGhldXJvcGUiLCJzY29wZSI6InNwZWVjaHNlcnZpY2VzIiwiYXVkIjoidXJuOm1zLnNwZWVjaHNlcnZpY2VzLm5vcnRoZXVyb3BlIn0.hVAWT2YHjknFI6qLhnjmjzoNgOgxKWguuFhJLlyDxLU";
-            var configWithInvalidToken = SpeechConfig.FromAuthorizationToken(expiredToken, region);
-            await AssertConnectionError(configWithInvalidToken, CancellationErrorCode.AuthenticationFailure, "WebSocket Upgrade failed with an authentication error (401)");
+            await AssertConnectionError(
+                SpeechConfig.FromAuthorizationToken(expiredToken, region),
+                CancellationErrorCode.AuthenticationFailure,
+                "WebSocket upgrade failed", "authentication error", "401");
+        }
+
+        [TestMethod]
+        public async Task InvalidSubscriptionKeyHandledProperly()
+        {
+            var configWithInvalidRegion = SpeechConfig.FromSubscription("invalid_subscription_key", RecognitionTestBase.region);
+            // "websocket upgrade", "authentication", "subscription";
+            // we use case insensitive comparison here since on Linux the error message is: "DNS connection failed (the remote host did not respond)"
+            await AssertConnectionError(configWithInvalidRegion, CancellationErrorCode.AuthenticationFailure, "websocket upgrade", "authentication", "subscription");
         }
 
         [TestMethod]
@@ -277,7 +292,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var configWithInvalidRegion = SpeechConfig.FromSubscription(subscriptionKey, "invalidRegion");
 
             // we use case insensitive comparison here since on Linux the error message is: "DNS connection failed (the remote host did not respond)"
-            await AssertConnectionError(configWithInvalidRegion, CancellationErrorCode.ConnectionFailure, "Connection failed", StringComparison.OrdinalIgnoreCase);
+            await AssertConnectionError(configWithInvalidRegion, CancellationErrorCode.ConnectionFailure, "connection failed");
         }
 
         [TestMethod]
@@ -291,14 +306,14 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public async Task InvalidDeploymentIdHandledProperly()
         {
             this.defaultConfig.EndpointId = "invalidDeploymentId";
-            await AssertConnectionError(this.defaultConfig, CancellationErrorCode.BadRequest, "WebSocket Upgrade failed with a bad request (400)");
+            await AssertConnectionError(this.defaultConfig, CancellationErrorCode.BadRequest, "WebSocket upgrade failed", "bad request", "400");
         }
 
         [TestMethod]
         public async Task InvalidLanguageHandledProperly()
         {
             this.defaultConfig.SpeechRecognitionLanguage = "InvalidLang";
-            await AssertConnectionError(this.defaultConfig, CancellationErrorCode.BadRequest, "WebSocket Upgrade failed with a bad request (400)");
+            await AssertConnectionError(this.defaultConfig, CancellationErrorCode.BadRequest, "WebSocket upgrade failed", "bad request", "400");
         }
 
         [TestMethod]

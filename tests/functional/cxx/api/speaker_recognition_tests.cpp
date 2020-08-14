@@ -111,7 +111,7 @@ TEST_CASE("text dependent verification enrollment bad request", "[api][cxx][spea
     auto result = client->EnrollProfileAsync(profile, audioInput).get();
     INFO(result->ProfileId);
     auto json_string = result->Properties.GetProperty(PropertyId::SpeechServiceResponse_JsonResult);
-    SPXTEST_REQUIRE(json_string.find("error") != std::string::npos);
+    SPXTEST_REQUIRE(json_string.find("Bad request") != std::string::npos);
 
     SPXTEST_REQUIRE(result->Reason == ResultReason::Canceled);
     auto details = VoiceProfileEnrollmentCancellationDetails::FromResult(result);

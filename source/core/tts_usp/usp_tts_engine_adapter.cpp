@@ -19,6 +19,7 @@
 #include "spx_build_information.h"
 #include "time_utils.h"
 #include "thread_service.h"
+#include "error_info.h"
 
 #define SPX_DBG_TRACE_USP_TTS 1
 
@@ -99,7 +100,7 @@ std::shared_ptr<ISpxSynthesisResult> CSpxUspTtsEngineAdapter::Speak(const std::s
             SPX_TRACE_ERROR("Synthesis cancelled with partial data received, cannot retry.");
             break;
         }
-        else if (m_currentErrorCode == USP::ErrorCode::ClientClosingConnection)
+        else if (m_currentError->GetRetryMode() != ISpxErrorInformation::RetryMode::Allowed)
         {
             SPX_TRACE_ERROR("Synthesis cancelled by user, won't retry.");
             break;
@@ -134,8 +135,7 @@ std::shared_ptr<ISpxSynthesisResult> CSpxUspTtsEngineAdapter::SpeakInternal(cons
         m_currentText = PAL::ToWString(text);
         m_currentTextIsSsml = isSsml;
         m_currentTextOffset = 0;
-        m_currentErrorCode = static_cast<USP::ErrorCode>(0);
-        m_currentErrorMessage = std::string();
+        m_currentError = nullptr;
 
         // Send request
         m_uspState = UspState::Sending;
@@ -161,8 +161,9 @@ std::shared_ptr<ISpxSynthesisResult> CSpxUspTtsEngineAdapter::SpeakInternal(cons
 
     if (m_uspState == UspState::Sending || m_uspState == UspState::TurnStarted)
     {
-        SPX_TRACE_ERROR("USP error, timeout to get the first audio chunk.");
-        m_currentErrorMessage = "USP error, timeout to get the first audio chunk.";
+        constexpr auto message = "USP error: timeout waiting for the first audio chunk";
+        SPX_TRACE_ERROR(message);
+        m_currentError = ErrorInfo::FromExplicitError(CancellationErrorCode::RuntimeError, message);
         m_uspState = UspState::Error;
         UspTerminate();
     }
@@ -182,9 +183,12 @@ std::shared_ptr<ISpxSynthesisResult> CSpxUspTtsEngineAdapter::SpeakInternal(cons
 
     if (m_uspState == UspState::ReceivingData)
     {
-        SPX_TRACE_ERROR("USP error, timeout to get all audio data.");
-        m_currentErrorMessage = "USP error, timeout to get all audio data.";
-        m_currentErrorMessage += " Received audio size: " + std::to_string(m_currentReceivedData.size()) + "bytes.";
+        constexpr auto messageBase = "USP error: timeout waiting for all remaining audio data.";
+        SPX_TRACE_ERROR(messageBase);
+        std::stringstream message;
+        message << messageBase
+            << " Received audio size " << CSpxSynthesisHelper::itos(m_currentReceivedData.size()) << " bytes.";
+        m_currentError = ErrorInfo::FromExplicitError(CancellationErrorCode::ServiceTimeout, message.str());
         m_uspState = UspState::Error;
         UspTerminate();
     }
@@ -197,16 +201,14 @@ std::shared_ptr<ISpxSynthesisResult> CSpxUspTtsEngineAdapter::SpeakInternal(cons
     if (m_uspState == UspState::Error)
     {
         resultInit->InitSynthesisResult(requestId, ResultReason::Canceled,
-            m_currentErrorCode == USP::ErrorCode::ClientClosingConnection ? CancellationReason::CancelledByUser : CancellationReason::Error,
-            UspErrorCodeToCancellationErrorCode(m_currentErrorCode),
+            CancellationReason::Error, m_currentError,
             m_currentReceivedData.data(), m_currentReceivedData.size(), outputFormat.get(), hasHeader);
-        SpxQueryInterface<ISpxNamedProperties>(resultInit)->SetStringValue(GetPropertyName(PropertyId::CancellationDetails_ReasonDetailedText), m_currentErrorMessage.data());
-        m_shouldStop = false;
+        SpxQueryInterface<ISpxNamedProperties>(resultInit)->SetStringValue(GetPropertyName(PropertyId::CancellationDetails_ReasonDetailedText), m_currentError->GetDetails().c_str());
     }
     else
     {
         resultInit->InitSynthesisResult(requestId, ResultReason::SynthesizingAudioCompleted,
-            REASON_CANCELED_NONE, CancellationErrorCode::NoError, m_currentReceivedData.data(), m_currentReceivedData.size(), outputFormat.get(), hasHeader);
+            REASON_CANCELED_NONE, nullptr, m_currentReceivedData.data(), m_currentReceivedData.size(), outputFormat.get(), hasHeader);
     }
 
     return result;
@@ -216,7 +218,7 @@ void CSpxUspTtsEngineAdapter::StopSpeaking()
 {
     SPX_DBG_TRACE_VERBOSE_IF(SPX_DBG_TRACE_USP_TTS, __FUNCTION__);
     m_shouldStop = true;
-    OnError(true, USP::ErrorCode::ClientClosingConnection, "Synthesis request cancelled by user.");
+    OnError(ErrorInfo::FromHttpStatus(HttpStatusCode::CLIENT_CLOSED_REQUEST));
 }
 
 std::shared_ptr<ISpxNamedProperties> CSpxUspTtsEngineAdapter::GetParentProperties() const
@@ -429,19 +431,24 @@ void CSpxUspTtsEngineAdapter::UspInitialize()
     catch (const std::exception& e)
     {
         SPX_TRACE_ERROR("Error: '%s'", e.what());
-        OnError(true, USP::ErrorCode::ConnectionError, e.what());
+        auto error = ErrorInfo::FromExplicitError(CancellationErrorCode::ConnectionFailure, e.what());
+        OnError(error);
     }
     catch (...)
     {
-        SPX_TRACE_ERROR("Error: Unexpected exception in UspInitialize");
-        OnError(true, USP::ErrorCode::ConnectionError, "Error: Unexpected exception in UspInitialize");
+        constexpr auto message = "Error: Unexpected exception in UspInitialize";
+        SPX_TRACE_ERROR(message);
+        auto error = ErrorInfo::FromExplicitError(CancellationErrorCode::ConnectionFailure, message);
+        OnError(error);
     }
 
     // if error occurs in the above client.Connect, set state to error and return.
     if (uspConnection == nullptr)
     {
+        constexpr auto message = "Error: failed to establish USP connection.";
+        SPX_TRACE_ERROR(message);
         m_uspState = UspState::Error;
-        m_currentErrorMessage = "USP connection establishment failed.";
+        m_currentError = ErrorInfo::FromExplicitError(CancellationErrorCode::ConnectionFailure, message);
         return;
     }
 
@@ -609,17 +616,16 @@ void CSpxUspTtsEngineAdapter::OnTurnEnd(const USP::TurnEndMsg& message)
     m_cv.notify_all();
 }
 
-void CSpxUspTtsEngineAdapter::OnError(bool transport, USP::ErrorCode errorCode, const std::string& errorMessage)
+void CSpxUspTtsEngineAdapter::OnError(const std::shared_ptr<ISpxErrorInformation>& error)
 {
-    UNUSED(transport);
-    SPX_DBG_TRACE_VERBOSE("Response: On Error: Code:%d, Message: %s.\n", errorCode, errorMessage.c_str());
+    SPX_DBG_TRACE_VERBOSE("Response: On Error: Code:%d, Message: %s.\n", error->GetCancellationCode(), error->GetDetails().c_str());
     std::unique_lock<std::mutex> lock(m_mutex);
     if (m_uspState != UspState::Idle || m_shouldStop) // no need to raise an error if synthesis is already done.
     {
-        m_currentErrorCode = errorCode;
-        m_currentErrorMessage = errorMessage;
-        m_currentErrorMessage += " USP state: " + std::to_string((int)(UspState)m_uspState) + ".";
-        m_currentErrorMessage += " Received audio size: " + std::to_string(m_currentReceivedData.size()) + "bytes.";
+        std::stringstream newMessage;
+        newMessage << "USP state: " << CSpxSynthesisHelper::itos((int)(UspState)m_uspState) << "."
+            << " Received audio size: " << CSpxSynthesisHelper::itos(m_currentReceivedData.size()) << " bytes.";
+        m_currentError = ErrorInfo::FromErrorWithAppendedDetails(error, newMessage.str());
         m_uspState = UspState::Error;
         m_cv.notify_all();
 
@@ -693,30 +699,5 @@ bool CSpxUspTtsEngineAdapter::InSsmlTag(size_t currentPos, const std::wstring& s
 
     return false;
 }
-
-CancellationErrorCode CSpxUspTtsEngineAdapter::UspErrorCodeToCancellationErrorCode(USP::ErrorCode uspErrorCode)
-{
-    std::map<USP::ErrorCode, CancellationErrorCode> uspErrorCodeToCancellationErrorCodeMapping = {
-        { USP::ErrorCode::AuthenticationError, CancellationErrorCode::AuthenticationFailure },
-        { USP::ErrorCode::BadRequest, CancellationErrorCode::BadRequest },
-        { USP::ErrorCode::ConnectionError, CancellationErrorCode::ConnectionFailure },
-        { USP::ErrorCode::Forbidden, CancellationErrorCode::Forbidden },
-        { USP::ErrorCode::RuntimeError, CancellationErrorCode::RuntimeError },
-        { USP::ErrorCode::ServiceError, CancellationErrorCode::ServiceError },
-        { USP::ErrorCode::ServiceUnavailable, CancellationErrorCode::ServiceUnavailable },
-        { USP::ErrorCode::TooManyRequests, CancellationErrorCode::TooManyRequests }
-    };
-
-    auto cancellationErrorCode = CancellationErrorCode::NoError;
-
-    auto iter = uspErrorCodeToCancellationErrorCodeMapping.find(uspErrorCode);
-    if (iter != uspErrorCodeToCancellationErrorCodeMapping.end())
-    {
-        cancellationErrorCode = iter->second;
-    }
-
-    return cancellationErrorCode;
-}
-
 
 } } } } // Microsoft::CognitiveServices::Speech::Impl

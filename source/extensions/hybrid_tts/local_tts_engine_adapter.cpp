@@ -150,14 +150,14 @@ std::shared_ptr<ISpxSynthesisResult> CSpxLocalTtsEngineAdapter::Speak(const std:
         auto dataSize = msTtsOutput.GetAudioData(buffer.get(), AUDIO_OUTPUT_BUFFER_SIZE);
 
         resultInit->InitSynthesisResult(requestId, ResultReason::SynthesizingAudioCompleted,
-            REASON_CANCELED_NONE, CancellationErrorCode::NoError, buffer.get(), dataSize, outputFormat.get(), hasHeader);
+            REASON_CANCELED_NONE, nullptr, buffer.get(), dataSize, outputFormat.get(), hasHeader);
         properties->SetStringValue("CharNumber", std::to_string(charNumber).c_str());
         properties->SetStringValue("OfflineVoiceName", m_voiceName.c_str());
     }
     else
     {
         resultInit->InitSynthesisResult(requestId, ResultReason::Canceled, CancellationReason::Error,
-            CancellationErrorCode::RuntimeError, nullptr, 0, outputFormat.get(), hasHeader);
+            nullptr, nullptr, 0, outputFormat.get(), hasHeader);
 
         // Set error detail string
         std::stringstream ss;

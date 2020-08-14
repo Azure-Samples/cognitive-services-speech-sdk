@@ -818,7 +818,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             REQUIRE_THROWS_MATCHES(
                 () => alice.Connection.Open(false),
                 typeof(ApplicationException),
-                Catch.HasHR("BadRequest") & Catch.HasHR("WebSocket Upgrade failed"));
+                Catch.HasHR("Bad request") & Catch.HasHR("WebSocket upgrade failed"));
 
             await Task.Delay(TimeSpan.FromMilliseconds(200));
 

@@ -78,6 +78,7 @@ namespace ConversationTranslation {
         NoMatchReason noMatchReason;
         uint64_t offset;
         uint64_t duration;
+        std::shared_ptr<ISpxErrorInformation> error;
 
     public:
         ConversationRecognitionResult() = default;
@@ -140,18 +141,18 @@ namespace ConversationTranslation {
         virtual NoMatchReason GetNoMatchReason() override { return noMatchReason; }
         virtual void SetLatency(uint64_t) override {}
         virtual CancellationReason GetCancellationReason() override { return static_cast<CancellationReason>(0); }
-        virtual CancellationErrorCode GetCancellationErrorCode() override { return CancellationErrorCode::NoError; }
+        virtual std::shared_ptr<ISpxErrorInformation> GetError() override { return error; }
     };
 
     class ConversationCancellationResult : public ConversationRecognitionResult
     {
     protected:
         CancellationReason cancelReason;
-        CancellationErrorCode cancelError;
+        std::shared_ptr<ISpxErrorInformation> cancelError;
 
     public:
         ConversationCancellationResult() = default;
-        ConversationCancellationResult(const string& participantId, CancellationReason reason, CancellationErrorCode error) :
+        ConversationCancellationResult(const string& participantId, CancellationReason reason, const std::shared_ptr<ISpxErrorInformation>& error) :
             ConversationRecognitionResult("", "", "", ResultReason::Canceled, participantId),
             cancelReason(reason),
             cancelError(error)
@@ -159,7 +160,7 @@ namespace ConversationTranslation {
         }
 
         virtual CancellationReason GetCancellationReason() override { return cancelReason; }
-        virtual CancellationErrorCode GetCancellationErrorCode() override { return cancelError; }
+        virtual std::shared_ptr<ISpxErrorInformation> GetError() override { return cancelError; }
 
         virtual void SetCancellationErrorDetails(const std::string& details)
         {

@@ -10,6 +10,7 @@
     </MSTestV2>
     <Catch2Adapter>
         <DiscoverCommandLine>--discovery --verbosity high --list-tests *</DiscoverCommandLine>
+        <DiscoverTimeout>5000</DiscoverTimeout>
         <WorkingDirectory>..\..\tests\functional\cxx\api</WorkingDirectory>
         <WorkingDirectoryRoot>Executable</WorkingDirectoryRoot>
         <FilenameFilter>_tests</FilenameFilter>

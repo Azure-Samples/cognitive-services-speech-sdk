@@ -107,7 +107,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 var result = await translationRecognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 var errorDetails = CancellationDetails.FromResult(result);
                 // Only translation error.
-                Assert.IsTrue(errorDetails.ErrorDetails.Contains("Please check the language name and endpoint id"), "Actual error:'" + errorDetails.ErrorDetails + "' does not contain expected string.");
+                Assert.IsTrue(errorDetails.ErrorDetails.Contains("Please verify the provided subscription details and language information"), "Actual error:'" + errorDetails.ErrorDetails + "' does not contain expected string.");
                 Assert.AreEqual(CancellationErrorCode.BadRequest, errorDetails.ErrorCode);
                 Assert.AreEqual(ResultReason.Canceled, result.Reason);
                 Assert.AreEqual("", result.Text);
@@ -564,7 +564,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             Assert.AreEqual(0, actualTranslations[ResultType.RecognizingText].Count, "Number of translations should be zero.");
             Assert.AreEqual(1, actualTranslations[ResultType.Cancelled].Count, "Number of cancelled events should not be zero.");
             var errorDetails = actualTranslations[ResultType.Cancelled].Cast<TranslationRecognitionCanceledEventArgs>().Last().ErrorDetails;
-            Assert.IsTrue(errorDetails.Contains("bad request"));
+            Assert.IsTrue(errorDetails.ToLowerInvariant().Contains("bad request"));
         }
 
         [TestMethod]

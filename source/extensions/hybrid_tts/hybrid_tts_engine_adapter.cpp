@@ -11,6 +11,7 @@
 #include "hybrid_tts_engine_adapter.h"
 #include "ms_tts_output.h"
 #include "create_object_helpers.h"
+#include "error_info.h"
 #include "handle_table.h"
 #include "service_helpers.h"
 #include "property_bag_impl.h"
@@ -556,8 +557,9 @@ std::shared_ptr<ISpxSynthesisResult> CSpxHybridTtsEngineAdapter::DummySpeak(cons
     bool hasHeader = false;
     auto outputFormat = GetOutputFormat(&hasHeader);
     auto resultInit = SpxQueryInterface<ISpxSynthesisResultInit>(result);
+    auto dummyError = ErrorInfo::FromRuntimeMessage("");
     resultInit->InitSynthesisResult(requestId, ResultReason::Canceled, CancellationReason::Error,
-            CancellationErrorCode::RuntimeError, nullptr, 0, outputFormat.get(), hasHeader);
+            dummyError, nullptr, 0, outputFormat.get(), hasHeader);
     return result;
 }
 

@@ -18,6 +18,8 @@
 #include "conversation_events.h"
 #include "conversation_translator_logging.h"
 #include "conversation_translator_connection.h"
+#include "error_info.h"
+#include "i_web_socket.h"
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -138,111 +140,6 @@ namespace ConversationTranslation {
     static inline void RaiseEvent(EventSignal<shared_ptr<I>>& event, Args... args)
     {
         RaiseEvent<I>(event, CreateEventArgs<C, I, Args...>(args...));
-    }
-
-    struct ErrorCodeHandling
-    {
-        bool isPermanentFailure;
-        CancellationErrorCode errorCode;
-    };
-
-    static ErrorCodeHandling ToCancellationErrorCode(bool isWebSocket, ConversationErrorCode error)
-    {
-        ErrorCodeHandling ret;
-        ret.isPermanentFailure = false;
-        ret.errorCode = CancellationErrorCode::RuntimeError;
-
-        if (!isWebSocket)
-        {
-            ret.isPermanentFailure = false;
-            ret.errorCode = CancellationErrorCode::RuntimeError;
-            return ret;
-        }
-
-        switch (error)
-        {
-            case ConversationErrorCode::AuthenticationError:
-                ret.isPermanentFailure = true;
-                ret.errorCode = CancellationErrorCode::AuthenticationFailure;
-                break;
-            case ConversationErrorCode::BadRequest:
-                ret.isPermanentFailure = true;
-                ret.errorCode = CancellationErrorCode::BadRequest;
-                break;
-            case ConversationErrorCode::ConnectionError:
-                ret.isPermanentFailure = false;
-                ret.errorCode = CancellationErrorCode::ConnectionFailure;
-                break;
-            case ConversationErrorCode::Forbidden:
-                ret.isPermanentFailure = true;
-                ret.errorCode = CancellationErrorCode::Forbidden;
-                break;
-            case ConversationErrorCode::RuntimeError:
-                ret.isPermanentFailure = false;
-                ret.errorCode = CancellationErrorCode::RuntimeError;
-                break;
-            case ConversationErrorCode::ServiceError:
-                ret.isPermanentFailure = false;
-                ret.errorCode = CancellationErrorCode::ServiceError;
-                break;
-            case ConversationErrorCode::ServiceUnavailable:
-                ret.isPermanentFailure = false;
-                ret.errorCode = CancellationErrorCode::ServiceUnavailable;
-                break;
-            case ConversationErrorCode::TooManyRequests:
-                ret.isPermanentFailure = false;
-                ret.errorCode = CancellationErrorCode::TooManyRequests;
-                break;
-            default:
-                ret.isPermanentFailure = false;
-                ret.errorCode = CancellationErrorCode::RuntimeError;
-                break;
-        }
-
-        return ret;
-    }
-
-    static ErrorCodeHandling ParseDisconnectReason(const USP::WebSocketDisconnectReason reason)
-    {
-        ErrorCodeHandling ret;
-        ret.isPermanentFailure = false;
-        ret.errorCode = CancellationErrorCode::RuntimeError;
-
-        switch (reason)
-        {
-            default:
-            case USP::WebSocketDisconnectReason::Unknown:
-                ret.isPermanentFailure = false;
-                ret.errorCode = CancellationErrorCode::RuntimeError;
-                break;
-
-            case USP::WebSocketDisconnectReason::Normal:
-                ret.isPermanentFailure = false;
-                ret.errorCode = CancellationErrorCode::NoError;
-                break;
-
-            case USP::WebSocketDisconnectReason::EndpointUnavailable:
-                ret.isPermanentFailure = false;
-                ret.errorCode = CancellationErrorCode::ServiceUnavailable;
-                break;
-
-            case USP::WebSocketDisconnectReason::ProtocolError:
-            case USP::WebSocketDisconnectReason::CannotAcceptDataType:
-            case USP::WebSocketDisconnectReason::InvalidPayloadData:
-            case USP::WebSocketDisconnectReason::PolicyViolation:
-            case USP::WebSocketDisconnectReason::MessageTooBig:
-            case USP::WebSocketDisconnectReason::UnexpectedCondition:
-                ret.isPermanentFailure = true;
-                ret.errorCode = CancellationErrorCode::BadRequest;
-                break;
-
-            case USP::WebSocketDisconnectReason::InternalServerError:
-                ret.isPermanentFailure = false;
-                ret.errorCode = CancellationErrorCode::ServiceError;
-                break;
-        }
-
-        return ret;
     }
 
     static ParticipantChangedReason ToReason(ConversationParticipantAction action)
@@ -720,7 +617,7 @@ namespace ConversationTranslation {
 
                 case ConversationState::Opening:
                 case ConversationState::Open:
-                    ToCreatedOrJoinedState(CancellationErrorCode::NoError, "");
+                    ToCreatedOrJoinedState(nullptr);
                     break;
             }
         });
@@ -819,15 +716,16 @@ namespace ConversationTranslation {
         });
     }
 
-    void CSpxConversationTranslator::OnDisconnected(const USP::WebSocketDisconnectReason reason, const string & message, bool serverRequested)
+    void CSpxConversationTranslator::OnDisconnected(const USP::WebSocketDisconnectReason reason, const string & message)
     {
-        RunAsynchronously([this, reason, message, serverRequested]()
+        RunAsynchronously([this, reason, message]()
         {
             CT_GET_AND_LOG_STATE(
-                "Conversation disconnected. Reason: %d, Message: '%s', Server requested: %d",
-                reason, message.c_str(), serverRequested);
+                "Conversation disconnected. Reason: %d, Message: '%s'",
+                reason, message.c_str());
 
-            const auto parsedReason = ParseDisconnectReason(reason);
+            auto error = ErrorInfo::FromWebSocket(WebSocketError::REMOTE_CLOSED, reason, message);
+            const auto canRetry = error != nullptr ? error->GetRetryMode() == ISpxErrorInformation::RetryMode::Allowed : false;
 
             switch (state)
             {
@@ -860,9 +758,9 @@ namespace ConversationTranslation {
                 case ConversationState::CreatedOrJoined:
                     // Did we get here because of an error that is non recoverable (e.g. authentication failure,
                     // conversation has been deleted, etc...)? If so, go to failed state
-                    if (parsedReason.isPermanentFailure)
+                    if (!canRetry)
                     {
-                        ToFailedState(false, parsedReason.errorCode, message);
+                        ToFailedState(false, error);
                     }
                     else
                     {
@@ -878,19 +776,18 @@ namespace ConversationTranslation {
                     // then we treat this as the host has deleted the conversation and so we move to the
                     // closed state
                     if (reason == USP::WebSocketDisconnectReason::Normal
-                        && serverRequested
                         && !m_isHost)
                     {
                         CT_I_LOG_INFO("The host has most likely deleted the conversation. Will go to closed state");
                         ToClosedState();
                     }
-                    else if (parsedReason.isPermanentFailure)
+                    else if (!canRetry)
                     {
-                        ToFailedState(false, parsedReason.errorCode, message);
+                        ToFailedState(false, error);
                     }
                     else
                     {
-                        ToCreatedOrJoinedState(parsedReason.errorCode, message);
+                        ToCreatedOrJoinedState(error);
                     }
                     break;
             }
@@ -1029,15 +926,16 @@ namespace ConversationTranslation {
         });
     }
 
-    void CSpxConversationTranslator::OnError(const bool isWebSocket, const ConversationErrorCode error, const string & message)
+    void CSpxConversationTranslator::OnError(const std::shared_ptr<ISpxErrorInformation>& error)
     {
-        RunAsynchronously([this, isWebSocket, error, message]()
+        RunAsynchronously([this, error]()
         {
-            CT_GET_AND_LOG_STATE(
-                "Conversation connection error. IsWebSocket: %d, Error: %u, Message: '%s'",
-                isWebSocket, error, message.c_str());
+            const auto errorCode = error != nullptr ? error->GetCancellationCode() : CancellationErrorCode::NoError;
+            const auto& errorMessage = error != nullptr ? error->GetDetails() : "";
+            const auto canRetry = error != nullptr ? error->GetRetryMode() == ISpxErrorInformation::RetryMode::Allowed : false;
 
-            auto parsedError = ToCancellationErrorCode(isWebSocket, error);
+            CT_GET_AND_LOG_STATE(
+                "Conversation connection error. Error: %d, Message: '%s'", (int)errorCode, errorMessage.c_str());
 
             switch (state)
             {
@@ -1065,9 +963,9 @@ namespace ConversationTranslation {
                     break;
 
                 case ConversationState::CreatedOrJoined:
-                    if (parsedError.isPermanentFailure)
+                    if (!canRetry)
                     {
-                        ToFailedState(false, parsedError.errorCode, message);
+                        ToFailedState(false, error);
                     }
                     else
                     {
@@ -1077,13 +975,13 @@ namespace ConversationTranslation {
 
                 case ConversationState::Opening:
                 case ConversationState::Open:
-                    if (parsedError.isPermanentFailure)
+                    if (!canRetry)
                     {
-                        ToFailedState(false, parsedError.errorCode, message);
+                        ToFailedState(false, error);
                     }
                     else
                     {
-                        ToCreatedOrJoinedState(parsedError.errorCode, message);
+                        ToCreatedOrJoinedState(error);
                     }
 
                     break;
@@ -1517,13 +1415,16 @@ namespace ConversationTranslation {
         return evt;
     }
 
-    void CSpxConversationTranslator::ToFailedState(bool isRecognizer, CancellationErrorCode error, const std::string& message)
+    void CSpxConversationTranslator::ToFailedState(bool isRecognizer, const std::shared_ptr<ISpxErrorInformation>& error)
     {
         auto evt = GetStateExitEvents();
 
+        const auto errorCode = error != nullptr ? error->GetCancellationCode() : CancellationErrorCode::NoError;
+        const auto& errorMessage = error != nullptr ? error->GetDetails() : "";
+
         CT_GET_AND_LOG_STATE(
             "Transition to failed state. IsRecognizer: %d, Error: %d, Message: '%s'",
-            isRecognizer, error, message.c_str());
+            isRecognizer, (int)errorCode, errorMessage.c_str());
 
         // Failed state always sends canceled and session stopped events except if coming from creating or joining state.
         // This is because we have not yet sent any session started event
@@ -1533,9 +1434,9 @@ namespace ConversationTranslation {
             evt.sessionStopped = true;
 
             evt.cancellationResult = CreateShared<ConversationCancellationResult>(GetParticipantId(), CancellationReason::Error, error);
-            if (!message.empty())
+            if (!errorMessage.empty())
             {
-                evt.cancellationResult->SetCancellationErrorDetails(message);
+                evt.cancellationResult->SetCancellationErrorDetails(errorMessage);
             }
         }
 
@@ -1601,21 +1502,24 @@ namespace ConversationTranslation {
         SendStateEvents(evt);
     }
 
-    void CSpxConversationTranslator::ToCreatedOrJoinedState(CancellationErrorCode error, const std::string& message)
+    void CSpxConversationTranslator::ToCreatedOrJoinedState(const std::shared_ptr<ISpxErrorInformation>& error)
     {
         auto evt = GetStateExitEvents();
 
+        const auto errorCode = error != nullptr ? error->GetCancellationCode() : CancellationErrorCode::NoError;
+        const auto& errorMessage = error != nullptr ? error->GetDetails() : "";
+
         CT_GET_AND_LOG_STATE(
             "Transition to created or joined state. Error: %d, Message: '%s'",
-            error, message.c_str());
+            (int)errorCode, errorMessage.c_str());
 
-        if (error != CancellationErrorCode::NoError)
+        if (errorCode != CancellationErrorCode::NoError)
         {
             evt.canceled = true;
             evt.cancellationResult = CreateShared<ConversationCancellationResult>(GetParticipantId(), CancellationReason::Error, error);
-            if (!message.empty())
+            if (!errorMessage.empty())
             {
-                evt.cancellationResult->SetCancellationErrorDetails(message);
+                evt.cancellationResult->SetCancellationErrorDetails(errorMessage);
             }
         }
 
@@ -1844,9 +1748,11 @@ namespace ConversationTranslation {
                 return;
             }
 
+            auto error = result->GetError();
+            auto resultErrorCode = error != nullptr ? error->GetCancellationCode() : CancellationErrorCode::NoError;
             CT_GET_AND_LOG_STATE(
-                "Recognizer result. Reason: %d, %zu chars, NoMatchReason: %d, Offset: %llu, CancellationError: %d",
-                result->GetReason(), result->GetText().length(), result->GetNoMatchReason(), result->GetOffset(), result->GetCancellationErrorCode());
+                "Recognizer result. Reason: %d, %zu chars, NoMatchReason: %d, Offset: %llu, CancellationErrorCode: %d",
+                result->GetReason(), result->GetText().length(), result->GetNoMatchReason(), result->GetOffset(), (int)resultErrorCode);
 
 
             if (!IsConsideredOpen(state))
@@ -1951,17 +1857,12 @@ namespace ConversationTranslation {
                 return;
             }
 
-            CT_GET_AND_LOG_STATE(
-                "Recognizer cancelled. Reason: %d, CancellationReason: %d, CancellationError: %d, WasConnected: %d",
-                result->GetReason(), result->GetCancellationReason(), result->GetCancellationErrorCode(), wasConnected);
+            auto error = result->GetError();
+            const auto errorCode = error != nullptr ? error->GetCancellationCode() : CancellationErrorCode::NoError;
 
-            std::string errorDetails;
-            CancellationErrorCode errorCode = result->GetCancellationErrorCode();
-            auto namedProperties = args->QueryInterface<ISpxNamedProperties>();
-            if (namedProperties != nullptr)
-            {
-                errorDetails = NamedPropertiesHelper::GetString(namedProperties, PropertyId::SpeechServiceResponse_JsonErrorDetails);
-            }
+            CT_GET_AND_LOG_STATE(
+                "Recognizer cancelled. Reason: %d, CancellationReason: %d, CancellationErrorCode: %d, WasConnected: %d",
+                result->GetReason(), result->GetCancellationReason(), (int)errorCode, wasConnected);
 
             switch (state)
             {
@@ -2009,7 +1910,7 @@ namespace ConversationTranslation {
                     {
                         CT_I_LOG_ERROR(
                             "Got an error canceled event from the recognizer. ErrorCode: %d, ErrorDetails: '%s'",
-                            result->GetCancellationErrorCode(), errorDetails.c_str());
+                            (int)error->GetCancellationCode(), error->GetDetails().c_str());
                         break;
                     }
 
@@ -2020,10 +1921,11 @@ namespace ConversationTranslation {
                 }
 
                 auto eventArgs = CreateShared<ConversationCancellationResult>(
-                    GetParticipantId(), result->GetCancellationReason(), errorCode);
-                if (!errorDetails.empty())
+                    GetParticipantId(), result->GetCancellationReason(), error);
+                const auto& errorMessage = error != nullptr ? error->GetDetails() : "";
+                if (!errorMessage.empty())
                 {
-                    eventArgs->SetCancellationErrorDetails(errorDetails);
+                    eventArgs->SetCancellationErrorDetails(errorMessage);
                 }
 
                 RaiseEvent<ConversationTranslationEventArgs>(Canceled, GetSessionId(), eventArgs);

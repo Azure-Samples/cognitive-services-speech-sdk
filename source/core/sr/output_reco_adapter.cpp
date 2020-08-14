@@ -93,7 +93,7 @@ void CSpxOutputRecoEngineAdapter::DetachInput()
     {
         auto duration = BytesToDuration<tick>(m_size, m_bytesPerSecond);
         auto factory = SpxQueryService<ISpxRecoResultFactory>(site);
-        auto result = factory->CreateFinalResult(nullptr, ResultReason::RecognizedSpeech, NO_MATCH_REASON_NONE, REASON_CANCELED_NONE, CancellationErrorCode::NoError, L"", 0, 0);
+        auto result = factory->CreateFinalResult(ResultReason::RecognizedSpeech, NO_MATCH_REASON_NONE, L"", 0, 0);
         site->FireAdapterResult_FinalResult(this, duration.count(), result);
         site->AdapterStoppedTurn(this);
     });

@@ -52,7 +52,7 @@ public:
     ResultReason GetReason() override;
     NoMatchReason GetNoMatchReason() override;
     CancellationReason GetCancellationReason() override;
-    CancellationErrorCode GetCancellationErrorCode() override;
+    std::shared_ptr<ISpxErrorInformation> GetError() override;
 
     uint64_t GetOffset() const override { return m_offset; }
     uint64_t GetDuration() const override { return m_duration; }
@@ -66,8 +66,15 @@ public:
     }
 
     // --- ISpxRecognitionResultInit ---
-    void InitIntermediateResult(const wchar_t* resultId, const wchar_t* text, uint64_t offset, uint64_t duration) override;
-    void InitFinalResult(const wchar_t* resultId, ResultReason reason, NoMatchReason noMatchReason, CancellationReason cancellation, CancellationErrorCode errorCode, const wchar_t* text, uint64_t offset, uint64_t duration) override;
+    void InitIntermediateResult(const wchar_t* text, uint64_t offset, uint64_t duration) override;
+    void InitFinalResult(
+        ResultReason reason,
+        NoMatchReason noMatchReason,
+        const wchar_t* text,
+        uint64_t offset,
+        uint64_t duration) override;
+    void InitErrorResult(const std::shared_ptr<ISpxErrorInformation>& error) override;
+    void InitEndOfStreamResult() override;
 
     // --- ISpxKeywordRecognitionResultInit ---
     void InitKeywordResult(const double confidence, const uint64_t offset, const uint64_t duration, const wchar_t* keyword, ResultReason reason, std::shared_ptr<ISpxAudioDataStream> stream) override;
@@ -116,7 +123,7 @@ private:
     std::wstring m_text;
     ResultReason m_reason;
     CancellationReason m_cancellationReason;
-    CancellationErrorCode m_cancellationErrorCode;
+    std::shared_ptr<ISpxErrorInformation> m_error;
     NoMatchReason m_noMatchReason;
     std::shared_ptr<ISpxAudioDataStream> m_stream;
 

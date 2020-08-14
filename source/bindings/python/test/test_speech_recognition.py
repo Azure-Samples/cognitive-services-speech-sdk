@@ -272,7 +272,8 @@ def test_bad_language_config(subscription, speech_input, speech_region):
 
     cancellation_details = result.cancellation_details
     assert msspeech.CancellationReason.Error == cancellation_details.reason
-    assert 'WebSocket Upgrade failed with a bad request (400)' in cancellation_details.error_details
+    assert 'WebSocket upgrade failed' in cancellation_details.error_details
+    assert 'Bad request' in cancellation_details.error_details
 
 
 @pytest.mark.parametrize('speech_input,', ['silence'], indirect=True)
@@ -782,4 +783,3 @@ def test_create_recognizer_invalid_language_detection_config_parameters():
     assert None != errFound
     assert "EndpointId on SpeechConfig is unsupported for auto detection source language scenario." in str(errFound)
 
-    

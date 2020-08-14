@@ -6,6 +6,7 @@ using Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.IO;
+using System.Linq;
 using System.Runtime.CompilerServices;
 
 namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
@@ -40,6 +41,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             conversationTranscriptionPPERegion = SubscriptionsRegionsMap[SubscriptionsRegionsKeys.CONVERSATION_TRANSCRIPTION_PPE_SUBSCRIPTION].Region;
             conversationTranscriptionPRODKey = SubscriptionsRegionsMap[SubscriptionsRegionsKeys.CONVERSATION_TRANSCRIPTION_PROD_SUBSCRIPTION].Key;
             conversationTranscriptionPRODRegion = SubscriptionsRegionsMap[SubscriptionsRegionsKeys.CONVERSATION_TRANSCRIPTION_PROD_SUBSCRIPTION].Region;
+
+            Assert.IsTrue(DefaultSettingsMap.Values.Any(value => !String.IsNullOrEmpty(value)),
+                "All default settings are empty. Has the settings .json been updated?");
+            Assert.IsTrue(SubscriptionsRegionsMap.Values.Any(value => !String.IsNullOrEmpty(value.Key) && !String.IsNullOrEmpty(value.Region)),
+                "All configured subscriptions are empty. Has the settings .json been updated?");
 
             Console.WriteLine("region: " + region);
             Console.WriteLine("input directory: " + DefaultSettingsMap[DefaultSettingKeys.INPUT_DIR]);

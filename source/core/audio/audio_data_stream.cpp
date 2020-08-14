@@ -82,7 +82,7 @@ void CSpxAudioDataStream::InitFromSynthesisResult(std::shared_ptr<ISpxSynthesisR
         if (result->GetReason() == ResultReason::Canceled)
         {
             m_cancellationReason = result->GetCancellationReason();
-            m_cancellationErrorCode = result->GetCancellationErrorCode();
+            m_error = result->GetError();
             auto properties = SpxQueryInterface<ISpxNamedProperties>(result);
             auto cancellationDetailedText = properties->GetStringValue(GetPropertyName(PropertyId::CancellationDetails_ReasonDetailedText));
             SetStringValue(GetPropertyName(PropertyId::CancellationDetails_ReasonDetailedText), cancellationDetailedText.c_str());
@@ -133,7 +133,7 @@ void CSpxAudioDataStream::InitFromSynthesisResult(std::shared_ptr<ISpxSynthesisR
         if (result->GetReason() == ResultReason::Canceled)
         {
             m_cancellationReason = result->GetCancellationReason();
-            m_cancellationErrorCode = result->GetCancellationErrorCode();
+            m_error = result->GetError();
             auto properties = SpxQueryInterface<ISpxNamedProperties>(result);
             auto cancellationDetailedText = properties->GetStringValue(GetPropertyName(PropertyId::CancellationDetails_ReasonDetailedText));
             SetStringValue(GetPropertyName(PropertyId::CancellationDetails_ReasonDetailedText), cancellationDetailedText.c_str());
@@ -233,9 +233,9 @@ CancellationReason CSpxAudioDataStream::GetCancellationReason()
     return m_cancellationReason;
 }
 
-CancellationErrorCode CSpxAudioDataStream::GetCancellationErrorCode()
+const std::shared_ptr<ISpxErrorInformation>& CSpxAudioDataStream::GetError()
 {
-    return m_cancellationErrorCode;
+    return m_error;
 }
 
 bool CSpxAudioDataStream::CanReadData(uint32_t requestedSize)

@@ -66,9 +66,11 @@ public:
     void Term() override;
 
     // --- ISpxRecoResultFactory
-    virtual RecognitionResultPtr CreateIntermediateResult(const wchar_t* resultId, const wchar_t* text, uint64_t offset, uint64_t duration) override;
-    virtual RecognitionResultPtr CreateFinalResult(const wchar_t* resultId, ResultReason reason, NoMatchReason noMatchReason, CancellationReason cancellation, CancellationErrorCode errorCode, const wchar_t* text, uint64_t offset, uint64_t duration, const wchar_t* userId = nullptr) override;
+    virtual RecognitionResultPtr CreateIntermediateResult(const wchar_t* text, uint64_t offset, uint64_t duration) override;
+    virtual RecognitionResultPtr CreateFinalResult(ResultReason reason, NoMatchReason noMatchReason, const wchar_t* text, uint64_t offset, uint64_t duration, const wchar_t* userId = nullptr) override;
     virtual std::shared_ptr<ISpxRecognitionResult> CreateKeywordResult(const double confidence, const uint64_t offset, const uint64_t duration, const wchar_t* keyword, ResultReason reason, std::shared_ptr<ISpxAudioDataStream> stream) override;
+    virtual std::shared_ptr<ISpxRecognitionResult> CreateErrorResult(const std::shared_ptr<ISpxErrorInformation>& error) override;
+    virtual std::shared_ptr<ISpxRecognitionResult> CreateEndOfStreamResult() override;
 
     // --- ISpxAudioStreamSessionInit
     void InitFromFile(const wchar_t* pszFileName) override;
@@ -107,7 +109,6 @@ private:
     std::shared_ptr<ISpxHttpRecoEngineAdapter> m_reco;
 
     std::packaged_task<void()> CreateTask(std::function<void()> func);
-    RecognitionResultPtr CreateErrorResult(const std::string& msg);
     void CleanupAfterEachAudioPumping();
 
     uint32_t m_avgBytesPerSecond = 16000*2;

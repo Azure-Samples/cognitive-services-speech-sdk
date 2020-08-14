@@ -30,7 +30,9 @@ enum Result_CancellationReason
 {
     CancellationReason_Error = 1,
     CancellationReason_EndOfStream = 2,
+    CancellationReason_UserCancelled = 3,
 };
+
 typedef enum Result_CancellationReason Result_CancellationReason;
 
 enum Result_CancellationErrorCode
