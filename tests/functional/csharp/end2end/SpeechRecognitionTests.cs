@@ -234,13 +234,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public async Task ContinuousValidSkipAudioRecognition(bool usingPreConnection)
         {
             var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
-            this.defaultConfig.SetProperty("SPEECH-SkipAudioDurationHNS", "5000000");
+            this.defaultConfig.SetProperty("SPEECH-SkipAudioDurationHNS", "4250000");
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
                 string plainExpectedText = Normalize(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text);
                 string plainActualText = Normalize(await helper.GetFirstRecognizerResult(recognizer));
 
-                plainExpectedText = plainExpectedText.Remove(0, 10);
+                plainExpectedText = plainExpectedText.Remove(0, 6);
 
                 Assert.IsTrue(
                         plainExpectedText.Equals(plainActualText),
