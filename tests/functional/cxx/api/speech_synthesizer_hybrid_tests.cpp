@@ -18,7 +18,7 @@ std::shared_ptr<SpeechConfig> OfflineConfig()
 {
     auto config = SpeechConfig::FromHost("wss://fake.com");
     config->SetProperty("SPEECH-SynthBackend", "offline");
-    config->SetProperty("SPEECH-SynthOfflineDataLocation", "input/synthesis/Mark");
+    config->SetProperty("SPEECH-SynthOfflineDataLocation", Config::OfflineVoicePath);
     return config;
 }
 
@@ -26,7 +26,7 @@ std::shared_ptr<SpeechConfig> HybridConfig()
 {
     auto config = UspSpeechConfig();
     config->SetProperty("SPEECH-SynthBackend", "hybrid");
-    config->SetProperty("SPEECH-SynthOfflineDataLocation", "input/synthesis/Mark");
+    config->SetProperty("SPEECH-SynthOfflineDataLocation", Config::OfflineVoicePath);
     config->SetProperty("SPEECH-SynthBackendSwitchingPolicy", "auto");
     return config;
 }

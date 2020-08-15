@@ -55,6 +55,7 @@ namespace Config
 {
     EXTERN std::string OfflineModelPathRoot;
     EXTERN std::string OfflineModelLanguage;
+    EXTERN std::string OfflineVoicePath;
     EXTERN bool DoDiscover;
     EXTERN std::string RnntModelSpec;
     EXTERN std::string RnntTokens;
@@ -670,6 +671,9 @@ inline int parse_cli_args(Catch::Session& session, int argc, char* argv[])
         | Opt(Config::OfflineModelLanguage, "OfflineModelLanguage")
         ["--offlineModelLanguage"]
     ("The language code of the offline speech recognition model used in tests.")
+        | Opt(Config::OfflineVoicePath, "OfflineVoicePath")
+        ["--offlineVoicePath"]
+    ("The path where the voice model for offline synthesis is located.")
         | Opt(Config::DoDiscover)
         ["--discovery"]
     ("Perform VS Test Adaptor discovery")

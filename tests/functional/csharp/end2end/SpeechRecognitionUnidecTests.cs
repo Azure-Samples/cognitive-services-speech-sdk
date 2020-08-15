@@ -25,17 +25,17 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod, TestCategory(TestCategory.OfflineUnidec)]
         public async Task OfflineUnidecRecognizeFromFileSingleShot()
         {
-            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_MULTIPLE_TURNS].FilePath.GetRootRelativePath());
-            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.offlineConfig, audioInput)))
-            {
-                var numUtterances = AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_MULTIPLE_TURNS].Utterances[Language.EN].Length;
+            var numLoops = 3;
 
-                for (var i = 0; i < numUtterances; i++)
+            for (var i = 0; i < numLoops; i++)
+            {
+                var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
+                using (var recognizer = TrackSessionId(new SpeechRecognizer(this.offlineConfig, audioInput)))
                 {
                     var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                     Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
-                    Assert.IsTrue(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_MULTIPLE_TURNS].Utterances[Language.EN][i].Text.IndexOf(result.Text, StringComparison.OrdinalIgnoreCase) >= 0,
-                        $"Utterance {i}: Expected '{AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_MULTIPLE_TURNS].Utterances[Language.EN][i]}', actual '{result.Text}'");
+                    Assert.IsTrue(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text.IndexOf(result.Text, StringComparison.OrdinalIgnoreCase) >= 0,
+                        $"Utterance: Expected '{AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0]}', actual '{result.Text}'");
                 }
             }
         }

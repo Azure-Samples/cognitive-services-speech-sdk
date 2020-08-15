@@ -64,7 +64,7 @@ public:
     ~RnntDecoder();
 
     size_t GetInputDim();
-    bool Run();
+    bool Run(bool continuousReco);
     RnntDecoderNBestPtr GetNBest();
     void Reset(IUnimicSource* source);
 

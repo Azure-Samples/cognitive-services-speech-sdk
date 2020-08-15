@@ -9,10 +9,15 @@ echo ......................................................
 echo .
 echo .  Welcome to Carbon!
 
-rem -- special handling for Unidec
+rem -- special handling for offline features
 echo .
-echo .  Adding Unidec binaries to path...
+echo .  Adding offline engine binaries to path...
+rem Unidec
 set PATH=%PATH%;%~dp0\external\unidec\Richland.Speech.UnidecRuntime\native
+rem RNN-T
+set PATH=%PATH%;%~dp0\external\mas\Windows\x64\Release
+rem TTS
+set PATH=%PATH%;%~dp0\external\offline_tts\Windows\x64
 echo .  Done!
 
 rem -- goodbye message

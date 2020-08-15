@@ -78,6 +78,7 @@ struct TokenDefs
     uint32_t m_nodupToken = (uint32_t)-1;
     uint32_t m_blockToken = (uint32_t)-1;
     uint32_t m_lastToken = (uint32_t)-1;
+    uint32_t m_eosToken = (uint32_t)-1;
 };
 
 class RnntTokens
@@ -226,6 +227,12 @@ private:
                 {
                     SPX_THROW_HR_IF(SPXERR_UNSUPPORTED_FORMAT, m_tokenDefs.m_lastToken != (uint32_t)-1);
                     m_tokenDefs.m_lastToken = (uint32_t)m_tokens.size();
+                }
+
+                if (s == L"<EOS>" || s == L"<eos>")
+                {
+                    SPX_THROW_HR_IF(SPXERR_UNSUPPORTED_FORMAT, m_tokenDefs.m_eosToken != (uint32_t)-1);
+                    m_tokenDefs.m_eosToken = (uint32_t)m_tokens.size();
                 }
 
                 m_tokens.emplace_back(s);

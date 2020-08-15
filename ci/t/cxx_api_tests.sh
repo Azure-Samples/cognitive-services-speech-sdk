@@ -27,6 +27,7 @@ case $TESTSET in
 esac
 
 RUN_OFFLINE_UNIDEC_TESTS=false
+RUN_HYBRID_TTS_TESTS=false
 case $PLATFORM in
   Linux-arm64*)
     UNIDEC_RUNTIME_PATH="$SCRIPT_DIR/../external/unidec/Richland.Speech.UnidecRuntime/linux-aarch64-platforms/lib"
@@ -37,12 +38,14 @@ case $PLATFORM in
     HYBRID_TTS_RUNTIME_PATH="$SCRIPT_DIR/../external/offline_tts/Linux/arm64"
     if [[ -d "$HYBRID_TTS_RUNTIME_PATH" ]]; then
       LD_LIBRARY_PATH="${HYBRID_TTS_RUNTIME_PATH}:$LD_LIBRARY_PATH"
+      RUN_HYBRID_TTS_TESTS=true
     fi
     ;;
   Linux-arm32*)
     HYBRID_TTS_RUNTIME_PATH="$SCRIPT_DIR/../external/offline_tts/Linux/arm32"
     if [[ -d "$HYBRID_TTS_RUNTIME_PATH" ]]; then
       LD_LIBRARY_PATH="${HYBRID_TTS_RUNTIME_PATH}:$LD_LIBRARY_PATH"
+      RUN_HYBRID_TTS_TESTS=true
     fi
     ;;
   Linux-x64*)
@@ -54,6 +57,7 @@ case $PLATFORM in
     HYBRID_TTS_RUNTIME_PATH="$SCRIPT_DIR/../external/offline_tts/Linux/x64"
     if [[ -d "$HYBRID_TTS_RUNTIME_PATH" ]]; then
       LD_LIBRARY_PATH="${HYBRID_TTS_RUNTIME_PATH}:$LD_LIBRARY_PATH"
+      RUN_HYBRID_TTS_TESTS=true
     fi
     ;;
   Windows-x64*)
@@ -69,6 +73,7 @@ case $PLATFORM in
     HYBRID_TTS_RUNTIME_PATH="$SCRIPT_DIR/../external/offline_tts/Windows/x64"
     if [[ -d "$HYBRID_TTS_RUNTIME_PATH" ]]; then
       PATH="${HYBRID_TTS_RUNTIME_PATH}:$PATH"
+      RUN_HYBRID_TTS_TESTS=true
     fi
     ;;
   Windows-x86*)
@@ -90,6 +95,17 @@ else
   fi
   OFFLINE_MODEL_PATH_ROOT=""
   OFFLINE_MODEL_LANGUAGE=""
+fi
+
+if [[ $RUN_HYBRID_TTS_TESTS = true ]]; then
+  OFFLINE_VOICE_PATH="tests/input/synthesis/Mark"
+else
+  if [[ $PATTERN ]]; then
+    PATTERN="~[hybrid_tts]$PATTERN"
+  else
+    PATTERN="~[hybrid_tts]~[.]"
+  fi
+  OFFLINE_VOICE_PATH=""
 fi
 
 RUN_OFFLINE_RNNT_TESTS=false
@@ -167,5 +183,6 @@ runCatchSuite \
   "$TEST_CODE" \
     --offlineModelPathRoot="$OFFLINE_MODEL_PATH_ROOT" \
     --offlineModelLanguage="$OFFLINE_MODEL_LANGUAGE" \
+    --offlineVoicePath="$OFFLINE_VOICE_PATH" \
     --rnntModelSpec="$RNNT_MODEL_SPEC" \
     --rnntTokens="$RNNT_TOKENS"

@@ -2632,7 +2632,8 @@ void CSpxAudioStreamSession::StartAudioPump(RecognitionKind startKind, std::shar
     // with offline Unidec. A better fix will need some refactoring.
     // Bug 2003347 Offline Unidec invalid state transition with KWS or Continuous reco
     bool useRecoEngineUnidec = PAL::ToBool(GetStringValue("CARBON-INTERNAL-UseRecoEngine-Unidec", PAL::BoolToString(false)));
-    if (m_recoAdapter && useRecoEngineUnidec && startKind != RecognitionKind::Keyword && startKind != RecognitionKind::KeywordOnce)
+    bool useRecoEngineRnnt = PAL::ToBool(GetStringValue("CARBON-INTERNAL-UseRecoEngine-Rnnt", PAL::BoolToString(false)));
+    if (m_recoAdapter && (useRecoEngineUnidec || useRecoEngineRnnt) && startKind != RecognitionKind::Keyword && startKind != RecognitionKind::KeywordOnce)
     {
         m_adapterResetPending = true;
     }
@@ -2708,7 +2709,8 @@ void CSpxAudioStreamSession::HotSwapAdaptersWhilePaused(RecognitionKind startKin
             // with offline Unidec. A better fix will need some refactoring.
             // Bug 2003347 Offline Unidec invalid state transition with KWS or Continuous reco
             bool useRecoEngineUnidec = PAL::ToBool(GetStringValue("CARBON-INTERNAL-UseRecoEngine-Unidec", PAL::BoolToString(false)));
-            if (m_recoAdapter && useRecoEngineUnidec)
+            bool useRecoEngineRnnt = PAL::ToBool(GetStringValue("CARBON-INTERNAL-UseRecoEngine-Rnnt", PAL::BoolToString(false)));
+            if (m_recoAdapter && (useRecoEngineUnidec || useRecoEngineRnnt))
             {
                 m_adapterResetPending = true;
             }

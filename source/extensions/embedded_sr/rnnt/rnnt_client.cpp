@@ -57,9 +57,14 @@ size_t RnntDecoder::GetInputDim()
     return RnntDll::GetUnimicDecoderInputDim(m_decoder);
 }
 
-bool RnntDecoder::Run()
+bool RnntDecoder::Run(bool continuousReco)
 {
-    return RnntDll::RunUnimicDecoder(m_decoder);
+    /* For now, we use some default timeouts.
+     * Decoder silence timeout = 50 frames * 30 ms per frame = 1.5 seconds
+     * Start timeout = 166 ~= 5 seconds
+     * Total audio length = 333 ~= 10 seconds
+     */
+    return RnntDll::RunUnimicDecoder(m_decoder, continuousReco, 50, 166, 333);
 }
 
 RnntDecoderNBestPtr RnntDecoder::GetNBest()
@@ -230,7 +235,8 @@ RnntClient::~RnntClient()
         std::to_wstring(tokenDefs.m_noopToken) + L"," +
         std::to_wstring(tokenDefs.m_nodupToken) + L"," +
         std::to_wstring(tokenDefs.m_blockToken) + L"," +
-        std::to_wstring(tokenDefs.m_lastToken) + L")";
+        std::to_wstring(tokenDefs.m_lastToken) + L"," +
+        std::to_wstring(tokenDefs.m_eosToken) + L")";   
 }
 
 void RnntClient::ProcessAudio(const Impl::DataChunkPtr& audioChunk)
@@ -358,8 +364,9 @@ void RnntClient::DecodeInternal()
     m_decoder->Reset(reader.GetSource());
 
     RnntEntryPtr lastEntry;
+    bool continuousReco = (m_recognitionMode != RNNT::RecognitionMode::Interactive);
 
-    while (m_decoder->Run())
+    while (m_decoder->Run(continuousReco))
     {
         auto nbest = m_decoder->GetNBest();
         if (nbest->GetCount() > 0)
@@ -377,11 +384,6 @@ void RnntClient::DecodeInternal()
         }
     }
     FireSpeechEvent(lastEntry, false, true);
-    // TODO: Remove this hack after speech end detection is supported by RNN-T engine.
-    if (m_speechStarted.load())
-    {
-        FireSpeechStartEnd(false);
-    }
     FireDecodeDone();
 }
 

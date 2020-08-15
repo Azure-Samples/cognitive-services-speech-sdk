@@ -69,7 +69,9 @@ public:
 
     static IUnimicDecoder* CreateUnimicDecoder(const wchar_t* spec) { return FORWARD_RNNT_FUNC_CALL(CreateUnimicDecoder, spec); }
     static size_t GetUnimicDecoderInputDim(IUnimicDecoder* decoder) { return FORWARD_RNNT_FUNC_CALL(GetUnimicDecoderInputDim, decoder); }
-    static bool RunUnimicDecoder(IUnimicDecoder* decoder) { return FORWARD_RNNT_FUNC_CALL(RunUnimicDecoder, decoder); }
+    static bool RunUnimicDecoder(IUnimicDecoder* decoder, bool continuousReco, uint32_t decoderInSilFrmCnt,
+        uint32_t startTimeoutFrmCnt, uint32_t totalAudioLengthFrmCnt) { return FORWARD_RNNT_FUNC_CALL(RunUnimicDecoder, decoder, continuousReco, decoderInSilFrmCnt,
+            startTimeoutFrmCnt, totalAudioLengthFrmCnt); }
     static IUnimicDecoderNBest* GetUnimicDecoderNBest(IUnimicDecoder* decoder) { return FORWARD_RNNT_FUNC_CALL(GetUnimicDecoderNBest, decoder); }
     static void DeleteUnimicDecoder(IUnimicDecoder* decoder) { FORWARD_RNNT_FUNC_CALL(DeleteUnimicDecoder, decoder); }
     static void ResetUnimicDecoder(IUnimicDecoder* decoder, IUnimicSource* source, const IUnimicDecoderSFLM* unimicDecoderSFLM) { FORWARD_RNNT_FUNC_CALL(ResetUnimicDecoder, decoder, source, unimicDecoderSFLM); }
