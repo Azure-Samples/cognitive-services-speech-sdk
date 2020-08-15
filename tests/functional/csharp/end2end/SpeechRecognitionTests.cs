@@ -229,8 +229,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [DataTestMethod]
-        [DataRow(true)]
-        [DataRow(false)]
+        [DataRow(true, DisplayName = "Using preconnect")]
+        [DataRow(false, DisplayName = "Without preconnect")]
         public async Task ContinuousValidSkipAudioRecognition(bool usingPreConnection)
         {
             var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
