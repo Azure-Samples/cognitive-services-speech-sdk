@@ -1031,6 +1031,7 @@ TEST_CASE("[CT] Conversation Translator Sweden demo", "[!hide][cxx_conversation_
     }
 
     auto speechConfig = SpeechConfig::FromEndpoint(endpointUrl, subscriptionKey);
+    speechConfig->SetServiceProperty("TrafficType", SpxGetTestTrafficType(__FILE__, __LINE__), ServicePropertyChannel::UriQueryParameter);
     speechConfig->SetSpeechRecognitionLanguage(speechLang);
     speechConfig->SetProperty("ConversationTranslator_Region", subscriptionRegion);
     speechConfig->SetProperty("ConversationTranslator_MultiChannelAudio", "true");

@@ -16,11 +16,13 @@
 
 using namespace Microsoft::CognitiveServices::Speech;
 
-std::shared_ptr<SpeechConfig> GetDynamicGrammarTestsConfig()
+std::shared_ptr<SpeechConfig> GetDynamicGrammarTestsConfig(const std::string& trafficType)
 {
-    return !DefaultSettingsMap[ENDPOINT].empty()
+    auto config = !DefaultSettingsMap[ENDPOINT].empty()
         ? SpeechConfig::FromEndpoint(DefaultSettingsMap[ENDPOINT], SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key)
         : SpeechConfig::FromSubscription(SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key, SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Region);
+    config->SetServiceProperty("TrafficType", trafficType, ServicePropertyChannel::UriQueryParameter);
+    return config;
 }
 
 TEST_CASE("Dynamic Grammar Basics", "[api][cxx][dgi]")
@@ -29,7 +31,7 @@ TEST_CASE("Dynamic Grammar Basics", "[api][cxx][dgi]")
 
     auto getRecognizer = []()
     {
-        auto config = GetDynamicGrammarTestsConfig();
+        auto config = GetDynamicGrammarTestsConfig(SpxGetTestTrafficType(__FILE__, __LINE__));
         auto audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(AMBIGUOUS_SPEECH));
         auto recognizer = SpeechRecognizer::FromConfig(config, audioConfig);
         return recognizer;

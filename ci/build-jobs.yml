@@ -296,7 +296,7 @@ jobs:
   condition: and(succeeded('Pre'), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' WindowsUwpBuild '))
   pool:
     vmImage: 'windows-2019'
-  timeoutInMinutes: 30
+  timeoutInMinutes: 60
   strategy:
     maxParallel: 8
     matrix:
@@ -1108,7 +1108,7 @@ jobs:
   condition: and(succeeded('Pre'), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' AndroidBuild '))
   pool:
     vmImage: 'windows-2019'
-  timeoutInMinutes: 30
+  timeoutInMinutes: 60
   strategy:
     maxParallel: 8
     matrix:

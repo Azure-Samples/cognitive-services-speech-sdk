@@ -64,7 +64,7 @@ TEST_CASE("Keyword Recognizer basics", "[api][cxx][keyword_recognizer]")
             while (i++ < n)
             {
                 auto resultFuture = recognizer->RecognizeOnceAsync(model);
-                wait_for_future(std::move(resultFuture), 10s,
+                wait_for_future(std::move(resultFuture), WAIT_FOR_RECO_RESULT_TIME,
                     [&resultCount, &invalidResultCount](std::shared_ptr<KeywordRecognitionResult> result)
                     {
                         if (result->Reason == ResultReason::RecognizedKeyword)
@@ -96,7 +96,7 @@ TEST_CASE("Keyword Recognizer basics", "[api][cxx][keyword_recognizer]")
             bool readData{ false };
             bool detached{ false };
             bool timeout{ false };
-            wait_for_future(std::move(resultFuture), 10s,
+            wait_for_future(std::move(resultFuture), WAIT_FOR_RECO_RESULT_TIME,
                 [&hasData, &readData, &detached](std::shared_ptr<KeywordRecognitionResult> result)
                 {
                     auto stream = AudioDataStream::FromResult(result);
@@ -135,7 +135,7 @@ TEST_CASE("Keyword Recognizer basics", "[api][cxx][keyword_recognizer]")
                 auto resultFuture = recognizer->RecognizeOnceAsync(model);
                 std::this_thread::sleep_for(2s);
                 recognizer->StopRecognitionAsync().wait();
-                wait_for_future(std::move(resultFuture), 500ms, [](std::shared_ptr<KeywordRecognitionResult>) { return true; }, [&timeout]() { timeout += 1; });
+                wait_for_future(std::move(resultFuture), 1000ms, [](std::shared_ptr<KeywordRecognitionResult>) { return true; }, [&timeout]() { timeout += 1; });
             }
             THEN("Stopping should cause the future to be resolved.")
             {
@@ -151,15 +151,14 @@ TEST_CASE("Keyword Recognizer basics", "[api][cxx][keyword_recognizer]")
             while(i++ < 3)
             {
                 auto resultFuture = recognizer->RecognizeOnceAsync(model);
-                wait_for_future(std::move(resultFuture), 10s, [](std::shared_ptr<KeywordRecognitionResult>) { return true; }, [&timeout]() { timeout += 1; });
+                wait_for_future(std::move(resultFuture), WAIT_FOR_RECO_RESULT_TIME, [](std::shared_ptr<KeywordRecognitionResult>) { return true; }, [&timeout]() { timeout += 1; });
                 auto stopFuture = recognizer->StopRecognitionAsync();
-                wait_for_future(std::move(stopFuture), 500s, []() { return true;  }, [&timeout]() { timeout += 1; });
+                wait_for_future(std::move(stopFuture), 1000ms, []() { return true;  }, [&timeout]() { timeout += 1; });
             }
             THEN("The stop recognition task should resolve quickly.")
             {
                 CHECK(timeout == 0);
             }
         }
-
     }
 }

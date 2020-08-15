@@ -732,3 +732,32 @@ inline int parse_cli_args(Catch::Session& session, int argc, char* argv[])
 #define SPXTEST_REQUIRE_THAT(arg, matcher) \
     SPX_TRACE_INFO("SPXTEST_REQUIRE_THAT('%s', '%s'): %s(%d):", __SPX_EXPR_AS_STRING(arg), __SPX_EXPR_AS_STRING(matcher), __FILE__, __LINE__); \
     REQUIRE_THAT(arg, matcher)
+
+inline std::string SpxGetTestTrafficType(const char* file, int line)
+{
+    char trafficType[1000];
+    if (strrchr(file, '/') != nullptr) file = strrchr(file, '/') + 1;
+    if (strrchr(file, '\\') != nullptr) file = strrchr(file, '\\') + 1;
+
+    #if defined(_MSC_VER)
+
+        size_t size = 0;
+        char buffer[100];
+        const char* buildid = "dev";
+        getenv_s(&size, NULL, 0, "BUILD_BUILDID");
+        if (size > 0 && size < sizeof(buffer))
+        {
+            getenv_s(&size, buffer, size, "BUILD_BUILDID");
+            buildid = buffer;
+        }
+
+    #else
+
+        const char* buildid = getenv("BUILD_BUILDID");
+        if (buildid == nullptr) buildid = "dev";
+
+    #endif
+
+    snprintf(trafficType, sizeof(trafficType), "%s(%d)%%20bld(%s)", file, line, buildid);
+    return trafficType;
+}

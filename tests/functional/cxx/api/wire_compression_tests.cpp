@@ -18,10 +18,10 @@ TEST_CASE("RecognizeOnceAsync with compressed audio works", "[api][cxx]")
     {
         SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
 
-        auto sc = !DefaultSettingsMap[ENDPOINT].empty() ? SpeechConfig::FromEndpoint(DefaultSettingsMap[ENDPOINT],
-            SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key) :
-            SpeechConfig::FromSubscription(SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key,
-                SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Region);
+        auto sc = !DefaultSettingsMap[ENDPOINT].empty()
+            ? SpeechConfig::FromEndpoint(DefaultSettingsMap[ENDPOINT], SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key)
+            : SpeechConfig::FromSubscription(SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key, SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Region);
+        sc->SetServiceProperty("TrafficType", SpxGetTestTrafficType(__FILE__, __LINE__), ServicePropertyChannel::UriQueryParameter);
 
         auto audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
         EnableSilkAudioCompression(audioConfig);
@@ -42,10 +42,10 @@ TEST_CASE("RecognizeOnceAsync with compressed audio works", "[api][cxx]")
     {
         SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_GERMAN)));
 
-        auto sc = !DefaultSettingsMap[ENDPOINT].empty() ? SpeechConfig::FromEndpoint(DefaultSettingsMap[ENDPOINT],
-            SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key) :
-            SpeechConfig::FromSubscription(SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key,
-                SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Region);
+        auto sc = !DefaultSettingsMap[ENDPOINT].empty()
+            ? SpeechConfig::FromEndpoint(DefaultSettingsMap[ENDPOINT], SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key)
+            : SpeechConfig::FromSubscription(SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key, SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Region);
+        sc->SetServiceProperty("TrafficType", SpxGetTestTrafficType(__FILE__, __LINE__), ServicePropertyChannel::UriQueryParameter);
 
         auto audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_GERMAN));
 
@@ -67,10 +67,10 @@ TEST_CASE("RecognizeOnceAsync with compressed audio works", "[api][cxx]")
     {
         SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
 
-        auto sc = !DefaultSettingsMap[ENDPOINT].empty() ? SpeechConfig::FromEndpoint(DefaultSettingsMap[ENDPOINT],
-            SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key) :
-            SpeechConfig::FromSubscription(SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key,
-                SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Region);
+        auto sc = !DefaultSettingsMap[ENDPOINT].empty()
+            ? SpeechConfig::FromEndpoint(DefaultSettingsMap[ENDPOINT], SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key)
+            : SpeechConfig::FromSubscription(SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key, SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Region);
+        sc->SetServiceProperty("TrafficType", SpxGetTestTrafficType(__FILE__, __LINE__), ServicePropertyChannel::UriQueryParameter);
 
         auto audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
 
@@ -105,7 +105,7 @@ TEST_CASE("ContinuousRecognitionAsync with compressed audio works", "[api][cxx]"
     UseMocks(false);
     SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
 
-    auto recognizer = CreateRecognizers<SpeechRecognizer>(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH), true);
+    auto recognizer = CreateRecognizers<SpeechRecognizer>(SpxGetTestTrafficType(__FILE__, __LINE__), ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH), true);
 
     // a normal case.
     SPXTEST_SECTION("start and stop once")
@@ -144,10 +144,10 @@ TEST_CASE("ContinuousRecognitionAsync with compressed audio - multiple recognize
 
     SPXTEST_REQUIRE(exists(audioFile));
 
-    auto recognizer1 = CreateRecognizers<SpeechRecognizer>(audioFile, true);
-    auto recognizer2 = CreateRecognizers<SpeechRecognizer>(audioFile, true);
-    auto recognizer3 = CreateRecognizers<SpeechRecognizer>(audioFile, true);
-    auto recognizer4 = CreateRecognizers<SpeechRecognizer>(audioFile, true);
+    auto recognizer1 = CreateRecognizers<SpeechRecognizer>(SpxGetTestTrafficType(__FILE__, __LINE__), audioFile, true);
+    auto recognizer2 = CreateRecognizers<SpeechRecognizer>(SpxGetTestTrafficType(__FILE__, __LINE__), audioFile, true);
+    auto recognizer3 = CreateRecognizers<SpeechRecognizer>(SpxGetTestTrafficType(__FILE__, __LINE__), audioFile, true);
+    auto recognizer4 = CreateRecognizers<SpeechRecognizer>(SpxGetTestTrafficType(__FILE__, __LINE__), audioFile, true);
 
     auto result1 = make_shared<RecoPhrases>();
     auto result2 = make_shared<RecoPhrases>();
@@ -221,7 +221,7 @@ TEST_CASE("ContinuousRecognitionAsync with compressed audio - long dictation", "
 
     SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(c_utteranceId)));
 
-    auto recognizer = CreateRecognizers<SpeechRecognizer>(ROOT_RELATIVE_PATH(c_utteranceId), true);
+    auto recognizer = CreateRecognizers<SpeechRecognizer>(SpxGetTestTrafficType(__FILE__, __LINE__), ROOT_RELATIVE_PATH(c_utteranceId), true);
     auto expectedUtterances = AudioUtterancesMap[c_utteranceId].Utterances["en-US"];
     recognizer->StartContinuousRecognitionAsync().get();
 

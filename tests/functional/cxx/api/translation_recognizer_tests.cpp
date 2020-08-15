@@ -9,6 +9,7 @@
 #include "file_utils.h"
 #include "recognizer_utils.h"
 #include "property_id_2_name_map.h"
+#include "test_utils.h"
 
 std::shared_ptr<SpeechTranslationConfig> CreateTranslationConfigWithLanguageId(
     const string& mode,
@@ -45,7 +46,7 @@ std::shared_ptr<SpeechTranslationConfig> CreateTranslationConfig(
     const string& from,
     const vector<string>& to)
 {
-     auto config = CurrentTranslationConfig();
+     auto config = CurrentTranslationConfig(SpxGetTestTrafficType(__FILE__, __LINE__));
      config->SetSpeechRecognitionLanguage(from);
      for (auto item : to)
      {
@@ -208,6 +209,7 @@ TEST_CASE("Translation", "[api][cxx]")
     {
         SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(MULTIPLE_UTTERANCE_ENGLISH)));
         auto config = SpeechTranslationConfig::FromSubscription(SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key, SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Region);
+        config->SetServiceProperty("TrafficType", SpxGetTestTrafficType(__FILE__, __LINE__), ServicePropertyChannel::UriQueryParameter);
 
         // Change languages in config
         config->SetSpeechRecognitionLanguage("en-US");
@@ -277,6 +279,7 @@ TEST_CASE("Translation", "[api][cxx]")
     SPXTEST_SECTION("Change languages in turn.")
     {
         auto config = SpeechTranslationConfig::FromSubscription(SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key, SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Region);
+        config->SetServiceProperty("TrafficType", SpxGetTestTrafficType(__FILE__, __LINE__), ServicePropertyChannel::UriQueryParameter);
 
         // Change languages in config
         config->SetSpeechRecognitionLanguage("en-US");

@@ -1086,6 +1086,7 @@ std::shared_ptr<SpeechConfig> CarbonTestConsole::SpeechRecognizerConfig()
     {
         sc = SpeechConfig::FromSubscription(m_subscriptionKey, m_region);
     }
+    sc->SetServiceProperty("TrafficType", "carbonx.exe/carbon_test_console.cpp", ServicePropertyChannel::UriQueryParameter);
 
     if (!m_offlineModelPathRoot.empty())
     {
@@ -1914,6 +1915,7 @@ void CarbonTestConsole::InitRecognizer(const std::string& recognizerType, const 
         auto sc = !m_endpointUri.empty()
             ? SpeechConfig::FromEndpoint(m_endpointUri, m_subscriptionKey)
             : SpeechConfig::FromSubscription(m_subscriptionKey, m_region);
+        sc->SetServiceProperty("TrafficType", "carbonx.exe-wire_compression_tests.cpp", ServicePropertyChannel::UriQueryParameter);
         sc->SetSpeechRecognitionLanguage("en-US");
 
         m_intentRecognizer = IntentRecognizer::FromConfig(sc, AudioConfig::FromWavFileInput(wavFileName));

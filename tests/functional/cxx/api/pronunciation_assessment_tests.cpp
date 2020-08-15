@@ -10,6 +10,7 @@
 #include "test_utils.h"
 #include "file_utils.h"
 #include "recognizer_utils.h"
+#include "test_utils.h"
 
 TEST_CASE("Pronunciation assessment configuration", "[api][cxx]")
 {
@@ -61,7 +62,7 @@ void TestPronunciationAssessment(const string& audio, const string& locale, bool
     auto pronunciationAssessmentConfig = PronunciationAssessmentConfig::Create(
         withReferenceText ? AudioUtterancesMap[audio].Utterances[locale][0].Text : "",
         PronunciationAssessmentGradingSystem::HundredMark, granularity, enableMiscue);
-    auto speechConfig = CurrentSpeechConfigForPronunciationAssessment();
+    auto speechConfig = CurrentSpeechConfigForPronunciationAssessment(SpxGetTestTrafficType(__FILE__, __LINE__));
     speechConfig->SetSpeechRecognitionLanguage(locale);
     auto recognizer = SpeechRecognizer::FromConfig(speechConfig, audioConfig);
     pronunciationAssessmentConfig->ApplyTo(recognizer);

@@ -22,18 +22,19 @@ using namespace Microsoft::CognitiveServices::Speech::Transcription;
 
 #define SPX_CONFIG_TRACE_INTERFACE_MAP
 
-std::shared_ptr<SpeechConfig> CreateCTSInroomServiceSpeechConfig()
+std::shared_ptr<SpeechConfig> CreateCTSInroomServiceSpeechConfig(const std::string& trafficType = SpxGetTestTrafficType(__FILE__, __LINE__))
 {
     auto audioEndpoint = DefaultSettingsMap[INROOM_AUDIO_ENDPOINT];
     audioEndpoint += "/multiaudio";
     auto config = SpeechConfig::FromSubscription(SubscriptionsRegionsMap[CONVERSATION_TRANSCRIPTION_PROD_SUBSCRIPTION].Key, SubscriptionsRegionsMap[CONVERSATION_TRANSCRIPTION_PROD_SUBSCRIPTION].Region);
+    config->SetServiceProperty("TrafficType", trafficType, ServicePropertyChannel::UriQueryParameter);
     config->SetProperty("ConversationTranscriptionInRoomAndOnline", "true");
     return config;
 }
 
 TEST_CASE("conversation create without id", "[api][cxx]")
 {
-    auto config = CreateCTSInroomServiceSpeechConfig();
+    auto config = CreateCTSInroomServiceSpeechConfig(SpxGetTestTrafficType(__FILE__, __LINE__));
     auto conversation = Conversation::CreateConversationAsync(config).get();
 
     auto got_id = conversation->GetConversationId();
@@ -42,7 +43,7 @@ TEST_CASE("conversation create without id", "[api][cxx]")
 
 TEST_CASE("conversation create with id", "[api][cxx]")
 {
-    auto config = CreateCTSInroomServiceSpeechConfig();
+    auto config = CreateCTSInroomServiceSpeechConfig(SpxGetTestTrafficType(__FILE__, __LINE__));
     auto id = PAL::CreateGuidWithDashesUTF8();
     auto conversation = Conversation::CreateConversationAsync(config, id).get();
 
@@ -52,7 +53,7 @@ TEST_CASE("conversation create with id", "[api][cxx]")
 
 TEST_CASE("conversation id in Chinese", "[api][cxx]")
 {
-    auto config = CreateCTSInroomServiceSpeechConfig();
+    auto config = CreateCTSInroomServiceSpeechConfig(SpxGetTestTrafficType(__FILE__, __LINE__));
 
     // chinese meaning "de" in "wo1 de".
     unsigned char s[] = { 0xe7, 0x9a, 0x84, 0 };
@@ -63,7 +64,7 @@ TEST_CASE("conversation id in Chinese", "[api][cxx]")
 
 TEST_CASE("conversation create transcriber no get", "[api][cxx]")
 {
-    auto config = CreateCTSInroomServiceSpeechConfig();
+    auto config = CreateCTSInroomServiceSpeechConfig(SpxGetTestTrafficType(__FILE__, __LINE__));
 
     std::string id = "asdf";
     auto conversation = Conversation::CreateConversationAsync(config, id).get();
@@ -76,7 +77,7 @@ TEST_CASE("conversation create transcriber no get", "[api][cxx]")
 
 TEST_CASE("conversation create transcriber", "[api][cxx]")
 {
-    auto config = CreateCTSInroomServiceSpeechConfig();
+    auto config = CreateCTSInroomServiceSpeechConfig(SpxGetTestTrafficType(__FILE__, __LINE__));
 
     std::string id = "asdf";
     auto conversation = Conversation::CreateConversationAsync(config, id).get();
@@ -111,7 +112,7 @@ TEST_CASE("conversation create participant", "[api][cxx]")
 
 TEST_CASE("conversation add_remove participant by user id", "[api][cxx]")
 {
-    auto config = CreateCTSInroomServiceSpeechConfig();
+    auto config = CreateCTSInroomServiceSpeechConfig(SpxGetTestTrafficType(__FILE__, __LINE__));
     auto conv = Conversation::CreateConversationAsync(config).get();
 
     auto user_id = "afdsafd";
@@ -131,7 +132,7 @@ TEST_CASE("conversation add_remove participant by user id", "[api][cxx]")
 
 TEST_CASE("conversation add_remove participant by user object", "[api][cxx]")
 {
-    auto config = CreateCTSInroomServiceSpeechConfig();
+    auto config = CreateCTSInroomServiceSpeechConfig(SpxGetTestTrafficType(__FILE__, __LINE__));
     auto conv = Conversation::CreateConversationAsync(config).get();
 
     auto id = "afdsafd";
@@ -147,7 +148,7 @@ TEST_CASE("conversation add_remove participant by user object", "[api][cxx]")
 
 TEST_CASE("conversation add_remove participant by participant object", "[api][cxx]")
 {
-    auto config = CreateCTSInroomServiceSpeechConfig();
+    auto config = CreateCTSInroomServiceSpeechConfig(SpxGetTestTrafficType(__FILE__, __LINE__));
     auto conv = Conversation::CreateConversationAsync(config).get();
 
     auto id = "afdsafd";
@@ -163,6 +164,7 @@ TEST_CASE("conversation add_remove participant by participant object", "[api][cx
 TEST_CASE("conversation online end meeting destroy resources", "[api][cxx]")
 {
     auto config = SpeechConfig::FromEndpoint(DefaultSettingsMap[ONLINE_AUDIO_ENDPOINT], SubscriptionsRegionsMap[CONVERSATION_TRANSCRIPTION_PPE_SUBSCRIPTION].Key);
+    config->SetServiceProperty("TrafficType", SpxGetTestTrafficType(__FILE__, __LINE__), ServicePropertyChannel::UriQueryParameter);
     config->SetProperty("ConversationTranscriptionInRoomAndOnline", "true");
 
     auto audioInput = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));

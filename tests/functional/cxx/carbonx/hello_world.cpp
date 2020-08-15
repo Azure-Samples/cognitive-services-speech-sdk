@@ -26,6 +26,8 @@ void CarbonTestConsole::Sample_HelloWorld()
     SpxSetMockParameterString(R"(CARBON-INTERNAL-MOCK-WavFileAudio)", R"(c:\temp\emergency-broadcast-system.wav)");
 
     auto config = SpeechConfig::FromSubscription(m_subscriptionKey, m_region);
+    config->SetServiceProperty("TrafficType", "carbonxcarbonxcarbonxcarbonx.exe-channel9.cpp", ServicePropertyChannel::UriQueryParameter);
+
     auto recognizer = SpeechRecognizer::FromConfig(config);
     // auto audio = AudioConfig::FromWavFileInput(R"(c:\temp\whatstheweatherlike.wav)");
     // auto recognizer = SpeechRecognizer::FromConfig(config, audio);
@@ -79,7 +81,10 @@ void CarbonTestConsole::Sample_HelloWorld()
 void CarbonTestConsole::Sample_HelloWorld_WithReasonInfo()
 {
     // Create the recognizer "with microphone input"
-    auto recognizer = SpeechRecognizer::FromConfig(SpeechConfig::FromSubscription(m_subscriptionKey, m_region), nullptr);
+    auto sc = SpeechConfig::FromSubscription(m_subscriptionKey, m_region);
+    sc->SetServiceProperty("TrafficType", "carbonx.exe-channel9.cpp", ServicePropertyChannel::UriQueryParameter);
+
+    auto recognizer = SpeechRecognizer::FromConfig(sc, nullptr);
 
     // Prompt and recognize
     ConsoleWriteLine("Say something...");
@@ -414,6 +419,8 @@ void CarbonTestConsole::Sample_ConnectionMessageCallback()
     SPX_DBG_TRACE_SCOPE("Sample_ConnectionMessageCallback", "Sample_ConnectionMessageCallback");
 
     auto config = SpeechConfig::FromSubscription(m_subscriptionKey, m_region);
+    config->SetServiceProperty("TrafficType", "carbonx.exe/hello_world.cpp", ServicePropertyChannel::UriQueryParameter);
+
     // auto audio = AudioConfig::FromWavFileInput("c:\\temp\\whatstheweatherlike.wav");
     // auto recognizer = SpeechRecognizer::FromConfig(config, audio);
     auto recognizer = SpeechRecognizer::FromConfig(config);

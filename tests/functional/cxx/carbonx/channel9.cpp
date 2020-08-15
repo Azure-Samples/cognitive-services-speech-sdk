@@ -130,6 +130,8 @@ void unused()
 void CarbonTestConsole::ch9_do_speech()
 {
     auto sc = SpeechConfig::FromSubscription(m_subscriptionKey, speechRegion);
+    sc->SetServiceProperty("TrafficType", "carbonx.exe-channel9.cpp", ServicePropertyChannel::UriQueryParameter);
+
     auto recognizer = SpeechRecognizer::FromConfig(sc, nullptr);
 
     printf("Say something...\n");
@@ -141,6 +143,8 @@ void CarbonTestConsole::ch9_do_speech()
 void CarbonTestConsole::ch9_do_speech_intermediate()
 {
     auto sc = SpeechConfig::FromSubscription(m_subscriptionKey, speechRegion);
+    sc->SetServiceProperty("TrafficType", "carbonx.exe-channel9.cpp", ServicePropertyChannel::UriQueryParameter);
+
     auto recognizer = SpeechRecognizer::FromConfig(sc, nullptr);
 
     recognizer->Recognizing += [](const SpeechRecognitionEventArgs& e) {
@@ -156,6 +160,8 @@ void CarbonTestConsole::ch9_do_speech_intermediate()
 void CarbonTestConsole::ch9_do_speech_continuous()
 {
     auto sc = SpeechConfig::FromSubscription(m_subscriptionKey, speechRegion);
+    sc->SetServiceProperty("TrafficType", "carbonx.exe-channel9.cpp", ServicePropertyChannel::UriQueryParameter);
+
     auto recognizer = SpeechRecognizer::FromConfig(sc, nullptr);
 
     recognizer->Recognizing += [](const SpeechRecognitionEventArgs& e) {
@@ -185,6 +191,8 @@ void CarbonTestConsole::ch9_do_speech_continuous()
 void CarbonTestConsole::ch9_do_intent()
 {
     auto sc = SpeechConfig::FromSubscription(m_subscriptionKey, luisRegion);
+    sc->SetServiceProperty("TrafficType", "carbonx.exe-channel9.cpp", ServicePropertyChannel::UriQueryParameter);
+
     auto recognizer = IntentRecognizer::FromConfig(sc, nullptr);
 
     recognizer->Recognizing += [](const IntentRecognitionEventArgs& e) {
@@ -216,6 +224,8 @@ void CarbonTestConsole::ch9_do_intent()
 void CarbonTestConsole::ch9_do_intent_continuous()
 {
     auto sc = SpeechConfig::FromSubscription(m_subscriptionKey, luisRegion);
+    sc->SetServiceProperty("TrafficType", "carbonx.exe-channel9.cpp", ServicePropertyChannel::UriQueryParameter);
+
     auto recognizer = IntentRecognizer::FromConfig(sc, nullptr);
 
     recognizer->Recognizing += [](const IntentRecognitionEventArgs& e) {
@@ -258,6 +268,8 @@ void CarbonTestConsole::ch9_do_intent_continuous()
 void CarbonTestConsole::ch9_do_kws_speech()
 {
     auto sc = SpeechConfig::FromSubscription(m_subscriptionKey, speechRegion);
+    sc->SetServiceProperty("TrafficType", "carbonx.exe-channel9.cpp", ServicePropertyChannel::UriQueryParameter);
+
     auto recognizer = SpeechRecognizer::FromConfig(sc, nullptr);
 
     recognizer->Recognizing += [](const SpeechRecognitionEventArgs& e) {
@@ -285,6 +297,8 @@ void CarbonTestConsole::ch9_do_kws_speech()
 void CarbonTestConsole::ch9_do_kws_speech_with_kwv()
 {
     auto sc = SpeechConfig::FromEndpoint(kwsPpeEndpoint, m_subscriptionKey);
+    sc->SetServiceProperty("TrafficType", "carbonx.exe-channel9.cpp", ServicePropertyChannel::UriQueryParameter);
+
     auto recognizer = SpeechRecognizer::FromConfig(sc, nullptr);
 
     recognizer->SessionStarted += [](const SessionEventArgs& e) {
@@ -336,6 +350,8 @@ void CarbonTestConsole::ch9_do_kws_speech_with_kwv()
 void CarbonTestConsole::ch9_do_kws_intent()
 {
     auto sc = SpeechConfig::FromSubscription(m_subscriptionKey, luisRegion);
+    sc->SetServiceProperty("TrafficType", "carbonx.exe-channel9.cpp", ServicePropertyChannel::UriQueryParameter);
+
     auto recognizer = IntentRecognizer::FromConfig(sc, nullptr);
 
     recognizer->Recognizing += [](const IntentRecognitionEventArgs& e) {

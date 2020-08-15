@@ -2263,7 +2263,7 @@ std::shared_ptr<ISpxRecoEngineAdapter> CSpxAudioStreamSession::EnsureInitOutputE
 
 void CSpxAudioStreamSession::EnsureResetOutputEngineAdapter()
 {
-
+    SPX_DBG_TRACE_FUNCTION();
     m_recoAdapter = nullptr;
     m_audioProcessor = nullptr;
 }
@@ -2820,7 +2820,7 @@ void CSpxAudioStreamSession::InformAdapterSetFormatStopping(SessionState comingF
     {
         if (m_audioProcessor)
         {
-            SPX_TRACE_INFO("[%p]CSpxAudioStreamSession::InformAdapterSetFormatStoppingProcessingAudio - Send zero size audio.", (void*)this);
+            SPX_TRACE_INFO("[%p]CSpxAudioStreamSession::InformAdapterSetFormatStoppingProcessingAudio - Send zero size audio, processor=%p", (void*)this, m_audioProcessor.get());
             m_audioProcessor->ProcessAudio(std::make_shared<DataChunk>(nullptr, 0));
         }
     }

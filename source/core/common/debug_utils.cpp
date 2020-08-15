@@ -244,7 +244,7 @@ static void SignalHandler()
 {
     auto callstack = Debug::GetCallStack(1);
 
-    SPX_TRACE_VERBOSE("%s", callstack.c_str());
+    SPX_TRACE_ERROR("%s", callstack.c_str());
 
     exit(1);
 }
@@ -296,7 +296,7 @@ extern "C" void __attribute__((weak)) __attribute__((visibility("default"))) pth
 
 
 static void SignalHandler(int sig) {
-    SPX_TRACE_VERBOSE("\nReceived an error signal: %d\n", sig);
+    SPX_TRACE_ERROR("\nReceived an error signal: %d\n", sig);
     SignalHandler();
 }
 

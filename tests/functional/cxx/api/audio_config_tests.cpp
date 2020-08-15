@@ -28,12 +28,13 @@ using namespace Microsoft::CognitiveServices::Speech;
 using namespace Microsoft::CognitiveServices::Speech::Audio;
 using namespace std;
 
-
-static std::shared_ptr<SpeechConfig> SpeechConfigForAudioConfigTests()
+static std::shared_ptr<SpeechConfig> SpeechConfigForAudioConfigTests(const std::string& trafficType = SpxGetTestTrafficType(__FILE__, __LINE__))
 {
-    return !DefaultSettingsMap[ENDPOINT].empty()
+    auto config = !DefaultSettingsMap[ENDPOINT].empty()
         ? SpeechConfig::FromEndpoint(DefaultSettingsMap[ENDPOINT], SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key)
         : SpeechConfig::FromSubscription(SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key, SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Region);
+    config->SetServiceProperty("TrafficType", trafficType, ServicePropertyChannel::UriQueryParameter);
+    return config;
 }
 
 TEST_CASE("Audio Basics", "[api][cxx][audio]")
@@ -97,6 +98,8 @@ TEST_CASE("Audio Basics", "[api][cxx][audio]")
             auto audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
 
             auto config = SpeechConfig::FromSubscription(SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key, SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Region);
+            config->SetServiceProperty("TrafficType", SpxGetTestTrafficType(__FILE__, __LINE__), ServicePropertyChannel::UriQueryParameter);
+
             auto recognizer = SpeechRecognizer::FromConfig(config, audioConfig);
 
             verifyAudioConfigInRecognizerProperties(recognizer);
@@ -118,7 +121,7 @@ TEST_CASE("Audio Basics", "[api][cxx][audio]")
             auto deviceNameInAudioConfig = audioConfig->GetProperty(PropertyId::AudioConfig_DeviceNameForCapture);
             REQUIRE(deviceNameExpected == deviceNameInAudioConfig);
 
-            auto config = SpeechConfigForAudioConfigTests();
+            auto config = SpeechConfigForAudioConfigTests(SpxGetTestTrafficType(__FILE__, __LINE__));
             auto recognizer = SpeechRecognizer::FromConfig(config, audioConfig);
 
             verifyAudioConfigInRecognizerProperties(recognizer, deviceNameExpected, channelsExpected);
@@ -138,7 +141,7 @@ TEST_CASE("Audio Basics", "[api][cxx][audio]")
         );
 
         // Create the recognizer with the pull stream
-        auto config = SpeechConfigForAudioConfigTests();
+        auto config = SpeechConfigForAudioConfigTests(SpxGetTestTrafficType(__FILE__, __LINE__));
         auto audioConfig = AudioConfig::FromStreamInput(pullStream);
         auto recognizer = SpeechRecognizer::FromConfig(config, audioConfig);
 
@@ -154,7 +157,7 @@ TEST_CASE("Audio Basics", "[api][cxx][audio]")
     SECTION("push stream works")
     {
         // Create the recognizer "with stream input" with a "push stream"
-        auto config = SpeechConfigForAudioConfigTests();
+        auto config = SpeechConfigForAudioConfigTests(SpxGetTestTrafficType(__FILE__, __LINE__));
         auto pushStream = AudioInputStream::CreatePushStream();
         auto audioConfig = AudioConfig::FromStreamInput(pushStream);
         auto recognizer = SpeechRecognizer::FromConfig(config, audioConfig);

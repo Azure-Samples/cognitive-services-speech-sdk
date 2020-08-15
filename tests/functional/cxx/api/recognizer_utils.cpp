@@ -12,25 +12,33 @@
 #include "wav_file_reader.h"
 #include "azure_c_shared_utility_includes.h"
 
-std::shared_ptr<SpeechConfig> CurrentSpeechConfig()
+std::shared_ptr<SpeechConfig> CurrentSpeechConfig(const std::string& trafficType)
 {
-    return !DefaultSettingsMap[ENDPOINT].empty() ? SpeechConfig::FromEndpoint(DefaultSettingsMap[ENDPOINT], SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key)
+    auto config = !DefaultSettingsMap[ENDPOINT].empty()
+        ? SpeechConfig::FromEndpoint(DefaultSettingsMap[ENDPOINT], SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key)
        : SpeechConfig::FromSubscription(SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key, SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Region);
+    config->SetServiceProperty("TrafficType", trafficType, ServicePropertyChannel::UriQueryParameter);
+    return config;
 }
 
-std::shared_ptr<SpeechTranslationConfig> CurrentTranslationConfig()
+std::shared_ptr<SpeechTranslationConfig> CurrentTranslationConfig(const std::string& trafficType)
 {
-    return !DefaultSettingsMap[ENDPOINT].empty()
+    auto config = !DefaultSettingsMap[ENDPOINT].empty()
         ? SpeechTranslationConfig::FromEndpoint(DefaultSettingsMap[ENDPOINT], SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key)
         : SpeechTranslationConfig::FromSubscription(SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key, SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Region);
+    config->SetServiceProperty("TrafficType", trafficType, ServicePropertyChannel::UriQueryParameter);
+    return config;
 }
 
 // pronunciation assessment service is currently only available on westus, eastasia and centralindia regions, using a westus key for tests
 // TODO: switch to main test key after pronunciation assessment service deployed to northeurope
-std::shared_ptr<SpeechConfig> CurrentSpeechConfigForPronunciationAssessment()
+std::shared_ptr<SpeechConfig> CurrentSpeechConfigForPronunciationAssessment(const std::string& trafficType)
 {
-    return !DefaultSettingsMap[ENDPOINT].empty() ? SpeechConfig::FromEndpoint(DefaultSettingsMap[ENDPOINT], SubscriptionsRegionsMap[SPEECH_SUBSCRIPTION_WEST_US].Key)
+    auto config = !DefaultSettingsMap[ENDPOINT].empty()
+        ? SpeechConfig::FromEndpoint(DefaultSettingsMap[ENDPOINT], SubscriptionsRegionsMap[SPEECH_SUBSCRIPTION_WEST_US].Key)
        : SpeechConfig::FromSubscription(SubscriptionsRegionsMap[SPEECH_SUBSCRIPTION_WEST_US].Key, SubscriptionsRegionsMap[SPEECH_SUBSCRIPTION_WEST_US].Region);
+    config->SetServiceProperty("TrafficType", trafficType, ServicePropertyChannel::UriQueryParameter);
+    return config;    
 }
 
 void UseMocks(bool value)
@@ -95,16 +103,6 @@ fstream OpenFile(const string& filename)
         throw invalid_argument("Failed to open the specified audio file.");
     }
 
-
-    return fs;
-}
-
-fstream OpenWaveFile(const string& filename)
-{
-    fstream fs = OpenFile(filename);
-    //skip the wave header
-    fs.seekg(44);
-
     return fs;
 }
 
@@ -137,40 +135,45 @@ void WaitForResult(future<void>&& f, std::chrono::seconds duration)
     REQUIRE(status == future_status::ready);
 }
 
-void PushData(PushAudioInputStream* pushStream, const string& filename, bool compressed)
+void PushData(PushAudioInputStream* push, const string& fileName, bool compressed)
 {
-    fstream fs;
     try
     {
+        std::array<uint8_t, 1000> buffer;
         if (compressed)
         {
-            fs = OpenFile(filename);
+            auto stream = OpenFile(fileName);
+            for (;;)
+            {
+                auto size = ReadBuffer(stream, buffer.data(), (uint32_t)buffer.size());
+                if (size == 0) break;
+
+                push->Write(buffer.data(), size);
+            }
+            push->Close();
+            stream.close();
         }
         else
         {
-            fs = OpenWaveFile(filename);
+            auto stream = AudioDataStream::FromWavFileInput(fileName);
+            for (;;)
+            {
+                auto size = stream->ReadData(buffer.data(), (uint32_t)buffer.size());
+                if (size == 0) break;
+
+                push->Write(buffer.data(), size);
+            }
+            push->Close();
+            stream.reset();
         }
     }
     catch (const exception& e)
     {
         SPX_TRACE_VERBOSE("Error: exception in pushData, %s.", e.what());
-        SPX_TRACE_VERBOSE("can't open '%s'", filename.c_str());
+        SPX_TRACE_VERBOSE("can't open '%s'", fileName.c_str());
         throw e;
         return;
     }
-
-    std::array<uint8_t, 1000> buffer;
-    while (1)
-    {
-        auto readSamples = ReadBuffer(fs, buffer.data(), (uint32_t)buffer.size());
-        if (readSamples == 0)
-        {
-            break;
-        }
-        pushStream->Write(buffer.data(), readSamples);
-    }
-    fs.close();
-    pushStream->Close();
 }
 
 void DoContinuousReco(SpeechRecognizer* recognizer, PushAudioInputStream* pushStream)
@@ -190,13 +193,13 @@ void DoKWS(SpeechRecognizer* recognizer, PushAudioInputStream* pushStream)
     auto res = make_shared<RecoPhrases>();
 
     ConnectCallbacks(recognizer, res);
-    PushData(pushStream, ROOT_RELATIVE_PATH(HEY_CORTANA));
+    PushData(pushStream, ROOT_RELATIVE_PATH(COMPUTER_KEYWORD_WITH_SINGLE_UTTERANCE_1));
     auto model = KeywordRecognitionModel::FromFile(DefaultSettingsMap[INPUT_DIR] + "/kws/Computer/kws.table");
     recognizer->StartKeywordRecognitionAsync(model).get();
     WaitForResult(res->ready.get_future(), WAIT_FOR_RECO_RESULT_TIME);
     recognizer->StopKeywordRecognitionAsync().get();
     SPXTEST_REQUIRE(!res->phrases.empty());
-    SPXTEST_REQUIRE(StringComparisions::AssertFuzzyMatch(res->phrases[0].Text, AudioUtterancesMap[HEY_CORTANA].Utterances["en-US"][0].Text));
+    SPXTEST_REQUIRE(StringComparisions::AssertFuzzyMatch(res->phrases[0].Text, AudioUtterancesMap[COMPUTER_KEYWORD_WITH_SINGLE_UTTERANCE_1].Utterances["en-US"][0].Text));
 }
 
 auto createCallbacksMap() -> std::map<Callbacks, atomic_int>

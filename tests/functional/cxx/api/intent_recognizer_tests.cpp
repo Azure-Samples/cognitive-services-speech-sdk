@@ -22,11 +22,12 @@ using namespace Microsoft::CognitiveServices::Speech::Audio;
 using namespace Microsoft::CognitiveServices::Speech::Intent;
 using namespace std;
 
-std::shared_ptr<SpeechConfig> SpeechConfigForIntentTests()
+std::shared_ptr<SpeechConfig> SpeechConfigForIntentTests(const std::string& trafficType)
 {
     auto config = !DefaultSettingsMap[ENDPOINT].empty()
         ? SpeechConfig::FromEndpoint(DefaultSettingsMap[ENDPOINT], SubscriptionsRegionsMap[LANGUAGE_UNDERSTANDING_SUBSCRIPTION].Key)
         : SpeechConfig::FromSubscription(SubscriptionsRegionsMap[LANGUAGE_UNDERSTANDING_SUBSCRIPTION].Key, SubscriptionsRegionsMap[LANGUAGE_UNDERSTANDING_SUBSCRIPTION].Region);
+    config->SetServiceProperty("TrafficType", trafficType, ServicePropertyChannel::UriQueryParameter);
     return config;
 }
 
@@ -36,7 +37,7 @@ TEST_CASE("Intent Recognizer basics", "[api][cxx][intent]")
     {
         REQUIRE(exists(ROOT_RELATIVE_PATH(INTENT_UTTERANCE)));
 
-        auto config = SpeechConfigForIntentTests();
+        auto config = SpeechConfigForIntentTests(SpxGetTestTrafficType(__FILE__, __LINE__));
         auto audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(INTENT_UTTERANCE));
         auto recognizer = IntentRecognizer::FromConfig(config, audioConfig);
 

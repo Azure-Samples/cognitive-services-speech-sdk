@@ -59,19 +59,22 @@ private:
     void TermFormat();
     void End();
 
-    void FireKeywordDetected(const DataChunkPtr& audioChunk);
+    void FireKeywordDetected();
 
 
 private:
 
-    const uint64_t m_numMsBeforeVeryFirstKeyword = 200;
-    const uint64_t m_numMsBetweenKeywords = 5000;
+    const uint64_t ticksPerSecond = 1000 * 1000 * 10; // 1000 == to_msec, 1000 == to_usec, 10 == to_100nsec
+    const uint64_t m_numMsKeywordEvery = 5000;
+    const uint64_t m_numMsKeywordOffset = 4750;
+    const uint64_t m_numMsKeywordDuration = 750;
+    const uint64_t m_numMsKeywordUPL = 100;
 
     SpxWAVEFORMATEX_Type m_format;
+    std::list<DataChunkPtr> m_audio;
     uint64_t m_cbAudioProcessed;
 
-    uint64_t m_cbFireNextKeyword;
-    uint64_t m_cbLastKeywordFired;
+    uint64_t m_cbFireKeyword;
 };
 
 

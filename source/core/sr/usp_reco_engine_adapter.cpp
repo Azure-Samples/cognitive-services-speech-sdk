@@ -2440,7 +2440,7 @@ SPXHR CSpxUspRecoEngineAdapter::PrepareCompressionCodec(
     SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_USP_SITE_FAILURE);
 
     std::string codecModule = properties->GetStringValue("SPEECH-Compression-Codec-Module");
-    SPX_IFTRUE_RETURN_HR(codecModule.length() == 0, SPXERR_NOT_FOUND);
+    if (codecModule.length() == 0) return SPXERR_NOT_FOUND; // don't spew into log... not fatal...
 
     // it should come as empty or audio/silk for now
     std::string encodingFormat = properties->GetStringValue("SPEECH-Compression-EncodingFormat");
@@ -2499,7 +2499,7 @@ void CSpxUspRecoEngineAdapter::PrepareFirstAudioReadyState(const SPXWAVEFORMATEX
             HandleCompressedAudioData(outData, nBytesOut);
         });
 
-    SPX_DBG_TRACE_VERBOSE_IF(SPX_FAILED(codecInitResult), "%s: (0x%8p)->PrepareCompressionCodec() failed: %8lx. Sending the audio uncompressed", __FUNCTION__, (void*)this, (unsigned long)codecInitResult);
+    SPX_DBG_TRACE_VERBOSE_IF(SPX_FAILED(codecInitResult), "%s: (0x%8p)->PrepareCompressionCodec() result: %8lx. Sending the audio uncompressed", __FUNCTION__, (void*)this, (unsigned long)codecInitResult);
 
     PrepareAudioReadyState();
 }

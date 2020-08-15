@@ -20,8 +20,7 @@ namespace Impl {
 
 CSpxMockKwsEngineAdapter::CSpxMockKwsEngineAdapter() :
     m_cbAudioProcessed(0),
-    m_cbFireNextKeyword(0),
-    m_cbLastKeywordFired(0)
+    m_cbFireKeyword(0)
 {
     SPX_DBG_TRACE_FUNCTION();
 }
@@ -73,12 +72,9 @@ void CSpxMockKwsEngineAdapter::ProcessAudio(const DataChunkPtr& audioChunk)
     SPX_DBG_TRACE_VERBOSE_IF(0, "%s(..., size=%d)", __FUNCTION__, audioChunk->size);
     SPX_IFTRUE_THROW_HR(!HasFormat(), SPXERR_UNINITIALIZED);
 
+    m_audio.push_front(audioChunk);
     m_cbAudioProcessed += audioChunk->size;
-    if (m_cbAudioProcessed > m_cbFireNextKeyword)
-    {
-        // we'll pretend that the most recent packet of data is the keyword data...
-        FireKeywordDetected(audioChunk);
-    }
+    SPX_IFTRUE(m_cbAudioProcessed >= m_cbFireKeyword, FireKeywordDetected());
 }
 
 void CSpxMockKwsEngineAdapter::InitFormat(const SPXWAVEFORMATEX* pformat)
@@ -90,9 +86,7 @@ void CSpxMockKwsEngineAdapter::InitFormat(const SPXWAVEFORMATEX* pformat)
     memcpy(m_format.get(), pformat, sizeOfFormat);
 
     m_cbAudioProcessed = 0;
-    m_cbLastKeywordFired = 0;
-
-    m_cbFireNextKeyword = m_numMsBeforeVeryFirstKeyword * m_format->nAvgBytesPerSec / 1000;
+    m_cbFireKeyword = (m_numMsKeywordEvery - m_numMsKeywordOffset + m_numMsKeywordDuration + m_numMsKeywordUPL) * m_format->nAvgBytesPerSec / 1000;
 }
 
 void CSpxMockKwsEngineAdapter::TermFormat()
@@ -106,22 +100,48 @@ void CSpxMockKwsEngineAdapter::End()
     GetSite()->AdapterCompletedSetFormatStop(this);
 }
 
-void CSpxMockKwsEngineAdapter::FireKeywordDetected(const DataChunkPtr& audioChunk)
+void CSpxMockKwsEngineAdapter::FireKeywordDetected()
 {
     SPX_DBG_TRACE_FUNCTION();
-
-    m_cbLastKeywordFired = m_cbAudioProcessed;
-    m_cbFireNextKeyword += m_numMsBetweenKeywords * m_format->nAvgBytesPerSec / 1000;
-
-    auto offset = (uint32_t)m_cbLastKeywordFired;
-    auto site = GetSite();
-
-    // we must call on the same thread as the CSpxMockKwsEngineAdapter::ProcessAudio
-    // has been called.
     std::string error;
+
     SPXAPI_TRY()
     {
-        site->KeywordDetected(this, offset, 5000/*500msec*/, 1.0, SpxGetMockParameterString("CARBON-INTERNAL-MOCK-KWS-Keyword", "keyword"), audioChunk);
+        auto offset = ticksPerSecond * ((m_cbFireKeyword * 1000 / m_format->nAvgBytesPerSec) - m_numMsKeywordDuration - m_numMsKeywordUPL) / 1000;
+        auto duration = ticksPerSecond * m_numMsKeywordDuration / 1000;
+        m_cbFireKeyword += m_numMsKeywordEvery * m_format->nAvgBytesPerSec / 1000;
+
+        auto site = GetSite();
+        auto properties = SpxQueryInterface<ISpxNamedProperties>(site);
+        auto keyword = properties->GetStringValue("CARBON-INTERNAL-MOCK-KWS-Keyword", "Computer");
+        SPX_TRACE_INFO("%s: text='%s', offset=%" PRIu64 ", duration=%" PRIu64, __FUNCTION__, keyword.c_str(), offset, duration);
+
+        auto size = (size_t)(m_cbFireKeyword - (m_numMsKeywordDuration + m_numMsKeywordUPL) * m_format->nAvgBytesPerSec / 1000 + (m_cbAudioProcessed - m_cbFireKeyword));
+        auto buffer = SpxAllocSharedAudioBuffer(size);
+        auto write = buffer.get() + size;
+
+        size_t remaining = size;
+        for (auto chunk : m_audio)
+        {
+            if (remaining == 0) break;
+
+            if (remaining >= chunk->size)
+            {
+                write = write - chunk->size;
+                memcpy(write, chunk->data.get(), chunk->size);
+                remaining -= chunk->size;
+            }
+            else
+            {
+                write = write - remaining;
+                memcpy(write, chunk->data.get() + chunk->size - remaining, remaining);
+                remaining -= remaining;
+            }
+        }
+
+        // MUST call on the same thread as the CSpxMockKwsEngineAdapter::ProcessAudio was called
+        auto chunk = std::make_shared<DataChunk>(buffer, (uint32_t)size);
+        site->KeywordDetected(this, offset, duration, 1.0, keyword, chunk);
     }
     SPXAPI_CATCH_ONLY()
 }

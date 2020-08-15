@@ -1007,6 +1007,11 @@ public class SpeechRecognizerTests {
             Thread.sleep(200);
         }
 
+        // Wait for max 30 seconds
+        future.get(30, TimeUnit.SECONDS);
+        assertFalse("future is canceled.", future.isCancelled());
+        assertTrue("future is not done.", future.isDone());
+        
         future = r.stopContinuousRecognitionAsync();
         assertNotNull("stopContinuousRecognitionAsync returned a null future", future);
         future.get(15, TimeUnit.SECONDS);

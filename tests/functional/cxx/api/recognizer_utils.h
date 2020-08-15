@@ -17,6 +17,7 @@
 
 #include "speechapi_cxx.h"
 #include "mock_controller.h"
+#include "test_utils.h"
 
 using namespace Microsoft::CognitiveServices::Speech::Impl; // for mocks
 using namespace Microsoft::CognitiveServices::Speech;
@@ -32,7 +33,7 @@ using namespace std;
 #define UNKNOWN_REASON "unknown reason"
 
 using MilliSeconds = chrono::duration<int, milli>;
-#define WAIT_FOR_RECO_RESULT_TIME  20s
+#define WAIT_FOR_RECO_RESULT_TIME  30s
 
 // declare the test data here
 struct RecoPhrase
@@ -72,9 +73,9 @@ bool IsUsingMocks(bool uspMockRequired = true);
 int ReadBuffer(fstream& fs, uint8_t* dataBuffer, uint32_t size);
 fstream OpenWaveFile(const string& filename);
 fstream OpenFile(const string& filename);
-shared_ptr<SpeechConfig> CurrentSpeechConfig();
-shared_ptr<SpeechTranslationConfig> CurrentTranslationConfig();
-shared_ptr<SpeechConfig> CurrentSpeechConfigForPronunciationAssessment();
+shared_ptr<SpeechConfig> CurrentSpeechConfig(const std::string& trafficType);
+shared_ptr<SpeechTranslationConfig> CurrentTranslationConfig(const std::string& trafficType);
+shared_ptr<SpeechConfig> CurrentSpeechConfigForPronunciationAssessment(const std::string& trafficType);
 void SetMockRealTimeSpeed(int value);
 void WaitForResult(future<void>&& f, std::chrono::seconds duration);
 void PushData(PushAudioInputStream* pushStream, const string& filename, bool compressed = false);
@@ -258,7 +259,7 @@ inline void SetDefaultFiddlerProxy(const std::shared_ptr<AudioConfig>& config)
 }
 
 template<typename RecogType>
-static std::shared_ptr<RecogType> CreateRecognizers(const string& filename, bool requestCompression = false, bool enableFiddlerProxy = false)
+static std::shared_ptr<RecogType> CreateRecognizers(const string& trafficType, const string& filename, bool requestCompression = false, bool enableFiddlerProxy = false)
 {
     auto audioInput = AudioConfig::FromWavFileInput(filename);
     if (requestCompression)
@@ -271,7 +272,7 @@ static std::shared_ptr<RecogType> CreateRecognizers(const string& filename, bool
         SetDefaultFiddlerProxy(audioInput);
     }
 
-    return RecogType::FromConfig(CurrentSpeechConfig(), audioInput);
+    return RecogType::FromConfig(CurrentSpeechConfig(trafficType), audioInput);
 }
 
 

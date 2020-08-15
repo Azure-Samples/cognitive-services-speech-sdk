@@ -80,17 +80,21 @@ private:
 
     std::wstring m_mockResultText;
 
-    const uint64_t m_numMsBeforeVeryFirstIntermediate = 500;
-    const uint64_t m_numMsBetweenFirstIntermediateAndFinal = 800;
-    const uint64_t m_numMsBetweenFinalAndNextIntermediate = 2000;
+    const uint64_t ticksPerSecond = 1000 * 1000 * 10; // 1000 == to_msec, 1000 == to_usec, 10 == to_100nsec
+    const uint64_t m_numMsFinalEvery = 3300;
+    const uint64_t m_numMsFinalOffset = 3050;
+    const uint64_t m_numMsFinalDuration = 1250;
+    const uint64_t m_numMsFinalUPL = 250;
+    // result.offset = Every - Offset; result.duration = duration;
     const uint64_t m_numMsBetweenIntermediates = 250;
+    const uint64_t m_numIntermediates = 3;
 
     uint64_t m_cbAudioProcessed;
-    uint64_t m_cbFireNextIntermediate;
-    uint64_t m_cbFireNextFinalResult;
 
-    uint64_t m_cbFiredLastIntermediate;
-    uint64_t m_cbFiredLastFinal;
+    uint64_t m_cbFireFinal;
+    uint64_t m_cbResultStartsAt;
+    uint64_t m_cbFireIntermediate;
+    uint32_t m_numIntermediatesFired;
 };
 
 

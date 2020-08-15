@@ -15,7 +15,7 @@ TEST_CASE("Offline continuous recognition using file input", "[api][cxx][unidec]
     UseMocks(false);
     SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
 
-    auto config = CurrentSpeechConfig();
+    auto config = CurrentSpeechConfig(SpxGetTestTrafficType(__FILE__, __LINE__));
     UseOfflineUnidec(config);
 
     SPXTEST_SECTION("continuous recognition")
@@ -50,7 +50,7 @@ TEST_CASE("Offline continuous recognition using file input fails", "[.][api][cxx
     UseMocks(false);
     SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_3X)));
 
-    auto config = CurrentSpeechConfig();
+    auto config = CurrentSpeechConfig(SpxGetTestTrafficType(__FILE__, __LINE__));
     UseOfflineUnidec(config);
 
     SPXTEST_SECTION("continuous recognition")
@@ -82,7 +82,7 @@ TEST_CASE("Offline single recognition using file input", "[api][cxx][unidec]")
     UseMocks(false);
     SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
 
-    auto config = CurrentSpeechConfig();
+    auto config = CurrentSpeechConfig(SpxGetTestTrafficType(__FILE__, __LINE__));
     UseOfflineUnidec(config);
 
     SPXTEST_SECTION("single recognition")
@@ -109,7 +109,7 @@ TEST_CASE("Offline continuous recognition using push stream input", "[api][cxx][
     UseMocks(false);
     SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
 
-    auto config = CurrentSpeechConfig();
+    auto config = CurrentSpeechConfig(SpxGetTestTrafficType(__FILE__, __LINE__));
     UseOfflineUnidec(config);
 
     SPXTEST_SECTION("continuous recognition")
@@ -146,7 +146,7 @@ TEST_CASE("Offline continuous recognition using push stream input fails", "[.][a
     UseMocks(false);
     SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
 
-    auto config = CurrentSpeechConfig();
+    auto config = CurrentSpeechConfig(SpxGetTestTrafficType(__FILE__, __LINE__));
     UseOfflineUnidec(config);
     auto pushStream = AudioInputStream::CreatePushStream();
     auto audioInput = AudioConfig::FromStreamInput(pushStream);
@@ -181,7 +181,7 @@ TEST_CASE("Offline single recognition using push stream input", "[api][cxx][unid
     UseMocks(false);
     SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
 
-    auto config = CurrentSpeechConfig();
+    auto config = CurrentSpeechConfig(SpxGetTestTrafficType(__FILE__, __LINE__));
     UseOfflineUnidec(config);
     auto pushStream = AudioInputStream::CreatePushStream();
 
@@ -209,7 +209,7 @@ TEST_CASE("Offline continuous recognition using pull stream input", "[api][cxx][
 
     UseMocks(false);
 
-    auto config = CurrentSpeechConfig();
+    auto config = CurrentSpeechConfig(SpxGetTestTrafficType(__FILE__, __LINE__));
     UseOfflineUnidec(config);
 
     SPXTEST_SECTION("continuous recognition")
@@ -242,7 +242,7 @@ TEST_CASE("Offline single recognition using pull stream input", "[api][cxx][unid
 
     UseMocks(false);
 
-    auto config = CurrentSpeechConfig();
+    auto config = CurrentSpeechConfig(SpxGetTestTrafficType(__FILE__, __LINE__));
     UseOfflineUnidec(config);
 
     SPXTEST_SECTION("single recognition")
@@ -269,7 +269,7 @@ TEST_CASE("Offline recognition with KWS", "[api][cxx][unidec]")
 
     UseMocks(false);
 
-    auto config = CurrentSpeechConfig();
+    auto config = CurrentSpeechConfig(SpxGetTestTrafficType(__FILE__, __LINE__));
     UseOfflineUnidec(config);
     auto pushStream = AudioInputStream::CreatePushStream();
     auto audioInput = AudioConfig::FromStreamInput(pushStream);
@@ -304,7 +304,7 @@ TEST_CASE("Offline recognition with KWS fails", "[.][api][cxx][unidec]")
 
     UseMocks(false);
 
-    auto config = CurrentSpeechConfig();
+    auto config = CurrentSpeechConfig(SpxGetTestTrafficType(__FILE__, __LINE__));
     UseOfflineUnidec(config);
     auto pushStream = AudioInputStream::CreatePushStream();
     auto audioInput = AudioConfig::FromStreamInput(pushStream);

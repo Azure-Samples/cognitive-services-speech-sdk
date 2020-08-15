@@ -15,7 +15,7 @@ TEST_CASE("Offline continuous recognition with RNN-T using file input", "[api][c
     UseMocks(false);
     SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
 
-    auto config = CurrentSpeechConfig();
+    auto config = CurrentSpeechConfig(SpxGetTestTrafficType(__FILE__, __LINE__));
     UseOfflineRnnt(config);
 
     SPXTEST_SECTION("continuous recognition")
@@ -48,7 +48,7 @@ TEST_CASE("Offline continuous recognition with RNN-T using push stream input", "
     UseMocks(false);
     SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
 
-    auto config = CurrentSpeechConfig();
+    auto config = CurrentSpeechConfig(SpxGetTestTrafficType(__FILE__, __LINE__));
     UseOfflineRnnt(config);
 
     SPXTEST_SECTION("continuous recognition")
@@ -82,7 +82,7 @@ TEST_CASE("Offline continuous recognition with RNN-T using pull stream input", "
 
     UseMocks(false);
 
-    auto config = CurrentSpeechConfig();
+    auto config = CurrentSpeechConfig(SpxGetTestTrafficType(__FILE__, __LINE__));
     UseOfflineRnnt(config);
 
     SPXTEST_SECTION("continuous recognition")
