@@ -960,10 +960,12 @@ void CSpxUspRecoEngineAdapter::SetSpeechConfigMessage(const ISpxNamedProperties&
 
         auto keywordsVector = PAL::split(keywords, ';');
 
+        auto keywordsTimeout = stoi(properties.GetStringValue("SPEECH-KeywordSearchTimeout", "5000"));
+
         for (auto oneKeyword : keywordsVector)
         {
             json oneKeywordJSON;
-            oneKeywordJSON = { { "text", oneKeyword }, { "triggerThreshold", "Medium" }, { "timeout", 5000 } };
+            oneKeywordJSON = { { "text", oneKeyword }, { "triggerThreshold", "Medium" }, { "timeout", keywordsTimeout } };
 
             keywordsJSON.push_back(oneKeywordJSON);
         }
@@ -1379,7 +1381,7 @@ void CSpxUspRecoEngineAdapter::OnSpeechKeywordDetected(const USP::SpeechKeywordD
             site->FireAdapterResult_KeywordResult(this, message.offset, result, true);
         });
     }
-    else if (message.status == USP::KeywordVerificationStatus::Rejected && TryChangeState(UspState::WaitingForPhrase, UspState::WaitingForTurnEnd))
+    else if (message.status == USP::KeywordVerificationStatus::Rejected && !m_continueOnKeywordReject && TryChangeState(UspState::WaitingForPhrase, UspState::WaitingForTurnEnd))
     {
         SPX_DBG_TRACE_VERBOSE("%s: site->FireAdapterResult_Final()", __FUNCTION__);
 
@@ -2100,13 +2102,17 @@ json CSpxUspRecoEngineAdapter::GetKeywordDetectionJson()
                 keywordsJSON.push_back(oneKeywordJSON);
             }
 
+            auto cancelOnMissing = PAL::ToBool(properties->GetStringValue("SPEECH-CancelOnKeywordMissing", "true"));
+            auto rejectAction = cancelOnMissing ? "EndOfTurn" : "Continue";
+            m_continueOnKeywordReject = !cancelOnMissing;
+
             keywordDetectionJson = { {
                 {"type", "startTrigger"},
                 {"clientDetectedKeywords",
                         keywordsJSON
                 },
                 {"onReject", {
-                    {"action", "EndOfTurn"}
+                    {"action", rejectAction}
                 }}
             } };
         }

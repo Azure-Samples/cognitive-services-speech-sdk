@@ -261,6 +261,7 @@ private:
     std::shared_ptr<ISpxUspCallbacks> m_uspCallbacks;
     std::shared_ptr<USP::Connection> m_uspConnection;
 
+    bool m_continueOnKeywordReject = false;
     bool m_isInteractiveMode = false;
     std::string m_speechConfig{};
     std::string m_agentConfig{};
