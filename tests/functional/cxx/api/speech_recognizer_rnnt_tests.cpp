@@ -116,7 +116,7 @@ TEST_CASE("Offline single recognition with RNN-T and offline TTS", "[api][cxx][r
     UseMocks(false);
     SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
 
-    auto config = CurrentSpeechConfig();
+    auto config = CurrentSpeechConfig(SpxGetTestTrafficType(__FILE__, __LINE__));
     UseOfflineRnnt(config);
     // Enable also offline TTS
     config->SetProperty("SPEECH-SynthBackend", "offline");

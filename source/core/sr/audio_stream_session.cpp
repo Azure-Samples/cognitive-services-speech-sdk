@@ -2818,10 +2818,11 @@ void CSpxAudioStreamSession::InformAdapterSetFormatStopping(SessionState comingF
                    comingFromState == SessionState::WaitForAdapterCompletedSetFormatStop);
     if (comingFromState == SessionState::StoppingPump)
     {
-        if (m_audioProcessor)
+        auto processor = m_audioProcessor;
+        if (processor)
         {
             SPX_TRACE_INFO("[%p]CSpxAudioStreamSession::InformAdapterSetFormatStoppingProcessingAudio - Send zero size audio, processor=%p", (void*)this, m_audioProcessor.get());
-            m_audioProcessor->ProcessAudio(std::make_shared<DataChunk>(nullptr, 0));
+            processor->ProcessAudio(std::make_shared<DataChunk>(nullptr, 0));
         }
     }
 
