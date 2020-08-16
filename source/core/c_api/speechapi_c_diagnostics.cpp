@@ -89,6 +89,17 @@ SPXAPI_(void) diagnostics_log_trace_message2(int level, const char* pszTitle, co
     }
 }
 
+SPXAPI_(void) diagnostics_log_format_message(char *buffer, size_t bufferSize, int level, const char* pszTitle, const char* fileName, const int lineNumber, const char* pszFormat, va_list argptr)
+{
+    try
+    {
+        SpxFormatMessage(buffer, bufferSize, level, pszTitle, fileName, lineNumber, pszFormat, argptr);
+    }
+    catch (...)
+    {
+    }
+}
+
 SPXAPI diagnostics_logmessage_set_callback(DIAGNOSTICS_CALLBACK_FUNC callback)
 {
     EventLogger::Instance().AttachLogTarget(callback);

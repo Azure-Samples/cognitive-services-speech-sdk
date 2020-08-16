@@ -677,8 +677,9 @@ void CSpxAudioStreamSession::CloseConnection()
 void CSpxAudioStreamSession::WaitForIdle(std::chrono::milliseconds timeout)
 {
     SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
-   SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::WaitForIdle: Timeout happened during waiting for Idle", (void*)this);
+   SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::WaitForIdle timeout:%" PRIu64, (void*)this, timeout.count());
     unique_lock<mutex> lock(m_stateMutex);
+
     auto success = m_cv.wait_for(lock, timeout, [&]
     {
         return m_sessionState == SessionState::Idle || (m_recoKind == RecognitionKind::Keyword && m_sessionState == SessionState::ProcessingAudio);

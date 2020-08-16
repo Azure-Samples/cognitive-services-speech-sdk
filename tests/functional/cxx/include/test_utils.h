@@ -198,6 +198,22 @@ inline std::ifstream get_stream(const std::string& name) {
     return std::ifstream(name.c_str(), std::ifstream::binary);
 }
 
+inline void test_diagnostics_log_trace_message(int level, const char* pszTitle, const char* fileName, const int lineNumber, const char* pszFormat, ...)
+{
+    char sz[4096];
+    va_list argptr;
+
+    va_start(argptr, pszFormat);
+    diagnostics_log_format_message(sz, 4096, level, pszTitle, fileName, lineNumber, pszFormat, argptr);
+    va_end(argptr);
+
+     fprintf(stderr, "%s", sz);
+    
+     va_start(argptr, pszFormat);
+     diagnostics_log_trace_message2(level, pszTitle, fileName, lineNumber, pszFormat, argptr);
+     va_end(argptr);
+}
+
 #define SPX_TEST_TRACE_ERROR(file, title, line, options, msg, ...) __SPX_TRACE_ERROR((std::string("SPX_TRACE_ERROR: ") + std::string(title)).c_str(), file, line, msg, ##__VA_ARGS__)
 #define SPX_TEST_TRACE_INFO(file, title, line, options, msg, ...)  __SPX_TRACE_INFO((std::string("SPX_TRACE_INFO: ") + std::string(title)).c_str(), file, line, msg, ##__VA_ARGS__)
 
@@ -510,7 +526,7 @@ inline void from_json(const nlohmann::json& jsonString, AudioEntry& audioEntry)
         audioEntry.NativeLanguage = "";
     }
 
-    if(jsonString.contains(UTTERANCES)) {
+    if (jsonString.contains(UTTERANCES)) {
         audioEntry.Utterances = jsonString.at(UTTERANCES).get<std::map<std::string, std::vector<Utterance>>>();
     }
     else {

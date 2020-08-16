@@ -18,6 +18,7 @@
 
 SPX_EXTERN_C {
 
+extern void SpxFormatMessage(char *buffer, size_t bufferSize, int level, const char* pszTitle, const char* fileName, const int lineNumber, const char* pszFormat, va_list argptr);
 extern void SpxTraceMessage1(int level, const char* pszTitle, const char* fileName, const int lineNumber, const char* pszFormat, ...) CLANG_ATTRIB_FORMAT_PRINTF(5, 6);
 extern void SpxTraceMessage2(int level, const char* pszTitle, const char* fileName, const int lineNumber, const char* pszFormat, va_list argptr);
 

@@ -108,11 +108,10 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 logMessages.Add(log);
             };
 
+            Diagnostics.SetLogMessageFilter(filePath);
             Diagnostics.SetLogMessageCallback(logCallback);
             try
             {
-                Diagnostics.SetLogMessageFilter(filePath);
-
                 using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
                 {
                     var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);

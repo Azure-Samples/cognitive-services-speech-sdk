@@ -65,6 +65,50 @@ SPX_EXTERN_C void SpxTraceMessage2(int level, const char* pszTitle, const char* 
         return;
     }
 
+    char sz[4096];
+    SpxFormatMessage(sz, 4096, level, pszTitle, fileName, lineNumber, pszFormat, argptr);
+
+#ifdef SPX_CONFIG_INCLUDE_TRACE_WINDOWS_DEBUGGER
+    OutputDebugStringA(sz);
+#endif // SPX_CONFIG_INCLUDE_TRACE_WINDOWS_DEBUGGER
+
+#if defined(ANDROID) || defined(__ANDROID__)
+    int androidPrio = ANDROID_LOG_ERROR;
+    switch (level)
+    {
+    case __SPX_TRACE_LEVEL_INFO:    androidPrio = ANDROID_LOG_INFO;     break; // Trace_Info
+    case __SPX_TRACE_LEVEL_WARNING: androidPrio = ANDROID_LOG_WARN;     break; // Trace_Warning
+    case __SPX_TRACE_LEVEL_ERROR:   androidPrio = ANDROID_LOG_ERROR;    break; // Trace_Error
+    case __SPX_TRACE_LEVEL_VERBOSE: androidPrio = ANDROID_LOG_VERBOSE;  break; // Trace_Verbose
+    default: androidPrio = ANDROID_LOG_FATAL; break;
+    }
+
+    if (logToConsole)
+    {
+        __android_log_write(androidPrio, "SpeechSDK", sz);
+    }
+    if (logToFile)
+    {
+        FileLogger::Instance().LogToFile(std::move(sz));
+    }
+#else
+    if (logToConsole)
+    {
+        fprintf(stderr, "%s", sz);
+    }
+    if (logToFile)
+    {
+        FileLogger::Instance().LogToFile(sz);
+    }
+    if (logToEvents)
+    {
+        EventLogger::Instance().LogToEvent(sz);
+    }
+#endif
+}
+
+SPX_EXTERN_C void SpxFormatMessage(char *buffer, size_t bufferSize, int level, const char* pszTitle, const char* fileName, const int lineNumber, const char* pszFormat, va_list argptr)
+{
     UNUSED(level);
 
     std::string format;
@@ -110,20 +154,11 @@ SPX_EXTERN_C void SpxTraceMessage2(int level, const char* pszTitle, const char* 
         format += "\n";
     }
 
-    va_list argptrDbg;
-#ifdef _MSC_VER
-    // Avoid warnings:
-    // Warning C4701: potentially uninitialized local variable 'X' used
-    // Warning C4703: potentially uninitialized local pointer variable 'X' used
-    argptrDbg = nullptr;
-#endif
-    va_copy(argptrDbg, argptr);
-    char sz[4096];
-    vsnprintf(sz, 4096, format.c_str(), argptrDbg);
+    vsnprintf(buffer, bufferSize, format.c_str(), argptr);
 
     static constexpr char prefix[] = "Microsoft::CognitiveServices::Speech::Impl::";
     static constexpr auto prefixLength = sizeof(prefix) - 1;
-    auto start = sz;
+    auto start = buffer;
     while (true)
     {
         auto found = strstr(start, prefix);
@@ -131,66 +166,6 @@ SPX_EXTERN_C void SpxTraceMessage2(int level, const char* pszTitle, const char* 
         strcpy(found, &found[prefixLength]);
         start = found;
     }
-
-#ifdef SPX_CONFIG_INCLUDE_TRACE_WINDOWS_DEBUGGER
-    OutputDebugStringA(sz);
-#endif // SPX_CONFIG_INCLUDE_TRACE_WINDOWS_DEBUGGER
-
-    va_list argptrConsole;
-#ifdef _MSC_VER
-    // Avoid warnings:
-    // Warning C4701: potentially uninitialized local variable 'X' used
-    // Warning C4703: potentially uninitialized local pointer variable 'X' used
-    argptrConsole = nullptr;
-#endif
-
-    if (logToConsole)
-    {
-        va_copy(argptrConsole, argptr);
-    }
-
-#if defined(ANDROID) || defined(__ANDROID__)
-    int androidPrio = ANDROID_LOG_ERROR;
-    switch (level)
-    {
-    case __SPX_TRACE_LEVEL_INFO:    androidPrio = ANDROID_LOG_INFO;     break; // Trace_Info
-    case __SPX_TRACE_LEVEL_WARNING: androidPrio = ANDROID_LOG_WARN;     break; // Trace_Warning
-    case __SPX_TRACE_LEVEL_ERROR:   androidPrio = ANDROID_LOG_ERROR;    break; // Trace_Error
-    case __SPX_TRACE_LEVEL_VERBOSE: androidPrio = ANDROID_LOG_VERBOSE;  break; // Trace_Verbose
-    default: androidPrio = ANDROID_LOG_FATAL; break;
-    }
-
-    if (logToConsole)
-    {
-        __android_log_write(androidPrio, "SpeechSDK", sz);
-    }
-    if (logToFile)
-    {
-        FileLogger::Instance().LogToFile(std::move(sz));
-    }
-#else
-    if (logToConsole)
-    {
-        fprintf(stderr, "%s", sz);
-    }
-    if (logToFile)
-    {
-        FileLogger::Instance().LogToFile(sz);
-    }
-    if (logToEvents)
-    {
-        EventLogger::Instance().LogToEvent(sz);
-    }
-#endif
-
-    if (logToConsole)
-    {
-        va_end(argptrConsole);
-    }
-
-#ifdef SPX_CONFIG_INCLUDE_TRACE_WINDOWS_DEBUGGER
-    va_end(argptrDbg);
-#endif
 }
 
 SPX_EXTERN_C void _xlogging_log_function_spx_trace_message_wrapper(LOG_CATEGORY log_category, const char* file, const char* func, int line, unsigned int options, const char* format, ...)
