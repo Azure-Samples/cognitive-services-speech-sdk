@@ -15,6 +15,7 @@ std::shared_ptr<SpeechTranslationConfig> CreateTranslationConfigWithLanguageId(
     const string& mode,
     const string& from,
     const vector<string>& to,
+    const string& trafficType,
     string defaultLanguage = "",
     const vector<string>& voiceNames = {})
 {
@@ -25,6 +26,7 @@ std::shared_ptr<SpeechTranslationConfig> CreateTranslationConfigWithLanguageId(
     
     auto endPoint = "wss://" + SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Region + ".sr.speech.microsoft.com/speech/translation/" + mode + "/mstranslator/v1?TrafficType=Test&language=" + defaultLanguage;
     auto config = SpeechTranslationConfig::FromEndpoint(endPoint, SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
+    config->SetServiceProperty("TrafficType", trafficType, ServicePropertyChannel::UriQueryParameter);
     config->SetProperty(PropertyId::SpeechServiceConnection_AutoDetectSourceLanguages, from);
     for (auto item : to)
     {
@@ -44,9 +46,10 @@ std::shared_ptr<SpeechTranslationConfig> CreateTranslationConfigWithLanguageId(
 
 std::shared_ptr<SpeechTranslationConfig> CreateTranslationConfig(
     const string& from,
-    const vector<string>& to)
+    const vector<string>& to,
+    const string& trafficType)
 {
-     auto config = CurrentTranslationConfig(SpxGetTestTrafficType(__FILE__, __LINE__));
+     auto config = CurrentTranslationConfig(trafficType);
      config->SetSpeechRecognitionLanguage(from);
      for (auto item : to)
      {
@@ -58,10 +61,11 @@ std::shared_ptr<SpeechTranslationConfig> CreateTranslationConfig(
 static shared_ptr<TranslationRecognizer> CreateTranslationRecognizer(
     const string& filename,
     const string& from,
-    const vector<string>& to)
+    const vector<string>& to,
+    const string &trafficType)
 {
     auto audioInput = AudioConfig::FromWavFileInput(filename);
-    auto config = CreateTranslationConfig(from, to);
+    auto config = CreateTranslationConfig(from, to, trafficType);
     return TranslationRecognizer::FromConfig(config, audioInput);
 }
 
@@ -92,7 +96,7 @@ TEST_CASE("Translation", "[api][cxx]")
         vector<string> translatedResults;
         vector<string> errorResults;
         
-        auto recognizer = CreateTranslationRecognizer(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH), "en-US", { "de" });
+        auto recognizer = CreateTranslationRecognizer(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH), "en-US", { "de" }, SpxGetTestTrafficType(__FILE__, __LINE__));
 
         recognizer->Recognizing.DisconnectAll();
         recognizer->Recognizing.Connect([&recognizingResults, &translatingResults](const TranslationRecognitionEventArgs& e)
@@ -182,7 +186,7 @@ TEST_CASE("Translation", "[api][cxx]")
 
         SPXTEST_SECTION("Without Language Id")
         {
-            recognizer = CreateTranslationRecognizer(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH), "en-US", { "de" });
+            recognizer = CreateTranslationRecognizer(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH), "en-US", { "de" }, SpxGetTestTrafficType(__FILE__, __LINE__));
             expectedTargetLanguage = "de";
         }
 
@@ -191,7 +195,8 @@ TEST_CASE("Translation", "[api][cxx]")
             auto config = CreateTranslationConfigWithLanguageId(
                 "interactive",
                 "en-US,de-DE",
-                { "en-US" , "de-DE" });
+                { "en-US" , "de-DE" },
+                SpxGetTestTrafficType(__FILE__, __LINE__));
             recognizer = CreateTranslationRecognizer(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH), config);
             expectedLanguageDetected = "en-US";
             expectedTargetLanguage = "de-DE";
@@ -391,6 +396,7 @@ TEST_CASE("Custom translation endpoints", "[api][cxx]")
     {
         auto host = speechEndpoint;
         auto config = SpeechTranslationConfig::FromHost(host, SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
+        config->SetServiceProperty("TrafficType", SpxGetTestTrafficType(__FILE__, __LINE__), ServicePropertyChannel::UriQueryParameter);
         config->SetServiceProperty("language", "de-DE", ServicePropertyChannel::UriQueryParameter);
         config->SetServiceProperty("from", "de-DE", ServicePropertyChannel::UriQueryParameter);
         config->SetServiceProperty("to", "en", ServicePropertyChannel::UriQueryParameter);
@@ -405,6 +411,7 @@ TEST_CASE("Custom translation endpoints", "[api][cxx]")
     {
         auto host = speechEndpoint + "?from=de-DE&to=en";
         auto config = SpeechTranslationConfig::FromHost(host, SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
+        config->SetServiceProperty("TrafficType", SpxGetTestTrafficType(__FILE__, __LINE__), ServicePropertyChannel::UriQueryParameter);
         config->SetServiceProperty("language", "de-DE", ServicePropertyChannel::UriQueryParameter);
         auto recognizer = TranslationRecognizer::FromConfig(config, audioInput);
 

@@ -169,7 +169,7 @@ namespace IntegrationTests {
         }
     }
 
-    static std::shared_ptr<SpeechTranslationConfig> CreateConfig(const string& lang, const vector<string> to)
+    static std::shared_ptr<SpeechTranslationConfig> CreateConfig(const string& lang, const vector<string> to, const string& trafficType)
     {
         shared_ptr<SpeechTranslationConfig> config;
 
@@ -190,6 +190,8 @@ namespace IntegrationTests {
         {
             config->AddTargetLanguage(t);
         }
+
+        config->SetServiceProperty("TrafficType", trafficType, ServicePropertyChannel::UriQueryParameter);
 
         SetCommonConfig(config);
         return config;
