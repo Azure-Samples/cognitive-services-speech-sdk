@@ -17,7 +17,7 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_SpeechSynthe
 
 /*
  * Class:     com_microsoft_cognitiveservices_speech_SpeechSynthesizer
- * Method:    createSpeechSynthesizerFromFromAutoDetectSourceLangConfig
+ * Method:    createSpeechSynthesizerFromAutoDetectSourceLangConfig
  * Signature: (Lcom/microsoft/cognitiveservices/speech/util/SafeHandle;Lcom/microsoft/cognitiveservices/speech/util/SafeHandle;Lcom/microsoft/cognitiveservices/speech/util/SafeHandle;Lcom/microsoft/cognitiveservices/speech/util/SafeHandle;)J
  */
 JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_SpeechSynthesizer_createSpeechSynthesizerFromAutoDetectSourceLangConfig

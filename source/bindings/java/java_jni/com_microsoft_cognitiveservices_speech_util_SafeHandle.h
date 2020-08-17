@@ -25,14 +25,6 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_util_SafeHan
 
 /*
  * Class:     com_microsoft_cognitiveservices_speech_util_SafeHandle
- * Method:    releaseConversationTranslatorHandle
- * Signature: (J)J
- */
-JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_util_SafeHandle_releaseConversationTranslatorHandle
-  (JNIEnv *, jobject, jlong);
-
-/*
- * Class:     com_microsoft_cognitiveservices_speech_util_SafeHandle
  * Method:    releaseSpeechConfigHandle
  * Signature: (J)J
  */
@@ -165,7 +157,7 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_util_SafeHan
  * Signature: (J)J
  */
 JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_util_SafeHandle_releaseAutoDetectSourceLanguageConfigHandle
-(JNIEnv*, jobject, jlong);
+  (JNIEnv *, jobject, jlong);
 
 /*
  * Class:     com_microsoft_cognitiveservices_speech_util_SafeHandle
@@ -221,7 +213,15 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_util_SafeHan
  * Signature: (J)J
  */
 JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_util_SafeHandle_releaseTranslationSynthesisHandle
-(JNIEnv*, jobject, jlong);
+  (JNIEnv *, jobject, jlong);
+
+/*
+ * Class:     com_microsoft_cognitiveservices_speech_util_SafeHandle
+ * Method:    releaseConversationTranslatorHandle
+ * Signature: (J)J
+ */
+JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_util_SafeHandle_releaseConversationTranslatorHandle
+  (JNIEnv *, jobject, jlong);
 
 /*
  * Class:     com_microsoft_cognitiveservices_speech_util_SafeHandle
@@ -229,7 +229,15 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_util_SafeHan
  * Signature: (J)J
  */
 JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_util_SafeHandle_releaseKeywordRecognizerHandle
-(JNIEnv*, jobject, jlong);
+  (JNIEnv *, jobject, jlong);
+
+/*
+ * Class:     com_microsoft_cognitiveservices_speech_util_SafeHandle
+ * Method:    releasePronunciationAssessmentConfig
+ * Signature: (J)J
+ */
+JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_util_SafeHandle_releasePronunciationAssessmentConfig
+  (JNIEnv *, jobject, jlong);
 
 #ifdef __cplusplus
 }

@@ -1541,7 +1541,7 @@ public class SpeechRecognizerTests {
     }
 
     @Test
-    public void verfiyLanguageIdDetection() throws InterruptedException, ExecutionException, TimeoutException {
+    public void verifyLanguageIdDetection() throws InterruptedException, ExecutionException, TimeoutException {
         SpeechConfig speechConfig = SpeechConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key,
             Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);
 

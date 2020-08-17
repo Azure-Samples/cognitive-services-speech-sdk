@@ -34,7 +34,7 @@ public class Settings {
 
         try {
             LoadSettings();
-        } catch (JsonIOException | JsonSyntaxException | FileNotFoundException e) {
+        } catch (JsonIOException | JsonSyntaxException | FileNotFoundException | UnsupportedEncodingException e) {
             e.printStackTrace();
         }
     };
@@ -43,7 +43,7 @@ public class Settings {
     public static Map<String, SubscriptionRegion> SubscriptionsRegionsMap;
     public static Map<String, AudioEntry> AudioUtterancesMap;
 
-    private static void LoadSettingsJson() throws JsonIOException, JsonSyntaxException, FileNotFoundException {
+    private static void LoadSettingsJson() throws JsonIOException, JsonSyntaxException, FileNotFoundException, UnsupportedEncodingException {
         if (isSettingsInitialized) {
             return;
         }
@@ -125,7 +125,7 @@ public class Settings {
         System.out.println("Opening audioUtterancesFile");
         if(audioUtterancesFile.exists()) {
             System.out.println("Reading test.audio.utterances.json");
-            audioUtterancesMap = gson.fromJson(new FileReader("test.audio.utterances.json"), audioEntryType);
+            audioUtterancesMap = gson.fromJson(new InputStreamReader(new FileInputStream("test.audio.utterances.json"), "UTF-8"), audioEntryType);
 
             for (String key : audioUtterancesMap.keySet()) {
                 System.out.println("Processing map key: " + key);
@@ -140,7 +140,7 @@ public class Settings {
         }
     }
 
-    public static void LoadSettings() throws JsonIOException, JsonSyntaxException, FileNotFoundException {
+    public static void LoadSettings() throws JsonIOException, JsonSyntaxException, FileNotFoundException, UnsupportedEncodingException {
         if(!isSettingsInitialized)
         {
             DefaultSettingsMap = new HashMap<String,String>();

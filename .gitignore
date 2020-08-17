@@ -114,6 +114,9 @@ external/android-openssl/*/
 /external/linux-openssl
 /openssl-1.1.1b.tar.gz
 
+# Java compiled classes
+/source/bindings/java/**/*.class
+
 # Ignores for the Java Maven test project
 tests/functional/java/target/
 tests/functional/java/.classpath

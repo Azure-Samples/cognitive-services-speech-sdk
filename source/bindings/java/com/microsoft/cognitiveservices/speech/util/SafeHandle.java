@@ -113,7 +113,7 @@ public class SafeHandle implements Closeable {
             }
             else if (handleType == SafeHandleType.AutoDetectSourceLanguageConfig) {
                 releaseAutoDetectSourceLanguageConfigHandle(value);
-            }            
+            }
             else if (handleType == SafeHandleType.SourceLanguageConfig) {
                 releaseSourceLanguageConfigHandle(value);
             }
@@ -140,6 +140,9 @@ public class SafeHandle implements Closeable {
             }
             else if (handleType == SafeHandleType.KeywordRecognizer) {
                 releaseKeywordRecognizerHandle(value);
+            }
+            else if (handleType == SafeHandleType.PronunciationAssessmentConfig) {
+                releasePronunciationAssessmentConfig(value);
             }
             else {
                 System.out.println("Java SafeHandle close, invalid handle value: " + String.valueOf(value));
@@ -177,6 +180,7 @@ public class SafeHandle implements Closeable {
     private final native long releaseTranslationSynthesisHandle(long handle);
     private final native long releaseConversationTranslatorHandle(long handle);
     private final native long releaseKeywordRecognizerHandle(long handle);
+    private final native long releasePronunciationAssessmentConfig(long handle);
 
     private long value = 0;
     private SafeHandleType handleType = SafeHandleType.UnInitialized;

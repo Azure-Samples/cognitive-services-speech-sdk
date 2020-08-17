@@ -25,6 +25,7 @@
 #include "speechapi_c_grammar.h"
 #include "speechapi_c_translation_recognizer.h"
 #include "speechapi_c_conversation_translator.h"
+#include "speechapi_c_pronunciation_assessment_config.h"
 #include "jni_utils.h"
 
 /*
@@ -400,5 +401,17 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_util_SafeHan
     recognizer_canceled_set_callback((SPXRECOHANDLE)handle, nullptr, nullptr);
     SPXHR hr = recognizer_handle_release((SPXRECOHANDLE)handle);
     RemoveGlobalReferenceFromHandle(env, (SPXHANDLE)handle);
+    return (jlong)hr;
+}
+
+/*
+ * Class:     com_microsoft_cognitiveservices_speech_util_SafeHandle
+ * Method:    releaseKeywordRecognizerHandle
+ * Signature: (J)J
+ */
+JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_util_SafeHandle_releasePronunciationAssessmentConfig
+  (JNIEnv* env, jobject obj, jlong handle)
+{
+    SPXHR hr = pronunciation_assessment_config_release((SPXPRONUNCIATIONASSESSMENTCONFIGHANDLE)handle);
     return (jlong)hr;
 }

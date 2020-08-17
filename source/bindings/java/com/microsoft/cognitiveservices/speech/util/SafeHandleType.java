@@ -39,7 +39,8 @@ public enum SafeHandleType {
     Grammar,
     TranslationSynthesis,
     ConversationTranslator,
-    KeywordRecognizer
+    KeywordRecognizer,
+    PronunciationAssessmentConfig
 }
 
 /*! \endcond */

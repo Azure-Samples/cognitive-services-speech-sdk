@@ -9,6 +9,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.FileNotFoundException;
+import java.io.UnsupportedEncodingException;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -32,7 +33,7 @@ public class RecognizerTests {
     static AudioConfig audioConfig;
 
     @BeforeClass
-    public static void setUpBeforeClass() throws JsonIOException, JsonSyntaxException, FileNotFoundException {
+    public static void setUpBeforeClass() throws JsonIOException, JsonSyntaxException, FileNotFoundException, UnsupportedEncodingException {
         Settings.LoadSettings();
         speechConfig = SpeechConfig.fromSubscription(Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Key, 
             Settings.SubscriptionsRegionsMap.get(SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION).Region);

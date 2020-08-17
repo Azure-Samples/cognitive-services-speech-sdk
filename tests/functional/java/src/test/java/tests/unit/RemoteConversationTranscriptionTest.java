@@ -33,6 +33,7 @@ import tests.Settings;
 import tests.SubscriptionsRegionsKeys;
 
 import java.io.FileNotFoundException;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
@@ -59,7 +60,7 @@ public class RemoteConversationTranscriptionTest {
         org.junit.Assume.assumeFalse(isMac);
         try {
             Settings.LoadSettings();
-        } catch (JsonIOException | JsonSyntaxException | FileNotFoundException e) {
+        } catch (JsonIOException | JsonSyntaxException | FileNotFoundException | UnsupportedEncodingException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }

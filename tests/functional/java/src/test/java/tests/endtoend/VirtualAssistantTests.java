@@ -26,6 +26,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 
 import static org.junit.Assert.*;
 import static tests.Settings.*;
@@ -61,7 +62,7 @@ public class VirtualAssistantTests {
         org.junit.Assume.assumeFalse(isMac);
         try {
             Settings.LoadSettings();
-        } catch (JsonIOException | JsonSyntaxException | FileNotFoundException e) {
+        } catch (JsonIOException | JsonSyntaxException | FileNotFoundException | UnsupportedEncodingException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }

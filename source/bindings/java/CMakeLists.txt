@@ -106,6 +106,11 @@ set(JAVA_SOURCES
     ${PACKAGE_DIR}/translation/SpeechTranslationConfig.java
     ${PACKAGE_DIR}/PropertyId.java
 
+    ${PACKAGE_DIR}/PronunciationAssessmentGradingSystem.java
+    ${PACKAGE_DIR}/PronunciationAssessmentGranularity.java
+    ${PACKAGE_DIR}/PronunciationAssessmentConfig.java
+    ${PACKAGE_DIR}/PronunciationAssessmentResult.java
+
     ${PACKAGE_DIR}/util/EventHandler.java
     ${PACKAGE_DIR}/util/EventHandlerImpl.java
     ${PACKAGE_DIR}/util/Contracts.java
