@@ -1,4 +1,4 @@
-# Quickstart: Synthesize speech in JavaScript on a Web Browser.
+# Quickstart: Recognize speech in JavaScript on a Web Browser.
 
 These samples demonstrate how to recognize speech using the Speech SDK for JavaScript on a web browser, like Microsoft Edge, or Chrome.
 
