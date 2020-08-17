@@ -24,12 +24,26 @@ using namespace std::chrono_literals;
 using namespace std;
 using namespace Microsoft::CognitiveServices::Speech;
 
-TEST_CASE("text independent verification enrollment", "[api][cxx][speaker_id][enrollment_ti_verification]")
+std::shared_ptr<SpeechConfig> GetSpeakerRecognitionProdSubscriptionConfig()
 {
-    // create a profile using a speech config
-    SPXTEST_REQUIRE(!DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT].empty());
+  // create a profile using a speech config
+  auto subscriptionKey = SubscriptionsRegionsMap[SPEAKER_RECOGNITION_SUBSCRIPTION].Key;
+  auto subscriptionRegion = SubscriptionsRegionsMap[SPEAKER_RECOGNITION_SUBSCRIPTION].Region;
+  SPXTEST_REQUIRE(!subscriptionKey.empty());
+  SPXTEST_REQUIRE(!subscriptionRegion.empty());
+  auto config = SpeechConfig::FromSubscription(subscriptionKey, subscriptionRegion);
+  SPXTEST_REQUIRE(config != nullptr);
+  return config;
+}
+
+TEST_CASE(
+      "Speaker recognition::text independent verification enrollment",
+      "[api][cxx][speaker_id][enrollment_ti_verification]")
+{
     REQUIRE(exists(ROOT_RELATIVE_PATH(MULTIPLE_UTTERANCE_CHINESE)));
-    auto config = SpeechConfig::FromHost(DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT], SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
+
+    // create a profile using a speech config
+    auto config = GetSpeakerRecognitionProdSubscriptionConfig();
     auto client = VoiceProfileClient::FromConfig(config);
 
     auto profile = client->CreateProfileAsync(VoiceProfileType::TextIndependentVerification, "en-us").get();
@@ -51,16 +65,16 @@ TEST_CASE("text independent verification enrollment", "[api][cxx][speaker_id][en
     SPXTEST_REQUIRE(result->GetEnrollmentInfo(EnrollmentInfoType::EnrollmentsCount) == 1);
     SPXTEST_REQUIRE(result->GetEnrollmentInfo(EnrollmentInfoType::EnrollmentsSpeechLength) >= 239200000);
     SPXTEST_REQUIRE(result->Reason == ResultReason::EnrolledVoiceProfile);
-    INFO(DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT]);
-    INFO(SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
 }
 
-TEST_CASE("text independent identication enrollment", "[api][cxx][speaker_id][enrollment_ti_identication]")
+TEST_CASE(
+    "Speaker recognition::text independent identication enrollment",
+    "[api][cxx][speaker_id][enrollment_ti_identication]")
 {
-    // create a profile using a speech config
-    SPXTEST_REQUIRE(!DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT].empty());
     REQUIRE(exists(ROOT_RELATIVE_PATH(MULTIPLE_UTTERANCE_CHINESE)));
-    auto config = SpeechConfig::FromEndpoint(DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT], SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
+
+    // create a profile using a speech config
+    auto config = GetSpeakerRecognitionProdSubscriptionConfig();
     auto client = VoiceProfileClient::FromConfig(config);
 
     auto profile = client->CreateProfileAsync(VoiceProfileType::TextIndependentIdentification, "en-us").get();
@@ -85,16 +99,16 @@ TEST_CASE("text independent identication enrollment", "[api][cxx][speaker_id][en
     auto length= result->GetEnrollmentInfo(EnrollmentInfoType::RemainingEnrollmentsSpeechLength);
     INFO(length);
     SPXTEST_REQUIRE(result->Reason == ResultReason::EnrolledVoiceProfile);
-    INFO(DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT]);
-    INFO(SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
 }
 
-TEST_CASE("text dependent verification enrollment bad request", "[api][cxx][speaker_id][enrollment_td_verfication_bad_request]")
+TEST_CASE(
+    "Speaker recognition::text dependent verification enrollment bad request",
+    "[api][cxx][speaker_id][enrollment_td_verfication_bad_request]")
 {
-    // create a profile using a speech config
-    SPXTEST_REQUIRE(!DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT].empty());
     REQUIRE(exists(ROOT_RELATIVE_PATH(MULTIPLE_UTTERANCE_CHINESE)));
-    auto config = SpeechConfig::FromEndpoint(DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT], SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
+
+    // create a profile using a speech config
+    auto config = GetSpeakerRecognitionProdSubscriptionConfig();
     auto client = VoiceProfileClient::FromConfig(config);
 
     auto profile = client->CreateProfileAsync(VoiceProfileType::TextDependentVerification, "en-us").get();
@@ -118,15 +132,14 @@ TEST_CASE("text dependent verification enrollment bad request", "[api][cxx][spea
     SPXTEST_REQUIRE(details->ErrorCode == CancellationErrorCode::BadRequest);
     SPXTEST_REQUIRE(details->ErrorDetails.find("Invalid audio length.") != std::string::npos);
     INFO(details->ErrorDetails);
-    INFO(DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT]);
-    INFO(SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
 }
 
-TEST_CASE("reset voice profile text dependent verification", "[api][cxx][speaker_id][reset_td_ver]")
+TEST_CASE(
+    "Speaker recognition::reset voice profile text dependent verification",
+    "[api][cxx][speaker_id][reset_td_ver]")
 {
     // create a profile using a speech config
-    SPXTEST_REQUIRE(!DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT].empty());
-    auto config = SpeechConfig::FromHost(DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT], SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
+    auto config = GetSpeakerRecognitionProdSubscriptionConfig();
     auto client = VoiceProfileClient::FromConfig(config);
 
     auto profile = client->CreateProfileAsync(VoiceProfileType::TextDependentVerification, "en-us").get();
@@ -141,15 +154,14 @@ TEST_CASE("reset voice profile text dependent verification", "[api][cxx][speaker
         });
     auto result = client->ResetProfileAsync(profile).get();
     SPXTEST_REQUIRE(result->Reason == ResultReason::ResetVoiceProfile);
-    INFO(DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT]);
-    INFO(SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
 }
 
-TEST_CASE("reset voice profile text independent verification", "[api][cxx][speaker_id][reset_ti_ver]")
+TEST_CASE(
+    "Speaker recognition::reset voice profile text independent verification",
+    "[api][cxx][speaker_id][reset_ti_ver]")
 {
     // create a profile using a speech config
-    SPXTEST_REQUIRE(!DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT].empty());
-    auto config = SpeechConfig::FromEndpoint(DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT], SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
+    auto config = GetSpeakerRecognitionProdSubscriptionConfig();
     auto client = VoiceProfileClient::FromConfig(config);
 
     auto profile = client->CreateProfileAsync(VoiceProfileType::TextIndependentVerification, "en-us").get();
@@ -167,16 +179,14 @@ TEST_CASE("reset voice profile text independent verification", "[api][cxx][speak
     //note: when reset is successful, the content buffer in the response is empty. So, SpeechServiceResponse_JsonResult is empty.
     SPXTEST_REQUIRE(result->Properties.GetProperty(PropertyId::SpeechServiceResponse_JsonResult).empty());
     SPXTEST_REQUIRE(!result->ResultId.empty());
-    INFO(DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT]);
-    INFO(SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
 }
 
-TEST_CASE("reset voice profile text independent identification", "[api][speaker_id][cxx][reset_ti_iden]")
+TEST_CASE(
+    "Speaker recognition::reset voice profile text independent identification",
+    "[api][speaker_id][cxx][reset_ti_iden]")
 {
     // create a profile using a speech config
-    SPXTEST_REQUIRE(!DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT].empty());
-    auto config = SpeechConfig::FromEndpoint(DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT], SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
-
+    auto config = GetSpeakerRecognitionProdSubscriptionConfig();
     auto client = VoiceProfileClient::FromConfig(config);
 
     auto profile = client->CreateProfileAsync(VoiceProfileType::TextIndependentIdentification, "en-us").get();
@@ -192,7 +202,7 @@ TEST_CASE("reset voice profile text independent identification", "[api][speaker_
     result = client->DeleteProfileAsync(profile).get();
     SPXTEST_REQUIRE(result->Reason == ResultReason::Canceled);
     auto d = VoiceProfileCancellationDetails::FromResult(result);
-    SPXTEST_REQUIRE(d->ErrorDetails.find("profile doesn't exist") != std::string::npos);
+    SPXTEST_REQUIRE(d->ErrorDetails.find("can't be found") != std::string::npos);
 
     // can't reset or reset without a voice type. it is a runtime error.
     auto fakeProfile = VoiceProfile::FromId("voice_profile_without_voice_type");
@@ -201,15 +211,14 @@ TEST_CASE("reset voice profile text independent identification", "[api][speaker_
     auto details = VoiceProfileCancellationDetails::FromResult(result);
     SPXTEST_REQUIRE(details->ErrorDetails.find("error") != std::string::npos);
     SPXTEST_REQUIRE(details->ErrorCode == CancellationErrorCode::RuntimeError);
-    INFO(DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT]);
-    INFO(SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
 }
 
-TEST_CASE("delete voice profile text independent identification", "[api][cxx][speaker_id][delete_ti_iden]")
+TEST_CASE(
+    "Speaker recognition::delete voice profile text independent identification",
+    "[api][cxx][speaker_id][delete_ti_iden]")
 {
     // create a profile using a speech config
-    SPXTEST_REQUIRE(!DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT].empty());
-    auto config = SpeechConfig::FromEndpoint(DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT], SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
+    auto config = GetSpeakerRecognitionProdSubscriptionConfig();
     auto client = VoiceProfileClient::FromConfig(config);
 
     auto profile = client->CreateProfileAsync(VoiceProfileType::TextIndependentIdentification, "en-us").get();
@@ -222,18 +231,18 @@ TEST_CASE("delete voice profile text independent identification", "[api][cxx][sp
     SPXTEST_REQUIRE(result->Reason == ResultReason::Canceled);
     //auto raw = result->Properties.GetProperty(PropertyId::SpeechServiceResponse_JsonResult, "");
     auto d = VoiceProfileCancellationDetails::FromResult(result);
-    SPXTEST_REQUIRE(d->ErrorDetails.find("profile doesn't exist") != std::string::npos);
+    SPXTEST_REQUIRE(d->ErrorDetails.find("can't be found") != std::string::npos);
     SPXTEST_REQUIRE(d->ErrorCode == CancellationErrorCode::ServiceError);
-    INFO(DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT]);
-    INFO(SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
 }
 
-TEST_CASE("speaker verification accept and reject speaker", "[api][cxx][speaker_id][verification]")
+TEST_CASE(
+    "Speaker recognition::verification accepts and rejects speaker",
+    "[api][cxx][speaker_id][verification]")
 {
-    SPXTEST_REQUIRE(!DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT].empty());
     REQUIRE(exists(ROOT_RELATIVE_PATH(MULTIPLE_UTTERANCE_CHINESE)));
     REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
-    auto config = SpeechConfig::FromEndpoint(DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT], SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
+
+    auto config = GetSpeakerRecognitionProdSubscriptionConfig();
     auto audioInput = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(MULTIPLE_UTTERANCE_CHINESE));
 
     auto client = VoiceProfileClient::FromConfig(config);
@@ -261,16 +270,15 @@ TEST_CASE("speaker verification accept and reject speaker", "[api][cxx][speaker_
     auto recognizer2 = SpeakerRecognizer::FromConfig(config, wrongAudio);
     auto result2 = recognizer2->RecognizeOnceAsync(model).get();
     SPXTEST_REQUIRE(result2->Reason == ResultReason::NoMatch);
-
-    INFO(DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT]);
-    INFO(SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
 }
 
-TEST_CASE("speaker identification", "[api][cxx][speaker_id][identification]")
+TEST_CASE(
+    "Speaker recognition::speaker identification",
+    "[api][cxx][speaker_id][identification]")
 {
-    SPXTEST_REQUIRE(!DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT].empty());
     REQUIRE(exists(ROOT_RELATIVE_PATH(MULTIPLE_UTTERANCE_CHINESE)));
-    auto config = SpeechConfig::FromEndpoint(DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT], SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
+
+    auto config = GetSpeakerRecognitionProdSubscriptionConfig();
     auto audioInput = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(MULTIPLE_UTTERANCE_CHINESE));
     auto recognizer = SpeakerRecognizer::FromConfig(config, audioInput);
 
@@ -306,16 +314,15 @@ TEST_CASE("speaker identification", "[api][cxx][speaker_id][identification]")
     auto model = SpeakerIdentificationModel::FromProfiles(profiles);
     auto result = recognizer->RecognizeOnceAsync(model).get();
     SPXTEST_REQUIRE(result->Reason == ResultReason::RecognizedSpeakers);
-    INFO(DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT]);
-    INFO(SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
 }
 
-TEST_CASE("Text Dependent Verify", "[api][cxx][speaker_id][td_good_case]")
+TEST_CASE(
+    "Speaker recognition::text dependent verification",
+    "[api][cxx][speaker_id][td_good_case]")
 {
-    SPXTEST_REQUIRE(!DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT].empty());
     REQUIRE(exists(ROOT_RELATIVE_PATH(SPEAKER_VERIFICATION_ENGLISH)));
-    SPXTEST_REQUIRE(!DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT].empty());
-    auto config = SpeechConfig::FromEndpoint(DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT], SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
+
+    auto config = GetSpeakerRecognitionProdSubscriptionConfig();
     auto audioInput = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SPEAKER_VERIFICATION_ENGLISH));
 
     auto client = VoiceProfileClient::FromConfig(config);
@@ -345,15 +352,15 @@ TEST_CASE("Text Dependent Verify", "[api][cxx][speaker_id][td_good_case]")
     auto recognizer = SpeakerRecognizer::FromConfig(config, audioInput);
     auto result = recognizer->RecognizeOnceAsync(model).get();
     SPXTEST_REQUIRE(result->Reason == ResultReason::RecognizedSpeaker);
-    INFO(DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT]);
-    INFO(SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
 }
 
-TEST_CASE("Text Dependent Verify wrong passphrase", "[api][cxx][speaker_id][td_wrong_case]")
+TEST_CASE(
+    "Speaker recognition::wrong passphrase in text dependent verification",
+    "[api][cxx][speaker_id][td_wrong_case]")
 {
-    SPXTEST_REQUIRE(!DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT].empty());
     REQUIRE(exists(ROOT_RELATIVE_PATH(SPEAKER_VERIFICATION_ENGLISH)));
-    auto config = SpeechConfig::FromEndpoint(DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT], SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
+
+    auto config = GetSpeakerRecognitionProdSubscriptionConfig();
     auto verifymeFile = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SPEAKER_VERIFICATION_ENGLISH));
 
     auto client = VoiceProfileClient::FromConfig(config);
@@ -379,16 +386,15 @@ TEST_CASE("Text Dependent Verify wrong passphrase", "[api][cxx][speaker_id][td_w
     auto details = VoiceProfileEnrollmentCancellationDetails::FromResult(enrollResult);
     SPXTEST_REQUIRE(details->ErrorCode == CancellationErrorCode::BadRequest);
     SPXTEST_REQUIRE(PAL::StringUtils::ToLower(details->ErrorDetails).find("invalid passphrase") != string::npos);
-
-    INFO(DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT]);
-    INFO(SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
 }
 
-TEST_CASE("enroll and delete in parallel", "[api][cxx][speaker_id][parallel]")
+TEST_CASE(
+    "Speaker recognition::enroll and delete in parallel",
+    "[api][cxx][speaker_id][parallel]")
 {
-    SPXTEST_REQUIRE(!DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT].empty());
     REQUIRE(exists(ROOT_RELATIVE_PATH(SPEAKER_VERIFICATION_ENGLISH)));
-    auto config = SpeechConfig::FromEndpoint(DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT], SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
+
+    auto config = GetSpeakerRecognitionProdSubscriptionConfig();
     auto verifymeFile = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SPEAKER_VERIFICATION_ENGLISH));
     auto weatherFile = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
 
@@ -415,11 +421,11 @@ TEST_CASE("enroll and delete in parallel", "[api][cxx][speaker_id][parallel]")
     auto deleteFuture3 = client->DeleteProfileAsync(profile2);
 }
 
-TEST_CASE("speaker recognition from the official endpoint", "[api][cxx][speaker_id][official_endpoint]")
+TEST_CASE(
+    "Speaker recognition::speaker recognition",
+    "[api][cxx][speaker_id][official_endpoint]")
 {
-    SPXTEST_REQUIRE(!DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT].empty());
-     auto config = SpeechConfig::FromSubscription(SubscriptionsRegionsMap[SPEAKER_RECOGNITION_SUBSCRIPTION].Key, SubscriptionsRegionsMap[SPEAKER_RECOGNITION_SUBSCRIPTION].Region);
-
+    auto config = GetSpeakerRecognitionProdSubscriptionConfig();
     auto audioInput = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SPEAKER_VERIFICATION_ENGLISH));
     auto client = VoiceProfileClient::FromConfig(config);
     auto profile1 = client->CreateProfileAsync(VoiceProfileType::TextDependentVerification, "en-us").get();
@@ -444,11 +450,11 @@ TEST_CASE("speaker recognition from the official endpoint", "[api][cxx][speaker_
 }
 
 #if 0
-TEST_CASE("Microphone Text Dependent Verify", "[api][cxx][speaker_id][microphone]")
+TEST_CASE(
+    "Speaker recognition::text dependent verification using the microphone",
+    "[api][cxx][speaker_id][microphone]")
 {
-    SPXTEST_REQUIRE(!DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT].empty());
-
-    auto config = SpeechConfig::FromEndpoint(DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT], SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
+    auto config = GetSpeakerRecognitionProdSubscriptionConfig();
     auto audioInput = AudioConfig::FromDefaultMicrophoneInput();
     //config->SetProperty("SPEECH-MicrophoneTimeoutInSpeakerRecognitionInMilliseconds", "thisis ");
     auto client = VoiceProfileClient::FromConfig(config);

@@ -94,7 +94,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public async Task text_independent_verification_enrollment()
         {
-            var config = SpeechConfig.FromHost(new Uri(DefaultSettingsMap[DefaultSettingKeys.SPEAKER_RECOGNITION_ENDPOINT]), SubscriptionsRegionsMap[SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION].Key);
+            var config = this.GetProdSpeakerRecognitionSubscriptionConfig();
+
             using (var client = new VoiceProfileClient(config))
             using (var profile = await client.CreateProfileAsync(VoiceProfileType.TextIndependentVerification, "en-us"))
             {
@@ -123,7 +124,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public async Task text_independent_identification_enrollment()
         {
-            var config = SpeechConfig.FromHost(new Uri(DefaultSettingsMap[DefaultSettingKeys.SPEAKER_RECOGNITION_ENDPOINT]), SubscriptionsRegionsMap[SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION].Key);
+            var config = this.GetProdSpeakerRecognitionSubscriptionConfig();
+
             using (var client = new VoiceProfileClient(config))
             using (var profile = await client.CreateProfileAsync(VoiceProfileType.TextIndependentIdentification, "en-us"))
             {
@@ -154,7 +156,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public async Task text_dependent_verification_enrollment()
         {
-            var config = SpeechConfig.FromHost(new Uri(DefaultSettingsMap[DefaultSettingKeys.SPEAKER_RECOGNITION_ENDPOINT]), SubscriptionsRegionsMap[SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION].Key);
+            var config = this.GetProdSpeakerRecognitionSubscriptionConfig();
+
             using (var client = new VoiceProfileClient(config))
             using (var profile = await client.CreateProfileAsync(VoiceProfileType.TextDependentVerification, "en-us"))
             {
@@ -183,7 +186,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public async Task text_dependent_verification_enrollment_good_case()
         {
-            var config = SpeechConfig.FromHost(new Uri(DefaultSettingsMap[DefaultSettingKeys.SPEAKER_RECOGNITION_ENDPOINT]), SubscriptionsRegionsMap[SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION].Key);
+            var config = this.GetProdSpeakerRecognitionSubscriptionConfig();
+
             using (var client = new VoiceProfileClient(config))
             using (var profile = await client.CreateProfileAsync(VoiceProfileType.TextDependentVerification, "en-us"))
             {
@@ -211,7 +215,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public async Task ResetVoiceProfile1()
         {
-            var config = SpeechConfig.FromHost(new Uri(DefaultSettingsMap[DefaultSettingKeys.SPEAKER_RECOGNITION_ENDPOINT]), SubscriptionsRegionsMap[SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION].Key);
+            var config = this.GetProdSpeakerRecognitionSubscriptionConfig();
+
             using (var client = new VoiceProfileClient(config))
             using (var profile = await client.CreateProfileAsync(VoiceProfileType.TextDependentVerification, "en-us"))
             {
@@ -233,7 +238,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public async Task ResetVoiceProfile2()
         {
-            var config = SpeechConfig.FromHost(new Uri(DefaultSettingsMap[DefaultSettingKeys.SPEAKER_RECOGNITION_ENDPOINT]), SubscriptionsRegionsMap[SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION].Key);
+            var config = this.GetProdSpeakerRecognitionSubscriptionConfig();
+
             using (var client = new VoiceProfileClient(config))
             using (var profile = await client.CreateProfileAsync(VoiceProfileType.TextIndependentVerification, "en-us"))
             {
@@ -255,7 +261,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public async Task ResetDeleteResetVoiceProfile()
         {
-            var config = SpeechConfig.FromHost(new Uri(DefaultSettingsMap[DefaultSettingKeys.SPEAKER_RECOGNITION_ENDPOINT]), SubscriptionsRegionsMap[SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION].Key);
+            var config = this.GetProdSpeakerRecognitionSubscriptionConfig();
+
             using (var client = new VoiceProfileClient(config))
             using (var profile = await client.CreateProfileAsync(VoiceProfileType.TextIndependentIdentification, "en-us"))
             {
@@ -270,7 +277,10 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     result = await client.DeleteProfileAsync(profile);
                     SPXTEST_REQUIRE(result.Reason == ResultReason.Canceled);
                     var details = VoiceProfileCancellationDetails.FromResult(result);
-                    SPXTEST_REQUIRE(details.ErrorDetails.Contains("profile doesn't exist"));
+
+                    var expectedSubstring = "can't be found";
+                    Assert.IsTrue(details.ErrorDetails.Contains(expectedSubstring),
+                        $"Didn't find expected substring '{expectedSubstring}' in error details.\nActual: {details.ErrorDetails}");
                 }
                 finally
                 {
@@ -282,7 +292,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public async Task SpeakerVerification()
         {
-            var config = SpeechConfig.FromHost(new Uri(DefaultSettingsMap[DefaultSettingKeys.SPEAKER_RECOGNITION_ENDPOINT]), SubscriptionsRegionsMap[SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION].Key);
+            var config = this.GetProdSpeakerRecognitionSubscriptionConfig();
+
             using (var client = new VoiceProfileClient(config))
             using (var profile = await client.CreateProfileAsync(VoiceProfileType.TextIndependentVerification, "en-us"))
             {
@@ -325,9 +336,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public async Task SpeakerIdentification()
         {
-            var speechConfig = SpeechConfig.FromHost(new Uri(DefaultSettingsMap[DefaultSettingKeys.SPEAKER_RECOGNITION_ENDPOINT]), SubscriptionsRegionsMap[SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION].Key);
+            var config = this.GetProdSpeakerRecognitionSubscriptionConfig();
 
-            using (var client = new VoiceProfileClient(speechConfig))
+            using (var client = new VoiceProfileClient(config))
             using (var profile = await client.CreateProfileAsync(VoiceProfileType.TextIndependentIdentification, "en-us"))
             {
                 try
@@ -352,7 +363,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                             profiles.Add(profile2);
                             using (var model = SpeakerIdentificationModel.FromProfiles(profiles))
                             {
-                                var recognizer = new SpeakerRecognizer(speechConfig, audioInput);
+                                var recognizer = new SpeakerRecognizer(config, audioInput);
                                 var result3 = await recognizer.RecognizeOnceAsync(model);
                                 SPXTEST_REQUIRE(result3.Reason == ResultReason.RecognizedSpeakers);
                             }
@@ -364,6 +375,21 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     await client.DeleteProfileAsync(profile);
                 }
             }
+        }
+
+        private SpeechConfig GetProdSpeakerRecognitionSubscriptionConfig()
+        {
+            var index = SubscriptionsRegionsKeys.SPEAKER_RECOGNITION_SUBSCRIPTION;
+
+            var subscriptionKey = SubscriptionsRegionsMap[index].Key;
+            var subscriptionRegion = SubscriptionsRegionsMap[index].Region;
+
+            Assert.IsTrue(!string.IsNullOrEmpty(subscriptionKey),
+                $"Couldn't find a speaker recognition subscription key. Check the test settings JSON for '{index}'.");
+            Assert.IsTrue(!string.IsNullOrEmpty(subscriptionRegion),
+                $"Couldn't find a speaker recognition subscription region. Check the test settings JSON. for '{index}'.");
+
+            return SpeechConfig.FromSubscription(subscriptionKey, subscriptionRegion);
         }
     }
 }

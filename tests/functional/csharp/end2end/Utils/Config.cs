@@ -49,6 +49,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils
         public static string CONVERSATION_TRANSLATOR => "ConversationTranslatorSubscription";
         public static string CUSTOM_VOICE_SUBSCRIPTION => "CustomVoiceSubscription";
         public static string MOONCAKE_SUBSCRIPTION => "MooncakeSubscription";
+        public static string SPEAKER_RECOGNITION_SUBSCRIPTION => "SpeakerRecognitionSubscription";
     }
 
     // Default settings keys
