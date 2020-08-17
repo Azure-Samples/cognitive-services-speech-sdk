@@ -56,6 +56,8 @@
 #import "auto_detect_source_language_config_private.h"
 #import "source_language_config_private.h"
 
+#import "pronunciation_assessment_config_private.h"
+
 #import "conversation_private.h"
 #import "conversation_event_args_private.h"
 #import "conversation_transcriber_private.h"

@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		3C740C5E22EFE6FB00BA9D95 /* SpeechSynthesisTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C740C5D22EFE6FB00BA9D95 /* SpeechSynthesisTests.swift */; };
+		83B59CD224E7B241008A1A39 /* PronunciationAssessmentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83B59CD124E7B241008A1A39 /* PronunciationAssessmentTests.swift */; };
 		DC0E472522E1E0B0005012F7 /* TestHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC0E472422E1E0B0005012F7 /* TestHelpers.swift */; };
 		DCB84E2B228C3D2300FE7617 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCB84E2A228C3D2300FE7617 /* AppDelegate.swift */; };
 		DCB84E2D228C3D2300FE7617 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCB84E2C228C3D2300FE7617 /* ViewController.swift */; };
@@ -34,6 +35,7 @@
 
 /* Begin PBXFileReference section */
 		3C740C5D22EFE6FB00BA9D95 /* SpeechSynthesisTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpeechSynthesisTests.swift; sourceTree = "<group>"; };
+		83B59CD124E7B241008A1A39 /* PronunciationAssessmentTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PronunciationAssessmentTests.swift; sourceTree = "<group>"; };
 		DC0E472422E1E0B0005012F7 /* TestHelpers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestHelpers.swift; sourceTree = "<group>"; };
 		DCB84E27228C3D2300FE7617 /* SpeechSDKSwift.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SpeechSDKSwift.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DCB84E2A228C3D2300FE7617 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -114,9 +116,10 @@
 			isa = PBXGroup;
 			children = (
 				FC5F53EB24E172F50009EA6E /* ConversationTranslationTests.swift */,
-				EB21A8F7242C34A50056703C /* LanguageConfigurationTests.swift */,
 				DCB84E4B228C734F00FE7617 /* Info.plist */,
 				DCCDCF3022B27D0D00E00B87 /* IntentTests.swift */,
+				EB21A8F7242C34A50056703C /* LanguageConfigurationTests.swift */,
+				83B59CD124E7B241008A1A39 /* PronunciationAssessmentTests.swift */,
 				DCCDCF3222B27D0D00E00B87 /* SpeechRecognitionTests.swift */,
 				3C740C5D22EFE6FB00BA9D95 /* SpeechSynthesisTests.swift */,
 				DC0E472422E1E0B0005012F7 /* TestHelpers.swift */,
@@ -239,6 +242,7 @@
 				DCCDCF3522B27D0D00E00B87 /* SpeechRecognitionTests.swift in Sources */,
 				DCCDCF3322B27D0D00E00B87 /* IntentTests.swift in Sources */,
 				FC5F53EC24E172F50009EA6E /* ConversationTranslationTests.swift in Sources */,
+				83B59CD224E7B241008A1A39 /* PronunciationAssessmentTests.swift in Sources */,
 				DCCDCF3422B27D0D00E00B87 /* TranslationTests.swift in Sources */,
 				EB21A8F8242C34A50056703C /* LanguageConfigurationTests.swift in Sources */,
 				3C740C5E22EFE6FB00BA9D95 /* SpeechSynthesisTests.swift in Sources */,

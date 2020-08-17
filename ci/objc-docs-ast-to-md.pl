@@ -55,7 +55,7 @@ $RE{ObjCPropertyDecl} = qr/
   \s$H{range}
   \s$H{col}
   \s(?<name>\w+)
-  \s'(?<type>.*?)':'(?<basetype>.*?)'
+  \s'(?<type>.*?)'(?::'(?<basetype>.*?)')?
   (?:\s(?<flags>(?:readwrite|readonly|copy|atomic|nonatomic|unsafe_unretained|assign)(?:\s(?:readwrite|readonly|copy|atomic|nonatomic|unsafe_unretained|assign))*))?
   \r?$
 /x;

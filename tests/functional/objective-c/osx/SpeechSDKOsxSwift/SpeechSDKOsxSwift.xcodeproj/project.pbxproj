@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		3C740C6022EFE75600BA9D95 /* SpeechSynthesisTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C740C5F22EFE75600BA9D95 /* SpeechSynthesisTests.swift */; };
+		83B59CCE24E7B1E3008A1A39 /* PronunciationAssessmentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83B59CCD24E7B1E3008A1A39 /* PronunciationAssessmentTests.swift */; };
 		DC0E472322E1DD1A005012F7 /* TestHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC0E472222E1DD1A005012F7 /* TestHelpers.swift */; };
 		DC70A97822CA5BC500D051C8 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC70A97722CA5BC500D051C8 /* AppDelegate.swift */; };
 		DC70A97A22CA5BC600D051C8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DC70A97922CA5BC600D051C8 /* Assets.xcassets */; };
@@ -33,6 +34,7 @@
 
 /* Begin PBXFileReference section */
 		3C740C5F22EFE75600BA9D95 /* SpeechSynthesisTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SpeechSynthesisTests.swift; path = ../../../ios/SpeechSDKSwift/SpeechSDKSwiftTests/SpeechSynthesisTests.swift; sourceTree = "<group>"; };
+		83B59CCD24E7B1E3008A1A39 /* PronunciationAssessmentTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PronunciationAssessmentTests.swift; path = ../../../ios/SpeechSDKSwift/SpeechSDKSwiftTests/PronunciationAssessmentTests.swift; sourceTree = "<group>"; };
 		DC0E472222E1DD1A005012F7 /* TestHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TestHelpers.swift; path = ../../../ios/SpeechSDKSwift/SpeechSDKSwiftTests/TestHelpers.swift; sourceTree = "<group>"; };
 		DC70A97422CA5BC500D051C8 /* SpeechSDKOsxSwift.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SpeechSDKOsxSwift.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DC70A97722CA5BC500D051C8 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -115,9 +117,10 @@
 			isa = PBXGroup;
 			children = (
 				FC5F53E924E1727D0009EA6E /* ConversationTranslationTests.swift */,
-				EB21A8F9242C58F00056703C /* LanguageConfigurationTests.swift */,
 				DC70A98D22CA5C0900D051C8 /* Info.plist */,
 				DC70A99B22CA5F7400D051C8 /* IntentTests.swift */,
+				EB21A8F9242C58F00056703C /* LanguageConfigurationTests.swift */,
+				83B59CCD24E7B1E3008A1A39 /* PronunciationAssessmentTests.swift */,
 				DC70A99322CA5C6000D051C8 /* SpeechRecognitionTests.swift */,
 				3C740C5F22EFE75600BA9D95 /* SpeechSynthesisTests.swift */,
 				DC0E472222E1DD1A005012F7 /* TestHelpers.swift */,
@@ -239,6 +242,7 @@
 				DC70A99D22CA5F7400D051C8 /* IntentTests.swift in Sources */,
 				DC70A99422CA5C6000D051C8 /* SpeechRecognitionTests.swift in Sources */,
 				FC5F53EA24E1727D0009EA6E /* ConversationTranslationTests.swift in Sources */,
+				83B59CCE24E7B1E3008A1A39 /* PronunciationAssessmentTests.swift in Sources */,
 				DC70A99C22CA5F7400D051C8 /* TranslationTests.swift in Sources */,
 				EB21A8FA242C58F00056703C /* LanguageConfigurationTests.swift in Sources */,
 				3C740C6022EFE75600BA9D95 /* SpeechSynthesisTests.swift in Sources */,

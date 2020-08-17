@@ -27,6 +27,8 @@
 #import "SPXLanguageUnderstandingModel.h"
 #import "SPXParticipant.h"
 #import "SPXPhraseListGrammar.h"
+#import "SPXPronunciationAssessmentConfiguration.h"
+#import "SPXPronunciationAssessmentResult.h"
 #import "SPXPropertyCollection.h"
 #import "SPXRecognitionEventArgs.h"
 #import "SPXRecognitionResult.h"

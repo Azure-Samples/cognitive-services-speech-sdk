@@ -19,6 +19,7 @@
 		3CC3789C2121CFD600F07A66 /* whatstheweatherlike.wav in Resources */ = {isa = PBXBuildFile; fileRef = 3CC3789B2121CFD600F07A66 /* whatstheweatherlike.wav */; };
 		3CCD06D62157F71E00A348DB /* microphone_test.m in Sources */ = {isa = PBXBuildFile; fileRef = 3CCD06D12157F71E00A348DB /* microphone_test.m */; };
 		3CCD06D72157F71E00A348DB /* dummytest.m in Sources */ = {isa = PBXBuildFile; fileRef = 3CCD06D22157F71E00A348DB /* dummytest.m */; };
+		83B59CCC24E7B125008A1A39 /* SPXPronunciationAssessmentTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 83B59CCB24E7B124008A1A39 /* SPXPronunciationAssessmentTest.m */; };
 		DC15EE9D22676E5F00991304 /* wreck-a-nice-beach.wav in Resources */ = {isa = PBXBuildFile; fileRef = DC15EE9C22676E5F00991304 /* wreck-a-nice-beach.wav */; };
 		DC15EE9E22676E7D00991304 /* wreck-a-nice-beach.wav in Resources */ = {isa = PBXBuildFile; fileRef = DC15EE9C22676E5F00991304 /* wreck-a-nice-beach.wav */; };
 		DC27A3F72260996200BD9FE0 /* Margarita-44100.wav in Resources */ = {isa = PBXBuildFile; fileRef = DC27A3F62260996200BD9FE0 /* Margarita-44100.wav */; };
@@ -94,6 +95,7 @@
 		3CCD06D22157F71E00A348DB /* dummytest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = dummytest.m; path = ../../shared/dummytest.m; sourceTree = "<group>"; };
 		3CCD06D32157F71E00A348DB /* dummytest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dummytest.h; path = ../../shared/dummytest.h; sourceTree = "<group>"; };
 		3CCD06D82157F77D00A348DB /* MicrosoftCognitiveServicesSpeech.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MicrosoftCognitiveServicesSpeech.framework; path = "../../../../xcode-build-output/MicrosoftCognitiveServicesSpeech.framework"; sourceTree = "<group>"; };
+		83B59CCB24E7B124008A1A39 /* SPXPronunciationAssessmentTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SPXPronunciationAssessmentTest.m; path = ../../shared/testrunners/SPXPronunciationAssessmentTest.m; sourceTree = "<group>"; };
 		DC15EE9C22676E5F00991304 /* wreck-a-nice-beach.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = "wreck-a-nice-beach.wav"; path = "../../../input/audio/wreck-a-nice-beach.wav"; sourceTree = "<group>"; };
 		DC27A3F62260996200BD9FE0 /* Margarita-44100.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = "Margarita-44100.wav"; path = "../../../../input/audio/Margarita-44100.wav"; sourceTree = "<group>"; };
 		DC419443225B6F2300F95B2F /* CompressedStreamsTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = CompressedStreamsTest.m; path = ../../shared/testrunners/CompressedStreamsTest.m; sourceTree = "<group>"; };
@@ -198,18 +200,19 @@
 		F3EABAC421639F5700BA4B2C /* SpeechSDK_iOSUnitTests */ = {
 			isa = PBXGroup;
 			children = (
+				DC419443225B6F2300F95B2F /* CompressedStreamsTest.m */,
+				F3EABAC721639F5700BA4B2C /* Info.plist */,
 				FC4C1DD524AF1B4200B3D799 /* SPXConversationTranscriberTest.m */,
 				FC4C1DD324AF16DE00B3D799 /* SPXConversationTranslatorTest.m */,
+				F3C06E36216E3AE2003989B2 /* SPXDummyTestRunner.m */,
 				EB21A8EA2429674B0056703C /* SPXLanguageConfigurationTest.m */,
-				3C740C5B22EFDC6A00BA9D95 /* SPXSpeechSynthesisTest.m */,
+				83B59CCB24E7B124008A1A39 /* SPXPronunciationAssessmentTest.m */,
 				DCC1352E225E182E00194047 /* SPXSpeechRecognitionEndtoEndTest.h */,
 				3CA6CFA2211F471600CD2768 /* SPXSpeechRecognitionTest.m */,
-				DC419443225B6F2300F95B2F /* CompressedStreamsTest.m */,
-				F3EABABD2163887500BA4B2C /* SPXTranslationRecognitionTest.m */,
-				DCF1E29122E1CC4E00FA9F3E /* SPXTestHelpers.m */,
+				3C740C5B22EFDC6A00BA9D95 /* SPXSpeechSynthesisTest.m */,
 				DCF1E29322E1CC8100FA9F3E /* SPXTestHelpers.h */,
-				F3C06E36216E3AE2003989B2 /* SPXDummyTestRunner.m */,
-				F3EABAC721639F5700BA4B2C /* Info.plist */,
+				DCF1E29122E1CC4E00FA9F3E /* SPXTestHelpers.m */,
+				F3EABABD2163887500BA4B2C /* SPXTranslationRecognitionTest.m */,
 			);
 			path = SpeechSDK_iOSUnitTests;
 			sourceTree = "<group>";
@@ -355,6 +358,7 @@
 				DC419444225B6F2300F95B2F /* CompressedStreamsTest.m in Sources */,
 				3C740C5C22EFDC6A00BA9D95 /* SPXSpeechSynthesisTest.m in Sources */,
 				F3EABACE21639F6300BA4B2C /* SPXTranslationRecognitionTest.m in Sources */,
+				83B59CCC24E7B125008A1A39 /* SPXPronunciationAssessmentTest.m in Sources */,
 				FC4C1DD424AF16DE00B3D799 /* SPXConversationTranslatorTest.m in Sources */,
 				DCF1E29222E1CC4E00FA9F3E /* SPXTestHelpers.m in Sources */,
 				F3C06E38216E4148003989B2 /* dummytest.m in Sources */,

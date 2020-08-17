@@ -303,6 +303,66 @@ typedef NS_ENUM(NSUInteger, SPXPropertyId)
      * NOTE: Added in version 1.13.0.
      */
     SPXDataBuffer_UserId = 11002,
+
+    /**
+     * The reference text of the audio for pronunciation evaluation.
+     * For this and the following pronunciation assessment parameters, see
+     * https://docs.microsoft.com/azure/cognitive-services/speech-service/rest-speech-to-text#pronunciation-assessment-parameters for details.
+     * Under normal circumstances, you shouldn't have to use this property directly.
+     *
+     * NOTE: Added in version 1.14.0
+     */
+    SPXPronunciationAssessment_ReferenceText = 12001,
+
+    /**
+     * The point system for pronunciation score calibration (FivePoint or HundredMark).
+     * Under normal circumstances, you shouldn't have to use this property directly.
+     *
+     * NOTE: Added in version 1.14.0
+     */
+    SPXPronunciationAssessment_GradingSystem = 12002,
+
+    /**
+     * The pronunciation evaluation granularity (Phoneme, Word, or FullText).
+     * Under normal circumstances, you shouldn't have to use this property directly.
+     *
+     * NOTE: Added in version 1.14.0
+     */
+    SPXPronunciationAssessment_Granularity = 12003,
+
+    /**
+     * Defines if enable miscue calculation. 
+     * With this enabled, the pronounced words will be compared to the reference text, 
+     * and will be marked with omission/insertion based on the comparison. The default setting is False.
+     * Under normal circumstances, you shouldn't have to use this property directly.
+     *
+     * NOTE: Added in version 1.14.0
+     */
+    SPXPronunciationAssessment_EnableMiscue = 12005,
+
+    /**
+     * A GUID indicating a customized pronunciation score system. 
+     * Under normal circumstances, you shouldn't have to use this property directly.
+     *
+     * NOTE: Added in version 1.14.0
+     */
+    SPXPronunciationAssessment_ScenarioId = 12006,
+
+    /**
+     * The json string of pronunciation assessment parameters
+     * Under normal circumstances, you shouldn't have to use this property directly.
+     *
+     * NOTE: Added in version 1.14.0
+     */
+    SPXPronunciationAssessment_Json = 12009,
+
+    /**
+     * Pronunciation assessment parameters.
+     * This property is intended to be read-only. The SDK is using it internally.
+     *
+     * NOTE: Added in version 1.14.0
+     */
+    SPXPronunciationAssessment_Params = 12010,
 };
 
 /**
@@ -666,9 +726,9 @@ typedef NS_ENUM(NSUInteger, SPXStreamStatus)
 };
 
 /**
-  * Defines the possible reasons why the participant changed event was raised.
-  * Added in version 1.13.0
-  */
+ * Defines the possible reasons why the participant changed event was raised.
+ * Added in version 1.13.0
+ */
 typedef NS_ENUM(NSUInteger, SPXParticipantChangedReason)
 {
     /**
@@ -686,3 +746,43 @@ typedef NS_ENUM(NSUInteger, SPXParticipantChangedReason)
      */
     SPXParticipantChangedReason_Updated = 2
 };
+
+/**
+ * Defines the point system for pronunciation score calibration; default value is FivePoint.
+ * Added in version 1.14.0
+ */
+typedef NS_ENUM(NSUInteger, SPXPronunciationAssessmentGradingSystem)
+{
+    /**
+     * Five point calibration
+     */
+    SPXPronunciationAssessmentGradingSystem_FivePoint = 1,
+
+    /**
+     * Hundred mark
+     */
+    SPXPronunciationAssessmentGradingSystem_HundredMark = 2
+};
+
+/**
+ * Defines the pronunciation evaluation granularity; default value is Phoneme.
+ * Added in version 1.14.0
+ */
+typedef NS_ENUM(NSUInteger, SPXPronunciationAssessmentGranularity)
+{
+    /**
+     * Shows the score on the full text, word and phoneme level
+     */
+    SPXPronunciationAssessmentGranularity_Phoneme = 1,
+
+    /**
+     * Shows the score on the full text and word level
+     */
+    SPXPronunciationAssessmentGranularity_Word = 2,
+
+    /**
+     * Shows the score on the full text level only
+     */
+    SPXPronunciationAssessmentGranularity_FullText = 3
+};
+

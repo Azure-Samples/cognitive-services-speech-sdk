@@ -55,6 +55,13 @@
     static_assert((int)SPXCancellationDetailsReasonDetailedText == (int)SpeechImpl::PropertyId::CancellationDetails_ReasonDetailedText, "inconsistent enum definition of property id");
     static_assert((int)SPXLanguageUnderstandingServiceResponseJsonResult == (int)SpeechImpl::PropertyId::LanguageUnderstandingServiceResponse_JsonResult, "inconsistent enum definition of property id");
     static_assert((int)SPXSpeechLogFilename == (int)SpeechImpl::PropertyId::Speech_LogFilename, "inconsistent enum definition of property id");
+    static_assert((int)SPXPronunciationAssessment_ReferenceText == (int)SpeechImpl::PropertyId::PronunciationAssessment_ReferenceText, "inconsistent enum definition of property id");
+    static_assert((int)SPXPronunciationAssessment_GradingSystem == (int)SpeechImpl::PropertyId::PronunciationAssessment_GradingSystem, "inconsistent enum definition of property id");
+    static_assert((int)SPXPronunciationAssessment_Granularity == (int)SpeechImpl::PropertyId::PronunciationAssessment_Granularity, "inconsistent enum definition of property id");
+    static_assert((int)SPXPronunciationAssessment_EnableMiscue == (int)SpeechImpl::PropertyId::PronunciationAssessment_EnableMiscue, "inconsistent enum definition of property id");
+    static_assert((int)SPXPronunciationAssessment_ScenarioId == (int)SpeechImpl::PropertyId::PronunciationAssessment_ScenarioId, "inconsistent enum definition of property id");
+    static_assert((int)SPXPronunciationAssessment_Json == (int)SpeechImpl::PropertyId::PronunciationAssessment_Json, "inconsistent enum definition of property id");
+    static_assert((int)SPXPronunciationAssessment_Params == (int)SpeechImpl::PropertyId::PronunciationAssessment_Params, "inconsistent enum definition of property id");
 
     self = [super init];
     propertiesImpl = propertiesHandle;
