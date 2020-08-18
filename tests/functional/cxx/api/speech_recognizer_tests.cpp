@@ -1519,6 +1519,32 @@ TEST_CASE("SetServiceProperty", "[api][cxx]")
         SPXTEST_REQUIRE(StringComparisions::AssertFuzzyMatch(result->Text, AudioUtterancesMap[SINGLE_UTTERANCE_GERMAN].Utterances["de"][0].Text));
         SPXTEST_REQUIRE(!result->Translations.at("en").compare("Call the first one."));
     }
+
+    SPXTEST_SECTION("SetServiceProperty value with special characters")
+    {
+        auto config = SpeechTranslationConfig::FromSubscription(SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key, SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Region);
+        config->SetServiceProperty("language", "de-DE", ServicePropertyChannel::UriQueryParameter);
+        config->SetServiceProperty("format", "detailed", ServicePropertyChannel::UriQueryParameter);
+
+        // Request for sentiment analysis
+        std::string specialProperty = "speechcontext-PhraseOutput.Detailed.Options";
+        std::string specialValue = R"(["Sentiment"])";
+        config->SetServiceProperty("speechcontext-PhraseOutput.Format", "Detailed", ServicePropertyChannel::UriQueryParameter);
+        config->SetServiceProperty(specialProperty, specialValue, ServicePropertyChannel::UriQueryParameter);
+
+        auto recognizer = SpeechRecognizer::FromConfig(config, audioInput);
+
+        auto result = recognizer->RecognizeOnceAsync().get();
+        SPXTEST_REQUIRE(result != nullptr);
+        SPXTEST_REQUIRE(result->Reason == ResultReason::RecognizedSpeech);
+
+        // Verify that the special property value was passed to the service.
+        // Sentiment analysis is only supported on Speech OnPrem containers,
+        // so we cannot check the actual results here.
+        auto connectionUrl = recognizer->Properties.GetProperty(PropertyId::SpeechServiceConnection_Url);
+        auto queryParam = specialProperty + "=" + specialValue;
+        SPXTEST_REQUIRE(connectionUrl.find(queryParam) != string::npos);
+    }
 }
 
 TEST_CASE("SpeechConfig properties", "[api][cxx]")

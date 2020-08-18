@@ -620,7 +620,8 @@ void Connection::Impl::Connect()
     //              directly on the endpoint instance
     m_connectionUrl = ConstructConnectionUrl();
     endpoint.EndpointUrl(m_connectionUrl);
-    LogInfo("connectionUrl=%s", endpoint.EndpointUrl().c_str());
+    m_connectionUrl = endpoint.EndpointUrl();
+    LogInfo("connectionUrl=%s", m_connectionUrl.c_str());
 
     m_telemetry = make_unique<Telemetry>(
         [weak = std::weak_ptr<Connection::Impl>(shared_from_this())](std::string&& data, const std::string& requestId)
