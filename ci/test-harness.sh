@@ -138,7 +138,7 @@ function runTest {
   EXIT_CODE=$?
 
   TIME_SECONDS=$(get_seconds_elapsed "$START_SECONDS")
-  TAIL="$(tail -20 "${!outputRef}.out")"
+  TAIL="$(tail -10 "${!outputRef}.out")"
 
   print_vars EXIT_CODE TIME_SECONDS = |
     tee -a "${!outputRef}.out"
