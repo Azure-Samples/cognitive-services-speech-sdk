@@ -2394,7 +2394,8 @@ jobs:
       set -e -o pipefail
       # log brew-related version information
       brew config
-      brew install doxygen
+      # install doxygen-1.8.18
+      brew install https://raw.githubusercontent.com/Homebrew/homebrew-core/c68ba0a3e333c417c375c5a9c200f6ed8cc7b011/Formula/doxygen.rb
       cd ci/doxygen
       mkdir -p "$(ArtifactOut)"
       rm -f doxygen.log || true

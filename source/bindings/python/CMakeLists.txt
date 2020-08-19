@@ -217,7 +217,7 @@ else()
 endif()
 
 search_python_module(wheel 0.33.6)
-search_python_module(strip_hints 0.1.4)
+search_python_module(strip_hints 0.1.9)
 
 # strip swig-generated type hints, because they confuse sphinx.
 add_custom_command(

@@ -10,7 +10,7 @@ import azure.cognitiveservices.speech as msspeech
 import Levenshtein as lev
 
 # the timeout to wait for session stopped event after recognition is finished
-_TIMEOUT_IN_SECONDS = 10.
+_TIMEOUT_IN_SECONDS = 30.
 _SIMILARITY_SCORE_THRESHOLD = 0.80
 
 class _TestCallback(object):
