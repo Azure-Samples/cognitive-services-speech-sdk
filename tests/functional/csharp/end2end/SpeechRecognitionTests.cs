@@ -789,7 +789,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 for (int i = 0; i < NumberOfIterations; ++i)
                 {
                     await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
+                    if (!string.IsNullOrEmpty(canceled))
+                    {
+                        break; // Fail test immediately to avoid invalid state exception
+                    }
                     await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
+                    Thread.Sleep(100); // Avoid hammering the service for test stability
                 }
 
                 if (!string.IsNullOrEmpty(canceled))
