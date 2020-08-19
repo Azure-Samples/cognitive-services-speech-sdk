@@ -107,6 +107,7 @@ DESTPUBLIBIOSNETSTANDARD20="$DEST/public/lib/IOS/netstandard2.0"
 DESTPUBINC="$DEST/public/include"
 DESTPRIVLIB="$DEST/private/lib"
 DESTPRIVLIBUNSTRIPPED="$DEST/private/libunstripped"
+DESTPRIVLIBMAP="$DEST/private/map"
 DESTPRIVBIN="$DEST/private/bin"
 DESTPRIVINC="$DEST/private/include"
 DESTPRIVINC2="$DEST/private/include.common"
@@ -140,8 +141,9 @@ fi
 
 printf "\nCopying files to drop location\n"
 
+set -x
 # N.B. no long option for -p (parents) on OSX.
-mkdir -p "$DESTPUBLIB" "$DESTPUBLIBNET461" "$DESTPUBLIBNETSTANDARD20" "$DESTPUBLIBUNIXOSNETSTANDARD20" "$DESTPUBLIBIOSNETSTANDARD20" "$DESTPUBINC" "$DESTPRIVLIB" "$DESTPRIVBIN" "$(dirname "$DESTPRIVINC")" "$(dirname "$DESTPRIVINC2")" "$(dirname "$DESTPRIVINCJSON")"  "$DESTPUBLIB"
+mkdir -p "$DESTPUBLIB" "$DESTPUBLIBNET461" "$DESTPUBLIBNETSTANDARD20" "$DESTPUBLIBUNIXOSNETSTANDARD20" "$DESTPUBLIBIOSNETSTANDARD20" "$DESTPUBINC" "$DESTPRIVLIB" "$DESTPRIVLIBMAP" "$DESTPRIVBIN" "$(dirname "$DESTPRIVINC")" "$(dirname "$DESTPRIVINC2")" "$(dirname "$DESTPRIVINCJSON")"  "$DESTPUBLIB"
 
 # N.B. no long option for -v (verbose) and -p (preserve) on OSX.
 CPOPT="-v -p"
@@ -153,6 +155,10 @@ CPOPT="-v -p"
 shopt -s extglob
 cp $CPOPT "$SRCDYNLIB"/$LIBPREFIX!(*.unstripped)$DYNLIBSUFFIX "$DESTPUBLIB"
 cp $CPOPT "$RNNTLIBDIR"/"$RNNTLIB""$DYNLIBSUFFIX" "$DESTPUBLIB"
+
+if [[ $OS == "Windows_NT" ]]; then
+  cp $CPOPT "$SRCDYNLIB"/*.map "$DESTPRIVLIBMAP" 2>/dev/null || :
+fi
 
 # On Windows and not Android, copy import libraries, XMLDoc, and PDBs.
 if [[ $OS == "Windows_NT" ]]; then
