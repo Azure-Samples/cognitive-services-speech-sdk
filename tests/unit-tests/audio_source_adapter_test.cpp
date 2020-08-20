@@ -56,7 +56,7 @@ TEST_CASE("CSpxMicrophoneAudioSourceAdapter tests", "[cxx][audio]")
             });
             THEN("Should not throw an exception")
             {
-                REQUIRE_FALSE(exceptionThrown);
+                SPXTEST_REQUIRE_FALSE(exceptionThrown);
             }
             THEN("Should create an interactive microphone object")
             {
@@ -217,7 +217,7 @@ TEST_CASE("CSpxMicrophoneAudioSourceAdapter tests", "[cxx][audio]")
             });
             THEN("No exception should be thrown")
             {
-                REQUIRE_FALSE(exceptionThrown);
+                SPXTEST_REQUIRE_FALSE(exceptionThrown);
             }
         }
         WHEN("[ISpxAudioProcessorNotifyMe] NotifyMe with processor == nullptr gets called")
@@ -228,7 +228,7 @@ TEST_CASE("CSpxMicrophoneAudioSourceAdapter tests", "[cxx][audio]")
             });
             THEN("No exception should be thrown")
             {
-                REQUIRE_FALSE(exceptionThrown);
+                SPXTEST_REQUIRE_FALSE(exceptionThrown);
             }
         }
     }
@@ -533,7 +533,7 @@ TEST_CASE("CSpxMicrophoneAudioSourceAdapter tests", "[cxx][audio]")
             });
             THEN("No exception should be thrown")
             {
-                REQUIRE_FALSE(exceptionThrown);
+                SPXTEST_REQUIRE_FALSE(exceptionThrown);
             }
         }
         WHEN("[ISpxAudioProcessorNotifyMe] NotifyMe with processor == nullptr gets called")
@@ -544,7 +544,7 @@ TEST_CASE("CSpxMicrophoneAudioSourceAdapter tests", "[cxx][audio]")
             });
             THEN("No exception should be thrown")
             {
-                REQUIRE_FALSE(exceptionThrown);
+                SPXTEST_REQUIRE_FALSE(exceptionThrown);
             }
         }
     }

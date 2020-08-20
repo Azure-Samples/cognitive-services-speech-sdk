@@ -18,3 +18,12 @@ SPXAPI_(void) diagnostics_log_trace_message2(int level, const char* pszTitle, co
 
 typedef void(*DIAGNOSTICS_CALLBACK_FUNC)(const char *logLine);
 SPXAPI diagnostics_logmessage_set_callback(DIAGNOSTICS_CALLBACK_FUNC callback);
+
+SPXAPI_(void) diagnostics_log_memory_start_logging();
+SPXAPI_(void) diagnostics_log_memory_stop_logging();
+
+SPXAPI_(size_t) diagnostics_log_memory_get_line_num_oldest();
+SPXAPI_(size_t) diagnostics_log_memory_get_line_num_newest();
+SPXAPI__(const char*) diagnostics_log_memory_get_line(size_t lineNum);
+
+SPXAPI_(void) diagnostics_log_memory_dump_to_file(const char* fileName, int options); // fileName == nullptr => stderr; options: 1 => dump now

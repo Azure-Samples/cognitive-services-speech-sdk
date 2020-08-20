@@ -69,11 +69,11 @@ TEST_CASE("CSpxAudioProcessorWriteToAudioSourceBuffer tests", "[cxx][audio][audi
             }
             THEN("Buffer data writer should not be called")
             {
-                REQUIRE_FALSE(writerCalled);
+                SPXTEST_REQUIRE_FALSE(writerCalled);
             }
             THEN("SetBufferProperty should not be called")
             {
-                REQUIRE_FALSE(setBufferPropertyCalled);
+                SPXTEST_REQUIRE_FALSE(setBufferPropertyCalled);
             }
         }
 
@@ -105,15 +105,15 @@ TEST_CASE("CSpxAudioProcessorWriteToAudioSourceBuffer tests", "[cxx][audio][audi
             }
             THEN("No event should be raised")
             {
-                REQUIRE_FALSE(receivedEvent);
+                SPXTEST_REQUIRE_FALSE(receivedEvent);
             }
             THEN("Buffer writer should not be called")
             {
-                REQUIRE_FALSE(writerCalled);
+                SPXTEST_REQUIRE_FALSE(writerCalled);
             }
             THEN("SetBufferProperty should not be called")
             {
-                REQUIRE_FALSE(setBufferPropertyCalled);
+                SPXTEST_REQUIRE_FALSE(setBufferPropertyCalled);
             }
         }
 
@@ -144,15 +144,15 @@ TEST_CASE("CSpxAudioProcessorWriteToAudioSourceBuffer tests", "[cxx][audio][audi
             }
             THEN("Notify should not be called")
             {
-                REQUIRE_FALSE(receivedEvent);
+                SPXTEST_REQUIRE_FALSE(receivedEvent);
             }
             THEN("Buffer data writer should not be called")
             {
-                REQUIRE_FALSE(writerCalled);
+                SPXTEST_REQUIRE_FALSE(writerCalled);
             }
             THEN("SetBufferProperty should not be called")
             {
-                REQUIRE_FALSE(setBufferPropertyCalled);
+                SPXTEST_REQUIRE_FALSE(setBufferPropertyCalled);
             }
         }
     }
@@ -194,15 +194,15 @@ TEST_CASE("CSpxAudioProcessorWriteToAudioSourceBuffer tests", "[cxx][audio][audi
             }
             THEN("Notify should not be called")
             {
-                REQUIRE_FALSE(receivedEvent);
+                SPXTEST_REQUIRE_FALSE(receivedEvent);
             }
             THEN("Buffer data writer should not be called")
             {
-                REQUIRE_FALSE(writerCalled);
+                SPXTEST_REQUIRE_FALSE(writerCalled);
             }
             THEN("SetBufferProperty should not be called")
             {
-                REQUIRE_FALSE(setBufferPropertyCalled);
+                SPXTEST_REQUIRE_FALSE(setBufferPropertyCalled);
             }
         }
 
@@ -302,7 +302,7 @@ TEST_CASE("CSpxAudioProcessorWriteToAudioSourceBuffer tests", "[cxx][audio][audi
             }
             THEN("SetBufferProperty should not be called")
             {
-                REQUIRE_FALSE(setBufferPropertyCalled);
+                SPXTEST_REQUIRE_FALSE(setBufferPropertyCalled);
             }
         }
     }

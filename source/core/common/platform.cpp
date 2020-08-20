@@ -154,4 +154,31 @@ OperatingSystemInfo getOperatingSystem()
 
 #endif
 
+std::string SpxGetEnv(const char* name, const char* defaultValue)
+{
+    #if defined(_MSC_VER)
+
+        const char* value = defaultValue;
+
+        size_t size = 0;
+        char buffer[100];
+        getenv_s(&size, NULL, 0, name);
+        if (size > 0 && size < sizeof(buffer))
+        {
+            getenv_s(&size, buffer, size, name);
+            value = buffer;
+        }
+
+        return value;
+
+    #else
+
+        const char* value = getenv(name);
+        if (value == nullptr) value = defaultValue;
+
+        return value;
+
+    #endif
+}
+
 } // PAL

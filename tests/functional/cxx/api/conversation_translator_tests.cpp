@@ -926,7 +926,7 @@ TEST_CASE("[CT] Host updates authorization token", "[!hide][api][cxx][conversati
     TestConversationParticipant host(speechConfig, "Host");
     host.Join(audioConfig);
 
-    REQUIRE_THAT(host.ConvTrans->GetAuthorizationToken(), Catch::Equals(speechConfig->GetAuthorizationToken()));
+    SPXTEST_REQUIRE_THAT(host.ConvTrans->GetAuthorizationToken(), Catch::Equals(speechConfig->GetAuthorizationToken()));
     REQUIRE(host.ConvTrans->GetParticipantId().empty() == false);
 
     // wait for the current authentication token to expire, and then generate a new one
@@ -940,7 +940,7 @@ TEST_CASE("[CT] Host updates authorization token", "[!hide][api][cxx][conversati
     host.ConvTrans->SetAuthorizationToken(longAuthToken);
     this_thread::sleep_for(5s);
 
-    REQUIRE_THAT(host.ConvTrans->GetAuthorizationToken(), Catch::Equals(longAuthToken));
+    SPXTEST_REQUIRE_THAT(host.ConvTrans->GetAuthorizationToken(), Catch::Equals(longAuthToken));
 
     // now try to send audio and validate the transcriptions
     host.StartAudio();
@@ -975,7 +975,7 @@ TEST_CASE("[CT] Participant receives updated authorization token", "[!hide][api]
     SetCommonConfig(audioConfig);
     participant.Join(audioConfig);
 
-    REQUIRE_THAT(participant.ConvTrans->GetAuthorizationToken(), Catch::Equals(speechConfig->GetAuthorizationToken()));
+    SPXTEST_REQUIRE_THAT(participant.ConvTrans->GetAuthorizationToken(), Catch::Equals(speechConfig->GetAuthorizationToken()));
     REQUIRE(participant.ConvTrans->GetParticipantId().empty() == false);
 
     // wait for the current authentication token to expire, and then generate a new one
@@ -989,7 +989,7 @@ TEST_CASE("[CT] Participant receives updated authorization token", "[!hide][api]
     host.ConvTrans->SetAuthorizationToken(longAuthToken, region);
     this_thread::sleep_for(5s);
 
-    REQUIRE_THAT(participant.ConvTrans->GetAuthorizationToken(), Catch::Equals(longAuthToken));
+    SPXTEST_REQUIRE_THAT(participant.ConvTrans->GetAuthorizationToken(), Catch::Equals(longAuthToken));
 
     // now try to send audio and validate the transcriptions
     participant.StartAudio();

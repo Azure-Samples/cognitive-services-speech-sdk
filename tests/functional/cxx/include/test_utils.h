@@ -30,6 +30,7 @@
 #include "json.h"
 #include "exception.h"
 #include "spxdebug.h"
+#include "platform.h"
 
 #ifdef _MSC_VER
 #pragma warning( push )
@@ -736,18 +737,67 @@ inline int parse_cli_args(Catch::Session& session, int argc, char* argv[])
     SPX_TRACE_INFO("SPXTEST_WHEN('%s') %s(%d):", msg, __FILE__, __LINE__); \
     return 1; }())
 
-#define SPXTEST_REQUIRE(expr) \
-    SPX_TRACE_INFO("SPXTEST_REQUIRE('%s'): %s(%d):", __SPX_EXPR_AS_STRING(expr), __FILE__, __LINE__); \
-    SPX_TRACE_ERROR_IF(!(expr), "SPXTEST_REQUIRE('%s') FAILED: %s(%d):", __SPX_EXPR_AS_STRING(expr), __FILE__, __LINE__); \
-    REQUIRE(expr)
+#define SPXTEST_CHECK( ... ) ([&](){ \
+    try { auto isTrue = !!(__VA_ARGS__); \
+          SPX_TRACE_INFO_IF(isTrue, "SPXTEST_CHECK('%s'): %s(%d): PASSED:", __SPX_EXPR_AS_STRING(__VA_ARGS__), __FILE__, __LINE__); \
+          SPX_TRACE_ERROR_IF(!isTrue, "SPXTEST_CHECK('%s'): %s(%d): FAILED:", __SPX_EXPR_AS_STRING(__VA_ARGS__), __FILE__, __LINE__); \
+          SPX_IFTRUE(!isTrue, diagnostics_log_memory_dump_to_file(nullptr, 1)); \
+    } catch (...) { \
+          SPX_TRACE_ERROR("SPXTEST_CHECK('%s'): FAILED: %s(%d) w/Exception:", __SPX_EXPR_AS_STRING(__VA_ARGS__), __FILE__, __LINE__); \
+    } CHECK(__VA_ARGS__); }())
+
+#define SPXTEST_REQUIRE( ... ) ([&](){ \
+    try { auto isTrue = !!(__VA_ARGS__); \
+          SPX_TRACE_INFO_IF(isTrue, "SPXTEST_REQUIRE('%s'): %s(%d): PASSED:", __SPX_EXPR_AS_STRING(__VA_ARGS__), __FILE__, __LINE__); \
+          SPX_TRACE_ERROR_IF(!isTrue, "SPXTEST_REQUIRE('%s'): %s(%d): FAILED:", __SPX_EXPR_AS_STRING(__VA_ARGS__), __FILE__, __LINE__); \
+          SPX_IFTRUE(!isTrue, diagnostics_log_memory_dump_to_file(nullptr, 1)); \
+    } catch (...) { \
+          SPX_TRACE_ERROR("SPXTEST_REQUIRE('%s'): %s(%d): FAILED: w/Exception:", __SPX_EXPR_AS_STRING(__VA_ARGS__), __FILE__, __LINE__); \
+    } REQUIRE(__VA_ARGS__); }())
+
+#define SPXTEST_CHECK_FALSE( ... ) ([&](){ \
+    try { auto isFalse = !(__VA_ARGS__); \
+          SPX_TRACE_INFO_IF(isFalse, "SPXTEST_CHECK_FALSE('%s'): %s(%d): PASSED:", __SPX_EXPR_AS_STRING(__VA_ARGS__), __FILE__, __LINE__); \
+          SPX_TRACE_ERROR_IF(!isFalse, "SPXTEST_CHECK_FALSE('%s'): %s(%d): FAILED:", __SPX_EXPR_AS_STRING(__VA_ARGS__), __FILE__, __LINE__); \
+          SPX_IFTRUE(!isFalse, diagnostics_log_memory_dump_to_file(nullptr, 1)); \
+    } catch (...) { \
+          SPX_TRACE_ERROR("SPXTEST_CHECK_FALSE('%s'): %s(%d): FAILED: w/Exception:", __SPX_EXPR_AS_STRING(__VA_ARGS__), __FILE__, __LINE__); \
+    } CHECK_FALSE(__VA_ARGS__); }())
+
+#define SPXTEST_REQUIRE_FALSE( ... ) ([&](){ \
+    try { auto isFalse = !(__VA_ARGS__); \
+          SPX_TRACE_INFO_IF(isFalse, "SPXTEST_REQUIRE_FALSE('%s'): %s(%d): PASSED:", __SPX_EXPR_AS_STRING(__VA_ARGS__), __FILE__, __LINE__); \
+          SPX_TRACE_ERROR_IF(!isFalse, "SPXTEST_REQUIRE_FALSE('%s'): %s(%d): FAILED:", __SPX_EXPR_AS_STRING(__VA_ARGS__), __FILE__, __LINE__); \
+          SPX_IFTRUE(!isFalse, diagnostics_log_memory_dump_to_file(nullptr, 1)); \
+    } catch (...) { \
+          SPX_TRACE_ERROR("SPXTEST_REQUIRE_FALSE('%s'): %s(%d): FAILED: w/Exception:", __SPX_EXPR_AS_STRING(__VA_ARGS__), __FILE__, __LINE__); \
+    } REQUIRE_FALSE(__VA_ARGS__); }())
+
+#define SPXTEST_CHECK_THAT(arg, matcher) ([&](){ \
+    try { auto isTrue = !!(matcher.match(arg)); \
+          SPX_TRACE_INFO_IF(isTrue, "SPXTEST_CHECK_THAT('%s', '%s'): %s(%d): PASSED:", __SPX_EXPR_AS_STRING(arg), __SPX_EXPR_AS_STRING(matcher), __FILE__, __LINE__); \
+          SPX_TRACE_ERROR_IF(!isTrue, "SPXTEST_CHECK_THAT('%s', '%s'): %s(%d): FAILED:", __SPX_EXPR_AS_STRING(arg), __SPX_EXPR_AS_STRING(matcher), __FILE__, __LINE__); \
+          SPX_IFTRUE(!isTrue, diagnostics_log_memory_dump_to_file(nullptr, 1)); \
+    } catch (...) { \
+          SPX_TRACE_ERROR("SPXTEST_CHECK_THAT('%s', '%s'): %s(%d): FAILED: w/Exception:", __SPX_EXPR_AS_STRING(arg), __SPX_EXPR_AS_STRING(matcher), __FILE__, __LINE__); \
+    } CHECK_THAT(arg, matcher); }())
+
+#define SPXTEST_REQUIRE_THAT(arg, matcher) ([&](){ \
+    try { auto isTrue = !!(matcher.match(arg)); \
+          SPX_TRACE_INFO_IF(isTrue, "SPXTEST_REQUIRE_THAT('%s', '%s'): %s(%d): PASSED:", __SPX_EXPR_AS_STRING(arg), __SPX_EXPR_AS_STRING(matcher), __FILE__, __LINE__); \
+          SPX_TRACE_ERROR_IF(!isTrue, "SPXTEST_REQUIRE_THAT('%s', '%s'): %s(%d): FAILED:", __SPX_EXPR_AS_STRING(arg), __SPX_EXPR_AS_STRING(matcher), __FILE__, __LINE__); \
+          SPX_IFTRUE(!isTrue, diagnostics_log_memory_dump_to_file(nullptr, 1)); \
+    } catch (...) { \
+          SPX_TRACE_INFO("SPXTEST_REQUIRE_THAT('%s', '%s'): %s(%d): FAILED: w/Exception:", __SPX_EXPR_AS_STRING(arg), __SPX_EXPR_AS_STRING(matcher), __FILE__, __LINE__); \
+    } REQUIRE_THAT(arg, matcher); }())
+
+#define SPXTEST_CHECK_NOTHROW( ... ) \
+    SPX_TRACE_INFO("SPXTEST_CHECK_NOTHROW('%s'): %s(%d):", __SPX_EXPR_AS_STRING(__VA_ARGS__), __FILE__, __LINE__); \
+    CHECK_NOTHROW(__VA_ARGS__)
 
 #define SPXTEST_REQUIRE_NOTHROW( ... ) \
     SPX_TRACE_INFO("SPXTEST_REQUIRE_NOTHROW('%s'): %s(%d):", __SPX_EXPR_AS_STRING(__VA_ARGS__), __FILE__, __LINE__); \
     REQUIRE_NOTHROW(__VA_ARGS__)
-
-#define SPXTEST_REQUIRE_THAT(arg, matcher) \
-    SPX_TRACE_INFO("SPXTEST_REQUIRE_THAT('%s', '%s'): %s(%d):", __SPX_EXPR_AS_STRING(arg), __SPX_EXPR_AS_STRING(matcher), __FILE__, __LINE__); \
-    REQUIRE_THAT(arg, matcher)
 
 inline std::string SpxGetTestTrafficType(const char* file, int line)
 {
@@ -755,25 +805,8 @@ inline std::string SpxGetTestTrafficType(const char* file, int line)
     if (strrchr(file, '/') != nullptr) file = strrchr(file, '/') + 1;
     if (strrchr(file, '\\') != nullptr) file = strrchr(file, '\\') + 1;
 
-    #if defined(_MSC_VER)
+    auto buildid = PAL::SpxGetEnv("BUILD_BUILDID", "dev");
 
-        size_t size = 0;
-        char buffer[100];
-        const char* buildid = "dev";
-        getenv_s(&size, NULL, 0, "BUILD_BUILDID");
-        if (size > 0 && size < sizeof(buffer))
-        {
-            getenv_s(&size, buffer, size, "BUILD_BUILDID");
-            buildid = buffer;
-        }
-
-    #else
-
-        const char* buildid = getenv("BUILD_BUILDID");
-        if (buildid == nullptr) buildid = "dev";
-
-    #endif
-
-    snprintf(trafficType, sizeof(trafficType), "%s(%d)%%20bld(%s)", file, line, buildid);
+    snprintf(trafficType, sizeof(trafficType), "%s(%d)%%20bld(%s)", file, line, buildid.c_str());
     return trafficType;
 }

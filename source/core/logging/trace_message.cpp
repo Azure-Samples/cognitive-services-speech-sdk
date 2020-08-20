@@ -14,6 +14,7 @@
 #include "file_logger.h"
 #include "event_logger.h"
 #include "exception.h"
+#include "memory_logger.h"
 #include "string_utils.h"
 #include <chrono>
 #include <stdio.h>
@@ -59,8 +60,9 @@ SPX_EXTERN_C void SpxTraceMessage2(int level, const char* pszTitle, const char* 
 
     bool logToFile = FileLogger::Instance().IsFileLoggingEnabled();
     bool logToEvents = EventLogger::Instance().IsLoggingEnabled();
+    bool logToMemory = MemoryLogger::Instance().IsLoggingEnabled();
 
-    if (!logToConsole && !logToFile && !logToEvents)
+    if (!logToConsole && !logToFile && !logToEvents && !logToMemory)
     {
         return;
     }
@@ -103,6 +105,10 @@ SPX_EXTERN_C void SpxTraceMessage2(int level, const char* pszTitle, const char* 
     if (logToEvents)
     {
         EventLogger::Instance().LogToEvent(sz);
+    }
+    if (logToMemory)
+    {
+        MemoryLogger::Instance().LogToMemory(sz);
     }
 #endif
 }

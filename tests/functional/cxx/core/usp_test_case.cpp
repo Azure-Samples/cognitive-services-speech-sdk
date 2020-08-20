@@ -234,7 +234,7 @@ public:
         try
         {
             REQUIRE(error->GetCancellationCode() == CancellationErrorCode::ConnectionFailure);
-            REQUIRE_THAT(error->GetDetails(), Catch::Contains("Connection failed", Catch::CaseSensitive::No));
+            SPXTEST_REQUIRE_THAT(error->GetDetails(), Catch::Contains("Connection failed", Catch::CaseSensitive::No));
             m_promise.set_value();
         }
         catch (std::exception&)

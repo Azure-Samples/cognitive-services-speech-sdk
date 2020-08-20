@@ -82,8 +82,7 @@ TEST_CASE("Translation", "[api][cxx]")
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
     UseMocks(false);
-    REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
-
+    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
     SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(MULTIPLE_UTTERANCE_ENGLISH)));
 
     SPXTEST_SECTION("TranslationContinuous")
@@ -166,16 +165,16 @@ TEST_CASE("Translation", "[api][cxx]")
 
         recognizer->StartContinuousRecognitionAsync().get();
         auto status = readyFuture.wait_for(WAIT_FOR_RECO_RESULT_TIME);
-        REQUIRE(status == future_status::ready);
+        SPXTEST_REQUIRE(status == future_status::ready);
         recognizer->StopContinuousRecognitionAsync().get();
 
-        REQUIRE(errorResults.size() == 0);
-        REQUIRE(recognizingResults.size() > 0);
-        REQUIRE(translatingResults.size() == recognizingResults.size());
-        REQUIRE(recognizedResults.size() > 0);
-        REQUIRE(translatedResults.size() == recognizedResults.size());
-        REQUIRE(recognizedResults[0] == AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH].Utterances["en-US"][0].Text);
-        REQUIRE(translatedResults[0] == AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH].Utterances["de"][0].Text);
+        SPXTEST_REQUIRE(errorResults.size() == 0);
+        SPXTEST_REQUIRE(recognizingResults.size() > 0);
+        SPXTEST_REQUIRE(translatingResults.size() == recognizingResults.size());
+        SPXTEST_REQUIRE(recognizedResults.size() > 0);
+        SPXTEST_REQUIRE(translatedResults.size() == recognizedResults.size());
+        SPXTEST_REQUIRE(recognizedResults[0] == AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH].Utterances["en-US"][0].Text);
+        SPXTEST_REQUIRE(translatedResults[0] == AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH].Utterances["de"][0].Text);
     }
 
     SPXTEST_SECTION("TranslationOnce")
@@ -203,11 +202,11 @@ TEST_CASE("Translation", "[api][cxx]")
         }
 
         auto result = recognizer->RecognizeOnceAsync().get();
-        REQUIRE(result != nullptr);
-        REQUIRE(result->Reason == ResultReason::TranslatedSpeech);
-        REQUIRE(!result->Text.compare(AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH].Utterances["en-US"][0].Text));
-        REQUIRE(!result->Translations.at(expectedTargetLanguage).compare(AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH].Utterances["de"][0].Text));
-        REQUIRE(result->Properties.GetProperty(PropertyId::SpeechServiceConnection_AutoDetectSourceLanguageResult) == expectedLanguageDetected);
+        SPXTEST_REQUIRE(result != nullptr);
+        SPXTEST_REQUIRE(result->Reason == ResultReason::TranslatedSpeech);
+        SPXTEST_REQUIRE(!result->Text.compare(AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH].Utterances["en-US"][0].Text));
+        SPXTEST_REQUIRE(!result->Translations.at(expectedTargetLanguage).compare(AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH].Utterances["de"][0].Text));
+        SPXTEST_REQUIRE(result->Properties.GetProperty(PropertyId::SpeechServiceConnection_AutoDetectSourceLanguageResult) == expectedLanguageDetected);
     }
 
     SPXTEST_SECTION("Change languages in config, before turn and after turn.")
@@ -220,65 +219,65 @@ TEST_CASE("Translation", "[api][cxx]")
         config->SetSpeechRecognitionLanguage("en-US");
         config->AddTargetLanguage("de");
         auto targetLangs = config->GetProperty(PropertyId::SpeechServiceConnection_TranslationToLanguages);
-        REQUIRE(!targetLangs.compare("de"));
+        SPXTEST_REQUIRE(!targetLangs.compare("de"));
 
         config->AddTargetLanguage("fr");
         targetLangs = config->GetProperty(PropertyId::SpeechServiceConnection_TranslationToLanguages);
-        REQUIRE(!targetLangs.compare("de,fr"));
+        SPXTEST_REQUIRE(!targetLangs.compare("de,fr"));
 
         config->RemoveTargetLanguage("de");
         targetLangs = config->GetProperty(PropertyId::SpeechServiceConnection_TranslationToLanguages);
-        REQUIRE(!targetLangs.compare("fr"));
+        SPXTEST_REQUIRE(!targetLangs.compare("fr"));
 
         config->AddTargetLanguage("de");
         targetLangs = config->GetProperty(PropertyId::SpeechServiceConnection_TranslationToLanguages);
-        REQUIRE(!targetLangs.compare("fr,de"));
+        SPXTEST_REQUIRE(!targetLangs.compare("fr,de"));
 
         auto recognizer = TranslationRecognizer::FromConfig(config, AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(MULTIPLE_UTTERANCE_ENGLISH)));
 
         // Change languages before turn.
         recognizer->AddTargetLanguage("es");
         targetLangs = recognizer->Properties.GetProperty(PropertyId::SpeechServiceConnection_TranslationToLanguages);
-        REQUIRE(!targetLangs.compare("fr,de,es"));
+        SPXTEST_REQUIRE(!targetLangs.compare("fr,de,es"));
 
         auto result = recognizer->RecognizeOnceAsync().get();
-        REQUIRE(result != nullptr);
-        REQUIRE(result->Reason == ResultReason::TranslatedSpeech);
-        REQUIRE(result->Text.length() > 0);
-        REQUIRE(result->Translations.at("de").length() > 0);
-        REQUIRE(result->Translations.at("fr").length() > 0);
-        REQUIRE(result->Translations.at("es").length() > 0);
+        SPXTEST_REQUIRE(result != nullptr);
+        SPXTEST_REQUIRE(result->Reason == ResultReason::TranslatedSpeech);
+        SPXTEST_REQUIRE(result->Text.length() > 0);
+        SPXTEST_REQUIRE(result->Translations.at("de").length() > 0);
+        SPXTEST_REQUIRE(result->Translations.at("fr").length() > 0);
+        SPXTEST_REQUIRE(result->Translations.at("es").length() > 0);
 
         // Change languages after turn.
         recognizer->RemoveTargetLanguage("es");
         targetLangs = recognizer->Properties.GetProperty(PropertyId::SpeechServiceConnection_TranslationToLanguages);
-        REQUIRE(!targetLangs.compare("fr,de"));
+        SPXTEST_REQUIRE(!targetLangs.compare("fr,de"));
 
         result = recognizer->RecognizeOnceAsync().get();
-        REQUIRE(result != nullptr);
-        REQUIRE(result->Reason == ResultReason::TranslatedSpeech);
-        REQUIRE(result->Text.length() > 0);
-        REQUIRE(result->Translations.at("de").length() > 0);
-        REQUIRE(result->Translations.at("fr").length() > 0);
-        REQUIRE(result->Translations.find("es") == result->Translations.end());
+        SPXTEST_REQUIRE(result != nullptr);
+        SPXTEST_REQUIRE(result->Reason == ResultReason::TranslatedSpeech);
+        SPXTEST_REQUIRE(result->Text.length() > 0);
+        SPXTEST_REQUIRE(result->Translations.at("de").length() > 0);
+        SPXTEST_REQUIRE(result->Translations.at("fr").length() > 0);
+        SPXTEST_REQUIRE(result->Translations.find("es") == result->Translations.end());
 
         recognizer->RemoveTargetLanguage("de");
         recognizer->RemoveTargetLanguage("es");
         targetLangs = recognizer->Properties.GetProperty(PropertyId::SpeechServiceConnection_TranslationToLanguages);
-        REQUIRE(!targetLangs.compare("fr"));
+        SPXTEST_REQUIRE(!targetLangs.compare("fr"));
 
         recognizer->AddTargetLanguage("pt");
         targetLangs = recognizer->Properties.GetProperty(PropertyId::SpeechServiceConnection_TranslationToLanguages);
-        REQUIRE(!targetLangs.compare("fr,pt"));
+        SPXTEST_REQUIRE(!targetLangs.compare("fr,pt"));
 
         result = recognizer->RecognizeOnceAsync().get();
-        REQUIRE(result != nullptr);
-        REQUIRE(result->Reason == ResultReason::TranslatedSpeech);
-        REQUIRE(result->Text.length() > 0);
-        REQUIRE(result->Translations.at("pt").length() > 0);
-        REQUIRE(result->Translations.at("fr").length() > 0);
-        REQUIRE(result->Translations.find("es") == result->Translations.end());
-        REQUIRE(result->Translations.find("de") == result->Translations.end());
+        SPXTEST_REQUIRE(result != nullptr);
+        SPXTEST_REQUIRE(result->Reason == ResultReason::TranslatedSpeech);
+        SPXTEST_REQUIRE(result->Text.length() > 0);
+        SPXTEST_REQUIRE(result->Translations.at("pt").length() > 0);
+        SPXTEST_REQUIRE(result->Translations.at("fr").length() > 0);
+        SPXTEST_REQUIRE(result->Translations.find("es") == result->Translations.end());
+        SPXTEST_REQUIRE(result->Translations.find("de") == result->Translations.end());
     }
 
     SPXTEST_SECTION("Change languages in turn.")
@@ -374,13 +373,13 @@ TEST_CASE("Translation", "[api][cxx]")
 
         recognizer->StartContinuousRecognitionAsync().get();
         auto status = readyFuture.wait_for(300s);
-        REQUIRE(status == future_status::ready);
+        SPXTEST_REQUIRE(status == future_status::ready);
         recognizer->StopContinuousRecognitionAsync().get();
-        REQUIRE(recognizedResults.size() > 0);
-        REQUIRE(translatedResultsFr.size() > 0);
-        REQUIRE(translatedResultsEs.size() > translatedResultsFr.size());
-        REQUIRE(translatedResultsDe.size() > translatedResultsEs.size());
-        REQUIRE(errorResults.size() == 0);
+        SPXTEST_REQUIRE(recognizedResults.size() > 0);
+        SPXTEST_REQUIRE(translatedResultsFr.size() > 0);
+        SPXTEST_REQUIRE(translatedResultsEs.size() > translatedResultsFr.size());
+        SPXTEST_REQUIRE(translatedResultsDe.size() > translatedResultsEs.size());
+        SPXTEST_REQUIRE(errorResults.size() == 0);
     }
 }
 

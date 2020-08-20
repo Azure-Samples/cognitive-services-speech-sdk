@@ -8,6 +8,7 @@
 #include "handle_helpers.h"
 #include "file_logger.h"
 #include "event_logger.h"
+#include "memory_logger.h"
 #include "trace_message.h"
 
 using namespace Microsoft::CognitiveServices::Speech;
@@ -111,3 +112,76 @@ SPXAPI diagnostics_logmessage_set_filters(const char *filters)
     EventLogger::Instance().SetLogFilters(filters);
     return SPX_NOERROR;
 }
+
+SPXAPI_(void) diagnostics_log_memory_start_logging()
+{
+    try
+    {
+        MemoryLogger::Instance().EnableLogging(true);
+    }
+    catch(...)
+    {
+    }
+}
+
+SPXAPI_(void) diagnostics_log_memory_stop_logging()
+{
+    try
+    {
+        MemoryLogger::Instance().EnableLogging(false);
+    }
+    catch(...)
+    {
+    }
+}
+
+SPXAPI_(size_t) diagnostics_log_memory_get_line_num_oldest()
+{
+    size_t line = 0;
+    try
+    {
+        line = MemoryLogger::Instance().GetLineNumOldest();
+    }
+    catch(...)
+    {
+    }
+    return line;
+}
+
+SPXAPI_(size_t) diagnostics_log_memory_get_line_num_newest()
+{
+    size_t line = 0;
+    try
+    {
+        line = MemoryLogger::Instance().GetLineNumNewest();
+    }
+    catch(...)
+    {
+    }
+    return line;
+}
+
+SPXAPI__(const char*) diagnostics_log_memory_get_line(size_t lineNum)
+{
+    const char* line = nullptr;
+    try
+    {
+        line = MemoryLogger::Instance().GetLine(lineNum);
+    }
+    catch(...)
+    {
+    }
+    return line;
+}
+
+SPXAPI_(void) diagnostics_log_memory_dump_to_file(const char* fileName, int options)
+{
+    try
+    {
+        MemoryLogger::Instance().DumpToFile(fileName, options);
+    }
+    catch(...)
+    {
+    }
+}
+

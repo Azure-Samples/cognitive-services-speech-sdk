@@ -303,9 +303,9 @@ TEST_CASE("Mic is properly functioning", "[!hide][audio][mic]")
                 v.emplace_back(run);
             }
 
-            CHECK(barrier.await(timeout)); // 1
+            SPXTEST_CHECK(barrier.await(timeout)); // 1
             sink->WaitAndStop(3);
-            CHECK(barrier.await(timeout)); // 2
+            SPXTEST_CHECK(barrier.await(timeout)); // 2
 
             for (auto& t : v)
             {
@@ -351,18 +351,18 @@ TEST_CASE("Mic is properly functioning", "[!hide][audio][mic]")
                 v.emplace_back(run);
             }
 
-            CHECK(barrier.await(timeout)); // 1
+            SPXTEST_CHECK(barrier.await(timeout)); // 1
 
             {
                 unique_lock<mutex> lock(m);
-                CHECK(sinks.size() == numThreads);
+                SPXTEST_CHECK(sinks.size() == numThreads);
                 for (auto& sink : sinks)
                 {
                     sink->WaitAndStop(3);
                 }
             }
 
-            CHECK(barrier.await(timeout)); // 2
+            SPXTEST_CHECK(barrier.await(timeout)); // 2
 
             for (auto& t : v)
             {

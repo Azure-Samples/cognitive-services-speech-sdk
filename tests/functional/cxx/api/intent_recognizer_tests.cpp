@@ -85,8 +85,8 @@ TEST_CASE("Intent Recognizer basics", "[api][cxx][intent]")
                     << " Reason: " << int(nomatch->Reason);
             }
             CAPTURE(details.str());
-            CHECK(result->Reason == expectedReason);
-            CHECK(!result->Text.empty());
+            SPXTEST_CHECK(result->Reason == expectedReason);
+            SPXTEST_CHECK(!result->Text.empty());
 #ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable: 6237)

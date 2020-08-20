@@ -32,4 +32,6 @@ struct OperatingSystemInfo {
 
 OperatingSystemInfo getOperatingSystem();
 
+std::string SpxGetEnv(const char* name, const char* defaultValue);
+
 } // PAL

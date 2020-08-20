@@ -8,6 +8,7 @@ set(HEADERS
     "${INC_DIR}/file_logger.h"
     "${INC_DIR}/trace_message.h"
     "${INC_DIR}/event_logger.h"
+    "${INC_DIR}/memory_logger.h"
     "${INC_DIR}/log_utils.h"
     )
 
@@ -15,6 +16,7 @@ set(SOURCES
     "${SRC_DIR}/file_logger.cpp"
     "${SRC_DIR}/trace_message.cpp"
     "${SRC_DIR}/event_logger.cpp"
+    "${SRC_DIR}/memory_logger.cpp"
     "${SRC_DIR}/log_utils.cpp"
     )
 

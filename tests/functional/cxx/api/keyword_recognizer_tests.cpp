@@ -45,6 +45,63 @@ void wait_for_future(
     success_cb();
 }
 
+#if 0
+TEST_CASE("SPXTEST_ basics", "[api][cxx][testing]")
+{
+    SPXTEST_SECTION("Testing new SPXTEST_ MACROS w/ mock KWS")
+    {
+        UseMocks(true);
+
+        auto recognizer = KeywordRecognizer::FromConfig();
+        auto model = KeywordRecognitionModel::FromFile(DefaultSettingsMap[INPUT_DIR] + "/kws/Computer/kws.table");
+
+        SPXTEST_WHEN("a = true; b = false; SPXTEST_CHECK(a == b)")
+        {
+            bool a = true;
+            bool b = false;
+            SPXTEST_CHECK(a == b);
+        }
+
+        SPXTEST_WHEN("a = true; b = true; SPXTEST_CHECK_FALSE(a == b)")
+        {
+            bool a = true;
+            bool b = true;
+            SPXTEST_CHECK_FALSE(a == b);
+        }
+
+        SPXTEST_WHEN("a = true; b = false; SPXTEST_REQUIRE(a == b)")
+        {
+            bool a = true;
+            bool b = false;
+            SPXTEST_REQUIRE(a == b);
+        }
+
+        SPXTEST_WHEN("a = true; b = true; SPXTEST_REQUIRE_FALSE(a == b)")
+        {
+            bool a = true;
+            bool b = true;
+            SPXTEST_REQUIRE_FALSE(a == b);
+        }
+
+        SPXTEST_WHEN("Using SPXTEST_CHECK_THAT")
+        {
+            auto a = "test";
+            auto b = "not test";
+            SPXTEST_CHECK_THAT(a, Catch::Equals(b));
+            SPXTEST_CHECK(a != b);
+        }
+
+        SPXTEST_WHEN("Using SPXTEST_REQUIRE_THAT")
+        {
+            auto a = "test";
+            auto b = "not test";
+            SPXTEST_REQUIRE_THAT(a, Catch::Equals(b));
+            SPXTEST_CHECK(a != b);
+        }
+    }
+}
+#endif
+
 TEST_CASE("Keyword Recognizer basics", "[api][cxx][keyword_recognizer]")
 {
     SPXTEST_GIVEN("Mocks for KWS and Microphone; Model.")
@@ -83,9 +140,9 @@ TEST_CASE("Keyword Recognizer basics", "[api][cxx][keyword_recognizer]")
             }
             THEN("We should have only valid results")
             {
-                CHECK(resultCount == n);
-                CHECK(invalidResultCount == 0);
-                CHECK(timeoutCount == 0);
+                SPXTEST_CHECK(resultCount == n);
+                SPXTEST_CHECK(invalidResultCount == 0);
+                SPXTEST_CHECK(timeoutCount == 0);
             }
         }
         SPXTEST_WHEN("We do a keyword recognition")
@@ -118,10 +175,10 @@ TEST_CASE("Keyword Recognizer basics", "[api][cxx][keyword_recognizer]")
                 });
             THEN("We should have been able to read the associated stream and detach the input.")
             {
-                CHECK(hasData);
-                CHECK(readData);
-                CHECK(detached);
-                CHECK(!timeout);
+                SPXTEST_CHECK(hasData);
+                SPXTEST_CHECK(readData);
+                SPXTEST_CHECK(detached);
+                SPXTEST_CHECK(!timeout);
             }
         }
 
@@ -139,7 +196,7 @@ TEST_CASE("Keyword Recognizer basics", "[api][cxx][keyword_recognizer]")
             }
             THEN("Stopping should cause the future to be resolved.")
             {
-                CHECK(timeout == 0);
+                SPXTEST_CHECK(timeout == 0);
             }
         }
 
@@ -157,7 +214,7 @@ TEST_CASE("Keyword Recognizer basics", "[api][cxx][keyword_recognizer]")
             }
             THEN("The stop recognition task should resolve quickly.")
             {
-                CHECK(timeout == 0);
+                SPXTEST_CHECK(timeout == 0);
             }
         }
     }
