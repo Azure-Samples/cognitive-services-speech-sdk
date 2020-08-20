@@ -46,6 +46,7 @@ namespace Microsoft.CognitiveServices.Speech
         private GCHandle gch;
 
         private SpeechRecognizer recognizer;
+        private Audio.AudioConfig audioInputKeepAlive;
 
         /// <summary>
         /// Creates a KeywordRecognizer from an <see cref="AudioConfig" />. The config is intended
@@ -74,6 +75,7 @@ namespace Microsoft.CognitiveServices.Speech
                     config.Dispose();
                     config = null;
                 }
+                audioInputKeepAlive = audioConfig;
             }
         }
 
@@ -176,7 +178,7 @@ namespace Microsoft.CognitiveServices.Speech
             recognizedCallbackDelegate = null;
             LogErrorIfFail(Internal.Recognizer.recognizer_recognized_set_callback(recognizer.recoHandle, null, IntPtr.Zero));
             recognizer.Dispose();
-
+            audioInputKeepAlive = null;
         }
 
         private CallbackFunctionDelegate recognizedCallbackDelegate;
