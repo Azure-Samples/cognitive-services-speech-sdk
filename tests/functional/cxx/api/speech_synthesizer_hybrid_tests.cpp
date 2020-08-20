@@ -14,6 +14,8 @@
 
 using namespace TTS;
 
+static constexpr char font_token_file[] = "Tokens.xml";
+
 std::shared_ptr<SpeechConfig> OfflineConfig()
 {
     auto config = SpeechConfig::FromHost("wss://fake.com");
@@ -33,6 +35,9 @@ std::shared_ptr<SpeechConfig> HybridConfig()
 
 TEST_CASE("Offline Synthesis", "[api][cxx][hybrid_tts]")
 {
+
+    SPXTEST_REQUIRE(exists(Config::OfflineVoicePath + "/" + font_token_file));
+
     auto synthesizer = SpeechSynthesizer::FromConfig(OfflineConfig(), nullptr);
 
     synthesizer->Synthesizing += [](const SpeechSynthesisEventArgs& e)
@@ -77,10 +82,14 @@ TEST_CASE("Offline Synthesis", "[api][cxx][hybrid_tts]")
         }
     }
 
-#if 0 // TTS offline stop has some issuse, disable for now.
+#ifdef __linux__ // TTS offline engine is only full-tested on linux, as there is no customer using Windows.
     SPXTEST_SECTION("Stop")
     {
         auto longText = AudioUtterancesMap[SYNTHESIS_LONG_UTTERANCE].Utterances["en-US"][0].Text;
+
+        // lengthen the text, to ensure the stopping works.
+        longText += longText;
+        longText += longText;
 
         std::future<void> stopFuture;
         bool stopped = false;
@@ -99,7 +108,11 @@ TEST_CASE("Offline Synthesis", "[api][cxx][hybrid_tts]")
         SPXTEST_REQUIRE(result->GetAudioLength() > 0);
 
         synthesizer->Synthesizing.DisconnectAll();
+        // ensure stop() in finished.
+        stopFuture.get();
         auto result2 = synthesizer->SpeakTextAsync(longText).get();
+        SPXTEST_REQUIRE(result2->Reason == ResultReason::SynthesizingAudioCompleted);
+        SPXTEST_REQUIRE(result2->GetAudioLength() > 0);
         SPXTEST_REQUIRE(result->GetAudioLength() < result2->GetAudioLength());
     }
 #endif
@@ -120,6 +133,8 @@ TEST_CASE("Offline Synthesis", "[api][cxx][hybrid_tts]")
 
 TEST_CASE("Hybrid Synthesis", "[api][cxx][hybrid_tts]")
 {
+    SPXTEST_REQUIRE(exists(Config::OfflineVoicePath + "/" + font_token_file));
+
     SPXTEST_SECTION("Normal")
     {
         auto synthesizer = SpeechSynthesizer::FromConfig(HybridConfig(), nullptr);
