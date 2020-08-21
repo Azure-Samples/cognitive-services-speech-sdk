@@ -158,6 +158,7 @@ BEGIN {
       samples/python/console/speech_sample.py#SpeechRecognitionUsingCustomizedModel
       samples/python/console/speech_sample.py#SpeechRecognitionWithFile
       samples/python/console/speech_sample.py#SpeechRecognitionWithMicrophone
+      samples/python/console/speech_sample.py#SpeechRecognitionWithCompressedFile
       samples/python/console/translation_sample.py#TranslationContinuous
       samples/python/console/translation_sample.py#TranslationOnceWithFile
       samples/python/console/translation_sample.py#TranslationOnceWithMic
