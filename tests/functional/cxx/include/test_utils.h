@@ -644,77 +644,86 @@ inline int parse_cli_args(Catch::Session& session, int argc, char* argv[])
     auto cli
         = session.cli() // Get Catch's composite command line parser
         | Opt(SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key, "SpeechSubscriptionKey") // bind variable to a new option, with a hint string
-        ["--keySpeech"]    // the option names it will respond to
-    ("The subscription key for speech")
+            ["--keySpeech"]    // the option names it will respond to
+            ("The subscription key for speech")
         | Opt(SubscriptionsRegionsMap[LANGUAGE_UNDERSTANDING_SUBSCRIPTION].Key, "LuisSubscriptionKey")
-        ["--keyLUIS"]
-    ("The subscription key for language understanding")
+            ["--keyLUIS"]
+            ("The subscription key for language understanding")
         | Opt(SubscriptionsRegionsMap[DIALOG_SUBSCRIPTION].Key, "keyDialog")
-        ["--keyDialog"]
-    ("The subscription key for the Speech Channel")
+            ["--keyDialog"]
+            ("The subscription key for the Speech Channel")
         | Opt(DefaultSettingsMap[ENDPOINT], "endpoint")
-        ["--endpoint"]
-    ("The endpoint url to test against.")
+            ["--endpoint"]
+            ("The endpoint url to test against.")
         | Opt(SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Region, "Region")
-        ["--region"]
-    ("The region id to be used for subscription and authorization requests")
+            ["--region"]
+            ("The region id to be used for subscription and authorization requests")
         | Opt(SubscriptionsRegionsMap[LANGUAGE_UNDERSTANDING_SUBSCRIPTION].Region, "LuisRegionId")
-        ["--regionIdLUIS"]
-    ("The region id to be used for language understanding subscription and authorization requests")
+            ["--regionIdLUIS"]
+            ("The region id to be used for language understanding subscription and authorization requests")
         | Opt(DefaultSettingsMap[LANGUAGE_UNDERSTANDING_HOME_AUTOMATION_APP_ID], "LuisAppId")
-        ["--luisAppId"]
-    ("The language understanding app id to be used intent recognition tests")
+            ["--luisAppId"]
+            ("The language understanding app id to be used intent recognition tests")
         | Opt(DefaultSettingsMap[INROOM_AUDIO_ENDPOINT], "InRoomAudioEndpoint")
-        ["--InRoomAudioEndpoint"]
-    ("The endpoint that in-room tests in intelligent meeting recognizer talks to")
+            ["--InRoomAudioEndpoint"]
+            ("The endpoint that in-room tests in intelligent meeting recognizer talks to")
         | Opt(DefaultSettingsMap[ONLINE_AUDIO_ENDPOINT], "OnlineAudioEndpoint")
-        ["--OnlineAudioEndpoint"]
-    ("The endpoint that on-line tests in intelligent meeting recognizer talks to")
-        | Opt(SubscriptionsRegionsMap[CONVERSATION_TRANSCRIPTION_PPE_SUBSCRIPTION].Key, "ConversationTranscriber")
-        ["--keyConversationTranscriberPPE"]
-    ("The conversation transcriber key")
+            ["--OnlineAudioEndpoint"]
+            ("The endpoint that on-line tests in intelligent meeting recognizer talks to")
+        | Opt(SubscriptionsRegionsMap[CONVERSATION_TRANSCRIPTION_PPE_SUBSCRIPTION].Key, "ConversationTranscriberPPEKey")
+            ["--keyConversationTranscriberPPE"]
+            ("The conversation transcriber PPE key")
+        | Opt(SubscriptionsRegionsMap[CONVERSATION_TRANSCRIPTION_PPE_SUBSCRIPTION].Region, "ConversationTranscriberPPERegion")
+            ["--regionConversationTranscriberPPE"]
+            ("The conversation transcriber PPE key")
+        | Opt(SubscriptionsRegionsMap[CONVERSATION_TRANSCRIPTION_PROD_SUBSCRIPTION].Key, "ConversationTranscriberProdKey")
+            ["--keyConversationTranscriberProd"]
+            ("The conversation transcriber PROD key")
+        | Opt(SubscriptionsRegionsMap[CONVERSATION_TRANSCRIPTION_PROD_SUBSCRIPTION].Region, "ConversationTranscriberProdRegion")
+            ["--regionConversationTranscriberProd"]
+            ("The conversation transcriber PROD region")
         | Opt(DefaultSettingsMap[INPUT_DIR], "InputDir")
-        ["--inputDir"]
-    ("The directory where test input files are placed")
+            ["--inputDir"]
+            ("The directory where test input files are placed")
         | Opt(SubscriptionsRegionsMap[DIALOG_SUBSCRIPTION].Region, "DialogRegion")
-        ["--dialogRegionId"]
-    ("The region id to be used for the Speech Channel Service")
+            ["--dialogRegionId"]
+            ("The region id to be used for the Speech Channel Service")
         | Opt(DefaultSettingsMap[DIALOG_FUNCTIONAL_TEST_BOT], "DialogBotSecret")
-        ["--dialogBotSecret"]
-    ("Secret for the functional test bot")
+            ["--dialogBotSecret"]
+            ("Secret for the functional test bot")
         | Opt(Config::OfflineModelPathRoot, "OfflineModelPathRoot")
-        ["--offlineModelPathRoot"]
-    ("The root path under which offline speech recognition models are located.")
+            ["--offlineModelPathRoot"]
+            ("The root path under which offline speech recognition models are located.")
         | Opt(Config::OfflineModelLanguage, "OfflineModelLanguage")
-        ["--offlineModelLanguage"]
-    ("The language code of the offline speech recognition model used in tests.")
+            ["--offlineModelLanguage"]
+            ("The language code of the offline speech recognition model used in tests.")
         | Opt(Config::OfflineVoicePath, "OfflineVoicePath")
-        ["--offlineVoicePath"]
-    ("The path where the voice model for offline synthesis is located.")
+            ["--offlineVoicePath"]
+            ("The path where the voice model for offline synthesis is located.")
         | Opt(Config::DoDiscover)
-        ["--discovery"]
-    ("Perform VS Test Adaptor discovery")
+            ["--discovery"]
+            ("Perform VS Test Adaptor discovery")
         | Opt(Config::RnntModelSpec, "RnntModelSpec")
-        ["--rnntModelSpec"]
-    ("The specification for RNN-T model used in tests.")
+            ["--rnntModelSpec"]
+            ("The specification for RNN-T model used in tests.")
         | Opt(Config::RnntTokens, "RnntTokens")
-        ["--rnntTokens"]
-    ("The path to tokens file used for RNN-T engine in tests.")
+            ["--rnntTokens"]
+            ("The path to tokens file used for RNN-T engine in tests.")
         | Opt(SubscriptionsRegionsMap[CONVERSATION_TRANSLATOR_SUBSCRIPTION].Key, "ConversationTranslatorSubscriptionKey")
-        ["--keyConversationTranslator"]
-    ("The subscription key to use for the conversation translator service")
+            ["--keyConversationTranslator"]
+            ("The subscription key to use for the conversation translator service")
         | Opt(DefaultSettingsMap[CONVERSATION_TRANSLATOR_HOST], "ConversationTranslatorHost")
-        ["--conversationTranslatorHost"]
-    ("The conversation host to use")
+            ["--conversationTranslatorHost"]
+            ("The conversation host to use")
         | Opt(SubscriptionsRegionsMap[CONVERSATION_TRANSLATOR_SUBSCRIPTION].Region, "ConversationTranslatorRegion")
-        ["--conversationTranslatorRegion"]
-    ("The conversation region to use")
+            ["--conversationTranslatorRegion"]
+            ("The conversation region to use")
         | Opt(DefaultSettingsMap[CONVERSATION_TRANSLATOR_SPEECH_ENDPOINT], "ConversationTranslatorSpeechEndpoint")
-        ["--conversationTranslatorEndpoint"]
-    ("The speech endpoint to use for the conversation translator")
+            ["--conversationTranslatorEndpoint"]
+            ("The speech endpoint to use for the conversation translator")
         | Opt(DefaultSettingsMap[CONVERSATION_TRANSLATOR_CLIENTID], "ConversationTranslatorClientId")
-        ["--conversationTranslatorClientId"]
-    ("The client ID to use for the conversation translator")
+            ["--conversationTranslatorClientId"]
+            ("The client ID to use for the conversation translator")
         ;
 
     // Now pass the new composite back to Catch so it uses that

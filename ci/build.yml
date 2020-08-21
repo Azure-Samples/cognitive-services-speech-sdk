@@ -108,7 +108,7 @@ variables:
       },
       "ConversationTranscriptionPPESubscription": {
         "Key": "$(ConverstationTranscriptionKeyWestUS220190509)",
-        "Region": "westus"
+        "Region": "westus2"
       },
       "ConversationTranslatorSubscription": {
         "Key": "$(Key_ConversationTranslator)",

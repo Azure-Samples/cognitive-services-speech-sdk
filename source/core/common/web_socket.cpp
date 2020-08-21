@@ -582,9 +582,9 @@ namespace USP {
         }
     }
 
-    void WebSocket::HandleDisconnected(WebSocketDisconnectReason reason, const string & cause)
+    void WebSocket::HandleDisconnected(WebSocketDisconnectReason reason, const string & cause, bool serverRequested)
     {
-        OnDisconnected(reason, cause);
+        OnDisconnected(reason, cause, serverRequested);
     }
 
     void WebSocket::HandleTextData(const string & data)
@@ -810,11 +810,9 @@ namespace USP {
                 open_result_detailed.code,
                 open_result_detailed.code);
 
-            HttpStatusCode statusCode = static_cast<HttpStatusCode>(open_result_detailed.code);
-
-            if (open_result == WS_OPEN_ERROR_BAD_RESPONSE_STATUS
-                && statusCode != HttpStatusCode::OK)
+            if (open_result == WS_OPEN_ERROR_BAD_RESPONSE_STATUS)
             {
+                HttpStatusCode statusCode = static_cast<HttpStatusCode>(open_result_detailed.code);
                 std::string errorString;
 
                 // special case to handle redirects
@@ -850,7 +848,7 @@ namespace USP {
                     }
                 }
 
-                HandleError(WebSocketError::WEBSOCKET_UPGRADE, /* HTTP status */ (int)statusCode, errorString);
+                HandleError(WebSocketError::WEBSOCKET_UPGRADE, /* HTTP status */ open_result_detailed.code, errorString);
             }
             else
             {
@@ -913,7 +911,7 @@ namespace USP {
             cause = std::string(reinterpret_cast<const char *>(extraData), extraDataLength);
         }
 
-        HandleDisconnected(reason, cause);
+        HandleDisconnected(reason, cause, true);
     }
 
     void WebSocket::OnWebSocketError(WS_ERROR errorCode)
@@ -935,7 +933,7 @@ namespace USP {
         m_open = false;
         ChangeState(WebSocketState::CLOSED);
         MetricsTransportClosed();
-        HandleDisconnected(WebSocketDisconnectReason::Normal, "");
+        HandleDisconnected(WebSocketDisconnectReason::Normal, "", false);
     }
 
     uint64_t WebSocket::GetTimestamp() const

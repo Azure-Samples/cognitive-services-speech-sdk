@@ -10,6 +10,7 @@
 
 #include "wav_file_reader.h"
 #include "guid_utils.h"
+#include "authentication_token_provider.h"
 
 #include "speechapi_cxx_conversation.h"
 #include "speechapi_cxx_conversation_transcriber.h"
@@ -22,15 +23,45 @@ using namespace Microsoft::CognitiveServices::Speech::Transcription;
 
 #define SPX_CONFIG_TRACE_INTERFACE_MAP
 
-std::shared_ptr<SpeechConfig> CreateSpeechConfigForCTSInRoom(const std::string& trafficType = SpxGetTestTrafficType(__FILE__, __LINE__))
+std::shared_ptr<SpeechConfig> CreateSpeechConfigForCTSInRoom(
+    const std::string& subscriptionKey, const std::string& region, const std::string& endpoint, const std::string& trafficType)
 {
-    auto audioEndpoint = DefaultSettingsMap[INROOM_AUDIO_ENDPOINT];
-    audioEndpoint += "/multiaudio";
-    auto config = SpeechConfig::FromSubscription(SubscriptionsRegionsMap[CONVERSATION_TRANSCRIPTION_PROD_SUBSCRIPTION].Key, SubscriptionsRegionsMap[CONVERSATION_TRANSCRIPTION_PROD_SUBSCRIPTION].Region);
-    config->SetServiceProperty("TrafficType", trafficType, ServicePropertyChannel::UriQueryParameter);
+    auto authToken = AuthenticationTokenProvider::GetOrCreateToken(subscriptionKey, region);
+
+    shared_ptr<SpeechConfig> config;
+    if (endpoint.empty())
+    {
+        config = SpeechConfig::FromAuthorizationToken(authToken, region);
+    }
+    else
+    {
+        config = SpeechConfig::FromEndpoint(endpoint);
+        config->SetAuthorizationToken(authToken);
+    }
+
     // this is the clue for Carbon to tell go to CTSInRoom service by using CSpxParticipantMgrImpl.
     config->SetProperty("ConversationTranscriptionInRoomAndOnline", "true");
+    
+    config->SetServiceProperty("TrafficType", trafficType, ServicePropertyChannel::UriQueryParameter);
     return config;
+}
+
+std::shared_ptr<SpeechConfig> CreateSpeechConfigForCTSInRoom(const std::string& endpoint, const std::string& trafficType)
+{
+    return CreateSpeechConfigForCTSInRoom(
+        SubscriptionsRegionsMap[CONVERSATION_TRANSCRIPTION_PROD_SUBSCRIPTION].Key,
+        SubscriptionsRegionsMap[CONVERSATION_TRANSCRIPTION_PROD_SUBSCRIPTION].Region,
+        endpoint,
+        trafficType);
+}
+
+std::shared_ptr<SpeechConfig> CreateSpeechConfigForCTSInRoom(const std::string& trafficType)
+{
+    return CreateSpeechConfigForCTSInRoom(
+        SubscriptionsRegionsMap[CONVERSATION_TRANSCRIPTION_PROD_SUBSCRIPTION].Key,
+        SubscriptionsRegionsMap[CONVERSATION_TRANSCRIPTION_PROD_SUBSCRIPTION].Region,
+        "",
+        trafficType);
 }
 
 TEST_CASE("conversation transcriber no join", "[api][cxx]")
@@ -198,9 +229,7 @@ TEST_CASE("conversation transcriber reco", "[api][cxx][reco]")
 TEST_CASE("conversation bad connection", "[api][cxx]")
 {
     auto audioEndpoint = "wrong_endpoint";
-    auto config = SpeechConfig::FromEndpoint(audioEndpoint, SubscriptionsRegionsMap[CONVERSATION_TRANSCRIPTION_PROD_SUBSCRIPTION].Key);
-    config->SetServiceProperty("TrafficType", SpxGetTestTrafficType(__FILE__, __LINE__), ServicePropertyChannel::UriQueryParameter);
-    config->SetProperty("ConversationTranscriptionInRoomAndOnline", "true");
+    auto config = CreateSpeechConfigForCTSInRoom(audioEndpoint, SpxGetTestTrafficType(__FILE__, __LINE__));
 
     std::shared_ptr<PullAudioInputStream> pullAudio;
     auto audioInput = CreateAudioPullUsingKatieSteveFile(pullAudio);
@@ -464,10 +493,14 @@ TEST_CASE("conversation_online_pull_stream", "[api][cxx][transcriber]")
 {
     REQUIRE(!DefaultSettingsMap[ONLINE_AUDIO_ENDPOINT].empty());
     REQUIRE(!SubscriptionsRegionsMap[CONVERSATION_TRANSCRIPTION_PPE_SUBSCRIPTION].Key.empty());
-    auto config = SpeechConfig::FromEndpoint(DefaultSettingsMap[ONLINE_AUDIO_ENDPOINT], SubscriptionsRegionsMap[CONVERSATION_TRANSCRIPTION_PPE_SUBSCRIPTION].Key);
-    config->SetServiceProperty("TrafficType", SpxGetTestTrafficType(__FILE__, __LINE__), ServicePropertyChannel::UriQueryParameter);
-    config->SetProperty("ConversationTranscriptionInRoomAndOnline", "true");
+
+    auto config = CreateSpeechConfigForCTSInRoom(
+        SubscriptionsRegionsMap[CONVERSATION_TRANSCRIPTION_PPE_SUBSCRIPTION].Key,
+        SubscriptionsRegionsMap[CONVERSATION_TRANSCRIPTION_PPE_SUBSCRIPTION].Region,
+        DefaultSettingsMap[ONLINE_AUDIO_ENDPOINT],
+        SpxGetTestTrafficType(__FILE__, __LINE__));
     config->SetProperty("iCalUid", "asdf");
+
     auto stream = AudioDataStream::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH).c_str());
 
     // Create the "pull stream" object with C++ lambda callbacks
@@ -543,10 +576,14 @@ TEST_CASE("conversation_online_pull_stream_internal_error", "[api][cxx][transcri
 {
     REQUIRE(!DefaultSettingsMap[ONLINE_AUDIO_ENDPOINT].empty());
     REQUIRE(!SubscriptionsRegionsMap[CONVERSATION_TRANSCRIPTION_PPE_SUBSCRIPTION].Key.empty());
-    auto config = SpeechConfig::FromEndpoint(DefaultSettingsMap[ONLINE_AUDIO_ENDPOINT], SubscriptionsRegionsMap[CONVERSATION_TRANSCRIPTION_PPE_SUBSCRIPTION].Key);
-    config->SetServiceProperty("TrafficType", SpxGetTestTrafficType(__FILE__, __LINE__), ServicePropertyChannel::UriQueryParameter);
-    config->SetProperty("ConversationTranscriptionInRoomAndOnline", "true");
+
+    auto config = CreateSpeechConfigForCTSInRoom(
+        SubscriptionsRegionsMap[CONVERSATION_TRANSCRIPTION_PPE_SUBSCRIPTION].Key,
+        SubscriptionsRegionsMap[CONVERSATION_TRANSCRIPTION_PPE_SUBSCRIPTION].Region,
+        DefaultSettingsMap[ONLINE_AUDIO_ENDPOINT],
+        SpxGetTestTrafficType(__FILE__, __LINE__));
     config->SetProperty("DiscardAudioFromIntermediateRecoResult", "true");
+
     auto stream = AudioDataStream::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH).c_str());
 
     auto myId = PAL::CreateGuidWithDashesUTF8();
@@ -660,9 +697,11 @@ TEST_CASE("conversation_online_pull_stream_internal_error", "[api][cxx][transcri
 
 TEST_CASE("conversation_online_1_channel_file", "[api][cxx]")
 {
-    auto config = SpeechConfig::FromEndpoint(DefaultSettingsMap[ONLINE_AUDIO_ENDPOINT], SubscriptionsRegionsMap[CONVERSATION_TRANSCRIPTION_PPE_SUBSCRIPTION].Key);
-    config->SetServiceProperty("TrafficType", SpxGetTestTrafficType(__FILE__, __LINE__), ServicePropertyChannel::UriQueryParameter);
-    config->SetProperty("ConversationTranscriptionInRoomAndOnline", "true");
+    auto config = CreateSpeechConfigForCTSInRoom(
+        SubscriptionsRegionsMap[CONVERSATION_TRANSCRIPTION_PPE_SUBSCRIPTION].Key,
+        SubscriptionsRegionsMap[CONVERSATION_TRANSCRIPTION_PPE_SUBSCRIPTION].Region,
+        DefaultSettingsMap[ONLINE_AUDIO_ENDPOINT],
+        SpxGetTestTrafficType(__FILE__, __LINE__));
 
     auto audioInput = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
 
@@ -687,8 +726,11 @@ TEST_CASE("conversation_online_1_channel_file", "[api][cxx]")
 #if 0
 TEST_CASE("conversation_online_microphone", "[api][cxx]")
 {
-    auto config = SpeechConfig::FromEndpoint(DefaultSettings[ONLINE_AUDIO_ENDPOINT], Keys::Speech);
-    config->SetServiceProperty("TrafficType", SpxGetTestTrafficType(__FILE__, __LINE__), ServicePropertyChannel::UriQueryParameter);
+    auto config = CreateSpeechConfigForCTSInRoom(
+        SubscriptionsRegionsMap[CONVERSATION_TRANSCRIPTION_PPE_SUBSCRIPTION].Key,
+        SubscriptionsRegionsMap[CONVERSATION_TRANSCRIPTION_PPE_SUBSCRIPTION].Region,
+        DefaultSettingsMap[ONLINE_AUDIO_ENDPOINT],
+        SpxGetTestTrafficType(__FILE__, __LINE__));
     config->SetProperty("ConversationTranscriptionInRoomAndOnline", "true");
 
     auto transcriber = ConversationTranscriber::FromConfig(config);

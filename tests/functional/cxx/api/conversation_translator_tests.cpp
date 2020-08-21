@@ -27,7 +27,7 @@ using namespace Microsoft::CognitiveServices::Speech::Transcription;
 TEST_CASE("[CT] Conversation host without translations", "[api][cxx][conversation_translator][cxx_conversation][no_translate]")
 {
     CT_INTEGRATION_TEST_INIT;
-    auto speechConfig = CreateConfig("en-US", {}, SpxGetTestTrafficType(__FILE__, __LINE__));
+    auto speechConfig = CreateConfig("en-US", {});
     auto conversation = Conversation::CreateConversationAsync(speechConfig).get();
     conversation->DeleteConversationAsync().get();
 }
@@ -35,7 +35,7 @@ TEST_CASE("[CT] Conversation host without translations", "[api][cxx][conversatio
 TEST_CASE("[CT] Conversation host with translations", "[api][cxx][conversation_translator][cxx_conversation][translate]")
 {
     CT_INTEGRATION_TEST_INIT;
-    auto speechConfig = CreateConfig("en-US", { "fr" }, SpxGetTestTrafficType(__FILE__, __LINE__));
+    auto speechConfig = CreateConfig("en-US", { "fr" });
     auto conversation = Conversation::CreateConversationAsync(speechConfig).get();
     conversation->DeleteConversationAsync().get();
 }
@@ -43,7 +43,7 @@ TEST_CASE("[CT] Conversation host with translations", "[api][cxx][conversation_t
 TEST_CASE("[CT] Conversation host destructor", "[api][cxx][conversation_translator][cxx_conversation][destructor]")
 {
     CT_INTEGRATION_TEST_INIT;
-    auto speechConfig = CreateConfig("en-US", { "fr", "ar" }, SpxGetTestTrafficType(__FILE__, __LINE__));
+    auto speechConfig = CreateConfig("en-US", { "fr", "ar" });
     auto conversation = Conversation::CreateConversationAsync(speechConfig).get();
 
     conversation.reset();
@@ -52,7 +52,7 @@ TEST_CASE("[CT] Conversation host destructor", "[api][cxx][conversation_translat
 TEST_CASE("[CT] Conversation destructor after start", "[api][cxx][conversation_translator][cxx_conversation][start_destructor]")
 {
     CT_INTEGRATION_TEST_INIT;
-    auto speechConfig = CreateConfig("en-US", { "fr", "ar" }, SpxGetTestTrafficType(__FILE__, __LINE__));
+    auto speechConfig = CreateConfig("en-US", { "fr", "ar" });
     auto conversation = Conversation::CreateConversationAsync(speechConfig).get();
     conversation->StartConversationAsync().get();
 
@@ -62,7 +62,7 @@ TEST_CASE("[CT] Conversation destructor after start", "[api][cxx][conversation_t
 TEST_CASE("[CT] Conversation call while not joined", "[api][cxx][conversation_translator][cxx_conversation][not_started]")
 {
     CT_INTEGRATION_TEST_INIT;
-    auto speechConfig = CreateConfig("en-US", { "fr", "ar" }, SpxGetTestTrafficType(__FILE__, __LINE__));
+    auto speechConfig = CreateConfig("en-US", { "fr", "ar" });
     auto conversation = Conversation::CreateConversationAsync(speechConfig).get();
 
     REQUIRE_THROWS_MATCHES(
@@ -111,7 +111,7 @@ TEST_CASE("[CT] Conversation call while not joined", "[api][cxx][conversation_tr
 TEST_CASE("[CT] Conversation call unsupported methods", "[api][cxx][conversation_translator][cxx_conversation][unsupported]")
 {
     CT_INTEGRATION_TEST_INIT;
-    auto speechConfig = CreateConfig("en-US", { "fr", "ar" }, SpxGetTestTrafficType(__FILE__, __LINE__));
+    auto speechConfig = CreateConfig("en-US", { "fr", "ar" });
 
     SECTION("Conversation Translator")
     {
@@ -192,7 +192,7 @@ TEST_CASE("[CT] Conversation Translator Host Audio", "[api][cxx][conversation_tr
     string speechLang("en-US");
     string hostname("TheHost");
     vector<string> toLangs{ "fr", "de" };
-    shared_ptr<SpeechTranslationConfig> speechConfig = CreateConfig(speechLang, toLangs, SpxGetTestTrafficType(__FILE__, __LINE__));
+    shared_ptr<SpeechTranslationConfig> speechConfig = CreateConfig(speechLang, toLangs);
 
     SPX_TRACE_INFO("Creating conversation");
     shared_ptr<Conversation> conversation = Conversation::CreateConversationAsync(speechConfig).get();
@@ -247,7 +247,7 @@ TEST_CASE("[CT] Join a conversation with translation", "[api][cxx][conversation_
     string bobId;
 
     // Create room
-    auto speechConfig = CreateConfig(hostLang, hostToLangs, SpxGetTestTrafficType(__FILE__, __LINE__));
+    auto speechConfig = CreateConfig(hostLang, hostToLangs);
 
     auto conversation = Conversation::CreateConversationAsync(speechConfig).get();
     conversation->StartConversationAsync().get();
@@ -310,7 +310,7 @@ TEST_CASE("[CT] Host sends an instant message", "[api][cxx][conversation_transla
     CT_INTEGRATION_TEST_INIT;
     REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
 
-    auto speechConfig = CreateConfig("en-US", { "ja", "ar" }, SpxGetTestTrafficType(__FILE__, __LINE__));
+    auto speechConfig = CreateConfig("en-US", { "ja", "ar" });
     TestConversationParticipant host(speechConfig, "Host");
 
     auto audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
@@ -335,7 +335,7 @@ TEST_CASE("[CT] Host and participants send instant messages", "[api][cxx][conver
     REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
     REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_CHINESE)));
 
-    auto speechConfig = CreateConfig("en-US", {}, SpxGetTestTrafficType(__FILE__, __LINE__));
+    auto speechConfig = CreateConfig("en-US", {});
     TestConversationParticipant host(speechConfig, "Host");
     auto audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
     host.Join(audioConfig);
@@ -375,7 +375,7 @@ TEST_CASE("[CT] Join locked room", "[api][cxx][conversation_translator][cxx_conv
     REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
     REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_CHINESE)));
 
-    auto speechConfig = CreateConfig("en-US", {}, SpxGetTestTrafficType(__FILE__, __LINE__));
+    auto speechConfig = CreateConfig("en-US", {});
 
     TestConversationParticipant host(speechConfig, "Host");
     auto audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
@@ -401,7 +401,7 @@ TEST_CASE("[CT] ConversationTranslator Host disconnects room", "[api][cxx][conve
     REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
     REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_CHINESE)));
 
-    auto speechConfig = CreateConfig("en-US", {}, SpxGetTestTrafficType(__FILE__, __LINE__));
+    auto speechConfig = CreateConfig("en-US", {});
     TestConversationParticipant host(speechConfig, "Host");
     auto audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
     host.Join(audioConfig);
@@ -432,7 +432,7 @@ TEST_CASE("[CT] Conversation Translator call methods when not joined", "[api][cx
 
     SECTION("Host")
     {
-        auto speechConfig = CreateConfig("de-DE", {}, SpxGetTestTrafficType(__FILE__, __LINE__));
+        auto speechConfig = CreateConfig("de-DE", {});
         auto conversation = Conversation::CreateConversationAsync(speechConfig).get();
         conversation->StartConversationAsync().get();
 
@@ -484,7 +484,7 @@ TEST_CASE("[CT] Double join should fail", "[api][cxx][conversation_translator][c
     CT_INTEGRATION_TEST_INIT;
 
     REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
-    auto hostSpeechConfig = CreateConfig("en-US", {}, SpxGetTestTrafficType(__FILE__, __LINE__));
+    auto hostSpeechConfig = CreateConfig("en-US", {});
     auto hostAudioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
 
     REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_CHINESE)));
@@ -543,7 +543,7 @@ TEST_CASE("[CT] Conversation Translator Connection After Leave", "[api][cxx][con
 {
     CT_INTEGRATION_TEST_INIT;
 
-    auto speechConfig = CreateConfig("en-US", {}, SpxGetTestTrafficType(__FILE__, __LINE__));
+    auto speechConfig = CreateConfig("en-US", {});
     REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
     auto audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
 
@@ -575,7 +575,7 @@ TEST_CASE("[CT] Conversation Translator Connection Recognizer events/methods", "
 {
     CT_INTEGRATION_TEST_INIT;
 
-    auto speechConfig = CreateConfig("en-US", {}, SpxGetTestTrafficType(__FILE__, __LINE__));
+    auto speechConfig = CreateConfig("en-US", {});
     REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
     auto audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
 
@@ -609,7 +609,7 @@ TEST_CASE("[CT] Conversation Translator Host Leave Rejoin", "[api][cxx][conversa
     string speechLang("en-US");
     string hostname("TheHost");
     vector<string> toLangs{ "fr", "de" };
-    shared_ptr<SpeechTranslationConfig> speechConfig = CreateConfig(speechLang, toLangs, SpxGetTestTrafficType(__FILE__, __LINE__));
+    shared_ptr<SpeechTranslationConfig> speechConfig = CreateConfig(speechLang, toLangs);
     
     SPX_TRACE_INFO("Creating conversation");
     shared_ptr<Conversation> conversation = Conversation::CreateConversationAsync(speechConfig).get();
@@ -677,7 +677,7 @@ TEST_CASE("[CT] Conversation Translator can't call methods after disconnect", "[
     CT_INTEGRATION_TEST_INIT;
 
     REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
-    auto speechConfig = CreateConfig("en-US", {}, SpxGetTestTrafficType(__FILE__, __LINE__));
+    auto speechConfig = CreateConfig("en-US", {});
     auto audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
 
     TestConversationParticipant host(speechConfig, "Host");
@@ -712,7 +712,7 @@ TEST_CASE("[CT] Conversation Translator Participant Rejoin", "[api][cxx][convers
     CT_INTEGRATION_TEST_INIT;
 
     REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
-    auto hostSpeechConfig = CreateConfig("en-US", {}, SpxGetTestTrafficType(__FILE__, __LINE__));
+    auto hostSpeechConfig = CreateConfig("en-US", {});
     auto hostAudioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
 
     REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_CHINESE)));
@@ -773,7 +773,7 @@ TEST_CASE("[CT] Conversation Translator Participant Rejoin After Delete", "[api]
     CT_INTEGRATION_TEST_INIT;
 
     REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
-    auto hostSpeechConfig = CreateConfig("en-US", {}, SpxGetTestTrafficType(__FILE__, __LINE__));
+    auto hostSpeechConfig = CreateConfig("en-US", {});
     auto hostAudioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
 
     REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_CHINESE)));
@@ -801,7 +801,7 @@ TEST_CASE("[CT] Conversation Translator Participant Rejoin After Delete", "[api]
     REQUIRE_THROWS_MATCHES(
         alice.Conn->Open(false),
         std::runtime_error,
-        Catch::MessageContains("Bad request") && Catch::MessageContains("WebSocket Upgrade failed"));
+        Catch::MessageContains("Bad request"));
 
     std::this_thread::sleep_for(400ms);
 
@@ -831,7 +831,7 @@ TEST_CASE("[CT] Conversation Translator SpeechRecognizer Connection Still Works"
 
     REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
     auto audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
-    auto speechConfig = CreateConfig("en-US", { }, SpxGetTestTrafficType(__FILE__, __LINE__));
+    auto speechConfig = CreateConfig("en-US", { });
 
     auto recognizer = SpeechRecognizer::FromConfig(speechConfig, audioConfig);
     auto connection = Connection::FromRecognizer(recognizer);
@@ -861,7 +861,7 @@ TEST_CASE("[CT] Conversation Translator INT endpoint", "[!hide][cxx_conversation
     REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
     auto audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
 
-    auto speechConfig = CreateConfig(speechLang, {}, SpxGetTestTrafficType(__FILE__, __LINE__));
+    auto speechConfig = CreateConfig(speechLang, {});
     speechConfig->SetProperty("ConversationTranslator_RestEndpoint", "https://dev.microsofttranslator-int.com/capito/room");
     speechConfig->SetProperty("ConversationTranslator_Endpoint", "wss://dev.microsofttranslator-int.com/capito/translate");
 
@@ -890,9 +890,9 @@ TEST_CASE("[CT] Conversation Translator INT endpoint", "[!hide][cxx_conversation
     });
 }
 
-TEST_CASE("[CT] Set invalid authorization token", "[!hide][api][cxx][conversation_translator][cxx_conversation_translator][authToken][invalid]")
+TEST_CASE("[CT] Set invalid authorization token", "[api][cxx][conversation_translator][cxx_conversation_translator][authToken][invalid]")
 {
-    auto speechConfig = CreateAuthTokenConfig(10min, "en-US", {});
+    auto speechConfig = CreateConfig("en-US", {});
 
     TestConversationParticipant host(speechConfig, "Host");
     host.Join(nullptr);
@@ -912,12 +912,12 @@ TEST_CASE("[CT] Set invalid authorization token", "[!hide][api][cxx][conversatio
     host.Leave();
 }
 
-TEST_CASE("[CT] Host updates authorization token", "[!hide][api][cxx][conversation_translator][cxx_conversation_translator][authToken][host]")
+TEST_CASE("[CT] Host updates authorization token", "[api][cxx][conversation_translator][cxx_conversation_translator][authToken][host]")
 {
-    auto authTokenValidity = 15s;
+    auto authTokenValidity = 20s;
     const auto speechLang = "en-US";
 
-    auto speechConfig = CreateAuthTokenConfig(authTokenValidity, speechLang, {});
+    auto speechConfig = CreateConfig(speechLang, {}, authTokenValidity);
 
     auto utterance = AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH];
     REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
@@ -934,7 +934,7 @@ TEST_CASE("[CT] Host updates authorization token", "[!hide][api][cxx][conversati
 
     auto subsKey = GetSubscriptionKey();
     auto region = GetRegion();
-    auto longAuthToken = GenerateAuthorizationToken(subsKey, region, 120s);
+    auto longAuthToken = AuthenticationTokenProvider::CreateToken(subsKey, region, 120s);
 
     // update the authentication token and validate it was set properly
     host.ConvTrans->SetAuthorizationToken(longAuthToken);
@@ -957,12 +957,12 @@ TEST_CASE("[CT] Host updates authorization token", "[!hide][api][cxx][conversati
     });
 }
 
-TEST_CASE("[CT] Participant receives updated authorization token", "[!hide][api][cxx][conversation_translator][cxx_conversation_translator][authToken][join]")
+TEST_CASE("[CT] Participant receives updated authorization token", "[api][cxx][conversation_translator][cxx_conversation_translator][authToken][join]")
 {
-    auto authTokenValidity = 15s;
+    auto authTokenValidity = 20s;
     const auto speechLang = "en-US";
 
-    auto speechConfig = CreateAuthTokenConfig(authTokenValidity, speechLang, {});
+    auto speechConfig = CreateConfig(speechLang, {}, authTokenValidity);
 
     auto utterance = AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH];
     REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
@@ -983,7 +983,7 @@ TEST_CASE("[CT] Participant receives updated authorization token", "[!hide][api]
 
     auto subsKey = GetSubscriptionKey();
     auto region = GetRegion();
-    auto longAuthToken = GenerateAuthorizationToken(subsKey, region, 120s);
+    auto longAuthToken = AuthenticationTokenProvider::CreateToken(subsKey, region, 120s);
 
     // update the authentication token and validate it was set properly
     host.ConvTrans->SetAuthorizationToken(longAuthToken, region);

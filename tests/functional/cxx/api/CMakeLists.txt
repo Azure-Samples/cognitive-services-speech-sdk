@@ -7,6 +7,7 @@ set(HEADERS_PRIVATE
     "${SRC_DIR}/conversation_translator_utils.h"
     "${SRC_DIR}/dump_log_files_at_end.h"
     "${SRC_DIR}/translator_languages.h"
+    "${SRC_DIR}/authentication_token_provider.h"
     )
 
 set(SOURCES
@@ -30,6 +31,7 @@ set(SOURCES
     "${SRC_DIR}/speaker_recognition_tests.cpp"
     "${SRC_DIR}/translator_languages.cpp"
     "${SRC_DIR}/pronunciation_assessment_tests.cpp"
+    "${SRC_DIR}/authentication_token_provider.cpp"
     )
 
 if(EXTENSION_AUDIOCOMPRESSION_ENABLED)

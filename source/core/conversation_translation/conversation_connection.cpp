@@ -372,7 +372,7 @@ namespace ConversationTranslation {
         }
     }
 
-    void ConversationConnection::HandleDisconnected(USP::WebSocketDisconnectReason reason, const std::string & message)
+    void ConversationConnection::HandleDisconnected(USP::WebSocketDisconnectReason reason, const std::string & message, bool serverRequested)
     {
         m_receivedParticipantsList = false;
         m_mutedByHost = false;
@@ -392,7 +392,7 @@ namespace ConversationTranslation {
 
         if (m_callbacks != nullptr)
         {
-            m_callbacks->OnDisconnected(reason, message);
+            m_callbacks->OnDisconnected(reason, message, serverRequested);
         }
     }
 

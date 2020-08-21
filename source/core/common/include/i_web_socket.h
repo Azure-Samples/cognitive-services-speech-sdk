@@ -162,9 +162,10 @@ namespace USP {
         /// <summary>
         /// Event raised when the socket is disconnected. The first parameter will be the reason
         /// we were disconnected. The second will either be the message the server sent to, or
-        /// an internally generated message in the case of errors.
+        /// an internally generated message in the case of errors. The third parameter is set
+        /// to true if the server requested the web socket be disconnected.
         /// </summary>
-        Impl::event<WebSocketDisconnectReason, const std::string&> OnDisconnected;
+        Impl::event<WebSocketDisconnectReason, const std::string&, bool> OnDisconnected;
 
         /// <summary>
         /// Event raised when we receive text data from the server

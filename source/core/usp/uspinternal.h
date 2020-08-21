@@ -138,7 +138,7 @@ private:
 
     void OnTelemetryData(std::string&& data, const std::string& requestId);
     void OnTransportOpened();
-    void OnTransportClosed(WebSocketDisconnectReason reason, const std::string& details);
+    void OnTransportClosed(WebSocketDisconnectReason reason, const std::string& details, bool serverRequested);
     void OnTransportError(const std::shared_ptr<ISpxErrorInformation>& error);
     void OnTransportData(bool isBinary, const UspHeaders& headers, const unsigned char* buffer, size_t bufferSize);
 

@@ -149,7 +149,7 @@ namespace ConversationTranslation {
 
         // ConversationCallbacks
         virtual void OnConnected() override;
-        virtual void OnDisconnected(const USP::WebSocketDisconnectReason reason, const string& message) override;
+        virtual void OnDisconnected(const USP::WebSocketDisconnectReason reason, const string& message, bool serverRequested) override;
         virtual void OnSpeechRecognition(const ConversationSpeechRecognitionMessage& reco) override;
         virtual void OnInstantMessage(const ConversationTranslatedMessage& im) override;
         virtual void OnParticipantChanged(const ConversationParticipantAction action, const std::vector<ConversationParticipant>& participants) override;

@@ -24,6 +24,7 @@
 #include "test_PAL.h"
 #include "conversation_utils.h"
 #include "translator_languages.h"
+#include "authentication_token_provider.h"
 
 #define SPX_CONFIG_TRACE_INTERFACE_MAP
 using json = nlohmann::json;
@@ -95,44 +96,6 @@ namespace IntegrationTests {
         });
     }
 
-    /// <summary>
-    /// Generates a Cognitive authorization token from a subscription key and region
-    /// </summary>
-    /// <param name="subscriptionKey">The Cognitive subscription key</param>
-    /// <param name="region">The Azure region for this subscription key</param>
-    /// <param name="validity">How long the authorization token is valid for</param>
-    /// <returns>The authorization token</returns>
-    static std::string GenerateAuthorizationToken(
-        const std::string& subscriptionKey, const std::string& region, std::chrono::seconds validity)
-    {
-        if (subscriptionKey.empty())
-        {
-            throw std::invalid_argument("You must specify a subscription key");
-        }
-        else if (region.empty())
-        {
-            throw std::invalid_argument("You must specify a region");
-        }
-        else if (validity <= 0s)
-        {
-            throw std::invalid_argument("You must specify a validity greater than 0 seconds");
-        }
-
-        HttpEndpointInfo authTokenEndpoint;
-        authTokenEndpoint
-            .Scheme(UriScheme::HTTPS)
-            .Host(region + ".api.cognitive.microsoft.com")
-            .Path("/sts/v1.0/issueToken")
-            .AddQueryParameter("expiredTime", std::to_string(validity.count()))
-            .SetHeader("Ocp-Apim-Subscription-Key", subscriptionKey);
-
-        HttpRequest request(authTokenEndpoint);
-        auto response = request.SendRequest(HTTPAPI_REQUEST_POST);
-        response->EnsureSuccess();
-
-        return response->ReadContentAsString();
-    }
-
     template<typename I>
     static void SetCommonConfig(std::shared_ptr<I> config)
     {
@@ -169,50 +132,34 @@ namespace IntegrationTests {
         }
     }
 
-    static std::shared_ptr<SpeechTranslationConfig> CreateConfig(const string& lang, const vector<string> to, const string& trafficType)
+    static std::shared_ptr<SpeechTranslationConfig> CreateConfig(const string& lang, const vector<string> to, chrono::seconds validity, const char* file, int line)
     {
+        // FIXME ralphe: Merge with Rob's traffic type changes
+        (void)file;
+        (void)line;
         shared_ptr<SpeechTranslationConfig> config;
 
         string subscriptionKey = GetSubscriptionKey();
         string region = GetRegion();
+        string endpoint = DefaultSettingsMap[CONVERSATION_TRANSLATOR_SPEECH_ENDPOINT];
 
-        if (DefaultSettingsMap[CONVERSATION_TRANSLATOR_SPEECH_ENDPOINT].empty())
+        string authToken;
+        if (validity == 0s)
         {
-            config = SpeechTranslationConfig::FromSubscription(subscriptionKey, region);
+            authToken = AuthenticationTokenProvider::GetOrCreateToken(subscriptionKey, region);
         }
         else
         {
-            config = SpeechTranslationConfig::FromEndpoint(DefaultSettingsMap[CONVERSATION_TRANSLATOR_SPEECH_ENDPOINT], subscriptionKey);
+            authToken = AuthenticationTokenProvider::CreateToken(subscriptionKey, region, validity);
         }
 
-        config->SetSpeechRecognitionLanguage(lang);
-        for (auto t : to)
-        {
-            config->AddTargetLanguage(t);
-        }
-
-        config->SetServiceProperty("TrafficType", trafficType, ServicePropertyChannel::UriQueryParameter);
-
-        SetCommonConfig(config);
-        return config;
-    }
-
-    static std::shared_ptr<SpeechTranslationConfig> CreateAuthTokenConfig(std::chrono::seconds authTokenValidity, const string& lang, const vector<string> to)
-    {
-        shared_ptr<SpeechTranslationConfig> config;
-
-        string subscriptionKey = GetSubscriptionKey();
-        string region = GetRegion();
-
-        string authToken = GenerateAuthorizationToken(subscriptionKey, region, authTokenValidity);
-
-        if (DefaultSettingsMap[CONVERSATION_TRANSLATOR_SPEECH_ENDPOINT].empty())
+        if (endpoint.empty())
         {
             config = SpeechTranslationConfig::FromAuthorizationToken(authToken, region);
         }
         else
         {
-            config = SpeechTranslationConfig::FromEndpoint(DefaultSettingsMap[CONVERSATION_TRANSLATOR_SPEECH_ENDPOINT]);
+            config = SpeechTranslationConfig::FromEndpoint(endpoint);
             config->SetAuthorizationToken(authToken);
         }
 
@@ -221,20 +168,42 @@ namespace IntegrationTests {
         {
             config->AddTargetLanguage(t);
         }
+        
+        config->SetServiceProperty("TrafficType", SpxGetTestTrafficType(file, line), ServicePropertyChannel::UriQueryParameter);
 
         SetCommonConfig(config);
         return config;
     }
 
-    static void SetParticipantConfig(std::shared_ptr<AudioConfig> config)
+    static std::shared_ptr<SpeechTranslationConfig> CreateConfig(const string& lang, const vector<string> to, const char* file, int line)
+    {
+        return CreateConfig(lang, to, 0s, file, line);
+    }
+
+#define CreateConfig(lang, ...) CreateConfig(lang, __VA_ARGS__, __FILE__, __LINE__)
+
+    static void SetParticipantConfig(std::shared_ptr<AudioConfig> config, const char * file, int line)
     {
         if (!DefaultSettingsMap[CONVERSATION_TRANSLATOR_SPEECH_ENDPOINT].empty())
         {
             config->SetProperty(PropertyId::SpeechServiceConnection_Endpoint, DefaultSettingsMap[CONVERSATION_TRANSLATOR_SPEECH_ENDPOINT]);
         }
 
+        // manually set the user defined query URL
+        const std::string propertyName = GetPropertyName(PropertyId::SpeechServiceConnection_UserDefinedQueryParameters);
+        std::string queryParam = config->GetProperty(propertyName);
+        if (!queryParam.empty())
+        {
+            queryParam += "&";
+        }
+
+        queryParam += "TrafficType=" + HttpUtils::UrlEscape(SpxGetTestTrafficType(file, line));
+        config->SetProperty(propertyName, queryParam);
+
         SetCommonConfig(config);
     }
+
+#define SetParticipantConfig(...) SetParticipantConfig(__VA_ARGS__, __FILE__, __LINE__)
 
 
     struct ExpectedTranscription

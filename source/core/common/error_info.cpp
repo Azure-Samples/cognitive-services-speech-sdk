@@ -18,6 +18,8 @@ namespace Microsoft { namespace CognitiveServices { namespace Speech { namespace
     HttpStatus,
   };
 
+  static constexpr int SKIP_HTTP_STATUS_VALIDATION = -32760;
+
   // This is intended to be "the one true place" that we generate all of the internal pieces for our
   // externally-facing errors.
   std::shared_ptr<ErrorInfo> create_error(
@@ -98,7 +100,6 @@ namespace Microsoft { namespace CognitiveServices { namespace Speech { namespace
             {
               case WebSocketDisconnectReason::ProtocolError:
               case WebSocketDisconnectReason::InvalidPayloadData:
-              case WebSocketDisconnectReason::UnsupportedLocale:
                 retryMode = ISpxErrorInformation::RetryMode::NotAllowed;
                 break;
               default:
@@ -112,8 +113,11 @@ namespace Microsoft { namespace CognitiveServices { namespace Speech { namespace
                 << statusCode << ". Error details: " << messageBody;
             break;
           case WebSocketError::WEBSOCKET_UPGRADE:
+            // An HTTP 200 response is not a valid upgrade response from a web socket server. We should get back
+            // HTTP 101. Set a flag to skip status code validation otherwise we'll return nullptr in this particular
+            // case even though we have an error
             return create_error(
-                ErrorSource::HttpStatus, statusCode, 0, "WebSocket upgrade failed:", messageBody, "");
+                ErrorSource::HttpStatus, statusCode, SKIP_HTTP_STATUS_VALIDATION, "WebSocket upgrade failed:", messageBody, "");
           case WebSocketError::WEBSOCKET_SEND_FRAME:
             msg << "Failure while sending a frame over the WebSocket connection. "
                 << "Internal error: " << statusCode << ". Error details: " << messageBody;
@@ -133,7 +137,7 @@ namespace Microsoft { namespace CognitiveServices { namespace Speech { namespace
         }
         break;
       case ErrorSource::HttpStatus:
-        if (categoryCode >= 200 && categoryCode < 300)
+        if (statusCode != SKIP_HTTP_STATUS_VALIDATION && categoryCode >= 200 && categoryCode < 300)
         {
           // 2XX codes are success codes and do not represent an error.
           return nullptr;

@@ -65,7 +65,8 @@ namespace ConversationTranslation {
         /// </summary>
         /// <param name="reason">The web socket disconnect reason</param>
         /// <param name="message">Any additional message explaining the disconnect (can be an empty string)</param>
-        virtual void OnDisconnected(const USP::WebSocketDisconnectReason, const string&) { }
+        /// <param name="serverRequested">True if the server requested that the web socket be closed</param>
+        virtual void OnDisconnected(const USP::WebSocketDisconnectReason, const string&, bool) { }
 
         /// <summary>
         /// A callback function that will be invoked when a partial or final recognition is received.
@@ -268,7 +269,7 @@ namespace ConversationTranslation {
         inline void CheckHostCanSend();
 
         void HandleConnected();
-        void HandleDisconnected(USP::WebSocketDisconnectReason reason, const std::string& message);
+        void HandleDisconnected(USP::WebSocketDisconnectReason reason, const std::string& message, bool serverRequested);
         void HandleTextData(const std::string& text);
         void HandleBinaryData(const uint8_t* data, const size_t length);
         void HandleError(const std::shared_ptr<ISpxErrorInformation>& error);

@@ -52,7 +52,7 @@ namespace USP {
 
         void HandleTextData(const std::string& data) override;
         void HandleBinaryData(const uint8_t* data, const size_t size) override;
-        void HandleDisconnected(WebSocketDisconnectReason reason, const std::string& cause) override;
+        void HandleDisconnected(WebSocketDisconnectReason reason, const std::string& cause, bool serverRequested) override;
 
     private:
         DISABLE_DEFAULT_CTORS(UspWebSocket);

@@ -955,20 +955,20 @@ void Connection::Impl::OnTransportOpened()
 }
 
 // Callback for transport closed
-void Connection::Impl::OnTransportClosed(WebSocketDisconnectReason reason, const std::string& details)
+void Connection::Impl::OnTransportClosed(WebSocketDisconnectReason reason, const std::string& details, bool serverRequested)
 {
     if (m_connected)
     {
         m_connected = false;
-        LogInfo("TS:%" PRIu64 ", OnDisconnected: connection:0x%x, Reason: %d, Details: %s",
-            getTimestamp(), this, reason, details.c_str());
+        LogInfo("TS:%" PRIu64 ", OnDisconnected: connection:0x%x, Reason: %d, Server Requested: %d, Details: %s",
+            getTimestamp(), this, reason, serverRequested, details.c_str());
 
         auto callbacks = m_config.m_callbacks;
         Invoke([&](auto callbacks) {
             callbacks->OnDisconnected();
         });
     }
-    }
+}
 
 // Callback for transport errors
 void Connection::Impl::OnTransportError(const std::shared_ptr<ISpxErrorInformation>& error)

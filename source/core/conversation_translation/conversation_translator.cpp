@@ -716,13 +716,13 @@ namespace ConversationTranslation {
         });
     }
 
-    void CSpxConversationTranslator::OnDisconnected(const USP::WebSocketDisconnectReason reason, const string & message)
+    void CSpxConversationTranslator::OnDisconnected(const USP::WebSocketDisconnectReason reason, const string & message, bool serverRequested)
     {
-        RunAsynchronously([this, reason, message]()
+        RunAsynchronously([this, reason, message, serverRequested]()
         {
             CT_GET_AND_LOG_STATE(
-                "Conversation disconnected. Reason: %d, Message: '%s'",
-                reason, message.c_str());
+                "Conversation disconnected. Reason: %d, Message: '%s', Server requested: %d",
+                reason, message.c_str(), serverRequested);
 
             auto error = ErrorInfo::FromWebSocket(WebSocketError::REMOTE_CLOSED, reason, message);
             const auto canRetry = error != nullptr ? error->GetRetryMode() == ISpxErrorInformation::RetryMode::Allowed : false;
@@ -776,6 +776,7 @@ namespace ConversationTranslation {
                     // then we treat this as the host has deleted the conversation and so we move to the
                     // closed state
                     if (reason == USP::WebSocketDisconnectReason::Normal
+                        && serverRequested
                         && !m_isHost)
                     {
                         CT_I_LOG_INFO("The host has most likely deleted the conversation. Will go to closed state");
