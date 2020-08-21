@@ -59,7 +59,7 @@ steps:
     coreHash=($(md5sum ${coreLib//repack/build}))
     pythonExtension=repack/azure/cognitiveservices/speech/_speech_py_impl.so # extension is .so on Linux and OSX
     libs=($coreLib $pythonExtension)
-    if [[ $(SPEECHSDK_ENABLE_KWS) == true ]]; then
+    if [[ $(SPEECHSDK_ENABLE_KWS) == true ]] && [[ $(SPEECHSDK_TARGET_PLATFORM) != OSX-x64 ]]; then
       kwsLib=repack/azure/cognitiveservices/speech/libMicrosoft.CognitiveServices.Speech.extension.kws.${dylibExtByPlatform[$(SPEECHSDK_TARGET_PLATFORM)]}
       libs+=($kwsLib)
       kwsHash=($(md5sum ${kwsLib//repack/build}))
@@ -77,7 +77,7 @@ steps:
         unzip -d repack "${wheel}"
         # check that the core & kws lib are identical in all wheels
         [[ $(md5sum "$coreLib") == ${coreHash[0]}* ]] || exitWithError "core lib changed between Python builds"
-        if [[ $(SPEECHSDK_ENABLE_KWS) == true ]]; then
+        if [[ $(SPEECHSDK_ENABLE_KWS) == true ]] && [[ $(SPEECHSDK_TARGET_PLATFORM) != OSX-x64 ]]; then
           [[ $(md5sum "$kwsLib") == ${kwsHash[0]}* ]] || exitWithError "kws lib changed between Python builds"
         fi
         # archive the unstripped python bindings lib

@@ -440,6 +440,16 @@ typedef NS_ENUM(NSUInteger, SPXResultReason)
     SPXResultReason_SynthesizingAudioCompleted = 9,
 
     /**
+     * Indicates the speech result contains (unverified) keyword text.
+     */
+    SPXResultReason_RecognizingKeyword = 10,
+
+    /**
+     * Indicates that keyword recognition completed recognizing the given keyword.
+     */
+    SPXResultReason_RecognizedKeyword = 11,
+
+    /**
      * Indicates the speech synthesis is now started.
      */
     SPXResultReason_SynthesizingAudioStarted = 12

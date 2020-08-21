@@ -20,11 +20,13 @@
 #import "speech_translation_config_private.h"
 
 #import "language_understanding_model_private.h"
+#import "keyword_recognition_model_private.h"
 
 #import "recognition_result_property_collection_private.h"
 #import "recognition_result_private.h"
 #import "speech_recognition_result_private.h"
 #import "intent_recognition_result_private.h"
+#import "keyword_recognition_result_private.h"
 #import "translation_text_result_private.h"
 #import "translation_synthesis_result_private.h"
 #import "speech_synthesis_result_property_collection_private.h"
@@ -36,6 +38,7 @@
 #import "recognition_event_args_private.h"
 #import "speech_recognition_event_args_private.h"
 #import "intent_recognition_event_args_private.h"
+#import "keyword_recognition_event_args_private.h"
 #import "translation_text_result_event_args_private.h"
 #import "translation_synthesis_result_event_args_private.h"
 #import "speech_synthesis_event_args_private.h"
@@ -46,6 +49,7 @@
 #import "speech_recognizer_private.h"
 #import "speech_synthesizer_private.h"
 #import "intent_recognizer_private.h"
+#import "keyword_recognizer_private.h"
 #import "translation_recognizer_private.h"
 #import "connection_private.h"
 

@@ -17,7 +17,7 @@
         self = [super init]; 
         audioImpl = SpeechImpl::AudioDataStream::FromResult([result getHandle]);
         if (audioImpl == nullptr) {
-            NSLog(@"Unable to create push audio input stream in core");
+            NSLog(@"Unable to get valid AudioDataStream handle");
             return nil;
         }            
         return self;
@@ -51,6 +51,57 @@
 {
     try {
         self = [self initFromSynthesisResult:result];
+        return self;
+    }
+    catch (NSException *exception) {
+        NSMutableDictionary *errorDict = [NSMutableDictionary dictionary];
+        [errorDict setObject:[NSString stringWithFormat:@"Error: %@", [exception reason]] forKey:NSLocalizedDescriptionKey];
+        *outError = [[NSError alloc] initWithDomain:@"SPXErrorDomain"
+                                               code:[Util getErrorNumberFromExceptionReason:[exception reason]] userInfo:errorDict];
+    }
+    return nil;
+}
+
+- (instancetype)initFromKeywordRecognitionResult:(SPXKeywordRecognitionResult *) result
+{
+    try {
+        self = [super init]; 
+        audioImpl = SpeechImpl::AudioDataStream::FromResult([result getHandle]);
+        if (audioImpl == nullptr) {
+            NSLog(@"Unable to get valid AudioDataStream handle");
+            return nil;
+        }            
+        return self;
+    }
+    catch (const std::exception &e) {
+        NSLog(@"Exception caught in core: %s", e.what());
+        NSException *exception = [NSException exceptionWithName:@"SPXException"
+                                                         reason:[NSString StringWithStdString:e.what()]
+                                                       userInfo:nil];
+        [exception raise];
+    }
+    catch (const SPXHR &hr) {
+        auto e = SpeechImpl::Impl::ExceptionWithCallStack(hr);
+        NSLog(@"Exception with error code in core: %s", e.what());
+        NSException *exception = [NSException exceptionWithName:@"SPXException"
+                                                         reason:[NSString StringWithStdString:e.what()]
+                                                       userInfo:nil];
+        [exception raise];
+    }
+    catch (...) {
+        NSLog(@"%@: Exception caught.", NSStringFromSelector(_cmd));
+        NSException *exception = [NSException exceptionWithName:@"SPXException"
+                                                         reason:@"Runtime Exception"
+                                                       userInfo:nil];
+        [exception raise];
+    }
+    return nil;
+}
+
+- (nullable instancetype)initFromKeywordRecognitionResult:(nonnull SPXKeywordRecognitionResult *)result error:(NSError * _Nullable * _Nullable)outError
+{
+    try {
+        self = [self initFromKeywordRecognitionResult:result];
         return self;
     }
     catch (NSException *exception) {
@@ -106,6 +157,24 @@
 - (void)saveToWavFile:(NSString *)fileName
 {
     return audioImpl->SaveToWavFileAsync([fileName toSpxString]).get();
+}
+
+- (void)detachInput
+{
+    return audioImpl->DetachInput();
+}
+
+- (void)detachInput:(NSError * _Nullable * _Nullable)outError
+{
+    try {
+        [self detachInput];
+    }
+    catch (NSException *exception) {
+        NSMutableDictionary *errorDict = [NSMutableDictionary dictionary];
+        [errorDict setObject:[NSString stringWithFormat:@"Error: %@", [exception reason]] forKey:NSLocalizedDescriptionKey];
+        *outError = [[NSError alloc] initWithDomain:@"SPXErrorDomain"
+                                               code:[Util getErrorNumberFromExceptionReason:[exception reason]] userInfo:errorDict];
+    }
 }
 
 @end

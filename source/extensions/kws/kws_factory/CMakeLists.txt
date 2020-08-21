@@ -23,7 +23,7 @@ if(WIN32)
   list(APPEND SOURCES "${CMAKE_CURRENT_BINARY_DIR}/windows/version.rc")
 endif()
 
-if(SPEECHSDK_OS MATCHES "^IOS")
+if(SPEECHSDK_OS MATCHES "^IOS" OR SPEECHSDK_OS STREQUAL "OSX")
     add_library(kws_factory STATIC ${HEADERS} ${HEADERS_PRIVATE} ${SOURCES})
 else()
     add_library(kws_factory SHARED ${HEADERS} ${HEADERS_PRIVATE} ${SOURCES})

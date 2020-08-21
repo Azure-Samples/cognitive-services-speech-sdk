@@ -48,6 +48,11 @@
 		F3EABAD22163B3E200BA4B2C /* whatstheweatherlike.wav in Resources */ = {isa = PBXBuildFile; fileRef = 3CC3789B2121CFD600F07A66 /* whatstheweatherlike.wav */; };
 		FC4C1DD424AF16DE00B3D799 /* SPXConversationTranslatorTest.m in Sources */ = {isa = PBXBuildFile; fileRef = FC4C1DD324AF16DE00B3D799 /* SPXConversationTranslatorTest.m */; };
 		FC4C1DD624AF1B4300B3D799 /* SPXConversationTranscriberTest.m in Sources */ = {isa = PBXBuildFile; fileRef = FC4C1DD524AF1B4200B3D799 /* SPXConversationTranscriberTest.m */; };
+		FC5F53FE24EA73190009EA6E /* SPXKeywordRecognizerTest.m in Sources */ = {isa = PBXBuildFile; fileRef = FC5F53FD24EA73190009EA6E /* SPXKeywordRecognizerTest.m */; };
+		FC5F540024EA732F0009EA6E /* kws_whatstheweatherlike.wav in Resources */ = {isa = PBXBuildFile; fileRef = FC5F53FF24EA732F0009EA6E /* kws_whatstheweatherlike.wav */; };
+		FC5F540224EA73400009EA6E /* kws.table in Resources */ = {isa = PBXBuildFile; fileRef = FC5F540124EA73400009EA6E /* kws.table */; };
+		FC5F540324EA73660009EA6E /* kws.table in Resources */ = {isa = PBXBuildFile; fileRef = FC5F540124EA73400009EA6E /* kws.table */; };
+		FC5F540424EA736E0009EA6E /* kws_whatstheweatherlike.wav in Resources */ = {isa = PBXBuildFile; fileRef = FC5F53FF24EA732F0009EA6E /* kws_whatstheweatherlike.wav */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -116,6 +121,9 @@
 		F3EABAC721639F5700BA4B2C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		FC4C1DD324AF16DE00B3D799 /* SPXConversationTranslatorTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SPXConversationTranslatorTest.m; path = ../../shared/testrunners/SPXConversationTranslatorTest.m; sourceTree = "<group>"; };
 		FC4C1DD524AF1B4200B3D799 /* SPXConversationTranscriberTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SPXConversationTranscriberTest.m; path = ../../shared/testrunners/SPXConversationTranscriberTest.m; sourceTree = "<group>"; };
+		FC5F53FD24EA73190009EA6E /* SPXKeywordRecognizerTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SPXKeywordRecognizerTest.m; path = ../../shared/testrunners/SPXKeywordRecognizerTest.m; sourceTree = "<group>"; };
+		FC5F53FF24EA732F0009EA6E /* kws_whatstheweatherlike.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = kws_whatstheweatherlike.wav; path = ../../../input/kws/kws_whatstheweatherlike.wav; sourceTree = "<group>"; };
+		FC5F540124EA73400009EA6E /* kws.table */ = {isa = PBXFileReference; lastKnownFileType = file; name = kws.table; path = ../../../input/kws/Computer/kws.table; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -140,6 +148,8 @@
 		3CA6CF7D211F471500CD2768 = {
 			isa = PBXGroup;
 			children = (
+				FC5F540124EA73400009EA6E /* kws.table */,
+				FC5F53FF24EA732F0009EA6E /* kws_whatstheweatherlike.wav */,
 				DC828F5C22F19D16007903CA /* whatstheweatherlike.alaw */,
 				DC828F5D22F19D16007903CA /* whatstheweatherlike.flac */,
 				DC828F5E22F19D16007903CA /* whatstheweatherlike.mulaw */,
@@ -200,6 +210,7 @@
 		F3EABAC421639F5700BA4B2C /* SpeechSDK_iOSUnitTests */ = {
 			isa = PBXGroup;
 			children = (
+				FC5F53FD24EA73190009EA6E /* SPXKeywordRecognizerTest.m */,
 				DC419443225B6F2300F95B2F /* CompressedStreamsTest.m */,
 				F3EABAC721639F5700BA4B2C /* Info.plist */,
 				FC4C1DD524AF1B4200B3D799 /* SPXConversationTranscriberTest.m */,
@@ -299,6 +310,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FC5F540424EA736E0009EA6E /* kws_whatstheweatherlike.wav in Resources */,
+				FC5F540324EA73660009EA6E /* kws.table in Resources */,
 				DC68200622A960C200AD8EA4 /* silenceshort.wav in Resources */,
 				DC15EE9D22676E5F00991304 /* wreck-a-nice-beach.wav in Resources */,
 				DC419449225B77BF00F95B2F /* whatstheweatherlike.mp3 in Resources */,
@@ -319,6 +332,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FC5F540224EA73400009EA6E /* kws.table in Resources */,
 				DC828F6222F1AE71007903CA /* whatstheweatherlike.alaw in Resources */,
 				DC15EE9E22676E7D00991304 /* wreck-a-nice-beach.wav in Resources */,
 				DC828F6322F1AE74007903CA /* whatstheweatherlike.flac in Resources */,
@@ -327,6 +341,7 @@
 				DC68200722A960C200AD8EA4 /* silenceshort.wav in Resources */,
 				DC828F6422F1AE79007903CA /* whatstheweatherlike.mulaw in Resources */,
 				DC419447225B779C00F95B2F /* whatstheweatherlike.opus in Resources */,
+				FC5F540024EA732F0009EA6E /* kws_whatstheweatherlike.wav in Resources */,
 				DC419448225B779C00F95B2F /* whatstheweatherlike.mp3 in Resources */,
 				DC27A3F82260996200BD9FE0 /* Margarita-44100.wav in Resources */,
 			);
@@ -353,6 +368,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				FC4C1DD624AF1B4300B3D799 /* SPXConversationTranscriberTest.m in Sources */,
+				FC5F53FE24EA73190009EA6E /* SPXKeywordRecognizerTest.m in Sources */,
 				EB21A8EB2429674B0056703C /* SPXLanguageConfigurationTest.m in Sources */,
 				F3C06E37216E3AE2003989B2 /* SPXDummyTestRunner.m in Sources */,
 				DC419444225B6F2300F95B2F /* CompressedStreamsTest.m in Sources */,

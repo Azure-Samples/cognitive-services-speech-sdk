@@ -6,6 +6,7 @@
 #import "SPXFoundation.h"
 #import "SPXSpeechEnums.h"
 #import "SPXSpeechSynthesisResult.h"
+#import "SPXKeywordRecognitionResult.h"
 
 /**
  * Represents audio data stream used for operating audio data as a stream. 
@@ -32,6 +33,24 @@ NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.");
  * @return an instance of audio data stream.
  */
 - (nullable instancetype)initFromSynthesisResult:(nonnull SPXSpeechSynthesisResult *)result error:(NSError * _Nullable * _Nullable)outError;
+
+/**
+ * Obtains the memory backed AudioDataStream associated with a given KeywordRecognition result.
+ * 
+ * @param result the keyword recognition result.
+ * @return An audio stream with the input to the KeywordRecognizer starting from right before the Keyword.
+ */
+- (nullable instancetype)initFromKeywordRecognitionResult:(nonnull SPXKeywordRecognitionResult *)result
+NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.");
+
+/**
+ * Obtains the memory backed AudioDataStream associated with a given KeywordRecognition result.
+ * 
+ * @param result the keyword recognition result.
+ * @param outError error information.
+ * @return An audio stream with the input to the KeywordRecognizer starting from right before the Keyword.
+ */
+- (nullable instancetype)initFromKeywordRecognitionResult:(nonnull SPXKeywordRecognitionResult *)result error:(NSError * _Nullable * _Nullable)outError;
 
 /**
  * Get current status of the audio data stream.
@@ -96,5 +115,19 @@ NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.");
  * @param pos position to be set.
  */
 - (void)setPosition:(NSUInteger)pos;
+
+/**
+ * Stops any more data from getting to the stream.
+ * 
+ */
+- (void)detachInput
+NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.");
+
+/**
+ * Stops any more data from getting to the stream.
+ * 
+ * @param outError error information.
+ */
+- (void)detachInput:(NSError * _Nullable * _Nullable)outError;
 
 @end

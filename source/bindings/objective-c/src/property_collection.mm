@@ -164,3 +164,19 @@
 }
 
 @end
+
+@implementation KeywordRecognizerPropertyCollection
+{
+    // We have to keep the recognizer instance alive in order to make sure the propertyHandle is valid
+    KeywordRecoSharedPtr recognizerImpl;
+}
+
+-(instancetype)initWithPropertyCollection :(const KeywordImpl::PropertyCollection *)propertiesHandle from:(KeywordRecoSharedPtr)recoHandle
+{
+    self = [super initWithPropertyCollection:(SpeechImpl::PropertyCollection *)propertiesHandle];
+    if (self)
+        self->recognizerImpl = recoHandle;
+    return self;
+}
+
+@end

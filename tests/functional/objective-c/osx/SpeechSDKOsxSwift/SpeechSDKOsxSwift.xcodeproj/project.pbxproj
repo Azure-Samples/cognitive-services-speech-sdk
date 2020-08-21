@@ -20,6 +20,11 @@
 		DC70A99D22CA5F7400D051C8 /* IntentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC70A99B22CA5F7400D051C8 /* IntentTests.swift */; };
 		EB21A8FA242C58F00056703C /* LanguageConfigurationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB21A8F9242C58F00056703C /* LanguageConfigurationTests.swift */; };
 		FC5F53EA24E1727D0009EA6E /* ConversationTranslationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC5F53E924E1727D0009EA6E /* ConversationTranslationTests.swift */; };
+		FC5F543024EADFC60009EA6E /* KeywordRecognitionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC5F542F24EADFC60009EA6E /* KeywordRecognitionTests.swift */; };
+		FC5F543224EADFD80009EA6E /* kws.table in Resources */ = {isa = PBXBuildFile; fileRef = FC5F543124EADFD80009EA6E /* kws.table */; };
+		FC5F543424EADFE80009EA6E /* kws_whatstheweatherlike.wav in Resources */ = {isa = PBXBuildFile; fileRef = FC5F543324EADFE80009EA6E /* kws_whatstheweatherlike.wav */; };
+		FC5F543524EADFF80009EA6E /* kws_whatstheweatherlike.wav in Resources */ = {isa = PBXBuildFile; fileRef = FC5F543324EADFE80009EA6E /* kws_whatstheweatherlike.wav */; };
+		FC5F543624EADFFD0009EA6E /* kws.table in Resources */ = {isa = PBXBuildFile; fileRef = FC5F543124EADFD80009EA6E /* kws.table */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -52,6 +57,9 @@
 		DC70A99B22CA5F7400D051C8 /* IntentTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = IntentTests.swift; path = ../../../ios/SpeechSDKSwift/SpeechSDKSwiftTests/IntentTests.swift; sourceTree = "<group>"; };
 		EB21A8F9242C58F00056703C /* LanguageConfigurationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = LanguageConfigurationTests.swift; path = ../../../ios/SpeechSDKSwift/SpeechSDKSwiftTests/LanguageConfigurationTests.swift; sourceTree = "<group>"; };
 		FC5F53E924E1727D0009EA6E /* ConversationTranslationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ConversationTranslationTests.swift; path = ../../../ios/SpeechSDKSwift/SpeechSDKSwiftTests/ConversationTranslationTests.swift; sourceTree = "<group>"; };
+		FC5F542F24EADFC60009EA6E /* KeywordRecognitionTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = KeywordRecognitionTests.swift; path = ../../../ios/SpeechSDKSwift/SpeechSDKSwiftTests/KeywordRecognitionTests.swift; sourceTree = "<group>"; };
+		FC5F543124EADFD80009EA6E /* kws.table */ = {isa = PBXFileReference; lastKnownFileType = file; name = kws.table; path = ../../../../input/kws/Computer/kws.table; sourceTree = "<group>"; };
+		FC5F543324EADFE80009EA6E /* kws_whatstheweatherlike.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = kws_whatstheweatherlike.wav; path = ../../../../input/kws/kws_whatstheweatherlike.wav; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -82,6 +90,8 @@
 		DC70A96B22CA5BC500D051C8 = {
 			isa = PBXGroup;
 			children = (
+				FC5F543324EADFE80009EA6E /* kws_whatstheweatherlike.wav */,
+				FC5F543124EADFD80009EA6E /* kws.table */,
 				DC70A99822CA5F4C00D051C8 /* silenceshort.wav */,
 				DC70A99622CA5E0C00D051C8 /* whatstheweatherlike.wav */,
 				DC70A97622CA5BC500D051C8 /* SpeechSDKOsxSwift */,
@@ -116,6 +126,7 @@
 		DC70A98A22CA5C0900D051C8 /* SpeechSDKOsxSwiftTests */ = {
 			isa = PBXGroup;
 			children = (
+				FC5F542F24EADFC60009EA6E /* KeywordRecognitionTests.swift */,
 				FC5F53E924E1727D0009EA6E /* ConversationTranslationTests.swift */,
 				DC70A98D22CA5C0900D051C8 /* Info.plist */,
 				DC70A99B22CA5F7400D051C8 /* IntentTests.swift */,
@@ -210,6 +221,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FC5F543624EADFFD0009EA6E /* kws.table in Resources */,
+				FC5F543524EADFF80009EA6E /* kws_whatstheweatherlike.wav in Resources */,
 				DC70A97A22CA5BC600D051C8 /* Assets.xcassets in Resources */,
 				DC70A97D22CA5BC600D051C8 /* MainMenu.xib in Resources */,
 				DC70A99722CA5E0C00D051C8 /* whatstheweatherlike.wav in Resources */,
@@ -221,6 +234,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FC5F543424EADFE80009EA6E /* kws_whatstheweatherlike.wav in Resources */,
+				FC5F543224EADFD80009EA6E /* kws.table in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -240,6 +255,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				DC70A99D22CA5F7400D051C8 /* IntentTests.swift in Sources */,
+				FC5F543024EADFC60009EA6E /* KeywordRecognitionTests.swift in Sources */,
 				DC70A99422CA5C6000D051C8 /* SpeechRecognitionTests.swift in Sources */,
 				FC5F53EA24E1727D0009EA6E /* ConversationTranslationTests.swift in Sources */,
 				83B59CCE24E7B1E3008A1A39 /* PronunciationAssessmentTests.swift in Sources */,

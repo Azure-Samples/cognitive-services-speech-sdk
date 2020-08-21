@@ -31,6 +31,12 @@
         case SpeechImpl::ResultReason::RecognizedIntent:
             reason = SPXResultReason_RecognizedIntent;
             break;
+        case SpeechImpl::ResultReason::RecognizingKeyword:
+            reason = SPXResultReason_RecognizingKeyword;
+            break;
+        case SpeechImpl::ResultReason::RecognizedKeyword:
+            reason = SPXResultReason_RecognizedKeyword;
+            break;
         case SpeechImpl::ResultReason::TranslatingSpeech:
             reason = SPXResultReason_TranslatingSpeech;
             break;

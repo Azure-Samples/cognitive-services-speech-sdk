@@ -34,3 +34,9 @@
 -(instancetype)initWithPropertyCollection :(SpeechImpl::PropertyCollection *)propertiesHandle from:(ParticipantSharedPtr)participantHandle;
 
 @end
+
+@interface KeywordRecognizerPropertyCollection : PropertyCollection
+
+-(instancetype)initWithPropertyCollection :(const KeywordImpl::PropertyCollection *)propertiesHandle from:(KeywordRecoSharedPtr)recoHandle;
+
+@end
