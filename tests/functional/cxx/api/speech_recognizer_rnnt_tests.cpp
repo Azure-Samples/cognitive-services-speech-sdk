@@ -81,6 +81,7 @@ TEST_CASE("Offline continuous recognition with RNN-T using pull stream input", "
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
     UseMocks(false);
+    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
 
     auto config = CurrentSpeechConfig(SpxGetTestTrafficType(__FILE__, __LINE__));
     UseOfflineRnnt(config);

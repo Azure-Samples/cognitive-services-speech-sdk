@@ -112,35 +112,35 @@ RUN_OFFLINE_RNNT_TESTS=false
 BUILD_CONFIGURATION=$(echo $PLATFORM | cut -f3 -d-)
 case $PLATFORM in
   Linux-x86*)
-    RNNT_RUNTIME_PATH="$SCRIPT_DIR/../external/mas/Linux/x86/$BUILD_CONFIGURATION"
+    RNNT_RUNTIME_PATH="$SCRIPT_DIR/../external/mas/Linux/x86/Release"
     if [[ -d "$RNNT_RUNTIME_PATH" ]]; then
       LD_LIBRARY_PATH="${RNNT_RUNTIME_PATH}:$LD_LIBRARY_PATH"
       RUN_OFFLINE_RNNT_TESTS=true
     fi
     ;;
   Linux-x64*)
-    RNNT_RUNTIME_PATH="$SCRIPT_DIR/../external/mas/Linux/x64/$BUILD_CONFIGURATION"
+    RNNT_RUNTIME_PATH="$SCRIPT_DIR/../external/mas/Linux/x64/Release"
     if [[ -d "$RNNT_RUNTIME_PATH" ]]; then
       LD_LIBRARY_PATH="${RNNT_RUNTIME_PATH}:$LD_LIBRARY_PATH"
       RUN_OFFLINE_RNNT_TESTS=true
     fi
     ;;
   Windows-x86*)
-    RNNT_RUNTIME_PATH="$SCRIPT_DIR/../external/mas/Windows/Win32/$BUILD_CONFIGURATION"
+    RNNT_RUNTIME_PATH="$SCRIPT_DIR/../external/mas/Windows/Win32/Release"
     if [[ -d "$RNNT_RUNTIME_PATH" ]]; then
       PATH="${RNNT_RUNTIME_PATH}:$PATH"
       RUN_OFFLINE_RNNT_TESTS=true
     fi
     ;;
   Windows-x64*)
-    RNNT_RUNTIME_PATH="$SCRIPT_DIR/../external/mas/Windows/x64/$BUILD_CONFIGURATION"
+    RNNT_RUNTIME_PATH="$SCRIPT_DIR/../external/mas/Windows/x64/Release"
     if [[ -d "$RNNT_RUNTIME_PATH" ]]; then
       PATH="${RNNT_RUNTIME_PATH}:$PATH"
       RUN_OFFLINE_RNNT_TESTS=true
     fi
     ;;
   OSX-x64*)
-    RNNT_RUNTIME_PATH="$SCRIPT_DIR/../external/mas/OSX/x64/$BUILD_CONFIGURATION"
+    RNNT_RUNTIME_PATH="$SCRIPT_DIR/../external/mas/OSX/x64/Release"
     if [[ -d "$RNNT_RUNTIME_PATH" ]]; then
       export LD_LIBRARY_PATH="${RNNT_RUNTIME_PATH}:$LD_LIBRARY_PATH"
       RUN_OFFLINE_RNNT_TESTS=true
