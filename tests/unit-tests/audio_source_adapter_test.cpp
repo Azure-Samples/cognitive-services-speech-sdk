@@ -325,7 +325,6 @@ TEST_CASE("CSpxMicrophoneAudioSourceAdapter tests", "[cxx][audio]")
                     };
                     return rawBufferData;
                 });
-            std::array<uint8_t, 10> buffer{};
             auto read = audioSourceBufferData->GetOffset();
             THEN("Creates a BufferData object (lazy init)")
             {
