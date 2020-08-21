@@ -35,13 +35,13 @@ TEST_CASE("Intent Recognizer basics", "[api][cxx][intent]")
 {
     SECTION("Intent Recognition works")
     {
-        REQUIRE(exists(ROOT_RELATIVE_PATH(INTENT_UTTERANCE)));
+        SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(INTENT_UTTERANCE)));
 
         auto config = SpeechConfigForIntentTests(SpxGetTestTrafficType(__FILE__, __LINE__));
         auto audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(INTENT_UTTERANCE));
         auto recognizer = IntentRecognizer::FromConfig(config, audioConfig);
 
-        REQUIRE(!DefaultSettingsMap[LANGUAGE_UNDERSTANDING_HOME_AUTOMATION_APP_ID].empty());
+        SPXTEST_REQUIRE(!DefaultSettingsMap[LANGUAGE_UNDERSTANDING_HOME_AUTOMATION_APP_ID].empty());
         auto model = LanguageUnderstandingModel::FromAppId(DefaultSettingsMap[LANGUAGE_UNDERSTANDING_HOME_AUTOMATION_APP_ID]);
         std::string sessionId;
 
@@ -58,7 +58,7 @@ TEST_CASE("Intent Recognizer basics", "[api][cxx][intent]")
 #pragma warning(disable: 6237)
 // Disable: (<zero> && <expression>) is always zero.  <expression> is never evaluated and might have side effects.
 #endif
-            REQUIRE(result != nullptr);
+            SPXTEST_REQUIRE(result != nullptr);
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif
@@ -92,48 +92,46 @@ TEST_CASE("Intent Recognizer basics", "[api][cxx][intent]")
 #pragma warning(disable: 6237)
 // Disable: (<zero> && <expression>) is always zero.  <expression> is never evaluated and might have side effects.
 #endif
-            REQUIRE(result->IntentId == expectedIntentId);
+            SPXTEST_REQUIRE(result->IntentId == expectedIntentId);
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif
         };
-
-        WHEN("using single model, all intents, no intent name, no intent ids")
+        SPXTEST_WHEN("using single model, all intents, no intent name, no intent ids")
         {
             recognizer->AddAllIntents(model);
             auto result = recognizer->RecognizeOnceAsync().get();
             requireIntentId(result, "HomeAutomation.TurnOn");
         }
 
-        WHEN("using single model, all intents, no intent name, override intent id")
+        SPXTEST_WHEN("using single model, all intents, no intent name, override intent id")
         {
             recognizer->AddAllIntents(model, "override-all-intent-ids-with-this");
             auto result = recognizer->RecognizeOnceAsync().get();
             requireIntentId(result, "override-all-intent-ids-with-this");
         }
-
-        WHEN("using single model, specific intent by name, no intent id")
+        SPXTEST_WHEN("using single model, specific intent by name, no intent id")
         {
             recognizer->AddIntent(model, "HomeAutomation.TurnOn");
             auto result = recognizer->RecognizeOnceAsync().get();
             requireIntentId(result, "HomeAutomation.TurnOn");
         }
 
-        WHEN("using single model, specific intent by name, override intent id")
+        SPXTEST_WHEN("using single model, specific intent by name, override intent id")
         {
             recognizer->AddIntent(model, "HomeAutomation.TurnOn", "override-turn-on-id-with-this");
             auto result = recognizer->RecognizeOnceAsync().get();
             requireIntentId(result, "override-turn-on-id-with-this");
         }
 
-        WHEN("using single model, other intent by name")
+        SPXTEST_WHEN("using single model, other intent by name")
         {
             recognizer->AddIntent(model, "HomeAutomation.TurnOff");
             auto result = recognizer->RecognizeOnceAsync().get();
             requireIntentId(result, "", ResultReason::RecognizedSpeech);
         }
 
-        WHEN("using single model, other intent by name, with all intents override id")
+        SPXTEST_WHEN("using single model, other intent by name, with all intents override id")
         {
             recognizer->AddIntent(model, "HomeAutomation.TurnOff");
             recognizer->AddAllIntents(model, "override-turn-on-id-with-this");
@@ -141,7 +139,7 @@ TEST_CASE("Intent Recognizer basics", "[api][cxx][intent]")
             requireIntentId(result, "override-turn-on-id-with-this");
         }
 
-        WHEN("using single model, specific intent by name, all other intents with override id")
+        SPXTEST_WHEN("using single model, specific intent by name, all other intents with override id")
         {
             recognizer->AddIntent(model, "HomeAutomation.TurnOn");
             recognizer->AddAllIntents(model, "override-all-intent-ids-with-this");

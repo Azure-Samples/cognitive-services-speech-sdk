@@ -209,7 +209,7 @@ inline void test_diagnostics_log_trace_message(int level, const char* pszTitle, 
     va_end(argptr);
 
      fprintf(stderr, "%s", sz);
-    
+
      va_start(argptr, pszFormat);
      diagnostics_log_trace_message2(level, pszTitle, fileName, lineNumber, pszFormat, argptr);
      va_end(argptr);
