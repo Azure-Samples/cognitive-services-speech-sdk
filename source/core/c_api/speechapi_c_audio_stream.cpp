@@ -337,8 +337,11 @@ SPXAPI audio_data_stream_detach_input(SPXAUDIOSTREAMHANDLE audioStreamHandle)
 {
     SPXAPI_INIT_HR_TRY(hr)
     {
-        auto stream = GetInstance<ISpxAudioDataStream>(audioStreamHandle);
-        stream->DetachInput();
+        auto wrapper = QueryInterfaceFromHandle<ISpxAudioDataStream, ISpxAudioDataStreamWrapper>(audioStreamHandle);
+        if (wrapper)
+        {
+            wrapper->DetachInput();
+        }
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }

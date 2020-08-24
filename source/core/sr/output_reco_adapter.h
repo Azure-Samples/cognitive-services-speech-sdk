@@ -13,6 +13,8 @@
 #include "ispxinterfaces.h"
 #include "interface_helpers.h"
 #include <object_with_site_init_impl.h>
+#include <interface_delegate_helpers.h>
+#include <function_helpers.h>
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -23,8 +25,9 @@ class CSpxOutputRecoEngineAdapter final:
     public ISpxObjectWithSiteInitImpl<ISpxRecoEngineAdapterSite>,
     public ISpxRecoEngineAdapter,
     public ISpxAudioProcessorMinInput,
+    public ISpxRetrievable,
     public ISpxAudioDataStream,
-    public ISpxRetrievable
+    public ISpxAudioDataStreamWrapper
 {
 public:
     using tick = std::chrono::duration<uint64_t, std::ratio<1, 10000000>>;
@@ -37,9 +40,10 @@ public:
         SPX_INTERFACE_MAP_ENTRY(ISpxObjectInit)
         SPX_INTERFACE_MAP_ENTRY(ISpxRecoEngineAdapter)
         SPX_INTERFACE_MAP_ENTRY(ISpxAudioProcessor)
-        SPX_INTERFACE_MAP_ENTRY(ISpxAudioDataStream)
         SPX_INTERFACE_MAP_ENTRY(ISpxRetrievable)
         SPX_INTERFACE_MAP_ENTRY(ISpxAudioProcessorMinInput)
+        SPX_INTERFACE_MAP_ENTRY(ISpxAudioDataStream)
+        SPX_INTERFACE_MAP_ENTRY(ISpxAudioDataStreamWrapper)
     SPX_INTERFACE_MAP_END()
 
     // --- ISpxObject
@@ -68,95 +72,91 @@ public:
     }
 
     // -- ISpxAudioDataStream
-    void InitFromFile(const char*) final { }
-    void InitFromSynthesisResult(std::shared_ptr<ISpxSynthesisResult>) final { }
+    inline void InitFromFile(const char*) final {}
 
-    void InitFromFormat(const SPXWAVEFORMATEX& format, bool hasHeader) final
+    inline void InitFromSynthesisResult(std::shared_ptr<ISpxSynthesisResult>) final {}
+
+    inline void InitFromFormat(const SPXWAVEFORMATEX&, bool) final {}
+
+    inline StreamStatus GetStatus() const noexcept final
     {
-        m_bytesPerSecond = (format.wBitsPerSample * format.nChannels * format.nSamplesPerSec) / 8;
-        m_stream->InitFromFormat(format, hasHeader);
+        return m_stream ? m_stream->GetStatus() : StreamStatus::NoData;
     }
 
-    StreamStatus GetStatus() noexcept final
+    inline void SetStatus(StreamStatus status) noexcept final
     {
-        return m_status;
+        SPX_IFTRUE(m_stream, m_stream->SetStatus(status));
     }
 
-    CancellationReason GetCancellationReason() final
+    inline CancellationReason GetCancellationReason() final
     {
-        return m_stream->GetCancellationReason();
+        return m_stream ? m_stream->GetCancellationReason() : CancellationReason::Error;
     }
 
-    const std::shared_ptr<ISpxErrorInformation>& GetError() final
+    inline std::shared_ptr<ISpxErrorInformation> GetError() final
     {
-        return m_stream->GetError();
+        return m_stream ? m_stream->GetError() : nullptr;
     }
 
-    bool CanReadData(uint32_t requestedSize) final
+    inline bool CanReadData(uint32_t requestedSize) final
     {
-        WaitForStateNot(StreamStatus::NoData);
-        return m_stream->CanReadData(requestedSize);
+        return m_stream ? m_stream->CanReadData(requestedSize) : false;
     }
 
-    bool CanReadData(uint32_t requestedSize, uint32_t pos) final
+    inline bool CanReadData(uint32_t requestedSize, uint32_t pos) final
     {
-        WaitForStateNot(StreamStatus::NoData);
-        return m_stream->CanReadData(requestedSize, pos);
+        return m_stream ? m_stream->CanReadData(requestedSize, pos) : false;
     }
 
-    uint32_t Read(uint8_t* buffer, uint32_t bufferSize) final
+    inline uint32_t Read(uint8_t* buffer, uint32_t bufferSize) final
     {
-        WaitForStateNot(StreamStatus::NoData);
-        return m_stream->Read(buffer, bufferSize);
+        return m_stream ? m_stream->Read(buffer, bufferSize) : 0;
     }
 
-    uint32_t Read(uint8_t* buffer, uint32_t bufferSize, uint32_t pos) final
+    inline uint32_t Read(uint8_t* buffer, uint32_t bufferSize, uint32_t pos) final
     {
-        WaitForStateNot(StreamStatus::NoData);
-        return m_stream->Read(buffer, bufferSize, pos);
+        return m_stream ? m_stream->Read(buffer, bufferSize, pos) : 0;
     }
 
-    void SaveToWaveFile(const wchar_t* fileName) final
+    inline void SaveToWaveFile(const wchar_t* fileName) final
     {
-        if (GetStatus() != StreamStatus::AllData)
-        {
-            SPX_THROW_HR(SPXERR_INVALID_STATE);
-        }
-        m_stream->SaveToWaveFile(fileName);
+        SPX_IFTRUE(m_stream, m_stream->SaveToWaveFile(fileName));
     }
 
-    uint32_t GetPosition() final
+    inline uint32_t GetPosition() final
     {
-        return m_stream->GetPosition();
+        return m_stream ? m_stream->GetPosition() : 0;
     }
 
-    void SetPosition(uint32_t pos) final
+    inline void SetPosition(uint32_t pos) final
     {
-        return m_stream->SetPosition(pos);
+        SPX_IFTRUE(m_stream, m_stream->SetPosition(pos));
     }
 
+    // -- ISpxAudioDataStreamWrapper
     void DetachInput() final;
 private:
-    void WaitForState(StreamStatus status) const
+    inline void UpdateStatus(StreamStatus status)
     {
-        std::unique_lock<std::mutex> lk{ m_stateMutex };
-        m_cv.wait(lk, [this, status]()
+        std::lock_guard<std::mutex> lk{ m_stateMutex };
+        if (m_stream)
         {
-            return m_status == status;
-        });
+            m_stream->SetStatus(status);
+            m_cv.notify_all();
+        }
     }
 
-    void WaitForStateNot(StreamStatus status) const
+    inline void WaitForStatus(StreamStatus status) const
     {
         std::unique_lock<std::mutex> lk{ m_stateMutex };
-        m_cv.wait(lk, [this, status]()
+
+        m_cv.wait(lk, [&]()
         {
-            return m_status != status;
+            return m_stream && (m_stream->GetStatus() == status);
         });
     }
 
     using SitePtr = std::shared_ptr<ISpxRecoEngineAdapterSite>;
-    StreamStatus m_status{ StreamStatus::NoData };
 
     std::shared_ptr<ISpxAudioDataStream> m_stream;
     std::shared_ptr<ISpxAudioOutput> m_sink;

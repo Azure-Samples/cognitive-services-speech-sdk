@@ -77,7 +77,7 @@ std::shared_ptr<I> SpxQueryInterface(std::shared_ptr<ISpxInterfaceBase> from)
             auto ptr = fn(interfaceName);                                               \
             if (ptr != nullptr)                                                         \
             {                                                                           \
-                SPX_DBG_TRACE_SERVICE_MAP_FOUND_IT();                                   \
+                SPX_DBG_TRACE_INTERFACE_MAP_FOUND_IT();                                   \
                 return ptr;                                                             \
             }                                                                           \
         }

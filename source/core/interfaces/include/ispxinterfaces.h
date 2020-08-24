@@ -423,12 +423,9 @@ public:
     virtual void SetReader(std::shared_ptr<ISpxAudioStreamReader> reader) = 0;
 };
 
-class ISpxAudioDataStream;
-
 #define REASON_CANCELED_NONE static_cast<CancellationReason>(0)
 #define NO_MATCH_REASON_NONE static_cast<NoMatchReason>(0)
 #define VOICE_PROFILE_TYPE_NONE static_cast<VoiceProfileType>(0)
-
 
 class ISpxKeywordRecognitionResultInit : public ISpxInterfaceBaseFor<ISpxKeywordRecognitionResultInit>
 {

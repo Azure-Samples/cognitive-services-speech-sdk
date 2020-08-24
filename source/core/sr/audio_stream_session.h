@@ -267,7 +267,6 @@ private:
     std::packaged_task<void()> CreateTask(std::function<void()> func, bool catchAll = true);
     std::shared_ptr<ISpxRecoEngineAdapter> EnsureInitRecoEngineAdapter();
     std::shared_ptr<ISpxRecoEngineAdapter> EnsureInitOutputEngineAdapter();
-    void EnsureResetOutputEngineAdapter();
     std::shared_ptr<ISpxSpeechAudioProcessorAdapter> EnsureInitSpeechProcessor();
     void InitRecoEngineAdapter();
 

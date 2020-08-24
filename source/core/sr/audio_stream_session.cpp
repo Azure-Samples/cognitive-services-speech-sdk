@@ -839,8 +839,8 @@ CSpxAsyncOp<std::shared_ptr<ISpxRecognitionResult>> CSpxAudioStreamSession::Reco
             auto retrievable = SpxQueryInterface<ISpxRetrievable>(m_recoAdapter);
             if (!retrievable->WasRetrieved())
             {
-                auto stream = SpxQueryInterface<ISpxAudioDataStream>(m_recoAdapter);
-                stream->DetachInput();
+                auto streamWrapper = SpxQueryInterface<ISpxAudioDataStreamWrapper>(m_recoAdapter);
+                streamWrapper->DetachInput();
             }
         }
         auto singleShotInFlight = std::make_shared<Operation>(RecognitionKind::KeywordOnce);
@@ -878,10 +878,10 @@ CSpxAsyncOp<void> CSpxAudioStreamSession::StopKeywordRecognitionAsync()
     if (m_recoKind == RecognitionKind::KWSOnceSingleShot)
     {
         /* For KWSOnceSingleShot stopping is equivalent to Detaching the input */
-        auto stream = m_recoAdapter->QueryInterface<ISpxAudioDataStream>();
-        if (stream != nullptr)
+        auto streamWrapper = m_recoAdapter->QueryInterface<ISpxAudioDataStreamWrapper>();
+        if (streamWrapper != nullptr)
         {
-            stream->DetachInput();
+            streamWrapper->DetachInput();
             return CSpxAsyncOp<void>::FromResult();
         }
     }
@@ -2262,13 +2262,6 @@ std::shared_ptr<ISpxRecoEngineAdapter> CSpxAudioStreamSession::EnsureInitOutputE
     return m_recoAdapter;
 }
 
-void CSpxAudioStreamSession::EnsureResetOutputEngineAdapter()
-{
-    SPX_DBG_TRACE_FUNCTION();
-    m_recoAdapter = nullptr;
-    m_audioProcessor = nullptr;
-}
-
 std::shared_ptr < ISpxSpeechAudioProcessorAdapter> CSpxAudioStreamSession::EnsureInitSpeechProcessor()
 {
     std::shared_ptr < ISpxSpeechAudioProcessorAdapter> retval = SpxCreateObjectWithSite<ISpxSpeechAudioProcessorAdapter>("CSpxSpeechAudioProcessor", this);
@@ -2819,11 +2812,10 @@ void CSpxAudioStreamSession::InformAdapterSetFormatStopping(SessionState comingF
                    comingFromState == SessionState::WaitForAdapterCompletedSetFormatStop);
     if (comingFromState == SessionState::StoppingPump)
     {
-        auto processor = m_audioProcessor;
-        if (processor)
+        if (m_audioProcessor)
         {
             SPX_TRACE_INFO("[%p]CSpxAudioStreamSession::InformAdapterSetFormatStoppingProcessingAudio - Send zero size audio, processor=%p", (void*)this, m_audioProcessor.get());
-            processor->ProcessAudio(std::make_shared<DataChunk>(nullptr, 0));
+            m_audioProcessor->ProcessAudio(std::make_shared<DataChunk>(nullptr, 0));
         }
     }
 
@@ -2872,8 +2864,7 @@ void CSpxAudioStreamSession::AdapterCompletedSetFormatStop(AdapterDoneProcessing
     {
         SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::AdapterCompletedSetFormatStop: KwsOnceSingleShot Waiting for done ... Done!! Going back to idle", (void*)this);
         SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::AdapterCompletedSetFormatStop: Now Idle/Idle ...", (void*)this);
-        /* Since this scenario is only for when we are using the OutputRecoEngineAdater, we should clean it up so it only persists if the user has a ref. */
-        EnsureResetOutputEngineAdapter();
+
         FireSessionStoppedEvent();
     }
     else if (TryChangeState(SessionState::HotSwapPaused, SessionState::ProcessingAudio))

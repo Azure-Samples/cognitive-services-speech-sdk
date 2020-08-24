@@ -49,9 +49,10 @@ public:
     void InitFromFile(const char* fileName) override;
     void InitFromSynthesisResult(std::shared_ptr<ISpxSynthesisResult> result) override;
     void InitFromFormat(const SPXWAVEFORMATEX& format, bool hasHeader) final;
-    StreamStatus GetStatus() noexcept final;
+    StreamStatus GetStatus() const noexcept final;
+    void SetStatus(StreamStatus status) noexcept final;
     CancellationReason GetCancellationReason() override;
-    const std::shared_ptr<ISpxErrorInformation>& GetError() override;
+    std::shared_ptr<ISpxErrorInformation> GetError() override;
     bool CanReadData(uint32_t requestedSize) override;
     bool CanReadData(uint32_t requestedSize, uint32_t pos) override;
     uint32_t Read(uint8_t* buffer, uint32_t bufferSize) override;
@@ -59,13 +60,13 @@ public:
     void SaveToWaveFile(const wchar_t* fileName) override;
     uint32_t GetPosition() override;
     void SetPosition(uint32_t pos) override;
-    inline void DetachInput() final {}
 
     // --- CSpxPullAudioOutputStream ---
     uint32_t Write(uint8_t* buffer, uint32_t size) override;
     void Close() override;
 
 private:
+    void UpdateStatusFromReason(ResultReason reason);
 
     using SynthesisCallbackFunction_Type = std::function<void(std::shared_ptr<ISpxSynthesisEventArgs>)>;
 
@@ -86,8 +87,8 @@ private:
 
     uint32_t m_position = 0;
 
+    StreamStatus m_status{ StreamStatus::Unknown };
     ResultReason m_beginningReason = ResultReason::SynthesizingAudioStarted;
-    ResultReason m_latestReason = ResultReason::SynthesizingAudioStarted;
     CancellationReason m_cancellationReason = CancellationReason::EndOfStream;
     std::shared_ptr<ISpxErrorInformation> m_error{ nullptr };
 };

@@ -46,7 +46,7 @@ void CSpxAudioDataStream::InitFromFile(const char* fileName)
         this->Write(buffer.get(), readSize);
     }
 
-    // mark that we're done reading ... 
+    // mark that we're done reading ...
     m_writingEnded = true;
 }
 
@@ -57,7 +57,7 @@ void CSpxAudioDataStream::InitFromSynthesisResult(std::shared_ptr<ISpxSynthesisR
 
     // Set reason
     m_beginningReason = result->GetReason();
-    m_latestReason = result->GetReason();
+    UpdateStatusFromReason(m_beginningReason);
 
     // Set audio format
     auto requiredFormatSize = result->GetFormat(nullptr, 0);
@@ -106,7 +106,7 @@ void CSpxAudioDataStream::InitFromSynthesisResult(std::shared_ptr<ISpxSynthesisR
         }
 
         // Update reason
-        m_latestReason = result->GetReason();
+        UpdateStatusFromReason(result->GetReason());
 
         auto audioData = result->GetRawAudioData();
         Write(audioData->data(), static_cast<uint32_t>(audioData->size()));
@@ -127,7 +127,7 @@ void CSpxAudioDataStream::InitFromSynthesisResult(std::shared_ptr<ISpxSynthesisR
         }
 
         // Update reason
-        m_latestReason = result->GetReason();
+        UpdateStatusFromReason(result->GetReason());
 
         // Set cancellation details if it's cancellation event
         if (result->GetReason() == ResultReason::Canceled)
@@ -184,10 +184,10 @@ void CSpxAudioDataStream::InitFromFormat(const SPXWAVEFORMATEX& format, bool has
     m_hasHeader = hasHeader;
 }
 
-StreamStatus CSpxAudioDataStream::GetStatus() noexcept
+void CSpxAudioDataStream::UpdateStatusFromReason(ResultReason reason)
 {
     auto status = StreamStatus::Unknown;
-    switch(m_latestReason)
+    switch(reason)
     {
     case ResultReason::SynthesizingAudioStarted:
         status = StreamStatus::NoData;
@@ -224,8 +224,17 @@ StreamStatus CSpxAudioDataStream::GetStatus() noexcept
     default:
         break;
     }
+    m_status = status;
+}
 
-    return status;
+StreamStatus CSpxAudioDataStream::GetStatus() const noexcept
+{
+    return m_status;
+}
+
+void CSpxAudioDataStream::SetStatus(StreamStatus status) noexcept
+{
+    m_status = status;
 }
 
 CancellationReason CSpxAudioDataStream::GetCancellationReason()
@@ -233,7 +242,7 @@ CancellationReason CSpxAudioDataStream::GetCancellationReason()
     return m_cancellationReason;
 }
 
-const std::shared_ptr<ISpxErrorInformation>& CSpxAudioDataStream::GetError()
+std::shared_ptr<ISpxErrorInformation> CSpxAudioDataStream::GetError()
 {
     return m_error;
 }

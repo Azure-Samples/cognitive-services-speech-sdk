@@ -2,9 +2,9 @@ if(WIN32)
   # Version >= 3.10 is required for generating VS 2017 solutions and ensuring SWIG to create correct dll names.
   cmake_minimum_required(VERSION 3.14)
 elseif(APPLE)
-  cmake_minimum_required(VERSION 3.9)
+  cmake_minimum_required(VERSION 3.12)
 else()
-  cmake_minimum_required(VERSION 3.5)
+  cmake_minimum_required(VERSION 3.12)
 endif()
 
 function(set_source_groups)
