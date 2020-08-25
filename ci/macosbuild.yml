@@ -68,7 +68,7 @@ jobs:
         -DSPEECHSDK_BUILD_TYPE=$(SPEECHSDK_BUILD_TYPE) \
         -DSPEECHSDK_VERSION=$(SPEECHSDK_SEMVER2NOMETA) \
         -DEXTENSION_RNNT_ENABLED=$(SPEECHSDK_ENABLE_RNNT) \
-        -DEXTENSION_KWS_ENABLED=$(SPEECHSDK_ENABLE_KWS) \        
+        -DEXTENSION_KWS_ENABLED=$(SPEECHSDK_ENABLE_KWS) \
         ${{ parameters.extraCmakeArgs }}
     displayName: Generate makefiles
   - bash: |
