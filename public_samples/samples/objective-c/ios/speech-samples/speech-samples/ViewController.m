@@ -18,6 +18,7 @@
 @property (strong, nonatomic) IBOutlet UIButton *recognizeWithPushStreamButton;
 @property (strong, nonatomic) IBOutlet UIButton *recognizeWithPullStreamButton;
 @property (strong, nonatomic) IBOutlet UIButton *recognizeWithAutoLanguageDetectionButton;
+@property (strong, nonatomic) IBOutlet UIButton *recognizeKeywordFromFileButton;
 
 @property (strong, nonatomic) IBOutlet UILabel *recognitionResultLabel;
 
@@ -27,6 +28,7 @@
 - (IBAction)recognizeWithPushStreamButtonTapped:(UIButton *)sender;
 - (IBAction)recognizeWithPullStreamButtonTapped:(UIButton *)sender;
 - (IBAction)recognizeWithAutoLanguageDetectionButtonTapped:(UIButton *)sender;
+- (IBAction)recognizeKeywordFromFileButtonTapped:(UIButton *)sender;
 @end
 
 @implementation ViewController
@@ -80,6 +82,13 @@
     self.recognizeWithAutoLanguageDetectionButton.accessibilityIdentifier = @"recognize_language_detection_button";
     [self.view addSubview:self.recognizeWithAutoLanguageDetectionButton];
 
+    self.recognizeKeywordFromFileButton = [UIButton buttonWithType:UIButtonTypeSystem];
+    [self.recognizeKeywordFromFileButton addTarget:self action:@selector(recognizeKeywordFromFileButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
+    [self.recognizeKeywordFromFileButton setTitle:@"Recognize keyword" forState:UIControlStateNormal];
+    [self.recognizeKeywordFromFileButton setFrame:CGRectMake(50.0, 400.0, 300.0, 50.0)];
+    self.recognizeKeywordFromFileButton.accessibilityIdentifier = @"recognize_keyword_button";
+    [self.view addSubview:self.recognizeKeywordFromFileButton];
+
     self.recognitionResultLabel = [[UILabel alloc] initWithFrame:CGRectMake(50.0, 350.0, 300.0, 400.0)];
     self.recognitionResultLabel.lineBreakMode = NSLineBreakByWordWrapping;
     self.recognitionResultLabel.numberOfLines = 0;
@@ -122,6 +131,12 @@
 - (IBAction)recognizeWithAutoLanguageDetectionButtonTapped:(UIButton *)sender {
     dispatch_async(dispatch_get_global_queue(QOS_CLASS_DEFAULT, 0), ^{
         [self recognizeWithAutoLanguageDetection];
+    });
+}
+
+- (IBAction)recognizeKeywordFromFileButtonTapped:(UIButton *)sender {
+    dispatch_async(dispatch_get_global_queue(QOS_CLASS_DEFAULT, 0), ^{
+        [self recognizeKeywordFromFile];
     });
 }
 
@@ -542,6 +557,66 @@
     } else {
         NSLog(@"There was an error.");
         [self updateRecognitionErrorText:(@"Speech Recognition Error")];
+    }
+}
+
+/*
+ * Performs keyword recognition from a wav file using kws.table keyword model
+ */
+- (void)recognizeKeywordFromFile {
+    NSBundle *mainBundle = [NSBundle mainBundle];
+    NSString *kwsWeatherFile = [mainBundle pathForResource: @"kws_whatstheweatherlike" ofType:@"wav"];
+    NSLog(@"kws_weatherFile path: %@", kwsWeatherFile);
+    if (!kwsWeatherFile) {
+        NSLog(@"Cannot find audio file!");
+        [self updateRecognitionErrorText:(@"Cannot find audio file")];
+        return;
+    }
+
+    SPXAudioConfiguration* audioFileInput = [[SPXAudioConfiguration alloc] initWithWavFileInput:kwsWeatherFile];
+    if (!audioFileInput) {
+        NSLog(@"Loading audio file failed!");
+        [self updateRecognitionErrorText:(@"Audio Error")];
+        return;
+    }
+
+    NSString *keywordModelFile = [mainBundle pathForResource: @"kws" ofType:@"table"];
+    NSLog(@"keyword model file path: %@", keywordModelFile);
+    if (!keywordModelFile) {
+        NSLog(@"Cannot find keyword model file!");
+        [self updateRecognitionErrorText:(@"Cannot find keyword model file")];
+        return;
+    }
+
+    SPXKeywordRecognitionModel* keywordRecognitionModel = [[SPXKeywordRecognitionModel alloc] initFromFile:keywordModelFile];
+
+    SPXKeywordRecognizer* keywordRecognizer = [[SPXKeywordRecognizer alloc] init:audioFileInput];
+    if (!keywordRecognizer) {
+        NSLog(@"Could not create keyword recognizer");
+        [self updateRecognitionResultText:(@"Keyword Recognition Error")];
+        return;
+    }
+
+    dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
+    __block SPXKeywordRecognitionResult * keywordResult;
+    [keywordRecognizer recognizeOnceAsync: ^ (SPXKeywordRecognitionResult *srresult) {
+        keywordResult = srresult;
+        dispatch_semaphore_signal(semaphore);
+    }keywordModel:keywordRecognitionModel];
+
+    [self updateRecognitionStatusText:(@"Waiting for keyword detected...")];
+    dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
+
+    if (SPXResultReason_Canceled == keywordResult.reason) {
+        SPXCancellationDetails *details = [[SPXCancellationDetails alloc] initFromCanceledRecognitionResult:keywordResult];
+        NSLog(@"Keyword recognition was canceled: %@.", details.errorDetails);
+        [self updateRecognitionErrorText:([NSString stringWithFormat:@"Canceled: %@", details.errorDetails ])];
+    } else if (SPXResultReason_RecognizedKeyword == keywordResult.reason) {
+        NSLog(@"Keyword recognition result received: %@", keywordResult.text);
+        [self updateRecognitionResultText:(keywordResult.text)];
+    } else {
+        NSLog(@"There was an error.");
+        [self updateRecognitionErrorText:(@"Keyword Recognition Error")];
     }
 }
 
