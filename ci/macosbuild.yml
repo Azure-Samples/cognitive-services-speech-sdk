@@ -191,7 +191,7 @@ jobs:
     displayName: Create drop files
   - task: PublishBuildArtifacts@1
     displayName: Publish drop
-    condition: succeededOrFailed()
+    condition: succeeded()
     inputs:
       PathtoPublish: '$(Build.ArtifactStagingDirectory)/$(BuildPlatform)'
       ArtifactName: $(BuildPlatform)
