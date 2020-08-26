@@ -65,12 +65,12 @@ namespace Connector
             return this.GetAsync<TranscriptionFiles>(path);
         }
 
-        public Task<Uri> PostTranscriptionAsync(string name, string description, string locale, Dictionary<string, string> properties, Uri recordingsUrl, IEnumerable<Guid> modelIds)
+        public Task<Uri> PostTranscriptionAsync(string name, string description, string locale, Dictionary<string, string> properties, List<Uri> contentUrls, IEnumerable<Guid> modelIds)
         {
             var models = modelIds.Select(m => ModelIdentity.Create(m)).ToList();
             var path = $"{SpeechToTextBasePath}Transcriptions/";
 
-            var transcriptionDefinition = TranscriptionDefinition.Create(name, description, locale, recordingsUrl, properties, models);
+            var transcriptionDefinition = TranscriptionDefinition.Create(name, description, locale, contentUrls, properties, models);
             return this.PostAsJsonAsync(path, transcriptionDefinition);
         }
 
@@ -85,9 +85,10 @@ namespace Connector
             return new Uri(headers["Location"]);
         }
 
-        private static async Task<HttpWebResponse> GetHttpWebResponseAsync(HttpWebRequest request)
+        private static async Task<HttpWebResponse> GetHttpWebResponseAsync(HttpWebRequest request, ILogger logger)
         {
-            var response = (HttpWebResponse)(await request.GetResponseAsync().ConfigureAwait(false));
+            var webresponse = await request.GetResponseAsync().ConfigureAwait(false);
+            var response = (HttpWebResponse)webresponse;
 
             if (IsThrottledOrTimeoutStatusCode(response.StatusCode))
             {
@@ -96,7 +97,7 @@ namespace Connector
 
             if (response.StatusCode != HttpStatusCode.Accepted && response.StatusCode != HttpStatusCode.Created)
             {
-                Log.LogInformation($"Failure: Status Code {response.StatusCode}, {response.StatusDescription}");
+                logger.LogInformation($"Failure: Status Code {response.StatusCode}, {response.StatusDescription}");
                 throw new NotImplementedException();
             }
 
@@ -116,7 +117,8 @@ namespace Connector
         private async Task<Uri> PostAsJsonAsync(string path, TranscriptionDefinition payload)
         {
             var request = BuildWebRequest(path, payload);
-            var webResponse = await GetHttpWebResponseAsync(request).ConfigureAwait(false);
+            Log.LogInformation("Request: " + request);
+            var webResponse = await GetHttpWebResponseAsync(request, Log).ConfigureAwait(false);
             Log.LogInformation("StatusCode: " + webResponse.StatusCode);
             return GetLocationFromPostResponseAsync(webResponse.Headers);
         }
@@ -131,7 +133,6 @@ namespace Connector
             request.Headers.Add("Ocp-Apim-Subscription-Key", SubscriptionKey);
 
             var payloadString = JsonConvert.SerializeObject(payload);
-            Log.LogInformation($"Request body: {payloadString}");
             var data = Encoding.ASCII.GetBytes(payloadString);
             request.ContentLength = data.Length;
 

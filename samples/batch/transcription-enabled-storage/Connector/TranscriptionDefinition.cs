@@ -49,5 +49,16 @@ namespace Connector
         {
             return new TranscriptionDefinition(name, description, locale, new[] { contentUrl }.ToList(), properties, models);
         }
+
+        public static TranscriptionDefinition Create(
+            string name,
+            string description,
+            string locale,
+            List<Uri> contentUrls,
+            Dictionary<string, string> properties,
+            IEnumerable<ModelIdentity> models)
+        {
+            return new TranscriptionDefinition(name, description, locale, contentUrls, properties, models);
+        }
     }
 }

@@ -6,17 +6,9 @@
 namespace Connector
 {
     using System;
-    using System.Collections.Generic;
-    using Microsoft.Extensions.Logging;
 
     public class Subscription
     {
-        public Subscription(string subscriptionKey, string region)
-        {
-            SubscriptionKey = subscriptionKey;
-            LocationUri = new Uri("https://" + region + ".api.cognitive.microsoft.com");
-        }
-
         public Subscription(string subscriptionKey, Uri locationUri)
         {
             SubscriptionKey = subscriptionKey;

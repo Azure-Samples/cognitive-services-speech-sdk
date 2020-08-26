@@ -7,12 +7,9 @@ namespace Tests
 {
     using System;
     using System.Collections.Generic;
-    using System.Globalization;
     using System.IO;
     using System.Linq;
-    using System.Threading.Tasks;
     using Connector;
-    using FetchTranscriptionFunction;
     using Microsoft.Extensions.Logging;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Moq;
@@ -21,13 +18,7 @@ namespace Tests
     [TestClass]
     public class OverallTests
     {
-        private const string TestSasUri = "https://contoso.blob.core.windows.net/testContainer/test.wav";
-
-        private const string SubscriptionKey = "TestSubscriptionKey";
-        private const string SubscriptionRegion = "testregion";
-        private const string TranscriptionLocation = "TestLocation";
-        private const string TestAudioFileName = "test.wav";
-        private const string TestAudioFileUrl = "https://contoso.com";
+        private const string TestSasUri = "https://contoso.blob.core.windows.net/testContainer/testfolder/test.wav";
 
         private static Mock<ILogger> Logger { get; set; }
 
@@ -40,80 +31,50 @@ namespace Tests
         [TestMethod]
         public void GetContainerFromSasTest()
         {
-            var containerPath = StorageUtilities.GetContainerPathFromSAS(TestSasUri, Logger.Object);
-            Assert.AreEqual("testContainer", containerPath);
+            var containerName = StorageUtilities.GetContainerNameFromPath(TestSasUri);
+            var fileName = StorageUtilities.GetFileNameFromPath(TestSasUri);
+            var fileNameWithoutExtension = StorageUtilities.GetFileNameWithoutExtension(fileName);
+            Assert.AreEqual("testContainer", containerName);
+            Assert.AreEqual("testfolder/test.wav", fileName);
+            Assert.AreEqual("testfolder/test", fileNameWithoutExtension);
         }
 
         [TestMethod]
         public void GetAudioDetailsWavTest()
         {
-            var wavAudioBytes = File.ReadAllBytes(@"testFiles/test_audio.wav");
-            (TimeSpan duration, int channels, double estimatedCost) = StorageUtilities.GetAudioDetailsFromBytes(wavAudioBytes, ".wav", Logger.Object);
+            var audioBytes = File.ReadAllBytes(@"testFiles/test_audio.wav");
+            var audioDetails = StorageUtilities.GetAudioDetails(audioBytes, "testFiles/test_audio.wav", "en-US", DateTime.UtcNow, false, false, false, Logger.Object);
 
-            Assert.AreEqual(1, channels);
-            Assert.AreEqual(0.0002d, Math.Round(estimatedCost, 4));
+            Assert.AreEqual(1, audioDetails.Channels);
         }
 
         [TestMethod]
         public void GetAudioDetailsMp3Test()
         {
-            var mp3AudioBytes = File.ReadAllBytes(@"testFiles/test_audio.mp3");
-            (TimeSpan duration, int channels, double estimatedCost) = StorageUtilities.GetAudioDetailsFromBytes(mp3AudioBytes, ".mp3", Logger.Object);
+            var audioBytes = File.ReadAllBytes(@"testFiles/test_audio.mp3");
+            var audioDetails = StorageUtilities.GetAudioDetails(audioBytes, "testFiles/test_audio.mp3", "en-US", DateTime.UtcNow, false, false, false, Logger.Object);
 
-            Assert.AreEqual(1, channels);
-            Assert.AreEqual(0.0002d, Math.Round(estimatedCost, 4));
+            Assert.AreEqual(1, audioDetails.Channels);
         }
 
         [TestMethod]
         public void GetAudioDetailsMissingHeaderTest()
         {
             var audioBytes = File.ReadAllBytes(@"testFiles/missing_wav_header.wav");
-            (TimeSpan duration, int channels, double estimatedCost) = StorageUtilities.GetAudioDetailsFromBytes(audioBytes, ".wav", Logger.Object);
+            var audioDetails = StorageUtilities.GetAudioDetails(audioBytes, "testFiles/missing_wav_header.wav", "en-US", DateTime.UtcNow, false, false, false, Logger.Object);
 
-            Assert.AreEqual(TimeSpan.Zero, duration);
-            Assert.AreEqual(0, channels);
-            Assert.AreEqual(0d, estimatedCost);
+            Assert.AreEqual(0, audioDetails.Channels);
+            Assert.AreEqual(TimeSpan.Zero, audioDetails.AudioLength);
         }
 
         [TestMethod]
         public void GetAudioDetailsInvalidFileTest()
         {
             var audioBytes = File.ReadAllBytes(@"testFiles/transcriptSample.json");
-            (TimeSpan duration, int channels, double estimatedCost) = StorageUtilities.GetAudioDetailsFromBytes(audioBytes, ".txt", Logger.Object);
+            var audioDetails = StorageUtilities.GetAudioDetails(audioBytes, "testFiles/transcriptSample.json", "en-US", DateTime.UtcNow, false, false, false, Logger.Object);
 
-            Assert.AreEqual(TimeSpan.Zero, duration);
-            Assert.AreEqual(0, channels);
-            Assert.AreEqual(0d, estimatedCost);
-        }
-
-        [TestMethod]
-        public void ParseServiceBusMessageTest()
-        {
-            var subscription = new Subscription(SubscriptionKey, SubscriptionRegion);
-            var createTranscriptionMessage = new TranscriptionServiceBusMessage(
-                subscription,
-                TranscriptionLocation,
-                TestAudioFileName,
-                TestAudioFileUrl,
-                DateTime.UtcNow.ToString(CultureInfo.InvariantCulture),
-                TimeSpan.Zero.ToString(),
-                1,
-                0.5d,
-                "en-US",
-                0,
-                3);
-            var messageAsString = createTranscriptionMessage.CreateMessageString();
-            var fetchTranscriptionMessage = TranscriptionServiceBusMessage.ParseMessageFromString(messageAsString);
-
-            Assert.AreEqual(createTranscriptionMessage.Subscription.SubscriptionKey, fetchTranscriptionMessage.Subscription.SubscriptionKey);
-            Assert.AreEqual(createTranscriptionMessage.Subscription.LocationUri, fetchTranscriptionMessage.Subscription.LocationUri);
-            Assert.AreEqual(createTranscriptionMessage.TranscriptionLocation, fetchTranscriptionMessage.TranscriptionLocation);
-            Assert.AreEqual(createTranscriptionMessage.BlobName, fetchTranscriptionMessage.BlobName);
-            Assert.AreEqual(createTranscriptionMessage.CreatedTime, fetchTranscriptionMessage.CreatedTime);
-            Assert.AreEqual(createTranscriptionMessage.AudioLength, fetchTranscriptionMessage.AudioLength);
-            Assert.AreEqual(createTranscriptionMessage.Channels, fetchTranscriptionMessage.Channels);
-            Assert.AreEqual(createTranscriptionMessage.EstimatedCost, fetchTranscriptionMessage.EstimatedCost);
-            Assert.AreEqual(createTranscriptionMessage.Locale, fetchTranscriptionMessage.Locale);
+            Assert.AreEqual(0, audioDetails.Channels);
+            Assert.AreEqual(TimeSpan.Zero, audioDetails.AudioLength);
         }
 
         [TestMethod]

@@ -1,19 +1,27 @@
-﻿// <copyright file="CreateEnvironmentVariables.cs" company="Microsoft Corporation">
+﻿// <copyright file="CreateTranscriptionEnvironmentVariables.cs" company="Microsoft Corporation">
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 
-namespace CreateTranscriptionFunction
+namespace Connector
 {
     using System;
 
-    public static class CreateEnvironmentVariables
+    public static class CreateTranscriptionEnvironmentVariables
     {
+        public static readonly string AzureServiceBus = Environment.GetEnvironmentVariable(nameof(AzureServiceBus), EnvironmentVariableTarget.Process);
+
         public static readonly string AzureSpeechServicesKey = Environment.GetEnvironmentVariable(nameof(AzureSpeechServicesKey), EnvironmentVariableTarget.Process);
 
         public static readonly string AzureSpeechServicesRegion = Environment.GetEnvironmentVariable(nameof(AzureSpeechServicesRegion), EnvironmentVariableTarget.Process);
 
         public static readonly string AudioInputContainer = Environment.GetEnvironmentVariable(nameof(AudioInputContainer), EnvironmentVariableTarget.Process);
+
+        public static readonly bool AddSentimentAnalysis = bool.TryParse(Environment.GetEnvironmentVariable(nameof(AddSentimentAnalysis), EnvironmentVariableTarget.Process), out AddSentimentAnalysis) && AddSentimentAnalysis;
+
+        public static readonly bool AddEntityRedaction = bool.TryParse(Environment.GetEnvironmentVariable(nameof(AddEntityRedaction), EnvironmentVariableTarget.Process), out AddEntityRedaction) && AddEntityRedaction;
+
+        public static readonly bool CreateReceiptFile = bool.TryParse(Environment.GetEnvironmentVariable(nameof(CreateReceiptFile), EnvironmentVariableTarget.Process), out CreateReceiptFile) && CreateReceiptFile;
 
         public static readonly string Locale = Environment.GetEnvironmentVariable(nameof(Locale), EnvironmentVariableTarget.Process);
 

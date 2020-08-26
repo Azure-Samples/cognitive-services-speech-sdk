@@ -285,7 +285,7 @@
 		}
     },
 	"variables": {
-    "appPackageVersion": "1.0.18",
+    "appPackageVersion": "1.0.20",
 	"UseSqlDatabase": "[and(not(equals(parameters('SqlAdministratorLogin'),'')), not(equals(parameters('SqlAdministratorLoginPassword'),'')))]",
 	"SqlServerName": "[concat('sqlserver', uniqueString(subscription().id, resourceGroup().id))]",
 	"DatabaseName": "[concat('Database-', resourceGroup().name)]",
@@ -302,7 +302,10 @@
     "authRuleRMK": "[resourceId('Microsoft.ServiceBus/namespaces/authorizationRules', concat('ServiceBus-', resourceGroup().name),'RootManageSharedAccessKey')]",
     "authRuleFT":  "[resourceId('Microsoft.ServiceBus/namespaces/queues/authorizationRules',concat('ServiceBus-', resourceGroup().name), 'fetch_transcription_queue','FetchTranscription')]",      
     "authRuleCT":  "[resourceId('Microsoft.ServiceBus/namespaces/queues/authorizationRules',concat('ServiceBus-', resourceGroup().name), 'create_transcription_queue','CreateTranscription')]",
-	"appServicePlanName": "AcceleratorAppServicePlan"	
+	"appServicePlanName": "AcceleratorAppServicePlan",
+	"createReceiptFile": true,
+	"createHtmlResultFile": true,
+	"timerBasedExecution": true
 	},
     "resources": [
         {
@@ -627,6 +630,7 @@
         },
         {
             "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+			"condition": "[variables('createHtmlResultFile')]",
             "apiVersion": "2019-06-01",
             "name": "[concat(variables('StorageAccountName'), '/default/', variables('htmlResultOutputContainer'))]",
             "location": "[resourceGroup().location]",
@@ -653,6 +657,7 @@
         },
         {
             "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+			"condition": "[variables('createReceiptFile')]",
             "apiVersion": "2019-06-01",
             "name": "[concat(variables('StorageAccountName'), '/default/', variables('receiptsContainer'))]",
             "location": "[resourceGroup().location]",
@@ -701,7 +706,7 @@
 		  "properties": {},
 		  "dependsOn": [],
 		  "sku": {
-			"name": "Y1"
+			"name": "EP1"
 		  }
 		},
         {
@@ -760,6 +765,14 @@
                             "value": "[parameters('AddWordLevelTimestamps')]"
                         },
                         {
+                            "name": "AddSentimentAnalysis",
+                            "value": "[parameters('AddSentimentAnalysis')]"
+                        },
+                        {
+                            "name": "AddEntityRedaction",
+                            "value": "[parameters('AddEntityRedaction')]"
+                        },
+                        {
                             "name": "Locale",
                             "value": "[parameters('Locale')]"
                         },
@@ -812,12 +825,16 @@
                             "value": "[parameters('AudioDatasetSize')]"
                         },
                         {
+                            "name": "CreateReceiptFile",
+                            "value": "[variables('createReceiptFile')]"
+                        },
+                        {
                             "name": "ReceiptsContainer",
                             "value": "[variables('receiptsContainer')]"
                         },
                         {
                             "name": "WEBSITE_RUN_FROM_PACKAGE",
-							"value": "[concat('https://github.com/HenryvanderVegte/AcceleratorAppZips/releases/download/', variables('appPackageVersion'), '/CreateTranscriptionPublish.zip')]"
+							"value": "[concat('https://github.com/HenryvanderVegte/AcceleratorAppZips/releases/download/', variables('appPackageVersion'), if(variables('timerBasedExecution'),'/CreateTranscriptionByTimerPublish.zip','/CreateTranscriptionPublish.zip'))]"
 						}
                     ]
                 }
@@ -862,14 +879,6 @@
                             "value": "[parameters('TextAnalyticsRegion')]"
                         },
                         {
-                            "name": "AddSentimentAnalysis",
-                            "value": "[parameters('AddSentimentAnalysis')]"
-                        },
-                        {
-                            "name": "AddEntityRedaction",
-                            "value": "[parameters('AddEntityRedaction')]"
-                        },
-                        {
                             "name": "AzureWebJobsStorage",
                             "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('StorageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value)]"
                         },
@@ -900,6 +909,10 @@
 						{
 							"name": "UseSqlDatabase",
 							"value": "[variables('UseSqlDatabase')]"
+						},
+						{
+							"name": "CreateHtmlResultFile",
+							"value": "[variables('createHtmlResultFile')]"
 						},
 						{
 							"name": "DatabaseConnectionString",

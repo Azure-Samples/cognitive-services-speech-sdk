@@ -6,54 +6,44 @@
 namespace Connector
 {
     using System;
+    using System.Collections.Generic;
     using System.IO;
     using System.Linq;
-    using System.Text;
     using System.Threading.Tasks;
     using Microsoft.Extensions.Logging;
     using Microsoft.WindowsAzure.Storage;
     using Microsoft.WindowsAzure.Storage.Blob;
-    using Newtonsoft.Json;
 
     public static class StorageUtilities
     {
-        public static (string, string, string) CreateSAS(string storageConnectionString, string filePath, ILogger log)
+        public static async Task<string> CreateSASAsync(string storageConnectionString, string filePath, ILogger log)
         {
-            var audioContainerPath = GetContainerPathFromSAS(filePath, log);
-
+            var containerName = GetContainerNameFromPath(filePath);
             var storageAccount = CloudStorageAccount.Parse(storageConnectionString);
             var blobClient = storageAccount.CreateCloudBlobClient();
-
-            var container = blobClient.GetContainerReference(audioContainerPath.Split('/').FirstOrDefault());
+            var container = blobClient.GetContainerReference(containerName);
 
             var containerPermissions = new BlobContainerPermissions
             {
                 PublicAccess = BlobContainerPublicAccessType.Blob
             };
 
-            container.SetPermissionsAsync(containerPermissions);
+            await container.SetPermissionsAsync(containerPermissions).ConfigureAwait(false);
             containerPermissions.SharedAccessPolicies.Add("mypolicy", new SharedAccessBlobPolicy()
             {
                 SharedAccessStartTime = DateTime.UtcNow,
-                SharedAccessExpiryTime = DateTime.UtcNow.AddDays(100),
-                Permissions = SharedAccessBlobPermissions.Read | SharedAccessBlobPermissions.Write
+                SharedAccessExpiryTime = DateTime.UtcNow.AddDays(1),
+                Permissions = SharedAccessBlobPermissions.Read
             });
 
-#pragma warning disable CA5377 // Use Container Level Access Policy
             var sas = container.GetSharedAccessSignature(containerPermissions.SharedAccessPolicies.FirstOrDefault().Value);
-#pragma warning restore CA5377 // Use Container Level Access Policy
-            log.LogInformation("SAS URI: " + sas);
-            var sasBlobClient = new CloudBlobClient(storageAccount.BlobEndpoint);
+            var absoluteSasUri = filePath + sas;
 
-            var blob = sasBlobClient.GetBlobReferenceFromServerAsync(new Uri(filePath + sas));
-
-            log.LogInformation("Absolute sas uri: " + blob.Result.Uri.AbsoluteUri + sas);
-            log.LogInformation("Blob container name is: " + blob.Result.Container.Name);
-            log.LogInformation("Blob name is: " + blob.Result.Name);
-            return (blob.Result.Uri.AbsoluteUri + sas, blob.Result.Container.Name, blob.Result.Name);
+            log.LogInformation($"Created sas url for file {filePath}");
+            return absoluteSasUri;
         }
 
-        public static void WriteTextFileToBlob(string storageConnectionString, string content, string containerName, string fileName, ILogger log)
+        public static async Task WriteTextFileToBlobAsync(string storageConnectionString, string content, string containerName, string fileName, ILogger log)
         {
             log.LogInformation($"Writing file {fileName} to container {containerName}.");
 
@@ -61,68 +51,21 @@ namespace Connector
             var fileClient = storageAccount.CreateCloudBlobClient();
             var container = fileClient.GetContainerReference(containerName);
             var blockBlob = container.GetBlockBlobReference(fileName);
-            blockBlob.UploadTextAsync(content);
+
+            await blockBlob.UploadTextAsync(content).ConfigureAwait(false);
         }
 
-        public static async Task<AudioDetails> WriteTranscriptionAcknowledgementToBlob(string storageConnectionString, byte[] audioBytes, string locale, string containerName, string fileName, ILogger log)
+        public static AudioDetails GetAudioDetails(byte[] audioBytes, string fileName, string locale, DateTime transcriptionCreationTime, bool isCustomModel, bool sentimentAnalysisAdded, bool entityRedactionAdded, ILogger log)
         {
-            if (fileName == null)
-            {
-                throw new ArgumentNullException(nameof(fileName));
-            }
+            var fileNameExtension = Path.GetExtension(fileName);
 
-            fileName = fileName.Replace("%20", " ", StringComparison.OrdinalIgnoreCase);
-
-            var createdTime = DateTime.UtcNow;
-            var receipt = "TranscriptionID:" + fileName + " filed at " + createdTime;
-
-            var ext = Path.GetExtension(fileName);
-            log.LogInformation("Determined file name extension:" + ext);
-
-            (TimeSpan duration, int channels, double estimatedCost) = GetAudioDetailsFromBytes(audioBytes, ext, log);
-
-            if (duration != TimeSpan.Zero && channels != 0 && estimatedCost != 0d)
-            {
-                receipt += "\nAudio length: " + duration.ToString();
-                receipt += "\nNumber of channels: " + channels;
-                receipt += "\nApproximate cost: $" + estimatedCost;
-            }
-            else
-            {
-                receipt += "\nUnable to parse file header.";
-            }
-
-            receipt += "\nLocale: " + locale;
-
-            // file storage
-            var storageAccount = CloudStorageAccount.Parse(storageConnectionString);
-            var fileClient = storageAccount.CreateCloudBlobClient();
-
-            // Get a reference to the file share we created previously.
-            var container = fileClient.GetContainerReference(containerName);
-            log.LogInformation("Got container reference for container: " + containerName);
-
-            var fileNameWithoutExtension = fileName.Replace(ext, string.Empty, StringComparison.OrdinalIgnoreCase);
-            var blockBlob = container.GetBlockBlobReference(fileNameWithoutExtension + "_receipt.txt");
-
-            await blockBlob.UploadTextAsync(receipt).ConfigureAwait(false);
-
-            return new AudioDetails(createdTime, duration, channels, estimatedCost, locale);
-        }
-
-        public static (TimeSpan, int, double) GetAudioDetailsFromBytes(byte[] fileBytes, string fileNameExtension, ILogger log)
-        {
             var duration = TimeSpan.Zero;
             var channels = 0;
-            var estimatedCost = 0d;
 
             try
             {
-                duration = AudioFileProcessor.GetDuration(fileBytes, fileNameExtension);
-
-                channels = AudioFileProcessor.GetNumberOfChannels(fileBytes, fileNameExtension);
-
-                estimatedCost = AudioFileProcessor.GetPayment(duration, channels);
+                duration = AudioFileProcessor.GetDuration(audioBytes, fileNameExtension);
+                channels = AudioFileProcessor.GetNumberOfChannels(audioBytes, fileNameExtension);
             }
             catch (Exception e)
             {
@@ -136,37 +79,82 @@ namespace Connector
                 }
             }
 
-            return (duration, channels, estimatedCost);
+            var estimatedCost = AudioFileProcessor.GetCostEstimation(duration, channels, isCustomModel, sentimentAnalysisAdded, entityRedactionAdded);
+            return new AudioDetails(fileName, transcriptionCreationTime, duration, channels, estimatedCost, locale);
         }
 
-        public static string GetContainerPathFromSAS(string sas, ILogger log)
+        public static async Task WriteTranscriptionReceiptToStorageAsync(string storageConnectionString, string containerName, AudioDetails audioDetails, ILogger log)
         {
-            return GetContainerPathFromSAS(new Uri(sas), log);
+            if (audioDetails == null)
+            {
+                throw new ArgumentNullException(nameof(audioDetails));
+            }
+
+            var receipt = $"Transcription job \"{audioDetails.FileName}\" filed at {audioDetails.CreatedTime}.";
+            if (audioDetails.EstimatedCost != 0d || audioDetails.AudioLength.TotalSeconds != 0d)
+            {
+                receipt += $"\nEstimated cost: {Math.Round(audioDetails.EstimatedCost, 4)} €";
+                receipt += $"\nAudio length: {audioDetails.AudioLength}";
+            }
+            else
+            {
+                receipt += "\nUnable to parse file header.";
+            }
+
+            receipt += $"\nLocale: {audioDetails.Locale}";
+
+            // file storage
+            var storageAccount = CloudStorageAccount.Parse(storageConnectionString);
+            var fileClient = storageAccount.CreateCloudBlobClient();
+
+            // Get a reference to the file share we created previously.
+            var container = fileClient.GetContainerReference(containerName);
+            log.LogInformation("Got container reference for container: " + containerName);
+
+            var fileNameWithoutExtension = GetFileNameWithoutExtension(audioDetails.FileName);
+            var blockBlob = container.GetBlockBlobReference(fileNameWithoutExtension + "_receipt.txt");
+
+            await blockBlob.UploadTextAsync(receipt).ConfigureAwait(false);
         }
 
-        public static string GetContainerPathFromSAS(Uri uri, ILogger log)
+        public static string GetFileNameFromPath(string filePath)
         {
-            if (uri == null)
+            if (filePath == null)
             {
-                throw new ArgumentNullException(nameof(uri));
+                throw new ArgumentNullException(nameof(filePath));
             }
 
-            string filePath = string.Empty;
-            int count = 0;
+            var pathParts = new Uri(filePath).AbsolutePath.Split('/').ToList();
+            var cleanedPathParts = pathParts.SkipWhile(part => string.IsNullOrEmpty(part) || part.Equals("/", StringComparison.OrdinalIgnoreCase));
 
-            var path = uri.AbsolutePath.Split('/').SkipLast(1).Skip(1);
-            foreach (string partPath in path)
+            var fileName = string.Join('/', cleanedPathParts.Skip(1));
+            return fileName;
+        }
+
+        public static string GetFileNameWithoutExtension(string fileName)
+        {
+            if (fileName == null)
             {
-                count++;
-                filePath += partPath;
-                if (count < path.Count())
-                {
-                    filePath += "/";
-                }
+                throw new ArgumentNullException(nameof(fileName));
             }
 
-            log.LogInformation("Path to container: " + filePath);
-            return filePath;
+            var fileExtension = Path.GetExtension(fileName);
+
+            return fileName.Substring(0, fileName.Length - fileExtension.Length);
+        }
+
+        public static string GetContainerNameFromPath(string filePath)
+        {
+            if (filePath == null)
+            {
+                throw new ArgumentNullException(nameof(filePath));
+            }
+
+            var pathParts = new Uri(filePath).AbsolutePath.Split('/').ToList();
+            var cleanedPathParts = pathParts.SkipWhile(part => string.IsNullOrEmpty(part) || part.Equals("/", StringComparison.OrdinalIgnoreCase));
+
+            var containerName = cleanedPathParts.FirstOrDefault();
+            return containerName;
         }
 
         public static bool IsItAudio(string fileName)

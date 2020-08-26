@@ -11,6 +11,13 @@ namespace Connector
 
     public static class AudioFileProcessor
     {
+        // prices in euro
+        private const double STTCostPerHour = 0.844d;
+
+        private const double STTCustomModelCostPerHour = 1.181d;
+
+        private const double TextAnalyticsCostPerHour = 0.72d;
+
         public static TimeSpan GetDuration(byte[] fileBytes, string fileNameExtension)
         {
             if (fileNameExtension == null)
@@ -37,13 +44,28 @@ namespace Connector
             }
         }
 
-        public static double GetPayment(TimeSpan timeSpan, int numberOfChannels)
+        public static double GetCostEstimation(
+            TimeSpan timeSpan,
+            int numberOfChannels,
+            bool isCustomModel,
+            bool sentimentAnalysisAdded,
+            bool entityRedactionAdded)
         {
-            double costPerSec = 100.00 / 3600.00;
+            double costPerHour = isCustomModel ? STTCustomModelCostPerHour : STTCostPerHour;
+            var price = timeSpan.TotalHours * costPerHour;
 
-            double price = timeSpan.TotalSeconds * costPerSec * numberOfChannels;
+            if (sentimentAnalysisAdded)
+            {
+                price += timeSpan.TotalHours * TextAnalyticsCostPerHour;
+            }
 
-            return Math.Round(price / 100, 4);
+            if (entityRedactionAdded)
+            {
+                price += timeSpan.TotalHours * TextAnalyticsCostPerHour;
+            }
+
+            price *= numberOfChannels;
+            return price;
         }
 
         public static byte[] ConvertToWaveBytes(byte[] fileBytes, string fileNameExtension)

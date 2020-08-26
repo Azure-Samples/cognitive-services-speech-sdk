@@ -43,39 +43,41 @@ namespace CreateTranscriptionFunction
 
         internal static async Task<string> TranscribeMessage(Message message, ILogger log)
         {
-            var subscriptionKey = CreateEnvironmentVariables.AzureSpeechServicesKey;
-            var subscriptionRegion = CreateEnvironmentVariables.AzureSpeechServicesRegion;
-            var subscription = new Subscription(subscriptionKey, subscriptionRegion);
+            var transcriptionCreationTime = DateTime.UtcNow;
+            var subscriptionKey = CreateTranscriptionEnvironmentVariables.AzureSpeechServicesKey;
+            var subscriptionRegion = CreateTranscriptionEnvironmentVariables.AzureSpeechServicesRegion;
+            var locationUri = new Uri($"https://{subscriptionRegion}.api.cognitive.microsoft.com");
+            var subscription = new Subscription(subscriptionKey, locationUri);
 
             var messageBody = Encoding.UTF8.GetString(message.Body);
             var busMessage = JsonConvert.DeserializeObject<ServiceBusMessage>(messageBody);
 
             var dataUri = busMessage.Data.Url;
-            var name = dataUri.AbsoluteUri.Split('/').LastOrDefault();
+            var modelIds = new List<Guid>();
 
             if (busMessage.EventType.Contains("BlobCreate", StringComparison.OrdinalIgnoreCase))
             {
-                (var audioFileUrl, var containerName, var blobName) = StorageUtilities.CreateSAS(CreateEnvironmentVariables.AzureWebJobsStorage, dataUri.AbsoluteUri, log);
-                var audioInputContainer = CreateEnvironmentVariables.AudioInputContainer;
+                var audioFileUrl = await StorageUtilities.CreateSASAsync(CreateTranscriptionEnvironmentVariables.AzureWebJobsStorage, dataUri.AbsoluteUri, log).ConfigureAwait(false);
+                var containerName = StorageUtilities.GetContainerNameFromPath(dataUri.AbsoluteUri);
+                var audioFileName = StorageUtilities.GetFileNameFromPath(dataUri.AbsoluteUri);
+                var audioInputContainer = CreateTranscriptionEnvironmentVariables.AudioInputContainer;
 
-                if (StorageUtilities.IsItAudio(blobName) && !string.IsNullOrEmpty(containerName) && containerName.Equals(audioInputContainer, StringComparison.Ordinal))
+                if (StorageUtilities.IsItAudio(audioFileName) && !string.IsNullOrEmpty(containerName) && containerName.Equals(audioInputContainer, StringComparison.Ordinal))
                 {
-                    log.LogInformation($"Create request for audio file {blobName}");
+                    log.LogInformation($"Create request for audio file {audioFileName}");
 
-                    var fileExtension = Path.GetExtension(blobName);
-                    log.LogInformation("Determined file name extension:" + fileExtension);
+                    var jobName = StorageUtilities.GetFileNameWithoutExtension(audioFileName);
 
-                    var primaryLocale = CreateEnvironmentVariables.Locale;
+                    var primaryLocale = CreateTranscriptionEnvironmentVariables.Locale;
                     primaryLocale = primaryLocale.Split('|')[0].Trim();
                     var locale = primaryLocale;
 
                     string locationString;
-                    byte[] byteArray;
+                    byte[] byteArray = null;
+
                     try
                     {
-                        byteArray = await StorageUtilities.DownloadFileFromSAS(audioFileUrl).ConfigureAwait(false);
-
-                        var secondaryLocale = CreateEnvironmentVariables.SecondaryLocale;
+                        var secondaryLocale = CreateTranscriptionEnvironmentVariables.SecondaryLocale;
 
                         if (!string.IsNullOrEmpty(secondaryLocale) &&
                             !secondaryLocale.Equals("None", StringComparison.OrdinalIgnoreCase) &&
@@ -87,16 +89,26 @@ namespace CreateTranscriptionFunction
                             log.LogInformation($"Secondary locale: {secondaryLocale}");
 
                             var languageID = new LanguageIdentification(subscriptionKey, subscriptionRegion);
+                            var fileExtension = Path.GetExtension(audioFileName);
+                            byteArray = await StorageUtilities.DownloadFileFromSAS(audioFileUrl).ConfigureAwait(false);
                             locale = await languageID.DetectLanguage(byteArray, fileExtension, primaryLocale, secondaryLocale).ConfigureAwait(false);
                             log.LogInformation($"Identified locale: {locale}");
                         }
 
-                        var modelIds = GetModelIds(locale.Equals(primaryLocale, StringComparison.OrdinalIgnoreCase), log);
-
+                        modelIds = GetModelIds(locale.Equals(primaryLocale, StringComparison.OrdinalIgnoreCase), log);
                         var properties = CreateTranscriptionPropertyBag();
-                        var location = await TranscriptionAPIRequest.PostRequest(subscription, blobName, audioFileUrl, locale, properties, modelIds, log).ConfigureAwait(false);
-                        log.LogInformation("Location:" + location);
-                        locationString = location.ToString();
+
+                        var client = new BatchClient(subscription.SubscriptionKey, subscription.LocationUri.AbsoluteUri, log);
+                        var transcriptionLocation = await client.PostTranscriptionAsync(
+                            jobName,
+                            "AcceleratorTranscription",
+                            locale,
+                            properties,
+                            new[] { new Uri(audioFileUrl) }.ToList(),
+                            modelIds).ConfigureAwait(false);
+
+                        log.LogInformation($"Location: {transcriptionLocation}");
+                        locationString = transcriptionLocation.ToString();
                     }
                     catch (WebException e)
                     {
@@ -104,18 +116,16 @@ namespace CreateTranscriptionFunction
                         {
                             log.LogError($"Throttled or timeout while creating post, re-enqueueing transcription create. Message: {e.Message}");
 
-                            var createTranscriptionSBConnectionString = CreateEnvironmentVariables.CreateTranscriptionServiceBusConnectionString;
+                            var createTranscriptionSBConnectionString = CreateTranscriptionEnvironmentVariables.CreateTranscriptionServiceBusConnectionString;
                             log.LogInformation($"CreateTranscriptionSBConnectionString from settings: {createTranscriptionSBConnectionString}");
                             ServiceBusUtilities.SendServiceBusMessageAsync(createTranscriptionSBConnectionString, message, log, 2).GetAwaiter().GetResult();
                             return string.Empty;
                         }
                         else
                         {
-                            log.LogError($"Failed with Webexception. Write message for {blobName} to report file.");
+                            log.LogError($"Failed with Webexception. Write message for {jobName} to report file.");
 
-                            var blobNameWithoutExtension = blobName.Replace(fileExtension, string.Empty, StringComparison.OrdinalIgnoreCase);
-
-                            var errorTxtName = blobNameWithoutExtension + "_error.txt";
+                            var errorTxtName = jobName + "_error.txt";
                             var exceptionMessage = e.Message;
 
                             using (var reader = new StreamReader(e.Response.GetResponseStream()))
@@ -124,66 +134,82 @@ namespace CreateTranscriptionFunction
                                 exceptionMessage += "\n" + responseMessage;
                             }
 
-                            var errorOutputContainer = CreateEnvironmentVariables.ErrorReportOutputContainer;
-                            StorageUtilities.WriteTextFileToBlob(CreateEnvironmentVariables.AzureWebJobsStorage, exceptionMessage, errorOutputContainer, errorTxtName, log);
+                            var errorOutputContainer = CreateTranscriptionEnvironmentVariables.ErrorReportOutputContainer;
+                            await StorageUtilities.WriteTextFileToBlobAsync(CreateTranscriptionEnvironmentVariables.AzureWebJobsStorage, exceptionMessage, errorOutputContainer, errorTxtName, log).ConfigureAwait(false);
                         }
 
                         throw;
                     }
                     catch (FormatException e)
                     {
-                        log.LogError($"Failed with FormatException. Write message for {blobName} to report file.");
-
-                        var blobNameWithoutExtension = blobName.Replace(fileExtension, string.Empty, StringComparison.OrdinalIgnoreCase);
-
-                        var errorTxtName = blobNameWithoutExtension + "_error.txt";
+                        log.LogError($"Failed with FormatException. Write message for {jobName} to report file.");
+                        var errorTxtName = jobName + "_error.txt";
                         var responseMessage = $"Transcription failed with FormatException:\n{e.Message}";
 
-                        var errorOutputContainer = CreateEnvironmentVariables.ErrorReportOutputContainer;
-                        StorageUtilities.WriteTextFileToBlob(CreateEnvironmentVariables.AzureWebJobsStorage, responseMessage, errorOutputContainer, errorTxtName, log);
+                        var errorOutputContainer = CreateTranscriptionEnvironmentVariables.ErrorReportOutputContainer;
+                        await StorageUtilities.WriteTextFileToBlobAsync(CreateTranscriptionEnvironmentVariables.AzureWebJobsStorage, responseMessage, errorOutputContainer, errorTxtName, log).ConfigureAwait(false);
 
                         return string.Empty;
                     }
                     catch (TimeoutException e)
                     {
                         log.LogError($"Timeout while creating post, re-enqueueing transcription create. Message: {e.Message}");
-                        var createTranscriptionSBConnectionString = CreateEnvironmentVariables.CreateTranscriptionServiceBusConnectionString;
+                        var createTranscriptionSBConnectionString = CreateTranscriptionEnvironmentVariables.CreateTranscriptionServiceBusConnectionString;
                         ServiceBusUtilities.SendServiceBusMessageAsync(createTranscriptionSBConnectionString, message, log, 2).GetAwaiter().GetResult();
                         return string.Empty;
                     }
 
-                    var receiptsContainerName = CreateEnvironmentVariables.ReceiptsContainer;
-                    var audioDetails = await StorageUtilities.WriteTranscriptionAcknowledgementToBlob(CreateEnvironmentVariables.AzureWebJobsStorage, byteArray, locale, receiptsContainerName, blobName, log).ConfigureAwait(false);
-                    log.LogInformation("Receipt created for flie: " + blobName);
+                    var audioLengthInSeconds = 0;
 
-                    var reenqueueingTimeInSeconds = MapDatasetSizeToReenqueueingTimeInSeconds(CreateEnvironmentVariables.AudioDatasetSize);
+                    if (CreateTranscriptionEnvironmentVariables.CreateReceiptFile)
+                    {
+                        if (byteArray == null)
+                        {
+                            byteArray = await StorageUtilities.DownloadFileFromSAS(audioFileUrl).ConfigureAwait(false);
+                        }
 
-                    var transcriptionMessage = new TranscriptionServiceBusMessage(
+                        var audioDetails = StorageUtilities.GetAudioDetails(
+                            byteArray,
+                            audioFileName,
+                            locale,
+                            transcriptionCreationTime,
+                            modelIds.Any(),
+                            CreateTranscriptionEnvironmentVariables.AddSentimentAnalysis,
+                            CreateTranscriptionEnvironmentVariables.AddEntityRedaction,
+                            log);
+                        audioLengthInSeconds = (int)audioDetails.AudioLength.TotalSeconds;
+                        await StorageUtilities.WriteTranscriptionReceiptToStorageAsync(CreateTranscriptionEnvironmentVariables.AzureWebJobsStorage, CreateTranscriptionEnvironmentVariables.ReceiptsContainer, audioDetails, log).ConfigureAwait(false);
+                        log.LogInformation("Receipt created for flie: " + jobName);
+                    }
+
+                    var reenqueueingTimeInSeconds = MapDatasetSizeToReenqueueingTimeInSeconds(CreateTranscriptionEnvironmentVariables.AudioDatasetSize);
+
+                    // Increase delay if audio file is very short:
+                    var initialDelayInSeconds = audioLengthInSeconds <= 10 ? reenqueueingTimeInSeconds : audioLengthInSeconds;
+
+                    var transcriptionMessage = new PostTranscriptionServiceBusMessage(
                         subscription,
                         locationString,
-                        blobName,
-                        audioFileUrl,
-                        audioDetails.CreatedTime.ToString(CultureInfo.InvariantCulture),
-                        audioDetails.AudioLength.ToString(),
-                        audioDetails.Channels,
-                        audioDetails.EstimatedCost,
-                        audioDetails.Locale,
+                        jobName,
+                        transcriptionCreationTime.ToString(CultureInfo.InvariantCulture),
+                        locale,
+                        modelIds.Any(),
+                        CreateTranscriptionEnvironmentVariables.AddSentimentAnalysis,
+                        CreateTranscriptionEnvironmentVariables.AddEntityRedaction,
                         0,
-                        reenqueueingTimeInSeconds);
-                    var fetchTranscriptionSBConnectionString = CreateEnvironmentVariables.FetchTranscriptionServiceBusConnectionString;
+                        reenqueueingTimeInSeconds,
+                        initialDelayInSeconds);
+                    var fetchTranscriptionSBConnectionString = CreateTranscriptionEnvironmentVariables.FetchTranscriptionServiceBusConnectionString;
                     log.LogInformation($"FetchTranscriptionServiceBusConnectionString from settings: {fetchTranscriptionSBConnectionString}");
 
-                    // Delay re-enqueueing for first start to the total length of the audio file
-                    var delay = audioDetails.AudioLength.TotalSeconds <= 10 ? new Random().Next(0, reenqueueingTimeInSeconds) : audioDetails.AudioLength.TotalSeconds;
+                    ServiceBusUtilities.SendServiceBusMessageAsync(fetchTranscriptionSBConnectionString, transcriptionMessage.CreateMessageString(), log, initialDelayInSeconds).GetAwaiter().GetResult();
+                    log.LogInformation("Fetch transcription queue informed about file: " + jobName);
 
-                    ServiceBusUtilities.SendServiceBusMessageAsync(fetchTranscriptionSBConnectionString, transcriptionMessage.CreateMessageString(), log, delay).GetAwaiter().GetResult();
-                    log.LogInformation("Fetch transcription queue informed about file: " + blobName);
-
-                    return $"{locationString}*{name}";
+                    return $"{locationString}";
                 }
                 else
                 {
-                    log.LogInformation($"File is not in supported audio format: {blobName}");
+                    log.LogInformation($"File is not in supported audio format: {audioFileName}");
                 }
             }
 
@@ -195,8 +221,8 @@ namespace CreateTranscriptionFunction
             var modelIds = new List<Guid>();
 
             var acousticModelId = isPrimaryLocale ?
-                CreateEnvironmentVariables.AcousticModelId :
-                CreateEnvironmentVariables.SecondaryAcousticModelId;
+                CreateTranscriptionEnvironmentVariables.AcousticModelId :
+                CreateTranscriptionEnvironmentVariables.SecondaryAcousticModelId;
 
             if (!string.IsNullOrEmpty(acousticModelId))
             {
@@ -205,8 +231,8 @@ namespace CreateTranscriptionFunction
             }
 
             var languageModelId = isPrimaryLocale ?
-                CreateEnvironmentVariables.LanguageModelId :
-                CreateEnvironmentVariables.SecondaryLanguageModelId;
+                CreateTranscriptionEnvironmentVariables.LanguageModelId :
+                CreateTranscriptionEnvironmentVariables.SecondaryLanguageModelId;
 
             if (!string.IsNullOrEmpty(languageModelId) && languageModelId != acousticModelId)
             {
@@ -221,17 +247,17 @@ namespace CreateTranscriptionFunction
         {
             var properties = new Dictionary<string, string>();
 
-            var profanityFilterMode = CreateEnvironmentVariables.ProfanityFilterMode;
+            var profanityFilterMode = CreateTranscriptionEnvironmentVariables.ProfanityFilterMode;
             properties.Add("ProfanityFilterMode", profanityFilterMode);
 
-            var punctuationMode = CreateEnvironmentVariables.PunctuationMode;
+            var punctuationMode = CreateTranscriptionEnvironmentVariables.PunctuationMode;
             punctuationMode = punctuationMode.Replace(" ", string.Empty, StringComparison.Ordinal);
             properties.Add("PunctuationMode", punctuationMode);
 
-            var addDiarization = CreateEnvironmentVariables.AddDiarization;
+            var addDiarization = CreateTranscriptionEnvironmentVariables.AddDiarization;
             properties.Add("DiarizationEnabled", addDiarization);
 
-            var addWordLevelTimestamps = CreateEnvironmentVariables.AddWordLevelTimestamps;
+            var addWordLevelTimestamps = CreateTranscriptionEnvironmentVariables.AddWordLevelTimestamps;
             properties.Add("WordLevelTimestampsEnabled", addWordLevelTimestamps);
 
             return properties;

@@ -21,7 +21,7 @@ Outline the file contents of the repository. It helps users navigate the codebas
 | `Connector`       | Shared code between both functions.                       |
 | `CreateTranscription`      | Function to add a new transcription job to the speech service.      |
 | `FetchTranscription`    | Function to check the state of the transcription job and write results to storage.             |
-| `Power BI`    | Power BI for automated analysis of transcriptions based on a SQL database.             |
+| `Power BI`    | Template files and deployment guide for visualizing insights from the accelerator.             |
 | `Setup` | ARM template to setup the project on Azure. |
 | `Tests`       | Unit tests for both functions.                          |
 

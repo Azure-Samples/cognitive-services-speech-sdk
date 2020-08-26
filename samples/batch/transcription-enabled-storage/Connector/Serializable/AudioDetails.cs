@@ -9,14 +9,17 @@ namespace Connector
 
     public class AudioDetails
     {
-        public AudioDetails(DateTime createdTime, TimeSpan audioLength, int channels, double estimatedCost, string locale)
+        public AudioDetails(string fileName, DateTime createdTime, TimeSpan audioLength, int channels, double estimatedCost, string locale)
         {
+            FileName = fileName;
             CreatedTime = createdTime;
             AudioLength = audioLength;
             Channels = channels;
             EstimatedCost = estimatedCost;
             Locale = locale;
         }
+
+        public string FileName { get; set; }
 
         public DateTime CreatedTime { get; set; }
 

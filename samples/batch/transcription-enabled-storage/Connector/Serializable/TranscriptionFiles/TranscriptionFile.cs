@@ -7,7 +7,6 @@ namespace Connector.Serializable.TranscriptionFiles
 {
     using System;
     using Connector.Enums;
-    using Newtonsoft.Json;
 
     public class TranscriptionFile
     {

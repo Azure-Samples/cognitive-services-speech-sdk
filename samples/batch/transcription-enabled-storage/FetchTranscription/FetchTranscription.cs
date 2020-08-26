@@ -20,7 +20,6 @@ namespace FetchTranscriptionFunction
                 throw new ArgumentNullException(nameof(log));
             }
 
-            log.LogInformation($"C# ServiceBus queue trigger function processed message: {myQueueItem}");
             log.LogInformation($"C# Timer trigger function executed at: {DateTime.Now}");
 
             ProcessMessage(myQueueItem, log);
@@ -30,7 +29,7 @@ namespace FetchTranscriptionFunction
         {
             if (!string.IsNullOrEmpty(message))
             {
-                var serviceBusMessage = TranscriptionServiceBusMessage.ParseMessageFromString(message);
+                var serviceBusMessage = PostTranscriptionServiceBusMessage.DeserializeMessage(message);
                 bool result = TranscriptionProcessor.GetTranscripts(serviceBusMessage, log).Result;
                 return result;
             }

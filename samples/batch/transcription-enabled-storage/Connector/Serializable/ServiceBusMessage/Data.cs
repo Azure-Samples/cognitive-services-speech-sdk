@@ -3,12 +3,10 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 
-namespace CreateTranscriptionFunction
+namespace Connector
 {
     using System;
-    using System.Diagnostics.CodeAnalysis;
 
-    [SuppressMessage("Microsoft.Design", "CA1724:TypeNamesShouldNotMatchNamespaces", Justification = "BusMessage contains Data object.")]
     public class Data
     {
         public string ApiVersion { get; set; }

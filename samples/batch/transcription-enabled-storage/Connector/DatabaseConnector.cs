@@ -30,7 +30,6 @@ namespace Connector
             Guid transcriptionId,
             string locale,
             string fileName,
-            int numberOfChannels,
             float approximateCost,
             SpeechTranscript speechTranscript)
         {
@@ -55,7 +54,7 @@ namespace Connector
                     command.Parameters.AddWithValue("@source", speechTranscript.Source);
                     command.Parameters.AddWithValue("@timestamp", speechTranscript.Timestamp);
                     command.Parameters.AddWithValue("@duration", speechTranscript.Duration);
-                    command.Parameters.AddWithValue("@numberOfChannels", numberOfChannels);
+                    command.Parameters.AddWithValue("@numberOfChannels", speechTranscript.CombinedRecognizedPhrases.Count());
                     command.Parameters.AddWithValue("@approximateCost", approximateCost);
 
                     var result = await command.ExecuteNonQueryAsync().ConfigureAwait(false);
