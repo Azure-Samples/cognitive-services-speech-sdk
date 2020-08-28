@@ -343,7 +343,7 @@ jobs:
         echo $logTail
         if ( $logTail -Match "Exit code:" ) {
           break
-          } 
+          }
         sleep -Seconds 10
         }
     displayName: download and Install Microsoft.VisualStudio.Component.Windows10SDK.19041
@@ -365,7 +365,7 @@ jobs:
       buildVersionToDownload: specific
       buildId: $(SPEECHSDK_UWP_OPENSSL_BUILD_ID)
       artifactName: speechsdk-static-release
-    # TODO detect installation failures, export diagnostics. For now, we'll fail in msbuild a little bit down.  
+    # TODO detect installation failures, export diagnostics. For now, we'll fail in msbuild a little bit down.
   - script: |
       move $(System.ArtifactsDirectory)\speechsdk-static-release\include external\uwp_ssl\include && ^
       move $(System.ArtifactsDirectory)\speechsdk-static-release\lib external\uwp_ssl\lib && ^
@@ -1157,6 +1157,7 @@ jobs:
       echo ##vso[task.prependpath]C:\Program Files\Git\mingw64\bin
       echo ##vso[task.prependpath]C:\Program Files\Git\usr\bin
       echo ##vso[task.prependpath]C:\Program Files\Git\bin
+      echo ##vso[task.prependpath].\ci
     displayName: Work around for recent broken system path on Hosted VS2017 build agents.
     # see ICM https://icm.ad.msft.net/imp/v3/incidents/details/171621867/home
     # see PR  https://github.com/actions/virtual-environments/pull/211/files that broke many bash commands on Hosted VS2017 build agents.

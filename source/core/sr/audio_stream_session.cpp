@@ -62,7 +62,7 @@ using namespace std::chrono_literals;
 
 using json = nlohmann::json;
 
-seconds CSpxAudioStreamSession::StopRecognitionTimeout = 10s;
+seconds CSpxAudioStreamSession::StopRecognitionTimeout = 3s;
 
 atomic<int64_t> CSpxAudioStreamSession::Operation::OperationId;
 const minutes CSpxAudioStreamSession::Operation::Timeout = 1min;
@@ -684,10 +684,32 @@ void CSpxAudioStreamSession::WaitForIdle(std::chrono::milliseconds timeout)
     {
         return m_sessionState == SessionState::Idle || (m_recoKind == RecognitionKind::Keyword && m_sessionState == SessionState::ProcessingAudio);
     });
-    if (!success)
+    if (success)
     {
-        SPX_TRACE_WARNING("[%p]CSpxAudioStreamSession::WaitForIdle: Timeout happened during waiting for Idle", (void*)this);
+        return;
     }
+    SPX_TRACE_WARNING("[%p]CSpxAudioStreamSession::WaitForIdle: Timeout happened during waiting for Idle", (void*)this);
+    /* If we had a timeout waiting for idle, we should cleanup and set for the adapter to be reset */
+    /********************** NOTE ***********************\
+     * THIS IS A POINT IN TIME FIX, THE NEW SESSION WILL
+     * OFFLOAD HANDLING OF THIS TYPE OF RELIABILITY
+     * PROBLEMS TO A DIFFERENT LAYER
+    \***************************************************/
+    if (m_expectAdapterStoppedTurn)
+    {
+        /* If the user is expecting session stop fire it along with a cancellation */
+        m_expectAdapterStoppedTurn = false;
+        auto result = CreateErrorResult(
+            ErrorInfo::FromExplicitError(
+                CancellationErrorCode::ServiceTimeout,
+                "Timeout while waiting for service to stop"));
+        FireSessionStoppedEvent();
+        FireResultEvent(m_sessionId, result);
+    }
+    m_adapterResetPending = true;
+    EnsureResetEngineEngineAdapterComplete();
+    lock.unlock();
+    AdapterCompletedSetFormatStop(AdapterDoneProcessingAudio::Speech);
 }
 
 template<class  ISpx_Recognizer_Type>

@@ -222,13 +222,17 @@ fi
 if [[ $TARGET == Android-* ]]; then
   cp $CPOPT -R "$DESTPUBLIB" "$DESTPRIVLIBUNSTRIPPED"
   if [[ $TARGET == Android-arm64 ]]; then
-    STRIP=$ANDROID_NDK/toolchains/aarch64-linux-android-4.9/prebuilt/windows-x86_64/aarch64-linux-android/bin/strip.exe
+    ln -s $ANDROID_NDK/toolchains/aarch64-linux-android-4.9/prebuilt/windows-x86_64/aarch64-linux-android/bin/strip.exe strip.exe
+    STRIP=`pwd`/strip.exe
   elif [[ $TARGET == Android-arm32 ]]; then
-    STRIP=$ANDROID_NDK/toolchains/arm-linux-androideabi-4.9/prebuilt/windows-x86_64/arm-linux-androideabi/bin/strip.exe
+    ln -s $ANDROID_NDK/toolchains/arm-linux-androideabi-4.9/prebuilt/windows-x86_64/arm-linux-androideabi/bin/strip.exe strip.exe
+    STRIP=`pwd`/strip.exe
   elif [[ $TARGET == Android-x86 ]]; then
-    STRIP=$ANDROID_NDK/toolchains/x86-4.9/prebuilt/windows-x86_64/i686-linux-android/bin/strip.exe
+    ln -s $ANDROID_NDK/toolchains/x86-4.9/prebuilt/windows-x86_64/i686-linux-android/bin/strip.exe strip.exe
+    STRIP=`pwd`/strip.exe
   elif [[ $TARGET == Android-x64 ]]; then
-    STRIP=$ANDROID_NDK/toolchains/x86_64-4.9/prebuilt/windows-x86_64/x86_64-linux-android/bin/strip.exe
+    ln -s $ANDROID_NDK/toolchains/x86_64-4.9/prebuilt/windows-x86_64/x86_64-linux-android/bin/strip.exe strip.exe
+    STRIP=`pwd`/strip.exe
   else
     echo Unsupported architecture $TARGET.
     exit 1
@@ -238,7 +242,9 @@ if [[ $TARGET == Android-* ]]; then
   # From the source code of xargs, it looks like the error comes before xargs even parses the arguments. "xargs --help" or
   # "xargs --version" will also fail. There seems to be something wrong with the environment. So, replacing it with -exec option of find command.
   # find "$DESTPUBLIB" -name \*.so -print0 | xargs -0 $STRIP
-  find "$DESTPUBLIB" -name \*.so -exec $STRIP '{}' \+
+  for shlib in `find "$DESTPUBLIB" -name \*.so`; do
+    $STRIP $shlib
+  done
 fi
 
 if [[ $PLATFORM == OSX-* ]]; then

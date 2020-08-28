@@ -202,9 +202,9 @@ def test_push_audio_input_stream(speech_input: SpeechInput, use_default_wave_for
 
     finally:
         print('closing')
+        stream.close()
         reco.stop_continuous_recognition_async()
         wav_fh.close()
-        stream.close()
 
     _wait_for_event(callbacks, 'session_stopped')
     _check_callbacks(callbacks)
