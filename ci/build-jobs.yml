@@ -266,15 +266,25 @@ jobs:
       downloadPath: $(System.ArtifactsDirectory)\In
   - powershell: |
       $tools = Start-Process -FilePath "C:\Program Files (x86)\Microsoft SDKs\Azure\AzCopy\AzCopy.exe" -Wait -PassThru -NoNewWindow -ArgumentList /Source:https://csspeechtestdata.blob.core.windows.net/tools/NormAndAlign, /Dest:CompEvalRun\, /SourceKey:$(TestDataStorageKey), /S, /Y, /XO
-      $data = Start-Process -FilePath "C:\Program Files (x86)\Microsoft SDKs\Azure\AzCopy\AzCopy.exe" -Wait -PassThru -NoNewWindow -ArgumentList /Source:https://csspeechtestdata.blob.core.windows.net/datasets/CompEval, /Dest:CompEvalRun\, /SourceKey:$(TestDataStorageKey), /S, /Y, /XO
-      if (($tools.ExitCode -ne 0) -or ($data.ExitCode -ne 0)) {
+      $transtripts = Start-Process -FilePath "C:\Program Files (x86)\Microsoft SDKs\Azure\AzCopy\AzCopy.exe" -Wait -PassThru -NoNewWindow -ArgumentList /Source:https://csspeechtestdata.blob.core.windows.net/datasets/CompEval/CompEval/Transcriptions, /Dest:CompEvalRun\CompEval\Transcriptions, /SourceKey:$(TestDataStorageKey), /S, /Y, /XO
+      $data = Start-Process -FilePath "C:\Program Files (x86)\Microsoft SDKs\Azure\AzCopy\AzCopy.exe" -Wait -PassThru -NoNewWindow -ArgumentList /Source:https://csspeechtestdata.blob.core.windows.net/datasets/CompEval/CompEval/en-US_small, /Dest:CompEvalRun\CompEval\en-US, /SourceKey:$(TestDataStorageKey), /S, /Y, /XO
+
+      if (($tools.ExitCode -ne 0) -or ($transtripts.ExitCode -ne 0) -or ($data.ExitCode -ne 0)) {
           throw "an error occurred"
       }
     displayName: 'Downloading CompEval data'
-  - powershell: |
-      cd CompEvalRun\CompEval\en-US
-      Remove-Item -Verbose c*.wav,d*.wav,e*.wav,f*.wav
-    displayName: Delete 1/4 of the files
+  - bash: |
+        set -x
+        cp ./ci/jsonsettings.py .
+        rm -f ./tests/test.subscriptions.regions.json
+        cat > ./tests/test.subscriptions.regions.json <<HEREDOC
+        $(KEYS_AND_REGIONS)
+        HEREDOC
+    displayName: Write Subscriptions Regions Data
+  - task: CMake@1
+    displayName: Generate solution just to populate test setting json files and make testrunner happy.
+    inputs:
+      cmakeArgs: '-G "Visual Studio 16 2019" -A x64 ..'
   - bash: |
       # --build-dir is used as a drop directory here
       ./ci/run-tests.sh \
