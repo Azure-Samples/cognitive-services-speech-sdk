@@ -100,6 +100,7 @@ namespace Microsoft { namespace CognitiveServices { namespace Speech { namespace
             {
               case WebSocketDisconnectReason::ProtocolError:
               case WebSocketDisconnectReason::InvalidPayloadData:
+              case WebSocketDisconnectReason::UnsupportedLocale:
                 retryMode = ISpxErrorInformation::RetryMode::NotAllowed;
                 break;
               default:
