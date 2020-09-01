@@ -35,9 +35,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\CreateTranscription\CreateTranscriptionFunction.csproj" />
     <ProjectReference Include="..\Connector\Connector.csproj" />
-    <ProjectReference Include="..\FetchTranscription\FetchTranscriptionFunction.csproj" />
   </ItemGroup>
 
   <ItemGroup>
