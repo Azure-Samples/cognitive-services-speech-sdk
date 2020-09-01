@@ -4,13 +4,13 @@
     <AzureFunctionsVersion>v3</AzureFunctionsVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <CodeAnalysisRuleSet>..\TranscriptionEnabledStorage.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>..\..\AcceleratorRules.ruleset</CodeAnalysisRuleSet>
     <LangVersion>latest</LangVersion>
     <DebugType>full</DebugType>
     <OutputPath>bin\Debug\</OutputPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <CodeAnalysisRuleSet>..\TranscriptionEnabledStorage.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>..\..\AcceleratorRules.ruleset</CodeAnalysisRuleSet>
     <LangVersion>latest</LangVersion>
     <DebugType>pdbonly</DebugType>
     <OutputPath>bin\Release\</OutputPath>
@@ -34,13 +34,9 @@
     <None Update="host.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="local.settings.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <CopyToPublishDirectory>Never</CopyToPublishDirectory>
-    </None>
   </ItemGroup>
   <ItemGroup>
-    <AdditionalFiles Include="..\stylecop.json">
+    <AdditionalFiles Include="..\..\stylecop.json">
       <Link>stylecop.json</Link>
     </AdditionalFiles>
   </ItemGroup>

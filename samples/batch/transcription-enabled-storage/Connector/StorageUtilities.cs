@@ -6,7 +6,6 @@
 namespace Connector
 {
     using System;
-    using System.Collections.Generic;
     using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
@@ -55,68 +54,6 @@ namespace Connector
             await blockBlob.UploadTextAsync(content).ConfigureAwait(false);
         }
 
-        public static AudioDetails GetAudioDetails(byte[] audioBytes, string fileName, string locale, DateTime transcriptionCreationTime, bool isCustomModel, bool sentimentAnalysisAdded, bool entityRedactionAdded, ILogger log)
-        {
-            var fileNameExtension = Path.GetExtension(fileName);
-
-            var duration = TimeSpan.Zero;
-            var channels = 0;
-
-            try
-            {
-                duration = AudioFileProcessor.GetDuration(audioBytes, fileNameExtension);
-                channels = AudioFileProcessor.GetNumberOfChannels(audioBytes, fileNameExtension);
-            }
-            catch (Exception e)
-            {
-                if (e is InvalidDataException || e is FormatException)
-                {
-                    log.LogInformation("Failed to parse audio file. Exception: " + e.Message);
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            var estimatedCost = AudioFileProcessor.GetCostEstimation(duration, channels, isCustomModel, sentimentAnalysisAdded, entityRedactionAdded);
-            return new AudioDetails(fileName, transcriptionCreationTime, duration, channels, estimatedCost, locale);
-        }
-
-        public static async Task WriteTranscriptionReceiptToStorageAsync(string storageConnectionString, string containerName, AudioDetails audioDetails, ILogger log)
-        {
-            if (audioDetails == null)
-            {
-                throw new ArgumentNullException(nameof(audioDetails));
-            }
-
-            var receipt = $"Transcription job \"{audioDetails.FileName}\" filed at {audioDetails.CreatedTime}.";
-            if (audioDetails.EstimatedCost != 0d || audioDetails.AudioLength.TotalSeconds != 0d)
-            {
-                receipt += $"\nEstimated cost: {Math.Round(audioDetails.EstimatedCost, 4)} €";
-                receipt += $"\nAudio length: {audioDetails.AudioLength}";
-            }
-            else
-            {
-                receipt += "\nUnable to parse file header.";
-            }
-
-            receipt += $"\nLocale: {audioDetails.Locale}";
-
-            // file storage
-            var storageAccount = CloudStorageAccount.Parse(storageConnectionString);
-            var fileClient = storageAccount.CreateCloudBlobClient();
-
-            // Get a reference to the file share we created previously.
-            var container = fileClient.GetContainerReference(containerName);
-            log.LogInformation("Got container reference for container: " + containerName);
-
-            var fileNameWithoutExtension = GetFileNameWithoutExtension(audioDetails.FileName);
-            var blockBlob = container.GetBlockBlobReference(fileNameWithoutExtension + "_receipt.txt");
-
-            await blockBlob.UploadTextAsync(receipt).ConfigureAwait(false);
-        }
-
         public static string GetFileNameFromPath(string filePath)
         {
             if (filePath == null)
@@ -155,16 +92,6 @@ namespace Connector
 
             var containerName = cleanedPathParts.FirstOrDefault();
             return containerName;
-        }
-
-        public static bool IsItAudio(string fileName)
-        {
-            string[] mediaExtensions =
-            {
-                ".WAV", ".MID", ".MIDI", ".WMA", ".MP3", ".OGG", ".RMA"
-            };
-
-            return mediaExtensions.Contains(Path.GetExtension(fileName).ToUpperInvariant());
         }
 
         public static async Task<byte[]> DownloadFileFromSAS(string blobSas)

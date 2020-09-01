@@ -1,4 +1,4 @@
-﻿// <copyright file="CreateTranscriptionEnvironmentVariables.cs" company="Microsoft Corporation">
+﻿// <copyright file="StartTranscriptionEnvironmentVariables.cs" company="Microsoft Corporation">
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
@@ -7,7 +7,7 @@ namespace Connector
 {
     using System;
 
-    public static class CreateTranscriptionEnvironmentVariables
+    public static class StartTranscriptionEnvironmentVariables
     {
         public static readonly string AzureServiceBus = Environment.GetEnvironmentVariable(nameof(AzureServiceBus), EnvironmentVariableTarget.Process);
 
@@ -21,19 +21,15 @@ namespace Connector
 
         public static readonly bool AddEntityRedaction = bool.TryParse(Environment.GetEnvironmentVariable(nameof(AddEntityRedaction), EnvironmentVariableTarget.Process), out AddEntityRedaction) && AddEntityRedaction;
 
-        public static readonly bool CreateReceiptFile = bool.TryParse(Environment.GetEnvironmentVariable(nameof(CreateReceiptFile), EnvironmentVariableTarget.Process), out CreateReceiptFile) && CreateReceiptFile;
-
         public static readonly string Locale = Environment.GetEnvironmentVariable(nameof(Locale), EnvironmentVariableTarget.Process);
 
         public static readonly string SecondaryLocale = Environment.GetEnvironmentVariable(nameof(SecondaryLocale), EnvironmentVariableTarget.Process);
 
         public static readonly string ErrorReportOutputContainer = Environment.GetEnvironmentVariable(nameof(ErrorReportOutputContainer), EnvironmentVariableTarget.Process);
 
-        public static readonly string CreateTranscriptionServiceBusConnectionString = Environment.GetEnvironmentVariable(nameof(CreateTranscriptionServiceBusConnectionString), EnvironmentVariableTarget.Process);
+        public static readonly string StartTranscriptionServiceBusConnectionString = Environment.GetEnvironmentVariable(nameof(StartTranscriptionServiceBusConnectionString), EnvironmentVariableTarget.Process);
 
         public static readonly string AzureWebJobsStorage = Environment.GetEnvironmentVariable(nameof(AzureWebJobsStorage), EnvironmentVariableTarget.Process);
-
-        public static readonly string ReceiptsContainer = Environment.GetEnvironmentVariable(nameof(ReceiptsContainer), EnvironmentVariableTarget.Process);
 
         public static readonly string AudioDatasetSize = Environment.GetEnvironmentVariable(nameof(AudioDatasetSize), EnvironmentVariableTarget.Process);
 

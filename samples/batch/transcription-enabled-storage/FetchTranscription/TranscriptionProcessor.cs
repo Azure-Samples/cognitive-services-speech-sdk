@@ -96,7 +96,7 @@ namespace FetchTranscriptionFunction
             log.LogInformation($"Got failed transcription for job {jobName}");
 
             var report = "Unknown Error.";
-            var errorTxtname = jobName + "_error.txt";
+            var errorTxtname = jobName + ".txt";
 
             var transcriptionFiles = await client.GetTranscriptionFilesAsync(transcriptionId).ConfigureAwait(false);
 
@@ -160,7 +160,6 @@ namespace FetchTranscriptionFunction
 
                     var transcriptionResult = JsonConvert.DeserializeObject<SpeechTranscript>(transcriptionResultJson);
                     fileName = StorageUtilities.GetFileNameFromPath(transcriptionResult.Source);
-                    var fileNameWithoutExtension = StorageUtilities.GetFileNameWithoutExtension(fileName);
 
                     if (transcriptionResult.RecognizedPhrases == null || transcriptionResult.RecognizedPhrases.All(phrase => !phrase.RecognitionStatus.Equals("Success", StringComparison.Ordinal)))
                     {
@@ -184,13 +183,13 @@ namespace FetchTranscriptionFunction
                     var editedTranscriptionResultJson = JsonConvert.SerializeObject(transcriptionResult, Newtonsoft.Json.Formatting.Indented);
 
                     // Store transcript json:
-                    var jsonFileName = $"{fileNameWithoutExtension}.json";
+                    var jsonFileName = $"{fileName}.json";
                     await StorageUtilities.WriteTextFileToBlobAsync(FetchTranscriptionEnvironmentVariables.AzureWebJobsStorage, editedTranscriptionResultJson, jsonContainer, jsonFileName, log).ConfigureAwait(false);
 
                     if (FetchTranscriptionEnvironmentVariables.CreateHtmlResultFile)
                     {
                         var htmlContainer = FetchTranscriptionEnvironmentVariables.HtmlResultOutputContainer;
-                        var htmlFileName = $"{fileNameWithoutExtension}.html";
+                        var htmlFileName = $"{fileName}.html";
                         var displayResults = TranscriptionToHtml.ToHTML(transcriptionResult, jobName);
                         await StorageUtilities.WriteTextFileToBlobAsync(FetchTranscriptionEnvironmentVariables.AzureWebJobsStorage, displayResults, htmlContainer, htmlFileName, log).ConfigureAwait(false);
                     }
@@ -206,7 +205,7 @@ namespace FetchTranscriptionFunction
                     if (FetchTranscriptionEnvironmentVariables.UseSqlDatabase)
                     {
                         var duration = XmlConvert.ToTimeSpan(transcriptionResult.Duration);
-                        var approximatedCost = AudioFileProcessor.GetCostEstimation(
+                        var approximatedCost = CostEstimation.GetCostEstimation(
                             duration,
                             transcriptionResult.CombinedRecognizedPhrases.Count(),
                             serviceBusMessage.UsesCustomModel,
@@ -236,7 +235,7 @@ namespace FetchTranscriptionFunction
                     }
                     else if (e is JsonException || e is SqlException)
                     {
-                        var errorTxtname = fileName + "_error.txt";
+                        var errorTxtname = fileName + ".txt";
                         var errorMessage = $"Transcription result processing failed with exception: {e.Message}";
                         log.LogError(errorMessage);
 
@@ -258,7 +257,7 @@ namespace FetchTranscriptionFunction
 
             if (!string.IsNullOrEmpty(errors))
             {
-                var errorTxtname = jobName + "_error.txt";
+                var errorTxtname = jobName + ".txt";
 
                 await StorageUtilities.WriteTextFileToBlobAsync(
                     FetchTranscriptionEnvironmentVariables.AzureWebJobsStorage,
@@ -284,12 +283,11 @@ namespace FetchTranscriptionFunction
             foreach (var failedTranscription in failedTranscriptions)
             {
                 var fileName = StorageUtilities.GetFileNameFromPath(failedTranscription.SourceUrl);
-                var fileNameWithoutExtension = StorageUtilities.GetFileNameWithoutExtension(fileName);
 
                 var message = $"Transcription \"{fileName}\" failed with error \"{failedTranscription.ErrorKind}\" and message \"{failedTranscription.ErrorMessage}\"";
                 log.LogError(message);
 
-                var errorTxtname = fileNameWithoutExtension + "_error.txt";
+                var errorTxtname = fileName + ".txt";
                 await StorageUtilities.WriteTextFileToBlobAsync(
                     FetchTranscriptionEnvironmentVariables.AzureWebJobsStorage,
                     message,

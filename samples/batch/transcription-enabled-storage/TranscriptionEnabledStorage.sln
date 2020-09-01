@@ -3,15 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29806.167
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CreateTranscriptionFunction", "CreateTranscription\CreateTranscriptionFunction.csproj", "{324AC20B-52DF-40D2-AC5E-52309ACE7E13}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StartTranscriptionByServiceBus", "StartTranscriptionByServiceBus\StartTranscriptionByServiceBus.csproj", "{324AC20B-52DF-40D2-AC5E-52309ACE7E13}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Connector", "Connector\Connector.csproj", "{BC7C18D4-0A0A-4F12-8D56-CBC42FF26649}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tests", "Tests\Tests.csproj", "{88021EA8-F47E-4A29-9BB2-038589AF5D18}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FetchTranscriptionFunction", "FetchTranscription\FetchTranscriptionFunction.csproj", "{EE55F008-BC87-47B8-82CB-9113F0F18D14}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FetchTranscription", "FetchTranscription\FetchTranscription.csproj", "{EE55F008-BC87-47B8-82CB-9113F0F18D14}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CreateByTimerFunction", "CreateByTimerFunction\CreateByTimerFunction.csproj", "{1628BA98-FCFD-4706-B594-54E4338957B1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StartTranscriptionByTimer", "StartTranscriptionByTimer\StartTranscriptionByTimer.csproj", "{1628BA98-FCFD-4706-B594-54E4338957B1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -4,17 +4,17 @@
     <AzureFunctionsVersion>v3</AzureFunctionsVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <CodeAnalysisRuleSet>..\TranscriptionEnabledStorage.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>..\..\AcceleratorRules.ruleset</CodeAnalysisRuleSet>
     <LangVersion>latest</LangVersion>
     <DebugType>full</DebugType>
     <OutputPath>bin\Debug\</OutputPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <CodeAnalysisRuleSet>..\TranscriptionEnabledStorage.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>..\..\AcceleratorRules.ruleset</CodeAnalysisRuleSet>
     <LangVersion>latest</LangVersion>
     <DebugType>pdbonly</DebugType>
     <OutputPath>bin\Release\</OutputPath>
-  </PropertyGroup>
+  </PropertyGroup>  
   <ItemGroup>
     <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.ServiceBus" Version="4.1.1" />
     <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.8">
@@ -23,7 +23,6 @@
     </PackageReference>
     <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.11.0" />
     <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="3.0.5" />
-    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -31,19 +30,16 @@
     <PackageReference Include="System.Data.SqlClient" Version="4.8.1" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Connector\Connector.csproj" />
+  </ItemGroup>
+  <ItemGroup>
     <None Update="host.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="local.settings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <AdditionalFiles Include="..\stylecop.json">
+    <AdditionalFiles Include="..\..\stylecop.json">
       <Link>stylecop.json</Link>
     </AdditionalFiles>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Connector\Connector.csproj" />
   </ItemGroup>
 </Project>

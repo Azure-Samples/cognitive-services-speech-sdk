@@ -9,11 +9,11 @@ namespace Connector.Serializable
 
     public class TextAnalyticsRequestsChunk
     {
-        public TextAnalyticsRequestsChunk(List<TextAnalyticsRequest> documents)
+        public TextAnalyticsRequestsChunk(IEnumerable<TextAnalyticsRequest> documents)
         {
             Documents = documents;
         }
 
-        public List<TextAnalyticsRequest> Documents { get; private set; }
+        public IEnumerable<TextAnalyticsRequest> Documents { get; private set; }
     }
 }

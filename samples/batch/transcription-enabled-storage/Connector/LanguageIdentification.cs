@@ -7,11 +7,13 @@ namespace Connector
 {
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.CognitiveServices.Speech;
     using Microsoft.CognitiveServices.Speech.Audio;
+    using NAudio.Wave;
 
     public class LanguageIdentification
     {
@@ -31,7 +33,7 @@ namespace Connector
 
         public async Task<string> DetectLanguage(byte[] audioBytes, string fileExtension, string locale1, string locale2)
         {
-            var wavBytes = AudioFileProcessor.ConvertToWaveBytes(audioBytes, fileExtension);
+            var wavBytes = ConvertToWaveBytes(audioBytes, fileExtension);
 
             var autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig.FromLanguages(new string[] { locale1, locale2 });
 
@@ -98,6 +100,41 @@ namespace Connector
             {
                 taskCompletionSource.TrySetResult(0);
             }
+        }
+
+        private static byte[] ConvertToWaveBytes(byte[] fileBytes, string fileNameExtension)
+        {
+            if (fileNameExtension == null)
+            {
+                throw new ArgumentNullException(nameof(fileNameExtension));
+            }
+
+            using var wavStream = GetWaveStream(fileBytes, fileNameExtension);
+            wavStream.Position = wavStream.Length / 2;
+
+            using var memStream = new MemoryStream();
+
+            using (var pcmStream = WaveFormatConversionStream.CreatePcmStream(wavStream))
+            {
+                WaveFileWriter.WriteWavFileToStream(memStream, pcmStream);
+            }
+
+            return memStream.ToArray();
+        }
+
+        private static WaveStream GetWaveStream(byte[] fileBytes, string fileNameExtension)
+        {
+            if (fileNameExtension.Equals(".mp3", StringComparison.OrdinalIgnoreCase))
+            {
+                return new Mp3FileReader(new MemoryStream(fileBytes));
+            }
+
+            if (fileNameExtension.Equals(".aiff", StringComparison.OrdinalIgnoreCase))
+            {
+                return new AiffFileReader(new MemoryStream(fileBytes));
+            }
+
+            return new WaveFileReader(new MemoryStream(fileBytes));
         }
     }
 }

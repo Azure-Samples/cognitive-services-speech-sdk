@@ -20,11 +20,11 @@ namespace Connector
     {
         private const string SpeechToTextBasePath = "speechtotext/v3.0/";
 
-        private static ILogger Log;
-
         private readonly string SubscriptionKey;
 
         private readonly string HostName;
+
+        private ILogger Log;
 
         public BatchClient(string subscriptionKey, string hostName, ILogger log)
         {
@@ -65,7 +65,7 @@ namespace Connector
             return this.GetAsync<TranscriptionFiles>(path);
         }
 
-        public Task<Uri> PostTranscriptionAsync(string name, string description, string locale, Dictionary<string, string> properties, List<Uri> contentUrls, IEnumerable<Guid> modelIds)
+        public Task<Uri> PostTranscriptionAsync(string name, string description, string locale, Dictionary<string, string> properties, IEnumerable<Uri> contentUrls, IEnumerable<Guid> modelIds)
         {
             var models = modelIds.Select(m => ModelIdentity.Create(m)).ToList();
             var path = $"{SpeechToTextBasePath}Transcriptions/";
@@ -85,7 +85,7 @@ namespace Connector
             return new Uri(headers["Location"]);
         }
 
-        private static async Task<HttpWebResponse> GetHttpWebResponseAsync(HttpWebRequest request, ILogger logger)
+        private async Task<HttpWebResponse> GetHttpWebResponseAsync(HttpWebRequest request)
         {
             var webresponse = await request.GetResponseAsync().ConfigureAwait(false);
             var response = (HttpWebResponse)webresponse;
@@ -97,8 +97,9 @@ namespace Connector
 
             if (response.StatusCode != HttpStatusCode.Accepted && response.StatusCode != HttpStatusCode.Created)
             {
-                logger.LogInformation($"Failure: Status Code {response.StatusCode}, {response.StatusDescription}");
-                throw new NotImplementedException();
+                var failureMessage = $"Failure: Status Code {response.StatusCode}, {response.StatusDescription}";
+                Log.LogInformation(failureMessage);
+                throw new WebException(failureMessage);
             }
 
             return response;
@@ -106,7 +107,7 @@ namespace Connector
 
         private HttpClient CreateHttpClient()
         {
-            var client = new HttpClient();
+            var client = HttpClientFactory.Create();
             client.Timeout = TimeSpan.FromMinutes(25);
             client.BaseAddress = new Uri(HostName);
             client.DefaultRequestHeaders.TransferEncodingChunked = null;
@@ -116,14 +117,14 @@ namespace Connector
 
         private async Task<Uri> PostAsJsonAsync(string path, TranscriptionDefinition payload)
         {
-            var request = BuildWebRequest(path, payload);
+            var request = BuildPostWebRequest(path, payload);
             Log.LogInformation("Request: " + request);
-            var webResponse = await GetHttpWebResponseAsync(request, Log).ConfigureAwait(false);
+            var webResponse = await GetHttpWebResponseAsync(request).ConfigureAwait(false);
             Log.LogInformation("StatusCode: " + webResponse.StatusCode);
             return GetLocationFromPostResponseAsync(webResponse.Headers);
         }
 
-        private HttpWebRequest BuildWebRequest(string path, TranscriptionDefinition payload)
+        private HttpWebRequest BuildPostWebRequest(string path, TranscriptionDefinition payload)
         {
             var request = (HttpWebRequest)WebRequest.Create(new Uri(HostName + path));
 
@@ -159,9 +160,9 @@ namespace Connector
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    Log.LogInformation("Failure: Status Code: " + response.StatusCode);
-                    Log.LogInformation("Failure: Response Header: " + response.Content.Headers);
-                    throw new NotImplementedException();
+                    var failureMessage = $"Failure: Status Code {response.StatusCode}, {response.Content.Headers}";
+                    Log.LogInformation(failureMessage);
+                    throw new WebException(failureMessage);
                 }
             }
         }
@@ -186,9 +187,9 @@ namespace Connector
                     return result;
                 }
 
-                Log.LogInformation("Failure: Status Code: " + response.StatusCode);
-                Log.LogInformation("Failure: Response Header: " + response.Content.Headers);
-                throw new NotImplementedException();
+                var failureMessage = $"Failure: Status Code {response.StatusCode}, {response.Content.Headers}";
+                Log.LogInformation(failureMessage);
+                throw new WebException(failureMessage);
             }
         }
     }

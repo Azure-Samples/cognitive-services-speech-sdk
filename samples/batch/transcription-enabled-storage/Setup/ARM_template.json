@@ -216,7 +216,6 @@
                 "description": "A value indicating whether word level timestamps are requested."
             }
         },
-		
         "TextAnalyticsKey": {
             "defaultValue": "",
             "type": "String",
@@ -285,25 +284,23 @@
 		}
     },
 	"variables": {
-    "appPackageVersion": "1.0.20",
+    "appPackageVersion": "1.0.21",
 	"UseSqlDatabase": "[and(not(equals(parameters('SqlAdministratorLogin'),'')), not(equals(parameters('SqlAdministratorLoginPassword'),'')))]",
 	"SqlServerName": "[concat('sqlserver', uniqueString(subscription().id, resourceGroup().id))]",
 	"DatabaseName": "[concat('Database-', resourceGroup().name)]",
 	"StorageAccountName": "[parameters('StorageAccount')]",
 	"audioInputContainer": "audio-input",
-	"receiptsContainer": "receipts",
 	"jsonResultOutputContainer": "json-result-output",
 	"htmlResultOutputContainer": "html-result-output",
 	"errorReportOutputContainer": "error-report-output",
-    "createTranscriptionFunctionName": "[take(concat('CreateTranscriptionFunction-', resourceGroup().name),60)]",
-    "createTranscriptionFunctionId": "[resourceId('Microsoft.Web/sites', variables('createTranscriptionFunctionName'))]",
+    "startTranscriptionFunctionName": "[take(concat('StartTranscriptionFunction-', resourceGroup().name),60)]",
+    "startTranscriptionFunctionId": "[resourceId('Microsoft.Web/sites', variables('startTranscriptionFunctionName'))]",
     "fetchTranscriptionFunctionName": "[take(concat('FetchTranscriptionFunction-', resourceGroup().name),60)]",
     "fetchTranscriptionFunctionId": "[resourceId('Microsoft.Web/sites', variables('fetchTranscriptionFunctionName'))]",
     "authRuleRMK": "[resourceId('Microsoft.ServiceBus/namespaces/authorizationRules', concat('ServiceBus-', resourceGroup().name),'RootManageSharedAccessKey')]",
     "authRuleFT":  "[resourceId('Microsoft.ServiceBus/namespaces/queues/authorizationRules',concat('ServiceBus-', resourceGroup().name), 'fetch_transcription_queue','FetchTranscription')]",      
-    "authRuleCT":  "[resourceId('Microsoft.ServiceBus/namespaces/queues/authorizationRules',concat('ServiceBus-', resourceGroup().name), 'create_transcription_queue','CreateTranscription')]",
+    "authRuleCT":  "[resourceId('Microsoft.ServiceBus/namespaces/queues/authorizationRules',concat('ServiceBus-', resourceGroup().name), 'start_transcription_queue','StartTranscription')]",
 	"appServicePlanName": "AcceleratorAppServicePlan",
-	"createReceiptFile": true,
 	"createHtmlResultFile": true,
 	"timerBasedExecution": true
 	},
@@ -488,7 +485,7 @@
         {
             "type": "Microsoft.ServiceBus/namespaces/queues",
             "apiVersion": "2017-04-01",
-            "name": "[concat(concat('ServiceBus-', resourceGroup().name), '/create_transcription_queue')]",
+            "name": "[concat(concat('ServiceBus-', resourceGroup().name), '/start_transcription_queue')]",
             "location": "[resourceGroup().location]",
             "dependsOn": [
                 "[resourceId('Microsoft.ServiceBus/namespaces', concat('ServiceBus-', resourceGroup().name))]"
@@ -589,10 +586,10 @@
         {
             "type": "Microsoft.ServiceBus/namespaces/queues/authorizationRules",
             "apiVersion": "2017-04-01",
-            "name": "[concat(concat('ServiceBus-', resourceGroup().name), '/create_transcription_queue/CreateTranscription')]",
+            "name": "[concat(concat('ServiceBus-', resourceGroup().name), '/start_transcription_queue/StartTranscription')]",
             "location": "[resourceGroup().location]",
             "dependsOn": [
-                "[resourceId('Microsoft.ServiceBus/namespaces/queues', concat('ServiceBus-', resourceGroup().name), 'create_transcription_queue')]",
+                "[resourceId('Microsoft.ServiceBus/namespaces/queues', concat('ServiceBus-', resourceGroup().name), 'start_transcription_queue')]",
                 "[resourceId('Microsoft.ServiceBus/namespaces', concat('ServiceBus-', resourceGroup().name))]"
             ],
             "properties": {
@@ -656,20 +653,6 @@
             }
         },
         {
-            "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
-			"condition": "[variables('createReceiptFile')]",
-            "apiVersion": "2019-06-01",
-            "name": "[concat(variables('StorageAccountName'), '/default/', variables('receiptsContainer'))]",
-            "location": "[resourceGroup().location]",
-            "dependsOn": [
-                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', variables('StorageAccountName'), 'default')]",
-                "[resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName'))]"
-            ],
-            "properties": {
-                "publicAccess": "None"
-            }
-        },
-        {
             "type": "Microsoft.Storage/storageAccounts/providers/eventSubscriptions",
             "apiVersion": "2019-06-01",
             "name": "[concat(variables('StorageAccountName'), '/Microsoft.EventGrid/BlobCreatedEvent')]",
@@ -677,20 +660,21 @@
 			"dependsOn": [
                 "[resourceId('Microsoft.Storage/storageAccounts/blobServices', variables('StorageAccountName'), 'default')]",
                 "[resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName'))]",
-                "[resourceId('Microsoft.ServiceBus/namespaces/queues', concat('ServiceBus-', resourceGroup().name), 'create_transcription_queue')]"
+                "[resourceId('Microsoft.ServiceBus/namespaces/queues', concat('ServiceBus-', resourceGroup().name), 'start_transcription_queue')]"
             ],
             "properties": {
 				"topic": "[concat('/subscriptions/',subscription().subscriptionId,'/resourceGroups/',resourceGroup().name,'/providers/Microsoft.Storage/storageAccounts/',variables('StorageAccountName'))]",
                 "destination": {
                     "endpointType": "ServiceBusQueue",
                     "properties": {
-                        "resourceId": "[concat('/subscriptions/',subscription().subscriptionId,'/resourceGroups/',resourceGroup().name,'/providers/Microsoft.ServiceBus/namespaces/ServiceBus-',resourceGroup().name,'/queues/create_transcription_queue')]"
+                        "resourceId": "[concat('/subscriptions/',subscription().subscriptionId,'/resourceGroups/',resourceGroup().name,'/providers/Microsoft.ServiceBus/namespaces/ServiceBus-',resourceGroup().name,'/queues/start_transcription_queue')]"
                     }
                 },
                 "filter": {
                     "includedEventTypes": [
                         "Microsoft.Storage.BlobCreated"
-                    ],
+                    ],				
+					"subjectBeginsWith": "[concat('/blobServices/default/containers/', variables('audioInputContainer'))]",
                     "advancedFilters": []
                 },
                 "labels": [],
@@ -712,221 +696,109 @@
         {
             "type": "Microsoft.Web/sites",
             "apiVersion": "2018-11-01",
-            "name": "[variables('createTranscriptionFunctionName')]",
+            "name": "[variables('startTranscriptionFunctionName')]",
             "location": "[resourceGroup().location]",
             "dependsOn": [
-                "[resourceId('Microsoft.Insights/components', 'AcceleratorInsights')]",
-                "[resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName'))]",
-				"[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]",	
-                "[variables('authRuleRMK')]",
-                "[variables('authRuleFT')]",
-                "[variables('authRuleCT')]"
+				"[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]"
             ],
             "kind": "functionapp",
             "properties": {
 				"serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]",
-				"httpsOnly": "true",
-                "siteConfig": {
-                    "appSettings": [
-                        {
-                            "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
-                            "value": "[reference(resourceId('Microsoft.Insights/components', 'AcceleratorInsights'), '2015-05-01').InstrumentationKey]"
-                        },
-                        {
-                            "name": "FUNCTIONS_EXTENSION_VERSION",
-                            "value": "~3"
-                        },
-                        {
-                            "name": "FUNCTIONS_WORKER_RUNTIME",
-                            "value": "dotnet"
-                        },
-                        {
-                            "name": "AzureSpeechServicesKey",
-                            "value": "[parameters('AzureSpeechServicesKey')]"
-                        },
-                        {
-                            "name": "AzureSpeechServicesRegion",
-                            "value": "[parameters('AzureSpeechServicesRegion')]"
-                        },
-                        {
-                            "name": "ProfanityFilterMode",
-                            "value": "[parameters('ProfanityFilterMode')]"
-                        },
-                        {
-                            "name": "PunctuationMode",
-                            "value": "[parameters('PunctuationMode')]"
-                        },
-                        {
-                            "name": "AddDiarization",
-                            "value": "[parameters('AddDiarization')]"
-                        },
-                        {
-                            "name": "AddWordLevelTimestamps",
-                            "value": "[parameters('AddWordLevelTimestamps')]"
-                        },
-                        {
-                            "name": "AddSentimentAnalysis",
-                            "value": "[parameters('AddSentimentAnalysis')]"
-                        },
-                        {
-                            "name": "AddEntityRedaction",
-                            "value": "[parameters('AddEntityRedaction')]"
-                        },
-                        {
-                            "name": "Locale",
-                            "value": "[parameters('Locale')]"
-                        },
-                        {
-                            "name": "AcousticModelId",
-                            "value": "[parameters('AcousticModelId')]"
-                        },
-                        {
-                            "name": "LanguageModelId",
-                            "value": "[parameters('LanguageModelId')]"
-                        },
-                        {
-                            "name": "SecondaryLocale",
-                            "value": "[parameters('SecondaryLocale')]"
-                        },
-                        {
-                            "name": "SecondaryAcousticModelId",
-                            "value": "[parameters('SecondaryAcousticModelId')]"
-                        },
-                        {
-                            "name": "SecondaryLanguageModelId",
-                            "value": "[parameters('SecondaryLanguageModelId')]"
-                        },
-                        {
-                            "name": "AzureWebJobsStorage",
-                            "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('StorageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value)]"
-                        },
-                        {
-                            "name": "AzureServiceBus",
-                            "value": "[listKeys(variables('authRuleRMK'),'2015-08-01').primaryConnectionString]"
-                        },
-                        {
-                            "name": "FetchTranscriptionServiceBusConnectionString",
-                            "value": "[listKeys(variables('authRuleFT'),'2015-08-01').primaryConnectionString]"
-                        },
-                        {
-                            "name": "CreateTranscriptionServiceBusConnectionString",
-                            "value": "[listKeys(variables('authRuleCT'),'2015-08-01').primaryConnectionString]"
-                        },
-                        {
-                            "name": "AudioInputContainer",
-                            "value": "[variables('audioInputContainer')]"
-                        },
-                        {
-                            "name": "ErrorReportOutputContainer",
-                            "value": "[variables('errorReportOutputContainer')]"
-                        },
-                        {
-                            "name": "AudioDatasetSize",
-                            "value": "[parameters('AudioDatasetSize')]"
-                        },
-                        {
-                            "name": "CreateReceiptFile",
-                            "value": "[variables('createReceiptFile')]"
-                        },
-                        {
-                            "name": "ReceiptsContainer",
-                            "value": "[variables('receiptsContainer')]"
-                        },
-                        {
-                            "name": "WEBSITE_RUN_FROM_PACKAGE",
-							"value": "[concat('https://github.com/HenryvanderVegte/AcceleratorAppZips/releases/download/', variables('appPackageVersion'), if(variables('timerBasedExecution'),'/CreateTranscriptionByTimerPublish.zip','/CreateTranscriptionPublish.zip'))]"
-						}
-                    ]
-                }
+				"httpsOnly": "true"
             }
         },
+		{			
+			"type": "Microsoft.Web/sites/config",
+			"name": "[concat(variables('startTranscriptionFunctionName'), '/AppSettings')]",
+			"apiVersion": "2018-11-01",
+			"dependsOn": [
+                "[resourceId('Microsoft.Insights/components', 'AcceleratorInsights')]",
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName'))]",	
+                "[variables('authRuleRMK')]",
+                "[variables('authRuleFT')]",
+                "[variables('authRuleCT')]"
+			],
+			"tags": {
+				"displayName": "WebAppSettings"
+			},
+			"properties": {					
+				"AcousticModelId": "[parameters('AcousticModelId')]",
+				"AddDiarization": "[parameters('AddDiarization')]",
+				"AddEntityRedaction": "[parameters('AddEntityRedaction')]",
+				"AddSentimentAnalysis": "[parameters('AddSentimentAnalysis')]",
+				"AddWordLevelTimestamps": "[parameters('AddWordLevelTimestamps')]",		
+				"APPINSIGHTS_INSTRUMENTATIONKEY": "[reference(resourceId('Microsoft.Insights/components', 'AcceleratorInsights'), '2015-05-01').InstrumentationKey]",
+				"AudioDatasetSize": "[parameters('AudioDatasetSize')]",
+				"AudioInputContainer": "[variables('audioInputContainer')]",
+				"AzureServiceBus": "[listKeys(variables('authRuleRMK'),'2015-08-01').primaryConnectionString]",
+				"AzureSpeechServicesKey": "[parameters('AzureSpeechServicesKey')]",
+				"AzureSpeechServicesRegion": "[parameters('AzureSpeechServicesRegion')]",
+				"AzureWebJobsStorage": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('StorageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value)]",
+				"StartTranscriptionServiceBusConnectionString": "[listKeys(variables('authRuleCT'),'2015-08-01').primaryConnectionString]",
+				"ErrorReportOutputContainer": "[variables('errorReportOutputContainer')]",
+				"FetchTranscriptionServiceBusConnectionString": "[listKeys(variables('authRuleFT'),'2015-08-01').primaryConnectionString]",
+				"FUNCTIONS_EXTENSION_VERSION": "~3",
+				"FUNCTIONS_WORKER_RUNTIME": "dotnet",
+				"LanguageModelId": "[parameters('LanguageModelId')]",
+				"Locale": "[parameters('Locale')]",
+				"ProfanityFilterMode": "[parameters('ProfanityFilterMode')]",
+				"PunctuationMode": "[parameters('PunctuationMode')]",
+				"SecondaryAcousticModelId": "[parameters('SecondaryAcousticModelId')]",
+				"SecondaryLanguageModelId": "[parameters('SecondaryLanguageModelId')]",
+				"SecondaryLocale": "[parameters('SecondaryLocale')]",
+				"WEBSITE_RUN_FROM_PACKAGE": "[concat('https://github.com/HenryvanderVegte/AcceleratorAppZips/releases/download/', variables('appPackageVersion'), if(variables('timerBasedExecution'),'/StartTranscriptionByTimer.zip','/StartTranscriptionByServiceBus.zip'))]"				
+			}
+		},
         {
             "type": "Microsoft.Web/sites",
             "apiVersion": "2018-11-01",
             "name": "[variables('fetchTranscriptionFunctionName')]",
             "location": "[resourceGroup().location]",
-            "dependsOn": [
-                "[resourceId('Microsoft.Insights/components', 'AcceleratorInsights')]",
-                "[resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName'))]",     
-				"[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]",	           
-                "[variables('authRuleRMK')]",
-                "[variables('authRuleFT')]"
+            "dependsOn": [   
+				"[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]"
             ],
             "kind": "functionapp",
             "properties": {
 				"serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]",
-				"httpsOnly": "true",
-                "siteConfig": {
-                    "appSettings": [
-                        {
-                            "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
-                            "value": "[reference(resourceId('Microsoft.Insights/components', 'AcceleratorInsights'), '2015-05-01').InstrumentationKey]"
-                        },
-                        {
-                            "name": "FUNCTIONS_EXTENSION_VERSION",
-                            "value": "~3"
-                        },
-                        {
-                            "name": "FUNCTIONS_WORKER_RUNTIME",
-                            "value": "dotnet"
-                        },
-                        {
-                            "name": "TextAnalyticsKey",
-                            "value": "[parameters('TextAnalyticsKey')]"
-                        },
-                        {
-                            "name": "TextAnalyticsRegion",
-                            "value": "[parameters('TextAnalyticsRegion')]"
-                        },
-                        {
-                            "name": "AzureWebJobsStorage",
-                            "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('StorageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value)]"
-                        },
-                        {
-                            "name": "AzureServiceBus",
-                            "value": "[listKeys(variables('authRuleRMK'),'2015-08-01').primaryConnectionString]"
-                        },
-                        {
-                            "name": "FetchTranscriptionServiceBusConnectionString",
-                            "value": "[listKeys(variables('authRuleFT'),'2015-08-01').primaryConnectionString]"
-                        },
-                        {
-                            "name": "JsonResultOutputContainer",
-                            "value": "[variables('jsonResultOutputContainer')]"
-                        },
-                        {
-                            "name": "HtmlResultOutputContainer",
-                            "value": "[variables('htmlResultOutputContainer')]"
-                        },
-                        {
-                            "name": "ErrorReportOutputContainer",
-                            "value": "[variables('errorReportOutputContainer')]"
-                        },
-                        {
-                            "name": "WEBSITE_RUN_FROM_PACKAGE",
-							"value": "[concat('https://github.com/HenryvanderVegte/AcceleratorAppZips/releases/download/', variables('appPackageVersion'), '/FetchTranscriptionPublish.zip')]"
-						},
-						{
-							"name": "UseSqlDatabase",
-							"value": "[variables('UseSqlDatabase')]"
-						},
-						{
-							"name": "CreateHtmlResultFile",
-							"value": "[variables('createHtmlResultFile')]"
-						},
-						{
-							"name": "DatabaseConnectionString",
-							"value": "[if(variables('UseSqlDatabase'), concat('Server=tcp:',reference(variables('SqlServerName'), '2014-04-01-preview').fullyQualifiedDomainName,',1433;Initial Catalog=',variables('DatabaseName'),';Persist Security Info=False;User ID=',parameters('SqlAdministratorLogin'),';Password=',parameters('SqlAdministratorLoginPassword'),';MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;'), '')]"
-						}
-                    ]
-                }
+				"httpsOnly": "true"
             }
-        }
+        },
+		{			
+			"type": "Microsoft.Web/sites/config",
+			"name": "[concat(variables('fetchTranscriptionFunctionName'), '/AppSettings')]",
+			"apiVersion": "2018-11-01",
+			"dependsOn": [
+				"[resourceId('Microsoft.Insights/components', 'AcceleratorInsights')]",
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName'))]",
+				"[variables('authRuleRMK')]",
+                "[variables('authRuleFT')]"
+			],
+			"tags": {
+				"displayName": "WebAppSettings"
+			},
+			"properties": {	
+				"APPINSIGHTS_INSTRUMENTATIONKEY": "[reference(resourceId('Microsoft.Insights/components', 'AcceleratorInsights'), '2015-05-01').InstrumentationKey]",			
+				"AzureServiceBus": "[listKeys(variables('authRuleRMK'),'2015-08-01').primaryConnectionString]",
+				"AzureWebJobsStorage": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('StorageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value)]",
+				"CreateHtmlResultFile": "[variables('createHtmlResultFile')]",
+				"DatabaseConnectionString": "[if(variables('UseSqlDatabase'), concat('Server=tcp:',reference(variables('SqlServerName'), '2014-04-01-preview').fullyQualifiedDomainName,',1433;Initial Catalog=',variables('DatabaseName'),';Persist Security Info=False;User ID=',parameters('SqlAdministratorLogin'),';Password=',parameters('SqlAdministratorLoginPassword'),';MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;'), '')]",
+				"ErrorReportOutputContainer": "[variables('errorReportOutputContainer')]",
+				"FetchTranscriptionServiceBusConnectionString": "[listKeys(variables('authRuleFT'),'2015-08-01').primaryConnectionString]",
+				"FUNCTIONS_EXTENSION_VERSION": "~3",
+				"FUNCTIONS_WORKER_RUNTIME": "dotnet",
+				"HtmlResultOutputContainer": "[variables('htmlResultOutputContainer')]",
+				"JsonResultOutputContainer": "[variables('jsonResultOutputContainer')]",
+				"TextAnalyticsKey": "[parameters('TextAnalyticsKey')]",
+				"TextAnalyticsRegion": "[parameters('TextAnalyticsRegion')]",
+				"UseSqlDatabase": "[variables('UseSqlDatabase')]",
+				"WEBSITE_RUN_FROM_PACKAGE": "[concat('https://github.com/HenryvanderVegte/AcceleratorAppZips/releases/download/', variables('appPackageVersion'), '/FetchTranscription.zip')]"			
+			}
+		}
     ],
     "outputs": {
-        "CreateTranscriptionFunctionId": {
+        "startTranscriptionFunctionId": {
             "type": "string",
-            "value": "[variables('createTranscriptionFunctionId')]"
+            "value": "[variables('startTranscriptionFunctionId')]"
         },
         "FetchTranscriptionFunctionId": {
             "type": "string",

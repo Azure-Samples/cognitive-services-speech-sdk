@@ -9,7 +9,7 @@ namespace Connector.Serializable.TextAnalytics
 
     public class TextAnalyticsDocument
     {
-        public TextAnalyticsDocument(string id, List<TextAnalyticsSentence> sentences, List<TextAnalyticsEntity> entities)
+        public TextAnalyticsDocument(string id, IEnumerable<TextAnalyticsSentence> sentences, IEnumerable<TextAnalyticsEntity> entities)
         {
             Id = id;
             Sentences = sentences;
@@ -18,8 +18,8 @@ namespace Connector.Serializable.TextAnalytics
 
         public string Id { get; set; }
 
-        public List<TextAnalyticsSentence> Sentences { get; private set; }
+        public IEnumerable<TextAnalyticsSentence> Sentences { get; private set; }
 
-        public List<TextAnalyticsEntity> Entities { get; private set; }
+        public IEnumerable<TextAnalyticsEntity> Entities { get; private set; }
     }
 }

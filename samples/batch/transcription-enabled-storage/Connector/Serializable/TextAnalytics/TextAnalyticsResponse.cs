@@ -9,14 +9,14 @@ namespace Connector.Serializable.TextAnalytics
 
     public class TextAnalyticsResponse
     {
-        public TextAnalyticsResponse(List<TextAnalyticsDocument> documents, List<ErrorEntity> errors)
+        public TextAnalyticsResponse(IEnumerable<TextAnalyticsDocument> documents, IEnumerable<ErrorEntity> errors)
         {
             Documents = documents;
             Errors = errors;
         }
 
-        public List<TextAnalyticsDocument> Documents { get; private set; }
+        public IEnumerable<TextAnalyticsDocument> Documents { get; private set; }
 
-        public List<ErrorEntity> Errors { get; private set; }
+        public IEnumerable<ErrorEntity> Errors { get; private set; }
     }
 }

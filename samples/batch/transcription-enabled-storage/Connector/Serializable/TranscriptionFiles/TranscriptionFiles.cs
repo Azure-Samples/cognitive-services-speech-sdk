@@ -9,11 +9,11 @@ namespace Connector.Serializable.TranscriptionFiles
 
     public class TranscriptionFiles
     {
-        public TranscriptionFiles(List<TranscriptionFile> values)
+        public TranscriptionFiles(IEnumerable<TranscriptionFile> values)
         {
             Values = values;
         }
 
-        public List<TranscriptionFile> Values { get; }
+        public IEnumerable<TranscriptionFile> Values { get; }
     }
 }
