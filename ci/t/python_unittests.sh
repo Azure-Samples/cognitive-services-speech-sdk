@@ -216,7 +216,7 @@ for PYTHON in ${PYTHONS[@]}; do
   fi
 
   # install dependencies inside the virtualenv
-  ${VIRTUALENV_PYTHON} -m pip install pytest==4.2.0 requests==2.21.0 attrs==19.1.0 python-levenshtein
+  ${VIRTUALENV_PYTHON} -m pip install pip==20.2.1 pytest==4.2.0 requests==2.21.0 attrs==19.1.0 python-levenshtein
 
   # try installing the azure-cognitiveservices-speech wheel
   wheel=(${BUILD_DIR}/*cp$MAJORMINOR*.whl)
