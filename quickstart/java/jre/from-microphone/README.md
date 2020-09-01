@@ -1,4 +1,4 @@
-# Quickstart: Recognize speech in Java on Windows, macOS, or Linux
+# Quickstart: Recognize speech from a microphone in Java on Windows, macOS, or Linux
 
 This sample demonstrates how to recognize speech with the Speech SDK for Java on Windows, macOS or Linux.
 See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-java-jre) on the SDK documentation page which describes how to build this sample from scratch in Eclipse.

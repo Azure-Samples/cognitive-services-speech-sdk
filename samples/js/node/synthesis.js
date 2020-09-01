@@ -19,7 +19,7 @@ module.exports = {
         // setting the synthesis language, voice name, and output audio format.
         // see https://aka.ms/speech/tts-languages for available languages and voices
         speechConfig.speechSynthesisLanguage = settings.language;
-        speechConfig.speechSynthesisVoiceName = "en-US-JessaRUS";
+        speechConfig.speechSynthesisVoiceName = "en-US-AriaRUS";
         speechConfig.speechSynthesisOutputFormat = sdk.SpeechSynthesisOutputFormat.Audio16Khz32KBitRateMonoMp3;
 
         var rl = readline.createInterface({
