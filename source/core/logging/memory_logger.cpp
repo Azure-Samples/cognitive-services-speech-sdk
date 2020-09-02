@@ -32,7 +32,7 @@ void MemoryLogger::EnableLogging(bool enable)
     auto msg = m_started == 0 ? "stopped logging"
         : enable && m_started == 1 ? "started logging"
         : enable ? "enable logging" : "disable logging";
-    SPX_TRACE_INFO_IF("%s; c=%d", msg, m_started);
+    SPX_TRACE_INFO("%s; c=%d", msg, m_started);
 }
 
 bool MemoryLogger::IsLoggingEnabled()

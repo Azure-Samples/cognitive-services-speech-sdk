@@ -39,15 +39,15 @@ int main(int argc, char* argv[])
     }
 #endif
 
-    auto logging = PAL::SpxGetEnv("SPEECHSDK_TEST_LOGGING", "memory");
-    auto enableMemoryLogging = logging.find("memory") != logging.npos;
-    if (enableMemoryLogging) diagnostics_log_memory_start_logging();
-
     Catch::Session session; // There must be exactly one instance
 
     // The catch2 test adapter runs a Discovery phase and we shouldn't attempt io during this phase
     if (!checkForDiscovery(argc, argv))
     {
+        auto logging = PAL::SpxGetEnv("SPEECHSDK_TEST_LOGGING", "memory");
+        auto enableMemoryLogging = logging.find("memory") != logging.npos;
+        if (enableMemoryLogging) diagnostics_log_memory_start_logging();
+
         std::string rootPath(argv[0]);
         std::replace(rootPath.begin(), rootPath.end(), '\\', '/');
         std::string rootPathOnly = rootPath.substr(0, rootPath.find_last_of('/') + 1);

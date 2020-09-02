@@ -99,15 +99,26 @@ for i in $(seq 1 4); do
     DIAG_FILENAME_RETRY=$DIAG_FILENAME-retry$i.txt
 
     echo "Rerunning the following failed test ${tests[*]}"
+    
+    #check if tests is empty, or white space only
+    if [[ -z "${tests// }" ]]; then
+        "$VSTEST" \
+            "$(cygpath -aw "$TEST_CODE")" \
+            --Logger:"trx;$LOG_FILE_NAME_RETRY" \
+            --Diag:./vstsconsolelog/$DIAG_FILENAME_RETRY \
+            --Blame \
+            --TestAdapterPath:"$(cygpath -aw "$SOURCE_ROOT")" \
+            --TestCaseFilter:"$TEST_CASE_FILTER"
+    else
+        "$VSTEST" \
+            "$(cygpath -aw "$TEST_CODE")" \
+            --Logger:"trx;$LOG_FILE_NAME_RETRY" \
+            --Diag:./vstsconsolelog/$DIAG_FILENAME_RETRY \
+            --Blame \
+            --TestAdapterPath:"$(cygpath -aw "$SOURCE_ROOT")" \
+            --Tests:"$tests"
+    fi
 
-    "$VSTEST" \
-    "$(cygpath -aw "$TEST_CODE")" \
-    --Logger:"trx;$LOG_FILE_NAME_RETRY" \
-    --Diag:./vstsconsolelog/$DIAG_FILENAME_RETRY \
-    --Blame \
-    --TestAdapterPath:"$(cygpath -aw "$SOURCE_ROOT")" \
-    --Tests:"$tests"
-  
     exitCode=$?
   else
     break
