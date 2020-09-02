@@ -808,6 +808,16 @@ inline int parse_cli_args(Catch::Session& session, int argc, char* argv[])
     SPX_TRACE_INFO("SPXTEST_REQUIRE_NOTHROW('%s'): %s(%d):", __SPX_EXPR_AS_STRING(__VA_ARGS__), __FILE__, __LINE__); \
     REQUIRE_NOTHROW(__VA_ARGS__)
 
+#define SPXTEST_NOTHROW_BEGIN(...) try
+
+#define SPXTEST_NOTHROW_END(...) \
+    catch (...)                  \
+    {                            \
+        SPX_TRACE_INFO("SPXTEST_NOTHROW_END: %s(%d):", __FILE__, __LINE__); \
+        diagnostics_log_memory_dump_to_file(nullptr, 1);\
+        FAIL("Exceptions were thrown between SPXTEST_NOTHROW_BEGIN and SPXTEST_NOTHROW_END"); \
+    }\
+
 inline std::string SpxGetTestTrafficType(const char* file, int line)
 {
     char trafficType[1000];

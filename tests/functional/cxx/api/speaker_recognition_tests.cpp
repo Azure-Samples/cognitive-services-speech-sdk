@@ -46,25 +46,32 @@ TEST_CASE(
     auto config = GetSpeakerRecognitionProdSubscriptionConfig();
     auto client = VoiceProfileClient::FromConfig(config);
 
-    auto profile = client->CreateProfileAsync(VoiceProfileType::TextIndependentVerification, "en-us").get();
-    SPXTEST_REQUIRE(!profile->GetId().empty());
-    // always delete the profile even when there are exceptions in following code. The lambda is called at when exits this test case.
-    auto finish = std::shared_ptr<void>(nullptr, [&](void*) {
-        if (!profile->GetId().empty())
-        {
-            auto deleteResult = client->DeleteProfileAsync(profile).get();
-            SPXTEST_REQUIRE(deleteResult->Reason == ResultReason::DeletedVoiceProfile);
-        }
-        });
-    auto audioInput = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(MULTIPLE_UTTERANCE_CHINESE));
-    auto result = client->EnrollProfileAsync(profile, audioInput).get();
-    auto json_string = result->Properties.GetProperty(PropertyId::SpeechServiceResponse_JsonResult);
-    SPXTEST_REQUIRE(!json_string.empty());
-    INFO(result->ProfileId);
-    SPXTEST_REQUIRE(result->ProfileId == profile->GetId());
-    SPXTEST_REQUIRE(result->GetEnrollmentInfo(EnrollmentInfoType::EnrollmentsCount) == 1);
-    SPXTEST_REQUIRE(result->GetEnrollmentInfo(EnrollmentInfoType::EnrollmentsSpeechLength) >= 239200000);
-    SPXTEST_REQUIRE(result->Reason == ResultReason::EnrolledVoiceProfile);
+    try
+    {
+        auto profile = client->CreateProfileAsync(VoiceProfileType::TextIndependentVerification, "en-us").get();
+        SPXTEST_REQUIRE(!profile->GetId().empty());
+        // always delete the profile even when there are exceptions in following code. The lambda is called at when exits this test case.
+        auto finish = std::shared_ptr<void>(nullptr, [&](void*) {
+            if (!profile->GetId().empty())
+            {
+                auto deleteResult = client->DeleteProfileAsync(profile).get();
+                SPXTEST_REQUIRE(deleteResult->Reason == ResultReason::DeletedVoiceProfile);
+            }
+            });
+        auto audioInput = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(MULTIPLE_UTTERANCE_CHINESE));
+        auto result = client->EnrollProfileAsync(profile, audioInput).get();
+        auto json_string = result->Properties.GetProperty(PropertyId::SpeechServiceResponse_JsonResult);
+        SPXTEST_REQUIRE(!json_string.empty());
+        INFO(result->ProfileId);
+        SPXTEST_REQUIRE(result->ProfileId == profile->GetId());
+        SPXTEST_REQUIRE(result->GetEnrollmentInfo(EnrollmentInfoType::EnrollmentsCount) == 1);
+        SPXTEST_REQUIRE(result->GetEnrollmentInfo(EnrollmentInfoType::EnrollmentsSpeechLength) >= 239200000);
+        SPXTEST_REQUIRE(result->Reason == ResultReason::EnrolledVoiceProfile);
+    }
+    catch (...)
+    {
+        diagnostics_log_memory_dump_to_file(nullptr, 1);
+    }
 }
 
 TEST_CASE(
@@ -87,18 +94,24 @@ TEST_CASE(
             SPXTEST_REQUIRE(deleteResult->Reason == ResultReason::DeletedVoiceProfile);
         }
         });
-    //auto audioInput = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
-    auto audioInput = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(MULTIPLE_UTTERANCE_CHINESE));
-    auto result = client->EnrollProfileAsync(profile, audioInput).get();
-    auto json_string = result->Properties.GetProperty(PropertyId::SpeechServiceResponse_JsonResult);
-    SPXTEST_REQUIRE(!json_string.empty());
-    INFO(result->ProfileId);
-    SPXTEST_REQUIRE(result->ProfileId == profile->GetId());
-    SPXTEST_REQUIRE(result->GetEnrollmentInfo(EnrollmentInfoType::EnrollmentsCount) == 1);
-    SPXTEST_REQUIRE(result->GetEnrollmentInfo(EnrollmentInfoType::EnrollmentsSpeechLength) >= 239200000);
-    auto length= result->GetEnrollmentInfo(EnrollmentInfoType::RemainingEnrollmentsSpeechLength);
-    INFO(length);
-    SPXTEST_REQUIRE(result->Reason == ResultReason::EnrolledVoiceProfile);
+    try
+    {
+        auto audioInput = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(MULTIPLE_UTTERANCE_CHINESE));
+        auto result = client->EnrollProfileAsync(profile, audioInput).get();
+        auto json_string = result->Properties.GetProperty(PropertyId::SpeechServiceResponse_JsonResult);
+        SPXTEST_REQUIRE(!json_string.empty());
+        INFO(result->ProfileId);
+        SPXTEST_REQUIRE(result->ProfileId == profile->GetId());
+        SPXTEST_REQUIRE(result->GetEnrollmentInfo(EnrollmentInfoType::EnrollmentsCount) == 1);
+        SPXTEST_REQUIRE(result->GetEnrollmentInfo(EnrollmentInfoType::EnrollmentsSpeechLength) >= 239200000);
+        auto length = result->GetEnrollmentInfo(EnrollmentInfoType::RemainingEnrollmentsSpeechLength);
+        INFO(length);
+        SPXTEST_REQUIRE(result->Reason == ResultReason::EnrolledVoiceProfile);
+    }
+    catch (...)
+    {
+        diagnostics_log_memory_dump_to_file(nullptr, 1);
+    }
 }
 
 TEST_CASE(
@@ -121,17 +134,24 @@ TEST_CASE(
             SPXTEST_REQUIRE(deleteResult->Reason == ResultReason::DeletedVoiceProfile);
         }
         });
-    auto audioInput = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(MULTIPLE_UTTERANCE_CHINESE));
-    auto result = client->EnrollProfileAsync(profile, audioInput).get();
-    INFO(result->ProfileId);
-    auto json_string = result->Properties.GetProperty(PropertyId::SpeechServiceResponse_JsonResult);
-    SPXTEST_REQUIRE(json_string.find("Bad request") != std::string::npos);
+    try
+    {
+        auto audioInput = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(MULTIPLE_UTTERANCE_CHINESE));
+        auto result = client->EnrollProfileAsync(profile, audioInput).get();
+        INFO(result->ProfileId);
+        auto json_string = result->Properties.GetProperty(PropertyId::SpeechServiceResponse_JsonResult);
+        SPXTEST_REQUIRE(json_string.find("Bad request") != std::string::npos);
 
-    SPXTEST_REQUIRE(result->Reason == ResultReason::Canceled);
-    auto details = VoiceProfileEnrollmentCancellationDetails::FromResult(result);
-    SPXTEST_REQUIRE(details->ErrorCode == CancellationErrorCode::BadRequest);
-    SPXTEST_REQUIRE(details->ErrorDetails.find("Invalid audio length.") != std::string::npos);
-    INFO(details->ErrorDetails);
+        SPXTEST_REQUIRE(result->Reason == ResultReason::Canceled);
+        auto details = VoiceProfileEnrollmentCancellationDetails::FromResult(result);
+        SPXTEST_REQUIRE(details->ErrorCode == CancellationErrorCode::BadRequest);
+        SPXTEST_REQUIRE(details->ErrorDetails.find("Invalid audio length.") != std::string::npos);
+        INFO(details->ErrorDetails);
+    }
+    catch (...)
+    {
+        diagnostics_log_memory_dump_to_file(nullptr, 1);
+    }
 }
 
 TEST_CASE(
@@ -256,20 +276,27 @@ TEST_CASE(
             SPXTEST_REQUIRE(deleteResult->Reason == ResultReason::DeletedVoiceProfile);
         }
         });
-    auto enrollResult = client->EnrollProfileAsync(profile, audioInput).get();
-    SPXTEST_REQUIRE(enrollResult->Reason == ResultReason::EnrolledVoiceProfile);
-    auto model = SpeakerVerificationModel::FromProfile(profile);
+    try
+    {
+        auto enrollResult = client->EnrollProfileAsync(profile, audioInput).get();
+        SPXTEST_REQUIRE(enrollResult->Reason == ResultReason::EnrolledVoiceProfile);
+        auto model = SpeakerVerificationModel::FromProfile(profile);
 
-    auto recognizer = SpeakerRecognizer::FromConfig(config, audioInput);
-    auto result = recognizer->RecognizeOnceAsync(model).get();
-    SPXTEST_REQUIRE(result->GetScore() > 0.0);
-    SPXTEST_REQUIRE(result->Reason == ResultReason::RecognizedSpeaker);
-    SPXTEST_REQUIRE(result->ProfileId == profile->GetId());
+        auto recognizer = SpeakerRecognizer::FromConfig(config, audioInput);
+        auto result = recognizer->RecognizeOnceAsync(model).get();
+        SPXTEST_REQUIRE(result->GetScore() > 0.0);
+        SPXTEST_REQUIRE(result->Reason == ResultReason::RecognizedSpeaker);
+        SPXTEST_REQUIRE(result->ProfileId == profile->GetId());
 
-    auto wrongAudio = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
-    auto recognizer2 = SpeakerRecognizer::FromConfig(config, wrongAudio);
-    auto result2 = recognizer2->RecognizeOnceAsync(model).get();
-    SPXTEST_REQUIRE(result2->Reason == ResultReason::NoMatch);
+        auto wrongAudio = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
+        auto recognizer2 = SpeakerRecognizer::FromConfig(config, wrongAudio);
+        auto result2 = recognizer2->RecognizeOnceAsync(model).get();
+        SPXTEST_REQUIRE(result2->Reason == ResultReason::NoMatch);
+    }
+    catch (...)
+    {
+        diagnostics_log_memory_dump_to_file(nullptr, 1);
+    }
 }
 
 TEST_CASE(
@@ -293,27 +320,34 @@ TEST_CASE(
             SPXTEST_REQUIRE(deleteResult->Reason == ResultReason::DeletedVoiceProfile);
         }
         });
-    auto enrollResult = client->EnrollProfileAsync(profile1, audioInput).get();
-    SPXTEST_REQUIRE(enrollResult->Reason == ResultReason::EnrolledVoiceProfile);
+    try
+    {
+        auto enrollResult = client->EnrollProfileAsync(profile1, audioInput).get();
+        SPXTEST_REQUIRE(enrollResult->Reason == ResultReason::EnrolledVoiceProfile);
 
-    auto profile2 = client->CreateProfileAsync(VoiceProfileType::TextIndependentIdentification, "en-us").get();
-    SPXTEST_REQUIRE(!profile2->GetId().empty());
-    // always delete the profile even when there are exceptions in following code.
-    auto finish2 = std::shared_ptr<void>(nullptr, [&](void*) {
-        if (!profile2->GetId().empty())
-        {
-            auto deleteResult = client->DeleteProfileAsync(profile2).get();
-            SPXTEST_REQUIRE(deleteResult->Reason == ResultReason::DeletedVoiceProfile);
-        }
-        });
-    auto enrollResult2 = client->EnrollProfileAsync(profile2, audioInput).get();
-    SPXTEST_REQUIRE(enrollResult2->Reason == ResultReason::EnrolledVoiceProfile);
+        auto profile2 = client->CreateProfileAsync(VoiceProfileType::TextIndependentIdentification, "en-us").get();
+        SPXTEST_REQUIRE(!profile2->GetId().empty());
+        // always delete the profile even when there are exceptions in following code.
+        auto finish2 = std::shared_ptr<void>(nullptr, [&](void*) {
+            if (!profile2->GetId().empty())
+            {
+                auto deleteResult = client->DeleteProfileAsync(profile2).get();
+                SPXTEST_REQUIRE(deleteResult->Reason == ResultReason::DeletedVoiceProfile);
+            }
+            });
+        auto enrollResult2 = client->EnrollProfileAsync(profile2, audioInput).get();
+        SPXTEST_REQUIRE(enrollResult2->Reason == ResultReason::EnrolledVoiceProfile);
 
-    auto profiles = std::vector<std::shared_ptr<VoiceProfile>>{ profile1, profile2 };
+        auto profiles = std::vector<std::shared_ptr<VoiceProfile>>{ profile1, profile2 };
 
-    auto model = SpeakerIdentificationModel::FromProfiles(profiles);
-    auto result = recognizer->RecognizeOnceAsync(model).get();
-    SPXTEST_REQUIRE(result->Reason == ResultReason::RecognizedSpeakers);
+        auto model = SpeakerIdentificationModel::FromProfiles(profiles);
+        auto result = recognizer->RecognizeOnceAsync(model).get();
+        SPXTEST_REQUIRE(result->Reason == ResultReason::RecognizedSpeakers);
+    }
+    catch (...)
+    {
+        diagnostics_log_memory_dump_to_file(nullptr, 1);
+    }
 }
 
 TEST_CASE(
@@ -336,22 +370,30 @@ TEST_CASE(
             SPXTEST_REQUIRE(deleteResult->Reason == ResultReason::DeletedVoiceProfile);
         }
         });
-    // passphrase is my voice is my passport verify me.
-    auto enrollResult = client->EnrollProfileAsync(profile1, audioInput).get();
-    SPXTEST_REQUIRE(enrollResult->Reason == ResultReason::EnrollingVoiceProfile);
-    SPXTEST_REQUIRE(enrollResult->GetEnrollmentInfo(EnrollmentInfoType::RemainingEnrollmentsCount) == 2);
-    SPXTEST_REQUIRE(enrollResult->GetEnrollmentInfo(EnrollmentInfoType::EnrollmentsCount) == 1);
+    try
+    {
+        // passphrase is my voice is my passport verify me.
+        auto enrollResult = client->EnrollProfileAsync(profile1, audioInput).get();
+        SPXTEST_REQUIRE(enrollResult->Reason == ResultReason::EnrollingVoiceProfile);
+        SPXTEST_REQUIRE(enrollResult->GetEnrollmentInfo(EnrollmentInfoType::RemainingEnrollmentsCount) == 2);
+        SPXTEST_REQUIRE(enrollResult->GetEnrollmentInfo(EnrollmentInfoType::EnrollmentsCount) == 1);
 
-    enrollResult = client->EnrollProfileAsync(profile1, audioInput).get();
-    SPXTEST_REQUIRE(enrollResult->Reason == ResultReason::EnrollingVoiceProfile);
+        enrollResult = client->EnrollProfileAsync(profile1, audioInput).get();
+        SPXTEST_REQUIRE(enrollResult->Reason == ResultReason::EnrollingVoiceProfile);
 
-    enrollResult = client->EnrollProfileAsync(profile1, audioInput).get();
-    SPXTEST_REQUIRE(enrollResult->Reason == ResultReason::EnrolledVoiceProfile);
+        enrollResult = client->EnrollProfileAsync(profile1, audioInput).get();
+        SPXTEST_REQUIRE(enrollResult->Reason == ResultReason::EnrolledVoiceProfile);
 
-    auto model = SpeakerVerificationModel::FromProfile(profile1);
-    auto recognizer = SpeakerRecognizer::FromConfig(config, audioInput);
-    auto result = recognizer->RecognizeOnceAsync(model).get();
-    SPXTEST_REQUIRE(result->Reason == ResultReason::RecognizedSpeaker);
+        auto model = SpeakerVerificationModel::FromProfile(profile1);
+        auto recognizer = SpeakerRecognizer::FromConfig(config, audioInput);
+        shared_ptr<SpeakerRecognitionResult> result;
+        SPXTEST_CHECK_NOTHROW(result = recognizer->RecognizeOnceAsync(model).get());
+        SPXTEST_REQUIRE(result->Reason == ResultReason::RecognizedSpeaker);
+    }
+    catch (...)
+    {
+        diagnostics_log_memory_dump_to_file(nullptr, 1);
+    }
 }
 
 TEST_CASE(
@@ -374,18 +416,22 @@ TEST_CASE(
             SPXTEST_REQUIRE(deleteResult->Reason == ResultReason::DeletedVoiceProfile);
         }
         });
-    // passphrase is my voice is my passport verify me.
-    auto enrollResult = client->EnrollProfileAsync(profile1, verifymeFile).get();
-    SPXTEST_REQUIRE(enrollResult->Reason == ResultReason::EnrollingVoiceProfile);
+    SPXTEST_NOTHROW_BEGIN()
+    {
+        // passphrase is my voice is my passport verify me.
+        auto enrollResult = client->EnrollProfileAsync(profile1, verifymeFile).get();
+        SPXTEST_REQUIRE(enrollResult->Reason == ResultReason::EnrollingVoiceProfile);
 
-    // feed a audio not containing the passphrase, expecting invalid passphrase in the error detail and BadRequest.
-    // this is to test switching audio input between two EnrollProfileAsync.
-    auto weatherFile = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
-    enrollResult = client->EnrollProfileAsync(profile1, weatherFile).get();
-    SPXTEST_REQUIRE(enrollResult->Reason == ResultReason::Canceled);
-    auto details = VoiceProfileEnrollmentCancellationDetails::FromResult(enrollResult);
-    SPXTEST_REQUIRE(details->ErrorCode == CancellationErrorCode::BadRequest);
-    SPXTEST_REQUIRE(PAL::StringUtils::ToLower(details->ErrorDetails).find("invalid passphrase") != string::npos);
+        // feed a audio not containing the passphrase, expecting invalid passphrase in the error detail and BadRequest.
+        // this is to test switching audio input between two EnrollProfileAsync.
+        auto weatherFile = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
+        enrollResult = client->EnrollProfileAsync(profile1, weatherFile).get();
+        SPXTEST_REQUIRE(enrollResult->Reason == ResultReason::Canceled);
+        auto details = VoiceProfileEnrollmentCancellationDetails::FromResult(enrollResult);
+        SPXTEST_REQUIRE(details->ErrorCode == CancellationErrorCode::BadRequest);
+        SPXTEST_REQUIRE(PAL::StringUtils::ToLower(details->ErrorDetails).find("invalid passphrase") != string::npos);
+    }
+   SPXTEST_NOTHROW_END()
 }
 
 TEST_CASE(
@@ -414,11 +460,14 @@ TEST_CASE(
         {
             auto deleteResult = client->DeleteProfileAsync(profile2).get();
         }});
-
-    // not waiting is an user error, we won't render a result but we should not crash.
-    auto enrollFuture1 = client->EnrollProfileAsync(profile1, verifymeFile);
-    auto enrollFuture2 = client->EnrollProfileAsync(profile2, weatherFile);
-    auto deleteFuture3 = client->DeleteProfileAsync(profile2);
+    SPXTEST_NOTHROW_BEGIN()
+    {
+        // not waiting is an user error, we won't render a result but we should not crash.
+        auto enrollFuture1 = client->EnrollProfileAsync(profile1, verifymeFile);
+        auto enrollFuture2 = client->EnrollProfileAsync(profile2, weatherFile);
+        auto deleteFuture3 = client->DeleteProfileAsync(profile2);
+    }
+    SPXTEST_NOTHROW_END()
 }
 
 TEST_CASE(
@@ -439,14 +488,18 @@ TEST_CASE(
         }
         });
 
-    auto enrollResult = client->EnrollProfileAsync(profile1, audioInput).get();
-    SPXTEST_REQUIRE(enrollResult->Reason == ResultReason::EnrollingVoiceProfile);
+    SPXTEST_NOTHROW_BEGIN()
+    {
+        auto enrollResult = client->EnrollProfileAsync(profile1, audioInput).get();
+        SPXTEST_REQUIRE(enrollResult->Reason == ResultReason::EnrollingVoiceProfile);
 
-    enrollResult = client->EnrollProfileAsync(profile1, audioInput).get();
-    SPXTEST_REQUIRE(enrollResult->Reason == ResultReason::EnrollingVoiceProfile);
+        enrollResult = client->EnrollProfileAsync(profile1, audioInput).get();
+        SPXTEST_REQUIRE(enrollResult->Reason == ResultReason::EnrollingVoiceProfile);
 
-    enrollResult = client->EnrollProfileAsync(profile1, audioInput).get();
-    SPXTEST_REQUIRE(enrollResult->Reason == ResultReason::EnrolledVoiceProfile);
+        enrollResult = client->EnrollProfileAsync(profile1, audioInput).get();
+        SPXTEST_REQUIRE(enrollResult->Reason == ResultReason::EnrolledVoiceProfile);
+    }
+    SPXTEST_NOTHROW_END()
 }
 
 #if 0
