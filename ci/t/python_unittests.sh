@@ -201,7 +201,7 @@ fi
 UNITTEST_ERROR=false
 SAMPLE_ERROR=false
 
-${GLOBALPYTHON} -m pip install virtualenv==16.3.0
+${GLOBALPYTHON} -m pip install setuptools==49.6.0 virtualenv==16.3.0
 
 for PYTHON in ${PYTHONS[@]}; do
   MAJORMINOR=$("${PYTHON}" -c "import sys; print('%s%s' % (sys.version_info[0:2]))")
@@ -216,7 +216,7 @@ for PYTHON in ${PYTHONS[@]}; do
   fi
 
   # install dependencies inside the virtualenv
-  ${VIRTUALENV_PYTHON} -m pip install pip==20.2.1 pytest==4.2.0 requests==2.21.0 attrs==19.1.0 python-levenshtein
+  ${VIRTUALENV_PYTHON} -m pip install pip==20.2.1 pytest==4.2.0 requests==2.21.0 attrs==19.1.0
 
   # try installing the azure-cognitiveservices-speech wheel
   wheel=(${BUILD_DIR}/*cp$MAJORMINOR*.whl)

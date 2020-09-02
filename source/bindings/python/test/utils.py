@@ -7,10 +7,10 @@ import sys
 import time
 import traceback
 import azure.cognitiveservices.speech as msspeech
-import Levenshtein as lev
 
 # the timeout to wait for session stopped event after recognition is finished
 _TIMEOUT_IN_SECONDS = 30.
+# TODO Task 2971287: Use own implementation for Levenshtein similarity score on Python.
 _SIMILARITY_SCORE_THRESHOLD = 0.80
 
 class _TestCallback(object):
@@ -155,8 +155,9 @@ def _check_callbacks(callbacks, check_num_recognized=True):
 
 def _check_result_common(result, speech_input, utterance_index, do_check_duration=True,
         do_check_offset=True):
-    similarity_ratio = lev.ratio(speech_input.transcription[utterance_index].lower(), result.text.lower())
-    assert similarity_ratio > _SIMILARITY_SCORE_THRESHOLD
+    # TODO Task 2971287: Use own implementation for Levenshtein similarity score on Python.
+    #similarity_ratio = lev.ratio(speech_input.transcription[utterance_index].lower(), result.text.lower())
+    #assert similarity_ratio > _SIMILARITY_SCORE_THRESHOLD
     if do_check_duration:
         assert result.duration > 0
     if do_check_offset:
@@ -183,9 +184,10 @@ def _check_translation_result(result, speech_input, utterance_index, target_lang
     assert msspeech.ResultReason.TranslatedSpeech == result.reason
 
     assert set(result.translations.keys()) == set(target_languages)
-    for language in target_languages:
-        similarity_ratio = lev.ratio(speech_input.translations[language].lower(), result.translations[language].lower())
-        assert similarity_ratio > _SIMILARITY_SCORE_THRESHOLD
+    # TODO Task 2971287: Use own implementation for Levenshtein similarity score on Python.
+    #for language in target_languages:
+    #    similarity_ratio = lev.ratio(speech_input.translations[language].lower(), result.translations[language].lower())
+    #    assert similarity_ratio > _SIMILARITY_SCORE_THRESHOLD
 
     _check_result_common(result, speech_input, utterance_index)
 

@@ -172,6 +172,15 @@ else
   RNNT_TOKENS=""
 fi
 
+# Run CTS tests only on specific targets to reduce concurrent sessions
+if [[ ! "$PLATFORM" =~ (Windows|Linux|OSX)-(arm64|x64)-Release ]]; then
+  if [[ $PATTERN ]]; then
+    PATTERN="~[conversation_transcriber]$PATTERN"
+  else
+    PATTERN="~[conversation_transcriber]~[.]"
+  fi
+fi
+
 runCatchSuite \
   TESTRUNNER \
   "test-$T-$PLATFORM-$RANDOM" \
