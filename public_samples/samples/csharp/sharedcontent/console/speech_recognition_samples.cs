@@ -9,6 +9,8 @@ using System.IO;
 using System.Threading.Tasks;
 using Microsoft.CognitiveServices.Speech;
 using Microsoft.CognitiveServices.Speech.Audio;
+using Microsoft.CognitiveServices.Speech.PronunciationAssessment;
+
 // </toplevel>
 
 namespace MicrosoftSpeechSDKSamples
@@ -939,6 +941,82 @@ namespace MicrosoftSpeechSDKSamples
                     else
                     {
                         Console.WriteLine($"got result reason as {result.Reason}. You can't get audio when no keyword is recognized.");
+                    }
+                }
+            }
+        }
+
+        // Pronunciation assessment.
+        public static async Task PronunciationAssessmentWithMicrophoneAsync()
+        {
+            // Creates an instance of a speech config with specified subscription key and service region.
+            // Replace with your own subscription key and service region (e.g., "westus").
+            // Note: The pronunciation assessment feature is currently only available on westus, eastasia and centralindia regions.
+            // And this feature is currently only available on en-US language.
+            var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+
+            var referenceText = "";
+            // create pronunciation assessment config, set grading system, granularity and if enable miscue based on your requirement.
+            var pronunciationConfig = new PronunciationAssessmentConfig(referenceText,
+                GradingSystem.HundredMark, Granularity.Phoneme, true);
+
+            // Creates a speech recognizer for the specified language, using microphone as audio input.
+            using (var recognizer = new SpeechRecognizer(config))
+            {
+                while (true)
+                {
+                    // Receives reference text from console input.
+                    Console.WriteLine("Enter reference text you want to assess, or enter empty text to exit.");
+                    Console.Write("> ");
+                    referenceText = Console.ReadLine();
+                    if (string.IsNullOrEmpty(referenceText))
+                    {
+                        break;
+                    }
+
+                    pronunciationConfig.ReferenceText = referenceText;
+
+                    // Starts recognizing.
+                    Console.WriteLine($"Read out \"{referenceText}\" for pronunciation assessment ...");
+
+                    pronunciationConfig.ApplyTo(recognizer);
+
+                    // Starts speech recognition, and returns after a single utterance is recognized.
+                    // For long-running multi-utterance recognition, use StartContinuousRecognitionAsync() instead.
+                    var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+
+                    // Checks result.
+                    if (result.Reason == ResultReason.RecognizedSpeech)
+                    {
+                        Console.WriteLine($"RECOGNIZED: Text={result.Text}");
+                        Console.WriteLine("  PRONUNCIATION ASSESSMENT RESULTS:");
+
+                        var pronunciationResult = PronunciationAssessmentResult.FromResult(result);
+                        Console.WriteLine(
+                            $"    Accuracy score: {pronunciationResult.AccuracyScore}, Pronunciation score: {pronunciationResult.PronunciationScore}, Completeness score : {pronunciationResult.CompletenessScore}, FluencyScore: {pronunciationResult.FluencyScore}");
+
+                        Console.WriteLine("  Word-level details:");
+
+                        foreach (var word in pronunciationResult.Words)
+                        {
+                            Console.WriteLine($"    Word: {word.Word}, Accuracy score: {word.AccuracyScore}, Error type: {word.ErrorType}.");
+                        }
+                    }
+                    else if (result.Reason == ResultReason.NoMatch)
+                    {
+                        Console.WriteLine($"NOMATCH: Speech could not be recognized.");
+                    }
+                    else if (result.Reason == ResultReason.Canceled)
+                    {
+                        var cancellation = CancellationDetails.FromResult(result);
+                        Console.WriteLine($"CANCELED: Reason={cancellation.Reason}");
+
+                        if (cancellation.Reason == CancellationReason.Error)
+                        {
+                            Console.WriteLine($"CANCELED: ErrorCode={cancellation.ErrorCode}");
+                            Console.WriteLine($"CANCELED: ErrorDetails={cancellation.ErrorDetails}");
+                            Console.WriteLine($"CANCELED: Did you update the subscription info?");
+                        }
                     }
                 }
             }

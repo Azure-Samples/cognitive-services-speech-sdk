@@ -10,6 +10,7 @@
 @interface ViewController () {
     NSString *speechKey;
     NSString *serviceRegion;
+    NSString *pronunciationAssessmentReferenceText;
 }
 
 @property (strong, nonatomic) IBOutlet UIButton *recognizeFromFileButton;
@@ -18,6 +19,7 @@
 @property (strong, nonatomic) IBOutlet UIButton *recognizeWithPushStreamButton;
 @property (strong, nonatomic) IBOutlet UIButton *recognizeWithPullStreamButton;
 @property (strong, nonatomic) IBOutlet UIButton *recognizeWithAutoLanguageDetectionButton;
+@property (strong, nonatomic) IBOutlet UIButton *pronunciationAssessFromMicButton;
 @property (strong, nonatomic) IBOutlet UIButton *recognizeKeywordFromFileButton;
 
 @property (strong, nonatomic) IBOutlet UILabel *recognitionResultLabel;
@@ -29,6 +31,7 @@
 - (IBAction)recognizeWithPullStreamButtonTapped:(UIButton *)sender;
 - (IBAction)recognizeWithAutoLanguageDetectionButtonTapped:(UIButton *)sender;
 - (IBAction)recognizeKeywordFromFileButtonTapped:(UIButton *)sender;
+- (IBAction)pronunciationAssessFromMicButtonTapped:(UIButton *)sender;
 @end
 
 @implementation ViewController
@@ -37,6 +40,7 @@
     [super viewDidLoad];
     speechKey = @"YourSubscriptionKey";
     serviceRegion = @"YourServiceRegion";
+    pronunciationAssessmentReferenceText = @"Hello world.";
 
     [self.view setBackgroundColor:[UIColor whiteColor]];
 
@@ -89,6 +93,15 @@
     self.recognizeKeywordFromFileButton.accessibilityIdentifier = @"recognize_keyword_button";
     [self.view addSubview:self.recognizeKeywordFromFileButton];
 
+    self.pronunciationAssessFromMicButton = [UIButton buttonWithType:UIButtonTypeSystem];
+    [self.pronunciationAssessFromMicButton addTarget:self action:@selector(pronunciationAssessFromMicButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
+    [self.pronunciationAssessFromMicButton setTitle:[NSString stringWithFormat:@"Start pronuciation assessment \n (Read out \"%@\")", pronunciationAssessmentReferenceText] forState:UIControlStateNormal];
+    [self.pronunciationAssessFromMicButton titleLabel].lineBreakMode = NSLineBreakByWordWrapping;
+    [self.pronunciationAssessFromMicButton titleLabel].textAlignment = NSTextAlignmentCenter;
+    [self.pronunciationAssessFromMicButton setFrame:CGRectMake(50.0, 450.0, 300.0, 50.0)];
+    self.pronunciationAssessFromMicButton.accessibilityIdentifier = @"pronuciation_assessment_button";
+    [self.view addSubview:self.pronunciationAssessFromMicButton];
+
     self.recognitionResultLabel = [[UILabel alloc] initWithFrame:CGRectMake(50.0, 350.0, 300.0, 400.0)];
     self.recognitionResultLabel.lineBreakMode = NSLineBreakByWordWrapping;
     self.recognitionResultLabel.numberOfLines = 0;
@@ -137,6 +150,12 @@
 - (IBAction)recognizeKeywordFromFileButtonTapped:(UIButton *)sender {
     dispatch_async(dispatch_get_global_queue(QOS_CLASS_DEFAULT, 0), ^{
         [self recognizeKeywordFromFile];
+    });
+}
+
+- (IBAction)pronunciationAssessFromMicButtonTapped:(UIButton *)sender {
+    dispatch_async(dispatch_get_global_queue(QOS_CLASS_DEFAULT, 0), ^{
+        [self pronunciationAssessFromMicrophone];
     });
 }
 
@@ -617,6 +636,51 @@
     } else {
         NSLog(@"There was an error.");
         [self updateRecognitionErrorText:(@"Keyword Recognition Error")];
+    }
+}
+
+/*
+ * Performs pronunciation assessment.
+ */
+- (void)pronunciationAssessFromMicrophone {
+    SPXSpeechConfiguration *speechConfig = [[SPXSpeechConfiguration alloc] initWithSubscription:speechKey region:serviceRegion];
+    if (!speechConfig) {
+        NSLog(@"Could not load speech config");
+        [self updateRecognitionErrorText:(@"Speech Config Error")];
+        return;
+    }
+
+    [self updateRecognitionStatusText:(@"Assessing...")];
+
+    SPXSpeechRecognizer* speechRecognizer = [[SPXSpeechRecognizer alloc] init:speechConfig];
+    if (!speechRecognizer) {
+        NSLog(@"Could not create speech recognizer");
+        [self updateRecognitionResultText:(@"Speech Recognition Error")];
+        return;
+    }
+
+    // create pronunciation assessment config, set grading system, granularity and if enable miscue based on your requirement.
+    SPXPronunciationAssessmentConfiguration *pronunicationConfig =
+    [[SPXPronunciationAssessmentConfiguration alloc] init:pronunciationAssessmentReferenceText
+                                            gradingSystem:SPXPronunciationAssessmentGradingSystem_HundredMark
+                                              granularity:SPXPronunciationAssessmentGranularity_Phoneme
+                                             enableMiscue:true];
+
+    [pronunicationConfig applyToRecognizer:speechRecognizer];
+
+    SPXSpeechRecognitionResult *speechResult = [speechRecognizer recognizeOnce];
+    if (SPXResultReason_Canceled == speechResult.reason) {
+        SPXCancellationDetails *details = [[SPXCancellationDetails alloc] initFromCanceledRecognitionResult:speechResult];
+        NSLog(@"Speech recognition was canceled: %@. Did you pass the correct key/region combination?", details.errorDetails);
+        [self updateRecognitionErrorText:([NSString stringWithFormat:@"Canceled: %@", details.errorDetails ])];
+    } else if (SPXResultReason_RecognizedSpeech == speechResult.reason) {
+        NSLog(@"Speech recognition result received: %@", speechResult.text);
+        SPXPronunciationAssessmentResult *pronunciationResult = [[SPXPronunciationAssessmentResult alloc]init:speechResult];
+        NSString *resultText = [NSString stringWithFormat:@"Assessment finished. \nAccuracy score: %f, Pronunciation score: %f, Completeness Score: %f, Fluency score: %f.", pronunciationResult.accuracyScore, pronunciationResult.pronunciationScore, pronunciationResult.completenessScore, pronunciationResult.fluencyScore];
+        [self updateRecognitionResultText:resultText];
+    } else {
+        NSLog(@"There was an error.");
+        [self updateRecognitionErrorText:(@"Speech Recognition Error")];
     }
 }
 

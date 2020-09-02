@@ -119,6 +119,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 Assert.IsTrue(pronResult.AccuracyScore > 0);
                 Assert.IsTrue(pronResult.PronunciationScore > 0);
                 Assert.IsTrue(pronResult.CompletenessScore > 0);
+                Assert.IsTrue(pronResult.FluencyScore > 0);
 
                 Assert.IsNotNull(pronResult.Words);
                 Assert.IsTrue(pronResult.Words.First().AccuracyScore > 0);
