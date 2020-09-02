@@ -70,7 +70,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
         public static IntPtr StartLogging(this RecognitionTestBase _, string logFile) => _startLogging.Value(logFile);
         public static IntPtr StopLogging(this RecognitionTestBase _) => _stopLogging.Value();
-        public static IntPtr ResetLogging() => _resetLogging.Value();
+        public static IntPtr ResetLogging(this RecognitionTestBase _) => _resetLogging.Value();
 
         private static bool TryGetDefaultSystemProxy(out Uri server, out string username, out string password)
         {
@@ -219,7 +219,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 Console.Write($"{message} ");
             }
 
-            string json = JsonConvert.SerializeObject(obj, SERIALIZER_SETTINGS);
+            string json = JsonConvert.SerializeObject(obj, SERIALIZER_SETTINGS) ?? string.Empty;
             json = Regex.Replace(json, "^", "    ", RegexOptions.Multiline);
             Console.WriteLine(json);
 

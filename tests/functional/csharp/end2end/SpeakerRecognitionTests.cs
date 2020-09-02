@@ -18,7 +18,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
     [TestClass]
     public class SpeakerRecognitionTests : RecognitionTestBase
     {
-        protected string LogFile { get; private set; }
+        public SpeakerRecognitionTests() : base(collectNativeLogs: true)
+        { }
 
         [ClassInitialize]
         public static void TestClassInitialize(TestContext context)
@@ -26,69 +27,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             BaseClassInit(context);
         }
 
-        [ClassCleanup]
-        public static void TestClassCleanup()
-        {
-            ConversationTranslatorExtensionMethods.ResetLogging();
-        }
-
         [TestInitialize]
         public void Initialize()
         {
-            WriteLine("Configuration values are:");
-            WriteLine($"\tSubscriptionKey: <{SubscriptionsRegionsMap[SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION].Key?.Length ?? -1}>");
-            WriteLine($"\tRegion:          <{SubscriptionsRegionsMap[SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION].Region}>");
-            WriteLine($"\tDefault Endpoint:        <{DefaultSettingsMap[DefaultSettingKeys.SPEAKER_RECOGNITION_ENDPOINT]}>");
-
-            // start logging to a file. This will be read back and dumped to the trace logs at the end of the
-            // test execution
-            LogFile = $"Carbon_{TestContext.TestName.FileNameSanitize()}.txt";
-            IntPtr res = this.StartLogging(LogFile);
-            if (res != IntPtr.Zero)
-            {
-                WriteLine($"Failed to start logging to {LogFile}. Cause: {res.ToInt64()}");
-            }
-            else
-            {
-                WriteLine($"Started logging to {LogFile}");
-            }
-        }
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031", Justification = "Don't care about exceptions here")]
-        [TestCleanup]
-        public void TestCleanup()
-        {
-            try
-            {
-                // just in case there are any logs that still need to be written
-                System.Threading.Thread.Sleep(1000);
-
-                var logFile = new System.IO.FileInfo(LogFile);
-                if (!logFile.Exists)
-                {
-                    WriteLine("Log file did not exist");
-                    return;
-                }
-
-                // force the log file to close otherwise we can't access it here
-                IntPtr res = this.StopLogging();
-                if (res != IntPtr.Zero)
-                {
-                    WriteLine($"Failed to stop logging to {LogFile}: {res.ToInt64()}");
-                }
-
-                // dump log file so the output stream
-                foreach (var line in System.IO.File.ReadLines(logFile.FullName))
-                {
-                    DumpLine(line);
-                }
-
-                logFile.Delete();
-            }
-            catch (Exception e)
-            {
-                WriteLine($"Encountered an exception when trying to read {LogFile}. {e.GetType().FullName}: {e}");
-            }
+            Log("Configuration values are:");
+            Log($"\tSubscriptionKey: <{SubscriptionsRegionsMap[SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION].Key?.Length ?? -1}>");
+            Log($"\tRegion:          <{SubscriptionsRegionsMap[SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION].Region}>");
+            Log($"\tDefault Endpoint:        <{DefaultSettingsMap[DefaultSettingKeys.SPEAKER_RECOGNITION_ENDPOINT]}>");
         }
 
         [TestMethod]

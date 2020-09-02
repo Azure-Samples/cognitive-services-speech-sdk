@@ -6,6 +6,7 @@ using Microsoft.CognitiveServices.Speech.Audio;
 using Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils;
 using Microsoft.CognitiveServices.Speech.Translation;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -29,6 +30,10 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         private static Uri endpointUrl;
         private static string hostInString;
         private static Uri hostUrl;
+
+        public TranslationTests() : base(collectNativeLogs: true)
+        {
+        }
 
         [ClassInitialize]
         public static void TestClassinitialize(TestContext context)
@@ -496,20 +501,78 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
         [DataTestMethod, TestCategory(TestCategory.LongRunning)]
         [DynamicData(nameof(Voice.LangAndSynthesis), typeof(Voice), DynamicDataSourceType.Property)]
-        public async Task TranslateFromENtoEachLangWithSynthesis(string lang, string voice)
+        public async Task TranslateFromENtoEachLangWithSynthesis(string translateTo, string voice)
         {
-            var tuple = await this.translationHelper.GetTranslationSynthesisAndFinalResult(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath(), Language.EN, new List<string> { lang }, voice);
-            foreach (var e in tuple.Item1)
+            Log("Test starting");
+
+            TimeSpan timeout = TimeSpan.FromMinutes(1);
+            string speechLang = Language.EN;
+
+            TranslationRecognizer recognizer = null;
+
+            try
             {
-                if (e.Result.GetAudio().Length == 0)
+                recognizer = this.translationHelper.CreateTranslationRecognizer(
+                    AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath(),
+                    speechLang,
+                    new List<string> { translateTo },
+                    voice);
+
+                var callbacks = new TranslationRecognitionTestRun(recognizer, this)
+                    .AddEventHandler(nameof(TranslationRecognizer.Canceled))
+                    .AddEventHandler(nameof(TranslationRecognizer.SessionStarted))
+                    .AddEventHandler(nameof(TranslationRecognizer.SessionStopped))
+                    .AddEventHandler(nameof(TranslationRecognizer.Synthesizing));
+
+                Log("Starting recognize once async");
+
+                // Do the single recognition
+                var result = await recognizer.RecognizeOnceAsync();
+                LogEvent(result, "Recognize once async result");
+
+                // wait for a session stopped event, or an error cancellation event with a timeout
+                await callbacks.WaitForCompletion(timeout);
+
+                Log("Done waiting for completion");
+
+                // there should be no canceled events with an error, or user cancelled
+                var badCanceledEvents = callbacks.Canceled
+                    .Where(c => c.Reason != CancellationReason.EndOfStream)
+                    .Select(c => c.ToString())
+                    .ToArray();
+
+                Assert.IsTrue(
+                    badCanceledEvents.Length == 0,
+                    "Cancelled events were raised that indicate an error occurred.\n{0}",
+                    string.Join("\n", badCanceledEvents));
+
+                Assert.IsFalse(string.IsNullOrEmpty(result?.Text), $"locale: { speechLang }, translateTo: { translateTo }, result: { result?.ToString() ?? "<<NULL>>" }");
+                Assert.IsTrue(callbacks.Synthesizing.Count > 0, "No synthesizing events were received");
+                for (int i = 0; i < callbacks.Synthesizing.Count; i++)
                 {
-                    Assert.AreEqual(e.Result.Reason, ResultReason.SynthesizingAudioCompleted, $"Synthesizing event failure: Reason:{0} Audio.Length={1}", e.Result.Reason, e.Result.GetAudio().Length);
+                    var synthResult = callbacks.Synthesizing[i]?.Result;
+                    if (i < callbacks.Synthesizing.Count - 1)
+                    {
+                        Assert.AreEqual(ResultReason.SynthesizingAudio, synthResult.Reason, "Wrong result reason at synthesizing event at index {0}", i);
+                        Assert.IsTrue(synthResult.GetAudio().Length > 0, "Synthesizing audio result at index {0} has no audio data", i);
+                    }
+                    else
+                    {
+                        Assert.AreEqual(ResultReason.SynthesizingAudioCompleted, synthResult.Reason, "Wrong result reason at synthesizing event at index {0}", i);
+                        Assert.IsTrue(synthResult.GetAudio().Length == 0, "Synthesizing audio completed result at index {0} should have no audio data", i);
+                    }
                 }
             }
+            finally
+            {
+                Log("Disposing recognizer");
+                if (recognizer != null)
+                {
+                    recognizer.Dispose();
+                }
 
-            var result = tuple.Item2;
-            Assert.IsNotNull(result, "Translation result should not be null");
-            Assert.IsFalse(String.IsNullOrEmpty(result.Text), $"locale: { Language.EN }, language: { lang }, result: { result.ToString() }");
+                Log("Test done");
+            }
         }
 
         [TestMethod]

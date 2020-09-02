@@ -9,7 +9,6 @@ using Microsoft.CognitiveServices.Speech.Transcription;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -24,10 +23,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
     [TestClass]
     public class ConversationTranslatorTests : RecognitionTestBase
     {
-        internal static Uri ManagementEndpoint { get; private set; }
-        internal static Uri WebSocketEndpoint { get; private set; }
+        public ConversationTranslatorTests() : base(collectNativeLogs: true)
+        { }
 
-        protected string LogFile { get; private set; }
+        internal Uri ManagementEndpoint { get; private set; }
+        internal Uri WebSocketEndpoint { get; private set; }
 
         [ClassInitialize]
         public static void TestClassInitialize(TestContext context)
@@ -35,77 +35,21 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             BaseClassInit(context);
         }
 
-        [ClassCleanup]
-        public static void TestClassCleanup()
-        {
-            ConversationTranslatorExtensionMethods.ResetLogging();
-        }
-
         [TestInitialize]
         public void Initialize()
         {
-            WriteLine("Configuration values are:");
-            WriteLine($"\tSubscriptionKey: <{SubscriptionsRegionsMap[SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION].Key?.Length ?? -1}>");
-            WriteLine($"\tRegion:          <{SubscriptionsRegionsMap[SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION].Region}>");
-            WriteLine($"\tEndpoint:        <{DefaultSettingsMap[DefaultSettingKeys.ENDPOINT]}>");
-            WriteLine($"\tConvTransHost:   <{DefaultSettingsMap[DefaultSettingKeys.CONVERSATION_TRANSLATOR_HOST]}>");
-            WriteLine($"\tConvTransRegion: <{SubscriptionsRegionsMap[SubscriptionsRegionsKeys.CONVERSATION_TRANSLATOR].Region}>");
-            WriteLine($"\tConvTransKey:    <{SubscriptionsRegionsMap[SubscriptionsRegionsKeys.CONVERSATION_TRANSLATOR].Key?.Length ?? -1}>");
+            Log("Configuration values are:");
+            Log($"\tSubscriptionKey: <{SubscriptionsRegionsMap[SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION].Key?.Length ?? -1}>");
+            Log($"\tRegion:          <{SubscriptionsRegionsMap[SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION].Region}>");
+            Log($"\tEndpoint:        <{DefaultSettingsMap[DefaultSettingKeys.ENDPOINT]}>");
+            Log($"\tConvTransHost:   <{DefaultSettingsMap[DefaultSettingKeys.CONVERSATION_TRANSLATOR_HOST]}>");
+            Log($"\tConvTransRegion: <{SubscriptionsRegionsMap[SubscriptionsRegionsKeys.CONVERSATION_TRANSLATOR].Region}>");
+            Log($"\tConvTransKey:    <{SubscriptionsRegionsMap[SubscriptionsRegionsKeys.CONVERSATION_TRANSLATOR].Key?.Length ?? -1}>");
 
             if (!string.IsNullOrWhiteSpace(DefaultSettingsMap[DefaultSettingKeys.CONVERSATION_TRANSLATOR_HOST]))
             {
                 ManagementEndpoint = new Uri($"https://{DefaultSettingsMap[DefaultSettingKeys.CONVERSATION_TRANSLATOR_HOST]}/capito/room");
                 WebSocketEndpoint = new Uri($"wss://{DefaultSettingsMap[DefaultSettingKeys.CONVERSATION_TRANSLATOR_HOST]}/capito/translate");
-            }
-
-            // start logging to a file. This will be read back and dumped to the trace logs at the end of the
-            // test execution
-            LogFile = $"Carbon_{TestContext.TestName.FileNameSanitize()}.txt";
-            IntPtr res = this.StartLogging(LogFile);
-            if (res != IntPtr.Zero)
-            {
-                WriteLine($"Failed to start logging to {LogFile}. Cause: {res.ToInt64()}");
-            }
-            else
-            {
-                WriteLine($"Started logging to {LogFile}");
-            }
-        }
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031", Justification = "Don't care about exceptions here")]
-        [TestCleanup]
-        public void TestCleanup()
-        {
-            try
-            {
-                // just in case there are any logs that still need to be written
-                System.Threading.Thread.Sleep(1000);
-
-                var logFile = new System.IO.FileInfo(LogFile);
-                if (!logFile.Exists)
-                {
-                    WriteLine("Log file did not exist");
-                    return;
-                }
-
-                // force the log file to close otherwise we can't access it here
-                IntPtr res = this.StopLogging();
-                if (res != IntPtr.Zero)
-                {
-                    WriteLine($"Failed to stop logging to {LogFile}: {res.ToInt64()}");
-                }
-
-                // dump log file so the output stream
-                foreach (var line in System.IO.File.ReadLines(logFile.FullName))
-                {
-                    DumpLine(line);
-                }
-
-                logFile.Delete();
-            }
-            catch (Exception e)
-            {
-                WriteLine($"Encountered an exception when trying to read {LogFile}. {e.GetType().FullName}: {e}");
             }
         }
 
@@ -116,7 +60,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var conversation = await Conversation.CreateConversationAsync(speechConfig))
             {
                 REQUIRE(!string.IsNullOrWhiteSpace(conversation.ConversationId));
-                WriteLine($"Created room {conversation.ConversationId}");
+                Log($"Created room {conversation.ConversationId}");
                 await conversation.DeleteConversationAsync();
             }
         }
@@ -128,9 +72,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var conversation = await Conversation.CreateConversationAsync(speechConfig))
             {
                 REQUIRE(!string.IsNullOrWhiteSpace(conversation.ConversationId));
-                WriteLine($"Created room {conversation.ConversationId}");
+                Log($"Created room {conversation.ConversationId}");
                 await conversation.DeleteConversationAsync();
-                WriteLine($"Deleted room");
+                Log($"Deleted room");
             }
         }
 
@@ -141,7 +85,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var conversation = await Conversation.CreateConversationAsync(speechConfig))
             {
                 REQUIRE(!string.IsNullOrWhiteSpace(conversation.ConversationId));
-                WriteLine($"Created room {conversation.ConversationId}");
+                Log($"Created room {conversation.ConversationId}");
 
                 // don't delete
             }
@@ -154,10 +98,10 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var conversation = await Conversation.CreateConversationAsync(speechConfig))
             {
                 REQUIRE(!string.IsNullOrWhiteSpace(conversation.ConversationId));
-                WriteLine($"Created room {conversation.ConversationId}");
+                Log($"Created room {conversation.ConversationId}");
 
                 await conversation.StartConversationAsync();
-                WriteLine($"Started room {conversation.ConversationId}");
+                Log($"Started room {conversation.ConversationId}");
             }
         }
 
@@ -168,32 +112,32 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var conversation = await Conversation.CreateConversationAsync(speechConfig))
             {
                 REQUIRE(!string.IsNullOrWhiteSpace(conversation.ConversationId));
-                WriteLine($"Created room {conversation.ConversationId}");
+                Log($"Created room {conversation.ConversationId}");
 
-                WriteLine($"Trying to lock room");
+                Log($"Trying to lock room");
                 await conversation.LockConversationAsync().ThrowsException<ApplicationException>("SPXERR_INVALID_STATE");
-                WriteLine($"Trying to unlock room");
+                Log($"Trying to unlock room");
                 await conversation.UnlockConversationAsync().ThrowsException<ApplicationException>("SPXERR_INVALID_STATE");
-                WriteLine($"Trying to mute a participant");
+                Log($"Trying to mute a participant");
                 await conversation.MuteParticipantAsync("id").ThrowsException<ApplicationException>("SPXERR_INVALID_STATE");
-                WriteLine($"Trying to unmute a participant");
+                Log($"Trying to unmute a participant");
                 await conversation.UnmuteParticipantAsync("id").ThrowsException<ApplicationException>("SPXERR_INVALID_STATE");
-                WriteLine($"Trying to mute all participants");
+                Log($"Trying to mute all participants");
                 await conversation.MuteAllParticipantsAsync().ThrowsException<ApplicationException>("SPXERR_INVALID_STATE");
-                WriteLine($"Trying to unmute all participants");
+                Log($"Trying to unmute all participants");
                 await conversation.UnmuteAllParticipantsAsync().ThrowsException<ApplicationException>("SPXERR_INVALID_STATE");
-                WriteLine($"Trying to remove a participant");
+                Log($"Trying to remove a participant");
                 await conversation.RemoveParticipantAsync("id").ThrowsException<ApplicationException>("SPXERR_INVALID_STATE");
 
                 // these should not throw exceptions
-                WriteLine($"Trying to get auth token");
+                Log($"Trying to get auth token");
                 string _ = conversation.AuthorizationToken;
-                WriteLine($"Trying to set auth token");
+                Log($"Trying to set auth token");
                 conversation.AuthorizationToken = "random";
 
-                WriteLine($"Ending conversation");
+                Log($"Ending conversation");
                 await conversation.EndConversationAsync();
-                WriteLine($"Deleting conversation");
+                Log($"Deleting conversation");
                 await conversation.DeleteConversationAsync();
             }
         }
@@ -201,55 +145,55 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public async Task CT_Conversation_CallUnsupportedMethods()
         {
-            WriteLine($"Checking methods on Conversation instance for the ConversationTranslator");
+            Log($"Checking methods on Conversation instance for the ConversationTranslator");
             var speechConfig = CreateConfig(Language.EN, Language.FR, "ar");
             using (var conv = await Conversation.CreateConversationAsync(speechConfig))
             {
-                WriteLine($"Created room {conv.ConversationId}");
+                Log($"Created room {conv.ConversationId}");
                 await conv.StartConversationAsync();
-                WriteLine($"Started room");
+                Log($"Started room");
 
                 var user = User.FromUserId("userId");
                 var part = Participant.From("userId", Language.EN, null);
 
-                WriteLine($"Trying to add a user");
+                Log($"Trying to add a user");
                 await conv.AddParticipantAsync(user).ThrowsException<ApplicationException>("SPXERR_UNSUPPORTED_API_ERROR");
-                WriteLine($"Trying to add a participant");
+                Log($"Trying to add a participant");
                 await conv.AddParticipantAsync(part).ThrowsException<ApplicationException>("SPXERR_UNSUPPORTED_API_ERROR");
-                WriteLine($"Trying to add a user Id");
+                Log($"Trying to add a user Id");
                 await conv.AddParticipantAsync("userId").ThrowsException<ApplicationException>("SPXERR_UNSUPPORTED_API_ERROR");
 
                 // should not throw
-                WriteLine($"Ending conversation");
+                Log($"Ending conversation");
                 await conv.EndConversationAsync();
-                WriteLine($"Deleting conversation");
+                Log($"Deleting conversation");
                 await conv.DeleteConversationAsync();
             }
 
-            WriteLine($"Checking methods on Conversation instance for the ConversationTranscriber");
+            Log($"Checking methods on Conversation instance for the ConversationTranscriber");
             speechConfig.SetProperty("ConversationTranscriptionInRoomAndOnline", "true");
             using (var conv = await Conversation.CreateConversationAsync(speechConfig))
             {
-                WriteLine($"Created room {conv.ConversationId}");
+                Log($"Created room {conv.ConversationId}");
 
                 var user = User.FromUserId("userId");
                 var part = Participant.From("userId", Language.EN, null);
 
-                WriteLine($"Trying to start a conversation");
+                Log($"Trying to start a conversation");
                 await conv.StartConversationAsync().ThrowsException<ApplicationException>("SPXERR_UNSUPPORTED_API_ERROR");
-                WriteLine($"Trying to lock a conversation");
+                Log($"Trying to lock a conversation");
                 await conv.LockConversationAsync().ThrowsException<ApplicationException>("SPXERR_UNSUPPORTED_API_ERROR");
-                WriteLine($"Trying to unlock a conversation");
+                Log($"Trying to unlock a conversation");
                 await conv.UnlockConversationAsync().ThrowsException<ApplicationException>("SPXERR_UNSUPPORTED_API_ERROR");
-                WriteLine($"Trying to mute all participants");
+                Log($"Trying to mute all participants");
                 await conv.MuteAllParticipantsAsync().ThrowsException<ApplicationException>("SPXERR_UNSUPPORTED_API_ERROR");
-                WriteLine($"Trying to unmute all participants");
+                Log($"Trying to unmute all participants");
                 await conv.UnmuteAllParticipantsAsync().ThrowsException<ApplicationException>("SPXERR_UNSUPPORTED_API_ERROR");
-                WriteLine($"Trying to mute a participant");
+                Log($"Trying to mute a participant");
                 await conv.MuteParticipantAsync("userId").ThrowsException<ApplicationException>("SPXERR_UNSUPPORTED_API_ERROR");
-                WriteLine($"Trying to unmute a participant");
+                Log($"Trying to unmute a participant");
                 await conv.UnmuteParticipantAsync("userId").ThrowsException<ApplicationException>("SPXERR_UNSUPPORTED_API_ERROR");
-                WriteLine($"Trying to delete conversation");
+                Log($"Trying to delete conversation");
                 await conv.DeleteConversationAsync().ThrowsException<ApplicationException>("SPXERR_UNSUPPORTED_API_ERROR"); ;
             }
         }

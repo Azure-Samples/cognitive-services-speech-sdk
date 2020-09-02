@@ -7,6 +7,8 @@ using Microsoft.CognitiveServices.Speech.Translation;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
@@ -290,5 +292,234 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         RecognizingText,
         Synthesis,
         Cancelled
+    }
+
+    public class TranslationRecognitionTestRun
+    {
+        private RecognitionTestBase _testClass;
+        private TranslationRecognizer _recog;
+        private Connection _conn;
+        private TaskCompletionSource<bool> _completion = new TaskCompletionSource<bool>();
+        private TaskCompletionSource<bool> _audio = new TaskCompletionSource<bool>();
+        private List<TranslationRecognitionCanceledEventArgs> _canceled = new List<TranslationRecognitionCanceledEventArgs>();
+        private List<TranslationRecognitionEventArgs> _recognized = new List<TranslationRecognitionEventArgs>();
+        private List<TranslationRecognitionEventArgs> _recognizing = new List<TranslationRecognitionEventArgs>();
+        private List<RecognitionEventArgs> _speechEndDetected = new List<RecognitionEventArgs>();
+        private List<RecognitionEventArgs> _speechStartDetected = new List<RecognitionEventArgs>();
+        private List<SessionEventArgs> _sessionStarted = new List<SessionEventArgs>();
+        private List<SessionEventArgs> _sessionStopped = new List<SessionEventArgs>();
+        private List<TranslationSynthesisEventArgs> _synthesizing = new List<TranslationSynthesisEventArgs>();
+        private List<ConnectionEventArgs> _connected = new List<ConnectionEventArgs>();
+        private List<ConnectionEventArgs> _disconnected = new List<ConnectionEventArgs>();
+        private List<ConnectionMessageEventArgs> _messageReceived = new List<ConnectionMessageEventArgs>();
+        private HashSet<string> _registeredHandlers = new HashSet<string>();
+
+        public TranslationRecognitionTestRun(TranslationRecognizer recog, RecognitionTestBase testClass)
+        {
+            if (recog == null)
+            {
+                throw new ArgumentNullException(nameof(recog));
+            }
+            else if (testClass == null)
+            {
+                throw new ArgumentNullException(nameof(testClass));
+            }
+
+            _recog = recog;
+            _testClass = testClass;
+
+            AddEventHandler(nameof(TranslationRecognizer.SessionStarted));
+        }
+
+        public string SessionId => (
+            _sessionStarted.FirstOrDefault(ss => !string.IsNullOrWhiteSpace(ss.SessionId))
+                ?? _sessionStopped.FirstOrDefault(ss => !string.IsNullOrWhiteSpace(ss.SessionId))
+        )?.SessionId;
+
+        public IReadOnlyList<TranslationRecognitionCanceledEventArgs> Canceled => _canceled;
+        public IReadOnlyList<SessionEventArgs> Recognized => _recognized;
+        public IReadOnlyList<SessionEventArgs> Recognizing => _recognizing;
+        public IReadOnlyList<RecognitionEventArgs> SpeechEndDetected => _speechEndDetected;
+        public IReadOnlyList<RecognitionEventArgs> SpeechStartDetected => _speechStartDetected;
+        public IReadOnlyList<SessionEventArgs> SessionStarted => _sessionStarted;
+        public IReadOnlyList<SessionEventArgs> SessionStopped => _sessionStopped;
+        public IReadOnlyList<TranslationSynthesisEventArgs> Synthesizing => _synthesizing;
+
+        public IReadOnlyList<ConnectionEventArgs> Connected => _connected;
+        public IReadOnlyList<ConnectionEventArgs> Disconnected => _disconnected;
+        public IReadOnlyList<ConnectionMessageEventArgs> MessageReceived => _messageReceived;
+
+        /// <summary>
+        /// Registers an event handler
+        /// </summary>
+        /// <param name="eventName">The name of the event to register an event handler for. E.g. nameof(TranslationRecognizer.Canceled)</param>
+        /// <returns>Reference to self for chaining</returns>
+        public TranslationRecognitionTestRun AddEventHandler(string eventName)
+        {
+            if (string.IsNullOrWhiteSpace(eventName))
+            {
+                throw new ArgumentException(nameof(eventName) + " cannot be null, empty or consist only of white space");
+            }
+            else if (_registeredHandlers.Contains(eventName))
+            {
+                // prevent adding duplicate handlers
+                return this;
+            }
+
+            switch (eventName)
+            {
+                default:
+                    throw new ArgumentException("Unknown event: " + eventName);
+                
+                case nameof(TranslationRecognizer.Canceled):
+                    _recog.Canceled += (s, e) =>
+                    {
+                        _canceled.Add(_testClass.LogEvent(e, "Canceled"));
+                        switch (e.Reason)
+                        {
+                            case CancellationReason.Error:
+                                _completion.TrySetResult(false);
+                                break;
+
+                            case CancellationReason.EndOfStream:
+                                _audio.TrySetResult(true);
+                                break;
+
+                            case CancellationReason.CancelledByUser:
+                                _audio.TrySetResult(false);
+                                break;
+
+                            default:
+                                throw new NotSupportedException(
+                                    "Don't know how to handle the following cancellation event: " + Newtonsoft.Json.JsonConvert.SerializeObject(e));
+                        }
+                    };
+                    break;
+                case nameof(TranslationRecognizer.Recognized):
+                    _recog.Recognized += (s, e) => _recognized.Add(_testClass.LogEvent(e, "Recognized"));
+                    break;
+                case nameof(TranslationRecognizer.Recognizing):
+                    _recog.Recognizing += (s, e) => _recognizing.Add(_testClass.LogEvent(e, "Recognizing"));
+                    break;
+                case nameof(TranslationRecognizer.SessionStarted):
+                    _recog.SessionStarted += (s, e) => _sessionStarted.Add(_testClass.LogEvent(e, "SessionStarted"));
+                    break;
+                case nameof(TranslationRecognizer.SessionStopped):
+                    _recog.SessionStopped += (s, e) =>
+                    {
+                        _sessionStopped.Add(_testClass.LogEvent(e, "SessionStopped"));
+                        _audio.TrySetResult(false); // this should have already been set but just in case
+                        _completion.TrySetResult(true);
+                    };
+                    break;
+                case nameof(TranslationRecognizer.SpeechEndDetected):
+                    _recog.SpeechEndDetected += (s, e) => _speechEndDetected.Add(_testClass.LogEvent(e, "SpeechEndDetected"));
+                    break;
+                case nameof(TranslationRecognizer.SpeechStartDetected):
+                    _recog.SpeechStartDetected += (s, e) => _speechStartDetected.Add(_testClass.LogEvent(e, "SpeechStartDetected"));
+                    break;
+                case nameof(TranslationRecognizer.Synthesizing):
+                    _recog.Synthesizing += (s, e) => _synthesizing.Add(_testClass.LogEvent(e, "Synthesizing"));
+                    break;
+                case nameof(Connection.Connected):
+                    EnsureConnection().Connected += (s, e) => _connected.Add(_testClass.LogEvent(e, "Connected"));
+                    break;
+                case nameof(Connection.Disconnected):
+                    EnsureConnection().Disconnected += (s, e) => _disconnected.Add(_testClass.LogEvent(e, "Disconnected"));
+                    break;
+                case nameof(Connection.MessageReceived):
+                    EnsureConnection().MessageReceived += (s, e) => _messageReceived.Add(_testClass.LogEvent(e, "MessageReceived"));
+                    break;
+            }
+
+            _registeredHandlers.Add(eventName);
+            
+            return this;
+        }
+
+        /// <summary>
+        /// Waits for a canceled event indicating an error, or a session stopped event
+        /// </summary>
+        /// <param name="timeout">How long to wait. Default value of null waits forever</param>
+        /// <returns>Asynchronous task</returns>
+        /// <exception cref="TimeoutException">If the we timed out while waiting</exception>
+        public async Task WaitForCompletion(TimeSpan? timeout = null)
+        {
+            // make sure we've registered for all required handlers
+            if (!_registeredHandlers.Contains(nameof(TranslationRecognizer.Canceled))
+                || !_registeredHandlers.Contains(nameof(TranslationRecognizer.SessionStopped)))
+            {
+                throw new InvalidOperationException("You must register at least the canceled and session stopped event handlers first");
+            }
+
+            await WaitFor(_completion.Task, timeout);
+
+            // if we timed out an exception would have been thrown so we know the completion task is done
+            await _completion.Task;
+        }
+
+        /// <summary>
+        /// Waits for the end of stream cancelled event, or an error event
+        /// </summary>
+        /// <param name="timeout">How long to wait. Default value of null waits forever</param>
+        /// <returns>Asynchronous task</returns>
+        /// <exception cref="TimeoutException">If we timed out while waiting</exception>
+        public async Task WaitForEndOfStream(TimeSpan? timeout = null)
+        {
+            // make sure we've registered for all required handlers
+            if (!_registeredHandlers.Contains(nameof(TranslationRecognizer.Canceled))
+                || !_registeredHandlers.Contains(nameof(TranslationRecognizer.SessionStopped)))
+            {
+                throw new InvalidOperationException("You must register at least the canceled and session stopped event handlers first");
+            }
+
+            await WaitFor(_audio.Task, timeout);
+
+            // if we timed out an exception would have been thrown so we know the completion task is done
+            await _audio.Task;
+        }
+
+        private static async Task WaitFor(Task<bool> completionTask, TimeSpan? timeout)
+        {
+            if (timeout != null && timeout != Timeout.InfiniteTimeSpan && timeout < TimeSpan.Zero)
+            {
+                throw new ArgumentException("Invalid timeout value: " + timeout);
+            }
+
+            if (timeout == null)
+            {
+                timeout = Timeout.InfiniteTimeSpan;
+            }
+
+            using (var cts = new CancellationTokenSource())
+            {
+                var tasks = new List<Task>() { completionTask };
+                if (timeout != Timeout.InfiniteTimeSpan)
+                {
+                    tasks.Add(Task.Delay(timeout.Value, cts.Token));
+                }
+
+                var finishedTask = await Task.WhenAny(tasks);
+                if (finishedTask != completionTask)
+                {
+                    throw new TimeoutException("Timed out waiting for a session stopped, or canceled error event. Timeout: " + timeout);
+                }
+                else
+                {
+                    // abort the delay task to avoid "consuming" a thread pointlessly
+                    cts.Cancel();
+                }
+            }
+        }
+
+        private Connection EnsureConnection()
+        {
+            if (_conn == null)
+            {
+                _conn = Connection.FromRecognizer(_recog);
+            }
+
+            return _conn;
+        }
     }
 }
