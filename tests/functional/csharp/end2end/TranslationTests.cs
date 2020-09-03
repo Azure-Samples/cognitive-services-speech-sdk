@@ -435,9 +435,14 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var actualTranslationRecognition = (TranslationRecognitionEventArgs)actualTranslations[ResultType.RecognizedText].Single();
 
             Assert.AreNotEqual(ResultReason.Canceled, actualTranslationRecognition.Result.Reason);
-            AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_CATALAN].Utterances[Language.CA_ES][0].Text, actualTranslationRecognition.Result.Text);
-
-            AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_CATALAN].Utterances[Language.DE][0].Text, actualTranslationRecognition.Result.Translations[Language.DE]);
+            AssertStringWordEditPercentage(
+                Normalize(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_CATALAN].Utterances[Language.CA_ES][0].Text),
+                Normalize(actualTranslationRecognition.Result.Text),
+                10, 2);
+            AssertStringWordEditPercentage(
+                Normalize(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_CATALAN].Utterances[Language.DE][0].Text),
+                Normalize(actualTranslationRecognition.Result.Translations[Language.DE]),
+                10, 2);
         }
 
         [Ignore]
@@ -455,9 +460,14 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var actualTranslationRecognition = (TranslationRecognitionEventArgs)actualTranslations[ResultType.RecognizedText].Single();
 
             Assert.AreNotEqual(ResultReason.Canceled, actualTranslationRecognition.Result.Reason);
-            AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_CATALAN].Utterances[Language.CA_ES][0].Text, actualTranslationRecognition.Result.Text);
-
-            AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_CATALAN].Utterances[Language.DE][0].Text, actualTranslationRecognition.Result.Translations[Language.DE]);
+            AssertStringWordEditPercentage(
+                Normalize(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_CATALAN].Utterances[Language.CA_ES][0].Text),
+                Normalize(actualTranslationRecognition.Result.Text),
+                10, 2);
+            AssertStringWordEditPercentage(
+                Normalize(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_CATALAN].Utterances[Language.DE][0].Text),
+                Normalize(actualTranslationRecognition.Result.Translations[Language.DE]),
+                10, 2);
         }
 
         [TestMethod]
