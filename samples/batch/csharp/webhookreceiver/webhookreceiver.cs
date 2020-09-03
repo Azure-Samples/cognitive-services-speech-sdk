@@ -49,21 +49,21 @@ namespace WebHookReceiver
                 return new BadRequestErrorMessageResult(message);
             }
 
-            if (eventKind == WebHookEventKind.Challenge)
-            {
-                var validationToken = request.Query[ValidationTokenKeyQueryParameterName].FirstOrDefault();
-                logger.LogInformation("Received challenge and responded.");
-                
-                return new OkObjectResult(validationToken);
-            }
-
-            logger.LogInformation($"Received web hook notification, kind={eventKindString}");
-
-            string requestBody = await new StreamReader(request.Body).ReadToEndAsync();
-
+            string requestBody = null, validationToken = null, payload;
             if (headers.TryGetValue(WebHookSignatureHeaderName, out var actualSignature))
             {
-                var contentBytes = Encoding.UTF8.GetBytes(requestBody);
+                if (eventKind == WebHookEventKind.Challenge)
+                {
+                    validationToken = request.Query[ValidationTokenKeyQueryParameterName].FirstOrDefault();
+                    payload = validationToken;
+                }
+                else
+                {
+                    requestBody = await new StreamReader(request.Body).ReadToEndAsync();
+                    payload = requestBody;
+                }
+
+                var contentBytes = Encoding.UTF8.GetBytes(payload);
                 var secretBytes = Encoding.UTF8.GetBytes(Program.WebHookSecret);
                 using (var hmacsha256 = new HMACSHA256(secretBytes))
                 {
@@ -77,6 +77,15 @@ namespace WebHookReceiver
                     }
                 }
             }
+
+            if (eventKind == WebHookEventKind.Challenge)
+            {
+                logger.LogInformation("Received challenge and responded.");
+                
+                return new OkObjectResult(validationToken);
+            }
+
+            logger.LogInformation($"Received web hook notification, kind={eventKindString}");
 
             var webHookNotification = JsonConvert.DeserializeObject<WebHookNotification>(requestBody);
 
