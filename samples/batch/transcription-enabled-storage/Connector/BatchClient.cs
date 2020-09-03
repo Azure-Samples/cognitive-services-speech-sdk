@@ -49,23 +49,34 @@ namespace Connector
 
         public Task<IEnumerable<Transcription>> GetTranscriptionsAsync()
         {
-            var path = $"{SpeechToTextBasePath}Transcriptions";
+            var path = $"{HostName}{SpeechToTextBasePath}Transcriptions";
             return this.GetAsync<IEnumerable<Transcription>>(path);
         }
 
         public Task<Transcription> GetTranscriptionAsync(Guid id)
         {
-            var path = $"{SpeechToTextBasePath}Transcriptions/{id}";
+            var path = $"{HostName}{SpeechToTextBasePath}Transcriptions/{id}";
             return this.GetAsync<Transcription>(path);
         }
 
-        public Task<TranscriptionFiles> GetTranscriptionFilesAsync(Guid id)
+        public async Task<TranscriptionFiles> GetTranscriptionFilesAsync(Guid id)
         {
-            var path = $"{SpeechToTextBasePath}Transcriptions/{id}/files";
-            return this.GetAsync<TranscriptionFiles>(path);
+            var path = $"{HostName}{SpeechToTextBasePath}Transcriptions/{id}/files";
+
+            var combinedTranscriptionFiles = new List<TranscriptionFile>();
+
+            do
+            {
+                var transcriptionFiles = await this.GetAsync<TranscriptionFiles>(path).ConfigureAwait(false);
+                combinedTranscriptionFiles.AddRange(transcriptionFiles.Values);
+                path = transcriptionFiles.NextLink;
+            }
+            while (!string.IsNullOrEmpty(path));
+
+            return new TranscriptionFiles(combinedTranscriptionFiles, null);
         }
 
-        public Task<Uri> PostTranscriptionAsync(string name, string description, string locale, Dictionary<string, string> properties, IEnumerable<Uri> contentUrls, IEnumerable<Guid> modelIds)
+        public Task<Uri> PostTranscriptionAsync(string name, string description, string locale, Dictionary<string, string> properties, IEnumerable<string> contentUrls, IEnumerable<Guid> modelIds)
         {
             var models = modelIds.Select(m => ModelIdentity.Create(m)).ToList();
             var path = $"{SpeechToTextBasePath}Transcriptions/";
@@ -74,7 +85,7 @@ namespace Connector
             return this.PostAsJsonAsync(path, transcriptionDefinition);
         }
 
-        public Task DeleteTranscriptionWithRetryAsync(Guid id)
+        public Task DeleteTranscriptionAsync(Guid id)
         {
             var path = $"{SpeechToTextBasePath}Transcriptions/{id}";
             return this.DeleteAsync(path);
@@ -169,11 +180,11 @@ namespace Connector
 
         private async Task<TResponse> GetAsync<TResponse>(string path)
         {
-            Log.LogInformation($"Creating GET request for {HostName + path}");
+            Log.LogInformation($"Creating GET request for {path}");
 
             using (var httpClient = CreateHttpClient())
             {
-                var response = await httpClient.GetAsync(new Uri(HostName + path)).ConfigureAwait(false);
+                var response = await httpClient.GetAsync(new Uri(path)).ConfigureAwait(false);
 
                 if (IsThrottledOrTimeoutStatusCode(response.StatusCode))
                 {

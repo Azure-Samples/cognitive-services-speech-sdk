@@ -6,14 +6,19 @@
 namespace Connector.Serializable.TranscriptionFiles
 {
     using System.Collections.Generic;
+    using Newtonsoft.Json;
 
     public class TranscriptionFiles
     {
-        public TranscriptionFiles(IEnumerable<TranscriptionFile> values)
+        public TranscriptionFiles(IEnumerable<TranscriptionFile> values, string nextLink)
         {
             Values = values;
+            NextLink = nextLink;
         }
 
-        public IEnumerable<TranscriptionFile> Values { get; }
+        public IEnumerable<TranscriptionFile> Values { get; set; }
+
+        [JsonProperty("@nextLink")]
+        public string NextLink { get; set; }
     }
 }

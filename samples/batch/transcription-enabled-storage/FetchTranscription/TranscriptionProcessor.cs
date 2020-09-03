@@ -122,7 +122,7 @@ namespace FetchTranscriptionFunction
                 await ProcessReportFileAsync(reportFileContent, log).ConfigureAwait(false);
             }
 
-            await client.DeleteTranscriptionWithRetryAsync(transcriptionId).ConfigureAwait(false);
+            await client.DeleteTranscriptionAsync(transcriptionId).ConfigureAwait(false);
         }
 
         internal static async Task ProcessSucceededTranscriptionAsync(BatchClient client, PostTranscriptionServiceBusMessage serviceBusMessage, Guid transcriptionId, string jobName, ILogger log)
@@ -159,7 +159,8 @@ namespace FetchTranscriptionFunction
                     }
 
                     var transcriptionResult = JsonConvert.DeserializeObject<SpeechTranscript>(transcriptionResultJson);
-                    fileName = StorageUtilities.GetFileNameFromPath(transcriptionResult.Source);
+                    fileName = StorageUtilities.GetFileNameFromUri(new Uri(transcriptionResult.Source));
+                    log.LogInformation($"Filename is {fileName}");
 
                     if (transcriptionResult.RecognizedPhrases == null || transcriptionResult.RecognizedPhrases.All(phrase => !phrase.RecognitionStatus.Equals("Success", StringComparison.Ordinal)))
                     {
@@ -268,7 +269,7 @@ namespace FetchTranscriptionFunction
             }
 
             // Delete trace from service
-            client.DeleteTranscriptionWithRetryAsync(transcriptionId).ConfigureAwait(false).GetAwaiter().GetResult();
+            client.DeleteTranscriptionAsync(transcriptionId).ConfigureAwait(false).GetAwaiter().GetResult();
         }
 
         internal static async Task ProcessReportFileAsync(string reportFileContent, ILogger log)
@@ -282,7 +283,7 @@ namespace FetchTranscriptionFunction
 
             foreach (var failedTranscription in failedTranscriptions)
             {
-                var fileName = StorageUtilities.GetFileNameFromPath(failedTranscription.SourceUrl);
+                var fileName = StorageUtilities.GetFileNameFromUri(new Uri(failedTranscription.SourceUrl));
 
                 var message = $"Transcription \"{fileName}\" failed with error \"{failedTranscription.ErrorKind}\" and message \"{failedTranscription.ErrorMessage}\"";
                 log.LogError(message);

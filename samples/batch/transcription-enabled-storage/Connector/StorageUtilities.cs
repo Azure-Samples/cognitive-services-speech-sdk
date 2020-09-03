@@ -9,15 +9,16 @@ namespace Connector
     using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
+    using System.Web;
     using Microsoft.Extensions.Logging;
     using Microsoft.WindowsAzure.Storage;
     using Microsoft.WindowsAzure.Storage.Blob;
 
     public static class StorageUtilities
     {
-        public static async Task<string> CreateSASAsync(string storageConnectionString, string filePath, ILogger log)
+        public static async Task<string> CreateSASAsync(string storageConnectionString, Uri fileUri, ILogger log)
         {
-            var containerName = GetContainerNameFromPath(filePath);
+            var containerName = GetContainerNameFromUri(fileUri);
             var storageAccount = CloudStorageAccount.Parse(storageConnectionString);
             var blobClient = storageAccount.CreateCloudBlobClient();
             var container = blobClient.GetContainerReference(containerName);
@@ -36,9 +37,9 @@ namespace Connector
             });
 
             var sas = container.GetSharedAccessSignature(containerPermissions.SharedAccessPolicies.FirstOrDefault().Value);
-            var absoluteSasUri = filePath + sas;
+            var absoluteSasUri = fileUri.AbsoluteUri + sas;
 
-            log.LogInformation($"Created sas url for file {filePath}");
+            log.LogInformation($"Created sas url for file {fileUri.AbsoluteUri}");
             return absoluteSasUri;
         }
 
@@ -54,14 +55,14 @@ namespace Connector
             await blockBlob.UploadTextAsync(content).ConfigureAwait(false);
         }
 
-        public static string GetFileNameFromPath(string filePath)
+        public static string GetFileNameFromUri(Uri fileUri)
         {
-            if (filePath == null)
+            if (fileUri == null)
             {
-                throw new ArgumentNullException(nameof(filePath));
+                throw new ArgumentNullException(nameof(fileUri));
             }
 
-            var pathParts = new Uri(filePath).AbsolutePath.Split('/').ToList();
+            var pathParts = HttpUtility.UrlDecode(fileUri.AbsolutePath).Split('/').ToList();
             var cleanedPathParts = pathParts.SkipWhile(part => string.IsNullOrEmpty(part) || part.Equals("/", StringComparison.OrdinalIgnoreCase));
 
             var fileName = string.Join('/', cleanedPathParts.Skip(1));
@@ -80,14 +81,14 @@ namespace Connector
             return fileName.Substring(0, fileName.Length - fileExtension.Length);
         }
 
-        public static string GetContainerNameFromPath(string filePath)
+        public static string GetContainerNameFromUri(Uri fileUri)
         {
-            if (filePath == null)
+            if (fileUri == null)
             {
-                throw new ArgumentNullException(nameof(filePath));
+                throw new ArgumentNullException(nameof(fileUri));
             }
 
-            var pathParts = new Uri(filePath).AbsolutePath.Split('/').ToList();
+            var pathParts = HttpUtility.UrlDecode(fileUri.AbsolutePath).Split('/').ToList();
             var cleanedPathParts = pathParts.SkipWhile(part => string.IsNullOrEmpty(part) || part.Equals("/", StringComparison.OrdinalIgnoreCase));
 
             var containerName = cleanedPathParts.FirstOrDefault();

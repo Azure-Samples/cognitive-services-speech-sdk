@@ -18,10 +18,11 @@ Outline the file contents of the repository. It helps users navigate the codebas
 
 | Folder       | Description                                |
 |-------------------|--------------------------------------------|
-| `Connector`       | Shared code between both functions.                       |
-| `CreateTranscription`      | Function to add a new transcription job to the speech service.      |
+| `Connector`       | Shared code between Azure Functions.                       |
 | `FetchTranscription`    | Function to check the state of the transcription job and write results to storage.             |
-| `Power BI`    | Template files and deployment guide for visualizing insights from the accelerator.             |
+| `StartTranscriptionByServiceBus`      | Function to add a new transcription job to the speech service as one-job-per-file.      |
+| `StartTranscriptionByTimer`      | Function to add a new transcription job to the speech service for all files added in a certain period of time.      |
+| `PowerBI`    | Template files and deployment guide for visualizing insights from the accelerator.             |
 | `Setup` | ARM template to setup the project on Azure. |
 | `Tests`       | Unit tests for both functions.                          |
 
@@ -32,7 +33,9 @@ Outline the file contents of the repository. It helps users navigate the codebas
 
 ## Getting started
 
-Follow the instructions [here](Setup/guide.md).
+Follow the instructions for setting up the Solution Accelerator [here](Setup/guide.md).
+
+To set up Power BI for further insights of the transcription, follow the guide [here](PowerBI/README.md).
 
 ## Contributing
 

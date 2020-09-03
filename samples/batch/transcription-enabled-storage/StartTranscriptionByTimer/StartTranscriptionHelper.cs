@@ -20,7 +20,7 @@ namespace StartTranscriptionByTimer
 
     public class StartTranscriptionHelper
     {
-        private const int MaxFilesPerTranscriptionJob = 500;
+        private const int MaxFilesPerTranscriptionJob = 1000;
 
         private ILogger Logger;
 
@@ -39,22 +39,13 @@ namespace StartTranscriptionByTimer
         public async Task StartTranscriptionsAsync(IEnumerable<Message> messages)
         {
             var startDateTime = DateTime.UtcNow;
-            var validMessages = messages.Where(message => IsValidServiceBusMessage(message));
-
-            if (!validMessages.Any())
-            {
-                Logger.LogInformation("No valid messages were found in this function execution.");
-                return;
-            }
-
-            var validMessageCount = validMessages.Count();
-            Logger.LogInformation($"{validMessageCount} valid messages were found in this function execution.");
 
             var chunkedMessages = new List<List<Message>>();
+            var messageCount = messages.Count();
 
-            for (int i = 0; i < validMessageCount; i += MaxFilesPerTranscriptionJob)
+            for (int i = 0; i < messageCount; i += MaxFilesPerTranscriptionJob)
             {
-                var chunk = validMessages.Skip(i).Take(Math.Min(MaxFilesPerTranscriptionJob, validMessageCount - i)).ToList();
+                var chunk = messages.Skip(i).Take(Math.Min(MaxFilesPerTranscriptionJob, messageCount - i)).ToList();
                 chunkedMessages.Add(chunk);
             }
 
@@ -67,14 +58,13 @@ namespace StartTranscriptionByTimer
 
         public async Task StartTranscriptionAsync(Message message)
         {
-            if (message == null || !IsValidServiceBusMessage(message))
+            if (message == null)
             {
-                Logger.LogInformation("Service bus message is invalid.");
-                return;
+                throw new ArgumentNullException(nameof(message));
             }
 
             var busMessage = JsonConvert.DeserializeObject<ServiceBusMessage>(Encoding.UTF8.GetString(message.Body));
-            var audioFileName = StorageUtilities.GetFileNameFromPath(busMessage.Data.Url.AbsoluteUri);
+            var audioFileName = StorageUtilities.GetFileNameFromUri(busMessage.Data.Url);
             var startDateTime = DateTime.UtcNow;
 
             // Check if language identification is required:
@@ -90,7 +80,7 @@ namespace StartTranscriptionByTimer
 
                 var languageID = new LanguageIdentification(StartTranscriptionEnvironmentVariables.AzureSpeechServicesKey, StartTranscriptionEnvironmentVariables.AzureSpeechServicesRegion);
                 var fileExtension = Path.GetExtension(audioFileName);
-                var sasUrl = await StorageUtilities.CreateSASAsync(StartTranscriptionEnvironmentVariables.AzureWebJobsStorage, busMessage.Data.Url.AbsoluteUri, Logger).ConfigureAwait(false);
+                var sasUrl = await StorageUtilities.CreateSASAsync(StartTranscriptionEnvironmentVariables.AzureWebJobsStorage, busMessage.Data.Url, Logger).ConfigureAwait(false);
                 var byteArray = await StorageUtilities.DownloadFileFromSAS(sasUrl).ConfigureAwait(false);
                 var identifiedLocale = await languageID.DetectLanguage(byteArray, fileExtension, Locale, secondaryLocale).ConfigureAwait(false);
                 Logger.LogInformation($"Identified locale: {identifiedLocale}");
@@ -100,10 +90,41 @@ namespace StartTranscriptionByTimer
             await StartBatchTranscriptionJobAsync(new[] { message }, audioFileName, startDateTime).ConfigureAwait(false);
         }
 
+        public bool IsValidServiceBusMessage(Message message)
+        {
+            if (message == null)
+            {
+                Logger.LogError($"Message {nameof(message)} is null.");
+                return false;
+            }
+
+            var messageBody = Encoding.UTF8.GetString(message.Body);
+
+            try
+            {
+                var serviceBusMessage = JsonConvert.DeserializeObject<ServiceBusMessage>(messageBody);
+
+                if (serviceBusMessage.EventType.Contains("BlobCreate", StringComparison.OrdinalIgnoreCase) &&
+                    StorageUtilities.GetContainerNameFromUri(serviceBusMessage.Data.Url).Equals(StartTranscriptionEnvironmentVariables.AudioInputContainer, StringComparison.Ordinal))
+                {
+                    return true;
+                }
+            }
+            catch (JsonSerializationException e)
+            {
+                Logger.LogError($"Exception {e.Message} while parsing message {messageBody} - message will be ignored.");
+                return false;
+            }
+
+            return false;
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "Allow general exception catching to retry transcriptions in that case.")]
         private async Task StartBatchTranscriptionJobAsync(IEnumerable<Message> messages, string jobName, DateTime startDateTime)
         {
             if (messages == null || !messages.Any())
             {
+                Logger.LogError("Invalid service bus message(s).");
                 return;
             }
 
@@ -116,12 +137,12 @@ namespace StartTranscriptionByTimer
                 var properties = GetTranscriptionPropertyBag();
                 modelIds = GetModelIds();
 
-                var audioFileUrls = new List<Uri>();
+                var audioFileUrls = new List<string>();
 
                 foreach (var serviceBusMessage in serviceBusMessages)
                 {
-                    var audioFileUrl = await StorageUtilities.CreateSASAsync(StartTranscriptionEnvironmentVariables.AzureWebJobsStorage, serviceBusMessage.Data.Url.AbsoluteUri, Logger).ConfigureAwait(false);
-                    audioFileUrls.Add(new Uri(audioFileUrl));
+                    var audioFileUrl = await StorageUtilities.CreateSASAsync(StartTranscriptionEnvironmentVariables.AzureWebJobsStorage, serviceBusMessage.Data.Url, Logger).ConfigureAwait(false);
+                    audioFileUrls.Add(audioFileUrl);
                 }
 
                 var client = new BatchClient(Subscription.SubscriptionKey, Subscription.LocationUri.AbsoluteUri, Logger);
@@ -166,21 +187,9 @@ namespace StartTranscriptionByTimer
 
                     var errorOutputContainer = StartTranscriptionEnvironmentVariables.ErrorReportOutputContainer;
                     await StorageUtilities.WriteTextFileToBlobAsync(StartTranscriptionEnvironmentVariables.AzureWebJobsStorage, exceptionMessage, errorOutputContainer, errorTxtName, Logger).ConfigureAwait(false);
+
+                    return;
                 }
-
-                throw;
-            }
-            catch (FormatException e)
-            {
-                Logger.LogError($"Failed with FormatException. Write message for job with name {jobName} to report file.");
-
-                var errorTxtName = jobName + ".txt";
-                var responseMessage = $"Transcription failed with FormatException:\n{e.Message}";
-
-                var errorOutputContainer = StartTranscriptionEnvironmentVariables.ErrorReportOutputContainer;
-                await StorageUtilities.WriteTextFileToBlobAsync(StartTranscriptionEnvironmentVariables.AzureWebJobsStorage, responseMessage, errorOutputContainer, errorTxtName, Logger).ConfigureAwait(false);
-
-                return;
             }
             catch (TimeoutException e)
             {
@@ -191,6 +200,18 @@ namespace StartTranscriptionByTimer
                 {
                     ServiceBusUtilities.SendServiceBusMessageAsync(startTranscriptionSBConnectionString, message, Logger, 2).GetAwaiter().GetResult();
                 }
+
+                return;
+            }
+            catch (Exception e)
+            {
+                Logger.LogError($"Failed with Exception {e} and message {e.Message}. Write message for job with name {jobName} to report file.");
+
+                var errorTxtName = jobName + ".txt";
+                var responseMessage = $"Transcription failed with Exception:\n{e.Message}";
+
+                var errorOutputContainer = StartTranscriptionEnvironmentVariables.ErrorReportOutputContainer;
+                await StorageUtilities.WriteTextFileToBlobAsync(StartTranscriptionEnvironmentVariables.AzureWebJobsStorage, responseMessage, errorOutputContainer, errorTxtName, Logger).ConfigureAwait(false);
 
                 return;
             }
@@ -214,35 +235,6 @@ namespace StartTranscriptionByTimer
 
             ServiceBusUtilities.SendServiceBusMessageAsync(fetchTranscriptionSBConnectionString, transcriptionMessage.CreateMessageString(), Logger, reenqueueingTimeInSeconds).GetAwaiter().GetResult();
             Logger.LogInformation($"Fetch transcription queue informed about job at: {jobName}");
-        }
-
-        private bool IsValidServiceBusMessage(Message message)
-        {
-            if (message == null)
-            {
-                Logger.LogError($"Message {nameof(message)} is null.");
-                return false;
-            }
-
-            var messageBody = Encoding.UTF8.GetString(message.Body);
-
-            try
-            {
-                var serviceBusMessage = JsonConvert.DeserializeObject<ServiceBusMessage>(messageBody);
-
-                if (serviceBusMessage.EventType.Contains("BlobCreate", StringComparison.OrdinalIgnoreCase) &&
-                    StorageUtilities.GetContainerNameFromPath(serviceBusMessage.Data.Url.AbsoluteUri).Equals(StartTranscriptionEnvironmentVariables.AudioInputContainer, StringComparison.Ordinal))
-                {
-                    return true;
-                }
-            }
-            catch (JsonSerializationException e)
-            {
-                Logger.LogError($"Exception {e.Message} while parsing message {messageBody} - message will be ignored.");
-                return false;
-            }
-
-            return false;
         }
 
         private Dictionary<string, string> GetTranscriptionPropertyBag()

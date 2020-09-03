@@ -32,6 +32,13 @@ namespace StartTranscription
             log.LogInformation($"Received message: SequenceNumber:{message.SystemProperties.SequenceNumber} Body:{Encoding.UTF8.GetString(message.Body)}");
 
             var transcriptionHelper = new StartTranscriptionHelper(log);
+
+            if (message == null || !transcriptionHelper.IsValidServiceBusMessage(message))
+            {
+                log.LogInformation($"Service bus message is invalid.");
+                return;
+            }
+
             await transcriptionHelper.StartTranscriptionAsync(message).ConfigureAwait(false);
         }
     }

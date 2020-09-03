@@ -15,7 +15,7 @@ namespace Connector
             string name,
             string description,
             string locale,
-            IEnumerable<Uri> contentUrls,
+            IEnumerable<string> contentUrls,
             Dictionary<string, string> properties,
             IEnumerable<ModelIdentity> models)
         {
@@ -31,7 +31,7 @@ namespace Connector
 
         public string Description { get; set; }
 
-        public IEnumerable<Uri> ContentUrls { get; }
+        public IEnumerable<string> ContentUrls { get; }
 
         public string Locale { get; set; }
 
@@ -43,7 +43,7 @@ namespace Connector
             string name,
             string description,
             string locale,
-            Uri contentUrl,
+            string contentUrl,
             Dictionary<string, string> properties,
             IEnumerable<ModelIdentity> models)
         {
@@ -54,7 +54,7 @@ namespace Connector
             string name,
             string description,
             string locale,
-            IEnumerable<Uri> contentUrls,
+            IEnumerable<string> contentUrls,
             Dictionary<string, string> properties,
             IEnumerable<ModelIdentity> models)
         {

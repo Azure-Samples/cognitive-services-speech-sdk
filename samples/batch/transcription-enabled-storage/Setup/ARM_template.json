@@ -284,7 +284,7 @@
 		}
     },
 	"variables": {
-    "appPackageVersion": "1.0.21",
+    "appPackageVersion": "1.0.22",
 	"UseSqlDatabase": "[and(not(equals(parameters('SqlAdministratorLogin'),'')), not(equals(parameters('SqlAdministratorLoginPassword'),'')))]",
 	"SqlServerName": "[concat('sqlserver', uniqueString(subscription().id, resourceGroup().id))]",
 	"DatabaseName": "[concat('Database-', resourceGroup().name)]",
@@ -711,9 +711,11 @@
 			"type": "Microsoft.Web/sites/config",
 			"name": "[concat(variables('startTranscriptionFunctionName'), '/AppSettings')]",
 			"apiVersion": "2018-11-01",
+			"location": "[resourceGroup().location]",
 			"dependsOn": [
                 "[resourceId('Microsoft.Insights/components', 'AcceleratorInsights')]",
-                "[resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName'))]",	
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName'))]",
+				"[concat('Microsoft.Web/sites/', variables('startTranscriptionFunctionName'))]",	
                 "[variables('authRuleRMK')]",
                 "[variables('authRuleFT')]",
                 "[variables('authRuleCT')]"
@@ -766,10 +768,12 @@
 		{			
 			"type": "Microsoft.Web/sites/config",
 			"name": "[concat(variables('fetchTranscriptionFunctionName'), '/AppSettings')]",
+			"location": "[resourceGroup().location]",
 			"apiVersion": "2018-11-01",
 			"dependsOn": [
 				"[resourceId('Microsoft.Insights/components', 'AcceleratorInsights')]",
                 "[resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName'))]",
+				"[concat('Microsoft.Web/sites/', variables('fetchTranscriptionFunctionName'))]",
 				"[variables('authRuleRMK')]",
                 "[variables('authRuleFT')]"
 			],

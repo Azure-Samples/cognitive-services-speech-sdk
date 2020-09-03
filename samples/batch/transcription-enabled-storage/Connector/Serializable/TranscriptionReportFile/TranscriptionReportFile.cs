@@ -6,7 +6,6 @@
 namespace Connector
 {
     using System.Collections.Generic;
-    using Newtonsoft.Json;
 
     public class TranscriptionReportFile
     {
@@ -17,13 +16,10 @@ namespace Connector
             Details = details;
         }
 
-        [JsonProperty("SuccessfulTranscriptionsCount")]
         public string SuccessfulTranscriptionsCount { get; }
 
-        [JsonProperty("FailedTranscriptionsCount")]
         public string FailedTranscriptionsCount { get; }
 
-        [JsonProperty("Details")]
         public IEnumerable<TranscriptionReportFileDetail> Details { get; }
     }
 }

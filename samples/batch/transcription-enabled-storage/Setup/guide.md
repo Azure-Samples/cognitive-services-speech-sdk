@@ -10,7 +10,7 @@ transcription of audio files.
 An [Azure Account](https://azure.microsoft.com/en-us/free/) as well as an [Azure Speech Services key](https://ms.portal.azure.com/#create/Microsoft.CognitiveServicesSpeechServices) is needed to run the Accelerator.
 
 > [!IMPORTANT]
-> You need to create a Speech Resource with a paying key. The free key account will not work. Optionally for analytics you can create a Text Analytics resource too.
+> You need to create a Speech Resource with a paid (S0) key. The free key account will not work. Optionally for analytics you can create a Text Analytics resource too.
 
 If the above link does not work try the following steps:
 
@@ -19,7 +19,7 @@ If the above link does not work try the following steps:
 3. Type Speech and
 4. Click Create on the Speech resource.
 5. You will find the subscription key under **Keys**
-6. You will also need to region so make a note of that too.
+6. You will also need the region, so make a note of that too.
 
 To test your account we suggest you use [Microsoft Azure Storage Explorer](https://azure.microsoft.com/en-us/features/storage-explorer/).
 
@@ -55,77 +55,90 @@ you could simply copy/paste the template in the editor.
 ![Load template](./images/image007.png)
 
 4. Once the template text is loaded you will be able to read and edit the transcript. Do
-**NOT** attempt any edits at this stage. You need to save the templated you loaded so please cick the **Save** button
+**NOT** attempt any edits at this stage. You need to save the template you loaded so please cick the **Save** button
 
 ![Save template](./images/image009.png)
 
 Saving the template will result in the screen below. You will need to fill in the form provided. It is
-important that all the information is correct. Let us look at the form go through each field.
+important that all the information is correct. Let us look at the form and go through each field.
 
 ![form template](./images/image011.png)
 
 > [!NOTE]
-> Please use short descriptive names in the form for your resource group. Long resource grou names may result in deployment error
+> Please use short descriptive names in the form for your resource group. Long resource group names may result in deployment error
 
-```
-a. First pick the Azure Subscription Id within which you will create the resources.
-b. Either pick or create a resource group. [It would be better to have all the accelerator
+
+* First pick the Azure Subscription Id within which you will create the resources.
+
+* Either pick or create a resource group. [It would be better to have all the accelerator
 resources within the same resource group so we suggest you create a new resource group].
-c. Pick a region [May be the same region as your Azure Speech key].
-```
+
+* Pick a region [May be the same region as your Azure Speech key].
+
 The following settings all relate to the resources and their attributes
 
-```
-d. Give your transcription enabled storage account a name [you will be using a new storage
+
+* Give your transcription enabled storage account a name [you will be using a new storage
 account rather than an existing one].
-```
+
 The following 2 steps are optional. Omitting them will result in using the base model to obtain
 transcripts. If you have created a Speech model, then
 
-```
-e. Enter optionally your primary Acoustic model
-f. Enter optionally your primaty Language model
-```
-If you want us to perform Language identification on the audio prior to transcription you can also specify a secondacy locale. Our service will check if the language on the audio content is the primary or secondary locale and select the right model for transcription. 
+
+* Enter optionally your primary Acoustic model
+
+* Enter optionally your primaty Language model
+
+If you want us to perform Language identification on the audio prior to transcription you can also specify a secondary locale. Our service will check if the language on the audio content is the primary or secondary locale and select the right model for transcription. 
 
 Transcripts are obtained by polling the service. We acknowledge that there is a cost related to that.
 So, the following setting gives you the option to limit that cost by telling your Azure Function how
 often you want it to fire.
 
-```
-g. Enter the polling frequency [There are many scenarios where this would be required to be
+
+* Enter the polling frequency [There are many scenarios where this would be required to be
 done couple of times a day]
-h. Enter locale of the audio [you need to tell us what language model we need to use to
+
+* Enter locale of the audio [you need to tell us what language model we need to use to
 transcribe your audio.]
-```
-i. Enter your Azure Speech subscription key and Locale information
+
+
+* Enter your Azure Speech subscription key and Locale information
+
 
 The rest of the settings related to the transcription request. You can read more about those in our
-[docs](https://docs.microsoft.com/bs-latn-ba/azure/cognitive-services/speech-service/batch-transcription).
+[docs](https://docs.microsoft.com/azure/cognitive-services/speech-service/batch-transcription).
 
-```
-j. Select a profanity option
-k. Select a punctuation option
-l. Select to Add Diarization [all locales]
-m. Select to Add Word level Timestamps [all locales]
-```
+
+* Select a profanity option
+
+* Select a punctuation option
+
+* Select to Add Diarization [all locales]
+
+* Select to Add Word level Timestamps [all locales]
+
 
 If you want to perform Text Analytics please add those credentials.
 
-```
-n. Add Text analytics key
-o. Add Text analytics region
-p. Add Sentiment
-q. Add data redaction
-```
+
+* Add Text analytics key
+
+* Add Text analytics region
+
+* Add Sentiment
+
+* Add data redaction
+
 
 If you want to further analytics we could map the transcript json we produce to a DB schema. 
-You can feed that data to a PowerBI script like the one included in this repo.
 
-```
-r. Enter SQL DB credential login
-s. Enter SQL DB credential password
-```
+* Enter SQL DB credential login
+
+* Enter SQL DB credential password
+
+
+You can feed that data to your custom PowerBI script or take the scripts included in this repository. Follow the [PowerBI guide](../Power BI/guide.md) for setting it up.
 
 > [!IMPORTANT]
 > While the rest of the option here are paid as you go, the SQL DB incurs monthly charges
@@ -135,7 +148,7 @@ are listed below.
 
 ![resources](./images/image013.png)
 
-Make sure that the functions are synced with the other resources (see [this](https://docs.microsoft.com/en-us/azure/azure-functions/functions-deployment-technologies#trigger-syncing) for further details).
+If a Consumption Plan (Y1) was selected for the Azure Functions, make sure that the functions are synced with the other resources (see [this](https://docs.microsoft.com/en-us/azure/azure-functions/functions-deployment-technologies#trigger-syncing) for further details).
 
 To do so, click on your CreateTranscription function in the portal and wait until your function shows up:
 
