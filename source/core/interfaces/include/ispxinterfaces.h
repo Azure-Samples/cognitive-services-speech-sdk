@@ -438,8 +438,8 @@ class ISpxSynthesizerEvents;
 class ISpxSynthesisResult : public ISpxInterfaceBaseFor<ISpxSynthesisResult>
 {
 public:
-    virtual std::wstring GetResultId() = 0;
-    virtual std::wstring GetRequestId() = 0;
+    virtual std::string GetResultId() = 0;
+    virtual std::string GetRequestId() = 0;
     virtual std::shared_ptr<ISpxSynthesizerEvents> GetEvents() = 0;
     virtual std::shared_ptr<CSpxAsyncOp<std::shared_ptr<ISpxSynthesisResult>>> GetFutureResult() = 0;
     virtual ResultReason GetReason() = 0;
@@ -456,7 +456,7 @@ public:
 class ISpxSynthesisResultInit : public ISpxInterfaceBaseFor<ISpxSynthesisResultInit>
 {
 public:
-    virtual void InitSynthesisResult(const std::wstring& requestId, ResultReason reason,
+    virtual void InitSynthesisResult(const std::string& requestId, ResultReason reason,
         CancellationReason cancellation, const std::shared_ptr<ISpxErrorInformation>& error,
         uint8_t* audio_buffer, size_t audio_length, SPXWAVEFORMATEX* format, bool hasHeader) = 0;
     virtual void SetEvents(const std::shared_ptr<ISpxSynthesizerEvents>& events) = 0;
@@ -853,14 +853,14 @@ class ISpxTtsEngineAdapter : public ISpxInterfaceBaseFor<ISpxTtsEngineAdapter>
 {
 public:
     virtual void SetOutput(std::shared_ptr<ISpxAudioOutput> output) = 0;
-    virtual std::shared_ptr<ISpxSynthesisResult> Speak(const std::string& text, bool isSsml, const std::wstring& requestId, bool retry) = 0;
+    virtual std::shared_ptr<ISpxSynthesisResult> Speak(const std::string& text, bool isSsml, const std::string& requestId, bool retry) = 0;
     virtual void StopSpeaking() = 0;
 };
 
 class ISpxTtsEngineAdapterSite : public ISpxInterfaceBaseFor<ISpxTtsEngineAdapterSite>
 {
 public:
-    virtual uint32_t Write(ISpxTtsEngineAdapter* adapter, const std::wstring& requestId, uint8_t* buffer, uint32_t size, std::shared_ptr<std::unordered_map<std::string, std::string>> properties) = 0;
+    virtual uint32_t Write(ISpxTtsEngineAdapter* adapter, const std::string& requestId, uint8_t* buffer, uint32_t size, std::shared_ptr<std::unordered_map<std::string, std::string>> properties) = 0;
     virtual std::shared_ptr<ISpxSynthesizerEvents> GetEventsSite() = 0;
     virtual std::shared_ptr<ISpxSynthesisResult> CreateEmptySynthesisResult() = 0;
 };

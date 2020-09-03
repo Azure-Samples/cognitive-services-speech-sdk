@@ -75,7 +75,7 @@ private:
     uint32_t FillBuffer(uint8_t* buffer, uint32_t bufferSize, uint32_t pos);
     void DisconnectSynthEvents();
 
-    std::wstring m_requestId;
+    std::string m_requestId;
 
     SynthesisCallbackFunction_Type m_pfnSynthesizing;
     SynthesisCallbackFunction_Type m_pfnSynthesisStopped; // This is for synthesis is either completed or canceled

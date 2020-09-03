@@ -31,7 +31,7 @@ typedef struct RestTtsResponse_Tag
 
 typedef struct RestTtsRequest_Tag
 {
-    std::wstring requestId;
+    std::string requestId;
     std::string endpoint;
     std::string postContent;
     bool isSsml;
@@ -68,7 +68,7 @@ public:
 
     // --- ISpxTtsEngineAdapter
     void SetOutput(std::shared_ptr<ISpxAudioOutput> output) override;
-    std::shared_ptr<ISpxSynthesisResult> Speak(const std::string& text, bool isSsml, const std::wstring& requestId, bool retry) override;
+    std::shared_ptr<ISpxSynthesisResult> Speak(const std::string& text, bool isSsml, const std::string& requestId, bool retry) override;
     void StopSpeaking() override;
 
 

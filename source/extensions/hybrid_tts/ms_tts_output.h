@@ -50,7 +50,7 @@ public:
         m_pSite = pSite;
     }
 
-    void SetRequestId(std::wstring requestId)
+    void SetRequestId(std::string requestId)
     {
         m_requestId = requestId;
     }
@@ -123,7 +123,7 @@ private:
     std::shared_ptr<ISpxAudioOutput> m_pullAudioOutputStream;
     ISpxTtsEngineAdapter* m_pAdapter;
     std::shared_ptr<ISpxTtsEngineAdapterSite> m_pSite;
-    std::wstring m_requestId;
+    std::string m_requestId;
 };
 
 

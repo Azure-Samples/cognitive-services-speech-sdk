@@ -90,7 +90,7 @@ public:
 
     // --- ISpxTtsEngineAdapterSite ---
 
-    uint32_t Write(ISpxTtsEngineAdapter* adapter, const std::wstring& requestId, uint8_t* buffer, uint32_t size, std::shared_ptr<std::unordered_map<std::string, std::string>> properties) override;
+    uint32_t Write(ISpxTtsEngineAdapter* adapter, const std::string& requestId, uint8_t* buffer, uint32_t size, std::shared_ptr<std::unordered_map<std::string, std::string>> properties) override;
     std::shared_ptr<ISpxSynthesizerEvents> GetEventsSite() override;
     std::shared_ptr<ISpxSynthesisResult> CreateEmptySynthesisResult() override;
 
@@ -102,16 +102,16 @@ protected:
 
 private:
 
-    void PushRequestIntoQueue(const std::wstring requestId);
-    void WaitUntilRequestInFrontOfQueue(const std::wstring& requestId);
-    void PopRequestFromQueue(const std::wstring& requestId = L"");
+    void PushRequestIntoQueue(const std::string requestId);
+    void WaitUntilRequestInFrontOfQueue(const std::string& requestId);
+    void PopRequestFromQueue(const std::string& requestId = "");
     void ClearRequestQueueAndKeepFront();
 
-    std::shared_ptr<ISpxSynthesisResult> CreateResult(const std::wstring& requestId, ResultReason reason,
+    std::shared_ptr<ISpxSynthesisResult> CreateResult(const std::string& requestId, ResultReason reason,
                                                       uint8_t* audio_buffer, size_t audio_length,
                                                       std::shared_ptr<std::unordered_map<std::string, std::string>>
                                                       properties = nullptr);
-    std::shared_ptr<ISpxSynthesisResult> CreateUserCancelledResult(const std::wstring& requestId);
+    std::shared_ptr<ISpxSynthesisResult> CreateUserCancelledResult(const std::string& requestId);
     void FireResultEvent(std::shared_ptr<ISpxSynthesisResult> result);
     void FireSynthesisEvent(std::list<std::pair<void*, std::shared_ptr<SynthEvent_Type>>> events, std::shared_ptr<ISpxSynthesisResult> result);
 
@@ -132,7 +132,7 @@ private:
 
     std::shared_ptr<ISpxGenericSite> m_siteKeepAlive;
 
-    std::queue<std::wstring> m_requestQueue;
+    std::queue<std::string> m_requestQueue;
     std::mutex m_queueOperationMutex;
     std::mutex m_requestWaitingMutex;
     std::condition_variable m_cv;

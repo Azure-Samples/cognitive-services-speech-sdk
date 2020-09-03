@@ -85,7 +85,7 @@ void CSpxSynthesizer::SetOutput(std::shared_ptr<ISpxAudioOutput> output)
 std::shared_ptr<ISpxSynthesisResult> CSpxSynthesizer::Speak(const std::string& text, bool isSsml)
 {
     // Request ID is per speak, different events from same speak will share one request ID
-    auto requestId = PAL::CreateGuidWithoutDashes();
+    auto requestId = PAL::ToString(PAL::CreateGuidWithoutDashes());
 
     // Push request into queue
     PushRequestIntoQueue(requestId);
@@ -143,7 +143,7 @@ CSpxAsyncOp<std::shared_ptr<ISpxSynthesisResult>> CSpxSynthesizer::SpeakAsync(co
 std::shared_ptr<ISpxSynthesisResult> CSpxSynthesizer::StartSpeaking(const std::string& text, bool isSsml)
 {
     // Request ID is per speak, different events from same speak will share one request ID
-    auto requestId = PAL::CreateGuidWithoutDashes();
+    auto requestId = PAL::ToString(PAL::CreateGuidWithoutDashes());
 
     // Push request into queue
     PushRequestIntoQueue(requestId);
@@ -226,7 +226,7 @@ void CSpxSynthesizer::StopSpeaking()
         m_audioOutput->ClearUnread();
     }
 
-    WaitUntilRequestInFrontOfQueue(std::wstring());
+    WaitUntilRequestInFrontOfQueue(std::string());
 
     m_shouldStop = false;
 
@@ -499,7 +499,7 @@ void CSpxSynthesizer::FireWordBoundary(uint64_t audioOffset, uint32_t textOffset
     WordBoundary.Signal(wordBoundaryEvent);
 }
 
-uint32_t CSpxSynthesizer::Write(ISpxTtsEngineAdapter* adapter, const std::wstring& requestId, uint8_t* buffer,
+uint32_t CSpxSynthesizer::Write(ISpxTtsEngineAdapter* adapter, const std::string& requestId, uint8_t* buffer,
                                 uint32_t size, std::shared_ptr<std::unordered_map<std::string, std::string>> properties)
 {
     UNUSED(adapter);
@@ -538,14 +538,14 @@ void CSpxSynthesizer::CheckLogFilename()
     SpxDiagLogSetProperties(GetParentProperties());
 }
 
-void CSpxSynthesizer::PushRequestIntoQueue(const std::wstring requestId)
+void CSpxSynthesizer::PushRequestIntoQueue(const std::string requestId)
 {
     std::unique_lock<std::mutex> lock(m_queueOperationMutex);
     m_requestQueue.emplace(requestId);
     m_cv.notify_all();
 }
 
-void CSpxSynthesizer::WaitUntilRequestInFrontOfQueue(const std::wstring& requestId)
+void CSpxSynthesizer::WaitUntilRequestInFrontOfQueue(const std::string& requestId)
 {
     std::unique_lock<std::mutex> lock(m_requestWaitingMutex);
 
@@ -563,7 +563,7 @@ void CSpxSynthesizer::WaitUntilRequestInFrontOfQueue(const std::wstring& request
 #endif
 }
 
-void CSpxSynthesizer::PopRequestFromQueue(const std::wstring& requestId)
+void CSpxSynthesizer::PopRequestFromQueue(const std::string& requestId)
 {
     std::unique_lock<std::mutex> lock(m_queueOperationMutex);
     if (!m_requestQueue.empty() && m_requestQueue.front() == requestId)
@@ -576,18 +576,18 @@ void CSpxSynthesizer::PopRequestFromQueue(const std::wstring& requestId)
 void CSpxSynthesizer::ClearRequestQueueAndKeepFront()
 {
     std::unique_lock<std::mutex> lock(m_queueOperationMutex);
-    std::queue<std::wstring> empty;
+    std::queue<std::string> empty;
     if (!m_requestQueue.empty())
     {
         empty.emplace(m_requestQueue.front());
     }
 
     std::swap(m_requestQueue, empty);
-    m_requestQueue.emplace(L"");
+    m_requestQueue.emplace("");
     m_cv.notify_all();
 }
 
-std::shared_ptr<ISpxSynthesisResult> CSpxSynthesizer::CreateResult(const std::wstring& requestId, ResultReason reason,
+std::shared_ptr<ISpxSynthesisResult> CSpxSynthesizer::CreateResult(const std::string& requestId, ResultReason reason,
                                                                    uint8_t* audio_buffer, size_t audio_length,
                                                                    std::shared_ptr<std::unordered_map<std::string, std::string>> properties)
 {
@@ -625,7 +625,7 @@ std::shared_ptr<ISpxSynthesisResult> CSpxSynthesizer::CreateResult(const std::ws
     return result;
 }
 
-std::shared_ptr<ISpxSynthesisResult> CSpxSynthesizer::CreateUserCancelledResult(const std::wstring& requestId)
+std::shared_ptr<ISpxSynthesisResult> CSpxSynthesizer::CreateUserCancelledResult(const std::string& requestId)
 {
     auto cancelledResult = CreateResult(requestId, ResultReason::Canceled, nullptr, 0);
     auto resultProperties = SpxQueryInterface<ISpxNamedProperties>(cancelledResult);

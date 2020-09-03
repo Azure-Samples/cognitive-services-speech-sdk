@@ -32,8 +32,8 @@ public:
     SPX_INTERFACE_MAP_END()
 
     // --- ISpxSynthesisResult ---
-    std::wstring GetResultId() override;
-    std::wstring GetRequestId() override;
+    std::string GetResultId() override;
+    std::string GetRequestId() override;
     std::shared_ptr<ISpxSynthesizerEvents> GetEvents() override;
     std::shared_ptr<CSpxAsyncOp<std::shared_ptr<ISpxSynthesisResult>>> GetFutureResult() override;
     ResultReason GetReason() override;
@@ -47,7 +47,7 @@ public:
     bool HasHeader() override;
 
     // --- ISpxSynthesisResultInit ---
-    void InitSynthesisResult(const std::wstring& requestId, ResultReason reason,
+    void InitSynthesisResult(const std::string& requestId, ResultReason reason,
         CancellationReason cancellation, const std::shared_ptr<ISpxErrorInformation>& error,
         uint8_t* audio_buffer, size_t audio_length, SPXWAVEFORMATEX* format, bool hasHeader) override;
     void SetEvents(const std::shared_ptr<ISpxSynthesizerEvents>& events) override;
@@ -60,13 +60,9 @@ public:
 
 private:
 
-    CSpxSynthesisResult(const CSpxSynthesisResult&) = delete;
-    CSpxSynthesisResult(const CSpxSynthesisResult&&) = delete;
+    DISABLE_COPY_AND_MOVE(CSpxSynthesisResult);
 
-    CSpxSynthesisResult& operator=(const CSpxSynthesisResult&) = delete;
-
-    std::wstring m_resultId;
-    std::wstring m_requestId;
+    std::string m_requestId;
     std::weak_ptr<ISpxSynthesizerEvents> m_events;
     std::shared_ptr<CSpxAsyncOp<std::shared_ptr<ISpxSynthesisResult>>> m_futureResult;
     ResultReason m_reason;

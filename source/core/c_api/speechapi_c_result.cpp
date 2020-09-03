@@ -161,7 +161,7 @@ SPXAPI synth_result_get_result_id(SPXRESULTHANDLE hresult, char* resultId, uint3
     {
         auto result = GetInstance<ISpxSynthesisResult>(hresult);
 
-        auto resultIdStr = PAL::ToString(result->GetResultId());
+        auto resultIdStr = result->GetResultId();
         PAL::strcpy(resultId, resultIdLength, resultIdStr.c_str(), resultIdStr.size(), true);
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);

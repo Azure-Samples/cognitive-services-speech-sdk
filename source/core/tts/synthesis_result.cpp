@@ -30,12 +30,12 @@ CSpxSynthesisResult::~CSpxSynthesisResult()
     SPX_DBG_TRACE_FUNCTION();
 }
 
-std::wstring CSpxSynthesisResult::GetResultId()
+std::string CSpxSynthesisResult::GetResultId()
 {
     return m_requestId;
 }
 
-std::wstring CSpxSynthesisResult::GetRequestId()
+std::string CSpxSynthesisResult::GetRequestId()
 {
     return m_requestId;
 }
@@ -112,7 +112,7 @@ bool CSpxSynthesisResult::HasHeader()
     return m_hasHeader;
 }
 
-void CSpxSynthesisResult::InitSynthesisResult(const std::wstring& requestId,
+void CSpxSynthesisResult::InitSynthesisResult(const std::string& requestId,
     ResultReason reason,
     CancellationReason cancellation,
     const std::shared_ptr<ISpxErrorInformation>& error,
@@ -120,9 +120,6 @@ void CSpxSynthesisResult::InitSynthesisResult(const std::wstring& requestId,
 {
     SPX_IFTRUE_THROW_HR(!m_audiodata.empty(), SPXERR_ALREADY_INITIALIZED);
     SPX_IFTRUE_THROW_HR(m_audioformat != nullptr, SPXERR_ALREADY_INITIALIZED);
-
-    // Set result ID
-    m_resultId = PAL::CreateGuidWithoutDashes();
 
     // Set request ID
     m_requestId = requestId;
@@ -188,7 +185,6 @@ void CSpxSynthesisResult::SetFutureResult(std::shared_ptr<CSpxAsyncOp<std::share
 
 void CSpxSynthesisResult::Reset()
 {
-    m_resultId.clear();
     m_requestId.clear();
     m_events.reset();
     m_reason = static_cast<ResultReason>(0);

@@ -53,12 +53,12 @@ public:
 
     // --- ISpxTtsEngineAdapter
     void SetOutput(std::shared_ptr<ISpxAudioOutput> output) override;
-    std::shared_ptr<ISpxSynthesisResult> Speak(const std::string& text, bool isSsml, const std::wstring& requestId, bool retry) override;
+    std::shared_ptr<ISpxSynthesisResult> Speak(const std::string& text, bool isSsml, const std::string& requestId, bool retry) override;
     void StopSpeaking() override;
 
     // --- ISpxTtsEngineAdapterSite ---
 
-    uint32_t Write(ISpxTtsEngineAdapter* adapter, const std::wstring& requestId, uint8_t* buffer, uint32_t size, std::shared_ptr<std::unordered_map<std::string, std::string>> properties) override;
+    uint32_t Write(ISpxTtsEngineAdapter* adapter, const std::string& requestId, uint8_t* buffer, uint32_t size, std::shared_ptr<std::unordered_map<std::string, std::string>> properties) override;
     std::shared_ptr<ISpxSynthesizerEvents> GetEventsSite() override;
     std::shared_ptr<ISpxSynthesisResult> CreateEmptySynthesisResult() override;
 
@@ -115,17 +115,17 @@ private:
 
     static std::pair<SwitchingPolicy, FallbackThreshold> ClarifyPolicy(const std::string& policy);
     std::shared_ptr<ISpxSynthesisResult> SpeakByConnectPolicy(const std::string& text, bool isSsml,
-                                                              const std::wstring& requestId, bool retry,
+                                                              const std::string& requestId, bool retry,
                                                               SwitchingPolicy switchingPolicy);
     std::shared_ptr<ISpxSynthesisResult> SpeakByBufferPolicy(const std::string& text, bool isSsml,
-                                                             const std::wstring& requestId, bool retry,
+                                                             const std::string& requestId, bool retry,
                                                              SwitchingPolicy switchingPolicy);
     std::shared_ptr<ISpxSynthesisResult> SpeakByFinishPolicy(const std::string& text, bool isSsml,
-                                                             const std::wstring& requestId, bool retry,
+                                                             const std::string& requestId, bool retry,
                                                              SwitchingPolicy switchingPolicy);
 
     // dummy speak when waiting for cloud result timeout.
-    std::shared_ptr<ISpxSynthesisResult> DummySpeak(const std::wstring& requestId);
+    std::shared_ptr<ISpxSynthesisResult> DummySpeak(const std::string& requestId);
 
 private:
 
@@ -146,7 +146,7 @@ private:
     std::shared_future<std::shared_ptr<ISpxSynthesisResult>> m_cloudResult;
     std::shared_future<std::shared_ptr<ISpxSynthesisResult>> m_lastCloudResult;
     std::shared_future<std::shared_ptr<ISpxSynthesisResult>> m_offlineResult;
-    std::wstring m_currentRequestId;
+    std::string m_currentRequestId;
 
     SwitchingPolicy m_switchingPolicy;
     FallbackThreshold m_fallbackThreshold;
@@ -155,6 +155,8 @@ private:
     std::string originalCloudFinishedTimeoutMs;
     int cloudConnectedTimeoutMs;
     int cloudFinishedTimeoutMs;
+
+    std::string m_offlineVoiceFolder;
 };
 
 

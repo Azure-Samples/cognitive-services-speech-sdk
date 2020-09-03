@@ -54,7 +54,7 @@ public:
 
     // --- ISpxTtsEngineAdapter
     void SetOutput(std::shared_ptr<ISpxAudioOutput> output) override;
-    std::shared_ptr<ISpxSynthesisResult> Speak(const std::string& text, bool isSsml, const std::wstring& requestId, bool retry) override;
+    std::shared_ptr<ISpxSynthesisResult> Speak(const std::string& text, bool isSsml, const std::string& requestId, bool retry) override;
     void StopSpeaking() override;
 
     // --- IServiceProvider ---
@@ -79,7 +79,7 @@ private:
 
     void GetProxySetting();
 
-    std::shared_ptr<ISpxSynthesisResult> SpeakInternal(const std::string& text, bool isSsml, const std::wstring& requestId);
+    std::shared_ptr<ISpxSynthesisResult> SpeakInternal(const std::string& text, bool isSsml, const std::string& requestId);
 
     void SetSpeechConfigMessage();
     void UspSendSpeechConfig();
@@ -105,6 +105,8 @@ private:
     std::string GetOutputFormatString(std::shared_ptr<ISpxAudioOutput> output);
     bool WordBoundaryEnabled() const;
     static bool InSsmlTag(size_t currentPos, const std::wstring& ssml, size_t beginningPos);
+
+    std::shared_ptr<ISpxSynthesisResult> CreateCancelledResult(const std::string& requestId);
 
 private:
 
@@ -135,7 +137,7 @@ private:
     std::atomic<bool> m_shouldStop{ false };
     std::vector<uint8_t> m_currentReceivedData;
 
-    std::wstring m_currentRequestId;
+    std::string m_currentRequestId;
     std::wstring m_currentText;
     bool m_currentTextIsSsml;
     uint32_t m_currentTextOffset;
@@ -145,6 +147,5 @@ private:
     std::mutex m_mutex;
     std::condition_variable m_cv;
 };
-
 
 } } } } // Microsoft::CognitiveServices::Speech::Impl

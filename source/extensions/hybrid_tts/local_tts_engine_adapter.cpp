@@ -102,7 +102,7 @@ void CSpxLocalTtsEngineAdapter::SetOutput(std::shared_ptr<ISpxAudioOutput> outpu
     m_audioOutput = output;
 }
 
-std::shared_ptr<ISpxSynthesisResult> CSpxLocalTtsEngineAdapter::Speak(const std::string& text, bool isSsml, const std::wstring& requestId, bool retry)
+std::shared_ptr<ISpxSynthesisResult> CSpxLocalTtsEngineAdapter::Speak(const std::string& text, bool isSsml, const std::string& requestId, bool retry)
 {
     SPX_DBG_TRACE_VERBOSE_IF(SPX_DBG_TRACE_LOCAL_TTS, __FUNCTION__);
 

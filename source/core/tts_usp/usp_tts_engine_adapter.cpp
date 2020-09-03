@@ -76,7 +76,7 @@ void CSpxUspTtsEngineAdapter::SetOutput(std::shared_ptr<ISpxAudioOutput> output)
     m_audioOutput = output;
 }
 
-std::shared_ptr<ISpxSynthesisResult> CSpxUspTtsEngineAdapter::Speak(const std::string& text, bool isSsml, const std::wstring& requestId, bool retry)
+std::shared_ptr<ISpxSynthesisResult> CSpxUspTtsEngineAdapter::Speak(const std::string& text, bool isSsml, const std::string& requestId, bool retry)
 {
     SPX_DBG_TRACE_VERBOSE_IF(SPX_DBG_TRACE_USP_TTS, __FUNCTION__);
     SPX_DBG_TRACE_VERBOSE("%d", int(m_uspState.load()));
@@ -89,7 +89,7 @@ std::shared_ptr<ISpxSynthesisResult> CSpxUspTtsEngineAdapter::Speak(const std::s
     for (auto tryCount = 0; tryCount <= maxRetry * static_cast<int>(retry); ++tryCount)
     {
         SPX_DBG_TRACE_VERBOSE_IF(SPX_DBG_TRACE_USP_TTS,
-            "%s: start to send synthesis request, request id : %s, try: %d", __FUNCTION__, PAL::ToString(requestId).c_str(), tryCount);
+            "%s: start to send synthesis request, request id : %s, try: %d", __FUNCTION__, requestId.c_str(), tryCount);
         result = SpeakInternal(text, isSsml, requestId);
         if (ResultReason::SynthesizingAudioCompleted == result->GetReason())
         {
@@ -98,6 +98,11 @@ std::shared_ptr<ISpxSynthesisResult> CSpxUspTtsEngineAdapter::Speak(const std::s
         else if (ResultReason::Canceled == result->GetReason() && !result->GetAudioData()->empty())
         {
             SPX_TRACE_ERROR("Synthesis cancelled with partial data received, cannot retry.");
+            break;
+        }
+        else if (requestId != m_currentRequestId)
+        {
+            SPX_TRACE_ERROR("request changed, won't retry.");
             break;
         }
         else if (m_currentError->GetRetryMode() != ISpxErrorInformation::RetryMode::Allowed)
@@ -112,7 +117,7 @@ std::shared_ptr<ISpxSynthesisResult> CSpxUspTtsEngineAdapter::Speak(const std::s
     return result;
 }
 
-std::shared_ptr<ISpxSynthesisResult> CSpxUspTtsEngineAdapter::SpeakInternal(const std::string& text, bool isSsml, const std::wstring& requestId)
+std::shared_ptr<ISpxSynthesisResult> CSpxUspTtsEngineAdapter::SpeakInternal(const std::string& text, bool isSsml, const std::string& requestId)
 {
     auto ssml = text;
     if (!isSsml)
@@ -140,8 +145,8 @@ std::shared_ptr<ISpxSynthesisResult> CSpxUspTtsEngineAdapter::SpeakInternal(cons
         // Send request
         m_uspState = UspState::Sending;
         m_currentReceivedData.clear();
-        UspSendSynthesisContext(PAL::ToString(requestId));
-        UspSendSsml(ssml, PAL::ToString(requestId));
+        UspSendSynthesisContext(requestId);
+        UspSendSsml(ssml, requestId);
     }
 
     std::unique_lock<std::mutex> lock(m_mutex);
@@ -158,6 +163,11 @@ std::shared_ptr<ISpxSynthesisResult> CSpxUspTtsEngineAdapter::SpeakInternal(cons
 #else
     m_cv.wait_for(lock, std::chrono::milliseconds(firstChunkTimeout), [&] { return m_uspState == UspState::ReceivingData || m_uspState == UspState::Idle || m_uspState == UspState::Error; });
 #endif
+
+    if (m_currentRequestId != requestId)
+    {
+        return CreateCancelledResult(requestId);
+    }
 
     if (m_uspState == UspState::Sending || m_uspState == UspState::TurnStarted)
     {
@@ -180,6 +190,11 @@ std::shared_ptr<ISpxSynthesisResult> CSpxUspTtsEngineAdapter::SpeakInternal(cons
 #else
     m_cv.wait_for(lock, std::chrono::milliseconds(allChunkTimeout), [&] { return m_uspState == UspState::Idle || m_uspState == UspState::Error; });
 #endif
+
+    if (m_currentRequestId != requestId)
+    {
+        CreateCancelledResult(requestId);
+    }
 
     if (m_uspState == UspState::ReceivingData)
     {
@@ -537,7 +552,13 @@ USP::Client& CSpxUspTtsEngineAdapter::SetUspSingleTrustedCert(const std::shared_
 
 void CSpxUspTtsEngineAdapter::OnTurnStart(const USP::TurnStartMsg& message)
 {
-    UNUSED(message);
+    if (message.requestId != m_currentRequestId)
+    {
+        SPX_TRACE_WARNING("%s: current request (%s) is different from message request id (%s), ignore.",
+            __FUNCTION__, m_currentRequestId.c_str(), message.requestId.c_str());
+        return;
+    }
+
     std::unique_lock<std::mutex> lock(m_mutex);
 
     if (m_uspState == UspState::Sending)
@@ -556,6 +577,13 @@ void CSpxUspTtsEngineAdapter::OnTurnStart(const USP::TurnStartMsg& message)
 
 void CSpxUspTtsEngineAdapter::OnAudioOutputChunk(const USP::AudioOutputChunkMsg& message)
 {
+    if (message.requestId != m_currentRequestId)
+    {
+        SPX_TRACE_WARNING("%s: current request (%s) is different from message request id (%s), ignore.",
+            __FUNCTION__, m_currentRequestId.c_str(), message.requestId.c_str());
+        return;
+    }
+
     std::unique_lock<std::mutex> lock(m_mutex);
     if (m_uspState == UspState::TurnStarted)
     {
@@ -582,6 +610,13 @@ void CSpxUspTtsEngineAdapter::OnAudioOutputChunk(const USP::AudioOutputChunkMsg&
 
 void CSpxUspTtsEngineAdapter::OnAudioOutputMetadata(const USP::AudioOutputMetadataMsg& message)
 {
+    if (message.requestId != m_currentRequestId)
+    {
+        SPX_TRACE_WARNING("%s: current request (%s) is different from message request id (%s), ignore.",
+            __FUNCTION__, m_currentRequestId.c_str(), message.requestId.c_str());
+        return;
+    }
+
     auto synthesizerEvents = SpxQueryInterface<ISpxSynthesizerEvents>(GetSite());
 
     for (auto iterator = message.metadatas.begin(); iterator != message.metadatas.end(); ++iterator)
@@ -610,7 +645,13 @@ void CSpxUspTtsEngineAdapter::OnAudioOutputMetadata(const USP::AudioOutputMetada
 
 void CSpxUspTtsEngineAdapter::OnTurnEnd(const USP::TurnEndMsg& message)
 {
-    UNUSED(message);
+    if (message.requestId != m_currentRequestId)
+    {
+        SPX_TRACE_WARNING("%s: current request (%s) is different from message request id (%s), ignore.",
+            __FUNCTION__, m_currentRequestId.c_str(), message.requestId.c_str());
+        return;
+    }
+
     std::unique_lock<std::mutex> lock(m_mutex);
     m_uspState = UspState::Idle;
     m_cv.notify_all();
@@ -698,6 +739,22 @@ bool CSpxUspTtsEngineAdapter::InSsmlTag(size_t currentPos, const std::wstring& s
     }
 
     return false;
+}
+
+std::shared_ptr<ISpxSynthesisResult> CSpxUspTtsEngineAdapter::CreateCancelledResult(const std::string& requestId)
+{
+    bool hasHeader = false;
+    auto outputFormat = GetOutputFormat(m_audioOutput, &hasHeader);
+    auto result = GetSite()->CreateEmptySynthesisResult();
+    auto resultInit = SpxQueryInterface<ISpxSynthesisResultInit>(result);
+    if (m_uspState == UspState::Error)
+    {
+        resultInit->InitSynthesisResult(requestId, ResultReason::Canceled,
+            CancellationReason::CancelledByUser, nullptr,
+            nullptr, 0, outputFormat.get(), hasHeader);
+    }
+
+    return result;
 }
 
 } } } } // Microsoft::CognitiveServices::Speech::Impl

@@ -101,7 +101,7 @@ void CSpxAudioDataStream::InitFromSynthesisResult(std::shared_ptr<ISpxSynthesisR
         {
             SPX_TRACE_ERROR(
                 "The request id of this data stream (%s) is different from the request id of current event (%s), ignored.",
-                PAL::ToString(m_requestId).c_str(), PAL::ToString(requestId).c_str());
+                m_requestId.c_str(), requestId.c_str());
             return;
         }
 
@@ -122,7 +122,7 @@ void CSpxAudioDataStream::InitFromSynthesisResult(std::shared_ptr<ISpxSynthesisR
         {
             SPX_TRACE_ERROR(
                 "The request id of this data stream (%s) is different from the request id of current event (%s), ignored.",
-                PAL::ToString(m_requestId).c_str(), PAL::ToString(requestId).c_str());
+                m_requestId.c_str(), requestId.c_str());
             return;
         }
 

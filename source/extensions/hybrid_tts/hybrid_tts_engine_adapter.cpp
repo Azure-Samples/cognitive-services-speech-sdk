@@ -84,7 +84,7 @@ void CSpxHybridTtsEngineAdapter::SetOutput(std::shared_ptr<ISpxAudioOutput> outp
 }
 
 std::shared_ptr<ISpxSynthesisResult> CSpxHybridTtsEngineAdapter::Speak(const std::string& text, bool isSsml,
-                                                                       const std::wstring& requestId, bool retry)
+                                                                       const std::string& requestId, bool retry)
 {
     SPX_DBG_TRACE_VERBOSE_IF(SPX_DBG_TRACE_HYBRID_TTS, __FUNCTION__);
 
@@ -146,7 +146,7 @@ void CSpxHybridTtsEngineAdapter::StopSpeaking()
     }
 }
 
-uint32_t CSpxHybridTtsEngineAdapter::Write(ISpxTtsEngineAdapter *adapter, const std::wstring &requestId,
+uint32_t CSpxHybridTtsEngineAdapter::Write(ISpxTtsEngineAdapter *adapter, const std::string &requestId,
                                            uint8_t *buffer, uint32_t size, std::shared_ptr<std::unordered_map<std::string, std::string>> properties)
 {
     UNUSED(properties);
@@ -319,14 +319,16 @@ void CSpxHybridTtsEngineAdapter::InitializeTtsCloudEngineAdapter()
 
 void CSpxHybridTtsEngineAdapter::EnsureTtsOfflineEngineAdapter()
 {
-    if (m_ttsOfflineAdapter == nullptr)
+    if (m_ttsOfflineAdapter == nullptr || m_offlineVoiceFolder != GetStringValue("SPEECH-SynthOfflineDataLocation", ""))
     {
+        SpxTermAndClear(m_ttsOfflineAdapter);
         InitializeOfflineTtsEngineAdapter();
     }
 }
 
 void CSpxHybridTtsEngineAdapter::InitializeOfflineTtsEngineAdapter()
 {
+    m_offlineVoiceFolder = GetStringValue("SPEECH-SynthOfflineDataLocation", "");
     m_ttsOfflineAdapter = SpxCreateObjectWithSite<ISpxTtsEngineAdapter>("CSpxLocalTtsEngineAdapter", this);
     if (m_audioOutput)
     {
@@ -373,7 +375,7 @@ CSpxHybridTtsEngineAdapter::ClarifyPolicy(const std::string& policy)
 }
 
 std::shared_ptr<ISpxSynthesisResult> CSpxHybridTtsEngineAdapter::SpeakByConnectPolicy(
-    const std::string& text, bool isSsml, const std::wstring& requestId, bool retry, SwitchingPolicy switchingPolicy)
+    const std::string& text, bool isSsml, const std::string& requestId, bool retry, SwitchingPolicy switchingPolicy)
 {
     SetStringValue("SpeechSynthesis_AllChunkTimeoutMs", originalCloudFinishedTimeoutMs.c_str());
 
@@ -419,7 +421,7 @@ std::shared_ptr<ISpxSynthesisResult> CSpxHybridTtsEngineAdapter::SpeakByConnectP
 }
 
 std::shared_ptr<ISpxSynthesisResult> CSpxHybridTtsEngineAdapter::SpeakByBufferPolicy(
-    const std::string& text, bool isSsml, const std::wstring& requestId, bool retry, SwitchingPolicy switchingPolicy)
+    const std::string& text, bool isSsml, const std::string& requestId, bool retry, SwitchingPolicy switchingPolicy)
 {
     SetStringValue("SpeechSynthesis_AllChunkTimeoutMs", originalCloudFinishedTimeoutMs.c_str());
 
@@ -499,7 +501,7 @@ std::shared_ptr<ISpxSynthesisResult> CSpxHybridTtsEngineAdapter::SpeakByBufferPo
 }
 
 std::shared_ptr<ISpxSynthesisResult> CSpxHybridTtsEngineAdapter::SpeakByFinishPolicy(const std::string& text,
-    bool isSsml, const std::wstring& requestId, bool retry, SwitchingPolicy switchingPolicy)
+    bool isSsml, const std::string& requestId, bool retry, SwitchingPolicy switchingPolicy)
 {
     {
         std::unique_lock<std::mutex> lock(m_mutex);
@@ -551,7 +553,7 @@ std::shared_ptr<ISpxSynthesisResult> CSpxHybridTtsEngineAdapter::SpeakByFinishPo
     return m_ttsOfflineAdapter->Speak(text, isSsml, requestId, retry);
 }
 
-std::shared_ptr<ISpxSynthesisResult> CSpxHybridTtsEngineAdapter::DummySpeak(const std::wstring& requestId)
+std::shared_ptr<ISpxSynthesisResult> CSpxHybridTtsEngineAdapter::DummySpeak(const std::string& requestId)
 {
     auto result = GetSite()->CreateEmptySynthesisResult();
     bool hasHeader = false;

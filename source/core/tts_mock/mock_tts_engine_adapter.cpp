@@ -43,7 +43,7 @@ void CSpxMockTtsEngineAdapter::SetOutput(std::shared_ptr<ISpxAudioOutput> output
     m_audioOutput = output;
 }
 
-std::shared_ptr<ISpxSynthesisResult> CSpxMockTtsEngineAdapter::Speak(const std::string& text, bool isSsml, const std::wstring& requestId, bool retry)
+std::shared_ptr<ISpxSynthesisResult> CSpxMockTtsEngineAdapter::Speak(const std::string& text, bool isSsml, const std::string& requestId, bool retry)
 {
     SPX_DBG_TRACE_VERBOSE_IF(SPX_DBG_TRACE_MOCK_TTS, __FUNCTION__);
 

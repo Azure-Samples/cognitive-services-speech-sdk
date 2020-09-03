@@ -139,7 +139,7 @@ void CSpxRestTtsEngineAdapter::SetOutput(std::shared_ptr<ISpxAudioOutput> output
     m_audioOutput = output;
 }
 
-std::shared_ptr<ISpxSynthesisResult> CSpxRestTtsEngineAdapter::Speak(const std::string& text, bool isSsml, const std::wstring& requestId, bool retry)
+std::shared_ptr<ISpxSynthesisResult> CSpxRestTtsEngineAdapter::Speak(const std::string& text, bool isSsml, const std::string& requestId, bool retry)
 {
     SPX_DBG_TRACE_VERBOSE_IF(SPX_DBG_TRACE_REST_TTS, __FUNCTION__);
 
@@ -364,7 +364,7 @@ void CSpxRestTtsEngineAdapter::PostTtsRequest(HTTP_HANDLE http_connect, RestTtsR
         }
 
         // X-ConnectionId will be logged as clientConnectionId, in guid format with dash
-        if (HTTPHeaders_AddHeaderNameValuePair(httpRequestHeaders, "X-ConnectionId", PAL::ToString(request.requestId).c_str()) != HTTP_HEADERS_OK)
+        if (HTTPHeaders_AddHeaderNameValuePair(httpRequestHeaders, "X-ConnectionId", request.requestId.c_str()) != HTTP_HEADERS_OK)
         {
             throw std::runtime_error("Could not add HTTP request header: X-ConnectionId");
         }
