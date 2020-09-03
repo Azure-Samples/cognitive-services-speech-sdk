@@ -28,8 +28,8 @@ To test your account we suggest you use [Microsoft Azure Storage Explorer](https
 Although you do not need to download or do any changes to the code you can still download it from GitHub:
 
 ```
-git clone https://github.com/Azure/SpeechAccelerators
-cd SpeechAccelerators/TranscriptionEnabledStorage
+git clone https://github.com/Azure-Samples/cognitive-services-speech-sdk
+cd cognitive-services-speech-sdk/samples/batch/transcription-enabled-storage
 ```
 
 Make sure that you have downloaded the [ARM Template](ARM_template.json) from the repository.
@@ -174,3 +174,7 @@ The structure of your newly created storage account will look like the picture b
 ![containers](./images/image015.png)
 
 There are several containers to distinguish between the various outputs. We suggest (for the sake of keeping things tidy) to follow the pattern and use the audio-input container as the only container for uploading your audio.
+
+## Customizing the Accelerator
+
+By default, the ARM template uses the newest version of the accelerator which can be found in this repository. If a custom version should be used, the paths to the binaries inside the deployment template must be edited to point to a custom published version (by default, our binaries are: https://mspublicstorage.blob.core.windows.net/transcription-enabled-storage/FetchTranscription.zip, https://mspublicstorage.blob.core.windows.net/transcription-enabled-storage/StartTranscriptionByTimer.zip and https://mspublicstorage.blob.core.windows.net/transcription-enabled-storage/StartTranscriptionByServiceBus.zip). To publish a new version, you can use Visual Studio, right click on the respective project, click publish and follow the instructions.

@@ -185,9 +185,7 @@ namespace StartTranscriptionByTimer
                         exceptionMessage += "\n" + responseMessage;
                     }
 
-                    var errorOutputContainer = StartTranscriptionEnvironmentVariables.ErrorReportOutputContainer;
-                    await StorageUtilities.WriteTextFileToBlobAsync(StartTranscriptionEnvironmentVariables.AzureWebJobsStorage, exceptionMessage, errorOutputContainer, errorTxtName, Logger).ConfigureAwait(false);
-
+                    await WriteFailedJobLogToStorageAsync(serviceBusMessages, exceptionMessage, jobName).ConfigureAwait(false);
                     return;
                 }
             }
@@ -206,13 +204,7 @@ namespace StartTranscriptionByTimer
             catch (Exception e)
             {
                 Logger.LogError($"Failed with Exception {e} and message {e.Message}. Write message for job with name {jobName} to report file.");
-
-                var errorTxtName = jobName + ".txt";
-                var responseMessage = $"Transcription failed with Exception:\n{e.Message}";
-
-                var errorOutputContainer = StartTranscriptionEnvironmentVariables.ErrorReportOutputContainer;
-                await StorageUtilities.WriteTextFileToBlobAsync(StartTranscriptionEnvironmentVariables.AzureWebJobsStorage, responseMessage, errorOutputContainer, errorTxtName, Logger).ConfigureAwait(false);
-
+                await WriteFailedJobLogToStorageAsync(serviceBusMessages, e.Message, jobName).ConfigureAwait(false);
                 return;
             }
 
@@ -233,8 +225,32 @@ namespace StartTranscriptionByTimer
             var fetchTranscriptionSBConnectionString = StartTranscriptionEnvironmentVariables.FetchTranscriptionServiceBusConnectionString;
             Logger.LogInformation($"FetchTranscriptionServiceBusConnectionString from settings: {fetchTranscriptionSBConnectionString}");
 
-            ServiceBusUtilities.SendServiceBusMessageAsync(fetchTranscriptionSBConnectionString, transcriptionMessage.CreateMessageString(), Logger, reenqueueingTimeInSeconds).GetAwaiter().GetResult();
+            try
+            {
+                ServiceBusUtilities.SendServiceBusMessageAsync(fetchTranscriptionSBConnectionString, transcriptionMessage.CreateMessageString(), Logger, reenqueueingTimeInSeconds).GetAwaiter().GetResult();
+            }
+            catch (Exception e)
+            {
+                Logger.LogError($"Failed with Exception {e} and message {e.Message}. Write message for job with name {jobName} to report file.");
+                await WriteFailedJobLogToStorageAsync(serviceBusMessages, e.Message, jobName).ConfigureAwait(false);
+            }
+
             Logger.LogInformation($"Fetch transcription queue informed about job at: {jobName}");
+        }
+
+        private async Task WriteFailedJobLogToStorageAsync(IEnumerable<ServiceBusMessage> serviceBusMessages, string errorMessage, string jobName)
+        {
+            var errorOutputContainer = StartTranscriptionEnvironmentVariables.ErrorReportOutputContainer;
+
+            var errorFileName = jobName + ".txt";
+            await StorageUtilities.WriteTextFileToBlobAsync(StartTranscriptionEnvironmentVariables.AzureWebJobsStorage, errorMessage, errorOutputContainer, errorFileName, Logger).ConfigureAwait(false);
+
+            foreach (var message in serviceBusMessages)
+            {
+                var fileName = StorageUtilities.GetFileNameFromUri(message.Data.Url);
+                errorFileName = fileName + ".txt";
+                await StorageUtilities.WriteTextFileToBlobAsync(StartTranscriptionEnvironmentVariables.AzureWebJobsStorage, errorMessage, errorOutputContainer, errorFileName, Logger).ConfigureAwait(false);
+            }
         }
 
         private Dictionary<string, string> GetTranscriptionPropertyBag()

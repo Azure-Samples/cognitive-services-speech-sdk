@@ -284,7 +284,6 @@
 		}
     },
 	"variables": {
-    "appPackageVersion": "1.0.22",
 	"UseSqlDatabase": "[and(not(equals(parameters('SqlAdministratorLogin'),'')), not(equals(parameters('SqlAdministratorLoginPassword'),'')))]",
 	"SqlServerName": "[concat('sqlserver', uniqueString(subscription().id, resourceGroup().id))]",
 	"DatabaseName": "[concat('Database-', resourceGroup().name)]",
@@ -748,7 +747,7 @@
 				"SecondaryAcousticModelId": "[parameters('SecondaryAcousticModelId')]",
 				"SecondaryLanguageModelId": "[parameters('SecondaryLanguageModelId')]",
 				"SecondaryLocale": "[parameters('SecondaryLocale')]",
-				"WEBSITE_RUN_FROM_PACKAGE": "[concat('https://github.com/HenryvanderVegte/AcceleratorAppZips/releases/download/', variables('appPackageVersion'), if(variables('timerBasedExecution'),'/StartTranscriptionByTimer.zip','/StartTranscriptionByServiceBus.zip'))]"				
+				"WEBSITE_RUN_FROM_PACKAGE": "[if(variables('timerBasedExecution'),'https://mspublicstorage.blob.core.windows.net/transcription-enabled-storage/StartTranscriptionByTimer.zip','https://mspublicstorage.blob.core.windows.net/transcription-enabled-storage/StartTranscriptionByServiceBus.zip')]"				
 			}
 		},
         {
@@ -795,7 +794,7 @@
 				"TextAnalyticsKey": "[parameters('TextAnalyticsKey')]",
 				"TextAnalyticsRegion": "[parameters('TextAnalyticsRegion')]",
 				"UseSqlDatabase": "[variables('UseSqlDatabase')]",
-				"WEBSITE_RUN_FROM_PACKAGE": "[concat('https://github.com/HenryvanderVegte/AcceleratorAppZips/releases/download/', variables('appPackageVersion'), '/FetchTranscription.zip')]"			
+				"WEBSITE_RUN_FROM_PACKAGE": "https://mspublicstorage.blob.core.windows.net/transcription-enabled-storage/FetchTranscription.zip"			
 			}
 		}
     ],
