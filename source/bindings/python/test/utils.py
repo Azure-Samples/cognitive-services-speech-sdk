@@ -10,7 +10,6 @@ import azure.cognitiveservices.speech as msspeech
 
 # the timeout to wait for session stopped event after recognition is finished
 _TIMEOUT_IN_SECONDS = 30.
-# TODO Task 2971287: Use own implementation for Levenshtein similarity score on Python.
 _SIMILARITY_SCORE_THRESHOLD = 0.80
 
 class _TestCallback(object):
@@ -148,16 +147,16 @@ def _check_result_properties(result):
 def _check_callbacks(callbacks, check_num_recognized=True):
     assert callbacks['session_started'].num_calls == 1
     assert callbacks['session_stopped'].num_calls == 1
-    assert callbacks['recognizing'].num_calls >= 1
+    # It is possible that service sends final result directly without intermediate results, thus not expecting intermediate always comes
+    #assert callbacks['recognizing'].num_calls >= 1
     if check_num_recognized:
         assert callbacks['recognized'].num_calls == 1
 
 
 def _check_result_common(result, speech_input, utterance_index, do_check_duration=True,
         do_check_offset=True):
-    # TODO Task 2971287: Use own implementation for Levenshtein similarity score on Python.
-    #similarity_ratio = lev.ratio(speech_input.transcription[utterance_index].lower(), result.text.lower())
-    #assert similarity_ratio > _SIMILARITY_SCORE_THRESHOLD
+    similarity_ratio = _levenshtein_ratio(speech_input.transcription[utterance_index].lower(), result.text.lower())
+    assert similarity_ratio > _SIMILARITY_SCORE_THRESHOLD
     if do_check_duration:
         assert result.duration > 0
     if do_check_offset:
@@ -184,10 +183,9 @@ def _check_translation_result(result, speech_input, utterance_index, target_lang
     assert msspeech.ResultReason.TranslatedSpeech == result.reason
 
     assert set(result.translations.keys()) == set(target_languages)
-    # TODO Task 2971287: Use own implementation for Levenshtein similarity score on Python.
-    #for language in target_languages:
-    #    similarity_ratio = lev.ratio(speech_input.translations[language].lower(), result.translations[language].lower())
-    #    assert similarity_ratio > _SIMILARITY_SCORE_THRESHOLD
+    for language in target_languages:
+        similarity_ratio = _levenshtein_ratio(speech_input.translations[language].lower(), result.translations[language].lower())
+        assert similarity_ratio > _SIMILARITY_SCORE_THRESHOLD
 
     _check_result_common(result, speech_input, utterance_index)
 
@@ -211,3 +209,23 @@ def get_token(subscription, region):
     response = requests.post(fetch_token_url, headers=headers)
     return str(response.text)
 
+def _levenshtein_ratio(str1, str2):
+    m = len(str1)
+    n = len(str2)
+    lensum = float(m + n)
+    d = []           
+    for i in range(m+1):
+        d.append([i])        
+    del d[0][0]    
+    for j in range(n+1):
+        d[0].append(j)       
+    for j in range(1,n+1):
+        for i in range(1,m+1):
+            if str1[i-1] == str2[j-1]:
+                d[i].insert(j,d[i-1][j-1])           
+            else:
+                minimum = min(d[i-1][j]+1, d[i][j-1]+1, d[i-1][j-1]+2)         
+                d[i].insert(j, minimum)
+    ldist = d[-1][-1]
+    ratio = (lensum - ldist)/lensum
+    return ratio

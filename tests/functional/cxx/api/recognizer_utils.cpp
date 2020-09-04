@@ -9,6 +9,7 @@
 
 #include <fstream>
 #include <chrono>
+#include <algorithm>
 #include "wav_file_reader.h"
 #include "azure_c_shared_utility_includes.h"
 
@@ -644,4 +645,11 @@ void ConnectCallbacks(ConversationTranscriber* ct, RecoPhrasesPtr result)
     ct->Transcribed.Connect(callback);
 
     ConnectNonRecoEvents<ConversationTranscriber, ConversationTranscriptionCanceledEventArgs>(ct, result);
+}
+
+std::string ToLower(const std::string& input)
+{
+    std::string result = input;
+    std::transform(result.begin(), result.end(), result.begin(), [](char c) {return static_cast<char>(std::tolower(c));});
+    return result;
 }

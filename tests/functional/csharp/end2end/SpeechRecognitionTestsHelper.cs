@@ -270,7 +270,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var actual = string.Join(" ", texts.ToArray());
             actual = Normalize(actual);
             // dont do a hard string comparison, we allow a small percentage of word edits (word insert/delete/move)
-            AssertStringWordEditPercentage(expected, actual, tolerance);
+            Assert.IsTrue(LevenshteinRatio(expected, actual) > TestData.Levenshtein.SimilarityScoreThreshold);
         }
 
         public static void AssertFuzzyMatching(string expectedUtterance, string actualUtterance, int tolerance = 10)
@@ -425,6 +425,43 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             Assert.IsTrue(
                 edits <= allowedEdits,
                 $"Number of edit operations '{edits}' exceeding allowed edits '{allowedEdits}'\ninput:   '{expectedString}'\ncompare: '{comparisonString}'\n");
+        }
+
+        static public float LevenshteinRatio(string s, string t)
+        {
+            int n = s.Length;
+            int m = t.Length;
+            float lensum = (float)(m + n);
+            int[,] d = new int[n + 1, m + 1];
+
+            if (n == 0)
+            {
+                return m;
+            }
+
+            if (m == 0)
+            {
+                return n;
+            }
+
+            for (int i = 0; i <= n; i++)
+                d[i, 0] = i;
+            for (int j = 0; j <= m; j++)
+                d[0, j] = j;
+
+            for (int j = 1; j <= m; j++)
+                for (int i = 1; i <= n; i++)
+                    if (s[i - 1] == t[j - 1])
+                        d[i, j] = d[i - 1, j - 1];  //no operation
+                    else
+                        d[i, j] = Math.Min(Math.Min(
+                            d[i - 1, j] + 1,    //a deletion
+                            d[i, j - 1] + 1),   //an insertion
+                            d[i - 1, j - 1] + 1 //a substitution
+                            );
+            var distance = d[n, m];
+            var ratio = (lensum - distance) / lensum;
+            return ratio;
         }
 
         public static void AssertDetailedResult(SpeechRecognitionResult result)

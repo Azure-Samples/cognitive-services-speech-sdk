@@ -2053,7 +2053,7 @@ TEST_CASE("Verify auto detect source language result from speech recognition res
         SPX_TRACE_VERBOSE("cxx_api_Test CANCELED: ErrorCode=%d, ErrorDetails=%s", (int)cancellationDetails->ErrorCode, cancellationDetails->ErrorDetails.c_str());
     }
     if (speechRecognitionResult->Reason == expectedReason) {
-        SPXTEST_REQUIRE(autoDetectSourceLanguageResult->Language == expectedLanguage);
+        SPXTEST_REQUIRE(ToLower(autoDetectSourceLanguageResult->Language) == ToLower(expectedLanguage));
     }
     else {
         SPX_TRACE_VERBOSE("cxx_api_Test result reason %d is not expected %d", speechRecognitionResult->Reason, expectedReason);
@@ -2080,7 +2080,7 @@ TEST_CASE("Verify language id detection for continuous speech recognition", "[ap
         {
             recognizingResults.push_back(e.Result->Text);
             auto languageDetectionResult = AutoDetectSourceLanguageResult::FromResult(e.Result);
-            if (languageDetectionResult->Language != "de-DE")
+            if (ToLower(languageDetectionResult->Language) != ToLower("de-DE"))
             {
                 errorResults.push_back("Language detection failed, detection result is " + languageDetectionResult->Language);
             }
@@ -2103,7 +2103,7 @@ TEST_CASE("Verify language id detection for continuous speech recognition", "[ap
         {
             recognizedResults.push_back(e.Result->Text);
             auto languageDetectionResult = AutoDetectSourceLanguageResult::FromResult(e.Result);
-            if (languageDetectionResult->Language != "de-DE")
+            if (ToLower(languageDetectionResult->Language) != ToLower("de-DE"))
             {
                 errorResults.push_back("Language detection failed, detection result is " + languageDetectionResult->Language);
             }

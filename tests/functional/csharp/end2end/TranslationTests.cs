@@ -308,8 +308,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             Assert.AreEqual(expectedUtterances.Count(), actualTranslationsTextResults.Count());
             for (var i = 0; i < actualTranslations.Count; i++)
             {
-                AssertStringWordEditPercentage(Normalize(expectedUtterances[i].Text), Normalize(actualRecognitionTextResults[i]), 10, 5);
-                AssertStringWordEditPercentage(Normalize(expectedTranslations[i].Text), Normalize(actualTranslationsTextResults[i]), 10, 5);
+                Assert.IsTrue(LevenshteinRatio(Normalize(expectedUtterances[i].Text), Normalize(actualRecognitionTextResults[i])) > TestData.Levenshtein.SimilarityScoreThreshold);
+                Assert.IsTrue(LevenshteinRatio(Normalize(expectedTranslations[i].Text), Normalize(actualTranslationsTextResults[i])) > TestData.Levenshtein.SimilarityScoreThreshold);
             }
         }
 
@@ -435,14 +435,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var actualTranslationRecognition = (TranslationRecognitionEventArgs)actualTranslations[ResultType.RecognizedText].Single();
 
             Assert.AreNotEqual(ResultReason.Canceled, actualTranslationRecognition.Result.Reason);
-            AssertStringWordEditPercentage(
-                Normalize(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_CATALAN].Utterances[Language.CA_ES][0].Text),
-                Normalize(actualTranslationRecognition.Result.Text),
-                10, 2);
-            AssertStringWordEditPercentage(
-                Normalize(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_CATALAN].Utterances[Language.DE][0].Text),
-                Normalize(actualTranslationRecognition.Result.Translations[Language.DE]),
-                10, 2);
+            Assert.IsTrue(LevenshteinRatio(Normalize(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_CATALAN].Utterances[Language.CA_ES][0].Text),
+                Normalize(actualTranslationRecognition.Result.Text)) > TestData.Levenshtein.SimilarityScoreThreshold);
+
+            Assert.IsTrue(LevenshteinRatio(Normalize(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_CATALAN].Utterances[Language.DE][0].Text),
+                Normalize(actualTranslationRecognition.Result.Translations[Language.DE])) > TestData.Levenshtein.SimilarityScoreThreshold);
         }
 
         [Ignore]
@@ -460,14 +457,10 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var actualTranslationRecognition = (TranslationRecognitionEventArgs)actualTranslations[ResultType.RecognizedText].Single();
 
             Assert.AreNotEqual(ResultReason.Canceled, actualTranslationRecognition.Result.Reason);
-            AssertStringWordEditPercentage(
-                Normalize(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_CATALAN].Utterances[Language.CA_ES][0].Text),
-                Normalize(actualTranslationRecognition.Result.Text),
-                10, 2);
-            AssertStringWordEditPercentage(
-                Normalize(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_CATALAN].Utterances[Language.DE][0].Text),
-                Normalize(actualTranslationRecognition.Result.Translations[Language.DE]),
-                10, 2);
+            Assert.IsTrue(LevenshteinRatio(Normalize(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_CATALAN].Utterances[Language.CA_ES][0].Text),
+                Normalize(actualTranslationRecognition.Result.Text)) > TestData.Levenshtein.SimilarityScoreThreshold);
+            Assert.IsTrue(LevenshteinRatio(Normalize(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_CATALAN].Utterances[Language.DE][0].Text),
+                Normalize(actualTranslationRecognition.Result.Translations[Language.DE])) > TestData.Levenshtein.SimilarityScoreThreshold);
         }
 
         [TestMethod]

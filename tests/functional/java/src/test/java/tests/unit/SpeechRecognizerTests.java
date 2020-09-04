@@ -265,7 +265,7 @@ public class SpeechRecognizerTests {
         SpeechRecognizer r = new SpeechRecognizer(s, AudioConfig.fromStreamInput(ais));
         assertNotNull(r);
         assertNotNull(r.getSpeechRecognitionLanguage());
-        assertEquals(language, r.getSpeechRecognitionLanguage());
+        assertEquals(language.toLowerCase(), r.getSpeechRecognitionLanguage().toLowerCase());
 
         r.close();
         s.close();
@@ -1568,7 +1568,8 @@ public class SpeechRecognizerTests {
         TestHelper.OutputResult(result);
         assertEquals(ResultReason.RecognizedSpeech, result.getReason());
         AutoDetectSourceLanguageResult autoDetectSourceLanguageResult = AutoDetectSourceLanguageResult.fromResult(result);
-        assertEquals("en-US", autoDetectSourceLanguageResult.getLanguage());
+        String expectedLanguage = "en-US";
+        assertEquals(expectedLanguage.toLowerCase(), autoDetectSourceLanguageResult.getLanguage().toLowerCase());
 
         recognizer.close();
         speechConfig.close();
@@ -1646,7 +1647,8 @@ public class SpeechRecognizerTests {
         assertTrue(recognizer instanceof Recognizer);
         assertEquals(customEndpoint1, recognizer.getProperties().getProperty("en-USSPEECH-ModelId"));
         assertEquals(customEndpoint2, recognizer.getProperties().getProperty("zh-CNSPEECH-ModelId"));
-        assertEquals("en-US,zh-CN", recognizer.getProperties().getProperty(PropertyId.SpeechServiceConnection_AutoDetectSourceLanguages));
+        String expectedLanguages = "en-US,zh-CN";
+        assertEquals(expectedLanguages.toLowerCase(), recognizer.getProperties().getProperty(PropertyId.SpeechServiceConnection_AutoDetectSourceLanguages).toLowerCase());
     }
 
         @Test

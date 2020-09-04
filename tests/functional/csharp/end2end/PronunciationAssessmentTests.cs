@@ -111,9 +111,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 Assert.AreEqual(pronunciationAssessmentConfig.ToJson(),
                     recognizer.Properties.GetProperty(PropertyId.PronunciationAssessment_Params));
                 var result = await helper.CompleteRecognizeOnceAsync(recognizer).ConfigureAwait(false);
-                AssertFuzzyMatching(
+                Assert.IsTrue(LevenshteinRatio(
                     AudioUtterancesMap[AudioUtteranceKeys.PRONUNCIATION_ASSESSMENT_GOOD_PRONUNCIATION_CHINESE]
-                        .Utterances["zh-CN"][0].Text, result.Text);
+                        .Utterances["zh-CN"][0].Text, result.Text) >= TestData.Levenshtein.PronunciationSimilarityScoreThreshold);
                 var pronResult = PronunciationAssessmentResult.FromResult(result);
 
                 Assert.IsTrue(pronResult.AccuracyScore > 0);

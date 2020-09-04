@@ -37,7 +37,8 @@ def test_add_clear(from_file_speech_reco_with_callbacks, speech_input):
     _check_sr_result(result, speech_input, 0)
 
 
-@pytest.mark.parametrize('intent_input,', ['beach'], indirect=True)
+@pytest.mark.skip(reason="Temporarily disabled due to ICM 203207091 PhraseListGrammar functionality is broken for intent")
+#@pytest.mark.parametrize('intent_input,', ['beach'], indirect=True)
 def test_intent_recognition_phraselist(from_file_intent_reco_with_callbacks, intent_input):
     reco, _ = from_file_intent_reco_with_callbacks()
 

@@ -275,5 +275,6 @@ static std::shared_ptr<RecogType> CreateRecognizers(const string& trafficType, c
     return RecogType::FromConfig(CurrentSpeechConfig(trafficType), audioInput);
 }
 
+std::string ToLower(const std::string& input);
 
 

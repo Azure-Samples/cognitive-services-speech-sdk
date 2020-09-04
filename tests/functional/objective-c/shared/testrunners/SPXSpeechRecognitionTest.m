@@ -524,7 +524,7 @@
     XCTAssertGreaterThan([result.resultId length], 0);
 
     SPXAutoDetectSourceLanguageResult *lidResult = [[SPXAutoDetectSourceLanguageResult alloc] init:result];
-    XCTAssertEqualObjects(@"en-US", [lidResult language]);
+    XCTAssertEqualObjects([@"en-US" lowercaseString], [[lidResult language] lowercaseString]);
 }
 
 @end

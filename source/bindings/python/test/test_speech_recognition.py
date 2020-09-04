@@ -712,7 +712,8 @@ def test_recognize_once_with_language_detection(default_speech_auth, speech_inpu
 
     assert str(result) == desired_result_str
     auto_detect_source_language_result = msspeech.AutoDetectSourceLanguageResult(result)
-    assert "en-US" == auto_detect_source_language_result.language
+    expected_lang = "en-US"
+    assert expected_lang.lower() == auto_detect_source_language_result.language.lower()
 
 
 @pytest.mark.parametrize('speech_input,', ['weather'], indirect=True)

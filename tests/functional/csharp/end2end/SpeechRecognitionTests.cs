@@ -1888,11 +1888,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_GERMAN].Utterances[Language.DE][0].Text, result.Text);
                 var autoDetectSourceLanguageResult = AutoDetectSourceLanguageResult.FromResult(result);
                 Assert.IsNotNull(autoDetectSourceLanguageResult);
-                Assert.AreEqual(Language.DE_DE, autoDetectSourceLanguageResult.Language);
+                Assert.AreEqual(Language.DE_DE.ToLower(), autoDetectSourceLanguageResult.Language.ToLower());
                 Assert.AreEqual(0, errors.Count);
                 Assert.IsTrue(recognizingText.Count > 0);
                 Assert.AreEqual(1, lidInHypothesis.Count);
-                Assert.AreEqual(Language.DE_DE, lidInHypothesis.First());
+                Assert.AreEqual(Language.DE_DE.ToLower(), lidInHypothesis.First().ToLower());
 
             }
         }
@@ -1962,9 +1962,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 AssertFuzzyMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_GERMAN].Utterances[Language.DE][0].Text, recognizedText[0]);
                 Assert.AreEqual(0, errors.Count);
                 Assert.AreEqual(1, lidInHypothesis.Count);
-                Assert.AreEqual(Language.DE_DE, lidInHypothesis.First());
+                Assert.AreEqual(Language.DE_DE.ToLower(), lidInHypothesis.First().ToLower());
                 Assert.AreEqual(1, lidInFinal.Count);
-                Assert.AreEqual(Language.DE_DE, lidInFinal.First());
+                Assert.AreEqual(Language.DE_DE.ToLower(), lidInFinal.First().ToLower());
             }
         }
         #endregion

@@ -55,5 +55,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             public static string LocalModelPathRoot => "unidec/Unidec.Model/model".GetRootRelativePath();
             public static string LocalModelLanguage => Language.EN;
         }
+
+        public static class Levenshtein
+        {
+            public static float SimilarityScoreThreshold => 0.80f;
+            public static float PronunciationSimilarityScoreThreshold => 0.50f;
+        }
     }
 }
