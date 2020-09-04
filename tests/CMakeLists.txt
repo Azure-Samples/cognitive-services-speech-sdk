@@ -16,6 +16,9 @@ set(TEST_HEADERS "${TEST_INCLUDE}/test_utils.h")
 set(TEST_LIBS)
 
 if(NOT ANDROID)
+  # Used to make the Catch2 harness properly emit traces to test run logs
+  add_definitions(-DCATCH_CONFIG_EXPERIMENTAL_REDIRECT)
+
   add_subdirectory("${SRC_DIR}/unit-tests")
   add_subdirectory("${SRC_DIR}/functional/cxx/core")
   add_subdirectory("${SRC_DIR}/functional/cxx/api")

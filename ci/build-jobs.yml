@@ -1107,7 +1107,8 @@ jobs:
   - task: PublishTestResults@2
     inputs:
       testRunner: VSTest
-      testResultsFiles: '**/test-*.trx'
+      testResultsFiles: '**/test-csharp_osx*trx'
+      testRunTitle: 'C# end-to-end tests $(SPEECHSDK_TARGET_PLATFORM)-$(SPEECHSDK_BUILD_CONFIGURATION)'
     condition: and(succeededOrFailed(), eq(variables['SPEECHSDK_RUN_TESTS'], 'true'))
 
 - job: AndroidBuild

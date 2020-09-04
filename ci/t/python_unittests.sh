@@ -101,16 +101,16 @@ SCRIPT
   # "import speech_sample; speech_sample.speech_recognize_once_from_mic()"
   # "import speech_sample; speech_recognize_keyword_from_microphone()"
 
-  startTests "$testStateVarPrefix" "$output" "$platform" "$redactStrings"
-  startSuite "$testStateVarPrefix" "$testsuiteName"
+  startConstructedTestRunOutput "$testStateVarPrefix" "$output" "$platform" "$redactStrings"
+  startConstructedSuiteOutput "$testStateVarPrefix" "$testsuiteName"
 
   for testCase in "${testCases[@]}"; do
     runTest "$testStateVarPrefix" "$testCase" "$timeoutSeconds" \
       ${VIRTUALENV_PYTHON} -c "$testCase" || true
   done
 
-  endSuite "$testStateVarPrefix"
-  endTests "$testStateVarPrefix"
+  endConstructedSuiteOutput "$testStateVarPrefix"
+  endConstructedTestRunOutput "$testStateVarPrefix"
 }
 
 source "$SCRIPT_DIR/functions.sh" || exit 1

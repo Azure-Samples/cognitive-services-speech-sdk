@@ -52,11 +52,11 @@ fi
 
 if [[ $SPEECHSDK_LONG_RUNNING = true ]]; then
   TEST_CASE_FILTER="TestCategory=LongTest&TestCategory!=CompressedStreamTest${OFFLINE_UNIDEC_FILTER}"
-  ACTUAL_LOG_FILE_NAME=test-$T-$PLATFORM-$RANDOM-long-running.trx
+  ACTUAL_LOG_FILE_NAME=test-csharp-$T-$PLATFORM-$RANDOM-long-running.trx
   LOG_FILE_NAME=LogFileName=$ACTUAL_LOG_FILE_NAME
 else
   TEST_CASE_FILTER="TestCategory!=LongTest&TestCategory!=CompressedStreamTest${OFFLINE_UNIDEC_FILTER}"
-  ACTUAL_LOG_FILE_NAME=test-$T-$PLATFORM-$RANDOM.trx
+  ACTUAL_LOG_FILE_NAME=test-csharp-$T-$PLATFORM-$RANDOM.trx
   LOG_FILE_NAME=LogFileName=$ACTUAL_LOG_FILE_NAME
 fi
 

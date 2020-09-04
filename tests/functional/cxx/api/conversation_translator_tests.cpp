@@ -24,7 +24,7 @@ using namespace Microsoft::CognitiveServices::Speech::Impl;
 using namespace Microsoft::CognitiveServices::Speech::IntegrationTests;
 using namespace Microsoft::CognitiveServices::Speech::Transcription;
 
-TEST_CASE("[CT] Conversation host without translations", "[api][cxx][conversation_translator][cxx_conversation][no_translate]")
+TEST_CASE("Conversation host without translations", "[api][cxx][conversation_translator][cxx_conversation][no_translate]")
 {
     CT_INTEGRATION_TEST_INIT;
     auto speechConfig = CreateConfig("en-US", {});
@@ -32,7 +32,7 @@ TEST_CASE("[CT] Conversation host without translations", "[api][cxx][conversatio
     conversation->DeleteConversationAsync().get();
 }
 
-TEST_CASE("[CT] Conversation host with translations", "[api][cxx][conversation_translator][cxx_conversation][translate]")
+TEST_CASE("Conversation host with translations", "[api][cxx][conversation_translator][cxx_conversation][translate]")
 {
     CT_INTEGRATION_TEST_INIT;
     auto speechConfig = CreateConfig("en-US", { "fr" });
@@ -40,7 +40,7 @@ TEST_CASE("[CT] Conversation host with translations", "[api][cxx][conversation_t
     conversation->DeleteConversationAsync().get();
 }
 
-TEST_CASE("[CT] Conversation host destructor", "[api][cxx][conversation_translator][cxx_conversation][destructor]")
+TEST_CASE("Conversation host destructor", "[api][cxx][conversation_translator][cxx_conversation][destructor]")
 {
     CT_INTEGRATION_TEST_INIT;
     auto speechConfig = CreateConfig("en-US", { "fr", "ar" });
@@ -49,7 +49,7 @@ TEST_CASE("[CT] Conversation host destructor", "[api][cxx][conversation_translat
     conversation.reset();
 }
 
-TEST_CASE("[CT] Conversation destructor after start", "[api][cxx][conversation_translator][cxx_conversation][start_destructor]")
+TEST_CASE("Conversation destructor after start", "[api][cxx][conversation_translator][cxx_conversation][start_destructor]")
 {
     CT_INTEGRATION_TEST_INIT;
     auto speechConfig = CreateConfig("en-US", { "fr", "ar" });
@@ -59,7 +59,7 @@ TEST_CASE("[CT] Conversation destructor after start", "[api][cxx][conversation_t
     conversation.reset();
 }
 
-TEST_CASE("[CT] Conversation call while not joined", "[api][cxx][conversation_translator][cxx_conversation][not_started]")
+TEST_CASE("Conversation call while not joined", "[api][cxx][conversation_translator][cxx_conversation][not_started]")
 {
     CT_INTEGRATION_TEST_INIT;
     auto speechConfig = CreateConfig("en-US", { "fr", "ar" });
@@ -108,7 +108,7 @@ TEST_CASE("[CT] Conversation call while not joined", "[api][cxx][conversation_tr
     REQUIRE_NOTHROW(conversation->DeleteConversationAsync().get());
 }
 
-TEST_CASE("[CT] Conversation call unsupported methods", "[api][cxx][conversation_translator][cxx_conversation][unsupported]")
+TEST_CASE("Conversation call unsupported methods", "[api][cxx][conversation_translator][cxx_conversation][unsupported]")
 {
     CT_INTEGRATION_TEST_INIT;
     auto speechConfig = CreateConfig("en-US", { "fr", "ar" });
@@ -184,7 +184,7 @@ TEST_CASE("[CT] Conversation call unsupported methods", "[api][cxx][conversation
     }
 }
 
-TEST_CASE("[CT] Conversation Translator Host Audio", "[api][cxx][conversation_translator][cxx_conversation_translator][audio][host]")
+TEST_CASE("Conversation Translator Host Audio", "[api][cxx][conversation_translator][cxx_conversation_translator][audio][host]")
 {
     CT_INTEGRATION_TEST_INIT;
     REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
@@ -232,7 +232,7 @@ TEST_CASE("[CT] Conversation Translator Host Audio", "[api][cxx][conversation_tr
     });
 }
 
-TEST_CASE("[CT] Join a conversation with translation", "[api][cxx][conversation_translator][cxx_conversation_translator][audio][join]")
+TEST_CASE("Join a conversation with translation", "[api][cxx][conversation_translator][cxx_conversation_translator][audio][join]")
 {
     CT_INTEGRATION_TEST_INIT;
     REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
@@ -305,7 +305,7 @@ TEST_CASE("[CT] Join a conversation with translation", "[api][cxx][conversation_
     });
 }
 
-TEST_CASE("[CT] Host sends an instant message", "[api][cxx][conversation_translator][cxx_conversation_translator][im][host]")
+TEST_CASE("Host sends an instant message", "[api][cxx][conversation_translator][cxx_conversation_translator][im][host]")
 {
     CT_INTEGRATION_TEST_INIT;
     REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
@@ -329,7 +329,7 @@ TEST_CASE("[CT] Host sends an instant message", "[api][cxx][conversation_transla
     });
 }
 
-TEST_CASE("[CT] Host and participants send instant messages", "[api][cxx][conversation_translator][cxx_conversation_translator][im][join]")
+TEST_CASE("Host and participants send instant messages", "[api][cxx][conversation_translator][cxx_conversation_translator][im][join]")
 {
     CT_INTEGRATION_TEST_INIT;
     REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
@@ -369,7 +369,7 @@ TEST_CASE("[CT] Host and participants send instant messages", "[api][cxx][conver
     host.VerifyIms(expectedIms);
 }
 
-TEST_CASE("[CT] Join locked room", "[api][cxx][conversation_translator][cxx_conversation_translator][join_locked]")
+TEST_CASE("Join locked room", "[api][cxx][conversation_translator][cxx_conversation_translator][join_locked]")
 {
     CT_INTEGRATION_TEST_INIT;
     REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
@@ -395,7 +395,7 @@ TEST_CASE("[CT] Join locked room", "[api][cxx][conversation_translator][cxx_conv
     host.VerifyBasicEvents(false);
 }
 
-TEST_CASE("[CT] ConversationTranslator Host disconnects room", "[api][cxx][conversation_translator][cxx_conversation_translator][host_disconnect]")
+TEST_CASE("ConversationTranslator Host disconnects room", "[api][cxx][conversation_translator][cxx_conversation_translator][host_disconnect]")
 {
     CT_INTEGRATION_TEST_INIT;
     REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
@@ -426,7 +426,7 @@ TEST_CASE("[CT] ConversationTranslator Host disconnects room", "[api][cxx][conve
     alice.VerifyBasicEvents(true);
 }
 
-TEST_CASE("[CT] Conversation Translator call methods when not joined", "[api][cxx][conversation_translator][cxx_conversation_translator][not_joined]")
+TEST_CASE("Conversation Translator call methods when not joined", "[api][cxx][conversation_translator][cxx_conversation_translator][not_joined]")
 {
     CT_INTEGRATION_TEST_INIT;
 
@@ -479,7 +479,7 @@ TEST_CASE("[CT] Conversation Translator call methods when not joined", "[api][cx
     }
 }
 
-TEST_CASE("[CT] Double join should fail", "[api][cxx][conversation_translator][cxx_conversation_translator][double_join]")
+TEST_CASE("Double join should fail", "[api][cxx][conversation_translator][cxx_conversation_translator][double_join]")
 {
     CT_INTEGRATION_TEST_INIT;
 
@@ -512,7 +512,7 @@ TEST_CASE("[CT] Double join should fail", "[api][cxx][conversation_translator][c
     host.Leave();
 }
 
-TEST_CASE("[CT] Conversation Translator Connection Before Join", "[api][cxx][conversation_translator][cxx_conversation_translator][connection][before_join]")
+TEST_CASE("Conversation Translator Connection Before Join", "[api][cxx][conversation_translator][cxx_conversation_translator][connection][before_join]")
 {
     CT_INTEGRATION_TEST_INIT;
 
@@ -539,7 +539,7 @@ TEST_CASE("[CT] Conversation Translator Connection Before Join", "[api][cxx][con
     REQUIRE_NOTHROW(connection->Close());
 }
 
-TEST_CASE("[CT] Conversation Translator Connection After Leave", "[api][cxx][conversation_translator][cxx_conversation_translator][connection][after_leave]")
+TEST_CASE("Conversation Translator Connection After Leave", "[api][cxx][conversation_translator][cxx_conversation_translator][connection][after_leave]")
 {
     CT_INTEGRATION_TEST_INIT;
 
@@ -571,7 +571,7 @@ TEST_CASE("[CT] Conversation Translator Connection After Leave", "[api][cxx][con
     REQUIRE_NOTHROW(host.Conn->Close());
 }
 
-TEST_CASE("[CT] Conversation Translator Connection Recognizer events/methods", "[api][cxx][conversation_translator][cxx_conversation_translator][connection][recognizer]")
+TEST_CASE("Conversation Translator Connection Recognizer events/methods", "[api][cxx][conversation_translator][cxx_conversation_translator][connection][recognizer]")
 {
     CT_INTEGRATION_TEST_INIT;
 
@@ -601,7 +601,7 @@ TEST_CASE("[CT] Conversation Translator Connection Recognizer events/methods", "
     SPXTEST_REQUIRE(evts.size() > 0);
 }
 
-TEST_CASE("[CT] Conversation Translator Host Leave Rejoin", "[api][cxx][conversation_translator][cxx_conversation_translator][connection][host][rejoin]")
+TEST_CASE("Conversation Translator Host Leave Rejoin", "[api][cxx][conversation_translator][cxx_conversation_translator][connection][host][rejoin]")
 {
     CT_INTEGRATION_TEST_INIT;
     REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
@@ -672,7 +672,7 @@ TEST_CASE("[CT] Conversation Translator Host Leave Rejoin", "[api][cxx][conversa
         });
 }
 
-TEST_CASE("[CT] Conversation Translator can't call methods after disconnect", "[api][cxx][conversation_translator][cxx_conversation_translator][connection][after_disconnect]")
+TEST_CASE("Conversation Translator can't call methods after disconnect", "[api][cxx][conversation_translator][cxx_conversation_translator][connection][after_disconnect]")
 {
     CT_INTEGRATION_TEST_INIT;
 
@@ -707,7 +707,7 @@ TEST_CASE("[CT] Conversation Translator can't call methods after disconnect", "[
     host.Leave();
 }
 
-TEST_CASE("[CT] Conversation Translator Participant Rejoin", "[api][cxx][conversation_translator][cxx_conversation_translator][connection][participant][rejoin]")
+TEST_CASE("Conversation Translator Participant Rejoin", "[api][cxx][conversation_translator][cxx_conversation_translator][connection][participant][rejoin]")
 {
     CT_INTEGRATION_TEST_INIT;
 
@@ -768,7 +768,7 @@ TEST_CASE("[CT] Conversation Translator Participant Rejoin", "[api][cxx][convers
     alice.VerifyTranscriptions(expectedTranscriptions);
 }
 
-TEST_CASE("[CT] Conversation Translator Participant Rejoin After Delete", "[api][cxx][conversation_translator][cxx_conversation_translator][connection][participant][rejoin_after_delete]")
+TEST_CASE("Conversation Translator Participant Rejoin After Delete", "[api][cxx][conversation_translator][cxx_conversation_translator][connection][participant][rejoin_after_delete]")
 {
     CT_INTEGRATION_TEST_INIT;
 
@@ -825,7 +825,7 @@ TEST_CASE("[CT] Conversation Translator Participant Rejoin After Delete", "[api]
     );
 }
 
-TEST_CASE("[CT] Conversation Translator SpeechRecognizer Connection Still Works", "[api][cxx][conversation_translator][cxx_conversation_translator][connection][trans_recognizer]")
+TEST_CASE("Conversation Translator SpeechRecognizer Connection Still Works", "[api][cxx][conversation_translator][cxx_conversation_translator][connection][trans_recognizer]")
 {
     auto utterance = AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH];
 
@@ -852,7 +852,7 @@ TEST_CASE("[CT] Conversation Translator SpeechRecognizer Connection Still Works"
     SPXTEST_REQUIRE_THAT(evts->Transcribed[0].Text, Catch::FuzzyMatch(utterance.Utterances["en-US"][0].Text));
 }
 
-TEST_CASE("[CT] Conversation Translator INT endpoint", "[!hide][cxx_conversation_translator][int]")
+TEST_CASE("Conversation Translator INT endpoint", "[!hide][cxx_conversation_translator][int]")
 {
     const auto hostName = "host";
     const auto speechLang = "en-US";
@@ -890,7 +890,7 @@ TEST_CASE("[CT] Conversation Translator INT endpoint", "[!hide][cxx_conversation
     });
 }
 
-TEST_CASE("[CT] Set invalid authorization token", "[api][cxx][conversation_translator][cxx_conversation_translator][authToken][invalid]")
+TEST_CASE("Set invalid authorization token", "[api][cxx][conversation_translator][cxx_conversation_translator][authToken][invalid]")
 {
     auto speechConfig = CreateConfig("en-US", {});
 
@@ -912,7 +912,7 @@ TEST_CASE("[CT] Set invalid authorization token", "[api][cxx][conversation_trans
     host.Leave();
 }
 
-TEST_CASE("[CT] Host updates authorization token", "[api][cxx][conversation_translator][cxx_conversation_translator][authToken][host]")
+TEST_CASE("Host updates authorization token", "[api][cxx][conversation_translator][cxx_conversation_translator][authToken][host]")
 {
     auto authTokenValidity = 20s;
     const auto speechLang = "en-US";
@@ -957,7 +957,7 @@ TEST_CASE("[CT] Host updates authorization token", "[api][cxx][conversation_tran
     });
 }
 
-TEST_CASE("[CT] Participant receives updated authorization token", "[api][cxx][conversation_translator][cxx_conversation_translator][authToken][join]")
+TEST_CASE("Participant receives updated authorization token", "[api][cxx][conversation_translator][cxx_conversation_translator][authToken][join]")
 {
     auto authTokenValidity = 20s;
     const auto speechLang = "en-US";
@@ -1011,7 +1011,7 @@ TEST_CASE("[CT] Participant receives updated authorization token", "[api][cxx][c
 
 
 
-TEST_CASE("[CT] Conversation Translator Sweden demo", "[!hide][cxx_conversation_translator][Sweden]")
+TEST_CASE("Conversation Translator Sweden demo", "[!hide][cxx_conversation_translator][Sweden]")
 {
     CT_INTEGRATION_TEST_INIT;
 

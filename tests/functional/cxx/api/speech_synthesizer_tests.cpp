@@ -1088,7 +1088,7 @@ TEST_CASE("Synthesis with language auto detection - USP", "[api][cxx]")
     }
 }
 
-TEST_CASE("Check word boundary events - USP [manual]", "[manual][api][cxx]") // manual test for AudioOffset of Word Boundary events
+TEST_CASE("Check word boundary events - USP manual", "[manual][api][cxx]") // manual test for AudioOffset of Word Boundary events
 {
     auto config = UspSpeechConfig();
     config->SetSpeechSynthesisVoiceName(AudioUtterancesMap[SYNTHESIS_WORD_BOUNDARY_UTTERANCE_CHINESE].Utterances["zh-CN"][0].VoiceName);

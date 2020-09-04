@@ -1,6 +1,6 @@
 /*
  *  Catch v2.13.0
- *  Generated: 2020-07-12 20:07:49.015950
+ *  Generated: 2020-09-04 12:39:25.588721
  *  ----------------------------------------------------------
  *  This file has been merged from multiple headers. Please don't edit it directly
  *  Copyright (c) 2020 Two Blue Cubes Ltd. All rights reserved.
@@ -330,7 +330,10 @@ namespace Catch {
 
   // Check if byte is available and usable
   #  if __has_include(<cstddef>) && defined(CATCH_CPP17_OR_GREATER)
-  #    define CATCH_INTERNAL_CONFIG_CPP17_BYTE
+  #    include <cstddef>
+  #    if __cpp_lib_byte > 0
+  #      define CATCH_INTERNAL_CONFIG_CPP17_BYTE
+  #    endif
   #  endif // __has_include(<cstddef>) && defined(CATCH_CPP17_OR_GREATER)
 
   // Check if variant is available and usable
@@ -1105,7 +1108,7 @@ struct AutoReg : NonCopyable {
                     int index = 0;                                    \
                     constexpr char const* tmpl_types[] = {CATCH_REC_LIST(INTERNAL_CATCH_STRINGIZE_WITHOUT_PARENS, __VA_ARGS__)};\
                     using expander = int[];\
-                    (void)expander{(reg_test(Types{}, Catch::NameAndTags{ Name " - " + std::string(tmpl_types[index]), Tags } ), index++, 0)... };/* NOLINT */ \
+                    (void)expander{(reg_test(Types{}, Catch::NameAndTags{ Name " - " + std::string(tmpl_types[index]), Tags } ), index++)... };/* NOLINT */ \
                 }\
             };\
             static int INTERNAL_CATCH_UNIQUE_NAME( globalRegistrar ) = [](){\
@@ -1151,7 +1154,7 @@ struct AutoReg : NonCopyable {
                     constexpr char const* tmpl_types[] = {CATCH_REC_LIST(INTERNAL_CATCH_STRINGIZE_WITHOUT_PARENS, INTERNAL_CATCH_REMOVE_PARENS(TmplTypes))};\
                     constexpr char const* types_list[] = {CATCH_REC_LIST(INTERNAL_CATCH_STRINGIZE_WITHOUT_PARENS, INTERNAL_CATCH_REMOVE_PARENS(TypesList))};\
                     constexpr auto num_types = sizeof(types_list) / sizeof(types_list[0]);\
-                    (void)expander{(Catch::AutoReg( Catch::makeTestInvoker( &TestFuncName<Types> ), CATCH_INTERNAL_LINEINFO, Catch::StringRef(), Catch::NameAndTags{ Name " - " + std::string(tmpl_types[index / num_types]) + "<" + std::string(types_list[index % num_types]) + ">", Tags } ), index++, 0)... };/* NOLINT */\
+                    (void)expander{(Catch::AutoReg( Catch::makeTestInvoker( &TestFuncName<Types> ), CATCH_INTERNAL_LINEINFO, Catch::StringRef(), Catch::NameAndTags{ Name " - " + std::string(tmpl_types[index / num_types]) + "<" + std::string(types_list[index % num_types]) + ">", Tags } ), index++)... };/* NOLINT */\
                 }                                                     \
             };                                                        \
             static int INTERNAL_CATCH_UNIQUE_NAME( globalRegistrar ) = [](){ \
@@ -1195,7 +1198,7 @@ struct AutoReg : NonCopyable {
             void reg_tests() {                                          \
                 int index = 0;                                    \
                 using expander = int[];                           \
-                (void)expander{(Catch::AutoReg( Catch::makeTestInvoker( &TestFunc<Types> ), CATCH_INTERNAL_LINEINFO, Catch::StringRef(), Catch::NameAndTags{ Name " - " + std::string(INTERNAL_CATCH_STRINGIZE(TmplList)) + " - " + std::to_string(index), Tags } ), index++, 0)... };/* NOLINT */\
+                (void)expander{(Catch::AutoReg( Catch::makeTestInvoker( &TestFunc<Types> ), CATCH_INTERNAL_LINEINFO, Catch::StringRef(), Catch::NameAndTags{ Name " - " + std::string(INTERNAL_CATCH_STRINGIZE(TmplList)) + " - " + std::to_string(index), Tags } ), index++)... };/* NOLINT */\
             }                                                     \
         };\
         static int INTERNAL_CATCH_UNIQUE_NAME( globalRegistrar ) = [](){ \
@@ -1229,7 +1232,7 @@ struct AutoReg : NonCopyable {
                     int index = 0;                                    \
                     constexpr char const* tmpl_types[] = {CATCH_REC_LIST(INTERNAL_CATCH_STRINGIZE_WITHOUT_PARENS, __VA_ARGS__)};\
                     using expander = int[];\
-                    (void)expander{(reg_test(Types{}, #ClassName, Catch::NameAndTags{ Name " - " + std::string(tmpl_types[index]), Tags } ), index++, 0)... };/* NOLINT */ \
+                    (void)expander{(reg_test(Types{}, #ClassName, Catch::NameAndTags{ Name " - " + std::string(tmpl_types[index]), Tags } ), index++)... };/* NOLINT */ \
                 }\
             };\
             static int INTERNAL_CATCH_UNIQUE_NAME( globalRegistrar ) = [](){\
@@ -1278,7 +1281,7 @@ struct AutoReg : NonCopyable {
                     constexpr char const* tmpl_types[] = {CATCH_REC_LIST(INTERNAL_CATCH_STRINGIZE_WITHOUT_PARENS, INTERNAL_CATCH_REMOVE_PARENS(TmplTypes))};\
                     constexpr char const* types_list[] = {CATCH_REC_LIST(INTERNAL_CATCH_STRINGIZE_WITHOUT_PARENS, INTERNAL_CATCH_REMOVE_PARENS(TypesList))};\
                     constexpr auto num_types = sizeof(types_list) / sizeof(types_list[0]);\
-                    (void)expander{(Catch::AutoReg( Catch::makeTestInvoker( &TestName<Types>::test ), CATCH_INTERNAL_LINEINFO, #ClassName, Catch::NameAndTags{ Name " - " + std::string(tmpl_types[index / num_types]) + "<" + std::string(types_list[index % num_types]) + ">", Tags } ), index++, 0)... };/* NOLINT */ \
+                    (void)expander{(Catch::AutoReg( Catch::makeTestInvoker( &TestName<Types>::test ), CATCH_INTERNAL_LINEINFO, #ClassName, Catch::NameAndTags{ Name " - " + std::string(tmpl_types[index / num_types]) + "<" + std::string(types_list[index % num_types]) + ">", Tags } ), index++)... };/* NOLINT */ \
                 }\
             };\
             static int INTERNAL_CATCH_UNIQUE_NAME( globalRegistrar ) = [](){\
@@ -1325,7 +1328,7 @@ struct AutoReg : NonCopyable {
                 void reg_tests(){\
                     int index = 0;\
                     using expander = int[];\
-                    (void)expander{(Catch::AutoReg( Catch::makeTestInvoker( &TestName<Types>::test ), CATCH_INTERNAL_LINEINFO, #ClassName, Catch::NameAndTags{ Name " - " + std::string(INTERNAL_CATCH_STRINGIZE(TmplList)) + " - " + std::to_string(index), Tags } ), index++, 0)... };/* NOLINT */ \
+                    (void)expander{(Catch::AutoReg( Catch::makeTestInvoker( &TestName<Types>::test ), CATCH_INTERNAL_LINEINFO, #ClassName, Catch::NameAndTags{ Name " - " + std::string(INTERNAL_CATCH_STRINGIZE(TmplList)) + " - " + std::to_string(index), Tags } ), index++)... };/* NOLINT */ \
                 }\
             };\
             static int INTERNAL_CATCH_UNIQUE_NAME( globalRegistrar ) = [](){\
@@ -1829,8 +1832,8 @@ namespace Catch {
 #endif
 
     namespace Detail {
-        template<typename InputIterator>
-        std::string rangeToString(InputIterator first, InputIterator last) {
+        template<typename InputIterator, typename Sentinel = InputIterator>
+        std::string rangeToString(InputIterator first, Sentinel last) {
             ReusableStringStream rss;
             rss << "{ ";
             if (first != last) {
@@ -2874,6 +2877,8 @@ namespace Catch {
 
         std::string name;
         std::string description; // !Deprecated: this will always be empty
+        std::string stdOut;
+        std::string stdErr;
         SourceLineInfo lineInfo;
     };
 
@@ -4531,7 +4536,7 @@ namespace Catch {
         virtual UseColour::YesOrNo useColour() const = 0;
         virtual std::vector<std::string> const& getSectionsToRun() const = 0;
         virtual Verbosity verbosity() const = 0;
-
+        virtual std::string attachment() const = 0;
         virtual bool benchmarkNoAnalysis() const = 0;
         virtual int benchmarkSamples() const = 0;
         virtual double benchmarkConfidenceInterval() const = 0;
@@ -5303,6 +5308,7 @@ namespace Catch {
         std::string outputFilename;
         std::string name;
         std::string processName;
+        std::string attachment;
 #ifndef CATCH_CONFIG_DEFAULT_REPORTER
 #define CATCH_CONFIG_DEFAULT_REPORTER "console"
 #endif
@@ -5354,6 +5360,7 @@ namespace Catch {
         int abortAfter() const override;
         bool showInvisibles() const override;
         Verbosity verbosity() const override;
+        std::string attachment() const override;
         bool benchmarkNoAnalysis() const override;
         int benchmarkSamples() const override;
         double benchmarkConfidenceInterval() const override;
@@ -5771,7 +5778,9 @@ namespace Catch {
         }
 
         void sectionEnded(SectionStats const& /* _sectionStats */) override {
-            m_sectionStack.pop_back();
+            if ( !m_sectionStack.empty() ) {
+                m_sectionStack.pop_back();
+            }
         }
         void testCaseEnded(TestCaseStats const& /* _testCaseStats */) override {
             currentTestCaseInfo.reset();
@@ -8067,6 +8076,118 @@ namespace Catch {
 #endif
 
 // end catch_fatal_condition.h
+#if defined(CATCH_CONFIG_EXPERIMENTAL_REDIRECT)
+// start catch_output_redirect.h
+#ifndef TWOBLUECUBES_CATCH_OUTPUT_REDIRECT_H
+#define TWOBLUECUBES_CATCH_OUTPUT_REDIRECT_H
+
+#include <cstdio>
+#include <iosfwd>
+#include <string>
+
+namespace Catch {
+
+    class RedirectedStream {
+        std::ostream& m_originalStream;
+        std::ostream& m_redirectionStream;
+        std::streambuf* m_prevBuf;
+
+    public:
+        RedirectedStream( std::ostream& originalStream, std::ostream& redirectionStream );
+        ~RedirectedStream();
+    };
+
+    class RedirectedStdOut {
+        ReusableStringStream m_rss;
+        RedirectedStream m_cout;
+    public:
+        RedirectedStdOut();
+        auto str() const -> std::string;
+    };
+
+    // StdErr has two constituent streams in C++, std::cerr and std::clog
+    // This means that we need to redirect 2 streams into 1 to keep proper
+    // order of writes
+    class RedirectedStdErr {
+        ReusableStringStream m_rss;
+        RedirectedStream m_cerr;
+        RedirectedStream m_clog;
+    public:
+        RedirectedStdErr();
+        auto str() const -> std::string;
+    };
+
+    class RedirectedStreams {
+    public:
+        RedirectedStreams(RedirectedStreams const&) = delete;
+        RedirectedStreams& operator=(RedirectedStreams const&) = delete;
+        RedirectedStreams(RedirectedStreams&&) = delete;
+        RedirectedStreams& operator=(RedirectedStreams&&) = delete;
+
+        RedirectedStreams(std::string& redirectedCout, std::string& redirectedCerr);
+        ~RedirectedStreams();
+    private:
+        std::string& m_redirectedCout;
+        std::string& m_redirectedCerr;
+        RedirectedStdOut m_redirectedStdOut;
+        RedirectedStdErr m_redirectedStdErr;
+    };
+
+#if defined(CATCH_CONFIG_NEW_CAPTURE)
+
+    // Windows's implementation of std::tmpfile is terrible (it tries
+    // to create a file inside system folder, thus requiring elevated
+    // privileges for the binary), so we have to use tmpnam(_s) and
+    // create the file ourselves there.
+    class TempFile {
+    public:
+        TempFile(TempFile const&) = delete;
+        TempFile& operator=(TempFile const&) = delete;
+        TempFile(TempFile&&) = delete;
+        TempFile& operator=(TempFile&&) = delete;
+
+        TempFile();
+        ~TempFile();
+
+        std::FILE* getFile();
+        std::string getContents();
+
+    private:
+        std::FILE* m_file = nullptr;
+    #if defined(_MSC_VER)
+        char m_buffer[L_tmpnam] = { 0 };
+    #endif
+    };
+
+    class OutputRedirect {
+    public:
+        OutputRedirect(OutputRedirect const&) = delete;
+        OutputRedirect& operator=(OutputRedirect const&) = delete;
+        OutputRedirect(OutputRedirect&&) = delete;
+        OutputRedirect& operator=(OutputRedirect&&) = delete;
+
+        void flush();
+
+        OutputRedirect(std::string& stdout_dest, std::string& stderr_dest);
+        ~OutputRedirect();
+
+    private:
+        int m_originalStdout = -1;
+        int m_originalStderr = -1;
+        TempFile m_stdoutFile;
+        TempFile m_stderrFile;
+        std::string& m_stdoutDest;
+        std::string& m_stderrDest;
+    };
+
+#endif
+
+} // end namespace Catch
+
+#endif // TWOBLUECUBES_CATCH_OUTPUT_REDIRECT_H
+// end catch_output_redirect.h
+#endif
+
 #include <string>
 
 namespace Catch {
@@ -8178,6 +8299,10 @@ namespace Catch {
         TestRunInfo m_runInfo;
         IMutableContext& m_context;
         TestCase const* m_activeTestCase = nullptr;
+        SectionInfo* m_activeSection = nullptr;
+#if defined( CATCH_CONFIG_EXPERIMENTAL_REDIRECT )
+        OutputRedirect* m_activeRedirect = nullptr;
+#endif
         ITracker* m_testCaseTracker = nullptr;
         Option<AssertionResult> m_lastResult;
 
@@ -9826,6 +9951,10 @@ namespace Catch {
                 return ParserResult::runtimeError( "Unrecognized reporter, '" + reporter + "'. Check available with --list-reporters" );
             return ParserResult::ok( ParseResultType::Matched );
         };
+        auto const setAttachment = [&]( std::string const& attachment ) {
+            config.attachment = attachment;
+            return ParserResult::ok( ParseResultType::Matched );
+        };
 
         auto cli
             = ExeName( config.processName )
@@ -9890,6 +10019,9 @@ namespace Catch {
             | Opt( config.listReporters )
                 ["--list-reporters"]
                 ( "list all reporters" )
+            | Opt( setAttachment, "attachmentPath" )
+                ["--attachment"]
+                ( "specify an attachment for the test run results" )
             | Opt( setTestOrder, "decl|lex|rand" )
                 ["--order"]
                 ( "test case order (defaults to decl)" )
@@ -10027,6 +10159,7 @@ namespace Catch {
     int Config::abortAfter() const                     { return m_data.abortAfter; }
     bool Config::showInvisibles() const                { return m_data.showInvisibles; }
     Verbosity Config::verbosity() const                { return m_data.verbosity; }
+    std::string Config::attachment() const             { return m_data.attachment; }
 
     bool Config::benchmarkNoAnalysis() const                      { return m_data.benchmarkNoAnalysis; }
     int Config::benchmarkSamples() const                          { return m_data.benchmarkSamples; }
@@ -11878,113 +12011,6 @@ namespace Catch {
 // end catch_message.cpp
 // start catch_output_redirect.cpp
 
-// start catch_output_redirect.h
-#ifndef TWOBLUECUBES_CATCH_OUTPUT_REDIRECT_H
-#define TWOBLUECUBES_CATCH_OUTPUT_REDIRECT_H
-
-#include <cstdio>
-#include <iosfwd>
-#include <string>
-
-namespace Catch {
-
-    class RedirectedStream {
-        std::ostream& m_originalStream;
-        std::ostream& m_redirectionStream;
-        std::streambuf* m_prevBuf;
-
-    public:
-        RedirectedStream( std::ostream& originalStream, std::ostream& redirectionStream );
-        ~RedirectedStream();
-    };
-
-    class RedirectedStdOut {
-        ReusableStringStream m_rss;
-        RedirectedStream m_cout;
-    public:
-        RedirectedStdOut();
-        auto str() const -> std::string;
-    };
-
-    // StdErr has two constituent streams in C++, std::cerr and std::clog
-    // This means that we need to redirect 2 streams into 1 to keep proper
-    // order of writes
-    class RedirectedStdErr {
-        ReusableStringStream m_rss;
-        RedirectedStream m_cerr;
-        RedirectedStream m_clog;
-    public:
-        RedirectedStdErr();
-        auto str() const -> std::string;
-    };
-
-    class RedirectedStreams {
-    public:
-        RedirectedStreams(RedirectedStreams const&) = delete;
-        RedirectedStreams& operator=(RedirectedStreams const&) = delete;
-        RedirectedStreams(RedirectedStreams&&) = delete;
-        RedirectedStreams& operator=(RedirectedStreams&&) = delete;
-
-        RedirectedStreams(std::string& redirectedCout, std::string& redirectedCerr);
-        ~RedirectedStreams();
-    private:
-        std::string& m_redirectedCout;
-        std::string& m_redirectedCerr;
-        RedirectedStdOut m_redirectedStdOut;
-        RedirectedStdErr m_redirectedStdErr;
-    };
-
-#if defined(CATCH_CONFIG_NEW_CAPTURE)
-
-    // Windows's implementation of std::tmpfile is terrible (it tries
-    // to create a file inside system folder, thus requiring elevated
-    // privileges for the binary), so we have to use tmpnam(_s) and
-    // create the file ourselves there.
-    class TempFile {
-    public:
-        TempFile(TempFile const&) = delete;
-        TempFile& operator=(TempFile const&) = delete;
-        TempFile(TempFile&&) = delete;
-        TempFile& operator=(TempFile&&) = delete;
-
-        TempFile();
-        ~TempFile();
-
-        std::FILE* getFile();
-        std::string getContents();
-
-    private:
-        std::FILE* m_file = nullptr;
-    #if defined(_MSC_VER)
-        char m_buffer[L_tmpnam] = { 0 };
-    #endif
-    };
-
-    class OutputRedirect {
-    public:
-        OutputRedirect(OutputRedirect const&) = delete;
-        OutputRedirect& operator=(OutputRedirect const&) = delete;
-        OutputRedirect(OutputRedirect&&) = delete;
-        OutputRedirect& operator=(OutputRedirect&&) = delete;
-
-        OutputRedirect(std::string& stdout_dest, std::string& stderr_dest);
-        ~OutputRedirect();
-
-    private:
-        int m_originalStdout = -1;
-        int m_originalStderr = -1;
-        TempFile m_stdoutFile;
-        TempFile m_stderrFile;
-        std::string& m_stdoutDest;
-        std::string& m_stderrDest;
-    };
-
-#endif
-
-} // end namespace Catch
-
-#endif // TWOBLUECUBES_CATCH_OUTPUT_REDIRECT_H
-// end catch_output_redirect.h
 #include <cstdio>
 #include <cstring>
 #include <fstream>
@@ -12042,7 +12068,7 @@ namespace Catch {
         if (tmpnam_s(m_buffer)) {
             CATCH_RUNTIME_ERROR("Could not get a temp filename");
         }
-        if (fopen_s(&m_file, m_buffer, "w")) {
+        if (fopen_s(&m_file, m_buffer, "w+")) {
             char buffer[100];
             if (strerror_s(buffer, errno)) {
                 CATCH_RUNTIME_ERROR("Could not translate errno to a string");
@@ -12094,16 +12120,20 @@ namespace Catch {
     }
 
     OutputRedirect::~OutputRedirect() {
+        flush();
+    }
+
+    void OutputRedirect::flush() {
         Catch::cout() << std::flush;
-        fflush(stdout);
+        fflush( stdout );
         // Since we support overriding these streams, we flush cerr
         // even though std::cerr is unbuffered
         Catch::cerr() << std::flush;
         Catch::clog() << std::flush;
-        fflush(stderr);
+        fflush( stderr );
 
-        dup2(m_originalStdout, 1);
-        dup2(m_originalStderr, 2);
+        dup2( m_originalStdout, 1 );
+        dup2( m_originalStderr, 2 );
 
         m_stdoutDest += m_stdoutFile.getContents();
         m_stderrDest += m_stderrFile.getContents();
@@ -12691,7 +12721,8 @@ namespace Catch {
             m_lastAssertionPassed = true;
         } else if (!result.isOk()) {
             m_lastAssertionPassed = false;
-            if( m_activeTestCase->getTestCaseInfo().okToFail() )
+            if( m_activeTestCase
+                && m_activeTestCase->getTestCaseInfo().okToFail() )
                 m_totals.assertions.failedButOk++;
             else
                 m_totals.assertions.failed++;
@@ -12829,25 +12860,32 @@ namespace Catch {
 
         handleUnfinishedSections();
 
-        // Recreate section for test case (as we will lose the one that was in scope)
+#if defined( CATCH_CONFIG_EXPERIMENTAL_REDIRECT )
+        // Under normal execution, OutputRedirect is flushed via RAII destruction. In this fatal
+        // case, the RAII object remains in scope while we need to report its contents -- so we
+        // flush it manually.
+        if ( m_activeRedirect != nullptr ) {
+            m_activeRedirect->flush();
+        }
+#endif
         auto const& testCaseInfo = m_activeTestCase->getTestCaseInfo();
-        SectionInfo testCaseSection(testCaseInfo.lineInfo, testCaseInfo.name);
-
+        SectionInfo dummySection(testCaseInfo.lineInfo, testCaseInfo.name);
+        if (m_activeSection == nullptr) {
+            m_activeSection = &dummySection;
+        }
         Counts assertions;
         assertions.failed = 1;
-        SectionStats testCaseSectionStats(testCaseSection, assertions, 0, false);
+        SectionStats testCaseSectionStats(*m_activeSection, assertions, 0, false);
         m_reporter->sectionEnded(testCaseSectionStats);
-
-        auto const& testInfo = m_activeTestCase->getTestCaseInfo();
+        m_activeSection = nullptr;
 
         Totals deltaTotals;
         deltaTotals.testCases.failed = 1;
         deltaTotals.assertions.failed = 1;
-        m_reporter->testCaseEnded(TestCaseStats(testInfo,
-                                  deltaTotals,
-                                  std::string(),
-                                  std::string(),
-                                  false));
+        TestCaseStats endStats{
+            testCaseInfo, deltaTotals, std::string(), std::string(), false };
+        m_reporter->testCaseEnded(endStats);
+        m_activeTestCase = nullptr;
         m_totals.testCases.failed++;
         testGroupEnded(std::string(), m_totals, 1, 1);
         m_reporter->testRunEnded(TestRunStats(m_runInfo, m_totals, false));
@@ -12868,10 +12906,15 @@ namespace Catch {
         return m_totals.assertions.failed >= static_cast<std::size_t>(m_config->abortAfter());
     }
 
-    void RunContext::runCurrentTest(std::string & redirectedCout, std::string & redirectedCerr) {
+    void RunContext::runCurrentTest(std::string & redirectedCoutForTest, std::string & redirectedCerrForTest) {
+        // Under normal execution, the lifetime of a section will begin and end within this function.
+        // In the event of abnormal termination, though, we need a reference to the section data for
+        // unwind purposes.
         auto const& testCaseInfo = m_activeTestCase->getTestCaseInfo();
         SectionInfo testCaseSection(testCaseInfo.lineInfo, testCaseInfo.name);
+        m_activeSection = &testCaseSection;
         m_reporter->sectionStarting(testCaseSection);
+
         Counts prevAssertions = m_totals.assertions;
         double duration = 0;
         m_shouldReportUnexpected = true;
@@ -12883,14 +12926,18 @@ namespace Catch {
         CATCH_TRY {
             if (m_reporter->getPreferences().shouldRedirectStdOut) {
 #if !defined(CATCH_CONFIG_EXPERIMENTAL_REDIRECT)
-                RedirectedStreams redirectedStreams(redirectedCout, redirectedCerr);
+                RedirectedStreams redirectedStreams( testCaseSection.stdOut,
+                                                     testCaseSection.stdErr );
 
                 timer.start();
                 invokeActiveTestCase();
 #else
-                OutputRedirect r(redirectedCout, redirectedCerr);
+                OutputRedirect r( testCaseSection.stdOut,
+                                  testCaseSection.stdErr );
+                m_activeRedirect = &r;
                 timer.start();
                 invokeActiveTestCase();
+                m_activeRedirect = nullptr;
 #endif
             } else {
                 timer.start();
@@ -12915,8 +12962,14 @@ namespace Catch {
         m_messages.clear();
         m_messageScopes.clear();
 
-        SectionStats testCaseSectionStats(testCaseSection, assertions, duration, missingAssertions);
+        redirectedCoutForTest += testCaseSection.stdOut;
+        redirectedCerrForTest += testCaseSection.stdErr;
+
+        SectionStats testCaseSectionStats(
+            testCaseSection, assertions, duration, missingAssertions );
+
         m_reporter->sectionEnded(testCaseSectionStats);
+        m_activeSection = nullptr;
     }
 
     void RunContext::invokeActiveTestCase() {
@@ -17068,6 +17121,676 @@ namespace Catch {
 
 } // end namespace Catch
 // end catch_reporter_listening.cpp
+// start catch_reporter_vstest.cpp
+
+// start catch_reporter_vstest.h
+
+namespace Catch {
+
+    class StreamingReporterUnwindContext {
+    public:
+        std::vector<SectionInfo> allSectionInfo;
+        std::vector<SectionStats> allSectionStats;
+        std::vector<AssertionStats> allTerminatedAssertions;
+        std::vector<std::string> allExpandedAssertionStatements;
+        std::string startTimestamp;
+        std::string endTimestamp;
+        std::string stdOut;
+        std::string stdErr;
+        unsigned long long elapsedNanoseconds;
+
+    public:
+        void addAssertion( AssertionStats const& assertionStats );
+        bool unwindIsComplete() const;
+        void clear();
+        bool hasFailures() const;
+        bool hasMessages() const;
+        std::string constructFullName() const;
+        std::string constructErrorMessage() const;
+        std::string constructStackMessage() const;
+        std::string constructDuration() const;
+    };
+
+        class VstestEntry {
+    public:
+            VstestEntry( std::string name );
+
+    public:
+        std::string name;
+        std::vector<std::string> tags;
+        std::string testId;
+        std::string executionId;
+        std::string startTimestamp;
+        std::string endTimestamp;
+        std::vector<StreamingReporterUnwindContext> unwindContexts;
+
+    public:
+        bool hasFailures() const;
+        std::string constructDuration() const;
+    };
+
+    class VstestReporter : public StreamingReporterBase<VstestReporter> {
+    private:
+        XmlWriter m_xml;
+        Timer m_timer;
+        IConfigPtr m_config;
+        std::string m_runName;
+        std::string m_defaultTestListId;
+        std::vector<std::string> m_currentTestCaseTags;
+        std::vector<VstestEntry> m_testEntries;
+        StreamingReporterUnwindContext m_currentUnwindContext;
+
+    public:
+        VstestReporter( ReporterConfig const& _config );
+
+        ~VstestReporter() override {}
+
+        static std::string getDescription() {
+            return "Reports test in .trx format like VsTest v2";
+        }
+
+    private: // trx emission methods
+        void startTestRunElement();
+
+        void writeTimesElement();
+        void writeUnwindOutput(
+            StreamingReporterUnwindContext const& unwindContext );
+        void startUnitTestResultElement( const std::string& executionId,
+                                         const std::string& testId,
+                                         const std::string& name );
+        void
+        writeInnerResult( StreamingReporterUnwindContext const& unwindContext,
+                          const std::string& parentExecutionId );
+        void writeToplevelResult( VstestEntry const& testEntry );
+
+        void writeResults();
+
+        void writeTestDefinitions();
+
+        void writeTestEntries();
+
+        void writeTestLists();
+
+        void writeSummaryElement();
+
+        void emitTrx();
+
+    private:
+        void flushCurrentUnwindContext(
+            const SectionStats* lastSectionStats = nullptr );
+
+    public: // StreamingReporterBase
+        void noMatchingTestCases( std::string const& s ) override;
+
+        void testRunStarting( TestRunInfo const& testInfo ) override;
+
+        void testGroupStarting( GroupInfo const& groupInfo ) override;
+
+        void testCaseStarting( TestCaseInfo const& testInfo ) override;
+
+        void sectionStarting( SectionInfo const& sectionInfo ) override;
+
+        void assertionStarting( AssertionInfo const& ) override;
+
+        bool assertionEnded( AssertionStats const& assertionStats ) override;
+
+        void sectionEnded( SectionStats const& sectionStats ) override;
+
+        void testCaseEnded( TestCaseStats const& testCaseStats ) override;
+
+        void testGroupEnded( TestGroupStats const& testGroupStats ) override;
+
+        void testRunEnded( TestRunStats const& testRunStats ) override;
+    };
+
+} // end namespace Catch
+
+// end catch_reporter_vstest.h
+#ifdef CATCH_PLATFORM_WINDOWS
+#define NOMINMAX
+#include <Rpc.h>
+#else
+#include <uuid/uuid.h>
+#endif
+
+#include <algorithm>
+#include <cassert>
+#include <ctime>
+#include <sstream>
+
+namespace Catch {
+
+    namespace {
+        std::string createGuid() {
+#ifdef CATCH_PLATFORM_WINDOWS
+            UUID uuid;
+            UuidCreate( &uuid );
+
+            unsigned char* str;
+            UuidToStringA( &uuid, &str );
+
+            std::string s( (char*)str );
+
+            RpcStringFreeA( &str );
+#else
+            uuid_t uuid;
+            uuid_generate_random( uuid );
+            char s[37];
+            uuid_unparse( uuid, s );
+#endif
+            return s;
+        }
+
+        std::string currentTimestamp() {
+            // Beware, this is not reentrant because of backward compatibility
+            // issues Also, UTC only, again because of backward compatibility
+            // (%z is C++11)
+            time_t rawtime;
+            std::time( &rawtime );
+            auto const timeStampSize = sizeof( "2017-01-16T17:06:45Z" );
+
+#ifdef _MSC_VER
+            std::tm timeInfo = {};
+            gmtime_s( &timeInfo, &rawtime );
+
+#else
+            std::tm* timeInfo;
+            timeInfo = std::gmtime( &rawtime );
+#endif
+
+            char timeStamp[timeStampSize];
+            const char* const fmt = "%Y-%m-%dT%H:%M:%SZ";
+
+#ifdef _MSC_VER
+            std::strftime( timeStamp, timeStampSize, fmt, &timeInfo );
+#else
+            std::strftime( timeStamp, timeStampSize, fmt, timeInfo );
+#endif
+            return std::string( timeStamp );
+        }
+
+        std::string nanosToDurationString( unsigned long long nanos ) {
+            auto totalSeconds = nanos / 1000000000;
+            auto totalMinutes = totalSeconds / 60;
+            auto totalHours = totalMinutes / 60;
+            constexpr auto bufferSize = sizeof( "hh:mm:ss.1234567" );
+            char buffer[bufferSize];
+            std::snprintf( buffer,
+                           bufferSize,
+                           "%02llu:%02llu:%02llu.%07llu",
+                           std::min( totalHours, 99ull ),
+                           totalMinutes % 60,
+                           totalSeconds % 60,
+                           ( nanos / 100 ) % 10000000 );
+            return std::string( buffer );
+        }
+
+        // Some consumers of output .trx files (e.g. Azure DevOps Pipelines)
+        // fail to ingest results from .trx files if they have certain
+        // characters in them. This removes those characters. to-do: make this a
+        // parameter or address the root problem of consumers being weird
+        std::string getSanitizedTrxName( const std::string& rawName ) {
+            ReusableStringStream resultStream;
+            auto lastChar = '\0';
+            for ( size_t i = 0; i < rawName.length(); ) {
+                if ( rawName[i] == '[' ) {
+                    if ( rawName.find( ']', i ) == std::string::npos ) {
+                        CATCH_ERROR( "Unclosed [tag] in name: " << rawName );
+                    }
+                    do {
+                        i++;
+                    } while ( rawName[i - 1] != ']' );
+                    if ( lastChar == ' ' && rawName[i] == ' ' ) {
+                        // "removed [tag] here" -> "removed  tag" -> "removed
+                        // tag"
+                        i++;
+                    }
+                } else if ( rawName[i] == ',' ) {
+                    i++;
+                } else {
+                    lastChar = rawName[i];
+                    resultStream << lastChar;
+                    i++;
+                }
+            }
+            return trim( resultStream.str() );
+        }
+    } // namespace
+
+    void StreamingReporterUnwindContext::addAssertion(
+        AssertionStats const& assertionStats ) {
+        allTerminatedAssertions.push_back( assertionStats );
+        allExpandedAssertionStatements.push_back(
+            assertionStats.assertionResult.getExpandedExpression() );
+        for ( auto const& info : assertionStats.infoMessages ) {
+            stdOut += "INFO: " + info.message + "\n";
+        }
+    }
+    bool StreamingReporterUnwindContext::unwindIsComplete() const {
+        return !allSectionStats.empty() &&
+               allSectionStats.size() == allSectionInfo.size();
+    }
+    void StreamingReporterUnwindContext::clear() {
+        allSectionInfo.clear();
+        allSectionStats.clear();
+        allTerminatedAssertions.clear();
+        allExpandedAssertionStatements.clear();
+    }
+    bool StreamingReporterUnwindContext::hasFailures() const {
+        for ( auto const& assertion : allTerminatedAssertions ) {
+            if ( !assertion.assertionResult.isOk() ) {
+                return true;
+            }
+        }
+        return false;
+    }
+    bool StreamingReporterUnwindContext::hasMessages() const {
+        return !stdOut.empty() || !stdErr.empty();
+    }
+    std::string StreamingReporterUnwindContext::constructFullName() const {
+        ReusableStringStream nameStream;
+        for ( size_t i = 0; i < allSectionInfo.size(); i++ ) {
+            nameStream << ( i > 0 ? " / " : "" )
+                       << getSanitizedTrxName( allSectionInfo[i].name );
+        }
+        return nameStream.str();
+    }
+    std::string StreamingReporterUnwindContext::constructErrorMessage() const {
+        ReusableStringStream errorMessageStream;
+        for ( size_t i = 0; i < allTerminatedAssertions.size(); i++ ) {
+            auto&& assertionInfo = allTerminatedAssertions[i];
+            auto&& result = assertionInfo.assertionResult;
+            if ( result.getResultType() == ResultWas::ExpressionFailed ) {
+                // Here we'll write the failure and also its expanded form, if
+                // available: REQUIRE( x == 1 ) REQUIRE( x == 1 ) as REQUIRE ( 2
+                // == 1 )
+                errorMessageStream << result.getExpressionInMacro();
+                if ( allExpandedAssertionStatements[i] !=
+                     result.getExpression() ) {
+                    errorMessageStream
+                        << " as " << result.getTestMacroName() << " ( "
+                        << allExpandedAssertionStatements[i] << " ) ";
+                }
+                errorMessageStream << '\n';
+            } else if ( result.getResultType() == ResultWas::ThrewException ) {
+                errorMessageStream << "Exception: " << result.getMessage()
+                                   << '\n';
+            } else if ( !result.isOk() ) {
+                errorMessageStream << "Failed: " << result.getMessage() << '\n';
+            }
+        }
+        return errorMessageStream.str();
+    }
+    std::string StreamingReporterUnwindContext::constructStackMessage() const {
+        ReusableStringStream stackStream;
+        for ( auto const& assertionInfo : allTerminatedAssertions ) {
+            auto&& sourceInfo = assertionInfo.assertionResult.getSourceInfo();
+            stackStream << "at Catch.Module.Method() in " << sourceInfo.file
+                        << ":line " << sourceInfo.line << '\n';
+        }
+        return stackStream.str();
+    }
+    std::string StreamingReporterUnwindContext::constructDuration() const {
+        return nanosToDurationString( elapsedNanoseconds );
+    }
+
+    VstestEntry::VstestEntry( std::string name ):
+        name( getSanitizedTrxName( name ) ),
+        testId( createGuid() ),
+        executionId( createGuid() ) {}
+
+    bool VstestEntry::hasFailures() const {
+        for ( auto&& unwindContext : unwindContexts ) {
+            if ( unwindContext.hasFailures() ) {
+                return true;
+            }
+        }
+        return false;
+    }
+    std::string VstestEntry::constructDuration() const {
+        auto total = 0ull;
+        for ( auto&& context : unwindContexts ) {
+            total += context.elapsedNanoseconds;
+        }
+        return nanosToDurationString( total );
+    }
+
+    VstestReporter::VstestReporter( ReporterConfig const& _config ):
+        StreamingReporterBase( _config ),
+        m_xml( _config.stream() ),
+        m_defaultTestListId{ createGuid() } {
+        m_reporterPrefs.shouldRedirectStdOut = true;
+        m_reporterPrefs.shouldReportAllAssertions = true;
+        m_config = _config.fullConfig();
+    }
+
+    // StreamingReporterBase implementation
+
+    void VstestReporter::noMatchingTestCases( std::string const& s ) {
+        StreamingReporterBase::noMatchingTestCases( s );
+    }
+
+    void VstestReporter::testRunStarting( TestRunInfo const& testInfo ) {
+        StreamingReporterBase::testRunStarting( testInfo );
+    }
+
+    void VstestReporter::testGroupStarting( GroupInfo const& groupInfo ) {
+        m_runName = groupInfo.name;
+        StreamingReporterBase::testGroupStarting( groupInfo );
+    }
+
+    void VstestReporter::testCaseStarting( TestCaseInfo const& testInfo ) {
+        m_currentTestCaseTags = testInfo.tags;
+        StreamingReporterBase::testCaseStarting( testInfo );
+    }
+
+    void VstestReporter::sectionStarting( SectionInfo const& sectionInfo ) {
+        StreamingReporterBase::sectionStarting( sectionInfo );
+        if ( m_currentUnwindContext.allSectionInfo.empty() ) {
+            m_timer.start();
+            m_currentUnwindContext.startTimestamp = currentTimestamp();
+        }
+        m_currentUnwindContext.allSectionInfo.push_back( sectionInfo );
+    }
+
+    void VstestReporter::assertionStarting( AssertionInfo const& ) {}
+
+    bool
+    VstestReporter::assertionEnded( AssertionStats const& assertionStats ) {
+        m_currentUnwindContext.addAssertion( assertionStats );
+        return true;
+    }
+
+    void VstestReporter::sectionEnded( SectionStats const& sectionStats ) {
+        m_currentUnwindContext.allSectionStats.push_back( sectionStats );
+
+        if ( m_currentUnwindContext.unwindIsComplete() ) {
+            flushCurrentUnwindContext( &sectionStats );
+        }
+
+        StreamingReporterBase::sectionEnded( sectionStats );
+    }
+
+    void VstestReporter::testCaseEnded( TestCaseStats const& testCaseStats ) {
+        StreamingReporterBase::testCaseEnded( testCaseStats );
+    }
+
+    void
+    VstestReporter::testGroupEnded( TestGroupStats const& testGroupStats ) {
+        StreamingReporterBase::testGroupEnded( testGroupStats );
+    }
+
+    void VstestReporter::testRunEnded( TestRunStats const& testRunStats ) {
+        if ( !m_currentUnwindContext.allTerminatedAssertions.empty() ) {
+            // The test run ended unexpectedly (without matched section
+            // starts and section ends), which usually happens because of a
+            // segfault or similar in a test. Flush the last entry so we get
+            // the info.
+            m_currentUnwindContext.stdErr +=
+                "<Test aborted unexpectedly; output may be incomplete>\n";
+            flushCurrentUnwindContext();
+        }
+        emitTrx();
+        StreamingReporterBase::testRunEnded( testRunStats );
+    }
+
+    // .trx emission
+    void VstestReporter::startTestRunElement() {
+        m_xml.startElement( "TestRun" );
+        m_xml.writeAttribute( "id", createGuid() );
+        m_xml.writeAttribute( "name", m_runName );
+        m_xml.writeAttribute( "runUser", "Catch2VstestReporter" );
+        m_xml.writeAttribute(
+            "xmlns",
+            "http://microsoft.com/schemas/VisualStudio/TeamTest/2010" );
+    }
+
+    void VstestReporter::writeTimesElement() {
+        auto now = currentTimestamp();
+        auto startTime = now;
+        auto endTime = now;
+
+        if ( !m_testEntries.empty() ) {
+            auto&& firstUnwind = m_testEntries[0].unwindContexts[0];
+            auto&& lastEntry = m_testEntries[m_testEntries.size() - 1];
+            auto&& lastUnwind =
+                lastEntry.unwindContexts[lastEntry.unwindContexts.size() - 1];
+            startTime = firstUnwind.startTimestamp;
+            endTime = lastUnwind.endTimestamp;
+        }
+
+        m_xml.scopedElement( "Times" )
+            .writeAttribute( "creation", startTime )
+            .writeAttribute( "queuing", startTime )
+            .writeAttribute( "start", startTime )
+            .writeAttribute( "finish", endTime );
+    }
+
+    void VstestReporter::writeUnwindOutput(
+        StreamingReporterUnwindContext const& unwindContext ) {
+        if ( unwindContext.hasMessages() || unwindContext.hasFailures() ) {
+            auto outputElement = m_xml.scopedElement( "Output" );
+            if ( !unwindContext.stdOut.empty() ) {
+                m_xml.scopedElement( "StdOut" )
+                    .writeText( unwindContext.stdOut, XmlFormatting::Newline );
+            }
+            if ( !unwindContext.stdErr.empty() ) {
+                m_xml.scopedElement( "StdErr" )
+                    .writeText( unwindContext.stdErr, XmlFormatting::Newline );
+            }
+            auto errorMessage = unwindContext.constructErrorMessage();
+            auto stackMessage = unwindContext.constructStackMessage();
+            if ( !errorMessage.empty() || !stackMessage.empty() ) {
+                auto errorInfoElement = m_xml.scopedElement( "ErrorInfo" );
+                if ( !errorMessage.empty() ) {
+                    m_xml.scopedElement( "Message" ).writeText( errorMessage, XmlFormatting::Newline );
+                }
+                if ( !stackMessage.empty() ) {
+                    m_xml.scopedElement( "StackTrace" )
+                        .writeText( stackMessage, XmlFormatting::Newline );
+                }
+            }
+        }
+    }
+
+    void
+    VstestReporter::startUnitTestResultElement( const std::string& executionId,
+                                                const std::string& testId,
+                                                const std::string& name ) {
+        constexpr auto g_vsTestType = "13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b";
+        constexpr auto g_computerName = "localhost";
+
+        m_xml.startElement( "UnitTestResult" );
+        m_xml.writeAttribute( "executionId", executionId );
+        m_xml.writeAttribute( "testId", testId );
+        m_xml.writeAttribute( "testName", name );
+        m_xml.writeAttribute( "computerName", g_computerName );
+        m_xml.writeAttribute( "testType", g_vsTestType );
+        m_xml.writeAttribute( "testListId", m_defaultTestListId );
+    }
+
+    void VstestReporter::writeInnerResult(
+        StreamingReporterUnwindContext const& unwindContext,
+        const std::string& parentExecutionId ) {
+        auto name = unwindContext.constructFullName();
+        name = name.empty() ? "Unknown test" : name;
+
+        startUnitTestResultElement( createGuid(), createGuid(), name );
+        m_xml.writeAttribute( "parentExecutionId", parentExecutionId );
+        m_xml.writeAttribute( "resultType", "DataDrivenDataRow" );
+        m_xml.writeAttribute( "startTime", unwindContext.startTimestamp );
+        m_xml.writeAttribute( "endTime", unwindContext.endTimestamp );
+        m_xml.writeAttribute( "duration", unwindContext.constructDuration() );
+        m_xml.writeAttribute(
+            "outcome", unwindContext.hasFailures() ? "Failed" : "Passed" );
+        writeUnwindOutput( unwindContext );
+        m_xml.endElement(); // UnitTestResult
+    }
+
+    void VstestReporter::writeToplevelResult( VstestEntry const& testEntry ) {
+        startUnitTestResultElement(
+            testEntry.executionId, testEntry.testId, testEntry.name );
+
+        auto&& firstUnwind = testEntry.unwindContexts[0];
+        auto&& lastUnwind =
+            testEntry.unwindContexts[testEntry.unwindContexts.size() - 1];
+        m_xml.writeAttribute( "startTime", firstUnwind.startTimestamp );
+        m_xml.writeAttribute( "endTime", lastUnwind.endTimestamp );
+        m_xml.writeAttribute( "duration", testEntry.constructDuration() );
+        m_xml.writeAttribute( "outcome",
+                              testEntry.hasFailures() ? "Failed" : "Passed" );
+
+        if ( testEntry.unwindContexts.size() == 1 ) {
+            // This is a flat test (no sections/sub-results) and gets its
+            // details in the top element from its single unwind
+            writeUnwindOutput( testEntry.unwindContexts[0] );
+        } else {
+            m_xml.writeAttribute( "resultType", "DataDrivenTest" );
+
+            auto innerResultsElement = m_xml.scopedElement( "InnerResults" );
+            for ( auto const& unwindContext : testEntry.unwindContexts ) {
+                writeInnerResult( unwindContext, testEntry.executionId );
+            }
+        }
+
+        m_xml.endElement(); // UnitTestResult
+    }
+
+    void VstestReporter::writeResults() {
+        auto resultsElement = m_xml.scopedElement( "Results" );
+        for ( auto const& testEntry : m_testEntries ) {
+            writeToplevelResult( testEntry );
+        }
+    }
+
+    void VstestReporter::writeTestDefinitions() {
+        auto testDefinitionsElement = m_xml.scopedElement( "TestDefinitions" );
+        for ( auto const& testEntry : m_testEntries ) {
+            auto unitTestElement = m_xml.scopedElement( "UnitTest" );
+            m_xml.writeAttribute( "name", testEntry.name );
+            m_xml.writeAttribute( "storage", m_runName );
+            m_xml.writeAttribute( "id", testEntry.testId );
+            if ( !testEntry.tags.empty() ) {
+                auto testCategoriesElement =
+                    m_xml.scopedElement( "TestCategory" );
+                for ( auto const& tag : testEntry.tags ) {
+                    m_xml.scopedElement( "TestCategoryItem" )
+                        .writeAttribute( "TestCategory", tag );
+                }
+            }
+            m_xml.scopedElement( "Execution" )
+                .writeAttribute( "id", testEntry.executionId );
+            m_xml.scopedElement( "TestMethod" )
+                .writeAttribute( "codeBase", m_runName )
+                .writeAttribute( "adapterTypeName",
+                                 "executor://mstestadapter/v2" )
+                .writeAttribute( "className", "Catch2.Test" )
+                .writeAttribute( "name", testEntry.name );
+        }
+    }
+
+    void VstestReporter::writeTestEntries() {
+        auto testEntriesElement = m_xml.scopedElement( "TestEntries" );
+        for ( auto const& testEntry : m_testEntries ) {
+            m_xml.scopedElement( "TestEntry" )
+                .writeAttribute( "testId", testEntry.testId )
+                .writeAttribute( "executionId", testEntry.executionId )
+                .writeAttribute( "testListId", m_defaultTestListId );
+        }
+    }
+
+    void VstestReporter::writeTestLists() {
+        auto testListsElement = m_xml.scopedElement( "TestLists" );
+        m_xml.scopedElement( "TestList" )
+            .writeAttribute( "name", "Default test list for Catch2" )
+            .writeAttribute( "id", m_defaultTestListId );
+    }
+
+    void VstestReporter::writeSummaryElement() {
+        auto resultSummaryElement = m_xml.scopedElement( "ResultSummary" );
+
+        auto hasFailures = false;
+        for ( auto const& testEntry : m_testEntries ) {
+            if ( testEntry.hasFailures() ) {
+                hasFailures = true;
+                break;
+            }
+        }
+        resultSummaryElement.writeAttribute(
+            "outcome", hasFailures ? "Failed" : "Passed" );
+
+        if ( !m_config->attachment().empty() ) {
+            auto resultFilesElement = m_xml.scopedElement( "ResultFiles" );
+            m_xml.scopedElement( "ResultFile" )
+                .writeAttribute( "path", m_config->attachment() );
+        }
+    }
+
+    void VstestReporter::emitTrx() {
+        startTestRunElement();
+        writeTimesElement();
+        writeResults();
+        writeTestDefinitions();
+        writeTestEntries();
+        writeTestLists();
+        writeSummaryElement();
+        m_xml.endElement(); // TestRun
+    }
+
+    void VstestReporter::flushCurrentUnwindContext(
+        const SectionStats* lastSectionStats ) {
+        if ( m_currentUnwindContext.allSectionStats.empty() ) {
+            return;
+        }
+
+        if ( lastSectionStats != nullptr ) {
+            auto&& lastSectionInfo = lastSectionStats->sectionInfo;
+            // Info messages and other input will show up *before* sections
+            // get to serialize their redirected data. Delineate when we're
+            // appending in this manner to avoid the perception of timing
+            // mismatch (all info messages will show up first, not
+            // interleaved with printf output, as an example)
+            if ( !m_currentUnwindContext.stdOut.empty() &&
+                 !lastSectionInfo.stdOut.empty() ) {
+                m_currentUnwindContext.stdOut +=
+                    "--- full standard output follows ---\n";
+            }
+            m_currentUnwindContext.stdOut += lastSectionInfo.stdOut;
+            if ( !m_currentUnwindContext.stdErr.empty() &&
+                 !lastSectionInfo.stdErr.empty() ) {
+                m_currentUnwindContext.stdErr +=
+                    "--- full standard error output follows ---\n";
+            }
+            m_currentUnwindContext.stdErr += lastSectionInfo.stdErr;
+        }
+
+        m_currentUnwindContext.elapsedNanoseconds =
+            m_timer.getElapsedNanoseconds();
+        auto&& currentStats = m_currentUnwindContext.allSectionStats;
+        auto&& currentToplevelName =
+            currentStats[currentStats.size() - 1].sectionInfo.name;
+        bool isUnwindFromCurrentTest =
+            !m_testEntries.empty() &&
+            m_testEntries[m_testEntries.size() - 1].name ==
+                getSanitizedTrxName( currentToplevelName );
+
+        if ( !isUnwindFromCurrentTest ) {
+            VstestEntry newEntry{ currentToplevelName };
+            newEntry.tags = m_currentTestCaseTags;
+            m_testEntries.push_back( std::move( newEntry ) );
+        }
+
+        m_currentUnwindContext.endTimestamp = currentTimestamp();
+        auto&& currentTest = m_testEntries[m_testEntries.size() - 1];
+        currentTest.unwindContexts.push_back(
+            std::move( m_currentUnwindContext ) );
+
+        m_currentUnwindContext.clear();
+    }
+    CATCH_REGISTER_REPORTER( "vstest", VstestReporter )
+
+} // end namespace Catch
+// end catch_reporter_vstest.cpp
 // start catch_reporter_xml.cpp
 
 #if defined(_MSC_VER)
@@ -17796,3 +18519,4 @@ using Catch::Detail::Approx;
 // end catch_reenable_warnings.h
 // end catch.hpp
 #endif // TWOBLUECUBES_SINGLE_INCLUDE_CATCH_HPP_INCLUDED
+

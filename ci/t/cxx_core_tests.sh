@@ -19,7 +19,7 @@ TEST_CODE="$BINARY_DIR/core_tests"
 
 runCatchSuite \
   TESTRUNNER \
-  "test-$T-$PLATFORM-$RANDOM" \
+  "test-catch-$T-$PLATFORM-$RANDOM" \
   "$PLATFORM" \
   "" \
   "$T" \

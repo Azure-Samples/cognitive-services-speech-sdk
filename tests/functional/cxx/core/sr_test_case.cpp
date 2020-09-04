@@ -45,7 +45,7 @@ TEST_CASE("ThreadService: Term not initialized", "[sr]")
     REQUIRE_NOTHROW(service->Term());
 }
 
-TEST_CASE("ThreadService: Term twice, term is idempotent", "[sr]")
+TEST_CASE("ThreadService: Term twice - term is idempotent", "[sr]")
 {
     auto service = make_shared<CSpxThreadService>();
     REQUIRE_NOTHROW(service->Term());

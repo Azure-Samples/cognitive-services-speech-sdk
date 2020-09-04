@@ -39,16 +39,16 @@ function runSwiftSuite {
   )
   deviceSettings=(--device "iPhone 8" --os "12.4")
 
-  startTests "$testStateVarPrefix" "$output" "$platform" "$redactStrings"
-  startSuite "$testStateVarPrefix" "$testsuiteName"
+  startConstructedTestRunOutput "$testStateVarPrefix" "$output" "$platform" "$redactStrings"
+  startConstructedSuiteOutput "$testStateVarPrefix" "$testsuiteName"
 
   for testCase in "${testCases[@]}"; do
     runTest "$testStateVarPrefix" "$testCase" "$timeoutSeconds" \
       $testCommand $testCase "${deviceSettings[@]}" --redact "$redactStrings" || true
   done
 
-  endSuite "$testStateVarPrefix"
-  endTests "$testStateVarPrefix"
+  endConstructedSuiteOutput "$testStateVarPrefix"
+  endConstructedTestRunOutput "$testStateVarPrefix"
 }
 
 runSwiftSuite \

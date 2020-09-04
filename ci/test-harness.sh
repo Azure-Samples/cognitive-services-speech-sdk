@@ -11,7 +11,8 @@ SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
 # Pull in common functions
 . "$SCRIPT_DIR/functions.sh"
 
-function startTests {
+# Create an artificial result .xml file for an arbitrary test and populate its root element
+function startConstructedTestRunOutput {
   # TODO error on non-alpha:
   local _testStateVarPrefix=$1
   local outputRef=${_testStateVarPrefix}_output
@@ -27,9 +28,8 @@ function startTests {
 XML
 }
 
-function startSuite {
+function startConstructedSuiteOutput {
   local _testStateVarPrefix=$1
-  local outputRef=${_testStateVarPrefix}_output
   local platformRef=${_testStateVarPrefix}_platform
 
   # Reset suite state
@@ -43,7 +43,7 @@ function startSuite {
   eval ${_testStateVarPrefix}_classname=\"$2.global\"
 }
 
-function endSuite {
+function endConstructedSuiteOutput {
   local _testStateVarPrefix="$1"
 
   local errorsRef=${_testStateVarPrefix}_errors
@@ -75,7 +75,7 @@ XML
   rm -f ${!outputRef}.{out,xml.parts}
 }
 
-function endTests {
+function endConstructedTestRunOutput {
   local _testStateVarPrefix="$1"
   local outputRef=${_testStateVarPrefix}_output
   local allpassRef=${_testStateVarPrefix}_allpass
@@ -92,12 +92,18 @@ function redact {
 }
 
 function runTest {
-  local testOutput
+  # When given a specific output destination, emit to that; otherwise create temporary files
+  # to be combined later (should be used in conjunction with endConstructedSuiteOutput)
+  local testOutput tempOutputRef
   testOutput=
   if [[ $1 = --output ]]; then
     testOutput="$2"
     shift 2
+  else
+    tempOutputRef=${1}_output
+    testOutput=${!tempOutputRef}.out
   fi
+
   local _testStateVarPrefix="$1"
   local TEST_NAME="$2"
   local TIMEOUT_SECONDS="$3"
@@ -107,7 +113,6 @@ function runTest {
   local testsRef=${_testStateVarPrefix}_tests
   local failuresRef=${_testStateVarPrefix}_failures
   local timeRef=${_testStateVarPrefix}_time
-  local outputRef=${_testStateVarPrefix}_output
   local testsuiteNameRef=${_testStateVarPrefix}_testsuiteName
   local classnameRef=${_testStateVarPrefix}_classname
   local redactStringsRef=${_testStateVarPrefix}_redactStrings
@@ -123,44 +128,47 @@ function runTest {
 
   print_vars = TEST_NAME TIMEOUT_SECONDS COMMAND - |
     redact ${!redactStringsRef} |
-    tee -a "${!outputRef}.out"
+    tee -a "$testOutput"
 
-  local START_SECONDS EXIT_CODE TIME_SECONDS TAIL
+  local START_SECONDS EXIT_CODE TIME_SECONDS
 
   START_SECONDS=$(get_time)
   (
   set +o pipefail
-  $cmdTimeout -k 5s $TIMEOUT_SECONDS ${callStdbuf[@]} "$@" 2>&1 | redact ${!redactStringsRef} |
-    if [[ -n $testOutput ]]; then tee "$testOutput"; else cat; fi \
-      1>> "${!outputRef}.out"
+  $cmdTimeout -k 5s $TIMEOUT_SECONDS ${callStdbuf[@]} "$@" 2>&1 |
+    redact ${!redactStringsRef} >> "$testOutput"
   exit ${PIPESTATUS[0]}
   )
   EXIT_CODE=$?
 
   TIME_SECONDS=$(get_seconds_elapsed "$START_SECONDS")
-  TAIL="$(tail -10 "${!outputRef}.out")"
 
   print_vars EXIT_CODE TIME_SECONDS = |
-    tee -a "${!outputRef}.out"
+    tee -a "$testOutput"
   echo
 
-  case $EXIT_CODE in
-    0)
-      printf '<testcase classname="%s" name="%s" time="%s"/>\n' \
-        "${!classnameRef}" "$TEST_NAME" "$TIME_SECONDS" >> "${!outputRef}.xml.parts"
-      ;;
-      # TODO need to distinguish error (e.g., 124 - timeout) from failure
-    *)
-      printf '<testcase classname="%s" name="%s" time="%s">\n  <failure message="%s"><![CDATA[%s]]></failure>\n</testcase>\n' \
-        "${!classnameRef}" \
-        "$TEST_NAME" \
-        "$TIME_SECONDS" \
-        "EXITCODE-$EXIT_CODE" \
-        "$TAIL" \
-        >> "${!outputRef}.xml.parts"
+  if [[ -n $tempOutputRef ]];
+  then
+    # This test is being run with constructed output via temporary files. Let's fake some readable
+    # results.
+    case $EXIT_CODE in
+      0)
+        printf '<testcase classname="%s" name="%s" time="%s"/>\n' \
+          "${!classnameRef}" "$TEST_NAME" "$TIME_SECONDS" >> "${!tempOutputRef}.xml.parts"
+        ;;
+        # TODO need to distinguish error (e.g., 124 - timeout) from failure
+      *)
+        printf '<testcase classname="%s" name="%s" time="%s">\n  <failure message="%s"><![CDATA[%s]]></failure>\n</testcase>\n' \
+          "${!classnameRef}" \
+          "$TEST_NAME" \
+          "$TIME_SECONDS" \
+          "EXITCODE-$EXIT_CODE" \
+          `tail -n 10 $testOutput` \
+          >> "${!tempOutputRef}.xml.parts"
       eval "(( ++$failuresRef ))"
       ;;
   esac
+  fi
 
   eval $timeRef=\"$(perl -e "printf '%0.3f', ${!timeRef} + $TIME_SECONDS")\"
 
@@ -169,23 +177,18 @@ function runTest {
   return $EXIT_CODE
 }
 
-function addToTestOutput {
-  local _testStateVarPrefix="$1"
-  shift
-
-  local outputRef=${_testStateVarPrefix}_output
-  local redactStringsRef=${_testStateVarPrefix}_redactStrings
-
-  "$@" |
-    redact ${!redactStringsRef} |
-    tee -a "${!outputRef}.out"
+function sanitize() {
+   local s="${1?need a string}" # receive input in first argument
+   s="${s//[^[:alnum:]]/-}"     # replace all non-alnum characters to -
+   s="${s//+(-)/-/g}"           # convert multiple - to single -
+   s="${s/#-}"                  # remove - from start
+   s="${s/%-}"                  # remove - from end
+   _sanitized="${s,,}"
 }
 
 # Run Catch2 test suite, each test-case in a separate process, for robustness.
-# Use the Catch2 XML reporter is streaming and will have more details than the
-# JUnit one in case of crashes.
 function runCatchSuite {
-  local usage testStateVarPrefix output platform redactStrings testsuiteName timeoutSeconds testCases testCaseIndex catchOut exitCode pattern
+  local usage testStateVarPrefix output platform redactStrings testsuiteName timeoutSeconds testCases testCaseIndex catchOut logPath exitCode pattern
   usage="Usage: ${FUNCNAME[0]} <testStateVarPrefix> <output> <platform> <redactStrings> <testsuiteName> <timeoutSeconds> <pattern> <command...>"
   testStateVarPrefix="${1?$usage}"
   output="${2?$usage}"
@@ -220,37 +223,27 @@ readarray -t testCases < "$TESTCASE_FILE"
     return 1
   }
 
-  startTests "$testStateVarPrefix" "$output" "$platform" "$redactStrings"
-  startSuite "$testStateVarPrefix" "$testsuiteName"
-
-  # Remove individual catch output files, ignoring errors
-  rm -f "catch$output-"*.{xml,txt}
-
   testCaseIndex=0
   for i in $(seq 1 3); do
     failedTestCases=()
      for testCase in "${testCases[@]}"; do
        ((testCaseIndex++))
-       catchOut="catch$output-$testCaseIndex"
-       runTest --output "$catchOut.txt" "$testStateVarPrefix" "$testCase" "$timeoutSeconds" \
-       "$@" --reporter xml --durations yes --out "$catchOut.xml" "$testCase" 
+       sanitize "$testCase"
+       catchOut=`printf "%s-%s-%03d" $output $_sanitized $testCaseIndex`
+       logPath="$catchOut.log"
+       echo `printf "Emitting full result details to: %s" $logPath`
+       runTest --output "$logPath" "$testStateVarPrefix" "$testCase" "$timeoutSeconds" \
+       "$@" --reporter vstest --durations yes --out "$catchOut.trx" --attachment "../../$logPath" "$testCase" 
        exitCode=$?
        if [ $exitCode -ne 0 ] ; then
          failedTestCases=( "${failedTestCases[@]}" "$testCase" )
-         if [[ -s $catchOut.xml ]] && [ $i == 3 ]; then
-           echo 'Test failed. Potential details here (cf. success="false"), or in the logs included in the test results file:'
-           addToTestOutput "$testStateVarPrefix" cat "$catchOut.xml"
-           if [[ $(uname) = Linux ]] && grep -q -F $'<FatalErrorCondition\n<Exception' "$catchOut.xml"; then
-             addToTestOutput "$testStateVarPrefix" perl "$SCRIPT_DIR/decode-stack.pl" "$catchOut.txt"
-           fi
+         if [ $i == 3 ]; then
+           echo 'Test failed. Potential details in the logs included in the test results files.'
          fi
        fi
       done
     testCases=("${failedTestCases[@]}")
   done
-
-  endSuite "$testStateVarPrefix"
-  endTests "$testStateVarPrefix"
 
   totalFailedTest=${#testCases[@]}
   exit $totalFailedTest

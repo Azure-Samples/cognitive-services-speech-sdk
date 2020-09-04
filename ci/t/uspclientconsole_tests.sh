@@ -44,8 +44,8 @@ if [[ $TESTSET != dev ]]; then
   )
 fi
 
-startTests TESTRUNNER "test-$T-$PLATFORM" "$PLATFORM" "$SPEECHSDK_SPEECH_KEY"
-startSuite TESTRUNNER "$T"
+startConstructedTestRunOutput TESTRUNNER "test-$T-$PLATFORM" "$PLATFORM" "$SPEECHSDK_SPEECH_KEY"
+startConstructedSuiteOutput TESTRUNNER "$T"
 
 TIMEOUT_SECONDS=30
 
@@ -57,5 +57,5 @@ for ((testIndex = 0; testIndex < ${#tests[@]}; testIndex += 2)); do
     "$TEST_CODE" auth:$SPEECHSDK_SPEECH_KEY region:$SPEECHSDK_SPEECH_REGION type:speech $testArg $audioFile
 done
 
-endSuite TESTRUNNER
-endTests TESTRUNNER
+endConstructedSuiteOutput TESTRUNNER
+endConstructedTestRunOutput TESTRUNNER

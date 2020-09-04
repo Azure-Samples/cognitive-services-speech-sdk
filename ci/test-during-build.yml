@@ -49,15 +49,25 @@ steps:
 - ${{ parameters.extraTests }}
 - task: PublishTestResults@2
   inputs:
-    testResultsFiles: '**/test-*.xml'
+    testRunner: VSTest
+    testResultsFiles: '**/test-csharp*trx'
+    testRunTitle: 'C# end-to-end tests $(SPEECHSDK_TARGET_PLATFORM)-$(SPEECHSDK_BUILD_CONFIGURATION)'
   condition: eq(variables['SPEECHSDK_RUN_TESTS'], 'true')
-  displayName: Publish test results (.xml)
+  displayName: Publish test results (C# .trx)
 - task: PublishTestResults@2
   inputs:
     testRunner: VSTest
-    testResultsFiles: '**/test-*trx'
+    testResultsFiles: '**/test-catch*trx'
+    testRunTitle: 'Catch2 Cxx Tests $(SPEECHSDK_TARGET_PLATFORM)-$(SPEECHSDK_BUILD_CONFIGURATION)'
+    platform: '$(SPEECHSDK_TARGET_PLATFORM)'
+    configuration: '$(SPEECHSDK_BUILD_CONFIGURATION)'
   condition: eq(variables['SPEECHSDK_RUN_TESTS'], 'true')
-  displayName: Publish test results (.trx)
+  displayName: Publish test results (Catch2 .trx)
+- task: PublishTestResults@2
+  inputs:
+    testResultsFiles: '**/test-*.xml'
+  condition: eq(variables['SPEECHSDK_RUN_TESTS'], 'true')
+  displayName: Publish test results (misc .xml)
 - task: PublishBuildArtifacts@1
   condition: and(eq(variables['SPEECHSDK_RUN_TESTS'], 'true'), or(failed(), ${{ parameters.continueOnTestFailure }}))
   displayName: 'Publish test console and debug artifacts'
@@ -65,4 +75,3 @@ steps:
     PathtoPublish: 'vstsconsolelog'
     ArtifactName: TestLog_$(SPEECHSDK_TARGET_PLATFORM)-$(SPEECHSDK_BUILD_CONFIGURATION)
     publishLocation: Container
-

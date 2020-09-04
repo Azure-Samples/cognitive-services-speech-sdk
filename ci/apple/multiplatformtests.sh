@@ -76,8 +76,8 @@ function runXcodeSuite {
 
   testCases=( "${testCases[@]/%/" ${xcodeExtraArgs[@]}"}" )
 
-  startTests "$testStateVarPrefix" "$output" "$platform" "$redactStrings"
-  startSuite "$testStateVarPrefix" "$testsuiteName"
+  startConstructedTestRunOutput "$testStateVarPrefix" "$output" "$platform" "$redactStrings"
+  startConstructedSuiteOutput "$testStateVarPrefix" "$testsuiteName"
 
   # Remove individual catch output files, ignoring errors
   rm -f "catch$output-"*.{xml,txt}
@@ -87,8 +87,8 @@ function runXcodeSuite {
       "${test_command[@]}" $testCase ${USEGUI} --redact "$redactStrings" || true
   done
 
-  endSuite "$testStateVarPrefix"
-  endTests "$testStateVarPrefix"
+  endConstructedSuiteOutput "$testStateVarPrefix"
+  endConstructedTestRunOutput "$testStateVarPrefix"
 }
 
 runXcodeSuite \

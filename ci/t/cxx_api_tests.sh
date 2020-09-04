@@ -183,7 +183,7 @@ fi
 
 runCatchSuite \
   TESTRUNNER \
-  "test-$T-$PLATFORM-$RANDOM" \
+  "test-catch-$T-$PLATFORM-$RANDOM" \
   "$PLATFORM" \
   "" \
   "$T" \
