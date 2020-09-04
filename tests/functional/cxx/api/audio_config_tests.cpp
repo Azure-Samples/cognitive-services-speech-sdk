@@ -236,5 +236,30 @@ TEST_CASE("Audio Basics", "[api][cxx][audio]")
             auto result = future.get();
             requireRecognizedSpeech(result);
         }
+
+        WHEN("pushing audio data twice with an empty frame in between.")
+        {
+            pushData(100000, 0, 0, 0, false);
+            pushStream->Write(NULL, 0);
+
+            auto result = make_shared<RecoPhrases>();
+            ConnectCallbacks(recognizer.get(), result);
+
+            recognizer->StartContinuousRecognitionAsync().get();
+            WaitForResult(result->ready.get_future(), WAIT_FOR_RECO_RESULT_TIME);
+            recognizer->StopContinuousRecognitionAsync().get();
+            SPXTEST_REQUIRE(!result->phrases.empty());
+            SPXTEST_REQUIRE(StringComparisions::AssertFuzzyMatch(result->phrases[0].Text, AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH].Utterances["en-US"][0].Text));
+
+            result = make_shared<RecoPhrases>();
+            ConnectCallbacks(recognizer.get(), result);
+            stream = AudioDataStream::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH).c_str());
+            pushData(100000);
+            recognizer->StartContinuousRecognitionAsync().get();
+            WaitForResult(result->ready.get_future(), WAIT_FOR_RECO_RESULT_TIME);
+            recognizer->StopContinuousRecognitionAsync().get();
+            SPXTEST_REQUIRE(!result->phrases.empty());
+            SPXTEST_REQUIRE(StringComparisions::AssertFuzzyMatch(result->phrases[0].Text, AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH].Utterances["en-US"][0].Text));
+        }
     }
 }

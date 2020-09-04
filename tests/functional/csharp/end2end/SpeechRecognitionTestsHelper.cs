@@ -260,7 +260,19 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        public static void AssertFuzzyMatching(string[] expectedUtterances, string[] actualUtterances, int tolerance)
+        public static void AssertFuzzyMatching(Utterance[] expectedUtterances, string[] actualUtterances, int tolerance = 10)
+        {
+            List<string> expected = new List<string>(expectedUtterances.Length);
+
+            foreach (var utterance in expectedUtterances)
+            {
+                expected.Add(utterance.Text);
+            }
+
+            AssertFuzzyMatching(expected.ToArray(), actualUtterances, tolerance);
+        }
+
+        public static void AssertFuzzyMatching(string[] expectedUtterances, string[] actualUtterances, int tolerance = 10)
         {
             // Checking text results.
             var texts = actualUtterances.Select(t => t).Where(t => !string.IsNullOrEmpty(t)).ToList();
