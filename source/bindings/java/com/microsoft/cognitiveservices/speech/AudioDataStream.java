@@ -88,6 +88,10 @@ public final class AudioDataStream implements Closeable
      * @return A bool indicating the result.
      */
     public boolean canReadData(long pos, long bytesRequested) {
+        if (pos < 0 ) {
+            throw new IndexOutOfBoundsException();
+        }
+
         return canReadData(streamHandle, pos, bytesRequested);
     }
 
@@ -113,6 +117,10 @@ public final class AudioDataStream implements Closeable
      * @return The number of bytes filled, or 0 in case the stream hits its end and there is no more data available.
      */
     public long readData(long pos, byte[] dataBuffer) {
+        if (pos < 0) {
+            throw new IndexOutOfBoundsException();
+        }
+
         IntRef filledSizeRef = new IntRef(0);
         Contracts.throwIfFail(readData(streamHandle, dataBuffer, pos, filledSizeRef));
         return filledSizeRef.getValue();
@@ -158,6 +166,10 @@ public final class AudioDataStream implements Closeable
      * @param pos Position to be set.
      */
     public void setPosition(long pos) {
+        if (pos < 0) {
+            throw new IndexOutOfBoundsException();
+        }
+
         Contracts.throwIfFail(setPosition(streamHandle, pos));
     }
 

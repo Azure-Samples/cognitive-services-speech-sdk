@@ -285,14 +285,12 @@ uint32_t CSpxAudioDataStream::GetPosition()
 
 void CSpxAudioDataStream::SetPosition(uint32_t pos)
 {
-    SPX_IFTRUE_THROW_HR(pos > m_inventorySize, SPXERR_INVALID_ARG);
-
     m_position = pos;
 }
 
 uint32_t CSpxAudioDataStream::Read(uint8_t* buffer, uint32_t bufferSize)
 {
-    SPX_DBG_TRACE_VERBOSE("CSpxAudioDataStream::Read: is called");
+    SPX_DBG_TRACE_VERBOSE("CSpxAudioDataStream::%s: is called", __FUNCTION__);
     SPX_IFTRUE_THROW_HR(buffer == nullptr, SPXERR_INVALID_ARG);
 
     // Wait until either enough data is collected, or writing is finished, otherwise it's unexpected
@@ -306,9 +304,8 @@ uint32_t CSpxAudioDataStream::Read(uint8_t* buffer, uint32_t bufferSize)
 
 uint32_t CSpxAudioDataStream::Read(uint8_t* buffer, uint32_t bufferSize, uint32_t pos)
 {
-    SPX_DBG_TRACE_VERBOSE("CSpxAudioDataStream::Read: is called");
+    SPX_DBG_TRACE_VERBOSE("CSpxAudioDataStream::%s: is called", __FUNCTION__);
     SPX_IFTRUE_THROW_HR(buffer == nullptr, SPXERR_INVALID_ARG);
-    SPX_IFTRUE_THROW_HR(pos > m_inventorySize, SPXERR_INVALID_ARG);
 
     // Wait until either enough data is collected, or writing is finished, otherwise it's unexpected
     if (!WaitForMoreData(pos + bufferSize) && !m_writingEnded)
@@ -321,7 +318,7 @@ uint32_t CSpxAudioDataStream::Read(uint8_t* buffer, uint32_t bufferSize, uint32_
 
 uint32_t CSpxAudioDataStream::Write(uint8_t* buffer, uint32_t size)
 {
-    SPX_DBG_TRACE_VERBOSE("CSpxAudioDataStream::Write buffer %p size=%d", (void*)buffer, size);
+    SPX_DBG_TRACE_VERBOSE("CSpxAudioDataStream::%s buffer %p size=%d", __FUNCTION__, (void*)buffer, size);
 
     if (size == 0)
     {
@@ -357,8 +354,13 @@ uint32_t CSpxAudioDataStream::FillBuffer(uint8_t* buffer, uint32_t bufferSize, u
     m_position = pos;
 
     // Calculate the count of bytes to be read
-    uint32_t totalBytesToBeRead = std::min(m_inventorySize - m_position, bufferSize);
-    uint32_t remainedBytesToBeRead = totalBytesToBeRead;
+    uint32_t totalBytesToBeRead = 0;
+    if (m_inventorySize > m_position)
+    {
+        totalBytesToBeRead = std::min(m_inventorySize - m_position, bufferSize);
+    }
+
+    auto remainedBytesToBeRead = totalBytesToBeRead;
     uint32_t offsetInBuffer = 0;
 
     // Seek to m_position
@@ -401,7 +403,7 @@ uint32_t CSpxAudioDataStream::FillBuffer(uint8_t* buffer, uint32_t bufferSize, u
         ++iterator;
     }
 
-    SPX_DBG_TRACE_VERBOSE("CSpxAudioDataStream::Read: bytesRead=%d", totalBytesToBeRead);
+    SPX_DBG_TRACE_VERBOSE("CSpxAudioDataStream::%s: bytesRead=%d", __FUNCTION__, totalBytesToBeRead);
     return totalBytesToBeRead;
 }
 
