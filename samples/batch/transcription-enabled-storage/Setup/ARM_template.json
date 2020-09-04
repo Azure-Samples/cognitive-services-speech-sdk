@@ -1,0 +1,811 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+		"StorageAccount": {
+            "type": "String",
+            "defaultValue": "",
+            "metadata": {
+                "description": "The name of the storage account. It must be unique across all existing storage account names in Azure, between 3 and 24 characters long, and can contain only lowercase letters and numbers."
+            }
+        }, 
+		"Locale": {
+            "defaultValue": "en-US | English (United States)",
+            "type": "String",
+			"allowedValues": [
+				"ar-BH | Arabic (Bahrain)",
+				"ar-EG | Arabic (Egypt)",
+				"ar-SY | Arabic (Syria)",
+				"ca-ES | Catalan",
+				"da-DK | Danish (Denmark)",
+				"de-DE | German (Germany)",
+				"en-AU | English (Australia)",
+				"en-CA | English (Canada)",
+				"en-GB | English (United Kingdom)",
+				"en-IN | English (India)",
+				"en-NZ | English (New Zealand)",
+				"en-US | English (United States)",
+				"es-ES | Spanish (Spain)",
+				"es-MX | Spanish (Mexico)",
+				"fi-FI | Finnish (Finland)",
+				"fr-CA | French (Canada)",
+				"fr-FR | French (France)",
+				"gu-IN | Gujarati (Indian)",
+				"hi-IN | Hindi (India)",
+				"it-IT | Italian (Italy)",
+				"ja-JP | Japanese (Japan)",
+				"ko-KR | Korean (Korea)",
+				"mr-IN | Marathi (India)",
+				"nb-NO | Norwegian (Bokmål)",
+				"nl-NL | Dutch (Netherlands)",
+				"pl-PL | Polish (Poland)",
+				"pt-BR | Portuguese (Brazil)",
+				"pt-PT | Portuguese (Portugal)",
+				"ru-RU | Russian (Russia)",
+				"sv-SE | Swedish (Sweden)",
+				"ta-IN | Tamil (India)",
+				"te-IN | Telugu (India)",
+				"th-TH | Thai (Thailand)",
+				"tr-TR | Turkish (Turkey)",
+				"zh-CN | Chinese (Mandarin, simplified)",
+				"zh-HK | Chinese (Cantonese, Traditional)",
+				"zh-TW | Chinese (Taiwanese Mandarin)"
+			]
+        },
+		"AcousticModelId": {
+            "defaultValue": "",
+            "type": "String",
+            "metadata": {
+                "description": "The id of the acoustic model. If empty, the default acoustic model will be selected."
+            }
+        },
+        "LanguageModelId": {
+            "defaultValue": "",
+            "type": "String",
+            "metadata": {
+                "description": "The id of the language model. If empty, the default language model will be selected."
+            }
+        },
+		"SecondaryLocale": {
+            "defaultValue": "None",
+            "type": "String",
+			"allowedValues": [
+				"None",
+				"ar-BH | Arabic (Bahrain)",
+				"ar-EG | Arabic (Egypt)",
+				"ar-SY | Arabic (Syria)",
+				"ca-ES | Catalan",
+				"da-DK | Danish (Denmark)",
+				"de-DE | German (Germany)",
+				"en-AU | English (Australia)",
+				"en-CA | English (Canada)",
+				"en-GB | English (United Kingdom)",
+				"en-IN | English (India)",
+				"en-NZ | English (New Zealand)",
+				"en-US | English (United States)",
+				"es-ES | Spanish (Spain)",
+				"es-MX | Spanish (Mexico)",
+				"fi-FI | Finnish (Finland)",
+				"fr-CA | French (Canada)",
+				"fr-FR | French (France)",
+				"gu-IN | Gujarati (Indian)",
+				"hi-IN | Hindi (India)",
+				"it-IT | Italian (Italy)",
+				"ja-JP | Japanese (Japan)",
+				"ko-KR | Korean (Korea)",
+				"mr-IN | Marathi (India)",
+				"nb-NO | Norwegian (Bokmål)",
+				"nl-NL | Dutch (Netherlands)",
+				"pl-PL | Polish (Poland)",
+				"pt-BR | Portuguese (Brazil)",
+				"pt-PT | Portuguese (Portugal)",
+				"ru-RU | Russian (Russia)",
+				"sv-SE | Swedish (Sweden)",
+				"ta-IN | Tamil (India)",
+				"te-IN | Telugu (India)",
+				"th-TH | Thai (Thailand)",
+				"tr-TR | Turkish (Turkey)",
+				"zh-CN | Chinese (Mandarin, simplified)",
+				"zh-HK | Chinese (Cantonese, Traditional)",
+				"zh-TW | Chinese (Taiwanese Mandarin)"
+			],
+            "metadata": {
+                "description": "A secondary locale is needed if language identification should be performed. The audio will then be transcribed in either the first or secondary locale, depending on which language was detected. If no secondary locale is selected, no language identification is performed."
+            }
+        },
+        "SecondaryAcousticModelId": {
+            "defaultValue": "",
+            "type": "String",
+            "metadata": {
+                "description": "The id of the acoustic model. If empty, the default acoustic model of the secondary locale will be selected."
+            }
+        },
+        "SecondaryLanguageModelId": {
+            "defaultValue": "",
+            "type": "String",
+            "metadata": {
+                "description": "The id of the language model. If empty, the default language model of the secondary locale will be selected."
+            }
+        },
+		"AudioDatasetSize": {
+            "defaultValue": "Small (0 - 50 files)",
+            "type": "String",
+            "metadata": {
+                "description": "The average number of files that are uploaded to the storage container at the same time. Specifying a range allows the usage of azure functions as economic as possible."
+            },
+			"allowedValues": [
+				"Small (0 - 50 files)",
+				"Medium (51 - 500 files)",
+				"Large (501 - 1000 files)",
+				"Very large (>1000 files)"
+			]
+        },
+        "AzureSpeechServicesKey": {
+            "type": "String",
+            "metadata": {
+                "description": "The key for the Azure Speech Services subscription."
+            }
+        },
+		"AzureSpeechServicesRegion": {
+            "defaultValue": "westus",
+            "type": "String",
+			"allowedValues": [
+				"centralus",
+				"eastus",
+				"eastus2",
+				"northcentralus",
+				"southcentralus",
+				"westcentralus",
+				"westus",
+				"westus2",
+				"canadacentral",
+				"brazilsouth",
+				"eastasia",
+				"southeastasia",
+				"australiaeast",
+				"centralindia",
+				"japaneast",
+				"japanwest",
+				"koreacentral",
+				"northeurope",
+				"westeurope",
+				"francecentral",
+				"uksouth"
+			],
+            "metadata": {
+                "description": "The region the Azure speech services subscription is associated with."
+            }
+        },		
+        "ProfanityFilterMode": {
+            "defaultValue": "Masked",
+            "type": "String",
+			"allowedValues": [
+			  "None",
+			  "Removed",
+			  "Tags",
+			  "Masked"
+			],
+            "metadata": {
+                "description": "The requested profanity filter mode."
+            }
+        },
+		"PunctuationMode": {
+            "defaultValue": "DictatedAndAutomatic",
+            "type": "String",
+			"allowedValues": [
+			  "None",
+			  "Dictated",
+			  "Automatic",
+			  "DictatedAndAutomatic"
+			],
+            "metadata": {
+                "description": "The requested punctuation mode."
+            }
+        },
+        "AddDiarization": {
+			"defaultValue": true,
+            "type": "bool",
+            "metadata": {
+                "description": "A value indicating whether diarization (speaker separation) is requested."
+            }
+        },
+        "AddWordLevelTimestamps": {
+			"defaultValue": true,
+            "type": "bool",
+            "metadata": {
+                "description": "A value indicating whether word level timestamps are requested."
+            }
+        },
+        "TextAnalyticsKey": {
+            "defaultValue": "",
+            "type": "String",
+            "metadata": {
+                "description": "The key for the Text Analytics subscription."
+            }
+        },
+		"TextAnalyticsRegion": {
+            "defaultValue": "none",
+            "type": "String",
+			"allowedValues": [
+				"none",
+				"centralus",
+				"eastus",
+				"eastus2",
+				"northcentralus",
+				"southcentralus",
+				"westcentralus",
+				"westus",
+				"westus2",
+				"canadacentral",
+				"brazilsouth",
+				"eastasia",
+				"southeastasia",
+				"australiaeast",
+				"centralindia",
+				"japaneast",
+				"japanwest",
+				"koreacentral",
+				"northeurope",
+				"westeurope",
+				"francecentral",
+				"uksouth"
+			],
+            "metadata": {
+                "description": "The region the Text Analytics subscription is associated with. If none is selected, no text analysis will be performed."
+            }
+        },        
+		"AddSentimentAnalysis": {
+			"defaultValue": false,
+            "type": "bool",
+            "metadata": {
+                "description": "A value indicating whether sentiment analysis is requested. Will only be performed if a Text Analytics Key and Region is provided."
+            }
+        },
+		"AddEntityRedaction": {
+			"defaultValue": false,
+            "type": "bool",
+            "metadata": {
+                "description": "A value indicating whether entity redaction is requested. Will only be performed if a Text Analytics Key and Region is provided."
+            }
+        },
+		"SqlAdministratorLogin": {
+			"type": "string",
+            "defaultValue": "",
+			"metadata": {
+				"description": "The administrator username of the SQL Server, which is used to gain insights of the audio with the provided PowerBI scripts. If it is left empty, no SQL server/database will be created."
+			}
+		},
+		"SqlAdministratorLoginPassword": {
+			"type": "securestring",
+            "defaultValue": "",
+			"metadata": {
+				"description": "The administrator password of the SQL Server. If it is left empty, no SQL server/database will be created."
+			}
+		}
+    },
+	"variables": {
+	"UseSqlDatabase": "[and(not(equals(parameters('SqlAdministratorLogin'),'')), not(equals(parameters('SqlAdministratorLoginPassword'),'')))]",
+	"SqlServerName": "[concat('sqlserver', uniqueString(subscription().id, resourceGroup().id))]",
+	"DatabaseName": "[concat('Database-', resourceGroup().name)]",
+	"StorageAccountName": "[parameters('StorageAccount')]",
+	"audioInputContainer": "audio-input",
+	"jsonResultOutputContainer": "json-result-output",
+	"htmlResultOutputContainer": "html-result-output",
+	"errorReportOutputContainer": "error-report-output",
+    "startTranscriptionFunctionName": "[take(concat('StartTranscriptionFunction-', resourceGroup().name),60)]",
+    "startTranscriptionFunctionId": "[resourceId('Microsoft.Web/sites', variables('startTranscriptionFunctionName'))]",
+    "fetchTranscriptionFunctionName": "[take(concat('FetchTranscriptionFunction-', resourceGroup().name),60)]",
+    "fetchTranscriptionFunctionId": "[resourceId('Microsoft.Web/sites', variables('fetchTranscriptionFunctionName'))]",
+    "authRuleRMK": "[resourceId('Microsoft.ServiceBus/namespaces/authorizationRules', concat('ServiceBus-', resourceGroup().name),'RootManageSharedAccessKey')]",
+    "authRuleFT":  "[resourceId('Microsoft.ServiceBus/namespaces/queues/authorizationRules',concat('ServiceBus-', resourceGroup().name), 'fetch_transcription_queue','FetchTranscription')]",      
+    "authRuleCT":  "[resourceId('Microsoft.ServiceBus/namespaces/queues/authorizationRules',concat('ServiceBus-', resourceGroup().name), 'start_transcription_queue','StartTranscription')]",
+	"appServicePlanName": "AcceleratorAppServicePlan",
+	"createHtmlResultFile": true,
+	"timerBasedExecution": true
+	},
+    "resources": [
+        {
+            "type": "microsoft.insights/components",
+            "apiVersion": "2015-05-01",
+            "name": "AcceleratorInsights",
+            "location": "[resourceGroup().location]",
+            "tags": {
+                "applicationType": "web",
+                "applicationName": "TranscriptionInsights"
+            },
+            "kind": "web",
+            "properties": {
+                "Application_Type": "web"
+            }
+        },
+        {
+            "type": "Microsoft.ServiceBus/namespaces",
+            "apiVersion": "2018-01-01-preview",
+            "name": "[concat('ServiceBus-', resourceGroup().name)]",
+            "location": "[resourceGroup().location]",
+            "sku": {
+                "name": "Standard",
+                "tier": "Standard"
+            },
+            "properties": {
+                "zoneRedundant": false
+            }
+        },
+		{
+		  "name": "[variables('SqlServerName')]",
+		  "condition": "[variables('UseSqlDatabase')]",
+		  "type": "Microsoft.Sql/servers",
+		  "apiVersion": "2014-04-01-preview",
+		  "location": "[resourceGroup().location]",
+		  "tags": {
+			"displayName": "SqlServer"
+		  },
+		  "properties": {
+			"administratorLogin": "[parameters('SqlAdministratorLogin')]",
+			"administratorLoginPassword": "[parameters('SqlAdministratorLoginPassword')]",
+			"version": "12.0"
+		  },
+		  "resources": [
+			{
+			  "name": "[variables('DatabaseName')]",
+			  "condition": "[variables('UseSqlDatabase')]",
+			  "type": "databases",
+			  "apiVersion": "2015-01-01",
+			  "location": "[resourceGroup().location]",
+			  "tags": {
+				"displayName": "Database"
+			  },
+			  "properties": {
+				"edition": "Basic",
+				"collation": "SQL_Latin1_General_CP1_CI_AS",
+				"requestedServiceObjectiveName": "Basic"
+			  },
+			  "dependsOn": [
+				"[variables('SqlServerName')]"
+			  ],
+			  "resources": [
+				{
+				  "comments": "Transparent Data Encryption",
+				  "name": "current",
+				  "condition": "[variables('UseSqlDatabase')]",
+				  "type": "transparentDataEncryption",
+				  "apiVersion": "2014-04-01-preview",
+				  "location": "[resourceGroup().location]",
+				  "properties": {
+					"status": "Enabled"
+				  },
+				  "dependsOn": [
+					"[variables('DatabaseName')]"
+				  ]
+				},
+				{
+				  "name": "Import",
+				  "condition": "[variables('UseSqlDatabase')]",
+				  "type": "extensions",
+				  "apiVersion": "2014-04-01",
+				  "dependsOn": [
+					"[resourceId('Microsoft.Sql/servers/databases', variables('SqlServerName'), variables('DatabaseName'))]"
+				  ],
+				  "properties": {
+					"operationMode": "Import",
+					"storageKey": "?",
+					"storageKeyType": "SharedAccessKey",
+					"administratorLogin": "[parameters('SqlAdministratorLogin')]",
+					"administratorLoginPassword": "[parameters('SqlAdministratorLoginPassword')]",
+					"storageUri": "https://spsvclocusw2.blob.core.windows.net/a-javan-public/transcription_accelerator_db.bacpac"
+				  }
+				}
+			  ]
+			},
+			{
+			  "apiVersion": "2017-03-01-preview",
+			  "type": "auditingSettings",
+			  "condition": "[variables('UseSqlDatabase')]",
+			  "name": "DefaultAuditingSettings",
+			  "dependsOn": [
+				"[variables('SqlServerName')]",
+				"[variables('StorageAccountName')]"
+			  ],
+			  "properties": {
+				"state": "Enabled",
+				"storageEndpoint": "[reference(resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName')), '2018-03-01-preview').PrimaryEndpoints.Blob]",
+				"storageAccountAccessKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName')), '2018-03-01-preview').keys[0].value]",
+				"storageAccountSubscriptionId": "[subscription().subscriptionId]",
+				"auditActionsAndGroups": null,
+				"isStorageSecondaryKeyInUse": false
+			  }
+			},
+			{
+			  "name": "AllowAllMicrosoftAzureIps",
+			  "condition": "[variables('UseSqlDatabase')]",
+			  "type": "firewallrules",
+			  "apiVersion": "2014-04-01",
+			  "location": "[resourceGroup().location]",
+			  "properties": {
+				"endIpAddress": "0.0.0.0",
+				"startIpAddress": "0.0.0.0"
+			  },
+			  "dependsOn": [
+				"[variables('SqlServerName')]"
+			  ]
+			}
+		  ]
+		},
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "2019-06-01",
+            "name": "[variables('StorageAccountName')]",
+            "location": "[resourceGroup().location]",
+            "sku": {
+                "name": "Standard_GRS",
+                "tier": "Standard"
+            },
+            "kind": "StorageV2",
+            "properties": {
+                "networkAcls": {
+                    "bypass": "AzureServices",
+                    "virtualNetworkRules": [],
+                    "ipRules": [],
+                    "defaultAction": "Allow"
+                },
+                "supportsHttpsTrafficOnly": true,
+                "encryption": {
+                    "services": {
+                        "file": {
+                            "keyType": "Account",
+                            "enabled": true
+                        },
+                        "blob": {
+                            "keyType": "Account",
+                            "enabled": true
+                        }
+                    },
+                    "keySource": "Microsoft.Storage"
+                },
+                "accessTier": "Hot"
+            }
+        },
+        {
+            "type": "Microsoft.ServiceBus/namespaces/AuthorizationRules",
+            "apiVersion": "2017-04-01",
+            "name": "[concat(concat('ServiceBus-', resourceGroup().name), '/RootManageSharedAccessKey')]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.ServiceBus/namespaces', concat('ServiceBus-', resourceGroup().name))]"
+            ],
+            "properties": {
+                "rights": [
+                    "Listen",
+                    "Manage",
+                    "Send"
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.ServiceBus/namespaces/queues",
+            "apiVersion": "2017-04-01",
+            "name": "[concat(concat('ServiceBus-', resourceGroup().name), '/start_transcription_queue')]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.ServiceBus/namespaces', concat('ServiceBus-', resourceGroup().name))]"
+            ],
+            "properties": {
+                "lockDuration": "PT1M",
+                "maxSizeInMegabytes": 5120,
+                "requiresDuplicateDetection": false,
+                "requiresSession": false,
+                "defaultMessageTimeToLive": "P10675199DT2H48M5.4775807S",
+                "deadLetteringOnMessageExpiration": false,
+                "enableBatchedOperations": false,
+                "duplicateDetectionHistoryTimeWindow": "PT10M",
+                "maxDeliveryCount": 10,
+                "status": "Active",
+                "autoDeleteOnIdle": "P10675199DT2H48M5.4775807S",
+                "enablePartitioning": false,
+                "enableExpress": false
+            }
+        },
+        {
+            "type": "Microsoft.ServiceBus/namespaces/queues",
+            "apiVersion": "2017-04-01",
+            "name": "[concat(concat('ServiceBus-', resourceGroup().name), '/fetch_transcription_queue')]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.ServiceBus/namespaces', concat('ServiceBus-', resourceGroup().name))]"
+            ],
+            "properties": {
+                "lockDuration": "PT1M",
+                "maxSizeInMegabytes": 5120,
+                "requiresDuplicateDetection": false,
+                "requiresSession": false,
+                "defaultMessageTimeToLive": "P10675199DT2H48M5.4775807S",
+                "deadLetteringOnMessageExpiration": false,
+                "enableBatchedOperations": false,
+                "duplicateDetectionHistoryTimeWindow": "PT10M",
+                "maxDeliveryCount": 10,
+                "status": "Active",
+                "autoDeleteOnIdle": "P10675199DT2H48M5.4775807S",
+                "enablePartitioning": false,
+                "enableExpress": false
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/blobServices",
+            "apiVersion": "2019-06-01",
+            "location": "[resourceGroup().location]",
+            "name": "[concat(variables('StorageAccountName'), '/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName'))]"
+            ],
+            "sku": {
+                "name": "Standard_GRS"
+            },
+            "properties": {
+                "cors": {
+                    "corsRules": []
+                },
+                "deleteRetentionPolicy": {
+                    "enabled": false
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/fileServices",
+            "apiVersion": "2019-06-01",
+            "location": "[resourceGroup().location]",
+            "name": "[concat(variables('StorageAccountName'), '/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName'))]"
+            ],
+            "sku": {
+                "name": "Standard_GRS"
+            },
+            "properties": {
+                "cors": {
+                    "corsRules": []
+                }
+            }
+        },
+        {
+            "type": "Microsoft.ServiceBus/namespaces/queues/authorizationRules",
+            "apiVersion": "2017-04-01",
+            "name": "[concat(concat('ServiceBus-', resourceGroup().name), '/fetch_transcription_queue/FetchTranscription')]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.ServiceBus/namespaces/queues', concat('ServiceBus-', resourceGroup().name), 'fetch_transcription_queue')]",
+                "[resourceId('Microsoft.ServiceBus/namespaces', concat('ServiceBus-', resourceGroup().name))]"
+            ],
+            "properties": {
+                "rights": [
+                    "Listen",
+                    "Send"
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.ServiceBus/namespaces/queues/authorizationRules",
+            "apiVersion": "2017-04-01",
+            "name": "[concat(concat('ServiceBus-', resourceGroup().name), '/start_transcription_queue/StartTranscription')]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.ServiceBus/namespaces/queues', concat('ServiceBus-', resourceGroup().name), 'start_transcription_queue')]",
+                "[resourceId('Microsoft.ServiceBus/namespaces', concat('ServiceBus-', resourceGroup().name))]"
+            ],
+            "properties": {
+                "rights": [
+                    "Listen",
+                    "Send"
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+            "apiVersion": "2019-06-01",
+            "name": "[concat(variables('StorageAccountName'), '/default/', variables('audioInputContainer'))]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', variables('StorageAccountName'), 'default')]",
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName'))]"
+            ],
+            "properties": {
+                "publicAccess": "None"
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+            "apiVersion": "2019-06-01",
+            "name": "[concat(variables('StorageAccountName'), '/default/', variables('jsonResultOutputContainer'))]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', variables('StorageAccountName'), 'default')]",
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName'))]"
+            ],
+            "properties": {
+                "publicAccess": "None"
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+			"condition": "[variables('createHtmlResultFile')]",
+            "apiVersion": "2019-06-01",
+            "name": "[concat(variables('StorageAccountName'), '/default/', variables('htmlResultOutputContainer'))]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', variables('StorageAccountName'), 'default')]",
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName'))]"
+            ],
+            "properties": {
+                "publicAccess": "None"
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+            "apiVersion": "2019-06-01",
+            "name": "[concat(variables('StorageAccountName'), '/default/', variables('errorReportOutputContainer'))]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', variables('StorageAccountName'), 'default')]",
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName'))]"
+            ],
+            "properties": {
+                "publicAccess": "None"
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/providers/eventSubscriptions",
+            "apiVersion": "2019-06-01",
+            "name": "[concat(variables('StorageAccountName'), '/Microsoft.EventGrid/BlobCreatedEvent')]",
+            "location": "[resourceGroup().location]",
+			"dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', variables('StorageAccountName'), 'default')]",
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName'))]",
+                "[resourceId('Microsoft.ServiceBus/namespaces/queues', concat('ServiceBus-', resourceGroup().name), 'start_transcription_queue')]"
+            ],
+            "properties": {
+				"topic": "[concat('/subscriptions/',subscription().subscriptionId,'/resourceGroups/',resourceGroup().name,'/providers/Microsoft.Storage/storageAccounts/',variables('StorageAccountName'))]",
+                "destination": {
+                    "endpointType": "ServiceBusQueue",
+                    "properties": {
+                        "resourceId": "[concat('/subscriptions/',subscription().subscriptionId,'/resourceGroups/',resourceGroup().name,'/providers/Microsoft.ServiceBus/namespaces/ServiceBus-',resourceGroup().name,'/queues/start_transcription_queue')]"
+                    }
+                },
+                "filter": {
+                    "includedEventTypes": [
+                        "Microsoft.Storage.BlobCreated"
+                    ],				
+					"subjectBeginsWith": "[concat('/blobServices/default/containers/', variables('audioInputContainer'))]",
+                    "advancedFilters": []
+                },
+                "labels": [],
+                "eventDeliverySchema": "EventGridSchema"
+            }
+        },    
+		{
+		  "apiVersion": "2018-02-01",
+		  "type": "Microsoft.Web/serverfarms",
+		  "kind": "app",
+		  "name": "[variables('appServicePlanName')]",
+		  "location": "[resourceGroup().location]",
+		  "properties": {},
+		  "dependsOn": [],
+		  "sku": {
+			"name": "EP1"
+		  }
+		},
+        {
+            "type": "Microsoft.Web/sites",
+            "apiVersion": "2018-11-01",
+            "name": "[variables('startTranscriptionFunctionName')]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+				"[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]"
+            ],
+            "kind": "functionapp",
+            "properties": {
+				"serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]",
+				"httpsOnly": "true"
+            }
+        },
+		{			
+			"type": "Microsoft.Web/sites/config",
+			"name": "[concat(variables('startTranscriptionFunctionName'), '/AppSettings')]",
+			"apiVersion": "2018-11-01",
+			"location": "[resourceGroup().location]",
+			"dependsOn": [
+                "[resourceId('Microsoft.Insights/components', 'AcceleratorInsights')]",
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName'))]",
+				"[concat('Microsoft.Web/sites/', variables('startTranscriptionFunctionName'))]",	
+                "[variables('authRuleRMK')]",
+                "[variables('authRuleFT')]",
+                "[variables('authRuleCT')]"
+			],
+			"tags": {
+				"displayName": "WebAppSettings"
+			},
+			"properties": {					
+				"AcousticModelId": "[parameters('AcousticModelId')]",
+				"AddDiarization": "[parameters('AddDiarization')]",
+				"AddEntityRedaction": "[parameters('AddEntityRedaction')]",
+				"AddSentimentAnalysis": "[parameters('AddSentimentAnalysis')]",
+				"AddWordLevelTimestamps": "[parameters('AddWordLevelTimestamps')]",		
+				"APPINSIGHTS_INSTRUMENTATIONKEY": "[reference(resourceId('Microsoft.Insights/components', 'AcceleratorInsights'), '2015-05-01').InstrumentationKey]",
+				"AudioDatasetSize": "[parameters('AudioDatasetSize')]",
+				"AudioInputContainer": "[variables('audioInputContainer')]",
+				"AzureServiceBus": "[listKeys(variables('authRuleRMK'),'2015-08-01').primaryConnectionString]",
+				"AzureSpeechServicesKey": "[parameters('AzureSpeechServicesKey')]",
+				"AzureSpeechServicesRegion": "[parameters('AzureSpeechServicesRegion')]",
+				"AzureWebJobsStorage": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('StorageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value)]",
+				"StartTranscriptionServiceBusConnectionString": "[listKeys(variables('authRuleCT'),'2015-08-01').primaryConnectionString]",
+				"ErrorReportOutputContainer": "[variables('errorReportOutputContainer')]",
+				"FetchTranscriptionServiceBusConnectionString": "[listKeys(variables('authRuleFT'),'2015-08-01').primaryConnectionString]",
+				"FUNCTIONS_EXTENSION_VERSION": "~3",
+				"FUNCTIONS_WORKER_RUNTIME": "dotnet",
+				"LanguageModelId": "[parameters('LanguageModelId')]",
+				"Locale": "[parameters('Locale')]",
+				"ProfanityFilterMode": "[parameters('ProfanityFilterMode')]",
+				"PunctuationMode": "[parameters('PunctuationMode')]",
+				"SecondaryAcousticModelId": "[parameters('SecondaryAcousticModelId')]",
+				"SecondaryLanguageModelId": "[parameters('SecondaryLanguageModelId')]",
+				"SecondaryLocale": "[parameters('SecondaryLocale')]",
+				"WEBSITE_RUN_FROM_PACKAGE": "[if(variables('timerBasedExecution'),'https://mspublicstorage.blob.core.windows.net/transcription-enabled-storage/StartTranscriptionByTimer.zip','https://mspublicstorage.blob.core.windows.net/transcription-enabled-storage/StartTranscriptionByServiceBus.zip')]"				
+			}
+		},
+        {
+            "type": "Microsoft.Web/sites",
+            "apiVersion": "2018-11-01",
+            "name": "[variables('fetchTranscriptionFunctionName')]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [   
+				"[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]"
+            ],
+            "kind": "functionapp",
+            "properties": {
+				"serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]",
+				"httpsOnly": "true"
+            }
+        },
+		{			
+			"type": "Microsoft.Web/sites/config",
+			"name": "[concat(variables('fetchTranscriptionFunctionName'), '/AppSettings')]",
+			"location": "[resourceGroup().location]",
+			"apiVersion": "2018-11-01",
+			"dependsOn": [
+				"[resourceId('Microsoft.Insights/components', 'AcceleratorInsights')]",
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName'))]",
+				"[concat('Microsoft.Web/sites/', variables('fetchTranscriptionFunctionName'))]",
+				"[variables('authRuleRMK')]",
+                "[variables('authRuleFT')]"
+			],
+			"tags": {
+				"displayName": "WebAppSettings"
+			},
+			"properties": {	
+				"APPINSIGHTS_INSTRUMENTATIONKEY": "[reference(resourceId('Microsoft.Insights/components', 'AcceleratorInsights'), '2015-05-01').InstrumentationKey]",			
+				"AzureServiceBus": "[listKeys(variables('authRuleRMK'),'2015-08-01').primaryConnectionString]",
+				"AzureWebJobsStorage": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('StorageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value)]",
+				"CreateHtmlResultFile": "[variables('createHtmlResultFile')]",
+				"DatabaseConnectionString": "[if(variables('UseSqlDatabase'), concat('Server=tcp:',reference(variables('SqlServerName'), '2014-04-01-preview').fullyQualifiedDomainName,',1433;Initial Catalog=',variables('DatabaseName'),';Persist Security Info=False;User ID=',parameters('SqlAdministratorLogin'),';Password=',parameters('SqlAdministratorLoginPassword'),';MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;'), '')]",
+				"ErrorReportOutputContainer": "[variables('errorReportOutputContainer')]",
+				"FetchTranscriptionServiceBusConnectionString": "[listKeys(variables('authRuleFT'),'2015-08-01').primaryConnectionString]",
+				"FUNCTIONS_EXTENSION_VERSION": "~3",
+				"FUNCTIONS_WORKER_RUNTIME": "dotnet",
+				"HtmlResultOutputContainer": "[variables('htmlResultOutputContainer')]",
+				"JsonResultOutputContainer": "[variables('jsonResultOutputContainer')]",
+				"TextAnalyticsKey": "[parameters('TextAnalyticsKey')]",
+				"TextAnalyticsRegion": "[parameters('TextAnalyticsRegion')]",
+				"UseSqlDatabase": "[variables('UseSqlDatabase')]",
+				"WEBSITE_RUN_FROM_PACKAGE": "https://mspublicstorage.blob.core.windows.net/transcription-enabled-storage/FetchTranscription.zip"			
+			}
+		}
+    ],
+    "outputs": {
+        "startTranscriptionFunctionId": {
+            "type": "string",
+            "value": "[variables('startTranscriptionFunctionId')]"
+        },
+        "FetchTranscriptionFunctionId": {
+            "type": "string",
+            "value": "[variables('fetchTranscriptionFunctionId')]"
+        }
+      }
+}
