@@ -178,6 +178,11 @@ public class Settings {
             FilePath=System.getProperty("WaveFile");
         }});
 
+        AudioUtterancesMap.put("MultipleUtteranceEnglish", new AudioEntry()
+        {{
+            FilePath=System.getProperty("MultipleUtteranceWaveFile");
+        }});
+
         AudioUtterancesMap.put("ConversationBetweenTwoPersonsEnglish", new AudioEntry()
         {{
             FilePath=System.getProperty("TwoSpeakersAudio");
