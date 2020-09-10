@@ -27,7 +27,7 @@ using namespace Microsoft::CognitiveServices::Speech::Impl;
 TEST_CASE("CSpxReadWriteRingBuffer Basics", "[ringbuffer]")
 {
     auto rb = std::make_shared<CSpxReadWriteRingBuffer>();
-    REQUIRE(rb != nullptr);
+    SPXTEST_REQUIRE(rb != nullptr);
 
     // Prepare a random buffer to play with
     size_t size = 1024;
@@ -44,8 +44,8 @@ TEST_CASE("CSpxReadWriteRingBuffer Basics", "[ringbuffer]")
        REQUIRE_NOTHROW(rb->SetSize(size));
        SPXTEST_REQUIRE(size == rb->GetSize());
 
-       REQUIRE(rb->GetWritePos() == 0);
-       REQUIRE(rb->GetReadPos() == 0);
+       SPXTEST_REQUIRE(rb->GetWritePos() == 0);
+       SPXTEST_REQUIRE(rb->GetReadPos() == 0);
 
        auto write = SpxQueryInterface<ISpxReadWriteBuffer>(rb);
        SPXTEST_WHEN("no data")
@@ -57,14 +57,14 @@ TEST_CASE("CSpxReadWriteRingBuffer Basics", "[ringbuffer]")
        SPXTEST_WHEN("half full")
        {
            REQUIRE_NOTHROW(rb->Write(data, size / 2));
-           REQUIRE(rb->GetWritePos() == size / 2);
-           REQUIRE(rb->GetReadPos() == 0);
+           SPXTEST_REQUIRE(rb->GetWritePos() == size / 2);
+           SPXTEST_REQUIRE(rb->GetReadPos() == 0);
 
            REQUIRE_THROWS(rb->Read(data, size)); // not that much available
            REQUIRE_THROWS(rb->Write(data, size)); // not that much space available
 
-           REQUIRE(rb->GetWritePos() == size / 2); // the Read and Write earlier shouldn't have changed this position
-           REQUIRE(rb->GetReadPos() == 0); // the Read and Write earlier shouldn't have changed this position
+           SPXTEST_REQUIRE(rb->GetWritePos() == size / 2); // the Read and Write earlier shouldn't have changed this position
+           SPXTEST_REQUIRE(rb->GetReadPos() == 0); // the Read and Write earlier shouldn't have changed this position
 
            SPXTEST_WHEN("its termed")
            {
@@ -78,8 +78,8 @@ TEST_CASE("CSpxReadWriteRingBuffer Basics", "[ringbuffer]")
            {
                auto read = new uint8_t[size];
                REQUIRE_NOTHROW(rb->Read(read, size /2 ));
-               REQUIRE(rb->GetWritePos() == size / 2);
-               REQUIRE(rb->GetReadPos() == size / 2);
+               SPXTEST_REQUIRE(rb->GetWritePos() == size / 2);
+               SPXTEST_REQUIRE(rb->GetReadPos() == size / 2);
 
                SPXTEST_REQUIRE(memcmp(data, read, size / 2) == 0);
 
@@ -95,26 +95,26 @@ TEST_CASE("CSpxReadWriteRingBuffer Basics", "[ringbuffer]")
 
                size_t bytesToRead1 = 10;
                REQUIRE_NOTHROW(rb->Read(ptr, bytesToRead1));
-               REQUIRE(rb->GetReadPos() == bytesToRead1);
+               SPXTEST_REQUIRE(rb->GetReadPos() == bytesToRead1);
                ptr += bytesToRead1;
 
                size_t bytesRead2 = 0;
                REQUIRE_NOTHROW(rb->Read(ptr, size, &bytesRead2));
-               REQUIRE(rb->GetReadPos() == bytesToRead1 + bytesRead2);
+               SPXTEST_REQUIRE(rb->GetReadPos() == bytesToRead1 + bytesRead2);
                ptr += bytesRead2;
 
                SPXTEST_REQUIRE((bytesToRead1 + bytesRead2) == size / 2);
                SPXTEST_REQUIRE(memcmp(data, read, size / 2) == 0);
 
-               REQUIRE(rb->GetWritePos() == size / 2);
-               REQUIRE(rb->GetReadPos() == size / 2);
+               SPXTEST_REQUIRE(rb->GetWritePos() == size / 2);
+               SPXTEST_REQUIRE(rb->GetReadPos() == size / 2);
 
                REQUIRE_THROWS(rb->Read(read, 1)); // nothing left to read, not even 1 byte
                REQUIRE_THROWS(rb->Read(read, size)); // nor huge amount
                REQUIRE_THROWS(rb->Read(read, size / 2)); // nor half as much
 
-               REQUIRE(rb->GetWritePos() == size / 2);
-               REQUIRE(rb->GetReadPos() == size / 2);
+               SPXTEST_REQUIRE(rb->GetWritePos() == size / 2);
+               SPXTEST_REQUIRE(rb->GetReadPos() == size / 2);
            }
        }
     }
@@ -129,15 +129,15 @@ TEST_CASE("CSpxReadWriteRingBuffer Basics", "[ringbuffer]")
         SPXTEST_REQUIRE(size == rb->GetSize());
         REQUIRE_NOTHROW(rb->AllowOverflow(true));
 
-        REQUIRE(rb->GetWritePos() == 0);
-        REQUIRE(rb->GetReadPos() == 0);
+        SPXTEST_REQUIRE(rb->GetWritePos() == 0);
+        SPXTEST_REQUIRE(rb->GetReadPos() == 0);
 
         auto write = SpxQueryInterface<ISpxReadWriteBuffer>(rb);
 
         // The buffer is full
         REQUIRE_NOTHROW(rb->Write(data, size));
-        REQUIRE(rb->GetWritePos() == size);
-        REQUIRE(rb->GetReadPos() == 0);
+        SPXTEST_REQUIRE(rb->GetWritePos() == size);
+        SPXTEST_REQUIRE(rb->GetReadPos() == 0);
 
         auto read = new uint8_t[size];
 
@@ -151,11 +151,11 @@ TEST_CASE("CSpxReadWriteRingBuffer Basics", "[ringbuffer]")
 
         // Write 1 character should succeed
         REQUIRE_NOTHROW(rb->Write(write1, 1));
-        REQUIRE(rb->GetReadPos() == 1);
+        SPXTEST_REQUIRE(rb->GetReadPos() == 1);
 
         // We should be able to read 1 and find the value
         REQUIRE_NOTHROW(rb->ReadAtBytePos(pos, read, 1));
-        REQUIRE(write1[0] == read[0]);
+        SPXTEST_REQUIRE(write1[0] == read[0]);
 
         // Trying to read 2 should throw
         REQUIRE_THROWS(rb->ReadAtBytePos(pos, read, 2));
@@ -175,8 +175,8 @@ TEST_CASE("CSpxReadWriteRingBuffer Basics", "[ringbuffer]")
         REQUIRE_NOTHROW(rb->SetInitPos(initPos));
         SPXTEST_REQUIRE(rb->GetInitPos() == initPos);
 
-        REQUIRE(rb->GetWritePos() == initPos);
-        REQUIRE(rb->GetReadPos() == initPos);
+        SPXTEST_REQUIRE(rb->GetWritePos() == initPos);
+        SPXTEST_REQUIRE(rb->GetReadPos() == initPos);
 
         auto write = SpxQueryInterface<ISpxReadWriteBuffer>(rb);
 
@@ -187,13 +187,13 @@ TEST_CASE("CSpxReadWriteRingBuffer Basics", "[ringbuffer]")
            {
                uint8_t theByteToWrite = data[(i % size)];
                REQUIRE_NOTHROW(rb->Write(&theByteToWrite, 1));
-               REQUIRE(rb->GetWritePos() == rb->GetReadPos() + 1);
+               SPXTEST_REQUIRE(rb->GetWritePos() == rb->GetReadPos() + 1);
 
                uint8_t theByteRead;
                REQUIRE_NOTHROW(rb->Read(&theByteRead, 1));
-               REQUIRE(rb->GetReadPos() == rb->GetWritePos());
+               SPXTEST_REQUIRE(rb->GetReadPos() == rb->GetWritePos());
 
-               REQUIRE(theByteToWrite == theByteRead);
+               SPXTEST_REQUIRE(theByteToWrite == theByteRead);
            }
         }
 
@@ -211,7 +211,7 @@ TEST_CASE("CSpxReadWriteRingBuffer Basics", "[ringbuffer]")
                     REQUIRE_NOTHROW(rb->Write(ptr, size / parts));
 
                     REQUIRE_NOTHROW(rb->Read(read, size / parts));
-                    REQUIRE(rb->GetReadPos() == rb->GetWritePos());
+                    SPXTEST_REQUIRE(rb->GetReadPos() == rb->GetWritePos());
 
                     SPXTEST_REQUIRE(memcmp(ptr, read, size / parts) == 0);
                 }
@@ -230,7 +230,7 @@ TEST_CASE("CSpxReadWriteRingBuffer Basics", "[ringbuffer]")
                     REQUIRE_NOTHROW(rb->Write(ptr, size / parts));
 
                     auto sharedData = rb->ReadShared(size / parts);
-                    REQUIRE(rb->GetReadPos() == rb->GetWritePos());
+                    SPXTEST_REQUIRE(rb->GetReadPos() == rb->GetWritePos());
 
                     SPXTEST_REQUIRE(memcmp(ptr, sharedData.get(), size / parts) == 0);
                 }
@@ -245,7 +245,7 @@ TEST_CASE("CSpxReadWriteRingBuffer Basics", "[ringbuffer]")
 TEST_CASE("BlockingReadWriteRingBuffer Basics", "[ringbuffer]")
 {
     auto rb = std::make_shared<CSpxBlockingReadWriteRingBuffer>();
-    REQUIRE(rb != nullptr);
+    SPXTEST_REQUIRE(rb != nullptr);
 
     // Prepare a random buffer to play with
     size_t size = 1024;
@@ -283,7 +283,7 @@ TEST_CASE("BlockingReadWriteRingBuffer Basics", "[ringbuffer]")
         SPX_TRACE_INFO("Reading at pos: %" PRIu64 "\n", pos);
 
         REQUIRE_NOTHROW(rb->ReadAtBytePos(pos, read.get(), size, &readSize));
-        REQUIRE(readSize == size);
+        SPXTEST_REQUIRE(readSize == size);
         SPXTEST_REQUIRE(memcmp(data.get(), read.get(), readSize) == 0);
         REQUIRE_NOTHROW(future.get());
     }
@@ -315,10 +315,9 @@ TEST_CASE("BlockingReadWriteRingBuffer Basics", "[ringbuffer]")
 
         REQUIRE_NOTHROW(blockingRead.get());
 
-        REQUIRE(readSize == size);
+        SPXTEST_REQUIRE(readSize == size);
         SPXTEST_REQUIRE(memcmp(data.get(), readData.get(), readSize) == 0);
     }
-
 
     SPXTEST_WHEN("using shared buffers")
     {

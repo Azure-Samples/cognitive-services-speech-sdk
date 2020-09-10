@@ -42,7 +42,7 @@ static void DoRecoFromCompressedPushStream(std::string fileName, AudioStreamCont
     {
         std::string str(e.what());
         std::string refException("Exception with an error code: 0x29 (SPXERR_GSTREAMER_NOT_FOUND_ERROR)");
-        CAPTURE(e.what());
+        SPXTEST_CAPTURE(e.what());
         SPXTEST_REQUIRE(str.find(refException) != string::npos);
     }
 #endif
@@ -89,7 +89,7 @@ static void DoRecoFromCompressedPullStream(std::string filename, AudioStreamCont
     {
         std::string str(e.what());
         std::string refException("Exception with an error code: 0x29 (SPXERR_GSTREAMER_NOT_FOUND_ERROR)");
-        CAPTURE(e.what());
+        SPXTEST_CAPTURE(e.what());
         SPXTEST_REQUIRE(str.find(refException) != string::npos);
     }
 #endif
@@ -97,11 +97,11 @@ static void DoRecoFromCompressedPullStream(std::string filename, AudioStreamCont
 
 TEST_CASE("compressed stream test", "[api][cxx]")
 {
-    REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_MP3)));
-    REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_OPUS)));
-    REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_A_LAW)));
-    REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_MU_LAW)));
-    REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_FLAC)));
+    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_MP3)));
+    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_OPUS)));
+    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_A_LAW)));
+    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_MU_LAW)));
+    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_FLAC)));
 
     SPXTEST_SECTION("push stream works mp3")
     {
@@ -376,7 +376,7 @@ TEST_CASE("Single trusted root", "[api][cxx]")
             auto cancellation = CancellationDetails::FromResult(result);
             SPXTEST_REQUIRE(cancellation->Reason == CancellationReason::Error);
             SPXTEST_REQUIRE(cancellation->ErrorCode == CancellationErrorCode::ConnectionFailure);
-            CAPTURE(cancellation->ErrorDetails);
+            SPXTEST_CAPTURE(cancellation->ErrorDetails);
         }
         SPXTEST_SECTION("pass with Baltimore CyberTrust Root as single trusted cert")
         {
@@ -401,7 +401,7 @@ TEST_CASE("Single trusted root", "[api][cxx]")
             auto cancellation = CancellationDetails::FromResult(result);
             SPXTEST_REQUIRE(cancellation->Reason == CancellationReason::Error);
             SPXTEST_REQUIRE(cancellation->ErrorCode == CancellationErrorCode::ConnectionFailure);
-            CAPTURE(cancellation->ErrorDetails);
+            SPXTEST_CAPTURE(cancellation->ErrorDetails);
         }
         SPXTEST_SECTION("passes without CRL check")
         {
@@ -412,7 +412,7 @@ TEST_CASE("Single trusted root", "[api][cxx]")
             auto cancellation = CancellationDetails::FromResult(result);
             SPXTEST_REQUIRE(cancellation->Reason == CancellationReason::Error);
             SPXTEST_REQUIRE(cancellation->ErrorCode == CancellationErrorCode::ConnectionFailure);
-            CAPTURE(cancellation->ErrorDetails);
+            SPXTEST_CAPTURE(cancellation->ErrorDetails);
         }
     }
 }
@@ -548,7 +548,7 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
         auto cancellation = CancellationDetails::FromResult(result);
         SPXTEST_REQUIRE(cancellation->Reason == CancellationReason::Error);
         SPXTEST_REQUIRE(cancellation->ErrorCode == CancellationErrorCode::ConnectionFailure);
-        CAPTURE(cancellation->ErrorDetails);
+        SPXTEST_CAPTURE(cancellation->ErrorDetails);
         SPXTEST_REQUIRE(cancellation->ErrorDetails.find("Url protocol prefix not recognized") != std::string::npos);
     }
     SPXTEST_SECTION("return canceled in StartContinuousRecognitionAsync given an invalid endpoint")
@@ -579,7 +579,7 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
         recognizer->StopContinuousRecognitionAsync().get();
 
         SPXTEST_REQUIRE(errorCode == CancellationErrorCode::ConnectionFailure);
-        CAPTURE(errorDetails);
+        SPXTEST_CAPTURE(errorDetails);
         SPXTEST_REQUIRE(errorDetails.find("Url protocol prefix not recognized") != std::string::npos);
     }
     SPXTEST_SECTION("Check that recognition can set authorization token")
@@ -650,7 +650,7 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
     }
 #endif
 
-    GIVEN("Mocks for USP, Microphone, WavFilePump and Reader, and then USP ...")
+    SPXTEST_GIVEN("Mocks for USP, Microphone, WavFilePump and Reader, and then USP ...")
     {
         SPX_TRACE_VERBOSE("%s: line=%d", __FUNCTION__, __LINE__);
 
@@ -820,8 +820,10 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
 
         auto result = recognizer->RecognizeOnceAsync().get();
         SPXTEST_CHECK(result->Reason == ResultReason::Canceled);
-        REQUIRE(canceledPromise.get_future().wait_for(5s) == future_status::ready);
-        REQUIRE(connectionReportedError);
+
+        auto status = canceledPromise.get_future().wait_for(5s);
+        SPXTEST_REQUIRE(status == future_status::ready);
+        SPXTEST_REQUIRE(connectionReportedError);
     }
 
     SPXTEST_SECTION("German Speech Recognition works")
@@ -854,7 +856,7 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
         auto audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
         auto recognizer = SpeechRecognizer::FromConfig(sc, audioConfig);
 
-        WHEN("using RecognizeOnceAsync() result")
+        SPXTEST_WHEN("using RecognizeOnceAsync() result")
         {
             auto result = recognizer->RecognizeOnceAsync().get();
             SPXTEST_REQUIRE(result != nullptr);
@@ -881,7 +883,7 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
             SPXTEST_REQUIRE(cancellation->Reason == CancellationReason::EndOfStream);
         }
 
-        WHEN("using RecognizeOnceAsync() and SpeechRecognitionCanceledEventArgs e.Result")
+        SPXTEST_WHEN("using RecognizeOnceAsync() and SpeechRecognitionCanceledEventArgs e.Result")
         {
             mutex mtx;
             condition_variable cv;
@@ -974,7 +976,7 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
                 "SessionStarted", "EndOfStream", "SessionStopped"
             };
 
-            REQUIRE(expectedEvents == events);
+            SPXTEST_REQUIRE(expectedEvents == events);
         }
     }
 }
@@ -982,7 +984,7 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
 TEST_CASE("KWS basics", "[api][cxx]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
-    GIVEN("Mocks for USP, KWS, and the Microphone...")
+    SPXTEST_GIVEN("Mocks for USP, KWS, and the Microphone...")
     {
         SPX_TRACE_VERBOSE("%s: line=%d", __FUNCTION__, __LINE__);
 
@@ -1362,7 +1364,7 @@ TEST_CASE("ConnectionEventsTest", "[api][cxx]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
-    REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
+    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
 
     SPXTEST_SECTION("Connected Disconnected Events with RecognizeOnceAsnyc")
     {
@@ -1642,13 +1644,13 @@ TEST_CASE("SpeechConfig properties", "[api][cxx]")
         auto recognizer = SpeechRecognizer::FromConfig(config, sourceLanguageConfig, audioInput);
         auto result = recognizer->RecognizeOnceAsync().get();
         auto connectionUrl = recognizer->Properties.GetProperty(PropertyId::SpeechServiceConnection_Url);
-        CAPTURE(connectionUrl);
+        SPXTEST_CAPTURE(connectionUrl);
 
         SPXTEST_CHECK(ResultReason::RecognizedSpeech == result->Reason);
         SPXTEST_CHECK(StringComparisions::AssertFuzzyMatch(result->Text, AudioUtterancesMap[SINGLE_UTTERANCE_GERMAN].Utterances["de"][0].Text));
         // Check no word-level timestamps included, but only detailed output.
         string jsonResult = result->Properties.GetProperty(PropertyId::SpeechServiceResponse_JsonResult);
-        CAPTURE(jsonResult);
+        SPXTEST_CAPTURE(jsonResult);
         SPXTEST_CHECK(jsonResult.find("Words") == string::npos);
         SPXTEST_CHECK(jsonResult.find("Lexical") != string::npos);
 
@@ -1675,13 +1677,13 @@ TEST_CASE("SpeechConfig properties", "[api][cxx]")
         auto recognizer = SpeechRecognizer::FromConfig(config, "de-DE", audioInput);
         auto result = recognizer->RecognizeOnceAsync().get();
         auto connectionUrl = recognizer->Properties.GetProperty(PropertyId::SpeechServiceConnection_Url);
-        CAPTURE(connectionUrl);
+        SPXTEST_CAPTURE(connectionUrl);
 
         SPXTEST_CHECK(ResultReason::RecognizedSpeech == result->Reason);
         SPXTEST_CHECK(StringComparisions::AssertFuzzyMatch(result->Text, AudioUtterancesMap[SINGLE_UTTERANCE_GERMAN].Utterances["de"][0].Text));
         // Check word-level timestamps included, but only detailed output.
         string jsonResult = result->Properties.GetProperty(PropertyId::SpeechServiceResponse_JsonResult);
-        CAPTURE(jsonResult);
+        SPXTEST_CAPTURE(jsonResult);
         SPXTEST_CHECK(jsonResult.find("Words") != string::npos);
         SPXTEST_CHECK(jsonResult.find("Lexical") != string::npos);
 
@@ -2028,10 +2030,10 @@ TEST_CASE("Verify auto detect source language result from speech recognition res
         auto autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig::FromLanguages({ "en-US", "notrecognized" });
         auto recognizer = SpeechRecognizer::FromConfig(CurrentSpeechConfig(SpxGetTestTrafficType(__FILE__, __LINE__)), autoDetectSourceLanguageConfig, audioConfig);
         speechRecognitionResult = recognizer->RecognizeOnceAsync().get();
-        REQUIRE(speechRecognitionResult != nullptr);
+        SPXTEST_REQUIRE(speechRecognitionResult != nullptr);
         expectedReason = ResultReason::Canceled;
         auto cancellation = CancellationDetails::FromResult(speechRecognitionResult);
-        REQUIRE(cancellation->Reason == CancellationReason::Error);
+        SPXTEST_REQUIRE(cancellation->Reason == CancellationReason::Error);
     }
 
     SPXTEST_SECTION("Language Id Scenario From Multiple SourceLanguageConfig")
@@ -2151,13 +2153,13 @@ TEST_CASE("Verify language id detection for continuous speech recognition", "[ap
 
     recognizer->StartContinuousRecognitionAsync().get();
     auto status = readyFuture.wait_for(WAIT_FOR_RECO_RESULT_TIME);
-    REQUIRE(status == future_status::ready);
+    SPXTEST_REQUIRE(status == future_status::ready);
     recognizer->StopContinuousRecognitionAsync().get();
 
-    REQUIRE(errorResults.size() == 0);
-    REQUIRE(recognizingResults.size() > 0);
-    REQUIRE(recognizedResults.size() > 0);
-    REQUIRE(recognizedResults[0] == AudioUtterancesMap[SINGLE_UTTERANCE_GERMAN].Utterances["de"][0].Text);
+    SPXTEST_REQUIRE(errorResults.size() == 0);
+    SPXTEST_REQUIRE(recognizingResults.size() > 0);
+    SPXTEST_REQUIRE(recognizedResults.size() > 0);
+    SPXTEST_REQUIRE(recognizedResults[0] == AudioUtterancesMap[SINGLE_UTTERANCE_GERMAN].Utterances["de"][0].Text);
 }
 
 
@@ -2186,7 +2188,8 @@ TEST_CASE("Connection Message Received Events", "[api][cxx]")
     SPXTEST_SECTION("RecognizeOnceAsync")
     {
         auto result = recognizer->RecognizeOnceAsync().get();
-        SPXTEST_REQUIRE(turnEndComplete.wait_for(WAIT_FOR_RECO_RESULT_TIME) == std::future_status::ready);
+        auto status = turnEndComplete.wait_for(WAIT_FOR_RECO_RESULT_TIME);
+        SPXTEST_REQUIRE(status == std::future_status::ready);
 
         SPXTEST_REQUIRE(result != nullptr);
         SPXTEST_REQUIRE(result->Reason == ResultReason::RecognizedSpeech);
@@ -2241,7 +2244,8 @@ TEST_CASE("Connection Message Received Events", "[api][cxx]")
         auto result = make_shared<RecoPhrases>();
         recognizer->StartContinuousRecognitionAsync().get();
 
-        SPXTEST_REQUIRE(turnEndComplete.wait_for(WAIT_FOR_RECO_RESULT_TIME) == std::future_status::ready);
+        auto status = turnEndComplete.wait_for(WAIT_FOR_RECO_RESULT_TIME);
+        SPXTEST_REQUIRE(status == std::future_status::ready);
         recognizer->StopContinuousRecognitionAsync().get();
 
         auto message = messages.front();
@@ -2340,7 +2344,7 @@ TEST_CASE("Custom speech-to-text endpoints", "[api][cxx]")
         auto cancellation = CancellationDetails::FromResult(result);
         SPXTEST_REQUIRE(cancellation->Reason == CancellationReason::Error);
         SPXTEST_REQUIRE(cancellation->ErrorCode == CancellationErrorCode::ConnectionFailure);
-        CAPTURE(cancellation->ErrorDetails);
+        SPXTEST_CAPTURE(cancellation->ErrorDetails);
         SPXTEST_REQUIRE(cancellation->ErrorDetails.find("Invalid argument exception: Query parameters are not allowed in the host URI.") != std::string::npos);
     }
 
@@ -2359,7 +2363,7 @@ TEST_CASE("Custom speech-to-text endpoints", "[api][cxx]")
         auto cancellation = CancellationDetails::FromResult(result);
         SPXTEST_REQUIRE(cancellation->Reason == CancellationReason::Error);
         SPXTEST_REQUIRE(cancellation->ErrorCode == CancellationErrorCode::ConnectionFailure);
-        CAPTURE(cancellation->ErrorDetails);
+        SPXTEST_CAPTURE(cancellation->ErrorDetails);
         SPXTEST_REQUIRE(cancellation->ErrorDetails.find("Invalid argument exception: Resource path is not allowed in the host URI.") != std::string::npos);
     }
 

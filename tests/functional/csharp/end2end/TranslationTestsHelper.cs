@@ -4,6 +4,7 @@
 //
 using Microsoft.CognitiveServices.Speech.Audio;
 using Microsoft.CognitiveServices.Speech.Translation;
+using Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -13,6 +14,9 @@ using System.Threading.Tasks;
 
 namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 {
+    using static SPXTEST;
+    using static CatchUtils;
+
     sealed class TranslationTestsHelper
     {
         private string subscriptionKey;
@@ -180,16 +184,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 GC.KeepAlive(connection);
 
-                if (!string.IsNullOrEmpty(canceled))
-                {
-                    Assert.Fail($"Recognition Canceled: {canceled}");
-                }
+                SPXTEST_REQUIRE(string.IsNullOrEmpty(canceled), $"Recognition Canceled w/ErrorDetails='{canceled}'");
 
                 SpeechRecognitionTestsHelper.AssertConnectionCountMatching(connectedEventCount, disconnectedEventCount);
 
                 if (synthesisFailed)
                 {
-                    Assert.Fail($"Synthesis failed.");
+                    SPXTEST_FAIL($"Synthesis failed.");
                 }
 
                 receivedRecognizedEvents.Add(ResultType.RecognizedText, textResultEvents);
@@ -238,10 +239,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 await Task.WhenAny(tcs.Task, Task.Delay(timeout));
                 await recognizer.StopContinuousRecognitionAsync();
 
-                if (!allowErrors && !string.IsNullOrEmpty(canceled))
-                {
-                    Assert.Fail($"Recognition canceled: {canceled}");
-                }
+                SPXTEST_REQUIRE(allowErrors || string.IsNullOrEmpty(canceled), $"Recognition Canceled w/ErrorDetails='{canceled}'");
 
                 receivedEvents.Add(ResultType.RecognizedText, recognizedEvents);
                 receivedEvents.Add(ResultType.RecognizingText, recognizingEvents);
@@ -277,12 +275,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public static void AssertDetailedOutput(TranslationRecognitionResult result, bool requireDetailedOutput)
         {
             var json = result.Properties.GetProperty(PropertyId.SpeechServiceResponse_JsonResult);
-            Assert.IsFalse(string.IsNullOrEmpty(json), "Empty JSON result from translation recognition.");
-            Assert.IsTrue(json.Contains("Text"), "Detailed result does not contain Text.");
-            Assert.IsTrue(requireDetailedOutput == json.Contains("ITN"), "Detailed result does not contain ITN.");
-            Assert.IsTrue(requireDetailedOutput == json.Contains("Lexical"), "Detailed result does not contain Lexical.");
-            Assert.IsTrue(requireDetailedOutput == json.Contains("MaskedITN"), "Detailed result does not contain MaskedITN.");
-            Assert.IsTrue(json.Contains("Text"), "Detailed result does not contain Text.");
+            SPXTEST_ISFALSE(string.IsNullOrEmpty(json), "Empty JSON result from translation recognition.");
+            SPXTEST_ISTRUE(json.Contains("Text"), "Detailed result does not contain Text.");
+            SPXTEST_ISTRUE(requireDetailedOutput == json.Contains("ITN"), "Detailed result does not contain ITN.");
+            SPXTEST_ISTRUE(requireDetailedOutput == json.Contains("Lexical"), "Detailed result does not contain Lexical.");
+            SPXTEST_ISTRUE(requireDetailedOutput == json.Contains("MaskedITN"), "Detailed result does not contain MaskedITN.");
+            SPXTEST_ISTRUE(json.Contains("Text"), "Detailed result does not contain Text.");
         }
     }
 

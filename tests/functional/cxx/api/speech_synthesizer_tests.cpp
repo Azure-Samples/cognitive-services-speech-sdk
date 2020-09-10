@@ -1161,7 +1161,8 @@ TEST_CASE("Stop synthesis - USP", "[api][cxx]")
         auto stopFuture = synthesizer->StopSpeakingAsync();
         stopFuture.get();
         // result1 should be finished now
-        SPXTEST_REQUIRE(future1.wait_for(std::chrono::milliseconds(50)) == std::future_status::ready);
+        auto status = future1.wait_for(std::chrono::milliseconds(50));
+        SPXTEST_REQUIRE(status == std::future_status::ready);
         auto future2 = synthesizer->SpeakTextAsync("reference");
 
         auto result1 = future1.get();

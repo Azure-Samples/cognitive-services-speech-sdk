@@ -10,11 +10,12 @@ using System.Threading.Tasks;
 
 namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 {
+    using static SPXTEST;
     using static Config;
     using static SpeechRecognitionTestsHelper;
 
     [TestClass]
-    public class SpeechRecognizerDynamicGrammarTests
+    public class SpeechRecognizerDynamicGrammarTests : LoggingTestBase
     {
         private static string unifiedRegion;
         private static string unifiedKey;
@@ -26,6 +27,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [ClassInitialize]
         public static void TestClassinitialize(TestContext context)
         {
+            LoggingTestBaseInit(context);
             _config = new Config(context);
 
             unifiedRegion = SubscriptionsRegionsMap[SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION].Region;
@@ -40,6 +42,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
             Console.WriteLine("unifiedRegion: " + unifiedRegion);
             Console.WriteLine("input directory: " + DefaultSettingsMap[DefaultSettingKeys.INPUT_DIR]);
+        }
+
+        [ClassCleanup]
+        public static void TestClassCleanup()
+        {
+            LoggingTestBaseCleanup();
         }
 
         [TestInitialize]
@@ -148,7 +156,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 phraselist.AddPhrase(correctRecoText);
 
                 var gl = GrammarList.FromRecognizer(recognizer);
-                Assert.ThrowsException<ApplicationException>(() => gl.SetRecognitionFactor(-1, RecognitionFactorScope.PartialPhrase));
+                SPXTEST_THROWS<ApplicationException>(() => gl.SetRecognitionFactor(-1, RecognitionFactorScope.PartialPhrase));
             }
         }
 
@@ -168,11 +176,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 phraselist.AddPhrase(correctRecoText);
 
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
-                Assert.IsTrue(result.Reason == ResultReason.Canceled);
+                SPXTEST_ISTRUE(result.Reason == ResultReason.Canceled);
 
                 var canceled = CancellationDetails.FromResult(result);
-                Assert.IsTrue(canceled.Reason == CancellationReason.Error);
-                Assert.IsTrue(canceled.ErrorCode == CancellationErrorCode.RuntimeError);
+                SPXTEST_ISTRUE(canceled.Reason == CancellationReason.Error);
+                SPXTEST_ISTRUE(canceled.ErrorCode == CancellationErrorCode.RuntimeError);
             }
         }
 
@@ -192,11 +200,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 phraselist.AddPhrase(correctRecoText);
 
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
-                Assert.IsTrue(result.Reason == ResultReason.Canceled);
+                SPXTEST_ISTRUE(result.Reason == ResultReason.Canceled);
 
                 var canceled = CancellationDetails.FromResult(result);
-                Assert.IsTrue(canceled.Reason == CancellationReason.Error);
-                Assert.IsTrue(canceled.ErrorCode == CancellationErrorCode.RuntimeError);
+                SPXTEST_ISTRUE(canceled.Reason == CancellationReason.Error);
+                SPXTEST_ISTRUE(canceled.ErrorCode == CancellationErrorCode.RuntimeError);
             }
         }
 

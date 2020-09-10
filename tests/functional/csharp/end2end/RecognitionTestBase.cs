@@ -3,6 +3,7 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 using Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils;
+using Microsoft.CognitiveServices.Speech.Tests;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
 using System;
@@ -13,10 +14,11 @@ using System.Text.RegularExpressions;
 
 namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 {
+    using static SPXTEST;
     using static Config;
 
     [TestClass]
-    public class RecognitionTestBase
+    public class RecognitionTestBase : LoggingTestBase
     {
         public static string subscriptionKey;
         public static string region;
@@ -57,6 +59,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
         public static void BaseClassInit(TestContext context)
         {
+            LoggingTestBaseInit(context);
             _config = new Config(context);
 
             subscriptionKey = SubscriptionsRegionsMap[SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION].Key;
@@ -67,13 +70,19 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             conversationTranscriptionPRODKey = SubscriptionsRegionsMap[SubscriptionsRegionsKeys.CONVERSATION_TRANSCRIPTION_PROD_SUBSCRIPTION].Key;
             conversationTranscriptionPRODRegion = SubscriptionsRegionsMap[SubscriptionsRegionsKeys.CONVERSATION_TRANSCRIPTION_PROD_SUBSCRIPTION].Region;
 
-            Assert.IsTrue(DefaultSettingsMap.Values.Any(value => !String.IsNullOrEmpty(value)),
+            SPXTEST_ISTRUE(DefaultSettingsMap.Values.Any(value => !String.IsNullOrEmpty(value)),
                 "All default settings are empty. Has the settings .json been updated?");
-            Assert.IsTrue(SubscriptionsRegionsMap.Values.Any(value => !String.IsNullOrEmpty(value.Key) && !String.IsNullOrEmpty(value.Region)),
+            SPXTEST_ISTRUE(SubscriptionsRegionsMap.Values.Any(value => !String.IsNullOrEmpty(value.Key) && !String.IsNullOrEmpty(value.Region)),
                 "All configured subscriptions are empty. Has the settings .json been updated?");
 
             Console.WriteLine("region: " + region);
             Console.WriteLine("input directory: " + DefaultSettingsMap[DefaultSettingKeys.INPUT_DIR]);
+        }
+
+        [ClassCleanup]
+        public static void TestClassCleanup()
+        {
+            LoggingTestBaseCleanup();
         }
 
         [TestInitialize]

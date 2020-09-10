@@ -33,7 +33,7 @@ std::shared_ptr<SpeechConfig> SpeechConfigForIntentTests(const std::string& traf
 
 TEST_CASE("Intent Recognizer basics", "[api][cxx][intent]")
 {
-    SECTION("Intent Recognition works")
+    SPXTEST_SECTION("Intent Recognition works")
     {
         SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(INTENT_UTTERANCE)));
 
@@ -52,7 +52,7 @@ TEST_CASE("Intent Recognizer basics", "[api][cxx][intent]")
 
         auto requireIntentId = [&sessionId](std::shared_ptr<IntentRecognitionResult> result, std::string expectedIntentId, ResultReason expectedReason = ResultReason::RecognizedIntent)
         {
-            CAPTURE(sessionId);
+            SPXTEST_CAPTURE(sessionId);
 #ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable: 6237)
@@ -66,7 +66,7 @@ TEST_CASE("Intent Recognizer basics", "[api][cxx][intent]")
             std::ostringstream details;
             if (result == nullptr)
             {
-                CAPTURE("Under Intent Recognition works section, result is null");
+                SPXTEST_CAPTURE("Under Intent Recognition works section, result is null");
                 return;
             }
             if (result->Reason == ResultReason::Canceled)
@@ -84,7 +84,7 @@ TEST_CASE("Intent Recognizer basics", "[api][cxx][intent]")
                     << "NoMatch:"
                     << " Reason: " << int(nomatch->Reason);
             }
-            CAPTURE(details.str());
+            SPXTEST_CAPTURE(details.str());
             SPXTEST_CHECK(result->Reason == expectedReason);
             SPXTEST_CHECK(!result->Text.empty());
 #ifdef _MSC_VER
@@ -97,6 +97,7 @@ TEST_CASE("Intent Recognizer basics", "[api][cxx][intent]")
 #pragma warning(pop)
 #endif
         };
+        
         SPXTEST_WHEN("using single model, all intents, no intent name, no intent ids")
         {
             recognizer->AddAllIntents(model);
@@ -110,6 +111,7 @@ TEST_CASE("Intent Recognizer basics", "[api][cxx][intent]")
             auto result = recognizer->RecognizeOnceAsync().get();
             requireIntentId(result, "override-all-intent-ids-with-this");
         }
+        
         SPXTEST_WHEN("using single model, specific intent by name, no intent id")
         {
             recognizer->AddIntent(model, "HomeAutomation.TurnOn");

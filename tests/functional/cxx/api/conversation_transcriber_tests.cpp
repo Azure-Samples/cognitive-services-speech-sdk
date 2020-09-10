@@ -310,7 +310,7 @@ TEST_CASE("conversation_inroom_8_channel_audio_pull", "[api][cxx][conversation_t
         int max_expected = 10;
         conversation->Properties.SetProperty("Conversation-MaximumAllowedParticipants", std::to_string(max_expected));
         auto maxInAudioConfig = std::stoi(conversation->Properties.GetProperty("Conversation-MaximumAllowedParticipants"), nullptr, 10);
-        REQUIRE(max_expected == maxInAudioConfig);
+        SPXTEST_REQUIRE(max_expected == maxInAudioConfig);
 
         // add by user id
         REQUIRE_NOTHROW(conversation->AddParticipantAsync("AddParticipantById_1").get());
@@ -491,8 +491,8 @@ TEST_CASE("conversation_inroom_8_channel_audio_push", "[api][cxx][conversation_t
 
 TEST_CASE("conversation_online_pull_stream", "[api][cxx][conversation_transcriber]")
 {
-    REQUIRE(!DefaultSettingsMap[ONLINE_AUDIO_ENDPOINT].empty());
-    REQUIRE(!SubscriptionsRegionsMap[CONVERSATION_TRANSCRIPTION_PPE_SUBSCRIPTION].Key.empty());
+    SPXTEST_REQUIRE(!DefaultSettingsMap[ONLINE_AUDIO_ENDPOINT].empty());
+    SPXTEST_REQUIRE(!SubscriptionsRegionsMap[CONVERSATION_TRANSCRIPTION_PPE_SUBSCRIPTION].Key.empty());
 
     auto config = CreateSpeechConfigForCTSInRoom(
         SubscriptionsRegionsMap[CONVERSATION_TRANSCRIPTION_PPE_SUBSCRIPTION].Key,
@@ -574,8 +574,8 @@ TEST_CASE("conversation_online_pull_stream", "[api][cxx][conversation_transcribe
 
 TEST_CASE("conversation_online_pull_stream_internal_error", "[api][cxx][conversation_transcriber]")
 {
-    REQUIRE(!DefaultSettingsMap[ONLINE_AUDIO_ENDPOINT].empty());
-    REQUIRE(!SubscriptionsRegionsMap[CONVERSATION_TRANSCRIPTION_PPE_SUBSCRIPTION].Key.empty());
+    SPXTEST_REQUIRE(!DefaultSettingsMap[ONLINE_AUDIO_ENDPOINT].empty());
+    SPXTEST_REQUIRE(!SubscriptionsRegionsMap[CONVERSATION_TRANSCRIPTION_PPE_SUBSCRIPTION].Key.empty());
 
     auto config = CreateSpeechConfigForCTSInRoom(
         SubscriptionsRegionsMap[CONVERSATION_TRANSCRIPTION_PPE_SUBSCRIPTION].Key,

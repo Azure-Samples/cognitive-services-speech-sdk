@@ -62,43 +62,44 @@ TEST_CASE("Silk codec can be loaded", "[audio][compression][codec]")
         }
     };
 
-    REQUIRE(SPX_NOERROR == codecAdapter->Load("Microsoft.CognitiveServices.Speech.extension.silk_codec.dll", "silk", dataCallBack));
+    auto loaded = codecAdapter->Load("Microsoft.CognitiveServices.Speech.extension.silk_codec.dll", "silk", dataCallBack);
+    SPXTEST_REQUIRE(SPX_NOERROR == loaded);
 
-    SECTION("Silk codec Init / Term")
+    SPXTEST_SECTION("Silk codec Init / Term")
     {
         REQUIRE_NOTHROW(codecAdapter->Init());
         REQUIRE_NOTHROW(codecAdapter->Term());
     }
 
-    SECTION("Silk codec content type")
+    SPXTEST_SECTION("Silk codec content type")
     {
         REQUIRE_NOTHROW(codecAdapter->Init());
 
         string contentType;
         REQUIRE_NOTHROW(contentType = codecAdapter->GetContentType());
-        REQUIRE(contentType.compare(c_silkContentType) == 0);
+        SPXTEST_REQUIRE(contentType.compare(c_silkContentType) == 0);
         REQUIRE_NOTHROW(codecAdapter->Term());
     }
 
-    SECTION("Silk codec InitCodec / Flush")
+    SPXTEST_SECTION("Silk codec InitCodec / Flush")
     {
         REQUIRE_NOTHROW(codecAdapter->Init());
         REQUIRE_NOTHROW(codecAdapter->InitCodec(&format));
         REQUIRE_NOTHROW(codecAdapter->Flush());
 
         size_t expectedSize = sizeof(c_silkV3Preamble) - 1 + sizeof(c_silkTermMark);
-        REQUIRE(finalReceived);
-        REQUIRE(dataCalls == 1);
-        REQUIRE(receivedData.size() == expectedSize);
-        REQUIRE(memcmp(receivedData.data(), c_silkV3Preamble, sizeof(c_silkV3Preamble) - 1) == 0);
-        REQUIRE(memcmp(receivedData.data() + receivedData.size() - sizeof(c_silkTermMark), &c_silkTermMark, sizeof(c_silkTermMark)) == 0);
+        SPXTEST_REQUIRE(finalReceived);
+        SPXTEST_REQUIRE(dataCalls == 1);
+        SPXTEST_REQUIRE(receivedData.size() == expectedSize);
+        SPXTEST_REQUIRE(memcmp(receivedData.data(), c_silkV3Preamble, sizeof(c_silkV3Preamble) - 1) == 0);
+        SPXTEST_REQUIRE(memcmp(receivedData.data() + receivedData.size() - sizeof(c_silkTermMark), &c_silkTermMark, sizeof(c_silkTermMark)) == 0);
         REQUIRE_NOTHROW(codecAdapter->Term());
     }
 
     // one audio frame (100ms) - 3200 for 16kbps
     const int c_ZeroDataUnitSize = 3200;
 
-    SECTION("Silk codec send 1 frame of zeros")
+    SPXTEST_SECTION("Silk codec send 1 frame of zeros")
     {
         REQUIRE_NOTHROW(codecAdapter->Init());
 
@@ -113,16 +114,16 @@ TEST_CASE("Silk codec can be loaded", "[audio][compression][codec]")
         REQUIRE_NOTHROW(codecAdapter->Flush());
 
         size_t expectedPreTermSize = sizeof(c_silkV3Preamble) - 1 + sizeof(c_silkTermMark);
-        REQUIRE(finalReceived);
-        REQUIRE(dataCalls == 2);
-        REQUIRE(receivedData.size() > expectedPreTermSize);
-        REQUIRE(receivedData.size() < dataToEncode.size());
-        REQUIRE(memcmp(receivedData.data(), c_silkV3Preamble, sizeof(c_silkV3Preamble) - 1) == 0);
-        REQUIRE(memcmp(receivedData.data() + receivedData.size() - sizeof(c_silkTermMark), &c_silkTermMark, sizeof(c_silkTermMark)) == 0);
+        SPXTEST_REQUIRE(finalReceived);
+        SPXTEST_REQUIRE(dataCalls == 2);
+        SPXTEST_REQUIRE(receivedData.size() > expectedPreTermSize);
+        SPXTEST_REQUIRE(receivedData.size() < dataToEncode.size());
+        SPXTEST_REQUIRE(memcmp(receivedData.data(), c_silkV3Preamble, sizeof(c_silkV3Preamble) - 1) == 0);
+        SPXTEST_REQUIRE(memcmp(receivedData.data() + receivedData.size() - sizeof(c_silkTermMark), &c_silkTermMark, sizeof(c_silkTermMark)) == 0);
         REQUIRE_NOTHROW(codecAdapter->Term());
     }
 
-    SECTION("Silk codec send 1/16 frame of zeros")
+    SPXTEST_SECTION("Silk codec send 1/16 frame of zeros")
     {
         REQUIRE_NOTHROW(codecAdapter->Init());
         int uncompressedDataSize = c_ZeroDataUnitSize / 16;
@@ -137,17 +138,17 @@ TEST_CASE("Silk codec can be loaded", "[audio][compression][codec]")
         REQUIRE_NOTHROW(codecAdapter->Flush());
 
         size_t expectedPreTermSize = sizeof(c_silkV3Preamble) - 1 + sizeof(c_silkTermMark);
-        REQUIRE(finalReceived);
-        REQUIRE(dataCalls == 1);
+        SPXTEST_REQUIRE(finalReceived);
+        SPXTEST_REQUIRE(dataCalls == 1);
 
         // not enought data for a 1/10th of a frame to encode but there will be padding added by Flush.
-        REQUIRE(receivedData.size() > expectedPreTermSize);
-        REQUIRE(memcmp(receivedData.data(), c_silkV3Preamble, sizeof(c_silkV3Preamble) - 1) == 0);
-        REQUIRE(memcmp(receivedData.data() + receivedData.size() - sizeof(c_silkTermMark), &c_silkTermMark, sizeof(c_silkTermMark)) == 0);
+        SPXTEST_REQUIRE(receivedData.size() > expectedPreTermSize);
+        SPXTEST_REQUIRE(memcmp(receivedData.data(), c_silkV3Preamble, sizeof(c_silkV3Preamble) - 1) == 0);
+        SPXTEST_REQUIRE(memcmp(receivedData.data() + receivedData.size() - sizeof(c_silkTermMark), &c_silkTermMark, sizeof(c_silkTermMark)) == 0);
         REQUIRE_NOTHROW(codecAdapter->Term());
     }
 
-    SECTION("Silk codec send 10 frames of zeros")
+    SPXTEST_SECTION("Silk codec send 10 frames of zeros")
     {
         const int c_iterationCount = 10;
         REQUIRE_NOTHROW(codecAdapter->Init());
@@ -166,16 +167,16 @@ TEST_CASE("Silk codec can be loaded", "[audio][compression][codec]")
         REQUIRE_NOTHROW(codecAdapter->Flush());
 
         size_t expectedPreTermSize = sizeof(c_silkV3Preamble) - 1 + sizeof(c_silkTermMark);
-        REQUIRE(finalReceived);
-        REQUIRE(dataCalls == c_iterationCount + 1);
-        REQUIRE(receivedData.size() > expectedPreTermSize);
-        REQUIRE(receivedData.size() < c_iterationCount * dataToEncode.size());
-        REQUIRE(memcmp(receivedData.data(), c_silkV3Preamble, sizeof(c_silkV3Preamble) - 1) == 0);
-        REQUIRE(memcmp(receivedData.data() + receivedData.size() - sizeof(c_silkTermMark), &c_silkTermMark, sizeof(c_silkTermMark)) == 0);
+        SPXTEST_REQUIRE(finalReceived);
+        SPXTEST_REQUIRE(dataCalls == c_iterationCount + 1);
+        SPXTEST_REQUIRE(receivedData.size() > expectedPreTermSize);
+        SPXTEST_REQUIRE(receivedData.size() < c_iterationCount * dataToEncode.size());
+        SPXTEST_REQUIRE(memcmp(receivedData.data(), c_silkV3Preamble, sizeof(c_silkV3Preamble) - 1) == 0);
+        SPXTEST_REQUIRE(memcmp(receivedData.data() + receivedData.size() - sizeof(c_silkTermMark), &c_silkTermMark, sizeof(c_silkTermMark)) == 0);
         REQUIRE_NOTHROW(codecAdapter->Term());
     }
 
-    SECTION("Silk codec send 10 1/16 frames of zeros")
+    SPXTEST_SECTION("Silk codec send 10 1/16 frames of zeros")
     {
         const int c_iterationCount = 10;
         int uncompressedDataSize = c_ZeroDataUnitSize / 16;
@@ -195,12 +196,12 @@ TEST_CASE("Silk codec can be loaded", "[audio][compression][codec]")
         REQUIRE_NOTHROW(codecAdapter->Flush());
 
         size_t expectedPreTermSize = sizeof(c_silkV3Preamble) - 1 + sizeof(c_silkTermMark);
-        REQUIRE(finalReceived);
-        REQUIRE(dataCalls == 1);
-        REQUIRE(receivedData.size() > expectedPreTermSize);
-        REQUIRE(receivedData.size() < c_iterationCount * dataToEncode.size());
-        REQUIRE(memcmp(receivedData.data(), c_silkV3Preamble, sizeof(c_silkV3Preamble) - 1) == 0);
-        REQUIRE(memcmp(receivedData.data() + receivedData.size() - sizeof(c_silkTermMark), &c_silkTermMark, sizeof(c_silkTermMark)) == 0);
+        SPXTEST_REQUIRE(finalReceived);
+        SPXTEST_REQUIRE(dataCalls == 1);
+        SPXTEST_REQUIRE(receivedData.size() > expectedPreTermSize);
+        SPXTEST_REQUIRE(receivedData.size() < c_iterationCount * dataToEncode.size());
+        SPXTEST_REQUIRE(memcmp(receivedData.data(), c_silkV3Preamble, sizeof(c_silkV3Preamble) - 1) == 0);
+        SPXTEST_REQUIRE(memcmp(receivedData.data() + receivedData.size() - sizeof(c_silkTermMark), &c_silkTermMark, sizeof(c_silkTermMark)) == 0);
         REQUIRE_NOTHROW(codecAdapter->Term());
     }
 

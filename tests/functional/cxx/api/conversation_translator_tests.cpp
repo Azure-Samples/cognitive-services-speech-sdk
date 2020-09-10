@@ -113,7 +113,7 @@ TEST_CASE("Conversation call unsupported methods", "[api][cxx][conversation_tran
     CT_INTEGRATION_TEST_INIT;
     auto speechConfig = CreateConfig("en-US", { "fr", "ar" });
 
-    SECTION("Conversation Translator")
+    SPXTEST_SECTION("Conversation Translator")
     {
         auto conversation = Conversation::CreateConversationAsync(speechConfig).get();
         conversation->StartConversationAsync().get();
@@ -141,7 +141,7 @@ TEST_CASE("Conversation call unsupported methods", "[api][cxx][conversation_tran
         conversation.reset();
     }
 
-    SECTION("Conversation Transcriber")
+    SPXTEST_SECTION("Conversation Transcriber")
     {
         speechConfig->SetProperty("ConversationTranscriptionInRoomAndOnline", "true");
 
@@ -187,7 +187,7 @@ TEST_CASE("Conversation call unsupported methods", "[api][cxx][conversation_tran
 TEST_CASE("Conversation Translator Host Audio", "[api][cxx][conversation_translator][cxx_conversation_translator][audio][host]")
 {
     CT_INTEGRATION_TEST_INIT;
-    REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
+    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
 
     string speechLang("en-US");
     string hostname("TheHost");
@@ -235,8 +235,8 @@ TEST_CASE("Conversation Translator Host Audio", "[api][cxx][conversation_transla
 TEST_CASE("Join a conversation with translation", "[api][cxx][conversation_translator][cxx_conversation_translator][audio][join]")
 {
     CT_INTEGRATION_TEST_INIT;
-    REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
-    REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_CHINESE)));
+    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
+    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_CHINESE)));
 
     string hostLang("en-US");
     string hostName("TheHost");
@@ -308,7 +308,7 @@ TEST_CASE("Join a conversation with translation", "[api][cxx][conversation_trans
 TEST_CASE("Host sends an instant message", "[api][cxx][conversation_translator][cxx_conversation_translator][im][host]")
 {
     CT_INTEGRATION_TEST_INIT;
-    REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
+    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
 
     auto speechConfig = CreateConfig("en-US", { "ja", "ar" });
     TestConversationParticipant host(speechConfig, "Host");
@@ -332,8 +332,8 @@ TEST_CASE("Host sends an instant message", "[api][cxx][conversation_translator][
 TEST_CASE("Host and participants send instant messages", "[api][cxx][conversation_translator][cxx_conversation_translator][im][join]")
 {
     CT_INTEGRATION_TEST_INIT;
-    REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
-    REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_CHINESE)));
+    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
+    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_CHINESE)));
 
     auto speechConfig = CreateConfig("en-US", {});
     TestConversationParticipant host(speechConfig, "Host");
@@ -372,8 +372,8 @@ TEST_CASE("Host and participants send instant messages", "[api][cxx][conversatio
 TEST_CASE("Join locked room", "[api][cxx][conversation_translator][cxx_conversation_translator][join_locked]")
 {
     CT_INTEGRATION_TEST_INIT;
-    REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
-    REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_CHINESE)));
+    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
+    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_CHINESE)));
 
     auto speechConfig = CreateConfig("en-US", {});
 
@@ -398,8 +398,8 @@ TEST_CASE("Join locked room", "[api][cxx][conversation_translator][cxx_conversat
 TEST_CASE("ConversationTranslator Host disconnects room", "[api][cxx][conversation_translator][cxx_conversation_translator][host_disconnect]")
 {
     CT_INTEGRATION_TEST_INIT;
-    REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
-    REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_CHINESE)));
+    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
+    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_CHINESE)));
 
     auto speechConfig = CreateConfig("en-US", {});
     TestConversationParticipant host(speechConfig, "Host");
@@ -430,7 +430,7 @@ TEST_CASE("Conversation Translator call methods when not joined", "[api][cxx][co
 {
     CT_INTEGRATION_TEST_INIT;
 
-    SECTION("Host")
+    SPXTEST_SECTION("Host")
     {
         auto speechConfig = CreateConfig("de-DE", {});
         auto conversation = Conversation::CreateConversationAsync(speechConfig).get();
@@ -456,7 +456,7 @@ TEST_CASE("Conversation Translator call methods when not joined", "[api][cxx][co
         REQUIRE_NOTHROW(translator->LeaveConversationAsync().get());
     }
 
-    SECTION("Participant")
+    SPXTEST_SECTION("Participant")
     {
         auto translator = ConversationTranslator::FromConfig();
 
@@ -483,11 +483,11 @@ TEST_CASE("Double join should fail", "[api][cxx][conversation_translator][cxx_co
 {
     CT_INTEGRATION_TEST_INIT;
 
-    REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
+    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
     auto hostSpeechConfig = CreateConfig("en-US", {});
     auto hostAudioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
 
-    REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_CHINESE)));
+    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_CHINESE)));
     auto aliceAudioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_CHINESE));
 
     TestConversationParticipant host(hostSpeechConfig, "Host");
@@ -516,7 +516,7 @@ TEST_CASE("Conversation Translator Connection Before Join", "[api][cxx][conversa
 {
     CT_INTEGRATION_TEST_INIT;
 
-    REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
+    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
     auto audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
 
     auto conversationTranslator = ConversationTranslator::FromConfig(audioConfig);
@@ -544,7 +544,7 @@ TEST_CASE("Conversation Translator Connection After Leave", "[api][cxx][conversa
     CT_INTEGRATION_TEST_INIT;
 
     auto speechConfig = CreateConfig("en-US", {});
-    REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
+    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
     auto audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
 
     TestConversationParticipant host(speechConfig, "Host");
@@ -576,7 +576,7 @@ TEST_CASE("Conversation Translator Connection Recognizer events/methods", "[api]
     CT_INTEGRATION_TEST_INIT;
 
     auto speechConfig = CreateConfig("en-US", {});
-    REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
+    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
     auto audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
 
     TestConversationParticipant host(speechConfig, "Host");
@@ -604,7 +604,7 @@ TEST_CASE("Conversation Translator Connection Recognizer events/methods", "[api]
 TEST_CASE("Conversation Translator Host Leave Rejoin", "[api][cxx][conversation_translator][cxx_conversation_translator][connection][host][rejoin]")
 {
     CT_INTEGRATION_TEST_INIT;
-    REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
+    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
 
     string speechLang("en-US");
     string hostname("TheHost");
@@ -676,7 +676,7 @@ TEST_CASE("Conversation Translator can't call methods after disconnect", "[api][
 {
     CT_INTEGRATION_TEST_INIT;
 
-    REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
+    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
     auto speechConfig = CreateConfig("en-US", {});
     auto audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
 
@@ -711,11 +711,11 @@ TEST_CASE("Conversation Translator Participant Rejoin", "[api][cxx][conversation
 {
     CT_INTEGRATION_TEST_INIT;
 
-    REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
+    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
     auto hostSpeechConfig = CreateConfig("en-US", {});
     auto hostAudioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
 
-    REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_CHINESE)));
+    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_CHINESE)));
     auto aliceAudioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_CHINESE));
 
     TestConversationParticipant host(hostSpeechConfig, "Host");
@@ -772,11 +772,11 @@ TEST_CASE("Conversation Translator Participant Rejoin After Delete", "[api][cxx]
 {
     CT_INTEGRATION_TEST_INIT;
 
-    REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
+    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
     auto hostSpeechConfig = CreateConfig("en-US", {});
     auto hostAudioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
 
-    REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_CHINESE)));
+    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_CHINESE)));
     auto aliceAudioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_CHINESE));
 
     TestConversationParticipant host(hostSpeechConfig, "Host");
@@ -829,7 +829,7 @@ TEST_CASE("Conversation Translator SpeechRecognizer Connection Still Works", "[a
 {
     auto utterance = AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH];
 
-    REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
+    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
     auto audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
     auto speechConfig = CreateConfig("en-US", { });
 
@@ -858,7 +858,7 @@ TEST_CASE("Conversation Translator INT endpoint", "[!hide][cxx_conversation_tran
     const auto speechLang = "en-US";
 
     auto utterance = AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH];
-    REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
+    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
     auto audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
 
     auto speechConfig = CreateConfig(speechLang, {});
@@ -920,14 +920,14 @@ TEST_CASE("Host updates authorization token", "[api][cxx][conversation_translato
     auto speechConfig = CreateConfig(speechLang, {}, authTokenValidity);
 
     auto utterance = AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH];
-    REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
+    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
     auto audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
 
     TestConversationParticipant host(speechConfig, "Host");
     host.Join(audioConfig);
 
     SPXTEST_REQUIRE_THAT(host.ConvTrans->GetAuthorizationToken(), Catch::Equals(speechConfig->GetAuthorizationToken()));
-    REQUIRE(host.ConvTrans->GetParticipantId().empty() == false);
+    SPXTEST_REQUIRE(host.ConvTrans->GetParticipantId().empty() == false);
 
     // wait for the current authentication token to expire, and then generate a new one
     this_thread::sleep_for(authTokenValidity + 5s);
@@ -965,7 +965,7 @@ TEST_CASE("Participant receives updated authorization token", "[api][cxx][conver
     auto speechConfig = CreateConfig(speechLang, {}, authTokenValidity);
 
     auto utterance = AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH];
-    REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
+    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
     auto audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
 
     TestConversationParticipant host(speechConfig, "Host");
@@ -976,7 +976,7 @@ TEST_CASE("Participant receives updated authorization token", "[api][cxx][conver
     participant.Join(audioConfig);
 
     SPXTEST_REQUIRE_THAT(participant.ConvTrans->GetAuthorizationToken(), Catch::Equals(speechConfig->GetAuthorizationToken()));
-    REQUIRE(participant.ConvTrans->GetParticipantId().empty() == false);
+    SPXTEST_REQUIRE(participant.ConvTrans->GetParticipantId().empty() == false);
 
     // wait for the current authentication token to expire, and then generate a new one
     this_thread::sleep_for(authTokenValidity + 5s);

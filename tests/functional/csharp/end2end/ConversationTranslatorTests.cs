@@ -15,9 +15,11 @@ using System.Threading.Tasks;
 
 namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 {
+    using static SPXTEST;
     using static CatchUtils;
     using static Config;
     using static ConversationTranslatorTestConstants;
+    using static Test.Diagnostics;
     using TRANS = Dictionary<string, string>;
 
     [TestClass]
@@ -32,7 +34,14 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [ClassInitialize]
         public static void TestClassInitialize(TestContext context)
         {
+            LoggingTestBaseInit(context);
             BaseClassInit(context);
+        }
+
+        [ClassCleanup]
+        new public static void TestClassCleanup()
+        {
+            LoggingTestBaseCleanup();
         }
 
         [TestInitialize]
@@ -59,7 +68,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var speechConfig = CreateConfig(Language.EN);
             using (var conversation = await Conversation.CreateConversationAsync(speechConfig))
             {
-                REQUIRE(!string.IsNullOrWhiteSpace(conversation.ConversationId));
+                SPXTEST_REQUIRE(!string.IsNullOrWhiteSpace(conversation.ConversationId));
                 Log($"Created room {conversation.ConversationId}");
                 await conversation.DeleteConversationAsync();
             }
@@ -71,7 +80,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var speechConfig = CreateConfig(Language.EN, Language.FR);
             using (var conversation = await Conversation.CreateConversationAsync(speechConfig))
             {
-                REQUIRE(!string.IsNullOrWhiteSpace(conversation.ConversationId));
+                SPXTEST_REQUIRE(!string.IsNullOrWhiteSpace(conversation.ConversationId));
                 Log($"Created room {conversation.ConversationId}");
                 await conversation.DeleteConversationAsync();
                 Log($"Deleted room");
@@ -84,7 +93,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var speechConfig = CreateConfig(Language.EN, Language.FR, "ar");
             using (var conversation = await Conversation.CreateConversationAsync(speechConfig))
             {
-                REQUIRE(!string.IsNullOrWhiteSpace(conversation.ConversationId));
+                SPXTEST_REQUIRE(!string.IsNullOrWhiteSpace(conversation.ConversationId));
                 Log($"Created room {conversation.ConversationId}");
 
                 // don't delete
@@ -97,7 +106,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var speechConfig = CreateConfig(Language.EN, Language.FR, "ar");
             using (var conversation = await Conversation.CreateConversationAsync(speechConfig))
             {
-                REQUIRE(!string.IsNullOrWhiteSpace(conversation.ConversationId));
+                SPXTEST_REQUIRE(!string.IsNullOrWhiteSpace(conversation.ConversationId));
                 Log($"Created room {conversation.ConversationId}");
 
                 await conversation.StartConversationAsync();
@@ -111,7 +120,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var speechConfig = CreateConfig(Language.EN, Language.FR, "ar");
             using (var conversation = await Conversation.CreateConversationAsync(speechConfig))
             {
-                REQUIRE(!string.IsNullOrWhiteSpace(conversation.ConversationId));
+                SPXTEST_REQUIRE(!string.IsNullOrWhiteSpace(conversation.ConversationId));
                 Log($"Created room {conversation.ConversationId}");
 
                 Log($"Trying to lock room");
@@ -226,7 +235,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
             await eventHandlers.WaitForAudioStreamCompletion(MAX_WAIT_FOR_AUDIO_TO_COMPLETE, WAIT_AFTER_AUDIO_COMPLETE);
 
-
             SPX_TRACE_INFO("Stop Transcribing");
             await conversationTranslator.StopTranscribingAsync();
 
@@ -282,7 +290,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             SPX_TRACE_INFO("Creating bob ConversationTranslator");
             var bobTranslator = new ConversationTranslator(bobAudioConfig);
             var bobEvents = new ConversationTranslatorCallbacks(bobTranslator);
-            SPX_TRACE_INFO("Bob joining {0}", conversation.ConversationId);
+            SPX_TRACE_INFO("Bob joining {0}", Args(conversation.ConversationId));
             await bobTranslator.JoinConversationAsync(conversation.ConversationId, bobName, bobLang);
 
 
@@ -830,7 +838,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             await host.JoinAsync(audioConfig);
 
             REQUIRE_THAT(host.Translator.AuthorizationToken, Catch.Equals(speechConfig.AuthorizationToken, Catch.CaseSensitive.Yes));
-            REQUIRE(!string.IsNullOrWhiteSpace(host.Translator.ParticipantId));
+            SPXTEST_REQUIRE(!string.IsNullOrWhiteSpace(host.Translator.ParticipantId));
 
             // wait for the current authentication token to expire, and then generate a new one
             await Task.Delay(authTokenValidity + TimeSpan.FromSeconds(5));
@@ -880,7 +888,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             await participant.JoinAsync(audioConfig);
 
             REQUIRE_THAT(participant.Translator.AuthorizationToken, Catch.Equals(speechConfig.AuthorizationToken, Catch.CaseSensitive.Yes));
-            REQUIRE(!string.IsNullOrWhiteSpace(participant.Translator.ParticipantId));
+            SPXTEST_REQUIRE(!string.IsNullOrWhiteSpace(participant.Translator.ParticipantId));
 
             // wait for the current authentication token to expire, and then generate a new one
             await Task.Delay(authTokenValidity + TimeSpan.FromSeconds(5));

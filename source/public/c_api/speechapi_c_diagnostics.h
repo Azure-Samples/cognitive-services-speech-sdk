@@ -13,6 +13,8 @@ SPXAPI diagnostics_log_apply_properties(SPXPROPERTYBAGHANDLE hpropbag, void* res
 SPXAPI diagnostics_log_stop_logging();
 
 SPXAPI_(void) diagnostics_log_format_message(char *buffer, size_t bufferSize, int level, const char* pszTitle, const char* fileName, const int lineNumber, const char* pszFormat, va_list argptr);
+
+SPXAPI_(void) diagnostics_log_trace_string(int level, const char* pszTitle, const char* fileName, const int lineNumber, const char* psz);
 SPXAPI_(void) diagnostics_log_trace_message(int level, const char* pszTitle, const char* fileName, const int lineNumber, const char* pszFormat, ...);
 SPXAPI_(void) diagnostics_log_trace_message2(int level, const char* pszTitle, const char* fileName, const int lineNumber, const char* pszFormat, va_list argptr);
 
@@ -26,4 +28,4 @@ SPXAPI_(size_t) diagnostics_log_memory_get_line_num_oldest();
 SPXAPI_(size_t) diagnostics_log_memory_get_line_num_newest();
 SPXAPI__(const char*) diagnostics_log_memory_get_line(size_t lineNum);
 
-SPXAPI_(void) diagnostics_log_memory_dump_to_file(const char* fileName, int options); // fileName == nullptr => stderr; options: 1 => dump now
+SPXAPI_(void) diagnostics_log_memory_dump_to_file(const char* fileName, int options);

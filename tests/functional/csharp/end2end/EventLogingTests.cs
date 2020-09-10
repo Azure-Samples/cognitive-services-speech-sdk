@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 
 namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 {
+    using static SPXTEST;
     using static Config;
     using static SpeechRecognitionTestsHelper;
 
@@ -23,7 +24,14 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [ClassInitialize]
         public static void TestClassinitialize(TestContext context)
         {
+            LoggingTestBaseInit(context);
             BaseClassInit(context);
+        }
+
+        [ClassCleanup]
+        new public static void TestClassCleanup()
+        {
+            LoggingTestBaseCleanup();
         }
 
         [TestInitialize]
@@ -53,7 +61,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 }
 
-                Assert.IsTrue(logMessages.Count > 0, "No messages were logged");
+                SPXTEST_ISTRUE(logMessages.Count > 0, "No messages were logged");
             }
             finally
             {
@@ -79,7 +87,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
             }
 
-            Assert.IsTrue(logMessages.Count > 0);
+            SPXTEST_ISTRUE(logMessages.Count > 0);
 
             int logMessageCount = logMessages.Count;
             Console.WriteLine($"{logMessageCount} before clearing callback.");
@@ -91,7 +99,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
             }
 
-            Assert.IsTrue(logMessageCount == logMessages.Count, $"Log message count differ '{logMessageCount}' != '{logMessages.Count}'");
+            SPXTEST_ISTRUE(logMessageCount == logMessages.Count, $"Log message count differ '{logMessageCount}' != '{logMessages.Count}'");
         }
 
         [TestMethodWindowsOnly]
@@ -118,11 +126,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     Console.WriteLine("Recognition done");
                 }
 
-                Assert.IsTrue(logMessages.Count > 0, "No messages were logged");
+                SPXTEST_ISTRUE(logMessages.Count > 0, "No messages were logged");
 
                 foreach (var line in logMessages)
                 {
-                    Assert.IsTrue(line.Contains(filePath), $"Line '{line}' did not contain '{filePath}'");
+                    SPXTEST_ISTRUE(line.Contains(filePath), $"Line '{line}' did not contain '{filePath}'");
                 }
             }
             finally
@@ -153,7 +161,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 }
 
-                Assert.IsTrue(logMessages.Count > 0, "No messages were logged");
+                SPXTEST_ISTRUE(logMessages.Count > 0, "No messages were logged");
             }
             finally
             {

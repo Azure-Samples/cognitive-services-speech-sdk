@@ -15,6 +15,7 @@ using System.Threading.Tasks;
 
 namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 {
+    using static SPXTEST;
     using static Config;
     using static SpeechRecognitionTestsHelper;
 
@@ -26,7 +27,14 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [ClassInitialize]
         public static void TestClassinitialize(TestContext context)
         {
+            LoggingTestBaseInit(context);
             BaseClassInit(context);
+        }
+
+        [ClassCleanup]
+        new public static void TestClassCleanup()
+        {
+            LoggingTestBaseCleanup();
         }
 
         [TestInitialize]
@@ -50,7 +58,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 : format == AudioStreamContainerFormat.ALAW ? AudioUtteranceKeys.SINGLE_UTTERANCE_A_LAW
                 : format == AudioStreamContainerFormat.MULAW ? AudioUtteranceKeys.SINGLE_UTTERANCE_MU_LAW
                 : null;
-            Assert.IsNotNull(filePathKey, $"Unsupported container format mapping for $'{format}'");
+            SPXTEST_ISNOTNULL(filePathKey, $"Unsupported container format mapping for $'{format}'");
             var filePath = AudioUtterancesMap[filePathKey].FilePath.GetRootRelativePath();
 
             var result = await this.speechHelper.GetSpeechFinalRecognitionResultPullStreamWithCompressedFile(
@@ -97,7 +105,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 utterance.Utterances[Language.EN]
                 : new Utterance[] { utterance.Utterances[Language.EN][0] };
 
-            Assert.AreEqual(
+            SPXTEST_ARE_EQUAL(
                 results.Count(),
                 referenceResults.Length,
                 $"Expected {referenceResults.Length} result(s); actual was {results.Count()}");
@@ -119,9 +127,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     .ToList()
                     .ForEach(oneBest =>
                     {
-                        Assert.IsTrue(!string.IsNullOrEmpty(oneBest.NormalizedForm), "A detailed result had an empty normalized form.");
-                        Assert.IsTrue(!string.IsNullOrEmpty(oneBest.LexicalForm), "A detailed result had an empty lexical form.");
-                        Assert.IsTrue(oneBest.LexicalForm.Replace(" '", "'") == oneBest.NormalizedForm,
+                        SPXTEST_ISTRUE(!string.IsNullOrEmpty(oneBest.NormalizedForm), "A detailed result had an empty normalized form.");
+                        SPXTEST_ISTRUE(!string.IsNullOrEmpty(oneBest.LexicalForm), "A detailed result had an empty lexical form.");
+
+                        var lexicalForm = oneBest.LexicalForm.Replace(" '", "'");
+                        var normalizedForm = oneBest.NormalizedForm.Replace(" '", "'");
+                        SPXTEST_ISTRUE(lexicalForm == normalizedForm,
                             $@"The sanitized lexical form of a result did not match its normalized form.\n  
                             Normalized: {oneBest.NormalizedForm}\n  
                             Lexical   : {oneBest.LexicalForm}");
@@ -134,13 +145,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
             results.ToList().ForEach(result =>
             {
-                Assert.IsTrue(
+                SPXTEST_ISTRUE(
                     result.OffsetInTicks > 0,
                     $"Result unexpectedly reports a value of 0 for its offset.\n  Text: {result.Text}");
-                Assert.IsTrue(
+                SPXTEST_ISTRUE(
                     result.Duration > TimeSpan.Zero,
                     $"Result unexpectedly reports a value of 0 for its duration.\n  Text: {result.Text}");
-                Assert.IsTrue(
+                SPXTEST_ISTRUE(
                     result.OffsetInTicks > minimumExpectedNextOffset,
                     $@"Expected an offset of at least {minimumExpectedNextOffset} after previous results;
                     actual was {result.OffsetInTicks}.");
@@ -186,7 +197,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 await recognizer.StartContinuousRecognitionAsync();
                 await Task.WhenAny(taskSource.Task, Task.Delay(TimeSpan.FromMinutes(20)));
-                Assert.AreEqual(TaskStatus.RanToCompletion, taskSource.Task.Status, "The timeout happened. SessionStopped event was not received in 20 minutes.");
+                SPXTEST_ARE_EQUAL(TaskStatus.RanToCompletion, taskSource.Task.Status, "The timeout happened. SessionStopped event was not received in 20 minutes.");
                 await recognizer.StopContinuousRecognitionAsync();
 
                 // Checking text results.

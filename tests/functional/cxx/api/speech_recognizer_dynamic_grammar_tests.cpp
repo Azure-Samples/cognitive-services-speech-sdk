@@ -27,7 +27,7 @@ std::shared_ptr<SpeechConfig> GetDynamicGrammarTestsConfig(const std::string& tr
 
 TEST_CASE("Dynamic Grammar Basics", "[api][cxx][dgi]")
 {
-    REQUIRE(exists(ROOT_RELATIVE_PATH(AMBIGUOUS_SPEECH)));
+    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(AMBIGUOUS_SPEECH)));
 
     auto getRecognizer = []()
     {

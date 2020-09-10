@@ -14,6 +14,7 @@ set(SOURCES
     "${SRC_DIR}/sequence_generator_audio_stream_reader.cpp"
     "${SRC_DIR}/read_write_ring_buffer_test_case.cpp"
     "${SRC_DIR}/string_utils_test.cpp"
+    "${SRC_DIR}/spxtest_unit_tests.cpp"
     "${SRC_DIR}/audio_processor_write_to_audio_source_buffer_test.cpp"
     "${SRC_DIR}/audio_source_adapter_test.cpp"
     )

@@ -54,7 +54,7 @@ void ReadStreamAndValidateIsInSequence(std::shared_ptr<ISpxAudioStreamReader> re
     while (totalReadCount > 0)
     {
         reader->Read(buffer.get(), bufferSize);
-        REQUIRE(ValidateBufferSequence(buffer.get(), bufferSize, previousLastValue));
+        SPXTEST_REQUIRE(ValidateBufferSequence(buffer.get(), bufferSize, previousLastValue));
 
         if (previousLastValue != nullptr)
         {
@@ -90,7 +90,7 @@ TEST_CASE("Demux audio stream adapter is properly functioning", "[core][demux ad
     demuxAudioReaderAdapter->SetSingletonReader(mockAudioReader);
 
     auto audioReaderFactory = SpxQueryInterface<ISpxAudioStreamReaderFactory>(demuxAudioReaderAdapter);
-    SECTION("Validate GetFormat")
+    SPXTEST_SECTION("Validate GetFormat")
     {
         // Get the audio format. We pass this information to the individual readers.
         auto mockSingletonFormatSize = singletonMockAudioReader->GetFormat(nullptr, 0);
@@ -102,96 +102,96 @@ TEST_CASE("Demux audio stream adapter is properly functioning", "[core][demux ad
         auto demuxReaderFormat = SpxAllocWAVEFORMATEX(demuxReaderFormatSize);
         demuxReader->GetFormat(demuxReaderFormat.get(), demuxReaderFormatSize);
 
-        REQUIRE(demuxReaderFormat.get() != nullptr);
-        REQUIRE(demuxReaderFormat->cbSize == sourceFormat->cbSize);
-        REQUIRE(memcmp(demuxReaderFormat.get(), sourceFormat.get(), sizeof(SPXWAVEFORMATEX) + sourceFormat->cbSize) == 0);
+        SPXTEST_REQUIRE(demuxReaderFormat.get() != nullptr);
+        SPXTEST_REQUIRE(demuxReaderFormat->cbSize == sourceFormat->cbSize);
+        SPXTEST_REQUIRE(memcmp(demuxReaderFormat.get(), sourceFormat.get(), sizeof(SPXWAVEFORMATEX) + sourceFormat->cbSize) == 0);
 
         demuxReader->Close();
     }
 
-    SECTION("Create one reader")
+    SPXTEST_SECTION("Create one reader")
     {
         auto demuxReader = audioReaderFactory->CreateReader();
         uint8_t buffer[10];
         auto readBytes = demuxReader->Read(buffer, 10);
-        REQUIRE(readBytes == 10);
-        REQUIRE(ValidateBufferSequence(buffer, readBytes));
+        SPXTEST_REQUIRE(readBytes == 10);
+        SPXTEST_REQUIRE(ValidateBufferSequence(buffer, readBytes));
         demuxReader->Close();
     }
 
-    SECTION("Create one reader after the other")
+    SPXTEST_SECTION("Create one reader after the other")
     {
         auto demuxReader = audioReaderFactory->CreateReader();
         uint8_t buffer[10];
         auto readBytes = demuxReader->Read(buffer, 10);
-        REQUIRE(readBytes == 10);
-        REQUIRE(ValidateBufferSequence(buffer, readBytes));
+        SPXTEST_REQUIRE(readBytes == 10);
+        SPXTEST_REQUIRE(ValidateBufferSequence(buffer, readBytes));
 
         uint8_t buffer2[10];
         auto demuxReader2 = audioReaderFactory->CreateReader();
         auto readBytes2 = demuxReader2->Read(buffer2, 10);
-        REQUIRE(readBytes2 == 10);
-        REQUIRE(ValidateBufferSequence(buffer2, readBytes2));
+        SPXTEST_REQUIRE(readBytes2 == 10);
+        SPXTEST_REQUIRE(ValidateBufferSequence(buffer2, readBytes2));
         demuxReader->Close();
         demuxReader2->Close();
     }
 
-    SECTION("Create one reader after the other and close them")
+    SPXTEST_SECTION("Create one reader after the other and close them")
     {
         auto demuxReader = audioReaderFactory->CreateReader();
         uint8_t buffer[10];
         auto readBytes = demuxReader->Read(buffer, 10);
-        REQUIRE(readBytes == 10);
-        REQUIRE(ValidateBufferSequence(buffer, readBytes));
+        SPXTEST_REQUIRE(readBytes == 10);
+        SPXTEST_REQUIRE(ValidateBufferSequence(buffer, readBytes));
         demuxReader->Close();
         demuxReader.reset();
 
         demuxReader = audioReaderFactory->CreateReader();
         readBytes = demuxReader->Read(buffer, 10);
-        REQUIRE(readBytes == 10);
-        REQUIRE(ValidateBufferSequence(buffer, readBytes));
+        SPXTEST_REQUIRE(readBytes == 10);
+        SPXTEST_REQUIRE(ValidateBufferSequence(buffer, readBytes));
         demuxReader->Close();
     }
 
-    SECTION("Exception gets propagated to 1 client")
+    SPXTEST_SECTION("Exception gets propagated to 1 client")
     {
         auto demuxReader = audioReaderFactory->CreateReader();
-        const int size = 3200 * 2;
+        constexpr size_t size = 3200 * 2;
         uint8_t buffer[size];
         auto readBytes = demuxReader->Read(buffer, size / 2);
         singletonMockAudioReader->ThrowNextRead();
 
-        REQUIRE(readBytes == (size / 2));
-        REQUIRE(ValidateBufferSequence(buffer, readBytes));
+        SPXTEST_REQUIRE(readBytes == (size / 2));
+        SPXTEST_REQUIRE(ValidateBufferSequence(buffer, readBytes));
         REQUIRE_THROWS(demuxReader->Read(buffer, size));
 
         auto demuxReaderAfter = audioReaderFactory->CreateReader();
         REQUIRE_NOTHROW(readBytes = demuxReaderAfter->Read(buffer, size));
-        REQUIRE(readBytes == size);
-        REQUIRE(ValidateBufferSequence(buffer, readBytes));
+        SPXTEST_REQUIRE(readBytes == size);
+        SPXTEST_REQUIRE(ValidateBufferSequence(buffer, readBytes));
 
         demuxReader->Close();
         demuxReaderAfter->Close();
     }
 
-    SECTION("Exception gets propagated to 2 clients")
+    SPXTEST_SECTION("Exception gets propagated to 2 clients")
     {
         auto demuxReader1 = audioReaderFactory->CreateReader();
         auto demuxReader2 = audioReaderFactory->CreateReader();
-        const int size = 3200 * 2;
+        constexpr size_t size = 3200 * 2;
         uint8_t buffer[size];
         auto readBytes = demuxReader1->Read(buffer, size / 2);
         singletonMockAudioReader->ThrowNextRead();
 
-        REQUIRE(readBytes == (size / 2));
-        REQUIRE(ValidateBufferSequence(buffer, readBytes));
+        SPXTEST_REQUIRE(readBytes == (size / 2));
+        SPXTEST_REQUIRE(ValidateBufferSequence(buffer, readBytes));
         REQUIRE_THROWS(demuxReader1->Read(buffer, size));
         REQUIRE_THROWS(demuxReader2->Read(buffer, size));
 
         auto demuxReaderAfter = audioReaderFactory->CreateReader();
         REQUIRE_NOTHROW(readBytes = demuxReaderAfter->Read(buffer, size));
-        REQUIRE(readBytes == size);
-        REQUIRE(ValidateBufferSequence(buffer, readBytes));
+        SPXTEST_REQUIRE(readBytes == size);
+        SPXTEST_REQUIRE(ValidateBufferSequence(buffer, readBytes));
 
         demuxReader1->Close();
         demuxReader2->Close();
@@ -228,7 +228,7 @@ TEST_CASE("Demux audio stream adapter stress and multithreaed", "[core][demux ad
 
     auto audioReaderFactory = SpxQueryInterface<ISpxAudioStreamReaderFactory>(demuxAudioReaderAdapter);
 
-    SECTION("Create many readers and close them")
+    SPXTEST_SECTION("Create many readers and close them")
     {
         const int c_iterationCount = 100;
         for (int i = 0; i < c_iterationCount; i++)
@@ -240,15 +240,15 @@ TEST_CASE("Demux audio stream adapter stress and multithreaed", "[core][demux ad
             // Validate 1 in 10
             if ((i % 10) == 0)
             {
-                REQUIRE(readBytes == 10);
-                REQUIRE(ValidateBufferSequence(buffer, readBytes));
+                SPXTEST_REQUIRE(readBytes == 10);
+                SPXTEST_REQUIRE(ValidateBufferSequence(buffer, readBytes));
             }
             demuxReader->Close();
         }
     }
 
 
-    SECTION("Parallel run with 4 readers created dynamically")
+    SPXTEST_SECTION("Parallel run with 4 readers created dynamically")
     {
         int iterationCountPerTask = 150;
         auto taskAction = [&iterationCountPerTask, &audioReaderFactory](string taskName)

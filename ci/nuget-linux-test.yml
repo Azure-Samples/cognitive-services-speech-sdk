@@ -120,7 +120,7 @@ jobs:
         LOG_FILE_NAME=LogFileName="\$ACTUAL_LOG_FILE_NAME.trx"
         dotnet test \$EXTRA_OPT --verbosity detailed --filter \
           "TestCategory!=LongTest&TestCategory!=OfflineUnidec" \
-          --framework netcoreapp2.0 --settings csharp.runsettings --logger "trx;\$LOG_FILE_NAME"
+          --framework netcoreapp2.0 --settings csharp.runsettings --logger "trx;\$LOG_FILE_NAME" -p:SpeechPlatform=UnixOS
 
         exitCode=\$?
 
@@ -154,7 +154,7 @@ jobs:
 
             echo "Rerunning the following failed test "
             echo \${tests[*]}
-            dotnet test \$EXTRA_OPT --verbosity detailed --filter "\$tests" --framework netcoreapp2.0 --settings csharp.runsettings --logger "trx;\$LOG_FILE_NAME_RETRY"
+            dotnet test \$EXTRA_OPT --verbosity detailed --filter "\$tests" --framework netcoreapp2.0 --settings csharp.runsettings --logger "trx;\$LOG_FILE_NAME_RETRY" -p:SpeechPlatform=UnixOS
             exitCode=\$?
           else
             break

@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 
 namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 {
+    using static SPXTEST;
     using static Config;
     using static SpeechRecognitionTestsHelper;
 
@@ -107,7 +108,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 // If there isn't a current file to read from, be done.
                 if (stream != null)
                 {
-                    Assert.IsTrue(dataBuffer.Length == size, "AudioDataStream should really allow specifying size to read; in this use case this is fine.");
+                    SPXTEST_ISTRUE(dataBuffer.Length == size, "AudioDataStream should really allow specifying size to read; in this use case this is fine.");
                     var read = stream.ReadData(dataBuffer);
                 }
                 else
@@ -153,12 +154,20 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [ClassInitialize]
         public static void TestClassinitialize(TestContext context)
         {
+            LoggingTestBaseInit(context);
             BaseClassInit(context);
+
             deploymentId = DefaultSettingsMap[DefaultSettingKeys.DEPLOYMENT_ID];
 
             languageUnderstandingSubscriptionKey = SubscriptionsRegionsMap[SubscriptionsRegionsKeys.LANGUAGE_UNDERSTANDING_SUBSCRIPTION].Key;
             languageUnderstandingServiceRegion = SubscriptionsRegionsMap[SubscriptionsRegionsKeys.LANGUAGE_UNDERSTANDING_SUBSCRIPTION].Region;
             languageUnderstandingHomeAutomationAppId = DefaultSettingsMap[DefaultSettingKeys.LANGUAGE_UNDERSTANDING_HOME_AUTOMATION_APP_ID];
+        }
+
+        [ClassCleanup]
+        new public static void TestClassCleanup()
+        {
+            LoggingTestBaseCleanup();
         }
 
         [TestInitialize]
@@ -184,7 +193,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 };
                 await recognizer.StartKeywordRecognitionAsync(model).ConfigureAwait(false);
                 Task.WaitAny(new[] { stopRecognition.Task }, kwsFoundTimeoutDelay);
-                Assert.IsTrue(stopRecognition.Task.IsCompleted, "Canceled event not received");
+                SPXTEST_ISTRUE(stopRecognition.Task.IsCompleted, "Canceled event not received");
                 await recognizer.StopKeywordRecognitionAsync().ConfigureAwait(false);
             }
         }
@@ -224,12 +233,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 try
                 {
                     recognizer.StartKeywordRecognitionAsync(model).ConfigureAwait(false).GetAwaiter().GetResult();
-                    Assert.Fail("recognizer did not throw expected exception");
+                    SPXTEST_FAIL("recognizer did not throw expected exception");
                 }
                 catch (ApplicationException ex)
                 {
                     Console.WriteLine("Got Exception: " + ex.Message.ToString());
-                    Assert.IsTrue(ex.Message.Contains("EXTENSION_LIBRARY_NOT_FOUND"), "not the expected error message: " + ex.Message);
+                    SPXTEST_ISTRUE(ex.Message.Contains("EXTENSION_LIBRARY_NOT_FOUND"), "not the expected error message: " + ex.Message);
                 }
 
                 await recognizer.StopKeywordRecognitionAsync().ConfigureAwait(false);
@@ -282,8 +291,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 Console.WriteLine();
 
                 var sessionid = recognizer.Properties.GetProperty(PropertyId.Speech_SessionId);
-                Assert.AreEqual(0, hasCompleted, $"keyword not detected within timeout ({sessionid})");
-                Assert.IsTrue(tcs.Task.Result, $"keyword not detected within timeout ({sessionid})");
+                SPXTEST_ARE_EQUAL(0, hasCompleted, $"keyword not detected within timeout ({sessionid})");
+                SPXTEST_ISTRUE(tcs.Task.Result, $"keyword not detected within timeout ({sessionid})");
 
                 await recognizer.StopKeywordRecognitionAsync().ConfigureAwait(false);
             }
@@ -335,8 +344,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 Console.WriteLine();
 
                 var sessionid = recognizer.Properties.GetProperty(PropertyId.Speech_SessionId);
-                Assert.AreEqual(0, hasCompleted, $"keyword not detected within timeout ({sessionid})");
-                Assert.IsTrue(tcs.Task.Result, $"keyword not detected within timeout ({sessionid})");
+                SPXTEST_ARE_EQUAL(0, hasCompleted, $"keyword not detected within timeout ({sessionid})");
+                SPXTEST_ISTRUE(tcs.Task.Result, $"keyword not detected within timeout ({sessionid})");
 
                 await recognizer.StopKeywordRecognitionAsync().ConfigureAwait(false);
             }
@@ -389,8 +398,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 Console.WriteLine();
 
                 var sessionid = recognizer.Properties.GetProperty(PropertyId.Speech_SessionId);
-                Assert.AreEqual(0, hasCompleted, $"keyword not detected within timeout ({sessionid})");
-                Assert.IsTrue(tcs.Task.Result, $"keyword not detected within timeout ({sessionid})");
+                SPXTEST_ARE_EQUAL(0, hasCompleted, $"keyword not detected within timeout ({sessionid})");
+                SPXTEST_ISTRUE(tcs.Task.Result, $"keyword not detected within timeout ({sessionid})");
 
                 await recognizer.StopKeywordRecognitionAsync().ConfigureAwait(false);
             }
@@ -445,12 +454,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 Console.WriteLine();
 
                 var sessionid = recognizer.Properties.GetProperty(PropertyId.Speech_SessionId);
-                Assert.AreEqual(0, hasCompleted, $"keyword not detected within timeout ({sessionid})");
-                Assert.IsTrue(tcs.Task.Result, $"keyword not detected within timeout ({sessionid})");
-                Assert.AreNotEqual(-1, tcsFoundRecognizing, $"tcsFoundRecognizing not detected within timeout ({sessionid})");
-                Assert.AreNotEqual(-1, tcsFoundRecognized, $"tcsFoundRecognized not detected within timeout ({sessionid})");
-                Assert.IsTrue(tcsFoundRecognizing < tcsFoundRecognized, $"tcsFoundRecognized event ordering incorrect ({sessionid})");
-                Assert.IsTrue(error.Length == 0, $"{error} ({sessionid})");
+                SPXTEST_ARE_EQUAL(0, hasCompleted, $"keyword not detected within timeout ({sessionid})");
+                SPXTEST_ISTRUE(tcs.Task.Result, $"keyword not detected within timeout ({sessionid})");
+                SPXTEST_ARE_NOT_EQUAL(-1, tcsFoundRecognizing, $"tcsFoundRecognizing not detected within timeout ({sessionid})");
+                SPXTEST_ARE_NOT_EQUAL(-1, tcsFoundRecognized, $"tcsFoundRecognized not detected within timeout ({sessionid})");
+                SPXTEST_ISTRUE(tcsFoundRecognizing < tcsFoundRecognized, $"tcsFoundRecognized event ordering incorrect ({sessionid})");
+                SPXTEST_ISTRUE(error.Length == 0, $"{error} ({sessionid})");
 
                 await recognizer.StopKeywordRecognitionAsync().ConfigureAwait(false);
             }
@@ -502,8 +511,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 Console.WriteLine();
 
                 var sessionid = recognizer.Properties.GetProperty(PropertyId.Speech_SessionId);
-                Assert.AreEqual(0, hasCompleted, $"keyword not detected within timeout ({sessionid})");
-                Assert.IsTrue(tcs.Task.Result, $"keyword not detected within timeout ({sessionid})");
+                SPXTEST_ARE_EQUAL(0, hasCompleted, $"keyword not detected within timeout ({sessionid})");
+                SPXTEST_ISTRUE(tcs.Task.Result, $"keyword not detected within timeout ({sessionid})");
 
                 await recognizer.StopKeywordRecognitionAsync().ConfigureAwait(false);
             }
@@ -603,8 +612,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
             var sessionid1 = recognizerSecret.Properties.GetProperty(PropertyId.Speech_SessionId);
             var sessionid2 = recognizerComputer.Properties.GetProperty(PropertyId.Speech_SessionId);
-            Assert.AreEqual(0, hasCompleted, $"keyword not detected within timeout ({sessionid1}, {sessionid2})");
-            Assert.IsTrue(tcs.Task.Result, $"keyword not detected within timeout ({sessionid1}, {sessionid2})");
+            SPXTEST_ARE_EQUAL(0, hasCompleted, $"keyword not detected within timeout ({sessionid1}, {sessionid2})");
+            SPXTEST_ISTRUE(tcs.Task.Result, $"keyword not detected within timeout ({sessionid1}, {sessionid2})");
 
             await recognizerSecret.StopKeywordRecognitionAsync().ConfigureAwait(false);
             await recognizerComputer.StopKeywordRecognitionAsync().ConfigureAwait(false);
@@ -701,14 +710,14 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             await taskStartRecognizerComputer.ConfigureAwait(false);
 
             var hasCompleted = Task.WaitAny(tcs.Task, tcsCanceled.Task, Task.Delay(kwsFoundTimeoutDelay));
-            Assert.AreEqual(1, hasCompleted, "keyword detected within timeout is unexpected");
-            Assert.IsFalse(tcs.Task.IsCompleted, "keyword detected task within timeout is unexpected");
-            Assert.IsFalse(tcs.Task.IsCanceled, "keyword detected task within timeout is unexpected");
+            SPXTEST_ARE_EQUAL(1, hasCompleted, "keyword detected within timeout is unexpected");
+            SPXTEST_ISFALSE(tcs.Task.IsCompleted, "keyword detected task within timeout is unexpected");
+            SPXTEST_ISFALSE(tcs.Task.IsCanceled, "keyword detected task within timeout is unexpected");
 
-            Assert.AreEqual(2, numCanceledCalled, "num closed sessions mismatch");
+            SPXTEST_ARE_EQUAL(2, numCanceledCalled, "num closed sessions mismatch");
 
-            Assert.IsFalse(tcsSecret, "secret keyword detected that should not happen");
-            Assert.IsFalse(tcsComputer, "computer keyword detected that should not happen");
+            SPXTEST_ISFALSE(tcsSecret, "secret keyword detected that should not happen");
+            SPXTEST_ISFALSE(tcsComputer, "computer keyword detected that should not happen");
 
             await recognizerSecret.StopKeywordRecognitionAsync().ConfigureAwait(false);
             await recognizerComputer.StopKeywordRecognitionAsync().ConfigureAwait(false);
@@ -771,8 +780,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 Console.WriteLine();
 
                 var sessionid = recognizer.Properties.GetProperty(PropertyId.Speech_SessionId);
-                Assert.AreEqual(0, hasCompleted, $"keyword not detected within timeout ({sessionid})");
-                Assert.AreEqual(true, tcs.Task.Result, $"2x keyword not detected within timeout ({sessionid})");
+                SPXTEST_ARE_EQUAL(0, hasCompleted, $"keyword not detected within timeout ({sessionid})");
+                SPXTEST_ARE_EQUAL(true, tcs.Task.Result, $"2x keyword not detected within timeout ({sessionid})");
 
                 await recognizer.StopKeywordRecognitionAsync().ConfigureAwait(false);
             }
@@ -843,9 +852,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 Console.WriteLine();
 
                 var sessionid = recognizer.Properties.GetProperty(PropertyId.Speech_SessionId);
-                Assert.AreEqual(0, hasCompleted, $"keyword not detected within timeout ({sessionid})");
-                Assert.AreEqual(true, tcs.Task.Result, $"2x keyword not detected within timeout ({sessionid})");
-                Assert.AreEqual(0, error.Length, $"{error} ({sessionid})");
+                SPXTEST_ARE_EQUAL(0, hasCompleted, $"keyword not detected within timeout ({sessionid})");
+                SPXTEST_ARE_EQUAL(true, tcs.Task.Result, $"2x keyword not detected within timeout ({sessionid})");
+                SPXTEST_ARE_EQUAL(0, error.Length, $"{error} ({sessionid})");
 
                 await recognizer.StopKeywordRecognitionAsync().ConfigureAwait(false);
             }
@@ -897,8 +906,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 await recognizer.StartKeywordRecognitionAsync(model).ConfigureAwait(false);
 
                 var hasCompleted = Task.WaitAny(tcs.Task, tcsCanceled.Task, Task.Delay(kwsFoundTimeoutDelay));
-                Assert.AreEqual(1, hasCompleted, "did expect a result (for canceled)");
-                Assert.AreEqual(1, numCanceledCalled, "unexpected num close sessions");
+                SPXTEST_ARE_EQUAL(1, hasCompleted, "did expect a result (for canceled)");
+                SPXTEST_ARE_EQUAL(1, numCanceledCalled, "unexpected num close sessions");
 
                 await recognizer.StopKeywordRecognitionAsync().ConfigureAwait(false);
             }
@@ -1003,8 +1012,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 await recognizer.StartKeywordRecognitionAsync(model).ConfigureAwait(false);
 
                 var hasCompleted = Task.WaitAny(tcs.Task, tcsCanceled.Task, Task.Delay(kwsFoundTimeoutDelay));
-                Assert.AreEqual(1, hasCompleted, "did expect a result (for canceled)");
-                Assert.AreEqual(1, numCanceledCalled, "unexpected num close sessions");
+                SPXTEST_ARE_EQUAL(1, hasCompleted, "did expect a result (for canceled)");
+                SPXTEST_ARE_EQUAL(1, numCanceledCalled, "unexpected num close sessions");
 
                 await recognizer.StopKeywordRecognitionAsync().ConfigureAwait(false);
             }
@@ -1092,11 +1101,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 Console.WriteLine();
 
                 var sessionid = recognizer.Properties.GetProperty(PropertyId.Speech_SessionId);
-                Assert.AreEqual(0, hasCompleted, $"keyword not detected within timeout ({sessionid})");
-                Assert.AreEqual(true, tcs.Task.Result, $"2x keyword not detected within timeout ({sessionid})");
-                Assert.AreEqual(2, tcsKeywordRecognizing, $"2x tcsKeywordRecognizing not detected within timeout ({sessionid})");
-                Assert.AreEqual(2, tcsKeywordRecognized, $"2x tcsKeywordRecognized not detected within timeout ({sessionid})");
-                Assert.AreEqual(0, error.Length, $"{error} ({sessionid})");
+                SPXTEST_ARE_EQUAL(0, hasCompleted, $"keyword not detected within timeout ({sessionid})");
+                SPXTEST_ARE_EQUAL(true, tcs.Task.Result, $"2x keyword not detected within timeout ({sessionid})");
+                SPXTEST_ARE_EQUAL(2, tcsKeywordRecognizing, $"2x tcsKeywordRecognizing not detected within timeout ({sessionid})");
+                SPXTEST_ARE_EQUAL(2, tcsKeywordRecognized, $"2x tcsKeywordRecognized not detected within timeout ({sessionid})");
+                SPXTEST_ARE_EQUAL(0, error.Length, $"{error} ({sessionid})");
                 stream.Close();
                 await recognizer.StopKeywordRecognitionAsync().ConfigureAwait(false);
             }
@@ -1154,8 +1163,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 Console.WriteLine();
 
                 var sessionid = recognizer.Properties.GetProperty(PropertyId.Speech_SessionId);
-                Assert.AreEqual(0, hasCompleted, $"keyword not detected within timeout ({sessionid})");
-                Assert.IsTrue(tcs.Task.Result, $"keyword not detected within timeout ({sessionid})");
+                SPXTEST_ARE_EQUAL(0, hasCompleted, $"keyword not detected within timeout ({sessionid})");
+                SPXTEST_ISTRUE(tcs.Task.Result, $"keyword not detected within timeout ({sessionid})");
 
                 await recognizer.StopKeywordRecognitionAsync().ConfigureAwait(false);
             }
@@ -1215,8 +1224,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 await recognizer.StartKeywordRecognitionAsync(model).ConfigureAwait(false);
 
                 var hasCompleted = Task.WaitAny(tcs.Task, tcsCanceled.Task, Task.Delay(kwsFoundTimeoutDelay));
-                Assert.AreEqual(1, hasCompleted, "did expect a result (for canceled)");
-                Assert.AreEqual(1, numCanceledCalled, "unexpected num close sessions");
+                SPXTEST_ARE_EQUAL(1, hasCompleted, "did expect a result (for canceled)");
+                SPXTEST_ARE_EQUAL(1, numCanceledCalled, "unexpected num close sessions");
 
                 await recognizer.StopKeywordRecognitionAsync().ConfigureAwait(false);
             }
@@ -1277,8 +1286,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 Console.WriteLine();
 
                 var sessionid = recognizer.Properties.GetProperty(PropertyId.Speech_SessionId);
-                Assert.AreEqual(0, hasCompleted, $"keyword not detected within timeout ({sessionid})");
-                Assert.IsTrue(tcs.Task.Result, $"keyword not detected within timeout ({sessionid})");
+                SPXTEST_ARE_EQUAL(0, hasCompleted, $"keyword not detected within timeout ({sessionid})");
+                SPXTEST_ISTRUE(tcs.Task.Result, $"keyword not detected within timeout ({sessionid})");
 
                 await recognizer.StopKeywordRecognitionAsync().ConfigureAwait(false);
             }
@@ -1366,9 +1375,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 Console.WriteLine();
 
                 var sessionid = recognizer.Properties.GetProperty(PropertyId.Speech_SessionId);
-                Assert.AreEqual(0, hasCompleted, $"keyword not detected within timeout ({sessionid})");
-                Assert.AreEqual(true, tcs.Task.Result, $"2x keyword not detected within timeout ({sessionid})");
-                Assert.AreEqual(0, error.Length, $"{error} ({sessionid})");
+                SPXTEST_ARE_EQUAL(0, hasCompleted, $"keyword not detected within timeout ({sessionid})");
+                SPXTEST_ARE_EQUAL(true, tcs.Task.Result, $"2x keyword not detected within timeout ({sessionid})");
+                SPXTEST_ARE_EQUAL(0, error.Length, $"{error} ({sessionid})");
 
                 await recognizer.StopKeywordRecognitionAsync().ConfigureAwait(false);
             }

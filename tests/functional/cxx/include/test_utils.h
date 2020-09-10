@@ -208,7 +208,7 @@ inline void test_diagnostics_log_trace_message(int level, const char* pszTitle, 
     diagnostics_log_format_message(sz, 4096, level, pszTitle, fileName, lineNumber, pszFormat, argptr);
     va_end(argptr);
 
-     fprintf(stderr, "%s", sz);
+     fprintf(stderr, "TEST: %s", sz);
 
      va_start(argptr, pszFormat);
      diagnostics_log_trace_message2(level, pszTitle, fileName, lineNumber, pszFormat, argptr);
@@ -750,16 +750,18 @@ inline int parse_cli_args(Catch::Session& session, int argc, char* argv[])
     try { auto isTrue = !!(__VA_ARGS__); \
           SPX_TRACE_INFO_IF(isTrue, "SPXTEST_CHECK('%s'): %s(%d): PASSED:", __SPX_EXPR_AS_STRING(__VA_ARGS__), __FILE__, __LINE__); \
           SPX_TRACE_ERROR_IF(!isTrue, "SPXTEST_CHECK('%s'): %s(%d): FAILED:", __SPX_EXPR_AS_STRING(__VA_ARGS__), __FILE__, __LINE__); \
-          SPX_IFTRUE(!isTrue, diagnostics_log_memory_dump_to_file(nullptr, 1)); \
+          SPX_IFTRUE(!isTrue, diagnostics_log_memory_dump_to_file(nullptr, 0)); \
     } catch (...) { \
           SPX_TRACE_ERROR("SPXTEST_CHECK('%s'): FAILED: %s(%d) w/Exception:", __SPX_EXPR_AS_STRING(__VA_ARGS__), __FILE__, __LINE__); \
     } CHECK(__VA_ARGS__); }())
 
+// ISSUE: need to try and not evaluate __VA_ARGS__ multiple times... 
+// ISSUE: also ... need to figure out why memory log didn't emit when cxx_api_tests failed last run
 #define SPXTEST_REQUIRE( ... ) ([&](){ \
     try { auto isTrue = !!(__VA_ARGS__); \
           SPX_TRACE_INFO_IF(isTrue, "SPXTEST_REQUIRE('%s'): %s(%d): PASSED:", __SPX_EXPR_AS_STRING(__VA_ARGS__), __FILE__, __LINE__); \
           SPX_TRACE_ERROR_IF(!isTrue, "SPXTEST_REQUIRE('%s'): %s(%d): FAILED:", __SPX_EXPR_AS_STRING(__VA_ARGS__), __FILE__, __LINE__); \
-          SPX_IFTRUE(!isTrue, diagnostics_log_memory_dump_to_file(nullptr, 1)); \
+          SPX_IFTRUE(!isTrue, diagnostics_log_memory_dump_to_file(nullptr, 0)); \
     } catch (...) { \
           SPX_TRACE_ERROR("SPXTEST_REQUIRE('%s'): %s(%d): FAILED: w/Exception:", __SPX_EXPR_AS_STRING(__VA_ARGS__), __FILE__, __LINE__); \
     } REQUIRE(__VA_ARGS__); }())
@@ -768,7 +770,7 @@ inline int parse_cli_args(Catch::Session& session, int argc, char* argv[])
     try { auto isFalse = !(__VA_ARGS__); \
           SPX_TRACE_INFO_IF(isFalse, "SPXTEST_CHECK_FALSE('%s'): %s(%d): PASSED:", __SPX_EXPR_AS_STRING(__VA_ARGS__), __FILE__, __LINE__); \
           SPX_TRACE_ERROR_IF(!isFalse, "SPXTEST_CHECK_FALSE('%s'): %s(%d): FAILED:", __SPX_EXPR_AS_STRING(__VA_ARGS__), __FILE__, __LINE__); \
-          SPX_IFTRUE(!isFalse, diagnostics_log_memory_dump_to_file(nullptr, 1)); \
+          SPX_IFTRUE(!isFalse, diagnostics_log_memory_dump_to_file(nullptr, 0)); \
     } catch (...) { \
           SPX_TRACE_ERROR("SPXTEST_CHECK_FALSE('%s'): %s(%d): FAILED: w/Exception:", __SPX_EXPR_AS_STRING(__VA_ARGS__), __FILE__, __LINE__); \
     } CHECK_FALSE(__VA_ARGS__); }())
@@ -777,7 +779,7 @@ inline int parse_cli_args(Catch::Session& session, int argc, char* argv[])
     try { auto isFalse = !(__VA_ARGS__); \
           SPX_TRACE_INFO_IF(isFalse, "SPXTEST_REQUIRE_FALSE('%s'): %s(%d): PASSED:", __SPX_EXPR_AS_STRING(__VA_ARGS__), __FILE__, __LINE__); \
           SPX_TRACE_ERROR_IF(!isFalse, "SPXTEST_REQUIRE_FALSE('%s'): %s(%d): FAILED:", __SPX_EXPR_AS_STRING(__VA_ARGS__), __FILE__, __LINE__); \
-          SPX_IFTRUE(!isFalse, diagnostics_log_memory_dump_to_file(nullptr, 1)); \
+          SPX_IFTRUE(!isFalse, diagnostics_log_memory_dump_to_file(nullptr, 0)); \
     } catch (...) { \
           SPX_TRACE_ERROR("SPXTEST_REQUIRE_FALSE('%s'): %s(%d): FAILED: w/Exception:", __SPX_EXPR_AS_STRING(__VA_ARGS__), __FILE__, __LINE__); \
     } REQUIRE_FALSE(__VA_ARGS__); }())
@@ -786,7 +788,7 @@ inline int parse_cli_args(Catch::Session& session, int argc, char* argv[])
     try { auto isTrue = !!(matcher.match(arg)); \
           SPX_TRACE_INFO_IF(isTrue, "SPXTEST_CHECK_THAT('%s', '%s'): %s(%d): PASSED:", __SPX_EXPR_AS_STRING(arg), __SPX_EXPR_AS_STRING(matcher), __FILE__, __LINE__); \
           SPX_TRACE_ERROR_IF(!isTrue, "SPXTEST_CHECK_THAT('%s', '%s'): %s(%d): FAILED:", __SPX_EXPR_AS_STRING(arg), __SPX_EXPR_AS_STRING(matcher), __FILE__, __LINE__); \
-          SPX_IFTRUE(!isTrue, diagnostics_log_memory_dump_to_file(nullptr, 1)); \
+          SPX_IFTRUE(!isTrue, diagnostics_log_memory_dump_to_file(nullptr, 0)); \
     } catch (...) { \
           SPX_TRACE_ERROR("SPXTEST_CHECK_THAT('%s', '%s'): %s(%d): FAILED: w/Exception:", __SPX_EXPR_AS_STRING(arg), __SPX_EXPR_AS_STRING(matcher), __FILE__, __LINE__); \
     } CHECK_THAT(arg, matcher); }())
@@ -795,10 +797,19 @@ inline int parse_cli_args(Catch::Session& session, int argc, char* argv[])
     try { auto isTrue = !!(matcher.match(arg)); \
           SPX_TRACE_INFO_IF(isTrue, "SPXTEST_REQUIRE_THAT('%s', '%s'): %s(%d): PASSED:", __SPX_EXPR_AS_STRING(arg), __SPX_EXPR_AS_STRING(matcher), __FILE__, __LINE__); \
           SPX_TRACE_ERROR_IF(!isTrue, "SPXTEST_REQUIRE_THAT('%s', '%s'): %s(%d): FAILED:", __SPX_EXPR_AS_STRING(arg), __SPX_EXPR_AS_STRING(matcher), __FILE__, __LINE__); \
-          SPX_IFTRUE(!isTrue, diagnostics_log_memory_dump_to_file(nullptr, 1)); \
+          SPX_IFTRUE(!isTrue, diagnostics_log_memory_dump_to_file(nullptr, 0)); \
     } catch (...) { \
           SPX_TRACE_INFO("SPXTEST_REQUIRE_THAT('%s', '%s'): %s(%d): FAILED: w/Exception:", __SPX_EXPR_AS_STRING(arg), __SPX_EXPR_AS_STRING(matcher), __FILE__, __LINE__); \
     } REQUIRE_THAT(arg, matcher); }())
+
+#define SPXTEST_CAPTURE(msg) ([&](){ \
+        SPX_TRACE_INFO("SPXTEST_CAPTURE(%s): %s", #msg, ::Catch::Detail::stringify(msg).c_str()); \
+    }())
+
+#define SPXTEST_FAIL(...) ([&](){ \
+        SPXTEST_CAPTURE(__VA_ARGS__); \
+        FAIL(__VA_ARGS__); \
+    }())
 
 #define SPXTEST_CHECK_NOTHROW( ... ) \
     SPX_TRACE_INFO("SPXTEST_CHECK_NOTHROW('%s'): %s(%d):", __SPX_EXPR_AS_STRING(__VA_ARGS__), __FILE__, __LINE__); \

@@ -13,8 +13,10 @@ using System.Threading.Tasks;
 
 namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 {
-    using Microsoft.CognitiveServices.Speech.Audio;
+    using static SPXTEST;
+    using static CatchUtils;
     using static Config;
+    using Microsoft.CognitiveServices.Speech.Audio;
 
     sealed class SpeechRecognitionTestsHelper
     {
@@ -68,10 +70,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             await Task.WhenAny(taskCompletionSource.Task, Task.Delay(timeout));
             await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
 
-            if (!string.IsNullOrEmpty(canceled))
-            {
-                Assert.Fail($"Recognition Canceled: {canceled}");
-            }
+            SPXTEST_REQUIRE(string.IsNullOrEmpty(canceled), $"Recognition Canceled w/ErrorDetails='{canceled}'");
         }
 
         public async Task<SpeechRecognitionResult> CompleteRecognizeOnceAsync(SpeechRecognizer recognizer, Connection connection = null)
@@ -104,11 +103,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 connection.Disconnected -= DisconnectedEventCounter;
             }
 
-            Assert.IsTrue(SessionStoppedEventCount == 1 || ErrorEventCount == 1);
-            if (!string.IsNullOrEmpty(canceled))
-            {
-                Assert.Fail($"Recognition Canceled: {canceled}");
-            }
+            SPXTEST_ISTRUE(SessionStoppedEventCount == 1 || ErrorEventCount == 1);
+            SPXTEST_REQUIRE(string.IsNullOrEmpty(canceled), $"Recognition Canceled w/ErrorDetails='{canceled}'");
 
             return result;
         }
@@ -219,42 +215,42 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             if (expected != actual)
             {
-                Assert.Fail($"Actual value {actual} does not match the expected value {expected}. {errorMessage}");
+                SPXTEST_FAIL($"Actual value {actual} does not match the expected value {expected}. {errorMessage}");
             }
         }
 
         public static void AssertOneEqual(string[] expected, string actual)
         {
             var expectedString = String.Join("', '", expected);
-            Assert.IsTrue(
+            SPXTEST_ISTRUE(
                 expected.Contains(actual),
                 $"'{actual}' (actual) is not a member of '{expectedString}' (expected)");
         }
 
         public static void AssertIfNotContains(string result, string substring)
         {
-            Assert.IsTrue(result.Contains(substring), $"Error: '{result}' does not contain expected substring '{substring}'");
+            SPXTEST_ISTRUE(result.Contains(substring), $"Error: '{result}' does not contain expected substring '{substring}'");
         }
         public static void AssertIfContains(string result, string substring)
         {
-            Assert.IsFalse(result.Contains(substring), $"Error: '{result}' contain unexpected substring '{substring}'");
+            SPXTEST_ISFALSE(result.Contains(substring), $"Error: '{result}' contain unexpected substring '{substring}'");
         }
         public static void AssertMatching(string expectedText, string actualText)
         {
-            Assert.IsFalse(actualText.Length == 0, $"Actual text should not be empty, expected '{expectedText}'");
+            SPXTEST_ISFALSE(actualText.Length == 0, $"Actual text should not be empty, expected '{expectedText}'");
 
             string plainActualText = Normalize(actualText);
             string plainExpectedText = Normalize(expectedText);
 
             if (plainActualText.Length <= plainExpectedText.Length)
             {
-                Assert.IsTrue(
+                SPXTEST_ISTRUE(
                     plainExpectedText.Contains(plainActualText),
                     $"'{plainExpectedText}' (expected)\n does not contain \n'{plainActualText}' (actual)");
             }
             else
             {
-                Assert.IsTrue(
+                SPXTEST_ISTRUE(
                     plainActualText.Contains(plainExpectedText),
                     $"'{plainActualText}' (actual)\n does not contain \n'{plainExpectedText}' (expected)");
             }
@@ -318,8 +314,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public static void AssertConnectionCountMatching(int connectedEventCount, int disconnectedEventCount)
         {
             Console.WriteLine($"ConnectedEventCount: {connectedEventCount}, DisconnectedEventCount: {disconnectedEventCount}");
-            Assert.IsTrue(connectedEventCount > 0, AssertOutput.ConnectedEventCountMustNotBeZero);
-            Assert.IsTrue(connectedEventCount == disconnectedEventCount || connectedEventCount == disconnectedEventCount + 1, AssertOutput.ConnectedDisconnectedEventUnmatch);
+            SPXTEST_ISTRUE(connectedEventCount > 0, AssertOutput.ConnectedEventCountMustNotBeZero);
+            SPXTEST_ISTRUE(connectedEventCount == disconnectedEventCount || connectedEventCount == disconnectedEventCount + 1, AssertOutput.ConnectedDisconnectedEventUnmatch);
         }
 
         public static async Task AssertConnectionError(SpeechConfig speechConfig, CancellationErrorCode expectedErrorCode, params string[] expectedErrorSubstrings)
@@ -341,10 +337,10 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 };
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 AssertEqual(0, connectedEventCount, AssertOutput.WrongConnectedEventCount);
-                Assert.AreEqual(ResultReason.Canceled, result.Reason);
+                SPXTEST_ARE_EQUAL(ResultReason.Canceled, result.Reason);
                 var cancellation = CancellationDetails.FromResult(result);
-                Assert.AreEqual(CancellationReason.Error, cancellation.Reason);
-                Assert.AreEqual(expectedErrorCode, cancellation.ErrorCode);
+                SPXTEST_ARE_EQUAL(CancellationReason.Error, cancellation.Reason);
+                SPXTEST_ARE_EQUAL(expectedErrorCode, cancellation.ErrorCode);
                 foreach (var expectedSubstring in expectedErrorSubstrings)
                 {
                     AssertHelpers.AssertStringContains(cancellation.ErrorDetails, expectedSubstring, comparison);
@@ -392,8 +388,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
             const int maxWordsExpected = 10000;  // just an arbitrary bound for this operation
                                                  // reconsider memory usage (or alternative algorithm) if you need to increase this significantly
-            Assert.IsTrue((wordsExpected.Length < maxWordsExpected) && (wordsExpected.Length > 0), $"number of words in expectedString out of bounds: '{wordsExpected.Length}'");
-            Assert.IsTrue((wordsComparison.Length < maxWordsExpected) && (wordsComparison.Length > 0), $"number of words in wordsComparison out of bounds: '{wordsComparison.Length}'");
+            SPXTEST_ISTRUE((wordsExpected.Length < maxWordsExpected) && (wordsExpected.Length > 0), $"number of words in expectedString out of bounds: '{wordsExpected.Length}'");
+            SPXTEST_ISTRUE((wordsComparison.Length < maxWordsExpected) && (wordsComparison.Length > 0), $"number of words in wordsComparison out of bounds: '{wordsComparison.Length}'");
 
             int[][] matrix = new int[wordsExpected.Length + 1][];
 
@@ -434,7 +430,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         static public void AssertStringWordEditCount(string expectedString, string comparisonString, int allowedEdits)
         {
             int edits = GetStringWordEditCount(expectedString, comparisonString);
-            Assert.IsTrue(
+            SPXTEST_ISTRUE(
                 edits <= allowedEdits,
                 $"Number of edit operations '{edits}' exceeding allowed edits '{allowedEdits}'\ninput:   '{expectedString}'\ncompare: '{comparisonString}'\n");
         }
@@ -479,16 +475,16 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public static void AssertDetailedResult(SpeechRecognitionResult result)
         {
             var bestResults = result.Best().ToArray();
-            Assert.IsTrue(bestResults.Length > 0);
+            SPXTEST_ISTRUE(bestResults.Length > 0);
             var detailedRecognitionText = bestResults[0].Text;
             var detailedRecognitionNormalizedForm = bestResults[0].NormalizedForm;
             var detailedRecognitionLexicalForm = bestResults[0].LexicalForm;
             var detailedRecognitionMaskedForm = bestResults[0].MaskedNormalizedForm;
 
-            Assert.IsTrue(detailedRecognitionText.Length > 0);
-            Assert.IsTrue(detailedRecognitionNormalizedForm.Length > 0);
-            Assert.IsTrue(detailedRecognitionLexicalForm.Length > 0);
-            Assert.IsTrue(detailedRecognitionMaskedForm.Length > 0);
+            SPXTEST_ISTRUE(detailedRecognitionText.Length > 0);
+            SPXTEST_ISTRUE(detailedRecognitionNormalizedForm.Length > 0);
+            SPXTEST_ISTRUE(detailedRecognitionLexicalForm.Length > 0);
+            SPXTEST_ISTRUE(detailedRecognitionMaskedForm.Length > 0);
         }
 
         public static void WarnIfContains(string result, string substring)

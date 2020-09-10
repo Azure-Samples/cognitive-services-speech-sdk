@@ -8,11 +8,13 @@ using System;
 
 namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils
 {
+    using static SPXTEST;
+
     class AssertHelpers
     {
         static public void AssertStringContains(string inputString, string searchString, StringComparison compare = StringComparison.Ordinal)
         {
-            Assert.IsTrue(
+            SPXTEST_ISTRUE(
                 inputString?.IndexOf(searchString, compare) >= 0,
                 $"Input string does not contain '{searchString}'. Actual: '{inputString}'");
         }

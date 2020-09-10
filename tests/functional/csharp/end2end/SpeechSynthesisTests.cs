@@ -9,12 +9,14 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 {
+    using static SPXTEST;
     using static Config;
 
     [TestClass]
@@ -23,7 +25,14 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [ClassInitialize]
         public static void TestClassinitialize(TestContext context)
         {
+            LoggingTestBaseInit(context);
             BaseClassInit(context);
+        }
+
+        [ClassCleanup]
+        new public static void TestClassCleanup()
+        {
+            LoggingTestBaseCleanup();
         }
 
         [TestInitialize]
@@ -106,7 +115,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 } // "{{{wavefile.wav}}}" is now closed
 
                 var waveSize1 = new FileInfo("wavefile.wav").Length;
-                Assert.IsTrue(waveSize1 > EmptyWaveFileSize, $"The size of output wave file 1 is unexpected. Expected: greater than {EmptyWaveFileSize}, Actual: {waveSize1}");
+                SPXTEST_ISTRUE(waveSize1 > EmptyWaveFileSize, $"The size of output wave file 1 is unexpected. Expected: greater than {EmptyWaveFileSize}, Actual: {waveSize1}");
 
                 // Make a second run with 2 speaks to verify that the audio can be appended to the file while speaking
                 using (var synthesizer = new SpeechSynthesizer(restConfig, fileConfig))
@@ -120,7 +129,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 } // "{{{wavefile.wav}}}" is now closed
 
                 var waveSize2 = new FileInfo("wavefile.wav").Length;
-                Assert.IsTrue(waveSize2 > waveSize1, $"The size of output wave file 1 and wave file 2 are unexpected. Expected: wave size 2 > wave size 1, Actual: wave size 2 = {waveSize2}, wave size 1 = {waveSize1}");
+                SPXTEST_ISTRUE(waveSize2 > waveSize1, $"The size of output wave file 1 and wave file 2 are unexpected. Expected: wave size 2 > wave size 1, Actual: wave size 2 = {waveSize2}, wave size 1 = {waveSize1}");
             }
         }
 
@@ -140,12 +149,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                         CheckSynthesisResult(result2);
                     }
 
-                    Assert.IsFalse(callback.IsClosed(), "The push audio output stream should be opened until synthesizer is released.");
+                    SPXTEST_ISFALSE(callback.IsClosed(), "The push audio output stream should be opened until synthesizer is released.");
                 }
 
                 var audioLength = callback.GetAudioLength();
-                Assert.IsTrue(audioLength > 0, $"The collected audio size should be greater than zero, but actually is {audioLength}.");
-                Assert.IsTrue(callback.IsClosed(), "The push audio output stream should be closed after synthesizer is released.");
+                SPXTEST_ISTRUE(audioLength > 0, $"The collected audio size should be greater than zero, but actually is {audioLength}.");
+                SPXTEST_ISTRUE(callback.IsClosed(), "The push audio output stream should be closed after synthesizer is released.");
             }
         }
 
@@ -199,19 +208,19 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has completed rendering, and available in result1
                 {
                     CheckSynthesisResult(result1);
-                    Assert.AreEqual(GuidLength, result1.ResultId.Length, "The length of result ID should be the length of a GUID (32).");
-                    Assert.AreEqual(ResultReason.SynthesizingAudioCompleted, result1.Reason, "The synthesis should be completed now.");
+                    SPXTEST_ARE_EQUAL(GuidLength, result1.ResultId.Length, "The length of result ID should be the length of a GUID (32).");
+                    SPXTEST_ARE_EQUAL(ResultReason.SynthesizingAudioCompleted, result1.Reason, "The synthesis should be completed now.");
                     var audioDataSize = result1.AudioData.Length;
-                    Assert.IsTrue(audioDataSize > 0, $"The audio data size should be greater than zero, but actually it's {audioDataSize}.");
+                    SPXTEST_ISTRUE(audioDataSize > 0, $"The audio data size should be greater than zero, but actually it's {audioDataSize}.");
                 }
 
                 using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has completed rendering, and available in result2
                 {
                     CheckSynthesisResult(result2);
-                    Assert.AreEqual(GuidLength, result2.ResultId.Length, "The length of result ID should be the length of a GUID (32).");
-                    Assert.AreEqual(ResultReason.SynthesizingAudioCompleted, result2.Reason, "The synthesis should be completed now.");
+                    SPXTEST_ARE_EQUAL(GuidLength, result2.ResultId.Length, "The length of result ID should be the length of a GUID (32).");
+                    SPXTEST_ARE_EQUAL(ResultReason.SynthesizingAudioCompleted, result2.Reason, "The synthesis should be completed now.");
                     var audioDataSize = result2.AudioData.Length;
-                    Assert.IsTrue(audioDataSize > 0, $"The audio data size should be greater than zero, but actually it's {audioDataSize}.");
+                    SPXTEST_ISTRUE(audioDataSize > 0, $"The audio data size should be greater than zero, but actually it's {audioDataSize}.");
                 }
             }
         }
@@ -238,12 +247,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 foreach (var resultReason in resultReasonList)
                 {
-                    Assert.AreEqual(ResultReason.SynthesizingAudio, resultReason, "The synthesis should be on going now.");
+                    SPXTEST_ARE_EQUAL(ResultReason.SynthesizingAudio, resultReason, "The synthesis should be on going now.");
                 }
 
                 foreach (var audioLength in audioLengthList)
                 {
-                    Assert.IsTrue(audioLength > 0, $"The audio chunk size should be greater than zero, but actually it's {audioLength}.");
+                    SPXTEST_ISTRUE(audioLength > 0, $"The audio chunk size should be greater than zero, but actually it's {audioLength}.");
                 }
             }
         }
@@ -256,9 +265,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has completed rendering, and available in result1
                 {
                     CheckSynthesisResult(result1);
-                    Assert.AreEqual(ResultReason.SynthesizingAudioCompleted, result1.Reason, "The synthesis should be completed now.");
+                    SPXTEST_ARE_EQUAL(ResultReason.SynthesizingAudioCompleted, result1.Reason, "The synthesis should be completed now.");
                     var audioDataSize = result1.AudioData.Length;
-                    Assert.IsTrue(audioDataSize > 0, $"The audio data size should be greater than zero, but actually it's {audioDataSize}.");
+                    SPXTEST_ISTRUE(audioDataSize > 0, $"The audio data size should be greater than zero, but actually it's {audioDataSize}.");
 
                     using (var stream1 = AudioDataStream.FromResult(result1)) // of type AudioDataStream, does not block
                     {
@@ -269,9 +278,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has completed rendering, and available in result2
                 {
                     CheckSynthesisResult(result2);
-                    Assert.AreEqual(ResultReason.SynthesizingAudioCompleted, result2.Reason, "The synthesis should be completed now.");
+                    SPXTEST_ARE_EQUAL(ResultReason.SynthesizingAudioCompleted, result2.Reason, "The synthesis should be completed now.");
                     var audioDataSize = result2.AudioData.Length;
-                    Assert.IsTrue(audioDataSize > 0, $"The audio data size should be greater than zero, but actually it's {audioDataSize}.");
+                    SPXTEST_ISTRUE(audioDataSize > 0, $"The audio data size should be greater than zero, but actually it's {audioDataSize}.");
 
                     using (var stream2 = AudioDataStream.FromResult(result2)) // of type AudioDataStream, does not block
                     {
@@ -324,12 +333,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 foreach (var resultReason in resultReasonList)
                 {
-                    Assert.AreEqual(ResultReason.SynthesizingAudioStarted, resultReason, "The synthesis should be started at this point.");
+                    SPXTEST_ARE_EQUAL(ResultReason.SynthesizingAudioStarted, resultReason, "The synthesis should be started at this point.");
                 }
 
                 foreach (var audioLength in audioLengthList)
                 {
-                    Assert.AreEqual(0, audioLength, "The synthesized audio should still be zero at this point, since the synthesis just started, and no audio chunk has been synthesized yet.");
+                    SPXTEST_ARE_EQUAL(0, audioLength, "The synthesized audio should still be zero at this point, since the synthesis just started, and no audio chunk has been synthesized yet.");
                 }
             }
         }
@@ -342,8 +351,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 using (var result1 = await synthesizer.StartSpeakingTextAsync("{{{text1}}}")) // "{{{text1}}}" synthesis has started, likely not finished
                 {
                     CheckSynthesisResult(result1);
-                    Assert.AreEqual(ResultReason.SynthesizingAudioStarted, result1.Reason, "The synthesis should be started now.");
-                    Assert.AreEqual(0, result1.AudioData.Length, "The synthesized audio should still be zero at this point, since the synthesis just started, and no audio chunk has been synthesized yet.");
+                    SPXTEST_ARE_EQUAL(ResultReason.SynthesizingAudioStarted, result1.Reason, "The synthesis should be started now.");
+                    SPXTEST_ARE_EQUAL(0, result1.AudioData.Length, "The synthesized audio should still be zero at this point, since the synthesis just started, and no audio chunk has been synthesized yet.");
 
                     using (var stream1 = AudioDataStream.FromResult(result1)) // of type AudioDataStream, does not block
                     {
@@ -352,8 +361,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                         using (var result2 = await synthesizer.StartSpeakingTextAsync("{{{text2}}}")) // "{{{text2}}}" synthesis has started, likely not finished
                         {
                             CheckSynthesisResult(result2);
-                            Assert.AreEqual(ResultReason.SynthesizingAudioStarted, result2.Reason, "The synthesis should be started now.");
-                            Assert.AreEqual(0, result2.AudioData.Length, "The synthesized audio should still be zero at this point, since the synthesis just started, and no audio chunk has been synthesized yet.");
+                            SPXTEST_ARE_EQUAL(ResultReason.SynthesizingAudioStarted, result2.Reason, "The synthesis should be started now.");
+                            SPXTEST_ARE_EQUAL(0, result2.AudioData.Length, "The synthesized audio should still be zero at this point, since the synthesis just started, and no audio chunk has been synthesized yet.");
 
                             using (var stream2 = AudioDataStream.FromResult(result2)) // of type AudioDataStream, does not block
                             {
@@ -401,7 +410,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 // This is to check the requests is queued
                 // When one request is already completed, the other one is still not started
-                Assert.AreEqual(1, startedRequestsWhenFirstRequestWasCompleted, "When one request is already completed, the other one should still not start yet.");
+                SPXTEST_ARE_EQUAL(1, startedRequestsWhenFirstRequestWasCompleted, "When one request is already completed, the other one should still not start yet.");
             }
         }
 
@@ -413,8 +422,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 using (var result = await synthesizer.StartSpeakingTextAsync("{{{text1}}}"))
                 {
                     CheckSynthesisResult(result);
-                    Assert.AreEqual(ResultReason.SynthesizingAudioStarted, result.Reason, "The synthesis should be started now.");
-                    Assert.AreEqual(0, result.AudioData.Length, "The synthesized audio should still be zero at this point, since the synthesis just started, and no audio chunk has been synthesized yet.");
+                    SPXTEST_ARE_EQUAL(ResultReason.SynthesizingAudioStarted, result.Reason, "The synthesis should be started now.");
+                    SPXTEST_ARE_EQUAL(0, result.AudioData.Length, "The synthesized audio should still be zero at this point, since the synthesis just started, and no audio chunk has been synthesized yet.");
 
                     bool synthesisDone = false;
                     synthesizer.SynthesisCompleted += (s, e) =>
@@ -449,26 +458,26 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             configWithInvalidToken.AuthorizationToken = "InvalidToken";
             using (var synthesizer = new SpeechSynthesizer(configWithInvalidToken, null)) // null indicates to do nothing with synthesizer audio by default
             {
-                Assert.AreEqual("InvalidToken", synthesizer.AuthorizationToken);
+                SPXTEST_ARE_EQUAL("InvalidToken", synthesizer.AuthorizationToken);
 
                 synthesizer.AuthorizationToken = await GetToken(subscriptionKey, region);
 
                 using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has completed rendering, and available in result1
                 {
                     CheckSynthesisResult(result1);
-                    Assert.AreEqual(GuidLength, result1.ResultId.Length, "The length of result ID should be the length of a GUID (32).");
-                    Assert.AreEqual(ResultReason.SynthesizingAudioCompleted, result1.Reason, "The synthesis should be completed now.");
+                    SPXTEST_ARE_EQUAL(GuidLength, result1.ResultId.Length, "The length of result ID should be the length of a GUID (32).");
+                    SPXTEST_ARE_EQUAL(ResultReason.SynthesizingAudioCompleted, result1.Reason, "The synthesis should be completed now.");
                     var audioDataSize = result1.AudioData.Length;
-                    Assert.IsTrue(audioDataSize > 0, $"The audio data size should be greater than zero, but actually it's {audioDataSize}.");
+                    SPXTEST_ISTRUE(audioDataSize > 0, $"The audio data size should be greater than zero, but actually it's {audioDataSize}.");
                 }
 
                 using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has completed rendering, and available in result2
                 {
                     CheckSynthesisResult(result2);
-                    Assert.AreEqual(GuidLength, result2.ResultId.Length, "The length of result ID should be the length of a GUID (32).");
-                    Assert.AreEqual(ResultReason.SynthesizingAudioCompleted, result2.Reason, "The synthesis should be completed now.");
+                    SPXTEST_ARE_EQUAL(GuidLength, result2.ResultId.Length, "The length of result ID should be the length of a GUID (32).");
+                    SPXTEST_ARE_EQUAL(ResultReason.SynthesizingAudioCompleted, result2.Reason, "The synthesis should be completed now.");
                     var audioDataSize = result2.AudioData.Length;
-                    Assert.IsTrue(audioDataSize > 0, $"The audio data size should be greater than zero, but actually it's {audioDataSize}.");
+                    SPXTEST_ISTRUE(audioDataSize > 0, $"The audio data size should be greater than zero, but actually it's {audioDataSize}.");
                 }
             }
         }
@@ -579,7 +588,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 } // "{{{wavefile.wav}}}" is now closed
 
                 var waveSize1 = new FileInfo("wavefile.wav").Length;
-                Assert.IsTrue(waveSize1 > EmptyWaveFileSize, $"The size of output wave file 1 is unexpected. Expected: greater than {EmptyWaveFileSize}, Actual: {waveSize1}");
+                SPXTEST_ISTRUE(waveSize1 > EmptyWaveFileSize, $"The size of output wave file 1 is unexpected. Expected: greater than {EmptyWaveFileSize}, Actual: {waveSize1}");
 
                 // Make a second run with 2 speaks to verify that the audio can be appended to the file while speaking
                 using (var synthesizer = new SpeechSynthesizer(uspConfig, fileConfig))
@@ -593,7 +602,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 } // "{{{wavefile.wav}}}" is now closed
 
                 var waveSize2 = new FileInfo("wavefile.wav").Length;
-                Assert.IsTrue(waveSize2 > waveSize1, $"The size of output wave file 1 and wave file 2 are unexpected. Expected: wave size 2 > wave size 1, Actual: wave size 2 = {waveSize2}, wave size 1 = {waveSize1}");
+                SPXTEST_ISTRUE(waveSize2 > waveSize1, $"The size of output wave file 1 and wave file 2 are unexpected. Expected: wave size 2 > wave size 1, Actual: wave size 2 = {waveSize2}, wave size 1 = {waveSize1}");
             }
         }
 
@@ -601,7 +610,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public void SynthesizerOutputToInvalidFileUsp()
         {
             var fileConfig = AudioConfig.FromWavFileOutput(Path.Combine("NonexistentDir", "InvalidFile"));
-            Assert.ThrowsException<ApplicationException>(() => new SpeechSynthesizer(uspConfig, fileConfig));
+            SPXTEST_THROWS<ApplicationException>(() => new SpeechSynthesizer(uspConfig, fileConfig));
         }
 
         [TestMethod]
@@ -620,12 +629,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                         CheckSynthesisResult(result2);
                     }
 
-                    Assert.IsFalse(callback.IsClosed(), "The push audio output stream should be opened until synthesizer is released.");
+                    SPXTEST_ISFALSE(callback.IsClosed(), "The push audio output stream should be opened until synthesizer is released.");
                 }
 
                 var audioLength = callback.GetAudioLength();
-                Assert.IsTrue(audioLength > 0, $"The collected audio size should be greater than zero, but actually is {audioLength}.");
-                Assert.IsTrue(callback.IsClosed(), "The push audio output stream should be closed after synthesizer is released.");
+                SPXTEST_ISTRUE(audioLength > 0, $"The collected audio size should be greater than zero, but actually is {audioLength}.");
+                SPXTEST_ISTRUE(callback.IsClosed(), "The push audio output stream should be closed after synthesizer is released.");
             }
         }
 
@@ -644,7 +653,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 synthesizer.Dispose();
                 var audioLength = callback.GetAudioLength();
-                Assert.IsTrue(audioLength > 0, $"The collected audio size should be greater than zero, but actually is {audioLength}.");
+                SPXTEST_ISTRUE(audioLength > 0, $"The collected audio size should be greater than zero, but actually is {audioLength}.");
             }
         }
 
@@ -698,19 +707,19 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has completed rendering, and available in result1
                 {
                     CheckSynthesisResult(result1);
-                    Assert.AreEqual(GuidLength, result1.ResultId.Length, "The length of result ID should be the length of a GUID (32).");
-                    Assert.AreEqual(ResultReason.SynthesizingAudioCompleted, result1.Reason, "The synthesis should be completed now.");
+                    SPXTEST_ARE_EQUAL(GuidLength, result1.ResultId.Length, "The length of result ID should be the length of a GUID (32).");
+                    SPXTEST_ARE_EQUAL(ResultReason.SynthesizingAudioCompleted, result1.Reason, "The synthesis should be completed now.");
                     var audioDataSize = result1.AudioData.Length;
-                    Assert.IsTrue(audioDataSize > 0, $"The audio data size should be greater than zero, but actually it's {audioDataSize}.");
+                    SPXTEST_ISTRUE(audioDataSize > 0, $"The audio data size should be greater than zero, but actually it's {audioDataSize}.");
                 }
 
                 using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has completed rendering, and available in result2
                 {
                     CheckSynthesisResult(result2);
-                    Assert.AreEqual(GuidLength, result2.ResultId.Length, "The length of result ID should be the length of a GUID (32).");
-                    Assert.AreEqual(ResultReason.SynthesizingAudioCompleted, result2.Reason, "The synthesis should be completed now.");
+                    SPXTEST_ARE_EQUAL(GuidLength, result2.ResultId.Length, "The length of result ID should be the length of a GUID (32).");
+                    SPXTEST_ARE_EQUAL(ResultReason.SynthesizingAudioCompleted, result2.Reason, "The synthesis should be completed now.");
                     var audioDataSize = result2.AudioData.Length;
-                    Assert.IsTrue(audioDataSize > 0, $"The audio data size should be greater than zero, but actually it's {audioDataSize}.");
+                    SPXTEST_ISTRUE(audioDataSize > 0, $"The audio data size should be greater than zero, but actually it's {audioDataSize}.");
                 }
             }
         }
@@ -737,12 +746,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 foreach (var resultReason in resultReasonList)
                 {
-                    Assert.AreEqual(ResultReason.SynthesizingAudio, resultReason, "The synthesis should be on going now.");
+                    SPXTEST_ARE_EQUAL(ResultReason.SynthesizingAudio, resultReason, "The synthesis should be on going now.");
                 }
 
                 foreach (var audioLength in audioLengthList)
                 {
-                    Assert.IsTrue(audioLength > 0, $"The audio chunk size should be greater than zero, but actually it's {audioLength}.");
+                    SPXTEST_ISTRUE(audioLength > 0, $"The audio chunk size should be greater than zero, but actually it's {audioLength}.");
                 }
             }
         }
@@ -755,9 +764,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has completed rendering, and available in result1
                 {
                     CheckSynthesisResult(result1);
-                    Assert.AreEqual(ResultReason.SynthesizingAudioCompleted, result1.Reason, "The synthesis should be completed now.");
+                    SPXTEST_ARE_EQUAL(ResultReason.SynthesizingAudioCompleted, result1.Reason, "The synthesis should be completed now.");
                     var audioDataSize = result1.AudioData.Length;
-                    Assert.IsTrue(audioDataSize > 0, $"The audio data size should be greater than zero, but actually it's {audioDataSize}.");
+                    SPXTEST_ISTRUE(audioDataSize > 0, $"The audio data size should be greater than zero, but actually it's {audioDataSize}.");
 
                     using (var stream1 = AudioDataStream.FromResult(result1)) // of type AudioDataStream, does not block
                     {
@@ -768,9 +777,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has completed rendering, and available in result2
                 {
                     CheckSynthesisResult(result2);
-                    Assert.AreEqual(ResultReason.SynthesizingAudioCompleted, result2.Reason, "The synthesis should be completed now.");
+                    SPXTEST_ARE_EQUAL(ResultReason.SynthesizingAudioCompleted, result2.Reason, "The synthesis should be completed now.");
                     var audioDataSize = result2.AudioData.Length;
-                    Assert.IsTrue(audioDataSize > 0, $"The audio data size should be greater than zero, but actually it's {audioDataSize}.");
+                    SPXTEST_ISTRUE(audioDataSize > 0, $"The audio data size should be greater than zero, but actually it's {audioDataSize}.");
 
                     using (var stream2 = AudioDataStream.FromResult(result2)) // of type AudioDataStream, does not block
                     {
@@ -823,12 +832,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 foreach (var resultReason in resultReasonList)
                 {
-                    Assert.AreEqual(ResultReason.SynthesizingAudioStarted, resultReason, "The synthesis should be started at this point.");
+                    SPXTEST_ARE_EQUAL(ResultReason.SynthesizingAudioStarted, resultReason, "The synthesis should be started at this point.");
                 }
 
                 foreach (var audioLength in audioLengthList)
                 {
-                    Assert.AreEqual(0, audioLength, "The synthesized audio should still be zero at this point, since the synthesis just started, and no audio chunk has been synthesized yet.");
+                    SPXTEST_ARE_EQUAL(0, audioLength, "The synthesized audio should still be zero at this point, since the synthesis just started, and no audio chunk has been synthesized yet.");
                 }
             }
         }
@@ -841,8 +850,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 using (var result1 = await synthesizer.StartSpeakingTextAsync("{{{text1}}}")) // "{{{text1}}}" synthesis has started, likely not finished
                 {
                     CheckSynthesisResult(result1);
-                    Assert.AreEqual(ResultReason.SynthesizingAudioStarted, result1.Reason, "The synthesis should be started now.");
-                    Assert.AreEqual(0, result1.AudioData.Length, "The synthesized audio should still be zero at this point, since the synthesis just started, and no audio chunk has been synthesized yet.");
+                    SPXTEST_ARE_EQUAL(ResultReason.SynthesizingAudioStarted, result1.Reason, "The synthesis should be started now.");
+                    SPXTEST_ARE_EQUAL(0, result1.AudioData.Length, "The synthesized audio should still be zero at this point, since the synthesis just started, and no audio chunk has been synthesized yet.");
 
                     using (var stream1 = AudioDataStream.FromResult(result1)) // of type AudioDataStream, does not block
                     {
@@ -851,8 +860,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                         using (var result2 = await synthesizer.StartSpeakingTextAsync("{{{text2}}}")) // "{{{text2}}}" synthesis has started, likely not finished
                         {
                             CheckSynthesisResult(result2);
-                            Assert.AreEqual(ResultReason.SynthesizingAudioStarted, result2.Reason, "The synthesis should be started now.");
-                            Assert.AreEqual(0, result2.AudioData.Length, "The synthesized audio should still be zero at this point, since the synthesis just started, and no audio chunk has been synthesized yet.");
+                            SPXTEST_ARE_EQUAL(ResultReason.SynthesizingAudioStarted, result2.Reason, "The synthesis should be started now.");
+                            SPXTEST_ARE_EQUAL(0, result2.AudioData.Length, "The synthesized audio should still be zero at this point, since the synthesis just started, and no audio chunk has been synthesized yet.");
 
                             using (var stream2 = AudioDataStream.FromResult(result2)) // of type AudioDataStream, does not block
                             {
@@ -900,7 +909,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 // This is to check the requests is queued
                 // When one request is already completed, the other one is still not started
-                Assert.AreEqual(1, startedRequestsWhenFirstRequestWasCompleted, "When one request is already completed, the other one should still not start yet.");
+                SPXTEST_ARE_EQUAL(1, startedRequestsWhenFirstRequestWasCompleted, "When one request is already completed, the other one should still not start yet.");
             }
         }
 
@@ -912,8 +921,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 using (var result = await synthesizer.StartSpeakingTextAsync("{{{text1}}}"))
                 {
                     CheckSynthesisResult(result);
-                    Assert.AreEqual(ResultReason.SynthesizingAudioStarted, result.Reason, "The synthesis should be started now.");
-                    Assert.AreEqual(0, result.AudioData.Length, "The synthesized audio should still be zero at this point, since the synthesis just started, and no audio chunk has been synthesized yet.");
+                    SPXTEST_ARE_EQUAL(ResultReason.SynthesizingAudioStarted, result.Reason, "The synthesis should be started now.");
+                    SPXTEST_ARE_EQUAL(0, result.AudioData.Length, "The synthesized audio should still be zero at this point, since the synthesis just started, and no audio chunk has been synthesized yet.");
 
                     bool synthesisDone = false;
                     synthesizer.SynthesisCompleted += (s, e) =>
@@ -945,26 +954,26 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var configWithInvalidToken = SpeechConfig.FromAuthorizationToken("InvalidToken", region);
             using (var synthesizer = new SpeechSynthesizer(configWithInvalidToken, null)) // null indicates to do nothing with synthesizer audio by default
             {
-                Assert.AreEqual("InvalidToken", synthesizer.AuthorizationToken);
+                SPXTEST_ARE_EQUAL("InvalidToken", synthesizer.AuthorizationToken);
 
                 synthesizer.AuthorizationToken = await GetToken(subscriptionKey, region);
 
                 using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has completed rendering, and available in result1
                 {
                     CheckSynthesisResult(result1);
-                    Assert.AreEqual(GuidLength, result1.ResultId.Length, "The length of result ID should be the length of a GUID (32).");
-                    Assert.AreEqual(ResultReason.SynthesizingAudioCompleted, result1.Reason, "The synthesis should be completed now.");
+                    SPXTEST_ARE_EQUAL(GuidLength, result1.ResultId.Length, "The length of result ID should be the length of a GUID (32).");
+                    SPXTEST_ARE_EQUAL(ResultReason.SynthesizingAudioCompleted, result1.Reason, "The synthesis should be completed now.");
                     var audioDataSize = result1.AudioData.Length;
-                    Assert.IsTrue(audioDataSize > 0, $"The audio data size should be greater than zero, but actually it's {audioDataSize}.");
+                    SPXTEST_ISTRUE(audioDataSize > 0, $"The audio data size should be greater than zero, but actually it's {audioDataSize}.");
                 }
 
                 using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has completed rendering, and available in result2
                 {
                     CheckSynthesisResult(result2);
-                    Assert.AreEqual(GuidLength, result2.ResultId.Length, "The length of result ID should be the length of a GUID (32).");
-                    Assert.AreEqual(ResultReason.SynthesizingAudioCompleted, result2.Reason, "The synthesis should be completed now.");
+                    SPXTEST_ARE_EQUAL(GuidLength, result2.ResultId.Length, "The length of result ID should be the length of a GUID (32).");
+                    SPXTEST_ARE_EQUAL(ResultReason.SynthesizingAudioCompleted, result2.Reason, "The synthesis should be completed now.");
                     var audioDataSize = result2.AudioData.Length;
-                    Assert.IsTrue(audioDataSize > 0, $"The audio data size should be greater than zero, but actually it's {audioDataSize}.");
+                    SPXTEST_ISTRUE(audioDataSize > 0, $"The audio data size should be greater than zero, but actually it's {audioDataSize}.");
                 }
             }
         }
@@ -980,10 +989,10 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 // use a long sentence here
                 using (var result = await synthesizer.SpeakTextAsync("I have a dream that one day this nation will rise up and live out the true meaning of its creed."))
                 {
-                    Assert.AreEqual(ResultReason.Canceled, result.Reason);
+                    SPXTEST_ARE_EQUAL(ResultReason.Canceled, result.Reason);
                     var cancellation = SpeechSynthesisCancellationDetails.FromResult(result);
                     AssertHelpers.AssertStringContains(cancellation.ErrorDetails, "timeout");
-                    Assert.AreEqual(result.AudioData.Length, 0);
+                    SPXTEST_ARE_EQUAL(result.AudioData.Length, 0);
                 }
             }
         }
@@ -999,10 +1008,10 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 // use a long sentence here
                 using (var result = await synthesizer.SpeakTextAsync("I have a dream that one day this nation will rise up and live out the true meaning of its creed."))
                 {
-                    Assert.AreEqual(ResultReason.Canceled, result.Reason);
+                    SPXTEST_ARE_EQUAL(ResultReason.Canceled, result.Reason);
                     var cancellation = SpeechSynthesisCancellationDetails.FromResult(result);
                     AssertHelpers.AssertStringContains(cancellation.ErrorDetails, "timeout");
-                    Assert.IsTrue(result.AudioData.Length > 0);
+                    SPXTEST_ISTRUE(result.AudioData.Length > 0);
                 }
             }
         }
@@ -1039,12 +1048,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     CheckSynthesisResult(result);
                 }
 
-                Assert.AreEqual(expectedTextOffsets.Length, actualAudioOffsets.Count, "Incorrect count of word boundary events.");
+                SPXTEST_ARE_EQUAL(expectedTextOffsets.Length, actualAudioOffsets.Count, "Incorrect count of word boundary events.");
                 for (var i = 0; i < expectedTextOffsets.Length; ++i)
                 {
-                    Assert.IsTrue(actualAudioOffsets[i] > 0, "Audio offset should be greater than zero.");
-                    Assert.AreEqual(expectedTextOffsets[i], actualTextOffsets[i], $"Text offset mismatch on word #{i + 1}.");
-                    Assert.AreEqual(expectedWordLengths[i], actualWordLengths[i], $"Word length mismatch on word #{i + 1}.");
+                    SPXTEST_ISTRUE(actualAudioOffsets[i] > 0, "Audio offset should be greater than zero.");
+                    SPXTEST_ARE_EQUAL(expectedTextOffsets[i], actualTextOffsets[i], $"Text offset mismatch on word #{i + 1}.");
+                    SPXTEST_ARE_EQUAL(expectedWordLengths[i], actualWordLengths[i], $"Word length mismatch on word #{i + 1}.");
                 }
 
                 synthesizer.WordBoundary -= wordBoundaryEventHandler;
@@ -1066,12 +1075,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     CheckSynthesisResult(result);
                 }
 
-                Assert.AreEqual(expectedTextOffsets.Length, actualAudioOffsets.Count, "Incorrect count of word boundary events.");
+                SPXTEST_ARE_EQUAL(expectedTextOffsets.Length, actualAudioOffsets.Count, "Incorrect count of word boundary events.");
                 for (var i = 0; i < expectedTextOffsets.Length; ++i)
                 {
-                    Assert.IsTrue(actualAudioOffsets[i] > 0, "Audio offset should be greater than zero.");
-                    Assert.AreEqual(expectedSsmlOffsets[i], actualSsmlOffsets[i], $"Ssml offset mismatch on word #{i + 1}.");
-                    Assert.AreEqual(expectedWordLengths[i], actualWordLengths[i], $"Word length mismatch on word #{i + 1}.");
+                    SPXTEST_ISTRUE(actualAudioOffsets[i] > 0, "Audio offset should be greater than zero.");
+                    SPXTEST_ARE_EQUAL(expectedSsmlOffsets[i], actualSsmlOffsets[i], $"Ssml offset mismatch on word #{i + 1}.");
+                    SPXTEST_ARE_EQUAL(expectedWordLengths[i], actualWordLengths[i], $"Word length mismatch on word #{i + 1}.");
                 }
             }
         }
@@ -1087,13 +1096,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 using (var result1 = await synthesizer.SpeakTextAsync(AudioUtterancesMap[AudioUtteranceKeys.SYNTHESIS_UTTERANCE_CHINESE_1].Utterances["zh-CN"][0].Text))
                 {
                     CheckSynthesisResult(result1, 32000); // should longer than 1s
-                    Assert.IsTrue(lastTextOffset >= AudioUtterancesMap[AudioUtteranceKeys.SYNTHESIS_UTTERANCE_CHINESE_1].Utterances["zh-CN"][0].TextOffsets.Last());
+                    SPXTEST_ISTRUE(lastTextOffset >= AudioUtterancesMap[AudioUtteranceKeys.SYNTHESIS_UTTERANCE_CHINESE_1].Utterances["zh-CN"][0].TextOffsets.Last());
                 }
                 lastTextOffset = 0;
                 using (var result2 = await synthesizer.SpeakTextAsync(AudioUtterancesMap[AudioUtteranceKeys.SYNTHESIS_UTTERANCE_CHINESE_2].Utterances["zh-CN"][0].Text))
                 {
                     CheckSynthesisResult(result2, 32000); // should longer than 1s
-                    Assert.IsTrue(lastTextOffset >= AudioUtterancesMap[AudioUtteranceKeys.SYNTHESIS_UTTERANCE_CHINESE_2].Utterances["zh-CN"][0].TextOffsets.Last());
+                    SPXTEST_ISTRUE(lastTextOffset >= AudioUtterancesMap[AudioUtteranceKeys.SYNTHESIS_UTTERANCE_CHINESE_2].Utterances["zh-CN"][0].TextOffsets.Last());
                 }
             }
         }
@@ -1108,9 +1117,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 await synthesizer.StopSpeakingAsync();
                 using (var result1 = task1.Result)
                 {
-                    Assert.AreEqual(ResultReason.Canceled, result1.Reason);
+                    SPXTEST_ARE_EQUAL(ResultReason.Canceled, result1.Reason);
                     var cancelDetails = SpeechSynthesisCancellationDetails.FromResult(result1);
-                    Assert.AreEqual(CancellationReason.CancelledByUser, cancelDetails.Reason);
+                    SPXTEST_ARE_EQUAL(CancellationReason.CancelledByUser, cancelDetails.Reason);
                 }
 
                 using (var result2 = await synthesizer.SpeakTextAsync("text2"))
@@ -1262,20 +1271,20 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     {
                         CheckSynthesisResult(result1);
                         CheckBinaryEqual(expectedAudioData1, callback.GetAudioData());
-                        Assert.IsFalse(callback.IsClosed(), "The push audio output stream should be opened until synthesizer is released.");
+                        SPXTEST_ISFALSE(callback.IsClosed(), "The push audio output stream should be opened until synthesizer is released.");
                     }
 
                     using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has completed rendering to pushstream
                     {
                         CheckSynthesisResult(result2);
                         CheckBinaryEqual(expectedAudioData12, callback.GetAudioData());
-                        Assert.IsFalse(callback.IsClosed(), "The push audio output stream should be opened until synthesizer is released.");
+                        SPXTEST_ISFALSE(callback.IsClosed(), "The push audio output stream should be opened until synthesizer is released.");
                     }
 
-                    Assert.IsFalse(callback.IsClosed(), "The push audio output stream should be opened until synthesizer is released.");
+                    SPXTEST_ISFALSE(callback.IsClosed(), "The push audio output stream should be opened until synthesizer is released.");
                 }
 
-                Assert.IsTrue(callback.IsClosed(), "The push audio output stream should be closed after synthesizer is released.");
+                SPXTEST_ISTRUE(callback.IsClosed(), "The push audio output stream should be closed after synthesizer is released.");
             }
         }
 
@@ -1340,8 +1349,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has completed rendering, and available in result1
                 {
                     CheckSynthesisResult(result1);
-                    Assert.AreEqual(GuidLength, result1.ResultId.Length, "The length of result ID should be the length of a GUID (32).");
-                    Assert.AreEqual(ResultReason.SynthesizingAudioCompleted, result1.Reason, "The synthesis should be completed now.");
+                    SPXTEST_ARE_EQUAL(GuidLength, result1.ResultId.Length, "The length of result ID should be the length of a GUID (32).");
+                    SPXTEST_ARE_EQUAL(ResultReason.SynthesizingAudioCompleted, result1.Reason, "The synthesis should be completed now.");
 
                     var expectedAudioData1 = BuildMockSynthesizedAudioWithHeader("{{{text1}}}", DefaultLanguage, DefaultVoice);
                     CheckBinaryEqual(expectedAudioData1, result1.AudioData);
@@ -1350,8 +1359,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has completed rendering, and available in result2
                 {
                     CheckSynthesisResult(result2);
-                    Assert.AreEqual(GuidLength, result2.ResultId.Length, "The length of result ID should be the length of a GUID (32).");
-                    Assert.AreEqual(ResultReason.SynthesizingAudioCompleted, result2.Reason, "The synthesis should be completed now.");
+                    SPXTEST_ARE_EQUAL(GuidLength, result2.ResultId.Length, "The length of result ID should be the length of a GUID (32).");
+                    SPXTEST_ARE_EQUAL(ResultReason.SynthesizingAudioCompleted, result2.Reason, "The synthesis should be completed now.");
 
                     var expectedAudioData2 = BuildMockSynthesizedAudioWithHeader("{{{text2}}}", DefaultLanguage, DefaultVoice);
                     CheckBinaryEqual(expectedAudioData2, result2.AudioData);
@@ -1401,12 +1410,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 foreach (var resultReason in resultReasonList)
                 {
-                    Assert.AreEqual(ResultReason.SynthesizingAudio, resultReason, "The synthesis should be on going now.");
+                    SPXTEST_ARE_EQUAL(ResultReason.SynthesizingAudio, resultReason, "The synthesis should be on going now.");
                 }
 
                 foreach (var audioLength in audioLengthList)
                 {
-                    Assert.IsTrue(audioLength > 0, $"The audio chunk size should be greater than zero, but actually it's {audioLength}.");
+                    SPXTEST_ISTRUE(audioLength > 0, $"The audio chunk size should be greater than zero, but actually it's {audioLength}.");
                 }
 
                 for (int i = 0; i < expectedAudioChunkList.Count; ++i)
@@ -1425,9 +1434,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has completed rendering, and available in result1
                 {
                     CheckSynthesisResult(result1);
-                    Assert.AreEqual(ResultReason.SynthesizingAudioCompleted, result1.Reason, "The synthesis should be completed now.");
+                    SPXTEST_ARE_EQUAL(ResultReason.SynthesizingAudioCompleted, result1.Reason, "The synthesis should be completed now.");
                     var audioDataSize = result1.AudioData.Length;
-                    Assert.IsTrue(audioDataSize > 0, $"The audio data size should be greater than zero, but actually it's {audioDataSize}.");
+                    SPXTEST_ISTRUE(audioDataSize > 0, $"The audio data size should be greater than zero, but actually it's {audioDataSize}.");
                     using (var stream1 = AudioDataStream.FromResult(result1)) // of type AudioDataStream, does not block
                     {
                         var expectedAudioData1 = BuildMockSynthesizedAudio("{{{text1}}}", DefaultLanguage, DefaultVoice);
@@ -1436,9 +1445,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                         using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has completed rendering, and available in result2
                         {
                             CheckSynthesisResult(result2);
-                            Assert.AreEqual(ResultReason.SynthesizingAudioCompleted, result2.Reason, "The synthesis should be completed now.");
+                            SPXTEST_ARE_EQUAL(ResultReason.SynthesizingAudioCompleted, result2.Reason, "The synthesis should be completed now.");
                             audioDataSize = result2.AudioData.Length;
-                            Assert.IsTrue(audioDataSize > 0, $"The audio data size should be greater than zero, but actually it's {audioDataSize}.");
+                            SPXTEST_ISTRUE(audioDataSize > 0, $"The audio data size should be greater than zero, but actually it's {audioDataSize}.");
 
                             using (var stream2 = AudioDataStream.FromResult(result2)) // of type AudioDataStream, does not block
                             {
@@ -1508,12 +1517,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 foreach (var resultReason in resultReasonList)
                 {
-                    Assert.AreEqual(ResultReason.SynthesizingAudioStarted, resultReason, "The synthesis should be started at this point.");
+                    SPXTEST_ARE_EQUAL(ResultReason.SynthesizingAudioStarted, resultReason, "The synthesis should be started at this point.");
                 }
 
                 foreach (var audioLength in audioLengthList)
                 {
-                    Assert.AreEqual(0, audioLength, "The synthesized audio should still be zero at this point, since the synthesis just started, and no audio chunk has been synthesized yet.");
+                    SPXTEST_ARE_EQUAL(0, audioLength, "The synthesized audio should still be zero at this point, since the synthesis just started, and no audio chunk has been synthesized yet.");
                 }
             }
         }
@@ -1527,8 +1536,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 using (var result1 = await synthesizer.StartSpeakingTextAsync("{{{text1}}}")) // "{{{text1}}}" synthesis has started, likely not finished
                 {
                     CheckSynthesisResult(result1);
-                    Assert.AreEqual(ResultReason.SynthesizingAudioStarted, result1.Reason, "The synthesis should be started now.");
-                    Assert.AreEqual(0, result1.AudioData.Length, "The synthesized audio should still be zero at this point, since the synthesis just started, and no audio chunk has been synthesized yet.");
+                    SPXTEST_ARE_EQUAL(ResultReason.SynthesizingAudioStarted, result1.Reason, "The synthesis should be started now.");
+                    SPXTEST_ARE_EQUAL(0, result1.AudioData.Length, "The synthesized audio should still be zero at this point, since the synthesis just started, and no audio chunk has been synthesized yet.");
 
                     using (var stream1 = AudioDataStream.FromResult(result1)) // of type AudioDataStream, does not block
                     {
@@ -1538,8 +1547,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                         using (var result2 = await synthesizer.StartSpeakingTextAsync("{{{text2}}}")) // "{{{text2}}}" synthesis has started, likely not finished
                         {
                             CheckSynthesisResult(result2);
-                            Assert.AreEqual(ResultReason.SynthesizingAudioStarted, result2.Reason, "The synthesis should be started now.");
-                            Assert.AreEqual(0, result2.AudioData.Length, "The synthesized audio should still be zero at this point, since the synthesis just started, and no audio chunk has been synthesized yet.");
+                            SPXTEST_ARE_EQUAL(ResultReason.SynthesizingAudioStarted, result2.Reason, "The synthesis should be started now.");
+                            SPXTEST_ARE_EQUAL(0, result2.AudioData.Length, "The synthesized audio should still be zero at this point, since the synthesis just started, and no audio chunk has been synthesized yet.");
 
                             using (var stream2 = AudioDataStream.FromResult(result2)) // of type AudioDataStream, does not block
                             {
@@ -1591,7 +1600,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 // This is to check the requests is queued
                 // When one request is already completed, the other one is still not started
-                Assert.AreEqual(1, startedRequestsWhenFirstRequestWasCompleted, "When one request is already completed, the other one should still not start yet.");
+                SPXTEST_ARE_EQUAL(1, startedRequestsWhenFirstRequestWasCompleted, "When one request is already completed, the other one should still not start yet.");
             }
         }
 
@@ -1604,8 +1613,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 using (var result = await synthesizer.StartSpeakingTextAsync("{{{text1}}}"))
                 {
                     CheckSynthesisResult(result);
-                    Assert.AreEqual(ResultReason.SynthesizingAudioStarted, result.Reason, "The synthesis should be started now.");
-                    Assert.AreEqual(0, result.AudioData.Length, "The synthesized audio should still be zero at this point, since the synthesis just started, and no audio chunk has been synthesized yet.");
+                    SPXTEST_ARE_EQUAL(ResultReason.SynthesizingAudioStarted, result.Reason, "The synthesis should be started now.");
+                    SPXTEST_ARE_EQUAL(0, result.AudioData.Length, "The synthesized audio should still be zero at this point, since the synthesis just started, and no audio chunk has been synthesized yet.");
 
                     bool synthesisCompleted = false;
                     synthesizer.SynthesisCompleted += (s, e) =>
@@ -1649,8 +1658,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 using (var result = await synthesizer.SpeakTextAsync("{{{text1}}}"))
                 {
                     CheckSynthesisResult(result);
-                    Assert.AreEqual(ResultReason.SynthesizingAudioCompleted, result.Reason, "The synthesis should be completed now.");
-                    Assert.AreEqual(StreamStatus.PartialData, stream.GetStatus(), "The stream should contain partial audio data since it's created from a synthesizing result.");
+                    SPXTEST_ARE_EQUAL(ResultReason.SynthesizingAudioCompleted, result.Reason, "The synthesis should be completed now.");
+                    SPXTEST_ARE_EQUAL(StreamStatus.PartialData, stream.GetStatus(), "The stream should contain partial audio data since it's created from a synthesizing result.");
 
                     var fullAudioData = BuildMockSynthesizedAudio("{{{text1}}}", DefaultLanguage, DefaultVoice);
                     var expectedAudioData = new byte[fullAudioData.Length - MockAudioChunkSize];
@@ -1753,7 +1762,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 }
 
                 var connectionUrl = synthesizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_Url);
-                Assert.IsTrue(connectionUrl.Contains("azure.cn"));
+                SPXTEST_ISTRUE(connectionUrl.Contains("azure.cn"));
             }
         }
 
@@ -1804,7 +1813,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        public static void CheckSynthesisResult(SpeechSynthesisResult result, int minimumSize = -1)
+        public static void CheckSynthesisResult(SpeechSynthesisResult result, int minimumSize = -1, [CallerLineNumber]int line = 0, [CallerMemberName]string caller = null, [CallerFilePath]string file = null)
         {
             string cancellationDetails = string.Empty;
             if (result.Reason == ResultReason.Canceled)
@@ -1812,10 +1821,10 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 cancellationDetails = SpeechSynthesisCancellationDetails.FromResult(result).ToString();
             }
 
-            Assert.AreNotEqual(ResultReason.Canceled, result.Reason, $"The synthesis was canceled unexpectedly, with request id = [{result.ResultId}], cancellation details = [{cancellationDetails}].");
+            SPXTEST_ARE_NOT_EQUAL(ResultReason.Canceled, result.Reason, $"The synthesis was canceled unexpectedly, with request id = [{result.ResultId}], cancellation details = [{cancellationDetails}].", line, caller, file);
             if (minimumSize > 0)
             {
-                Assert.IsTrue(result.AudioData.Length >= minimumSize, $"Audio size should be greater than {minimumSize}, but actually it's {result.AudioData.Length}.");
+                SPXTEST_ISTRUE(result.AudioData.Length >= minimumSize, $"Audio size should be greater than {minimumSize}, but actually it's {result.AudioData.Length}.", line, caller, file);
             }
         }
 
@@ -1844,7 +1853,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
             if (!canceled[0])
             {
-                Assert.IsTrue(totalSize > 0, $"Audio size should be greater than zero, but actually it's {totalSize}.");
+                SPXTEST_ISTRUE(totalSize > 0, $"Audio size should be greater than zero, but actually it's {totalSize}.");
             }
 
             if (expectedData != null)
@@ -1875,14 +1884,14 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             if (afterSynthesisDone && stream.GetStatus() != StreamStatus.Canceled)
             {
-                Assert.AreEqual(StreamStatus.AllData, stream.GetStatus(), "Audio data stream should contain all data after a succeeded synthesis.");
+                SPXTEST_ARE_EQUAL(StreamStatus.AllData, stream.GetStatus(), "Audio data stream should contain all data after a succeeded synthesis.");
             }
 
             CheckAudioInDataStream(stream, expectedData);
 
             if (!afterSynthesisDone && stream.GetStatus() != StreamStatus.Canceled)
             {
-                Assert.AreEqual(StreamStatus.AllData, stream.GetStatus(), "Audio data stream should contain all data after a succeeded synthesis.");
+                SPXTEST_ARE_EQUAL(StreamStatus.AllData, stream.GetStatus(), "Audio data stream should contain all data after a succeeded synthesis.");
             }
         }
 
@@ -1913,12 +1922,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 var cancelDetails = SpeechSynthesisCancellationDetails.FromStream(stream);
                 // do something with cancellation details
-                Assert.AreEqual(CancellationReason.Error, cancelDetails.Reason);
-                Assert.AreNotEqual(CancellationErrorCode.NoError, cancelDetails.ErrorCode);
+                SPXTEST_ARE_EQUAL(CancellationReason.Error, cancelDetails.Reason);
+                SPXTEST_ARE_NOT_EQUAL(CancellationErrorCode.NoError, cancelDetails.ErrorCode);
             }
             else
             {
-                Assert.IsTrue(totalSize > 0, $"Audio size should be greater than zero for a succeeded synthesis, but actually it's {totalSize}");
+                SPXTEST_ISTRUE(totalSize > 0, $"Audio size should be greater than zero for a succeeded synthesis, but actually it's {totalSize}");
             }
         }
 
@@ -1954,13 +1963,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
         private void CheckBinaryEqual(byte[] expectedData, byte[] actualData)
         {
-            Assert.IsNotNull(expectedData);
-            Assert.IsNotNull(actualData);
-            Assert.AreEqual(expectedData.Length, actualData.Length);
+            SPXTEST_ISNOTNULL(expectedData);
+            SPXTEST_ISNOTNULL(actualData);
+            SPXTEST_ARE_EQUAL(expectedData.Length, actualData.Length);
 
             for (int i = 0; i < expectedData.Length; ++i)
             {
-                Assert.AreEqual(expectedData[i], actualData[i]);
+                SPXTEST_ARE_EQUAL(expectedData[i], actualData[i]);
             }
         }
 

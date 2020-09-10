@@ -18,6 +18,7 @@ using System.Threading.Tasks;
 
 namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 {
+    using static SPXTEST;
     using static Config;
     using static ConversationTranscriberTestsHelper;
     using static SpeechRecognitionTestsHelper;
@@ -78,8 +79,15 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [ClassInitialize]
         public static void TestClassinitialize(TestContext context)
         {
+            LoggingTestBaseInit(context);
             BaseClassInit(context);
             conversationTranscriptionMultiAudioEndpoint = conversationTranscriptionEndpoint + "/multiaudio";
+        }
+
+        [ClassCleanup]
+        new public static void TestClassCleanup()
+        {
+            LoggingTestBaseCleanup();
         }
 
         [TestInitialize]
@@ -98,7 +106,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 //the UTF8 decoding of 的 is \xe7\x9a\x84, which will be shown in the debugger in the C++ side.
                 var gotId = conversation.ConversationId;
-                Assert.AreEqual(myConversationId, gotId);
+                SPXTEST_ARE_EQUAL(myConversationId, gotId);
             }
         }
 
@@ -110,7 +118,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var conversation = await Conversation.CreateConversationAsync(config, myConversationId))
             {
                 var gotId = conversation.ConversationId;
-                Assert.AreEqual(myConversationId, gotId);
+                SPXTEST_ARE_EQUAL(myConversationId, gotId);
             }
         }
 
@@ -119,7 +127,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             string myId = "xyz@example.com";
             var user = User.FromUserId(myId);
-            Assert.AreEqual(myId, user.UserId);
+            SPXTEST_ARE_EQUAL(myId, user.UserId);
         }
 
         [TestMethod]
@@ -135,7 +143,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 Console.WriteLine("Got Exception: " + ex.Message.ToString());
                 exception = true;
             }
-            Assert.AreEqual(exception, false);
+            SPXTEST_ARE_EQUAL(exception, false);
         }
 
         [TestMethod]
@@ -151,7 +159,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 Console.WriteLine("Got Exception: " + ex.Message.ToString());
                 exception = true;
             }
-            Assert.AreEqual(exception, false);
+            SPXTEST_ARE_EQUAL(exception, false);
         }
 
         [TestMethod]
@@ -167,7 +175,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 Console.WriteLine("Got Exception: " + ex.Message.ToString());
                 exception = true;
             }
-            Assert.AreEqual(exception, false);
+            SPXTEST_ARE_EQUAL(exception, false);
         }
 
         [TestMethod]
@@ -183,7 +191,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 Console.WriteLine("Got Exception: " + ex.Message.ToString());
                 exception = true;
             }
-            Assert.AreEqual(exception, false);
+            SPXTEST_ARE_EQUAL(exception, false);
         }
 
         [TestMethod]
@@ -199,7 +207,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 Console.WriteLine("Got Exception: " + ex.Message.ToString());
                 exception = true;
             }
-            Assert.AreEqual(exception, true);
+            SPXTEST_ARE_EQUAL(exception, true);
         }
 
         [Ignore("Temporarily Disabled see task 2854191")]
@@ -226,7 +234,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     await conversation.AddParticipantAsync(participant);
 
                     var result = await helper.GetRecognizerResult(conversationTranscriber, meetingId);
-                    Assert.IsTrue(helper.FindTheRef(result, AudioUtterancesMap[AudioUtteranceKeys.CONVERSATION_BETWEEN_TWO_PERSONS_ENGLISH].Utterances[Language.EN][0].Text));
+                    SPXTEST_ISTRUE(helper.FindTheRef(result, AudioUtterancesMap[AudioUtteranceKeys.CONVERSATION_BETWEEN_TWO_PERSONS_ENGLISH].Utterances[Language.EN][0].Text));
                 }
             }
         }
@@ -258,7 +266,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     await conversation.AddParticipantAsync(participant);
 
                     var result = await helper.GetRecognizerResult(conversationTranscriber, meetingID);
-                    Assert.IsTrue(helper.FindTheRef(result, AudioUtterancesMap[AudioUtteranceKeys.CONVERSATION_BETWEEN_TWO_PERSONS_ENGLISH].Utterances[Language.EN][0].Text));
+                    SPXTEST_ISTRUE(helper.FindTheRef(result, AudioUtterancesMap[AudioUtteranceKeys.CONVERSATION_BETWEEN_TWO_PERSONS_ENGLISH].Utterances[Language.EN][0].Text));
                 }
             }
         }
@@ -295,7 +303,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                         Console.WriteLine("Got Exception: " + ex.Message.ToString());
                         exception = true;
                     }
-                    Assert.AreEqual(exception, true);
+                    SPXTEST_ARE_EQUAL(exception, true);
 
                     await conversation.AddParticipantAsync("OneUserByUserId");
                     await conversation.RemoveParticipantAsync("OneUserByUserId");
@@ -310,7 +318,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     await conversation.RemoveParticipantAsync(participant);
 
                     var result = await helper.GetRecognizerResult(conversationTranscriber, meetingID);
-                    Assert.IsTrue(helper.FindTheRef(result, AudioUtterancesMap[AudioUtteranceKeys.CONVERSATION_BETWEEN_TWO_PERSONS_ENGLISH].Utterances[Language.EN][0].Text));
+                    SPXTEST_ISTRUE(helper.FindTheRef(result, AudioUtterancesMap[AudioUtteranceKeys.CONVERSATION_BETWEEN_TWO_PERSONS_ENGLISH].Utterances[Language.EN][0].Text));
                 }
             }
         }
@@ -409,7 +417,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                             Task.WaitAny(new[] { stopRecognition.Task });
 
                             await conversationTranscriber.StopTranscribingAsync().ConfigureAwait(false);
-                            Assert.IsFalse(string.IsNullOrEmpty(recoResult));
+                            SPXTEST_ISFALSE(string.IsNullOrEmpty(recoResult));
                         }
                     }
                 }
@@ -506,9 +514,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                         await conversationTranscriber.StopTranscribingAsync().ConfigureAwait(false);
 
-                        Assert.IsTrue(bGotReco);
-                        Assert.IsTrue(speakers.Contains("Katie"));
-                        Assert.IsTrue(speakers.Contains("Steve"));
+                        SPXTEST_ISTRUE(bGotReco);
+                        SPXTEST_ISTRUE(speakers.Contains("Katie"));
+                        SPXTEST_ISTRUE(speakers.Contains("Steve"));
                     }
                 }
             }
@@ -528,14 +536,14 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 {
                     await conversationTranscriber.JoinConversationAsync(conversation);
                     var recoLanguage = conversationTranscriber.Properties.GetProperty(PropertyId.SpeechServiceConnection_RecoLanguage);
-                    Assert.IsTrue(String.IsNullOrEmpty(recoLanguage), "RecoLanguage should not be set here. RecoLanguage: " + recoLanguage);
+                    SPXTEST_ISTRUE(String.IsNullOrEmpty(recoLanguage), "RecoLanguage should not be set here. RecoLanguage: " + recoLanguage);
 
 
                     await helper.CompleteContinuousRecognition(conversationTranscriber, meetingID);
                     var connectionUrl = conversationTranscriber.Properties.GetProperty(PropertyId.SpeechServiceConnection_Url);
                     // Currently we do not have endpoint ready that supports detailed conversation transcription, so we only check connection URL for now.
-                    Assert.IsTrue(connectionUrl.Contains("format=detailed"), "mismatch initialSilencetimeout in " + connectionUrl);
-                    Assert.IsTrue(connectionUrl.Contains("language=en-us"), "Incorrect default language (should be en-us) in " + connectionUrl);
+                    SPXTEST_ISTRUE(connectionUrl.Contains("format=detailed"), "mismatch initialSilencetimeout in " + connectionUrl);
+                    SPXTEST_ISTRUE(connectionUrl.Contains("language=en-us"), "Incorrect default language (should be en-us) in " + connectionUrl);
                 }
             }
         }
@@ -544,7 +552,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public async Task CreateVoiceSignature()
         {
             var result = await CreateVoiceSignatureFromVoiceSample(AudioUtterancesMap[AudioUtteranceKeys.PERSON_ENROLLMENT_ENGLISH_1].FilePath.GetRootRelativePath());
-            Assert.IsTrue(result.Status == "OK", "Voice signature is not valid");
+            SPXTEST_ISTRUE(result.Status == "OK", "Voice signature is not valid");
         }
 
         private async Task<VoiceSignature> CreateVoiceSignatureFromVoiceSample(string voiceSample)
@@ -554,7 +562,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var client = new HttpClient();
             client.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", conversationTranscriptionPPEKey);
             var response = await client.PostAsync($"https://signature.princetonppe.customspeech.ai/api/v1/Signature/GenerateVoiceSignatureFromByteArray", content);
-            Assert.IsTrue(response.IsSuccessStatusCode, $"CreateVoiceSignatureFromVoiceSample failed to get a response from the enrolment service. HTTP_Status={response.StatusCode}");
+            SPXTEST_ISTRUE(response.IsSuccessStatusCode, $"CreateVoiceSignatureFromVoiceSample failed to get a response from the enrolment service. HTTP_Status={response.StatusCode}");
             var jsonData = await response.Content.ReadAsStringAsync();
             Console.WriteLine($"CreateVoiceSignatureFromVoiceSample: Service Response jsonData={jsonData}");
             var result = JsonConvert.DeserializeObject<VoiceSignature>(jsonData);
@@ -595,7 +603,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 await conversationTranscriber.JoinConversationAsync(conversation);
                 var recoLanguage = conversationTranscriber.Properties.GetProperty(PropertyId.SpeechServiceConnection_RecoLanguage);
-                Assert.IsTrue(String.IsNullOrEmpty(recoLanguage), "RecoLanguage should not be set here. RecoLanguage: " + recoLanguage);
+                SPXTEST_ISTRUE(String.IsNullOrEmpty(recoLanguage), "RecoLanguage should not be set here. RecoLanguage: " + recoLanguage);
 
                 conversationTranscriber.Transcribed += (s, e) =>
                 {
@@ -617,8 +625,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 conversationTranscriber.Canceled += (s, e) =>
                 {
-                    Assert.IsTrue(string.IsNullOrWhiteSpace(e.ErrorDetails), $"Error details were present {e.ErrorDetails}");
-                    Assert.IsTrue(e.Reason == CancellationReason.EndOfStream, $"Cancellation Reason was not EOS it was {e.Reason.ToString()} with error code ${e.ErrorCode.ToString()}");
+                    SPXTEST_ISTRUE(string.IsNullOrWhiteSpace(e.ErrorDetails), $"Error details were present {e.ErrorDetails}");
+                    SPXTEST_ISTRUE(e.Reason == CancellationReason.EndOfStream, $"Cancellation Reason was not EOS it was {e.Reason.ToString()} with error code ${e.ErrorCode.ToString()}");
                     Console.WriteLine("Reached EndOfStream");
                     canceledEvent.Set();
                 };
@@ -639,7 +647,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 pushStream.Write(fileContents);
                 pushStream.Close();
 
-                Assert.IsTrue(WaitHandle.WaitAll(new System.Threading.WaitHandle[] { transcribedEvent, canceledEvent },
+                SPXTEST_ISTRUE(WaitHandle.WaitAll(new System.Threading.WaitHandle[] { transcribedEvent, canceledEvent },
                     TimeSpan.FromSeconds(3000)), "Events were not received in time");
             }
         }
@@ -669,7 +677,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 await conversationTranscriber.JoinConversationAsync(conversation);
                 var recoLanguage = conversationTranscriber.Properties.GetProperty(PropertyId.SpeechServiceConnection_RecoLanguage);
-                Assert.IsTrue(String.IsNullOrEmpty(recoLanguage), "RecoLanguage should not be set here. RecoLanguage: " + recoLanguage);
+                SPXTEST_ISTRUE(String.IsNullOrEmpty(recoLanguage), "RecoLanguage should not be set here. RecoLanguage: " + recoLanguage);
 
                 conversationTranscriber.Transcribed += (s, e) =>
                 {
@@ -678,8 +686,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 conversationTranscriber.Canceled += (s, e) =>
                 {
-                    Assert.IsTrue(string.IsNullOrWhiteSpace(e.ErrorDetails), $"Error details were present {e.ErrorDetails}");
-                    Assert.IsTrue(e.Reason == CancellationReason.EndOfStream, $"Cancellation Reason was not EOS it was {e.Reason.ToString()} with error code ${e.ErrorCode.ToString()}");
+                    SPXTEST_ISTRUE(string.IsNullOrWhiteSpace(e.ErrorDetails), $"Error details were present {e.ErrorDetails}");
+                    SPXTEST_ISTRUE(e.Reason == CancellationReason.EndOfStream, $"Cancellation Reason was not EOS it was {e.Reason.ToString()} with error code ${e.ErrorCode.ToString()}");
                     Console.WriteLine("Reached EndOfStream");
                     canceledEvent.Set();
                 };
@@ -690,8 +698,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 {
                     Console.WriteLine("Connected");
 
-                    Assert.IsTrue(conversationTranscriber.Properties.GetProperty(PropertyId.SpeechServiceConnection_Url).ToLowerInvariant().Contains("forcetemporaryredirect=false"));
-                    Assert.IsTrue(conversationTranscriber.Properties.GetProperty(PropertyId.SpeechServiceConnection_Endpoint).ToLowerInvariant().Contains("forcetemporaryredirect=true"));
+                    SPXTEST_ISTRUE(conversationTranscriber.Properties.GetProperty(PropertyId.SpeechServiceConnection_Url).ToLowerInvariant().Contains("forcetemporaryredirect=false"));
+                    SPXTEST_ISTRUE(conversationTranscriber.Properties.GetProperty(PropertyId.SpeechServiceConnection_Endpoint).ToLowerInvariant().Contains("forcetemporaryredirect=true"));
                     successfulConnections++;
                     if (successfulConnections == 2)
                     {
@@ -701,7 +709,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 await conversationTranscriber.StartTranscribingAsync();
 
-                Assert.IsTrue(reconnectEvent.WaitOne(TimeSpan.FromSeconds(60)), "Events were not received in time");
+                SPXTEST_ISTRUE(reconnectEvent.WaitOne(TimeSpan.FromSeconds(60)), "Events were not received in time");
             }
         }
 
@@ -730,7 +738,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 await conversationTranscriber.JoinConversationAsync(conversation);
                 var recoLanguage = conversationTranscriber.Properties.GetProperty(PropertyId.SpeechServiceConnection_RecoLanguage);
-                Assert.IsTrue(String.IsNullOrEmpty(recoLanguage), "RecoLanguage should not be set here. RecoLanguage: " + recoLanguage);
+                SPXTEST_ISTRUE(String.IsNullOrEmpty(recoLanguage), "RecoLanguage should not be set here. RecoLanguage: " + recoLanguage);
 
                 conversationTranscriber.Transcribed += (s, e) =>
                 {
@@ -739,8 +747,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 conversationTranscriber.Canceled += (s, e) =>
                 {
-                    Assert.IsTrue(string.IsNullOrWhiteSpace(e.ErrorDetails), $"Error details were present {e.ErrorDetails}");
-                    Assert.IsTrue(e.Reason == CancellationReason.EndOfStream, $"Cancellation Reason was not EOS it was {e.Reason.ToString()} with error code ${e.ErrorCode.ToString()}");
+                    SPXTEST_ISTRUE(string.IsNullOrWhiteSpace(e.ErrorDetails), $"Error details were present {e.ErrorDetails}");
+                    SPXTEST_ISTRUE(e.Reason == CancellationReason.EndOfStream, $"Cancellation Reason was not EOS it was {e.Reason.ToString()} with error code ${e.ErrorCode.ToString()}");
                     Console.WriteLine("Reached EndOfStream");
                     canceledEvent.Set();
                 };
@@ -751,8 +759,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 {
                     Console.WriteLine("Connected");
 
-                    Assert.IsTrue(conversationTranscriber.Properties.GetProperty(PropertyId.SpeechServiceConnection_Url).ToLowerInvariant().Contains("forcepermanentredirect=false"), conversationTranscriber.Properties.GetProperty(PropertyId.SpeechServiceConnection_Url));
-                    Assert.IsTrue(conversationTranscriber.Properties.GetProperty(PropertyId.SpeechServiceConnection_Endpoint).ToLowerInvariant().Contains("forcepermanentredirect=false"), conversationTranscriber.Properties.GetProperty(PropertyId.SpeechServiceConnection_Endpoint));
+                    SPXTEST_ISTRUE(conversationTranscriber.Properties.GetProperty(PropertyId.SpeechServiceConnection_Url).ToLowerInvariant().Contains("forcepermanentredirect=false"), conversationTranscriber.Properties.GetProperty(PropertyId.SpeechServiceConnection_Url));
+                    SPXTEST_ISTRUE(conversationTranscriber.Properties.GetProperty(PropertyId.SpeechServiceConnection_Endpoint).ToLowerInvariant().Contains("forcepermanentredirect=false"), conversationTranscriber.Properties.GetProperty(PropertyId.SpeechServiceConnection_Endpoint));
                     successfulConnections++;
                     if (successfulConnections == 2)
                     {
@@ -762,7 +770,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 await conversationTranscriber.StartTranscribingAsync();
 
-                Assert.IsTrue(reconnectEvent.WaitOne(TimeSpan.FromSeconds(60)), "Events were not received in time");
+                SPXTEST_ISTRUE(reconnectEvent.WaitOne(TimeSpan.FromSeconds(60)), "Events were not received in time");
             }
         }
 
@@ -783,7 +791,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 await conversationTranscriber.JoinConversationAsync(conversation);
                 var recoLanguage = conversationTranscriber.Properties.GetProperty(PropertyId.SpeechServiceConnection_RecoLanguage);
-                Assert.IsTrue(String.IsNullOrEmpty(recoLanguage), "RecoLanguage should not be set here. RecoLanguage: " + recoLanguage);
+                SPXTEST_ISTRUE(String.IsNullOrEmpty(recoLanguage), "RecoLanguage should not be set here. RecoLanguage: " + recoLanguage);
 
                 bool threw = false;
                 int participants = 0;
@@ -798,7 +806,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     {
                         Console.WriteLine(e.ToString());
                         threw = true;
-                        Assert.IsTrue(participants == 100);
+                        SPXTEST_ISTRUE(participants == 100);
                     }
                 }
             }
@@ -837,8 +845,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 conversationTranscriber.Canceled += (s, e) =>
                 {
-                    Assert.IsTrue(string.IsNullOrWhiteSpace(e.ErrorDetails), $"Error details were present {e.ErrorDetails}");
-                    Assert.IsTrue(e.Reason == CancellationReason.EndOfStream, $"Cancellation Reason was not EOS it was {e.Reason.ToString()} with error code ${e.ErrorCode.ToString()}");
+                    SPXTEST_ISTRUE(string.IsNullOrWhiteSpace(e.ErrorDetails), $"Error details were present {e.ErrorDetails}");
+                    SPXTEST_ISTRUE(e.Reason == CancellationReason.EndOfStream, $"Cancellation Reason was not EOS it was {e.Reason.ToString()} with error code ${e.ErrorCode.ToString()}");
                     Console.WriteLine("Reached EndOfStream");
                 };
 
@@ -856,7 +864,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 await conversationTranscriber.StartTranscribingAsync();
                 await conversation.AddParticipantAsync("userID@microsoft.com");
 
-                Assert.IsTrue(WaitHandle.WaitAll(new System.Threading.WaitHandle[] { transcribedEvent, transcribingEvent },
+                SPXTEST_ISTRUE(WaitHandle.WaitAll(new System.Threading.WaitHandle[] { transcribedEvent, transcribingEvent },
                     TimeSpan.FromSeconds(300)), "Events were not received in time");
 
             }

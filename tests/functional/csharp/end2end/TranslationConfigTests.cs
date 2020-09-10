@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 
 namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 {
+    using static SPXTEST;
     using static Config;
     using static SpeechRecognitionTestsHelper;
     using static TranslationTestsHelper;
@@ -20,7 +21,14 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [ClassInitialize]
         public static void TestClassinitialize(TestContext context)
         {
+            LoggingTestBaseInit(context);
             BaseClassInit(context);
+        }
+
+        [ClassCleanup]
+        new public static void TestClassCleanup()
+        {
+            LoggingTestBaseCleanup();
         }
 
         [TestMethod]
@@ -31,7 +39,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             config.AddTargetLanguage(Language.DE);
             config.VoiceName = Voice.DE;
 
-            Assert.AreEqual(config.VoiceName, Voice.DE);
+            SPXTEST_ARE_EQUAL(config.VoiceName, Voice.DE);
         }
 
         [TestMethod]
@@ -42,7 +50,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             config.AddTargetLanguage(Language.DE);
             config.VoiceName = "";
 
-            Assert.AreEqual(config.VoiceName, "");
+            SPXTEST_ARE_EQUAL(config.VoiceName, "");
         }
 
         [TestMethod]
@@ -52,7 +60,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             config.SpeechRecognitionLanguage = Language.EN;
             config.AddTargetLanguage(Language.DE);
 
-            Assert.AreEqual("", config.VoiceName);
+            SPXTEST_ARE_EQUAL("", config.VoiceName);
         }
 
         [TestMethod]
@@ -79,26 +87,26 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 connectionUrl = recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_Url);
-                Assert.AreEqual(ResultReason.TranslatedSpeech, result.Reason);
+                SPXTEST_ARE_EQUAL(ResultReason.TranslatedSpeech, result.Reason);
                 AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text, result.Text);
                 AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.DE][0].Text, result.Translations[Language.DE]);
                 // Check no word-level timestamps included, but only detailed output.
                 var jsonResult = result.Properties.GetProperty(PropertyId.SpeechServiceResponse_JsonResult);
-                Assert.IsFalse(jsonResult.Contains("Words"), "Word-level timestamps not expected. Returned JSON: " + jsonResult);
+                SPXTEST_ISFALSE(jsonResult.Contains("Words"), "Word-level timestamps not expected. Returned JSON: " + jsonResult);
                 AssertDetailedOutput(result, true);
             }
-            Assert.IsTrue(connectionUrl.Length > 0);
+            SPXTEST_ISTRUE(connectionUrl.Length > 0);
 
-            Assert.IsTrue(connectionUrl.Contains("initialSilenceTimeoutMs=5000"), "mismatch initialSilencetimeout in " + connectionUrl);
-            Assert.IsTrue(connectionUrl.Contains("endSilenceTimeoutMs=12000"), "mismatch endSilencetimeout in " + connectionUrl);
-            Assert.IsTrue(connectionUrl.Contains("stableIntermediateThreshold=5"), "mismatch stableIntermediateThreshold in " + connectionUrl);
-            Assert.IsTrue(connectionUrl.Contains("format=detailed"), "mismatch format in " + connectionUrl);
-            Assert.IsTrue(connectionUrl.Contains("profanity=masked"), "mismatch profanity in " + connectionUrl);
-            Assert.IsTrue(connectionUrl.Contains("storeAudio=false"), "mismatch storeAudio in " + connectionUrl);
-            Assert.IsTrue(connectionUrl.Contains("wordLevelTimestamps=false"), "mismatch wordLevelTimestamps in " + connectionUrl);
-            Assert.IsTrue(connectionUrl.Contains("stableTranslation=true"), "mismatch stableTranslation in " + connectionUrl);
+            SPXTEST_ISTRUE(connectionUrl.Contains("initialSilenceTimeoutMs=5000"), "mismatch initialSilencetimeout in " + connectionUrl);
+            SPXTEST_ISTRUE(connectionUrl.Contains("endSilenceTimeoutMs=12000"), "mismatch endSilencetimeout in " + connectionUrl);
+            SPXTEST_ISTRUE(connectionUrl.Contains("stableIntermediateThreshold=5"), "mismatch stableIntermediateThreshold in " + connectionUrl);
+            SPXTEST_ISTRUE(connectionUrl.Contains("format=detailed"), "mismatch format in " + connectionUrl);
+            SPXTEST_ISTRUE(connectionUrl.Contains("profanity=masked"), "mismatch profanity in " + connectionUrl);
+            SPXTEST_ISTRUE(connectionUrl.Contains("storeAudio=false"), "mismatch storeAudio in " + connectionUrl);
+            SPXTEST_ISTRUE(connectionUrl.Contains("wordLevelTimestamps=false"), "mismatch wordLevelTimestamps in " + connectionUrl);
+            SPXTEST_ISTRUE(connectionUrl.Contains("stableTranslation=true"), "mismatch stableTranslation in " + connectionUrl);
 
-            Assert.IsFalse(connectionUrl.Contains("postprocessing="), "unexpected postprocessing in " + connectionUrl);
+            SPXTEST_ISFALSE(connectionUrl.Contains("postprocessing="), "unexpected postprocessing in " + connectionUrl);
         }
 
         [TestMethod]
@@ -119,27 +127,27 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 connectionUrl = recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_Url);
-                Assert.AreEqual(ResultReason.TranslatedSpeech, result.Reason);
+                SPXTEST_ARE_EQUAL(ResultReason.TranslatedSpeech, result.Reason);
                 AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text, result.Text);
                 AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.DE][0].Text, result.Translations[Language.DE]);
                 var jsonResult = result.Properties.GetProperty(PropertyId.SpeechServiceResponse_JsonResult);
-                Assert.IsTrue(jsonResult.Contains("Words"), "No word-level timestamps. Returned JSON: " + jsonResult);
+                SPXTEST_ISTRUE(jsonResult.Contains("Words"), "No word-level timestamps. Returned JSON: " + jsonResult);
                 AssertDetailedOutput(result, true);
             }
-            Assert.IsTrue(connectionUrl.Length > 0);
+            SPXTEST_ISTRUE(connectionUrl.Length > 0);
 
             // Word-level timestamps will set format to detailed.
-            Assert.IsTrue(connectionUrl.Contains("format=detailed"), "unexpected format in " + connectionUrl);
-            Assert.IsTrue(connectionUrl.Contains("profanity=raw"), "mismatch profanity in " + connectionUrl);
-            Assert.IsTrue(connectionUrl.Contains("storeAudio=true"), "mismatch storeAudio in " + connectionUrl);
-            Assert.IsTrue(connectionUrl.Contains("wordLevelTimestamps=true"), "mismatch wordLevelTimestamps in " + connectionUrl);
+            SPXTEST_ISTRUE(connectionUrl.Contains("format=detailed"), "unexpected format in " + connectionUrl);
+            SPXTEST_ISTRUE(connectionUrl.Contains("profanity=raw"), "mismatch profanity in " + connectionUrl);
+            SPXTEST_ISTRUE(connectionUrl.Contains("storeAudio=true"), "mismatch storeAudio in " + connectionUrl);
+            SPXTEST_ISTRUE(connectionUrl.Contains("wordLevelTimestamps=true"), "mismatch wordLevelTimestamps in " + connectionUrl);
 
-            Assert.IsFalse(connectionUrl.Contains("dictation"), "unexpected dictation mode in " + connectionUrl);
-            Assert.IsFalse(connectionUrl.Contains("initialSilenceTimeoutMs="), "unexpected initialSilencetimeout in " + connectionUrl);
-            Assert.IsFalse(connectionUrl.Contains("endSilenceTimeoutMs="), "unexpected endSilencetimeout in " + connectionUrl);
-            Assert.IsFalse(connectionUrl.Contains("stableIntermediateThreshold="), "unexpected stableIntermediateThreshold in " + connectionUrl);
-            Assert.IsFalse(connectionUrl.Contains("postprocessing="), "unexpected postprocessing in " + connectionUrl);
-            Assert.IsFalse(connectionUrl.Contains("stableTranslation="), "unexpected stableTranslation in " + connectionUrl);
+            SPXTEST_ISFALSE(connectionUrl.Contains("dictation"), "unexpected dictation mode in " + connectionUrl);
+            SPXTEST_ISFALSE(connectionUrl.Contains("initialSilenceTimeoutMs="), "unexpected initialSilencetimeout in " + connectionUrl);
+            SPXTEST_ISFALSE(connectionUrl.Contains("endSilenceTimeoutMs="), "unexpected endSilencetimeout in " + connectionUrl);
+            SPXTEST_ISFALSE(connectionUrl.Contains("stableIntermediateThreshold="), "unexpected stableIntermediateThreshold in " + connectionUrl);
+            SPXTEST_ISFALSE(connectionUrl.Contains("postprocessing="), "unexpected postprocessing in " + connectionUrl);
+            SPXTEST_ISFALSE(connectionUrl.Contains("stableTranslation="), "unexpected stableTranslation in " + connectionUrl);
         }
 
         [TestMethod]
@@ -159,24 +167,24 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 connectionUrl = recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_Url);
-                Assert.AreEqual(ResultReason.TranslatedSpeech, result.Reason);
+                SPXTEST_ARE_EQUAL(ResultReason.TranslatedSpeech, result.Reason);
                 AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text, result.Text);
                 AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.DE][0].Text, result.Translations[Language.DE]);
             }
-            Assert.IsTrue(connectionUrl.Length > 0);
+            SPXTEST_ISTRUE(connectionUrl.Length > 0);
 
-            Assert.IsTrue(connectionUrl.Contains("from=" + Language.EN), "mismatch from in " + connectionUrl);
-            Assert.IsTrue(connectionUrl.Contains("to=" + Language.DE), "mismtach to in " + connectionUrl);
-            Assert.IsTrue(connectionUrl.Contains("stableTranslation=true"), "mismatch stableTranslation in " + connectionUrl);
+            SPXTEST_ISTRUE(connectionUrl.Contains("from=" + Language.EN), "mismatch from in " + connectionUrl);
+            SPXTEST_ISTRUE(connectionUrl.Contains("to=" + Language.DE), "mismtach to in " + connectionUrl);
+            SPXTEST_ISTRUE(connectionUrl.Contains("stableTranslation=true"), "mismatch stableTranslation in " + connectionUrl);
 
-            Assert.IsFalse(connectionUrl.Contains("initialSilenceTimeoutMs="), "unexpected initialSilencetimeout in " + connectionUrl);
-            Assert.IsFalse(connectionUrl.Contains("endSilenceTimeoutMs="), "unexpected endSilencetimeout in " + connectionUrl);
-            Assert.IsFalse(connectionUrl.Contains("stableIntermediateThreshold="), "unexpected stableIntermediateThreshold in " + connectionUrl);
-            Assert.IsFalse(connectionUrl.Contains("format="), "unexpected format in " + connectionUrl);
-            Assert.IsFalse(connectionUrl.Contains("profanity="), "unexpected profanity in " + connectionUrl);
-            Assert.IsFalse(connectionUrl.Contains("storeAudio="), "unexpected storeAudio in " + connectionUrl);
-            Assert.IsFalse(connectionUrl.Contains("wordLevelTimestamps="), "unexpected wordLevelTimestamps in " + connectionUrl);
-            Assert.IsFalse(connectionUrl.Contains("postprocessing="), "unexpected postprocessing in " + connectionUrl);
+            SPXTEST_ISFALSE(connectionUrl.Contains("initialSilenceTimeoutMs="), "unexpected initialSilencetimeout in " + connectionUrl);
+            SPXTEST_ISFALSE(connectionUrl.Contains("endSilenceTimeoutMs="), "unexpected endSilencetimeout in " + connectionUrl);
+            SPXTEST_ISFALSE(connectionUrl.Contains("stableIntermediateThreshold="), "unexpected stableIntermediateThreshold in " + connectionUrl);
+            SPXTEST_ISFALSE(connectionUrl.Contains("format="), "unexpected format in " + connectionUrl);
+            SPXTEST_ISFALSE(connectionUrl.Contains("profanity="), "unexpected profanity in " + connectionUrl);
+            SPXTEST_ISFALSE(connectionUrl.Contains("storeAudio="), "unexpected storeAudio in " + connectionUrl);
+            SPXTEST_ISFALSE(connectionUrl.Contains("wordLevelTimestamps="), "unexpected wordLevelTimestamps in " + connectionUrl);
+            SPXTEST_ISFALSE(connectionUrl.Contains("postprocessing="), "unexpected postprocessing in " + connectionUrl);
         }
     }
 }

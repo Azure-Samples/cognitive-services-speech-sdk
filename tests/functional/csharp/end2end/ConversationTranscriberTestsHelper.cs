@@ -7,9 +7,12 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils;
 
 namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 {
+    using static SPXTEST;
+
     sealed class ConversationTranscriberTestsHelper
     {
         private TaskCompletionSource<int> taskCompletionSource;
@@ -42,7 +45,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
             if (!string.IsNullOrEmpty(canceled))
             {
-                Assert.Fail($"Recognition Canceled(meetingID={conversationId}): {canceled}");
+                SPXTEST_FAIL($"Recognition Canceled(meetingID={conversationId}): {canceled}");
             }
         }
         public bool FindTheRef(List<string> phrases, string reference)

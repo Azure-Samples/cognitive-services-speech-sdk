@@ -40,7 +40,7 @@ TEST_CASE(
       "Speaker recognition::text independent verification enrollment",
       "[api][cxx][speaker_id][enrollment_ti_verification]")
 {
-    REQUIRE(exists(ROOT_RELATIVE_PATH(MULTIPLE_UTTERANCE_CHINESE)));
+    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(MULTIPLE_UTTERANCE_CHINESE)));
 
     // create a profile using a speech config
     auto config = GetSpeakerRecognitionProdSubscriptionConfig();
@@ -78,7 +78,7 @@ TEST_CASE(
     "Speaker recognition::text independent identication enrollment",
     "[api][cxx][speaker_id][enrollment_ti_identication]")
 {
-    REQUIRE(exists(ROOT_RELATIVE_PATH(MULTIPLE_UTTERANCE_CHINESE)));
+    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(MULTIPLE_UTTERANCE_CHINESE)));
 
     // create a profile using a speech config
     auto config = GetSpeakerRecognitionProdSubscriptionConfig();
@@ -118,7 +118,7 @@ TEST_CASE(
     "Speaker recognition::text dependent verification enrollment bad request",
     "[api][cxx][speaker_id][enrollment_td_verfication_bad_request]")
 {
-    REQUIRE(exists(ROOT_RELATIVE_PATH(MULTIPLE_UTTERANCE_CHINESE)));
+    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(MULTIPLE_UTTERANCE_CHINESE)));
 
     // create a profile using a speech config
     auto config = GetSpeakerRecognitionProdSubscriptionConfig();
@@ -259,8 +259,8 @@ TEST_CASE(
     "Speaker recognition::verification accepts and rejects speaker",
     "[api][cxx][speaker_id][verification]")
 {
-    REQUIRE(exists(ROOT_RELATIVE_PATH(MULTIPLE_UTTERANCE_CHINESE)));
-    REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
+    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(MULTIPLE_UTTERANCE_CHINESE)));
+    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
 
     auto config = GetSpeakerRecognitionProdSubscriptionConfig();
     auto audioInput = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(MULTIPLE_UTTERANCE_CHINESE));
@@ -303,7 +303,7 @@ TEST_CASE(
     "Speaker recognition::speaker identification",
     "[api][cxx][speaker_id][identification]")
 {
-    REQUIRE(exists(ROOT_RELATIVE_PATH(MULTIPLE_UTTERANCE_CHINESE)));
+    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(MULTIPLE_UTTERANCE_CHINESE)));
 
     auto config = GetSpeakerRecognitionProdSubscriptionConfig();
     auto audioInput = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(MULTIPLE_UTTERANCE_CHINESE));
@@ -354,7 +354,7 @@ TEST_CASE(
     "Speaker recognition::text dependent verification",
     "[api][cxx][speaker_id][td_good_case]")
 {
-    REQUIRE(exists(ROOT_RELATIVE_PATH(SPEAKER_VERIFICATION_ENGLISH)));
+    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SPEAKER_VERIFICATION_ENGLISH)));
 
     auto config = GetSpeakerRecognitionProdSubscriptionConfig();
     auto audioInput = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SPEAKER_VERIFICATION_ENGLISH));
@@ -400,7 +400,7 @@ TEST_CASE(
     "Speaker recognition::wrong passphrase in text dependent verification",
     "[api][cxx][speaker_id][td_wrong_case]")
 {
-    REQUIRE(exists(ROOT_RELATIVE_PATH(SPEAKER_VERIFICATION_ENGLISH)));
+    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SPEAKER_VERIFICATION_ENGLISH)));
 
     auto config = GetSpeakerRecognitionProdSubscriptionConfig();
     auto verifymeFile = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SPEAKER_VERIFICATION_ENGLISH));
@@ -438,7 +438,7 @@ TEST_CASE(
     "Speaker recognition::enroll and delete in parallel",
     "[api][cxx][speaker_id][parallel]")
 {
-    REQUIRE(exists(ROOT_RELATIVE_PATH(SPEAKER_VERIFICATION_ENGLISH)));
+    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SPEAKER_VERIFICATION_ENGLISH)));
 
     auto config = GetSpeakerRecognitionProdSubscriptionConfig();
     auto verifymeFile = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SPEAKER_VERIFICATION_ENGLISH));

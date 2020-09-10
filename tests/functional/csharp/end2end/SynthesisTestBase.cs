@@ -11,7 +11,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
     using static Config;
 
     [TestClass]
-    public class SynthesisTestBase
+    public class SynthesisTestBase : LoggingTestBase
     {
         public long EmptyWaveFileSize => 46;
         public int GuidLength => 32;
@@ -33,12 +33,19 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
         public static void BaseClassInit(TestContext context)
         {
+            LoggingTestBaseInit(context);
             _config = new Config(context);
 
             subscriptionKey = SubscriptionsRegionsMap[SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION].Key;
             region = SubscriptionsRegionsMap[SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION].Region;
 
             Console.WriteLine("region: " + region);
+        }
+
+        [ClassCleanup]
+        public static void TestClassCleanup()
+        {
+            LoggingTestBaseCleanup();
         }
 
         [TestInitialize]

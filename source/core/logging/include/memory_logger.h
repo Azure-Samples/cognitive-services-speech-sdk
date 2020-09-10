@@ -2,8 +2,6 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
-// event_log.h: Class to log to a user registered event.
-//
 
 #include <string>
 #include <iostream>
@@ -125,7 +123,7 @@ public:
 
 private:
 
-    typedef size_t TicketType;
+    using TicketType = size_t;
     void LogToMemoryInternal(TicketType ticket, const char* traceLine);
 
     size_t m_started = 0;

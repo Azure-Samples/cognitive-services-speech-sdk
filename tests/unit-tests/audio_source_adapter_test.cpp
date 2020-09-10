@@ -38,7 +38,7 @@ TEST_CASE("CSpxMicrophoneAudioSourceAdapter tests", "[cxx][audio]")
         return MakeEnvironment(proxyFactory, mockSite, adapter, notifyMe);
     };
 
-    GIVEN("A newly created adapter")
+    SPXTEST_GIVEN("A newly created adapter")
     {
         auto env = makeBaseTestEnv();
         auto audioSourceInit = env.Get<Carbon::ISpxAudioSourceInit>();
@@ -48,7 +48,7 @@ TEST_CASE("CSpxMicrophoneAudioSourceAdapter tests", "[cxx][audio]")
         auto audioProcessorNotifyMe = Carbon::SpxQueryInterface<Carbon::ISpxAudioProcessorNotifyMe>(audioSourceInit);
         auto site = env.Get<MockSite>();
 
-        WHEN("[ISpxAudioSourceInit] Calling InitFromMicrophone")
+        SPXTEST_WHEN("[ISpxAudioSourceInit] Calling InitFromMicrophone")
         {
             auto exceptionThrown = CheckThrow<std::runtime_error>([&]
             {
@@ -60,10 +60,10 @@ TEST_CASE("CSpxMicrophoneAudioSourceAdapter tests", "[cxx][audio]")
             }
             THEN("Should create an interactive microphone object")
             {
-                REQUIRE(rawMicPtr != nullptr);
+                SPXTEST_REQUIRE(rawMicPtr != nullptr);
             }
         }
-        WHEN("[ISpxAudioSourceInit] Calling InitFromFile")
+        SPXTEST_WHEN("[ISpxAudioSourceInit] Calling InitFromFile")
         {
             auto exceptionThrown = CheckThrow<std::runtime_error>([&]
             {
@@ -71,10 +71,10 @@ TEST_CASE("CSpxMicrophoneAudioSourceAdapter tests", "[cxx][audio]")
             });
             THEN("Should throw an exception")
             {
-                REQUIRE(exceptionThrown);
+                SPXTEST_REQUIRE(exceptionThrown);
             }
         }
-        WHEN("[ISpxAudioSourceInit] Calling InitFromStream")
+        SPXTEST_WHEN("[ISpxAudioSourceInit] Calling InitFromStream")
         {
             auto ptr = Carbon::SpxCreateObjectWithSite<Carbon::ISpxAudioStreamInitFormat>("CSpxPullAudioInputStream", site);
             auto stream = ptr->QueryInterface<Carbon::ISpxAudioStream>();
@@ -84,10 +84,10 @@ TEST_CASE("CSpxMicrophoneAudioSourceAdapter tests", "[cxx][audio]")
             });
             THEN("Should throw an exception")
             {
-                REQUIRE(exceptionThrown);
+                SPXTEST_REQUIRE(exceptionThrown);
             }
         }
-        WHEN("[ISpxAudioSourceControl] Calling StartAudio")
+        SPXTEST_WHEN("[ISpxAudioSourceControl] Calling StartAudio")
         {
             auto notifyMe = env.Get<MockAudioSourceNotifyMe>();
             auto exceptionThrown = CheckThrow<std::runtime_error>([&]
@@ -96,10 +96,10 @@ TEST_CASE("CSpxMicrophoneAudioSourceAdapter tests", "[cxx][audio]")
             });
             THEN("An exception should be thrown")
             {
-                REQUIRE(exceptionThrown);
+                SPXTEST_REQUIRE(exceptionThrown);
             }
         }
-        WHEN("[ISpxAudioSourceControl] Calling StopAudio")
+        SPXTEST_WHEN("[ISpxAudioSourceControl] Calling StopAudio")
         {
             auto exceptionThrown = CheckThrow<std::runtime_error>([&]
             {
@@ -107,10 +107,10 @@ TEST_CASE("CSpxMicrophoneAudioSourceAdapter tests", "[cxx][audio]")
             });
             THEN("An exception should be thrown")
             {
-                REQUIRE(exceptionThrown);
+                SPXTEST_REQUIRE(exceptionThrown);
             }
         }
-        WHEN("[ISpxBufferData] Calling GetOffset")
+        SPXTEST_WHEN("[ISpxBufferData] Calling GetOffset")
         {
             auto exceptionThrown = CheckThrow<std::runtime_error>([&]
             {
@@ -118,10 +118,10 @@ TEST_CASE("CSpxMicrophoneAudioSourceAdapter tests", "[cxx][audio]")
             });
             THEN("An exception should be thrown")
             {
-                REQUIRE(exceptionThrown);
+                SPXTEST_REQUIRE(exceptionThrown);
             }
         }
-        WHEN("[ISpxBufferData] Calling Read")
+        SPXTEST_WHEN("[ISpxBufferData] Calling Read")
         {
             std::array<uint8_t, 10> buffer{};
             auto exceptionThrown = CheckThrow<std::runtime_error>([&]
@@ -130,10 +130,10 @@ TEST_CASE("CSpxMicrophoneAudioSourceAdapter tests", "[cxx][audio]")
             });
             THEN("An exception should be thrown")
             {
-                REQUIRE(exceptionThrown);
+                SPXTEST_REQUIRE(exceptionThrown);
             }
         }
-        WHEN("[ISpxBufferData] Calling ReadAt")
+        SPXTEST_WHEN("[ISpxBufferData] Calling ReadAt")
         {
             std::array<uint8_t, 10> buffer{};
             auto exceptionThrown = CheckThrow<std::runtime_error>([&]
@@ -142,10 +142,10 @@ TEST_CASE("CSpxMicrophoneAudioSourceAdapter tests", "[cxx][audio]")
             });
             THEN("An exception should be thrown")
             {
-                REQUIRE(exceptionThrown);
+                SPXTEST_REQUIRE(exceptionThrown);
             }
         }
-        WHEN("[ISpxBufferData] Calling GetBytesDead")
+        SPXTEST_WHEN("[ISpxBufferData] Calling GetBytesDead")
         {
             auto exceptionThrown = CheckThrow<std::runtime_error>([&]
             {
@@ -153,10 +153,10 @@ TEST_CASE("CSpxMicrophoneAudioSourceAdapter tests", "[cxx][audio]")
             });
             THEN("An exception should be thrown")
             {
-                REQUIRE(exceptionThrown);
+                SPXTEST_REQUIRE(exceptionThrown);
             }
         }
-        WHEN("[ISpxBufferData] Calling GetBytesRead")
+        SPXTEST_WHEN("[ISpxBufferData] Calling GetBytesRead")
         {
             auto exceptionThrown = CheckThrow<std::runtime_error>([&]
             {
@@ -164,10 +164,10 @@ TEST_CASE("CSpxMicrophoneAudioSourceAdapter tests", "[cxx][audio]")
             });
             THEN("An exception should be thrown")
             {
-                REQUIRE(exceptionThrown);
+                SPXTEST_REQUIRE(exceptionThrown);
             }
         }
-        WHEN("[ISpxBufferData] Calling GetBytesReady")
+        SPXTEST_WHEN("[ISpxBufferData] Calling GetBytesReady")
         {
             auto exceptionThrown = CheckThrow<std::runtime_error>([&]
             {
@@ -175,10 +175,10 @@ TEST_CASE("CSpxMicrophoneAudioSourceAdapter tests", "[cxx][audio]")
             });
             THEN("An exception should be thrown")
             {
-                REQUIRE(exceptionThrown);
+                SPXTEST_REQUIRE(exceptionThrown);
             }
         }
-        WHEN("[ISpxBufferData] Calling GetBytesReadyMax")
+        SPXTEST_WHEN("[ISpxBufferData] Calling GetBytesReadyMax")
         {
             auto exceptionThrown = CheckThrow<std::runtime_error>([&]
             {
@@ -186,18 +186,18 @@ TEST_CASE("CSpxMicrophoneAudioSourceAdapter tests", "[cxx][audio]")
             });
             THEN("An exception should be thrown")
             {
-                REQUIRE(exceptionThrown);
+                SPXTEST_REQUIRE(exceptionThrown);
             }
         }
-        WHEN("[ISpxAudioSource] Calling GetState")
+        SPXTEST_WHEN("[ISpxAudioSource] Calling GetState")
         {
             auto state = audioSource->GetState();
             THEN("State should be idle")
             {
-                REQUIRE(Carbon::ISpxAudioSource::State::Idle == state);
+                SPXTEST_REQUIRE(Carbon::ISpxAudioSource::State::Idle == state);
             }
         }
-        WHEN("[ISpxAudioSource] Calling GetFormat")
+        SPXTEST_WHEN("[ISpxAudioSource] Calling GetFormat")
         {
             auto exceptionThrown = CheckThrow<std::runtime_error>([&]
             {
@@ -205,10 +205,10 @@ TEST_CASE("CSpxMicrophoneAudioSourceAdapter tests", "[cxx][audio]")
             });
             THEN("Should throw an exception")
             {
-                REQUIRE(exceptionThrown);
+                SPXTEST_REQUIRE(exceptionThrown);
             }
         }
-        WHEN("[ISpxAudioProcessorNotifyMe] NotifyMe with processor != nullptr gets called")
+        SPXTEST_WHEN("[ISpxAudioProcessorNotifyMe] NotifyMe with processor != nullptr gets called")
         {
             auto processor = std::make_shared<MockAudioProcessor>();
             auto exceptionThrown = CheckThrow<std::runtime_error>([&]
@@ -220,7 +220,7 @@ TEST_CASE("CSpxMicrophoneAudioSourceAdapter tests", "[cxx][audio]")
                 SPXTEST_REQUIRE_FALSE(exceptionThrown);
             }
         }
-        WHEN("[ISpxAudioProcessorNotifyMe] NotifyMe with processor == nullptr gets called")
+        SPXTEST_WHEN("[ISpxAudioProcessorNotifyMe] NotifyMe with processor == nullptr gets called")
         {
             auto exceptionThrown = CheckThrow<std::runtime_error>([&]
             {
@@ -233,7 +233,7 @@ TEST_CASE("CSpxMicrophoneAudioSourceAdapter tests", "[cxx][audio]")
         }
     }
 
-    GIVEN("An initialized adapter")
+    SPXTEST_GIVEN("An initialized adapter")
     {
         auto env = makeBaseTestEnv();
         auto audioSourceInit = env.Get<Carbon::ISpxAudioSourceInit>();
@@ -244,7 +244,7 @@ TEST_CASE("CSpxMicrophoneAudioSourceAdapter tests", "[cxx][audio]")
         audioSourceInit->InitFromMicrophone();
         auto microphoneKeepAlive = GetSharedPointer<Carbon::ISpxAudioPump>(rawMicPtr);
 
-        WHEN("[ISpxAudioSourceControl] Calling StartAudio")
+        SPXTEST_WHEN("[ISpxAudioSourceControl] Calling StartAudio")
         {
             auto proxyFactory = env.Get<ObjectFactoryProxy>();
             auto processorCreated{ false };
@@ -277,28 +277,28 @@ TEST_CASE("CSpxMicrophoneAudioSourceAdapter tests", "[cxx][audio]")
             audioSourceControl->StartAudio(notifyMe);
             THEN("Should emit notification with state == Started and bytesReady == 0")
             {
-                REQUIRE(state == Carbon::ISpxAudioSource::State::Started);
-                REQUIRE(bytesReady == 0);
+                SPXTEST_REQUIRE(state == Carbon::ISpxAudioSource::State::Started);
+                SPXTEST_REQUIRE(bytesReady == 0);
             }
             THEN("Should now be in the Started state")
             {
-                REQUIRE(audioSource->GetState() == Carbon::ISpxAudioSource::State::Started);
+                SPXTEST_REQUIRE(audioSource->GetState() == Carbon::ISpxAudioSource::State::Started);
             }
             THEN("Should create a CSpxAudioProcessorWriteToAudioSourceBuffer object")
             {
-                REQUIRE(processorCreated);
+                SPXTEST_REQUIRE(processorCreated);
             }
             THEN("Should call StartPump on the pump")
             {
-                REQUIRE(startPumpCalled);
-                REQUIRE(startPumpCalledWithProcessor);
+                SPXTEST_REQUIRE(startPumpCalled);
+                SPXTEST_REQUIRE(startPumpCalledWithProcessor);
             }
             THEN("Should create a CSpxBufferData object.")
             {
-                REQUIRE(bufferDataCreated);
+                SPXTEST_REQUIRE(bufferDataCreated);
             }
         }
-        WHEN("[ISpxAudioSourceControl] Calling StopAudio")
+        SPXTEST_WHEN("[ISpxAudioSourceControl] Calling StopAudio")
         {
             auto exceptionThrown = CheckThrow<std::runtime_error>([&]
                 {
@@ -306,10 +306,10 @@ TEST_CASE("CSpxMicrophoneAudioSourceAdapter tests", "[cxx][audio]")
                 });
             THEN("Should throw an exception")
             {
-                REQUIRE(exceptionThrown);
+                SPXTEST_REQUIRE(exceptionThrown);
             }
         }
-        WHEN("[ISpxBufferData] Calling GetOffset")
+        SPXTEST_WHEN("[ISpxBufferData] Calling GetOffset")
         {
             auto proxyFactory = env.Get<ObjectFactoryProxy>();
             auto bufferDataCreated{ false };
@@ -328,15 +328,15 @@ TEST_CASE("CSpxMicrophoneAudioSourceAdapter tests", "[cxx][audio]")
             auto read = audioSourceBufferData->GetOffset();
             THEN("Creates a BufferData object (lazy init)")
             {
-                REQUIRE(bufferDataCreated);
+                SPXTEST_REQUIRE(bufferDataCreated);
             }
             THEN("Delegates the Read to the underlying buffer")
             {
-                REQUIRE(getOffsetCallDelegated);
-                REQUIRE(read == 0);
+                SPXTEST_REQUIRE(getOffsetCallDelegated);
+                SPXTEST_REQUIRE(read == 0);
             }
         }
-        WHEN("[ISpxBufferData] Calling Read")
+        SPXTEST_WHEN("[ISpxBufferData] Calling Read")
         {
             auto proxyFactory = env.Get<ObjectFactoryProxy>();
             auto bufferDataCreated{ false };
@@ -356,15 +356,15 @@ TEST_CASE("CSpxMicrophoneAudioSourceAdapter tests", "[cxx][audio]")
             auto read = audioSourceBufferData->Read(buffer.data(), static_cast<uint32_t>(buffer.size()));
             THEN("Creates a BufferData object (lazy init)")
             {
-                REQUIRE(bufferDataCreated);
+                SPXTEST_REQUIRE(bufferDataCreated);
             }
             THEN("Delegates the Read to the underlying buffer")
             {
-                REQUIRE(readCallDelegated);
-                REQUIRE(read == 0);
+                SPXTEST_REQUIRE(readCallDelegated);
+                SPXTEST_REQUIRE(read == 0);
             }
         }
-        WHEN("[ISpxBufferData] Calling ReadAt")
+        SPXTEST_WHEN("[ISpxBufferData] Calling ReadAt")
         {
             auto proxyFactory = env.Get<ObjectFactoryProxy>();
             auto bufferDataCreated{ false };
@@ -384,15 +384,15 @@ TEST_CASE("CSpxMicrophoneAudioSourceAdapter tests", "[cxx][audio]")
             auto read = audioSourceBufferData->ReadAt(0, buffer.data(), static_cast<uint32_t>(buffer.size()));
             THEN("Creates a BufferData object (lazy init)")
             {
-                REQUIRE(bufferDataCreated);
+                SPXTEST_REQUIRE(bufferDataCreated);
             }
             THEN("Delegates the ReadAt to the underlying buffer")
             {
-                REQUIRE(readAtCallDelegated);
-                REQUIRE(read == 0);
+                SPXTEST_REQUIRE(readAtCallDelegated);
+                SPXTEST_REQUIRE(read == 0);
             }
         }
-        WHEN("[ISpxBufferData] Calling GetBytesDead")
+        SPXTEST_WHEN("[ISpxBufferData] Calling GetBytesDead")
         {
             auto proxyFactory = env.Get<ObjectFactoryProxy>();
             auto bufferDataCreated{ false };
@@ -411,15 +411,15 @@ TEST_CASE("CSpxMicrophoneAudioSourceAdapter tests", "[cxx][audio]")
             auto read = audioSourceBufferData->GetBytesDead();
             THEN("Creates a BufferData object (lazy init)")
             {
-                REQUIRE(bufferDataCreated);
+                SPXTEST_REQUIRE(bufferDataCreated);
             }
             THEN("Delegates the GetBytesDead to the underlying buffer")
             {
-                REQUIRE(getBytesDeadCallDelegated);
-                REQUIRE(read == 0);
+                SPXTEST_REQUIRE(getBytesDeadCallDelegated);
+                SPXTEST_REQUIRE(read == 0);
             }
         }
-        WHEN("[ISpxBufferData] Calling GetBytesRead")
+        SPXTEST_WHEN("[ISpxBufferData] Calling GetBytesRead")
         {
             auto proxyFactory = env.Get<ObjectFactoryProxy>();
             auto bufferDataCreated{ false };
@@ -438,15 +438,15 @@ TEST_CASE("CSpxMicrophoneAudioSourceAdapter tests", "[cxx][audio]")
             auto read = audioSourceBufferData->GetBytesRead();
             THEN("Creates a BufferData object (lazy init)")
             {
-                REQUIRE(bufferDataCreated);
+                SPXTEST_REQUIRE(bufferDataCreated);
             }
             THEN("Delegates the GetBytesRead to the underlying buffer")
             {
-                REQUIRE(getBytesReadCallDelegated);
-                REQUIRE(read == 0);
+                SPXTEST_REQUIRE(getBytesReadCallDelegated);
+                SPXTEST_REQUIRE(read == 0);
             }
         }
-        WHEN("[ISpxBufferData] Calling GetBytesReady")
+        SPXTEST_WHEN("[ISpxBufferData] Calling GetBytesReady")
         {
             auto proxyFactory = env.Get<ObjectFactoryProxy>();
             auto bufferDataCreated{ false };
@@ -465,15 +465,15 @@ TEST_CASE("CSpxMicrophoneAudioSourceAdapter tests", "[cxx][audio]")
             auto read = audioSourceBufferData->GetBytesReady();
             THEN("Creates a BufferData object (lazy init)")
             {
-                REQUIRE(bufferDataCreated);
+                SPXTEST_REQUIRE(bufferDataCreated);
             }
             THEN("Delegates the GetBytesReady to the underlying buffer")
             {
-                REQUIRE(getBytesReadyCallDelegated);
-                REQUIRE(read == 0);
+                SPXTEST_REQUIRE(getBytesReadyCallDelegated);
+                SPXTEST_REQUIRE(read == 0);
             }
         }
-        WHEN("[ISpxBufferData] Calling GetBytesReadyMax")
+        SPXTEST_WHEN("[ISpxBufferData] Calling GetBytesReadyMax")
         {
             auto proxyFactory = env.Get<ObjectFactoryProxy>();
             auto bufferDataCreated{ false };
@@ -492,23 +492,23 @@ TEST_CASE("CSpxMicrophoneAudioSourceAdapter tests", "[cxx][audio]")
             auto read = audioSourceBufferData->GetBytesReadyMax();
             THEN("Creates a BufferData object (lazy init)")
             {
-                REQUIRE(bufferDataCreated);
+                SPXTEST_REQUIRE(bufferDataCreated);
             }
             THEN("Delegates the Read to the underlying buffer")
             {
-                REQUIRE(getBytesReadyMaxCallDelegated);
-                REQUIRE(read == 0);
+                SPXTEST_REQUIRE(getBytesReadyMaxCallDelegated);
+                SPXTEST_REQUIRE(read == 0);
             }
         }
-        WHEN("[ISpxAudioSource] Calling GetState")
+        SPXTEST_WHEN("[ISpxAudioSource] Calling GetState")
         {
             auto state = audioSource->GetState();
             THEN("State should be Idle")
             {
-                REQUIRE(state == Carbon::ISpxAudioSource::State::Idle);
+                SPXTEST_REQUIRE(state == Carbon::ISpxAudioSource::State::Idle);
             }
         }
-        WHEN("[ISpxAudioSource] Calling GetFormat")
+        SPXTEST_WHEN("[ISpxAudioSource] Calling GetFormat")
         {
             auto getFormatCalled{ false };
             rawMicPtr->GetFormatHandler = [&](Carbon::SPXWAVEFORMATEX* format, uint16_t size)
@@ -519,10 +519,10 @@ TEST_CASE("CSpxMicrophoneAudioSourceAdapter tests", "[cxx][audio]")
             auto format = audioSource->GetFormat();
             THEN("GetFormat should be called in the underlying pump")
             {
-                REQUIRE(getFormatCalled);
+                SPXTEST_REQUIRE(getFormatCalled);
             }
         }
-        WHEN("[ISpxAudioProcessorNotifyMe] NotifyMe with processor != nullptr gets called")
+        SPXTEST_WHEN("[ISpxAudioProcessorNotifyMe] NotifyMe with processor != nullptr gets called")
         {
             auto processor = std::make_shared<MockAudioProcessor>();
             audioProcessorNotifyMe->NotifyMe(processor);
@@ -535,7 +535,7 @@ TEST_CASE("CSpxMicrophoneAudioSourceAdapter tests", "[cxx][audio]")
                 SPXTEST_REQUIRE_FALSE(exceptionThrown);
             }
         }
-        WHEN("[ISpxAudioProcessorNotifyMe] NotifyMe with processor == nullptr gets called")
+        SPXTEST_WHEN("[ISpxAudioProcessorNotifyMe] NotifyMe with processor == nullptr gets called")
         {
             auto exceptionThrown = CheckThrow<std::runtime_error>([&]
             {
@@ -548,7 +548,7 @@ TEST_CASE("CSpxMicrophoneAudioSourceAdapter tests", "[cxx][audio]")
         }
     }
 
-    GIVEN("An started adapter")
+    SPXTEST_GIVEN("An started adapter")
     {
         MockAudioProcessor* rawAudioProcessor = nullptr;
         MockBufferData* rawAudioSourceBufferData = nullptr;
@@ -576,7 +576,7 @@ TEST_CASE("CSpxMicrophoneAudioSourceAdapter tests", "[cxx][audio]")
         auto processorKeepAlive = GetSharedPointer<Carbon::ISpxAudioProcessor>(rawAudioProcessor);
         auto bufferDataKeepAlive = GetSharedPointer<Carbon::ISpxBufferData>(rawAudioSourceBufferData);
 
-        WHEN("[ISpxAudioSourceControl] Calling StartAudio")
+        SPXTEST_WHEN("[ISpxAudioSourceControl] Calling StartAudio")
         {
             auto exceptionThrown = CheckThrow<std::runtime_error>([&]
                 {
@@ -584,10 +584,10 @@ TEST_CASE("CSpxMicrophoneAudioSourceAdapter tests", "[cxx][audio]")
                 });
             THEN("Should throw an exception")
             {
-                REQUIRE(exceptionThrown);
+                SPXTEST_REQUIRE(exceptionThrown);
             }
         }
-        WHEN("[ISpxAudioSourceControl] Calling StopAudio")
+        SPXTEST_WHEN("[ISpxAudioSourceControl] Calling StopAudio")
         {
             auto stopPumpCalled{ false };
             rawMicPtr->StopPumpHandler = [&]()
@@ -604,19 +604,19 @@ TEST_CASE("CSpxMicrophoneAudioSourceAdapter tests", "[cxx][audio]")
             audioSourceControl->StopAudio();
             THEN("Notify should be called")
             {
-                REQUIRE(notifyCalled);
-                REQUIRE(notifyProperState);
+                SPXTEST_REQUIRE(notifyCalled);
+                SPXTEST_REQUIRE(notifyProperState);
             }
             THEN("StopPump should be called on the pump")
             {
-                REQUIRE(stopPumpCalled);
+                SPXTEST_REQUIRE(stopPumpCalled);
             }
             THEN("Source should be in the Idle state")
             {
-                REQUIRE(audioSource->GetState() == Carbon::ISpxAudioSource::State::Idle);
+                SPXTEST_REQUIRE(audioSource->GetState() == Carbon::ISpxAudioSource::State::Idle);
             }
         }
-        WHEN("[ISpxBufferData] Calling GetOffset")
+        SPXTEST_WHEN("[ISpxBufferData] Calling GetOffset")
         {
             constexpr uint64_t val{ 0xABCD01234 };
             auto callDelegated{ false };
@@ -628,11 +628,11 @@ TEST_CASE("CSpxMicrophoneAudioSourceAdapter tests", "[cxx][audio]")
             auto offset = audioSourceBufferData->GetOffset();
             THEN("Call should be delegated to the underlying buffer")
             {
-                REQUIRE(callDelegated);
-                REQUIRE(offset == val);
+                SPXTEST_REQUIRE(callDelegated);
+                SPXTEST_REQUIRE(offset == val);
             }
         }
-        WHEN("[ISpxBufferData] Calling Read")
+        SPXTEST_WHEN("[ISpxBufferData] Calling Read")
         {
             constexpr std::array<uint8_t, 5> val{ 0xAB, 0xDE, 0xF0, 0xBA, 0xCF };
             auto callDelegated{ false };
@@ -646,12 +646,14 @@ TEST_CASE("CSpxMicrophoneAudioSourceAdapter tests", "[cxx][audio]")
             auto readBytes = audioSourceBufferData->Read(buffer.data(), static_cast<uint32_t>(buffer.size()));
             THEN("Call should be delegated to the underlying buffer")
             {
-                REQUIRE(callDelegated);
-                REQUIRE(readBytes == val.size());
-                REQUIRE(std::equal(buffer.begin(), buffer.end(), val.begin()));
+                SPXTEST_REQUIRE(callDelegated);
+                SPXTEST_REQUIRE(readBytes == val.size());
+
+                bool equal = std::equal(buffer.begin(), buffer.end(), val.begin());
+                SPXTEST_REQUIRE(equal); // work around compiler bug w/SPXTEST_REQUIRE(std::equal(...))
             }
         }
-        WHEN("[ISpxBufferData] Calling ReadAt")
+        SPXTEST_WHEN("[ISpxBufferData] Calling ReadAt")
         {
             constexpr std::array<uint8_t, 5> val{ 0xAB, 0xDE, 0xF0, 0xBA, 0xCF };
             constexpr uint64_t off{ 0xABDEF0 };
@@ -668,13 +670,15 @@ TEST_CASE("CSpxMicrophoneAudioSourceAdapter tests", "[cxx][audio]")
             auto readBytes = audioSourceBufferData->ReadAt(off, buffer.data(), static_cast<uint32_t>(buffer.size()));
             THEN("Call should be delegated to the underlying buffer")
             {
-                REQUIRE(callDelegated);
-                REQUIRE(properOffset);
-                REQUIRE(readBytes == val.size());
-                REQUIRE(std::equal(buffer.begin(), buffer.end(), val.begin()));
+                SPXTEST_REQUIRE(callDelegated);
+                SPXTEST_REQUIRE(properOffset);
+                SPXTEST_REQUIRE(readBytes == val.size());
+
+                bool equal = std::equal(buffer.begin(), buffer.end(), val.begin());
+                SPXTEST_REQUIRE(equal); // work around compiler bug w/SPXTEST_REQUIRE(std::equal(...))
             }
         }
-        WHEN("[ISpxBufferData] Calling GetBytesDead")
+        SPXTEST_WHEN("[ISpxBufferData] Calling GetBytesDead")
         {
             constexpr uint64_t val{ 0xABDEF0 };
             auto callDelegated{ false };
@@ -686,11 +690,11 @@ TEST_CASE("CSpxMicrophoneAudioSourceAdapter tests", "[cxx][audio]")
             auto result = audioSourceBufferData->GetBytesDead();
             THEN("Call should be delegated to the underlying buffer")
             {
-                REQUIRE(callDelegated);
-                REQUIRE(result == val);
+                SPXTEST_REQUIRE(callDelegated);
+                SPXTEST_REQUIRE(result == val);
             }
         }
-        WHEN("[ISpxBufferData] Calling GetBytesRead")
+        SPXTEST_WHEN("[ISpxBufferData] Calling GetBytesRead")
         {
             constexpr uint64_t val{ 0xABDEF1 };
             auto callDelegated{ false };
@@ -702,11 +706,11 @@ TEST_CASE("CSpxMicrophoneAudioSourceAdapter tests", "[cxx][audio]")
             auto result = audioSourceBufferData->GetBytesRead();
             THEN("Call should be delegated to the underlying buffer")
             {
-                REQUIRE(callDelegated);
-                REQUIRE(result == val);
+                SPXTEST_REQUIRE(callDelegated);
+                SPXTEST_REQUIRE(result == val);
             }
         }
-        WHEN("[ISpxBufferData] Calling GetBytesReady")
+        SPXTEST_WHEN("[ISpxBufferData] Calling GetBytesReady")
         {
             constexpr uint64_t val{ 0xABDEF2 };
             auto callDelegated{ false };
@@ -718,11 +722,11 @@ TEST_CASE("CSpxMicrophoneAudioSourceAdapter tests", "[cxx][audio]")
             auto result = audioSourceBufferData->GetBytesReady();
             THEN("Call should be delegated to the underlying buffer")
             {
-                REQUIRE(callDelegated);
-                REQUIRE(result == val);
+                SPXTEST_REQUIRE(callDelegated);
+                SPXTEST_REQUIRE(result == val);
             }
         }
-        WHEN("[ISpxBufferData] Calling GetBytesReadyMax")
+        SPXTEST_WHEN("[ISpxBufferData] Calling GetBytesReadyMax")
         {
             constexpr uint64_t val{ 0xABDEF3 };
             auto callDelegated{ false };
@@ -734,19 +738,19 @@ TEST_CASE("CSpxMicrophoneAudioSourceAdapter tests", "[cxx][audio]")
             auto result = audioSourceBufferData->GetBytesReadyMax();
             THEN("Call should be delegated to the underlying buffer")
             {
-                REQUIRE(callDelegated);
-                REQUIRE(result == val);
+                SPXTEST_REQUIRE(callDelegated);
+                SPXTEST_REQUIRE(result == val);
             }
         }
-        WHEN("[ISpxAudioSource] Calling GetState")
+        SPXTEST_WHEN("[ISpxAudioSource] Calling GetState")
         {
             auto state = audioSource->GetState();
             THEN("Should be in the Started state")
             {
-                REQUIRE(state == Carbon::ISpxAudioSource::State::Started);
+                SPXTEST_REQUIRE(state == Carbon::ISpxAudioSource::State::Started);
             }
         }
-        WHEN("[ISpxAudioSource] Calling GetFormat")
+        SPXTEST_WHEN("[ISpxAudioSource] Calling GetFormat")
         {
             auto getFormatCalled{ false };
             rawMicPtr->GetFormatHandler = [&](Carbon::SPXWAVEFORMATEX* format, uint16_t size)
@@ -757,10 +761,10 @@ TEST_CASE("CSpxMicrophoneAudioSourceAdapter tests", "[cxx][audio]")
             audioSource->GetFormat();
             THEN("Should delegate the call to the pump")
             {
-                REQUIRE(getFormatCalled);
+                SPXTEST_REQUIRE(getFormatCalled);
             }
         }
-        WHEN("[ISpxAudioProcessorNotifyMe] NotifyMe with processor != nullptr gets called")
+        SPXTEST_WHEN("[ISpxAudioProcessorNotifyMe] NotifyMe with processor != nullptr gets called")
         {
             constexpr uint64_t val{ 42 };
             auto getBytesCalled{ false };
@@ -781,17 +785,17 @@ TEST_CASE("CSpxMicrophoneAudioSourceAdapter tests", "[cxx][audio]")
             audioProcessorNotifyMe->NotifyMe(processorKeepAlive);
             THEN("Should be in the DataAvailable state")
             {
-                REQUIRE(audioSource->GetState() == Carbon::ISpxAudioSource::State::DataAvailable);
+                SPXTEST_REQUIRE(audioSource->GetState() == Carbon::ISpxAudioSource::State::DataAvailable);
             }
             THEN("Should emit a NotifyMe event")
             {
-                REQUIRE(notifyMeCalled);
-                REQUIRE(getBytesCalled);
-                REQUIRE(state == audioSource->GetState());
-                REQUIRE(byteCountRetrieved == val);
+                SPXTEST_REQUIRE(notifyMeCalled);
+                SPXTEST_REQUIRE(getBytesCalled);
+                SPXTEST_REQUIRE(state == audioSource->GetState());
+                SPXTEST_REQUIRE(byteCountRetrieved == val);
             }
         }
-        WHEN("[ISpxAudioProcessorNotifyMe] NotifyMe with processor == nullptr gets called")
+        SPXTEST_WHEN("[ISpxAudioProcessorNotifyMe] NotifyMe with processor == nullptr gets called")
         {
             auto notifyMeCalled{ false };
             auto state{ Carbon::ISpxAudioSource::State::DataAvailable };
@@ -803,12 +807,12 @@ TEST_CASE("CSpxMicrophoneAudioSourceAdapter tests", "[cxx][audio]")
             audioProcessorNotifyMe->NotifyMe(nullptr);
             THEN("Should be in the Idle state")
             {
-                REQUIRE(audioSource->GetState() == Carbon::ISpxAudioSource::State::Idle);
+                SPXTEST_REQUIRE(audioSource->GetState() == Carbon::ISpxAudioSource::State::Idle);
             }
             THEN("Should emit a NotifyMe event")
             {
-                REQUIRE(notifyMeCalled);
-                REQUIRE(state == audioSource->GetState());
+                SPXTEST_REQUIRE(notifyMeCalled);
+                SPXTEST_REQUIRE(state == audioSource->GetState());
             }
         }
     }

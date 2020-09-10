@@ -7,6 +7,8 @@
 
 #define CATCH_CONFIG_RUNNER
 #include "test_utils.h"
+#include "trace_message.h"
+#include "azure_c_shared_utility/xlogging.h"
 
 #if defined(_MSC_VER) && defined(_DEBUG)
 // in case of asserts in debug mode, print the message into stderr and throw exception
@@ -33,6 +35,12 @@ int main(int argc, char* argv[])
         return -1;
     }
 #endif
+
+    xlogging_set_log_function(_xlogging_log_function_spx_trace_message_wrapper);
+
+    auto logging = PAL::SpxGetEnv("SPEECHSDK_TEST_LOGGING", "memory");
+    auto enableMemoryLogging = logging.find("memory") != logging.npos;
+    if (enableMemoryLogging) diagnostics_log_memory_start_logging();
 
     Catch::Session session; // There must be exactly one instance
 

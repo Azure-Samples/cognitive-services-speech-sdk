@@ -73,9 +73,9 @@ TEST_CASE("ThreadService: Execute tasks on background/user threads", "[sr]")
     for (auto affinity : g_affinities)
     {
         vector<thread::id> ids;
-        const int NumIterations = 10;
+        const size_t NumIterations = 10;
         vector<future<void>> futures;
-        for (int i = 0; i < NumIterations; ++i)
+        for (size_t i = 0; i < NumIterations; ++i)
         {
             packaged_task<void()> task([&ids]() { ids.push_back(this_thread::get_id()); });
             futures.emplace_back(task.get_future());
@@ -85,12 +85,12 @@ TEST_CASE("ThreadService: Execute tasks on background/user threads", "[sr]")
         for (auto& f : futures)
             f.get();
 
-        REQUIRE(ids.size() == NumIterations);
+        SPXTEST_REQUIRE(ids.size() == NumIterations);
         auto expected = ids.front();
-        REQUIRE(this_thread::get_id() != expected);
+        SPXTEST_REQUIRE(this_thread::get_id() != expected);
         for (auto& id : ids)
         {
-            REQUIRE(id == expected);
+            SPXTEST_REQUIRE(id == expected);
         }
     }
 
@@ -129,10 +129,10 @@ TEST_CASE("ThreadService: User and background threads are different", "[sr]")
 
     REQUIRE_NOTHROW(service->Term());
 
-    REQUIRE(ids.size() == 2);
-    REQUIRE(ids[0] != ids[1]);
-    REQUIRE(ids[0] != this_thread::get_id());
-    REQUIRE(ids[1] != this_thread::get_id());
+    SPXTEST_REQUIRE(ids.size() == 2);
+    SPXTEST_REQUIRE(ids[0] != ids[1]);
+    SPXTEST_REQUIRE(ids[0] != this_thread::get_id());
+    SPXTEST_REQUIRE(ids[1] != this_thread::get_id());
 }
 
 TEST_CASE("ThreadService: Throw in a task and next task succeeds", "[sr]")
@@ -158,7 +158,7 @@ TEST_CASE("ThreadService: Throw in a task and next task succeeds", "[sr]")
 
         REQUIRE_NOTHROW(service->ExecuteAsync(move(taskGood), affinity));
         REQUIRE_NOTHROW(futureGood.get());
-        REQUIRE(counter == 1);
+        SPXTEST_REQUIRE(counter == 1);
     }
 
     REQUIRE_NOTHROW(service->Term());
@@ -198,14 +198,14 @@ TEST_CASE("ThreadService: Schedule several timers.")
     REQUIRE_NOTHROW(service->ExecuteAsync(move(taskAfter500ms), milliseconds(500)));
 
     this_thread::sleep_for(seconds(5));
-    REQUIRE(counter == 3);
+    SPXTEST_REQUIRE(counter == 3);
 
     SPX_TRACE_INFO("Expected 500 ms task took : %s", std::to_string(duration500.count()).c_str());
     SPX_TRACE_INFO("Expected 1500 ms task took : %s", to_string(duration1500.count()).c_str());
     SPX_TRACE_INFO("Expected 2500 ms task took : %s", to_string(duration2500.count()).c_str());
 
-    REQUIRE(duration500 < duration1500);
-    REQUIRE(duration1500 < duration2500);
+    SPXTEST_REQUIRE(duration500 < duration1500);
+    SPXTEST_REQUIRE(duration1500 < duration2500);
 
     REQUIRE_NOTHROW(service->Term());
 }
@@ -239,11 +239,11 @@ TEST_CASE("ThreadService: Shutdown with immediate tasks and timers", "[sr]")
     }
 
     REQUIRE_NOTHROW(service->Term());
-    REQUIRE(counter < NumIterations);
+    SPXTEST_REQUIRE(counter < NumIterations);
 
     int counterOld = counter;
     this_thread::sleep_for(seconds(3));
-    REQUIRE(counterOld == counter);
+    SPXTEST_REQUIRE(counterOld == counter);
 }
 
 TEST_CASE("ThreadService: Shutdown on a background thread fails", "[sr]")
@@ -286,7 +286,7 @@ TEST_CASE("ThreadService: Synchronous execution", "[sr]")
     });
 
     REQUIRE_NOTHROW(service->ExecuteSync(std::move(task)));
-    REQUIRE(counter == 1);
+    SPXTEST_REQUIRE(counter == 1);
     REQUIRE_NOTHROW(service->Term());
 }
 

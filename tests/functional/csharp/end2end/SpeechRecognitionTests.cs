@@ -14,6 +14,8 @@ using System.Threading.Tasks;
 namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 {
     using System.IO;
+    using static SPXTEST;
+    using static CatchUtils;
     using static AssertHelpers;
     using static Config;
     using static SpeechRecognitionTestsHelper;
@@ -30,11 +32,19 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [ClassInitialize]
         public static void TestClassinitialize(TestContext context)
         {
+            LoggingTestBaseInit(context);
             BaseClassInit(context);
+
             deploymentId = DefaultSettingsMap[DefaultSettingKeys.DEPLOYMENT_ID];
             endpointInString = String.Format("wss://{0}.stt.speech.microsoft.com/speech/recognition/conversation/cognitiveservices/v1", region);
             endpointUrl = new Uri(endpointInString);
             officeEndpointString = "wss://officespeech.platform.bing.com/speech/recognition/dictation/office/v1";
+        }
+
+        [ClassCleanup]
+        new public static void TestClassCleanup()
+        {
+            LoggingTestBaseCleanup();
         }
 
         [TestInitialize]
@@ -51,12 +61,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
             using (var speechRecognizer = new SpeechRecognizer(config, audioInput))
             {
-                Assert.AreEqual(token, speechRecognizer.AuthorizationToken);
+                SPXTEST_ARE_EQUAL(token, speechRecognizer.AuthorizationToken);
 
                 var newToken = "y";
                 speechRecognizer.AuthorizationToken = newToken;
-                Assert.AreEqual(token, config.AuthorizationToken);
-                Assert.AreEqual(newToken, speechRecognizer.AuthorizationToken);
+                SPXTEST_ARE_EQUAL(token, config.AuthorizationToken);
+                SPXTEST_ARE_EQUAL(newToken, speechRecognizer.AuthorizationToken);
             }
         }
 
@@ -69,13 +79,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
             using (var speechRecognizer = new SpeechRecognizer(configWithToken, audioInput))
             {
-                Assert.AreEqual(invalidToken, speechRecognizer.AuthorizationToken);
+                SPXTEST_ARE_EQUAL(invalidToken, speechRecognizer.AuthorizationToken);
 
                 var newToken = await GetToken(subscriptionKey, region);
                 speechRecognizer.AuthorizationToken = newToken;
                 SpeechRecognitionTestsHelper helper = new SpeechRecognitionTestsHelper();
 
-                Assert.AreEqual(newToken, speechRecognizer.AuthorizationToken);
+                SPXTEST_ARE_EQUAL(newToken, speechRecognizer.AuthorizationToken);
                 AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text, await helper.GetFirstRecognizerResult(speechRecognizer));
             }
         }
@@ -84,7 +94,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public void TestSetAndGetSubKey()
         {
             var config = SpeechConfig.FromSubscription("x", "westus");
-            Assert.AreEqual("x", config.SubscriptionKey);
+            SPXTEST_ARE_EQUAL("x", config.SubscriptionKey);
         }
 
         [TestMethod]
@@ -94,16 +104,16 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
                 var recoLanguage = recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_RecoLanguage);
-                Assert.IsTrue(String.IsNullOrEmpty(recoLanguage), "RecoLanguage should not be set here. RecoLanguage: " + recoLanguage);
+                SPXTEST_ISTRUE(String.IsNullOrEmpty(recoLanguage), "RecoLanguage should not be set here. RecoLanguage: " + recoLanguage);
 
                 var result = await helper.CompleteRecognizeOnceAsync(recognizer).ConfigureAwait(false);
 
                 var connectionUrl = recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_Url);
-                Assert.IsTrue(connectionUrl.Contains("language=en-us"), "Incorrect default language (should be en-us) in " + connectionUrl);
-                Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
+                SPXTEST_ISTRUE(connectionUrl.Contains("language=en-us"), "Incorrect default language (should be en-us) in " + connectionUrl);
+                SPXTEST_ARE_EQUAL(ResultReason.RecognizedSpeech, result.Reason);
                 AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text, result.Text);
                 var bestResults = result.Best().ToArray();
-                Assert.AreEqual(0, bestResults.Length, "There should be no detailed result for default output format");
+                SPXTEST_ARE_EQUAL(0, bestResults.Length, "There should be no detailed result for default output format");
             }
         }
 
@@ -124,8 +134,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                     var result = await helper.CompleteRecognizeOnceAsync(recognizer, connection).ConfigureAwait(false);
                     AssertConnectionCountMatching(helper.ConnectedEventCount, helper.DisconnectedEventCount);
-                    Assert.IsTrue(result.Duration.Ticks > 0, result.Reason.ToString(), "Duration == 0");
-                    Assert.IsTrue(100000 < result.OffsetInTicks && result.OffsetInTicks < 700000, $"Offset value ${result.OffsetInTicks} seems incorrect");
+                    SPXTEST_ISTRUE(result.Duration.Ticks > 0, $"{result.Reason.ToString()} Duration == 0");
+                    SPXTEST_ISTRUE(100000 < result.OffsetInTicks && result.OffsetInTicks < 700000, $"Offset value ${result.OffsetInTicks} seems incorrect");
                     AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text, result.Text);
                 }
             }
@@ -153,8 +163,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                     var result = await helper.CompleteRecognizeOnceAsync(recognizer, connection).ConfigureAwait(false);
                     AssertConnectionCountMatching(helper.ConnectedEventCount, helper.DisconnectedEventCount);
-                    Assert.IsTrue(result.Duration.Ticks > 0, result.Reason.ToString(), "Duration == 0");
-                    Assert.IsTrue(100000 < result.OffsetInTicks && result.OffsetInTicks < 700000, $"Offset value ${result.OffsetInTicks} seems incorrect");
+                    SPXTEST_ISTRUE(result.Duration.Ticks > 0, $"{result.Reason.ToString()}, Duration == 0");
+                    SPXTEST_ISTRUE(100000 < result.OffsetInTicks && result.OffsetInTicks < 700000, $"Offset value ${result.OffsetInTicks} seems incorrect");
                     AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text, result.Text);
                 }
             }
@@ -191,7 +201,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
                 var recoLanguage = recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_RecoLanguage);
-                Assert.IsTrue(String.IsNullOrEmpty(recoLanguage), "RecoLanguage should be empty. RecoLanguage: " + recoLanguage);
+                SPXTEST_ISTRUE(String.IsNullOrEmpty(recoLanguage), "RecoLanguage should be empty. RecoLanguage: " + recoLanguage);
                 using (var connection = Connection.FromRecognizer(recognizer))
                 {
                     if (usingPreConnection)
@@ -202,7 +212,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text, result.Text);
                     AssertConnectionCountMatching(helper.ConnectedEventCount, helper.DisconnectedEventCount);
                     var connectionUrl = recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_Url);
-                    Assert.IsFalse(connectionUrl.Contains("language="), "ConnectionUrl should not contain language: " + connectionUrl);
+                    SPXTEST_ISFALSE(connectionUrl.Contains("language="), "ConnectionUrl should not contain language: " + connectionUrl);
                 }
             }
         }
@@ -242,7 +252,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 plainExpectedText = plainExpectedText.Remove(0, 6);
 
-                Assert.IsTrue(
+                SPXTEST_ISTRUE(
                         plainExpectedText.Equals(plainActualText),
                             $"'{plainExpectedText}' (expected)\n is not equals \n'{plainActualText}' (actual)");
             }
@@ -299,7 +309,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public void InvalidInputFileHandledProperly()
         {
             var audioInput = AudioConfig.FromWavFileInput("invalidFile.wav");
-            Assert.ThrowsException<ApplicationException>(() => new SpeechRecognizer(this.defaultConfig, audioInput));
+            SPXTEST_THROWS<ApplicationException>(() => new SpeechRecognizer(this.defaultConfig, audioInput));
         }
 
         [TestMethod]
@@ -384,7 +394,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
                     await Task.WhenAny(taskCompletionSource.Task, Task.Delay(TimeSpan.FromMinutes(1)));
                     await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
-                    Assert.IsTrue(expectedExceptionCaught, "No expected exception is caught in connection.Open().");
+                    SPXTEST_ISTRUE(expectedExceptionCaught, "No expected exception is caught in connection.Open().");
                 }
             }
         }
@@ -417,7 +427,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                         connection.Open(false);
                     }
                     var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
-                    Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
+                    SPXTEST_ARE_EQUAL(ResultReason.RecognizedSpeech, result.Reason);
                     AssertFuzzyMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_GERMAN].Utterances[Language.DE][0].Text, result.Text);
                 }
             }
@@ -437,7 +447,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                         connection.Open(false);
                     }
                     var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
-                    Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
+                    SPXTEST_ARE_EQUAL(ResultReason.RecognizedSpeech, result.Reason);
                     AssertFuzzyMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_GERMAN].Utterances[Language.DE][0].Text, result.Text);
                 }
             }
@@ -531,16 +541,16 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     await helper.CompleteContinuousRecognition(recognizer);
 
                     AssertConnectionCountMatching(helper.ConnectedEventCount, helper.DisconnectedEventCount);
-                    Assert.IsTrue(helper.RecognizedEventCount > 0, $"Invalid number of final result events {helper.RecognizedEventCount}");
+                    SPXTEST_ISTRUE(helper.RecognizedEventCount > 0, $"Invalid number of final result events {helper.RecognizedEventCount}");
                     AssertEqual(0, helper.ErrorEventCount, AssertOutput.WrongErrorCount);
                     AssertEqual(1, helper.SpeechStartedEventCount, AssertOutput.WrongSpeechStartedCount);
-                    Assert.IsTrue(recognizedText.Count > 0, $"Invalid number of text messages {recognizedText.Count}");
+                    SPXTEST_ISTRUE(recognizedText.Count > 0, $"Invalid number of text messages {recognizedText.Count}");
 
                     AssertFuzzyMatching(AudioUtterancesMap[AudioUtteranceKeys.MULTIPLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text, recognizedText[0]);
                     AssertFuzzyMatching(AudioUtterancesMap[AudioUtteranceKeys.MULTIPLE_UTTERANCE_ENGLISH].Utterances[Language.EN].Last().Text, recognizedText.Last());
 
-                    Assert.IsTrue(string.IsNullOrEmpty(hypothesisLatencyError), $"hypothesisLatencyError: {hypothesisLatencyError}");
-                    Assert.IsTrue(string.IsNullOrEmpty(phraseLatencyError), $"phraseLatencyError: {phraseLatencyError}");
+                    SPXTEST_ISTRUE(string.IsNullOrEmpty(hypothesisLatencyError), $"hypothesisLatencyError: {hypothesisLatencyError}");
+                    SPXTEST_ISTRUE(string.IsNullOrEmpty(phraseLatencyError), $"phraseLatencyError: {phraseLatencyError}");
 
                     GC.KeepAlive(connection);
                 }
@@ -683,36 +693,36 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_GERMAN].FilePath.GetRootRelativePath());
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
-                Assert.IsTrue(string.IsNullOrEmpty(recognizer.SpeechRecognitionLanguage), $"No language should be set, is {recognizer.SpeechRecognitionLanguage}");
-                Assert.AreEqual(recognizer.SpeechRecognitionLanguage, recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_RecoLanguage));
-                Assert.AreEqual(OutputFormat.Simple, recognizer.OutputFormat);
+                SPXTEST_ISTRUE(string.IsNullOrEmpty(recognizer.SpeechRecognitionLanguage), $"No language should be set, is {recognizer.SpeechRecognitionLanguage}");
+                SPXTEST_ARE_EQUAL(recognizer.SpeechRecognitionLanguage, recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_RecoLanguage));
+                SPXTEST_ARE_EQUAL(OutputFormat.Simple, recognizer.OutputFormat);
             }
 
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, SourceLanguageConfig.FromLanguage(Language.DE_DE, deploymentId), audioInput)))
             {
-                Assert.AreEqual(Language.DE_DE, recognizer.SpeechRecognitionLanguage);
-                Assert.AreEqual(recognizer.SpeechRecognitionLanguage, recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_RecoLanguage));
-                Assert.AreEqual(deploymentId, recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_EndpointId));
-                Assert.AreEqual(OutputFormat.Simple, recognizer.OutputFormat);
+                SPXTEST_ARE_EQUAL(Language.DE_DE, recognizer.SpeechRecognitionLanguage);
+                SPXTEST_ARE_EQUAL(recognizer.SpeechRecognitionLanguage, recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_RecoLanguage));
+                SPXTEST_ARE_EQUAL(deploymentId, recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_EndpointId));
+                SPXTEST_ARE_EQUAL(OutputFormat.Simple, recognizer.OutputFormat);
             }
 
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, Language.DE_DE, audioInput)))
             {
-                Assert.AreEqual(Language.DE_DE, recognizer.SpeechRecognitionLanguage);
-                Assert.AreEqual(Language.DE_DE, recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_RecoLanguage));
-                Assert.AreEqual(OutputFormat.Simple, recognizer.OutputFormat);
+                SPXTEST_ARE_EQUAL(Language.DE_DE, recognizer.SpeechRecognitionLanguage);
+                SPXTEST_ARE_EQUAL(Language.DE_DE, recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_RecoLanguage));
+                SPXTEST_ARE_EQUAL(OutputFormat.Simple, recognizer.OutputFormat);
             }
 
             this.defaultConfig.OutputFormat = OutputFormat.Simple;
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
-                Assert.AreEqual(OutputFormat.Simple, recognizer.OutputFormat);
+                SPXTEST_ARE_EQUAL(OutputFormat.Simple, recognizer.OutputFormat);
             }
 
             this.defaultConfig.OutputFormat = OutputFormat.Detailed;
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
-                Assert.AreEqual(OutputFormat.Detailed, recognizer.OutputFormat);
+                SPXTEST_ARE_EQUAL(OutputFormat.Detailed, recognizer.OutputFormat);
             }
         }
 
@@ -749,7 +759,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
-                Assert.IsTrue(result.Duration.Ticks > 0, result.Reason.ToString(), "First result duration should be greater than 0");
+                SPXTEST_ISTRUE(result.Duration.Ticks > 0, $"{result.Reason.ToString()} First result duration should be greater than 0");
                 var offset = result.OffsetInTicks;
                 var expectedNextOffset = offset + result.Duration.Ticks;
 
@@ -761,12 +771,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 Console.WriteLine($"Result1: {result.ToString()}");
                 Console.WriteLine($"Result2: {result2.ToString()}");
 
-                Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
+                SPXTEST_ARE_EQUAL(ResultReason.RecognizedSpeech, result.Reason);
                 AssertStringContains(result.Text.ToLower(), "detective skills");
-                Assert.IsTrue(result.Duration.Ticks > 0, $"Result duration {result.Duration.Ticks} in {result.ToString()} should be greater than 0");
+                SPXTEST_ISTRUE(result.Duration.Ticks > 0, $"Result duration {result.Duration.Ticks} in {result.ToString()} should be greater than 0");
 
-                Assert.AreEqual(ResultReason.RecognizedSpeech, result2.Reason);
-                Assert.IsTrue(offset2 >= expectedNextOffset, $"Offset of the second recognition {offset2} should be greater or equal than offset of the first plus duration {expectedNextOffset}.");
+                SPXTEST_ARE_EQUAL(ResultReason.RecognizedSpeech, result2.Reason);
+                SPXTEST_ISTRUE(offset2 >= expectedNextOffset, $"Offset of the second recognition {offset2} should be greater or equal than offset of the first plus duration {expectedNextOffset}.");
             }
         }
 
@@ -797,10 +807,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     Thread.Sleep(100); // Avoid hammering the service for test stability
                 }
 
-                if (!string.IsNullOrEmpty(canceled))
-                {
-                    Assert.Fail($"Recognition Canceled: {canceled}");
-                }
+                SPXTEST_REQUIRE(string.IsNullOrEmpty(canceled), $"Recognition Canceled w/ErrorDetails='{canceled}'");
             }
         }
 
@@ -825,10 +832,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
                     await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
 
-                    if (!string.IsNullOrEmpty(canceled))
-                    {
-                        Assert.Fail($"Recognition Canceled: {canceled}");
-                    }
+                    SPXTEST_REQUIRE(string.IsNullOrEmpty(canceled), $"Recognition Canceled w/ErrorDetails='{canceled}'");
                 }
             }
         }
@@ -848,12 +852,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                         connection.Open(false);
                     }
                     var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
-                    Assert.AreEqual(ResultReason.NoMatch, result.Reason);
-                    Assert.IsTrue(result.OffsetInTicks > 0 || result.Duration.Ticks > 0, $"Bad offset: {result.OffsetInTicks} or duration: {result.Duration}");
-                    Assert.IsTrue(string.IsNullOrEmpty(result.Text), $"Bad result text: {result.Text}");
+                    SPXTEST_ARE_EQUAL(ResultReason.NoMatch, result.Reason);
+                    SPXTEST_ISTRUE(result.OffsetInTicks > 0 || result.Duration.Ticks > 0, $"Bad offset: {result.OffsetInTicks} or duration: {result.Duration}");
+                    SPXTEST_ISTRUE(string.IsNullOrEmpty(result.Text), $"Bad result text: {result.Text}");
 
                     var noMatch = NoMatchDetails.FromResult(result);
-                    Assert.AreEqual(NoMatchReason.InitialSilenceTimeout, noMatch.Reason);
+                    SPXTEST_ARE_EQUAL(NoMatchReason.InitialSilenceTimeout, noMatch.Reason);
                 }
             }
         }
@@ -867,7 +871,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 properties = recognizer.Properties;
             }
-            Assert.AreEqual("", properties.GetProperty(PropertyId.SpeechServiceAuthorization_Token));
+            SPXTEST_ARE_EQUAL("", properties.GetProperty(PropertyId.SpeechServiceAuthorization_Token));
         }
 
         [TestMethod]
@@ -930,7 +934,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var recognizer = TrackSessionId(new SpeechRecognizer(configFromEndpoint, Language.DE_DE, AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_GERMAN].FilePath.GetRootRelativePath()))))
             {
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
-                Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
+                SPXTEST_ARE_EQUAL(ResultReason.RecognizedSpeech, result.Reason);
                 AssertFuzzyMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_GERMAN].Utterances[Language.DE][0].Text, result.Text);
             }
         }
@@ -944,12 +948,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var recognizer = TrackSessionId(new SpeechRecognizer(configFromEndpoint, audioInput)))
             {
                 var recoLanguage = recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_RecoLanguage);
-                Assert.IsTrue(String.IsNullOrEmpty(recoLanguage), "RecoLanguage should be empty. RecoLanguage: " + recoLanguage);
+                SPXTEST_ISTRUE(String.IsNullOrEmpty(recoLanguage), "RecoLanguage should be empty. RecoLanguage: " + recoLanguage);
                 var result = await helper.CompleteRecognizeOnceAsync(recognizer).ConfigureAwait(false);
-                Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
+                SPXTEST_ARE_EQUAL(ResultReason.RecognizedSpeech, result.Reason);
                 AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text, result.Text);
                 var connectionUrl = recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_Url);
-                Assert.IsFalse(connectionUrl.Contains("language="), "ConnectionUrl should not contain language: " + connectionUrl);
+                SPXTEST_ISFALSE(connectionUrl.Contains("language="), "ConnectionUrl should not contain language: " + connectionUrl);
             }
         }
 
@@ -962,13 +966,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var recognizer = TrackSessionId(new SpeechRecognizer(configFromEndpoint, audioInput)))
             {
                 var recoLanguage = recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_RecoLanguage);
-                Assert.IsTrue(String.IsNullOrEmpty(recoLanguage), "RecoLanguage should be empty. RecoLanguage: " + recoLanguage);
+                SPXTEST_ISTRUE(String.IsNullOrEmpty(recoLanguage), "RecoLanguage should be empty. RecoLanguage: " + recoLanguage);
 
                 var result = await helper.CompleteRecognizeOnceAsync(recognizer).ConfigureAwait(false);
-                Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
+                SPXTEST_ARE_EQUAL(ResultReason.RecognizedSpeech, result.Reason);
                 AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text, result.Text);
                 var connectionUrl = recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_Url);
-                Assert.IsFalse(connectionUrl.Contains("language="), "ConnectionUrl should not contain language: " + connectionUrl);
+                SPXTEST_ISFALSE(connectionUrl.Contains("language="), "ConnectionUrl should not contain language: " + connectionUrl);
 
             }
         }
@@ -981,7 +985,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var recognizer = TrackSessionId(new SpeechRecognizer(configFromEndpoint, AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath()))))
             {
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
-                Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
+                SPXTEST_ARE_EQUAL(ResultReason.RecognizedSpeech, result.Reason);
                 AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text, result.Text);
                 AssertDetailedResult(result);
             }
@@ -996,7 +1000,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var recognizer = TrackSessionId(new SpeechRecognizer(configFromEndpoint, Language.EN, AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_GERMAN].FilePath.GetRootRelativePath()))))
             {
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
-                Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
+                SPXTEST_ARE_EQUAL(ResultReason.RecognizedSpeech, result.Reason);
                 AssertFuzzyMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_GERMAN].Utterances[Language.DE][0].Text, result.Text);
             }
         }
@@ -1012,7 +1016,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var recognizer = TrackSessionId(new SpeechRecognizer(configFromEndpoint, audioInput)))
             {
                 var result = await helper.CompleteRecognizeOnceAsync(recognizer).ConfigureAwait(false);
-                Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
+                SPXTEST_ARE_EQUAL(ResultReason.RecognizedSpeech, result.Reason);
                 AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text, result.Text);
             }
         }
@@ -1026,7 +1030,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var recognizer = TrackSessionId(new SpeechRecognizer(configFromEndpoint, AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath()))))
             {
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
-                Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
+                SPXTEST_ARE_EQUAL(ResultReason.RecognizedSpeech, result.Reason);
                 AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text, result.Text);
                 AssertDetailedResult(result);
             }
@@ -1039,7 +1043,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_GERMAN].FilePath.GetRootRelativePath()))))
             {
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
-                Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
+                SPXTEST_ARE_EQUAL(ResultReason.RecognizedSpeech, result.Reason);
                 AssertFuzzyMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_GERMAN].Utterances[Language.DE][0].Text, result.Text);
             }
         }
@@ -1051,7 +1055,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, Language.EN, AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_GERMAN].FilePath.GetRootRelativePath()))))
             {
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
-                Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
+                SPXTEST_ARE_EQUAL(ResultReason.RecognizedSpeech, result.Reason);
                 AssertFuzzyMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_GERMAN].Utterances[Language.DE][0].Text, result.Text);
             }
         }
@@ -1064,7 +1068,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_GERMAN].FilePath.GetRootRelativePath()))))
             {
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
-                Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
+                SPXTEST_ARE_EQUAL(ResultReason.RecognizedSpeech, result.Reason);
                 AssertFuzzyMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_GERMAN].Utterances[Language.DE][0].Text, result.Text);
                 AssertDetailedResult(result);
             }
@@ -1078,7 +1082,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var recognizer = TrackSessionId(new SpeechRecognizer(configFromEndpoint, AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_GERMAN].FilePath.GetRootRelativePath()))))
             {
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
-                Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
+                SPXTEST_ARE_EQUAL(ResultReason.RecognizedSpeech, result.Reason);
                 AssertFuzzyMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_GERMAN].Utterances[Language.DE][0].Text, result.Text);
             }
         }
@@ -1093,7 +1097,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var recognizer = TrackSessionId(new SpeechRecognizer(configFromEndpoint, AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_GERMAN].FilePath.GetRootRelativePath()))))
             {
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
-                Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
+                SPXTEST_ARE_EQUAL(ResultReason.RecognizedSpeech, result.Reason);
                 AssertFuzzyMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_GERMAN].Utterances[Language.DE][0].Text, result.Text);
                 AssertDetailedResult(result);
             }
@@ -1102,20 +1106,20 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public void SetServicePropertyInvalidParameters()
         {
-            Assert.ThrowsException<ApplicationException>(() => this.defaultConfig.SetServiceProperty(null, "value", ServicePropertyChannel.UriQueryParameter));
-            Assert.ThrowsException<ApplicationException>(() => this.defaultConfig.SetServiceProperty("", "value", ServicePropertyChannel.UriQueryParameter));
-            Assert.ThrowsException<ApplicationException>(() => this.defaultConfig.SetServiceProperty("Name", null, ServicePropertyChannel.UriQueryParameter));
-            Assert.ThrowsException<ApplicationException>(() => this.defaultConfig.SetServiceProperty("Name", "", ServicePropertyChannel.UriQueryParameter));
+            SPXTEST_THROWS<ApplicationException>(() => this.defaultConfig.SetServiceProperty(null, "value", ServicePropertyChannel.UriQueryParameter));
+            SPXTEST_THROWS<ApplicationException>(() => this.defaultConfig.SetServiceProperty("", "value", ServicePropertyChannel.UriQueryParameter));
+            SPXTEST_THROWS<ApplicationException>(() => this.defaultConfig.SetServiceProperty("Name", null, ServicePropertyChannel.UriQueryParameter));
+            SPXTEST_THROWS<ApplicationException>(() => this.defaultConfig.SetServiceProperty("Name", "", ServicePropertyChannel.UriQueryParameter));
         }
 
         [TestMethod]
         public async Task TestExceptionsDuringEventsRecognizeOnceAsync()
         {
             SpeechConfig config = SpeechConfig.FromSubscription(subscriptionKey, region);
-            Assert.IsNotNull(config);
+            SPXTEST_ISNOTNULL(config);
             using (SpeechRecognizer recognizer = new SpeechRecognizer(config, AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath())))
             {
-                Assert.IsNotNull(recognizer);
+                SPXTEST_ISNOTNULL(recognizer);
                 using (Connection connection = Connection.FromRecognizer(recognizer))
                 {
                     var tcs = new TaskCompletionSource<int>();
@@ -1176,8 +1180,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
 
                     var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
-                    Assert.IsNotNull(result);
-                    Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
+                    SPXTEST_ISNOTNULL(result);
+                    SPXTEST_ARE_EQUAL(ResultReason.RecognizedSpeech, result.Reason);
                     AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text, result.Text);
                     await Task.WhenAny(tcs.Task, Task.Delay(TimeSpan.FromMinutes(1)));
                 }
@@ -1203,8 +1207,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 await helper.CompleteContinuousRecognition(recognizer);
                 var connectionUrl = recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_Url);
-                Assert.IsTrue(connectionUrl.Contains("speech/recognition/dictation/cognitiveservices"), "mismatch dictation mode in " + connectionUrl);
-                Assert.AreEqual(1, recognizedText.Count, "The number of recognized texts is not 1, but " + recognizedText.Count);
+                SPXTEST_ISTRUE(connectionUrl.Contains("speech/recognition/dictation/cognitiveservices"), "mismatch dictation mode in " + connectionUrl);
+                SPXTEST_ARE_EQUAL(1, recognizedText.Count, "The number of recognized texts is not 1, but " + recognizedText.Count);
                 AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_WITH_PUNCTUATION].Utterances[Language.EN][0].Text, recognizedText[0]);
             }
         }
@@ -1241,13 +1245,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 await helper.CompleteContinuousRecognition(recognizer);
                 var connectionUrl = recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_Url);
-                Assert.IsTrue(connectionUrl.Contains("speech/recognition/dictation/cognitiveservices"), "mismatch dictation mode in " + connectionUrl);
-                Assert.AreEqual(1, recognizedText.Count, "The number of recognized texts is not 1, but " + recognizedText.Count);
+                SPXTEST_ISTRUE(connectionUrl.Contains("speech/recognition/dictation/cognitiveservices"), "mismatch dictation mode in " + connectionUrl);
+                SPXTEST_ARE_EQUAL(1, recognizedText.Count, "The number of recognized texts is not 1, but " + recognizedText.Count);
                 AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_WITH_PUNCTUATION].Utterances[Language.EN][0].Text, recognizedText[0]);
                 bool start = startEvent.WaitOne(100);
                 bool end = endEvent.WaitOne(100);
-                Assert.AreEqual(true, start, "expected SpeechStartDetected but did not receive");
-                Assert.AreEqual(true, end, "expected SpeechEndDetected but did not receive");
+                SPXTEST_ARE_EQUAL(true, start, "expected SpeechStartDetected but did not receive");
+                SPXTEST_ARE_EQUAL(true, end, "expected SpeechEndDetected but did not receive");
             }
         }
 
@@ -1260,8 +1264,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 var connectionUrl = recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_Url);
-                Assert.IsTrue(connectionUrl.Contains("speech/recognition/dictation/cognitiveservices"), "mismatch dictation mode in " + connectionUrl);
-                Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
+                SPXTEST_ISTRUE(connectionUrl.Contains("speech/recognition/dictation/cognitiveservices"), "mismatch dictation mode in " + connectionUrl);
+                SPXTEST_ARE_EQUAL(ResultReason.RecognizedSpeech, result.Reason);
                 AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_WITH_PUNCTUATION].Utterances[Language.EN][0].Text, result.Text);
             }
         }
@@ -1275,8 +1279,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 var connectionUrl = recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_Url);
-                Assert.IsTrue(connectionUrl.Contains("speech/recognition/dictation/cognitiveservices"), "mismatch dictation mode in " + connectionUrl);
-                Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
+                SPXTEST_ISTRUE(connectionUrl.Contains("speech/recognition/dictation/cognitiveservices"), "mismatch dictation mode in " + connectionUrl);
+                SPXTEST_ARE_EQUAL(ResultReason.RecognizedSpeech, result.Reason);
 
                 var taskCompletionSource = new TaskCompletionSource<int>();
                 recognizer.SessionStopped += (s, e) =>
@@ -1297,13 +1301,10 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
                 await Task.WhenAny(taskCompletionSource.Task, Task.Delay(TimeSpan.FromMinutes(3)));
                 connectionUrl = recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_Url);
-                Assert.IsTrue(connectionUrl.Contains("speech/recognition/dictation/cognitiveservices"), "mismatch dictation mode in " + connectionUrl);
+                SPXTEST_ISTRUE(connectionUrl.Contains("speech/recognition/dictation/cognitiveservices"), "mismatch dictation mode in " + connectionUrl);
                 await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
 
-                if (!string.IsNullOrEmpty(canceled))
-                {
-                    Assert.Fail($"Recognition Canceled: {canceled}");
-                }
+                SPXTEST_REQUIRE(string.IsNullOrEmpty(canceled), $"Recognition Canceled w/ErrorDetails='{canceled}'");
             }
         }
 
@@ -1315,8 +1316,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
-                Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
-                Assert.IsFalse(String.IsNullOrEmpty(result.Text), "result.Text was null or empty.");
+                SPXTEST_ARE_EQUAL(ResultReason.RecognizedSpeech, result.Reason);
+                SPXTEST_ISFALSE(String.IsNullOrEmpty(result.Text), "result.Text was null or empty.");
                 AssertIfContains(result.Text, AudioUtterancesMap[AudioUtteranceKeys.PROFANITY_SINGLE_UTTERANCE_ENGLISH_2].Utterances[Language.EN][0].ProfanityRaw);
                 AssertIfNotContains(result.Text, AudioUtterancesMap[AudioUtteranceKeys.PROFANITY_SINGLE_UTTERANCE_ENGLISH_2].Utterances[Language.EN][0].ProfanityMaskedPattern);
                 AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.PROFANITY_SINGLE_UTTERANCE_ENGLISH_2].Utterances[Language.EN][0].ProfanityMasked, result.Text);
@@ -1332,7 +1333,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
-                Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
+                SPXTEST_ARE_EQUAL(ResultReason.RecognizedSpeech, result.Reason);
                 AssertIfContains(result.Text, AudioUtterancesMap[AudioUtteranceKeys.PROFANITY_SINGLE_UTTERANCE_ENGLISH_2].Utterances[Language.EN][0].Text);
                 WarnIfNotContains(result.Text, AudioUtterancesMap[AudioUtteranceKeys.PROFANITY_SINGLE_UTTERANCE_ENGLISH_2].Utterances[Language.EN][0].ProfanityRemoved);
             }
@@ -1346,7 +1347,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
-                Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
+                SPXTEST_ARE_EQUAL(ResultReason.RecognizedSpeech, result.Reason);
                 AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.PROFANTITY_SINGLE_UTTERANCE_ENGLISH_1].Utterances[Language.EN][0].Text, result.Text);
                 WarnIfNotContains(result.Text, AudioUtterancesMap[AudioUtteranceKeys.PROFANTITY_SINGLE_UTTERANCE_ENGLISH_1].Utterances[Language.EN][0].ProfanityRaw);
             }
@@ -1371,7 +1372,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     connection.SetMessageProperty("speech.context", "phraseDetection", phraseDetectionPayload);
 
                     var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
-                    Assert.IsTrue(result.Properties.GetProperty(PropertyId.SpeechServiceResponse_JsonResult).Contains("Corrections"));
+                    SPXTEST_ISTRUE(result.Properties.GetProperty(PropertyId.SpeechServiceResponse_JsonResult).Contains("Corrections"));
                 }
             }
         }
@@ -1414,7 +1415,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     await connection.SendMessageAsync("event", payload);
 
                     var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
-                    Assert.IsTrue(result.Properties.GetProperty(PropertyId.SpeechServiceResponse_JsonResult).Contains("Corrections"));
+                    SPXTEST_ISTRUE(result.Properties.GetProperty(PropertyId.SpeechServiceResponse_JsonResult).Contains("Corrections"));
                 }
             }
         }
@@ -1441,8 +1442,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     var cancellation = CancellationDetails.FromResult(result);
                     Console.WriteLine("First reco attempt failed (details=%s).", cancellation.ErrorDetails);
                 }
-                Assert.IsTrue(result.Properties.GetProperty(PropertyId.SpeechServiceResponse_JsonResult).Contains("Corrections"));
-                Assert.IsTrue(result.Text.StartsWith("W"));
+                SPXTEST_ISTRUE(result.Properties.GetProperty(PropertyId.SpeechServiceResponse_JsonResult).Contains("Corrections"));
+                SPXTEST_ISTRUE(result.Text.StartsWith("W"));
             }
         }
 
@@ -1484,8 +1485,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
                 await Task.WhenAny(taskCompletionSource.Task, Task.Delay(TimeSpan.FromMinutes(3)));
                 await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
-                Assert.IsTrue(json.Contains("Corrections"));
-                Assert.IsTrue(text.StartsWith("w"));
+                SPXTEST_ISTRUE(json.Contains("Corrections"));
+                SPXTEST_ISTRUE(text.StartsWith("w"));
             }
         }
 
@@ -1497,20 +1498,20 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
                 var result = await helper.CompleteRecognizeOnceAsync(recognizer).ConfigureAwait(false);
-                Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason, $"Expected status: RecognizedSpeech, actual status: {result.Reason}");
+                SPXTEST_ARE_EQUAL(ResultReason.RecognizedSpeech, result.Reason, $"Expected status: RecognizedSpeech, actual status: {result.Reason}");
                 AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text, result.Text);
                 var jsonResult = result.Properties.GetProperty(PropertyId.SpeechServiceResponse_JsonResult);
                 foreach (var detailedResult in result.Best())
                 {
-                    Assert.IsTrue(detailedResult.Text.Length > 0, $"Empty Text. Json result: {jsonResult}");
-                    Assert.IsTrue(detailedResult.LexicalForm.Length > 0, $"Empty LexicalForm. Json result: {jsonResult}");
-                    Assert.IsTrue(detailedResult.NormalizedForm.Length > 0, $"Empty NormalizedForm. Json result: {jsonResult}");
-                    Assert.IsTrue(detailedResult.MaskedNormalizedForm.Length > 0, $"Empty MaskedNormalizedForm. Json result: {jsonResult}");
-                    Assert.IsTrue(detailedResult.Words.Count() > 0, $"No words available. Json result: {jsonResult}");
+                    SPXTEST_ISTRUE(detailedResult.Text.Length > 0, $"Empty Text. Json result: {jsonResult}");
+                    SPXTEST_ISTRUE(detailedResult.LexicalForm.Length > 0, $"Empty LexicalForm. Json result: {jsonResult}");
+                    SPXTEST_ISTRUE(detailedResult.NormalizedForm.Length > 0, $"Empty NormalizedForm. Json result: {jsonResult}");
+                    SPXTEST_ISTRUE(detailedResult.MaskedNormalizedForm.Length > 0, $"Empty MaskedNormalizedForm. Json result: {jsonResult}");
+                    SPXTEST_ISTRUE(detailedResult.Words.Count() > 0, $"No words available. Json result: {jsonResult}");
                     foreach (var word in detailedResult.Words)
                     {
-                        Assert.IsTrue(word.Offset > 0, $"The word {word.Word} has incorrect offset: {word.Offset}. Json result: {jsonResult}");
-                        Assert.IsTrue(word.Duration > 0, $"The word {word.Word} has incorrect duration: {word.Duration}.Json result: {jsonResult}");
+                        SPXTEST_ISTRUE(word.Offset > 0, $"The word {word.Word} has incorrect offset: {word.Offset}. Json result: {jsonResult}");
+                        SPXTEST_ISTRUE(word.Duration > 0, $"The word {word.Word} has incorrect duration: {word.Duration}.Json result: {jsonResult}");
                     }
                 }
             }
@@ -1561,23 +1562,23 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 for (var i = 0; i < recognizedText.Count; i++)
                 {
                     AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_MULTIPLE_TURNS].Utterances[Language.EN][i].Text, recognizedText[i]);
-                    Assert.IsTrue(utteranceOffsets[i] >= utteranceOffset + utteranceDuration, $"Utterance offset must be in ascending order. the previous offset {utteranceOffset}, the previous duration {utteranceDuration}, the current offset {utteranceOffsets[i]}.");
+                    SPXTEST_ISTRUE(utteranceOffsets[i] >= utteranceOffset + utteranceDuration, $"Utterance offset must be in ascending order. the previous offset {utteranceOffset}, the previous duration {utteranceDuration}, the current offset {utteranceOffsets[i]}.");
                     if (i >= 1)
                     {
-                        Assert.IsTrue(utteranceOffsets[i] - utteranceOffset - utteranceDuration > 3 * 10000000, $"The silence between 2 utterances must be longer than 3s. The previous offset {utteranceOffset}, the previous duration {utteranceDuration}, the current offset {utteranceOffsets[i]}.");
+                        SPXTEST_ISTRUE(utteranceOffsets[i] - utteranceOffset - utteranceDuration > 3 * 10000000, $"The silence between 2 utterances must be longer than 3s. The previous offset {utteranceOffset}, the previous duration {utteranceDuration}, the current offset {utteranceOffsets[i]}.");
                     }
                     utteranceOffset = utteranceOffsets[i];
                     utteranceDuration = utteranceDurations[i];
 
-                    Assert.IsTrue(detailedResults[i].Text.Length > 0, $"Empty Text in detailed result {i}. Json result: {jsonResult[i]}");
-                    Assert.IsTrue(detailedResults[i].LexicalForm.Length > 0, $"Empty LexicalForm in detailed result {i}. Json result: {jsonResult[i]}");
-                    Assert.IsTrue(detailedResults[i].NormalizedForm.Length > 0, $"Empty NormallizedForm in detailed result {i}. Json result: {jsonResult[i]}");
-                    Assert.IsTrue(detailedResults[i].MaskedNormalizedForm.Length > 0, $"Empty MaskedNormalizedForm in detailed result {i}. Json result: {jsonResult[i]}");
-                    Assert.IsTrue(detailedResults[i].Words.Count() > 0, $"No words available in detailed result {i}. Json result: {jsonResult[i]}");
+                    SPXTEST_ISTRUE(detailedResults[i].Text.Length > 0, $"Empty Text in detailed result {i}. Json result: {jsonResult[i]}");
+                    SPXTEST_ISTRUE(detailedResults[i].LexicalForm.Length > 0, $"Empty LexicalForm in detailed result {i}. Json result: {jsonResult[i]}");
+                    SPXTEST_ISTRUE(detailedResults[i].NormalizedForm.Length > 0, $"Empty NormallizedForm in detailed result {i}. Json result: {jsonResult[i]}");
+                    SPXTEST_ISTRUE(detailedResults[i].MaskedNormalizedForm.Length > 0, $"Empty MaskedNormalizedForm in detailed result {i}. Json result: {jsonResult[i]}");
+                    SPXTEST_ISTRUE(detailedResults[i].Words.Count() > 0, $"No words available in detailed result {i}. Json result: {jsonResult[i]}");
                     foreach (var word in detailedResults[i].Words)
                     {
-                        Assert.IsTrue(word.Offset >= wordOffset + wordDuration, $"The word offset must be in ascending order. the previous offset {wordOffset}, the previous duration {wordDuration}, the current offset {word.Offset}. Json result: {jsonResult[i]}");
-                        Assert.IsTrue(word.Duration > 0, $"The word {word.Word} has incorrect duration: {word.Duration}. Json result: {jsonResult[i]}");
+                        SPXTEST_ISTRUE(word.Offset >= wordOffset + wordDuration, $"The word offset must be in ascending order. the previous offset {wordOffset}, the previous duration {wordDuration}, the current offset {word.Offset}. Json result: {jsonResult[i]}");
+                        SPXTEST_ISTRUE(word.Duration > 0, $"The word {word.Word} has incorrect duration: {word.Duration}. Json result: {jsonResult[i]}");
                         wordOffset = word.Offset;
                         wordDuration = word.Duration;
                     }
@@ -1603,46 +1604,46 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 var result = await helper.CompleteRecognizeOnceAsync(recognizer).ConfigureAwait(false);
                 await Task.WhenAny(turnEndComplete.Task, Task.Delay(TimeSpan.FromMinutes(3)));
 
-                Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
+                SPXTEST_ARE_EQUAL(ResultReason.RecognizedSpeech, result.Reason);
                 AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text, result.Text);
 
                 int i = 0;
                 var requestId = messages[0].Properties.GetProperty("X-RequestId");
 
-                Assert.AreEqual(messages[i].Path, "turn.start");
-                Assert.AreEqual(messages[i].Properties.GetProperty("X-RequestId"), requestId);
-                Assert.IsTrue(messages[i].Properties.GetProperty("Content-Type").Contains("application/json"));
+                SPXTEST_ARE_EQUAL(messages[i].Path, "turn.start");
+                SPXTEST_ARE_EQUAL(messages[i].Properties.GetProperty("X-RequestId"), requestId);
+                SPXTEST_ISTRUE(messages[i].Properties.GetProperty("Content-Type").Contains("application/json"));
                 i += 1;
 
-                Assert.AreEqual(messages[i].Path, "speech.startDetected");
-                Assert.AreEqual(messages[i].Properties.GetProperty("X-RequestId"), requestId);
-                Assert.IsTrue(messages[i].Properties.GetProperty("Content-Type").Contains("application/json"));
+                SPXTEST_ARE_EQUAL(messages[i].Path, "speech.startDetected");
+                SPXTEST_ARE_EQUAL(messages[i].Properties.GetProperty("X-RequestId"), requestId);
+                SPXTEST_ISTRUE(messages[i].Properties.GetProperty("Content-Type").Contains("application/json"));
                 i += 1;
 
                 while (messages[i].Path == "speech.hypothesis")
                 {
-                    Assert.AreEqual(messages[i].Path, "speech.hypothesis");
-                    Assert.AreEqual(messages[i].Properties.GetProperty("X-RequestId"), requestId);
-                    Assert.IsTrue(messages[i].Properties.GetProperty("Content-Type").Contains("application/json"));
+                    SPXTEST_ARE_EQUAL(messages[i].Path, "speech.hypothesis");
+                    SPXTEST_ARE_EQUAL(messages[i].Properties.GetProperty("X-RequestId"), requestId);
+                    SPXTEST_ISTRUE(messages[i].Properties.GetProperty("Content-Type").Contains("application/json"));
                     i += 1;
                 }
 
-                Assert.AreEqual(messages[i].Path, "speech.endDetected");
-                Assert.AreEqual(messages[i].Properties.GetProperty("X-RequestId"), requestId);
-                Assert.IsTrue(messages[i].Properties.GetProperty("Content-Type").Contains("application/json"));
+                SPXTEST_ARE_EQUAL(messages[i].Path, "speech.endDetected");
+                SPXTEST_ARE_EQUAL(messages[i].Properties.GetProperty("X-RequestId"), requestId);
+                SPXTEST_ISTRUE(messages[i].Properties.GetProperty("Content-Type").Contains("application/json"));
                 i += 1;
 
-                Assert.AreEqual(messages[i].Path, "speech.phrase");
-                Assert.AreEqual(messages[i].Properties.GetProperty("X-RequestId"), requestId);
-                Assert.IsTrue(messages[i].Properties.GetProperty("Content-Type").Contains("application/json"));
+                SPXTEST_ARE_EQUAL(messages[i].Path, "speech.phrase");
+                SPXTEST_ARE_EQUAL(messages[i].Properties.GetProperty("X-RequestId"), requestId);
+                SPXTEST_ISTRUE(messages[i].Properties.GetProperty("Content-Type").Contains("application/json"));
                 i += 1;
 
-                Assert.AreEqual(messages[i].Path, "turn.end");
-                Assert.AreEqual(messages[i].Properties.GetProperty("X-RequestId"), requestId);
-                Assert.IsTrue(messages[i].Properties.GetProperty("Content-Type").Contains("application/json"));
+                SPXTEST_ARE_EQUAL(messages[i].Path, "turn.end");
+                SPXTEST_ARE_EQUAL(messages[i].Properties.GetProperty("X-RequestId"), requestId);
+                SPXTEST_ISTRUE(messages[i].Properties.GetProperty("Content-Type").Contains("application/json"));
                 i += 1;
 
-                Assert.AreEqual(i, messages.Count());
+                SPXTEST_ARE_EQUAL(i, messages.Count());
             }
         }
 
@@ -1672,49 +1673,49 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 int i = 0;
                 var requestId = messages[0].Properties.GetProperty("X-RequestId");
 
-                Assert.AreEqual(messages[i].Path, "turn.start");
-                Assert.AreEqual(messages[i].Properties.GetProperty("X-RequestId"), requestId);
-                Assert.IsTrue(messages[i].Properties.GetProperty("Content-Type").Contains("application/json"));
+                SPXTEST_ARE_EQUAL(messages[i].Path, "turn.start");
+                SPXTEST_ARE_EQUAL(messages[i].Properties.GetProperty("X-RequestId"), requestId);
+                SPXTEST_ISTRUE(messages[i].Properties.GetProperty("Content-Type").Contains("application/json"));
                 i += 1;
 
-                Assert.AreEqual(messages[1].Path, "speech.startDetected");
-                Assert.AreEqual(messages[i].Properties.GetProperty("X-RequestId"), requestId);
-                Assert.IsTrue(messages[i].Properties.GetProperty("Content-Type").Contains("application/json"));
+                SPXTEST_ARE_EQUAL(messages[1].Path, "speech.startDetected");
+                SPXTEST_ARE_EQUAL(messages[i].Properties.GetProperty("X-RequestId"), requestId);
+                SPXTEST_ISTRUE(messages[i].Properties.GetProperty("Content-Type").Contains("application/json"));
                 i += 1;
 
                 while (i < messages.Count() && messages[i].Path != "speech.endDetected")
                 {
-                    Assert.IsTrue(messages[i].Path == "speech.hypothesis" || messages[i].Path == "speech.phrase");
-                    Assert.AreEqual(messages[i].Properties.GetProperty("X-RequestId"), requestId);
-                    Assert.IsTrue(messages[i].Properties.GetProperty("Content-Type").Contains("application/json"));
+                    SPXTEST_ISTRUE(messages[i].Path == "speech.hypothesis" || messages[i].Path == "speech.phrase");
+                    SPXTEST_ARE_EQUAL(messages[i].Properties.GetProperty("X-RequestId"), requestId);
+                    SPXTEST_ISTRUE(messages[i].Properties.GetProperty("Content-Type").Contains("application/json"));
                     i += 1;
                 }
 
                 i -= 1;
-                Assert.AreEqual(messages[i].Path, "speech.phrase");
-                Assert.AreEqual(messages[i].Properties.GetProperty("X-RequestId"), requestId);
-                Assert.IsTrue(messages[i].Properties.GetProperty("Content-Type").Contains("application/json"));
+                SPXTEST_ARE_EQUAL(messages[i].Path, "speech.phrase");
+                SPXTEST_ARE_EQUAL(messages[i].Properties.GetProperty("X-RequestId"), requestId);
+                SPXTEST_ISTRUE(messages[i].Properties.GetProperty("Content-Type").Contains("application/json"));
                 i += 1;
 
-                Assert.AreEqual(messages[i].Path, "speech.endDetected");
-                Assert.AreEqual(messages[i].Properties.GetProperty("X-RequestId"), requestId);
-                Assert.IsTrue(messages[i].Properties.GetProperty("Content-Type").Contains("application/json"));
+                SPXTEST_ARE_EQUAL(messages[i].Path, "speech.endDetected");
+                SPXTEST_ARE_EQUAL(messages[i].Properties.GetProperty("X-RequestId"), requestId);
+                SPXTEST_ISTRUE(messages[i].Properties.GetProperty("Content-Type").Contains("application/json"));
                 i += 1;
 
                 if (messages[i].Path == "speech.phrase")
                 {
-                    Assert.IsTrue(messages[i].GetTextMessage().Contains("EndOfDictation"));
-                    Assert.AreEqual(messages[i].Properties.GetProperty("X-RequestId"), requestId);
-                    Assert.IsTrue(messages[i].Properties.GetProperty("Content-Type").Contains("application/json"));
+                    SPXTEST_ISTRUE(messages[i].GetTextMessage().Contains("EndOfDictation"));
+                    SPXTEST_ARE_EQUAL(messages[i].Properties.GetProperty("X-RequestId"), requestId);
+                    SPXTEST_ISTRUE(messages[i].Properties.GetProperty("Content-Type").Contains("application/json"));
                     i += 1;
                 }
 
-                Assert.AreEqual(messages[i].Path, "turn.end");
-                Assert.AreEqual(messages[i].Properties.GetProperty("X-RequestId"), requestId);
-                Assert.IsTrue(messages[i].Properties.GetProperty("Content-Type").Contains("application/json"));
+                SPXTEST_ARE_EQUAL(messages[i].Path, "turn.end");
+                SPXTEST_ARE_EQUAL(messages[i].Properties.GetProperty("X-RequestId"), requestId);
+                SPXTEST_ISTRUE(messages[i].Properties.GetProperty("Content-Type").Contains("application/json"));
                 i += 1;
 
-                Assert.AreEqual(i, messages.Count());
+                SPXTEST_ARE_EQUAL(i, messages.Count());
             }
         }
 
@@ -1725,7 +1726,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.hostConfig, audioInput)))
             {
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
-                Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
+                SPXTEST_ARE_EQUAL(ResultReason.RecognizedSpeech, result.Reason);
                 AssertFuzzyMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text, result.Text);
             }
         }
@@ -1884,15 +1885,15 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     }
                 };
                 var result = await helper.CompleteRecognizeOnceAsync(recognizer).ConfigureAwait(false);
-                Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
+                SPXTEST_ARE_EQUAL(ResultReason.RecognizedSpeech, result.Reason);
                 AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_GERMAN].Utterances[Language.DE][0].Text, result.Text);
                 var autoDetectSourceLanguageResult = AutoDetectSourceLanguageResult.FromResult(result);
-                Assert.IsNotNull(autoDetectSourceLanguageResult);
-                Assert.AreEqual(Language.DE_DE.ToLower(), autoDetectSourceLanguageResult.Language.ToLower());
-                Assert.AreEqual(0, errors.Count);
-                Assert.IsTrue(recognizingText.Count > 0);
-                Assert.AreEqual(1, lidInHypothesis.Count);
-                Assert.AreEqual(Language.DE_DE.ToLower(), lidInHypothesis.First().ToLower());
+                SPXTEST_ISNOTNULL(autoDetectSourceLanguageResult);
+                SPXTEST_ARE_EQUAL(Language.DE_DE.ToLower(), autoDetectSourceLanguageResult.Language.ToLower());
+                SPXTEST_ARE_EQUAL(0, errors.Count);
+                SPXTEST_ISTRUE(recognizingText.Count > 0);
+                SPXTEST_ARE_EQUAL(1, lidInHypothesis.Count);
+                SPXTEST_ARE_EQUAL(Language.DE_DE.ToLower(), lidInHypothesis.First().ToLower());
 
             }
         }
@@ -1957,14 +1958,14 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 await helper.CompleteContinuousRecognition(recognizer);
 
-                Assert.IsTrue(recognizingText.Count > 0);
-                Assert.IsTrue(recognizedText.Count > 0);
+                SPXTEST_ISTRUE(recognizingText.Count > 0);
+                SPXTEST_ISTRUE(recognizedText.Count > 0);
                 AssertFuzzyMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_GERMAN].Utterances[Language.DE][0].Text, recognizedText[0]);
-                Assert.AreEqual(0, errors.Count);
-                Assert.AreEqual(1, lidInHypothesis.Count);
-                Assert.AreEqual(Language.DE_DE.ToLower(), lidInHypothesis.First().ToLower());
-                Assert.AreEqual(1, lidInFinal.Count);
-                Assert.AreEqual(Language.DE_DE.ToLower(), lidInFinal.First().ToLower());
+                SPXTEST_ARE_EQUAL(0, errors.Count);
+                SPXTEST_ARE_EQUAL(1, lidInHypothesis.Count);
+                SPXTEST_ARE_EQUAL(Language.DE_DE.ToLower(), lidInHypothesis.First().ToLower());
+                SPXTEST_ARE_EQUAL(1, lidInFinal.Count);
+                SPXTEST_ARE_EQUAL(Language.DE_DE.ToLower(), lidInFinal.First().ToLower());
             }
         }
         #endregion
@@ -1983,20 +1984,20 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 recognizer.Canceled += (s, e) =>
                 {
-                    Assert.IsFalse(string.IsNullOrWhiteSpace(e.ErrorDetails));
-                    Assert.Equals(e.Reason, CancellationReason.Error);
+                    SPXTEST_ISFALSE(string.IsNullOrWhiteSpace(e.ErrorDetails));
+                    SPXTEST_ARE_EQUAL(e.Reason, CancellationReason.Error);
                     canceled.Set();
                 };
 
                 await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
 
-                Assert.IsTrue(canceled.Wait(TimeSpan.FromMinutes(1)));
+                SPXTEST_ISTRUE(canceled.Wait(TimeSpan.FromMinutes(1)));
 
                 var beforeStop = DateTime.UtcNow;
                 await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
                 var afterStop = DateTime.UtcNow;
 
-                Assert.IsTrue(TimeSpan.FromMilliseconds(500) > afterStop - beforeStop);
+                SPXTEST_ISTRUE(TimeSpan.FromMilliseconds(500) > afterStop - beforeStop);
             }
         }
 
@@ -2055,8 +2056,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 recognizer.Canceled += (s, e) =>
                 {
-                    Assert.IsFalse(string.IsNullOrWhiteSpace(e.ErrorDetails));
-                    Assert.Equals(e.Reason, CancellationReason.Error);
+                    SPXTEST_ISFALSE(string.IsNullOrWhiteSpace(e.ErrorDetails));
+                    SPXTEST_ARE_EQUAL(e.Reason, CancellationReason.Error);
                 };
 
                 recognizer.Recognized += (s, e) =>
@@ -2071,7 +2072,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
 
-                Assert.IsTrue(recognizedEnough.WaitOne(TimeSpan.FromMinutes(4)));
+                SPXTEST_ISTRUE(recognizedEnough.WaitOne(TimeSpan.FromMinutes(4)));
             }
         }
     }

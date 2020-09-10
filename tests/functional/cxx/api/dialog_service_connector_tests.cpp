@@ -342,9 +342,9 @@ const auto verifyNotRecognizedKeyword = [](std::ostringstream& oss, const Speech
 
 TEST_CASE("Dialog Service Connector basics", "[api][cxx][dialog_service_connector]")
 {
-    SECTION("Listen Once works")
+    SPXTEST_SECTION("Listen Once works")
     {
-        REQUIRE(exists(ROOT_RELATIVE_PATH(INTENT_UTTERANCE)));
+        SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(INTENT_UTTERANCE)));
         auto config = DialogServiceConfigForTests();
         auto audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(INTENT_UTTERANCE));
 
@@ -377,12 +377,12 @@ TEST_CASE("Dialog Service Connector basics", "[api][cxx][dialog_service_connecto
         auto success = std::get<0>(result);
         auto message = std::move(std::get<1>(result));
         INFO(message);
-        REQUIRE(success);
+        SPXTEST_REQUIRE(success);
     }
 
-    SECTION("Send/Receive activity works (w/TTS)")
+    SPXTEST_SECTION("Send/Receive activity works (w/TTS)")
     {
-        REQUIRE(exists(ROOT_RELATIVE_PATH(INTENT_UTTERANCE)));
+        SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(INTENT_UTTERANCE)));
         auto config = DialogServiceConfigForTests();
         auto audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(INTENT_UTTERANCE));
         test_runner runner{ config, audioConfig };
@@ -457,16 +457,16 @@ TEST_CASE("Dialog Service Connector basics", "[api][cxx][dialog_service_connecto
         auto success = std::get<0>(result);
         auto message = std::move(std::get<1>(result));
         INFO(message);
-        REQUIRE(success);
+        SPXTEST_REQUIRE(success);
 
     }
 
 #if 0
 /* Disabling as the bot does not seem to be responding (these are the only tests not using autoreply) */
 /* https://msasg.visualstudio.com/DefaultCollection/Skyman/_workitems/edit/2424596/ */
-    SECTION("Listen Once, no bot ID provided")
+    SPXTEST_SECTION("Listen Once, no bot ID provided")
     {
-        REQUIRE(exists(ROOT_RELATIVE_PATH(INTENT_UTTERANCE)));
+        SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(INTENT_UTTERANCE)));
 
         auto config = BotFrameworkConfig::FromSubscription(SubscriptionsRegionsMap[DIALOG_SUBSCRIPTION].Key, SubscriptionsRegionsMap[DIALOG_SUBSCRIPTION].Region);
         config->SetLanguage("en-us");
@@ -502,12 +502,12 @@ TEST_CASE("Dialog Service Connector basics", "[api][cxx][dialog_service_connecto
         //auto success = std::get<0>(result);
         auto message = std::move(std::get<1>(result));
         INFO(message);
-        //REQUIRE(success);
+        //SPXTEST_REQUIRE(success);
     }
 
-    SECTION("Listen Once, bot ID provided")
+    SPXTEST_SECTION("Listen Once, bot ID provided")
     {
-        REQUIRE(exists(ROOT_RELATIVE_PATH(INTENT_UTTERANCE)));
+        SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(INTENT_UTTERANCE)));
 
         auto config = BotFrameworkConfig::FromSubscription(SubscriptionsRegionsMap[DIALOG_SUBSCRIPTION].Key, SubscriptionsRegionsMap[DIALOG_SUBSCRIPTION].Region, DefaultSettingsMap[DIALOG_FUNCTIONAL_TEST_BOT]);
         config->SetLanguage("en-us");
@@ -543,16 +543,16 @@ TEST_CASE("Dialog Service Connector basics", "[api][cxx][dialog_service_connecto
         //auto success = std::get<0>(result);
         auto message = std::move(std::get<1>(result));
         INFO(message);
-        //REQUIRE(success);
+        //SPXTEST_REQUIRE(success);
     }
 #endif
 }
 
 TEST_CASE("Dialog Service Connector extended", "[api][cxx][dialog_service_connector][adv][!hide]")
 {
-    SECTION("Interleaving speech and activities.")
+    SPXTEST_SECTION("Interleaving speech and activities.")
     {
-        REQUIRE(exists(ROOT_RELATIVE_PATH(INTENT_UTTERANCE)));
+        SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(INTENT_UTTERANCE)));
         auto config = DialogServiceConfigForTests();
         auto audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(INTENT_UTTERANCE));
 
@@ -590,15 +590,15 @@ TEST_CASE("Dialog Service Connector extended", "[api][cxx][dialog_service_connec
         auto success = std::get<0>(result);
         auto message = std::move(std::get<1>(result));
         INFO(message);
-        REQUIRE(success);
+        SPXTEST_REQUIRE(success);
     }
 }
 
 TEST_CASE("Dialog Service Connector CustomCommands", "[api][cxx][dialog_service_connector][tahiti][!hide]")
 {
-    SECTION("Send/receive activities.")
+    SPXTEST_SECTION("Send/receive activities.")
     {
-        REQUIRE(exists(ROOT_RELATIVE_PATH(INTENT_UTTERANCE)));
+        SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(INTENT_UTTERANCE)));
         auto config = DialogServiceConfigForTests(false);
         auto audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(INTENT_UTTERANCE));
 
@@ -628,7 +628,7 @@ TEST_CASE("Dialog Service Connector CustomCommands", "[api][cxx][dialog_service_
         auto success = std::get<0>(result);
         auto message = std::move(std::get<1>(result));
         INFO(message);
-        REQUIRE(success);
+        SPXTEST_REQUIRE(success);
     }
 }
 
@@ -643,10 +643,10 @@ TEST_CASE("Dialog Service Connector CustomCommands", "[api][cxx][dialog_service_
 
 TEST_CASE("Dialog Service Connector KWS basics", "[api][cxx][dialog_service_connector]") {
 
-    SECTION("Listen once with KWS only works")
+    SPXTEST_SECTION("Listen once with KWS only works")
     {
         UseMocks(false);
-        REQUIRE(exists(ROOT_RELATIVE_PATH(COMPUTER_KEYWORD_WITH_SINGLE_UTTERANCE_1)));
+        SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(COMPUTER_KEYWORD_WITH_SINGLE_UTTERANCE_1)));
         auto config = DialogServiceConfigForTests();
         // Turn off keyword verification
         config->SetProperty("KeywordConfig_EnableKeywordVerification", "false");
@@ -674,7 +674,7 @@ TEST_CASE("Dialog Service Connector KWS basics", "[api][cxx][dialog_service_conn
         if (!success)
         {
             std::string message = std::move(std::get<1>(result));
-            FAIL(message);
+            SPXTEST_FAIL(message);
         }
     }
 }
@@ -682,10 +682,10 @@ TEST_CASE("Dialog Service Connector KWS basics", "[api][cxx][dialog_service_conn
 TEST_CASE("Dialog Service Connector KWV basics", "[api][cxx][dialog_service_connector][!hide]")
 {
 
-    SECTION("Listen once with KWS + KWV accept works")
+    SPXTEST_SECTION("Listen once with KWS + KWV accept works")
     {
         UseMocks(false);
-        REQUIRE(exists(ROOT_RELATIVE_PATH(COMPUTER_KEYWORD_WITH_SINGLE_UTTERANCE_1)));
+        SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(COMPUTER_KEYWORD_WITH_SINGLE_UTTERANCE_1)));
         auto config = DialogServiceConfigForTests();
         auto audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(COMPUTER_KEYWORD_WITH_SINGLE_UTTERANCE_1));
         auto model = KeywordRecognitionModel::FromFile(DefaultSettingsMap[INPUT_DIR] + "/kws/Computer/kws.table");
@@ -711,14 +711,14 @@ TEST_CASE("Dialog Service Connector KWV basics", "[api][cxx][dialog_service_conn
         if (!success)
         {
             std::string message = std::move(std::get<1>(result));
-            FAIL(message);
+            SPXTEST_FAIL(message);
         }
     }
 
-    SECTION("Listen once with KWS + KWV reject works")
+    SPXTEST_SECTION("Listen once with KWS + KWV reject works")
     {
         UseMocks(false);
-        REQUIRE(exists(ROOT_RELATIVE_PATH(COMPUTER_KEYWORD_WITH_SINGLE_UTTERANCE_2)));
+        SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(COMPUTER_KEYWORD_WITH_SINGLE_UTTERANCE_2)));
         auto config = DialogServiceConfigForTests();
         auto audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(COMPUTER_KEYWORD_WITH_SINGLE_UTTERANCE_2));
         auto model = KeywordRecognitionModel::FromFile(DefaultSettingsMap[INPUT_DIR] + "/kws/Computer/kws.table");
@@ -776,7 +776,7 @@ TEST_CASE("Dialog Service Connector KWV basics", "[api][cxx][dialog_service_conn
         if (!success)
         {
             std::string message = std::move(std::get<1>(result));
-            FAIL(message);
+            SPXTEST_FAIL(message);
         }
     }
 }
@@ -786,10 +786,10 @@ TEST_CASE("Dialog Service Connector KWV basics", "[api][cxx][dialog_service_conn
 TEST_CASE("Dialog Service Connector KWV multi-turn tests", "[api][cxx][dialog_service_connector]")
 {
 
-    SECTION("Later utterances should not be polluted by KWV during multi turn recognition")
+    SPXTEST_SECTION("Later utterances should not be polluted by KWV during multi turn recognition")
     {
         UseMocks(false);
-        REQUIRE(exists(ROOT_RELATIVE_PATH(MULTIPLE_UTTERANCE_ENGLISH)));
+        SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(MULTIPLE_UTTERANCE_ENGLISH)));
         auto config = DialogServiceConfigForTests();
         auto audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(MULTIPLE_UTTERANCE_ENGLISH));
         auto model = KeywordRecognitionModel::FromFile(ROOT_RELATIVE_PATH(MULTIPLE_UTTERANCE_ENGLISH) + "/kws/Computer/kws.table");
@@ -843,7 +843,7 @@ TEST_CASE("Dialog Service Connector KWV multi-turn tests", "[api][cxx][dialog_se
         if (!success)
         {
             std::string message = std::move(std::get<1>(result));
-            FAIL(message);
+            SPXTEST_FAIL(message);
         }
     }
 }

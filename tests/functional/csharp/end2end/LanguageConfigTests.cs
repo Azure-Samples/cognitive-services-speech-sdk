@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 
 namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 {
+    using static SPXTEST;
     using static Config;
 
     [TestClass]
@@ -22,7 +23,14 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [ClassInitialize]
         public static void TestClassinitialize(TestContext context)
         {
+            LoggingTestBaseInit(context);
             BaseClassInit(context);
+        }
+
+        [ClassCleanup]
+        new public static void TestClassCleanup()
+        {
+            LoggingTestBaseCleanup();
         }
 
         [TestInitialize]
@@ -35,67 +43,67 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public void TestSourceLanguageConfig()
         {
-            Assert.ThrowsException<ArgumentNullException>(() =>
+            SPXTEST_THROWS<ArgumentNullException>(() =>
             {
                 SourceLanguageConfig.FromLanguage(null);
             });
 
-            Assert.ThrowsException<ArgumentNullException>(() =>
+            SPXTEST_THROWS<ArgumentNullException>(() =>
             {
                 SourceLanguageConfig.FromLanguage("");
             });
 
-            Assert.ThrowsException<ArgumentNullException>(() =>
+            SPXTEST_THROWS<ArgumentNullException>(() =>
             {
                 SourceLanguageConfig.FromLanguage(Language.DE_DE, null);
             });
 
-            Assert.ThrowsException<ArgumentNullException>(() =>
+            SPXTEST_THROWS<ArgumentNullException>(() =>
             {
                 SourceLanguageConfig.FromLanguage(Language.CA_ES, "");
             });
 
-            Assert.IsNotNull(SourceLanguageConfig.FromLanguage(Language.DE_DE));
-            Assert.IsNotNull(SourceLanguageConfig.FromLanguage(Language.DE_DE, "CustomEndpointId"));
+            SPXTEST_ISNOTNULL(SourceLanguageConfig.FromLanguage(Language.DE_DE));
+            SPXTEST_ISNOTNULL(SourceLanguageConfig.FromLanguage(Language.DE_DE, "CustomEndpointId"));
         }
 
         [TestMethod]
         public void TestAutoDetectSourceLanguageConfig()
         {
-            Assert.ThrowsException<ArgumentNullException>(() =>
+            SPXTEST_THROWS<ArgumentNullException>(() =>
             {
                 AutoDetectSourceLanguageConfig.FromLanguages(null);
             });
 
-            Assert.ThrowsException<ArgumentNullException>(() =>
+            SPXTEST_THROWS<ArgumentNullException>(() =>
             {
                 AutoDetectSourceLanguageConfig.FromLanguages(new string[] { });
             });
 
 
-            Assert.ThrowsException<ArgumentNullException>(() =>
+            SPXTEST_THROWS<ArgumentNullException>(() =>
             {
                 AutoDetectSourceLanguageConfig.FromLanguages(new string[] { null });
             });
 
-            Assert.ThrowsException<ArgumentNullException>(() =>
+            SPXTEST_THROWS<ArgumentNullException>(() =>
             {
                 AutoDetectSourceLanguageConfig.FromSourceLanguageConfigs(null);
             });
 
-            Assert.ThrowsException<ArgumentNullException>(() =>
+            SPXTEST_THROWS<ArgumentNullException>(() =>
             {
                 AutoDetectSourceLanguageConfig.FromSourceLanguageConfigs(new SourceLanguageConfig[] { });
             });
 
 
-            Assert.ThrowsException<ArgumentNullException>(() =>
+            SPXTEST_THROWS<ArgumentNullException>(() =>
             {
                 AutoDetectSourceLanguageConfig.FromSourceLanguageConfigs(new SourceLanguageConfig[] { null });
             });
 
-            Assert.IsNotNull(AutoDetectSourceLanguageConfig.FromLanguages(new string[] { Language.DE_DE, Language.CA_ES }));
-            Assert.IsNotNull(AutoDetectSourceLanguageConfig.FromSourceLanguageConfigs(
+            SPXTEST_ISNOTNULL(AutoDetectSourceLanguageConfig.FromLanguages(new string[] { Language.DE_DE, Language.CA_ES }));
+            SPXTEST_ISNOTNULL(AutoDetectSourceLanguageConfig.FromSourceLanguageConfigs(
                 new SourceLanguageConfig[] {
                     SourceLanguageConfig.FromLanguage(Language.EN),
                     SourceLanguageConfig.FromLanguage(Language.DE_DE, "custom endpointId") }));
@@ -108,10 +116,10 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var speechRecognizer = new SpeechRecognizer(this.defaultConfig, Language.DE_DE, audioInput))
             {
                 Assert.IsInstanceOfType(speechRecognizer, typeof(SpeechRecognizer));
-                Assert.AreEqual(Language.DE_DE, speechRecognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_RecoLanguage));
+                SPXTEST_ARE_EQUAL(Language.DE_DE, speechRecognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_RecoLanguage));
                 await helper.CompleteRecognizeOnceAsync(speechRecognizer).ConfigureAwait(false);
                 var connectionUrl = speechRecognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_Url);
-                Assert.IsTrue(connectionUrl.Contains("language=" + Language.DE_DE), "specified language (should be de-DE) in " + connectionUrl);
+                SPXTEST_ISTRUE(connectionUrl.Contains("language=" + Language.DE_DE), "specified language (should be de-DE) in " + connectionUrl);
             }
         }
 
@@ -122,10 +130,10 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var speechRecognizer = new SpeechRecognizer(this.defaultConfig, sourceLanguageConfig, audioInput))
             {
                 Assert.IsInstanceOfType(speechRecognizer, typeof(SpeechRecognizer));
-                Assert.AreEqual(Language.DE_DE, speechRecognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_RecoLanguage));
+                SPXTEST_ARE_EQUAL(Language.DE_DE, speechRecognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_RecoLanguage));
                 await helper.CompleteRecognizeOnceAsync(speechRecognizer).ConfigureAwait(false);
                 var connectionUrl = speechRecognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_Url);
-                Assert.IsTrue(connectionUrl.Contains("language=" + Language.DE_DE), "specified language (should be de-DE) in " + connectionUrl);
+                SPXTEST_ISTRUE(connectionUrl.Contains("language=" + Language.DE_DE), "specified language (should be de-DE) in " + connectionUrl);
             }
         }
 
@@ -136,12 +144,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var speechRecognizer = new SpeechRecognizer(this.defaultConfig, sourceLanguageConfig, audioInput))
             {
                 Assert.IsInstanceOfType(speechRecognizer, typeof(SpeechRecognizer));
-                Assert.AreEqual(Language.DE_DE, speechRecognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_RecoLanguage));
-                Assert.AreEqual("endpoint1", speechRecognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_EndpointId));
+                SPXTEST_ARE_EQUAL(Language.DE_DE, speechRecognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_RecoLanguage));
+                SPXTEST_ARE_EQUAL("endpoint1", speechRecognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_EndpointId));
                 await helper.CompleteRecognizeOnceAsync(speechRecognizer).ConfigureAwait(false);
                 var connectionUrl = speechRecognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_Url);
-                Assert.IsTrue(connectionUrl.Contains("language=" + Language.DE_DE), "specified language (should be de-DE) in " + connectionUrl);
-                Assert.IsTrue(connectionUrl.Contains("cid=endpoint1"), "specified cid (should be endpoint1) in " + connectionUrl);
+                SPXTEST_ISTRUE(connectionUrl.Contains("language=" + Language.DE_DE), "specified language (should be de-DE) in " + connectionUrl);
+                SPXTEST_ISTRUE(connectionUrl.Contains("cid=endpoint1"), "specified cid (should be endpoint1) in " + connectionUrl);
             }
         }
 
@@ -154,10 +162,10 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 Assert.IsInstanceOfType(speechRecognizer, typeof(SpeechRecognizer));
                 var languages = speechRecognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_AutoDetectSourceLanguages);
-                Assert.IsNotNull(languages);
-                Assert.IsTrue(Enumerable.SequenceEqual(autoDetectSourceLanguages.OrderBy(t => t), languages.Split(',').OrderBy(t => t)));
-                Assert.AreEqual("", speechRecognizer.Properties.GetProperty(Language.DE_DE + "SPEECH-ModelId"));
-                Assert.AreEqual("", speechRecognizer.Properties.GetProperty(Language.CA_ES + "SPEECH-ModelId"));
+                SPXTEST_ISNOTNULL(languages);
+                SPXTEST_ISTRUE(Enumerable.SequenceEqual(autoDetectSourceLanguages.OrderBy(t => t), languages.Split(',').OrderBy(t => t)));
+                SPXTEST_ARE_EQUAL("", speechRecognizer.Properties.GetProperty(Language.DE_DE + "SPEECH-ModelId"));
+                SPXTEST_ARE_EQUAL("", speechRecognizer.Properties.GetProperty(Language.CA_ES + "SPEECH-ModelId"));
             }
 
             var sourceLanguageConfigs = new SourceLanguageConfig[]
@@ -171,10 +179,10 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 Assert.IsInstanceOfType(speechRecognizer, typeof(SpeechRecognizer));
                 var languages = speechRecognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_AutoDetectSourceLanguages);
-                Assert.IsNotNull(languages);
-                Assert.IsTrue(Enumerable.SequenceEqual(autoDetectSourceLanguages.OrderBy(t => t), languages.Split(',').OrderBy(t => t)));
-                Assert.AreEqual("customendpoint1", speechRecognizer.Properties.GetProperty(Language.DE_DE + "SPEECH-ModelId"));
-                Assert.AreEqual("", speechRecognizer.Properties.GetProperty(Language.CA_ES + "SPEECH-ModelId"));
+                SPXTEST_ISNOTNULL(languages);
+                SPXTEST_ISTRUE(Enumerable.SequenceEqual(autoDetectSourceLanguages.OrderBy(t => t), languages.Split(',').OrderBy(t => t)));
+                SPXTEST_ARE_EQUAL("customendpoint1", speechRecognizer.Properties.GetProperty(Language.DE_DE + "SPEECH-ModelId"));
+                SPXTEST_ARE_EQUAL("", speechRecognizer.Properties.GetProperty(Language.CA_ES + "SPEECH-ModelId"));
             }
 
             this.defaultConfig.EndpointId = "CustomEndpointId2";
@@ -186,10 +194,10 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             catch (Exception ex)
             {
                 foundException = true;
-                Assert.IsTrue(ex is ApplicationException);
-                Assert.IsTrue(ex.Message.Contains("Invalid argument exception: EndpointId on SpeechConfig is unsupported for auto detection source language scenario. Please set per language endpointId through SourceLanguageConfig and use it to construct AutoDetectSourceLanguageConfig."));
+                SPXTEST_ISTRUE(ex is ApplicationException);
+                SPXTEST_ISTRUE(ex.Message.Contains("Invalid argument exception: EndpointId on SpeechConfig is unsupported for auto detection source language scenario. Please set per language endpointId through SourceLanguageConfig and use it to construct AutoDetectSourceLanguageConfig."));
             }
-            Assert.IsTrue(foundException);
+            SPXTEST_ISTRUE(foundException);
         }
     }
 }

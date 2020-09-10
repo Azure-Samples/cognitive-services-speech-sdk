@@ -36,7 +36,7 @@ TEST_CASE("CSpxAudioProcessorWriteToAudioSourceBuffer tests", "[cxx][audio][audi
         return MakeEnvironment(notifyMe, bufferDataWriter, bufferProperties, mockSite, processor);
     };
 
-    GIVEN("A newly initialized processor")
+    SPXTEST_GIVEN("A newly initialized processor")
     {
         auto env = makeBaseTestEnv();
         auto notify = env.Get<MockAudioProcessorNotifyMe>();
@@ -45,7 +45,7 @@ TEST_CASE("CSpxAudioProcessorWriteToAudioSourceBuffer tests", "[cxx][audio][audi
         auto processor = env.Get<Carbon::ISpxAudioProcessor>();
         auto mockFormat = ConstructDefaultFormat();
 
-        WHEN("Receiving set format != nullptr")
+        SPXTEST_WHEN("Receiving set format != nullptr")
         {
             bool notifyStarted{ false };
             bool writerCalled{ false };
@@ -65,7 +65,7 @@ TEST_CASE("CSpxAudioProcessorWriteToAudioSourceBuffer tests", "[cxx][audio][audi
             processor->SetFormat(mockFormat.get());
             THEN("Should notify started (processor != nullptr)")
             {
-                REQUIRE(notifyStarted);
+                SPXTEST_REQUIRE(notifyStarted);
             }
             THEN("Buffer data writer should not be called")
             {
@@ -77,7 +77,7 @@ TEST_CASE("CSpxAudioProcessorWriteToAudioSourceBuffer tests", "[cxx][audio][audi
             }
         }
 
-        WHEN("Receiving audio")
+        SPXTEST_WHEN("Receiving audio")
         {
             bool receivedEvent{ false };
             bool writerCalled{ false };
@@ -101,7 +101,7 @@ TEST_CASE("CSpxAudioProcessorWriteToAudioSourceBuffer tests", "[cxx][audio][audi
             });
             THEN("An exception should be thrown")
             {
-                REQUIRE(exceptionThrown);
+                SPXTEST_REQUIRE(exceptionThrown);
             }
             THEN("No event should be raised")
             {
@@ -117,7 +117,7 @@ TEST_CASE("CSpxAudioProcessorWriteToAudioSourceBuffer tests", "[cxx][audio][audi
             }
         }
 
-        WHEN("Receiving set format == nullptr")
+        SPXTEST_WHEN("Receiving set format == nullptr")
         {
             bool receivedEvent{ false };
             bool writerCalled{ false };
@@ -140,7 +140,7 @@ TEST_CASE("CSpxAudioProcessorWriteToAudioSourceBuffer tests", "[cxx][audio][audi
             });
             THEN("An exception should be thrown")
             {
-                REQUIRE(exceptionThrown);
+                SPXTEST_REQUIRE(exceptionThrown);
             }
             THEN("Notify should not be called")
             {
@@ -157,7 +157,7 @@ TEST_CASE("CSpxAudioProcessorWriteToAudioSourceBuffer tests", "[cxx][audio][audi
         }
     }
 
-    GIVEN("A processor that has already started (i.e received SetFormat with format != nullptr)")
+    SPXTEST_GIVEN("A processor that has already started (i.e received SetFormat with format != nullptr)")
     {
         auto env = makeBaseTestEnv();
         auto notify = env.Get<MockAudioProcessorNotifyMe>();
@@ -167,7 +167,7 @@ TEST_CASE("CSpxAudioProcessorWriteToAudioSourceBuffer tests", "[cxx][audio][audi
         auto format = ConstructDefaultFormat();
         processor->SetFormat(format.get());
 
-        WHEN("Received set format != nullptr")
+        SPXTEST_WHEN("Received set format != nullptr")
         {
             bool receivedEvent{ false };
             bool writerCalled{ false };
@@ -190,7 +190,7 @@ TEST_CASE("CSpxAudioProcessorWriteToAudioSourceBuffer tests", "[cxx][audio][audi
             });
             THEN("An exception should be thrown")
             {
-                REQUIRE(exceptionThrown);
+                SPXTEST_REQUIRE(exceptionThrown);
             }
             THEN("Notify should not be called")
             {
@@ -206,7 +206,7 @@ TEST_CASE("CSpxAudioProcessorWriteToAudioSourceBuffer tests", "[cxx][audio][audi
             }
         }
 
-        WHEN("Receiving audio")
+        SPXTEST_WHEN("Receiving audio")
         {
             bool receivedEvent{ false };
             bool writerCalled{ false };
@@ -252,23 +252,23 @@ TEST_CASE("CSpxAudioProcessorWriteToAudioSourceBuffer tests", "[cxx][audio][audi
             processor->ProcessAudio(chunk);
             THEN("An event should be raised")
             {
-                REQUIRE(receivedEvent);
+                SPXTEST_REQUIRE(receivedEvent);
             }
             THEN("Buffer writer should be called")
             {
-                REQUIRE(writerCalled);
-                REQUIRE(receivedCount == 1);
-                REQUIRE(val == receivedVal);
+                SPXTEST_REQUIRE(writerCalled);
+                SPXTEST_REQUIRE(receivedCount == 1);
+                SPXTEST_REQUIRE(val == receivedVal);
             }
             THEN("SetBufferProperty should be called twice for DataBuffer_TimeStamp and DataBuffer_UserId")
             {
-                REQUIRE(setBufferPropertyCallCount == 2);
-                REQUIRE(receivedDataBufferTimestamp);
-                REQUIRE(receivedDataBufferUserId);
+                SPXTEST_REQUIRE(setBufferPropertyCallCount == 2);
+                SPXTEST_REQUIRE(receivedDataBufferTimestamp);
+                SPXTEST_REQUIRE(receivedDataBufferUserId);
             }
         }
 
-        WHEN("Receiving set format == nullptr")
+        SPXTEST_WHEN("Receiving set format == nullptr")
         {
             bool notifyStopped{ false };
             bool writerCalled{ false };
@@ -292,13 +292,13 @@ TEST_CASE("CSpxAudioProcessorWriteToAudioSourceBuffer tests", "[cxx][audio][audi
             processor->SetFormat(nullptr);
             THEN("Should notify stopped (processor == nullptr)")
             {
-                REQUIRE(notifyStopped);
+                SPXTEST_REQUIRE(notifyStopped);
             }
             THEN("Buffer data writer should be called with nullptr and 0")
             {
-                REQUIRE(writerCalled);
-                REQUIRE(isBufferEmpty);
-                REQUIRE(isCountZero);
+                SPXTEST_REQUIRE(writerCalled);
+                SPXTEST_REQUIRE(isBufferEmpty);
+                SPXTEST_REQUIRE(isCountZero);
             }
             THEN("SetBufferProperty should not be called")
             {

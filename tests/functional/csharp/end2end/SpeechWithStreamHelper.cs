@@ -3,6 +3,7 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 using Microsoft.CognitiveServices.Speech.Audio;
+using Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils;
 using MicrosoftSpeechSDKSamples;
 using System;
 using System.Collections.Generic;
@@ -12,6 +13,7 @@ using System.Threading.Tasks;
 namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 {
     using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using static SPXTEST;
     using static SpeechRecognitionTestsHelper;
 
     public class ClientPullStreamCallback : PullAudioInputStreamCallback
@@ -111,10 +113,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 await Task.WhenAny(tcs.Task, Task.Delay(timeout));
                 await recognizer.StopContinuousRecognitionAsync();
 
-                if (!string.IsNullOrEmpty(canceled))
-                {
-                    Assert.Fail($"Recognition canceled: {canceled}");
-                }
+                SPXTEST_REQUIRE(string.IsNullOrEmpty(canceled), $"Recognition Canceled w/ErrorDetails='{canceled}'");
 
                 return textResultEvents;
             }

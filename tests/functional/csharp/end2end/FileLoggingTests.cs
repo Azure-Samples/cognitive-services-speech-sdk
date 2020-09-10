@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 
 namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 {
+    using static SPXTEST;
     using static Config;
     using static SpeechRecognitionTestsHelper;
 
@@ -24,7 +25,14 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [ClassInitialize]
         public static void TestClassinitialize(TestContext context)
         {
+            LoggingTestBaseInit(context);
             BaseClassInit(context);
+        }
+
+        [ClassCleanup]
+        new public static void TestClassCleanup()
+        {
+            LoggingTestBaseCleanup();
         }
 
         [TestInitialize]
@@ -79,7 +87,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
             fi = new FileInfo(baseName);
             Console.WriteLine("File size while closed: " + fi.Length);
-            Assert.AreEqual(size, fi.Length, "File should not have changed size");
+            SPXTEST_ARE_EQUAL(size, fi.Length, "File should not have changed size");
 
             this.defaultConfig.SetProperty("SPEECH-LogFilename", baseName);
             this.defaultConfig.SetProperty("SPEECH-AppendToLogFile", "1");
@@ -95,7 +103,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
             fi = new FileInfo(baseName);
             Console.WriteLine("File size after being re-enabled: " + fi.Length);
-            Assert.IsTrue(size < fi.Length, "File should have grown.");
+            SPXTEST_ISTRUE(size < fi.Length, "File should have grown.");
         }
 
         [TestMethod]
@@ -134,7 +142,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
             var files = Directory.EnumerateFiles(tempDir, query);
             var fileCount = files.Count();
-            Assert.IsTrue(fileCount > 1, "Not enough files created");
+            SPXTEST_ISTRUE(fileCount > 1, "Not enough files created");
         }
 
         [TestMethod]
@@ -160,7 +168,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
             foreach(var line in File.ReadAllLines(baseName))
             {
-                Assert.IsTrue(line.Contains(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text));
+                SPXTEST_ISTRUE(line.Contains(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text));
             }
         }
 

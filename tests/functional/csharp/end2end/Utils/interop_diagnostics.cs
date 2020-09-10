@@ -17,11 +17,43 @@ namespace Microsoft.CognitiveServices.Speech.Test.Internal
 
     internal class Diagnostics
     {
+        public const int __SPX_TRACE_LEVEL_INFO = 0x08; // Trace_Info
+        public const int __SPX_TRACE_LEVEL_WARNING = 0x04; // Trace_Warning
+        public const int __SPX_TRACE_LEVEL_ERROR = 0x02; // Trace_Error
+        public const int __SPX_TRACE_LEVEL_VERBOSE = 0x10; // Trace_Verbose
+
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention, CharSet = CharSet.Ansi)]
+        public static extern void diagnostics_log_trace_string(
+            int level, [MarshalAs(UnmanagedType.LPStr)] string title,
+            [MarshalAs(UnmanagedType.LPStr)] string fileName, int lineNumber,
+            [MarshalAs(UnmanagedType.LPStr)] string message);
+
         [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR diagnostics_logmessage_set_callback(LogMessageCallbackFunctionDelegate callback);
 
         [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention, CharSet = CharSet.Ansi)]
         public static extern SPXHR diagnostics_logmessage_set_filters([MarshalAs(UnmanagedType.LPStr)] string filters);
+
+
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
+        public static extern void diagnostics_log_memory_start_logging();
+
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
+        public static extern void diagnostics_log_memory_stop_logging();
+
+
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
+        public static extern int diagnostics_log_memory_get_line_num_oldest();
+
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
+        public static extern int diagnostics_log_memory_get_line_num_newest();
+
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
+        public static extern IntPtr diagnostics_log_memory_get_line(int lineNum);
+
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
+        public static extern void diagnostics_log_memory_dump_to_file([MarshalAs(UnmanagedType.LPStr)] string fileName, int options); // fileName == nullptr => stderr; options: 1 => dump now
+
     }
 
     internal static class Import

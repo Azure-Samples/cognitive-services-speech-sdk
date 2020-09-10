@@ -14,11 +14,12 @@ using System.Threading.Tasks;
 namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 {
     using static AssertHelpers;
+    using static SPXTEST;
     using static Config;
     using static SpeechRecognitionTestsHelper;
 
     [TestClass]
-    public class IntentRecognitionTests
+    public class IntentRecognitionTests : LoggingTestBase
     {
         private static string languageUnderstandingSubscriptionKey;
         private static string languageUnderstandingServiceRegion;
@@ -34,6 +35,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [ClassInitialize]
         public static void TestClassinitialize(TestContext context)
         {
+            LoggingTestBaseInit(context);
             _config = new Config(context);
 
             languageUnderstandingSubscriptionKey = SubscriptionsRegionsMap[SubscriptionsRegionsKeys.LANGUAGE_UNDERSTANDING_SUBSCRIPTION].Key;
@@ -44,6 +46,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             endpointUrl = new Uri(endpointInString);
             hostInString = String.Format("wss://speech.platform.bing.com");
             hostUrl = new Uri(hostInString);
+        }
+
+        [ClassCleanup]
+        public static void TestClassCleanup()
+        {
+            LoggingTestBaseCleanup();
         }
 
         [TestInitialize]
@@ -70,7 +78,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 {"eastasia", "asiaeast"}
             };
 
-            Assert.IsTrue(regionMap.ContainsKey(speechServiceRegion), "Cannot map speech service region to intent service region.");
+            SPXTEST_ISTRUE(regionMap.ContainsKey(speechServiceRegion), "Cannot map speech service region to intent service region.");
             return regionMap[speechServiceRegion];
         }
 
@@ -123,13 +131,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
 
-                Assert.AreEqual(
+                SPXTEST_ARE_EQUAL(
                     string.IsNullOrEmpty(expectedIntentId) ? ResultReason.RecognizedSpeech : ResultReason.RecognizedIntent,
                     result.Reason);
-                Assert.AreEqual(expectedIntentId, result.IntentId);
-                Assert.AreEqual(AudioUtterancesMap[AudioUtteranceKeys.INTENT_UTTERANCE].Utterances[Language.EN][0].Text, result.Text);
+                SPXTEST_ARE_EQUAL(expectedIntentId, result.IntentId);
+                SPXTEST_ARE_EQUAL(AudioUtterancesMap[AudioUtteranceKeys.INTENT_UTTERANCE].Utterances[Language.EN][0].Text, result.Text);
                 var json = result.Properties.GetProperty(PropertyId.LanguageUnderstandingServiceResponse_JsonResult);
-                Assert.IsFalse(string.IsNullOrEmpty(json), "Empty JSON from intent recognition");
+                SPXTEST_ISFALSE(string.IsNullOrEmpty(json), "Empty JSON from intent recognition");
                 // TODO check JSON validity
             }
         }
@@ -145,7 +153,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 recognizer.AddAllIntents(model);
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 var json = result.Properties.GetProperty(PropertyId.LanguageUnderstandingServiceResponse_JsonResult);
-                Assert.IsTrue(json.Contains("AT&T"), $"Could not find AT&T in JSON response: {json}");
+                SPXTEST_ISTRUE(json.Contains("AT&T"), $"Could not find AT&T in JSON response: {json}");
             }
         }
 
@@ -158,12 +166,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
             using (var recognizer = new IntentRecognizer(config, audioInput))
             {
-                Assert.AreEqual(token, recognizer.AuthorizationToken);
+                SPXTEST_ARE_EQUAL(token, recognizer.AuthorizationToken);
 
                 var newToken = "y";
                 recognizer.AuthorizationToken = newToken;
-                Assert.AreEqual(token, config.AuthorizationToken);
-                Assert.AreEqual(newToken, recognizer.AuthorizationToken);
+                SPXTEST_ARE_EQUAL(token, config.AuthorizationToken);
+                SPXTEST_ARE_EQUAL(newToken, recognizer.AuthorizationToken);
             }
         }
 
@@ -176,14 +184,14 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
             using (var recognizer = TrackSessionId(new IntentRecognizer(configWithToken, audioInput)))
             {
-                Assert.AreEqual(invalidToken, recognizer.AuthorizationToken);
+                SPXTEST_ARE_EQUAL(invalidToken, recognizer.AuthorizationToken);
 
                 var newToken = await GetToken(languageUnderstandingSubscriptionKey, languageUnderstandingServiceRegion);
                 recognizer.AuthorizationToken = newToken;
 
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
 
-                Assert.AreEqual(newToken, recognizer.AuthorizationToken);
+                SPXTEST_ARE_EQUAL(newToken, recognizer.AuthorizationToken);
                 AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text, result.Text);
             }
         }
@@ -211,9 +219,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     recognizer.AddIntent(phrase, someId);
                 }
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
-                Assert.AreEqual(string.IsNullOrEmpty(expectedId) ? ResultReason.RecognizedSpeech : ResultReason.RecognizedIntent, result.Reason);
-                Assert.AreEqual(AudioUtterancesMap[AudioUtteranceKeys.INTENT_UTTERANCE].Utterances[Language.EN][0].Text, result.Text);
-                Assert.AreEqual(expectedId, result.IntentId,
+                SPXTEST_ARE_EQUAL(string.IsNullOrEmpty(expectedId) ? ResultReason.RecognizedSpeech : ResultReason.RecognizedIntent, result.Reason);
+                SPXTEST_ARE_EQUAL(AudioUtterancesMap[AudioUtteranceKeys.INTENT_UTTERANCE].Utterances[Language.EN][0].Text, result.Text);
+                SPXTEST_ARE_EQUAL(expectedId, result.IntentId,
                     $"Unexpected intent ID for singleArgument={singleArgument} matchingPhrase={matchingPhrase}: is {result.IntentId}, expected {expectedId}");
             }
         }
@@ -259,10 +267,10 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     connection.Disconnected -= myDisconnectedHandler;
 
                     Console.WriteLine($"ConnectedEventCount: {connectedEventCount}, DisconnectedEventCount: {disconnectedEventCount}");
-                    Assert.IsTrue(connectedEventCount > 0, AssertOutput.ConnectedEventCountMustNotBeZero);
-                    Assert.IsTrue(connectedEventCount == disconnectedEventCount || connectedEventCount == disconnectedEventCount + 1, AssertOutput.ConnectedDisconnectedEventUnmatch);
+                    SPXTEST_ISTRUE(connectedEventCount > 0, AssertOutput.ConnectedEventCountMustNotBeZero);
+                    SPXTEST_ISTRUE(connectedEventCount == disconnectedEventCount || connectedEventCount == disconnectedEventCount + 1, AssertOutput.ConnectedDisconnectedEventUnmatch);
 
-                    Assert.AreEqual(ResultReason.RecognizedIntent, result.Reason);
+                    SPXTEST_ARE_EQUAL(ResultReason.RecognizedIntent, result.Reason);
                 }
                 }
         }
@@ -275,7 +283,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 using (var connection = Connection.FromRecognizer(recognizer))
                 {
-                    var ex = Assert.ThrowsException<ApplicationException>(() => connection.Open(false));
+                    var ex = SPXTEST_THROWS<ApplicationException>(() => connection.Open(false));
                     AssertStringContains(ex.Message, "Exception with an error code: 0x1f");
                 }
             }
@@ -315,16 +323,16 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
 
-                Assert.AreEqual(ResultReason.RecognizedIntent, result.Reason);
-                Assert.AreEqual(phrase, result.Text);
-                Assert.AreEqual("HomeAutomation.TurnOn", result.IntentId, $"Unexpected intent ID: actual: {result.IntentId}, expected {phrase}");
+                SPXTEST_ARE_EQUAL(ResultReason.RecognizedIntent, result.Reason);
+                SPXTEST_ARE_EQUAL(phrase, result.Text);
+                SPXTEST_ARE_EQUAL("HomeAutomation.TurnOn", result.IntentId, $"Unexpected intent ID: actual: {result.IntentId}, expected {phrase}");
 
                 var json = result.Properties.GetProperty(PropertyId.SpeechServiceResponse_JsonResult);
-                Assert.IsFalse(string.IsNullOrEmpty(json), "Empty JSON from intent recognition");
-                Assert.IsTrue(json.Contains("ITN"), "Detailed result does not contain ITN.");
-                Assert.IsTrue(json.Contains("Lexical"), "Detailed result does not contain Lexical.");
-                Assert.IsTrue(json.Contains("MaskedITN"), "Detailed result does not contain MaskedITN.");
-                Assert.IsTrue(json.Contains("Display"), "Detailed result does not contain Text.");
+                SPXTEST_ISFALSE(string.IsNullOrEmpty(json), "Empty JSON from intent recognition");
+                SPXTEST_ISTRUE(json.Contains("ITN"), "Detailed result does not contain ITN.");
+                SPXTEST_ISTRUE(json.Contains("Lexical"), "Detailed result does not contain Lexical.");
+                SPXTEST_ISTRUE(json.Contains("MaskedITN"), "Detailed result does not contain MaskedITN.");
+                SPXTEST_ISTRUE(json.Contains("Display"), "Detailed result does not contain Text.");
             }
         }
 
@@ -342,16 +350,16 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
 
-                Assert.AreEqual(ResultReason.RecognizedIntent, result.Reason);
+                SPXTEST_ARE_EQUAL(ResultReason.RecognizedIntent, result.Reason);
                 AssertFuzzyMatching(phrase, result.Text);
-                Assert.AreEqual(phrase, result.IntentId, $"Unexpected intent ID: actual: {result.IntentId}, expected {phrase}");
+                SPXTEST_ARE_EQUAL(phrase, result.IntentId, $"Unexpected intent ID: actual: {result.IntentId}, expected {phrase}");
 
                 var json = result.Properties.GetProperty(PropertyId.SpeechServiceResponse_JsonResult);
-                Assert.IsFalse(string.IsNullOrEmpty(json), "Empty JSON from intent recognition");
-                Assert.IsTrue(json.Contains("ITN"), "Detailed result does not contain ITN.");
-                Assert.IsTrue(json.Contains("Lexical"), "Detailed result does not contain Lexical.");
-                Assert.IsTrue(json.Contains("MaskedITN"), "Detailed result does not contain MaskedITN.");
-                Assert.IsTrue(json.Contains("Display"), "Detailed result does not contain Text.");
+                SPXTEST_ISFALSE(string.IsNullOrEmpty(json), "Empty JSON from intent recognition");
+                SPXTEST_ISTRUE(json.Contains("ITN"), "Detailed result does not contain ITN.");
+                SPXTEST_ISTRUE(json.Contains("Lexical"), "Detailed result does not contain Lexical.");
+                SPXTEST_ISTRUE(json.Contains("MaskedITN"), "Detailed result does not contain MaskedITN.");
+                SPXTEST_ISTRUE(json.Contains("Display"), "Detailed result does not contain Text.");
             }
         }
 
@@ -373,16 +381,16 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
 
-                Assert.AreEqual(ResultReason.RecognizedIntent, result.Reason);
-                Assert.AreEqual(phrase, result.Text);
-                Assert.AreEqual("HomeAutomation.TurnOn", result.IntentId, $"Unexpected intent ID: actual: {result.IntentId}, expected {phrase}");
+                SPXTEST_ARE_EQUAL(ResultReason.RecognizedIntent, result.Reason);
+                SPXTEST_ARE_EQUAL(phrase, result.Text);
+                SPXTEST_ARE_EQUAL("HomeAutomation.TurnOn", result.IntentId, $"Unexpected intent ID: actual: {result.IntentId}, expected {phrase}");
 
                 var json = result.Properties.GetProperty(PropertyId.SpeechServiceResponse_JsonResult);
-                Assert.IsFalse(string.IsNullOrEmpty(json), "Empty JSON from intent recognition");
-                Assert.IsTrue(json.Contains("ITN"), "Detailed result does not contain ITN.");
-                Assert.IsTrue(json.Contains("Lexical"), "Detailed result does not contain Lexical.");
-                Assert.IsTrue(json.Contains("MaskedITN"), "Detailed result does not contain MaskedITN.");
-                Assert.IsTrue(json.Contains("Display"), "Detailed result does not contain Text.");
+                SPXTEST_ISFALSE(string.IsNullOrEmpty(json), "Empty JSON from intent recognition");
+                SPXTEST_ISTRUE(json.Contains("ITN"), "Detailed result does not contain ITN.");
+                SPXTEST_ISTRUE(json.Contains("Lexical"), "Detailed result does not contain Lexical.");
+                SPXTEST_ISTRUE(json.Contains("MaskedITN"), "Detailed result does not contain MaskedITN.");
+                SPXTEST_ISTRUE(json.Contains("Display"), "Detailed result does not contain Text.");
             }
         }
 
@@ -393,11 +401,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var recognizer = TrackSessionId(new IntentRecognizer(config, audioInput)))
             {
                 var recoLanguage = recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_RecoLanguage);
-                Assert.IsTrue(String.IsNullOrEmpty(recoLanguage), "RecoLanguage should not be set here. RecoLanguage: " + recoLanguage);
+                SPXTEST_ISTRUE(String.IsNullOrEmpty(recoLanguage), "RecoLanguage should not be set here. RecoLanguage: " + recoLanguage);
 
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 var connectionUrl = recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_Url);
-                Assert.IsTrue(connectionUrl.Contains("language=en-us"), "Incorrect default language (should be en-us) in " + connectionUrl);
+                SPXTEST_ISTRUE(connectionUrl.Contains("language=en-us"), "Incorrect default language (should be en-us) in " + connectionUrl);
             }
         }
 
@@ -414,7 +422,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 recognizer.AddAllIntents(model);
 
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
-                Assert.AreEqual(ResultReason.RecognizedIntent, result.Reason);
+                SPXTEST_ARE_EQUAL(ResultReason.RecognizedIntent, result.Reason);
             }
         }
 

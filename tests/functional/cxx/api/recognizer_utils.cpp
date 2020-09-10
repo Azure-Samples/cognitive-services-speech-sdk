@@ -132,8 +132,8 @@ int ReadBuffer(fstream& fs, uint8_t* dataBuffer, uint32_t size)
 void WaitForResult(future<void>&& f, std::chrono::seconds duration)
 {
     auto status = f.wait_for(duration);
-    CAPTURE(duration);
-    REQUIRE(status == future_status::ready);
+    SPXTEST_CAPTURE(duration);
+    SPXTEST_REQUIRE(status == future_status::ready);
 }
 
 void PushData(PushAudioInputStream* push, const string& fileName, bool compressed)
@@ -410,7 +410,7 @@ std::shared_ptr<AudioConfig> CreateAudioPullSingleChannel(std::shared_ptr<PullAu
 std::shared_ptr<AudioConfig> CreateAudioPullFromRecordedFile(std::shared_ptr<PullAudioInputStream>& pullStream)
 {
     auto audioReader = std::make_shared<RecordedDataReader>("audio");
-    REQUIRE(exists(DefaultSettingsMap[INPUT_DIR] + ("/audio/RecordedAudioMessages.json")));
+    SPXTEST_REQUIRE(exists(DefaultSettingsMap[INPUT_DIR] + ("/audio/RecordedAudioMessages.json")));
     audioReader->Open(DefaultSettingsMap[INPUT_DIR] + ("/audio/RecordedAudioMessages.json"));
 
     pullStream = AudioInputStream::CreatePullStream(

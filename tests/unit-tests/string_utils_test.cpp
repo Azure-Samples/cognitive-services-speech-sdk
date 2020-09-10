@@ -23,21 +23,21 @@ TEST_CASE("strcpy and wcscpy", "[core][string utils]")
         wsrc[i] = (wchar_t)(i % 255 + 1);
     }
 
-    SECTION("truncate: true")
+    SPXTEST_SECTION("truncate: true")
     {
         // source not null-terminated
 
         // strcpy
         dst[maxCopySize] = 1;
         REQUIRE_NOTHROW(PAL::strcpy(dst, dstSize, src, srcSize, true));
-        REQUIRE(PAL::strnicmp(src, dst, maxCopySize) == 0);
-        REQUIRE(dst[maxCopySize] == 0);
+        SPXTEST_REQUIRE(PAL::strnicmp(src, dst, maxCopySize) == 0);
+        SPXTEST_REQUIRE(dst[maxCopySize] == 0);
 
         // wcscpy
         wdst[maxCopySize] = 1;
         REQUIRE_NOTHROW(PAL::wcscpy(wdst, dstSize, wsrc, srcSize, true));
-        REQUIRE(PAL::wcsnicmp(wsrc, wdst, maxCopySize) == 0);
-        REQUIRE(wdst[maxCopySize] == 0);
+        SPXTEST_REQUIRE(PAL::wcsnicmp(wsrc, wdst, maxCopySize) == 0);
+        SPXTEST_REQUIRE(wdst[maxCopySize] == 0);
 
         // source null-terminated at destination length
 
@@ -45,20 +45,20 @@ TEST_CASE("strcpy and wcscpy", "[core][string utils]")
         src[maxCopySize] = 0;
         dst[maxCopySize] = 1;
         REQUIRE_NOTHROW(PAL::strcpy(dst, dstSize, src, srcSize, true));
-        REQUIRE(PAL::strnicmp(src, dst, dstSize) == 0);
-        REQUIRE(dst[maxCopySize] == 0);
+        SPXTEST_REQUIRE(PAL::strnicmp(src, dst, dstSize) == 0);
+        SPXTEST_REQUIRE(dst[maxCopySize] == 0);
         src[maxCopySize] = 1;
 
         // wcscpy
         wsrc[maxCopySize] = 0;
         wdst[maxCopySize] = 1;
         REQUIRE_NOTHROW(PAL::wcscpy(wdst, dstSize, wsrc, srcSize, true));
-        REQUIRE(PAL::wcsnicmp(wsrc, wdst, dstSize) == 0);
-        REQUIRE(wdst[maxCopySize] == 0);
+        SPXTEST_REQUIRE(PAL::wcsnicmp(wsrc, wdst, dstSize) == 0);
+        SPXTEST_REQUIRE(wdst[maxCopySize] == 0);
         wsrc[maxCopySize] = 1;
     }
 
-    SECTION("truncate: false")
+    SPXTEST_SECTION("truncate: false")
     {
         // source too long
 
@@ -71,14 +71,14 @@ TEST_CASE("strcpy and wcscpy", "[core][string utils]")
         // strcpy
         dst[maxCopySize] = 1;
         REQUIRE_NOTHROW(PAL::strcpy(dst, dstSize, src, maxCopySize, false));
-        REQUIRE(PAL::strnicmp(src, dst, maxCopySize) == 0);
-        REQUIRE(dst[maxCopySize] == 0);
+        SPXTEST_REQUIRE(PAL::strnicmp(src, dst, maxCopySize) == 0);
+        SPXTEST_REQUIRE(dst[maxCopySize] == 0);
 
         // wcscpy
         wdst[maxCopySize] = 1;
         REQUIRE_NOTHROW(PAL::wcscpy(wdst, dstSize, wsrc, maxCopySize, false));
-        REQUIRE(PAL::wcsnicmp(wsrc, wdst, maxCopySize) == 0);
-        REQUIRE(wdst[maxCopySize] == 0);
+        SPXTEST_REQUIRE(PAL::wcsnicmp(wsrc, wdst, maxCopySize) == 0);
+        SPXTEST_REQUIRE(wdst[maxCopySize] == 0);
 
         // source null-terminated at destination length
 
@@ -86,14 +86,14 @@ TEST_CASE("strcpy and wcscpy", "[core][string utils]")
         src[maxCopySize] = 0;
         dst[maxCopySize] = 1;
         REQUIRE_NOTHROW(PAL::strcpy(dst, dstSize, src, srcSize, false));
-        REQUIRE(PAL::strnicmp(src, dst, dstSize) == 0);
-        REQUIRE(dst[maxCopySize] == 0);
+        SPXTEST_REQUIRE(PAL::strnicmp(src, dst, dstSize) == 0);
+        SPXTEST_REQUIRE(dst[maxCopySize] == 0);
 
         // wcscpy
         wsrc[maxCopySize] = 0;
         wdst[maxCopySize] = 1;
         REQUIRE_NOTHROW(PAL::wcscpy(wdst, dstSize, wsrc, srcSize, false));
-        REQUIRE(PAL::wcsnicmp(wsrc, wdst, dstSize) == 0);
-        REQUIRE(wdst[maxCopySize] == 0);
+        SPXTEST_REQUIRE(PAL::wcsnicmp(wsrc, wdst, dstSize) == 0);
+        SPXTEST_REQUIRE(wdst[maxCopySize] == 0);
     }
 }

@@ -61,7 +61,7 @@ public:
 
     virtual void OnError(const std::shared_ptr<ISpxErrorInformation>& error) override
     {
-        FAIL(error->GetDetails());
+        SPXTEST_FAIL(error->GetDetails());
     }
 
     template <class T>
@@ -84,16 +84,16 @@ using UspClientPtr = std::shared_ptr<UspClient>;
 
 TEST_CASE("USP is properly functioning", "[usp]")
 {
-    SECTION("usp can be initialized, connected and closed")
+    SPXTEST_SECTION("usp can be initialized, connected and closed")
     {
         auto client = std::make_shared<UspClient>();
         REQUIRE_NOTHROW(client->Init());
         REQUIRE_NOTHROW(client->Term());
     }
 
-    REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
+    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
 
-    SECTION("usp can be used to upload binary data")
+    SPXTEST_SECTION("usp can be used to upload binary data")
     {
         string dummy = "RIFF1234567890";
         auto client = std::make_shared<UspClient>();
@@ -106,7 +106,7 @@ TEST_CASE("USP is properly functioning", "[usp]")
     size_t buffer_size_8k = 1 << 13;
     vector<char> buffer(buffer_size_8k);
 
-    SECTION("usp can be used to upload audio from file")
+    SPXTEST_SECTION("usp can be used to upload audio from file")
     {
         auto client = std::make_shared<UspClient>();
         client->Init();
@@ -123,7 +123,7 @@ TEST_CASE("USP is properly functioning", "[usp]")
         REQUIRE_NOTHROW(client->Term());
     }
 
-    SECTION("usp can toggled on/off multiple times in a row")
+    SPXTEST_SECTION("usp can toggled on/off multiple times in a row")
     {
         for (unsigned int i = 10; i > 0; i--)
         {
@@ -141,7 +141,7 @@ TEST_CASE("USP is properly functioning", "[usp]")
         }
     }
 
-    SECTION("several usp clients can coexist peacefully")
+    SPXTEST_SECTION("several usp clients can coexist peacefully")
     {
         int num_handles = 10;
         vector<UspClientPtr> clients(num_handles);
@@ -153,7 +153,7 @@ TEST_CASE("USP is properly functioning", "[usp]")
 
         auto is = get_stream(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
         is.read(buffer.data(), buffer_size_8k);
-        REQUIRE(is.good());
+        SPXTEST_REQUIRE(is.good());
 
         for (int i = 0; i < num_handles; i++)
         {
@@ -187,7 +187,7 @@ class TlsCheck : public USP::Callbacks
 #pragma warning(disable: 6237)
         // Disable: (<zero> && <expression>) is always zero.  <expression> is never evaluated and might have side effects.
 #endif
-        REQUIRE(error->GetCancellationCode() == CancellationErrorCode::ServiceRedirectPermanent);
+        SPXTEST_REQUIRE(error->GetCancellationCode() == CancellationErrorCode::ServiceRedirectPermanent);
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif
@@ -233,7 +233,7 @@ public:
 
         try
         {
-            REQUIRE(error->GetCancellationCode() == CancellationErrorCode::ConnectionFailure);
+            SPXTEST_REQUIRE(error->GetCancellationCode() == CancellationErrorCode::ConnectionFailure);
             SPXTEST_REQUIRE_THAT(error->GetDetails(), Catch::Contains("Connection failed", Catch::CaseSensitive::No));
             m_promise.set_value();
         }
@@ -268,7 +268,7 @@ private:
 
 TEST_CASE("Port specification", "[usp]")
 {
-    SECTION("Valid port specification")
+    SPXTEST_SECTION("Valid port specification")
     {
         auto service = std::make_shared<CSpxThreadService>();
         service->Init();
@@ -288,7 +288,7 @@ TEST_CASE("Port specification", "[usp]")
         callbacks->WaitForErrorCallback();
     }
 
-    SECTION("Valid port specification 2")
+    SPXTEST_SECTION("Valid port specification 2")
     {
         auto service = std::make_shared<CSpxThreadService>();
         service->Init();
@@ -308,7 +308,7 @@ TEST_CASE("Port specification", "[usp]")
         callbacks->WaitForErrorCallback();
     }
 
-    SECTION("Invalid port specification")
+    SPXTEST_SECTION("Invalid port specification")
     {
         auto service = std::make_shared<CSpxThreadService>();
         service->Init();
@@ -331,8 +331,8 @@ TEST_CASE("USP binary message serialization optimisation", "[usp][binary_message
     memcpy(msg.Data(), original.c_str(), original.length() + 1);
 
     uint8_t* ptrData = msg.Data();
-    REQUIRE(ptrData != nullptr);
-    REQUIRE(ptrData[0] == 'T');
+    SPXTEST_REQUIRE(ptrData != nullptr);
+    SPXTEST_REQUIRE(ptrData[0] == 'T');
 
     std::shared_ptr<uint8_t> serialized;
     size_t bytes = msg.Serialize(serialized);
@@ -341,5 +341,5 @@ TEST_CASE("USP binary message serialization optimisation", "[usp][binary_message
     ptrData = msg.Data();
 
     std::string afterSerialization(reinterpret_cast<char*>(ptrData), original.length());
-    REQUIRE(original == afterSerialization);
+    SPXTEST_REQUIRE(original == afterSerialization);
 }

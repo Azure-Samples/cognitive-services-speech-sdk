@@ -65,6 +65,11 @@ SPXAPI diagnostics_log_stop_logging()
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
+SPXAPI_(void) diagnostics_log_trace_string(int level, const char* pszTitle, const char* fileName, const int lineNumber, const char* psz)
+{
+    diagnostics_log_trace_message(level, pszTitle, fileName, lineNumber, psz);
+}
+
 SPXAPI_(void) diagnostics_log_trace_message(int level, const char* pszTitle, const char* fileName, const int lineNumber, const char* pszFormat, ...)
 {
     try

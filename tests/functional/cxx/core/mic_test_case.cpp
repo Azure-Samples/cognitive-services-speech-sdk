@@ -73,35 +73,35 @@ public:
     int GetNumCallsToSetFormat() const
     {
         unique_lock<mutex> lock(m_mutex);
-        REQUIRE(!m_running);
+        SPXTEST_REQUIRE(!m_running);
         return m_setFormatCallCounter;
     }
 
     int GetNumCallsToSetFormatWithNullptr() const
     {
         unique_lock<mutex> lock(m_mutex);
-        REQUIRE(!m_running);
+        SPXTEST_REQUIRE(!m_running);
         return m_setFormatWithNullptrCallCounter;
     }
 
     int GetNumCallsToProcessAudio() const
     {
         unique_lock<mutex> lock(m_mutex);
-        REQUIRE(!m_running);
+        SPXTEST_REQUIRE(!m_running);
         return m_processAudioCallCounter;
     }
 
     const SPXWAVEFORMATEX& GetFormat() const
     {
         unique_lock<mutex> lock(m_mutex);
-        REQUIRE(!m_running);
+        SPXTEST_REQUIRE(!m_running);
         return m_format;
     }
 
     size_t GetTotalAudioBytes() const
     {
         unique_lock<mutex> lock(m_mutex);
-        REQUIRE(!m_running);
+        SPXTEST_REQUIRE(!m_running);
         return accumulate(m_data.begin(), m_data.end(),
             size_t(0), // start with first element
             [](size_t total, const DataBuffer& buffer )
@@ -113,7 +113,7 @@ public:
     void Reset()
     {
         unique_lock<mutex> lock(m_mutex);
-        REQUIRE(!m_running);
+        SPXTEST_REQUIRE(!m_running);
         m_running = true;
         m_format = { 0, 0, 0, 0, 0, 0, 0 };
         m_data.clear();
@@ -188,30 +188,30 @@ public:
 
 void CheckFormatIsValid(const SPXWAVEFORMATEX& format)
 {
-    REQUIRE(format.wFormatTag != 0);
-    REQUIRE(format.nChannels != 0);
-    REQUIRE(format.nSamplesPerSec != 0);
-    REQUIRE(format.wBitsPerSample != 0);
+    SPXTEST_REQUIRE(format.wFormatTag != 0);
+    SPXTEST_REQUIRE(format.nChannels != 0);
+    SPXTEST_REQUIRE(format.nSamplesPerSec != 0);
+    SPXTEST_REQUIRE(format.wBitsPerSample != 0);
 }
 
 void RunMicAndCheckStateTransitions(const shared_ptr<ISpxAudioPump>& mic, const shared_ptr<AudioTestSink>& sink)
 {
-    REQUIRE(mic->GetState() == ISpxAudioPump::State::NoInput);
+    SPXTEST_REQUIRE(mic->GetState() == ISpxAudioPump::State::NoInput);
     mic->StartPump(sink);
-    REQUIRE(mic->GetState() == ISpxAudioPump::State::Processing);
+    SPXTEST_REQUIRE(mic->GetState() == ISpxAudioPump::State::Processing);
     sink->WaitAndStop(3);
-    REQUIRE(mic->GetState() == ISpxAudioPump::State::Processing);
+    SPXTEST_REQUIRE(mic->GetState() == ISpxAudioPump::State::Processing);
     mic->StopPump();
-    REQUIRE(mic->GetState() == ISpxAudioPump::State::NoInput);
+    SPXTEST_REQUIRE(mic->GetState() == ISpxAudioPump::State::NoInput);
 }
 
 void CheckThatSinkReceivedAudioData(const shared_ptr<AudioTestSink>& sink)
 {
-    REQUIRE(sink->GetNumCallsToSetFormat() == 1);
-    REQUIRE(sink->GetNumCallsToSetFormatWithNullptr() == 1);
-    REQUIRE(sink->GetNumCallsToProcessAudio() != 0);
+    SPXTEST_REQUIRE(sink->GetNumCallsToSetFormat() == 1);
+    SPXTEST_REQUIRE(sink->GetNumCallsToSetFormatWithNullptr() == 1);
+    SPXTEST_REQUIRE(sink->GetNumCallsToProcessAudio() != 0);
     CheckFormatIsValid(sink->GetFormat());
-    REQUIRE(sink->GetTotalAudioBytes() != 0);
+    SPXTEST_REQUIRE(sink->GetTotalAudioBytes() != 0);
 }
 
 
@@ -220,32 +220,32 @@ TEST_CASE("Mic is properly functioning", "[!hide][audio][mic]")
 
     const auto& mic = SpxCreateObjectWithSite<ISpxAudioPump>("CSpxMicrophonePump", SpxGetRootSite());
 
-    SECTION("freshly created mic is properly initialized")
+    SPXTEST_SECTION("freshly created mic is properly initialized")
     {
-        REQUIRE(mic != nullptr);
-        REQUIRE(mic->GetState() == ISpxAudioPump::State::NoInput);
+        SPXTEST_REQUIRE(mic != nullptr);
+        SPXTEST_REQUIRE(mic->GetState() == ISpxAudioPump::State::NoInput);
     }
 
-    SECTION("freshly created mic provides a valid audio format")
+    SPXTEST_SECTION("freshly created mic provides a valid audio format")
     {
         SPXWAVEFORMATEX format;
-        REQUIRE(mic->GetFormat(&format, sizeof(format)) != 0);
+        SPXTEST_REQUIRE(mic->GetFormat(&format, sizeof(format)) != 0);
         CheckFormatIsValid(format);
     }
 
-    SECTION("start/stop calls are reflected by corresponding state changes")
+    SPXTEST_SECTION("start/stop calls are reflected by corresponding state changes")
     {
         RunMicAndCheckStateTransitions(mic, make_shared<AudioTestSink>(false));
     }
 
-    SECTION("mic is pumping audio data into the processor")
+    SPXTEST_SECTION("mic is pumping audio data into the processor")
     {
         const auto& sink = make_shared<AudioTestSink>();
         RunMicAndCheckStateTransitions(mic, sink);
         CheckThatSinkReceivedAudioData(sink);
     }
 
-    SECTION("mic can be used (switched on and off) multiple times in a row")
+    SPXTEST_SECTION("mic can be used (switched on and off) multiple times in a row")
     {
         const auto& sink = make_shared<AudioTestSink>();
         RunMicAndCheckStateTransitions(mic, sink);
@@ -258,26 +258,26 @@ TEST_CASE("Mic is properly functioning", "[!hide][audio][mic]")
         CheckThatSinkReceivedAudioData(sink);
     }
 
-    SECTION("start/stop methods can be safely invoked multiples times in a row")
+    SPXTEST_SECTION("start/stop methods can be safely invoked multiples times in a row")
     {
         const auto& sink = make_shared<AudioTestSink>(false);
-        REQUIRE(mic->GetState() == ISpxAudioPump::State::NoInput);
+        SPXTEST_REQUIRE(mic->GetState() == ISpxAudioPump::State::NoInput);
         for (int j = 0; j < 3; ++j)
         {
             for (int i = 0; i < 3; ++i)
             {
                 mic->StartPump(sink);
-                REQUIRE(mic->GetState() == ISpxAudioPump::State::Processing);
+                SPXTEST_REQUIRE(mic->GetState() == ISpxAudioPump::State::Processing);
             }
             for (int i = 0; i < 3; ++i)
             {
                 mic->StopPump();
-                REQUIRE(mic->GetState() == ISpxAudioPump::State::NoInput);
+                SPXTEST_REQUIRE(mic->GetState() == ISpxAudioPump::State::NoInput);
             }
         }
     }
 
-    SECTION("mic instance can be used from multiple threads (one shared sink)")
+    SPXTEST_SECTION("mic instance can be used from multiple threads (one shared sink)")
     {
         const auto& sink = make_shared<AudioTestSink>();
         int numThreads = 5;
@@ -292,7 +292,7 @@ TEST_CASE("Mic is properly functioning", "[!hide][audio][mic]")
             mic->StopPump();
         };
 
-        REQUIRE(mic->GetState() == ISpxAudioPump::State::NoInput);
+        SPXTEST_REQUIRE(mic->GetState() == ISpxAudioPump::State::NoInput);
 
         for (int j = 0; j < 3; ++j)
         {
@@ -303,23 +303,25 @@ TEST_CASE("Mic is properly functioning", "[!hide][audio][mic]")
                 v.emplace_back(run);
             }
 
-            SPXTEST_CHECK(barrier.await(timeout)); // 1
+            bool check1 = barrier.await(timeout);
+            SPXTEST_CHECK(check1); // 1
             sink->WaitAndStop(3);
-            SPXTEST_CHECK(barrier.await(timeout)); // 2
+            bool check2 = barrier.await(timeout);
+            SPXTEST_CHECK(check2); // 2
 
             for (auto& t : v)
             {
                 t.join();
             }
 
-            REQUIRE(mic->GetState() == ISpxAudioPump::State::NoInput);
+            SPXTEST_REQUIRE(mic->GetState() == ISpxAudioPump::State::NoInput);
 
             CheckThatSinkReceivedAudioData(sink);
             sink->Reset();
         }
     }
 
-    SECTION("different mic instances can be used from multiple threads (different sinks)")
+    SPXTEST_SECTION("different mic instances can be used from multiple threads (different sinks)")
     {
         unsigned int numThreads = 3;
         CyclicBarrier barrier(numThreads + 1);
@@ -351,7 +353,8 @@ TEST_CASE("Mic is properly functioning", "[!hide][audio][mic]")
                 v.emplace_back(run);
             }
 
-            SPXTEST_CHECK(barrier.await(timeout)); // 1
+            auto check1 = barrier.await(timeout);
+            SPXTEST_CHECK(check1); // 1
 
             {
                 unique_lock<mutex> lock(m);
@@ -362,7 +365,8 @@ TEST_CASE("Mic is properly functioning", "[!hide][audio][mic]")
                 }
             }
 
-            SPXTEST_CHECK(barrier.await(timeout)); // 2
+            auto check2 = barrier.await(timeout);
+            SPXTEST_CHECK(check2); // 2
 
             for (auto& t : v)
             {
@@ -377,7 +381,7 @@ TEST_CASE("Mic is properly functioning", "[!hide][audio][mic]")
         }
     }
 
-    SECTION("stress-test mic with multiple threads (no lock-step syncronization)")
+    SPXTEST_SECTION("stress-test mic with multiple threads (no lock-step syncronization)")
     {
         int numThreads = 10;
         mutex m;
@@ -428,23 +432,23 @@ TEST_CASE("Mic is properly functioning", "[!hide][audio][mic]")
             for (auto& sink : sinks)
             {
                 sink->WaitAndStop(0);
-                REQUIRE(sink->GetNumCallsToSetFormat() == numCycles);
-                REQUIRE(sink->GetNumCallsToSetFormatWithNullptr() == numCycles);
-                REQUIRE(sink->GetNumCallsToProcessAudio() != 0);
+                SPXTEST_REQUIRE(sink->GetNumCallsToSetFormat() == numCycles);
+                SPXTEST_REQUIRE(sink->GetNumCallsToSetFormatWithNullptr() == numCycles);
+                SPXTEST_REQUIRE(sink->GetNumCallsToProcessAudio() != 0);
                 CheckFormatIsValid(sink->GetFormat());
-                REQUIRE(sink->GetTotalAudioBytes() != 0);
+                SPXTEST_REQUIRE(sink->GetTotalAudioBytes() != 0);
             }
             sinks.clear();
         }
     }
 
-    SECTION("check a few corner cases")
+    SPXTEST_SECTION("check a few corner cases")
     {
-        REQUIRE(mic->GetFormat(nullptr, 0) != 0);
-        REQUIRE(mic->GetFormat(nullptr, uint16_t(-1)) != 0);
+        SPXTEST_REQUIRE(mic->GetFormat(nullptr, 0) != 0);
+        SPXTEST_REQUIRE(mic->GetFormat(nullptr, uint16_t(-1)) != 0);
         vector<char> x(sizeof(SPXWAVEFORMATEX)/sizeof(char));
-        REQUIRE(mic->GetFormat(reinterpret_cast<SPXWAVEFORMATEX*>(x.data()), 1) != 0);
+        SPXTEST_REQUIRE(mic->GetFormat(reinterpret_cast<SPXWAVEFORMATEX*>(x.data()), 1) != 0);
         CHECK_THROWS(mic->StartPump(nullptr));
-        REQUIRE(mic->GetState() == ISpxAudioPump::State::NoInput);
+        SPXTEST_REQUIRE(mic->GetState() == ISpxAudioPump::State::NoInput);
     }
 }

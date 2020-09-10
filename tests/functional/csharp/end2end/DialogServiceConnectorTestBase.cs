@@ -12,7 +12,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
     using static Config;
 
     [TestClass]
-    public class DialogServiceConnectorTestBase
+    public class DialogServiceConnectorTestBase : LoggingTestBase
     {
         public static string inputDir;
         public static string subscriptionKey;
@@ -25,6 +25,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [ClassInitialize]
         public static void BaseClassInitialize(TestContext context)
         {
+            LoggingTestBaseInit(context);
+
             // Ignore for now, using AutoReply
             config = new Config(context);
             botSecret = DefaultSettingsMap[DefaultSettingKeys.DIALOG_FUNCTIONAL_TEST_BOT];
@@ -34,6 +36,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
             Console.WriteLine("region: " + region);
             Console.WriteLine("input directory: " + inputDir);
+        }
+
+        [ClassCleanup]
+        public static void BaseClassCleanup()
+        {
+            LoggingTestBaseCleanup();
         }
 
         [TestInitialize]

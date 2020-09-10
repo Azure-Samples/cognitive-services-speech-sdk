@@ -181,12 +181,12 @@ TEST_CASE("Test JSON Generation", "[context_json]")
         expectedJson["intent"]["key"] = key;
 
         auto contextJson = adapterTest.GetSpeechContextJson();
-        REQUIRE(contextJson == expectedJson);
+        SPXTEST_REQUIRE(contextJson == expectedJson);
 
         session->SetNoIntent();
         contextJson = adapterTest.GetSpeechContextJson();
         json emptyJson;
-        REQUIRE(contextJson == emptyJson);
+        SPXTEST_REQUIRE(contextJson == emptyJson);
     }
 
     SPXTEST_SECTION("Test DGI Json")
@@ -218,7 +218,7 @@ TEST_CASE("Test JSON Generation", "[context_json]")
         expectedJson["dgi"]["Groups"] = json::array({ grammarJson });
 
         auto contextJson = adapterTest.GetSpeechContextJson();
-        REQUIRE(contextJson == expectedJson);
+        SPXTEST_REQUIRE(contextJson == expectedJson);
     }
 
     SPXTEST_SECTION("Test KeywordResult Json")
@@ -244,7 +244,7 @@ TEST_CASE("Test JSON Generation", "[context_json]")
                } };
 
         auto contextJson = adapterTest.GetSpeechContextJson();
-        REQUIRE(contextJson == expectedJson);
+        SPXTEST_REQUIRE(contextJson == expectedJson);
     }
 
     SPXTEST_SECTION("Test Dictation Json")
@@ -253,7 +253,7 @@ TEST_CASE("Test JSON Generation", "[context_json]")
         expectedJson["dictation"]["insertionPoint"]["left"] = "left";
         expectedJson["dictation"]["insertionPoint"]["right"] = "right";
         auto contextJson = adapterTest.GetSpeechContextJson();
-        REQUIRE(contextJson == expectedJson);
+        SPXTEST_REQUIRE(contextJson == expectedJson);
         // clean the data
         session->SetInsertLeftRight("", "");
 
@@ -267,7 +267,7 @@ TEST_CASE("Test JSON Generation", "[context_json]")
         auto contextJson = adapterTest.GetSpeechContextJson();
         auto contextJsonStr = contextJson.dump();
         auto expectedJsonStr = expectedJson.dump();
-        REQUIRE(contextJson == expectedJson);
+        SPXTEST_REQUIRE(contextJson == expectedJson);
         // clean the data
         session->SetTargetLanguages("");
     }
@@ -313,7 +313,7 @@ TEST_CASE("Test JSON Generation", "[context_json]")
         expectedJson["translationcontext"]["to"] = json(toLangs);
 
         auto contextJson = adapterTest.GetSpeechContextJson();
-        REQUIRE(contextJson == expectedJson);
+        SPXTEST_REQUIRE(contextJson == expectedJson);
 
         for (auto& pair : voiceNameMap)
         {
@@ -323,7 +323,7 @@ TEST_CASE("Test JSON Generation", "[context_json]")
         expectedJson["translation"]["onSuccess"]["action"] = "Synthesize";
         expectedJson["synthesis"]["defaultVoices"] = json(std::move(voiceNameMap));
         contextJson = adapterTest.GetSpeechContextJson();
-        REQUIRE(contextJson == expectedJson);
+        SPXTEST_REQUIRE(contextJson == expectedJson);
     }
 
     SPXTEST_SECTION("Test SR NewEndpoint Json")
@@ -361,7 +361,7 @@ TEST_CASE("Test JSON Generation", "[context_json]")
         expectedJson["phraseOutput"]["phraseResults"]["resultType"] = "Always";
 
         auto contextJson = adapterTest.GetSpeechContextJson();
-        REQUIRE(contextJson == expectedJson);
+        SPXTEST_REQUIRE(contextJson == expectedJson);
 
         for (auto& pair : languageToEndpointIdMap)
         {
@@ -380,7 +380,7 @@ TEST_CASE("Test JSON Generation", "[context_json]")
         customModelsJson.push_back(move(frJson));
         expectedJson["phraseDetection"]["customModels"] = move(customModelsJson);
         contextJson = adapterTest.GetSpeechContextJson();
-        REQUIRE(contextJson == expectedJson);
+        SPXTEST_REQUIRE(contextJson == expectedJson);
     }
 
     SPXTEST_SECTION("Test Language Detection Only Json")
@@ -401,6 +401,6 @@ TEST_CASE("Test JSON Generation", "[context_json]")
         expectedJson["languageId"] = languageIdJson;
 
         auto contextJson = adapterTest.GetSpeechContextJson();
-        REQUIRE(contextJson == expectedJson);
+        SPXTEST_REQUIRE(contextJson == expectedJson);
     }
 }

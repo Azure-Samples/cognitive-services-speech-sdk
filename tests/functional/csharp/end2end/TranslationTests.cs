@@ -16,6 +16,7 @@ using System.Threading.Tasks;
 
 namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 {
+    using static SPXTEST;
     using static Config;
     using static SpeechRecognitionTestsHelper;
     using static TranslationTestsHelper;
@@ -38,13 +39,21 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [ClassInitialize]
         public static void TestClassinitialize(TestContext context)
         {
+            LoggingTestBaseInit(context);
             BaseClassInit(context);
+
             synthesisDir = "synthesis".GetRootRelativePath();
             deploymentId = DefaultSettingsMap[DefaultSettingKeys.DEPLOYMENT_ID];
             endpointInString = String.Format("wss://{0}.s2s.speech.microsoft.com/speech/translation/cognitiveservices/v1", region);
             endpointUrl = new Uri(endpointInString);
             hostInString = String.Format("wss://{0}.s2s.speech.microsoft.com", region);
             hostUrl = new Uri(hostInString);
+        }
+
+        [ClassCleanup]
+        new public static void TestClassCleanup()
+        {
+            LoggingTestBaseCleanup();
         }
 
         [TestInitialize]
@@ -62,9 +71,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
             using (var translationRecognizer = TrackSessionId(new TranslationRecognizer(config, audioInput)))
             {
-                Assert.AreEqual(Language.EN, translationRecognizer.SpeechRecognitionLanguage);
-                CollectionAssert.AreEqual(new List<string> { Language.DE }, translationRecognizer.TargetLanguages.ToList());
-                Assert.AreEqual(String.Empty, translationRecognizer.VoiceName);
+                SPXTEST_ARE_EQUAL(Language.EN, translationRecognizer.SpeechRecognitionLanguage);
+                SPXTEST_ARE_EQUAL(new List<string> { Language.DE }, translationRecognizer.TargetLanguages.ToList());
+                SPXTEST_ARE_EQUAL(String.Empty, translationRecognizer.VoiceName);
             }
         }
 
@@ -80,9 +89,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
             using (var translationRecognizer = TrackSessionId(new TranslationRecognizer(config, audioInput)))
             {
-                Assert.AreEqual(fromLanguage, translationRecognizer.SpeechRecognitionLanguage);
-                CollectionAssert.AreEqual(toLanguages, translationRecognizer.TargetLanguages.ToList());
-                Assert.AreEqual(String.Empty, translationRecognizer.VoiceName);
+                SPXTEST_ARE_EQUAL(fromLanguage, translationRecognizer.SpeechRecognitionLanguage);
+                SPXTEST_ARE_EQUAL(toLanguages, translationRecognizer.TargetLanguages.ToList());
+                SPXTEST_ARE_EQUAL(String.Empty, translationRecognizer.VoiceName);
             }
         }
 
@@ -95,9 +104,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var translationRecognizer = TrackSessionId(new TranslationRecognizer(config, audioInput)))
             {
                 var result = await translationRecognizer.RecognizeOnceAsync().ConfigureAwait(false);
-                Assert.AreEqual(ResultReason.Canceled, result.Reason);
+                SPXTEST_ARE_EQUAL(ResultReason.Canceled, result.Reason);
                 var errorCode = CancellationDetails.FromResult(result).ErrorCode;
-                Assert.AreEqual(CancellationErrorCode.BadRequest, errorCode);
+                SPXTEST_ARE_EQUAL(CancellationErrorCode.BadRequest, errorCode);
             }
         }
 
@@ -112,10 +121,10 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 var result = await translationRecognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 var errorDetails = CancellationDetails.FromResult(result);
                 // Only translation error.
-                Assert.IsTrue(errorDetails.ErrorDetails.Contains("Please verify the provided subscription details and language information"), "Actual error:'" + errorDetails.ErrorDetails + "' does not contain expected string.");
-                Assert.AreEqual(CancellationErrorCode.BadRequest, errorDetails.ErrorCode);
-                Assert.AreEqual(ResultReason.Canceled, result.Reason);
-                Assert.AreEqual("", result.Text);
+                SPXTEST_ISTRUE(errorDetails.ErrorDetails.Contains("Please verify the provided subscription details and language information"), "Actual error:'" + errorDetails.ErrorDetails + "' does not contain expected string.");
+                SPXTEST_ARE_EQUAL(CancellationErrorCode.BadRequest, errorDetails.ErrorCode);
+                SPXTEST_ARE_EQUAL(ResultReason.Canceled, result.Reason);
+                SPXTEST_ARE_EQUAL("", result.Text);
             }
         }
 
@@ -129,9 +138,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var translationRecognizer = TrackSessionId(new TranslationRecognizer(config, audioInput)))
             {
                 var result = await translationRecognizer.RecognizeOnceAsync().ConfigureAwait(false);
-                Assert.AreEqual(ResultReason.TranslatedSpeech, result.Reason);
-                Assert.AreEqual(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text, result.Text);
-                Assert.AreEqual(1, result.Translations.Count);
+                SPXTEST_ARE_EQUAL(ResultReason.TranslatedSpeech, result.Reason);
+                SPXTEST_ARE_EQUAL(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text, result.Text);
+                SPXTEST_ARE_EQUAL(1, result.Translations.Count);
                 AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.DE][0].Text, result.Translations[Language.DE]);
                 // Default output format is simple.
                 AssertDetailedOutput(result, false);
@@ -152,9 +161,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
             using (var translationRecognizer = TrackSessionId(new TranslationRecognizer(config, audioInput)))
             {
-                Assert.AreEqual(fromLanguage, translationRecognizer.SpeechRecognitionLanguage);
-                CollectionAssert.AreEqual(toLanguages, translationRecognizer.TargetLanguages.ToList());
-                Assert.AreEqual(voice, translationRecognizer.VoiceName);
+                SPXTEST_ARE_EQUAL(fromLanguage, translationRecognizer.SpeechRecognitionLanguage);
+                SPXTEST_ARE_EQUAL(toLanguages, translationRecognizer.TargetLanguages.ToList());
+                SPXTEST_ARE_EQUAL(voice, translationRecognizer.VoiceName);
             }
         }
 
@@ -165,13 +174,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var toLanguages = new List<string>() { "invalidLanguages" };
             var result = await this.translationHelper.GetTranslationFinalResult(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath(), Language.EN, toLanguages);
 
-            Assert.IsNotNull(result, AssertOutput.TranslationShouldNotBeNull);
+            SPXTEST_ISNOTNULL(result, AssertOutput.TranslationShouldNotBeNull);
             var errorDetails = CancellationDetails.FromResult(result).ErrorDetails;
-            Assert.IsFalse(String.IsNullOrEmpty(errorDetails), "Error details cannot be empty when translation language is invalid.");
+            SPXTEST_ISFALSE(String.IsNullOrEmpty(errorDetails), "Error details cannot be empty when translation language is invalid.");
             Console.WriteLine($"Result: {result.ToString()}, Error details: ErrorDetails: {errorDetails}");
-            Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason, "Unexpected result reason.");
+            SPXTEST_ARE_EQUAL(ResultReason.RecognizedSpeech, result.Reason, "Unexpected result reason.");
             AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text, result.Text);
-            Assert.AreEqual(0, result.Translations.Count, "Unmatched translation results.");
+            SPXTEST_ARE_EQUAL(0, result.Translations.Count, "Unmatched translation results.");
             AssertMatching(TestData.ExpectedErrorDetails.InvalidTargetLanaguageErrorMessage, errorDetails);
         }
 
@@ -187,13 +196,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
             var expectedUtterances = AudioUtterancesMap[AudioUtteranceKeys.MULTIPLE_UTTERANCE_ENGLISH].Utterances[Language.EN].Where(t => !string.IsNullOrEmpty(t.Text)).ToArray();
 
-            Assert.AreEqual(expectedUtterances.Count(), actualTranslationsTextResults.Count());
+            SPXTEST_ARE_EQUAL(expectedUtterances.Count(), actualTranslationsTextResults.Count());
             for (var i = 0; i < actualTranslationsTextResults.Count(); i++)
             {
                 var result = actualTranslationsTextResults[i];
-                Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason, "Unmatched result reason.");
+                SPXTEST_ARE_EQUAL(ResultReason.RecognizedSpeech, result.Reason, "Unmatched result reason.");
 
-                Assert.AreEqual(0, result.Translations.Count, "Unmatched translation results");
+                SPXTEST_ARE_EQUAL(0, result.Translations.Count, "Unmatched translation results");
                 var errorDetails = CancellationDetails.FromResult(result).ErrorDetails;
                 AssertMatching(TestData.ExpectedErrorDetails.InvalidTargetLanaguageErrorMessage, errorDetails);
             }
@@ -243,11 +252,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 await Task.WhenAny(tcs.Task, Task.Delay(TimeSpan.FromSeconds(30)));
                 await recognizer.StopContinuousRecognitionAsync();
 
-                Assert.IsTrue(result != null, "No result received.");
-                Assert.AreEqual(CancellationErrorCode.ServiceError, errorCode, "Unmatched error code.");
+                SPXTEST_ISTRUE(result != null, "No result received.");
+                SPXTEST_ARE_EQUAL(CancellationErrorCode.ServiceError, errorCode, "Unmatched error code.");
                 AssertMatching(TestData.ExpectedErrorDetails.InvalidVoiceNameErrorMessage, errorDetails);
-                Assert.IsFalse(receivedSynthesizingEvent, "Received unexpected synthesizing event.");
-                Assert.AreEqual(ResultReason.TranslatedSpeech, result.Reason, "Unmatched result reason.");
+                SPXTEST_ISFALSE(receivedSynthesizingEvent, "Received unexpected synthesizing event.");
+                SPXTEST_ARE_EQUAL(ResultReason.TranslatedSpeech, result.Reason, "Unmatched result reason.");
                 AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text, result.Text);
                 AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.FR][0].Text, result.Translations[toLanguages[0]]);
             }
@@ -259,7 +268,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var toLanguages = new List<string>() { Language.DE, Language.ZH_CN };
             var result = await this.translationHelper.GetTranslationFinalResult(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath(), Language.EN, toLanguages);
 
-            Assert.IsNotNull(result, AssertOutput.TranslationShouldNotBeNull);
+            SPXTEST_ISNOTNULL(result, AssertOutput.TranslationShouldNotBeNull);
             Console.WriteLine(result.ToString());
 
             var errorDetails = result.Reason == ResultReason.Canceled ? CancellationDetails.FromResult(result).ErrorDetails : "";
@@ -278,7 +287,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
             var result = await this.translationHelper.GetTranslationFinalResult(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath(), Language.EN, toLanguages);
 
-            Assert.IsNotNull(result, AssertOutput.TranslationShouldNotBeNull);
+            SPXTEST_ISNOTNULL(result, AssertOutput.TranslationShouldNotBeNull);
             Console.WriteLine(result.ToString());
 
             var errorDetails = result.Reason == ResultReason.Canceled ? CancellationDetails.FromResult(result).ErrorDetails : "";
@@ -305,7 +314,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var expectedTranslations = AudioUtterancesMap[AudioUtteranceKeys.MULTIPLE_UTTERANCE_ENGLISH].Utterances[Language.DE].Where(t => !string.IsNullOrEmpty(t.Text)).ToArray();
 
             // compare only nonempty utterances, either expected or actual
-            Assert.AreEqual(expectedUtterances.Count(), actualTranslationsTextResults.Count());
+            SPXTEST_ARE_EQUAL(expectedUtterances.Count(), actualTranslationsTextResults.Count());
             for (var i = 0; i < actualTranslations.Count; i++)
             {
                 Assert.IsTrue(LevenshteinRatio(Normalize(expectedUtterances[i].Text), Normalize(actualRecognitionTextResults[i])) > TestData.Levenshtein.SimilarityScoreThreshold);
@@ -319,10 +328,10 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var toLanguages = new List<string>() { Language.FR, Language.ES };
 
             var actualTranslations = await this.translationHelper.GetTranslationRecognizedContinuous(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_GERMAN].FilePath.GetRootRelativePath(), Language.DE_DE, toLanguages);
-            Assert.AreEqual(1, actualTranslations[ResultType.RecognizedText].Count);
+            SPXTEST_ARE_EQUAL(1, actualTranslations[ResultType.RecognizedText].Count);
             var actualTranslationRecognition = (TranslationRecognitionEventArgs)actualTranslations[ResultType.RecognizedText].Single();
 
-            Assert.AreNotEqual(ResultReason.Canceled, actualTranslationRecognition.Result.Reason);
+            SPXTEST_ARE_NOT_EQUAL(ResultReason.Canceled, actualTranslationRecognition.Result.Reason);
             AssertFuzzyMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_GERMAN].Utterances[Language.DE][0].Text, actualTranslationRecognition.Result.Text);
 
             AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_GERMAN].Utterances[Language.FR][0].Text, actualTranslationRecognition.Result.Translations[Language.FR]);
@@ -335,13 +344,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var toLanguages = new List<string>() { Language.DE };
 
             var actualTranslations = await this.translationHelper.GetTranslationRecognizedContinuous(AudioUtterancesMap[AudioUtteranceKeys.MULTIPLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath(), Language.EN, toLanguages, voice: Voice.DE);
-            Assert.AreNotEqual(actualTranslations[ResultType.Synthesis].Count, 0);
+            SPXTEST_ARE_NOT_EQUAL(actualTranslations[ResultType.Synthesis].Count, 0);
             var actualSynthesisByteResults = actualTranslations[ResultType.Synthesis].Cast<TranslationSynthesisEventArgs>().ToList();
             const int MinSize = 20000;
             foreach (var s in actualSynthesisByteResults)
             {
                 Console.WriteLine($"Audio.Length: {s.Result.GetAudio().Length}");
-                Assert.IsTrue(s.Result.GetAudio().Length > MinSize, $"Expects audio size {s.Result.GetAudio().Length} to be greater than {MinSize}");
+                SPXTEST_ISTRUE(s.Result.GetAudio().Length > MinSize, $"Expects audio size {s.Result.GetAudio().Length} to be greater than {MinSize}");
             }
         }
 
@@ -362,11 +371,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var toLanguages = new List<string>() { Language.FR };
 
             var actualTranslations = await this.translationHelper.GetTranslationRecognizedContinuous(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath(), Language.EN, toLanguages, voice: voice);
-            Assert.AreEqual(1, actualTranslations[ResultType.Synthesis].Count);
+            SPXTEST_ARE_EQUAL(1, actualTranslations[ResultType.Synthesis].Count);
 
             var actualSynthesisByteResult = (TranslationSynthesisEventArgs)actualTranslations[ResultType.Synthesis].Single();
             const int MinSize = 49000;
-            Assert.IsTrue(actualSynthesisByteResult.Result.GetAudio().Length > MinSize,
+            SPXTEST_ISTRUE(actualSynthesisByteResult.Result.GetAudio().Length > MinSize,
                 $"Received response for speech synthesis is less than {MinSize}: {actualSynthesisByteResult.Result.GetAudio().Length}.");
         }
 
@@ -376,15 +385,15 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var toLanguages = new List<string>() { Language.FR };
 
             var actualTranslations = await this.translationHelper.GetTranslationRecognizedContinuous(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath(), Language.EN, toLanguages, Voice.FR);
-            Assert.AreEqual(1, actualTranslations[ResultType.RecognizedText].Count);
-            Assert.AreEqual(1, actualTranslations[ResultType.Synthesis].Count);
+            SPXTEST_ARE_EQUAL(1, actualTranslations[ResultType.RecognizedText].Count);
+            SPXTEST_ARE_EQUAL(1, actualTranslations[ResultType.Synthesis].Count);
 
             var actualTextResult = (TranslationRecognitionEventArgs)actualTranslations[ResultType.RecognizedText].Single();
-            Assert.AreEqual(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text, actualTextResult.Result.Text);
+            SPXTEST_ARE_EQUAL(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text, actualTextResult.Result.Text);
 
             var actualSynthesisByteResult = (TranslationSynthesisEventArgs)actualTranslations[ResultType.Synthesis].Single();
             const int MinSize = 50000;
-            Assert.IsTrue(actualSynthesisByteResult.Result.GetAudio().Length > MinSize,
+            SPXTEST_ISTRUE(actualSynthesisByteResult.Result.GetAudio().Length > MinSize,
                 $"Received response for speech synthesis is less than {MinSize}: {actualSynthesisByteResult.Result.GetAudio().Length}.");
         }
 
@@ -394,14 +403,14 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var toLanguages = new List<string>() { Language.TR };
 
             var actualTranslations = await this.translationHelper.GetTranslationRecognizingContinuous(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath(), Language.EN, toLanguages);
-            Assert.AreNotEqual(actualTranslations[ResultType.RecognizedText].Count, 0, "Empty translation received");
+            SPXTEST_ARE_NOT_EQUAL(actualTranslations[ResultType.RecognizedText].Count, 0, "Empty translation received");
             var finalResultText = actualTranslations[ResultType.RecognizedText][0].Result.Text;
-            Assert.IsTrue(finalResultText.Contains("What"), $"Final result does not contain expected string \"What\", but is {finalResultText}");
+            SPXTEST_ISTRUE(finalResultText.Contains("What"), $"Final result does not contain expected string \"What\", but is {finalResultText}");
 
             if (actualTranslations[ResultType.RecognizingText].Count > 0)
             {
                 var lastIntermediateResultText = actualTranslations[ResultType.RecognizingText].Last().Result.Text;
-                Assert.IsTrue(lastIntermediateResultText.Contains("What"), $"Last intermediate result does not contain expected string \"What\", but is {lastIntermediateResultText}");
+                SPXTEST_ISTRUE(lastIntermediateResultText.Contains("What"), $"Last intermediate result does not contain expected string \"What\", but is {lastIntermediateResultText}");
             }
         }
 
@@ -411,18 +420,18 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var toLanguages = new List<string>() { Language.DE };
             var result = await this.translationHelper.GetTranslationFinalResult(AudioUtterancesMap[AudioUtteranceKeys.SHORT_SILENCE].FilePath.GetRootRelativePath(), Language.EN, toLanguages);
 
-            Assert.IsNotNull(result, AssertOutput.TranslationShouldNotBeNull);
+            SPXTEST_ISNOTNULL(result, AssertOutput.TranslationShouldNotBeNull);
             Console.WriteLine(result.ToString());
 
             var errorDetails = result.Reason == ResultReason.Canceled ? CancellationDetails.FromResult(result).ErrorDetails : "";
             Console.WriteLine($"Reason: {result.Reason}, ErrorDetails: {errorDetails}");
 
-            Assert.AreEqual(ResultReason.NoMatch, result.Reason);
-            Assert.IsTrue(result.OffsetInTicks > 0 || result.Duration.Ticks > 0, $"Bad offset: {result.OffsetInTicks} or duration: {result.Duration}");
-            Assert.IsTrue(string.IsNullOrEmpty(result.Text), $"Bad result text: {result.Text}");
+            SPXTEST_ARE_EQUAL(ResultReason.NoMatch, result.Reason);
+            SPXTEST_ISTRUE(result.OffsetInTicks > 0 || result.Duration.Ticks > 0, $"Bad offset: {result.OffsetInTicks} or duration: {result.Duration}");
+            SPXTEST_ISTRUE(string.IsNullOrEmpty(result.Text), $"Bad result text: {result.Text}");
 
             var noMatch = NoMatchDetails.FromResult(result);
-            Assert.AreEqual(NoMatchReason.InitialSilenceTimeout, noMatch.Reason);
+            SPXTEST_ARE_EQUAL(NoMatchReason.InitialSilenceTimeout, noMatch.Reason);
         }
 
         [TestMethod]
@@ -431,14 +440,14 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var toLanguages = new List<string>() { Language.DE };
 
             var actualTranslations = await this.translationHelper.GetTranslationRecognizedContinuous(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_CATALAN].FilePath.GetRootRelativePath(), Language.CA_ES, toLanguages);
-            Assert.AreEqual(1, actualTranslations[ResultType.RecognizedText].Count, AssertOutput.WrongTranslatedUtterancesCount);
+            SPXTEST_ARE_EQUAL(1, actualTranslations[ResultType.RecognizedText].Count, AssertOutput.WrongTranslatedUtterancesCount);
             var actualTranslationRecognition = (TranslationRecognitionEventArgs)actualTranslations[ResultType.RecognizedText].Single();
 
-            Assert.AreNotEqual(ResultReason.Canceled, actualTranslationRecognition.Result.Reason);
-            Assert.IsTrue(LevenshteinRatio(Normalize(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_CATALAN].Utterances[Language.CA_ES][0].Text),
+            SPXTEST_ARE_NOT_EQUAL(ResultReason.Canceled, actualTranslationRecognition.Result.Reason);
+            SPXTEST_ISTRUE(LevenshteinRatio(Normalize(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_CATALAN].Utterances[Language.CA_ES][0].Text),
                 Normalize(actualTranslationRecognition.Result.Text)) > TestData.Levenshtein.SimilarityScoreThreshold);
 
-            Assert.IsTrue(LevenshteinRatio(Normalize(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_CATALAN].Utterances[Language.DE][0].Text),
+            SPXTEST_ISTRUE(LevenshteinRatio(Normalize(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_CATALAN].Utterances[Language.DE][0].Text),
                 Normalize(actualTranslationRecognition.Result.Translations[Language.DE])) > TestData.Levenshtein.SimilarityScoreThreshold);
         }
 
@@ -453,13 +462,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
             TranslationTestsHelper trHelper = new TranslationTestsHelper(mooncakeSubscriptionKey, mooncakeRegion);
             var actualTranslations = await trHelper.GetTranslationRecognizedContinuous(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_CATALAN].FilePath.GetRootRelativePath(), Language.CA_ES, toLanguages);
-            Assert.AreEqual(1, actualTranslations[ResultType.RecognizedText].Count, AssertOutput.WrongTranslatedUtterancesCount);
+            SPXTEST_ARE_EQUAL(1, actualTranslations[ResultType.RecognizedText].Count, AssertOutput.WrongTranslatedUtterancesCount);
             var actualTranslationRecognition = (TranslationRecognitionEventArgs)actualTranslations[ResultType.RecognizedText].Single();
 
-            Assert.AreNotEqual(ResultReason.Canceled, actualTranslationRecognition.Result.Reason);
-            Assert.IsTrue(LevenshteinRatio(Normalize(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_CATALAN].Utterances[Language.CA_ES][0].Text),
+            SPXTEST_ARE_NOT_EQUAL(ResultReason.Canceled, actualTranslationRecognition.Result.Reason);
+            SPXTEST_ISTRUE(LevenshteinRatio(Normalize(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_CATALAN].Utterances[Language.CA_ES][0].Text),
                 Normalize(actualTranslationRecognition.Result.Text)) > TestData.Levenshtein.SimilarityScoreThreshold);
-            Assert.IsTrue(LevenshteinRatio(Normalize(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_CATALAN].Utterances[Language.DE][0].Text),
+            SPXTEST_ISTRUE(LevenshteinRatio(Normalize(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_CATALAN].Utterances[Language.DE][0].Text),
                 Normalize(actualTranslationRecognition.Result.Translations[Language.DE])) > TestData.Levenshtein.SimilarityScoreThreshold);
         }
 
@@ -480,7 +489,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var recognizer = this.translationHelper.CreateTranslationRecognizer(AudioUtterancesMap[AudioUtteranceKeys.MULTIPLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath(), Language.CA_ES, toLanguages))
             {
                 Task singleShot = null;
-                Assert.ThrowsException<InvalidOperationException>(() =>
+                SPXTEST_THROWS<InvalidOperationException>(() =>
                 {
                     singleShot = recognizer.RecognizeOnceAsync();
                     Thread.Sleep(100);
@@ -495,11 +504,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public async Task TranslateFromEachLocaletoEachTextLang(string locale, string lang)
         {
             var result = await this.translationHelper.GetTranslationFinalResult(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath(), locale, new List<string> { lang });
-            Assert.IsNotNull(result, AssertOutput.TranslationShouldNotBeNull);
-            Assert.AreEqual(ResultReason.TranslatedSpeech, result.Reason, "Unmatched result reason.");
-            Assert.IsTrue(String.IsNullOrEmpty(CancellationDetails.FromResult(result).ErrorDetails));
-            Assert.IsFalse(String.IsNullOrEmpty(result.Text), $"locale: {locale}, language: {lang}, result: {result.ToString()}");
-            Assert.AreEqual(1, result.Translations.Count, AssertOutput.WrongTranslatedUtterancesCount);
+            SPXTEST_ISNOTNULL(result, AssertOutput.TranslationShouldNotBeNull);
+            SPXTEST_ARE_EQUAL(ResultReason.TranslatedSpeech, result.Reason, "Unmatched result reason.");
+            SPXTEST_ISTRUE(String.IsNullOrEmpty(CancellationDetails.FromResult(result).ErrorDetails));
+            SPXTEST_ISFALSE(String.IsNullOrEmpty(result.Text), $"locale: {locale}, language: {lang}, result: {result.ToString()}");
+            SPXTEST_ARE_EQUAL(1, result.Translations.Count, AssertOutput.WrongTranslatedUtterancesCount);
         }
 
         [DataTestMethod, TestCategory(TestCategory.LongRunning)]
@@ -544,25 +553,23 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     .Select(c => c.ToString())
                     .ToArray();
 
-                Assert.IsTrue(
-                    badCanceledEvents.Length == 0,
-                    "Cancelled events were raised that indicate an error occurred.\n{0}",
-                    string.Join("\n", badCanceledEvents));
+                var badEvents = string.Join("\n", badCanceledEvents);
+                SPXTEST_ISTRUE(badCanceledEvents.Length == 0, $"Cancelled events were raised that indicate an error occurred.\n{badEvents}");
 
-                Assert.IsFalse(string.IsNullOrEmpty(result?.Text), $"locale: { speechLang }, translateTo: { translateTo }, result: { result?.ToString() ?? "<<NULL>>" }");
-                Assert.IsTrue(callbacks.Synthesizing.Count > 0, "No synthesizing events were received");
+                SPXTEST_ISFALSE(string.IsNullOrEmpty(result?.Text), $"locale: { speechLang }, translateTo: { translateTo }, result: { result?.ToString() ?? "<<NULL>>" }");
+                SPXTEST_ISTRUE(callbacks.Synthesizing.Count > 0, "No synthesizing events were received");
                 for (int i = 0; i < callbacks.Synthesizing.Count; i++)
                 {
                     var synthResult = callbacks.Synthesizing[i]?.Result;
                     if (i < callbacks.Synthesizing.Count - 1)
                     {
-                        Assert.AreEqual(ResultReason.SynthesizingAudio, synthResult.Reason, "Wrong result reason at synthesizing event at index {0}", i);
-                        Assert.IsTrue(synthResult.GetAudio().Length > 0, "Synthesizing audio result at index {0} has no audio data", i);
+                        SPXTEST_ARE_EQUAL(ResultReason.SynthesizingAudio, synthResult.Reason, $"Wrong result reason at synthesizing event at index {i}");
+                        SPXTEST_ISTRUE(synthResult.GetAudio().Length > 0, "Synthesizing audio result at index {i} has no audio data");
                     }
                     else
                     {
-                        Assert.AreEqual(ResultReason.SynthesizingAudioCompleted, synthResult.Reason, "Wrong result reason at synthesizing event at index {0}", i);
-                        Assert.IsTrue(synthResult.GetAudio().Length == 0, "Synthesizing audio completed result at index {0} should have no audio data", i);
+                        SPXTEST_ARE_EQUAL(ResultReason.SynthesizingAudioCompleted, synthResult.Reason, $"Wrong result reason at synthesizing event at index {i}");
+                        SPXTEST_ISTRUE(synthResult.GetAudio().Length == 0, $"Synthesizing audio completed result at index {i} should have no audio data");
                     }
                 }
             }
@@ -582,10 +589,10 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public async Task TranslateFromENtoTongan()
         {
             var result = await this.translationHelper.GetTranslationFinalResult(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath(), Language.EN, new List<string> { "to" });
-            Assert.IsNotNull(result, "Failed to recognize and translate From English audio file to Tongal.");
-            Assert.AreEqual(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text, result.Text, "Failed to recognize text correctly.");
-            Assert.AreEqual(ResultReason.TranslatedSpeech, result.Reason, $"Unexpected result reason. Cancellation error details: { CancellationDetails.FromResult(result).ErrorDetails }");
-            Assert.AreEqual(1, result.Translations.Count, "Unmatched translation results.");
+            SPXTEST_ISNOTNULL(result, "Failed to recognize and translate From English audio file to Tongal.");
+            SPXTEST_ARE_EQUAL(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text, result.Text, "Failed to recognize text correctly.");
+            SPXTEST_ARE_EQUAL(ResultReason.TranslatedSpeech, result.Reason, $"Unexpected result reason. Cancellation error details: { CancellationDetails.FromResult(result).ErrorDetails }");
+            SPXTEST_ARE_EQUAL(1, result.Translations.Count, "Unmatched translation results.");
         }
 
         [TestMethod]
@@ -597,19 +604,19 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             config.AddTargetLanguage(Language.DE);
             var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
             var recognizer = new TranslationRecognizer(config, audioInput);
-            Assert.AreEqual(token, recognizer.AuthorizationToken);
+            SPXTEST_ARE_EQUAL(token, recognizer.AuthorizationToken);
 
             var newToken = "y";
             recognizer.AuthorizationToken = newToken;
-            Assert.AreEqual(token, config.AuthorizationToken);
-            Assert.AreEqual(newToken, recognizer.AuthorizationToken);
+            SPXTEST_ARE_EQUAL(token, config.AuthorizationToken);
+            SPXTEST_ARE_EQUAL(newToken, recognizer.AuthorizationToken);
         }
 
         [TestMethod]
         public void TestSetAndGetSubKey()
         {
             var config = SpeechTranslationConfig.FromSubscription("x", "westus");
-            Assert.AreEqual("x", config.SubscriptionKey);
+            SPXTEST_ARE_EQUAL("x", config.SubscriptionKey);
         }
 
         [TestMethod]
@@ -617,7 +624,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             var toLanguages = new List<string>() { Language.DE };
             var actualTranslations = await this.translationHelper.GetTranslationRecognizingContinuous(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath(), Language.EN, toLanguages, deploymentId);
-            Assert.AreNotEqual(actualTranslations[ResultType.RecognizedText].Count, 0, "Number of translations should not be zero.");
+            SPXTEST_ARE_NOT_EQUAL(actualTranslations[ResultType.RecognizedText].Count, 0, "Number of translations should not be zero.");
             AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.DE][0].Text, actualTranslations[ResultType.RecognizedText].Last().Result.Translations[Language.DE]);
         }
 
@@ -626,11 +633,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             var toLanguages = new List<string>() { Language.DE };
             var actualTranslations = await this.translationHelper.GetTranslationRecognizingContinuous(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath(), "", toLanguages, "invalidid", true);
-            Assert.AreEqual(0, actualTranslations[ResultType.RecognizedText].Count, "Number of translations should be zero.");
-            Assert.AreEqual(0, actualTranslations[ResultType.RecognizingText].Count, "Number of translations should be zero.");
-            Assert.AreEqual(1, actualTranslations[ResultType.Cancelled].Count, "Number of cancelled events should not be zero.");
+            SPXTEST_ARE_EQUAL(0, actualTranslations[ResultType.RecognizedText].Count, "Number of translations should be zero.");
+            SPXTEST_ARE_EQUAL(0, actualTranslations[ResultType.RecognizingText].Count, "Number of translations should be zero.");
+            SPXTEST_ARE_EQUAL(1, actualTranslations[ResultType.Cancelled].Count, "Number of cancelled events should not be zero.");
             var errorDetails = actualTranslations[ResultType.Cancelled].Cast<TranslationRecognitionCanceledEventArgs>().Last().ErrorDetails;
-            Assert.IsTrue(errorDetails.ToLowerInvariant().Contains("bad request"));
+            SPXTEST_ISTRUE(errorDetails.ToLowerInvariant().Contains("bad request"));
         }
 
         [TestMethod]
@@ -646,7 +653,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             Console.WriteLine($"Log file name {logFilename}");
 
             config.SetProperty(PropertyId.Speech_LogFilename, logFilename);
-            Assert.AreEqual(logFilename, config.GetProperty(PropertyId.Speech_LogFilename));
+            SPXTEST_ARE_EQUAL(logFilename, config.GetProperty(PropertyId.Speech_LogFilename));
             using (var recognizer = new TranslationRecognizer(config, audioInput))
             { recognizer.RecognizeOnceAsync().Wait(); }
 
@@ -658,7 +665,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 var stream = new FileStream(logFilename, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
                 var sr = new StreamReader(stream);
                 var contents = sr.ReadToEnd();
-                Assert.IsTrue(stream.Length > 0, "log file must contain logs after recognizer created '" + contents + "'");
+                SPXTEST_ISTRUE(stream.Length > 0, "log file must contain logs after recognizer created '" + contents + "'");
                 Console.WriteLine(contents);
                 stream.Dispose();
             }
@@ -704,12 +711,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 var allResultEvents = await this.translationHelper.DoTranslationAsync(recognizer, true);
 
-                Assert.AreEqual(1, allResultEvents[ResultType.RecognizedText].Count, "Bad count of translation events");
+                SPXTEST_ARE_EQUAL(1, allResultEvents[ResultType.RecognizedText].Count, "Bad count of translation events");
                 var translationTextEvent = (TranslationRecognitionEventArgs)allResultEvents[ResultType.RecognizedText].Single();
                 var translationTextResult = translationTextEvent.Result;
-                Assert.AreEqual(ResultReason.TranslatedSpeech, translationTextResult.Reason);
+                SPXTEST_ARE_EQUAL(ResultReason.TranslatedSpeech, translationTextResult.Reason);
                 AssertFuzzyMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_GERMAN].Utterances[Language.DE][0].Text, translationTextResult.Text);
-                Assert.AreEqual(2, translationTextResult.Translations.Count, "Bad count of translation utterances");
+                SPXTEST_ARE_EQUAL(2, translationTextResult.Translations.Count, "Bad count of translation utterances");
                 AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_GERMAN].Utterances[Language.FR][0].Text, translationTextResult.Translations[Language.FR]);
                 var expected = AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_GERMAN].Utterances[Language.ES].Select(x => x.Text).ToArray();
                 Console.WriteLine("Expected spanish one of:");
@@ -720,13 +727,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 Console.WriteLine($"Actually was {translationTextResult.Translations[Language.ES]} in spanish");
                 AssertOneEqual(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_GERMAN].Utterances[Language.ES].Select(x => x.Text).ToArray(), translationTextResult.Translations[Language.ES]);
 
-                Assert.AreNotEqual(allResultEvents[ResultType.Synthesis].Count, 0, "There should not be zero Synthesis events");
+                SPXTEST_ARE_NOT_EQUAL(allResultEvents[ResultType.Synthesis].Count, 0, "There should not be zero Synthesis events");
                 var synthesisResultEvents = allResultEvents[ResultType.Synthesis].Cast<TranslationSynthesisEventArgs>().ToList();
                 const int MinSize = 50000;
                 foreach (var s in synthesisResultEvents)
                 {
                     Console.WriteLine($"Audio.Length: {s.Result.GetAudio().Length}");
-                    Assert.IsTrue(s.Result.GetAudio().Length > MinSize, $"Expects audio size {s.Result.GetAudio().Length} to be greater than {MinSize}");
+                    SPXTEST_ISTRUE(s.Result.GetAudio().Length > MinSize, $"Expects audio size {s.Result.GetAudio().Length} to be greater than {MinSize}");
                 }
             }
         }
@@ -745,12 +752,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 var allResults = await this.translationHelper.DoTranslationAsync(recognizer, true);
 
-                Assert.AreEqual(1, allResults[ResultType.RecognizedText].Count, AssertOutput.WrongRecognizedUtterancesCount);
+                SPXTEST_ARE_EQUAL(1, allResults[ResultType.RecognizedText].Count, AssertOutput.WrongRecognizedUtterancesCount);
                 var translationTextEvent = (TranslationRecognitionEventArgs)allResults[ResultType.RecognizedText].Single();
                 var translationTextResult = translationTextEvent.Result;
-                Assert.AreEqual(ResultReason.TranslatedSpeech, translationTextResult.Reason);
+                SPXTEST_ARE_EQUAL(ResultReason.TranslatedSpeech, translationTextResult.Reason);
                 AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text, translationTextResult.Text);
-                Assert.AreEqual(1, translationTextResult.Translations.Count, AssertOutput.WrongTranslatedUtterancesCount);
+                SPXTEST_ARE_EQUAL(1, translationTextResult.Translations.Count, AssertOutput.WrongTranslatedUtterancesCount);
                 AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.FR][0].Text, translationTextResult.Translations[Language.FR]);
                 AssertDetailedOutput(translationTextResult, true);
             }
@@ -772,21 +779,21 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 var allResultEvents = await this.translationHelper.DoTranslationAsync(recognizer, true);
 
-                Assert.AreEqual(1, allResultEvents[ResultType.RecognizedText].Count, AssertOutput.WrongRecognizedUtterancesCount);
+                SPXTEST_ARE_EQUAL(1, allResultEvents[ResultType.RecognizedText].Count, AssertOutput.WrongRecognizedUtterancesCount);
                 var translationTextEvent = (TranslationRecognitionEventArgs)allResultEvents[ResultType.RecognizedText].Single();
                 var translationTextResult = translationTextEvent.Result;
-                Assert.AreEqual(ResultReason.TranslatedSpeech, translationTextResult.Reason);
+                SPXTEST_ARE_EQUAL(ResultReason.TranslatedSpeech, translationTextResult.Reason);
                 AssertFuzzyMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_GERMAN].Utterances[Language.DE][0].Text, translationTextResult.Text);
-                Assert.AreEqual(1, translationTextResult.Translations.Count, AssertOutput.WrongTranslatedUtterancesCount);
+                SPXTEST_ARE_EQUAL(1, translationTextResult.Translations.Count, AssertOutput.WrongTranslatedUtterancesCount);
                 AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_GERMAN].Utterances[Language.FR][0].Text, translationTextResult.Translations[Language.FR]);
 
-                Assert.AreNotEqual(allResultEvents[ResultType.Synthesis].Count, 0, AssertOutput.WrongSynthesizedUtterancesCount);
+                SPXTEST_ARE_NOT_EQUAL(allResultEvents[ResultType.Synthesis].Count, 0, AssertOutput.WrongSynthesizedUtterancesCount);
                 var synthesisResultEvents = allResultEvents[ResultType.Synthesis].Cast<TranslationSynthesisEventArgs>().ToList();
                 const int MinSize = 50000;
                 foreach (var s in synthesisResultEvents)
                 {
                     Console.WriteLine($"Audio.Length: {s.Result.GetAudio().Length}");
-                    Assert.IsTrue(s.Result.GetAudio().Length > MinSize, $"Expects audio size {s.Result.GetAudio().Length} to be greater than {MinSize}");
+                    SPXTEST_ISTRUE(s.Result.GetAudio().Length > MinSize, $"Expects audio size {s.Result.GetAudio().Length} to be greater than {MinSize}");
                 }
 
                 AssertDetailedOutput(translationTextResult, false);
@@ -806,12 +813,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 var allResultEvents = await this.translationHelper.DoTranslationAsync(recognizer, true);
 
-                Assert.AreEqual(1, allResultEvents[ResultType.RecognizedText].Count, AssertOutput.WrongRecognizedUtterancesCount);
+                SPXTEST_ARE_EQUAL(1, allResultEvents[ResultType.RecognizedText].Count, AssertOutput.WrongRecognizedUtterancesCount);
                 var translationTextEvent = (TranslationRecognitionEventArgs)allResultEvents[ResultType.RecognizedText].Single();
                 var translationTextResult = translationTextEvent.Result;
-                Assert.AreEqual(ResultReason.TranslatedSpeech, translationTextResult.Reason);
+                SPXTEST_ARE_EQUAL(ResultReason.TranslatedSpeech, translationTextResult.Reason);
                 AssertFuzzyMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_GERMAN].Utterances[Language.DE][0].Text, translationTextResult.Text);
-                Assert.AreEqual(1, translationTextResult.Translations.Count, AssertOutput.WrongTranslatedUtterancesCount);
+                SPXTEST_ARE_EQUAL(1, translationTextResult.Translations.Count, AssertOutput.WrongTranslatedUtterancesCount);
                 AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_GERMAN].Utterances[Language.FR][0].Text, translationTextResult.Translations[Language.FR]);
 
                 AssertDetailedOutput(translationTextResult, true);
@@ -831,12 +838,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 var allResults = await this.translationHelper.DoTranslationAsync(recognizer, true);
 
-                Assert.AreEqual(1, allResults[ResultType.RecognizedText].Count, AssertOutput.WrongRecognizedUtterancesCount);
+                SPXTEST_ARE_EQUAL(1, allResults[ResultType.RecognizedText].Count, AssertOutput.WrongRecognizedUtterancesCount);
                 var translationTextEvent = (TranslationRecognitionEventArgs)allResults[ResultType.RecognizedText].Single();
                 var translationTextResult = translationTextEvent.Result;
-                Assert.AreEqual(ResultReason.TranslatedSpeech, translationTextResult.Reason);
+                SPXTEST_ARE_EQUAL(ResultReason.TranslatedSpeech, translationTextResult.Reason);
                 AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text, translationTextResult.Text);
-                Assert.AreEqual(1, translationTextResult.Translations.Count, AssertOutput.WrongTranslatedUtterancesCount);
+                SPXTEST_ARE_EQUAL(1, translationTextResult.Translations.Count, AssertOutput.WrongTranslatedUtterancesCount);
                 AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.FR][0].Text, translationTextResult.Translations[Language.FR]);
 
                 AssertDetailedOutput(translationTextResult, true);
@@ -855,10 +862,10 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var recognizer = TrackSessionId(new TranslationRecognizer(config, audioInput)))
             {
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
-                Assert.AreEqual(ResultReason.TranslatedSpeech, result.Reason);
-                Assert.IsFalse(result.Text.Contains(AudioUtterancesMap[AudioUtteranceKeys.PROFANITY_SINGLE_UTTERANCE_ENGLISH_2].Utterances[Language.EN][0].ProfanityRaw));
-                Assert.AreEqual(1, result.Translations.Count, AssertOutput.WrongTranslatedUtterancesCount);
-                Assert.IsFalse(string.IsNullOrEmpty(result.Translations[Language.DE]));
+                SPXTEST_ARE_EQUAL(ResultReason.TranslatedSpeech, result.Reason);
+                SPXTEST_ISFALSE(result.Text.Contains(AudioUtterancesMap[AudioUtteranceKeys.PROFANITY_SINGLE_UTTERANCE_ENGLISH_2].Utterances[Language.EN][0].ProfanityRaw));
+                SPXTEST_ARE_EQUAL(1, result.Translations.Count, AssertOutput.WrongTranslatedUtterancesCount);
+                SPXTEST_ISFALSE(string.IsNullOrEmpty(result.Translations[Language.DE]));
                 WarnIfNotContains(result.Translations[Language.DE], AudioUtterancesMap[AudioUtteranceKeys.PROFANITY_SINGLE_UTTERANCE_ENGLISH_2].Utterances[Language.DE][0].ProfanityRemoved);
             }
 
@@ -866,10 +873,10 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var recognizer = TrackSessionId(new TranslationRecognizer(config, audioInput)))
             {
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
-                Assert.AreEqual(ResultReason.TranslatedSpeech, result.Reason);
+                SPXTEST_ARE_EQUAL(ResultReason.TranslatedSpeech, result.Reason);
                 AssertIfNotContains(result.Text, AudioUtterancesMap[AudioUtteranceKeys.PROFANITY_SINGLE_UTTERANCE_ENGLISH_2].Utterances[Language.EN][0].ProfanityMaskedPattern);
                 WarnIfNotContains(result.Text, AudioUtterancesMap[AudioUtteranceKeys.PROFANITY_SINGLE_UTTERANCE_ENGLISH_2].Utterances[Language.EN][0].ProfanityMasked);
-                Assert.AreEqual(1, result.Translations.Count, AssertOutput.WrongTranslatedUtterancesCount);
+                SPXTEST_ARE_EQUAL(1, result.Translations.Count, AssertOutput.WrongTranslatedUtterancesCount);
                 AssertIfNotContains(result.Translations[Language.DE], AudioUtterancesMap[AudioUtteranceKeys.PROFANITY_SINGLE_UTTERANCE_ENGLISH_2].Utterances[Language.DE][0].ProfanityMaskedPattern);
                 WarnIfNotContains(result.Translations[Language.DE], AudioUtterancesMap[AudioUtteranceKeys.PROFANTITY_SINGLE_UTTERANCE_ENGLISH_1].Utterances[Language.DE][0].ProfanityMasked);
             }
@@ -878,9 +885,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var recognizer = TrackSessionId(new TranslationRecognizer(config, audioInput)))
             {
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
-                Assert.AreEqual(ResultReason.TranslatedSpeech, result.Reason);
+                SPXTEST_ARE_EQUAL(ResultReason.TranslatedSpeech, result.Reason);
                 AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.PROFANITY_SINGLE_UTTERANCE_ENGLISH_2].Utterances[Language.EN][0].Text, result.Text);
-                Assert.AreEqual(1, result.Translations.Count, AssertOutput.WrongTranslatedUtterancesCount);
+                SPXTEST_ARE_EQUAL(1, result.Translations.Count, AssertOutput.WrongTranslatedUtterancesCount);
                 // this is the RAW output, so the RawUtteranceTranslation should be there.
                 AssertIfNotContains(result.Translations[Language.DE], AudioUtterancesMap[AudioUtteranceKeys.PROFANITY_SINGLE_UTTERANCE_ENGLISH_2].Utterances[Language.DE][0].Text);
             }
@@ -890,9 +897,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var recognizer = TrackSessionId(new TranslationRecognizer(config, audioInput)))
             {
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
-                Assert.AreEqual(ResultReason.TranslatedSpeech, result.Reason);
+                SPXTEST_ARE_EQUAL(ResultReason.TranslatedSpeech, result.Reason);
                 AssertIfNotContains(result.Text.ToLower(), AudioUtterancesMap[AudioUtteranceKeys.PROFANITY_SINGLE_UTTERANCE_ENGLISH_2].Utterances[Language.EN][0].ProfanityTagged.ToLower());
-                Assert.AreEqual(1, result.Translations.Count, AssertOutput.WrongTranslatedUtterancesCount);
+                SPXTEST_ARE_EQUAL(1, result.Translations.Count, AssertOutput.WrongTranslatedUtterancesCount);
                 AssertIfNotContains(result.Translations[Language.DE], AudioUtterancesMap[AudioUtteranceKeys.PROFANITY_SINGLE_UTTERANCE_ENGLISH_2].Utterances[Language.DE][0].ProfanityTagged);
             }
         }
@@ -905,49 +912,49 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             config.SpeechRecognitionLanguage = Language.EN;
             config.AddTargetLanguage(Language.DE);
             var targetLangs = config.GetProperty(PropertyId.SpeechServiceConnection_TranslationToLanguages);
-            Assert.AreEqual(Language.DE, targetLangs);
+            SPXTEST_ARE_EQUAL(Language.DE, targetLangs);
 
             config.AddTargetLanguage(Language.FR);
             targetLangs = config.GetProperty(PropertyId.SpeechServiceConnection_TranslationToLanguages);
-            Assert.AreEqual(Language.DE + "," + Language.FR, targetLangs);
+            SPXTEST_ARE_EQUAL(Language.DE + "," + Language.FR, targetLangs);
 
             config.RemoveTargetLanguage(Language.DE);
             targetLangs = config.GetProperty(PropertyId.SpeechServiceConnection_TranslationToLanguages);
-            Assert.AreEqual(Language.FR, targetLangs);
+            SPXTEST_ARE_EQUAL(Language.FR, targetLangs);
 
             config.AddTargetLanguage(Language.DE);
             targetLangs = config.GetProperty(PropertyId.SpeechServiceConnection_TranslationToLanguages);
-            Assert.AreEqual(Language.FR + "," + Language.DE, targetLangs);
+            SPXTEST_ARE_EQUAL(Language.FR + "," + Language.DE, targetLangs);
 
             using (var recognizer = TrackSessionId(new TranslationRecognizer(config, audioInput)))
             {
                 recognizer.AddTargetLanguage(Language.ES);
                 targetLangs = recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_TranslationToLanguages);
-                Assert.AreEqual(Language.FR + "," + Language.DE + "," + Language.ES, targetLangs);
+                SPXTEST_ARE_EQUAL(Language.FR + "," + Language.DE + "," + Language.ES, targetLangs);
 
                 var result = await recognizer.RecognizeOnceAsync();
-                Assert.AreEqual(ResultReason.TranslatedSpeech, result.Reason);
-                Assert.IsTrue(result.Text.Length > 0, $"result.Text.Length({result.Text.Length}) !> 0");
-                Assert.IsTrue(result.Translations[Language.DE].Length > 0, "result.Translations[Language.DE].Length !> 0");
-                Assert.IsTrue(result.Translations[Language.FR].Length > 0, "result.Translations[Language.FR].Length !> 0");
-                Assert.IsTrue(result.Translations[Language.ES].Length > 0, "result.Translations[Language.ES].Length !> 0");
+                SPXTEST_ARE_EQUAL(ResultReason.TranslatedSpeech, result.Reason);
+                SPXTEST_ISTRUE(result.Text.Length > 0, $"result.Text.Length({result.Text.Length}) !> 0");
+                SPXTEST_ISTRUE(result.Translations[Language.DE].Length > 0, "result.Translations[Language.DE].Length !> 0");
+                SPXTEST_ISTRUE(result.Translations[Language.FR].Length > 0, "result.Translations[Language.FR].Length !> 0");
+                SPXTEST_ISTRUE(result.Translations[Language.ES].Length > 0, "result.Translations[Language.ES].Length !> 0");
 
                 recognizer.RemoveTargetLanguage(Language.DE);
                 recognizer.RemoveTargetLanguage(Language.ES);
                 targetLangs = recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_TranslationToLanguages);
-                Assert.AreEqual(Language.FR, targetLangs);
+                SPXTEST_ARE_EQUAL(Language.FR, targetLangs);
 
                 recognizer.AddTargetLanguage(Language.ZH_CN);
                 targetLangs = recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_TranslationToLanguages);
-                Assert.AreEqual(Language.FR + "," + Language.ZH_CN, targetLangs);
+                SPXTEST_ARE_EQUAL(Language.FR + "," + Language.ZH_CN, targetLangs);
 
                 result = await recognizer.RecognizeOnceAsync();
-                Assert.AreEqual(ResultReason.TranslatedSpeech, result.Reason);
-                Assert.IsTrue(result.Text.Length > 0, "result.Text.Length !> 0");
-                Assert.IsTrue(result.Translations[Language.FR].Length > 0, $"result.Translations[Language.FR].Length({result.Translations[Language.FR].Length}) !> 0");
-                Assert.IsTrue(result.Translations[Language.ZH].Length > 0, $"result.Translations[Language.ZH].Length({result.Translations[Language.ZH].Length}) !> 0");
-                Assert.IsFalse(result.Translations.ContainsKey(Language.ES));
-                Assert.IsFalse(result.Translations.ContainsKey(Language.DE));
+                SPXTEST_ARE_EQUAL(ResultReason.TranslatedSpeech, result.Reason);
+                SPXTEST_ISTRUE(result.Text.Length > 0, "result.Text.Length !> 0");
+                SPXTEST_ISTRUE(result.Translations[Language.FR].Length > 0, $"result.Translations[Language.FR].Length({result.Translations[Language.FR].Length}) !> 0");
+                SPXTEST_ISTRUE(result.Translations[Language.ZH].Length > 0, $"result.Translations[Language.ZH].Length({result.Translations[Language.ZH].Length}) !> 0");
+                SPXTEST_ISFALSE(result.Translations.ContainsKey(Language.ES));
+                SPXTEST_ISFALSE(result.Translations.ContainsKey(Language.DE));
             }
         }
 
@@ -1031,13 +1038,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 await Task.WhenAny(tcs.Task, Task.Delay(TimeSpan.FromSeconds(300)));
                 await recognizer.StopContinuousRecognitionAsync();
 
-                Assert.AreEqual(recognizedResults.Count, translatedResultsDe.Count, $"recognized English count {recognizedResults.Count} not equal to translated German count {translatedResultsDe.Count}");
-                Assert.AreEqual(errorResults.Count, 0, $"errorResults count {errorResults.Count} not equal 0");
-                Assert.IsTrue(recognizedResults.Count > 0, $"recognizedResults.Count({recognizedResults.Count}) not equal to zero.");
-                Assert.IsTrue(translatedResultsFr.Count > 0, $"translatedResultsFr.Count({translatedResultsFr.Count}) !> zero.");
-                Assert.IsTrue(translatedResultsEs.Count > 0, $"translatedResultsEs.Count({translatedResultsEs.Count}) !> zero.");
-                Assert.IsTrue(translatedResultsFr.Count < translatedResultsDe.Count, $"translatedResultsFr.Count({translatedResultsFr.Count}) !< translatedResultsDe.Count({translatedResultsDe.Count})");
-                Assert.IsTrue(translatedResultsEs.Count < translatedResultsDe.Count, $"translatedResultsEs.Count({translatedResultsEs.Count}) !< translatedResultsDe.Count({translatedResultsDe.Count})");
+                SPXTEST_ARE_EQUAL(recognizedResults.Count, translatedResultsDe.Count, $"recognized English count {recognizedResults.Count} not equal to translated German count {translatedResultsDe.Count}");
+                SPXTEST_ARE_EQUAL(errorResults.Count, 0, $"errorResults count {errorResults.Count} not equal 0");
+                SPXTEST_ISTRUE(recognizedResults.Count > 0, $"recognizedResults.Count({recognizedResults.Count}) not equal to zero.");
+                SPXTEST_ISTRUE(translatedResultsFr.Count > 0, $"translatedResultsFr.Count({translatedResultsFr.Count}) !> zero.");
+                SPXTEST_ISTRUE(translatedResultsEs.Count > 0, $"translatedResultsEs.Count({translatedResultsEs.Count}) !> zero.");
+                SPXTEST_ISTRUE(translatedResultsFr.Count < translatedResultsDe.Count, $"translatedResultsFr.Count({translatedResultsFr.Count}) !< translatedResultsDe.Count({translatedResultsDe.Count})");
+                SPXTEST_ISTRUE(translatedResultsEs.Count < translatedResultsDe.Count, $"translatedResultsEs.Count({translatedResultsEs.Count}) !< translatedResultsDe.Count({translatedResultsDe.Count})");
             }
         }
 
@@ -1052,9 +1059,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var translationRecognizer = TrackSessionId(new TranslationRecognizer(config, audioInput)))
             {
                 var result = await translationRecognizer.RecognizeOnceAsync().ConfigureAwait(false);
-                Assert.AreEqual(ResultReason.TranslatedSpeech, result.Reason);
-                Assert.AreEqual(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text, result.Text);
-                Assert.AreEqual(1, result.Translations.Count);
+                SPXTEST_ARE_EQUAL(ResultReason.TranslatedSpeech, result.Reason);
+                SPXTEST_ARE_EQUAL(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text, result.Text);
+                SPXTEST_ARE_EQUAL(1, result.Translations.Count);
                 AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.DE][0].Text, result.Translations[Language.DE]);
                 // Default output format is simple.
                 AssertDetailedOutput(result, false);

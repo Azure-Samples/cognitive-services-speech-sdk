@@ -3,11 +3,29 @@
         <TargetFrameworks>netcoreapp2.0;net461</TargetFrameworks>
         <IsPackable>false</IsPackable>
     </PropertyGroup>
+  <PropertyGroup Condition="$(Configuration.Contains('Debug'))">
+    <DebugType>full</DebugType>
+  </PropertyGroup>
+  <PropertyGroup Condition="$(Configuration.Contains('Release'))">
+    <DebugType>pdbonly</DebugType>
+  </PropertyGroup>
+  <PropertyGroup Condition="$(SpeechPlatform.Contains('UnixOS'))">
+    <DefineConstants>UNIX</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="$(SpeechPlatform.Contains('IOS'))">
+    <DefineConstants>IOS</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'' == 'OS_BUILD'">
+    <DefineConstants>OS_BUILD</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="$(SpeechPlatform.Contains('MacOS'))">
+    <DefineConstants>OSX</DefineConstants>
+  </PropertyGroup>
     <ItemGroup>
         <Compile Include="..\console\util.cs" Link="util.cs" />
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="0.6.0" />
+        <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.13.0" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.7.0" />
         <PackageReference Include="MSTest.TestAdapter" Version="1.3.2" />
         <PackageReference Include="MSTest.TestFramework" Version="1.3.2" />

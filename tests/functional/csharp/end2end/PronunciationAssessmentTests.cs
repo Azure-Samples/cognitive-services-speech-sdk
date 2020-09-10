@@ -17,6 +17,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 {
     using System.IO;
     using static AssertHelpers;
+    using static SPXTEST;
     using static Config;
     using static SpeechRecognitionTestsHelper;
 
@@ -28,7 +29,14 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [ClassInitialize]
         public static void TestClassInitialize(TestContext context)
         {
+            LoggingTestBaseInit(context);
             BaseClassInit(context);
+        }
+
+        [ClassCleanup]
+        new public static void TestClassCleanup()
+        {
+            LoggingTestBaseCleanup();
         }
 
         [TestInitialize]
@@ -41,40 +49,40 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public void TestPronunciationAssessmentConfig()
         {
             var config = new PronunciationAssessmentConfig("reference", GradingSystem.HundredMark);
-            Assert.IsNotNull(config);
-            Assert.AreEqual("reference", config.ReferenceText);
+            SPXTEST_ISNOTNULL(config);
+            SPXTEST_ARE_EQUAL("reference", config.ReferenceText);
             var jo = JObject.Parse(config.ToJson());
-            Assert.AreEqual(config.ReferenceText, jo["referenceText"]);
-            Assert.AreEqual("HundredMark", jo["gradingSystem"]);
-            Assert.AreEqual("Phoneme", jo["granularity"]);
-            Assert.AreEqual("Comprehensive", jo["dimension"]);
+            SPXTEST_ARE_EQUAL(config.ReferenceText, jo["referenceText"]);
+            SPXTEST_ARE_EQUAL("HundredMark", jo["gradingSystem"]);
+            SPXTEST_ARE_EQUAL("Phoneme", jo["granularity"]);
+            SPXTEST_ARE_EQUAL("Comprehensive", jo["dimension"]);
 
             config = new PronunciationAssessmentConfig("reference", GradingSystem.HundredMark, Granularity.Word, true, "id");
             config.ReferenceText = "new reference";
             jo = JObject.Parse(config.ToJson());
-            Assert.AreEqual("new reference", jo["referenceText"]);
-            Assert.AreEqual("HundredMark", jo["gradingSystem"]);
-            Assert.AreEqual("Word", jo["granularity"]);
-            Assert.AreEqual("Comprehensive", jo["dimension"]);
-            Assert.IsTrue(jo["enableMiscue"].ToObject<bool>());
-            Assert.AreEqual("id", jo["scenarioId"]);
+            SPXTEST_ARE_EQUAL("new reference", jo["referenceText"]);
+            SPXTEST_ARE_EQUAL("HundredMark", jo["gradingSystem"]);
+            SPXTEST_ARE_EQUAL("Word", jo["granularity"]);
+            SPXTEST_ARE_EQUAL("Comprehensive", jo["dimension"]);
+            SPXTEST_ISTRUE(jo["enableMiscue"].ToObject<bool>());
+            SPXTEST_ARE_EQUAL("id", jo["scenarioId"]);
 
             var config2 = PronunciationAssessmentConfig.FromJson(config.ToJson());
-            Assert.IsNotNull(config2);
-            Assert.AreEqual(config.ToJson(), config2.ToJson());
+            SPXTEST_ISNOTNULL(config2);
+            SPXTEST_ARE_EQUAL(config.ToJson(), config2.ToJson());
 
-            Assert.ThrowsException<ApplicationException>(() =>
+            SPXTEST_THROWS<ApplicationException>(() =>
             {
                 var pronunciationAssessmentConfig = new PronunciationAssessmentConfig("reference", (GradingSystem) 8);
             });
 
-            Assert.ThrowsException<ApplicationException>(() =>
+            SPXTEST_THROWS<ApplicationException>(() =>
             {
                 var pronunciationAssessmentConfig = new PronunciationAssessmentConfig("reference",
                         GradingSystem.HundredMark, (Granularity) 8);
             });
 
-            Assert.ThrowsException<ApplicationException>(() =>
+            SPXTEST_THROWS<ApplicationException>(() =>
             {
                 var pronunciationAssessmentConfig = PronunciationAssessmentConfig.FromJson("invalid json");
             });
@@ -88,7 +96,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 var config = new PronunciationAssessmentConfig("reference");
                 config.ApplyTo(recognizer);
-                Assert.AreEqual(config.ToJson(), recognizer.Properties.GetProperty(PropertyId.PronunciationAssessment_Params));
+                SPXTEST_ARE_EQUAL(config.ToJson(), recognizer.Properties.GetProperty(PropertyId.PronunciationAssessment_Params));
             }
         }
 
@@ -108,7 +116,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var recognizer = TrackSessionId(new SpeechRecognizer(speechConfig, audioInput)))
             {
                 pronunciationAssessmentConfig.ApplyTo(recognizer);
-                Assert.AreEqual(pronunciationAssessmentConfig.ToJson(),
+                SPXTEST_ARE_EQUAL(pronunciationAssessmentConfig.ToJson(),
                     recognizer.Properties.GetProperty(PropertyId.PronunciationAssessment_Params));
                 var result = await helper.CompleteRecognizeOnceAsync(recognizer).ConfigureAwait(false);
                 Assert.IsTrue(LevenshteinRatio(
@@ -116,15 +124,15 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                         .Utterances["zh-CN"][0].Text, result.Text) >= TestData.Levenshtein.PronunciationSimilarityScoreThreshold);
                 var pronResult = PronunciationAssessmentResult.FromResult(result);
 
-                Assert.IsTrue(pronResult.AccuracyScore > 0);
-                Assert.IsTrue(pronResult.PronunciationScore > 0);
-                Assert.IsTrue(pronResult.CompletenessScore > 0);
-                Assert.IsTrue(pronResult.FluencyScore > 0);
+                SPXTEST_ISTRUE(pronResult.AccuracyScore > 0);
+                SPXTEST_ISTRUE(pronResult.PronunciationScore > 0);
+                SPXTEST_ISTRUE(pronResult.CompletenessScore > 0);
+                SPXTEST_ISTRUE(pronResult.FluencyScore > 0);
 
-                Assert.IsNotNull(pronResult.Words);
-                Assert.IsTrue(pronResult.Words.First().AccuracyScore > 0);
-                Assert.IsNotNull(pronResult.Words.First().Phonemes);
-                Assert.IsTrue(pronResult.Words.First().Phonemes.First().AccuracyScore > 0);
+                SPXTEST_ISNOTNULL(pronResult.Words);
+                SPXTEST_ISTRUE(pronResult.Words.First().AccuracyScore > 0);
+                SPXTEST_ISNOTNULL(pronResult.Words.First().Phonemes);
+                SPXTEST_ISTRUE(pronResult.Words.First().Phonemes.First().AccuracyScore > 0);
             }
         }
     }

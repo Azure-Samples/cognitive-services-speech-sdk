@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 
 namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 {
+    using static SPXTEST;
     using static CatchUtils;
     using static Config;
 
@@ -24,7 +25,14 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [ClassInitialize]
         public static void TestClassInitialize(TestContext context)
         {
+            LoggingTestBaseInit(context);
             BaseClassInit(context);
+        }
+
+        [ClassCleanup]
+        new public static void TestClassCleanup()
+        {
+            LoggingTestBaseCleanup();
         }
 
         [TestInitialize]
@@ -224,7 +232,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     var details = VoiceProfileCancellationDetails.FromResult(result);
 
                     var expectedSubstring = "can't be found";
-                    Assert.IsTrue(details.ErrorDetails.Contains(expectedSubstring),
+                    SPXTEST_ISTRUE(details.ErrorDetails.Contains(expectedSubstring),
                         $"Didn't find expected substring '{expectedSubstring}' in error details.\nActual: {details.ErrorDetails}");
                 }
                 finally
@@ -329,9 +337,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var subscriptionKey = SubscriptionsRegionsMap[index].Key;
             var subscriptionRegion = SubscriptionsRegionsMap[index].Region;
 
-            Assert.IsTrue(!string.IsNullOrEmpty(subscriptionKey),
+            SPXTEST_ISTRUE(!string.IsNullOrEmpty(subscriptionKey),
                 $"Couldn't find a speaker recognition subscription key. Check the test settings JSON for '{index}'.");
-            Assert.IsTrue(!string.IsNullOrEmpty(subscriptionRegion),
+            SPXTEST_ISTRUE(!string.IsNullOrEmpty(subscriptionRegion),
                 $"Couldn't find a speaker recognition subscription region. Check the test settings JSON. for '{index}'.");
 
             return SpeechConfig.FromSubscription(subscriptionKey, subscriptionRegion);

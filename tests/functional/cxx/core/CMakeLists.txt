@@ -7,6 +7,7 @@ set(SOURCES
     "${SRC_DIR}/usp_test_case.cpp"
     "${SRC_DIR}/mic_test_case.cpp"
     "${SRC_DIR}/sr_test_case.cpp"
+    "${SRC_DIR}/spxtest_core_tests.cpp"
     "${SRC_DIR}/speech_context_json_test.cpp"
     "${SRC_DIR}/event.cpp"
     )
@@ -23,6 +24,7 @@ set_source_groups()
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${TEST_HEADERS})
 
+set(PRIVATE_COMMON_HEADERS "${CARBON_CORE}/logging/include")
 set(PRIVATE_AUDIO_HEADERS "${CARBON_CORE}/audio")
 set(PRIVATE_SR_HEADERS "${CARBON_CORE}/sr")
 
@@ -35,6 +37,7 @@ target_include_directories(${PROJECT_NAME}
         "${CARBON_EXTERNAL}/json"
         ${PRIVATE_AUDIO_HEADERS}
         ${PRIVATE_SR_HEADERS}
+        ${PRIVATE_COMMON_HEADERS}
 )
 
 # define USE_NON_CORE_ROOT_SITE when building extensions or unit tests. This enable the extensions or unit test to use the extension root site provided by CSpxExtensionResourceManager.

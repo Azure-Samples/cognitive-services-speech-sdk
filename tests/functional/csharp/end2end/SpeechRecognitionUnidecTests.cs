@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 
 namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 {
+    using static SPXTEST;
     using static Config;
     using static SpeechRecognitionTestsHelper;
 
@@ -19,7 +20,14 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [ClassInitialize]
         public static void TestClassinitialize(TestContext context)
         {
+            LoggingTestBaseInit(context);
             BaseClassInit(context);
+        }
+
+        [ClassCleanup]
+        new public static void TestClassCleanup()
+        {
+            LoggingTestBaseCleanup();
         }
 
         [TestMethod, TestCategory(TestCategory.OfflineUnidec)]
@@ -33,8 +41,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 using (var recognizer = TrackSessionId(new SpeechRecognizer(this.offlineConfig, audioInput)))
                 {
                     var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
-                    Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
-                    Assert.IsTrue(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text.IndexOf(result.Text, StringComparison.OrdinalIgnoreCase) >= 0,
+                    SPXTEST_ARE_EQUAL(ResultReason.RecognizedSpeech, result.Reason);
+                    SPXTEST_ISTRUE(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text.IndexOf(result.Text, StringComparison.OrdinalIgnoreCase) >= 0,
                         $"Utterance: Expected '{AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0]}', actual '{result.Text}'");
                 }
             }
@@ -77,7 +85,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     await Task.WhenAny(tcs.Task, Task.Delay(TimeSpan.FromSeconds(5)));
                     await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
 
-                    Assert.IsTrue(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_MULTIPLE_TURNS].Utterances[Language.EN][i].Text.IndexOf(resultText, StringComparison.OrdinalIgnoreCase) >= 0,
+                    SPXTEST_ISTRUE(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_MULTIPLE_TURNS].Utterances[Language.EN][i].Text.IndexOf(resultText, StringComparison.OrdinalIgnoreCase) >= 0,
                         $"Utterance {i}: Expected '{AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_MULTIPLE_TURNS].Utterances[Language.EN][i].Text}', actual '{resultText}'");
                 }
             }
@@ -128,8 +136,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 Console.WriteLine();
 
                 var sessionid = recognizer.Properties.GetProperty(PropertyId.Speech_SessionId);
-                Assert.AreEqual(0, hasCompleted, $"keyword not detected within timeout ({sessionid})");
-                Assert.IsTrue(tcs.Task.Result, $"keyword not detected within timeout ({sessionid})");
+                SPXTEST_ARE_EQUAL(0, hasCompleted, $"keyword not detected within timeout ({sessionid})");
+                SPXTEST_ISTRUE(tcs.Task.Result, $"keyword not detected within timeout ({sessionid})");
 
                 await recognizer.StopKeywordRecognitionAsync().ConfigureAwait(false);
             }
@@ -181,8 +189,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 Console.WriteLine();
 
                 var sessionid = recognizer.Properties.GetProperty(PropertyId.Speech_SessionId);
-                Assert.AreEqual(0, hasCompleted, $"keyword not detected within timeout ({sessionid})");
-                Assert.IsTrue(tcs.Task.Result, $"keyword not detected within timeout ({sessionid})");
+                SPXTEST_ARE_EQUAL(0, hasCompleted, $"keyword not detected within timeout ({sessionid})");
+                SPXTEST_ISTRUE(tcs.Task.Result, $"keyword not detected within timeout ({sessionid})");
 
                 await recognizer.StopKeywordRecognitionAsync().ConfigureAwait(false);
             }

@@ -21,8 +21,10 @@ using System.Threading.Tasks;
 namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 {
     using System.Globalization;
+    using static SPXTEST;
     using static CatchUtils;
     using static ConversationTranslatorTestConstants;
+    using static Test.Diagnostics;
 
     public static class ConversationTranslatorTestConstants
     {
@@ -168,13 +170,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                         return;
                     }
 
-                    Assert.Fail($"Expected a {typeof(TException).FullName} with message containing '{match}'. Got: {e.GetType().Name} from '{e.Source}' {e.ToString()}");
+                    SPXTEST_FAIL($"Expected a {typeof(TException).FullName} with message containing '{match}'. Got: {e.GetType().Name} from '{e.Source}' {e.ToString()}");
                 }
 
-                Assert.Fail($"Expected a {typeof(TException).FullName}. Got a {e.GetType().FullName} from '{e.Source}' {e.ToString()}");
+                SPXTEST_FAIL($"Expected a {typeof(TException).FullName}. Got a {e.GetType().FullName} from '{e.Source}' {e.ToString()}");
             }
 
-            Assert.Fail($"Expected a {typeof(TException).FullName} exception. None was thrown");
+            SPXTEST_FAIL($"Expected a {typeof(TException).FullName} exception. None was thrown");
         }
 
         public static TValue GetOrDefault<TKey, TValue>(this IDictionary<TKey, TValue> dict, TKey key)
@@ -447,14 +449,14 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     || SpeechRecognitionTestsHelper.IsWithinStringWordEditPercentage(e.Text, x.Text));
                 if (match == null)
                 {
-                    FAIL($"Could not final that matches '{e.Text}'\nFinals found:\n"
+                    SPXTEST_FAIL($"Could not final that matches '{e.Text}'\nFinals found:\n"
                         + string.Join("\n", f.Select(t => $"  [{t.ParticipantId}] '{t.Text}'")));
                 }
 
-                REQUIRE(TranslatorTextLanguage.Parse(match.OriginalLang).Equals(e.Lang));
+                SPXTEST_REQUIRE(TranslatorTextLanguage.Parse(match.OriginalLang).Equals(e.Lang));
                 REQUIRE_THAT(match.ParticipantId, Catch.Equals(e.ParticipantId, Catch.CaseSensitive.No));
-                REQUIRE(match.Reason == expectedFinalReason);
-                REQUIRE(match.Translations.Count >= e.Translations.Count);
+                SPXTEST_REQUIRE(match.Reason == expectedFinalReason);
+                SPXTEST_REQUIRE(match.Translations.Count >= e.Translations.Count);
                 foreach (var expectedEntry in e.Translations)
                 {
                     TranslatorTextLanguage transLang = TranslatorTextLanguage.Parse(expectedEntry.Key);
@@ -478,11 +480,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     if (p[i].ResultId == match.ResultId)
                     {
                         numPartials++;
-                        REQUIRE(p[i].Reason == expectedPartialReason);
+                        SPXTEST_REQUIRE(p[i].Reason == expectedPartialReason);
                     }
                 }
 
-                REQUIRE(numPartials >= e.MinPartials);
+                SPXTEST_REQUIRE(numPartials >= e.MinPartials);
             }
         }
 
@@ -509,14 +511,14 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     || SpeechRecognitionTestsHelper.IsWithinStringWordEditPercentage(expected.Text, x.Text));
                 if (match == null)
                 {
-                    FAIL($"Could not instant message that matches '{expected.Text}'\nFinals found:\n"
+                    SPXTEST_FAIL($"Could not instant message that matches '{expected.Text}'\nFinals found:\n"
                         + string.Join("\n", receivedFromUser.Select(im => $"  [{im.ParticipantId}] '{im.Text}'")));
                 }
 
-                REQUIRE(TranslatorTextLanguage.Parse(match.OriginalLang) == expected.Lang);
+                SPXTEST_REQUIRE(TranslatorTextLanguage.Parse(match.OriginalLang) == expected.Lang);
                 REQUIRE_THAT(match.ParticipantId, Catch.Equals(expected.ParticipantId, Catch.CaseSensitive.No));
-                REQUIRE(match.Reason == expectedReason);
-                REQUIRE(match.Translations.Count >= expected.Translations.Count);
+                SPXTEST_REQUIRE(match.Reason == expectedReason);
+                SPXTEST_REQUIRE(match.Translations.Count >= expected.Translations.Count);
                 foreach (var expectedEntry in expected.Translations)
                 {
                     TranslatorTextLanguage transLang = TranslatorTextLanguage.Parse(expectedEntry.Key);
@@ -621,29 +623,29 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
             if (IsHost)
             {
-                SPX_TRACE_INFO(">> [{0}] Creating conversation", Name);
+                SPX_TRACE_INFO($">> [{Name}] Creating conversation");
                 Conversation = await Conversation.CreateConversationAsync(m_config);
                 ConversationId = Conversation.ConversationId;
-                SPX_TRACE_INFO(">> [{0}] Joining conversation '{1}'", Name, ConversationId);
+                SPX_TRACE_INFO($">> [{Name}] Joining conversation '{ConversationId}'");
                 SPXTEST_REQUIRE(!string.IsNullOrWhiteSpace(ConversationId));
 
-                SPX_TRACE_INFO(">> [{0}] Starting conversation", Name);
+                SPX_TRACE_INFO($">> [{Name}] Starting conversation");
                 await Conversation.StartConversationAsync();
 
-                SPX_TRACE_INFO(">> [{0}] Creating conversation translator", Name);
+                SPX_TRACE_INFO($">> [{Name}] Creating conversation translator");
                 Translator = new ConversationTranslator(audioConfig);
                 Events = new ConversationTranslatorCallbacks(Translator);
 
-                SPX_TRACE_INFO(">> [{0}] Creating connection", Name);
+                SPX_TRACE_INFO($">> [{Name}] Creating connection");
                 Connection = Connection.FromConversationTranslator(Translator);
                 Events.AddConnectionCallbacks(Connection);
 
-                SPX_TRACE_INFO(">> [{0}] Joining conversation", Name);
+                SPX_TRACE_INFO($">> [{Name}] Joining conversation");
                 await Translator.JoinConversationAsync(Conversation, Name);
             }
             else
             {
-                SPX_TRACE_INFO(">> [{0}] Creating conversation translator", Name);
+                SPX_TRACE_INFO($">> [{Name}] Creating conversation translator");
 
                 // Apply configuration before connecting
                 m_setConfig(audioConfig);
@@ -651,18 +653,18 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 Translator = new ConversationTranslator(audioConfig);
                 Events = new ConversationTranslatorCallbacks(Translator);
 
-                SPX_TRACE_INFO(">> [{0}] Creating connection", Name);
+                SPX_TRACE_INFO($">> [{Name}] Creating connection");
                 Connection = Connection.FromConversationTranslator(Translator);
                 Events.AddConnectionCallbacks(Connection);
 
-                SPX_TRACE_INFO(">> [{0}] Joining conversation '{1}'", Name, ConversationId);
+                SPX_TRACE_INFO($">> [{Name}] Joining conversation '{ConversationId}'");
                 await Translator.JoinConversationAsync(ConversationId, Name, Lang);
             }
         }
 
         public async Task StartAudioAsync()
         {
-            SPX_TRACE_INFO(">> [{0}] Starting audio", Name);
+            SPX_TRACE_INFO($">> [{Name}] Starting audio");
             await Translator.StartTranscribingAsync();
         }
 
@@ -673,14 +675,14 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 maxWait = MAX_WAIT_FOR_AUDIO_TO_COMPLETE;
             }
 
-            SPX_TRACE_INFO(">> [{0}] Waiting up to {1} for audio to complete", Name, maxWait);
+            SPX_TRACE_INFO($">> [{Name}] Waiting up to {maxWait} for audio to complete");
             await Events.WaitForAudioStreamCompletion(maxWait.Value, WAIT_AFTER_AUDIO_COMPLETE);
-            SPX_TRACE_INFO(">> [{0}] Audio has completed", Name);
+            SPX_TRACE_INFO($">> [{Name}] Audio has completed");
         }
 
         public async Task StopAudioAsync()
         {
-            SPX_TRACE_INFO(">> [{0}] Stopping audio", Name);
+            SPX_TRACE_INFO($">> [{Name}] Stopping audio");
             await Translator.StopTranscribingAsync();
         }
 
@@ -688,18 +690,18 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             if (Translator != null)
             {
-                SPX_TRACE_INFO(">> [{0}] Leaving conversation", Name);
+                SPX_TRACE_INFO($">> [{Name}] Leaving conversation");
                 await Translator.LeaveConversationAsync();
             }
 
             if (Conversation != null)
             {
-                SPX_TRACE_INFO(">> [{0}] Ending conversation", Name);
+                SPX_TRACE_INFO($">> [{Name}] Ending conversation");
                 await Conversation.EndConversationAsync();
-                SPX_TRACE_INFO(">> [{0}] Deleting conversation", Name);
+                SPX_TRACE_INFO($">> [{Name}] Deleting conversation");
                 await Conversation.DeleteConversationAsync();
 
-                SPX_TRACE_INFO(">> [{0}] DONE!", Name);
+                SPX_TRACE_INFO($">> [{Name}] DONE!");
             }
         }
 

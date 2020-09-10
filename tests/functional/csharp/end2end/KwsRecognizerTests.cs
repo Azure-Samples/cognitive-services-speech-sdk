@@ -8,10 +8,12 @@ using Microsoft.CognitiveServices.Speech.Audio;
 using Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 {
+    using static SPXTEST;
     using static Config;
 
     [TestClass]
@@ -22,7 +24,14 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [ClassInitialize]
         public static void TestClassinitialize(TestContext context)
         {
+            LoggingTestBaseInit(context);
             BaseClassInit(context);
+        }
+
+        [ClassCleanup]
+        new public static void TestClassCleanup()
+        {
+            LoggingTestBaseCleanup();
         }
 
         [TestMethod]
@@ -61,22 +70,22 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 var model = KeywordRecognitionModel.FromFile(TestData.Kws.Secret.ModelFile);
                 var result = await recognizer.RecognizeOnceAsync(model);
 
-                Assert.IsTrue(result.Reason == ResultReason.RecognizedKeyword, "Wrong result reason.");
-                Assert.IsTrue(result.Text.ToLowerInvariant().StartsWith(TestData.Kws.Secret.ModelKeyword), "Wrong result contents.");
+                SPXTEST_ISTRUE(result.Reason == ResultReason.RecognizedKeyword, "Wrong result reason.");
+                SPXTEST_ISTRUE(result.Text.ToLowerInvariant().StartsWith(TestData.Kws.Secret.ModelKeyword), "Wrong result contents.");
 
                 var hasCompleted = Task.WaitAny(tcs.Task, cancellation.Task, Task.Delay(kwsFoundTimeoutDelay));
                 Console.WriteLine();
 
                 var sessionid = recognizer.Properties.GetProperty(PropertyId.Speech_SessionId);
-                Assert.AreEqual(0, hasCompleted, $"keyword not detected within timeout ({sessionid})");
-                Assert.IsTrue(tcs.Task.Result, $"keyword not detected within timeout ({sessionid})");
+                SPXTEST_ARE_EQUAL(0, hasCompleted, $"keyword not detected within timeout ({sessionid})");
+                SPXTEST_ISTRUE(tcs.Task.Result, $"keyword not detected within timeout ({sessionid})");
 
                 /* Give some time so the stream is filled */
                 await Task.Delay(500);
                 var stream = AudioDataStream.FromResult(result);
-                Assert.IsTrue(stream.CanReadData(100), "Can't read data from the stream");
+                SPXTEST_ISTRUE(stream.CanReadData(100), "Can't read data from the stream");
                 var buffer = new byte[100];
-                Assert.AreEqual(100u, stream.ReadData(buffer));
+                SPXTEST_ARE_EQUAL(100u, stream.ReadData(buffer));
                 stream.DetachInput();
             }
         }

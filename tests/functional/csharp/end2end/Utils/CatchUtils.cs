@@ -1,30 +1,282 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.Collections;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils
 {
+    using static Test.Diagnostics;
+
+    public static class SPXTEST
+    {
+        public static void SPXTEST_REQUIRE(bool isTrue, string message, object[] args, [CallerLineNumber]int line = 0, [CallerMemberName]string caller = null, [CallerFilePath]string file = null)
+        {
+            SPXTEST_REQUIRE(isTrue, string.Format(message, args), line, caller, file);
+        }
+
+        public static void SPXTEST_REQUIRE(bool isTrue, string message = "", [CallerLineNumber]int line = 0, [CallerMemberName]string caller = null, [CallerFilePath]string file = null)
+        {
+            message = !string.IsNullOrEmpty(message) ? $"SPXTEST_REQUIRE: {message}" : $"SPXTEST_REQUIRE:";
+
+            if (isTrue) SPX_TRACE_INFO("SPXTEST_REQUIRE: PASSED:", line, caller, file);
+            if (!isTrue) SPX_TRACE_ERROR($"{message} FAILED:", line, caller, file);
+            if (!isTrue) Test.Diagnostics.DumpMemoryLogToFile(null, 2);
+
+            Assert.IsTrue(isTrue, $"{message} at {caller} in {file}({line}): FAILED:");
+        }
+
+
+        public static void SPXTEST_ISTRUE(bool isTrue, string message, object[] args, [CallerLineNumber]int line = 0, [CallerMemberName]string caller = null, [CallerFilePath]string file = null)
+        {
+            SPXTEST_ISTRUE(isTrue, string.Format(message, args), line, caller, file);
+        }
+
+        public static void SPXTEST_ISTRUE(bool isTrue, string message = "", [CallerLineNumber]int line = 0, [CallerMemberName]string caller = null, [CallerFilePath]string file = null)
+        {
+            message = !string.IsNullOrEmpty(message) ? $"SPXTEST_ISTRUE: {message}" : $"SPXTEST_ISTRUE:";
+
+            if (isTrue) SPX_TRACE_INFO("SPXTEST_ISTRUE: PASSED:", line, caller, file);
+            if (!isTrue) SPX_TRACE_ERROR($"{message} FAILED:", line, caller, file);
+            if (!isTrue) Test.Diagnostics.DumpMemoryLogToFile(null, 2);
+
+            Assert.IsTrue(isTrue, $"{message} at {caller} in {file}({line}): FAILED:");
+        }
+
+        public static void SPXTEST_ISFALSE(bool condition, string message, object[] args, [CallerLineNumber]int line = 0, [CallerMemberName]string caller = null, [CallerFilePath]string file = null)
+        {
+            SPXTEST_ISFALSE(condition, string.Format(message, args), line, caller, file);
+        }
+
+        public static void SPXTEST_ISFALSE(bool condition, string message = "", [CallerLineNumber]int line = 0, [CallerMemberName]string caller = null, [CallerFilePath]string file = null)
+        {
+            message = !string.IsNullOrEmpty(message) ? $"SPXTEST_ISFALSE: {message}" : $"SPXTEST_ISFALSE:";
+
+            if (!condition) SPX_TRACE_INFO("SPXTEST_ISFALSE: PASSED:", line, caller, file);
+            if (condition) SPX_TRACE_ERROR($"{message} FAILED:", line, caller, file);
+            if (condition) Test.Diagnostics.DumpMemoryLogToFile(null, 2);
+
+            Assert.IsFalse(condition, $"{message} at {caller} in {file}({line}): FAILED:");
+        }
+
+        public static void SPXTEST_ISNOTNULL(object value, string message, object[] args, [CallerLineNumber]int line = 0, [CallerMemberName]string caller = null, [CallerFilePath]string file = null)
+        {
+            SPXTEST_ISNOTNULL(value, string.Format(message, args), line, caller, file);
+        }
+
+        public static void SPXTEST_ISNOTNULL(object value, string message = "", [CallerLineNumber]int line = 0, [CallerMemberName]string caller = null, [CallerFilePath]string file = null)
+        {
+            message = !string.IsNullOrEmpty(message) ? $"SPXTEST_ISNOTNULL: {message}" : $"SPXTEST_ISNOTNULL:";
+
+            var notNull = (value != null);
+
+            if (notNull) SPX_TRACE_INFO("SPXTEST_ISNOTNULL: PASSED:", line, caller, file);
+            if (!notNull) SPX_TRACE_ERROR($"{message} FAILED:", line, caller, file);
+            if (!notNull) Test.Diagnostics.DumpMemoryLogToFile(null, 2);
+
+            Assert.IsNotNull(value, $"{message} at {caller} in {file}({line}): FAILED:");
+        }
+
+        public static void SPXTEST_ARE_EQUAL<T>(T t1, T t2, string message, object[] args, [CallerLineNumber]int line = 0, [CallerMemberName]string caller = null, [CallerFilePath]string file = null)
+        {
+            SPXTEST_ARE_EQUAL(t1, t2, string.Format(message, args), line, caller, file);
+        }
+
+        public static void SPXTEST_ARE_EQUAL<T>(T t1, T t2, string message = "", [CallerLineNumber]int line = 0, [CallerMemberName]string caller = null, [CallerFilePath]string file = null)
+        {
+            message = !string.IsNullOrEmpty(message) ? $"SPXTEST_ARE_EQUAL: {message}" : $"SPXTEST_ARE_EQUAL:";
+
+            var c1 = t1 as ICollection;
+            var c2 = t2 as ICollection;
+            var areCollections = c1 != null && c2 != null;
+
+            var isEqual = areCollections ? AreCollectionsEqual(c1, c2) : Object.Equals(t1, t2);
+
+            if (isEqual) SPX_TRACE_INFO("SPXTEST_ARE_EQUAL: PASSED:", line, caller, file);
+            if (!isEqual) SPX_TRACE_ERROR($"{message} FAILED:", line, caller, file);
+            if (!isEqual) Test.Diagnostics.DumpMemoryLogToFile(null, 2);
+
+            if (areCollections) CollectionAssert.AreEqual(t1 as ICollection, t2 as ICollection, $"{message} at {caller} in {file}({line}): FAILED:");
+            if (!areCollections) Assert.AreEqual(t1, t2, $"{message} at {caller} in {file}({line}): FAILED:");
+        }
+
+        public static void SPXTEST_ARE_NOT_EQUAL<T>(T t1, T t2, string message, object[] args, [CallerLineNumber]int line = 0, [CallerMemberName]string caller = null, [CallerFilePath]string file = null)
+        {
+            SPXTEST_ARE_NOT_EQUAL(t1, t2, string.Format(message, args), line, caller, file);
+        }
+
+        public static void SPXTEST_ARE_NOT_EQUAL<T>(T t1, T t2, string message = "", [CallerLineNumber]int line = 0, [CallerMemberName]string caller = null, [CallerFilePath]string file = null)
+        {
+            message = !string.IsNullOrEmpty(message) ? $"SPXTEST_ARE_NOT_EQUAL: {message}" : $"SPXTEST_ARE_NOT_EQUAL:";
+
+            var c1 = t1 as ICollection;
+            var c2 = t2 as ICollection;
+            var areCollections = c1 != null && c2 != null;
+
+            var isEqual = areCollections ? AreCollectionsEqual(c1, c2) : Object.Equals(t1, t2);
+
+            if (!isEqual) SPX_TRACE_INFO("SPXTEST_ARE_NOT_EQUAL: PASSED:", line, caller, file);
+            if (isEqual) SPX_TRACE_ERROR($"{message} FAILED:", line, caller, file);
+            if (isEqual) Test.Diagnostics.DumpMemoryLogToFile(null, 2);
+
+            if (areCollections) CollectionAssert.AreNotEqual(t1 as ICollection, t2 as ICollection, $"{message} at {caller} in {file}({line}): FAILED:");
+            if (!areCollections) Assert.AreNotEqual(t1, t2, $"{message} at {caller} in {file}({line}): FAILED:");
+        }
+
+        public static void SPXTEST_FAIL(string message, object[] args, [CallerLineNumber]int line = 0, [CallerMemberName]string caller = null, [CallerFilePath]string file = null)
+        {
+            SPXTEST_FAIL(string.Format(message, args), line, caller, file);
+        }
+
+        public static void SPXTEST_FAIL(string message = "", [CallerLineNumber]int line = 0, [CallerMemberName]string caller = null, [CallerFilePath]string file = null)
+        {
+            message = !string.IsNullOrEmpty(message) ? $"SPXTEST_FAIL: {message}" : $"SPXTEST_FAIL:";
+
+            SPX_TRACE_ERROR($"{message} FAILED:", line, caller, file);
+            Test.Diagnostics.DumpMemoryLogToFile(null, 2);
+
+            Assert.Fail($"{message} at {caller} in {file}({line}): FAILED:");
+        }
+
+        public static T SPXTEST_THROWS<T>(Action action, string message, object[] args, [CallerLineNumber]int line = 0, [CallerMemberName]string caller = null, [CallerFilePath]string file = null) where T : Exception
+        {
+            return SPXTEST_THROWS<T>(action, string.Format(message, args), line, caller, file);
+        }
+
+        public static T SPXTEST_THROWS<T>(Action action, string message = "", [CallerLineNumber]int line = 0, [CallerMemberName]string caller = null, [CallerFilePath]string file = null) where T : Exception
+        {
+            message = !string.IsNullOrEmpty(message) ? $"SPXTEST_THROWS: {message}" : $"SPXTEST_THROWS:";
+
+            try
+            {
+                action();
+            }
+            catch (T ex)
+            {
+                SPX_TRACE_INFO("SPXTEST_THROWS: PASSED:", line, caller, file);
+                return ex;
+            }
+            catch
+            {
+                // do nothing
+            }
+
+            SPX_TRACE_ERROR($"{message} FAILED:", line, caller, file);
+            Test.Diagnostics.DumpMemoryLogToFile(null, 2);
+
+            Assert.ThrowsException<T>(() => null, $"{message} at {caller} in {file}({line}): FAILED:");
+            return null;
+        }
+
+        public static void SPXTEST_THROWS<T>(Func<object> action, string message, object[] args, [CallerLineNumber]int line = 0, [CallerMemberName]string caller = null, [CallerFilePath]string file = null) where T : Exception
+        {
+            SPXTEST_THROWS<T>(action, string.Format(message, args), line, caller, file);
+        }
+
+        public static T SPXTEST_THROWS<T>(Func<object> action, string message = "", [CallerLineNumber]int line = 0, [CallerMemberName]string caller = null, [CallerFilePath]string file = null) where T : Exception
+        {
+            message = !string.IsNullOrEmpty(message) ? $"SPXTEST_THROWS: {message}" : $"SPXTEST_THROWS:";
+
+            try
+            {
+                action();
+            }
+            catch (T ex)
+            {
+                SPX_TRACE_INFO("SPXTEST_THROWS: PASSED:", line, caller, file);
+                return ex;
+            }
+            catch
+            {
+                // do nothing
+            }
+
+            SPX_TRACE_ERROR($"{message} FAILED:", line, caller, file);
+            Test.Diagnostics.DumpMemoryLogToFile(null, 2);
+
+            Assert.ThrowsException<T>(() => null, $"{message} at {caller} in {file}({line}): FAILED:");
+            return null;
+        }
+
+        public static void SPXTEST_NOTHROW(Action action, string message, object[] args, [CallerLineNumber]int line = 0, [CallerMemberName]string caller = null, [CallerFilePath]string file = null)
+        {
+            SPXTEST_NOTHROW(action, string.Format(message, args), line, caller, file);
+        }
+
+        public static void SPXTEST_NOTHROW(Action action, string message = "", [CallerLineNumber]int line = 0, [CallerMemberName]string caller = null, [CallerFilePath]string file = null)
+        {
+            message = !string.IsNullOrEmpty(message) ? $"SPXTEST_NOTHROW: {message}" : $"SPXTEST_NOTHROW:";
+
+            Exception exception = null;
+            try
+            {
+                action();
+            }
+            catch (Exception ex)
+            {
+                exception = ex;
+            }
+
+            if (exception == null) SPX_TRACE_INFO("SPXTEST_NOTHROW: PASSED:", line, caller, file);
+            if (exception != null) SPX_TRACE_ERROR($"{message} FAILED:", line, caller, file);
+            if (exception != null) Test.Diagnostics.DumpMemoryLogToFile(null, 2);
+
+            Assert.IsTrue(exception == null, $"{message} at {caller} in {file}({line}): FAILED:");
+        }
+
+        public static void SPXTEST_NOTHROW(Func<object> action, string message, object[] args, [CallerLineNumber]int line = 0, [CallerMemberName]string caller = null, [CallerFilePath]string file = null)
+        {
+            SPXTEST_NOTHROW(action, string.Format(message, args), line, caller, file);
+        }
+
+        public static void SPXTEST_NOTHROW(Func<object> action, string message = "", [CallerLineNumber]int line = 0, [CallerMemberName]string caller = null, [CallerFilePath]string file = null)
+        {
+            message = !string.IsNullOrEmpty(message) ? $"SPXTEST_NOTHROW: {message}" : $"SPXTEST_NOTHROW:";
+
+            Exception exception = null;
+            try
+            {
+                action();
+            }
+            catch (Exception ex)
+            {
+                exception = ex;
+            }
+
+            if (exception == null) SPX_TRACE_INFO("SPXTEST_NOTHROW: PASSED:", line, caller, file);
+            if (exception != null) SPX_TRACE_ERROR($"{message} FAILED:", line, caller, file);
+            if (exception != null) Test.Diagnostics.DumpMemoryLogToFile(null, 2);
+
+            Assert.IsTrue(exception == null, $"{message} at {caller} in {file}({line}): FAILED:");
+        }
+
+        private static bool AreCollectionsEqual(ICollection t1, ICollection t2)
+        {
+            if (t1.Count != t2.Count) return false;
+
+            var iter1 = t1.GetEnumerator();
+            var iter2 = t2.GetEnumerator();
+            if (iter1 == null || iter2 == null) return false;
+
+            while (iter1.MoveNext() && iter2.MoveNext())
+            {
+                var obj1 = iter1.Current;
+                var obj2 = iter2.Current;
+                var isEqual = (obj1 == null && obj2 == null) || (obj1 != null && obj2 != null && obj1.Equals(obj2));
+                if (!isEqual) return false;
+            }
+
+            return true;
+        }
+    }
+
     /// <summary>
     /// Helper class to make it easier to reuse code from C++. Include the following using in your file:
     /// using static Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils.CatchUtils;
     /// </summary>
     public static class CatchUtils
     {
-        public static void FAIL(string msg = null, [CallerMemberName]string caller = null, [CallerLineNumber]int line = 0, [CallerFilePath]string file = null)
-        {
-            Assert.Fail("[{0}:{1}] FAIL: {2}", caller, line, msg);
-        }
-
-        public static void REQUIRE(bool cond, [CallerMemberName]string caller = null, [CallerLineNumber]int line = 0, [CallerFilePath]string file = null)
-        {
-            Assert.IsTrue(cond, "[{0}:{1}] Condition is false", caller, line);
-        }
-
-        public static void SPXTEST_REQUIRE(bool cond, [CallerMemberName]string caller = null, [CallerLineNumber]int line = 0, [CallerFilePath]string file = null)
-            => REQUIRE(cond, caller, line, file);
-
         public static void REQUIRE_NOTHROW(Action action, [CallerMemberName]string caller = null, [CallerLineNumber]int line = 0, [CallerFilePath]string file = null)
         {
             try
@@ -46,9 +298,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils
         {
             Assert.IsTrue(matcher.IsMatch(text), "[{0}:{1}] Expected '{2}'. Got '{3}'", caller, line, matcher.ToString(), text);
         }
-
-        public static void SPXTEST_REQUIRE_THAT(string text, Catch.IMatcher matcher, [CallerMemberName]string caller = null, [CallerLineNumber]int line = 0, [CallerFilePath]string file = null)
-            => REQUIRE_THAT(text, matcher, caller, line, file);
 
         public static void REQUIRE_NOTHROW(Task t, [CallerMemberName]string caller = null, [CallerLineNumber]int line = 0, [CallerFilePath]string file = null)
         {
@@ -174,18 +423,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils
                     exceptionType.FullName,
                     matcher.ToString());
             }
-        }
-
-        public static void SPX_TRACE_INFO(string format, params object[] args)
-        {
-            string formatted = string.Format(
-                CultureInfo.InvariantCulture,
-                format,
-                args);
-            Console.WriteLine(formatted);
-
-            // prefix with timestamp
-            System.Diagnostics.Debug.WriteLine("({0}) {1}", DateTime.UtcNow.ToString("yyyy-MM-dd HH::mm::ss.ff"), formatted);
         }
     }
 
