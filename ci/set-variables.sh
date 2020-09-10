@@ -94,8 +94,12 @@ VERSION="$(cat "$SCRIPT_DIR/../version.txt")"
 # Must be a major.minor.patch version
 echo VERSION=$VERSION
 
-# Determine the build type, ID, and commit
+# check free disk space, to help diagnose space issues on some hosted build agents.
+echo checking free disk space
+df || true
+echo " "
 
+# Determine the build type, ID, and commit
 SPEECHSDK_BUILD_TYPE=dev
 
 IN_VSTS=$([[ -n $SYSTEM_DEFINITIONID && -n $SYSTEM_COLLECTIONID ]] && echo true || echo false)
