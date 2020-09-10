@@ -5,19 +5,6 @@
   var sdk = require("microsoft-cognitiveservices-speech-sdk");
   var fs = require("fs");
 
-  let getAudioConfigFromFile = (file) => {
-      // Create the push stream we need for the speech sdk.
-      let pushStream = sdk.AudioInputStream.createPushStream();
-
-      // Open the file and push it to the push stream.
-      fs.createReadStream(file).on("data", function(arrayBuffer) {
-        pushStream.write(arrayBuffer.buffer);
-      }).on("end", function() {
-        pushStream.close();
-      });
-      return sdk.AudioConfig.fromStreamInput(pushStream);
-  };
-  
   // replace with your own subscription key,
   // service region (e.g., "westus"), and
   // the name of the files you want to use
@@ -39,6 +26,18 @@
     sdk.VoiceProfileType.TextDependentVerification,
     locale,
     function (result) {
+      let getAudioConfigFromFile = function (file) {
+          // Create the push stream we need for the speech sdk.
+          let pushStream = sdk.AudioInputStream.createPushStream();
+
+          // Open the file and push it to the push stream.
+          fs.createReadStream(file).on("data", function(arrayBuffer) {
+            pushStream.write(arrayBuffer.buffer);
+          }).on("end", function() {
+            pushStream.close();
+          });
+          return sdk.AudioConfig.fromStreamInput(pushStream);
+      };
       let profile = result;
       let enrollConfigs = [];
       enrollFiles.forEach(f => {
