@@ -15,8 +15,6 @@
 #include <speechapi_c_result.h>
 #include <speechapi_c_synthesizer.h>
 
-#define AUDIO_OUTPUT_BUFFER_SIZE 0x1000000
-
 namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
@@ -81,7 +79,18 @@ public:
 
         Result_Reason resultReason;
         SPX_THROW_ON_FAIL(synth_result_get_reason(hresult, &resultReason));
-        m_reason = (ResultReason)resultReason;
+        m_reason = static_cast<ResultReason>(resultReason);
+
+        uint32_t audioLength = 0;
+        SPX_THROW_ON_FAIL(synth_result_get_audio_length(m_hresult, &audioLength));
+
+        m_audioData = std::make_shared<std::vector<uint8_t>>(audioLength);
+
+        if (audioLength > 0)
+        {
+            uint32_t filledSize = 0;
+            SPX_THROW_ON_FAIL(synth_result_get_audio_data(m_hresult, m_audioData->data(), audioLength, &filledSize));
+        }
     }
 
     /// <summary>
@@ -90,9 +99,7 @@ public:
     /// <returns>Length of synthesized audio</returns>
     uint32_t GetAudioLength()
     {
-        uint32_t audioLength = 0;
-        synth_result_get_audio_length(m_hresult, &audioLength);
-        return audioLength;
+        return static_cast<uint32_t>(m_audioData->size());
     }
 
     /// <summary>
@@ -101,18 +108,7 @@ public:
     /// <returns>Synthesized audio data</returns>
     std::shared_ptr<std::vector<uint8_t>> GetAudioData()
     {
-        uint32_t audioLength = 0;
-        SPX_THROW_ON_FAIL(synth_result_get_audio_length(m_hresult, &audioLength));
-
-        m_audiodata.resize(audioLength);
-
-        if (audioLength > 0)
-        {
-            uint32_t filledSize = 0;
-            SPX_THROW_ON_FAIL(synth_result_get_audio_data(m_hresult, m_audiodata.data(), audioLength, &filledSize));
-        }
-
-        return std::make_shared<std::vector<uint8_t>>(m_audiodata);
+        return m_audioData;
     }
 
     /// <summary>
@@ -162,17 +158,7 @@ private:
     /// <summary>
     /// Internal member variable that holds the audio data
     /// </summary>
-    std::vector<uint8_t> m_audiodata;
-
-    template <class T>
-    static std::shared_ptr<T> SpxAllocSharedBuffer(size_t sizeInBytes)
-    {
-        auto ptr = reinterpret_cast<T*>(new uint8_t[sizeInBytes]);
-        auto deleter = [](T* p) { delete[] reinterpret_cast<uint8_t*>(p); };
-
-        std::shared_ptr<T> buffer(ptr, deleter);
-        return buffer;
-    }
+    std::shared_ptr<std::vector<uint8_t>> m_audioData;
 };
 
 
@@ -258,7 +244,7 @@ private:
         SPXRESULTHANDLE hresult = (SPXRESULTHANDLE)(*result);
         SPX_IFFAILED_THROW_HR(synth_result_get_reason_canceled(hresult, &reason));
 
-        return (Speech::CancellationReason)reason;
+        return static_cast<Speech::CancellationReason>(reason);
     }
 
     Speech::CancellationErrorCode GetCancellationErrorCode(SpeechSynthesisResult* result)
@@ -268,7 +254,7 @@ private:
         SPXRESULTHANDLE hresult = (SPXRESULTHANDLE)(*result);
         SPX_IFFAILED_THROW_HR(synth_result_get_canceled_error_code(hresult, &errorCode));
 
-        return (Speech::CancellationErrorCode)errorCode;
+        return static_cast<Speech::CancellationErrorCode>(errorCode);
     }
 
     Speech::CancellationReason GetCancellationReason(AudioDataStream* stream)
@@ -278,7 +264,7 @@ private:
         SPXAUDIOSTREAMHANDLE hstream = (SPXAUDIOSTREAMHANDLE)(*stream);
         SPX_IFFAILED_THROW_HR(audio_data_stream_get_reason_canceled(hstream, &reason));
 
-        return (Speech::CancellationReason)reason;
+        return static_cast<Speech::CancellationReason>(reason);
     }
 
     Speech::CancellationErrorCode GetCancellationErrorCode(AudioDataStream* stream)
@@ -288,7 +274,7 @@ private:
         SPXAUDIOSTREAMHANDLE hstream = (SPXAUDIOSTREAMHANDLE)(*stream);
         SPX_IFFAILED_THROW_HR(audio_data_stream_get_canceled_error_code(hstream, &errorCode));
 
-        return (Speech::CancellationErrorCode)errorCode;
+        return static_cast<Speech::CancellationErrorCode>(errorCode);
     }
 };
 

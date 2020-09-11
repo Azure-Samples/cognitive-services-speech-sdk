@@ -87,7 +87,7 @@ private:
 
     uint32_t m_position = 0;
 
-    StreamStatus m_status{ StreamStatus::Unknown };
+    std::atomic<StreamStatus> m_status{ StreamStatus::Unknown };
     ResultReason m_beginningReason = ResultReason::SynthesizingAudioStarted;
     CancellationReason m_cancellationReason = CancellationReason::EndOfStream;
     std::shared_ptr<ISpxErrorInformation> m_error{ nullptr };

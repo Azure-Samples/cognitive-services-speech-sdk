@@ -136,13 +136,36 @@ using namespace TTS;
 
 /* Test cases based on cognitive service TTS, without output audio content check */
 
-TEST_CASE("Synthesis Defaults - REST", "[api][cxx]")
+#define TTS_TESTS_FOR_ALL_ADAPTERS( ... ) SPXTEST_SECTION("USP") {       \
+        __VA_ARGS__(UspSpeechConfig(), false); }                         \
+    SPXTEST_SECTION("REST") {                                            \
+        __VA_ARGS__(RestSpeechConfig(), false); }                        \
+    SPXTEST_SECTION("Mock") {                                            \
+        __VA_ARGS__(MockSpeechConfig(), true); }
+
+void SynthesisDefaults(shared_ptr<SpeechConfig> config, bool isMock)
 {
-    auto config = RestSpeechConfig();
     auto synthesizer = SpeechSynthesizer::FromConfig(config);
 
-    synthesizer->SpeakTextAsync("{{{text1}}}"); /* "{{{text1}}}" has now completed rendering to default speakers */
-    synthesizer->SpeakTextAsync("{{{text2}}}"); /* "{{{text2}}}" has now completed rendering to default speakers */
+    auto result1 = synthesizer->SpeakTextAsync("{{{text1}}}").get(); /* "{{{text1}}}" has now completed rendering to default speakers */
+    auto result2 = synthesizer->SpeakTextAsync("{{{text2}}}").get(); /* "{{{text2}}}" has now completed rendering to default speakers */
+
+    SPXTEST_REQUIRE(result1->Reason == ResultReason::SynthesizingAudioCompleted);
+    SPXTEST_REQUIRE(result2->Reason == ResultReason::SynthesizingAudioCompleted);
+
+    if (isMock)
+    {
+        auto expectedAudioData1 = BuildMockSynthesizedAudioWithHeader("{{{text1}}}", DEFAULT_LANGUAGE, DEFAULT_VOICE);
+        auto expectedAudioData2 = BuildMockSynthesizedAudioWithHeader("{{{text2}}}", DEFAULT_LANGUAGE, DEFAULT_VOICE);
+
+        SPXTEST_REQUIRE(AreBinaryEqual(expectedAudioData1, result1->GetAudioData()));
+        SPXTEST_REQUIRE(AreBinaryEqual(expectedAudioData2, result2->GetAudioData()));
+    }
+}
+
+TEST_CASE("Synthesis Defaults", "[api][cxx]")
+{
+    TTS_TESTS_FOR_ALL_ADAPTERS(SynthesisDefaults)
 }
 
 TEST_CASE("Explicitly use default speakers - REST", "[api][cxx]")
@@ -402,7 +425,7 @@ TEST_CASE("Speak output in streams before done from event synthesis started - RE
     auto synthesizer = SpeechSynthesizer::FromConfig(config, nullptr); /* nullptr indicates to do nothing with synthesizer audio by default */
 
     // hook the future here to make sure the callback below is not blocked by DoSomethingWithAudioInDataStreamInBackground
-    future<void> futureThread[3];
+    future<StreamResult> futureThread[3];
     int requestOrder = -1;
     synthesizer->SynthesisStarted += [&futureThread, &requestOrder](const SpeechSynthesisEventArgs& e) {
 
@@ -444,38 +467,25 @@ TEST_CASE("Speak output in streams before done from method start speaking text a
     auto future2 = DoSomethingWithAudioInDataStreamInBackground(stream2, false); /* does not block, just spins a thread up */
 }
 
-TEST_CASE("Speak output in streams before done queued - REST", "[api][cxx]")
+void SpeakOutputInStreamsBeforeDoneQueued(shared_ptr<SpeechConfig> config, bool isMock)
 {
-    auto config = RestSpeechConfig();
     auto synthesizer = SpeechSynthesizer::FromConfig(config, nullptr); // nullptr indicates to do nothing with synthesizer audio by default
 
+    vector<bool> requestNumMatch;
     int startedRequests = 0;
     synthesizer->SynthesisStarted += [&startedRequests](const SpeechSynthesisEventArgs& e) {
         UNUSED(e);
-        startedRequests++;
+        ++startedRequests;
     };
 
     int doneRequests = 0;
 
-    synthesizer->SynthesisCompleted += [&startedRequests, &doneRequests](const SpeechSynthesisEventArgs& e) {
+    synthesizer->SynthesisCompleted += [&startedRequests, &doneRequests, &requestNumMatch](const SpeechSynthesisEventArgs& e) {
         UNUSED(e);
-        doneRequests++;
-        if (doneRequests == 1)
+        ++doneRequests;
+        if (startedRequests == 1)
         {
-            // This is to check the requests is queued
-            // When one request is already completed, the other one is still not started
-            SPXTEST_REQUIRE(startedRequests == 1);
-        }
-    };
-
-    synthesizer->SynthesisCanceled += [&startedRequests, &doneRequests](const SpeechSynthesisEventArgs& e) {
-        UNUSED(e);
-        doneRequests++;
-        if (doneRequests == 1)
-        {
-            // This is to check the requests is queued
-            // When one request is already completed, the other one is still not started
-            SPXTEST_REQUIRE(startedRequests == 1);
+            requestNumMatch.push_back(doneRequests == 1);
         }
     };
 
@@ -485,8 +495,16 @@ TEST_CASE("Speak output in streams before done queued - REST", "[api][cxx]")
     auto future1 = DoSomethingWithAudioInResultInBackground(futureResult1, false); // does not block, just spins a thread up
     auto future2 = DoSomethingWithAudioInResultInBackground(futureResult2, false); // does not block, just spins a thread up
 
-    future1.wait();
-    future2.wait();
+    CheckStreamResult(future1.get(), isMock ? BuildMockSynthesizedAudio("{{{text1}}}", DEFAULT_LANGUAGE, DEFAULT_VOICE) : nullptr);
+    CheckStreamResult(future2.get(), isMock ? BuildMockSynthesizedAudio("{{{text2}}}", DEFAULT_LANGUAGE, DEFAULT_VOICE) : nullptr);
+
+    SPXTEST_REQUIRE(!requestNumMatch.empty());
+    SPXTEST_REQUIRE(requestNumMatch[0]);
+}
+
+TEST_CASE("Speak output in streams before done queued", "[api][cxx]")
+{
+    TTS_TESTS_FOR_ALL_ADAPTERS(SpeakOutputInStreamsBeforeDoneQueued)
 }
 
 TEST_CASE("Speak output in streams with all data get on synthesis started result - REST", "[api][cxx]")
@@ -576,15 +594,6 @@ TEST_CASE("Synthesis with invalid voice - REST", "[api][cxx]")
     SPXTEST_REQUIRE(std::string::npos != cancellationDetail->ErrorDetails.find("Unsupported voice"));
     SPXTEST_REQUIRE(result->GetAudioData()->empty());
     SPXTEST_REQUIRE(synthesisCanceled);
-}
-
-TEST_CASE("Synthesis Defaults - USP", "[api][cxx]")
-{
-    auto config = UspSpeechConfig();
-    auto synthesizer = SpeechSynthesizer::FromConfig(config);
-
-    synthesizer->SpeakTextAsync("{{{text1}}}"); /* "{{{text1}}}" has now completed rendering to default speakers */
-    synthesizer->SpeakTextAsync("{{{text2}}}"); /* "{{{text2}}}" has now completed rendering to default speakers */
 }
 
 TEST_CASE("Explicitly use default speakers - USP", "[api][cxx]")
@@ -858,7 +867,7 @@ TEST_CASE("Speak output in streams before done from event synthesis started - US
     auto synthesizer = SpeechSynthesizer::FromConfig(config, nullptr); /* nullptr indicates to do nothing with synthesizer audio by default */
 
     // hook the future here to make sure the callback below is not blocked by DoSomethingWithAudioInDataStreamInBackground
-    future<void> futureThread[3];
+    future<StreamResult> futureThread[3];
     int requestOrder = -1;
     synthesizer->SynthesisStarted += [&futureThread, &requestOrder](const SpeechSynthesisEventArgs& e) {
 
@@ -898,51 +907,6 @@ TEST_CASE("Speak output in streams before method start speaking text async - USP
 
     auto stream2 = AudioDataStream::FromResult(result2); /* of type std::shared_ptr<AudioDataStream>, does not block */
     auto future2 = DoSomethingWithAudioInDataStreamInBackground(stream2, false); /* does not block, just spins a thread up */
-}
-
-TEST_CASE("Speak output in streams before done queued - USP", "[api][cxx]")
-{
-    auto config = UspSpeechConfig();
-    auto synthesizer = SpeechSynthesizer::FromConfig(config, nullptr); // nullptr indicates to do nothing with synthesizer audio by default
-
-    int startedRequests = 0;
-    synthesizer->SynthesisStarted += [&startedRequests](const SpeechSynthesisEventArgs& e) {
-        UNUSED(e);
-        startedRequests++;
-    };
-
-    int doneRequests = 0;
-
-    synthesizer->SynthesisCompleted += [&startedRequests, &doneRequests](const SpeechSynthesisEventArgs& e) {
-        UNUSED(e);
-        doneRequests++;
-        if (doneRequests == 1)
-        {
-            // This is to check the requests is queued
-            // When one request is already completed, the other one is still not started
-            SPXTEST_REQUIRE(startedRequests == 1);
-        }
-    };
-
-    synthesizer->SynthesisCanceled += [&startedRequests, &doneRequests](const SpeechSynthesisEventArgs& e) {
-        UNUSED(e);
-        doneRequests++;
-        if (doneRequests == 1)
-        {
-            // This is to check the requests is queued
-            // When one request is already completed, the other one is still not started
-            SPXTEST_REQUIRE(startedRequests == 1);
-        }
-    };
-
-    auto futureResult1 = synthesizer->StartSpeakingTextAsync("{{{text1}}}"); // "{{{text1}}}" synthesis might have started, likely not finished
-    auto futureResult2 = synthesizer->StartSpeakingTextAsync("{{{text2}}}"); // "{{{text2}}}" synthesis might have started (very unlikely)
-
-    auto future1 = DoSomethingWithAudioInResultInBackground(futureResult1, false); // does not block, just spins a thread up
-    auto future2 = DoSomethingWithAudioInResultInBackground(futureResult2, false); // does not block, just spins a thread up
-
-    future1.wait();
-    future2.wait();
 }
 
 TEST_CASE("Speak output in streams with all data get on synthesis started result - USP", "[api][cxx]")
@@ -1268,23 +1232,6 @@ TEST_CASE("Stop synthesis - USP", "[api][cxx]")
     }
 }
 
-/* Test cases based on mock TTS engine, with output audio content check */
-
-TEST_CASE("Synthesis Defaults - Mock", "[api][cxx]")
-{
-    auto config = MockSpeechConfig();
-    auto synthesizer = SpeechSynthesizer::FromConfig(config);
-
-    auto result1 = synthesizer->SpeakTextAsync("{{{text1}}}").get(); /* "{{{text1}}}" has now completed rendering to default speakers */
-    auto result2 = synthesizer->SpeakTextAsync("{{{text2}}}").get(); /* "{{{text2}}}" has now completed rendering to default speakers */
-
-    auto expectedAudioData1 = BuildMockSynthesizedAudioWithHeader("{{{text1}}}", DEFAULT_LANGUAGE, DEFAULT_VOICE);
-    auto expectedAudioData2 = BuildMockSynthesizedAudioWithHeader("{{{text2}}}", DEFAULT_LANGUAGE, DEFAULT_VOICE);
-
-    SPXTEST_REQUIRE(AreBinaryEqual(expectedAudioData1, result1->GetAudioData()));
-    SPXTEST_REQUIRE(AreBinaryEqual(expectedAudioData2, result2->GetAudioData()));
-}
-
 TEST_CASE("Explicitly use default speakers - Mock", "[api][cxx]")
 {
     auto config = MockSpeechConfig();
@@ -1495,14 +1442,16 @@ TEST_CASE("Speak output in streams - Mock", "[api][cxx]")
 
     auto stream1 = AudioDataStream::FromResult(result1); /* of type std::shared_ptr<AudioDataStream>, does not block */
     auto expectedAudioData1 = BuildMockSynthesizedAudio("{{{text1}}}", DEFAULT_LANGUAGE, DEFAULT_VOICE);
-    DoSomethingWithAudioInDataStream(stream1, true, expectedAudioData1);
+    auto streamResult1 = DoSomethingWithAudioInDataStream(stream1, true);
+    CheckStreamResult(streamResult1, expectedAudioData1);
 
     auto result2 = synthesizer->SpeakTextAsync("{{{text2}}}").get(); /* "{{{text2}}}" has completed rendering, and available in result2 */
     SPXTEST_REQUIRE(result2->Reason == ResultReason::SynthesizingAudioCompleted);
 
     auto stream2 = AudioDataStream::FromResult(result2); /* of type std::shared_ptr<AudioDataStream>, does not block */
     auto expectedAudioData2 = BuildMockSynthesizedAudio("{{{text2}}}", DEFAULT_LANGUAGE, DEFAULT_VOICE);
-    DoSomethingWithAudioInDataStream(stream2, true, expectedAudioData2);
+    auto streamResult2 = DoSomethingWithAudioInDataStream(stream2, true);
+    CheckStreamResult(streamResult2, expectedAudioData2);
 }
 
 TEST_CASE("Speak output in streams before done from event synthesis started - Mock", "[api][cxx]")
@@ -1516,7 +1465,7 @@ TEST_CASE("Speak output in streams before done from event synthesis started - Mo
     expectedAudioData[2] = BuildMockSynthesizedAudio("{{{text3}}}", DEFAULT_LANGUAGE, DEFAULT_VOICE);
 
     // hook the future here to make sure the callback below is not blocked by DoSomethingWithAudioInDataStreamInBackground
-    future<void> futureThread[3];
+    future<StreamResult> futureThread[3];
     int requestOrder = -1;
     synthesizer->SynthesisStarted += [expectedAudioData, &futureThread, &requestOrder](const SpeechSynthesisEventArgs& e) {
 
@@ -1529,7 +1478,7 @@ TEST_CASE("Speak output in streams before done from event synthesis started - Mo
         requestOrder++;
 
         auto stream = AudioDataStream::FromResult(e.Result); /* of type std::shared_ptr<AudioDataStream>, does not block */
-        futureThread[requestOrder] = DoSomethingWithAudioInDataStreamInBackground(stream, false, expectedAudioData[requestOrder]);
+        futureThread[requestOrder] = DoSomethingWithAudioInDataStreamInBackground(stream, false);
     };
 
     synthesizer->SpeakTextAsync("{{{text1}}}"); /* "{{{text1}}}" has completed rendering */
@@ -1550,7 +1499,8 @@ TEST_CASE("Speak output in streams before done from method start speaking text a
 
     auto stream1 = AudioDataStream::FromResult(result1); /* of type std::shared_ptr<AudioDataStream>, does not block */
     auto expectedAudioData1 = BuildMockSynthesizedAudio("{{{text1}}}", DEFAULT_LANGUAGE, DEFAULT_VOICE);
-    auto future1 = DoSomethingWithAudioInDataStreamInBackground(stream1, false, expectedAudioData1); /* does not block, just spins a thread up */
+    auto future1 = DoSomethingWithAudioInDataStreamInBackground(stream1, false); /* does not block, just spins a thread up */
+    CheckStreamResult(future1.get(), expectedAudioData1);
 
     auto result2 = synthesizer->StartSpeakingTextAsync("{{{text2}}}").get(); /* "{{{text2}}}" synthesis has started, likely not finished */
     SPXTEST_REQUIRE(result2->Reason == ResultReason::SynthesizingAudioStarted);
@@ -1558,42 +1508,8 @@ TEST_CASE("Speak output in streams before done from method start speaking text a
 
     auto stream2 = AudioDataStream::FromResult(result2); /* of type std::shared_ptr<AudioDataStream>, does not block */
     auto expectedAudioData2 = BuildMockSynthesizedAudio("{{{text2}}}", DEFAULT_LANGUAGE, DEFAULT_VOICE);
-    auto future2 = DoSomethingWithAudioInDataStreamInBackground(stream2, false, expectedAudioData2); /* does not block, just spins a thread up */
-}
-
-TEST_CASE("Speak output in streams before done queued - Mock", "[api][cxx]")
-{
-    auto config = MockSpeechConfig();
-    auto synthesizer = SpeechSynthesizer::FromConfig(config, nullptr); /* nullptr indicates to do nothing with synthesizer audio by default */
-
-    int startedRequests = 0;
-    synthesizer->SynthesisStarted += [&startedRequests](const SpeechSynthesisEventArgs& e) {
-        UNUSED(e);
-        startedRequests++;
-    };
-
-    int completedRequests = 0;
-    synthesizer->SynthesisCompleted += [&startedRequests, &completedRequests](const SpeechSynthesisEventArgs& e) {
-        UNUSED(e);
-        completedRequests++;
-        if (completedRequests == 1)
-        {
-            // This is to check the requests is queued
-            // When one request is already completed, the other one is still not started
-            SPXTEST_REQUIRE(startedRequests == 1);
-        }
-    };
-
-    auto futureResult1 = synthesizer->StartSpeakingTextAsync("{{{text1}}}"); /* "{{{text1}}}" synthesis might have started, likely not finished */
-    auto futureResult2 = synthesizer->StartSpeakingTextAsync("{{{text2}}}"); /* "{{{text2}}}" synthesis might have started (very unlikely) */
-
-    auto expectedAudioData1 = BuildMockSynthesizedAudio("{{{text1}}}", DEFAULT_LANGUAGE, DEFAULT_VOICE);
-    auto future1 = DoSomethingWithAudioInResultInBackground(futureResult1, false, expectedAudioData1); /* does not block, just spins a thread up */
-    auto expectedAudioData2 = BuildMockSynthesizedAudio("{{{text2}}}", DEFAULT_LANGUAGE, DEFAULT_VOICE);
-    auto future2 = DoSomethingWithAudioInResultInBackground(futureResult2, false, expectedAudioData2); /* does not block, just spins a thread up */
-
-    future1.wait();
-    future2.wait();
+    auto future2 = DoSomethingWithAudioInDataStreamInBackground(stream2, false); /* does not block, just spins a thread up */
+    CheckStreamResult(future2.get(), expectedAudioData2);
 }
 
 TEST_CASE("Speak output in streams with all data get on synthesis started result - Mock", "[api][cxx]")
@@ -1618,12 +1534,12 @@ TEST_CASE("Speak output in streams with all data get on synthesis started result
 
     auto stream = AudioDataStream::FromResult(result); /* now get the stream from result */
     auto expectedAudioData = BuildMockSynthesizedAudio("{{{text1}}}", DEFAULT_LANGUAGE, DEFAULT_VOICE);
-    DoSomethingWithAudioInDataStream(stream, true, expectedAudioData); /* the stream should be with AllData status */
+    auto streamResult = DoSomethingWithAudioInDataStream(stream, true); /* the stream should be with AllData status */
+    CheckStreamResult(streamResult, expectedAudioData);
 }
 
-TEST_CASE("Speak output in streams with all data get since synthesizing result - Mock", "[api][cxx]")
+void SpeakOutputInStreamsWithAllDataFromSynthesizingResult(shared_ptr<SpeechConfig> config, bool isMock)
 {
-    auto config = MockSpeechConfig();
     auto synthesizer = SpeechSynthesizer::FromConfig(config, nullptr); /* nullptr indicates to do nothing with synthesizer audio by default */
 
     bool firstChunkSkipped = false;
@@ -1644,12 +1560,24 @@ TEST_CASE("Speak output in streams with all data get since synthesizing result -
     // Check stream
     SPXTEST_REQUIRE(stream->GetStatus() == StreamStatus::PartialData);
 
-    auto fullAudioData = BuildMockSynthesizedAudio("{{{text1}}}", DEFAULT_LANGUAGE, DEFAULT_VOICE);
     auto expectedAudioData = std::make_shared<std::vector<uint8_t>>();
-    expectedAudioData->resize(fullAudioData->size() - MOCK_AUDIO_CHUNK_SIZE);
-    memcpy(expectedAudioData->data(), fullAudioData->data() + MOCK_AUDIO_CHUNK_SIZE, expectedAudioData->size());
+    if (isMock)
+    {
+        auto fullAudioData = BuildMockSynthesizedAudio("{{{text1}}}", DEFAULT_LANGUAGE, DEFAULT_VOICE);
+        expectedAudioData->resize(fullAudioData->size() - MOCK_AUDIO_CHUNK_SIZE);
+        memcpy(expectedAudioData->data(), fullAudioData->data() + MOCK_AUDIO_CHUNK_SIZE, expectedAudioData->size());
+    }
 
-    CheckAudioInDataStream(stream, expectedAudioData);
+    auto streamResult = DoSomethingWithAudioInDataStream(stream, false);
+    CheckStreamResult(streamResult, expectedAudioData, StreamStatus::PartialData);
+}
+
+TEST_CASE("Speak output in streams with all data get since synthesizing result - Mock", "[api][cxx]")
+{
+    SPXTEST_SECTION("Mock")
+    {
+        SpeakOutputInStreamsWithAllDataFromSynthesizingResult(MockSpeechConfig(), true);
+    }
 }
 
 TEST_CASE("Custom voice - REST", "[api][cxx]")

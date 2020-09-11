@@ -228,7 +228,7 @@ SPXAPI audio_data_stream_get_status(SPXAUDIOSTREAMHANDLE haudioStream, Stream_St
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto stream = GetInstance<ISpxAudioDataStream>(haudioStream);
-        *status = (Stream_Status)stream->GetStatus();
+        *status = static_cast<Stream_Status>(stream->GetStatus());
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }

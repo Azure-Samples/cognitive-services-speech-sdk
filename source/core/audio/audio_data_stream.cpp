@@ -290,16 +290,7 @@ void CSpxAudioDataStream::SetPosition(uint32_t pos)
 
 uint32_t CSpxAudioDataStream::Read(uint8_t* buffer, uint32_t bufferSize)
 {
-    SPX_DBG_TRACE_VERBOSE("CSpxAudioDataStream::%s: is called", __FUNCTION__);
-    SPX_IFTRUE_THROW_HR(buffer == nullptr, SPXERR_INVALID_ARG);
-
-    // Wait until either enough data is collected, or writing is finished, otherwise it's unexpected
-    if (!WaitForMoreData(m_position + bufferSize) && !m_writingEnded)
-    {
-        SPX_THROW_HR(SPXERR_UNEXPECTED_AUDIO_OUTPUT_FAILURE);
-    }
-
-    return FillBuffer(buffer, bufferSize, m_position);
+    return Read(buffer, bufferSize, m_position);
 }
 
 uint32_t CSpxAudioDataStream::Read(uint8_t* buffer, uint32_t bufferSize, uint32_t pos)

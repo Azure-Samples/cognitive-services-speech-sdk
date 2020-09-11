@@ -658,12 +658,6 @@ AUDIO_SYS_HANDLE audio_output_create_with_parameters(AUDIO_SETTINGS_HANDLE forma
 {
     AUDIO_SYS_DATA* result;
 
-    if (0 != strcmp(STRING_c_str(format->hDeviceName), ""))
-    {
-        LogError("specific audio output device is not supported now.");
-        return NULL;
-    }
-
     result = (AUDIO_SYS_DATA*)malloc(sizeof(AUDIO_SYS_DATA));
     if (result != NULL)
     {

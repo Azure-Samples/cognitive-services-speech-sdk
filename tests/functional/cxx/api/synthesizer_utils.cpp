@@ -53,11 +53,6 @@ namespace TTS
         return data;
     }
 
-    void DoSomethingWithAudioInPullStream(shared_ptr<PullAudioOutputStream> stream, bool& canceled)
-    {
-        DoSomethingWithAudioInPullStream(stream, canceled, nullptr);
-    }
-
     void DoSomethingWithAudioInPullStream(shared_ptr<PullAudioOutputStream> stream, bool& canceled, shared_ptr<vector<uint8_t>> expectedData)
     {
         uint8_t buffer[1024];
@@ -104,28 +99,10 @@ namespace TTS
         SPXTEST_REQUIRE(audioLength == audio->size());
     }
 
-    void DoSomethingWithAudioInDataStream(shared_ptr<AudioDataStream> stream, bool afterSynthesisDone)
+    StreamResult DoSomethingWithAudioInDataStream(shared_ptr<AudioDataStream> stream, bool afterSynthesisDone)
     {
-        DoSomethingWithAudioInDataStream(stream, afterSynthesisDone, nullptr);
-    }
+        StreamResult result;
 
-    void DoSomethingWithAudioInDataStream(shared_ptr<AudioDataStream> stream, bool afterSynthesisDone, std::shared_ptr<std::vector<uint8_t>> expectedData)
-    {
-        if (afterSynthesisDone)
-        {
-            SPXTEST_REQUIRE(stream->GetStatus() == StreamStatus::AllData);
-        }
-
-        CheckAudioInDataStream(stream, expectedData);
-
-        if (!afterSynthesisDone)
-        {
-            SPXTEST_REQUIRE(stream->GetStatus() == StreamStatus::AllData);
-        }
-    }
-
-    void CheckAudioInDataStream(shared_ptr<AudioDataStream> stream, std::shared_ptr<std::vector<uint8_t>> expectedData)
-    {
         uint8_t buffer[1024];
         uint32_t totalSize = 0;
         uint32_t filledSize = 0;
@@ -139,49 +116,29 @@ namespace TTS
             memcpy(actualData->data() + totalSize - filledSize, buffer, filledSize);
         }
 
-        if (expectedData != nullptr)
-        {
-            SPXTEST_REQUIRE(AreBinaryEqual(expectedData, actualData));
-        }
+        result.audioData = actualData;
+        result.status = stream->GetStatus();
 
-        if (stream->GetStatus() != StreamStatus::Canceled)
-        {
-            SPXTEST_REQUIRE(totalSize > 0);
-        }
+        UNUSED(afterSynthesisDone);
 
-        if (stream->GetStatus() == StreamStatus::Canceled) {
-            auto cancelDetails = SpeechSynthesisCancellationDetails::FromStream(stream);
-            /* do something with cancellation details */
-            SPXTEST_REQUIRE(cancelDetails->Reason == CancellationReason::Error);
-            SPXTEST_REQUIRE(cancelDetails->ErrorCode != CancellationErrorCode::NoError);
-        }
+        return result;
     }
 
-    future<void> DoSomethingWithAudioInDataStreamInBackground(shared_ptr<AudioDataStream> stream, bool afterSynthesisDone)
+    future<StreamResult> DoSomethingWithAudioInDataStreamInBackground(shared_ptr<AudioDataStream> stream, bool afterSynthesisDone)
     {
-        return DoSomethingWithAudioInDataStreamInBackground(stream, afterSynthesisDone, nullptr);
-    }
-
-    future<void> DoSomethingWithAudioInDataStreamInBackground(shared_ptr<AudioDataStream> stream, bool afterSynthesisDone, std::shared_ptr<std::vector<uint8_t>> expectedData)
-    {
-        auto future = async(launch::async, [stream, afterSynthesisDone, expectedData]() {
-            DoSomethingWithAudioInDataStream(stream, afterSynthesisDone, expectedData); // calls to stream->ReadData(buffer, size) will block until size data is available
+        auto future = async(launch::async, [stream, afterSynthesisDone]() {
+            return DoSomethingWithAudioInDataStream(stream, afterSynthesisDone); // calls to stream->ReadData(buffer, size) will block until size data is available
         });
 
         return future;
     }
 
-    future<void> DoSomethingWithAudioInResultInBackground(future<shared_ptr<SpeechSynthesisResult>>& futureResult, bool afterSynthesisDone)
+    future<StreamResult> DoSomethingWithAudioInResultInBackground(future<shared_ptr<SpeechSynthesisResult>>& futureResult, bool afterSynthesisDone)
     {
-        return DoSomethingWithAudioInResultInBackground(futureResult, afterSynthesisDone, nullptr);
-    }
-
-    future<void> DoSomethingWithAudioInResultInBackground(future<shared_ptr<SpeechSynthesisResult>>& futureResult, bool afterSynthesisDone, std::shared_ptr<std::vector<uint8_t>> expectedData)
-    {
-        auto future = std::async(std::launch::async, [&futureResult, afterSynthesisDone, expectedData]() {
+        auto future = std::async(std::launch::async, [&futureResult, afterSynthesisDone]() {
             auto result = futureResult.get();
             auto stream = AudioDataStream::FromResult(result);
-            DoSomethingWithAudioInDataStream(stream, afterSynthesisDone, expectedData); // calls to stream->ReadData(buffer, size) will block until size data is available
+            return DoSomethingWithAudioInDataStream(stream, afterSynthesisDone); // calls to stream->ReadData(buffer, size) will block until size data is available
         });
 
         return future;
@@ -335,5 +292,17 @@ namespace TTS
     {
         std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converter;
         return converter.from_bytes(string);
+    }
+
+    void CheckStreamResult(StreamResult result, shared_ptr<vector<uint8_t>> expectedData, StreamStatus expectedStatus)
+    {
+        if (expectedData && !expectedData->empty())
+        {
+            SPXTEST_REQUIRE(AreBinaryEqual(expectedData, result.audioData));
+        }
+
+        SPXTEST_REQUIRE(result.audioData->size() > 0);
+
+        SPXTEST_REQUIRE(result.status == expectedStatus);
     }
 }

@@ -30,6 +30,12 @@ using namespace std;
 
 namespace TTS
 {
+    struct StreamResult
+    {
+        shared_ptr<vector<uint8_t>> audioData;
+        StreamStatus status;
+    };
+
     shared_ptr<SpeechConfig> CurrentSpeechConfig();
 
     shared_ptr<SpeechConfig> RestSpeechConfig();
@@ -42,29 +48,17 @@ namespace TTS
 
     std::vector<uint8_t> ReadWavFile(const string& filename);
 
-    void DoSomethingWithAudioInPullStream(std::shared_ptr<PullAudioOutputStream> stream, bool& canceled);
+    void DoSomethingWithAudioInPullStream(std::shared_ptr<PullAudioOutputStream> stream, bool& canceled, std::shared_ptr<std::vector<uint8_t>> expectedData = nullptr);
 
-    void DoSomethingWithAudioInPullStream(std::shared_ptr<PullAudioOutputStream> stream, bool& canceled, std::shared_ptr<std::vector<uint8_t>> expectedData);
-
-    future<void> DoSomethingWithAudioInPullStreamInBackground(shared_ptr<PullAudioOutputStream> stream, bool& canceled);
-
-    future<void> DoSomethingWithAudioInPullStreamInBackground(shared_ptr<PullAudioOutputStream> stream, bool& canceled, std::shared_ptr<std::vector<uint8_t>> expectedData);
+    future<void> DoSomethingWithAudioInPullStreamInBackground(shared_ptr<PullAudioOutputStream> stream, bool& canceled, std::shared_ptr<std::vector<uint8_t>> expectedData = nullptr);
 
     void DoSomethingWithAudioInVector(shared_ptr<vector<uint8_t>> audio, size_t audioLength);
 
-    void DoSomethingWithAudioInDataStream(shared_ptr<AudioDataStream> stream, bool afterSynthesisDone);
+    StreamResult DoSomethingWithAudioInDataStream(shared_ptr<AudioDataStream> stream, bool afterSynthesisDone);
 
-    void CheckAudioInDataStream(shared_ptr<AudioDataStream> stream, std::shared_ptr<std::vector<uint8_t>> expectedData);
+    future<StreamResult> DoSomethingWithAudioInDataStreamInBackground(shared_ptr<AudioDataStream> stream, bool afterSynthesisDone);
 
-    void DoSomethingWithAudioInDataStream(shared_ptr<AudioDataStream> stream, bool afterSynthesisDone, std::shared_ptr<std::vector<uint8_t>> expectedData);
-
-    future<void> DoSomethingWithAudioInDataStreamInBackground(shared_ptr<AudioDataStream> stream, bool afterSynthesisDone);
-
-    future<void> DoSomethingWithAudioInDataStreamInBackground(shared_ptr<AudioDataStream> stream, bool afterSynthesisDone, std::shared_ptr<std::vector<uint8_t>> expectedData);
-
-    future<void> DoSomethingWithAudioInResultInBackground(future<shared_ptr<SpeechSynthesisResult>>& futureResult, bool afterSynthesisDone);
-
-    future<void> DoSomethingWithAudioInResultInBackground(future<shared_ptr<SpeechSynthesisResult>>& futureResult, bool afterSynthesisDone, std::shared_ptr<std::vector<uint8_t>> expectedData);
+    future<StreamResult> DoSomethingWithAudioInResultInBackground(future<shared_ptr<SpeechSynthesisResult>>& futureResult, bool afterSynthesisDone);
 
     bool AreBinaryEqual(std::shared_ptr<std::vector<uint8_t>> expectedData, std::shared_ptr<std::vector<uint8_t>> ActualData);
 
@@ -85,6 +79,8 @@ namespace TTS
     std::string XmlEncode(const std::string& text);
 
     std::wstring ToWString(const std::string& string);
+
+    void CheckStreamResult(StreamResult result, shared_ptr<vector<uint8_t>> expectedData = nullptr, StreamStatus expectedStatus = StreamStatus::AllData);
 
     class PushAudioOutputStreamTestCallback : public PushAudioOutputStreamCallback
     {

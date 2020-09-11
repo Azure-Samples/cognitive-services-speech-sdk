@@ -22,19 +22,22 @@ namespace Speech {
 /// </summary>
 class SpeechSynthesisEventArgs : public EventArgs
 {
+private:
+    SPXEVENTHANDLE m_hevent;
+    std::shared_ptr<SpeechSynthesisResult> m_result;
+
 public:
 
     /// <summary>
     /// Constructor.
     /// </summary>
     /// <param name="hevent">Event handle</param>
-    explicit SpeechSynthesisEventArgs(SPXEVENTHANDLE hevent) : m_hevent(hevent)
+    explicit SpeechSynthesisEventArgs(SPXEVENTHANDLE hevent) :
+        m_hevent(hevent),
+        m_result(std::make_shared<SpeechSynthesisResult>(ResultHandleFromEventHandle(hevent))),
+        Result(m_result)
     {
         SPX_DBG_TRACE_VERBOSE("%s (this=0x%p, handle=0x%p)", __FUNCTION__, (void*)this, (void*)m_hevent);
-
-        auto hresult = ResultHandleFromEventHandle(hevent);
-        m_result = std::make_shared<SpeechSynthesisResult>(hresult);
-        Result = m_result;
     };
 
     /// <inheritdoc/>
@@ -61,8 +64,6 @@ private:
         return hresult;
     }
 
-    SPXEVENTHANDLE m_hevent;
-    std::shared_ptr<SpeechSynthesisResult> m_result;
 };
 
 
