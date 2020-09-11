@@ -64,7 +64,7 @@ public:
     ~RnntDecoder();
 
     size_t GetInputDim();
-    bool Run(bool continuousReco);
+    bool Run(bool continuousReco, uint32_t decoderInSilenceTimeout, uint32_t startTimeout, uint32_t totalAudioLengthTimeout);
     RnntDecoderNBestPtr GetNBest();
     void Reset(IUnimicSource* source);
 
@@ -131,6 +131,7 @@ public:
     void ProcessAudio(const Impl::DataChunkPtr& audioChunk) override;
     void FlushAudio() override;
     void SetRecognitionMode(RNNT::RecognitionMode mode) override;
+    void SetSegmentationTimeouts(uint32_t decoderInSilenceTimeout, uint32_t startTimeout, uint32_t totalAudioLengthTimeout) override;
     void Start() override;
     void Stop() override;
     bool Running() override;
@@ -165,6 +166,7 @@ private:
     size_t m_consumedSourceFrames;
     size_t m_committedSourceFrames;
     RNNT::RecognitionMode m_recognitionMode;
+    uint32_t m_decoderInSilenceTimeout, m_startTimeout, m_totalAudioLengthTimeout;
     std::thread m_processor;
     ConditionalVariableBuffer<std::queue<float>> m_buffer;
 };

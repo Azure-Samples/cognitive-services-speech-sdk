@@ -113,7 +113,7 @@ DESTPRIVINC="$DEST/private/include"
 DESTPRIVINC2="$DEST/private/include.common"
 DESTPRIVINCJSON="$DEST/private/external.json"
 
-RNNTLIB=libunimic_runtime
+RNNTLIB=libpasco_runtime
 if [[ $OS == "Windows_NT" ]]; then
   if [[ $TARGET == "UWP" || $TARGET == "UNKNOWN" ]]; then
     RNNTLIBDIR=$SOURCE_ROOT/external/mas/Windows/$PLATFORM/$CONFIG

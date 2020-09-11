@@ -57,14 +57,10 @@ size_t RnntDecoder::GetInputDim()
     return RnntDll::GetUnimicDecoderInputDim(m_decoder);
 }
 
-bool RnntDecoder::Run(bool continuousReco)
+bool RnntDecoder::Run(bool continuousReco ,uint32_t decoderInSilenceTimeout, uint32_t startTimeout, uint32_t totalAudioLengthTimeout)
 {
-    /* For now, we use some default timeouts.
-     * Decoder silence timeout = 50 frames * 30 ms per frame = 1.5 seconds
-     * Start timeout = 166 ~= 5 seconds
-     * Total audio length = 333 ~= 10 seconds
-     */
-    return RnntDll::RunUnimicDecoder(m_decoder, continuousReco, 50, 166, 333);
+    bool hypoChanged = false;
+    return RnntDll::RunUnimicDecoder(m_decoder, continuousReco, decoderInSilenceTimeout, startTimeout, totalAudioLengthTimeout, hypoChanged);
 }
 
 RnntDecoderNBestPtr RnntDecoder::GetNBest()
@@ -289,6 +285,13 @@ void RnntClient::SetRecognitionMode(RNNT::RecognitionMode mode)
     m_recognitionMode = mode;
 }
 
+void RnntClient::SetSegmentationTimeouts(uint32_t decoderInSilenceTimeout, uint32_t startTimeout, uint32_t totalAudioLengthTimeout)
+{
+    m_decoderInSilenceTimeout = decoderInSilenceTimeout;
+    m_startTimeout = startTimeout;
+    m_totalAudioLengthTimeout = totalAudioLengthTimeout;
+}
+
 void RnntClient::Start()
 {
     if (!m_running)
@@ -366,7 +369,7 @@ void RnntClient::DecodeInternal()
     RnntEntryPtr lastEntry;
     bool continuousReco = (m_recognitionMode != RNNT::RecognitionMode::Interactive);
 
-    while (m_decoder->Run(continuousReco))
+    while (m_decoder->Run(continuousReco, m_decoderInSilenceTimeout, m_startTimeout, m_totalAudioLengthTimeout))
     {
         auto nbest = m_decoder->GetNBest();
         if (nbest->GetCount() > 0)

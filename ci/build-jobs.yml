@@ -2115,8 +2115,8 @@ jobs:
       fi
 
       if [[ $(SPEECHSDK_ENABLE_RNNT) == true ]]; then
-        cp $(Build.SourcesDirectory)/external/mas/iOS/arm64/Release/libunimic_runtime_static.a "build_ios_device/lib"
-        cp $(Build.SourcesDirectory)/external/mas/iOS/x64/Release/libunimic_runtime_static.a "build_ios_simulator64/lib"
+        cp $(Build.SourcesDirectory)/external/mas/iOS/arm64/Release/libpasco_runtime_static.a "build_ios_device/lib"
+        cp $(Build.SourcesDirectory)/external/mas/iOS/x64/Release/libpasco_runtime_static.a "build_ios_simulator64/lib"
       fi
 
       # create output static library with bitcode stripped out.

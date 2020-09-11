@@ -272,6 +272,14 @@ void CSpxRnntRecoEngineAdapter::RnntInitialize()
     auto displayText = PAL::ToBool(properties->GetStringValue("CARBON-INTERNAL-RNNT-DisplayText", "true"));
     auto maxEndPaddingDim = std::stoul(properties->GetStringValue("CARBON-INTERNAL-RNNT-MaxEndPaddingDim", "0"));
 
+    // Default timeout settings are as follows:
+    // Decoder silence timeout = 50 frames * 30 ms per frame = 1.5 seconds
+    // Start timeout = 166 ~= 5 seconds
+    // Total audio length = 333 ~= 10 seconds
+    auto decoderInSilenceTimeout = std::stoul(properties->GetStringValue("CARBON-INTERNAL-RNNT-DecoderInSilenceTimeout", "50"));
+    auto startTimeout = std::stoul(properties->GetStringValue("CARBON-INTERNAL-RNNT-StartTimeout", "166"));
+    auto totalAudioLengthTimeout = std::stoul(properties->GetStringValue("CARBON-INTERNAL-RNNT-TotalAudioLengthTimeout", "333"));
+
     // Create the RNN-T client.
     m_rnntCallbacks = SpxCreateObjectWithSite<ISpxRnntCallbacks>("CSpxRnntCallbackWrapper", this);
     try
@@ -291,6 +299,7 @@ void CSpxRnntRecoEngineAdapter::RnntInitialize()
     SPX_IFTRUE_RETURN(m_rnntClient == nullptr);
 
     SetRnntRecoMode(properties, m_rnntClient);
+    m_rnntClient->SetSegmentationTimeouts(decoderInSilenceTimeout, startTimeout, totalAudioLengthTimeout);
 }
 
 void CSpxRnntRecoEngineAdapter::RnntTerminate()

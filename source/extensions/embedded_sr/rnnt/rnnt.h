@@ -71,6 +71,7 @@ struct IRnntClient
     virtual void ProcessAudio(const Impl::DataChunkPtr& audioChunk) = 0;
     virtual void FlushAudio() = 0;
     virtual void SetRecognitionMode(RNNT::RecognitionMode mode) = 0;
+    virtual void SetSegmentationTimeouts(uint32_t decoderInSilenceTimeout, uint32_t startTimeout, uint32_t totalAudioLengthTimeout) = 0;
     virtual void Start() = 0;
     virtual void Stop() = 0;
     virtual bool Running() = 0;

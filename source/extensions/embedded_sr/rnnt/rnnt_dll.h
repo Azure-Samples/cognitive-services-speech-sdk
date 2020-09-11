@@ -69,9 +69,7 @@ public:
 
     static IUnimicDecoder* CreateUnimicDecoder(const wchar_t* spec) { return FORWARD_RNNT_FUNC_CALL(CreateUnimicDecoder, spec); }
     static size_t GetUnimicDecoderInputDim(IUnimicDecoder* decoder) { return FORWARD_RNNT_FUNC_CALL(GetUnimicDecoderInputDim, decoder); }
-    static bool RunUnimicDecoder(IUnimicDecoder* decoder, bool continuousReco, uint32_t decoderInSilFrmCnt,
-        uint32_t startTimeoutFrmCnt, uint32_t totalAudioLengthFrmCnt) { return FORWARD_RNNT_FUNC_CALL(RunUnimicDecoder, decoder, continuousReco, decoderInSilFrmCnt,
-            startTimeoutFrmCnt, totalAudioLengthFrmCnt); }
+    static bool RunUnimicDecoder(IUnimicDecoder* decoder, bool continuousReco, uint32_t decoderInSilFrmCnt, uint32_t startTimeoutFrmCnt, uint32_t totalAudioLengthFrmCnt, bool& hypoChanged) { return FORWARD_RNNT_FUNC_CALL(RunUnimicDecoder, decoder, continuousReco, decoderInSilFrmCnt, startTimeoutFrmCnt, totalAudioLengthFrmCnt, hypoChanged); }
     static IUnimicDecoderNBest* GetUnimicDecoderNBest(IUnimicDecoder* decoder) { return FORWARD_RNNT_FUNC_CALL(GetUnimicDecoderNBest, decoder); }
     static void DeleteUnimicDecoder(IUnimicDecoder* decoder) { FORWARD_RNNT_FUNC_CALL(DeleteUnimicDecoder, decoder); }
     static void ResetUnimicDecoder(IUnimicDecoder* decoder, IUnimicSource* source, const IUnimicDecoderSFLM* unimicDecoderSFLM) { FORWARD_RNNT_FUNC_CALL(ResetUnimicDecoder, decoder, source, unimicDecoderSFLM); }
@@ -114,13 +112,13 @@ private:
         SPX_IFTRUE_THROW_HR(m_handle == nullptr, HRESULT_FROM_WIN32(GetLastError()));
 #elif defined(__APPLE__)
 #if TARGET_OS_OSX
-        m_handle = dlopen("libunimic_runtime.dylib", RTLD_LAZY | RTLD_LOCAL);
-        SPX_TRACE_VERBOSE_IF(m_handle == nullptr, "Failed to load libunimic_runtime.dylib: %s.", dlerror());
+        m_handle = dlopen("libpasco_runtime.dylib", RTLD_LAZY | RTLD_LOCAL);
+        SPX_TRACE_VERBOSE_IF(m_handle == nullptr, "Failed to load libpasco_runtime.dylib: %s.", dlerror());
         SPX_IFTRUE_THROW_HR(m_handle == nullptr, SPXERR_INVALID_HANDLE);
 #endif
 #else
-        m_handle = dlopen("libunimic_runtime.so", RTLD_LAZY | RTLD_LOCAL);
-        SPX_TRACE_VERBOSE_IF(m_handle == nullptr, "Failed to load libunimic_runtime.so: %s.", dlerror());
+        m_handle = dlopen("libpasco_runtime.so", RTLD_LAZY | RTLD_LOCAL);
+        SPX_TRACE_VERBOSE_IF(m_handle == nullptr, "Failed to load libpasco_runtime.so: %s.", dlerror());
         SPX_IFTRUE_THROW_HR(m_handle == nullptr, SPXERR_INVALID_HANDLE);
 #endif
 
