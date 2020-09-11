@@ -62,7 +62,7 @@ using namespace std::chrono_literals;
 
 using json = nlohmann::json;
 
-seconds CSpxAudioStreamSession::StopRecognitionTimeout = 3s;
+seconds CSpxAudioStreamSession::StopRecognitionTimeout = 10s;
 
 atomic<int64_t> CSpxAudioStreamSession::Operation::OperationId;
 const minutes CSpxAudioStreamSession::Operation::Timeout = 1min;
