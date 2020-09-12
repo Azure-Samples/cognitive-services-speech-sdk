@@ -692,7 +692,7 @@ jobs:
   # Note: for now building any platform. In the future, should build all available.
   - task: VSBuild@1
     inputs:
-      solution: 'public_samples/**/*.sln'
+      solution: 'public_samples/**/*.sln;-:$(Build.SourcesDirectory)/public_samples/quickstart/csharp/xamarin/helloworld.sln;-:$(Build.SourcesDirectory)/public_samples/samples/csharp/xamarin/kws-xamarin/kws-xamarin.sln'
       maximumCpuCount: true
     displayName: 'Test - build solutions'
   - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
