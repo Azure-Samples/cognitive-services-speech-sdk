@@ -132,7 +132,7 @@ private:
 
     std::shared_ptr<ISpxGenericSite> m_siteKeepAlive;
 
-    std::queue<std::string> m_requestQueue;
+    std::deque<std::string> m_requestQueue;
     std::mutex m_queueOperationMutex;
     std::mutex m_requestWaitingMutex;
     std::condition_variable m_cv;

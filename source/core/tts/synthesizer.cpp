@@ -541,7 +541,7 @@ void CSpxSynthesizer::CheckLogFilename()
 void CSpxSynthesizer::PushRequestIntoQueue(const std::string requestId)
 {
     std::unique_lock<std::mutex> lock(m_queueOperationMutex);
-    m_requestQueue.emplace(requestId);
+    m_requestQueue.push_back(requestId);
     m_cv.notify_all();
 }
 
@@ -550,16 +550,20 @@ void CSpxSynthesizer::WaitUntilRequestInFrontOfQueue(const std::string& requestI
     std::unique_lock<std::mutex> lock(m_requestWaitingMutex);
 
 #ifdef _DEBUG
-    while (!m_cv.wait_for(lock, std::chrono::milliseconds(100), [&] {
-        std::unique_lock<std::mutex> lock(m_queueOperationMutex);
-        return m_requestQueue.empty() || m_requestQueue.front() == requestId || m_requestQueue.front().empty(); }))
+    while (!m_cv.wait_for(lock, std::chrono::milliseconds(100),
+#else
+    m_cv.wait(lock,
+#endif
+        [&] {
+        std::unique_lock<std::mutex> queueLock(m_queueOperationMutex);
+        return std::find(m_requestQueue.begin(), m_requestQueue.end(), requestId) == m_requestQueue.end() || m_requestQueue.front() == requestId;
+#ifdef _DEBUG
+        }))
     {
-        SPX_DBG_TRACE_VERBOSE("%s: waiting for processing speak request ...", __FUNCTION__);
+        SPX_DBG_TRACE_VERBOSE("%s: waiting for processing speak request %s, current queue front: %s", __FUNCTION__, requestId.c_str(), m_requestQueue.front().c_str());
     }
 #else
-    m_cv.wait(lock, [&] {
-        std::unique_lock<std::mutex> lock(m_queueOperationMutex);
-        return m_requestQueue.empty() || m_requestQueue.front() == requestId || m_requestQueue.front().empty(); });
+    });
 #endif
 }
 
@@ -568,7 +572,7 @@ void CSpxSynthesizer::PopRequestFromQueue(const std::string& requestId)
     std::unique_lock<std::mutex> lock(m_queueOperationMutex);
     if (!m_requestQueue.empty() && m_requestQueue.front() == requestId)
     {
-        m_requestQueue.pop();
+        m_requestQueue.pop_front();
     }
     m_cv.notify_all();
 }
@@ -576,14 +580,14 @@ void CSpxSynthesizer::PopRequestFromQueue(const std::string& requestId)
 void CSpxSynthesizer::ClearRequestQueueAndKeepFront()
 {
     std::unique_lock<std::mutex> lock(m_queueOperationMutex);
-    std::queue<std::string> empty;
     if (!m_requestQueue.empty())
     {
-        empty.emplace(m_requestQueue.front());
+        const auto front = m_requestQueue.front();
+        m_requestQueue.clear();
+        m_requestQueue.push_back(front);
     }
 
-    std::swap(m_requestQueue, empty);
-    m_requestQueue.emplace("");
+    m_requestQueue.emplace_back();
     m_cv.notify_all();
 }
 
