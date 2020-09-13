@@ -46,20 +46,20 @@
   transcriber.joinConversationAsync(conversation,
     function () {
       // add first participant with voice signature from enrollment step
-      var voiceSignatureUser1 = `{
-        Version: 0,
-        Tag: "<<VOICE_TAG_HERE>>",
-        Data: "<<VOICE_DATA_HERE>>"
-       }`;
+      var voiceSignatureUser1 = "{" +
+        "Version: 0," +
+        "Tag: \"<<VOICE_TAG_HERE>>\"" +
+        "Data: \"<<VOICE_DATA_HERE>>\"" +
+       "}";
       var user1 = sdk.Participant.From("user1@example.com", "en-us", voiceSignatureUser1);
       conversation.addParticipantAsync(user1,
         function () {
           // add second participant with voice signature from enrollment step
-          var voiceSignatureUser2 = `{
-            Version: 0,
-            Tag: "<<VOICE_TAG_HERE>>",
-            Data: "<<VOICE_DATA_HERE>>"
-           }`;
+          var voiceSignatureUser2 = "{" +
+            "Version: 0," +
+            "Tag: \"<<VOICE_TAG_HERE>>\"," +
+            "Data: \"<<VOICE_DATA_HERE>>\"" +
+           "}";
           var user2 = sdk.Participant.From("user2@example.com", "en-us", voiceSignatureUser2);
           conversation.addParticipantAsync(user2,
             function () {
