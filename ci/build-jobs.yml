@@ -2335,7 +2335,7 @@ jobs:
     jobName: "macOSProxyBuild"
     buildPlatform: macOSProxy
     extraDependencyInstallSteps: []
-    extraCmakeArgs: "-Duse_openssl=ON -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl"
+    extraCmakeArgs: "-Duse_openssl=ON -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl@1.1"
 
 - template: objectivec-unit-tests.yml
   parameters:
