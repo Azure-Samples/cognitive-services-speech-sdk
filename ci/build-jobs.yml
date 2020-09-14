@@ -1649,11 +1649,6 @@ jobs:
   - template: test-during-build.yml
     parameters:
       continueOnTestFailure: ${{ parameters.continueOnTestFailure }}
-# this test should only run on the Linux Ubuntu Agent pool, so that the latency data produced is from datcenter "westus" to "westus2".
-  - template: run-latency-test.yml
-    parameters:
-      speechKey: "$(WestUSLatencyTestSpeechKey)"
-      region: "westus"
 
 - job: LinuxProxyTest
   dependsOn: [Pre, LinuxBuild]
