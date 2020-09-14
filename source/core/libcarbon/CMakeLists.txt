@@ -101,6 +101,7 @@ target_link_libraries(${PROJECT_NAME}
     PRIVATE speaker_recognition
     PRIVATE conversation_translation
     PRIVATE usp
+    PRIVATE session2
     PRIVATE xyz_new_lib
   )
 

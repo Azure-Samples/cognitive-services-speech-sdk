@@ -13,6 +13,7 @@ namespace PAL
 std::wstring CreateGuidWithoutDashes();
 
 std::string CreateGuidWithDashesUTF8();
+std::string CreateGuidWithoutDashesUTF8();
 
 std::string DeviceUuid();
 

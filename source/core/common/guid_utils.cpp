@@ -49,6 +49,27 @@ namespace PAL
         return PAL::GenerateGUID();
     }
 
+    std::string CreateGuidWithoutDashesUTF8()
+    {
+        auto guid = CreateGuidWithDashesUTF8();
+        auto cch = guid.length();
+
+        constexpr auto maxcch = 100;
+        SPX_DBG_ASSERT(cch <= maxcch);
+
+        char stripped[maxcch + 1];
+        char *psz = &stripped[0];
+        
+        for (size_t i = 0; i < cch && i < maxcch; i++)
+        {
+            if (guid[i] == '-') continue;
+            *psz++ = guid[i];
+        }
+        *psz = '\0';
+
+        return stripped;
+    }
+
     std::string DeviceUuid()
     {
         // We make this stable per run for now.

@@ -34,6 +34,7 @@ SPX_EXTERN_C void* SRLib_CreateModuleObject(const char* className, const char* i
 SPX_EXTERN_C void* TTSLib_CreateModuleObject(const char* className, const char* interfaceName);
 SPX_EXTERN_C void* ConversationTranslationLib_CreateModuleObject(const char *className, const char* interfaceName);
 SPX_EXTERN_C void* SpeakerRecognition_CreateModuleObject(const char *className, const char* interfaceName);
+SPX_EXTERN_C void* Session2_CreateModuleObject(const char* className, const char* interfaceName);
 SPX_EXTERN_C void* XyzNewLib_CreateModuleObject(const char* className, const char* interfaceName);
 
 SPX_EXTERN_C void* PrimaryCarbon_CreateModuleObject(const char* className, const char* interfaceName)
@@ -56,6 +57,7 @@ SPX_EXTERN_C void* PrimaryCarbon_CreateModuleObject(const char* className, const
     SPX_FACTORY_MAP_ENTRY_FUNC(TTSLib_CreateModuleObject);
     SPX_FACTORY_MAP_ENTRY_FUNC(ConversationTranslationLib_CreateModuleObject);
     SPX_FACTORY_MAP_ENTRY_FUNC(SpeakerRecognition_CreateModuleObject);
+    SPX_FACTORY_MAP_ENTRY_FUNC(Session2_CreateModuleObject);
     SPX_FACTORY_MAP_ENTRY_FUNC(XyzNewLib_CreateModuleObject);
     SPX_FACTORY_MAP_ENTRY(CSpxSpeechApiFactory, ISpxSpeechApiFactory);
     SPX_FACTORY_MAP_ENTRY(CSpxSpeechSynthesisApiFactory, ISpxSpeechSynthesisApiFactory);

@@ -36,27 +36,15 @@
 #include <interfaces/results.h>
 #include <interfaces/types.h>
 
+#include <interfaces/ispxobjectinit.h>
+#include <interfaces/ispxobjectwithsite.h>
+#include <interfaces/ispxgenericsite.h>
+#include <interfaces/ispxsession2.h>
+
 namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
 namespace Impl {
-
-class ISpxObjectInit : public ISpxInterfaceBaseFor<ISpxObjectInit>
-{
-public:
-    virtual void Init() = 0;
-    virtual void Term() = 0;
-};
-
-class ISpxGenericSite : public ISpxInterfaceBaseFor<ISpxGenericSite>
-{
-};
-
-class ISpxObjectWithSite : public ISpxInterfaceBaseFor<ISpxObjectWithSite>
-{
-public:
-    virtual void SetSite(std::weak_ptr<ISpxGenericSite> site) = 0;
-};
 
 template <class T, class I, class... Types>
 std::shared_ptr<I> SpxCreateObjectInternal(Types&&... Args)

@@ -3,16 +3,19 @@ project(core_unit_tests)
 set(SRC_DIR "${PROJECT_SOURCE_DIR}")
 
 set (HEADERS_PRIVATE
+    "${SRC_DIR}/mocks.h"
     "${SRC_DIR}/sequence_generator_audio_stream_reader.h"
     "${SRC_DIR}/unit_test_utils.h"
-    "${SRC_DIR}/mocks.h"
     )
 
 set(SOURCES
+    "${SRC_DIR}/audio_processor_write_to_audio_source_buffer_test.cpp"
+    "${SRC_DIR}/audio_source_adapter_test.cpp"
     "${SRC_DIR}/main.cpp"
+    "${SRC_DIR}/read_write_ring_buffer_test_case.cpp"
+    "${SRC_DIR}/session2_test.cpp"
     "${SRC_DIR}/single_to_many_stream_reader_adapter_test.cpp"
     "${SRC_DIR}/sequence_generator_audio_stream_reader.cpp"
-    "${SRC_DIR}/read_write_ring_buffer_test_case.cpp"
     "${SRC_DIR}/string_utils_test.cpp"
     "${SRC_DIR}/spxtest_unit_tests.cpp"
     "${SRC_DIR}/audio_processor_write_to_audio_source_buffer_test.cpp"
