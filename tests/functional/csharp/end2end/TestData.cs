@@ -59,7 +59,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public static class Levenshtein
         {
             public static float SimilarityScoreThreshold => 0.80f;
-            public static float PronunciationSimilarityScoreThreshold => 0.50f;
         }
     }
 }

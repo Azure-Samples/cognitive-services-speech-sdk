@@ -16,7 +16,6 @@ using Newtonsoft.Json.Linq;
 namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 {
     using System.IO;
-    using static AssertHelpers;
     using static SPXTEST;
     using static Config;
     using static SpeechRecognitionTestsHelper;
@@ -34,7 +33,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [ClassCleanup]
-        new public static void TestClassCleanup()
+        public new static void TestClassCleanup()
         {
             LoggingTestBaseCleanup();
         }
@@ -119,9 +118,15 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 SPXTEST_ARE_EQUAL(pronunciationAssessmentConfig.ToJson(),
                     recognizer.Properties.GetProperty(PropertyId.PronunciationAssessment_Params));
                 var result = await helper.CompleteRecognizeOnceAsync(recognizer).ConfigureAwait(false);
-                Assert.IsTrue(LevenshteinRatio(
-                    AudioUtterancesMap[AudioUtteranceKeys.PRONUNCIATION_ASSESSMENT_GOOD_PRONUNCIATION_CHINESE]
-                        .Utterances["zh-CN"][0].Text, result.Text) >= TestData.Levenshtein.PronunciationSimilarityScoreThreshold);
+                // check recognition result only when reference text is set.
+                if (useReferenceText)
+                {
+                    SPXTEST_ISTRUE(LevenshteinRatio(
+                                       AudioUtterancesMap[AudioUtteranceKeys.PRONUNCIATION_ASSESSMENT_GOOD_PRONUNCIATION_CHINESE]
+                                           .Utterances["zh-CN"][0].Text, result.Text) >=
+                                   TestData.Levenshtein.SimilarityScoreThreshold);
+                }
+
                 var pronResult = PronunciationAssessmentResult.FromResult(result);
 
                 SPXTEST_ISTRUE(pronResult.AccuracyScore > 0);
