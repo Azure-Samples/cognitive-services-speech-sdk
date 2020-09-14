@@ -63,16 +63,16 @@
           var user2 = sdk.Participant.From("user2@example.com", "en-us", voiceSignatureUser2);
           conversation.addParticipantAsync(user2,
             function () {
-              transcriber.sessionStarted = (s, e) => {
+              transcriber.sessionStarted = function(s, e) {
                 console.log("(sessionStarted)");
               };
-              transcriber.sessionStopped = (s, e) => {
+              transcriber.sessionStopped = function(s, e) {
                 console.log("(sessionStopped)");
               };
-              transcriber.canceled = (s, e) => {
+              transcriber.canceled = function(s, e) {
                 console.log("(canceled)");
               };
-              transcriber.transcribed = (s, e) => {
+              transcriber.transcribed = function(s, e) {
                 console.log("(transcribed) text: " + e.result.text);
                 console.log("(transcribed) speakerId: " + e.result.speakerId);
               };

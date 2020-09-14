@@ -40,7 +40,7 @@
       };
       var profile = result;
       var enrollConfigs = [];
-      enrollFiles.forEach(f => {
+      enrollFiles.forEach(function(f) {
         enrollConfigs.push(getAudioConfigFromFile(f));
       });
 
@@ -107,4 +107,3 @@
     });
   
 }());
-
