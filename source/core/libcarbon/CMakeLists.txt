@@ -101,6 +101,7 @@ target_link_libraries(${PROJECT_NAME}
     PRIVATE speaker_recognition
     PRIVATE conversation_translation
     PRIVATE usp
+    PRIVATE xyz_new_lib
   )
 
 if(ANDROID OR (${CMAKE_SYSTEM_NAME} STREQUAL "Linux"))
