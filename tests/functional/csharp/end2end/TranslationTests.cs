@@ -500,18 +500,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [DataTestMethod, TestCategory(TestCategory.LongRunning)]
-        [DynamicData(nameof(Language.LocaleAndLang), typeof(Language), DynamicDataSourceType.Property)]
-        public async Task TranslateFromEachLocaletoEachTextLang(string locale, string lang)
-        {
-            var result = await this.translationHelper.GetTranslationFinalResult(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath(), locale, new List<string> { lang });
-            SPXTEST_ISNOTNULL(result, AssertOutput.TranslationShouldNotBeNull);
-            SPXTEST_ARE_EQUAL(ResultReason.TranslatedSpeech, result.Reason, "Unmatched result reason.");
-            SPXTEST_ISTRUE(String.IsNullOrEmpty(CancellationDetails.FromResult(result).ErrorDetails));
-            SPXTEST_ISFALSE(String.IsNullOrEmpty(result.Text), $"locale: {locale}, language: {lang}, result: {result.ToString()}");
-            SPXTEST_ARE_EQUAL(1, result.Translations.Count, AssertOutput.WrongTranslatedUtterancesCount);
-        }
-
-        [DataTestMethod, TestCategory(TestCategory.LongRunning)]
         [DynamicData(nameof(Voice.LangAndSynthesis), typeof(Voice), DynamicDataSourceType.Property)]
         public async Task TranslateFromENtoEachLangWithSynthesis(string translateTo, string voice)
         {
