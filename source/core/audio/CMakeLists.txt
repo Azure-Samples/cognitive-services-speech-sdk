@@ -30,6 +30,7 @@ set(HEADERS_PRIVATE
     "${SRC_DIR}/microphone_audio_source_adapter.h"
     "${SRC_DIR}/file_audio_source_adapter.h"
     "${SRC_DIR}/stream_audio_source_adapter.h"
+    "${SRC_DIR}/audio_object_tracker.h"
     )
 
 set(SOURCES
@@ -111,10 +112,11 @@ else()
     if (NOT (CMAKE_SYSTEM_NAME STREQUAL "Android"))
         list(APPEND HEADERS_PRIVATE
              "${SRC_DIR}/linux/microphone_pump.h"
+             "${SRC_DIR}/linux/azure_c_shared_dependencies.h"
              )
         list(APPEND SOURCES
             "${SRC_DIR}/linux/microphone_pump.cpp"
-            "${SRC_DIR}/linux/audio_sys.c"
+            "${SRC_DIR}/linux/audio_sys.cpp"
             )
         list(APPEND AUDIO_LIBS asound)
     else()

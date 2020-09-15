@@ -132,6 +132,7 @@ extern STRING_HANDLE get_input_device_nice_name(AUDIO_SYS_HANDLE);
 
 #ifdef __cplusplus
 }
+
 #endif /* __cplusplus */
 
 #endif /* AUDIO_SYS_H */

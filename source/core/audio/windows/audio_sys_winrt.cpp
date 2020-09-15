@@ -23,6 +23,7 @@
 #include <endpointvolume.h>
 #include <windows/audio_sys_win_base.h>
 #include <string_utils.h>
+#include "audio_object_tracker.h"
 
 #include <winrt/Windows.Foundation.h>
 #include <winrt/Windows.Devices.Enumeration.h>
@@ -55,7 +56,7 @@ public:
     promise<HRESULT> m_promise;
 };
 
-typedef struct AUDIO_SYS_DATA_TAG
+struct AUDIO_SYS_DATA
 {
     //Audio Input Context
     std::thread hCaptureThread;
@@ -82,12 +83,13 @@ typedef struct AUDIO_SYS_DATA_TAG
     uint32_t inputFrameCnt;
 
     winrt::hstring deviceLongname;
-} AUDIO_SYS_DATA;
+};
 
+using namespace Microsoft::CognitiveServices::Speech::Impl;
+AudioObjectTracker<AUDIO_SYS_DATA, AUDIO_SYS_HANDLE> s_tracker{};
 
 //-------------------
 // helpers
-HRESULT audio_create_events(AUDIO_SYS_DATA * const audioData);
 
 WASAPICapture::WASAPICapture(const WAVEFORMATEX f) :
     audioInFormat(f)
@@ -225,64 +227,34 @@ Exit:
 
 AUDIO_SYS_HANDLE audio_create_with_parameters(AUDIO_SETTINGS_HANDLE format)
 {
-    HRESULT hr = S_OK;
-    AUDIO_SYS_DATA * result = nullptr;
+    auto audio_sys = std::make_shared<AUDIO_SYS_DATA>();
+    auto handle = s_tracker.Track(audio_sys);
 
-    result = new AUDIO_SYS_DATA();
+    memset(audio_sys.get(), 0, sizeof(AUDIO_SYS_DATA));
 
-    memset(result, 0, sizeof(AUDIO_SYS_DATA));
-
-    result->current_output_state = AUDIO_STATE_STOPPED;
-    result->current_input_state = AUDIO_STATE_STOPPED;
+    audio_sys->current_output_state = AUDIO_STATE_STOPPED;
+    audio_sys->current_input_state = AUDIO_STATE_STOPPED;
     // set input frame to 10 ms.(16000 frames(samples) is in one second )
-    result->inputFrameCnt = 160;
+    audio_sys->inputFrameCnt = 160;
 
-    result->audioInFormat.wFormatTag = format->wFormatTag;
-    result->audioInFormat.wBitsPerSample = format->wBitsPerSample;
-    result->audioInFormat.nChannels = format->nChannels;
-    result->audioInFormat.nSamplesPerSec = format->nSamplesPerSec;
-    result->audioInFormat.nAvgBytesPerSec = format->nAvgBytesPerSec;
-    result->audioInFormat.nBlockAlign = format->nBlockAlign;
-    result->audioInFormat.cbSize = 0;
+    audio_sys->audioInFormat.wFormatTag = format->wFormatTag;
+    audio_sys->audioInFormat.wBitsPerSample = format->wBitsPerSample;
+    audio_sys->audioInFormat.nChannels = format->nChannels;
+    audio_sys->audioInFormat.nSamplesPerSec = format->nSamplesPerSec;
+    audio_sys->audioInFormat.nAvgBytesPerSec = format->nAvgBytesPerSec;
+    audio_sys->audioInFormat.nBlockAlign = format->nBlockAlign;
+    audio_sys->audioInFormat.cbSize = 0;
 
-    audio_set_options(result, AUDIO_OPTION_DEVICENAME, STRING_c_str(format->hDeviceName));
+    audio_set_options(handle, AUDIO_OPTION_DEVICENAME, STRING_c_str(format->hDeviceName));
 
-    hr = audio_input_create(result);
-    EXIT_ON_ERROR(hr);
+    auto hr = audio_input_create(audio_sys.get());
 
-Exit:
     if (FAILED(hr))
     {
-        delete result;
-        result = nullptr;
+        s_tracker.Release(handle);
+        return nullptr;
     }
-    return result;
-}
-
-HRESULT audio_create_events(AUDIO_SYS_DATA * const audioData)
-{
-    HRESULT hr = S_OK;
-    if (audioData == nullptr)
-    {
-        return AUDIO_RESULT_INVALID_ARG;
-    }
-
-    audioData->hRenderThreadShouldExit = CreateEvent(0, FALSE, FALSE, nullptr);
-    EXIT_ON_ERROR_IF(E_FAIL, nullptr == audioData->hRenderThreadShouldExit);
-
-    // n.b. starts signaled so force_render_thread_to_exit_and_wait will work even if audio was never played
-    audioData->hRenderThreadDidExit = CreateEvent(0, FALSE, TRUE, nullptr);
-    EXIT_ON_ERROR_IF(E_FAIL, NULL == audioData->hRenderThreadDidExit);
-
-Exit:
-    if (FAILED(hr))
-    {
-
-        SAFE_CLOSE_HANDLE(audioData->hRenderThreadShouldExit);
-        SAFE_CLOSE_HANDLE(audioData->hRenderThreadDidExit);
-
-    }
-    return hr;
+    return handle;
 }
 
 // Returns 1 on success.
@@ -298,14 +270,13 @@ static void force_render_thread_to_exit_and_wait(AUDIO_SYS_DATA *audioData)
 
 void audio_destroy(AUDIO_SYS_HANDLE handle)
 {
-    if (handle != NULL)
+    auto audioData = s_tracker.Get(handle);
+    if (audioData)
     {
-        AUDIO_SYS_DATA* audioData = (AUDIO_SYS_DATA*)handle;
-
         if (audioData->hRenderThreadShouldExit != NULL &&
             audioData->hRenderThreadDidExit != NULL)
         {
-            force_render_thread_to_exit_and_wait(audioData);
+            force_render_thread_to_exit_and_wait(audioData.get());
         }
         SAFE_CLOSE_HANDLE(audioData->hRenderThreadShouldExit);
         SAFE_CLOSE_HANDLE(audioData->hRenderThreadDidExit);
@@ -315,7 +286,7 @@ void audio_destroy(AUDIO_SYS_HANDLE handle)
             STRING_delete(audioData->hDeviceName);
         }
 
-        delete audioData;
+        s_tracker.Release(handle);
     }
 }
 
@@ -330,10 +301,9 @@ AUDIO_RESULT audio_setcallbacks(AUDIO_SYS_HANDLE              handle,
     void*                         error_ctx)
 {
     AUDIO_RESULT result = AUDIO_RESULT_INVALID_ARG;
-    if (handle != NULL && audio_write_cb != NULL)
+    auto audioData = s_tracker.Get(handle);
+    if (audioData && audio_write_cb != NULL)
     {
-        AUDIO_SYS_DATA* audioData = (AUDIO_SYS_DATA*)handle;
-
         audioData->error_cb = error_cb;
         audioData->user_errorctx = error_ctx;
         audioData->user_errorctx = error_cb;
@@ -349,12 +319,11 @@ AUDIO_RESULT audio_setcallbacks(AUDIO_SYS_HANDLE              handle,
     return result;
 }
 
-DWORD WINAPI captureThreadProc(
-    _In_ LPVOID lpParameter
-)
+void captureThreadProc(AUDIO_SYS_HANDLE handle)
 {
     HRESULT hr;
-    AUDIO_SYS_DATA* pInput = (AUDIO_SYS_DATA*)lpParameter;
+    auto pInput = s_tracker.Get(handle);
+    SPX_DBG_ASSERT(pInput != nullptr);
     DWORD waitResult;
     IAudioCaptureClient *pCaptureClient;
 
@@ -430,14 +399,13 @@ Exit:
     }
 
     SAFE_RELEASE(pCaptureClient);
-    return 0;
 }
 
 
 AUDIO_RESULT audio_input_start(AUDIO_SYS_HANDLE handle)
 {
     HRESULT hr = E_FAIL;
-    AUDIO_SYS_DATA * audioData = (AUDIO_SYS_DATA*)handle;
+    auto audioData = s_tracker.Get(handle);
 
     if (!audioData || audioData->spCapture->hBufferReady == nullptr)
     {
@@ -450,7 +418,7 @@ AUDIO_RESULT audio_input_start(AUDIO_SYS_HANDLE handle)
     }
     if (!audioData->hCaptureThread.joinable())
     {
-        audioData->hCaptureThread = std::thread(&captureThreadProc, (LPVOID)audioData);
+        audioData->hCaptureThread = std::thread(&captureThreadProc, handle);
         EXIT_ON_ERROR_IF(E_FAIL, audioData->hCaptureThread.native_handle() == nullptr);
     }
 
@@ -465,9 +433,9 @@ Exit:
 AUDIO_RESULT audio_input_stop(AUDIO_SYS_HANDLE handle)
 {
     AUDIO_RESULT result;
-    if (handle != NULL)
+    auto audioData = s_tracker.Get(handle);
+    if (audioData)
     {
-        AUDIO_SYS_DATA* audioData = (AUDIO_SYS_DATA*)handle;
         if (audioData->current_input_state != AUDIO_STATE_RUNNING)
         {
             result = AUDIO_RESULT_INVALID_STATE;
@@ -496,10 +464,9 @@ AUDIO_RESULT audio_input_stop(AUDIO_SYS_HANDLE handle)
 
 AUDIO_RESULT audio_set_options(AUDIO_SYS_HANDLE handle, const char* optionName, const void* value)
 {
-    if (handle != NULL)
+    auto audioData = s_tracker.Get(handle);
+    if (audioData)
     {
-        AUDIO_SYS_DATA* audioData = (AUDIO_SYS_DATA*)handle;
-
         if (strcmp(AUDIO_OPTION_INPUT_FRAME_COUNT, optionName) == 0)
         {
             if (value)
@@ -550,7 +517,11 @@ AUDIO_RESULT audio_playwavfile(AUDIO_SYS_HANDLE hAudioOut, const char* file)
     return AUDIO_RESULT_OK;
 }
 
-STRING_HANDLE get_input_device_nice_name(AUDIO_SYS_HANDLE audioData) {
-    STRING_HANDLE result = STRING_construct(winrt::to_string(audioData->deviceLongname).c_str());
-    return result;
+STRING_HANDLE get_input_device_nice_name(AUDIO_SYS_HANDLE handle) {
+    auto audioData = s_tracker.Get(handle);
+    if (audioData)
+    {
+        return STRING_construct(winrt::to_string(audioData->deviceLongname).c_str());
+    }
+    return nullptr;
 }

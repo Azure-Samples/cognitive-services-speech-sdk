@@ -16,6 +16,7 @@
 #include <Functiondiscoverykeys_devpkey.h>
 #include <windows/audio_sys_win_base.h>
 #include <string_utils.h>
+#include "audio_object_tracker.h"
 
 #define AUDIO_OPTION_DEVICE_LONGNAME "devicelongname"
 
@@ -68,6 +69,8 @@ typedef struct _RENDERCALL
     void* pContext;
 } RENDERCALL_DATA;
 
+using namespace Microsoft::CognitiveServices::Speech::Impl;
+AudioObjectTracker<AUDIO_SYS_DATA, AUDIO_SYS_HANDLE> s_tracker{};
 
 //-------------------
 // helpers
@@ -345,7 +348,6 @@ static AUDIO_RESULT write_audio_stream(
 
 AUDIO_SYS_HANDLE audio_create_with_parameters(AUDIO_SETTINGS_HANDLE format)
 {
-    AUDIO_SYS_DATA      *result = nullptr;
     HRESULT hr = E_FAIL;
 
     std::shared_ptr<IMMDeviceEnumerator> pEnumerator(nullptr);
@@ -355,17 +357,14 @@ AUDIO_SYS_HANDLE audio_create_with_parameters(AUDIO_SETTINGS_HANDLE format)
 
     REFERENCE_TIME      hnsRequestedDuration = REFTIMES_PER_SEC;
 
-    result = (AUDIO_SYS_DATA*)malloc(sizeof(AUDIO_SYS_DATA));
-    if (result == nullptr)
-    {
-        return nullptr;
-    }
+    auto audio_sys = std::make_shared<AUDIO_SYS_DATA>();
+    auto handle = s_tracker.Track(audio_sys);
 
-    memset(result, 0, sizeof(AUDIO_SYS_DATA));
+    memset(audio_sys.get(), 0, sizeof(AUDIO_SYS_DATA));
 
-    result->current_output_state = AUDIO_STATE_STOPPED;
-    result->current_input_state = AUDIO_STATE_STOPPED;
-    result->inputFrameCnt = 160;
+    audio_sys->current_output_state = AUDIO_STATE_STOPPED;
+    audio_sys->current_input_state = AUDIO_STATE_STOPPED;
+    audio_sys->inputFrameCnt = 160;
 
     {
         IMMDeviceEnumerator * pEnumeratorRaw = nullptr;
@@ -417,31 +416,31 @@ AUDIO_SYS_HANDLE audio_create_with_parameters(AUDIO_SETTINGS_HANDLE format)
     {
         // get microphone nice name here
         nice_name = get_nice_name_from_endpoint(pDevice);
-        audio_set_options(result, AUDIO_OPTION_DEVICE_LONGNAME, nice_name.c_str());
+        audio_set_options(handle, AUDIO_OPTION_DEVICE_LONGNAME, nice_name.c_str());
 
-        hr = pDevice->Activate(IID_IAudioClient, CLSCTX_ALL, NULL, (void**)&result->pAudioInputClient);
+        hr = pDevice->Activate(IID_IAudioClient, CLSCTX_ALL, NULL, (void**)&audio_sys->pAudioInputClient);
         EXIT_ON_ERROR(hr);
 
         // Set the audio stream category for speech recognition
-        hr = SetAudioStreamCategory(result->pAudioInputClient, AudioCategory_Speech);
+        hr = SetAudioStreamCategory(audio_sys->pAudioInputClient, AudioCategory_Speech);
         EXIT_ON_ERROR(hr);
 
-        result->audioInFormat.wFormatTag = format->wFormatTag;
-        result->audioInFormat.wBitsPerSample = format->wBitsPerSample;
-        result->audioInFormat.nChannels = format->nChannels;
-        result->audioInFormat.nSamplesPerSec = format->nSamplesPerSec;
-        result->audioInFormat.nAvgBytesPerSec = format->nAvgBytesPerSec;
-        result->audioInFormat.nBlockAlign = format->nBlockAlign;
-        result->audioInFormat.cbSize = 0;
+        audio_sys->audioInFormat.wFormatTag = format->wFormatTag;
+        audio_sys->audioInFormat.wBitsPerSample = format->wBitsPerSample;
+        audio_sys->audioInFormat.nChannels = format->nChannels;
+        audio_sys->audioInFormat.nSamplesPerSec = format->nSamplesPerSec;
+        audio_sys->audioInFormat.nAvgBytesPerSec = format->nAvgBytesPerSec;
+        audio_sys->audioInFormat.nBlockAlign = format->nBlockAlign;
+        audio_sys->audioInFormat.cbSize = 0;
 
-        audio_set_options(result, AUDIO_OPTION_DEVICENAME, STRING_c_str(format->hDeviceName));
+        audio_set_options(handle, AUDIO_OPTION_DEVICENAME, STRING_c_str(format->hDeviceName));
 
-        hr = result->pAudioInputClient->Initialize(
+        hr = audio_sys->pAudioInputClient->Initialize(
             AUDCLNT_SHAREMODE_SHARED,
             AUDCLNT_STREAMFLAGS_EVENTCALLBACK | AUDCLNT_STREAMFLAGS_AUTOCONVERTPCM,
             hnsRequestedDuration,
             0,
-            &result->audioInFormat,
+            &audio_sys->audioInFormat,
             nullptr);
         EXIT_ON_ERROR(hr);
     }
@@ -449,25 +448,25 @@ AUDIO_SYS_HANDLE audio_create_with_parameters(AUDIO_SETTINGS_HANDLE format)
     // Attach audio output device to result, to make it returned with the result
     if (format->eDataFlow == AUDIO_RENDER)
     {
-        result->pAudioOutputDevice = pDevice.get();
-        result->pAudioOutputDevice->AddRef();
+        audio_sys->pAudioOutputDevice = pDevice.get();
+        audio_sys->pAudioOutputDevice->AddRef();
     }
 
-    hr = audio_create_events(result);
+    hr = audio_create_events(audio_sys.get());
 
 Exit:
     if (FAILED(hr))
     {
-        SAFE_RELEASE(result->pAudioInputClient);
-        SAFE_RELEASE(result->pAudioOutputDevice);
+        SAFE_RELEASE(audio_sys->pAudioInputClient);
+        SAFE_RELEASE(audio_sys->pAudioOutputDevice);
 
-        if (result)
+        if (audio_sys)
         {
-            free(result);
-            result = nullptr;
+            s_tracker.Release(handle);
+            return nullptr;
         }
     }
-    return result;
+    return handle;
 }
 
 /// Get the friendly name of an endpoint device.
@@ -509,7 +508,7 @@ std::string get_nice_name_from_endpoint(const std::shared_ptr<IMMDevice>& pEndpo
 }
 
 STRING_HANDLE get_input_device_nice_name(AUDIO_SYS_HANDLE handle) {
-    AUDIO_SYS_DATA* audioData = reinterpret_cast<AUDIO_SYS_DATA*>(handle);
+    auto audioData = s_tracker.Get(handle);
 
     if (audioData)
     {
@@ -571,9 +570,9 @@ static bool force_render_thread_to_exit_and_wait(AUDIO_SYS_DATA *audioData, int 
 
 void audio_destroy(AUDIO_SYS_HANDLE handle)
 {
-    if (handle != NULL)
+    auto audioData = s_tracker.Get(handle);
+    if (audioData)
     {
-        AUDIO_SYS_DATA* audioData = (AUDIO_SYS_DATA*)handle;
 
         SAFE_RELEASE(audioData->pAudioInputClient);
 
@@ -582,7 +581,7 @@ void audio_destroy(AUDIO_SYS_HANDLE handle)
         if (audioData->hRenderThreadShouldExit != NULL  &&
             audioData->hRenderThreadDidExit != NULL)
         {
-            force_render_thread_to_exit_and_wait(audioData, INFINITE);
+            force_render_thread_to_exit_and_wait(audioData.get(), INFINITE);
         }
         SAFE_CLOSE_HANDLE(audioData->hRenderThreadShouldExit);
         SAFE_CLOSE_HANDLE(audioData->hRenderThreadDidExit);
@@ -596,7 +595,7 @@ void audio_destroy(AUDIO_SYS_HANDLE handle)
             STRING_delete(audioData->hDeviceLongName);
         }
 
-        free(audioData);
+        s_tracker.Release(handle);
     }
 }
 
@@ -610,11 +609,10 @@ AUDIO_RESULT audio_setcallbacks(AUDIO_SYS_HANDLE              handle,
                                 ON_AUDIOERROR_CALLBACK        error_cb,
                                 void*                         error_ctx)
 {
+    auto audioData = s_tracker.Get(handle);
     AUDIO_RESULT result;
-    if (handle != NULL && audio_write_cb != NULL)
+    if (audioData && audio_write_cb != NULL)
     {
-        AUDIO_SYS_DATA* audioData = (AUDIO_SYS_DATA*)handle;
-
         audioData->error_cb         = error_cb;
         audioData->user_errorctx    = error_ctx;
         audioData->user_errorctx    = error_cb;
@@ -635,10 +633,10 @@ AUDIO_RESULT audio_setcallbacks(AUDIO_SYS_HANDLE              handle,
 
 AUDIO_RESULT audio_output_start(AUDIO_SYS_HANDLE handle, const unsigned char* audioBuffer, size_t audioLen)
 {
+    auto audioData = s_tracker.Get(handle);
     AUDIO_RESULT result = AUDIO_RESULT_ERROR;
-    if (handle != nullptr)
+    if (audioData)
     {
-        AUDIO_SYS_DATA* audioData = (AUDIO_SYS_DATA*)handle;
         const unsigned char* responseCtx = audioBuffer;
         size_t offset = 0;
         uint32_t magic;
@@ -666,7 +664,7 @@ AUDIO_RESULT audio_output_start(AUDIO_SYS_HANDLE handle, const unsigned char* au
                 case MAGIC_TAG_data: // data
                     offset += 4;
                     chunkSize = *(uint32_t*)(responseCtx + offset);
-                    result = write_audio_stream(audioData, &fmt, responseCtx + (offset + 4), chunkSize, NULL, NULL, NULL);
+                    result = write_audio_stream(audioData.get(), &fmt, responseCtx + (offset + 4), chunkSize, NULL, NULL, NULL);
                     break;
 
                 case MAGIC_TAG_fmt:  // fmt - WAVEFORMAT
@@ -711,14 +709,14 @@ AUDIO_RESULT  audio_output_startasync(
     AUDIO_BUFFERUNDERRUN_CALLBACK pfnBufferUnderRun,
     void* pContext)
 {
-    pfnBufferUnderRun;
-
-    if (!handle)
+    (void)pfnBufferUnderRun;
+    auto audioData = s_tracker.Get(handle);
+    if (!audioData)
     {
         return AUDIO_RESULT_ERROR;
     }
 
-    return write_audio_stream(handle, format, NULL, 0, pfnReadCallback, pfnComplete, pContext);
+    return write_audio_stream(audioData.get(), format, NULL, 0, pfnReadCallback, pfnComplete, pContext);
 }
 
 AUDIO_RESULT audio_output_pause(AUDIO_SYS_HANDLE handle)
@@ -735,17 +733,17 @@ AUDIO_RESULT audio_output_restart(AUDIO_SYS_HANDLE handle)
 
 AUDIO_RESULT audio_output_stop(AUDIO_SYS_HANDLE handle)
 {
+    auto audioData = s_tracker.Get(handle);
     AUDIO_RESULT result;
-    if (handle != NULL)
+    if (audioData)
     {
-        AUDIO_SYS_DATA* audioData = (AUDIO_SYS_DATA*)handle;
         if (audioData->current_output_state != AUDIO_STATE_RUNNING)
         {
             result = AUDIO_RESULT_INVALID_STATE;
         }
         else
         {
-            force_render_thread_to_exit_and_wait(audioData, 5000);
+            force_render_thread_to_exit_and_wait(audioData.get(), 5000);
             result = AUDIO_RESULT_OK;
         }
     }
@@ -761,7 +759,7 @@ DWORD WINAPI captureThreadProc(
 )
 {
     HRESULT hr;
-    AUDIO_SYS_DATA* pInput = (AUDIO_SYS_DATA*)lpParameter;
+    auto pInput = s_tracker.Get(reinterpret_cast<AUDIO_SYS_HANDLE>(lpParameter));
     DWORD waitResult;
     IAudioCaptureClient *pCaptureClient;
     int audio_result = 0;
@@ -844,7 +842,7 @@ Exit:
 AUDIO_RESULT audio_input_start(AUDIO_SYS_HANDLE handle)
 {
     HRESULT hr = E_FAIL;
-    AUDIO_SYS_DATA * audioData = (AUDIO_SYS_DATA*)handle;
+    auto audioData = s_tracker.Get(handle);
 
     if (!audioData || audioData->hBufferReady == nullptr)
     {
@@ -858,7 +856,7 @@ AUDIO_RESULT audio_input_start(AUDIO_SYS_HANDLE handle)
 
     if (nullptr == audioData->hCaptureThread)
     {
-        audioData->hCaptureThread = CreateThread(0, 0, captureThreadProc, (LPVOID)audioData, 0, nullptr);
+        audioData->hCaptureThread = CreateThread(0, 0, captureThreadProc, (LPVOID)handle, 0, nullptr);
         EXIT_ON_ERROR_IF(E_FAIL, audioData->hCaptureThread == nullptr);
     }
 
@@ -872,10 +870,10 @@ Exit:
 
 AUDIO_RESULT audio_input_stop(AUDIO_SYS_HANDLE handle)
 {
+    auto audioData = s_tracker.Get(handle);
     AUDIO_RESULT result;
-    if (handle != NULL)
+    if (audioData)
     {
-        AUDIO_SYS_DATA* audioData = (AUDIO_SYS_DATA*)handle;
         if (audioData->current_input_state != AUDIO_STATE_RUNNING)
         {
             result = AUDIO_RESULT_INVALID_STATE;
@@ -903,10 +901,9 @@ AUDIO_RESULT audio_input_stop(AUDIO_SYS_HANDLE handle)
 
 AUDIO_RESULT audio_set_options(AUDIO_SYS_HANDLE handle, const char* optionName, const void* value)
 {
-    if (handle != NULL)
+    auto audioData = s_tracker.Get(handle);
+    if (audioData)
     {
-        AUDIO_SYS_DATA* audioData = (AUDIO_SYS_DATA*)handle;
-
         if (strcmp(AUDIO_OPTION_INPUT_FRAME_COUNT, optionName) == 0)
         {
             if (value)
@@ -1021,16 +1018,16 @@ AUDIO_RESULT  audio_output_set_volume(AUDIO_SYS_HANDLE handle, long volume)
     IAudioEndpointVolume *endpointVolume = NULL;
     HRESULT hr = E_FAIL;
     AUDIO_RESULT result = AUDIO_RESULT_ERROR;
-
-    if (!handle) goto Exit;
-    if (!(handle->pAudioOutputDevice)) goto Exit;
+    auto audioData = s_tracker.Get(handle);
+    if (!audioData) goto Exit;
+    if (!(audioData->pAudioOutputDevice)) goto Exit;
     if (volume < 0 || volume > 100)
     {
         result = AUDIO_RESULT_INVALID_ARG;
         goto Exit;
     }
     float target = (float)volume / 100;
-    hr = handle->pAudioOutputDevice->Activate(__uuidof(IAudioEndpointVolume), CLSCTX_INPROC_SERVER, NULL, (LPVOID *)&endpointVolume);
+    hr = audioData->pAudioOutputDevice->Activate(__uuidof(IAudioEndpointVolume), CLSCTX_INPROC_SERVER, NULL, (LPVOID *)&endpointVolume);
     EXIT_ON_ERROR(hr);
 
     hr = endpointVolume->SetMasterVolumeLevelScalar(target, NULL);
@@ -1049,10 +1046,10 @@ AUDIO_RESULT  audio_output_get_volume(AUDIO_SYS_HANDLE handle, long* volume)
     AUDIO_RESULT result = AUDIO_RESULT_ERROR;
     HRESULT hr = E_FAIL;
     float currentVolume = 0;
-
-    if (!handle) goto Exit;
-    if (!(handle->pAudioOutputDevice)) goto Exit;
-    hr = handle->pAudioOutputDevice->Activate(__uuidof(IAudioEndpointVolume), CLSCTX_INPROC_SERVER, NULL, (LPVOID *)&endpointVolume);
+    auto audioData = s_tracker.Get(handle);
+    if (!audioData) goto Exit;
+    if (!(audioData->pAudioOutputDevice)) goto Exit;
+    hr = audioData->pAudioOutputDevice->Activate(__uuidof(IAudioEndpointVolume), CLSCTX_INPROC_SERVER, NULL, (LPVOID *)&endpointVolume);
     EXIT_ON_ERROR(hr);
     hr = endpointVolume->GetMasterVolumeLevelScalar(&currentVolume);
     EXIT_ON_ERROR(hr);
@@ -1069,9 +1066,8 @@ Exit:
 
 STRING_HANDLE audio_output_get_name(AUDIO_SYS_HANDLE handle)
 {
-    AUDIO_SYS_DATA* audioData = (AUDIO_SYS_DATA*)handle;
-
-    if (handle)
+    auto audioData = s_tracker.Get(handle);
+    if (audioData)
     {
         if (audioData->hDeviceName)
         {

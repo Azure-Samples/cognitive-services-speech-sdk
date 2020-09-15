@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include <stdlib.h>
+#include <memory>
 #include <stdint.h>
 #include <stdbool.h>
 #include <time.h>
@@ -14,10 +15,8 @@
 #include <linux/sched.h>
 #include <assert.h>
 #include "audio_sys.h"
-#include "azure_c_shared_utility/xlogging.h"
-#include "azure_c_shared_utility/buffer_.h"
-#include "azure_c_shared_utility/threadapi.h"
-#include "azure_c_shared_utility/lock.h"
+
+#include "azure_c_shared_dependencies.h"
 
 #define MAGIC_TAG_RIFF      0x46464952
 #define MAGIC_TAG_WAVE      0x45564157
@@ -491,7 +490,7 @@ static int init_alsa_pcm_device(snd_pcm_t** pcmHandle, snd_pcm_stream_t streamTy
         int paramerr = 0;
         snd_pcm_hw_params_t* hw_params = NULL;
 
-        snd_pcm_format_t bits_per_sample = -1;
+        snd_pcm_format_t bits_per_sample = SND_PCM_FORMAT_UNKNOWN;
 
         switch (audioData->bitsPerSample)
         {
@@ -706,6 +705,7 @@ AUDIO_SYS_HANDLE audio_create_with_parameters(AUDIO_SETTINGS_HANDLE format)
         LogError("Unknown audio data flow");
         break;
     }
+    return nullptr;
 }
 
 void audio_destroy(AUDIO_SYS_HANDLE handle)
@@ -1041,12 +1041,12 @@ AUDIO_RESULT  audio_output_startasync(
     AUDIO_BUFFERUNDERRUN_CALLBACK pfnBufferUnderRun,
     void* pContext)
 {
-    AUDIO_RESULT        ret = -1;
+    AUDIO_RESULT        ret = AUDIO_RESULT_ERROR;
     struct _ASYNCAUDIO *async;
 
     if (!handle || !format || !pfnReadCallback || !pfnComplete)
     {
-        return ret;
+        return AUDIO_RESULT_INVALID_ARG;
     }
 
     if (handle->waveDataDirty)
@@ -1054,14 +1054,14 @@ AUDIO_RESULT  audio_output_startasync(
         if (open_wave_data(handle, SND_PCM_STREAM_PLAYBACK) != 0)
         {
             LogError("open_wave_data");
-            return ret;
+            return AUDIO_RESULT_ERROR;
         }
     }
 
     async = (struct _ASYNCAUDIO *)malloc(sizeof(struct _ASYNCAUDIO));
     if (!async)
     {
-        return ret;
+        return AUDIO_RESULT_ERROR;
     }
 
     async->audioData = (AUDIO_SYS_DATA*)handle;
@@ -1086,7 +1086,7 @@ uint64_t gettickcount()
 
     struct timespec tv;
     int ret = clock_gettime(CLOCK_MONOTONIC, &tv);
-
+    (void)ret;
     assert(ret == 0);
 
     return ((uint64_t)tv.tv_sec * 1000) + ((uint64_t)tv.tv_nsec / 1000000);
@@ -1096,7 +1096,7 @@ static int CaptureAudio(void *p)
 {
     AUDIO_SYS_DATA* audioData = (AUDIO_SYS_DATA *)p;
     int  ret;
-    uint16_t      audioBufferAlsa[audioData->inputFrameCnt];
+    std::unique_ptr<uint16_t[]> audioBufferAlsa = std::make_unique<uint16_t[]>(audioData->inputFrameCnt);
     char          name[1024];
     uint64_t      readHistoryBuffer[HISTORY_BUFFER_SIZE];
     int           readHistoryBufferHead = 0;
@@ -1147,7 +1147,7 @@ static int CaptureAudio(void *p)
         }
 
         lastTick = currentTick;
-        ret = snd_pcm_readi(audioData->pcmHandle, audioBufferAlsa, audioData->inputFrameCnt);
+        ret = snd_pcm_readi(audioData->pcmHandle, audioBufferAlsa.get(), audioData->inputFrameCnt);
 
         if (ret == -EPIPE)
         {
@@ -1196,7 +1196,7 @@ static int CaptureAudio(void *p)
 
                 // consume new frame
                 assert(audioData->bufferTail + audioData->inputFrameCnt <= audioData->bufferCapacity);
-                memcpy(audioData->buffer + audioData->bufferTail, audioBufferAlsa, audioData->inputFrameCnt * sizeof(uint16_t));
+                memcpy(audioData->buffer + audioData->bufferTail, audioBufferAlsa.get(), audioData->inputFrameCnt * sizeof(uint16_t));
                 audioData->bufferTail = (audioData->bufferTail + audioData->inputFrameCnt) % audioData->bufferCapacity;
 
                 // do not post as we just replaced a frame
@@ -1214,7 +1214,7 @@ static int CaptureAudio(void *p)
             assert(audioData->bufferTail + audioData->inputFrameCnt <= audioData->bufferCapacity);
 
             // consume new frame
-            memcpy(audioData->buffer + audioData->bufferTail, audioBufferAlsa, audioData->inputFrameCnt * sizeof(uint16_t));
+            memcpy(audioData->buffer + audioData->bufferTail, audioBufferAlsa.get(), audioData->inputFrameCnt * sizeof(uint16_t));
             audioData->bufferTail = (audioData->bufferTail + audioData->inputFrameCnt) % audioData->bufferCapacity;
             audioData->bufferSize += audioData->inputFrameCnt;
 
@@ -1269,7 +1269,7 @@ static int ProcessAudio(void *p)
         int val = -1000;
         sem_getvalue(&audioData->audioFrameAvailable, &val);
 
-        if (val + 1 != audioData->bufferSize / audioData->inputFrameCnt)
+        if ((val + 1) != static_cast<int>(audioData->bufferSize / audioData->inputFrameCnt))
         {
             if (audioData->current_input_state == AUDIO_STATE_STOPPED)
             {
@@ -1487,18 +1487,18 @@ AUDIO_RESULT audio_set_options(AUDIO_SYS_HANDLE handle, const char* optionName, 
 
 AUDIO_RESULT audio_playwavfile(AUDIO_SYS_HANDLE handle, const char* audioFile)
 {
-    AUDIO_RESULT        ret = -1;
+    AUDIO_RESULT        ret = AUDIO_RESULT_ERROR;
     struct _ASYNCAUDIO *async;
 
     if (!handle)
     {
-        return ret;
+        return AUDIO_RESULT_INVALID_ARG;
     }
 
     async = (struct _ASYNCAUDIO *)malloc(sizeof(struct _ASYNCAUDIO));
     if (!async)
     {
-        return ret;
+        return AUDIO_RESULT_ERROR;
     }
 
     async->audioData = (AUDIO_SYS_DATA*)handle;
@@ -1623,7 +1623,7 @@ AUDIO_RESULT audio_output_get_volume(AUDIO_SYS_HANDLE handle, long* volume)
         {
             *volume = 0;
         }
-        else if (0 != snd_mixer_selem_get_playback_volume(audioData->pMixerDevice, 0, &currVolume))
+        else if (0 != snd_mixer_selem_get_playback_volume(audioData->pMixerDevice, static_cast<snd_mixer_selem_channel_id_t>(0), &currVolume))
         {
             result = AUDIO_RESULT_ERROR;
         }
