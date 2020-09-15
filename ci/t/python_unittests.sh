@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-set -e -u -o pipefail
-
 T="$(basename "$0" .sh)"
 BUILD_DIR=`realpath "$1"`
 PLATFORM="$2"
@@ -22,6 +20,7 @@ function runUnitTests {
 
   ${VIRTUALENV_PYTHON} -m pytest -v ${SCRIPT_DIR}/../source/bindings/python/test \
       --junitxml=test-$T-$PLATFORM-py${MAJORMINOR}.xml \
+      --lf \
       "${extra_args[@]}"
 }
 
