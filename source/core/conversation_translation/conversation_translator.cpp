@@ -898,7 +898,6 @@ namespace ConversationTranslation {
                 // though not expected, we should err on the side of caution and try to raise the event
                 // anyway in case we ran into a bug in our state machine. That is better than losing
                 // events
-                return;
             }
 
             auto eventArgs = CreateShared<ConversationParticipantChangedEventArgs>(GetSessionId(), ToReason(action));

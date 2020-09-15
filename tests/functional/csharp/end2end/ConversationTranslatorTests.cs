@@ -604,12 +604,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var connection = Connection.FromConversationTranslator(conversationTranslator);
             eventHandlers.AddConnectionCallbacks(connection);
 
-            await Task.Delay(TimeSpan.FromMilliseconds(200));
+            await Task.Delay(TimeSpan.FromMilliseconds(1000));
 
             SPX_TRACE_INFO("Disconnecting conversation");
             connection.Close();
 
-            await Task.Delay(TimeSpan.FromMilliseconds(200));
+            await Task.Delay(TimeSpan.FromMilliseconds(500));
 
             SPX_TRACE_INFO("Reconnecting conversation");
             connection.Open(false);
@@ -694,12 +694,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var alice = new TestConversationParticipant("Alice", "zh-CN", host, SetParticipantConfig);
             await alice.JoinAsync(aliceAudioConfig);
 
-            await Task.Delay(TimeSpan.FromMilliseconds(200));
+            await Task.Delay(TimeSpan.FromMilliseconds(1000));
 
             // Alice disconnects
             SPX_TRACE_INFO("Alice disconnecting");
             alice.Connection.Close();
-            await Task.Delay(TimeSpan.FromMilliseconds(400));
+            await Task.Delay(TimeSpan.FromMilliseconds(500));
 
             // Alice reconnects
             SPX_TRACE_INFO("Alice reconnecting");
@@ -754,13 +754,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var alice = new TestConversationParticipant("Alice", "zh-CN", host, SetParticipantConfig);
             await alice.JoinAsync(aliceAudioConfig);
 
-            await Task.Delay(TimeSpan.FromMilliseconds(200));
+            await Task.Delay(TimeSpan.FromMilliseconds(1000));
 
             // Alice disconnects. This prevents the conversation translator from detecting the conversation
             // has been deleted since we no longer have an active web socket connection
             SPX_TRACE_INFO("Alice disconnecting");
             alice.Connection.Close();
-            await Task.Delay(TimeSpan.FromMilliseconds(400));
+            await Task.Delay(TimeSpan.FromMilliseconds(500));
 
             // Delete the room
             await host.LeaveAsync();
@@ -772,7 +772,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 typeof(ApplicationException),
                 Catch.HasHR("Bad request") & Catch.HasHR("WebSocket upgrade failed"));
 
-            await Task.Delay(TimeSpan.FromMilliseconds(200));
+            await Task.Delay(TimeSpan.FromMilliseconds(400));
 
             // Make sure we got the correct cancelled event
             SPXTEST_REQUIRE(alice.Events.Canceled.Count > 0);

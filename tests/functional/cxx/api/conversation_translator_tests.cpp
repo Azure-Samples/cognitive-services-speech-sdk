@@ -628,12 +628,12 @@ TEST_CASE("Conversation Translator Host Leave Rejoin", "[api][cxx][conversation_
     auto connection = Connection::FromConversationTranslator(conversationTranslator);
     eventHandlers->AddConnectionCallbacks(connection);
 
-    std::this_thread::sleep_for(200ms);
+    std::this_thread::sleep_for(1000ms);
 
     SPX_TRACE_INFO("Disconnecting conversation");
     connection->Close();
 
-    std::this_thread::sleep_for(200ms);
+    std::this_thread::sleep_for(500ms);
 
     SPX_TRACE_INFO("Reconnecting conversation");
     connection->Open(false);
@@ -724,12 +724,12 @@ TEST_CASE("Conversation Translator Participant Rejoin", "[api][cxx][conversation
     TestConversationParticipant alice("Alice", "zh-CN", host);
     alice.Join(aliceAudioConfig);
 
-    std::this_thread::sleep_for(200ms);
+    std::this_thread::sleep_for(1000ms);
 
     // Alice disconnects
     SPX_TRACE_INFO("Alice disconnecting");
     alice.Conn->Close();
-    std::this_thread::sleep_for(400ms);
+    std::this_thread::sleep_for(500ms);
 
     // Alice reconnects
     SPX_TRACE_INFO("Alice reconnecting");
@@ -785,13 +785,13 @@ TEST_CASE("Conversation Translator Participant Rejoin After Delete", "[api][cxx]
     TestConversationParticipant alice("Alice", "zh-CN", host);
     alice.Join(aliceAudioConfig);
 
-    std::this_thread::sleep_for(400ms);
+    std::this_thread::sleep_for(1000ms);
 
     // Alice disconnects. This prevents the conversation translator from detecting the conversation
     // has been deleted since we no longer have an active web socket connection
     SPX_TRACE_INFO("Alice disconnecting");
     alice.Conn->Close();
-    std::this_thread::sleep_for(400ms);
+    std::this_thread::sleep_for(500ms);
 
     // Delete the room
     host.Leave();
