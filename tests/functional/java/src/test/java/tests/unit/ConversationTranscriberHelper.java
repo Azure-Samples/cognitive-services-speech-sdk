@@ -16,7 +16,7 @@ public class ConversationTranscriberHelper {
         AtomicBoolean allDone = new AtomicBoolean(false);
 
         ct.transcribing.addEventListener((o, e) -> {
-            //System.out.println("Conversation transcriber transcibing:" + e.toString());
+            System.out.println("Conversation transcriber transcibing:" + e.toString());
         });
 
         ct.transcribed.addEventListener((o, e) -> {
