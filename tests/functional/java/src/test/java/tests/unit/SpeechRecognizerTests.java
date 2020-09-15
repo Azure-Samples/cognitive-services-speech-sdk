@@ -675,11 +675,13 @@ public class SpeechRecognizerTests {
 
         // there is no partial result reported after the final result
         // (and check that we have intermediate and final results recorded)
-        if(eventsMap.containsKey("recognizing"))
+        if(eventsMap.containsKey("recognizing")) {
             assertTrue(eventsMap.get("recognizing") > eventsMap.get("speechStartDetected"));
-        assertTrue(eventsMap.get("speechEndDetected") < eventsMap.get("recognized"));
-        assertTrue(eventsMap.get("recognizing") < eventsMap.get("recognized"));
+            assertTrue(eventsMap.get("recognizing") < eventsMap.get("recognized"));
+        }
 
+        assertTrue(eventsMap.get("speechEndDetected") < eventsMap.get("recognized"));
+        
         // make sure events we don't expect, don't get raised
         assertFalse(eventsMap.containsKey("canceled"));
 
