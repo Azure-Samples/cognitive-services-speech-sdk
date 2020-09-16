@@ -27,9 +27,9 @@ namespace Impl {
     SPX_EXTERN_C void* ConversationTranslationLib_CreateModuleObject(const char *className, const char* interfaceName)
     {
         SPX_FACTORY_MAP_BEGIN();
-        SPX_FACTORY_MAP_ENTRY(CSpxConversationTranslator, ISpxConversationTranslator);
-        SPX_FACTORY_MAP_ENTRY(CSpxConversationImpl, ISpxConversation);
-        SPX_FACTORY_MAP_ENTRY(CSpxConversationTranslatorConnection, ISpxConnection);
+            SPX_FACTORY_MAP_ENTRY(CSpxConversationTranslator, ISpxConversationTranslator);
+            SPX_FACTORY_MAP_ENTRY(CSpxConversationImpl, ISpxConversation);
+            SPX_FACTORY_MAP_ENTRY(CSpxConversationTranslatorConnection, ISpxConnection);
         SPX_FACTORY_MAP_END();
     }
 

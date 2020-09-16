@@ -39,29 +39,29 @@ namespace Impl {
 SPX_EXTERN_C void* AudioLib_CreateModuleObject(const char* className, const char* interfaceName)
 {
     SPX_FACTORY_MAP_BEGIN();
-    SPX_FACTORY_MAP_ENTRY(CSpxAudioPump, ISpxAudioPumpInit);
-    SPX_FACTORY_MAP_ENTRY(CSpxAudioPump, ISpxAudioPump);
-    SPX_FACTORY_MAP_ENTRY(CSpxMicrophonePump, ISpxAudioPump);
-    SPX_FACTORY_MAP_ENTRY(CSpxAudioConfig, ISpxAudioConfig);
-    SPX_FACTORY_MAP_ENTRY(CSpxPushAudioInputStream, ISpxAudioStreamInitFormat);
-    SPX_FACTORY_MAP_ENTRY(CSpxPullAudioInputStream, ISpxAudioStreamInitFormat);
-    SPX_FACTORY_MAP_ENTRY(CSpxPushAudioOutputStream, ISpxAudioStreamInitFormat);
-    SPX_FACTORY_MAP_ENTRY(CSpxPullAudioOutputStream, ISpxAudioStreamInitFormat);
-    SPX_FACTORY_MAP_ENTRY(CSpxPullAudioOutputStream, ISpxAudioOutput);
-    SPX_FACTORY_MAP_ENTRY(CSpxInteractiveMicrophone, ISpxAudioPump);
-    SPX_FACTORY_MAP_ENTRY(CSpxWavFileReader, ISpxAudioFile);
-    SPX_FACTORY_MAP_ENTRY(CSpxWavFilePump, ISpxAudioFile);
-    SPX_FACTORY_MAP_ENTRY(CSpxWavFileWriter, ISpxAudioFile);
-    SPX_FACTORY_MAP_ENTRY(CSpxDefaultSpeaker, ISpxAudioOutput);
-    SPX_FACTORY_MAP_ENTRY(CSpxNullAudioOutput, ISpxAudioOutput);
-    SPX_FACTORY_MAP_ENTRY(CSpxAudioDataStream, ISpxAudioDataStream);
-    SPX_FACTORY_MAP_ENTRY(CSpxSingleToManyStreamReaderAdapter, ISpxSingleToManyStreamReaderAdapter);
-    SPX_FACTORY_MAP_ENTRY(CSpxAudioProcessorWriteToAudioSourceBuffer, ISpxAudioProcessor);
-    SPX_FACTORY_MAP_ENTRY(CSpxAudioSourceWrapper, ISpxAudioSourceInit);
-    SPX_FACTORY_MAP_ENTRY(CSpxMicrophoneAudioSourceAdapter, ISpxAudioSourceInit);
-    SPX_FACTORY_MAP_ENTRY(CSpxFileAudioSourceAdapter, ISpxAudioSourceInit);
-    SPX_FACTORY_MAP_ENTRY(CSpxStreamAudioSourceAdapter, ISpxAudioSourceInit);
-    SPX_FACTORY_MAP_ENTRY(CSpxInternalAudioCodecAdapter, ISpxInternalAudioCodecAdapter);
+        SPX_FACTORY_MAP_ENTRY(CSpxAudioPump, ISpxAudioPumpInit);
+        SPX_FACTORY_MAP_ENTRY(CSpxAudioPump, ISpxAudioPump);
+        SPX_FACTORY_MAP_ENTRY(CSpxMicrophonePump, ISpxAudioPump);
+        SPX_FACTORY_MAP_ENTRY(CSpxAudioConfig, ISpxAudioConfig);
+        SPX_FACTORY_MAP_ENTRY(CSpxPushAudioInputStream, ISpxAudioStreamInitFormat);
+        SPX_FACTORY_MAP_ENTRY(CSpxPullAudioInputStream, ISpxAudioStreamInitFormat);
+        SPX_FACTORY_MAP_ENTRY(CSpxPushAudioOutputStream, ISpxAudioStreamInitFormat);
+        SPX_FACTORY_MAP_ENTRY(CSpxPullAudioOutputStream, ISpxAudioStreamInitFormat);
+        SPX_FACTORY_MAP_ENTRY(CSpxPullAudioOutputStream, ISpxAudioOutput);
+        SPX_FACTORY_MAP_ENTRY(CSpxInteractiveMicrophone, ISpxAudioPump);
+        SPX_FACTORY_MAP_ENTRY(CSpxWavFileReader, ISpxAudioFile);
+        SPX_FACTORY_MAP_ENTRY(CSpxWavFilePump, ISpxAudioFile);
+        SPX_FACTORY_MAP_ENTRY(CSpxWavFileWriter, ISpxAudioFile);
+        SPX_FACTORY_MAP_ENTRY(CSpxDefaultSpeaker, ISpxAudioOutput);
+        SPX_FACTORY_MAP_ENTRY(CSpxNullAudioOutput, ISpxAudioOutput);
+        SPX_FACTORY_MAP_ENTRY(CSpxAudioDataStream, ISpxAudioDataStream);
+        SPX_FACTORY_MAP_ENTRY(CSpxSingleToManyStreamReaderAdapter, ISpxSingleToManyStreamReaderAdapter);
+        SPX_FACTORY_MAP_ENTRY(CSpxAudioProcessorWriteToAudioSourceBuffer, ISpxAudioProcessor);
+        SPX_FACTORY_MAP_ENTRY(CSpxAudioSourceWrapper, ISpxAudioSourceInit);
+        SPX_FACTORY_MAP_ENTRY(CSpxMicrophoneAudioSourceAdapter, ISpxAudioSourceInit);
+        SPX_FACTORY_MAP_ENTRY(CSpxFileAudioSourceAdapter, ISpxAudioSourceInit);
+        SPX_FACTORY_MAP_ENTRY(CSpxStreamAudioSourceAdapter, ISpxAudioSourceInit);
+        SPX_FACTORY_MAP_ENTRY(CSpxInternalAudioCodecAdapter, ISpxInternalAudioCodecAdapter);
     SPX_FACTORY_MAP_END();
 }
 

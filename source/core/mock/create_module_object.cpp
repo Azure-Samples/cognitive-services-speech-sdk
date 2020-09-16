@@ -35,28 +35,28 @@ SPX_EXTERN_C void* Mock_CreateModuleObject(const char* className, const char* in
     SPX_DBG_TRACE_VERBOSE("%s trying to create %s, %s.", __FUNCTION__, className, interfaceName);
 
     SPX_FACTORY_MAP_BEGIN();
-    SPX_FACTORY_MAP_ENTRY(CSpxMockAudioReader, ISpxAudioStreamReader);
-    SPX_FACTORY_MAP_ENTRY(CSpxMockInteractiveMicrophone, ISpxAudioPump);
-    SPX_FACTORY_MAP_ENTRY(CSpxMockKwsEngineAdapter, ISpxKwsEngineAdapter);
-    SPX_FACTORY_MAP_ENTRY(CSpxMockRecoEngineAdapter, ISpxRecoEngineAdapter);
-    SPX_FACTORY_MAP_ENTRY(CSpxMockWavFileReader, ISpxAudioFile);
-    SPX_FACTORY_MAP_ENTRY(CSpxMockWavFilePump, ISpxAudioFile);
-    SPX_FACTORY_MAP_ENTRY(CSpxMockLuEngineAdapter, ISpxLuEngineAdapter);
-    SPX_FACTORY_MAP_ENTRY_IF(ShouldMock(L"CARBON-INTERNAL-MOCK-SdkKwsEngine"), CSpxSdkKwsEngineAdapter, ISpxKwsEngineAdapter, CSpxMockKwsEngineAdapter);
-    SPX_FACTORY_MAP_ENTRY_IF(ShouldMock(L"CARBON-INTERNAL-MOCK-UspRecoEngine"), CSpxUspRecoEngineAdapter, ISpxRecoEngineAdapter, CSpxMockRecoEngineAdapter);
-    SPX_FACTORY_MAP_ENTRY_IF(ShouldMock(L"CARBON-INTERNAL-MOCK-RnntRecoEngine"), CSpxRnntRecoEngineAdapter, ISpxRecoEngineAdapter, CSpxMockRecoEngineAdapter);
-    SPX_FACTORY_MAP_ENTRY_IF(ShouldMock(L"CARBON-INTERNAL-MOCK-UnidecRecoEngine"), CSpxUnidecRecoEngineAdapter, ISpxRecoEngineAdapter, CSpxMockRecoEngineAdapter);
-    SPX_FACTORY_MAP_ENTRY_IF(ShouldMock(L"CARBON-INTERNAL-MOCK-Microphone"), CSpxInteractiveMicrophone, ISpxAudioPump, CSpxMockInteractiveMicrophone);
-    SPX_FACTORY_MAP_ENTRY_IF(ShouldMock(L"CARBON-INTERNAL-MOCK-WavFileReader"), CSpxWavFileReader, ISpxAudioFile, CSpxMockWavFileReader);
-    SPX_FACTORY_MAP_ENTRY_IF(ShouldMock(L"CARBON-INTERNAL-MOCK-WavFilePump"), CSpxWavFilePump, ISpxAudioFile, CSpxMockWavFilePump);
-    SPX_FACTORY_MAP_ENTRY_IF(ShouldMock(L"CARBON-INTERNAL-MOCK-LuisDirectEngine"), CSpxLuisDirectEngineAdapter, ISpxLuEngineAdapter, CSpxMockLuEngineAdapter);
+        SPX_FACTORY_MAP_ENTRY(CSpxMockAudioReader, ISpxAudioStreamReader);
+        SPX_FACTORY_MAP_ENTRY(CSpxMockInteractiveMicrophone, ISpxAudioPump);
+        SPX_FACTORY_MAP_ENTRY(CSpxMockKwsEngineAdapter, ISpxKwsEngineAdapter);
+        SPX_FACTORY_MAP_ENTRY(CSpxMockRecoEngineAdapter, ISpxRecoEngineAdapter);
+        SPX_FACTORY_MAP_ENTRY(CSpxMockWavFileReader, ISpxAudioFile);
+        SPX_FACTORY_MAP_ENTRY(CSpxMockWavFilePump, ISpxAudioFile);
+        SPX_FACTORY_MAP_ENTRY(CSpxMockLuEngineAdapter, ISpxLuEngineAdapter);
+        SPX_FACTORY_MAP_ENTRY_IF(ShouldMock(L"CARBON-INTERNAL-MOCK-SdkKwsEngine"), CSpxSdkKwsEngineAdapter, ISpxKwsEngineAdapter, CSpxMockKwsEngineAdapter);
+        SPX_FACTORY_MAP_ENTRY_IF(ShouldMock(L"CARBON-INTERNAL-MOCK-UspRecoEngine"), CSpxUspRecoEngineAdapter, ISpxRecoEngineAdapter, CSpxMockRecoEngineAdapter);
+        SPX_FACTORY_MAP_ENTRY_IF(ShouldMock(L"CARBON-INTERNAL-MOCK-RnntRecoEngine"), CSpxRnntRecoEngineAdapter, ISpxRecoEngineAdapter, CSpxMockRecoEngineAdapter);
+        SPX_FACTORY_MAP_ENTRY_IF(ShouldMock(L"CARBON-INTERNAL-MOCK-UnidecRecoEngine"), CSpxUnidecRecoEngineAdapter, ISpxRecoEngineAdapter, CSpxMockRecoEngineAdapter);
+        SPX_FACTORY_MAP_ENTRY_IF(ShouldMock(L"CARBON-INTERNAL-MOCK-Microphone"), CSpxInteractiveMicrophone, ISpxAudioPump, CSpxMockInteractiveMicrophone);
+        SPX_FACTORY_MAP_ENTRY_IF(ShouldMock(L"CARBON-INTERNAL-MOCK-WavFileReader"), CSpxWavFileReader, ISpxAudioFile, CSpxMockWavFileReader);
+        SPX_FACTORY_MAP_ENTRY_IF(ShouldMock(L"CARBON-INTERNAL-MOCK-WavFilePump"), CSpxWavFilePump, ISpxAudioFile, CSpxMockWavFilePump);
+        SPX_FACTORY_MAP_ENTRY_IF(ShouldMock(L"CARBON-INTERNAL-MOCK-LuisDirectEngine"), CSpxLuisDirectEngineAdapter, ISpxLuEngineAdapter, CSpxMockLuEngineAdapter);
     SPX_FACTORY_MAP_END();
 }
 
 SPX_EXTERN_C SPXDLL_EXPORT void* CreateModuleObject(const char* className, const char* interfaceName)
 {
     SPX_FACTORY_MAP_BEGIN();
-    SPX_FACTORY_MAP_ENTRY_FUNC(Mock_CreateModuleObject);
+        SPX_FACTORY_MAP_ENTRY_FUNC(Mock_CreateModuleObject);
     SPX_FACTORY_MAP_END();
 }
 

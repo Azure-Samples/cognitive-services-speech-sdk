@@ -30,7 +30,7 @@ target_include_directories(session2
 )
 
 if(WIN32 AND SPECTRE_MITIGATION)
-    set_property(TARGET audio PROPERTY VS_GLOBAL_SpectreMitigation "Spectre")
+    set_property(TARGET session2 PROPERTY VS_GLOBAL_SpectreMitigation "Spectre")
 endif()
 
 set_target_properties(session2 PROPERTIES

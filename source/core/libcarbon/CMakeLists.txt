@@ -102,7 +102,7 @@ target_link_libraries(${PROJECT_NAME}
     PRIVATE conversation_translation
     PRIVATE usp
     PRIVATE session2
-    PRIVATE xyz_new_lib
+    PRIVATE xyz_new_static_lib
   )
 
 if(ANDROID OR (${CMAKE_SYSTEM_NAME} STREQUAL "Linux"))

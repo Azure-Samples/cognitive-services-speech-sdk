@@ -35,32 +35,32 @@ SPX_EXTERN_C void* TTSLib_CreateModuleObject(const char* className, const char* 
 SPX_EXTERN_C void* ConversationTranslationLib_CreateModuleObject(const char *className, const char* interfaceName);
 SPX_EXTERN_C void* SpeakerRecognition_CreateModuleObject(const char *className, const char* interfaceName);
 SPX_EXTERN_C void* Session2_CreateModuleObject(const char* className, const char* interfaceName);
-SPX_EXTERN_C void* XyzNewLib_CreateModuleObject(const char* className, const char* interfaceName);
+SPX_EXTERN_C void* XyzNewStaticLib_CreateModuleObject(const char* className, const char* interfaceName);
 
 SPX_EXTERN_C void* PrimaryCarbon_CreateModuleObject(const char* className, const char* interfaceName)
 {
     SPX_FACTORY_MAP_BEGIN();
-#ifdef STATIC_CODEC_EXTENSION
-    SPX_FACTORY_MAP_ENTRY_FUNC(Codec_CreateModuleObject);
-#endif
-#ifdef STATIC_KWS_EXTENSION
-    SPX_FACTORY_MAP_ENTRY_FUNC(SDKKWS_CreateModuleObject);
-#endif
-#ifdef STATIC_EMBEDDEDSR_EXTENSION
-#ifdef BUILD_RNNT
-    SPX_FACTORY_MAP_ENTRY_FUNC(RNNT_CreateModuleObject);
-#endif
-#endif
-    SPX_FACTORY_MAP_ENTRY_FUNC(AudioLib_CreateModuleObject);
-    SPX_FACTORY_MAP_ENTRY_FUNC(DataLib_CreateModuleObject);
-    SPX_FACTORY_MAP_ENTRY_FUNC(SRLib_CreateModuleObject);
-    SPX_FACTORY_MAP_ENTRY_FUNC(TTSLib_CreateModuleObject);
-    SPX_FACTORY_MAP_ENTRY_FUNC(ConversationTranslationLib_CreateModuleObject);
-    SPX_FACTORY_MAP_ENTRY_FUNC(SpeakerRecognition_CreateModuleObject);
-    SPX_FACTORY_MAP_ENTRY_FUNC(Session2_CreateModuleObject);
-    SPX_FACTORY_MAP_ENTRY_FUNC(XyzNewLib_CreateModuleObject);
-    SPX_FACTORY_MAP_ENTRY(CSpxSpeechApiFactory, ISpxSpeechApiFactory);
-    SPX_FACTORY_MAP_ENTRY(CSpxSpeechSynthesisApiFactory, ISpxSpeechSynthesisApiFactory);
+        #ifdef STATIC_CODEC_EXTENSION
+            SPX_FACTORY_MAP_ENTRY_FUNC(Codec_CreateModuleObject);
+        #endif
+        #ifdef STATIC_KWS_EXTENSION
+            SPX_FACTORY_MAP_ENTRY_FUNC(SDKKWS_CreateModuleObject);
+        #endif
+        #ifdef STATIC_EMBEDDEDSR_EXTENSION
+        #ifdef BUILD_RNNT
+            SPX_FACTORY_MAP_ENTRY_FUNC(RNNT_CreateModuleObject);
+        #endif
+        #endif
+        SPX_FACTORY_MAP_ENTRY_FUNC(AudioLib_CreateModuleObject);
+        SPX_FACTORY_MAP_ENTRY_FUNC(DataLib_CreateModuleObject);
+        SPX_FACTORY_MAP_ENTRY_FUNC(SRLib_CreateModuleObject);
+        SPX_FACTORY_MAP_ENTRY_FUNC(TTSLib_CreateModuleObject);
+        SPX_FACTORY_MAP_ENTRY_FUNC(ConversationTranslationLib_CreateModuleObject);
+        SPX_FACTORY_MAP_ENTRY_FUNC(SpeakerRecognition_CreateModuleObject);
+        SPX_FACTORY_MAP_ENTRY_FUNC(Session2_CreateModuleObject);
+        SPX_FACTORY_MAP_ENTRY_FUNC(XyzNewStaticLib_CreateModuleObject);
+        SPX_FACTORY_MAP_ENTRY(CSpxSpeechApiFactory, ISpxSpeechApiFactory);
+        SPX_FACTORY_MAP_ENTRY(CSpxSpeechSynthesisApiFactory, ISpxSpeechSynthesisApiFactory);
     SPX_FACTORY_MAP_END();
 }
 

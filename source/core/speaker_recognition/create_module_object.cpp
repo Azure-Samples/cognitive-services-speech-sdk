@@ -24,12 +24,12 @@ namespace Impl {
 SPX_EXTERN_C void* SpeakerRecognition_CreateModuleObject(const char* className, const char* interfaceName)
 {
     SPX_FACTORY_MAP_BEGIN();
-    SPX_FACTORY_MAP_ENTRY(CSpxVoiceProfile, ISpxVoiceProfile);
-    SPX_FACTORY_MAP_ENTRY(CSpxVoiceProfileClient, ISpxVoiceProfileClient);
-    SPX_FACTORY_MAP_ENTRY(CSpxHttpRecoEngineAdapter, ISpxHttpRecoEngineAdapter);
-    SPX_FACTORY_MAP_ENTRY(CSpxHttpAudioStreamSession, ISpxHttpAudioStreamSession);
-    SPX_FACTORY_MAP_ENTRY(CSpxSpeakerIdentificationModel, ISpxSIModel);
-    SPX_FACTORY_MAP_ENTRY(CSpxSpeakerVerificationModel, ISpxSVModel);
+        SPX_FACTORY_MAP_ENTRY(CSpxVoiceProfile, ISpxVoiceProfile);
+        SPX_FACTORY_MAP_ENTRY(CSpxVoiceProfileClient, ISpxVoiceProfileClient);
+        SPX_FACTORY_MAP_ENTRY(CSpxHttpRecoEngineAdapter, ISpxHttpRecoEngineAdapter);
+        SPX_FACTORY_MAP_ENTRY(CSpxHttpAudioStreamSession, ISpxHttpAudioStreamSession);
+        SPX_FACTORY_MAP_ENTRY(CSpxSpeakerIdentificationModel, ISpxSIModel);
+        SPX_FACTORY_MAP_ENTRY(CSpxSpeakerVerificationModel, ISpxSVModel);
     SPX_FACTORY_MAP_END();
 }
 

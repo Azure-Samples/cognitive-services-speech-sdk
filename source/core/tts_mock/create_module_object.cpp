@@ -21,14 +21,14 @@ namespace Impl {
 SPX_EXTERN_C void* TTS_MOCK_CreateModuleObject(const char* className, const char* interfaceName)
 {
     SPX_FACTORY_MAP_BEGIN();
-    SPX_FACTORY_MAP_ENTRY(CSpxMockTtsEngineAdapter, ISpxTtsEngineAdapter);
+        SPX_FACTORY_MAP_ENTRY(CSpxMockTtsEngineAdapter, ISpxTtsEngineAdapter);
     SPX_FACTORY_MAP_END();
 }
 
 SPX_EXTERN_C SPXDLL_EXPORT void* CreateModuleObject(const char* className, const char* interfaceName)
 {
     SPX_FACTORY_MAP_BEGIN();
-    SPX_FACTORY_MAP_ENTRY_FUNC(TTS_MOCK_CreateModuleObject);
+        SPX_FACTORY_MAP_ENTRY_FUNC(TTS_MOCK_CreateModuleObject);
     SPX_FACTORY_MAP_END();
 }
 

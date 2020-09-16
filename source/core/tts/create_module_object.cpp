@@ -25,13 +25,13 @@ namespace Impl {
 SPX_EXTERN_C void* TTSLib_CreateModuleObject(const char* className, const char* interfaceName)
 {
     SPX_FACTORY_MAP_BEGIN();
-    SPX_FACTORY_MAP_ENTRY(CSpxSynthesizer, ISpxSynthesizer);
-    SPX_FACTORY_MAP_ENTRY(CSpxSynthesisResult, ISpxSynthesisResult);
-    SPX_FACTORY_MAP_ENTRY(CSpxSynthesisEventArgs, ISpxSynthesisEventArgs);
-    SPX_FACTORY_MAP_ENTRY(CSpxWordBoundaryEventArgs, ISpxWordBoundaryEventArgs);
-    SPX_FACTORY_MAP_ENTRY(CSpxRestTtsEngineAdapter, ISpxTtsEngineAdapter);
-    SPX_FACTORY_MAP_ENTRY(CSpxUspTtsEngineAdapter, ISpxTtsEngineAdapter);
-    SPX_FACTORY_MAP_ENTRY(CSpxThreadService, ISpxThreadService);
+        SPX_FACTORY_MAP_ENTRY(CSpxSynthesizer, ISpxSynthesizer);
+        SPX_FACTORY_MAP_ENTRY(CSpxSynthesisResult, ISpxSynthesisResult);
+        SPX_FACTORY_MAP_ENTRY(CSpxSynthesisEventArgs, ISpxSynthesisEventArgs);
+        SPX_FACTORY_MAP_ENTRY(CSpxWordBoundaryEventArgs, ISpxWordBoundaryEventArgs);
+        SPX_FACTORY_MAP_ENTRY(CSpxRestTtsEngineAdapter, ISpxTtsEngineAdapter);
+        SPX_FACTORY_MAP_ENTRY(CSpxUspTtsEngineAdapter, ISpxTtsEngineAdapter);
+        SPX_FACTORY_MAP_ENTRY(CSpxThreadService, ISpxThreadService);
     SPX_FACTORY_MAP_END();
 }
 

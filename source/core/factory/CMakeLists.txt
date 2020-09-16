@@ -54,6 +54,6 @@ target_link_libraries(factory
                       PRIVATE speaker_recognition
                       PRIVATE data
                       PRIVATE session2
-                      PRIVATE xyz_new_lib
+                      PRIVATE xyz_new_static_lib
                       PRIVATE ${CMAKE_DL_LIBS}
                       PRIVATE ${additional_static_libs})

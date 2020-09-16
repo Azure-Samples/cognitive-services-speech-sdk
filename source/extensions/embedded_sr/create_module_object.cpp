@@ -23,37 +23,33 @@ namespace Speech {
 namespace Impl {
 
 
-#ifdef BUILD_RNNT
 SPX_EXTERN_C void* RNNT_CreateModuleObject(const char* className, const char* interfaceName)
 {
-    SPX_DBG_TRACE_VERBOSE("RNNT_CreateModuleObject Creating object via %s: %s as %s", __FUNCTION__, className, interfaceName);
-
     SPX_FACTORY_MAP_BEGIN();
-    SPX_FACTORY_MAP_ENTRY(CSpxRnntCallbackWrapper, ISpxRnntCallbacks);
-    SPX_FACTORY_MAP_ENTRY(CSpxRnntRecoEngineAdapter, ISpxRecoEngineAdapter);
+        #ifdef BUILD_RNNT
+            SPX_FACTORY_MAP_ENTRY(CSpxRnntCallbackWrapper, ISpxRnntCallbacks);
+            SPX_FACTORY_MAP_ENTRY(CSpxRnntRecoEngineAdapter, ISpxRecoEngineAdapter);
+        #endif
     SPX_FACTORY_MAP_END();
 }
-#endif
 
-#ifdef BUILD_UNIDEC
+
 SPX_EXTERN_C void* Unidec_CreateModuleObject(const char* className, const char* interfaceName)
 {
     SPX_FACTORY_MAP_BEGIN();
-    SPX_FACTORY_MAP_ENTRY(CSpxUnidecRecoEngineAdapter, ISpxRecoEngineAdapter);
+        #ifdef BUILD_UNIDEC
+            SPX_FACTORY_MAP_ENTRY(CSpxUnidecRecoEngineAdapter, ISpxRecoEngineAdapter);
+        #endif
     SPX_FACTORY_MAP_END();
 }
-#endif
+
 
 #ifndef STATIC_EMBEDDEDSR_EXTENSION
 SPX_EXTERN_C SPXDLL_EXPORT void* CreateModuleObject(const char* className, const char* interfaceName)
 {
     SPX_FACTORY_MAP_BEGIN();
-#ifdef BUILD_RNNT
-    SPX_FACTORY_MAP_ENTRY_FUNC(RNNT_CreateModuleObject);
-#endif
-#ifdef BUILD_UNIDEC
-    SPX_FACTORY_MAP_ENTRY_FUNC(Unidec_CreateModuleObject);
-#endif
+        SPX_FACTORY_MAP_ENTRY_FUNC(RNNT_CreateModuleObject);
+        SPX_FACTORY_MAP_ENTRY_FUNC(Unidec_CreateModuleObject);
     SPX_FACTORY_MAP_END();
 }
 #endif

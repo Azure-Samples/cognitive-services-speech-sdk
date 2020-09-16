@@ -1,4 +1,4 @@
-project(xyz_new_lib)
+project(xyz_new_static_lib)
 
 set(SRC_DIR "${PROJECT_SOURCE_DIR}")
 set(INC_DIR "${PROJECT_SOURCE_DIR}/include")
@@ -21,9 +21,9 @@ set(SOURCES
 
 set_source_groups()
 
-add_library(xyz_new_lib STATIC ${HEADERS} ${HEADERS_PRIVATE} ${SOURCES})
+add_library(xyz_new_static_lib STATIC ${HEADERS} ${HEADERS_PRIVATE} ${SOURCES})
 
-target_include_directories(xyz_new_lib
+target_include_directories(xyz_new_static_lib
     PRIVATE
         ${CARBON_C_API}
         ${CARBON_CXX_API}
@@ -32,11 +32,15 @@ target_include_directories(xyz_new_lib
 )
 
 if(WIN32 AND SPECTRE_MITIGATION)
-    set_property(TARGET audio PROPERTY VS_GLOBAL_SpectreMitigation "Spectre")
+    set_property(TARGET xyz_new_static_lib PROPERTY VS_GLOBAL_SpectreMitigation "Spectre")
 endif()
 
-set_target_properties(xyz_new_lib PROPERTIES
+set_target_properties(xyz_new_static_lib PROPERTIES
     FOLDER core
 )
 
-target_link_libraries(xyz_new_lib PRIVATE interfaces common)
+target_link_libraries(xyz_new_static_lib
+    PRIVATE
+        interfaces
+        common
+)
