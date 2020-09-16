@@ -68,7 +68,8 @@ DIAG_FILENAME=diag-${ACTUAL_LOG_FILE_NAME::-4}
 --Diag:./vstsconsolelog/$DIAG_FILENAME.txt \
 --Blame \
 --TestAdapterPath:"$(cygpath -aw "$SOURCE_ROOT")" \
---TestCaseFilter:"$TEST_CASE_FILTER"
+--TestCaseFilter:"$TEST_CASE_FILTER" \
+--InIsolation
 
 exitCode=$?
 
@@ -108,7 +109,8 @@ for i in $(seq 1 4); do
             --Diag:./vstsconsolelog/$DIAG_FILENAME_RETRY \
             --Blame \
             --TestAdapterPath:"$(cygpath -aw "$SOURCE_ROOT")" \
-            --TestCaseFilter:"$TEST_CASE_FILTER"
+            --TestCaseFilter:"$TEST_CASE_FILTER" \
+            --InIsolation
     else
         "$VSTEST" \
             "$(cygpath -aw "$TEST_CODE")" \
@@ -116,7 +118,8 @@ for i in $(seq 1 4); do
             --Diag:./vstsconsolelog/$DIAG_FILENAME_RETRY \
             --Blame \
             --TestAdapterPath:"$(cygpath -aw "$SOURCE_ROOT")" \
-            --Tests:"$tests"
+            --Tests:"$tests" \
+            --InIsolation
     fi
 
     exitCode=$?

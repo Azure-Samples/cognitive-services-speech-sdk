@@ -177,7 +177,7 @@ jobs:
                     --logger "trx;\$LOG_FILE_NAME_RETRY" \
                     -p:SpeechPlatform=UnixOS
             fi
-            
+
             exitCode=\$?
           else
             break
