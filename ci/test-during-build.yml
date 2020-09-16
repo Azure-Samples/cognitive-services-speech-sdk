@@ -55,19 +55,34 @@ steps:
   condition: eq(variables['SPEECHSDK_RUN_TESTS'], 'true')
   displayName: Publish test results (C# .trx)
 - task: PublishTestResults@2
+  displayName: Publish test results (Catch2 .trx)
+  condition: eq(variables['SPEECHSDK_RUN_TESTS'], 'true')
   inputs:
     testRunner: VSTest
     testResultsFiles: '**/test-catch*trx'
     testRunTitle: 'Catch2 Cxx Tests $(SPEECHSDK_TARGET_PLATFORM)-$(SPEECHSDK_BUILD_CONFIGURATION)'
     platform: '$(SPEECHSDK_TARGET_PLATFORM)'
     configuration: '$(SPEECHSDK_BUILD_CONFIGURATION)'
-  condition: eq(variables['SPEECHSDK_RUN_TESTS'], 'true')
-  displayName: Publish test results (Catch2 .trx)
+# C++ tests run on all platforms *except* iOS and macOS
+- task: ArchiveFiles@2
+  displayName: Archive C++ test run backup artifact
+  condition: and(eq(variables['SPEECHSDK_RUN_TESTS'], 'true'), not(contains(variables['SPEECHSDK_TARGET_PLATFORM'], 'iOS')), not(contains(variables['SPEECHSDK_TARGET_PLATFORM'], 'macOS')))
+  inputs:
+    rootFolderOrFile: 'testresults'
+    includeRootFolder: false
+    archiveFile: '$(Build.ArtifactsStagingDirectory)/$(SPEECHSDK_TARGET_PLATFORM)-$(SPEECHSDK_BUILD_CONFIGURATION)-cxxtestresults.zip'
+    replaceExistingArchive: false
+- task: PublishBuildArtifacts@1
+  displayName: Publish C++ test run backup artifact
+  condition: and(eq(variables['SPEECHSDK_RUN_TESTS'], 'true'), not(contains(variables['SPEECHSDK_TARGET_PLATFORM'], 'iOS')), not(contains(variables['SPEECHSDK_TARGET_PLATFORM'], 'macOS')))
+  inputs:
+    pathToPublish: '$(Build.ArtifactsStagingDirectory)/$(SPEECHSDK_TARGET_PLATFORM)-$(SPEECHSDK_BUILD_CONFIGURATION)-cxxtestresults.zip'
+    artifactName: CxxTestResultFiles
 - task: PublishTestResults@2
+  displayName: Publish test results (misc .xml)
+  condition: eq(variables['SPEECHSDK_RUN_TESTS'], 'true')
   inputs:
     testResultsFiles: '**/test-*.xml'
-  condition: eq(variables['SPEECHSDK_RUN_TESTS'], 'true')
-  displayName: Publish test results (misc .xml)
 - task: PublishBuildArtifacts@1
   condition: and(eq(variables['SPEECHSDK_RUN_TESTS'], 'true'), or(failed(), ${{ parameters.continueOnTestFailure }}))
   displayName: 'Publish test console and debug artifacts'

@@ -223,6 +223,8 @@ readarray -t testCases < "$TESTCASE_FILE"
     return 1
   }
 
+  mkdir testresults
+
   testCaseIndex=0
   for i in $(seq 1 3); do
     failedTestCases=()
@@ -230,10 +232,8 @@ readarray -t testCases < "$TESTCASE_FILE"
        ((testCaseIndex++))
        sanitize "$testCase"
        catchOut=`printf "%s-%s-%03d" $output $_sanitized $testCaseIndex`
-       logPath="$catchOut.log"
-       echo `printf "Emitting full result details to: %s" $logPath`
-       runTest --output "$logPath" "$testStateVarPrefix" "$testCase" "$timeoutSeconds" \
-       "$@" --reporter vstest --durations yes --out "$catchOut.trx" --attachment "../../$logPath" "$testCase" 
+       runTest "$testStateVarPrefix" "$testCase" "$timeoutSeconds" \
+       "$@" --reporter vstest --out "testresults/$catchOut.trx" "$testCase"
        exitCode=$?
        if [ $exitCode -ne 0 ] ; then
          failedTestCases=( "${failedTestCases[@]}" "$testCase" )
