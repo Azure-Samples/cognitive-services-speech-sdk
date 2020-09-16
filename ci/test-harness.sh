@@ -163,7 +163,7 @@ function runTest {
           "$TEST_NAME" \
           "$TIME_SECONDS" \
           "EXITCODE-$EXIT_CODE" \
-          `tail -n 10 $testOutput` \
+          `tail -10 $testOutput` \
           >> "${!tempOutputRef}.xml.parts"
       eval "(( ++$failuresRef ))"
       ;;
