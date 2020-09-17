@@ -49,6 +49,7 @@ for img in $DOCKER_IMAGES; do
     # Run carbonx with proxy. The iptables calls block direct HTTP and HTTPS
     # connections, to make sure that alle connections are proxied.
     docker run --volume $(pwd):/carbon --interactive \
+        --workdir /carbon \
         --cap-add=NET_ADMIN \
         --link=tinyproxy:tinyproxy \
         --rm ${img} \
@@ -60,8 +61,8 @@ for img in $DOCKER_IMAGES; do
             iptables -A OUTPUT -p tcp --dport 80 -j REJECT
             iptables -A OUTPUT -p tcp --dport 443 -j REJECT
             LD_LIBRARY_PATH=/carbon/${bindir} /carbon/${carbonx} \
-                --speech --input:/carbon/${SPEECHSDK_INPUTDIR}/audio/whatstheweatherlike.wav \
-                --subscription:${SPEECHSDK_SPEECH_KEY} --region:${SPEECHSDK_SPEECH_REGION} --single \
+                --speech --input:/carbon/tests/\${SPEECHSDK_INPUTDIR}/audio/whatstheweatherlike.wav \
+                --subscription:\${SPEECHSDK_SPEECH_KEY} --region:\${SPEECHSDK_SPEECH_REGION} --single \
                 --proxy-host:tinyproxy --proxy-port:8888
 SCRIPT
 done
