@@ -79,12 +79,13 @@ public class RemoteConversationTranscriptionTest {
         RemoteConversationTranscriptionResult pollResponse;
         int retryCount = 0;
         try {
-            String randomUUIDString = testStartAndStopConversationTranscribingAsyncInternal(false);
-            System.out.println(randomUUIDString);
-
-            config = SpeechConfig.fromSubscription(speechKey,speechRegion);
 
             do{
+                String randomUUIDString = testStartAndStopConversationTranscribingAsyncInternal(false);
+                System.out.println("Trying for the: " + retryCount + "with meeting Id is: " + randomUUIDString);
+    
+                config = SpeechConfig.fromSubscription(speechKey,speechRegion);
+
                 RemoteConversationTranscriptionClient client = new RemoteConversationTranscriptionClient(config);
                 PollerFlux<RemoteConversationTranscriptionOperation, RemoteConversationTranscriptionResult> remoteTranscriptionOperation = client.getTranscriptionOperation(randomUUIDString, 5);
 
