@@ -806,8 +806,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
                     Thread.Sleep(100); // Avoid hammering the service for test stability
                 }
+                var ok = string.IsNullOrEmpty(canceled) || canceled.ToLower().Contains("timeout");
 
-                SPXTEST_REQUIRE(string.IsNullOrEmpty(canceled), $"Recognition Canceled w/ErrorDetails='{canceled}'");
+                SPXTEST_REQUIRE(ok, $"Recognition Canceled w/ErrorDetails='{canceled}'");
             }
         }
 
