@@ -34,7 +34,7 @@ if(WIN32 AND SPECTRE_MITIGATION)
 endif()
 
 set_target_properties(session2 PROPERTIES
-    FOLDER core
+    FOLDER core2
 )
 
 target_link_libraries(session2 PRIVATE interfaces common)

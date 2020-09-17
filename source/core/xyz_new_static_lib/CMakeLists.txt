@@ -36,7 +36,7 @@ if(WIN32 AND SPECTRE_MITIGATION)
 endif()
 
 set_target_properties(xyz_new_static_lib PROPERTIES
-    FOLDER core
+    FOLDER templates
 )
 
 target_link_libraries(xyz_new_static_lib
