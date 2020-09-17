@@ -130,7 +130,7 @@ function runTest {
     redact ${!redactStringsRef} |
     tee -a "$testOutput"
 
-  local START_SECONDS EXIT_CODE TIME_SECONDS
+  local START_SECONDS EXIT_CODE TIME_SECONDS TAIL
 
   START_SECONDS=$(get_time)
   (
@@ -142,6 +142,7 @@ function runTest {
   EXIT_CODE=$?
 
   TIME_SECONDS=$(get_seconds_elapsed "$START_SECONDS")
+  TAIL="$(tail -10 "${testOutput}")"
 
   print_vars EXIT_CODE TIME_SECONDS = |
     tee -a "$testOutput"
@@ -154,7 +155,7 @@ function runTest {
     case $EXIT_CODE in
       0)
         printf '<testcase classname="%s" name="%s" time="%s"/>\n' \
-          "${!classnameRef}" "$TEST_NAME" "$TIME_SECONDS" >> "${!tempOutputRef}.xml.parts"
+         "${!classnameRef}" "$TEST_NAME" "$TIME_SECONDS" >> "${!tempOutputRef}.xml.parts"
         ;;
         # TODO need to distinguish error (e.g., 124 - timeout) from failure
       *)
@@ -163,7 +164,7 @@ function runTest {
           "$TEST_NAME" \
           "$TIME_SECONDS" \
           "EXITCODE-$EXIT_CODE" \
-          `tail -10 $testOutput` \
+          "$TAIL" \
           >> "${!tempOutputRef}.xml.parts"
       eval "(( ++$failuresRef ))"
       ;;

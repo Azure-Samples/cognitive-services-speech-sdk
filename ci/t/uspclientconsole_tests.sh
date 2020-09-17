@@ -29,20 +29,14 @@ audioFile="$SPEECHSDK_INPUTDIR/audio/whatstheweatherlike.wav"
 
 tests=(
   "speech base model in interactive mode" "mode:interactive"
+  "speech base model in conversation mode"  "mode:conversation"
+  "speech base model in dictation mode" "mode:dictation"
+  "CRIS model in interactive mode" "mode:interactive model:$SPEECHSDK_SPEECH_ENDPOINTID_ENUS"
+  "CRIS model in conversation mode" "mode:conversation model:$SPEECHSDK_SPEECH_ENDPOINTID_ENUS"
+  "CRIS model in dictation mode" "mode:dictation model:$SPEECHSDK_SPEECH_ENDPOINTID_ENUS"
+  "endpoint for speech model" "url:$speechEndpoint"
+  "endpoint for CRIS model" "url:$crisEndpoint"
 )
-
-if [[ $TESTSET != dev ]]; then
-  # Additional tests for prod and int builds.
-  tests+=(
-    "speech base model in conversation mode"  "mode:conversation"
-    "speech base model in dictation mode" "mode:dictation"
-    "CRIS model in interactive mode" "mode:interactive model:$SPEECHSDK_SPEECH_ENDPOINTID_ENUS"
-    "CRIS model in conversation mode" "mode:conversation model:$SPEECHSDK_SPEECH_ENDPOINTID_ENUS"
-    "CRIS model in dictation mode" "mode:dictation model:$SPEECHSDK_SPEECH_ENDPOINTID_ENUS"
-    "endpoint for speech model" "url:$speechEndpoint"
-    "endpoint for CRIS model" "url:$crisEndpoint"
-  )
-fi
 
 startConstructedTestRunOutput TESTRUNNER "test-$T-$PLATFORM" "$PLATFORM" "$SPEECHSDK_SPEECH_KEY"
 startConstructedSuiteOutput TESTRUNNER "$T"
