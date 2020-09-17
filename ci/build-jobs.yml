@@ -674,7 +674,7 @@ jobs:
          perl ci/patch-samples-pkg.pl "$(SPEECHSDK_SEMVER2NOMETA)" public_samples
          cp --verbose --recursive --preserve public_samples "$(ZipBasename)"
          NOW=$(date -Iseconds)
-         find "$(ZipBasename)" | xargs touch --date=$NOW
+         for file in `find $(ZipBasename)`; do touch --date=$NOW $file; done
     displayName: 'Create directory with patched samples'
   - task: ArchiveFiles@2
     inputs:
