@@ -1698,6 +1698,16 @@ jobs:
   - bash: sudo xcode-select -s /Applications/Xcode_10.3.app/Contents/Developer
     displayName: Select XCode Version 10.3
   - bash: |
+      rm -f ./tests/test.subscriptions.regions.json
+      cp ./tests/test.defaults.json ./
+      cp ./tests/test.audio.utterances.json ./
+      cat > ./tests/test.subscriptions.regions.json <<HEREDOC
+        $(KEYS_AND_REGIONS)
+      HEREDOC
+      cp ./tests/test.subscriptions.regions.json ./
+      cp -rf ./tests/input .
+    displayName: Write Subscriptions Regions Data    
+  - bash: |
       set -e -o pipefail
       . ci/functions.sh
       ./ci/set-variables.sh
@@ -1729,16 +1739,6 @@ jobs:
     displayName: Set Java package variables
     continueOnError: ${{ parameters.continueOnTestFailure }}
   - bash: |
-      rm -f ./tests/test.subscriptions.regions.json
-      cp ./tests/test.defaults.json ./
-      cp ./tests/test.audio.utterances.json ./
-      cat > ./tests/test.subscriptions.regions.json <<HEREDOC
-        $(KEYS_AND_REGIONS)
-      HEREDOC
-      cp ./tests/test.subscriptions.regions.json ./
-      cp -rf ./tests/input .
-    displayName: Write Subscriptions Regions Data
-  - bash: |
       set -u -e -o pipefail
       . ci/functions.sh
       cp ./ci/jsonsettings.py .
@@ -1751,6 +1751,7 @@ jobs:
     displayName: Patch Java quickstart
     continueOnError: ${{ parameters.continueOnTestFailure }}
   - bash: |
+      . ci/functions.sh
       ./ci/build/osx-proxy-test.sh $(System.ArtifactsDirectory) $(PathToJar)
     displayName: Run proxy tests
     continueOnError: ${{ parameters.continueOnTestFailure }}
