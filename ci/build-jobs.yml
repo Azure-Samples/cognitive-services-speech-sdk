@@ -1698,6 +1698,7 @@ jobs:
   - bash: sudo xcode-select -s /Applications/Xcode_10.3.app/Contents/Developer
     displayName: Select XCode Version 10.3
   - bash: |
+      set -e -o pipefail
       rm -f ./tests/test.subscriptions.regions.json
       cp ./tests/test.defaults.json ./
       cp ./tests/test.audio.utterances.json ./
@@ -1740,8 +1741,8 @@ jobs:
     continueOnError: ${{ parameters.continueOnTestFailure }}
   - bash: |
       set -u -e -o pipefail
-      . ci/functions.sh
       cp ./ci/jsonsettings.py .
+      . ci/functions.sh
       perl ci/patch-samples-pkg.pl "$(SPEECHSDK_SEMVER2NOMETA)" public_samples
           patchSample public_samples/quickstart/java/jre/from-microphone
           patchSample public_samples/quickstart/java/jre/text-to-speech
@@ -1752,6 +1753,8 @@ jobs:
     continueOnError: ${{ parameters.continueOnTestFailure }}
   - bash: |
       . ci/functions.sh
+      export SPEECHSDK_SPEECH_KEY
+      export SPEECHSDK_SPEECH_REGION
       ./ci/build/osx-proxy-test.sh $(System.ArtifactsDirectory) $(PathToJar)
     displayName: Run proxy tests
     continueOnError: ${{ parameters.continueOnTestFailure }}
