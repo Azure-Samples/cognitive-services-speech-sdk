@@ -15,11 +15,13 @@ import com.microsoft.cognitiveservices.speech.dialog.DialogServiceConnector;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.Rule;
 
 import tests.AudioUtterancesKeys;
 import tests.DefaultSettingsKeys;
 import tests.Settings;
 import tests.SubscriptionsRegionsKeys;
+import tests.Retry;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -54,6 +56,9 @@ public class VirtualAssistantTests {
         return result;
     }
 
+    @Rule
+    public Retry retry = new Retry(Settings.TestRetryCount);
+        
     @BeforeClass
     public static void setupBeforeClass() {
         String operatingSystem = ("" + System.getProperty("os.name")).toLowerCase();

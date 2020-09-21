@@ -15,10 +15,15 @@ import com.microsoft.cognitiveservices.speech.*;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.Rule;
 
 import tests.Settings;
+import tests.Retry;
 
 public class GrammarTests {
+
+    @Rule
+    public Retry retry = new Retry(Settings.TestRetryCount);
 
     @BeforeClass
     static public void setUpBeforeClass() throws Exception {

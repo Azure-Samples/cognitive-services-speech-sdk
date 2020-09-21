@@ -13,6 +13,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.Ignore;
+import org.junit.Rule;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
@@ -46,11 +47,15 @@ import tests.AudioUtterancesKeys;
 import tests.Settings;
 import tests.SubscriptionsRegionsKeys;
 import tests.TestHelper;
+import tests.Retry;
 
 @SuppressWarnings({"unused", "resource"})
 public class SpeechConfigTests {
 
     private static String authorizationToken;
+
+    @Rule
+    public Retry retry = new Retry(Settings.TestRetryCount);
 
     @BeforeClass
     static public void setUpBeforeClass() throws Exception {

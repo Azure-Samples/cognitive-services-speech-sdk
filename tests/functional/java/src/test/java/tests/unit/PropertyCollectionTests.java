@@ -15,6 +15,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.Ignore;
+import org.junit.Rule;
 
 import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.PropertyCollection;
@@ -28,10 +29,14 @@ import com.microsoft.cognitiveservices.speech.PropertyId;
 import tests.AudioUtterancesKeys;
 import tests.Settings;
 import tests.SubscriptionsRegionsKeys;
+import tests.Retry;
 
 @SuppressWarnings("unused")
 public class PropertyCollectionTests {
 
+    @Rule
+    public Retry retry = new Retry(Settings.TestRetryCount);
+        
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
         Settings.LoadSettings();

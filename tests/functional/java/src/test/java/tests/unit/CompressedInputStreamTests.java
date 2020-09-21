@@ -48,8 +48,12 @@ import tests.AudioUtterancesKeys;
 import tests.Settings;
 import tests.SubscriptionsRegionsKeys;
 import tests.TestHelper;
+import tests.Retry;
 
 public class CompressedInputStreamTests {
+
+    @Rule
+    public Retry retry = new Retry(Settings.TestRetryCount);
 
     @BeforeClass
     static public void setUpBeforeClass() throws Exception {

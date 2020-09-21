@@ -12,17 +12,21 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.Rule;
 import org.junit.Ignore;
 import static org.junit.Assert.*;
 
 import tests.AudioUtterancesKeys;
 import tests.Settings;
-
+import tests.Retry;
 import tests.unit.WavFileAudioInputStream;
 
 @SuppressWarnings("unused")
 public class WavFileAudioInputStreamTest {
     WavFileAudioInputStream waveStream;
+
+    @Rule
+    public Retry retry = new Retry(Settings.TestRetryCount);
 
     @BeforeClass
     static public void setUpBeforeClass() throws Exception {

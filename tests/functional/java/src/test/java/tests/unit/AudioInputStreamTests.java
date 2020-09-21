@@ -9,13 +9,18 @@ import static org.junit.Assert.*;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
-
+import org.junit.Rule;
 import com.microsoft.cognitiveservices.speech.audio.PullAudioInputStreamCallback;
 
 import tests.AudioUtterancesKeys;
 import tests.Settings;
+import tests.Retry;
 
 public class AudioInputStreamTests {
+
+    @Rule
+    public Retry retry = new Retry(Settings.TestRetryCount);
+    
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
         Settings.LoadSettings();

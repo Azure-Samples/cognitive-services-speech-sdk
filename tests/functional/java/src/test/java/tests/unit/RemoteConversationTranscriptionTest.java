@@ -26,11 +26,13 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.Rule;
 
 import tests.AudioUtterancesKeys;
 import tests.DefaultSettingsKeys;
 import tests.Settings;
 import tests.SubscriptionsRegionsKeys;
+import tests.Retry;
 
 import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
@@ -51,6 +53,9 @@ public class RemoteConversationTranscriptionTest {
     private static String speechKey;
     private static String speechRegion;
     private static String inputDirectory;
+ 
+    @Rule
+    public Retry retry = new Retry(Settings.TestRetryCount);
 
     @BeforeClass
     public static void setupBeforeClass() {

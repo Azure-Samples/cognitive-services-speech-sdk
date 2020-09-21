@@ -12,6 +12,7 @@ import static org.junit.Assert.*;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.Rule;
 import org.junit.rules.ExpectedException;
 
 import com.microsoft.cognitiveservices.speech.audio.*;
@@ -31,8 +32,12 @@ import tests.AudioUtterancesKeys;
 import tests.Settings;
 import tests.SubscriptionsRegionsKeys;
 import tests.TestHelper;
+import tests.Retry;
 
 public class PronunciationAssessmentTests {
+
+    @Rule
+    public Retry retry = new Retry(Settings.TestRetryCount);
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {

@@ -17,12 +17,17 @@ import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.Rule;
 
 import tests.AudioUtterancesKeys;
 import tests.Settings;
 import tests.SubscriptionsRegionsKeys;
+import tests.Retry;
 
 public class ClassLanguageModelTests {
+
+    @Rule
+    public Retry retry = new Retry(Settings.TestRetryCount);
 
     @BeforeClass
     static public void setUpBeforeClass() throws Exception {

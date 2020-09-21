@@ -54,6 +54,7 @@ import tests.AudioUtterancesKeys;
 import tests.Settings;
 import tests.SubscriptionsRegionsKeys;
 import tests.TestHelper;
+import tests.Retry;
 
 public class SpeechSynthesizerTests {
     private final Integer EMPTY_WAVE_FILE_SIZE = 46;
@@ -73,6 +74,9 @@ public class SpeechSynthesizerTests {
     private final String DEFAULT_VOICE = "Microsoft Server Speech Text to Speech Voice (en-US, AriaRUS)";
 
     private static ExecutorService s_executorService;
+
+    @Rule
+    public Retry retry = new Retry(Settings.TestRetryCount);
 
     @BeforeClass
     static public void setUpBeforeClass() throws Exception {

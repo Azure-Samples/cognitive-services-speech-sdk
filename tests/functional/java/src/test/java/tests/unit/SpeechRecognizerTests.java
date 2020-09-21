@@ -53,10 +53,14 @@ import tests.AudioUtterancesKeys;
 import tests.Settings;
 import tests.SubscriptionsRegionsKeys;
 import tests.TestHelper;
+import tests.Retry;
 
 public class SpeechRecognizerTests {
     private final Integer FIRST_EVENT_ID = 1;
     private static String authorizationToken;
+
+    @Rule
+    public Retry retry = new Retry(Settings.TestRetryCount);
 
     @BeforeClass
     static public void setUpBeforeClass() throws Exception {

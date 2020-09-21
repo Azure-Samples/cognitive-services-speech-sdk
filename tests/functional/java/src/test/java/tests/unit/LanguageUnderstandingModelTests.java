@@ -13,7 +13,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.Ignore;
-
+import org.junit.Rule;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -29,9 +29,13 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
 import tests.DefaultSettingsKeys;
 import tests.Settings;
 import tests.SubscriptionsRegionsKeys;
+import tests.Retry;
 
 @SuppressWarnings("unused")
 public class LanguageUnderstandingModelTests {
+
+    @Rule
+    public Retry retry = new Retry(Settings.TestRetryCount);
 
     @BeforeClass
     static public void setUpBeforeClass() throws Exception {

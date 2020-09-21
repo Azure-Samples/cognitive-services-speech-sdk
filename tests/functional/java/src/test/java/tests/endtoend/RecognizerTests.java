@@ -13,6 +13,7 @@ import java.io.UnsupportedEncodingException;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.Rule;
 
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
@@ -26,11 +27,15 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
 import tests.AudioUtterancesKeys;
 import tests.Settings;
 import tests.SubscriptionsRegionsKeys;
+import tests.Retry;
 
 public class RecognizerTests {
     static SpeechConfig speechConfig;
     static SpeechTranslationConfig translationConfig;
     static AudioConfig audioConfig;
+
+    @Rule
+    public Retry retry = new Retry(Settings.TestRetryCount);
 
     @BeforeClass
     public static void setUpBeforeClass() throws JsonIOException, JsonSyntaxException, FileNotFoundException, UnsupportedEncodingException {

@@ -8,6 +8,7 @@ enable_language(Java)
 set(JAVA_SOURCES_TESTS
     tests/AllTests.java
     tests/Settings.java
+    tests/Retry.java
 
     tests/runner/AntXmlRunListener.java
     tests/runner/DateUtils.java

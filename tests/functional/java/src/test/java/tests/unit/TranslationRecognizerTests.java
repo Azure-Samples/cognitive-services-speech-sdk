@@ -21,6 +21,7 @@ import java.net.URI;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.Ignore;
+import org.junit.Rule;
 
 import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.CancellationReason;
@@ -37,12 +38,16 @@ import tests.AudioUtterancesKeys;
 import tests.Settings;
 import tests.SubscriptionsRegionsKeys;
 import tests.TestHelper;
+import tests.Retry;
 
 public class TranslationRecognizerTests {
     private final Integer FIRST_EVENT_ID = 1;
     private static String authorizationToken;
     private double similarityScoreThresholdTranslation = 0.80;
 
+    @Rule
+    public Retry retry = new Retry(Settings.TestRetryCount);
+        
     @BeforeClass
     static public void setUpBeforeClass() throws Exception {
         Settings.LoadSettings();

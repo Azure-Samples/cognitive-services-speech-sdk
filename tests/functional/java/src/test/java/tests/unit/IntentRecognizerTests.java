@@ -20,6 +20,7 @@ import java.util.concurrent.CountDownLatch;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.Ignore;
+import org.junit.Rule;
 
 import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.CancellationReason;
@@ -39,11 +40,15 @@ import tests.DefaultSettingsKeys;
 import tests.Settings;
 import tests.SubscriptionsRegionsKeys;
 import tests.TestHelper;
+import tests.Retry;
 
 public class IntentRecognizerTests {
     private final Integer FIRST_EVENT_ID = 1;
     private AtomicInteger eventIdentifier = new AtomicInteger(FIRST_EVENT_ID);
 
+    @Rule
+    public Retry retry = new Retry(Settings.TestRetryCount);
+        
     @BeforeClass
     static public void setUpBeforeClass() throws Exception {
         Settings.LoadSettings();

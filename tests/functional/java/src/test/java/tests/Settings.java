@@ -20,6 +20,7 @@ public class Settings {
 
     public static String Keyword = "Computer";
     public static String KeywordModel = "/data/keyword/kws.table";
+    public static int TestRetryCount = 3;
 
     static {
         try {

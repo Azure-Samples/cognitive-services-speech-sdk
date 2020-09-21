@@ -102,33 +102,18 @@ jobs:
   - bash: |
       set -x -e
       . ci/functions.sh
-      # set +e to allow capturing exit codes
       GSTREAMER_RUNTIME_PATH="$(pwd)/gstreamer/1.0/x86_64/bin"
       PATH="${GSTREAMER_RUNTIME_PATH}:$PATH"
-      set +e
-      for retry in {0..3}; do
-         java \
-           -cp $(printf "%s;" \
-             "$(MavenPackageDirWindows)/$(ArtifactBasename).jar" \
-             "$(Build.ArtifactStagingDirectory)/In/Windows/x64/Release/private/bin/com.microsoft.cognitiveservices.speech.tests.jar" \
-             "external/junit/junit-4.12.jar" \
-             "external/junit/hamcrest-core-1.3.jar" \
-             "external/json/gson-2.8.6.jar") \
-             -DTestOutputFilename=test-java-unittests-package-$retry.xml \
-             tests.runner.Runner \
-             tests.AllTests
-         exitCode=$?
-         if [[ $exitCode == 0 ]]; then
-           echo "Test suite passed, RetryCount( $retry )"
-           break
-         else
-           echo "Test suite failed during retry( $retry )."
-           vsts_logissue warning "Test suite failed during retry( $retry )."
-           sleep 2s
-         fi
-      done
-      set -e
-      exit ${exitCode}
+      java \
+        -cp $(printf "%s;" \
+          "$(MavenPackageDirWindows)/$(ArtifactBasename).jar" \
+          "$(Build.ArtifactStagingDirectory)/In/Windows/x64/Release/private/bin/com.microsoft.cognitiveservices.speech.tests.jar" \
+          "external/junit/junit-4.12.jar" \
+          "external/junit/hamcrest-core-1.3.jar" \
+          "external/json/gson-2.8.6.jar") \
+          -DTestOutputFilename=test-java-unittests-package.xml \
+          tests.runner.Runner \
+          tests.AllTests
     displayName: Run unit test
     condition: eq(variables['SPEECHSDK_RUN_TESTS'], 'true')
     continueOnError: ${{ parameters.continueOnTestFailure }}

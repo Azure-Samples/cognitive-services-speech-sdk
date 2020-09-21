@@ -25,14 +25,19 @@ import com.microsoft.cognitiveservices.speech.intent.IntentRecognizer;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.Rule;
 
 import tests.AudioUtterancesKeys;
 import tests.DefaultSettingsKeys;
 import tests.Settings;
 import tests.SubscriptionsRegionsKeys;
+import tests.Retry;
 
 public class PhraseListGrammarTests {
 
+    @Rule
+    public Retry retry = new Retry(Settings.TestRetryCount);
+        
     @BeforeClass
     static public void setUpBeforeClass() throws Exception {
         Settings.LoadSettings();

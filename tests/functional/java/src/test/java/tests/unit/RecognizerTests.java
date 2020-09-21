@@ -11,6 +11,7 @@ import static org.junit.Assert.assertTrue;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.Rule;
 
 import com.microsoft.cognitiveservices.speech.Recognizer;
 import com.microsoft.cognitiveservices.speech.SpeechConfig;
@@ -23,8 +24,12 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
 import tests.AudioUtterancesKeys;
 import tests.Settings;
 import tests.SubscriptionsRegionsKeys;
+import tests.Retry;
 
 public class RecognizerTests {
+
+    @Rule
+    public Retry retry = new Retry(Settings.TestRetryCount);
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
