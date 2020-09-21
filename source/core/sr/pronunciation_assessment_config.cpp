@@ -18,7 +18,7 @@ using namespace std;
 using namespace PronunciationAssessment;
 
 void CSpxPronunciationAssessmentConfig::InitWithParameters(const char* referenceText, PronunciationAssessmentGradingSystem gradingSystem,
-                          PronunciationAssessmentGranularity granularity, bool enableMiscue, const char* scenarioId)
+                          PronunciationAssessmentGranularity granularity, bool enableMiscue)
 {
     SPX_IFTRUE_THROW_HR(m_init, SPXERR_ALREADY_INITIALIZED);
     m_init = true;
@@ -39,8 +39,6 @@ void CSpxPronunciationAssessmentConfig::InitWithParameters(const char* reference
     {
         SetStringValue(GetPropertyName(PropertyId::PronunciationAssessment_EnableMiscue), TrueString);
     }
-    
-    SetStringValue(GetPropertyName(PropertyId::PronunciationAssessment_ScenarioId), scenarioId);
 }
 
 void CSpxPronunciationAssessmentConfig::InitFromJson(const char* json)

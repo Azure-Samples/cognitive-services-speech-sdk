@@ -10,10 +10,10 @@ extern "C" {
 /*
  * Class:     com_microsoft_cognitiveservices_speech_PronunciationAssessmentConfig
  * Method:    create
- * Signature: (Lcom/microsoft/cognitiveservices/speech/util/IntRef;Ljava/lang/String;IIZLjava/lang/String;)J
+ * Signature: (Lcom/microsoft/cognitiveservices/speech/util/IntRef;Ljava/lang/String;IIZ)J
  */
 JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_PronunciationAssessmentConfig_create
-  (JNIEnv *, jclass, jobject, jstring, jint, jint, jboolean, jstring);
+  (JNIEnv *, jclass, jobject, jstring, jint, jint, jboolean);
 
 /*
  * Class:     com_microsoft_cognitiveservices_speech_PronunciationAssessmentConfig

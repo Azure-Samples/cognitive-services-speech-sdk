@@ -15,16 +15,14 @@
 - (instancetype)init:(nonnull NSString *)referenceText
        gradingSystem:(SPXPronunciationAssessmentGradingSystem)gradingSystem
          granularity:(SPXPronunciationAssessmentGranularity)granularity
-        enableMiscue:(BOOL)enableMiscue
-          scenarioId:(nonnull NSString *)scenarioId {
+        enableMiscue:(BOOL)enableMiscue {
     std::shared_ptr<SpeechImpl::PronunciationAssessmentConfig> configImpl = nil;
 
     try {
         configImpl = SpeechImpl::PronunciationAssessmentConfig::Create([referenceText toSpxString],
                                                                        (SpeechImpl::PronunciationAssessmentGradingSystem)(int)gradingSystem,
                                                                        (SpeechImpl::PronunciationAssessmentGranularity)(int)granularity,
-                                                                       enableMiscue,
-                                                                       [scenarioId toSpxString]);
+                                                                       enableMiscue);
     }
     catch (const std::exception &e) {
         NSLog(@"Exception caught in core: %s", e.what());
@@ -51,41 +49,6 @@
     if (configImpl == nullptr)
         return nil;
     return [self initWithImpl:configImpl];
-}
-
-
-- (nullable instancetype)init:(nonnull NSString *)referenceText
-                gradingSystem:(SPXPronunciationAssessmentGradingSystem)gradingSystem
-                  granularity:(SPXPronunciationAssessmentGranularity)granularity
-                 enableMiscue:(BOOL)enableMiscue
-                   scenarioId:(nonnull NSString *)scenarioId
-                        error:(NSError * _Nullable * _Nullable)outError {
-    try {
-        return [self init:referenceText
-            gradingSystem:gradingSystem
-              granularity:granularity
-             enableMiscue:enableMiscue
-               scenarioId:scenarioId];
-    }
-    catch (NSException *exception) {
-        NSMutableDictionary *errorDict = [NSMutableDictionary dictionary];
-        [errorDict setObject:[NSString stringWithFormat:@"Error: %@", [exception reason]] forKey:NSLocalizedDescriptionKey];
-        *outError = [[NSError alloc] initWithDomain:@"SPXErrorDomain"
-                                               code:[Util getErrorNumberFromExceptionReason:[exception reason]] userInfo:errorDict];
-    }
-    return nil;
-}
-
-
-- (instancetype)init:(nonnull NSString *)referenceText
-       gradingSystem:(SPXPronunciationAssessmentGradingSystem)gradingSystem
-         granularity:(SPXPronunciationAssessmentGranularity)granularity
-        enableMiscue:(BOOL)enableMiscue {
-    return [self init:referenceText
-        gradingSystem:gradingSystem
-          granularity:granularity
-          enableMiscue:enableMiscue
-            scenarioId:@""];
 }
 
 - (nullable instancetype)init:(nonnull NSString *)referenceText
@@ -212,6 +175,16 @@
 - (NSString *)referenceText
 {
     return [NSString StringWithStdString:pronAssessmentConfigImpl->GetReferenceText()];
+}
+
+- (void)setScenarioId: (NSString *)scenarioId
+{
+    pronAssessmentConfigImpl->SetScenarioId([scenarioId toSpxString]);
+}
+
+- (NSString *)scenarioId
+{
+    return [NSString StringWithStdString:pronAssessmentConfigImpl->GetScenarioId()];
 }
 
 - (nullable NSString *)toJson {

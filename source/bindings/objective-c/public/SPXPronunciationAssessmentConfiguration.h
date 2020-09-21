@@ -23,47 +23,6 @@ SPX_EXPORT
  * @param gradingSystem The point system for score calibration.
  * @param granularity The evaluation granularity.
  * @param enableMiscue If enables miscue calculation.
- * @param scenarioId A GUID indicating a customized point system.
- *
- * @return an instance of pronunciation assessment configuration.
- */
-- (nullable instancetype)init:(nonnull NSString *)referenceText
-                gradingSystem:(SPXPronunciationAssessmentGradingSystem)gradingSystem
-                  granularity:(SPXPronunciationAssessmentGranularity)granularity
-                 enableMiscue:(BOOL)enableMiscue
-                   scenarioId:(nonnull NSString *)scenarioId
-NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.");
-
-/**
- * Initializes an instance of the SPXPronunciationAssessmentConfiguration.
- * For the parameters details, see
- * https://docs.microsoft.com/azure/cognitive-services/speech-service/rest-speech-to-text#pronunciation-assessment-parameters
- *
- * @param referenceText The reference text.
- * @param gradingSystem The point system for score calibration.
- * @param granularity The evaluation granularity.
- * @param enableMiscue If enables miscue calculation.
- * @param scenarioId A GUID indicating a customized point system.
- * @param outError error information.
- *
- * @return an instance of pronunciation assessment configuration.
- */
-- (nullable instancetype)init:(nonnull NSString *)referenceText
-                gradingSystem:(SPXPronunciationAssessmentGradingSystem)gradingSystem
-                  granularity:(SPXPronunciationAssessmentGranularity)granularity
-                 enableMiscue:(BOOL)enableMiscue
-                   scenarioId:(nonnull NSString *)scenarioId
-                        error:(NSError * _Nullable * _Nullable)outError;
-
-/**
- * Initializes an instance of the SPXPronunciationAssessmentConfiguration.
- * For the parameters details, see
- * https://docs.microsoft.com/azure/cognitive-services/speech-service/rest-speech-to-text#pronunciation-assessment-parameters
- *
- * @param referenceText The reference text.
- * @param gradingSystem The point system for score calibration.
- * @param granularity The evaluation granularity.
- * @param enableMiscue If enables miscue calculation.
  *
  * @return an instance of pronunciation assessment configuration.
  */
@@ -175,6 +134,11 @@ NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.");
  * The reference text.
  */
 @property (nonatomic, copy, nullable)NSString *referenceText;
+
+/**
+ * Scenario ID, which is a GUID indicating a customized point system.
+ */
+@property (nonatomic, copy, nullable)NSString *scenarioId;
 
 /**
  * Gets the json string of pronunciation assessment parameters.

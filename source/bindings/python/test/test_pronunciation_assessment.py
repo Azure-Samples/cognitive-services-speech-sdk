@@ -21,9 +21,9 @@ def test_pronunciation_assessment_config():
     config = msspeech.PronunciationAssessmentConfig(reference_text='reference',
                                                     grading_system=msspeech.PronunciationAssessmentGradingSystem.HundredMark,
                                                     granularity=msspeech.PronunciationAssessmentGranularity.Word,
-                                                    enable_miscue=True,
-                                                    scenario_id="id")
+                                                    enable_miscue=True)
     config.reference_text = "new reference"
+    config.scenario_id = "id"
     jo = json.loads(config.to_json())
     assert config.reference_text == 'new reference'
     assert jo['referenceText'] == config.reference_text

@@ -1661,21 +1661,20 @@ class PronunciationAssessmentConfig:
                  grading_system: PronunciationAssessmentGradingSystem = PronunciationAssessmentGradingSystem.FivePoint,
                  granularity: PronunciationAssessmentGranularity = PronunciationAssessmentGranularity.Phoneme,
                  enable_miscue: bool = False,
-                 scenario_id: str = "",
                  json_string: str = None):
         if reference_text is not None and json_string is not None:
             raise ValueError("reference text and json string cannot be both specified to create PronunciationAssessmentConfig")
         self._impl = self._get_impl(impl.PronunciationAssessmentConfig, reference_text, grading_system, granularity,
-                                    enable_miscue, scenario_id, json_string)
+                                    enable_miscue, json_string)
 
     @staticmethod
-    def _get_impl(config_type, reference_text, grading_system, granularity, enable_miscue, scenario_id, json_string):
+    def _get_impl(config_type, reference_text, grading_system, granularity, enable_miscue, json_string):
         if json_string is not None:
             return config_type._create_from_json(json_string)
 
         ref_text = "" if reference_text is None else reference_text
 
-        return config_type._create(ref_text, grading_system.value, granularity.value, enable_miscue, scenario_id)
+        return config_type._create(ref_text, grading_system.value, granularity.value, enable_miscue)
 
     def to_json(self) -> str:
         """
@@ -1703,6 +1702,17 @@ class PronunciationAssessmentConfig:
     @reference_text.setter
     def reference_text(self, text: str):
         self._impl.set_reference_text(text)
+
+    @property
+    def scenario_id(self) -> str:
+        """
+        The scenario id, which is a GUID indicating a customized point system.
+        """
+        return self._impl.get_scenario_id()
+
+    @scenario_id.setter
+    def scenario_id(self, scenario_id: str):
+        self._impl.set_scenario_id(scenario_id)
 
 
 class PronunciationAssessmentPhonemeResult:

@@ -38,7 +38,7 @@ public:
 
     // --- ISpxPronunciationAssessmentConfig ---
     void InitWithParameters(const char* referenceText, PronunciationAssessmentGradingSystem gradingSystem,
-              PronunciationAssessmentGranularity granularity, bool enableMiscue, const char* scenarioId) override;
+              PronunciationAssessmentGranularity granularity, bool enableMiscue) override;
     void InitFromJson(const char* json) override;
     void UpdateJson() override;
 

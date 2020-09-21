@@ -27,7 +27,8 @@ TEST_CASE("Pronunciation assessment configuration", "[api][cxx]")
 
         pronConfig = PronunciationAssessmentConfig::Create("reference",
                                                            PronunciationAssessmentGradingSystem::HundredMark,
-                                                           PronunciationAssessmentGranularity::Word, true, "id");
+                                                           PronunciationAssessmentGranularity::Word, true);
+        pronConfig->SetScenarioId("id");
         pronConfig->SetReferenceText("new reference");
         jsonString = pronConfig->ToJson();
         j = nlohmann::json::parse(jsonString);

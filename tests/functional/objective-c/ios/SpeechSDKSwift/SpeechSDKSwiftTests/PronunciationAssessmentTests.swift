@@ -28,11 +28,11 @@ class PronunciationAssessmentTests: XCTestCase {
         pronConfig = try! SPXPronunciationAssessmentConfiguration("reference",
                                                                   gradingSystem:SPXPronunciationAssessmentGradingSystem.hundredMark,
                                                                   granularity:SPXPronunciationAssessmentGranularity.word,
-                                                                  enableMiscue:true,
-                                                                  scenarioId:"id")
+                                                                  enableMiscue:true)
 
         XCTAssertNotNil(pronConfig)
         pronConfig?.referenceText = "new reference"
+        pronConfig?.scenarioId = "id"
         XCTAssertNotNil(pronConfig?.toJson()!.range(of: "HundredMark"))
         XCTAssertNotNil(pronConfig?.toJson()!.range(of: "Word"))
         XCTAssertNotNil(pronConfig?.toJson()!.range(of: "new reference"))

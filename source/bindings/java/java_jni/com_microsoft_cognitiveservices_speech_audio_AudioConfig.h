@@ -34,7 +34,7 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_audio_AudioC
 /*
  * Class:     com_microsoft_cognitiveservices_speech_audio_AudioConfig
  * Method:    createAudioInputFromStream
- * Signature: (Lcom/microsoft/cognitiveservices/speech/util/IntRef;Lcom/microsoft/cognitiveservices/speech/util/SafeHandle)J
+ * Signature: (Lcom/microsoft/cognitiveservices/speech/util/IntRef;Lcom/microsoft/cognitiveservices/speech/util/SafeHandle;)J
  */
 JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_audio_AudioConfig_createAudioInputFromStream
   (JNIEnv *, jclass, jobject, jobject);

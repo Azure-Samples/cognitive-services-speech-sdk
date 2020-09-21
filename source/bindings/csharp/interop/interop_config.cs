@@ -159,8 +159,7 @@ namespace Microsoft.CognitiveServices.Speech.Internal
                                                                             IntPtr referenceText,
                                                                             Int32 gradingSystem,
                                                                             Int32 granularity,
-                                                                            bool enableMiscue,
-                                                                            [MarshalAs(UnmanagedType.LPStr)] string scenarioId);
+                                                                            bool enableMiscue);
 
         [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR create_pronunciation_assessment_config_from_json(out SPXPRONUNCIATIONASSESSMENTCONFIGHANDLE hAutoDetectSourceLanguageconfig, IntPtr json);

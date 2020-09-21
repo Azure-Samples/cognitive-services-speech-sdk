@@ -41,15 +41,13 @@ public:
     /// <param name="gradingSystem">The point system for score calibration</param>
     /// <param name="granularity">The evaluation granularity</param>
     /// <param name="enableMiscue">If enables miscue calculation</param>
-    /// <param name="scenarioId">A GUID indicating a customized point system</param>
     /// <returns>A shared pointer to the new PronunciationAssessmentConfig instance.</returns>
     static std::shared_ptr<PronunciationAssessmentConfig> Create(const std::string& referenceText,
                                                                  PronunciationAssessmentGradingSystem gradingSystem =
                                                                      PronunciationAssessmentGradingSystem::FivePoint,
                                                                  PronunciationAssessmentGranularity granularity =
                                                                      PronunciationAssessmentGranularity::Phoneme,
-                                                                 bool enableMiscue = false,
-                                                                 const SPXSTRING& scenarioId = SPXSTRING_EMPTY)
+                                                                 bool enableMiscue = false)
     {
         SPXPRONUNCIATIONASSESSMENTCONFIGHANDLE hconfig = SPXHANDLE_INVALID;
 
@@ -57,8 +55,7 @@ public:
             create_pronunciation_assessment_config(&hconfig, Utils::ToUTF8(referenceText).c_str(),
                 static_cast<PronunciationAssessment_GradingSystem>(gradingSystem),
                 static_cast<PronunciationAssessment_Granularity>(granularity),
-                enableMiscue,
-                scenarioId.c_str()));
+                enableMiscue));
         const auto ptr = new PronunciationAssessmentConfig(hconfig);
         return std::shared_ptr<PronunciationAssessmentConfig>(ptr);
     }
@@ -73,17 +70,15 @@ public:
     /// <param name="gradingSystem">The point system for score calibration</param>
     /// <param name="granularity">The evaluation granularity</param>
     /// <param name="enableMiscue">If enables miscue calculation</param>
-    /// <param name="scenarioId">A GUID indicating a customized point system</param>
     /// <returns>A shared pointer to the new PronunciationAssessmentConfig instance.</returns>
     static std::shared_ptr<PronunciationAssessmentConfig> Create(const std::wstring& referenceText,
                                                                  PronunciationAssessmentGradingSystem gradingSystem =
                                                                      PronunciationAssessmentGradingSystem::FivePoint,
                                                                  PronunciationAssessmentGranularity granularity =
                                                                      PronunciationAssessmentGranularity::Phoneme,
-                                                                 bool enableMiscue = false,
-                                                                 const SPXSTRING& scenarioId = SPXSTRING_EMPTY)
+                                                                 bool enableMiscue = false)
     {
-        return Create(Utils::ToUTF8(referenceText), gradingSystem, granularity, enableMiscue, scenarioId);
+        return Create(Utils::ToUTF8(referenceText), gradingSystem, granularity, enableMiscue);
     }
 #endif
 
@@ -142,6 +137,25 @@ public:
         SetReferenceText(Utils::ToUTF8(referenceText));
     }
 #endif
+
+    /// <summary>
+    /// Sets the scenario ID, which is a GUID indicating a customized point system.
+    /// </summary>
+    /// <param name="scenarioId">The scenario ID.</param>
+    void SetScenarioId(const SPXSTRING& scenarioId)
+    {
+        property_bag_set_string(m_propertybag, static_cast<int>(PropertyId::PronunciationAssessment_ScenarioId), nullptr, scenarioId.c_str());
+    }
+
+    /// <summary>
+    /// Gets the scenario ID, which is a GUID indicating a customized point system.
+    /// </summary>
+    /// <returns>The scenario ID.</returns>
+    SPXSTRING GetScenarioId() const
+    {
+        const char* value = property_bag_get_string(m_propertybag, static_cast<int>(PropertyId::PronunciationAssessment_ScenarioId), nullptr, "");
+        return Utils::ToSPXString(Utils::CopyAndFreePropertyString(value));
+    }
 
     /// <summary>
     /// Applies the settings in this config to a Recognizer.

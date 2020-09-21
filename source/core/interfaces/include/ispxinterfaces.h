@@ -1252,7 +1252,7 @@ class ISpxPronunciationAssessmentConfig : public ISpxInterfaceBaseFor<ISpxPronun
 {
 public:
     virtual void InitWithParameters(const char* referenceText, PronunciationAssessmentGradingSystem gradingSystem,
-                      PronunciationAssessmentGranularity granularity, bool enableMiscue, const char* scenarioId) = 0;
+                      PronunciationAssessmentGranularity granularity, bool enableMiscue) = 0;
     virtual void InitFromJson(const char* json) = 0;
     virtual void UpdateJson() = 0;
 };

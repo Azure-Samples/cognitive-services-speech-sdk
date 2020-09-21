@@ -33,20 +33,18 @@ namespace Microsoft.CognitiveServices.Speech.PronunciationAssessment
         /// <param name="gradingSystem">The point system for score calibration</param>
         /// <param name="granularity">The evaluation granularity</param>
         /// <param name="enableMiscue">If enables miscue calculation</param>
-        /// <param name="scenarioId">A GUID indicating a customized point system</param>
         /// <returns>A new PronunciationAssessmentConfig instance.</returns>
         public PronunciationAssessmentConfig(string referenceText,
             GradingSystem gradingSystem = GradingSystem.FivePoint,
             Granularity granularity = Granularity.Phoneme,
-            bool enableMiscue = false,
-            string scenarioId = "")
+            bool enableMiscue = false)
         {
             IntPtr pronunciationAssessmentConfigHandle = IntPtr.Zero;
             IntPtr referenceTexTPtr = Utf8StringMarshaler.MarshalManagedToNative(referenceText);
-            ThrowIfFail(Internal.PronunciationAssessmentConfig.create_pronunciation_assessment_config(out pronunciationAssessmentConfigHandle, referenceTexTPtr, (int)gradingSystem, (int)granularity, enableMiscue, scenarioId));
+            ThrowIfFail(Internal.PronunciationAssessmentConfig.create_pronunciation_assessment_config(out pronunciationAssessmentConfigHandle, referenceTexTPtr, (int)gradingSystem, (int)granularity, enableMiscue));
             Setup(pronunciationAssessmentConfigHandle);
         }
-        
+
         internal void Setup(IntPtr configPtr)
         {
             ThrowIfNull(configPtr);
@@ -83,6 +81,22 @@ namespace Microsoft.CognitiveServices.Speech.PronunciationAssessment
             set
             {
                 progBag.SetProperty(PropertyId.PronunciationAssessment_ReferenceText, value);
+            }
+        }
+
+        /// <summary>
+        /// Gets and Sets the scenario ID, which is a GUID indicating a customized point system.
+        /// </summary>
+        public string ScenarioId
+        {
+            get
+            {
+                return progBag.GetProperty(PropertyId.PronunciationAssessment_ScenarioId);
+            }
+
+            set
+            {
+                progBag.SetProperty(PropertyId.PronunciationAssessment_ScenarioId, value);
             }
         }
 

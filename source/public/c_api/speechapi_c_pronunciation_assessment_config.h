@@ -23,8 +23,7 @@ SPXAPI create_pronunciation_assessment_config(SPXPRONUNCIATIONASSESSMENTCONFIGHA
                                               const char* referenceText,
                                               PronunciationAssessment_GradingSystem gradingSystem,
                                               PronunciationAssessment_Granularity granularity,
-                                              bool enableMiscue,
-                                              const char* scenarioId);
+                                              bool enableMiscue);
 SPXAPI create_pronunciation_assessment_config_from_json(SPXPRONUNCIATIONASSESSMENTCONFIGHANDLE* hPronunciationAssessmentConfig, const char* json);
 SPXAPI_(bool) pronunciation_assessment_config_is_handle_valid(SPXPRONUNCIATIONASSESSMENTCONFIGHANDLE hPronunciationAssessmentConfig);
 SPXAPI pronunciation_assessment_config_release(SPXPRONUNCIATIONASSESSMENTCONFIGHANDLE hPronunciationAssessmentConfig);

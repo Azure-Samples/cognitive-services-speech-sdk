@@ -38,8 +38,7 @@ SPXAPI create_pronunciation_assessment_config(SPXPRONUNCIATIONASSESSMENTCONFIGHA
                                               const char* referenceText,
                                               PronunciationAssessment_GradingSystem gradingSystem,
                                               PronunciationAssessment_Granularity granularity,
-                                              bool enableMiscue,
-                                              const char* scenarioId)
+                                              bool enableMiscue)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, hPronunciationAssessmentConfig == nullptr);
 
@@ -51,8 +50,7 @@ SPXAPI create_pronunciation_assessment_config(SPXPRONUNCIATIONASSESSMENTCONFIGHA
         pronunciationAssessmentConfig->InitWithParameters(referenceText,
                                                          static_cast<PronunciationAssessmentGradingSystem>(gradingSystem),
                                                          static_cast<PronunciationAssessmentGranularity>(granularity),
-                                                         enableMiscue,
-                                                         scenarioId);
+                                                         enableMiscue);
 
         auto pronunciationAssessmentConfigs = CSpxSharedPtrHandleTableManager::Get<ISpxPronunciationAssessmentConfig, SPXPRONUNCIATIONASSESSMENTCONFIGHANDLE>();
         *hPronunciationAssessmentConfig = pronunciationAssessmentConfigs->TrackHandle(pronunciationAssessmentConfig);
@@ -130,7 +128,7 @@ SPXAPI pronunciation_assessment_config_apply_to_recognizer(SPXPRONUNCIATIONASSES
         auto config = GetInstance<ISpxPronunciationAssessmentConfig>(hPronunciationAssessmentConfig);
         config->UpdateJson();
         auto recognizerProperties = SpxQueryInterface<ISpxNamedProperties>(recognizer);
-        auto paramsPropertyName = GetPropertyName(PropertyId::PronunciationAssessment_Params);
+        const auto paramsPropertyName = GetPropertyName(PropertyId::PronunciationAssessment_Params);
         const auto configProperties = SpxQueryInterface<ISpxNamedProperties>(config);
         recognizerProperties->SetStringValue(paramsPropertyName, configProperties->GetStringValue(paramsPropertyName).c_str());
     }

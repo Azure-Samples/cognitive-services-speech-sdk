@@ -54,16 +54,17 @@ public class PronunciationAssessmentTests {
         assertTrue(pronConfig.toJson().contains("reference"));
         pronConfig.close();
 
-        pronConfig = new PronunciationAssessmentConfig("reference", PronunciationAssessmentGradingSystem.HundredMark, PronunciationAssessmentGranularity.Word, true, "id");
+        pronConfig = new PronunciationAssessmentConfig("reference", PronunciationAssessmentGradingSystem.HundredMark, PronunciationAssessmentGranularity.Word, true);
         assertNotNull(pronConfig);
         pronConfig.setReferenceText("new reference");
+        pronConfig.setScenarioId("id");
         assertTrue(pronConfig.toJson().contains("HundredMark"));
         assertTrue(pronConfig.toJson().contains("Word"));
 
         PronunciationAssessmentConfig pronConfig2 = PronunciationAssessmentConfig.fromJson(pronConfig.toJson());
         assertNotNull(pronConfig2);
         assertEquals(pronConfig.toJson(), pronConfig2.toJson());
-        
+
         pronConfig.close();
         pronConfig2.close();
     }
@@ -89,7 +90,7 @@ public class PronunciationAssessmentTests {
     @Test(expected = IllegalArgumentException.class)
     public void verifyInvalidJsonForPronunciationAssessmentConfig() throws ExecutionException {
         PronunciationAssessmentConfig pronConfig = PronunciationAssessmentConfig.fromJson("invalid json");
-        
+
     }
 
     public void testPronunciationAssessment(boolean useReferenceText) throws InterruptedException, ExecutionException {
@@ -131,7 +132,7 @@ public class PronunciationAssessmentTests {
     public void testPronunciationAssessmentWithReferenceText() throws InterruptedException, ExecutionException {
         testPronunciationAssessment(true);
     }
-    
+
     @Test
     public void testPronunciationAssessmentWithoutReferenceText() throws InterruptedException, ExecutionException {
         testPronunciationAssessment(false);

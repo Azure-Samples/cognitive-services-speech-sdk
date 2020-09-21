@@ -12,21 +12,19 @@
 /*
  * Class:     com_microsoft_cognitiveservices_speech_PronunciationAssessmentConfig
  * Method:    create
- * Signature: (Lcom/microsoft/cognitiveservices/speech/util/IntRef;Ljava/lang/String;IIZLjava/lang/String;)J
+ * Signature: (Lcom/microsoft/cognitiveservices/speech/util/IntRef;Ljava/lang/String;IIZ)J
  */
 JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_PronunciationAssessmentConfig_create
-  (JNIEnv *env, jclass cls, jobject pronAssessmentConfigHandle, jstring referenceText, jint gradingSystem, jint granularity, jboolean enableMiscue, jstring scenarioId)
+  (JNIEnv *env, jclass cls, jobject pronAssessmentConfigHandle, jstring referenceText, jint gradingSystem, jint granularity, jboolean enableMiscue)
 {
     SPXPRONUNCIATIONASSESSMENTCONFIGHANDLE configHandle = SPXHANDLE_INVALID;
     const char* referenceTextPtr = GetStringUTFChars(env, referenceText);
-    const char* scenarioIdPtr = GetStringUTFChars(env, scenarioId);
-    SPXHR hr = create_pronunciation_assessment_config(&configHandle, referenceTextPtr, (PronunciationAssessment_GradingSystem) gradingSystem, (PronunciationAssessment_Granularity) granularity, (bool) enableMiscue, scenarioIdPtr);
+    SPXHR hr = create_pronunciation_assessment_config(&configHandle, referenceTextPtr, (PronunciationAssessment_GradingSystem) gradingSystem, (PronunciationAssessment_Granularity) granularity, (bool) enableMiscue);
     if (SPX_SUCCEEDED(hr))
     {
         SetObjectHandle(env, pronAssessmentConfigHandle, (jlong)configHandle);
     }
     ReleaseStringUTFChars(env, referenceText, referenceTextPtr);
-    ReleaseStringUTFChars(env, scenarioId, scenarioIdPtr);
     return (jlong)hr;
 }
 

@@ -41,25 +41,11 @@ public final class PronunciationAssessmentConfig implements Closeable
      * @param gradingSystem The point system for score calibration
      * @param granularity The evaluation granularity
      * @param enableMiscue If enables miscue calculation
-     * @param scenarioId A GUID indicating a customized point system
-     */
-    public PronunciationAssessmentConfig(String referenceText, PronunciationAssessmentGradingSystem gradingSystem, PronunciationAssessmentGranularity granularity, boolean enableMiscue, String scenarioId) {
-        IntRef pronAssessmentConfigRef = new IntRef(0);
-        Contracts.throwIfFail(create(pronAssessmentConfigRef, referenceText, gradingSystem.getValue(), granularity.getValue(), enableMiscue, scenarioId));
-        init(pronAssessmentConfigRef.getValue());
-    }
-
-    /**
-     * Initializes an instance of the PronunciationAssessmentConfig
-     * For the parameters details, see
-     * https://docs.microsoft.com/azure/cognitive-services/speech-service/rest-speech-to-text#pronunciation-assessment-parameters
-     * @param referenceText The reference text
-     * @param gradingSystem The point system for score calibration
-     * @param granularity The evaluation granularity
-     * @param enableMiscue If enables miscue calculation
      */
     public PronunciationAssessmentConfig(String referenceText, PronunciationAssessmentGradingSystem gradingSystem, PronunciationAssessmentGranularity granularity, boolean enableMiscue) {
-        this(referenceText, gradingSystem, granularity, false, "");
+        IntRef pronAssessmentConfigRef = new IntRef(0);
+        Contracts.throwIfFail(create(pronAssessmentConfigRef, referenceText, gradingSystem.getValue(), granularity.getValue(), enableMiscue));
+        init(pronAssessmentConfigRef.getValue());
     }
 
     /**
@@ -133,6 +119,23 @@ public final class PronunciationAssessmentConfig implements Closeable
     }
 
     /**
+     * Sets the scenario ID, which is a GUID indicating a customized point system.
+     * @param scenarioId the scenario ID.
+     */
+    public void setScenarioId(String scenarioId) {
+        Contracts.throwIfNull(scenarioId, "scenarioId");
+        propertyHandle.setProperty(PropertyId.PronunciationAssessment_ScenarioId, scenarioId);
+    }
+
+    /**
+     * Gets the scenario ID, which is a GUID indicating a customized point system.
+     * @return The scenario ID.
+     */
+    public String getScenarioId() {
+        return propertyHandle.getProperty(PropertyId.PronunciationAssessment_ScenarioId);
+    }
+
+    /**
      * Gets the json string of pronunciation assessment parameters.
      * @return json string of pronunciation assessment parameters.
      */
@@ -176,7 +179,7 @@ public final class PronunciationAssessmentConfig implements Closeable
         this.propertyHandle = new PropertyCollection(propHandle);
     }
 
-    private final static native long create(IntRef pronConfigRef, String referenceText, int gradingSystem, int granularity, boolean enableMiscue, String scenarioId);
+    private final static native long create(IntRef pronConfigRef, String referenceText, int gradingSystem, int granularity, boolean enableMiscue);
     private final static native long fromJson(IntRef pronConfigRef, String json);
     private final native long getPropertyBag(SafeHandle pronConfigRef, IntRef propHandle);
     private final native long applyTo(SafeHandle pronConfigRef, SafeHandle recoHandle);

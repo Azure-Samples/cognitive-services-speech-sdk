@@ -56,8 +56,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             SPXTEST_ARE_EQUAL("Phoneme", jo["granularity"]);
             SPXTEST_ARE_EQUAL("Comprehensive", jo["dimension"]);
 
-            config = new PronunciationAssessmentConfig("reference", GradingSystem.HundredMark, Granularity.Word, true, "id");
+            config = new PronunciationAssessmentConfig("reference", GradingSystem.HundredMark, Granularity.Word, true);
             config.ReferenceText = "new reference";
+            config.ScenarioId = "id";
             jo = JObject.Parse(config.ToJson());
             SPXTEST_ARE_EQUAL("new reference", jo["referenceText"]);
             SPXTEST_ARE_EQUAL("HundredMark", jo["gradingSystem"]);
