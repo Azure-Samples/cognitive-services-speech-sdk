@@ -258,18 +258,21 @@ namespace IntegrationTests {
             _Canceled(const SpeechRecognitionCanceledEventArgs& args) :
                 _Session(args),
                 Reason(args.Reason),
-                ErrorCode(args.ErrorCode)
+                ErrorCode(args.ErrorCode),
+                Details(args.ErrorDetails)
             {
             }
             _Canceled(const ConversationTranslationCanceledEventArgs& args) :
                 _Session(args),
                 Reason(args.Reason),
-                ErrorCode(args.ErrorCode)
+                ErrorCode(args.ErrorCode),
+                Details(args.ErrorDetails)
             {
             }
 
             CancellationReason Reason;
             CancellationErrorCode ErrorCode;
+            std::string Details;
         };
         struct _Expiration : public _Session
         {
@@ -381,6 +384,29 @@ namespace IntegrationTests {
                 case std::future_status::deferred:
                     throw std::runtime_error("Deferred status not supported");
             }
+        }
+
+        void WaitUntil(const std::string& description, std::function<bool(const ConversationTranslatorCallbacks*)> predicate, std::chrono::milliseconds maxWaitTime = 10s)
+        {
+            auto start = std::chrono::steady_clock::now();
+
+            do
+            {
+                this_thread::sleep_for(500ms);
+
+                if (predicate(this))
+                {
+                    return;
+                }
+                else
+                {
+                    // fail if we received a canceled event indicating an error
+                    FailOnErrorCanceledEvent();
+                }
+            } while (std::chrono::steady_clock::now() - start < maxWaitTime);
+
+            // if we reached here we've timed out
+            throw std::runtime_error("Timed out while waiting for " + description);
         }
 
         void VerifySessionAndConnectEvents(bool expectEndOfStream)
@@ -594,6 +620,28 @@ namespace IntegrationTests {
                 SPX_TRACE_INFO("%s: Received event", name.c_str());
                 list.push_back(arg);
             });
+        }
+
+        void FailOnErrorCanceledEvent()
+        {
+            auto found = std::find_if(
+                Canceled.begin(),
+                Canceled.end(),
+                [](const _Canceled& evt) -> bool
+                {
+                    return evt.Reason != CancellationReason::EndOfStream;
+                });
+
+            if (found != Canceled.end())
+            {
+                std::string msg("Failed due to a received error cancellation event. Reason: ");
+                msg += to_string(static_cast<int>(found->Reason))
+                    + ", ErrorCode: "
+                    + to_string(static_cast<int>(found->ErrorCode))
+                    + ", Details: "
+                    + found->Details;
+                throw std::runtime_error(msg);
+            }
         }
     };
 

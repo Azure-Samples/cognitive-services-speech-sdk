@@ -346,11 +346,34 @@ TEST_CASE("Host and participants send instant messages", "[api][cxx][conversatio
     SetParticipantConfig(aliceAudioConfig);
     alice.Join(aliceAudioConfig);
 
+    // wait until the host is aware that Alice has joined
+    host.Events->WaitUntil("host to detect Alice to joined", [](const ConversationTranslatorCallbacks* host) -> bool
+    {
+        for (const auto& evt : host->ParticipantsChanged)
+        {
+            auto& part = evt.Participants;
+            auto found = std::find_if(part.begin(), part.end(), [](std::shared_ptr<Participant> p) -> bool
+            {
+                return p->DisplayName == "Alice";
+            });
+
+            if (found != part.end())
+            {
+                return true;
+            }
+        }
+
+        return false;
+    });
+
     host.ConvTrans->SendTextMessageAsync("This is a test").get();
     this_thread::sleep_for(1s);
     alice.ConvTrans->SendTextMessageAsync("C'est un test").get();
 
-    this_thread::sleep_for(3s);
+    host.Events->WaitUntil("all participants have received all text messages", [alice = alice.Events](const ConversationTranslatorCallbacks* host) -> bool
+    {
+        return host->TextMessageReceived.size() == 2 && alice->TextMessageReceived.size() == 2;
+    });
 
     alice.Leave();
     host.Leave();
