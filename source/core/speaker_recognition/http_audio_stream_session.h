@@ -95,11 +95,13 @@ private:
     static uint32_t FromBytesToMilisecond(uint32_t bytes, uint32_t bytesPerSecond);
     void StopPump();
     std::chrono::milliseconds GetMicrophoneTimeout();
+    void OnDoneAudioPumping();
+    RecognitionResultPtr GetResult(std::future<RecognitionResultPtr>&& future);
 
     std::shared_ptr<ISpxAudioPump> m_audioPump;
     std::shared_ptr<ISpxGenericSite> m_keepFactoryAlive;
 
-    std::shared_ptr<std::promise<RecognitionResultPtr>> m_audioIsDone;
+    std::shared_ptr<std::promise<RecognitionResultPtr>> m_resultPromise;
 
     std::shared_ptr<CSpxThreadService> m_threadService;
     std::shared_ptr<ISpxAudioStreamReader> m_codecAdapter;
@@ -114,6 +116,7 @@ private:
     uint32_t m_avgBytesPerSecond = 16000*2;
     uint32_t m_totalAudioinMS = 0;
     std::mutex m_mutex;
+    std::thread m_postAudioThread; // the HTTP POST audio thread.
 };
 
  }}}}

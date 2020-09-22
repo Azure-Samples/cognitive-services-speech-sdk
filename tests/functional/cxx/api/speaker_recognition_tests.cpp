@@ -276,7 +276,7 @@ TEST_CASE(
             SPXTEST_REQUIRE(deleteResult->Reason == ResultReason::DeletedVoiceProfile);
         }
         });
-    try
+    SPXTEST_NOTHROW_BEGIN()
     {
         auto enrollResult = client->EnrollProfileAsync(profile, audioInput).get();
         SPXTEST_REQUIRE(enrollResult->Reason == ResultReason::EnrolledVoiceProfile);
@@ -293,10 +293,7 @@ TEST_CASE(
         auto result2 = recognizer2->RecognizeOnceAsync(model).get();
         SPXTEST_REQUIRE(result2->Reason == ResultReason::NoMatch);
     }
-    catch (...)
-    {
-        diagnostics_log_memory_dump_to_file(nullptr, 1);
-    }
+    SPXTEST_NOTHROW_END()
 }
 
 TEST_CASE(
@@ -320,7 +317,7 @@ TEST_CASE(
             SPXTEST_REQUIRE(deleteResult->Reason == ResultReason::DeletedVoiceProfile);
         }
         });
-    try
+    SPXTEST_NOTHROW_BEGIN()
     {
         auto enrollResult = client->EnrollProfileAsync(profile1, audioInput).get();
         SPXTEST_REQUIRE(enrollResult->Reason == ResultReason::EnrolledVoiceProfile);
@@ -344,10 +341,7 @@ TEST_CASE(
         auto result = recognizer->RecognizeOnceAsync(model).get();
         SPXTEST_REQUIRE(result->Reason == ResultReason::RecognizedSpeakers);
     }
-    catch (...)
-    {
-        diagnostics_log_memory_dump_to_file(nullptr, 1);
-    }
+    SPXTEST_NOTHROW_END()
 }
 
 TEST_CASE(
@@ -370,7 +364,7 @@ TEST_CASE(
             SPXTEST_REQUIRE(deleteResult->Reason == ResultReason::DeletedVoiceProfile);
         }
         });
-    try
+    SPXTEST_NOTHROW_BEGIN()
     {
         // passphrase is my voice is my passport verify me.
         auto enrollResult = client->EnrollProfileAsync(profile1, audioInput).get();
@@ -390,10 +384,7 @@ TEST_CASE(
         SPXTEST_CHECK_NOTHROW(result = recognizer->RecognizeOnceAsync(model).get());
         SPXTEST_REQUIRE(result->Reason == ResultReason::RecognizedSpeaker);
     }
-    catch (...)
-    {
-        diagnostics_log_memory_dump_to_file(nullptr, 1);
-    }
+    SPXTEST_NOTHROW_END()
 }
 
 TEST_CASE(

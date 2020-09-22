@@ -44,7 +44,7 @@ void CSpxHttpAudioStreamSession::Term()
 
         m_audioPump->StopPump();
 
-        auto audioIsDone = m_audioIsDone;
+        auto audioIsDone = m_resultPromise;
         if (audioIsDone)
         {
             Error("Terminate the http session.");
@@ -176,12 +176,10 @@ void CSpxHttpAudioStreamSession::InitFromStream(shared_ptr<ISpxAudioStream> stre
 
 RecognitionResultPtr CSpxHttpAudioStreamSession::StartStreamingAudioAndWaitForResult(bool enroll, VoiceProfileType type, vector<string>&& profileIds)
 {
-    SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
-
     auto keepAlive = SpxSharedPtrFromThis<ISpxAudioProcessor>(this);
     RecognitionResultPtr result;
     auto task = CreateTask([&result, this, keepAlive, profileIds = move(profileIds), type = type, enroll = enroll]() mutable {
-
+        SPX_DBG_TRACE_SCOPE("StartStreamingAudioAndWaitForResult starting","StartStreamingAudioAndWaitForResult ended");
         if (m_reco == nullptr)
         {
             auto site = SpxSiteFromThis(this);
@@ -204,22 +202,16 @@ RecognitionResultPtr CSpxHttpAudioStreamSession::StartStreamingAudioAndWaitForRe
         m_totalAudioinMS = 0;
         auto ptr = (ISpxAudioProcessor*)this;
         auto pISpxAudioProcessor = ptr->shared_from_this();
-        m_audioIsDone = std::make_shared<std::promise<RecognitionResultPtr>>();
-        auto future = (*m_audioIsDone).get_future();
+        m_resultPromise = std::make_shared<std::promise<RecognitionResultPtr>>();
+        auto future = (*m_resultPromise).get_future();
         audioPump->StartPump(pISpxAudioProcessor);
 
         // the max time we wait for audio streaming and result back from http post is 1 minutes.
         auto status = future.wait_for(m_microphoneTimeoutInMS + (milliseconds)1min);
 
-        if (status == future_status::ready)
-        {
-            result = future.get();
-        }
-        else
-        {
-            const auto error = ErrorInfo::FromRuntimeMessage("Bailed out due to wait more than 1 minutes for the result of enrollment or speaker recognition.");
-            result = CreateErrorResult(error);
-        }
+        result = status == future_status::timeout
+            ? CreateErrorResult(ErrorInfo::FromRuntimeMessage("Bailed out due to wait more than 1 minutes for the result of enrollment or speaker recognition."))
+            : GetResult(move(future));
 
         // each enroll or verify/identify has its own audio config, so we have to destroy the all audio input and its related member variables here.
         auto finish = shared_ptr<void>(nullptr, [this](void*) {CleanupAfterEachAudioPumping(); });
@@ -230,10 +222,32 @@ RecognitionResultPtr CSpxHttpAudioStreamSession::StartStreamingAudioAndWaitForRe
     return result;
 }
 
+RecognitionResultPtr CSpxHttpAudioStreamSession::GetResult(future<RecognitionResultPtr>&& future)
+{
+    RecognitionResultPtr result;
+
+    try
+    {
+        result = future.get();
+    }
+    catch (const std::exception& e)
+    {
+        result = CreateErrorResult(ErrorInfo::FromRuntimeMessage(e.what()));
+    }
+
+    return result;
+}
+
 void CSpxHttpAudioStreamSession::CleanupAfterEachAudioPumping()
 {
     StopPump();
     SpxTermAndClear(m_audioPump);
+    // make sure the current http post thread is done. Occasionally, HTTP post takes long, AudioDone future times out in StartStreamingAudioAndWaitForResult
+    // If we let the postAudioThread lingering around. The next session might creating a new promise at the moment postAudioThread set the result to the promise. The result from previous session could got post to the  new session.
+    if (m_postAudioThread.joinable())
+    {
+        m_postAudioThread.join();
+    }
     m_audioPump = nullptr;
     m_fromMicrophone = false;
     m_totalAudioinMS = 0;
@@ -267,7 +281,7 @@ void CSpxHttpAudioStreamSession::Error(const string& msg)
 {
     const auto error = ErrorInfo::FromRuntimeMessage(msg);
     auto result = CreateErrorResult(error);
-    auto audioIsDone = m_audioIsDone;
+    auto audioIsDone = m_resultPromise;
     if (audioIsDone)
     {
         (*audioIsDone).set_value(result);
@@ -276,6 +290,8 @@ void CSpxHttpAudioStreamSession::Error(const string& msg)
 
 void CSpxHttpAudioStreamSession::SetFormat(const SPXWAVEFORMATEX* pformat)
 {
+    SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+
     if (m_reco == nullptr)
     {
         SPX_TRACE_ERROR("http reco engine adapter is null.");
@@ -287,17 +303,40 @@ void CSpxHttpAudioStreamSession::SetFormat(const SPXWAVEFORMATEX* pformat)
         m_avgBytesPerSecond = pformat->nAvgBytesPerSec;
     }
     // all audio is done pumping.
-    if (pformat == nullptr && m_audioIsDone)
+    if (pformat == nullptr)
     {
-        m_reco->FlushAudio();
-        auto result = m_reco->GetResult();
-        SPX_DBG_TRACE_INFO("Audio session received the result of flush audio.");
-        if (m_audioIsDone)
-        {
-            (*m_audioIsDone).set_value(result);
-            m_audioIsDone = nullptr;
-        }
+        OnDoneAudioPumping();
     }
+}
+// OnDoneAudioPumping is called at the AudioPump thread. HTTP Post does taking time, so we don't want to hog the audio pump thread.
+void CSpxHttpAudioStreamSession::OnDoneAudioPumping()
+{
+    if (m_postAudioThread.joinable())
+    {
+        m_postAudioThread.join();
+    }
+    auto keepAlive = SpxSharedPtrFromThis<ISpxHttpAudioStreamSession>(this);
+    m_postAudioThread = thread([this, keepAlive]() {
+        SPX_DBG_TRACE_VERBOSE("Starting to flush all audio data to the HTTP Adapter.");
+        auto httpRecoAdapter = m_reco;
+        if (!httpRecoAdapter)
+        {
+            if (m_resultPromise)
+            {
+                (*m_resultPromise).set_exception(std::make_exception_ptr(std::runtime_error("The http adapter is a nullptr.")));
+            }
+            return;
+        }
+
+        httpRecoAdapter->FlushAudio();
+        auto result = httpRecoAdapter->GetResult();
+        SPX_DBG_TRACE_INFO("Audio session received the result of flush audio.");
+        if (m_resultPromise)
+        {
+            (*m_resultPromise).set_value(result);
+        }
+        SPX_DBG_TRACE_VERBOSE("Done sending result back to the caller.");
+        });
 }
 
 uint32_t CSpxHttpAudioStreamSession::FromBytesToMilisecond(uint32_t bytes, uint32_t bytesPerSecond)
