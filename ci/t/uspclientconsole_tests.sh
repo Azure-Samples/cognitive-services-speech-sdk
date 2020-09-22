@@ -42,14 +42,23 @@ startConstructedTestRunOutput TESTRUNNER "test-$T-$PLATFORM" "$PLATFORM" "$SPEEC
 startConstructedSuiteOutput TESTRUNNER "$T"
 
 TIMEOUT_SECONDS=30
-
+totalFailedTest=0
 for ((testIndex = 0; testIndex < ${#tests[@]}; testIndex += 2)); do
   t="${tests[$testIndex]}"
   testArg="${tests[$testIndex + 1]}"
 
-  runTest TESTRUNNER "$t" $TIMEOUT_SECONDS \
-    "$TEST_CODE" auth:$SPEECHSDK_SPEECH_KEY region:$SPEECHSDK_SPEECH_REGION type:speech $testArg $audioFile
+  for i in $(seq 1 3); do
+    runTest TESTRUNNER "$t" $TIMEOUT_SECONDS \
+      "$TEST_CODE" auth:$SPEECHSDK_SPEECH_KEY region:$SPEECHSDK_SPEECH_REGION type:speech $testArg $audioFile
+    exitCode=$?
+    if [ $exitCode -eq 0 ]; then
+      break
+    elif [ $i -eq 3 ]; then
+      $totalFailedTest=$totalFailedTest+1
+    fi
+    done
 done
 
 endConstructedSuiteOutput TESTRUNNER
-endConstructedTestRunOutput TESTRUNNER
+#endConstructedTestRunOutput TESTRUNNER
+exit $totalFailedTest
