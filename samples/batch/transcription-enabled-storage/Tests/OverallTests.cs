@@ -1,4 +1,4 @@
-﻿// <copyright file="OverallTests.cs" company="Microsoft Corporation">
+// <copyright file="OverallTests.cs" company="Microsoft Corporation">
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
@@ -55,7 +55,7 @@ namespace Tests
             var body = File.ReadAllText(@"testFiles/transcriptSample.json");
             var transcription = JsonConvert.DeserializeObject<SpeechTranscript>(body);
 
-            var html = TranscriptionToHtml.ToHTML(transcription, "testfile");
+            var html = TranscriptionToHtml.ToHtml(transcription, "testfile");
             Assert.IsTrue(!string.IsNullOrEmpty(html));
             Assert.IsTrue(html.StartsWith("<html lang=", StringComparison.OrdinalIgnoreCase));
         }

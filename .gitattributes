@@ -37,6 +37,7 @@ proguard-rules.pro text
 *.pro text
 *.properties text
 *.py text
+*.ruleset text
 *.sln text
 *.storyboard text
 *.swift text
@@ -49,13 +50,16 @@ proguard-rules.pro text
 *.xml text
 *.yml text
 
+
 # Bash only likes Unix line endings
 *.sh text eol=lf
 
 # Binary extensions:
 *.class binary
 *.jar binary
+*.jpg binary
 *.mp3 binary
+*.pbit binary
 *.pfx binary
 *.png binary
 *.table binary

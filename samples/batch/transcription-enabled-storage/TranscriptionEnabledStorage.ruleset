@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <RuleSet Name="Product code rules" Description="Code analysis rules for Accelerator product code" ToolsVersion="16.0">
   <Rules AnalyzerId="AsyncUsageAnalyzers" RuleNamespace="AsyncUsageAnalyzers">
     <Rule Id="UseConfigureAwait" Action="Warning" />
@@ -462,7 +462,7 @@
     <Rule Id="SA1408" Action="Error" />
     <Rule Id="SA1410" Action="Error" />
     <Rule Id="SA1411" Action="Error" />
-    <Rule Id="SA1412" Action="Error" />
+    <Rule Id="SA1412" Action="None" />
     <Rule Id="SA1413" Action="None" />
     <Rule Id="SA1500" Action="Error" />
     <Rule Id="SA1501" Action="Error" />

@@ -1,4 +1,4 @@
-﻿// <copyright file="TranscriptionProcessor.cs" company="Microsoft Corporation">
+// <copyright file="TranscriptionProcessor.cs" company="Microsoft Corporation">
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
@@ -191,7 +191,7 @@ namespace FetchTranscriptionFunction
                     {
                         var htmlContainer = FetchTranscriptionEnvironmentVariables.HtmlResultOutputContainer;
                         var htmlFileName = $"{fileName}.html";
-                        var displayResults = TranscriptionToHtml.ToHTML(transcriptionResult, jobName);
+                        var displayResults = TranscriptionToHtml.ToHtml(transcriptionResult, jobName);
                         await StorageUtilities.WriteTextFileToBlobAsync(FetchTranscriptionEnvironmentVariables.AzureWebJobsStorage, displayResults, htmlContainer, htmlFileName, log).ConfigureAwait(false);
                     }
 

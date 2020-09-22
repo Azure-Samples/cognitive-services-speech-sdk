@@ -32,7 +32,7 @@ git clone https://github.com/Azure-Samples/cognitive-services-speech-sdk
 cd cognitive-services-speech-sdk/samples/batch/transcription-enabled-storage
 ```
 
-Make sure that you have downloaded the [ARM Template](ARM_template.json) from the repository.
+Make sure that you have downloaded the [ARM Template](ArmTemplate.json) from the repository.
 
 ## Accelerator Setup Instructions
 
