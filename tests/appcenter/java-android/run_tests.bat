@@ -27,8 +27,10 @@ set SPEECHSDK_ROOT=%~dp0\..\..\..\
 
 
 set SPEECHSDK_BUILD_ROOT=%~dpf1
-set SPEECHSDK_BUILD_LIB="%SPEECHSDK_BUILD_ROOT%\lib"
-set SPEECHSDK_BUILD_BIN="%SPEECHSDK_BUILD_ROOT%\bin"
+set SPEECHSDK_BUILD_ARM32_LIB="%SPEECHSDK_BUILD_ROOT%-arm32\lib"
+set SPEECHSDK_BUILD_ARM32_BIN="%SPEECHSDK_BUILD_ROOT%-arm32\bin"
+set SPEECHSDK_BUILD_ARM64_LIB="%SPEECHSDK_BUILD_ROOT%-arm64\lib"
+set SPEECHSDK_BUILD_ARM64_BIN="%SPEECHSDK_BUILD_ROOT%-arm64\bin"
 
 REM all updating is relative to this script, so go there.
 cd /d "%~dp0"
@@ -45,18 +47,22 @@ if errorlevel 1 (
 )
 
 echo.
-if NOT EXIST "%SPEECHSDK_BUILD_LIB%"\libMicrosoft.CognitiveServices.Speech.core.so (
+if NOT EXIST "%SPEECHSDK_BUILD_ARM32_LIB%"\libMicrosoft.CognitiveServices.Speech.core.so (
     echo Could not find the SpeechSdk core library. Expecting it at
-    echo     "%SPEECHSDK_BUILD_LIB%"\libMicrosoft.CognitiveServices.Speech.core.so
+    echo     "%SPEECHSDK_BUILD_ARM32_LIB%"\libMicrosoft.CognitiveServices.Speech.core.so
     exit /b 1
 )
 
 echo Found Carbon native libraries (these are needed until we use the AAR library for android builds directly)
-echo     bin directory "%SPEECHSDK_BUILD_BIN%"
-echo     lib directory "%SPEECHSDK_BUILD_LIB%"
+echo     arm32 bin directory "%SPEECHSDK_BUILD_ARM32_BIN%"
+echo     arm32 lib directory "%SPEECHSDK_BUILD_ARM32_LIB%"
+echo     arm64 bin directory "%SPEECHSDK_BUILD_ARM64_BIN%"
+echo     arm64 lib directory "%SPEECHSDK_BUILD_ARM64_LIB%"
 
-dir %SPEECHSDK_BUILD_BIN%
-dir %SPEECHSDK_BUILD_LIB%
+dir %SPEECHSDK_BUILD_ARM32_BIN%
+dir %SPEECHSDK_BUILD_ARM32_LIB%
+dir %SPEECHSDK_BUILD_ARM64_BIN%
+dir %SPEECHSDK_BUILD_ARM64_LIB%
 
 if NOT EXIST "%SPEECHSDK_BUILD_ROOT%\MainActivity.properties" (
     echo You need a file "%SPEECHSDK_BUILD_ROOT%"\MainActivity.properties with the subscription keys and other settings.
@@ -93,25 +99,18 @@ if errorlevel 1 (
 
 echo.
 echo Copying Speech Sdk libs to test application
-md "%SPEECHSDK_TEST_ROOT%\app\src\main\jniLibs\armeabi" && ^
-copy /Y "%SPEECHSDK_BUILD_LIB%\com.microsoft.cognitiveservices.speech.jar"             "%SPEECHSDK_TEST_ROOT%\app\src\main\jniLibs\"          && ^
-copy /Y "%SPEECHSDK_BUILD_BIN%\com.microsoft.cognitiveservices.speech.tests.jar"       "%SPEECHSDK_TEST_ROOT%\app\src\main\jniLibs\"          && ^
-copy /Y "%SPEECHSDK_BUILD_LIB%\libMicrosoft.CognitiveServices.Speech.core.so"          "%SPEECHSDK_TEST_ROOT%\app\src\main\jniLibs\armeabi\"  && ^
-copy /Y "%SPEECHSDK_BUILD_LIB%\libMicrosoft.CognitiveServices.Speech.extension.codec.so" "%SPEECHSDK_TEST_ROOT%\app\src\main\jniLibs\armeabi\"  && ^
-copy /Y "%SPEECHSDK_BUILD_LIB%\libgstreamer_android.so"                                 "%SPEECHSDK_TEST_ROOT%\app\src\main\jniLibs\armeabi\"  && ^
-copy /Y "%SPEECHSDK_BUILD_BIN%\libMicrosoft.CognitiveServices.Speech.java.bindings.so" "%SPEECHSDK_TEST_ROOT%\app\src\main\jniLibs\armeabi\"
+md "%SPEECHSDK_TEST_ROOT%\app\src\main\jniLibs\armeabi-v7a" && ^
+md "%SPEECHSDK_TEST_ROOT%\app\src\main\jniLibs\arm64-v8a" && ^
+copy /Y "%SPEECHSDK_BUILD_ARM32_LIB%\com.microsoft.cognitiveservices.speech.jar"             "%SPEECHSDK_TEST_ROOT%\app\src\main\jniLibs\"              && ^
+copy /Y "%SPEECHSDK_BUILD_ARM32_BIN%\com.microsoft.cognitiveservices.speech.tests.jar"       "%SPEECHSDK_TEST_ROOT%\app\src\main\jniLibs\"              && ^
+copy /Y "%SPEECHSDK_BUILD_ARM32_LIB%\*.so"                                                   "%SPEECHSDK_TEST_ROOT%\app\src\main\jniLibs\armeabi-v7a\"  && ^
+copy /Y "%SPEECHSDK_BUILD_ARM32_BIN%\libMicrosoft.CognitiveServices.Speech.java.bindings.so" "%SPEECHSDK_TEST_ROOT%\app\src\main\jniLibs\armeabi-v7a\"  && ^
+copy /Y "%SPEECHSDK_BUILD_ARM64_LIB%\*.so"                                                   "%SPEECHSDK_TEST_ROOT%\app\src\main\jniLibs\arm64-v8a\"    && ^
+copy /Y "%SPEECHSDK_BUILD_ARM64_BIN%\libMicrosoft.CognitiveServices.Speech.java.bindings.so" "%SPEECHSDK_TEST_ROOT%\app\src\main\jniLibs\arm64-v8a\"
 if errorlevel 1 (
     echo Could not copy necessary native libs.
     exit /b 1
 )
-if EXIST "%SPEECHSDK_BUILD_LIB%\libMicrosoft.CognitiveServices.Speech.extension.kws.so" (
-    copy /Y "%SPEECHSDK_BUILD_LIB%\libMicrosoft.CognitiveServices.Speech.extension.kws.so" "%SPEECHSDK_TEST_ROOT%\app\src\main\jniLibs\armeabi\"
-    if errorlevel 1 (
-        echo Could not copy kws extension.
-        exit /b 1
-    )
-)
-
 
 echo.
 echo Now building app and tester with gradle.

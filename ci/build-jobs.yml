@@ -1335,9 +1335,9 @@ jobs:
       artifactName: Android
       downloadPath: $(System.ArtifactsDirectory)/In
       itemPattern: |
-        **/Android-arm32/Release/**/com.microsoft.cognitiveservices.speech.*jar
-        **/Android-arm32/Release/**/libMicrosoft.CognitiveServices.Speech.*.so
-        **/GstLibOnlyForTesting/armeabi-v7a/libgstreamer_android.so
+        **/Android-arm*/Release/**/com.microsoft.cognitiveservices.speech.*jar
+        **/Android-arm*/Release/**/libMicrosoft.CognitiveServices.Speech.*.so
+        **/GstLibOnlyForTesting/arm*/libgstreamer_android.so
   - bash: |
       . ci/functions.sh &&
       vsts_setvar SPEECHSDK_SASTOKENEXPIRYUTC $(date -u -d "4 hours" +"%Y-%m-%dT%H:%M:%SZ")
@@ -1370,23 +1370,34 @@ jobs:
       set -x
       cp -f ./ci/jsonsettings.py .
       . ./ci/functions.sh
-      FAKE_BUILD=buildfromrelease
-      mkdir -p "$FAKE_BUILD"{/bin,/lib}
-      DROP_DIR=$(cygpath -au "$(System.ArtifactsDirectory)/In/Android/Android-arm32/Release")
+      FAKE_BUILD_ARM32=buildfromrelease-arm32
+      FAKE_BUILD_ARM64=buildfromrelease-arm64
+      mkdir -p "buildfromrelease"
+      mkdir -p "$FAKE_BUILD_ARM32"{/bin,/lib}
+      mkdir -p "$FAKE_BUILD_ARM64"{/bin,/lib}
+      DROP_DIR_ARM32=$(cygpath -au "$(System.ArtifactsDirectory)/In/Android/Android-arm32/Release")
+      DROP_DIR_ARM64=$(cygpath -au "$(System.ArtifactsDirectory)/In/Android/Android-arm64/Release")
       GST_LIB_DIR=$(cygpath -au "$(System.ArtifactsDirectory)/In/Android/GstLibOnlyForTesting")
-      cat > "$FAKE_BUILD/MainActivity.properties" <<HEREDOC
+      cat > "buildfromrelease/MainActivity.properties" <<HEREDOC
         SampleAudioInput=$( getSetting './tests/test.defaults.json' 'InputDir' )/$( getSetting './tests/test.audio.utterances.json' 'SingleUtteranceEnglish.FilePath' )
         SasToken=$(SPEECHSDK_SASTOKEN)
         SasContainerPrefix=$(SPEECHSDK_TEST_APPCENTERUPLOAD)
       HEREDOC
-      cp --preserve "$DROP_DIR/public/lib/com.microsoft.cognitiveservices.speech.jar" "$FAKE_BUILD/lib"
-      cp --preserve "$DROP_DIR/private/bin/com.microsoft.cognitiveservices.speech.tests.jar" "$FAKE_BUILD/bin"
-      cp --preserve "$DROP_DIR/public/lib/libMicrosoft.CognitiveServices.Speech.core.so" "$FAKE_BUILD/lib"
-      cp --preserve "$DROP_DIR/public/lib/libMicrosoft.CognitiveServices.Speech.extension.kws.so" "$FAKE_BUILD/lib"
-      cp --preserve "$DROP_DIR/public/lib/libMicrosoft.CognitiveServices.Speech.extension.codec.so" "$FAKE_BUILD/lib"
-      cp --preserve "$DROP_DIR/public/lib/libMicrosoft.CognitiveServices.Speech.java.bindings.so" "$FAKE_BUILD/bin"
-      cp --preserve "$GST_LIB_DIR/armeabi-v7a/libgstreamer_android.so" "$FAKE_BUILD/lib"
-      find "$FAKE_BUILD" -ls
+      cp --preserve "$DROP_DIR_ARM32/public/lib/com.microsoft.cognitiveservices.speech.jar" "$FAKE_BUILD_ARM32/lib"
+      cp --preserve "$DROP_DIR_ARM32/private/bin/com.microsoft.cognitiveservices.speech.tests.jar" "$FAKE_BUILD_ARM32/bin"
+      cp --preserve "$DROP_DIR_ARM32/public/lib/libMicrosoft.CognitiveServices.Speech.core.so" "$FAKE_BUILD_ARM32/lib"
+      cp --preserve "$DROP_DIR_ARM32/public/lib/libMicrosoft.CognitiveServices.Speech.extension.kws.so" "$FAKE_BUILD_ARM32/lib"
+      cp --preserve "$DROP_DIR_ARM32/public/lib/libMicrosoft.CognitiveServices.Speech.extension.codec.so" "$FAKE_BUILD_ARM32/lib"
+      cp --preserve "$DROP_DIR_ARM32/public/lib/libMicrosoft.CognitiveServices.Speech.java.bindings.so" "$FAKE_BUILD_ARM32/bin"
+      cp --preserve "$GST_LIB_DIR/armeabi-v7a/libgstreamer_android.so" "$FAKE_BUILD_ARM32/lib"
+      cp --preserve "$DROP_DIR_ARM64/public/lib/com.microsoft.cognitiveservices.speech.jar" "$FAKE_BUILD_ARM64/lib"
+      cp --preserve "$DROP_DIR_ARM64/private/bin/com.microsoft.cognitiveservices.speech.tests.jar" "$FAKE_BUILD_ARM64/bin"
+      cp --preserve "$DROP_DIR_ARM64/public/lib/libMicrosoft.CognitiveServices.Speech.core.so" "$FAKE_BUILD_ARM64/lib"
+      cp --preserve "$DROP_DIR_ARM64/public/lib/libMicrosoft.CognitiveServices.Speech.extension.kws.so" "$FAKE_BUILD_ARM64/lib"
+      cp --preserve "$DROP_DIR_ARM64/public/lib/libMicrosoft.CognitiveServices.Speech.extension.codec.so" "$FAKE_BUILD_ARM64/lib"
+      cp --preserve "$DROP_DIR_ARM64/public/lib/libMicrosoft.CognitiveServices.Speech.java.bindings.so" "$FAKE_BUILD_ARM64/bin"
+      cp --preserve "$GST_LIB_DIR/arm64-v8a/libgstreamer_android.so" "$FAKE_BUILD_ARM64/lib"
+      find buildfromrelease* -ls
     displayName: 'Prepare (fake) build dir for kicking off AppCenter tests'
   - script: |
       set APPCENTER_USER_ID=Speech-SDK-Test
