@@ -371,13 +371,24 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var alice = new TestConversationParticipant("Alice", Language.FR_FR, host, SetParticipantConfig);
             await alice.JoinAsync(null);
 
+            await host.Events.WaitUntil(
+                "host to detect Alice to joined",
+                () => host.Events.ParticipantsChanged
+                        .Any(e => e.Reason != ParticipantChangedReason.LeftConversation
+                                  && e.Participants.Any(p => p.DisplayName == "Alice")));
+
             SPX_TRACE_INFO($">> [{host.Name}] Sends IM");
             await host.Translator.SendTextMessageAsync("This is a test");
             await Task.Delay(TimeSpan.FromSeconds(1));
             SPX_TRACE_INFO($">> [{alice.Name}] Sends IM in French");
             await alice.Translator.SendTextMessageAsync("C'est un test");
 
-            await Task.Delay(TimeSpan.FromSeconds(3));
+            await host.Events.WaitUntil(
+                "host has received all text messages",
+                () => host.Events.TextMessageReceived.Count == 2);
+            await alice.Events.WaitUntil(
+                "Alice has received all text messages",
+                () => alice.Events.TextMessageReceived.Count == 2);
 
             await alice.LeaveAsync();
             await host.LeaveAsync();

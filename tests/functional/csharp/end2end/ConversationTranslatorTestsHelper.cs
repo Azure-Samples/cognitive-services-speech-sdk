@@ -359,6 +359,39 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             });
         }
 
+        public Task WaitUntil(string description, Func<bool> predicate) => WaitUntil(description, predicate, TimeSpan.FromSeconds(10));
+
+        public Task WaitUntil(string description, Func<bool> predicate, TimeSpan maxWaitTime)
+        {
+            DateTimeOffset start = DateTimeOffset.UtcNow;
+
+            return Task.Run(() =>
+            {
+                do
+                {
+                    Thread.Sleep(500);
+
+                    if (predicate())
+                    {
+                        return;
+                    }
+                    else
+                    {
+                        // fail if we received a canceled event indicating an error
+                        var failedEvent = Canceled.FirstOrDefault(evt => evt.Reason != CancellationReason.EndOfStream);
+                        if (failedEvent != null)
+                        {
+                            throw new Exception($"Failed to due to a received error cancellation event. Reason: {failedEvent.Reason}, "
+                                + $"ErrorCode: {failedEvent.ErrorCode}, Details: {failedEvent.ErrorDetails}");
+                        }
+                    }
+                } while (DateTimeOffset.UtcNow - start < maxWaitTime);
+
+                // if we reached here we've timed out
+                throw new OperationCanceledException("Timed out while waiting for " + description);
+            });
+        }
+
         public void VerifySessionAndConnectEvents(bool expectEndOfStream)
         {
             SPXTEST_REQUIRE(SessionStarted.Count > 0);

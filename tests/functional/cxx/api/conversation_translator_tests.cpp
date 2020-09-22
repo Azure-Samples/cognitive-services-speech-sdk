@@ -351,6 +351,11 @@ TEST_CASE("Host and participants send instant messages", "[api][cxx][conversatio
     {
         for (const auto& evt : host->ParticipantsChanged)
         {
+            if (evt.Reason == ParticipantChangedReason::LeftConversation)
+            {
+                continue;
+            }
+
             auto& part = evt.Participants;
             auto found = std::find_if(part.begin(), part.end(), [](std::shared_ptr<Participant> p) -> bool
             {
@@ -370,9 +375,13 @@ TEST_CASE("Host and participants send instant messages", "[api][cxx][conversatio
     this_thread::sleep_for(1s);
     alice.ConvTrans->SendTextMessageAsync("C'est un test").get();
 
-    host.Events->WaitUntil("all participants have received all text messages", [alice = alice.Events](const ConversationTranslatorCallbacks* host) -> bool
+    host.Events->WaitUntil("host has received all text messages", [](const ConversationTranslatorCallbacks* host) -> bool
     {
-        return host->TextMessageReceived.size() == 2 && alice->TextMessageReceived.size() == 2;
+        return host->TextMessageReceived.size() == 2;
+    });
+    alice.Events->WaitUntil("Alice has received all text messages", [](const ConversationTranslatorCallbacks* alice) -> bool
+    {
+        return alice->TextMessageReceived.size() == 2;
     });
 
     alice.Leave();
