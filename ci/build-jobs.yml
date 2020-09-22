@@ -736,6 +736,7 @@ jobs:
     displayName: NuGet push to VSTS feed
     inputs:
       command: push
+      allowPackageConflicts: true
       publishVstsFeed: $(SPEECHSDK_VSTS_FEED)
       packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg'
       includeSymbols: true
@@ -1707,7 +1708,7 @@ jobs:
       HEREDOC
       cp ./tests/test.subscriptions.regions.json ./
       cp -rf ./tests/input .
-    displayName: Write Subscriptions Regions Data    
+    displayName: Write Subscriptions Regions Data
   - bash: |
       set -e -o pipefail
       . ci/functions.sh
