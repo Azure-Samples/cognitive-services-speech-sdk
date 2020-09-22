@@ -55,7 +55,7 @@ namespace Tests
             var body = File.ReadAllText(@"testFiles/transcriptSample.json");
             var transcription = JsonConvert.DeserializeObject<SpeechTranscript>(body);
 
-            var html = TranscriptionToHtml.ToHTML(transcription, "testfile");
+            var html = TranscriptionToHtml.ToHtml(transcription, "testfile");
             Assert.IsTrue(!string.IsNullOrEmpty(html));
             Assert.IsTrue(html.StartsWith("<html lang=", StringComparison.OrdinalIgnoreCase));
         }

@@ -191,7 +191,7 @@ namespace FetchTranscriptionFunction
                     {
                         var htmlContainer = FetchTranscriptionEnvironmentVariables.HtmlResultOutputContainer;
                         var htmlFileName = $"{fileName}.html";
-                        var displayResults = TranscriptionToHtml.ToHTML(transcriptionResult, jobName);
+                        var displayResults = TranscriptionToHtml.ToHtml(transcriptionResult, jobName);
                         await StorageUtilities.WriteTextFileToBlobAsync(FetchTranscriptionEnvironmentVariables.AzureWebJobsStorage, displayResults, htmlContainer, htmlFileName, log).ConfigureAwait(false);
                     }
 

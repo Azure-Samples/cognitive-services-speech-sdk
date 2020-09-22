@@ -1,4 +1,4 @@
-﻿// <copyright file="TranscriptionToHTML.cs" company="Microsoft Corporation">
+﻿// <copyright file="TranscriptionToHtml.cs" company="Microsoft Corporation">
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
@@ -11,7 +11,7 @@ namespace Connector
 
     public static class TranscriptionToHtml
     {
-        public static string ToHTML(SpeechTranscript transcription, string filename)
+        public static string ToHtml(SpeechTranscript transcription, string filename)
         {
             if (transcription == null)
             {
