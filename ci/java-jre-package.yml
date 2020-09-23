@@ -74,7 +74,7 @@ jobs:
       mkdir -p "$(MavenPackageDir)"
       mv "$(ArtifactOut)/$(ArtifactBasename).zip" "$(MavenPackageDir)/$(ArtifactBasename).jar"
     displayName: 'Rename .zip -> .jar, place'
-  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
+  - task: EsrpCodeSigning@1
     displayName: 'Sign *.jar'
     inputs:
       ConnectedServiceName: 'Speech SDK ESRP Signing Alternate'

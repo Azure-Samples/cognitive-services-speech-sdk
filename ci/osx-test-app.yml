@@ -72,7 +72,7 @@ jobs:
       cp -R SpeechSDK.app ${appname}/
       hdiutil create -volname ${appname}.dmg -srcfolder ${appname} -ov -format UDZO ${appname}.dmg
     displayName: Create the disk image for the sample app (necessary for notarization)
-  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
+  - task: EsrpCodeSigning@1
     inputs:
       ConnectedServiceName: Speech SDK ESRP Signing Alternate
       FolderPath: osxbuild

@@ -446,7 +446,7 @@ jobs:
       configuration: '$(BuildConfiguration)'
       clean: true
       maximumCpuCount: true
-  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
+  - task: EsrpCodeSigning@1
     displayName: 'Sign Windows C++ and C# binaries'
     inputs:
       ConnectedServiceName: 'Speech SDK ESRP Signing Alternate'
@@ -695,7 +695,7 @@ jobs:
       solution: 'public_samples/**/*.sln;-:$(Build.SourcesDirectory)/public_samples/quickstart/csharp/xamarin/helloworld.sln;-:$(Build.SourcesDirectory)/public_samples/samples/csharp/xamarin/kws-xamarin/kws-xamarin.sln'
       maximumCpuCount: true
     displayName: 'Test - build solutions'
-  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
+  - task: EsrpCodeSigning@1
     inputs:
       ConnectedServiceName: 'Speech SDK ESRP Signing Alternate'
       FolderPath: '$(Build.ArtifactStagingDirectory)/Windows'
@@ -831,7 +831,7 @@ jobs:
       dotnet restore --no-cache --source https://api.nuget.org/v3/index.json --source "$(System.ArtifactsDirectory)/In/Windows/" RemoteConversation.csproj
       dotnet build --configuration Release
     displayName: Build remote conversation transcription
-  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
+  - task: EsrpCodeSigning@1
     displayName: Sign RemoteConversation dlls
     inputs:
       ConnectedServiceName: 'Speech SDK ESRP Signing Alternate'
@@ -868,7 +868,7 @@ jobs:
       mkdir -p "$(System.ArtifactsDirectory)/In/Windows/"
       cp source/extensions/remoteconversation/csharp/remoteconversation/remoteconversation/bin/Release/*.nupkg "$(System.ArtifactsDirectory)/In/Windows/"
     displayName: Copy artifacts to a directory
-  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
+  - task: EsrpCodeSigning@1
     displayName: Sign RemoteConversation Nuget Package
     inputs:
       ConnectedServiceName: 'Speech SDK ESRP Signing Alternate'
@@ -988,7 +988,7 @@ jobs:
       cat pom.xml
       mvn clean test -Dtest=tests.unit.RemoteConversationTranscriptionTest
     displayName: run unit test for remote conversation transcription package
-  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
+  - task: EsrpCodeSigning@1
     displayName: 'Sign *.jar'
     inputs:
       ConnectedServiceName: 'Speech SDK ESRP Signing Alternate'
@@ -1279,7 +1279,7 @@ jobs:
     displayName: Build
     inputs:
       filename: 'ci\android\build-android.bat'
-  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
+  - task: EsrpCodeSigning@1
     displayName: Sign com.microsoft.cognitiveservices.speech.jar
     inputs:
       ConnectedServiceName: 'Speech SDK ESRP Signing Alternate'
@@ -1546,7 +1546,7 @@ jobs:
       POM
       done
     displayName: 'Rename .zip -> .aar, place, and create .pom'
-  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
+  - task: EsrpCodeSigning@1
     displayName: 'Sign *.aar (Release)'
     inputs:
       ConnectedServiceName: 'Speech SDK ESRP Signing Alternate'
@@ -2190,7 +2190,7 @@ jobs:
       zip --symlinks -r "$(VersionedFrameworkName).zip" REDIST.txt license.md ThirdPartyNotices.md "$(FrameworkName).framework"
       rm -rf REDIST.txt license.md ThirdPartyNotices.md "$(FrameworkName).framework"
     displayName: Create archive for signing
-  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
+  - task: EsrpCodeSigning@1
     displayName: 'Sign iOS framework'
     inputs:
       ConnectedServiceName: 'Speech SDK ESRP Signing Alternate'

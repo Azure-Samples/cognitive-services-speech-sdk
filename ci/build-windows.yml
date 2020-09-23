@@ -112,7 +112,7 @@ jobs:
         -DEXTENSION_RNNT_ENABLED=$(SPEECHSDK_ENABLE_RNNT)
         -DEXTENSION_UNIDEC_ENABLED=$(SPEECHSDK_ENABLE_UNIDEC)
         -DEXTENSION_HYBRID_TTS_ENABLED=$(SPEECHSDK_ENABLE_HYBRID_TTS)
-        -DEXTENSION_CODEC_ENABLED=true        
+        -DEXTENSION_CODEC_ENABLED=true
         -DGST_ROOT=$(GSTREAMER_INSTALL_PATH)
         ..
   - task: VSBuild@1
@@ -179,7 +179,7 @@ jobs:
       # copy wheels to build/ for tests
       cp -v dist/*.whl build/
     displayName: Build Python wheels
-  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
+  - task: EsrpCodeSigning@1
     displayName: Sign Python
     inputs:
       ConnectedServiceName: Speech SDK ESRP Signing Alternate
@@ -202,7 +202,7 @@ jobs:
       cp -v dist/*.whl $(cygpath -au "$(OutputDirectory)\wheelhouse")
     displayName: Archive unsigned wheels
     condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'false'))
-  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
+  - task: EsrpCodeSigning@1
     displayName: 'Sign Windows C++, C# and Java binaries'
     inputs:
       ConnectedServiceName: 'Speech SDK ESRP Signing Alternate'

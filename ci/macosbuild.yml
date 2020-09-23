@@ -75,7 +75,7 @@ jobs:
       cmake --build build -j 4
     displayName: CMake build
   - template: build-unix-python-wheels.yml
-  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
+  - task: EsrpCodeSigning@1
     displayName: Sign .so (dynamic library) in .whl
     inputs:
       ConnectedServiceName: Speech SDK ESRP Signing Alternate
@@ -123,7 +123,7 @@ jobs:
       zip --symlinks -r "$(VersionedFrameworkName).zip" REDIST.txt license.md ThirdPartyNotices.md "$(FrameworkName).framework"
       rm -rf REDIST.txt license.md ThirdPartyNotices.md "$(FrameworkName).framework"
     displayName: Create archive for signing
-  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
+  - task: EsrpCodeSigning@1
     displayName: 'Sign OSX framework'
     inputs:
       ConnectedServiceName: 'Speech SDK ESRP Signing Alternate'
@@ -154,7 +154,7 @@ jobs:
         mkdir tosign && zip tosign/libs.zip "${dylibname}" "${jnilibname}" "${embedlibname}"
       fi
     displayName: "Strip dylib and create archive for signing dylib if necessary"
-  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
+  - task: EsrpCodeSigning@1
     displayName: Sign .dylib (dynamic library)
     inputs:
       ConnectedServiceName: Speech SDK ESRP Signing Alternate
@@ -163,7 +163,7 @@ jobs:
       signConfigType: inlineSignParams
       inlineOperation: $(SIGN_PARAMS_MACOS)
     condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
-  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
+  - task: EsrpCodeSigning@1
     displayName: 'Sign Mac .dll for nuget package'
     inputs:
       ConnectedServiceName: 'Speech SDK ESRP Signing Alternate'
