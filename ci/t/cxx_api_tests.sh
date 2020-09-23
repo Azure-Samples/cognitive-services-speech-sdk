@@ -97,15 +97,12 @@ else
   OFFLINE_MODEL_LANGUAGE=""
 fi
 
-if [[ $RUN_HYBRID_TTS_TESTS = true ]]; then
-  OFFLINE_VOICE_PATH="tests/input/synthesis/Mark"
-else
+if [[ $RUN_HYBRID_TTS_TESTS != true ]]; then
   if [[ $PATTERN ]]; then
     PATTERN="~[hybrid_tts]$PATTERN"
   else
     PATTERN="~[hybrid_tts]~[.]"
   fi
-  OFFLINE_VOICE_PATH=""
 fi
 
 RUN_OFFLINE_RNNT_TESTS=false
@@ -192,6 +189,5 @@ runCatchSuite \
   "$TEST_CODE" \
     --offlineModelPathRoot="$OFFLINE_MODEL_PATH_ROOT" \
     --offlineModelLanguage="$OFFLINE_MODEL_LANGUAGE" \
-    --offlineVoicePath="$OFFLINE_VOICE_PATH" \
     --rnntModelSpec="$RNNT_MODEL_SPEC" \
     --rnntTokens="$RNNT_TOKENS"

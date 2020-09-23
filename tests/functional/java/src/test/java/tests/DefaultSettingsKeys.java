@@ -24,4 +24,5 @@ public class DefaultSettingsKeys
     public static final String KEYWORD_MODEL = "KeywordModel";
     public static final String CUSTOM_VOICE_DEPLOYMENT_ID = "CustomVoiceDeploymentId";
     public static final String CUSTOM_VOICE_VOICE_NAME = "CustomVoiceVoiceName";
+    public static final String OFFLINE_VOICE_PATH = "OfflineVoicePath";
 }

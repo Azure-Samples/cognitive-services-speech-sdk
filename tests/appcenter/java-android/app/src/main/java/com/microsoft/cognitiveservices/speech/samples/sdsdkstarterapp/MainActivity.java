@@ -51,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
                 filename = filename.replace('\\', '/');
 
                 if (filename.contains(".zip")) continue;
-                if (filename.contains("/")) continue;
+                if (filename.contains("/kws.table")) continue;
 
                 File outFile = new File(baseDir, filename);
                 String fullPathName = outFile.getCanonicalPath();
@@ -123,6 +123,15 @@ public class MainActivity extends AppCompatActivity {
                 if (inputStream != null) {
                     extractAll(inputStream, tempDir, "kws");
                     inputStream.close();
+                }
+
+                inputStream = assets.open("synthesistestassets.zip");
+
+                if (inputStream != null) {
+                    extractAll(inputStream, tempDir, "synthesis");
+                    inputStream.close();
+                } else {
+                    System.out.println("synthesistestassets.zip is not found.");
                 }
             } catch (IOException e) {
                 e.printStackTrace();

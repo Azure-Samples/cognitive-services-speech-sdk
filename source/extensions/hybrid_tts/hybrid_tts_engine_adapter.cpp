@@ -185,10 +185,10 @@ uint32_t CSpxHybridTtsEngineAdapter::Write(ISpxTtsEngineAdapter *adapter, const 
             if (m_cloudAudioStream != nullptr)
             {
                 m_cloudAudioStream->Close();
-                if (m_cloudAudioStreamReader->AvailableSize() > 0)
+                if (m_cloudAudioStream->AvailableSize() > 0)
                 {
-                    std::vector<uint8_t> tmpBuffer(m_cloudAudioStreamReader->AvailableSize());
-                    const auto tmpSize = m_cloudAudioStreamReader->Read(tmpBuffer.data(), static_cast<uint32_t>(tmpBuffer.size()));
+                    std::vector<uint8_t> tmpBuffer(m_cloudAudioStream->AvailableSize());
+                    const auto tmpSize = m_cloudAudioStream->Read(tmpBuffer.data(), static_cast<uint32_t>(tmpBuffer.size()));
                     GetSite()->Write(adapter, requestId, tmpBuffer.data(), tmpSize, nullptr);
                 }
                 m_cloudAudioStream.reset();
@@ -236,10 +236,10 @@ uint32_t CSpxHybridTtsEngineAdapter::Write(ISpxTtsEngineAdapter *adapter, const 
             if (m_offlineAudioStream != nullptr)
             {
                 m_offlineAudioStream->Close();
-                if (m_offlineAudioStreamReader->AvailableSize() > 0)
+                if (m_offlineAudioStream->AvailableSize() > 0)
                 {
-                    std::vector<uint8_t> tmpBuffer(m_offlineAudioStreamReader->AvailableSize());
-                    const auto tmpSize = m_offlineAudioStreamReader->Read(tmpBuffer.data(), static_cast<uint32_t>(tmpBuffer.size()));
+                    std::vector<uint8_t> tmpBuffer(m_offlineAudioStream->AvailableSize());
+                    const auto tmpSize = m_offlineAudioStream->Read(tmpBuffer.data(), static_cast<uint32_t>(tmpBuffer.size()));
                     GetSite()->Write(adapter, requestId, tmpBuffer.data(), tmpSize, offlineProperty);
                 }
                 m_offlineAudioStream.reset();
@@ -284,20 +284,6 @@ SpxWAVEFORMATEX_Type CSpxHybridTtsEngineAdapter::GetOutputFormat(bool *hasHeader
     }
 
     return format;
-}
-
-void CSpxHybridTtsEngineAdapter::UpdateStreamReader()
-{
-    if (m_cloudAudioStream != nullptr)
-    {
-        m_cloudAudioStreamReader = SpxQueryInterface<ISpxAudioOutputReader>(m_cloudAudioStream);
-        SPX_DBG_ASSERT(m_cloudAudioStreamReader != nullptr);
-    }
-    if (m_offlineAudioStream != nullptr)
-    {
-        m_offlineAudioStreamReader = SpxQueryInterface<ISpxAudioOutputReader>(m_offlineAudioStream);
-        SPX_DBG_ASSERT(m_offlineAudioStreamReader != nullptr);
-    }
 }
 
 void CSpxHybridTtsEngineAdapter::EnsureTtsCloudEngineAdapter()
@@ -385,8 +371,7 @@ std::shared_ptr<ISpxSynthesisResult> CSpxHybridTtsEngineAdapter::SpeakByConnectP
         {
             std::unique_lock<std::mutex> lock(m_mutex);
             m_synthesisState = SynthesisState::CloudSynthesizing_BufferFilling;
-            m_offlineAudioStream = SpxCreateObjectWithSite<ISpxAudioOutput>("CSpxPullAudioOutputStream", SpxGetRootSite());
-            UpdateStreamReader();
+            m_offlineAudioStream = std::make_shared<CSpxPullAudioOutputStream>();
         }
 
         auto keepAlive = SpxSharedPtrFromThis<ISpxTtsEngineAdapterSite>(this);
@@ -428,12 +413,11 @@ std::shared_ptr<ISpxSynthesisResult> CSpxHybridTtsEngineAdapter::SpeakByBufferPo
     {
         std::unique_lock<std::mutex> lock(m_mutex);
         m_synthesisState = SynthesisState::CloudSynthesizing_BufferFilling;
-        m_cloudAudioStream = SpxCreateObjectWithSite<ISpxAudioOutput>("CSpxPullAudioOutputStream", SpxGetRootSite());
+        m_cloudAudioStream = std::make_shared<CSpxPullAudioOutputStream>();
         if (switchingPolicy == SwitchingPolicy::Parallel)
         {
-            m_offlineAudioStream = SpxCreateObjectWithSite<ISpxAudioOutput>("CSpxPullAudioOutputStream", SpxGetRootSite());
+            m_offlineAudioStream = std::make_shared<CSpxPullAudioOutputStream>();
         }
-        UpdateStreamReader();
     }
 
     auto keepAlive = SpxSharedPtrFromThis<ISpxTtsEngineAdapterSite>(this);
@@ -460,14 +444,14 @@ std::shared_ptr<ISpxSynthesisResult> CSpxHybridTtsEngineAdapter::SpeakByBufferPo
     const auto bufferSize = std::stoi(GetStringValue("SPEECH-SynthBackendFallbackBufferLengthMs", "500"))
             * GetOutputFormat(nullptr)->nAvgBytesPerSec / 1000;
     for (int remaining = 0; remaining < bufferTimeout; remaining += 20) {
-        if (m_cloudResult.wait_for(std::chrono::milliseconds(20)) == std::future_status::ready || m_cloudAudioStreamReader->AvailableSize() > bufferSize)
+        if (m_cloudResult.wait_for(std::chrono::milliseconds(20)) == std::future_status::ready || m_cloudAudioStream->AvailableSize() > bufferSize)
         {
             break;
         }
     }
 
     auto cloudResultStatus = m_cloudResult.wait_for(std::chrono::milliseconds(0));
-    if ((m_cloudAudioStreamReader->AvailableSize() > bufferSize && cloudResultStatus != std::future_status::ready) ||
+    if ((m_cloudAudioStream->AvailableSize() > bufferSize && cloudResultStatus != std::future_status::ready) ||
         (cloudResultStatus == std::future_status::ready && m_cloudResult.get()->GetReason() == ResultReason::SynthesizingAudioCompleted))
     {
         {
@@ -506,12 +490,11 @@ std::shared_ptr<ISpxSynthesisResult> CSpxHybridTtsEngineAdapter::SpeakByFinishPo
     {
         std::unique_lock<std::mutex> lock(m_mutex);
         m_synthesisState = SynthesisState::CloudSynthesizing_BufferFilling;
-        m_cloudAudioStream = SpxCreateObjectWithSite<ISpxAudioOutput>("CSpxPullAudioOutputStream", SpxGetRootSite());
+        m_cloudAudioStream = std::make_shared<CSpxPullAudioOutputStream>();
         if (switchingPolicy == SwitchingPolicy::Parallel)
         {
-            m_offlineAudioStream = SpxCreateObjectWithSite<ISpxAudioOutput>("CSpxPullAudioOutputStream", SpxGetRootSite());
+            m_offlineAudioStream = std::make_shared<CSpxPullAudioOutputStream>();
         }
-        UpdateStreamReader();
     }
 
     if (switchingPolicy == SwitchingPolicy::Parallel)

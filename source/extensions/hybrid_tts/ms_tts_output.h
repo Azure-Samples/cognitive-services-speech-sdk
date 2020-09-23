@@ -11,6 +11,7 @@
 #include "service_helpers.h"
 #include "create_object_helpers.h"
 #include "site_helpers.h"
+#include "pull_audio_output_stream.h"
 
 
 namespace Microsoft {
@@ -23,10 +24,7 @@ class CSpxMsTtsOutput : public IMSTTSOutput
 {
 public:
 
-    CSpxMsTtsOutput() 
-    {
-        m_pullAudioOutputStream = SpxCreateObjectWithSite<ISpxAudioOutput>("CSpxPullAudioOutputStream", SpxGetRootSite());
-    }
+    CSpxMsTtsOutput() { }
     virtual ~CSpxMsTtsOutput() {}
 
     void SetOutput(std::shared_ptr<ISpxAudioOutput> output)
@@ -57,14 +55,12 @@ public:
 
     void Close()
     {
-        m_pullAudioOutputStream->Close();
+        m_pullAudioOutputStream.Close();
     }
 
     uint32_t GetAudioData(uint8_t* buffer, uint32_t bufferSize)
     {
-        auto audioDataStream = SpxQueryInterface<ISpxAudioOutputReader>(m_pullAudioOutputStream);
-        SPX_DBG_ASSERT(audioDataStream != nullptr);
-        return audioDataStream->Read(buffer, bufferSize);
+        return m_pullAudioOutputStream.Read(buffer, bufferSize);
     }
 
     // --- IMSTTSOutput ---
@@ -90,7 +86,7 @@ public:
 
     MSTTSERROR Write(const char* pWaveSamples, int32_t nBytes) override
     {
-        m_pullAudioOutputStream->Write((uint8_t *)pWaveSamples, nBytes);
+        m_pullAudioOutputStream.Write((uint8_t *)pWaveSamples, nBytes);
         auto offlineProperty = std::make_shared<std::unordered_map<std::string, std::string>>();
         offlineProperty->insert(std::make_pair<std::string, std::string>("SynthesisFinishedBy", "offline"));
         m_pSite->Write(m_pAdapter, m_requestId, (uint8_t *)pWaveSamples, nBytes, offlineProperty);
@@ -120,7 +116,7 @@ private:
 private:
 
     MSTTSWAVEFORMATEX m_msTtsWaveFormat;
-    std::shared_ptr<ISpxAudioOutput> m_pullAudioOutputStream;
+    CSpxPullAudioOutputStream m_pullAudioOutputStream;
     ISpxTtsEngineAdapter* m_pAdapter;
     std::shared_ptr<ISpxTtsEngineAdapterSite> m_pSite;
     std::string m_requestId;

@@ -82,6 +82,11 @@ namespace TTS
 
     void CheckStreamResult(StreamResult result, shared_ptr<vector<uint8_t>> expectedData = nullptr, StreamStatus expectedStatus = StreamStatus::AllData);
 
+    inline std::string GetOfflineVoicePath()
+    {
+        return DefaultSettingsMap[INPUT_DIR] + "/" + DefaultSettingsMap[OFFLINE_VOICE_PATH];
+    }
+
     class PushAudioOutputStreamTestCallback : public PushAudioOutputStreamCallback
     {
     public:

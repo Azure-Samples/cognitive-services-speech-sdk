@@ -432,7 +432,7 @@ public class ConversationTranslatorTests {
         String arch = System.getProperty("os.arch");
 
         if (!"amd64".equalsIgnoreCase(arch)) {
-            log("skipping test, not sure if "+arch + "is supported");
+            log("skipping test, not sure if " + arch + " is supported");
             return;
         }
 

@@ -20,7 +20,7 @@ std::shared_ptr<SpeechConfig> OfflineConfig()
 {
     auto config = SpeechConfig::FromHost("wss://fake.com");
     config->SetProperty("SPEECH-SynthBackend", "offline");
-    config->SetProperty("SPEECH-SynthOfflineDataLocation", Config::OfflineVoicePath);
+    config->SetProperty("SPEECH-SynthOfflineDataLocation", GetOfflineVoicePath());
     return config;
 }
 
@@ -28,7 +28,7 @@ std::shared_ptr<SpeechConfig> HybridConfig()
 {
     auto config = UspSpeechConfig();
     config->SetProperty("SPEECH-SynthBackend", "hybrid");
-    config->SetProperty("SPEECH-SynthOfflineDataLocation", Config::OfflineVoicePath);
+    config->SetProperty("SPEECH-SynthOfflineDataLocation", GetOfflineVoicePath());
     config->SetProperty("SPEECH-SynthBackendSwitchingPolicy", "auto");
     return config;
 }
@@ -36,7 +36,7 @@ std::shared_ptr<SpeechConfig> HybridConfig()
 TEST_CASE("Offline Synthesis", "[api][cxx][hybrid_tts]")
 {
 
-    SPXTEST_REQUIRE(exists(Config::OfflineVoicePath + "/" + font_token_file));
+    SPXTEST_REQUIRE(exists(GetOfflineVoicePath() + "/" + font_token_file));
 
     auto synthesizer = SpeechSynthesizer::FromConfig(OfflineConfig(), nullptr);
 
@@ -133,7 +133,7 @@ TEST_CASE("Offline Synthesis", "[api][cxx][hybrid_tts]")
 
 TEST_CASE("Hybrid Synthesis", "[api][cxx][hybrid_tts]")
 {
-    SPXTEST_REQUIRE(exists(Config::OfflineVoicePath + "/" + font_token_file));
+    SPXTEST_REQUIRE(exists(GetOfflineVoicePath() + "/" + font_token_file));
 
     SPXTEST_SECTION("Normal")
     {

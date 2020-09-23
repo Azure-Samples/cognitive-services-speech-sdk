@@ -7,6 +7,7 @@
 #include "test_utils.h"
 #include "file_utils.h"
 #include "recognizer_utils.h"
+#include "synthesizer_utils.h"
 
 TEST_CASE("Offline continuous recognition with RNN-T using file input", "[api][cxx][rnnt]")
 {
@@ -121,7 +122,7 @@ TEST_CASE("Offline single recognition with RNN-T and offline TTS", "[api][cxx][r
     UseOfflineRnnt(config);
     // Enable also offline TTS
     config->SetProperty("SPEECH-SynthBackend", "offline");
-    config->SetProperty("SPEECH-SynthOfflineDataLocation", Config::OfflineVoicePath);
+    config->SetProperty("SPEECH-SynthOfflineDataLocation", TTS::GetOfflineVoicePath());
 
     SPXTEST_SECTION("single recognition and synthesis")
     {

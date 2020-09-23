@@ -29,6 +29,7 @@ target_include_directories(hybrid_tts
         ${SRC_DIR}
         ${CARBON_C_API}
         ${CARBON_CXX_API}
+        "${CARBON_CORE}/audio"
         "${CARBON_EXTERNAL}/json"
         ${COMMON_GENERATED_INCLUDE}
         "${CARBON_EXTERNAL}/offline_tts/include"

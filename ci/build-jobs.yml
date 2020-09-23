@@ -1338,6 +1338,10 @@ jobs:
         **/Android-arm*/Release/**/com.microsoft.cognitiveservices.speech.*jar
         **/Android-arm*/Release/**/libMicrosoft.CognitiveServices.Speech.*.so
         **/GstLibOnlyForTesting/arm*/libgstreamer_android.so
+  - template: get-offline-tts-artifact.yml
+    parameters:
+      enableVariable: SPEECHSDK_RUN_TESTS
+      os: Android
   - bash: |
       . ci/functions.sh &&
       vsts_setvar SPEECHSDK_SASTOKENEXPIRYUTC $(date -u -d "4 hours" +"%Y-%m-%dT%H:%M:%SZ")
@@ -1395,8 +1399,10 @@ jobs:
       cp --preserve "$DROP_DIR_ARM64/public/lib/libMicrosoft.CognitiveServices.Speech.core.so" "$FAKE_BUILD_ARM64/lib"
       cp --preserve "$DROP_DIR_ARM64/public/lib/libMicrosoft.CognitiveServices.Speech.extension.kws.so" "$FAKE_BUILD_ARM64/lib"
       cp --preserve "$DROP_DIR_ARM64/public/lib/libMicrosoft.CognitiveServices.Speech.extension.codec.so" "$FAKE_BUILD_ARM64/lib"
+      cp --preserve "$DROP_DIR_ARM64/public/lib/libMicrosoft.CognitiveServices.Speech.extension.embedded.tts.so" "$FAKE_BUILD_ARM64/lib"
       cp --preserve "$DROP_DIR_ARM64/public/lib/libMicrosoft.CognitiveServices.Speech.java.bindings.so" "$FAKE_BUILD_ARM64/bin"
       cp --preserve "$GST_LIB_DIR/arm64-v8a/libgstreamer_android.so" "$FAKE_BUILD_ARM64/lib"
+      cp --preserve "./external/offline_tts/Android/arm64/libMSTTSEngine.so" "$FAKE_BUILD_ARM64/lib"
       find buildfromrelease* -ls
     displayName: 'Prepare (fake) build dir for kicking off AppCenter tests'
   - script: |

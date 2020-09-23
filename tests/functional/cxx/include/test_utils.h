@@ -56,7 +56,6 @@ namespace Config
 {
     EXTERN std::string OfflineModelPathRoot;
     EXTERN std::string OfflineModelLanguage;
-    EXTERN std::string OfflineVoicePath;
     EXTERN bool DoDiscover;
     EXTERN std::string RnntModelSpec;
     EXTERN std::string RnntTokens;
@@ -93,6 +92,7 @@ namespace Config
 #define CUSTOM_VOICE_DEPLOYMENT_ID "CustomVoiceDeploymentId"
 #define CUSTOM_VOICE_VOICE_NAME "CustomVoiceVoiceName"
 #define SPEAKER_RECOGNITION_ENDPOINT "SpeakerRecognitionEndpoint"
+#define OFFLINE_VOICE_PATH "OfflineVoicePath"
 
 // Audio file and utterances keys
 #define FILE_PATH "FilePath"
@@ -697,9 +697,6 @@ inline int parse_cli_args(Catch::Session& session, int argc, char* argv[])
         | Opt(Config::OfflineModelLanguage, "OfflineModelLanguage")
             ["--offlineModelLanguage"]
             ("The language code of the offline speech recognition model used in tests.")
-        | Opt(Config::OfflineVoicePath, "OfflineVoicePath")
-            ["--offlineVoicePath"]
-            ("The path where the voice model for offline synthesis is located.")
         | Opt(Config::DoDiscover)
             ["--discovery"]
             ("Perform VS Test Adaptor discovery")

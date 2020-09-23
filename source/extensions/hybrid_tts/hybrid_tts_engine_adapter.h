@@ -16,6 +16,7 @@
 #include "mstts.h"
 #include "service_helpers.h"
 #include <object_with_site_init_impl.h>
+#include "pull_audio_output_stream.h"
 
 
 namespace Microsoft {
@@ -106,8 +107,6 @@ private:
 
     SpxWAVEFORMATEX_Type GetOutputFormat(bool* hasHeader) const;
 
-    void UpdateStreamReader();
-
     void EnsureTtsCloudEngineAdapter();
     void InitializeTtsCloudEngineAdapter();
     void EnsureTtsOfflineEngineAdapter();
@@ -136,10 +135,8 @@ private:
 
     std::shared_ptr<ISpxTtsEngineAdapter> m_ttsCloudAdapter;
     std::shared_ptr<ISpxTtsEngineAdapter> m_ttsOfflineAdapter;
-    std::shared_ptr<ISpxAudioOutput> m_cloudAudioStream;
-    std::shared_ptr<ISpxAudioOutput> m_offlineAudioStream;
-    std::shared_ptr<ISpxAudioOutputReader> m_cloudAudioStreamReader;
-    std::shared_ptr<ISpxAudioOutputReader> m_offlineAudioStreamReader;
+    std::shared_ptr<CSpxPullAudioOutputStream> m_cloudAudioStream;
+    std::shared_ptr<CSpxPullAudioOutputStream> m_offlineAudioStream;
 
     std::shared_ptr<ISpxAudioOutput> m_audioOutput;
 

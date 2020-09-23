@@ -31,6 +31,7 @@ import org.junit.Test;
 import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.rules.ExpectedException;
+import org.junit.Assume;
 
 import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.audio.AudioOutputStream;
@@ -51,6 +52,7 @@ import com.microsoft.cognitiveservices.speech.SpeechSynthesisCancellationDetails
 import com.microsoft.cognitiveservices.speech.util.EventHandler;
 
 import tests.AudioUtterancesKeys;
+import tests.DefaultSettingsKeys;
 import tests.Settings;
 import tests.SubscriptionsRegionsKeys;
 import tests.TestHelper;
@@ -80,6 +82,10 @@ public class SpeechSynthesizerTests {
 
     @BeforeClass
     static public void setUpBeforeClass() throws Exception {
+        String operatingSystem = ("" + System.getProperty("os.name")).toLowerCase();
+        System.out.println("Current operation system: " + operatingSystem);
+        System.out.println("Current arch: " + System.getProperty("os.arch"));
+
         // Override inputs, if necessary
         Settings.LoadSettings();
 
@@ -1287,6 +1293,31 @@ public class SpeechSynthesizerTests {
         CheckAudioInDataStream(stream[0], expectedAudioData);
 
         stream[0].close();
+        result.close();
+        synthesizer.close();
+        speechConfig.close();
+    }
+
+    @Test
+    public void testOfflineSynthesis() throws InterruptedException, ExecutionException, UnsupportedEncodingException {
+        // only enable this test on Android aarch64 for now.
+        Assume.assumeTrue(System.getProperty("java.specification.vendor").equals("The Android Project"));
+        Assume.assumeTrue(System.getProperty("os.arch").equals("aarch64"));
+
+        SpeechConfig speechConfig = SpeechConfig.fromSubscription("None", "None");
+        assertNotNull(speechConfig);
+        speechConfig.setProperty("SPEECH-SynthBackend", "offline");
+        speechConfig.setProperty("SPEECH-SynthOfflineDataLocation", Settings.GetRootRelativePath(Settings.DefaultSettingsMap.get(DefaultSettingsKeys.OFFLINE_VOICE_PATH)));
+
+        SpeechSynthesizer synthesizer = new SpeechSynthesizer(speechConfig, null); // null indicates to do nothing with synthesizer audio by default
+        assertNotNull(synthesizer);
+
+        SpeechSynthesisResult result = synthesizer.SpeakTextAsync("{{{text1}}}").get();
+
+        assertTrue(result.getReason() == ResultReason.SynthesizingAudioCompleted);
+        assertTrue(result.getAudioLength() > 0);
+        assertTrue("offline".equals(result.getProperties().getProperty("SynthesisFinishedBy")));
+
         result.close();
         synthesizer.close();
         speechConfig.close();
