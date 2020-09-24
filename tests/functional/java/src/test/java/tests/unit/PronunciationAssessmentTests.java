@@ -29,12 +29,13 @@ import com.microsoft.cognitiveservices.speech.SpeechRecognitionResult;
 import com.microsoft.cognitiveservices.speech.SpeechRecognizer;
 
 import tests.AudioUtterancesKeys;
+import tests.BaseJUnit;
 import tests.Settings;
 import tests.SubscriptionsRegionsKeys;
 import tests.TestHelper;
 import tests.Retry;
 
-public class PronunciationAssessmentTests {
+public class PronunciationAssessmentTests extends BaseJUnit {
 
     @Rule
     public Retry retry = new Retry(Settings.TestRetryCount);

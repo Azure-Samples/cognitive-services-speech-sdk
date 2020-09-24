@@ -33,12 +33,13 @@ import org.junit.Test;
 import org.junit.Rule;
 
 import tests.AudioUtterancesKeys;
+import tests.BaseJUnit;
 import tests.DefaultSettingsKeys;
 import tests.Settings;
 import tests.SubscriptionsRegionsKeys;
 import tests.Retry;
 
-public class ConversationTranscriberTests {
+public class ConversationTranscriberTests extends BaseJUnit {
     private static String inroomEndpoint = "";
     private static String onlineEndpoint = "";
 

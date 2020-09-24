@@ -17,10 +17,11 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.Rule;
 
+import tests.BaseJUnit;
 import tests.Settings;
 import tests.Retry;
 
-public class GrammarTests {
+public class GrammarTests extends BaseJUnit {
 
     @Rule
     public Retry retry = new Retry(Settings.TestRetryCount);

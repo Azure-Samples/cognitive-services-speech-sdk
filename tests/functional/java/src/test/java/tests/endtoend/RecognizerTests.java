@@ -25,11 +25,12 @@ import com.microsoft.cognitiveservices.speech.translation.SpeechTranslationConfi
 import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
 
 import tests.AudioUtterancesKeys;
+import tests.BaseJUnit;
 import tests.Settings;
 import tests.SubscriptionsRegionsKeys;
 import tests.Retry;
 
-public class RecognizerTests {
+public class RecognizerTests extends BaseJUnit {
     static SpeechConfig speechConfig;
     static SpeechTranslationConfig translationConfig;
     static AudioConfig audioConfig;

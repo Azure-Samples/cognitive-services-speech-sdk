@@ -27,12 +27,13 @@ import com.microsoft.cognitiveservices.speech.translation.SpeechTranslationConfi
 import com.microsoft.cognitiveservices.speech.PropertyId;
 
 import tests.AudioUtterancesKeys;
+import tests.BaseJUnit;
 import tests.Settings;
 import tests.SubscriptionsRegionsKeys;
 import tests.Retry;
 
 @SuppressWarnings("unused")
-public class PropertyCollectionTests {
+public class PropertyCollectionTests extends BaseJUnit {
 
     @Rule
     public Retry retry = new Retry(Settings.TestRetryCount);

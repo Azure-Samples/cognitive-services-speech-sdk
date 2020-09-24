@@ -18,6 +18,7 @@ import org.junit.Test;
 import org.junit.Rule;
 
 import tests.AudioUtterancesKeys;
+import tests.BaseJUnit;
 import tests.DefaultSettingsKeys;
 import tests.Settings;
 import tests.SubscriptionsRegionsKeys;
@@ -33,7 +34,7 @@ import java.io.UnsupportedEncodingException;
 import static org.junit.Assert.*;
 import static tests.Settings.*;
 
-public class VirtualAssistantTests {
+public class VirtualAssistantTests extends BaseJUnit {
 
     public static final String COMMUNICATION_TYPE_STRING = "Conversation_Communication_Type";
     public static final String AUTO_REPLY_CONNECTION_TYPE = "AutoReply";

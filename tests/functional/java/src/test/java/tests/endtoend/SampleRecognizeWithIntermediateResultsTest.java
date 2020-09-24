@@ -11,10 +11,11 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.Ignore;
 
+import tests.BaseJUnit;
 import tests.Settings;
 import tests.endtoend.SampleRecognizeWithIntermediateResults;
 
-public class SampleRecognizeWithIntermediateResultsTest {
+public class SampleRecognizeWithIntermediateResultsTest extends BaseJUnit{
     SampleRecognizeWithIntermediateResults test;
 
     @BeforeClass

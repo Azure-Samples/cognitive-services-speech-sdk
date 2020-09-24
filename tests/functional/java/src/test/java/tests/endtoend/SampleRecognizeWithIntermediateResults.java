@@ -13,10 +13,11 @@ import com.microsoft.cognitiveservices.speech.SpeechRecognitionResult;
 import com.microsoft.cognitiveservices.speech.SpeechRecognitionEventArgs;
 import com.microsoft.cognitiveservices.speech.SpeechRecognizer;
 
+import tests.BaseJUnit;
 import tests.AudioUtterancesKeys;
 import tests.Settings;
 
-public class SampleRecognizeWithIntermediateResults implements Runnable {
+public class SampleRecognizeWithIntermediateResults extends BaseJUnit implements Runnable {
 
     private SpeechRecognitionResult recognitionResult;
     public SpeechRecognitionResult getResult()

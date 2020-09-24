@@ -16,12 +16,13 @@ import com.microsoft.cognitiveservices.speech.intent.IntentRecognitionResult;
 import com.microsoft.cognitiveservices.speech.intent.IntentRecognizer;
 import com.microsoft.cognitiveservices.speech.intent.LanguageUnderstandingModel;
 import tests.AudioUtterancesKeys;
+import tests.BaseJUnit;
 import tests.DefaultSettingsKeys;
 import tests.Settings;
 import tests.SubscriptionsRegionsKeys;
 import tests.TestHelper;
 
-public class SampleRecognizeIntent implements Runnable {
+public class SampleRecognizeIntent extends BaseJUnit implements Runnable {
     private IntentRecognitionResult recognitionResult;
     public IntentRecognitionResult getResult()
     {

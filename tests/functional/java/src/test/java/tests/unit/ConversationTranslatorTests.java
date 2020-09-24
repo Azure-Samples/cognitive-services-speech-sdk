@@ -25,11 +25,12 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.Rule;
 import tests.AudioUtterancesKeys;
+import tests.BaseJUnit;
 import tests.Settings;
 import tests.SubscriptionsRegionsKeys;
 import tests.Retry;
 
-public class ConversationTranslatorTests {
+public class ConversationTranslatorTests extends BaseJUnit {
 
     @Rule
     public Retry retry = new Retry(Settings.TestRetryCount);

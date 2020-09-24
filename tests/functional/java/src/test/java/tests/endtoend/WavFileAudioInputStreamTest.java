@@ -17,12 +17,13 @@ import org.junit.Ignore;
 import static org.junit.Assert.*;
 
 import tests.AudioUtterancesKeys;
+import tests.BaseJUnit;
 import tests.Settings;
 import tests.Retry;
 import tests.unit.WavFileAudioInputStream;
 
 @SuppressWarnings("unused")
-public class WavFileAudioInputStreamTest {
+public class WavFileAudioInputStreamTest extends BaseJUnit {
     WavFileAudioInputStream waveStream;
 
     @Rule

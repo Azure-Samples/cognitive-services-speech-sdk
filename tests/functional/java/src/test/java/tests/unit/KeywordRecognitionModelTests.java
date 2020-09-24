@@ -26,10 +26,11 @@ import com.microsoft.cognitiveservices.speech.intent.IntentRecognizer;
 import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
 
 import tests.Settings;
+import tests.BaseJUnit;
 import tests.DefaultSettingsKeys;
 
 @SuppressWarnings("unused")
-public class KeywordRecognitionModelTests {
+public class KeywordRecognitionModelTests extends BaseJUnit {
 
     @BeforeClass
     static public void setUpBeforeClass() throws Exception {

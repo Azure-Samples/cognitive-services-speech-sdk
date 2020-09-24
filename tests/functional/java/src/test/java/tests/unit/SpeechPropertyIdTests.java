@@ -21,11 +21,12 @@ import com.microsoft.cognitiveservices.speech.translation.SpeechTranslationConfi
 import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
 
 import tests.AudioUtterancesKeys;
+import tests.BaseJUnit;
 import tests.Settings;
 import tests.SubscriptionsRegionsKeys;
 import tests.Retry;
 
-public class SpeechPropertyIdTests {
+public class SpeechPropertyIdTests extends BaseJUnit {
 
     @Rule
     public Retry retry = new Retry(Settings.TestRetryCount);

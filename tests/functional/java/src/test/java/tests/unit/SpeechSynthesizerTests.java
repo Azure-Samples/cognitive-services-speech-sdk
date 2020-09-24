@@ -52,13 +52,14 @@ import com.microsoft.cognitiveservices.speech.SpeechSynthesisCancellationDetails
 import com.microsoft.cognitiveservices.speech.util.EventHandler;
 
 import tests.AudioUtterancesKeys;
+import tests.BaseJUnit;
 import tests.DefaultSettingsKeys;
 import tests.Settings;
 import tests.SubscriptionsRegionsKeys;
 import tests.TestHelper;
 import tests.Retry;
 
-public class SpeechSynthesizerTests {
+public class SpeechSynthesizerTests extends BaseJUnit {
     private final Integer EMPTY_WAVE_FILE_SIZE = 46;
 
     private final Integer GUID_LENGTH = 32;

@@ -9,11 +9,12 @@ import static org.junit.Assert.*;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import tests.BaseJUnit;
 import tests.Settings;
 import tests.TestHelper;
-import tests.endtoend.SampleSimpleRecognize;
 
-public class SampleSimpleRecognizeTest {
+public class SampleSimpleRecognizeTest extends BaseJUnit {
     SampleSimpleRecognize test;
 
     @BeforeClass

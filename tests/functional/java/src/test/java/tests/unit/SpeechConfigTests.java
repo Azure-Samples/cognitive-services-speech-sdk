@@ -44,13 +44,14 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognition
 import com.microsoft.cognitiveservices.speech.SpeechSynthesizer;
 
 import tests.AudioUtterancesKeys;
+import tests.BaseJUnit;
 import tests.Settings;
 import tests.SubscriptionsRegionsKeys;
 import tests.TestHelper;
 import tests.Retry;
 
 @SuppressWarnings({"unused", "resource"})
-public class SpeechConfigTests {
+public class SpeechConfigTests extends BaseJUnit {
 
     private static String authorizationToken;
 

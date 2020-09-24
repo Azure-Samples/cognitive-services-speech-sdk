@@ -36,13 +36,14 @@ import com.microsoft.cognitiveservices.speech.util.EventHandler;
 import com.microsoft.cognitiveservices.speech.ConnectionEventArgs;
 
 import tests.AudioUtterancesKeys;
+import tests.BaseJUnit;
 import tests.DefaultSettingsKeys;
 import tests.Settings;
 import tests.SubscriptionsRegionsKeys;
 import tests.TestHelper;
 import tests.Retry;
 
-public class IntentRecognizerTests {
+public class IntentRecognizerTests extends BaseJUnit {
     private final Integer FIRST_EVENT_ID = 1;
     private AtomicInteger eventIdentifier = new AtomicInteger(FIRST_EVENT_ID);
 

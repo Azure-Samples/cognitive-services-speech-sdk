@@ -29,6 +29,7 @@ import org.junit.Test;
 import org.junit.Rule;
 
 import tests.AudioUtterancesKeys;
+import tests.BaseJUnit;
 import tests.DefaultSettingsKeys;
 import tests.Settings;
 import tests.SubscriptionsRegionsKeys;
@@ -45,7 +46,7 @@ import java.util.concurrent.TimeoutException;
 import static junit.framework.TestCase.fail;
 import static org.junit.Assert.assertNotNull;
 
-public class RemoteConversationTranscriptionTest {
+public class RemoteConversationTranscriptionTest extends BaseJUnit {
     private static ConversationTranscriber transcriber;
     private static WavFileAudioInputStream waveFilePullStream;
     private static Conversation conversation = null;

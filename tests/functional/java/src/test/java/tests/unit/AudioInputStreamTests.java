@@ -13,10 +13,11 @@ import org.junit.Rule;
 import com.microsoft.cognitiveservices.speech.audio.PullAudioInputStreamCallback;
 
 import tests.AudioUtterancesKeys;
+import tests.BaseJUnit;
 import tests.Settings;
 import tests.Retry;
 
-public class AudioInputStreamTests {
+public class AudioInputStreamTests extends BaseJUnit {
 
     @Rule
     public Retry retry = new Retry(Settings.TestRetryCount);

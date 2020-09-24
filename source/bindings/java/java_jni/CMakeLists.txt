@@ -109,6 +109,7 @@ set(HEADERS
     "${SRC_DIR}/com_microsoft_cognitiveservices_speech_transcription_ConversationTranslator.h"
     "${SRC_DIR}/com_microsoft_cognitiveservices_speech_transcription_User.h"
     "${SRC_DIR}/com_microsoft_cognitiveservices_speech_transcription_Participant.h"
+    "${SRC_DIR}/com_microsoft_cognitiveservices_speech_diagnostics.h"
     "${SRC_DIR}/jni_utils.h"
     )
 
@@ -168,6 +169,7 @@ set(SOURCES
     "${SRC_DIR}/com_microsoft_cognitiveservices_speech_transcription_ConversationTranslator.cpp"
     "${SRC_DIR}/com_microsoft_cognitiveservices_speech_transcription_User.cpp"
     "${SRC_DIR}/com_microsoft_cognitiveservices_speech_transcription_Participant.cpp"
+    "${SRC_DIR}/com_microsoft_cognitiveservices_speech_diagnostics.cpp"
     "${SRC_DIR}/jni_utils.cpp"
     "${SRC_DIR}/dll.cpp"
     )

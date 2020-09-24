@@ -35,12 +35,13 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognition
 import com.microsoft.cognitiveservices.speech.Connection;
 
 import tests.AudioUtterancesKeys;
+import tests.BaseJUnit;
 import tests.Settings;
 import tests.SubscriptionsRegionsKeys;
 import tests.TestHelper;
 import tests.Retry;
 
-public class TranslationRecognizerTests {
+public class TranslationRecognizerTests extends BaseJUnit {
     private final Integer FIRST_EVENT_ID = 1;
     private static String authorizationToken;
     private double similarityScoreThresholdTranslation = 0.80;

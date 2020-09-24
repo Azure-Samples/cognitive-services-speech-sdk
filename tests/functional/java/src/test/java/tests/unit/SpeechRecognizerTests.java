@@ -50,12 +50,13 @@ import com.microsoft.cognitiveservices.speech.AutoDetectSourceLanguageConfig;
 import com.microsoft.cognitiveservices.speech.AutoDetectSourceLanguageResult;
 
 import tests.AudioUtterancesKeys;
+import tests.BaseJUnit;
 import tests.Settings;
 import tests.SubscriptionsRegionsKeys;
 import tests.TestHelper;
 import tests.Retry;
 
-public class SpeechRecognizerTests {
+public class SpeechRecognizerTests extends BaseJUnit {
     private final Integer FIRST_EVENT_ID = 1;
     private static String authorizationToken;
 

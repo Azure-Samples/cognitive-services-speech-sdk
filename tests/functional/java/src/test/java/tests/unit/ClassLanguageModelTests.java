@@ -20,11 +20,12 @@ import org.junit.Test;
 import org.junit.Rule;
 
 import tests.AudioUtterancesKeys;
+import tests.BaseJUnit;
 import tests.Settings;
 import tests.SubscriptionsRegionsKeys;
 import tests.Retry;
 
-public class ClassLanguageModelTests {
+public class ClassLanguageModelTests extends BaseJUnit {
 
     @Rule
     public Retry retry = new Retry(Settings.TestRetryCount);

@@ -12,11 +12,12 @@ import org.junit.Test;
 
 import com.microsoft.cognitiveservices.speech.PropertyId;
 
+import tests.BaseJUnit;
 import tests.AudioUtterancesKeys;
 import tests.Settings;
 import tests.endtoend.SampleRecognizeIntent;
 
-public class SampleRecognizeIntentTest {
+public class SampleRecognizeIntentTest extends BaseJUnit {
     SampleRecognizeIntent test;
 
     @BeforeClass

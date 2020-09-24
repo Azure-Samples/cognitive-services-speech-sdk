@@ -986,6 +986,7 @@ jobs:
       cd tests/functional/java
       sed -i "s/buildVersion1234/$RELEASE_SDK_VERSION_FOR_USE/g" pom.xml
       cat pom.xml
+      export SPEECHSDK_TEST_LOGGING=none
       mvn clean test -Dtest=tests.unit.RemoteConversationTranscriptionTest
     displayName: run unit test for remote conversation transcription package
   - task: EsrpCodeSigning@1
