@@ -1003,7 +1003,7 @@ void CSpxAudioStreamSession::StartRecognizing(RecognitionKind startKind, std::sh
 
         HotSwapAdaptersWhilePaused(startKind, model);
     }
-    else if (m_adapterResetPending && startKind == RecognitionKind::Continuous
+    else if (m_adapterResetPending && (startKind == RecognitionKind::Continuous || startKind == RecognitionKind::SingleShot)
         && TryChangeState({ SessionState::ProcessingAudio, SessionState::HotSwapPaused, SessionState::ProcessingAudioLeftovers }, SessionState::HotSwapPaused))
     {
         SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::StartRecognizing: Resetting adapter via HotSwap. Attempting to stay in continuous mode!!! ...", (void*)this);
@@ -2132,7 +2132,8 @@ void CSpxAudioStreamSession::Error(ISpxRecoEngineAdapter* adapter, ErrorPayload_
     // If it is a transport error, we retry in continuous mode. We retry for m_numMaxRetries for the same error offset.
     // The retry will be delayed by m_retryDurationMS milliseconds
     // Otherwise report the error to the user, so that he can recreate a recognizer.
-    else if (m_recoKind == RecognitionKind::Continuous
+    else if ((m_recoKind == RecognitionKind::Continuous
+        || m_recoKind == RecognitionKind::SingleShot)
         && payload->GetRetryMode() == ISpxErrorInformation::RetryMode::Allowed
         && m_retriesDone < m_numMaxRetries)
     {
@@ -2340,7 +2341,7 @@ void CSpxAudioStreamSession::StartResetEngineAdapter()
     SPX_DBG_TRACE_FUNCTION();
 
     m_adapterResetPending = true;
-    if (m_recoKind == RecognitionKind::Continuous)
+    if (m_recoKind == RecognitionKind::Continuous || m_recoKind == RecognitionKind::SingleShot)
     {
         // If we were continuous, let's try and restart recognition, same kind...
         StartRecognizing(m_recoKind, nullptr);
