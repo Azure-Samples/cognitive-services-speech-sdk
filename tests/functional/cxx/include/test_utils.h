@@ -12,6 +12,7 @@
 #include <fstream>
 #include <algorithm>
 #include <string>
+#include <mutex>
 
 #ifdef _DEBUG
 #define SPX_CONFIG_DBG_TRACE_ALL 1
@@ -51,6 +52,11 @@
 #define TEST_AUDIOUTTERANCES_FILE "test.audio.utterances.json"
 #define TEST_DEFAULTS_FILE "test.defaults.json"
 #define TEST_SUBSCRIPTIONSREGIONS_FILE "test.subscriptions.regions.json"
+
+// Catch2 does not have built-in concurrency protection. We'll work around that by using a scoped
+// lock in the appropriate places in the wrapper macros to ensure we're synchronized.
+static std::mutex g_catchConcurrencyMutex;
+#define CATCH_AUTO_LOCK() std::lock_guard<std::mutex> catchAutoLock { g_catchConcurrencyMutex }
 
 namespace Config
 {
@@ -745,20 +751,30 @@ inline int parse_cli_args(Catch::Session& session, int argc, char* argv[])
     std::string msg{"Failed due to exception '"};                    \
     msg += e.what();                                                 \
     msg += "'";                                                      \
+    CATCH_AUTO_LOCK();                                               \
     FAIL(msg.c_str());                                               \
 } }
 
-#define SPXTEST_SECTION(msg) SECTION(msg) if ([=](){ \
-    SPX_TRACE_INFO("SPXTEST_SECTION('%s') %s(%d)", msg, __FILE__, __LINE__);  \
-    return 1; }())
+#define SPXTEST_SECTION(msg) \
+    SECTION(msg) \
+    if ([=](){ \
+        SPX_TRACE_INFO("SPXTEST_SECTION('%s') %s(%d)", msg, __FILE__, __LINE__);  \
+        return 1; \
+    }())
 
-#define SPXTEST_GIVEN(msg) GIVEN(msg) if ([=](){ \
-    SPX_TRACE_INFO("SPXTEST_GIVEN('%s') %s(%d):", msg, __FILE__, __LINE__); \
-    return 1; }())
+#define SPXTEST_GIVEN(msg) \
+    GIVEN(msg) \
+    if ([=](){ \
+        SPX_TRACE_INFO("SPXTEST_GIVEN('%s') %s(%d):", msg, __FILE__, __LINE__); \
+        return 1; \
+    }())
 
-#define SPXTEST_WHEN(msg) WHEN(msg) if ([=](){ \
-    SPX_TRACE_INFO("SPXTEST_WHEN('%s') %s(%d):", msg, __FILE__, __LINE__); \
-    return 1; }())
+#define SPXTEST_WHEN(msg) \
+    WHEN(msg) \
+    if ([=](){ \
+        SPX_TRACE_INFO("SPXTEST_WHEN('%s') %s(%d):", msg, __FILE__, __LINE__); \
+        return 1; \
+    }())
 
 #define SPXTEST_CHECK( ... ) ([&](){ \
     try { auto isTrue = !!(__VA_ARGS__); \
@@ -767,7 +783,9 @@ inline int parse_cli_args(Catch::Session& session, int argc, char* argv[])
           SPX_IFTRUE(!isTrue, diagnostics_log_memory_dump_to_file(nullptr, 0)); \
     } catch (...) { \
           SPX_TRACE_ERROR("SPXTEST_CHECK('%s'): FAILED: %s(%d) w/Exception:", __SPX_EXPR_AS_STRING(__VA_ARGS__), __FILE__, __LINE__); \
-    } CHECK(__VA_ARGS__); }())
+    } \
+    CATCH_AUTO_LOCK(); \
+    CHECK(__VA_ARGS__); }())
 
 // ISSUE: need to try and not evaluate __VA_ARGS__ multiple times...
 // ISSUE: also ... need to figure out why memory log didn't emit when cxx_api_tests failed last run
@@ -778,7 +796,9 @@ inline int parse_cli_args(Catch::Session& session, int argc, char* argv[])
           SPX_IFTRUE(!isTrue, diagnostics_log_memory_dump_to_file(nullptr, 0)); \
     } catch (...) { \
           SPX_TRACE_ERROR("SPXTEST_REQUIRE('%s'): %s(%d): FAILED: w/Exception:", __SPX_EXPR_AS_STRING(__VA_ARGS__), __FILE__, __LINE__); \
-    } REQUIRE(__VA_ARGS__); }())
+    } \
+    CATCH_AUTO_LOCK(); \
+    REQUIRE(__VA_ARGS__); }())
 
 #define SPXTEST_CHECK_FALSE( ... ) ([&](){ \
     try { auto isFalse = !(__VA_ARGS__); \
@@ -787,7 +807,9 @@ inline int parse_cli_args(Catch::Session& session, int argc, char* argv[])
           SPX_IFTRUE(!isFalse, diagnostics_log_memory_dump_to_file(nullptr, 0)); \
     } catch (...) { \
           SPX_TRACE_ERROR("SPXTEST_CHECK_FALSE('%s'): %s(%d): FAILED: w/Exception:", __SPX_EXPR_AS_STRING(__VA_ARGS__), __FILE__, __LINE__); \
-    } CHECK_FALSE(__VA_ARGS__); }())
+    } \
+    CATCH_AUTO_LOCK(); \
+    CHECK_FALSE(__VA_ARGS__); }())
 
 #define SPXTEST_REQUIRE_FALSE( ... ) ([&](){ \
     try { auto isFalse = !(__VA_ARGS__); \
@@ -796,7 +818,9 @@ inline int parse_cli_args(Catch::Session& session, int argc, char* argv[])
           SPX_IFTRUE(!isFalse, diagnostics_log_memory_dump_to_file(nullptr, 0)); \
     } catch (...) { \
           SPX_TRACE_ERROR("SPXTEST_REQUIRE_FALSE('%s'): %s(%d): FAILED: w/Exception:", __SPX_EXPR_AS_STRING(__VA_ARGS__), __FILE__, __LINE__); \
-    } REQUIRE_FALSE(__VA_ARGS__); }())
+    } \
+    CATCH_AUTO_LOCK(); \
+    REQUIRE_FALSE(__VA_ARGS__); }())
 
 #define SPXTEST_CHECK_THAT(arg, matcher) ([&](){ \
     try { auto isTrue = !!(matcher.match(arg)); \
@@ -805,7 +829,9 @@ inline int parse_cli_args(Catch::Session& session, int argc, char* argv[])
           SPX_IFTRUE(!isTrue, diagnostics_log_memory_dump_to_file(nullptr, 0)); \
     } catch (...) { \
           SPX_TRACE_ERROR("SPXTEST_CHECK_THAT('%s', '%s'): %s(%d): FAILED: w/Exception:", __SPX_EXPR_AS_STRING(arg), __SPX_EXPR_AS_STRING(matcher), __FILE__, __LINE__); \
-    } CHECK_THAT(arg, matcher); }())
+    } \
+    CATCH_AUTO_LOCK(); \
+    CHECK_THAT(arg, matcher); }())
 
 #define SPXTEST_REQUIRE_THAT(arg, matcher) ([&](){ \
     try { auto isTrue = !!(matcher.match(arg)); \
@@ -814,24 +840,32 @@ inline int parse_cli_args(Catch::Session& session, int argc, char* argv[])
           SPX_IFTRUE(!isTrue, diagnostics_log_memory_dump_to_file(nullptr, 0)); \
     } catch (...) { \
           SPX_TRACE_INFO("SPXTEST_REQUIRE_THAT('%s', '%s'): %s(%d): FAILED: w/Exception:", __SPX_EXPR_AS_STRING(arg), __SPX_EXPR_AS_STRING(matcher), __FILE__, __LINE__); \
-    } REQUIRE_THAT(arg, matcher); }())
+    } \
+    CATCH_AUTO_LOCK(); \
+    REQUIRE_THAT(arg, matcher); }())
 
 #define SPXTEST_CAPTURE(msg) ([&](){ \
+        CATCH_AUTO_LOCK(); \
         SPX_TRACE_INFO("SPXTEST_CAPTURE(%s): %s", #msg, ::Catch::Detail::stringify(msg).c_str()); \
     }())
 
 #define SPXTEST_FAIL(...) ([&](){ \
         SPXTEST_CAPTURE(__VA_ARGS__); \
+        CATCH_AUTO_LOCK(); \
         FAIL(__VA_ARGS__); \
     }())
 
-#define SPXTEST_CHECK_NOTHROW( ... ) \
-    SPX_TRACE_INFO("SPXTEST_CHECK_NOTHROW('%s'): %s(%d):", __SPX_EXPR_AS_STRING(__VA_ARGS__), __FILE__, __LINE__); \
-    CHECK_NOTHROW(__VA_ARGS__)
+#define SPXTEST_CHECK_NOTHROW( ... ) ([&](){ \
+        SPX_TRACE_INFO("SPXTEST_CHECK_NOTHROW('%s'): %s(%d):", __SPX_EXPR_AS_STRING(__VA_ARGS__), __FILE__, __LINE__); \
+        CATCH_AUTO_LOCK(); \
+        CHECK_NOTHROW(__VA_ARGS__); \
+    }())
 
-#define SPXTEST_REQUIRE_NOTHROW( ... ) \
-    SPX_TRACE_INFO("SPXTEST_REQUIRE_NOTHROW('%s'): %s(%d):", __SPX_EXPR_AS_STRING(__VA_ARGS__), __FILE__, __LINE__); \
-    REQUIRE_NOTHROW(__VA_ARGS__)
+#define SPXTEST_REQUIRE_NOTHROW( ... ) ([&](){ \
+        SPX_TRACE_INFO("SPXTEST_REQUIRE_NOTHROW('%s'): %s(%d):", __SPX_EXPR_AS_STRING(__VA_ARGS__), __FILE__, __LINE__); \
+        CATCH_AUTO_LOCK(); \
+        REQUIRE_NOTHROW(__VA_ARGS__); \
+    }())
 
 inline std::string SpxGetTestTrafficType(const char* file, int line)
 {
