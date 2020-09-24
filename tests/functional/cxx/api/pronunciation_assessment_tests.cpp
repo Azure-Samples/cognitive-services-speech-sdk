@@ -12,7 +12,7 @@
 #include "recognizer_utils.h"
 #include "test_utils.h"
 
-TEST_CASE("Pronunciation assessment configuration", "[api][cxx]")
+SPXTEST_CASE_BEGIN("Pronunciation assessment configuration", "[api][cxx]")
 {
     SPXTEST_SECTION("normal")
     {
@@ -55,7 +55,7 @@ TEST_CASE("Pronunciation assessment configuration", "[api][cxx]")
                 static_cast<PronunciationAssessmentGranularity>(8)));
         REQUIRE_THROWS(PronunciationAssessmentConfig::CreateFromJson("invalid json"));
     }
-}
+} SPXTEST_CASE_END()
 
 void TestPronunciationAssessment(const string& audio, const string& locale, bool withReferenceText, PronunciationAssessmentGranularity granularity, bool enableMiscue)
 {
@@ -98,7 +98,7 @@ void TestPronunciationAssessment(const string& audio, const string& locale, bool
     }
 }
 
-TEST_CASE("Pronunciation assessment", "[api][cxx]") {
+SPXTEST_CASE_BEGIN("PronunciationAssessment::basic", "[api][cxx]") {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
     SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(PRONUNCIATION_ASSESSMENT_BAD_PRONUNCIATION)));
 
@@ -126,4 +126,4 @@ TEST_CASE("Pronunciation assessment", "[api][cxx]") {
     {
         TestPronunciationAssessment(PRONUNCIATION_ASSESSMENT_BAD_PRONUNCIATION, "en-US", true, PronunciationAssessmentGranularity::FullText, false);
     }
-}
+} SPXTEST_CASE_END()

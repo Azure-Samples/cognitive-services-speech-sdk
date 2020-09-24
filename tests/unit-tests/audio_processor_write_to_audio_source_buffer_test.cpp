@@ -19,7 +19,7 @@
 #include <create_object_helpers.h>
 #include <property_id_2_name_map.h>
 
-TEST_CASE("CSpxAudioProcessorWriteToAudioSourceBuffer tests", "[cxx][audio][audio_processor_write_to_audio_source_buffer]")
+SPXTEST_CASE_BEGIN("CSpxAudioProcessorWriteToAudioSourceBuffer tests", "[cxx][audio][audio_processor_write_to_audio_source_buffer]")
 {
     auto makeBaseTestEnv = []()
     {
@@ -96,9 +96,9 @@ TEST_CASE("CSpxAudioProcessorWriteToAudioSourceBuffer tests", "[cxx][audio][audi
             };
             auto chunk = std::make_shared<Carbon::DataChunk>(Carbon::SpxAllocSharedAudioBuffer(1), 1);
             auto exceptionThrown = CheckThrow<std::runtime_error>([&]
-            {
-                processor->ProcessAudio(chunk);
-            });
+                {
+                    processor->ProcessAudio(chunk);
+                });
             THEN("An exception should be thrown")
             {
                 SPXTEST_REQUIRE(exceptionThrown);
@@ -135,9 +135,9 @@ TEST_CASE("CSpxAudioProcessorWriteToAudioSourceBuffer tests", "[cxx][audio][audi
                 setBufferPropertyCalled = true;
             };
             auto exceptionThrown = CheckThrow<std::runtime_error>([&]
-            {
-                processor->SetFormat(nullptr);
-            });
+                {
+                    processor->SetFormat(nullptr);
+                });
             THEN("An exception should be thrown")
             {
                 SPXTEST_REQUIRE(exceptionThrown);
@@ -185,9 +185,9 @@ TEST_CASE("CSpxAudioProcessorWriteToAudioSourceBuffer tests", "[cxx][audio][audi
                 setBufferPropertyCalled = true;
             };
             bool exceptionThrown = CheckThrow<std::runtime_error>([&]
-            {
-                processor->SetFormat(format.get());
-            });
+                {
+                    processor->SetFormat(format.get());
+                });
             THEN("An exception should be thrown")
             {
                 SPXTEST_REQUIRE(exceptionThrown);
@@ -307,4 +307,4 @@ TEST_CASE("CSpxAudioProcessorWriteToAudioSourceBuffer tests", "[cxx][audio][audi
         }
     }
 
-}
+}SPXTEST_CASE_END()

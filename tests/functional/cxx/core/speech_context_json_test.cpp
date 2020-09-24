@@ -162,7 +162,7 @@ private:
 };
 
 
-TEST_CASE("Test JSON Generation", "[context_json]")
+SPXTEST_CASE_BEGIN("Test JSON Generation", "[context_json]")
 {
     CSpxUspRecoEngineAdapterTest adapterTest;
     auto session = adapterTest.GetSession();
@@ -403,4 +403,4 @@ TEST_CASE("Test JSON Generation", "[context_json]")
         auto contextJson = adapterTest.GetSpeechContextJson();
         SPXTEST_REQUIRE(contextJson == expectedJson);
     }
-}
+}SPXTEST_CASE_END()

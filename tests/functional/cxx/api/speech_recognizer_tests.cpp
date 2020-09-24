@@ -95,7 +95,7 @@ static void DoRecoFromCompressedPullStream(std::string filename, AudioStreamCont
 #endif
 }
 
-TEST_CASE("compressed stream test", "[api][cxx]")
+SPXTEST_CASE_BEGIN("compressed stream test", "[api][cxx]")
 {
     SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_MP3)));
     SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_OPUS)));
@@ -152,9 +152,9 @@ TEST_CASE("compressed stream test", "[api][cxx]")
     {
         DoRecoFromCompressedPullStream(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_MU_LAW), AudioStreamContainerFormat::MULAW);
     }
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("continuousRecognitionAsync using push stream", "[api][cxx]")
+SPXTEST_CASE_BEGIN("continuousRecognitionAsync using push stream", "[api][cxx]")
 {
     auto config = CurrentSpeechConfig(SpxGetTestTrafficType(__FILE__, __LINE__));
     auto pushStream = AudioInputStream::CreatePushStream();
@@ -215,9 +215,9 @@ TEST_CASE("continuousRecognitionAsync using push stream", "[api][cxx]")
     }
 #endif
 
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("ContinuousRecognitionAsync using file input", "[api][cxx]")
+SPXTEST_CASE_BEGIN("ContinuousRecognitionAsync using file input", "[api][cxx]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
@@ -290,10 +290,10 @@ TEST_CASE("ContinuousRecognitionAsync using file input", "[api][cxx]")
         recognizer->StopContinuousRecognitionAsync().get();
     }
 #endif
-}
+} SPXTEST_CASE_END()
 
 #ifdef SPEECHSDK_USE_OPENSSL
-TEST_CASE("Single trusted root", "[api][cxx]")
+SPXTEST_CASE_BEGIN("Single trusted root", "[api][cxx]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
@@ -402,10 +402,10 @@ TEST_CASE("Single trusted root", "[api][cxx]")
             SPXTEST_CAPTURE(cancellation->ErrorDetails);
         }
     }
-}
+} SPXTEST_CASE_END()
 #endif
 
-TEST_CASE("Speech Recognizer basics", "[api][cxx]")
+SPXTEST_CASE_BEGIN("Speech Recognizer basics", "[api][cxx]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
@@ -966,9 +966,9 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
             SPXTEST_REQUIRE(expectedEvents == events);
         }
     }
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("KWS basics", "[api][cxx]")
+SPXTEST_CASE_BEGIN("KWS basics", "[api][cxx]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
     SPXTEST_GIVEN("Mocks for USP, KWS, and the Microphone...")
@@ -1056,9 +1056,9 @@ TEST_CASE("KWS basics", "[api][cxx]")
 
         UseMocks(false);
     }
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Speech on local server", "[api][cxx]")
+SPXTEST_CASE_BEGIN("Speech on local server", "[api][cxx]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
@@ -1102,9 +1102,9 @@ TEST_CASE("Speech on local server", "[api][cxx]")
         }
         */
     }
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Speech Recognizer is thread-safe.", "[api][cxx]")
+SPXTEST_CASE_BEGIN("Speech Recognizer is thread-safe.", "[api][cxx]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
@@ -1207,9 +1207,9 @@ TEST_CASE("Speech Recognizer is thread-safe.", "[api][cxx]")
         auto future = recognizer->RecognizeOnceAsync();
         UNUSED(future);
     }
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Speech Recognizer SpeechConfig validations", "[api][cxx]")
+SPXTEST_CASE_BEGIN("Speech Recognizer SpeechConfig validations", "[api][cxx]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
@@ -1246,7 +1246,7 @@ TEST_CASE("Speech Recognizer SpeechConfig validations", "[api][cxx]")
         CHECK_THROWS(SpeechConfig::FromAuthorizationToken("illegal-token", ""));
         CHECK_NOTHROW(SpeechConfig::FromAuthorizationToken("illegal-token", "illegal-region"));
     }
-}
+} SPXTEST_CASE_END()
 
 static void ConnectionEventTests(bool forContinuousRecognition)
 {
@@ -1347,7 +1347,7 @@ static void ConnectionEventTests(bool forContinuousRecognition)
     SPXTEST_REQUIRE(canceledCount == 0);
 }
 
-TEST_CASE("ConnectionEventsTest", "[api][cxx]")
+SPXTEST_CASE_BEGIN("ConnectionEventsTest", "[api][cxx]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
@@ -1362,9 +1362,9 @@ TEST_CASE("ConnectionEventsTest", "[api][cxx]")
     {
         ConnectionEventTests(true);
     }
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("FromEndpoint without key and token", "[api][cxx]")
+SPXTEST_CASE_BEGIN("FromEndpoint without key and token", "[api][cxx]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
@@ -1394,9 +1394,9 @@ TEST_CASE("FromEndpoint without key and token", "[api][cxx]")
         SPXTEST_REQUIRE(recognizer->Properties.GetProperty(PropertyId::SpeechServiceAuthorization_Token).empty());
         SPXTEST_REQUIRE(recognizer->Properties.GetProperty(PropertyId::SpeechServiceConnection_Key).empty());
     }
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("SetServiceProperty", "[api][cxx]")
+SPXTEST_CASE_BEGIN("SetServiceProperty", "[api][cxx]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
@@ -1534,9 +1534,9 @@ TEST_CASE("SetServiceProperty", "[api][cxx]")
         auto queryParam = specialProperty + "=" + specialValue;
         SPXTEST_REQUIRE(connectionUrl.find(queryParam) != string::npos);
     }
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("SpeechConfig properties", "[api][cxx]")
+SPXTEST_CASE_BEGIN("SpeechConfig properties", "[api][cxx]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
@@ -1688,9 +1688,9 @@ TEST_CASE("SpeechConfig properties", "[api][cxx]")
         SPXTEST_CHECK(connectionUrl.find("postprocessing=") == string::npos);
         SPXTEST_CHECK(connectionUrl.find("stableTranslation=") == string::npos);
     }
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Dictation Corrections", "[api][cxx]")
+SPXTEST_CASE_BEGIN("Dictation Corrections", "[api][cxx]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
@@ -1917,9 +1917,9 @@ TEST_CASE("Dictation Corrections", "[api][cxx]")
         SPXTEST_REQUIRE(detailedResult.find("Display") != string::npos);
         SPXTEST_REQUIRE(detailedResult.find("Corrections") != string::npos);
     }
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Verify auto detect source language config in SpeechRecognizer", "[api][cxx]")
+SPXTEST_CASE_BEGIN("Verify auto detect source language config in SpeechRecognizer", "[api][cxx]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
     SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
@@ -1960,9 +1960,9 @@ TEST_CASE("Verify auto detect source language config in SpeechRecognizer", "[api
         REQUIRE_THROWS_WITH(SpeechRecognizer::FromConfig(speechConfig, autoDetectSourceLanguageConfig, audioConfig),
             Catch::Contains("doesn't support auto detection source language from open range."));
     }
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Verify source language config in SpeechRecognizer", "[api][cxx]")
+SPXTEST_CASE_BEGIN("Verify source language config in SpeechRecognizer", "[api][cxx]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
     SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
@@ -1987,9 +1987,9 @@ TEST_CASE("Verify source language config in SpeechRecognizer", "[api][cxx]")
         SPXTEST_REQUIRE(recognizer->Properties.GetProperty(PropertyId::SpeechServiceConnection_RecoLanguage) == "de-DE");
         SPXTEST_REQUIRE(recognizer->Properties.GetProperty(PropertyId::SpeechServiceConnection_EndpointId) == "CustomId");
     }
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Verify auto detect source language result from speech recognition result", "[api][cxx]") {
+SPXTEST_CASE_BEGIN("Verify auto detect source language result from speech recognition result", "[api][cxx]") {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
     SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
     auto audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
@@ -2047,9 +2047,9 @@ TEST_CASE("Verify auto detect source language result from speech recognition res
     else {
         SPX_TRACE_VERBOSE("cxx_api_Test result reason %d is not expected %d", speechRecognitionResult->Reason, expectedReason);
     }
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Verify language id detection for continuous speech recognition", "[api][cxx]") {
+SPXTEST_CASE_BEGIN("Verify language id detection for continuous speech recognition", "[api][cxx]") {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
     SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_GERMAN)));
     auto audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_GERMAN));
@@ -2147,10 +2147,10 @@ TEST_CASE("Verify language id detection for continuous speech recognition", "[ap
     SPXTEST_REQUIRE(recognizingResults.size() > 0);
     SPXTEST_REQUIRE(recognizedResults.size() > 0);
     SPXTEST_REQUIRE(recognizedResults[0] == AudioUtterancesMap[SINGLE_UTTERANCE_GERMAN].Utterances["de"][0].Text);
-}
+} SPXTEST_CASE_END()
 
 
-TEST_CASE("Connection Message Received Events", "[api][cxx]")
+SPXTEST_CASE_BEGIN("Connection Message Received Events", "[api][cxx]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
@@ -2281,9 +2281,9 @@ TEST_CASE("Connection Message Received Events", "[api][cxx]")
 
         SPXTEST_REQUIRE(messages.size() == 0);
     }
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Custom speech-to-text endpoints", "[api][cxx]")
+SPXTEST_CASE_BEGIN("Custom speech-to-text endpoints", "[api][cxx]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
@@ -2367,9 +2367,9 @@ TEST_CASE("Custom speech-to-text endpoints", "[api][cxx]")
         SPXTEST_REQUIRE(result->Reason == ResultReason::RecognizedSpeech);
         SPXTEST_REQUIRE(StringComparisions::AssertFuzzyMatch(result->Text, AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH].Utterances["en-US"][0].Text));
     }
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Local speech-to-text endpoints", "[.][api][cxx]") // for manual testing of speech service containers
+SPXTEST_CASE_BEGIN("Local speech-to-text endpoints", "[.][api][cxx]") // for manual testing of speech service containers
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
     SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
@@ -2402,4 +2402,4 @@ TEST_CASE("Local speech-to-text endpoints", "[.][api][cxx]") // for manual testi
         SPXTEST_REQUIRE(result->Reason == ResultReason::RecognizedSpeech);
         SPXTEST_REQUIRE(StringComparisions::AssertFuzzyMatch(result->Text, AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH].Utterances["en-US"][0].Text));
     }
-}
+} SPXTEST_CASE_END()

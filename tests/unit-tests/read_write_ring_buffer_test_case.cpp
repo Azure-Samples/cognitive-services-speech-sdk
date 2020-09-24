@@ -24,7 +24,7 @@ using namespace Microsoft::CognitiveServices::Speech;
 using namespace Microsoft::CognitiveServices::Speech::Impl;
 
 
-TEST_CASE("CSpxReadWriteRingBuffer Basics", "[ringbuffer]")
+SPXTEST_CASE_BEGIN("CSpxReadWriteRingBuffer Basics", "[ringbuffer]")
 {
     auto rb = std::make_shared<CSpxReadWriteRingBuffer>();
     SPXTEST_REQUIRE(rb != nullptr);
@@ -240,9 +240,9 @@ TEST_CASE("CSpxReadWriteRingBuffer Basics", "[ringbuffer]")
             }
         }
     }
-}
+}SPXTEST_CASE_END()
 
-TEST_CASE("BlockingReadWriteRingBuffer Basics", "[ringbuffer]")
+SPXTEST_CASE_BEGIN("BlockingReadWriteRingBuffer Basics", "[ringbuffer]")
 {
     auto rb = std::make_shared<CSpxBlockingReadWriteRingBuffer>();
     SPXTEST_REQUIRE(rb != nullptr);
@@ -341,4 +341,4 @@ TEST_CASE("BlockingReadWriteRingBuffer Basics", "[ringbuffer]")
         SPXTEST_REQUIRE(memcmp(data.get(), read.get(), bytesRead) == 0);
         SPXTEST_REQUIRE(bytesRead == size);
     }
-}
+}SPXTEST_CASE_END()

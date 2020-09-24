@@ -68,7 +68,7 @@ public:
 };
 
 
-TEST_CASE("No arg event callbacks", "[core][event][callbacks][no_args]")
+SPXTEST_CASE_BEGIN("No arg event callbacks", "[core][event][callbacks][no_args]")
 {
     reset();
 
@@ -86,9 +86,9 @@ TEST_CASE("No arg event callbacks", "[core][event][callbacks][no_args]")
     evt();
     SPXTEST_REQUIRE(2 == publicCount);
     SPXTEST_REQUIRE(1 == c->m_count);
-}
+}SPXTEST_CASE_END()
 
-TEST_CASE("One arg event callbacks", "[core][event][callbacks][one_arg]")
+SPXTEST_CASE_BEGIN("One arg event callbacks", "[core][event][callbacks][one_arg]")
 {
     reset();
 
@@ -116,9 +116,9 @@ TEST_CASE("One arg event callbacks", "[core][event][callbacks][one_arg]")
     SPXTEST_REQUIRE(1 == c->m_count);
     SPXTEST_REQUIRE(1 == c->m_stringCallbacks.size());
     SPXTEST_REQUIRE(arg == c->m_stringCallbacks[0]);
-}
+}SPXTEST_CASE_END()
 
-TEST_CASE("Two arg event callbacks", "[core][event][callbacks][two_arg]")
+SPXTEST_CASE_BEGIN("Two arg event callbacks", "[core][event][callbacks][two_arg]")
 {
     reset();
 
@@ -153,9 +153,9 @@ TEST_CASE("Two arg event callbacks", "[core][event][callbacks][two_arg]")
     SPXTEST_REQUIRE(2 == c->m_stringCallbacks.size());
     SPXTEST_REQUIRE(expected0 == c->m_stringCallbacks[0]);
     SPXTEST_REQUIRE(expected1 == c->m_stringCallbacks[1]);
-}
+}SPXTEST_CASE_END()
 
-TEST_CASE("Remove callbacks", "[core][event][callbacks][remove]")
+SPXTEST_CASE_BEGIN("Remove callbacks", "[core][event][callbacks][remove]")
 {
     reset();
 
@@ -189,4 +189,4 @@ TEST_CASE("Remove callbacks", "[core][event][callbacks][remove]")
     SPXTEST_REQUIRE(1 == instance->m_count);
     SPXTEST_REQUIRE(1 == instance->m_stringCallbacks.size());
     SPXTEST_REQUIRE(arg == instance->m_stringCallbacks[0]);
-}
+}SPXTEST_CASE_END()

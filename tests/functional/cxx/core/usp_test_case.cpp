@@ -82,7 +82,7 @@ private:
 
 using UspClientPtr = std::shared_ptr<UspClient>;
 
-TEST_CASE("USP is properly functioning", "[usp]")
+SPXTEST_CASE_BEGIN("USP is properly functioning", "[usp]")
 {
     SPXTEST_SECTION("usp can be initialized, connected and closed")
     {
@@ -176,7 +176,7 @@ TEST_CASE("USP is properly functioning", "[usp]")
             REQUIRE_NOTHROW(clients[i]->Term());
         }
     }
-}
+}SPXTEST_CASE_END()
 
 class TlsCheck : public USP::Callbacks
 {
@@ -197,7 +197,7 @@ public:
     virtual ~TlsCheck() {};
 };
 
-TEST_CASE("USP uses TLS12", "[usp]")
+SPXTEST_CASE_BEGIN("USP uses TLS12", "[usp]")
 {
     // GitHub doesn't allow TLSv1 and TLSv1.1 since February 2018 (https://githubengineering.com/crypto-removal-notice/).
     auto service = std::make_shared<CSpxThreadService>();
@@ -216,7 +216,7 @@ TEST_CASE("USP uses TLS12", "[usp]")
     std::shared_ptr<uint8_t> buffer(data, [](uint8_t* p) { delete[] p; });
     connection->WriteAudio(std::make_shared<DataChunk>(buffer, dataSize));
     this_thread::sleep_for(5s);
-}
+}SPXTEST_CASE_END()
 
 class PortCheck : public USP::Callbacks
 {
@@ -266,7 +266,7 @@ private:
     std::promise<void> m_promise;
 };
 
-TEST_CASE("Port specification", "[usp]")
+SPXTEST_CASE_BEGIN("Port specification", "[usp]")
 {
     SPXTEST_SECTION("Valid port specification")
     {
@@ -322,9 +322,9 @@ TEST_CASE("Port specification", "[usp]")
 
         REQUIRE_THROWS_WITH(client.Connect(), "Port is not valid");
     }
-}
+}SPXTEST_CASE_END()
 
-TEST_CASE("USP binary message serialization optimisation", "[usp][binary_message]")
+SPXTEST_CASE_BEGIN("USP binary message serialization optimisation", "[usp][binary_message]")
 {
     std::string original("This is a short test");
     USP::BinaryMessage msg(original.length() + 1, "ralph.test", USP::MessageType::Config, PAL::ToString(PAL::CreateGuidWithoutDashes()));
@@ -342,4 +342,4 @@ TEST_CASE("USP binary message serialization optimisation", "[usp][binary_message
 
     std::string afterSerialization(reinterpret_cast<char*>(ptrData), original.length());
     SPXTEST_REQUIRE(original == afterSerialization);
-}
+}SPXTEST_CASE_END()

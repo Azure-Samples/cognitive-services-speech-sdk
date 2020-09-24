@@ -8,7 +8,7 @@
 #include "file_utils.h"
 #include "recognizer_utils.h"
 
-TEST_CASE("Offline continuous recognition using file input", "[api][cxx][unidec]")
+SPXTEST_CASE_BEGIN("Offline continuous recognition using file input", "[api][cxx][unidec]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
@@ -39,11 +39,11 @@ TEST_CASE("Offline continuous recognition using file input", "[api][cxx][unidec]
             SPXTEST_REQUIRE(MatchText(AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH].Utterances["en-US"][0].Text, result->phrases[0].Text));
         }
     }
-}
+}SPXTEST_CASE_END()
 
 // Returns future_status::timeout on Linux-arm64.
 // Bug 2003392 Offline Unidec continuous reco from file fails on Linux-arm64
-TEST_CASE("Offline continuous recognition using file input fails", "[.][api][cxx][unidec]")
+SPXTEST_CASE_BEGIN("Offline continuous recognition using file input fails", "[.][api][cxx][unidec]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
@@ -73,9 +73,9 @@ TEST_CASE("Offline continuous recognition using file input fails", "[.][api][cxx
             SPXTEST_REQUIRE(MatchText(AudioUtterancesMap[SINGLE_UTTERANCE_3X].Utterances["en-US"][0].Text, result->phrases[i].Text));
         }
     }
-}
+}SPXTEST_CASE_END()
 
-TEST_CASE("Offline single recognition using file input", "[api][cxx][unidec]")
+SPXTEST_CASE_BEGIN("Offline single recognition using file input", "[api][cxx][unidec]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
@@ -100,9 +100,9 @@ TEST_CASE("Offline single recognition using file input", "[api][cxx][unidec]")
             SPXTEST_REQUIRE(MatchText(AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH].Utterances["en-US"][0].Text, result->Text));
         }
     }
-}
+}SPXTEST_CASE_END()
 
-TEST_CASE("Offline continuous recognition using push stream input", "[api][cxx][unidec]")
+SPXTEST_CASE_BEGIN("Offline continuous recognition using push stream input", "[api][cxx][unidec]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
@@ -135,11 +135,11 @@ TEST_CASE("Offline continuous recognition using push stream input", "[api][cxx][
             SPXTEST_REQUIRE(MatchText(AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH].Utterances["en-US"][0].Text, result->phrases[0].Text));
         }
     }
-}
+}SPXTEST_CASE_END()
 
 // Returns future_status::timeout or empty phrase list on the second round.
 // Bug 2003412 Offline Unidec continuous reco from push stream fails
-TEST_CASE("Offline continuous recognition using push stream input fails", "[.][api][cxx][unidec]")
+SPXTEST_CASE_BEGIN("Offline continuous recognition using push stream input fails", "[.][api][cxx][unidec]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
@@ -172,9 +172,9 @@ TEST_CASE("Offline continuous recognition using push stream input fails", "[.][a
             SPXTEST_REQUIRE(MatchText(AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH].Utterances["en-US"][0].Text, result->phrases[0].Text));
         }
     }
-}
+}SPXTEST_CASE_END()
 
-TEST_CASE("Offline single recognition using push stream input", "[api][cxx][unidec]")
+SPXTEST_CASE_BEGIN("Offline single recognition using push stream input", "[api][cxx][unidec]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
@@ -201,9 +201,9 @@ TEST_CASE("Offline single recognition using push stream input", "[api][cxx][unid
             SPXTEST_REQUIRE(MatchText(AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH].Utterances["en-US"][0].Text, result->Text));
         }
     }
-}
+}SPXTEST_CASE_END()
 
-TEST_CASE("Offline continuous recognition using pull stream input", "[api][cxx][unidec]")
+SPXTEST_CASE_BEGIN("Offline continuous recognition using pull stream input", "[api][cxx][unidec]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
@@ -234,9 +234,9 @@ TEST_CASE("Offline continuous recognition using pull stream input", "[api][cxx][
             SPXTEST_REQUIRE(MatchText(AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH].Utterances["en-US"][0].Text, result->phrases[0].Text));
         }
     }
-}
+}SPXTEST_CASE_END()
 
-TEST_CASE("Offline single recognition using pull stream input", "[api][cxx][unidec]")
+SPXTEST_CASE_BEGIN("Offline single recognition using pull stream input", "[api][cxx][unidec]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
@@ -261,9 +261,9 @@ TEST_CASE("Offline single recognition using pull stream input", "[api][cxx][unid
             SPXTEST_REQUIRE(MatchText(AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH].Utterances["en-US"][0].Text, result->Text));
         }
     }
-}
+}SPXTEST_CASE_END()
 
-TEST_CASE("Offline recognition with KWS", "[api][cxx][unidec]")
+SPXTEST_CASE_BEGIN("Offline recognition with KWS", "[api][cxx][unidec]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
@@ -294,11 +294,11 @@ TEST_CASE("Offline recognition with KWS", "[api][cxx][unidec]")
             SPXTEST_REQUIRE(MatchText(AudioUtterancesMap[COMPUTER_KEYWORD_WITH_SINGLE_UTTERANCE_1].Utterances["en-US"][0].Text, result->phrases[0].Text));
         }
     }
-}
+}SPXTEST_CASE_END()
 
 // Generates SIGSEGV on Linux-arm64.
 // Bug 2003421 Offline Unidec recognition with KWS generates SIGSEGV on Linux-arm64
-TEST_CASE("Offline recognition with KWS fails", "[.][api][cxx][unidec]")
+SPXTEST_CASE_BEGIN("Offline recognition with KWS fails", "[.][api][cxx][unidec]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
@@ -329,4 +329,4 @@ TEST_CASE("Offline recognition with KWS fails", "[.][api][cxx][unidec]")
             SPXTEST_REQUIRE(MatchText(AudioUtterancesMap[COMPUTER_KEYWORD_WITH_SINGLE_UTTERANCE_2X].Utterances["en-US"][0].Text, result->phrases[0].Text));
         }
     }
-}
+}SPXTEST_CASE_END()

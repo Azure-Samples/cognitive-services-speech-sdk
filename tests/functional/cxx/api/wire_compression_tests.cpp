@@ -12,7 +12,7 @@
 
 // #define USEFIDDLERPROXY
 
-TEST_CASE("RecognizeOnceAsync with compressed audio works", "[api][cxx]")
+SPXTEST_CASE_BEGIN("RecognizeOnceAsync with compressed audio works", "[api][cxx]")
 {
     SPXTEST_SECTION("English Speech Recognition works")
     {
@@ -97,9 +97,9 @@ TEST_CASE("RecognizeOnceAsync with compressed audio works", "[api][cxx]")
         SPXTEST_REQUIRE(StringComparisions::AssertFuzzyMatch(result1->Text, AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH].Utterances["en-US"][0].Text));
         SPXTEST_REQUIRE(StringComparisions::AssertFuzzyMatch(result2->Text, AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH].Utterances["en-US"][0].Text));
     }
-}
+}SPXTEST_CASE_END()
 
-TEST_CASE("ContinuousRecognitionAsync with compressed audio works", "[api][cxx]")
+SPXTEST_CASE_BEGIN("ContinuousRecognitionAsync with compressed audio works", "[api][cxx]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
     UseMocks(false);
@@ -132,10 +132,10 @@ TEST_CASE("ContinuousRecognitionAsync with compressed audio works", "[api][cxx]"
         SPXTEST_REQUIRE(StringComparisions::AssertFuzzyMatch(result->phrases[0].Text, AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH].Utterances["en-US"][0].Text));
     }
 
-}
+}SPXTEST_CASE_END()
 
 #include <chrono>
-TEST_CASE("ContinuousRecognitionAsync with compressed audio - multiple recognizers in parallel", "[api][cxx]")
+SPXTEST_CASE_BEGIN("ContinuousRecognitionAsync with compressed audio - multiple recognizers in parallel", "[api][cxx]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
     UseMocks(false);
@@ -201,9 +201,9 @@ TEST_CASE("ContinuousRecognitionAsync with compressed audio - multiple recognize
         SPXTEST_REQUIRE(StringComparisions::AssertFuzzyMatch(result3->phrases[0].Text, expectedUtterances[0].Text));
         SPXTEST_REQUIRE(StringComparisions::AssertFuzzyMatch(result4->phrases[0].Text, expectedUtterances[0].Text));
     }
-}
+}SPXTEST_CASE_END()
 
-TEST_CASE("ContinuousRecognitionAsync with compressed audio - long dictation", "[!hide][api][cxx]")
+SPXTEST_CASE_BEGIN("ContinuousRecognitionAsync with compressed audio - long dictation", "[!hide][api][cxx]")
 {
     // This works as a semi - manual test for reconnecting after a disconnect :
     // This test takes about 1 minute to complete.
@@ -243,4 +243,4 @@ TEST_CASE("ContinuousRecognitionAsync with compressed audio - long dictation", "
         SPXTEST_REQUIRE(StringComparisions::AssertFuzzyMatch(result->phrases[idx].Text, expectedUtterances[idx].Text, 20));
     }
 
-}
+}SPXTEST_CASE_END()

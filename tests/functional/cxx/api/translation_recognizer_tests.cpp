@@ -23,7 +23,7 @@ std::shared_ptr<SpeechTranslationConfig> CreateTranslationConfigWithLanguageId(
     {
         defaultLanguage = PAL::split(from, CommaDelim)[0];
     }
-    
+
     auto endPoint = "wss://" + SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Region + ".sr.speech.microsoft.com/speech/translation/" + mode + "/mstranslator/v1?TrafficType=Test&language=" + defaultLanguage;
     auto config = SpeechTranslationConfig::FromEndpoint(endPoint, SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
     config->SetServiceProperty("TrafficType", trafficType, ServicePropertyChannel::UriQueryParameter);
@@ -36,7 +36,7 @@ std::shared_ptr<SpeechTranslationConfig> CreateTranslationConfigWithLanguageId(
     {
         for (size_t i = 0; i < voiceNames.size(); i++)
         {
-            auto propertyName = to[i] + GetPropertyName(PropertyId::SpeechServiceConnection_TranslationVoice); 
+            auto propertyName = to[i] + GetPropertyName(PropertyId::SpeechServiceConnection_TranslationVoice);
             config->SetProperty(propertyName, voiceNames[i]);
         }
     }
@@ -77,7 +77,7 @@ static shared_ptr<TranslationRecognizer> CreateTranslationRecognizer(
     return TranslationRecognizer::FromConfig(config, audioInput);
 }
 
-TEST_CASE("Translation", "[api][cxx]")
+SPXTEST_CASE_BEGIN("TranslationRecognizer::translation", "[api][cxx]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
@@ -94,7 +94,7 @@ TEST_CASE("Translation", "[api][cxx]")
         vector<string> recognizedResults;
         vector<string> translatedResults;
         vector<string> errorResults;
-        
+
         auto recognizer = CreateTranslationRecognizer(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH), "en-US", { "de" }, SpxGetTestTrafficType(__FILE__, __LINE__));
 
         recognizer->Recognizing.DisconnectAll();
@@ -151,7 +151,7 @@ TEST_CASE("Translation", "[api][cxx]")
                     }
                 }
             });
-        
+
         recognizer->SessionStopped.DisconnectAll();
         recognizer->SessionStopped.Connect([&complete, &readyFuture](const SessionEventArgs& e)
             {
@@ -301,75 +301,75 @@ TEST_CASE("Translation", "[api][cxx]")
 
         recognizer->Recognized.DisconnectAll();
         recognizer->Recognized.Connect([&recognizer, &recognizedResults, &translatedResultsDe, &translatedResultsEs, &translatedResultsFr, &errorResults, &complete, &readyFuture](const TranslationRecognitionEventArgs& e)
-        {
-            if (e.Result->Reason == ResultReason::TranslatedSpeech)
             {
-                recognizedResults.push_back(e.Result->Text);
-                translatedResultsDe.push_back(e.Result->Translations.at("de"));
-                if (translatedResultsDe.size() == 1)
+                if (e.Result->Reason == ResultReason::TranslatedSpeech)
                 {
-                    recognizer->AddTargetLanguage("es");
-                }
-
-                if (e.Result->Translations.find("es") != e.Result->Translations.end())
-                {
-                    translatedResultsEs.push_back(e.Result->Translations.at("es"));
-                    if (translatedResultsEs.size() == 1)
+                    recognizedResults.push_back(e.Result->Text);
+                    translatedResultsDe.push_back(e.Result->Translations.at("de"));
+                    if (translatedResultsDe.size() == 1)
                     {
-                        recognizer->AddTargetLanguage("fr");
+                        recognizer->AddTargetLanguage("es");
                     }
-                }
 
-                if (e.Result->Translations.find("fr") != e.Result->Translations.end())
-                {
-                    translatedResultsFr.push_back(e.Result->Translations.at("fr"));
-                }
-            }
-            else
-            {
-                if (e.Result->Reason == ResultReason::RecognizedSpeech)
-                {
-                    SPX_TRACE_VERBOSE("cxx_api_Test Only speech is recognized, but no translation.");
-                    errorResults.push_back("RecognizedSpeech Only");
+                    if (e.Result->Translations.find("es") != e.Result->Translations.end())
+                    {
+                        translatedResultsEs.push_back(e.Result->Translations.at("es"));
+                        if (translatedResultsEs.size() == 1)
+                        {
+                            recognizer->AddTargetLanguage("fr");
+                        }
+                    }
+
+                    if (e.Result->Translations.find("fr") != e.Result->Translations.end())
+                    {
+                        translatedResultsFr.push_back(e.Result->Translations.at("fr"));
+                    }
                 }
                 else
                 {
-                    SPX_TRACE_VERBOSE("cxx_api_Test Recognized failed: Reason:%d.", e.Result->Reason);
-                    errorResults.push_back("Recognized error.");
+                    if (e.Result->Reason == ResultReason::RecognizedSpeech)
+                    {
+                        SPX_TRACE_VERBOSE("cxx_api_Test Only speech is recognized, but no translation.");
+                        errorResults.push_back("RecognizedSpeech Only");
+                    }
+                    else
+                    {
+                        SPX_TRACE_VERBOSE("cxx_api_Test Recognized failed: Reason:%d.", e.Result->Reason);
+                        errorResults.push_back("Recognized error.");
+                    }
+                    if (readyFuture.wait_for(std::chrono::seconds(0)) != std::future_status::ready)
+                    {
+                        complete.set_value();
+                    }
                 }
-                if (readyFuture.wait_for(std::chrono::seconds(0)) != std::future_status::ready)
-                {
-                    complete.set_value();
-                }
-            }
-        });
+            });
         recognizer->Canceled.DisconnectAll();
         recognizer->Canceled.Connect([&errorResults, &complete, &readyFuture](const TranslationRecognitionCanceledEventArgs& e)
-        {
-            if (e.Reason == CancellationReason::EndOfStream)
             {
-                SPX_TRACE_VERBOSE("CXX_API_TEST CANCELED: Reach the end of the file.");
-            }
-            else
+                if (e.Reason == CancellationReason::EndOfStream)
+                {
+                    SPX_TRACE_VERBOSE("CXX_API_TEST CANCELED: Reach the end of the file.");
+                }
+                else
+                {
+                    auto error = !e.ErrorDetails.empty() ? e.ErrorDetails : "Errors!";
+                    SPX_TRACE_VERBOSE("CXX_API_TEST CANCELED: ErrorCode=%d, ErrorDetails=%s", (int)e.ErrorCode, e.ErrorDetails.c_str());
+                    errorResults.push_back(error);
+                    if (readyFuture.wait_for(std::chrono::seconds(0)) != std::future_status::ready)
+                    {
+                        complete.set_value();
+                    }
+                }
+            });
+        recognizer->SessionStopped.DisconnectAll();
+        recognizer->SessionStopped.Connect([&complete, &readyFuture](const SessionEventArgs& e)
             {
-                auto error = !e.ErrorDetails.empty() ? e.ErrorDetails : "Errors!";
-                SPX_TRACE_VERBOSE("CXX_API_TEST CANCELED: ErrorCode=%d, ErrorDetails=%s", (int)e.ErrorCode, e.ErrorDetails.c_str());
-                errorResults.push_back(error);
+                SPX_TRACE_VERBOSE("CXX_API_TEST SessionStopped: session id %s", e.SessionId.c_str());
                 if (readyFuture.wait_for(std::chrono::seconds(0)) != std::future_status::ready)
                 {
                     complete.set_value();
                 }
-            }
-        });
-        recognizer->SessionStopped.DisconnectAll();
-        recognizer->SessionStopped.Connect([&complete, &readyFuture](const SessionEventArgs& e)
-        {
-            SPX_TRACE_VERBOSE("CXX_API_TEST SessionStopped: session id %s", e.SessionId.c_str());
-            if (readyFuture.wait_for(std::chrono::seconds(0)) != std::future_status::ready)
-            {
-                complete.set_value();
-            }
-        });
+            });
 
         recognizer->StartContinuousRecognitionAsync().get();
         auto status = readyFuture.wait_for(300s);
@@ -381,9 +381,10 @@ TEST_CASE("Translation", "[api][cxx]")
         SPXTEST_REQUIRE(translatedResultsDe.size() > translatedResultsEs.size());
         SPXTEST_REQUIRE(errorResults.size() == 0);
     }
-}
 
-TEST_CASE("Custom translation endpoints", "[api][cxx]")
+} SPXTEST_CASE_END()
+
+SPXTEST_CASE_BEGIN("TranslationRecognizer::custom translation endpoints", "[api][cxx]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
@@ -418,4 +419,4 @@ TEST_CASE("Custom translation endpoints", "[api][cxx]")
         SPXTEST_REQUIRE(result != nullptr);
         SPXTEST_REQUIRE(result->Reason == ResultReason::Canceled);
     }
-}
+} SPXTEST_CASE_END()

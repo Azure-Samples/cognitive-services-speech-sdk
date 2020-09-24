@@ -163,12 +163,12 @@ void SynthesisDefaults(shared_ptr<SpeechConfig> config, bool isMock)
     }
 }
 
-TEST_CASE("Synthesis Defaults", "[api][cxx]")
+SPXTEST_CASE_BEGIN("SpeechSynthesizer::Synthesis Defaults", "[api][cxx]")
 {
     TTS_TESTS_FOR_ALL_ADAPTERS(SynthesisDefaults)
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Explicitly use default speakers - REST", "[api][cxx]")
+SPXTEST_CASE_BEGIN("SpeechSynthesizer::Explicitly use default speakers - REST", "[api][cxx]")
 {
     auto config = RestSpeechConfig();
     auto deviceConfig = AudioConfig::FromDefaultSpeakerOutput();
@@ -176,9 +176,9 @@ TEST_CASE("Explicitly use default speakers - REST", "[api][cxx]")
 
     synthesizer->SpeakTextAsync("{{{text1}}}"); /* "{{{text1}}}" has now completed rendering to default speakers */
     synthesizer->SpeakTextAsync("{{{text2}}}"); /* "{{{text2}}}" has now completed rendering to default speakers */
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Pick language - REST", "[api][cxx]")
+SPXTEST_CASE_BEGIN("SpeechSynthesizer::Pick language - REST", "[api][cxx]")
 {
     auto config = RestSpeechConfig();
     config->SetSpeechSynthesisLanguage("en-GB");
@@ -186,9 +186,9 @@ TEST_CASE("Pick language - REST", "[api][cxx]")
 
     synthesizer->SpeakTextAsync("{{{text1}}}"); /* "{{{text1}}}" has now completed rendering to default speakers */
     synthesizer->SpeakTextAsync("{{{text2}}}"); /* "{{{text2}}}" has now completed rendering to default speakers */
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Pick voice - REST", "[api][cxx]")
+SPXTEST_CASE_BEGIN("SpeechSynthesizer::Pick voice - REST", "[api][cxx]")
 {
     auto config = RestSpeechConfig();
     config->SetSpeechSynthesisVoiceName("Microsoft Server Speech Text to Speech Voice (en-GB, HazelRUS)");
@@ -196,9 +196,9 @@ TEST_CASE("Pick voice - REST", "[api][cxx]")
 
     synthesizer->SpeakTextAsync("{{{text1}}}"); /* "{{{text1}}}" has now completed rendering to default speakers */
     synthesizer->SpeakTextAsync("{{{text2}}}"); /* "{{{text2}}}" has now completed rendering to default speakers */
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Synthesis with multi voices - REST", "[api][cxx]")
+SPXTEST_CASE_BEGIN("SpeechSynthesizer::Synthesis with multi voices - REST", "[api][cxx]")
 {
     auto config = RestSpeechConfig();
     auto synthesizer = SpeechSynthesizer::FromConfig(config, nullptr);
@@ -209,9 +209,9 @@ TEST_CASE("Synthesis with multi voices - REST", "[api][cxx]")
     auto result = synthesizer->SpeakSsmlAsync(ssmlWithMultiVoices).get();
     SPXTEST_REQUIRE(result->Reason == ResultReason::SynthesizingAudioCompleted);
     SPXTEST_REQUIRE(!result->GetAudioData()->empty());
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Synthesis with recorded audio - REST", "[api][cxx]")
+SPXTEST_CASE_BEGIN("SpeechSynthesizer::Synthesis with recorded audio - REST", "[api][cxx]")
 {
     auto config = RestSpeechConfig();
     auto synthesizer = SpeechSynthesizer::FromConfig(config, nullptr);
@@ -222,9 +222,9 @@ TEST_CASE("Synthesis with recorded audio - REST", "[api][cxx]")
     auto result = synthesizer->SpeakSsmlAsync(ssmlWithRecordedAudio).get();
     SPXTEST_REQUIRE(result->Reason == ResultReason::SynthesizingAudioCompleted);
     SPXTEST_REQUIRE(!result->GetAudioData()->empty());
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Synthesis using std::wstring - REST", "[api][cxx]")
+SPXTEST_CASE_BEGIN("SpeechSynthesizer::Synthesis using std::wstring - REST", "[api][cxx]")
 {
     const auto config = RestSpeechConfig();
     config->SetSpeechSynthesisVoiceName(AudioUtterancesMap[SYNTHESIS_SHORT_UTTERANCE_CHINESE].Utterances["zh-CN"][0].VoiceName);
@@ -240,9 +240,9 @@ TEST_CASE("Synthesis using std::wstring - REST", "[api][cxx]")
 
     SPXTEST_REQUIRE(result2->Reason == ResultReason::SynthesizingAudioCompleted);
     SPXTEST_REQUIRE(result2->GetAudioLength() > 0);
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Synthesizer output to file - REST", "[api][cxx]")
+SPXTEST_CASE_BEGIN("SpeechSynthesizer::output to file - REST", "[api][cxx]")
 {
     auto config = RestSpeechConfig();
     auto fileConfig = AudioConfig::FromWavFileOutput("wavefile.wav");
@@ -275,9 +275,9 @@ TEST_CASE("Synthesizer output to file - REST", "[api][cxx]")
     {
         SPXTEST_REQUIRE(waveSize2 > waveSize1);
     }
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Synthesizer output to push stream - REST", "[api][cxx]")
+SPXTEST_CASE_BEGIN("SpeechSynthesizer::output to push stream - REST", "[api][cxx]")
 {
     auto config = RestSpeechConfig();
 
@@ -304,9 +304,9 @@ TEST_CASE("Synthesizer output to push stream - REST", "[api][cxx]")
         SPXTEST_REQUIRE(callback->GetAudioSize() == 0);
         SPXTEST_REQUIRE(callback->IsClosed());
     }
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Synthesizer output to pull stream use after synthesis completed - REST", "[api][cxx]")
+SPXTEST_CASE_BEGIN("SpeechSynthesizer::output to pull stream use after synthesis completed - REST", "[api][cxx]")
 {
     auto config = RestSpeechConfig();
     auto stream = AudioOutputStream::CreatePullStream();
@@ -321,9 +321,9 @@ TEST_CASE("Synthesizer output to pull stream use after synthesis completed - RES
     synthesizer = nullptr;
 
     DoSomethingWithAudioInPullStream(stream, canceled);
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Synthesizer output to pull stream start using before done synthesizing - REST", "[api][cxx]")
+SPXTEST_CASE_BEGIN("SpeechSynthesizer::output to pull stream start using before done synthesizing - REST", "[api][cxx]")
 {
     auto config = RestSpeechConfig();
     auto stream = AudioOutputStream::CreatePullStream();
@@ -336,9 +336,9 @@ TEST_CASE("Synthesizer output to pull stream start using before done synthesizin
 
     auto result1 = synthesizer->SpeakTextAsync("{{{text1}}}").get(); /* "{{{text1}}}" has completed rendering to pullstream */
     auto result2 = synthesizer->SpeakTextAsync("{{{text2}}}").get(); /* "{{{text2}}}" has completed rendering to pullstream */
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Speak out in results - REST", "[api][cxx]")
+SPXTEST_CASE_BEGIN("SpeechSynthesizer::Speak out in results - REST", "[api][cxx]")
 {
     auto config = RestSpeechConfig();
     auto synthesizer = SpeechSynthesizer::FromConfig(config, nullptr); /* nullptr indicates to do nothing with synthesizer audio by default */
@@ -367,9 +367,9 @@ TEST_CASE("Speak out in results - REST", "[api][cxx]")
 
     auto audioData2 = result2->GetAudioData(); /* of type std::shared_ptr<std::vector<uint8_t>> */
     DoSomethingWithAudioInVector(audioData2, result2->GetAudioLength());
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Speak output in chunks in event synthesizing - REST", "[api][cxx]")
+SPXTEST_CASE_BEGIN("SpeechSynthesizer::Speak output in chunks in event synthesizing - REST", "[api][cxx]")
 {
     auto config = RestSpeechConfig();
     auto synthesizer = SpeechSynthesizer::FromConfig(config, nullptr); /* nullptr indicates to do nothing with synthesizer audio by default */
@@ -388,9 +388,9 @@ TEST_CASE("Speak output in chunks in event synthesizing - REST", "[api][cxx]")
 
     synthesizer->SpeakTextAsync("{{{text1}}}"); /* "{{{text1}}}" has completed rendering */
     synthesizer->SpeakTextAsync("{{{text2}}}"); /* "{{{text2}}}" has completed rendering */
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Speak output in streams - REST", "[api][cxx]")
+SPXTEST_CASE_BEGIN("SpeechSynthesizer::Speak output in streams - REST", "[api][cxx]")
 {
     auto config = RestSpeechConfig();
     auto synthesizer = SpeechSynthesizer::FromConfig(config, nullptr); /* nullptr indicates to do nothing with synthesizer audio by default */
@@ -417,9 +417,9 @@ TEST_CASE("Speak output in streams - REST", "[api][cxx]")
 
     stream1->SetPosition(0);
     DoSomethingWithAudioInDataStream(stream1, true); /* re-check stream1 to make sure it's not impacted by stream2 */
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Speak output in streams before done from event synthesis started - REST", "[api][cxx]")
+SPXTEST_CASE_BEGIN("SpeechSynthesizer::Speak output in streams before done from event synthesis started - REST", "[api][cxx]")
 {
     auto config = RestSpeechConfig();
     auto synthesizer = SpeechSynthesizer::FromConfig(config, nullptr); /* nullptr indicates to do nothing with synthesizer audio by default */
@@ -445,9 +445,9 @@ TEST_CASE("Speak output in streams before done from event synthesis started - RE
 
     auto future3 = synthesizer->SpeakTextAsync("{{{text3}}}"); /* "{{{text3}}}" synthesis might have started */
     auto result3 = future3.get(); /* "{{{text3}}}" synthesis has completed */
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Speak output in streams before done from method start speaking text async - REST", "[api][cxx]")
+SPXTEST_CASE_BEGIN("SpeechSynthesizer::Speak output in streams before done from method start speaking text async - REST", "[api][cxx]")
 {
     auto config = RestSpeechConfig();
     auto synthesizer = SpeechSynthesizer::FromConfig(config, nullptr); /* nullptr indicates to do nothing with synthesizer audio by default */
@@ -465,7 +465,7 @@ TEST_CASE("Speak output in streams before done from method start speaking text a
 
     auto stream2 = AudioDataStream::FromResult(result2); /* of type std::shared_ptr<AudioDataStream>, does not block */
     auto future2 = DoSomethingWithAudioInDataStreamInBackground(stream2, false); /* does not block, just spins a thread up */
-}
+} SPXTEST_CASE_END()
 
 void SpeakOutputInStreamsBeforeDoneQueued(shared_ptr<SpeechConfig> config, bool isMock)
 {
@@ -502,12 +502,12 @@ void SpeakOutputInStreamsBeforeDoneQueued(shared_ptr<SpeechConfig> config, bool 
     SPXTEST_REQUIRE(requestNumMatch[0]);
 }
 
-TEST_CASE("Speak output in streams before done queued", "[api][cxx]")
+SPXTEST_CASE_BEGIN("SpeechSynthesizer::Speak output in streams before done queued", "[api][cxx]")
 {
     TTS_TESTS_FOR_ALL_ADAPTERS(SpeakOutputInStreamsBeforeDoneQueued)
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Speak output in streams with all data get on synthesis started result - REST", "[api][cxx]")
+SPXTEST_CASE_BEGIN("SpeechSynthesizer::Speak output in streams with all data get on synthesis started result - REST", "[api][cxx]")
 {
     auto config = RestSpeechConfig();
     auto synthesizer = SpeechSynthesizer::FromConfig(config, nullptr); /* nullptr indicates to do nothing with synthesizer audio by default */
@@ -534,9 +534,9 @@ TEST_CASE("Speak output in streams with all data get on synthesis started result
 
     auto stream = AudioDataStream::FromResult(result); /* now get the stream from result */
     DoSomethingWithAudioInDataStream(stream, true); /* the stream should be with AllData status */
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Result data should be consistent with output stream data - REST", "[api][cxx]")
+SPXTEST_CASE_BEGIN("SpeechSynthesizer::Result data should be consistent with output stream data - REST", "[api][cxx]")
 {
     auto config = RestSpeechConfig();
     auto stream = AudioOutputStream::CreatePullStream();
@@ -555,9 +555,9 @@ TEST_CASE("Result data should be consistent with output stream data - REST", "[a
 
     bool canceled = false;
     DoSomethingWithAudioInPullStream(stream, canceled, resultData);
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Synthesis with invalid subscription key", "[api][cxx]")
+SPXTEST_CASE_BEGIN("SpeechSynthesizer::Synthesis with invalid subscription key", "[api][cxx]")
 {
     auto config = SpeechConfig::FromSubscription("InvalidKey",  SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Region);
 
@@ -572,9 +572,9 @@ TEST_CASE("Synthesis with invalid subscription key", "[api][cxx]")
     SPXTEST_REQUIRE(ResultReason::Canceled == result->Reason);
     SPXTEST_REQUIRE(result->GetAudioData()->empty());
     SPXTEST_REQUIRE(synthesisCanceled);
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Synthesis with invalid voice - REST", "[api][cxx]")
+SPXTEST_CASE_BEGIN("SpeechSynthesizer::Synthesis with invalid voice - REST", "[api][cxx]")
 {
     auto config = RestSpeechConfig();
     config->SetSpeechSynthesisVoiceName("InvalidVoiceName");
@@ -594,9 +594,9 @@ TEST_CASE("Synthesis with invalid voice - REST", "[api][cxx]")
     SPXTEST_REQUIRE(std::string::npos != cancellationDetail->ErrorDetails.find("Unsupported voice"));
     SPXTEST_REQUIRE(result->GetAudioData()->empty());
     SPXTEST_REQUIRE(synthesisCanceled);
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Explicitly use default speakers - USP", "[api][cxx]")
+SPXTEST_CASE_BEGIN("SpeechSynthesizer::Explicitly use default speakers - USP", "[api][cxx]")
 {
     auto config = UspSpeechConfig();
     auto deviceConfig = AudioConfig::FromDefaultSpeakerOutput();
@@ -604,9 +604,9 @@ TEST_CASE("Explicitly use default speakers - USP", "[api][cxx]")
 
     synthesizer->SpeakTextAsync("{{{text1}}}"); /* "{{{text1}}}" has now completed rendering to default speakers */
     synthesizer->SpeakTextAsync("{{{text2}}}"); /* "{{{text2}}}" has now completed rendering to default speakers */
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Pick language - USP", "[api][cxx]")
+SPXTEST_CASE_BEGIN("SpeechSynthesizer::Pick language - USP", "[api][cxx]")
 {
     auto config = UspSpeechConfig();
     config->SetSpeechSynthesisLanguage("en-GB");
@@ -614,9 +614,9 @@ TEST_CASE("Pick language - USP", "[api][cxx]")
 
     synthesizer->SpeakTextAsync("{{{text1}}}"); /* "{{{text1}}}" has now completed rendering to default speakers */
     synthesizer->SpeakTextAsync("{{{text2}}}"); /* "{{{text2}}}" has now completed rendering to default speakers */
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Pick voice - USP", "[api][cxx]")
+SPXTEST_CASE_BEGIN("SpeechSynthesizer::Pick voice - USP", "[api][cxx]")
 {
     auto config = UspSpeechConfig();
     config->SetSpeechSynthesisVoiceName("Microsoft Server Speech Text to Speech Voice (en-GB, HazelRUS)");
@@ -624,9 +624,9 @@ TEST_CASE("Pick voice - USP", "[api][cxx]")
 
     synthesizer->SpeakTextAsync("{{{text1}}}"); /* "{{{text1}}}" has now completed rendering to default speakers */
     synthesizer->SpeakTextAsync("{{{text2}}}"); /* "{{{text2}}}" has now completed rendering to default speakers */
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Synthesis with multi voices - USP", "[api][cxx]")
+SPXTEST_CASE_BEGIN("SpeechSynthesizer::Synthesis with multi voices - USP", "[api][cxx]")
 {
     auto config = UspSpeechConfig();
     auto synthesizer = SpeechSynthesizer::FromConfig(config, nullptr);
@@ -637,9 +637,9 @@ TEST_CASE("Synthesis with multi voices - USP", "[api][cxx]")
     auto result = synthesizer->SpeakSsmlAsync(ssmlWithMultiVoices).get();
     SPXTEST_REQUIRE(result->Reason == ResultReason::SynthesizingAudioCompleted);
     SPXTEST_REQUIRE(!result->GetAudioData()->empty());
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Synthesis with recorded audio - USP", "[api][cxx]")
+SPXTEST_CASE_BEGIN("SpeechSynthesizer::Synthesis with recorded audio - USP", "[api][cxx]")
 {
     auto config = UspSpeechConfig();
     auto synthesizer = SpeechSynthesizer::FromConfig(config, nullptr);
@@ -650,9 +650,9 @@ TEST_CASE("Synthesis with recorded audio - USP", "[api][cxx]")
     auto result = synthesizer->SpeakSsmlAsync(ssmlWithRecordedAudio).get();
     SPXTEST_REQUIRE(result->Reason == ResultReason::SynthesizingAudioCompleted);
     SPXTEST_REQUIRE(!result->GetAudioData()->empty());
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Synthesis using std::wstring - USP", "[api][cxx]")
+SPXTEST_CASE_BEGIN("SpeechSynthesizer::Synthesis using std::wstring - USP", "[api][cxx]")
 {
     const auto config = UspSpeechConfig();
     config->SetSpeechSynthesisVoiceName(AudioUtterancesMap[SYNTHESIS_SHORT_UTTERANCE_CHINESE].Utterances["zh-CN"][0].VoiceName);
@@ -668,9 +668,9 @@ TEST_CASE("Synthesis using std::wstring - USP", "[api][cxx]")
 
     SPXTEST_REQUIRE(result2->Reason == ResultReason::SynthesizingAudioCompleted);
     SPXTEST_REQUIRE(result2->GetAudioLength() > 0);
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Synthesizer output to file - USP", "[api][cxx]")
+SPXTEST_CASE_BEGIN("SpeechSynthesizer::Synthesizer output to file - USP", "[api][cxx]")
 {
     auto config = UspSpeechConfig();
     auto fileConfig = AudioConfig::FromWavFileOutput("wavefile.wav");
@@ -695,9 +695,9 @@ TEST_CASE("Synthesizer output to file - USP", "[api][cxx]")
     {
         SPXTEST_REQUIRE(waveSize2 > waveSize1);
     }
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Synthesizer output to push stream - USP", "[api][cxx]")
+SPXTEST_CASE_BEGIN("SpeechSynthesizer::Synthesizer output to push stream - USP", "[api][cxx]")
 {
     auto config = UspSpeechConfig();
 
@@ -724,9 +724,9 @@ TEST_CASE("Synthesizer output to push stream - USP", "[api][cxx]")
         SPXTEST_REQUIRE(callback->GetAudioSize() == 0);
         SPXTEST_REQUIRE(callback->IsClosed());
     }
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Push stream disposed before synthesizer - USP", "[api][cxx]")
+SPXTEST_CASE_BEGIN("SpeechSynthesizer::Push stream disposed before synthesizer - USP", "[api][cxx]")
 {
     const auto config = UspSpeechConfig();
     std::shared_ptr<AudioConfig> streamConfig;
@@ -748,9 +748,9 @@ TEST_CASE("Push stream disposed before synthesizer - USP", "[api][cxx]")
     SPXTEST_REQUIRE(result2->Reason == ResultReason::SynthesizingAudioCompleted);
     SPXTEST_REQUIRE(result2->GetAudioLength() > 0);
 
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Synthesizer output to pull stream use after synthesis completed - USP", "[api][cxx]")
+SPXTEST_CASE_BEGIN("SpeechSynthesizer::Synthesizer output to pull stream use after synthesis completed - USP", "[api][cxx]")
 {
     auto config = UspSpeechConfig();
     auto stream = AudioOutputStream::CreatePullStream();
@@ -765,9 +765,9 @@ TEST_CASE("Synthesizer output to pull stream use after synthesis completed - USP
     synthesizer = nullptr;
 
     DoSomethingWithAudioInPullStream(stream, canceled);
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Synthesizer output to pull stream start using before done synthesizing - USP", "[api][cxx]")
+SPXTEST_CASE_BEGIN("SpeechSynthesizer::Synthesizer output to pull stream start using before done synthesizing - USP", "[api][cxx]")
 {
     auto config = UspSpeechConfig();
     auto stream = AudioOutputStream::CreatePullStream();
@@ -780,9 +780,9 @@ TEST_CASE("Synthesizer output to pull stream start using before done synthesizin
 
     auto result1 = synthesizer->SpeakTextAsync("{{{text1}}}").get(); /* "{{{text1}}}" has completed rendering to pullstream */
     auto result2 = synthesizer->SpeakTextAsync("{{{text2}}}").get(); /* "{{{text2}}}" has completed rendering to pullstream */
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Speak out in results - USP", "[api][cxx]")
+SPXTEST_CASE_BEGIN("SpeechSynthesizer::Speak out in results - USP", "[api][cxx]")
 {
     auto config = UspSpeechConfig();
     auto synthesizer = SpeechSynthesizer::FromConfig(config, nullptr); /* nullptr indicates to do nothing with synthesizer audio by default */
@@ -809,9 +809,9 @@ TEST_CASE("Speak out in results - USP", "[api][cxx]")
 
     auto audioData2 = result2->GetAudioData(); /* of type std::shared_ptr<std::vector<uint8_t>> */
     DoSomethingWithAudioInVector(audioData2, result2->GetAudioLength());
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Speak output in chunks in event synthesizing - USP", "[api][cxx]")
+SPXTEST_CASE_BEGIN("SpeechSynthesizer::Speak output in chunks in event synthesizing - USP", "[api][cxx]")
 {
     auto config = UspSpeechConfig();
     auto synthesizer = SpeechSynthesizer::FromConfig(config, nullptr); /* nullptr indicates to do nothing with synthesizer audio by default */
@@ -830,9 +830,9 @@ TEST_CASE("Speak output in chunks in event synthesizing - USP", "[api][cxx]")
 
     synthesizer->SpeakTextAsync("{{{text1}}}"); /* "{{{text1}}}" has completed rendering */
     synthesizer->SpeakTextAsync("{{{text2}}}"); /* "{{{text2}}}" has completed rendering */
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Speak output in streams - USP", "[api][cxx]")
+SPXTEST_CASE_BEGIN("SpeechSynthesizer::Speak output in streams - USP", "[api][cxx]")
 {
     auto config = UspSpeechConfig();
     auto synthesizer = SpeechSynthesizer::FromConfig(config, nullptr); /* nullptr indicates to do nothing with synthesizer audio by default */
@@ -859,9 +859,9 @@ TEST_CASE("Speak output in streams - USP", "[api][cxx]")
 
     stream1->SetPosition(0);
     DoSomethingWithAudioInDataStream(stream1, true); /* re-check stream1 to make sure it's not impacted by stream2 */
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Speak output in streams before done from event synthesis started - USP", "[api][cxx]")
+SPXTEST_CASE_BEGIN("SpeechSynthesizer::Speak output in streams before done from event synthesis started - USP", "[api][cxx]")
 {
     auto config = UspSpeechConfig();
     auto synthesizer = SpeechSynthesizer::FromConfig(config, nullptr); /* nullptr indicates to do nothing with synthesizer audio by default */
@@ -887,9 +887,9 @@ TEST_CASE("Speak output in streams before done from event synthesis started - US
 
     auto future3 = synthesizer->SpeakTextAsync("{{{text3}}}"); /* "{{{text3}}}" synthesis might have started */
     auto result3 = future3.get(); /* "{{{text3}}}" synthesis has completed */
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Speak output in streams before method start speaking text async - USP", "[api][cxx]")
+SPXTEST_CASE_BEGIN("SpeechSynthesizer::Speak output in streams before method start speaking text async - USP", "[api][cxx]")
 {
     auto config = UspSpeechConfig();
     auto synthesizer = SpeechSynthesizer::FromConfig(config, nullptr); /* nullptr indicates to do nothing with synthesizer audio by default */
@@ -907,9 +907,9 @@ TEST_CASE("Speak output in streams before method start speaking text async - USP
 
     auto stream2 = AudioDataStream::FromResult(result2); /* of type std::shared_ptr<AudioDataStream>, does not block */
     auto future2 = DoSomethingWithAudioInDataStreamInBackground(stream2, false); /* does not block, just spins a thread up */
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Speak output in streams with all data get on synthesis started result - USP", "[api][cxx]")
+SPXTEST_CASE_BEGIN("SpeechSynthesizer::Speak output in streams with all data get on synthesis started result - USP", "[api][cxx]")
 {
     auto config = UspSpeechConfig();
     auto synthesizer = SpeechSynthesizer::FromConfig(config, nullptr); /* nullptr indicates to do nothing with synthesizer audio by default */
@@ -936,9 +936,9 @@ TEST_CASE("Speak output in streams with all data get on synthesis started result
 
     auto stream = AudioDataStream::FromResult(result); /* now get the stream from result */
     DoSomethingWithAudioInDataStream(stream, true); /* the stream should be with AllData status */
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Check word boundary events - USP", "[api][cxx]")
+SPXTEST_CASE_BEGIN("SpeechSynthesizer::Check word boundary events - USP", "[api][cxx]")
 {
     auto config = UspSpeechConfig();
     config->SetSpeechSynthesisVoiceName(AudioUtterancesMap[SYNTHESIS_WORD_BOUNDARY_UTTERANCE_CHINESE].Utterances["zh-CN"][0].VoiceName);
@@ -1009,9 +1009,9 @@ TEST_CASE("Check word boundary events - USP", "[api][cxx]")
 
     (void)synthesizer->SpeakSsmlAsync(ssml);
     SPXTEST_REQUIRE(order > 0);
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Synthesis with language auto detection - USP", "[api][cxx]")
+SPXTEST_CASE_BEGIN("SpeechSynthesizer::Synthesis with language auto detection - USP", "[api][cxx]")
 {
     auto config = UspSpeechConfig();
     SPXTEST_SECTION("auto detect source language in synthesizer from open range")
@@ -1050,9 +1050,9 @@ TEST_CASE("Synthesis with language auto detection - USP", "[api][cxx]")
         REQUIRE_THROWS_WITH(SpeechSynthesizer::FromConfig(speechConfig, autoDetectSourceLanguageConfig, nullptr),
             Catch::Contains("Auto detection source languages in SpeechSynthesizer doesn't support language range specification."));
     }
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Check word boundary events - USP manual", "[manual][api][cxx]") // manual test for AudioOffset of Word Boundary events
+SPXTEST_CASE_BEGIN("SpeechSynthesizer::Check word boundary events - USP manual", "[manual][api][cxx]") // manual test for AudioOffset of Word Boundary events
 {
     auto config = UspSpeechConfig();
     config->SetSpeechSynthesisVoiceName(AudioUtterancesMap[SYNTHESIS_WORD_BOUNDARY_UTTERANCE_CHINESE].Utterances["zh-CN"][0].VoiceName);
@@ -1080,9 +1080,9 @@ TEST_CASE("Check word boundary events - USP manual", "[manual][api][cxx]") // ma
     SPXTEST_REQUIRE(expectedWordLengths == actualWordLengths);
 
     synthesizer->WordBoundary.DisconnectAll();
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Synthesis with invalid voice - USP", "[api][cxx]")
+SPXTEST_CASE_BEGIN("SpeechSynthesizer::Synthesis with invalid voice - USP", "[api][cxx]")
 {
     auto config = UspSpeechConfig();
     config->SetSpeechSynthesisVoiceName("InvalidVoiceName");
@@ -1102,9 +1102,9 @@ TEST_CASE("Synthesis with invalid voice - USP", "[api][cxx]")
     SPXTEST_REQUIRE(std::string::npos != cancellationDetail->ErrorDetails.find("Unsupported voice"));
     SPXTEST_REQUIRE(result->GetAudioData()->empty());
     SPXTEST_REQUIRE(synthesisCanceled);
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Stop synthesis - USP", "[api][cxx]")
+SPXTEST_CASE_BEGIN("SpeechSynthesizer::Stop synthesis - USP", "[api][cxx]")
 {
     auto config = UspSpeechConfig();
     // using a format without header for easy comparison
@@ -1230,9 +1230,9 @@ TEST_CASE("Stop synthesis - USP", "[api][cxx]")
         stream->Read(buffer.data(), static_cast<uint32_t>(buffer.size()));
         SPXTEST_REQUIRE(AreBinaryEqual(referenceResult->GetAudioData(), buffer));
     }
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Explicitly use default speakers - Mock", "[api][cxx]")
+SPXTEST_CASE_BEGIN("SpeechSynthesizer::Explicitly use default speakers - Mock", "[api][cxx]")
 {
     auto config = MockSpeechConfig();
     auto deviceConfig = AudioConfig::FromDefaultSpeakerOutput();
@@ -1246,9 +1246,9 @@ TEST_CASE("Explicitly use default speakers - Mock", "[api][cxx]")
 
     SPXTEST_REQUIRE(AreBinaryEqual(expectedAudioData1, result1->GetAudioData()));
     SPXTEST_REQUIRE(AreBinaryEqual(expectedAudioData2, result2->GetAudioData()));
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Pick language - Mock", "[api][cxx]")
+SPXTEST_CASE_BEGIN("SpeechSynthesizer::Pick language - Mock", "[api][cxx]")
 {
     auto config = MockSpeechConfig();
     config->SetSpeechSynthesisLanguage("en-GB");
@@ -1262,9 +1262,9 @@ TEST_CASE("Pick language - Mock", "[api][cxx]")
 
     SPXTEST_REQUIRE(AreBinaryEqual(expectedAudioData1, result1->GetAudioData()));
     SPXTEST_REQUIRE(AreBinaryEqual(expectedAudioData2, result2->GetAudioData()));
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Pick voice - Mock", "[api][cxx]")
+SPXTEST_CASE_BEGIN("SpeechSynthesizer::Pick voice - Mock", "[api][cxx]")
 {
     auto config = MockSpeechConfig();
     config->SetSpeechSynthesisVoiceName("Microsoft Server Speech Text to Speech Voice (en-GB, HazelRUS)");
@@ -1278,9 +1278,9 @@ TEST_CASE("Pick voice - Mock", "[api][cxx]")
 
     SPXTEST_REQUIRE(AreBinaryEqual(expectedAudioData1, result1->GetAudioData()));
     SPXTEST_REQUIRE(AreBinaryEqual(expectedAudioData2, result2->GetAudioData()));
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Synthesis using std::wstring - Mock", "[api][cxx]")
+SPXTEST_CASE_BEGIN("SpeechSynthesizer::using std::wstring - Mock", "[api][cxx]")
 {
     const auto config = MockSpeechConfig();
     config->SetSpeechSynthesisVoiceName(AudioUtterancesMap[SYNTHESIS_SHORT_UTTERANCE_CHINESE].Utterances["zh-CN"][0].VoiceName);
@@ -1298,9 +1298,9 @@ TEST_CASE("Synthesis using std::wstring - Mock", "[api][cxx]")
     auto result2_s = synthesizer->SpeakSsmlAsync(ssml_s).get();
     auto result2_ws = synthesizer->SpeakSsml(ssml_ws);
     SPXTEST_REQUIRE(AreBinaryEqual(result2_s->GetAudioData(), result2_ws->GetAudioData()));
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Synthesizer output to file - Mock", "[api][cxx]")
+SPXTEST_CASE_BEGIN("SpeechSynthesizer::output to file - Mock", "[api][cxx]")
 {
     auto config = MockSpeechConfig();
     auto fileConfig = AudioConfig::FromWavFileOutput("wavefile.wav");
@@ -1322,9 +1322,9 @@ TEST_CASE("Synthesizer output to file - Mock", "[api][cxx]")
     auto expectedAudioData2 = BuildMockSynthesizedAudio("{{{text2}}}", DEFAULT_LANGUAGE, DEFAULT_VOICE);
     auto expectedAudioData12 = MergeBinary(expectedAudioData1, expectedAudioData2);
     SPXTEST_REQUIRE(AreBinaryEqual(expectedAudioData12, waveData12));
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Synthesizer output to push stream - Mock", "[api][cxx]")
+SPXTEST_CASE_BEGIN("SpeechSynthesizer::output to push stream - Mock", "[api][cxx]")
 {
     auto config = MockSpeechConfig();
 
@@ -1346,9 +1346,9 @@ TEST_CASE("Synthesizer output to push stream - Mock", "[api][cxx]")
     synthesizer = nullptr;
 
     SPXTEST_REQUIRE(callback->IsClosed());
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Synthesizer output to pull stream use after synthesis completed - Mock", "[api][cxx]")
+SPXTEST_CASE_BEGIN("SpeechSynthesizer::output to pull stream use after synthesis completed - Mock", "[api][cxx]")
 {
     auto config = MockSpeechConfig();
     auto stream = AudioOutputStream::CreatePullStream();
@@ -1366,9 +1366,9 @@ TEST_CASE("Synthesizer output to pull stream use after synthesis completed - Moc
 
     bool canceled = false;
     DoSomethingWithAudioInPullStream(stream, canceled, expectedAudioData12);
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Synthesizer output to pull stream start using before done synthesizing - Mock", "[api][cxx]")
+SPXTEST_CASE_BEGIN("SpeechSynthesizer::output to pull stream start using before done synthesizing - Mock", "[api][cxx]")
 {
     auto config = MockSpeechConfig();
     auto stream = AudioOutputStream::CreatePullStream();
@@ -1385,9 +1385,9 @@ TEST_CASE("Synthesizer output to pull stream start using before done synthesizin
 
     auto result1 = synthesizer->SpeakTextAsync("{{{text1}}}").get(); /* "{{{text1}}}" has completed rendering to pullstream */
     auto result2 = synthesizer->SpeakTextAsync("{{{text2}}}").get(); /* "{{{text2}}}" has completed rendering to pullstream */
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Speak out in results - Mock", "[api][cxx]")
+SPXTEST_CASE_BEGIN("SpeechSynthesizer::Speak out in results - Mock", "[api][cxx]")
 {
     auto config = MockSpeechConfig();
     auto synthesizer = SpeechSynthesizer::FromConfig(config, nullptr); /* nullptr indicates to do nothing with synthesizer audio by default */
@@ -1403,9 +1403,9 @@ TEST_CASE("Speak out in results - Mock", "[api][cxx]")
     SPXTEST_REQUIRE(result2->Reason == ResultReason::SynthesizingAudioCompleted);
     auto expectedAudioData2 = BuildMockSynthesizedAudioWithHeader("{{{text2}}}", DEFAULT_LANGUAGE, DEFAULT_VOICE);
     SPXTEST_REQUIRE(AreBinaryEqual(expectedAudioData2, result2->GetAudioData()));
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Speak output in chunks in event synthesizing - Mock", "[api][cxx]")
+SPXTEST_CASE_BEGIN("SpeechSynthesizer::Speak output in chunks in event synthesizing - Mock", "[api][cxx]")
 {
     auto config = MockSpeechConfig();
     auto synthesizer = SpeechSynthesizer::FromConfig(config, nullptr); /* nullptr indicates to do nothing with synthesizer audio by default */
@@ -1430,9 +1430,9 @@ TEST_CASE("Speak output in chunks in event synthesizing - Mock", "[api][cxx]")
 
     synthesizer->SpeakTextAsync("{{{text1}}}"); /* "{{{text1}}}" has completed rendering */
     synthesizer->SpeakTextAsync("{{{text2}}}"); /* "{{{text2}}}" has completed rendering */
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Speak output in streams - Mock", "[api][cxx]")
+SPXTEST_CASE_BEGIN("SpeechSynthesizer::Speak output in streams - Mock", "[api][cxx]")
 {
     auto config = MockSpeechConfig();
     auto synthesizer = SpeechSynthesizer::FromConfig(config, nullptr); /* nullptr indicates to do nothing with synthesizer audio by default */
@@ -1452,9 +1452,9 @@ TEST_CASE("Speak output in streams - Mock", "[api][cxx]")
     auto expectedAudioData2 = BuildMockSynthesizedAudio("{{{text2}}}", DEFAULT_LANGUAGE, DEFAULT_VOICE);
     auto streamResult2 = DoSomethingWithAudioInDataStream(stream2, true);
     CheckStreamResult(streamResult2, expectedAudioData2);
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Speak output in streams before done from event synthesis started - Mock", "[api][cxx]")
+SPXTEST_CASE_BEGIN("SpeechSynthesizer::Speak output in streams before done from event synthesis started - Mock", "[api][cxx]")
 {
     auto config = MockSpeechConfig();
     auto synthesizer = SpeechSynthesizer::FromConfig(config, nullptr); /* nullptr indicates to do nothing with synthesizer audio by default */
@@ -1486,9 +1486,9 @@ TEST_CASE("Speak output in streams before done from event synthesis started - Mo
 
     auto future3 = synthesizer->SpeakTextAsync("{{{text3}}}"); /* "{{{text3}}}" synthesis might have started */
     auto result3 = future3.get(); /* "{{{text3}}}" synthesis has completed */
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Speak output in streams before done from method start speaking text async - Mock", "[api][cxx]")
+SPXTEST_CASE_BEGIN("SpeechSynthesizer::Speak output in streams before done from method start speaking text async - Mock", "[api][cxx]")
 {
     auto config = MockSpeechConfig();
     auto synthesizer = SpeechSynthesizer::FromConfig(config, nullptr); /* nullptr indicates to do nothing with synthesizer audio by default */
@@ -1510,9 +1510,9 @@ TEST_CASE("Speak output in streams before done from method start speaking text a
     auto expectedAudioData2 = BuildMockSynthesizedAudio("{{{text2}}}", DEFAULT_LANGUAGE, DEFAULT_VOICE);
     auto future2 = DoSomethingWithAudioInDataStreamInBackground(stream2, false); /* does not block, just spins a thread up */
     CheckStreamResult(future2.get(), expectedAudioData2);
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Speak output in streams with all data get on synthesis started result - Mock", "[api][cxx]")
+SPXTEST_CASE_BEGIN("SpeechSynthesizer::Speak output in streams with all data get on synthesis started result - Mock", "[api][cxx]")
 {
     auto config = MockSpeechConfig();
     auto synthesizer = SpeechSynthesizer::FromConfig(config, nullptr); /* nullptr indicates to do nothing with synthesizer audio by default */
@@ -1536,7 +1536,7 @@ TEST_CASE("Speak output in streams with all data get on synthesis started result
     auto expectedAudioData = BuildMockSynthesizedAudio("{{{text1}}}", DEFAULT_LANGUAGE, DEFAULT_VOICE);
     auto streamResult = DoSomethingWithAudioInDataStream(stream, true); /* the stream should be with AllData status */
     CheckStreamResult(streamResult, expectedAudioData);
-}
+} SPXTEST_CASE_END()
 
 void SpeakOutputInStreamsWithAllDataFromSynthesizingResult(shared_ptr<SpeechConfig> config, bool isMock)
 {
@@ -1572,15 +1572,15 @@ void SpeakOutputInStreamsWithAllDataFromSynthesizingResult(shared_ptr<SpeechConf
     CheckStreamResult(streamResult, expectedAudioData, StreamStatus::PartialData);
 }
 
-TEST_CASE("Speak output in streams with all data get since synthesizing result - Mock", "[api][cxx]")
+SPXTEST_CASE_BEGIN("SpeechSynthesizer::Speak output in streams with all data get since synthesizing result - Mock", "[api][cxx]")
 {
     SPXTEST_SECTION("Mock")
     {
         SpeakOutputInStreamsWithAllDataFromSynthesizingResult(MockSpeechConfig(), true);
     }
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Custom voice - REST", "[api][cxx]")
+SPXTEST_CASE_BEGIN("SpeechSynthesizer::Custom voice - REST", "[api][cxx]")
 {
     string customVoiceEndpoint = "https://" + SubscriptionsRegionsMap[CUSTOM_VOICE_SUBSCRIPTION].Region + ".voice.speech.microsoft.com";
     customVoiceEndpoint += "/cognitiveservices/v1?deploymentId=" + DefaultSettingsMap[CUSTOM_VOICE_DEPLOYMENT_ID];
@@ -1592,9 +1592,9 @@ TEST_CASE("Custom voice - REST", "[api][cxx]")
     auto result = synthesizer->SpeakTextAsync("{{{text1}}}").get();
     SPXTEST_REQUIRE(result->Reason == ResultReason::SynthesizingAudioCompleted);
     SPXTEST_REQUIRE(result->GetAudioLength() > 0);
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Custom text-to-speech endpoints", "[api][cxx]")
+SPXTEST_CASE_BEGIN("SpeechSynthesizer::Custom text-to-speech endpoints", "[api][cxx]")
 {
     string speechHost = SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Region + ".tts.speech.microsoft.com";
     string speechHostRest = "https://" + speechHost;
@@ -1648,9 +1648,9 @@ TEST_CASE("Custom text-to-speech endpoints", "[api][cxx]")
         SPXTEST_REQUIRE(result->Reason == ResultReason::SynthesizingAudioCompleted);
         SPXTEST_REQUIRE(result->GetAudioLength() > 0);
     }
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Local text-to-speech endpoints", "[.][api][cxx]") // for manual testing of speech service containers
+SPXTEST_CASE_BEGIN("SpeechSynthesizer::Local text-to-speech endpoints", "[.][api][cxx]") // for manual testing of speech service containers
 {
     SPXTEST_SECTION("Host only")
     {
@@ -1673,4 +1673,4 @@ TEST_CASE("Local text-to-speech endpoints", "[.][api][cxx]") // for manual testi
         SPXTEST_REQUIRE(result->Reason == ResultReason::SynthesizingAudioCompleted);
         SPXTEST_REQUIRE(result->GetAudioLength() > 0);
     }
-}
+} SPXTEST_CASE_END()

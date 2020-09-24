@@ -25,34 +25,34 @@ const vector<ISpxThreadService::Affinity> g_affinities =
     ISpxThreadService::Affinity::Background
 };
 
-TEST_CASE("ThreadService: Start/Stop", "[sr]")
+SPXTEST_CASE_BEGIN("ThreadService: Start/Stop", "[sr]")
 {
     auto service = make_shared<CSpxThreadService>();
     REQUIRE_NOTHROW(service->Init());
     REQUIRE_NOTHROW(service->Term());
-}
+}SPXTEST_CASE_END()
 
-TEST_CASE("ThreadService: Start twice fails", "[sr]")
+SPXTEST_CASE_BEGIN("ThreadService: Start twice fails", "[sr]")
 {
     auto service = make_shared<CSpxThreadService>();
     REQUIRE_NOTHROW(service->Init());
     REQUIRE_THROWS_WITH(service->Init(), Catch::Contains("INVALID_STATE"));
-}
+}SPXTEST_CASE_END()
 
-TEST_CASE("ThreadService: Term not initialized", "[sr]")
+SPXTEST_CASE_BEGIN("ThreadService: Term not initialized", "[sr]")
 {
     auto service = make_shared<CSpxThreadService>();
     REQUIRE_NOTHROW(service->Term());
-}
+}SPXTEST_CASE_END()
 
-TEST_CASE("ThreadService: Term twice - term is idempotent", "[sr]")
+SPXTEST_CASE_BEGIN("ThreadService: Term twice - term is idempotent", "[sr]")
 {
     auto service = make_shared<CSpxThreadService>();
     REQUIRE_NOTHROW(service->Term());
     REQUIRE_NOTHROW(service->Term());
-}
+}SPXTEST_CASE_END()
 
-TEST_CASE("ThreadService: Execute a task on uninitialized service fails", "[sr]")
+SPXTEST_CASE_BEGIN("ThreadService: Execute a task on uninitialized service fails", "[sr]")
 {
     auto service = make_shared<CSpxThreadService>();
     int counter = 0;
@@ -62,9 +62,9 @@ TEST_CASE("ThreadService: Execute a task on uninitialized service fails", "[sr]"
     });
 
     REQUIRE_THROWS_WITH(service->ExecuteAsync(move(task)), Catch::Contains("INVALID_STATE"));
-}
+}SPXTEST_CASE_END()
 
-TEST_CASE("ThreadService: Execute tasks on background/user threads", "[sr]")
+SPXTEST_CASE_BEGIN("ThreadService: Execute tasks on background/user threads", "[sr]")
 {
     auto service = make_shared<CSpxThreadService>();
 
@@ -95,9 +95,9 @@ TEST_CASE("ThreadService: Execute tasks on background/user threads", "[sr]")
     }
 
     REQUIRE_NOTHROW(service->Term());
-}
+}SPXTEST_CASE_END()
 
-TEST_CASE("ThreadService: User and background threads are different", "[sr]")
+SPXTEST_CASE_BEGIN("ThreadService: User and background threads are different", "[sr]")
 {
     auto service = make_shared<CSpxThreadService>();
     vector<thread::id> ids;
@@ -133,9 +133,9 @@ TEST_CASE("ThreadService: User and background threads are different", "[sr]")
     SPXTEST_REQUIRE(ids[0] != ids[1]);
     SPXTEST_REQUIRE(ids[0] != this_thread::get_id());
     SPXTEST_REQUIRE(ids[1] != this_thread::get_id());
-}
+}SPXTEST_CASE_END()
 
-TEST_CASE("ThreadService: Throw in a task and next task succeeds", "[sr]")
+SPXTEST_CASE_BEGIN("ThreadService: Throw in a task and next task succeeds", "[sr]")
 {
     auto service = make_shared<CSpxThreadService>();
 
@@ -162,9 +162,9 @@ TEST_CASE("ThreadService: Throw in a task and next task succeeds", "[sr]")
     }
 
     REQUIRE_NOTHROW(service->Term());
-}
+}SPXTEST_CASE_END()
 
-TEST_CASE("ThreadService: Schedule several timers.")
+SPXTEST_CASE_BEGIN("ThreadService: Schedule several timers.")
 {
     auto service = make_shared<CSpxThreadService>();
 
@@ -208,9 +208,9 @@ TEST_CASE("ThreadService: Schedule several timers.")
     SPXTEST_REQUIRE(duration1500 < duration2500);
 
     REQUIRE_NOTHROW(service->Term());
-}
+}SPXTEST_CASE_END()
 
-TEST_CASE("ThreadService: Shutdown with immediate tasks and timers", "[sr]")
+SPXTEST_CASE_BEGIN("ThreadService: Shutdown with immediate tasks and timers", "[sr]")
 {
     auto service = make_shared<CSpxThreadService>();
 
@@ -244,9 +244,9 @@ TEST_CASE("ThreadService: Shutdown with immediate tasks and timers", "[sr]")
     int counterOld = counter;
     this_thread::sleep_for(seconds(3));
     SPXTEST_REQUIRE(counterOld == counter);
-}
+}SPXTEST_CASE_END()
 
-TEST_CASE("ThreadService: Shutdown on a background thread fails", "[sr]")
+SPXTEST_CASE_BEGIN("ThreadService: Shutdown on a background thread fails", "[sr]")
 {
     auto service = make_shared<CSpxThreadService>();
     REQUIRE_NOTHROW(service->Init());
@@ -259,9 +259,9 @@ TEST_CASE("ThreadService: Shutdown on a background thread fails", "[sr]")
     REQUIRE_NOTHROW(service->ExecuteAsync(move(task)));
     REQUIRE_NOTHROW(future.get());
     REQUIRE_NOTHROW(service->Term());
-}
+}SPXTEST_CASE_END()
 
-TEST_CASE("ThreadService: Shutdown on a user thread succeeds", "[sr]")
+SPXTEST_CASE_BEGIN("ThreadService: Shutdown on a user thread succeeds", "[sr]")
 {
     auto service = make_shared<CSpxThreadService>();
     REQUIRE_NOTHROW(service->Init());
@@ -273,9 +273,9 @@ TEST_CASE("ThreadService: Shutdown on a user thread succeeds", "[sr]")
     auto future = task.get_future();
     REQUIRE_NOTHROW(service->ExecuteAsync(move(task), ISpxThreadService::Affinity::User));
     REQUIRE_NOTHROW(future.get());
-}
+}SPXTEST_CASE_END()
 
-TEST_CASE("ThreadService: Synchronous execution", "[sr]")
+SPXTEST_CASE_BEGIN("ThreadService: Synchronous execution", "[sr]")
 {
     auto service = make_shared<CSpxThreadService>();
     REQUIRE_NOTHROW(service->Init());
@@ -288,9 +288,9 @@ TEST_CASE("ThreadService: Synchronous execution", "[sr]")
     REQUIRE_NOTHROW(service->ExecuteSync(std::move(task)));
     SPXTEST_REQUIRE(counter == 1);
     REQUIRE_NOTHROW(service->Term());
-}
+}SPXTEST_CASE_END()
 
-TEST_CASE("ThreadService: Async with promise", "[sr]")
+SPXTEST_CASE_BEGIN("ThreadService: Async with promise", "[sr]")
 {
     auto service = make_shared<CSpxThreadService>();
     REQUIRE_NOTHROW(service->Init());
@@ -324,4 +324,4 @@ TEST_CASE("ThreadService: Async with promise", "[sr]")
     REQUIRE(task1FinishedFuture.get() == true);
     REQUIRE(task2FinishedFuture.get() == false);
     REQUIRE(counter == 1);
-}
+}SPXTEST_CASE_END()

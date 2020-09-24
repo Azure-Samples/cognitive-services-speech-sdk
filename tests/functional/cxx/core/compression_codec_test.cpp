@@ -25,7 +25,7 @@ const char c_silkV3Preamble[] = "#!SILK_V3";
 const uint16_t c_silkTermMark = 0xffff;
 const char c_silkContentType[] = "audio/SILK";
 
-TEST_CASE("Silk codec can be loaded", "[audio][compression][codec]")
+SPXTEST_CASE_BEGIN("Silk codec can be loaded", "[audio][compression][codec]")
 {
     shared_ptr<CSpxInternalAudioCodecAdapter> codecAdapter = make_shared<CSpxInternalAudioCodecAdapter>();
 
@@ -205,4 +205,5 @@ TEST_CASE("Silk codec can be loaded", "[audio][compression][codec]")
         REQUIRE_NOTHROW(codecAdapter->Term());
     }
 
-}
+
+}SPXTEST_CASE_END()

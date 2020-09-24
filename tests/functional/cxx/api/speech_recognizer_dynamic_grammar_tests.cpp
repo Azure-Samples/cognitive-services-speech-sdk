@@ -25,7 +25,7 @@ std::shared_ptr<SpeechConfig> GetDynamicGrammarTestsConfig(const std::string& tr
     return config;
 }
 
-TEST_CASE("Dynamic Grammar Basics", "[api][cxx][dgi]")
+SPXTEST_CASE_BEGIN("PhraseListGrammar::Dynamic Grammar Basics", "[api][cxx][dgi]")
 {
     SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(AMBIGUOUS_SPEECH)));
 
@@ -224,4 +224,4 @@ TEST_CASE("Dynamic Grammar Basics", "[api][cxx][dgi]")
             }
         }
     }
-}
+} SPXTEST_CASE_END()

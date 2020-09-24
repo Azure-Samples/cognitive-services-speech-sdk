@@ -215,7 +215,7 @@ void CheckThatSinkReceivedAudioData(const shared_ptr<AudioTestSink>& sink)
 }
 
 
-TEST_CASE("Mic is properly functioning", "[!hide][audio][mic]")
+SPXTEST_CASE_BEGIN("Mic is properly functioning", "[!hide][audio][mic]")
 {
 
     const auto& mic = SpxCreateObjectWithSite<ISpxAudioPump>("CSpxMicrophonePump", SpxGetRootSite());
@@ -451,4 +451,4 @@ TEST_CASE("Mic is properly functioning", "[!hide][audio][mic]")
         CHECK_THROWS(mic->StartPump(nullptr));
         SPXTEST_REQUIRE(mic->GetState() == ISpxAudioPump::State::NoInput);
     }
-}
+}SPXTEST_CASE_END()

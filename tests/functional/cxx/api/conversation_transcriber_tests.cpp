@@ -64,7 +64,7 @@ std::shared_ptr<SpeechConfig> CreateSpeechConfigForCTSInRoom(const std::string& 
         trafficType);
 }
 
-TEST_CASE("conversation transcriber no join", "[api][cxx][conversation_transcriber]")
+SPXTEST_CASE_BEGIN("ConversationTranscriber::no join", "[api][cxx][conversation_transcriber]")
 {
     auto config = CreateSpeechConfigForCTSInRoom(SpxGetTestTrafficType(__FILE__, __LINE__));
 
@@ -76,7 +76,7 @@ TEST_CASE("conversation transcriber no join", "[api][cxx][conversation_transcrib
     auto transcriber = ConversationTranscriber::FromConfig(audioInput);
 
     REQUIRE_THROWS(transcriber->StartTranscribingAsync().get());
-}
+} SPXTEST_CASE_END()
 #if 0
 TEST_CASE("conversation transcriber leave conversation", "[api][cxx][conversation_transcriber]")
 {
@@ -226,7 +226,7 @@ TEST_CASE("conversation transcriber reco", "[api][cxx][conversation_transcriber]
 //}
 #endif
 
-TEST_CASE("conversation bad connection", "[api][cxx][conversation_transcriber]")
+SPXTEST_CASE_BEGIN("ConversationTranscriber::bad connection", "[api][cxx][conversation_transcriber]")
 {
     auto audioEndpoint = "wrong_endpoint";
     auto config = CreateSpeechConfigForCTSInRoom(audioEndpoint, SpxGetTestTrafficType(__FILE__, __LINE__));
@@ -247,7 +247,7 @@ TEST_CASE("conversation bad connection", "[api][cxx][conversation_transcriber]")
     transcriber->StopTranscribingAsync().get();
 
     SPXTEST_REQUIRE(result->phrases[0].Text.find("Runtime error: Url protocol prefix not recognized") != string::npos);
-}
+} SPXTEST_CASE_END()
 #if 0
 TEST_CASE("conversation_inroom_8_channel_file", "[api][cxx][conversation_transcriber]")
 {
@@ -270,7 +270,7 @@ TEST_CASE("conversation_inroom_8_channel_file", "[api][cxx][conversation_transcr
     SPXTEST_REQUIRE(FindTheRef(result->phrases, AudioUtterancesMap[CONVERSATION_BETWEEN_TWO_PERSONS_ENGLISH].Utterances["en-US"][0].Text));
 }
 #endif
-TEST_CASE("conversation_inroom_8_channel_audio_pull", "[api][cxx][conversation_transcriber]")
+SPXTEST_CASE_BEGIN("ConversationTranscriber::inroom_8_channel_audio_pull", "[api][cxx][conversation_transcriber]")
 {
     auto config = CreateSpeechConfigForCTSInRoom(SpxGetTestTrafficType(__FILE__, __LINE__));
 
@@ -426,9 +426,9 @@ TEST_CASE("conversation_inroom_8_channel_audio_pull", "[api][cxx][conversation_t
         SPXTEST_REQUIRE(!result->phrases.empty());
         SPXTEST_REQUIRE(FindTheRef(result->phrases, AudioUtterancesMap[CONVERSATION_BETWEEN_TWO_PERSONS_ENGLISH].Utterances["en-US"][0].Text));
     }
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("conversation_inroom_8_channel_audio_push", "[api][cxx][conversation_transcriber]")
+SPXTEST_CASE_BEGIN("ConversationTranscriber::inroom_8_channel_audio_push", "[api][cxx][conversation_transcriber]")
 {
     auto config = CreateSpeechConfigForCTSInRoom(SpxGetTestTrafficType(__FILE__, __LINE__));
 
@@ -487,9 +487,9 @@ TEST_CASE("conversation_inroom_8_channel_audio_push", "[api][cxx][conversation_t
     INFO(GetText(result->phrases));
     SPXTEST_REQUIRE(!result->phrases.empty());
     SPXTEST_REQUIRE(FindTheRef(result->phrases, AudioUtterancesMap[CONVERSATION_BETWEEN_TWO_PERSONS_ENGLISH].Utterances["en-US"][0].Text));
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("conversation_online_pull_stream", "[api][cxx][conversation_transcriber]")
+SPXTEST_CASE_BEGIN("ConversationTranscriber::online_pull_stream", "[api][cxx][conversation_transcriber]")
 {
     SPXTEST_REQUIRE(!DefaultSettingsMap[ONLINE_AUDIO_ENDPOINT].empty());
     SPXTEST_REQUIRE(!SubscriptionsRegionsMap[CONVERSATION_TRANSCRIPTION_PPE_SUBSCRIPTION].Key.empty());
@@ -570,9 +570,9 @@ TEST_CASE("conversation_online_pull_stream", "[api][cxx][conversation_transcribe
         SPXTEST_REQUIRE(result->phrases.size() >= 1);
         SPXTEST_REQUIRE(result->phrases[0].Text == AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH].Utterances["en-US"][0].Text);
     }
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("conversation_online_pull_stream_internal_error", "[api][cxx][conversation_transcriber]")
+SPXTEST_CASE_BEGIN("ConversationTranscriber::online_pull_stream_internal_error", "[api][cxx][conversation_transcriber]")
 {
     SPXTEST_REQUIRE(!DefaultSettingsMap[ONLINE_AUDIO_ENDPOINT].empty());
     SPXTEST_REQUIRE(!SubscriptionsRegionsMap[CONVERSATION_TRANSCRIPTION_PPE_SUBSCRIPTION].Key.empty());
@@ -693,9 +693,9 @@ TEST_CASE("conversation_online_pull_stream_internal_error", "[api][cxx][conversa
     WaitForResult(ready.get_future(), 15min);
     transcriber->StopTranscribingAsync().get();
     SPXTEST_REQUIRE(finalCount >=2);
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("conversation_online_1_channel_file", "[api][cxx][conversation_transcriber]")
+SPXTEST_CASE_BEGIN("ConversationTranscriber::online_1_channel_file", "[api][cxx][conversation_transcriber]")
 {
     auto config = CreateSpeechConfigForCTSInRoom(
         SubscriptionsRegionsMap[CONVERSATION_TRANSCRIPTION_PPE_SUBSCRIPTION].Key,
@@ -721,7 +721,7 @@ TEST_CASE("conversation_online_1_channel_file", "[api][cxx][conversation_transcr
     transcriber->StopTranscribingAsync().get();
     SPXTEST_REQUIRE(result->phrases.size() >= 1);
     SPXTEST_REQUIRE(result->phrases[0].Text == AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH].Utterances["en-US"][0].Text);
-}
+} SPXTEST_CASE_END()
 
 #if 0
 TEST_CASE("conversation_online_microphone", "[api][cxx][conversation_transcriber]")

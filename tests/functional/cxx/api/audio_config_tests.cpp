@@ -37,7 +37,7 @@ static std::shared_ptr<SpeechConfig> SpeechConfigForAudioConfigTests(const std::
     return config;
 }
 
-TEST_CASE("Audio Basics", "[api][cxx][audio]")
+SPXTEST_CASE_BEGIN("Audio Basics", "[api][cxx][audio]")
 {
     std::string sessionId;
 
@@ -262,4 +262,4 @@ TEST_CASE("Audio Basics", "[api][cxx][audio]")
             SPXTEST_REQUIRE(StringComparisions::AssertFuzzyMatch(result->phrases[0].Text, AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH].Utterances["en-US"][0].Text));
         }
     }
-}
+} SPXTEST_CASE_END()

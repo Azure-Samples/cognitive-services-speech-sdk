@@ -9,7 +9,7 @@
 #include "recognizer_utils.h"
 #include "synthesizer_utils.h"
 
-TEST_CASE("Offline continuous recognition with RNN-T using file input", "[api][cxx][rnnt]")
+SPXTEST_CASE_BEGIN("Offline continuous recognition with RNN-T using file input", "[api][cxx][rnnt]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
@@ -40,9 +40,9 @@ TEST_CASE("Offline continuous recognition with RNN-T using file input", "[api][c
             SPXTEST_REQUIRE(MatchText(AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH].Utterances["en-US"][0].Text, result->phrases[0].Text));
         }
     }
-}
+}SPXTEST_CASE_END()
 
-TEST_CASE("Offline continuous recognition with RNN-T using push stream input", "[api][cxx][rnnt]")
+SPXTEST_CASE_BEGIN("Offline continuous recognition with RNN-T using push stream input", "[api][cxx][rnnt]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
@@ -75,9 +75,9 @@ TEST_CASE("Offline continuous recognition with RNN-T using push stream input", "
             SPXTEST_REQUIRE(MatchText(AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH].Utterances["en-US"][0].Text, result->phrases[0].Text));
         }
     }
-}
+}SPXTEST_CASE_END()
 
-TEST_CASE("Offline continuous recognition with RNN-T using pull stream input", "[api][cxx][rnnt]")
+SPXTEST_CASE_BEGIN("Offline continuous recognition with RNN-T using pull stream input", "[api][cxx][rnnt]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
@@ -109,9 +109,9 @@ TEST_CASE("Offline continuous recognition with RNN-T using pull stream input", "
             SPXTEST_REQUIRE(MatchText(AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH].Utterances["en-US"][0].Text, result->phrases[0].Text));
         }
     }
-}
+}SPXTEST_CASE_END()
 
-TEST_CASE("Offline single recognition with RNN-T and offline TTS", "[api][cxx][rnnt][hybrid_tts]")
+SPXTEST_CASE_BEGIN("Offline single recognition with RNN-T and offline TTS", "[api][cxx][rnnt][hybrid_tts]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
@@ -156,4 +156,4 @@ TEST_CASE("Offline single recognition with RNN-T and offline TTS", "[api][cxx][r
             SPXTEST_REQUIRE(resultSynth->Properties.GetProperty("SynthesisFinishedBy") == "offline");
         }
     }
-}
+}SPXTEST_CASE_END()

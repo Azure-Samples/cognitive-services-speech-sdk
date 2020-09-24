@@ -10,15 +10,15 @@
 #include "file_utils.h"
 #include "recognizer_utils.h"
 
-TEST_CASE("Verify invalid SourceLanguageConfig construction", "[api][cxx]")
+SPXTEST_CASE_BEGIN("SourceLanguageConfig::Verify invalid SourceLanguageConfig construction", "[api][cxx]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
     REQUIRE_THROWS(SourceLanguageConfig::FromLanguage(""));
     REQUIRE_THROWS(SourceLanguageConfig::FromLanguage("en-US", ""));
     REQUIRE_THROWS(SpeechRecognizer::FromConfig(CurrentSpeechConfig(SpxGetTestTrafficType(__FILE__, __LINE__)), (std::shared_ptr<SourceLanguageConfig>)nullptr, nullptr));
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Verify invalid AutoDetectSourceLanguageConfig construction", "[api][cxx]")
+SPXTEST_CASE_BEGIN("SourceLanguageConfig::Verify invalid AutoDetectSourceLanguageConfig construction", "[api][cxx]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
     REQUIRE_THROWS(AutoDetectSourceLanguageConfig::FromLanguages({}));
@@ -29,4 +29,4 @@ TEST_CASE("Verify invalid AutoDetectSourceLanguageConfig construction", "[api][c
     REQUIRE_THROWS(AutoDetectSourceLanguageConfig::FromSourceLanguageConfigs(sourceLanguageConfigs));
     REQUIRE_THROWS(
         SpeechRecognizer::FromConfig(CurrentSpeechConfig(SpxGetTestTrafficType(__FILE__, __LINE__)), (std::shared_ptr<AutoDetectSourceLanguageConfig>)nullptr, nullptr));
-}
+} SPXTEST_CASE_END()

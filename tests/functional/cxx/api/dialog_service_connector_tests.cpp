@@ -340,7 +340,7 @@ const auto verifyNotRecognizedKeyword = [](std::ostringstream& oss, const Speech
     return false;
 };
 
-TEST_CASE("Dialog Service Connector basics", "[api][cxx][dialog_service_connector]")
+SPXTEST_CASE_BEGIN("DialogServiceConnector::basics", "[api][cxx][dialog_service_connector]")
 {
     SPXTEST_SECTION("Listen Once works")
     {
@@ -546,9 +546,9 @@ TEST_CASE("Dialog Service Connector basics", "[api][cxx][dialog_service_connecto
         //SPXTEST_REQUIRE(success);
     }
 #endif
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Dialog Service Connector extended", "[api][cxx][dialog_service_connector][adv][!hide]")
+SPXTEST_CASE_BEGIN("DialogServiceConnector::extended", "[api][cxx][dialog_service_connector][adv][!hide]")
 {
     SPXTEST_SECTION("Interleaving speech and activities.")
     {
@@ -592,9 +592,9 @@ TEST_CASE("Dialog Service Connector extended", "[api][cxx][dialog_service_connec
         INFO(message);
         SPXTEST_REQUIRE(success);
     }
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Dialog Service Connector CustomCommands", "[api][cxx][dialog_service_connector][tahiti][!hide]")
+SPXTEST_CASE_BEGIN("DialogServiceConnector::CustomCommands", "[api][cxx][dialog_service_connector][tahiti][!hide]")
 {
     SPXTEST_SECTION("Send/receive activities.")
     {
@@ -630,7 +630,7 @@ TEST_CASE("Dialog Service Connector CustomCommands", "[api][cxx][dialog_service_
         INFO(message);
         SPXTEST_REQUIRE(success);
     }
-}
+} SPXTEST_CASE_END()
 
 #ifdef SPEECHSDK_KWS_ENABLED
 
@@ -641,7 +641,7 @@ TEST_CASE("Dialog Service Connector CustomCommands", "[api][cxx][dialog_service_
 // 3) Being able to specify the keyword text in keyword detection (Done)
 // 4) Being able to specify the audio for the latter utterance
 
-TEST_CASE("Dialog Service Connector KWS basics", "[api][cxx][dialog_service_connector]") {
+SPXTEST_CASE_BEGIN("DialogServiceConnector::KWS basics", "[api][cxx][dialog_service_connector]") {
 
     SPXTEST_SECTION("Listen once with KWS only works")
     {
@@ -677,9 +677,9 @@ TEST_CASE("Dialog Service Connector KWS basics", "[api][cxx][dialog_service_conn
             SPXTEST_FAIL(message);
         }
     }
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Dialog Service Connector KWV basics", "[api][cxx][dialog_service_connector][!hide]")
+SPXTEST_CASE_BEGIN("DialogServiceConnector::KWV basics", "[api][cxx][dialog_service_connector][!hide]")
 {
 
     SPXTEST_SECTION("Listen once with KWS + KWV accept works")
@@ -779,11 +779,11 @@ TEST_CASE("Dialog Service Connector KWV basics", "[api][cxx][dialog_service_conn
             SPXTEST_FAIL(message);
         }
     }
-}
+} SPXTEST_CASE_END()
 
 // Disable multi-turn tests for now as we don't have an easy way of loading audio in stages to simulate a microphone scenario
 #if 0
-TEST_CASE("Dialog Service Connector KWV multi-turn tests", "[api][cxx][dialog_service_connector]")
+SPXTEST_CASE_BEGIN("DialogServiceConnector::KWV multi-turn tests", "[api][cxx][dialog_service_connector]")
 {
 
     SPXTEST_SECTION("Later utterances should not be polluted by KWV during multi turn recognition")
@@ -846,6 +846,6 @@ TEST_CASE("Dialog Service Connector KWV multi-turn tests", "[api][cxx][dialog_se
             SPXTEST_FAIL(message);
         }
     }
-}
+} SPXTEST_CASE_END()
 #endif
 #endif

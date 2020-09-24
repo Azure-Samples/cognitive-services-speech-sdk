@@ -33,7 +33,7 @@ std::shared_ptr<SpeechConfig> HybridConfig()
     return config;
 }
 
-TEST_CASE("Offline Synthesis", "[api][cxx][hybrid_tts]")
+SPXTEST_CASE_BEGIN("Offline Synthesis", "[api][cxx][hybrid_tts]")
 {
 
     SPXTEST_REQUIRE(exists(GetOfflineVoicePath() + "/" + font_token_file));
@@ -129,9 +129,9 @@ TEST_CASE("Offline Synthesis", "[api][cxx][hybrid_tts]")
         auto cancellationDetail = SpeechSynthesisCancellationDetails::FromResult(result);
         SPXTEST_REQUIRE(cancellationDetail->ErrorDetails.find("Local TTS engine not initialized") != std::string::npos);
     }
-}
+}SPXTEST_CASE_END()
 
-TEST_CASE("Hybrid Synthesis", "[api][cxx][hybrid_tts]")
+SPXTEST_CASE_BEGIN("Hybrid Synthesis", "[api][cxx][hybrid_tts]")
 {
     SPXTEST_REQUIRE(exists(GetOfflineVoicePath() + "/" + font_token_file));
 
@@ -177,4 +177,4 @@ TEST_CASE("Hybrid Synthesis", "[api][cxx][hybrid_tts]")
         SPXTEST_REQUIRE(result2->Properties.GetProperty("SynthesisFinishedBy") == "offline");
         SPXTEST_REQUIRE(!AreBinaryEqual(result1->GetAudioData(), result2->GetAudioData()));
     }
-}
+}SPXTEST_CASE_END()

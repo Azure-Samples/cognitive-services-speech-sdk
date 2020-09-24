@@ -8,7 +8,7 @@
 #include "test_utils.h"
 
 #if 0
-TEST_CASE("SPXTEST cxx", "[cxx][spxtest]")
+SPXTEST_CASE_BEGIN("SPXTEST cxx", "[cxx][spxtest]")
 {
     SPXTEST_SECTION("Testing new SPXTEST_ MACROS")
     {
@@ -56,6 +56,6 @@ TEST_CASE("SPXTEST cxx", "[cxx][spxtest]")
             SPXTEST_CHECK(a != b);
         }
     }
-}
+} SPXTEST_CASE_END()
 #endif
 

@@ -14,21 +14,21 @@
 using namespace Microsoft::CognitiveServices::Speech;
 using namespace std;
 
-TEST_CASE("Speech Event Signal basics", "[api][cxx]")
+SPXTEST_CASE_BEGIN("EventSignal::Speech Event Signal basics", "[api][cxx]")
 {
-    
+
     SPXTEST_SECTION("Check callbacks can be connected and disconnected.")
     {
         SPX_TRACE_VERBOSE("%s: line=%d", __FUNCTION__, __LINE__);
         EventSignal<int> signal;
         vector<int> numCalls(2);
         auto callback0 = [&](const int&)
-        { 
-            numCalls[0]++; 
+        {
+            numCalls[0]++;
         };
-        auto callback1 = [&](const int&) 
-        { 
-            numCalls[1]++; 
+        auto callback1 = [&](const int&)
+        {
+            numCalls[1]++;
         };
 
         auto callback2 = [&](const int&)
@@ -83,4 +83,4 @@ TEST_CASE("Speech Event Signal basics", "[api][cxx]")
         SPXTEST_REQUIRE(numCalls[0] == 0);
         SPXTEST_REQUIRE(numCalls[1] == 1);
     }
-}
+} SPXTEST_CASE_END()

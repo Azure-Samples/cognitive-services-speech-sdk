@@ -45,7 +45,7 @@ void wait_for_future(
     success_cb();
 }
 
-TEST_CASE("Keyword Recognizer basics", "[api][cxx][keyword_recognizer]")
+SPXTEST_CASE_BEGIN("KeywordRecognizer::basics", "[api][cxx][keyword_recognizer]")
 {
     SPXTEST_GIVEN("Mocks for KWS and Microphone; Model.")
     {
@@ -161,4 +161,4 @@ TEST_CASE("Keyword Recognizer basics", "[api][cxx][keyword_recognizer]")
             }
         }
     }
-}
+} SPXTEST_CASE_END()

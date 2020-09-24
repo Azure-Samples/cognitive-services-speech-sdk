@@ -19,7 +19,7 @@
 #include <create_object_helpers.h>
 #include <property_id_2_name_map.h>
 
-TEST_CASE("CSpxSession2 basics", "[cxx][session2]")
+SPXTEST_CASE_BEGIN("CSpxSession2 basics", "[cxx][session2]")
 {
     auto makeBaseTestEnv = []()
     {
@@ -67,4 +67,4 @@ TEST_CASE("CSpxSession2 basics", "[cxx][session2]")
             SPXTEST_REQUIRE(cch > 0);
         }
     }
-}
+}SPXTEST_CASE_END()

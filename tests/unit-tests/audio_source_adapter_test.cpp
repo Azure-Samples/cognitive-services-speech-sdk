@@ -16,7 +16,7 @@
 #include <memory>
 #include <chrono>
 
-TEST_CASE("CSpxMicrophoneAudioSourceAdapter tests", "[cxx][audio]")
+SPXTEST_CASE_BEGIN("CSpxMicrophoneAudioSourceAdapter tests", "[cxx][audio]")
 {
     MockInteractiveMicrophone* rawMicPtr = nullptr;
     auto makeBaseTestEnv = [&]()
@@ -816,4 +816,4 @@ TEST_CASE("CSpxMicrophoneAudioSourceAdapter tests", "[cxx][audio]")
             }
         }
     }
-}
+}SPXTEST_CASE_END()

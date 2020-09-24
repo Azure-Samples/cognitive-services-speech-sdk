@@ -31,7 +31,7 @@ std::shared_ptr<SpeechConfig> SpeechConfigForIntentTests(const std::string& traf
     return config;
 }
 
-TEST_CASE("Intent Recognizer basics", "[api][cxx][intent]")
+SPXTEST_CASE_BEGIN("IntentRecognizer::basics", "[api][cxx][intent]")
 {
     SPXTEST_SECTION("Intent Recognition works")
     {
@@ -97,7 +97,7 @@ TEST_CASE("Intent Recognizer basics", "[api][cxx][intent]")
 #pragma warning(pop)
 #endif
         };
-        
+
         SPXTEST_WHEN("using single model, all intents, no intent name, no intent ids")
         {
             recognizer->AddAllIntents(model);
@@ -111,7 +111,7 @@ TEST_CASE("Intent Recognizer basics", "[api][cxx][intent]")
             auto result = recognizer->RecognizeOnceAsync().get();
             requireIntentId(result, "override-all-intent-ids-with-this");
         }
-        
+
         SPXTEST_WHEN("using single model, specific intent by name, no intent id")
         {
             recognizer->AddIntent(model, "HomeAutomation.TurnOn");
@@ -149,4 +149,4 @@ TEST_CASE("Intent Recognizer basics", "[api][cxx][intent]")
             requireIntentId(result, "HomeAutomation.TurnOn");
         }
     }
-}
+} SPXTEST_CASE_END()

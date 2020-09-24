@@ -731,6 +731,23 @@ inline int parse_cli_args(Catch::Session& session, int argc, char* argv[])
 }
 #endif
 
+//This is how you set up tests for carbon, always use SPXTEST_CASE_BEGIN / SPXTEST_CASE_END.
+//This ensures no exceptions are thrown. In case there is exception, it fails the test and do a memory dump of all the accumulated logging to stderr.
+#define SPXTEST_CASE_BEGIN(...)              \
+        INTERNAL_CATCH_TESTCASE(__VA_ARGS__) \
+        { try      {                         \
+
+#define SPXTEST_CASE_END(...)                                        \
+} catch (const std::exception& e)                                    \
+{                                                                    \
+    SPX_TRACE_ERROR("SPXTEST_CASE_END %s(%d):", __FILE__, __LINE__); \
+    diagnostics_log_memory_dump_to_file(nullptr, 0);                 \
+    std::string msg{"Failed due to exception '"};                    \
+    msg += e.what();                                                 \
+    msg += "'";                                                      \
+    FAIL(msg.c_str());                                               \
+} }
+
 #define SPXTEST_SECTION(msg) SECTION(msg) if ([=](){ \
     SPX_TRACE_INFO("SPXTEST_SECTION('%s') %s(%d)", msg, __FILE__, __LINE__);  \
     return 1; }())
@@ -752,7 +769,7 @@ inline int parse_cli_args(Catch::Session& session, int argc, char* argv[])
           SPX_TRACE_ERROR("SPXTEST_CHECK('%s'): FAILED: %s(%d) w/Exception:", __SPX_EXPR_AS_STRING(__VA_ARGS__), __FILE__, __LINE__); \
     } CHECK(__VA_ARGS__); }())
 
-// ISSUE: need to try and not evaluate __VA_ARGS__ multiple times... 
+// ISSUE: need to try and not evaluate __VA_ARGS__ multiple times...
 // ISSUE: also ... need to figure out why memory log didn't emit when cxx_api_tests failed last run
 #define SPXTEST_REQUIRE( ... ) ([&](){ \
     try { auto isTrue = !!(__VA_ARGS__); \
@@ -815,16 +832,6 @@ inline int parse_cli_args(Catch::Session& session, int argc, char* argv[])
 #define SPXTEST_REQUIRE_NOTHROW( ... ) \
     SPX_TRACE_INFO("SPXTEST_REQUIRE_NOTHROW('%s'): %s(%d):", __SPX_EXPR_AS_STRING(__VA_ARGS__), __FILE__, __LINE__); \
     REQUIRE_NOTHROW(__VA_ARGS__)
-
-#define SPXTEST_NOTHROW_BEGIN(...) try
-
-#define SPXTEST_NOTHROW_END(...) \
-    catch (...)                  \
-    {                            \
-        SPX_TRACE_INFO("SPXTEST_NOTHROW_END: %s(%d):", __FILE__, __LINE__); \
-        diagnostics_log_memory_dump_to_file(nullptr, 1);\
-        FAIL("Exceptions were thrown between SPXTEST_NOTHROW_BEGIN and SPXTEST_NOTHROW_END"); \
-    }\
 
 inline std::string SpxGetTestTrafficType(const char* file, int line)
 {

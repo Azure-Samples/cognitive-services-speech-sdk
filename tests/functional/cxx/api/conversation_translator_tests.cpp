@@ -24,32 +24,32 @@ using namespace Microsoft::CognitiveServices::Speech::Impl;
 using namespace Microsoft::CognitiveServices::Speech::IntegrationTests;
 using namespace Microsoft::CognitiveServices::Speech::Transcription;
 
-TEST_CASE("Conversation host without translations", "[api][cxx][conversation_translator][cxx_conversation][no_translate]")
+SPXTEST_CASE_BEGIN("Conversation host without translations", "[api][cxx][conversation_translator][cxx_conversation][no_translate]")
 {
     CT_INTEGRATION_TEST_INIT;
     auto speechConfig = CreateConfig("en-US", {});
     auto conversation = Conversation::CreateConversationAsync(speechConfig).get();
     conversation->DeleteConversationAsync().get();
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Conversation host with translations", "[api][cxx][conversation_translator][cxx_conversation][translate]")
+SPXTEST_CASE_BEGIN("Conversation host with translations", "[api][cxx][conversation_translator][cxx_conversation][translate]")
 {
     CT_INTEGRATION_TEST_INIT;
     auto speechConfig = CreateConfig("en-US", { "fr" });
     auto conversation = Conversation::CreateConversationAsync(speechConfig).get();
     conversation->DeleteConversationAsync().get();
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Conversation host destructor", "[api][cxx][conversation_translator][cxx_conversation][destructor]")
+SPXTEST_CASE_BEGIN("Conversation host destructor", "[api][cxx][conversation_translator][cxx_conversation][destructor]")
 {
     CT_INTEGRATION_TEST_INIT;
     auto speechConfig = CreateConfig("en-US", { "fr", "ar" });
     auto conversation = Conversation::CreateConversationAsync(speechConfig).get();
 
     conversation.reset();
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Conversation destructor after start", "[api][cxx][conversation_translator][cxx_conversation][start_destructor]")
+SPXTEST_CASE_BEGIN("Conversation destructor after start", "[api][cxx][conversation_translator][cxx_conversation][start_destructor]")
 {
     CT_INTEGRATION_TEST_INIT;
     auto speechConfig = CreateConfig("en-US", { "fr", "ar" });
@@ -57,9 +57,9 @@ TEST_CASE("Conversation destructor after start", "[api][cxx][conversation_transl
     conversation->StartConversationAsync().get();
 
     conversation.reset();
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Conversation call while not joined", "[api][cxx][conversation_translator][cxx_conversation][not_started]")
+SPXTEST_CASE_BEGIN("Conversation call while not joined", "[api][cxx][conversation_translator][cxx_conversation][not_started]")
 {
     CT_INTEGRATION_TEST_INIT;
     auto speechConfig = CreateConfig("en-US", { "fr", "ar" });
@@ -106,9 +106,9 @@ TEST_CASE("Conversation call while not joined", "[api][cxx][conversation_transla
 
     REQUIRE_NOTHROW(conversation->EndConversationAsync().get());
     REQUIRE_NOTHROW(conversation->DeleteConversationAsync().get());
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Conversation call unsupported methods", "[api][cxx][conversation_translator][cxx_conversation][unsupported]")
+SPXTEST_CASE_BEGIN("Conversation call unsupported methods", "[api][cxx][conversation_translator][cxx_conversation][unsupported]")
 {
     CT_INTEGRATION_TEST_INIT;
     auto speechConfig = CreateConfig("en-US", { "fr", "ar" });
@@ -182,9 +182,9 @@ TEST_CASE("Conversation call unsupported methods", "[api][cxx][conversation_tran
             std::runtime_error,
             Catch::HasHR(SPXERR_UNSUPPORTED_API_ERROR));
     }
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Conversation Translator Host Audio", "[api][cxx][conversation_translator][cxx_conversation_translator][audio][host]")
+SPXTEST_CASE_BEGIN("Conversation Translator Host Audio", "[api][cxx][conversation_translator][cxx_conversation_translator][audio][host]")
 {
     CT_INTEGRATION_TEST_INIT;
     SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
@@ -230,9 +230,9 @@ TEST_CASE("Conversation Translator Host Audio", "[api][cxx][conversation_transla
     {
         ExpectedTranscription(participantId, AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH].Utterances["en-US"][0].Text, speechLang)
     });
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Join a conversation with translation", "[api][cxx][conversation_translator][cxx_conversation_translator][audio][join]")
+SPXTEST_CASE_BEGIN("Join a conversation with translation", "[api][cxx][conversation_translator][cxx_conversation_translator][audio][join]")
 {
     CT_INTEGRATION_TEST_INIT;
     SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
@@ -303,9 +303,9 @@ TEST_CASE("Join a conversation with translation", "[api][cxx][conversation_trans
         ExpectedTranscription(bobId, AudioUtterancesMap[SINGLE_UTTERANCE_CHINESE].Utterances["zh-CN"][0].Text, bobLang, { { "en-US", "Weather." }, { "de", "wetter." } }),
         ExpectedTranscription(hostId, AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH].Utterances["en-US"][0].Text, hostLang, { { "de", "Wie ist das Wetter?" } }),
     });
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Host sends an instant message", "[api][cxx][conversation_translator][cxx_conversation_translator][im][host]")
+SPXTEST_CASE_BEGIN("Host sends an instant message", "[api][cxx][conversation_translator][cxx_conversation_translator][im][host]")
 {
     CT_INTEGRATION_TEST_INIT;
     SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
@@ -327,9 +327,9 @@ TEST_CASE("Host sends an instant message", "[api][cxx][conversation_translator][
     {
         ExpectedTranscription(host.ParticipantId, "This is a test", host.Lang, {{ "ja", "これはテストです" }, { "ar", "هذا اختبار" }})
     });
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Host and participants send instant messages", "[api][cxx][conversation_translator][cxx_conversation_translator][im][join]")
+SPXTEST_CASE_BEGIN("Host and participants send instant messages", "[api][cxx][conversation_translator][cxx_conversation_translator][im][join]")
 {
     CT_INTEGRATION_TEST_INIT;
     SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
@@ -399,9 +399,9 @@ TEST_CASE("Host and participants send instant messages", "[api][cxx][conversatio
 
     alice.VerifyIms(expectedIms);
     host.VerifyIms(expectedIms);
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Join locked room", "[api][cxx][conversation_translator][cxx_conversation_translator][join_locked]")
+SPXTEST_CASE_BEGIN("Join locked room", "[api][cxx][conversation_translator][cxx_conversation_translator][join_locked]")
 {
     CT_INTEGRATION_TEST_INIT;
     SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
@@ -425,9 +425,9 @@ TEST_CASE("Join locked room", "[api][cxx][conversation_translator][cxx_conversat
 
     host.Leave();
     host.VerifyBasicEvents(false);
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("ConversationTranslator Host disconnects room", "[api][cxx][conversation_translator][cxx_conversation_translator][host_disconnect]")
+SPXTEST_CASE_BEGIN("Conversation Translator Host disconnects room", "[api][cxx][conversation_translator][cxx_conversation_translator][host_disconnect]")
 {
     CT_INTEGRATION_TEST_INIT;
     SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
@@ -456,9 +456,9 @@ TEST_CASE("ConversationTranslator Host disconnects room", "[api][cxx][conversati
 
     host.VerifyBasicEvents(true);
     alice.VerifyBasicEvents(true);
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Conversation Translator call methods when not joined", "[api][cxx][conversation_translator][cxx_conversation_translator][not_joined]")
+SPXTEST_CASE_BEGIN("Conversation Translator call methods when not joined", "[api][cxx][conversation_translator][cxx_conversation_translator][not_joined]")
 {
     CT_INTEGRATION_TEST_INIT;
 
@@ -509,9 +509,9 @@ TEST_CASE("Conversation Translator call methods when not joined", "[api][cxx][co
 
         REQUIRE_NOTHROW(translator->LeaveConversationAsync().get());
     }
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Double join should fail", "[api][cxx][conversation_translator][cxx_conversation_translator][double_join]")
+SPXTEST_CASE_BEGIN("Double join should fail", "[api][cxx][conversation_translator][cxx_conversation_translator][double_join]")
 {
     CT_INTEGRATION_TEST_INIT;
 
@@ -542,9 +542,9 @@ TEST_CASE("Double join should fail", "[api][cxx][conversation_translator][cxx_co
 
     alice.Leave();
     host.Leave();
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Conversation Translator Connection Before Join", "[api][cxx][conversation_translator][cxx_conversation_translator][connection][before_join]")
+SPXTEST_CASE_BEGIN("Conversation Translator Connection Before Join", "[api][cxx][conversation_translator][cxx_conversation_translator][connection][before_join]")
 {
     CT_INTEGRATION_TEST_INIT;
 
@@ -569,9 +569,9 @@ TEST_CASE("Conversation Translator Connection Before Join", "[api][cxx][conversa
 
     // Close should not throw exceptions
     REQUIRE_NOTHROW(connection->Close());
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Conversation Translator Connection After Leave", "[api][cxx][conversation_translator][cxx_conversation_translator][connection][after_leave]")
+SPXTEST_CASE_BEGIN("Conversation Translator Connection After Leave", "[api][cxx][conversation_translator][cxx_conversation_translator][connection][after_leave]")
 {
     CT_INTEGRATION_TEST_INIT;
 
@@ -601,9 +601,9 @@ TEST_CASE("Conversation Translator Connection After Leave", "[api][cxx][conversa
 
     // Close should not throw exceptions
     REQUIRE_NOTHROW(host.Conn->Close());
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Conversation Translator Connection Recognizer events/methods", "[api][cxx][conversation_translator][cxx_conversation_translator][connection][recognizer]")
+SPXTEST_CASE_BEGIN("Conversation Translator Connection Recognizer events/methods", "[api][cxx][conversation_translator][cxx_conversation_translator][connection][recognizer]")
 {
     CT_INTEGRATION_TEST_INIT;
 
@@ -631,9 +631,9 @@ TEST_CASE("Conversation Translator Connection Recognizer events/methods", "[api]
     host.Leave();
 
     SPXTEST_REQUIRE(evts.size() > 0);
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Conversation Translator Host Leave Rejoin", "[api][cxx][conversation_translator][cxx_conversation_translator][connection][host][rejoin]")
+SPXTEST_CASE_BEGIN("Conversation Translator Host Leave Rejoin", "[api][cxx][conversation_translator][cxx_conversation_translator][connection][host][rejoin]")
 {
     CT_INTEGRATION_TEST_INIT;
     SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH)));
@@ -702,9 +702,9 @@ TEST_CASE("Conversation Translator Host Leave Rejoin", "[api][cxx][conversation_
         {
             ExpectedTranscription(participantId, "This is a test", speechLang, {{ "fr", "C'est un test" }, { "de", "Dies ist ein Test" }})
         });
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Conversation Translator can't call methods after disconnect", "[api][cxx][conversation_translator][cxx_conversation_translator][connection][after_disconnect]")
+SPXTEST_CASE_BEGIN("Conversation Translator can't call methods after disconnect", "[api][cxx][conversation_translator][cxx_conversation_translator][connection][after_disconnect]")
 {
     CT_INTEGRATION_TEST_INIT;
 
@@ -737,9 +737,9 @@ TEST_CASE("Conversation Translator can't call methods after disconnect", "[api][
         Catch::HasHR(SPXERR_INVALID_STATE));
 
     host.Leave();
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Conversation Translator Participant Rejoin", "[api][cxx][conversation_translator][cxx_conversation_translator][connection][participant][rejoin]")
+SPXTEST_CASE_BEGIN("Conversation Translator Participant Rejoin", "[api][cxx][conversation_translator][cxx_conversation_translator][connection][participant][rejoin]")
 {
     CT_INTEGRATION_TEST_INIT;
 
@@ -798,9 +798,9 @@ TEST_CASE("Conversation Translator Participant Rejoin", "[api][cxx][conversation
     host.VerifyTranscriptions(expectedTranscriptions);
     SPX_TRACE_INFO("Validating Alice transcriptions");
     alice.VerifyTranscriptions(expectedTranscriptions);
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Conversation Translator Participant Rejoin After Delete", "[api][cxx][conversation_translator][cxx_conversation_translator][connection][participant][rejoin_after_delete]")
+SPXTEST_CASE_BEGIN("Conversation Translator Participant Rejoin After Delete", "[api][cxx][conversation_translator][cxx_conversation_translator][connection][participant][rejoin_after_delete]")
 {
     CT_INTEGRATION_TEST_INIT;
 
@@ -855,9 +855,9 @@ TEST_CASE("Conversation Translator Participant Rejoin After Delete", "[api][cxx]
         std::runtime_error,
         Catch::HasHR(SPXERR_INVALID_STATE)
     );
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Conversation Translator SpeechRecognizer Connection Still Works", "[api][cxx][conversation_translator][cxx_conversation_translator][connection][trans_recognizer]")
+SPXTEST_CASE_BEGIN("Conversation Translator SpeechRecognizer Connection Still Works", "[api][cxx][conversation_translator][cxx_conversation_translator][connection][trans_recognizer]")
 {
     auto utterance = AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH];
 
@@ -882,9 +882,9 @@ TEST_CASE("Conversation Translator SpeechRecognizer Connection Still Works", "[a
     evts->VerifySessionAndConnectEvents(true);
     SPXTEST_REQUIRE(evts->Transcribed.size() > 0);
     SPXTEST_REQUIRE_THAT(evts->Transcribed[0].Text, Catch::FuzzyMatch(utterance.Utterances["en-US"][0].Text));
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Conversation Translator INT endpoint", "[!hide][cxx_conversation_translator][int]")
+SPXTEST_CASE_BEGIN("Conversation Translator INT endpoint", "[!hide][cxx_conversation_translator][int]")
 {
     const auto hostName = "host";
     const auto speechLang = "en-US";
@@ -920,9 +920,9 @@ TEST_CASE("Conversation Translator INT endpoint", "[!hide][cxx_conversation_tran
     {
         ExpectedTranscription(participantId, AudioUtterancesMap[SINGLE_UTTERANCE_ENGLISH].Utterances[speechLang][0].Text, speechLang)
     });
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Set invalid authorization token", "[api][cxx][conversation_translator][cxx_conversation_translator][authToken][invalid]")
+SPXTEST_CASE_BEGIN("Conversation Translator Set invalid authorization token", "[api][cxx][conversation_translator][cxx_conversation_translator][authToken][invalid]")
 {
     auto speechConfig = CreateConfig("en-US", {});
 
@@ -942,9 +942,9 @@ TEST_CASE("Set invalid authorization token", "[api][cxx][conversation_translator
     );
 
     host.Leave();
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Host updates authorization token", "[api][cxx][conversation_translator][cxx_conversation_translator][authToken][host]")
+SPXTEST_CASE_BEGIN("Conversation Translator Host updates authorization token", "[api][cxx][conversation_translator][cxx_conversation_translator][authToken][host]")
 {
     auto authTokenValidity = 20s;
     const auto speechLang = "en-US";
@@ -987,9 +987,9 @@ TEST_CASE("Host updates authorization token", "[api][cxx][conversation_translato
     {
         ExpectedTranscription(host.ParticipantId, utterance.Utterances[speechLang][0].Text, speechLang, {})
     });
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("Participant receives updated authorization token", "[api][cxx][conversation_translator][cxx_conversation_translator][authToken][join]")
+SPXTEST_CASE_BEGIN("Conversation Translator Participant receives updated authorization token", "[api][cxx][conversation_translator][cxx_conversation_translator][authToken][join]")
 {
     auto authTokenValidity = 20s;
     const auto speechLang = "en-US";
@@ -1039,11 +1039,11 @@ TEST_CASE("Participant receives updated authorization token", "[api][cxx][conver
     });
 
     host.VerifyBasicEvents(false);
-}
+} SPXTEST_CASE_END()
 
 
 
-TEST_CASE("Conversation Translator Sweden demo", "[!hide][cxx_conversation_translator][Sweden]")
+SPXTEST_CASE_BEGIN("Conversation Translator Sweden demo", "[!hide][cxx_conversation_translator][Sweden]")
 {
     CT_INTEGRATION_TEST_INIT;
 
@@ -1097,5 +1097,5 @@ TEST_CASE("Conversation Translator Sweden demo", "[!hide][cxx_conversation_trans
     conversation->EndConversationAsync().get();
     SPX_TRACE_INFO("Delete conversation");
     conversation->DeleteConversationAsync().get();
-}
+} SPXTEST_CASE_END()
 

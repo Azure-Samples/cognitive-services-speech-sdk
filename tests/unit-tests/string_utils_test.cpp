@@ -7,7 +7,7 @@
 #include "string_utils.h"
 
 
-TEST_CASE("strcpy and wcscpy", "[core][string utils]")
+SPXTEST_CASE_BEGIN("strcpy and wcscpy", "[core][string utils]")
 {
     const size_t srcSize = 1024;
     const size_t dstSize = srcSize / 2;
@@ -96,4 +96,4 @@ TEST_CASE("strcpy and wcscpy", "[core][string utils]")
         SPXTEST_REQUIRE(PAL::wcsnicmp(wsrc, wdst, dstSize) == 0);
         SPXTEST_REQUIRE(wdst[maxCopySize] == 0);
     }
-}
+}SPXTEST_CASE_END()

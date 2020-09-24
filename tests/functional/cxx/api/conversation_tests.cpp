@@ -32,16 +32,16 @@ std::shared_ptr<SpeechConfig> CreateCTSInroomServiceSpeechConfig(const std::stri
     return config;
 }
 
-TEST_CASE("conversation create without id", "[api][cxx]")
+SPXTEST_CASE_BEGIN("Conversation::create without id", "[api][cxx]")
 {
     auto config = CreateCTSInroomServiceSpeechConfig(SpxGetTestTrafficType(__FILE__, __LINE__));
     auto conversation = Conversation::CreateConversationAsync(config).get();
 
     auto got_id = conversation->GetConversationId();
     SPXTEST_REQUIRE(got_id.empty());
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("conversation create with id", "[api][cxx]")
+SPXTEST_CASE_BEGIN("Conversation::create with id", "[api][cxx]")
 {
     auto config = CreateCTSInroomServiceSpeechConfig(SpxGetTestTrafficType(__FILE__, __LINE__));
     auto id = PAL::CreateGuidWithDashesUTF8();
@@ -49,9 +49,9 @@ TEST_CASE("conversation create with id", "[api][cxx]")
 
     auto got_id = conversation->GetConversationId();
     SPXTEST_REQUIRE(got_id == id);
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("conversation id in Chinese", "[api][cxx]")
+SPXTEST_CASE_BEGIN("Conversation::id in Chinese", "[api][cxx]")
 {
     auto config = CreateCTSInroomServiceSpeechConfig(SpxGetTestTrafficType(__FILE__, __LINE__));
 
@@ -60,9 +60,9 @@ TEST_CASE("conversation id in Chinese", "[api][cxx]")
     auto conversation = Conversation::CreateConversationAsync(config, reinterpret_cast<char*>(s)).get();
     auto gotId = conversation->GetConversationId();
     SPXTEST_REQUIRE((PAL::stricmp(reinterpret_cast<char*>(s), gotId.c_str())) == 0);
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("conversation create transcriber no get", "[api][cxx]")
+SPXTEST_CASE_BEGIN("Conversation::create transcriber no get", "[api][cxx]")
 {
     auto config = CreateCTSInroomServiceSpeechConfig(SpxGetTestTrafficType(__FILE__, __LINE__));
 
@@ -73,9 +73,9 @@ TEST_CASE("conversation create transcriber no get", "[api][cxx]")
     auto transcriber = ConversationTranscriber::FromConfig(audioInput);
 
     REQUIRE_NOTHROW(transcriber->JoinConversationAsync(conversation));  // did not have .get() by intention. Carbon should not crash when customers forget .get()
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("conversation create transcriber", "[api][cxx]")
+SPXTEST_CASE_BEGIN("Conversation::create transcriber", "[api][cxx]")
 {
     auto config = CreateCTSInroomServiceSpeechConfig(SpxGetTestTrafficType(__FILE__, __LINE__));
 
@@ -86,16 +86,16 @@ TEST_CASE("conversation create transcriber", "[api][cxx]")
     auto transcriber = ConversationTranscriber::FromConfig(audioInput);
 
     REQUIRE_NOTHROW(transcriber->JoinConversationAsync(conversation).get());
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("conversation create users", "[api][cxx]")
+SPXTEST_CASE_BEGIN("Conversation::create users", "[api][cxx]")
 {
     auto myId = "emailOfSomeUser";
     auto user = User::FromUserId(myId);
     SPXTEST_REQUIRE(user->GetId() == myId);
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("conversation create participant", "[api][cxx]")
+SPXTEST_CASE_BEGIN("Conversation::create participant", "[api][cxx]")
 {
     REQUIRE_THROWS(Participant::From(""));
     REQUIRE_NOTHROW(Participant::From("secondparticipant"));
@@ -108,9 +108,9 @@ TEST_CASE("conversation create participant", "[api][cxx]")
          "XXXX" : "YYY"
         }
         )"));
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("conversation add_remove participant by user id", "[api][cxx]")
+SPXTEST_CASE_BEGIN("Conversation::add_remove participant by user id", "[api][cxx]")
 {
     auto config = CreateCTSInroomServiceSpeechConfig(SpxGetTestTrafficType(__FILE__, __LINE__));
     auto conv = Conversation::CreateConversationAsync(config).get();
@@ -128,9 +128,9 @@ TEST_CASE("conversation add_remove participant by user id", "[api][cxx]")
     SPXTEST_REQUIRE(got_value == value);
 
     REQUIRE_NOTHROW(conv->RemoveParticipantAsync(user_id).get());
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("conversation add_remove participant by user object", "[api][cxx]")
+SPXTEST_CASE_BEGIN("Conversation::add_remove participant by user object", "[api][cxx]")
 {
     auto config = CreateCTSInroomServiceSpeechConfig(SpxGetTestTrafficType(__FILE__, __LINE__));
     auto conv = Conversation::CreateConversationAsync(config).get();
@@ -144,9 +144,9 @@ TEST_CASE("conversation add_remove participant by user object", "[api][cxx]")
     SPXTEST_REQUIRE(user_object->GetId() == id);
 
     REQUIRE_NOTHROW(conv->RemoveParticipantAsync(user_object).get());
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("conversation add_remove participant by participant object", "[api][cxx]")
+SPXTEST_CASE_BEGIN("Conversation::add_remove participant by participant object", "[api][cxx]")
 {
     auto config = CreateCTSInroomServiceSpeechConfig(SpxGetTestTrafficType(__FILE__, __LINE__));
     auto conv = Conversation::CreateConversationAsync(config).get();
@@ -159,9 +159,9 @@ TEST_CASE("conversation add_remove participant by participant object", "[api][cx
     SPXTEST_REQUIRE(participant_from_add == participant);
 
     REQUIRE_NOTHROW(conv->RemoveParticipantAsync(participant).get());
-}
+} SPXTEST_CASE_END()
 
-TEST_CASE("conversation online end meeting destroy resources", "[api][cxx]")
+SPXTEST_CASE_BEGIN("Conversation::online end meeting destroy resources", "[api][cxx]")
 {
     auto config = SpeechConfig::FromEndpoint(DefaultSettingsMap[ONLINE_AUDIO_ENDPOINT], SubscriptionsRegionsMap[CONVERSATION_TRANSCRIPTION_PPE_SUBSCRIPTION].Key);
     config->SetServiceProperty("TrafficType", SpxGetTestTrafficType(__FILE__, __LINE__), ServicePropertyChannel::UriQueryParameter);
@@ -202,4 +202,4 @@ TEST_CASE("conversation online end meeting destroy resources", "[api][cxx]")
 
     // allow EndConversationAsync at any time.
     REQUIRE_NOTHROW(conversation->EndConversationAsync().get());
-}
+} SPXTEST_CASE_END()

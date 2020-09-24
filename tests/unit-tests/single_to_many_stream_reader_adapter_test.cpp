@@ -65,7 +65,7 @@ void ReadStreamAndValidateIsInSequence(std::shared_ptr<ISpxAudioStreamReader> re
     }
 }
 
-TEST_CASE("Demux audio stream adapter is properly functioning", "[core][demux adapter]")
+SPXTEST_CASE_BEGIN("Demux audio stream adapter is properly functioning", "[core][demux adapter]")
 {
     const uint32_t c_SequentialBufferSize = 500;
 
@@ -200,9 +200,9 @@ TEST_CASE("Demux audio stream adapter is properly functioning", "[core][demux ad
 
 
     return;
-}
+}SPXTEST_CASE_END()
 
-TEST_CASE("Demux audio stream adapter stress and multithreaed", "[core][demux adapter]")
+SPXTEST_CASE_BEGIN("Demux audio stream adapter stress and multithreaed", "[core][demux adapter]")
 {
     const uint32_t c_SequentialBufferSize = 500;
 
@@ -318,4 +318,4 @@ TEST_CASE("Demux audio stream adapter stress and multithreaed", "[core][demux ad
     }
 
     return;
-}
+}SPXTEST_CASE_END()
