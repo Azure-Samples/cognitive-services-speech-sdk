@@ -143,9 +143,6 @@ namespace MicrosoftSpeechSDKSamples
                     case ConsoleKey.S:
                         SpeechSynthesisServerScenarioSample.SpeechSynthesizeWithPool();
                         break;
-                    case ConsoleKey.X:
-                        SpeechSynthesisSamples.SynthesisWithAutoDetectSourceLanguageAsync().Wait();
-                        break;
                     case ConsoleKey.T:
                         SpeechRecognitionSamples.SpeechRecognitionWithCompressedInputPullStreamAudio().Wait();
                         break;
@@ -155,9 +152,14 @@ namespace MicrosoftSpeechSDKSamples
                     case ConsoleKey.V:
                         TranslationSamples.TranslationWithFileCompressedInputAsync().Wait();
                         break;
-
                     case ConsoleKey.W:
                         SpeechRecognitionSamples.KeywordRecognizer().Wait();
+                        break;
+                    case ConsoleKey.X:
+                        SpeechSynthesisSamples.SynthesisWithAutoDetectSourceLanguageAsync().Wait();
+                        break;
+                    case ConsoleKey.Y:
+                        SpeechRecognitionSamples.RecognitionOnceWithFileAsyncSwitchSecondaryRegion().Wait();
                         break;
 
                     case ConsoleKey.D0:
