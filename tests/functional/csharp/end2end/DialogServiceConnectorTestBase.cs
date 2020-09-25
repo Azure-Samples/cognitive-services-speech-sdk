@@ -10,6 +10,7 @@ using System;
 namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 {
     using static Config;
+    using static SPXTEST;
 
     [TestClass]
     public class DialogServiceConnectorTestBase : LoggingTestBase
@@ -34,6 +35,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             region = SubscriptionsRegionsMap[SubscriptionsRegionsKeys.DIALOG_SUBSCRIPTION].Region;
             inputDir = DefaultSettingsMap[DefaultSettingKeys.INPUT_DIR];
 
+            SPXTEST_ISTRUE(!string.IsNullOrEmpty(botSecret) && !string.IsNullOrEmpty(subscriptionKey) && !string.IsNullOrEmpty(region),
+                String.Format("Subscription, region, and bot app id are all expected to be non-empty. Actual lengths are "
+                    + "{0}, {1}, and {2}. Is the json file with subscription information updated?",
+                        subscriptionKey.Length,
+                        region.Length,
+                        botSecret.Length));
+                        
             Console.WriteLine("region: " + region);
             Console.WriteLine("input directory: " + inputDir);
         }

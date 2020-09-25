@@ -31,7 +31,7 @@ public class BaseJUnit {
         @Override
         protected void failed(Throwable e, org.junit.runner.Description description) {
             if (MEMORY_LOGGER_ENABLED) {
-                Diagnostics.dumpMemoryLogToFile("CRBN", Diagnostics.MemoryLoggerOptions.STANDARD_OUT);
+                Diagnostics.dumpMemoryLog(null, "CRBN", false, true);
             }
         };
 

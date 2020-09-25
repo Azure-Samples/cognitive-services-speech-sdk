@@ -22,7 +22,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils
 
             if (isTrue) SPX_TRACE_INFO("SPXTEST_REQUIRE: PASSED:", line, caller, file);
             if (!isTrue) SPX_TRACE_ERROR($"{message} FAILED:", line, caller, file);
-            if (!isTrue) Test.Diagnostics.DumpMemoryLogToFile(null, 2);
+            if (!isTrue) Test.Diagnostics.DumpMemoryLog();
 
             Assert.IsTrue(isTrue, $"{message} at {caller} in {file}({line}): FAILED:");
         }
@@ -39,7 +39,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils
 
             if (isTrue) SPX_TRACE_INFO("SPXTEST_ISTRUE: PASSED:", line, caller, file);
             if (!isTrue) SPX_TRACE_ERROR($"{message} FAILED:", line, caller, file);
-            if (!isTrue) Test.Diagnostics.DumpMemoryLogToFile(null, 2);
+            if (!isTrue) Test.Diagnostics.DumpMemoryLog();
 
             Assert.IsTrue(isTrue, $"{message} at {caller} in {file}({line}): FAILED:");
         }
@@ -55,7 +55,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils
 
             if (!condition) SPX_TRACE_INFO("SPXTEST_ISFALSE: PASSED:", line, caller, file);
             if (condition) SPX_TRACE_ERROR($"{message} FAILED:", line, caller, file);
-            if (condition) Test.Diagnostics.DumpMemoryLogToFile(null, 2);
+            if (condition) Test.Diagnostics.DumpMemoryLog();
 
             Assert.IsFalse(condition, $"{message} at {caller} in {file}({line}): FAILED:");
         }
@@ -73,7 +73,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils
 
             if (notNull) SPX_TRACE_INFO("SPXTEST_ISNOTNULL: PASSED:", line, caller, file);
             if (!notNull) SPX_TRACE_ERROR($"{message} FAILED:", line, caller, file);
-            if (!notNull) Test.Diagnostics.DumpMemoryLogToFile(null, 2);
+            if (!notNull) Test.Diagnostics.DumpMemoryLog();
 
             Assert.IsNotNull(value, $"{message} at {caller} in {file}({line}): FAILED:");
         }
@@ -95,7 +95,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils
 
             if (isEqual) SPX_TRACE_INFO("SPXTEST_ARE_EQUAL: PASSED:", line, caller, file);
             if (!isEqual) SPX_TRACE_ERROR($"{message} FAILED:", line, caller, file);
-            if (!isEqual) Test.Diagnostics.DumpMemoryLogToFile(null, 2);
+            if (!isEqual) Test.Diagnostics.DumpMemoryLog();
 
             if (areCollections) CollectionAssert.AreEqual(t1 as ICollection, t2 as ICollection, $"{message} at {caller} in {file}({line}): FAILED:");
             if (!areCollections) Assert.AreEqual(t1, t2, $"{message} at {caller} in {file}({line}): FAILED:");
@@ -118,7 +118,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils
 
             if (!isEqual) SPX_TRACE_INFO("SPXTEST_ARE_NOT_EQUAL: PASSED:", line, caller, file);
             if (isEqual) SPX_TRACE_ERROR($"{message} FAILED:", line, caller, file);
-            if (isEqual) Test.Diagnostics.DumpMemoryLogToFile(null, 2);
+            if (isEqual) Test.Diagnostics.DumpMemoryLog();
 
             if (areCollections) CollectionAssert.AreNotEqual(t1 as ICollection, t2 as ICollection, $"{message} at {caller} in {file}({line}): FAILED:");
             if (!areCollections) Assert.AreNotEqual(t1, t2, $"{message} at {caller} in {file}({line}): FAILED:");
@@ -134,7 +134,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils
             message = !string.IsNullOrEmpty(message) ? $"SPXTEST_FAIL: {message}" : $"SPXTEST_FAIL:";
 
             SPX_TRACE_ERROR($"{message} FAILED:", line, caller, file);
-            Test.Diagnostics.DumpMemoryLogToFile(null, 2);
+            Test.Diagnostics.DumpMemoryLog();
 
             Assert.Fail($"{message} at {caller} in {file}({line}): FAILED:");
         }
@@ -163,7 +163,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils
             }
 
             SPX_TRACE_ERROR($"{message} FAILED:", line, caller, file);
-            Test.Diagnostics.DumpMemoryLogToFile(null, 2);
+            Test.Diagnostics.DumpMemoryLog();
 
             Assert.ThrowsException<T>(() => null, $"{message} at {caller} in {file}({line}): FAILED:");
             return null;
@@ -193,7 +193,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils
             }
 
             SPX_TRACE_ERROR($"{message} FAILED:", line, caller, file);
-            Test.Diagnostics.DumpMemoryLogToFile(null, 2);
+            Test.Diagnostics.DumpMemoryLog();
 
             Assert.ThrowsException<T>(() => null, $"{message} at {caller} in {file}({line}): FAILED:");
             return null;
@@ -220,7 +220,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils
 
             if (exception == null) SPX_TRACE_INFO("SPXTEST_NOTHROW: PASSED:", line, caller, file);
             if (exception != null) SPX_TRACE_ERROR($"{message} FAILED:", line, caller, file);
-            if (exception != null) Test.Diagnostics.DumpMemoryLogToFile(null, 2);
+            if (exception != null) Test.Diagnostics.DumpMemoryLog();
 
             Assert.IsTrue(exception == null, $"{message} at {caller} in {file}({line}): FAILED:");
         }
@@ -246,7 +246,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils
 
             if (exception == null) SPX_TRACE_INFO("SPXTEST_NOTHROW: PASSED:", line, caller, file);
             if (exception != null) SPX_TRACE_ERROR($"{message} FAILED:", line, caller, file);
-            if (exception != null) Test.Diagnostics.DumpMemoryLogToFile(null, 2);
+            if (exception != null) Test.Diagnostics.DumpMemoryLog();
 
             Assert.IsTrue(exception == null, $"{message} at {caller} in {file}({line}): FAILED:");
         }

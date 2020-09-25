@@ -35,7 +35,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             if (testContext?.CurrentTestOutcome != UnitTestOutcome.Passed)
             {
-                Microsoft.CognitiveServices.Speech.Test.Diagnostics.DumpMemoryLogToFile("CLEANUP", 2);
+                Microsoft.CognitiveServices.Speech.Test.Diagnostics.DumpMemoryLog(
+                    filename: null,
+                    linePrefix: "CLEANUP",
+                    emitToStdOut: false,
+                    emitToStdErr: true);
                 testContext = null;
             }
         }

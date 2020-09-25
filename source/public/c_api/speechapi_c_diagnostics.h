@@ -28,4 +28,5 @@ SPXAPI_(size_t) diagnostics_log_memory_get_line_num_oldest();
 SPXAPI_(size_t) diagnostics_log_memory_get_line_num_newest();
 SPXAPI__(const char*) diagnostics_log_memory_get_line(size_t lineNum);
 
-SPXAPI_(void) diagnostics_log_memory_dump_to_file(const char* fileName, int options);
+SPXAPI_(void) diagnostics_log_memory_dump_to_stderr();
+SPXAPI_(void) diagnostics_log_memory_dump(const char* filename, const char* linePrefix, bool emitToStdOut, bool emitToStdErr);

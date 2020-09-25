@@ -109,7 +109,7 @@ public:
     MemoryLogger(MemoryLogger const&) = delete;
     void operator=(MemoryLogger const&) = delete;
 
-    void DumpToFile(const char* fileName, int options = 1);
+    void Dump(const char* filename, const char* linePrefix, bool emitToStdOut, bool emitToStdErr);
 
     void EnableLogging(bool enable);
     bool IsLoggingEnabled();

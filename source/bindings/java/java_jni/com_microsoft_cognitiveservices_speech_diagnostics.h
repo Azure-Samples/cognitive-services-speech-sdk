@@ -17,8 +17,8 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_Diagnostics_
 JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_Diagnostics_logMemoryStopLogging
     (JNIEnv *, jclass);
 
-JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_Diagnostics_logMemoryDumpToFile
-    (JNIEnv *, jclass, jstring, jint);
+JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_Diagnostics_logMemoryDump
+    (JNIEnv *, jclass, jstring, jstring, jboolean, jboolean);
 
 #ifdef __cplusplus
 }

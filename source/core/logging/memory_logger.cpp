@@ -46,40 +46,36 @@ bool MemoryLogger::IsLoggingEnabled()
     return m_started > 0;
 }
 
-void MemoryLogger::DumpToFile(const char* fileName, int options)
+void MemoryLogger::Dump(const char* filename, const char* linePrefix, bool emitToStdOut, bool emitToStdErr)
 {
     SPX_IFTRUE_RETURN(!IsLoggingEnabled());
-    SPX_IFTRUE_THROW_HR(options < 0 || options > 7, SPXERR_INVALID_ARG);
 
-    bool stdOut = (options & 2) == 2;
-    bool stdErr = (options & 4) == 4 || (fileName == nullptr && options == 0);
+    bool emitToFile = filename != nullptr && filename[0] != '\0';
 
-    FILE* file = nullptr;
-    bool outputFile = (options & 1) == 1;
-    if (outputFile && fileName != nullptr)
+    SPX_IFTRUE_RETURN(!emitToFile && !emitToStdOut && !emitToStdErr);
+
+    FILE* outputFile = nullptr;
+    if (emitToFile)
     {
-        PAL::fopen_s(&file, fileName, "w");
-        SPX_IFTRUE_THROW_HR(file == nullptr, SPXERR_FILE_OPEN_FAILED);
+        PAL::fopen_s(&outputFile, filename, "w");
+        SPX_IFTRUE_THROW_HR(outputFile == nullptr, SPXERR_FILE_OPEN_FAILED);
     }
 
-    if ((stdOut || stdErr) && fileName == nullptr)
-    {
-        fileName = "CRBN";
-    }
+    linePrefix = (linePrefix == nullptr) ? "CRBN" : linePrefix;
 
     auto start = diagnostics_log_memory_get_line_num_oldest();
     auto stop = diagnostics_log_memory_get_line_num_newest();
+
     for (auto i = start; i <= stop; i++)
     {
         auto line = diagnostics_log_memory_get_line(i);
 
-        SPX_IFTRUE(stdOut, printf("%s: %s", fileName, line));
-        SPX_IFTRUE(stdErr, fprintf(stderr, "%s: %s", fileName, line));
-
-        SPX_IFTRUE(file != nullptr, fprintf(file, "CRBN: %s", line));
+        SPX_IFTRUE(emitToStdOut, fprintf(stdout, "%s: %s", linePrefix, line));
+        SPX_IFTRUE(emitToStdErr, fprintf(stderr, "%s: %s", linePrefix, line));
+        SPX_IFTRUE(emitToFile, fprintf(outputFile, "%s: %s", linePrefix, line));
     }
 
-    SPX_IFTRUE(file != nullptr, fclose(file));
+    SPX_IFTRUE(emitToFile, fclose(outputFile));
 }
 
 void MemoryLogger::LogToMemory(const char *line)

@@ -179,11 +179,16 @@ SPXAPI__(const char*) diagnostics_log_memory_get_line(size_t lineNum)
     return line;
 }
 
-SPXAPI_(void) diagnostics_log_memory_dump_to_file(const char* fileName, int options)
+SPXAPI_(void) diagnostics_log_memory_dump_to_stderr()
+{
+    diagnostics_log_memory_dump(nullptr, nullptr, false, true);
+}
+
+SPXAPI_(void) diagnostics_log_memory_dump(const char* filename, const char* linePrefix, bool emitToStdOut, bool emitToStdErr)
 {
     try
     {
-        MemoryLogger::Instance().DumpToFile(fileName, options);
+        MemoryLogger::Instance().Dump(filename, linePrefix, emitToStdOut, emitToStdErr);
     }
     catch(...)
     {

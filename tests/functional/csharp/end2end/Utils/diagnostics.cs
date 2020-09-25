@@ -12,6 +12,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
 using System.IO;
 using System.Text;
+using System.Linq;
 
 namespace Microsoft.CognitiveServices.Speech.Test
 {
@@ -59,35 +60,12 @@ namespace Microsoft.CognitiveServices.Speech.Test
             Internal.Diagnostics.diagnostics_log_memory_stop_logging();
         }
 
-        public static void DumpMemoryLogToFile(string fileName, int options)
+        public static void DumpMemoryLog(string filename, string linePrefix, bool emitToStdOut, bool emitToStdErr)
         {
-            bool stdOut = (options & 2) == 2;
-            bool stdErr = (options & 4) == 4 || (fileName == null && options == 0);
-            if ((stdOut || stdErr) && fileName == null)
-            {
-                fileName = "CRBN";
-            }
-
-            var sw = (options & 1) == 1 && !string.IsNullOrEmpty(fileName)
-                ? new StreamWriter(File.Open(fileName, FileMode.Create), Encoding.UTF8)
-                : null;
-
-            var start = Internal.Diagnostics.diagnostics_log_memory_get_line_num_oldest();
-            var stop = Internal.Diagnostics.diagnostics_log_memory_get_line_num_newest();
-            for (var i = start; i <= stop; i++)
-            {
-                var linePtr = Internal.Diagnostics.diagnostics_log_memory_get_line(i);
-                var line = Marshal.PtrToStringAnsi(linePtr);
-
-                if (stdOut) Console.Write($"{fileName}: {line}");
-                if (stdErr) Console.Error.Write($"{fileName}: {line}");
-
-                if (sw != null) sw.Write($"CRBN: {line}");
-            }
-
-            sw?.Close();
-            sw?.Dispose();
+            Internal.Diagnostics.diagnostics_log_memory_dump(filename, linePrefix, emitToStdOut, emitToStdErr);
         }
+
+        public static void DumpMemoryLog() => DumpMemoryLog(null, null, false, true);
 
         public static object[] Args(params object[] args)
         {

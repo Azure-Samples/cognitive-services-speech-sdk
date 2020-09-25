@@ -52,8 +52,11 @@ namespace Microsoft.CognitiveServices.Speech.Test.Internal
         public static extern IntPtr diagnostics_log_memory_get_line(int lineNum);
 
         [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
-        public static extern void diagnostics_log_memory_dump_to_file([MarshalAs(UnmanagedType.LPStr)] string fileName, int options); // fileName == nullptr => stderr; options: 1 => dump now
-
+        public static extern void diagnostics_log_memory_dump(
+            [MarshalAs(UnmanagedType.LPStr)] string filename,
+            [MarshalAs(UnmanagedType.LPStr)] string linePrefix,
+            bool emitToStdOut,
+            bool emitToStdErr);
     }
 
     internal static class Import

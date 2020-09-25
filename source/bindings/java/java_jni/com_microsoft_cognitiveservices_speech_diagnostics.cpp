@@ -19,14 +19,16 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_Diagnostics_
     return SPX_NOERROR;
 }
 
-JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_Diagnostics_logMemoryDumpToFile(JNIEnv* env, jclass, jstring filename, jint options)
+JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_Diagnostics_logMemoryDump(JNIEnv* env, jclass, jstring filename, jstring linePrefix, jboolean emitToStdOut, jboolean emitToStdErr)
 {
     const char* pszFilename = nullptr;
+    const char* pszLinePrefix = nullptr;
     SPXHR result = SPX_NOERROR;
     try
     {
         pszFilename = GetStringUTFChars(env, filename);
-        diagnostics_log_memory_dump_to_file(pszFilename, static_cast<int>(options));
+        pszLinePrefix = GetStringUTFChars(env, linePrefix);
+        diagnostics_log_memory_dump(pszFilename, pszLinePrefix, (bool)emitToStdOut, (bool)emitToStdErr);
     }
     catch (...)
     {
@@ -34,5 +36,7 @@ JNIEXPORT jlong JNICALL Java_com_microsoft_cognitiveservices_speech_Diagnostics_
     }
 
     ReleaseStringUTFChars(env, filename, pszFilename);
+    ReleaseStringUTFChars(env, linePrefix, pszLinePrefix);
+
     return result;
 }

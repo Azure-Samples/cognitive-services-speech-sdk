@@ -55,24 +55,15 @@ public final class Diagnostics {
     /**
      * Dumps the contents of the memory logger
      * @param filename The name of the file to write to. Set this to an empty string if not needed
-     * @param option Where to dump the contents of the memory logger to
+     * @param linePrefix The prefix to apply to each line of logged memory content, e.g. "CRBN"
+     * @param emitToStdOut Whether the log should be emitted to standard output in addition to any other targets
+     * @param emitToStdErr Whether the log should be emitted to standard error in addition to any other targets
      */
-    public static void dumpMemoryLogToFile(String filename, MemoryLoggerOptions option) {
-        int optionsVal = option.getValue();
-        Contracts.throwIfFail(logMemoryDumpToFile(filename, optionsVal));
+    public static void dumpMemoryLog(String filename, String linePrefix, boolean emitToStdOut, boolean emitToStdErr) {
+        Contracts.throwIfFail(logMemoryDump(filename, linePrefix, emitToStdOut, emitToStdErr));
     }
 
-    /**
-     * Dumps the contents of the memory logger
-     * @param filename The name of the file to write to. Set this to an empty string if not needed
-     * @param options Where to dump the contents of the memory logger to
-     */
-    public static void dumpMemoryLogToFile(String filename, EnumSet<MemoryLoggerOptions> options) {
-        int optionsVal = MemoryLoggerOptions.getValue(options);
-        Contracts.throwIfFail(logMemoryDumpToFile(filename, optionsVal));
-    }
-    
     private final native static long logMemoryStartLogging();
     private final native static long logMemoryStopLogging();
-    private final native static long logMemoryDumpToFile(String filename, int options);
+    private final native static long logMemoryDump(String filename, String linePrefix, boolean emitToStdOut, boolean emitToStdErr);
 }
