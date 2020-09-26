@@ -74,7 +74,7 @@ jobs:
     displayName: Create the disk image for the sample app (necessary for notarization)
   - task: EsrpCodeSigning@1
     inputs:
-      ConnectedServiceName: Speech SDK ESRP Signing Alternate
+      ConnectedServiceName: Speech SDK ESRP Signing Primary
       FolderPath: osxbuild
       Pattern: '*.dmg'
       signConfigType: inlineSignParams

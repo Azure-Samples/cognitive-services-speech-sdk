@@ -449,7 +449,7 @@ jobs:
   - task: EsrpCodeSigning@1
     displayName: 'Sign Windows C++ and C# binaries'
     inputs:
-      ConnectedServiceName: 'Speech SDK ESRP Signing Alternate'
+      ConnectedServiceName: 'Speech SDK ESRP Signing Primary'
       FolderPath: 'build/bin/$(BuildConfiguration)'
       Pattern: 'Microsoft.CognitiveServices.Speech.core.dll,Microsoft.CognitiveServices.Speech.csharp.dll,Microsoft.CognitiveServices.Speech.extension.kws.dll,Microsoft.CognitiveServices.Speech.extension.silk_codec.dll,Microsoft.CognitiveServices.Speech.extension.embedded.sr.dll,unimic_runtime.dll'
       signConfigType: inlineSignParams
@@ -697,7 +697,7 @@ jobs:
     displayName: 'Test - build solutions'
   - task: EsrpCodeSigning@1
     inputs:
-      ConnectedServiceName: 'Speech SDK ESRP Signing Alternate'
+      ConnectedServiceName: 'Speech SDK ESRP Signing Primary'
       FolderPath: '$(Build.ArtifactStagingDirectory)/Windows'
       Pattern: '*.nupkg'
       signConfigType: inlineSignParams
@@ -834,7 +834,7 @@ jobs:
   - task: EsrpCodeSigning@1
     displayName: Sign RemoteConversation dlls
     inputs:
-      ConnectedServiceName: 'Speech SDK ESRP Signing Alternate'
+      ConnectedServiceName: 'Speech SDK ESRP Signing Primary'
       FolderPath: 'source/extensions/remoteconversation/csharp/remoteconversation/remoteconversation/bin/Release/netstandard2.0'
       Pattern: '*.dll'
       signConfigType: inlineSignParams
@@ -871,7 +871,7 @@ jobs:
   - task: EsrpCodeSigning@1
     displayName: Sign RemoteConversation Nuget Package
     inputs:
-      ConnectedServiceName: 'Speech SDK ESRP Signing Alternate'
+      ConnectedServiceName: 'Speech SDK ESRP Signing Primary'
       FolderPath: '$(System.ArtifactsDirectory)/In/Windows'
       Pattern: '*.nupkg'
       signConfigType: inlineSignParams
@@ -992,7 +992,7 @@ jobs:
   - task: EsrpCodeSigning@1
     displayName: 'Sign *.jar'
     inputs:
-      ConnectedServiceName: 'Speech SDK ESRP Signing Alternate'
+      ConnectedServiceName: 'Speech SDK ESRP Signing Primary'
       FolderPath: '$(RemoteTranscriptionMavenRoot)'
       Pattern: '*.jar'
       signConfigType: inlineSignParams
@@ -1283,7 +1283,7 @@ jobs:
   - task: EsrpCodeSigning@1
     displayName: Sign com.microsoft.cognitiveservices.speech.jar
     inputs:
-      ConnectedServiceName: 'Speech SDK ESRP Signing Alternate'
+      ConnectedServiceName: 'Speech SDK ESRP Signing Primary'
       FolderPath: 'build/lib'
       Pattern: com.microsoft.cognitiveservices.speech.jar
       signConfigType: inlineSignParams
@@ -1550,7 +1550,7 @@ jobs:
   - task: EsrpCodeSigning@1
     displayName: 'Sign *.aar (Release)'
     inputs:
-      ConnectedServiceName: 'Speech SDK ESRP Signing Alternate'
+      ConnectedServiceName: 'Speech SDK ESRP Signing Primary'
       FolderPath: '$(MavenRootWindows)'
       Pattern: '*.aar'
       signConfigType: inlineSignParams
@@ -2194,7 +2194,7 @@ jobs:
   - task: EsrpCodeSigning@1
     displayName: 'Sign iOS framework'
     inputs:
-      ConnectedServiceName: 'Speech SDK ESRP Signing Alternate'
+      ConnectedServiceName: 'Speech SDK ESRP Signing Primary'
       FolderPath: '$(OutputDirectory)'
       Pattern: $(VersionedFrameworkName).zip
       signConfigType: inlineSignParams

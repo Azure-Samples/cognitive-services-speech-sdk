@@ -77,7 +77,7 @@ jobs:
   - task: EsrpCodeSigning@1
     displayName: 'Sign *.jar'
     inputs:
-      ConnectedServiceName: 'Speech SDK ESRP Signing Alternate'
+      ConnectedServiceName: 'Speech SDK ESRP Signing Primary'
       FolderPath: '$(MavenRootWindows)'
       Pattern: '*.jar'
       signConfigType: inlineSignParams

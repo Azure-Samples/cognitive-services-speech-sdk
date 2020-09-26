@@ -78,7 +78,7 @@ jobs:
   - task: EsrpCodeSigning@1
     displayName: Sign .so (dynamic library) in .whl
     inputs:
-      ConnectedServiceName: Speech SDK ESRP Signing Alternate
+      ConnectedServiceName: Speech SDK ESRP Signing Primary
       FolderPath: $(OutputDirectory)/wheelhouse
       Pattern: '*.whl.zip'
       signConfigType: inlineSignParams
@@ -126,7 +126,7 @@ jobs:
   - task: EsrpCodeSigning@1
     displayName: 'Sign OSX framework'
     inputs:
-      ConnectedServiceName: 'Speech SDK ESRP Signing Alternate'
+      ConnectedServiceName: 'Speech SDK ESRP Signing Primary'
       FolderPath: '$(OutputDirectory)'
       Pattern: $(VersionedFrameworkName).zip
       signConfigType: inlineSignParams
@@ -157,7 +157,7 @@ jobs:
   - task: EsrpCodeSigning@1
     displayName: Sign .dylib (dynamic library)
     inputs:
-      ConnectedServiceName: Speech SDK ESRP Signing Alternate
+      ConnectedServiceName: Speech SDK ESRP Signing Primary
       FolderPath: tosign
       Pattern: '*.zip'
       signConfigType: inlineSignParams
@@ -166,7 +166,7 @@ jobs:
   - task: EsrpCodeSigning@1
     displayName: 'Sign Mac .dll for nuget package'
     inputs:
-      ConnectedServiceName: 'Speech SDK ESRP Signing Alternate'
+      ConnectedServiceName: 'Speech SDK ESRP Signing Primary'
       FolderPath: 'build/bin/$(BuildConfiguration)MacOS/netstandard2.0/'
       Pattern: 'Microsoft.CognitiveServices.Speech.csharp.dll'
       signConfigType: inlineSignParams

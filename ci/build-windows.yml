@@ -182,7 +182,7 @@ jobs:
   - task: EsrpCodeSigning@1
     displayName: Sign Python
     inputs:
-      ConnectedServiceName: Speech SDK ESRP Signing Alternate
+      ConnectedServiceName: Speech SDK ESRP Signing Primary
       FolderPath: repack
       Pattern: '*.pyd,Microsoft.CognitiveServices.Speech.core.dll,Microsoft.CognitiveServices.Speech.extension.kws.dll,Microsoft.CognitiveServices.Speech.extension.codec.dll,Microsoft.CognitiveServices.Speech.extension.embedded.sr.dll,unimic_runtime.dll'
       signConfigType: inlineSignParams
@@ -205,7 +205,7 @@ jobs:
   - task: EsrpCodeSigning@1
     displayName: 'Sign Windows C++, C# and Java binaries'
     inputs:
-      ConnectedServiceName: 'Speech SDK ESRP Signing Alternate'
+      ConnectedServiceName: 'Speech SDK ESRP Signing Primary'
       FolderPath: 'build/bin'
       Pattern: 'Microsoft.CognitiveServices.Speech.core${{ parameters.suffix }}.dll,Microsoft.CognitiveServices.Speech.extension.kws${{ parameters.suffix }}.dll,Microsoft.CognitiveServices.Speech.csharp.dll,Microsoft.CognitiveServices.Speech.java.bindings.dll,Microsoft.CognitiveServices.Speech.extension.codec.dll,Microsoft.CognitiveServices.Speech.extension.silk_codec.dll,Microsoft.CognitiveServices.Speech.extension.embedded.sr.dll,unimic_runtime.dll'
       signConfigType: inlineSignParams
