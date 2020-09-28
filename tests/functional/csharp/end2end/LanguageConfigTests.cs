@@ -40,7 +40,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public void TestSourceLanguageConfig()
         {
             SPXTEST_THROWS<ArgumentNullException>(() =>
@@ -67,7 +67,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             SPXTEST_ISNOTNULL(SourceLanguageConfig.FromLanguage(Language.DE_DE, "CustomEndpointId"));
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public void TestAutoDetectSourceLanguageConfig()
         {
             SPXTEST_THROWS<ArgumentNullException>(() =>
@@ -110,7 +110,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task TestCreateRecognizerWithLanguageConfig()
         {
             using (var speechRecognizer = new SpeechRecognizer(this.defaultConfig, Language.DE_DE, audioInput))
@@ -123,7 +123,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task TestCreateRecognizerWithSourceLanguageConfig()
         {
             var sourceLanguageConfig = SourceLanguageConfig.FromLanguage(Language.DE_DE);
@@ -137,7 +137,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task TestCreateRecognizerWithSourceLanguageConfigAndEndpointId()
         {
             var sourceLanguageConfig = SourceLanguageConfig.FromLanguage(Language.DE_DE, "endpoint1");
@@ -153,7 +153,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public void TestCreateRecognizerWithAutoDetectSourceLanguageConfig()
         {
             var autoDetectSourceLanguages = new string[] { Language.DE_DE, Language.CA_ES };

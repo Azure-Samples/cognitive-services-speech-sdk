@@ -53,7 +53,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             helper = new SpeechRecognitionTestsHelper();
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public void TestSetAndGetAuthToken()
         {
             var token = "x";
@@ -70,7 +70,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task TestSetAuthorizationTokenOnSpeechRecognizer()
         {
             var invalidToken = "InvalidToken";
@@ -90,14 +90,14 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public void TestSetAndGetSubKey()
         {
             var config = SpeechConfig.FromSubscription("x", "westus");
             SPXTEST_ARE_EQUAL("x", config.SubscriptionKey);
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task DefaultLanguageAndOutputFormatRecognition()
         {
             var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
@@ -117,7 +117,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [DataTestMethod]
+        [RetryTestMethod]
         [DataRow(true)]
         [DataRow(false)]
         public async Task ValidBaselineRecognition(bool usingPreConnection)
@@ -142,7 +142,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [Ignore]
-        [DataTestMethod]
+        [RetryTestMethod]
         [DataRow(true)]
         [DataRow(false)]
         public async Task ValidBaselineRecognitionWithSovereignCloud(bool usingPreConnection)
@@ -170,7 +170,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [DataTestMethod]
+        [RetryTestMethod]
         [DataRow(true)]
         [DataRow(false)]
         public async Task ContinuousValidBaselineRecognition(bool usingPreConnection)
@@ -191,7 +191,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [DataTestMethod]
+        [RetryTestMethod]
         [DataRow(true)]
         [DataRow(false)]
         public async Task ValidCustomRecognition(bool usingPreConnection)
@@ -217,7 +217,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [DataTestMethod]
+        [RetryTestMethod]
         [DataRow(true)]
         [DataRow(false)]
         public async Task ContinuousValidCustomRecognition(bool usingPreConnection)
@@ -238,7 +238,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [DataTestMethod]
+        [RetryTestMethod]
         [DataRow(true, DisplayName = "Using preconnect")]
         [DataRow(false, DisplayName = "Without preconnect")]
         public async Task ContinuousValidSkipAudioRecognition(bool usingPreConnection)
@@ -258,7 +258,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task InvalidKeyHandledProperly()
         {
             await AssertConnectionError(
@@ -267,7 +267,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 "WebSocket upgrade failed", "authentication error", "401");
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task InvalidAuthTokenHandledProperly()
         {
             var invalidToken = "InvalidToken";
@@ -277,7 +277,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 "WebSocket upgrade failed", "authentication error", "401");
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task ExpiredAuthTokenHandledProperly()
         {
             var expiredToken = "eyJhbGciOiJodHRwOi8vd3d3LnczLm9yZy8yMDAxLzA0L3htbGRzaWctbW9yZSNobWFjLXNoYTI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ1cm46bXMuY29nbml0aXZlc2VydmljZXMiLCJleHAiOiIxNTU0MzE1Nzk5IiwicmVnaW9uIjoibm9ydGhldXJvcGUiLCJzdWJzY3JpcHRpb24taWQiOiIwNmZlNjU2MWVkZTM0NDdiYTg2NDY5Njc4YTIwNTNkYiIsInByb2R1Y3QtaWQiOiJTcGVlY2hTZXJ2aWNlcy5TMCIsImNvZ25pdGl2ZS1zZXJ2aWNlcy1lbmRwb2ludCI6Imh0dHBzOi8vYXBpLmNvZ25pdGl2ZS5taWNyb3NvZnQuY29tL2ludGVybmFsL3YxLjAvIiwiYXp1cmUtcmVzb3VyY2UtaWQiOiIvc3Vic2NyaXB0aW9ucy8zYTk2ZWY1Ni00MWE5LTQwYTAtYjBmMy1mYjEyNWMyYjg3OTgvcmVzb3VyY2VHcm91cHMvY3NzcGVlY2hzZGstY2FyYm9uL3Byb3ZpZGVycy9NaWNyb3NvZnQuQ29nbml0aXZlU2VydmljZXMvYWNjb3VudHMvc3BlZWNoc2Rrbm9ydGhldXJvcGUiLCJzY29wZSI6InNwZWVjaHNlcnZpY2VzIiwiYXVkIjoidXJuOm1zLnNwZWVjaHNlcnZpY2VzLm5vcnRoZXVyb3BlIn0.hVAWT2YHjknFI6qLhnjmjzoNgOgxKWguuFhJLlyDxLU";
@@ -287,7 +287,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 "WebSocket upgrade failed", "authentication error", "401");
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task InvalidSubscriptionKeyHandledProperly()
         {
             var configWithInvalidRegion = SpeechConfig.FromSubscription("invalid_subscription_key", RecognitionTestBase.region);
@@ -296,7 +296,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             await AssertConnectionError(configWithInvalidRegion, CancellationErrorCode.AuthenticationFailure, "websocket upgrade", "authentication", "subscription");
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task InvalidRegionHandledProperly()
         {
             var configWithInvalidRegion = SpeechConfig.FromSubscription(subscriptionKey, "invalidRegion");
@@ -305,28 +305,28 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             await AssertConnectionError(configWithInvalidRegion, CancellationErrorCode.ConnectionFailure, "connection failed");
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public void InvalidInputFileHandledProperly()
         {
             var audioInput = AudioConfig.FromWavFileInput("invalidFile.wav");
             SPXTEST_THROWS<ApplicationException>(() => new SpeechRecognizer(this.defaultConfig, audioInput));
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task InvalidDeploymentIdHandledProperly()
         {
             this.defaultConfig.EndpointId = "invalidDeploymentId";
             await AssertConnectionError(this.defaultConfig, CancellationErrorCode.BadRequest, "WebSocket upgrade failed", "bad request", "400");
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task InvalidLanguageHandledProperly()
         {
             this.defaultConfig.SpeechRecognitionLanguage = "InvalidLang";
             await AssertConnectionError(this.defaultConfig, CancellationErrorCode.BadRequest, "WebSocket upgrade failed", "bad request", "400");
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task InvalidConnectionForContinuousRecognition()
         {
             var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
@@ -341,7 +341,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task InvalidConnectionForSingleShotRecognition()
         {
             var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
@@ -356,7 +356,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [DataTestMethod]
+        [RetryTestMethod]
         [DataRow(true)]
         [DataRow(false)]
         public async Task InvalidOpenOrCloseDuringRecognition(bool testingOpen)
@@ -399,7 +399,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task TestCloseConnection()
         {
             var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
@@ -413,7 +413,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [DataTestMethod]
+        [RetryTestMethod]
         [DataRow(true)]
         [DataRow(false)]
         public async Task GermanRecognition(bool usingPreConnection)
@@ -433,7 +433,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [DataTestMethod]
+        [RetryTestMethod]
         [DataRow(true)]
         [DataRow(false)]
         public async Task GermanRecognitionWithSourceLangConfig(bool usingPreConnection)
@@ -453,7 +453,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [DataTestMethod]
+        [RetryTestMethod]
         [DataRow(true)]
         [DataRow(false)]
         public async Task ContinuousGermanRecognition(bool usingPreConnection)
@@ -473,7 +473,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [DataTestMethod, TestCategory(TestCategory.LongRunning)]
+        [RetryTestMethod, TestCategory(TestCategory.LongRunning)]
         [DataRow(true)]
         [DataRow(false)]
         public async Task ContinuousRecognitionOnLongFileInput(bool usingPreConnection)
@@ -557,7 +557,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [DataTestMethod]
+        [RetryTestMethod]
         [DataRow(true)]
         [DataRow(false)]
         public async Task SubscribeToManyEventHandlers(bool usingPreConnection)
@@ -586,7 +586,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [DataTestMethod]
+        [RetryTestMethod]
         [DataRow(true)]
         [DataRow(false)]
         public async Task UnsubscribeFromEventHandlers(bool usingPreConnection)
@@ -615,7 +615,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [DataTestMethod]
+        [RetryTestMethod]
         [DataRow(true)]
         [DataRow(false)]
         public async Task ResubscribeToEventHandlers(bool usingPreConnection)
@@ -658,7 +658,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [DataTestMethod]
+        [RetryTestMethod]
         [DataRow(true)]
         [DataRow(false)]
         public async Task ChangeSubscriptionDuringRecognition(bool usingPreConnection)
@@ -687,7 +687,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public void TestGetters()
         {
             var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_GERMAN].FilePath.GetRootRelativePath());
@@ -726,7 +726,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task TestExceptionSwitchFromSingleShotToContinuous()
         {
             var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
@@ -738,7 +738,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task TestExceptionSwitchFromContinuousToSingleShot()
         {
             var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
@@ -752,7 +752,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task TestSingleShotTwice()
         {
             var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.MULTIPLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
@@ -780,7 +780,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [DataTestMethod]
+        [RetryTestMethod]
         [DataRow(true)]
         [DataRow(false)]
         public async Task TestStartStopManyTimes(bool usingPreConnection)
@@ -812,7 +812,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [DataTestMethod]
+        [RetryTestMethod]
         [DataRow(true)]
         [DataRow(false)]
         public async Task TestContinuousRecognitionTwice(bool usingPreConnection)
@@ -838,7 +838,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [DataTestMethod]
+        [RetryTestMethod]
         [DataRow(true)]
         [DataRow(false)]
         public async Task TestInitialSilenceTimeout(bool usingPreConnection)
@@ -863,7 +863,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public void TestPropertyCollectionWithoutRecognizer()
         {
             var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SHORT_SILENCE].FilePath.GetRootRelativePath());
@@ -875,7 +875,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             SPXTEST_ARE_EQUAL("", properties.GetProperty(PropertyId.SpeechServiceAuthorization_Token));
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task TestContinuous44KHz()
         {
             var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.AUDIO_44_1KHZ].FilePath.GetRootRelativePath());
@@ -897,7 +897,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public void CloseConnectionWithoutOpen()
         {
             var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_GERMAN].FilePath.GetRootRelativePath());
@@ -909,7 +909,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         [ExpectedException(typeof(ObjectDisposedException))]
         public async Task AsyncRecognitionAfterDisposingSpeechRecognizer()
         {
@@ -919,7 +919,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             await recognizer.StartContinuousRecognitionAsync();
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         [ExpectedException(typeof(InvalidOperationException))]
         public void DisposingSpeechRecognizerWhileAsyncRecognition()
         {
@@ -928,7 +928,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             recognizer = helper.GetSpeechRecognizingAsyncNotAwaited(recognizer);
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task FromEndpointGermanRecognition()
         {
             var configFromEndpoint = SpeechConfig.FromEndpoint(endpointUrl, subscriptionKey);
@@ -940,7 +940,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task FromEndpointCustomRecognition()
         {
             var configFromEndpoint = SpeechConfig.FromEndpoint(endpointUrl, subscriptionKey);
@@ -958,7 +958,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task FromEndpointDefaultLanguage()
         {
             var endpointWithDeploymentId = endpointInString + "?cid=" + deploymentId;
@@ -978,7 +978,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task FromEndpointDetailedRecognition()
         {
             var configFromEndpoint = SpeechConfig.FromEndpoint(endpointUrl, subscriptionKey);
@@ -992,7 +992,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task FromEndpointGermanRecognitionWithPropertyOverwrite()
         {
             var endpointWithLang = endpointInString + "?language=de-de";
@@ -1006,7 +1006,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task FromEndpointCustomRecognitionWithPropertyOverwrite()
         {
             var endpointWithDeploymentId = endpointInString + "?cid=" + deploymentId;
@@ -1022,7 +1022,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task FromEndpointDetailedRecognitionWithPropertyOverwrite()
         {
             var endpointWithOutputFormat = endpointInString + "?format=detailed";
@@ -1037,7 +1037,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task SetServicePropertySingleSetting()
         {
             this.defaultConfig.SetServiceProperty("language", "de-DE", ServicePropertyChannel.UriQueryParameter);
@@ -1049,7 +1049,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task SetServicePropertyOverwrite()
         {
             this.defaultConfig.SetServiceProperty("language", "de-DE", ServicePropertyChannel.UriQueryParameter);
@@ -1061,7 +1061,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task SetServiceProperty2Properties()
         {
             this.defaultConfig.SetServiceProperty("language", "de-DE", ServicePropertyChannel.UriQueryParameter);
@@ -1075,7 +1075,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task SetServicePropertyFromEndpoint()
         {
             var configFromEndpoint = SpeechConfig.FromEndpoint(endpointUrl, subscriptionKey);
@@ -1088,7 +1088,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task SetServicePropertyFromEndpointWithParameter()
         {
             var endpointWithOutputFormat = endpointInString + "?format=detailed";
@@ -1104,7 +1104,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public void SetServicePropertyInvalidParameters()
         {
             SPXTEST_THROWS<ApplicationException>(() => this.defaultConfig.SetServiceProperty(null, "value", ServicePropertyChannel.UriQueryParameter));
@@ -1113,7 +1113,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             SPXTEST_THROWS<ApplicationException>(() => this.defaultConfig.SetServiceProperty("Name", "", ServicePropertyChannel.UriQueryParameter));
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task TestExceptionsDuringEventsRecognizeOnceAsync()
         {
             SpeechConfig config = SpeechConfig.FromSubscription(subscriptionKey, region);
@@ -1189,7 +1189,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task DictationRecognition()
         {
             this.defaultConfig.EnableDictation();
@@ -1214,7 +1214,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task DictationRecognitionWithLocalSpeechDetection()
         {
             this.defaultConfig.EnableDictation();
@@ -1256,7 +1256,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task DictationRecognizeOnce()
         {
             this.defaultConfig.EnableDictation();
@@ -1271,7 +1271,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task DictationAllowSwitchRecognizeOnceAndContinuous()
         {
             this.defaultConfig.EnableDictation();
@@ -1309,7 +1309,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task ProfanityMaskedRecognizeOnce()
         {
             var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.PROFANITY_SINGLE_UTTERANCE_ENGLISH_2].FilePath.GetRootRelativePath());
@@ -1326,7 +1326,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         // TODO: THESE PROFANITY TESTS DON'T MAKE SENSE NEED TO RE-EXAMINE
-        [TestMethod]
+        [RetryTestMethod]
         public async Task ProfanityRemovedRecognizeOnce()
         {
             var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.PROFANITY_SINGLE_UTTERANCE_ENGLISH_2].FilePath.GetRootRelativePath());
@@ -1340,7 +1340,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task ProfanityRawRecognizeOnce()
         {
             var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.PROFANTITY_SINGLE_UTTERANCE_ENGLISH_1].FilePath.GetRootRelativePath());
@@ -1354,7 +1354,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task DictationCorrectionsSetParameter()
         {
             // right now, Office endpoint takes any string as authorization token.
@@ -1378,7 +1378,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task DictationSendMessage()
         {
             var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
@@ -1421,7 +1421,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task DictationCorrectionsRecognizeOnce()
         {
             var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
@@ -1448,7 +1448,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task DictationCorrectionsContinuousRecognition()
         {
             var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
@@ -1491,7 +1491,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task WordLevelTiming()
         {
             var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
@@ -1518,7 +1518,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task WordLevelOffsetInMultiTurn()
         {
             var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_MULTIPLE_TURNS].FilePath.GetRootRelativePath());
@@ -1587,7 +1587,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task TestMessageReceivedEvents_SpeechRecognizer_RecognizeOnce()
         {
             var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
@@ -1648,7 +1648,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task TestMessageReceivedEvents_SpeechRecognizer_ContinuousRecognition()
         {
             var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
@@ -1720,7 +1720,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task TestSpeechConfigFromHost()
         {
             var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
@@ -1736,7 +1736,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         // Tests that start recognition in various modes and for different events allow the recognizer to fall out of scope and be disposed
         // mid recognition
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task CloseOnSessonStart()
         {
             var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.MULTIPLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
@@ -1756,7 +1756,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task CloseOnRecognizing()
         {
             var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.MULTIPLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
@@ -1776,7 +1776,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task CloseOnRecognized()
         {
             var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.MULTIPLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
@@ -1796,7 +1796,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task CloseOnSpeechStart()
         {
             var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.MULTIPLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
@@ -1816,7 +1816,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task CloseOnConnected()
         {
             var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.MULTIPLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
@@ -1840,7 +1840,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         #endregion
 
         #region LID Tests
-        [DataTestMethod]
+        [RetryTestMethod]
         [DataRow(true)]
         [DataRow(false)]
         public async Task LanguageIDRecognitionOnce(bool constructFromSourceLanguageConfig)
@@ -1899,7 +1899,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task LanguageIDRecognitionContinous()
         {
             using (var recognizer = TrackSessionId(new SpeechRecognizer(
@@ -1971,7 +1971,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
         #endregion
 
-        [TestMethod]
+        [RetryTestMethod]
         [Ignore]
         public async Task TestStopAfterErrorIsFast()
         {

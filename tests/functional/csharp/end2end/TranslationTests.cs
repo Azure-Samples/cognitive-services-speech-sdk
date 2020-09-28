@@ -62,7 +62,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             this.translationHelper = new TranslationTestsHelper(subscriptionKey, region);
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public void TestLanguageProperties()
         {
             var config = SpeechTranslationConfig.FromSubscription(subscriptionKey, region);
@@ -77,7 +77,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public void TestLanguagePropertiesMultiTargets()
         {
             var toLanguages = new List<string>() { Language.DE, Language.ES };
@@ -95,7 +95,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task TestNoFromInTranslationConfig()
         {
             var config = SpeechTranslationConfig.FromSubscription(subscriptionKey, region);
@@ -110,7 +110,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task TestNoToInTranslationConfig()
         {
             var config = SpeechTranslationConfig.FromSubscription(subscriptionKey, region);
@@ -128,7 +128,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task TestDefaultOutputInTranslationConfig()
         {
             var config = SpeechTranslationConfig.FromSubscription(subscriptionKey, region);
@@ -147,7 +147,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public void TestVoiceName()
         {
             var toLanguages = new List<string>() { Language.DE };
@@ -168,7 +168,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task TestInvalidTargetLanguageWithRecognizedOnce()
         {
             var toLanguages = new List<string>() { "invalidLanguages" };
@@ -184,7 +184,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             AssertMatching(TestData.ExpectedErrorDetails.InvalidTargetLanaguageErrorMessage, errorDetails);
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task TestInvalidTargetLanguageWithContinuousRecognition()
         {
             var toLanguages = new List<string>() { "invalidLanguages" };
@@ -208,7 +208,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task TestInvalidVoice()
         {
             var toLanguages = new List<string>() { Language.FR };
@@ -262,7 +262,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task TranslationWeatherEnToDeFinalTextResult()
         {
             var toLanguages = new List<string>() { Language.DE, Language.ZH_CN };
@@ -280,7 +280,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task TranslationWeatherEntoFrAndEsFinalTextResult()
         {
             var toLanguages = new List<string>() { Language.FR, Language.ES };
@@ -322,7 +322,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task TranslationFirstOneDeToFrAndEsFinalTextResultContinuous()
         {
             var toLanguages = new List<string>() { Language.FR, Language.ES };
@@ -338,7 +338,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             AssertOneEqual(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_GERMAN].Utterances[Language.ES].Select(x => x.Text).ToArray(), actualTranslationRecognition.Result.Translations[Language.ES]);
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task TranslationBatmanEnToDeHeddaRUSSynthesisResultContinuous()
         {
             var toLanguages = new List<string>() { Language.DE };
@@ -354,13 +354,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task SynthesisWeatherEnToFrCarolineShortVoice()
         {
             await TranslationWeatherEnToFrCarolineSynthesis(Voice.FR);
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task SynthesisWeatherEnToFrCarolineFullVoice()
         {
             await TranslationWeatherEnToFrCarolineSynthesis("Microsoft Server Speech Text to Speech Voice (fr-FR, Julie, Apollo)");
@@ -379,7 +379,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 $"Received response for speech synthesis is less than {MinSize}: {actualSynthesisByteResult.Result.GetAudio().Length}.");
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task TranslationWeatherEnToFrCarolineTextAndSynthesisResultContinuous()
         {
             var toLanguages = new List<string>() { Language.FR };
@@ -397,7 +397,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 $"Received response for speech synthesis is less than {MinSize}: {actualSynthesisByteResult.Result.GetAudio().Length}.");
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task TranslationWeatherEnToTrRecognizingContinuous()
         {
             var toLanguages = new List<string>() { Language.TR };
@@ -414,7 +414,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task TestInitialSilenceTimeout()
         {
             var toLanguages = new List<string>() { Language.DE };
@@ -434,7 +434,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             SPXTEST_ARE_EQUAL(NoMatchReason.InitialSilenceTimeout, noMatch.Reason);
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task TranslationFromCatalanToGerman()
         {
             var toLanguages = new List<string>() { Language.DE };
@@ -452,7 +452,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [Ignore]
-        [TestMethod]
+        [RetryTestMethod]
         public async Task TranslationFromCatalanToGermanInSovereignCloud()
         {
             var toLanguages = new List<string>() { Language.DE };
@@ -472,7 +472,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 Normalize(actualTranslationRecognition.Result.Translations[Language.DE])) > TestData.Levenshtein.SimilarityScoreThreshold);
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         [ExpectedException(typeof(ObjectDisposedException))]
         public async Task AsyncRecognitionAfterDisposingTranslationRecognizer()
         {
@@ -482,7 +482,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             await recognizer.StopContinuousRecognitionAsync();
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public void DisposingTranslationRecognizerWhileAsyncRecognition()
         {
             var toLanguages = new List<string>() { Language.DE };
@@ -499,7 +499,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [DataTestMethod, TestCategory(TestCategory.LongRunning)]
+        [RetryTestMethod, TestCategory(TestCategory.LongRunning)]
         [DynamicData(nameof(Voice.LangAndSynthesis), typeof(Voice), DynamicDataSourceType.Property)]
         public async Task TranslateFromENtoEachLangWithSynthesis(string translateTo, string voice)
         {
@@ -573,7 +573,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task TranslateFromENtoTongan()
         {
             var result = await this.translationHelper.GetTranslationFinalResult(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath(), Language.EN, new List<string> { "to" });
@@ -583,7 +583,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             SPXTEST_ARE_EQUAL(1, result.Translations.Count, "Unmatched translation results.");
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public void TestSetAndGetAuthToken()
         {
             var token = "x";
@@ -600,14 +600,14 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             SPXTEST_ARE_EQUAL(newToken, recognizer.AuthorizationToken);
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public void TestSetAndGetSubKey()
         {
             var config = SpeechTranslationConfig.FromSubscription("x", "westus");
             SPXTEST_ARE_EQUAL("x", config.SubscriptionKey);
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task ContinuousValidCustomTranslation()
         {
             var toLanguages = new List<string>() { Language.DE };
@@ -616,7 +616,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.DE][0].Text, actualTranslations[ResultType.RecognizedText].Last().Result.Translations[Language.DE]);
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task ContinuousInvalidCustomTranslation()
         {
             var toLanguages = new List<string>() { Language.DE };
@@ -628,7 +628,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             SPXTEST_ISTRUE(errorDetails.ToLowerInvariant().Contains("bad request"));
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public void SetLogFilename()
         {
             var toLanguages = new List<string>() { Language.DE };
@@ -675,7 +675,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             File.Delete(logFilename);
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         [ExpectedException(typeof(ArgumentException), "Cannot set a property to whitespace")]
         public void SetPropertyToWhiteSpace()
         {
@@ -684,7 +684,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             config.SetProperty(PropertyId.Speech_LogFilename, " ");
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task FromEndpointDeToFrTranslationWithVoice()
         {
             var configFromEndpoint = SpeechTranslationConfig.FromEndpoint(endpointUrl, subscriptionKey);
@@ -726,7 +726,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task FromEndpointCustomSpeechModelDetailedFormatEnToFrTranslation()
         {
             var configFromEndpoint = SpeechTranslationConfig.FromEndpoint(endpointUrl, subscriptionKey);
@@ -751,7 +751,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         [Ignore]
         public async Task FromEndpointPropertyOverwriteTranslation()
         {
@@ -788,7 +788,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task FromEndpointWithoutSettingFromToProperty()
         {
             var endpointWithParameters = endpointInString + "?from=de-DE&to=fr";
@@ -813,7 +813,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task SetServicePropertyTranslation()
         {
             var config = SpeechTranslationConfig.FromSubscription(subscriptionKey, region);
@@ -838,7 +838,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task ProfanityTranslation()
         {
             var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.PROFANITY_SINGLE_UTTERANCE_ENGLISH_2].FilePath.GetRootRelativePath());
@@ -892,7 +892,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task ChangeLanguageOutsideTurn()
         {
             var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.MULTIPLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
@@ -946,7 +946,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task ChangeLanguageInsideTurn()
         {
             var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.MULTIPLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
@@ -1036,7 +1036,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task TestTranslationConfigFromHost()
         {
             var config = SpeechTranslationConfig.FromHost(new Uri(hostInString), subscriptionKey);

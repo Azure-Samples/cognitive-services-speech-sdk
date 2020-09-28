@@ -36,7 +36,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             helper = new DialogServiceConnectorTestsHelper();
         }
 
-        [DataTestMethod]
+        [RetryTestMethod]
         public async Task ValidBaselineListenOnce()
         {
             var audioInput = AudioConfig.FromWavFileInput(Config.AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
@@ -46,7 +46,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [DataTestMethod]
+        [RetryTestMethod]
         public async Task ValidSendActivity()
         {
             var audioInput = AudioConfig.FromWavFileInput(Config.AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());

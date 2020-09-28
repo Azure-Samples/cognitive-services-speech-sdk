@@ -96,7 +96,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             helper = new ConversationTranscriberTestsHelper();
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task ConversationIdWithChinese()
         {
             var config = CreateCTSInRoomSpeechConfig();
@@ -110,7 +110,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task ConversationIdWithAnsiOnly()
         {
             var config = CreateCTSInRoomSpeechConfig();
@@ -122,7 +122,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public void ConversationCreateUsers()
         {
             string myId = "xyz@example.com";
@@ -130,7 +130,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             SPXTEST_ARE_EQUAL(myId, user.UserId);
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public void ConversationCreateParticipantWithValidPreferredLanguageAndVoiceSignature()
         {
             bool exception = false;
@@ -146,7 +146,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             SPXTEST_ARE_EQUAL(exception, false);
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public void ConversationCreateParticipantWithEmptyPreferredLanguage()
         {
             bool exception = false;
@@ -162,7 +162,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             SPXTEST_ARE_EQUAL(exception, false);
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public void ConversationCreateParticipantWithInvalidPreferredLanguage()
         {
             bool exception = false;
@@ -178,7 +178,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             SPXTEST_ARE_EQUAL(exception, false);
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public void ConversationCreateParticipantWithEmptyVoiceSignature()
         {
             bool exception = false;
@@ -194,7 +194,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             SPXTEST_ARE_EQUAL(exception, false);
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public void ConversationCreateParticipantWithInvalidVoiceSignature()
         {
             bool exception = false;
@@ -424,7 +424,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         [Ignore("Temporarily Disabled because enrollment service is broken, see bug #2027717")]
         public async Task ConversationPullStreamWithEnrollment()
         {
@@ -523,7 +523,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [Ignore]
-        [TestMethod]
+        [RetryTestMethod]
         public async Task ConversationDefaultLanguageAndDetailedOutput()
         {
             var config = CreateCTSInRoomSpeechConfig();
@@ -583,7 +583,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             return config;
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task TestDelayedAudio()
         {
             var config = CreateCTSTeamsSpeechConfig(DefaultSettingsMap[DefaultSettingKeys.ONLINE_AUDIO_ENDPOINT]);
@@ -652,7 +652,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task TestTempRedirect()
         {
             var config = CreateCTSTeamsSpeechConfig(DefaultSettingsMap[DefaultSettingKeys.RECONNECT_AUDIO_ENDPOINT], "?forceTemporaryRedirect=true");
@@ -713,7 +713,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task TestPermRedirect()
         {
             var config = CreateCTSTeamsSpeechConfig(DefaultSettingsMap[DefaultSettingKeys.RECONNECT_AUDIO_ENDPOINT], "?forcePermanentRedirect=true");
@@ -774,7 +774,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task TestTooManyParticipants()
         {
             var config = CreateCTSTeamsSpeechConfig(DefaultSettingsMap[DefaultSettingKeys.ONLINE_AUDIO_ENDPOINT]);

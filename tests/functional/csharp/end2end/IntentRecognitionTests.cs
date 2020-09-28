@@ -99,7 +99,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             return recognizer;
         }
 
-        [DataTestMethod]
+        [RetryTestMethod]
         [DataRow("", "", "HomeAutomation.TurnOn")]
         [DataRow("", "my-custom-intent-id-string", "my-custom-intent-id-string")]
         [DataRow("HomeAutomation.TurnOn", "", "HomeAutomation.TurnOn")]
@@ -142,7 +142,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         [Ignore] // TODO: This is being worked on by Ryan
         public async Task RecognizeIntentSpecialCharacters()
         {
@@ -157,7 +157,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public void TestSetAndGetAuthTokenOnIntent()
         {
             var token = "x";
@@ -175,7 +175,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task TestSetAuthorizationTokenOnIntentRecognizer()
         {
             var invalidToken = "InvalidToken";
@@ -196,7 +196,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         [DataRow(false, false)]
         [DataRow(false, true)]
         [DataRow(true, false)]
@@ -226,7 +226,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task IntentRecognizerConnectedEvent()
         {
             var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.INTENT_UTTERANCE].FilePath.GetRootRelativePath());
@@ -275,7 +275,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public void IntentRecognizerUsingConnectionOpen()
         {
             var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.INTENT_UTTERANCE].FilePath.GetRootRelativePath());
@@ -289,7 +289,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         [ExpectedException(typeof(ObjectDisposedException))]
         public async Task AsyncRecognitionAfterDisposingIntentRecognizer()
         {
@@ -300,7 +300,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             await recognizer.StartContinuousRecognitionAsync();
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         [ExpectedException(typeof(InvalidOperationException))]
         public void DisposingIntentRecognizerWhileAsyncRecognition()
         {
@@ -310,7 +310,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             recognizer = DoAsyncRecognitionNotAwaited(recognizer);
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task FromEndpointIntentModel()
         {
             var configFromEndpoint = SpeechConfig.FromEndpoint(endpointUrl, languageUnderstandingSubscriptionKey);
@@ -336,7 +336,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task FromEndpointGermanPhraseIntent()
         {
             var configFromEndpoint = SpeechConfig.FromEndpoint(endpointUrl, languageUnderstandingSubscriptionKey);
@@ -363,7 +363,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task FromEndpointPropertyOverwriteIntent()
         {
             var endpointWithProperty = endpointInString + "?language=en-us&format=detailed";
@@ -394,7 +394,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task RecognizeIntentDefaultLanguage()
         {
             var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_WITH_SPECIAL_CHARACTER].FilePath.GetRootRelativePath());
@@ -409,7 +409,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         [Ignore("This is failing intermitantly with Websocket upgrade failure.")]
         public async Task TestIntentConfigFromHost()
         {

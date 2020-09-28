@@ -56,7 +56,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             config = SpeechConfig.FromSubscription(unifiedKey, unifiedRegion);
         }
 
-        [DataTestMethod]
+        [RetryTestMethod]
         [DataRow(false, 0, 0, 0, 0, 0)]
         [DataRow(true, 1, 0, 0, 0, 0)]
         [DataRow(true, 1, 2, 0, 0, 0)]
@@ -117,7 +117,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         [Ignore]
         public async Task TestSetRecognitionFactor()
         {
@@ -142,7 +142,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public void TestSetRecognitionFactorError()
         {
             var defaultRecoText = TestData.DgiWreckANiceBeach.DefaultRecoText;
@@ -160,7 +160,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task TestSetRecognitionFactorStringErrorRange()
         {
             var defaultRecoText = TestData.DgiWreckANiceBeach.DefaultRecoText;
@@ -184,7 +184,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task TestSetRecognitionFactorStringError()
         {
             var defaultRecoText = TestData.DgiWreckANiceBeach.DefaultRecoText;
@@ -208,7 +208,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task TestPhraseListGrammarInChinese()
         {
             var recoTextExpected = AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_CHINESE].Utterances[Language.ZH_CN][0].Text;

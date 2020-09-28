@@ -62,7 +62,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task CT_Conversation_WithoutTranslations()
         {
             var speechConfig = CreateConfig(Language.EN);
@@ -74,7 +74,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task CT_Conversation_WithTranslations()
         {
             var speechConfig = CreateConfig(Language.EN, Language.FR);
@@ -87,7 +87,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task CT_Conversation_Dispose()
         {
             var speechConfig = CreateConfig(Language.EN, Language.FR, "ar");
@@ -100,7 +100,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task CT_Conversation_DisposeAfterStart()
         {
             var speechConfig = CreateConfig(Language.EN, Language.FR, "ar");
@@ -114,7 +114,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task CT_Conversation_MethodsWhileNotStarted()
         {
             var speechConfig = CreateConfig(Language.EN, Language.FR, "ar");
@@ -151,7 +151,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task CT_Conversation_CallUnsupportedMethods()
         {
             Log($"Checking methods on Conversation instance for the ConversationTranslator");
@@ -207,7 +207,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task CT_ConversationTranslator_HostAudio()
         {
             var audioUtterance = AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH];
@@ -255,7 +255,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             );
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task CT_ConversationTranslator_JoinWithTranslation()
         {
             string hostLang = Language.EN;
@@ -339,7 +339,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             );
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task CT_ConversationTranslator_HostSendsIm()
         {
             var speechConfig = CreateConfig(Language.EN, Language.JA, Language.AR_SA);
@@ -360,7 +360,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             );
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task CT_ConversationTranslator_HostAndParticipantSendIms()
         {
             var speechConfig = CreateConfig(Language.EN);
@@ -407,7 +407,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             host.VerifyIms(expectedIms);
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task CT_ConversationTranslator_JoinLockedRoom()
         {
             var speechConfig = CreateConfig(Language.EN);
@@ -426,7 +426,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             host.VerifyBasicEvents(false);
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task CT_ConversationTranslator_CallMethodsWhenNotJoined()
         {
             SPX_TRACE_INFO("========== Host ==========");
@@ -478,7 +478,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task CT_ConversationTranslator_DoubleJoinShouldFail()
         {
             var hostSpeechConfig = CreateConfig(Language.EN);
@@ -505,7 +505,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             await host.LeaveAsync();
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public void ConversationTranslator_ConnectionBeforeJoin()
         {
             var audioConfig = AudioConfig.FromWavFileInput(Config.AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
@@ -530,7 +530,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             REQUIRE_NOTHROW(() => connection.Close());
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task CT_ConversationTranslator_ConnectionAfterLeave()
         {
             var speechConfig = CreateConfig(Language.EN);
@@ -559,7 +559,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             REQUIRE_NOTHROW(() => host.Connection.Close());
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task CT_ConversationTranslator_RecognizerEventsAndMethods()
         {
             var speechConfig = CreateConfig(Language.EN);
@@ -587,7 +587,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             SPXTEST_REQUIRE(evts.Count > 0);
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task CT_ConversationTranslator_HostLeaveRejoin()
         {
             var audioFile = AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH];
@@ -657,7 +657,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             );
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task CT_ConversationTranslator_CantCallMethodsAfterDisconnected()
         {
             var speechConfig = CreateConfig("en-US");
@@ -689,7 +689,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             await host.LeaveAsync();
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task CT_ConversationTranslator_ParticipantRejoin()
         {
             var hostUtterance = AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH];
@@ -749,7 +749,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             alice.VerifyTranscriptions(expectedTranscriptions);
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task CT_ConversationTranslator_RejoinAfterDelete()
         {
             var hostUtterance = AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH];
@@ -805,7 +805,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             );
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         [Ignore] // code is not yet live in PROD
         public async Task CT_ConversationTranslator_SetInvalidAuthorizationToken()
         {
@@ -833,7 +833,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             await host.LeaveAsync();
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         [Ignore] // code is not yet live in PROD
         public async Task CT_ConversationTranslator_HostUpdatesAuthorizationToken()
         {
@@ -880,7 +880,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             );
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         [Ignore] // code is not yet live in PROD
         public async Task CT_ConversationTranslator_ParticipantReceivesUpdatedAuthToken()
         {

@@ -44,7 +44,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             helper = new SpeechRecognitionTestsHelper();
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public void TestPronunciationAssessmentConfig()
         {
             var config = new PronunciationAssessmentConfig("reference", GradingSystem.HundredMark);
@@ -88,7 +88,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             });
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public void TestPronunciationAssessmentConfigApplyToRecognizer()
         {
             var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.PRONUNCIATION_ASSESSMENT_GOOD_PRONUNCIATION_CHINESE].FilePath.GetRootRelativePath());
@@ -100,7 +100,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         // [DataRow(true)] enable this when pronunciation assessment deployed to north europe
         [DataRow(false)]
         public async Task TestPronunciationAssessment(bool useReferenceText)

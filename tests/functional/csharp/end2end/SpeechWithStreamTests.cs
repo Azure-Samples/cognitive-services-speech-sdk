@@ -43,7 +43,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             speechHelper = new SpeechWithStreamHelper();
         }
 
-        [DataTestMethod, TestCategory(TestCategory.CompressedStreamTest)]
+        [RetryTestMethod, TestCategory(TestCategory.CompressedStreamTest)]
         [DataRow(AudioStreamContainerFormat.MP3)]
         [DataRow(AudioStreamContainerFormat.OGG_OPUS)]
         [DataRow(AudioStreamContainerFormat.FLAC)]
@@ -68,7 +68,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             AssertMatching(AudioUtterancesMap[filePathKey].Utterances[Language.EN][0].Text, result.Text);
         }
 
-        [DataTestMethod]
+        [RetryTestMethod]
         [DataRow(false, false, true, DisplayName = "Simple one-shot with preconnect")]
         [DataRow(false, true, false, DisplayName = "Simple continuous")]
         [DataRow(true, false, false, DisplayName = "Detailed one-shot")]

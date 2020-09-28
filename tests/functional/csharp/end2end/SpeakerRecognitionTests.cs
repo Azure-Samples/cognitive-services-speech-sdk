@@ -44,7 +44,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             Log($"\tDefault Endpoint:        <{DefaultSettingsMap[DefaultSettingKeys.SPEAKER_RECOGNITION_ENDPOINT]}>");
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task text_independent_verification_enrollment()
         {
             var config = this.GetProdSpeakerRecognitionSubscriptionConfig();
@@ -74,7 +74,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task text_independent_identification_enrollment()
         {
             var config = this.GetProdSpeakerRecognitionSubscriptionConfig();
@@ -106,7 +106,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task text_dependent_verification_enrollment()
         {
             var config = this.GetProdSpeakerRecognitionSubscriptionConfig();
@@ -136,7 +136,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task text_dependent_verification_enrollment_good_case()
         {
             var config = this.GetProdSpeakerRecognitionSubscriptionConfig();
@@ -165,7 +165,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task ResetVoiceProfile1()
         {
             var config = this.GetProdSpeakerRecognitionSubscriptionConfig();
@@ -188,7 +188,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task ResetVoiceProfile2()
         {
             var config = this.GetProdSpeakerRecognitionSubscriptionConfig();
@@ -211,7 +211,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task ResetDeleteResetVoiceProfile()
         {
             var config = this.GetProdSpeakerRecognitionSubscriptionConfig();
@@ -242,7 +242,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task SpeakerVerification()
         {
             var config = this.GetProdSpeakerRecognitionSubscriptionConfig();
@@ -286,7 +286,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task SpeakerIdentification()
         {
             var config = this.GetProdSpeakerRecognitionSubscriptionConfig();

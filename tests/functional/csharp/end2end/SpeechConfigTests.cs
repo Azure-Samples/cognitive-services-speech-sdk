@@ -34,7 +34,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             LoggingTestBaseCleanup();
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public void TestCreateRecognizerTypes()
         {
             var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
@@ -61,14 +61,14 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public void TestGetters()
         {
             SPXTEST_ARE_EQUAL(subscriptionKey, this.defaultConfig.SubscriptionKey);
             SPXTEST_ARE_EQUAL(region, this.defaultConfig.Region);
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task ConfigFromAuthorizationToken()
         {
             var token = await GetToken(subscriptionKey, region);
@@ -94,7 +94,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task SetAuthorizationTokenOnConfig()
         {
             var invalidToken = "InvalidToken";
@@ -114,7 +114,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task SetAuthorizationTokenOnRecognizer()
         {
             var invalidToken = "InvalidToken";
@@ -132,7 +132,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task SubscriptionKeyAndInvalidAuthToken()
         {
             var invalidToken = "InvalidToken";
@@ -164,7 +164,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task SubscriptionKeyAndValidAuthToken()
         {
             var token = await GetToken(subscriptionKey, region);
@@ -193,7 +193,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task SubscriptionKeyAndExpiredAuthToken()
         {
             var expiredToken = "eyJhbGciOiJodHRwOi8vd3d3LnczLm9yZy8yMDAxLzA0L3htbGRzaWctbW9yZSNobWFjLXNoYTI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ1cm46bXMuY29nbml0aXZlc2VydmljZXMiLCJleHAiOiIxNTU0MzE1Nzk5IiwicmVnaW9uIjoibm9ydGhldXJvcGUiLCJzdWJzY3JpcHRpb24taWQiOiIwNmZlNjU2MWVkZTM0NDdiYTg2NDY5Njc4YTIwNTNkYiIsInByb2R1Y3QtaWQiOiJTcGVlY2hTZXJ2aWNlcy5TMCIsImNvZ25pdGl2ZS1zZXJ2aWNlcy1lbmRwb2ludCI6Imh0dHBzOi8vYXBpLmNvZ25pdGl2ZS5taWNyb3NvZnQuY29tL2ludGVybmFsL3YxLjAvIiwiYXp1cmUtcmVzb3VyY2UtaWQiOiIvc3Vic2NyaXB0aW9ucy8zYTk2ZWY1Ni00MWE5LTQwYTAtYjBmMy1mYjEyNWMyYjg3OTgvcmVzb3VyY2VHcm91cHMvY3NzcGVlY2hzZGstY2FyYm9uL3Byb3ZpZGVycy9NaWNyb3NvZnQuQ29nbml0aXZlU2VydmljZXMvYWNjb3VudHMvc3BlZWNoc2Rrbm9ydGhldXJvcGUiLCJzY29wZSI6InNwZWVjaHNlcnZpY2VzIiwiYXVkIjoidXJuOm1zLnNwZWVjaHNlcnZpY2VzLm5vcnRoZXVyb3BlIn0.hVAWT2YHjknFI6qLhnjmjzoNgOgxKWguuFhJLlyDxLU";
@@ -222,7 +222,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task InvalidSubscriptionKeyAndValidAuthToken()
         {
             var invalidKey = "InvalidKey";
@@ -255,7 +255,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task InvalidSubscriptionKeyAndInvalidAuthToken()
         {
             var invalidKey = "InvalidKey";
@@ -301,7 +301,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public void FromEndpointWithoutSubscriptionKeyAndAuthToken()
         {
             var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
@@ -334,7 +334,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public void PropertiesSetAndGet()
         {
             int initialSilenceTimeout = 6000;
@@ -384,7 +384,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public void PropertiesDirectSetAndGet()
         {
             this.defaultConfig.SetProfanity(ProfanityOption.Removed);
@@ -405,7 +405,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task SpeechConfigPropertiesSetAndCheckUrl()
         {
             this.defaultConfig.SetProperty(PropertyId.SpeechServiceConnection_InitialSilenceTimeoutMs, "5000");
@@ -451,7 +451,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             SPXTEST_ISFALSE(connectionUrl.Contains("stableTranslation="), "unexpected stableTranslation in " + connectionUrl);
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task SpeechConfigPropertiesDirectSetAndCheckUrl()
         {
             this.defaultConfig.SetProfanity(ProfanityOption.Masked);
@@ -494,7 +494,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             SPXTEST_ISFALSE(connectionUrl.Contains("stableTranslation="), "unexpected stableTranslation in " + connectionUrl);
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task SpeechConfigPropertiesNegativeInteger()
         {
             this.defaultConfig.SetProperty(PropertyId.SpeechServiceConnection_InitialSilenceTimeoutMs, "-50");
@@ -510,7 +510,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task SpeechConfigPropertiesInvalidInteger()
         {
             this.defaultConfig.SetProperty(PropertyId.SpeechServiceConnection_InitialSilenceTimeoutMs, "A50");
@@ -525,7 +525,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task SpeechConfigPropertiesInvalidBool()
         {
             this.defaultConfig.SetProperty(PropertyId.SpeechServiceResponse_RequestWordLevelTimestamps, "nontrue");
@@ -541,7 +541,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task SpeechConfigOutputFormatOptionOverwrite()
         {
             this.defaultConfig.OutputFormat = OutputFormat.Detailed;
@@ -558,7 +558,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task SpeechConfigWordLevelTimestampsOverwriteOutputFormatOption()
         {
             this.defaultConfig.RequestWordLevelTimestamps();
@@ -578,7 +578,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task SpeechConfigWordLevelTimestampsOverwriteOutputFormatProperty()
         {
             this.defaultConfig.RequestWordLevelTimestamps();
@@ -598,7 +598,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task DefaultLanguageSpeechReco()
         {
             var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
@@ -612,7 +612,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task DefaultLanguageWithSpeechReco()
         {
             var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
@@ -626,7 +626,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public void ObjectErrorThreshold()
         {
             var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());

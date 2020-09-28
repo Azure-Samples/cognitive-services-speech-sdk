@@ -42,7 +42,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         #region Diagnostic Tests
-        [TestMethod]
+        [RetryTestMethod]
         public void SwitchLogFileNames()
         {
             var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.MULTIPLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
@@ -55,7 +55,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task StartAndStopLogging()
         {
             var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
@@ -106,7 +106,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             SPXTEST_ISTRUE(size < fi.Length, "File should have grown.");
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task FileSizeCap()
         {
             ManualResetEvent stoppedEvent = new ManualResetEvent(false);
@@ -145,7 +145,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             SPXTEST_ISTRUE(fileCount > 1, "Not enough files created");
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task TestFileLogFilter()
         {
             var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());

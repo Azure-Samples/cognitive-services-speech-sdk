@@ -176,7 +176,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             helper = new SpeechRecognitionTestsHelper();
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task TestSpeechKeywordspotterStartAndStopWithInvalidSubscription()
         {
             var str = AudioUtterancesMap[AudioUtteranceKeys.COMPUTER_KEYWORD_WITH_SINGLE_UTTERANCE_1].FilePath.GetRootRelativePath();
@@ -198,7 +198,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task TestSpeechSpeechKeywordspotterStartStop()
         {
             var str = AudioUtterancesMap[AudioUtteranceKeys.COMPUTER_KEYWORD_WITH_SINGLE_UTTERANCE_1].FilePath.GetRootRelativePath();
@@ -216,7 +216,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task TestSpeechKeywordspotterNonExisting()
         {
             var str = AudioUtterancesMap[AudioUtteranceKeys.COMPUTER_KEYWORD_WITH_SINGLE_UTTERANCE_1].FilePath.GetRootRelativePath();
@@ -245,7 +245,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task TestSpeechKeywordspotterComputerFound()
         {
             var tcs = new TaskCompletionSource<bool>();
@@ -298,7 +298,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task TestSpeechKeywordspotterComputerFoundFromWavFile()
         {
             var tcs = new TaskCompletionSource<bool>();
@@ -351,7 +351,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
         
-        [TestMethod]
+        [RetryTestMethod]
         [Ignore]
         public async Task TestSpeechKeywordspotterComputer2PassFoundFromWavFile()
         {
@@ -405,7 +405,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task TestSpeechKeywordspotterEventsFound()
         {
             var tcs = new TaskCompletionSource<bool>();
@@ -465,7 +465,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task TestSpeechSpeechKeywordspotterSecretFound()
         {
             var tcs = new TaskCompletionSource<bool>();
@@ -518,7 +518,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         [Ignore("This test is crashing a lot of the time on a background thread.")]
         public async Task TestSpeechKeywordspotterSecretAndComputerFound()
         {
@@ -619,7 +619,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             await recognizerComputer.StopKeywordRecognitionAsync().ConfigureAwait(false);
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         [Ignore("This test is crashing a lot of the time on a background thread.")]
         public async Task TestSpeechKeywordspotterSecretAndComputerNotFound()
         {
@@ -723,7 +723,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             await recognizerComputer.StopKeywordRecognitionAsync().ConfigureAwait(false);
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task TestSpeechKeywordspotterComputerFound2Utterances()
         {
             var tcs = new TaskCompletionSource<bool>();
@@ -787,7 +787,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task TestSpeechKeywordspotterComputerFound2DifferentUtterances()
         {
             var tcs = new TaskCompletionSource<bool>();
@@ -860,7 +860,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task TestSpeechKeywordspotterComputerNotFound()
         {
             var tcs = new TaskCompletionSource<bool>();
@@ -913,7 +913,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task TestSpeechMockKeywordspotterStartStop()
         {
             var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
@@ -929,7 +929,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task TestIntentKeywordspotterStartStop()
         {
             var config = SpeechConfig.FromSubscription(languageUnderstandingSubscriptionKey, languageUnderstandingServiceRegion);
@@ -957,7 +957,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task TestIntentKeywordspotterComputerNotFound()
         {
             var tcs = new TaskCompletionSource<bool>();
@@ -1019,7 +1019,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task TestIntentKeywordspotterComputerFound2DifferentUtterances()
         {
             var count = 0;
@@ -1111,7 +1111,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task TestIntentKeywordspotterComputerFound()
         {
             var tcs = new TaskCompletionSource<bool>();
@@ -1170,7 +1170,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task TestTranslationKeywordspotterComputerNotFound()
         {
             var tcs = new TaskCompletionSource<bool>();
@@ -1231,7 +1231,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task TestTranslationKeywordspotterComputerFound()
         {
             var tcs = new TaskCompletionSource<bool>();
@@ -1293,7 +1293,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task TestTranslationKeywordspotterComputerFound2DifferentUtterances()
         {
             var count = 0;
@@ -1387,7 +1387,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         // Tests that start recognition in various modes and for different events allow the recognizer to fall out of scope and be disposed
         // mid recognition
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task CloseOnSessonStart()
         {
             var str = AudioUtterancesMap[AudioUtteranceKeys.COMPUTER_KEYWORD_WITH_SINGLE_UTTERANCE_1].FilePath.GetRootRelativePath();
@@ -1408,7 +1408,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task CloseOnRecognizing()
         {
             var str = AudioUtterancesMap[AudioUtteranceKeys.COMPUTER_KEYWORD_WITH_SINGLE_UTTERANCE_1].FilePath.GetRootRelativePath();
@@ -1429,7 +1429,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task CloseOnRecognized()
         {
             var str = AudioUtterancesMap[AudioUtteranceKeys.COMPUTER_KEYWORD_WITH_SINGLE_UTTERANCE_1].FilePath.GetRootRelativePath();
@@ -1450,7 +1450,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task CloseOnSpeechStart()
         {
             var str = AudioUtterancesMap[AudioUtteranceKeys.COMPUTER_KEYWORD_WITH_SINGLE_UTTERANCE_1].FilePath.GetRootRelativePath();
@@ -1471,7 +1471,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task CloseOnConnected()
         {
             var str = AudioUtterancesMap[AudioUtteranceKeys.COMPUTER_KEYWORD_WITH_SINGLE_UTTERANCE_1].FilePath.GetRootRelativePath();

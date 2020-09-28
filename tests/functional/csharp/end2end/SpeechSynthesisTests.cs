@@ -40,7 +40,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task SynthesisDefaultsREST()
         {
             using (var synthesizer = new SpeechSynthesizer(restConfig))
@@ -54,7 +54,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task ExplicitlyUseDefaultSpeakersREST()
         {
             using (var deviceConfig = AudioConfig.FromDefaultSpeakerOutput())
@@ -71,7 +71,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task PickLanguageREST()
         {
             restConfig.SpeechSynthesisLanguage = "en-GB";
@@ -86,7 +86,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task PickVoiceREST()
         {
             restConfig.SpeechSynthesisVoiceName = "Microsoft Server Speech Text to Speech Voice (en-GB, HazelRUS)";
@@ -101,7 +101,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task SynthesizerOutputToFileREST()
         {
             using (var fileConfig = AudioConfig.FromWavFileOutput("wavefile.wav"))
@@ -133,7 +133,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task SynthesizerOutputToPushStreamREST()
         {
             using (var callback = new PushAudioOutputStreamTestCallback())
@@ -158,7 +158,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task SynthesizerOutputToPullStreamUseAfterSynthesisCompletedREST()
         {
             using (var stream = AudioOutputStream.CreatePullStream())
@@ -178,7 +178,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task SynthesizerOutputToPullStreamStartUsingBeforeDoneSynthesizingREST()
         {
             using (var stream = AudioOutputStream.CreatePullStream())
@@ -200,7 +200,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task SpeakOutInResultsREST()
         {
             using (var synthesizer = new SpeechSynthesizer(restConfig, null)) // null indicates to do nothing with synthesizer audio by default
@@ -225,7 +225,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task SpeakOutputInChunksInEventSynthesizingREST()
         {
             using (var synthesizer = new SpeechSynthesizer(restConfig, null)) // null indicates to do nothing with synthesizer audio by default
@@ -257,7 +257,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task SpeakOutputInStreamsREST()
         {
             using (var synthesizer = new SpeechSynthesizer(restConfig, null)) // null indicates to do nothing with synthesizer audio by default
@@ -290,7 +290,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task SpeakOutputInStreamsBeforeDoneFromEventSynthesisStartedREST()
         {
             using (var synthesizer = new SpeechSynthesizer(restConfig, null)) // null indicates to do nothing with synthesizer audio by default
@@ -343,7 +343,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task SpeakOutputInStreamsBeforeDoneFromMethodStartSpeakingTextAsyncREST()
         {
             using (var synthesizer = new SpeechSynthesizer(restConfig, null)) // null indicates to do nothing with synthesizer audio by default
@@ -377,7 +377,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task SpeakOutputInStreamsBeforeDoneQueuedREST()
         {
             using (var synthesizer = new SpeechSynthesizer(restConfig, null)) // null indicates to do nothing with synthesizer audio by default
@@ -414,7 +414,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task SpeakOutputInStreamsWithAllDataGetOnSynthesisStartedResultREST()
         {
             using (var synthesizer = new SpeechSynthesizer(restConfig, null)) // null indicates to do nothing with synthesizer audio by default
@@ -450,7 +450,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task SpeakOutWithAuthorizationTokenREST()
         {
             var endpoint = $"https://{region}.tts.speech.microsoft.com/cognitiveservices/v1";
@@ -483,7 +483,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task SynthesisDefaultsUsp()
         {
             using (var synthesizer = new SpeechSynthesizer(uspConfig))
@@ -497,7 +497,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task ExplicitlyUseDefaultSpeakersUsp()
         {
             using (var deviceConfig = AudioConfig.FromDefaultSpeakerOutput())
@@ -514,7 +514,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task PickLanguageUsp()
         {
             uspConfig.SpeechSynthesisLanguage = "en-GB";
@@ -529,7 +529,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task PickVoiceUsp()
         {
             uspConfig.SpeechSynthesisVoiceName = "Microsoft Server Speech Text to Speech Voice (en-GB, HazelRUS)";
@@ -544,7 +544,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
         
-        [TestMethod]
+        [RetryTestMethod]
         public async Task SynthesisWithMultiVoicesUsp()
         {
             using (var synthesizer = new SpeechSynthesizer(uspConfig, null))
@@ -559,7 +559,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task SynthesisWithRecordedAudioUsp()
         {
             using (var synthesizer = new SpeechSynthesizer(uspConfig, null))
@@ -574,7 +574,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task SynthesizerOutputToFileUsp()
         {
             using (var fileConfig = AudioConfig.FromWavFileOutput("wavefile.wav"))
@@ -606,14 +606,14 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public void SynthesizerOutputToInvalidFileUsp()
         {
             var fileConfig = AudioConfig.FromWavFileOutput(Path.Combine("NonexistentDir", "InvalidFile"));
             SPXTEST_THROWS<ApplicationException>(() => new SpeechSynthesizer(uspConfig, fileConfig));
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task SynthesizerOutputToPushStreamUsp()
         {
             using (var callback = new PushAudioOutputStreamTestCallback())
@@ -638,7 +638,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task SynthesizerOutputToPushStreamAfterAudioConfigDisposeUsp()
         {
             using (var callback = new PushAudioOutputStreamTestCallback())
@@ -657,7 +657,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task SynthesizerOutputToPullStreamUseAfterSynthesisCompletedUsp()
         {
             using (var stream = AudioOutputStream.CreatePullStream())
@@ -677,7 +677,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task SynthesizerOutputToPullStreamStartUsingBeforeDoneSynthesizingUsp()
         {
             using (var stream = AudioOutputStream.CreatePullStream())
@@ -699,7 +699,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task SpeakOutInResultsUsp()
         {
             using (var synthesizer = new SpeechSynthesizer(uspConfig, null)) // null indicates to do nothing with synthesizer audio by default
@@ -724,7 +724,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task SpeakOutputInChunksInEventSynthesizingUsp()
         {
             using (var synthesizer = new SpeechSynthesizer(uspConfig, null)) // null indicates to do nothing with synthesizer audio by default
@@ -756,7 +756,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task SpeakOutputInStreamsUsp()
         {
             using (var synthesizer = new SpeechSynthesizer(uspConfig, null)) // null indicates to do nothing with synthesizer audio by default
@@ -789,7 +789,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task SpeakOutputInStreamsBeforeDoneFromEventSynthesisStartedUsp()
         {
             using (var synthesizer = new SpeechSynthesizer(uspConfig, null)) // null indicates to do nothing with synthesizer audio by default
@@ -842,7 +842,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task SpeakOutputInStreamsBeforeDoneFromMethodStartSpeakingTextAsyncUsp()
         {
             using (var synthesizer = new SpeechSynthesizer(uspConfig, null)) // null indicates to do nothing with synthesizer audio by default
@@ -876,7 +876,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task SpeakOutputInStreamsBeforeDoneQueuedUsp()
         {
             using (var synthesizer = new SpeechSynthesizer(uspConfig, null)) // null indicates to do nothing with synthesizer audio by default
@@ -913,7 +913,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task SpeakOutputInStreamsWithAllDataGetOnSynthesisStartedResultUsp()
         {
             using (var synthesizer = new SpeechSynthesizer(uspConfig, null)) // null indicates to do nothing with synthesizer audio by default
@@ -948,7 +948,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task SpeakOutWithAuthorizationTokenUsp()
         {
             var configWithInvalidToken = SpeechConfig.FromAuthorizationToken("InvalidToken", region);
@@ -978,7 +978,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task SynthesisFirstChunkTimeoutUsp()
         {
             using (var synthesizer = new SpeechSynthesizer(uspConfig, null))
@@ -997,7 +997,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task SynthesisAllChunkTimeoutUsp()
         {
             using (var synthesizer = new SpeechSynthesizer(uspConfig, null))
@@ -1016,7 +1016,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task CheckWordBoundaryEventsUsp()
         {
             uspConfig.SpeechSynthesisVoiceName = "Microsoft Server Speech Text to Speech Voice (zh-CN, HuihuiRUS)";
@@ -1085,7 +1085,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task SynthesisWithLanguageAutoDetectionUsp()
         {
             var autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig.FromOpenRange();
@@ -1107,7 +1107,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task StopSynthesisUsp()
         {
             using (var synthesizer = new SpeechSynthesizer(uspConfig, null as AudioConfig))
@@ -1129,7 +1129,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         [TestCategory("SpeechSynthesisMockTest")]
         public async Task SynthesisDefaultsMock()
         {
@@ -1150,7 +1150,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         [TestCategory("SpeechSynthesisMockTest")]
         public async Task ExplicitlyUseDefaultSpeakersMock()
         {
@@ -1174,7 +1174,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         [TestCategory("SpeechSynthesisMockTest")]
         public async Task PickLanguageMock()
         {
@@ -1196,7 +1196,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         [TestCategory("SpeechSynthesisMockTest")]
         public async Task PickVoiceMock()
         {
@@ -1218,7 +1218,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         [TestCategory("SpeechSynthesisMockTest")]
         public async Task SynthesizerOutputToFileMock()
         {
@@ -1253,7 +1253,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         [TestCategory("SpeechSynthesisMockTest")]
         public async Task SynthesizerOutputToPushStreamMock()
         {
@@ -1288,7 +1288,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         [TestCategory("SpeechSynthesisMockTest")]
         public async Task SynthesizerOutputToPullStreamUseAfterSynthesisCompletedMock()
         {
@@ -1313,7 +1313,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         [TestCategory("SpeechSynthesisMockTest")]
         public async Task SynthesizerOutputToPullStreamStartUsingBeforeDoneSynthesizingMock()
         {
@@ -1340,7 +1340,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         [TestCategory("SpeechSynthesisMockTest")]
         public async Task SpeakOutInResultsMock()
         {
@@ -1368,7 +1368,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         [TestCategory("SpeechSynthesisMockTest")]
         public async Task SpeakOutputInChunksInEventSynthesizingMock()
         {
@@ -1425,7 +1425,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         [TestCategory("SpeechSynthesisMockTest")]
         public async Task SpeakOutputInStreamsMock()
         {
@@ -1463,7 +1463,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         [TestCategory("SpeechSynthesisMockTest")]
         public async Task SpeakOutputInStreamsBeforeDoneFromEventSynthesisStartedMock()
         {
@@ -1527,7 +1527,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         [TestCategory("SpeechSynthesisMockTest")]
         public async Task SpeakOutputInStreamsBeforeDoneFromMethodStartSpeakingTextAsyncMock()
         {
@@ -1564,7 +1564,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         [TestCategory("SpeechSynthesisMockTest")]
         public async Task SpeakOutputInStreamsBeforeDoneQueuedMock()
         {
@@ -1604,7 +1604,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         [TestCategory("SpeechSynthesisMockTest")]
         public async Task SpeakOutputInStreamsWithAllDataGetOnSynthesisStartedResultMock()
         {
@@ -1637,7 +1637,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         [TestCategory("SpeechSynthesisMockTest")]
         public async Task SpeakOutputInStreamsWithAllDataGetSinceSynthesizingResultMock()
         {
@@ -1671,7 +1671,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task TestSynthesisWithCustomVoice()
         {
             using (var synthesizer = new SpeechSynthesizer(customVoiceConfig, null))
@@ -1683,7 +1683,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
         
-        [TestMethod]
+        [RetryTestMethod]
         public async Task SynthesisWithSovereignCloudToken()
         {
             var mooncakeSubscriptionKey = SubscriptionsRegionsMap[SubscriptionsRegionsKeys.MOONCAKE_SUBSCRIPTION].Key;
@@ -1715,7 +1715,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task SynthesisWithSovereignCloudFromEndpoint()
         {
             var mooncakeSubscriptionKey = SubscriptionsRegionsMap[SubscriptionsRegionsKeys.MOONCAKE_SUBSCRIPTION].Key;
@@ -1745,7 +1745,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task SynthesisWithMooncakeFromSubscription()
         {
             var mooncakeSubscriptionKey = SubscriptionsRegionsMap[SubscriptionsRegionsKeys.MOONCAKE_SUBSCRIPTION].Key;
@@ -1766,7 +1766,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task SynthesisWithSovereignCloudFromHost()
         {
             var mooncakeSubscriptionKey = SubscriptionsRegionsMap[SubscriptionsRegionsKeys.MOONCAKE_SUBSCRIPTION].Key;
@@ -1794,7 +1794,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task TestSynthesisConfigFromHost()
         {
             using (var synthesizer = new SpeechSynthesizer(restHostConfig))

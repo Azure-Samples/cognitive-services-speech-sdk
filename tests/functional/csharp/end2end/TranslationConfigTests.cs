@@ -31,7 +31,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             LoggingTestBaseCleanup();
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public void TestVoiceNameInTranslationConfig()
         {
             var config = SpeechTranslationConfig.FromSubscription(subscriptionKey, region);
@@ -42,7 +42,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             SPXTEST_ARE_EQUAL(config.VoiceName, Voice.DE);
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public void TestEmptyVoiceNameInTranslationConfig()
         {
             var config = SpeechTranslationConfig.FromSubscription(subscriptionKey, region);
@@ -53,7 +53,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             SPXTEST_ARE_EQUAL(config.VoiceName, "");
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public void TestDefaultVoiceNameInTranslationConfig()
         {
             var config = SpeechTranslationConfig.FromSubscription(subscriptionKey, region);
@@ -63,7 +63,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             SPXTEST_ARE_EQUAL("", config.VoiceName);
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task TranslationConfigPropertiesAndCheckUrl()
         {
             var config = SpeechTranslationConfig.FromSubscription(subscriptionKey, region);
@@ -109,7 +109,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             SPXTEST_ISFALSE(connectionUrl.Contains("postprocessing="), "unexpected postprocessing in " + connectionUrl);
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task TranslationConfigPropertiesDirectSetAndCheckUrl()
         {
             var config = SpeechTranslationConfig.FromSubscription(subscriptionKey, region);
@@ -150,7 +150,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             SPXTEST_ISFALSE(connectionUrl.Contains("stableTranslation="), "unexpected stableTranslation in " + connectionUrl);
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task TranslationConfigStablePartialResultCheckInUrl()
         {
             var config = SpeechTranslationConfig.FromSubscription(subscriptionKey, region);

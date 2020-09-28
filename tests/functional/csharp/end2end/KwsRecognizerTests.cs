@@ -34,7 +34,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             LoggingTestBaseCleanup();
         }
 
-        [TestMethod]
+        [RetryTestMethod]
         public async Task TestKeywordFound()
         {
             var tcs = new TaskCompletionSource<bool>();

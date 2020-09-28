@@ -73,62 +73,6 @@ DIAG_FILENAME=diag-${ACTUAL_LOG_FILE_NAME::-4}
 
 exitCode=$?
 
-ACTUAL_LOG_FILE_NAME_RETRY=$ACTUAL_LOG_FILE_NAME
-
-for i in $(seq 1 4); do
-  if [[ $exitCode != 0 ]]; then
-    echo Parsing the trx file "./TestResults/$ACTUAL_LOG_FILE_NAME_RETRY"
-    tests=""
-    FAILED="outcome=\"Failed\""
-    TESTNAME="testName"
-    while read p; do
-      if [[ "$p" == *"$FAILED"* ]] ; then
-        words=( $p )
-        for q in "${words[@]}"; do
-          if [[ "$q" == *"$TESTNAME"* ]] ; then
-            test=${q:10}
-            test="${test::-1}"
-            tests="$tests,$test"
-          fi
-        done
-      fi
-    done <"./TestResults/$ACTUAL_LOG_FILE_NAME_RETRY"
-    tests=${tests:1}
-
-    ACTUAL_LOG_FILE_NAME_RETRY=$ACTUAL_LOG_FILE_NAME-retry$i
-    LOG_FILE_NAME_RETRY=LogFileName=$ACTUAL_LOG_FILE_NAME_RETRY
-    DIAG_FILENAME_RETRY=$DIAG_FILENAME-retry$i.txt
-
-    echo "Rerunning the following failed test ${tests[*]}"
-    
-    #check if tests is empty, or white space only
-    if [[ -z "${tests// }" ]]; then
-        "$VSTEST" \
-            "$(cygpath -aw "$TEST_CODE")" \
-            --Logger:"trx;$LOG_FILE_NAME_RETRY" \
-            --Diag:./vstsconsolelog/$DIAG_FILENAME_RETRY \
-            --Blame \
-            --TestAdapterPath:"$(cygpath -aw "$SOURCE_ROOT")" \
-            --TestCaseFilter:"$TEST_CASE_FILTER" \
-            --InIsolation
-    else
-        "$VSTEST" \
-            "$(cygpath -aw "$TEST_CODE")" \
-            --Logger:"trx;$LOG_FILE_NAME_RETRY" \
-            --Diag:./vstsconsolelog/$DIAG_FILENAME_RETRY \
-            --Blame \
-            --TestAdapterPath:"$(cygpath -aw "$SOURCE_ROOT")" \
-            --Tests:"$tests" \
-            --InIsolation
-    fi
-
-    exitCode=$?
-  else
-    break
-  fi
-done
-
-
 set +x
 rm -f "$runSettings"
 exit $exitCode
