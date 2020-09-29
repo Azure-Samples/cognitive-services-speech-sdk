@@ -1067,40 +1067,6 @@ jobs:
       --framework netcoreapp2.0 --settings csharp.runsettings --logger "trx;$LOG_FILE_NAME" -p:SpeechPlatform=MacOS
 
       exitCode=$?
-
-      ACTUAL_LOG_FILE_NAME_RETRY=$ACTUAL_LOG_FILE_NAME
-
-      for i in $(seq 1 4); do
-        if [[ $exitCode != 0 ]]; then
-          echo Parsing the trx file "./TestResults/$ACTUAL_LOG_FILE_NAME_RETRY.trx"
-          tests=""
-          FAILED="outcome=\"Failed\""
-          TESTNAME="testName"
-          while read p; do
-            if [[ "$p" == *"$FAILED"* ]] && [[ "$p" != *parentExecutionId* ]]; then
-              words=( $p )
-              for q in "${words[@]}"; do
-                if [[ "$q" == *"$TESTNAME"* ]] ; then
-                  test=${q:10}
-                  test="${test::-1}"
-                  tests="$tests | (Name=$test)"
-                fi
-              done
-            fi
-          done <"./TestResults/$ACTUAL_LOG_FILE_NAME_RETRY.trx"
-          tests=${tests:3}
-
-          ACTUAL_LOG_FILE_NAME_RETRY=$ACTUAL_LOG_FILE_NAME-retry$i
-          LOG_FILE_NAME_RETRY=LogFileName=$ACTUAL_LOG_FILE_NAME_RETRY.trx
-
-          echo "Rerunning the following failed test "
-          echo "${tests[*]}"
-          dotnet test --blame --verbosity detailed --filter "$tests" --framework netcoreapp2.0 --settings csharp.runsettings --logger "trx;$LOG_FILE_NAME_RETRY" -p:SpeechPlatform=MacOS
-          exitCode=$?
-        else
-          break
-        fi
-      done
       set -e
       exit ${exitCode}
     displayName: Run C# unit tests
