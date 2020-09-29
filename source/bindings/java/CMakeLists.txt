@@ -45,6 +45,7 @@ set(JAVA_SOURCES
     ${PACKAGE_DIR}/KeywordRecognizer.java
     ${PACKAGE_DIR}/KeywordRecognitionResult.java
     ${PACKAGE_DIR}/KeywordRecognitionEventArgs.java
+    ${PACKAGE_DIR}/Diagnostics.java
 
     ${PACKAGE_DIR}/transcription/Conversation.java
     ${PACKAGE_DIR}/transcription/ConversationTranscriptionResult.java

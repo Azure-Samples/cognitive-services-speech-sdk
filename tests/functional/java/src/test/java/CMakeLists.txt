@@ -10,7 +10,6 @@ set(JAVA_SOURCES_TESTS
     tests/Settings.java
     tests/Retry.java
     tests/BaseJUnit.java
-    tests/Diagnostics.java
 
     tests/runner/AntXmlRunListener.java
     tests/runner/DateUtils.java

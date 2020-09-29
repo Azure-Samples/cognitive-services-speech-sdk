@@ -5,51 +5,24 @@
 
 package com.microsoft.cognitiveservices.speech;
 
-import java.util.EnumSet;
-import java.util.Set;
-
 import com.microsoft.cognitiveservices.speech.util.Contracts;
 
 /**
  * Native logging and other diagnostics
  */
 public final class Diagnostics {
-    public enum MemoryLoggerOptions
-    {
-        NONE(0),
-        FILE(1),
-        STANDARD_OUT(2),
-        STANDARD_ERROR(4)
-        ;
-
-        private final int val;
-
-        MemoryLoggerOptions(int val) {
-            this.val = val;
-        }
-
-        public int getValue() { return this.val; }
-        public static int getValue(Set<MemoryLoggerOptions> set) {
-            int value = 0;
-            for (MemoryLoggerOptions f : set) {
-                value |= f.getValue();
-            }
-            return value;
-        }
-    }
-
     /**
      * Enables the native memory logger
      */
     public static void startMemoryLogging() {
-        logMemoryStartLogging();
+        Contracts.throwIfFail(logMemoryStartLogging());
     }
 
     /**
      * Stops the native memory logger
      */
     public static void stopMemoryLogging() {
-        logMemoryStopLogging();
+        Contracts.throwIfFail(logMemoryStopLogging());
     }
 
     /**

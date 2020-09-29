@@ -45,7 +45,16 @@ public class BaseJUnit {
 
     private static boolean isMemoryLoggerEnabled()
     {
+        // debug builds already write the native logs to the stderr stream so no need to enable
+        // the memory logger
+        String buildConfig = System.getProperty("BUILD_CONFIGURATION");
+        boolean isDebugBuild = buildConfig != null && buildConfig.toUpperCase().equals("DEBUG");
+
+        // Also check the environment variables to see if memory logging has been enabled. By default
+        // it is enabled
         String env = System.getenv("SPEECHSDK_TEST_LOGGING");
-        return env == null || env.isEmpty() || env.toUpperCase().contains("MEMORY");
+        boolean isMemoryLoggerEnabled = env == null || env.isEmpty() || env.toUpperCase().contains("MEMORY");
+
+        return !isDebugBuild && isMemoryLoggerEnabled;
     }
 }
