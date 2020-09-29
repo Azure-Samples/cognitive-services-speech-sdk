@@ -20,6 +20,10 @@
      {
       "hash": "JOjuwUuNDCuLwj1D/sNMDVsk7YSbNuEyLRvWmSrA/ZU=",
       "_justification": "Exclude expired/bad AAD token used in tests/functional/csharp/end2end/SpeechConfigTests.cs"
+     },
+     {
+      "hash": "2OSbmn1SQXzIiYUuYdE9MMTyTBFrcfLRW6JLkzm3Wso=",
+      "_justification": "Exclude WebHookSecret variable in tests/functional/csharp/end2end/SpeechConfigTests.cs"
      }
   ]
 }
