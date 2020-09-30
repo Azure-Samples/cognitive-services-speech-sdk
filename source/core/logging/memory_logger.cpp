@@ -70,9 +70,12 @@ void MemoryLogger::Dump(const char* filename, const char* linePrefix, bool emitT
     {
         auto line = diagnostics_log_memory_get_line(i);
 
-        SPX_IFTRUE(emitToStdOut, fprintf(stdout, "%s: %s", linePrefix, line));
-        SPX_IFTRUE(emitToStdErr, fprintf(stderr, "%s: %s", linePrefix, line));
-        SPX_IFTRUE(emitToFile, fprintf(outputFile, "%s: %s", linePrefix, line));
+        if (line != nullptr)
+        {
+            SPX_IFTRUE(emitToStdOut, fprintf(stdout, "%s: %s", linePrefix, line));
+            SPX_IFTRUE(emitToStdErr, fprintf(stderr, "%s: %s", linePrefix, line));
+            SPX_IFTRUE(emitToFile, fprintf(outputFile, "%s: %s", linePrefix, line));
+        }
     }
 
     SPX_IFTRUE(emitToFile, fclose(outputFile));

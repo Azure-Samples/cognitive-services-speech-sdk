@@ -10,6 +10,7 @@ from typing import Callable
 
 import azure.cognitiveservices.speech as msspeech
 from .utils import _setup_callbacks
+from .spxtest import SpxTest
 
 
 def pytest_addoption(parser):
@@ -464,3 +465,27 @@ def from_file_intent_reco_with_callbacks(luis_subscription: str,
         return (reco, callbacks)
 
     return build_recognizer
+
+
+# SpxTest instance for a pytest session
+spxtest = SpxTest()
+
+@pytest.fixture(autouse=True, scope="session")
+def session_logging():
+    spxtest.start_logging() # before any tests
+    yield                   # until the session ends
+    spxtest.stop_logging()  # after all tests
+
+
+# Runtest hook for a single test case, ref.
+# https://docs.pytest.org/en/stable/reference.html#test-running-runtest-hooks
+def pytest_runtest_makereport(item, call):
+    if call.when == "call":
+        file = item.location[0] # pytest module
+        line = item.location[1] # pytest case start
+
+        if call.excinfo is None:
+            spxtest.trace_info(file, line, "{} PASSED".format(item.name))
+        else: # pytest AssertionError
+            spxtest.trace_error(file, line, "{} FAILED: {}".format(item.name, call.excinfo))
+            spxtest.dump_log()
