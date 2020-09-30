@@ -7,39 +7,33 @@ namespace Connector
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Net;
     using System.Net.Http;
     using System.Text;
+    using System.Threading;
     using System.Threading.Tasks;
     using Connector.Serializable.TranscriptionFiles;
     using Microsoft.Extensions.Logging;
     using Newtonsoft.Json;
 
-    public class BatchClient
+    public static class BatchClient
     {
-        private const string SpeechToTextBasePath = "speechtotext/v3.0/";
+        private const string TranscriptionsBasePath = "speechtotext/v3.0/Transcriptions/";
 
-        private readonly string SubscriptionKey;
+        private static readonly TimeSpan PostTimeout = TimeSpan.FromMinutes(1);
 
-        private readonly string HostName;
+        private static readonly TimeSpan DefaultTimeout = TimeSpan.FromMinutes(2);
 
-        private ILogger Log;
+        private static readonly TimeSpan GetFilesTimeout = TimeSpan.FromMinutes(5);
 
-        public BatchClient(string subscriptionKey, string hostName, ILogger log)
-        {
-            SubscriptionKey = subscriptionKey;
-            HostName = hostName;
-            Log = log;
-        }
+        private static HttpClient HttpClient = new HttpClient() { Timeout = System.Threading.Timeout.InfiniteTimeSpan };
 
         public static bool IsThrottledOrTimeoutStatusCode(HttpStatusCode statusCode)
         {
             if (statusCode == HttpStatusCode.TooManyRequests ||
                 statusCode == HttpStatusCode.GatewayTimeout ||
                 statusCode == HttpStatusCode.RequestTimeout ||
-                statusCode == HttpStatusCode.BadGateway ||
-                statusCode == HttpStatusCode.NotFound)
+                statusCode == HttpStatusCode.BadGateway)
             {
                 return true;
             }
@@ -47,27 +41,33 @@ namespace Connector
             return false;
         }
 
-        public Task<IEnumerable<Transcription>> GetTranscriptionsAsync()
+        public static Task<TranscriptionReportFile> GetTranscriptionReportFileFromSasAsync(string sasUri, ILogger log)
         {
-            var path = $"{HostName}{SpeechToTextBasePath}Transcriptions";
-            return this.GetAsync<IEnumerable<Transcription>>(path);
+            return GetAsync<TranscriptionReportFile>(sasUri, null, DefaultTimeout, log);
         }
 
-        public Task<Transcription> GetTranscriptionAsync(Guid id)
+        public static Task<SpeechTranscript> GetSpeechTranscriptFromSasAsync(string sasUri, ILogger log)
         {
-            var path = $"{HostName}{SpeechToTextBasePath}Transcriptions/{id}";
-            return this.GetAsync<Transcription>(path);
+            return GetAsync<SpeechTranscript>(sasUri, null, DefaultTimeout, log);
         }
 
-        public async Task<TranscriptionFiles> GetTranscriptionFilesAsync(Guid id)
+        public static Task<Transcription> GetTranscriptionAsync(string transcriptionLocation, string subscriptionKey, ILogger log)
         {
-            var path = $"{HostName}{SpeechToTextBasePath}Transcriptions/{id}/files";
+            return GetAsync<Transcription>(transcriptionLocation, subscriptionKey, DefaultTimeout, log);
+        }
+
+        public static async Task<TranscriptionFiles> GetTranscriptionFilesAsync(string transcriptionLocation, string subscriptionKey, ILogger log)
+        {
+            var path = $"{transcriptionLocation}/files";
 
             var combinedTranscriptionFiles = new List<TranscriptionFile>();
 
             do
             {
-                var transcriptionFiles = await this.GetAsync<TranscriptionFiles>(path).ConfigureAwait(false);
+                // Delay to avoid throttling
+                await Task.Delay(2000).ConfigureAwait(false);
+
+                var transcriptionFiles = await GetAsync<TranscriptionFiles>(path, subscriptionKey, GetFilesTimeout, log).ConfigureAwait(false);
                 combinedTranscriptionFiles.AddRange(transcriptionFiles.Values);
                 path = transcriptionFiles.NextLink;
             }
@@ -76,131 +76,123 @@ namespace Connector
             return new TranscriptionFiles(combinedTranscriptionFiles, null);
         }
 
-        public Task<Uri> PostTranscriptionAsync(string name, string description, string locale, Dictionary<string, string> properties, IEnumerable<string> contentUrls, IEnumerable<Guid> modelIds)
+        public static Task DeleteTranscriptionAsync(string transcriptionLocation, string subscriptionKey, ILogger log)
         {
-            var models = modelIds.Select(m => ModelIdentity.Create(m)).ToList();
-            var path = $"{SpeechToTextBasePath}Transcriptions/";
-
-            var transcriptionDefinition = TranscriptionDefinition.Create(name, description, locale, contentUrls, properties, models);
-            return this.PostAsJsonAsync(path, transcriptionDefinition);
+            return DeleteAsync(transcriptionLocation, subscriptionKey, DefaultTimeout, log);
         }
 
-        public Task DeleteTranscriptionAsync(Guid id)
+        public static async Task<Uri> PostTranscriptionAsync(TranscriptionDefinition transcriptionDefinition, string hostName, string subscriptionKey, ILogger log)
         {
-            var path = $"{SpeechToTextBasePath}Transcriptions/{id}";
-            return this.DeleteAsync(path);
+            var path = $"{hostName}{TranscriptionsBasePath}";
+            var payloadString = JsonConvert.SerializeObject(transcriptionDefinition);
+
+            return await PostAsync(path, subscriptionKey, payloadString, PostTimeout, log).ConfigureAwait(false);
         }
 
-        private static Uri GetLocationFromPostResponseAsync(WebHeaderCollection headers)
+        private static async Task<Uri> PostAsync(string path, string subscriptionKey, string payloadString, TimeSpan timeout, ILogger log)
         {
-            return new Uri(headers["Location"]);
-        }
-
-        private async Task<HttpWebResponse> GetHttpWebResponseAsync(HttpWebRequest request)
-        {
-            var webresponse = await request.GetResponseAsync().ConfigureAwait(false);
-            var response = (HttpWebResponse)webresponse;
-
-            if (IsThrottledOrTimeoutStatusCode(response.StatusCode))
+            using (var requestMessage = new HttpRequestMessage(HttpMethod.Post, path))
             {
-                throw new TimeoutException();
-            }
+                requestMessage.Headers.Add("Ocp-Apim-Subscription-Key", subscriptionKey);
+                requestMessage.Content = new StringContent(payloadString, Encoding.UTF8, "application/json");
 
-            if (response.StatusCode != HttpStatusCode.Accepted && response.StatusCode != HttpStatusCode.Created)
-            {
-                var failureMessage = $"Failure: Status Code {response.StatusCode}, {response.StatusDescription}";
-                Log.LogInformation(failureMessage);
-                throw new WebException(failureMessage);
-            }
-
-            return response;
-        }
-
-        private HttpClient CreateHttpClient()
-        {
-            var client = HttpClientFactory.Create();
-            client.Timeout = TimeSpan.FromMinutes(25);
-            client.BaseAddress = new Uri(HostName);
-            client.DefaultRequestHeaders.TransferEncodingChunked = null;
-            client.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", SubscriptionKey);
-            return client;
-        }
-
-        private async Task<Uri> PostAsJsonAsync(string path, TranscriptionDefinition payload)
-        {
-            var request = BuildPostWebRequest(path, payload);
-            Log.LogInformation("Request: " + request);
-            var webResponse = await GetHttpWebResponseAsync(request).ConfigureAwait(false);
-            Log.LogInformation("StatusCode: " + webResponse.StatusCode);
-            return GetLocationFromPostResponseAsync(webResponse.Headers);
-        }
-
-        private HttpWebRequest BuildPostWebRequest(string path, TranscriptionDefinition payload)
-        {
-            var request = (HttpWebRequest)WebRequest.Create(new Uri(HostName + path));
-
-            request.ContentType = "application/json; charset=UTF-8";
-            request.Accept = "application/json";
-            request.Method = "POST";
-            request.Headers.Add("Ocp-Apim-Subscription-Key", SubscriptionKey);
-
-            var payloadString = JsonConvert.SerializeObject(payload);
-            var data = Encoding.ASCII.GetBytes(payloadString);
-            request.ContentLength = data.Length;
-
-            using (var stream = request.GetRequestStream())
-            {
-                stream.Write(data, 0, data.Length);
-            }
-
-            return request;
-        }
-
-        private async Task DeleteAsync(string path)
-        {
-            Log.LogInformation($"Creating DELETE request for {HostName + path}");
-
-            using (var httpClient = CreateHttpClient())
-            {
-                var response = await httpClient.DeleteAsync(new Uri(HostName + path)).ConfigureAwait(false);
-
-                if (IsThrottledOrTimeoutStatusCode(response.StatusCode))
+                try
                 {
-                    throw new TimeoutException();
+                    using var cts = new CancellationTokenSource();
+                    cts.CancelAfter(timeout);
+                    var responseMessage = await HttpClient.SendAsync(requestMessage, cts.Token).ConfigureAwait(false);
+
+                    if (IsThrottledOrTimeoutStatusCode(responseMessage.StatusCode))
+                    {
+                        throw new TimeoutException(responseMessage.StatusCode.ToString());
+                    }
+
+                    if (!responseMessage.IsSuccessStatusCode)
+                    {
+                        var failureMessage = $"Failure: Status Code {responseMessage.StatusCode}, {responseMessage.Content.Headers}";
+                        log.LogInformation(failureMessage);
+                        throw new WebException(failureMessage);
+                    }
+
+                    return responseMessage.Headers.Location;
+                }
+                catch (OperationCanceledException)
+                {
+                    throw new TimeoutException($"The operation has timed out after {timeout.TotalSeconds} seconds.");
+                }
+            }
+        }
+
+        private static async Task DeleteAsync(string path, string subscriptionKey, TimeSpan timeout, ILogger log)
+        {
+            using (var requestMessage = new HttpRequestMessage(HttpMethod.Delete, path))
+            {
+                if (!string.IsNullOrEmpty(subscriptionKey))
+                {
+                    requestMessage.Headers.Add("Ocp-Apim-Subscription-Key", subscriptionKey);
                 }
 
-                if (!response.IsSuccessStatusCode)
+                try
                 {
-                    var failureMessage = $"Failure: Status Code {response.StatusCode}, {response.Content.Headers}";
-                    Log.LogInformation(failureMessage);
+                    using var cts = new CancellationTokenSource();
+                    cts.CancelAfter(timeout);
+                    var responseMessage = await HttpClient.SendAsync(requestMessage, cts.Token).ConfigureAwait(false);
+
+                    if (IsThrottledOrTimeoutStatusCode(responseMessage.StatusCode))
+                    {
+                        throw new TimeoutException(responseMessage.StatusCode.ToString());
+                    }
+
+                    if (!responseMessage.IsSuccessStatusCode)
+                    {
+                        var failureMessage = $"Failure: Status Code {responseMessage.StatusCode}, {responseMessage.Content.Headers}";
+                        log.LogInformation(failureMessage);
+                        throw new WebException(failureMessage);
+                    }
+                }
+                catch (OperationCanceledException)
+                {
+                    throw new TimeoutException($"The operation has timed out after {timeout.TotalSeconds} seconds.");
+                }
+            }
+        }
+
+        private static async Task<TResponse> GetAsync<TResponse>(string path, string subscriptionKey, TimeSpan timeout, ILogger log)
+        {
+            using (var requestMessage = new HttpRequestMessage(HttpMethod.Get, path))
+            {
+                if (!string.IsNullOrEmpty(subscriptionKey))
+                {
+                    requestMessage.Headers.Add("Ocp-Apim-Subscription-Key", subscriptionKey);
+                }
+
+                log.LogInformation($"Timeout: {timeout}");
+
+                try
+                {
+                    using var cts = new CancellationTokenSource();
+                    cts.CancelAfter(timeout);
+                    var responseMessage = await HttpClient.SendAsync(requestMessage, cts.Token).ConfigureAwait(false);
+
+                    if (IsThrottledOrTimeoutStatusCode(responseMessage.StatusCode))
+                    {
+                        throw new TimeoutException($"{responseMessage.ReasonPhrase} - {responseMessage.StatusCode}");
+                    }
+
+                    if (responseMessage.IsSuccessStatusCode)
+                    {
+                        var contentString = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
+                        return JsonConvert.DeserializeObject<TResponse>(contentString);
+                    }
+
+                    var failureMessage = $"Failure: Status Code {responseMessage.StatusCode}";
+                    log.LogInformation(failureMessage);
                     throw new WebException(failureMessage);
                 }
-            }
-        }
-
-        private async Task<TResponse> GetAsync<TResponse>(string path)
-        {
-            Log.LogInformation($"Creating GET request for {path}");
-
-            using (var httpClient = CreateHttpClient())
-            {
-                var response = await httpClient.GetAsync(new Uri(path)).ConfigureAwait(false);
-
-                if (IsThrottledOrTimeoutStatusCode(response.StatusCode))
+                catch (OperationCanceledException)
                 {
-                    throw new TimeoutException();
+                    throw new TimeoutException($"The operation has timed out after {timeout.TotalSeconds} seconds.");
                 }
-
-                var contentType = response.Content.Headers.ContentType;
-                if (response.IsSuccessStatusCode && string.Equals(contentType.MediaType, "application/json", StringComparison.OrdinalIgnoreCase))
-                {
-                    var result = await response.Content.ReadAsJsonAsync<TResponse>().ConfigureAwait(false);
-                    return result;
-                }
-
-                var failureMessage = $"Failure: Status Code {response.StatusCode}, {response.Content.Headers}";
-                Log.LogInformation(failureMessage);
-                throw new WebException(failureMessage);
             }
         }
     }

@@ -9,24 +9,30 @@ namespace Connector
 
     public class TranscriptionReportFileDetail
     {
-        public TranscriptionReportFileDetail(string status, string errorKind, string errorMessage, string sourceUrl)
+        public TranscriptionReportFileDetail(string status, string errorKind, string errorMessage, string source)
         {
             Status = status;
             ErrorKind = errorKind;
             ErrorMessage = errorMessage;
-            SourceUrl = sourceUrl;
+            Source = source;
         }
 
         [JsonProperty("status")]
-        public string Status { get; }
+        public string Status { get; set; }
 
         [JsonProperty("errorKind")]
-        public string ErrorKind { get; }
+        public string ErrorKind { get; set; }
 
         [JsonProperty("errorMessage")]
-        public string ErrorMessage { get; }
+        public string ErrorMessage { get; set; }
+
+        [JsonProperty("source")]
+        public string Source { get; set; }
 
         [JsonProperty("sourceUrl")]
-        public string SourceUrl { get; }
+        private string SourceUrl
+        {
+            set { Source = value; }
+        }
     }
 }

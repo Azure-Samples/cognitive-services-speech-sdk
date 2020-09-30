@@ -6,6 +6,7 @@
 namespace FetchTranscriptionFunction
 {
     using System;
+    using System.Threading.Tasks;
     using Connector;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Extensions.Logging;
@@ -13,7 +14,7 @@ namespace FetchTranscriptionFunction
     public static class FetchTranscription
     {
         [FunctionName("FetchTranscription")]
-        public static void Run([ServiceBusTrigger("fetch_transcription_queue", Connection = "AzureServiceBus")]string myQueueItem, ILogger log)
+        public static async Task Run([ServiceBusTrigger("fetch_transcription_queue", Connection = "AzureServiceBus")]string message, ILogger log)
         {
             if (log == null)
             {
@@ -22,19 +23,14 @@ namespace FetchTranscriptionFunction
 
             log.LogInformation($"C# Timer trigger function executed at: {DateTime.Now}");
 
-            ProcessMessage(myQueueItem, log);
-        }
-
-        public static bool ProcessMessage(string message, ILogger log)
-        {
-            if (!string.IsNullOrEmpty(message))
+            if (string.IsNullOrEmpty(message))
             {
-                var serviceBusMessage = PostTranscriptionServiceBusMessage.DeserializeMessage(message);
-                bool result = TranscriptionProcessor.GetTranscripts(serviceBusMessage, log).Result;
-                return result;
+                log.LogInformation($"Found invalid service bus message: {message}. Stopping execution.");
+                return;
             }
 
-            return false;
+            var serviceBusMessage = TranscriptionStartedMessage.DeserializeMessage(message);
+            await TranscriptionProcessor.ProcessTranscriptionJobAsync(serviceBusMessage, log).ConfigureAwait(false);
         }
     }
 }

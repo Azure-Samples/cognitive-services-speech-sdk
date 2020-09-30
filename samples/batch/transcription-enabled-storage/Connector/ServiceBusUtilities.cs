@@ -10,29 +10,25 @@ namespace Connector
     using System.Threading.Tasks;
     using Microsoft.Azure.ServiceBus;
     using Microsoft.Extensions.Logging;
+    using Newtonsoft.Json;
 
     public static class ServiceBusUtilities
     {
-        public static async Task SendServiceBusMessageAsync(string serviceBusConnectionString, string messageContent, ILogger log, double delayInSeconds = 0d)
+        public static async Task SendServiceBusMessageAsync(QueueClient queueClient, string messageContent, ILogger log, TimeSpan delay)
         {
             var message = new Message(Encoding.UTF8.GetBytes(messageContent));
-            log.LogInformation($"Sending message: {messageContent}");
-
-            await SendServiceBusMessageAsync(serviceBusConnectionString, message, log, delayInSeconds).ConfigureAwait(false);
+            await SendServiceBusMessageAsync(queueClient, message, log, delay).ConfigureAwait(false);
         }
 
-        public static async Task SendServiceBusMessageAsync(string serviceBusConnectionString, Message message, ILogger log, double delayInSeconds = 0d)
+        public static async Task SendServiceBusMessageAsync(QueueClient queueClient, Message message, ILogger log, TimeSpan delay)
         {
-            var queueClient = new QueueClient(new ServiceBusConnectionStringBuilder(serviceBusConnectionString));
-            if (delayInSeconds == 0d)
+            if (queueClient == null)
             {
-                await queueClient.SendAsync(message).ConfigureAwait(false);
+                throw new ArgumentNullException(nameof(queueClient));
             }
-            else
-            {
-                log.LogInformation($"Delaying message for {(int)delayInSeconds} seconds.");
-                await queueClient.ScheduleMessageAsync(message, DateTimeOffset.Now.AddSeconds(delayInSeconds)).ConfigureAwait(false);
-            }
+
+            log.LogInformation($"Sending message with delay of {delay.TotalMinutes} minutes.");
+            await queueClient.ScheduleMessageAsync(message, DateTimeOffset.Now.Add(delay)).ConfigureAwait(false);
         }
     }
 }
