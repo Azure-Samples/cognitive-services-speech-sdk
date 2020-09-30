@@ -68,8 +68,6 @@ namespace Transcription {
 
             ::conversation_translator_handle_release(m_handle);
             m_handle = SPXHANDLE_INVALID;
-
-            m_participants.clear();
         }
 
         /// <summary>
@@ -114,11 +112,6 @@ namespace Transcription {
         /// Raised when a text message is received from the conversation.
         /// </summary>
         EventSignal<const ConversationTranslationEventArgs&> TextMessageReceived;
-
-        /// <summary>
-        /// The current participants in the conversation
-        /// </summary>
-        const std::vector<std::shared_ptr<Participant>>& Participants;
 
         /// <summary>
         /// Joins a conversation. After you call this, you will start receiving events.
@@ -241,10 +234,8 @@ namespace Transcription {
             Transcribing(BindHandler(&ConversationTranslator::OnTranscriptionEventChanged)),
             Transcribed(BindHandler(&ConversationTranslator::OnTranscriptionEventChanged)),
             TextMessageReceived(BindHandler(&ConversationTranslator::OnTextMessageEventChanged)),
-            Participants(m_participants),
             m_handle(handle),
-            m_properties(handle),
-            m_participants()
+            m_properties(handle)
         {
             SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
         }
@@ -302,7 +293,7 @@ namespace Transcription {
             if (!ValidateHandle(m_handle, __FUNCTION__)) return;
 
             PCONV_TRANS_CALLBACK callback = nullptr;
-            if (Canceled.IsConnected())
+            if (ParticipantsChanged.IsConnected())
             {
                 callback = [](auto, auto b, auto c) { FireEvent(b, c, &ConversationTranslator::ParticipantsChanged); };
             }
@@ -315,7 +306,7 @@ namespace Transcription {
             if (!ValidateHandle(m_handle, __FUNCTION__)) return;
 
             PCONV_TRANS_CALLBACK callback = nullptr;
-            if (Canceled.IsConnected())
+            if (ConversationExpiration.IsConnected())
             {
                 callback = [](auto, auto b, auto c) { FireEvent(b, c, &ConversationTranslator::ConversationExpiration); };
             }
@@ -441,7 +432,6 @@ namespace Transcription {
     private:
         SPXCONVERSATIONTRANSLATORHANDLE m_handle;
         PrivatePropertyCollection m_properties;
-        std::vector<std::shared_ptr<Participant>> m_participants;
     };
 
 }}}}
