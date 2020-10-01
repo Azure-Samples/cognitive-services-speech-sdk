@@ -10,6 +10,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils
     public class RetryTestMethod : DataTestMethodAttribute
     {
         private int retryCount = 0;
+        private bool retryNeeded = false;
         private const int MaxRetryCount = 3;
         private TestResult[] testResult = null;
         public override TestResult[] Execute(ITestMethod testMethod)
@@ -17,9 +18,14 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils
             do
             {
                 testResult = Invoke(testMethod);
-                retryCount++;
+                retryNeeded = TestFailed(testMethod.TestMethodName);
+                if (retryNeeded)
+                {
+                    retryCount++;
+                }
             }
-            while (TestFailed(testMethod.TestMethodName) && retryCount < MaxRetryCount);
+            while (retryNeeded && retryCount < MaxRetryCount);
+            retryCount = 0;
             return testResult;
         }
 
