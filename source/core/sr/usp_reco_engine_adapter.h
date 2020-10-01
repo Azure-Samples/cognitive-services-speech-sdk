@@ -152,6 +152,8 @@ private:
     void OnUserMessage(const USP::UserMsg&) override;
     void OnConnected() override;
     void OnDisconnected() override;
+    void OnToken(const std::string token) override;
+    void OnAcknowledgedAudio(uint64_t offset) override;
 
     void OnTranslationHypothesis(const USP::TranslationHypothesisMsg&) override;
     void OnTranslationPhrase(const USP::TranslationPhraseMsg&) override;
@@ -239,6 +241,7 @@ private:
     void ResetBeforeFirstAudio();
 
     void CreateConversationResult(std::shared_ptr<ISpxRecognitionResult>& result, const std::wstring& userId, const std::wstring& utteranceId);
+    void UpdateAdapterResult_JsonResult(std::shared_ptr<ISpxRecognitionResult> result);
 
 #ifdef _DEBUG
     void SetupAudioDumpFile();
@@ -269,13 +272,18 @@ private:
     bool m_customHost = false;
     USP::EndpointType m_endpointType = USP::EndpointType::Speech;
 
-    const bool m_allowUspResetAfterAudioByteCount = true;
-    const size_t m_resetUspAfterAudioSeconds = 2 * 60; // 2 minutes
+    std::string m_continuationToken;
+    std::string m_tokenOffset;
+    std::string m_currentServiceTag;
+    uint64_t m_startingOffset;
+
+    bool m_allowUspResetAfterAudioByteCount = true;
+    size_t m_resetUspAfterAudioSeconds = 2 * 60; // 2 minutes
     uint64_t m_resetUspAfterAudioByteCount;
     uint64_t m_uspAudioByteCount;
 
-    const bool m_allowUspResetAfterTime = true;
-    const size_t m_resetUspAfterTimeSeconds = 4 * 60; // 4 minutes
+    bool m_allowUspResetAfterTime = true;
+    size_t m_resetUspAfterTimeSeconds = 4 * 60; // 4 minutes
     std::chrono::system_clock::time_point m_uspInitTime;
     std::chrono::system_clock::time_point m_uspResetTime;
 

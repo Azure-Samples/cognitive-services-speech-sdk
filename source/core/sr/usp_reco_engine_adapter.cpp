@@ -37,6 +37,7 @@ using namespace std;
 using json = nlohmann::json;
 
 CSpxUspRecoEngineAdapter::CSpxUspRecoEngineAdapter() :
+    m_startingOffset(0),
     m_resetUspAfterAudioByteCount(0),
     m_uspAudioByteCount(0),
     m_audioState(AudioState::Idle),
@@ -74,6 +75,16 @@ void CSpxUspRecoEngineAdapter::Init()
     };
 
     SPX_DBG_ASSERT(IsState(AudioState::Idle) && IsState(UspState::Idle));
+
+    // Get a couple of control properties.
+    auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
+    SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_USP_SITE_FAILURE);
+
+    m_resetUspAfterAudioSeconds = stoul(properties->GetStringValue("SPEECH-ForceUSPReconnectionByAudioSentTimeSeconds", "120"));
+    m_allowUspResetAfterAudioByteCount = 0 != m_resetUspAfterAudioSeconds;
+
+    m_resetUspAfterTimeSeconds = stoul(properties->GetStringValue("SPEECH-ForceUSPReconnectionByTimeConnectedSeconds", "240"));
+    m_allowUspResetAfterTime = 0 != m_resetUspAfterAudioSeconds;
 }
 
 void CSpxUspRecoEngineAdapter::Term()
@@ -1265,6 +1276,8 @@ void CSpxUspRecoEngineAdapter::WriteTelemetryLatency(uint64_t latencyInTicks, bo
 
 void CSpxUspRecoEngineAdapter::OnMessageReceived(const USP::RawMsg& m)
 {
+    // Check the message for offset or tokens.
+
     InvokeOnSite([&](const SitePtr& p) { p->FireConnectionMessageReceived(m.headers, m.path, m.buffer, m.bufferSize, m.isBufferBinary); });
 }
 
@@ -1283,7 +1296,7 @@ void CSpxUspRecoEngineAdapter::OnSpeechStartDetected(const USP::SpeechStartDetec
     else if (IsState(UspState::WaitingForPhrase))
     {
         SPX_DBG_TRACE_VERBOSE("%s: (0x%8p) site->AdapterDetectedSpeechStart()", __FUNCTION__, (void*)this);
-        InvokeOnSite([this, &message](const SitePtr& p) { p->AdapterDetectedSpeechStart(this, message.offset); });
+        InvokeOnSite([this, &message](const SitePtr& p) { p->AdapterDetectedSpeechStart(this, message.offset + m_startingOffset); });
     }
     else
     {
@@ -1293,7 +1306,7 @@ void CSpxUspRecoEngineAdapter::OnSpeechStartDetected(const USP::SpeechStartDetec
 
 void CSpxUspRecoEngineAdapter::OnSpeechEndDetected(const USP::SpeechEndDetectedMsg& message)
 {
-    SPX_DBG_TRACE_VERBOSE("Response: Speech.EndDetected message. Speech ends at offset %" PRIu64 " (100ns)\n", message.offset);
+    SPX_DBG_TRACE_VERBOSE("Response: Speech.EndDetected message. Speech ends at offset %" PRIu64 " (100ns)\n", message.offset + m_startingOffset);
 
     auto requestMute = TryChangeState(AudioState::Sending, AudioState::Mute);
 
@@ -1306,7 +1319,7 @@ void CSpxUspRecoEngineAdapter::OnSpeechEndDetected(const USP::SpeechEndDetectedM
               IsState(AudioState::Mute)))
     {
         SPX_DBG_TRACE_VERBOSE("%s: (0x%8p) site->AdapterDetectedSpeechEnd()", __FUNCTION__, (void*)this);
-        InvokeOnSite([this, &message](const SitePtr& p) { p->AdapterDetectedSpeechEnd(this, message.offset); });
+        InvokeOnSite([this, &message](const SitePtr& p) { p->AdapterDetectedSpeechEnd(this, message.offset + m_startingOffset); });
     }
     else
     {
@@ -1326,7 +1339,7 @@ void CSpxUspRecoEngineAdapter::OnSpeechEndDetected(const USP::SpeechEndDetectedM
 
 void CSpxUspRecoEngineAdapter::OnSpeechHypothesis(const USP::SpeechHypothesisMsg& message)
 {
-    SPX_DBG_TRACE_VERBOSE("Response: Speech.Hypothesis message. Starts at offset %" PRIu64 ", with duration %" PRIu64 " (100ns). Text: %ls\n", message.offset, message.duration, message.text.c_str());
+    SPX_DBG_TRACE_VERBOSE("Response: Speech.Hypothesis message. Starts at offset %" PRIu64 ", with duration %" PRIu64 " (100ns). Text: %ls\n", message.offset + m_startingOffset, message.duration, message.text.c_str());
 
     if (IsBadState())
     {
@@ -1339,7 +1352,7 @@ void CSpxUspRecoEngineAdapter::OnSpeechHypothesis(const USP::SpeechHypothesisMsg
         InvokeOnSite([&](const SitePtr& site)
         {
             auto factory = SpxQueryService<ISpxRecoResultFactory>(site);
-            auto result = factory->CreateIntermediateResult(message.text.c_str(), message.offset, message.duration);
+            auto result = factory->CreateIntermediateResult(message.text.c_str(), message.offset + m_startingOffset, message.duration);
             auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
             namedProperties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_JsonResult), PAL::ToString(message.json).c_str());
             if (!message.speaker.empty())
@@ -1351,7 +1364,9 @@ void CSpxUspRecoEngineAdapter::OnSpeechHypothesis(const USP::SpeechHypothesisMsg
             {
                 namedProperties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_AutoDetectSourceLanguageResult), message.language.c_str());
             }
-            site->FireAdapterResult_Intermediate(this, message.offset, result);
+
+            UpdateAdapterResult_JsonResult(result);
+            site->FireAdapterResult_Intermediate(this, message.offset + m_startingOffset, result);
         });
     }
     else
@@ -1360,9 +1375,124 @@ void CSpxUspRecoEngineAdapter::OnSpeechHypothesis(const USP::SpeechHypothesisMsg
     }
 }
 
+#define JSON_KEY_NBEST  "NBest"
+#define JSON_KEY_WORDS  "Words"
+#define JSON_KEY_OFFSET  "Offset"
+#define JSON_KEY_ITN     "ITN"
+#define JSON_KEY_LEXICAL "Lexical"
+#define JSON_KEY_PRONUNCIATION_ASSESSMENT "PronunciationAssessment"
+
+void CSpxUspRecoEngineAdapter::UpdateAdapterResult_JsonResult(shared_ptr<ISpxRecognitionResult> result)
+{
+    auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
+    auto jsonResult = namedProperties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_JsonResult));
+    if (jsonResult.empty())
+    {
+        return;
+    }
+
+    SPX_DBG_TRACE_VERBOSE("%s: before update: json='%s'", __FUNCTION__, jsonResult.c_str());
+    auto root = json::parse(jsonResult);
+    bool valueChanged = false;
+    uint64_t offset = 0;
+    auto iteratorOffset = root.find(JSON_KEY_OFFSET);
+    if (iteratorOffset != root.end())
+    {
+        uint64_t oldOffset = iteratorOffset->get<uint64_t>();
+        uint64_t newOffset = oldOffset + m_startingOffset;
+        if (oldOffset != newOffset)
+        {
+            root[JSON_KEY_OFFSET] = newOffset;
+            valueChanged = true;
+        }
+    }
+    auto iteratorNBest = root.find(JSON_KEY_NBEST);
+    if (iteratorNBest != root.end() && iteratorNBest->is_array())
+    {
+        size_t nBestSize = iteratorNBest->size();
+        for (size_t index = 0; index < nBestSize; index++)
+        {
+            auto item = iteratorNBest->at(index);
+            if (index == 0)
+            {
+                auto iteratorItn = item.find(JSON_KEY_ITN);
+                if (iteratorItn != item.end())
+                {
+                    namedProperties->SetStringValue("ITN", iteratorItn->get<string>().c_str());
+                }
+                auto iteratorLexical = item.find(JSON_KEY_LEXICAL);
+                if ( iteratorLexical != item.end())
+                {
+                    namedProperties->SetStringValue("Lexical", iteratorLexical->get<string>().c_str());
+                }
+
+                auto iteratorPron = item.find(JSON_KEY_PRONUNCIATION_ASSESSMENT);
+                if (iteratorPron != item.end())
+                {
+                    for (auto& it : iteratorPron.value().items())
+                    {
+                        if (it.value().is_number())
+                        {
+                            namedProperties->SetStringValue(it.key().c_str(), it.value().dump().c_str());
+                        }
+                    }
+
+                }
+            }
+            auto iteratorWords = item.find(JSON_KEY_WORDS);
+            if (iteratorWords != item.end() && iteratorWords->is_array())
+            {
+                valueChanged = true;
+                size_t wordListSize = iteratorWords->size();
+                for (size_t wordIndex = 0; wordIndex < wordListSize; wordIndex++)
+                {
+                    auto word = iteratorWords->at(wordIndex);
+                    auto iteratorWordOffset = word.find(JSON_KEY_OFFSET);
+                    if (iteratorWordOffset != word.end())
+                    {
+                        offset = iteratorWordOffset->get<uint64_t>();
+                        root[JSON_KEY_NBEST][index][JSON_KEY_WORDS][wordIndex][JSON_KEY_OFFSET] = offset + m_startingOffset;
+                    }
+                }
+            }
+        }
+    }
+
+    if (!namedProperties->HasStringValue("Lexical"))
+    {
+        auto iteratorLexical = root.find(JSON_KEY_LEXICAL);
+        if (iteratorLexical != root.end())
+        {
+            namedProperties->SetStringValue("Lexical", iteratorLexical->get<string>().c_str());
+        }
+    }
+
+    if (!namedProperties->HasStringValue("ITN"))
+    {
+        auto iteratorItn = root.find(JSON_KEY_ITN);
+        if (iteratorItn != root.end())
+        {
+            namedProperties->SetStringValue("ITN", iteratorItn->get<string>().c_str());
+        }
+    }
+
+    if (valueChanged)
+    {
+        string updatedJsonStr = root.dump();
+        SPX_DBG_TRACE_VERBOSE("%s: after update: json='%s'", __FUNCTION__, updatedJsonStr.c_str());
+        namedProperties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_JsonResult), updatedJsonStr.c_str());
+    }
+}
+
+#undef JSON_KEY_NBEST
+#undef JSON_KEY_WORDS
+#undef JSON_KEY_OFFSET
+#undef JSON_KEY_ITN
+#undef JSON_KEY_LEXICAL
+
 void CSpxUspRecoEngineAdapter::OnSpeechKeywordDetected(const USP::SpeechKeywordDetectedMsg& message)
 {
-    SPX_DBG_TRACE_VERBOSE("Response: Speech.Keyword message. Status: %d, Text: %ls, starts at %" PRIu64 ", with duration %" PRIu64 " (100ns).\n", message.status, message.text.c_str(), message.offset, message.duration);
+    SPX_DBG_TRACE_VERBOSE("Response: Speech.Keyword message. Status: %d, Text: %ls, starts at %" PRIu64 ", with duration %" PRIu64 " (100ns).\n", message.status, message.text.c_str(), message.offset + m_startingOffset, message.duration);
 
     if (IsBadState())
     {
@@ -1376,9 +1506,11 @@ void CSpxUspRecoEngineAdapter::OnSpeechKeywordDetected(const USP::SpeechKeywordD
         {
             auto factory = SpxQueryService<ISpxRecoResultFactory>(site);
             auto result = factory->CreateKeywordResult(1.0, message.offset, message.duration, message.text.c_str(), ResultReason::RecognizedKeyword, nullptr);
+            result->SetOffset(message.offset + m_startingOffset);
             auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
             namedProperties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_JsonResult), PAL::ToString(message.json).c_str());
-            site->FireAdapterResult_KeywordResult(this, message.offset, result, true);
+            UpdateAdapterResult_JsonResult(result);
+            site->FireAdapterResult_KeywordResult(this, message.offset + m_startingOffset, result, true);
         });
     }
     else if (message.status == USP::KeywordVerificationStatus::Rejected && !m_continueOnKeywordReject && TryChangeState(UspState::WaitingForPhrase, UspState::WaitingForTurnEnd))
@@ -1389,9 +1521,11 @@ void CSpxUspRecoEngineAdapter::OnSpeechKeywordDetected(const USP::SpeechKeywordD
         {
             auto factory = SpxQueryService<ISpxRecoResultFactory>(site);
             auto result = factory->CreateKeywordResult(1.0, message.offset, message.duration, message.text.c_str(), ResultReason::NoMatch, nullptr);
+            result->SetOffset(message.offset + m_startingOffset);
             auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
             namedProperties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_JsonResult), PAL::ToString(message.json).c_str());
-            site->FireAdapterResult_KeywordResult(this, message.offset, result, false);
+            UpdateAdapterResult_JsonResult(result);
+            site->FireAdapterResult_KeywordResult(this, message.offset + m_startingOffset, result, false);
         });
 
     }
@@ -1403,7 +1537,7 @@ void CSpxUspRecoEngineAdapter::OnSpeechKeywordDetected(const USP::SpeechKeywordD
 
 void CSpxUspRecoEngineAdapter::OnSpeechFragment(const USP::SpeechFragmentMsg& message)
 {
-    SPX_DBG_TRACE_VERBOSE("Response: Speech.Fragment message. Starts at offset %" PRIu64 ", with duration %" PRIu64 " (100ns). Text: %ls\n", message.offset, message.duration, message.text.c_str());
+    SPX_DBG_TRACE_VERBOSE("Response: Speech.Fragment message. Starts at offset %" PRIu64 ", with duration %" PRIu64 " (100ns). Text: %ls\n", message.offset + m_startingOffset, message.duration, message.text.c_str());
 
     bool sendIntermediate = false;
 
@@ -1435,6 +1569,8 @@ void CSpxUspRecoEngineAdapter::OnSpeechFragment(const USP::SpeechFragmentMsg& me
         {
             auto factory = SpxQueryService<ISpxRecoResultFactory>(site);
             auto result = factory->CreateIntermediateResult(message.text.c_str(), message.offset, message.duration);
+            result->SetOffset(message.offset + m_startingOffset);
+
             auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
             namedProperties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_JsonResult), PAL::ToString(message.json).c_str());
             if (!message.speaker.empty())
@@ -1445,6 +1581,7 @@ void CSpxUspRecoEngineAdapter::OnSpeechFragment(const USP::SpeechFragmentMsg& me
             {
                 namedProperties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_AutoDetectSourceLanguageResult), message.language.c_str());
             }
+            UpdateAdapterResult_JsonResult(result);
             site->FireAdapterResult_Intermediate(this, message.offset, result);
         });
     }
@@ -1452,7 +1589,7 @@ void CSpxUspRecoEngineAdapter::OnSpeechFragment(const USP::SpeechFragmentMsg& me
 
 void CSpxUspRecoEngineAdapter::OnSpeechPhrase(const USP::SpeechPhraseMsg& message)
 {
-    SPX_DBG_TRACE_VERBOSE("Response: Speech.Phrase message. Status: %d, Text: %ls, starts at %" PRIu64 ", with duration %" PRIu64 " (100ns).\n", message.recognitionStatus, message.displayText.c_str(), message.offset, message.duration);
+    SPX_DBG_TRACE_VERBOSE("Response: Speech.Phrase message. Status: %d, Text: %ls, starts at %" PRIu64 ", with duration %" PRIu64 " (100ns).\n", message.recognitionStatus, message.displayText.c_str(), message.offset + m_startingOffset, message.duration);
     SPX_DBG_TRACE_VERBOSE("%s: this=0x%8p", __FUNCTION__, (void*)this);
 
     if (IsBadState())
@@ -1482,7 +1619,7 @@ void CSpxUspRecoEngineAdapter::OnSpeechPhrase(const USP::SpeechPhraseMsg& messag
         {
             InvokeOnSite([&](const SitePtr& site)
             {
-                site->AdapterEndOfDictation(this, message.offset, message.duration);
+                site->AdapterEndOfDictation(this, message.offset + m_startingOffset, message.duration);
             });
         }
         else
@@ -1589,7 +1726,7 @@ DataChunkPtr CSpxUspRecoEngineAdapter::MakeDataChunkForAudioFormat(SPXWAVEFORMAT
 void CSpxUspRecoEngineAdapter::OnTranslationHypothesis(const USP::TranslationHypothesisMsg& message)
 {
     SPX_DBG_TRACE_VERBOSE("Response: Translation.Hypothesis message. RecoText: %ls, TranslationStatus: %d, starts at %" PRIu64 ", with duration %" PRIu64 " (100ns).\n",
-        message.text.c_str(), message.translation.translationStatus, message.offset, message.duration);
+        message.text.c_str(), message.translation.translationStatus, message.offset + m_startingOffset, message.duration);
     auto resultMap = message.translation.translations;
 #ifdef _DEBUG
     for (const auto& it : resultMap)
@@ -1611,6 +1748,7 @@ void CSpxUspRecoEngineAdapter::OnTranslationHypothesis(const USP::TranslationHyp
                 // Create the result
                 auto factory = SpxQueryService<ISpxRecoResultFactory>(site);
                 auto result = factory->CreateIntermediateResult(message.text.c_str(), message.offset, message.duration);
+                result->SetOffset(message.offset + m_startingOffset);
 
                 auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
                 namedProperties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_JsonResult), PAL::ToString(message.json).c_str());
@@ -1626,7 +1764,8 @@ void CSpxUspRecoEngineAdapter::OnTranslationHypothesis(const USP::TranslationHyp
                 initTranslationResult->InitTranslationRecognitionResult(status, message.translation.translations, message.translation.failureReason);
 
                 // Fire the result
-                site->FireAdapterResult_Intermediate(this, message.offset, result);
+                UpdateAdapterResult_JsonResult(result);
+                site->FireAdapterResult_Intermediate(this, message.offset + m_startingOffset, result);
             });
         }
     }
@@ -1642,7 +1781,7 @@ void CSpxUspRecoEngineAdapter::OnTranslationPhrase(const USP::TranslationPhraseM
 
     SPX_DBG_TRACE_VERBOSE("Response: Translation.Phrase message. RecoStatus: %d, TranslationStatus: %d, RecoText: %ls, starts at %" PRIu64 ", with duration %" PRIu64 " (100ns).\n",
         message.recognitionStatus, message.translation.translationStatus,
-        message.text.c_str(), message.offset, message.duration);
+        message.text.c_str(), message.offset + m_startingOffset, message.duration);
 #ifdef _DEBUG
     if (message.translation.translationStatus != USP::TranslationStatus::Success)
     {
@@ -1666,7 +1805,7 @@ void CSpxUspRecoEngineAdapter::OnTranslationPhrase(const USP::TranslationPhraseM
         {
             InvokeOnSite([&](const SitePtr& site)
             {
-                site->AdapterEndOfDictation(this, message.offset, message.duration);
+                site->AdapterEndOfDictation(this, message.offset + m_startingOffset, message.duration);
             });
         }
         else
@@ -1684,6 +1823,7 @@ void CSpxUspRecoEngineAdapter::OnTranslationPhrase(const USP::TranslationPhraseM
                 // Create the result
                 auto factory = SpxQueryService<ISpxRecoResultFactory>(site);
                 auto result = factory->CreateFinalResult(ToReason(message.recognitionStatus), ToNoMatchReason(message.recognitionStatus), message.text.c_str(), message.offset, message.duration);
+                result->SetOffset(message.offset + m_startingOffset);
 
                 auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
                 namedProperties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_JsonResult), PAL::ToString(message.json).c_str());
@@ -1698,8 +1838,10 @@ void CSpxUspRecoEngineAdapter::OnTranslationPhrase(const USP::TranslationPhraseM
                 auto status = GetTranslationStatus(message.translation.translationStatus);
                 initTranslationResult->InitTranslationRecognitionResult(status, message.translation.translations, message.translation.failureReason);
 
+                UpdateAdapterResult_JsonResult(result);
+
                 // Fire the result
-                site->FireAdapterResult_FinalResult(this, message.offset, result);
+                site->FireAdapterResult_FinalResult(this, message.offset + m_startingOffset, result);
             });
         }
     }
@@ -1750,7 +1892,17 @@ void CSpxUspRecoEngineAdapter::OnTurnStart(const USP::TurnStartMsg& message)
     {
         SPX_DBG_TRACE_VERBOSE("%s: site->AdapterStartedTurn()", __FUNCTION__);
         SPX_DBG_ASSERT(GetSite());
+
+        auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
+        SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_USP_SITE_FAILURE);
+        if (!message.serviceManagesOffset && properties->HasStringValue("SPEECH-UspContinuationOffset"))
+        {
+            m_startingOffset = stoull(properties->GetStringValue("SPEECH-UspContinuationOffset"));
+        }
+
         InvokeOnSite([this, &message](const SitePtr& p) { p->AdapterStartedTurn(this, message.contextServiceTag); });
+
+       properties->SetStringValue("SPEECH-UspContinuationServiceTag", message.contextServiceTag.c_str());
     }
     else
     {
@@ -2218,6 +2370,24 @@ json CSpxUspRecoEngineAdapter::GetSpeechContextJson()
         SPX_DBG_TRACE_VERBOSE("Speech context with LID scenario %s.", contextJson.dump().c_str());
     }
 
+    // Setup the audio stream and continuation token.
+    contextJson["audio"]["streams"]["1"] = {};
+
+    if (properties->HasStringValue("SPEECH-UspContinuationOffset"))
+    {
+        contextJson["continuation"]["audio"]["streams"]["1"]["offset"] = properties->GetStringValue("SPEECH-UspContinuationOffset");
+    }
+
+    if (properties->HasStringValue("SPEECH-UspContinuationToken"))
+    {
+        contextJson["continuation"]["token"] = properties->GetStringValue("SPEECH-UspContinuationToken");
+    }
+
+    if (properties->HasStringValue("SPEECH-UspContinuationServiceTag"))
+    {
+        contextJson["continuation"]["previousServiceTag"] = properties->GetStringValue("SPEECH-UspContinuationServiceTag");
+    }
+
     auto userParams = GetParametersFromUser("speech.context");
     for (const auto& it : userParams)
     {
@@ -2371,7 +2541,9 @@ void CSpxUspRecoEngineAdapter::FireFinalResultNow(const USP::SpeechPhraseMsg& me
             SPX_TRACE_ERROR("Unexpected recognition status %d.", message.recognitionStatus);
             SPX_THROW_HR(SPXERR_RUNTIME_ERROR);
         }
+
         auto result = factory->CreateFinalResult(ToReason(message.recognitionStatus), ToNoMatchReason(message.recognitionStatus), message.displayText.c_str(), message.offset, message.duration);
+        result->SetOffset(message.offset + m_startingOffset);
 
         auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
         namedProperties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_JsonResult), PAL::ToString(message.json).c_str());
@@ -2391,7 +2563,9 @@ void CSpxUspRecoEngineAdapter::FireFinalResultNow(const USP::SpeechPhraseMsg& me
         {
             namedProperties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_AutoDetectSourceLanguageResult), message.language.c_str());
         }
-        site->FireAdapterResult_FinalResult(this, message.offset, result);
+
+        UpdateAdapterResult_JsonResult(result);
+        site->FireAdapterResult_FinalResult(this, message.offset + m_startingOffset, result);
     });
 }
 
@@ -2693,6 +2867,30 @@ CSpxStringMap CSpxUspRecoEngineAdapter::GetParametersFromUser(std::string&& path
     SPX_IFTRUE_THROW_HR(getter == nullptr, SPXERR_UNEXPECTED_USP_SITE_FAILURE);
 
     return getter->GetParametersFromUser(move(path));
+}
+
+void CSpxUspRecoEngineAdapter::OnToken(const std::string token)
+{
+    auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
+    SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_USP_SITE_FAILURE);
+    properties->SetStringValue("SPEECH-UspContinuationToken", token.c_str());
+}
+
+void CSpxUspRecoEngineAdapter::OnAcknowledgedAudio(uint64_t offset)
+{
+    offset = offset + m_startingOffset;
+
+    SPX_DBG_TRACE_VERBOSE("%s: this=0x%8p Service acknowledging to offset %" PRIu64 " (100ns).", __FUNCTION__, (void*)this, offset);
+    auto site = GetSite();
+    auto properties = SpxQueryService<ISpxNamedProperties>(site);
+    SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_USP_SITE_FAILURE);
+    properties->SetStringValue("SPEECH-UspContinuationOffset", std::to_string(offset).c_str());
+
+    auto replayer = SpxQueryInterface<ISpxAudioReplayer>(site);
+    if (nullptr != replayer)
+    {
+        replayer->ShrinkReplayBuffer(offset);
+    }
 }
 
 std::shared_ptr<ISpxNamedProperties> CSpxUspRecoEngineAdapter::GetParentProperties() const

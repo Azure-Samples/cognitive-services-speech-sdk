@@ -99,15 +99,17 @@ struct SpeechEndDetectedMsg : public JsonMsg
 */
 struct TurnStartMsg : public JsonMsg
 {
-    TurnStartMsg(std::wstring&& content, const std::string& tag, const std::string& request) :
+    TurnStartMsg(std::wstring&& content, const std::string& tag, const std::string& request, bool serviceManagesOffset) :
         JsonMsg(std::move(content)),
         contextServiceTag(tag),
-        requestId{ request }
+        requestId{ request },
+        serviceManagesOffset(serviceManagesOffset)
     {
     }
 
     std::string contextServiceTag;
     std::string requestId;
+    bool serviceManagesOffset;
 };
 
 /**

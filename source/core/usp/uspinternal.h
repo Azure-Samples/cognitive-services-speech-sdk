@@ -135,6 +135,7 @@ private:
     std::unique_ptr<Telemetry> m_telemetry;
     std::shared_ptr<UspWebSocket> m_transport;
     const uint64_t m_creationTime;
+    bool m_turnUsingHeaders;
 
     void OnTelemetryData(std::string&& data, const std::string& requestId);
     void OnTransportOpened();

@@ -5,6 +5,8 @@
 using Microsoft.CognitiveServices.Speech.Audio;
 using Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -2074,6 +2076,122 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
 
                 SPXTEST_ISTRUE(recognizedEnough.WaitOne(TimeSpan.FromMinutes(4)));
+            }
+        }
+
+        [RetryTestMethod]
+        public async Task MultiTurnOffsetsIncreases()
+        {
+            var config = defaultConfig;
+            config.SetProperty(PropertyId.SpeechServiceConnection_EndSilenceTimeoutMs, "5000");
+            
+            ManualResetEvent doneEvent = new ManualResetEvent(false);
+            ManualResetEvent endEvent = new ManualResetEvent(false);
+            int recognized = 0;
+            int endEvents = 0;
+            UInt64 lastOffset = 0;
+            UInt64 lastPhraseEnd = 0;
+            UInt64 lastEndOffset = 0;
+            UInt64 lastHypoOffset = 0;
+            UInt64 lastStartOffset = 0;
+            bool hypoPassed = true;
+            bool recognizedPassed = true;
+            bool endPassed = true;
+            bool startPassed = true;
+            var files = new string[] { AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath(),
+                                       AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath(),
+                                       AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath(),
+                                       AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath(),
+                                       AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath() };
+
+            var fileStream = new RealTimeMultiFileStream(files);
+
+            var audioInput = AudioConfig.FromStreamInput(fileStream);
+
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(config, audioInput)))
+            {
+                var con = Connection.FromRecognizer(recognizer);
+                con.MessageReceived += (s, m) =>
+                {
+                    Console.WriteLine($"{m.Message.Path} {m.Message.GetTextMessage()}");
+               
+                };
+
+                recognizer.SpeechStartDetected += (s, e) =>
+                {
+                    Console.WriteLine($"Start {e.Offset}");
+
+                    startPassed &= e.Offset > lastEndOffset;
+                    
+                    lastStartOffset = e.Offset;
+                };
+
+                recognizer.Recognizing += (s, h) =>
+                {
+                    Console.WriteLine($"Hypothesis Offset {h.Offset} {h.Result.Properties.GetProperty(PropertyId.SpeechServiceResponse_JsonResult)}");
+
+                    hypoPassed &= h.Offset >= lastHypoOffset;
+                    hypoPassed &= h.Offset > lastEndOffset;
+                    hypoPassed &= h.Offset >= lastStartOffset;
+                    hypoPassed &= h.Offset == Convert.ToUInt64(h.Result.OffsetInTicks);
+                    var json = h.Result.Properties.GetProperty(PropertyId.SpeechServiceResponse_JsonResult);
+                    var jObj = (JObject)JsonConvert.DeserializeObject(json);
+                   
+                    var jsonOffset = jObj["Offset"].Value<UInt64>();
+                    hypoPassed &= h.Offset == jsonOffset;
+
+                    lastHypoOffset = h.Offset;
+
+                };
+
+                recognizer.Recognized += (s, e) =>
+                {
+                    Console.WriteLine($"Reco Offset {e.Offset} Done {e.Result.Duration} {e.Result.Properties.GetProperty(PropertyId.SpeechServiceResponse_JsonResult)}");
+
+                    recognizedPassed &= e.Offset > lastOffset;
+                    recognizedPassed &= e.Offset >= lastStartOffset;
+                    recognizedPassed &= e.Offset == Convert.ToUInt64(e.Result.OffsetInTicks);
+                    var json = e.Result.Properties.GetProperty(PropertyId.SpeechServiceResponse_JsonResult);
+                    var jObj = (JObject)JsonConvert.DeserializeObject(json);
+
+                    var jsonOffset = jObj["Offset"].Value<UInt64>();
+                    recognizedPassed &= e.Offset == jsonOffset;
+
+                    lastOffset = e.Offset;
+                    lastPhraseEnd = e.Offset + (Convert.ToUInt64(e.Result.Duration.TotalMilliseconds) * 10000);
+
+                    if (files.Length == ++recognized)
+                    {
+                        doneEvent.Set();
+                    }
+                };
+
+                recognizer.SpeechEndDetected += (s, e) =>
+                {
+                    Console.WriteLine($"EndOffset {e.Offset}");
+
+                    endPassed &= e.Offset > lastEndOffset;
+                    endPassed &= e.Offset >= lastPhraseEnd;
+                    endPassed &= e.Offset > lastStartOffset;
+
+                    lastEndOffset = e.Offset;
+                    fileStream.NextFile();
+
+                    if (files.Length == ++endEvents)
+                    {
+                        endEvent.Set();
+                    }
+                };
+
+                await recognizer.StartContinuousRecognitionAsync();
+
+                Assert.IsTrue(ManualResetEvent.WaitAll(new WaitHandle[] { doneEvent, endEvent }, TimeSpan.FromSeconds(600)), "Events were not received in time");
+                Assert.IsTrue(hypoPassed, "Hypothesis passed.");
+                Assert.IsTrue(recognizedPassed, "Recognized passed.");
+                Assert.IsTrue(endPassed, "End passed.");
+                Assert.IsTrue(startPassed, "Start passed");
+
+                await recognizer.StopContinuousRecognitionAsync();
             }
         }
     }

@@ -17,6 +17,7 @@ set(SOURCES
     "${SRC_DIR}/single_to_many_stream_reader_adapter_test.cpp"
     "${SRC_DIR}/sequence_generator_audio_stream_reader.cpp"
     "${SRC_DIR}/string_utils_test.cpp"
+    "${SRC_DIR}/AudioBuffer_Tests.cpp"
     "${SRC_DIR}/spxtest_unit_tests.cpp"
     "${SRC_DIR}/audio_processor_write_to_audio_source_buffer_test.cpp"
     "${SRC_DIR}/audio_source_adapter_test.cpp"
@@ -35,6 +36,7 @@ target_include_directories(${PROJECT_NAME}
     PRIVATE
         ${TEST_INCLUDE}
         "${CARBON_CORE}/include"
+        "${CARBON_CORE}/sr"
         ${CARBON_C_API}
         ${CARBON_CXX_API}
         "${CARBON_EXTERNAL}/json"

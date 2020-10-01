@@ -176,6 +176,7 @@ SPXTEST_CASE_BEGIN("Test JSON Generation", "[context_json]")
         string region = "WEUS";
         session->SetIntentInfo(provider, id, key, region);
 
+        expectedJson["audio"]["streams"]["1"] = {};
         expectedJson["intent"]["provider"] = provider;
         expectedJson["intent"]["id"] = id;
         expectedJson["intent"]["key"] = key;
@@ -185,8 +186,10 @@ SPXTEST_CASE_BEGIN("Test JSON Generation", "[context_json]")
 
         session->SetNoIntent();
         contextJson = adapterTest.GetSpeechContextJson();
-        json emptyJson;
-        SPXTEST_REQUIRE(contextJson == emptyJson);
+        json noIntentJson;
+        // Everyone gets an audio stream
+        noIntentJson["audio"]["streams"]["1"] = {};
+        SPXTEST_REQUIRE(contextJson == noIntentJson);
     }
 
     SPXTEST_SECTION("Test DGI Json")
@@ -204,6 +207,7 @@ SPXTEST_CASE_BEGIN("Test JSON Generation", "[context_json]")
         listenFors.push_back("{luis:" + id + "-PRODUCTION#" + intentName + "}");
         session->SetListenForList(listenFors);
 
+        expectedJson["audio"]["streams"]["1"] = {};
         expectedJson["dgi"]["ReferenceGrammars"] = json::array(
             {
                 "luis/" + id + "-PRODUCTION#" + intentName
@@ -229,6 +233,7 @@ SPXTEST_CASE_BEGIN("Test JSON Generation", "[context_json]")
         uint64_t duration = 20000;
         session->SetSpottedKeywordResult(keyWord, confidence, offSet, duration);
 
+        expectedJson["audio"]["streams"]["1"] = {};
         expectedJson["invocationSource"] = "VoiceActivationWithKeyword";
         expectedJson["keywordDetection"] = { {
                    {"type", "startTrigger"},
@@ -250,6 +255,7 @@ SPXTEST_CASE_BEGIN("Test JSON Generation", "[context_json]")
     SPXTEST_SECTION("Test Dictation Json")
     {
         session->SetInsertLeftRight("left", "right");
+        expectedJson["audio"]["streams"]["1"] = {};
         expectedJson["dictation"]["insertionPoint"]["left"] = "left";
         expectedJson["dictation"]["insertionPoint"]["right"] = "right";
         auto contextJson = adapterTest.GetSpeechContextJson();
@@ -263,6 +269,7 @@ SPXTEST_CASE_BEGIN("Test JSON Generation", "[context_json]")
     {
         vector<string> toLangs{ "en-us", "Fr-fr" };
         session->SetTargetLanguages(adapterTest.Join(toLangs));
+        expectedJson["audio"]["streams"]["1"] = {};
         expectedJson["translationcontext"]["to"] = json(toLangs);
         auto contextJson = adapterTest.GetSpeechContextJson();
         auto contextJsonStr = contextJson.dump();
@@ -284,6 +291,7 @@ SPXTEST_CASE_BEGIN("Test JSON Generation", "[context_json]")
         languageIdJson["onUnknown"]["action"] = "None";
         languageIdJson["onSuccess"]["action"] = "Recognize";
         expectedJson["languageId"] = languageIdJson;
+        expectedJson["audio"]["streams"]["1"] = {};
 
         unordered_map<string, string> voiceNameMap
         {
@@ -359,6 +367,7 @@ SPXTEST_CASE_BEGIN("Test JSON Generation", "[context_json]")
         expectedJson["phraseDetection"] = phraseDetectionJson;
         expectedJson["phraseOutput"]["interimResults"]["resultType"] = "Auto";
         expectedJson["phraseOutput"]["phraseResults"]["resultType"] = "Always";
+        expectedJson["audio"]["streams"]["1"] = {};
 
         auto contextJson = adapterTest.GetSpeechContextJson();
         SPXTEST_REQUIRE(contextJson == expectedJson);
@@ -399,6 +408,7 @@ SPXTEST_CASE_BEGIN("Test JSON Generation", "[context_json]")
         languageIdJson["onUnknown"]["action"] = "None";
         languageIdJson["onSuccess"]["action"] = "None";
         expectedJson["languageId"] = languageIdJson;
+        expectedJson["audio"]["streams"]["1"] = {};
 
         auto contextJson = adapterTest.GetSpeechContextJson();
         SPXTEST_REQUIRE(contextJson == expectedJson);

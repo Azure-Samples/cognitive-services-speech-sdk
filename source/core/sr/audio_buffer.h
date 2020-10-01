@@ -54,8 +54,7 @@ namespace Impl {
 
         // Discards all chunks till the specified offset in ticks.
         // Offset is relative to the current turn. Should be called on successful final result.
-        // It returns the timestamp of the last discarded audio.
-        virtual ProcessedAudioTimestampPtr DiscardTill(uint64_t offsetInTicksTurnRelative /*Tick = HNS*/) = 0;
+        virtual void DiscardTill(uint64_t offsetInTicks /*Tick = HNS*/) = 0;
 
         // Discards "size" bytes from the beginning of unconfirmed chunks.
         // Currently used only for KWS, (in the future DiscardTill should be used instead).
@@ -98,7 +97,7 @@ namespace Impl {
         void Add(const DataChunkPtr& audioChunk) override;
         DataChunkPtr GetNext() override;
         void NewTurn() override;
-        ProcessedAudioTimestampPtr DiscardTill(uint64_t offset) override;
+        void DiscardTill(uint64_t offset) override;
         void DiscardBytes(uint64_t bytes) override;
         uint64_t ToAbsolute(uint64_t offsetInTicksTurnRelative) const override;
         uint64_t StashedSizeInBytes() const override;
@@ -106,14 +105,14 @@ namespace Impl {
         void CopyNonAcknowledgedDataTo(AudioBufferPtr buffer) const override;
         uint64_t NonAcknowledgedSizeInBytes() const override;
         uint64_t GetAbsoluteOffset() const override;
-        ProcessedAudioTimestampPtr GetTimestamp(uint64_t offsetInTicksTurnRelative /*Tick = HNS*/) const override;
+        ProcessedAudioTimestampPtr GetTimestamp(uint64_t offsetInTicks /*Tick = HNS*/) const override;
 
     private:
         DISABLE_COPY_AND_MOVE(PcmAudioBuffer);
 
-        ProcessedAudioTimestampPtr DiscardBytesUnlocked(uint64_t bytes);
+        void DiscardBytesUnlocked(uint64_t bytes);
         DataChunkPtr GetNextUnlocked();
-        ProcessedAudioTimestampPtr DiscardTillUnlocked(uint64_t offsetInTicks);
+        void DiscardTillUnlocked(uint64_t offsetInTicks);
 
         uint64_t DurationToBytes(uint64_t durationInTicks) const;
         uint64_t BytesToDurationInTicks(uint64_t bytes) const;
@@ -129,7 +128,6 @@ namespace Impl {
         uint64_t m_totalSizeInBytes;
 
         size_t m_currentChunk;
-        uint64_t m_bufferStartOffsetInBytesTurnRelative;
         uint64_t m_bufferStartOffsetInBytesAbsolute;
         mutable std::mutex m_lock;
         const uint32_t m_bytesPerSample;

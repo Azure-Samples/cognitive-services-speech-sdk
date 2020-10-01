@@ -195,7 +195,8 @@ Connection::Impl::Impl(const Client& config)
     m_connected(false),
     m_speechContextMessageAllowed(true),
     m_audioOffset(0),
-    m_creationTime(telemetry_gettime())
+    m_creationTime(telemetry_gettime()),
+    m_turnUsingHeaders(false)
 {
     if (m_config.m_proxyServerInfo != nullptr)
     {
@@ -1158,6 +1159,8 @@ void Connection::Impl::OnTransportData(bool isBinary, const UspHeaders& headers,
         return;
     }
 
+    bool messageHadContinuationHeader = false;
+
     auto path = TryGet(headers, HEADER_PATH);
     if (path.empty())
     {
@@ -1211,6 +1214,20 @@ void Connection::Impl::OnTransportData(bool isBinary, const UspHeaders& headers,
 
     MetricsReceivedMessage(*m_telemetry, requestId, path);
 
+    auto headerOffset = TryGet(headers, headers::continuationOffset);
+    if (!headerOffset.empty())
+    {
+        Invoke([&](auto callbacks) { callbacks->OnAcknowledgedAudio(stoull(headerOffset)); });
+        messageHadContinuationHeader = true;
+    }
+
+    auto token = TryGet(headers, headers::continuationToken);
+    if (!token.empty())
+    {
+        Invoke([&](auto callbacks) { callbacks->OnToken(token); });
+        messageHadContinuationHeader = true;
+    }
+
     LogInfo("TS:%" PRIu64 " Response Message: path: %s, size: %zu.", getTimestamp(), path.c_str(), bufferSize);
 
     if (isBinary)
@@ -1252,21 +1269,26 @@ void Connection::Impl::OnTransportData(bool isBinary, const UspHeaders& headers,
             }
             else
             {
+               // Not sure this doesn't belong here....
+               // connection->Invoke([&] { callbacks->OnAcknowledgedAudio(offset); });
                 Invoke([&](auto callbacks) { callbacks->OnSpeechEndDetected({PAL::ToWString(json.dump()), offset}); });
             }
         }
         else if (path == path::turnStart)
         {
             auto tag = json[json_properties::context][json_properties::tag].get<string>();
+
+            m_turnUsingHeaders = messageHadContinuationHeader;
+
             if (requestId == m_speechRequestId)
             {
                 /* We know this request id is related to a speech turn */
-                Invoke([&](auto callbacks) { callbacks->OnTurnStart({ PAL::ToWString(json.dump()), tag, requestId }); });
+                Invoke([&](auto callbacks) { callbacks->OnTurnStart({ PAL::ToWString(json.dump()), tag, requestId, m_turnUsingHeaders }); });
             }
             else
             {
                 /* We know this request id is a server initiated request */
-                Invoke([&](auto callbacks) { callbacks->OnMessageStart({ PAL::ToWString(json.dump()), tag, requestId }); });
+                Invoke([&](auto callbacks) { callbacks->OnMessageStart({ PAL::ToWString(json.dump()), tag, requestId, m_turnUsingHeaders }); });
             }
         }
         else if (path == path::turnEnd)
@@ -1362,6 +1384,12 @@ void Connection::Impl::OnTransportData(bool isBinary, const UspHeaders& headers,
             {
                 Invoke([&](auto callbacks) { callbacks->OnSpeechPhrase(result); });
             }
+
+            if (!m_turnUsingHeaders)
+            {
+                // Tell our site we're done with the audio.
+                Invoke([&](auto callbacks) { callbacks->OnAcknowledgedAudio(result.offset + result.duration); });
+            }
         }
         else if (path == path::translationHypothesis)
         {
@@ -1407,6 +1435,12 @@ void Connection::Impl::OnTransportData(bool isBinary, const UspHeaders& headers,
                                                     move(translationResult),
                                                     status});
                 });
+
+                if (!m_turnUsingHeaders)
+                {
+                    // Tell our site we're done with the audio.
+                    Invoke([&](auto callbacks) { callbacks->OnAcknowledgedAudio(speechResult.offset + speechResult.duration); });
+                }
             }
         }
         else if (path == path::translationSynthesisEnd)
@@ -1512,6 +1546,13 @@ void Connection::Impl::OnTransportData(bool isBinary, const UspHeaders& headers,
                                                         move(speechPhraseMsg.language),
                                                         speechPhraseMsg.languageDetectionConfidence});
                     });
+
+
+                    if (!m_turnUsingHeaders)
+                    {
+                        // Tell our site we're done with the audio.
+                        Invoke([&](auto callbacks) { callbacks->OnAcknowledgedAudio(speechPhraseMsg.offset + speechPhraseMsg.duration); });
+                    }
                 }
             }
             else

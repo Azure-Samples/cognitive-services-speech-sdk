@@ -130,6 +130,10 @@ struct Callbacks
     * A callback function that will be invoked when the connection to service is lost.
     */
     virtual void OnDisconnected() {}
+
+    virtual void OnToken(const std::string /*token*/) {}
+
+    virtual void OnAcknowledgedAudio(uint64_t /*offset*/) {}
 };
 
 class ISpxUspCallbacks :
@@ -174,7 +178,8 @@ public:
     inline void OnUserMessage(const USP::UserMsg& m) final { InvokeOnSite([&](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnUserMessage(m); }); }
     inline void OnConnected() final { InvokeOnSite([&](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnConnected(); }); }
     inline void OnDisconnected() final { InvokeOnSite([&](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnDisconnected(); }); }
-
+    inline void OnToken(const std::string s) final { InvokeOnSite([s](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnToken(s); }); }
+    inline void OnAcknowledgedAudio(uint64_t s) final { InvokeOnSite([s](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnAcknowledgedAudio(s); }); }
 
 private:
     DISABLE_COPY_AND_MOVE(CSpxUspCallbackWrapper);

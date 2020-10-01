@@ -24,6 +24,8 @@ namespace USP {
         constexpr auto dialogDLSSecret = "X-DLS-Secret";
         constexpr auto dialogCommandsAppId = "X-CommandsAppId";
         constexpr auto capitoConversationToken = "X-CapitoToken";
+        constexpr auto continuationToken = "X-Continuation-Token";
+        constexpr auto continuationOffset = "X-Continuation-Audio-Streams-1-Offset";
     }
 
 } } } }

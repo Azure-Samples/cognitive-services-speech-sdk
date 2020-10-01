@@ -19,7 +19,6 @@ namespace Impl {
         : m_header{ header },
           m_totalSizeInBytes{ 0 },
           m_currentChunk{ 0 },
-          m_bufferStartOffsetInBytesTurnRelative{ 0 },
           m_bufferStartOffsetInBytesAbsolute{ 0 },
           m_bytesPerSample{ header.wBitsPerSample / 8u },
           m_samplesPerSecond{ header.nSamplesPerSec }
@@ -47,7 +46,9 @@ namespace Impl {
     void PcmAudioBuffer::NewTurn()
     {
         std::unique_lock<std::mutex> guard(m_lock);
-        m_bufferStartOffsetInBytesTurnRelative = 0;
+
+        SPX_DBG_TRACE_FUNCTION();
+
         m_currentChunk = 0;
     }
 
@@ -66,22 +67,19 @@ namespace Impl {
         mutable std::shared_ptr<uint8_t> data;
     };
 
-    ProcessedAudioTimestampPtr PcmAudioBuffer::DiscardBytesUnlocked(uint64_t bytes)
+    void PcmAudioBuffer::DiscardBytesUnlocked(uint64_t bytes)
     {
-        system_clock::time_point audioTimestamp;
-        uint64_t remainingInTicks = 0;
+        SPX_DBG_TRACE_VERBOSE("%s discarding %" PRIu64 " bytes.", __FUNCTION__, bytes);
 
         uint64_t chunkBytes = 0;
         while (!m_audioBuffers.empty() && bytes &&
                (chunkBytes = m_audioBuffers.front()->size) <= bytes)
         {
             bytes -= chunkBytes;
-            audioTimestamp = m_audioBuffers.front()->receivedTime;
             m_audioBuffers.pop_front();
             m_currentChunk--;
             SPX_THROW_HR_IF(SPXERR_RUNTIME_ERROR, m_totalSizeInBytes < chunkBytes);
             m_totalSizeInBytes -= chunkBytes;
-            m_bufferStartOffsetInBytesTurnRelative += chunkBytes;
             m_bufferStartOffsetInBytesAbsolute += chunkBytes;
         }
 
@@ -95,34 +93,28 @@ namespace Impl {
 
             if (bytes > 0)
             {
-                SPX_TRACE_WARNING("%s: Discarding %d more bytes than were available in the buffer. Using oldest available timestamp: %s",
-                        __FUNCTION__, (int)bytes, PAL::GetTimeInString(audioTimestamp).c_str());
+                SPX_TRACE_WARNING("%s: Discarding %d more bytes than were available in the buffer.",
+                        __FUNCTION__, (int)bytes);
             }
 
             m_currentChunk = 0;
         }
         else if (bytes > 0)
         {
-            audioTimestamp = m_audioBuffers.front()->receivedTime;
-            remainingInTicks = BytesToDurationInTicks(m_audioBuffers.front()->size - bytes);
-
             // At this point, bytes is less than the size of current chunk, so safe to cast to uint32_t.
             m_audioBuffers.front()->size -= (uint32_t)bytes;
-            m_bufferStartOffsetInBytesTurnRelative += bytes;
             m_bufferStartOffsetInBytesAbsolute += bytes;
             auto holder = PtrHolder{ m_audioBuffers.front()->data };
             m_audioBuffers.front()->data = std::shared_ptr<uint8_t>(holder.data.get() + bytes, [holder](void *) { holder.data.reset(); });
             SPX_THROW_HR_IF(SPXERR_RUNTIME_ERROR, m_totalSizeInBytes < bytes);
             m_totalSizeInBytes -= bytes;
         }
-
-        return std::make_shared<ProcessedAudioTimestamp>(audioTimestamp, remainingInTicks);
     }
 
-    ProcessedAudioTimestampPtr PcmAudioBuffer::DiscardTill(uint64_t offsetInTicks)
+    void PcmAudioBuffer::DiscardTill(uint64_t offsetInTicks)
     {
         std::unique_lock<std::mutex> guard(m_lock);
-        return DiscardTillUnlocked(offsetInTicks);
+        DiscardTillUnlocked(offsetInTicks);
     }
 
     uint64_t PcmAudioBuffer::DurationToBytes(uint64_t durationInTicks) const
@@ -157,7 +149,7 @@ namespace Impl {
 
     uint64_t PcmAudioBuffer::ToAbsolute(uint64_t offsetInTicksTurnRelative) const
     {
-        int64_t bytes = DurationToBytes(offsetInTicksTurnRelative) - m_bufferStartOffsetInBytesTurnRelative;
+        int64_t bytes = DurationToBytes(offsetInTicksTurnRelative);
         return BytesToDurationInTicks(m_bufferStartOffsetInBytesAbsolute + bytes);
     }
 
@@ -229,16 +221,17 @@ namespace Impl {
         return result;
     }
 
-    ProcessedAudioTimestampPtr PcmAudioBuffer::DiscardTillUnlocked(uint64_t offsetInTicks)
+    void PcmAudioBuffer::DiscardTillUnlocked(uint64_t offsetInTicks)
     {
         uint64_t offsetInBytes = DurationToBytes(offsetInTicks);
-        if (offsetInBytes < m_bufferStartOffsetInBytesTurnRelative)
+        if (offsetInBytes < m_bufferStartOffsetInBytesAbsolute)
         {
-            SPX_TRACE_WARNING("%s: Offset is not monotonically increasing. Current turn offset in bytes %d, discarding bytes %d",
-                __FUNCTION__, (int)m_bufferStartOffsetInBytesTurnRelative, (int)offsetInBytes);
-            return nullptr;
+            SPX_TRACE_WARNING("%s: Offset is not monotonically increasing. Current offset in bytes %d, discarding bytes %d",
+                __FUNCTION__, (int)m_bufferStartOffsetInBytesAbsolute, (int)offsetInBytes);
+            return;
         }
-        return DiscardBytesUnlocked(offsetInBytes - m_bufferStartOffsetInBytesTurnRelative);
+
+        DiscardBytesUnlocked(offsetInBytes - m_bufferStartOffsetInBytesAbsolute);
     }
 
     uint64_t PcmAudioBuffer::NonAcknowledgedSizeInBytes() const
@@ -258,14 +251,14 @@ namespace Impl {
         std::unique_lock<std::mutex> guard(m_lock);
 
         uint64_t offsetInBytes = DurationToBytes(offsetInTicks);
-        if (offsetInBytes < m_bufferStartOffsetInBytesTurnRelative)
+        if (offsetInBytes < m_bufferStartOffsetInBytesAbsolute)
         {
-            SPX_TRACE_WARNING("%s: Offset is not monotonically increasing. Current turn offset in bytes %d, offset to get timestamp in bytes %d",
-                __FUNCTION__, (int)m_bufferStartOffsetInBytesTurnRelative, (int)offsetInBytes);
+            SPX_TRACE_WARNING("%s: Offset is not monotonically increasing. Current offset in bytes %d, offset to get timestamp in bytes %d",
+                __FUNCTION__, (int)m_bufferStartOffsetInBytesAbsolute, (int)offsetInBytes);
             return nullptr;
         }
 
-        uint64_t bytes = offsetInBytes - m_bufferStartOffsetInBytesTurnRelative;
+        uint64_t bytes = offsetInBytes;
         uint64_t chunkBytes = 0;
         auto queueSize = m_audioBuffers.size();
         size_t index;

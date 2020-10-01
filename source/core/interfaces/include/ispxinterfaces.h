@@ -306,6 +306,12 @@ public:
     virtual std::shared_ptr<ISpxAudioStream> GetStream() = 0;
 };
 
+class ISpxAudioReplayer : public ISpxInterfaceBaseFor<ISpxAudioReplayer>
+{
+public:
+    virtual void ShrinkReplayBuffer(uint64_t newBaseOffset) = 0;
+};
+
 class ISpxInternalAudioCodecAdapter : public ISpxInterfaceBaseFor <ISpxInternalAudioCodecAdapter>
 {
 public:

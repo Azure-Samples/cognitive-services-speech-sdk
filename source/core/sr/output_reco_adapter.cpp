@@ -91,6 +91,14 @@ void CSpxOutputRecoEngineAdapter::DetachInput()
     InvokeOnSite([this](const SitePtr& site)
     {
         auto duration = BytesToDuration<tick>(m_size, m_bytesPerSecond);
+
+        // If our site has been holding bytes to replay them, tell it that it can discard.
+        auto replayer = SpxQueryInterface<ISpxAudioReplayer>(site);
+        if (nullptr != replayer)
+        {
+            replayer->ShrinkReplayBuffer(duration.count());
+        }
+
         auto factory = SpxQueryService<ISpxRecoResultFactory>(site);
         auto result = factory->CreateFinalResult(ResultReason::RecognizedSpeech, NO_MATCH_REASON_NONE, L"", 0, 0);
         site->FireAdapterResult_FinalResult(this, duration.count(), result);

@@ -43,7 +43,8 @@ class CSpxAudioStreamSession :
     public ISpxPropertyBagImpl,
     public ISpxSpeechEventPayloadProvider,
     public ISpxGetUspMessageParamsFromUser,
-    public CSpxInteractionIdProvider<CSpxAudioStreamSession>
+    public CSpxInteractionIdProvider<CSpxAudioStreamSession>,
+    public ISpxAudioReplayer
 {
 public:
 
@@ -71,6 +72,7 @@ public:
         SPX_INTERFACE_MAP_ENTRY(ISpxInteractionIdProvider)
         SPX_INTERFACE_MAP_ENTRY(ISpxSpeechEventPayloadProvider)
         SPX_INTERFACE_MAP_ENTRY(ISpxGetUspMessageParamsFromUser)
+        SPX_INTERFACE_MAP_ENTRY(ISpxAudioReplayer)
     SPX_INTERFACE_MAP_END()
 
     // --- ISpxObjectInit
@@ -206,6 +208,9 @@ public:
 
     // --- ISpxGetUspMessageParamsFromUser
     CSpxStringMap GetParametersFromUser(std::string&& path) override;
+
+    // --- ISpxAudioReplayer
+    void ShrinkReplayBuffer(uint64_t newBaseOffset) override;
 
 private:
     std::shared_ptr<ISpxThreadService> InternalQueryService(const char* serviceName);
@@ -344,8 +349,6 @@ private:
     uint64_t GetResultLatencyInMs(const ProcessedAudioTimestampPtr& audiotimestamp) const;
 
     void SetThrottleVariables(const SPXWAVEFORMATEX* format);
-
-    void UpdateAdapterResult_JsonResult(std::shared_ptr<ISpxRecognitionResult> result);
 
     void ForEachRecognizer(std::function<void(std::shared_ptr<ISpxRecognizer>)> fn);
     void SetUSPRetriesParams();
