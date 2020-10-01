@@ -177,7 +177,7 @@
             }
         },
         "PunctuationMode": {
-            "defaultValue": "None",
+            "defaultValue": "DictatedAndAutomatic",
             "type": "String",
             "allowedValues": [
                 "None",
@@ -380,7 +380,7 @@
                                 "storageKeyType": "SharedAccessKey",
                                 "administratorLogin": "[parameters('SqlAdministratorLogin')]",
                                 "administratorLoginPassword": "[parameters('SqlAdministratorLoginPassword')]",
-                                "storageUri": "https://spsvclocusw2.blob.core.windows.net/a-javan-public/transcription_accelerator_db.bacpac"
+                                "storageUri": "https://mspublicstorage.blob.core.windows.net/transcription-enabled-storage/transcription_accelerator_db.bacpac"
                             }
                         }
                     ]

@@ -59,14 +59,10 @@ namespace Connector
         public static async Task<TranscriptionFiles> GetTranscriptionFilesAsync(string transcriptionLocation, string subscriptionKey, ILogger log)
         {
             var path = $"{transcriptionLocation}/files";
-
             var combinedTranscriptionFiles = new List<TranscriptionFile>();
 
             do
             {
-                // Delay to avoid throttling
-                await Task.Delay(2000).ConfigureAwait(false);
-
                 var transcriptionFiles = await GetAsync<TranscriptionFiles>(path, subscriptionKey, GetFilesTimeout, log).ConfigureAwait(false);
                 combinedTranscriptionFiles.AddRange(transcriptionFiles.Values);
                 path = transcriptionFiles.NextLink;
