@@ -602,7 +602,7 @@ jobs:
     )
   pool:
     vmImage: 'windows-2019'
-  timeoutInMinutes: 30
+  timeoutInMinutes: 40
   steps:
   - script: |
       echo ##vso[task.prependpath]C:\Program Files\Git\mingw64\bin
