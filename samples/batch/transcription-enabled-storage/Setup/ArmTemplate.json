@@ -127,19 +127,6 @@
                 "description": "The id of the language model. If empty, the default language model of the secondary locale will be selected."
             }
         },
-        "AudioDatasetSize": {
-            "defaultValue": "Small (0 - 50 files)",
-            "type": "String",
-            "metadata": {
-                "description": "The average number of files that are uploaded to the storage container at the same time. Specifying a range allows the usage of azure functions as economic as possible."
-            },
-            "allowedValues": [
-                "Small (0 - 50 files)",
-                "Medium (51 - 500 files)",
-                "Large (501 - 1000 files)",
-                "Very large (>1000 files)"
-            ]
-        },
         "AzureSpeechServicesKey": {
             "type": "String",
             "metadata": {
@@ -177,7 +164,7 @@
             }
         },
         "ProfanityFilterMode": {
-            "defaultValue": "Masked",
+            "defaultValue": "None",
             "type": "String",
             "allowedValues": [
                 "None",
@@ -203,14 +190,14 @@
             }
         },
         "AddDiarization": {
-            "defaultValue": true,
+            "defaultValue": false,
             "type": "bool",
             "metadata": {
                 "description": "A value indicating whether diarization (speaker separation) is requested."
             }
         },
         "AddWordLevelTimestamps": {
-            "defaultValue": true,
+            "defaultValue": false,
             "type": "bool",
             "metadata": {
                 "description": "A value indicating whether word level timestamps are requested."
@@ -291,7 +278,8 @@
         "audioInputContainer": "audio-input",
         "jsonResultOutputContainer": "json-result-output",
         "htmlResultOutputContainer": "html-result-output",
-        "errorReportOutputContainer": "error-report-output",
+        "errorReportOutputContainer": "error-report",
+        "errorFilesOutputContainer": "error-files",
         "startTranscriptionFunctionName": "[take(concat('StartTranscriptionFunction-', resourceGroup().name),60)]",
         "startTranscriptionFunctionId": "[resourceId('Microsoft.Web/sites', variables('startTranscriptionFunctionName'))]",
         "fetchTranscriptionFunctionName": "[take(concat('FetchTranscriptionFunction-', resourceGroup().name),60)]",
@@ -392,7 +380,7 @@
                                 "storageKeyType": "SharedAccessKey",
                                 "administratorLogin": "[parameters('SqlAdministratorLogin')]",
                                 "administratorLoginPassword": "[parameters('SqlAdministratorLoginPassword')]",
-                                "storageUri": "https://spsvclocusw2.blob.core.windows.net/a-javan-public/transcription_accelerator_db.bacpac"
+                                "storageUri": "https://mspublicstorage.blob.core.windows.net/transcription-enabled-storage/transcription_accelerator_db.bacpac"
                             }
                         }
                     ]
@@ -490,7 +478,7 @@
                 "[resourceId('Microsoft.ServiceBus/namespaces', concat('ServiceBus-', resourceGroup().name))]"
             ],
             "properties": {
-                "lockDuration": "PT1M",
+                "lockDuration": "PT4M",
                 "maxSizeInMegabytes": 5120,
                 "requiresDuplicateDetection": false,
                 "requiresSession": false,
@@ -652,6 +640,19 @@
             }
         },
         {
+            "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+            "apiVersion": "2019-06-01",
+            "name": "[concat(variables('StorageAccountName'), '/default/', variables('errorFilesOutputContainer'))]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', variables('StorageAccountName'), 'default')]",
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName'))]"
+            ],
+            "properties": {
+                "publicAccess": "None"
+            }
+        },
+        {
             "type": "Microsoft.Storage/storageAccounts/providers/eventSubscriptions",
             "apiVersion": "2019-06-01",
             "name": "[concat(variables('StorageAccountName'), '/Microsoft.EventGrid/BlobCreatedEvent')]",
@@ -725,17 +726,15 @@
             "properties": {
                 "AcousticModelId": "[parameters('AcousticModelId')]",
                 "AddDiarization": "[parameters('AddDiarization')]",
-                "AddEntityRedaction": "[parameters('AddEntityRedaction')]",
-                "AddSentimentAnalysis": "[parameters('AddSentimentAnalysis')]",
                 "AddWordLevelTimestamps": "[parameters('AddWordLevelTimestamps')]",
                 "APPINSIGHTS_INSTRUMENTATIONKEY": "[reference(resourceId('Microsoft.Insights/components', 'AcceleratorInsights'), '2015-05-01').InstrumentationKey]",
-                "AudioDatasetSize": "[parameters('AudioDatasetSize')]",
                 "AudioInputContainer": "[variables('audioInputContainer')]",
                 "AzureServiceBus": "[listKeys(variables('authRuleRMK'),'2015-08-01').primaryConnectionString]",
                 "AzureSpeechServicesKey": "[parameters('AzureSpeechServicesKey')]",
                 "AzureSpeechServicesRegion": "[parameters('AzureSpeechServicesRegion')]",
                 "AzureWebJobsStorage": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('StorageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value)]",
-                "StartTranscriptionServiceBusConnectionString": "[listKeys(variables('authRuleCT'),'2015-08-01').primaryConnectionString]",
+                "AzureWebJobsDashboard": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('StorageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value)]",
+                "ErrorFilesOutputContainer": "[variables('errorFilesOutputContainer')]",
                 "ErrorReportOutputContainer": "[variables('errorReportOutputContainer')]",
                 "FetchTranscriptionServiceBusConnectionString": "[listKeys(variables('authRuleFT'),'2015-08-01').primaryConnectionString]",
                 "FUNCTIONS_EXTENSION_VERSION": "~3",
@@ -747,6 +746,7 @@
                 "SecondaryAcousticModelId": "[parameters('SecondaryAcousticModelId')]",
                 "SecondaryLanguageModelId": "[parameters('SecondaryLanguageModelId')]",
                 "SecondaryLocale": "[parameters('SecondaryLocale')]",
+                "StartTranscriptionServiceBusConnectionString": "[listKeys(variables('authRuleCT'),'2015-08-01').primaryConnectionString]",
                 "WEBSITE_RUN_FROM_PACKAGE": "[if(variables('timerBasedExecution'),'https://mspublicstorage.blob.core.windows.net/transcription-enabled-storage/StartTranscriptionByTimer.zip','https://mspublicstorage.blob.core.windows.net/transcription-enabled-storage/StartTranscriptionByServiceBus.zip')]"
             }
         },
@@ -774,23 +774,31 @@
                 "[resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName'))]",
                 "[concat('Microsoft.Web/sites/', variables('fetchTranscriptionFunctionName'))]",
                 "[variables('authRuleRMK')]",
-                "[variables('authRuleFT')]"
+                "[variables('authRuleFT')]",
+                "[variables('authRuleCT')]"
             ],
             "tags": {
                 "displayName": "WebAppSettings"
             },
             "properties": {
                 "APPINSIGHTS_INSTRUMENTATIONKEY": "[reference(resourceId('Microsoft.Insights/components', 'AcceleratorInsights'), '2015-05-01').InstrumentationKey]",
+                "AddEntityRedaction": "[parameters('AddEntityRedaction')]",
+                "AddSentimentAnalysis": "[parameters('AddSentimentAnalysis')]",
+                "AudioInputContainer": "[variables('audioInputContainer')]",
                 "AzureServiceBus": "[listKeys(variables('authRuleRMK'),'2015-08-01').primaryConnectionString]",
+                "AzureSpeechServicesKey": "[parameters('AzureSpeechServicesKey')]",
                 "AzureWebJobsStorage": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('StorageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value)]",
+                "AzureWebJobsDashboard": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('StorageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value)]",
                 "CreateHtmlResultFile": "[variables('createHtmlResultFile')]",
                 "DatabaseConnectionString": "[if(variables('UseSqlDatabase'), concat('Server=tcp:',reference(variables('SqlServerName'), '2014-04-01-preview').fullyQualifiedDomainName,',1433;Initial Catalog=',variables('DatabaseName'),';Persist Security Info=False;User ID=',parameters('SqlAdministratorLogin'),';Password=',parameters('SqlAdministratorLoginPassword'),';MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;'), '')]",
+                "ErrorFilesOutputContainer": "[variables('errorFilesOutputContainer')]",
                 "ErrorReportOutputContainer": "[variables('errorReportOutputContainer')]",
                 "FetchTranscriptionServiceBusConnectionString": "[listKeys(variables('authRuleFT'),'2015-08-01').primaryConnectionString]",
                 "FUNCTIONS_EXTENSION_VERSION": "~3",
                 "FUNCTIONS_WORKER_RUNTIME": "dotnet",
                 "HtmlResultOutputContainer": "[variables('htmlResultOutputContainer')]",
                 "JsonResultOutputContainer": "[variables('jsonResultOutputContainer')]",
+                "StartTranscriptionServiceBusConnectionString": "[listKeys(variables('authRuleCT'),'2015-08-01').primaryConnectionString]",
                 "TextAnalyticsKey": "[parameters('TextAnalyticsKey')]",
                 "TextAnalyticsRegion": "[parameters('TextAnalyticsRegion')]",
                 "UseSqlDatabase": "[variables('UseSqlDatabase')]",

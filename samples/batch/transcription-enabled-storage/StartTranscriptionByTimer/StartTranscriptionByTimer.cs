@@ -7,6 +7,7 @@ namespace StartTranscriptionByTimer
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
     using System.Threading.Tasks;
     using Connector;
@@ -17,9 +18,11 @@ namespace StartTranscriptionByTimer
 
     public static class StartTranscriptionByTimer
     {
-        private const int MaxMessagesPerRequest = 500;
+        private const int MessagesPerExecutionThreshold = 5000;
 
         private const double MessageReceiveTimeoutInSeconds = 60;
+
+        private static MessageReceiver MessageReceiverInstance = new MessageReceiver(new ServiceBusConnectionStringBuilder(StartTranscriptionEnvironmentVariables.StartTranscriptionServiceBusConnectionString), prefetchCount: MessagesPerExecutionThreshold);
 
         [FunctionName("StartTranscriptionByTimer")]
         public static async Task Run([TimerTrigger("0 */2 * * * *")] TimerInfo myTimer, ILogger log)
@@ -42,43 +45,42 @@ namespace StartTranscriptionByTimer
                 log.LogWarning($"Language identification is not supported for timer-based transcription creation.");
             }
 
-            var receiver = new MessageReceiver(StartTranscriptionEnvironmentVariables.AzureServiceBus, "start_transcription_queue");
             var validServiceBusMessages = new List<Message>();
             var transcriptionHelper = new StartTranscriptionHelper(log);
 
-            var receiveFromServiceBus = true;
             log.LogInformation("Pulling messages from queue...");
-            do
+
+            var messages = await MessageReceiverInstance.ReceiveAsync(MessagesPerExecutionThreshold, TimeSpan.FromSeconds(MessageReceiveTimeoutInSeconds)).ConfigureAwait(false);
+
+            if (messages == null || !messages.Any())
             {
-                var messages = await receiver.ReceiveAsync(MaxMessagesPerRequest, TimeSpan.FromSeconds(30)).ConfigureAwait(false);
+                log.LogInformation($"Got no messages in this iteration.");
+                return;
+            }
 
-                if (messages == null)
+            log.LogInformation($"Got {messages.Count} in this iteration.");
+            foreach (var message in messages)
+            {
+                if (message.SystemProperties.LockedUntilUtc > DateTime.UtcNow.AddSeconds(5))
                 {
-                    log.LogInformation("No remaining messages found in queue.");
-                    break;
-                }
-
-                foreach (var message in messages)
-                {
-                    await receiver.CompleteAsync(message.SystemProperties.LockToken).ConfigureAwait(false);
-                    if (transcriptionHelper.IsValidServiceBusMessage(message))
+                    try
                     {
-                        validServiceBusMessages.Add(message);
+                        if (transcriptionHelper.IsValidServiceBusMessage(message))
+                        {
+                            await MessageReceiverInstance.RenewLockAsync(message.SystemProperties.LockToken).ConfigureAwait(false);
+                            validServiceBusMessages.Add(message);
+                        }
+                        else
+                        {
+                            await MessageReceiverInstance.CompleteAsync(message.SystemProperties.LockToken).ConfigureAwait(false);
+                        }
+                    }
+                    catch (MessageLockLostException)
+                    {
+                        log.LogInformation($"Message lock expired for message. Ignore message in this iteration.");
                     }
                 }
-
-                if (startDateTime.AddSeconds(MessageReceiveTimeoutInSeconds) > DateTime.UtcNow)
-                {
-                    log.LogInformation("Receiving messages from queue timed out.");
-                    receiveFromServiceBus = false;
-                }
-                else if (messages.Count < MaxMessagesPerRequest)
-                {
-                    log.LogInformation("Received all remaining messages from the queue.");
-                    receiveFromServiceBus = false;
-                }
             }
-            while (receiveFromServiceBus);
 
             if (!validServiceBusMessages.Any())
             {
@@ -86,9 +88,9 @@ namespace StartTranscriptionByTimer
                 return;
             }
 
-            log.LogInformation($"Received {validServiceBusMessages.Count} valid messages in total from queue.");
+            log.LogInformation($"Pulled {validServiceBusMessages.Count} valid messages from queue.");
 
-            await transcriptionHelper.StartTranscriptionsAsync(validServiceBusMessages).ConfigureAwait(false);
+            await transcriptionHelper.StartTranscriptionsAsync(validServiceBusMessages, MessageReceiverInstance, startDateTime).ConfigureAwait(false);
         }
     }
 }

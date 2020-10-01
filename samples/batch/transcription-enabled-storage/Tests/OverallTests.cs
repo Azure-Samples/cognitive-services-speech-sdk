@@ -30,9 +30,9 @@ namespace Tests
         [TestMethod]
         public void GetContainerFromSasTest()
         {
-            var containerName = StorageUtilities.GetContainerNameFromUri(new Uri(TestSasUri));
-            var fileName = StorageUtilities.GetFileNameFromUri(new Uri(TestSasUri));
-            var fileNameWithoutExtension = StorageUtilities.GetFileNameWithoutExtension(fileName);
+            var containerName = StorageConnector.GetContainerNameFromUri(new Uri(TestSasUri));
+            var fileName = StorageConnector.GetFileNameFromUri(new Uri(TestSasUri));
+            var fileNameWithoutExtension = StorageConnector.GetFileNameWithoutExtension(fileName);
             Assert.AreEqual("testContainer", containerName);
             Assert.AreEqual("testfolder/test.wav", fileName);
             Assert.AreEqual("testfolder/test", fileNameWithoutExtension);

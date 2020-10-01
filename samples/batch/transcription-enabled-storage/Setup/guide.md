@@ -150,7 +150,7 @@ are listed below.
 
 If a Consumption Plan (Y1) was selected for the Azure Functions, make sure that the functions are synced with the other resources (see [this](https://docs.microsoft.com/en-us/azure/azure-functions/functions-deployment-technologies#trigger-syncing) for further details).
 
-To do so, click on your CreateTranscription function in the portal and wait until your function shows up:
+To do so, click on your StartTranscription function in the portal and wait until your function shows up:
 
 ![resources](./images/image016.png)
 
