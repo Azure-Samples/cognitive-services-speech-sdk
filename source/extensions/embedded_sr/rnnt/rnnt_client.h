@@ -88,6 +88,7 @@ public:
     RnntFeatureReader(IUnimicSource* source, size_t featDim, size_t stride, size_t maxEndPaddingDim);
 
     bool Forward();
+    bool GetAudioEnded();
     size_t GetChannelCount() const;
     IUnimicSource* GetSource();
 

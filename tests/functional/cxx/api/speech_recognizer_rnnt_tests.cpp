@@ -157,3 +157,101 @@ SPXTEST_CASE_BEGIN("Offline single recognition with RNN-T and offline TTS", "[ap
         }
     }
 }SPXTEST_CASE_END()
+
+// Requires an updated test model
+SPXTEST_CASE_BEGIN("Offline continuous recognition with RNN-T and early stop", "[.][api][cxx][rnnt]")
+{
+    SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+
+    UseMocks(false);
+    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(MULTIPLE_UTTERANCE_ENGLISH)));
+
+    auto config = CurrentSpeechConfig(SpxGetTestTrafficType(__FILE__, __LINE__));
+    UseOfflineRnnt(config);
+
+    SPXTEST_SECTION("continuous recognition")
+    {
+        auto numLoops = 3;
+
+        for (int i = 0; i < numLoops; i++)
+        {
+            auto audioInput = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(MULTIPLE_UTTERANCE_ENGLISH));
+            auto recognizer = SpeechRecognizer::FromConfig(config, audioInput);
+
+            promise<void> recognitionEnd;
+
+            recognizer->Recognized.Connect([&recognitionEnd](const SpeechRecognitionEventArgs& e)
+            {
+                if (e.Result->Reason == ResultReason::RecognizedSpeech)
+                {
+                    recognitionEnd.set_value(); // Stop recognition after the first phrase
+                }
+            });
+
+            recognizer->StartContinuousRecognitionAsync().get();
+            WaitForResult(recognitionEnd.get_future(), WAIT_FOR_RECO_RESULT_TIME);
+            recognizer->StopContinuousRecognitionAsync().get();
+        }
+    }
+}SPXTEST_CASE_END()
+
+// For manual testing, requires an updated test model
+SPXTEST_CASE_BEGIN("Offline continuous recognition with RNN-T and live output", "[.][api][cxx][rnnt]")
+{
+    SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+
+    UseMocks(false);
+    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(MULTIPLE_UTTERANCE_ENGLISH)));
+
+    auto config = CurrentSpeechConfig(SpxGetTestTrafficType(__FILE__, __LINE__));
+    UseOfflineRnnt(config);
+
+    SPXTEST_SECTION("continuous recognition")
+    {
+        auto audioInput = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(MULTIPLE_UTTERANCE_ENGLISH));
+        auto recognizer = SpeechRecognizer::FromConfig(config, audioInput);
+
+        promise<void> recognitionEnd;
+
+        recognizer->Recognizing.Connect([](const SpeechRecognitionEventArgs& e)
+            {
+                cout << "Recognizing:" << e.Result->Text << std::endl;
+            });
+
+        recognizer->Recognized.Connect([](const SpeechRecognitionEventArgs& e)
+            {
+                if (e.Result->Reason == ResultReason::RecognizedSpeech)
+                {
+                    cout << "RECOGNIZED: Text=" << e.Result->Text << std::endl;
+                }
+                else if (e.Result->Reason == ResultReason::NoMatch)
+                {
+                    cout << "NOMATCH: Speech could not be recognized." << std::endl;
+                }
+            });
+
+        recognizer->Canceled.Connect([&recognitionEnd](const SpeechRecognitionCanceledEventArgs& e)
+            {
+                cout << "CANCELED: Reason=" << (int)e.Reason << std::endl;
+                if (e.Reason == CancellationReason::Error)
+                {
+                    cout << "CANCELED: ErrorCode=" << (int)e.ErrorCode << "\n"
+                        << "CANCELED: ErrorDetails=" << e.ErrorDetails << "\n"
+                        << "CANCELED: Did you update the subscription info?" << std::endl;
+
+                    recognitionEnd.set_value(); // Notify to stop recognition.
+                }
+            });
+
+        recognizer->SessionStopped.Connect([&recognitionEnd](const SessionEventArgs& e)
+            {
+                UNUSED(e);
+                cout << "Session stopped.";
+                recognitionEnd.set_value(); // Notify to stop recognition.
+            });
+
+        recognizer->StartContinuousRecognitionAsync().get();
+        recognitionEnd.get_future().get();
+        recognizer->StopContinuousRecognitionAsync().get();
+    }
+}SPXTEST_CASE_END()

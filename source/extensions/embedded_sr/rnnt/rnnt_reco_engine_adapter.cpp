@@ -272,14 +272,6 @@ void CSpxRnntRecoEngineAdapter::RnntInitialize()
     auto displayText = PAL::ToBool(properties->GetStringValue("CARBON-INTERNAL-RNNT-DisplayText", "true"));
     auto maxEndPaddingDim = std::stoul(properties->GetStringValue("CARBON-INTERNAL-RNNT-MaxEndPaddingDim", "0"));
 
-    // Default timeout settings are as follows:
-    // Decoder silence timeout = 50 frames * 30 ms per frame = 1.5 seconds
-    // Start timeout = 166 ~= 5 seconds
-    // Total audio length = 333 ~= 10 seconds
-    auto decoderInSilenceTimeout = std::stoul(properties->GetStringValue("CARBON-INTERNAL-RNNT-DecoderInSilenceTimeout", "50"));
-    auto startTimeout = std::stoul(properties->GetStringValue("CARBON-INTERNAL-RNNT-StartTimeout", "166"));
-    auto totalAudioLengthTimeout = std::stoul(properties->GetStringValue("CARBON-INTERNAL-RNNT-TotalAudioLengthTimeout", "333"));
-
     // Create the RNN-T client.
     m_rnntCallbacks = SpxCreateObjectWithSite<ISpxRnntCallbacks>("CSpxRnntCallbackWrapper", this);
     try
@@ -299,6 +291,29 @@ void CSpxRnntRecoEngineAdapter::RnntInitialize()
     SPX_IFTRUE_RETURN(m_rnntClient == nullptr);
 
     SetRnntRecoMode(properties, m_rnntClient);
+
+    unsigned long decoderInSilenceTimeout = 0;
+    unsigned long startTimeout = 0;
+    unsigned long totalAudioLengthTimeout = 0;
+
+    if (m_isInteractiveMode)
+    {
+        // Default timeout settings for single-shot reco are as follows:
+        // Decoder silence timeout = 50 frames * 30 ms per frame = 1.5 seconds
+        // Start timeout = 166 ~= 5 seconds
+        // Total audio length = 333 ~= 10 seconds
+        decoderInSilenceTimeout = std::stoul(properties->GetStringValue("CARBON-INTERNAL-RNNT-DecoderInSilenceTimeoutSingleShot", "50"));
+        startTimeout = std::stoul(properties->GetStringValue("CARBON-INTERNAL-RNNT-StartTimeoutSingleShot", "166"));
+        totalAudioLengthTimeout = std::stoul(properties->GetStringValue("CARBON-INTERNAL-RNNT-TotalAudioLengthTimeoutSingleShot", "333"));
+    }
+    else
+    {
+        // For continuous reco timeouts are disabled (zero) by default
+        decoderInSilenceTimeout = std::stoul(properties->GetStringValue("CARBON-INTERNAL-RNNT-DecoderInSilenceTimeoutContinuous", "0"));
+        startTimeout = std::stoul(properties->GetStringValue("CARBON-INTERNAL-RNNT-StartTimeoutContinuous", "0"));
+        totalAudioLengthTimeout = std::stoul(properties->GetStringValue("CARBON-INTERNAL-RNNT-TotalAudioLengthTimeoutContinuous", "0"));
+    }
+
     m_rnntClient->SetSegmentationTimeouts(decoderInSilenceTimeout, startTimeout, totalAudioLengthTimeout);
 }
 
@@ -490,6 +505,14 @@ void CSpxRnntRecoEngineAdapter::OnSpeechPhrase(const RNNT::SpeechPhraseMsg& mess
     else if ((m_isInteractiveMode && ChangeState(RnntState::WaitingForPhrase, RnntState::WaitingForTurnEnd)) ||
         (!m_isInteractiveMode && ChangeState(RnntState::WaitingForPhrase, RnntState::WaitingForPhrase)))
     {
+        // If our site has been holding bytes to replay them, tell it that it can discard.
+        auto site = GetSite();
+        auto replayer = SpxQueryInterface<ISpxAudioReplayer>(site);
+        if (nullptr != replayer)
+        {
+            replayer->ShrinkReplayBuffer(message.offset + message.duration);
+        }
+
         if (message.recognitionStatus == RNNT::RecognitionStatus::EndOfDictation)
         {
             InvokeOnSite([&](const SitePtr& site)

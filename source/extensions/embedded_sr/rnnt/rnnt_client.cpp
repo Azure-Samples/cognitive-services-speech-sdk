@@ -126,6 +126,11 @@ bool RnntFeatureReader::Forward()
     return m_endPadding <= m_maxEndPaddingDim;
 }
 
+bool RnntFeatureReader::GetAudioEnded()
+{
+    return m_audioEnded;
+}
+
 size_t RnntFeatureReader::GetChannelCount() const
 {
     return m_featDim;
@@ -364,30 +369,34 @@ void RnntClient::DecodeInternal()
     constexpr size_t BaseFeatStride = 240U;
 
     RnntFeatureReader reader(m_features, BaseFeatDim, BaseFeatStride, m_maxEndPaddingDim);
-    m_decoder->Reset(reader.GetSource());
 
-    RnntEntryPtr lastEntry;
     bool continuousReco = (m_recognitionMode != RNNT::RecognitionMode::Interactive);
 
-    while (m_decoder->Run(continuousReco, m_decoderInSilenceTimeout, m_startTimeout, m_totalAudioLengthTimeout))
-    {
-        auto nbest = m_decoder->GetNBest();
-        if (nbest->GetCount() > 0)
+    do {
+        m_decoder->Reset(reader.GetSource());
+
+        RnntEntryPtr lastEntry;
+
+        while (m_decoder->Run(false, m_decoderInSilenceTimeout, m_startTimeout, m_totalAudioLengthTimeout))
         {
-            if (!m_speechStarted.load())
+            auto nbest = m_decoder->GetNBest();
+            if (nbest->GetCount() > 0)
             {
-                FireSpeechStartEnd(true);
-            }
-            auto entry = nbest->GetEntry(0);
-            if (!lastEntry || *entry != *lastEntry)
-            {
-                FireSpeechEvent(entry, true, false);
-                lastEntry = std::move(entry);
+                if (!m_speechStarted.load())
+                {
+                    FireSpeechStartEnd(true);
+                }
+                auto entry = nbest->GetEntry(0);
+                if (!lastEntry || *entry != *lastEntry)
+                {
+                    FireSpeechEvent(entry, true, false);
+                    lastEntry = std::move(entry);
+                }
             }
         }
-    }
-    FireSpeechEvent(lastEntry, false, true);
-    FireDecodeDone();
+        FireSpeechEvent(lastEntry, false, true);
+        FireDecodeDone();
+    } while (continuousReco && !reader.GetAudioEnded());
 }
 
 void RnntClient::FireSpeechStartEnd(bool speechStarted)
