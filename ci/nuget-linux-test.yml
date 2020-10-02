@@ -63,16 +63,10 @@ jobs:
     parameters:
       imageBase: $(DOCKER_BASE)
       outvarImage: DOCKER_IMAGE
-  - bash: |
-      rm -f ./tests/test.subscriptions.regions.json
-      cp ./tests/test.defaults.json ./
-      cp ./tests/test.audio.utterances.json ./
-      cat > ./tests/test.subscriptions.regions.json <<HEREDOC
-        $(KEYS_AND_REGIONS)
-      HEREDOC
-      cp ./tests/test.subscriptions.regions.json ./
-      cp -rf ./tests/input .
-    displayName: Write Subscriptions Regions Data
+  - template: templates/generate_subscription_file.yml
+  - template: templates/copy_test_files.yml
+    parameters:
+      targetDir: ./
   - bash: |
       set -u -e -x -o pipefail
       . ci/functions.sh

@@ -1,0 +1,87 @@
+#
+# Copyright (c) Microsoft. All rights reserved.
+# Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+#
+#######################################################################################################
+# This file defines variables that are used for configuring the EsrpCodeSigning task for packages for
+# different platforms.
+#######################################################################################################
+variables:
+  SIGN_PARAMS_JAVA: |
+    [
+      {
+        "keyCode": "CP-447347-Java",
+        "operationSetCode": "JavaSign",
+        "parameters": [
+        {
+          "parameterName": "SigAlg",
+          "parameterValue": "SHA256withRSA"
+        },
+        {
+          "parameterName": "Timestamp",
+          "parameterValue": "-tsa http://sha256timestamp.ws.digicert.com/sha256/timestamp"
+        }
+        ],
+        "toolName": "sign",
+        "toolVersion": "1.0"
+      },
+      {
+        "keyCode": "CP-447347-Java",
+        "operationSetCode": "JavaVerify",
+        "parameters": [ ],
+        "toolName": "sign",
+        "toolVersion": "1.0"
+      }
+    ]
+  SIGN_PARAMS_DLL: |
+    [
+      {
+        "keyCode": "CP-230012",
+        "operationSetCode": "SigntoolSign",
+        "parameters": [
+          {
+            "parameterName": "OpusName",
+            "parameterValue": "Microsoft"
+          },
+          {
+            "parameterName": "OpusInfo",
+            "parameterValue": "http://www.microsoft.com"
+          },
+          {
+            "parameterName": "PageHash",
+            "parameterValue": "/NPH"
+          },
+          {
+            "parameterName": "FileDigest",
+            "parameterValue": "/fd sha256"
+          },
+          {
+            "parameterName": "TimeStamp",
+            "parameterValue": "/tr \"http://rfc3161.gtm.corp.microsoft.com/TSS/HttpTspServer\" /td sha256"
+          }
+        ],
+        "toolName": "signtool.exe",
+        "toolVersion": "6.2.9304.0"
+      },
+      {
+          "keyCode": "CP-230012",
+          "operationSetCode": "SigntoolVerify",
+          "parameters": [ ],
+          "toolName": "signtool.exe",
+          "toolVersion": "6.2.9304.0"
+       }
+    ]
+  SIGN_PARAMS_IOS: |
+    [
+      {
+        "keyCode": "CP-233039-Apple",
+        "operationSetCode": "iOSSdkSign"
+      }
+    ]
+  SIGN_PARAMS_MACOS: |
+    [
+      {
+        "keyCode": "CP-401337-Apple",
+        "operationSetCode": "MacAppDeveloperSign"
+      }
+    ]

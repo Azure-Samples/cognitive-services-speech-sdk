@@ -9,26 +9,20 @@ steps:
 - bash: . ci/functions.sh && vsts_setvar SPEECHSDK_RUN_TESTS false
   condition: or(failed(), canceled())
   displayName: Skip tests on build failure.
-- bash: |
-    rm -f ./tests/test.subscriptions.regions.json
-    cp ./tests/test.defaults.json ./
-    cp ./tests/test.audio.utterances.json ./
-    cat > ./tests/test.subscriptions.regions.json <<HEREDOC
-      $(KEYS_AND_REGIONS)
-    HEREDOC
-    cp ./tests/test.subscriptions.regions.json ./
-    cp -rf ./tests/input .
-  displayName: Write Subscriptions Regions Data
+- template: templates/generate_subscription_file.yml
+- template: templates/copy_test_files.yml
+  parameters:
+    targetDir: ./
 - bash: |
     set -u -e -x -o pipefail
-    . ci/functions.sh
     cp ./ci/jsonsettings.py .
+    . ci/functions.sh
     patchSample public_samples/samples/python/console
     cp tests/input/audio/*.wav public_samples/samples/python/console
   displayName: Prepare Python samples for testing (as part of python_unittests)
-  condition: eq(variables['SPEECHSDK_RUN_TESTS'], 'true')
+  condition: and(succeeded(), eq(variables['SPEECHSDK_RUN_TESTS'], 'true'))
 - bash: |
-    set -x 
+    set -x
     if [[ -n $dockerImage ]]; then
       wrapMe=(docker run --rm --workdir /csspeech --env LD_LIBRARY_PATH=/csspeech/build/lib --volume "$PWD:/csspeech" "$dockerImage")
     else

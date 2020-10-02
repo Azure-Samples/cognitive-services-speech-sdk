@@ -130,15 +130,10 @@ jobs:
     parameters:
       imageBase: $(DOCKER_BUILD_BASE)
       outvarImage: DOCKER_BUILD_IMAGE
-  - bash: |
-      rm -f ./tests/test.subscriptions.regions.json
-      cp ./tests/test.defaults.json ./bin
-      cp ./tests/test.audio.utterances.json ./bin
-      cat > ./tests/test.subscriptions.regions.json <<HEREDOC
-        $(KEYS_AND_REGIONS)
-      HEREDOC
-      cp ./tests/test.subscriptions.regions.json ./bin
-    displayName: Write Subscriptions Regions Data
+  - template: templates/generate_subscription_file.yml
+  - template: templates/copy_test_files.yml
+    parameters:
+      targetDir: ./bin
   - bash: |
       set -e -o pipefail
       docker run --rm -i --workdir /csspeech --volume "$PWD:/csspeech" $(DOCKER_BUILD_IMAGE) bash - <<"HERE_DOC"
@@ -195,11 +190,11 @@ jobs:
   - bash: |
       set -e -o pipefail
       if [[ $(SPEECHSDK_TARGET_PLATFORM) =~ Linux-(arm32|arm64) ]]; then
-        echo "Cross-Compiling!!!" 
+        echo "Cross-Compiling!!!"
         docker run --rm --workdir /csspeech --volume "$PWD:/csspeech" "$(DOCKER_BUILD_IMAGE)" \
           ci/drop/bindrop.sh $(SPEECHSDK_TARGET_PLATFORM) $(SPEECHSDK_BUILD_CONFIGURATION) _drop true
       else
-        echo "Not Cross-Compiling!!!" 
+        echo "Not Cross-Compiling!!!"
         docker run --rm --workdir /csspeech --volume "$PWD:/csspeech" "$(DOCKER_BUILD_IMAGE)" \
           ci/drop/bindrop.sh $(SPEECHSDK_TARGET_PLATFORM) $(SPEECHSDK_BUILD_CONFIGURATION) _drop false
       fi

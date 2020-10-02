@@ -88,17 +88,10 @@ jobs:
       perl ci/patch-samples-pkg.pl "$(SPEECHSDK_SEMVER2NOMETA)" public_samples
       ./ci/run-maven.sh public_samples "$(MavenRoot)"
     displayName: Build Maven-based samples
-  - bash: |
-      rm -f ./tests/test.subscriptions.regions.json
-      cp ./tests/test.defaults.json ./
-      cp ./tests/test.audio.utterances.json ./
-      cat > ./tests/test.subscriptions.regions.json <<HEREDOC
-        $(KEYS_AND_REGIONS)
-      HEREDOC
-      cp ./tests/test.subscriptions.regions.json ./
-      cp -r tests/input ./
-      cp ./ci/jsonsettings.py .
-    displayName: Write Subscriptions Regions Data
+  - template: templates/generate_subscription_file.yml
+  - template: templates/copy_test_files.yml
+    parameters:
+      targetDir: ./
   - bash: |
       set -x -e
       . ci/functions.sh

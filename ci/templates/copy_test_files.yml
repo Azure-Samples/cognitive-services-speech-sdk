@@ -1,0 +1,22 @@
+#
+# Copyright (c) Microsoft. All rights reserved.
+# Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+#
+#######################################################################################################
+# This file defines a reusable step that copies common configuration and input files used by tests to
+# the specified location. This should always be used after the files have been properly initialized
+# (see generate_subscription_file.yml)
+# TODO: This may be replacable by the built in 'CopyFiles' task
+# (https://docs.microsoft.com/azure/devops/pipelines/tasks/utility/copy-files)
+#######################################################################################################
+parameters:
+  targetDir: ''
+steps:
+- bash: |
+    set -x -e -o pipefail
+    if [ ! -d ${{parameters.targetDir }} ]; then
+      mkdir ${{ parameters.targetDir }}
+    fi
+    cp ./tests/*.json ${{ parameters.targetDir }}
+    cp -Rf ./tests/input ${{ parameters.targetDir }}
+  displayName: Copy test files

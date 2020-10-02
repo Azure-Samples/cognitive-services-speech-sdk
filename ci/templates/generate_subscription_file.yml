@@ -1,0 +1,16 @@
+#
+# Copyright (c) Microsoft. All rights reserved.
+# Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+#
+#######################################################################################################
+# This file defines a reusable step that initializes the json file with the subscriptions and regions
+# required for testing. This step depends on the availability of the variables defined in
+# subscription_vars.yml.
+#######################################################################################################
+steps:
+- task: FileTransform@1
+  inputs:
+    fileType: 'json'
+    folderPath: ./tests/
+    targetFiles: 'test.subscriptions.regions.json'
+  displayName: "Write Subscriptions Regions Data"

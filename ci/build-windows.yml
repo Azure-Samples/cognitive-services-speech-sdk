@@ -83,12 +83,7 @@ jobs:
       versionSpec: $(SPEECHSDK_NUGET_VERSION)
   - bash: ./ci/install-build-dependencies.sh
     displayName: Install build dependencies
-  - bash: |
-      rm -f ./tests/test.subscriptions.regions.json
-      cat > ./tests/test.subscriptions.regions.json <<HEREDOC
-        $(KEYS_AND_REGIONS)
-      HEREDOC
-    displayName: Write Subscriptions Regions Data
+  - template: templates/generate_subscription_file.yml
   - template: install-gstreamer-windows.yml
     parameters:
       speechsdkTargetPlatfrom: $(SPEECHSDK_TARGET_PLATFORM)

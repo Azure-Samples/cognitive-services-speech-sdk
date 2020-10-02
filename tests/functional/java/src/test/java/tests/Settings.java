@@ -253,7 +253,7 @@ public class Settings {
         try {
             rrPath = (DefaultSettingsMap.get(DefaultSettingsKeys.INPUT_DIR) + "/" + input).toString();
             File tempFile = new File(rrPath);
-            
+
             if(!tempFile.exists()) {
                 System.out.println("Android detected using base path " + System.getProperty("JsonConfigPath", "/data/local/tmp/"));
                 System.out.println("Setting rrPath to " + (System.getProperty("JsonConfigPath", "/data/local/tmp/") + "/" + input).toString());

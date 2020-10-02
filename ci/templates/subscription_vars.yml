@@ -1,0 +1,30 @@
+#
+# Copyright (c) Microsoft. All rights reserved.
+# Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+#
+#######################################################################################################
+# This file defines the variables needed to properly initialize the json file containing subscriptions
+# and regions used for testing. The variables defined in this file have to match the keys in the
+# test.subscriptions.regions.json file.
+#######################################################################################################
+variables:
+  UnifiedSpeechSubscription.Key: "$(NorthEuropeKeySkyMan)"
+  UnifiedSpeechSubscription.Region: "northeurope"
+  DialogSubscription.Key: "$(DialogSubscriptionKey)"
+  DialogSubscription.Region: "$(DialogRegion)"
+  LanguageUnderstandingSubscription.Key: "$(luis-westus-s0-201809-key1)"
+  LanguageUnderstandingSubscription.Region: "westus"
+  ConversationTranscriptionPRODSubscription.Key: "$(ConverstationTranscriptionKeyCentralUS20190509)"
+  ConversationTranscriptionPRODSubscription.Region: "centralus"
+  ConversationTranscriptionPPESubscription.Key: "$(ConverstationTranscriptionKeyWestUS220190509)"
+  ConversationTranscriptionPPESubscription.Region: "westus2"
+  ConversationTranslatorSubscription.Key: "$(Key_ConversationTranslator)"
+  ConversationTranslatorSubscription.Region: "$(Region_ConversationTranslator)"
+  CustomVoiceSubscription.Key: "$(NorthEuropeKeySkyMan)"
+  CustomVoiceSubscription.Region: "northeurope"
+  MooncakeSubscription.Key: "$(KeyChinaEast2Speech)"
+  MooncakeSubscription.Region: "chinaeast2"
+  SpeakerRecognitionSubscription.Key: "$(SpeakerRecognition-WestUS-Key)"
+  SpeakerRecognitionSubscription.Region: "westus"
+  SpeechSubscriptionWestUS.Key: "$(csspeechsdk-speech-westus-s0-201809)"
+  SpeechSubscriptionWestUS.Region: "westus"

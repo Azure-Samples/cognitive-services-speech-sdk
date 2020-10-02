@@ -49,12 +49,7 @@ jobs:
      brew unlink swig
      ./ci/install-build-dependencies.sh
     displayName: Install build dependencies
-  - bash: |
-      rm -f ./tests/test.subscriptions.regions.json
-      cat > ./tests/test.subscriptions.regions.json <<HEREDOC
-        $(KEYS_AND_REGIONS)
-      HEREDOC
-    displayName: Write Subscriptions Regions Data
+  - template: templates/generate_subscription_file.yml
   - template: get-rnnt-artifact.yml
     parameters:
       enableVariable: SPEECHSDK_ENABLE_RNNT

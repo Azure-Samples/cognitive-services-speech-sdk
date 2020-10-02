@@ -273,14 +273,7 @@ jobs:
           throw "an error occurred"
       }
     displayName: 'Downloading CompEval data'
-  - bash: |
-        set -x
-        cp ./ci/jsonsettings.py .
-        rm -f ./tests/test.subscriptions.regions.json
-        cat > ./tests/test.subscriptions.regions.json <<HEREDOC
-        $(KEYS_AND_REGIONS)
-        HEREDOC
-    displayName: Write Subscriptions Regions Data
+  - template: templates/generate_subscription_file.yml
   - task: CMake@1
     displayName: Generate solution just to populate test setting json files and make testrunner happy.
     inputs:
@@ -417,14 +410,7 @@ jobs:
   - template: get-rnnt-artifact.yml
     parameters:
       enableVariable: SPEECHSDK_ENABLE_RNNT
-  - bash: |
-      set -x
-      cp ./ci/jsonsettings.py .
-      rm -f ./tests/test.subscriptions.regions.json
-      cat > ./tests/test.subscriptions.regions.json <<HEREDOC
-        $(KEYS_AND_REGIONS)
-      HEREDOC
-    displayName: Write Subscriptions Regions Data
+  - template: templates/generate_subscription_file.yml
   - task: CMake@1
     displayName: Generate solution
     inputs:
@@ -484,16 +470,10 @@ jobs:
     name: JavaJrePackageLinuxTest
     vmImage: 'ubuntu-16.04'
     extraSteps:
-      - bash: |
-          rm -f ./tests/test.subscriptions.regions.json
-          cp ./tests/test.defaults.json ./
-          cp ./tests/test.audio.utterances.json ./
-          cat > ./tests/test.subscriptions.regions.json <<HEREDOC
-            $(KEYS_AND_REGIONS)
-          HEREDOC
-          cp ./tests/test.subscriptions.regions.json ./
-          cp -rf ./tests/input .
-        displayName: Write Subscriptions Regions Data
+      - template: templates/generate_subscription_file.yml
+      - template: templates/copy_test_files.yml
+        parameters:
+          targetDir: ./
       - bash: |
           set -u -e -o pipefail
           . ci/functions.sh
@@ -542,16 +522,10 @@ jobs:
           artifactName: macOS
           downloadPath: $(Build.ArtifactStagingDirectory)/In
           Pattern: '*.jar'
-      - bash: |
-          rm -f ./tests/test.subscriptions.regions.json
-          cp ./tests/test.defaults.json ./
-          cp ./tests/test.audio.utterances.json ./
-          cat > ./tests/test.subscriptions.regions.json <<HEREDOC
-            $(KEYS_AND_REGIONS)
-          HEREDOC
-          cp ./tests/test.subscriptions.regions.json ./
-          cp -rf ./tests/input .
-        displayName: Write Subscriptions Regions Data
+      - template: templates/generate_subscription_file.yml
+      - template: templates/copy_test_files.yml
+        parameters:
+          targetDir: ./
       - bash: |
           set -e
           . ci/functions.sh
@@ -846,12 +820,9 @@ jobs:
       cd source/extensions/remoteconversation/csharp/remoteconversation/remoteconversation
       dotnet pack --no-build --configuration release
     displayName: Create nuget package remote conversation transcription
+  - template: templates/generate_subscription_file.yml
   - bash: |
       set -e -o pipefail
-      rm -f ./tests/test.subscriptions.regions.json
-      cat > ./tests/test.subscriptions.regions.json <<HEREDOC
-        $(KEYS_AND_REGIONS)
-      HEREDOC
       cp ./tests/test.subscriptions.regions.json ./tests/functional/csharp/RemoteConversationTest/
       cp ./tests/input/audio/katiesteve.wav ./tests/functional/csharp/RemoteConversationTest/
       cd ./tests/functional/csharp/RemoteConversationTest/
@@ -972,17 +943,13 @@ jobs:
       rm -rf ~/.m2/repository/com/microsoft/cognitiveservices/speech/remoteconversation/remote-conversation/$RELEASE_SDK_VERSION_FOR_USE/remote-conversation-$RELEASE_SDK_VERSION_FOR_USE.pom
       cp -rf remote-conversation-$RELEASE_SDK_VERSION_FOR_USE.pom ~/.m2/repository/com/microsoft/cognitiveservices/speech/remoteconversation/remote-conversation/$RELEASE_SDK_VERSION_FOR_USE/remote-conversation-$RELEASE_SDK_VERSION_FOR_USE.pom
     displayName: Install remote conversation transcription package
+  - template: templates/generate_subscription_file.yml
+  - template: templates/copy_test_files.yml
+    parameters:
+      targetDir: tests/functional/java
   - bash: |
       set -e -o pipefail
       export AUDIO_DIR_PATH=$(pwd)/tests/input/audio
-            rm -f ./tests/test.subscriptions.regions.json
-      cat > ./tests/test.subscriptions.regions.json <<HEREDOC
-        $(KEYS_AND_REGIONS)
-      HEREDOC
-      cp tests/test.defaults.json tests/functional/java
-      cp tests/test.audio.utterances.json tests/functional/java
-      cp tests/test.subscriptions.regions.json tests/functional/java
-      cp -r tests/input tests/functional/java
       cd tests/functional/java
       sed -i "s/buildVersion1234/$RELEASE_SDK_VERSION_FOR_USE/g" pom.xml
       cat pom.xml
@@ -1027,12 +994,9 @@ jobs:
       itemPattern: '**/*.nupkg'
   - bash: sudo xcode-select -s /Applications/Xcode_10.3.app/Contents/Developer
     displayName: Select XCode Version 10.3
+  - template: templates/generate_subscription_file.yml
   - bash: |
       set -u -e -o pipefail
-      rm -f ./tests/test.subscriptions.regions.json
-      cat > ./tests/test.subscriptions.regions.json <<HEREDOC
-        $(KEYS_AND_REGIONS)
-      HEREDOC
       mkdir -p "tests/functional/csharp/end2end/bin/Debug/netcoreapp2.0"
       cp tests/test.defaults.json tests/functional/csharp/end2end/bin/Debug/netcoreapp2.0
       cp tests/test.audio.utterances.json tests/functional/csharp/end2end/bin/Debug/netcoreapp2.0
@@ -1329,13 +1293,7 @@ jobs:
         if not defined TOKEN echo Error acquiring token.&exit /b 1
         echo ##vso[task.setvariable variable=SPEECHSDK_SASTOKEN;issecret=true]!TOKEN!
         set TOKEN=
-  - bash: |
-      set -u -e -o pipefail
-      rm -rf ./tests/test.subscriptions.regions.json
-      cat > ./tests/test.subscriptions.regions.json << HEREDOC
-        $(KEYS_AND_REGIONS)
-      HEREDOC
-    displayName: 'Update subscriptions and regions'
+  - template: templates/generate_subscription_file.yml
   - bash: |
       set -u -e -o pipefail
       set -x
@@ -1593,13 +1551,7 @@ jobs:
     inputs:
       type: FilePath
       scriptPath: './ci/check-gcc-parse.sh'
-  - bash: |
-      cp ./ci/jsonsettings.py .
-      rm -f ./tests/test.subscriptions.regions.json
-      cat > ./tests/test.subscriptions.regions.json << HEREDOC
-        $(KEYS_AND_REGIONS)
-      HEREDOC
-    displayName: Write Subscriptions Regions Data
+  - template: templates/generate_subscription_file.yml
   - task: CMake@1
     displayName: Generate makefiles
     inputs:
@@ -1641,13 +1593,7 @@ jobs:
   pool:
     name: Hosted Ubuntu 1604
   steps:
-  - bash: |
-      cp ./ci/jsonsettings.py .
-      rm -f ./tests/test.subscriptions.regions.json
-      cat > ./tests/test.subscriptions.regions.json << HEREDOC
-      $(KEYS_AND_REGIONS)
-      HEREDOC
-    displayName: Write Subscriptions Regions Data
+  - template: templates/generate_subscription_file.yml
   - bash: |
       set -e -o pipefail
       . ci/functions.sh
@@ -1682,17 +1628,10 @@ jobs:
     displayName: Install findutils for maven script
   - bash: sudo xcode-select -s /Applications/Xcode_10.3.app/Contents/Developer
     displayName: Select XCode Version 10.3
-  - bash: |
-      set -e -o pipefail
-      rm -f ./tests/test.subscriptions.regions.json
-      cp ./tests/test.defaults.json ./
-      cp ./tests/test.audio.utterances.json ./
-      cat > ./tests/test.subscriptions.regions.json <<HEREDOC
-        $(KEYS_AND_REGIONS)
-      HEREDOC
-      cp ./tests/test.subscriptions.regions.json ./
-      cp -rf ./tests/input .
-    displayName: Write Subscriptions Regions Data
+  - template: templates/generate_subscription_file.yml
+  - template: templates/copy_test_files.yml
+    parameters:
+      targetDir: ./
   - bash: |
       set -e -o pipefail
       . ci/functions.sh
@@ -1776,16 +1715,10 @@ jobs:
     parameters:
       imageBase: oobedevpy35_ubuntu1604_x64 oobedevpy36_ubuntu1804_x64 oobedevpy38_ubuntu2004_x64 oobedevpy35_debian9_x64 oobedevpy37_debian9py37_x64 oobedevpy37_debian10_x64 oobedevpy36_centos7_x64 oobedevpy36_centos8_x64
       outvarImage: DOCKER_IMAGES
-  - bash: |
-      rm -f ./tests/test.subscriptions.regions.json
-      cp ./tests/test.defaults.json ./
-      cp ./tests/test.audio.utterances.json ./
-      cat > ./tests/test.subscriptions.regions.json <<HEREDOC
-        $(KEYS_AND_REGIONS)
-      HEREDOC
-      cp ./tests/test.subscriptions.regions.json ./
-      cp -rf ./tests/input .
-    displayName: Write Subscriptions Regions Data
+  - template: templates/generate_subscription_file.yml
+  - template: templates/copy_test_files.yml
+    parameters:
+      targetDir: ./
   - bash: |
       set -u -e -x -o pipefail
       . ci/functions.sh
@@ -1899,16 +1832,10 @@ jobs:
       #  oobedevcpp_ubuntu1604_x64 oobedevcpp_ubuntu1604_x86 TODO: THERE'S A PROBLEM WITH THESE 2 IMAGES THEY ARE FAILING THE SAMPLE TESTS
       imageBase: oobedevcpp_ubuntu1804_x64 oobedevcpp_ubuntu1804_x86 oobedevcpp_ubuntu2004_x64 oobedevcpp_debian9_x64 oobedevcpp_debian9_x86 oobedevcpp_debian10_x64 oobedevcpp_centos7_x64 oobedevcpp_centos8_x64
       outvarImage: DOCKER_IMAGES
-  - bash: |
-      rm -f ./tests/test.subscriptions.regions.json
-      cp ./tests/test.defaults.json ./
-      cp ./tests/test.audio.utterances.json ./
-      cat > ./tests/test.subscriptions.regions.json <<HEREDOC
-        $(KEYS_AND_REGIONS)
-      HEREDOC
-      cp ./tests/test.subscriptions.regions.json ./
-      cp -rf ./tests/input .
-    displayName: Write Subscriptions Regions Data
+  - template: templates/generate_subscription_file.yml
+  - template: templates/copy_test_files.yml
+    parameters:
+      targetDir: ./
   - bash: |
       cp ./ci/jsonsettings.py .
       . ci/functions.sh &&
@@ -2232,16 +2159,10 @@ jobs:
     displayName: "Run iOS unit tests"
     condition: eq(variables['SPEECHSDK_RUN_TESTS'], 'true')
     continueOnError: true
-  - bash: |
-      rm -f ./tests/test.subscriptions.regions.json
-      cp ./tests/test.defaults.json ./
-      cp ./tests/test.audio.utterances.json ./
-      cat > ./tests/test.subscriptions.regions.json <<HEREDOC
-        $(KEYS_AND_REGIONS)
-      HEREDOC
-      cp ./tests/test.subscriptions.regions.json ./
-      cp -rf ./tests/input .
-    displayName: Write Subscriptions Regions Data
+  - template: templates/generate_subscription_file.yml
+  - template: templates/copy_test_files.yml
+    parameters:
+      targetDir: ./
   - bash: |
       set -u -e -o pipefail -x
       mkdir -p "$(OutputDirectory)/logs"
