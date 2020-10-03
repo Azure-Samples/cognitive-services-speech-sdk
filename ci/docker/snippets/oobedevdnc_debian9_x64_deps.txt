@@ -11,7 +11,7 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
     wget --quiet --output-document=- https://packages.microsoft.com/config/debian/9/prod.list > /etc/apt/sources.list.d/microsoft-prod.list && \
     apt-get update --quiet || true && \
     apt-get install --quiet --yes --no-install-recommends \
-        dotnet-sdk-2.0.0 \
+        dotnet-sdk-2.1 \
         && \
     apt-get autoremove --quiet --yes && \
     rm -rf /var/lib/apt/lists/*

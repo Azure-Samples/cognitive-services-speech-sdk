@@ -49,7 +49,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
   VS_DOTNET_TARGET_FRAMEWORK_VERSION "v4.6.1"
   VS_DOTNET_REFERENCES "${END2END_TEST_REFERENCES}"
   VS_DOTNET_REFERENCE_Speech "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$(Configuration)/net461/${CSHARP_LIB}.dll"
-  VS_DOTNET_REFERENCE_TestFramework "${CMAKE_BINARY_DIR}/packages/MSTest.TestFramework.1.3.2/lib/net45/Microsoft.VisualStudio.TestPlatform.TestFramework.dll"
-  VS_DOTNET_REFERENCE_TestFrameworkExtensions "${CMAKE_BINARY_DIR}/packages/MSTest.TestFramework.1.3.2/lib/net45/Microsoft.VisualStudio.TestPlatform.TestFramework.Extensions.dll")
+  VS_DOTNET_REFERENCE_TestFramework "${CMAKE_BINARY_DIR}/packages/MSTest.TestFramework.2.1.2/lib/net45/Microsoft.VisualStudio.TestPlatform.TestFramework.dll"
+  VS_DOTNET_REFERENCE_TestFrameworkExtensions "${CMAKE_BINARY_DIR}/packages/MSTest.TestFramework.2.1.2/lib/net45/Microsoft.VisualStudio.TestPlatform.TestFramework.Extensions.dll")
 
 endif()

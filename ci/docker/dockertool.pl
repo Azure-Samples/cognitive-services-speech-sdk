@@ -216,17 +216,17 @@ my %images = (
         'builduser',
         'set_env_centos'],
   },
-  oobedevdnc20_ubuntu1604_x64 => {
-    version => 4,
-    spec => ['from-ubuntu1604-x64', aptInstallWith(qw/oobe_ubuntu1604_deps oobe_ubuntu_gstreamer_deps test_deps/), 'oobedevdnc20_ubuntu1604_version', 'oobedevdnc_ubuntu_x64_deps', 'builduser'],
+  oobedevdnc21_ubuntu1604_x64 => {
+    version => 1,
+    spec => ['from-ubuntu1604-x64', aptInstallWith(qw/oobe_ubuntu1604_deps oobe_ubuntu_gstreamer_deps test_deps/), 'oobedevdnc_ubuntu1604_version', 'oobedevdnc_ubuntu_x64_deps', 'builduser'],
   },
   oobedevdnc21_ubuntu1804_x64 => {
     version => 3,
-    spec => ['from-ubuntu1804-x64', aptInstallWith(qw/oobe_ubuntu1604_deps oobe_ubuntu_gstreamer_deps test_deps_ubuntu1804/), 'oobedevdnc21_ubuntu1804_version', 'oobedevdnc_ubuntu_x64_deps', 'builduser'],
+    spec => ['from-ubuntu1804-x64', aptInstallWith(qw/oobe_ubuntu1604_deps oobe_ubuntu_gstreamer_deps test_deps_ubuntu1804/), 'oobedevdnc_ubuntu1804_version', 'oobedevdnc_ubuntu_x64_deps', 'builduser'],
   },
   oobedevdnc21_ubuntu2004_x64 => {
     version => 1,
-    spec => ['from-ubuntu2004-x64', aptInstallWith(qw/oobe_ubuntu1804_deps oobe_ubuntu_gstreamer_deps test_deps_ubuntu1804/), 'oobedevdnc21_ubuntu2004_version', 'oobedevdnc_ubuntu_x64_deps', 'builduser'],
+    spec => ['from-ubuntu2004-x64', aptInstallWith(qw/oobe_ubuntu1804_deps oobe_ubuntu_gstreamer_deps test_deps_ubuntu1804/), 'oobedevdnc_ubuntu2004_version', 'oobedevdnc_ubuntu_x64_deps', 'builduser'],
   },
   oobedevdnc21_ubuntu1804_arm32 => { # Not used yet due to various qemu errors with dotnet
     version => 2,
@@ -250,13 +250,13 @@ my %images = (
         aptInstallWith(qw/oobe_ubuntu1804_deps oobe_ubuntu_gstreamer_deps test_deps_ubuntu1804/),
         'builduser'],
   },
-  oobedevdnc20_debian9_x64 => {
+  oobedevdnc21_debian9_x64 => {
     version => 1,
-    spec => ['from-debian9-x64', aptInstallWith(qw/oobe_debian9_deps oobe_ubuntu_gstreamer_deps test_deps/), 'oobedevdnc20_debian9_x64_deps', 'builduser'],
+    spec => ['from-debian9-x64', aptInstallWith(qw/oobe_debian9_deps oobe_ubuntu_gstreamer_deps test_deps/), 'oobedevdnc_debian9_x64_deps', 'builduser'],
   },
   oobedevdnc21_debian10_x64 => {
     version => 1,
-    spec => ['from-debian10-x64', aptInstallWith(qw/oobe_ubuntu1804_deps oobe_ubuntu_gstreamer_deps test_deps_ubuntu1804/), 'oobedevdnc21_debian10_version', 'oobedevdnc_ubuntu_x64_deps', 'builduser'],
+    spec => ['from-debian10-x64', aptInstallWith(qw/oobe_ubuntu1804_deps oobe_ubuntu_gstreamer_deps test_deps_ubuntu1804/), 'oobedevdnc_debian10_version', 'oobedevdnc_ubuntu_x64_deps', 'builduser'],
   },
   oobedevdnc21_centos8_x64 => {
     version => 4,

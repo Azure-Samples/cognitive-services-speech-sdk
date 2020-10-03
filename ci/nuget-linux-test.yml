@@ -20,13 +20,13 @@ jobs:
     maxParallel: 8
     matrix:
       Ubuntu 16.04 x64:
-        DOCKER_BASE: oobedevdnc20_ubuntu1604_x64
+        DOCKER_BASE: oobedevdnc21_ubuntu1604_x64
       Ubuntu 18.04 x64:
         DOCKER_BASE: oobedevdnc21_ubuntu1804_x64
       Ubuntu 20.04 x64:
         DOCKER_BASE: oobedevdnc21_ubuntu2004_x64
       Debian 9 x64:
-        DOCKER_BASE: oobedevdnc20_debian9_x64
+        DOCKER_BASE: oobedevdnc21_debian9_x64
       Debian 10 x64:
         DOCKER_BASE: oobedevdnc21_debian10_x64
       Microsoft Dotnet Core v2.1:
