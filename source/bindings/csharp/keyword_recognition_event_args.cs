@@ -10,7 +10,7 @@ using static Microsoft.CognitiveServices.Speech.Internal.SpxExceptionThrower;
 namespace Microsoft.CognitiveServices.Speech
 {
     /// <summary>
-    /// Class for the events emmited by the <see cref="KeywordRecognizer" />.
+    /// Class for the events emitted by the <see cref="KeywordRecognizer" />.
     /// </summary>
     public class KeywordRecognitionEventArgs: RecognitionEventArgs
     {
