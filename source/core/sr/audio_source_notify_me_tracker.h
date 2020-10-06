@@ -35,12 +35,11 @@ public:
         auto oldState = m_state;
         m_state = newState;
 
-
         auto newBytesReady = data != nullptr ? data->GetBytesReady() : 0;
         auto oldBytesReady = m_bytesReady;
         m_bytesReady = newBytesReady;
 
-        if (oldState != newState || oldBytesReady != newBytesReady)
+        if ((oldState != newState) || (oldBytesReady != newBytesReady) || (newBytesReady != 0))
         {
             OnStateChange(oldState, newState, newBytesReady);
         }
@@ -119,7 +118,7 @@ private:
 protected:
 
     State m_state { State::Idle };
-    uint64_t m_bytesReady { 0 };
+    uint64_t m_bytesReady{ 0 };
 
     std::shared_ptr<ISpxAudioSource> m_source;
     std::shared_ptr<ISpxBufferData> m_data;
