@@ -1599,7 +1599,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 var turnEndComplete = new TaskCompletionSource<int>();
 
                 List<ConnectionMessage> messages = new List<ConnectionMessage>();
-                connection.MessageReceived += (sender, e) => {
+                connection.MessageReceived += (sender, e) =>
+                {
                     messages.Add(e.Message);
                     turnEndComplete.TrySetResult(0);
                 };
@@ -1660,10 +1661,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 var turnEndComplete = new TaskCompletionSource<int>();
 
                 List<ConnectionMessage> messages = new List<ConnectionMessage>();
-                connection.MessageReceived += (sender, e) => {
+                connection.MessageReceived += (sender, e) =>
+                {
                     var turnEnd = e.Message.Path == "turn.end";
                     messages.Add(e.Message);
-                    if (turnEnd) {
+                    if (turnEnd)
+                    {
                         turnEndComplete.TrySetResult(0);
                     }
                 };
@@ -2025,7 +2028,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                  {
                      var best = e.Result.Best();
 
-                     if(e.Result.OffsetInTicks > int.MaxValue)
+                     if (e.Result.OffsetInTicks > int.MaxValue)
                      {
                          recognizedEnough.Set();
                      }
@@ -2042,7 +2045,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             var config = defaultConfig;
             config.SetProperty(PropertyId.SpeechServiceConnection_EndSilenceTimeoutMs, "5000");
-            
+
             ManualResetEvent doneEvent = new ManualResetEvent(false);
             ManualResetEvent endEvent = new ManualResetEvent(false);
             int recognized = 0;
@@ -2072,7 +2075,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 con.MessageReceived += (s, m) =>
                 {
                     Console.WriteLine($"{m.Message.Path} {m.Message.GetTextMessage()}");
-               
+
                 };
 
                 recognizer.SpeechStartDetected += (s, e) =>
@@ -2080,7 +2083,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     Console.WriteLine($"Start {e.Offset}");
 
                     startPassed &= e.Offset > lastEndOffset;
-                    
+
                     lastStartOffset = e.Offset;
                 };
 
@@ -2094,7 +2097,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     hypoPassed &= h.Offset == Convert.ToUInt64(h.Result.OffsetInTicks);
                     var json = h.Result.Properties.GetProperty(PropertyId.SpeechServiceResponse_JsonResult);
                     var jObj = (JObject)JsonConvert.DeserializeObject(json);
-                   
+
                     var jsonOffset = jObj["Offset"].Value<UInt64>();
                     hypoPassed &= h.Offset == jsonOffset;
 
@@ -2150,6 +2153,71 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 Assert.IsTrue(startPassed, "Start passed");
 
                 await recognizer.StopContinuousRecognitionAsync();
+            }
+        }
+
+        [RetryTestMethod]
+        public async Task TestEmptyFrameInPushStream()
+        {
+            var ps = AudioInputStream.CreatePushStream();
+            var audioInput = AudioConfig.FromStreamInput(ps);
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
+            {
+                var file1 = AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH];
+                var file2 = AudioUtterancesMap[AudioUtteranceKeys.COMPUTER_KEYWORD_WITH_SINGLE_UTTERANCE_1];
+                var inputSource1 = AudioDataStream.FromWavFileInput(file1.FilePath.GetRootRelativePath());
+                var inputSource2 = AudioDataStream.FromWavFileInput(file2.FilePath.GetRootRelativePath());
+
+                var cancelTCS = new TaskCompletionSource<bool>();
+                string recognition = null;
+
+                recognizer.Canceled += (s, e) =>
+                {
+                    if (e.Reason == CancellationReason.EndOfStream)
+                    {
+                        cancelTCS.TrySetResult(true);
+                    }
+                    else
+                    {
+                        cancelTCS.SetResult(false);
+                    }
+                };
+
+                recognizer.Recognized += (s, e) =>
+                {
+                    if (e.Result.Reason == ResultReason.RecognizedSpeech)
+                    {
+                        recognition = e.Result.Text;
+                    }
+                };
+
+                await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
+
+                byte[] buffer = new byte[4096];
+                while (buffer.Length == inputSource1.ReadData(buffer))
+                {
+                    ps.Write(buffer);
+                }
+                ps.Write(buffer);
+                ps.Write(Array.Empty<byte>());
+
+                SPXTEST_REQUIRE(await Task.WhenAny(cancelTCS.Task, Task.Delay(TimeSpan.FromMinutes(1))) == cancelTCS.Task, "Cancel did not happen in 1 minute");
+                SPXTEST_ARE_EQUAL(recognition, file1.Utterances[file1.NativeLanguage][0].Text);
+
+                cancelTCS = new TaskCompletionSource<bool>();
+
+                while (buffer.Length == inputSource2.ReadData(buffer))
+                {
+                    ps.Write(buffer);
+                }
+                ps.Write(buffer);
+                ps.Write(Array.Empty<byte>());
+
+                await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
+                SPXTEST_REQUIRE(await Task.WhenAny(cancelTCS.Task, Task.Delay(TimeSpan.FromMinutes(1))) == cancelTCS.Task, "Cancel did not happen in 1 minute");
+
+                SPXTEST_ARE_EQUAL(recognition, file2.Utterances[file2.NativeLanguage][0].Text);
+
             }
         }
     }

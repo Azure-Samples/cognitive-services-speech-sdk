@@ -73,7 +73,7 @@ namespace USP {
             Path("audio") // TODO ralphe: Why is this hard coded?
             .SetHeader(Constants::HEADER_STREAM_ID, std::to_string(m_streamId.load()))
             .SetHeader(Constants::HEADER_CONTENT_TYPE, contentType)
-            .SetHeader(Constants::HEADER_TIMESTAMP, audioChunk->capturedTime)
+            .SetHeader(Constants::HEADER_PRESENTATION_TIMESTAMP, audioChunk->capturedTime)
             .SetHeader(Constants::HEADER_SPEAKER_ID, audioChunk->userId);
 
         auto metricType = MetricMessageType::METRIC_MESSAGE_TYPE_INVALID;
