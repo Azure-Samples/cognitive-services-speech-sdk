@@ -4,6 +4,7 @@
 //
 
 import XCTest
+import AVFoundation
 
 class SpeechRecognitionTests: XCTestCase {
     var speechKey: String! = ""
@@ -235,7 +236,6 @@ class TranslationRecognitionTests: XCTestCase {
     }
 }
 
-
 class SpeechRecognitionEndToEndTests: XCTestCase {
     var speechKey: String! = ""
     var serviceRegion: String! = ""
@@ -385,5 +385,105 @@ class SpeechRecognitionEndToEndTests: XCTestCase {
         XCTAssertNotNil(transcription)
         let autoDetectSrcLanguageResult = SPXAutoDetectSourceLanguageResult(transcription!)
         XCTAssertEqual("", autoDetectSrcLanguageResult.language)
+    }
+}
+
+class SpeechRecognitionPullAudioStreamEndToEndTests: XCTestCase {
+    var speechKey: String! = ""
+    var serviceRegion: String! = ""
+    let timeoutInSeconds = 20.0
+    let weatherFileName = "whatstheweatherlike"
+    let weatherTextEnglish = "What's the weather like?"
+
+    var result: [String: String] = ["finalText": ""]
+    var counts: [String: Int] = ["finalResultCount": 0,
+                                 "sessionStartedCount": 0,
+                                 "sessionStoppedCount": 0]
+
+    var sessionStoppedCountPred: NSPredicate? = nil
+
+    override func setUp() {
+        super.setUp()
+        speechKey = ProcessInfo.processInfo.environment["subscriptionKey"]
+        serviceRegion = ProcessInfo.processInfo.environment["serviceRegion"]
+    }
+        
+    func testContinuousWithPullAudioStream () {
+        let filePath = Bundle.main.path(forResource: weatherFileName, ofType: "wav")
+        let targetUrl = URL(string: filePath!)
+        let audioFile = try! AVAudioFile(forReading: targetUrl!, commonFormat: .pcmFormatInt16, interleaved: false)
+        XCTAssertNotNil(audioFile)
+        let bytesPerFrame = audioFile.fileFormat.streamDescription.pointee.mBytesPerFrame
+        XCTAssertEqual(1, audioFile.fileFormat.channelCount)
+        XCTAssertEqual(16000, audioFile.fileFormat.sampleRate)
+
+        let stream: SPXPullAudioInputStream = SPXPullAudioInputStream.init(readHandler: {
+            (data:NSMutableData, size:UInt) -> Int in
+
+            let buffer = AVAudioPCMBuffer.init(pcmFormat: audioFile.fileFormat, frameCapacity: AVAudioFrameCount(size)/bytesPerFrame)
+            var success = false
+            do {
+                if buffer != nil {
+                    try audioFile.read(into: buffer!)
+                    success = true
+                } else {
+                    print("AVAudioPCMBuffer is nil")
+                }
+            } catch {
+                print("Error when reading AVAudioFile")
+            }
+
+            var nBytes = 0
+            if success {
+                nBytes = Int(buffer!.frameLength * bytesPerFrame)
+                var range: NSRange = NSRange()
+                range.location = 0
+                range.length = nBytes
+                XCTAssertEqual(1, buffer!.stride)
+                XCTAssertNotEqual(nil, buffer?.int16ChannelData)
+                data.replaceBytes(in: range, withBytes: (buffer?.int16ChannelData![0])!)
+            }
+            return nBytes
+        }) {}!
+
+        let audioConfig = SPXAudioConfiguration(streamInput: stream)
+        XCTAssertNotNil(audioConfig)
+        let speechConfig = try! SPXSpeechConfiguration(subscription:self.speechKey, region:self.serviceRegion)
+        XCTAssertNotNil(speechConfig)
+        let reco = try! SPXSpeechRecognizer(speechConfiguration: speechConfig, audioConfiguration: audioConfig!)
+        XCTAssertNotNil(reco)
+
+        reco.addRecognizedEventHandler() {[unowned self] _, evt in
+            print("received result: \(evt.result.text ?? "*no text*") with reason \(evt.result.reason)")
+            self.result["finalText"]! = evt.result.text!
+            self.counts["finalResultCount"]! += 1
+            print("counts in recog handler: \(self.counts)")
+        }
+
+        reco.addSessionStartedEventHandler() {[unowned self] _, evt in
+            self.counts["sessionStartedCount"]! += 1
+            print("counts in sessionStarted handler: \(self.counts)")
+        }
+
+        reco.addSessionStoppedEventHandler() {[unowned self] _, evt in
+            self.counts["sessionStoppedCount"]! += 1
+            print("counts in sessionStopped handler: \(self.counts)")
+        }
+
+        let sessionStoppedCountPredBlock: (Any?, [String : Any]?) -> Bool = {evaluatedObject, _ in
+            return (1 == (evaluatedObject as! SpeechRecognitionPullAudioStreamEndToEndTests).counts["sessionStoppedCount"])
+        }
+
+        sessionStoppedCountPred = NSPredicate(block: sessionStoppedCountPredBlock)
+        
+        try! reco.startContinuousRecognition()
+
+        self.expectation(for: sessionStoppedCountPred!, evaluatedWith: self, handler: nil)
+        self.waitForExpectations(timeout: timeoutInSeconds, handler: nil)
+
+        XCTAssertEqual(self.result["finalText"], self.weatherTextEnglish);
+        XCTAssertEqual(self.counts["finalResultCount"], 1);
+
+        try! reco.stopContinuousRecognition()
     }
 }

@@ -10,6 +10,7 @@
 {
     TranslationRecoSharedPtr translationRecoImpl;
     dispatch_queue_t dispatchQueue;
+    SPXAudioConfiguration *audioInputKeepAlive;
 }
 
 - (instancetype)init:(SPXSpeechTranslationConfiguration *)translationConfiguration
@@ -64,8 +65,12 @@
 {
     try {
         auto recoImpl = TranslationImpl::TranslationRecognizer::FromConfig([translationConfiguration getHandle], [audioConfiguration getHandle]);
-        if (recoImpl == nullptr)
+        if (recoImpl == nullptr) {
             return nil;
+        }
+        if (audioConfiguration) {
+            audioInputKeepAlive = audioConfiguration;
+        }
         return [self initWithImpl:recoImpl];
     }
     catch (const std::exception &e) {
@@ -124,14 +129,12 @@
 
 - (void)dealloc {
     LogDebug(@"translation recognizer object deallocated.");
-    if (!self->translationRecoImpl)
-    {
+    if (!self->translationRecoImpl) {
         NSLog(@"translationRecoImpl is nil in translation recognizer destructor");
         return;
     }
 
-    try
-    {
+    try {
         self->translationRecoImpl->SessionStarted.DisconnectAll();
         self->translationRecoImpl->SessionStopped.DisconnectAll();
         self->translationRecoImpl->SpeechStartDetected.DisconnectAll();
@@ -141,6 +144,7 @@
         self->translationRecoImpl->Canceled.DisconnectAll();
         self->translationRecoImpl->Synthesizing.DisconnectAll();
         self->translationRecoImpl.reset();
+        audioInputKeepAlive = nil;
     }
     catch (const std::exception &e) {
         NSLog(@"Exception caught in core: %s", e.what());
@@ -149,8 +153,7 @@
         auto e = SpeechImpl::Impl::ExceptionWithCallStack(hr);
         NSLog(@"Exception with error code in core: %s", e.what());
     }
-    catch (...)
-    {
+    catch (...) {
         NSLog(@"Exception caught in translation recognizer destructor");
     }
 }

@@ -9,6 +9,8 @@
 @implementation SPXAudioConfiguration
 {
     std::shared_ptr<AudioImpl::AudioConfig> audioImpl;
+    SPXAudioInputStream *inputStreamKeepAlive;
+    SPXAudioOutputStream *outputStreamKeepAlive;
 }
 
 - (instancetype)init
@@ -50,13 +52,39 @@
 
 - (instancetype)initWithStreamInput:(SPXAudioInputStream *)stream
 {
-    self = [super init];
-    self->audioImpl = AudioImpl::AudioConfig::FromStreamInput([stream getHandle]);
-    if (self->audioImpl == nullptr) {
-        NSLog(@"Unable to create audio config in core using stream input.");
-        return nil;
+    try {
+        self = [super init];
+        self->audioImpl = AudioImpl::AudioConfig::FromStreamInput([stream getHandle]);
+        if (self->audioImpl == nullptr) {
+            NSLog(@"Unable to create audio config in core using stream input.");
+            return nil;
+        }
+        self->inputStreamKeepAlive = stream;
+        return self;
     }
-    return self;
+    catch (const std::exception &e) {
+        NSLog(@"Exception caught in core: %s", e.what());
+        NSException *exception = [NSException exceptionWithName:@"SPXException"
+                                                         reason:[NSString StringWithStdString:e.what()]
+                                                       userInfo:nil];
+        [exception raise];
+    }
+    catch (const SPXHR &hr) {
+        auto e = SpeechImpl::Impl::ExceptionWithCallStack(hr);
+        NSLog(@"Exception with error code in core: %s", e.what());
+        NSException *exception = [NSException exceptionWithName:@"SPXException"
+                                                         reason:[NSString StringWithStdString:e.what()]
+                                                       userInfo:nil];
+        [exception raise];
+    }
+    catch (...) {
+        NSLog(@"%@: Exception caught.", NSStringFromSelector(_cmd));
+        NSException *exception = [NSException exceptionWithName:@"SPXException"
+                                                         reason:@"Runtime Exception"
+                                                       userInfo:nil];
+        [exception raise];
+    }
+    return nil;
 }
 
 - (instancetype)initWithDefaultSpeakerOutput
@@ -170,6 +198,7 @@
             NSLog(@"Unable to create audio config in core using stream output.");
             return nil;
         }
+        self->outputStreamKeepAlive = stream;
         return self;
     }
     catch (const std::exception &e) {
@@ -210,6 +239,18 @@
                                                code:[Util getErrorNumberFromExceptionReason:[exception reason]] userInfo:errorDict];
     }
     return nil;
+}
+
+- (void)dealloc 
+{
+    NSLog(@"Audio config object deallocated.");
+    if (!self->audioImpl) {
+        NSLog(@"audioImpl object is nil in audio config destructor");
+        return;
+    }
+
+    self->inputStreamKeepAlive = nil;
+    self->outputStreamKeepAlive = nil;
 }
 
 - (std::shared_ptr<AudioImpl::AudioConfig>)getHandle

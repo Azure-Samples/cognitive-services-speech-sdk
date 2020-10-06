@@ -10,6 +10,7 @@
 @implementation SPXSpeechSynthesizer
 {
     SpeechSynthSharedPtr speechSynthImpl;
+    SPXAudioConfiguration *audioOutputKeepAlive;
 }
 
 - (instancetype)init:(SPXSpeechConfiguration *)speechConfiguration {
@@ -68,6 +69,9 @@
         if (speechSynthImpl == nullptr)
             return nil;
         _properties = [[SpeechSynthesizerPropertyCollection alloc] initWithPropertyCollection:&speechSynthImpl->Properties from:speechSynthImpl];
+        if (audioConfiguration) {
+            audioOutputKeepAlive = audioConfiguration;
+        }
         return self;
     }
     catch (const std::exception &e) {
@@ -173,6 +177,9 @@
         if (speechSynthImpl == nullptr)
             return nil;
         _properties = [[SpeechSynthesizerPropertyCollection alloc] initWithPropertyCollection:&speechSynthImpl->Properties from:speechSynthImpl];
+        if (audioConfiguration) {
+            audioOutputKeepAlive = audioConfiguration;
+        }
         return self;
     }
     catch (const std::exception &e) {
@@ -588,6 +595,7 @@
         self->speechSynthImpl->SynthesisCanceled.DisconnectAll();
         self->speechSynthImpl->WordBoundary.DisconnectAll();
         self->speechSynthImpl.reset();
+        audioOutputKeepAlive = nil;
     }
     catch (const std::exception &e) {
         NSLog(@"Exception caught in core: %s", e.what());

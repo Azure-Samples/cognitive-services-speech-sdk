@@ -11,6 +11,7 @@
 {
     ConversationTranslatorSharedPtr translatorImpl;
     dispatch_queue_t dispatchQueue;
+    SPXAudioConfiguration *audioInputKeepAlive;    
 }
 
 - (instancetype)init
@@ -62,8 +63,12 @@
 {
     try {
         auto recoImpl = TranscriptionImpl::ConversationTranslator::FromConfig([audioConfiguration getHandle]);
-        if (recoImpl == nullptr)
+        if (recoImpl == nullptr) {
             return nil;
+        }
+        if (audioConfiguration) {
+            audioInputKeepAlive = audioConfiguration;
+        }
         return [self initWithImpl:recoImpl];
     }
     catch (const std::exception &e) {
@@ -125,13 +130,11 @@
 - (void)dealloc
 {
     LogDebug(@"Conversation translator object deallocated.");
-    if (!self->translatorImpl)
-    {
+    if (!self->translatorImpl) {
         NSLog(@"translatorImpl is nil in conversation translator destructor");
         return;
     }
-    try
-    {
+    try {
         self->translatorImpl->SessionStarted.DisconnectAll();
         self->translatorImpl->SessionStopped.DisconnectAll();
         self->translatorImpl->Transcribing.DisconnectAll();
@@ -141,6 +144,7 @@
         self->translatorImpl->ConversationExpiration.DisconnectAll();
         self->translatorImpl->ParticipantsChanged.DisconnectAll();
         self->translatorImpl.reset();
+        audioInputKeepAlive = nil;
     }
     catch (const std::exception &e) {
         NSLog(@"Exception caught in core: %s", e.what());

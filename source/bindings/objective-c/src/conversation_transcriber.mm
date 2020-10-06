@@ -11,6 +11,7 @@
 {
     ConversationTranscriberSharedPtr transcriberImpl;
     dispatch_queue_t dispatchQueue;
+    SPXAudioConfiguration *audioInputKeepAlive;
 }
 
 - (instancetype)init
@@ -62,8 +63,12 @@
 {
     try {
         auto recoImpl = TranscriptionImpl::ConversationTranscriber::FromConfig([audioConfiguration getHandle]);
-        if (recoImpl == nullptr)
+        if (recoImpl == nullptr) {
             return nil;
+        }
+        if (audioConfiguration) {
+            audioInputKeepAlive = audioConfiguration;
+        }
         return [self initWithImpl:recoImpl];
     }
     catch (const std::exception &e) {
@@ -120,13 +125,11 @@
 - (void)dealloc
 {
     LogDebug(@"Conversation transcriber object deallocated.");
-    if (!self->transcriberImpl)
-    {
+    if (!self->transcriberImpl) {
         NSLog(@"transcriberImpl is nil in conversation transcriber destructor");
         return;
     }
-    try
-    {
+    try {
         self->transcriberImpl->SessionStarted.DisconnectAll();
         self->transcriberImpl->SessionStopped.DisconnectAll();
         self->transcriberImpl->SpeechStartDetected.DisconnectAll();
@@ -135,6 +138,7 @@
         self->transcriberImpl->Transcribed.DisconnectAll();
         self->transcriberImpl->Canceled.DisconnectAll();
         self->transcriberImpl.reset();
+        audioInputKeepAlive = nil;
     }
     catch (const std::exception &e) {
         NSLog(@"Exception caught in core: %s", e.what());

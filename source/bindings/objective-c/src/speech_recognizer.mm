@@ -13,6 +13,7 @@
     dispatch_queue_t dispatchQueue;
 
     RecognizerPropertyCollection *propertyCollection;
+    SPXAudioConfiguration *audioInputKeepAlive;
 }
 
 - (instancetype)init:(SPXSpeechConfiguration *)speechConfiguration {
@@ -245,8 +246,12 @@
             else
                 recoImpl= SpeechImpl::SpeechRecognizer::FromConfig([speechConfiguration getHandle]);
         }
-        if (recoImpl == nullptr)
+        if (recoImpl == nullptr) {
             return nil;
+        }
+        if (audioConfiguration) {
+            audioInputKeepAlive = audioConfiguration;
+        }
         return [self initWithImpl:recoImpl];
     }
     catch (const std::exception &e) {
@@ -290,14 +295,12 @@
 
 - (void)dealloc {
     NSLog(@"Speech recognizer object deallocated.");
-    if (!self->speechRecoImpl)
-    {
+    if (!self->speechRecoImpl) {
         NSLog(@"speechRecoImpl is nil in speech recognizer destructor");
         return;
     }
 
-    try
-    {
+    try {
         self->speechRecoImpl->SessionStarted.DisconnectAll();
         self->speechRecoImpl->SessionStopped.DisconnectAll();
         self->speechRecoImpl->SpeechStartDetected.DisconnectAll();
@@ -306,6 +309,7 @@
         self->speechRecoImpl->Recognized.DisconnectAll();
         self->speechRecoImpl->Canceled.DisconnectAll();
         self->speechRecoImpl.reset();
+        audioInputKeepAlive = nil;
     }
     catch (const std::exception &e) {
         NSLog(@"Exception caught in core: %s", e.what());

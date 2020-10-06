@@ -11,6 +11,7 @@
 {
     IntentRecoSharedPtr intentRecoImpl;
     dispatch_queue_t dispatchQueue;
+    SPXAudioConfiguration *audioInputKeepAlive;
 }
 
 - (instancetype)init:(SPXSpeechConfiguration *)speechConfiguration
@@ -65,8 +66,12 @@
 {
     try {
         auto recoImpl = IntentImpl::IntentRecognizer::FromConfig([speechConfiguration getHandle], [audioConfiguration getHandle]);
-        if (recoImpl == nullptr)
+        if (recoImpl == nullptr) {
             return nil;
+        }
+        if (audioConfiguration) {
+            audioInputKeepAlive = audioConfiguration;
+        }
         return [self initWithImpl:recoImpl];
     }
     catch (const std::exception &e) {
@@ -125,13 +130,11 @@
 
 - (void)dealloc {
     LogDebug(@"Intent recognizer object deallocated.");
-    if (!self->intentRecoImpl)
-    {
+    if (!self->intentRecoImpl) {
         NSLog(@"intentRecoImpl is nil in intent recognizer destructor");
         return;
     }
-    try
-    {
+    try {
         self->intentRecoImpl->SessionStarted.DisconnectAll();
         self->intentRecoImpl->SessionStopped.DisconnectAll();
         self->intentRecoImpl->SpeechStartDetected.DisconnectAll();
@@ -140,6 +143,7 @@
         self->intentRecoImpl->Recognized.DisconnectAll();
         self->intentRecoImpl->Canceled.DisconnectAll();
         self->intentRecoImpl.reset();
+        audioInputKeepAlive = nil;
     }
     catch (const std::exception &e) {
         NSLog(@"Exception caught in core: %s", e.what());

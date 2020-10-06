@@ -11,14 +11,19 @@
 {
     KeywordRecoSharedPtr keywordRecoImpl;
     dispatch_queue_t dispatchQueue;
+    SPXAudioConfiguration *audioInputKeepAlive;
 }
 
 - (instancetype)init:(SPXAudioConfiguration *)audioConfiguration
 {
     try {
         auto recoImpl = KeywordImpl::KeywordRecognizer::FromConfig([audioConfiguration getHandle]);
-        if (recoImpl == nullptr)
+        if (recoImpl == nullptr) {
             return nil;
+        }
+        if (audioConfiguration) {
+            audioInputKeepAlive = audioConfiguration;
+        }
         return [self initWithImpl:recoImpl];
     }
     catch (const std::exception &e) {
@@ -77,16 +82,15 @@
 
 - (void)dealloc {
     LogDebug(@"Keyword recognizer object deallocated.");
-    if (!self->keywordRecoImpl)
-    {
+    if (!self->keywordRecoImpl) {
         NSLog(@"keywordRecoImpl is nil in keyword recognizer destructor");
         return;
     }
-    try
-    {
+    try {
         self->keywordRecoImpl->Recognized.DisconnectAll();
         self->keywordRecoImpl->Canceled.DisconnectAll();
         self->keywordRecoImpl.reset();
+        audioInputKeepAlive = nil;
     }
     catch (const std::exception &e) {
         NSLog(@"Exception caught in core: %s", e.what());
