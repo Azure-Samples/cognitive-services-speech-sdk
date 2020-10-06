@@ -11,6 +11,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
+using Microsoft.CognitiveServices.Speech.Test;
 
 namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 {

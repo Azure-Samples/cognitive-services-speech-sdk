@@ -129,7 +129,7 @@ struct Callbacks
     /**
     * A callback function that will be invoked when the connection to service is lost.
     */
-    virtual void OnDisconnected() {}
+    virtual void OnDisconnected(const std::shared_ptr<ISpxErrorInformation>&) {}
 
     virtual void OnToken(const std::string /*token*/) {}
 
@@ -177,7 +177,7 @@ public:
     inline void OnAudioOutputMetadata(const USP::AudioOutputMetadataMsg& m) final { InvokeOnSite([&](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnAudioOutputMetadata(m); }); }
     inline void OnUserMessage(const USP::UserMsg& m) final { InvokeOnSite([&](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnUserMessage(m); }); }
     inline void OnConnected() final { InvokeOnSite([&](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnConnected(); }); }
-    inline void OnDisconnected() final { InvokeOnSite([&](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnDisconnected(); }); }
+    inline void OnDisconnected(const std::shared_ptr<ISpxErrorInformation>& error) final { InvokeOnSite([&error](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnDisconnected(error); }); }
     inline void OnToken(const std::string s) final { InvokeOnSite([s](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnToken(s); }); }
     inline void OnAcknowledgedAudio(uint64_t s) final { InvokeOnSite([s](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnAcknowledgedAudio(s); }); }
 

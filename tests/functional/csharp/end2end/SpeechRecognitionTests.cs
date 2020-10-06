@@ -2004,48 +2004,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        private class ContinuousFilePullStream : PullAudioInputStreamCallback
-        {
-            FileStream fs;
-            readonly object fsLock = new object();
-
-            public ContinuousFilePullStream(string fileName)
-            {
-                Console.WriteLine("Trying to open " + fileName);
-                fs = File.OpenRead(fileName);
-            }
-
-            public override int Read(byte[] dataBuffer, uint size)
-            {
-                lock (fsLock)
-                {
-                    if (fs == null)
-                    {
-                        return 0;
-                    }
-
-                    if (fs.Read(dataBuffer, 0, (int)size) < size)
-                    {
-                        // reset the file stream.
-                        fs.Seek(0, SeekOrigin.Begin);
-                    }
-                }
-
-                return dataBuffer.Length;
-            }
-
-            public override void Close()
-            {
-                lock (fsLock)
-                {
-                    fs.Dispose();
-                    fs = null;
-                }
-
-                base.Close();
-            }
-        }
-
         [TestMethod, TestCategory(TestCategory.LongRunning)]
         public async Task WordLevelTimingsWorkForLongSpeech()
         {
@@ -2193,6 +2151,48 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 await recognizer.StopContinuousRecognitionAsync();
             }
+        }
+    }
+
+    internal class ContinuousFilePullStream : PullAudioInputStreamCallback
+    {
+        FileStream fs;
+        readonly object fsLock = new object();
+
+        public ContinuousFilePullStream(string fileName)
+        {
+            Console.WriteLine("Trying to open " + fileName);
+            fs = File.OpenRead(fileName);
+        }
+
+        public override int Read(byte[] dataBuffer, uint size)
+        {
+            lock (fsLock)
+            {
+                if (fs == null)
+                {
+                    return 0;
+                }
+
+                if (fs.Read(dataBuffer, 0, (int)size) < size)
+                {
+                    // reset the file stream.
+                    fs.Seek(0, SeekOrigin.Begin);
+                }
+            }
+
+            return dataBuffer.Length;
+        }
+
+        public override void Close()
+        {
+            lock (fsLock)
+            {
+                fs.Dispose();
+                fs = null;
+            }
+
+            base.Close();
         }
     }
 }

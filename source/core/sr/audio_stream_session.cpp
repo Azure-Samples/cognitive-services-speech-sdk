@@ -1193,18 +1193,31 @@ void CSpxAudioStreamSession::FireSessionStoppedEvent()
     FireEvent(EventType::SessionStop, nullptr, sessionIdOverride.empty() ? nullptr : sessionIdOverride.c_str());
 }
 
-void CSpxAudioStreamSession::FireConnectedEvent()
+void CSpxAudioStreamSession::AdapterConnected()
 {
-    SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::FireConnectedEvent", (void*)this);
+    SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::AdapterConnected", (void*)this);
 
     FireEvent(EventType::Connected);
 }
 
-void CSpxAudioStreamSession::FireDisconnectedEvent()
+void CSpxAudioStreamSession::AdapterDisconnected(std::shared_ptr<ISpxErrorInformation> payload)
 {
-    SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::FireDisconnectedEvent", (void*)this);
+    SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::AdapterDisconnected", (void*)this);
 
     FireEvent(EventType::Disconnected);
+
+    // There's a defensive guard on Close() to prevent it from being called while recognition is happening.
+
+    // The only conditions to check reconnect in the disconnect handler is for when the remote service closed
+    // the connection normally. Then we need to check and see if we need to reconnect.
+    // All error conditions are handled by the ::Error(...) method.
+    if (payload->GetCancellationCode() == CancellationErrorCode::ConnectionFailure  &&
+        payload->GetCategoryCode() == static_cast<int>(WebSocketError::REMOTE_CLOSED) &&
+        payload->GetStatusCode() == static_cast<int>(WebSocketDisconnectReason::Normal) &&
+        ShouldReconnect(payload))
+    {
+        StartReconnect(payload);
+    }
 }
 
 void CSpxAudioStreamSession::FireConnectionMessageReceived(const std::string& headers, const std::string& path, const uint8_t* buffer, uint32_t bufferSize, bool isBufferBinary)
@@ -1955,14 +1968,50 @@ void CSpxAudioStreamSession::CheckError(const string& errorMessage)
     }
 }
 
-void CSpxAudioStreamSession::Error(ISpxRecoEngineAdapter* adapter, ErrorPayload_Type payload)
+bool CSpxAudioStreamSession::ShouldReconnect(std::shared_ptr<ISpxErrorInformation> payload)
 {
-    // We will reset the retry counter if we are in the new phrase and we get the error.
+    // We will reset the retry counter if we have been asked to shrink the replay buffer since the last error.
     if ((m_audioBuffer != nullptr) && (static_cast<uint64_t>(m_audioBuffer->GetAbsoluteOffset()) > m_lastErrorGlobalOffset))
     {
         m_retriesDone = 0;
     }
 
+    // Retry for Continuous and SingleShot recognition where the error is retryable (the default)
+    return ((m_recoKind == RecognitionKind::Continuous
+        || m_recoKind == RecognitionKind::SingleShot)
+        && payload->GetRetryMode() == ISpxErrorInformation::RetryMode::Allowed
+        && m_retriesDone < m_numMaxRetries);
+}
+
+void CSpxAudioStreamSession::StartReconnect(std::shared_ptr<ISpxErrorInformation> payload)
+{
+    m_retriesDone++;
+
+    // The retry will be delayed by m_retryDurationMS milliseconds
+    std::this_thread::sleep_for(std::chrono::milliseconds(m_retryDurationMS));
+    if (payload->GetCancellationCode() == CancellationErrorCode::ServiceRedirectPermanent)
+    {
+        SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Endpoint), payload->GetDetails().c_str());
+    }
+
+    if (payload->GetCancellationCode() == CancellationErrorCode::ServiceRedirectTemporary)
+    {
+        SetStringValue("SPEECH-SingleUseEndpoint", payload->GetDetails().c_str());
+    }
+
+    SPX_DBG_TRACE_VERBOSE("%s: Trying to reset the engine adapter", __FUNCTION__);
+    auto finalResult = DiscardAudioUnderTransportErrors();
+    if (finalResult != nullptr)
+    {
+        FireResultEvent(GetSessionId(), finalResult);
+    }
+
+    m_lastErrorGlobalOffset = static_cast<uint64_t>(m_audioBuffer->GetAbsoluteOffset());
+    StartResetEngineAdapter();
+}
+
+void CSpxAudioStreamSession::Error(ISpxRecoEngineAdapter* adapter, std::shared_ptr<ISpxErrorInformation> payload)
+{
     if (m_sessionState == SessionState::Idle)
     {
         if (adapter != m_recoAdapter.get())
@@ -1986,35 +2035,9 @@ void CSpxAudioStreamSession::Error(ISpxRecoEngineAdapter* adapter, ErrorPayload_
             FireResultEvent(GetSessionId(), result);
         }
     }
-    // If it is a transport error, we retry in continuous mode. We retry for m_numMaxRetries for the same error offset.
-    // The retry will be delayed by m_retryDurationMS milliseconds
-    // Otherwise report the error to the user, so that he can recreate a recognizer.
-    else if ((m_recoKind == RecognitionKind::Continuous
-        || m_recoKind == RecognitionKind::SingleShot)
-        && payload->GetRetryMode() == ISpxErrorInformation::RetryMode::Allowed
-        && m_retriesDone < m_numMaxRetries)
+    else if( ShouldReconnect(payload) )
     {
-        m_retriesDone++;
-        std::this_thread::sleep_for(std::chrono::milliseconds(m_retryDurationMS));
-        if (payload->GetCancellationCode() == CancellationErrorCode::ServiceRedirectPermanent)
-        {
-            SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Endpoint), payload->GetDetails().c_str());
-        }
-
-        if (payload->GetCancellationCode() == CancellationErrorCode::ServiceRedirectTemporary)
-        {
-            SetStringValue("SPEECH-SingleUseEndpoint", payload->GetDetails().c_str());
-        }
-
-        SPX_DBG_TRACE_VERBOSE("%s: Trying to reset the engine adapter", __FUNCTION__);
-        auto finalResult = DiscardAudioUnderTransportErrors();
-        if (finalResult != nullptr)
-        {
-            FireResultEvent(GetSessionId(), finalResult);
-        }
-
-        m_lastErrorGlobalOffset = static_cast<uint64_t>(m_audioBuffer->GetAbsoluteOffset());
-        StartResetEngineAdapter();
+        StartReconnect(payload);
     }
     else if (m_recoKind == RecognitionKind::Keyword)
     {
@@ -2022,7 +2045,7 @@ void CSpxAudioStreamSession::Error(ISpxRecoEngineAdapter* adapter, ErrorPayload_
         m_adapterResetPending = true;
         SPX_DBG_TRACE_VERBOSE("%s: Reset adapter at the next recognition. We are in active keyword recognition mode, ignore error events.", __FUNCTION__);
     }
-    else
+    else // Otherwise report the error to the user, so that he can recreate a recognizer.
     {
         SPX_DBG_TRACE_VERBOSE("%s: Creating/firing ResultReason::Canceled result", __FUNCTION__);
         auto factory = SpxQueryService<ISpxRecoResultFactory>(SpxSharedPtrFromThis<ISpxSession>(this));

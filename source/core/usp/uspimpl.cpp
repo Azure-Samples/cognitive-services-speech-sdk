@@ -963,10 +963,12 @@ void Connection::Impl::OnTransportClosed(WebSocketDisconnectReason reason, const
         m_connected = false;
         LogInfo("TS:%" PRIu64 ", OnDisconnected: connection:0x%x, Reason: %d, Server Requested: %d, Details: %s",
             getTimestamp(), this, reason, serverRequested, details.c_str());
-
+        
+        auto error = ErrorInfo::FromWebSocket(serverRequested ? WebSocketError::REMOTE_CLOSED : WebSocketError::UNKNOWN, reason, details);
         auto callbacks = m_config.m_callbacks;
-        Invoke([&](auto callbacks) {
-            callbacks->OnDisconnected();
+
+        Invoke([&error](auto callbacks) {
+            callbacks->OnDisconnected(error);
         });
     }
 }
@@ -984,12 +986,12 @@ void Connection::Impl::OnTransportError(const std::shared_ptr<ISpxErrorInformati
     {
         m_connected = false;
         LogInfo("TS:%" PRIu64 ", OnDisconnected: connection:0x%x", getTimestamp(), this);
-        Invoke([&](auto callbacks) {
-            callbacks->OnDisconnected();
+        Invoke([&error](auto callbacks) {
+            callbacks->OnDisconnected(error);
         });
     }
 
-    Invoke([&](auto callbacks) {
+    Invoke([&error](auto callbacks) {
         callbacks->OnError(error);
     });
 

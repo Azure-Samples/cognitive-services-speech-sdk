@@ -183,15 +183,15 @@ public:
     void FireAdapterResult_FinalResult(ISpxRecoEngineAdapter* adapter, uint64_t offset, std::shared_ptr<ISpxRecognitionResult> result) override;
     void FireAdapterResult_ActivityReceived(ISpxRecoEngineAdapter* adapter, std::string activity, std::shared_ptr<ISpxAudioOutput> audio) final;
     void FireAdapterResult_TranslationSynthesis(ISpxRecoEngineAdapter* adapter, std::shared_ptr<ISpxRecognitionResult> result) override;
-    void FireConnectedEvent() override;
-    void FireDisconnectedEvent() override;
+    void AdapterConnected() override;
+    void AdapterDisconnected(std::shared_ptr<ISpxErrorInformation> payload) override;
     void FireConnectionMessageReceived(const std::string& headers, const std::string& path, const uint8_t* buffer, uint32_t bufferSize, bool isBufferBinary) override;
 
     void AdapterCompletedSetFormatStop(ISpxRecoEngineAdapter* /* adapter */) override { AdapterCompletedSetFormatStop(AdapterDoneProcessingAudio::Speech); }
     void AdapterRequestingAudioMute(ISpxRecoEngineAdapter* adapter, bool muteAudio) override;
 
     void AdditionalMessage(ISpxRecoEngineAdapter* adapter, uint64_t offset, AdditionalMessagePayload_Type payload) override;
-    void Error(ISpxRecoEngineAdapter* adapter, ErrorPayload_Type payload) override;
+    void Error(ISpxRecoEngineAdapter* adapter, std::shared_ptr<ISpxErrorInformation> payload) override;
 
     // --- ISpxAudioPumpSite
     void Error(const std::string& error) override;
@@ -355,6 +355,9 @@ private:
 
     template<typename T>
     void SendMessageToService(std::string&& path, T&& payload, bool alwaysSend);
+
+    bool ShouldReconnect(std::shared_ptr<ISpxErrorInformation> payload);
+    void StartReconnect(std::shared_ptr<ISpxErrorInformation> payload);
 
 private:
 

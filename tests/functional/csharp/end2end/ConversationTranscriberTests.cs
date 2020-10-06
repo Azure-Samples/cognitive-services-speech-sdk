@@ -11,6 +11,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Runtime.Serialization;
 using System.Threading;
@@ -869,6 +870,116 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
             }
         }
+
+
+        // Uses th CTS endpoint as it suppports controlling the audio connection time.
+        [RetryTestMethod]
+        public async Task TestReconnect()
+        {
+            var config = CreateCTSInRoomSpeechConfig();
+            config.OutputFormat = OutputFormat.Detailed;
+            config.SetServiceProperty("maxConnectionDurationSecs", "15", ServicePropertyChannel.UriQueryParameter);
+            config.SetProperty("SPEECH-AudioThrottleAsPercentageOfRealTime", "100");
+            
+            ContinuousFilePullStream inputStream = new ContinuousFilePullStream(AudioUtterancesMap[AudioUtteranceKeys.CONVERSATION_BETWEEN_TWO_PERSONS_ENGLISH].FilePath.GetRootRelativePath());
+
+            var audioInput = AudioConfig.FromStreamInput(inputStream, AudioStreamFormat.GetWaveFormatPCM(16000, 16, 8));
+            var meetingID = Guid.NewGuid().ToString();
+            int connectedCount = 0;
+            int disconnectedCount = 0;
+            var phrases = new Dictionary<int, string>();
+
+            TaskCompletionSource<bool> taskCompletionSource = new TaskCompletionSource<bool>();
+
+            Log("Creating conversation");
+            using (var conversation = await Conversation.CreateConversationAsync(config, meetingID))
+            {
+                Log("Creating transcriber");
+                using (var conversationTranscriber = TrackSessionId(new ConversationTranscriber(audioInput)))
+                {
+                    Log("Joining conversation");
+                    await conversationTranscriber.JoinConversationAsync(conversation);
+
+                    Log("Getting connection");
+                    var con = Connection.FromRecognizer(conversationTranscriber);
+
+                    Log("Setting up connection events");
+                    con.Connected += (s, e) =>
+                    {
+                        Log($"Connected {connectedCount++}");
+                    };
+                    con.Disconnected += (s, e) =>
+                    {
+                        Log($"Disconnected {disconnectedCount}");
+                        if (disconnectedCount++ > 3)
+                        {
+                            taskCompletionSource.SetResult(true);
+                        }
+                    };
+
+                    string canceled = string.Empty;
+
+                    Log("Setting up transcriber events");
+                    conversationTranscriber.SessionStopped += (s, e) =>
+                    {
+                        Log("Session Stopped");
+                        taskCompletionSource.TrySetResult(false);
+                    };
+
+                    conversationTranscriber.Canceled += (s, e) =>
+                    {
+                        canceled = e.ErrorDetails;
+                        if (e.Reason == CancellationReason.Error)
+                        {
+                            taskCompletionSource.TrySetResult(false);
+                        }
+                    };
+
+                    conversationTranscriber.Transcribed += (s, e) =>
+                    {
+                        Log($"Transcribed {e.Result.Text}");
+
+                        if (!phrases.ContainsKey(connectedCount))
+                        {
+                            phrases.Add(connectedCount, "");
+                        }
+
+                        phrases[connectedCount] += e.Result.Text;
+                    };
+
+                    Log("Starting transcription");
+                    await conversationTranscriber.StartTranscribingAsync().ConfigureAwait(false);
+
+                    Log("Waiting on task");
+
+                    if (await Task.WhenAny(taskCompletionSource.Task, Task.Delay(TimeSpan.FromMinutes(3))) == taskCompletionSource.Task)
+                    {
+                        SPXTEST_REQUIRE(await taskCompletionSource.Task, $"Canceled unexpecdedly {canceled}");
+                    }
+                    else
+                    {
+                        SPXTEST_REQUIRE(false, "Test timed out");
+                    }
+
+                    Log("Stopping transcription");
+                    await conversationTranscriber.StopTranscribingAsync().ConfigureAwait(false);
+
+                    GC.KeepAlive(conversation);
+                    GC.KeepAlive(con);
+
+                    Log("Verifying results");
+                    for (int i = 1; i < disconnectedCount; i++)
+                    {
+                        SPXTEST_REQUIRE(!string.IsNullOrEmpty(phrases[i]), $"Connection {i} had no non-empty phrases");
+                    }
+
+                    SPXTEST_ISTRUE(connectedCount > 2, $"Connected count {connectedCount} was not > 2");
+                    SPXTEST_ISTRUE(disconnectedCount > 2, $"Connected count {disconnectedCount} was not > 2");
+
+                }
+            }
+        }
+
     }
 
 

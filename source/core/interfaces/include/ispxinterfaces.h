@@ -805,8 +805,7 @@ class ISpxRecoEngineAdapterSite : public ISpxInterfaceBaseFor<ISpxRecoEngineAdap
 public:
     using ResultPayload_Type = std::shared_ptr<ISpxRecognitionResult>;
     using AdditionalMessagePayload_Type = void*;
-    using ErrorPayload_Type = std::shared_ptr<ISpxErrorInformation>;
-
+    
     virtual void GetScenarioCount(uint16_t* countSpeech, uint16_t* countIntent, uint16_t* countTranslation, uint16_t* countDialog, uint16_t* countTranscriber ) = 0;
 
     virtual std::list<std::string> GetListenForList() = 0;
@@ -829,8 +828,8 @@ public:
     virtual void FireAdapterResult_TranslationSynthesis(ISpxRecoEngineAdapter* adapter, ResultPayload_Type payload) = 0;
     virtual void FireAdapterResult_ActivityReceived(ISpxRecoEngineAdapter* adapter, std::string activity, std::shared_ptr<ISpxAudioOutput> audio) = 0;
     virtual void AdapterEndOfDictation(ISpxRecoEngineAdapter* adapter, uint64_t offset, uint64_t duration) = 0;
-    virtual void FireConnectedEvent() = 0;
-    virtual void FireDisconnectedEvent() = 0;
+    virtual void AdapterConnected() = 0;
+    virtual void AdapterDisconnected(std::shared_ptr<ISpxErrorInformation> payload) = 0;
     virtual void FireConnectionMessageReceived(const std::string& headers, const std::string& path, const uint8_t* buffer, uint32_t bufferSize, bool isBufferBinary) = 0;
 
     virtual void AdapterRequestingAudioMute(ISpxRecoEngineAdapter* adapter, bool mute) = 0;
@@ -838,7 +837,7 @@ public:
 
     virtual void AdditionalMessage(ISpxRecoEngineAdapter* adapter, uint64_t offset, AdditionalMessagePayload_Type payload) = 0;
 
-    virtual void Error(ISpxRecoEngineAdapter* adapter, ErrorPayload_Type payload) = 0;
+    virtual void Error(ISpxRecoEngineAdapter* adapter, std::shared_ptr<ISpxErrorInformation> payload) = 0;
 };
 
 class ISpxTtsEngineAdapterSite;

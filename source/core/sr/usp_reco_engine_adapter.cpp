@@ -421,7 +421,8 @@ void CSpxUspRecoEngineAdapter::UspTerminate()
     // Inform upper layer about disconnection.
     if ((m_uspConnection != nullptr) && m_uspConnection->IsConnected())
     {
-        OnDisconnected();
+        auto disconnectionReason = ErrorInfo::FromWebSocket(WebSocketError::UNKNOWN, WebSocketDisconnectReason::Normal);
+        OnDisconnected(disconnectionReason);
     }
 
     // Term the callbacks first and then reset/release the connection
@@ -2088,12 +2089,12 @@ void CSpxUspRecoEngineAdapter::OnUserMessage(const USP::UserMsg& msg)
 
 void CSpxUspRecoEngineAdapter::OnConnected()
 {
-    InvokeOnSite([](const SitePtr& p) { p->FireConnectedEvent(); });
+    InvokeOnSite([](const SitePtr& p) { p->AdapterConnected(); });
 }
 
-void CSpxUspRecoEngineAdapter::OnDisconnected()
+void CSpxUspRecoEngineAdapter::OnDisconnected(const std::shared_ptr<ISpxErrorInformation>& payload)
 {
-    InvokeOnSite([](const SitePtr& p) { p->FireDisconnectedEvent(); });
+    InvokeOnSite([&payload](const SitePtr& p) { p->AdapterDisconnected(payload); });
 }
 
 uint8_t* CSpxUspRecoEngineAdapter::FormatBufferWriteBytes(uint8_t* buffer, const uint8_t* source, size_t bytes)

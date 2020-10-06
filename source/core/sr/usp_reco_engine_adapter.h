@@ -151,7 +151,7 @@ private:
     void OnError(const std::shared_ptr<ISpxErrorInformation>& error) override;
     void OnUserMessage(const USP::UserMsg&) override;
     void OnConnected() override;
-    void OnDisconnected() override;
+    void OnDisconnected(const std::shared_ptr<ISpxErrorInformation>&) override;
     void OnToken(const std::string token) override;
     void OnAcknowledgedAudio(uint64_t offset) override;
 
