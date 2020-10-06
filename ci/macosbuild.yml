@@ -26,7 +26,9 @@ jobs:
     OutputDirectory: $(Build.ArtifactStagingDirectory)/$(BuildPlatform)/$(BuildConfiguration)
   steps:
   # Update bash really early so it will be picked up by "bash" steps.
-  - bash: brew config && brew install bash
+  - bash: |
+     export HOMEBREW_NO_INSTALL_CLEANUP=1
+     brew config && brew install bash
     displayName: Install modern bash
   - ${{ parameters.extraDependencyInstallSteps }}
   - bash: sudo xcode-select -s /Applications/Xcode_10.3.app/Contents/Developer
@@ -46,6 +48,7 @@ jobs:
       versionSpec: 3.7
       addToPath: true
   - bash: |
+     export HOMEBREW_NO_INSTALL_CLEANUP=1
      brew unlink swig
      ./ci/install-build-dependencies.sh
     displayName: Install build dependencies

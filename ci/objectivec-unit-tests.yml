@@ -32,7 +32,9 @@ jobs:
     OutputDirectory: $(Build.ArtifactStagingDirectory)/$(BuildPlatform)/Out/$(BuildConfiguration)
     GStreamerWrapper: GStreamerWrapper
   steps:
-  - bash: brew config && brew install bash coreutils
+  - bash: |
+      export HOMEBREW_NO_INSTALL_CLEANUP=1
+      brew config && brew install bash coreutils
     displayName: Install modern bash and coreutils
   - bash: sudo xcode-select -s /Applications/Xcode_10.3.app/Contents/Developer
     displayName: Select XCode Version 10.3

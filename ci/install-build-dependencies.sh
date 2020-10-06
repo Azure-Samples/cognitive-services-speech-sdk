@@ -83,6 +83,7 @@ case $SPEECHSDK_BUILD_AGENT_PLATFORM in
 
   OSX-x64)
     # log brew-related version information
+    export HOMEBREW_NO_INSTALL_CLEANUP=1
     brew config
     brew install pkg-config coreutils bash ninja
     # custom-install swig 3.0.12

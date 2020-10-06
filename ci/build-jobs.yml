@@ -979,7 +979,9 @@ jobs:
     name: Hosted macOS
   timeoutInMinutes: 240
   steps:
-  - bash: brew config && brew install bash
+  - bash: |
+      export HOMEBREW_NO_INSTALL_CLEANUP=1
+      brew config && brew install bash
     displayName: Install modern bash on macOS
   - bash: |
       set -x -e -o pipefail
@@ -1622,9 +1624,13 @@ jobs:
     BuildPlatform: macOSProxy
     BuildConfiguration: Release
   steps:
-  - bash: brew config && brew install bash
+  - bash: |
+      export HOMEBREW_NO_INSTALL_CLEANUP=1
+      brew config && brew install bash
     displayName: Install modern bash
-  - bash: brew install findutils
+  - bash: |
+      export HOMEBREW_NO_INSTALL_CLEANUP=1
+      brew install findutils
     displayName: Install findutils for maven script
   - bash: sudo xcode-select -s /Applications/Xcode_10.3.app/Contents/Developer
     displayName: Select XCode Version 10.3
@@ -1943,7 +1949,9 @@ jobs:
     JointCmakeArgs: -DCMAKE_BUILD_TYPE=$(BuildConfiguration) -DSPEECHSDK_BUILD_TYPE=$(SPEECHSDK_BUILD_TYPE) -DSPEECHSDK_VERSION=$(SPEECHSDK_SEMVER2NOMETA) -DCMAKE_FRAMEWORK_PATH="$(OutputDirectory);${HOME}/Library/Developer/GStreamer/iPhone.sdk/"
   steps:
   # Update bash really early so it will be picked up by "bash" steps.
-  - bash: brew config && brew install bash coreutils
+  - bash: |
+      export HOMEBREW_NO_INSTALL_CLEANUP=1
+      brew config && brew install bash coreutils
     displayName: Install modern bash and coreutils
   - bash: sudo xcode-select -s /Applications/Xcode_10.3.app/Contents/Developer
     displayName: Select XCode Version 10.3
@@ -2128,7 +2136,9 @@ jobs:
     microsoftDevTeamId: UBF8T346G9
   steps:
   # Update bash really early so it will be picked up by "bash" steps.
-  - bash: brew config && brew install bash coreutils
+  - bash: |
+      export HOMEBREW_NO_INSTALL_CLEANUP=1
+      brew config && brew install bash coreutils
     displayName: Install modern bash and coreutils
   - bash: ./ci/set-variables.sh
     displayName: Set variables
@@ -2296,7 +2306,9 @@ jobs:
     ArtifactOut: $(Build.ArtifactStagingDirectory)/Out
   steps:
   # Update bash really early so it will be picked up by "bash" steps.
-  - bash: brew config && brew install bash
+  - bash: |
+      export HOMEBREW_NO_INSTALL_CLEANUP=1
+      brew config && brew install bash
     displayName: Install modern bash
   - bash: sudo xcode-select -s /Applications/Xcode_10.3.app/Contents/Developer
     displayName: Select XCode Version 10.3
@@ -2317,6 +2329,7 @@ jobs:
   - bash: |
       set -e -o pipefail
       # log brew-related version information
+      export HOMEBREW_NO_INSTALL_CLEANUP=1
       brew config
       # install doxygen-1.8.18
       brew install https://raw.githubusercontent.com/Homebrew/homebrew-core/c68ba0a3e333c417c375c5a9c200f6ed8cc7b011/Formula/doxygen.rb

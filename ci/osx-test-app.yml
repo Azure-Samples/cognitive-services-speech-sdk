@@ -20,7 +20,9 @@ jobs:
     VersionedFrameworkName: $(FrameworkName)-$(BuildPlatform)-$(SPEECHSDK_SEMVER2NOMETA)
     OutputDirectory: $(Build.ArtifactStagingDirectory)/$(BuildPlatform)/$(BuildConfiguration)
   steps:
-  - bash: brew config && brew install bash coreutils
+  - bash: |
+      export HOMEBREW_NO_INSTALL_CLEANUP=1
+      brew config && brew install bash coreutils
     displayName: Install modern bash and coreutils
   - bash: ./ci/set-variables.sh
     displayName: Set variables
