@@ -813,61 +813,42 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-
-        [TestMethod, Ignore]
+        // This test covers sending a binary message in Rockfall project. Don't turn it off.
+        [RetryTestMethod]
         public async Task TestSendMessageAsync()
         {
-            string faceStreamUrl = "wss://transcribe.princetondev.customspeech.ai/speech/recognition/audioface";
-            var config = SpeechConfig.FromEndpoint(new Uri(faceStreamUrl), conversationTranscriptionPPEKey);
-            config.SetProperty("ConversationTranscriptionInRoomAndOnline", "true");
+            var config = CreateCTSInRoomSpeechConfig();
             //config.SetProperty(PropertyId.Speech_LogFilename, "sendMessageSync_log.txt");
-
-            ManualResetEvent transcribedEvent = new ManualResetEvent(false);
-            ManualResetEvent transcribingEvent = new ManualResetEvent(false);
+            //config.SetProxy("127.0.0.1", 8888);
 
             var meetingID = Guid.NewGuid().ToString();
-            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.CONVERSATION_BETWEEN_TWO_PERSONS_ENGLISH].FilePath.GetRootRelativePath());
+
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
             using (var conversation = await Conversation.CreateConversationAsync(config, meetingID))
             using (var conversationTranscriber = TrackSessionId(new ConversationTranscriber(audioInput)))
             {
                 await conversationTranscriber.JoinConversationAsync(conversation);
 
-                conversationTranscriber.Transcribed += (s, e) =>
-                {
-                    Console.WriteLine($"Recognized {e.Result.Text}");
-                    transcribedEvent.Set();
-                };
-
-                conversationTranscriber.Transcribing += (s, e) =>
-                {
-                    Console.WriteLine($"Recognizing {e.Result.Text}");
-                    transcribingEvent.Set();
-                };
-
-                conversationTranscriber.Canceled += (s, e) =>
-                {
-                    SPXTEST_ISTRUE(string.IsNullOrWhiteSpace(e.ErrorDetails), $"Error details were present {e.ErrorDetails}");
-                    SPXTEST_ISTRUE(e.Reason == CancellationReason.EndOfStream, $"Cancellation Reason was not EOS it was {e.Reason.ToString()} with error code ${e.ErrorCode.ToString()}");
-                    Console.WriteLine("Reached EndOfStream");
-                };
-
-                const string messageName = "face.stream";
                 var connection = Connection.FromRecognizer(conversationTranscriber);
-                // just send some binary data.
-                var fileContents = File.ReadAllBytes(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
-                await connection.SendMessageAsync(messageName, fileContents, (uint)fileContents.Length);
-                Thread.Sleep((int)10);
                 connection.MessageReceived += (s, e) =>
                 {
                     Console.WriteLine($"Message Received {e.Message}");
                 };
 
-                await conversationTranscriber.StartTranscribingAsync();
-                await conversation.AddParticipantAsync("userID@microsoft.com");
-
-                SPXTEST_ISTRUE(WaitHandle.WaitAll(new System.Threading.WaitHandle[] { transcribedEvent, transcribingEvent },
-                    TimeSpan.FromSeconds(300)), "Events were not received in time");
-
+                // Sending some binary data so that we can verify we can send binary data out.
+                var fileContents = File.ReadAllBytes(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
+                bool threw = false;
+                try
+                {
+                    const string messageName = "speech.datachannel";
+                    await connection.SendMessageAsync(messageName, fileContents, (uint)fileContents.Length);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine($"Catch exception: {e.Message}");
+                    threw = true;
+                }
+                SPXTEST_ISFALSE(threw);
             }
         }
 

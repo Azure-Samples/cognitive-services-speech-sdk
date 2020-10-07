@@ -158,7 +158,7 @@ namespace USP {
         /// <summary>
         /// Gets the telemetry type of the web socket message
         /// </summary>
-        /// <returns>The message type</returns>
+        /// <returns>Reference to this instance</returns>
         Message& MetricMessageType(USP::MetricMessageType metricType);
 
         /// <summary>
@@ -174,6 +174,13 @@ namespace USP {
         uint8_t FrameType() const override;
 
         /// <summary>
+        /// Set a promise that will signal when the message is being sent.
+        /// </summary>
+        /// <param name="messageSendPromise">The promise from the caller</param>
+        /// <returns>Reference to this instance</returns>
+        Message& SetMessageSentPromise(const std::shared_ptr<std::promise<bool>>& messageSendPromise);
+
+        /// <summary>
         /// Serializes this USP message
         /// </summary>
         /// <param name="buffer">The buffer instantiate and serialize to</param>
@@ -181,16 +188,16 @@ namespace USP {
         size_t Serialize(std::shared_ptr<uint8_t>& buffer) override;
 
         /// <summary>
-        /// Get the future that is completed when the message has been sent
-        /// </summary>
-        /// <returns>The future. A true result indicates success, false indicates failure</returns>
-        std::future<bool> MessageSent() override;
-
-        /// <summary>
         /// Sets that the message has been sent
         /// </summary>
         /// <param>True if the message was sent successfully, false otherwise</param>
-        void MessageSent(bool success) override;
+        void SetMessageSent(bool success) override;
+
+        /// <summary>
+        /// Sets an exception when sending the message.
+        /// </summary>
+        /// <param>The exception when sending the message.</param>
+        void SetMessageSentException(std::exception_ptr eptr) override;
 
     protected:
         Message(bool isBinary, const std::string& path, USP::MessageType messageType, const std::string& requestId);
@@ -207,7 +214,7 @@ namespace USP {
         std::unordered_map<std::string, std::string> m_headers;
         USP::MessageType m_msgType;
         USP::MetricMessageType m_metricType;
-        std::promise<bool> m_messageSent;
+        std::shared_ptr<std::promise<bool>> m_messageSent;
     };
 
 }}}}

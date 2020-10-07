@@ -41,7 +41,7 @@ std::shared_ptr<SpeechConfig> CreateSpeechConfigForCTSInRoom(
 
     // this is the clue for Carbon to tell go to CTSInRoom service by using CSpxParticipantMgrImpl.
     config->SetProperty("ConversationTranscriptionInRoomAndOnline", "true");
-    
+
     config->SetServiceProperty("TrafficType", trafficType, ServicePropertyChannel::UriQueryParameter);
     return config;
 }

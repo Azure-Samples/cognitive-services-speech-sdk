@@ -38,7 +38,7 @@ namespace USP {
         METRIC_TRANSPORT_STATE_CANCELLED = 8,
         METRIC_TRANSPORT_STATE_RESET = 9
     };
-    
+
     /// <summary>
     /// The interface for web socket messages
     /// </summary>
@@ -75,16 +75,16 @@ namespace USP {
         virtual size_t Serialize(std::shared_ptr<uint8_t>& buffer) = 0;
 
         /// <summary>
-        /// Get the future that is completed when the message has been sent
-        /// </summary>
-        /// <returns>The future. A true result indicates success, false indicates failure</returns>
-        virtual std::future<bool> MessageSent() = 0;
-
-        /// <summary>
         /// Sets that the message has been sent
         /// </summary>
         /// <param>True if the message was sent successfully, false otherwise</param>
-        virtual void MessageSent(bool success) = 0;
+        virtual void SetMessageSent(bool success) = 0;
+
+        /// <summary>
+        /// Sets an exception when sending the message.
+        /// </summary>
+        /// <param>The exception when sending the message.</param>
+        virtual void SetMessageSentException(std::exception_ptr eptr) = 0;
 
         /// <summary>
         /// Constructor

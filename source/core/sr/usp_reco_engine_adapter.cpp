@@ -200,7 +200,7 @@ USP::MessageType CSpxUspRecoEngineAdapter::GetMessageType(const std::string& pat
     return m_message_name_to_type_map.find(path) == m_message_name_to_type_map.end() ? USP::MessageType::Unknown : m_message_name_to_type_map[path];
 }
 
-std::future<bool> CSpxUspRecoEngineAdapter::SendNetworkMessage(std::string&& path, std::string&& payload)
+void CSpxUspRecoEngineAdapter::SendNetworkMessage(std::string&& path, std::string&& payload, const std::shared_ptr<std::promise<bool>>& pr)
 {
     // Establish the connection to service.
     EnsureUspInit();
@@ -210,12 +210,15 @@ std::future<bool> CSpxUspRecoEngineAdapter::SendNetworkMessage(std::string&& pat
     {
         std::string error_message{ "Invalid state in USP adapter when sending " };
         error_message += path;
-        return GetFalseFuture();
+        return;
     }
-    return UspSendMessage(path, payload, GetMessageType(path));
+
+    auto message = std::make_unique<USP::TextMessage>(move(payload), path, GetMessageType(path));
+    message->SetMessageSentPromise(pr);
+    return UspSendMessage(move(message));
 }
 
-std::future<bool> CSpxUspRecoEngineAdapter::SendNetworkMessage(std::string&& path, std::vector<uint8_t>&& payload)
+void CSpxUspRecoEngineAdapter::SendNetworkMessage(std::string&& path, std::vector<uint8_t>&& payload, const std::shared_ptr<std::promise<bool>>& pr)
 {
     // Establish the connection to service.
     EnsureUspInit();
@@ -225,8 +228,9 @@ std::future<bool> CSpxUspRecoEngineAdapter::SendNetworkMessage(std::string&& pat
     {
         ThrowRuntimeError("No usp connection.");
     }
-
-    return UspSendMessage(std::make_unique<USP::BinaryMessage>(move(payload), path, GetMessageType(path)));
+    auto message = std::make_unique<USP::BinaryMessage>(move(payload), path, GetMessageType(path));
+    message->SetMessageSentPromise(pr);
+    return UspSendMessage(move(message));
 }
 
 void CSpxUspRecoEngineAdapter::SetFormat(const SPXWAVEFORMATEX* pformat)
@@ -1144,13 +1148,13 @@ void CSpxUspRecoEngineAdapter::UspSendSpeechContext()
     }
  }
 
-std::future<bool> CSpxUspRecoEngineAdapter::UspSendMessage(const std::string& messagePath, const std::string &buffer, USP::MessageType messageType)
+void CSpxUspRecoEngineAdapter::UspSendMessage(const std::string& messagePath, const std::string &buffer, USP::MessageType messageType)
 {
     SPX_DBG_TRACE_VERBOSE("%s='%s'", messagePath.c_str(), buffer.c_str());
     return UspSendMessage(std::make_unique<USP::TextMessage>(buffer, messagePath, messageType));
 }
 
-std::future<bool> CSpxUspRecoEngineAdapter::UspSendMessage(std::unique_ptr<USP::Message> message)
+void CSpxUspRecoEngineAdapter::UspSendMessage(std::unique_ptr<USP::Message> message)
 {
     SPX_DBG_ASSERT(m_uspConnection != nullptr || IsState(UspState::Terminating) || IsState(UspState::Zombie));
     if (IsBadState() || m_uspConnection == nullptr)
@@ -1163,21 +1167,9 @@ std::future<bool> CSpxUspRecoEngineAdapter::UspSendMessage(std::unique_ptr<USP::
         });
         SPX_TRACE_ERROR("no connection established or in bad USP state. m_uspConnection %s nullptr, m_uspState:%d.", m_uspConnection == nullptr ? "is" : "is not", m_uspState);
 
-        return GetFalseFuture();
+        return;
     }
-
-    auto future = message->MessageSent();
-    m_uspConnection->SendMessage(move(message));
-    return future;
-}
-
-std::future<bool> CSpxUspRecoEngineAdapter::GetFalseFuture()
-{
-    promise<bool> promiseForTheMessage;
-    future<bool> future = promiseForTheMessage.get_future();
-    // false for not sending the message.
-    promiseForTheMessage.set_value(false);
-    return future;
+    return m_uspConnection->SendMessage(move(message));
 }
 
 //

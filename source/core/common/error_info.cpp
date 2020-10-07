@@ -133,7 +133,11 @@ namespace Microsoft { namespace CognitiveServices { namespace Speech { namespace
                 << statusCode << ".";
             break;
           case WebSocketError::UNKNOWN:
-            msg << "Unknown transport error.";
+            msg << "Unknown transport error. ";
+            if (!messageBody.empty())
+            {
+                msg << "Error details: " << messageBody;
+            }
             break;
         }
         break;

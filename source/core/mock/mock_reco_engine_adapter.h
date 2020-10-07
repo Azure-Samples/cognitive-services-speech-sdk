@@ -41,8 +41,8 @@ public:
 
     // --- ISpxRecoEngineAdapter
     void SetAdapterMode(bool singleShot) override;
-    std::future<bool> SendNetworkMessage(std::string&&, std::string&&) override { std::future<bool> f; return f;}
-    std::future<bool> SendNetworkMessage(std::string&&, std::vector<uint8_t>&&) override { std::future<bool> f; return f; }
+    void SendNetworkMessage(std::string&&, std::string&&, const std::shared_ptr<std::promise<bool>>&) override { return; }
+    void SendNetworkMessage(std::string&&, std::vector<uint8_t>&&, const std::shared_ptr<std::promise<bool>>&) override { return; }
 
     // --- ISpxAudioProcessor
     void SetFormat(const SPXWAVEFORMATEX* pformat) override;

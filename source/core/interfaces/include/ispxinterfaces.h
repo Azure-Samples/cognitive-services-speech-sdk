@@ -792,12 +792,8 @@ public:
 
     virtual void WriteTelemetryLatency(uint64_t, bool) {};
     virtual void SendSpeechEventMessage(std::string&&) {};
-    virtual std::future<bool> SendNetworkMessage(std::string&&, std::string&&) {
-        std::promise<bool> p; p.set_value(false); return p.get_future();
-    }
-    virtual std::future<bool> SendNetworkMessage(std::string&&, std::vector<uint8_t>&&) {
-        std::promise<bool> p; p.set_value(false); return p.get_future();
-    }
+    virtual void SendNetworkMessage(std::string&&, std::string&&, const std::shared_ptr<std::promise<bool>>& ) {}
+    virtual void SendNetworkMessage(std::string&&, std::vector<uint8_t>&&, const std::shared_ptr<std::promise<bool>>&) {}
 };
 
 class ISpxRecoEngineAdapterSite : public ISpxInterfaceBaseFor<ISpxRecoEngineAdapterSite>

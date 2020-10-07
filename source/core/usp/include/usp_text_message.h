@@ -83,7 +83,7 @@ namespace USP {
         /// </summary>
         /// <returns>The string data content</returns>
         const std::string& Data() const;
-    
+
     protected:
         virtual size_t GetDataSize() const override;
         virtual size_t WriteData(uint8_t* buffer, const size_t bufferSize) const override;

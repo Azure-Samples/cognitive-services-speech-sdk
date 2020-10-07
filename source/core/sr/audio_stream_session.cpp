@@ -3025,61 +3025,45 @@ template<typename T>
 void CSpxAudioStreamSession::SendMessageToService(std::string&& path, T&& payload, bool alwaysSend)
 {
     SPX_DBG_TRACE_SCOPE("SendMessageToService", "SendMessageToService");
+
     auto keepAlive = SpxSharedPtrFromThis<ISpxSession>(this);
-    std::future<bool> message_is_sent;
-    auto task = CreateTask([this, keepAlive, path, payload, alwaysSend, &message_is_sent]() mutable {
-        // alwaysSend is set to true by default. It is only set to false in CSpxTranslationRecognizer::UpdateTargetLanguages.
-        // This is because CSpxTranslationRecognizer::UpdateTargetLanguages can be called before streaming audio and
-        // core throws a "reco mode" not set exception due to reco mode is only set after start streaming data. Adding "alwaysSend||IsStreaming" if statement to avoid the exception.
+
+    std::shared_ptr<std::promise<bool>> messageSentPromise = std::make_shared<std::promise<bool>>();
+    auto messageSentFuture = messageSentPromise->get_future();
+    bool sent = false;
+    auto task = CreateTask([this, keepAlive, &sent, alwaysSend, path, payload, &messageSentPromise]() mutable {
+
+       // alwaysSend is set to true by default. It is only set to false in CSpxTranslationRecognizer::UpdateTargetLanguages.
+       // This is because CSpxTranslationRecognizer::UpdateTargetLanguages can be called before streaming audio and
+       // core throws a "reco mode" not set exception due to reco mode is only set after start streaming data. Adding "alwaysSend||IsStreaming" if statement to avoid the exception.
         if (alwaysSend || IsStreaming())
         {
             EnsureInitRecoEngineAdapter();
-            message_is_sent = m_recoAdapter->SendNetworkMessage(std::move(path), std::move(payload));
+            m_recoAdapter->SendNetworkMessage(std::move(path), std::move(payload), messageSentPromise);
+            sent = true;
         }
-        });
+     });
 
     m_threadService->ExecuteSync(move(task));
 
-    auto status = std::future_status::timeout;
-
-    // if we bypass sending the message, no point in waiting its result.
-    if (!message_is_sent.valid())
+    if (!sent)
     {
         return;
     }
 
-    try
-    {
-        // wait for maximum 90 seconds for the message to be sent over socket.
-        constexpr std::chrono::seconds timeout = std::chrono::seconds(90);
-        status = message_is_sent.wait_for(timeout);
-    }
-    catch (const std::future_error& e)
-    {
-        std::string msg{ "SendNetworkMessage error in sending '" };
-        msg += path;
-        msg += "' The future error is ";
-        msg += e.what();
-
-        ThrowRuntimeError(msg);
-    }
-    catch (...)
-    {
-    }
+    auto status = std::future_status::timeout;
+    // wait for maximum 90 seconds for the message to be sent over socket.
+    constexpr std::chrono::seconds timeout = 90s;
+    status = messageSentFuture.wait_for(timeout);
 
     if (status != std::future_status::ready)
     {
-        std::string message{ "Timeout waiting for SendMessageAsync to be done for " };
-        message += path;
-        ThrowRuntimeError(message);
+        SPX_THROW_HR(SPXERR_TIMEOUT);
     }
 
-    if (false == message_is_sent.get())
+    if(false == messageSentFuture.get())
     {
-        std::string message{ "Message " };
-        message += path;
-        message += "is not sent.";
-        ThrowRuntimeError(message);
+        ThrowRuntimeError({ std::string("Message ") + path + " is not sent."});
     }
 }
 

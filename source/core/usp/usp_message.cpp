@@ -278,14 +278,28 @@ namespace USP {
         return offset;
     }
 
-    std::future<bool> Message::MessageSent()
+    Message& Message::SetMessageSentPromise(const std::shared_ptr<std::promise<bool>>& messageSendPromise)
     {
-        return m_messageSent.get_future();
+        m_messageSent = messageSendPromise;
+        return *this;
     }
 
-    void Message::MessageSent(bool success)
+    void Message::SetMessageSent(bool success)
     {
-        m_messageSent.set_value(success);
+        auto messagePromise = m_messageSent;
+        if (messagePromise)
+        {
+            messagePromise->set_value(success);
+        }
+    }
+
+    void Message::SetMessageSentException(std::exception_ptr eptr)
+    {
+        auto messagePromise = m_messageSent;
+        if (messagePromise)
+        {
+            messagePromise->set_exception(eptr);
+        }
     }
 
     Message::Message(bool isBinary, const std::string& path, USP::MessageType messageType, const std::string& requestId) :
@@ -293,8 +307,7 @@ namespace USP {
         m_timestamp(),
         m_headers(),
         m_msgType(messageType),
-        m_metricType(USP::MetricMessageType::METRIC_MESSAGE_TYPE_INVALID),
-        m_messageSent()
+        m_metricType(USP::MetricMessageType::METRIC_MESSAGE_TYPE_INVALID)
     {
         Timestamp(std::chrono::system_clock::now());
 

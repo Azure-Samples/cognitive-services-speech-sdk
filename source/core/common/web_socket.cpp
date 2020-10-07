@@ -60,8 +60,24 @@ namespace USP {
         USP::MetricMessageType MetricMessageType() const override { return m_metricType; }
         uint8_t FrameType() const override { return m_frameType; }
         size_t Size() const override { return m_size; }
-        std::future<bool> MessageSent() override { return m_messageSent.get_future(); }
-        void MessageSent(bool success) override { m_messageSent.set_value(success); }
+
+        void SetMessageSent(bool success) override
+        {
+            auto messageSentPromise = m_messageSent;
+            if (messageSentPromise)
+            {
+                messageSentPromise->set_value(success);
+            }
+        }
+
+        void SetMessageSentException(std::exception_ptr eptr) override
+        {
+            auto messageSentPromise = m_messageSent;
+            if (messageSentPromise)
+            {
+                messageSentPromise->set_exception(eptr);
+            }
+        }
 
         size_t Serialize(std::shared_ptr<uint8_t>& buffer) override
         {
@@ -74,7 +90,7 @@ namespace USP {
         uint8_t m_frameType;
         size_t m_size;
         std::shared_ptr<uint8_t> m_buffer;
-        std::promise<bool> m_messageSent;
+        std::shared_ptr<std::promise<bool>> m_messageSent;
     };
 
     struct BoundMessage
@@ -538,7 +554,16 @@ namespace USP {
 
         // get the serialized buffer of data to send
         auto boundMessage = std::make_unique<BoundMessage>(std::move(message), shared_from_this());
-        size_t bytes = boundMessage->message->Serialize(boundMessage->buffer);
+        size_t bytes = 0;
+        try
+        {
+            bytes = boundMessage->message->Serialize(boundMessage->buffer);
+        }
+        catch (const std::exception&)
+        {
+            boundMessage->message->SetMessageSentException(std::current_exception());
+            return err;
+        }
 
         // TODO: This does not handle breaking up large payloads into multiple chunks
         err = uws_client_send_frame_async(
@@ -624,7 +649,7 @@ namespace USP {
             MetricsTransportStateEnd(msgType);
         }
 
-        packet->MessageSent(result == WS_SEND_FRAME_OK);
+        packet->SetMessageSent(result == WS_SEND_FRAME_OK);
     }
 
     void WebSocket::WorkLoop(weak_ptr<WebSocket> weakPtr)

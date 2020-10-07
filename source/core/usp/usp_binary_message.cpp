@@ -86,7 +86,8 @@ namespace USP {
             bytesToWrite = bufferSize;
         }
 
-        std::memcpy(buffer, Data(), bytesToWrite);
+        const uint8_t* ptr = m_dataVector.size()?m_dataVector.data():Data();
+        std::memcpy(buffer, ptr, bytesToWrite);
         return bytesToWrite;
     }
 
