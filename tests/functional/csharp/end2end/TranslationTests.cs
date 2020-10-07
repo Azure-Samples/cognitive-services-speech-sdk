@@ -434,6 +434,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             SPXTEST_ARE_EQUAL(NoMatchReason.InitialSilenceTimeout, noMatch.Reason);
         }
 
+        [Ignore]
         [RetryTestMethod]
         public async Task TranslationFromCatalanToGerman()
         {

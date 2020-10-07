@@ -191,7 +191,8 @@ private:
                 if (s == L"<eosNoop>" ||
                     s == L"<eosNoopLast>" ||
                     s == L"<eosNoopNodup>" ||
-                    s == L"<eosNoopNodupLast>")
+                    s == L"<eosNoopNodupLast>" ||
+                    s == L"<EOS>")
                 {
                     SPX_THROW_HR_IF(SPXERR_UNSUPPORTED_FORMAT, m_tokenDefs.m_noopToken != (uint32_t)-1);
                     m_tokenDefs.m_noopToken = (uint32_t)m_tokens.size();
@@ -204,7 +205,8 @@ private:
                     s == L"<eosNoopNodup>" ||
                     s == L"<eosNoopNodupLast>" ||
                     s == L"<eosNodup>" ||
-                    s == L"<eosNodupLast>")
+                    s == L"<eosNodupLast>" ||
+                    s == L"<EOS>")
                 {
                     SPX_THROW_HR_IF(SPXERR_UNSUPPORTED_FORMAT, m_tokenDefs.m_nodupToken != (uint32_t)-1);
                     m_tokenDefs.m_nodupToken = (uint32_t)m_tokens.size();

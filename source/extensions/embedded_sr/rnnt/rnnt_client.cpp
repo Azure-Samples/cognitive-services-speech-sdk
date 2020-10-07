@@ -109,25 +109,19 @@ bool RnntFeatureReader::Forward()
         cnt = m_stride;
     }
 
-    size_t read = 0U;
-    if (!m_audioEnded)
-    {
-        read = ReadSource(m_source, &m_buf[offset], cnt, m_channels);
-        if (read < cnt)
-        {
-            m_audioEnded = true;
-        }
-    }
+    size_t read = ReadSource(m_source, &m_buf[offset], cnt, m_channels);
     if (read != cnt)
     {
         m_endPadding += cnt - read;
     }
+    m_audioEnded = m_endPadding > m_maxEndPaddingDim;
 
-    return m_endPadding <= m_maxEndPaddingDim;
+    return !m_audioEnded;
 }
 
 bool RnntFeatureReader::GetAudioEnded()
 {
+    SPX_DBG_TRACE_VERBOSE("%s: m_audioEnded %d", __FUNCTION__, m_audioEnded);
     return m_audioEnded;
 }
 
@@ -377,8 +371,12 @@ void RnntClient::DecodeInternal()
 
         RnntEntryPtr lastEntry;
 
-        while (m_decoder->Run(false, m_decoderInSilenceTimeout, m_startTimeout, m_totalAudioLengthTimeout))
-        {
+        // Run a single recognition until a phrase detected (end of segmentation, EOS) or end of audio
+        bool notDone = false;
+
+        do {
+            notDone = m_decoder->Run(false, m_decoderInSilenceTimeout, m_startTimeout, m_totalAudioLengthTimeout);
+
             auto nbest = m_decoder->GetNBest();
             if (nbest->GetCount() > 0)
             {
@@ -393,7 +391,8 @@ void RnntClient::DecodeInternal()
                     lastEntry = std::move(entry);
                 }
             }
-        }
+        } while (notDone);
+
         FireSpeechEvent(lastEntry, false, true);
         FireDecodeDone();
     } while (continuousReco && !reader.GetAudioEnded());
@@ -457,8 +456,8 @@ void RnntClient::FireDecodeDone()
 {
     std::packaged_task<void()> task([this]()
     {
-        m_callback->OnTurnEnd();
         m_turnStarted.clear();
+        m_callback->OnTurnEnd();
     });
     m_threadService->ExecuteAsync(std::move(task), Impl::ISpxThreadService::Affinity::Background);
 }

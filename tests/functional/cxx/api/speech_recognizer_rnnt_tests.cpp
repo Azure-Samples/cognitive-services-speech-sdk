@@ -32,7 +32,7 @@ SPXTEST_CASE_BEGIN("Offline continuous recognition with RNN-T using file input",
             ConnectCallbacks(recognizer.get(), result);
             recognizer->StartContinuousRecognitionAsync().get();
 
-            WaitForResult(result->ready.get_future(), 10 * WAIT_FOR_RECO_RESULT_TIME);
+            WaitForResult(result->ready.get_future(), WAIT_FOR_RECO_RESULT_TIME);
             recognizer->StopContinuousRecognitionAsync().get();
 
             INFO(GetText(result->phrases));
@@ -67,7 +67,7 @@ SPXTEST_CASE_BEGIN("Offline continuous recognition with RNN-T using push stream 
             PushData(pushStream.get(), ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
             recognizer->StartContinuousRecognitionAsync().get();
 
-            WaitForResult(result->ready.get_future(), 10 * WAIT_FOR_RECO_RESULT_TIME);
+            WaitForResult(result->ready.get_future(), WAIT_FOR_RECO_RESULT_TIME);
             recognizer->StopContinuousRecognitionAsync().get();
 
             INFO(GetText(result->phrases));
@@ -101,7 +101,7 @@ SPXTEST_CASE_BEGIN("Offline continuous recognition with RNN-T using pull stream 
             ConnectCallbacks(recognizer.get(), result);
             recognizer->StartContinuousRecognitionAsync().get();
 
-            WaitForResult(result->ready.get_future(), 10 * WAIT_FOR_RECO_RESULT_TIME);
+            WaitForResult(result->ready.get_future(), WAIT_FOR_RECO_RESULT_TIME);
             recognizer->StopContinuousRecognitionAsync().get();
 
             INFO(GetText(result->phrases));
@@ -158,13 +158,12 @@ SPXTEST_CASE_BEGIN("Offline single recognition with RNN-T and offline TTS", "[ap
     }
 }SPXTEST_CASE_END()
 
-// Requires an updated test model
-SPXTEST_CASE_BEGIN("Offline continuous recognition with RNN-T and early stop", "[.][api][cxx][rnnt]")
+SPXTEST_CASE_BEGIN("Offline continuous recognition with RNN-T and early stop", "[api][cxx][rnnt]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
     UseMocks(false);
-    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(MULTIPLE_UTTERANCE_ENGLISH)));
+    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_MULTIPLE_TURNS)));
 
     auto config = CurrentSpeechConfig(SpxGetTestTrafficType(__FILE__, __LINE__));
     UseOfflineRnnt(config);
@@ -175,7 +174,7 @@ SPXTEST_CASE_BEGIN("Offline continuous recognition with RNN-T and early stop", "
 
         for (int i = 0; i < numLoops; i++)
         {
-            auto audioInput = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(MULTIPLE_UTTERANCE_ENGLISH));
+            auto audioInput = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_MULTIPLE_TURNS));
             auto recognizer = SpeechRecognizer::FromConfig(config, audioInput);
 
             promise<void> recognitionEnd;
@@ -184,6 +183,8 @@ SPXTEST_CASE_BEGIN("Offline continuous recognition with RNN-T and early stop", "
             {
                 if (e.Result->Reason == ResultReason::RecognizedSpeech)
                 {
+                    SPXTEST_REQUIRE(MatchText(AudioUtterancesMap[SINGLE_UTTERANCE_MULTIPLE_TURNS].Utterances["en-US"][0].Text, e.Result->Text));
+
                     recognitionEnd.set_value(); // Stop recognition after the first phrase
                 }
             });
@@ -195,7 +196,7 @@ SPXTEST_CASE_BEGIN("Offline continuous recognition with RNN-T and early stop", "
     }
 }SPXTEST_CASE_END()
 
-// For manual testing, requires an updated test model
+// For manual testing
 SPXTEST_CASE_BEGIN("Offline continuous recognition with RNN-T and live output", "[.][api][cxx][rnnt]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);

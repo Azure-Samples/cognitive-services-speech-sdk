@@ -757,6 +757,8 @@ bool CSpxRnntRecoEngineAdapter::ChangeState(AudioState fromAudioState, RnntState
         m_rnntState = toRnntState;
         return true;
     }
+    SPX_DBG_TRACE_VERBOSE("%s; audioState/rnntState: %d/%d don't match %d/%d or change not allowed",
+        __FUNCTION__, m_audioState, m_rnntState, fromAudioState, fromRnntState);
 
     return false;
 }
