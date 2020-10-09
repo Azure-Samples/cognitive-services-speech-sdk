@@ -57,6 +57,25 @@ namespace USP {
             memcpy(m_buffer.get(), data, size);
         }
 
+        ~WebSocketMessage()
+        {
+            if (m_messageSent)
+            {
+                try
+                {
+                    m_messageSent->set_value(false);
+                }
+                catch (std::exception& ex)
+                {
+                    SPX_TRACE_ERROR("Failed to set the message promise. Cause: %s", ex.what());
+                }
+                catch (...)
+                {
+                    SPX_TRACE_ERROR("Failed to set the message promise");
+                }
+            }
+        }
+
         USP::MetricMessageType MetricMessageType() const override { return m_metricType; }
         uint8_t FrameType() const override { return m_frameType; }
         size_t Size() const override { return m_size; }
@@ -67,6 +86,7 @@ namespace USP {
             if (messageSentPromise)
             {
                 messageSentPromise->set_value(success);
+                m_messageSent.reset();
             }
         }
 
@@ -76,6 +96,7 @@ namespace USP {
             if (messageSentPromise)
             {
                 messageSentPromise->set_exception(eptr);
+                m_messageSent.reset();
             }
         }
 

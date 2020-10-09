@@ -71,6 +71,25 @@ namespace USP {
 
 
 
+    Message::~Message()
+    {
+        if (m_messageSent)
+        {
+            try
+            {
+                m_messageSent->set_value(false);
+            }
+            catch (std::exception& ex)
+            {
+                SPX_TRACE_ERROR("Failed to set the message promise. Cause: %s", ex.what());
+            }
+            catch (...)
+            {
+                SPX_TRACE_ERROR("Failed to set the message promise");
+            }
+        }
+    }
+
     Message& Message::Path(const std::string& path)
     {
         SetValue(m_headers, Constants::HEADER_PATH, path);
@@ -290,6 +309,7 @@ namespace USP {
         if (messagePromise)
         {
             messagePromise->set_value(success);
+            m_messageSent.reset();
         }
     }
 
@@ -299,6 +319,7 @@ namespace USP {
         if (messagePromise)
         {
             messagePromise->set_exception(eptr);
+            m_messageSent.reset();
         }
     }
 
@@ -307,7 +328,8 @@ namespace USP {
         m_timestamp(),
         m_headers(),
         m_msgType(messageType),
-        m_metricType(USP::MetricMessageType::METRIC_MESSAGE_TYPE_INVALID)
+        m_metricType(USP::MetricMessageType::METRIC_MESSAGE_TYPE_INVALID),
+        m_messageSent()
     {
         Timestamp(std::chrono::system_clock::now());
 

@@ -39,7 +39,7 @@ namespace USP {
         /// <summary>
         /// Class destructor
         /// </summary>
-        virtual ~Message() = default;
+        virtual ~Message();
 
         /// <summary>
         /// Sets the message path for this message
