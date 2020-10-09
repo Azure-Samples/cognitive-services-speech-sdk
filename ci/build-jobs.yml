@@ -1598,6 +1598,7 @@ jobs:
   - template: templates/generate_subscription_file.yml
   - bash: |
       set -e -o pipefail
+      cp ./ci/jsonsettings.py .
       . ci/functions.sh
       ./ci/set-variables.sh
     displayName: Set variables
