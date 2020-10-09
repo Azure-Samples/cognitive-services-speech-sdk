@@ -46,6 +46,7 @@ void CSpxPushAudioInputStream::Write(uint8_t* buffer, uint32_t size)
     if (buffer != nullptr && size > 0)
     {
         WriteBuffer(buffer, size);
+        m_endOfStream = false;
     }
     else
     {

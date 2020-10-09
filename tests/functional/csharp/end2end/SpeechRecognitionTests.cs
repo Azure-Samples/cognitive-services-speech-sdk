@@ -2220,7 +2220,81 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
             }
         }
-    }
+
+        [RetryTestMethod]
+        public async Task TestEmptyFrameInPushStreamWithDelay()
+        {
+            var ps = AudioInputStream.CreatePushStream();
+            var audioInput = AudioConfig.FromStreamInput(ps);
+        
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
+            {
+                var file1 = AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH];
+                var file2 = AudioUtterancesMap[AudioUtteranceKeys.COMPUTER_KEYWORD_WITH_SINGLE_UTTERANCE_1];
+                var inputSource1 = AudioDataStream.FromWavFileInput(file1.FilePath.GetRootRelativePath());
+                var inputSource2 = AudioDataStream.FromWavFileInput(file2.FilePath.GetRootRelativePath());
+
+                var cancelTCS = new TaskCompletionSource<bool>();
+                string recognition = null;
+
+                recognizer.Canceled += (s, e) =>
+                {
+                    if (e.Reason == CancellationReason.EndOfStream)
+                    {
+                        cancelTCS.TrySetResult(true);
+                    }
+                    else
+                    {
+                        cancelTCS.SetResult(false);
+                    }
+                };
+
+                recognizer.Recognized += (s, e) =>
+                {
+                    if (e.Result.Reason == ResultReason.RecognizedSpeech)
+                    {
+                        recognition = e.Result.Text;
+                    }
+                    else
+                    {
+                        recognition = "";
+                    }
+                };
+
+                await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
+
+                byte[] buffer = new byte[4096];
+                while (buffer.Length == inputSource1.ReadData(buffer))
+                {
+                    ps.Write(buffer);
+                }
+                ps.Write(buffer);
+                ps.Write(Array.Empty<byte>());
+
+                SPXTEST_REQUIRE(await Task.WhenAny(cancelTCS.Task, Task.Delay(TimeSpan.FromMinutes(1))) == cancelTCS.Task, "Cancel did not happen in 1 minute");
+                SPXTEST_ARE_EQUAL(recognition, file1.Utterances[file1.NativeLanguage][0].Text);
+
+                cancelTCS = new TaskCompletionSource<bool>();
+
+                ps.Write(new byte[2]);
+
+                await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
+                await Task.Delay(TimeSpan.FromSeconds(2));
+
+                while (buffer.Length == inputSource2.ReadData(buffer))
+                {
+                    ps.Write(buffer);
+                }
+                ps.Write(buffer);
+                ps.Write(Array.Empty<byte>());
+
+                SPXTEST_REQUIRE(await Task.WhenAny(cancelTCS.Task, Task.Delay(TimeSpan.FromMinutes(1))) == cancelTCS.Task, "Cancel did not happen in 1 minute");
+
+                SPXTEST_ARE_EQUAL(recognition, file2.Utterances[file2.NativeLanguage][0].Text);
+
+            }
+        }
+        }
 
     internal class ContinuousFilePullStream : PullAudioInputStreamCallback
     {
