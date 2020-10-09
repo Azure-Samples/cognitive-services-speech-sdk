@@ -177,12 +177,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             if (Environment.OSVersion.Platform != PlatformID.Win32NT)
             {
+                Console.WriteLine($"Test method: {testMethod.TestMethodName} only valid on Windows.");
                 return new[]
                 {
                     new TestResult
                     {
-                        Outcome = UnitTestOutcome.NotRunnable,
-                        TestFailureException = new AssertInconclusiveException("Test only valid on windows.")
+                        Outcome = UnitTestOutcome.Inconclusive // Inconclusive is reported as skipped
                     }
                 };
             }

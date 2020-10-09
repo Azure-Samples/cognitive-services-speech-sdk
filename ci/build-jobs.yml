@@ -999,11 +999,11 @@ jobs:
   - template: templates/generate_subscription_file.yml
   - bash: |
       set -u -e -o pipefail
-      mkdir -p "tests/functional/csharp/end2end/bin/Debug/netcoreapp2.0"
-      cp tests/test.defaults.json tests/functional/csharp/end2end/bin/Debug/netcoreapp2.0
-      cp tests/test.audio.utterances.json tests/functional/csharp/end2end/bin/Debug/netcoreapp2.0
-      cp tests/test.subscriptions.regions.json tests/functional/csharp/end2end/bin/Debug/netcoreapp2.0
-      cp -r tests/input tests/functional/csharp/end2end/bin/Debug/netcoreapp2.0
+      mkdir -p "tests/functional/csharp/end2end/bin/Debug/netcoreapp2.1"
+      cp tests/test.defaults.json tests/functional/csharp/end2end/bin/Debug/netcoreapp2.1
+      cp tests/test.audio.utterances.json tests/functional/csharp/end2end/bin/Debug/netcoreapp2.1
+      cp tests/test.subscriptions.regions.json tests/functional/csharp/end2end/bin/Debug/netcoreapp2.1
+      cp -r tests/input tests/functional/csharp/end2end/bin/Debug/netcoreapp2.1
       cp tests/test.defaults.json tests/functional/csharp/end2end
       cp tests/test.audio.utterances.json tests/functional/csharp/end2end
       cp tests/test.subscriptions.regions.json tests/functional/csharp/end2end
@@ -1030,7 +1030,7 @@ jobs:
       echo $LOG_FILE_NAME
       dotnet test --blame --verbosity detailed --filter \
       "TestCategory!=LongTest&TestCategory!=SpeechSynthesisMockTest&ClassName!=Microsoft.CognitiveServices.Speech.Tests.EndToEnd.KwsRecognitionTests&ClassName!=Microsoft.CognitiveServices.Speech.Tests.EndToEnd.KwsRecognizerTests&TestCategory!=CompressedStreamTest&TestCategory!=OfflineUnidec" \
-      --framework netcoreapp2.0 --settings csharp.runsettings --logger "trx;$LOG_FILE_NAME" -p:SpeechPlatform=MacOS
+      --framework netcoreapp2.1 --settings csharp.runsettings --logger "trx;$LOG_FILE_NAME" -p:SpeechPlatform=MacOS
 
       exitCode=$?
       set -e

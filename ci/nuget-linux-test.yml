@@ -81,11 +81,11 @@ jobs:
       mkdir localnuget
       cp --verbose "$(System.ArtifactsDirectory)/In/Windows/"Microsoft.CognitiveServices.Speech.*.nupkg localnuget
       #
-      mkdir -p "tests/functional/csharp/end2end/bin/Debug/netcoreapp2.0"
-      cp tests/test.defaults.json tests/functional/csharp/end2end/bin/Debug/netcoreapp2.0
-      cp tests/test.audio.utterances.json tests/functional/csharp/end2end/bin/Debug/netcoreapp2.0
-      cp tests/test.subscriptions.regions.json tests/functional/csharp/end2end/bin/Debug/netcoreapp2.0
-      cp -r tests/input tests/functional/csharp/end2end/bin/Debug/netcoreapp2.0
+      mkdir -p "tests/functional/csharp/end2end/bin/Debug/netcoreapp2.1"
+      cp tests/test.defaults.json tests/functional/csharp/end2end/bin/Debug/netcoreapp2.1
+      cp tests/test.audio.utterances.json tests/functional/csharp/end2end/bin/Debug/netcoreapp2.1
+      cp tests/test.subscriptions.regions.json tests/functional/csharp/end2end/bin/Debug/netcoreapp2.1
+      cp -r tests/input tests/functional/csharp/end2end/bin/Debug/netcoreapp2.1
       ERRORS=0
 
       # [[ $DOCKER_IMAGE =~ _([^_]*): ]] || exitWithError "Cannot parse out architecture from %s" "$DOCKER_IMAGE"
@@ -115,7 +115,7 @@ jobs:
         dotnet test \$EXTRA_OPT \
             --verbosity detailed \
             --filter "TestCategory!=LongTest&TestCategory!=OfflineUnidec" \
-            --framework netcoreapp2.0 \
+            --framework netcoreapp2.1 \
             --settings csharp.runsettings \
             --logger "trx;\$LOG_FILE_NAME" \
             -p:SpeechPlatform=UnixOS
