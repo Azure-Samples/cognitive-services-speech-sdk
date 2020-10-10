@@ -1841,7 +1841,7 @@ void CSpxAudioStreamSession::FireAdapterResult_KeywordResult(ISpxRecoEngineAdapt
     SPX_DBG_ASSERT_WITH_MESSAGE(m_sessionState != SessionState::WaitForPumpSetFormatStart, "ERROR! FireAdapterResult_KeywordResult was called with SessionState==WaitForPumpSetFormatStart");
 
     auto buffer = m_audioBuffer;
-    
+
     if (isAccepted) {
         FireResultEvent(GetSessionId(), result);
     }
@@ -2067,6 +2067,8 @@ void CSpxAudioStreamSession::Error(ISpxRecoEngineAdapter* adapter, std::shared_p
         // We're not going to see a start or stop message. We're done. Canceled.
         m_expectAdapterStartedTurn = false;
         m_expectAdapterStoppedTurn = false;
+
+        TryChangeState(m_sessionState, SessionState::Idle);
     }
 }
 
@@ -3016,7 +3018,7 @@ void CSpxAudioStreamSession::ForEachRecognizer(std::function<void(std::shared_pt
     SPXAPI_CATCH_ONLY()
 }
 
-void CSpxAudioStreamSession::ShrinkReplayBuffer(uint64_t newBaseOffset) 
+void CSpxAudioStreamSession::ShrinkReplayBuffer(uint64_t newBaseOffset)
 {
     m_audioBuffer->DiscardTill(newBaseOffset);
 }
