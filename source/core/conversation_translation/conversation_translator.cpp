@@ -1122,6 +1122,11 @@ namespace ConversationTranslation {
                        << "&meetingId=" << HttpUtils::UrlEscape(args->RoomCode)
                        << "&deviceId=" << HttpUtils::UrlEscape(args->ParticipantId);
 
+            if (!isHost)
+            {
+                queryParms << "&isParticipant";
+            }
+
             SetStringValue(PropertyId::SpeechServiceConnection_UserDefinedQueryParameters, queryParms.str().c_str());
         }
 

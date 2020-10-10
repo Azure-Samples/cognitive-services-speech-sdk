@@ -1047,27 +1047,23 @@ SPXTEST_CASE_BEGIN("Conversation Translator Sweden demo", "[!hide][cxx_conversat
 {
     CT_INTEGRATION_TEST_INIT;
 
+    bool useFiddler = false;
+
     auto subscriptionKey = SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key;
     auto subscriptionRegion = SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Region;
 
     std::string speechLang("en-US");
-    std::string endpointUrl;
-    {
-        std::string host("its-loadbalancer-devb9503283r42485a4.princetondev.customspeech.ai");
-        std::ostringstream oss;
-
-        oss << "wss://" << host << "/speech/recognition/dynamicaudio?&format=simple"
-            << "&channelCount=1";;
-
-        endpointUrl = oss.str();
-    }
+    std::string endpointUrl("wss://transcribe.princetondev.customspeech.ai/speech/recognition/dynamicaudio?&format=simple");
 
     auto speechConfig = SpeechConfig::FromEndpoint(endpointUrl, subscriptionKey);
     speechConfig->SetServiceProperty("TrafficType", SpxGetTestTrafficType(__FILE__, __LINE__), ServicePropertyChannel::UriQueryParameter);
     speechConfig->SetSpeechRecognitionLanguage(speechLang);
     speechConfig->SetProperty("ConversationTranslator_Region", subscriptionRegion);
     speechConfig->SetProperty("ConversationTranslator_MultiChannelAudio", "true");
-    //speechConfig->SetProxy("127.0.0.1", 8888);
+    if (useFiddler)
+    {
+        speechConfig->SetProxy("127.0.0.1", 8888);
+    }
 
     shared_ptr<Conversation> conversation = Conversation::CreateConversationAsync(speechConfig).get();
     SPX_TRACE_INFO("Starting conversation");
@@ -1075,20 +1071,39 @@ SPXTEST_CASE_BEGIN("Conversation Translator Sweden demo", "[!hide][cxx_conversat
 
     shared_ptr<AudioConfig> audioConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
     shared_ptr<ConversationTranslator> conversationTranslator = ConversationTranslator::FromConfig(audioConfig);
-
     auto eventHandlers = ConversationTranslatorCallbacks::From(conversationTranslator);
 
-    SPX_TRACE_INFO("Joining conversation");
     conversationTranslator->JoinConversationAsync(conversation, "TheHost").get();
+
+    // The participant now joins
+    shared_ptr<AudioConfig> partConfig = AudioConfig::FromWavFileInput(ROOT_RELATIVE_PATH(SINGLE_UTTERANCE_ENGLISH));
+    partConfig->SetProperty(PropertyId::SpeechServiceConnection_Endpoint, endpointUrl);
+    partConfig->SetProperty("ConversationTranslator_MultiChannelAudio", "true");
+    if (useFiddler)
+    {
+        partConfig->SetProperty("SPEECH-ProxyHostName", "127.0.0.1");
+        partConfig->SetProperty("SPEECH-ProxyPort", "8888");
+    }
+
+    auto partConvTrans = ConversationTranslator::FromConfig(partConfig);
+    auto partEvents = ConversationTranslatorCallbacks::From(partConvTrans);
+    SPX_TRACE_INFO("Participant joining conversation");
+    partConvTrans->JoinConversationAsync(conversation->GetConversationId(), "Participant", speechLang).get();
+    std::this_thread::sleep_for(5s);
 
     SPX_TRACE_INFO("Start transcribing");
     conversationTranslator->StartTranscribingAsync().get();
+    partConvTrans->StartTranscribingAsync().get();
 
     //eventHandlers->WaitForAudioStreamCompletion(MAX_WAIT_FOR_AUDIO_TO_COMPLETE, WAIT_AFTER_AUDIO_COMPLETE);
     std::this_thread::sleep_for(15s);
 
     SPX_TRACE_INFO("Stop Transcribing");
     conversationTranslator->StopTranscribingAsync().get();
+    partConvTrans->StopTranscribingAsync().get();
+
+    SPX_TRACE_INFO("Participant leaves");
+    partConvTrans->LeaveConversationAsync().get();
 
     SPX_TRACE_INFO("Leave conversation");
     conversationTranslator->LeaveConversationAsync().get();
