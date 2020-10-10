@@ -224,6 +224,15 @@ uint16_t CSpxMicrophonePumpBase::GetChannelsFromConfig()
     return channels.empty() ? 0 : static_cast<uint16_t>(stoi(channels));
 }
 
+bool CSpxMicrophonePumpBase::UseEmbeddedSRFromConfig() const
+{
+    auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
+    bool useRnnt = PAL::ToBool(properties->GetStringValue("CARBON-INTERNAL-UseRecoEngine-Rnnt", PAL::BoolToString(false)));
+    bool useUnidec = PAL::ToBool(properties->GetStringValue("CARBON-INTERNAL-UseRecoEngine-Unidec", PAL::BoolToString(false)));
+
+    return useRnnt || useUnidec;
+}
+
 std::string CSpxMicrophonePumpBase::GetDeviceNameFromConfig()
 {
     auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());

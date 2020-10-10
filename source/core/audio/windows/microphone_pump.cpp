@@ -34,7 +34,7 @@ void CSpxMicrophonePump::SetOptionsAfterCreateAudioHandle()
 {
     // size in samples for a buffer that holds the audio from Core Audio API.
     // 100 ms for now.
-    const int val = 1600;
+    auto val = UseEmbeddedSRFromConfig() ? 160 : 1600;
     auto result = audio_set_options(m_audioHandle, AUDIO_OPTION_INPUT_FRAME_COUNT, &val);
     SPX_IFTRUE_THROW_HR(result != AUDIO_RESULT_OK, SPXERR_MIC_ERROR);
 }
