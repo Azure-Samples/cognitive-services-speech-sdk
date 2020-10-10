@@ -471,7 +471,7 @@ private:
     // to duration based where we will wait a % of the audio packet length.
     bool m_useDurationBasedThrottle = false;
 
-    static seconds StopRecognitionTimeout;
+    seconds GetStopRecognitionTimeout();
 
     std::list<std::weak_ptr<ISpxRecognizer>> m_recognizers;
     mutable std::mutex m_recognizersLock;

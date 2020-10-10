@@ -60,9 +60,9 @@ using namespace std;
 using namespace std::chrono;
 using namespace std::chrono_literals;
 
-using json = nlohmann::json;
+constexpr std::chrono::seconds defaultStopRecognitionTimeout{ 10 };
 
-seconds CSpxAudioStreamSession::StopRecognitionTimeout = 10s;
+using json = nlohmann::json;
 
 atomic<int64_t> CSpxAudioStreamSession::Operation::OperationId;
 const minutes CSpxAudioStreamSession::Operation::Timeout = 1min;
@@ -789,7 +789,7 @@ CSpxAsyncOp<std::shared_ptr<ISpxRecognitionResult>> CSpxAudioStreamSession::Reco
 
         auto result = singleShotInFlight->m_future.get();
         // Make sure we are in Idle state due to end turn.
-        WaitForIdle(StopRecognitionTimeout);
+        WaitForIdle(GetStopRecognitionTimeout());
         return result;
     }));
 
@@ -956,7 +956,7 @@ CSpxAsyncOp<void> CSpxAudioStreamSession::StopRecognitionAsync(RecognitionKind s
             taskFuture.get();
         }
 
-        WaitForIdle(StopRecognitionTimeout);
+        WaitForIdle(GetStopRecognitionTimeout());
     }));
 
     return CSpxAsyncOp<void>(waitForIdle, AOS_Started);
@@ -3067,6 +3067,16 @@ void CSpxAudioStreamSession::SendMessageToService(std::string&& path, T&& payloa
     {
         ThrowRuntimeError({ std::string("Message ") + path + " is not sent."});
     }
+}
+
+std::chrono::seconds CSpxAudioStreamSession::GetStopRecognitionTimeout()
+{
+    auto value = GetStringValue(g_stopRecognitionTimeoutPropertyName, "");
+    if (value.empty())
+    {
+        return defaultStopRecognitionTimeout;
+    }
+    return std::chrono::seconds{ std::stoi(value) };
 }
 
 } } } } // Microsoft::CognitiveServices::Speech::Impl
