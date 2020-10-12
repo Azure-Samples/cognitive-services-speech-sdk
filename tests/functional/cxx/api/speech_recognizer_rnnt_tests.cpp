@@ -247,7 +247,7 @@ SPXTEST_CASE_BEGIN("Offline continuous recognition with RNN-T and live output", 
         recognizer->SessionStopped.Connect([&recognitionEnd](const SessionEventArgs& e)
             {
                 UNUSED(e);
-                cout << "Session stopped.";
+                cout << "Session stopped.\n";
                 recognitionEnd.set_value(); // Notify to stop recognition.
             });
 

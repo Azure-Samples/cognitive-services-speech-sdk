@@ -118,7 +118,7 @@ protected:
 
     uint16_t GetChannelsFromConfig();
     std::string GetDeviceNameFromConfig();
-    bool UseEmbeddedSRFromConfig() const;
+    bool UseEmbeddedUnidecSRFromConfig() const;
 
     // This is for querying any properties needed by audio_create, and validating the values.
     virtual AUDIO_SETTINGS_HANDLE SetOptionsBeforeCreateAudioHandle();

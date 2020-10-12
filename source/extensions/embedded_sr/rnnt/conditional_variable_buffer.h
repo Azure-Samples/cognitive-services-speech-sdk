@@ -51,6 +51,14 @@ public:
     ConditionalVariableBuffer() noexcept : m_end(false), m_data(T{}) {};
 
     // Reset buffer to initial state and clear the internal buffer
+    void Reset()
+    {
+        std::unique_lock<std::mutex> lock(m_mutex);
+        m_end = false;
+        _traits_type::Clear(m_data);
+    }
+
+    // Reset buffer to initial state and clear the internal buffer
     // This is performed without lock so it can only be called when no reader is waiting.
     void ResetNoLock()
     {

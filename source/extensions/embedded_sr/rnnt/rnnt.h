@@ -75,6 +75,7 @@ struct IRnntClient
     virtual void Start() = 0;
     virtual void Stop() = 0;
     virtual bool Running() = 0;
+    virtual void ResetBuffer() = 0;
 };
 
 using IRnntClientPtr = std::unique_ptr<IRnntClient>;

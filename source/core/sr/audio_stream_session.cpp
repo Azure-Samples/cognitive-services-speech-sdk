@@ -1587,8 +1587,10 @@ void CSpxAudioStreamSession::AdapterStoppedTurn(ISpxRecoEngineAdapter* /* adapte
                 }
 
                 // Ensure that SessionStopped event is sent.
+                bool useRecoEngineRnnt = PAL::ToBool(GetStringValue("CARBON-INTERNAL-UseRecoEngine-Rnnt", PAL::BoolToString(false)));
                 bool useRecoEngineUnidec = PAL::ToBool(GetStringValue("CARBON-INTERNAL-UseRecoEngine-Unidec", PAL::BoolToString(false)));
-                if (useRecoEngineUnidec)
+
+                if (useRecoEngineRnnt || useRecoEngineUnidec)
                 {
                     m_expectAdapterStoppedTurn = false;
                     TryChangeState(SessionState::ProcessingAudioLeftovers, SessionState::WaitForAdapterCompletedSetFormatStop);

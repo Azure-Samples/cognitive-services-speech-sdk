@@ -215,10 +215,7 @@ RnntClient::RnntClient(
 
 RnntClient::~RnntClient()
 {
-    if (Running())
-    {
-        Stop();
-    }
+    Stop();
 }
 
 /*static*/ std::wstring RnntClient::ComposeDecoderSpec(const std::wstring& modelSpec, const TokenDefs& tokenDefs)
@@ -270,6 +267,7 @@ void RnntClient::ProcessAudio(const Impl::DataChunkPtr& audioChunk)
     }
     else
     {
+        SPX_DBG_TRACE_VERBOSE("%s: audioChunk->size %d, ignored", __FUNCTION__, audioChunk->size);
         m_buffer.SetEndOfStream();
     }
 }
@@ -277,6 +275,11 @@ void RnntClient::ProcessAudio(const Impl::DataChunkPtr& audioChunk)
 void RnntClient::FlushAudio()
 {
     m_buffer.SetEndOfStream();
+}
+
+void RnntClient::ResetBuffer()
+{
+    m_buffer.Reset();
 }
 
 void RnntClient::SetRecognitionMode(RNNT::RecognitionMode mode)
@@ -355,6 +358,8 @@ void RnntClient::Decode()
         });
         m_threadService->ExecuteAsync(std::move(task), Impl::ISpxThreadService::Affinity::Background);
     }
+
+    m_running = false; // end of thread
 }
 
 void RnntClient::DecodeInternal()

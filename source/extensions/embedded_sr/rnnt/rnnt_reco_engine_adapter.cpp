@@ -187,6 +187,13 @@ void CSpxRnntRecoEngineAdapter::SetFormat(const SPXWAVEFORMATEX* pformat)
 void CSpxRnntRecoEngineAdapter::ProcessAudio(const DataChunkPtr& audioChunk)
 {
     auto size = audioChunk->size;
+
+    if (IsRunning() == false)
+    {
+        SPX_DBG_TRACE_VERBOSE("%s: (0x%8p) Ignoring audio size=%d, not running... (audioState/rnntState=%d/%d)", __FUNCTION__, (void*)this, size, m_audioState, m_rnntState);
+        return;
+    }
+
     if (IsState(RnntState::Zombie) && size == 0)
     {
         SPX_DBG_TRACE_VERBOSE("%s: (0x%8p) IGNORING... size=0 ... (audioState/rnntState=%d/%d) RNNT-ZOMBIE", __FUNCTION__, (void*)this, m_audioState, m_rnntState);
@@ -232,12 +239,12 @@ void CSpxRnntRecoEngineAdapter::EnsureRnntInit()
     if (m_rnntClient == nullptr)
     {
         RnntInitialize();
-    }
 
-    // Start RNN-T client.
-    if (m_rnntClient != nullptr && !m_rnntClient->Running())
-    {
-        m_rnntClient->Start();
+        // Start RNN-T client.
+        if (m_rnntClient != nullptr)
+        {
+            m_rnntClient->Start();
+        }
     }
 }
 
@@ -320,7 +327,7 @@ void CSpxRnntRecoEngineAdapter::RnntInitialize()
 void CSpxRnntRecoEngineAdapter::RnntTerminate()
 {
     // Stop RNN-T client.
-    if (m_rnntClient != nullptr && m_rnntClient->Running())
+    if (m_rnntClient != nullptr)
     {
         m_rnntClient->Stop();
     }
@@ -411,6 +418,14 @@ void CSpxRnntRecoEngineAdapter::FlushAudio()
     if (!IsState(RnntState::Terminating) && !IsState(RnntState::Zombie) && m_rnntClient != nullptr)
     {
         m_rnntClient->FlushAudio();
+    }
+}
+
+void CSpxRnntRecoEngineAdapter::ResetBuffer()
+{
+    if (m_rnntClient != nullptr)
+    {
+        m_rnntClient->ResetBuffer();
     }
 }
 
@@ -601,6 +616,8 @@ void CSpxRnntRecoEngineAdapter::OnTurnEnd()
     {
         return;
     }
+
+    ResetBuffer();
 
     if (adapterTurnStopped)
     {

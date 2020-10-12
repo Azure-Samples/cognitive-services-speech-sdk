@@ -136,6 +136,7 @@ public:
     void Start() override;
     void Stop() override;
     bool Running() override;
+    void ResetBuffer() override;
 
 private:
 
@@ -163,7 +164,7 @@ private:
     IUnimicSource* m_features;
     std::atomic_flag m_turnStarted = ATOMIC_FLAG_INIT;
     std::atomic_bool m_speechStarted{ 0 };
-    bool m_running;
+    std::atomic_bool m_running{ 0 };
     size_t m_consumedSourceFrames;
     size_t m_committedSourceFrames;
     RNNT::RecognitionMode m_recognitionMode;

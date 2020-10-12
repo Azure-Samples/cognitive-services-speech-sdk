@@ -33,8 +33,11 @@ AUDIO_SETTINGS_HANDLE CSpxMicrophonePump::SetOptionsBeforeCreateAudioHandle()
 void CSpxMicrophonePump::SetOptionsAfterCreateAudioHandle()
 {
     // size in samples for a buffer that holds the audio from Core Audio API.
-    // 100 ms for now.
-    auto val = UseEmbeddedSRFromConfig() ? 160 : 1600;
+    // 100 ms is the default for now.
+    const int defaultSize = 1600;
+    // Use 10 ms for offline Unidec. With RNN-T it would degrade performance, so don't.
+    auto val = UseEmbeddedUnidecSRFromConfig() ? 160 : defaultSize;
+
     auto result = audio_set_options(m_audioHandle, AUDIO_OPTION_INPUT_FRAME_COUNT, &val);
     SPX_IFTRUE_THROW_HR(result != AUDIO_RESULT_OK, SPXERR_MIC_ERROR);
 }

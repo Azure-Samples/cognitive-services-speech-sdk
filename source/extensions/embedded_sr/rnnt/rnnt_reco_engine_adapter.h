@@ -116,6 +116,7 @@ private:
     void ProcessAudioChunk(const DataChunkPtr& audioChunk);
     void RnntWrite(const DataChunkPtr& audioChunk);
     void FlushAudio();
+    void ResetBuffer();
 
     void OnSpeechStartDetected(const RNNT::SpeechStartDetectedMsg&) override;
     void OnSpeechEndDetected(const RNNT::SpeechEndDetectedMsg&) override;
@@ -144,6 +145,7 @@ private:
     };
 
     bool IsBadState() const { return IsState(RnntState::Error) || IsState(RnntState::Terminating) || IsState(RnntState::Zombie); }
+    bool IsRunning() const { return m_rnntClient != nullptr && m_rnntClient->Running(); }
     bool IsState(AudioState state) const { return m_audioState == state; }
     bool IsState(RnntState state) const { return m_rnntState == state; }
     bool IsState(AudioState audioState, RnntState rnntState) const { return IsState(audioState) && IsState(rnntState); }
