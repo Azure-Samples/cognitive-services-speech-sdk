@@ -30,7 +30,7 @@ public:
     /// </summary>
     /// <param name="result">recognition result</param>
     /// <returns>A shared pointer to the created PronunciationAssessmentResult instance.</returns>
-    static std::shared_ptr<PronunciationAssessmentResult> FromResult(std::shared_ptr<RecognitionResult> result)    
+    static std::shared_ptr<PronunciationAssessmentResult> FromResult(std::shared_ptr<RecognitionResult> result)
     {
         SPX_THROW_HR_IF(SPXERR_INVALID_ARG, result == nullptr);
         if (result->Properties.GetProperty("AccuracyScore").empty())
@@ -44,22 +44,26 @@ public:
     /// <summary>
     /// The score indicating the pronunciation accuracy of the given speech, which indicates
     /// how closely the phonemes match a native speaker's pronunciation.
+    /// If this is less 0, it means the pronunciation assessment failed.
     /// </summary>
     const double AccuracyScore;
 
     /// <summary>
     /// The overall score indicating the pronunciation quality of the given speech.
     /// This is calculated from AccuracyScore, FluencyScore and CompletenessScore with weight.
+    /// If this is less 0, it means the pronunciation assessment failed.
     /// </summary>
     const double PronunciationScore;
 
     /// <summary>
     /// The score indicating the completeness of the given speech by calculating the ratio of pronounced words towards entire input.
+    /// If this is less 0, it means the pronunciation assessment failed.
     /// </summary>
     const double CompletenessScore;
 
     /// <summary>
     /// The score indicating the fluency of the given speech.
+    /// If this is less 0, it means the pronunciation assessment failed.
     /// </summary>
     const double FluencyScore;
 
@@ -67,12 +71,12 @@ protected:
 
     /*! \cond PROTECTED */
 
-    
+
     explicit PronunciationAssessmentResult(const PropertyCollection& properties) :
-        AccuracyScore(std::stod(properties.GetProperty("AccuracyScore"))),
-        PronunciationScore(std::stod(properties.GetProperty("PronScore"))),
-        CompletenessScore(std::stod(properties.GetProperty("CompletenessScore"))),
-        FluencyScore(std::stod(properties.GetProperty("FluencyScore")))
+        AccuracyScore(std::stod(properties.GetProperty("AccuracyScore", "-1"))),
+        PronunciationScore(std::stod(properties.GetProperty("PronScore", "-1"))),
+        CompletenessScore(std::stod(properties.GetProperty("CompletenessScore", "-1"))),
+        FluencyScore(std::stod(properties.GetProperty("FluencyScore", "-1")))
     {
     }
 
