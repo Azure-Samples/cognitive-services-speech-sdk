@@ -51,10 +51,6 @@ public class KeywordRecognizerTests extends BaseJUnit {
 
     @BeforeClass
     static public void setUpBeforeClass() throws Exception {
-        String operatingSystem = ("" + System.getProperty("os.name")).toLowerCase();
-        System.out.println("Current operation system: " + operatingSystem);
-        boolean isMac = operatingSystem.contains("mac") || operatingSystem.contains("darwin");
-        org.junit.Assume.assumeFalse(isMac);
         Settings.LoadSettings();
     }
 

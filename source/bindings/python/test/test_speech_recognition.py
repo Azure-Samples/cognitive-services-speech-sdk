@@ -420,7 +420,6 @@ def test_keyword_recognition_model_constructor():
         model = msspeech.KeywordRecognitionModel()
 
 
-@pytest.mark.skipif(sys.platform == 'darwin', reason="KWS is not available on macOS")
 @pytest.mark.parametrize('kws_input,', ['computer'], indirect=True)
 def test_keyword_recognition_from_wav_file(from_file_speech_reco_with_callbacks, kws_input):
     reco, callbacks = from_file_speech_reco_with_callbacks()
@@ -440,7 +439,6 @@ def test_keyword_recognition_from_wav_file(from_file_speech_reco_with_callbacks,
     assert valid_events[-1].result.text.startswith(kws_input.model_keyword)
 
 
-@pytest.mark.skipif(sys.platform == 'darwin', reason="KWS is not available on macOS")
 @pytest.mark.parametrize('kws_input,', ['computer'], indirect=True)
 def test_local_keyword_recognition_from_wav_file(from_file_keyword_reco_with_callbacks, kws_input):
     reco, callbacks = from_file_keyword_reco_with_callbacks()
