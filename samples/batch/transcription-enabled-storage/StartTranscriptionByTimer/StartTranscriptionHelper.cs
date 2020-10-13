@@ -117,7 +117,7 @@ namespace StartTranscriptionByTimer
 
                 var languageID = new LanguageIdentification(SubscriptionKey, SubscriptionRegion);
                 var fileExtension = Path.GetExtension(audioFileName);
-                var sasUrl = await StorageConnectorInstance.CreateSASAsync(busMessage.Data.Url).ConfigureAwait(false);
+                var sasUrl = StorageConnectorInstance.CreateSas(busMessage.Data.Url);
                 var byteArray = await StorageConnector.DownloadFileFromSAS(sasUrl).ConfigureAwait(false);
                 var identifiedLocale = await languageID.DetectLanguage(byteArray, fileExtension, Locale, secondaryLocale).ConfigureAwait(false);
                 Logger.LogInformation($"Identified locale: {identifiedLocale}");
@@ -193,7 +193,7 @@ namespace StartTranscriptionByTimer
 
                 foreach (var serviceBusMessage in serviceBusMessages)
                 {
-                    var sasUrl = await StorageConnectorInstance.CreateSASAsync(serviceBusMessage.Data.Url).ConfigureAwait(false);
+                    var sasUrl = StorageConnectorInstance.CreateSas(serviceBusMessage.Data.Url);
                     sasUrls.Add(sasUrl);
                     audioFileInfos.Add(new AudioFileInfo(serviceBusMessage.Data.Url.AbsoluteUri, serviceBusMessage.RetryCount));
                 }
