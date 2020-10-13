@@ -10,6 +10,8 @@ namespace Connector
     using System.Linq;
     using System.Threading.Tasks;
     using System.Web;
+    using Azure.Storage;
+    using Azure.Storage.Sas;
     using Microsoft.Extensions.Logging;
     using Microsoft.WindowsAzure.Storage;
     using Microsoft.WindowsAzure.Storage.Blob;
@@ -18,9 +20,21 @@ namespace Connector
     {
         private CloudBlobClient CloudBlobClient;
 
+        private string AccountName;
+
+        private string AccountKey;
+
         public StorageConnector(string storageConnectionString)
         {
+            if (storageConnectionString == null)
+            {
+                throw new ArgumentNullException(nameof(storageConnectionString));
+            }
+
             var storageAccount = CloudStorageAccount.Parse(storageConnectionString);
+
+            AccountName = GetValueFromConnectionString("AccountName", storageConnectionString);
+            AccountKey = GetValueFromConnectionString("AccountKey", storageConnectionString);
             CloudBlobClient = storageAccount.CreateCloudBlobClient();
         }
 
@@ -81,28 +95,25 @@ namespace Connector
             return data;
         }
 
-        public async Task<string> CreateSASAsync(Uri fileUri)
+        public string CreateSas(Uri fileUri)
         {
             var containerName = GetContainerNameFromUri(fileUri);
+            var fileName = GetFileNameFromUri(fileUri);
             var container = CloudBlobClient.GetContainerReference(containerName);
 
-            var containerPermissions = new BlobContainerPermissions
+            var sasBuilder = new BlobSasBuilder()
             {
-                PublicAccess = BlobContainerPublicAccessType.Blob
+                BlobContainerName = container.Name,
+                BlobName = fileName,
+                Resource = "b",
             };
 
-            await container.SetPermissionsAsync(containerPermissions).ConfigureAwait(false);
-            containerPermissions.SharedAccessPolicies.Add("mypolicy", new SharedAccessBlobPolicy()
-            {
-                SharedAccessStartTime = DateTime.UtcNow,
-                SharedAccessExpiryTime = DateTime.UtcNow.AddDays(1),
-                Permissions = SharedAccessBlobPermissions.Read
-            });
+            sasBuilder.StartsOn = DateTime.UtcNow;
+            sasBuilder.ExpiresOn = DateTime.UtcNow.AddDays(1);
+            sasBuilder.SetPermissions(BlobContainerSasPermissions.Read);
 
-            var sas = container.GetSharedAccessSignature(containerPermissions.SharedAccessPolicies.FirstOrDefault().Value);
-            var absoluteSasUri = fileUri.AbsoluteUri + sas;
-
-            return absoluteSasUri;
+            var sasToken = sasBuilder.ToSasQueryParameters(new StorageSharedKeyCredential(AccountName, AccountKey)).ToString();
+            return $"{container.GetBlockBlobReference(fileName).Uri}?{sasToken}";
         }
 
         public async Task WriteTextFileToBlobAsync(string content, string containerName, string fileName, ILogger log)
@@ -131,6 +142,21 @@ namespace Connector
 
             await outputBlockBlob.StartCopyAsync(inputBlockBlob).ConfigureAwait(false);
             await inputBlockBlob.DeleteAsync().ConfigureAwait(false);
+        }
+
+        private static string GetValueFromConnectionString(string key, string connectionString)
+        {
+            var split = connectionString.Split(';');
+
+            foreach (var subConnectionString in split)
+            {
+                if (subConnectionString.StartsWith(key, StringComparison.OrdinalIgnoreCase))
+                {
+                    return subConnectionString.Substring(key.Length + 1);
+                }
+            }
+
+            return string.Empty;
         }
     }
 }

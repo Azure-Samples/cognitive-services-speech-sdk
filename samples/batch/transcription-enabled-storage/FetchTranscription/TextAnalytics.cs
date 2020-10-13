@@ -44,7 +44,7 @@ namespace FetchTranscriptionFunction
         public TextAnalytics(string locale, string subscriptionKey, string region, ILogger log)
         {
             Locale = locale;
-            TextAnalyticsUri = new Uri($"https://{region}.api.cognitive.microsoft.com/text/analytics/v3.0-preview.1");
+            TextAnalyticsUri = new Uri($"https://{region}.api.cognitive.microsoft.com/text/analytics/v3.0");
             SubscriptionKey = subscriptionKey;
             Log = log;
         }
@@ -99,37 +99,19 @@ namespace FetchTranscriptionFunction
 
         private static bool IsMaskableEntityType(TextAnalyticsEntity entity)
         {
-            switch (entity.Type)
+            switch (entity.Category)
             {
-                case EntityType.Person:
-                case EntityType.Organization:
-                case EntityType.PhoneNumber:
-                case EntityType.Email:
-                case EntityType.URL:
-                case EntityType.IPAddress:
-                case EntityType.Quantity:
+                case EntityCategory.Person:
+                case EntityCategory.Organization:
+                case EntityCategory.PhoneNumber:
+                case EntityCategory.Email:
+                case EntityCategory.URL:
+                case EntityCategory.IPAddress:
+                case EntityCategory.Quantity:
                     return true;
 
                 default: return false;
             }
-        }
-
-        private static RecognizedPhrase AddSentimentToSegment(RecognizedPhrase recognizedPhrase, TextAnalyticsSentence sentence)
-        {
-            var nBest = recognizedPhrase.NBest.FirstOrDefault();
-            if (nBest != null)
-            {
-                if (nBest.Sentiment == null)
-                {
-                    nBest.Sentiment = new Sentiment();
-                }
-
-                nBest.Sentiment.Negative = sentence.SentenceScores.Negative;
-                nBest.Sentiment.Positive = sentence.SentenceScores.Positive;
-                nBest.Sentiment.Neutral = sentence.SentenceScores.Neutral;
-            }
-
-            return recognizedPhrase;
         }
 
         private static RecognizedPhrase RedactEntityInRecognizedPhrase(RecognizedPhrase recognizedPhrase, TextAnalyticsEntity entity)
@@ -140,24 +122,28 @@ namespace FetchTranscriptionFunction
             }
 
             var nBest = recognizedPhrase.NBest.FirstOrDefault();
+
+            // only keep first nBest:
+            recognizedPhrase.NBest = new[] { nBest };
+
             var displayForm = nBest.Display;
 
             var preMask = displayForm.Substring(0, entity.Offset);
             var postMask = displayForm.Substring(entity.Offset + entity.Length, displayForm.Length - (entity.Offset + entity.Length));
 
-            if (entity.Type == EntityType.Quantity && entity.SubType.Equals("Number", StringComparison.OrdinalIgnoreCase))
+            if (entity.Category == EntityCategory.Quantity && entity.SubCategory.Equals("Number", StringComparison.OrdinalIgnoreCase))
             {
                 displayForm = preMask + new string('#', entity.Length) + postMask;
             }
             else
             {
-                if (!string.IsNullOrEmpty(entity.SubType))
+                if (!string.IsNullOrEmpty(entity.SubCategory))
                 {
-                    displayForm = $"{preMask}#{entity.Type}-{entity.SubType}#{postMask}";
+                    displayForm = $"{preMask}#{entity.Category}-{entity.SubCategory}#{postMask}";
                 }
                 else
                 {
-                    displayForm = $"{preMask}#{entity.Type}#{postMask}";
+                    displayForm = $"{preMask}#{entity.Category}#{postMask}";
                 }
             }
 
@@ -293,7 +279,7 @@ namespace FetchTranscriptionFunction
                     // Create full transcription per channel
                     if (fullTranscriptionPerChannelDict.ContainsKey(newSegment.Channel))
                     {
-                        fullTranscriptionPerChannelDict[newSegment.Channel].Append(nBest.Display);
+                        fullTranscriptionPerChannelDict[newSegment.Channel].Append(" " + nBest.Display);
                     }
                     else
                     {
@@ -348,9 +334,18 @@ namespace FetchTranscriptionFunction
                 foreach (var document in textAnalyticsResponse.Documents)
                 {
                     var targetSegment = speechTranscript.RecognizedPhrases.Where(e => $"{e.Channel}_{e.Offset}".Equals(document.Id, StringComparison.Ordinal)).FirstOrDefault();
-                    foreach (var sentence in document.Sentences)
+
+                    var nBest = targetSegment.NBest.FirstOrDefault();
+                    if (nBest != null)
                     {
-                        AddSentimentToSegment(targetSegment, sentence);
+                        if (nBest.Sentiment == null)
+                        {
+                            nBest.Sentiment = new Sentiment();
+                        }
+
+                        nBest.Sentiment.Negative = document.ConfidenceScores.Negative;
+                        nBest.Sentiment.Positive = document.ConfidenceScores.Positive;
+                        nBest.Sentiment.Neutral = document.ConfidenceScores.Neutral;
                     }
                 }
             }

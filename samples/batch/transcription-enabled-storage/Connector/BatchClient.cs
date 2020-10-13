@@ -162,8 +162,6 @@ namespace Connector
                     requestMessage.Headers.Add("Ocp-Apim-Subscription-Key", subscriptionKey);
                 }
 
-                log.LogInformation($"Timeout: {timeout}");
-
                 try
                 {
                     using var cts = new CancellationTokenSource();

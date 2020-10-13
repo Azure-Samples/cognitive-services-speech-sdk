@@ -1,13 +1,13 @@
-// <copyright file="TextAnalyticsScores.cs" company="Microsoft Corporation">
+// <copyright file="TextAnalyticsConfidenceScores.cs" company="Microsoft Corporation">
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 
 namespace Connector.Serializable.TextAnalytics
 {
-    public class TextAnalyticsScores
+    public class TextAnalyticsConfidenceScores
     {
-        public TextAnalyticsScores(float positive, float neutral, float negative)
+        public TextAnalyticsConfidenceScores(float positive, float neutral, float negative)
         {
             Positive = positive;
             Neutral = neutral;

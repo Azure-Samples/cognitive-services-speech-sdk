@@ -5,10 +5,6 @@
 
 namespace Connector.Serializable.TranscriptionStartedServiceBusMessage
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Text;
-
     public class AudioFileInfo
     {
         public AudioFileInfo(string fileUrl, int retryCount)

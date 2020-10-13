@@ -221,7 +221,13 @@ namespace FetchTranscriptionFunction
                     }
                 }
 
-                var editedTranscriptionResultJson = JsonConvert.SerializeObject(transcriptionResult, Newtonsoft.Json.Formatting.Indented);
+                var editedTranscriptionResultJson = JsonConvert.SerializeObject(
+                    transcriptionResult,
+                    Newtonsoft.Json.Formatting.Indented,
+                    new JsonSerializerSettings
+                    {
+                        NullValueHandling = NullValueHandling.Ignore
+                    });
 
                 var jsonFileName = $"{fileName}.json";
                 await StorageConnectorInstance.WriteTextFileToBlobAsync(editedTranscriptionResultJson, jsonContainer, jsonFileName, log).ConfigureAwait(false);
