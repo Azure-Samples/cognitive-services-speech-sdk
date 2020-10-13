@@ -21,6 +21,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
     using static AssertHelpers;
     using static Config;
     using static SpeechRecognitionTestsHelper;
+    using System.Diagnostics;
 
     [TestClass]
     public class SpeechRecognitionTests : RecognitionTestBase
@@ -2226,7 +2227,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             var ps = AudioInputStream.CreatePushStream();
             var audioInput = AudioConfig.FromStreamInput(ps);
-        
+
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
                 var file1 = AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH];
@@ -2294,47 +2295,91 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
             }
         }
-        }
 
-    internal class ContinuousFilePullStream : PullAudioInputStreamCallback
-    {
-        FileStream fs;
-        readonly object fsLock = new object();
-
-        public ContinuousFilePullStream(string fileName)
+        [RetryTestMethod, TestCategory(TestCategory.LongRunning)]
+        public async Task LongRunningPushStreamTest()
         {
-            Console.WriteLine("Trying to open " + fileName);
-            fs = File.OpenRead(fileName);
-        }
+            // Streams the multi-utterance file through a push stream while setting properties on ther stream.
+            // Goal is to prevent a buffer overflow of the proeprties buffers in the SDK.
+            // Checks once a minute to ensure that forward progress is being made in recognition.
+            // If the property buffer overflows it (currently) stops the audio pump and prevents forward progress.
 
-        public override int Read(byte[] dataBuffer, uint size)
-        {
-            lock (fsLock)
+            var ps = AudioInputStream.CreatePushStream();
+            var audioInput = AudioConfig.FromStreamInput(ps);
+            var cancelTCS = new TaskCompletionSource<CancellationReason>();
+            var recognitionStopped = new TaskCompletionSource<bool>();
+
+            var sessionSoruce = new TaskCompletionSource<bool>();
+            var monitorStop = new TaskCompletionSource<bool>();
+
+            DateTime lastResultTime = DateTime.UtcNow;
+
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
-                if (fs == null)
-                {
-                    return 0;
-                }
+                var file = AudioUtterancesMap[AudioUtteranceKeys.MULTIPLE_UTTERANCE_ENGLISH];
+                var psPusher = new ContinuousFilePushStream(ps, file.FilePath.GetRootRelativePath());
 
-                if (fs.Read(dataBuffer, 0, (int)size) < size)
+                recognizer.Canceled += (s, e) =>
                 {
-                    // reset the file stream.
-                    fs.Seek(0, SeekOrigin.Begin);
-                }
+                    cancelTCS.TrySetResult(e.Reason);
+                };
+
+                recognizer.Recognized += (s, e) =>
+                {
+                    lastResultTime = DateTime.UtcNow;
+                    Log(e.Result.Text);
+                };
+
+                await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
+
+                psPusher.Start();
+
+                // This task will wake up and check once a minute for forward progress.
+                var recoMonitor = Task.Run(async () =>
+                {
+                    while (true)
+                    {
+                        if ((DateTime.UtcNow - lastResultTime) > TimeSpan.FromMinutes(1))
+                        {
+                            recognitionStopped.TrySetResult(false);
+                        }
+                        if (await Task.WhenAny(Task.Delay(TimeSpan.FromMinutes(1)), monitorStop.Task) == monitorStop.Task)
+                        {
+                            break;
+                        }
+                    }
+                });
+
+                var testEndTimeTask = Task.Delay(TimeSpan.FromMinutes(15));
+                Log($"Wait started");
+                var firstTaskDone = await Task.WhenAny(cancelTCS.Task, recognitionStopped.Task, testEndTimeTask);
+                Log($"Wait completed.");
+
+                SPXTEST_REQUIRE(firstTaskDone != recognitionStopped.Task, $"The recognition monitor ended before being asked to.");
+                var reason = cancelTCS.Task.IsCompleted ? cancelTCS.Task.Result : CancellationReason.CancelledByUser;
+
+                SPXTEST_REQUIRE(firstTaskDone != cancelTCS.Task, $"The cancel task was completed unexpecedly. It ended becasue {reason}");
+                SPXTEST_REQUIRE(firstTaskDone == testEndTimeTask, "The timeout task was not the first task to complete.");
+
+                Log("Stopping pusher.");
+                var stopTask = psPusher.Stop();
+                await TimeoutTask(stopTask, TimeSpan.FromMinutes(1), "Push Stream failed to stop");
+
+                Log("Pusher stopped, waiting on cancel");
+                await TimeoutTask(cancelTCS.Task, TimeSpan.FromMinutes(1), "Cancel failed to complete");
+
+                Log("Canceled received, stopping watcher");
+                monitorStop.TrySetResult(true);
+
+                Log("Stop signal sent, waiting on completion");
+                await TimeoutTask(recoMonitor, TimeSpan.FromMinutes(1), "Monitor failed to stop");
+                Log("Test over");
             }
-
-            return dataBuffer.Length;
         }
 
-        public override void Close()
+        public static async Task TimeoutTask(Task task, TimeSpan timeout, string message)
         {
-            lock (fsLock)
-            {
-                fs.Dispose();
-                fs = null;
-            }
-
-            base.Close();
+            SPXTEST_REQUIRE(await Task.WhenAny(task, Task.Delay(timeout)) == task, message);
         }
     }
 }

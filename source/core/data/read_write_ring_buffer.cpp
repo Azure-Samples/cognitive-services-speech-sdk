@@ -269,6 +269,7 @@ void CSpxReadWriteRingBuffer::ThrowExceptionIfNotInitialized() const
 /// <remarks>NO LOCK REQUIRED - always called from methods that have already acquired lock.</remarks>
 size_t CSpxReadWriteRingBuffer::SetSizeInternal(size_t size)
 {
+    SPX_DBG_TRACE_INFO_IF(READ_WRITE_RING_BUFFER_VERBOSE_DEBUGGING, "[%s] Setting size of ring buffer to %" PRId64, m_ringName.c_str(), size);
     return size == 0 ? SetZeroRingSize() : SetNonZeroRingSize(size);
 }
 
@@ -319,10 +320,16 @@ size_t CSpxReadWriteRingBuffer::SetNonZeroRingSize(size_t size)
 /// <remarks>NO LOCK REQUIRED - always called from methods that have already acquired lock.</remarks>
 void CSpxReadWriteRingBuffer::EnsureSpaceToWrite(size_t *bytesToWrite, const size_t *bytesActuallyWritten)
 {
+    SPX_DBG_TRACE_INFO_IF(READ_WRITE_RING_BUFFER_VERBOSE_DEBUGGING, "[%s] Checking for space to write %" PRId64 " Bytes (Read: %" PRId64 ") (Write: %" PRId64 ") ",
+        m_ringName.c_str(), *bytesToWrite, m_readPos, m_writePos);
+
     SPX_DBG_ASSERT(bytesToWrite != nullptr);
     size_t bytesCanWrite = m_ringSize - (size_t)(m_writePos - m_readPos);
     if (*bytesToWrite > bytesCanWrite)
     {
+        SPX_DBG_TRACE_INFO("[%s] Overflow occurred on ring of size %" PRId64 "  %" PRId64 " Bytes (Read: %" PRId64 ") (Write: %" PRId64 ") ",
+            m_ringName.c_str(), m_ringSize, *bytesToWrite, m_readPos, m_writePos);
+
         if (!m_allowOverflow)
         {
             SPX_IFTRUE_THROW_HR(bytesActuallyWritten == nullptr, SPXERR_BUFFER_TOO_SMALL);
@@ -348,6 +355,9 @@ void CSpxReadWriteRingBuffer::EnsureSpaceToWrite(size_t *bytesToWrite, const siz
 /// <remarks>NO LOCK REQUIRED - always called from methods that have already acquired lock.</remarks>
 void CSpxReadWriteRingBuffer::EnsureSpaceToReadAtPos(uint64_t pos, size_t* bytesToRead, const size_t* bytesActuallyRead)
 {
+    SPX_DBG_TRACE_INFO_IF(READ_WRITE_RING_BUFFER_VERBOSE_DEBUGGING, "[%s] Checking for space to read %" PRId64 " Bytes (Read: %" PRId64 ") (Write: %" PRId64 ") ",
+        m_ringName.c_str(), *bytesToRead, m_readPos, m_writePos);
+
     SPX_DBG_ASSERT(bytesToRead != nullptr);
     size_t bytesCanRead = (m_writePos > pos) ? (size_t)(m_writePos - pos) : 0;
     if (*bytesToRead > bytesCanRead)

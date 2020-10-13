@@ -15,6 +15,9 @@ namespace CognitiveServices {
 namespace Speech {
 namespace Impl {
 
+#ifndef READ_WRITE_RING_BUFFER_VERBOSE_DEBUGGING
+#define READ_WRITE_RING_BUFFER_VERBOSE_DEBUGGING 0
+#endif
 
 class CSpxReadWriteRingBuffer :
     public ISpxObjectInitImpl,

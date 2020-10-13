@@ -83,6 +83,7 @@ void CSpxBufferProperties::InitPropertyDataBuffer()
     auto data = SpxCreateObjectWithSite<ISpxReadWriteBufferInit>("CSpxReadWriteRingBuffer", this);
     data->SetName("BufferPropertyData");
     data->SetSize(GetPropertyDataBufferSize());
+    data->AllowOverflow(true);
     m_data = SpxQueryInterface<ISpxReadWriteBuffer>(data);
 }
 
@@ -102,6 +103,7 @@ void CSpxBufferProperties::InitPropertyValuesBuffer()
     auto values = SpxCreateObjectWithSite<ISpxReadWriteBufferInit>("CSpxReadWriteRingBuffer", this);
     values->SetName("BufferPropertyValues");
     values->SetSize(GetPropertyValueBufferSize());
+    values->AllowOverflow(true);
     m_values = SpxQueryInterface<ISpxReadWriteBuffer>(values);
 }
 
