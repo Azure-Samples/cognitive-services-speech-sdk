@@ -597,7 +597,7 @@ jobs:
       downloadPath: $(System.ArtifactsDirectory)\In
       downloadType: specific
       itemPattern: |
-        @(Android|Linux|Windows|WindowsOS|WindowsUwp)/*/Release/**
+        @(Android|Linux|Windows|WindowsUwp)/*/Release/**
         @(iOS|macOS)/Release/**
         @(iOS|macOS)/Debug/**
         !**/libunstripped*/**
@@ -623,13 +623,6 @@ jobs:
       scriptPath: './ci/nuget/pack.sh'
       args: './ci/nuget/carbon.nuspec $(Build.Repository.LocalPath) $(System.ArtifactsDirectory)\In $(SPEECHSDK_SEMVER2NOMETA) $(Build.ArtifactStagingDirectory)\Windows'
     displayName: Create public NuGet
-  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
-    inputs:
-      type: FilePath
-      scriptPath: './ci/nuget/pack.sh'
-      args: './ci/nuget/carbon_os.nuspec $(Build.Repository.LocalPath) $(System.ArtifactsDirectory)\In $(SPEECHSDK_SEMVER2NOMETA) $(Build.ArtifactStagingDirectory)\WindowsOS true'
-    displayName: Create OS NuGet
-    condition: and(succeeded(), eq(variables['HAS_OS_BUILD'], 'true'))
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
     inputs:
       type: FilePath
@@ -722,13 +715,6 @@ jobs:
       publishLocation: Container
     condition: succeededOrFailed()
     displayName: 'Publish .zip and .nupkg'
-  - task: PublishBuildArtifacts@1
-    inputs:
-      PathtoPublish: '$(Build.ArtifactStagingDirectory)/WindowsOS'
-      ArtifactName: WindowsOS
-      publishLocation: Container
-    condition: and(succeededOrFailed(), eq(variables['HAS_OS_BUILD'], 'true'))
-    displayName: 'Publish OS .nupkg'
 
 - job: WackTest
   dependsOn: [Pre, NuGet]

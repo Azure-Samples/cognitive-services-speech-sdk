@@ -279,33 +279,6 @@ if(MSVC)
   # (e.g. std::shared_ptr or std::string). https://docs.microsoft.com/cpp/build/reference/jmc
   set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /JMC")
 
-  # The code below are changes for the version that is included in the Windows OS. In the OS we don't want to dynamically depend on
-  # vcruntime*.dll so we create a version of the library that is statically linked agains the UCRT.
-  if((CMAKE_SYSTEM_NAME STREQUAL "Windows") AND (SPEECHSDK_CRT STREQUAL "OS_UCRT"))
-      # TODO: When we add support remove this from here and the csharp tests.
-      set(DISABLE_KWS_TESTS ON)
-
-      message("changing to hybrid static linked VCRuntime.")
-      foreach(flag_var
-      CMAKE_CXX_FLAGS_RELEASE
-      CMAKE_CXX_FLAGS_DEBUG
-      CMAKE_C_FLAGS_RELEASE
-      CMAKE_C_FLAGS_DEBUG
-      )
-        if(${flag_var} MATCHES "/MD")
-            string(REGEX REPLACE "/MD" "/MT" ${flag_var} "${${flag_var}}")
-        endif()
-      endforeach()
-
-      # Override linker to still dynamically link the ABI stable core c runtime DLLs, to reduce our DLL size.
-      set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} /NODEFAULTLIB:libucrt.lib /DEFAULTLIB:ucrt.lib")
-      set(CMAKE_SHARED_LINKER_FLAGS_DEBUG "${CMAKE_SHARED_LINKER_FLAGS_DEBUG} /NODEFAULTLIB:libucrtd.lib /DEFAULTLIB:ucrtd.lib")
-      set(CMAKE_MODULE_LINKER_FLAGS_RELEASE "${CMAKE_MODULE_LINKER_FLAGS_RELEASE} /NODEFAULTLIB:libucrt.lib /DEFAULTLIB:ucrt.lib")
-      set(CMAKE_MODULE_LINKER_FLAGS_DEBUG "${CMAKE_MODULE_LINKER_FLAGS_DEBUG} /NODEFAULTLIB:libucrtd.lib /DEFAULTLIB:ucrtd.lib")
-      set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /NODEFAULTLIB:libucrt.lib /DEFAULTLIB:ucrt.lib")
-      set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} /NODEFAULTLIB:libucrtd.lib /DEFAULTLIB:ucrtd.lib")
-  endif()
-
   # add control flow guard
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /guard:cf")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /guard:cf")
@@ -436,8 +409,6 @@ if(CMAKE_SYSTEM_NAME STREQUAL "WindowsStore")
 elseif(APPLE)
   set(SPEECHSDK_CORE_LIBRARY "Microsoft.CognitiveServices.Speech.core")
   set(SPEECHSDK_CORE_FRAMEWORK "MicrosoftCognitiveServicesSpeech")
-elseif((CMAKE_SYSTEM_NAME STREQUAL "Windows") AND (SPEECHSDK_CRT STREQUAL "OS_UCRT"))
-  set(SPEECHSDK_CORE_LIBRARY "Microsoft.CognitiveServices.Speech.core.os")
 else()
   set(SPEECHSDK_CORE_LIBRARY "Microsoft.CognitiveServices.Speech.core")
 endif()

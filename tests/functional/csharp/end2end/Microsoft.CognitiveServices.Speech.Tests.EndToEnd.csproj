@@ -16,9 +16,6 @@
   <PropertyGroup Condition="$(SpeechPlatform.Contains('IOS'))">
     <DefineConstants>IOS</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup Condition="'' == 'OS_BUILD'">
-    <DefineConstants>OS_BUILD</DefineConstants>
-  </PropertyGroup>
   <PropertyGroup Condition="$(SpeechPlatform.Contains('MacOS'))">
     <DefineConstants>OSX</DefineConstants>
   </PropertyGroup>

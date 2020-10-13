@@ -71,13 +71,8 @@ namespace Microsoft.CognitiveServices.Speech.Test.Internal
         public const string NativeDllName = "libMicrosoft.CognitiveServices.Speech.core.so";
         public const CallingConvention NativeCallConvention = CallingConvention.Cdecl;
 #else
-#if OS_BUILD
-        public const string NativeDllName = "Microsoft.CognitiveServices.Speech.core.os.dll";
-        public const CallingConvention NativeCallConvention = CallingConvention.StdCall;
-#else
         public const string NativeDllName = "Microsoft.CognitiveServices.Speech.core.dll";
         public const CallingConvention NativeCallConvention = CallingConvention.StdCall;
-#endif
 #endif
     }
 

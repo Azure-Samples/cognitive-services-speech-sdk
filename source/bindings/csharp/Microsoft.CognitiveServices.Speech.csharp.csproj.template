@@ -50,9 +50,6 @@
     <DefineConstants>IOS</DefineConstants>
     <TargetFrameworks>netstandard2.0</TargetFrameworks>
   </PropertyGroup>
-  <PropertyGroup Condition="'@OS_BUILD@' == 'OS_BUILD'">
-    <DefineConstants>OS_BUILD</DefineConstants>
-  </PropertyGroup>
   <PropertyGroup Condition="$(Configuration.Contains('MacOS'))">
     <DefineConstants>OSX</DefineConstants>
     <TargetFrameworks>netstandard2.0</TargetFrameworks>
