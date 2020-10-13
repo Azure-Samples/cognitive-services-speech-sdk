@@ -81,7 +81,7 @@ void CSpxRnntRecoEngineAdapter::OpenConnection(bool singleShot)
     SPX_DBG_TRACE_VERBOSE("%s: Open connection.", __FUNCTION__);
 
     auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
-    SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_RNNT_SITE_FAILURE);
+    SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_USP_SITE_FAILURE);
     const char* recoModePropertyName = GetPropertyName(PropertyId::SpeechServiceConnection_RecoMode);
     std::string currentRecoMode = properties->GetStringValue(recoModePropertyName);
     std::string recoModeToSet;
@@ -256,11 +256,11 @@ void CSpxRnntRecoEngineAdapter::RnntInitialize()
 
     // Get the named property service.
     auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
-    SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_RNNT_SITE_FAILURE);
+    SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_USP_SITE_FAILURE);
 
     // Get the thread service.
     auto threadService = SpxQueryService<ISpxThreadService>(GetSite());
-    SPX_IFTRUE_THROW_HR(threadService == nullptr, SPXERR_UNEXPECTED_RNNT_SITE_FAILURE);
+    SPX_IFTRUE_THROW_HR(threadService == nullptr, SPXERR_UNEXPECTED_USP_SITE_FAILURE);
 
     auto modelSpec = PAL::ToWString(properties->GetStringValue("CARBON-INTERNAL-RNNT-ModelSpec"));
     if (modelSpec.empty())

@@ -328,8 +328,3 @@ typedef uintptr_t SPXHR;
 /// Added in version 1.12.0
 /// </summary>
 #define SPXERR_INVALID_RESULT_REASON   __SPX_ERRCODE_FAILED(0x035)
-
-/// <summary>
-/// An unexpected error was encountered when trying to access the RNN-T site.
-/// </summary>
-#define SPXERR_UNEXPECTED_RNNT_SITE_FAILURE  __SPX_ERRCODE_FAILED(0x036)
