@@ -13,8 +13,6 @@ namespace StartTranscriptionByTimer
 
         public static readonly bool AddWordLevelTimestamps = bool.TryParse(Environment.GetEnvironmentVariable(nameof(AddWordLevelTimestamps), EnvironmentVariableTarget.Process), out AddWordLevelTimestamps) && AddWordLevelTimestamps;
 
-        public static readonly string AcousticModelId = Environment.GetEnvironmentVariable(nameof(AcousticModelId), EnvironmentVariableTarget.Process);
-
         public static readonly string AudioInputContainer = Environment.GetEnvironmentVariable(nameof(AudioInputContainer), EnvironmentVariableTarget.Process);
 
         public static readonly string AzureServiceBus = Environment.GetEnvironmentVariable(nameof(AzureServiceBus), EnvironmentVariableTarget.Process);
@@ -25,13 +23,13 @@ namespace StartTranscriptionByTimer
 
         public static readonly string AzureWebJobsStorage = Environment.GetEnvironmentVariable(nameof(AzureWebJobsStorage), EnvironmentVariableTarget.Process);
 
+        public static readonly string CustomModelId = Environment.GetEnvironmentVariable(nameof(CustomModelId), EnvironmentVariableTarget.Process);
+
         public static readonly string ErrorFilesOutputContainer = Environment.GetEnvironmentVariable(nameof(ErrorFilesOutputContainer), EnvironmentVariableTarget.Process);
 
         public static readonly string ErrorReportOutputContainer = Environment.GetEnvironmentVariable(nameof(ErrorReportOutputContainer), EnvironmentVariableTarget.Process);
 
         public static readonly string FetchTranscriptionServiceBusConnectionString = Environment.GetEnvironmentVariable(nameof(FetchTranscriptionServiceBusConnectionString), EnvironmentVariableTarget.Process);
-
-        public static readonly string LanguageModelId = Environment.GetEnvironmentVariable(nameof(LanguageModelId), EnvironmentVariableTarget.Process);
 
         public static readonly string Locale = Environment.GetEnvironmentVariable(nameof(Locale), EnvironmentVariableTarget.Process);
 
@@ -39,9 +37,7 @@ namespace StartTranscriptionByTimer
 
         public static readonly string PunctuationMode = Environment.GetEnvironmentVariable(nameof(PunctuationMode), EnvironmentVariableTarget.Process);
 
-        public static readonly string SecondaryAcousticModelId = Environment.GetEnvironmentVariable(nameof(SecondaryAcousticModelId), EnvironmentVariableTarget.Process);
-
-        public static readonly string SecondaryLanguageModelId = Environment.GetEnvironmentVariable(nameof(SecondaryLanguageModelId), EnvironmentVariableTarget.Process);
+        public static readonly string SecondaryCustomModelId = Environment.GetEnvironmentVariable(nameof(SecondaryCustomModelId), EnvironmentVariableTarget.Process);
 
         public static readonly string SecondaryLocale = Environment.GetEnvironmentVariable(nameof(SecondaryLocale), EnvironmentVariableTarget.Process);
 

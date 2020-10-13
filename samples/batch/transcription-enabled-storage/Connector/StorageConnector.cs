@@ -6,7 +6,6 @@
 namespace Connector
 {
     using System;
-    using System.Collections.Generic;
     using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
@@ -48,6 +47,7 @@ namespace Connector
 
             var pathParts = HttpUtility.UrlDecode(fileUri.AbsolutePath).Split('/').ToList();
             var cleanedPathParts = pathParts.SkipWhile(part => string.IsNullOrEmpty(part) || part.Equals("/", StringComparison.OrdinalIgnoreCase));
+
             var fileName = string.Join('/', cleanedPathParts.Skip(1));
             return fileName;
         }

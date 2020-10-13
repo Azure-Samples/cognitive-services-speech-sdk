@@ -5,7 +5,6 @@
 
 namespace Connector
 {
-    using System;
     using System.Collections.Generic;
     using System.Linq;
 
@@ -17,13 +16,13 @@ namespace Connector
             string locale,
             IEnumerable<string> contentUrls,
             Dictionary<string, string> properties,
-            IEnumerable<ModelIdentity> models)
+            ModelIdentity model)
         {
             DisplayName = name;
             Description = description;
             ContentUrls = contentUrls;
             Locale = locale;
-            Models = models;
+            Model = model;
             Properties = properties;
         }
 
@@ -35,7 +34,7 @@ namespace Connector
 
         public string Locale { get; set; }
 
-        public IEnumerable<ModelIdentity> Models { get; set; }
+        public ModelIdentity Model { get; set; }
 
         public IDictionary<string, string> Properties { get; }
 
@@ -45,9 +44,9 @@ namespace Connector
             string locale,
             string contentUrl,
             Dictionary<string, string> properties,
-            IEnumerable<ModelIdentity> models)
+            ModelIdentity model)
         {
-            return new TranscriptionDefinition(name, description, locale, new[] { contentUrl }.ToList(), properties, models);
+            return new TranscriptionDefinition(name, description, locale, new[] { contentUrl }.ToList(), properties, model);
         }
 
         public static TranscriptionDefinition Create(
@@ -56,9 +55,9 @@ namespace Connector
             string locale,
             IEnumerable<string> contentUrls,
             Dictionary<string, string> properties,
-            IEnumerable<ModelIdentity> models)
+            ModelIdentity model)
         {
-            return new TranscriptionDefinition(name, description, locale, contentUrls, properties, models);
+            return new TranscriptionDefinition(name, description, locale, contentUrls, properties, model);
         }
     }
 }

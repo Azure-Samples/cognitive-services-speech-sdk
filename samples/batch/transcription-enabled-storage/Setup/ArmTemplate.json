@@ -52,18 +52,11 @@
                 "zh-TW | Chinese (Taiwanese Mandarin)"
             ]
         },
-        "AcousticModelId": {
+        "CustomModelId": {
             "defaultValue": "",
             "type": "String",
             "metadata": {
-                "description": "The id of the acoustic model. If empty, the default acoustic model will be selected."
-            }
-        },
-        "LanguageModelId": {
-            "defaultValue": "",
-            "type": "String",
-            "metadata": {
-                "description": "The id of the language model. If empty, the default language model will be selected."
+                "description": "The id of the custom model for transcription. If empty, the base model will be selected."
             }
         },
         "SecondaryLocale": {
@@ -113,18 +106,11 @@
                 "description": "A secondary locale is needed if language identification should be performed. The audio will then be transcribed in either the first or secondary locale, depending on which language was detected. If no secondary locale is selected, no language identification is performed."
             }
         },
-        "SecondaryAcousticModelId": {
+        "SecondaryCustomModelId": {
             "defaultValue": "",
             "type": "String",
             "metadata": {
-                "description": "The id of the acoustic model. If empty, the default acoustic model of the secondary locale will be selected."
-            }
-        },
-        "SecondaryLanguageModelId": {
-            "defaultValue": "",
-            "type": "String",
-            "metadata": {
-                "description": "The id of the language model. If empty, the default language model of the secondary locale will be selected."
+                "description": "The id of the custom model for transcription. If empty, the base model of the secondary locale will be selected."
             }
         },
         "AzureSpeechServicesKey": {
@@ -724,7 +710,6 @@
                 "displayName": "WebAppSettings"
             },
             "properties": {
-                "AcousticModelId": "[parameters('AcousticModelId')]",
                 "AddDiarization": "[parameters('AddDiarization')]",
                 "AddWordLevelTimestamps": "[parameters('AddWordLevelTimestamps')]",
                 "APPINSIGHTS_INSTRUMENTATIONKEY": "[reference(resourceId('Microsoft.Insights/components', 'AcceleratorInsights'), '2015-05-01').InstrumentationKey]",
@@ -734,17 +719,16 @@
                 "AzureSpeechServicesRegion": "[parameters('AzureSpeechServicesRegion')]",
                 "AzureWebJobsStorage": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('StorageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value)]",
                 "AzureWebJobsDashboard": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('StorageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value)]",
+                "CustomModelId": "[parameters('CustomModelId')]",
                 "ErrorFilesOutputContainer": "[variables('errorFilesOutputContainer')]",
                 "ErrorReportOutputContainer": "[variables('errorReportOutputContainer')]",
                 "FetchTranscriptionServiceBusConnectionString": "[listKeys(variables('authRuleFT'),'2015-08-01').primaryConnectionString]",
                 "FUNCTIONS_EXTENSION_VERSION": "~3",
                 "FUNCTIONS_WORKER_RUNTIME": "dotnet",
-                "LanguageModelId": "[parameters('LanguageModelId')]",
                 "Locale": "[parameters('Locale')]",
                 "ProfanityFilterMode": "[parameters('ProfanityFilterMode')]",
                 "PunctuationMode": "[parameters('PunctuationMode')]",
-                "SecondaryAcousticModelId": "[parameters('SecondaryAcousticModelId')]",
-                "SecondaryLanguageModelId": "[parameters('SecondaryLanguageModelId')]",
+                "SecondaryCustomModelId": "[parameters('SecondaryCustomModelId')]",
                 "SecondaryLocale": "[parameters('SecondaryLocale')]",
                 "StartTranscriptionServiceBusConnectionString": "[listKeys(variables('authRuleCT'),'2015-08-01').primaryConnectionString]",
                 "WEBSITE_RUN_FROM_PACKAGE": "[if(variables('timerBasedExecution'),'https://mspublicstorage.blob.core.windows.net/transcription-enabled-storage/StartTranscriptionByTimer.zip','https://mspublicstorage.blob.core.windows.net/transcription-enabled-storage/StartTranscriptionByServiceBus.zip')]"

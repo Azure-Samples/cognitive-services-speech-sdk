@@ -181,12 +181,10 @@ namespace StartTranscriptionByTimer
             var fetchingDelay = GetInitialFetchingDelay(messages.Count());
             var locationString = string.Empty;
             var serviceBusMessages = messages.Select(message => JsonConvert.DeserializeObject<ServiceBusMessage>(Encoding.UTF8.GetString(message.Body)));
-            var modelIds = new List<Guid>();
 
             try
             {
                 var properties = GetTranscriptionPropertyBag();
-                modelIds = GetModelIds();
 
                 var sasUrls = new List<string>();
                 var audioFileInfos = new List<AudioFileInfo>();
@@ -198,9 +196,14 @@ namespace StartTranscriptionByTimer
                     audioFileInfos.Add(new AudioFileInfo(serviceBusMessage.Data.Url.AbsoluteUri, serviceBusMessage.RetryCount));
                 }
 
-                var models = modelIds.Select(m => ModelIdentity.Create(m)).ToList();
+                ModelIdentity modelIdentity = null;
 
-                var transcriptionDefinition = TranscriptionDefinition.Create(jobName, "StartByTimerTranscription", Locale, sasUrls, properties, models);
+                if (Guid.TryParse(StartTranscriptionEnvironmentVariables.CustomModelId, out var customModelId))
+                {
+                    modelIdentity = ModelIdentity.Create(StartTranscriptionEnvironmentVariables.AzureSpeechServicesRegion, customModelId);
+                }
+
+                var transcriptionDefinition = TranscriptionDefinition.Create(jobName, "StartByTimerTranscription", Locale, sasUrls, properties, modelIdentity);
 
                 var transcriptionLocation = await BatchClient.PostTranscriptionAsync(
                     transcriptionDefinition,
@@ -214,7 +217,7 @@ namespace StartTranscriptionByTimer
                     transcriptionLocation.AbsoluteUri,
                     jobName,
                     Locale,
-                    modelIds.Any(),
+                    modelIdentity != null,
                     audioFileInfos,
                     0,
                     0);
@@ -335,28 +338,6 @@ namespace StartTranscriptionByTimer
             Logger.LogInformation($"Setting word level timestamps enabled to {addWordLevelTimestamps}");
 
             return properties;
-        }
-
-        private List<Guid> GetModelIds()
-        {
-            var modelIds = new List<Guid>();
-
-            var acousticModelId = StartTranscriptionEnvironmentVariables.AcousticModelId;
-            if (!string.IsNullOrEmpty(acousticModelId))
-            {
-                Logger.LogInformation($"Acoustic model id: {acousticModelId}");
-                modelIds.Add(Guid.Parse(acousticModelId));
-            }
-
-            var languageModelId = StartTranscriptionEnvironmentVariables.LanguageModelId;
-
-            if (!string.IsNullOrEmpty(languageModelId) && languageModelId != acousticModelId)
-            {
-                Logger.LogInformation($"Language model id: {languageModelId}");
-                modelIds.Add(Guid.Parse(languageModelId));
-            }
-
-            return modelIds;
         }
     }
 }
