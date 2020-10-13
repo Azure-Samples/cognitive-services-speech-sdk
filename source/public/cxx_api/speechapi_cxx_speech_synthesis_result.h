@@ -94,7 +94,7 @@ public:
     }
 
     /// <summary>
-    /// Gets the length of synthesized audio
+    /// Gets the length of synthesized audio in bytes.
     /// </summary>
     /// <returns>Length of synthesized audio</returns>
     uint32_t GetAudioLength()
@@ -103,7 +103,7 @@ public:
     }
 
     /// <summary>
-    /// Gets the synthesized audio
+    /// Gets the synthesized audio.
     /// </summary>
     /// <returns>Synthesized audio data</returns>
     std::shared_ptr<std::vector<uint8_t>> GetAudioData()

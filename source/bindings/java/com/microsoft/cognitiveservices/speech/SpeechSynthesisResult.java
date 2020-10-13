@@ -60,7 +60,7 @@ public class SpeechSynthesisResult implements Closeable {
     }
 
     /**
-      * Gets the length of synthesized audio from the result.
+      * Gets the length of synthesized audio in bytes.
       * @return Length of synthesized audio.
       */
     public long getAudioLength() {
