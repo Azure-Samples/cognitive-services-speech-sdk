@@ -48,7 +48,6 @@ namespace Connector
 
             var pathParts = HttpUtility.UrlDecode(fileUri.AbsolutePath).Split('/').ToList();
             var cleanedPathParts = pathParts.SkipWhile(part => string.IsNullOrEmpty(part) || part.Equals("/", StringComparison.OrdinalIgnoreCase));
-
             var fileName = string.Join('/', cleanedPathParts.Skip(1));
             return fileName;
         }
@@ -109,8 +108,8 @@ namespace Connector
                 Resource = "b",
             };
 
-            sasBuilder.StartsOn = DateTime.UtcNow.Subtract(TimeSpan.FromDays(3));
-            sasBuilder.ExpiresOn = DateTime.UtcNow.AddDays(3);
+            sasBuilder.StartsOn = DateTime.UtcNow;
+            sasBuilder.ExpiresOn = DateTime.UtcNow.AddDays(1);
             sasBuilder.SetPermissions(BlobContainerSasPermissions.Read);
 
             var sasToken = sasBuilder.ToSasQueryParameters(new StorageSharedKeyCredential(AccountName, AccountKey)).ToString();
