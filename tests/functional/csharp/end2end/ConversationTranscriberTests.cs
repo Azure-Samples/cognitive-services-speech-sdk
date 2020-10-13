@@ -859,7 +859,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             var config = CreateCTSInRoomSpeechConfig();
             config.OutputFormat = OutputFormat.Detailed;
-            config.SetServiceProperty("maxConnectionDurationSecs", "15", ServicePropertyChannel.UriQueryParameter);
+            config.SetServiceProperty("maxConnectionDurationSecs", "30", ServicePropertyChannel.UriQueryParameter);
             config.SetProperty("SPEECH-AudioThrottleAsPercentageOfRealTime", "100");
             
             ContinuousFilePullStream inputStream = new ContinuousFilePullStream(AudioUtterancesMap[AudioUtteranceKeys.CONVERSATION_BETWEEN_TWO_PERSONS_ENGLISH].FilePath.GetRootRelativePath());
