@@ -648,7 +648,7 @@ void CSpxUspRecoEngineAdapter::SetUspQueryParametersInternal(const char *queryPa
     };
 
     using TupleType = std::tuple<const char *, const char *, PropertyValueType>;
-    constexpr std::array<TupleType, 17> QueryParamInfo{{
+    constexpr std::array<TupleType, 18> QueryParamInfo{{
         TupleType{ USP::endpoint::langQueryParam, GetPropertyName(PropertyId::SpeechServiceConnection_RecoLanguage), PropertyValueType::StringProperty },
         TupleType{ USP::endpoint::deploymentIdQueryParam, GetPropertyName(PropertyId::SpeechServiceConnection_EndpointId), PropertyValueType::StringProperty },
         TupleType{ USP::endpoint::initialSilenceTimeoutQueryParam, GetPropertyName(PropertyId::SpeechServiceConnection_InitialSilenceTimeoutMs), PropertyValueType::IntProperty },
@@ -665,7 +665,8 @@ void CSpxUspRecoEngineAdapter::SetUspQueryParametersInternal(const char *queryPa
         TupleType{ USP::endpoint::translation::voiceQueryParam, GetPropertyName(PropertyId::SpeechServiceConnection_TranslationVoice), PropertyValueType::StringProperty },
         TupleType{ USP::endpoint::translation::stableTranslationQueryParam, GetPropertyName(PropertyId::SpeechServiceResponse_TranslationRequestStablePartialResult), PropertyValueType::BoolProperty },
         TupleType{ USP::endpoint::dialog::customVoiceDeploymentIdsQueryParam, GetPropertyName(PropertyId::Conversation_Custom_Voice_Deployment_Ids), PropertyValueType::StringProperty },
-        TupleType{ USP::endpoint::dialog::botIdQueryParam, GetPropertyName(PropertyId::Conversation_ApplicationId), PropertyValueType::StringProperty }
+        TupleType{ USP::endpoint::dialog::botIdQueryParam, GetPropertyName(PropertyId::Conversation_ApplicationId), PropertyValueType::StringProperty },
+        TupleType{ USP::endpoint::dialog::botStatusMessageQueryParam, GetPropertyName(PropertyId::Conversation_Request_Bot_Status_Messages), PropertyValueType::StringProperty },
     }};
 
     auto QueryParameterToPropertyId = [&](const char *queryName) -> const TupleType&
@@ -2052,25 +2053,60 @@ void CSpxUspRecoEngineAdapter::OnUserMessage(const USP::UserMsg& msg)
         else if (m_endpointType == USP::EndpointType::Dialog)
         {
             std::string message{ reinterpret_cast<const char*>(msg.buffer), msg.size };
-            SPX_DBG_TRACE_VERBOSE("USP User Message: response; message='%s'", message.c_str());
+            SPX_DBG_TRACE_VERBOSE("USP Dialog User Message: response; message='%s'", message.c_str());
             auto responseMessage = json::parse(message);
-            if (!responseMessage["conversationId"].is_null())
+            auto conversationId = responseMessage.value("conversationId", "");
+            if (!conversationId.empty())
             {
                 /* Update conversation id */
-                m_dialogConversationId = responseMessage["conversationId"].get<std::string>();
+                m_dialogConversationId = conversationId;
                 InvokeOnServiceIfAvailable<ISpxNamedProperties>(GetSite(), [&](ISpxNamedProperties& properties)
                 {
                     properties.SetStringValue(GetPropertyName(PropertyId::Conversation_Conversation_Id), m_dialogConversationId.c_str());
                 });
             }
-            auto it = m_request_session_map.find(msg.requestId);
-            if (it != m_request_session_map.end())
+
+            auto messageType = responseMessage.value("messageType", "");
+
+            // A response payload received with a 'messageType' property set to 'MessageStatus' is an auxilliary message from
+            // ConvAI reporting the end execution status of an ITurnContext on the bot. This is plumbed through ActivityReceived
+            // but available only via opt-in with a property.
+            if (messageType == "MessageStatus")
             {
-                auto& machine = it->second;
-                machine->Switch(CSpxActivitySession::State::ActivityReceived, &message, nullptr);
-                return;
+                auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
+                auto propName = GetPropertyName(PropertyId::Conversation_Request_Bot_Status_Messages);
+                auto allowBotStatusMessages = PAL::ToBool(properties->GetStringValue(propName));
+
+                if (!allowBotStatusMessages)
+                {
+                    SPX_TRACE_WARNING("Unexpected Bot MessageStatus with no opt-in property set; ignoring.");
+                }
+                else
+                {
+                    // MessageStatus payloads are stateless and thus we don't want to use the connector's state machine to fire
+                    // here -- as that'd be restrictive and inappropriately modify said state.
+                    InvokeOnSite([&](const SitePtr& p)
+                    {
+                        p->FireAdapterResult_ActivityReceived(this, responseMessage.dump(), nullptr);
+                    });
+                }
             }
-            SPX_TRACE_ERROR("Unexpected message; request_id='%s'", msg.requestId.c_str());
+            // Response messages with a 'type' parameter set to 'message' are standard Bot Framework activity payloads. These
+            // can have associated audio information that's streamed over time and thus we need to maintain a stateful interaction
+            // via the DialogServiceConnector's state machine.
+            else if (messageType == "Message")
+            {
+                auto it = m_request_session_map.find(msg.requestId);
+                if (it != m_request_session_map.end())
+                {
+                    auto& machine = it->second;
+                    machine->Switch(CSpxActivitySession::State::ActivityReceived, &message, nullptr);
+                }
+            }
+            else
+            {
+                SPX_TRACE_ERROR("Unexpected message, request_id='%s': %s", msg.requestId.c_str(), responseMessage.dump().c_str());
+            }
         }
         else
         {

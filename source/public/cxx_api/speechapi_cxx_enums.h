@@ -405,6 +405,11 @@ enum class PropertyId
     /// </summary>
     Conversation_ParticipantId = 10007,
 
+    // If specified as true, request that the service send MessageStatus payloads via the ActivityReceived event
+    // handler. These messages communicate the outcome of ITurnContext resolution from the dialog system.
+    // Added in version 1.14.0.
+    Conversation_Request_Bot_Status_Messages = 10008,
+
     /// <summary>
     /// The time stamp associated to data buffer written by client when using Pull/Push audio input streams.
     /// The time stamp is a 64-bit value with a resolution of 90 kHz. It is the same as the presentation timestamp in an MPEG transport stream. See https://en.wikipedia.org/wiki/Presentation_timestamp

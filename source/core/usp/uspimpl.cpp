@@ -60,7 +60,7 @@ constexpr std::array<const char *, 11> endpoint::unifiedspeech::queryParameters;
 constexpr std::array<const char *, 12> endpoint::translation::queryParameters;
 constexpr std::array<const char *, 2> endpoint::luis::queryParameters;
 constexpr std::array<const char*, 2> endpoint::dialog::customCommands::queryParameters;
-constexpr std::array<const char *, 3> endpoint::dialog::botFramework::queryParameters;
+constexpr std::array<const char *, 4> endpoint::dialog::botFramework::queryParameters;
 constexpr std::array<const char *, 2> endpoint::conversationTranscriber::queryParameters;
 constexpr std::array<const char *, 0> endpoint::speechSynthesis::queryParameters;
 
