@@ -36,7 +36,7 @@ namespace Microsoft.CognitiveServices.Speech.Translation
     ///     using (var recognizer = new TranslationRecognizer(config))
     ///     {
     ///         // Subscribes to events.
-    ///         recognizer.Recognizing += (s, e) =>
+    ///         recognizer.Recognizing += (s, e) =&gt;
     ///         {
     ///             Console.WriteLine($"RECOGNIZING in '{fromLanguage}': Text={e.Result.Text}");
     ///             foreach (var element in e.Result.Translations)
@@ -45,7 +45,7 @@ namespace Microsoft.CognitiveServices.Speech.Translation
     ///             }
     ///         };
     ///
-    ///         recognizer.Recognized += (s, e) =>
+    ///         recognizer.Recognized += (s, e) =&gt;
     ///         {
     ///             if (e.Result.Reason == ResultReason.TranslatedSpeech)
     ///             {
@@ -57,7 +57,7 @@ namespace Microsoft.CognitiveServices.Speech.Translation
     ///             }
     ///         };
     ///
-    ///         recognizer.Synthesizing += (s, e) =>
+    ///         recognizer.Synthesizing += (s, e) =&gt;
     ///         {
     ///             var audio = e.Result.GetAudio();
     ///             Console.WriteLine(audio.Length != 0
@@ -65,17 +65,17 @@ namespace Microsoft.CognitiveServices.Speech.Translation
     ///                 : $"AudioSize: {audio.Length} (end of synthesis data)");
     ///         };
     ///
-    ///         recognizer.Canceled += (s, e) =>
+    ///         recognizer.Canceled += (s, e) =&gt;
     ///         {
     ///             Console.WriteLine($"\nRecognition canceled. Reason: {e.Reason}; ErrorDetails: {e.ErrorDetails}");
     ///         };
     ///
-    ///         recognizer.SessionStarted += (s, e) =>
+    ///         recognizer.SessionStarted += (s, e) =&gt;
     ///         {
     ///             Console.WriteLine("\nSession started event.");
     ///         };
     ///
-    ///         recognizer.SessionStopped += (s, e) =>
+    ///         recognizer.SessionStopped += (s, e) =&gt;
     ///         {
     ///             Console.WriteLine("\nSession stopped event.");
     ///         };

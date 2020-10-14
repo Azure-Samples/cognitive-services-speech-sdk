@@ -22,20 +22,24 @@ namespace Microsoft.CognitiveServices.Speech
     /// <example>
     /// First, the object needs to be instantiated:
     /// <code>
-    /// var audioConfig = AudioConfig.FromDefaultMicrophoneInput(); // Or an alternative input
-    /// var recognizer = KeywordRecognizer.FromConfig(audioConfig);
+    /// // (This sample uses the microphone. You can use any input source.)
+    /// var audioConfig = Microsoft.CognitiveServices.Speech.Audio.AudioConfig.FromDefaultMicrophoneInput();
+    /// var recognizer = new KeywordRecognizer (audioConfig);
     /// </code>
     /// (optional) Then, the events need to be wired in order to receive notifications:
     /// <code>
-    /// recognizer.Recognized += (s, e)
+    /// recognizer.Recognized += (s, e) =&gt;
     /// {
-    ///     // Your logic here...
+    ///     // Keyword detected!
     /// };
     /// </code>
-    /// And finally, recognition needs to be started.
+    /// All set up. Start recognition.
     /// <code>
-    /// var keywordModel = KeywordRecognitionModel.FromFile(modelPath);
-    /// var result = await recognizer.RecognizeKeywordOnceAsync(keywordModel);
+    /// // for .table, see:
+    /// // https://docs.microsoft.com/azure/cognitive-services/speech-service/custom-keyword-basics
+    /// var keywordModel = KeywordRecognitionModel.FromFile(@"C:\path\to\your\tablefile.table");
+    /// var result = recognizer.RecognizeOnceAsync(keywordModel);
+    /// result.Wait();
     /// </code>
     /// </example>
     public sealed class KeywordRecognizer: IDisposable
