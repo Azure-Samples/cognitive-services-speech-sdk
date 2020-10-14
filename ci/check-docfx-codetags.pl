@@ -140,6 +140,7 @@ BEGIN {
       samples/csharp/sharedcontent/console/translation_samples.cs#TranslationWithFileCompressedInputAsync
       samples/csharp/sharedcontent/console/translation_samples.cs#TranslationWithMicrophoneAsync
       samples/csharp/sharedcontent/console/translation_samples.cs#toplevel
+      samples/csharp/sharedcontent/console/remote_conversation_samples.cs#toplevel
       samples/java/jre/console/src/com/microsoft/cognitiveservices/speech/samples/console/IntentRecognitionSamples.java#IntentContinuousRecognitionWithFile
       samples/java/jre/console/src/com/microsoft/cognitiveservices/speech/samples/console/IntentRecognitionSamples.java#IntentRecognitionWithLanguage
       samples/java/jre/console/src/com/microsoft/cognitiveservices/speech/samples/console/IntentRecognitionSamples.java#IntentRecognitionWithMicrophone
