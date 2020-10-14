@@ -177,16 +177,6 @@
     return [NSString StringWithStdString:pronAssessmentConfigImpl->GetReferenceText()];
 }
 
-- (void)setScenarioId: (NSString *)scenarioId
-{
-    pronAssessmentConfigImpl->SetScenarioId([scenarioId toSpxString]);
-}
-
-- (NSString *)scenarioId
-{
-    return [NSString StringWithStdString:pronAssessmentConfigImpl->GetScenarioId()];
-}
-
 - (nullable NSString *)toJson {
     if (pronAssessmentConfigImpl == nullptr) {
         NSLog(@"SPXPronunciationAssessmentConfiguration handle is null");

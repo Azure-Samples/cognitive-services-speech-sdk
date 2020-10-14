@@ -45,14 +45,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
             config = new PronunciationAssessmentConfig("reference", GradingSystem.HundredMark, Granularity.Word, true);
             config.ReferenceText = "new reference";
-            config.ScenarioId = "id";
             jo = JObject.Parse(config.ToJson());
             SPXTEST_ARE_EQUAL("new reference", jo["referenceText"]);
             SPXTEST_ARE_EQUAL("HundredMark", jo["gradingSystem"]);
             SPXTEST_ARE_EQUAL("Word", jo["granularity"]);
             SPXTEST_ARE_EQUAL("Comprehensive", jo["dimension"]);
             SPXTEST_ISTRUE(jo["enableMiscue"].ToObject<bool>());
-            SPXTEST_ARE_EQUAL("id", jo["scenarioId"]);
 
             var config2 = PronunciationAssessmentConfig.FromJson(config.ToJson());
             SPXTEST_ISNOTNULL(config2);

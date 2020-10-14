@@ -63,7 +63,6 @@ public class PronunciationAssessmentTests extends BaseJUnit {
         pronConfig = new PronunciationAssessmentConfig("reference", PronunciationAssessmentGradingSystem.HundredMark, PronunciationAssessmentGranularity.Word, true);
         assertNotNull(pronConfig);
         pronConfig.setReferenceText("new reference");
-        pronConfig.setScenarioId("id");
         assertTrue(pronConfig.toJson().contains("HundredMark"));
         assertTrue(pronConfig.toJson().contains("Word"));
 

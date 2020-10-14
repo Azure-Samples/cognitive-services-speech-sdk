@@ -341,14 +341,6 @@ typedef NS_ENUM(NSUInteger, SPXPropertyId)
     SPXPronunciationAssessment_EnableMiscue = 12005,
 
     /**
-     * A GUID indicating a customized pronunciation score system. 
-     * Under normal circumstances, you shouldn't have to use this property directly.
-     *
-     * NOTE: Added in version 1.14.0
-     */
-    SPXPronunciationAssessment_ScenarioId = 12006,
-
-    /**
      * The json string of pronunciation assessment parameters
      * Under normal circumstances, you shouldn't have to use this property directly.
      *

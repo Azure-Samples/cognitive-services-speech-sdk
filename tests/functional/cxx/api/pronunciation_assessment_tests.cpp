@@ -28,7 +28,6 @@ SPXTEST_CASE_BEGIN("Pronunciation assessment configuration", "[api][cxx]")
         pronConfig = PronunciationAssessmentConfig::Create("reference",
                                                            PronunciationAssessmentGradingSystem::HundredMark,
                                                            PronunciationAssessmentGranularity::Word, true);
-        pronConfig->SetScenarioId("id");
         pronConfig->SetReferenceText("new reference");
         jsonString = pronConfig->ToJson();
         j = nlohmann::json::parse(jsonString);
@@ -37,7 +36,6 @@ SPXTEST_CASE_BEGIN("Pronunciation assessment configuration", "[api][cxx]")
         SPXTEST_REQUIRE(j["granularity"] == "Word");
         SPXTEST_REQUIRE(j["dimension"] == "Comprehensive");
         SPXTEST_REQUIRE(j["enableMiscue"] == true);
-        SPXTEST_REQUIRE(j["scenarioId"] == "id");
     }
 
     SPXTEST_SECTION("from json")

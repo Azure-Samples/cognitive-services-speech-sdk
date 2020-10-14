@@ -1654,7 +1654,6 @@ class PronunciationAssessmentConfig:
     :param grading_system: The point system for score calibration
     :param granularity: The evaluation granularity
     :param enable_miscue: If enables miscue calculation
-    :param scenario_id: A GUID indicating a customized point system
     :param json_string: A json string representing pronunciation assessment parameters
     """
     def __init__(self, reference_text: str = None,
@@ -1702,17 +1701,6 @@ class PronunciationAssessmentConfig:
     @reference_text.setter
     def reference_text(self, text: str):
         self._impl.set_reference_text(text)
-
-    @property
-    def scenario_id(self) -> str:
-        """
-        The scenario id, which is a GUID indicating a customized point system.
-        """
-        return self._impl.get_scenario_id()
-
-    @scenario_id.setter
-    def scenario_id(self, scenario_id: str):
-        self._impl.set_scenario_id(scenario_id)
 
 
 class PronunciationAssessmentPhonemeResult:

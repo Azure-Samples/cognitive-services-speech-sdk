@@ -88,7 +88,7 @@ constexpr const char* GetPropertyName(const PropertyId id)
     case PropertyId::PronunciationAssessment_GradingSystem: return "PronunciationAssessment_GradingSystem";
     case PropertyId::PronunciationAssessment_Granularity: return "PronunciationAssessment_Granularity";
     case PropertyId::PronunciationAssessment_EnableMiscue: return "PronunciationAssessment_EnableMiscue";
-    case PropertyId::PronunciationAssessment_ScenarioId: return "PronunciationAssessment_ScenarioId";
+    // case PropertyId::PronunciationAssessment_ScenarioId: return "PronunciationAssessment_ScenarioId";
     case PropertyId::PronunciationAssessment_Json: return "PronunciationAssessment_Json";
     case PropertyId::PronunciationAssessment_Params: return "PronunciationAssessment_Params";
 

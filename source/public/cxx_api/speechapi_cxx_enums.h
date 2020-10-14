@@ -455,14 +455,6 @@ enum class PropertyId
     PronunciationAssessment_EnableMiscue = 12005,
 
     /// <summary>
-    /// A GUID indicating a customized pronunciation score system. 
-    /// Under normal circumstances, you shouldn't have to use this property directly.
-    /// Instead, use <see cref="PronunciationAssessmentConfig::Create"/>.
-    /// Added in version 1.14.0
-    /// </summary>
-    PronunciationAssessment_ScenarioId = 12006,
-
-    /// <summary>
     /// The json string of pronunciation assessment parameters
     /// Under normal circumstances, you shouldn't have to use this property directly.
     /// Instead, use <see cref="PronunciationAssessmentConfig::Create"/>.

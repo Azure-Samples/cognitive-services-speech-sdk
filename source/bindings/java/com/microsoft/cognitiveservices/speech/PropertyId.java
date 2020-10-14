@@ -386,13 +386,6 @@ public enum PropertyId {
     PronunciationAssessment_EnableMiscue (12005),
 
     /**
-     * A GUID indicating a customized pronunciation score system. 
-     * Under normal circumstances, you shouldn't have to use this property directly.
-     * Added in version 1.14.0
-     */
-    PronunciationAssessment_ScenarioId (12006),
-
-    /**
      * The json string of pronunciation assessment parameters
      * Under normal circumstances, you shouldn't have to use this property directly.
      * Added in version 1.14.0

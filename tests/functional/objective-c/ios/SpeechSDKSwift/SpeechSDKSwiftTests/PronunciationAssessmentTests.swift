@@ -32,7 +32,6 @@ class PronunciationAssessmentTests: XCTestCase {
 
         XCTAssertNotNil(pronConfig)
         pronConfig?.referenceText = "new reference"
-        pronConfig?.scenarioId = "id"
         XCTAssertNotNil(pronConfig?.toJson()!.range(of: "HundredMark"))
         XCTAssertNotNil(pronConfig?.toJson()!.range(of: "Word"))
         XCTAssertNotNil(pronConfig?.toJson()!.range(of: "new reference"))

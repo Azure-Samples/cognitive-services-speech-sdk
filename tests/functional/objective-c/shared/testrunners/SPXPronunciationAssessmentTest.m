@@ -55,7 +55,6 @@
                                             enableMiscue:true];
     XCTAssertNotNil(pronConfig);
     pronConfig.referenceText = @"new reference";
-    pronConfig.scenarioId = @"id";
     XCTAssertTrue([[pronConfig toJson] containsString:@"HundredMark"]);
     XCTAssertTrue([[pronConfig toJson] containsString:@"Word"]);
     XCTAssertTrue([[pronConfig toJson] containsString:@"new reference"]);

@@ -119,23 +119,6 @@ public final class PronunciationAssessmentConfig implements Closeable
     }
 
     /**
-     * Sets the scenario ID, which is a GUID indicating a customized point system.
-     * @param scenarioId the scenario ID.
-     */
-    public void setScenarioId(String scenarioId) {
-        Contracts.throwIfNull(scenarioId, "scenarioId");
-        propertyHandle.setProperty(PropertyId.PronunciationAssessment_ScenarioId, scenarioId);
-    }
-
-    /**
-     * Gets the scenario ID, which is a GUID indicating a customized point system.
-     * @return The scenario ID.
-     */
-    public String getScenarioId() {
-        return propertyHandle.getProperty(PropertyId.PronunciationAssessment_ScenarioId);
-    }
-
-    /**
      * Gets the json string of pronunciation assessment parameters.
      * @return json string of pronunciation assessment parameters.
      */

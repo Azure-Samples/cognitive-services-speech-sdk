@@ -139,25 +139,6 @@ public:
 #endif
 
     /// <summary>
-    /// Sets the scenario ID, which is a GUID indicating a customized point system.
-    /// </summary>
-    /// <param name="scenarioId">The scenario ID.</param>
-    void SetScenarioId(const SPXSTRING& scenarioId)
-    {
-        property_bag_set_string(m_propertybag, static_cast<int>(PropertyId::PronunciationAssessment_ScenarioId), nullptr, scenarioId.c_str());
-    }
-
-    /// <summary>
-    /// Gets the scenario ID, which is a GUID indicating a customized point system.
-    /// </summary>
-    /// <returns>The scenario ID.</returns>
-    SPXSTRING GetScenarioId() const
-    {
-        const char* value = property_bag_get_string(m_propertybag, static_cast<int>(PropertyId::PronunciationAssessment_ScenarioId), nullptr, "");
-        return Utils::ToSPXString(Utils::CopyAndFreePropertyString(value));
-    }
-
-    /// <summary>
     /// Applies the settings in this config to a Recognizer.
     /// </summary>
     /// <param name="recognizer">The target Recognizer.</param>

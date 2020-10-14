@@ -96,7 +96,7 @@ void CSpxPronunciationAssessmentConfig::UpdateJson()
         paramsJson["enableMiscue"] = false;
     }
 
-    auto scenarioId = GetStringValue(GetPropertyName(PropertyId::PronunciationAssessment_ScenarioId));
+    auto scenarioId = GetStringValue("PronunciationAssessment_ScenarioId");
     if (!scenarioId.empty())
     {
         paramsJson["scenarioId"] = scenarioId;

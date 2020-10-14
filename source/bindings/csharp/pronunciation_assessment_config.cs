@@ -85,22 +85,6 @@ namespace Microsoft.CognitiveServices.Speech.PronunciationAssessment
         }
 
         /// <summary>
-        /// Gets and Sets the scenario ID, which is a GUID indicating a customized point system.
-        /// </summary>
-        public string ScenarioId
-        {
-            get
-            {
-                return progBag.GetProperty(PropertyId.PronunciationAssessment_ScenarioId);
-            }
-
-            set
-            {
-                progBag.SetProperty(PropertyId.PronunciationAssessment_ScenarioId, value);
-            }
-        }
-
-        /// <summary>
         /// Gets to json string of pronunciation assessment parameters.
         /// </summary>
         /// <returns>json string of pronunciation assessment parameters.</returns>

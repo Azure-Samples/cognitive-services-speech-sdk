@@ -73,7 +73,6 @@ namespace Microsoft.CognitiveServices.Speech.Internal
         PronunciationAssessment_GradingSystem = 12002,
         PronunciationAssessment_Granularity = 12003,
         PronunciationAssessment_EnableMiscue = 12005,
-        PronunciationAssessment_ScenarioId = 12006,
         PronunciationAssessment_Json = 12009,
         PronunciationAssessment_Params = 12010
     }

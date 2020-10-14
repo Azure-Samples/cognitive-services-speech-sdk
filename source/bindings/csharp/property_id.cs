@@ -387,13 +387,6 @@ namespace Microsoft.CognitiveServices.Speech
         PronunciationAssessment_EnableMiscue = Internal.PropertyId.PronunciationAssessment_EnableMiscue,
 
         /// <summary>
-        /// A GUID indicating a customized pronunciation score system. 
-        /// Under normal circumstances, you shouldn't have to use this property directly.
-        /// Added in version 1.14.0
-        /// </summary>
-        PronunciationAssessment_ScenarioId = Internal.PropertyId.PronunciationAssessment_ScenarioId,
-
-        /// <summary>
         /// The json string of pronunciation assessment parameters
         /// Under normal circumstances, you shouldn't have to use this property directly.
         /// Added in version 1.14.0

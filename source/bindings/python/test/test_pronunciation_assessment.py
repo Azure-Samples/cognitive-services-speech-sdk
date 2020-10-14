@@ -23,7 +23,6 @@ def test_pronunciation_assessment_config():
                                                     granularity=msspeech.PronunciationAssessmentGranularity.Word,
                                                     enable_miscue=True)
     config.reference_text = "new reference"
-    config.scenario_id = "id"
     jo = json.loads(config.to_json())
     assert config.reference_text == 'new reference'
     assert jo['referenceText'] == config.reference_text
@@ -31,7 +30,6 @@ def test_pronunciation_assessment_config():
     assert "Word" == jo["granularity"]
     assert "Comprehensive" == jo["dimension"]
     assert jo['enableMiscue']
-    assert 'id' == jo['scenarioId']
 
     config2 = msspeech.PronunciationAssessmentConfig(json_string=config.to_json())
     assert config.to_json() == config2.to_json()

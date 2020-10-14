@@ -626,14 +626,6 @@ DocstringForPropertyId = """
       .. note::
         This property id was added in version 1.4.0.
 
-    .. py:attribute:: PronunciationAssessment_ScenarioId
-
-      A GUID indicating a customized pronunciation score system.
-      Under normal circumstances, you shouldn't have to use this property directly.
-
-      .. note::
-        This property id was added in version 1.4.0.
-
     .. py:attribute:: PronunciationAssessment_Json
 
       The json string of pronunciation assessment parameters

@@ -136,11 +136,6 @@ NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.");
 @property (nonatomic, copy, nullable)NSString *referenceText;
 
 /**
- * Scenario ID, which is a GUID indicating a customized point system.
- */
-@property (nonatomic, copy, nullable)NSString *scenarioId;
-
-/**
  * Gets the json string of pronunciation assessment parameters.
  *
  * @return json string of pronunciation assessment parameters.
