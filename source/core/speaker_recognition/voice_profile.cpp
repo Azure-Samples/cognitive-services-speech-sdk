@@ -30,4 +30,10 @@ VoiceProfileType CSpxVoiceProfile::GetType() const
     return m_profile_type;
 }
 
+void CSpxVoiceProfile::SetType(VoiceProfileType type)
+{
+    m_profile_type = type;
+}
+
+
  }}}}

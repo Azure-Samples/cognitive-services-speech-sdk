@@ -69,7 +69,7 @@ std::shared_ptr<ISpxVoiceProfileClient> CSpxSpeechApiFactory::CreateVoiceProfile
 {
     // Create the session
     auto factoryAsSite = SpxSiteFromThis(this);
-    auto session = SpxCreateObjectWithSite<ISpxHttpAudioStreamSession>("CSpxHttpAudioStreamSession", factoryAsSite);
+    auto session = SpxCreateObjectWithSite<ISpxSpeakerRecognition>("CSpxHttpAudioStreamSession", factoryAsSite);
 
     try
     {
@@ -90,7 +90,7 @@ std::shared_ptr<ISpxVoiceProfileClient>  CSpxSpeechApiFactory::CreateSpeakerReco
 {
     // Create the session
     auto factoryAsSite = SpxSiteFromThis(this);
-    auto session = SpxCreateObjectWithSite<ISpxHttpAudioStreamSession>("CSpxHttpAudioStreamSession", factoryAsSite);
+    auto session = SpxCreateObjectWithSite<ISpxSpeakerRecognition>("CSpxHttpAudioStreamSession", factoryAsSite);
 
     try
     {

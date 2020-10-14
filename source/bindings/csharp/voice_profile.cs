@@ -19,14 +19,16 @@ namespace Microsoft.CognitiveServices.Speech
         /// Creates a VoiceProfile.
         /// </summary>
         /// <param name="id">An unique id.</param>
+        /// <param name="type">VoiceProfileType.</param>
+        ///
         /// <returns></returns>
         ///
-        public VoiceProfile(string id)
+        public VoiceProfile(string id, VoiceProfileType type = VoiceProfileType.TextIndependentIdentification)
         {
             using (var idHandle = new Utf8StringHandle(id))
             {
                 IntPtr handlePtr = Internal.SpeakerRecognition.SPXHANDLE_INVALID;
-                ThrowIfFail(Internal.SpeakerRecognition.create_voice_profile_from_id(out handlePtr, idHandle));
+                ThrowIfFail(Internal.SpeakerRecognition.create_voice_profile_from_id_and_type(out handlePtr, idHandle, (int)type));
                 InteropSafeHandle handle = new InteropSafeHandle(handlePtr, Internal.SpeakerRecognition.voice_profile_release_handle);
                 this.voiceProfileHandle = handle;
             }

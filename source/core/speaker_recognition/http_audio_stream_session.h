@@ -31,7 +31,7 @@ class CSpxHttpAudioStreamSession :
     public ISpxAudioPumpSite,
     public ISpxRecoResultFactory,
     public ISpxPropertyBagImpl,
-    public ISpxHttpAudioStreamSession
+    public ISpxSpeakerRecognition
 {
 public:
 
@@ -49,13 +49,13 @@ public:
         SPX_INTERFACE_MAP_ENTRY(ISpxAudioProcessor)
         SPX_INTERFACE_MAP_ENTRY(ISpxNamedProperties)
         SPX_INTERFACE_MAP_ENTRY(ISpxRecoResultFactory)
-        SPX_INTERFACE_MAP_ENTRY(ISpxHttpAudioStreamSession)
+        SPX_INTERFACE_MAP_ENTRY(ISpxSpeakerRecognition)
     SPX_INTERFACE_MAP_END()
 
     // --- IServiceProvider ---
     SPX_SERVICE_MAP_BEGIN()
         SPX_SERVICE_MAP_ENTRY(ISpxNamedProperties)
-        SPX_SERVICE_MAP_ENTRY(ISpxHttpAudioStreamSession)
+        SPX_SERVICE_MAP_ENTRY(ISpxSpeakerRecognition)
         SPX_SERVICE_MAP_ENTRY(ISpxRecoResultFactory)
     SPX_SERVICE_MAP_ENTRY_SITE(GetSite())
 
@@ -84,10 +84,13 @@ public:
     // --- ISpxAudioPumpSite
     void Error(const std::string& msg) override;
 
-    // --- ISpxHttpAudioStreamSession
-    std::string CreateVoiceProfile(VoiceProfileType type, std::string&& locale) override;
-    RecognitionResultPtr ModifyVoiceProfile(bool reset, VoiceProfileType type, std::string&& id) override;
-    RecognitionResultPtr StartStreamingAudioAndWaitForResult(bool enroll, VoiceProfileType type, std::vector<std::string>&& profileIds) override;
+    // --- ISpxSpeakerRecognition
+    VoiceProfilePtr CreateVoiceProfile(VoiceProfileType type, std::string&& locale) const override;
+    RecognitionResultPtr ModifyVoiceProfile(ModifyOperation operation, VoiceProfileType type, std::string&& id) override;
+    RecognitionResultPtr EnrollVoiceProfile(VoiceProfileType type, std::string&& profileId) override;
+    RecognitionResultPtr RecognizeVoiceProfile(VoiceProfileType type, std::vector<std::string>&& profileIds) override;
+    std::vector<VoiceProfilePtr> GetVoiceProfiles(VoiceProfileType type) const override;
+    VoiceProfilePtr GetVoiceProfileStatus(VoiceProfileType type, std::string&& voiceProfileId) const override;
 
 private:
 
@@ -97,6 +100,7 @@ private:
     std::chrono::milliseconds GetMicrophoneTimeout();
     void OnDoneAudioPumping();
     RecognitionResultPtr GetResult(std::future<RecognitionResultPtr>&& future);
+    std::shared_ptr<ISpxGenericSite> GetNonConstSite() const;
 
     std::shared_ptr<ISpxAudioPump> m_audioPump;
     std::shared_ptr<ISpxGenericSite> m_keepFactoryAlive;
@@ -112,6 +116,8 @@ private:
 
     std::packaged_task<void()> CreateTask(std::function<void()> func);
     void CleanupAfterEachAudioPumping();
+
+    RecognitionResultPtr StartStreamingAudioAndWaitForResult(bool enroll, VoiceProfileType type, std::vector<std::string>&& profileIds);
 
     uint32_t m_avgBytesPerSecond = 16000*2;
     uint32_t m_totalAudioinMS = 0;

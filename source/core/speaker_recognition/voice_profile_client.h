@@ -18,7 +18,7 @@ namespace Speech {
 namespace Impl {
 
 class CSpxVoiceProfileClient :
-    public ISpxObjectWithSiteInitImpl<ISpxHttpAudioStreamSession>,
+    public ISpxObjectWithSiteInitImpl<ISpxSpeakerRecognition>,
     public ISpxGenericSite,
     public ISpxServiceProvider,
     public ISpxVoiceProfileClient,
@@ -50,22 +50,26 @@ public:
     SPX_SERVICE_MAP_END()
 
     // --- ISpxVoiceProfileClient
-    std::shared_ptr<ISpxVoiceProfile> Create(VoiceProfileType voiceProfileType, std::string&& locale) override;
-    RecognitionResultPtr ProcessProfileAction(Action action, VoiceProfileType type, std::string&& profileId) override;
+    VoiceProfilePtr CreateVoiceProfile(VoiceProfileType voiceProfileType, std::string&& locale) const override;
+    RecognitionResultPtr ModifyVoiceProfile(ModifyOperation operation, VoiceProfileType type, std::string&& id) override;
+    std::vector<VoiceProfilePtr> GetVoiceProfiles(VoiceProfileType type) const override;
     RecognitionResultPtr Identify(std::vector<std::shared_ptr<ISpxVoiceProfile>>&& profiles) override;
+    RecognitionResultPtr Verify(VoiceProfileType type, std::string&& profileId) override;
+    RecognitionResultPtr Enroll(VoiceProfileType type, std::string&& profileId)  override;
+    VoiceProfilePtr GetVoiceProfileStatus(VoiceProfileType type, std::string&& voiceProfileId) const override;
 
 private:
-    using SitePtr = std::shared_ptr<ISpxHttpAudioStreamSession>;
+    using SitePtr = std::shared_ptr<ISpxSpeakerRecognition>;
 
     DISABLE_COPY_AND_MOVE(CSpxVoiceProfileClient);
 
-    std::shared_ptr<ISpxHttpAudioStreamSession> InternalQueryService(const char* serviceName);
+    std::shared_ptr<ISpxSpeakerRecognition> InternalQueryService(const char* serviceName);
 
     // enable logging.
     void CheckLogFilename();
     // --- provide a way to get parent's site's properties.
     std::shared_ptr<ISpxNamedProperties> GetParentProperties() const override;
-    std::shared_ptr<ISpxHttpAudioStreamSession> m_keepSiteAlive;
+    std::shared_ptr<ISpxSpeakerRecognition> m_keepSiteAlive;
 };
 
  }}}}

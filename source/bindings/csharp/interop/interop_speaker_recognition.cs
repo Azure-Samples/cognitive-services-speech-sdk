@@ -60,7 +60,7 @@ namespace Microsoft.CognitiveServices.Speech.Internal
         public static extern SPXHR voice_profile_client_get_property_bag(SPXSPEAKERIDHANDLE speakerRecognizerHandle, out SPXPROPERTYBAGHANDLE propertyBagHandle);
 
         [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
-        public static extern SPXHR create_voice_profile(InteropSafeHandle speakerRecognizerHandle, Int32 id, Utf8StringHandle locale, out SPXVOICEPROFILEHANDLE profileHandle);
+        public static extern SPXHR create_voice_profile(InteropSafeHandle speakerRecognizerHandle, Int32 voiceProfileType, Utf8StringHandle locale, out SPXVOICEPROFILEHANDLE profileHandle);
 
         [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR enroll_voice_profile(InteropSafeHandle speakerRecognizerHandle, InteropSafeHandle profileHandle, InteropSafeHandle audioConfigHandle, out SPXRESULTHANDLE result);
@@ -78,7 +78,7 @@ namespace Microsoft.CognitiveServices.Speech.Internal
         public static extern SPXHR voice_profile_client_release_handle(SPXVOICEPROFILECLIENTHANDLE voiceProfileClientHandle);
 
         [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
-        public static extern SPXHR create_voice_profile_from_id(out SPXVOICEPROFILEHANDLE profileHandle, Utf8StringHandle id);
+        public static extern SPXHR create_voice_profile_from_id_and_type(out SPXVOICEPROFILEHANDLE profileHandle, Utf8StringHandle id, Int32 voiceProfileType);
     }
 }
 

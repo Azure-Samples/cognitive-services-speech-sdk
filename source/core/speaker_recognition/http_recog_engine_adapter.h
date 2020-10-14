@@ -1,8 +1,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
-// participant.h: Private implementation declarations for participant
-//
+
 #pragma once
 
 #include "ispxinterfaces.h"
@@ -20,7 +19,8 @@ namespace CognitiveServices {
 namespace Speech {
 namespace Impl {
 
-using CreateFinalResultFuncPtr = std::function<RecognitionResultPtr(ResultReason, CancellationReason, NoMatchReason, const std::shared_ptr<ISpxErrorInformation>&, const wchar_t*)>;
+
+using ResponsePtr = std::unique_ptr<HttpResponse>;
 
 class CSpxHttpRecoEngineAdapter :
     public ISpxGenericSite,
@@ -69,8 +69,10 @@ public:
     void ProcessAudio(const DataChunkPtr& audioChunk) override;
     void FlushAudio() override;
     RecognitionResultPtr GetResult() override;
-    RecognitionResultPtr ModifyVoiceProfile(bool reset, VoiceProfileType type, std::string&& id) override;
-    std::string CreateVoiceProfile(VoiceProfileType type, std::string&& locale) const override;
+    RecognitionResultPtr ModifyVoiceProfile(ModifyOperation operation, VoiceProfileType type, std::string&& id) override;
+    VoiceProfilePtr CreateVoiceProfile(VoiceProfileType type, std::string&& locale) const override;
+    std::vector<VoiceProfilePtr> GetVoiceProfiles(VoiceProfileType type) const override;
+    VoiceProfilePtr GetVoiceProfileStatus(VoiceProfileType type, std::string&& voiceProfileId) const override;
 
     RecognitionResultPtr GetResult(SpeakerRecognitionOperationType operationType);
 

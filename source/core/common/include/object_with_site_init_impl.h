@@ -57,7 +57,7 @@ protected:
     }
 
     template<class F>
-    void InvokeOnSite(F f)
+    void InvokeOnSite(F f) const
     {
         auto site = GetSite();
         if (site != nullptr)
@@ -65,7 +65,6 @@ protected:
             f(site);
         }
     }
-
 
 private:
     bool m_hasSite;

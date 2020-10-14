@@ -11,15 +11,19 @@
 
 SPXAPI create_voice_profile_client_from_config(SPXVOICEPROFILECLIENTHANDLE* phclient, SPXSPEECHCONFIGHANDLE hSpeechConfig);
 SPXAPI voice_profile_client_release_handle(SPXVOICEPROFILECLIENTHANDLE hVoiceClient);
-SPXAPI create_voice_profile(SPXVOICEPROFILECLIENTHANDLE hclient, int id, const char* locale, SPXVOICEPROFILEHANDLE *pProfileHandle);
+SPXAPI create_voice_profile(SPXVOICEPROFILECLIENTHANDLE hVoiceProfileClient, int id, const char* locale, SPXVOICEPROFILEHANDLE *pProfileHandle);
 
 SPXAPI enroll_voice_profile(SPXVOICEPROFILECLIENTHANDLE hVoiceProfileClient, SPXVOICEPROFILEHANDLE hProfileHandle, SPXAUDIOCONFIGHANDLE hAudioInput, SPXRESULTHANDLE * phresult);
-SPXAPI voice_profile_client_get_property_bag(SPXVOICEPROFILECLIENTHANDLE hclient, SPXPROPERTYBAGHANDLE *hpropbag);
-SPXAPI create_voice_profile_from_id(SPXVOICEPROFILEHANDLE * phVoiceProfile, const char* id);
+SPXAPI voice_profile_client_get_property_bag(SPXVOICEPROFILECLIENTHANDLE hVoiceProfileClient, SPXPROPERTYBAGHANDLE *hpropbag);
+SPXAPI create_voice_profile_from_id_and_type(SPXVOICEPROFILEHANDLE * phVoiceProfile, const char* id, int type);
 SPXAPI voice_profile_get_id(SPXVOICEPROFILEHANDLE hVoiceProfile, char * psz, uint32_t * pcch);
 SPXAPI voice_profile_release_handle(SPXVOICEPROFILEHANDLE hVoiceProfile);
 SPXAPI delete_voice_profile(SPXVOICEPROFILECLIENTHANDLE hclient, SPXVOICEPROFILEHANDLE hProfileHandle, SPXRESULTHANDLE *phresult);
 SPXAPI reset_voice_profile(SPXVOICEPROFILECLIENTHANDLE hVoiceProfileClient, SPXVOICEPROFILEHANDLE hProfileHandle, SPXRESULTHANDLE *phresult);
+
+SPXAPI get_voice_profile_status(SPXVOICEPROFILECLIENTHANDLE hVoiceProfileClient, SPXVOICEPROFILEHANDLE hProfileHandle, SPXRESULTHANDLE *phresult);
+SPXAPI get_voice_profiles(SPXVOICEPROFILECLIENTHANDLE hVoiceProfileClient, int type, SPXVOICEPROFILEHANDLE *pProfileHandle[]);
+SPXAPI_(size_t) get_num_of_voice_profiles(SPXVOICEPROFILECLIENTHANDLE hVoiceProfileClient, int type);
 
 SPXAPI recognizer_create_speaker_recognizer_from_config(SPXSPEAKERIDHANDLE* phspeakerid, SPXSPEECHCONFIGHANDLE hspeechconfig, SPXAUDIOCONFIGHANDLE haudioInput);
 SPXAPI speaker_recognizer_release_handle(SPXSPEAKERIDHANDLE phspeakerid);

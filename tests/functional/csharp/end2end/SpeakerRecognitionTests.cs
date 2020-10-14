@@ -81,6 +81,15 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                         SPXTEST_REQUIRE(result.RemainingEnrollmentsSpeechLength >= new TimeSpan((long)0));
                         SPXTEST_REQUIRE(result.EnrollmentsSpeechLength >= new TimeSpan((long)239200000));
                         SPXTEST_REQUIRE(result.Reason == ResultReason.EnrolledVoiceProfile);
+
+                        var profile2 = new VoiceProfile(profile.Id, VoiceProfileType.TextIndependentIdentification);
+                        var recognizer = new SpeakerRecognizer(config, audioInput);
+                        var profiles = new List<VoiceProfile>();
+                        profiles.Add(profile);
+                        profiles.Add(profile2);
+                        var model = SpeakerIdentificationModel.FromProfiles(profiles);
+                        var result2 = await recognizer.RecognizeOnceAsync(model);
+                        SPXTEST_REQUIRE(result2.Reason == ResultReason.RecognizedSpeakers);
                     }
                 }
                 finally

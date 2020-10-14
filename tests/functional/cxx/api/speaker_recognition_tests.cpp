@@ -65,6 +65,12 @@ SPXTEST_CASE_BEGIN(
     SPXTEST_REQUIRE(result->GetEnrollmentInfo(EnrollmentInfoType::EnrollmentsCount) == 1);
     SPXTEST_REQUIRE(result->GetEnrollmentInfo(EnrollmentInfoType::EnrollmentsSpeechLength) >= 239200000);
     SPXTEST_REQUIRE(result->Reason == ResultReason::EnrolledVoiceProfile);
+
+    auto secondProfile = VoiceProfile::FromId(profile->GetId(), VoiceProfileType::TextIndependentVerification);
+    auto model = SpeakerVerificationModel::FromProfile(secondProfile);
+    auto recognizer = SpeakerRecognizer::FromConfig(config, audioInput);
+    auto result2 = recognizer->RecognizeOnceAsync(model).get();
+    SPXTEST_REQUIRE(result2->Reason == ResultReason::RecognizedSpeaker);
 } SPXTEST_CASE_END()
 
 SPXTEST_CASE_BEGIN(
@@ -98,15 +104,25 @@ SPXTEST_CASE_BEGIN(
     auto length = result->GetEnrollmentInfo(EnrollmentInfoType::RemainingEnrollmentsSpeechLength);
     INFO(length);
     SPXTEST_REQUIRE(result->Reason == ResultReason::EnrolledVoiceProfile);
+    INFO(DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT]);
+    INFO(SubscriptionsRegionsMap[UNIFIED_SPEECH_SUBSCRIPTION].Key);
+
+    auto profile2 = VoiceProfile::FromId(profile->GetId(), VoiceProfileType::TextIndependentIdentification);
+    auto profile3 = VoiceProfile::FromId(profile->GetId(), VoiceProfileType::TextIndependentIdentification);
+    auto profiles = std::vector<std::shared_ptr<VoiceProfile>>{ profile3, profile2 };
+    auto model = SpeakerIdentificationModel::FromProfiles(profiles);
+    auto recognizer = SpeakerRecognizer::FromConfig(config, audioInput);
+    auto result2 = recognizer->RecognizeOnceAsync(model).get();
+    SPXTEST_REQUIRE(result2->Reason == ResultReason::RecognizedSpeakers);
 } SPXTEST_CASE_END()
 
 SPXTEST_CASE_BEGIN(
     "Speaker recognition::text dependent verification enrollment bad request",
     "[api][cxx][speaker_id][enrollment_td_verfication_bad_request]")
 {
-    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(MULTIPLE_UTTERANCE_CHINESE)));
-
     // create a profile using a speech config
+    SPXTEST_REQUIRE(!DefaultSettingsMap[SPEAKER_RECOGNITION_ENDPOINT].empty());
+    SPXTEST_REQUIRE(exists(ROOT_RELATIVE_PATH(MULTIPLE_UTTERANCE_CHINESE)));
     auto config = GetSpeakerRecognitionProdSubscriptionConfig();
     auto client = VoiceProfileClient::FromConfig(config);
 
@@ -203,13 +219,13 @@ SPXTEST_CASE_BEGIN(
     auto d = VoiceProfileCancellationDetails::FromResult(result);
     SPXTEST_REQUIRE(d->ErrorDetails.find("can't be found") != std::string::npos);
 
-    // can't reset or reset without a voice type. it is a runtime error.
-    auto fakeProfile = VoiceProfile::FromId("voice_profile_without_voice_type");
+    // a fake profile to trig a canceled event.
+    auto fakeProfile = VoiceProfile::FromId("voice_profile_without_voice_type", VoiceProfileType::TextIndependentIdentification);
     result = client->ResetProfileAsync(fakeProfile).get();
     SPXTEST_REQUIRE(result->Reason == ResultReason::Canceled);
     auto details = VoiceProfileCancellationDetails::FromResult(result);
     SPXTEST_REQUIRE(details->ErrorDetails.find("error") != std::string::npos);
-    SPXTEST_REQUIRE(details->ErrorCode == CancellationErrorCode::RuntimeError);
+    SPXTEST_REQUIRE(details->ErrorCode == CancellationErrorCode::ServiceError);
 } SPXTEST_CASE_END()
 
 SPXTEST_CASE_BEGIN(
@@ -449,6 +465,12 @@ SPXTEST_CASE_BEGIN(
 
     enrollResult = client->EnrollProfileAsync(profile1, audioInput).get();
     SPXTEST_REQUIRE(enrollResult->Reason == ResultReason::EnrolledVoiceProfile);
+
+    auto profile = VoiceProfile::FromId(profile1->GetId(), VoiceProfileType::TextDependentVerification);
+    auto model = SpeakerVerificationModel::FromProfile(profile);
+    auto recognizer = SpeakerRecognizer::FromConfig(config, audioInput);
+    auto result = recognizer->RecognizeOnceAsync(model).get();
+    SPXTEST_REQUIRE( result->Reason == ResultReason::RecognizedSpeaker);
 } SPXTEST_CASE_END()
 
 #if 0

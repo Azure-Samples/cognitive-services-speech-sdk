@@ -7,6 +7,7 @@
 
 #include "stdafx.h"
 #include <sstream>
+#include <type_traits>
 #include <usp.h>
 #include "http_recog_engine_adapter.h"
 #include "http_recog_engine_response_helpers.h"
@@ -21,13 +22,104 @@
 #include <http_headers.h>
 #include <http_utils.h>
 
-using json = nlohmann::json;
-using namespace std;
-
 namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
 namespace Impl {
+
+using namespace std;
+using json = nlohmann::json;
+
+#define FROM_SECOND_TO_HNS 10000000 // 7 zeros
+
+namespace  voiceProfileHelper
+{
+    void GetEnrollmentInfo(const nlohmann::json& json, ISpxNamedProperties * properties);
+
+    template <typename FieldType>
+    bool GetValue(const nlohmann::json& json, const char* key, FieldType& value)
+    {
+        bool hasValue = false;
+        if (json.find(key) != json.end())
+        {
+            auto rawValue = json[key];
+            if (!rawValue.is_null())
+            {
+                value = json[key].get<FieldType>();
+                hasValue = true;
+            }
+        }
+        return hasValue;
+    }
+
+    std::string CreateKey(const char* prefix, const char* key)
+    {
+        std::string keyName{ prefix };
+        if (!keyName.empty())
+        {
+            keyName += ".";
+        }
+        return keyName.append(key);
+    }
+
+    template <typename T, typename std::enable_if_t<std::is_same<T, std::string>::value>* = nullptr>
+    void FromJsonToPropertyBag(const nlohmann::json& json, const char* key, ISpxNamedProperties* properties, const char* prefix = "")
+    {
+        std::string value{ "" };
+        if (GetValue<std::string>(json, key, value))
+        {
+            std::string keyName = CreateKey(prefix, key);
+            properties->SetStringValue(keyName.c_str(), value.c_str());
+        }
+    }
+
+    template <typename T, typename std::enable_if_t<std::is_floating_point<T>::value>* = nullptr>
+    void FromJsonToPropertyBag(const nlohmann::json& json, const char* key, ISpxNamedProperties* properties, const char* prefix = "")
+    {
+        float valueInSeconds = 0.0;
+        if (GetValue<float>(json, key, valueInSeconds))
+        {
+            std::string keyName = CreateKey(prefix, key);
+            uint64_t valueInHNS = static_cast<uint64_t>(valueInSeconds * FROM_SECOND_TO_HNS);
+            properties->SetStringValue(keyName.c_str(), std::to_string(valueInHNS).c_str());
+        }
+    }
+
+    template <typename Integer, std::enable_if_t<std::is_integral<Integer>::value, int> =0>
+    void FromJsonToPropertyBag(const nlohmann::json& json, const char* key, ISpxNamedProperties* properties, const char* prefix = "")
+    {
+        int value = 0;
+        if (GetValue<int>(json, key, value))
+        {
+            std::string keyName = CreateKey(prefix, key);
+            properties->SetStringValue(keyName.c_str(), std::to_string(value).c_str());
+        }
+    }
+
+    template <typename T, typename Fields>
+    void FromJsonToPropertyBag(const nlohmann::json& json, Fields fields, ISpxNamedProperties* properties, const char* prefix = "")
+    {
+        for (auto& field : fields)
+        {
+            FromJsonToPropertyBag<T>(json, field, properties, prefix);
+        }
+    }
+}
+
+void voiceProfileHelper::GetEnrollmentInfo(const nlohmann::json& json, ISpxNamedProperties * properties)
+{
+    if (properties == nullptr)
+    {
+        return;
+    }
+
+    vector<const char*> intFields{ "enrollmentsCount", "remainingEnrollmentsCount"};
+    voiceProfileHelper::FromJsonToPropertyBag<int>(json, intFields, properties, "enrollment");
+
+    // todo: "HTTP Get Profile" from service returns "enrollmentSpeechLength" missing s after enrollmentsSpeechLength.
+    vector<const char*> floatFields{ "enrollmentsSpeechLength", "enrollmentSpeechLength", "remainingEnrollmentsSpeechLength"};
+    voiceProfileHelper::FromJsonToPropertyBag<float>(json, floatFields, properties, "enrollment");
+}
 
 void CSpxHttpRecoEngineAdapter::Init()
 {
@@ -79,7 +171,7 @@ const std::string CSpxHttpRecoEngineAdapter::GetSubscriptionKey() const
     return subscriptionKey;
 }
 
-string CSpxHttpRecoEngineAdapter::CreateVoiceProfile(VoiceProfileType type, string&& locale) const
+VoiceProfilePtr CSpxHttpRecoEngineAdapter::CreateVoiceProfile(VoiceProfileType type, string&& locale) const
 {
     HttpEndpointInfo end_point = CreateEndpoint(type);
     string voice_profile_id{ "" };
@@ -89,7 +181,7 @@ string CSpxHttpRecoEngineAdapter::CreateVoiceProfile(VoiceProfileType type, stri
     auto culture = oss.str();
 
     auto response = SendRequest(end_point, HTTPAPI_REQUEST_POST, culture.c_str(), culture.length());
-    SPX_IFTRUE_RETURN_X(response == nullptr, voice_profile_id);
+    SPX_IFTRUE_RETURN_X(response == nullptr, nullptr);
 
     auto json = json::parse(response->ReadContentAsString());
 
@@ -102,7 +194,14 @@ string CSpxHttpRecoEngineAdapter::CreateVoiceProfile(VoiceProfileType type, stri
     {
         SPX_TRACE_INFO("Successfully created a profile id as %s", voice_profile_id.c_str());
     }
-    return voice_profile_id;
+
+    auto voiceProfile = SpxCreateObjectWithSite<ISpxVoiceProfile>("CSpxVoiceProfile", SpxGetRootSite());
+    SPX_IFTRUE_RETURN_X(voiceProfile == nullptr, nullptr);
+
+    voiceProfile->SetProfileId(move(voice_profile_id));
+    voiceProfile->SetType(type);
+
+    return voiceProfile;
 }
 
 unique_ptr<HttpResponse> CSpxHttpRecoEngineAdapter::SendRequest(const HttpEndpointInfo& endPoint, HTTPAPI_REQUEST_TYPE requestType, const void *content, size_t contentSize) const
@@ -140,7 +239,7 @@ unique_ptr<HttpResponse> CSpxHttpRecoEngineAdapter::SendRequest(const HttpEndpoi
         return response;
     }
 
-    SPX_TRACE_ERROR_IF(!response->IsSuccess(), "ModifyVoiceProfile failed with HTTP %u [%s] url:'%s'",
+    SPX_TRACE_ERROR_IF(!response->IsSuccess(), "SendRequest failed with HTTP %u [%s] url:'%s'",
         response->GetStatusCode(),
         response->ReadContentAsString().c_str(),
         endPoint.EndpointUrl().c_str());
@@ -221,7 +320,7 @@ void CSpxHttpRecoEngineAdapter::FlushAudio()
     m_audioFlushed = true;
 }
 
-RecognitionResultPtr CSpxHttpRecoEngineAdapter::ModifyVoiceProfile(bool reset, VoiceProfileType type, std::string&& id)
+RecognitionResultPtr CSpxHttpRecoEngineAdapter::ModifyVoiceProfile(ModifyOperation operation, VoiceProfileType type, std::string&& id)
 {
     if (type == VOICE_PROFILE_TYPE_NONE)
     {
@@ -232,6 +331,7 @@ RecognitionResultPtr CSpxHttpRecoEngineAdapter::ModifyVoiceProfile(bool reset, V
     }
 
     auto fullPath = m_speakerIdPaths.at(type) + "/" + id;
+    bool reset = operation == ModifyOperation::Reset;
     if (reset)
     {
         fullPath += "/reset";
@@ -452,6 +552,43 @@ std::shared_ptr<ISpxErrorInformation> CSpxHttpRecoEngineAdapter::TryPopulateResu
 
     // Population successful; no error
     return nullptr;
+}
+
+vector<VoiceProfilePtr> CSpxHttpRecoEngineAdapter::GetVoiceProfiles(VoiceProfileType type) const
+{
+    // todo: how to conjure a vector VoiceProfilePtr for error case??
+    vector<VoiceProfilePtr> result;
+    SPX_IFTRUE_RETURN_X(type == VOICE_PROFILE_TYPE_NONE, result);
+
+    return vector<VoiceProfilePtr>{};
+}
+
+VoiceProfilePtr CSpxHttpRecoEngineAdapter::GetVoiceProfileStatus(VoiceProfileType type, string&& voiceProfileId) const
+{
+    // todo: how to conjure a VoiceProfilePtr for error case?
+    SPX_IFTRUE_RETURN_X(type == VOICE_PROFILE_TYPE_NONE, nullptr);
+    SPX_IFTRUE_RETURN_X(voiceProfileId.empty(), nullptr);
+
+    auto fullPath = m_speakerIdPaths.at(type) + "/" + voiceProfileId;
+    auto endPoint = CreateEndpoint(move(fullPath));
+    auto response = SendRequest(endPoint, HTTPAPI_REQUEST_GET);
+    SPX_IFTRUE_RETURN_X(response == nullptr, nullptr);
+    SPX_TRACE_VERBOSE("Successfully get voice profile %s", voiceProfileId.c_str());
+
+    auto voiceProfile = SpxCreateObjectWithSite<ISpxVoiceProfile>("CSpxVoiceProfile", SpxGetRootSite());
+    SPX_IFTRUE_RETURN_X(voiceProfile == nullptr, nullptr);
+
+    voiceProfile->SetProfileId(move(voiceProfileId));
+    voiceProfile->SetType(type);
+
+    auto json = json::parse(response->ReadContentAsString());
+    auto properties = SpxQueryInterface<ISpxNamedProperties>(voiceProfile);
+    voiceProfileHelper::GetEnrollmentInfo(json, properties.get());
+
+    vector<const char*> fields{ "locale", "enrollmentStatus", "createdDateTime", "lastUpdatedDateTime", "modelVersion" };
+    voiceProfileHelper::FromJsonToPropertyBag<std::string>(json, fields, properties.get());
+
+    return voiceProfile;
 }
 
 }}}}

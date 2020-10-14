@@ -174,6 +174,17 @@ void CSpxHttpAudioStreamSession::InitFromStream(shared_ptr<ISpxAudioStream> stre
     m_threadService->ExecuteAsync(move(task));
 }
 
+RecognitionResultPtr CSpxHttpAudioStreamSession::EnrollVoiceProfile(VoiceProfileType type, std::string&& profileId)
+{
+    vector<string> ids{ profileId };
+    return StartStreamingAudioAndWaitForResult(true, type, move(ids));
+}
+
+RecognitionResultPtr CSpxHttpAudioStreamSession::RecognizeVoiceProfile(VoiceProfileType type, std::vector<std::string>&& profileIds)
+{
+    return StartStreamingAudioAndWaitForResult(false, type, move(profileIds));
+}
+
 RecognitionResultPtr CSpxHttpAudioStreamSession::StartStreamingAudioAndWaitForResult(bool enroll, VoiceProfileType type, vector<string>&& profileIds)
 {
     auto keepAlive = SpxSharedPtrFromThis<ISpxAudioProcessor>(this);
@@ -315,7 +326,7 @@ void CSpxHttpAudioStreamSession::OnDoneAudioPumping()
     {
         m_postAudioThread.join();
     }
-    auto keepAlive = SpxSharedPtrFromThis<ISpxHttpAudioStreamSession>(this);
+    auto keepAlive = SpxSharedPtrFromThis<ISpxSpeakerRecognition>(this);
     m_postAudioThread = thread([this, keepAlive]() {
         SPX_DBG_TRACE_VERBOSE("Starting to flush all audio data to the HTTP Adapter.");
         auto httpRecoAdapter = m_reco;
@@ -373,21 +384,20 @@ void CSpxHttpAudioStreamSession::StopPump()
     }
 }
 
-string CSpxHttpAudioStreamSession::CreateVoiceProfile(VoiceProfileType type, string&& locale)
+VoiceProfilePtr CSpxHttpAudioStreamSession::CreateVoiceProfile(VoiceProfileType type, string&& locale) const
 {
-    auto site = SpxSiteFromThis(this);
-    auto reco = SpxCreateObjectWithSite<ISpxHttpRecoEngineAdapter>("CSpxHttpRecoEngineAdapter", site);
+    auto reco = SpxCreateObjectWithSite<ISpxHttpRecoEngineAdapter>("CSpxHttpRecoEngineAdapter", GetNonConstSite());
     return reco->CreateVoiceProfile(type, move(locale));
 }
 
-RecognitionResultPtr CSpxHttpAudioStreamSession::ModifyVoiceProfile(bool reset, VoiceProfileType type, std::string&& id)
+RecognitionResultPtr CSpxHttpAudioStreamSession::ModifyVoiceProfile(ModifyOperation operation, VoiceProfileType type, std::string&& id)
 {
     auto keepAlive = SpxSharedPtrFromThis<ISpxAudioProcessor>(this);
     RecognitionResultPtr result;
-    auto task = CreateTask([this, keepAlive, &result, reset=reset, type = type, id = move(id)]() mutable {
+    auto task = CreateTask([this, keepAlive, &result, operation = operation, type = type, id = move(id)]() mutable {
         auto site = SpxSiteFromThis(this);
         auto reco = SpxCreateObjectWithSite<ISpxHttpRecoEngineAdapter>("CSpxHttpRecoEngineAdapter", site);
-        result = reco->ModifyVoiceProfile(reset, type, move(id));
+        result = reco->ModifyVoiceProfile(operation, type, move(id));
         SpxTermAndClear(reco);
         });
     m_threadService->ExecuteSync(move(task));
@@ -395,11 +405,30 @@ RecognitionResultPtr CSpxHttpAudioStreamSession::ModifyVoiceProfile(bool reset, 
     return result;
 }
 
+VoiceProfilePtr CSpxHttpAudioStreamSession::GetVoiceProfileStatus(VoiceProfileType type, string&& voiceProfileId) const
+{
+    auto reco = SpxCreateObjectWithSite<ISpxHttpRecoEngineAdapter>("CSpxHttpRecoEngineAdapter", GetNonConstSite());
+    return reco->GetVoiceProfileStatus(type, move(voiceProfileId));
+}
+
+vector<shared_ptr<ISpxVoiceProfile>> CSpxHttpAudioStreamSession::GetVoiceProfiles(VoiceProfileType type) const
+{
+    auto reco = SpxCreateObjectWithSite<ISpxHttpRecoEngineAdapter>("CSpxHttpRecoEngineAdapter", GetNonConstSite());
+    return reco->GetVoiceProfiles(type);
+}
+
+std::shared_ptr<ISpxGenericSite> CSpxHttpAudioStreamSession::GetNonConstSite() const
+{
+    // cast away the const-ness of the object. This is still a const pointer.
+    CSpxHttpAudioStreamSession * const localThis = const_cast<CSpxHttpAudioStreamSession* const>(this);
+    return SpxSiteFromThis(localThis);
+}
+
 packaged_task<void()> CSpxHttpAudioStreamSession::CreateTask(function<void()> func)
 {
     // Creates a packaged task that propagates all exceptions
     // to the user thread and then user callback.
-    auto keepAlive = SpxSharedPtrFromThis<ISpxHttpAudioStreamSession>(this);
+    auto keepAlive = SpxSharedPtrFromThis<ISpxSpeakerRecognition>(this);
 
     // Catches all exceptions and sends them to the user thread.
     return packaged_task<void()>([this, keepAlive, func]() {

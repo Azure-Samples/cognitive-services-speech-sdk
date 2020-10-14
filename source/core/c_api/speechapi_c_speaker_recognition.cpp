@@ -21,7 +21,7 @@ using namespace Microsoft::CognitiveServices::Speech;
 using namespace Microsoft::CognitiveServices::Speech::Impl;
 using namespace std;
 
-SPXAPI create_voice_profile_from_id(SPXVOICEPROFILEHANDLE * phVoiceProfile, const char* id)
+SPXAPI create_voice_profile_from_id_and_type(SPXVOICEPROFILEHANDLE * phVoiceProfile, const char* id, int type)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, id == nullptr || !(*id));
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, phVoiceProfile == nullptr);
@@ -33,6 +33,7 @@ SPXAPI create_voice_profile_from_id(SPXVOICEPROFILEHANDLE * phVoiceProfile, cons
         auto voiceProfile = SpxCreateObjectWithSite<ISpxVoiceProfile>("CSpxVoiceProfile", SpxGetRootSite());
 
         voiceProfile->SetProfileId(id);
+        voiceProfile->SetType(static_cast<VoiceProfileType>(type));
 
         auto voiceProfileHandles = CSpxSharedPtrHandleTableManager::Get<ISpxVoiceProfile, SPXPARTICIPANTHANDLE>();
         *phVoiceProfile = voiceProfileHandles->TrackHandle(voiceProfile);
@@ -112,13 +113,13 @@ SPXAPI enroll_voice_profile(SPXVOICEPROFILECLIENTHANDLE hVoiceProfileClient, SPX
         auto voice_profile = GetInstance<ISpxVoiceProfile>(hVoiceProfile);
         auto audio_input = TryGetInstance<ISpxAudioConfig>(hAudioInput); // hAudioInput could be nullptr, that is OK.
 
-        auto session = SpxQueryService<ISpxHttpAudioStreamSession>(client);
+        auto session = SpxQueryService<ISpxSpeakerRecognition>(client);
         auto audio_init = SpxQueryInterface<ISpxAudioStreamSessionInit>(session);
         factory->InitSessionFromAudioInputConfig(audio_init, audio_input);
 
         auto type = voice_profile->GetType();
         auto id = voice_profile->GetProfileId();
-        auto result = client->ProcessProfileAction(ISpxVoiceProfileClient::Action::Enroll, type, std::move(id));
+        auto result = client->Enroll(type, std::move(id));
 
         auto result_handles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
         *phProfileResult = result_handles->TrackHandle(result);
@@ -139,7 +140,7 @@ SPXAPI create_voice_profile(SPXVOICEPROFILECLIENTHANDLE hclient, int id, const c
     {
         auto client = GetInstance<ISpxVoiceProfileClient>(hclient);
 
-        auto voice_profile = client->Create(static_cast<VoiceProfileType>(id), locale);
+        auto voice_profile = client->CreateVoiceProfile(static_cast<VoiceProfileType>(id), locale);
 
         auto voice_profile_handles = CSpxSharedPtrHandleTableManager::Get<ISpxVoiceProfile, SPXVOICEPROFILEHANDLE>();
         *pProfile = voice_profile_handles->TrackHandle(voice_profile);
@@ -160,7 +161,7 @@ SPXAPI delete_voice_profile(SPXVOICEPROFILECLIENTHANDLE hclient, SPXVOICEPROFILE
         auto client = GetInstance<ISpxVoiceProfileClient>(hclient);
         auto profile = GetInstance<ISpxVoiceProfile>(hProfileHandle);
 
-        auto result = client->ProcessProfileAction(ISpxVoiceProfileClient::Action::Delete, profile->GetType(), profile->GetProfileId());
+        auto result = client->ModifyVoiceProfile(ISpxVoiceProfileProcessor::ModifyOperation::Delete, profile->GetType(), profile->GetProfileId()); // false for delete.
         auto result_handles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
         *phresult = result_handles->TrackHandle(result);
     }
@@ -175,7 +176,7 @@ SPXAPI reset_voice_profile(SPXVOICEPROFILECLIENTHANDLE hclient, SPXVOICEPROFILEH
         auto client = GetInstance<ISpxVoiceProfileClient>(hclient);
         auto profile = GetInstance<ISpxVoiceProfile>(hProfileHandle);
 
-        auto result = client->ProcessProfileAction(ISpxVoiceProfileClient::Action::Reset, profile->GetType(), profile->GetProfileId());
+        auto result = client->ModifyVoiceProfile(ISpxVoiceProfileProcessor::ModifyOperation::Reset, profile->GetType(), profile->GetProfileId()); // true for reset.
         auto result_handles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
         *phresult = result_handles->TrackHandle(result);
     }
@@ -289,9 +290,30 @@ SPXAPI speaker_recognizer_verify(SPXSPEAKERIDHANDLE phspeakerid, SPXSVMODELHANDL
         auto profile = model->GetProfile();
         if (profile != nullptr)
         {
-            auto result = recognizer->ProcessProfileAction(ISpxVoiceProfileClient::Action::Verify, profile->GetType(), profile->GetProfileId());
+            auto result = recognizer->Verify(profile->GetType(), profile->GetProfileId());
             auto result_handles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
             *phresult = result_handles->TrackHandle(result);
+        }
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
+SPXAPI get_voice_profiles(SPXVOICEPROFILECLIENTHANDLE hVoiceProfileClient, int type, SPXVOICEPROFILEHANDLE* pVoiceProfileHandles[])
+{
+    SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, hVoiceProfileClient == nullptr);
+
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        auto client = GetInstance<ISpxVoiceProfileClient>(hVoiceProfileClient);
+
+        auto profiles = client->GetVoiceProfiles(static_cast<VoiceProfileType>(type));
+
+        for( size_t i = 0; i< profiles.size(); i++)
+        {
+            auto voice_profile_handles = CSpxSharedPtrHandleTableManager::Get<ISpxVoiceProfile, SPXVOICEPROFILEHANDLE>();
+            *pVoiceProfileHandles[i] = voice_profile_handles->TrackHandle(profiles[i]);
         }
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);

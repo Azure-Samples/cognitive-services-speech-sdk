@@ -937,44 +937,55 @@ public:
     virtual std::string GetProfileId() const = 0;
 
     virtual VoiceProfileType GetType() const = 0;
+    virtual void SetType(VoiceProfileType type) = 0;
 };
 
+using VoiceProfilePtr = std::shared_ptr<ISpxVoiceProfile>;
 class ISpxSIModel : public ISpxInterfaceBaseFor<ISpxSIModel>
 {
 public:
-    virtual void AddProfile(const std::shared_ptr<ISpxVoiceProfile>& profile) = 0;
-    virtual std::vector<std::shared_ptr<ISpxVoiceProfile>> GetProfiles() const = 0;
+    virtual void AddProfile(const VoiceProfilePtr& profile) = 0;
+    virtual std::vector<VoiceProfilePtr> GetProfiles() const = 0;
 };
 
 class ISpxSVModel : public ISpxInterfaceBaseFor<ISpxSVModel>
 {
 public:
-    virtual void InitModel(const std::shared_ptr<ISpxVoiceProfile>& profile) = 0;
-    virtual std::shared_ptr<ISpxVoiceProfile> GetProfile() const = 0;
+    virtual void InitModel(const VoiceProfilePtr& profile) = 0;
+    virtual VoiceProfilePtr GetProfile() const = 0;
 };
 
-//todo:
-class ISpxVoiceProfileResult
+class ISpxVoiceProfileProcessor
 {
 public:
-
+    enum class ModifyOperation
+    {
+        Delete = 0,
+        Reset = 1
+    };
+    virtual VoiceProfilePtr CreateVoiceProfile(VoiceProfileType type, std::string&& locale) const = 0;
+    virtual RecognitionResultPtr ModifyVoiceProfile(ModifyOperation operation, VoiceProfileType type, std::string&& id) = 0;
+    virtual std::vector<VoiceProfilePtr> GetVoiceProfiles(VoiceProfileType type) const = 0;
+    virtual VoiceProfilePtr GetVoiceProfileStatus(VoiceProfileType type, std::string&& voiceProfileId) const = 0;
 };
 
-class ISpxVoiceProfileClient :public ISpxInterfaceBaseFor<ISpxVoiceProfileClient>
+class ISpxVoiceProfileClient :
+    public ISpxVoiceProfileProcessor,
+    public ISpxInterfaceBaseFor<ISpxVoiceProfileClient>
 {
 public:
-    enum class Action {Verify, Delete, Reset, Enroll};
-    virtual std::shared_ptr<ISpxVoiceProfile> Create(VoiceProfileType voiceProfileType, std::string&& locale) = 0;
-    virtual RecognitionResultPtr Identify(std::vector<std::shared_ptr<ISpxVoiceProfile>>&& profileIds) = 0;
-    virtual RecognitionResultPtr ProcessProfileAction(Action action, VoiceProfileType type, std::string&& profileId) = 0;
+    virtual RecognitionResultPtr Identify(std::vector<VoiceProfilePtr>&& profileIds) = 0;
+    virtual RecognitionResultPtr Verify(VoiceProfileType type, std::string&& profileId) = 0;
+    virtual RecognitionResultPtr Enroll(VoiceProfileType type, std::string&& profileId) = 0;
 };
 
-class ISpxHttpAudioStreamSession :public ISpxInterfaceBaseFor<ISpxHttpAudioStreamSession>
+class ISpxSpeakerRecognition :
+    public ISpxVoiceProfileProcessor,
+    public ISpxInterfaceBaseFor<ISpxSpeakerRecognition>
 {
 public:
-    virtual std::string CreateVoiceProfile(VoiceProfileType type, std::string&& locale) = 0;
-    virtual RecognitionResultPtr StartStreamingAudioAndWaitForResult(bool enroll, VoiceProfileType type, std::vector<std::string>&& ids) = 0;
-    virtual RecognitionResultPtr ModifyVoiceProfile(bool reset, VoiceProfileType type, std::string&& id) = 0;
+    virtual RecognitionResultPtr EnrollVoiceProfile(VoiceProfileType type, std::string&& ids) = 0;
+    virtual RecognitionResultPtr RecognizeVoiceProfile(VoiceProfileType type, std::vector<std::string>&& ids) = 0;
 };
 
 class ISpxSpeechApiFactory : public ISpxInterfaceBaseFor<ISpxSpeechApiFactory>
@@ -1210,14 +1221,17 @@ public:
     virtual void SetProfanity(ProfanityOption profanity) = 0;
 };
 
-class ISpxHttpRecoEngineAdapter : public ISpxInterfaceBaseFor<ISpxHttpRecoEngineAdapter>
+class ISpxHttpRecoEngineAdapter :
+    public ISpxVoiceProfileProcessor,
+    public ISpxInterfaceBaseFor<ISpxHttpRecoEngineAdapter>
 {
 public:
-    virtual std::string CreateVoiceProfile(VoiceProfileType type, std::string&& locale) const = 0;
-    virtual RecognitionResultPtr ModifyVoiceProfile(bool reset, VoiceProfileType type, std::string&& id) = 0;
+    virtual VoiceProfilePtr CreateVoiceProfile(VoiceProfileType type, std::string&& locale) const = 0;
+    virtual RecognitionResultPtr ModifyVoiceProfile(ModifyOperation operation, VoiceProfileType type, std::string&& id) = 0;
     virtual void SetFormat(const SPXWAVEFORMATEX* pformat, VoiceProfileType type, std::vector<std::string>&& profileIds, bool enroll) = 0;
     virtual void ProcessAudio(const DataChunkPtr& audioChunk) = 0;
     virtual void FlushAudio() = 0;
+
     virtual RecognitionResultPtr GetResult() = 0;
 };
 

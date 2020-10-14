@@ -29,11 +29,11 @@ class VoiceProfile : public std::enable_shared_from_this<VoiceProfile>
 {
 public:
 
-    static std::shared_ptr<VoiceProfile> FromId(const SPXSTRING& Id)
+    static std::shared_ptr<VoiceProfile> FromId(const SPXSTRING& Id, VoiceProfileType voiceProfileType = VoiceProfileType::TextIndependentIdentification)
     {
         SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
         SPXVOICEPROFILEHANDLE hVoiceProfile;
-        SPX_THROW_ON_FAIL(::create_voice_profile_from_id(&hVoiceProfile,Utils::ToUTF8(Id).c_str()));
+        SPX_THROW_ON_FAIL(::create_voice_profile_from_id_and_type(&hVoiceProfile,Utils::ToUTF8(Id).c_str(), static_cast<int>(voiceProfileType)));
         return std::shared_ptr<VoiceProfile> { new VoiceProfile(hVoiceProfile) };
     }
 

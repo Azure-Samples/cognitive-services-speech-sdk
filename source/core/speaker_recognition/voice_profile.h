@@ -12,6 +12,7 @@
 #include "interface_helpers.h"
 #include "service_helpers.h"
 #include <object_with_site_init_impl.h>
+#include "property_bag_impl.h"
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -20,15 +21,17 @@ namespace Impl {
 
 class CSpxVoiceProfile :
     public ISpxVoiceProfile,
-    public ISpxObjectWithSiteInitImpl<ISpxGenericSite>
+    public ISpxObjectWithSiteInitImpl<ISpxGenericSite>,
+    public ISpxPropertyBagImpl
 {
 public:
 
     SPX_INTERFACE_MAP_BEGIN()
         SPX_INTERFACE_MAP_ENTRY(ISpxObjectWithSite)
         SPX_INTERFACE_MAP_ENTRY(ISpxObjectInit)
+        SPX_INTERFACE_MAP_ENTRY(ISpxNamedProperties)
         SPX_INTERFACE_MAP_ENTRY(ISpxVoiceProfile)
-   SPX_INTERFACE_MAP_END()
+        SPX_INTERFACE_MAP_END()
 
     CSpxVoiceProfile() : m_profile_type(VOICE_PROFILE_TYPE_NONE) {};
     virtual ~CSpxVoiceProfile() = default;
@@ -45,6 +48,8 @@ public:
     std::string GetProfileId() const override;
 
     VoiceProfileType GetType() const override;
+
+    void SetType(VoiceProfileType type) override;
 
 private:
 
