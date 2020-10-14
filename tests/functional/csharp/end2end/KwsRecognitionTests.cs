@@ -33,20 +33,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [ClassInitialize]
         public static void TestClassinitialize(TestContext context)
         {
-            LoggingTestBaseInit(context);
-            BaseClassInit(context);
-
             deploymentId = DefaultSettingsMap[DefaultSettingKeys.DEPLOYMENT_ID];
 
             languageUnderstandingSubscriptionKey = SubscriptionsRegionsMap[SubscriptionsRegionsKeys.LANGUAGE_UNDERSTANDING_SUBSCRIPTION].Key;
             languageUnderstandingServiceRegion = SubscriptionsRegionsMap[SubscriptionsRegionsKeys.LANGUAGE_UNDERSTANDING_SUBSCRIPTION].Region;
             languageUnderstandingHomeAutomationAppId = DefaultSettingsMap[DefaultSettingKeys.LANGUAGE_UNDERSTANDING_HOME_AUTOMATION_APP_ID];
-        }
-
-        [ClassCleanup]
-        new public static void TestClassCleanup()
-        {
-            LoggingTestBaseCleanup();
         }
 
         [TestInitialize]

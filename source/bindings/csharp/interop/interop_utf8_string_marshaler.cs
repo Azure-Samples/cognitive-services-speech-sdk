@@ -23,6 +23,11 @@ namespace Microsoft.CognitiveServices.Speech.Internal
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303", Justification = "exceptions not localized")]
         public static string MarshalNativeToManaged(IntPtr native)
         {
+            if (native == IntPtr.Zero)
+            {
+                return string.Empty;
+            }
+
             // Identifying the length of the UTF8 string by searching for 0 byte.
             int lengthInBytes = 0;
             while (Marshal.ReadByte(native + lengthInBytes) != 0 && lengthInBytes < lengthLimit)
@@ -32,7 +37,7 @@ namespace Microsoft.CognitiveServices.Speech.Internal
 
             if (lengthInBytes >= lengthLimit)
             {
-                throw new ArgumentException("Provided data is not a string or it has the size exceeding ${lengthLimit} bytes.");
+                throw new ArgumentException($"Provided data is not a string or it has the size exceeding ${lengthLimit} bytes.");
             }
 
             var buffer = new byte[lengthInBytes];

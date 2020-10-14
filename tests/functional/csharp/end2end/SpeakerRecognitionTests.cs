@@ -19,22 +19,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
     [TestClass]
     public class SpeakerRecognitionTests : RecognitionTestBase
     {
-        public SpeakerRecognitionTests() : base(collectNativeLogs: true)
-        { }
-
-        [ClassInitialize]
-        public static void TestClassInitialize(TestContext context)
-        {
-            LoggingTestBaseInit(context);
-            BaseClassInit(context);
-        }
-
-        [ClassCleanup]
-        new public static void TestClassCleanup()
-        {
-            LoggingTestBaseCleanup();
-        }
-
         [TestInitialize]
         public void Initialize()
         {

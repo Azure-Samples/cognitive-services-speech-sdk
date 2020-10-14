@@ -22,19 +22,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
     {
         private SpeechRecognitionTestsHelper helper;
 
-        [ClassInitialize]
-        public static void TestClassinitialize(TestContext context)
-        {
-            LoggingTestBaseInit(context);
-            BaseClassInit(context);
-        }
-
-        [ClassCleanup]
-        new public static void TestClassCleanup()
-        {
-            LoggingTestBaseCleanup();
-        }
-
         [TestInitialize]
         public void Initialize()
         {

@@ -6,6 +6,7 @@
 using System;
 using System.Globalization;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace Microsoft.CognitiveServices.Speech.Test.Internal
 {
@@ -17,10 +18,40 @@ namespace Microsoft.CognitiveServices.Speech.Test.Internal
 
     internal class Diagnostics
     {
+        // Limit the length by 4 MB for safety check if something bad has happened on the native side.
+        private const int lengthLimit = 1 << 22;
+
         public const int __SPX_TRACE_LEVEL_INFO = 0x08; // Trace_Info
         public const int __SPX_TRACE_LEVEL_WARNING = 0x04; // Trace_Warning
         public const int __SPX_TRACE_LEVEL_ERROR = 0x02; // Trace_Error
         public const int __SPX_TRACE_LEVEL_VERBOSE = 0x10; // Trace_Verbose
+
+        public static string ReadNativeUtf8String(IntPtr native)
+        {
+            // Copied from source/bindings/csharp/interop/interop_utf8_string_marshaler.cs
+            if (native == IntPtr.Zero)
+            {
+                return string.Empty;
+            }
+
+            // Identifying the length of the UTF8 string by searching for 0 byte.
+            int lengthInBytes = 0;
+            while (Marshal.ReadByte(native + lengthInBytes) != 0 && lengthInBytes < lengthLimit)
+            {
+                lengthInBytes++;
+            }
+
+            if (lengthInBytes >= lengthLimit)
+            {
+                throw new ArgumentException($"Provided data is not a string or it has the size exceeding ${lengthLimit} bytes.");
+            }
+
+            var buffer = new byte[lengthInBytes];
+
+            // Performance wise this can be improved by switching to unsafe code and avoiding copying.
+            Marshal.Copy(native, buffer, 0, lengthInBytes);
+            return Encoding.UTF8.GetString(buffer);
+        }
 
         [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention, CharSet = CharSet.Ansi)]
         public static extern void diagnostics_log_trace_string(
@@ -48,8 +79,20 @@ namespace Microsoft.CognitiveServices.Speech.Test.Internal
         [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern int diagnostics_log_memory_get_line_num_newest();
 
-        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
-        public static extern IntPtr diagnostics_log_memory_get_line(int lineNum);
+        public static string diagnostics_log_memory_get_line(int lineNum)
+        {
+            /*
+             * NOTES:
+             * - [MarshalAs(UnmanagedType.LPStr)] incorrectly tries to free the native memory resulting in exceptions
+             * - Marshal.PtrToStringAnsi mangles all UTF-8 character sequences beyond the standard ANSI range
+             * - Native code returns UTF-8 so we can't use Marshal.PtrToStringUni
+             */
+            IntPtr nativeString = diagnostics_log_memory_get_line_internal(lineNum);
+            return ReadNativeUtf8String(nativeString);
+        }
+
+        [DllImport(Import.NativeDllName, EntryPoint = "diagnostics_log_memory_get_line", CallingConvention = Import.NativeCallConvention)]
+        private static extern IntPtr diagnostics_log_memory_get_line_internal(int lineNum);
 
         [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern void diagnostics_log_memory_dump(

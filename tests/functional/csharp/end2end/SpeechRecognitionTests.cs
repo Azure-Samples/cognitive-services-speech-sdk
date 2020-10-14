@@ -35,19 +35,10 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [ClassInitialize]
         public static void TestClassinitialize(TestContext context)
         {
-            LoggingTestBaseInit(context);
-            BaseClassInit(context);
-
             deploymentId = DefaultSettingsMap[DefaultSettingKeys.DEPLOYMENT_ID];
             endpointInString = String.Format("wss://{0}.stt.speech.microsoft.com/speech/recognition/conversation/cognitiveservices/v1", region);
             endpointUrl = new Uri(endpointInString);
             officeEndpointString = "wss://officespeech.platform.bing.com/speech/recognition/dictation/office/v1";
-        }
-
-        [ClassCleanup]
-        new public static void TestClassCleanup()
-        {
-            LoggingTestBaseCleanup();
         }
 
         [TestInitialize]

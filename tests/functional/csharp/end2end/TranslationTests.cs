@@ -32,28 +32,15 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         private static string hostInString;
         private static Uri hostUrl;
 
-        public TranslationTests() : base(collectNativeLogs: true)
-        {
-        }
-
         [ClassInitialize]
         public static void TestClassinitialize(TestContext context)
         {
-            LoggingTestBaseInit(context);
-            BaseClassInit(context);
-
             synthesisDir = "synthesis".GetRootRelativePath();
             deploymentId = DefaultSettingsMap[DefaultSettingKeys.DEPLOYMENT_ID];
             endpointInString = String.Format("wss://{0}.s2s.speech.microsoft.com/speech/translation/cognitiveservices/v1", region);
             endpointUrl = new Uri(endpointInString);
             hostInString = String.Format("wss://{0}.s2s.speech.microsoft.com", region);
             hostUrl = new Uri(hostInString);
-        }
-
-        [ClassCleanup]
-        new public static void TestClassCleanup()
-        {
-            LoggingTestBaseCleanup();
         }
 
         [TestInitialize]

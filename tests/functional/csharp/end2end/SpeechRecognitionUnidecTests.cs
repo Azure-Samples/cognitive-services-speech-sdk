@@ -17,19 +17,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
     [TestClass]
     public class SpeechRecognitionUnidecTests : RecognitionTestBase
     {
-        [ClassInitialize]
-        public static void TestClassinitialize(TestContext context)
-        {
-            LoggingTestBaseInit(context);
-            BaseClassInit(context);
-        }
-
-        [ClassCleanup]
-        new public static void TestClassCleanup()
-        {
-            LoggingTestBaseCleanup();
-        }
-
         [TestMethod, TestCategory(TestCategory.OfflineUnidec)]
         public async Task OfflineUnidecRecognizeFromFileSingleShot()
         {

@@ -21,19 +21,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
     {
         private static int kwsFoundTimeoutDelay = 30000;
 
-        [ClassInitialize]
-        public static void TestClassinitialize(TestContext context)
-        {
-            LoggingTestBaseInit(context);
-            BaseClassInit(context);
-        }
-
-        [ClassCleanup]
-        new public static void TestClassCleanup()
-        {
-            LoggingTestBaseCleanup();
-        }
-
         [RetryTestMethod]
         public async Task TestKeywordFound()
         {

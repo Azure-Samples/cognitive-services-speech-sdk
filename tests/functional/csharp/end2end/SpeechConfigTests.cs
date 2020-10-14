@@ -21,19 +21,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
     [TestClass]
     public class SpeechConfigTests : RecognitionTestBase
     {
-        [ClassInitialize]
-        public static void TestClassinitialize(TestContext context)
-        {
-            LoggingTestBaseInit(context);
-            BaseClassInit(context);
-        }
-
-        [ClassCleanup]
-        new public static void TestClassCleanup()
-        {
-            LoggingTestBaseCleanup();
-        }
-
         [RetryTestMethod]
         public void TestCreateRecognizerTypes()
         {

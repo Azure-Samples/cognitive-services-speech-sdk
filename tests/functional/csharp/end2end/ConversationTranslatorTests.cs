@@ -25,24 +25,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
     [TestClass]
     public class ConversationTranslatorTests : RecognitionTestBase
     {
-        public ConversationTranslatorTests() : base(collectNativeLogs: true)
-        { }
-
         internal Uri ManagementEndpoint { get; private set; }
         internal Uri WebSocketEndpoint { get; private set; }
-
-        [ClassInitialize]
-        public static void TestClassInitialize(TestContext context)
-        {
-            LoggingTestBaseInit(context);
-            BaseClassInit(context);
-        }
-
-        [ClassCleanup]
-        new public static void TestClassCleanup()
-        {
-            LoggingTestBaseCleanup();
-        }
 
         [TestInitialize]
         public void Initialize()

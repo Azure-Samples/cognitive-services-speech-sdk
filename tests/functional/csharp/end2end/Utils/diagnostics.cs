@@ -4,15 +4,11 @@
 //
 
 using System;
+using System.Globalization;
+using System.IO;
+using System.Runtime.CompilerServices;
 using Microsoft.CognitiveServices.Speech.Test.Internal;
 using static Microsoft.CognitiveServices.Speech.Test.Internal.SpxExceptionThrower;
-using Microsoft.CognitiveServices.Speech.Internal;
-using System.Globalization;
-using System.Runtime.InteropServices;
-using System.Runtime.CompilerServices;
-using System.IO;
-using System.Text;
-using System.Linq;
 
 namespace Microsoft.CognitiveServices.Speech.Test
 {
@@ -62,7 +58,49 @@ namespace Microsoft.CognitiveServices.Speech.Test
 
         public static void DumpMemoryLog(string filename, string linePrefix, bool emitToStdOut, bool emitToStdErr)
         {
-            Internal.Diagnostics.diagnostics_log_memory_dump(filename, linePrefix, emitToStdOut, emitToStdErr);
+            // VSTest doesn't seem to like capturing anything written to stdout, or stderr from native code
+            // Instead we will replicate the native code here in managed
+            StreamWriter fileStream = null;
+
+            try
+            {
+                if (!string.IsNullOrWhiteSpace(filename))
+                {
+                    fileStream = new StreamWriter(File.OpenWrite(filename));
+                }
+
+                int start = Internal.Diagnostics.diagnostics_log_memory_get_line_num_oldest();
+                int end = Internal.Diagnostics.diagnostics_log_memory_get_line_num_newest();
+
+                if (string.IsNullOrEmpty(linePrefix))
+                {
+                    linePrefix = "CRBN";
+                }
+
+                for (int i = start; i < end; i++)
+                {
+                    string line = Internal.Diagnostics.diagnostics_log_memory_get_line(i);
+                    if (!string.IsNullOrEmpty(line))
+                    {
+                        line = string.Format(
+                            CultureInfo.InvariantCulture,
+                            "{0}: {1}",
+                            linePrefix,
+                            line);
+
+                        if (emitToStdOut) Console.Write(line);
+                        if (emitToStdErr) Console.Error.Write(line);
+                        if (fileStream != null) fileStream.Write("{0}: {1}", linePrefix, line);
+                    }
+                }
+            }
+            finally
+            {
+                if (fileStream != null)
+                {
+                    fileStream.Dispose();
+                }
+            }
         }
 
         public static void DumpMemoryLog() => DumpMemoryLog(null, null, false, true);
@@ -96,6 +134,16 @@ namespace Microsoft.CognitiveServices.Speech.Test
         {
             var message = string.Format(format, args);
             Internal.Diagnostics.diagnostics_log_trace_string(Internal.Diagnostics.__SPX_TRACE_LEVEL_INFO, "SPX_TRACE_INFO", file, line, message);
+        }
+
+        public static void SPX_TRACE_TEST_START(string testName, [CallerLineNumber] int line = 0, [CallerMemberName] string caller = null, [CallerFilePath] string file = null)
+        {
+            Internal.Diagnostics.diagnostics_log_trace_string(
+                Internal.Diagnostics.__SPX_TRACE_LEVEL_INFO,
+                "SPX_TEST_START",
+                Path.GetFileName(file),
+                line,
+                $" >> {testName} ========================================================================================");
         }
 
         private static void SPX_TRACE_WARNING(string format, object[] args, [CallerLineNumber]int line = 0, [CallerMemberName]string caller = null, [CallerFilePath]string file = null)

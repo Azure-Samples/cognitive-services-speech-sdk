@@ -18,19 +18,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
     [TestClass]
     public sealed class TranslationConfigTests : RecognitionTestBase
     {
-        [ClassInitialize]
-        public static void TestClassinitialize(TestContext context)
-        {
-            LoggingTestBaseInit(context);
-            BaseClassInit(context);
-        }
-
-        [ClassCleanup]
-        new public static void TestClassCleanup()
-        {
-            LoggingTestBaseCleanup();
-        }
-
         [RetryTestMethod]
         public void TestVoiceNameInTranslationConfig()
         {
