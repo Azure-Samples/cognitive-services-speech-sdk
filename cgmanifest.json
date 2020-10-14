@@ -159,7 +159,6 @@
         "git": {
           "commitHash": "33789f3a04bf6dea13a50506aff2d96fd0bf396f",
           "repositoryUrl": "https://github.com/googlesamples/android-ndk.git"
-
         }
       }
     },
@@ -174,14 +173,15 @@
     //        From a point of view of our GIT repository, the usage is internal (for testing).
     {
       "component": {
-        "type": "other",
-        "other": {
-          "name": "Gradle",
-          "version": "4.4",
-          "downloadUrl": "https://services.gradle.org/distributions/gradle-4.4-all.zip"
+        "Type": "Maven",
+        "Maven": {
+          "ArtifactId": "gradle",
+          "GroupId": "com.android.tools.build",
+          "Version": "4.4"
         }
       }
     },
+    // "name": "Zanders3 TINY JSON",
     // Location:
     // public_samples/samples/unity/speechrecognizer/Assets/SpeechSDKSample/Scripts/JSONParser.cs
     // OSS request: https://ossmsft.visualstudio.com/_oss?requestId=1727486&_a=progress
@@ -190,11 +190,10 @@
     // It is used to parse the JSON response from the speech service.
     {
       "component": {
-        "type": "other",
-        "other": {
-          "name": "Zanders3 TINY JSON",
-          "version": "1.1",
-          "downloadUrl": "https://github.com/zanders3/json"
+        "type": "git",
+        "git": {
+          "commitHash": "a45b3ad0a1aa710ba4a2722195579a43aa92bba7",
+          "RepositoryUrl": "https://github.com/zanders3/json"
         }
       }
     },
@@ -205,11 +204,11 @@
     // Usage: Internal only
     {
       "component": {
-        "type": "other",
-        "other": {
-          "name": "gson-2.8.6.jar",
-          "version": "1.0",
-          "downloadUrl": "https://search.maven.org/artifact/com.google.code.gson/gson/2.8.6/jar"
+        "Type": "Maven",
+        "Maven": {
+          "ArtifactId": "Gson",
+          "GroupId": "com.google.code.gson",
+          "Version": "2.8.6"
         }
       }
     },
@@ -219,11 +218,11 @@
     // Usage: Downloaded by maven during build time
     {
       "component": {
-        "type": "other",
-        "other": {
-          "name": "azure-core-1.0.0.jar",
-          "version": "1.0",
-          "downloadUrl": "http://repo1.maven.org/maven2/com/azure/azure-core/1.0.0/azure-core-1.0.0.jar"
+        "Type": "Maven",
+        "Maven": {
+          "ArtifactId": "azure-core",
+          "GroupId": "com.azure",
+          "Version": "1.0.0"
         }
       }
     },
@@ -233,11 +232,11 @@
     // Usage: Downloaded by maven during build time
     {
       "component": {
-        "type": "other",
-        "other": {
-          "name": "azure-core-http-netty-1.0.0.jar",
-          "version": "1.0",
-          "downloadUrl": "http://repo1.maven.org/maven2/com/azure/azure-core-http-netty/1.0.0/azure-core-http-netty-1.0.0.jar"
+        "Type": "Maven",
+        "Maven": {
+          "ArtifactId": "azure-core-http-netty",
+          "GroupId": "com.azure",
+          "Version": "1.0.0"
         }
       }
     },
