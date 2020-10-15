@@ -37,7 +37,11 @@ namespace Microsoft.CognitiveServices.Speech.Internal
 
             if (lengthInBytes >= lengthLimit)
             {
-                throw new ArgumentException($"Provided data is not a string or it has the size exceeding ${lengthLimit} bytes.");
+                throw new ArgumentException(
+                    string.Format(
+                        System.Globalization.CultureInfo.InvariantCulture,
+                        "Provided data is not a string or it has the size exceeding {0} bytes.",
+                        lengthLimit));
             }
 
             var buffer = new byte[lengthInBytes];
