@@ -40,6 +40,7 @@ public:
         SPX_INTERFACE_MAP_ENTRY(ISpxGetUspMessageParamsFromUser)
         SPX_INTERFACE_MAP_ENTRY(ISpxConversationTranscriber)
         SPX_INTERFACE_MAP_ENTRY(ISpxObjectWithAudioConfig)
+        SPX_INTERFACE_MAP_ENTRY(ISpxGenericSite)
     SPX_INTERFACE_MAP_END()
 
       // --- ISpxObjectInit

@@ -3,6 +3,7 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 using Microsoft.CognitiveServices.Speech.Audio;
+using Microsoft.CognitiveServices.Speech.Test;
 using Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
@@ -2285,6 +2286,95 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 SPXTEST_ARE_EQUAL(recognition, file2.Utterances[file2.NativeLanguage][0].Text);
 
             }
+        }
+
+        [RetryTestMethod]
+        public void TestSendOrder()
+        {
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.MULTIPLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
+
+            var config = SpeechConfig.FromSubscription(subscriptionKey, region);
+            config.SetProperty(PropertyId.SpeechServiceConnection_RecoMode, "INTERACTIVE");
+
+            var evt = new ManualResetEvent(false);
+
+            int sendCount = 100;
+            List<string> messageReceived = new List<string>(sendCount + 1);
+
+            var randoPath = Guid.NewGuid().ToString().Replace("-", "");
+            Diagnostics.SetLogMessageFilter(randoPath);
+            Diagnostics.SetLogMessageCallback((string logLine) =>
+            {
+                if (logLine.Contains("path="))
+                {
+                    Console.WriteLine($"Got back line '{logLine}'");
+                    messageReceived.Add(logLine);
+                }
+                if (messageReceived.Count == sendCount)
+                {
+                    evt.Set();
+                }
+            });
+            try
+            {
+                var recognizer = new SpeechRecognizer(config, audioInput);
+                var con = Connection.FromRecognizer(recognizer);
+
+                List<Task> messageSendTasks = new List<Task>(sendCount);
+                for (int i = 0; i < sendCount; i++)
+                {
+                    var t = con.SendMessageAsync($"{randoPath}.{i}", new byte[10], 10);
+                    messageSendTasks.Add(t);
+                }
+
+                SPXTEST_REQUIRE(Task.WaitAll(messageSendTasks.ToArray(), TimeSpan.FromMinutes(1)), "Send Tasks did not complete");
+
+                SPXTEST_REQUIRE(evt.WaitOne(TimeSpan.FromMinutes(1)), "All log messages not found in time.");
+
+            }
+            finally
+            {
+                Diagnostics.SetLogMessageCallback(null);
+                Diagnostics.SetLogMessageFilter("");
+            }
+            // Now parse through the log messages and see they're in ordedr.
+            for (int i = 0; i < sendCount; i++)
+            {
+                SPXTEST_REQUIRE(messageReceived[i].Contains($"={randoPath}.{i} "), $"Path {messageReceived[i]} was not the next path in the sequence, it should have been {i}");
+            }
+        }
+
+
+        [RetryTestMethod]
+        public async Task TestSendTimeout()
+        {
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.MULTIPLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
+
+            var config = SpeechConfig.FromSubscription(subscriptionKey, region);
+            config.SetProperty(PropertyId.SpeechServiceConnection_RecoMode, "INTERACTIVE");
+            config.SetProperty("SPEECH-SendMessageTimeout", "1");
+
+            var evt = new ManualResetEvent(false);
+
+            var randoPath = Guid.NewGuid().ToString().Replace("-", "");
+            var recognizer = new SpeechRecognizer(config, audioInput);
+            var con = Connection.FromRecognizer(recognizer);
+            
+            try
+            {
+                await con.SendMessageAsync($"{randoPath}", new byte[1024 * 63], 1024 * 63);
+                SPXTEST_REQUIRE(false, "SendMessage did not throw");
+            }
+            catch (Exception e)
+            {
+                Log($"Exception {e}");
+                /// <summary>
+                /// The specified timeout value has elapsed.
+                /// </summary>
+                // #define SPXERR_TIMEOUT              __SPX_ERRCODE_FAILED(0x006)
+                SPXTEST_REQUIRE(e.Message.Contains("0x6"), $"Exception did not contian 0x6 {e}");
+            }
+            
         }
 
         [RetryTestMethod, TestCategory(TestCategory.LongRunning)]

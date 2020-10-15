@@ -47,6 +47,7 @@ public:
         SPX_INTERFACE_MAP_ENTRY(ISpxGrammar)
         SPX_INTERFACE_MAP_ENTRY(ISpxMessageParamFromUser)
         SPX_INTERFACE_MAP_ENTRY(ISpxGetUspMessageParamsFromUser)
+        SPX_INTERFACE_MAP_ENTRY(ISpxGenericSite)
     SPX_INTERFACE_MAP_END()
 
     // --- ISpxObjectWithSiteInit

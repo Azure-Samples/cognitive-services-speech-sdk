@@ -125,8 +125,8 @@ public:
     void WriteTelemetryLatency(uint64_t latencyInTicks, bool isPhraseLatency) override;
 
     void SendSpeechEventMessage(std::string&& payload) override;
-    void SendNetworkMessage(std::string&& path, std::string&& payload, bool alwaysSend) override;
-    void SendNetworkMessage(std::string&& path, std::vector<uint8_t>&& payload, bool alwaysSend) override;
+    CSpxAsyncOp<bool> SendNetworkMessage(std::string&& path, std::string&& payload, bool alwaysSend) override;
+    CSpxAsyncOp<bool> SendNetworkMessage(std::string&& path, std::vector<uint8_t>&& payload, bool alwaysSend) override;
 
     bool IsStreaming() override;
 
@@ -354,7 +354,7 @@ private:
     void SetUSPRetriesParams();
 
     template<typename T>
-    void SendMessageToService(std::string&& path, T&& payload, bool alwaysSend);
+    CSpxAsyncOp<bool> SendMessageToService(std::string&& path, T&& payload, bool alwaysSend);
 
     bool ShouldReconnect(std::shared_ptr<ISpxErrorInformation> payload);
     void StartReconnect(std::shared_ptr<ISpxErrorInformation> payload);

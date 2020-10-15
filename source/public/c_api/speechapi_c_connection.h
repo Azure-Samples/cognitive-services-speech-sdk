@@ -12,12 +12,20 @@ SPXAPI connection_from_dialog_service_connector(SPXRECOHANDLE convTransHandle, S
 
 SPXAPI_(bool) connection_handle_is_valid(SPXCONNECTIONHANDLE handle);
 SPXAPI connection_handle_release(SPXCONNECTIONHANDLE handle);
+SPXAPI connection_async_handle_release(SPXASYNCHANDLE hasync);
 
 SPXAPI connection_open(SPXCONNECTIONHANDLE handle, bool forContinuousRecognition);
 SPXAPI connection_close(SPXCONNECTIONHANDLE handle);
 SPXAPI connection_set_message_property(SPXCONNECTIONHANDLE handle, const char* path, const char* name, const char* value);
 SPXAPI connection_send_message(SPXCONNECTIONHANDLE handle, const char* path, const char* payload);
+SPXAPI connection_send_message_async(SPXCONNECTIONHANDLE handle, const char* path, const char* payload, SPXASYNCHANDLE* phasync);
+
 SPXAPI connection_send_message_data(SPXCONNECTIONHANDLE handle, const char* path, uint8_t* data, uint32_t size);
+SPXAPI connection_send_message_data_async(SPXCONNECTIONHANDLE handle, const char* path, uint8_t* data, uint32_t size, SPXASYNCHANDLE* phasync);
+
+SPXAPI connection_send_message_wait_for(SPXASYNCHANDLE hasync, uint32_t milliseconds);
+
+SPXAPI conection_get_property_bag(SPXRECOHANDLE hconn, SPXPROPERTYBAGHANDLE* hpropbag);
 
 typedef void(*CONNECTION_CALLBACK_FUNC)(SPXEVENTHANDLE event, void* context);
 SPXAPI connection_connected_set_callback(SPXCONNECTIONHANDLE connection, CONNECTION_CALLBACK_FUNC callback, void* context);

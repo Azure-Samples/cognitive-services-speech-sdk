@@ -844,7 +844,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-
         // Uses th CTS endpoint as it suppports controlling the audio connection time.
         [RetryTestMethod]
         public async Task TestReconnect()
@@ -853,7 +852,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             config.OutputFormat = OutputFormat.Detailed;
             config.SetServiceProperty("maxConnectionDurationSecs", "30", ServicePropertyChannel.UriQueryParameter);
             config.SetProperty("SPEECH-AudioThrottleAsPercentageOfRealTime", "100");
-            
+
             ContinuousFilePullStream inputStream = new ContinuousFilePullStream(AudioUtterancesMap[AudioUtteranceKeys.CONVERSATION_BETWEEN_TWO_PERSONS_ENGLISH].FilePath.GetRootRelativePath());
 
             var audioInput = AudioConfig.FromStreamInput(inputStream, AudioStreamFormat.GetWaveFormatPCM(16000, 16, 8));
@@ -861,8 +860,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             int connectedCount = 0;
             int disconnectedCount = 0;
             var phrases = new Dictionary<int, string>();
+            var messages = new Dictionary<int, int>();
+            int messagesSent = 0;
 
             TaskCompletionSource<bool> taskCompletionSource = new TaskCompletionSource<bool>();
+            TaskCompletionSource<bool> sendMessageStop = new TaskCompletionSource<bool>();
 
             Log("Creating conversation");
             using (var conversation = await Conversation.CreateConversationAsync(config, meetingID))
@@ -879,8 +881,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     Log("Setting up connection events");
                     con.Connected += (s, e) =>
                     {
-                        Log($"Connected {connectedCount++}");
+                        Log($"Connected {connectedCount}");
+                        messages.Add(connectedCount, messagesSent);
+                        connectedCount++;
                     };
+
                     con.Disconnected += (s, e) =>
                     {
                         Log($"Disconnected {disconnectedCount}");
@@ -922,6 +927,54 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                     Log("Starting transcription");
                     await conversationTranscriber.StartTranscribingAsync().ConfigureAwait(false);
+                    var sendMessageLoop = Task.Run(async () =>
+                    {
+                        var payload = new byte[32 * 1024];
+                        var sentQueue = new List<Task>();
+
+                        while (true)
+                        {
+                            int n = 0;
+
+                            Log("Sending message");
+                            try
+                            {
+                                n = Interlocked.Increment(ref messagesSent);
+
+                                var sendTask = con.SendMessageAsync("fakePath." + n, payload, Convert.ToUInt32(payload.Length));
+                                Log($"Message {Interlocked.Increment(ref n)} Sent to Queue");
+                                sentQueue.Add(sendTask);
+                            }
+                            catch (Exception e)
+                            {
+                                Log($"Send ({n}) threw Exception {e}");
+                                throw;
+                            }
+
+                            if (await Task.WhenAny(sendMessageStop.Task, Task.Delay(TimeSpan.FromMilliseconds(2))) == sendMessageStop.Task)
+                            {
+                                for(int i = 0; i < messagesSent; i++)
+                                {
+                                    try
+                                    {
+                                        await sentQueue[i];
+                                        Log($"Message {i} was sent");
+                                    } catch (Exception e)
+                                    {
+                                        /// <summary>
+                                        /// Sending of a network message failed.
+                                        /// </summary>
+                                        //#define SPXERR_NETWORK_SEND_FAILED  __SPX_ERRCODE_FAILED(0x037)
+
+                                        Log($"Message {i} thew exception {e}");
+                                        SPXTEST_REQUIRE(e.Message.Contains("0x37"), "Exception message did not contain 0x37");
+                                    }
+                                }
+
+                                return;
+                            }
+                        }
+                    });
 
                     Log("Waiting on task");
 
@@ -934,6 +987,10 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                         SPXTEST_REQUIRE(false, "Test timed out");
                     }
 
+                    sendMessageStop.TrySetResult(true);
+
+                    SPXTEST_REQUIRE(await Task.WhenAny(sendMessageLoop, Task.Delay(TimeSpan.FromMinutes(3))) == sendMessageLoop, "Stopping the sendMessage Loop timed out.");
+
                     Log("Stopping transcription");
                     await conversationTranscriber.StopTranscribingAsync().ConfigureAwait(false);
 
@@ -941,19 +998,20 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     GC.KeepAlive(con);
 
                     Log("Verifying results");
+                    int lastConnectionSentAmount = 0;
                     for (int i = 1; i < disconnectedCount; i++)
                     {
                         SPXTEST_REQUIRE(!string.IsNullOrEmpty(phrases[i]), $"Connection {i} had no non-empty phrases");
+                        SPXTEST_REQUIRE(lastConnectionSentAmount != messages[i], $"Connection {i} had no new messages sent");
+                        lastConnectionSentAmount = messages[i];
                     }
 
                     SPXTEST_ISTRUE(connectedCount > 2, $"Connected count {connectedCount} was not > 2");
                     SPXTEST_ISTRUE(disconnectedCount > 2, $"Connected count {disconnectedCount} was not > 2");
 
                 }
+
             }
         }
-
     }
-
-
 }

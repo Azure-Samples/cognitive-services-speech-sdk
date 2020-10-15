@@ -42,6 +42,15 @@ namespace Microsoft.CognitiveServices.Speech.Internal
         public static int GetErrorCode(SPXERRORHANDLE errorHandle)
         {
             int errorCode = (int)error_get_error_code(errorHandle);
+
+            // A 0 means there was no corresponding event stored.
+            // So this much be a SPX_* error and not a stored exception.
+            // Return the HR as the error.
+            if(0 == errorCode)
+            {
+                return errorHandle.ToInt32();
+            }
+
             return errorCode;
         }
 

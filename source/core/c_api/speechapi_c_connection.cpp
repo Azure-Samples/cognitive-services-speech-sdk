@@ -5,6 +5,8 @@
 
 #include "stdafx.h"
 #include "common.h"
+#include "async_helpers.h"
+#include "function_helpers.h"
 #include "handle_helpers.h"
 #include "event_helpers.h"
 #include <speechapi_c_conversation_translator.h>
@@ -147,7 +149,7 @@ SPXAPI connection_set_message_property(SPXCONNECTIONHANDLE handle, const char* p
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI connection_send_message(SPXCONNECTIONHANDLE handle, const char* path, const char* payload)
+SPXAPI connection_send_message_async(SPXCONNECTIONHANDLE handle, const char* path, const char* payload, SPXASYNCHANDLE* phasync)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, handle == nullptr);
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, payload == nullptr || !(*payload));
@@ -158,12 +160,38 @@ SPXAPI connection_send_message(SPXCONNECTIONHANDLE handle, const char* path, con
         auto setter = QueryInterfaceFromHandle<ISpxConnection, ISpxMessageParamFromUser>(handle);
         SPX_IFTRUE_THROW_HR(setter == nullptr, SPXERR_INVALID_ARG);
 
-        setter->SendNetworkMessage(path, payload);
+        launch_async_op(*setter, resolveOverload<std::string&&, std::string&&>(&ISpxMessageParamFromUser::SendNetworkMessage),
+            phasync,
+            path,
+            payload);
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
+SPXAPI connection_send_message(SPXCONNECTIONHANDLE handle, const char* path, const char* payload)
+{
+    return async_to_sync(
+        handle,
+        connection_send_message_async,
+        connection_send_message_wait_for,
+        path,
+        payload
+    );
+}
+
 SPXAPI connection_send_message_data(SPXCONNECTIONHANDLE handle, const char* path, uint8_t* data, uint32_t size)
+{
+    return async_to_sync(
+        handle,
+        connection_send_message_data_async,
+        connection_send_message_wait_for,
+        path,
+        data,
+        size
+    );
+}
+
+SPXAPI connection_send_message_data_async(SPXCONNECTIONHANDLE handle, const char* path, uint8_t* data, uint32_t size, SPXASYNCHANDLE* phasync)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, handle == nullptr);
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, path == nullptr);
@@ -175,9 +203,32 @@ SPXAPI connection_send_message_data(SPXCONNECTIONHANDLE handle, const char* path
         SPX_IFTRUE_THROW_HR(setter == nullptr, SPXERR_INVALID_ARG);
 
         std::vector<uint8_t> payload(data, data + size);
-        setter->SendNetworkMessage(path, std::move(payload));
+
+        launch_async_op(*setter, resolveOverload<std::string&&, std::vector<uint8_t>&&>(&ISpxMessageParamFromUser::SendNetworkMessage),
+                phasync,
+                path,
+                std::move(payload));
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
+SPXAPI connection_send_message_wait_for(SPXASYNCHANDLE hasync, uint32_t milliseconds)
+{
+    bool sendResult;
+
+    auto waitResult = async_operation_wait_for_untracked(hasync, milliseconds, &sendResult);
+
+    if (SPX_NOERROR == waitResult && !sendResult)
+    {
+        return SPXERR_NETWORK_SEND_FAILED;
+    }
+
+    return waitResult;
+}
+
+SPXAPI connection_async_handle_release(SPXASYNCHANDLE hasync)
+{
+    return Handle_Close<SPXASYNCHANDLE, CSpxAsyncOp<bool>>(hasync);
 }
 
 SPXAPI_(bool) connection_message_received_event_handle_is_valid(SPXCONNECTIONMESSAGEHANDLE handle)
@@ -243,4 +294,10 @@ SPXAPI_(uint32_t) connection_message_get_data_size(SPXCONNECTIONMESSAGEHANDLE hc
         return message->GetBufferSize();
     }
     SPXAPI_CATCH_AND_RETURN(hr, 0);
+}
+
+SPXAPI connection_get_property_bag(SPXRECOHANDLE hconn, SPXPROPERTYBAGHANDLE* hpropbag)
+{
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, !connection_handle_is_valid(hconn));
+    return GetTargetObjectByInterface<ISpxConnection, ISpxNamedProperties>(hconn, hpropbag);
 }

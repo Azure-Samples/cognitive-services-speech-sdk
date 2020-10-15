@@ -7,6 +7,7 @@
 
 #include "stdafx.h"
 #include "connection.h"
+#include <service_helpers.h>
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -68,24 +69,29 @@ void CSpxConnection::SetParameter(std::string&& path, std::string&& name, std::s
     shared->SetParameter(move(path), move(name), move(value));
 }
 
-void CSpxConnection::SendNetworkMessage(std::string&& path, std::string&& payload)
+CSpxAsyncOp<bool> CSpxConnection::SendNetworkMessage(std::string&& path, std::string&& payload)
 {
     auto shared = m_setMessageParamFromUser.lock();
     if (shared == nullptr)
     {
         ThrowRuntimeError("Could not get ISpxMessageParamFromUser.");
     }
-    shared->SendNetworkMessage(move(path), move(payload));
+    return shared->SendNetworkMessage(move(path), move(payload));
 }
 
-void CSpxConnection::SendNetworkMessage(std::string&& path, std::vector<uint8_t>&& payload)
+CSpxAsyncOp<bool> CSpxConnection::SendNetworkMessage(std::string&& path, std::vector<uint8_t>&& payload)
 {
     auto shared = m_setMessageParamFromUser.lock();
     if (shared == nullptr)
     {
         ThrowRuntimeError("Could not get ISpxMessageParamFromUser.");
     }
-    shared->SendNetworkMessage(move(path), move(payload));
+    return shared->SendNetworkMessage(move(path), move(payload));
+}
+
+std::shared_ptr<ISpxNamedProperties> CSpxConnection::GetParentProperties() const
+{
+    return SpxQueryService<ISpxNamedProperties>(GetSite());
 }
 
 } } } } // Microsoft::CognitiveServices::Speech::Impl

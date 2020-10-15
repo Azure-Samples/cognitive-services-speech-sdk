@@ -53,6 +53,7 @@ public:
         SPX_INTERFACE_MAP_ENTRY(ISpxMessageParamFromUser)
         SPX_INTERFACE_MAP_ENTRY(ISpxGetUspMessageParamsFromUser)
         SPX_INTERFACE_MAP_ENTRY(ISpxConnectionFromRecognizer)
+        SPX_INTERFACE_MAP_ENTRY(ISpxGenericSite)
     SPX_INTERFACE_MAP_END()
 
     // --- ISpxObjectWithSiteInit
@@ -113,8 +114,8 @@ public:
 
     // --- ISpxSetUspMessageParamFromUser
     void SetParameter(std::string&& path, std::string&& name, std::string&& value) override;
-    void SendNetworkMessage(std::string&& path, std::string&& payload) override;
-    void SendNetworkMessage(std::string&& path, std::vector<uint8_t>&& payload) override;
+    CSpxAsyncOp<bool> SendNetworkMessage(std::string&& path, std::string&& payload) override;
+    CSpxAsyncOp<bool> SendNetworkMessage(std::string&& path, std::vector<uint8_t>&& payload) override;
 
     // --- ISpxGetUspMessageParamsFromUser
     CSpxStringMap GetParametersFromUser(std::string&& path) override;

@@ -32,6 +32,7 @@ public:
         SPX_INTERFACE_MAP_ENTRY(ISpxGetUspMessageParamsFromUser)
         SPX_INTERFACE_MAP_ENTRY(ISpxGrammarList)
         SPX_INTERFACE_MAP_ENTRY(ISpxGrammar)
+        SPX_INTERFACE_MAP_ENTRY(ISpxGenericSite)
     SPX_INTERFACE_MAP_END()
 
     // --- ISpxObjectInit (overrides) ---

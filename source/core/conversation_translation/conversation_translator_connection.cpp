@@ -84,7 +84,7 @@ namespace ConversationTranslation {
         messageParamFromUser->SetParameter(std::move(path), std::move(name), std::move(value));
     }
 
-    void CSpxConversationTranslatorConnection::SendNetworkMessage(std::string && path, std::string && payload)
+    CSpxAsyncOp<bool> CSpxConversationTranslatorConnection::SendNetworkMessage(std::string && path, std::string && payload)
     {
         auto reco = m_reco.lock();
         SPX_IFTRUE_THROW_HR(reco == nullptr, SPXERR_INVALID_RECOGNIZER);
@@ -92,10 +92,10 @@ namespace ConversationTranslation {
         auto messageParamFromUser = reco->QueryInterface<ISpxMessageParamFromUser>();
         SPX_IFTRUE_THROW_HR(messageParamFromUser == nullptr, SPXERR_INVALID_RECOGNIZER);
 
-        messageParamFromUser->SendNetworkMessage(std::move(path), std::move(payload));
+        return messageParamFromUser->SendNetworkMessage(std::move(path), std::move(payload));
     }
 
-    void CSpxConversationTranslatorConnection::SendNetworkMessage(std::string && path, std::vector<uint8_t>&& payload)
+    CSpxAsyncOp<bool> CSpxConversationTranslatorConnection::SendNetworkMessage(std::string && path, std::vector<uint8_t>&& payload)
     {
         auto reco = m_reco.lock();
         SPX_IFTRUE_THROW_HR(reco == nullptr, SPXERR_INVALID_RECOGNIZER);
@@ -103,7 +103,7 @@ namespace ConversationTranslation {
         auto messageParamFromUser = reco->QueryInterface<ISpxMessageParamFromUser>();
         SPX_IFTRUE_THROW_HR(messageParamFromUser == nullptr, SPXERR_INVALID_RECOGNIZER);
 
-        messageParamFromUser->SendNetworkMessage(std::move(path), std::move(payload));
+        return messageParamFromUser->SendNetworkMessage(std::move(path), std::move(payload));
     }
 
 }}}}} // Microsoft::CognitiveServices::Speech::Impl::Conversation

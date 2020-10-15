@@ -2943,14 +2943,14 @@ void CSpxAudioStreamSession::SendSpeechEventMessage(std::string&& payload)
     m_recoAdapter->SendSpeechEventMessage(std::move(payload));
 }
 
-void CSpxAudioStreamSession::SendNetworkMessage(std::string&& path, std::string&& payload, bool alwaysSend)
+CSpxAsyncOp<bool> CSpxAudioStreamSession::SendNetworkMessage(std::string&& path, std::string&& payload, bool alwaysSend)
 {
-    SendMessageToService(std::move(path), payload, alwaysSend);
+    return SendMessageToService(std::move(path), payload, alwaysSend);
 }
 
-void CSpxAudioStreamSession::SendNetworkMessage(std::string&& path, std::vector<uint8_t>&& payload,  bool alwaysSend)
+CSpxAsyncOp<bool> CSpxAudioStreamSession::SendNetworkMessage(std::string&& path, std::vector<uint8_t>&& payload,  bool alwaysSend)
 {
-    SendMessageToService(std::move(path), payload, alwaysSend);
+    return SendMessageToService(std::move(path), payload, alwaysSend);
 }
 
 bool CSpxAudioStreamSession::IsStreaming()
@@ -3026,14 +3026,15 @@ void CSpxAudioStreamSession::ShrinkReplayBuffer(uint64_t newBaseOffset)
 }
 
 template<typename T>
-void CSpxAudioStreamSession::SendMessageToService(std::string&& path, T&& payload, bool alwaysSend)
+CSpxAsyncOp<bool> CSpxAudioStreamSession::SendMessageToService(std::string&& path, T&& payload, bool alwaysSend)
 {
     SPX_DBG_TRACE_SCOPE("SendMessageToService", "SendMessageToService");
 
     auto keepAlive = SpxSharedPtrFromThis<ISpxSession>(this);
 
     std::shared_ptr<std::promise<bool>> messageSentPromise = std::make_shared<std::promise<bool>>();
-    auto messageSentFuture = messageSentPromise->get_future();
+
+    auto messageSentFuture = std::shared_future<bool>(messageSentPromise->get_future());
     bool sent = false;
     auto task = CreateTask([this, keepAlive, &sent, alwaysSend, path, payload, &messageSentPromise]() mutable {
 
@@ -3049,26 +3050,8 @@ void CSpxAudioStreamSession::SendMessageToService(std::string&& path, T&& payloa
      });
 
     m_threadService->ExecuteSync(move(task));
-
-    if (!sent)
-    {
-        return;
-    }
-
-    auto status = std::future_status::timeout;
-    // wait for maximum 90 seconds for the message to be sent over socket.
-    constexpr std::chrono::seconds timeout = 90s;
-    status = messageSentFuture.wait_for(timeout);
-
-    if (status != std::future_status::ready)
-    {
-        SPX_THROW_HR(SPXERR_TIMEOUT);
-    }
-
-    if(false == messageSentFuture.get())
-    {
-        ThrowRuntimeError({ std::string("Message ") + path + " is not sent."});
-    }
+    
+    return CSpxAsyncOp<bool>(messageSentFuture, AsyncOpState::AOS_Started);
 }
 
 std::chrono::seconds CSpxAudioStreamSession::GetStopRecognitionTimeout()

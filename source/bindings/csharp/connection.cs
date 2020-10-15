@@ -127,6 +127,7 @@ namespace Microsoft.CognitiveServices.Speech
             if (disposing)
             {
                 connectionHandle?.Dispose();
+                Properties?.Close();
             }
 
             if (gch.IsAllocated)
@@ -150,6 +151,10 @@ namespace Microsoft.CognitiveServices.Speech
             connectedCallbackDelegate = FireEvent_Connected;
             disconnectedCallbackDelegate = FireEvent_Disconnected;
             messageReceivedCallbackDelegate = FireEvent_MessageReceived;
+
+            IntPtr propertyHandle = IntPtr.Zero;
+            ThrowIfFail(Internal.Connection.connection_get_property_bag(connectionHandle, out propertyHandle));
+            Properties = new PropertyCollection(propertyHandle);
 
             gch = GCHandle.Alloc(this, GCHandleType.Weak);
         }
@@ -206,9 +211,39 @@ namespace Microsoft.CognitiveServices.Speech
         /// <returns>A task representing the asynchronous operation that sends the message.</returns>
         public Task SendMessageAsync(string path, byte[] payload, uint size)
         {
+            InteropSafeHandle asyncHandle = null;
+
+            DoAsyncConnectionAction(() =>
+            {
+                asyncHandle = SendMessageData(path, payload, size);
+            });
+
+            // The astute code reviewer will note there's a risk here between the two DoAsyncConnectionAction calls of
+            // the count being wrong because the task won't start to run until some future, indeterminate time.
+            // Of course, this is a risk all across the binding, so we'll accept it here for now.
+
+            var timeoutString = Properties.GetProperty("SPEECH-SendMessageTimeout", "90000");
+
+            uint timeout;
+
+            if(!uint.TryParse(timeoutString, out timeout))
+            {
+                timeout = 90000;
+            }
+
             return Task.Run(() =>
             {
-                DoAsyncConnectionAction(() => SendMessageData(path, payload, size));
+                DoAsyncConnectionAction(() =>
+                {
+                    try
+                    {
+                        ThrowIfFail(Internal.Connection.connection_send_message_wait_for(asyncHandle, timeout));
+                    }
+                    finally
+                    {
+                        asyncHandle.Dispose();
+                    }
+                });
             });
         }
 
@@ -221,10 +256,10 @@ namespace Microsoft.CognitiveServices.Speech
         /// <param name="propertyValue">Value of the property. This is a json string.</param>
         public void SetMessageProperty(string path, string propertyName, string propertyValue)
         {
-           ThrowIfFail(connectionHandle != null, SpxError.InvalidHandle.ToInt32());
-           IntPtr propertyNamePtr = Utf8StringMarshaler.MarshalManagedToNative(propertyName);
-           IntPtr propertyValuePtr = Utf8StringMarshaler.MarshalManagedToNative(propertyValue);
-           ThrowIfFail(Internal.Connection.connection_set_message_property(connectionHandle, path, propertyNamePtr, propertyValuePtr));
+            ThrowIfFail(connectionHandle != null, SpxError.InvalidHandle.ToInt32());
+            IntPtr propertyNamePtr = Utf8StringMarshaler.MarshalManagedToNative(propertyName);
+            IntPtr propertyValuePtr = Utf8StringMarshaler.MarshalManagedToNative(propertyValue);
+            ThrowIfFail(Internal.Connection.connection_set_message_property(connectionHandle, path, propertyNamePtr, propertyValuePtr));
         }
 
         private event EventHandler<ConnectionEventArgs> _Connected;
@@ -323,6 +358,9 @@ namespace Microsoft.CognitiveServices.Speech
         object connectionLock = new object();
         private int activeAsyncConnectionCounter = 0;
 
+        // Not on the public API, but handy for our own uses.
+        private PropertyCollection Properties { get; set; }
+
         /// <summary>
         /// Defines a private methods which raise a C# event when a corresponding callback is invoked from the native layer.
         /// </summary>
@@ -384,7 +422,7 @@ namespace Microsoft.CognitiveServices.Speech
 
         void DoAsyncConnectionAction(Action connectionImplAction)
         {
-            lock(connectionLock)
+            lock (connectionLock)
             {
                 activeAsyncConnectionCounter++;
             }
@@ -421,10 +459,14 @@ namespace Microsoft.CognitiveServices.Speech
             }
         }
 
-        internal void SendMessageData(string path, byte[] payload, UInt32 size)
+        internal InteropSafeHandle SendMessageData(string path, byte[] payload, UInt32 size)
         {
+            IntPtr ret = IntPtr.Zero;
+
             ThrowIfFail(connectionHandle != null, SpxError.InvalidHandle.ToInt32());
-            ThrowIfFail(Internal.Connection.connection_send_message_data(connectionHandle, path, payload, size));
+            ThrowIfFail(Internal.Connection.connection_send_message_data_async(connectionHandle, path, payload, size, out ret));
+
+            return new InteropSafeHandle(ret, Internal.Connection.connection_async_handle_release);
         }
     }
 }

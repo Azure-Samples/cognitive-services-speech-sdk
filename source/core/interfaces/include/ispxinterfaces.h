@@ -507,8 +507,8 @@ class ISpxMessageParamFromUser : public ISpxInterfaceBaseFor<ISpxMessageParamFro
 {
 public:
     virtual void SetParameter(std::string&& path, std::string&& name, std::string&& value) = 0;
-    virtual void SendNetworkMessage(std::string&& path, std::string&& payload) = 0;
-    virtual void SendNetworkMessage(std::string&& path, std::vector<uint8_t>&& payload) = 0;
+    virtual CSpxAsyncOp<bool> SendNetworkMessage(std::string&& path, std::string&& payload) = 0;
+    virtual CSpxAsyncOp<bool> SendNetworkMessage(std::string&& path, std::vector<uint8_t>&& payload) = 0;
 };
 
 using CSpxStringMap = std::unordered_map<std::string, std::string>;
@@ -752,8 +752,8 @@ public:
 
     virtual void WriteTelemetryLatency(uint64_t latencyInTicks, bool isPhraseLatency) = 0;
     virtual void SendSpeechEventMessage(std::string&& payload) = 0;
-    virtual void SendNetworkMessage(std::string&& path, std::string&& payload, bool alwaysSend = true) = 0;
-    virtual void SendNetworkMessage(std::string&& path, std::vector<uint8_t>&& payload, bool alwaysSend = true) = 0;
+    virtual CSpxAsyncOp<bool> SendNetworkMessage(std::string&& path, std::string&& payload, bool alwaysSend = true) = 0;
+    virtual CSpxAsyncOp<bool> SendNetworkMessage(std::string&& path, std::vector<uint8_t>&& payload, bool alwaysSend = true) = 0;
 
     virtual void SetConversation(std::shared_ptr<ISpxConversation> conversation) = 0;
 };

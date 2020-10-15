@@ -15,6 +15,7 @@ namespace Microsoft.CognitiveServices.Speech.Internal
     using SPXCONNECTIONMESSAGEHANDLE = System.IntPtr;
     using SPXCONNECTIONMESSAGEEVENTHANDLE = System.IntPtr;
     using SPXPROPERTYBAGHANDLE = System.IntPtr;
+    using SPXASYNCHANDLE = System.IntPtr;
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate void ConnectionCallbackFunctionDelegate(SPXEVENTHANDLE hevent, IntPtr context);
@@ -30,6 +31,9 @@ namespace Microsoft.CognitiveServices.Speech.Internal
 
         [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR connection_from_dialog_service_connector(InteropSafeHandle dialogServiceConnectorHandle, out SPXCONNECTIONHANDLE connectionHandle);
+
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
+        public static extern SPXHR connection_get_property_bag(InteropSafeHandle connHandle, out SPXPROPERTYBAGHANDLE propbag);
 
         [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern bool connection_handle_is_valid(InteropSafeHandle handle);
@@ -66,6 +70,22 @@ namespace Microsoft.CognitiveServices.Speech.Internal
         [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern SPXHR connection_send_message_data(InteropSafeHandle connection, [MarshalAs(UnmanagedType.LPStr)] string path,
             [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 3)] byte[] payload, UInt32 size);
+
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
+        public static extern SPXHR connection_send_message_async(InteropSafeHandle connection,
+                                                                       [MarshalAs(UnmanagedType.LPStr)] string path,
+                                                                       IntPtr payload,
+                                                                       out SPXASYNCHANDLE asyncHandle);
+
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
+        public static extern SPXHR connection_send_message_data_async(InteropSafeHandle connection, [MarshalAs(UnmanagedType.LPStr)] string path,
+            [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 3)] byte[] payload, UInt32 size, out SPXASYNCHANDLE asyncHandle);
+
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
+        public static extern SPXHR connection_send_message_wait_for(InteropSafeHandle asyncHandle, UInt32 milliseconds);
+
+        [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
+        public static extern SPXHR connection_async_handle_release(SPXASYNCHANDLE asyncHandle);
 
         [DllImport(Import.NativeDllName, CallingConvention = Import.NativeCallConvention)]
         public static extern bool connection_message_received_event_handle_is_valid(InteropSafeHandle handle);

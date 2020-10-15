@@ -462,7 +462,7 @@ CSpxStringMap CSpxRecognizer::GetParametersFromUser(std::string&& path)
     return result;
 }
 
-void CSpxRecognizer::SendNetworkMessage(std::string&& path, std::string&& payload)
+CSpxAsyncOp<bool> CSpxRecognizer::SendNetworkMessage(std::string&& path, std::string&& payload)
 {
     if (payload.length() > MAX_JSON_PAYLOAD_FROM_USER)
     {
@@ -481,14 +481,14 @@ void CSpxRecognizer::SendNetworkMessage(std::string&& path, std::string&& payloa
 
     SPX_DBG_TRACE_INFO("CSpxRecognizer::SendNetworkMessage path=%s, payload=%s", path.c_str(), payload.c_str());
     SPX_IFTRUE_THROW_HR(m_defaultSession == nullptr, SPXERR_UNINITIALIZED);
-    m_defaultSession->SendNetworkMessage(std::move(path), std::move(payload));
+    return m_defaultSession->SendNetworkMessage(std::move(path), std::move(payload));
 }
 
-void CSpxRecognizer::SendNetworkMessage(std::string&& path, std::vector<uint8_t>&& payload)
+CSpxAsyncOp<bool> CSpxRecognizer::SendNetworkMessage(std::string&& path, std::vector<uint8_t>&& payload)
 {
     SPX_IFTRUE_THROW_HR(m_defaultSession == nullptr, SPXERR_UNINITIALIZED);
     SPX_DBG_TRACE_INFO("CSpxRecognizer::SendNetworkMessage path=%s binary payload", path.c_str());
-    m_defaultSession->SendNetworkMessage(std::move(path), std::move(payload));
+    return m_defaultSession->SendNetworkMessage(std::move(path), std::move(payload));
 }
 
 } } } } // Microsoft::CognitiveServices::Speech::Impl

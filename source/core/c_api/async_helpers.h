@@ -58,6 +58,29 @@ SPXHR async_operation_wait_for(SPXASYNCHANDLE async_handle, uint32_t millisecond
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
+template<typename Result>
+SPXHR async_operation_wait_for_untracked(SPXASYNCHANDLE async_handle, uint32_t milliseconds, Result* resultPtr)
+{
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, resultPtr == nullptr);
+
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        *resultPtr = SPXHANDLE_INVALID;
+
+        auto async_handles = CSpxSharedPtrHandleTableManager::Get<CSpxAsyncOp<Result>, SPXASYNCHANDLE>();
+        auto async_operation = (*async_handles)[async_handle];
+        auto completed = async_operation->WaitFor(milliseconds);
+        if (!completed)
+        {
+            return SPXERR_TIMEOUT;
+        }
+        auto result = async_operation->Future.get();
+        *resultPtr = result;
+        return SPX_NOERROR;
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
 template<typename OperationFn, typename WaitFn, typename... Args>
 inline SPXHR async_to_sync(SPXHANDLE handle, OperationFn operationFn, WaitFn waitFn, Args&&... args)
 {

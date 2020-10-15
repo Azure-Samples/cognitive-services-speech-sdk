@@ -40,8 +40,8 @@ namespace ConversationTranslation {
 
         // --- ISpxUspMessageParamFromUser
         virtual void SetParameter(std::string&& path, std::string&& name, std::string&& value) override;
-        virtual void SendNetworkMessage(std::string&& path, std::string&& payload) override;
-        virtual void SendNetworkMessage(std::string&& path, std::vector<uint8_t>&& payload) override;
+        virtual CSpxAsyncOp<bool> SendNetworkMessage(std::string&& path, std::string&& payload) override;
+        virtual CSpxAsyncOp<bool> SendNetworkMessage(std::string&& path, std::vector<uint8_t>&& payload) override;
 
     private:
         DISABLE_COPY_AND_MOVE(CSpxConversationTranslatorConnection);
