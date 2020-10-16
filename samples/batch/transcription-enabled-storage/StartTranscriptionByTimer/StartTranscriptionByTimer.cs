@@ -16,11 +16,9 @@ namespace StartTranscriptionByTimer
 
     public static class StartTranscriptionByTimer
     {
-        private const int MessagesPerExecutionThreshold = 5000;
-
         private const double MessageReceiveTimeoutInSeconds = 60;
 
-        private static MessageReceiver MessageReceiverInstance = new MessageReceiver(new ServiceBusConnectionStringBuilder(StartTranscriptionEnvironmentVariables.StartTranscriptionServiceBusConnectionString), prefetchCount: MessagesPerExecutionThreshold);
+        private static MessageReceiver MessageReceiverInstance = new MessageReceiver(new ServiceBusConnectionStringBuilder(StartTranscriptionEnvironmentVariables.StartTranscriptionServiceBusConnectionString), prefetchCount: StartTranscriptionEnvironmentVariables.MessagesPerFunctionExecution);
 
         [FunctionName("StartTranscriptionByTimer")]
         public static async Task Run([TimerTrigger("0 */2 * * * *")] TimerInfo myTimer, ILogger log)
@@ -48,7 +46,7 @@ namespace StartTranscriptionByTimer
 
             log.LogInformation("Pulling messages from queue...");
 
-            var messages = await MessageReceiverInstance.ReceiveAsync(MessagesPerExecutionThreshold, TimeSpan.FromSeconds(MessageReceiveTimeoutInSeconds)).ConfigureAwait(false);
+            var messages = await MessageReceiverInstance.ReceiveAsync(StartTranscriptionEnvironmentVariables.MessagesPerFunctionExecution, TimeSpan.FromSeconds(MessageReceiveTimeoutInSeconds)).ConfigureAwait(false);
 
             if (messages == null || !messages.Any())
             {
