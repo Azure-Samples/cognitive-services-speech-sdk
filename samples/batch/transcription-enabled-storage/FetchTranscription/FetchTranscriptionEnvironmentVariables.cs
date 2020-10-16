@@ -6,6 +6,7 @@
 namespace FetchTranscriptionFunction
 {
     using System;
+    using Connector.Extensions;
 
     public static class FetchTranscriptionEnvironmentVariables
     {
@@ -35,10 +36,16 @@ namespace FetchTranscriptionFunction
 
         public static readonly string JsonResultOutputContainer = Environment.GetEnvironmentVariable(nameof(JsonResultOutputContainer), EnvironmentVariableTarget.Process);
 
+        public static readonly int RetryLimit = int.TryParse(Environment.GetEnvironmentVariable(nameof(RetryLimit), EnvironmentVariableTarget.Process), out RetryLimit) ? RetryLimit.ClampInt(1, MaxRetryLimit) : DefaultRetryLimit;
+
         public static readonly string StartTranscriptionServiceBusConnectionString = Environment.GetEnvironmentVariable(nameof(StartTranscriptionServiceBusConnectionString), EnvironmentVariableTarget.Process);
 
         public static readonly string TextAnalyticsKey = Environment.GetEnvironmentVariable(nameof(TextAnalyticsKey), EnvironmentVariableTarget.Process);
 
         public static readonly string TextAnalyticsRegion = Environment.GetEnvironmentVariable(nameof(TextAnalyticsRegion), EnvironmentVariableTarget.Process);
+
+        private const int MaxRetryLimit = 16;
+
+        private const int DefaultRetryLimit = 4;
     }
 }

@@ -51,8 +51,6 @@ namespace FetchTranscriptionFunction
 
         public async Task<IEnumerable<string>> AddSentimentToTranscriptAsync(SpeechTranscript speechTranscript)
         {
-            Log.LogInformation($"Starting sentiment analysis.");
-
             if (speechTranscript == null)
             {
                 throw new ArgumentNullException(nameof(speechTranscript));
@@ -75,8 +73,6 @@ namespace FetchTranscriptionFunction
 
         public async Task<IEnumerable<string>> RedactEntitiesAsync(SpeechTranscript speechTranscript)
         {
-            Log.LogInformation($"Starting entity masking.");
-
             if (speechTranscript == null)
             {
                 throw new ArgumentNullException(nameof(speechTranscript));
@@ -208,14 +204,12 @@ namespace FetchTranscriptionFunction
                 textAnalyticsDocumentList.Add(textAnalyticsDocument);
             }
 
-            Log.LogInformation($"Total text analytics documents: {textAnalyticsDocumentList.Count}");
-
             for (int i = 0; i < textAnalyticsDocumentList.Count; i += documentRequestLimit)
             {
                 textAnalyticChunks.Add(new TextAnalyticsRequestsChunk(textAnalyticsDocumentList.GetRange(i, Math.Min(documentRequestLimit, textAnalyticsDocumentList.Count - i))));
             }
 
-            Log.LogInformation($"Total chunks: {textAnalyticChunks.Count}");
+            Log.LogInformation($"Received {textAnalyticChunks.Count} text analytics chunks from {textAnalyticsDocumentList.Count} documents.");
             return textAnalyticChunks;
         }
 
@@ -350,7 +344,6 @@ namespace FetchTranscriptionFunction
                 }
             }
 
-            Log.LogInformation($"Added sentiment segments.");
             return sentimentErrors;
         }
 

@@ -22,10 +22,6 @@ namespace StartTranscriptionByTimer
 
     public class StartTranscriptionHelper
     {
-        private const int MaxFilesPerTranscriptionJob = 1000;
-
-        private const int MaxMessageRetryCount = 6;
-
         private static StorageConnector StorageConnectorInstance = new StorageConnector(StartTranscriptionEnvironmentVariables.AzureWebJobsStorage);
 
         private static QueueClient StartQueueClientInstance = new QueueClient(new ServiceBusConnectionStringBuilder(StartTranscriptionEnvironmentVariables.StartTranscriptionServiceBusConnectionString));
@@ -39,6 +35,8 @@ namespace StartTranscriptionByTimer
         private readonly string ErrorReportContaineName = StartTranscriptionEnvironmentVariables.ErrorReportOutputContainer;
 
         private readonly string AudioInputContainerName = StartTranscriptionEnvironmentVariables.AudioInputContainer;
+
+        private readonly int FilesPerTranscriptionJob = StartTranscriptionEnvironmentVariables.FilesPerTranscriptionJob;
 
         private readonly string HostName = $"https://{StartTranscriptionEnvironmentVariables.AzureSpeechServicesRegion}.api.cognitive.microsoft.com/";
 
@@ -67,9 +65,9 @@ namespace StartTranscriptionByTimer
             var chunkedMessages = new List<List<Message>>();
             var messageCount = messages.Count();
 
-            for (int i = 0; i < messageCount; i += MaxFilesPerTranscriptionJob)
+            for (int i = 0; i < messageCount; i += FilesPerTranscriptionJob)
             {
-                var chunk = messages.Skip(i).Take(Math.Min(MaxFilesPerTranscriptionJob, messageCount - i)).ToList();
+                var chunk = messages.Skip(i).Take(Math.Min(FilesPerTranscriptionJob, messageCount - i)).ToList();
                 chunkedMessages.Add(chunk);
             }
 
@@ -231,7 +229,6 @@ namespace StartTranscriptionByTimer
                     var errorMessage = $"Throttled or timeout while creating post. Error Message: {e.Message}";
                     Logger.LogError(errorMessage);
                     await RetryOrFailMessagesAsync(messages, errorMessage).ConfigureAwait(false);
-                    return;
                 }
                 else
                 {
@@ -245,22 +242,23 @@ namespace StartTranscriptionByTimer
                     }
 
                     await WriteFailedJobLogToStorageAsync(serviceBusMessages, errorMessage, jobName).ConfigureAwait(false);
-                    return;
                 }
+
+                throw;
             }
             catch (TimeoutException e)
             {
                 var errorMessage = $"Timeout while creating post, re-enqueueing transcription start. Message: {e.Message}";
                 Logger.LogError(errorMessage);
                 await RetryOrFailMessagesAsync(messages, errorMessage).ConfigureAwait(false);
-                return;
+                throw;
             }
             catch (Exception e)
             {
                 var errorMessage = $"Start Transcription in job with name {jobName} failed with exception {e} and message {e.Message}";
                 Logger.LogError(errorMessage);
                 await WriteFailedJobLogToStorageAsync(serviceBusMessages, errorMessage, jobName).ConfigureAwait(false);
-                return;
+                throw;
             }
 
             Logger.LogInformation($"Fetch transcription queue successfully informed about job at: {jobName}");
@@ -272,7 +270,7 @@ namespace StartTranscriptionByTimer
             {
                 var sbMessage = JsonConvert.DeserializeObject<ServiceBusMessage>(Encoding.UTF8.GetString(message.Body));
 
-                if (sbMessage.RetryCount >= MaxMessageRetryCount)
+                if (sbMessage.RetryCount >= StartTranscriptionEnvironmentVariables.RetryLimit)
                 {
                     var fileName = StorageConnector.GetFileNameFromUri(sbMessage.Data.Url);
                     var errorFileName = fileName + ".txt";

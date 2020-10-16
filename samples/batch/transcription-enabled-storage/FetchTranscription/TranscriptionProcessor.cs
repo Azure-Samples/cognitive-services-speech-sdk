@@ -20,8 +20,6 @@ namespace FetchTranscriptionFunction
 
     public static class TranscriptionProcessor
     {
-        private const int MaxRetryCount = 6;
-
         private static StorageConnector StorageConnectorInstance = new StorageConnector(FetchTranscriptionEnvironmentVariables.AzureWebJobsStorage);
 
         private static QueueClient StartQueueClientInstance = new QueueClient(new ServiceBusConnectionStringBuilder(FetchTranscriptionEnvironmentVariables.StartTranscriptionServiceBusConnectionString));
@@ -68,28 +66,32 @@ namespace FetchTranscriptionFunction
             }
             catch (WebException e)
             {
-                if (BatchClient.IsThrottledOrTimeoutStatusCode(((HttpWebResponse)e.Response).StatusCode))
+                if (e.Response != null && BatchClient.IsThrottledOrTimeoutStatusCode(((HttpWebResponse)e.Response).StatusCode))
                 {
                     log.LogInformation("Timeout or throttled, retrying message.");
                     await ServiceBusUtilities.SendServiceBusMessageAsync(FetchQueueClientInstance, serviceBusMessage.CreateMessageString(), log, messageDelayTime).ConfigureAwait(false);
-                    return;
+                }
+                else
+                {
+                    var errorMessage = $"Fetch Transcription in job with name {jobName} failed with WebException {e} and message {e.Message}.";
+                    log.LogError($"{errorMessage}");
+                    await RetryOrFailJobAsync(serviceBusMessage, errorMessage, jobName, transcriptionLocation, subscriptionKey, log).ConfigureAwait(false);
                 }
 
-                var errorMessage = $"Fetch Transcription in job with name {jobName} failed with WebException {e} and message {e.Message}.";
-                log.LogError($"{errorMessage}");
-                await RetryOrFailJobAsync(serviceBusMessage, errorMessage, jobName, transcriptionLocation, subscriptionKey, log).ConfigureAwait(false);
+                throw;
             }
             catch (TimeoutException e)
             {
                 log.LogInformation($"Timeout - re-enqueueing fetch transcription message. Exception message: {e.Message}");
                 await ServiceBusUtilities.SendServiceBusMessageAsync(FetchQueueClientInstance, serviceBusMessage.CreateMessageString(), log, messageDelayTime).ConfigureAwait(false);
-                return;
+                throw;
             }
             catch (Exception e)
             {
                 var errorMessage = $"Fetch Transcription in job with name {jobName} failed with Exception {e} and message {e.Message}.";
                 log.LogError($"{errorMessage}");
                 await RetryOrFailJobAsync(serviceBusMessage, errorMessage, jobName, transcriptionLocation, subscriptionKey, log).ConfigureAwait(false);
+                throw;
             }
         }
 
@@ -126,7 +128,7 @@ namespace FetchTranscriptionFunction
             {
                 var fileName = StorageConnector.GetFileNameFromUri(new Uri(audio.FileUrl));
 
-                if (retryAudioFile && audio.RetryCount < MaxRetryCount)
+                if (retryAudioFile && audio.RetryCount < FetchTranscriptionEnvironmentVariables.RetryLimit)
                 {
                     log.LogInformation($"Retrying transcription with name {fileName} - retry count: {audio.RetryCount}");
                     var sbMessage = new ServiceBusMessage
@@ -337,7 +339,7 @@ namespace FetchTranscriptionFunction
             message.FailedExecutionCounter += 1;
             var messageDelayTime = GetMessageDelayTime(message.PollingCounter);
 
-            if (message.FailedExecutionCounter > MaxRetryCount)
+            if (message.FailedExecutionCounter > FetchTranscriptionEnvironmentVariables.RetryLimit)
             {
                 await WriteFailedJobLogToStorageAsync(message, error, jobName, log).ConfigureAwait(false);
                 await BatchClient.DeleteTranscriptionAsync(transcriptionLocation, subscriptionKey, log).ConfigureAwait(false);
