@@ -277,7 +277,7 @@
         "createHtmlResultFile": true,
         "timerBasedExecution": true,
         "messagesPerFunctionExecution": 500,
-        "filesPerTranscriptionJob": 16,
+        "filesPerTranscriptionJob": 32,
         "retryLimit": 4
     },
     "resources": [
