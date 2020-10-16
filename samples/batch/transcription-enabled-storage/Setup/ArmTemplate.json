@@ -274,7 +274,7 @@
         "authRuleFT": "[resourceId('Microsoft.ServiceBus/namespaces/queues/authorizationRules',concat('ServiceBus-', resourceGroup().name), 'fetch_transcription_queue','FetchTranscription')]",
         "authRuleCT": "[resourceId('Microsoft.ServiceBus/namespaces/queues/authorizationRules',concat('ServiceBus-', resourceGroup().name), 'start_transcription_queue','StartTranscription')]",
         "appServicePlanName": "AcceleratorAppServicePlan",
-        "createHtmlResultFile": false,
+        "createHtmlResultFile": true,
         "timerBasedExecution": true,
         "messagesPerFunctionExecution": 500,
         "filesPerTranscriptionJob": 16,
