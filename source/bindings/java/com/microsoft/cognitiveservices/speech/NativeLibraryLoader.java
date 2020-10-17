@@ -272,8 +272,7 @@ class NativeLibraryLoader {
                 throw new FileNotFoundException(String.format("Could not find resource %s in jar.", path));
             }
             else {
-                // Optional library; just print a message
-                System.err.println(String.format("Could not find optional resource %s in jar.", path));
+                // Optional library
                 return;
             }
         }
