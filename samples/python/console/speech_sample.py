@@ -62,9 +62,17 @@ def speech_recognize_once_from_mic():
 
 
 def speech_recognize_once_from_file():
-    """performs one-shot speech recognition with input from an audio file"""
+    """performs one-shot speech recognition with input from an audio file. Also
+    demonstrates how to get word level confidence scores as well as detailed
+    results in json format."""
     # <SpeechRecognitionWithFile>
     speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
+    speech_config.set_service_property(
+        name='wordLevelConfidence', value='true',
+        channel=speechsdk.ServicePropertyChannel.UriQueryParameter)
+    speech_config.set_service_property(
+        name='format', value='detailed',
+        channel=speechsdk.ServicePropertyChannel.UriQueryParameter)
     audio_config = speechsdk.audio.AudioConfig(filename=weatherfilename)
     # Creates a speech recognizer using a file as audio input, also specify the speech language
     speech_recognizer = speechsdk.SpeechRecognizer(
@@ -80,7 +88,9 @@ def speech_recognize_once_from_file():
 
     # Check the result
     if result.reason == speechsdk.ResultReason.RecognizedSpeech:
-        print("Recognized: {}".format(result.text))
+        # Prints detailed result in json format.
+        print("Recognized: {}".format(
+            result.properties[speechsdk.PropertyId.SpeechServiceResponse_JsonResult]))
     elif result.reason == speechsdk.ResultReason.NoMatch:
         print("No speech could be recognized: {}".format(result.no_match_details))
     elif result.reason == speechsdk.ResultReason.Canceled:
