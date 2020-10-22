@@ -261,6 +261,7 @@ void CSpxHttpAudioStreamSession::CleanupAfterEachAudioPumping()
     }
     m_audioPump = nullptr;
     m_fromMicrophone = false;
+    m_audioDataCollected = false;
     m_totalAudioinMS = 0;
 }
 
@@ -301,7 +302,8 @@ void CSpxHttpAudioStreamSession::Error(const string& msg)
 
 void CSpxHttpAudioStreamSession::SetFormat(const SPXWAVEFORMATEX* pformat)
 {
-    SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+    const char* msg = pformat ? "some format" : "null format";
+    SPX_DBG_TRACE_INFO("Enter CSpxHttpAudioStreamSession::SetFormat with %s", msg);
 
     if (m_reco == nullptr)
     {
@@ -314,12 +316,15 @@ void CSpxHttpAudioStreamSession::SetFormat(const SPXWAVEFORMATEX* pformat)
         m_avgBytesPerSecond = pformat->nAvgBytesPerSec;
     }
     // all audio is done pumping.
-    if (pformat == nullptr)
+    if (pformat == nullptr && !m_audioDataCollected)
     {
+        m_audioDataCollected = true;
         OnDoneAudioPumping();
     }
+    SPX_DBG_TRACE_INFO("Exit CSpxHttpAudioStreamSession::SetFormat with %s", msg);
 }
-// OnDoneAudioPumping is called at the AudioPump thread. HTTP Post does taking time, so we don't want to hog the audio pump thread.
+
+// OnDoneAudioPumping is called at the AudioPump thread. HTTP Post does take time, so we don't want to hog the audio pump thread.
 void CSpxHttpAudioStreamSession::OnDoneAudioPumping()
 {
     if (m_postAudioThread.joinable())
@@ -368,8 +373,9 @@ void CSpxHttpAudioStreamSession::ProcessAudio(const DataChunkPtr& audioChunk)
     if (m_fromMicrophone)
     {
         m_totalAudioinMS += FromBytesToMilisecond(audioChunk->size, m_avgBytesPerSecond);
-        if (m_totalAudioinMS >= m_microphoneTimeoutInMS.count())
+        if (m_totalAudioinMS >= m_microphoneTimeoutInMS.count() && !m_audioDataCollected)
         {
+            SPX_DBG_TRACE_INFO("Collected enough audio samples from microphone.");
             SetFormat(nullptr);
         }
     }

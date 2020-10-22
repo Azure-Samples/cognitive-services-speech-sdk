@@ -121,6 +121,7 @@ private:
 
     uint32_t m_avgBytesPerSecond = 16000*2;
     uint32_t m_totalAudioinMS = 0;
+    bool m_audioDataCollected = false;
     std::mutex m_mutex;
     std::thread m_postAudioThread; // the HTTP POST audio thread.
 };
