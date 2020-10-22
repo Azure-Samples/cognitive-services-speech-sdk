@@ -203,16 +203,19 @@ void CSpxMicrophonePumpBase::UpdateState(AUDIO_STATE state)
 
 int CSpxMicrophonePumpBase::Process(const uint8_t* pBuffer, uint32_t size)
 {
+    unique_lock<mutex> lock(m_mutex);
     int result = 0;
-    SPX_IFTRUE_THROW_HR(m_sink == nullptr, SPXERR_INVALID_ARG);
-
-    if (pBuffer != nullptr)
+    if (m_state == State::Processing)
     {
-        auto sharedBuffer = SpxAllocSharedAudioBuffer(size);
-        memcpy(sharedBuffer.get(), pBuffer, size);
-        m_sink->ProcessAudio(std::make_shared<DataChunk>(sharedBuffer, size));
-    }
+        SPX_IFTRUE_THROW_HR(m_sink == nullptr, SPXERR_INVALID_ARG);
 
+        if (pBuffer != nullptr)
+        {
+            auto sharedBuffer = SpxAllocSharedAudioBuffer(size);
+            memcpy(sharedBuffer.get(), pBuffer, size);
+            m_sink->ProcessAudio(std::make_shared<DataChunk>(sharedBuffer, size));
+        }
+    }
     return result;
 }
 
