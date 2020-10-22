@@ -48,8 +48,6 @@ jobs:
       versionSpec: 3.7
       addToPath: true
   - bash: |
-     export HOMEBREW_NO_INSTALL_CLEANUP=1
-     brew unlink swig
      ./ci/install-build-dependencies.sh
     displayName: Install build dependencies
   - template: templates/generate_subscription_file.yml

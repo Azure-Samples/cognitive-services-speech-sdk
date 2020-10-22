@@ -87,8 +87,9 @@ case $SPEECHSDK_BUILD_AGENT_PLATFORM in
     brew config
     brew install pkg-config coreutils bash ninja
     # custom-install swig 3.0.12
-    brew install https://raw.githubusercontent.com/Homebrew/homebrew-core/f3544543a3115023fc7ca962c21d14b443f419d0/Formula/swig.rb
-
+    brew unlink swig || true
+    brew install swig@3
+    brew link --force swig@3
     if [[ $SPEECHSDK_ENABLE_RNNT == true ]]; then
       # Install RNN-T model package
       nuget sources add -name RNNTModel -source $RNNT_MODEL_NUGET_SOURCE -username carbon -password $VSTS_TOKEN
