@@ -144,13 +144,20 @@ void CSpxConversationTranscriber::FireResultEvent(const std::wstring& sessionId,
 
 void CSpxConversationTranscriber::FireRecoEvent(ISpxRecognizerEvents::RecoEvent_Type* event, const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result, uint64_t offset)
 {
-    if (event != nullptr && event->IsConnected())
+    if (event != nullptr)
     {
-        auto factory = SpxQueryService<ISpxEventArgsFactory>(CheckAndGetSite());
-        auto recoEvent = (result != nullptr)
-            ? factory->CreateRecognitionEventArgs(sessionId, result)
-            : factory->CreateRecognitionEventArgs(sessionId, offset);
-        event->Signal(recoEvent);
+        if (event->IsConnected())
+        {
+            auto factory = SpxQueryService<ISpxEventArgsFactory>(CheckAndGetSite());
+            auto recoEvent = (result != nullptr)
+                ? factory->CreateRecognitionEventArgs(sessionId, result)
+                : factory->CreateRecognitionEventArgs(sessionId, offset);
+            event->Signal(recoEvent);
+        }
+        else
+        {
+            SPX_DBG_TRACE_VERBOSE("No listener connected to event");
+        }
     }
 }
 

@@ -186,14 +186,21 @@ void CSpxDialogServiceConnector::FireResultEvent(const std::wstring& sessionId, 
 
 void CSpxDialogServiceConnector::FireRecoEvent(ISpxRecognizerEvents::RecoEvent_Type* event, const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result, uint64_t offset)
 {
-    if (event != nullptr && event->IsConnected())
+    if (event != nullptr)
     {
+        if(event->IsConnected())
+        {
         SPX_DBG_ASSERT(GetSite());
         auto factory = SpxQueryService<ISpxEventArgsFactory>(GetSite());
         auto recoEvent = (result != nullptr)
             ? factory->CreateRecognitionEventArgs(sessionId, result)
             : factory->CreateRecognitionEventArgs(sessionId, offset);
         event->Signal(recoEvent);
+        }
+        else
+        {
+            SPX_DBG_TRACE_VERBOSE("No listener connected to event");
+        }
     }
 }
 

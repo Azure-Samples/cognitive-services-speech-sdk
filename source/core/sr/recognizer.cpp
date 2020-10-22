@@ -318,13 +318,20 @@ void CSpxRecognizer::FireResultEvent(const std::wstring& sessionId, std::shared_
 
 void CSpxRecognizer::FireRecoEvent(ISpxRecognizerEvents::RecoEvent_Type* pevent, const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result, uint64_t offset)
 {
-    if (pevent != nullptr && pevent->IsConnected())
+    if (pevent != nullptr )
     {
-        auto factory = GetEventArgsFactory();
-        auto recoEvent = (result != nullptr)
-            ? factory->CreateRecognitionEventArgs(sessionId, result)
-            : factory->CreateRecognitionEventArgs(sessionId, offset);
-        pevent->Signal(recoEvent);
+        if (pevent->IsConnected())
+        {
+            auto factory = GetEventArgsFactory();
+            auto recoEvent = (result != nullptr)
+                ? factory->CreateRecognitionEventArgs(sessionId, result)
+                : factory->CreateRecognitionEventArgs(sessionId, offset);
+            pevent->Signal(recoEvent);
+        }
+        else
+        {
+            SPX_DBG_TRACE_VERBOSE("No listener connected to event");
+        }
     }
 }
 
