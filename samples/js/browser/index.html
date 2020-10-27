@@ -209,6 +209,12 @@
                 </td>
             </tr>
             <tr>
+                <td align="right">Category ID of Custom Translator:</td>
+                <td>
+                    <input id="categoryid" type="text" size="60" value="">(specify custom translation model)
+                </td>
+            </tr>
+            <tr>
                 <td align="right">Results:</td>
                 <td align="left">
                     <textarea id="phraseDiv" style="display: inline-block;width:500px;height:200px"></textarea>
@@ -314,6 +320,7 @@
             key = document.getElementById("key");
             appId = document.getElementById("appId");
             phrases = document.getElementById("phrases");
+            categoryid = document.getElementById("categoryid");
             languageOptions = document.getElementById("languageOptions");
             languageTargetOptions = document.getElementById("languageTargetOptions");
             voiceOutput = document.getElementById("voiceOutput");
@@ -479,6 +486,9 @@
                         return;
                     }
                     speechConfig = SpeechSDK.SpeechTranslationConfig.fromSubscription(key.value, regionOptions.value);
+                }
+                if (categoryid.value !== "") {
+                    speechConfig.setServiceProperty("category", categoryid.value, SpeechSDK.ServicePropertyChannel.UriQueryParameter);
                 }
 
                 // Set the source language.
