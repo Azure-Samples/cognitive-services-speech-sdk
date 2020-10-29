@@ -9,6 +9,7 @@
     XCUIApplication *app;
     NSString *weatherText;
     NSString *beachText;
+    NSString *keywordText;
 }
 @end
 
@@ -19,6 +20,7 @@
 
     weatherText = @"What's the weather like?";
     beachText = @"Wreck a nice beach.";
+    beachText = @"Computer";
     // Put setup code here. This method is called before the invocation of each test method in the class.
 
     // In UI tests it is usually best to stop immediately when a failure occurs.
@@ -117,6 +119,24 @@
     XCTAssert(result_label.exists);
 
     NSPredicate *pred = [NSPredicate predicateWithFormat:@"label == Language: en-US, %@", weatherText];
+
+    [self expectationForPredicate:pred evaluatedWithObject:result_label handler:nil];
+
+    [reco_button tap];
+
+    [self waitForExpectationsWithTimeout:20 handler:nil];
+}
+
+- (void)testRecognizeKeyword {
+    // sleep to make sure elements are there
+    [NSThread sleepForTimeInterval:1];
+    XCUIElement * reco_button = app.buttons[@"recognize_keyword_button"];
+    XCTAssert(reco_button.exists);
+
+    XCUIElement * result_label = app.staticTexts[@"result_label"];
+    XCTAssert(result_label.exists);
+
+    NSPredicate *pred = [NSPredicate predicateWithFormat:@"label == Language: en-US, %@", keywordText];
 
     [self expectationForPredicate:pred evaluatedWithObject:result_label handler:nil];
 
