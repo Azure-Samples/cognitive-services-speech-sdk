@@ -1,7 +1,7 @@
 # Quickstart: Synthesize speech in C++ for Linux
 
 This sample demonstrates how to synthesize speech with C++ using the Speech SDK for Linux.
-See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-text-to-speech-cpp-linux) on the SDK documentation page for step-by-step instructions.
+See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstarts/text-to-speech-audio-file?tabs=ubuntu%2Cwindowsinstall&pivots=programming-language-cpp) on the SDK documentation page for step-by-step instructions.
 
 > **Note:**
 > We currently only support [specific Linux distributions and target architectures](https://docs.microsoft.com/azure/cognitive-services/speech-service/speech-sdk?tabs=linux).

@@ -2,7 +2,7 @@
 
 This sample shows how to use the Speech Service through the Speech SDK for Python. It illustrates how the SDK can be used to recognize speech from microphone input.
 
-See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-python) on the SDK documentation page for step-by-step instructions.
+See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstarts/speech-to-text-from-microphone?tabs=dotnet%2Cx-android%2Clinux%2Cjava-runtime%2Cwindowsinstall&pivots=programming-language-python) on the SDK documentation page for step-by-step instructions.
 
 ## Prerequisites
 

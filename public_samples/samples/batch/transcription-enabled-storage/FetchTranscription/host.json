@@ -1,0 +1,12 @@
+{
+  "version": "2.0",
+  "functionTimeout": "00:30:00",
+  "extensions": {
+    "serviceBus": {
+      "messageHandlerOptions": {
+        "autoComplete": true,
+        "maxAutoRenewDuration": "00:30:00"
+      }
+    }
+  }
+}

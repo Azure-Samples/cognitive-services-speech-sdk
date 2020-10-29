@@ -1021,5 +1021,41 @@ namespace MicrosoftSpeechSDKSamples
                 }
             }
         }
+        private static async Task<RecognitionResult> RecognizeOnceAsyncInternal(string key, string region)
+        {
+            RecognitionResult recognitionResult = null;
+            var config = SpeechConfig.FromSubscription(key, region);
+
+            // Creates a speech recognizer using file as audio input.
+            using (var audioInput = AudioConfig.FromWavFileInput(@"whatstheweatherlike.wav"))
+            {
+                using (var recognizer = new SpeechRecognizer(config, audioInput))
+                {
+                    recognitionResult = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+                }
+            }
+
+            return recognitionResult;
+        }
+
+        // Speech recognition with backup subscription region.
+        public static async Task RecognitionOnceWithFileAsyncSwitchSecondaryRegion()
+        {
+            // Create a speech resource with primary subscription key and service region.
+            // Also create a speech resource with secondary subscription key and service region 
+            RecognitionResult recognitionResult = await RecognizeOnceAsyncInternal("PrimarySubscriptionKey", "PrimarySubscriptionRegion");
+            if (recognitionResult.Reason == ResultReason.Canceled)
+            {
+                CancellationDetails details = CancellationDetails.FromResult(recognitionResult);
+                if (details.ErrorCode == CancellationErrorCode.ConnectionFailure
+                    || details.ErrorCode == CancellationErrorCode.ServiceUnavailable
+                    || details.ErrorCode == CancellationErrorCode.ServiceTimeout)
+                {
+                    recognitionResult = await RecognizeOnceAsyncInternal("SecondarySubscriptionRegion", "SecondarySubscriptionRegion");
+                }
+            }
+            Console.WriteLine("Recognized {0}", recognitionResult.Text);
+        }
+
     }
 }

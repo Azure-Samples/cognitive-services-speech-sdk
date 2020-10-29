@@ -1,7 +1,7 @@
 # Quickstart: Translate speech in Java on Windows or Linux
 
-This sample demonstrates how to translate speech with the Speech SDK for Java on Windows or Linux.
-See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-translate-speech-java-jre) on the SDK documentation page which describes how to build this sample from scratch in Eclipse.
+This sample demonstrates how to translate speech with the Speech SDK for Java on Windows or Linux (Ubuntu 16.04, Ubuntu 18.04, Debian 9, RHEL 8, CentOS 8).
+See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstarts/translate-speech-to-text?tabs=dotnet%2Cwindowsinstall&pivots=programming-language-java) on the SDK documentation page which describes how to build this sample from scratch in Eclipse.
 
 > **Note:**
 > The Speech SDK for the JRE currently supports only the Windows x64 platform, macOS 10.13 or later, and [specific Linux distributions and target architectures](https://docs.microsoft.com/azure/cognitive-services/speech-service/speech-sdk?tabs=linux).
