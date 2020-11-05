@@ -202,15 +202,15 @@ namespace FetchTranscriptionFunction
                 {
                     var textAnalyticsErrors = new List<string>();
 
-                    if (FetchTranscriptionEnvironmentVariables.AddSentimentAnalysis)
+                    if (FetchTranscriptionEnvironmentVariables.SentimentAnalysisSetting != SentimentAnalysisSetting.None)
                     {
-                        var sentimentErrors = await textAnalytics.AddSentimentToTranscriptAsync(transcriptionResult).ConfigureAwait(false);
+                        var sentimentErrors = await textAnalytics.AddSentimentToTranscriptAsync(transcriptionResult, FetchTranscriptionEnvironmentVariables.SentimentAnalysisSetting).ConfigureAwait(false);
                         textAnalyticsErrors.AddRange(sentimentErrors);
                     }
 
-                    if (FetchTranscriptionEnvironmentVariables.AddEntityRedaction)
+                    if (FetchTranscriptionEnvironmentVariables.EntityRedactionSetting != EntityRedactionSetting.None)
                     {
-                        var entityRedactionErrors = await textAnalytics.RedactEntitiesAsync(transcriptionResult).ConfigureAwait(false);
+                        var entityRedactionErrors = await textAnalytics.RedactEntitiesAsync(transcriptionResult, FetchTranscriptionEnvironmentVariables.EntityRedactionSetting).ConfigureAwait(false);
                         textAnalyticsErrors.AddRange(entityRedactionErrors);
                     }
 
@@ -249,8 +249,8 @@ namespace FetchTranscriptionFunction
                         duration,
                         transcriptionResult.CombinedRecognizedPhrases.Count(),
                         serviceBusMessage.UsesCustomModel,
-                        FetchTranscriptionEnvironmentVariables.AddSentimentAnalysis,
-                        FetchTranscriptionEnvironmentVariables.AddEntityRedaction);
+                        FetchTranscriptionEnvironmentVariables.SentimentAnalysisSetting,
+                        FetchTranscriptionEnvironmentVariables.EntityRedactionSetting);
 
                     var jobId = containsMultipleTranscriptions ? Guid.NewGuid() : new Guid(transcriptionLocation.Split('/').LastOrDefault());
                     var dbConnectionString = FetchTranscriptionEnvironmentVariables.DatabaseConnectionString;
