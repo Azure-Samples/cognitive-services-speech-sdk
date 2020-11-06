@@ -459,7 +459,7 @@ namespace MicrosoftSpeechSDKSamples
                                 Console.WriteLine($"Audio data for text [{text}] was saved to [{fileName}]");
 
                                 // You can also read data from audio data stream and process it in memory
-                                // Reset the stream position to the beginning since saving to file puts the position to end
+                                // Reset the stream position to the beginning since saving to file puts the position at the end
                                 audioDataStream.SetPosition(0);
 
                                 byte[] buffer = new byte[16000];
