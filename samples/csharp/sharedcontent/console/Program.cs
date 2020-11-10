@@ -49,6 +49,7 @@ namespace MicrosoftSpeechSDKSamples
             Console.WriteLine("V. Translation with compressed input push audio stream.");
             Console.WriteLine("W. Keyword recognizer.");
             Console.WriteLine("X. Speech synthesis with source language auto detection.");
+            Console.WriteLine("Y. Remote Conversation for an async job.");
 
             Console.Write(prompt);
 
@@ -160,6 +161,10 @@ namespace MicrosoftSpeechSDKSamples
                         break;
                     case ConsoleKey.Y:
                         SpeechRecognitionSamples.RecognitionOnceWithFileAsyncSwitchSecondaryRegion().Wait();
+                        break;
+
+                    case ConsoleKey.Z:
+                        RemoteConversationSamples.RemoteConversationWithFileAsync().Wait();
                         break;
 
                     case ConsoleKey.D0:

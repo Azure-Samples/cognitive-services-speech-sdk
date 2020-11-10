@@ -30,6 +30,7 @@ speech_key, service_region = "YourSubscriptionKey", "YourServiceRegion"
 # Specify the path to an audio file containing speech (mono WAV / PCM with a sampling rate of 16
 # kHz).
 weatherfilename = "whatstheweatherlike.wav"
+weatherfilenamemp3 = "whatstheweatherlike.mp3"
 
 
 def speech_recognize_once_from_mic():
@@ -89,6 +90,65 @@ def speech_recognize_once_from_file():
         if cancellation_details.reason == speechsdk.CancellationReason.Error:
             print("Error details: {}".format(cancellation_details.error_details))
     # </SpeechRecognitionWithFile>
+
+
+def speech_recognize_once_compressed_input():
+    """performs one-shot speech recognition with compressed input from an audio file"""
+    # <SpeechRecognitionWithCompressedFile>
+    class BinaryFileReaderCallback(speechsdk.audio.PullAudioInputStreamCallback):
+        def __init__(self, filename: str):
+            super().__init__()
+            self._file_h = open(filename, "rb")
+
+        def read(self, buffer: memoryview) -> int:
+            try:
+                size = buffer.nbytes
+                frames = self._file_h.read(size)
+
+                buffer[:len(frames)] = frames
+
+                return len(frames)
+            except Exception as ex:
+                print('Exception in `read`: {}'.format(ex))
+                raise
+
+        def close(self) -> None:
+            print('closing file')
+            try:
+                self._file_h.close()
+            except Exception as ex:
+                print('Exception in `close`: {}'.format(ex))
+                raise
+    # Creates an audio stream format. For an example we are using MP3 compressed file here
+    compressed_format = speechsdk.audio.AudioStreamFormat(compressed_stream_format=speechsdk.AudioStreamContainerFormat.MP3)
+    callback = BinaryFileReaderCallback(filename=weatherfilenamemp3)
+    stream = speechsdk.audio.PullAudioInputStream(stream_format=compressed_format, pull_stream_callback=callback)
+
+    speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
+    audio_config = speechsdk.audio.AudioConfig(stream=stream)
+
+    # Creates a speech recognizer using a file as audio input, also specify the speech language
+    speech_recognizer = speechsdk.SpeechRecognizer(speech_config, audio_config)
+
+    # Starts speech recognition, and returns after a single utterance is recognized. The end of a
+    # single utterance is determined by listening for silence at the end or until a maximum of 15
+    # seconds of audio is processed. It returns the recognition text as result.
+    # Note: Since recognize_once() returns only a single utterance, it is suitable only for single
+    # shot recognition like command or query.
+    # For long-running multi-utterance recognition, use start_continuous_recognition() instead.
+    result = speech_recognizer.recognize_once()
+
+    # Check the result
+    if result.reason == speechsdk.ResultReason.RecognizedSpeech:
+        print("Recognized: {}".format(result.text))
+    elif result.reason == speechsdk.ResultReason.NoMatch:
+        print("No speech could be recognized: {}".format(result.no_match_details))
+    elif result.reason == speechsdk.ResultReason.Canceled:
+        cancellation_details = result.cancellation_details
+        print("Speech Recognition canceled: {}".format(cancellation_details.reason))
+        if cancellation_details.reason == speechsdk.CancellationReason.Error:
+            print("Error details: {}".format(cancellation_details.error_details))
+    # </SpeechRecognitionWithCompressedFile>
 
 
 def speech_recognize_once_from_file_with_customized_model():
@@ -452,3 +512,121 @@ def speech_recognize_with_auto_language_detection_UsingCustomizedModel():
         print("Speech Recognition canceled: {}".format(cancellation_details.reason))
         if cancellation_details.reason == speechsdk.CancellationReason.Error:
             print("Error details: {}".format(cancellation_details.error_details))
+
+
+def speech_recognize_keyword_locally_from_microphone():
+    """runs keyword spotting locally, with direct access to the result audio"""
+
+    # Creates an instance of a keyword recognition model. Update this to
+    # point to the location of your keyword recognition model.
+    model = speechsdk.KeywordRecognitionModel("YourKeywordRecognitionModelFile.table")
+
+    # The phrase your keyword recognition model triggers on.
+    keyword = "YourKeyword"
+
+    # Create a local keyword recognizer with the default microphone device for input.
+    keyword_recognizer = speechsdk.KeywordRecognizer()
+
+    done = False
+
+    def recognized_cb(evt):
+        # Only a keyword phrase is recognized. The result cannot be 'NoMatch'
+        # and there is no timeout. The recognizer runs until a keyword phrase
+        # is detected or recognition is canceled (by stop_recognition_async()
+        # or due to the end of an input file or stream).
+        result = evt.result
+        if result.reason == speechsdk.ResultReason.RecognizedKeyword:
+            print("RECOGNIZED KEYWORD: {}".format(result.text))
+        nonlocal done
+        done = True
+
+    def canceled_cb(evt):
+        result = evt.result
+        if result.reason == speechsdk.ResultReason.Canceled:
+            print('CANCELED: {}'.format(result.cancellation_details.reason))
+        nonlocal done
+        done = True
+
+    # Connect callbacks to the events fired by the keyword recognizer.
+    keyword_recognizer.recognized.connect(recognized_cb)
+    keyword_recognizer.canceled.connect(canceled_cb)
+
+    # Start keyword recognition.
+    result_future = keyword_recognizer.recognize_once_async(model)
+    print('Say something starting with "{}" followed by whatever you want...'.format(keyword))
+    result = result_future.get()
+
+    # Read result audio (incl. the keyword).
+    if result.reason == speechsdk.ResultReason.RecognizedKeyword:
+        time.sleep(2) # give some time so the stream is filled
+        result_stream = speechsdk.AudioDataStream(result)
+        result_stream.detach_input() # stop any more data from input getting to the stream
+
+        save_future = result_stream.save_to_wav_file_async("AudioFromRecognizedKeyword.wav")
+        print('Saving file...')
+        saved = save_future.get()
+
+    # If active keyword recognition needs to be stopped before results, it can be done with
+    #
+    #   stop_future = keyword_recognizer.stop_recognition_async()
+    #   print('Stopping...')
+    #   stopped = stop_future.get()
+
+
+def pronunciation_assessment_from_microphone():
+    """pronunciation assessment."""
+
+    # Creates an instance of a speech config with specified subscription key and service region.
+    # Replace with your own subscription key and service region (e.g., "westus").
+    # Note: The pronunciation assessment feature is currently only available on westus, eastasia and centralindia regions.
+    # And this feature is currently only available on en-US language.
+    config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
+
+    reference_text = ""
+    # create pronunciation assessment config, set grading system, granularity and if enable miscue based on your requirement.
+    pronunciation_config = speechsdk.PronunciationAssessmentConfig(reference_text=reference_text,
+                                                                   grading_system=speechsdk.PronunciationAssessmentGradingSystem.HundredMark,
+                                                                   granularity=speechsdk.PronunciationAssessmentGranularity.Phoneme,
+                                                                   enable_miscue=True)
+
+    recognizer = speechsdk.SpeechRecognizer(speech_config=config)
+    while True:
+        # Receives reference text from console input.
+        print('Enter reference text you want to assess, or enter empty text to exit.')
+        print('> ')
+
+        try:
+            reference_text = input()
+        except EOFError:
+            break
+
+        pronunciation_config.reference_text = reference_text
+        pronunciation_config.apply_to(recognizer)
+
+        # Starts recognizing.
+        print('Read out "{}" for pronunciation assessment ...'.format(reference_text))
+
+        result = recognizer.recognize_once_async().get()
+
+        # Check the result
+        if result.reason == speechsdk.ResultReason.RecognizedSpeech:
+            print('Recognized: {}'.format(result.text))
+            print('  Pronunciation Assessment Result:')
+
+            pronunciation_result = speechsdk.PronunciationAssessmentResult(result)
+            print('    Accuracy score: {}, Pronunciation score: {}, Completeness score : {}, FluencyScore: {}'.format(
+                pronunciation_result.accuracy_score, pronunciation_result.pronunciation_score,
+                pronunciation_result.completeness_score, pronunciation_result.fluency_score
+            ))
+            print('  Word-level details:')
+            for idx, word in enumerate(pronunciation_result.words):
+                print('    {}: word: {}, accuracy score: {}, error type: {};'.format(
+                    idx + 1, word.word, word.accuracy_score, word.error_type
+                ))
+        elif result.reason == speechsdk.ResultReason.NoMatch:
+            print("No speech could be recognized")
+        elif result.reason == speechsdk.ResultReason.Canceled:
+            cancellation_details = result.cancellation_details
+            print("Speech Recognition canceled: {}".format(cancellation_details.reason))
+            if cancellation_details.reason == speechsdk.CancellationReason.Error:
+                print("Error details: {}".format(cancellation_details.error_details))
