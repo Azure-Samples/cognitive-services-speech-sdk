@@ -9,13 +9,14 @@ namespace Connector
 
     public class CombinedRecognizedPhrase
     {
-        public CombinedRecognizedPhrase(int channel, string lexical, string itn, string maskedItn, string display)
+        public CombinedRecognizedPhrase(int channel, string lexical, string itn, string maskedItn, string display, Sentiment sentiment)
         {
             Channel = channel;
             Lexical = lexical;
             ITN = itn;
             MaskedITN = maskedItn;
             Display = display;
+            Sentiment = sentiment;
         }
 
         [JsonProperty("channel")]
@@ -32,5 +33,8 @@ namespace Connector
 
         [JsonProperty("display")]
         public string Display { get; set; }
+
+        [JsonProperty("sentiment")]
+        public Sentiment Sentiment { get; set; }
     }
 }

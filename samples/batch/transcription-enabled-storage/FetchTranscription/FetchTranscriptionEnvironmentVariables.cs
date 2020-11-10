@@ -6,13 +6,14 @@
 namespace FetchTranscriptionFunction
 {
     using System;
+    using Connector.Enums;
     using Connector.Extensions;
 
     public static class FetchTranscriptionEnvironmentVariables
     {
-        public static readonly bool AddEntityRedaction = bool.TryParse(Environment.GetEnvironmentVariable(nameof(AddEntityRedaction), EnvironmentVariableTarget.Process), out AddEntityRedaction) && AddEntityRedaction;
+        public static readonly SentimentAnalysisSetting SentimentAnalysisSetting = Enum.TryParse(Environment.GetEnvironmentVariable(nameof(SentimentAnalysisSetting), EnvironmentVariableTarget.Process), out SentimentAnalysisSetting) ? SentimentAnalysisSetting : SentimentAnalysisSetting.None;
 
-        public static readonly bool AddSentimentAnalysis = bool.TryParse(Environment.GetEnvironmentVariable(nameof(AddSentimentAnalysis), EnvironmentVariableTarget.Process), out AddSentimentAnalysis) && AddSentimentAnalysis;
+        public static readonly EntityRedactionSetting EntityRedactionSetting = Enum.TryParse(Environment.GetEnvironmentVariable(nameof(EntityRedactionSetting), EnvironmentVariableTarget.Process), out EntityRedactionSetting) ? EntityRedactionSetting : EntityRedactionSetting.None;
 
         public static readonly bool CreateHtmlResultFile = bool.TryParse(Environment.GetEnvironmentVariable(nameof(CreateHtmlResultFile), EnvironmentVariableTarget.Process), out CreateHtmlResultFile) && CreateHtmlResultFile;
 
