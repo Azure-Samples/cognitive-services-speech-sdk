@@ -76,6 +76,8 @@ namespace MicrosoftSpeechSDKSamples
             var pool = new SynthesizerPool(() => new SpeechSynthesizer(speechConfig, null));
             var latencyList = new List<double>();
             var processingTimeList = new List<double>();
+            // change this value to true if you want to record the result ids for debugging purposes.
+            var printResultId = false;
 
             for (var turn = 0; turn < 3; turn++)
             {
@@ -102,6 +104,10 @@ namespace MicrosoftSpeechSDKSamples
                     synthesizer.Synthesizing += SynthesizingEvent;
 
                     var result = synthesizer.SpeakTextAsync($"today is a nice day. {turn}{i}").Result;
+                    if (printResultId && turn == 0)
+                    {
+                        Console.WriteLine("First result ID for synthesizer {0} is {1}", i, result.ResultId);
+                    }
                     if (result.Reason == ResultReason.SynthesizingAudioCompleted)
                     {
                         if (turn > 0)
