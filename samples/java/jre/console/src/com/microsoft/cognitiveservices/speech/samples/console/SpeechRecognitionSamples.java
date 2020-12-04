@@ -356,9 +356,18 @@ public class SpeechRecognitionSamples {
             // Push audio read from the file into the PushStream.
             // The audio can be pushed into the stream before, after, or during recognition
             // and recognition will continue as data becomes available.
-            while(  inputStream.read(readBuffer) != -1)
+            int bytesRead;
+            while ((bytesRead = inputStream.read(readBuffer)) != -1)
             {
-                pushStream.write(readBuffer);
+                if (bytesRead == readBuffer.length)
+                {
+                    pushStream.write(readBuffer);
+                }
+                else
+                {
+                    // Last buffer read from the WAV file is likely to have less bytes
+                    pushStream.write(Arrays.copyOfRange(readBuffer, 0, bytesRead));
+                }
             }
 
             pushStream.close();
