@@ -91,7 +91,9 @@ public class WavStream extends PullAudioInputStreamCallback {
         int formatTag = ReadUInt16(reader);
         int channels = ReadUInt16(reader);
         int samplesPerSec = (int) ReadUInt32(reader);
+        @SuppressWarnings("unused")
         int avgBytesPerSec = (int) ReadUInt32(reader);
+        @SuppressWarnings("unused")
         int blockAlign = ReadUInt16(reader);
         int bitsPerSample = ReadUInt16(reader);
         ThrowIfFalse(formatTag == 1, "PCM"); // PCM
