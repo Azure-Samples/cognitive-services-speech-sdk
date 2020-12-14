@@ -45,7 +45,6 @@ namespace StartTranscriptionByTimer
             var transcriptionHelper = new StartTranscriptionHelper(log);
 
             log.LogInformation("Pulling messages from queue...");
-
             var messages = await MessageReceiverInstance.ReceiveAsync(StartTranscriptionEnvironmentVariables.MessagesPerFunctionExecution, TimeSpan.FromSeconds(MessageReceiveTimeoutInSeconds)).ConfigureAwait(false);
 
             if (messages == null || !messages.Any())
