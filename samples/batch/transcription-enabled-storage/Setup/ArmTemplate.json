@@ -279,9 +279,11 @@
         "ErrorFilesOutputContainer": "error-files",
         "CreateHtmlResultFile": false,
         "TimerBasedExecution": true,
-        "MessagesPerFunctionExecution": 500,
-        "FilesPerTranscriptionJob": 16,
+        "MessagesPerFunctionExecution": 1000,
+        "FilesPerTranscriptionJob": 100,
         "RetryLimit": 4,
+        "InitialPollingDelayInMinutes": 2,
+        "MaxPollingDelayInMinutes": 180,
         "InstanceId": "[parameters('DeploymentId')]",
         "StorageAccountName": "[parameters('StorageAccount')]",
         "UseSqlDatabase": "[and(not(equals(parameters('SqlAdministratorLogin'),'')), not(equals(parameters('SqlAdministratorLoginPassword'),'')))]",
@@ -695,8 +697,25 @@
                     "includedEventTypes": [
                         "Microsoft.Storage.BlobCreated"
                     ],
-                    "subjectBeginsWith": "[concat('/blobServices/default/containers/', variables('AudioInputContainer'))]",
-                    "advancedFilters": []
+                    "advancedFilters": [
+                        {
+                            "operatorType": "StringBeginsWith",
+                            "key": "Subject",
+                            "values": [
+                                "[concat('/blobServices/default/containers/', variables('AudioInputContainer'), '/blobs')]"
+                            ]
+                        },
+                        {
+                            "operatorType": "StringContains",
+                            "key": "data.api",
+                            "values": [
+                                "FlushWithClose",
+                                "PutBlob",
+                                "PutBlockList",
+                                "CopyBlob"
+                            ]
+                        }
+                    ]
                 },
                 "labels": [],
                 "eventDeliverySchema": "EventGridSchema"
@@ -747,13 +766,13 @@
             "properties": {
                 "AddDiarization": "[parameters('AddDiarization')]",
                 "AddWordLevelTimestamps": "[parameters('AddWordLevelTimestamps')]",
-                "APPINSIGHTS_INSTRUMENTATIONKEY": "[reference(resourceId('Microsoft.Insights/components', variables('AppInsightsName')), '2015-05-01').InstrumentationKey]",
+                "APPLICATIONINSIGHTS_CONNECTION_STRING": "[reference(resourceId('Microsoft.Insights/components', variables('AppInsightsName')), '2015-05-01').ConnectionString]",
                 "AudioInputContainer": "[variables('AudioInputContainer')]",
                 "AzureServiceBus": "[listKeys(variables('AuthRuleRMK'),'2015-08-01').primaryConnectionString]",
                 "AzureSpeechServicesKey": "[parameters('AzureSpeechServicesKey')]",
                 "AzureSpeechServicesRegion": "[parameters('AzureSpeechServicesRegion')]",
-                "AzureWebJobsStorage": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('StorageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value)]",
-                "AzureWebJobsDashboard": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('StorageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value)]",
+                "AzureWebJobsStorage": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('StorageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value, ';EndpointSuffix=core.windows.net')]",
+                "AzureWebJobsDashboard": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('StorageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value, ';EndpointSuffix=core.windows.net')]",
                 "CustomModelId": "[parameters('CustomModelId')]",
                 "ErrorFilesOutputContainer": "[variables('ErrorFilesOutputContainer')]",
                 "ErrorReportOutputContainer": "[variables('ErrorReportOutputContainer')]",
@@ -761,6 +780,8 @@
                 "FilesPerTranscriptionJob": "[variables('FilesPerTranscriptionJob')]",
                 "FUNCTIONS_EXTENSION_VERSION": "~3",
                 "FUNCTIONS_WORKER_RUNTIME": "dotnet",
+                "InitialPollingDelayInMinutes": "[variables('InitialPollingDelayInMinutes')]",
+                "MaxPollingDelayInMinutes": "[variables('MaxPollingDelayInMinutes')]",
                 "Locale": "[parameters('Locale')]",
                 "MessagesPerFunctionExecution": "[variables('MessagesPerFunctionExecution')]",
                 "ProfanityFilterMode": "[parameters('ProfanityFilterMode')]",
@@ -803,14 +824,14 @@
                 "displayName": "WebAppSettings"
             },
             "properties": {
-                "APPINSIGHTS_INSTRUMENTATIONKEY": "[reference(resourceId('Microsoft.Insights/components', variables('AppInsightsName')), '2015-05-01').InstrumentationKey]",
+                "APPLICATIONINSIGHTS_CONNECTION_STRING": "[reference(resourceId('Microsoft.Insights/components', variables('AppInsightsName')), '2015-05-01').ConnectionString]",
                 "EntityRedactionSetting": "[parameters('EntityRedaction')]",
                 "SentimentAnalysisSetting": "[parameters('SentimentAnalysis')]",
                 "AudioInputContainer": "[variables('AudioInputContainer')]",
                 "AzureServiceBus": "[listKeys(variables('AuthRuleRMK'),'2015-08-01').primaryConnectionString]",
                 "AzureSpeechServicesKey": "[parameters('AzureSpeechServicesKey')]",
-                "AzureWebJobsStorage": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('StorageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value)]",
-                "AzureWebJobsDashboard": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('StorageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value)]",
+                "AzureWebJobsStorage": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('StorageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value, ';EndpointSuffix=core.windows.net')]",
+                "AzureWebJobsDashboard": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('StorageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value, ';EndpointSuffix=core.windows.net')]",
                 "CreateHtmlResultFile": "[variables('CreateHtmlResultFile')]",
                 "DatabaseConnectionString": "[if(variables('UseSqlDatabase'), concat('Server=tcp:',reference(variables('SqlServerName'), '2014-04-01-preview').fullyQualifiedDomainName,',1433;Initial Catalog=',variables('DatabaseName'),';Persist Security Info=False;User ID=',parameters('SqlAdministratorLogin'),';Password=',parameters('SqlAdministratorLoginPassword'),';MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;'), '')]",
                 "ErrorFilesOutputContainer": "[variables('ErrorFilesOutputContainer')]",
@@ -819,6 +840,8 @@
                 "FUNCTIONS_EXTENSION_VERSION": "~3",
                 "FUNCTIONS_WORKER_RUNTIME": "dotnet",
                 "HtmlResultOutputContainer": "[variables('HtmlResultOutputContainer')]",
+                "InitialPollingDelayInMinutes": "[variables('InitialPollingDelayInMinutes')]",
+                "MaxPollingDelayInMinutes": "[variables('MaxPollingDelayInMinutes')]",
                 "JsonResultOutputContainer": "[variables('JsonResultOutputContainer')]",
                 "RetryLimit": "[variables('RetryLimit')]",
                 "StartTranscriptionServiceBusConnectionString": "[listKeys(variables('AuthRuleCT'),'2015-08-01').primaryConnectionString]",

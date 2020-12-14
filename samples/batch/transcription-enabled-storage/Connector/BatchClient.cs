@@ -7,6 +7,7 @@ namespace Connector
 {
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Net;
     using System.Net.Http;
     using System.Text;
@@ -105,7 +106,14 @@ namespace Connector
 
                     if (!responseMessage.IsSuccessStatusCode)
                     {
-                        var failureMessage = $"Failure: Status Code {responseMessage.StatusCode}, {responseMessage.Content.Headers}";
+                        var failureMessage = $"Failure - Status Code: {responseMessage.StatusCode}";
+
+                        if (responseMessage.Content != null)
+                        {
+                            var body = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
+                            failureMessage += $", Body: {body}";
+                        }
+
                         log.LogInformation(failureMessage);
                         throw new WebException(failureMessage);
                     }
@@ -141,7 +149,14 @@ namespace Connector
 
                     if (!responseMessage.IsSuccessStatusCode)
                     {
-                        var failureMessage = $"Failure: Status Code {responseMessage.StatusCode}, {responseMessage.Content.Headers}";
+                        var failureMessage = $"Failure - Status Code: {responseMessage.StatusCode}";
+
+                        if (responseMessage.Content != null)
+                        {
+                            var body = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
+                            failureMessage += $", Body: {body}";
+                        }
+
                         log.LogInformation(failureMessage);
                         throw new WebException(failureMessage);
                     }
@@ -181,6 +196,13 @@ namespace Connector
 
                     var failureMessage = $"Failure: Status Code {responseMessage.StatusCode}";
                     log.LogInformation(failureMessage);
+
+                    if (responseMessage.Content != null)
+                    {
+                        var body = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
+                        failureMessage += $", Body: {body}";
+                    }
+
                     throw new WebException(failureMessage);
                 }
                 catch (OperationCanceledException)

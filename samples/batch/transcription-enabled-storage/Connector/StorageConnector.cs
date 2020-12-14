@@ -8,17 +8,17 @@ namespace Connector
     using System;
     using System.IO;
     using System.Linq;
+    using System.Text;
     using System.Threading.Tasks;
     using System.Web;
     using Azure.Storage;
+    using Azure.Storage.Blobs;
     using Azure.Storage.Sas;
     using Microsoft.Extensions.Logging;
-    using Microsoft.WindowsAzure.Storage;
-    using Microsoft.WindowsAzure.Storage.Blob;
 
     public class StorageConnector
     {
-        private CloudBlobClient CloudBlobClient;
+        private BlobServiceClient BlobServiceClient;
 
         private string AccountName;
 
@@ -31,11 +31,10 @@ namespace Connector
                 throw new ArgumentNullException(nameof(storageConnectionString));
             }
 
-            var storageAccount = CloudStorageAccount.Parse(storageConnectionString);
-
             AccountName = GetValueFromConnectionString("AccountName", storageConnectionString);
             AccountKey = GetValueFromConnectionString("AccountKey", storageConnectionString);
-            CloudBlobClient = storageAccount.CreateCloudBlobClient();
+
+            BlobServiceClient = new BlobServiceClient(storageConnectionString);
         }
 
         public static string GetFileNameFromUri(Uri fileUri)
@@ -80,13 +79,13 @@ namespace Connector
 
         public static async Task<byte[]> DownloadFileFromSAS(string blobSas)
         {
-            var blob = new CloudBlockBlob(new Uri(blobSas));
+            var blob = new BlobClient(new Uri(blobSas));
 
             byte[] data;
 
             using (var memoryStream = new MemoryStream())
             {
-                await blob.DownloadToStreamAsync(memoryStream).ConfigureAwait(false);
+                await blob.DownloadToAsync(memoryStream).ConfigureAwait(false);
                 data = new byte[memoryStream.Length];
                 memoryStream.Position = 0;
                 memoryStream.Read(data, 0, data.Length);
@@ -99,49 +98,52 @@ namespace Connector
         {
             var containerName = GetContainerNameFromUri(fileUri);
             var fileName = GetFileNameFromUri(fileUri);
-            var container = CloudBlobClient.GetContainerReference(containerName);
+            var blobContainerClient = BlobServiceClient.GetBlobContainerClient(containerName);
 
             var sasBuilder = new BlobSasBuilder()
             {
-                BlobContainerName = container.Name,
+                BlobContainerName = blobContainerClient.Name,
                 BlobName = fileName,
                 Resource = "b",
             };
 
-            sasBuilder.StartsOn = DateTime.UtcNow;
+            sasBuilder.StartsOn = DateTime.UtcNow.Subtract(TimeSpan.FromMinutes(10));
             sasBuilder.ExpiresOn = DateTime.UtcNow.AddDays(1);
             sasBuilder.SetPermissions(BlobContainerSasPermissions.Read);
 
             var sasToken = sasBuilder.ToSasQueryParameters(new StorageSharedKeyCredential(AccountName, AccountKey)).ToString();
-            return $"{container.GetBlockBlobReference(fileName).Uri}?{sasToken}";
+            return $"{blobContainerClient.GetBlobClient(fileName).Uri}?{sasToken}";
         }
 
         public async Task WriteTextFileToBlobAsync(string content, string containerName, string fileName, ILogger log)
         {
             log.LogInformation($"Writing file {fileName} to container {containerName}.");
-            var container = CloudBlobClient.GetContainerReference(containerName);
-            var blockBlob = container.GetBlockBlobReference(fileName);
+            var container = BlobServiceClient.GetBlobContainerClient(containerName);
+            var blockBlob = container.GetBlobClient(fileName);
 
-            await blockBlob.UploadTextAsync(content).ConfigureAwait(false);
+            using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(content)))
+            {
+                await blockBlob.UploadAsync(stream).ConfigureAwait(false);
+            }
         }
 
         public async Task MoveFileAsync(string inputContainerName,  string inputFileName, string outputContainerName, string outputFileName, ILogger log)
         {
             log.LogInformation($"Moving file {inputFileName} from container {inputContainerName} to {outputFileName} in container {outputContainerName}.");
-            var inputContainer = CloudBlobClient.GetContainerReference(inputContainerName);
-            var inputBlockBlob = inputContainer.GetBlockBlobReference(inputFileName);
+            var inputContainerClient = BlobServiceClient.GetBlobContainerClient(inputContainerName);
+            var inputBlockBlobClient = inputContainerClient.GetBlobClient(inputFileName);
 
-            if (!await inputBlockBlob.ExistsAsync().ConfigureAwait(false))
+            if (!await inputBlockBlobClient.ExistsAsync().ConfigureAwait(false))
             {
                 log.LogError($"File {inputFileName} does not exist in container {inputContainerName}. Returning.");
                 return;
             }
 
-            var outputContainer = CloudBlobClient.GetContainerReference(outputContainerName);
-            var outputBlockBlob = outputContainer.GetBlockBlobReference(outputFileName);
+            var outputContainerClient = BlobServiceClient.GetBlobContainerClient(outputContainerName);
+            var outputBlockBlobClient = outputContainerClient.GetBlobClient(outputFileName);
 
-            await outputBlockBlob.StartCopyAsync(inputBlockBlob).ConfigureAwait(false);
-            await inputBlockBlob.DeleteAsync().ConfigureAwait(false);
+            await outputBlockBlobClient.StartCopyFromUriAsync(inputBlockBlobClient.Uri).ConfigureAwait(false);
+            await inputBlockBlobClient.DeleteAsync().ConfigureAwait(false);
         }
 
         private static string GetValueFromConnectionString(string key, string connectionString)
