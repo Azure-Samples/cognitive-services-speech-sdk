@@ -6,8 +6,8 @@ This sample demonstrates how to recognize speech from compressed audio input wit
 
 * A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
 * A PC (Windows, Linux, Mac) capable to run Android Studio.
-* Version 3.1 of [Android Studio](https://developer.android.com/studio/).
-* An ARM-based Android device (API 23: Android 6.0 Marshmallow or higher) [enabled for development](https://developer.android.com/studio/debug/dev-options) with a working microphone.
+* Version 3.1 or higher of [Android Studio](https://developer.android.com/studio/).
+* An ARM-based Android device (API 23: Android 6.0 Marshmallow or higher) [enabled for development](https://developer.android.com/studio/debug/dev-options) with a working microphone. Make sure that "USB debugging" is enabled on your device.
 
 ## Build the sample
 
@@ -18,11 +18,11 @@ This sample demonstrates how to recognize speech from compressed audio input wit
   * Replace the string `YourSubscriptionKey` with your own subscription key.
   * Replace the string `YourServiceRegion` with the service region of your subscription.
     For example, replace with `westus` if you are using the 30-day free trial subscription.
-* Create folder jniLibs inside app\src\main. (jniLibs should be at the same level as java)
-* Create four folder inside jniLibs with names arm64-v8a, armeabi-v7a, x86, x86_64 respectively.
-* Create libgstreamer_android.so for each ABI using the information provided in  [Compressed audio input with the Speech SDK on Android](https://docs.microsoft.com/bs-latn-ba/azure/cognitive-services/speech-service/how-to-use-codec-compressed-audio-input-streams-android)
-* Place the libgstreamer_android.so inside jniLibs\arm64-v8a and the other folders respectively. 
-* Put the whatstheweatherlike.mp3 inside /sdcard/input/.
+* Create folder `jniLibs` inside `app\src\main`. (`jniLibs` should be at the same level as the `java` folder)
+* Create four folders inside `jniLibs` with names `arm64-v8a`, `armeabi-v7a`, `x86`, `x86_64` respectively.
+* Create `libgstreamer_android.so` for each Application Binary Interface (ABI) using the information provided in  [Compressed audio input with the Speech SDK on Android](https://docs.microsoft.com/azure/cognitive-services/speech-service/how-to-use-codec-compressed-audio-input-streams-android)
+* Place the `libgstreamer_android.so` inside `jniLibs\arm64-v8a` and the other folders respectively. 
+* Put the `whatstheweatherlike.mp3` inside `/sdcard/input/`.
 * Press Ctrl+F9, or select **Build** \> **Make Project**.
 
 ## Run the sample
@@ -57,3 +57,4 @@ catch (Exception ex) {
 ## References
 
 * [Speech SDK API reference for Java](https://aka.ms/csspeech/javaref)
+* [Use codec compressed audio input with the Speech SDK](https://docs.microsoft.com/azure/cognitive-services/speech-service/how-to-use-codec-compressed-audio-input-streams?tabs=debian&pivots=programming-language-java)
