@@ -107,8 +107,8 @@ namespace Connector
 
             var combinedPhrases = speechTranscript.CombinedRecognizedPhrases.Where(t => t.Channel == channel).FirstOrDefault();
 
-            var query = "INSERT INTO dbo.CombinedRecognizedPhrases (ID, TranscriptionID, Channel, Lexical, Itn, MaskedItn, Display)" +
-                " VALUES (@id, @transcriptionID, @channel, @lexical, @itn, @maskedItn, @display)";
+            var query = "INSERT INTO dbo.CombinedRecognizedPhrases (ID, TranscriptionID, Channel, Lexical, Itn, MaskedItn, Display, SentimentPositive, SentimentNeutral, SentimentNegative)" +
+                " VALUES (@id, @transcriptionID, @channel, @lexical, @itn, @maskedItn, @display, @sentimentPositive, @sentimentNeutral, @sentimentNegative)";
 
             using (var command = new SqlCommand(query, Connection))
             {
@@ -116,20 +116,14 @@ namespace Connector
                 command.Parameters.AddWithValue("@transcriptionID", transcriptionId);
                 command.Parameters.AddWithValue("@channel", channel);
 
-                if (combinedPhrases != null)
-                {
-                    command.Parameters.AddWithValue("@lexical", combinedPhrases.Lexical);
-                    command.Parameters.AddWithValue("@itn", combinedPhrases.ITN);
-                    command.Parameters.AddWithValue("@maskedItn", combinedPhrases.MaskedITN);
-                    command.Parameters.AddWithValue("@display", combinedPhrases.Display);
-                }
-                else
-                {
-                    command.Parameters.AddWithValue("@lexical", string.Empty);
-                    command.Parameters.AddWithValue("@itn", string.Empty);
-                    command.Parameters.AddWithValue("@maskedItn", string.Empty);
-                    command.Parameters.AddWithValue("@display", string.Empty);
-                }
+                command.Parameters.AddWithValue("@lexical", combinedPhrases.Lexical ?? string.Empty);
+                command.Parameters.AddWithValue("@itn", combinedPhrases.ITN ?? string.Empty);
+                command.Parameters.AddWithValue("@maskedItn", combinedPhrases.MaskedITN ?? string.Empty);
+                command.Parameters.AddWithValue("@display", combinedPhrases.Display ?? string.Empty);
+
+                command.Parameters.AddWithValue("@sentimentPositive", combinedPhrases?.Sentiment?.Positive ?? 0f);
+                command.Parameters.AddWithValue("@sentimentNeutral", combinedPhrases?.Sentiment?.Neutral ?? 0f);
+                command.Parameters.AddWithValue("@sentimentNegative", combinedPhrases?.Sentiment?.Negative ?? 0f);
 
                 var result = await command.ExecuteNonQueryAsync().ConfigureAwait(false);
 
@@ -194,18 +188,10 @@ namespace Connector
                 command.Parameters.AddWithValue("@itn", nBest.ITN);
                 command.Parameters.AddWithValue("@maskedItn", nBest.MaskedITN);
                 command.Parameters.AddWithValue("@display", nBest.Display);
-                if (nBest.Sentiment != null)
-                {
-                    command.Parameters.AddWithValue("@sentimentNegative", nBest.Sentiment.Negative);
-                    command.Parameters.AddWithValue("@sentimentNeutral", nBest.Sentiment.Neutral);
-                    command.Parameters.AddWithValue("@sentimentPositive", nBest.Sentiment.Positive);
-                }
-                else
-                {
-                    command.Parameters.AddWithValue("@sentimentNegative", 0f);
-                    command.Parameters.AddWithValue("@sentimentNeutral", 0f);
-                    command.Parameters.AddWithValue("@sentimentPositive", 0f);
-                }
+
+                command.Parameters.AddWithValue("@sentimentNegative", nBest?.Sentiment?.Negative ?? 0f);
+                command.Parameters.AddWithValue("@sentimentNeutral", nBest?.Sentiment?.Neutral ?? 0f);
+                command.Parameters.AddWithValue("@sentimentPositive", nBest?.Sentiment?.Positive ?? 0f);
 
                 var result = await command.ExecuteNonQueryAsync().ConfigureAwait(false);
 

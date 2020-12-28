@@ -105,7 +105,7 @@ void to_json(nlohmann::json& j, const Transcription& t) {
             { "recordingsurl",t.recordingsUrl },
             { "resultUrls", t.resultsUrls},
             { "status", t.status},
-            { "statusmessage", t.statusMessage}
+            { "statusMessage", t.statusMessage},
     };
 };
 
@@ -117,7 +117,7 @@ void from_json(const nlohmann::json& j, Transcription& t) {
     j.at("recordingsUrl").get_to(t.recordingsUrl);
     t.resultsUrls = j.at("resultsUrls").get<map<string, string>>();
     j.at("status").get_to(t.status);
-    j.at("statusMessage").get_to(t.statusMessage);
+    t.statusMessage = j.value("statusMessage", "");
 }
 class Result
 {
@@ -233,19 +233,19 @@ void recognizeSpeech()
         }
 
         auto body = statusResponse.extract_string().get();
-        nlohmann::json statusJSON = nlohmann::json::parse(body);
-        Transcription transcriptonStatus = statusJSON;
+        auto statusJSON = nlohmann::json::parse(body);
+        Transcription transcriptionStatus = statusJSON;
 
-        if (!_stricmp(transcriptonStatus.status.c_str(), "Failed"))
+        if (!_stricmp(transcriptionStatus.status.c_str(), "Failed"))
         {
             completed = true;
-            cout << "Transcription has failed " << transcriptonStatus.statusMessage << endl;
+            cout << "Transcription has failed " << transcriptionStatus.statusMessage << endl;
         }
-        else if (!_stricmp(transcriptonStatus.status.c_str(), "Succeeded"))
+        else if (!_stricmp(transcriptionStatus.status.c_str(), "Succeeded"))
         {
             completed = true;
             cout << "Success!" << endl;
-            string result = transcriptonStatus.resultsUrls["channel_0"];
+            string result = transcriptionStatus.resultsUrls["channel_0"];
             cout << "Transcription has completed. Results are at " << result << endl;
             cout << "Fetching results" << endl;
 
@@ -283,11 +283,11 @@ void recognizeSpeech()
                 }
             }
         }
-        else if (!_stricmp(transcriptonStatus.status.c_str(), "Running"))
+        else if (!_stricmp(transcriptionStatus.status.c_str(), "Running"))
         {
             cout << "Transcription is running." << endl;
         }
-        else if (!_stricmp(transcriptonStatus.status.c_str(), "NotStarted"))
+        else if (!_stricmp(transcriptionStatus.status.c_str(), "NotStarted"))
         {
             cout << "Transcription has not started." << endl;
         }
