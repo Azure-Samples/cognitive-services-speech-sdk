@@ -202,8 +202,8 @@ namespace FetchTranscriptionFunction
                 return textAnalyticsEntities;
             }
 
-            textAnalyticsEntities.OrderBy(o => o.Offset);
-            List<TextAnalyticsEntity> resultEntities = textAnalyticsEntities;
+            var orderedEntities = textAnalyticsEntities.OrderBy(o => o.Offset);
+            var resultEntities = orderedEntities.ToList();
             bool foundOverlap;
 
             do
