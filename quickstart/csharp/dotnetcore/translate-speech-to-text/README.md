@@ -3,10 +3,13 @@
 This sample demonstrates how to translate speech with C# under .NET Core 2.0 (Windows or Linux) using the Speech SDK.
 See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstarts/translate-speech-to-text?tabs=dotnetcore%2Cwindowsinstall&pivots=programming-language-csharp) on the SDK documentation page which describes how to build this sample from scratch in Visual Studio 2017.
 
+> **Note:**
+> We currently only support [specific Linux distributions and target architectures](https://docs.microsoft.com/azure/cognitive-services/speech-service/speech-sdk?tabs=linux).
+
 ## Prerequisites
 
 * A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
-* A PC (Windows x64, Ubuntu 16.04 x64, Ubuntu 18.04 x64, Debian 9 x64, RHEL 8 x64, CentOS 8 x64) with a working microphone.
+* A PC (Windows x64 or a supported Linux distribution) with a working microphone.
 * Either one of the following:
   * On Windows:
     * [Microsoft Visual Studio 2017](https://www.visualstudio.com/), Community Edition or higher.
@@ -15,26 +18,23 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
   * On Windows or Linux:
     * [.NET Core 2.0](https://www.microsoft.com/net/download/dotnet-core/2.0)
     * On Windows you also need the [Microsoft Visual C++ Redistributable for Visual Studio 2017](https://support.microsoft.com/help/2977003/the-latest-supported-visual-c-downloads) for your platform.
-* On Ubuntu, run the following commands for the installation of required packages:
+* On Ubuntu or Debian, run the following commands for the installation of required packages:
 
   ```sh
   sudo apt-get update
   sudo apt-get install libssl1.0.0 libasound2
   ```
 
-* On Debian 9, run the following commands for the installation of required packages:
+  * If libssl1.0.0 is not available, install libssl1.0.x (where x is greater than 0) or libssl1.1 instead.
 
-  ```sh
-  sudo apt-get update
-  sudo apt-get install libssl1.0.2 libasound2
-  ```
-
-* On RHEL 8 or CentOS 8, run the following commands for the installation of required packages:
+* On RHEL or CentOS, run the following commands for the installation of required packages:
 
   ```sh
   sudo yum update
   sudo yum install alsa-lib dotnet-sdk-2.1 openssl
   ```
+
+  * See also [how to configure RHEL/CentOS 7 for Speech SDK](https://docs.microsoft.com/azure/cognitive-services/speech-service/how-to-configure-rhel-centos-7).
 
 ## Build the sample
 

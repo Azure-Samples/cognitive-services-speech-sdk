@@ -15,6 +15,7 @@ extern void SpeechRecognitionUsingCustomizedModel();
 extern void SpeechContinuousRecognitionWithPullStream();
 extern void SpeechContinuousRecognitionWithPushStream();
 extern void KeywordTriggeredSpeechRecognitionWithMicrophone();
+extern void PronunciationAssessmentWithMicrophone();
 
 extern void IntentRecognitionWithMicrophone();
 extern void IntentRecognitionWithLanguage();
@@ -57,6 +58,7 @@ void SpeechSamples()
         cout << "5.) Speech recognition using pull stream input.\n";
         cout << "6.) Speech recognition using push stream input.\n";
         cout << "7.) Speech recognition using microphone with a keyword trigger.\n";
+        cout << "8.) Pronunciation assessment using microphone input.\n";
         cout << "\nChoice (0 for MAIN MENU): ";
         cout.flush();
 
@@ -85,6 +87,9 @@ void SpeechSamples()
             break;
         case '7':
             KeywordTriggeredSpeechRecognitionWithMicrophone();
+            break;
+        case '8':
+            PronunciationAssessmentWithMicrophone();
             break;
         case '0':
             break;

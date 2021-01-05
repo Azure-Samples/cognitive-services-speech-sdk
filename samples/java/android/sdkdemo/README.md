@@ -10,8 +10,8 @@ This sample demonstrates how to recognize speech and intents with Java using the
 
 * A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
 * A PC (Windows, Linux, Mac) capable to run Android Studio.
-* Version 3.1 of [Android Studio](https://developer.android.com/studio/).
-* An ARM-based Android device (API 23: Android 6.0 Marshmallow or higher) [enabled for development](https://developer.android.com/studio/debug/dev-options) with a working microphone.
+* Version 3.1 or higher of [Android Studio](https://developer.android.com/studio/).
+* An ARM-based Android device (API 23: Android 6.0 Marshmallow or higher) [enabled for development](https://developer.android.com/studio/debug/dev-options) with a working microphone. Make sure that "USB debugging" is enabled on your device.
 
 ## Build the sample
 
