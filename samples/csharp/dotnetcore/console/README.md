@@ -62,7 +62,7 @@ It runs under .NET Core 2.0 on Windows or Linux (see the list of [supported Linu
 * If you are using the .NET Core CLI, run the following command from the directory that contains this sample:
 
   ```bash
-  dotnet build helloworld/helloworld.csproj
+  dotnet build samples/samples.csproj
   ```
 
 ## Run the sample
