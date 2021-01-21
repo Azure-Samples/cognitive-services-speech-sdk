@@ -1,6 +1,6 @@
-# Quickstart: Using Voice Assistant in C# Universal Windows Platform
+# Quickstart: Using Voice Assistants in C# Universal Windows Platform
 
-This sample demonstrates how to recognize speech for Voice Assistant and receive activity responses.
+This sample demonstrates how to use Voice Assistants to recognize speech and receive activity responses.
 
 ## Prerequisites
 
