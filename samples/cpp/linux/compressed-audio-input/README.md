@@ -5,7 +5,7 @@ The compressed audio input stream should be either in MP3 or Opus format.
 
 > **Note:**
 > Support for compressed audio input streams was added to the Speech SDK version 1.4.0.
-> Check the [compressed audio input article on the SDK documentation site](https://docs.microsoft.com/azure/cognitive-services/speech-service/how-to-use-compressed-audio-input-streams)
+> Check the [compressed audio input article on the SDK documentation site](https://docs.microsoft.com/azure/cognitive-services/speech-service/how-to-use-codec-compressed-audio-input-streams)
 > for additional information.
 
 ## Prerequisites
@@ -87,5 +87,5 @@ Run the application:
 
 ## References
 
-* [Compressed audio input article on the SDK documentation site](https://docs.microsoft.com/azure/cognitive-services/speech-service/how-to-use-compressed-audio-input-streams)
+* [Compressed audio input article on the SDK documentation site](https://docs.microsoft.com/azure/cognitive-services/speech-service/how-to-use-codec-compressed-audio-input-streams)
 * [Speech SDK API reference for C++](https://aka.ms/csspeech/cppref)

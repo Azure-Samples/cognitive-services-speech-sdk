@@ -1,13 +1,11 @@
-# Quickstart: Using virtual assistant (Preview) in C# Universal Windows Platform
+# Quickstart: Using Voice Assistants in C# Universal Windows Platform
 
-This sample demonstrates how to recognize speech for custom voice-first virtual assistants (Preview) and receive activity responses.
+This sample demonstrates how to use Voice Assistants to recognize speech and receive activity responses.
 
 ## Prerequisites
 
 * A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
 * A pre-configured bot created using Bot Framework version 4.2 or above. See [here for steps on how to create a bot](https://blog.botframework.com/2018/05/07/build-a-microsoft-bot-framework-bot-with-the-bot-builder-sdk-v4/). The bot would need to subscribe to the new [Direct Line Speech channel](https://docs.microsoft.com/azure/bot-service/bot-service-channel-connect-directlinespeech) to receive voice inputs.
-    > **Note:**
-    > In preview, the Direct Line Speech channel currently supports only the `westus2` region.
 * A Windows PC with Windows 10 Fall Creators Update (10.0; Build 16299) or later, with a working microphone.
 * [Microsoft Visual Studio 2017](https://www.visualstudio.com/), Community Edition or higher.
 * The **Universal Windows Platform development** workload in Visual Studio.
@@ -31,5 +29,5 @@ When you see the `Enable microphone` button, click it. Enter your bot connection
 
 ## References
 
-* [Quickstart article on the SDK documentation site](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-virtual-assistant-java-jre)
+* [Quickstart article on the SDK documentation site](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstarts/voice-assistants?tabs=jre&pivots=programming-language-csharp)
 * [Speech SDK API reference for C#](https://aka.ms/csspeech/csharpref)
