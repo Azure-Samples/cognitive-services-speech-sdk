@@ -1,0 +1,16 @@
+{
+  "private": true,
+  "name": "speech-sdk-quickstart-node",
+  "version": "1.0.0",
+  "description": "Quickstart for the Microsoft Speech SDK on Node.js",
+  "main": "dependent-verification.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Microsoft",
+  "license": "MIT",
+  "dependencies": {
+    "https-proxy-agent": "^3.0.0",
+    "microsoft-cognitiveservices-speech-sdk": "^1.14.0"
+  }
+}

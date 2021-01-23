@@ -1,7 +1,7 @@
 # Quickstart: Keyword Recognition in Java on Android
 
 This sample demonstrates how to recognize keywords with Java using the Speech SDK for Android.
-See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-java-android) on the SDK documentation page which describes how to build this sample from scratch in Android Studio.
+See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstarts/speech-to-text-from-microphone?tabs=dotnet%2Cx-android%2Clinux%2Candroid%2Cwindowsinstall&pivots=programming-language-java) on the SDK documentation page which describes how to build this sample from scratch in Android Studio.
 
 > **Note:**
 > this sample is *not* for the Speech Devices SDK and the Roobo device.
