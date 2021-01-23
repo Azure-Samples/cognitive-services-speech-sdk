@@ -1,6 +1,7 @@
-# Quickstart: Recognize speech from a file in JavaScript on a Web Browser.
 
-These samples demonstrate how to recognize speech from a file using the Speech SDK for JavaScript on a web browser, like Microsoft Edge, or Chrome.
+# Quickstart: Recognize speech from an audio file in JavaScript on a Web Browser.
+
+These samples demonstrate how to recognize speech from an audio file using the Speech SDK for JavaScript on a web browser, like Microsoft Edge, or Chrome.
 * See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstarts/speech-to-text-from-file?pivots=programming-language-javascript) on the SDK documentation page which describes how to build this sample from scratch in your favorite editor.
 
 ## Prerequisites
