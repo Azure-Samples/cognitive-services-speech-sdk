@@ -1,4 +1,4 @@
-# Quickstart: Recognize speech in Swift on iOS using the Speech SDK
+# Quickstart: Recognize speech from a microphone in Swift on iOS using the Speech SDK
 
 This sample demonstrates how to create an iOS app in Swift using the Cognitive Services Speech SDK to transcribe speech recorded from a microphone to text.
 

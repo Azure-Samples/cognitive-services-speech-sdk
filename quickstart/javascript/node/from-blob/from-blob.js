@@ -4,21 +4,21 @@
     var https = require("https");
 
     // Replace with your subscription key
-    SubscriptionKey = "YourSubscriptionKey";
+    var subscriptionKey = "YourSubscriptionKey";
 
     // Update with your service region
-    Region = "YourServiceRegion";
-    Port = 443;
+    var region = "YourServiceRegion";
+    var port = 443;
 
     // Recordings and locale
-    Locale = "en-US";
-    RecordingsBlobUri = "`YourAudioFile.wav";
+    var locale = "en-US";
+    var recordingsBlobUri = "`YourAudioFile.wav";
 
     // Name and description
-    Name = "Simple transcription";
-    Description = "Simple transcription description";
+    var name = "Simple transcription";
+    var description = "Simple transcription description";
 
-    SpeechToTextBasePath = "/api/speechtotext/v2.0/";
+    var speechToTextBasePath = "/api/speechtotext/v2.0/";
 
     // These classes show the properties on JSON objects returned by the Speech Service or sent to it.
     /*
@@ -50,10 +50,10 @@
     */
 
     var ts = {
-        Name: Name,
-        Description: Description,
-        Locale: Locale,
-        RecordingsUrl: RecordingsBlobUri,
+        Name: name,
+        Description: description,
+        Locale: locale,
+        RecordingsUrl: recordingsBlobUri,
         Properties: {
             "PunctuationMode": "DictatedAndAutomatic",
             "ProfanityFilterMode": "Masked",
@@ -65,21 +65,21 @@
     var postPayload = JSON.stringify(ts);
 
     var startOptions = {
-        hostname: Region + ".cris.ai",
-        port: Port,
-        path: SpeechToTextBasePath + "Transcriptions/",
+        hostname: region + ".cris.ai",
+        port: port,
+        path: speechToTextBasePath + "Transcriptions/",
         method: "POST",
         headers: {
             "Content-Type": "application/json",
             'Content-Length': postPayload.length,
-            "Ocp-Apim-Subscription-Key": SubscriptionKey
+            "Ocp-Apim-Subscription-Key": subscriptionKey
         }
     }
 
-    function PrintResults(resultUrl) {
+    function printResults(resultUrl) {
         var fetchOptions = {
             headers: {
-                "Ocp-Apim-Subscription-Key": SubscriptionKey
+                "Ocp-Apim-Subscription-Key": subscriptionKey
             }
         }
 
@@ -101,11 +101,10 @@
         });
     }
 
-    function CheckTranscriptionStatus(statusUrl) {
-        transcription = null;
+    function checkTranscriptionStatus(statusUrl) {
         var fetchOptions = {
             headers: {
-                "Ocp-Apim-Subscription-Key": SubscriptionKey
+                "Ocp-Apim-Subscription-Key": subscriptionKey
             }
         }
 
@@ -121,16 +120,15 @@
 
                 response.on("end", function () {
                     var statusObject = JSON.parse(responseText);
-
                     var done = false;
                     switch (statusObject.status) {
                         case "Failed":
-                            console.info("Transcription failed. Status: " + transcription.StatusMessage);
+                            console.info("Transcription failed. Status: " + statusObject.statusMessage);
                             done = true;
                             break;
                         case "Succeeded":
                             done = true;
-                            PrintResults(statusObject.resultsUrls["channel_0"]);
+                            printResults(statusObject.resultsUrls["channel_0"]);
                             break;
                         case "Running":
                             console.info("Transcription is still running.");
@@ -142,7 +140,7 @@
 
                     if (!done) {
                         setTimeout(function () {
-                            CheckTranscriptionStatus(statusUrl);
+                            checkTranscriptionStatus(statusUrl);
                         }, (5000));
                     }
                 });
@@ -155,7 +153,7 @@
     }
 
     var request = https.request(startOptions, function (response) {
-        if (response.statusCode != 202) {
+        if (response.statusCode !== 202) {
             console.error("Error, status code " + response.statusCode);
         } else {
 
@@ -164,7 +162,7 @@
             console.info("Created transcription at location " + transcriptionLocation);
             console.info("Checking status.");
 
-            CheckTranscriptionStatus(transcriptionLocation);
+            checkTranscriptionStatus(transcriptionLocation);
         }
     });
 

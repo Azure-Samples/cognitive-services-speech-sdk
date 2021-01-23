@@ -13,8 +13,9 @@ See [this article](https://docs.microsoft.com/azure/cognitive-services/speech-se
 
 * Update the following strings in the `settings.js` file with your configuration:
   * `YourSubscriptionKey`: replace with your subscription key.
-  * `YourServiceRegion`: replace with the [region](https://aka.ms/csspeech/region) your subscription is associated with.
-    For example, `westus` or `northeurope`.
+  * `YourServiceRegion`: replace with the [region](https://aka.ms/csspeech/region) your subscription is associated with. For example, `westus` or `northeurope`.
+  * Your language for speech recognition, if you want to change the default `en-us` (American English).
+  * `YourAudioFile.wav`: An audio file with speech to be recognized. The format is 16khz sample rate, mono, 16-bit per sample PCM. See for example a file named `whatstheweatherlike.wav` located in several folders in this repository. Make sure the above language settings matches the language spoken in the WAV file.
   * The following settings apply for intent recognition powered by the [Language Understanding service (LUIS)](https://aka.ms/csspeech/luisdocs):
     * `YourLanguageUnderstandingSubscriptionKey`: replace with your Language Understanding service subscription key (endpoint key).
     * `YourLanguageUnderstandingServiceRegion`: replace with the region associated with your Language Understanding service subscription.

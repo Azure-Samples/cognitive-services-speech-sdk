@@ -1,4 +1,4 @@
-# Quickstart: Recognize speech in Objective-C on macOS using the Speech SDK
+# Quickstart: Recognize speech from a microphone in Objective-C on macOS using the Speech SDK
 
 This sample demonstrates how to create a macOS app in Objective-C using the Cognitive Services Speech SDK to transcribe speech recorded from a microphone to text.
 

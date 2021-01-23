@@ -13,17 +13,17 @@ import java.io.InputStream;
 
 public class BinaryAudioStreamReader extends PullAudioInputStreamCallback {
 
-    InputStream insputStream;
+    InputStream inputStream;
 
     BinaryAudioStreamReader(String fileName) throws FileNotFoundException {
         File file = new File(fileName);
-        insputStream = new FileInputStream(file);
+        inputStream = new FileInputStream(file);
     }
 
     @Override
     public int read(byte[] dataBuffer) {
         try {
-            return insputStream.read(dataBuffer, 0, dataBuffer.length);
+            return inputStream.read(dataBuffer, 0, dataBuffer.length);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -36,7 +36,7 @@ public class BinaryAudioStreamReader extends PullAudioInputStreamCallback {
     @Override
     public void close() {
         try {
-            insputStream.close();
+            inputStream.close();
         } catch (IOException e) {
             e.printStackTrace();
         }

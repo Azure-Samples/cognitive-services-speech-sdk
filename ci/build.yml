@@ -67,7 +67,7 @@ jobs:
   dependsOn: Pre
   timeoutInMinutes: 60
   pool:
-    name: Hosted VS2017
+    vmImage: 'windows-2019'
   variables:
     V_VSTS_FEED: $[dependencies.Pre.outputs['var.V_VSTS_FEED']]
     V_INCLUDE_NUGET_ORG: $[dependencies.Pre.outputs['var.V_INCLUDE_NUGET_ORG']]

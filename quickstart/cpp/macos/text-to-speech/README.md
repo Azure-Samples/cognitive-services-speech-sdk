@@ -1,7 +1,6 @@
 # Quickstart: Synthesize speech in C++ for macOS
 
 This sample demonstrates how to synthesize speech with C++ using the Speech SDK for macOS.
-See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-text-to-speech-cpp-macos) on the SDK documentation page for step-by-step instructions.
 
 ## Prerequisites
 
@@ -46,5 +45,4 @@ Run the application:
 
 ## References
 
-* [Quickstart article on the SDK documentation site](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-text-to-speech-cpp-macos)
 * [Speech SDK API reference for C++](https://aka.ms/csspeech/cppref)

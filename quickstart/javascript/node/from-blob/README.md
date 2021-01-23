@@ -1,4 +1,4 @@
-# Quickstart: Recognize speech in JavaScript on Node.js.
+# Quickstart: Recognize speech from a blob in JavaScript on Node.js.
 
 This sample demonstrates how to recognize speech with the Speech SDK for JavaScript on Node.js.
 See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstarts/from-blob?pivots=programming-language-javacript) on the SDK documentation page which describes how to build this sample from scratch in your favourite editor.
