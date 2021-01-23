@@ -6,7 +6,6 @@
 namespace Connector
 {
     using System;
-    using System.Collections;
     using System.Collections.Generic;
     using Connector.Serializable.TranscriptionStartedServiceBusMessage;
     using Newtonsoft.Json;

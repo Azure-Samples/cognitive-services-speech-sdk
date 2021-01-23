@@ -16,12 +16,11 @@ namespace FetchTranscriptionFunction
     using Connector.Enums;
     using Microsoft.Azure.ServiceBus;
     using Microsoft.Extensions.Logging;
+    using Microsoft.WindowsAzure.Storage;
     using Newtonsoft.Json;
 
     public static class TranscriptionProcessor
     {
-        private const int MaxRetryCount = 6;
-
         private static StorageConnector StorageConnectorInstance = new StorageConnector(FetchTranscriptionEnvironmentVariables.AzureWebJobsStorage);
 
         private static QueueClient StartQueueClientInstance = new QueueClient(new ServiceBusConnectionStringBuilder(FetchTranscriptionEnvironmentVariables.StartTranscriptionServiceBusConnectionString));
@@ -41,8 +40,8 @@ namespace FetchTranscriptionFunction
             var transcriptionLocation = serviceBusMessage.TranscriptionLocation;
             log.LogInformation($"Received transcription at {transcriptionLocation} with name {jobName} from service bus message.");
 
-            serviceBusMessage.PollingCounter += 1;
             var messageDelayTime = GetMessageDelayTime(serviceBusMessage.PollingCounter);
+            serviceBusMessage.PollingCounter += 1;
 
             try
             {
@@ -68,22 +67,22 @@ namespace FetchTranscriptionFunction
             }
             catch (WebException e)
             {
-                if (BatchClient.IsThrottledOrTimeoutStatusCode(((HttpWebResponse)e.Response).StatusCode))
+                if (e.Response != null && BatchClient.IsThrottledOrTimeoutStatusCode(((HttpWebResponse)e.Response).StatusCode))
                 {
                     log.LogInformation("Timeout or throttled, retrying message.");
                     await ServiceBusUtilities.SendServiceBusMessageAsync(FetchQueueClientInstance, serviceBusMessage.CreateMessageString(), log, messageDelayTime).ConfigureAwait(false);
-                    return;
                 }
-
-                var errorMessage = $"Fetch Transcription in job with name {jobName} failed with WebException {e} and message {e.Message}.";
-                log.LogError($"{errorMessage}");
-                await RetryOrFailJobAsync(serviceBusMessage, errorMessage, jobName, transcriptionLocation, subscriptionKey, log).ConfigureAwait(false);
+                else
+                {
+                    var errorMessage = $"Fetch Transcription in job with name {jobName} failed with WebException {e} and message {e.Message}.";
+                    log.LogError($"{errorMessage}");
+                    await RetryOrFailJobAsync(serviceBusMessage, errorMessage, jobName, transcriptionLocation, subscriptionKey, log).ConfigureAwait(false);
+                }
             }
             catch (TimeoutException e)
             {
                 log.LogInformation($"Timeout - re-enqueueing fetch transcription message. Exception message: {e.Message}");
                 await ServiceBusUtilities.SendServiceBusMessageAsync(FetchQueueClientInstance, serviceBusMessage.CreateMessageString(), log, messageDelayTime).ConfigureAwait(false);
-                return;
             }
             catch (Exception e)
             {
@@ -95,8 +94,19 @@ namespace FetchTranscriptionFunction
 
         private static TimeSpan GetMessageDelayTime(int pollingCounter)
         {
-            var delayInMinutes = Math.Pow(2, Math.Min(pollingCounter, 7));
-            return TimeSpan.FromMinutes(delayInMinutes);
+            if (pollingCounter == 0)
+            {
+                return TimeSpan.FromMinutes(FetchTranscriptionEnvironmentVariables.InitialPollingDelayInMinutes);
+            }
+
+            var updatedDelay = Math.Pow(2, Math.Min(pollingCounter, 8)) * FetchTranscriptionEnvironmentVariables.InitialPollingDelayInMinutes;
+
+            if ((int)updatedDelay > FetchTranscriptionEnvironmentVariables.MaxPollingDelayInMinutes)
+            {
+                return TimeSpan.FromMinutes(FetchTranscriptionEnvironmentVariables.MaxPollingDelayInMinutes);
+            }
+
+            return TimeSpan.FromMinutes(updatedDelay);
         }
 
         private static async Task ProcessFailedTranscriptionAsync(string transcriptionLocation, string subscriptionKey, TranscriptionStartedMessage serviceBusMessage, Transcription transcription, string jobName, ILogger log)
@@ -126,7 +136,7 @@ namespace FetchTranscriptionFunction
             {
                 var fileName = StorageConnector.GetFileNameFromUri(new Uri(audio.FileUrl));
 
-                if (retryAudioFile && audio.RetryCount < MaxRetryCount)
+                if (retryAudioFile && audio.RetryCount < FetchTranscriptionEnvironmentVariables.RetryLimit)
                 {
                     log.LogInformation($"Retrying transcription with name {fileName} - retry count: {audio.RetryCount}");
                     var sbMessage = new ServiceBusMessage
@@ -200,15 +210,15 @@ namespace FetchTranscriptionFunction
                 {
                     var textAnalyticsErrors = new List<string>();
 
-                    if (FetchTranscriptionEnvironmentVariables.AddSentimentAnalysis)
+                    if (FetchTranscriptionEnvironmentVariables.SentimentAnalysisSetting != SentimentAnalysisSetting.None)
                     {
-                        var sentimentErrors = await textAnalytics.AddSentimentToTranscriptAsync(transcriptionResult).ConfigureAwait(false);
+                        var sentimentErrors = await textAnalytics.AddSentimentToTranscriptAsync(transcriptionResult, FetchTranscriptionEnvironmentVariables.SentimentAnalysisSetting).ConfigureAwait(false);
                         textAnalyticsErrors.AddRange(sentimentErrors);
                     }
 
-                    if (FetchTranscriptionEnvironmentVariables.AddEntityRedaction)
+                    if (FetchTranscriptionEnvironmentVariables.EntityRedactionSetting != EntityRedactionSetting.None)
                     {
-                        var entityRedactionErrors = await textAnalytics.RedactEntitiesAsync(transcriptionResult).ConfigureAwait(false);
+                        var entityRedactionErrors = await textAnalytics.RedactEntitiesAsync(transcriptionResult, FetchTranscriptionEnvironmentVariables.EntityRedactionSetting).ConfigureAwait(false);
                         textAnalyticsErrors.AddRange(entityRedactionErrors);
                     }
 
@@ -221,7 +231,13 @@ namespace FetchTranscriptionFunction
                     }
                 }
 
-                var editedTranscriptionResultJson = JsonConvert.SerializeObject(transcriptionResult, Newtonsoft.Json.Formatting.Indented);
+                var editedTranscriptionResultJson = JsonConvert.SerializeObject(
+                    transcriptionResult,
+                    Newtonsoft.Json.Formatting.Indented,
+                    new JsonSerializerSettings
+                    {
+                        NullValueHandling = NullValueHandling.Ignore
+                    });
 
                 var jsonFileName = $"{fileName}.json";
                 await StorageConnectorInstance.WriteTextFileToBlobAsync(editedTranscriptionResultJson, jsonContainer, jsonFileName, log).ConfigureAwait(false);
@@ -241,8 +257,8 @@ namespace FetchTranscriptionFunction
                         duration,
                         transcriptionResult.CombinedRecognizedPhrases.Count(),
                         serviceBusMessage.UsesCustomModel,
-                        FetchTranscriptionEnvironmentVariables.AddSentimentAnalysis,
-                        FetchTranscriptionEnvironmentVariables.AddEntityRedaction);
+                        FetchTranscriptionEnvironmentVariables.SentimentAnalysisSetting,
+                        FetchTranscriptionEnvironmentVariables.EntityRedactionSetting);
 
                     var jobId = containsMultipleTranscriptions ? Guid.NewGuid() : new Guid(transcriptionLocation.Split('/').LastOrDefault());
                     var dbConnectionString = FetchTranscriptionEnvironmentVariables.DatabaseConnectionString;
@@ -294,7 +310,7 @@ namespace FetchTranscriptionFunction
             var failedTranscriptions = transcriptionReportFile.Details.
                 Where(detail => !string.IsNullOrEmpty(detail.Status) &&
                     detail.Status.Equals("Failed", StringComparison.OrdinalIgnoreCase) &&
-                     !string.IsNullOrEmpty(detail.Source));
+                    !string.IsNullOrEmpty(detail.Source));
 
             foreach (var failedTranscription in failedTranscriptions)
             {
@@ -331,7 +347,7 @@ namespace FetchTranscriptionFunction
             message.FailedExecutionCounter += 1;
             var messageDelayTime = GetMessageDelayTime(message.PollingCounter);
 
-            if (message.FailedExecutionCounter > MaxRetryCount)
+            if (message.FailedExecutionCounter > FetchTranscriptionEnvironmentVariables.RetryLimit)
             {
                 await WriteFailedJobLogToStorageAsync(message, error, jobName, log).ConfigureAwait(false);
                 await BatchClient.DeleteTranscriptionAsync(transcriptionLocation, subscriptionKey, log).ConfigureAwait(false);
@@ -354,13 +370,20 @@ namespace FetchTranscriptionFunction
             {
                 var fileName = StorageConnector.GetFileNameFromUri(new Uri(audioFileInfo.FileUrl));
                 var errorFileName = fileName + ".txt";
-                await StorageConnectorInstance.WriteTextFileToBlobAsync(errorMessage, errorOutputContainer, errorFileName, log).ConfigureAwait(false);
-                await StorageConnectorInstance.MoveFileAsync(
-                    FetchTranscriptionEnvironmentVariables.AudioInputContainer,
-                    fileName,
-                    FetchTranscriptionEnvironmentVariables.ErrorFilesOutputContainer,
-                    fileName,
-                    log).ConfigureAwait(false);
+                try
+                {
+                    await StorageConnectorInstance.WriteTextFileToBlobAsync(errorMessage, errorOutputContainer, errorFileName, log).ConfigureAwait(false);
+                    await StorageConnectorInstance.MoveFileAsync(
+                        FetchTranscriptionEnvironmentVariables.AudioInputContainer,
+                        fileName,
+                        FetchTranscriptionEnvironmentVariables.ErrorFilesOutputContainer,
+                        fileName,
+                        log).ConfigureAwait(false);
+                }
+                catch (StorageException e)
+                {
+                    log.LogError($"Storage Exception {e} while writing error log to file and moving result");
+                }
             }
         }
     }

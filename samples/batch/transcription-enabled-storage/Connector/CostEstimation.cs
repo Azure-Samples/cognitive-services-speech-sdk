@@ -6,6 +6,7 @@
 namespace Connector
 {
     using System;
+    using Connector.Enums;
 
     public static class CostEstimation
     {
@@ -20,18 +21,18 @@ namespace Connector
             TimeSpan timeSpan,
             int numberOfChannels,
             bool isCustomModel,
-            bool sentimentAnalysisAdded,
-            bool entityRedactionAdded)
+            SentimentAnalysisSetting sentimentSetting,
+            EntityRedactionSetting entityRedactionSetting)
         {
             double costPerHour = isCustomModel ? STTCustomModelCostPerHour : STTCostPerHour;
             var price = timeSpan.TotalHours * costPerHour;
 
-            if (sentimentAnalysisAdded)
+            if (sentimentSetting != SentimentAnalysisSetting.None)
             {
                 price += timeSpan.TotalHours * TextAnalyticsCostPerHour;
             }
 
-            if (entityRedactionAdded)
+            if (entityRedactionSetting != EntityRedactionSetting.None)
             {
                 price += timeSpan.TotalHours * TextAnalyticsCostPerHour;
             }

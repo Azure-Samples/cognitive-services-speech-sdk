@@ -44,6 +44,6 @@ namespace Connector
         public double DurationInTicks { get; }
 
         [JsonProperty("nBest")]
-        public IEnumerable<NBest> NBest { get; }
+        public IEnumerable<NBest> NBest { get; set; }
     }
 }

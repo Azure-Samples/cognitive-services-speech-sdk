@@ -9,16 +9,16 @@ namespace Connector
 
     public sealed class ModelIdentity
     {
-        private ModelIdentity(Guid id)
+        private ModelIdentity(string self)
         {
-            this.Id = id;
+            this.Self = self;
         }
 
-        public Guid Id { get; private set; }
+        public string Self { get; private set; }
 
-        public static ModelIdentity Create(Guid id)
+        public static ModelIdentity Create(string region, Guid id)
         {
-            return new ModelIdentity(id);
+            return new ModelIdentity($"https://{region}.api.cognitive.microsoft.com/speechtotext/v3.0/models/{id}");
         }
     }
 }

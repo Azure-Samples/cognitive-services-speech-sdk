@@ -7,9 +7,11 @@ namespace FetchTranscriptionFunction
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
     using System.Net.Http;
     using System.Net.Http.Headers;
+    using System.Reflection.Metadata.Ecma335;
     using System.Text;
     using System.Threading.Tasks;
     using System.Web;
@@ -24,6 +26,8 @@ namespace FetchTranscriptionFunction
     {
         // Request limits for v3 API: https://docs.microsoft.com/en-us/azure/cognitive-services/text-analytics/concepts/data-limits
         private const int SentimentRequestLimit = 10;
+
+        private const int TextAnalyticsRequestCharacterLimit = 5120;
 
         private const int EntityRecognitionRequestLimit = 5;
 
@@ -44,125 +48,151 @@ namespace FetchTranscriptionFunction
         public TextAnalytics(string locale, string subscriptionKey, string region, ILogger log)
         {
             Locale = locale;
-            TextAnalyticsUri = new Uri($"https://{region}.api.cognitive.microsoft.com/text/analytics/v3.0-preview.1");
+            TextAnalyticsUri = new Uri($"https://{region}.api.cognitive.microsoft.com/text/analytics/v3.0");
             SubscriptionKey = subscriptionKey;
             Log = log;
         }
 
-        public async Task<IEnumerable<string>> AddSentimentToTranscriptAsync(SpeechTranscript speechTranscript)
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "Don't fail full transcription job because of text analytics error - return transcript without text analytics.")]
+        public async Task<IEnumerable<string>> AddSentimentToTranscriptAsync(SpeechTranscript speechTranscript, SentimentAnalysisSetting sentimentSetting)
         {
-            Log.LogInformation($"Starting sentiment analysis.");
-
             if (speechTranscript == null)
             {
                 throw new ArgumentNullException(nameof(speechTranscript));
             }
 
-            var textAnalyticsChunks = CreateRequestChunks(speechTranscript, SentimentRequestLimit);
+            var sentimentErrors = new List<string>();
 
-            var responses = new List<HttpResponseMessage>();
-            foreach (var chunk in textAnalyticsChunks)
+            try
             {
-                var chunkString = JsonConvert.SerializeObject(chunk);
-                var response = await MakeRequestAsync(chunkString, SentimentSuffix).ConfigureAwait(false);
-                responses.Add(response);
-            }
+                var textAnalyticsChunks = new List<TextAnalyticsRequestsChunk>();
 
-            Log.LogInformation($"Total responses: {responses.Count}");
-            var sentimentErrors = await AddSentimentToSpeechTranscriptAsync(responses, speechTranscript).ConfigureAwait(false);
-            return sentimentErrors;
+                if (sentimentSetting == SentimentAnalysisSetting.UtteranceLevel)
+                {
+                    textAnalyticsChunks = CreateUtteranceLevelRequests(speechTranscript, SentimentRequestLimit);
+                }
+                else if (sentimentSetting == SentimentAnalysisSetting.AudioLevel)
+                {
+                    textAnalyticsChunks = CreateAudioLevelRequests(speechTranscript, SentimentRequestLimit);
+                }
+
+                var responses = new List<HttpResponseMessage>();
+                foreach (var chunk in textAnalyticsChunks)
+                {
+                    var chunkString = JsonConvert.SerializeObject(chunk);
+                    var response = await MakeRequestAsync(chunkString, SentimentSuffix).ConfigureAwait(false);
+                    responses.Add(response);
+                }
+
+                Log.LogInformation($"Total responses: {responses.Count}");
+                sentimentErrors = await AddSentimentToSpeechTranscriptAsync(responses, speechTranscript, sentimentSetting).ConfigureAwait(false);
+
+                return sentimentErrors;
+            }
+            catch (Exception e)
+            {
+                var sentimentError = $"Sentiment Analysis failed with exception: {e.Message}";
+                Log.LogError(sentimentError);
+                sentimentErrors.Add(sentimentError);
+                return sentimentErrors;
+            }
         }
 
-        public async Task<IEnumerable<string>> RedactEntitiesAsync(SpeechTranscript speechTranscript)
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "Don't fail full transcription job because of text analytics error - return transcript without text analytics.")]
+        public async Task<IEnumerable<string>> RedactEntitiesAsync(SpeechTranscript speechTranscript, EntityRedactionSetting entityRedactionSetting)
         {
-            Log.LogInformation($"Starting entity masking.");
-
             if (speechTranscript == null)
             {
                 throw new ArgumentNullException(nameof(speechTranscript));
             }
 
-            var textAnalyticsChunks = CreateRequestChunks(speechTranscript, EntityRecognitionRequestLimit);
-            var responses = new List<HttpResponseMessage>();
-            foreach (var chunk in textAnalyticsChunks)
+            var entityRedactionErrors = new List<string>();
+
+            try
             {
-                var chunkString = JsonConvert.SerializeObject(chunk);
-                var response = await MakeRequestAsync(chunkString, EntityRecognitionSuffix).ConfigureAwait(false);
-                responses.Add(response);
+                var textAnalyticsChunks = new List<TextAnalyticsRequestsChunk>();
+                if (entityRedactionSetting == EntityRedactionSetting.UtteranceLevel)
+                {
+                    textAnalyticsChunks = CreateUtteranceLevelRequests(speechTranscript, EntityRecognitionRequestLimit);
+                }
+
+                var responses = new List<HttpResponseMessage>();
+                foreach (var chunk in textAnalyticsChunks)
+                {
+                    var chunkString = JsonConvert.SerializeObject(chunk);
+                    var response = await MakeRequestAsync(chunkString, EntityRecognitionSuffix).ConfigureAwait(false);
+                    responses.Add(response);
+                }
+
+                Log.LogInformation($"Total responses: {responses.Count}");
+                entityRedactionErrors = await RedactEntitiesInSpeechTranscriptAsync(responses, speechTranscript, entityRedactionSetting).ConfigureAwait(false);
+
+                return entityRedactionErrors;
             }
-
-            Log.LogInformation($"Total responses: {responses.Count}");
-            var entityRedactionErrors = await RedactEntitiesInSpeechTranscriptAsync(responses, speechTranscript).ConfigureAwait(false);
-
-            return entityRedactionErrors;
+            catch (Exception e)
+            {
+                var entityRedactionError = $"Entity Redaction failed with exception: {e.Message}";
+                Log.LogError(entityRedactionError);
+                entityRedactionErrors.Add(entityRedactionError);
+                return entityRedactionErrors;
+            }
         }
 
         private static bool IsMaskableEntityType(TextAnalyticsEntity entity)
         {
-            switch (entity.Type)
+            switch (entity.Category)
             {
-                case EntityType.Person:
-                case EntityType.Organization:
-                case EntityType.PhoneNumber:
-                case EntityType.Email:
-                case EntityType.URL:
-                case EntityType.IPAddress:
-                case EntityType.Quantity:
+                case EntityCategory.Person:
+                case EntityCategory.Organization:
+                case EntityCategory.PhoneNumber:
+                case EntityCategory.Email:
+                case EntityCategory.URL:
+                case EntityCategory.IPAddress:
+                case EntityCategory.Quantity:
                     return true;
 
                 default: return false;
             }
         }
 
-        private static RecognizedPhrase AddSentimentToSegment(RecognizedPhrase recognizedPhrase, TextAnalyticsSentence sentence)
+        private static string RedactEntitiesInText(string text, IEnumerable<TextAnalyticsEntity> entities)
         {
-            var nBest = recognizedPhrase.NBest.FirstOrDefault();
-            if (nBest != null)
-            {
-                if (nBest.Sentiment == null)
-                {
-                    nBest.Sentiment = new Sentiment();
-                }
+            var maskableEntities = entities.Where(e => IsMaskableEntityType(e)).ToList();
+            var cleanedEntities = RemoveOverlappingEntities(maskableEntities);
 
-                nBest.Sentiment.Negative = sentence.SentenceScores.Negative;
-                nBest.Sentiment.Positive = sentence.SentenceScores.Positive;
-                nBest.Sentiment.Neutral = sentence.SentenceScores.Neutral;
+            // Order descending to make insertions that do not impact the offset of other entities
+            cleanedEntities = cleanedEntities.OrderByDescending(o => o.Offset).ToList();
+
+            foreach (var entity in cleanedEntities)
+            {
+                text = RedactEntityInText(text, entity);
             }
 
-            return recognizedPhrase;
+            return text;
         }
 
-        private static RecognizedPhrase RedactEntityInRecognizedPhrase(RecognizedPhrase recognizedPhrase, TextAnalyticsEntity entity)
+        private static string RedactEntityInText(string text, TextAnalyticsEntity entity)
         {
-            if (!IsMaskableEntityType(entity) || !recognizedPhrase.NBest.Any())
+            var preMask = text.Substring(0, entity.Offset);
+            var postMask = text.Substring(entity.Offset + entity.Length, text.Length - (entity.Offset + entity.Length));
+
+            if (entity.Category == EntityCategory.Quantity && entity.SubCategory.Equals("Number", StringComparison.OrdinalIgnoreCase))
             {
-                return recognizedPhrase;
-            }
-
-            var nBest = recognizedPhrase.NBest.FirstOrDefault();
-            var displayForm = nBest.Display;
-
-            var preMask = displayForm.Substring(0, entity.Offset);
-            var postMask = displayForm.Substring(entity.Offset + entity.Length, displayForm.Length - (entity.Offset + entity.Length));
-
-            if (entity.Type == EntityType.Quantity && entity.SubType.Equals("Number", StringComparison.OrdinalIgnoreCase))
-            {
-                displayForm = preMask + new string('#', entity.Length) + postMask;
+                text = preMask + new string('#', entity.Length) + postMask;
             }
             else
             {
-                if (!string.IsNullOrEmpty(entity.SubType))
+                if (!string.IsNullOrEmpty(entity.SubCategory))
                 {
-                    displayForm = $"{preMask}#{entity.Type}-{entity.SubType}#{postMask}";
+                    text = $"{preMask}#{entity.Category}-{entity.SubCategory}#{postMask}";
                 }
                 else
                 {
-                    displayForm = $"{preMask}#{entity.Type}#{postMask}";
+                    text = $"{preMask}#{entity.Category}#{postMask}";
                 }
             }
 
-            nBest.Display = displayForm;
-            return recognizedPhrase;
+            return text;
         }
 
         private static List<TextAnalyticsEntity> RemoveOverlappingEntities(List<TextAnalyticsEntity> textAnalyticsEntities)
@@ -172,8 +202,8 @@ namespace FetchTranscriptionFunction
                 return textAnalyticsEntities;
             }
 
-            textAnalyticsEntities.OrderBy(o => o.Offset);
-            List<TextAnalyticsEntity> resultEntities = textAnalyticsEntities;
+            var orderedEntities = textAnalyticsEntities.OrderBy(o => o.Offset);
+            var resultEntities = orderedEntities.ToList();
             bool foundOverlap;
 
             do
@@ -205,9 +235,8 @@ namespace FetchTranscriptionFunction
             return resultEntities;
         }
 
-        private List<TextAnalyticsRequestsChunk> CreateRequestChunks(SpeechTranscript speechTranscript, int documentRequestLimit)
+        private List<TextAnalyticsRequestsChunk> CreateUtteranceLevelRequests(SpeechTranscript speechTranscript, int documentRequestLimit)
         {
-            var textAnalyticsDocumentList = new List<TextAnalyticsRequest>();
             var textAnalyticChunks = new List<TextAnalyticsRequestsChunk>();
 
             if (!speechTranscript.RecognizedPhrases.Any())
@@ -215,25 +244,60 @@ namespace FetchTranscriptionFunction
                 return textAnalyticChunks;
             }
 
+            var textAnalyticsDocumentList = new List<TextAnalyticsRequest>();
             foreach (var recognizedPhrase in speechTranscript.RecognizedPhrases)
             {
                 var id = $"{recognizedPhrase.Channel}_{recognizedPhrase.Offset}";
-                var textAnalyticsDocument = new TextAnalyticsRequest(Locale, id, recognizedPhrase.NBest.FirstOrDefault().Display);
+                var text = recognizedPhrase.NBest.FirstOrDefault().Display;
+                text = text.Substring(0, Math.Min(text.Length, TextAnalyticsRequestCharacterLimit));
+                var textAnalyticsDocument = new TextAnalyticsRequest(Locale, id, text);
                 textAnalyticsDocumentList.Add(textAnalyticsDocument);
             }
-
-            Log.LogInformation($"Total text analytics documents: {textAnalyticsDocumentList.Count}");
 
             for (int i = 0; i < textAnalyticsDocumentList.Count; i += documentRequestLimit)
             {
                 textAnalyticChunks.Add(new TextAnalyticsRequestsChunk(textAnalyticsDocumentList.GetRange(i, Math.Min(documentRequestLimit, textAnalyticsDocumentList.Count - i))));
             }
 
-            Log.LogInformation($"Total chunks: {textAnalyticChunks.Count}");
+            Log.LogInformation($"Received {textAnalyticChunks.Count} text analytics chunks from {textAnalyticsDocumentList.Count} documents.");
             return textAnalyticChunks;
         }
 
-        private async Task<IEnumerable<string>> RedactEntitiesInSpeechTranscriptAsync(List<HttpResponseMessage> responses, SpeechTranscript speechTranscript)
+        private List<TextAnalyticsRequestsChunk> CreateAudioLevelRequests(SpeechTranscript speechTranscript, int documentRequestLimit)
+        {
+            var textAnalyticChunks = new List<TextAnalyticsRequestsChunk>();
+            if (!speechTranscript.RecognizedPhrases.Any())
+            {
+                return textAnalyticChunks;
+            }
+
+            var textAnalyticsDocumentList = new List<TextAnalyticsRequest>();
+            foreach (var combinedRecognizedPhrase in speechTranscript.CombinedRecognizedPhrases)
+            {
+                var channel = combinedRecognizedPhrase.Channel;
+                var requestCount = 0;
+
+                var displayForm = combinedRecognizedPhrase.Display;
+
+                for (int i = 0; i < displayForm.Length; i += TextAnalyticsRequestCharacterLimit)
+                {
+                    var displayChunk = displayForm.Substring(i, Math.Min(TextAnalyticsRequestCharacterLimit, displayForm.Length - i));
+                    var textAnalyticsDocument = new TextAnalyticsRequest(Locale, $"{channel}_{requestCount}", displayChunk);
+                    textAnalyticsDocumentList.Add(textAnalyticsDocument);
+                    requestCount += 1;
+                }
+            }
+
+            for (int i = 0; i < textAnalyticsDocumentList.Count; i += documentRequestLimit)
+            {
+                textAnalyticChunks.Add(new TextAnalyticsRequestsChunk(textAnalyticsDocumentList.GetRange(i, Math.Min(documentRequestLimit, textAnalyticsDocumentList.Count - i))));
+            }
+
+            Log.LogInformation($"Received {textAnalyticChunks.Count} text analytics chunks from {textAnalyticsDocumentList.Count} documents.");
+            return textAnalyticChunks;
+        }
+
+        private async Task<List<string>> RedactEntitiesInSpeechTranscriptAsync(List<HttpResponseMessage> responses, SpeechTranscript speechTranscript, EntityRedactionSetting entityRedactionSetting)
         {
             var entityRedactionErrors = new List<string>();
 
@@ -259,69 +323,64 @@ namespace FetchTranscriptionFunction
                     entityRedactionErrors.Add(errorMessage);
                 }
 
-                // Matching entities and transcription JSON by using the timestamp
                 foreach (var document in textAnalyticsResponse.Documents)
                 {
-                    var newSegment = speechTranscript.RecognizedPhrases.Where(e => $"{e.Channel}_{e.Offset}".Equals(document.Id, StringComparison.Ordinal)).FirstOrDefault();
-
-                    // Remove all text but the display form
-                    if (newSegment.NBest == null || !newSegment.NBest.Any())
+                    if (entityRedactionSetting == EntityRedactionSetting.UtteranceLevel)
                     {
-                        continue;
-                    }
+                        var phrase = speechTranscript.RecognizedPhrases.Where(e => $"{e.Channel}_{e.Offset}".Equals(document.Id, StringComparison.Ordinal)).FirstOrDefault();
 
-                    var nBest = newSegment.NBest.FirstOrDefault();
+                        // Remove all text but the display form
+                        if (phrase.NBest == null || !phrase.NBest.Any())
+                        {
+                            continue;
+                        }
 
-                    nBest.ITN = string.Empty;
-                    nBest.MaskedITN = string.Empty;
-                    nBest.Lexical = string.Empty;
+                        var nBest = phrase.NBest.FirstOrDefault();
+                        nBest.ITN = string.Empty;
+                        nBest.MaskedITN = string.Empty;
+                        nBest.Lexical = string.Empty;
 
-                    // Remove word level timestamps if they exist
-                    nBest.Words = null;
+                        // Remove word level timestamps if they exist
+                        nBest.Words = null;
 
-                    var maskableEntities = document.Entities.Where(e => IsMaskableEntityType(e)).ToList();
-                    var entities = RemoveOverlappingEntities(maskableEntities);
+                        nBest.Display = RedactEntitiesInText(nBest.Display, document.Entities);
+                        phrase.NBest = new[] { nBest };
 
-                    // Order descending to make insertions that do not impact the offset of other entities
-                    entities = entities.OrderByDescending(o => o.Offset).ToList();
-
-                    foreach (var entity in entities)
-                    {
-                        RedactEntityInRecognizedPhrase(newSegment, entity);
-                    }
-
-                    // Create full transcription per channel
-                    if (fullTranscriptionPerChannelDict.ContainsKey(newSegment.Channel))
-                    {
-                        fullTranscriptionPerChannelDict[newSegment.Channel].Append(nBest.Display);
-                    }
-                    else
-                    {
-                        fullTranscriptionPerChannelDict.Add(newSegment.Channel, new StringBuilder(nBest.Display));
+                        if (fullTranscriptionPerChannelDict.ContainsKey(phrase.Channel))
+                        {
+                            fullTranscriptionPerChannelDict[phrase.Channel].Append(" " + nBest.Display);
+                        }
+                        else
+                        {
+                            fullTranscriptionPerChannelDict.Add(phrase.Channel, new StringBuilder(nBest.Display));
+                        }
                     }
                 }
             }
 
-            foreach (var combinedRecognizedPhrase in speechTranscript.CombinedRecognizedPhrases)
+            if (entityRedactionSetting == EntityRedactionSetting.UtteranceLevel)
             {
-                var channel = combinedRecognizedPhrase.Channel;
-
-                // Remove full transcription for channel:
-                combinedRecognizedPhrase.MaskedITN = string.Empty;
-                combinedRecognizedPhrase.ITN = string.Empty;
-                combinedRecognizedPhrase.Lexical = string.Empty;
-                combinedRecognizedPhrase.Display = string.Empty;
-
-                if (fullTranscriptionPerChannelDict.ContainsKey(channel))
+                foreach (var combinedRecognizedPhrase in speechTranscript.CombinedRecognizedPhrases)
                 {
-                    combinedRecognizedPhrase.Display = fullTranscriptionPerChannelDict[channel].ToString();
+                    var channel = combinedRecognizedPhrase.Channel;
+
+                    // Remove full transcription for channel:
+                    combinedRecognizedPhrase.MaskedITN = string.Empty;
+                    combinedRecognizedPhrase.ITN = string.Empty;
+                    combinedRecognizedPhrase.Lexical = string.Empty;
+                    combinedRecognizedPhrase.Display = string.Empty;
+
+                    if (fullTranscriptionPerChannelDict.ContainsKey(channel))
+                    {
+                        combinedRecognizedPhrase.Display = fullTranscriptionPerChannelDict[channel].ToString();
+                    }
                 }
             }
 
             return entityRedactionErrors;
         }
 
-        private async Task<IEnumerable<string>> AddSentimentToSpeechTranscriptAsync(List<HttpResponseMessage> responses, SpeechTranscript speechTranscript)
+        private async Task<List<string>> AddSentimentToSpeechTranscriptAsync(List<HttpResponseMessage> responses, SpeechTranscript speechTranscript, SentimentAnalysisSetting sentimentSetting)
         {
             var sentimentErrors = new List<string>();
 
@@ -329,6 +388,8 @@ namespace FetchTranscriptionFunction
             {
                 return sentimentErrors;
             }
+
+            var textAnalyticsDocuments = new List<TextAnalyticsDocument>();
 
             foreach (var message in responses)
             {
@@ -344,18 +405,52 @@ namespace FetchTranscriptionFunction
                     sentimentErrors.Add(errorMessage);
                 }
 
-                // Matching sentiment and transcription JSON by using the timestamp
-                foreach (var document in textAnalyticsResponse.Documents)
+                textAnalyticsDocuments.AddRange(textAnalyticsResponse.Documents);
+            }
+
+            if (sentimentSetting == SentimentAnalysisSetting.UtteranceLevel)
+            {
+                foreach (var document in textAnalyticsDocuments)
                 {
-                    var targetSegment = speechTranscript.RecognizedPhrases.Where(e => $"{e.Channel}_{e.Offset}".Equals(document.Id, StringComparison.Ordinal)).FirstOrDefault();
-                    foreach (var sentence in document.Sentences)
+                    // Matching sentiment and transcription JSON by using the timestamp
+                    var target = speechTranscript.RecognizedPhrases.Where(e => $"{e.Channel}_{e.Offset}".Equals(document.Id, StringComparison.Ordinal)).FirstOrDefault();
+
+                    var nBest = target.NBest.FirstOrDefault();
+                    if (nBest != null)
                     {
-                        AddSentimentToSegment(targetSegment, sentence);
+                        if (nBest.Sentiment == null)
+                        {
+                            nBest.Sentiment = new Sentiment();
+                        }
+
+                        nBest.Sentiment.Negative = document.ConfidenceScores.Negative;
+                        nBest.Sentiment.Positive = document.ConfidenceScores.Positive;
+                        nBest.Sentiment.Neutral = document.ConfidenceScores.Neutral;
                     }
                 }
             }
+            else if (sentimentSetting == SentimentAnalysisSetting.AudioLevel)
+            {
+                foreach (var combinedRecognizedPhrase in speechTranscript.CombinedRecognizedPhrases)
+                {
+                    var documents = textAnalyticsDocuments.Where(document => document.Id.StartsWith($"{combinedRecognizedPhrase.Channel}_", StringComparison.OrdinalIgnoreCase));
 
-            Log.LogInformation($"Added sentiment segments.");
+                    if (!documents.Any())
+                    {
+                        continue;
+                    }
+
+                    if (combinedRecognizedPhrase.Sentiment == null)
+                    {
+                        combinedRecognizedPhrase.Sentiment = new Sentiment();
+                    }
+
+                    combinedRecognizedPhrase.Sentiment.Negative = documents.Average(d => d.ConfidenceScores.Negative);
+                    combinedRecognizedPhrase.Sentiment.Positive = documents.Average(d => d.ConfidenceScores.Positive);
+                    combinedRecognizedPhrase.Sentiment.Neutral = documents.Average(d => d.ConfidenceScores.Neutral);
+                }
+            }
+
             return sentimentErrors;
         }
 

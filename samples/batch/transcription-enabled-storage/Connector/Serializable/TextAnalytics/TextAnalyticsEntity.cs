@@ -10,11 +10,11 @@ namespace Connector.Serializable.TextAnalytics
 
     public class TextAnalyticsEntity
     {
-        public TextAnalyticsEntity(string text, string type, string subType, int offset, int length, float score)
+        public TextAnalyticsEntity(string text, string category, string subCategory, int offset, int length, float score)
         {
             Text = text;
-            TypeString = type;
-            SubType = subType;
+            CategoryString = category;
+            SubCategory = subCategory;
             Offset = offset;
             Length = length;
             Score = score;
@@ -22,7 +22,7 @@ namespace Connector.Serializable.TextAnalytics
 
         public string Text { get; private set; }
 
-        public string SubType { get; private set; }
+        public string SubCategory { get; private set; }
 
         public int Offset { get; private set; }
 
@@ -30,19 +30,19 @@ namespace Connector.Serializable.TextAnalytics
 
         public float Score { get; private set; }
 
-        public EntityType Type
+        public EntityCategory Category
         {
             get
             {
-                if (Enum.TryParse(TypeString, out EntityType outputType))
+                if (Enum.TryParse(CategoryString, out EntityCategory outputType))
                 {
                     return outputType;
                 }
 
-                return EntityType.Unknown;
+                return EntityCategory.Unknown;
             }
         }
 
-        private string TypeString { get; set; }
+        private string CategoryString { get; set; }
     }
 }
