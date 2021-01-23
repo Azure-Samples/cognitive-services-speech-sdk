@@ -2,7 +2,6 @@
 
 This sample shows how to translate speech into multiple languages with the Speech Service using the Speech SDK for JavaScript on a web browser, like Microsoft Edge, or Chrome. It illustrates how the SDK can be used to translate speech in one language to text in a different language.
 
-* See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-translate-speech-to-text-multiple-languages-js-browser) on the SDK documentation page for step-by-step instructions.
 * See the [overview article](https://docs.microsoft.com/azure/cognitive-services/speech-service/speech-translation) on the SDK documentation page to learn more about translation using the Speech Service.
 
 ## Prerequisites

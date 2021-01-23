@@ -1,32 +1,28 @@
-# Sample: Recognize speech in C++ for Linux (Ubuntu 16.04, Ubuntu 18.04, Debian 9, RHEL 8, CentOS 8) from an MP3/Opus file
+# Sample: Recognize speech in C++ for Linux from an MP3/Opus file
 
 This sample demonstrates how to recognize speech in compressed audio input stream with C++ using the Speech SDK for Linux.
 The compressed audio input stream should be either in MP3 or Opus format.
 
 > **Note:**
 > Support for compressed audio input streams was added to the Speech SDK version 1.4.0.
-> Check the [compressed audio input article on the SDK documentation site](https://docs.microsoft.com/azure/cognitive-services/speech-service/how-to-use-compressed-audio-input-streams)
+> Check the [compressed audio input article on the SDK documentation site](https://docs.microsoft.com/azure/cognitive-services/speech-service/how-to-use-codec-compressed-audio-input-streams)
 > for additional information.
 
 ## Prerequisites
 
 * A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
-* An Ubuntu 16.04, Ubuntu 18.04, Debian 9, RHEL 8, or CentOS 8 PC.
-* On Ubuntu, install these packages to build and run this sample:
+* A PC with a [supported Linux distribution](https://docs.microsoft.com/azure/cognitive-services/speech-service/speech-sdk?tabs=linux).
+* On Ubuntu or Debian, install these packages to build and run this sample:
 
   ```sh
   sudo apt-get update
   sudo apt-get install build-essential libssl1.0.0 libasound2 wget
   sudo apt-get install libgstreamer1.0-0 gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly
   ```
-* On Debian 9, install these packages to build and run this sample:
 
-  ```sh
-  sudo apt-get update
-  sudo apt-get install build-essential libssl1.0.2 libasound2 wget
-  sudo apt-get install libgstreamer1.0-0 gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly
-  ```
-* On RHEL 8, or CentOS 8, install these packages to build and run this sample:
+  * If libssl1.0.0 is not available, install libssl1.0.x (where x is greater than 0) or libssl1.1 instead.
+
+* On RHEL or CentOS, install these packages to build and run this sample:
 
   ```sh
   sudo yum update
@@ -34,6 +30,8 @@ The compressed audio input stream should be either in MP3 or Opus format.
   sudo yum install alsa-lib openssl wget
   sudo yum install gstreamer1 gstreamer1-plugins-base gstreamer1-plugins-good gstreamer1-plugins-ugly-free gstreamer1-plugins-bad-free
   ```
+
+  * See also [how to configure RHEL/CentOS 7 for Speech SDK](https://docs.microsoft.com/azure/cognitive-services/speech-service/how-to-configure-rhel-centos-7).
 
 ## Build the sample
 
@@ -89,5 +87,5 @@ Run the application:
 
 ## References
 
-* [Compressed audio input article on the SDK documentation site](https://docs.microsoft.com/azure/cognitive-services/speech-service/how-to-use-compressed-audio-input-streams)
+* [Compressed audio input article on the SDK documentation site](https://docs.microsoft.com/azure/cognitive-services/speech-service/how-to-use-codec-compressed-audio-input-streams)
 * [Speech SDK API reference for C++](https://aka.ms/csspeech/cppref)

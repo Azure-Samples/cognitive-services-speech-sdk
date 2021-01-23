@@ -25,6 +25,12 @@
         <td><input id="serviceRegion" type="text" size="40" value="YourServiceRegion"></td>
       </tr>
       <tr>
+        <td align="right">File to Recognize</td>
+        <td>
+          <input type="file" id="filePicker" accept=".wav" />
+        </td>
+      </tr>
+      <tr>
         <td></td>
         <td><button id="startRecognizeOnceAsyncButton">Start recognition</button></td>
       </tr>
@@ -65,6 +71,7 @@
     // status fields and start button in UI
     var phraseDiv;
     var startRecognizeOnceAsyncButton;
+    var filePicker, audioFile;
 
     // subscription key and region for speech services.
     var subscriptionKey, serviceRegion;
@@ -77,6 +84,11 @@
       subscriptionKey = document.getElementById("subscriptionKey");
       serviceRegion = document.getElementById("serviceRegion");
       phraseDiv = document.getElementById("phraseDiv");
+      filePicker = document.getElementById("filePicker");
+      filePicker.addEventListener("change", function () {
+          audioFile = filePicker.files[0];
+          startRecognizeOnceAsyncButton.disabled = false;
+      });
 
       startRecognizeOnceAsyncButton.addEventListener("click", function () {
         startRecognizeOnceAsyncButton.disabled = true;
@@ -95,7 +107,7 @@
         }
 
         speechConfig.speechRecognitionLanguage = "en-US";
-        var audioConfig  = SpeechSDK.AudioConfig.fromDefaultMicrophoneInput();
+        var audioConfig  = SpeechSDK.AudioConfig.fromWavFileInput(audioFile);
         recognizer = new SpeechSDK.SpeechRecognizer(speechConfig, audioConfig);
 
         recognizer.recognizeOnceAsync(

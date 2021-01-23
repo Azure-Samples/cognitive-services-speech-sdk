@@ -148,7 +148,7 @@
     // https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support#text-to-speech
     speechConfig.speechSynthesisLanguage = @"en-GB";
     // Sets the voice name
-    // e.g. "Microsoft Server Speech Text to Speech Voice (en-US, JessaRUS)"
+    // e.g. "Microsoft Server Speech Text to Speech Voice (en-US, AriaRUS)"
     // The full list of supported voices can be found here:
     // https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support#text-to-speech
     speechConfig.speechSynthesisVoiceName = @"Microsoft Server Speech Text to Speech Voice (en-GB, George, Apollo)";

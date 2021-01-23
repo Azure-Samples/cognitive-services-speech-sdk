@@ -1,8 +1,8 @@
-# Quickstart: Using the Speech Service from Python
+# Quickstart: Synthesize speech from Python using the Speech Service
 
 This sample shows how to use the Speech Service through the Speech SDK for Python. It illustrates how the SDK can be used to synthesize speech to speaker output.
 
-See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-text-to-speech-python) on the SDK documentation page for step-by-step instructions.
+See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstarts/text-to-speech?tabs=dotnet%2Clinux%2Cjre%2Cwindowsinstall&pivots=programming-language-python) on the SDK documentation page for step-by-step instructions.
 
 ## Prerequisites
 
@@ -10,26 +10,22 @@ Before you get started, here's a list of prerequisites:
 
 * A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
 * Python 3.5 or later needs to be installed. Downloads are available [here](https://www.python.org/downloads/).
-* The Python Speech SDK package is available for Windows (x64 and x86), Mac (macOS X version 10.12 or later), and Linux (x64; Ubuntu 16.04, Ubuntu 18.04, Debian 9, RHEL 8, CentOS 8).
-* On Ubuntu 16.04 or 18.04, run the following commands for the installation of required packages:
-  
+* The Python Speech SDK package is available for Windows (x64 and x86), Mac (macOS X version 10.12 or later), and [specific Linux distributions and target architectures](https://docs.microsoft.com/azure/cognitive-services/speech-service/speech-sdk?tabs=linux).
+* On Ubuntu or Debian, run the following commands for the installation of required packages:
   ```sh
   sudo apt-get update
   sudo apt-get install libssl1.0.0 libasound2
   ```
 
-* On Debian 9, run the following commands for the installation of required packages:
+  * If libssl1.0.0 is not available, install libssl1.0.x (where x is greater than 0) or libssl1.1 instead.
 
-  ```sh
-  sudo apt-get update
-  sudo apt-get install libssl1.0.2 libasound2
-  ```
-
-* On RHEL 8 or CentOS 8, run the following commands for the installation of required packages:
+* On RHEL or CentOS, run the following commands for the installation of required packages:
   ```sh
   sudo yum update
   sudo yum install alsa-lib openssl python3
   ```
+
+  * See also [how to configure RHEL/CentOS 7 for Speech SDK](https://docs.microsoft.com/azure/cognitive-services/speech-service/how-to-configure-rhel-centos-7).
 
 * On Windows you need the [Microsoft Visual C++ Redistributable for Visual Studio 2017](https://support.microsoft.com/help/2977003/the-latest-supported-visual-c-downloads) for your platform.
 
