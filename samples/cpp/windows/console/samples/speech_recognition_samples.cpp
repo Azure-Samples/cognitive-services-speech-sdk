@@ -512,7 +512,7 @@ void SpeechRecognitionWithSourceLanguageAutoDetection()
 
      // Currently this feature only supports 2 different language candidates
      // Replace the languages with your languages in BCP-47 format, e.g. fr-FR.
-     // Please see https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support for all supported langauges
+     // Please see https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support for all supported languages
      auto autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig::FromLanguages({ "en-US", "de-DE" });
 
      // The recognizer uses microphone,  to use file or stream as audio input, just construct the audioInput and pass to FromConfig API as the 3rd parameter.
@@ -626,6 +626,75 @@ void SpeechRecognitionWithSourceLanguageAutoDetectionUsingCustomizedModel()
             cout << "CANCELED: ErrorCode=" << (int)cancellation->ErrorCode << std::endl;
             cout << "CANCELED: ErrorDetails=" << cancellation->ErrorDetails << std::endl;
             cout << "CANCELED: Did you update the subscription info?" << std::endl;
+        }
+    }
+}
+
+// Pronunciation assessment.
+void PronunciationAssessmentWithMicrophone()
+{
+    // Creates an instance of a speech config with specified subscription key and service region.
+    // Replace with your own subscription key and service region (e.g., "westus").
+    // Note: The pronunciation assessment feature is currently only available on westus, eastasia and centralindia regions.
+    // And this feature is currently only available on en-US language.
+    auto config = SpeechConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+
+    std::string referenceText = "";
+    // create pronunciation assessment config, set grading system, granularity and if enable miscue based on your requirement.
+    auto pronunciationConfig = PronunciationAssessmentConfig::Create(referenceText,
+        PronunciationAssessmentGradingSystem::HundredMark,
+        PronunciationAssessmentGranularity::Phoneme, true);
+
+    // Creates a speech recognizer using microphone as audio input.
+    auto recognizer = SpeechRecognizer::FromConfig(config);
+
+    while (true)
+    {
+        // Receives reference text from console input.
+        cout << "Enter reference text that you want to assess, or enter empty text to exit." << std::endl;
+        cout << "> ";
+        getline(cin, referenceText);
+        if (referenceText.empty())
+        {
+            break;
+        }
+
+        pronunciationConfig->SetReferenceText(referenceText);
+        cout << "Read out \"" << referenceText << "\" for pronunciation assessment ..." << endl;
+
+        pronunciationConfig->ApplyTo(recognizer);
+
+        // Starts speech recognition, and returns after a single utterance is recognized.
+        // For long-running multi-utterance recognition, use StartContinuousRecognitionAsync() instead.
+        auto result = recognizer->RecognizeOnceAsync().get();
+
+        // Checks result.
+        if (result->Reason == ResultReason::RecognizedSpeech)
+        {
+            cout << "RECOGNIZED: Text=" << result->Text << std::endl
+                 <<"  PRONUNCIATION ASSESSMENT RESULTS:";
+
+            auto pronunciationResult = PronunciationAssessmentResult::FromResult(result);
+
+            cout << "    Accuracy score: " << pronunciationResult->AccuracyScore << ", Pronunciation score: "
+                 << pronunciationResult->PronunciationScore << ", Completeness score : " << pronunciationResult->CompletenessScore
+                 << ", FluencyScore: " << pronunciationResult->FluencyScore << endl;
+        }
+        else if (result->Reason == ResultReason::NoMatch)
+        {
+            cout << "NOMATCH: Speech could not be recognized." << std::endl;
+        }
+        else if (result->Reason == ResultReason::Canceled)
+        {
+            auto cancellation = CancellationDetails::FromResult(result);
+            cout << "CANCELED: Reason=" << (int)cancellation->Reason << std::endl;
+
+            if (cancellation->Reason == CancellationReason::Error)
+            {
+                cout << "CANCELED: ErrorCode=" << (int)cancellation->ErrorCode << std::endl;
+                cout << "CANCELED: ErrorDetails=" << cancellation->ErrorDetails << std::endl;
+                cout << "CANCELED: Did you update the subscription info?" << std::endl;
+            }
         }
     }
 }

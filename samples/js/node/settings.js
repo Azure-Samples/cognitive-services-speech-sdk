@@ -12,7 +12,7 @@
     serviceRegion:     "YourServiceRegion", // e.g., "westus"
     language:          "en-US",
   
-    // Replace with the full path to a wav file you want to recognize.
+    // Replace with the full path to a wav file you want to recognize or overwrite.
     filename:          "YourAudioFile.wav", // 16000 Hz, Mono
   
     // Replace with your own Language Understanding subscription key (endpoint

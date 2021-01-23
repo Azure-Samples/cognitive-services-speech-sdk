@@ -1,4 +1,4 @@
-# Quickstart: Recognize speech in Unity using the Speech SDK for Unity
+# Quickstart: Recognize speech from a microphone in Unity using the Speech SDK for Unity
 
 This sample demonstrates how to recognize speech in [Unity](https://unity3d.com/).
 
