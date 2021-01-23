@@ -14,13 +14,14 @@ These samples demonstrate how to recognize speech, and how to create or join a m
 
 
 * **By downloading the Microsoft Cognitive Services Speech SDK when building this sample, you acknowledge its license, see [Speech SDK license agreement](https://docs.microsoft.com/azure/cognitive-services/speech-service/license).**
-* [Download the sample code to your development PC.](../../../README.md#get-the-samples)
+* [Download the sample code to your development PC.](/README.md#get-the-samples)
 * From the [Speech SDK for JavaScript .zip package](https://aka.ms/csspeech/jsbrowserpackage) extract the file
   `microsoft.cognitiveservices.speech.sdk.bundle.js` and place it into the folder that contains this quickstart.
 
 If you want to host the sample on a web server:
 
 * The web server must be secure (HTTPS).
+* The web server must support PHP with curl enabled.
 * Edit the `token.php` source:
   * Replace the string `YourServiceRegion` with the service region of your subscription.
     For example, replace with `westus` if you are using the 30-day free trial subscription.

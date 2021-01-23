@@ -293,7 +293,7 @@ public class SpeechRecognitionSamples {
     }
 
     // Speech recognition with events from a push stream
-    // This sample takes and existing file and reads it by chunk into a local buffer and then pushes the 
+    // This sample takes and existing file and reads it by chunk into a local buffer and then pushes the
     // buffer into an PushAudioStream for speech recognition.
     public static void continuousRecognitionWithPushStream() throws InterruptedException, ExecutionException, IOException
     {
@@ -352,18 +352,27 @@ public class SpeechRecognitionSamples {
 
             // Arbitrary buffer size.
             byte[] readBuffer = new byte[4096];
-        
+
             // Push audio read from the file into the PushStream.
             // The audio can be pushed into the stream before, after, or during recognition
             // and recognition will continue as data becomes available.
-            while(  inputStream.read(readBuffer) != -1)
+            int bytesRead;
+            while ((bytesRead = inputStream.read(readBuffer)) != -1)
             {
-                pushStream.write(readBuffer);
+                if (bytesRead == readBuffer.length)
+                {
+                    pushStream.write(readBuffer);
+                }
+                else
+                {
+                    // Last buffer read from the WAV file is likely to have less bytes
+                    pushStream.write(Arrays.copyOfRange(readBuffer, 0, bytesRead));
+                }
             }
 
             pushStream.close();
             inputStream.close();
-            
+
             System.out.println("Press any key to stop");
             new Scanner(System.in).nextLine();
 
@@ -449,7 +458,7 @@ public class SpeechRecognitionSamples {
         config.close();
         recognizer.close();
     }
-    
+
     // Speech recognition with events from file
     public static void continuousRecognitionWithFileWithPhraseListAsync() throws InterruptedException, ExecutionException, IOException
     {
@@ -517,7 +526,7 @@ public class SpeechRecognitionSamples {
         recognizer.close();
     }
 
-    // Speech recognition with events from file, also with source langauge auto detection
+    // Speech recognition with events from file, also with source language auto detection
     public static void continuousRecognitionWithFileAndSourceLanguageAutoDetection() throws InterruptedException, ExecutionException, IOException
     {
         // Creates an instance of a speech config with specified
@@ -549,7 +558,7 @@ public class SpeechRecognitionSamples {
                 String language = autoDetectSourceLanguageResult.getLanguage();
                 if (e.getResult().getReason() == ResultReason.RecognizedSpeech) {
                     System.out.println("RECOGNIZED: Text=" + e.getResult().getText());
-                    
+
                     System.out.println("RECOGNIZING: Langauge=" + language);
                 }
                 else if (e.getResult().getReason() == ResultReason.NoMatch) {
@@ -596,7 +605,7 @@ public class SpeechRecognitionSamples {
         recognizer.close();
     }
 
-    // Speech recognition with events from file, also with source langauge auto detection and using customized model
+    // Speech recognition with events from file, also with source language auto detection and using customized model
     public static void continuousRecognitionWithSourceLanguageAutoDetectionAndCustomizedModel() throws InterruptedException, ExecutionException, IOException
     {
         // Creates an instance of a speech config with specified
@@ -634,7 +643,7 @@ public class SpeechRecognitionSamples {
                 String language = autoDetectSourceLanguageResult.getLanguage();
                 if (e.getResult().getReason() == ResultReason.RecognizedSpeech) {
                     System.out.println("RECOGNIZED: Text=" + e.getResult().getText());
-                    
+
                     System.out.println("RECOGNIZING: Langauge=" + language);
                 }
                 else if (e.getResult().getReason() == ResultReason.NoMatch) {
@@ -683,5 +692,78 @@ public class SpeechRecognitionSamples {
         autoDetectSourceLanguageConfig.close();
         audioInput.close();
         recognizer.close();
+    }
+
+    // Pronunciation assessment.
+    public static void pronunciationAssessmentWithMicrophoneAsync() throws ExecutionException, InterruptedException {
+        // Creates an instance of a speech config with specified subscription key and service region.
+        // Replace with your own subscription key and service region (e.g., "westus").
+        // Note: The pronunciation assessment feature is currently only available on westus, eastasia and centralindia regions.
+        // And this feature is currently only available on en-US language.
+        SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+
+        String referenceText = "";
+        // create pronunciation assessment config, set grading system, granularity and if enable miscue based on your requirement.
+        PronunciationAssessmentConfig pronunciationConfig = new PronunciationAssessmentConfig(referenceText,
+            PronunciationAssessmentGradingSystem.HundredMark, PronunciationAssessmentGranularity.Phoneme, true);
+
+        // Creates a speech recognizer for the specified language, using microphone as audio input.
+        SpeechRecognizer recognizer = new SpeechRecognizer(config);
+        {
+            while (true)
+            {
+                // Receives reference text from console input.
+                System.out.println("Enter reference text you want to assess, or enter empty text to exit.");
+                System.out.println("> ");
+                referenceText = new Scanner(System.in).nextLine();
+                if (referenceText.isEmpty())
+                {
+                    break;
+                }
+
+                pronunciationConfig.setReferenceText(referenceText);
+
+                // Starts recognizing.
+                System.out.println("Read out \"" + referenceText + "\" for pronunciation assessment ...");
+
+                pronunciationConfig.applyTo(recognizer);
+
+                // Starts speech recognition, and returns after a single utterance is recognized.
+                // For long-running multi-utterance recognition, use StartContinuousRecognitionAsync() instead.
+                SpeechRecognitionResult result = recognizer.recognizeOnceAsync().get();
+
+                // Checks result.
+                if (result.getReason() == ResultReason.RecognizedSpeech) {
+                    System.out.println("RECOGNIZED: Text=" + result.getText());
+                    System.out.println("  PRONUNCIATION ASSESSMENT RESULTS:");
+
+                    PronunciationAssessmentResult pronunciationResult = PronunciationAssessmentResult.fromResult(result);
+                    System.out.println(
+                        String.format(
+                            "    Accuracy score: %f, Pronunciation score: %f, Completeness score : %f, FluencyScore: %f",
+                            pronunciationResult.getAccuracyScore(), pronunciationResult.getPronunciationScore(),
+                            pronunciationResult.getCompletenessScore(), pronunciationResult.getFluencyScore()));
+                }
+                else if (result.getReason() == ResultReason.NoMatch) {
+                    System.out.println("NOMATCH: Speech could not be recognized.");
+                }
+                else if (result.getReason() == ResultReason.Canceled) {
+                    CancellationDetails cancellation = CancellationDetails.fromResult(result);
+                    System.out.println("CANCELED: Reason=" + cancellation.getReason());
+
+                    if (cancellation.getReason() == CancellationReason.Error) {
+                        System.out.println("CANCELED: ErrorCode=" + cancellation.getErrorCode());
+                        System.out.println("CANCELED: ErrorDetails=" + cancellation.getErrorDetails());
+                        System.out.println("CANCELED: Did you update the subscription info?");
+                    }
+                }
+
+                result.close();
+            }
+
+            pronunciationConfig.close();
+            config.close();
+            recognizer.close();
+        }
     }
 }

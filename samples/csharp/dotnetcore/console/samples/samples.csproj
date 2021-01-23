@@ -15,6 +15,7 @@
     <Compile Include="..\..\..\sharedcontent\console\speech_synthesis_with_token_sample.cs" Link="speech_synthesis_with_token_sample.cs" />
     <Compile Include="..\..\..\sharedcontent\console\speech_synthesis_server_scenario_sample.cs" Link="speech_synthesis_server_scenario_sample.cs" />
     <Compile Include="..\..\..\sharedcontent\console\translation_samples.cs" Link="translation_samples.cs" />
+    <Compile Include="..\..\..\sharedcontent\console\remote_conversation_samples.cs" Link="remote_conversation_samples.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -25,10 +26,14 @@
       <Link>wreck-a-nice-beach.wav</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="..\..\..\sharedcontent\console\katiesteve.wav" Link="katiesteve.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.12.1" />
+    <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.14.0" />
+    <PackageReference Include="Microsoft.CognitiveServices.Speech.Remoteconversation" Version="1.14.0" />
   </ItemGroup>
 
 </Project>

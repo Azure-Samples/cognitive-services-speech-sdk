@@ -1,9 +1,8 @@
-# Quickstart: Using the Speech Service in JavaScript on a Web Browser.
+# Quickstart: Using the Speech Service in JavaScript on a Web Browser to synthesize speech to speaker output.
 
 This sample shows how to use the Speech Service using the Speech SDK for JavaScript on a web browser, like Microsoft Edge, or Chrome. It illustrates how the SDK can be used to synthesize speech to speaker output.
 
-* See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-text-to-speech-js-browser) on the SDK documentation page for step-by-step instructions.
-* See the [overview article](https://docs.microsoft.com/azure/cognitive-services/speech-service/text-to-speech) on the SDK documentation page to learn more about Text to Speech.
+* See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstarts/text-to-speech?pivots=programming-language-javascript) on the SDK documentation page for step-by-step instructions.
 
 ## Prerequisites
 
@@ -15,13 +14,14 @@ This sample shows how to use the Speech Service using the Speech SDK for JavaScr
 ## Build the sample
 
 * **By downloading the Microsoft Cognitive Services Speech SDK when building this sample, you acknowledge its license, see [Speech SDK license agreement](https://docs.microsoft.com/azure/cognitive-services/speech-service/license).**
-* [Download the sample code to your development PC.](../../../README.md#get-the-samples)
+* [Download the sample code to your development PC.](/README.md#get-the-samples)
 * From the [Speech SDK for JavaScript .zip package](https://aka.ms/csspeech/jsbrowserpackage) extract the file
   `microsoft.cognitiveservices.speech.sdk.bundle.js` and place it into the folder that contains this quickstart.
 
 If you want to host the sample on a web server:
 
 * The web server must be secure (HTTPS).
+* The web server must support PHP with curl enabled.
 * Edit the `token.php` source:
   * Replace the string `YourServiceRegion` with the service region of your subscription.
     For example, replace with `westus` if you are using the 30-day free trial subscription.
