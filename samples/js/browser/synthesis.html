@@ -443,6 +443,8 @@
           }
           speechConfig = SpeechSDK.SpeechConfig.fromSubscription(subscriptionKey.value, regionOptions.value);
         }
+        
+        speechConfig.speechSynthesisVoiceName = voiceOptions.value;
 
         pushStreamCallback = {
             write: function (dataBuffer) {
