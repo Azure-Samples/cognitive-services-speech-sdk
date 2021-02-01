@@ -1,0 +1,94 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT license.
+#
+# vim:set expandtab shiftwidth=2 tabstop=2:
+#
+# Variables:
+#   SpeechSdkVersion - Speech SDK version to use
+#   SpeechSdkNuGetSource - where to pick up the Speech SDK from ("nuget.org" or "VstsFeed")
+#   SpeechSdkVstsFeed - VSTS feed to use if SpeechSdkNuGetSource == "VstsFeed"
+#
+
+trigger:
+- master
+
+pr:
+- master
+
+resources:
+- repo: self
+  clean: true
+
+variables:
+  SPEECHSDK_NUGET_VERSION: 4.6
+  CG_RAN: true # we do Component Governance explicitly only in the Pre job
+
+jobs:
+
+- job: Pre
+  pool:
+    name: Hosted Ubuntu 1604
+  timeoutInMinutes: 10
+  variables:
+    CG_RAN: false
+  steps:
+  - bash: ./ci/check-git-head.sh
+    displayName: Repository checks
+  - task: ms.vss-governance-buildtask.governance-build-task-component-detection.ComponentGovernanceComponentDetection@0
+    displayName: Component Detection
+    condition: >
+      and(eq(variables['System.CollectionId'], '19422243-19b9-4d85-9ca6-bc961861d287'),
+        eq(variables['System.DefinitionId'], '5400'),
+        eq(variables['Build.SourceBranch'], 'refs/heads/master'),
+        or(eq(variables['Build.Reason'], 'Schedule'), eq(variables['Build.Reason'], 'Manual')))
+  - bash: |
+      . ci/functions.sh || exit 1
+      set -u -e -o pipefail
+      case "$(SpeechSdkNuGetSource)" in
+        nuget.org)
+          V_VSTS_FEED=
+          V_INCLUDE_NUGET_ORG=true
+          ;;
+        VstsFeed)
+          V_VSTS_FEED="$(SpeechSdkVstsFeed)"
+          V_INCLUDE_NUGET_ORG=true
+          ;;
+        *)
+          echo Unexpected value SpeechSdkNuGetSource=$(SpeechSdkNuGetSource)
+          exit 1
+          ;;
+      esac
+      vsts_setoutvar V_VSTS_FEED "$V_VSTS_FEED"
+      vsts_setoutvar V_INCLUDE_NUGET_ORG "$V_INCLUDE_NUGET_ORG"
+    name: var
+    displayName: Set variables
+
+- job: Windows
+  dependsOn: Pre
+  timeoutInMinutes: 60
+  pool:
+    vmImage: 'windows-2019'
+  variables:
+    V_VSTS_FEED: $[dependencies.Pre.outputs['var.V_VSTS_FEED']]
+    V_INCLUDE_NUGET_ORG: $[dependencies.Pre.outputs['var.V_INCLUDE_NUGET_ORG']]
+  steps:
+  - bash: 'perl ci/patch-samples.pl "$(SpeechSdkVersion)" . && git diff'
+    displayName: Patch samples
+  - task: NuGetToolInstaller@0
+    displayName: Use NuGet $(SPEECHSDK_NUGET_VERSION)
+    inputs:
+      versionSpec: $(SPEECHSDK_NUGET_VERSION)
+  - task: NuGetCommand@2
+    inputs:
+      command: restore
+      vstsFeed: $(V_VSTS_FEED)
+      includeNuGetOrg: $(V_INCLUDE_NUGET_ORG)
+  # Note: for now building any platform. In the future, should build all available.
+  - task: VSBuild@1
+    inputs:
+      maximumCpuCount: true
+    displayName: 'Build samples (*.sln)'
+    # Get results from all builds:
+    continueOnError: true
+  - bash: ./ci/run-gradle.sh
+    displayName: 'Build samples (gradle)'
