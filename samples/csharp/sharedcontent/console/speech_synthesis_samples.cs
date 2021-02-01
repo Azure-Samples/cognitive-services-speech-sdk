@@ -158,6 +158,54 @@ namespace MicrosoftSpeechSDKSamples
             }
         }
 
+        // Speech synthesis using Custom Voice (https://aka.ms/customvoice)
+        public static async Task SynthesisUsingCustomVoiceAsync()
+        {
+            // Creates an instance of a speech config with specified subscription key and service region.
+            // Replace with your own subscription key and service region (e.g., "westus").
+            var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+            // Replace with the endpoint id of your Custom Voice model.
+            config.EndpointId = "YourEndpointId";
+            // Replace with the voice name of your Custom Voice model.
+            config.SpeechSynthesisVoiceName = "YourVoiceName";
+
+            // Creates a speech synthesizer for Custom Voice, using the default speaker as audio output.
+            using (var synthesizer = new SpeechSynthesizer(config))
+            {
+                while (true)
+                {
+                    // Receives a text from console input and synthesize it to speaker.
+                    Console.WriteLine("Enter some text that you want to speak, or enter empty text to exit.");
+                    Console.Write("> ");
+                    string text = Console.ReadLine();
+                    if (string.IsNullOrEmpty(text))
+                    {
+                        break;
+                    }
+
+                    using (var result = await synthesizer.SpeakTextAsync(text))
+                    {
+                        if (result.Reason == ResultReason.SynthesizingAudioCompleted)
+                        {
+                            Console.WriteLine($"Speech synthesized to speaker for text [{text}].");
+                        }
+                        else if (result.Reason == ResultReason.Canceled)
+                        {
+                            var cancellation = SpeechSynthesisCancellationDetails.FromResult(result);
+                            Console.WriteLine($"CANCELED: Reason={cancellation.Reason}");
+
+                            if (cancellation.Reason == CancellationReason.Error)
+                            {
+                                Console.WriteLine($"CANCELED: ErrorCode={cancellation.ErrorCode}");
+                                Console.WriteLine($"CANCELED: ErrorDetails=[{cancellation.ErrorDetails}]");
+                                Console.WriteLine($"CANCELED: Did you update the subscription info?");
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         // Speech synthesis to wave file.
         public static async Task SynthesisToWaveFileAsync()
         {
@@ -459,7 +507,7 @@ namespace MicrosoftSpeechSDKSamples
                                 Console.WriteLine($"Audio data for text [{text}] was saved to [{fileName}]");
 
                                 // You can also read data from audio data stream and process it in memory
-                                // Reset the stream position to the beginnging since saving to file puts the postion to end
+                                // Reset the stream position to the beginning since saving to file puts the position at the end
                                 audioDataStream.SetPosition(0);
 
                                 byte[] buffer = new byte[16000];

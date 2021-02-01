@@ -36,6 +36,7 @@ extern void SpeechSynthesisToAudioDataStream();
 extern void SpeechSynthesisEvents();
 extern void SpeechSynthesisWordBoundaryEvent();
 extern void SpeechSynthesisWithSourceLanguageAutoDetection();
+extern void SpeechSynthesisUsingCustomVoice();
 
 extern void ConversationWithPullAudioStream();
 extern void ConversationWithPushAudioStream();
@@ -175,6 +176,7 @@ void SpeechSynthesisSamples()
         cout << "A.) Speech synthesis events.\n";
         cout << "B.) Speech synthesis word boundary event.\n";
         cout << "C.) Speech synthesis with source language auto detection\n";
+        cout << "D.) Speech synthesis using Custom Voice\n";
         cout << "\nChoice (0 for MAIN MENU): ";
         cout.flush();
 
@@ -222,6 +224,9 @@ void SpeechSynthesisSamples()
         case 'c':
             SpeechSynthesisWithSourceLanguageAutoDetection();
             break;
+        case 'D':
+        case 'd':
+            SpeechSynthesisUsingCustomVoice();
         case '0':
             break;
         }
