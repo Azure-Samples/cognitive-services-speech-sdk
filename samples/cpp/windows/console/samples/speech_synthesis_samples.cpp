@@ -157,6 +157,55 @@ void SpeechSynthesisWithVoice()
     }
 }
 
+
+// Speech synthesis using Custom Voice (https://aka.ms/customvoice)
+void SpeechSynthesisUsingCustomVoice()
+{
+    // Creates an instance of a speech config with specified subscription key and service region.
+    // Replace with your own subscription key and service region (e.g., "westus").
+    auto config = SpeechConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+    // Replace with the endpoint id of your Custom Voice model.
+    config->SetEndpointId("YourEndpointId");
+    // Replace with the voice name of your Custom Voice model.
+    config->SetSpeechSynthesisVoiceName("YourVoiceName");
+
+    // Creates a speech synthesizer for Custom Voice, using the default speaker as audio output.
+    auto synthesizer = SpeechSynthesizer::FromConfig(config);
+
+    while (true)
+    {
+        // Receives a text from console input and synthesize it to speaker.
+        cout << "Enter some text that you want to speak, or enter empty text to exit." << std::endl;
+        cout << "> ";
+        std::string text;
+        getline(cin, text);
+        if (text.empty())
+        {
+            break;
+        }
+
+        auto result = synthesizer->SpeakTextAsync(text).get();
+
+        // Checks result.
+        if (result->Reason == ResultReason::SynthesizingAudioCompleted)
+        {
+            cout << "Speech synthesized to speaker for text [" << text << "]" << std::endl;
+        }
+        else if (result->Reason == ResultReason::Canceled)
+        {
+            auto cancellation = SpeechSynthesisCancellationDetails::FromResult(result);
+            cout << "CANCELED: Reason=" << static_cast<int>(cancellation->Reason) << std::endl;
+
+            if (cancellation->Reason == CancellationReason::Error)
+            {
+                cout << "CANCELED: ErrorCode=" << static_cast<int>(cancellation->ErrorCode) << std::endl;
+                cout << "CANCELED: ErrorDetails=[" << cancellation->ErrorDetails << "]" << std::endl;
+                cout << "CANCELED: Did you update the subscription info?" << std::endl;
+            }
+        }
+    }
+}
+
 // Speech synthesis to wave file.
 void SpeechSynthesisToWaveFile()
 {

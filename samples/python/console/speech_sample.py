@@ -9,6 +9,7 @@ Speech recognition samples for the Microsoft Cognitive Services Speech SDK
 
 import time
 import wave
+import string
 
 try:
     import azure.cognitiveservices.speech as speechsdk
@@ -574,7 +575,7 @@ def speech_recognize_keyword_locally_from_microphone():
 
 
 def pronunciation_assessment_from_microphone():
-    """pronunciation assessment."""
+    """"performs one-shot pronunciation assessment asynchronously with input from microphone."""
 
     # Creates an instance of a speech config with specified subscription key and service region.
     # Replace with your own subscription key and service region (e.g., "westus").
@@ -606,6 +607,9 @@ def pronunciation_assessment_from_microphone():
         # Starts recognizing.
         print('Read out "{}" for pronunciation assessment ...'.format(reference_text))
 
+        # Note: Since recognize_once() returns only a single utterance, it is suitable only for single
+        # shot evaluation.
+        # For long-running multi-utterance pronunciation evaluation, use start_continuous_recognition() instead.
         result = recognizer.recognize_once_async().get()
 
         # Check the result
@@ -630,3 +634,96 @@ def pronunciation_assessment_from_microphone():
             print("Speech Recognition canceled: {}".format(cancellation_details.reason))
             if cancellation_details.reason == speechsdk.CancellationReason.Error:
                 print("Error details: {}".format(cancellation_details.error_details))
+
+
+def pronunciation_assessment_continuous_from_file():
+    """performs continuous speech recognition asynchronously with input from an audio file"""
+
+    import difflib
+
+    # Creates an instance of a speech config with specified subscription key and service region.
+    # Replace with your own subscription key and service region (e.g., "westus").
+    # Note: The pronunciation assessment feature is currently only available on westus, eastasia and centralindia regions.
+    # And this feature is currently only available on en-US language.
+    speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
+    audio_config = speechsdk.audio.AudioConfig(filename=weatherfilename)
+
+    reference_text = "What's the weather like?"
+    # create pronunciation assessment config, set grading system, granularity and if enable miscue based on your requirement.
+    enable_miscue = True
+    pronunciation_config = speechsdk.PronunciationAssessmentConfig(reference_text=reference_text,
+                                                                   grading_system=speechsdk.PronunciationAssessmentGradingSystem.HundredMark,
+                                                                   granularity=speechsdk.PronunciationAssessmentGranularity.Phoneme,
+                                                                   enable_miscue=enable_miscue)
+
+    # Creates a speech recognizer using a file as audio input.
+    # The default language is "en-us".
+    speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, audio_config=audio_config)
+    # apply pronunciation assessment config to speech recognizer
+    pronunciation_config.apply_to(speech_recognizer)
+
+    done = False
+    recognized_words = []
+
+    def stop_cb(evt):
+        """callback that signals to stop continuous recognition upon receiving an event `evt`"""
+        print('CLOSING on {}'.format(evt))
+        nonlocal done
+        done = True
+
+    def recognized(evt):
+        print('pronunciation assessment for: {}'.format(evt.result.text))
+        pronunciation_result = speechsdk.PronunciationAssessmentResult(evt.result)
+        print('    Accuracy score: {}, Pronunciation score: {}, Completeness score : {}, FluencyScore: {}'.format(
+            pronunciation_result.accuracy_score, pronunciation_result.pronunciation_score,
+            pronunciation_result.completeness_score, pronunciation_result.fluency_score
+        ))
+        nonlocal recognized_words
+        recognized_words += pronunciation_result.words
+
+    # Connect callbacks to the events fired by the speech recognizer
+    speech_recognizer.recognized.connect(recognized)
+    speech_recognizer.session_started.connect(lambda evt: print('SESSION STARTED: {}'.format(evt)))
+    speech_recognizer.session_stopped.connect(lambda evt: print('SESSION STOPPED {}'.format(evt)))
+    speech_recognizer.canceled.connect(lambda evt: print('CANCELED {}'.format(evt)))
+    # stop continuous recognition on either session stopped or canceled events
+    speech_recognizer.session_stopped.connect(stop_cb)
+    speech_recognizer.canceled.connect(stop_cb)
+
+    # Start continuous pronunciation assessment
+    speech_recognizer.start_continuous_recognition()
+    while not done:
+        time.sleep(.5)
+
+    speech_recognizer.stop_continuous_recognition()
+
+    # For continuous pronunciation assessment mode, the service won't return the words with `Insertion` or `Omission` even miscue is enabled.
+    # We need to compare with the reference text after received all recognized words to get these error words.
+    if enable_miscue:
+        reference_words = reference_text.lower().split().strip(string.punctuation)
+        diff = difflib.SequenceMatcher(None, reference_words, [x.word for x in recognized_words])
+        final_words = []
+        for tag, i1, i2, j1, j2 in diff.get_opcodes():
+            if tag == 'insert':
+                for word in recognized_words[j1:j2]:
+                    if word.error_type == 'None':
+                        word._error_type = 'Insertion'
+                    final_words.append(word)
+            elif tag == 'delete':
+                for word_text in reference_words[i1:i2]:
+                    word = speechsdk.PronunciationAssessmentWordResult({
+                        'Word': word_text,
+                        'PronunciationAssessment': {
+                            'ErrorType': 'Omission',
+                        }
+                    })
+                    final_words.append(word)
+            else:
+                final_words += recognized_words[j1:j2]
+    else:
+        final_words = recognized_words
+
+    for idx, word in enumerate(final_words):
+        print('    {}: word: {}\taccuracy score: {}\terror type: {};'.format(
+            idx + 1, word.word, word.accuracy_score, word.error_type
+        ))

@@ -156,7 +156,10 @@
     // The full list of supported format can be found here:
     // https://docs.microsoft.com/azure/cognitive-services/speech-service/rest-text-to-speech#audio-outputs
     [speechConfig setSpeechSynthesisOutputFormat:SPXSpeechSynthesisOutputFormat_Riff16Khz16BitMonoPcm];
-    
+    // If you are using Custom Voice (https://aka.ms/customvoice),
+    // uncomment the following line to set the endpoint id of your Custom Voice model.
+    // speechConfig.EndpointId = @"YourEndpointId";
+
     [self updateStatusText:(@"Synthesizing...")];
     
     SPXSpeechSynthesizer *synthesizer = [[SPXSpeechSynthesizer alloc] init:speechConfig];

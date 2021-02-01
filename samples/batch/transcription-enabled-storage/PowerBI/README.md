@@ -24,7 +24,7 @@ There are template reports provided for two use cases that help to realize value
 
 ## Prerequisites
 
-* An existing [Azure Account](https://azure.microsoft.com/en-us/free/)
+* An existing [Azure Account](https://azure.microsoft.com/free/)
 * An existing [Speech Services Subscription](https://ms.portal.azure.com/#create/Microsoft.CognitiveServicesSpeechServices)
 * An existing [Text Analytics Subscription](https://ms.portal.azure.com/#create/Microsoft.CognitiveServicesTextAnalytics) (required for SentimentInsights.pbit only)
 * Successfully deployed [Transcription Enabled Storage Solution Accelerator](https://github.com/Azure/SpeechAccelerators/pull/TranscriptionEnabledStorage/Setup/guide.md)

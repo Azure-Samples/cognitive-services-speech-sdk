@@ -15,7 +15,7 @@ This sample demonstrates how to recognize speech with C# under .NET Core 2.0 (Wi
     * The **.NET Core cross-platform development** workload in Visual Studio.
       You can enable it in **Tools** \> **Get Tools and Features**.
   * On Windows, macOS, or Linux:
-    * [.NET Core 2.0](https://www.microsoft.com/net/download/dotnet-core/2.0)
+    * [.NET Core 2.1](https://www.microsoft.com/net/download/dotnet-core/2.1)
     * On Windows you also need the [Microsoft Visual C++ Redistributable for Visual Studio 2017](https://support.microsoft.com/help/2977003/the-latest-supported-visual-c-downloads) for your platform.
 * On Ubuntu or Debian, run the following commands for the installation of required packages:
 
@@ -65,7 +65,7 @@ To debug the app and then run it, press F5 or use **Debug** \> **Start Debugging
 Run the following command from the directory that contains this sample:
 
 ```bash
-dotnet helloworld/bin/Debug/netcoreapp2.0/helloworld.dll
+dotnet helloworld/bin/Debug/netcoreapp2.1/helloworld.dll
 ```
 
 ## References
