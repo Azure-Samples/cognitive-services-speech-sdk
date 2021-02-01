@@ -148,7 +148,8 @@ are listed below.
 
 ![resources](./images/image013.png)
 
-If a Consumption Plan (Y1) was selected for the Azure Functions, make sure that the functions are synced with the other resources (see [this](https://docs.microsoft.com/azure/azure-functions/functions-deployment-technologies#trigger-syncing) for further details).
+If a Consumption Plan (Y1) was selected for the Azure Functions, make sure that the functions are synced with the other resources (see [this](https://docs.microsoft.com/azure/azure-functions/functions-deployment-technologies#trigger-syncing) for further details).  By default, an elastic premium plan (EP1) is selected.
+
 
 To do so, click on your StartTranscription function in the portal and wait until your function shows up:
 

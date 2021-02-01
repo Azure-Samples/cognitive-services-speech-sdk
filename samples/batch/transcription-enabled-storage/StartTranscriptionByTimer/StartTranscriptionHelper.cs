@@ -339,6 +339,7 @@ namespace StartTranscriptionByTimer
                     fileName,
                     StartTranscriptionEnvironmentVariables.ErrorFilesOutputContainer,
                     fileName,
+                    false,
                     Logger).ConfigureAwait(false);
             }
             catch (StorageException e)

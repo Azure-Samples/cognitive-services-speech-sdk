@@ -161,6 +161,7 @@ namespace FetchTranscriptionFunction
                         fileName,
                         FetchTranscriptionEnvironmentVariables.ErrorFilesOutputContainer,
                         fileName,
+                        false,
                         log).ConfigureAwait(false);
                 }
             }
@@ -176,6 +177,8 @@ namespace FetchTranscriptionFunction
             var jsonContainer = FetchTranscriptionEnvironmentVariables.JsonResultOutputContainer;
             var textAnalyticsKey = FetchTranscriptionEnvironmentVariables.TextAnalyticsKey;
             var textAnalyticsRegion = FetchTranscriptionEnvironmentVariables.TextAnalyticsRegion;
+
+            var consolidatedContainer = FetchTranscriptionEnvironmentVariables.ConsolidatedFilesOutputContainer;
 
             var transcriptionFiles = await BatchClient.GetTranscriptionFilesAsync(transcriptionLocation, subscriptionKey, log).ConfigureAwait(false);
             log.LogInformation($"Received transcription files.");
@@ -193,6 +196,7 @@ namespace FetchTranscriptionFunction
             foreach (var resultFile in resultFiles)
             {
                 log.LogInformation($"Getting result for file {resultFile.Name}");
+
                 var transcriptionResult = await BatchClient.GetSpeechTranscriptFromSasAsync(resultFile.Links.ContentUrl, log).ConfigureAwait(false);
 
                 if (string.IsNullOrEmpty(transcriptionResult.Source))
@@ -240,7 +244,18 @@ namespace FetchTranscriptionFunction
                     });
 
                 var jsonFileName = $"{fileName}.json";
+                var archiveFileLocation = System.IO.Path.GetFileNameWithoutExtension(fileName);
+
                 await StorageConnectorInstance.WriteTextFileToBlobAsync(editedTranscriptionResultJson, jsonContainer, jsonFileName, log).ConfigureAwait(false);
+
+                if (FetchTranscriptionEnvironmentVariables.CreateConsolidatedOutputFiles)
+                {
+                    var audioArchiveFileName = $"{archiveFileLocation}/{fileName}";
+                    var jsonArchiveFileName = $"{archiveFileLocation}/{jsonFileName}";
+
+                    await StorageConnectorInstance.MoveFileAsync(FetchTranscriptionEnvironmentVariables.AudioInputContainer, fileName, consolidatedContainer, audioArchiveFileName, true, log).ConfigureAwait(false);
+                    await StorageConnectorInstance.WriteTextFileToBlobAsync(editedTranscriptionResultJson, consolidatedContainer, jsonArchiveFileName, log).ConfigureAwait(false);
+                }
 
                 if (FetchTranscriptionEnvironmentVariables.CreateHtmlResultFile)
                 {
@@ -248,6 +263,12 @@ namespace FetchTranscriptionFunction
                     var htmlFileName = $"{fileName}.html";
                     var displayResults = TranscriptionToHtml.ToHtml(transcriptionResult, jobName);
                     await StorageConnectorInstance.WriteTextFileToBlobAsync(displayResults, htmlContainer, htmlFileName, log).ConfigureAwait(false);
+
+                    if (FetchTranscriptionEnvironmentVariables.CreateConsolidatedOutputFiles)
+                    {
+                        var htmlArchiveFileName = $"{archiveFileLocation}/{htmlFileName}";
+                        await StorageConnectorInstance.WriteTextFileToBlobAsync(displayResults, consolidatedContainer, htmlArchiveFileName, log).ConfigureAwait(false);
+                    }
                 }
 
                 if (FetchTranscriptionEnvironmentVariables.UseSqlDatabase)
@@ -269,6 +290,11 @@ namespace FetchTranscriptionFunction
                         string.IsNullOrEmpty(fileName) ? jobName : fileName,
                         (float)approximatedCost,
                         transcriptionResult).ConfigureAwait(false);
+                }
+
+                if (FetchTranscriptionEnvironmentVariables.CreateAudioProcessedContainer)
+                {
+                    await StorageConnectorInstance.MoveFileAsync(FetchTranscriptionEnvironmentVariables.AudioInputContainer, fileName, FetchTranscriptionEnvironmentVariables.AudioProcessedContainer, fileName, false, log).ConfigureAwait(false);
                 }
             }
 
@@ -338,6 +364,7 @@ namespace FetchTranscriptionFunction
                     fileName,
                     FetchTranscriptionEnvironmentVariables.ErrorFilesOutputContainer,
                     fileName,
+                    false,
                     log).ConfigureAwait(false);
             }
         }
@@ -378,6 +405,7 @@ namespace FetchTranscriptionFunction
                         fileName,
                         FetchTranscriptionEnvironmentVariables.ErrorFilesOutputContainer,
                         fileName,
+                        false,
                         log).ConfigureAwait(false);
                 }
                 catch (StorageException e)
