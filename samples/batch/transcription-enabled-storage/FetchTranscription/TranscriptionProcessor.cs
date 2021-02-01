@@ -67,14 +67,14 @@ namespace FetchTranscriptionFunction
             }
             catch (WebException e)
             {
-                if (e.Response != null && BatchClient.IsThrottledOrTimeoutStatusCode(((HttpWebResponse)e.Response).StatusCode))
+                if (e.Response != null && (BatchClient.IsThrottledOrTimeoutStatusCode(((HttpWebResponse)e.Response).StatusCode) || ((HttpWebResponse)e.Response).StatusCode == HttpStatusCode.InternalServerError))
                 {
                     log.LogInformation("Timeout or throttled, retrying message.");
                     await ServiceBusUtilities.SendServiceBusMessageAsync(FetchQueueClientInstance, serviceBusMessage.CreateMessageString(), log, messageDelayTime).ConfigureAwait(false);
                 }
                 else
                 {
-                    var errorMessage = $"Fetch Transcription in job with name {jobName} failed with WebException {e} and message {e.Message}.";
+                    var errorMessage = $"Fetch Transcription in job with name {jobName} at {transcriptionLocation} failed with WebException {e} and message {e.Message}.";
                     log.LogError($"{errorMessage}");
                     await RetryOrFailJobAsync(serviceBusMessage, errorMessage, jobName, transcriptionLocation, subscriptionKey, log).ConfigureAwait(false);
                 }
@@ -86,7 +86,7 @@ namespace FetchTranscriptionFunction
             }
             catch (Exception e)
             {
-                var errorMessage = $"Fetch Transcription in job with name {jobName} failed with Exception {e} and message {e.Message}.";
+                var errorMessage = $"Fetch Transcription in job with name {jobName} at {transcriptionLocation}  failed with Exception {e} and message {e.Message}.";
                 log.LogError($"{errorMessage}");
                 await RetryOrFailJobAsync(serviceBusMessage, errorMessage, jobName, transcriptionLocation, subscriptionKey, log).ConfigureAwait(false);
             }
