@@ -68,7 +68,7 @@
     <h1 style="font-weight:500;">Speech Speech SDK not found
       (microsoft.cognitiveservices.speech.sdk.bundle.js missing).</h1>
   </div>
-  
+
   <div id="content" style="display:none">
     <table>
       <tr>
@@ -143,6 +143,7 @@
           <button id="startSynthesisAsyncButton">Start synthesis</button>
           <button id="pauseButton">Pause</button>
           <button id="resumeButton">Resume</button>
+          <button id="downloadButton">Download</button>
         </td>
       </tr>
       <tr>
@@ -204,7 +205,7 @@
     // status fields and start button in UI
     var resultsDiv, eventsDiv;
     var highlightDiv;
-    var startSynthesisAsyncButton, pauseButton, resumeButton;
+    var startSynthesisAsyncButton, pauseButton, resumeButton, downloadButton;
     var updateVoiceListButton;
 
     // subscription key and region for speech services.
@@ -222,6 +223,7 @@
       updateVoiceListButton = document.getElementById("updateVoiceListButton");
       pauseButton = document.getElementById("pauseButton");
       resumeButton = document.getElementById("resumeButton");
+      downloadButton = document.getElementById("downloadButton");
       subscriptionKey = document.getElementById("subscriptionKey");
       regionOptions = document.getElementById("regionOptions");
       resultsDiv = document.getElementById("resultsDiv");
@@ -306,6 +308,7 @@
 
       startSynthesisAsyncButton.addEventListener("click", function () {
         startSynthesisAsyncButton.disabled = true;
+        downloadButton.disabled = true;
         resultsDiv.innerHTML = "";
         eventsDiv.innerHTML = "";
         wordBoundaryList = [];
@@ -330,6 +333,7 @@
           window.console.log("playback finished");
           eventsDiv.innerHTML += "playback finished" + "\r\n";
           startSynthesisAsyncButton.disabled = false;
+          downloadButton.disabled = false;
           pauseButton.disabled = true;
           resumeButton.disabled = true;
           wordBoundaryList = [];
@@ -373,6 +377,7 @@
           window.console.log(e);
           eventsDiv.innerHTML += str + "\r\n";
           startSynthesisAsyncButton.disabled = false;
+          downloadButton.disabled = false;
           pauseButton.disabled = true;
           resumeButton.disabled = true;
         };
@@ -397,6 +402,7 @@
         };
         const err_cb = function (err) {
           startSynthesisAsyncButton.disabled = false;
+          downloadButton.disabled = false;
           phraseDiv.innerHTML += err;
           window.console.log(err);
           synthesizer.close();
@@ -413,9 +419,108 @@
         }
       });
 
+      downloadButton.addEventListener("click", function () {
+        startSynthesisAsyncButton.disabled = true;
+        downloadButton.disabled = true;
+        resultsDiv.innerHTML = "";
+        eventsDiv.innerHTML = "";
+        synthesisText = document.getElementById("synthesisText");
+
+        var speechConfig,
+            audioConfig,
+            outputStream,
+            pushStreamCallback,
+            wavFragments = {},
+            currentFragment = 0;
+
+        // if we got an authorization token, use the token. Otherwise use the provided subscription key
+        if (authorizationToken) {
+          speechConfig = SpeechSDK.SpeechConfig.fromAuthorizationToken(authorizationToken, regionOptions.value);
+        } else {
+          if (subscriptionKey.value === "" || subscriptionKey.value === "subscription") {
+            alert("Please enter your Microsoft Cognitive Services Speech subscription key!");
+            return;
+          }
+          speechConfig = SpeechSDK.SpeechConfig.fromSubscription(subscriptionKey.value, regionOptions.value);
+        }
+        
+        speechConfig.speechSynthesisVoiceName = voiceOptions.value;
+
+        pushStreamCallback = {
+            write: function (dataBuffer) {
+                wavFragments[currentFragment] = dataBuffer;
+                currentFragment += 1;
+            },
+            close: function () {
+                var byteCount = 0,
+                    sentAudio,
+                    a,
+                    url;
+
+                for (i = 0; i < currentFragment; i += 1) {
+                    byteCount += wavFragments[i].byteLength;
+                }
+
+                // Output array.
+                sentAudio = new window.Uint8Array(byteCount);
+
+                byteCount = 0;
+                for (i = 0; i < currentFragment; i += 1) {
+                    sentAudio.set(new window.Uint8Array(wavFragments[i]), byteCount);
+                    byteCount += wavFragments[i].byteLength;
+                }
+                a = document.createElement('a');
+                url = window.URL.createObjectURL(new Blob([sentAudio]));
+                a.href = url;
+                a.download = 'synth.mp3';
+                document.body.appendChild(a);
+                a.click();
+                setTimeout(function () {
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                }, 0);
+            }
+        };
+
+        outputStream = SpeechSDK.PushAudioOutputStream.create(pushStreamCallback);
+
+        audioConfig = SpeechSDK.AudioConfig.fromStreamOutput(outputStream);
+
+        synthesizer = new SpeechSDK.SpeechSynthesizer(speechConfig, audioConfig);
+
+        synthesizer.SynthesisCanceled = function (s, e) {
+          const cancellationDetails = SpeechSDK.CancellationDetails.fromResult(e.result);
+          let str = "(cancel) Reason: " + SpeechSDK.CancellationReason[cancellationDetails.reason];
+          if (cancellationDetails.reason === SpeechSDK.CancellationReason.Error) {
+            str += ": " + e.result.errorDetails;
+          }
+          window.console.log(e);
+          eventsDiv.innerHTML += str + "\r\n";
+          resultsDiv.innerHTML = str;
+          startSynthesisAsyncButton.disabled = false;
+          downloadButton.disabled = false;
+          pauseButton.disabled = true;
+          resumeButton.disabled = true;
+        };
+
+        synthesizer.synthesisCompleted = function () {
+            resultsDiv.innerHTML = "synthesis finished";
+            synthesizer.close();
+            startSynthesisAsyncButton.disabled = false;
+            downloadButton.disabled = false;
+        };
+
+        if (isSsml.checked) {
+          synthesizer.speakSsmlAsync(synthesisText.value);
+        } else {
+          synthesizer.speakTextAsync(synthesisText.value);
+        }
+      });
+
       Initialize(function (speechSdk) {
         SpeechSDK = speechSdk;
         startSynthesisAsyncButton.disabled = false;
+        downloadButton.disabled = false;
         pauseButton.disabled = true;
         resumeButton.disabled = true;
 

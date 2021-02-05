@@ -113,6 +113,38 @@ def speech_synthesis_with_voice():
                 print("Error details: {}".format(cancellation_details.error_details))
 
 
+def speech_synthesis_using_custom_voice():
+    """performs speech synthesis to the default speaker using custom voice.
+       see https://aka.ms/customvoice
+    """
+    # Creates an instance of a speech config with specified subscription key and service region.
+    speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
+    # Replace with the endpoint id of your Custom Voice model.
+    speech_config.endpoint_id = "YourEndpointId"
+    # Replace with the voice name of your Custom Voice model.
+    speech_config.speech_synthesis_voice_name = "YourVoiceName"
+    # Creates a speech synthesizer for Custom Voice,
+    # using the default speaker as audio output.
+    speech_synthesizer = speechsdk.SpeechSynthesizer(speech_config=speech_config)
+
+    # Receives a text from console input and synthesizes it to speaker.
+    while True:
+        print("Enter some text that you want to speak, Ctrl-Z to exit")
+        try:
+            text = input()
+        except EOFError:
+            break
+        result = speech_synthesizer.speak_text_async(text).get()
+        # Check result
+        if result.reason == speechsdk.ResultReason.SynthesizingAudioCompleted:
+            print("Speech synthesized to speaker for text [{}]".format(text))
+        elif result.reason == speechsdk.ResultReason.Canceled:
+            cancellation_details = result.cancellation_details
+            print("Speech synthesis canceled: {}".format(cancellation_details.reason))
+            if cancellation_details.reason == speechsdk.CancellationReason.Error:
+                print("Error details: {}".format(cancellation_details.error_details))
+
+
 def speech_synthesis_to_wave_file():
     """performs speech synthesis to a wave file"""
     # Creates an instance of a speech config with specified subscription key and service region.
