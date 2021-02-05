@@ -28,7 +28,7 @@ Outline the file contents of the repository. It helps users navigate the codebas
 
 ## Prerequisites
 
-* An existing [Azure Account](https://azure.microsoft.com/en-us/free/)
+* An existing [Azure Account](https://azure.microsoft.com/free/)
 * An existing [Speech Services Subscription](https://ms.portal.azure.com/#create/Microsoft.CognitiveServicesSpeechServices)
 
 ## Getting started
