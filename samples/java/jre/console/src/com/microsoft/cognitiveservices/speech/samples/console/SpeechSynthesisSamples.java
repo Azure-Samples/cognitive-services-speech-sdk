@@ -165,6 +165,56 @@ public class SpeechSynthesisSamples {
         synthesizer.close();
     }
 
+    // Speech synthesis using Custom Voice (https://aka.ms/customvoice).
+    public static void synthesisUsingCustomVoiceAsync() throws InterruptedException, ExecutionException
+    {
+        // Creates an instance of a speech config with specified
+        // subscription key and service region. Replace with your own subscription key
+        // and service region (e.g., "westus").
+        SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+        // Replace with the endpoint id of your Custom Voice model.
+        config.setEndpointId("YourEndpointId");
+        // Replace with the voice name of your Custom Voice model.
+        config.setSpeechSynthesisVoiceName("YourVoiceName");
+
+        // Creates a speech synthesizer using the default speaker as audio output.
+        SpeechSynthesizer synthesizer = new SpeechSynthesizer(config);
+        {
+            while (true)
+            {
+                // Receives a text from console input and synthesize it to speaker.
+                System.out.println("Enter some text that you want to speak, or enter empty text to exit.");
+                System.out.print("> ");
+                String text = new Scanner(System.in).nextLine();
+                if (text.isEmpty())
+                {
+                    break;
+                }
+
+                SpeechSynthesisResult result = synthesizer.SpeakTextAsync(text).get();
+
+                // Checks result.
+                if (result.getReason() == ResultReason.SynthesizingAudioCompleted) {
+                    System.out.println("Speech synthesized to speaker for text [" + text + "]");
+                }
+                else if (result.getReason() == ResultReason.Canceled) {
+                    SpeechSynthesisCancellationDetails cancellation = SpeechSynthesisCancellationDetails.fromResult(result);
+                    System.out.println("CANCELED: Reason=" + cancellation.getReason());
+
+                    if (cancellation.getReason() == CancellationReason.Error) {
+                        System.out.println("CANCELED: ErrorCode=" + cancellation.getErrorCode());
+                        System.out.println("CANCELED: ErrorDetails=" + cancellation.getErrorDetails());
+                        System.out.println("CANCELED: Did you update the subscription info?");
+                    }
+                }
+
+                result.close();
+            }
+        }
+
+        synthesizer.close();
+    }
+
     // Speech synthesis to wave file.
     public static void synthesisToWaveFileAsync() throws InterruptedException, ExecutionException
     {

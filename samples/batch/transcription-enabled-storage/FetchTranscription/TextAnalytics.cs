@@ -24,7 +24,7 @@ namespace FetchTranscriptionFunction
 
     public class TextAnalytics
     {
-        // Request limits for v3 API: https://docs.microsoft.com/en-us/azure/cognitive-services/text-analytics/concepts/data-limits
+        // Request limits for v3 API: https://docs.microsoft.com/azure/cognitive-services/text-analytics/concepts/data-limits
         private const int SentimentRequestLimit = 10;
 
         private const int TextAnalyticsRequestCharacterLimit = 5120;

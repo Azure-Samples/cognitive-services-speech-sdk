@@ -7,7 +7,7 @@ transcription of audio files.
 
 ## Prerequisites
 
-An [Azure Account](https://azure.microsoft.com/en-us/free/) as well as an [Azure Speech Services key](https://ms.portal.azure.com/#create/Microsoft.CognitiveServicesSpeechServices) is needed to run the Accelerator.
+An [Azure Account](https://azure.microsoft.com/free/) as well as an [Azure Speech Services key](https://ms.portal.azure.com/#create/Microsoft.CognitiveServicesSpeechServices) is needed to run the Accelerator.
 
 > [!IMPORTANT]
 > You need to create a Speech Resource with a paid (S0) key. The free key account will not work. Optionally for analytics you can create a Text Analytics resource too.
@@ -21,7 +21,7 @@ If the above link does not work try the following steps:
 5. You will find the subscription key under **Keys**
 6. You will also need the region, so make a note of that too.
 
-To test your account we suggest you use [Microsoft Azure Storage Explorer](https://azure.microsoft.com/en-us/features/storage-explorer/).
+To test your account we suggest you use [Microsoft Azure Storage Explorer](https://azure.microsoft.com/features/storage-explorer/).
 
 ### The Project
 
@@ -148,7 +148,7 @@ are listed below.
 
 ![resources](./images/image013.png)
 
-If a Consumption Plan (Y1) was selected for the Azure Functions, make sure that the functions are synced with the other resources (see [this](https://docs.microsoft.com/en-us/azure/azure-functions/functions-deployment-technologies#trigger-syncing) for further details).
+If a Consumption Plan (Y1) was selected for the Azure Functions, make sure that the functions are synced with the other resources (see [this](https://docs.microsoft.com/azure/azure-functions/functions-deployment-technologies#trigger-syncing) for further details).
 
 To do so, click on your StartTranscription function in the portal and wait until your function shows up:
 
@@ -166,7 +166,7 @@ Do the same for the FetchTranscription function:
 Upload audio files to the newly created audio-input container (results are added to json-result-output and test-results-output containers).
 Once they are done you can test your account.
 
-Use [Microsoft Azure Storage Explorer](https://azure.microsoft.com/en-us/features/storage-explorer/) to test uploading files to your new account. The process of transcription is asynchronous. Transcription usually takes half the time of the audio track to be
+Use [Microsoft Azure Storage Explorer](https://azure.microsoft.com/features/storage-explorer/) to test uploading files to your new account. The process of transcription is asynchronous. Transcription usually takes half the time of the audio track to be
 obtained.
 
 The structure of your newly created storage account will look like the picture below.
