@@ -8,6 +8,7 @@ This sample demonstrates how to transcribe a conversation from a file using the 
 * A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
 * A PC or Mac.
 * User voice samples [See User voice samples for Conversation Transcription](https://docs.microsoft.com/azure/cognitive-services/speech-service/conversation-transcription#expected-inputs)
+* An 8-channel wav file (while in preview, the feature only accepts 8-channel wav file input)
 * A text editor.
 * Optionally, a web server that supports hosting PHP scripts.
 
