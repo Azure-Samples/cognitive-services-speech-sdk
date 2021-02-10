@@ -194,14 +194,17 @@ By default, the ARM template uses the newest version of the accelerator which ca
 
 The created resources their pricing and correspoding plans (where applicable) are:
 
-* [Storage] (https://azure.microsoft.com/en-gb/services/storage/), [Pricing](https://azure.microsoft.com/en-gb/pricing/details/storage/), Simple Storage
-* [Service Bus](https://azure.microsoft.com/en-us/services/service-bus), [Pricing](https://azure.microsoft.com/en-us/pricing/details/service-bus/), Standard 
-* [Azure Functions](https://azure.microsoft.com/en-us/services/functions/), [Pricing](https://azure.microsoft.com/en-us/pricing/details/functions/), Premium
-* [Key Vault](https://azure.microsoft.com/en-us/services/key-vault/), [Pricing](https://azure.microsoft.com/en-us/pricing/details/key-vault/)
+* [Storage Pricing](https://azure.microsoft.com/en-gb/pricing/details/storage/), Simple Storage
+
+* [Service Bus Pricing](https://azure.microsoft.com/en-us/pricing/details/service-bus/), Standard 
+
+* [Azure Functions Pricing](https://azure.microsoft.com/en-us/pricing/details/functions/), Premium
+
+* [Key Vault Pricing](https://azure.microsoft.com/en-us/pricing/details/key-vault/)
 
 Optionally
 
-* [SQL Database](https://azure.microsoft.com/en-us/services/sql-database/), [Pricing](https://azure.microsoft.com/en-us/pricing/details/sql-database/single/)
+* [Sql DB Pricing](https://azure.microsoft.com/en-us/pricing/details/sql-database/single/)
 * [PowerBI](https://powerbi.microsoft.com/en-us/)
 
 The following example is indicative of the cost distributions to inform and set the cost expectations.
@@ -209,11 +212,15 @@ The following example is indicative of the cost distributions to inform and set 
 Assume a scenario where we are trying to transcribe 1000 mp3 files of an average length of 10mins and size of 10MB. Each of them individually landing on the storage container over the course of a business day.
 
 Speech Transcription Costs are: 10k mins = $166.60
-Service Bus Costs are: 1k events landing in 'CreateTranscriptionQueue' and another 1k in 'FetchTranscriptionQueue' = $0.324/daily (standing charge) for up to 13m messages/month 
-Storage Costs are: Write operations are $0.0175 (per 10,000), and Read operations $0.0014 (again per 10k read operations) = ($0.0175 + $0.0014)/10 (for 1000 files)
-Azure Function Costs are: The first 400,000 GB/s of execution and 1,000,000 executions are free = $0.00
-Key Vault Costs are: 0.03/10,000 transactions (For the above scenario 1 transations would be required per file) = $0.003
 
-Hopefully the above scneario gives you an idea of the costs distributions. Of course will vary depending on scenario and usage pattern.
+[Service Bus](https://azure.microsoft.com/en-us/services/service-bus) Costs are: 1k events landing in 'CreateTranscriptionQueue' and another 1k in 'FetchTranscriptionQueue' = $0.324/daily (standing charge) for up to 13m messages/month 
+
+[Storage] (https://azure.microsoft.com/en-gb/services/storage/) Costs are: Write operations are $0.0175 (per 10,000), and Read operations $0.0014 (again per 10k read operations) = ($0.0175 + $0.0014)/10 (for 1000 files)
+
+[Azure Functions](https://azure.microsoft.com/en-us/services/functions/) Costs are: The first 400,000 GB/s of execution and 1,000,000 executions are free = $0.00
+
+[Key Vault](https://azure.microsoft.com/en-us/services/key-vault/) Costs are: 0.03/10,000 transactions (For the above scenario 1 transations would be required per file) = $0.003
+
+We trust that the above scneario gives you an idea of the costs distributions. Of course will vary depending on scenario and usage pattern.
 
 Please use our [Azure Calculator](https://azure.microsoft.com/en-us/pricing/calculator/) to better understand pricing
