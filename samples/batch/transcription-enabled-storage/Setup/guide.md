@@ -229,7 +229,7 @@ Assume a scenario where we are trying to transcribe 1000 mp3 files of an average
 
 [Key Vault](https://azure.microsoft.com/en-us/services/key-vault/) Costs are: 0.03/10,000 transactions (For the above scenario 1 transations would be required per file) = **$0.003**
 
-The total for the above scenario would be **$166.60**, with the 
+The total for the above scenario would be **$166.60**, with the majority of the cost being on transcription. The message here is that all this additional convinience comes at a franction of an addition to your original transcription costs.
 
 We trust that the above scenario gives you an idea of the costs distributions. Of course will vary depending on scenario and usage pattern.
 
