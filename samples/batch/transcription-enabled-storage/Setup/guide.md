@@ -1,11 +1,11 @@
 # Getting started with the Batch Ingestion Layer
 
-This is a smart client utilising Azure resources such as a Service Bus and Azure Functions to orchesrtate the production of transcriptions from audio files landing in storage containers. 
+This is a smart client utilising Azure resources such as Service Bus and Azure Functions to orchesrtate transcription requests to Azure Speech Services from audio files landing in storage containers. 
 Before we delve deeper into the set up instructions let us have a look at the architecture of the solution this ARM template builds. 
 
 ![Architecture](./images/Architecture.png)
 
-The diagram is simple and hopefuly self explanatory. As soon as files in a container, the Grid Event that indicates the comlpete upload of a file lands in a Service bus topic. Azure functions (time triggered by default)  pick up those events and act, namely creating Tx requests using the Azure Speech Services batch pipeline. When the Tx request is successfully carried out an event is placed in another queue in the same service bus resource. A different Azure function trggered by the coomlpetion event starts monitoting transcritpion completion status and copies the actual transcripts in the containers from which the audio file was obtained. This is it. The rest of the feature are applied on demand. Users can choose to apply analytics on the transcript, produce reports etc, all of which are the result of additional resources being deployed.
+The diagram is simple and hopefuly self explanatory. As soon as files in a container, the Grid Event that indicates the comlpete upload of a file lands in a Service bus topic. Azure Functions (time triggered by default)  pick up those events and act, namely creating Tx requests using the Azure Speech Services batch pipeline. When the Tx request is successfully carried out an event is placed in another queue in the same service bus resource. A different Azure Function trggered by the completion event starts monitoting transcritpion completion status and copies the actual transcripts in the containers from which the audio file was obtained. This is it. The rest of the feature are applied on demand. Users can choose to apply analytics on the transcript, produce reports etc, all of which are the result of additional resources being deployed through the ARM template. The solution will can start transcribing audio files without the need to touch any code. If however you want to customize further this is possible too. The code is available in this repo.
 
 ## Setup Guide
 
@@ -188,7 +188,15 @@ There are several containers to distinguish between the various outputs. We sugg
 
 ## Customizing the Accelerator
 
-By default, the ARM template uses the newest version of the accelerator which can be found in this repository. If a custom version should be used, the paths to the binaries inside the deployment template must be edited to point to a custom published version (by default, our binaries are: https://mspublicstorage.blob.core.windows.net/transcription-enabled-storage/FetchTranscription.zip, https://mspublicstorage.blob.core.windows.net/transcription-enabled-storage/StartTranscriptionByTimer.zip and https://mspublicstorage.blob.core.windows.net/transcription-enabled-storage/StartTranscriptionByServiceBus.zip). To publish a new version, you can use Visual Studio, right click on the respective project, click publish and follow the instructions.
+By default, the ARM template uses the newest version of the accelerator which can be found in this repository. If a custom version should be used, the paths to the binaries inside the deployment template must be edited to point to a custom published version (by default, our binaries are: 
+
+* https://mspublicstorage.blob.core.windows.net/transcription-enabled-storage/FetchTranscription.zip, 
+
+* https://mspublicstorage.blob.core.windows.net/transcription-enabled-storage/StartTranscriptionByTimer.zip and 
+
+* https://mspublicstorage.blob.core.windows.net/transcription-enabled-storage/StartTranscriptionByServiceBus.zip). 
+
+To publish a new version, you can use Visual Studio, right click on the respective project, click publish and follow the instructions.
 
 ## Costs 
 
