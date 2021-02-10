@@ -3,7 +3,7 @@
 This is a smart client utilising Azure resources such as a Service Bus and Azure Functions to orchesrtate the production of transcriptions from audio files landing in storage containers. 
 Before we delve deeper into the set up instructions let us have a look at the architecture of the solution this ARM template builds. 
 
-![Architecture](./images/architecture.png)
+![Architecture](./images/Architecture.png)
 
 The diagram is simple and hopefuly self explanatory. As soon as files in a container, the Grid Event that indicates the comlpete upload of a file lands in a Service bus topic. Azure functions (time triggered by default)  pick up those events and act, namely creating Tx requests using the Azure Speech Services batch pipeline. When the Tx request is successfully carried out an event is placed in another queue in the same service bus resource. A different Azure function trggered by the coomlpetion event starts monitoting transcritpion completion status and copies the actual transcripts in the containers from which the audio file was obtained. This is it. The rest of the feature are applied on demand. Users can choose to apply analytics on the transcript, produce reports etc, all of which are the result of additional resources being deployed.
 
