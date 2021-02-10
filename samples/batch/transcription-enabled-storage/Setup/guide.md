@@ -110,8 +110,7 @@ transcribe your audio.]
 
 * Enter your Azure Speech subscription key and Locale information
 
-> [!NOTE]
-> If you plan to transcribe large volume of audio (say millions of files) we propose that you rotate the traffic between regions. In the Azure Speech Subscription Key text box you can put as many keys separated by column ';'. 
+> **_NOTE:_** If you plan to transcribe large volume of audio (say millions of files) we propose that you rotate the traffic between regions. In the Azure Speech Subscription Key text box you can put as many keys separated by column ';'. 
 > In is important that the corresponding regions (Again separated by column ';') appear in the Locale information text box.
 > For example if you have 3 keys (abc, xyz, 123) for east us, west us and central us respectively then lay them out as follows 'abc;xyz;123' followed by 'east us;west us;central us'
 
