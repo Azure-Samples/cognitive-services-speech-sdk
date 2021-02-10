@@ -16,7 +16,7 @@ transcription of audio files.
 
 An [Azure Account](https://azure.microsoft.com/free/) as well as an [Azure Speech Services key](https://ms.portal.azure.com/#create/Microsoft.CognitiveServicesSpeechServices) is needed to run the Accelerator.
 
-**_NOTE:_** You need to create a Speech Resource with a paid (S0) key. The free key account will not work. Optionally for analytics you can create a Text Analytics resource too.
+> **_NOTE:_** You need to create a Speech Resource with a paid (S0) key. The free key account will not work. Optionally for analytics you can create a Text Analytics resource too.
 
 If the above link does not work try the following steps:
 
@@ -70,8 +70,7 @@ important that all the information is correct. Let us look at the form and go th
 
 ![form template](./images/image011.png)
 
-> [!NOTE]
-> Please use short descriptive names in the form for your resource group. Long resource group names may result in deployment error
+> **_NOTE:_** Please use short descriptive names in the form for your resource group. Long resource group names may result in deployment error
 
 
 * First pick the Azure Subscription Id within which you will create the resources.
@@ -150,9 +149,6 @@ If you want to further analytics we could map the transcript json we produce to 
 
 You can feed that data to your custom PowerBI script or take the scripts included in this repository. Follow the [PowerBI guide](../Power BI/guide.md) for setting it up.
 
-> [!IMPORTANT]
-> While the rest of the option here are paid as you go, the SQL DB incurs monthly charges
-
 Press **Create** to trigger the resource creating process. It typically takes 1-2 mins. The set of resources
 are listed below.
 
@@ -168,8 +164,7 @@ Do the same for the FetchTranscription function:
 
 ![resources](./images/image017.png)
 
-> [!IMPORTANT]
-> Until you restart both Azure functions you may see errors. Ignore those.
+> **_Important:_** Until you restart both Azure functions you may see errors.
 
 ## Running the Accelerator
 
