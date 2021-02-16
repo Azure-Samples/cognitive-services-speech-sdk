@@ -11,3 +11,4 @@ Available samples:
 | C# | [csharp](csharp) | C# calling batch transcription REST API through System.Net.Http |
 | C# | [Transcription Enabled Storage](transcription-enabled-storage) | Project to automatically transcribe all audio files which are added to an Azure Storage Container. Setup via ARM template. |
 | Python | [python](python) | Python client calling batch transcription REST API |
+| Node.js | [nodejs](nodejs) | Node.js client calling batch transcription REST API |
