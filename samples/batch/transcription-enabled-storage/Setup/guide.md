@@ -1,4 +1,11 @@
-# Getting started with the Accelerator
+# Getting started with the Batch Ingestion Layer
+
+This is a smart client utilising Azure resources such as Service Bus and Azure Functions to orchesrtate transcription requests to Azure Speech Services from audio files landing in storage containers. 
+Before we delve deeper into the set up instructions let us have a look at the architecture of the solution this ARM template builds. 
+
+![Architecture](./images/Architecture.png)
+
+The diagram is simple and hopefuly self explanatory. As soon as files in a container, the Grid Event that indicates the comlpete upload of a file lands in a Service bus topic. Azure Functions (time triggered by default)  pick up those events and act, namely creating Tx requests using the Azure Speech Services batch pipeline. When the Tx request is successfully carried out an event is placed in another queue in the same service bus resource. A different Azure Function trggered by the completion event starts monitoting transcritpion completion status and copies the actual transcripts in the containers from which the audio file was obtained. This is it. The rest of the feature are applied on demand. Users can choose to apply analytics on the transcript, produce reports etc, all of which are the result of additional resources being deployed through the ARM template. The solution will can start transcribing audio files without the need to touch any code. If however you want to customize further this is possible too. The code is available in this repo.
 
 ## Setup Guide
 
@@ -9,8 +16,7 @@ transcription of audio files.
 
 An [Azure Account](https://azure.microsoft.com/free/) as well as an [Azure Speech Services key](https://ms.portal.azure.com/#create/Microsoft.CognitiveServicesSpeechServices) is needed to run the Accelerator.
 
-> [!IMPORTANT]
-> You need to create a Speech Resource with a paid (S0) key. The free key account will not work. Optionally for analytics you can create a Text Analytics resource too.
+> **_NOTE:_** You need to create a Speech Resource with a paid (S0) key. The free key account will not work. Optionally for analytics you can create a Text Analytics resource too.
 
 If the above link does not work try the following steps:
 
@@ -64,8 +70,7 @@ important that all the information is correct. Let us look at the form and go th
 
 ![form template](./images/image011.png)
 
-> [!NOTE]
-> Please use short descriptive names in the form for your resource group. Long resource group names may result in deployment error
+> **_NOTE:_** Please use short descriptive names in the form for your resource group. Long resource group names may result in deployment error
 
 
 * First pick the Azure Subscription Id within which you will create the resources.
@@ -105,6 +110,9 @@ transcribe your audio.]
 
 * Enter your Azure Speech subscription key and Locale information
 
+> **_NOTE:_** If you plan to transcribe large volume of audio (say millions of files) we propose that you rotate the traffic between regions. In the Azure Speech Subscription Key text box you can put as many keys separated by column ';'. 
+> In is important that the corresponding regions (Again separated by column ';') appear in the Locale information text box.
+> For example if you have 3 keys (abc, xyz, 123) for east us, west us and central us respectively then lay them out as follows 'abc;xyz;123' followed by 'east us;west us;central us'
 
 The rest of the settings related to the transcription request. You can read more about those in our
 [docs](https://docs.microsoft.com/azure/cognitive-services/speech-service/batch-transcription).
@@ -140,9 +148,6 @@ If you want to further analytics we could map the transcript json we produce to 
 
 You can feed that data to your custom PowerBI script or take the scripts included in this repository. Follow the [PowerBI guide](../Power BI/guide.md) for setting it up.
 
-> [!IMPORTANT]
-> While the rest of the option here are paid as you go, the SQL DB incurs monthly charges
-
 Press **Create** to trigger the resource creating process. It typically takes 1-2 mins. The set of resources
 are listed below.
 
@@ -158,8 +163,7 @@ Do the same for the FetchTranscription function:
 
 ![resources](./images/image017.png)
 
-> [!IMPORTANT]
-> Until you restart both Azure functions you may see errors. Ignore those.
+> **_Important:_** Until you restart both Azure functions you may see errors.
 
 ## Running the Accelerator
 
@@ -177,4 +181,49 @@ There are several containers to distinguish between the various outputs. We sugg
 
 ## Customizing the Accelerator
 
-By default, the ARM template uses the newest version of the accelerator which can be found in this repository. If a custom version should be used, the paths to the binaries inside the deployment template must be edited to point to a custom published version (by default, our binaries are: https://mspublicstorage.blob.core.windows.net/transcription-enabled-storage/FetchTranscription.zip, https://mspublicstorage.blob.core.windows.net/transcription-enabled-storage/StartTranscriptionByTimer.zip and https://mspublicstorage.blob.core.windows.net/transcription-enabled-storage/StartTranscriptionByServiceBus.zip). To publish a new version, you can use Visual Studio, right click on the respective project, click publish and follow the instructions.
+By default, the ARM template uses the newest version of the accelerator which can be found in this repository. If a custom version should be used, the paths to the binaries inside the deployment template must be edited to point to a custom published version (by default, our binaries are: 
+
+* https://mspublicstorage.blob.core.windows.net/transcription-enabled-storage/FetchTranscription.zip, 
+
+* https://mspublicstorage.blob.core.windows.net/transcription-enabled-storage/StartTranscriptionByTimer.zip and 
+
+* https://mspublicstorage.blob.core.windows.net/transcription-enabled-storage/StartTranscriptionByServiceBus.zip). 
+
+To publish a new version, you can use Visual Studio, right click on the respective project, click publish and follow the instructions.
+
+## Costs 
+
+The created resources their pricing and correspoding plans (where applicable) are:
+
+* [Storage Pricing](https://azure.microsoft.com/en-gb/pricing/details/storage/), Simple Storage
+
+* [Service Bus Pricing](https://azure.microsoft.com/en-us/pricing/details/service-bus/), Standard 
+
+* [Azure Functions Pricing](https://azure.microsoft.com/en-us/pricing/details/functions/), Premium
+
+* [Key Vault Pricing](https://azure.microsoft.com/en-us/pricing/details/key-vault/)
+
+Optionally
+
+* [Sql DB Pricing](https://azure.microsoft.com/en-us/pricing/details/sql-database/single/)
+* [PowerBI](https://powerbi.microsoft.com/en-us/)
+
+The following example is indicative of the cost distributions to inform and set the cost expectations.
+
+Assume a scenario where we are trying to transcribe 1000 mp3 files of an average length of 10mins and size of 10MB. Each of them individually landing on the storage container over the course of a business day.
+
+[Speech Transcription](https://azure.microsoft.com/en-us/services/cognitive-services/speech-to-text/) Costs are: 10k mins = **$166.60**
+
+[Service Bus](https://azure.microsoft.com/en-us/services/service-bus) Costs are: 1k events landing in 'CreateTranscriptionQueue' and another 1k in 'FetchTranscriptionQueue' = **$0.324/daily** (standing charge) for up to 13m messages/month 
+
+[Storage](https://azure.microsoft.com/en-gb/services/storage/) Costs are: Write operations are $0.0175 (per 10,000), and Read operations $0.0014 (again per 10k read operations) = ($0.0175 + $0.0014)/10 (for 1000 files) = **$0.00189**
+
+[Azure Functions](https://azure.microsoft.com/en-us/services/functions/) Costs are: The first 400,000 GB/s of execution and 1,000,000 executions are free = $0.00
+
+[Key Vault](https://azure.microsoft.com/en-us/services/key-vault/) Costs are: 0.03/10,000 transactions (For the above scenario 1 transations would be required per file) = **$0.003**
+
+The total for the above scenario would be **$166.60**, with the majority of the cost being on transcription. The message here is that all this additional convinience comes at a franction of an addition to your original transcription costs.
+
+We trust that the above scenario gives you an idea of the costs distributions. Of course will vary depending on scenario and usage pattern.
+
+Please use our [Azure Calculator](https://azure.microsoft.com/en-us/pricing/calculator/) to better understand pricing
