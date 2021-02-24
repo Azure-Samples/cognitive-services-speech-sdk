@@ -697,9 +697,10 @@ def pronunciation_assessment_continuous_from_file():
 
     speech_recognizer.stop_continuous_recognition()
 
-    # For continuous pronunciation assessment mode, the service won't return the words with `Insertion` or `Omission` even miscue is enabled.
+    # For continuous pronunciation assessment mode, the service won't return the words with `Insertion` or `Omission` even if miscue is enabled.
     # We need to compare with the reference text after received all recognized words to get these error words.
     if enable_miscue:
+        # we need to convert the reference text to lower case, and split to words, then remove the punctuations.
         reference_words = [w.strip(string.punctuation) for w in reference_text.lower().split()]
         diff = difflib.SequenceMatcher(None, reference_words, [x.word for x in recognized_words])
         final_words = []
