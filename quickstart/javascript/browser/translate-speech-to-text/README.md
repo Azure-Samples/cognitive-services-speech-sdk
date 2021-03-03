@@ -2,7 +2,6 @@
 
 This sample shows how to translate speech with the Speech Service using the Speech SDK for JavaScript on a web browser, like Microsoft Edge, or Chrome. It illustrates how the SDK can be used to translate speech in one language to text in a different language.
 
-* See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstarts/translate-speech-to-text?pivots=programming-language-javascript) on the SDK documentation page for step-by-step instructions.
 * See the [overview article](https://docs.microsoft.com/azure/cognitive-services/speech-service/speech-translation) on the SDK documentation page to learn more about translation using the Speech Service.
 
 ## Prerequisites
@@ -13,8 +12,6 @@ This sample shows how to translate speech with the Speech Service using the Spee
 * Optionally, a web server that supports hosting PHP scripts.
 
 ## Build the sample
-
-> Note: more detailed step-by-step instructions are available [here](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-js-browser).
 
 * **By downloading the Microsoft Cognitive Services Speech SDK when building this sample, you acknowledge its license, see [Speech SDK license agreement](https://docs.microsoft.com/azure/cognitive-services/speech-service/license).**
 * [Download the sample code to your development PC.](/README.md#get-the-samples)

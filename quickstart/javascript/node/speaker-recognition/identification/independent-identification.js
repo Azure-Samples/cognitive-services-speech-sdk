@@ -5,40 +5,40 @@
   var sdk = require("microsoft-cognitiveservices-speech-sdk");
   var fs = require("fs");
 
-  let getAudioConfigFromFile = (file) => {
-      // Create the push stream we need for the speech sdk.
-      let pushStream = sdk.AudioInputStream.createPushStream();
-
-      // Open the file and push it to the push stream.
-      fs.createReadStream(file).on("data", function(arrayBuffer) {
-        pushStream.write(arrayBuffer.buffer);
-      }).on("end", function() {
-        pushStream.close();
-      });
-      return sdk.AudioConfig.fromStreamInput(pushStream);
-  };
   
   // replace with your own subscription key,
   // service region (e.g., "westus"), and
   // the name of the files you want to use
   // to enroll and then identify the speaker.
-  let subscriptionKey = "YourSubscriptionKey";
-  let serviceRegion = "YourSubscriptionRegion"; // e.g., "westus"
-  let enrollFile = "aboutSpeechSdk.wav"; // 16000 Hz, Mono
-  let identificationFile = "myVoiceIsMyPassportVerifyMe01.wav"; // 16000 Hz, Mono
+  var subscriptionKey = "YourSubscriptionKey";
+  var serviceRegion = "YourSubscriptionRegion"; // e.g., "westus"
+  var enrollFile = "aboutSpeechSdk.wav"; // 16000 Hz, Mono
+  var identificationFile = "myVoiceIsMyPassportVerifyMe01.wav"; // 16000 Hz, Mono
   
   // now create the speech config with the credentials for the subscription
-  let speechConfig = sdk.SpeechConfig.fromSubscription(subscriptionKey, serviceRegion);
-  let client = new sdk.VoiceProfileClient(speechConfig);
-  let locale = "en-us";
+  var speechConfig = sdk.SpeechConfig.fromSubscription(subscriptionKey, serviceRegion);
+  var client = new sdk.VoiceProfileClient(speechConfig);
+  var locale = "en-us";
 
   // we are done with the setup
   client.createProfileAsync(
     sdk.VoiceProfileType.TextIndependentIdentification,
     locale,
     function (result) {
-      let profile = result;
-      let enrollConfig = getAudioConfigFromFile(enrollFile);
+      var profile = result;
+      var getAudioConfigFromFile = function (file) {
+          // Create the push stream we need for the speech sdk.
+          var pushStream = sdk.AudioInputStream.createPushStream();
+
+          // Open the file and push it to the push stream.
+          fs.createReadStream(file).on("data", function(arrayBuffer) {
+            pushStream.write(arrayBuffer.buffer);
+          }).on("end", function() {
+            pushStream.close();
+          });
+          return sdk.AudioConfig.fromStreamInput(pushStream);
+      };
+      var enrollConfig = getAudioConfigFromFile(enrollFile);
 
       console.log("Profile id: " + profile.profileId +" created, now enrolling using file: " + enrollFile);
 
@@ -47,17 +47,17 @@
         enrollConfig,
         function(enrollResult) {
           console.log("(Enrollment result) Reason: " + sdk.ResultReason[enrollResult.reason]); 
-          let identificationConfig = getAudioConfigFromFile(identificationFile);
-          let recognizer = new sdk.SpeakerRecognizer(speechConfig, identificationConfig);
-          let model = sdk.SpeakerIdentificationModel.fromProfiles([profile]);
+          var identificationConfig = getAudioConfigFromFile(identificationFile);
+          var recognizer = new sdk.SpeakerRecognizer(speechConfig, identificationConfig);
+          var model = sdk.SpeakerIdentificationModel.fromProfiles([profile]);
           recognizer.recognizeOnceAsync(
             model,
             function(identificationResult) {
-              let reason = identificationResult.reason; 
+              var reason = identificationResult.reason; 
               console.log("(Identification result) Reason: " + sdk.ResultReason[reason]); 
 
               if( reason === sdk.ResultReason.Canceled ) {
-                let cancellationDetails = sdk.SpeakerRecognitionCancellationDetails.fromResult(identificationResult);
+                var cancellationDetails = sdk.SpeakerRecognitionCancellationDetails.fromResult(identificationResult);
                 console.log("(Identification canceled) Error Details: " + cancellationDetails.errorDetails); 
                 console.log("(Identification canceled) Error Code: " + cancellationDetails.errorCode);
               } else {

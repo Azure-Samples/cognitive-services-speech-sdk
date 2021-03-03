@@ -15,6 +15,7 @@ extern void SpeechRecognitionUsingCustomizedModel();
 extern void SpeechContinuousRecognitionWithPullStream();
 extern void SpeechContinuousRecognitionWithPushStream();
 extern void KeywordTriggeredSpeechRecognitionWithMicrophone();
+extern void PronunciationAssessmentWithMicrophone();
 
 extern void IntentRecognitionWithMicrophone();
 extern void IntentRecognitionWithLanguage();
@@ -35,6 +36,7 @@ extern void SpeechSynthesisToAudioDataStream();
 extern void SpeechSynthesisEvents();
 extern void SpeechSynthesisWordBoundaryEvent();
 extern void SpeechSynthesisWithSourceLanguageAutoDetection();
+extern void SpeechSynthesisUsingCustomVoice();
 
 extern void ConversationWithPullAudioStream();
 extern void ConversationWithPushAudioStream();
@@ -57,6 +59,7 @@ void SpeechSamples()
         cout << "5.) Speech recognition using pull stream input.\n";
         cout << "6.) Speech recognition using push stream input.\n";
         cout << "7.) Speech recognition using microphone with a keyword trigger.\n";
+        cout << "8.) Pronunciation assessment using microphone input.\n";
         cout << "\nChoice (0 for MAIN MENU): ";
         cout.flush();
 
@@ -85,6 +88,9 @@ void SpeechSamples()
             break;
         case '7':
             KeywordTriggeredSpeechRecognitionWithMicrophone();
+            break;
+        case '8':
+            PronunciationAssessmentWithMicrophone();
             break;
         case '0':
             break;
@@ -170,6 +176,7 @@ void SpeechSynthesisSamples()
         cout << "A.) Speech synthesis events.\n";
         cout << "B.) Speech synthesis word boundary event.\n";
         cout << "C.) Speech synthesis with source language auto detection\n";
+        cout << "D.) Speech synthesis using Custom Voice\n";
         cout << "\nChoice (0 for MAIN MENU): ";
         cout.flush();
 
@@ -217,6 +224,9 @@ void SpeechSynthesisSamples()
         case 'c':
             SpeechSynthesisWithSourceLanguageAutoDetection();
             break;
+        case 'D':
+        case 'd':
+            SpeechSynthesisUsingCustomVoice();
         case '0':
             break;
         }

@@ -24,6 +24,14 @@ This project hosts the **samples** for the Microsoft Cognitive Services Speech S
 
 Please check [here](https://aka.ms/csspeech/whatsnew) for release notes and older releases.
 
+* Speech SDK Release 1.15.0
+
+  January 2021 we released version 1.15.0 of the Speech SDK
+
+* Speech SDK Release 1.14.0
+
+  October 2020 we released version 1.14.0 of the Speech SDK
+
 * Speech SDK Release 1.13.0
 
   July 2020 we released version 1.13.0 of the Speech SDK
@@ -81,7 +89,7 @@ Please check [here](https://aka.ms/csspeech/whatsnew) for release notes and olde
 This repository hosts samples that help you to get started with several features of the SDK.
 In addition more complex scenarios are included to give you a head-start on using speech technology in your application.
 
-We tested the samples with the latest released version of the SDK (1.6.0) on Windows 10, Linux (Ubuntu 16.04, Ubuntu 18.04, Debian 9), Android devices (API 23: Android 6.0 Marshmallow or higher), and iOS 11.4 devices.
+We tested the samples with the latest released version of the SDK on Windows 10, Linux (on [supported Linux distributions and target architectures](https://docs.microsoft.com/azure/cognitive-services/speech-service/speech-sdk?tabs=linux)), Android devices (API 23: Android 6.0 Marshmallow or higher), and iOS 11.4 devices.
 
 ## Getting Started
 
@@ -106,7 +114,7 @@ Please see the description of each individual sample for instructions on how to 
 ### Speech recognition quickstarts
 
 The following quickstarts demonstrate how to perform one-shot speech recognition using a microphone.
-If you want to build them from scratch, please follow the articles in the Quickstart section on our [documentation page](https://aka.ms/csspeech).
+If you want to build them from scratch, please follow the quickstart or basics articles on our [documentation page](https://aka.ms/csspeech).
 
 | Quickstart | Platform | Description |
 | ---------- | -------- | ----------- |
@@ -130,7 +138,7 @@ If you want to build them from scratch, please follow the articles in the Quicks
 ### Speech translation quickstarts
 
 The following quickstarts demonstrate how to perform one-shot speech translation using a microphone.
-If you want to build them from scratch, please follow the articles in the Quickstart section on our [documentation page](https://aka.ms/csspeech).
+If you want to build them from scratch, please follow the quickstart or basics articles on our [documentation page](https://aka.ms/csspeech).
 
 | Quickstart | Platform | Description |
 | ---------- | -------- | ----------- |
@@ -143,7 +151,7 @@ If you want to build them from scratch, please follow the articles in the Quicks
 ### Speech synthesis quickstarts
 
 The following quickstarts demonstrate how to perform one-shot speech synthesis to a speaker.
-If you want to build them from scratch, please follow the articles in the Quickstart section on our [documentation page](https://aka.ms/csspeech).
+If you want to build them from scratch, please follow the quickstart or basics articles on our [documentation page](https://aka.ms/csspeech).
 
 | Quickstart | Platform | Description |
 | ---------- | -------- | ----------- |
@@ -166,7 +174,7 @@ If you want to build them from scratch, please follow the articles in the Quicks
 
 The following quickstarts demonstrate how to create a custom voice assistant.
 The applications will connect to a previously authored bot configured to use the Direct Line Speech channel, send a voice request, and return a voice response activity (if configured).
-If you want to build these quickstarts from scratch, please follow the articles in the Quickstart section on our [documentation page](https://aka.ms/csspeech).
+If you want to build these quickstarts from scratch, please follow the quickstart or basics articles on our [documentation page](https://aka.ms/csspeech).
 
 | Quickstart | Platform | Description |
 | ---------- | -------- | ----------- |
