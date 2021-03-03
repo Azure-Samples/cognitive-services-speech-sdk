@@ -11,17 +11,19 @@ const request = require('request');
 var apiInstance = new SpeechToTextApiV30.DefaultApi();
 // Your subscription key and region for the speech service
 
-const API_KEY=""
+const API_KEY="d2cc865984bb4104ae30fc249931edf9"
 const NAME = "Simple transcription"
 const DESCRIPTION = "Simple transcription description"
 const LOCALE = "en-US"
-const DEFAULTPATH = "https://centralindia.api.cognitive.microsoft.com/speechtotext/v3.0"
-// Provide the uri of the audio file 
+// provide the service region
+const SERVICE_REGION = "your service region"
+const DEFAULTPATH = 'https://'+SERVICE_REGION+'.api.cognitive.microsoft.com/speechtotext/v3.0'
+
+// Provide the SAS URI of the audio file stored in Azure Blob Storage
 const RECORDINGS_BLOB_URI = ""
 
-// Provide the uri of a container with audio files for transcribing all of them with a single request
+// Provide the SAS URI pointing to a container in Azure Blob Storage for transcribing all of them with a single request
 const RECORDINGS_CONTAINER_URI = ""
-
 var callbackGetTrans = function(error, data, response) {
   if (error) {
     console.error(error);
@@ -77,6 +79,7 @@ _transcribe();
 
 function _transcribe(){
     
+  console.log(DEFAULTPATH);
   // Configure API key authorization: apiKeyHeader
   var apiKeyHeader = defaultClient.authentications['apiKeyHeader'];
   apiKeyHeader.apiKey = API_KEY;
