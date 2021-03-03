@@ -11,7 +11,7 @@ const request = require('request');
 var apiInstance = new SpeechToTextApiV30.DefaultApi();
 // Your subscription key and region for the speech service
 
-const API_KEY="d2cc865984bb4104ae30fc249931edf9"
+const API_KEY=""
 const NAME = "Simple transcription"
 const DESCRIPTION = "Simple transcription description"
 const LOCALE = "en-US"
