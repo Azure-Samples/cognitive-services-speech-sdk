@@ -3,7 +3,7 @@
 This sample demonstrates how to recognize speech in [Unity](https://unity3d.com/).
 
 > Note:
-> The Speech SDK for Unity supports Windows Desktop (x86 and x64) or Universal Windows Platform (x86, x64, ARM/ARM64), Android (x86, ARM32/64) and iOS (x64 simulator, ARM32 and ARM64).
+> The Speech SDK for Unity supports Windows Desktop (x86 and x64) or Universal Windows Platform (x86, x64, ARM/ARM64), Android (x86, ARM32/64) and iOS (x64 simulator and ARM64).
 > Speech SDK support has been built and verified for Windows and Android using Windows PC development environment for Unity and for iOS using Mac development environment for Unity.
 
 ## Prerequisites
