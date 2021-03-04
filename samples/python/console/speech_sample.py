@@ -640,6 +640,7 @@ def pronunciation_assessment_continuous_from_file():
     """performs continuous speech recognition asynchronously with input from an audio file"""
 
     import difflib
+    import json
 
     # Creates an instance of a speech config with specified subscription key and service region.
     # Replace with your own subscription key and service region (e.g., "westus").
@@ -664,6 +665,9 @@ def pronunciation_assessment_continuous_from_file():
 
     done = False
     recognized_words = []
+    accuracy_scores = []
+    fluency_scores = []
+    durations = []
 
     def stop_cb(evt):
         """callback that signals to stop continuous recognition upon receiving an event `evt`"""
@@ -674,12 +678,18 @@ def pronunciation_assessment_continuous_from_file():
     def recognized(evt):
         print('pronunciation assessment for: {}'.format(evt.result.text))
         pronunciation_result = speechsdk.PronunciationAssessmentResult(evt.result)
-        print('    Accuracy score: {}, Pronunciation score: {}, Completeness score : {}, FluencyScore: {}'.format(
+        print('    Accuracy score: {}, pronunciation score: {}, completeness score : {}, fluency score: {}'.format(
             pronunciation_result.accuracy_score, pronunciation_result.pronunciation_score,
             pronunciation_result.completeness_score, pronunciation_result.fluency_score
         ))
-        nonlocal recognized_words
+        nonlocal recognized_words, accuracy_scores, fluency_scores, durations
         recognized_words += pronunciation_result.words
+        accuracy_scores.append(pronunciation_result.accuracy_score)
+        fluency_scores.append(pronunciation_result.fluency_score)
+        json_result = evt.result.properties.get(speechsdk.PropertyId.SpeechServiceResponse_JsonResult)
+        jo = json.loads(json_result)
+        nb = jo['NBest'][0]
+        durations.append(sum([int(w['Duration']) for w in nb['Words']]))
 
     # Connect callbacks to the events fired by the speech recognizer
     speech_recognizer.recognized.connect(recognized)
@@ -697,11 +707,17 @@ def pronunciation_assessment_continuous_from_file():
 
     speech_recognizer.stop_continuous_recognition()
 
-    # For continuous pronunciation assessment mode, the service won't return the words with `Insertion` or `Omission` even if miscue is enabled.
+    # We can calculate whole accuracy and fluency scores by duration weighted averaging
+    accuracy_score = sum(i[0] * i[1] for i in zip(accuracy_scores, durations)) / sum(durations)
+    fluency_score = sum(i[0] * i[1] for i in zip(fluency_scores, durations)) / sum(durations)
+
+    # we need to convert the reference text to lower case, and split to words, then remove the punctuations.
+    reference_words = [w.strip(string.punctuation) for w in reference_text.lower().split()]
+
+    # For continuous pronunciation assessment mode, the service won't return the words with `Insertion` or `Omission`
+    # even if miscue is enabled.
     # We need to compare with the reference text after received all recognized words to get these error words.
     if enable_miscue:
-        # we need to convert the reference text to lower case, and split to words, then remove the punctuations.
-        reference_words = [w.strip(string.punctuation) for w in reference_text.lower().split()]
         diff = difflib.SequenceMatcher(None, reference_words, [x.word for x in recognized_words])
         final_words = []
         for tag, i1, i2, j1, j2 in diff.get_opcodes():
@@ -723,6 +739,13 @@ def pronunciation_assessment_continuous_from_file():
                 final_words += recognized_words[j1:j2]
     else:
         final_words = recognized_words
+
+    # Calculate whole completeness score
+    completeness_score = len([w for w in final_words if w.error_type == 'None']) / len(reference_words) * 100
+
+    print('    Paragraph accuracy score: {}, completeness score: {}, fluency score: {}'.format(
+        accuracy_score, completeness_score, fluency_score
+    ))
 
     for idx, word in enumerate(final_words):
         print('    {}: word: {}\taccuracy score: {}\terror type: {};'.format(
