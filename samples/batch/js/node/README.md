@@ -30,7 +30,6 @@ Modified node_modules/speech_to_text_api_v30/src/model/PaginatedFiles.constructF
 
 ```bash
 Was : obj.values = ApiClient.convertToType(data['values'], [File]);
-
 Now : obj.values = ApiClient.convertToType(data['values'], ['File']);
 ```
 
