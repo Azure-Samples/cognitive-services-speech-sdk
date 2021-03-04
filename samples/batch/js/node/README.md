@@ -28,8 +28,8 @@ npm install request
 ## Locally modify the Swagger client for the issue related to 'File'
 Modified node_modules/speech_to_text_api_v30/src/model/PaginatedFiles.constructFromObject as it was throwing an error reference File not found.
 
-	Was : obj.values = ApiClient.convertToType(data['values'], [File]);
-    Now : obj.values = ApiClient.convertToType(data['values'], ['File']);
+Was : obj.values = ApiClient.convertToType(data['values'], [File]);
+Now : obj.values = ApiClient.convertToType(data['values'], ['File']);
 
 ## Run the sample code
 
