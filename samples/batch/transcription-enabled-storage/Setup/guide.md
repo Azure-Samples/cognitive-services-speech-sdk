@@ -1,6 +1,6 @@
 # Getting started with the Batch Ingestion Client
 
-Without writing any code what-so-ever you can have all your audio files in your Azure Storage account automatically transcribed! The solution will monitor your dedicated storage container so that new files are transcribed automatically as soon as they land.
+Without writing any code what-so-ever you can have all your audio files in your Azure Storage account automatically transcribed! The Batch Ingestion Client will monitor your dedicated storage container so that new files are transcribed automatically as soon as they land.
 
 The simplest way to explain this sample is to say that it is a zero-touch solution for all your audio files in Azure Storage. If you are looking for a quick and effortless way to process your audio files or even explore without writing any code, then this solution is for you. Through the ARM template it will set up all the resources necessary so that your audio files are automatically transcribed as soon as they land in the dedicated Azure Storage blob container.
 
