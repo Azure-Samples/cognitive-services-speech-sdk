@@ -1,11 +1,18 @@
 # Getting started with the Batch Ingestion Layer
 
-This is a smart client utilising Azure resources such as Service Bus and Azure Functions to orchesrtate transcription requests to Azure Speech Services from audio files landing in storage containers. 
-Before we delve deeper into the set up instructions let us have a look at the architecture of the solution this ARM template builds. 
+Without writing any code what-so-ever you can have all your audio files in your Azure Storage account automatically transcribed!
+
+The simplest way to explain this sample is to say that it is a zero-touch solution for all your audio files in Azure Storage. If you are looking for a quick and effortless way to process your audio files or even explore without writing any code, then this solution is for you. Through the ARM template it will set up all the resources necessary so that your audio files are automatically transcribed as soon as they land in the dedicated Azure Storage blob container.
+
+Getting started with any API requires some amount of time investment in learning the API, understanding its scope, and getting value through trial and error. In order to speed up your transcription solutions for those of you that do not have the time to invest in getting to know our API or related best practices, we created an ingestion layer (a client for batch transcription) that will help you set up a full blown, scalable and secure transcription pipeline without writing any code. 
+
+This is a smart client utilizing Azure resources such as Service Bus and Azure Functions to orchestrate transcription requests to Azure Speech Services from audio files landing in your dedicated storage containers. The set is done through an ARM template that the user is required to fill. 
+
+Before we delve deeper into the set-up instructions, let us have a look at the architecture of the solution this ARM template builds. 
 
 ![Architecture](./images/Architecture.png)
 
-The diagram is simple and hopefuly self explanatory. As soon as files in a container, the Grid Event that indicates the comlpete upload of a file lands in a Service bus topic. Azure Functions (time triggered by default)  pick up those events and act, namely creating Tx requests using the Azure Speech Services batch pipeline. When the Tx request is successfully carried out an event is placed in another queue in the same service bus resource. A different Azure Function trggered by the completion event starts monitoting transcritpion completion status and copies the actual transcripts in the containers from which the audio file was obtained. This is it. The rest of the feature are applied on demand. Users can choose to apply analytics on the transcript, produce reports etc, all of which are the result of additional resources being deployed through the ARM template. The solution will can start transcribing audio files without the need to touch any code. If however you want to customize further this is possible too. The code is available in this repo.
+The diagram is simple and hopefully self-explanatory. As soon as files in a storage container, the Grid Event that indicates the complete upload of a file lands in a Service bus topic. Azure Functions (time triggered by default) pick up those events and act, namely creating Tx requests using the Azure Speech Services batch pipeline. When the Tx request is successfully carried out an event is placed in another queue in the same service bus resource. A different Azure Function triggered by the completion event starts monitoring transcription completion status and copies the actual transcripts in the containers from which the audio file was obtained. This is it. The rest of the features are applied on demand. Users can choose to apply analytics on the transcript, produce reports or redact, all of which are the result of additional resources being deployed through the ARM template. The solution will start transcribing audio files without the need to write any code. If -however- you want to customize further this is possible too. The code is available in this repo.
 
 ## Setup Guide
 
