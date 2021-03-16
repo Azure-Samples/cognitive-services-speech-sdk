@@ -1,8 +1,8 @@
 # Getting started with the Batch Ingestion Client
 
-Get all audio files in your Azure Storage account automatically transcribed without writing any code what-so-ever! The Batch Ingestion Client will monitor your dedicated storage container so that new audio files are transcribed automatically as soon as they land.
+Get your audio files automatically transcribed without writing any code what-so-ever! The Batch Ingestion Client will monitor your dedicated Azure Storage container so that new audio files are transcribed automatically as soon as they land.
 
-The simplest way to explain this tech is as a zero-touch transcription solution for all your audio files in your Azure Storage. If you are looking for a quick and effortless way to transcribe your audio files or even explore transcription, without writing any code, then this solution is for you. Through an ARM template deployment, all the resources necessary to seamlessly process your audio files are set-up and set motion.
+The simplest way to explain this tech is as a zero-touch transcription solution for all your audio files in your Azure Storage. If you are looking for a quick and effortless way to transcribe your audio files or even explore transcription, without writing any code, then this solution is for you. Through an ARM template deployment, all the resources necessary to seamlessly process your audio files are set-up and set in motion.
 
 # Why do I need this?
 
@@ -16,7 +16,7 @@ Before we delve deeper into the set-up instructions, let us have a look at the a
 
 The diagram is simple and hopefully self-explanatory. As soon as files land in a storage container, the Grid Event that indicates the complete upload of a file is filtered and pushed to a Service bus topic. Azure Functions (time triggered by default) pick up those events and act, namely creating Tx requests using the Azure Speech Services batch pipeline. When the Tx request is successfully carried out an event is placed in another queue in the same service bus resource. A different Azure Function triggered by the completion event starts monitoring transcription completion status and copies the actual transcripts in the containers from which the audio file was obtained. This is it. The rest of the features are applied on demand. Users can choose to apply analytics on the transcript, produce reports or redact, all of which are the result of additional resources being deployed through the ARM template. The solution will start transcribing audio files without the need to write any code. If -however- you want to customize further this is possible too. The code is available in this repo.
 
-The list of best practices we implemented as part of the solution:
+The list of best practices we implemented as part of the solution are:
 
 1. Optimized the number of audio files included in each transcription with the view of achieving the shortest possible SAS TTL.
 2. Round Robin around selected regions in order to distribute load across available regions (per customer request)
@@ -25,8 +25,7 @@ The list of best practices we implemented as part of the solution:
 
 ## Setup Guide
 
-The following guide will help you create a set of resources on Azure that will manage the
-transcription of audio files.
+The following guide will help you set up and execute the ARM template.
 
 ## Prerequisites
 
