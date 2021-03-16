@@ -9,6 +9,6 @@ Available samples:
 | Language | Directory | Description |
 | ---------- | -------- | ----------- |
 | C# | [csharp](csharp) | C# calling batch transcription REST API through System.Net.Http |
-| C# | [Batch Transcription Client](batch-transcription-client) | Project to automatically transcribe all audio files which are added to an Azure Storage Container. Setup via ARM template. |
+| C# | [Batch Ingestion Client](batch-ingestion-client) | Project to automatically transcribe all audio files which are added to an Azure Storage Container. Setup via ARM template. |
 | Python | [python](python) | Python client calling batch transcription REST API |
 | Node.js | [js/node](js/node) | Node.js client calling batch transcription REST API |
