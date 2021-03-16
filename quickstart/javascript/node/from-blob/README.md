@@ -23,7 +23,7 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 
 ## Run the sample
 
-Execute `node index.js` from the location where you have downloaded this quickstart.
+Execute `node from-blob.js` from the location where you have downloaded this quickstart.
 
 ## References
 
