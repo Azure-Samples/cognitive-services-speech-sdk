@@ -8,18 +8,18 @@ Guidance on onboarding samples to docs.microsoft.com/samples: https://review.doc
 Taxonomies for products and languages: https://review.docs.microsoft.com/new-hope/information-architecture/metadata/taxonomies?branch=master
 -->
 
-This project contains Power BI templates that use the SQL outputs from the Transcription Enabled Storage Solution Accelerator.
+This project contains Power BI templates generated from the SQL tables created by the ARM Template.
 
 See the Contribution guide for how to contribute to this repo.
 
 ## Contents
 
-There are template reports provided for two use cases that help to realize value of the speech solution accelerator. Below are the file names and a brief description of each template.
+These are template reports provided for two use cases that help realize value of the transcription output. Below are the file names and a brief description of each template.
 
 | File       | Description                                |
 |-------------------|--------------------------------------------|
-| `SpeechInsights.pbit`       | A collection of reports that use data from Transcription Enabled Storage to quantify your customer care agents' interactions and improve empathetic conversations.                       |
-| `SentimentInsights.pbit`      | A collection of reports that use data from Transcription Enabled Storage to understand the sentiment of your customers during an interaction and improve satisfaction.      |
+| `SpeechInsights.pbit`       | A collection of reports that use transcrpition data to quantify your customer care agents' interactions and improve empathetic conversations.                       |
+| `SentimentInsights.pbit`      | A collection of reports that use transcrpition data to understand the sentiment of your customers during an interaction and improve satisfaction.      |
 
 
 ## Prerequisites
@@ -27,11 +27,11 @@ There are template reports provided for two use cases that help to realize value
 * An existing [Azure Account](https://azure.microsoft.com/free/)
 * An existing [Speech Services Subscription](https://ms.portal.azure.com/#create/Microsoft.CognitiveServicesSpeechServices)
 * An existing [Text Analytics Subscription](https://ms.portal.azure.com/#create/Microsoft.CognitiveServicesTextAnalytics) (required for SentimentInsights.pbit only)
-* Successfully deployed [Transcription Enabled Storage Solution Accelerator](https://github.com/Azure/SpeechAccelerators/pull/TranscriptionEnabledStorage/Setup/guide.md)
+* Successfully deployed [Batch Ingestion Client](https://github.com/Azure-Samples/cognitive-services-speech-sdk/blob/master/samples/batch/batch-ingestion-client/Setup/guide.md)
 
 ## Getting started
 
-Follow the instructions [here](guide.md).
+Follow the instructions [here](https://github.com/Azure-Samples/cognitive-services-speech-sdk/blob/master/samples/batch/batch-ingestion-client/Setup/guide.md).
 
 ## Contributing
 
