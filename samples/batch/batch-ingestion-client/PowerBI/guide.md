@@ -1,13 +1,13 @@
 
-# Visualizing Outputs of the Accelerator in Power BI
+# Visualizing the transcription output in Power BI
 
 ## Setup Guide
 
-The following guide will help you create Power BI reports from templates that will help to realize value from the speech transcription accelerator you just deployed.
+The following guide will help you create Power BI reports from templates that will help to realize value from the speech transcription out.
 
 ## Prerequisites
 
-A working version of the [Accelerator](Setup/guide.md) as well as [Power BI Desktop](aka.ms/PowerBIDownload) installed for free on your machine.
+A working version of the [Batch Ingestion Client](Setup/guide.md) as well as [Power BI Desktop](aka.ms/PowerBIDownload) installed for free on your machine.
 
 Make sure you have also [read the descriptions](PowerBI#contents) of the use cases and downloaded a copy of the report you would like to use:
 
