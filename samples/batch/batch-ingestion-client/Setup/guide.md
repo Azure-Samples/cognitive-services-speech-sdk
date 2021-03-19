@@ -1,20 +1,35 @@
-# Getting started with the Batch Ingestion Layer
+# Getting started with the Batch Ingestion Client
 
-This is a smart client utilising Azure resources such as Service Bus and Azure Functions to orchesrtate transcription requests to Azure Speech Services from audio files landing in storage containers. 
-Before we delve deeper into the set up instructions let us have a look at the architecture of the solution this ARM template builds. 
+Get your audio files automatically transcribed without writing any code what-so-ever! The Batch Ingestion Client will monitor your dedicated Azure Storage container so that new audio files are transcribed automatically as soon as they land.
 
-![Architecture](./images/Architecture.png)
+The simplest way to explain this tech is as a zero-touch transcription solution for all your audio files in your Azure Storage. If you are looking for a quick and effortless way to transcribe your audio files or even explore transcription, without writing any code, then this solution is for you. Through an ARM template deployment, all the resources necessary to seamlessly process your audio files are set-up and set in motion.
 
-The diagram is simple and hopefuly self explanatory. As soon as files in a container, the Grid Event that indicates the comlpete upload of a file lands in a Service bus topic. Azure Functions (time triggered by default)  pick up those events and act, namely creating Tx requests using the Azure Speech Services batch pipeline. When the Tx request is successfully carried out an event is placed in another queue in the same service bus resource. A different Azure Function trggered by the completion event starts monitoting transcritpion completion status and copies the actual transcripts in the containers from which the audio file was obtained. This is it. The rest of the feature are applied on demand. Users can choose to apply analytics on the transcript, produce reports etc, all of which are the result of additional resources being deployed through the ARM template. The solution will can start transcribing audio files without the need to touch any code. If however you want to customize further this is possible too. The code is available in this repo.
+# Why do I need this?
+
+Getting started with any API requires some amount of time investment in learning the API, understanding its scope, and getting value through trial and error. In order to speed up your transcription solution, for those of you that do not have the time to invest in getting to know our API or related best practices, we created an ingestion layer (a client for batch transcription) that will help you set-up a full blown, scalable and secure transcription pipeline without writing any code. 
+
+This is a smart client in the sense that it implements best practices and optimized against the capabilities of the Azure Speech infrastructure. It utilizes Azure resources such as Service Bus and Azure Functions to orchestrate transcription requests to Azure Speech Services from audio files landing in your dedicated storage containers. Do you need more than transcription? Do you need to applly Sentiment to your transcript? Downstream analytics are possible too, with Text Analytics Sentiment and Redaction being offered as part of this solution too. 
+
+Before we delve deeper into the set-up instructions, let us have a look at the architecture of the solution this ARM template builds. 
+
+![Architecture](./images/architecture.png)
+
+The diagram is simple and hopefully self-explanatory. As soon as files land in a storage container, the Grid Event that indicates the complete upload of a file is filtered and pushed to a Service bus topic. Azure Functions (time triggered by default) pick up those events and act, namely creating Tx requests using the Azure Speech Services batch pipeline. When the Tx request is successfully carried out an event is placed in another queue in the same service bus resource. A different Azure Function triggered by the completion event starts monitoring transcription completion status and copies the actual transcripts in the containers from which the audio file was obtained. This is it. The rest of the features are applied on demand. Users can choose to apply analytics on the transcript, produce reports or redact, all of which are the result of additional resources being deployed through the ARM template. The solution will start transcribing audio files without the need to write any code. If -however- you want to customize further this is possible too. The code is available in this repo.
+
+The list of best practices we implemented as part of the solution are:
+
+1. Optimized the number of audio files included in each transcription with the view of achieving the shortest possible SAS TTL.
+2. Round Robin around selected regions in order to distribute load across available regions (per customer request)
+3. Retry logic optimization to handle smooth scaling up and transient HTTP 429 errors
+4. Running Azure Functions economically, ensuring minimal execution costs
 
 ## Setup Guide
 
-The following guide will help you create a set of resources on Azure that will manage the
-transcription of audio files.
+The following guide will help you set up and execute the ARM template.
 
 ## Prerequisites
 
-An [Azure Account](https://azure.microsoft.com/free/) as well as an [Azure Speech Services key](https://ms.portal.azure.com/#create/Microsoft.CognitiveServicesSpeechServices) is needed to run the Accelerator.
+An [Azure Account](https://azure.microsoft.com/free/) as well as an [Azure Speech Services key](https://ms.portal.azure.com/#create/Microsoft.CognitiveServicesSpeechServices) is needed to run the Batch Ingestion Client.
 
 > **_NOTE:_** You need to create a Speech Resource with a paid (S0) key. The free key account will not work. Optionally for analytics you can create a Text Analytics resource too.
 
@@ -40,7 +55,7 @@ cd cognitive-services-speech-sdk/samples/batch/transcription-enabled-storage
 
 Make sure that you have downloaded the [ARM Template](ArmTemplate.json) from the repository.
 
-## Accelerator Setup Instructions
+## Batch Ingestion Client Setup Instructions
 
 1. Click on **+Create Resource** on [Azure portal](https://portal.azure.com) as shown in the following picture and type ‘ _template
 deployment_ ’ on the search box.
@@ -75,7 +90,7 @@ important that all the information is correct. Let us look at the form and go th
 
 * First pick the Azure Subscription Id within which you will create the resources.
 
-* Either pick or create a resource group. [It would be better to have all the accelerator
+* Either pick or create a resource group. [It would be better to have all the Batch Ingestion Client
 resources within the same resource group so we suggest you create a new resource group].
 
 * Pick a region [May be the same region as your Azure Speech key].
@@ -83,7 +98,7 @@ resources within the same resource group so we suggest you create a new resource
 The following settings all relate to the resources and their attributes
 
 
-* Give your transcription enabled storage account a name [you will be using a new storage
+* Give your storage account a name [you will be using a new storage
 account rather than an existing one].
 
 The following 2 steps are optional. Omitting them will result in using the base model to obtain
@@ -165,7 +180,7 @@ Do the same for the FetchTranscription function:
 
 > **_Important:_** Until you restart both Azure functions you may see errors.
 
-## Running the Accelerator
+## Running the Batch Ingestion Client
 
 Upload audio files to the newly created audio-input container (results are added to json-result-output and test-results-output containers).
 Once they are done you can test your account.
@@ -179,9 +194,9 @@ The structure of your newly created storage account will look like the picture b
 
 There are several containers to distinguish between the various outputs. We suggest (for the sake of keeping things tidy) to follow the pattern and use the audio-input container as the only container for uploading your audio.
 
-## Customizing the Accelerator
+## Customizing the Batch Ingestion Client
 
-By default, the ARM template uses the newest version of the accelerator which can be found in this repository. If a custom version should be used, the paths to the binaries inside the deployment template must be edited to point to a custom published version (by default, our binaries are: 
+By default, the ARM template uses the newest version of the Batch Ingestion Client which can be found in this repository. If a custom version should be used, the paths to the binaries inside the deployment template must be edited to point to a custom published version (by default, our binaries are: 
 
 * https://mspublicstorage.blob.core.windows.net/transcription-enabled-storage/FetchTranscription.zip, 
 

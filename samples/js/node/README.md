@@ -1,7 +1,7 @@
 # JavaScript Speech Recognition, Synthesis and Translation Sample for Node.js
 
 This sample demonstrates how to recognize and synthesis speech with the Speech SDK for JavaScript on Node.js. It is based on the [Microsoft Cognitive Services Speech SDK for JavaScript](https://aka.ms/csspeech/npmpackage).
-See [this article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-js-node) for introductory information on the Speech SDK for JavaScript on Node.js.
+See [this article](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started-speech-to-text?pivots=programming-language-nodejs) for introductory information on the Speech SDK for JavaScript on Node.js.
 
 ## Prerequisites
 
