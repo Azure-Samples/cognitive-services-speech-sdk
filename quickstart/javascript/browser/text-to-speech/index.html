@@ -90,31 +90,7 @@
   </div>
 
   <!-- Speech SDK reference sdk. -->
-  <script src="microsoft.cognitiveservices.speech.sdk.bundle.js"></script>
-
-  <!-- Speech SDK Authorization token -->
-  <script>
-  // Note: Replace the URL with a valid endpoint to retrieve
-  //       authorization tokens for your subscription.
-  var authorizationEndpoint = "token.php";
-
-  function RequestAuthorizationToken() {
-    if (authorizationEndpoint) {
-      var a = new XMLHttpRequest();
-      a.open("GET", authorizationEndpoint);
-      a.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-      a.send("");
-      a.onload = function() {
-        var token = JSON.parse(atob(this.responseText.split(".")[1]));
-        serviceRegion.value = token.region;
-        authorizationToken = this.responseText;
-        subscriptionKey.disabled = true;
-        subscriptionKey.value = "using authorization token (hit F5 to refresh)";
-        console.log("Got an authorization token: " + token);
-      }
-    }
-  }
-  </script>
+  <script src="https://aka.ms/csspeech/jsbrowserpackageraw"></script>
 
   <!-- Speech SDK USAGE -->
   <script>
@@ -125,7 +101,6 @@
 
     // subscription key and region for speech services.
     var subscriptionKey, serviceRegion;
-    var authorizationToken;
     var SpeechSDK;
     var synthesizer;
 
@@ -140,18 +115,12 @@
         startSpeakTextAsyncButton.disabled = true;
         phraseDiv.innerHTML = "";
 
-        // if we got an authorization token, use the token. Otherwise use the provided subscription key
-        var speechConfig;
-        if (authorizationToken) {
-          speechConfig = SpeechSDK.SpeechConfig.fromAuthorizationToken(authorizationToken, serviceRegion.value);
-        } else {
-          if (subscriptionKey.value === "" || subscriptionKey.value === "subscription") {
-            alert("Please enter your Microsoft Cognitive Services Speech subscription key!");
-            startSpeakTextAsyncButton.disabled = false;
-            return;
-          }
-          speechConfig = SpeechSDK.SpeechConfig.fromSubscription(subscriptionKey.value, serviceRegion.value);
+        if (subscriptionKey.value === "" || subscriptionKey.value === "subscription") {
+          alert("Please enter your Microsoft Cognitive Services Speech subscription key!");
+          startSpeakTextAsyncButton.disabled = false;
+          return;
         }
+        var speechConfig = SpeechSDK.SpeechConfig.fromSubscription(subscriptionKey.value, serviceRegion.value);
 
         synthesizer = new SpeechSDK.SpeechSynthesizer(speechConfig);
 

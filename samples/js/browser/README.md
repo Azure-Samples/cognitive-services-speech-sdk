@@ -1,4 +1,4 @@
-# JavaScript Speech Recongition, Synthesis, and Translation Sample for the Web Browser
+# JavaScript Speech Recognition, Synthesis, and Translation Sample for the Web Browser
 
 This sample demonstrates how to recognize, synthesize, and translate speech with the Speech SDK for JavaScript on a web browser, like Microsoft Edge, or Chrome.
 See [this article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-js-browser) for introductory information on the Speech SDK for JavaScript.
@@ -15,8 +15,6 @@ See [this article](https://docs.microsoft.com/azure/cognitive-services/speech-se
 
 * **By downloading the Microsoft Cognitive Services Speech SDK when building this sample, you acknowledge its license, see [Speech SDK license agreement](https://docs.microsoft.com/azure/cognitive-services/speech-service/license).**
 * [Download the sample code to your development PC.](/README.md#get-the-samples)
-* From the [Speech SDK for JavaScript .zip package](https://aka.ms/csspeech/jsbrowserpackage) extract the file
-  `microsoft.cognitiveservices.speech.sdk.bundle.js` and place it into the folder that contains this sample.
 
 If you want to host the sample on a web server, the web server must support PHP with curl enabled. Follow these steps:
 

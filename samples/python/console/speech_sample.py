@@ -579,8 +579,7 @@ def pronunciation_assessment_from_microphone():
 
     # Creates an instance of a speech config with specified subscription key and service region.
     # Replace with your own subscription key and service region (e.g., "westus").
-    # Note: The pronunciation assessment feature is currently only available on westus, eastasia and centralindia regions.
-    # And this feature is currently only available on en-US language.
+    # Note: The pronunciation assessment feature is currently only available on en-US language.
     config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
 
     reference_text = ""
@@ -643,8 +642,7 @@ def pronunciation_assessment_continuous_from_file():
 
     # Creates an instance of a speech config with specified subscription key and service region.
     # Replace with your own subscription key and service region (e.g., "westus").
-    # Note: The pronunciation assessment feature is currently only available on westus, eastasia and centralindia regions.
-    # And this feature is currently only available on en-US language.
+    # Note: The pronunciation assessment feature is currently only available on en-US language.
     speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
     audio_config = speechsdk.audio.AudioConfig(filename=weatherfilename)
 
@@ -697,10 +695,11 @@ def pronunciation_assessment_continuous_from_file():
 
     speech_recognizer.stop_continuous_recognition()
 
-    # For continuous pronunciation assessment mode, the service won't return the words with `Insertion` or `Omission` even miscue is enabled.
+    # For continuous pronunciation assessment mode, the service won't return the words with `Insertion` or `Omission` even if miscue is enabled.
     # We need to compare with the reference text after received all recognized words to get these error words.
     if enable_miscue:
-        reference_words = reference_text.lower().split().strip(string.punctuation)
+        # we need to convert the reference text to lower case, and split to words, then remove the punctuations.
+        reference_words = [w.strip(string.punctuation) for w in reference_text.lower().split()]
         diff = difflib.SequenceMatcher(None, reference_words, [x.word for x in recognized_words])
         final_words = []
         for tag, i1, i2, j1, j2 in diff.get_opcodes():
