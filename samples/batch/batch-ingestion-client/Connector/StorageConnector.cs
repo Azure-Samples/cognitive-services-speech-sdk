@@ -131,15 +131,9 @@ namespace Connector
             var container = BlobServiceClient.GetBlobContainerClient(containerName);
             var blockBlobClient = container.GetBlobClient(fileName);
 
-            if (await blockBlobClient.ExistsAsync().ConfigureAwait(false))
-            {
-                log.LogError($"File {fileName} already exists in container {containerName}. Returning.");
-                return;
-            }
-
             using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(content)))
             {
-                await blockBlobClient.UploadAsync(stream).ConfigureAwait(false);
+                await blockBlobClient.UploadAsync(stream, overwrite: true).ConfigureAwait(false);
             }
         }
 
