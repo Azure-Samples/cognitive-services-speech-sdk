@@ -698,8 +698,7 @@ public class SpeechRecognitionSamples {
     public static void pronunciationAssessmentWithMicrophoneAsync() throws ExecutionException, InterruptedException {
         // Creates an instance of a speech config with specified subscription key and service region.
         // Replace with your own subscription key and service region (e.g., "westus").
-        // Note: The pronunciation assessment feature is currently only available on westus, eastasia and centralindia regions.
-        // And this feature is currently only available on en-US language.
+        // Note: The pronunciation assessment feature is currently only available on en-US language.
         SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
         String referenceText = "";
