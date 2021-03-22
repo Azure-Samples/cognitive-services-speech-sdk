@@ -579,8 +579,7 @@ def pronunciation_assessment_from_microphone():
 
     # Creates an instance of a speech config with specified subscription key and service region.
     # Replace with your own subscription key and service region (e.g., "westus").
-    # Note: The pronunciation assessment feature is currently only available on westus, eastasia and centralindia regions.
-    # And this feature is currently only available on en-US language.
+    # Note: The pronunciation assessment feature is currently only available on en-US language.
     config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
 
     reference_text = ""
@@ -643,8 +642,7 @@ def pronunciation_assessment_continuous_from_file():
 
     # Creates an instance of a speech config with specified subscription key and service region.
     # Replace with your own subscription key and service region (e.g., "westus").
-    # Note: The pronunciation assessment feature is currently only available on westus, eastasia and centralindia regions.
-    # And this feature is currently only available on en-US language.
+    # Note: The pronunciation assessment feature is currently only available on en-US language.
     speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
     audio_config = speechsdk.audio.AudioConfig(filename=weatherfilename)
 

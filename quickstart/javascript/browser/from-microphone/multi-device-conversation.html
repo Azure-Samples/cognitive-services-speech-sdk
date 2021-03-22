@@ -200,31 +200,7 @@
     </div>
     
     <!-- Speech SDK reference sdk. -->
-    <script src="microsoft.cognitiveservices.speech.sdk.bundle.js"></script>
-    
-    <!-- Speech SDK Authorization token -->
-    <script>
-        // Note: Replace the URL with a valid endpoint to retrieve
-        //       authorization tokens for your subscription.
-        var authorizationEndpoint = "token.php";
-      
-        function RequestAuthorizationToken() {
-          if (authorizationEndpoint) {
-            var a = new XMLHttpRequest();
-            a.open("GET", authorizationEndpoint);
-            a.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-            a.send("");
-            a.onload = function() {
-                var token = JSON.parse(atob(this.responseText.split(".")[1]));
-                serviceRegion.value = token.region;
-                authorizationToken = this.responseText;
-                subscriptionKey.disabled = true;
-                subscriptionKey.value = "using authorization token (hit F5 to refresh)";
-                console.log("Got an authorization token: " + token);
-            }
-          }
-        }
-    </script>
+    <script src="https://aka.ms/csspeech/jsbrowserpackageraw"></script>
     
     <!-- Speech SDK USAGE -->
     <script>
@@ -233,7 +209,6 @@
 
         // subscription key and region for speech services.
         var subscriptionKey, serviceRegion;
-        var authorizationToken;
         var SpeechSDK;
         var conversation;
         var conversationTranslator;
@@ -342,17 +317,15 @@
                 window.localStorage.setItem("demoSubscriptionKey", subscriptionKey.value);
                 startConversationButton.disabled = true;
 
-                if (!authorizationToken) {
-                    if (serviceRegion.value === "" || serviceRegion.value === "region") {
-                        alert("Please enter your Microsoft Cognitive Services Speech region.");
-                        resetUI();
-                        return;
-                    }
-                    if (subscriptionKey.value === "" || subscriptionKey.value === "subscription") {
-                        alert("Please enter your Microsoft Cognitive Services Speech subscription key.");
-                        resetUI();
-                        return;
-                    }
+                if (serviceRegion.value === "" || serviceRegion.value === "region") {
+                    alert("Please enter your Microsoft Cognitive Services Speech region.");
+                    resetUI();
+                    return;
+                }
+                if (subscriptionKey.value === "" || subscriptionKey.value === "subscription") {
+                    alert("Please enter your Microsoft Cognitive Services Speech subscription key.");
+                    resetUI();
+                    return;
                 }
                 
                 var language = languageCode.value;
@@ -370,13 +343,7 @@
                     conversation = undefined;
                 }
 
-                var config;
-
-                if (authorizationToken) {
-                    config = SpeechSDK.SpeechTranslationConfig.fromAuthorizationToken(authorizationToken, serviceRegion.value);
-                } else {
-                    config = SpeechSDK.SpeechTranslationConfig.fromSubscription(subscriptionKey.value, serviceRegion.value);
-                }
+                var config = SpeechSDK.SpeechTranslationConfig.fromSubscription(subscriptionKey.value, serviceRegion.value);
                 config.speechRecognitionLanguage = language;
                 phraseDiv.innerHTML = "Starting a conversation...";
 
@@ -733,11 +700,6 @@
 
                 document.getElementById('content').style.display = 'block';
                 document.getElementById('warning').style.display = 'none';
-
-                // in case we have a function for getting an authorization token, call it.
-                if (typeof RequestAuthorizationToken === "function") {
-                    RequestAuthorizationToken();
-                }
             }
         });
     </script>
