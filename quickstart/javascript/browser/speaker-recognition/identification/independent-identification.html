@@ -54,33 +54,6 @@
     </table>
   </div>
 
-  <!-- Speech SDK reference sdk. -->
-  <script src="microsoft.cognitiveservices.speech.sdk.bundle.js"></script>
-
-  <!-- Speech SDK Authorization token -->
-  <script>
-  // Note: Replace the URL with a valid endpoint to retrieve
-  //       authorization tokens for your subscription.
-  var authorizationEndpoint = "token.php";
-
-  function RequestAuthorizationToken() {
-    if (authorizationEndpoint) {
-      var a = new XMLHttpRequest();
-      a.open("GET", authorizationEndpoint);
-      a.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-      a.send("");
-      a.onload = function() {
-          var token = JSON.parse(atob(this.responseText.split(".")[1]));
-          serviceRegion.value = token.region;
-          authorizationToken = this.responseText;
-          subscriptionKey.disabled = true;
-          subscriptionKey.value = "using authorization token (hit F5 to refresh)";
-          console.log("Got an authorization token: " + token);
-      }
-    }
-  }
-  </script>
-
   <!-- Speech SDK USAGE -->
   <script>
     // status fields and start button in UI
@@ -88,11 +61,9 @@
     var createVoiceProfileButton;
     var identifySpeakerButton;
     var deleteProfileButton;
-;
 
     // subscription key and region for speech services.
     var subscriptionKey, serviceRegion;
-    var authorizationToken;
     var SpeechSDK;
     var client;
     var filePicker, testFilePicker,audioFiles, testFile;
@@ -124,17 +95,12 @@
         createVoiceProfileButton.disabled = true;
         resultDiv.innerHTML = "";
 
-        // if we got an authorization token, use the token. Otherwise use the provided subscription key
-        if (authorizationToken) {
-          speechConfig = SpeechSDK.SpeechConfig.fromAuthorizationToken(authorizationToken, serviceRegion.value);
-        } else {
-          if (subscriptionKey.value === "" || subscriptionKey.value === "subscription") {
-            alert("Please enter your Microsoft Cognitive Services Speech subscription key!");
-            createVoiceProfileButton.disabled = false;
-            return;
-          }
-          speechConfig = SpeechSDK.SpeechConfig.fromSubscription(subscriptionKey.value, serviceRegion.value);
+        if (subscriptionKey.value === "" || subscriptionKey.value === "subscription") {
+          alert("Please enter your Microsoft Cognitive Services Speech subscription key!");
+          createVoiceProfileButton.disabled = false;
+          return;
         }
+        var speechConfig = SpeechSDK.SpeechConfig.fromSubscription(subscriptionKey.value, serviceRegion.value);
 
         speechConfig.setProperty(SpeechSDK.PropertyId.SpeechServiceConnection_TranslationVoice, "en-US");
         client = new SpeechSDK.VoiceProfileClient(speechConfig);
@@ -228,11 +194,6 @@
 
         document.getElementById('content').style.display = 'block';
         document.getElementById('warning').style.display = 'none';
-
-        // in case we have a function for getting an authorization token, call it.
-        if (typeof RequestAuthorizationToken === "function") {
-            RequestAuthorizationToken();
-        }
       }
     });
   </script>
