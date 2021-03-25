@@ -9,8 +9,6 @@ This sample demonstrates how to recognize speech with the Speech SDK for JavaScr
 
 ## Prepare the sample
 
-> Note: more detailed step-by-step instructions are available [here](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstarts/from-blob?pivots=programming-language-javascript).
-
 * [Download the sample code to your development PC.](/README.md#get-the-samples)
 * Open a command prompt at the quickstart directory, and run `npm install` to install the dependencies of the quickstart.
   This will place the Speech SDK library in the `node_modules` directory.
