@@ -351,7 +351,7 @@
                 "enabledForTemplateDeployment": "false",
                 "tenantId": "[subscription().tenantId]",
                 "accessPolicies": [
-					{
+                    {
                         "objectId": "[reference(resourceId('Microsoft.Web/sites', variables('StartTranscriptionFunctionName')), '2019-08-01', 'full').identity.principalId]",
                         "tenantId": "[reference(resourceId('Microsoft.Web/sites', variables('StartTranscriptionFunctionName')), '2019-08-01', 'full').identity.tenantId]",
                         "permissions": {
@@ -852,8 +852,8 @@
                 "httpsOnly": "true"
             },
             "identity": {
-				"type": "SystemAssigned"
-			}
+                "type": "SystemAssigned"
+            }
         },
         {
             "type": "Microsoft.Web/sites/config",
@@ -916,8 +916,8 @@
                 "httpsOnly": "true"
             },
             "identity": {
-				"type": "SystemAssigned"
-			}
+                "type": "SystemAssigned"
+            }
         },
         {
             "type": "Microsoft.Web/sites/config",
