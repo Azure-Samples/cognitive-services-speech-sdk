@@ -50,19 +50,19 @@ namespace WebHookReceiver
             }
 
             string requestBody = null, validationToken = null, payload;
+            if (eventKind == WebHookEventKind.Challenge)
+            {
+                validationToken = request.Query[ValidationTokenKeyQueryParameterName].FirstOrDefault();
+                payload = validationToken;
+            }
+            else
+            {
+                requestBody = await new StreamReader(request.Body).ReadToEndAsync();
+                payload = requestBody;
+            }
+
             if (headers.TryGetValue(WebHookSignatureHeaderName, out var actualSignature))
             {
-                if (eventKind == WebHookEventKind.Challenge)
-                {
-                    validationToken = request.Query[ValidationTokenKeyQueryParameterName].FirstOrDefault();
-                    payload = validationToken;
-                }
-                else
-                {
-                    requestBody = await new StreamReader(request.Body).ReadToEndAsync();
-                    payload = requestBody;
-                }
-
                 var contentBytes = Encoding.UTF8.GetBytes(payload);
                 var secretBytes = Encoding.UTF8.GetBytes(Program.WebHookSecret);
                 using (var hmacsha256 = new HMACSHA256(secretBytes))

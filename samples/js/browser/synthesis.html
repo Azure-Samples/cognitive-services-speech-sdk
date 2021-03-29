@@ -125,6 +125,15 @@
         </td>
       </tr>
       <tr>
+        <td align="right"><label for="formatOptions">Format</label></td>
+        <td>
+          <select id="formatOptions">
+            <option>Waiting for SDK loading.</option>
+          </select>
+          (riff pcm, mp3, ogg and webm formats are supported for playback.)
+        </td>
+      </tr>
+      <tr>
         <td align="right"><label for="isSSML">Is SSML</label><br></td>
         <td>
           <input type="checkbox" id="isSSML" name="isSSML" value="ssml">
@@ -162,7 +171,7 @@
   </div>
 
   <!-- Speech SDK reference sdk. -->
-  <script src="microsoft.cognitiveservices.speech.sdk.bundle.js"></script>
+  <script src="https://aka.ms/csspeech/jsbrowserpackageraw"></script>
 
   <!-- Speech SDK Authorization token -->
   <script>
@@ -327,6 +336,7 @@
         }
 
         speechConfig.speechSynthesisVoiceName = voiceOptions.value;
+        speechConfig.speechSynthesisOutputFormat = formatOptions.value;
 
         player = new SpeechSDK.SpeakerAudioDestination();
         player.onAudioEnd = function (_) {
@@ -444,6 +454,9 @@
           speechConfig = SpeechSDK.SpeechConfig.fromSubscription(subscriptionKey.value, regionOptions.value);
         }
 
+        speechConfig.speechSynthesisVoiceName = voiceOptions.value;
+        speechConfig.speechSynthesisOutputFormat = formatOptions.value;
+
         pushStreamCallback = {
             write: function (dataBuffer) {
                 wavFragments[currentFragment] = dataBuffer;
@@ -521,6 +534,14 @@
         downloadButton.disabled = false;
         pauseButton.disabled = true;
         resumeButton.disabled = true;
+
+        formatOptions.innerHTML = "";
+        Object.keys(SpeechSDK.SpeechSynthesisOutputFormat).forEach(format => {
+          if (isNaN(format)) {
+            formatOptions.innerHTML += "<option value=\"" + SpeechSDK.SpeechSynthesisOutputFormat[format] + "\">" + format + "</option>"
+          }}
+        );
+        formatOptions.selectedIndex = SpeechSDK.SpeechSynthesisOutputFormat.Audio24Khz48KBitRateMonoMp3;
 
         // in case we have a function for getting an authorization token, call it.
         if (typeof RequestAuthorizationToken === "function") {

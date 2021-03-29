@@ -1,4 +1,4 @@
-# Transcription Enabled Storage
+# Batch Ingestion Client
 
 <!-- 
 Guidelines on README format: https://review.docs.microsoft.com/help/onboard/admin/samples/concepts/readme-template?branch=master
@@ -8,7 +8,7 @@ Guidance on onboarding samples to docs.microsoft.com/samples: https://review.doc
 Taxonomies for products and languages: https://review.docs.microsoft.com/new-hope/information-architecture/metadata/taxonomies?branch=master
 -->
 
-This project contains a Solution Accelerator which will automatically transcribe audio files added to an Azure Storage Container and writes the results into another container.
+Batch Ingestion Client is a solution which accelerates transcription capability by automatically transcribing audio files uploaded to an Azure Storage Container.
 
 See the Contribution guide for how to contribute to this repo.
 
@@ -33,7 +33,7 @@ Outline the file contents of the repository. It helps users navigate the codebas
 
 ## Getting started
 
-Follow the instructions for setting up the Solution Accelerator [here](Setup/guide.md).
+Follow the instructions for setting up Batch Ingestion Client [here](Setup/guide.md).
 
 To set up Power BI for further insights of the transcription, follow the guide [here](PowerBI/README.md).
 

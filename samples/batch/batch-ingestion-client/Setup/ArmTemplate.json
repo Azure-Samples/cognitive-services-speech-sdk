@@ -273,12 +273,16 @@
     },
     "variables": {
         "AudioInputContainer": "audio-input",
+        "AudioProcessedContainer": "audio-processed",
         "JsonResultOutputContainer": "json-result-output",
         "HtmlResultOutputContainer": "html-result-output",
         "ErrorReportOutputContainer": "error-report",
         "ErrorFilesOutputContainer": "error-files",
+        "ConsolidatedFilesOutputContainer": "consolidated-files",
         "CreateHtmlResultFile": false,
+        "CreateConsolidatedOutputFiles": false,
         "TimerBasedExecution": true,
+        "CreateAudioProcessedContainer": true,
         "MessagesPerFunctionExecution": 1000,
         "FilesPerTranscriptionJob": 100,
         "RetryLimit": 4,
@@ -624,6 +628,34 @@
         },
         {
             "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+            "condition": "[variables('CreateConsolidatedOutputFiles')]",
+            "apiVersion": "2019-06-01",
+            "name": "[concat(variables('StorageAccountName'), '/default/', variables('ConsolidatedFilesOutputContainer'))]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', variables('StorageAccountName'), 'default')]",
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName'))]"
+            ],
+            "properties": {
+                "publicAccess": "None"
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+            "condition": "[variables('CreateAudioProcessedContainer')]",
+            "apiVersion": "2019-06-01",
+            "name": "[concat(variables('StorageAccountName'), '/default/', variables('AudioProcessedContainer'))]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', variables('StorageAccountName'), 'default')]",
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName'))]"
+            ],
+            "properties": {
+                "publicAccess": "None"
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
             "condition": "[variables('CreateHtmlResultFile')]",
             "apiVersion": "2019-06-01",
             "name": "[concat(variables('StorageAccountName'), '/default/', variables('HtmlResultOutputContainer'))]",
@@ -848,7 +880,11 @@
                 "TextAnalyticsKey": "[parameters('TextAnalyticsKey')]",
                 "TextAnalyticsRegion": "[parameters('TextAnalyticsRegion')]",
                 "UseSqlDatabase": "[variables('UseSqlDatabase')]",
-                "WEBSITE_RUN_FROM_PACKAGE": "https://mspublicstorage.blob.core.windows.net/transcription-enabled-storage/FetchTranscription.zip"
+                "WEBSITE_RUN_FROM_PACKAGE": "https://mspublicstorage.blob.core.windows.net/transcription-enabled-storage/FetchTranscription.zip",
+                "CreateConsolidatedOutputFiles": "[variables('CreateConsolidatedOutputFiles')]",
+                "ConsolidatedFilesOutputContainer": "[variables('ConsolidatedFilesOutputContainer')]",
+                "CreateAudioProcessedContainer": "[variables('CreateAudioProcessedContainer')]",
+                "AudioProcessedContainer": "[variables('AudioProcessedContainer')]"
             }
         }
     ],

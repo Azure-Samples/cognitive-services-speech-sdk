@@ -8,6 +8,7 @@ This sample demonstrates how to transcribe a conversation from a file using the 
 * A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
 * A PC or Mac.
 * User voice samples [See User voice samples for Conversation Transcription](https://docs.microsoft.com/azure/cognitive-services/speech-service/conversation-transcription#expected-inputs)
+* An 8-channel wav file (while in preview, the feature only accepts 8-channel wav file input)
 * A text editor.
 * Optionally, a web server that supports hosting PHP scripts.
 
@@ -17,21 +18,11 @@ This sample demonstrates how to transcribe a conversation from a file using the 
 
 * **By downloading the Microsoft Cognitive Services Speech SDK when building this sample, you acknowledge its license, see [Speech SDK license agreement](https://docs.microsoft.com/azure/cognitive-services/speech-service/license).**
 * [Download the sample code to your development PC.](/README.md#get-the-samples)
-* From the [Speech SDK for JavaScript .zip package](https://aka.ms/csspeech/jsbrowserpackage) extract the file
-  `microsoft.cognitiveservices.speech.sdk.bundle.js` and place it into the folder that contains this quickstart.
 
 If you want to host the sample on a web server:
 
-* The web server must be secure (HTTPS).
-* The web server must support PHP with curl enabled.
-* Edit the `token.php` source:
-  * Replace the string `YourServiceRegion` with the service region of your subscription.
-    For example, replace with `westus` if you are using the 30-day free trial subscription.
-  * Replace the string `YourSubscriptionKey` with your own subscription key.
-* Edit the `index.html` source:
-  * Replace the value for the variable `authorizationEndpoint` with the full URL where you can access the token.php resource.
-  * Add voice signature data for all participants
 * Deploy all files to your web server.
+* IMPORTANT: Never add a subscription key to client-side code. For advanced guidance on keeping sensitive subscription info secure, see the [sample using a server-side auth token](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/js/browser)
 
 ## Run the `index.html` sample
 
