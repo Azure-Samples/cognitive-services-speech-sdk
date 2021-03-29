@@ -239,7 +239,7 @@ namespace StartTranscriptionByTimer
             }
             catch (WebException e)
             {
-                if (e.Response != null && BatchClient.IsThrottledOrTimeoutStatusCode(((HttpWebResponse)e.Response).StatusCode))
+                if (e.Response != null && (BatchClient.IsThrottledOrTimeoutStatusCode(((HttpWebResponse)e.Response).StatusCode) || ((HttpWebResponse)e.Response).StatusCode == HttpStatusCode.InternalServerError))
                 {
                     var errorMessage = $"Throttled or timeout while creating post. Error Message: {e.Message}";
                     Logger.LogError(errorMessage);
@@ -339,6 +339,7 @@ namespace StartTranscriptionByTimer
                     fileName,
                     StartTranscriptionEnvironmentVariables.ErrorFilesOutputContainer,
                     fileName,
+                    false,
                     Logger).ConfigureAwait(false);
             }
             catch (StorageException e)
