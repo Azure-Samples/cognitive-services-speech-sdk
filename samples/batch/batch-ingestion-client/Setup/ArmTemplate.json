@@ -294,7 +294,7 @@
         "SqlServerName": "[concat('sqlserver', toLower(variables('InstanceId')))]",
         "DatabaseName": "[concat('Database-', toLower(variables('InstanceId')))]",
         "ServiceBusName": "[concat('ServiceBus-', variables('InstanceId'))]",
-        "AppInsightsName": "[concat('AcceleratorInsights-', variables('InstanceId'))]",
+        "AppInsightsName": "[concat('AppInsights-', variables('InstanceId'))]",
         "KeyVaultName": "[concat('KV-', variables('InstanceId'))]",
         "EventGridSystemTopicName": "[concat(variables('StorageAccountName'),'-',variables('InstanceId'))]",
         "StartTranscriptionFunctionName": "[take(concat('StartTranscriptionFunction-', variables('InstanceId')),60)]",
@@ -310,8 +310,8 @@
     },
     "resources": [
         {
-            "type": "microsoft.insights/components",
-            "apiVersion": "2015-05-01",
+            "type": "Microsoft.Insights/components",
+            "apiVersion": "2020-02-02-preview",
             "name": "[variables('AppInsightsName')]",
             "location": "[resourceGroup().location]",
             "tags": {
