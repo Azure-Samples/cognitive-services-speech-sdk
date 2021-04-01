@@ -103,7 +103,7 @@
         createVoiceProfileButton.disabled = false;
         return;
       }
-      var speechConfig = SpeechSDK.SpeechConfig.fromSubscription(subscriptionKey.value, serviceRegion.value);
+      speechConfig = SpeechSDK.SpeechConfig.fromSubscription(subscriptionKey.value, serviceRegion.value);
 
         speechConfig.setProperty(SpeechSDK.PropertyId.SpeechServiceConnection_TranslationVoice, "en-US");
         client = new SpeechSDK.VoiceProfileClient(speechConfig);
