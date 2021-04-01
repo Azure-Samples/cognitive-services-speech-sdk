@@ -27,7 +27,7 @@ namespace Connector
 
         private static readonly TimeSpan GetFilesTimeout = TimeSpan.FromMinutes(5);
 
-        private static HttpClient HttpClient = new HttpClient() { Timeout = System.Threading.Timeout.InfiniteTimeSpan };
+        private static readonly HttpClient HttpClient = new () { Timeout = System.Threading.Timeout.InfiniteTimeSpan };
 
         public static bool IsThrottledOrTimeoutStatusCode(HttpStatusCode statusCode)
         {
@@ -88,114 +88,24 @@ namespace Connector
 
         private static async Task<Uri> PostAsync(string path, string subscriptionKey, string payloadString, TimeSpan timeout, ILogger log)
         {
-            using (var requestMessage = new HttpRequestMessage(HttpMethod.Post, path))
+            using var requestMessage = new HttpRequestMessage(HttpMethod.Post, path);
+            requestMessage.Headers.Add("Ocp-Apim-Subscription-Key", subscriptionKey);
+            requestMessage.Content = new StringContent(payloadString, Encoding.UTF8, "application/json");
+
+            try
             {
-                requestMessage.Headers.Add("Ocp-Apim-Subscription-Key", subscriptionKey);
-                requestMessage.Content = new StringContent(payloadString, Encoding.UTF8, "application/json");
+                using var cts = new CancellationTokenSource();
+                cts.CancelAfter(timeout);
+                var responseMessage = await HttpClient.SendAsync(requestMessage, cts.Token).ConfigureAwait(false);
 
-                try
+                if (IsThrottledOrTimeoutStatusCode(responseMessage.StatusCode))
                 {
-                    using var cts = new CancellationTokenSource();
-                    cts.CancelAfter(timeout);
-                    var responseMessage = await HttpClient.SendAsync(requestMessage, cts.Token).ConfigureAwait(false);
-
-                    if (IsThrottledOrTimeoutStatusCode(responseMessage.StatusCode))
-                    {
-                        throw new TimeoutException(responseMessage.StatusCode.ToString());
-                    }
-
-                    if (!responseMessage.IsSuccessStatusCode)
-                    {
-                        var failureMessage = $"Failure - Status Code: {responseMessage.StatusCode}";
-
-                        if (responseMessage.Content != null)
-                        {
-                            var body = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
-                            failureMessage += $", Body: {body}";
-                        }
-
-                        log.LogInformation(failureMessage);
-                        throw new WebException(failureMessage);
-                    }
-
-                    return responseMessage.Headers.Location;
-                }
-                catch (OperationCanceledException)
-                {
-                    throw new TimeoutException($"The operation has timed out after {timeout.TotalSeconds} seconds.");
-                }
-            }
-        }
-
-        private static async Task DeleteAsync(string path, string subscriptionKey, TimeSpan timeout, ILogger log)
-        {
-            using (var requestMessage = new HttpRequestMessage(HttpMethod.Delete, path))
-            {
-                if (!string.IsNullOrEmpty(subscriptionKey))
-                {
-                    requestMessage.Headers.Add("Ocp-Apim-Subscription-Key", subscriptionKey);
+                    throw new TimeoutException(responseMessage.StatusCode.ToString());
                 }
 
-                try
+                if (!responseMessage.IsSuccessStatusCode)
                 {
-                    using var cts = new CancellationTokenSource();
-                    cts.CancelAfter(timeout);
-                    var responseMessage = await HttpClient.SendAsync(requestMessage, cts.Token).ConfigureAwait(false);
-
-                    if (IsThrottledOrTimeoutStatusCode(responseMessage.StatusCode))
-                    {
-                        throw new TimeoutException(responseMessage.StatusCode.ToString());
-                    }
-
-                    if (!responseMessage.IsSuccessStatusCode)
-                    {
-                        var failureMessage = $"Failure - Status Code: {responseMessage.StatusCode}";
-
-                        if (responseMessage.Content != null)
-                        {
-                            var body = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
-                            failureMessage += $", Body: {body}";
-                        }
-
-                        log.LogInformation(failureMessage);
-                        throw new WebException(failureMessage);
-                    }
-                }
-                catch (OperationCanceledException)
-                {
-                    throw new TimeoutException($"The operation has timed out after {timeout.TotalSeconds} seconds.");
-                }
-            }
-        }
-
-        private static async Task<TResponse> GetAsync<TResponse>(string path, string subscriptionKey, TimeSpan timeout, ILogger log)
-        {
-            using (var requestMessage = new HttpRequestMessage(HttpMethod.Get, path))
-            {
-                if (!string.IsNullOrEmpty(subscriptionKey))
-                {
-                    requestMessage.Headers.Add("Ocp-Apim-Subscription-Key", subscriptionKey);
-                }
-
-                try
-                {
-                    using var cts = new CancellationTokenSource();
-                    cts.CancelAfter(timeout);
-                    var responseMessage = await HttpClient.SendAsync(requestMessage, cts.Token).ConfigureAwait(false);
-
-                    if (IsThrottledOrTimeoutStatusCode(responseMessage.StatusCode))
-                    {
-                        throw new TimeoutException($"{responseMessage.ReasonPhrase} - {responseMessage.StatusCode}");
-                    }
-
-                    if (responseMessage.IsSuccessStatusCode)
-                    {
-                        var contentString = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
-                        return JsonConvert.DeserializeObject<TResponse>(contentString);
-                    }
-
-                    var failureMessage = $"Failure: Status Code {responseMessage.StatusCode}";
-                    log.LogInformation(failureMessage);
+                    var failureMessage = $"Failure - Status Code: {responseMessage.StatusCode}";
 
                     if (responseMessage.Content != null)
                     {
@@ -203,12 +113,96 @@ namespace Connector
                         failureMessage += $", Body: {body}";
                     }
 
+                    log.LogInformation(failureMessage);
                     throw new WebException(failureMessage);
                 }
-                catch (OperationCanceledException)
+
+                return responseMessage.Headers.Location;
+            }
+            catch (OperationCanceledException)
+            {
+                throw new TimeoutException($"The operation has timed out after {timeout.TotalSeconds} seconds.");
+            }
+        }
+
+        private static async Task DeleteAsync(string path, string subscriptionKey, TimeSpan timeout, ILogger log)
+        {
+            using var requestMessage = new HttpRequestMessage(HttpMethod.Delete, path);
+            if (!string.IsNullOrEmpty(subscriptionKey))
+            {
+                requestMessage.Headers.Add("Ocp-Apim-Subscription-Key", subscriptionKey);
+            }
+
+            try
+            {
+                using var cts = new CancellationTokenSource();
+                cts.CancelAfter(timeout);
+                var responseMessage = await HttpClient.SendAsync(requestMessage, cts.Token).ConfigureAwait(false);
+
+                if (IsThrottledOrTimeoutStatusCode(responseMessage.StatusCode))
                 {
-                    throw new TimeoutException($"The operation has timed out after {timeout.TotalSeconds} seconds.");
+                    throw new TimeoutException(responseMessage.StatusCode.ToString());
                 }
+
+                if (!responseMessage.IsSuccessStatusCode)
+                {
+                    var failureMessage = $"Failure - Status Code: {responseMessage.StatusCode}";
+
+                    if (responseMessage.Content != null)
+                    {
+                        var body = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
+                        failureMessage += $", Body: {body}";
+                    }
+
+                    log.LogInformation(failureMessage);
+                    throw new WebException(failureMessage);
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                throw new TimeoutException($"The operation has timed out after {timeout.TotalSeconds} seconds.");
+            }
+        }
+
+        private static async Task<TResponse> GetAsync<TResponse>(string path, string subscriptionKey, TimeSpan timeout, ILogger log)
+        {
+            using var requestMessage = new HttpRequestMessage(HttpMethod.Get, path);
+            if (!string.IsNullOrEmpty(subscriptionKey))
+            {
+                requestMessage.Headers.Add("Ocp-Apim-Subscription-Key", subscriptionKey);
+            }
+
+            try
+            {
+                using var cts = new CancellationTokenSource();
+                cts.CancelAfter(timeout);
+                var responseMessage = await HttpClient.SendAsync(requestMessage, cts.Token).ConfigureAwait(false);
+
+                if (IsThrottledOrTimeoutStatusCode(responseMessage.StatusCode))
+                {
+                    throw new TimeoutException($"{responseMessage.ReasonPhrase} - {responseMessage.StatusCode}");
+                }
+
+                if (responseMessage.IsSuccessStatusCode)
+                {
+                    var contentString = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
+                    return JsonConvert.DeserializeObject<TResponse>(contentString);
+                }
+
+                var failureMessage = $"Failure: Status Code {responseMessage.StatusCode}";
+                log.LogInformation(failureMessage);
+
+                if (responseMessage.Content != null)
+                {
+                    var body = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
+                    failureMessage += $", Body: {body}";
+                }
+
+                throw new WebException(failureMessage);
+            }
+            catch (OperationCanceledException)
+            {
+                throw new TimeoutException($"The operation has timed out after {timeout.TotalSeconds} seconds.");
             }
         }
     }

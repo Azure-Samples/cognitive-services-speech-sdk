@@ -18,11 +18,11 @@ namespace Connector
 
     public class StorageConnector
     {
-        private BlobServiceClient BlobServiceClient;
+        private readonly BlobServiceClient BlobServiceClient;
 
-        private string AccountName;
+        private readonly string AccountName;
 
-        private string AccountKey;
+        private readonly string AccountKey;
 
         public StorageConnector(string storageConnectionString)
         {
@@ -131,10 +131,8 @@ namespace Connector
             var container = BlobServiceClient.GetBlobContainerClient(containerName);
             var blockBlobClient = container.GetBlobClient(fileName);
 
-            using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(content)))
-            {
-                await blockBlobClient.UploadAsync(stream, overwrite: true).ConfigureAwait(false);
-            }
+            using var stream = new MemoryStream(Encoding.UTF8.GetBytes(content));
+            await blockBlobClient.UploadAsync(stream, overwrite: true).ConfigureAwait(false);
         }
 
         public async Task MoveFileAsync(string inputContainerName,  string inputFileName, string outputContainerName, string outputFileName, bool keepSource, ILogger log)

@@ -21,11 +21,11 @@ namespace FetchTranscriptionFunction
 
     public static class TranscriptionProcessor
     {
-        private static StorageConnector StorageConnectorInstance = new StorageConnector(FetchTranscriptionEnvironmentVariables.AzureWebJobsStorage);
+        private static readonly StorageConnector StorageConnectorInstance = new (FetchTranscriptionEnvironmentVariables.AzureWebJobsStorage);
 
-        private static QueueClient StartQueueClientInstance = new QueueClient(new ServiceBusConnectionStringBuilder(FetchTranscriptionEnvironmentVariables.StartTranscriptionServiceBusConnectionString));
+        private static readonly QueueClient StartQueueClientInstance = new (new ServiceBusConnectionStringBuilder(FetchTranscriptionEnvironmentVariables.StartTranscriptionServiceBusConnectionString));
 
-        private static QueueClient FetchQueueClientInstance = new QueueClient(new ServiceBusConnectionStringBuilder(FetchTranscriptionEnvironmentVariables.FetchTranscriptionServiceBusConnectionString));
+        private static readonly QueueClient FetchQueueClientInstance = new (new ServiceBusConnectionStringBuilder(FetchTranscriptionEnvironmentVariables.FetchTranscriptionServiceBusConnectionString));
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "Catch general exception to allow manual retrying.")]
         public static async Task ProcessTranscriptionJobAsync(TranscriptionStartedMessage serviceBusMessage, ILogger log)
@@ -169,7 +169,6 @@ namespace FetchTranscriptionFunction
             await BatchClient.DeleteTranscriptionAsync(transcriptionLocation, subscriptionKey, log).ConfigureAwait(false);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "Catching general exception to log exception message to file.")]
         private static async Task ProcessSucceededTranscriptionAsync(string transcriptionLocation, string subscriptionKey, TranscriptionStartedMessage serviceBusMessage, string jobName, ILogger log)
         {
             log.LogInformation($"Got succeeded transcription for job {jobName}");
@@ -319,16 +318,11 @@ namespace FetchTranscriptionFunction
 
         private static bool IsRetryableError(string errorCode)
         {
-            switch (errorCode)
+            return errorCode switch
             {
-                case "InvalidUri":
-                case "Internal":
-                case "Timeout":
-                case "Transient":
-                    return true;
-            }
-
-            return false;
+                "InvalidUri" or "Internal" or "Timeout" or "Transient" => true,
+                _ => false,
+            };
         }
 
         private static async Task ProcessReportFileAsync(TranscriptionReportFile transcriptionReportFile, ILogger log)
