@@ -24,11 +24,11 @@ namespace StartTranscriptionByTimer
 
     public class StartTranscriptionHelper
     {
-        private static StorageConnector StorageConnectorInstance = new StorageConnector(StartTranscriptionEnvironmentVariables.AzureWebJobsStorage);
+        private static readonly StorageConnector StorageConnectorInstance = new (StartTranscriptionEnvironmentVariables.AzureWebJobsStorage);
 
-        private static QueueClient StartQueueClientInstance = new QueueClient(new ServiceBusConnectionStringBuilder(StartTranscriptionEnvironmentVariables.StartTranscriptionServiceBusConnectionString));
+        private static readonly QueueClient StartQueueClientInstance = new (new ServiceBusConnectionStringBuilder(StartTranscriptionEnvironmentVariables.StartTranscriptionServiceBusConnectionString));
 
-        private static QueueClient FetchQueueClientInstance = new QueueClient(new ServiceBusConnectionStringBuilder(StartTranscriptionEnvironmentVariables.FetchTranscriptionServiceBusConnectionString));
+        private static readonly QueueClient FetchQueueClientInstance = new (new ServiceBusConnectionStringBuilder(StartTranscriptionEnvironmentVariables.FetchTranscriptionServiceBusConnectionString));
 
         private readonly string SubscriptionKey = StartTranscriptionEnvironmentVariables.AzureSpeechServicesKey;
 
@@ -42,19 +42,14 @@ namespace StartTranscriptionByTimer
             $"https://{StartTranscriptionEnvironmentVariables.AzureSpeechServicesRegion}.api.cognitive.microsoft.us/" :
             $"https://{StartTranscriptionEnvironmentVariables.AzureSpeechServicesRegion}.api.cognitive.microsoft.com/";
 
-        private ILogger Logger;
+        private readonly ILogger Logger;
 
-        private string Locale;
+        private readonly string Locale;
 
         public StartTranscriptionHelper(ILogger logger)
         {
             Logger = logger;
             Locale = StartTranscriptionEnvironmentVariables.Locale.Split('|')[0].Trim();
-        }
-
-        public static StorageConnector GetStorageConnector()
-        {
-            return StorageConnectorInstance;
         }
 
         public async Task StartTranscriptionsAsync(IEnumerable<Message> messages, MessageReceiver messageReceiver, DateTime startDateTime)
@@ -111,26 +106,6 @@ namespace StartTranscriptionByTimer
 
             var busMessage = JsonConvert.DeserializeObject<ServiceBusMessage>(Encoding.UTF8.GetString(message.Body));
             var audioFileName = StorageConnector.GetFileNameFromUri(busMessage.Data.Url);
-
-            // Check if language identification is required:
-            var secondaryLocale = StartTranscriptionEnvironmentVariables.SecondaryLocale;
-            if (!string.IsNullOrEmpty(secondaryLocale) &&
-                !secondaryLocale.Equals("None", StringComparison.OrdinalIgnoreCase) &&
-                !secondaryLocale.Equals(Locale, StringComparison.OrdinalIgnoreCase))
-            {
-                secondaryLocale = secondaryLocale.Split('|')[0].Trim();
-
-                Logger.LogInformation($"Primary locale: {Locale}");
-                Logger.LogInformation($"Secondary locale: {secondaryLocale}");
-
-                var languageID = new LanguageIdentification(SubscriptionKey, StartTranscriptionEnvironmentVariables.AzureSpeechServicesRegion);
-                var fileExtension = Path.GetExtension(audioFileName);
-                var sasUrl = StorageConnectorInstance.CreateSas(busMessage.Data.Url);
-                var byteArray = await StorageConnector.DownloadFileFromSAS(sasUrl).ConfigureAwait(false);
-                var identifiedLocale = await languageID.DetectLanguage(byteArray, fileExtension, Locale, secondaryLocale).ConfigureAwait(false);
-                Logger.LogInformation($"Identified locale: {identifiedLocale}");
-                Locale = identifiedLocale;
-            }
 
             await StartBatchTranscriptionJobAsync(new[] { message }, audioFileName).ConfigureAwait(false);
         }

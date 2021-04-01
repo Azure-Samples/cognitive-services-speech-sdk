@@ -51,10 +51,6 @@ namespace StartTranscriptionByTimer
 
         public static readonly string PunctuationMode = Environment.GetEnvironmentVariable(nameof(PunctuationMode), EnvironmentVariableTarget.Process);
 
-        public static readonly string SecondaryCustomModelId = Environment.GetEnvironmentVariable(nameof(SecondaryCustomModelId), EnvironmentVariableTarget.Process);
-
-        public static readonly string SecondaryLocale = Environment.GetEnvironmentVariable(nameof(SecondaryLocale), EnvironmentVariableTarget.Process);
-
         public static readonly string StartTranscriptionServiceBusConnectionString = Environment.GetEnvironmentVariable(nameof(StartTranscriptionServiceBusConnectionString), EnvironmentVariableTarget.Process);
     }
 }
