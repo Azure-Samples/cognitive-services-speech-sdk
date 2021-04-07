@@ -45,7 +45,7 @@ namespace FetchTranscriptionFunction
 
             try
             {
-                var transcription = await BatchClient.GetTranscriptionAsync(transcriptionLocation, subscriptionKey, log).ConfigureAwait(false);
+                var transcription = await BatchClient.GetTranscriptionAsync(transcriptionLocation, subscriptionKey).ConfigureAwait(false);
                 log.LogInformation($"Polled {serviceBusMessage.PollingCounter} time(s) for results in total, delay job for {messageDelayTime.TotalMinutes} minutes if not completed.");
                 switch (transcription.Status)
                 {
@@ -117,13 +117,13 @@ namespace FetchTranscriptionFunction
 
             log.LogInformation(logMessage);
 
-            var transcriptionFiles = await BatchClient.GetTranscriptionFilesAsync(transcriptionLocation, subscriptionKey, log).ConfigureAwait(false);
+            var transcriptionFiles = await BatchClient.GetTranscriptionFilesAsync(transcriptionLocation, subscriptionKey).ConfigureAwait(false);
 
             var errorReportOutput = logMessage;
             var reportFile = transcriptionFiles.Values.Where(t => t.Kind == TranscriptionFileKind.TranscriptionReport).FirstOrDefault();
             if (reportFile?.Links?.ContentUrl != null)
             {
-                var reportFileContent = await BatchClient.GetTranscriptionReportFileFromSasAsync(reportFile.Links.ContentUrl, log).ConfigureAwait(false);
+                var reportFileContent = await BatchClient.GetTranscriptionReportFileFromSasAsync(reportFile.Links.ContentUrl).ConfigureAwait(false);
                 errorReportOutput += $"\nReport file: \n {JsonConvert.SerializeObject(reportFileContent)}";
             }
 
@@ -166,7 +166,7 @@ namespace FetchTranscriptionFunction
                 }
             }
 
-            await BatchClient.DeleteTranscriptionAsync(transcriptionLocation, subscriptionKey, log).ConfigureAwait(false);
+            await BatchClient.DeleteTranscriptionAsync(transcriptionLocation, subscriptionKey).ConfigureAwait(false);
         }
 
         private static async Task ProcessSucceededTranscriptionAsync(string transcriptionLocation, string subscriptionKey, TranscriptionStartedMessage serviceBusMessage, string jobName, ILogger log)
@@ -179,7 +179,7 @@ namespace FetchTranscriptionFunction
 
             var consolidatedContainer = FetchTranscriptionEnvironmentVariables.ConsolidatedFilesOutputContainer;
 
-            var transcriptionFiles = await BatchClient.GetTranscriptionFilesAsync(transcriptionLocation, subscriptionKey, log).ConfigureAwait(false);
+            var transcriptionFiles = await BatchClient.GetTranscriptionFilesAsync(transcriptionLocation, subscriptionKey).ConfigureAwait(false);
             log.LogInformation($"Received transcription files.");
             var resultFiles = transcriptionFiles.Values.Where(t => t.Kind == TranscriptionFileKind.Transcription);
             var containsMultipleTranscriptions = resultFiles.Skip(1).Any();
@@ -196,7 +196,7 @@ namespace FetchTranscriptionFunction
             {
                 log.LogInformation($"Getting result for file {resultFile.Name}");
 
-                var transcriptionResult = await BatchClient.GetSpeechTranscriptFromSasAsync(resultFile.Links.ContentUrl, log).ConfigureAwait(false);
+                var transcriptionResult = await BatchClient.GetSpeechTranscriptFromSasAsync(resultFile.Links.ContentUrl).ConfigureAwait(false);
 
                 if (string.IsNullOrEmpty(transcriptionResult.Source))
                 {
@@ -310,10 +310,10 @@ namespace FetchTranscriptionFunction
             }
 
             var reportFile = transcriptionFiles.Values.Where(t => t.Kind == TranscriptionFileKind.TranscriptionReport).FirstOrDefault();
-            var reportFileContent = await BatchClient.GetTranscriptionReportFileFromSasAsync(reportFile.Links.ContentUrl, log).ConfigureAwait(false);
+            var reportFileContent = await BatchClient.GetTranscriptionReportFileFromSasAsync(reportFile.Links.ContentUrl).ConfigureAwait(false);
             await ProcessReportFileAsync(reportFileContent, log).ConfigureAwait(false);
 
-            BatchClient.DeleteTranscriptionAsync(transcriptionLocation, subscriptionKey, log).ConfigureAwait(false).GetAwaiter().GetResult();
+            BatchClient.DeleteTranscriptionAsync(transcriptionLocation, subscriptionKey).ConfigureAwait(false).GetAwaiter().GetResult();
         }
 
         private static bool IsRetryableError(string errorCode)
@@ -377,7 +377,7 @@ namespace FetchTranscriptionFunction
             else
             {
                 await WriteFailedJobLogToStorageAsync(message, errorMessage, jobName, log).ConfigureAwait(false);
-                await BatchClient.DeleteTranscriptionAsync(transcriptionLocation, subscriptionKey, log).ConfigureAwait(false);
+                await BatchClient.DeleteTranscriptionAsync(transcriptionLocation, subscriptionKey).ConfigureAwait(false);
             }
         }
 

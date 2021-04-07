@@ -196,8 +196,7 @@ namespace StartTranscriptionByTimer
                 var transcriptionLocation = await BatchClient.PostTranscriptionAsync(
                     transcriptionDefinition,
                     HostName,
-                    SubscriptionKey,
-                    Logger).ConfigureAwait(false);
+                    SubscriptionKey).ConfigureAwait(false);
 
                 Logger.LogInformation($"Location: {transcriptionLocation}");
 
