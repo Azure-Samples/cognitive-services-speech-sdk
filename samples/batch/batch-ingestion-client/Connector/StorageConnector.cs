@@ -79,7 +79,17 @@ namespace Connector
 
         public static async Task<byte[]> DownloadFileFromSAS(string blobSas)
         {
-            var blob = new BlobClient(new Uri(blobSas));
+            var blobClientOptions = new BlobClientOptions()
+            {
+                Retry =
+                {
+                    MaxRetries = 3,
+                    Delay = TimeSpan.FromSeconds(5),
+                    Mode = Azure.Core.RetryMode.Fixed
+                }
+            };
+
+            var blob = new BlobClient(new Uri(blobSas), blobClientOptions);
 
             byte[] data;
 
@@ -119,17 +129,18 @@ namespace Connector
         {
             log.LogInformation($"Writing file {fileName} to container {containerName}.");
             var container = BlobServiceClient.GetBlobContainerClient(containerName);
-            var blockBlob = container.GetBlobClient(fileName);
+            var blockBlobClient = container.GetBlobClient(fileName);
 
             using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(content)))
             {
-                await blockBlob.UploadAsync(stream).ConfigureAwait(false);
+                await blockBlobClient.UploadAsync(stream, overwrite: true).ConfigureAwait(false);
             }
         }
 
-        public async Task MoveFileAsync(string inputContainerName,  string inputFileName, string outputContainerName, string outputFileName, ILogger log)
+        public async Task MoveFileAsync(string inputContainerName,  string inputFileName, string outputContainerName, string outputFileName, bool keepSource, ILogger log)
         {
-            log.LogInformation($"Moving file {inputFileName} from container {inputContainerName} to {outputFileName} in container {outputContainerName}.");
+            log.LogInformation($"Start moving file {inputFileName} from container {inputContainerName} to {outputFileName} in container {outputContainerName}.");
+
             var inputContainerClient = BlobServiceClient.GetBlobContainerClient(inputContainerName);
             var inputBlockBlobClient = inputContainerClient.GetBlobClient(inputFileName);
 
@@ -142,8 +153,18 @@ namespace Connector
             var outputContainerClient = BlobServiceClient.GetBlobContainerClient(outputContainerName);
             var outputBlockBlobClient = outputContainerClient.GetBlobClient(outputFileName);
 
+            if (await outputBlockBlobClient.ExistsAsync().ConfigureAwait(false))
+            {
+                log.LogError($"File {outputFileName} already exists in container {outputContainerName}. Returning.");
+                return;
+            }
+
             await outputBlockBlobClient.StartCopyFromUriAsync(inputBlockBlobClient.Uri).ConfigureAwait(false);
-            await inputBlockBlobClient.DeleteAsync().ConfigureAwait(false);
+
+            if (!keepSource)
+            {
+                await inputBlockBlobClient.DeleteAsync().ConfigureAwait(false);
+            }
         }
 
         private static string GetValueFromConnectionString(string key, string connectionString)
