@@ -6,8 +6,8 @@
 namespace StartTranscriptionByTimer
 {
     using System;
+    using Connector;
     using Connector.Constants;
-    using Connector.Extensions;
 
     public static class StartTranscriptionEnvironmentVariables
     {
