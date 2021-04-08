@@ -6,13 +6,13 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <CodeAnalysisRuleSet>..\TranscriptionEnabledStorage.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>..\BatchIngestionClient.ruleset</CodeAnalysisRuleSet>
     <LangVersion>latest</LangVersion>
     <DebugType>full</DebugType>
     <OutputPath>bin\Debug\</OutputPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <CodeAnalysisRuleSet>..\TranscriptionEnabledStorage.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>..\BatchIngestionClient.ruleset</CodeAnalysisRuleSet>
     <LangVersion>latest</LangVersion>
     <DebugType>pdbonly</DebugType>
     <OutputPath>bin\Release\</OutputPath>

@@ -6,8 +6,8 @@
 namespace StartTranscriptionByTimer
 {
     using System;
+    using Connector;
     using Connector.Constants;
-    using Connector.Extensions;
 
     public static class StartTranscriptionEnvironmentVariables
     {
@@ -50,10 +50,6 @@ namespace StartTranscriptionByTimer
         public static readonly string ProfanityFilterMode = Environment.GetEnvironmentVariable(nameof(ProfanityFilterMode), EnvironmentVariableTarget.Process);
 
         public static readonly string PunctuationMode = Environment.GetEnvironmentVariable(nameof(PunctuationMode), EnvironmentVariableTarget.Process);
-
-        public static readonly string SecondaryCustomModelId = Environment.GetEnvironmentVariable(nameof(SecondaryCustomModelId), EnvironmentVariableTarget.Process);
-
-        public static readonly string SecondaryLocale = Environment.GetEnvironmentVariable(nameof(SecondaryLocale), EnvironmentVariableTarget.Process);
 
         public static readonly string StartTranscriptionServiceBusConnectionString = Environment.GetEnvironmentVariable(nameof(StartTranscriptionServiceBusConnectionString), EnvironmentVariableTarget.Process);
     }
