@@ -37,13 +37,13 @@ namespace FetchTranscriptionFunction
 
         private const string EntityRecognitionSuffix = "/entities/recognition/general";
 
-        private Uri TextAnalyticsUri;
+        private readonly Uri TextAnalyticsUri;
 
-        private string Locale;
+        private readonly string Locale;
 
-        private string SubscriptionKey;
+        private readonly string SubscriptionKey;
 
-        private ILogger Log;
+        private readonly ILogger Log;
 
         public TextAnalytics(string locale, string subscriptionKey, string region, ILogger log)
         {
@@ -466,17 +466,12 @@ namespace FetchTranscriptionFunction
 
             var uri = new Uri(TextAnalyticsUri.AbsoluteUri + uriSuffix);
 
-            HttpResponseMessage response;
-
             // Request body
-            byte[] byteData = Encoding.UTF8.GetBytes(chunkString);
+            var byteData = Encoding.UTF8.GetBytes(chunkString);
 
-            using (var content = new ByteArrayContent(byteData))
-            {
-                content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-                response = await client.PostAsync(uri, content).ConfigureAwait(false);
-                return response;
-            }
+            using var content = new ByteArrayContent(byteData);
+            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+            return await client.PostAsync(uri, content).ConfigureAwait(false);
         }
     }
 }
