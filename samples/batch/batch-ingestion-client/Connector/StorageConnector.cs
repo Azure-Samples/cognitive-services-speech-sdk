@@ -154,6 +154,12 @@ namespace Connector
             if (await outputBlockBlobClient.ExistsAsync().ConfigureAwait(false))
             {
                 log.LogError($"File {outputFileName} already exists in container {outputContainerName}. Returning.");
+
+                if (!keepSource)
+                {
+                    await inputBlockBlobClient.DeleteAsync().ConfigureAwait(false);
+                }
+
                 return;
             }
 
