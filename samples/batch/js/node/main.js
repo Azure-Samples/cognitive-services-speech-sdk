@@ -1,29 +1,28 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-const { TranscriptionProperties } = require('speech_to_text_api_v30');
 var SpeechToTextApiV30 = require('speech_to_text_api_v30');
 var sleep = require('system-sleep');
 var defaultClient = SpeechToTextApiV30.ApiClient.instance;
-const request = require('request');
+var request = require('request');
 
 // Create API Instance
 var apiInstance = new SpeechToTextApiV30.DefaultApi();
 // Your subscription key and region for the speech service
 
-const API_KEY=""
-const NAME = "Simple transcription"
-const DESCRIPTION = "Simple transcription description"
-const LOCALE = "en-US"
+var API_KEY=""
+var NAME = "Simple transcription"
+var DESCRIPTION = "Simple transcription description"
+var LOCALE = "en-US"
 // provide the service region
-const SERVICE_REGION = "your service region"
-const DEFAULTPATH = 'https://'+SERVICE_REGION+'.api.cognitive.microsoft.com/speechtotext/v3.0'
+var SERVICE_REGION = "your service region"
+var DEFAULTPATH = 'https://'+SERVICE_REGION+'.api.cognitive.microsoft.com/speechtotext/v3.0'
 
 // Provide the SAS URI of the audio file stored in Azure Blob Storage
-const RECORDINGS_BLOB_URI = ""
+var RECORDINGS_BLOB_URI = ""
 
 // Provide the SAS URI pointing to a container in Azure Blob Storage for transcribing all of them with a single request
-const RECORDINGS_CONTAINER_URI = ""
+var RECORDINGS_CONTAINER_URI = ""
 var callbackGetTrans = function(error, data, response) {
   if (error) {
     console.error(error);
@@ -54,11 +53,11 @@ var callbackGetTransFiles = function(error, data, response) {
     for (var i = 0; i < pag_files.length; i++){
       var file_data = pag_files[i];
       var url = file_data.links.contentUrl; 
-      if(file_data.kind !='Transcription'){
+      if(file_data.kind !== 'Transcription'){
         continue;
       } 
       else {
-        request(url, { json: true }, (err, res, body) => {
+        request(url, { json: true }, function(err, res, body) {
           if (err) { 
             return console.log(err); 
           }    
