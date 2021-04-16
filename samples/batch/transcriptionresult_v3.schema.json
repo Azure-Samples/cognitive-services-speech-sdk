@@ -126,7 +126,7 @@
                         "examples": [
                             "Hello world."
                         ],
-                        "pattern": "^.*$"
+                        "pattern": "^(.*\n*)*$"
                     }
                 }
             }
@@ -301,7 +301,7 @@
                                     "examples": [
                                         "Hello world."
                                     ],
-                                    "pattern": "^.*$"
+                                    "pattern": "^(.*\n*)*$"
                                 },
                                 "words": {
                                     "$id": "#root/recognizedPhrases/items/nBest/items/words",
