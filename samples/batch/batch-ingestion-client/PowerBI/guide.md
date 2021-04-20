@@ -3,7 +3,7 @@
 
 ## Setup Guide
 
-The following guide will help you create Power BI reports from templates that will help to realize value from the speech transcription out.
+The following guide describes how you can create Power BI reports from templates that help realize the value of the speech transcription output
 
 ## Prerequisites
 

@@ -18,8 +18,8 @@ These are template reports provided for two use cases that help realize value of
 
 | File       | Description                                |
 |-------------------|--------------------------------------------|
-| `SpeechInsights.pbit`       | A collection of reports that use transcrpition data to quantify your customer care agents' interactions and improve empathetic conversations.                       |
-| `SentimentInsights.pbit`      | A collection of reports that use transcrpition data to understand the sentiment of your customers during an interaction and improve satisfaction.      |
+| `SpeechInsights.pbit`       | A collection of reports that use transcription data to quantify your customer care agents' interactions and improve empathetic conversations.                       |
+| `SentimentInsights.pbit`      | A collection of reports that use transcription data to understand the sentiment of your customers during an interaction and improve satisfaction.      |
 
 
 ## Prerequisites
