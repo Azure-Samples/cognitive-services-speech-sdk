@@ -103,9 +103,7 @@ account rather than an existing one].
 The following 2 steps are optional. Omitting them will result in using the base model to obtain
 transcripts. If you have created a Speech model, then
 
-* Enter optionally an Acoustic model
-
-* Enter optionally a Language model
+* Enter optionally a custom model
 
 Transcripts are obtained by polling the service. We acknowledge that there is a cost related to that.
 So, the following setting gives you the option to limit that cost by telling your Azure Function how
