@@ -2,11 +2,11 @@
 
 Get your audio files automatically transcribed without writing any code what-so-ever! The Batch Ingestion Client will monitor your dedicated Azure Storage container so that new audio files are transcribed automatically as soon as they land.
 
-The simplest way to explain this tech is as a zero-touch transcription solution for all your audio files in your Azure Storage. If you are looking for a quick and effortless way to transcribe your audio files or even explore transcription, without writing any code, then this solution is for you. Through an ARM template deployment, all the resources necessary to seamlessly process your audio files are set-up and set in motion.
+The simplest way to explain this tech is as a zero-touch transcription solution for all your audio files in your Azure Storage. If you are looking for a quick and effortless way to transcribe your audio files or even explore transcription, then this solution is for you. 
 
-# Why do I need this?
+We created an ingestion layer (a client for batch transcription) that will help you set-up a full blown, scalable and secure transcription pipeline and through an ARM template deployment, all the resources necessary to seamlessly process your audio files are set-up and set in motion.
 
-Getting started with any API requires some amount of time investment in learning the API, understanding its scope, and getting value through trial and error. In order to speed up your transcription solution, for those of you that do not have the time to invest in getting to know our API or related best practices, we created an ingestion layer (a client for batch transcription) that will help you set-up a full blown, scalable and secure transcription pipeline without writing any code. 
+# Architecture
 
 This is a smart client in the sense that it implements best practices and optimized against the capabilities of the Azure Speech infrastructure. It utilizes Azure resources such as Service Bus and Azure Functions to orchestrate transcription requests to Azure Speech Services from audio files landing in your dedicated storage containers. Do you need more than transcription? Do you need to applly Sentiment to your transcript? Downstream analytics are possible too, with Text Analytics Sentiment and Redaction being offered as part of this solution too. 
 
@@ -97,19 +97,13 @@ resources within the same resource group so we suggest you create a new resource
 
 The following settings all relate to the resources and their attributes
 
-
 * Give your storage account a name [you will be using a new storage
 account rather than an existing one].
 
 The following 2 steps are optional. Omitting them will result in using the base model to obtain
 transcripts. If you have created a Speech model, then
 
-
-* Enter optionally your primary Acoustic model
-
-* Enter optionally your primaty Language model
-
-If you want us to perform Language identification on the audio prior to transcription you can also specify a secondary locale. Our service will check if the language on the audio content is the primary or secondary locale and select the right model for transcription. 
+* Enter optionally a custom model
 
 Transcripts are obtained by polling the service. We acknowledge that there is a cost related to that.
 So, the following setting gives you the option to limit that cost by telling your Azure Function how
@@ -121,7 +115,6 @@ done couple of times a day]
 
 * Enter locale of the audio [you need to tell us what language model we need to use to
 transcribe your audio.]
-
 
 * Enter your Azure Speech subscription key and Locale information
 
