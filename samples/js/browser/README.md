@@ -15,8 +15,6 @@ See [this article](https://docs.microsoft.com/azure/cognitive-services/speech-se
 
 * **By downloading the Microsoft Cognitive Services Speech SDK when building this sample, you acknowledge its license, see [Speech SDK license agreement](https://docs.microsoft.com/azure/cognitive-services/speech-service/license).**
 * [Download the sample code to your development PC.](/README.md#get-the-samples)
-* From the [Speech SDK for JavaScript .zip package](https://aka.ms/csspeech/jsbrowserpackage) extract the file
-  `microsoft.cognitiveservices.speech.sdk.bundle.js` and place it into the folder that contains this sample.
 
 If you want to host the sample on a web server, the web server must support PHP with curl enabled. Follow these steps:
 
