@@ -2,7 +2,7 @@
 
 Get your audio files automatically transcribed without writing any code what-so-ever! The Batch Ingestion Client will monitor your dedicated Azure Storage container so that new audio files are transcribed automatically as soon as they land.
 
-The simplest way to explain this tech is as a zero-touch transcription solution for all your audio files in your Azure Storage. If you are looking for a quick and effortless way to transcribe your audio files or even explore transcription, then this solution is for you. 
+The simplest way to explain this tech is as an automated & scalable transcription solution for all your audio files in your Azure Storage. If you are looking for a quick and effortless way to transcribe your audio files or even explore transcription, then this solution is for you. 
 
 We created an ingestion layer (a client for batch transcription) that will help you set-up a full blown, scalable and secure transcription pipeline and through an ARM template deployment, all the resources necessary to seamlessly process your audio files are set-up and set in motion.
 
