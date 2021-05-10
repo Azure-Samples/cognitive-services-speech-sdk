@@ -272,7 +272,7 @@ namespace FetchTranscriptionFunction
 
                 if (FetchTranscriptionEnvironmentVariables.UseSqlDatabase)
                 {
-                    var duration = XmlConvert.ToTimeSpan(transcriptionResult.Duration);
+                    var duration = string.IsNullOrEmpty(transcriptionResult.Duration) ? TimeSpan.Zero : XmlConvert.ToTimeSpan(transcriptionResult.Duration);
                     var approximatedCost = CostEstimation.GetCostEstimation(
                         duration,
                         transcriptionResult.CombinedRecognizedPhrases.Count(),
