@@ -53,7 +53,7 @@ namespace Connector
                     command.Parameters.AddWithValue("@name", fileName);
                     command.Parameters.AddWithValue("@source", speechTranscript.Source);
                     command.Parameters.AddWithValue("@timestamp", speechTranscript.Timestamp);
-                    command.Parameters.AddWithValue("@duration", speechTranscript.Duration);
+                    command.Parameters.AddWithValue("@duration", speechTranscript.Duration ?? string.Empty);
                     command.Parameters.AddWithValue("@numberOfChannels", speechTranscript.CombinedRecognizedPhrases.Count());
                     command.Parameters.AddWithValue("@approximateCost", approximateCost);
 
