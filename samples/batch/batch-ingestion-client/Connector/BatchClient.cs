@@ -7,7 +7,6 @@ namespace Connector
 {
     using System;
     using System.Collections.Generic;
-    using System.IO;
     using System.Net;
     using System.Net.Http;
     using System.Text;
@@ -27,44 +26,31 @@ namespace Connector
 
         private static readonly TimeSpan GetFilesTimeout = TimeSpan.FromMinutes(5);
 
-        private static HttpClient HttpClient = new HttpClient() { Timeout = System.Threading.Timeout.InfiniteTimeSpan };
+        private static readonly HttpClient HttpClient = new () { Timeout = Timeout.InfiniteTimeSpan };
 
-        public static bool IsThrottledOrTimeoutStatusCode(HttpStatusCode statusCode)
+        public static Task<TranscriptionReportFile> GetTranscriptionReportFileFromSasAsync(string sasUri)
         {
-            if (statusCode == HttpStatusCode.TooManyRequests ||
-                statusCode == HttpStatusCode.GatewayTimeout ||
-                statusCode == HttpStatusCode.RequestTimeout ||
-                statusCode == HttpStatusCode.BadGateway)
-            {
-                return true;
-            }
-
-            return false;
+            return GetAsync<TranscriptionReportFile>(sasUri, null, DefaultTimeout);
         }
 
-        public static Task<TranscriptionReportFile> GetTranscriptionReportFileFromSasAsync(string sasUri, ILogger log)
+        public static Task<SpeechTranscript> GetSpeechTranscriptFromSasAsync(string sasUri)
         {
-            return GetAsync<TranscriptionReportFile>(sasUri, null, DefaultTimeout, log);
+            return GetAsync<SpeechTranscript>(sasUri, null, DefaultTimeout);
         }
 
-        public static Task<SpeechTranscript> GetSpeechTranscriptFromSasAsync(string sasUri, ILogger log)
+        public static Task<Transcription> GetTranscriptionAsync(string transcriptionLocation, string subscriptionKey)
         {
-            return GetAsync<SpeechTranscript>(sasUri, null, DefaultTimeout, log);
+            return GetAsync<Transcription>(transcriptionLocation, subscriptionKey, DefaultTimeout);
         }
 
-        public static Task<Transcription> GetTranscriptionAsync(string transcriptionLocation, string subscriptionKey, ILogger log)
-        {
-            return GetAsync<Transcription>(transcriptionLocation, subscriptionKey, DefaultTimeout, log);
-        }
-
-        public static async Task<TranscriptionFiles> GetTranscriptionFilesAsync(string transcriptionLocation, string subscriptionKey, ILogger log)
+        public static async Task<TranscriptionFiles> GetTranscriptionFilesAsync(string transcriptionLocation, string subscriptionKey)
         {
             var path = $"{transcriptionLocation}/files";
             var combinedTranscriptionFiles = new List<TranscriptionFile>();
 
             do
             {
-                var transcriptionFiles = await GetAsync<TranscriptionFiles>(path, subscriptionKey, GetFilesTimeout, log).ConfigureAwait(false);
+                var transcriptionFiles = await GetAsync<TranscriptionFiles>(path, subscriptionKey, GetFilesTimeout).ConfigureAwait(false);
                 combinedTranscriptionFiles.AddRange(transcriptionFiles.Values);
                 path = transcriptionFiles.NextLink;
             }
@@ -73,142 +59,70 @@ namespace Connector
             return new TranscriptionFiles(combinedTranscriptionFiles, null);
         }
 
-        public static Task DeleteTranscriptionAsync(string transcriptionLocation, string subscriptionKey, ILogger log)
+        public static Task DeleteTranscriptionAsync(string transcriptionLocation, string subscriptionKey)
         {
-            return DeleteAsync(transcriptionLocation, subscriptionKey, DefaultTimeout, log);
+            return DeleteAsync(transcriptionLocation, subscriptionKey, DefaultTimeout);
         }
 
-        public static async Task<Uri> PostTranscriptionAsync(TranscriptionDefinition transcriptionDefinition, string hostName, string subscriptionKey, ILogger log)
+        public static async Task<Uri> PostTranscriptionAsync(TranscriptionDefinition transcriptionDefinition, string hostName, string subscriptionKey)
         {
             var path = $"{hostName}{TranscriptionsBasePath}";
             var payloadString = JsonConvert.SerializeObject(transcriptionDefinition);
 
-            return await PostAsync(path, subscriptionKey, payloadString, PostTimeout, log).ConfigureAwait(false);
+            return await PostAsync(path, subscriptionKey, payloadString, PostTimeout).ConfigureAwait(false);
         }
 
-        private static async Task<Uri> PostAsync(string path, string subscriptionKey, string payloadString, TimeSpan timeout, ILogger log)
+        private static async Task<Uri> PostAsync(string path, string subscriptionKey, string payloadString, TimeSpan timeout)
         {
-            using (var requestMessage = new HttpRequestMessage(HttpMethod.Post, path))
+            using var requestMessage = new HttpRequestMessage(HttpMethod.Post, path);
+            requestMessage.Headers.Add("Ocp-Apim-Subscription-Key", subscriptionKey);
+            requestMessage.Content = new StringContent(payloadString, Encoding.UTF8, "application/json");
+
+            var responseMessage = await SendHttpRequestMessage(requestMessage, timeout).ConfigureAwait(false);
+
+            return responseMessage.Headers.Location;
+        }
+
+        private static async Task DeleteAsync(string path, string subscriptionKey, TimeSpan timeout)
+        {
+            using var requestMessage = new HttpRequestMessage(HttpMethod.Delete, path);
+            if (!string.IsNullOrEmpty(subscriptionKey))
             {
                 requestMessage.Headers.Add("Ocp-Apim-Subscription-Key", subscriptionKey);
-                requestMessage.Content = new StringContent(payloadString, Encoding.UTF8, "application/json");
-
-                try
-                {
-                    using var cts = new CancellationTokenSource();
-                    cts.CancelAfter(timeout);
-                    var responseMessage = await HttpClient.SendAsync(requestMessage, cts.Token).ConfigureAwait(false);
-
-                    if (IsThrottledOrTimeoutStatusCode(responseMessage.StatusCode))
-                    {
-                        throw new TimeoutException(responseMessage.StatusCode.ToString());
-                    }
-
-                    if (!responseMessage.IsSuccessStatusCode)
-                    {
-                        var failureMessage = $"Failure - Status Code: {responseMessage.StatusCode}";
-
-                        if (responseMessage.Content != null)
-                        {
-                            var body = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
-                            failureMessage += $", Body: {body}";
-                        }
-
-                        log.LogInformation(failureMessage);
-                        throw new WebException(failureMessage);
-                    }
-
-                    return responseMessage.Headers.Location;
-                }
-                catch (OperationCanceledException)
-                {
-                    throw new TimeoutException($"The operation has timed out after {timeout.TotalSeconds} seconds.");
-                }
             }
+
+            await SendHttpRequestMessage(requestMessage, timeout).ConfigureAwait(false);
         }
 
-        private static async Task DeleteAsync(string path, string subscriptionKey, TimeSpan timeout, ILogger log)
+        private static async Task<TResponse> GetAsync<TResponse>(string path, string subscriptionKey, TimeSpan timeout)
         {
-            using (var requestMessage = new HttpRequestMessage(HttpMethod.Delete, path))
+            using var requestMessage = new HttpRequestMessage(HttpMethod.Get, path);
+            if (!string.IsNullOrEmpty(subscriptionKey))
             {
-                if (!string.IsNullOrEmpty(subscriptionKey))
-                {
-                    requestMessage.Headers.Add("Ocp-Apim-Subscription-Key", subscriptionKey);
-                }
-
-                try
-                {
-                    using var cts = new CancellationTokenSource();
-                    cts.CancelAfter(timeout);
-                    var responseMessage = await HttpClient.SendAsync(requestMessage, cts.Token).ConfigureAwait(false);
-
-                    if (IsThrottledOrTimeoutStatusCode(responseMessage.StatusCode))
-                    {
-                        throw new TimeoutException(responseMessage.StatusCode.ToString());
-                    }
-
-                    if (!responseMessage.IsSuccessStatusCode)
-                    {
-                        var failureMessage = $"Failure - Status Code: {responseMessage.StatusCode}";
-
-                        if (responseMessage.Content != null)
-                        {
-                            var body = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
-                            failureMessage += $", Body: {body}";
-                        }
-
-                        log.LogInformation(failureMessage);
-                        throw new WebException(failureMessage);
-                    }
-                }
-                catch (OperationCanceledException)
-                {
-                    throw new TimeoutException($"The operation has timed out after {timeout.TotalSeconds} seconds.");
-                }
+                requestMessage.Headers.Add("Ocp-Apim-Subscription-Key", subscriptionKey);
             }
+
+            var responseMessage = await SendHttpRequestMessage(requestMessage, timeout).ConfigureAwait(false);
+
+            var contentString = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
+            return JsonConvert.DeserializeObject<TResponse>(contentString);
         }
 
-        private static async Task<TResponse> GetAsync<TResponse>(string path, string subscriptionKey, TimeSpan timeout, ILogger log)
+        private static async Task<HttpResponseMessage> SendHttpRequestMessage(HttpRequestMessage httpRequestMessage, TimeSpan timeout)
         {
-            using (var requestMessage = new HttpRequestMessage(HttpMethod.Get, path))
+            try
             {
-                if (!string.IsNullOrEmpty(subscriptionKey))
-                {
-                    requestMessage.Headers.Add("Ocp-Apim-Subscription-Key", subscriptionKey);
-                }
+                using var cts = new CancellationTokenSource();
+                cts.CancelAfter(timeout);
+                var responseMessage = await HttpClient.SendAsync(httpRequestMessage, cts.Token).ConfigureAwait(false);
 
-                try
-                {
-                    using var cts = new CancellationTokenSource();
-                    cts.CancelAfter(timeout);
-                    var responseMessage = await HttpClient.SendAsync(requestMessage, cts.Token).ConfigureAwait(false);
+                await responseMessage.EnsureSuccessStatusCodeAsync().ConfigureAwait(false);
 
-                    if (IsThrottledOrTimeoutStatusCode(responseMessage.StatusCode))
-                    {
-                        throw new TimeoutException($"{responseMessage.ReasonPhrase} - {responseMessage.StatusCode}");
-                    }
-
-                    if (responseMessage.IsSuccessStatusCode)
-                    {
-                        var contentString = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
-                        return JsonConvert.DeserializeObject<TResponse>(contentString);
-                    }
-
-                    var failureMessage = $"Failure: Status Code {responseMessage.StatusCode}";
-                    log.LogInformation(failureMessage);
-
-                    if (responseMessage.Content != null)
-                    {
-                        var body = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
-                        failureMessage += $", Body: {body}";
-                    }
-
-                    throw new WebException(failureMessage);
-                }
-                catch (OperationCanceledException)
-                {
-                    throw new TimeoutException($"The operation has timed out after {timeout.TotalSeconds} seconds.");
-                }
+                return responseMessage;
+            }
+            catch (OperationCanceledException)
+            {
+                throw new TimeoutException($"The operation has timed out after {timeout.TotalSeconds} seconds.");
             }
         }
     }

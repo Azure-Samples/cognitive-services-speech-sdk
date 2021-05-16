@@ -58,60 +58,6 @@
                 "description": "The id of the custom model for transcription. If empty, the base model will be selected."
             }
         },
-        "SecondaryLocale": {
-            "defaultValue": "None",
-            "type": "String",
-            "allowedValues": [
-                "None",
-                "ar-BH | Arabic (Bahrain)",
-                "ar-EG | Arabic (Egypt)",
-                "ar-SY | Arabic (Syria)",
-                "ca-ES | Catalan",
-                "da-DK | Danish (Denmark)",
-                "de-DE | German (Germany)",
-                "en-AU | English (Australia)",
-                "en-CA | English (Canada)",
-                "en-GB | English (United Kingdom)",
-                "en-IN | English (India)",
-                "en-NZ | English (New Zealand)",
-                "en-US | English (United States)",
-                "es-ES | Spanish (Spain)",
-                "es-MX | Spanish (Mexico)",
-                "fi-FI | Finnish (Finland)",
-                "fr-CA | French (Canada)",
-                "fr-FR | French (France)",
-                "gu-IN | Gujarati (Indian)",
-                "hi-IN | Hindi (India)",
-                "it-IT | Italian (Italy)",
-                "ja-JP | Japanese (Japan)",
-                "ko-KR | Korean (Korea)",
-                "mr-IN | Marathi (India)",
-                "nb-NO | Norwegian (Bokmål)",
-                "nl-NL | Dutch (Netherlands)",
-                "pl-PL | Polish (Poland)",
-                "pt-BR | Portuguese (Brazil)",
-                "pt-PT | Portuguese (Portugal)",
-                "ru-RU | Russian (Russia)",
-                "sv-SE | Swedish (Sweden)",
-                "ta-IN | Tamil (India)",
-                "te-IN | Telugu (India)",
-                "th-TH | Thai (Thailand)",
-                "tr-TR | Turkish (Turkey)",
-                "zh-CN | Chinese (Mandarin, simplified)",
-                "zh-HK | Chinese (Cantonese, Traditional)",
-                "zh-TW | Chinese (Taiwanese Mandarin)"
-            ],
-            "metadata": {
-                "description": "A secondary locale is needed if language identification should be performed. The audio will then be transcribed in either the first or secondary locale, depending on which language was detected. If no secondary locale is selected, no language identification is performed."
-            }
-        },
-        "SecondaryCustomModelId": {
-            "defaultValue": "",
-            "type": "String",
-            "metadata": {
-                "description": "The id of the custom model for transcription. If empty, the base model of the secondary locale will be selected."
-            }
-        },
         "AzureSpeechServicesKey": {
             "type": "SecureString",
             "metadata": {
@@ -897,8 +843,6 @@
                 "ProfanityFilterMode": "[parameters('ProfanityFilterMode')]",
                 "PunctuationMode": "[parameters('PunctuationMode')]",
                 "RetryLimit": "[variables('RetryLimit')]",
-                "SecondaryCustomModelId": "[parameters('SecondaryCustomModelId')]",
-                "SecondaryLocale": "[parameters('SecondaryLocale')]",
                 "StartTranscriptionServiceBusConnectionString": "[listKeys(variables('AuthRuleCT'),'2015-08-01').primaryConnectionString]",
                 "WEBSITE_RUN_FROM_PACKAGE": "[if(variables('timerBasedExecution'),'https://mspublicstorage.blob.core.windows.net/transcription-enabled-storage/StartTranscriptionByTimer.zip','https://mspublicstorage.blob.core.windows.net/transcription-enabled-storage/StartTranscriptionByServiceBus.zip')]"
             }

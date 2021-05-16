@@ -12,6 +12,7 @@ namespace StartTranscriptionByTimer
     using System.IO;
     using System.Linq;
     using System.Net;
+    using System.Net.Http;
     using System.Text;
     using System.Threading.Tasks;
     using Connector;
@@ -24,11 +25,11 @@ namespace StartTranscriptionByTimer
 
     public class StartTranscriptionHelper
     {
-        private static StorageConnector StorageConnectorInstance = new StorageConnector(StartTranscriptionEnvironmentVariables.AzureWebJobsStorage);
+        private static readonly StorageConnector StorageConnectorInstance = new (StartTranscriptionEnvironmentVariables.AzureWebJobsStorage);
 
-        private static QueueClient StartQueueClientInstance = new QueueClient(new ServiceBusConnectionStringBuilder(StartTranscriptionEnvironmentVariables.StartTranscriptionServiceBusConnectionString));
+        private static readonly QueueClient StartQueueClientInstance = new (new ServiceBusConnectionStringBuilder(StartTranscriptionEnvironmentVariables.StartTranscriptionServiceBusConnectionString));
 
-        private static QueueClient FetchQueueClientInstance = new QueueClient(new ServiceBusConnectionStringBuilder(StartTranscriptionEnvironmentVariables.FetchTranscriptionServiceBusConnectionString));
+        private static readonly QueueClient FetchQueueClientInstance = new (new ServiceBusConnectionStringBuilder(StartTranscriptionEnvironmentVariables.FetchTranscriptionServiceBusConnectionString));
 
         private readonly string SubscriptionKey = StartTranscriptionEnvironmentVariables.AzureSpeechServicesKey;
 
@@ -42,19 +43,14 @@ namespace StartTranscriptionByTimer
             $"https://{StartTranscriptionEnvironmentVariables.AzureSpeechServicesRegion}.api.cognitive.microsoft.us/" :
             $"https://{StartTranscriptionEnvironmentVariables.AzureSpeechServicesRegion}.api.cognitive.microsoft.com/";
 
-        private ILogger Logger;
+        private readonly ILogger Logger;
 
-        private string Locale;
+        private readonly string Locale;
 
         public StartTranscriptionHelper(ILogger logger)
         {
             Logger = logger;
             Locale = StartTranscriptionEnvironmentVariables.Locale.Split('|')[0].Trim();
-        }
-
-        public static StorageConnector GetStorageConnector()
-        {
-            return StorageConnectorInstance;
         }
 
         public async Task StartTranscriptionsAsync(IEnumerable<Message> messages, MessageReceiver messageReceiver, DateTime startDateTime)
@@ -111,26 +107,6 @@ namespace StartTranscriptionByTimer
 
             var busMessage = JsonConvert.DeserializeObject<ServiceBusMessage>(Encoding.UTF8.GetString(message.Body));
             var audioFileName = StorageConnector.GetFileNameFromUri(busMessage.Data.Url);
-
-            // Check if language identification is required:
-            var secondaryLocale = StartTranscriptionEnvironmentVariables.SecondaryLocale;
-            if (!string.IsNullOrEmpty(secondaryLocale) &&
-                !secondaryLocale.Equals("None", StringComparison.OrdinalIgnoreCase) &&
-                !secondaryLocale.Equals(Locale, StringComparison.OrdinalIgnoreCase))
-            {
-                secondaryLocale = secondaryLocale.Split('|')[0].Trim();
-
-                Logger.LogInformation($"Primary locale: {Locale}");
-                Logger.LogInformation($"Secondary locale: {secondaryLocale}");
-
-                var languageID = new LanguageIdentification(SubscriptionKey, StartTranscriptionEnvironmentVariables.AzureSpeechServicesRegion);
-                var fileExtension = Path.GetExtension(audioFileName);
-                var sasUrl = StorageConnectorInstance.CreateSas(busMessage.Data.Url);
-                var byteArray = await StorageConnector.DownloadFileFromSAS(sasUrl).ConfigureAwait(false);
-                var identifiedLocale = await languageID.DetectLanguage(byteArray, fileExtension, Locale, secondaryLocale).ConfigureAwait(false);
-                Logger.LogInformation($"Identified locale: {identifiedLocale}");
-                Locale = identifiedLocale;
-            }
 
             await StartBatchTranscriptionJobAsync(new[] { message }, audioFileName).ConfigureAwait(false);
         }
@@ -220,8 +196,7 @@ namespace StartTranscriptionByTimer
                 var transcriptionLocation = await BatchClient.PostTranscriptionAsync(
                     transcriptionDefinition,
                     HostName,
-                    SubscriptionKey,
-                    Logger).ConfigureAwait(false);
+                    SubscriptionKey).ConfigureAwait(false);
 
                 Logger.LogInformation($"Location: {transcriptionLocation}");
 
@@ -237,44 +212,50 @@ namespace StartTranscriptionByTimer
                 var fetchingDelay = TimeSpan.FromMinutes(StartTranscriptionEnvironmentVariables.InitialPollingDelayInMinutes);
                 await ServiceBusUtilities.SendServiceBusMessageAsync(FetchQueueClientInstance, transcriptionMessage.CreateMessageString(), Logger, fetchingDelay).ConfigureAwait(false);
             }
-            catch (WebException e)
-            {
-                if (e.Response != null && (BatchClient.IsThrottledOrTimeoutStatusCode(((HttpWebResponse)e.Response).StatusCode) || ((HttpWebResponse)e.Response).StatusCode == HttpStatusCode.InternalServerError))
-                {
-                    var errorMessage = $"Throttled or timeout while creating post. Error Message: {e.Message}";
-                    Logger.LogError(errorMessage);
-                    await RetryOrFailMessagesAsync(messages, errorMessage).ConfigureAwait(false);
-                }
-                else
-                {
-                    var errorMessage = $"Start Transcription in job with name {jobName} failed with WebException {e} and message {e.Message}";
-                    Logger.LogError(errorMessage);
-                    await WriteFailedJobLogToStorageAsync(serviceBusMessages, errorMessage, jobName).ConfigureAwait(false);
-                }
-            }
             catch (TimeoutException e)
             {
-                var errorMessage = $"Timeout while creating post, re-enqueueing transcription start. Message: {e.Message}";
-                Logger.LogError(errorMessage);
-                await RetryOrFailMessagesAsync(messages, errorMessage).ConfigureAwait(false);
+                await RetryOrFailMessagesAsync(messages, $"Timeout in job {jobName}: {e.Message}", HttpStatusCode.RequestTimeout).ConfigureAwait(false);
             }
             catch (Exception e)
             {
-                var errorMessage = $"Start Transcription in job with name {jobName} failed with exception {e} and message {e.Message}";
-                Logger.LogError(errorMessage);
-                await WriteFailedJobLogToStorageAsync(serviceBusMessages, errorMessage, jobName).ConfigureAwait(false);
+                HttpStatusCode? httpStatusCode = null;
+                if (e is HttpStatusCodeException statusCodeException && statusCodeException.HttpStatusCode.HasValue)
+                {
+                    httpStatusCode = statusCodeException.HttpStatusCode.Value;
+                }
+                else if (e is WebException webException && webException.Response != null)
+                {
+                    httpStatusCode = ((HttpWebResponse)webException.Response).StatusCode;
+                }
+
+                if (httpStatusCode.HasValue && httpStatusCode.Value.IsRetryableStatus())
+                {
+                    await RetryOrFailMessagesAsync(messages, $"Error in job {jobName}: {e.Message}", httpStatusCode.Value).ConfigureAwait(false);
+                }
+                else
+                {
+                    await WriteFailedJobLogToStorageAsync(serviceBusMessages, $"Exception {e} in job {jobName}: {e.Message}", jobName).ConfigureAwait(false);
+                }
             }
 
             Logger.LogInformation($"Fetch transcription queue successfully informed about job at: {jobName}");
         }
 
-        private async Task RetryOrFailMessagesAsync(IEnumerable<Message> messages, string errorMessage)
+        private async Task RetryOrFailMessagesAsync(IEnumerable<Message> messages, string errorMessage, HttpStatusCode statusCode)
         {
+            Logger.LogError(errorMessage);
             foreach (var message in messages)
             {
                 var sbMessage = JsonConvert.DeserializeObject<ServiceBusMessage>(Encoding.UTF8.GetString(message.Body));
 
-                if (sbMessage.RetryCount >= StartTranscriptionEnvironmentVariables.RetryLimit)
+                if (sbMessage.RetryCount <= StartTranscriptionEnvironmentVariables.RetryLimit || statusCode == HttpStatusCode.TooManyRequests)
+                {
+                    sbMessage.RetryCount += 1;
+                    var messageDelay = GetMessageDelayTime(sbMessage.RetryCount);
+                    var newMessage = new Message(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(sbMessage)));
+                    await ServiceBusUtilities.SendServiceBusMessageAsync(StartQueueClientInstance, newMessage, Logger, messageDelay).ConfigureAwait(false);
+                }
+                else
                 {
                     var fileName = StorageConnector.GetFileNameFromUri(sbMessage.Data.Url);
                     var errorFileName = fileName + ".txt";
@@ -282,18 +263,12 @@ namespace StartTranscriptionByTimer
                     Logger.LogError(retryExceededErrorMessage);
                     await ProcessFailedFileAsync(fileName, errorMessage, errorFileName).ConfigureAwait(false);
                 }
-                else
-                {
-                    sbMessage.RetryCount += 1;
-                    var messageDelay = GetMessageDelayTime(sbMessage.RetryCount);
-                    var newMessage = new Message(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(sbMessage)));
-                    await ServiceBusUtilities.SendServiceBusMessageAsync(StartQueueClientInstance, newMessage, Logger, messageDelay).ConfigureAwait(false);
-                }
             }
         }
 
         private async Task WriteFailedJobLogToStorageAsync(IEnumerable<ServiceBusMessage> serviceBusMessages, string errorMessage, string jobName)
         {
+            Logger.LogError(errorMessage);
             var jobErrorFileName = $"jobs/{jobName}.txt";
             await StorageConnectorInstance.WriteTextFileToBlobAsync(errorMessage, ErrorReportContaineName, jobErrorFileName, Logger).ConfigureAwait(false);
 

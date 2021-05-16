@@ -14,9 +14,9 @@ namespace Connector
 
     public class DatabaseConnector : IDisposable
     {
-        private ILogger Logger;
+        private readonly ILogger Logger;
 
-        private string DBConnectionString;
+        private readonly string DBConnectionString;
 
         private SqlConnection Connection;
 
@@ -53,7 +53,7 @@ namespace Connector
                     command.Parameters.AddWithValue("@name", fileName);
                     command.Parameters.AddWithValue("@source", speechTranscript.Source);
                     command.Parameters.AddWithValue("@timestamp", speechTranscript.Timestamp);
-                    command.Parameters.AddWithValue("@duration", speechTranscript.Duration);
+                    command.Parameters.AddWithValue("@duration", speechTranscript.Duration ?? string.Empty);
                     command.Parameters.AddWithValue("@numberOfChannels", speechTranscript.CombinedRecognizedPhrases.Count());
                     command.Parameters.AddWithValue("@approximateCost", approximateCost);
 
@@ -110,33 +110,31 @@ namespace Connector
             var query = "INSERT INTO dbo.CombinedRecognizedPhrases (ID, TranscriptionID, Channel, Lexical, Itn, MaskedItn, Display, SentimentPositive, SentimentNeutral, SentimentNegative)" +
                 " VALUES (@id, @transcriptionID, @channel, @lexical, @itn, @maskedItn, @display, @sentimentPositive, @sentimentNeutral, @sentimentNegative)";
 
-            using (var command = new SqlCommand(query, Connection))
+            using var command = new SqlCommand(query, Connection);
+            command.Parameters.AddWithValue("@id", combinedRecognizedPhraseID);
+            command.Parameters.AddWithValue("@transcriptionID", transcriptionId);
+            command.Parameters.AddWithValue("@channel", channel);
+
+            command.Parameters.AddWithValue("@lexical", combinedPhrases.Lexical ?? string.Empty);
+            command.Parameters.AddWithValue("@itn", combinedPhrases.ITN ?? string.Empty);
+            command.Parameters.AddWithValue("@maskedItn", combinedPhrases.MaskedITN ?? string.Empty);
+            command.Parameters.AddWithValue("@display", combinedPhrases.Display ?? string.Empty);
+
+            command.Parameters.AddWithValue("@sentimentPositive", combinedPhrases?.Sentiment?.Positive ?? 0f);
+            command.Parameters.AddWithValue("@sentimentNeutral", combinedPhrases?.Sentiment?.Neutral ?? 0f);
+            command.Parameters.AddWithValue("@sentimentNegative", combinedPhrases?.Sentiment?.Negative ?? 0f);
+
+            var result = await command.ExecuteNonQueryAsync().ConfigureAwait(false);
+
+            if (result < 0)
             {
-                command.Parameters.AddWithValue("@id", combinedRecognizedPhraseID);
-                command.Parameters.AddWithValue("@transcriptionID", transcriptionId);
-                command.Parameters.AddWithValue("@channel", channel);
-
-                command.Parameters.AddWithValue("@lexical", combinedPhrases.Lexical ?? string.Empty);
-                command.Parameters.AddWithValue("@itn", combinedPhrases.ITN ?? string.Empty);
-                command.Parameters.AddWithValue("@maskedItn", combinedPhrases.MaskedITN ?? string.Empty);
-                command.Parameters.AddWithValue("@display", combinedPhrases.Display ?? string.Empty);
-
-                command.Parameters.AddWithValue("@sentimentPositive", combinedPhrases?.Sentiment?.Positive ?? 0f);
-                command.Parameters.AddWithValue("@sentimentNeutral", combinedPhrases?.Sentiment?.Neutral ?? 0f);
-                command.Parameters.AddWithValue("@sentimentNegative", combinedPhrases?.Sentiment?.Negative ?? 0f);
-
-                var result = await command.ExecuteNonQueryAsync().ConfigureAwait(false);
-
-                if (result < 0)
+                Logger.LogInformation("Did not store combined phrase in Db, command did not update table");
+            }
+            else
+            {
+                foreach (var phrase in recognizedPhrases)
                 {
-                    Logger.LogInformation("Did not store combined phrase in Db, command did not update table");
-                }
-                else
-                {
-                    foreach (var phrase in recognizedPhrases)
-                    {
-                        await StoreRecognizedPhraseAsync(combinedRecognizedPhraseID, phrase).ConfigureAwait(false);
-                    }
+                    await StoreRecognizedPhraseAsync(combinedRecognizedPhraseID, phrase).ConfigureAwait(false);
                 }
             }
         }
@@ -147,28 +145,26 @@ namespace Connector
             var query = "INSERT INTO dbo.RecognizedPhrases (ID, CombinedRecognizedPhraseID, RecognitionStatus, Speaker, Channel, Offset, Duration)" +
                 " VALUES (@id, @combinedRecognizedPhraseID, @recognitionStatus, @speaker, @channel, @offset, @duration)";
 
-            using (var command = new SqlCommand(query, Connection))
+            using var command = new SqlCommand(query, Connection);
+            command.Parameters.AddWithValue("@id", phraseId);
+            command.Parameters.AddWithValue("@combinedRecognizedPhraseID", combinedPhraseID);
+            command.Parameters.AddWithValue("@recognitionStatus", recognizedPhrase.RecognitionStatus);
+            command.Parameters.AddWithValue("@speaker", recognizedPhrase.Speaker);
+            command.Parameters.AddWithValue("@channel", recognizedPhrase.Channel);
+            command.Parameters.AddWithValue("@offset", recognizedPhrase.Offset);
+            command.Parameters.AddWithValue("@duration", recognizedPhrase.Duration);
+
+            var result = await command.ExecuteNonQueryAsync().ConfigureAwait(false);
+
+            if (result < 0)
             {
-                command.Parameters.AddWithValue("@id", phraseId);
-                command.Parameters.AddWithValue("@combinedRecognizedPhraseID", combinedPhraseID);
-                command.Parameters.AddWithValue("@recognitionStatus", recognizedPhrase.RecognitionStatus);
-                command.Parameters.AddWithValue("@speaker", recognizedPhrase.Speaker);
-                command.Parameters.AddWithValue("@channel", recognizedPhrase.Channel);
-                command.Parameters.AddWithValue("@offset", recognizedPhrase.Offset);
-                command.Parameters.AddWithValue("@duration", recognizedPhrase.Duration);
-
-                var result = await command.ExecuteNonQueryAsync().ConfigureAwait(false);
-
-                if (result < 0)
+                Logger.LogInformation("Did not store phrase in Db, command did not update table");
+            }
+            else
+            {
+                foreach (var nBestResult in recognizedPhrase.NBest)
                 {
-                    Logger.LogInformation("Did not store phrase in Db, command did not update table");
-                }
-                else
-                {
-                    foreach (var nBestResult in recognizedPhrase.NBest)
-                    {
-                        await StoreNBestAsync(phraseId, nBestResult).ConfigureAwait(false);
-                    }
+                    await StoreNBestAsync(phraseId, nBestResult).ConfigureAwait(false);
                 }
             }
         }
@@ -179,37 +175,35 @@ namespace Connector
             var query = "INSERT INTO dbo.NBests (ID, RecognizedPhraseID, Confidence, Lexical, Itn, MaskedItn, Display, SentimentNegative, SentimentNeutral, SentimentPositive)" +
                 " VALUES (@id, @recognizedPhraseID, @confidence, @lexical, @itn, @maskedItn, @display, @sentimentNegative, @sentimentNeutral, @sentimentPositive)";
 
-            using (var command = new SqlCommand(query, Connection))
+            using var command = new SqlCommand(query, Connection);
+            command.Parameters.AddWithValue("@id", nBestID);
+            command.Parameters.AddWithValue("@recognizedPhraseID", recognizedPhraseID);
+            command.Parameters.AddWithValue("@confidence", nBest.Confidence);
+            command.Parameters.AddWithValue("@lexical", nBest.Lexical);
+            command.Parameters.AddWithValue("@itn", nBest.ITN);
+            command.Parameters.AddWithValue("@maskedItn", nBest.MaskedITN);
+            command.Parameters.AddWithValue("@display", nBest.Display);
+
+            command.Parameters.AddWithValue("@sentimentNegative", nBest?.Sentiment?.Negative ?? 0f);
+            command.Parameters.AddWithValue("@sentimentNeutral", nBest?.Sentiment?.Neutral ?? 0f);
+            command.Parameters.AddWithValue("@sentimentPositive", nBest?.Sentiment?.Positive ?? 0f);
+
+            var result = await command.ExecuteNonQueryAsync().ConfigureAwait(false);
+
+            if (result < 0)
             {
-                command.Parameters.AddWithValue("@id", nBestID);
-                command.Parameters.AddWithValue("@recognizedPhraseID", recognizedPhraseID);
-                command.Parameters.AddWithValue("@confidence", nBest.Confidence);
-                command.Parameters.AddWithValue("@lexical", nBest.Lexical);
-                command.Parameters.AddWithValue("@itn", nBest.ITN);
-                command.Parameters.AddWithValue("@maskedItn", nBest.MaskedITN);
-                command.Parameters.AddWithValue("@display", nBest.Display);
-
-                command.Parameters.AddWithValue("@sentimentNegative", nBest?.Sentiment?.Negative ?? 0f);
-                command.Parameters.AddWithValue("@sentimentNeutral", nBest?.Sentiment?.Neutral ?? 0f);
-                command.Parameters.AddWithValue("@sentimentPositive", nBest?.Sentiment?.Positive ?? 0f);
-
-                var result = await command.ExecuteNonQueryAsync().ConfigureAwait(false);
-
-                if (result < 0)
+                Logger.LogInformation("Did not store nbest in Db, command did not update table");
+            }
+            else
+            {
+                if (nBest.Words == null)
                 {
-                    Logger.LogInformation("Did not store nbest in Db, command did not update table");
+                    return;
                 }
-                else
-                {
-                    if (nBest.Words == null)
-                    {
-                        return;
-                    }
 
-                    foreach (var word in nBest.Words)
-                    {
-                        await StoreWordsAsync(nBestID, word).ConfigureAwait(false);
-                    }
+                foreach (var word in nBest.Words)
+                {
+                    await StoreWordsAsync(nBestID, word).ConfigureAwait(false);
                 }
             }
         }
@@ -220,20 +214,18 @@ namespace Connector
             var query = "INSERT INTO dbo.Words (ID, NBestID, Word, Offset, Duration, Confidence)" +
                 " VALUES (@id, @nBestID, @word, @offset, @duration, @confidence)";
 
-            using (var command = new SqlCommand(query, Connection))
-            {
-                command.Parameters.AddWithValue("@id", wordID);
-                command.Parameters.AddWithValue("@nBestID", nBestId);
-                command.Parameters.AddWithValue("@word", word.Word);
-                command.Parameters.AddWithValue("@offset", word.Offset);
-                command.Parameters.AddWithValue("@duration", word.Duration);
-                command.Parameters.AddWithValue("@confidence", word.Confidence);
+            using var command = new SqlCommand(query, Connection);
+            command.Parameters.AddWithValue("@id", wordID);
+            command.Parameters.AddWithValue("@nBestID", nBestId);
+            command.Parameters.AddWithValue("@word", word.Word);
+            command.Parameters.AddWithValue("@offset", word.Offset);
+            command.Parameters.AddWithValue("@duration", word.Duration);
+            command.Parameters.AddWithValue("@confidence", word.Confidence);
 
-                var result = await command.ExecuteNonQueryAsync().ConfigureAwait(false);
-                if (result < 0)
-                {
-                    Logger.LogInformation("Did not Store word result in Db, command did not update table");
-                }
+            var result = await command.ExecuteNonQueryAsync().ConfigureAwait(false);
+            if (result < 0)
+            {
+                Logger.LogInformation("Did not Store word result in Db, command did not update table");
             }
         }
     }

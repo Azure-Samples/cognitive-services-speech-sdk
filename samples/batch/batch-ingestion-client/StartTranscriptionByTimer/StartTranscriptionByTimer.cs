@@ -18,7 +18,7 @@ namespace StartTranscriptionByTimer
     {
         private const double MessageReceiveTimeoutInSeconds = 60;
 
-        private static MessageReceiver MessageReceiverInstance = new MessageReceiver(new ServiceBusConnectionStringBuilder(StartTranscriptionEnvironmentVariables.StartTranscriptionServiceBusConnectionString), prefetchCount: StartTranscriptionEnvironmentVariables.MessagesPerFunctionExecution);
+        private static readonly MessageReceiver MessageReceiverInstance = new (new ServiceBusConnectionStringBuilder(StartTranscriptionEnvironmentVariables.StartTranscriptionServiceBusConnectionString), prefetchCount: StartTranscriptionEnvironmentVariables.MessagesPerFunctionExecution);
 
         [FunctionName("StartTranscriptionByTimer")]
         public static async Task Run([TimerTrigger("0 */2 * * * *")] TimerInfo myTimer, ILogger log)
@@ -35,11 +35,6 @@ namespace StartTranscriptionByTimer
 
             var startDateTime = DateTime.UtcNow;
             log.LogInformation($"C# Timer trigger function v3 executed at: {startDateTime}. Next occurrence on {myTimer.Schedule.GetNextOccurrence(startDateTime)}.");
-
-            if (!string.IsNullOrEmpty(StartTranscriptionEnvironmentVariables.SecondaryLocale) && !StartTranscriptionEnvironmentVariables.SecondaryLocale.Equals("None", StringComparison.OrdinalIgnoreCase))
-            {
-                log.LogWarning($"Language identification is not supported for timer-based transcription creation.");
-            }
 
             var validServiceBusMessages = new List<Message>();
             var transcriptionHelper = new StartTranscriptionHelper(log);

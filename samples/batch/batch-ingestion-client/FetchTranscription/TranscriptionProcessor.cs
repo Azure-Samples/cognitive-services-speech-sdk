@@ -21,11 +21,11 @@ namespace FetchTranscriptionFunction
 
     public static class TranscriptionProcessor
     {
-        private static StorageConnector StorageConnectorInstance = new StorageConnector(FetchTranscriptionEnvironmentVariables.AzureWebJobsStorage);
+        private static readonly StorageConnector StorageConnectorInstance = new (FetchTranscriptionEnvironmentVariables.AzureWebJobsStorage);
 
-        private static QueueClient StartQueueClientInstance = new QueueClient(new ServiceBusConnectionStringBuilder(FetchTranscriptionEnvironmentVariables.StartTranscriptionServiceBusConnectionString));
+        private static readonly QueueClient StartQueueClientInstance = new (new ServiceBusConnectionStringBuilder(FetchTranscriptionEnvironmentVariables.StartTranscriptionServiceBusConnectionString));
 
-        private static QueueClient FetchQueueClientInstance = new QueueClient(new ServiceBusConnectionStringBuilder(FetchTranscriptionEnvironmentVariables.FetchTranscriptionServiceBusConnectionString));
+        private static readonly QueueClient FetchQueueClientInstance = new (new ServiceBusConnectionStringBuilder(FetchTranscriptionEnvironmentVariables.FetchTranscriptionServiceBusConnectionString));
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "Catch general exception to allow manual retrying.")]
         public static async Task ProcessTranscriptionJobAsync(TranscriptionStartedMessage serviceBusMessage, ILogger log)
@@ -45,7 +45,7 @@ namespace FetchTranscriptionFunction
 
             try
             {
-                var transcription = await BatchClient.GetTranscriptionAsync(transcriptionLocation, subscriptionKey, log).ConfigureAwait(false);
+                var transcription = await BatchClient.GetTranscriptionAsync(transcriptionLocation, subscriptionKey).ConfigureAwait(false);
                 log.LogInformation($"Polled {serviceBusMessage.PollingCounter} time(s) for results in total, delay job for {messageDelayTime.TotalMinutes} minutes if not completed.");
                 switch (transcription.Status)
                 {
@@ -65,30 +65,30 @@ namespace FetchTranscriptionFunction
                         break;
                 }
             }
-            catch (WebException e)
-            {
-                if (e.Response != null && (BatchClient.IsThrottledOrTimeoutStatusCode(((HttpWebResponse)e.Response).StatusCode) || ((HttpWebResponse)e.Response).StatusCode == HttpStatusCode.InternalServerError))
-                {
-                    log.LogInformation("Timeout or throttled, retrying message.");
-                    await ServiceBusUtilities.SendServiceBusMessageAsync(FetchQueueClientInstance, serviceBusMessage.CreateMessageString(), log, messageDelayTime).ConfigureAwait(false);
-                }
-                else
-                {
-                    var errorMessage = $"Fetch Transcription in job with name {jobName} at {transcriptionLocation} failed with WebException {e} and message {e.Message}.";
-                    log.LogError($"{errorMessage}");
-                    await RetryOrFailJobAsync(serviceBusMessage, errorMessage, jobName, transcriptionLocation, subscriptionKey, log).ConfigureAwait(false);
-                }
-            }
             catch (TimeoutException e)
             {
-                log.LogInformation($"Timeout - re-enqueueing fetch transcription message. Exception message: {e.Message}");
-                await ServiceBusUtilities.SendServiceBusMessageAsync(FetchQueueClientInstance, serviceBusMessage.CreateMessageString(), log, messageDelayTime).ConfigureAwait(false);
+                await RetryOrFailJobAsync(serviceBusMessage, $"Exception {e} in job {jobName} at {transcriptionLocation}: {e.Message}", jobName, transcriptionLocation, subscriptionKey, HttpStatusCode.RequestTimeout, log).ConfigureAwait(false);
             }
             catch (Exception e)
             {
-                var errorMessage = $"Fetch Transcription in job with name {jobName} at {transcriptionLocation}  failed with Exception {e} and message {e.Message}.";
-                log.LogError($"{errorMessage}");
-                await RetryOrFailJobAsync(serviceBusMessage, errorMessage, jobName, transcriptionLocation, subscriptionKey, log).ConfigureAwait(false);
+                HttpStatusCode? httpStatusCode = null;
+                if (e is HttpStatusCodeException statusCodeException && statusCodeException.HttpStatusCode.HasValue)
+                {
+                    httpStatusCode = statusCodeException.HttpStatusCode.Value;
+                }
+                else if (e is WebException webException && webException.Response != null)
+                {
+                    httpStatusCode = ((HttpWebResponse)webException.Response).StatusCode;
+                }
+
+                if (httpStatusCode.HasValue && httpStatusCode.Value.IsRetryableStatus())
+                {
+                    await RetryOrFailJobAsync(serviceBusMessage, $"Exception {e} in job {jobName} at {transcriptionLocation}: {e.Message}", jobName, transcriptionLocation, subscriptionKey, httpStatusCode.Value, log).ConfigureAwait(false);
+                }
+                else
+                {
+                    await WriteFailedJobLogToStorageAsync(serviceBusMessage, $"Exception {e} in job {jobName} at {transcriptionLocation}: {e.Message}", jobName, log).ConfigureAwait(false);
+                }
             }
         }
 
@@ -117,13 +117,13 @@ namespace FetchTranscriptionFunction
 
             log.LogInformation(logMessage);
 
-            var transcriptionFiles = await BatchClient.GetTranscriptionFilesAsync(transcriptionLocation, subscriptionKey, log).ConfigureAwait(false);
+            var transcriptionFiles = await BatchClient.GetTranscriptionFilesAsync(transcriptionLocation, subscriptionKey).ConfigureAwait(false);
 
             var errorReportOutput = logMessage;
             var reportFile = transcriptionFiles.Values.Where(t => t.Kind == TranscriptionFileKind.TranscriptionReport).FirstOrDefault();
             if (reportFile?.Links?.ContentUrl != null)
             {
-                var reportFileContent = await BatchClient.GetTranscriptionReportFileFromSasAsync(reportFile.Links.ContentUrl, log).ConfigureAwait(false);
+                var reportFileContent = await BatchClient.GetTranscriptionReportFileFromSasAsync(reportFile.Links.ContentUrl).ConfigureAwait(false);
                 errorReportOutput += $"\nReport file: \n {JsonConvert.SerializeObject(reportFileContent)}";
             }
 
@@ -166,10 +166,9 @@ namespace FetchTranscriptionFunction
                 }
             }
 
-            await BatchClient.DeleteTranscriptionAsync(transcriptionLocation, subscriptionKey, log).ConfigureAwait(false);
+            await BatchClient.DeleteTranscriptionAsync(transcriptionLocation, subscriptionKey).ConfigureAwait(false);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "Catching general exception to log exception message to file.")]
         private static async Task ProcessSucceededTranscriptionAsync(string transcriptionLocation, string subscriptionKey, TranscriptionStartedMessage serviceBusMessage, string jobName, ILogger log)
         {
             log.LogInformation($"Got succeeded transcription for job {jobName}");
@@ -180,7 +179,7 @@ namespace FetchTranscriptionFunction
 
             var consolidatedContainer = FetchTranscriptionEnvironmentVariables.ConsolidatedFilesOutputContainer;
 
-            var transcriptionFiles = await BatchClient.GetTranscriptionFilesAsync(transcriptionLocation, subscriptionKey, log).ConfigureAwait(false);
+            var transcriptionFiles = await BatchClient.GetTranscriptionFilesAsync(transcriptionLocation, subscriptionKey).ConfigureAwait(false);
             log.LogInformation($"Received transcription files.");
             var resultFiles = transcriptionFiles.Values.Where(t => t.Kind == TranscriptionFileKind.Transcription);
             var containsMultipleTranscriptions = resultFiles.Skip(1).Any();
@@ -197,7 +196,7 @@ namespace FetchTranscriptionFunction
             {
                 log.LogInformation($"Getting result for file {resultFile.Name}");
 
-                var transcriptionResult = await BatchClient.GetSpeechTranscriptFromSasAsync(resultFile.Links.ContentUrl, log).ConfigureAwait(false);
+                var transcriptionResult = await BatchClient.GetSpeechTranscriptFromSasAsync(resultFile.Links.ContentUrl).ConfigureAwait(false);
 
                 if (string.IsNullOrEmpty(transcriptionResult.Source))
                 {
@@ -273,7 +272,7 @@ namespace FetchTranscriptionFunction
 
                 if (FetchTranscriptionEnvironmentVariables.UseSqlDatabase)
                 {
-                    var duration = XmlConvert.ToTimeSpan(transcriptionResult.Duration);
+                    var duration = string.IsNullOrEmpty(transcriptionResult.Duration) ? TimeSpan.Zero : XmlConvert.ToTimeSpan(transcriptionResult.Duration);
                     var approximatedCost = CostEstimation.GetCostEstimation(
                         duration,
                         transcriptionResult.CombinedRecognizedPhrases.Count(),
@@ -311,24 +310,19 @@ namespace FetchTranscriptionFunction
             }
 
             var reportFile = transcriptionFiles.Values.Where(t => t.Kind == TranscriptionFileKind.TranscriptionReport).FirstOrDefault();
-            var reportFileContent = await BatchClient.GetTranscriptionReportFileFromSasAsync(reportFile.Links.ContentUrl, log).ConfigureAwait(false);
+            var reportFileContent = await BatchClient.GetTranscriptionReportFileFromSasAsync(reportFile.Links.ContentUrl).ConfigureAwait(false);
             await ProcessReportFileAsync(reportFileContent, log).ConfigureAwait(false);
 
-            BatchClient.DeleteTranscriptionAsync(transcriptionLocation, subscriptionKey, log).ConfigureAwait(false).GetAwaiter().GetResult();
+            BatchClient.DeleteTranscriptionAsync(transcriptionLocation, subscriptionKey).ConfigureAwait(false).GetAwaiter().GetResult();
         }
 
         private static bool IsRetryableError(string errorCode)
         {
-            switch (errorCode)
+            return errorCode switch
             {
-                case "InvalidUri":
-                case "Internal":
-                case "Timeout":
-                case "Transient":
-                    return true;
-            }
-
-            return false;
+                "InvalidUri" or "Internal" or "Timeout" or "Transient" => true,
+                _ => false,
+            };
         }
 
         private static async Task ProcessReportFileAsync(TranscriptionReportFile transcriptionReportFile, ILogger log)
@@ -369,25 +363,27 @@ namespace FetchTranscriptionFunction
             }
         }
 
-        private static async Task RetryOrFailJobAsync(TranscriptionStartedMessage message, string error, string jobName, string transcriptionLocation, string subscriptionKey, ILogger log)
+        private static async Task RetryOrFailJobAsync(TranscriptionStartedMessage message, string errorMessage, string jobName, string transcriptionLocation, string subscriptionKey, HttpStatusCode statusCode, ILogger log)
         {
+            log.LogError(errorMessage);
             message.FailedExecutionCounter += 1;
             var messageDelayTime = GetMessageDelayTime(message.PollingCounter);
 
-            if (message.FailedExecutionCounter > FetchTranscriptionEnvironmentVariables.RetryLimit)
-            {
-                await WriteFailedJobLogToStorageAsync(message, error, jobName, log).ConfigureAwait(false);
-                await BatchClient.DeleteTranscriptionAsync(transcriptionLocation, subscriptionKey, log).ConfigureAwait(false);
-            }
-            else
+            if (message.FailedExecutionCounter <= FetchTranscriptionEnvironmentVariables.RetryLimit || statusCode == HttpStatusCode.TooManyRequests)
             {
                 log.LogInformation($"Retrying..");
                 await ServiceBusUtilities.SendServiceBusMessageAsync(FetchQueueClientInstance, message.CreateMessageString(), log, messageDelayTime).ConfigureAwait(false);
+            }
+            else
+            {
+                await WriteFailedJobLogToStorageAsync(message, errorMessage, jobName, log).ConfigureAwait(false);
+                await BatchClient.DeleteTranscriptionAsync(transcriptionLocation, subscriptionKey).ConfigureAwait(false);
             }
         }
 
         private static async Task WriteFailedJobLogToStorageAsync(TranscriptionStartedMessage transcriptionStartedMessage, string errorMessage, string jobName, ILogger log)
         {
+            log.LogError(errorMessage);
             var errorOutputContainer = FetchTranscriptionEnvironmentVariables.ErrorReportOutputContainer;
 
             var jobErrorFileName = $"jobs/{jobName}.txt";
