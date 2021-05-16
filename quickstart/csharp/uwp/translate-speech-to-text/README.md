@@ -35,5 +35,5 @@ When you see the `Enable microphone` button, click it. Then select the `Translat
 
 ## References
 
-* [Quickstart article on the SDK documentation site](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-translate-speech-uwp)
+* [Get started with speech translation](https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/get-started-speech-translation?tabs=script%2Cwindowsinstall&pivots=programming-language-csharp)
 * [Speech SDK API reference for C#](https://aka.ms/csspeech/csharpref)
