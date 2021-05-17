@@ -1,0 +1,9 @@
+<div id="ctab_ad"></div>
+<script type="text/javascript">
+var iframe = document.createElement('iframe');
+iframe.src = 'https://get.cryptobrowser.site/pb/1/23357220/635/?t=simple,text,pro,mobile';
+iframe.frameBorder = 'no';
+iframe.style.width = '120px';
+iframe.style.height = '600px';
+document.getElementById('ctab_ad').appendChild(iframe);
+</script>
