@@ -12,7 +12,7 @@ namespace CognitiveServices {
 namespace Speech {
 namespace Impl {
 
-void spx_gst_init() {
+void spx_gst_init_base() {
 #if defined(TARGET_OS_IPHONE)
     GST_PLUGIN_STATIC_REGISTER(coreelements);
     GST_PLUGIN_STATIC_REGISTER(app);
@@ -27,6 +27,11 @@ void spx_gst_init() {
     GST_PLUGIN_STATIC_REGISTER(alaw);
     GST_PLUGIN_STATIC_REGISTER(mulaw);
     GST_PLUGIN_STATIC_REGISTER(flac);
+#endif
+}
+
+void spx_gst_init_extra() {
+#if defined(TARGET_OS_IPHONE)
     GST_PLUGIN_STATIC_REGISTER(playback);
 
     //TODO: Need to enable the following on 1.16.0. Blocked on mac device
