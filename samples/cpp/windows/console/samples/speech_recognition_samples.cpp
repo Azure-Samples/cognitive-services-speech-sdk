@@ -638,6 +638,11 @@ void PronunciationAssessmentWithMicrophone()
     // Note: The pronunciation assessment feature is currently only available on en-US language.
     auto config = SpeechConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
+    // The pronunciation assessment service has a longer default end silence timeout (5 seconds) than normal STT
+    // as the pronunciation assessment is widely used in education scenario where kids have longer break in reading.
+    // You can adjust the end silence timeout based on your real scenario.
+    config->SetProperty(PropertyId::SpeechServiceConnection_EndSilenceTimeoutMs, "3000");
+
     std::string referenceText = "";
     // create pronunciation assessment config, set grading system, granularity and if enable miscue based on your requirement.
     auto pronunciationConfig = PronunciationAssessmentConfig::Create(referenceText,

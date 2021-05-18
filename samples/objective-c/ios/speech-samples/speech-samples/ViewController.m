@@ -4,6 +4,7 @@
 //
 
 #import "ViewController.h"
+#import "AudioRecorder.h"
 #import <AVFoundation/AVFoundation.h>
 #import <MicrosoftCognitiveServicesSpeech/SPXSpeechApi.h>
 
@@ -11,6 +12,7 @@
     NSString *speechKey;
     NSString *serviceRegion;
     NSString *pronunciationAssessmentReferenceText;
+    AudioRecorder *recorder;
 }
 
 @property (strong, nonatomic) IBOutlet UIButton *recognizeFromFileButton;
@@ -95,11 +97,11 @@
 
     self.pronunciationAssessFromMicButton = [UIButton buttonWithType:UIButtonTypeSystem];
     [self.pronunciationAssessFromMicButton addTarget:self action:@selector(pronunciationAssessFromMicButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
-    [self.pronunciationAssessFromMicButton setTitle:[NSString stringWithFormat:@"Start pronuciation assessment \n (Read out \"%@\")", pronunciationAssessmentReferenceText] forState:UIControlStateNormal];
+    [self.pronunciationAssessFromMicButton setTitle:[NSString stringWithFormat:@"Start pronunciation assessment \n (Read out \"%@\")", pronunciationAssessmentReferenceText] forState:UIControlStateNormal];
     [self.pronunciationAssessFromMicButton titleLabel].lineBreakMode = NSLineBreakByWordWrapping;
     [self.pronunciationAssessFromMicButton titleLabel].textAlignment = NSTextAlignmentCenter;
     [self.pronunciationAssessFromMicButton setFrame:CGRectMake(50.0, 450.0, 300.0, 50.0)];
-    self.pronunciationAssessFromMicButton.accessibilityIdentifier = @"pronuciation_assessment_button";
+    self.pronunciationAssessFromMicButton.accessibilityIdentifier = @"pronunciation_assessment_button";
     [self.view addSubview:self.pronunciationAssessFromMicButton];
 
     self.recognitionResultLabel = [[UILabel alloc] initWithFrame:CGRectMake(50.0, 350.0, 300.0, 400.0)];
@@ -154,9 +156,18 @@
 }
 
 - (IBAction)pronunciationAssessFromMicButtonTapped:(UIButton *)sender {
-    dispatch_async(dispatch_get_global_queue(QOS_CLASS_DEFAULT, 0), ^{
-        [self pronunciationAssessFromMicrophone];
-    });
+    if ([[(UIButton *)sender currentTitle]isEqualToString:@"Stop recording"])
+    {
+        [self->recorder stop];
+        [self.pronunciationAssessFromMicButton setTitle:[NSString stringWithFormat:@"Start pronunciation assessment \n (Read out \"%@\")", self->pronunciationAssessmentReferenceText] forState:UIControlStateNormal];
+    }
+    else
+    {
+        [self.pronunciationAssessFromMicButton setTitle:@"Stop recording" forState:UIControlStateNormal];
+        dispatch_async(dispatch_get_global_queue(QOS_CLASS_DEFAULT, 0), ^{
+            [self pronunciationAssessFromMicrophone];
+        });
+    }
 }
 
 /*
@@ -650,9 +661,11 @@
         return;
     }
 
-    [self updateRecognitionStatusText:(@"Assessing...")];
+    SPXPushAudioInputStream *stream = [[SPXPushAudioInputStream alloc] init];
+    self->recorder = [[AudioRecorder alloc]initWithPushStream:stream];
+    SPXAudioConfiguration *audioConfig = [[SPXAudioConfiguration alloc]initWithStreamInput:stream];
 
-    SPXSpeechRecognizer* speechRecognizer = [[SPXSpeechRecognizer alloc] init:speechConfig];
+    SPXSpeechRecognizer* speechRecognizer = [[SPXSpeechRecognizer alloc] initWithSpeechConfiguration:speechConfig audioConfiguration:audioConfig];
     if (!speechRecognizer) {
         NSLog(@"Could not create speech recognizer");
         [self updateRecognitionResultText:(@"Speech Recognition Error")];
@@ -667,6 +680,8 @@
                                              enableMiscue:true];
 
     [pronunicationConfig applyToRecognizer:speechRecognizer];
+    [self updateRecognitionStatusText:(@"Assessing...")];
+    [self->recorder record];
 
     SPXSpeechRecognitionResult *speechResult = [speechRecognizer recognizeOnce];
     if (SPXResultReason_Canceled == speechResult.reason) {
@@ -682,6 +697,8 @@
         NSLog(@"There was an error.");
         [self updateRecognitionErrorText:(@"Speech Recognition Error")];
     }
+
+    [self->recorder stop];
 }
 
 - (void)updateRecognitionResultText:(NSString *) resultText {

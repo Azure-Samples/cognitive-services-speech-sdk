@@ -955,6 +955,11 @@ namespace MicrosoftSpeechSDKSamples
             // Note: The pronunciation assessment feature is currently only available on en-US language.
             var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
+            // The pronunciation assessment service has a longer default end silence timeout (5 seconds) than normal STT
+            // as the pronunciation assessment is widely used in education scenario where kids have longer break in reading.
+            // You can adjust the end silence timeout based on your real scenario.
+            config.SetProperty(PropertyId.SpeechServiceConnection_EndSilenceTimeoutMs, "3000");
+
             var referenceText = "";
             // create pronunciation assessment config, set grading system, granularity and if enable miscue based on your requirement.
             var pronunciationConfig = new PronunciationAssessmentConfig(referenceText,
