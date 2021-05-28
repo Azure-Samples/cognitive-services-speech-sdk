@@ -3,6 +3,7 @@
 <head>
   <title>Microsoft Cognitive Services Speech SDK JavaScript Sample for Speech Synthesis</title>
   <meta charset="utf-8" />
+  <script src="https://ajax.aspnetcdn.com/ajax/jquery/jquery-3.6.0.min.js"></script>
   <style>
     body {
       font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', 'Helvetica Neue', sans-serif;
@@ -112,6 +113,7 @@
             <option value="francecentral">France Central</option>
             <option value="uksouth">UK South</option>
             <option value="chinaeast2">China East2 (azure.cn)</option>
+            <option value="chinanorth2">China North2 (azure.cn)</option>
           </select>
         </td>
       </tr>
@@ -158,6 +160,13 @@
       <tr>
         <td align="right" valign="top"><label for="resultsDiv">Results</label></td>
         <td><textarea id="resultsDiv" readonly style="display: inline-block;width:500px;height:50px"></textarea></td>
+      </tr>
+      <tr>
+        <td align="right" valign="top"><label for="talkingHeadDiv">
+          <a href="https://docs.microsoft.com/azure/cognitive-services/speech-service/how-to-speech-synthesis-viseme?pivots=programming-language-javascript"
+            rel="noreferrer noopener"
+            target="_blank">Talking Head</a></label></td>
+        <td><div id="talkingHeadDiv" style="display: inline-block;width:800px;"></div></td>
       </tr>
       <tr>
         <td align="right" valign="top"><label for="eventsDiv">Events</label></td>
@@ -212,8 +221,10 @@
   <!-- Browser Hooks -->
   <script>
     // status fields and start button in UI
-    var resultsDiv, eventsDiv;
-    var highlightDiv;
+    var resultsDiv,
+        eventsDiv,
+        talkingHeadDiv,
+        highlightDiv;
     var startSynthesisAsyncButton, pauseButton, resumeButton, downloadButton;
     var updateVoiceListButton;
 
@@ -227,6 +238,26 @@
     var player;
     var wordBoundaryList = [];
 
+    function getExtensionFromFormat(format) {
+      format = format.toLowerCase();
+      if (format.includes('mp3')) {
+        return 'mp3';
+      } else if (format.includes('ogg')) {
+        return 'ogg';
+      } else if (format.includes('webm')) {
+        return 'webm';
+      } else if (format.includes('ogg')) {
+        return 'ogg';
+      } else if (format.includes('silk')) {
+        return 'silk';
+      } else if (format.includes('riff')) {
+        return 'wav';
+      } else {
+        return 'pcm';
+      }
+    }
+
+
     document.addEventListener("DOMContentLoaded", function () {
       startSynthesisAsyncButton = document.getElementById("startSynthesisAsyncButton");
       updateVoiceListButton = document.getElementById("updateVoiceListButton");
@@ -239,6 +270,7 @@
       eventsDiv = document.getElementById("eventsDiv");
       voiceOptions = document.getElementById("voiceOptions");
       isSsml = document.getElementById("isSSML");
+      talkingHeadDiv = document.getElementById("talkingHeadDiv");
       highlightDiv = document.getElementById("highlightDiv");
 
       setInterval(function () {
@@ -281,7 +313,7 @@
         request.onload = function() {
           if (request.status >= 200 && request.status < 400) {
             const response = this.response;
-            const defaultVoice = "AriaNeural";
+            const defaultVoice = "JennyNeural";
             let selectId;
             const data = JSON.parse(response);
             voiceOptions.innerHTML = "";
@@ -315,8 +347,6 @@
       });
 
       startSynthesisAsyncButton.addEventListener("click", function () {
-        startSynthesisAsyncButton.disabled = true;
-        downloadButton.disabled = true;
         resultsDiv.innerHTML = "";
         eventsDiv.innerHTML = "";
         wordBoundaryList = [];
@@ -338,6 +368,10 @@
         speechConfig.speechSynthesisOutputFormat = formatOptions.value;
 
         player = new SpeechSDK.SpeakerAudioDestination();
+        player.onAudioStart = function(_) {
+          window.console.log("playback started");
+          setTimeout(function(){ $("svg path :first-child").each( function(i) {this.beginElement();}); }, 0.5);
+        }
         player.onAudioEnd = function (_) {
           window.console.log("playback finished");
           eventsDiv.innerHTML += "playback finished" + "\r\n";
@@ -399,6 +433,18 @@
           wordBoundaryList.push(e);
         };
 
+        synthesizer.visemeReceived = function (s, e) {
+          window.console.log(e);
+          eventsDiv.innerHTML += "(Viseme), Audio offset: " + e.audioOffset / 10000 + "ms. Viseme ID: " + e.visemeId + '\n';
+          talkingHeadDiv.innerHTML = e.animation.replaceAll("begin=\"0.5s\"", "begin=\"indefinite\"");
+          $("svg").width('500px').height('500px');
+        }
+
+        synthesizer.bookmarkReached = function (s, e) {
+          window.console.log(e);
+          eventsDiv.innerHTML +=  "(Bookmark reached), Audio offset: " + e.audioOffset / 10000 + "ms. Bookmark text: " + e.text + '\n';
+        }
+
         const complete_cb = function (result) {
           if (result.reason === SpeechSDK.ResultReason.SynthesizingAudioCompleted) {
             resultsDiv.innerHTML += "synthesis finished";
@@ -417,6 +463,15 @@
           synthesizer.close();
           synthesizer = undefined;
         };
+
+        if (!synthesisText.value) {
+          alert("Please enter synthesis content.");
+          return;
+        }
+
+        startSynthesisAsyncButton.disabled = true;
+        downloadButton.disabled = true;
+
         if (isSsml.checked) {
           synthesizer.speakSsmlAsync(synthesisText.value,
                   complete_cb,
@@ -429,18 +484,11 @@
       });
 
       downloadButton.addEventListener("click", function () {
-        startSynthesisAsyncButton.disabled = true;
-        downloadButton.disabled = true;
         resultsDiv.innerHTML = "";
         eventsDiv.innerHTML = "";
         synthesisText = document.getElementById("synthesisText");
 
-        var speechConfig,
-            audioConfig,
-            outputStream,
-            pushStreamCallback,
-            wavFragments = {},
-            currentFragment = 0;
+        var speechConfig;
 
         // if we got an authorization token, use the token. Otherwise use the provided subscription key
         if (authorizationToken) {
@@ -456,47 +504,7 @@
         speechConfig.speechSynthesisVoiceName = voiceOptions.value;
         speechConfig.speechSynthesisOutputFormat = formatOptions.value;
 
-        pushStreamCallback = {
-            write: function (dataBuffer) {
-                wavFragments[currentFragment] = dataBuffer;
-                currentFragment += 1;
-            },
-            close: function () {
-                var byteCount = 0,
-                    sentAudio,
-                    a,
-                    url;
-
-                for (i = 0; i < currentFragment; i += 1) {
-                    byteCount += wavFragments[i].byteLength;
-                }
-
-                // Output array.
-                sentAudio = new window.Uint8Array(byteCount);
-
-                byteCount = 0;
-                for (i = 0; i < currentFragment; i += 1) {
-                    sentAudio.set(new window.Uint8Array(wavFragments[i]), byteCount);
-                    byteCount += wavFragments[i].byteLength;
-                }
-                a = document.createElement('a');
-                url = window.URL.createObjectURL(new Blob([sentAudio]));
-                a.href = url;
-                a.download = 'synth.mp3';
-                document.body.appendChild(a);
-                a.click();
-                setTimeout(function () {
-                    document.body.removeChild(a);
-                    window.URL.revokeObjectURL(url);
-                }, 0);
-            }
-        };
-
-        outputStream = SpeechSDK.PushAudioOutputStream.create(pushStreamCallback);
-
-        audioConfig = SpeechSDK.AudioConfig.fromStreamOutput(outputStream);
-
-        synthesizer = new SpeechSDK.SpeechSynthesizer(speechConfig, audioConfig);
+        synthesizer = new SpeechSDK.SpeechSynthesizer(speechConfig, null);
 
         synthesizer.SynthesisCanceled = function (s, e) {
           const cancellationDetails = SpeechSDK.CancellationDetails.fromResult(e.result);
@@ -513,12 +521,29 @@
           resumeButton.disabled = true;
         };
 
-        synthesizer.synthesisCompleted = function () {
+        synthesizer.synthesisCompleted = function (s, e) {
             resultsDiv.innerHTML = "synthesis finished";
             synthesizer.close();
+            a = document.createElement('a');
+            url = window.URL.createObjectURL(new Blob([e.result.audioData]));
+            a.href = url;
+            a.download = 'synth.' + getExtensionFromFormat(formatOptions.options[formatOptions.selectedIndex].text);
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(function () {
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+            }, 0);
             startSynthesisAsyncButton.disabled = false;
             downloadButton.disabled = false;
         };
+
+        if (!synthesisText.value) {
+          alert("Please enter synthesis content.");
+        }
+
+        startSynthesisAsyncButton.disabled = true;
+        downloadButton.disabled = true;
 
         if (isSsml.checked) {
           synthesizer.speakSsmlAsync(synthesisText.value);
@@ -536,7 +561,7 @@
 
         formatOptions.innerHTML = "";
         Object.keys(SpeechSDK.SpeechSynthesisOutputFormat).forEach(format => {
-          if (isNaN(format)) {
+          if (isNaN(format) && !format.includes('Siren')) {
             formatOptions.innerHTML += "<option value=\"" + SpeechSDK.SpeechSynthesisOutputFormat[format] + "\">" + format + "</option>"
           }}
         );
