@@ -16,6 +16,12 @@
     <Compile Include="..\..\..\sharedcontent\console\speech_synthesis_server_scenario_sample.cs" Link="speech_synthesis_server_scenario_sample.cs" />
     <Compile Include="..\..\..\sharedcontent\console\translation_samples.cs" Link="translation_samples.cs" />
     <Compile Include="..\..\..\sharedcontent\console\remote_conversation_samples.cs" Link="remote_conversation_samples.cs" />
+    <Compile Include="..\..\..\sharedcontent\console\speech_recognition_with_language_id_samples.cs">
+      <Link>speech_recognition_with_language_id_samples.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\sharedcontent\console\standalone_language_detection_samples.cs">
+      <Link>standalone_language_detection_samples.cs</Link>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>
@@ -29,10 +35,18 @@
     <Content Include="..\..\..\sharedcontent\console\katiesteve.wav" Link="katiesteve.wav">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="..\..\..\sharedcontent\console\en-us_zh-cn.wav">
+      <Link>en-us_zh-cn.wav</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\..\..\sharedcontent\console\LanguageDetection_enUS.wav">
+      <Link>LanguageDetection_enUS.wav</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.16.0" />
+    <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.17.0" />
     <PackageReference Include="Microsoft.CognitiveServices.Speech.Remoteconversation" Version="1.16.0" />
   </ItemGroup>
 

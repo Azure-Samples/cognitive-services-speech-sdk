@@ -582,6 +582,11 @@ def pronunciation_assessment_from_microphone():
     # Note: The pronunciation assessment feature is currently only available on en-US language.
     config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
 
+    # The pronunciation assessment service has a longer default end silence timeout (5 seconds) than normal STT
+    # as the pronunciation assessment is widely used in education scenario where kids have longer break in reading.
+    # You can adjust the end silence timeout based on your real scenario.
+    config.set_property(speechsdk.PropertyId.SpeechServiceConnection_EndSilenceTimeoutMs, "3000")
+
     reference_text = ""
     # create pronunciation assessment config, set grading system, granularity and if enable miscue based on your requirement.
     pronunciation_config = speechsdk.PronunciationAssessmentConfig(reference_text=reference_text,

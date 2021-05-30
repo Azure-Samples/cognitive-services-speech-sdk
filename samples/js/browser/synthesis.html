@@ -281,8 +281,7 @@
         request.onload = function() {
           if (request.status >= 200 && request.status < 400) {
             const response = this.response;
-            const neuralSupport = (response.indexOf("AriaNeural") > 0);
-            const defaultVoice = neuralSupport ? "AriaNeural" : "AriaRUS";
+            const defaultVoice = "AriaNeural";
             let selectId;
             const data = JSON.parse(response);
             voiceOptions.innerHTML = "";

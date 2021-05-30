@@ -701,6 +701,11 @@ public class SpeechRecognitionSamples {
         // Note: The pronunciation assessment feature is currently only available on en-US language.
         SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
+        // The pronunciation assessment service has a longer default end silence timeout (5 seconds) than normal STT
+        // as the pronunciation assessment is widely used in education scenario where kids have longer break in reading.
+        // You can adjust the end silence timeout based on your real scenario.
+        config.setProperty(PropertyId.SpeechServiceConnection_EndSilenceTimeoutMs, "3000");
+
         String referenceText = "";
         // create pronunciation assessment config, set grading system, granularity and if enable miscue based on your requirement.
         PronunciationAssessmentConfig pronunciationConfig = new PronunciationAssessmentConfig(referenceText,

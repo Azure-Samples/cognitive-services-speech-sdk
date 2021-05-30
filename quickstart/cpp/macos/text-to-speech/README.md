@@ -35,7 +35,7 @@ This sample demonstrates how to synthesize speech with C++ using the Speech SDK 
 To run the sample, you'll need to configure the loader's library path to point to the Speech SDK library.
 
 ```sh
-export DYLD_FRAMEWORK_PATH="DYLD_FRAMEWORK_PATH:$SPEECHSDK_ROOT"
+export DYLD_FRAMEWORK_PATH="$DYLD_FRAMEWORK_PATH:$SPEECHSDK_ROOT"
 ```
 
 Run the application:

@@ -547,7 +547,7 @@ public class SpeechSynthesisSamples {
                     long totalSize = 0;
                     long filledSize = audioDataStream.readData(buffer);
                     while (filledSize > 0) {
-                        System.out.println(filledSize + " bytes revceived.");
+                        System.out.println(filledSize + " bytes received.");
                         totalSize += filledSize;
                         filledSize = audioDataStream.readData(buffer);
                     }

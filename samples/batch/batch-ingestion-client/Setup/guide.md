@@ -234,4 +234,4 @@ The total for the above scenario would be **$166.60**, with the majority of the 
 
 We trust that the above scenario gives you an idea of the costs distributions. Of course will vary depending on scenario and usage pattern.
 
-Please use our [Azure Calculator](https://azure.microsoft.com/en-us/pricing/calculator/) to better understand pricing
+Please use our [Azure Calculator](https://azure.microsoft.com/pricing/calculator/) to better understand pricing
