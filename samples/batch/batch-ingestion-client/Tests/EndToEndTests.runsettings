@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+  <!-- Parameters used by tests at runtime -->
+  <TestRunParameters>
+    <Parameter name="SpeechServicesRegion" value=""/>
+    <Parameter name="SpeechServicesSubscriptionKey" value=""/>
+  </TestRunParameters>
+
+  <RunConfiguration>
+    <!--Limit the total test session to 1 hour-->
+    <TestSessionTimeout>3600000</TestSessionTimeout>
+    <TargetPlatform>x64</TargetPlatform>
+  </RunConfiguration>
+</RunSettings>

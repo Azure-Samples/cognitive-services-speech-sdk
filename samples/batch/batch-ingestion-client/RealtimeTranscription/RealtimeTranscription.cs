@@ -1,0 +1,73 @@
+// <copyright file="RealtimeTranscription.cs" company="Microsoft Corporation">
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+// </copyright>
+
+namespace RealtimeTranscription
+{
+    using System;
+    using System.Text;
+    using System.Threading.Tasks;
+    using Connector;
+    using Microsoft.Azure.ServiceBus;
+    using Microsoft.Azure.WebJobs;
+    using Microsoft.CognitiveServices.Speech;
+    using Microsoft.Extensions.Logging;
+    using Newtonsoft.Json;
+
+    public static class RealtimeTranscription
+    {
+        private static readonly StorageConnector StorageConnectorInstance = new (RealtimeTranscriptionEnvironmentVariables.AzureWebJobsStorage);
+
+        private static readonly SpeechConfig SpeechConfig = SpeechConfig.FromEndpoint(
+            new Uri($"wss://{RealtimeTranscriptionEnvironmentVariables.AzureSpeechServicesRegion}.stt.speech.microsoft.com/speech/recognition/conversation/cognitiveservices/v1?setfeature=multichannel2"),
+            RealtimeTranscriptionEnvironmentVariables.AzureSpeechServicesKey);
+
+        [FunctionName("RealtimeTranscription")]
+        public static async Task Run([ServiceBusTrigger("start_transcription_queue", Connection = "AzureServiceBus")]Message message, ILogger logger)
+        {
+            if (logger == null)
+            {
+                throw new ArgumentNullException(nameof(logger));
+            }
+
+            if (message == null)
+            {
+                throw new ArgumentNullException(nameof(message));
+            }
+
+            logger.LogInformation($"C# ServiceBus queue trigger function processed message: {message.Label}");
+            logger.LogInformation($"Received message: SequenceNumber:{message.SystemProperties.SequenceNumber} Body:{Encoding.UTF8.GetString(message.Body)}");
+
+            var serviceBusMessage = JsonConvert.DeserializeObject<ServiceBusMessage>(Encoding.UTF8.GetString(message.Body));
+
+            if (!serviceBusMessage.EventType.Contains("BlobCreate", StringComparison.OrdinalIgnoreCase) ||
+                !StorageConnector.GetContainerNameFromUri(serviceBusMessage.Data.Url).Equals(RealtimeTranscriptionEnvironmentVariables.AudioInputContainer, StringComparison.Ordinal))
+            {
+                logger.LogInformation("Ignoring service bus message since it is not a BlobCreate message or not coming from the audio input container.");
+                return;
+            }
+
+            var audioFileName = StorageConnector.GetFileNameFromUri(serviceBusMessage.Data.Url);
+
+            var audioBytes = await StorageConnectorInstance.DownloadFileFromContainer(
+                RealtimeTranscriptionEnvironmentVariables.AudioInputContainer,
+                audioFileName).ConfigureAwait(false);
+
+            var jsonResults = await RealtimeTranscriptionHelper.TranscribeAsync(audioBytes, SpeechConfig, logger).ConfigureAwait(false);
+            var speechTranscript = ResultConversionHelper.CreateBatchResultFromRealtimeResults(serviceBusMessage.Data.Url.AbsoluteUri, jsonResults, logger);
+
+            var speechTranscriptString = JsonConvert.SerializeObject(speechTranscript, new JsonSerializerSettings()
+            {
+                Formatting = Formatting.Indented,
+                NullValueHandling = NullValueHandling.Ignore
+            });
+
+            await StorageConnectorInstance.WriteTextFileToBlobAsync(
+                speechTranscriptString,
+                RealtimeTranscriptionEnvironmentVariables.JsonResultOutputContainer,
+                $"{audioFileName}.json",
+                logger).ConfigureAwait(false);
+        }
+    }
+}

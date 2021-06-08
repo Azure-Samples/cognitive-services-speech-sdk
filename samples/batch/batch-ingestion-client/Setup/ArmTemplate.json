@@ -195,6 +195,17 @@
                 "description": "A value indicating whether entity redaction is requested. Will only be performed if a Text Analytics Key and Region is provided."
             }
         },
+        "TranscriptionMode": {
+            "defaultValue": "Batch",
+            "type": "String",
+            "allowedValues": [
+                "Batch",
+                "Realtime"
+            ],
+            "metadata": {
+                "description": "Batch mode will start batch jobs that pick up the audio files from storage whereas realtime will stream them from storage immediately."
+            }
+        },
         "SqlAdministratorLogin": {
             "type": "string",
             "defaultValue": "",
@@ -229,6 +240,7 @@
         "CreateConsolidatedOutputFiles": false,
         "TimerBasedExecution": true,
         "CreateAudioProcessedContainer": true,
+        "IsBatchMode": "[equals(parameters('TranscriptionMode'),'Batch')]",
         "MessagesPerFunctionExecution": 1000,
         "FilesPerTranscriptionJob": 100,
         "RetryLimit": 4,
@@ -837,6 +849,7 @@
                 "FUNCTIONS_EXTENSION_VERSION": "~3",
                 "FUNCTIONS_WORKER_RUNTIME": "dotnet",
                 "InitialPollingDelayInMinutes": "[variables('InitialPollingDelayInMinutes')]",
+                "JsonResultOutputContainer": "[variables('JsonResultOutputContainer')]",
                 "MaxPollingDelayInMinutes": "[variables('MaxPollingDelayInMinutes')]",
                 "Locale": "[parameters('Locale')]",
                 "MessagesPerFunctionExecution": "[variables('MessagesPerFunctionExecution')]",
@@ -844,7 +857,7 @@
                 "PunctuationMode": "[parameters('PunctuationMode')]",
                 "RetryLimit": "[variables('RetryLimit')]",
                 "StartTranscriptionServiceBusConnectionString": "[listKeys(variables('AuthRuleCT'),'2015-08-01').primaryConnectionString]",
-                "WEBSITE_RUN_FROM_PACKAGE": "[if(variables('timerBasedExecution'),'https://mspublicstorage.blob.core.windows.net/transcription-enabled-storage/StartTranscriptionByTimer.zip','https://mspublicstorage.blob.core.windows.net/transcription-enabled-storage/StartTranscriptionByServiceBus.zip')]"
+                "WEBSITE_RUN_FROM_PACKAGE": "[if(not(variables('IsBatchMode')), 'https://mspublicstorage.blob.core.windows.net/transcription-enabled-storage/RealtimeTranscription.zip', if(variables('timerBasedExecution'),'https://mspublicstorage.blob.core.windows.net/transcription-enabled-storage/StartTranscriptionByTimer.zip','https://mspublicstorage.blob.core.windows.net/transcription-enabled-storage/StartTranscriptionByServiceBus.zip'))]"
             }
         },
         {

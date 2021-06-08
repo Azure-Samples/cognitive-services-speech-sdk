@@ -1,4 +1,4 @@
-// <copyright file="OverallTests.cs" company="Microsoft Corporation">
+// <copyright file="UnitTests.cs" company="Microsoft Corporation">
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
@@ -6,6 +6,7 @@
 namespace Tests
 {
     using System;
+    using System.Collections.Generic;
     using System.IO;
     using System.Linq;
     using Connector;
@@ -13,9 +14,10 @@ namespace Tests
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Moq;
     using Newtonsoft.Json;
+    using RealtimeTranscription;
 
     [TestClass]
-    public class OverallTests
+    public class UnitTests
     {
         private const string TestSasUri = "https://contoso.blob.core.windows.net/testContainer/testfolder/test.wav";
 
@@ -28,6 +30,21 @@ namespace Tests
         }
 
         [TestMethod]
+        [TestCategory(TestCategories.UnitTest)]
+        public void ConvertRealtimeResultToBatchFormat()
+        {
+            var realtimeResultString = File.ReadAllText(@"testFiles/realtimeresult.json");
+            var fileResult = JsonConvert.DeserializeObject<List<JsonResult>>(realtimeResultString);
+
+            var speechTranscript = ResultConversionHelper.CreateBatchResultFromRealtimeResults("test", fileResult, Logger.Object);
+
+            Assert.AreEqual(speechTranscript.Duration, "PT1.7S");
+            Assert.IsTrue(speechTranscript.CombinedRecognizedPhrases.Any());
+            Assert.IsTrue(speechTranscript.RecognizedPhrases.Any());
+        }
+
+        [TestMethod]
+        [TestCategory(TestCategories.UnitTest)]
         public void GetContainerFromSasTest()
         {
             var containerName = StorageConnector.GetContainerNameFromUri(new Uri(TestSasUri));
@@ -39,6 +56,7 @@ namespace Tests
         }
 
         [TestMethod]
+        [TestCategory(TestCategories.UnitTest)]
         public void GetSpeechObjectFromJson()
         {
             var body = File.ReadAllText(@"testFiles/transcriptSample.json");
@@ -50,6 +68,7 @@ namespace Tests
         }
 
         [TestMethod]
+        [TestCategory(TestCategories.UnitTest)]
         public void GetHTMLFromJson()
         {
             var body = File.ReadAllText(@"testFiles/transcriptSample.json");
@@ -61,6 +80,7 @@ namespace Tests
         }
 
         [TestMethod]
+        [TestCategory(TestCategories.UnitTest)]
         public void GetCostEstimationWithEmptyDuration()
         {
             var cost = CostEstimation.GetCostEstimation(TimeSpan.Zero, 1, true, Connector.Enums.SentimentAnalysisSetting.None, Connector.Enums.EntityRedactionSetting.None);
