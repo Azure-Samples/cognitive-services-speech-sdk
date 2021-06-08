@@ -59,5 +59,12 @@ namespace Tests
             Assert.IsTrue(!string.IsNullOrEmpty(html));
             Assert.IsTrue(html.StartsWith("<html lang=", StringComparison.OrdinalIgnoreCase));
         }
+
+        [TestMethod]
+        public void GetCostEstimationWithEmptyDuration()
+        {
+            var cost = CostEstimation.GetCostEstimation(TimeSpan.Zero, 1, true, Connector.Enums.SentimentAnalysisSetting.None, Connector.Enums.EntityRedactionSetting.None);
+            Assert.AreEqual(cost, 0);
+        }
     }
 }

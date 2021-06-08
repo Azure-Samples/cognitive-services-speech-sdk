@@ -6,9 +6,9 @@
 namespace FetchTranscriptionFunction
 {
     using System;
+    using Connector;
     using Connector.Constants;
     using Connector.Enums;
-    using Connector.Extensions;
 
     public static class FetchTranscriptionEnvironmentVariables
     {

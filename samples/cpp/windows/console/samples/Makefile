@@ -21,7 +21,7 @@ LIBS:=-lMicrosoft.CognitiveServices.Speech.core -lpthread -l:libasound.so.2
 all: sample
 
 # Note: to run, LD_LIBRARY_PATH should point to $LIBPATH.
-sample: main.cpp speech_recognition_samples.cpp speech_synthesis_samples.cpp translation_samples.cpp intent_recognition_samples.cpp conversation_transcriber_samples.cpp speaker_recognition_samples.cpp
+sample: main.cpp speech_recognition_samples.cpp speech_synthesis_samples.cpp translation_samples.cpp intent_recognition_samples.cpp conversation_transcriber_samples.cpp speaker_recognition_samples.cpp standalone_language_detection_samples.cpp
 	g++ $^ -o $@ \
 	    --std=c++14 \
 	    $(patsubst %,-I%, $(INCPATH)) \

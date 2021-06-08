@@ -25,6 +25,7 @@ Which version of the SDK are you using.
  - Browser [e.g. Chrome, Safari] (if applicable) - please be specific
 
 **Additional context**
- - Error messages, log information, stack trace, ...
+ - Error messages, stack trace, sample code to reproduce the issue, ...
+ - Please provide full Speech SDK Log, as per the instructions [here](https://docs.microsoft.com/azure/cognitive-services/speech-service/how-to-use-logging)?
  - If you report an error for a specific service interaction, please report the SessionId and time (incl. timezone) of the reported incidents. The SessionId is reported in all call-backs/events you receive.
  - Any other additional information
