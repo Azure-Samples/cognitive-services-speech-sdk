@@ -43,15 +43,15 @@ If the above link does not work try the following steps:
 6. You will also need the region, so make a note of that too.
 7. You need to decide on the operating mode [read next section] 
 
-To test your the set up we reccomend you use [Microsoft Azure Storage Explorer](https://azure.microsoft.com/features/storage-explorer/).
+To test your the set up we recommend you use [Microsoft Azure Storage Explorer](https://azure.microsoft.com/features/storage-explorer/).
 
 ### Operating Mode
 
-Audio files can be processed either by the v3 API (batch) or our Speech SDK (real time). Both operations are wrapped and implemented in serverless and although seamless to the user there are sublte differences. The goal of this section is to explain the pros and cons of these options.
+Audio files can be processed either by the V3 API (batch) or our Speech SDK (real time). Both operations are wrapped and implemented in serverless and although seamless to the user there are sublte differences. In this section we enumerate those differences to serve as pros and cons of these options.
 
 #### Batch Mode
 
-In this mode you will experience the following
+In this mode audio files will be processed in batches. Internally the Azure Function will raise a transcription request periodically with all the files that have been requested up to that point. If the number of files is large then multiple of such requests will be raised. You will experience the following behavior:
 
 1. Low Azure Function costs [2 Azure Functions will coordinate the process and run for milliseconds]
 2. Diarization and Sentiment [offered in Batch Mode only]
@@ -60,16 +60,17 @@ In this mode you will experience the following
 
 #### Real Time Mode
 
-In this mode you will experience the following
+In this mode audio files will be downloaded and streamed from the Azure Function to the real time Azure Speech endpoint. You will experience the following behavior:
 
 1. Higher Azure Function costs [A single type Azure Functions will handle the process for each file and run at least for half the audio length]
 2. 2x processing of audio files [i.e. a 10-min file is transcribed in 5mins]
-3. There is no availability of Diarization or Sentiment in real time
-4. You will need to use the [Real Time ARM Template](ArmTemplateRealTime.json) from the repository for this operating mode.
+3. There is no availability of the Diarization and Sentiment features in real time
+4. There is also no downstream SQL post processing option
+5. You will need to use the [Real Time ARM Template](ArmTemplateRealTime.json) from the repository for this operating mode.
 
 ## Ingestion Client Setup Instructions
 
-Irrespective of the operating mode the ARM templates are largely the same. The main differences are the lack of diarization and sentiment options in Real Time mode. With that in mind please follow the instructions below to deploy the resources from ARM template.
+Irrespective of the operating mode the ARM templates are largely the same. The main differences are the lack of diarization and sentiment options in Real Time mode, as well as down stream post processing through SQL. With that in mind please follow the instructions below to deploy the resources from ARM template.
 
 1. Click on **+Create Resource** on [Azure portal](https://portal.azure.com) as shown in the following picture and type ‘ _template
 deployment_ ’ on the search box.
@@ -158,10 +159,10 @@ If you want to perform Text Analytics please add those credentials.
 
 * Add Sentiment [Batch Only]
 
-* Add data redaction [Batch Only]
+* Add Text Redaction [Batch Only]
 
 
-If you want to further analytics we could map the transcript json we produce to a DB schema. 
+If you want to further analytics we could map the transcript json we produce to a DB schema. [Batch Only]
 
 * Enter SQL DB credential login
 
