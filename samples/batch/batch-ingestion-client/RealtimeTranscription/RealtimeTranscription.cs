@@ -54,6 +54,28 @@ namespace RealtimeTranscription
                 RealtimeTranscriptionEnvironmentVariables.AudioInputContainer,
                 audioFileName).ConfigureAwait(false);
 
+            // Set speech config parameters:
+            SpeechConfig.OutputFormat = OutputFormat.Detailed;
+
+            // custom endpoint
+            if (!string.IsNullOrEmpty(RealtimeTranscriptionEnvironmentVariables.CustomEndpointId))
+            {
+                SpeechConfig.EndpointId = RealtimeTranscriptionEnvironmentVariables.CustomEndpointId;
+            }
+
+            // locale
+            SpeechConfig.SpeechRecognitionLanguage = RealtimeTranscriptionEnvironmentVariables.Locale.Split('|')[0].Trim();
+
+            // profanity filter mode
+            var profanityFilterMode = RealtimeTranscriptionHelper.ParseProfanityModeFromString(RealtimeTranscriptionEnvironmentVariables.ProfanityFilterMode, logger);
+            SpeechConfig.SetProfanity(profanityFilterMode);
+
+            // word level timestamps
+            if (RealtimeTranscriptionEnvironmentVariables.AddWordLevelTimestamps)
+            {
+                SpeechConfig.RequestWordLevelTimestamps();
+            }
+
             var jsonResults = await RealtimeTranscriptionHelper.TranscribeAsync(audioBytes, SpeechConfig, logger).ConfigureAwait(false);
             var speechTranscript = ResultConversionHelper.CreateBatchResultFromRealtimeResults(serviceBusMessage.Data.Url.AbsoluteUri, jsonResults, logger);
 
@@ -67,6 +89,14 @@ namespace RealtimeTranscription
                 speechTranscriptString,
                 RealtimeTranscriptionEnvironmentVariables.JsonResultOutputContainer,
                 $"{audioFileName}.json",
+                logger).ConfigureAwait(false);
+
+            await StorageConnectorInstance.MoveFileAsync(
+                RealtimeTranscriptionEnvironmentVariables.AudioInputContainer,
+                audioFileName,
+                RealtimeTranscriptionEnvironmentVariables.AudioProcessedContainer,
+                audioFileName,
+                false,
                 logger).ConfigureAwait(false);
         }
     }

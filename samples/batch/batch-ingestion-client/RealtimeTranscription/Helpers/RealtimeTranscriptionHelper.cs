@@ -24,8 +24,6 @@ namespace RealtimeTranscription
 
             var jsonResults = new List<JsonResult>();
 
-            speechConfig.OutputFormat = OutputFormat.Detailed;
-
             var chunkId = Encoding.ASCII.GetString(audio.Take(4).ToArray());
 
             // Verify that first 4 bytes are RIFF in ascii:
@@ -100,6 +98,22 @@ namespace RealtimeTranscription
             }
 
             return jsonResults;
+        }
+
+        public static ProfanityOption ParseProfanityModeFromString(string profanityMode, ILogger logger)
+        {
+            switch (profanityMode)
+            {
+                case "None":
+                    return ProfanityOption.Raw;
+                case "Removed":
+                    return ProfanityOption.Removed;
+                case "Masked":
+                    return ProfanityOption.Masked;
+                default:
+                    logger.LogError($"Profanity filter mode \'{profanityMode}\' is not available for realtime transcription.");
+                    return ProfanityOption.Raw;
+            }
         }
     }
 }
