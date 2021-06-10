@@ -56,7 +56,7 @@ In this mode you will experience the following
 1. Low Azure Function costs [2 Azure Functions will coordinate the process and run for milliseconds]
 2. Diarization and Sentiment [offered in Batch Mode only]
 3. Higher Latency. Transcripts are scheduled and executed based on capacity of cluster [real time mode takes priority]
-4. You will need to deploy the [Batch ARM Template](ArmTemplate.json) from the repository for this operating mode.
+4. You will need to deploy the [Batch ARM Template](ArmTemplateBatch.json) from the repository for this operating mode.
 
 #### Real Time Mode
 
@@ -65,7 +65,7 @@ In this mode you will experience the following
 1. Higher Azure Function costs [A single type Azure Functions will handle the process for each file and run at least for half the audio length]
 2. 2x processing of audio files [i.e. a 10-min file is transcribed in 5mins]
 3. There is no availability of Diarization or Sentiment in real time
-4. You will need to use the [Real Time ARM Template](ArmTemplate.json) from the repository for this operating mode.
+4. You will need to use the [Real Time ARM Template](ArmTemplateRealTime.json) from the repository for this operating mode.
 
 ## Batch Ingestion Client Setup Instructions
 
