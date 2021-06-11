@@ -66,7 +66,7 @@ In this mode audio files will be downloaded and streamed from the Azure Function
 2. 2x processing of audio files [i.e. a 10-min file is transcribed in 5mins]
 3. There is no availability of the Diarization and Sentiment features in real time
 4. There is also no downstream SQL post processing option
-5. You will need to use the [Real Time ARM Template](ArmTemplateRealTime.json) from the repository for this operating mode.
+5. You will need to use the [Real Time ARM Template](ArmTemplateRealtime.json) from the repository for this operating mode.
 
 ## Ingestion Client Setup Instructions
 
