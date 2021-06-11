@@ -728,11 +728,11 @@
 
             // The 'sessionStarted' event signals that audio has begun flowing and an interaction with the service has
             // started.
-            reco.sessionStarted = onSessionStarted;
+            recognizer.sessionStarted = onSessionStarted;
 
             // The 'sessionStopped' event signals that the current interaction with the speech service has ended and
             // audio has stopped flowing.
-            reco.sessionStopped = onSessionStopped;
+            recognizer.sessionStopped = onSessionStopped;
 
             // PhraseListGrammar allows for the customization of recognizer vocabulary.
             // The semicolon-delimited list of words or phrases will be treated as additional, more likely components
@@ -740,7 +740,7 @@
             //
             // See https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started-speech-to-text#improve-recognition-accuracy
             if (phrases.value) {
-                var phraseListGrammar = SpeechSDK.PhraseListGrammar.fromRecognizer(reco);
+                var phraseListGrammar = SpeechSDK.PhraseListGrammar.fromRecognizer(recognizer);
                 phraseListGrammar.addPhrase(phrases.value.split(";"));
             }
         }
