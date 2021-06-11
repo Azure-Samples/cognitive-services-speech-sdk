@@ -40,9 +40,9 @@
   </ItemGroup>
 
   <ItemGroup>
-	<None Update="TestFiles\*.*">
-		<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-	</None>
+    <None Update="TestFiles\*.*">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <AdditionalFiles Include="..\stylecop.json">

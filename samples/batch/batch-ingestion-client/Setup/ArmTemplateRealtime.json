@@ -556,7 +556,7 @@
                 "AddWordLevelTimestamps": "[parameters('AddWordLevelTimestamps')]",
                 "APPLICATIONINSIGHTS_CONNECTION_STRING": "[reference(resourceId('Microsoft.Insights/components', variables('AppInsightsName')), '2020-02-02-preview').ConnectionString]",
                 "AudioInputContainer": "[variables('AudioInputContainer')]",
-				"AudioProcessedContainer": "[variables('AudioProcessedContainer')]",
+                "AudioProcessedContainer": "[variables('AudioProcessedContainer')]",
                 "AzureServiceBus": "[listKeys(variables('AuthRuleRMK'),'2015-08-01').primaryConnectionString]",
                 "AzureSpeechServicesKey": "[concat('@Microsoft.KeyVault(VaultName=', variables('KeyVaultName'), ';SecretName=', variables('AzureSpeechServicesKeySecretName'), ')')]",
                 "AzureSpeechServicesRegion": "[parameters('AzureSpeechServicesRegion')]",

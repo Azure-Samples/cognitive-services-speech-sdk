@@ -12,7 +12,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FetchTranscription", "Fetch
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StartTranscriptionByTimer", "StartTranscriptionByTimer\StartTranscriptionByTimer.csproj", "{1628BA98-FCFD-4706-B594-54E4338957B1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RealtimeTranscription", "RealtimeTranscription\RealtimeTranscription.csproj", "{5B4B7645-41AD-4951-AA06-44DF94CDEB8D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RealtimeTranscription", "RealtimeTranscription\RealtimeTranscription.csproj", "{5B4B7645-41AD-4951-AA06-44DF94CDEB8D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
