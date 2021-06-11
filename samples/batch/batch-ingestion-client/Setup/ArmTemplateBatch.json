@@ -837,7 +837,6 @@
                 "FUNCTIONS_EXTENSION_VERSION": "~3",
                 "FUNCTIONS_WORKER_RUNTIME": "dotnet",
                 "InitialPollingDelayInMinutes": "[variables('InitialPollingDelayInMinutes')]",
-                "JsonResultOutputContainer": "[variables('JsonResultOutputContainer')]",
                 "MaxPollingDelayInMinutes": "[variables('MaxPollingDelayInMinutes')]",
                 "Locale": "[parameters('Locale')]",
                 "MessagesPerFunctionExecution": "[variables('MessagesPerFunctionExecution')]",
