@@ -23,6 +23,10 @@ namespace RealtimeTranscription
 
         public static readonly string CustomEndpointId = Environment.GetEnvironmentVariable(nameof(CustomEndpointId), EnvironmentVariableTarget.Process);
 
+        public static readonly string ErrorFilesOutputContainer = Environment.GetEnvironmentVariable(nameof(ErrorFilesOutputContainer), EnvironmentVariableTarget.Process);
+
+        public static readonly string ErrorReportOutputContainer = Environment.GetEnvironmentVariable(nameof(ErrorReportOutputContainer), EnvironmentVariableTarget.Process);
+
         public static readonly string JsonResultOutputContainer = Environment.GetEnvironmentVariable(nameof(JsonResultOutputContainer), EnvironmentVariableTarget.Process);
 
         public static readonly string Locale = Environment.GetEnvironmentVariable(nameof(Locale), EnvironmentVariableTarget.Process);

@@ -24,6 +24,7 @@ namespace RealtimeTranscription
             RealtimeTranscriptionEnvironmentVariables.AzureSpeechServicesKey);
 
         [FunctionName("RealtimeTranscription")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "Catching general exception to write to storage in case of failure.")]
         public static async Task Run([ServiceBusTrigger("start_transcription_queue", Connection = "AzureServiceBus")]Message message, ILogger logger)
         {
             if (logger == null)
@@ -50,54 +51,75 @@ namespace RealtimeTranscription
 
             var audioFileName = StorageConnector.GetFileNameFromUri(serviceBusMessage.Data.Url);
 
-            var audioBytes = await StorageConnectorInstance.DownloadFileFromContainer(
-                RealtimeTranscriptionEnvironmentVariables.AudioInputContainer,
-                audioFileName).ConfigureAwait(false);
-
-            // Set speech config parameters:
-            SpeechConfig.OutputFormat = OutputFormat.Detailed;
-
-            // custom endpoint
-            if (!string.IsNullOrEmpty(RealtimeTranscriptionEnvironmentVariables.CustomEndpointId))
+            try
             {
-                SpeechConfig.EndpointId = RealtimeTranscriptionEnvironmentVariables.CustomEndpointId;
+                var audioBytes = await StorageConnectorInstance.DownloadFileFromContainer(
+                    RealtimeTranscriptionEnvironmentVariables.AudioInputContainer,
+                    audioFileName).ConfigureAwait(false);
+
+                // Set speech config parameters:
+                SpeechConfig.OutputFormat = OutputFormat.Detailed;
+
+                // custom endpoint
+                if (!string.IsNullOrEmpty(RealtimeTranscriptionEnvironmentVariables.CustomEndpointId))
+                {
+                    SpeechConfig.EndpointId = RealtimeTranscriptionEnvironmentVariables.CustomEndpointId;
+                }
+
+                // locale
+                SpeechConfig.SpeechRecognitionLanguage = RealtimeTranscriptionEnvironmentVariables.Locale.Split('|')[0].Trim();
+
+                // profanity filter mode
+                var profanityFilterMode = RealtimeTranscriptionHelper.ParseProfanityModeFromString(RealtimeTranscriptionEnvironmentVariables.ProfanityFilterMode, logger);
+                SpeechConfig.SetProfanity(profanityFilterMode);
+
+                // word level timestamps
+                if (RealtimeTranscriptionEnvironmentVariables.AddWordLevelTimestamps)
+                {
+                    SpeechConfig.RequestWordLevelTimestamps();
+                }
+
+                var jsonResults = await RealtimeTranscriptionHelper.TranscribeAsync(audioBytes, SpeechConfig, logger).ConfigureAwait(false);
+                var speechTranscript = ResultConversionHelper.CreateBatchResultFromRealtimeResults(serviceBusMessage.Data.Url.AbsoluteUri, jsonResults, logger);
+
+                var speechTranscriptString = JsonConvert.SerializeObject(speechTranscript, new JsonSerializerSettings()
+                {
+                    Formatting = Formatting.Indented,
+                    NullValueHandling = NullValueHandling.Ignore
+                });
+
+                await StorageConnectorInstance.WriteTextFileToBlobAsync(
+                    speechTranscriptString,
+                    RealtimeTranscriptionEnvironmentVariables.JsonResultOutputContainer,
+                    $"{audioFileName}.json",
+                    logger).ConfigureAwait(false);
+
+                await StorageConnectorInstance.MoveFileAsync(
+                    RealtimeTranscriptionEnvironmentVariables.AudioInputContainer,
+                    audioFileName,
+                    RealtimeTranscriptionEnvironmentVariables.AudioProcessedContainer,
+                    audioFileName,
+                    false,
+                    logger).ConfigureAwait(false);
             }
-
-            // locale
-            SpeechConfig.SpeechRecognitionLanguage = RealtimeTranscriptionEnvironmentVariables.Locale.Split('|')[0].Trim();
-
-            // profanity filter mode
-            var profanityFilterMode = RealtimeTranscriptionHelper.ParseProfanityModeFromString(RealtimeTranscriptionEnvironmentVariables.ProfanityFilterMode, logger);
-            SpeechConfig.SetProfanity(profanityFilterMode);
-
-            // word level timestamps
-            if (RealtimeTranscriptionEnvironmentVariables.AddWordLevelTimestamps)
+            catch (Exception e)
             {
-                SpeechConfig.RequestWordLevelTimestamps();
+                logger.LogError(e.Message);
+
+                await StorageConnectorInstance.MoveFileAsync(
+                    RealtimeTranscriptionEnvironmentVariables.AudioInputContainer,
+                    audioFileName,
+                    RealtimeTranscriptionEnvironmentVariables.ErrorFilesOutputContainer,
+                    audioFileName,
+                    false,
+                    logger).ConfigureAwait(false);
+
+                await StorageConnectorInstance.WriteTextFileToBlobAsync(
+                    e.Message,
+                    RealtimeTranscriptionEnvironmentVariables.ErrorReportOutputContainer,
+                    $"{audioFileName}.txt",
+                    logger).ConfigureAwait(false);
             }
-
-            var jsonResults = await RealtimeTranscriptionHelper.TranscribeAsync(audioBytes, SpeechConfig, logger).ConfigureAwait(false);
-            var speechTranscript = ResultConversionHelper.CreateBatchResultFromRealtimeResults(serviceBusMessage.Data.Url.AbsoluteUri, jsonResults, logger);
-
-            var speechTranscriptString = JsonConvert.SerializeObject(speechTranscript, new JsonSerializerSettings()
-            {
-                Formatting = Formatting.Indented,
-                NullValueHandling = NullValueHandling.Ignore
-            });
-
-            await StorageConnectorInstance.WriteTextFileToBlobAsync(
-                speechTranscriptString,
-                RealtimeTranscriptionEnvironmentVariables.JsonResultOutputContainer,
-                $"{audioFileName}.json",
-                logger).ConfigureAwait(false);
-
-            await StorageConnectorInstance.MoveFileAsync(
-                RealtimeTranscriptionEnvironmentVariables.AudioInputContainer,
-                audioFileName,
-                RealtimeTranscriptionEnvironmentVariables.AudioProcessedContainer,
-                audioFileName,
-                false,
-                logger).ConfigureAwait(false);
         }
     }
 }
