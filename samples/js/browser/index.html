@@ -741,7 +741,7 @@
             // See https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started-speech-to-text#improve-recognition-accuracy
             if (phrases.value) {
                 var phraseListGrammar = SpeechSDK.PhraseListGrammar.fromRecognizer(recognizer);
-                phraseListGrammar.addPhrase(phrases.value.split(";"));
+                phraseListGrammar.addPhrases(phrases.value.split(";"));
             }
         }
 
