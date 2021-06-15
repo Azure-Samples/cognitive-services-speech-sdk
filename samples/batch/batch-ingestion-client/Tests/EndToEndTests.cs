@@ -40,9 +40,9 @@ namespace Tests
             var conf = SpeechConfig.FromEndpoint(
                 new Uri($"wss://{region}.stt.speech.microsoft.com/speech/recognition/conversation/cognitiveservices/v1?setfeature=multichannel2"),
                 subscriptionKey);
+            conf.OutputFormat = OutputFormat.Detailed;
 
             var stereoFile = File.ReadAllBytes(@"testFiles/test_audio_stereo.wav");
-
             var jsonResults = await RealtimeTranscriptionHelper.TranscribeAsync(stereoFile, conf, Logger.Object).ConfigureAwait(false);
 
             Assert.IsTrue(jsonResults.Any());

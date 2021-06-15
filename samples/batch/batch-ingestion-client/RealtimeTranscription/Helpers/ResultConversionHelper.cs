@@ -22,8 +22,11 @@ namespace RealtimeTranscription
             var duration = XmlConvert.ToString(TimeSpan.FromTicks(durationInTicks));
 
             logger.LogInformation("Converting combined recognized phrases");
-            var combinedRecognizedPhrases = realtimeResults
-                .Where(r => r.NBest.Any() && !string.IsNullOrEmpty(r.NBest.First().Lexical))
+
+            var nonEmptyResults = realtimeResults
+                .Where(r => r.NBest.Any() && !string.IsNullOrEmpty(r.NBest.First().Lexical));
+
+            var combinedRecognizedPhrases = nonEmptyResults
                 .GroupBy(r => r.SpeakerId, p => p, (key, g) => new
                 {
                     channel = int.TryParse(key, out var channel) ? channel : 0,
@@ -38,7 +41,7 @@ namespace RealtimeTranscription
                     null));
 
             logger.LogInformation("Converting recognized phrases");
-            var recognizedPhrases = realtimeResults.Select(r => new RecognizedPhrase(
+            var recognizedPhrases = nonEmptyResults.Select(r => new RecognizedPhrase(
                  r.RecognitionStatus,
                  int.TryParse(r.SpeakerId, out var channel) ? channel : 0,
                  int.TryParse(r.SpeakerId, out var speaker) ? speaker : 0,

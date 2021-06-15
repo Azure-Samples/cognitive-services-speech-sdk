@@ -84,6 +84,11 @@ namespace RealtimeTranscription
                     {
                         logger.LogError($"ErrorCode={cancellation.ErrorCode}");
                         logger.LogError($"ErrorDetails={cancellation.ErrorDetails}");
+
+                        if (cancellation.ErrorCode != CancellationErrorCode.NoError)
+                        {
+                            throw new RealtimeTranscriptionException(cancellation.ErrorCode, cancellation.ErrorDetails);
+                        }
                     }
 
                     stopRecognition.TrySetResult(0);
@@ -91,7 +96,7 @@ namespace RealtimeTranscription
 
                 await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
 
-                await stopRecognition.Task.ConfigureAwait(false);
+                await Task.WhenAll(stopRecognition.Task).ConfigureAwait(false);
 
                 await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
                 logger.LogInformation("Recognition stopped.");

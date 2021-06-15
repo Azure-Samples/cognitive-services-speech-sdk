@@ -24,7 +24,6 @@ namespace RealtimeTranscription
             RealtimeTranscriptionEnvironmentVariables.AzureSpeechServicesKey);
 
         [FunctionName("RealtimeTranscription")]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "Catching general exception to write to storage in case of failure.")]
         public static async Task Run([ServiceBusTrigger("start_transcription_queue", Connection = "AzureServiceBus")]Message message, ILogger logger)
         {
             if (logger == null)
@@ -102,9 +101,15 @@ namespace RealtimeTranscription
                     false,
                     logger).ConfigureAwait(false);
             }
-            catch (Exception e)
+            catch (Exception exception)
             {
-                logger.LogError(e.Message);
+                if (exception is RealtimeTranscriptionException realtimeTranscriptionException && IsRetryableErrorCode(realtimeTranscriptionException.CancellationErrorCode))
+                {
+                    // Trigger automatic retry:
+                    throw;
+                }
+
+                logger.LogError(exception.Message);
 
                 await StorageConnectorInstance.MoveFileAsync(
                     RealtimeTranscriptionEnvironmentVariables.AudioInputContainer,
@@ -115,10 +120,24 @@ namespace RealtimeTranscription
                     logger).ConfigureAwait(false);
 
                 await StorageConnectorInstance.WriteTextFileToBlobAsync(
-                    e.Message,
+                    exception.Message,
                     RealtimeTranscriptionEnvironmentVariables.ErrorReportOutputContainer,
                     $"{audioFileName}.txt",
                     logger).ConfigureAwait(false);
+            }
+        }
+
+        private static bool IsRetryableErrorCode(CancellationErrorCode cancellationErrorCode)
+        {
+            switch (cancellationErrorCode)
+            {
+                case CancellationErrorCode.NoError:
+                case CancellationErrorCode.TooManyRequests:
+                case CancellationErrorCode.ServiceError:
+                case CancellationErrorCode.ServiceTimeout:
+                case CancellationErrorCode.ServiceUnavailable:
+                    return true;
+                default: return false;
             }
         }
     }
