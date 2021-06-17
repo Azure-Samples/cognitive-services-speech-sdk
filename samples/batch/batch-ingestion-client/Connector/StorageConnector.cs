@@ -104,6 +104,17 @@ namespace Connector
             return data;
         }
 
+        public async Task<byte[]> DownloadFileFromContainer(string containerName, string blobName)
+        {
+            var containerClient = BlobServiceClient.GetBlobContainerClient(containerName);
+
+            var blobClient = containerClient.GetBlobClient(blobName);
+
+            using var memoryStream = new MemoryStream();
+            await blobClient.DownloadToAsync(memoryStream).ConfigureAwait(false);
+            return memoryStream.ToArray();
+        }
+
         public string CreateSas(Uri fileUri)
         {
             var containerName = GetContainerNameFromUri(fileUri);

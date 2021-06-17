@@ -41,11 +41,36 @@ If the above link does not work try the following steps:
 4. Click Create on the Speech resource.
 5. You will find the subscription key under **Keys**
 6. You will also need the region, so make a note of that too.
+7. You need to decide on the operating mode [read next section] 
 
-To test your the set up we reccomend you use [Microsoft Azure Storage Explorer](https://azure.microsoft.com/features/storage-explorer/).
+To test your the set up we recommend you use [Microsoft Azure Storage Explorer](https://azure.microsoft.com/features/storage-explorer/).
 
-## Batch Ingestion Client Setup Instructions
+### Operating Mode
 
+Audio files can be processed either by the V3 API (batch) or our Speech SDK (real time). Both operations are wrapped and implemented in serverless and although seamless to the user there are sublte differences. In this section we enumerate those differences to serve as pros and cons of these options.
+
+#### Batch Mode
+
+In this mode audio files will be processed in batches. Internally the Azure Function will raise a transcription request periodically with all the files that have been requested up to that point. If the number of files is large then multiple of such requests will be raised. You will experience the following behavior:
+
+1. Low Azure Function costs [2 Azure Functions will coordinate the process and run for milliseconds]
+2. Diarization and Sentiment [offered in Batch Mode only]
+3. Higher Latency. Transcripts are scheduled and executed based on capacity of cluster [real time mode takes priority]
+4. You will need to deploy the [Batch ARM Template](ArmTemplateBatch.json) from the repository for this operating mode.
+
+#### Real Time Mode
+
+In this mode audio files will be downloaded and streamed from the Azure Function to the real time Azure Speech endpoint. You will experience the following behavior:
+
+1. Higher Azure Function costs [A single type Azure Functions will handle the process for each file and run at least for half the audio length]
+2. 2x processing of audio files [i.e. a 10-min file is transcribed in 5mins]
+3. There is no availability of the Diarization and Sentiment features in real time
+4. There is also no downstream SQL post processing option
+5. You will need to use the [Real Time ARM Template](ArmTemplateRealtime.json) from the repository for this operating mode.
+
+## Ingestion Client Setup Instructions
+
+Irrespective of the operating mode the ARM templates are largely the same. The main differences are the lack of diarization and sentiment options in Real Time mode, as well as down stream post processing through SQL. With that in mind please follow the instructions below to deploy the resources from ARM template.
 
 1. Click on **+Create Resource** on [Azure portal](https://portal.azure.com) as shown in the following picture and type ‘ _template
 deployment_ ’ on the search box.
@@ -120,9 +145,9 @@ The rest of the settings related to the transcription request. You can read more
 
 * Select a punctuation option
 
-* Select to Add Diarization [all locales]
+* Select to Add Diarization [all locales] [Batch Only]
 
-* Select to Add Word level Timestamps [all locales]
+* Select to Add Word level Timestamps [all locales] [Batch Only]
 
 
 If you want to perform Text Analytics please add those credentials.
@@ -132,12 +157,12 @@ If you want to perform Text Analytics please add those credentials.
 
 * Add Text analytics region
 
-* Add Sentiment
+* Add Sentiment [Batch Only]
 
-* Add data redaction
+* Add Text Redaction [Batch Only]
 
 
-If you want to further analytics we could map the transcript json we produce to a DB schema. 
+If you want to further analytics we could map the transcript json we produce to a DB schema. [Batch Only]
 
 * Enter SQL DB credential login
 
@@ -163,7 +188,7 @@ Do the same for the FetchTranscription function:
 
 > **_Important:_** Until you restart both Azure functions you may see errors.
 
-## Running the Batch Ingestion Client
+## Running the Ingestion Client
 
 Upload audio files to the newly created audio-input container (results are added to json-result-output and test-results-output containers).
 Once they are done you can test your account.
@@ -177,7 +202,7 @@ The structure of your newly created storage account will look like the picture b
 
 There are several containers to distinguish between the various outputs. We suggest (for the sake of keeping things tidy) to follow the pattern and use the audio-input container as the only container for uploading your audio.
 
-## Customizing the Batch Ingestion Client
+## Customizing the Ingestion Client
 
 By default, the ARM template uses the newest version of the Batch Ingestion Client which can be found in this repository. If a custom version should be used, the paths to the binaries inside the deployment template must be edited to point to a custom published version (by default, our binaries are: 
 
@@ -188,8 +213,6 @@ By default, the ARM template uses the newest version of the Batch Ingestion Clie
 * https://mspublicstorage.blob.core.windows.net/transcription-enabled-storage/StartTranscriptionByServiceBus.zip). 
 
 To publish a new version, you can use Visual Studio, right click on the respective project, click publish and follow the instructions.
-
-
 
 ## The Project
 
