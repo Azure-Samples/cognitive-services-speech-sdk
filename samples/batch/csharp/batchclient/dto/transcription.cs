@@ -8,7 +8,7 @@ namespace BatchClient
     using System;
     using System.Collections.Generic;
 
-    public sealed class Transcription : LocalizedDtoBase
+    public sealed class Transcription : ScopedLocalizedDtoBase
     {
         public IEnumerable<Uri> ContentUrls { get; set; }
 

@@ -84,5 +84,17 @@ namespace BatchClient
             return transientFailureRetryingPolicy
                 .ExecuteAsync(() => this.client.DeleteAsync(location.PathAndQuery));
         }
+
+        public Task<Transcription> UpdateTranscriptionAsync(TranscriptionUpdate transcriptionUpdate)
+        {
+            if (transcriptionUpdate == null)
+            {
+                throw new ArgumentNullException(nameof(transcriptionUpdate));
+            }
+
+            var path = $"{this.speechToTextBasePath}transcriptions/";
+
+            return this.PatchAsJsonAsync<TranscriptionUpdate, Transcription>(path, transcriptionUpdate);
+        }
     }
 }

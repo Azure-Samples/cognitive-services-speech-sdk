@@ -39,9 +39,31 @@ namespace BatchClient
                 throw new ArgumentNullException(nameof(webHook));
             }
 
-            var path = $"{this.speechToTextBasePath}webHooks/";
+            var path = $"{this.speechToTextBasePath}webhooks/";
 
             return this.PostAsJsonAsync<WebHook, WebHook>(path, webHook);
+        }
+
+        public Task<WebHook> GetWebHookAsync(Uri location)
+        {
+            if (location == null)
+            {
+                throw new ArgumentNullException(nameof(location));
+            }
+
+            return this.GetAsync<WebHook>(location.PathAndQuery);
+        }
+
+        public Task<WebHook> UpdateWebHookAsync(WebHookUpdate webHookUpdate)
+        {
+            if (webHookUpdate == null)
+            {
+                throw new ArgumentNullException(nameof(webHookUpdate));
+            }
+
+            var path = $"{this.speechToTextBasePath}webhooks/";
+
+            return this.PatchAsJsonAsync<WebHookUpdate, WebHook>(path, webHookUpdate);
         }
     }
 }
