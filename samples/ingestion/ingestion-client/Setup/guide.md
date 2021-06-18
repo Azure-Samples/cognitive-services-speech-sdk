@@ -14,7 +14,7 @@ Before we delve deeper into the set-up instructions, let us have a look at the a
 
 ![Architecture](./images/architecture.png)
 
-The diagram is simple and hopefully self-explanatory. As soon as files land in a storage container, the Grid Event that indicates the complete upload of a file is filtered and pushed to a Service bus topic. Azure Functions (timer triggered by default) pick up those events and act, namely creating Tx requests using the Azure Speech Services batch pipeline. When the Tx request is successfully carried out, an event is placed in another queue in the same service bus resource. A different Azure Function triggered by the completion event starts monitoring transcription completion status and copies the actual transcripts in the containers from which the audio file was obtained. This is it. The rest of the features are applied on demand. Users can choose to apply analytics on the transcript, produce reports or redact, all of which are the result of additional resources being deployed through the ARM template. The solution will start transcribing audio files automatically and at scale. If -however- you want to customize further the Ingestion Client is possible too. The code is available in this repo.
+As soon as files land in a storage container, the Grid Event that indicates the complete upload of a file is filtered and pushed to a Service bus topic. Azure Functions (timer triggered by default) pick up those events and act, namely creating Tx requests using the Azure Speech Services batch pipeline. When the Tx request is successfully carried out, an event is placed in another queue in the same service bus resource. A different Azure Function triggered by the completion event starts monitoring transcription completion status and copies the actual transcripts in the containers from which the audio file was obtained. This is it. The rest of the features are applied on demand. Users can choose to apply analytics on the transcript, produce reports or redact, all of which are the result of additional resources being deployed through the ARM template. The solution will start transcribing audio files automatically and at scale. If -however- you want to customize further the Ingestion Client is possible too. The code is available in this repo.
 
 The list of best practices we implemented as part of the solution are:
 
@@ -47,7 +47,7 @@ To test your the set up we recommend you use [Microsoft Azure Storage Explorer](
 
 ### Operating Mode
 
-Audio files can be processed either by the [V3 API (Batch)](https://centralus.dev.cognitive.microsoft.com/docs/services/speech-to-text-api-v3-0) or our [Speech SDK (real time)](https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/speech-sdk). Both operations are wrapped and implemented in serverless and although seamless to the user there are subtle differences. In this section we enumerate those differences to serve as pros and cons of these options.
+Audio files can be processed either by the [V3 API (Batch)](https://centralus.dev.cognitive.microsoft.com/docs/services/speech-to-text-api-v3-0) or our [Speech SDK (real time)](https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/speech-sdk). In this section we enumerate those differences to serve as pros and cons of these options.
 
 #### Batch Mode
 
