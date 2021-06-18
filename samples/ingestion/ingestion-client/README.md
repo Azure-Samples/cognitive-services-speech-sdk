@@ -22,6 +22,7 @@ Outline the file contents of the repository. It helps users navigate the codebas
 | `FetchTranscription`    | Function to check the state of the transcription job and write results to storage.             |
 | `StartTranscriptionByServiceBus`      | Function to add a new transcription job to the speech service as one-job-per-file.      |
 | `StartTranscriptionByTimer`      | Function to add a new transcription job to the speech service for all files added in a certain period of time.      |
+| `RealTimeTranscription`      | Function to stream an audio file to the speech service and compose the transcript results in a single json file.      |
 | `PowerBI`    | Template files and deployment guide for visualizing insights from the accelerator.             |
 | `Setup` | ARM template to setup the project on Azure. |
 | `Tests`       | Unit tests for both functions.                          |
