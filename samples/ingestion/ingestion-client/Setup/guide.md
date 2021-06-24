@@ -68,6 +68,11 @@ In this mode audio files will be downloaded and streamed from the Azure Function
 3. Only .wav PCM is supported
 4. You will need to use the [Real Time ARM Template](ArmTemplateRealtime.json) from the repository for this operating mode.
 
+#### Scale up
+Batch mode will process transcription requests following best effort policies via which compute is requested as soon as the transcription is scheduled. Available compute is directly allocated. 
+
+In Real time mode, each Azure Speech resource is allocated by default 50 concurrent connections, which indicates the maximum number of parallel audio transcription streams. Customers do have a choice to raise a request to have that number increased through Azure Speech customer channels. To avoid throttling however the rythm/tempo of uploading audio files to Azure storage (therefore triggering real time transcriptions) should be controlled. If it is not contolled it will result in throttling.
+
 ## Ingestion Client Setup Instructions
 
 Irrespective of the operating mode the ARM templates are largely the same. The main differences are the lack of diarization and sentiment options in Real Time mode, as well as down stream post processing through SQL. With that in mind please follow the instructions below to deploy the resources from ARM template.
