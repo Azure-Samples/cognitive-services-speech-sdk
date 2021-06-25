@@ -20,7 +20,7 @@ namespace RealtimeTranscription
         private static readonly StorageConnector StorageConnectorInstance = new (RealtimeTranscriptionEnvironmentVariables.AzureWebJobsStorage);
 
         private static readonly SpeechConfig SpeechConfig = SpeechConfig.FromEndpoint(
-            new Uri($"wss://{RealtimeTranscriptionEnvironmentVariables.AzureSpeechServicesRegion}.stt.speech.microsoft.com/speech/recognition/conversation/cognitiveservices/v1?setfeature=multichannel2"),
+            new Uri($"wss://{RealtimeTranscriptionEnvironmentVariables.AzureSpeechServicesRegion}.stt.speech.microsoft.com/speech/recognition/conversation/cognitiveservices/v1?setfeature=multichannel2&initialSilenceTimeoutMs=600000&endSilenceTimeoutMs=600000"),
             RealtimeTranscriptionEnvironmentVariables.AzureSpeechServicesKey);
 
         [FunctionName("RealtimeTranscription")]
