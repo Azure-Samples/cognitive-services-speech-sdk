@@ -661,16 +661,17 @@ def pronunciation_assessment_continuous_from_file():
                                                                    enable_miscue=enable_miscue)
 
     # Creates a speech recognizer using a file as audio input.
-    # The default language is "en-us".
-    speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, audio_config=audio_config)
+    language = 'en-US'
+    speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, language=language, audio_config=audio_config)
     # apply pronunciation assessment config to speech recognizer
     pronunciation_config.apply_to(speech_recognizer)
 
     done = False
     recognized_words = []
     accuracy_scores = []
-    fluency_scores = []
     durations = []
+    valid_durations = []
+    start_offset, end_offset = None, None
 
     def stop_cb(evt):
         """callback that signals to stop continuous recognition upon receiving an event `evt`"""
@@ -685,14 +686,19 @@ def pronunciation_assessment_continuous_from_file():
             pronunciation_result.accuracy_score, pronunciation_result.pronunciation_score,
             pronunciation_result.completeness_score, pronunciation_result.fluency_score
         ))
-        nonlocal recognized_words, accuracy_scores, fluency_scores, durations
+        nonlocal recognized_words, accuracy_scores, durations, valid_durations, start_offset, end_offset
         recognized_words += pronunciation_result.words
         accuracy_scores.append(pronunciation_result.accuracy_score)
-        fluency_scores.append(pronunciation_result.fluency_score)
         json_result = evt.result.properties.get(speechsdk.PropertyId.SpeechServiceResponse_JsonResult)
         jo = json.loads(json_result)
         nb = jo['NBest'][0]
         durations.append(sum([int(w['Duration']) for w in nb['Words']]))
+        if start_offset is None:
+            start_offset = nb['Words'][0]['Offset']
+        end_offset = nb['Words'][-1]['Offset'] + nb['Words'][-1]['Duration'] + 100000
+        for w, d in zip(pronunciation_result.words, nb['Words']):
+            if w.error_type == 'None':
+                valid_durations.append(d['Duration'] + 100000)
 
     # Connect callbacks to the events fired by the speech recognizer
     speech_recognizer.recognized.connect(recognized)
@@ -712,10 +718,18 @@ def pronunciation_assessment_continuous_from_file():
 
     # We can calculate whole accuracy and fluency scores by duration weighted averaging
     accuracy_score = sum(i[0] * i[1] for i in zip(accuracy_scores, durations)) / sum(durations)
-    fluency_score = sum(i[0] * i[1] for i in zip(fluency_scores, durations)) / sum(durations)
+    # Re-calculate fluency score
+    if start_offset is not None:
+        fluency_score = sum(valid_durations) / (end_offset - start_offset) * 100
 
     # we need to convert the reference text to lower case, and split to words, then remove the punctuations.
-    reference_words = [w.strip(string.punctuation) for w in reference_text.lower().split()]
+    if language == 'zh-CN':
+        # Use jieba package to split words for Chinese
+        import jieba, zhon.hanzi
+        reference_words = [w for w in jieba.cut(reference_text) if w not in zhon.hanzi.punctuation]
+        print(reference_words)
+    else:
+        reference_words = [w.strip(string.punctuation) for w in reference_text.lower().split()]
 
     # For continuous pronunciation assessment mode, the service won't return the words with `Insertion` or `Omission`
     # even if miscue is enabled.
