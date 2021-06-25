@@ -21,41 +21,39 @@
   var client = new sdk.VoiceProfileClient(speechConfig);
   var locale = "en-us";
 
-  // we are done with the setup
+  // we are done with the setup, so create a dependent verification specific profile
   client.createProfileAsync(
     sdk.VoiceProfileType.TextDependentVerification,
     locale,
     function (result) {
       var getAudioConfigFromFile = function (file) {
-          // Create the push stream we need for the speech sdk.
-          var pushStream = sdk.AudioInputStream.createPushStream();
-
-          // Open the file and push it to the push stream.
-          fs.createReadStream(file).on("data", function(arrayBuffer) {
-            pushStream.write(arrayBuffer.buffer);
-          }).on("end", function() {
-            pushStream.close();
-          });
-          return sdk.AudioConfig.fromStreamInput(pushStream);
+          return sdk.AudioConfig.fromWavFileInput(fs.readFileSync(file));
       };
       var profile = result;
       var enrollConfigs = [];
+      
+      // create audio configs for each of the enrollment files to use for each of the enrollment steps
       enrollFiles.forEach(function(f) {
         enrollConfigs.push(getAudioConfigFromFile(f));
       });
 
       console.log("Profile id: " + profile.profileId +" created, now enrolling using files beginning with: " + enrollFiles[0]);
 
+      // enrollment step one
       client.enrollProfileAsync(
         profile, 
         enrollConfigs[0],
         function(enrollResult) {
           console.log("(Enrollment result) Reason: " + sdk.ResultReason[enrollResult.reason]); 
+          
+          // enrollment step two
           client.enrollProfileAsync(
             profile, 
             enrollConfigs[1],
             function(enrollResult) {
               console.log("(Enrollment result) Reason: " + sdk.ResultReason[enrollResult.reason]); 
+              
+              // enrollment step three
               client.enrollProfileAsync(
                 profile, 
                 enrollConfigs[2],
@@ -63,6 +61,8 @@
                   console.log("(Enrollment result) Reason: " + sdk.ResultReason[enrollResult.reason]); 
                   var verificationConfig = getAudioConfigFromFile(verificationFile);
                   var recognizer = new sdk.SpeakerRecognizer(speechConfig, verificationConfig);
+                  
+                  // For verification scenarios, create a SpeakerVerificationModel. (Note that identification scenarios use a different type and API here.)
                   var model = sdk.SpeakerVerificationModel.fromProfile(profile);
                   recognizer.recognizeOnceAsync(
                     model,
@@ -77,6 +77,8 @@
                         console.log("(Verification result) Profile Id: " + verificationResult.profileId); 
                         console.log("(Verification result) Score: " + verificationResult.score);
                       }
+                      
+                      // Delete voice profile after we're done with this scenario 
                       client.deleteProfileAsync(
                         profile,
                         function(deleteResult) {
