@@ -36,20 +36,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Connector\Connector.csproj" />
+    <ProjectReference Include="..\RealtimeTranscription\RealtimeTranscription.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="TestFiles\transcriptSample.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="TestFiles\test_audio.wav">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="TestFiles\test_audio.mp3">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="TestFiles\missing_wav_header.wav">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <None Update="TestFiles\*.*">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
   <ItemGroup>
