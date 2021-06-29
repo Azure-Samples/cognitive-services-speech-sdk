@@ -726,8 +726,8 @@ def pronunciation_assessment_continuous_from_file():
     if language == 'zh-CN':
         # Use jieba package to split words for Chinese
         import jieba, zhon.hanzi
+        jieba.suggest_freq([x.word for x in recognized_words], True)
         reference_words = [w for w in jieba.cut(reference_text) if w not in zhon.hanzi.punctuation]
-        print(reference_words)
     else:
         reference_words = [w.strip(string.punctuation) for w in reference_text.lower().split()]
 
@@ -738,12 +738,12 @@ def pronunciation_assessment_continuous_from_file():
         diff = difflib.SequenceMatcher(None, reference_words, [x.word for x in recognized_words])
         final_words = []
         for tag, i1, i2, j1, j2 in diff.get_opcodes():
-            if tag == 'insert':
+            if tag in ['insert', 'replace']:
                 for word in recognized_words[j1:j2]:
                     if word.error_type == 'None':
                         word._error_type = 'Insertion'
                     final_words.append(word)
-            elif tag == 'delete':
+            if tag in ['delete', 'replace']:
                 for word_text in reference_words[i1:i2]:
                     word = speechsdk.PronunciationAssessmentWordResult({
                         'Word': word_text,
@@ -752,7 +752,7 @@ def pronunciation_assessment_continuous_from_file():
                         }
                     })
                     final_words.append(word)
-            else:
+            if tag == 'equal':
                 final_words += recognized_words[j1:j2]
     else:
         final_words = recognized_words
