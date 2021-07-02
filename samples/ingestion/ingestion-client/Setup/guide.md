@@ -75,7 +75,7 @@ In real time mode, audio files are downloaded and streamed from the Azure Functi
 * **You will need to use the [Real Time ARM Template](ArmTemplateRealtime.json) from the repository for this operating mode.**
 
 #### Scale up
-Batch mode will process transcription requests following best effort policies via which compute is requested as soon as the transcription is scheduled. Available compute is directly allocated. 
+Batch mode will process transcription requests following best effort policies using the compute you request when the transcription is scheduled. Available compute is directly allocated. 
 
 In Real time mode, each Azure Speech resource is allocated by default 50 concurrent connections, which indicates the maximum number of parallel audio transcription streams. Customers do have a choice to raise a request to have that number increased through Azure Speech customer channels. To avoid throttling however the rhythm/tempo of uploading audio files to Azure storage (therefore triggering real time transcriptions) should be controlled. If it is not controlled it will result in throttling.
 
