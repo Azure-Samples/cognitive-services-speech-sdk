@@ -105,7 +105,9 @@ namespace RealtimeTranscription
             {
                 if (exception is RealtimeTranscriptionException realtimeTranscriptionException && IsRetryableErrorCode(realtimeTranscriptionException.CancellationErrorCode))
                 {
-                    // Trigger automatic retry:
+                    // Sleeping for a minute to safe guarding against exhausting the Service Bus retries.
+                    // For processing higher volume than 50 concurrent audio streams refer to set up guide
+                    System.Threading.Thread.Sleep(60000);
                     throw;
                 }
 
