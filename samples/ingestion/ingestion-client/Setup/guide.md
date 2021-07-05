@@ -77,7 +77,7 @@ In real time mode, audio files are downloaded and streamed from the Azure Functi
 #### Scale up
 Batch mode will process transcription requests following best effort policies using the compute you request when the transcription is scheduled. Available compute is directly allocated. 
 
-In Real time mode, each Azure Speech resource is allocated with a default of 50 concurrent connections, which indicates the maximum number of parallel audio transcription streams. Customers can request a higher limit. To avoid throttling, the cadence of new audio file uploads to Azure storage should be controlled, because each upload triggers  a real-time transcription. Throttling occurs when the concurrency limit is reached.
+In Real time mode, each Azure Speech resource is allocated with a default of 100 concurrent connections, which indicates the maximum number of parallel audio transcription streams. Customers can request a higher limit. To avoid throttling, the cadence of new audio file uploads to Azure storage should be controlled, because each upload triggers  a real-time transcription. Throttling occurs when the concurrency limit is reached.
 
 ## Ingestion Client Setup Instructions
 
