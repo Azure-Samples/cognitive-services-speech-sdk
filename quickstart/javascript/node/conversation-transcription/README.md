@@ -1,7 +1,7 @@
 # Quickstart: Transcribe a conversation in JavaScript on Node.js.
 
 This sample demonstrates how to transcribe conversations with the Speech SDK for JavaScript on Node.js.
-See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-js-node) on the SDK documentation page which describes how to build this sample from scratch in your favourite editor.
+See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/how-to-use-conversation-transcription?pivots=programming-language-javascript) on the SDK documentation page which describes how to build this sample from scratch in your favourite editor.
 
 ## Prerequisites
 
