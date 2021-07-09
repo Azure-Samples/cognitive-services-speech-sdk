@@ -124,7 +124,7 @@
       <Link>katiesteve.wav</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="..\..\..\sharedcontent\console\en-us_ja-jp.wav">
+    <Content Include="..\..\..\sharedcontent\console\en-us_zh-cn.wav">
       <Link>en-us_zh-cn.wav</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
