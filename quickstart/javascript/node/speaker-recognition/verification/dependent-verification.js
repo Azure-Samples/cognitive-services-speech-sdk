@@ -30,79 +30,56 @@
           return sdk.AudioConfig.fromWavFileInput(fs.readFileSync(file));
       };
       var profile = result;
-      var enrollConfigs = [];
+      var resultReason: sdk.ResultReason = sdk.ResultReason.EnrollingVoiceProfile;
       
+      console.log("Profile id: " + profile.profileId +" created, now enrolling using files beginning with: " + enrollFiles[0]);
       // create audio configs for each of the enrollment files to use for each of the enrollment steps
       enrollFiles.forEach(function(f) {
-        enrollConfigs.push(getAudioConfigFromFile(f));
+        var enrollConfig = getAudioConfigFromFile(f);
+        try {
+          var enrollResult = await client.enrollProfileAsync(profile, enrollConfig);
+          console.log("(Enrollment result) Reason: " + sdk.ResultReason[enrollResult.reason]); 
+          resultReason = enrollResult.reason;
+        } catch(err) {
+          console.log(`Enrollment file ${f} ERROR: ${err}`); 
+          break;
+        }
       });
 
-      console.log("Profile id: " + profile.profileId +" created, now enrolling using files beginning with: " + enrollFiles[0]);
-
-      // enrollment step one
-      client.enrollProfileAsync(
-        profile, 
-        enrollConfigs[0],
-        function(enrollResult) {
-          console.log("(Enrollment result) Reason: " + sdk.ResultReason[enrollResult.reason]); 
-          
-          // enrollment step two
-          client.enrollProfileAsync(
-            profile, 
-            enrollConfigs[1],
-            function(enrollResult) {
-              console.log("(Enrollment result) Reason: " + sdk.ResultReason[enrollResult.reason]); 
-              
-              // enrollment step three
-              client.enrollProfileAsync(
-                profile, 
-                enrollConfigs[2],
-                function(enrollResult) {
-                  console.log("(Enrollment result) Reason: " + sdk.ResultReason[enrollResult.reason]); 
-                  var verificationConfig = getAudioConfigFromFile(verificationFile);
-                  var recognizer = new sdk.SpeakerRecognizer(speechConfig, verificationConfig);
+      if (resultReason === sdk.ResultReason.EnrolledVoiceProfile) {
+        var verificationConfig = getAudioConfigFromFile(verificationFile);
+        var recognizer = new sdk.SpeakerRecognizer(speechConfig, verificationConfig);
                   
-                  // For verification scenarios, create a SpeakerVerificationModel. (Note that identification scenarios use a different type and API here.)
-                  var model = sdk.SpeakerVerificationModel.fromProfile(profile);
-                  recognizer.recognizeOnceAsync(
-                    model,
-                    function(verificationResult) {
-                      var reason = verificationResult.reason; 
-                      console.log("(Verification result) Reason: " + sdk.ResultReason[reason]); 
-                      if( reason === sdk.ResultReason.Canceled ) {
-                        var cancellationDetails = sdk.SpeakerRecognitionCancellationDetails.fromResult(verificationResult);
-                        console.log("(Verification canceled) Error Details: " + cancellationDetails.errorDetails); 
-                        console.log("(Verification canceled) Error Code: " + cancellationDetails.errorCode);
-                      } else {
-                        console.log("(Verification result) Profile Id: " + verificationResult.profileId); 
-                        console.log("(Verification result) Score: " + verificationResult.score);
-                      }
+        // For verification scenarios, create a SpeakerVerificationModel. (Note that identification scenarios use a different type and API here.)
+        var model = sdk.SpeakerVerificationModel.fromProfile(profile);
+        recognizer.recognizeOnceAsync(
+          model,
+          function(verificationResult) {
+            var reason = verificationResult.reason; 
+            console.log("(Verification result) Reason: " + sdk.ResultReason[reason]); 
+            if( reason === sdk.ResultReason.Canceled ) {
+              var cancellationDetails = sdk.SpeakerRecognitionCancellationDetails.fromResult(verificationResult);
+              console.log("(Verification canceled) Error Details: " + cancellationDetails.errorDetails); 
+              console.log("(Verification canceled) Error Code: " + cancellationDetails.errorCode);
+            } else {
+              console.log("(Verification result) Profile Id: " + verificationResult.profileId); 
+              console.log("(Verification result) Score: " + verificationResult.score);
+            }
                       
-                      // Delete voice profile after we're done with this scenario 
-                      client.deleteProfileAsync(
-                        profile,
-                        function(deleteResult) {
-                          console.log("(Delete profile result) Reason: " + sdk.ResultReason[deleteResult.reason]); 
-                        },
-                        function(err) {
-                          console.log("Delete Profile ERROR: " + err); 
-                        });
-                    },
-                    function(err) {
-                      console.log("Recognize Once ERROR: " + err); 
-                    });
-                },
-                function(err) {
-                  console.log("Third Enrollment file ERROR: " + err); 
-                });
+            // Delete voice profile after we're done with this scenario 
+            client.deleteProfileAsync(
+              profile,
+              function(deleteResult) {
+                console.log("(Delete profile result) Reason: " + sdk.ResultReason[deleteResult.reason]); 
+              },
+              function(err) {
+                console.log("Delete Profile ERROR: " + err); 
+              });
             },
             function(err) {
-              console.log("Second Enrollment file ERROR: " + err); 
+              console.log("Recognize Once ERROR: " + err); 
             });
-        },
-        function(err) {
-          console.log("First Enrollment file ERROR: " + err); 
-        });
+      }
     },
     function (err) {
       console.log("Create Profile ERROR: " + err); 

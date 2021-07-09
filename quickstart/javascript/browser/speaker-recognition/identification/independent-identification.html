@@ -118,19 +118,16 @@
             
             let audioConfig = SpeechSDK.AudioConfig.fromWavFileInput(audioFiles[0]);
 
-            client.enrollProfileAsync(
-              profile, 
-              audioConfig,
-              function(result) {
-                resultDiv.innerHTML += "(Enrollment result) Reason: " + SpeechSDK.ResultReason[result.reason]; 
-                resultDiv.innerHTML += "\r\n"; 
-                window.console.log(result);
-                identifySpeakerButton.disabled = false;
-              },
-              function(err) {
-                window.console.log(err);
-                resultDiv.innerHTML += "ERROR: " + err; 
-              });
+            try { 
+              let result = await client.enrollProfileAsync(profile, audioConfig);
+              resultDiv.innerHTML += "(Enrollment result) Reason: " + SpeechSDK.ResultReason[result.reason]; 
+              resultDiv.innerHTML += "\r\n"; 
+              window.console.log(result);
+              identifySpeakerButton.disabled = false;
+            } catch (err) {
+              window.console.log(err);
+              resultDiv.innerHTML += "ERROR: " + err; 
+            }
             resultDiv.innerHTML += "\r\n"; 
 
             createVoiceProfileButton.disabled = false;
