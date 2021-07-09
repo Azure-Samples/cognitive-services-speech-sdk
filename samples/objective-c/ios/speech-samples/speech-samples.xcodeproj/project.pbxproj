@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		3C00A32C25F8727100512312 /* AudioRecorder.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C00A32B25F8727100512312 /* AudioRecorder.m */; };
+		3C1B8BCA2679C50600706BB3 /* pronunciation-assessment.wav in Resources */ = {isa = PBXBuildFile; fileRef = 3C1B8BC92679C50600706BB3 /* pronunciation-assessment.wav */; };
 		DC2CBA04227047FB007EB18A /* wreck-a-nice-beach.wav in Resources */ = {isa = PBXBuildFile; fileRef = DC2CBA03227047EA007EB18A /* wreck-a-nice-beach.wav */; };
 		F3184E4B214674D60096193E /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = F3184E4A214674D60096193E /* AppDelegate.m */; };
 		F3184E4E214674D60096193E /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F3184E4D214674D60096193E /* ViewController.m */; };
@@ -49,6 +50,7 @@
 /* Begin PBXFileReference section */
 		3C00A32A25F8726500512312 /* AudioRecorder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AudioRecorder.h; sourceTree = "<group>"; };
 		3C00A32B25F8727100512312 /* AudioRecorder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AudioRecorder.m; sourceTree = "<group>"; };
+		3C1B8BC92679C50600706BB3 /* pronunciation-assessment.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = "pronunciation-assessment.wav"; sourceTree = "<group>"; };
 		DC2CBA03227047EA007EB18A /* wreck-a-nice-beach.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = "wreck-a-nice-beach.wav"; path = "./wreck-a-nice-beach.wav"; sourceTree = "<group>"; };
 		F3184E46214674D60096193E /* speech-samples.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "speech-samples.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		F3184E49214674D60096193E /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -93,6 +95,7 @@
 			children = (
 				FC5F544124F2BE6F0009EA6E /* kws_whatstheweatherlike.wav */,
 				FC5F543F24F2BE5A0009EA6E /* kws.table */,
+				3C1B8BC92679C50600706BB3 /* pronunciation-assessment.wav */,
 				DC2CBA03227047EA007EB18A /* wreck-a-nice-beach.wav */,
 				F376163D21540C9D0097B6F1 /* MicrosoftCognitiveServicesSpeech.framework */,
 				F3184E67214685C70096193E /* whatstheweatherlike.wav */,
@@ -227,6 +230,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				FC5F544024F2BE5A0009EA6E /* kws.table in Resources */,
+				3C1B8BCA2679C50600706BB3 /* pronunciation-assessment.wav in Resources */,
 				DC2CBA04227047FB007EB18A /* wreck-a-nice-beach.wav in Resources */,
 				F3184E68214685C80096193E /* whatstheweatherlike.wav in Resources */,
 				FC5F544224F2BE6F0009EA6E /* kws_whatstheweatherlike.wav in Resources */,
@@ -325,7 +329,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 11.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.3;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
@@ -378,7 +382,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 11.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.3;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				VALIDATE_PRODUCT = YES;
