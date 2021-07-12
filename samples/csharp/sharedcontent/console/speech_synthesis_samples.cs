@@ -850,5 +850,72 @@ namespace MicrosoftSpeechSDKSamples
                 }
             }
         }
+
+        private static async Task<SpeechSynthesisResult> SynthesizeOnceAsyncInternal(string key, string region,
+            string endpointId = null, string voiceName = null, string text = "Hello World!")
+        {
+            SpeechSynthesisResult synthesisResult = null;
+            var config = SpeechConfig.FromSubscription(key, region);
+            if (!string.IsNullOrEmpty(endpointId))
+            {
+                config.EndpointId = endpointId;
+            }
+
+            if (!string.IsNullOrEmpty(voiceName))
+            {
+                config.SpeechSynthesisVoiceName = voiceName;
+            }
+
+            // Creates a speech synthesizer using the default speaker as audio output.
+            using (var synthesizer = new SpeechSynthesizer(config, null as AudioConfig))
+            {
+                synthesisResult = await synthesizer.SpeakTextAsync(text).ConfigureAwait(false);
+            }
+            
+
+            return synthesisResult;
+        }
+
+        // Speech synthesis with backup subscription region.
+        public static async Task SynthesizeOnceToSpeakerAsyncSwitchSecondaryRegion()
+        {
+            // Create a speech resource with primary subscription key and service region.
+            // Also create a speech resource with secondary subscription key and service region
+            SpeechSynthesisResult synthesisResult = await SynthesizeOnceAsyncInternal("PrimarySubscriptionKey", "PrimarySubscriptionRegion" );
+            if (synthesisResult.Reason == ResultReason.Canceled)
+            {
+                SpeechSynthesisCancellationDetails details = SpeechSynthesisCancellationDetails.FromResult(synthesisResult);
+                if (details.ErrorCode == CancellationErrorCode.ConnectionFailure
+                    || details.ErrorCode == CancellationErrorCode.ServiceUnavailable
+                    || details.ErrorCode == CancellationErrorCode.ServiceTimeout)
+                {
+                    synthesisResult = await SynthesizeOnceAsyncInternal("SecondarySubscriptionRegion", "SecondarySubscriptionRegion");
+                }
+            }
+        }
+
+        // Custom voice with backup.
+        // If custom voice service is unavailable, you can fallback to a standard platform voice
+        // or your custom voice service in another region.
+        // This sample uses platform voice as back up.
+        public static async Task SynthesizeOnceUseCustomVoiceToSpeakerAsyncSwitchPlatformVoice()
+        {
+            // Create a speech resource with primary subscription key and service region.
+            // Also create a speech resource with secondary subscription key and service region
+            SpeechSynthesisResult synthesisResult = await SynthesizeOnceAsyncInternal("PrimarySubscriptionKey",
+                "PrimarySubscriptionRegion", "YourEndpointId", "YourVoiceName");
+            if (synthesisResult.Reason == ResultReason.Canceled)
+            {
+                SpeechSynthesisCancellationDetails details = SpeechSynthesisCancellationDetails.FromResult(synthesisResult);
+                if (details.ErrorCode == CancellationErrorCode.ConnectionFailure
+                    || details.ErrorCode == CancellationErrorCode.ServiceUnavailable
+                    || details.ErrorCode == CancellationErrorCode.ServiceTimeout 
+                    || details.ErrorDetails.Contains("Error code: 1007"))
+                {
+                    // Synthesize using platform voice. The SecondarySubscription could be same with primary one
+                    synthesisResult = await SynthesizeOnceAsyncInternal("SecondarySubscriptionRegion", "SecondarySubscriptionRegion");
+                }
+            }
+        }
     }
 }
