@@ -3,7 +3,7 @@
 
 ## Setup Guide
 
-The following guide describes how you can create Power BI reports from templates that help realize the value of the speech transcription output
+The following guide describes how you can create Power BI reports from templates that help realize the value of the speech transcription output. For complete functionality, please ensure you have enabled Text Analytics and word-level timestamps during the [Ingestion Client](Setup/guide.md) set up.
 
 ## Prerequisites
 
