@@ -31,7 +31,7 @@ These are template reports provided for two use cases that help realize value of
 
 ## Getting started
 
-Follow the instructions [here](https://github.com/Azure-Samples/cognitive-services-speech-sdk/blob/master/samples/ingestion/ingestion-client/Setup/guide.md).
+Follow the instructions [here](https://github.com/cgero-msft/cognitive-services-speech-sdk/blob/master/samples/ingestion/ingestion-client/PowerBI/guide.md).
 
 ## Contributing
 
