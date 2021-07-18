@@ -11,6 +11,7 @@
 using namespace std;
 using namespace Microsoft::CognitiveServices::Speech;
 using namespace Microsoft::CognitiveServices::Speech::Audio;
+using namespace Microsoft::CognitiveServices::Speech::Speaker;
 
 void verifySpeaker(const shared_ptr<SpeechConfig>& config, const shared_ptr<VoiceProfile>& profile)
 {
