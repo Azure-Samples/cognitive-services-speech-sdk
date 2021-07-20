@@ -111,7 +111,7 @@
         client.createProfileAsync(
           SpeechSDK.VoiceProfileType.TextDependentVerification,
           "en-us",
-          function (result) {
+          async function (result) {
             profile = result;
             window.console.log(result);
             
