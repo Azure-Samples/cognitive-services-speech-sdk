@@ -24,7 +24,7 @@
   client.createProfileAsync(
     sdk.VoiceProfileType.TextIndependentIdentification,
     locale,
-    function (result) {
+    async function (result) {
       var profile = result;
       var getAudioConfigFromFile = function (file) {
           // Create the push stream we need for the speech sdk.
