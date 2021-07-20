@@ -41,6 +41,8 @@ This sample demonstrates how to synthesize speech in [Unity](https://unity3d.com
   * Import the Speech SDK by selecting **Assets** > **Import Package** > **Custom Package**.
   * In the file picker, select the Speech SDK .unitypackage file that you downloaded before.
   * Ensure that all files are selected and click **Import**.
+  * NOTE: If you have installed Unity only for specific platform e.g. Unity CloudBuild for Android, be aware that you may need to remove other 
+  * platform (iOS, Mac, WSA) binaries from the Speech SDK Plugins folder to avoid possible conflicts with the same library name.
 * Select the `HelloWorld` sample scene:
   * In the Project Window (bottom left by default), navigate to **Assets** > **Scenes** and double-click on the `HelloWorld` scene to open it up.
 * Update the sample code with your subscription data:
