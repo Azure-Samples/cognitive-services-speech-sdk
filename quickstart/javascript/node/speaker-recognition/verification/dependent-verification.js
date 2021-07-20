@@ -25,7 +25,7 @@
   client.createProfileAsync(
     sdk.VoiceProfileType.TextDependentVerification,
     locale,
-    function (result) {
+    async function (result) {
       var getAudioConfigFromFile = function (file) {
           return sdk.AudioConfig.fromWavFileInput(fs.readFileSync(file));
       };
