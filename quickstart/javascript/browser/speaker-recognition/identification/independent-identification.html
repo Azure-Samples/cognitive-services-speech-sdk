@@ -108,7 +108,7 @@
         client.createProfileAsync(
           SpeechSDK.VoiceProfileType.TextIndependentIdentification,
           "en-us",
-          function (result) {
+          async function (result) {
             profile = result;
             window.console.log(result);
             
