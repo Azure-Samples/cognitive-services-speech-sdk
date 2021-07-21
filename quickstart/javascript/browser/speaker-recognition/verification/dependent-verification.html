@@ -111,7 +111,7 @@
         client.createProfileAsync(
           SpeechSDK.VoiceProfileType.TextDependentVerification,
           "en-us",
-          function (result) {
+          async function (result) {
             profile = result;
             window.console.log(result);
             
@@ -121,40 +121,19 @@
             
             let configs = [];
             for(var i = 0; i < audioFiles.length; i++){
-              configs.push(SpeechSDK.AudioConfig.fromWavFileInput(audioFiles[i]));
-            }
-
-            client.enrollProfileAsync(
-              profile, 
-              configs[0],
-              function(result) {
+              const config = SpeechSDK.AudioConfig.fromWavFileInput(audioFiles[i]);
+              try {
+                let result = await client.enrollProfileAsync(profile, config);
                 resultDiv.innerHTML += "(Enrollment result) Reason: " + SpeechSDK.ResultReason[result.reason]; 
                 resultDiv.innerHTML += "\n"; 
                 window.console.log(result);
-                client.enrollProfileAsync(
-                  profile,
-                  configs[1],
-                  function(result2) {
-                    resultDiv.innerHTML += "(Enrollment result) Reason: " + SpeechSDK.ResultReason[result2.reason];
-                    resultDiv.innerHTML += "\n";
-                    window.console.log(result2);
-                    client.enrollProfileAsync(
-                      profile,
-                      configs[2],
-                      function(result3) {
-                        resultDiv.innerHTML += "(Enrollment result) Reason: " + SpeechSDK.ResultReason[result3.reason];
-                        resultDiv.innerHTML += "\n";
-                        window.console.log(result3);
-                        verifySpeakerButton.disabled = false;
-                      },
-                      (err) => { resultDiv.innerHTML += "ERROR: " + err; })
-                  },
-                  (err) => { resultDiv.innerHTML += "ERROR: " + err; })
-              },
-              (err) => { resultDiv.innerHTML += "ERROR: " + err; })
-
+              } catch (err) {
+                resultDiv.innerHTML += "ERROR: " + err;
+              }
+            }
+            
+            verifySpeakerButton.disabled = false;
             resultDiv.innerHTML += "\r\n"; 
-
             createVoiceProfileButton.disabled = false;
           },
           function (err) {
