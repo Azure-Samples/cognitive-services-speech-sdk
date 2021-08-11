@@ -16,6 +16,7 @@ namespace MicrosoftSpeechSDKSamples
 {
     // For server scenario synthesizing with high concurrency, we recommend two methods to reduce the latency.
     // Firstly, reuse the synthesizers (e.g. use a synthesizer pool ) to reduce the connection establish latency;
+    //          This is because new synthesizer instance need to take time to connect to the service. Reusing the instance can save time of conenction.
     // secondly, use AudioOutputStream or synthesizing event to streaming receive the synthesized audio to lower the first byte latency.
 
     public class SynthesizerPool : IDisposable
@@ -73,6 +74,8 @@ namespace MicrosoftSpeechSDKSamples
         public static void SpeechSynthesizeWithPool()
         {
             var speechConfig = SpeechConfig.FromSubscription(subscriptionKey, region);
+
+            // pool should be a single instance to handle all request
             var pool = new SynthesizerPool(() => new SpeechSynthesizer(speechConfig, null));
             var latencyList = new List<double>();
             var processingTimeList = new List<double>();

@@ -370,6 +370,7 @@ namespace MicrosoftSpeechSDKSamples
         }
 
         // Speech synthesis to push audio output stream.
+        // This sample will also print the first byte latency of the request
         public static async Task SynthesisToPushAudioOutputStreamAsync()
         {
             // Creates an instance of a speech config with specified subscription key and service region.
@@ -401,7 +402,7 @@ namespace MicrosoftSpeechSDKSamples
                         {
                             if (result.Reason == ResultReason.SynthesizingAudioCompleted)
                             {
-                                Console.WriteLine($"Speech synthesized for text [{text}], and the audio was written to output stream.");
+                                Console.WriteLine($"Speech synthesized for text [{text}], and the audio was written to output stream. first byte latency: {callback.GetLatency()}");
                             }
                             else if (result.Reason == ResultReason.Canceled)
                             {
