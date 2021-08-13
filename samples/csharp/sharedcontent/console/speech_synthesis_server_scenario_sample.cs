@@ -84,6 +84,12 @@ namespace MicrosoftSpeechSDKSamples
         {
             var speechConfig = SpeechConfig.FromSubscription(subscriptionKey, region);
 
+            // set your voice name
+            speechConfig.SpeechSynthesisVoiceName = "en-US-JennyNeural";
+
+            // use mp3 format to reduce network transfer payload 
+            speechConfig.SetSpeechSynthesisOutputFormat(SpeechSynthesisOutputFormat.Audio24Khz48KBitRateMonoMp3);
+
             // pool should be a single instance to handle all request
             var pool = new SynthesizerPool(() => new SpeechSynthesizer(speechConfig, null));
             var latencyList = new List<double>();
@@ -93,7 +99,7 @@ namespace MicrosoftSpeechSDKSamples
             {
                 Console.WriteLine("turn: {0}", turn);
 
-                Parallel.For(0, 64, (i) =>
+                Parallel.For(0, 1, (i) =>
                 {
                     var start = DateTime.Now;
                     var synthesizer = pool.Get();
@@ -107,29 +113,57 @@ namespace MicrosoftSpeechSDKSamples
                         first = false;
                         if (turn > 0)
                         {
+                            // skip first turn which is used to warm up 
                             latencyList.Add((DateTime.Now - start).TotalMilliseconds);
                         }
                     }
 
                     synthesizer.Synthesizing += SynthesizingEvent;
 
-                    var result = synthesizer.SpeakTextAsync($"today is a nice day. {turn}{i}").Result;
-                    if (result.Reason == ResultReason.SynthesizingAudioCompleted)
+                    var result = synthesizer.StartSpeakingTextAsync($"today is a nice day. {turn}{i}").Result;
+                    try
                     {
-                        if (turn > 0)
+                        // BUGBUG: the reason is started, even i don't set key or region right
+                        if (result.Reason == ResultReason.SynthesizingAudioStarted)
                         {
-                            processingTimeList.Add((DateTime.Now - start).TotalMilliseconds);
+                            using (var audioDataStream = AudioDataStream.FromResult(result))
+                            {
+                                // buffer block size can be adjusted based on scenario
+                                byte[] buffer = new byte[4096];
+                                uint filledSize = 0;
+
+                                // read audio block in a loop here 
+                                // if it is end of audio stream, it will return 0
+                                // Question: if network error happens, it will throw exception??
+                                while ((filledSize = audioDataStream.ReadData(buffer)) > 0)
+                                {
+                                    // Here you can save the audio or send the data to another pipeline in your service.
+                                    Console.WriteLine($"{filledSize} bytes received. Handle the data buffer here");
+                                }
+                            }
+
+                            if (turn > 0)
+                            {
+                                processingTimeList.Add((DateTime.Now - start).TotalMilliseconds);
+                            }
+
+                            synthesizer.Synthesizing -= SynthesizingEvent;
+                            pool.Put(synthesizer);
                         }
-                        synthesizer.Synthesizing -= SynthesizingEvent;
-                        pool.Put(synthesizer);
                     }
-                    else
+                    catch (Exception)
                     {
-                        var err = SpeechSynthesisCancellationDetails.FromResult(result);
-                        Console.WriteLine(err.ToString());
+                        synthesizer.Synthesizing -= SynthesizingEvent;
                         synthesizer.Dispose();
                     }
-
+                    finally
+                    {
+                        if (result.Reason == ResultReason.Canceled)
+                        {
+                            var err = SpeechSynthesisCancellationDetails.FromResult(result);
+                            Console.WriteLine(err.ToString());
+                        }
+                    }
                 });
 
                 Thread.Sleep(2000);
