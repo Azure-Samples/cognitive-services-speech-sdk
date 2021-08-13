@@ -49,17 +49,26 @@ namespace MicrosoftSpeechSDKSamples
 
         public SpeechSynthesizer Get()
         {
-            return _synthesizerStack.TryPop(out SpeechSynthesizer item) ? item : _synthesizerGenerator();
+            SpeechSynthesizer item;
+            if (!_synthesizerStack.TryPop(out item))
+            {
+                Console.WriteLine("create a brand new synthesizer...");
+                item = _synthesizerGenerator();
+            }
+
+            return item;
         }
 
         public void Put(SpeechSynthesizer item)
         {
             if (_synthesizerStack.Count < _maximumRetainedCapacity)
             {
+                Console.WriteLine("put synthesizer to pool.");
                 _synthesizerStack.Push(item);
             }
             else
             {
+                Console.WriteLine("dispose a synthesizer.");
                 item.Dispose();
             }
         }
