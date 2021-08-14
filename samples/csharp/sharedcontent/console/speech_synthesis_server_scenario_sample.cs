@@ -39,16 +39,22 @@ namespace MicrosoftSpeechSDKSamples
         private readonly int _initialCapacity;
         private readonly int _maximumRetainedCapacity;
 
-        public SynthesizerPool(Func<SpeechSynthesizer> synthesizerGenerator, int initialCapacity = 2, int maximumRetainedCapacity = 64)
+        public SynthesizerPool(Func<SpeechSynthesizer> synthesizerGenerator, int initialCapacity = 2, int maximumRetainedCapacity = 100)
         {
             _synthesizerGenerator = synthesizerGenerator;
             _synthesizerStack = new ConcurrentStack<SpeechSynthesizer>();
             _initialCapacity = initialCapacity;
             _maximumRetainedCapacity = maximumRetainedCapacity;
+
+            Console.WriteLine($"Create initial {initialCapacity} syntheszier and warm up");
             for (var i = 0; i < initialCapacity; i++)
             {
-                Put(_synthesizerGenerator());
+                SpeechSynthesizer item = _synthesizerGenerator();
+                item.SpeakTextAsync("1").Wait();
+                Put(item);
             }
+
+            Console.WriteLine("Pool created!");
         }
 
         public void Dispose()
@@ -86,148 +92,103 @@ namespace MicrosoftSpeechSDKSamples
         }
     }
 
+    /// <summary>
+    /// a synthesizer class that can init once, handle concurrent request
+    /// </summary>
     public class SynthesisServer
     {
-        private string subscription;
-        private string region;
-        private string voiceName;
-        private string outputFormat;
         private SynthesizerPool pool;
         private SpeechConfig speechConfig;
         private List<double> latencyList;
         private List<double> processingTimeList;
 
-        public SynthesisServer(string subscription, string region, string voiceName, string outputFormat)
+        public SynthesisServer(string subscription, string region, string voiceName, SpeechSynthesisOutputFormat outputFormat, int concurrency)
         {
-            this.subscription = subscription;
-            this.region = region;
-            this.voiceName = voiceName;
-            this.outputFormat = outputFormat;
-
-
             this.speechConfig = SpeechConfig.FromSubscription(subscription, region);
 
             // set your voice name
-            speechConfig.SpeechSynthesisVoiceName = "en-US-JennyNeural";
+            speechConfig.SpeechSynthesisVoiceName = voiceName;
 
             // use mp3 format to reduce network transfer payload 
-            speechConfig.SetSpeechSynthesisOutputFormat(SpeechSynthesisOutputFormat.Audio24Khz48KBitRateMonoMp3);
+            speechConfig.SetSpeechSynthesisOutputFormat(outputFormat);
 
             // pool should be a single instance to handle all request. In real scenario, this could be put as a static class member
-            pool = new SynthesizerPool(() => new SpeechSynthesizer(speechConfig, null));
+            pool = new SynthesizerPool(() => new SpeechSynthesizer(speechConfig, null), concurrency);
             latencyList = new List<double>();
             processingTimeList = new List<double>();
         }
 
-    }
-
-    /// <summary>
-    /// This sample demostrates the concurrent synthesis with the pool
-    /// </summary>
-    public class SpeechSynthesisServerScenarioSample
-    {
-        // Specify your subscription key and service region (e.g., "westus").
-        private const string subscriptionKey = "YourSubscriptionKey";
-        private const string region = "YourServiceRegion";
-
-        public static void SpeechSynthesizeWithPool()
+        public void Synthesize(string text)
         {
-            var speechConfig = SpeechConfig.FromSubscription(subscriptionKey, region);
+            var start = DateTime.Now;
+            var synthesizer = pool.Get();
+            bool first = true;
 
-            // set your voice name
-            speechConfig.SpeechSynthesisVoiceName = "en-US-JennyNeural";
-
-            // use mp3 format to reduce network transfer payload 
-            speechConfig.SetSpeechSynthesisOutputFormat(SpeechSynthesisOutputFormat.Audio24Khz48KBitRateMonoMp3);
-
-            // pool should be a single instance to handle all request. In real scenario, this could be put as a static class member
-            var pool = new SynthesizerPool(() => new SpeechSynthesizer(speechConfig, null));
-            var latencyList = new List<double>();
-            var processingTimeList = new List<double>();
-
-            for (var turn = 0; turn < 3; turn++)
+            void SynthesizingEvent(object sender, SpeechSynthesisEventArgs eventArgs)
             {
-                Console.WriteLine("turn: {0}", turn);
-
-                Parallel.For(0, 64, (i) =>
+                // receive streaming audio here.
+                if (!first)
                 {
-                    var start = DateTime.Now;
-                    var synthesizer = pool.Get();
-                    bool first = true;
+                    return;
+                }
 
-                    void SynthesizingEvent(object sender, SpeechSynthesisEventArgs eventArgs)
-                    {
-                        // receive streaming audio here.
-                        if (!first)
-                        {
-                            return;
-                        }
-
-                        Console.WriteLine("First byte latency: {0}", DateTime.Now - start);
-                        first = false;
-                        if (turn > 0)
-                        {
-                            // skip first turn which is used to warm up 
-                            latencyList.Add((DateTime.Now - start).TotalMilliseconds);
-                        }
-                    }
-
-                    synthesizer.Synthesizing += SynthesizingEvent;
-
-                    var result = synthesizer.StartSpeakingTextAsync($"today is a nice day. {turn}{i}").Result;
-                    try
-                    {
-                        if (result.Reason == ResultReason.SynthesizingAudioStarted)
-                        {
-                            uint totalSize = 0;
-                            using (var audioDataStream = AudioDataStream.FromResult(result))
-                            {
-                                // buffer block size can be adjusted based on scenario
-                                byte[] buffer = new byte[4096];
-                                uint filledSize = 0;
-
-                                // read audio block in a loop here 
-                                // if it is end of audio stream, it will return 0
-                                // BUGBUG: if network issue, how to get cancelled result?
-                                while ((filledSize = audioDataStream.ReadData(buffer)) > 0)
-                                {
-                                    // Here you can save the audio or send the data to another pipeline in your service.
-                                    Console.WriteLine($"{filledSize} bytes received. Handle the data buffer here");
-
-                                    totalSize += filledSize;
-                                }
-                            }
-
-                            if (totalSize> 0)
-                            {
-                                if (turn > 0)
-                                {
-                                    processingTimeList.Add((DateTime.Now - start).TotalMilliseconds);
-                                }
-                            }
-
-                            synthesizer.Synthesizing -= SynthesizingEvent;
-                            pool.Put(synthesizer);
-                        }
-                    }
-                    catch (Exception)
-                    {
-                        synthesizer.Synthesizing -= SynthesizingEvent;
-                        synthesizer.Dispose();
-                    }
-                    finally
-                    {
-                        if (result.Reason == ResultReason.Canceled)
-                        {
-                            var err = SpeechSynthesisCancellationDetails.FromResult(result);
-                            Console.WriteLine(err.ToString());
-                        }
-                    }
-                });
-
-                Thread.Sleep(2000);
+                Console.WriteLine("First byte latency: {0}", DateTime.Now - start);
+                first = false;
+                latencyList.Add((DateTime.Now - start).TotalMilliseconds);
             }
 
+            synthesizer.Synthesizing += SynthesizingEvent;
+
+            var result = synthesizer.StartSpeakingTextAsync(text).Result;
+            try
+            {
+                if (result.Reason == ResultReason.SynthesizingAudioStarted)
+                {
+                    uint totalSize = 0;
+                    using (var audioDataStream = AudioDataStream.FromResult(result))
+                    {
+                        // buffer block size can be adjusted based on scenario
+                        byte[] buffer = new byte[4096];
+                        uint filledSize = 0;
+
+                        // read audio block in a loop here 
+                        // if it is end of audio stream, it will return 0
+                        // BUGBUG: if network issue, how to get cancelled result?
+                        while ((filledSize = audioDataStream.ReadData(buffer)) > 0)
+                        {
+                            // Here you can save the audio or send the data to another pipeline in your service.
+                            Console.WriteLine($"{filledSize} bytes received. Handle the data buffer here");
+
+                            totalSize += filledSize;
+                        }
+                    }
+
+                    if (totalSize > 0)
+                    {
+                        processingTimeList.Add((DateTime.Now - start).TotalMilliseconds);
+                    }
+
+                    synthesizer.Synthesizing -= SynthesizingEvent;
+                    pool.Put(synthesizer);
+                }
+            }
+            catch (Exception)
+            {
+                synthesizer.Synthesizing -= SynthesizingEvent;
+                synthesizer.Dispose();
+            }
+            finally
+            {
+                if (result.Reason == ResultReason.Canceled)
+                {
+                    var err = SpeechSynthesisCancellationDetails.FromResult(result);
+                    Console.WriteLine(err.ToString());
+                }
+            }
+        }
+
+        public void DumpStats()
+        {
             if (latencyList.Count > 0)
             {
                 latencyList.Sort();
@@ -248,8 +209,34 @@ namespace MicrosoftSpeechSDKSamples
             {
                 Console.WriteLine("Something wrong! No latency data!");
             }
+        }
+    }
 
+    public class SpeechSynthesisServerScenarioSample
+    {
+        // Specify your subscription key and service region (e.g., "westus").
+        private const string subscriptionKey = "YourSubscriptionKey";
+        private const string region = "YourServiceRegion";
 
+        private const int concurrency = 64;
+        public static void SpeechSynthesizeWithPool()
+        {
+            SynthesisServer server = new SynthesisServer(subscriptionKey, region,
+                    "en-US-JennyNeural", SpeechSynthesisOutputFormat.Audio24Khz48KBitRateMonoMp3, concurrency);
+
+            for (var turn = 0; turn < 3; turn++)
+            {
+                Console.WriteLine("turn: {0}", turn);
+
+                Parallel.For(0, concurrency, (i) =>
+                {
+                    server.Synthesize($"today is a nice day. {turn}{i}");
+                });
+
+                Thread.Sleep(2000);
+            }
+
+            server.DumpStats();
             Console.WriteLine("Press the Enter key to exit.");
             Console.ReadLine();
         }
