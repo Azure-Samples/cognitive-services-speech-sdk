@@ -137,7 +137,21 @@ namespace MicrosoftSpeechSDKSamples
                 latencyList.Add((DateTime.Now - start).TotalMilliseconds);
             }
 
+            void Synthesizer_SynthesisCanceled(object sender, SpeechSynthesisEventArgs e)
+            {
+                var cancellation = SpeechSynthesisCancellationDetails.FromResult(e.Result);
+                Console.WriteLine($"CANCELED: Reason={cancellation.Reason}");
+
+                if (cancellation.Reason == CancellationReason.Error)
+                {
+                    Console.WriteLine($"CANCELED: ErrorCode={cancellation.ErrorCode}");
+                    Console.WriteLine($"CANCELED: ErrorDetails=[{cancellation.ErrorDetails}]");
+                    Console.WriteLine($"CANCELED: Did you update the subscription info?");
+                }
+            }
+
             synthesizer.Synthesizing += SynthesizingEvent;
+            synthesizer.SynthesisCanceled += Synthesizer_SynthesisCanceled;
 
             var result = synthesizer.StartSpeakingTextAsync(text).Result;
             try
@@ -169,21 +183,18 @@ namespace MicrosoftSpeechSDKSamples
                     }
 
                     synthesizer.Synthesizing -= SynthesizingEvent;
+                    synthesizer.SynthesisCanceled -= Synthesizer_SynthesisCanceled;
                     pool.Put(synthesizer);
                 }
             }
             catch (Exception)
             {
+                synthesizer.SynthesisCanceled -= Synthesizer_SynthesisCanceled;
                 synthesizer.Synthesizing -= SynthesizingEvent;
                 synthesizer.Dispose();
             }
             finally
             {
-                if (result.Reason == ResultReason.Canceled)
-                {
-                    var err = SpeechSynthesisCancellationDetails.FromResult(result);
-                    Console.WriteLine(err.ToString());
-                }
             }
         }
 
