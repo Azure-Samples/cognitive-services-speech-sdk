@@ -167,7 +167,7 @@ namespace MicrosoftSpeechSDKSamples
 
                         // read audio block in a loop here 
                         // if it is end of audio stream, it will return 0
-                        // BUGBUG: if network issue, how to get cancelled result?
+                        // if there are error happening,  the cancel event will be called.
                         while ((filledSize = audioDataStream.ReadData(buffer)) > 0)
                         {
                             // Here you can save the audio or send the data to another pipeline in your service.
