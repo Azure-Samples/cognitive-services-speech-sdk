@@ -20,7 +20,7 @@ See [this information on the Speech SDK for JavaScript](https://github.com/micro
 * In case you are running the sample from your local computer, open `dialogServiceConnectorSample.html` from the location where you have downloaded this sample with a JavaScript capable browser.
 * Use the input fields to set your subscription key and service region.
 * Click **Connect** to establish a connection with your credentials.
-* Click 'Start listening' and speak a phrase to your bot
+* Click **Start listening** and speak a phrase to your bot.
 
 ## References
 
