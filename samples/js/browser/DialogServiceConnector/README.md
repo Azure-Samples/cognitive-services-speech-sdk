@@ -1,7 +1,7 @@
 # JavaScript voice assistant sample for web browsers  
 
-This sample demonstrates how to connect to and interact with your voice assistant using the Speech SDK for JavaScript on a web browser, like Microsoft Edge, or Chrome.
-See [this page](https://github.com/microsoft/cognitive-services-speech-sdk-js#readme) for introductory information on the Speech SDK for JavaScript.
+This sample shows how to connect to and interact with your voice assistant using the Speech SDK for JavaScript on a web browser, like Microsoft Edge, or Chrome.
+See [this information on the Speech SDK for JavaScript](https://github.com/microsoft/cognitive-services-speech-sdk-js#readme).
 
 ## Prerequisites
 
@@ -10,7 +10,7 @@ See [this page](https://github.com/microsoft/cognitive-services-speech-sdk-js#re
 * A PC or Mac, with a working microphone.
 * A text editor.
 
-## Build the sample
+## Get the sample
 
 * **By downloading the Microsoft Cognitive Services Speech SDK when building this sample, you acknowledge its license, see [Speech SDK license agreement](https://docs.microsoft.com/azure/cognitive-services/speech-service/license).**
 * [Download the sample code to your development PC.](/README.md#get-the-samples)
