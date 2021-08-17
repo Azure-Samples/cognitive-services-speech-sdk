@@ -10,7 +10,7 @@ See [this information on the Speech SDK for JavaScript](https://github.com/micro
 * A PC or Mac, with a working microphone.
 * A text editor.
 
-## Build the sample
+## Get the sample
 
 * **By downloading the Microsoft Cognitive Services Speech SDK when building this sample, you acknowledge its license, see [Speech SDK license agreement](https://docs.microsoft.com/azure/cognitive-services/speech-service/license).**
 * [Download the sample code to your development PC.](/README.md#get-the-samples)
