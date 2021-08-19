@@ -259,7 +259,7 @@ namespace MicrosoftSpeechSDKSamples
         public static void SpeechSynthesizeWithPool()
         {
             SynthesisServer server = new SynthesisServer(subscriptionKey, region,
-                    "en-US-JennyNeural", SpeechSynthesisOutputFormat.Audio24Khz48KBitRateMonoMp3, concurrency);
+                    "en-US-ChristopherNeural", SpeechSynthesisOutputFormat.Audio24Khz48KBitRateMonoMp3, concurrency);
 
             for (var turn = 0; turn < 3; turn++)
             {
