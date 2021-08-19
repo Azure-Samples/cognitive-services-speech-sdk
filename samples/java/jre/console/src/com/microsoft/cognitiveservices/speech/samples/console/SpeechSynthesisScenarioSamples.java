@@ -23,6 +23,7 @@ public class SpeechSynthesisScenarioSamples {
 
         @Override
         public SpeechSynthesizer create() throws Exception {
+            System.out.println("create a brand new synthesizer");
             return new SpeechSynthesizer(config, null);
         }
 
