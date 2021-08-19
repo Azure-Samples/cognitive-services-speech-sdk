@@ -11,6 +11,7 @@ using Microsoft.CognitiveServices.Speech;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml.Linq;
 
 namespace MicrosoftSpeechSDKSamples
 {
@@ -50,6 +51,8 @@ namespace MicrosoftSpeechSDKSamples
             for (var i = 0; i < initialCapacity; i++)
             {
                 SpeechSynthesizer item = _synthesizerGenerator();
+
+                // warm up synthesizer
                 item.SpeakTextAsync("1").Wait();
                 Put(item);
             }
@@ -118,11 +121,34 @@ namespace MicrosoftSpeechSDKSamples
             processingTimeList = new List<double>();
         }
 
+        /// <summary>
+        /// Generates SSML.
+        /// </summary>
+        /// <param name="locale">The locale.</param>
+        /// <param name="gender">The gender.</param>
+        /// <param name="name">The voice name.</param>
+        /// <param name="text">The text input.</param>
+        private string GenerateSsml(string locale, string gender, string name, string text)
+        {
+            var ssmlDoc = new XDocument(
+                              new XElement("speak",
+                                  new XAttribute("version", "1.0"),
+                                  new XAttribute(XNamespace.Xml + "lang", locale),
+                                  new XElement("voice",
+                                      new XAttribute(XNamespace.Xml + "lang", locale),
+                                      new XAttribute(XNamespace.Xml + "gender", gender),
+                                      new XAttribute("name", name),
+                                      text)));
+            return ssmlDoc.ToString();
+        }
+
         public void Synthesize(string text)
         {
             var start = DateTime.Now;
             var synthesizer = pool.Get();
+            var ssml = GenerateSsml("en-US", "Female", speechConfig.SpeechSynthesisVoiceName, text);
             bool first = true;
+
 
             void SynthesizingEvent(object sender, SpeechSynthesisEventArgs eventArgs)
             {
@@ -153,7 +179,7 @@ namespace MicrosoftSpeechSDKSamples
             synthesizer.Synthesizing += SynthesizingEvent;
             synthesizer.SynthesisCanceled += Synthesizer_SynthesisCanceled;
 
-            var result = synthesizer.StartSpeakingTextAsync(text).Result;
+            var result = synthesizer.StartSpeakingSsmlAsync(ssml).Result;
             try
             {
                 if (result.Reason == ResultReason.SynthesizingAudioStarted)
