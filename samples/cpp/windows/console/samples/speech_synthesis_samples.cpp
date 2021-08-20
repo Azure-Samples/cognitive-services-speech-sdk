@@ -114,11 +114,11 @@ void SpeechSynthesisWithVoice()
     auto config = SpeechConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
     // Sets the voice name.
-    // e.g. "Microsoft Server Speech Text to Speech Voice (en-US, JennyNeural)".
+    // e.g. "Microsoft Server Speech Text to Speech Voice (en-US, ChristopherNeural)".
     // The full list of supported voices can be found here:
     // https://aka.ms/csspeech/voicenames
     // And, you can try GetVoicesAsync method to get all available voices (see SpeechSynthesisGetAvailableVoices() sample below).
-    auto voice = "Microsoft Server Speech Text to Speech Voice (en-US, GuyNeural)";
+    auto voice = "Microsoft Server Speech Text to Speech Voice (en-US, ChristopherNeural)";
     config->SetSpeechSynthesisVoiceName(voice);
 
     // Creates a speech synthesizer for the specified voice, using the default speaker as audio output.
