@@ -4,7 +4,6 @@
 //
 
 using System;
-using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.CognitiveServices.Speech;
@@ -23,10 +22,10 @@ namespace MicrosoftSpeechSDKSamples
     // Best Practice:
     //      For server scenario synthesizing with high concurrency, we recommend two methods to reduce the latency.
     //      Firstly, reuse the synthesizers (e.g. use a synthesizer pool ) to reduce the connection establish latency.
-    //      This is because new synthesizer instance need to take time to connect to the service. Reusing the instance can save time of conenction.
+    //      This is because new synthesizer instance need to take time to connect to the service. Reusing the instance can save time of connection.
     //      Secondly, use AudioOutputStream or synthesizing event to streaming receive the synthesized audio to lower the first byte latency.
-    //      This middel layer service should send audio back to client app/device as soon as possible.
-    //      On the client side, it can start playback when enough audio bytes has been recieved. 
+    //      This middle layer service should send audio back to client app/device as soon as possible.
+    //      On the client side, it can start playback when enough audio bytes has been received.
 
 
     /// <summary>
@@ -34,20 +33,18 @@ namespace MicrosoftSpeechSDKSamples
     /// </summary>
     public class SynthesizerPool : IDisposable
     {
-        private readonly Func<SpeechSynthesizer> _synthesizerGenerator; 
+        private readonly Func<SpeechSynthesizer> _synthesizerGenerator;
 
         private readonly ConcurrentStack<SpeechSynthesizer> _synthesizerStack;
-        private readonly int _initialCapacity;
         private readonly int _maximumRetainedCapacity;
 
         public SynthesizerPool(Func<SpeechSynthesizer> synthesizerGenerator, int initialCapacity = 2, int maximumRetainedCapacity = 100)
         {
             _synthesizerGenerator = synthesizerGenerator;
             _synthesizerStack = new ConcurrentStack<SpeechSynthesizer>();
-            _initialCapacity = initialCapacity;
             _maximumRetainedCapacity = maximumRetainedCapacity;
 
-            Console.WriteLine($"Create initial {initialCapacity} syntheszier and warm up");
+            Console.WriteLine($"Create initial {initialCapacity} synthesizer and warm up");
             for (var i = 0; i < initialCapacity; i++)
             {
                 SpeechSynthesizer item = _synthesizerGenerator();
@@ -112,7 +109,7 @@ namespace MicrosoftSpeechSDKSamples
             // set your voice name
             speechConfig.SpeechSynthesisVoiceName = voiceName;
 
-            // use mp3 format to reduce network transfer payload 
+            // use mp3 format to reduce network transfer payload
             speechConfig.SetSpeechSynthesisOutputFormat(outputFormat);
 
             // pool should be a single instance to handle all request. In real scenario, this could be put as a static class member
@@ -163,7 +160,7 @@ namespace MicrosoftSpeechSDKSamples
                 latencyList.Add((DateTime.Now - start).TotalMilliseconds);
             }
 
-            void Synthesizer_SynthesisCanceled(object sender, SpeechSynthesisEventArgs e)
+            void SynthesizerSynthesisCanceled(object sender, SpeechSynthesisEventArgs e)
             {
                 var cancellation = SpeechSynthesisCancellationDetails.FromResult(e.Result);
                 Console.WriteLine($"CANCELED: Reason={cancellation.Reason}");
@@ -177,7 +174,7 @@ namespace MicrosoftSpeechSDKSamples
             }
 
             synthesizer.Synthesizing += SynthesizingEvent;
-            synthesizer.SynthesisCanceled += Synthesizer_SynthesisCanceled;
+            synthesizer.SynthesisCanceled += SynthesizerSynthesisCanceled;
 
             var result = synthesizer.StartSpeakingSsmlAsync(ssml).Result;
             try
@@ -191,7 +188,7 @@ namespace MicrosoftSpeechSDKSamples
                         byte[] buffer = new byte[4096];
                         uint filledSize = 0;
 
-                        // read audio block in a loop here 
+                        // read audio block in a loop here
                         // if it is end of audio stream, it will return 0
                         // if there are error happening,  the cancel event will be called.
                         while ((filledSize = audioDataStream.ReadData(buffer)) > 0)
@@ -209,13 +206,13 @@ namespace MicrosoftSpeechSDKSamples
                     }
 
                     synthesizer.Synthesizing -= SynthesizingEvent;
-                    synthesizer.SynthesisCanceled -= Synthesizer_SynthesisCanceled;
+                    synthesizer.SynthesisCanceled -= SynthesizerSynthesisCanceled;
                     pool.Put(synthesizer);
                 }
             }
             catch (Exception)
             {
-                synthesizer.SynthesisCanceled -= Synthesizer_SynthesisCanceled;
+                synthesizer.SynthesisCanceled -= SynthesizerSynthesisCanceled;
                 synthesizer.Synthesizing -= SynthesizingEvent;
                 synthesizer.Dispose();
             }
