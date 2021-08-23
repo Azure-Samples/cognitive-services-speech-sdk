@@ -156,13 +156,16 @@ namespace MicrosoftSpeechSDKSamples
     public sealed class PushAudioOutputStreamSampleCallback : PushAudioOutputStreamCallback
     {
         private byte[] audioData;
+        private System.DateTime dt;
+        private bool firstWrite = true;
+        private double latency = 0;
 
         /// <summary>
         /// Constructor
         /// </summary>
         public PushAudioOutputStreamSampleCallback()
         {
-            audioData = new byte[0];
+            Reset();
         }
 
         /// <summary>
@@ -172,6 +175,12 @@ namespace MicrosoftSpeechSDKSamples
         /// <returns>Tell synthesizer how many bytes are received</returns>
         public override uint Write(byte[] dataBuffer)
         {
+            if (firstWrite)
+            {
+                firstWrite = false;
+                latency = (DateTime.Now - dt).TotalMilliseconds;
+            }
+
             int oldSize = audioData.Length;
             Array.Resize(ref audioData, oldSize + dataBuffer.Length);
             for (int i = 0; i < dataBuffer.Length; ++i)
@@ -199,6 +208,26 @@ namespace MicrosoftSpeechSDKSamples
         public byte[] GetAudioData()
         {
             return audioData;
+        }
+
+        /// <summary>
+        /// reset stream
+        /// </summary>
+        public void Reset()
+        {
+            audioData = new byte[0];
+            dt = DateTime.Now;
+            firstWrite = true;
+        }
+
+
+        /// <summary>
+        /// get latecny
+        /// </summary>
+        /// <returns></returns>
+        public double GetLatency()
+        {
+            return latency;
         }
     }
 }

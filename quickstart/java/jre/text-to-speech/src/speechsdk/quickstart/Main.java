@@ -18,18 +18,21 @@ public class Main {
      * @param args Arguments are ignored in this sample.
      */
     public static void main(String[] args) {
-        try {
-            // Replace below with your own subscription key
-            String speechSubscriptionKey = "YourSubscriptionKey";
-            // Replace below with your own service region (e.g., "westus").
-            String serviceRegion = "YourServiceRegion";
+
+        // Replace below with your own subscription key
+        String speechSubscriptionKey = "YourSubscriptionKey";
+        // Replace below with your own service region (e.g., "westus").
+        String serviceRegion = "YourServiceRegion";
+
+        // Creates an instance of a speech synthesizer using speech configuration with specified
+        // subscription key and service region and default speaker as audio output.
+        try (SpeechConfig config = SpeechConfig.fromSubscription(speechSubscriptionKey, serviceRegion);
+             SpeechSynthesizer synth = new SpeechSynthesizer(config)) {
+            
+            assert(config != null);
+            assert(synth != null);
 
             int exitCode = 1;
-            SpeechConfig config = SpeechConfig.fromSubscription(speechSubscriptionKey, serviceRegion);
-            assert(config != null);
-
-            SpeechSynthesizer synth = new SpeechSynthesizer(config);
-            assert(synth != null);
 
             System.out.println("Type some text that you want to speak...");
             System.out.print("> ");
@@ -56,9 +59,6 @@ public class Main {
                 }
             }
 
-            result.close();
-            synth.close();
-            
             System.exit(exitCode);
         } catch (Exception ex) {
             System.out.println("Unexpected exception: " + ex.getMessage());

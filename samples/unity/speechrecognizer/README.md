@@ -44,7 +44,8 @@ This sample demonstrates how to use the Microsoft Cognitive Service Speech SDK i
   * Import the Speech SDK by selecting **Assets** > **Import Package** > **Custom Package**.
   * In the file picker, select the Speech SDK .unitypackage file that you downloaded before.
   * Ensure that all files are selected and click **Import**.
-
+  * NOTE: If you have installed Unity only for specific platform e.g. Unity CloudBuild for Android, be aware that you may need to remove other 
+  * platform (iOS, Mac, WSA) binaries from the Speech SDK Plugins folder to avoid possible conflicts with the same library name.
 
 ## SCENE 1: Prepare & run the Speech Recognition & Translation sample scene
 
