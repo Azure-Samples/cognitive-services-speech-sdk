@@ -38,7 +38,7 @@ namespace Tests
             var region = TestProperties["SpeechServicesRegion"].ToString();
             var subscriptionKey = TestProperties["SpeechServicesSubscriptionKey"].ToString();
             var conf = SpeechConfig.FromEndpoint(
-                new Uri($"wss://{region}.stt.speech.microsoft.com/speech/recognition/conversation/cognitiveservices/v1?setfeature=multichannel2"),
+                new Uri($"wss://{region}.stt.speech.microsoft.com/speech/recognition/conversation/cognitiveservices/v1?setfeature=multichannel2&initialSilenceTimeoutMs=600000&endSilenceTimeoutMs=600000"),
                 subscriptionKey);
             conf.OutputFormat = OutputFormat.Detailed;
 

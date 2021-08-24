@@ -23,6 +23,7 @@ public class SpeechSynthesisScenarioSamples {
 
         @Override
         public SpeechSynthesizer create() throws Exception {
+            System.out.println("create a brand new synthesizer");
             return new SpeechSynthesizer(config, null);
         }
 
@@ -41,12 +42,16 @@ public class SpeechSynthesisScenarioSamples {
     // Speech synthesis sample for server scenario
     public static void synthesisServerScenarioAsync() throws InterruptedException {
         // For server scenario synthesizing with high concurrency, we recommend two methods to reduce the latency.
-        // Firstly, reuse the synthesizers (e.g. use a synthesizer pool )to reduce the connection establish latency;
+        // Firstly, reuse the synthesizers (e.g. use a synthesizer pool )to reduce the connection establish latency; 
+        //          This is because new synthesizer instance need to take time to connect to the service. Reusing the instance can save time of conenction. 
         // secondly, use AudioOutputStream or synthesizing event to streaming receive the synthesized audio to lower the first byte latency.
 
         GenericObjectPoolConfig<SpeechSynthesizer> poolConfig = new GenericObjectPoolConfig<>();
         poolConfig.setMinIdle(2);
         poolConfig.setMaxTotal(64);
+
+        // Make sure pool is a single object instance used to handle all request. 
+        // You can put it as a static field of a class
         GenericObjectPool<SpeechSynthesizer> pool = new GenericObjectPool<>(new SynthesizerPoolFactory(),
             poolConfig);
 

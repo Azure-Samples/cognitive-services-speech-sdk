@@ -7,7 +7,6 @@ These samples demonstrate how to recognize speech from an audio file using the S
 ## Prerequisites
 
 * A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
-* A PC or Mac, with a working microphone.
 * A text editor.
 * Optionally, a web server that supports hosting PHP scripts.
 

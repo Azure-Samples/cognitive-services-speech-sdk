@@ -36,6 +36,29 @@ Note that this tutorial will not work without changes for any version earlier th
 1. Build and run the example code by selecting **Product** -> **Run** from the menu or clicking the **Play** button.
 1. After you input some text and click the button in the app, you should hear the synthesized audio played.
 
+## Importing Speech SDK as module
+
+This sample uses bridging header (MicrosoftCognitiveServicesSpeech-Bridging-Header.h) to include MicrosoftCognitiveServicesSpeech framework into the app.
+
+Alternatively from 1.16.0 SDK and onwards, you can also import Speech SDK as follows.
+
+import MicrosoftCognitiveServicesSpeech
+
+## Use Speech SDK as xcframework
+
+1. Step download https://aka.ms/csspeech/iosbinary  
+your-mac$ ls  
+MicrosoftCognitiveServicesSpeech.framework
+
+2. Extract arm64 bits from the framework file to separate binary (MicrosoftCognitiveServicesSpeech) because xcframework conversion does not support multiple binaries  
+your-mac$ lipo -extract arm64 MicrosoftCognitiveServicesSpeech.framework/MicrosoftCognitiveServicesSpeech -o MicrosoftCognitiveServicesSpeech
+
+3. Replace multi-arch (x86_64, arm64) binary in the framework file with arm64 extracted binary (MicrosoftCognitiveServicesSpeech)  
+your-mac$ mv MicrosoftCognitiveServicesSpeech MicrosoftCognitiveServicesSpeech.framework/
+
+4. Create xcframework from the updated framework file  
+your-mac$ xcodebuild -create-xcframework -framework MicrosoftCognitiveServicesSpeech.framework/ -output MicrosoftCognitiveServicesSpeech.xcframework
+
 ## References
 
 * [Quickstart article on the SDK documentation site](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-text-to-speech-swift-ios)
