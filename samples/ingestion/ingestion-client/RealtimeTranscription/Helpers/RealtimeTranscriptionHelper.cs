@@ -75,6 +75,9 @@ namespace RealtimeTranscription
                     stopRecognition.TrySetResult(0);
                 };
 
+                var cancellationError = CancellationErrorCode.NoError;
+                var errorDetails = string.Empty;
+
                 recognizer.Canceled += (s, e) =>
                 {
                     var cancellation = CancellationDetails.FromResult(e.Result);
@@ -85,10 +88,8 @@ namespace RealtimeTranscription
                         logger.LogError($"ErrorCode={cancellation.ErrorCode}");
                         logger.LogError($"ErrorDetails={cancellation.ErrorDetails}");
 
-                        if (cancellation.ErrorCode != CancellationErrorCode.NoError)
-                        {
-                            throw new RealtimeTranscriptionException(cancellation.ErrorCode, cancellation.ErrorDetails);
-                        }
+                        cancellationError = cancellation.ErrorCode;
+                        errorDetails = cancellation.ErrorDetails;
                     }
 
                     stopRecognition.TrySetResult(0);
@@ -99,6 +100,12 @@ namespace RealtimeTranscription
                 await Task.WhenAll(stopRecognition.Task).ConfigureAwait(false);
 
                 await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
+
+                if (cancellationError != CancellationErrorCode.NoError)
+                {
+                    throw new RealtimeTranscriptionException(cancellationError, errorDetails);
+                }
+
                 logger.LogInformation("Recognition stopped.");
             }
 

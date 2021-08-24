@@ -312,7 +312,7 @@
         request.onload = function() {
           if (request.status >= 200 && request.status < 400) {
             const response = this.response;
-            const defaultVoice = "JennyNeural";
+            const defaultVoice = "ChristopherNeural";
             let selectId;
             const data = JSON.parse(response);
             voiceOptions.innerHTML = "";
