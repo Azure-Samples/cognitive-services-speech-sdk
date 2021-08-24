@@ -2,11 +2,11 @@
 
 Get your audio files automatically transcribed without writing any code what-so-ever! The Batch Ingestion Client will monitor your dedicated Azure Storage container so that new audio files are transcribed automatically as soon as they land.
 
-The simplest way to explain this tech is as a zero-touch transcription solution for all your audio files in your Azure Storage. If you are looking for a quick and effortless way to transcribe your audio files or even explore transcription, without writing any code, then this solution is for you. Through an ARM template deployment, all the resources necessary to seamlessly process your audio files are set-up and set in motion.
+The simplest way to explain this tech is as an automated & scalable transcription solution for all your audio files in your Azure Storage. If you are looking for a quick and effortless way to transcribe your audio files or even explore transcription, then this solution is for you. 
 
-# Why do I need this?
+We created an ingestion layer (a client for batch transcription) that will help you set-up a full blown, scalable and secure transcription pipeline and through an ARM template deployment, all the resources necessary to seamlessly process your audio files are set-up and set in motion.
 
-Getting started with any API requires some amount of time investment in learning the API, understanding its scope, and getting value through trial and error. In order to speed up your transcription solution, for those of you that do not have the time to invest in getting to know our API or related best practices, we created an ingestion layer (a client for batch transcription) that will help you set-up a full blown, scalable and secure transcription pipeline without writing any code. 
+# Architecture
 
 This is a smart client in the sense that it implements best practices and optimized against the capabilities of the Azure Speech infrastructure. It utilizes Azure resources such as Service Bus and Azure Functions to orchestrate transcription requests to Azure Speech Services from audio files landing in your dedicated storage containers. Do you need more than transcription? Do you need to applly Sentiment to your transcript? Downstream analytics are possible too, with Text Analytics Sentiment and Redaction being offered as part of this solution too. 
 
@@ -97,19 +97,13 @@ resources within the same resource group so we suggest you create a new resource
 
 The following settings all relate to the resources and their attributes
 
-
 * Give your storage account a name [you will be using a new storage
 account rather than an existing one].
 
 The following 2 steps are optional. Omitting them will result in using the base model to obtain
 transcripts. If you have created a Speech model, then
 
-
-* Enter optionally your primary Acoustic model
-
-* Enter optionally your primaty Language model
-
-If you want us to perform Language identification on the audio prior to transcription you can also specify a secondary locale. Our service will check if the language on the audio content is the primary or secondary locale and select the right model for transcription. 
+* Enter optionally a custom model
 
 Transcripts are obtained by polling the service. We acknowledge that there is a cost related to that.
 So, the following setting gives you the option to limit that cost by telling your Azure Function how
@@ -121,7 +115,6 @@ done couple of times a day]
 
 * Enter locale of the audio [you need to tell us what language model we need to use to
 transcribe your audio.]
-
 
 * Enter your Azure Speech subscription key and Locale information
 
@@ -212,33 +205,33 @@ The created resources their pricing and correspoding plans (where applicable) ar
 
 * [Storage Pricing](https://azure.microsoft.com/en-gb/pricing/details/storage/), Simple Storage
 
-* [Service Bus Pricing](https://azure.microsoft.com/en-us/pricing/details/service-bus/), Standard 
+* [Service Bus Pricing](https://azure.microsoft.com/pricing/details/service-bus/), Standard 
 
-* [Azure Functions Pricing](https://azure.microsoft.com/en-us/pricing/details/functions/), Premium
+* [Azure Functions Pricing](https://azure.microsoft.com/pricing/details/functions/), Premium
 
-* [Key Vault Pricing](https://azure.microsoft.com/en-us/pricing/details/key-vault/)
+* [Key Vault Pricing](https://azure.microsoft.com/pricing/details/key-vault/)
 
 Optionally
 
-* [Sql DB Pricing](https://azure.microsoft.com/en-us/pricing/details/sql-database/single/)
-* [PowerBI](https://powerbi.microsoft.com/en-us/)
+* [Sql DB Pricing](https://azure.microsoft.com/pricing/details/sql-database/single/)
+* [PowerBI](https://powerbi.microsoft.com/)
 
 The following example is indicative of the cost distributions to inform and set the cost expectations.
 
 Assume a scenario where we are trying to transcribe 1000 mp3 files of an average length of 10mins and size of 10MB. Each of them individually landing on the storage container over the course of a business day.
 
-[Speech Transcription](https://azure.microsoft.com/en-us/services/cognitive-services/speech-to-text/) Costs are: 10k mins = **$166.60**
+[Speech Transcription](https://azure.microsoft.com/services/cognitive-services/speech-to-text/) Costs are: 10k mins = **$166.60**
 
-[Service Bus](https://azure.microsoft.com/en-us/services/service-bus) Costs are: 1k events landing in 'CreateTranscriptionQueue' and another 1k in 'FetchTranscriptionQueue' = **$0.324/daily** (standing charge) for up to 13m messages/month 
+[Service Bus](https://azure.microsoft.com/services/service-bus) Costs are: 1k events landing in 'CreateTranscriptionQueue' and another 1k in 'FetchTranscriptionQueue' = **$0.324/daily** (standing charge) for up to 13m messages/month 
 
 [Storage](https://azure.microsoft.com/en-gb/services/storage/) Costs are: Write operations are $0.0175 (per 10,000), and Read operations $0.0014 (again per 10k read operations) = ($0.0175 + $0.0014)/10 (for 1000 files) = **$0.00189**
 
-[Azure Functions](https://azure.microsoft.com/en-us/services/functions/) Costs are: The first 400,000 GB/s of execution and 1,000,000 executions are free = $0.00
+[Azure Functions](https://azure.microsoft.com/services/functions/) Costs are: The first 400,000 GB/s of execution and 1,000,000 executions are free = $0.00
 
-[Key Vault](https://azure.microsoft.com/en-us/services/key-vault/) Costs are: 0.03/10,000 transactions (For the above scenario 1 transations would be required per file) = **$0.003**
+[Key Vault](https://azure.microsoft.com/services/key-vault/) Costs are: 0.03/10,000 transactions (For the above scenario 1 transations would be required per file) = **$0.003**
 
 The total for the above scenario would be **$166.60**, with the majority of the cost being on transcription. The message here is that all this additional convinience comes at a franction of an addition to your original transcription costs.
 
 We trust that the above scenario gives you an idea of the costs distributions. Of course will vary depending on scenario and usage pattern.
 
-Please use our [Azure Calculator](https://azure.microsoft.com/en-us/pricing/calculator/) to better understand pricing
+Please use our [Azure Calculator](https://azure.microsoft.com/pricing/calculator/) to better understand pricing

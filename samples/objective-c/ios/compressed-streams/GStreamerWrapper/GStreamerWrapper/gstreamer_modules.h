@@ -134,6 +134,7 @@ namespace CognitiveServices {
 namespace Speech {
 namespace Impl {
 
-__attribute__((visibility ("default"))) void spx_gst_init();
+__attribute__((visibility ("default"))) void spx_gst_init_base();
+__attribute__((visibility ("default"))) void spx_gst_init_extra();
 
 } } } } // Microsoft::CognitiveServices::Speech::Impl

@@ -1,7 +1,6 @@
 # Quickstart: Recognize speech from a blob in JavaScript on Node.js.
 
 This sample demonstrates how to recognize speech with the Speech SDK for JavaScript on Node.js.
-See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstarts/from-blob?pivots=programming-language-javacript) on the SDK documentation page which describes how to build this sample from scratch in your favourite editor.
 
 ## Prerequisites
 
@@ -9,8 +8,6 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 * A [Node.js](https://nodejs.org) compatible device.
 
 ## Prepare the sample
-
-> Note: more detailed step-by-step instructions are available [here](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstarts/from-blob?pivots=programming-language-javascript).
 
 * [Download the sample code to your development PC.](/README.md#get-the-samples)
 * Open a command prompt at the quickstart directory, and run `npm install` to install the dependencies of the quickstart.

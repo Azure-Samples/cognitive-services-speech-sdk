@@ -749,7 +749,7 @@ namespace MicrosoftSpeechSDKSamples
 
             // Creates an instance of AutoDetectSourceLanguageConfig with the 2 source language candidates
             // Currently this feature only supports 2 different language candidates
-            // Replace the languages to be the language candidates for your speech. Please see https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support for all supported langauges
+            // Replace the languages to be the language candidates for your speech. Please see https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support for all supported languages
             var autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig.FromLanguages(new string[] { "de-DE", "fr-FR" });
 
             var stopRecognition = new TaskCompletionSource<int>();
@@ -836,7 +836,7 @@ namespace MicrosoftSpeechSDKSamples
             var sourceLanguageConfigs = new SourceLanguageConfig[]
             {
                 // The endpoint id is optional, if not specified,  the service will use the default model for en-US
-                // Replace the language with your source language candidate. Please see https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support for all supported langauges
+                // Replace the language with your source language candidate. Please see https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support for all supported languages
                 SourceLanguageConfig.FromLanguage("en-US"),
 
                 // Replace the id with the CRIS endpoint id of your customized model. If the speech is in fr-FR, the service will use the corresponding customized model for speech recognition
@@ -954,6 +954,11 @@ namespace MicrosoftSpeechSDKSamples
             // Replace with your own subscription key and service region (e.g., "westus").
             // Note: The pronunciation assessment feature is currently only available on en-US language.
             var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+
+            // The pronunciation assessment service has a longer default end silence timeout (5 seconds) than normal STT
+            // as the pronunciation assessment is widely used in education scenario where kids have longer break in reading.
+            // You can adjust the end silence timeout based on your real scenario.
+            config.SetProperty(PropertyId.SpeechServiceConnection_EndSilenceTimeoutMs, "3000");
 
             var referenceText = "";
             // create pronunciation assessment config, set grading system, granularity and if enable miscue based on your requirement.
