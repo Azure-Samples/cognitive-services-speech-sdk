@@ -14,6 +14,7 @@
 using namespace std;
 using namespace Microsoft::CognitiveServices::Speech;
 using namespace Microsoft::CognitiveServices::Speech::Audio;
+using namespace Microsoft::CognitiveServices::Speech::Speaker;
 // </toplevel>
 
 const string audioDirName{ "..\\..\\..\\..\\..\\SampleData\\audiofiles\\" };

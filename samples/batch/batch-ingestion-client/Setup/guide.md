@@ -205,30 +205,30 @@ The created resources their pricing and correspoding plans (where applicable) ar
 
 * [Storage Pricing](https://azure.microsoft.com/en-gb/pricing/details/storage/), Simple Storage
 
-* [Service Bus Pricing](https://azure.microsoft.com/en-us/pricing/details/service-bus/), Standard 
+* [Service Bus Pricing](https://azure.microsoft.com/pricing/details/service-bus/), Standard 
 
-* [Azure Functions Pricing](https://azure.microsoft.com/en-us/pricing/details/functions/), Premium
+* [Azure Functions Pricing](https://azure.microsoft.com/pricing/details/functions/), Premium
 
-* [Key Vault Pricing](https://azure.microsoft.com/en-us/pricing/details/key-vault/)
+* [Key Vault Pricing](https://azure.microsoft.com/pricing/details/key-vault/)
 
 Optionally
 
-* [Sql DB Pricing](https://azure.microsoft.com/en-us/pricing/details/sql-database/single/)
-* [PowerBI](https://powerbi.microsoft.com/en-us/)
+* [Sql DB Pricing](https://azure.microsoft.com/pricing/details/sql-database/single/)
+* [PowerBI](https://powerbi.microsoft.com/)
 
 The following example is indicative of the cost distributions to inform and set the cost expectations.
 
 Assume a scenario where we are trying to transcribe 1000 mp3 files of an average length of 10mins and size of 10MB. Each of them individually landing on the storage container over the course of a business day.
 
-[Speech Transcription](https://azure.microsoft.com/en-us/services/cognitive-services/speech-to-text/) Costs are: 10k mins = **$166.60**
+[Speech Transcription](https://azure.microsoft.com/services/cognitive-services/speech-to-text/) Costs are: 10k mins = **$166.60**
 
-[Service Bus](https://azure.microsoft.com/en-us/services/service-bus) Costs are: 1k events landing in 'CreateTranscriptionQueue' and another 1k in 'FetchTranscriptionQueue' = **$0.324/daily** (standing charge) for up to 13m messages/month 
+[Service Bus](https://azure.microsoft.com/services/service-bus) Costs are: 1k events landing in 'CreateTranscriptionQueue' and another 1k in 'FetchTranscriptionQueue' = **$0.324/daily** (standing charge) for up to 13m messages/month 
 
 [Storage](https://azure.microsoft.com/en-gb/services/storage/) Costs are: Write operations are $0.0175 (per 10,000), and Read operations $0.0014 (again per 10k read operations) = ($0.0175 + $0.0014)/10 (for 1000 files) = **$0.00189**
 
-[Azure Functions](https://azure.microsoft.com/en-us/services/functions/) Costs are: The first 400,000 GB/s of execution and 1,000,000 executions are free = $0.00
+[Azure Functions](https://azure.microsoft.com/services/functions/) Costs are: The first 400,000 GB/s of execution and 1,000,000 executions are free = $0.00
 
-[Key Vault](https://azure.microsoft.com/en-us/services/key-vault/) Costs are: 0.03/10,000 transactions (For the above scenario 1 transations would be required per file) = **$0.003**
+[Key Vault](https://azure.microsoft.com/services/key-vault/) Costs are: 0.03/10,000 transactions (For the above scenario 1 transations would be required per file) = **$0.003**
 
 The total for the above scenario would be **$166.60**, with the majority of the cost being on transcription. The message here is that all this additional convinience comes at a franction of an addition to your original transcription costs.
 

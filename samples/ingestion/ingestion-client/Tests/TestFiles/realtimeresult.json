@@ -1,0 +1,108 @@
+[
+  {
+    "RecognitionStatus": "Success",
+    "Offset": 900000,
+    "Duration": 5600000,
+    "SpeakerId": "0",
+    "NBest": [
+      {
+        "Confidence": 0.95030487,
+        "Lexical": "hello",
+        "ITN": "hello",
+        "MaskedITN": "hello",
+        "Display": "Hello.",
+        "Sentiment": null,
+        "Words": null
+      },
+      {
+        "Confidence": 0.25987574,
+        "Lexical": "hullo",
+        "ITN": "hullo",
+        "MaskedITN": "hullo",
+        "Display": "hullo",
+        "Sentiment": null,
+        "Words": null
+      },
+      {
+        "Confidence": 0.9503083,
+        "Lexical": "hello i",
+        "ITN": "hello i",
+        "MaskedITN": "hello i",
+        "Display": "hello i",
+        "Sentiment": null,
+        "Words": null
+      },
+      {
+        "Confidence": 0.9377716,
+        "Lexical": "hello uh",
+        "ITN": "hello uh",
+        "MaskedITN": "hello uh",
+        "Display": "hello uh",
+        "Sentiment": null,
+        "Words": null
+      },
+      {
+        "Confidence": 0.90149075,
+        "Lexical": "hello how",
+        "ITN": "hello how",
+        "MaskedITN": "hello how",
+        "Display": "hello how",
+        "Sentiment": null,
+        "Words": null
+      }
+    ]
+  },
+  {
+    "RecognitionStatus": "Success",
+    "Offset": 6900000,
+    "Duration": 10100000,
+    "SpeakerId": "1",
+    "NBest": [
+      {
+        "Confidence": 0.94485575,
+        "Lexical": "hello hello",
+        "ITN": "hello hello",
+        "MaskedITN": "hello hello",
+        "Display": "Hello hello.",
+        "Sentiment": null,
+        "Words": null
+      },
+      {
+        "Confidence": 0.92820674,
+        "Lexical": "hello hello i",
+        "ITN": "hello hello i",
+        "MaskedITN": "hello hello i",
+        "Display": "hello hello i",
+        "Sentiment": null,
+        "Words": null
+      },
+      {
+        "Confidence": 0.92343813,
+        "Lexical": "hello hello uh",
+        "ITN": "hello hello uh",
+        "MaskedITN": "hello hello uh",
+        "Display": "hello hello uh",
+        "Sentiment": null,
+        "Words": null
+      },
+      {
+        "Confidence": 0.95544064,
+        "Lexical": "hello",
+        "ITN": "hello",
+        "MaskedITN": "hello",
+        "Display": "hello",
+        "Sentiment": null,
+        "Words": null
+      },
+      {
+        "Confidence": 0.8313737,
+        "Lexical": "hello have",
+        "ITN": "hello have",
+        "MaskedITN": "hello have",
+        "Display": "hello have",
+        "Sentiment": null,
+        "Words": null
+      }
+    ]
+  }
+]

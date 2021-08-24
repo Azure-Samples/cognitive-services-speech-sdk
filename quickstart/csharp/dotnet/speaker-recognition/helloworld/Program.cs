@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 
 using Microsoft.CognitiveServices.Speech;
 using Microsoft.CognitiveServices.Speech.Audio;
+using Microsoft.CognitiveServices.Speech.Speaker;
 
 namespace helloworld
 {
