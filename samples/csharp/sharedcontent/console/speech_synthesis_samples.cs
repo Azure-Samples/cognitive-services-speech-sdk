@@ -115,11 +115,11 @@ namespace MicrosoftSpeechSDKSamples
             var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
             // Sets the voice name.
-            // e.g. "Microsoft Server Speech Text to Speech Voice (en-US, JennyNeural)".
+            // e.g. "Microsoft Server Speech Text to Speech Voice (en-US, ChristopherNeural)".
             // The full list of supported voices can be found here:
             // https://aka.ms/csspeech/voicenames
             // And, you can try GetVoicesAsync method to get all available voices (see SynthesisGetAvailableVoicesAsync() sample below).
-            var voice = "Microsoft Server Speech Text to Speech Voice (en-US, GuyNeural)";
+            var voice = "Microsoft Server Speech Text to Speech Voice (en-US, ChristopherNeural)";
             config.SpeechSynthesisVoiceName = voice;
 
             // Creates a speech synthesizer for the specified voice, using the default speaker as audio output.
@@ -370,6 +370,7 @@ namespace MicrosoftSpeechSDKSamples
         }
 
         // Speech synthesis to push audio output stream.
+        // This sample will also print the first byte latency of the request
         public static async Task SynthesisToPushAudioOutputStreamAsync()
         {
             // Creates an instance of a speech config with specified subscription key and service region.
@@ -401,7 +402,7 @@ namespace MicrosoftSpeechSDKSamples
                         {
                             if (result.Reason == ResultReason.SynthesizingAudioCompleted)
                             {
-                                Console.WriteLine($"Speech synthesized for text [{text}], and the audio was written to output stream.");
+                                Console.WriteLine($"Speech synthesized for text [{text}], and the audio was written to output stream. first byte latency: {callback.GetLatency()}");
                             }
                             else if (result.Reason == ResultReason.Canceled)
                             {
@@ -909,7 +910,7 @@ namespace MicrosoftSpeechSDKSamples
                     || details.ErrorCode == CancellationErrorCode.ServiceTimeout
                     || details.ErrorDetails.Contains("Error code: 1007"))
                 {
-                    // Synthesize using a standard platform voice, e.g. en-US-GuyNeural
+                    // Synthesize using a standard platform voice, e.g. en-US-ChristopherNeural
                     synthesisResult = await SynthesizeOnceAsyncInternal("YourSubscriptionKey", "YourServiceRegion", null, "YourPlatformVoiceName");
                 }
             }
