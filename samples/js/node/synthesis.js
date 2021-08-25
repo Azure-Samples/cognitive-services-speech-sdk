@@ -19,7 +19,7 @@ module.exports = {
         // setting the synthesis language, voice name, and output audio format.
         // see https://aka.ms/speech/tts-languages for available languages and voices
         speechConfig.speechSynthesisLanguage = settings.language;
-        speechConfig.speechSynthesisVoiceName = "en-US-GuyNeural";
+        speechConfig.speechSynthesisVoiceName = "en-US-ChristopherNeural";
         speechConfig.speechSynthesisOutputFormat = sdk.SpeechSynthesisOutputFormat.Audio16Khz32KBitRateMonoMp3;
 
         var rl = readline.createInterface({
@@ -40,6 +40,13 @@ module.exports = {
             console.log(str);
         };
 
+        // The event visemeReceived signals that a viseme is detected.
+        // a viseme is the visual description of a phoneme in spoken language. It defines the position of the face and mouth when speaking a word.
+        synthesizer.visemeReceived = function(s, e) {
+            var str = "(viseme) : Viseme event received. Audio offset: " + (e.audioOffset / 10000) + "ms, viseme id: " + e.visemeId;
+            console.log(str);
+        }
+        
         // The event synthesis completed signals that the synthesis is completed.
         synthesizer.synthesisCompleted = function (s, e) {
             console.log("(synthesized)  Reason: " + sdk.ResultReason[e.result.reason] + " Audio length: " + e.result.audioData.byteLength);
