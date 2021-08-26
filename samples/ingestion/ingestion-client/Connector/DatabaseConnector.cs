@@ -115,10 +115,10 @@ namespace Connector
             command.Parameters.AddWithValue("@transcriptionID", transcriptionId);
             command.Parameters.AddWithValue("@channel", channel);
 
-            command.Parameters.AddWithValue("@lexical", combinedPhrases.Lexical ?? string.Empty);
-            command.Parameters.AddWithValue("@itn", combinedPhrases.ITN ?? string.Empty);
-            command.Parameters.AddWithValue("@maskedItn", combinedPhrases.MaskedITN ?? string.Empty);
-            command.Parameters.AddWithValue("@display", combinedPhrases.Display ?? string.Empty);
+            command.Parameters.AddWithValue("@lexical", combinedPhrases?.Lexical ?? string.Empty);
+            command.Parameters.AddWithValue("@itn", combinedPhrases?.ITN ?? string.Empty);
+            command.Parameters.AddWithValue("@maskedItn", combinedPhrases?.MaskedITN ?? string.Empty);
+            command.Parameters.AddWithValue("@display", combinedPhrases?.Display ?? string.Empty);
 
             command.Parameters.AddWithValue("@sentimentPositive", combinedPhrases?.Sentiment?.Positive ?? 0f);
             command.Parameters.AddWithValue("@sentimentNeutral", combinedPhrases?.Sentiment?.Neutral ?? 0f);
