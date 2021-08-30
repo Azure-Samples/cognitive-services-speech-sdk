@@ -247,11 +247,15 @@ namespace FetchTranscriptionFunction
             var textAnalyticsDocumentList = new List<TextAnalyticsRequest>();
             foreach (var recognizedPhrase in speechTranscript.RecognizedPhrases)
             {
-                var id = $"{recognizedPhrase.Channel}_{recognizedPhrase.Offset}";
                 var text = recognizedPhrase.NBest.FirstOrDefault().Display;
-                text = text.Substring(0, Math.Min(text.Length, TextAnalyticsRequestCharacterLimit));
-                var textAnalyticsDocument = new TextAnalyticsRequest(Locale, id, text);
-                textAnalyticsDocumentList.Add(textAnalyticsDocument);
+
+                if (!string.IsNullOrEmpty(text))
+                {
+                    var id = $"{recognizedPhrase.Channel}_{recognizedPhrase.Offset}";
+                    text = text.Substring(0, Math.Min(text.Length, TextAnalyticsRequestCharacterLimit));
+                    var textAnalyticsDocument = new TextAnalyticsRequest(Locale, id, text);
+                    textAnalyticsDocumentList.Add(textAnalyticsDocument);
+                }
             }
 
             for (int i = 0; i < textAnalyticsDocumentList.Count; i += documentRequestLimit)
