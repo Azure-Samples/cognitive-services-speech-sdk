@@ -83,7 +83,7 @@ namespace Tests
         [TestCategory(TestCategories.UnitTest)]
         public void GetCostEstimationWithEmptyDuration()
         {
-            var cost = CostEstimation.GetCostEstimation(TimeSpan.Zero, 1, true, Connector.Enums.SentimentAnalysisSetting.None, Connector.Enums.EntityRedactionSetting.None);
+            var cost = CostEstimation.GetCostEstimation(TimeSpan.Zero, 1, true, Connector.Enums.SentimentAnalysisSetting.None, Connector.Enums.PiiRedactionSetting.None);
             Assert.AreEqual(cost, 0);
         }
     }

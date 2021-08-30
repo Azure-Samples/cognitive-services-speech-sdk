@@ -22,7 +22,7 @@ namespace Connector
             int numberOfChannels,
             bool isCustomModel,
             SentimentAnalysisSetting sentimentSetting,
-            EntityRedactionSetting entityRedactionSetting)
+            PiiRedactionSetting entityRedactionSetting)
         {
             double costPerHour = isCustomModel ? STTCustomModelCostPerHour : STTCostPerHour;
             var price = timeSpan.TotalHours * costPerHour;
@@ -32,7 +32,7 @@ namespace Connector
                 price += timeSpan.TotalHours * TextAnalyticsCostPerHour;
             }
 
-            if (entityRedactionSetting != EntityRedactionSetting.None)
+            if (entityRedactionSetting != PiiRedactionSetting.None)
             {
                 price += timeSpan.TotalHours * TextAnalyticsCostPerHour;
             }

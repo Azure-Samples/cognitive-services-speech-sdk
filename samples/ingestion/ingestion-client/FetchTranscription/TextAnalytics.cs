@@ -7,11 +7,8 @@ namespace FetchTranscriptionFunction
 {
     using System;
     using System.Collections.Generic;
-    using System.Globalization;
     using System.Linq;
     using System.Net.Http;
-    using System.Net.Http.Headers;
-    using System.Reflection.Metadata.Ecma335;
     using System.Text;
     using System.Threading.Tasks;
     using System.Web;
@@ -33,11 +30,11 @@ namespace FetchTranscriptionFunction
 
         private const string Caller = "Microsoft Speech to Text";
 
-        private const string SentimentSuffix = "/sentiment?showStats=False";
+        private static readonly HttpClient HttpClient = new HttpClient();
 
-        private const string EntityRecognitionSuffix = "/entities/recognition/general";
+        private readonly Uri SentimentAnalysisUri;
 
-        private readonly Uri TextAnalyticsUri;
+        private readonly Uri PiiRedactionUri;
 
         private readonly string Locale;
 
@@ -48,7 +45,8 @@ namespace FetchTranscriptionFunction
         public TextAnalytics(string locale, string subscriptionKey, string region, ILogger log)
         {
             Locale = locale;
-            TextAnalyticsUri = new Uri($"https://{region}.api.cognitive.microsoft.com/text/analytics/v3.0");
+            SentimentAnalysisUri = new Uri($"https://{region}.api.cognitive.microsoft.com/text/analytics/v3.0/sentiment?showStats=False");
+            PiiRedactionUri = new Uri($"https://{region}.api.cognitive.microsoft.com/text/analytics/v3.1/entities/recognition/pii");
             SubscriptionKey = subscriptionKey;
             Log = log;
         }
@@ -80,7 +78,7 @@ namespace FetchTranscriptionFunction
                 foreach (var chunk in textAnalyticsChunks)
                 {
                     var chunkString = JsonConvert.SerializeObject(chunk);
-                    var response = await MakeRequestAsync(chunkString, SentimentSuffix).ConfigureAwait(false);
+                    var response = await MakeRequestAsync(SentimentAnalysisUri, chunkString).ConfigureAwait(false);
                     responses.Add(response);
                 }
 
@@ -99,7 +97,7 @@ namespace FetchTranscriptionFunction
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "Don't fail full transcription job because of text analytics error - return transcript without text analytics.")]
-        public async Task<IEnumerable<string>> RedactEntitiesAsync(SpeechTranscript speechTranscript, EntityRedactionSetting entityRedactionSetting)
+        public async Task<IEnumerable<string>> RedactEntitiesAsync(SpeechTranscript speechTranscript, PiiRedactionSetting entityRedactionSetting)
         {
             if (speechTranscript == null)
             {
@@ -111,7 +109,7 @@ namespace FetchTranscriptionFunction
             try
             {
                 var textAnalyticsChunks = new List<TextAnalyticsRequestsChunk>();
-                if (entityRedactionSetting == EntityRedactionSetting.UtteranceLevel)
+                if (entityRedactionSetting == PiiRedactionSetting.UtteranceLevel)
                 {
                     textAnalyticsChunks = CreateUtteranceLevelRequests(speechTranscript, EntityRecognitionRequestLimit);
                 }
@@ -119,8 +117,23 @@ namespace FetchTranscriptionFunction
                 var responses = new List<HttpResponseMessage>();
                 foreach (var chunk in textAnalyticsChunks)
                 {
+                    var uriBuilder = new UriBuilder(PiiRedactionUri);
+                    var query = HttpUtility.ParseQueryString(uriBuilder.Query);
+
+                    if (!string.IsNullOrEmpty(FetchTranscriptionEnvironmentVariables.PiiCategories))
+                    {
+                        query["piiCategories"] = FetchTranscriptionEnvironmentVariables.PiiCategories;
+                    }
+
+                    if (!string.IsNullOrEmpty(FetchTranscriptionEnvironmentVariables.PiiMinimumPrecision))
+                    {
+                        query["minimumPrecision"] = FetchTranscriptionEnvironmentVariables.PiiMinimumPrecision;
+                    }
+
+                    uriBuilder.Query = query.ToString();
+
                     var chunkString = JsonConvert.SerializeObject(chunk);
-                    var response = await MakeRequestAsync(chunkString, EntityRecognitionSuffix).ConfigureAwait(false);
+                    var response = await MakeRequestAsync(uriBuilder.Uri, chunkString).ConfigureAwait(false);
                     responses.Add(response);
                 }
 
@@ -136,103 +149,6 @@ namespace FetchTranscriptionFunction
                 entityRedactionErrors.Add(entityRedactionError);
                 return entityRedactionErrors;
             }
-        }
-
-        private static bool IsMaskableEntityType(TextAnalyticsEntity entity)
-        {
-            switch (entity.Category)
-            {
-                case EntityCategory.Person:
-                case EntityCategory.Organization:
-                case EntityCategory.PhoneNumber:
-                case EntityCategory.Email:
-                case EntityCategory.URL:
-                case EntityCategory.IPAddress:
-                case EntityCategory.Quantity:
-                    return true;
-
-                default: return false;
-            }
-        }
-
-        private static string RedactEntitiesInText(string text, IEnumerable<TextAnalyticsEntity> entities)
-        {
-            var maskableEntities = entities.Where(e => IsMaskableEntityType(e)).ToList();
-            var cleanedEntities = RemoveOverlappingEntities(maskableEntities);
-
-            // Order descending to make insertions that do not impact the offset of other entities
-            cleanedEntities = cleanedEntities.OrderByDescending(o => o.Offset).ToList();
-
-            foreach (var entity in cleanedEntities)
-            {
-                text = RedactEntityInText(text, entity);
-            }
-
-            return text;
-        }
-
-        private static string RedactEntityInText(string text, TextAnalyticsEntity entity)
-        {
-            var preMask = text.Substring(0, entity.Offset);
-            var postMask = text.Substring(entity.Offset + entity.Length, text.Length - (entity.Offset + entity.Length));
-
-            if (entity.Category == EntityCategory.Quantity && entity.SubCategory.Equals("Number", StringComparison.OrdinalIgnoreCase))
-            {
-                text = preMask + new string('#', entity.Length) + postMask;
-            }
-            else
-            {
-                if (!string.IsNullOrEmpty(entity.SubCategory))
-                {
-                    text = $"{preMask}#{entity.Category}-{entity.SubCategory}#{postMask}";
-                }
-                else
-                {
-                    text = $"{preMask}#{entity.Category}#{postMask}";
-                }
-            }
-
-            return text;
-        }
-
-        private static List<TextAnalyticsEntity> RemoveOverlappingEntities(List<TextAnalyticsEntity> textAnalyticsEntities)
-        {
-            if (textAnalyticsEntities.Count <= 1)
-            {
-                return textAnalyticsEntities;
-            }
-
-            var orderedEntities = textAnalyticsEntities.OrderBy(o => o.Offset);
-            var resultEntities = orderedEntities.ToList();
-            bool foundOverlap;
-
-            do
-            {
-                foundOverlap = false;
-                var remainingEntities = new List<TextAnalyticsEntity>();
-                for (int i = 0; i < resultEntities.Count; i++)
-                {
-                    var current = resultEntities.ElementAt(i);
-                    if (i != resultEntities.Count - 1)
-                    {
-                        var next = resultEntities.ElementAt(i + 1);
-
-                        // if current entity overlaps with the next entity, ignore the next entity.
-                        if (current.Offset + current.Length >= next.Offset)
-                        {
-                            foundOverlap = true;
-                            i++;
-                        }
-                    }
-
-                    remainingEntities.Add(current);
-                }
-
-                resultEntities = remainingEntities;
-            }
-            while (foundOverlap);
-
-            return resultEntities;
         }
 
         private List<TextAnalyticsRequestsChunk> CreateUtteranceLevelRequests(SpeechTranscript speechTranscript, int documentRequestLimit)
@@ -301,7 +217,7 @@ namespace FetchTranscriptionFunction
             return textAnalyticChunks;
         }
 
-        private async Task<List<string>> RedactEntitiesInSpeechTranscriptAsync(List<HttpResponseMessage> responses, SpeechTranscript speechTranscript, EntityRedactionSetting entityRedactionSetting)
+        private async Task<List<string>> RedactEntitiesInSpeechTranscriptAsync(List<HttpResponseMessage> responses, SpeechTranscript speechTranscript, PiiRedactionSetting entityRedactionSetting)
         {
             var entityRedactionErrors = new List<string>();
 
@@ -329,7 +245,7 @@ namespace FetchTranscriptionFunction
 
                 foreach (var document in textAnalyticsResponse.Documents)
                 {
-                    if (entityRedactionSetting == EntityRedactionSetting.UtteranceLevel)
+                    if (entityRedactionSetting == PiiRedactionSetting.UtteranceLevel)
                     {
                         var phrase = speechTranscript.RecognizedPhrases.Where(e => $"{e.Channel}_{e.Offset}".Equals(document.Id, StringComparison.Ordinal)).FirstOrDefault();
 
@@ -347,7 +263,7 @@ namespace FetchTranscriptionFunction
                         // Remove word level timestamps if they exist
                         nBest.Words = null;
 
-                        nBest.Display = RedactEntitiesInText(nBest.Display, document.Entities);
+                        nBest.Display = document.RedactedText;
                         phrase.NBest = new[] { nBest };
 
                         if (fullTranscriptionPerChannelDict.ContainsKey(phrase.Channel))
@@ -362,7 +278,7 @@ namespace FetchTranscriptionFunction
                 }
             }
 
-            if (entityRedactionSetting == EntityRedactionSetting.UtteranceLevel)
+            if (entityRedactionSetting == PiiRedactionSetting.UtteranceLevel)
             {
                 foreach (var combinedRecognizedPhrase in speechTranscript.CombinedRecognizedPhrases)
                 {
@@ -458,24 +374,15 @@ namespace FetchTranscriptionFunction
             return sentimentErrors;
         }
 
-        private async Task<HttpResponseMessage> MakeRequestAsync(string chunkString, string uriSuffix)
+        private async Task<HttpResponseMessage> MakeRequestAsync(Uri requestUri, string chunkString)
         {
-            using var client = new HttpClient();
-            var queryString = HttpUtility.ParseQueryString(string.Empty);
+            using var requestMessage = new HttpRequestMessage(HttpMethod.Post, requestUri);
+            requestMessage.Headers.Add("Ocp-Apim-Subscription-Key", SubscriptionKey);
+            requestMessage.Headers.Add("x-ms-sender", Caller);
 
-            // Request headers
-            client.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", SubscriptionKey);
-            client.DefaultRequestHeaders.Add("client-request-id", SubscriptionKey);
-            client.DefaultRequestHeaders.Add("x-ms-sender", Caller);
+            requestMessage.Content = new StringContent(chunkString, Encoding.UTF8, "application/json");
 
-            var uri = new Uri(TextAnalyticsUri.AbsoluteUri + uriSuffix);
-
-            // Request body
-            var byteData = Encoding.UTF8.GetBytes(chunkString);
-
-            using var content = new ByteArrayContent(byteData);
-            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-            return await client.PostAsync(uri, content).ConfigureAwait(false);
+            return await HttpClient.SendAsync(requestMessage).ConfigureAwait(false);
         }
     }
 }
