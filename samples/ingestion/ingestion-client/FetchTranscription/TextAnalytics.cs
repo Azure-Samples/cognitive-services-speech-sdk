@@ -186,7 +186,7 @@ namespace FetchTranscriptionFunction
         private List<TextAnalyticsRequestsChunk> CreateAudioLevelRequests(SpeechTranscript speechTranscript, int documentRequestLimit)
         {
             var textAnalyticChunks = new List<TextAnalyticsRequestsChunk>();
-            if (!speechTranscript.RecognizedPhrases.Any())
+            if (!speechTranscript.RecognizedPhrases.Any() || !speechTranscript.CombinedRecognizedPhrases.Any())
             {
                 return textAnalyticChunks;
             }
