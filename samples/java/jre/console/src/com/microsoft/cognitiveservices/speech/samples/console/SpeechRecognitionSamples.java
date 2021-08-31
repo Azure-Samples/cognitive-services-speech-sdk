@@ -163,11 +163,11 @@ public class SpeechRecognitionSamples {
         // Creates an instance of a speech config with specified
         // subscription key and service region. Replace with your own subscription key
         // and service region (e.g., "westus").
-		SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+        SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
         // Creates a speech recognizer using file as audio input.
         // Replace with your own audio file name.
-		AudioConfig audioInput = AudioConfig.fromWavFileInput("YourAudioFile.wav");
+        AudioConfig audioInput = AudioConfig.fromWavFileInput("YourAudioFile.wav");
 
         SpeechRecognizer recognizer = new SpeechRecognizer(config, audioInput);
         {
