@@ -114,7 +114,7 @@ namespace FetchTranscriptionFunction
                     continue;
                 }
 
-                var firstNBest = phrase.NBest.FirstOrDefault();
+                var firstNBest = phrase.NBest.First();
                 phrase.NBest = new[] { firstNBest };
             }
 
