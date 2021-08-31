@@ -106,6 +106,18 @@ namespace FetchTranscriptionFunction
 
             var piiRedactionErrors = new List<string>();
 
+            // Remove all nBests except the first one to make sure that no pii is included in other nBests:
+            foreach (var phrase in speechTranscript.RecognizedPhrases)
+            {
+                if (phrase.NBest == null || !phrase.NBest.Any())
+                {
+                    continue;
+                }
+
+                var firstNBest = phrase.NBest.FirstOrDefault();
+                phrase.NBest = new[] { firstNBest };
+            }
+
             try
             {
                 var textAnalyticsChunks = new List<TextAnalyticsRequestsChunk>();
