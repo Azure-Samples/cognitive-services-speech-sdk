@@ -41,7 +41,7 @@ public class WavStream extends PullAudioInputStreamCallback {
     }
     
     public AudioStreamFormat getFormat() {
-    	return format;
+        return format;
     }
     // endregion
 
