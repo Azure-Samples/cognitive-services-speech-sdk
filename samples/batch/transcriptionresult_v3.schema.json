@@ -155,7 +155,7 @@
                         "title": "Recognition status",
                         "type": "string",
                         "default": "",
-                        "description": "recognition state, e.g. \"Success\", \"Failure\"",
+                        "description": "recognition state, e.g. \"Success\".
                         "examples": [
                             "Success"
                         ],
