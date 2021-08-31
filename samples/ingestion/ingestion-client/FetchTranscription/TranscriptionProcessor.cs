@@ -221,8 +221,8 @@ namespace FetchTranscriptionFunction
 
                     if (FetchTranscriptionEnvironmentVariables.PiiRedactionSetting != PiiRedactionSetting.None)
                     {
-                        var entityRedactionErrors = await textAnalytics.RedactEntitiesAsync(transcriptionResult, FetchTranscriptionEnvironmentVariables.PiiRedactionSetting).ConfigureAwait(false);
-                        textAnalyticsErrors.AddRange(entityRedactionErrors);
+                        var piiRedactionErrors = await textAnalytics.RedactPiiAsync(transcriptionResult, FetchTranscriptionEnvironmentVariables.PiiRedactionSetting).ConfigureAwait(false);
+                        textAnalyticsErrors.AddRange(piiRedactionErrors);
                     }
 
                     if (textAnalyticsErrors.Any())

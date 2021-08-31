@@ -26,7 +26,7 @@ namespace FetchTranscriptionFunction
 
         private const int TextAnalyticsRequestCharacterLimit = 5120;
 
-        private const int EntityRecognitionRequestLimit = 5;
+        private const int PiiRedactionRequestLimit = 5;
 
         private const string Caller = "Microsoft Speech to Text";
 
@@ -97,21 +97,21 @@ namespace FetchTranscriptionFunction
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "Don't fail full transcription job because of text analytics error - return transcript without text analytics.")]
-        public async Task<IEnumerable<string>> RedactEntitiesAsync(SpeechTranscript speechTranscript, PiiRedactionSetting entityRedactionSetting)
+        public async Task<IEnumerable<string>> RedactPiiAsync(SpeechTranscript speechTranscript, PiiRedactionSetting piiRedactionSetting)
         {
             if (speechTranscript == null)
             {
                 throw new ArgumentNullException(nameof(speechTranscript));
             }
 
-            var entityRedactionErrors = new List<string>();
+            var piiRedactionErrors = new List<string>();
 
             try
             {
                 var textAnalyticsChunks = new List<TextAnalyticsRequestsChunk>();
-                if (entityRedactionSetting == PiiRedactionSetting.UtteranceLevel)
+                if (piiRedactionSetting == PiiRedactionSetting.UtteranceLevel)
                 {
-                    textAnalyticsChunks = CreateUtteranceLevelRequests(speechTranscript, EntityRecognitionRequestLimit);
+                    textAnalyticsChunks = CreateUtteranceLevelRequests(speechTranscript, PiiRedactionRequestLimit);
                 }
 
                 var responses = new List<HttpResponseMessage>();
@@ -138,16 +138,16 @@ namespace FetchTranscriptionFunction
                 }
 
                 Log.LogInformation($"Total responses: {responses.Count}");
-                entityRedactionErrors = await RedactEntitiesInSpeechTranscriptAsync(responses, speechTranscript, entityRedactionSetting).ConfigureAwait(false);
+                piiRedactionErrors = await RedactPiiInSpeechTranscriptAsync(responses, speechTranscript, piiRedactionSetting).ConfigureAwait(false);
 
-                return entityRedactionErrors;
+                return piiRedactionErrors;
             }
             catch (Exception e)
             {
-                var entityRedactionError = $"Entity Redaction failed with exception: {e.Message}";
-                Log.LogError(entityRedactionError);
-                entityRedactionErrors.Add(entityRedactionError);
-                return entityRedactionErrors;
+                var piiRedactionError = $"PII Redaction failed with exception: {e.Message}";
+                Log.LogError(piiRedactionError);
+                piiRedactionErrors.Add(piiRedactionError);
+                return piiRedactionErrors;
             }
         }
 
@@ -217,13 +217,13 @@ namespace FetchTranscriptionFunction
             return textAnalyticChunks;
         }
 
-        private async Task<List<string>> RedactEntitiesInSpeechTranscriptAsync(List<HttpResponseMessage> responses, SpeechTranscript speechTranscript, PiiRedactionSetting entityRedactionSetting)
+        private async Task<List<string>> RedactPiiInSpeechTranscriptAsync(List<HttpResponseMessage> responses, SpeechTranscript speechTranscript, PiiRedactionSetting piiRedactionSetting)
         {
-            var entityRedactionErrors = new List<string>();
+            var piiRedactionErrors = new List<string>();
 
             if (!speechTranscript.RecognizedPhrases.Any())
             {
-                return entityRedactionErrors;
+                return piiRedactionErrors;
             }
 
             var displayFull = new List<string>();
@@ -238,14 +238,14 @@ namespace FetchTranscriptionFunction
 
                 foreach (var error in textAnalyticsResponse.Errors)
                 {
-                    var errorMessage = $"Entity redaction failed with error: {error.Error.InnerError.Message}";
+                    var errorMessage = $"PII redaction failed with error: {error.Error.InnerError.Message}";
                     Log.LogError(errorMessage);
-                    entityRedactionErrors.Add(errorMessage);
+                    piiRedactionErrors.Add(errorMessage);
                 }
 
                 foreach (var document in textAnalyticsResponse.Documents)
                 {
-                    if (entityRedactionSetting == PiiRedactionSetting.UtteranceLevel)
+                    if (piiRedactionSetting == PiiRedactionSetting.UtteranceLevel)
                     {
                         var phrase = speechTranscript.RecognizedPhrases.Where(e => $"{e.Channel}_{e.Offset}".Equals(document.Id, StringComparison.Ordinal)).FirstOrDefault();
 
@@ -278,7 +278,7 @@ namespace FetchTranscriptionFunction
                 }
             }
 
-            if (entityRedactionSetting == PiiRedactionSetting.UtteranceLevel)
+            if (piiRedactionSetting == PiiRedactionSetting.UtteranceLevel)
             {
                 foreach (var combinedRecognizedPhrase in speechTranscript.CombinedRecognizedPhrases)
                 {
@@ -297,7 +297,7 @@ namespace FetchTranscriptionFunction
                 }
             }
 
-            return entityRedactionErrors;
+            return piiRedactionErrors;
         }
 
         private async Task<List<string>> AddSentimentToSpeechTranscriptAsync(List<HttpResponseMessage> responses, SpeechTranscript speechTranscript, SentimentAnalysisSetting sentimentSetting)
