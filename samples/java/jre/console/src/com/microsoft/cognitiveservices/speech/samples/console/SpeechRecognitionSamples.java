@@ -163,11 +163,12 @@ public class SpeechRecognitionSamples {
         // Creates an instance of a speech config with specified
         // subscription key and service region. Replace with your own subscription key
         // and service region (e.g., "westus").
-        SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+		SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
         // Creates a speech recognizer using file as audio input.
         // Replace with your own audio file name.
-        AudioConfig audioInput = AudioConfig.fromWavFileInput("YourAudioFile.wav");
+		AudioConfig audioInput = AudioConfig.fromWavFileInput("YourAudioFile.wav");
+
         SpeechRecognizer recognizer = new SpeechRecognizer(config, audioInput);
         {
             // Subscribes to events.
@@ -231,10 +232,15 @@ public class SpeechRecognitionSamples {
         // and service region (e.g., "westus").
         SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
-        // Create an audio stream from a wav file.
-        // Replace with your own audio file name.
-        PullAudioInputStreamCallback callback = new WavStream(new FileInputStream("YourAudioFile.wav"));
-        AudioConfig audioInput = AudioConfig.fromStreamInput(callback);
+        // Create an object that parses the WAV file and implements PullAudioInputStreamCallback to read audio data from the file.
+        // Replace with your own audio file name. 
+        WavStream wavStream = new WavStream(new FileInputStream("YourAudioFile.wav"));
+        
+        // Create a pull audio input stream from the WAV file
+        PullAudioInputStream inputStream = PullAudioInputStream.createPullStream(wavStream, wavStream.getFormat());
+        
+        // Create a configuration object for the recognizer, to read from the pull audio input stream
+        AudioConfig audioInput = AudioConfig.fromStreamInput(inputStream);
 
         // Creates a speech recognizer using audio stream input.
         SpeechRecognizer recognizer = new SpeechRecognizer(config, audioInput);
