@@ -8,10 +8,10 @@ This sample demonstrates various forms of recognizing speech with C# under the U
 * A Windows PC with Windows 10 Fall Creators Update (10.0; Build 16299) or later.
   Some sample scenarios require a working microphone.
 * [Microsoft Visual Studio 2017](https://www.visualstudio.com/), Community Edition or higher.
-* The **Universal Windows Platform development** workload in Visual Studio.
+* The **Universal Windows Platform development** workload in Visual Studio.  You can enable it in **Tools** \> **Get Tools and Features**.
 * Note: processor target ARM is not yet supported.
 
-  You can enable it in **Tools** \> **Get Tools and Features**.
+ 
 
 ## Build the sample
 
@@ -31,7 +31,7 @@ To debug the app and then run it, press F5 or use **Debug** \> **Start Debugging
 The app displays a graphical user interface (GUI).
 
 * Use the **Subscription Key** text field to enter your subscription key.
-* In the drop down below, choose the region associated with your subscription.
+* In the drop-down below, choose the region associated with your subscription.
 * In the drop-down right below the subscription key, choose the input language.
 * If you'd like to use your microphone, select **Enable Microphone**, which (first time you're clicking it) launches a permission prompt asking for microphone access.
   Approve it.
