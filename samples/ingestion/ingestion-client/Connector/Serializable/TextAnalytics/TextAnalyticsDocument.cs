@@ -9,14 +9,17 @@ namespace Connector.Serializable.TextAnalytics
 
     public class TextAnalyticsDocument
     {
-        public TextAnalyticsDocument(string id, TextAnalyticsConfidenceScores confidenceScores, IEnumerable<TextAnalyticsEntity> entities)
+        public TextAnalyticsDocument(string id, string redactedText, TextAnalyticsConfidenceScores confidenceScores, IEnumerable<TextAnalyticsEntity> entities)
         {
             Id = id;
+            RedactedText = redactedText;
             ConfidenceScores = confidenceScores;
             Entities = entities;
         }
 
         public string Id { get; set; }
+
+        public string RedactedText { get; set; }
 
         public TextAnalyticsConfidenceScores ConfidenceScores { get; private set; }
 

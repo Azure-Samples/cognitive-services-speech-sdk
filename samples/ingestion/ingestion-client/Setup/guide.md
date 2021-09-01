@@ -137,10 +137,6 @@ transcribe your audio.
 
 * Enter your Azure Speech subscription key and Locale information.
 
-> **_NOTE:_** If you plan to transcribe large volume of audio (say millions of files) we propose that you rotate the traffic between regions. In the **Azure Speech Subscription Key** text box you can include many keys separated by a semi-colon.
-> In is important that the corresponding regions appear in the Locale information text box, also separated by a semi-colon.
-> For example if you have 3 keys (abc, xyz, 123) for east us, west us and central us, enter them as 'abc;xyz;123' followed by 'eastus;westus;centralus'.
-
 The rest of the settings relate to the transcription request. You can read more about those in [How to use batch transcription](https://docs.microsoft.com/azure/cognitive-services/speech-service/batch-transcription).
 
 
@@ -162,8 +158,9 @@ If you want to perform Text Analytics, add those credentials.
 
 * Add Sentiment [Batch Template Only]
 
-* Add Text Redaction [Batch Template Only]
+* Add Personally Identifiable Information (PII) Redaction [Batch Template Only]
 
+> **_NOTE:_** The ARM template also allows you to customize the PII categories through the PiiCategories variable (e.g., to only redact person names and organizations set the value to "Person,Organization"). A full list of all supported categories can be found in the [PII Entity Categories](https://docs.microsoft.com/azure/cognitive-services/text-analytics/named-entity-types?tabs=personal). The ARM template also allows you to set a minimum confidence for redaction through the PiiMinimumPrecision value, the value must be between 0.0 and 1.0. More details can be found in the [Pii Detection Documentation](https://docs.microsoft.com/azure/search/cognitive-search-skill-pii-detection).
 
 If you want to further analytics we could map the transcript json we produce to a DB schema. [Batch Template Only]
 
