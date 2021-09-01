@@ -32,5 +32,5 @@ To debug the app and then run it, press F5 or use **Debug** \> **Start Debugging
 
 ## References
 
-* [Quickstart article on the SDK documentation site](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-translate-speech-dotnetframework-windows)
+* [Quickstart article on the SDK documentation site](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started-speech-translation?tabs=script%2Cwindowsinstall&pivots=programming-language-csharp)
 * [Speech SDK API reference for C#](https://aka.ms/csspeech/csharpref)
