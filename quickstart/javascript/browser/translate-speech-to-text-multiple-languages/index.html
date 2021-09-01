@@ -40,7 +40,7 @@
           <option value="pt-BR">Portuguese - BR</option>
           <option value="ru-RU">Russian - RU</option>
           <option value="sv-SE">Swedish - SE</option>
-          <option value="zh-Hans">Chinese - Simplified</option>
+          <option value="zh-CN">Chinese - Simplified</option>
         </select></td>
       </tr>
       <tr>
@@ -99,31 +99,7 @@
   </div>
 
   <!-- Speech SDK reference sdk. -->
-  <script src="microsoft.cognitiveservices.speech.sdk.bundle.js"></script>
-
-  <!-- Speech SDK Authorization token -->
-  <script>
-  // Note: Replace the URL with a valid endpoint to retrieve
-  //       authorization tokens for your subscription.
-  var authorizationEndpoint = "token.php";
-
-  function RequestAuthorizationToken() {
-    if (authorizationEndpoint) {
-      var a = new XMLHttpRequest();
-      a.open("GET", authorizationEndpoint);
-      a.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-      a.send("");
-      a.onload = function() {
-        var token = JSON.parse(atob(this.responseText.split(".")[1]));
-        serviceRegion.value = token.region;
-        authorizationToken = this.responseText;
-        subscriptionKey.disabled = true;
-        subscriptionKey.value = "using authorization token (hit F5 to refresh)";
-        console.log("Got an authorization token: " + token);
-      }
-    }
-  }
-  </script>
+  <script src="https://aka.ms/csspeech/jsbrowserpackageraw"></script>
 
   <!-- Speech SDK USAGE -->
   <script>
@@ -133,7 +109,6 @@
 
     // subscription key and region for speech services.
     var subscriptionKey, serviceRegion, languageTargetOptions;
-    var authorizationToken;
     var SpeechSDK;
     var recognizer;
 
@@ -157,18 +132,12 @@
           elem.innerHTML = "";
         });
 
-        // if we got an authorization token, use the token. Otherwise use the provided subscription key
-        var speechConfig;
-        if (authorizationToken) {
-          speechConfig = SpeechSDK.SpeechTranslationConfig.fromAuthorizationToken(authorizationToken, serviceRegion.value);
-        } else {
-          if (subscriptionKey.value === "" || subscriptionKey.value === "subscription") {
-            alert("Please enter your Microsoft Cognitive Services Speech subscription key!");
-            startRecognizeOnceAsyncButton.disabled = false;
-            return;
-          }
-          speechConfig = SpeechSDK.SpeechTranslationConfig.fromSubscription(subscriptionKey.value, serviceRegion.value);
+        if (subscriptionKey.value === "" || subscriptionKey.value === "subscription") {
+          alert("Please enter your Microsoft Cognitive Services Speech subscription key!");
+          startRecognizeOnceAsyncButton.disabled = false;
+          return;
         }
+        var speechConfig = SpeechSDK.SpeechTranslationConfig.fromSubscription(subscriptionKey.value, serviceRegion.value);
 
         speechConfig.speechRecognitionLanguage = languageSourceOptions.value;
         let languageKeys = {};
@@ -209,11 +178,6 @@
 
         document.getElementById('content').style.display = 'block';
         document.getElementById('warning').style.display = 'none';
-
-        // in case we have a function for getting an authorization token, call it.
-        if (typeof RequestAuthorizationToken === "function") {
-          RequestAuthorizationToken();
-        }
       }
     });
   </script>

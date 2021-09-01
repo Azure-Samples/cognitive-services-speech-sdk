@@ -114,10 +114,11 @@ void SpeechSynthesisWithVoice()
     auto config = SpeechConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
     // Sets the voice name.
-    // e.g. "Microsoft Server Speech Text to Speech Voice (en-US, AriaRUS)".
+    // e.g. "Microsoft Server Speech Text to Speech Voice (en-US, ChristopherNeural)".
     // The full list of supported voices can be found here:
-    // https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support
-    auto voice = "Microsoft Server Speech Text to Speech Voice (en-US, BenjaminRUS)";
+    // https://aka.ms/csspeech/voicenames
+    // And, you can try GetVoicesAsync method to get all available voices (see SpeechSynthesisGetAvailableVoices() sample below).
+    auto voice = "Microsoft Server Speech Text to Speech Voice (en-US, ChristopherNeural)";
     config->SetSpeechSynthesisVoiceName(voice);
 
     // Creates a speech synthesizer for the specified voice, using the default speaker as audio output.
@@ -723,6 +724,111 @@ void SpeechSynthesisWordBoundaryEvent()
     }
 }
 
+// Speech synthesis viseme event.
+void SpeechSynthesisVisemeEvent()
+{
+    // Creates an instance of a speech config with specified subscription key and service region.
+    // Replace with your own subscription key and service region (e.g., "westus").
+    auto config = SpeechConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+
+    // Creates a speech synthesizer with a null output stream.
+    // This means the audio output data will not be written to any stream.
+    // You can just get the audio from the result.
+    auto synthesizer = SpeechSynthesizer::FromConfig(config, nullptr);
+
+    // Subscribes to viseme received event
+    synthesizer->VisemeReceived += [](const SpeechSynthesisVisemeEventArgs& e)
+    {
+        cout << "viseme event received. "
+            // The unit of e.AudioOffset is tick (1 tick = 100 nanoseconds), divide by 10,000 to convert to milliseconds.
+            << "Audio offset: " << e.AudioOffset / 10000 << "ms, "
+            << "viseme id: " << e.VisemeId << "." << endl;
+    };
+
+    while (true)
+    {
+        // Receives a text from console input and synthesize it to result.
+        cout << "Enter some text that you want to synthesize, or enter empty text to exit." << std::endl;
+        cout << "> ";
+        std::string text;
+        getline(cin, text);
+        if (text.empty())
+        {
+            break;
+        }
+
+        auto result = synthesizer->SpeakTextAsync(text).get();
+
+        // Checks result.
+        if (result->Reason == ResultReason::SynthesizingAudioCompleted)
+        {
+            cout << "Speech synthesized for text [" << text << "]" << std::endl;
+            const auto audioData = result->GetAudioData();
+            cout << audioData->size() << " bytes of audio data received for text [" << text << "]" << endl;
+        }
+        else if (result->Reason == ResultReason::Canceled)
+        {
+            auto cancellation = SpeechSynthesisCancellationDetails::FromResult(result);
+            cout << "CANCELED: Reason=" << static_cast<int>(cancellation->Reason) << std::endl;
+
+            if (cancellation->Reason == CancellationReason::Error)
+            {
+                cout << "CANCELED: ErrorCode=" << static_cast<int>(cancellation->ErrorCode) << std::endl;
+                cout << "CANCELED: ErrorDetails=[" << cancellation->ErrorDetails << "]" << std::endl;
+                cout << "CANCELED: Did you update the subscription info?" << std::endl;
+            }
+        }
+    }
+}
+
+// Speech synthesis bookmark event.
+void SpeechSynthesisBookmarkEvent()
+{
+    // Creates an instance of a speech config with specified subscription key and service region.
+    // Replace with your own subscription key and service region (e.g., "westus").
+    auto config = SpeechConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+
+    // Creates a speech synthesizer with a null output stream.
+    // This means the audio output data will not be written to any stream.
+    // You can just get the audio from the result.
+    auto synthesizer = SpeechSynthesizer::FromConfig(config, nullptr);
+
+    // Subscribes to bookmark reached event
+    synthesizer->BookmarkReached += [](const SpeechSynthesisBookmarkEventArgs& e)
+    {
+        cout << "bookmark reached. "
+            // The unit of e.AudioOffset is tick (1 tick = 100 nanoseconds), divide by 10,000 to convert to milliseconds.
+            << "Audio offset: " << e.AudioOffset / 10000 << "ms, "
+            << "Bookmark text: " << e.Text << "." << endl;
+    };
+
+    // Bookmark tag is needed in the SSML, e.g.
+    const auto ssml = "<speak version='1.0' xml:lang='en-US' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts'><voice name='Microsoft Server Speech Text to Speech Voice (en-US, AriaNeural)'><bookmark mark='bookmark_one'/> one. <bookmark mark='bookmark_two'/> two. three. four.</voice></speak>";
+
+    cout << "Press Enter to start synthesizing." << std::endl;
+    std::string text;
+    getline(cin, text);
+    const auto result = synthesizer->SpeakSsmlAsync(ssml).get();
+
+    // Checks result.
+    if (result->Reason == ResultReason::SynthesizingAudioCompleted)
+    {
+        cout << "Speech synthesized." << std::endl;
+    }
+    else if (result->Reason == ResultReason::Canceled)
+    {
+        auto cancellation = SpeechSynthesisCancellationDetails::FromResult(result);
+        cout << "CANCELED: Reason=" << static_cast<int>(cancellation->Reason) << std::endl;
+
+        if (cancellation->Reason == CancellationReason::Error)
+        {
+            cout << "CANCELED: ErrorCode=" << static_cast<int>(cancellation->ErrorCode) << std::endl;
+            cout << "CANCELED: ErrorDetails=[" << cancellation->ErrorDetails << "]" << std::endl;
+            cout << "CANCELED: Did you update the subscription info?" << std::endl;
+        }
+    }
+}
+
 // Speech synthesis with auto detection for source language
 // Note: this is a preview feature, which might be updated in future versions.
 void SpeechSynthesisWithSourceLanguageAutoDetection()
@@ -763,5 +869,38 @@ void SpeechSynthesisWithSourceLanguageAutoDetection()
                 cout << "CANCELED: Did you update the subscription info?" << std::endl;
             }
         }
+    }
+}
+
+// Speech synthesis get available voices
+void SpeechSynthesisGetAvailableVoices()
+{
+    // Creates an instance of a speech config with specified subscription key and service region.
+    // Replace with your own subscription key and service region (e.g., "westus").
+    const auto speechConfig = SpeechConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+
+    // Creates a speech synthesizer.
+    auto synthesizer = SpeechSynthesizer::FromConfig(speechConfig, nullptr);
+
+    cout << "Enter a locale in BCP-47 format (e.g. en-US) that you want to get the voices of, or enter empty to get voices in all locales." << std::endl;
+    cout << "> ";
+    std::string text;
+    getline(cin, text);
+
+    const auto result = synthesizer->GetVoicesAsync(text).get();
+
+    // Checks result.
+    if (result->Reason == ResultReason::VoicesListRetrieved)
+    {
+        cout << "Voices successfully retrieved, they are:" << std::endl;
+        for (const auto& voice : result->Voices)
+        {
+            cout << voice->Name << endl;
+        }
+    }
+    else if (result->Reason == ResultReason::Canceled)
+    {
+        cout << "CANCELED: ErrorDetails=[" << result->ErrorDetails << "]" << std::endl;
+        cout << "CANCELED: Did you update the subscription info?" << std::endl;
     }
 }

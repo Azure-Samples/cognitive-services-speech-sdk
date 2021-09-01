@@ -5,6 +5,7 @@
 
 // <toplevel>
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.CognitiveServices.Speech;
@@ -748,7 +749,7 @@ namespace MicrosoftSpeechSDKSamples
 
             // Creates an instance of AutoDetectSourceLanguageConfig with the 2 source language candidates
             // Currently this feature only supports 2 different language candidates
-            // Replace the languages to be the language candidates for your speech. Please see https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support for all supported langauges
+            // Replace the languages to be the language candidates for your speech. Please see https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support for all supported languages
             var autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig.FromLanguages(new string[] { "de-DE", "fr-FR" });
 
             var stopRecognition = new TaskCompletionSource<int>();
@@ -835,7 +836,7 @@ namespace MicrosoftSpeechSDKSamples
             var sourceLanguageConfigs = new SourceLanguageConfig[]
             {
                 // The endpoint id is optional, if not specified,  the service will use the default model for en-US
-                // Replace the language with your source language candidate. Please see https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support for all supported langauges
+                // Replace the language with your source language candidate. Please see https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support for all supported languages
                 SourceLanguageConfig.FromLanguage("en-US"),
 
                 // Replace the id with the CRIS endpoint id of your customized model. If the speech is in fr-FR, the service will use the corresponding customized model for speech recognition
@@ -946,14 +947,18 @@ namespace MicrosoftSpeechSDKSamples
             }
         }
 
-        // Pronunciation assessment.
+        // Pronunciation assessment with microphone as audio input.
         public static async Task PronunciationAssessmentWithMicrophoneAsync()
         {
             // Creates an instance of a speech config with specified subscription key and service region.
             // Replace with your own subscription key and service region (e.g., "westus").
-            // Note: The pronunciation assessment feature is currently only available on westus, eastasia and centralindia regions.
-            // And this feature is currently only available on en-US language.
+            // Note: The pronunciation assessment feature is currently only available on en-US language.
             var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+
+            // The pronunciation assessment service has a longer default end silence timeout (5 seconds) than normal STT
+            // as the pronunciation assessment is widely used in education scenario where kids have longer break in reading.
+            // You can adjust the end silence timeout based on your real scenario.
+            config.SetProperty(PropertyId.SpeechServiceConnection_EndSilenceTimeoutMs, "3000");
 
             var referenceText = "";
             // create pronunciation assessment config, set grading system, granularity and if enable miscue based on your requirement.
@@ -1021,6 +1026,66 @@ namespace MicrosoftSpeechSDKSamples
                 }
             }
         }
+
+        // Pronunciation assessment with audio stream input.
+        public static void PronunciationAssessmentWithStream()
+        {
+            // Creates an instance of a speech config with specified subscription key and service region.
+            // Replace with your own subscription key and service region (e.g., "westus").
+            // Note: The pronunciation assessment feature is currently only available on en-US language.
+            var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+
+            // Read audio data from file. In real scenario this can be from memory or network
+            var audioDataWithHeader = File.ReadAllBytes("whatstheweatherlike.wav");
+            var audioData = new byte[audioDataWithHeader.Length - 46];
+            Array.Copy(audioDataWithHeader, 46, audioData, 0, audioData.Length);
+
+            var resultReceived = new TaskCompletionSource<int>();
+            var resultContainer = new List<string>();
+
+            var startTime = DateTime.Now;
+
+            var task = PronunciationAssessmentWithStreamInternalAsync(config, "what's the weather like", audioData, resultReceived, resultContainer);
+            Task.WaitAny(new[] { resultReceived.Task });
+            var resultJson = resultContainer[0];
+
+            var endTime = DateTime.Now;
+
+            Console.WriteLine(resultJson);
+
+            var timeCost = endTime.Subtract(startTime).TotalMilliseconds;
+            Console.WriteLine($"Time cost: {timeCost}ms");
+        }
+
+        private static async Task PronunciationAssessmentWithStreamInternalAsync(SpeechConfig speechConfig, string referenceText, byte[] audioData, TaskCompletionSource<int> resultReceived, List<string> resultContainer)
+        {
+            using (var audioInputStream = AudioInputStream.CreatePushStream(AudioStreamFormat.GetWaveFormatPCM(16000, 16, 1))) // This need be set based on the format of the given audio data
+            using (var audioConfig = AudioConfig.FromStreamInput(audioInputStream))
+            using (var speechRecognizer = new SpeechRecognizer(speechConfig, audioConfig))
+            {
+                // create pronunciation assessment config, set grading system, granularity and if enable miscue based on your requirement.
+                var pronAssessmentConfig = new PronunciationAssessmentConfig(referenceText, GradingSystem.HundredMark, Granularity.Phoneme, false);
+                pronAssessmentConfig.ApplyTo(speechRecognizer);
+
+                audioInputStream.Write(audioData);
+                audioInputStream.Write(new byte[0]); // send a zero-size chunk to signal the end of stream
+
+                var result = await speechRecognizer.RecognizeOnceAsync().ConfigureAwait(false);
+                if (result.Reason == ResultReason.Canceled)
+                {
+                    var cancellationDetail = CancellationDetails.FromResult(result);
+                    Console.Write(cancellationDetail);
+                }
+                else
+                {
+                    var responseJson = result.Properties.GetProperty(PropertyId.SpeechServiceResponse_JsonResult);
+                    resultContainer.Add(responseJson);
+                }
+
+                resultReceived.SetResult(1);
+            }
+        }
+
         private static async Task<RecognitionResult> RecognizeOnceAsyncInternal(string key, string region)
         {
             RecognitionResult recognitionResult = null;
@@ -1042,7 +1107,7 @@ namespace MicrosoftSpeechSDKSamples
         public static async Task RecognitionOnceWithFileAsyncSwitchSecondaryRegion()
         {
             // Create a speech resource with primary subscription key and service region.
-            // Also create a speech resource with secondary subscription key and service region 
+            // Also create a speech resource with secondary subscription key and service region
             RecognitionResult recognitionResult = await RecognizeOnceAsyncInternal("PrimarySubscriptionKey", "PrimarySubscriptionRegion");
             if (recognitionResult.Reason == ResultReason.Canceled)
             {

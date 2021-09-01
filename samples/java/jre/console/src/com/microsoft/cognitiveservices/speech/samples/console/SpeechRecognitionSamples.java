@@ -168,6 +168,7 @@ public class SpeechRecognitionSamples {
         // Creates a speech recognizer using file as audio input.
         // Replace with your own audio file name.
         AudioConfig audioInput = AudioConfig.fromWavFileInput("YourAudioFile.wav");
+
         SpeechRecognizer recognizer = new SpeechRecognizer(config, audioInput);
         {
             // Subscribes to events.
@@ -231,10 +232,15 @@ public class SpeechRecognitionSamples {
         // and service region (e.g., "westus").
         SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
-        // Create an audio stream from a wav file.
-        // Replace with your own audio file name.
-        PullAudioInputStreamCallback callback = new WavStream(new FileInputStream("YourAudioFile.wav"));
-        AudioConfig audioInput = AudioConfig.fromStreamInput(callback);
+        // Create an object that parses the WAV file and implements PullAudioInputStreamCallback to read audio data from the file.
+        // Replace with your own audio file name. 
+        WavStream wavStream = new WavStream(new FileInputStream("YourAudioFile.wav"));
+        
+        // Create a pull audio input stream from the WAV file
+        PullAudioInputStream inputStream = PullAudioInputStream.createPullStream(wavStream, wavStream.getFormat());
+        
+        // Create a configuration object for the recognizer, to read from the pull audio input stream
+        AudioConfig audioInput = AudioConfig.fromStreamInput(inputStream);
 
         // Creates a speech recognizer using audio stream input.
         SpeechRecognizer recognizer = new SpeechRecognizer(config, audioInput);
@@ -698,9 +704,13 @@ public class SpeechRecognitionSamples {
     public static void pronunciationAssessmentWithMicrophoneAsync() throws ExecutionException, InterruptedException {
         // Creates an instance of a speech config with specified subscription key and service region.
         // Replace with your own subscription key and service region (e.g., "westus").
-        // Note: The pronunciation assessment feature is currently only available on westus, eastasia and centralindia regions.
-        // And this feature is currently only available on en-US language.
+        // Note: The pronunciation assessment feature is currently only available on en-US language.
         SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+
+        // The pronunciation assessment service has a longer default end silence timeout (5 seconds) than normal STT
+        // as the pronunciation assessment is widely used in education scenario where kids have longer break in reading.
+        // You can adjust the end silence timeout based on your real scenario.
+        config.setProperty(PropertyId.SpeechServiceConnection_EndSilenceTimeoutMs, "3000");
 
         String referenceText = "";
         // create pronunciation assessment config, set grading system, granularity and if enable miscue based on your requirement.

@@ -4,7 +4,7 @@ This Speech SDK sample demonstrates how to use Unity's microphone and streaming 
 Using Unity's microphone instead of internal microphone from the Speech SDK can be useful in scenarios where user wants e.g. to save the audio recorded from the microphone for some other purposes. Also this can be usefull in platforms like Android which has limitations in shared microphone accesses. 
 
 > Note:
-> The Speech SDK for Unity supports Windows Desktop (x86 and x64) or Universal Windows Platform (x86, x64, ARM/ARM64), Android (x86, ARM32/64) and iOS (x64 simulator, ARM64).
+> The Speech SDK for Unity supports Windows Desktop (x86 and x64) or Universal Windows Platform (x86, x64, ARM/ARM64), Android (x86, ARM32/64), iOS (x64 simulator, ARM64) and Mac (x64).
 > Speech SDK support has been built and verified for Windows and Android using Windows PC development environment for Unity and for iOS using Mac development environment for Unity.
 
 ## Prerequisites
@@ -21,6 +21,7 @@ Using Unity's microphone instead of internal microphone from the Speech SDK can 
 * Access to your computer's microphone.
 * To target Android: an Android device (ARM32/64, x86; API 23: Android 6.0 Marshmallow or higher) [enabled for development](https://developer.android.com/studio/debug/dev-options) with a working microphone.
 * To target iOS: an iOS device (ARM64) [enabled for development](https://learn.unity.com/tutorial/building-for-mobile) with a working microphone.
+* To target MacOS: Use latest LTS version of Unity 2019 or higher as they have integrated support for microphone access in Unity Player settings.
 
 ## Download the Speech SDK for Unity and the sample code
 
@@ -43,6 +44,8 @@ Using Unity's microphone instead of internal microphone from the Speech SDK can 
   * Import the Speech SDK by selecting **Assets** > **Import Package** > **Custom Package**.
   * In the file picker, select the Speech SDK .unitypackage file that you downloaded before.
   * Ensure that all files are selected and click **Import**.
+  * NOTE: If you have installed Unity only for specific platform e.g. Unity CloudBuild for Android, be aware that you may need to remove other 
+  * platform (iOS, Mac, WSA) binaries from the Speech SDK Plugins folder to avoid possible conflicts with the same library name.
 * Select the `HelloWorld` sample scene:
   * In the Project Window (bottom left by default), navigate to **Assets** > **Scenes** and double-click on the `HelloWorld` scene to open it up.
 * Update the sample code with your subscription data:

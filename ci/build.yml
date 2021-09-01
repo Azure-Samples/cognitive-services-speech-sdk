@@ -26,11 +26,12 @@ variables:
 jobs:
 
 - job: Pre
+  variables:
+    CG_RAN: false
+    DECODE_PERCENTS: true
   pool:
     name: Hosted Ubuntu 1604
   timeoutInMinutes: 10
-  variables:
-    CG_RAN: false
   steps:
   - bash: ./ci/check-git-head.sh
     displayName: Repository checks
@@ -64,13 +65,14 @@ jobs:
     displayName: Set variables
 
 - job: Windows
+  variables:
+    V_VSTS_FEED: $[dependencies.Pre.outputs['var.V_VSTS_FEED']]
+    V_INCLUDE_NUGET_ORG: $[dependencies.Pre.outputs['var.V_INCLUDE_NUGET_ORG']]
+    DECODE_PERCENTS: true
   dependsOn: Pre
   timeoutInMinutes: 60
   pool:
     vmImage: 'windows-2019'
-  variables:
-    V_VSTS_FEED: $[dependencies.Pre.outputs['var.V_VSTS_FEED']]
-    V_INCLUDE_NUGET_ORG: $[dependencies.Pre.outputs['var.V_INCLUDE_NUGET_ORG']]
   steps:
   - bash: 'perl ci/patch-samples.pl "$(SpeechSdkVersion)" . && git diff'
     displayName: Patch samples

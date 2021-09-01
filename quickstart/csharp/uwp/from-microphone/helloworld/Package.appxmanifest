@@ -4,7 +4,7 @@
   <mp:PhoneIdentity PhoneProductId="aa5d0ddc-2cef-444f-8a16-48ca346262a6" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
   <Properties>
     <DisplayName>helloworld</DisplayName>
-    <PublisherDisplayName>weixu</PublisherDisplayName>
+    <PublisherDisplayName>Microsoft</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
   <Dependencies>

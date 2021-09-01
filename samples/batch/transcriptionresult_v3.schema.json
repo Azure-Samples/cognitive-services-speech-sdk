@@ -126,7 +126,7 @@
                         "examples": [
                             "Hello world."
                         ],
-                        "pattern": "^.*$"
+                        "pattern": "^(.*\n*)*$"
                     }
                 }
             }
@@ -155,7 +155,7 @@
                         "title": "Recognition status",
                         "type": "string",
                         "default": "",
-                        "description": "recognition state, e.g. \"Success\", \"Failure\"",
+                        "description": "recognition state, e.g. \"Success\".",
                         "examples": [
                             "Success"
                         ],
@@ -301,7 +301,7 @@
                                     "examples": [
                                         "Hello world."
                                     ],
-                                    "pattern": "^.*$"
+                                    "pattern": "^(.*\n*)*$"
                                 },
                                 "words": {
                                     "$id": "#root/recognizedPhrases/items/nBest/items/words",
