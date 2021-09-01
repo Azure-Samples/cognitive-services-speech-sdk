@@ -15,6 +15,7 @@ extern void SpeechRecognitionUsingCustomizedModel();
 extern void SpeechContinuousRecognitionWithPullStream();
 extern void SpeechContinuousRecognitionWithPushStream();
 extern void KeywordTriggeredSpeechRecognitionWithMicrophone();
+extern void PronunciationAssessmentWithMicrophone();
 
 extern void IntentRecognitionWithMicrophone();
 extern void IntentRecognitionWithLanguage();
@@ -34,9 +35,31 @@ extern void SpeechSynthesisToResult();
 extern void SpeechSynthesisToAudioDataStream();
 extern void SpeechSynthesisEvents();
 extern void SpeechSynthesisWordBoundaryEvent();
+extern void SpeechSynthesisWithSourceLanguageAutoDetection();
+extern void SpeechSynthesisUsingCustomVoice();
+extern void SpeechSynthesisGetAvailableVoices();
+extern void SpeechSynthesisVisemeEvent();
+extern void SpeechSynthesisBookmarkEvent();
 
 extern void ConversationWithPullAudioStream();
 extern void ConversationWithPushAudioStream();
+
+extern void SpeakerVerificationWithMicrophone();
+extern void SpeakerVerificationWithPushStream();
+extern void SpeakerIdentificationWithPullStream();
+extern void SpeakerIdentificationWithMicrophone();
+
+// Language Id related tests
+extern void SpeechRecognitionAndLanguageIdWithMicrophone();
+extern void SpeechContinuousRecognitionAndLanguageIdWithMultiLingualFile();
+
+extern void TranslationAndLanguageIdWithMicrophone();
+extern void TranslationRecognitionAndLanguageIdWithMultiLingualFile();
+
+extern void StandaloneLanguageDetectionWithMicrophone();
+extern void StandaloneLanguageDetectionInSingleshotModeWithFileInput();
+extern void StandaloneLanguageDetectionInContinuousModeWithFileInput();
+extern void StandaloneLanguageDetectionInContinuousModeWithMultiLingualFileInput();
 
 void SpeechSamples()
 {
@@ -51,10 +74,11 @@ void SpeechSamples()
         cout << "5.) Speech recognition using pull stream input.\n";
         cout << "6.) Speech recognition using push stream input.\n";
         cout << "7.) Speech recognition using microphone with a keyword trigger.\n";
+        cout << "8.) Pronunciation assessment using microphone input.\n";
         cout << "\nChoice (0 for MAIN MENU): ";
         cout.flush();
 
-        input.empty();
+        input.clear();
         getline(cin, input);
 
         switch (input[0])
@@ -80,6 +104,37 @@ void SpeechSamples()
         case '7':
             KeywordTriggeredSpeechRecognitionWithMicrophone();
             break;
+        case '8':
+            PronunciationAssessmentWithMicrophone();
+            break;
+        case '0':
+            break;
+        }
+    } while (input[0] != '0');
+}
+
+void SpeechWithLanguageIdSamples()
+{
+    string input;
+    do
+    {
+        cout << "\nSPEECH RECOGNITION WITH LANGUAGE ID SAMPLES:\n";
+        cout << "1.) Speech recognition with microphone input.\n";
+        cout << "2.) Speech continuous recognition with multi-lingual file input.\n";
+        cout << "\nChoice (0 for MAIN MENU): ";
+        cout.flush();
+
+        input.clear();
+        getline(cin, input);
+
+        switch (input[0])
+        {
+        case '1':
+            SpeechRecognitionAndLanguageIdWithMicrophone();
+            break;
+        case '2':
+            SpeechContinuousRecognitionAndLanguageIdWithMultiLingualFile();
+            break;
         case '0':
             break;
         }
@@ -98,7 +153,7 @@ void IntentSamples()
         cout << "\nChoice (0 for MAIN MENU): ";
         cout.flush();
 
-        input.empty();
+        input.clear();
         getline(cin, input);
 
         switch (input[0])
@@ -126,10 +181,12 @@ void TranslationSamples()
         cout << "\nTRANSLATION SAMPLES:\n";
         cout << "1.) Translation with microphone input.\n";
         cout << "2.) Translation continuous recognition.\n";
+        cout << "3.) Translation with language detection using microphone input.\n";
+        cout << "4.) Translation with language detection using multi-lingual file input.\n";
         cout << "\nChoice (0 for MAIN MENU): ";
         cout.flush();
 
-        input.empty();
+        input.clear();
         getline(cin, input);
 
         switch (input[0])
@@ -139,6 +196,12 @@ void TranslationSamples()
             break;
         case '2':
             TranslationContinuousRecognition();
+            break;
+        case '3':
+            TranslationAndLanguageIdWithMicrophone();
+            break;
+        case '4':
+            TranslationRecognitionAndLanguageIdWithMultiLingualFile();
             break;
         case '0':
             break;
@@ -163,10 +226,15 @@ void SpeechSynthesisSamples()
         cout << "9.) Speech synthesis to audio data stream.\n";
         cout << "A.) Speech synthesis events.\n";
         cout << "B.) Speech synthesis word boundary event.\n";
+        cout << "C.) Speech synthesis with source language auto detection\n";
+        cout << "D.) Speech synthesis using Custom Voice\n";
+        cout << "E.) Speech synthesis get available voices\n";
+        cout << "F.) Speech synthesis viseme event.\n";
+        cout << "G.) Speech synthesis bookmark event.\n";
         cout << "\nChoice (0 for MAIN MENU): ";
         cout.flush();
 
-        input.empty();
+        input.clear();
         getline(cin, input);
 
         switch (input[0])
@@ -206,6 +274,26 @@ void SpeechSynthesisSamples()
         case 'b':
             SpeechSynthesisWordBoundaryEvent();
             break;
+        case 'C':
+        case 'c':
+            SpeechSynthesisWithSourceLanguageAutoDetection();
+            break;
+        case 'D':
+        case 'd':
+            SpeechSynthesisUsingCustomVoice();
+            break;
+        case 'E':
+        case 'e':
+            SpeechSynthesisGetAvailableVoices();
+            break;
+        case 'F':
+        case 'f':
+            SpeechSynthesisVisemeEvent();
+            break;
+        case 'G':
+        case 'g':
+            SpeechSynthesisBookmarkEvent();
+            break;
         case '0':
             break;
         }
@@ -223,7 +311,7 @@ void ConversationTranscriberSamples()
         cout << "\nChoice (0 for MAIN MENU): ";
         cout.flush();
 
-        input.empty();
+        input.clear();
         getline(cin, input);
 
         switch (input[0])
@@ -234,6 +322,86 @@ void ConversationTranscriberSamples()
         case '2':
             ConversationWithPushAudioStream();
             break;
+        case '0':
+            break;
+        }
+    } while (input[0] != '0');
+}
+
+void SpeakerRecognitionSamples()
+{
+    string input;
+    do
+    {
+        cout << "\nSpeakerRecognition SAMPLES:\n";
+        cout << "1.) Speaker verification with microphone input.\n";
+        cout << "2.) Speaker verification with push audio stream input.\n";
+        cout << "3.) Speaker identification with pull audio stream input.\n";
+        cout << "4.) Speaker identification with microphone input.\n";
+        cout << "\nChoice (0 for MAIN MENU): ";
+        cout.flush();
+
+        input.clear();
+        getline(cin, input);
+
+        switch (input[0])
+        {
+        case '1':
+            SpeakerVerificationWithMicrophone();
+            break;
+
+        case '2':
+            SpeakerVerificationWithPushStream();
+            break;
+
+        case '3':
+            SpeakerIdentificationWithPullStream();
+            break;
+
+        case '4':
+            SpeakerIdentificationWithMicrophone();
+            break;
+
+        case '0':
+            break;
+        }
+    } while (input[0] != '0');
+}
+
+void StandaloneLanguageDetectionSamples()
+{
+    string input;
+    do
+    {
+        cout << "\nStandalone Language Detection SAMPLES:\n";
+        cout << "1.) Standalone language detection with microphone input.\n";
+        cout << "2.) Standalone language detection in single-shot mode with file input.\n";
+        cout << "3.) Standalone language detection in continuous mode with file input.\n";
+        cout << "4.) Standalone language detection in continuous mode with multi-lingual file input.\n";
+        cout << "\nChoice (0 for MAIN MENU): ";
+        cout.flush();
+
+        input.clear();
+        getline(cin, input);
+
+        switch (input[0])
+        {
+        case '1':
+            StandaloneLanguageDetectionWithMicrophone();
+            break;
+
+        case '2':
+            StandaloneLanguageDetectionInSingleshotModeWithFileInput();
+            break;
+
+        case '3':
+            StandaloneLanguageDetectionInContinuousModeWithFileInput();
+            break;
+
+        case '4':
+            StandaloneLanguageDetectionInContinuousModeWithMultiLingualFileInput();
+            break;
+
         case '0':
             break;
         }
@@ -255,10 +423,13 @@ int main(int argc, char **argv)
         cout << "3.) Translation samples.\n";
         cout << "4.) Speech synthesis samples.\n";
         cout << "5.) Conversation transcriber samples.\n";
+        cout << "6.) Speaker Recognition samples.\n";
+        cout << "7.) Standalone language detection samples.\n";
+        cout << "8.) Speech Recgnition with language detection samples.\n";
         cout << "\nChoice (0 to Exit): ";
         cout.flush();
 
-        input.empty();
+        input.clear();
         getline(cin, input);
 
         switch (input[0])
@@ -277,6 +448,15 @@ int main(int argc, char **argv)
             break;
         case '5':
             ConversationTranscriberSamples();
+            break;
+        case '6':
+            SpeakerRecognitionSamples();
+            break;
+        case '7':
+            StandaloneLanguageDetectionSamples();
+            break;
+        case '8':
+            SpeechWithLanguageIdSamples();
             break;
         case '0':
             break;

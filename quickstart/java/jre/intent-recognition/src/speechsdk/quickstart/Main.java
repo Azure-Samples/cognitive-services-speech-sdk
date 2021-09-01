@@ -17,23 +17,25 @@ public class Main {
      * @param args Arguments are ignored in this sample.
      */
     public static void main(String[] args) {
-        try {
+        
+        // Replace below with with specified subscription key (called 'endpoint key' by the Language Understanding service)
+        String languageUnderstandingSubscriptionKey = "YourLanguageUnderstandingSubscriptionKey";
+        // Replace below with your own service region (e.g., "westus").
+        String languageUnderstandingServiceRegion = "YourLanguageUnderstandingServiceRegion";
 
-            // Creates an instance of a speech config with specified
-            // subscription key (called 'endpoint key' by the Language Understanding service)
-            // and service region. Replace with your own subscription (endpoint) key
-            // and service region (e.g., "westus2").
-            // The default language is "en-us".
-            SpeechConfig config = SpeechConfig.fromSubscription("YourLanguageUnderstandingSubscriptionKey", "YourLanguageUnderstandingServiceRegion");
-
-            // Creates an intent recognizer using microphone as audio input.
-            IntentRecognizer recognizer = new IntentRecognizer(config);
-
+        // Creates an instance of intent recognizer with a given speech configuration.
+        // Recognizer is created with the default microphone audio input and default language "en-us".
+        try (SpeechConfig config = SpeechConfig.fromSubscription(languageUnderstandingSubscriptionKey, languageUnderstandingServiceRegion);
+             IntentRecognizer recognizer = new IntentRecognizer(config)) {
+            
             // Creates a language understanding model using the app id, and adds specific intents from your model
             LanguageUnderstandingModel model = LanguageUnderstandingModel.fromAppId("YourLanguageUnderstandingAppId");
             recognizer.addIntent(model, "YourLanguageUnderstandingIntentName1", "id1");
             recognizer.addIntent(model, "YourLanguageUnderstandingIntentName2", "id2");
             recognizer.addIntent(model, "YourLanguageUnderstandingIntentName3", "any-IntentId-here");
+
+            // To add all of the possible intents from a LUIS model to the recognizer, uncomment the line below:
+            // recognizer.addAllIntents(model);
 
             System.out.println("Say something...");
 
@@ -64,8 +66,6 @@ public class Main {
                 }
             }
             
-            result.close();
-            recognizer.close();
         } catch (Exception ex) {
             System.out.println("Unexpected exception: " + ex.getMessage());
 

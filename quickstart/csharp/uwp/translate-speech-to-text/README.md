@@ -1,7 +1,7 @@
-# Quickstart: Translate speech in C# for Universal Windows Platform
+# Quickstart: Translate speech from a microphone in C# for Universal Windows Platform
 
 This sample demonstrates how to translate speech with C# under the Universal Windows Platform using the Speech SDK.
-See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-translate-speech-uwp) on the SDK documentation page which describes how to build this sample from scratch in Visual Studio 2017.
+See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started-speech-translation?tabs=script%2Cwindowsinstall&pivots=programming-language-csharp) on the SDK documentation page which describes how to build this sample from scratch in Visual Studio 2017.
 
 ## Prerequisites
 

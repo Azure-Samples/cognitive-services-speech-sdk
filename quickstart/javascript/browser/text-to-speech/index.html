@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Microsoft Cognitive Services Speech SDK JavaScript Quickstart</title>
+  <meta charset="utf-8" />
+  <style>
+    body {
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', 'Helvetica Neue', sans-serif;
+      font-size: 14px;
+    }
+
+    table, th, td {
+      border: 1px solid #f1f1f1;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 10px;
+    }
+
+    .mode {
+      font-size: 18px;
+    }
+
+    input:not(disabled) {
+      font-weight: bold;
+      color: black;
+    }
+
+    button {
+      padding: 4px 8px;
+      background: #0078d4;
+      color: #ffffff;
+    }
+
+    button:disabled {
+      padding: 4px 8px;
+      background: #ccc;
+      color: #666;
+    }
+
+    input[type=radio] {
+      position: relative;
+      z-index: 1;
+    }
+
+    input[type=radio] + label {
+      padding: 8px 4px 8px 30px;
+      margin-left: -30px;
+    }
+
+    input[type=radio]:checked + label {
+      background: #0078d4;
+      color: #ffffff;
+    }
+  </style>
+</head>
+<body style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:13px;">
+  <div id="warning">
+    <h1 style="font-weight:500;">Speech Recognition Speech SDK not found (microsoft.cognitiveservices.speech.sdk.bundle.js missing).</h1>
+  </div>
+  
+  <div id="content" style="display:none">
+    <table width="100%">
+      <tr>
+        <td></td>
+        <td><h1 style="font-weight:500;">Microsoft Cognitive Services Speech SDK JavaScript Quickstart</h1></td>
+      </tr>
+      <tr>
+        <td align="right"><a href="https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started" target="_blank">Subscription</a>:</td>
+        <td><input id="subscriptionKey" type="text" size="40" placeholder="YourSubscriptionKey"></td>
+      </tr>
+      <tr>
+        <td align="right">Region</td>
+        <td><input id="serviceRegion" type="text" size="40" placeholder="YourServiceRegion"></td>
+      </tr>
+      <tr>
+        <td align="right" valign="top">Input Text</td>
+        <td><textarea id="phraseDiv" style="display: inline-block;width:500px;height:50px"></textarea></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td><button id="startSpeakTextAsyncButton">Start Text to Speech</button></td>
+      </tr>
+      <tr>
+        <td align="right" valign="top">Result</td>
+        <td><textarea id="resultDiv" style="display: inline-block;width:500px;height:100px"></textarea></td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- Speech SDK reference sdk. -->
+  <script src="https://aka.ms/csspeech/jsbrowserpackageraw"></script>
+
+  <!-- Speech SDK USAGE -->
+  <script>
+    // status fields and start button in UI
+    var phraseDiv;
+    var resultDiv;
+    var startSpeakTextAsyncButton;
+
+    // subscription key and region for speech services.
+    var subscriptionKey, serviceRegion;
+    var SpeechSDK;
+    var synthesizer;
+
+    document.addEventListener("DOMContentLoaded", function () {
+      startSpeakTextAsyncButton = document.getElementById("startSpeakTextAsyncButton");
+      subscriptionKey = document.getElementById("subscriptionKey");
+      serviceRegion = document.getElementById("serviceRegion");
+      phraseDiv = document.getElementById("phraseDiv");
+      resultDiv = document.getElementById("resultDiv");
+
+      startSpeakTextAsyncButton.addEventListener("click", function () {
+        startSpeakTextAsyncButton.disabled = true;
+        phraseDiv.innerHTML = "";
+
+        if (subscriptionKey.value === "" || subscriptionKey.value === "subscription") {
+          alert("Please enter your Microsoft Cognitive Services Speech subscription key!");
+          startSpeakTextAsyncButton.disabled = false;
+          return;
+        }
+        var speechConfig = SpeechSDK.SpeechConfig.fromSubscription(subscriptionKey.value, serviceRegion.value);
+
+        synthesizer = new SpeechSDK.SpeechSynthesizer(speechConfig);
+
+        let inputText = phraseDiv.value;
+        synthesizer.speakTextAsync(
+          inputText,
+          function (result) {
+            startSpeakTextAsyncButton.disabled = false;
+            if (result.reason === SpeechSDK.ResultReason.SynthesizingAudioCompleted) {
+              resultDiv.innerHTML += "synthesis finished for [" + inputText + "].\n";
+            } else if (result.reason === SpeechSDK.ResultReason.Canceled) {
+              resultDiv.innerHTML += "synthesis failed. Error detail: " + result.errorDetails + "\n";
+            }
+            window.console.log(result);
+            synthesizer.close();
+            synthesizer = undefined;
+          },
+          function (err) {
+            startSpeakTextAsyncButton.disabled = false;
+            resultDiv.innerHTML += "Error: ";
+            resultDiv.innerHTML += err;
+            resultDiv.innerHTML += "\n";
+            window.console.log(err);
+
+            synthesizer.close();
+            synthesizer = undefined;
+        });
+      });
+
+      if (!!window.SpeechSDK) {
+        SpeechSDK = window.SpeechSDK;
+        startSpeakTextAsyncButton.disabled = false;
+
+        document.getElementById('content').style.display = 'block';
+        document.getElementById('warning').style.display = 'none';
+
+        // in case we have a function for getting an authorization token, call it.
+        if (typeof RequestAuthorizationToken === "function") {
+            RequestAuthorizationToken();
+        }
+      }
+    });
+  
+  </script>
+</body>
+</html>

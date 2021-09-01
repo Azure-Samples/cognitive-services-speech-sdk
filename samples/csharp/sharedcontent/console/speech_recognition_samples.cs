@@ -5,9 +5,13 @@
 
 // <toplevel>
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using Microsoft.CognitiveServices.Speech;
 using Microsoft.CognitiveServices.Speech.Audio;
+using Microsoft.CognitiveServices.Speech.PronunciationAssessment;
+
 // </toplevel>
 
 namespace MicrosoftSpeechSDKSamples
@@ -31,9 +35,9 @@ namespace MicrosoftSpeechSDKSamples
 
                 // Starts speech recognition, and returns after a single utterance is recognized. The end of a
                 // single utterance is determined by listening for silence at the end or until a maximum of 15
-                // seconds of audio is processed.  The task returns the recognition text as result. 
+                // seconds of audio is processed.  The task returns the recognition text as result.
                 // Note: Since RecognizeOnceAsync() returns only a single utterance, it is suitable only for single
-                // shot recognition like command or query. 
+                // shot recognition like command or query.
                 // For long-running multi-utterance recognition, use StartContinuousRecognitionAsync() instead.
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
 
@@ -82,9 +86,9 @@ namespace MicrosoftSpeechSDKSamples
 
                 // Starts speech recognition, and returns after a single utterance is recognized. The end of a
                 // single utterance is determined by listening for silence at the end or until a maximum of 15
-                // seconds of audio is processed.  The task returns the recognition text as result. 
+                // seconds of audio is processed.  The task returns the recognition text as result.
                 // Note: Since RecognizeOnceAsync() returns only a single utterance, it is suitable only for single
-                // shot recognition like command or query. 
+                // shot recognition like command or query.
                 // For long-running multi-utterance recognition, use StartContinuousRecognitionAsync() instead.
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
 
@@ -136,9 +140,9 @@ namespace MicrosoftSpeechSDKSamples
 
                 // Starts speech recognition, and returns after a single utterance is recognized. The end of a
                 // single utterance is determined by listening for silence at the end or until a maximum of 15
-                // seconds of audio is processed.  The task returns the recognition text as result. 
+                // seconds of audio is processed.  The task returns the recognition text as result.
                 // Note: Since RecognizeOnceAsync() returns only a single utterance, it is suitable only for single
-                // shot recognition like command or query. 
+                // shot recognition like command or query.
                 // For long-running multi-utterance recognition, use StartContinuousRecognitionAsync() instead.
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
 
@@ -239,6 +243,173 @@ namespace MicrosoftSpeechSDKSamples
                 }
             }
             // </recognitionContinuousWithFile>
+        }
+
+        public static async Task SpeechRecognitionWithCompressedInputPullStreamAudio()
+        {
+            // <recognitionWithCompressedInputPullStreamAudio>
+            // Creates an instance of a speech config with specified subscription key and service region.
+            // Replace with your own subscription key and service region (e.g., "westus").
+            var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+
+            var stopRecognition = new TaskCompletionSource<int>();
+
+            // Create an audio stream from a wav file.
+            // Replace with your own audio file name.
+
+            using (var audioInput = AudioConfig.FromStreamInput(new PullAudioInputStream(new BinaryAudioStreamReader(
+                                    new BinaryReader(File.OpenRead(@"whatstheweatherlike.mp3"))),
+                                    AudioStreamFormat.GetCompressedFormat(AudioStreamContainerFormat.MP3))))
+            {
+                // Creates a speech recognizer using audio stream input.
+                using (var recognizer = new SpeechRecognizer(config, audioInput))
+                {
+                    // Subscribes to events.
+                    recognizer.Recognizing += (s, e) =>
+                    {
+                        Console.WriteLine($"RECOGNIZING: Text={e.Result.Text}");
+                    };
+
+                    recognizer.Recognized += (s, e) =>
+                    {
+                        if (e.Result.Reason == ResultReason.RecognizedSpeech)
+                        {
+                            Console.WriteLine($"RECOGNIZED: Text={e.Result.Text}");
+                        }
+                        else if (e.Result.Reason == ResultReason.NoMatch)
+                        {
+                            Console.WriteLine($"NOMATCH: Speech could not be recognized.");
+                        }
+                    };
+
+                    recognizer.Canceled += (s, e) =>
+                    {
+                        Console.WriteLine($"CANCELED: Reason={e.Reason}");
+
+                        if (e.Reason == CancellationReason.Error)
+                        {
+                            Console.WriteLine($"CANCELED: ErrorCode={e.ErrorCode}");
+                            Console.WriteLine($"CANCELED: ErrorDetails={e.ErrorDetails}");
+                            Console.WriteLine($"CANCELED: Did you update the subscription info?");
+                        }
+
+                        stopRecognition.TrySetResult(0);
+                    };
+
+                    recognizer.SessionStarted += (s, e) =>
+                    {
+                        Console.WriteLine("\nSession started event.");
+                    };
+
+                    recognizer.SessionStopped += (s, e) =>
+                    {
+                        Console.WriteLine("\nSession stopped event.");
+                        Console.WriteLine("\nStop recognition.");
+                        stopRecognition.TrySetResult(0);
+                    };
+
+                    // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
+                    await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
+
+                    // Waits for completion.
+                    // Use Task.WaitAny to keep the task rooted.
+                    Task.WaitAny(new[] { stopRecognition.Task });
+
+                    // Stops recognition.
+                    await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
+                }
+            }
+            // </recognitionWithCompressedInputPullStreamAudio>
+        }
+
+        public static async Task SpeechRecognitionWithCompressedInputPushStreamAudio()
+        {
+            // <recognitionWithCompressedInputPushStreamAudio>
+            // Creates an instance of a speech config with specified subscription key and service region.
+            // Replace with your own subscription key and service region (e.g., "westus").
+            var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+
+            var stopRecognition = new TaskCompletionSource<int>();
+
+            using (var pushStream = AudioInputStream.CreatePushStream(AudioStreamFormat.GetCompressedFormat(AudioStreamContainerFormat.MP3)))
+            {
+                using (var audioInput = AudioConfig.FromStreamInput(pushStream))
+                {
+                    // Creates a speech recognizer using audio stream input.
+                    using (var recognizer = new SpeechRecognizer(config, audioInput))
+                    {
+                        // Subscribes to events.
+                        recognizer.Recognizing += (s, e) =>
+                        {
+                            Console.WriteLine($"RECOGNIZING: Text={e.Result.Text}");
+                        };
+
+                        recognizer.Recognized += (s, e) =>
+                        {
+                            if (e.Result.Reason == ResultReason.RecognizedSpeech)
+                            {
+                                Console.WriteLine($"RECOGNIZED: Text={e.Result.Text}");
+                            }
+                            else if (e.Result.Reason == ResultReason.NoMatch)
+                            {
+                                Console.WriteLine($"NOMATCH: Speech could not be recognized.");
+                            }
+                        };
+
+                        recognizer.Canceled += (s, e) =>
+                        {
+                            Console.WriteLine($"CANCELED: Reason={e.Reason}");
+
+                            if (e.Reason == CancellationReason.Error)
+                            {
+                                Console.WriteLine($"CANCELED: ErrorCode={e.ErrorCode}");
+                                Console.WriteLine($"CANCELED: ErrorDetails={e.ErrorDetails}");
+                                Console.WriteLine($"CANCELED: Did you update the subscription info?");
+                            }
+
+                            stopRecognition.TrySetResult(0);
+                        };
+
+                        recognizer.SessionStarted += (s, e) =>
+                        {
+                            Console.WriteLine("\nSession started event.");
+                        };
+
+                        recognizer.SessionStopped += (s, e) =>
+                        {
+                            Console.WriteLine("\nSession stopped event.");
+                            Console.WriteLine("\nStop recognition.");
+                            stopRecognition.TrySetResult(0);
+                        };
+
+                        // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
+                        await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
+
+                        using (BinaryAudioStreamReader reader = Helper.CreateBinaryFileReader(@"whatstheweatherlike.mp3"))
+                        {
+                            byte[] buffer = new byte[1000];
+                            while (true)
+                            {
+                                var readSamples = reader.Read(buffer, (uint)buffer.Length);
+                                if (readSamples == 0)
+                                {
+                                    break;
+                                }
+                                pushStream.Write(buffer, readSamples);
+                            }
+                        }
+                        pushStream.Close();
+
+                        // Waits for completion.
+                        // Use Task.WaitAny to keep the task rooted.
+                        Task.WaitAny(new[] { stopRecognition.Task });
+
+                        // Stops recognition.
+                        await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
+                    }
+                }
+            }
+            // </recognitionWithCompressedInputPushStreamAudio>
         }
 
         // Speech recognition with audio stream
@@ -578,7 +749,7 @@ namespace MicrosoftSpeechSDKSamples
 
             // Creates an instance of AutoDetectSourceLanguageConfig with the 2 source language candidates
             // Currently this feature only supports 2 different language candidates
-            // Replace the languages to be the language candidates for your speech. Please see https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support for all supported langauges
+            // Replace the languages to be the language candidates for your speech. Please see https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support for all supported languages
             var autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig.FromLanguages(new string[] { "de-DE", "fr-FR" });
 
             var stopRecognition = new TaskCompletionSource<int>();
@@ -665,7 +836,7 @@ namespace MicrosoftSpeechSDKSamples
             var sourceLanguageConfigs = new SourceLanguageConfig[]
             {
                 // The endpoint id is optional, if not specified,  the service will use the default model for en-US
-                // Replace the language with your source language candidate. Please see https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support for all supported langauges
+                // Replace the language with your source language candidate. Please see https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support for all supported languages
                 SourceLanguageConfig.FromLanguage("en-US"),
 
                 // Replace the id with the CRIS endpoint id of your customized model. If the speech is in fr-FR, the service will use the corresponding customized model for speech recognition
@@ -748,5 +919,208 @@ namespace MicrosoftSpeechSDKSamples
                 }
             }
         }
+
+        public static async Task KeywordRecognizer()
+        {
+            Console.WriteLine("say something ...");
+            using (var audioInput = AudioConfig.FromDefaultMicrophoneInput())
+            {
+                using (var recognizer = new KeywordRecognizer(audioInput))
+                {
+                    var model = KeywordRecognitionModel.FromFile("YourKeywordModelFilename.");
+                    var result = await recognizer.RecognizeOnceAsync(model).ConfigureAwait(false);
+                    Console.WriteLine($"got result reason as {result.Reason}");
+                    if(result.Reason == ResultReason.RecognizedKeyword)
+                    {
+                        var stream = AudioDataStream.FromResult(result);
+
+                        await Task.Delay(2000);
+
+                        stream.DetachInput();
+                        await stream.SaveToWaveFileAsync("AudioFromRecognizedKeyword.wav");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"got result reason as {result.Reason}. You can't get audio when no keyword is recognized.");
+                    }
+                }
+            }
+        }
+
+        // Pronunciation assessment with microphone as audio input.
+        public static async Task PronunciationAssessmentWithMicrophoneAsync()
+        {
+            // Creates an instance of a speech config with specified subscription key and service region.
+            // Replace with your own subscription key and service region (e.g., "westus").
+            // Note: The pronunciation assessment feature is currently only available on en-US language.
+            var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+
+            // The pronunciation assessment service has a longer default end silence timeout (5 seconds) than normal STT
+            // as the pronunciation assessment is widely used in education scenario where kids have longer break in reading.
+            // You can adjust the end silence timeout based on your real scenario.
+            config.SetProperty(PropertyId.SpeechServiceConnection_EndSilenceTimeoutMs, "3000");
+
+            var referenceText = "";
+            // create pronunciation assessment config, set grading system, granularity and if enable miscue based on your requirement.
+            var pronunciationConfig = new PronunciationAssessmentConfig(referenceText,
+                GradingSystem.HundredMark, Granularity.Phoneme, true);
+
+            // Creates a speech recognizer for the specified language, using microphone as audio input.
+            using (var recognizer = new SpeechRecognizer(config))
+            {
+                while (true)
+                {
+                    // Receives reference text from console input.
+                    Console.WriteLine("Enter reference text you want to assess, or enter empty text to exit.");
+                    Console.Write("> ");
+                    referenceText = Console.ReadLine();
+                    if (string.IsNullOrEmpty(referenceText))
+                    {
+                        break;
+                    }
+
+                    pronunciationConfig.ReferenceText = referenceText;
+
+                    // Starts recognizing.
+                    Console.WriteLine($"Read out \"{referenceText}\" for pronunciation assessment ...");
+
+                    pronunciationConfig.ApplyTo(recognizer);
+
+                    // Starts speech recognition, and returns after a single utterance is recognized.
+                    // For long-running multi-utterance recognition, use StartContinuousRecognitionAsync() instead.
+                    var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+
+                    // Checks result.
+                    if (result.Reason == ResultReason.RecognizedSpeech)
+                    {
+                        Console.WriteLine($"RECOGNIZED: Text={result.Text}");
+                        Console.WriteLine("  PRONUNCIATION ASSESSMENT RESULTS:");
+
+                        var pronunciationResult = PronunciationAssessmentResult.FromResult(result);
+                        Console.WriteLine(
+                            $"    Accuracy score: {pronunciationResult.AccuracyScore}, Pronunciation score: {pronunciationResult.PronunciationScore}, Completeness score : {pronunciationResult.CompletenessScore}, FluencyScore: {pronunciationResult.FluencyScore}");
+
+                        Console.WriteLine("  Word-level details:");
+
+                        foreach (var word in pronunciationResult.Words)
+                        {
+                            Console.WriteLine($"    Word: {word.Word}, Accuracy score: {word.AccuracyScore}, Error type: {word.ErrorType}.");
+                        }
+                    }
+                    else if (result.Reason == ResultReason.NoMatch)
+                    {
+                        Console.WriteLine($"NOMATCH: Speech could not be recognized.");
+                    }
+                    else if (result.Reason == ResultReason.Canceled)
+                    {
+                        var cancellation = CancellationDetails.FromResult(result);
+                        Console.WriteLine($"CANCELED: Reason={cancellation.Reason}");
+
+                        if (cancellation.Reason == CancellationReason.Error)
+                        {
+                            Console.WriteLine($"CANCELED: ErrorCode={cancellation.ErrorCode}");
+                            Console.WriteLine($"CANCELED: ErrorDetails={cancellation.ErrorDetails}");
+                            Console.WriteLine($"CANCELED: Did you update the subscription info?");
+                        }
+                    }
+                }
+            }
+        }
+
+        // Pronunciation assessment with audio stream input.
+        public static void PronunciationAssessmentWithStream()
+        {
+            // Creates an instance of a speech config with specified subscription key and service region.
+            // Replace with your own subscription key and service region (e.g., "westus").
+            // Note: The pronunciation assessment feature is currently only available on en-US language.
+            var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+
+            // Read audio data from file. In real scenario this can be from memory or network
+            var audioDataWithHeader = File.ReadAllBytes("whatstheweatherlike.wav");
+            var audioData = new byte[audioDataWithHeader.Length - 46];
+            Array.Copy(audioDataWithHeader, 46, audioData, 0, audioData.Length);
+
+            var resultReceived = new TaskCompletionSource<int>();
+            var resultContainer = new List<string>();
+
+            var startTime = DateTime.Now;
+
+            var task = PronunciationAssessmentWithStreamInternalAsync(config, "what's the weather like", audioData, resultReceived, resultContainer);
+            Task.WaitAny(new[] { resultReceived.Task });
+            var resultJson = resultContainer[0];
+
+            var endTime = DateTime.Now;
+
+            Console.WriteLine(resultJson);
+
+            var timeCost = endTime.Subtract(startTime).TotalMilliseconds;
+            Console.WriteLine($"Time cost: {timeCost}ms");
+        }
+
+        private static async Task PronunciationAssessmentWithStreamInternalAsync(SpeechConfig speechConfig, string referenceText, byte[] audioData, TaskCompletionSource<int> resultReceived, List<string> resultContainer)
+        {
+            using (var audioInputStream = AudioInputStream.CreatePushStream(AudioStreamFormat.GetWaveFormatPCM(16000, 16, 1))) // This need be set based on the format of the given audio data
+            using (var audioConfig = AudioConfig.FromStreamInput(audioInputStream))
+            using (var speechRecognizer = new SpeechRecognizer(speechConfig, audioConfig))
+            {
+                // create pronunciation assessment config, set grading system, granularity and if enable miscue based on your requirement.
+                var pronAssessmentConfig = new PronunciationAssessmentConfig(referenceText, GradingSystem.HundredMark, Granularity.Phoneme, false);
+                pronAssessmentConfig.ApplyTo(speechRecognizer);
+
+                audioInputStream.Write(audioData);
+                audioInputStream.Write(new byte[0]); // send a zero-size chunk to signal the end of stream
+
+                var result = await speechRecognizer.RecognizeOnceAsync().ConfigureAwait(false);
+                if (result.Reason == ResultReason.Canceled)
+                {
+                    var cancellationDetail = CancellationDetails.FromResult(result);
+                    Console.Write(cancellationDetail);
+                }
+                else
+                {
+                    var responseJson = result.Properties.GetProperty(PropertyId.SpeechServiceResponse_JsonResult);
+                    resultContainer.Add(responseJson);
+                }
+
+                resultReceived.SetResult(1);
+            }
+        }
+
+        private static async Task<RecognitionResult> RecognizeOnceAsyncInternal(string key, string region)
+        {
+            RecognitionResult recognitionResult = null;
+            var config = SpeechConfig.FromSubscription(key, region);
+
+            // Creates a speech recognizer using file as audio input.
+            using (var audioInput = AudioConfig.FromWavFileInput(@"whatstheweatherlike.wav"))
+            {
+                using (var recognizer = new SpeechRecognizer(config, audioInput))
+                {
+                    recognitionResult = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+                }
+            }
+
+            return recognitionResult;
+        }
+
+        // Speech recognition with backup subscription region.
+        public static async Task RecognitionOnceWithFileAsyncSwitchSecondaryRegion()
+        {
+            // Create a speech resource with primary subscription key and service region.
+            // Also create a speech resource with secondary subscription key and service region
+            RecognitionResult recognitionResult = await RecognizeOnceAsyncInternal("PrimarySubscriptionKey", "PrimarySubscriptionRegion");
+            if (recognitionResult.Reason == ResultReason.Canceled)
+            {
+                CancellationDetails details = CancellationDetails.FromResult(recognitionResult);
+                if (details.ErrorCode == CancellationErrorCode.ConnectionFailure
+                    || details.ErrorCode == CancellationErrorCode.ServiceUnavailable
+                    || details.ErrorCode == CancellationErrorCode.ServiceTimeout)
+                {
+                    recognitionResult = await RecognizeOnceAsyncInternal("SecondarySubscriptionRegion", "SecondarySubscriptionRegion");
+                }
+            }
+            Console.WriteLine("Recognized {0}", recognitionResult.Text);
+        }
+
     }
 }

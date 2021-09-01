@@ -5,9 +5,12 @@
 // <code>
 package com.speechsdk.quickstart;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.joda.JodaModule;
-import com.microsoft.bot.schema.models.Activity;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.microsoft.bot.schema.Activity;
 import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.audio.PullAudioOutputStream;
 import com.microsoft.cognitiveservices.speech.dialog.BotFrameworkConfig;
@@ -23,7 +26,9 @@ import javax.sound.sampled.DataLine;
 import javax.sound.sampled.SourceDataLine;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.concurrent.*;
+
 
 public class Main {
 
@@ -31,11 +36,17 @@ public class Main {
     public static final int WAIT_INTERVAL_IN_MILLIS = 1000;
 
     private static final Logger log = LoggerFactory.getLogger(Main.class);
-    private static final ObjectMapper mapper = new ObjectMapper();
-
-    static {
-        mapper.registerModule(new JodaModule());
-    }
+    private static final ObjectMapper mapper = new ObjectMapper()
+    {
+        {
+            this.registerModule(new JodaModule());
+            this.registerModule(new JavaTimeModule());
+            this.findAndRegisterModules();
+            this.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            this.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+            this.setDateFormat(new SimpleDateFormat());
+        }
+    };
 
     private static Boolean receivedResponse;
 
@@ -146,10 +157,10 @@ public class Main {
 
             try {
                 Activity activity = mapper.readValue(act, Activity.class);
-                if (StringUtils.isNotBlank(activity.text()) || StringUtils.isNotBlank(activity.speak())) {
+                if (StringUtils.isNotBlank(activity.getText()) || StringUtils.isNotBlank(activity.getSpeak())) {
                     receivedResponse = true;
                     System.out.println(String.format("Response: \n\t Text: %s \n\t Speech: %s",
-                            activity.text(), activity.speak()));
+                            activity.getText(), activity.getSpeak()));
                 }
             } catch (IOException e) {
                 log.error("IO exception thrown when deserializing the bot response. ErrorMessage:", e.getMessage(), e);

@@ -1,7 +1,7 @@
 # Quickstart: Recognize speech in C++ for macOS
 
 This sample demonstrates how to recognize speech with C++ using the Speech SDK for macOS.
-See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-cpp-macos) on the SDK documentation page for step-by-step instructions.
+See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstarts/speech-to-text-from-microphone?tabs=dotnet%2Cx-android%2CmacOS%2Cjava-runtime%2Cwindowsinstall&pivots=programming-language-cpp) on the SDK documentation page for step-by-step instructions.
 
 ## Prerequisites
 
@@ -35,7 +35,7 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 To run the sample, you'll need to configure the loader's library path to point to the Speech SDK library.
 
 ```sh
-export DYLD_FRAMEWORK_PATH="DYLD_FRAMEWORK_PATH:$SPEECHSDK_ROOT"
+export DYLD_FRAMEWORK_PATH="$DYLD_FRAMEWORK_PATH:$SPEECHSDK_ROOT"
 ```
 
 Run the application:

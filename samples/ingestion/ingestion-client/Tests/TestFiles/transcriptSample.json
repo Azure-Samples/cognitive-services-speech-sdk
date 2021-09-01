@@ -1,0 +1,165 @@
+{
+  "source": "https://www.contoso.com",
+  "timestamp": "2020-06-26T15:18:35Z",
+  "durationTicks": 74800000,
+  "duration": "PT7.48S",
+  "combinedRecognizedPhrases": [
+    {
+      "channel": 0,
+      "lexical": "run alabama drivers license zero zero three zero six six nine",
+      "itn": "run alabama drivers license 0030 669",
+      "maskedITN": "run alabama drivers license 0030 669",
+      "display": "Run Alabama drivers license. 0030 669"
+    }
+  ],
+  "recognizedPhrases": [
+    {
+      "recognitionStatus": "Success",
+      "channel": 0,
+      "speaker": 1,
+      "offset": "PT0.04S",
+      "duration": "PT2.18S",
+      "offsetInTicks": 400000.0,
+      "durationInTicks": 21800000.0,
+      "nBest": [
+        {
+          "confidence": 0.9509893,
+          "lexical": "run alabama drivers license",
+          "itn": "run alabama drivers license",
+          "maskedITN": "run alabama drivers license",
+          "display": "Run Alabama drivers license.",
+          "words": [
+            {
+              "word": "run",
+              "offset": "PT0.04S",
+              "duration": "PT0.48S",
+              "offsetInTicks": 400000.0,
+              "durationInTicks": 4800000.0,
+              "confidence": 0.968795
+            },
+            {
+              "word": "alabama",
+              "offset": "PT0.52S",
+              "duration": "PT0.58S",
+              "offsetInTicks": 5200000.0,
+              "durationInTicks": 5800000.0,
+              "confidence": 0.986991
+            },
+            {
+              "word": "drivers",
+              "offset": "PT1.1S",
+              "duration": "PT0.52S",
+              "offsetInTicks": 11000000.0,
+              "durationInTicks": 5200000.0,
+              "confidence": 0.989197
+            },
+            {
+              "word": "license",
+              "offset": "PT1.62S",
+              "duration": "PT0.6S",
+              "offsetInTicks": 16200000.0,
+              "durationInTicks": 6000000.0,
+              "confidence": 0.996206
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "recognitionStatus": "Success",
+      "channel": 0,
+      "speaker": 2,
+      "offset": "PT2.28S",
+      "duration": "PT3.08S",
+      "offsetInTicks": 22800000.0,
+      "durationInTicks": 30800000.0,
+      "nBest": [
+        {
+          "confidence": 0.9509893,
+          "lexical": "zero zero three zero",
+          "itn": "0030",
+          "maskedITN": "0030",
+          "display": "0030",
+          "words": [
+            {
+              "word": "zero",
+              "offset": "PT2.28S",
+              "duration": "PT0.76S",
+              "offsetInTicks": 22800000.0,
+              "durationInTicks": 7600000.0,
+              "confidence": 0.991542
+            },
+            {
+              "word": "zero",
+              "offset": "PT3.06S",
+              "duration": "PT0.74S",
+              "offsetInTicks": 30600000.0,
+              "durationInTicks": 7400000.0,
+              "confidence": 0.992899
+            },
+            {
+              "word": "three",
+              "offset": "PT3.86S",
+              "duration": "PT0.74S",
+              "offsetInTicks": 38600000.0,
+              "durationInTicks": 7400000.0,
+              "confidence": 0.99463
+            },
+            {
+              "word": "zero",
+              "offset": "PT4.62S",
+              "duration": "PT0.74S",
+              "offsetInTicks": 46200000.0,
+              "durationInTicks": 7400000.0,
+              "confidence": 0.988379
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "recognitionStatus": "Success",
+      "channel": 0,
+      "speaker": 1,
+      "offset": "PT5.4S",
+      "duration": "PT2.06S",
+      "offsetInTicks": 54000000.0,
+      "durationInTicks": 20600000.0,
+      "nBest": [
+        {
+          "confidence": 0.9509893,
+          "lexical": "six six nine",
+          "itn": "669",
+          "maskedITN": "669",
+          "display": "669",
+          "words": [
+            {
+              "word": "six",
+              "offset": "PT5.4S",
+              "duration": "PT0.7S",
+              "offsetInTicks": 54000000.0,
+              "durationInTicks": 7000000.0,
+              "confidence": 0.988606
+            },
+            {
+              "word": "six",
+              "offset": "PT6.16S",
+              "duration": "PT0.71S",
+              "offsetInTicks": 61600000.0,
+              "durationInTicks": 7100000.0,
+              "confidence": 0.984716
+            },
+            {
+              "word": "nine",
+              "offset": "PT6.9S",
+              "duration": "PT0.56S",
+              "offsetInTicks": 69000000.0,
+              "durationInTicks": 5600000.0,
+              "confidence": 0.994942
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

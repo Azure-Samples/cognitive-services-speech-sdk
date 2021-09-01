@@ -11,6 +11,111 @@ namespace MicrosoftSpeechSDKSamples
 {
     class Program
     {
+        /// <summary>
+        /// Speech Recognition with Language Detection feature enabled
+        /// </summary>
+        private static void SpeechRecognitionWithLanguageDetectionEnabled()
+        {
+            Console.WriteLine("Please choose the following samples (with Language detection enabled)");
+            var prompt = "Your choice (0: Stop): ";
+
+            Console.WriteLine("1. Speech recognition with microphone input.");
+            Console.WriteLine("2. Speech continuous recognition with multi-lingual audio input.");
+
+            Console.Write(prompt);
+
+            ConsoleKeyInfo x;
+            x = Console.ReadKey();
+            Console.WriteLine("");
+            switch (x.Key)
+            {
+                case ConsoleKey.D1:
+                    SpeechRecognitionWithLanguageIdSamples.RecognitionWithMicrophoneAsync().Wait();
+                    break;
+                case ConsoleKey.D2:
+                    SpeechRecognitionWithLanguageIdSamples.MultiLingualRecognitionWithUniversalV2Endpiont().Wait();
+                    break;
+                case ConsoleKey.D0:
+                    Console.WriteLine("Exiting...");
+                    break;
+                default:
+                    Console.WriteLine("Invalid input.");
+                    break;
+            }
+            Console.WriteLine("\nExecution done. " + prompt);
+        }
+
+        /// <summary>
+        /// Language Detection (SourceLanguageRecognizer) samples
+        /// </summary>
+        private static void LanguageDetectionSamples()
+        {
+            var prompt = "Your choice (0: Stop): ";
+
+            Console.WriteLine("1. Language detection with microphone input.");
+            Console.WriteLine("2. SingleShot language detection with file input.");
+            Console.WriteLine("3. Continuous language detection with multi-lingual audio input.");
+
+            Console.Write(prompt);
+
+            ConsoleKeyInfo x;
+            x = Console.ReadKey();
+            Console.WriteLine("");
+            switch (x.Key)
+            {
+                case ConsoleKey.D1:
+                    StandaloneLanguageDetectionSamples.DetectionWithMicrophoneAsync().Wait();
+                    break;
+                case ConsoleKey.D2:
+                    StandaloneLanguageDetectionSamples.LanguageDetectionWithFileAsync().Wait();
+                    break;
+                case ConsoleKey.D3:
+                    StandaloneLanguageDetectionSamples.ContinuousLanguageDetectionWithFileAsync().Wait();
+                    break;
+                case ConsoleKey.D0:
+                    Console.WriteLine("Exiting...");
+                    break;
+                default:
+                    Console.WriteLine("Invalid input.");
+                    break;
+            }
+            Console.WriteLine("\nExecution done. " + prompt);
+        }
+
+        /// <summary>
+        /// Translation with language detection enabled.
+        /// </summary>
+        private static void TranslationWithLanguageDetectionEnabled()
+        {
+            Console.WriteLine("Please choose the following samples (with Language detection enabled)");
+            var prompt = "Your choice (0: Stop): ";
+
+            Console.WriteLine("1. Translation with microphone input.");
+            Console.WriteLine("2. Translation with multi-lingual audio input.");
+
+            Console.Write(prompt);
+
+            ConsoleKeyInfo x;
+            x = Console.ReadKey();
+            Console.WriteLine("");
+            switch (x.Key)
+            {
+                case ConsoleKey.D1:
+                    TranslationSamples.TranslationWithMicrophoneAsync_withLanguageDetectionEnabled().Wait();
+                    break;
+                case ConsoleKey.D2:
+                    TranslationSamples.TranslationWithMultiLingualFileAsync_withLanguageDetectionEnabled().Wait();
+                    break;
+                case ConsoleKey.D0:
+                    Console.WriteLine("Exiting...");
+                    break;
+                default:
+                    Console.WriteLine("Invalid input.");
+                    break;
+            }
+            Console.WriteLine("\nExecution done. " + prompt);
+        }
+
         static void Main(string[] args)
         {
 
@@ -44,6 +149,16 @@ namespace MicrosoftSpeechSDKSamples
             Console.WriteLine("Q. Speech synthesis word boundary event.");
             Console.WriteLine("R. Speech synthesis using authorization token.");
             Console.WriteLine("S. Speech synthesis in server scenario.");
+            Console.WriteLine("T. Speech recognition with compressed input pull audio stream.");
+            Console.WriteLine("U. Speech recognition with compressed input push audio stream.");
+            Console.WriteLine("V. Translation with compressed input push audio stream.");
+            Console.WriteLine("W. Keyword recognizer.");
+            Console.WriteLine("X. Speech synthesis with source language auto detection.");
+            Console.WriteLine("Y. Remote Conversation for an async job.");
+            Console.WriteLine("Z. Speech recognition with file input and a switch to secondary region.");
+            Console.WriteLine("F1. Speech recognition with language detection enabled samples");
+            Console.WriteLine("F2. Standalone language detection samples.");
+            Console.WriteLine("F3. Translation with language detection samples.");
 
             Console.Write(prompt);
 
@@ -137,6 +252,36 @@ namespace MicrosoftSpeechSDKSamples
                         break;
                     case ConsoleKey.S:
                         SpeechSynthesisServerScenarioSample.SpeechSynthesizeWithPool();
+                        break;
+                    case ConsoleKey.T:
+                        SpeechRecognitionSamples.SpeechRecognitionWithCompressedInputPullStreamAudio().Wait();
+                        break;
+                    case ConsoleKey.U:
+                        SpeechRecognitionSamples.SpeechRecognitionWithCompressedInputPushStreamAudio().Wait();
+                        break;
+                    case ConsoleKey.V:
+                        TranslationSamples.TranslationWithFileCompressedInputAsync().Wait();
+                        break;
+                    case ConsoleKey.W:
+                        SpeechRecognitionSamples.KeywordRecognizer().Wait();
+                        break;
+                    case ConsoleKey.X:
+                        SpeechSynthesisSamples.SynthesisWithAutoDetectSourceLanguageAsync().Wait();
+                        break;
+                    case ConsoleKey.Y:
+                        RemoteConversationSamples.RemoteConversationWithFileAsync().Wait();
+                        break;
+                    case ConsoleKey.Z:
+                        SpeechRecognitionSamples.RecognitionOnceWithFileAsyncSwitchSecondaryRegion().Wait();
+                        break;
+                    case ConsoleKey.F1:
+                        SpeechRecognitionWithLanguageDetectionEnabled();
+                        break;
+                    case ConsoleKey.F2:
+                        LanguageDetectionSamples();
+                        break;
+                    case ConsoleKey.F3:
+                        TranslationWithLanguageDetectionEnabled();
                         break;
                     case ConsoleKey.D0:
                         Console.WriteLine("Exiting...");

@@ -8,6 +8,7 @@ import speech_sample
 import intent_sample
 import translation_sample
 import speech_synthesis_sample
+import speech_language_detection_sample
 
 from collections import OrderedDict
 import platform
@@ -18,6 +19,7 @@ samples = OrderedDict([
     (speech_sample, [
         speech_sample.speech_recognize_once_from_mic,
         speech_sample.speech_recognize_once_from_file,
+        speech_sample.speech_recognize_once_compressed_input,
         speech_sample.speech_recognize_once_from_file_with_customized_model,
         speech_sample.speech_recognize_once_from_file_with_custom_endpoint_parameters,
         speech_sample.speech_recognize_async_from_file,
@@ -25,6 +27,9 @@ samples = OrderedDict([
         speech_sample.speech_recognition_with_pull_stream,
         speech_sample.speech_recognition_with_push_stream,
         speech_sample.speech_recognize_keyword_from_microphone,
+        speech_sample.speech_recognize_keyword_locally_from_microphone,
+        speech_sample.pronunciation_assessment_from_microphone,
+        speech_sample.pronunciation_assessment_continuous_from_file,
     ]), (intent_sample, [
         intent_sample.recognize_intent_once_from_mic,
         intent_sample.recognize_intent_once_async_from_mic,
@@ -46,6 +51,15 @@ samples = OrderedDict([
         speech_synthesis_sample.speech_synthesis_to_audio_data_stream,
         speech_synthesis_sample.speech_synthesis_events,
         speech_synthesis_sample.speech_synthesis_word_boundary_event,
+        speech_synthesis_sample.speech_synthesis_viseme_event,
+        speech_synthesis_sample.speech_synthesis_bookmark_event,
+        speech_synthesis_sample.speech_synthesis_with_auto_language_detection_to_speaker,
+        speech_synthesis_sample.speech_synthesis_using_custom_voice,
+        speech_synthesis_sample.speech_synthesis_get_available_voices,
+    ]), (speech_language_detection_sample, [
+        speech_language_detection_sample.speech_language_detection_once_from_mic,
+        speech_language_detection_sample.speech_language_detection_once_from_file,
+        speech_language_detection_sample.speech_language_detection_once_from_continuous,
     ])
 ])
 

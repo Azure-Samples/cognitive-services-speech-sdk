@@ -9,7 +9,7 @@
 @interface ViewController () {
     NSString *speechKey;
     NSString *serviceRegion;
-    
+
     NSString *inputText;
 }
 
@@ -40,14 +40,14 @@
     serviceRegion = @"YourServiceRegion";
 
     [self.view setBackgroundColor:[UIColor whiteColor]];
-    
+
     self.inputField = [[UITextField alloc] initWithFrame:CGRectMake(50.0, 80.0, 300.0, 50.0)];
     self.inputField.placeholder = @"Input something to synthesize...";
     self.inputField.borderStyle = UITextBorderStyleRoundedRect;
     self.inputField.delegate = self;
     self.inputField.accessibilityIdentifier = @"input_text_field";
     [self.view addSubview:self.inputField];
-    
+
     self.synthesisDefaultButton = [UIButton buttonWithType:UIButtonTypeSystem];
     [self.synthesisDefaultButton addTarget:self action:@selector(synthesisDefaultButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
     [self.synthesisDefaultButton setTitle:@"Start synth to speaker" forState:UIControlStateNormal];
@@ -148,26 +148,30 @@
     // https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support#text-to-speech
     speechConfig.speechSynthesisLanguage = @"en-GB";
     // Sets the voice name
-    // e.g. "Microsoft Server Speech Text to Speech Voice (en-US, JessaRUS)"
+    // e.g. "Microsoft Server Speech Text to Speech Voice (en-US, ChristopherNeural)".
     // The full list of supported voices can be found here:
-    // https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support#text-to-speech
-    speechConfig.speechSynthesisVoiceName = @"Microsoft Server Speech Text to Speech Voice (en-GB, George, Apollo)";
+    // https://aka.ms/csspeech/voicenames
+    // And, you can try getVoices method to get all available voices.
+    speechConfig.speechSynthesisVoiceName = @"Microsoft Server Speech Text to Speech Voice (en-GB, RyanNeural)";
     // Sets the synthesis output format.
     // The full list of supported format can be found here:
     // https://docs.microsoft.com/azure/cognitive-services/speech-service/rest-text-to-speech#audio-outputs
     [speechConfig setSpeechSynthesisOutputFormat:SPXSpeechSynthesisOutputFormat_Riff16Khz16BitMonoPcm];
-    
+    // If you are using Custom Voice (https://aka.ms/customvoice),
+    // uncomment the following line to set the endpoint id of your Custom Voice model.
+    // speechConfig.EndpointId = @"YourEndpointId";
+
     [self updateStatusText:(@"Synthesizing...")];
-    
+
     SPXSpeechSynthesizer *synthesizer = [[SPXSpeechSynthesizer alloc] init:speechConfig];
     if (!synthesizer) {
         NSLog(@"Could not create speech synthesizer");
         [self updateResultText:(@"Speech Synthesis Error")];
         return;
     }
-    
+
     SPXSpeechSynthesisResult *speechResult = [synthesizer speakText:inputText];
-    
+
     // Checks result.
     if (SPXResultReason_Canceled == speechResult.reason) {
         SPXSpeechSynthesisCancellationDetails *details = [[SPXSpeechSynthesisCancellationDetails alloc] initFromCanceledSynthesisResult:speechResult];
@@ -203,18 +207,18 @@
         [self updateErrorText:(@"Speech Config Error")];
         return;
     }
-    
+
     [self updateStatusText:(@"Synthesizing...")];
-    
+
     SPXSpeechSynthesizer *synthesizer = [[SPXSpeechSynthesizer alloc] initWithSpeechConfiguration:speechConfig audioConfiguration:audioConfig];
     if (!synthesizer) {
         NSLog(@"Could not create speech synthesizer");
         [self updateResultText:(@"Speech Synthesis Error")];
         return;
     }
-    
+
     SPXSpeechSynthesisResult *speechResult = [synthesizer speakText:inputText];
-    
+
     // Checks result.
     if (SPXResultReason_Canceled == speechResult.reason) {
         SPXSpeechSynthesisCancellationDetails *details = [[SPXSpeechSynthesisCancellationDetails alloc] initFromCanceledSynthesisResult:speechResult];
@@ -249,18 +253,18 @@
         [self updateErrorText:(@"Speech Config Error")];
         return;
     }
-    
+
     [self updateStatusText:(@"Synthesizing...")];
-    
+
     SPXSpeechSynthesizer *synthesizer = [[SPXSpeechSynthesizer alloc] initWithSpeechConfiguration:speechConfig audioConfiguration:audioConfig];
     if (!synthesizer) {
         NSLog(@"Could not create speech synthesizer");
         [self updateResultText:(@"Speech Synthesis Error")];
         return;
     }
-    
+
     SPXSpeechSynthesisResult *speechResult = [synthesizer speakText:inputText];
-    
+
     // Checks result.
     if (SPXResultReason_Canceled == speechResult.reason) {
         SPXSpeechSynthesisCancellationDetails *details = [[SPXSpeechSynthesisCancellationDetails alloc] initFromCanceledSynthesisResult:speechResult];
@@ -325,18 +329,18 @@
         [self updateErrorText:(@"Speech Config Error")];
         return;
     }
-    
+
     [self updateStatusText:(@"Synthesizing...")];
-    
+
     SPXSpeechSynthesizer *synthesizer = [[SPXSpeechSynthesizer alloc] initWithSpeechConfiguration:speechConfig audioConfiguration:audioConfig];
     if (!synthesizer) {
         NSLog(@"Could not create speech synthesizer");
         [self updateResultText:(@"Speech Synthesis Error")];
         return;
     }
-    
+
     SPXSpeechSynthesisResult *speechResult = [synthesizer speakText:inputText];
-    
+
     // Checks result.
     if (SPXResultReason_Canceled == speechResult.reason) {
         SPXSpeechSynthesisCancellationDetails *details = [[SPXSpeechSynthesisCancellationDetails alloc] initFromCanceledSynthesisResult:speechResult];
@@ -362,16 +366,16 @@
         [self updateErrorText:(@"Speech Config Error")];
         return;
     }
-    
+
     [self updateStatusText:(@"Synthesizing...")];
-    
+
     SPXSpeechSynthesizer *synthesizer = [[SPXSpeechSynthesizer alloc] initWithSpeechConfiguration:speechConfig audioConfiguration:nil];
     if (!synthesizer) {
         NSLog(@"Could not create speech synthesizer");
         [self updateResultText:(@"Speech Synthesis Error")];
         return;
     }
-    
+
     SPXSpeechSynthesisResult *speechResult = [synthesizer startSpeakingText:inputText];
     SPXAudioDataStream *stream = [[SPXAudioDataStream alloc] initFromSynthesisResult:speechResult];
 
@@ -430,13 +434,27 @@
         NSLog(@"Speech synthesis was canceled: %@. Did you pass the correct key/region combination?", details.errorDetails);
         [self updateErrorText:([NSString stringWithFormat:@"Canceled: %@", details.errorDetails])];
     }];
-    
+
     [synthesizer addSynthesisWordBoundaryEventHandler: ^ (SPXSpeechSynthesizer *synthesizer, SPXSpeechSynthesisWordBoundaryEventArgs *eventArgs) {
         // The unit of AudioOffset is tick (1 tick = 100 nanoseconds), divide by 10,000 to converted to milliseconds.
         NSLog(@"Word boundary event received. Audio offset: %fms, text offset %lu, word length: %lu.", eventArgs.audioOffset/10000., eventArgs.textOffset, eventArgs.wordLength);
         [self updateStatusText:[NSString stringWithFormat:@"Word boundary event received. Audio offset: %fms, text offset %lu, word length: %lu.", eventArgs.audioOffset/10000., eventArgs.textOffset, eventArgs.wordLength]];
     }];
-    
+
+    [synthesizer addVisemeReceivedEventHandler: ^ (SPXSpeechSynthesizer *synthesizer, SPXSpeechSynthesisVisemeEventArgs *eventArgs) {
+        // The unit of AudioOffset is tick (1 tick = 100 nanoseconds), divide by 10,000 to converted to milliseconds.
+        NSLog(@"Viseme event received. Audio offset: %fms, viseme id: %lu.", eventArgs.audioOffset/10000., eventArgs.visemeId);
+        [self updateStatusText:[NSString stringWithFormat:@"Viseme event received. Audio offset: %fms, viseme id: %lu.", eventArgs.audioOffset/10000., eventArgs.visemeId]];
+    }];
+
+    // To trigger a bookmark event, bookmark tags are required in the SSML, e.g.
+    // "<speak version='1.0' xml:lang='en-US' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts'><voice name='Microsoft Server Speech Text to Speech Voice (en-US, AriaNeural)'><bookmark mark='bookmark_one'/> one. <bookmark mark='bookmark_two'/> two. three. four.</voice></speak>"
+    [synthesizer addBookmarkReachedEventHandler: ^ (SPXSpeechSynthesizer *synthesizer, SPXSpeechSynthesisBookmarkEventArgs *eventArgs) {
+        // The unit of AudioOffset is tick (1 tick = 100 nanoseconds), divide by 10,000 to converted to milliseconds.
+        NSLog(@"Bookmark reached. Audio offset: %fms, bookmark text: %@.", eventArgs.audioOffset/10000., eventArgs.text);
+        [self updateStatusText:[NSString stringWithFormat:@"Bookmark reached. Audio offset: %fms, bookmark text: %@.", eventArgs.audioOffset/10000., eventArgs.text]];
+    }];
+
     [synthesizer startSpeakingText:inputText];
 }
 

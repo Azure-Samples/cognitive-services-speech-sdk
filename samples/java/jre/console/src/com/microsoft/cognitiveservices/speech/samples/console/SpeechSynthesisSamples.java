@@ -121,10 +121,11 @@ public class SpeechSynthesisSamples {
         SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
         // Sets the voice name.
-        // e.g. "Microsoft Server Speech Text to Speech Voice (en-US, JessaRUS)"
+        // e.g. "Microsoft Server Speech Text to Speech Voice (en-US, ChristopherNeural)".
         // The full list of supported voices can be found here:
-        // https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support
-        String voice = "Microsoft Server Speech Text to Speech Voice (en-US, BenjaminRUS)";
+        // https://aka.ms/csspeech/voicenames
+        // And, you can try getVoicesAsync method to get all available voices (see synthesisGetAvailableVoicesAsync() sample below).
+        String voice = "Microsoft Server Speech Text to Speech Voice (en-US, ChristopherNeural)";
         config.setSpeechSynthesisVoiceName(voice);
 
         // Creates a speech synthesizer using the default speaker as audio output.
@@ -146,6 +147,56 @@ public class SpeechSynthesisSamples {
                 // Checks result.
                 if (result.getReason() == ResultReason.SynthesizingAudioCompleted) {
                     System.out.println("Speech synthesized to speaker for text [" + text + "] with voice [" + voice + "]");
+                }
+                else if (result.getReason() == ResultReason.Canceled) {
+                    SpeechSynthesisCancellationDetails cancellation = SpeechSynthesisCancellationDetails.fromResult(result);
+                    System.out.println("CANCELED: Reason=" + cancellation.getReason());
+
+                    if (cancellation.getReason() == CancellationReason.Error) {
+                        System.out.println("CANCELED: ErrorCode=" + cancellation.getErrorCode());
+                        System.out.println("CANCELED: ErrorDetails=" + cancellation.getErrorDetails());
+                        System.out.println("CANCELED: Did you update the subscription info?");
+                    }
+                }
+
+                result.close();
+            }
+        }
+
+        synthesizer.close();
+    }
+
+    // Speech synthesis using Custom Voice (https://aka.ms/customvoice).
+    public static void synthesisUsingCustomVoiceAsync() throws InterruptedException, ExecutionException
+    {
+        // Creates an instance of a speech config with specified
+        // subscription key and service region. Replace with your own subscription key
+        // and service region (e.g., "westus").
+        SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+        // Replace with the endpoint id of your Custom Voice model.
+        config.setEndpointId("YourEndpointId");
+        // Replace with the voice name of your Custom Voice model.
+        config.setSpeechSynthesisVoiceName("YourVoiceName");
+
+        // Creates a speech synthesizer using the default speaker as audio output.
+        SpeechSynthesizer synthesizer = new SpeechSynthesizer(config);
+        {
+            while (true)
+            {
+                // Receives a text from console input and synthesize it to speaker.
+                System.out.println("Enter some text that you want to speak, or enter empty text to exit.");
+                System.out.print("> ");
+                String text = new Scanner(System.in).nextLine();
+                if (text.isEmpty())
+                {
+                    break;
+                }
+
+                SpeechSynthesisResult result = synthesizer.SpeakTextAsync(text).get();
+
+                // Checks result.
+                if (result.getReason() == ResultReason.SynthesizingAudioCompleted) {
+                    System.out.println("Speech synthesized to speaker for text [" + text + "]");
                 }
                 else if (result.getReason() == ResultReason.Canceled) {
                     SpeechSynthesisCancellationDetails cancellation = SpeechSynthesisCancellationDetails.fromResult(result);
@@ -231,7 +282,7 @@ public class SpeechSynthesisSamples {
         // The full list of supported format can be found here:
         // https://docs.microsoft.com/azure/cognitive-services/speech-service/rest-text-to-speech#audio-outputs
         config.setSpeechSynthesisOutputFormat(SpeechSynthesisOutputFormat.Audio16Khz32KBitRateMonoMp3);
-        
+
         // Creates a speech synthesizer using file as audio output.
         // Replace with your own audio file name.
         String fileName = "outputaudio.mp3";
@@ -353,7 +404,7 @@ public class SpeechSynthesisSamples {
 
         // Creates an instance of a customer class inherited from PushAudioOutputStreamCallback
         PushAudioOutputStreamSampleCallback callback = new PushAudioOutputStreamSampleCallback();
-        
+
         // Creates an audio out stream from the callback.
         PushAudioOutputStream stream = AudioOutputStream.createPushStream(callback);
 
@@ -483,12 +534,12 @@ public class SpeechSynthesisSamples {
                 if (result.getReason() == ResultReason.SynthesizingAudioCompleted) {
                     System.out.println("Speech synthesized for text [" + text + "].");
                     AudioDataStream audioDataStream = AudioDataStream.fromResult(result);
-                    
+
                     // You can save all the data in the audio data stream to a file
                     String fileName = "outputaudio.wav";
                     audioDataStream.saveToWavFileAsync(fileName).get();
                     System.out.println("Audio data for text [" + text + "] was saved to [" + fileName + "].");
-                    
+
                     // You can also read data from audio data stream and process it in memory
                     // Reset the stream position to the beginning since saving to file puts the position to end
                     audioDataStream.setPosition(0);
@@ -496,7 +547,7 @@ public class SpeechSynthesisSamples {
                     long totalSize = 0;
                     long filledSize = audioDataStream.readData(buffer);
                     while (filledSize > 0) {
-                        System.out.println(filledSize + " bytes revceived.");
+                        System.out.println(filledSize + " bytes received.");
                         totalSize += filledSize;
                         filledSize = audioDataStream.readData(buffer);
                     }
@@ -641,6 +692,198 @@ public class SpeechSynthesisSamples {
             }
         }
 
+        synthesizer.close();
+    }
+
+    // Speech synthesis viseme event.
+    public static void synthesisVisemeEventAsync() throws InterruptedException, ExecutionException
+    {
+        // Creates an instance of a speech config with specified
+        // subscription key and service region. Replace with your own subscription key
+        // and service region (e.g., "westus").
+        // The default language is "en-us".
+        SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+
+        // Creates a speech synthesizer with a null output stream.
+        // This means the audio output data will not be written to any stream.
+        // You can just get the audio from the result.
+        SpeechSynthesizer synthesizer = new SpeechSynthesizer(config, null);
+        {
+            // Subscribes to viseme received event
+            synthesizer.VisemeReceived.addEventListener((o, e) -> {
+                // The unit of e.AudioOffset is tick (1 tick = 100 nanoseconds), divide by 10,000 to convert to milliseconds.
+                System.out.print("Viseme event received. Audio offset: " + e.getAudioOffset() / 10000 + "ms, ");
+                System.out.println("viseme id: " + e.getVisemeId() + ".");
+            });
+
+            while (true)
+            {
+                // Receives a text from console input and synthesize it to result.
+                System.out.println("Enter some text that you want to synthesize, or enter empty text to exit.");
+                System.out.print("> ");
+                String text = new Scanner(System.in).nextLine();
+                if (text.isEmpty())
+                {
+                    break;
+                }
+
+                SpeechSynthesisResult result = synthesizer.SpeakTextAsync(text).get();
+
+                // Checks result.
+                if (result.getReason() == ResultReason.SynthesizingAudioCompleted) {
+                    System.out.println("Speech synthesized for text [" + text + "].");
+                    byte[] audioData = result.getAudioData();
+                    System.out.println(audioData.length + " bytes of audio data received for text [" + text + "]");
+                }
+                else if (result.getReason() == ResultReason.Canceled) {
+                    SpeechSynthesisCancellationDetails cancellation = SpeechSynthesisCancellationDetails.fromResult(result);
+                    System.out.println("CANCELED: Reason=" + cancellation.getReason());
+
+                    if (cancellation.getReason() == CancellationReason.Error) {
+                        System.out.println("CANCELED: ErrorCode=" + cancellation.getErrorCode());
+                        System.out.println("CANCELED: ErrorDetails=" + cancellation.getErrorDetails());
+                        System.out.println("CANCELED: Did you update the subscription info?");
+                    }
+                }
+
+                result.close();
+            }
+        }
+
+        synthesizer.close();
+    }
+
+    // Speech synthesis bookmark event.
+    public static void synthesisBookmarkEventAsync() throws InterruptedException, ExecutionException
+    {
+        // Creates an instance of a speech config with specified
+        // subscription key and service region. Replace with your own subscription key
+        // and service region (e.g., "westus").
+        // The default language is "en-us".
+        SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+
+        // Creates a speech synthesizer with a null output stream.
+        // This means the audio output data will not be written to any stream.
+        // You can just get the audio from the result.
+        SpeechSynthesizer synthesizer = new SpeechSynthesizer(config, null);
+
+        // Subscribes to bookmark received event
+        synthesizer.BookmarkReached.addEventListener((o, e) -> {
+            // The unit of e.AudioOffset is tick (1 tick = 100 nanoseconds), divide by 10,000 to convert to milliseconds.
+            System.out.print("Bookmark reached. Audio offset: " + e.getAudioOffset() / 10000 + "ms, ");
+            System.out.println("bookmark text: " + e.getText() + ".");
+        });
+
+        System.out.println("Press Enter to start synthesizing.");
+        new Scanner(System.in).nextLine();
+
+        // Bookmark tag is needed in the SSML, e.g.
+        String ssml = "<speak version='1.0' xml:lang='en-US' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts'><voice name='Microsoft Server Speech Text to Speech Voice (en-US, AriaNeural)'><bookmark mark='bookmark_one'/> one. <bookmark mark='bookmark_two'/> two. three. four.</voice></speak>";
+
+        SpeechSynthesisResult result = synthesizer.SpeakSsmlAsync(ssml).get();
+
+        // Checks result.
+        if (result.getReason() == ResultReason.SynthesizingAudioCompleted) {
+            System.out.println("Speech synthesized.");
+        }
+        else if (result.getReason() == ResultReason.Canceled) {
+            SpeechSynthesisCancellationDetails cancellation = SpeechSynthesisCancellationDetails.fromResult(result);
+            System.out.println("CANCELED: Reason=" + cancellation.getReason());
+
+            if (cancellation.getReason() == CancellationReason.Error) {
+                System.out.println("CANCELED: ErrorCode=" + cancellation.getErrorCode());
+                System.out.println("CANCELED: ErrorDetails=" + cancellation.getErrorDetails());
+                System.out.println("CANCELED: Did you update the subscription info?");
+            }
+        }
+
+        result.close();
+        synthesizer.close();
+    }
+
+    // Speech synthesis with auto detection for source language.
+    // Note: this is a preview feature, which might be updated in future versions.
+    public static void synthesisWithSourceLanguageAutoDetectionAsync() throws InterruptedException, ExecutionException
+    {
+        // Creates an instance of a speech config with specified
+        // subscription key and service region. Replace with your own subscription key
+        // and service region (e.g., "westus").
+        SpeechConfig speechConfig = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+
+        AutoDetectSourceLanguageConfig autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig.fromOpenRange();
+
+        // Creates a speech synthesizer with auto detection for source language
+        SpeechSynthesizer synthesizer = new SpeechSynthesizer(speechConfig,
+            autoDetectSourceLanguageConfig,
+            AudioConfig.fromDefaultSpeakerOutput());
+        {
+            while (true)
+            {
+                // Receives a text from console input and synthesize it to speaker.
+                // For example, you can input "Bonjour le monde. Hello world.", then you will hear "Bonjour le monde."
+                // spoken in a French voice and "Hello world." in an English voice.
+                System.out.println("Enter some multi lingual text that you want to speak, or enter empty text to exit.");
+                System.out.print("> ");
+                String text = new Scanner(System.in).nextLine();
+                if (text.isEmpty())
+                {
+                    break;
+                }
+
+                SpeechSynthesisResult result = synthesizer.SpeakTextAsync(text).get();
+
+                // Checks result.
+                if (result.getReason() == ResultReason.SynthesizingAudioCompleted) {
+                    System.out.println("Speech synthesized to speaker for text [" + text + "]");
+                }
+                else if (result.getReason() == ResultReason.Canceled) {
+                    SpeechSynthesisCancellationDetails cancellation = SpeechSynthesisCancellationDetails.fromResult(result);
+                    System.out.println("CANCELED: Reason=" + cancellation.getReason());
+
+                    if (cancellation.getReason() == CancellationReason.Error) {
+                        System.out.println("CANCELED: ErrorCode=" + cancellation.getErrorCode());
+                        System.out.println("CANCELED: ErrorDetails=" + cancellation.getErrorDetails());
+                        System.out.println("CANCELED: Did you update the subscription info?");
+                    }
+                }
+
+                result.close();
+            }
+        }
+
+        synthesizer.close();
+    }
+
+    // Speech synthesis get available voices
+    public static void synthesisGetAvailableVoicesAsync() throws InterruptedException, ExecutionException
+    {
+        // Creates an instance of a speech config with specified
+        // subscription key and service region. Replace with your own subscription key
+        // and service region (e.g., "westus").
+        SpeechConfig speechConfig = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+
+        // Creates a speech synthesizer
+        SpeechSynthesizer synthesizer = new SpeechSynthesizer(speechConfig, null);
+
+        System.out.println("Enter a locale in BCP-47 format (e.g. en-US) that you want to get the voices of, or enter empty to get voices in all locales.");
+        System.out.print("> ");
+        String text = new Scanner(System.in).nextLine();
+
+        SynthesisVoicesResult result = synthesizer.getVoicesAsync(text).get();
+
+        // Checks result.
+        if (result.getReason() == ResultReason.VoicesListRetrieved) {
+            System.out.println("Voices successfully retrieved, they are:");
+            for (VoiceInfo voice : result.getVoices()) {
+                System.out.println(voice.getName());
+            }
+        }
+        else if (result.getReason() == ResultReason.Canceled) {
+            System.out.println("CANCELED: ErrorDetails=" + result.getErrorDetails());
+            System.out.println("CANCELED: Did you update the subscription info?");
+        }
+
+        result.close();
         synthesizer.close();
     }
 }

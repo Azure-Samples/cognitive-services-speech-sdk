@@ -44,9 +44,9 @@ namespace helloworld
             }
         }
 
-        static void Main()
+        static async Task Main()
         {
-            RecognizeSpeechAsync().Wait();
+            await RecognizeSpeechAsync();
             Console.WriteLine("Please press <Return> to continue.");
             Console.ReadLine();
         }
