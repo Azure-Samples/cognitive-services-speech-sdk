@@ -184,7 +184,7 @@
                 "description": "A value indicating whether sentiment analysis is requested (either per utterance or per audio). Will only be performed if a Text Analytics Key and Region is provided."
             }
         },
-        "EntityRedaction": {
+        "PiiRedaction": {
             "defaultValue": "None",
             "type": "String",
             "allowedValues": [
@@ -192,7 +192,7 @@
                 "UtteranceLevel"
             ],
             "metadata": {
-                "description": "A value indicating whether entity redaction is requested. Will only be performed if a Text Analytics Key and Region is provided."
+                "description": "A value indicating whether personally identifiable information (PII) redaction is requested. Will only be performed if a Text Analytics Key and Region is provided."
             }
         },
         "SqlAdministratorLogin": {
@@ -253,7 +253,9 @@
         "AppServicePlanName": "[concat('AppServicePlan-', variables('InstanceId'))]",
         "AzureSpeechServicesKeySecretName": "AzureSpeechServicesKey",
         "TextAnalyticsKeySecretName": "TextAnalyticsKey",
-        "DatabaseConnectionStringSecretName": "DatabaseConnectionString"
+        "DatabaseConnectionStringSecretName": "DatabaseConnectionString",
+        "PiiCategories": "",
+        "PiiMinimumPrecision": ""
     },
     "resources": [
         {
@@ -899,7 +901,7 @@
             },
             "properties": {
                 "APPLICATIONINSIGHTS_CONNECTION_STRING": "[reference(resourceId('Microsoft.Insights/components', variables('AppInsightsName')), '2020-02-02-preview').ConnectionString]",
-                "EntityRedactionSetting": "[parameters('EntityRedaction')]",
+                "PiiRedactionSetting": "[parameters('PiiRedaction')]",
                 "SentimentAnalysisSetting": "[parameters('SentimentAnalysis')]",
                 "AudioInputContainer": "[variables('AudioInputContainer')]",
                 "AzureServiceBus": "[listKeys(variables('AuthRuleRMK'),'2015-08-01').primaryConnectionString]",
@@ -926,7 +928,9 @@
                 "CreateConsolidatedOutputFiles": "[variables('CreateConsolidatedOutputFiles')]",
                 "ConsolidatedFilesOutputContainer": "[variables('ConsolidatedFilesOutputContainer')]",
                 "CreateAudioProcessedContainer": "[variables('CreateAudioProcessedContainer')]",
-                "AudioProcessedContainer": "[variables('AudioProcessedContainer')]"
+                "AudioProcessedContainer": "[variables('AudioProcessedContainer')]",
+                "PiiCategories": "[variables('PiiCategories')]",
+                "PiiMinimumPrecision": "[variables('PiiMinimumPrecision')]"
             }
         }
     ],
