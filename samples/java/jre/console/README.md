@@ -56,7 +56,12 @@ This sample demonstrates various forms of speech recognition, intent recognition
 ## Run the sample
 
 * Press F11, or select **Run** \> **Debug**.
+* Or run in terminal:
 
+```sh
+mvn clean package
+java -jar ./target/SpeechSDKDemo-0.0.1-SNAPSHOT-jar-with-dependencies.jar
+```
 ## References
 
 * [Speech SDK API reference for Java](https://aka.ms/csspeech/javaref)
