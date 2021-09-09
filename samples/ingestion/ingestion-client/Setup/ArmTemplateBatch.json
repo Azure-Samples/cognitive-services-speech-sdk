@@ -88,7 +88,9 @@
                 "northeurope",
                 "westeurope",
                 "francecentral",
-                "uksouth"
+                "uksouth",
+                "usgovarizona",
+                "usgovvirginia"
             ],
             "metadata": {
                 "description": "The region the Azure speech services subscription is associated with."
@@ -134,65 +136,25 @@
                 "description": "A value indicating whether word level timestamps are requested."
             }
         },
-        "TextAnalyticsKey": {
-            "defaultValue": "",
-            "type": "SecureString",
+        "ProjectFrankfurt: RedactPii": {
+            "defaultValue": false,
+            "type": "bool",
             "metadata": {
-                "description": "The key for the Text Analytics subscription."
+                "description": "A value indicating whether PII should be redacted."
             }
         },
-        "TextAnalyticsRegion": {
-            "defaultValue": "None",
-            "type": "String",
-            "allowedValues": [
-                "None",
-                "centralus",
-                "eastus",
-                "eastus2",
-                "northcentralus",
-                "southcentralus",
-                "westcentralus",
-                "westus",
-                "westus2",
-                "canadacentral",
-                "brazilsouth",
-                "eastasia",
-                "southeastasia",
-                "australiaeast",
-                "centralindia",
-                "japaneast",
-                "japanwest",
-                "koreacentral",
-                "northeurope",
-                "westeurope",
-                "francecentral",
-                "uksouth"
-            ],
+        "ProjectFrankfurt: RedactPiiAudio": {
+            "defaultValue": false,
+            "type": "bool",
             "metadata": {
-                "description": "The region the Text Analytics subscription is associated with. If none is selected, no text analysis will be performed."
+                "description": "A value indicating whether PII should be redacted in the audio files."
             }
         },
-        "SentimentAnalysis": {
-            "defaultValue": "None",
-            "type": "String",
-            "allowedValues": [
-                "None",
-                "UtteranceLevel",
-                "AudioLevel"
-            ],
+        "ProjectFrankfurt: DetectCallReason": {
+            "defaultValue": false,
+            "type": "bool",
             "metadata": {
-                "description": "A value indicating whether sentiment analysis is requested (either per utterance or per audio). Will only be performed if a Text Analytics Key and Region is provided."
-            }
-        },
-        "PiiRedaction": {
-            "defaultValue": "None",
-            "type": "String",
-            "allowedValues": [
-                "None",
-                "UtteranceLevel"
-            ],
-            "metadata": {
-                "description": "A value indicating whether personally identifiable information (PII) redaction is requested. Will only be performed if a Text Analytics Key and Region is provided."
+                "description": "A value indicating whether CallReason should be detected."
             }
         },
         "SqlAdministratorLogin": {
@@ -221,6 +183,7 @@
         "AudioInputContainer": "audio-input",
         "AudioProcessedContainer": "audio-processed",
         "ErrorFilesOutputContainer": "audio-failed",
+        "RedactedAudioContainer": "audio-redacted",
         "JsonResultOutputContainer": "json-result-output",
         "HtmlResultOutputContainer": "html-result-output",
         "ErrorReportOutputContainer": "error-report",
@@ -229,8 +192,8 @@
         "CreateConsolidatedOutputFiles": false,
         "TimerBasedExecution": true,
         "CreateAudioProcessedContainer": true,
-        "MessagesPerFunctionExecution": 1000,
-        "FilesPerTranscriptionJob": 100,
+        "MessagesPerFunctionExecution": 25,
+        "FilesPerTranscriptionJob": 5,
         "RetryLimit": 4,
         "InitialPollingDelayInMinutes": 2,
         "MaxPollingDelayInMinutes": 180,
@@ -253,9 +216,13 @@
         "AppServicePlanName": "[concat('AppServicePlan-', variables('InstanceId'))]",
         "AzureSpeechServicesKeySecretName": "AzureSpeechServicesKey",
         "TextAnalyticsKeySecretName": "TextAnalyticsKey",
+        "TextAnalyticsKey": "",
+        "TextAnalyticsRegion": "",
         "DatabaseConnectionStringSecretName": "DatabaseConnectionString",
         "PiiCategories": "",
-        "PiiMinimumPrecision": ""
+        "PiiMinimumPrecision": "",
+        "IsAzureGovDeployment": "[or(equals(parameters('AzureSpeechServicesRegion'),'usgovarizona'), equals(parameters('AzureSpeechServicesRegion'),'usgovvirginia'))]",
+        "EndpointSuffix": "[if(variables('IsAzureGovDeployment'),'core.usgovcloudapi.net','core.windows.net')]"
     },
     "resources": [
         {
@@ -352,7 +319,7 @@
                 "[concat('Microsoft.KeyVault/vaults/', variables('KeyVaultName'))]"
             ],
             "properties": {
-                "value": "[if(empty(parameters('TextAnalyticsKey')), 'NULL', parameters('TextAnalyticsKey'))]"
+                "value": "[if(empty(variables('TextAnalyticsKey')), 'NULL', variables('TextAnalyticsKey'))]"
             }
         },
         {
@@ -677,6 +644,20 @@
         },
         {
             "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+            "condition": "[parameters('ProjectFrankfurt: RedactPiiAudio')]",
+            "apiVersion": "2019-06-01",
+            "name": "[concat(variables('StorageAccountName'), '/default/', variables('RedactedAudioContainer'))]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', variables('StorageAccountName'), 'default')]",
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName'))]"
+            ],
+            "properties": {
+                "publicAccess": "None"
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
             "condition": "[variables('CreateAudioProcessedContainer')]",
             "apiVersion": "2019-06-01",
             "name": "[concat(variables('StorageAccountName'), '/default/', variables('AudioProcessedContainer'))]",
@@ -843,8 +824,8 @@
                 "AzureServiceBus": "[listKeys(variables('AuthRuleRMK'),'2015-08-01').primaryConnectionString]",
                 "AzureSpeechServicesKey": "[concat('@Microsoft.KeyVault(VaultName=', variables('KeyVaultName'), ';SecretName=', variables('AzureSpeechServicesKeySecretName'), ')')]",
                 "AzureSpeechServicesRegion": "[parameters('AzureSpeechServicesRegion')]",
-                "AzureWebJobsStorage": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('StorageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value, ';EndpointSuffix=core.windows.net')]",
-                "AzureWebJobsDashboard": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('StorageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value, ';EndpointSuffix=core.windows.net')]",
+                "AzureWebJobsStorage": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('StorageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value, ';EndpointSuffix=', variables('EndpointSuffix'))]",
+                "AzureWebJobsDashboard": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('StorageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value, ';EndpointSuffix=', variables('EndpointSuffix'))]",
                 "CustomModelId": "[parameters('CustomModelId')]",
                 "ErrorFilesOutputContainer": "[variables('ErrorFilesOutputContainer')]",
                 "ErrorReportOutputContainer": "[variables('ErrorReportOutputContainer')]",
@@ -853,6 +834,7 @@
                 "FUNCTIONS_EXTENSION_VERSION": "~3",
                 "FUNCTIONS_WORKER_RUNTIME": "dotnet",
                 "InitialPollingDelayInMinutes": "[variables('InitialPollingDelayInMinutes')]",
+                "IsAzureGovDeployment": "[variables('IsAzureGovDeployment')]",
                 "MaxPollingDelayInMinutes": "[variables('MaxPollingDelayInMinutes')]",
                 "Locale": "[parameters('Locale')]",
                 "MessagesPerFunctionExecution": "[variables('MessagesPerFunctionExecution')]",
@@ -899,39 +881,42 @@
             "tags": {
                 "displayName": "WebAppSettings"
             },
-            "properties": {
-                "APPLICATIONINSIGHTS_CONNECTION_STRING": "[reference(resourceId('Microsoft.Insights/components', variables('AppInsightsName')), '2020-02-02-preview').ConnectionString]",
-                "PiiRedactionSetting": "[parameters('PiiRedaction')]",
-                "SentimentAnalysisSetting": "[parameters('SentimentAnalysis')]",
-                "AudioInputContainer": "[variables('AudioInputContainer')]",
-                "AzureServiceBus": "[listKeys(variables('AuthRuleRMK'),'2015-08-01').primaryConnectionString]",
-                "AzureSpeechServicesKey": "[concat('@Microsoft.KeyVault(VaultName=', variables('KeyVaultName'), ';SecretName=', variables('AzureSpeechServicesKeySecretName'), ')')]",
-                "AzureWebJobsStorage": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('StorageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value, ';EndpointSuffix=core.windows.net')]",
-                "AzureWebJobsDashboard": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('StorageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value, ';EndpointSuffix=core.windows.net')]",
-                "CreateHtmlResultFile": "[variables('CreateHtmlResultFile')]",
-                "DatabaseConnectionString": "[concat('@Microsoft.KeyVault(VaultName=', variables('KeyVaultName'), ';SecretName=', variables('DatabaseConnectionStringSecretName'), ')')]",
-                "ErrorFilesOutputContainer": "[variables('ErrorFilesOutputContainer')]",
-                "ErrorReportOutputContainer": "[variables('ErrorReportOutputContainer')]",
-                "FetchTranscriptionServiceBusConnectionString": "[listKeys(variables('AuthRuleFT'),'2015-08-01').primaryConnectionString]",
-                "FUNCTIONS_EXTENSION_VERSION": "~3",
-                "FUNCTIONS_WORKER_RUNTIME": "dotnet",
-                "HtmlResultOutputContainer": "[variables('HtmlResultOutputContainer')]",
-                "InitialPollingDelayInMinutes": "[variables('InitialPollingDelayInMinutes')]",
-                "MaxPollingDelayInMinutes": "[variables('MaxPollingDelayInMinutes')]",
-                "JsonResultOutputContainer": "[variables('JsonResultOutputContainer')]",
-                "RetryLimit": "[variables('RetryLimit')]",
-                "StartTranscriptionServiceBusConnectionString": "[listKeys(variables('AuthRuleCT'),'2015-08-01').primaryConnectionString]",
-                "TextAnalyticsKey": "[concat('@Microsoft.KeyVault(VaultName=', variables('KeyVaultName'), ';SecretName=', variables('TextAnalyticsKeySecretName'), ')')]",
-                "TextAnalyticsRegion": "[parameters('TextAnalyticsRegion')]",
-                "UseSqlDatabase": "[variables('UseSqlDatabase')]",
-                "WEBSITE_RUN_FROM_PACKAGE": "https://mspublicstorage.blob.core.windows.net/transcription-enabled-storage/FetchTranscription.zip",
-                "CreateConsolidatedOutputFiles": "[variables('CreateConsolidatedOutputFiles')]",
-                "ConsolidatedFilesOutputContainer": "[variables('ConsolidatedFilesOutputContainer')]",
-                "CreateAudioProcessedContainer": "[variables('CreateAudioProcessedContainer')]",
-                "AudioProcessedContainer": "[variables('AudioProcessedContainer')]",
-                "PiiCategories": "[variables('PiiCategories')]",
-                "PiiMinimumPrecision": "[variables('PiiMinimumPrecision')]"
-            }
+          "properties": {
+            "APPLICATIONINSIGHTS_CONNECTION_STRING": "[reference(resourceId('Microsoft.Insights/components', variables('AppInsightsName')), '2020-02-02-preview').ConnectionString]",
+            "AddDiarization": "[parameters('AddDiarization')]",
+            "AddWordLevelTimestamps": "[parameters('AddWordLevelTimestamps')]",
+            "RedactPiiAudio": "[parameters('ProjectFrankfurt: RedactPiiAudio')]",
+            "AudioInputContainer": "[variables('AudioInputContainer')]",
+            "AzureServiceBus": "[listKeys(variables('AuthRuleRMK'),'2015-08-01').primaryConnectionString]",
+            "AzureSpeechServicesKey": "[concat('@Microsoft.KeyVault(VaultName=', variables('KeyVaultName'), ';SecretName=', variables('AzureSpeechServicesKeySecretName'), ')')]",
+            "AzureSpeechServicesRegion": "[parameters('AzureSpeechServicesRegion')]",
+            "AzureWebJobsStorage": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('StorageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value, ';EndpointSuffix=', variables('EndpointSuffix'))]",
+            "AzureWebJobsDashboard": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('StorageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value, ';EndpointSuffix=', variables('EndpointSuffix'))]",
+            "CreateHtmlResultFile": "[variables('CreateHtmlResultFile')]",
+            "DatabaseConnectionString": "[concat('@Microsoft.KeyVault(VaultName=', variables('KeyVaultName'), ';SecretName=', variables('DatabaseConnectionStringSecretName'), ')')]",
+            "ErrorFilesOutputContainer": "[variables('ErrorFilesOutputContainer')]",
+            "RedactedAudioContainer": "[variables('RedactedAudioContainer')]",
+            "ErrorReportOutputContainer": "[variables('ErrorReportOutputContainer')]",
+            "FetchTranscriptionServiceBusConnectionString": "[listKeys(variables('AuthRuleFT'),'2015-08-01').primaryConnectionString]",
+            "FUNCTIONS_EXTENSION_VERSION": "~3",
+            "FUNCTIONS_WORKER_RUNTIME": "dotnet",
+            "HtmlResultOutputContainer": "[variables('HtmlResultOutputContainer')]",
+            "InitialPollingDelayInMinutes": "[variables('InitialPollingDelayInMinutes')]",
+            "MaxPollingDelayInMinutes": "[variables('MaxPollingDelayInMinutes')]",
+            "JsonResultOutputContainer": "[variables('JsonResultOutputContainer')]",
+            "RetryLimit": "[variables('RetryLimit')]",
+            "StartTranscriptionServiceBusConnectionString": "[listKeys(variables('AuthRuleCT'),'2015-08-01').primaryConnectionString]",
+            "TextAnalyticsKey": "[concat('@Microsoft.KeyVault(VaultName=', variables('KeyVaultName'), ';SecretName=', variables('TextAnalyticsKeySecretName'), ')')]",
+            "TextAnalyticsRegion": "[variables('TextAnalyticsRegion')]",
+            "UseSqlDatabase": "[variables('UseSqlDatabase')]",
+            "WEBSITE_RUN_FROM_PACKAGE": "https://mspublicstorage.blob.core.windows.net/ingestion-client-insights/09092021.0/FetchTranscription.zip",
+            "CreateConsolidatedOutputFiles": "[variables('CreateConsolidatedOutputFiles')]",
+            "ConsolidatedFilesOutputContainer": "[variables('ConsolidatedFilesOutputContainer')]",
+            "CreateAudioProcessedContainer": "[variables('CreateAudioProcessedContainer')]",
+            "AudioProcessedContainer": "[variables('AudioProcessedContainer')]",
+            "RedactPii": "[parameters('ProjectFrankfurt: RedactPii')]",
+            "DetectCallReason": "[parameters('ProjectFrankfurt: DetectCallReason')]"
+          }
         }
     ],
     "outputs": {

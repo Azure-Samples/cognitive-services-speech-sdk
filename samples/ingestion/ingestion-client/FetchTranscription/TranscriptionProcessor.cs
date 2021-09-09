@@ -14,6 +14,7 @@ namespace FetchTranscriptionFunction
     using System.Xml;
     using Connector;
     using Connector.Enums;
+    using global::FetchTranscription;
     using Microsoft.Azure.ServiceBus;
     using Microsoft.Extensions.Logging;
     using Microsoft.WindowsAzure.Storage;
@@ -190,6 +191,10 @@ namespace FetchTranscriptionFunction
 
             var textAnalytics = textAnalyticsInfoProvided ? new TextAnalytics(serviceBusMessage.Locale, textAnalyticsKey, textAnalyticsRegion, log) : null;
 
+            var insights = (FetchTranscriptionEnvironmentVariables.RedactPii || FetchTranscriptionEnvironmentVariables.DetectCallReason) ?
+                new Insights(subscriptionKey, FetchTranscriptionEnvironmentVariables.AzureSpeechServicesRegion, log) :
+                null;
+
             var generalErrorsStringBuilder = new StringBuilder();
 
             foreach (var resultFile in resultFiles)
@@ -211,23 +216,43 @@ namespace FetchTranscriptionFunction
 
                 if (transcriptionResult.RecognizedPhrases != null && transcriptionResult.RecognizedPhrases.All(phrase => phrase.RecognitionStatus.Equals("Success", StringComparison.Ordinal)))
                 {
-                    var textAnalyticsErrors = new List<string>();
+                    var additionalErrors = new List<string>();
+
+                    if (FetchTranscriptionEnvironmentVariables.RedactPii || FetchTranscriptionEnvironmentVariables.DetectCallReason)
+                    {
+                        foreach (var phrase in transcriptionResult.RecognizedPhrases)
+                        {
+                            phrase.Speaker = Math.Max(0, phrase.Speaker - 1); // setting speaker id-=1 since they start at 1, not 0
+                        }
+                    }
+
+                    if (FetchTranscriptionEnvironmentVariables.RedactPii)
+                    {
+                        var errors = await insights.AddRedactionToTranscriptAsync(transcriptionResult).ConfigureAwait(false);
+                        additionalErrors.AddRange(errors);
+                    }
+
+                    if (FetchTranscriptionEnvironmentVariables.DetectCallReason)
+                    {
+                        var errors = await insights.AddCallReasonToTranscriptAsync(transcriptionResult).ConfigureAwait(false);
+                        additionalErrors.AddRange(errors);
+                    }
 
                     if (FetchTranscriptionEnvironmentVariables.SentimentAnalysisSetting != SentimentAnalysisSetting.None)
                     {
                         var sentimentErrors = await textAnalytics.AddSentimentToTranscriptAsync(transcriptionResult, FetchTranscriptionEnvironmentVariables.SentimentAnalysisSetting).ConfigureAwait(false);
-                        textAnalyticsErrors.AddRange(sentimentErrors);
+                        additionalErrors.AddRange(sentimentErrors);
                     }
 
                     if (FetchTranscriptionEnvironmentVariables.PiiRedactionSetting != PiiRedactionSetting.None)
                     {
                         var piiRedactionErrors = await textAnalytics.RedactPiiAsync(transcriptionResult, FetchTranscriptionEnvironmentVariables.PiiRedactionSetting).ConfigureAwait(false);
-                        textAnalyticsErrors.AddRange(piiRedactionErrors);
+                        additionalErrors.AddRange(piiRedactionErrors);
                     }
 
-                    if (textAnalyticsErrors.Any())
+                    if (additionalErrors.Any())
                     {
-                        var distinctErrors = textAnalyticsErrors.Distinct();
+                        var distinctErrors = additionalErrors.Distinct();
                         var errorMessage = $"File {(string.IsNullOrEmpty(fileName) ? "unknown" : fileName)}:\n{string.Join('\n', distinctErrors)}";
 
                         generalErrorsStringBuilder.AppendLine(errorMessage);
@@ -289,6 +314,24 @@ namespace FetchTranscriptionFunction
                         string.IsNullOrEmpty(fileName) ? jobName : fileName,
                         (float)approximatedCost,
                         transcriptionResult).ConfigureAwait(false);
+                }
+
+                if (
+                    FetchTranscriptionEnvironmentVariables.RedactPii &&
+                    FetchTranscriptionEnvironmentVariables.RedactPiiAudio &&
+                    FetchTranscriptionEnvironmentVariables.AddWordLevelTimestamps)
+                {
+                    var audioBytes = await StorageConnectorInstance.DownloadFileFromContainer(
+                        FetchTranscriptionEnvironmentVariables.AudioInputContainer,
+                        fileName).ConfigureAwait(false);
+
+                    var redactedAudioBytes = AudioUtilities.RedactAudio(audioBytes, transcriptionResult.RedactionResponse, FetchTranscriptionEnvironmentVariables.AddDiarization);
+
+                    await StorageConnectorInstance.WriteBinaryFileToBlobAsync(
+                        redactedAudioBytes,
+                        FetchTranscriptionEnvironmentVariables.RedactedAudioContainer,
+                        fileName,
+                        log).ConfigureAwait(false);
                 }
 
                 if (FetchTranscriptionEnvironmentVariables.CreateAudioProcessedContainer)

@@ -146,6 +146,16 @@ namespace Connector
             await blockBlobClient.UploadAsync(stream, overwrite: true).ConfigureAwait(false);
         }
 
+        public async Task WriteBinaryFileToBlobAsync(byte[] content, string containerName, string fileName, ILogger log)
+        {
+            log.LogInformation($"Writing binary file {fileName} to container {containerName}.");
+            var container = BlobServiceClient.GetBlobContainerClient(containerName);
+            var blockBlobClient = container.GetBlobClient(fileName);
+
+            using var stream = new MemoryStream(content);
+            await blockBlobClient.UploadAsync(stream, overwrite: true).ConfigureAwait(false);
+        }
+
         public async Task MoveFileAsync(string inputContainerName,  string inputFileName, string outputContainerName, string outputFileName, bool keepSource, ILogger log)
         {
             log.LogInformation($"Start moving file {inputFileName} from container {inputContainerName} to {outputFileName} in container {outputContainerName}.");

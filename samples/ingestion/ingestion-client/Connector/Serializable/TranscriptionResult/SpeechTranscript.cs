@@ -7,6 +7,7 @@ namespace Connector
 {
     using System.Collections.Generic;
     using Newtonsoft.Json;
+    using Newtonsoft.Json.Linq;
 
     public class SpeechTranscript
     {
@@ -37,5 +38,21 @@ namespace Connector
 
         [JsonProperty("recognizedPhrases")]
         public IEnumerable<RecognizedPhrase> RecognizedPhrases { get; }
+
+        [JsonProperty("callReasonResponse")]
+        public JObject CallReasonResponse { get; private set; }
+
+        [JsonProperty("redactionResponse")]
+        public JObject RedactionResponse { get; private set; }
+
+        public void AddCallReasonResponse(JObject callReasonResponse)
+        {
+            this.CallReasonResponse = callReasonResponse;
+        }
+
+        public void AddRedactionResponse(JObject redactionResponse)
+        {
+            this.RedactionResponse = redactionResponse;
+        }
     }
 }

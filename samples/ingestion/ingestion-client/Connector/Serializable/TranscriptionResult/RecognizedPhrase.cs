@@ -29,7 +29,7 @@ namespace Connector
         public int Channel { get; }
 
         [JsonProperty("speaker")]
-        public int Speaker { get; }
+        public int Speaker { get; set; }
 
         [JsonProperty("offset")]
         public string Offset { get; }

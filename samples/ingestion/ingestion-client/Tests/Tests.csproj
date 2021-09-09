@@ -37,6 +37,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Connector\Connector.csproj" />
     <ProjectReference Include="..\RealtimeTranscription\RealtimeTranscription.csproj" />
+    <ProjectReference Include="..\FetchTranscription\FetchTranscription.csproj" />
   </ItemGroup>
 
   <ItemGroup>
