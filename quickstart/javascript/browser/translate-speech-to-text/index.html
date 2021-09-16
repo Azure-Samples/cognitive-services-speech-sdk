@@ -117,9 +117,11 @@
         recognizer.recognizeOnceAsync(
           function (result) {
             startRecognizeOnceAsyncButton.disabled = false;
-            let translation = result.translations.get(language);
-            window.console.log(translation);
-            phraseDiv.innerHTML += translation;
+            if (result.reason === SpeechSDK.ResultReason.TranslatedSpeech) {
+              let translation = result.translations.get(language);
+              window.console.log(translation);
+              phraseDiv.innerHTML += translation;
+            }
 
             recognizer.close();
             recognizer = undefined;
