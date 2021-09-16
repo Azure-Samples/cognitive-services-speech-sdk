@@ -153,10 +153,12 @@
         recognizer.recognizeOnceAsync(
           function (result) {
             startRecognizeOnceAsyncButton.disabled = false;
-            for (var key in languageKeys) {
-              let translation = result.translations.get(key);
-              window.console.log(key + ": " + translation);
-              languageKeys[key].innerHTML += translation;
+            if (result.reason === SpeechSDK.ResultReason.TranslatedSpeech) {
+              for (var key in languageKeys) {
+                let translation = result.translations.get(key);
+                window.console.log(key + ": " + translation);
+                languageKeys[key].innerHTML += translation;
+              }
             }
 
             recognizer.close();
