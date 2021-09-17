@@ -188,7 +188,7 @@ namespace FetchTranscriptionFunction
                 && !string.IsNullOrEmpty(textAnalyticsRegion)
                 && !textAnalyticsRegion.Equals("none", StringComparison.OrdinalIgnoreCase);
 
-            var textAnalytics = textAnalyticsInfoProvided ? new TextAnalytics(serviceBusMessage.Locale, textAnalyticsKey, textAnalyticsRegion, log) : null;
+            var textAnalytics = textAnalyticsInfoProvided ? new TextAnalyticsProvider(serviceBusMessage.Locale, textAnalyticsKey, textAnalyticsRegion, log) : null;
 
             var generalErrorsStringBuilder = new StringBuilder();
 
@@ -213,17 +213,18 @@ namespace FetchTranscriptionFunction
                 {
                     var textAnalyticsErrors = new List<string>();
 
-                    if (FetchTranscriptionEnvironmentVariables.SentimentAnalysisSetting != SentimentAnalysisSetting.None)
-                    {
-                        var sentimentErrors = await textAnalytics.AddSentimentToTranscriptAsync(transcriptionResult, FetchTranscriptionEnvironmentVariables.SentimentAnalysisSetting).ConfigureAwait(false);
-                        textAnalyticsErrors.AddRange(sentimentErrors);
-                    }
+                    var utteranceLevelErrors = await textAnalytics.AddUtteranceLevelEntitiesAsync(
+                        transcriptionResult,
+                        FetchTranscriptionEnvironmentVariables.SentimentAnalysisSetting,
+                        FetchTranscriptionEnvironmentVariables.PiiRedactionSetting).ConfigureAwait(false);
 
-                    if (FetchTranscriptionEnvironmentVariables.PiiRedactionSetting != PiiRedactionSetting.None)
-                    {
-                        var piiRedactionErrors = await textAnalytics.RedactPiiAsync(transcriptionResult, FetchTranscriptionEnvironmentVariables.PiiRedactionSetting).ConfigureAwait(false);
-                        textAnalyticsErrors.AddRange(piiRedactionErrors);
-                    }
+                    textAnalyticsErrors.AddRange(utteranceLevelErrors);
+
+                    var audioLevelErrors = await textAnalytics.AddAudioLevelEntitiesAsync(
+                        transcriptionResult,
+                        FetchTranscriptionEnvironmentVariables.SentimentAnalysisSetting).ConfigureAwait(false);
+
+                    textAnalyticsErrors.AddRange(audioLevelErrors);
 
                     if (textAnalyticsErrors.Any())
                     {
