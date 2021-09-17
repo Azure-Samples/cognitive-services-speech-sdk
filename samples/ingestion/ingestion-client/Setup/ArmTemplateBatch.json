@@ -257,7 +257,6 @@
         "TextAnalyticsKeySecretName": "TextAnalyticsKey",
         "DatabaseConnectionStringSecretName": "DatabaseConnectionString",
         "PiiCategories": "",
-        "PiiMinimumPrecision": "",
         "IsAzureGovDeployment": "[or(equals(parameters('AzureSpeechServicesRegion'),'usgovarizona'), equals(parameters('AzureSpeechServicesRegion'),'usgovvirginia'))]",
         "EndpointSuffix": "[if(variables('IsAzureGovDeployment'),'core.usgovcloudapi.net','core.windows.net')]"
     },
@@ -934,8 +933,7 @@
                 "ConsolidatedFilesOutputContainer": "[variables('ConsolidatedFilesOutputContainer')]",
                 "CreateAudioProcessedContainer": "[variables('CreateAudioProcessedContainer')]",
                 "AudioProcessedContainer": "[variables('AudioProcessedContainer')]",
-                "PiiCategories": "[variables('PiiCategories')]",
-                "PiiMinimumPrecision": "[variables('PiiMinimumPrecision')]"
+                "PiiCategories": "[variables('PiiCategories')]"
             }
         }
     ],
