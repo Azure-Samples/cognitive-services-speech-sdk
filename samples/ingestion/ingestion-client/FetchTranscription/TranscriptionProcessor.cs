@@ -12,6 +12,7 @@ namespace FetchTranscriptionFunction
     using System.Text;
     using System.Threading.Tasks;
     using System.Xml;
+    using Azure;
     using Connector;
     using Connector.Enums;
     using Microsoft.Azure.ServiceBus;
@@ -79,6 +80,10 @@ namespace FetchTranscriptionFunction
                 else if (e is WebException webException && webException.Response != null)
                 {
                     httpStatusCode = ((HttpWebResponse)webException.Response).StatusCode;
+                }
+                else if (e is RequestFailedException requestFailedException && requestFailedException.Status != 0)
+                {
+                    httpStatusCode = (HttpStatusCode)requestFailedException.Status;
                 }
 
                 if (httpStatusCode.HasValue && httpStatusCode.Value.IsRetryableStatus())
