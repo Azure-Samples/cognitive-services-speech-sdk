@@ -614,7 +614,9 @@
             "location": "[resourceGroup().location]",
             "dependsOn": [
                 "[resourceId('Microsoft.ServiceBus/namespaces/queues', variables('ServiceBusName'), 'fetch_transcription_queue')]",
-                "[resourceId('Microsoft.ServiceBus/namespaces', variables('ServiceBusName'))]"
+                "[resourceId('Microsoft.ServiceBus/namespaces', variables('ServiceBusName'))]",
+                "[variables('AuthRuleRMK')]",
+                "[variables('AuthRuleCT')]"
             ],
             "properties": {
                 "rights": [
@@ -630,7 +632,8 @@
             "location": "[resourceGroup().location]",
             "dependsOn": [
                 "[resourceId('Microsoft.ServiceBus/namespaces/queues', variables('ServiceBusName'), 'start_transcription_queue')]",
-                "[resourceId('Microsoft.ServiceBus/namespaces', variables('ServiceBusName'))]"
+                "[resourceId('Microsoft.ServiceBus/namespaces', variables('ServiceBusName'))]",
+                "[variables('AuthRuleRMK')]"
             ],
             "properties": {
                 "rights": [
