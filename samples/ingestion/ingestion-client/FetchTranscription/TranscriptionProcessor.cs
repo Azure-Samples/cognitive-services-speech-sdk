@@ -19,6 +19,7 @@ namespace FetchTranscriptionFunction
     using Microsoft.Extensions.Logging;
     using Microsoft.WindowsAzure.Storage;
     using Newtonsoft.Json;
+    using TextAnalytics;
 
     public static class TranscriptionProcessor
     {
@@ -220,14 +221,14 @@ namespace FetchTranscriptionFunction
 
                     var utteranceLevelErrors = await textAnalytics.AddUtteranceLevelEntitiesAsync(
                         transcriptionResult,
-                        FetchTranscriptionEnvironmentVariables.SentimentAnalysisSetting,
-                        FetchTranscriptionEnvironmentVariables.PiiRedactionSetting).ConfigureAwait(false);
+                        FetchTranscriptionEnvironmentVariables.SentimentAnalysisSetting).ConfigureAwait(false);
 
                     textAnalyticsErrors.AddRange(utteranceLevelErrors);
 
                     var audioLevelErrors = await textAnalytics.AddAudioLevelEntitiesAsync(
                         transcriptionResult,
-                        FetchTranscriptionEnvironmentVariables.SentimentAnalysisSetting).ConfigureAwait(false);
+                        FetchTranscriptionEnvironmentVariables.SentimentAnalysisSetting,
+                        FetchTranscriptionEnvironmentVariables.PiiRedactionSetting).ConfigureAwait(false);
 
                     textAnalyticsErrors.AddRange(audioLevelErrors);
 
@@ -377,7 +378,7 @@ namespace FetchTranscriptionFunction
 
             if (message.FailedExecutionCounter <= FetchTranscriptionEnvironmentVariables.RetryLimit || statusCode == HttpStatusCode.TooManyRequests)
             {
-                log.LogInformation($"Retrying..");
+                log.LogInformation("Retrying..");
                 await ServiceBusUtilities.SendServiceBusMessageAsync(FetchQueueClientInstance, message.CreateMessageString(), log, messageDelayTime).ConfigureAwait(false);
             }
             else

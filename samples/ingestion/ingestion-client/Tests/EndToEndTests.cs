@@ -19,6 +19,7 @@ namespace Tests
     using Moq;
     using Newtonsoft.Json;
     using RealtimeTranscription;
+    using TextAnalytics;
 
     [TestClass]
     public class EndToEndTests
@@ -70,8 +71,8 @@ namespace Tests
                 TestProperties["SpeechServicesRegion"].ToString(),
                 Logger.Object);
 
-            await textAnalytics.AddAudioLevelEntitiesAsync(speechTranscript, SentimentAnalysisSetting.AudioLevel).ConfigureAwait(false);
-            await textAnalytics.AddUtteranceLevelEntitiesAsync(speechTranscript, SentimentAnalysisSetting.UtteranceLevel, PiiRedactionSetting.UtteranceLevel).ConfigureAwait(false);
+            await textAnalytics.AddAudioLevelEntitiesAsync(speechTranscript, SentimentAnalysisSetting.AudioLevel, PiiRedactionSetting.UtteranceAndAudioLevel).ConfigureAwait(false);
+            await textAnalytics.AddUtteranceLevelEntitiesAsync(speechTranscript, SentimentAnalysisSetting.UtteranceLevel).ConfigureAwait(false);
 
             Assert.IsNotNull(speechTranscript.CombinedRecognizedPhrases.First().Sentiment);
             Assert.IsNotNull(speechTranscript.RecognizedPhrases.First().NBest.First().Sentiment);

@@ -191,7 +191,7 @@
             "type": "String",
             "allowedValues": [
                 "None",
-                "UtteranceLevel"
+                "UtteranceAndAudioLevel"
             ],
             "metadata": {
                 "description": "A value indicating whether personally identifiable information (PII) redaction is requested. Will only be performed if a Text Analytics Key and Region is provided."
@@ -554,7 +554,7 @@
                 "[resourceId('Microsoft.ServiceBus/namespaces', variables('ServiceBusName'))]"
             ],
             "properties": {
-                "lockDuration": "PT1M",
+                "lockDuration": "PT5M",
                 "maxSizeInMegabytes": 5120,
                 "requiresDuplicateDetection": false,
                 "requiresSession": false,
