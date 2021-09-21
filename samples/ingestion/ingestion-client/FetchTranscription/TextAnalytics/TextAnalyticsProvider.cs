@@ -157,10 +157,9 @@ namespace TextAnalytics
                     };
                 }
 
-                if (piiRedactionSetting == PiiRedactionSetting.UtteranceAndAudioLevel)
+                var piiResult = piiResults.Where(document => document.Id.Equals($"{channel}", StringComparison.OrdinalIgnoreCase)).SingleOrDefault();
+                if (piiResult != null)
                 {
-                    var piiResult = piiResults.Where(document => document.Id.Equals($"{channel}", StringComparison.OrdinalIgnoreCase)).SingleOrDefault();
-
                     var redactedText = piiResult.Entities.RedactedText;
 
                     combinedRecognizedPhrase.Display = redactedText;
@@ -202,6 +201,11 @@ namespace TextAnalytics
             var errors = new List<string>();
             var sentimentResults = new List<AnalyzeSentimentResult>();
             var piiResults = new List<RecognizePiiEntitiesResult>();
+
+            if (!documents.Any())
+            {
+                return (sentimentResults, piiResults, errors);
+            }
 
             var chunkedDocuments = new List<List<TextDocumentInput>>();
             var totalDocuments = documents.Count();
