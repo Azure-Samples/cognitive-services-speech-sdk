@@ -51,7 +51,7 @@ namespace TextAnalytics
                 return errors;
             }
 
-            var documents = speechTranscript.RecognizedPhrases.Where(r => r.NBest.FirstOrDefault() != null).Select(r => new TextDocumentInput($"{r.Channel}_{r.Offset}", r.NBest.First().Display) { Language = Locale });
+            var documents = speechTranscript.RecognizedPhrases.Where(r => r.NBest.FirstOrDefault() != null && !string.IsNullOrEmpty(r.NBest.First().Display)).Select(r => new TextDocumentInput($"{r.Channel}_{r.Offset}", r.NBest.First().Display) { Language = Locale });
 
             var actions = new TextAnalyticsActions
             {
@@ -68,13 +68,14 @@ namespace TextAnalytics
                 var firstNBest = recognizedPhrase.NBest.FirstOrDefault();
 
                 var sentimentResult = sentimentResults.Where(s => s.Id == index).FirstOrDefault();
-                if (sentimentResult != null && firstNBest != null)
+
+                if (firstNBest != null)
                 {
                     firstNBest.Sentiment = new Sentiment()
                     {
-                        Negative = sentimentResult.DocumentSentiment.ConfidenceScores.Negative,
-                        Positive = sentimentResult.DocumentSentiment.ConfidenceScores.Positive,
-                        Neutral = sentimentResult.DocumentSentiment.ConfidenceScores.Neutral,
+                        Negative = sentimentResult?.DocumentSentiment.ConfidenceScores.Negative ?? 0.0,
+                        Positive = sentimentResult?.DocumentSentiment.ConfidenceScores.Positive ?? 0.0,
+                        Neutral = sentimentResult?.DocumentSentiment.ConfidenceScores.Neutral ?? 0.0,
                     };
                 }
             }
