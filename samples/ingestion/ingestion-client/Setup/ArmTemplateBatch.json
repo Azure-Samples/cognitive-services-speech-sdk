@@ -191,7 +191,7 @@
             "type": "String",
             "allowedValues": [
                 "None",
-                "UtteranceLevel"
+                "UtteranceAndAudioLevel"
             ],
             "metadata": {
                 "description": "A value indicating whether personally identifiable information (PII) redaction is requested. Will only be performed if a Text Analytics Key and Region is provided."
@@ -257,7 +257,6 @@
         "TextAnalyticsKeySecretName": "TextAnalyticsKey",
         "DatabaseConnectionStringSecretName": "DatabaseConnectionString",
         "PiiCategories": "",
-        "PiiMinimumPrecision": "",
         "IsAzureGovDeployment": "[or(equals(parameters('AzureSpeechServicesRegion'),'usgovarizona'), equals(parameters('AzureSpeechServicesRegion'),'usgovvirginia'))]",
         "EndpointSuffix": "[if(variables('IsAzureGovDeployment'),'core.usgovcloudapi.net','core.windows.net')]"
     },
@@ -555,7 +554,7 @@
                 "[resourceId('Microsoft.ServiceBus/namespaces', variables('ServiceBusName'))]"
             ],
             "properties": {
-                "lockDuration": "PT1M",
+                "lockDuration": "PT5M",
                 "maxSizeInMegabytes": 5120,
                 "requiresDuplicateDetection": false,
                 "requiresSession": false,
@@ -937,8 +936,7 @@
                 "ConsolidatedFilesOutputContainer": "[variables('ConsolidatedFilesOutputContainer')]",
                 "CreateAudioProcessedContainer": "[variables('CreateAudioProcessedContainer')]",
                 "AudioProcessedContainer": "[variables('AudioProcessedContainer')]",
-                "PiiCategories": "[variables('PiiCategories')]",
-                "PiiMinimumPrecision": "[variables('PiiMinimumPrecision')]"
+                "PiiCategories": "[variables('PiiCategories')]"
             }
         }
     ],

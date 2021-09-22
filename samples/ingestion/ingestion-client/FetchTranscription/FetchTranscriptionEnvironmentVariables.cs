@@ -52,8 +52,6 @@ namespace FetchTranscriptionFunction
 
         public static readonly string PiiCategories = Environment.GetEnvironmentVariable(nameof(PiiCategories), EnvironmentVariableTarget.Process);
 
-        public static readonly string PiiMinimumPrecision = Environment.GetEnvironmentVariable(nameof(PiiMinimumPrecision), EnvironmentVariableTarget.Process);
-
         public static readonly bool CreateConsolidatedOutputFiles = bool.TryParse(Environment.GetEnvironmentVariable(nameof(CreateConsolidatedOutputFiles), EnvironmentVariableTarget.Process), out CreateConsolidatedOutputFiles) && CreateConsolidatedOutputFiles;
 
         public static readonly string ConsolidatedFilesOutputContainer = Environment.GetEnvironmentVariable(nameof(ConsolidatedFilesOutputContainer), EnvironmentVariableTarget.Process);

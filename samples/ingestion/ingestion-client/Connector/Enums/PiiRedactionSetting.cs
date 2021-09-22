@@ -8,6 +8,6 @@ namespace Connector.Enums
     public enum PiiRedactionSetting
     {
         None,
-        UtteranceLevel
+        UtteranceAndAudioLevel
     }
 }

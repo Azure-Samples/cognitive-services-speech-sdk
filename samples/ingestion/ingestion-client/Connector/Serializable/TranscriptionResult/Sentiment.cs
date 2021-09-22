@@ -10,12 +10,12 @@ namespace Connector
     public class Sentiment
     {
         [JsonProperty("negative")]
-        public float Negative { get; set; }
+        public double Negative { get; set; }
 
         [JsonProperty("neutral")]
-        public float Neutral { get; set; }
+        public double Neutral { get; set; }
 
         [JsonProperty("positive")]
-        public float Positive { get; set; }
+        public double Positive { get; set; }
     }
 }
