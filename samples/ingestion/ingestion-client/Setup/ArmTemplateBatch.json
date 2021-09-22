@@ -191,7 +191,7 @@
             "type": "String",
             "allowedValues": [
                 "None",
-                "UtteranceLevel"
+                "UtteranceAndAudioLevel"
             ],
             "metadata": {
                 "description": "A value indicating whether personally identifiable information (PII) redaction is requested. Will only be performed if a Text Analytics Key and Region is provided."
@@ -257,7 +257,6 @@
         "TextAnalyticsKeySecretName": "TextAnalyticsKey",
         "DatabaseConnectionStringSecretName": "DatabaseConnectionString",
         "PiiCategories": "",
-        "PiiMinimumPrecision": "",
         "IsAzureGovDeployment": "[or(equals(parameters('AzureSpeechServicesRegion'),'usgovarizona'), equals(parameters('AzureSpeechServicesRegion'),'usgovvirginia'))]",
         "EndpointSuffix": "[if(variables('IsAzureGovDeployment'),'core.usgovcloudapi.net','core.windows.net')]"
     },
@@ -433,7 +432,7 @@
                                 "storageKeyType": "SharedAccessKey",
                                 "administratorLogin": "[parameters('SqlAdministratorLogin')]",
                                 "administratorLoginPassword": "[parameters('SqlAdministratorLoginPassword')]",
-                                "storageUri": "https://mspublicstorage.blob.core.windows.net/transcription-enabled-storage/transcription_accelerator_db.bacpac"
+                                "storageUri": "https://mspublicstorage.blob.core.windows.net/ingestion-client/IngestionClient.bacpac"
                             }
                         }
                     ]
@@ -555,7 +554,7 @@
                 "[resourceId('Microsoft.ServiceBus/namespaces', variables('ServiceBusName'))]"
             ],
             "properties": {
-                "lockDuration": "PT1M",
+                "lockDuration": "PT5M",
                 "maxSizeInMegabytes": 5120,
                 "requiresDuplicateDetection": false,
                 "requiresSession": false,
@@ -614,7 +613,9 @@
             "location": "[resourceGroup().location]",
             "dependsOn": [
                 "[resourceId('Microsoft.ServiceBus/namespaces/queues', variables('ServiceBusName'), 'fetch_transcription_queue')]",
-                "[resourceId('Microsoft.ServiceBus/namespaces', variables('ServiceBusName'))]"
+                "[resourceId('Microsoft.ServiceBus/namespaces', variables('ServiceBusName'))]",
+                "[variables('AuthRuleRMK')]",
+                "[variables('AuthRuleCT')]"
             ],
             "properties": {
                 "rights": [
@@ -630,7 +631,8 @@
             "location": "[resourceGroup().location]",
             "dependsOn": [
                 "[resourceId('Microsoft.ServiceBus/namespaces/queues', variables('ServiceBusName'), 'start_transcription_queue')]",
-                "[resourceId('Microsoft.ServiceBus/namespaces', variables('ServiceBusName'))]"
+                "[resourceId('Microsoft.ServiceBus/namespaces', variables('ServiceBusName'))]",
+                "[variables('AuthRuleRMK')]"
             ],
             "properties": {
                 "rights": [
@@ -865,7 +867,7 @@
                 "PunctuationMode": "[parameters('PunctuationMode')]",
                 "RetryLimit": "[variables('RetryLimit')]",
                 "StartTranscriptionServiceBusConnectionString": "[listKeys(variables('AuthRuleCT'),'2015-08-01').primaryConnectionString]",
-                "WEBSITE_RUN_FROM_PACKAGE": "[if(variables('timerBasedExecution'),'https://mspublicstorage.blob.core.windows.net/transcription-enabled-storage/StartTranscriptionByTimer.zip','https://mspublicstorage.blob.core.windows.net/transcription-enabled-storage/StartTranscriptionByServiceBus.zip')]"
+                "WEBSITE_RUN_FROM_PACKAGE": "[if(variables('timerBasedExecution'),'https://mspublicstorage.blob.core.windows.net/ingestion-client/StartTranscriptionByTimer.zip','https://mspublicstorage.blob.core.windows.net/ingestion-client/StartTranscriptionByServiceBus.zip')]"
             }
         },
         {
@@ -929,13 +931,12 @@
                 "TextAnalyticsKey": "[concat('@Microsoft.KeyVault(VaultName=', variables('KeyVaultName'), ';SecretName=', variables('TextAnalyticsKeySecretName'), ')')]",
                 "TextAnalyticsRegion": "[parameters('TextAnalyticsRegion')]",
                 "UseSqlDatabase": "[variables('UseSqlDatabase')]",
-                "WEBSITE_RUN_FROM_PACKAGE": "https://mspublicstorage.blob.core.windows.net/transcription-enabled-storage/FetchTranscription.zip",
+                "WEBSITE_RUN_FROM_PACKAGE": "https://mspublicstorage.blob.core.windows.net/ingestion-client/FetchTranscription.zip",
                 "CreateConsolidatedOutputFiles": "[variables('CreateConsolidatedOutputFiles')]",
                 "ConsolidatedFilesOutputContainer": "[variables('ConsolidatedFilesOutputContainer')]",
                 "CreateAudioProcessedContainer": "[variables('CreateAudioProcessedContainer')]",
                 "AudioProcessedContainer": "[variables('AudioProcessedContainer')]",
-                "PiiCategories": "[variables('PiiCategories')]",
-                "PiiMinimumPrecision": "[variables('PiiMinimumPrecision')]"
+                "PiiCategories": "[variables('PiiCategories')]"
             }
         }
     ],
