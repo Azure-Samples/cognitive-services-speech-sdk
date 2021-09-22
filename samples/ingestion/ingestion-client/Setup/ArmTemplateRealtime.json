@@ -574,7 +574,7 @@
                 "ProfanityFilterMode": "[parameters('ProfanityFilterMode')]",
                 "RetryLimit": "[variables('RetryLimit')]",
                 "StartTranscriptionServiceBusConnectionString": "[listKeys(variables('AuthRuleCT'),'2015-08-01').primaryConnectionString]",
-                "WEBSITE_RUN_FROM_PACKAGE": "https://mspublicstorage.blob.core.windows.net/transcription-enabled-storage/RealtimeTranscription.zip"
+                "WEBSITE_RUN_FROM_PACKAGE": "https://mspublicstorage.blob.core.windows.net/ingestion-client/RealtimeTranscription.zip"
             }
         }
     ],

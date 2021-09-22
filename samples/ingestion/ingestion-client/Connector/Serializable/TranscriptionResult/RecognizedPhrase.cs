@@ -10,7 +10,7 @@ namespace Connector
 
     public class RecognizedPhrase
     {
-        public RecognizedPhrase(string recognitionStatus, int channel, int speaker, string offset, string duration, double offsetInTicks, double durationInTicks, IEnumerable<NBest> nBest)
+        public RecognizedPhrase(string recognitionStatus, int channel, int speaker, string offset, string duration, long offsetInTicks, long durationInTicks, IEnumerable<NBest> nBest)
         {
             RecognitionStatus = recognitionStatus;
             Channel = channel;
@@ -38,10 +38,10 @@ namespace Connector
         public string Duration { get; }
 
         [JsonProperty("offsetInTicks")]
-        public double OffsetInTicks { get; }
+        public long OffsetInTicks { get; }
 
         [JsonProperty("durationInTicks")]
-        public double DurationInTicks { get; }
+        public long DurationInTicks { get; }
 
         [JsonProperty("nBest")]
         public IEnumerable<NBest> NBest { get; set; }
