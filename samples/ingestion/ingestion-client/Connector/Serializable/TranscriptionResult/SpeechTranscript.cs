@@ -10,11 +10,11 @@ namespace Connector
 
     public class SpeechTranscript
     {
-        public SpeechTranscript(string source, string timestamp, long durationTicks, string duration, IEnumerable<CombinedRecognizedPhrase> combinedRecognizedPhrases, IEnumerable<RecognizedPhrase> recognizedPhrases)
+        public SpeechTranscript(string source, string timestamp, long durationInTicks, string duration, IEnumerable<CombinedRecognizedPhrase> combinedRecognizedPhrases, IEnumerable<RecognizedPhrase> recognizedPhrases)
         {
             Source = source;
             Timestamp = timestamp;
-            DurationTicks = durationTicks;
+            DurationInTicks = durationInTicks;
             Duration = duration;
             CombinedRecognizedPhrases = combinedRecognizedPhrases;
             RecognizedPhrases = recognizedPhrases;
@@ -26,8 +26,8 @@ namespace Connector
         [JsonProperty("timeStamp")]
         public string Timestamp { get; }
 
-        [JsonProperty("durationTicks")]
-        public long DurationTicks { get; }
+        [JsonProperty("durationInTicks")]
+        public long DurationInTicks { get; }
 
         [JsonProperty("duration")]
         public string Duration { get; }
