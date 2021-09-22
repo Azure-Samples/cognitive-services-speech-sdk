@@ -432,7 +432,7 @@
                                 "storageKeyType": "SharedAccessKey",
                                 "administratorLogin": "[parameters('SqlAdministratorLogin')]",
                                 "administratorLoginPassword": "[parameters('SqlAdministratorLoginPassword')]",
-                                "storageUri": "https://mspublicstorage.blob.core.windows.net/transcription-enabled-storage/transcription_accelerator_db.bacpac"
+                                "storageUri": "https://mspublicstorage.blob.core.windows.net/ingestion-client/IngestionClient.bacpac"
                             }
                         }
                     ]
@@ -867,7 +867,7 @@
                 "PunctuationMode": "[parameters('PunctuationMode')]",
                 "RetryLimit": "[variables('RetryLimit')]",
                 "StartTranscriptionServiceBusConnectionString": "[listKeys(variables('AuthRuleCT'),'2015-08-01').primaryConnectionString]",
-                "WEBSITE_RUN_FROM_PACKAGE": "[if(variables('timerBasedExecution'),'https://mspublicstorage.blob.core.windows.net/transcription-enabled-storage/StartTranscriptionByTimer.zip','https://mspublicstorage.blob.core.windows.net/transcription-enabled-storage/StartTranscriptionByServiceBus.zip')]"
+                "WEBSITE_RUN_FROM_PACKAGE": "[if(variables('timerBasedExecution'),'https://mspublicstorage.blob.core.windows.net/ingestion-client/StartTranscriptionByTimer.zip','https://mspublicstorage.blob.core.windows.net/ingestion-client/StartTranscriptionByServiceBus.zip')]"
             }
         },
         {
@@ -931,7 +931,7 @@
                 "TextAnalyticsKey": "[concat('@Microsoft.KeyVault(VaultName=', variables('KeyVaultName'), ';SecretName=', variables('TextAnalyticsKeySecretName'), ')')]",
                 "TextAnalyticsRegion": "[parameters('TextAnalyticsRegion')]",
                 "UseSqlDatabase": "[variables('UseSqlDatabase')]",
-                "WEBSITE_RUN_FROM_PACKAGE": "https://mspublicstorage.blob.core.windows.net/transcription-enabled-storage/FetchTranscription.zip",
+                "WEBSITE_RUN_FROM_PACKAGE": "https://mspublicstorage.blob.core.windows.net/ingestion-client/FetchTranscription.zip",
                 "CreateConsolidatedOutputFiles": "[variables('CreateConsolidatedOutputFiles')]",
                 "ConsolidatedFilesOutputContainer": "[variables('ConsolidatedFilesOutputContainer')]",
                 "CreateAudioProcessedContainer": "[variables('CreateAudioProcessedContainer')]",
