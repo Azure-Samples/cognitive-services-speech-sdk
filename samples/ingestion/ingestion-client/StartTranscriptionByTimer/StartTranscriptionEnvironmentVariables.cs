@@ -33,7 +33,7 @@ namespace StartTranscriptionByTimer
 
         public static readonly string AzureSpeechServicesKey = Environment.GetEnvironmentVariable(nameof(AzureSpeechServicesKey), EnvironmentVariableTarget.Process);
 
-        public static readonly string AzureSpeechServicesRegion = Environment.GetEnvironmentVariable(nameof(AzureSpeechServicesRegion), EnvironmentVariableTarget.Process);
+        public static readonly string AzureSpeechServicesEndpointUri = Environment.GetEnvironmentVariable(nameof(AzureSpeechServicesEndpointUri), EnvironmentVariableTarget.Process);
 
         public static readonly string AzureWebJobsStorage = Environment.GetEnvironmentVariable(nameof(AzureWebJobsStorage), EnvironmentVariableTarget.Process);
 

@@ -215,7 +215,7 @@ namespace FetchTranscriptionFunction
 
                 var fileName = StorageConnector.GetFileNameFromUri(new Uri(transcriptionResult.Source));
 
-                if (transcriptionResult.RecognizedPhrases != null && transcriptionResult.RecognizedPhrases.All(phrase => phrase.RecognitionStatus.Equals("Success", StringComparison.Ordinal)))
+                if (textAnalytics != null && transcriptionResult.RecognizedPhrases != null && transcriptionResult.RecognizedPhrases.All(phrase => phrase.RecognitionStatus.Equals("Success", StringComparison.Ordinal)))
                 {
                     var textAnalyticsErrors = new List<string>();
 
