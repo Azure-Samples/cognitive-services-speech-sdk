@@ -100,7 +100,7 @@
             "defaultValue": "",
             "type": "String",
             "metadata": {
-                "description": "Enter the address of your private endpoint here (e.g. https://#endpointname#.cognitiveservices.azure.com/) if you are connecting with a private endpoint"
+                "description": "Enter the address of your private endpoint here (e.g. https://mycustomendpoint.cognitiveservices.azure.com/) if you are connecting with a private endpoint"
             }
         },
         "ProfanityFilterMode": {
