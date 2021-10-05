@@ -58,6 +58,9 @@ void ConversationWithPullAudioStream()
     auto config = SpeechConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
     config->SetProperty("ConversationTranscriptionInRoomAndOnline", "true");
 
+    // This will show different speakers
+    config->SetProperty("DifferentiateGuestSpeakers", "true");
+
     // Creates a callback that will read audio data from a WAV file.
     shared_ptr<AudioInputFromFileCallback> callback;
     try
@@ -179,6 +182,9 @@ void ConversationWithPushAudioStream()
     // Conversation Transcription is currently available in eastasia and centralus region.
     auto config = SpeechConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
     config->SetProperty("ConversationTranscriptionInRoomAndOnline", "true");
+
+    // This will show different speakers
+    config->SetProperty("DifferentiateGuestSpeakers", "true");
 
     // Creates a push stream using 16kHz, 16bits per sample and 8 channels audio.
     auto pushStream = AudioInputStream::CreatePushStream(AudioStreamFormat::GetWaveFormatPCM(16000, 16, 8));

@@ -131,6 +131,10 @@ namespace MicrosoftSpeechSDKSamples
 
             var config = SpeechConfig.FromSubscription(key, region);
             config.SetProperty("ConversationTranscriptionInRoomAndOnline", "true");
+
+            // This will show different speakers
+            config.SetProperty("DifferentiateGuestSpeakers", "true");
+            
             config.SetServiceProperty("transcriptionMode", "RealTimeAndAsync", ServicePropertyChannel.UriQueryParameter);
             var waveFilePullStream = OpenWavFile(@"katiesteve.wav", out audioStreamFormat);
             var audioInput = AudioConfig.FromStreamInput(AudioInputStream.CreatePullStream(waveFilePullStream, audioStreamFormat));

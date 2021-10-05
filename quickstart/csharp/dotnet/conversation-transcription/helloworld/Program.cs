@@ -79,6 +79,10 @@ namespace helloworld
         {
             var config = SpeechConfig.FromSubscription(subscriptionKey, region);
             config.SetProperty("ConversationTranscriptionInRoomAndOnline", "true");
+
+            // This will show different speakers
+            config.SetProperty("DifferentiateGuestSpeakers", "true");
+            
             var stopRecognition = new TaskCompletionSource<int>();
 
             // Create an audio stream from a wav file or from the default microphone if you want to stream live audio from the supported devices
