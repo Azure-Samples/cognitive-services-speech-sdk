@@ -34,8 +34,8 @@
       
       console.log("Profile id: " + profile.profileId +" created, now enrolling using files beginning with: " + enrollFiles[0]);
       // create audio configs for each of the enrollment files to use for each of the enrollment steps
-      enrollFiles.forEach(function(f) {
-        var enrollConfig = getAudioConfigFromFile(f);
+      for (const enrollFile of enrollFiles) {
+        var enrollConfig = getAudioConfigFromFile(enrollFile);
         try {
           var enrollResult = await client.enrollProfileAsync(profile, enrollConfig);
           console.log("(Enrollment result) Reason: " + sdk.ResultReason[enrollResult.reason]); 
@@ -44,7 +44,7 @@
           console.log(`Enrollment file ${f} ERROR: ${err}`); 
           break;
         }
-      });
+      }
 
       if (resultReason === sdk.ResultReason.EnrolledVoiceProfile) {
         var verificationConfig = getAudioConfigFromFile(verificationFile);

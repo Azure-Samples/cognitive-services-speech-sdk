@@ -43,8 +43,8 @@ namespace Connector
                 Connection = new SqlConnection(DBConnectionString);
                 Connection.Open();
 
-                var query = "INSERT INTO dbo.Transcriptions (ID, Locale, Name, Source, Timestamp, Duration, NumberOfChannels, ApproximateCost)" +
-                    " VALUES (@id, @locale, @name, @source, @timestamp, @duration, @numberOfChannels, @approximateCost)";
+                var query = "INSERT INTO dbo.Transcriptions (ID, Locale, Name, Source, Timestamp, Duration, DurationInSeconds, NumberOfChannels, ApproximateCost)" +
+                    " VALUES (@id, @locale, @name, @source, @timestamp, @duration, @durationInSeconds, @numberOfChannels, @approximateCost)";
 
                 using (var command = new SqlCommand(query, Connection))
                 {
@@ -54,6 +54,7 @@ namespace Connector
                     command.Parameters.AddWithValue("@source", speechTranscript.Source);
                     command.Parameters.AddWithValue("@timestamp", speechTranscript.Timestamp);
                     command.Parameters.AddWithValue("@duration", speechTranscript.Duration ?? string.Empty);
+                    command.Parameters.AddWithValue("@durationInSeconds", TimeSpan.FromTicks(speechTranscript.DurationInTicks).TotalSeconds);
                     command.Parameters.AddWithValue("@numberOfChannels", speechTranscript.CombinedRecognizedPhrases.Count());
                     command.Parameters.AddWithValue("@approximateCost", approximateCost);
 
@@ -132,18 +133,23 @@ namespace Connector
             }
             else
             {
-                foreach (var phrase in recognizedPhrases)
+                var orderedPhrases = recognizedPhrases.OrderBy(p => p.OffsetInTicks);
+                var previousEndInMs = 0.0;
+                foreach (var phrase in orderedPhrases)
                 {
-                    await StoreRecognizedPhraseAsync(combinedRecognizedPhraseID, phrase).ConfigureAwait(false);
+                    await StoreRecognizedPhraseAsync(combinedRecognizedPhraseID, phrase, previousEndInMs).ConfigureAwait(false);
+                    previousEndInMs = (TimeSpan.FromTicks(phrase.OffsetInTicks) + TimeSpan.FromTicks(phrase.DurationInTicks)).TotalMilliseconds;
                 }
             }
         }
 
-        private async Task StoreRecognizedPhraseAsync(Guid combinedPhraseID, RecognizedPhrase recognizedPhrase)
+        private async Task StoreRecognizedPhraseAsync(Guid combinedPhraseID, RecognizedPhrase recognizedPhrase, double previousEndInMs)
         {
+            var silenceBetweenCurrentAndPreviousSegmentInMs = Math.Max(0, TimeSpan.FromTicks(recognizedPhrase.OffsetInTicks).TotalMilliseconds - previousEndInMs);
+
             var phraseId = Guid.NewGuid();
-            var query = "INSERT INTO dbo.RecognizedPhrases (ID, CombinedRecognizedPhraseID, RecognitionStatus, Speaker, Channel, Offset, Duration)" +
-                " VALUES (@id, @combinedRecognizedPhraseID, @recognitionStatus, @speaker, @channel, @offset, @duration)";
+            var query = "INSERT INTO dbo.RecognizedPhrases (ID, CombinedRecognizedPhraseID, RecognitionStatus, Speaker, Channel, Offset, Duration, SilenceBetweenCurrentAndPreviousSegmentInMs)" +
+                " VALUES (@id, @combinedRecognizedPhraseID, @recognitionStatus, @speaker, @channel, @offset, @duration, @silenceBetweenCurrentAndPreviousSegmentInMs)";
 
             using var command = new SqlCommand(query, Connection);
             command.Parameters.AddWithValue("@id", phraseId);
@@ -153,6 +159,7 @@ namespace Connector
             command.Parameters.AddWithValue("@channel", recognizedPhrase.Channel);
             command.Parameters.AddWithValue("@offset", recognizedPhrase.Offset);
             command.Parameters.AddWithValue("@duration", recognizedPhrase.Duration);
+            command.Parameters.AddWithValue("@silenceBetweenCurrentAndPreviousSegmentInMs", silenceBetweenCurrentAndPreviousSegmentInMs);
 
             var result = await command.ExecuteNonQueryAsync().ConfigureAwait(false);
 
