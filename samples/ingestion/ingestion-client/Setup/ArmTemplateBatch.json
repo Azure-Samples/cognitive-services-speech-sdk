@@ -96,6 +96,13 @@
                 "description": "The region the Azure speech services subscription is associated with."
             }
         },
+        "CustomEndpoint": {
+            "defaultValue": "",
+            "type": "String",
+            "metadata": {
+                "description": "Enter the address of your private endpoint here (e.g. https://mycustomendpoint.cognitiveservices.azure.com/) if you are connecting with a private endpoint"
+            }
+        },
         "ProfanityFilterMode": {
             "defaultValue": "None",
             "type": "String",
@@ -258,6 +265,7 @@
         "DatabaseConnectionStringSecretName": "DatabaseConnectionString",
         "PiiCategories": "",
         "IsAzureGovDeployment": "[or(equals(parameters('AzureSpeechServicesRegion'),'usgovarizona'), equals(parameters('AzureSpeechServicesRegion'),'usgovvirginia'))]",
+        "AzureSpeechServicesEndpointUri": "[if(not(equals(parameters('CustomEndpoint'),'')), parameters('CustomEndpoint'), if(variables('IsAzureGovDeployment'), concat('https://', parameters('AzureSpeechServicesRegion') ,'.api.cognitive.microsoft.us/'), concat('https://', parameters('AzureSpeechServicesRegion') ,'.api.cognitive.microsoft.com/')))]",
         "EndpointSuffix": "[if(variables('IsAzureGovDeployment'),'core.usgovcloudapi.net','core.windows.net')]"
     },
     "resources": [
@@ -858,6 +866,7 @@
                 "FilesPerTranscriptionJob": "[variables('FilesPerTranscriptionJob')]",
                 "FUNCTIONS_EXTENSION_VERSION": "~3",
                 "FUNCTIONS_WORKER_RUNTIME": "dotnet",
+                "AzureSpeechServicesEndpointUri": "[variables('AzureSpeechServicesEndpointUri')]",
                 "InitialPollingDelayInMinutes": "[variables('InitialPollingDelayInMinutes')]",
                 "IsAzureGovDeployment": "[variables('IsAzureGovDeployment')]",
                 "MaxPollingDelayInMinutes": "[variables('MaxPollingDelayInMinutes')]",
