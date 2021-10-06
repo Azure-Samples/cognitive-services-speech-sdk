@@ -313,3 +313,6 @@ quickstart/**/text-to-speech/*.wav
 # compiled JavaScript files
 quickstart/javascript/**/microsoft.cognitiveservices.speech.sdk.bundle*.js*
 samples/js/**/microsoft.cognitiveservices.speech.sdk.bundle*.js*
+
+# iOS framwork
+samples/objective-c/ios/MicrosoftCognitiveServicesSpeech.framework/

@@ -17,18 +17,20 @@ public class Main {
      * @param args Arguments are ignored in this sample.
      */
     public static void main(String[] args) {
-        try {
-            // Replace below with your own subscription key
-            String speechSubscriptionKey = "YourSubscriptionKey";
-            // Replace below with your own service region (e.g., "westus").
-            String serviceRegion = "YourServiceRegion";
 
-            int exitCode = 1;
-            SpeechConfig config = SpeechConfig.fromSubscription(speechSubscriptionKey, serviceRegion);
+        // Replace below with your own subscription key
+        String speechSubscriptionKey = "YourSubscriptionKey";
+        // Replace below with your own service region (e.g., "westus").
+        String serviceRegion = "YourServiceRegion";
+
+        // Creates an instance of a speech recognizer using speech configuration with specified
+        // subscription key and service region and microphone as default audio input.
+        try (SpeechConfig config = SpeechConfig.fromSubscription(speechSubscriptionKey, serviceRegion);
+             SpeechRecognizer reco = new SpeechRecognizer(config)) {
+
             assert(config != null);
-
-            SpeechRecognizer reco = new SpeechRecognizer(config);
             assert(reco != null);
+            int exitCode = 1;
 
             System.out.println("Say something...");
 
@@ -55,9 +57,7 @@ public class Main {
                     System.out.println("CANCELED: Did you update the subscription info?");
                 }
             }
-
-            reco.close();
-
+            
             System.exit(exitCode);
         } catch (Exception ex) {
             System.out.println("Unexpected exception: " + ex.getMessage());

@@ -115,10 +115,11 @@ namespace MicrosoftSpeechSDKSamples
             var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
             // Sets the voice name.
-            // e.g. "Microsoft Server Speech Text to Speech Voice (en-US, AriaRUS)"
+            // e.g. "Microsoft Server Speech Text to Speech Voice (en-US, ChristopherNeural)".
             // The full list of supported voices can be found here:
-            // https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support
-            var voice = "Microsoft Server Speech Text to Speech Voice (en-US, BenjaminRUS)";
+            // https://aka.ms/csspeech/voicenames
+            // And, you can try GetVoicesAsync method to get all available voices (see SynthesisGetAvailableVoicesAsync() sample below).
+            var voice = "Microsoft Server Speech Text to Speech Voice (en-US, ChristopherNeural)";
             config.SpeechSynthesisVoiceName = voice;
 
             // Creates a speech synthesizer for the specified voice, using the default speaker as audio output.
@@ -140,6 +141,54 @@ namespace MicrosoftSpeechSDKSamples
                         if (result.Reason == ResultReason.SynthesizingAudioCompleted)
                         {
                             Console.WriteLine($"Speech synthesized to speaker for text [{text}] with voice [{voice}]");
+                        }
+                        else if (result.Reason == ResultReason.Canceled)
+                        {
+                            var cancellation = SpeechSynthesisCancellationDetails.FromResult(result);
+                            Console.WriteLine($"CANCELED: Reason={cancellation.Reason}");
+
+                            if (cancellation.Reason == CancellationReason.Error)
+                            {
+                                Console.WriteLine($"CANCELED: ErrorCode={cancellation.ErrorCode}");
+                                Console.WriteLine($"CANCELED: ErrorDetails=[{cancellation.ErrorDetails}]");
+                                Console.WriteLine($"CANCELED: Did you update the subscription info?");
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Speech synthesis using Custom Voice (https://aka.ms/customvoice)
+        public static async Task SynthesisUsingCustomVoiceAsync()
+        {
+            // Creates an instance of a speech config with specified subscription key and service region.
+            // Replace with your own subscription key and service region (e.g., "westus").
+            var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+            // Replace with the endpoint id of your Custom Voice model.
+            config.EndpointId = "YourEndpointId";
+            // Replace with the voice name of your Custom Voice model.
+            config.SpeechSynthesisVoiceName = "YourVoiceName";
+
+            // Creates a speech synthesizer for Custom Voice, using the default speaker as audio output.
+            using (var synthesizer = new SpeechSynthesizer(config))
+            {
+                while (true)
+                {
+                    // Receives a text from console input and synthesize it to speaker.
+                    Console.WriteLine("Enter some text that you want to speak, or enter empty text to exit.");
+                    Console.Write("> ");
+                    string text = Console.ReadLine();
+                    if (string.IsNullOrEmpty(text))
+                    {
+                        break;
+                    }
+
+                    using (var result = await synthesizer.SpeakTextAsync(text))
+                    {
+                        if (result.Reason == ResultReason.SynthesizingAudioCompleted)
+                        {
+                            Console.WriteLine($"Speech synthesized to speaker for text [{text}].");
                         }
                         else if (result.Reason == ResultReason.Canceled)
                         {
@@ -321,6 +370,7 @@ namespace MicrosoftSpeechSDKSamples
         }
 
         // Speech synthesis to push audio output stream.
+        // This sample will also print the first byte latency of the request
         public static async Task SynthesisToPushAudioOutputStreamAsync()
         {
             // Creates an instance of a speech config with specified subscription key and service region.
@@ -352,7 +402,7 @@ namespace MicrosoftSpeechSDKSamples
                         {
                             if (result.Reason == ResultReason.SynthesizingAudioCompleted)
                             {
-                                Console.WriteLine($"Speech synthesized for text [{text}], and the audio was written to output stream.");
+                                Console.WriteLine($"Speech synthesized for text [{text}], and the audio was written to output stream. first byte latency: {callback.GetLatency()}");
                             }
                             else if (result.Reason == ResultReason.Canceled)
                             {
@@ -459,7 +509,7 @@ namespace MicrosoftSpeechSDKSamples
                                 Console.WriteLine($"Audio data for text [{text}] was saved to [{fileName}]");
 
                                 // You can also read data from audio data stream and process it in memory
-                                // Reset the stream position to the beginnging since saving to file puts the postion to end
+                                // Reset the stream position to the beginning since saving to file puts the position at the end
                                 audioDataStream.SetPosition(0);
 
                                 byte[] buffer = new byte[16000];
@@ -612,6 +662,110 @@ namespace MicrosoftSpeechSDKSamples
             }
         }
 
+        // Speech synthesis viseme event.
+        public static async Task SynthesisVisemeEventAsync()
+        {
+            // Creates an instance of a speech config with specified subscription key and service region.
+            // Replace with your own subscription key and service region (e.g., "westus").
+            var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+
+            // Creates a speech synthesizer with a null output stream.
+            // This means the audio output data will not be written to any stream.
+            // You can just get the audio from the result.
+            using (var synthesizer = new SpeechSynthesizer(config, null as AudioConfig))
+            {
+                // Subscribes to viseme received event
+                synthesizer.VisemeReceived += (s, e) =>
+                {
+                    // The unit of e.AudioOffset is tick (1 tick = 100 nanoseconds), divide by 10,000 to convert to milliseconds.
+                    Console.WriteLine($"Viseme event received. Audio offset: " +
+                        $"{e.AudioOffset / 10000}ms, viseme id: {e.VisemeId}.");
+                };
+
+                while (true)
+                {
+                    // Receives a text from console input and synthesize it to result.
+                    Console.WriteLine("Enter some text that you want to synthesize, or enter empty text to exit.");
+                    Console.Write("> ");
+                    string text = Console.ReadLine();
+                    if (string.IsNullOrEmpty(text))
+                    {
+                        break;
+                    }
+
+                    using (var result = await synthesizer.SpeakTextAsync(text))
+                    {
+                        if (result.Reason == ResultReason.SynthesizingAudioCompleted)
+                        {
+                            Console.WriteLine($"Speech synthesized for text [{text}].");
+                            var audioData = result.AudioData;
+                            Console.WriteLine($"{audioData.Length} bytes of audio data received for text [{text}]");
+                        }
+                        else if (result.Reason == ResultReason.Canceled)
+                        {
+                            var cancellation = SpeechSynthesisCancellationDetails.FromResult(result);
+                            Console.WriteLine($"CANCELED: Reason={cancellation.Reason}");
+
+                            if (cancellation.Reason == CancellationReason.Error)
+                            {
+                                Console.WriteLine($"CANCELED: ErrorCode={cancellation.ErrorCode}");
+                                Console.WriteLine($"CANCELED: ErrorDetails=[{cancellation.ErrorDetails}]");
+                                Console.WriteLine($"CANCELED: Did you update the subscription info?");
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Speech synthesis bookmark event.
+        public static async Task SynthesisBookmarkEventAsync()
+        {
+            // Creates an instance of a speech config with specified subscription key and service region.
+            // Replace with your own subscription key and service region (e.g., "westus").
+            var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+
+            // Creates a speech synthesizer with a null output stream.
+            // This means the audio output data will not be written to any stream.
+            // You can just get the audio from the result.
+            using (var synthesizer = new SpeechSynthesizer(config, null as AudioConfig))
+            {
+                // Subscribes to bookmark reached event
+                synthesizer.BookmarkReached += (s, e) =>
+                {
+                    // The unit of e.AudioOffset is tick (1 tick = 100 nanoseconds), divide by 10,000 to convert to milliseconds.
+                    Console.WriteLine($"Bookmark reached. Audio offset: " +
+                        $"{e.AudioOffset / 10000}ms, bookmark text: {e.Text}.");
+                };
+
+                Console.WriteLine("Press Enter to start synthesizing.");
+                Console.ReadLine();
+
+                // Bookmark tag is needed in the SSML, e.g.
+                var ssml = "<speak version='1.0' xml:lang='en-US' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts'><voice name='Microsoft Server Speech Text to Speech Voice (en-US, AriaNeural)'><bookmark mark='bookmark_one'/> one. <bookmark mark='bookmark_two'/> two. three. four.</voice></speak>";
+
+                using (var result = await synthesizer.SpeakSsmlAsync(ssml))
+                {
+                    if (result.Reason == ResultReason.SynthesizingAudioCompleted)
+                    {
+                        Console.WriteLine("Speech synthesized.");
+                    }
+                    else if (result.Reason == ResultReason.Canceled)
+                    {
+                        var cancellation = SpeechSynthesisCancellationDetails.FromResult(result);
+                        Console.WriteLine($"CANCELED: Reason={cancellation.Reason}");
+
+                        if (cancellation.Reason == CancellationReason.Error)
+                        {
+                            Console.WriteLine($"CANCELED: ErrorCode={cancellation.ErrorCode}");
+                            Console.WriteLine($"CANCELED: ErrorDetails=[{cancellation.ErrorDetails}]");
+                            Console.WriteLine($"CANCELED: Did you update the subscription info?");
+                        }
+                    }
+                }
+            }
+        }
+
         // Speech synthesis with auto detection for source language
         // Note: this is a preview feature, which might be updated in future versions.
         public static async Task SynthesisWithAutoDetectSourceLanguageAsync()
@@ -660,6 +814,128 @@ namespace MicrosoftSpeechSDKSamples
                             }
                         }
                     }
+                }
+            }
+        }
+
+        // Speech synthesis get available voices
+        public static async Task SynthesisGetAvailableVoicesAsync()
+        {
+            // Creates an instance of a speech config with specified subscription key and service region.
+            // Replace with your own subscription key and service region (e.g., "westus").
+            // The default language is "en-us".
+            var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+
+            // Creates a speech synthesizer
+            using (var synthesizer = new SpeechSynthesizer(config, null as AudioConfig))
+            {
+                Console.WriteLine("Enter a locale in BCP-47 format (e.g. en-US) that you want to get the voices of, or enter empty to get voices in all locales.");
+                Console.Write("> ");
+                string text = Console.ReadLine();
+
+                using (var result = await synthesizer.GetVoicesAsync(text))
+                {
+                    if (result.Reason == ResultReason.VoicesListRetrieved)
+                    {
+                        Console.WriteLine("Voices successfully retrieved, they are:");
+                        foreach (var voice in result.Voices)
+                        {
+                            Console.WriteLine(voice.Name);
+                        }
+                    }
+                    else if (result.Reason == ResultReason.Canceled)
+                    {
+                        Console.WriteLine($"CANCELED: ErrorDetails=[{result.ErrorDetails}]");
+                        Console.WriteLine($"CANCELED: Did you update the subscription info?");
+                    }
+                }
+            }
+        }
+
+        private static async Task<SpeechSynthesisResult> SynthesizeOnceAsyncInternal(string key, string region,
+            string endpointId = null, string voiceName = null, string text = "Hello World!")
+        {
+            SpeechSynthesisResult synthesisResult = null;
+            var config = SpeechConfig.FromSubscription(key, region);
+            if (!string.IsNullOrEmpty(endpointId))
+            {
+                config.EndpointId = endpointId;
+            }
+
+            if (!string.IsNullOrEmpty(voiceName))
+            {
+                config.SpeechSynthesisVoiceName = voiceName;
+            }
+
+            // Creates a speech synthesizer using the default speaker as audio output.
+            using (var synthesizer = new SpeechSynthesizer(config))
+            {
+                synthesisResult = await synthesizer.SpeakTextAsync(text).ConfigureAwait(false);
+            }
+
+
+            return synthesisResult;
+        }
+
+        // Speech synthesis with backup subscription region.
+        public static async Task SynthesizeOnceToSpeakerAsyncSwitchSecondaryRegion()
+        {
+            // Create a speech resource with primary subscription key and service region.
+            // Also create a speech resource with secondary subscription key and service region
+            SpeechSynthesisResult synthesisResult = await SynthesizeOnceAsyncInternal("PrimarySubscriptionKey", "PrimarySubscriptionRegion" );
+            if (synthesisResult.Reason == ResultReason.Canceled)
+            {
+                SpeechSynthesisCancellationDetails details = SpeechSynthesisCancellationDetails.FromResult(synthesisResult);
+                if (details.ErrorCode == CancellationErrorCode.ConnectionFailure
+                    || details.ErrorCode == CancellationErrorCode.ServiceUnavailable
+                    || details.ErrorCode == CancellationErrorCode.ServiceTimeout)
+                {
+                    synthesisResult = await SynthesizeOnceAsyncInternal("SecondarySubscriptionKey", "SecondarySubscriptionRegion");
+                }
+            }
+        }
+
+        // Custom voice with backup
+        // If custom voice service is unavailable, you can fallback to a standard platform voice.
+        public static async Task SynthesizeOnceUseCustomVoiceToSpeakerAsyncSwitchPlatformVoice()
+        {
+            // Create a custom voice speech resource with subscription key, service region, endpoint ID and voice name.
+            SpeechSynthesisResult synthesisResult = await SynthesizeOnceAsyncInternal("YourSubscriptionKey",
+                "YourServiceRegion", "YourEndpointId", "YourCustomVoiceName");
+            if (synthesisResult.Reason == ResultReason.Canceled)
+            {
+                SpeechSynthesisCancellationDetails details = SpeechSynthesisCancellationDetails.FromResult(synthesisResult);
+                if (details.ErrorCode == CancellationErrorCode.ConnectionFailure
+                    || details.ErrorCode == CancellationErrorCode.ServiceUnavailable
+                    || details.ErrorCode == CancellationErrorCode.ServiceTimeout
+                    || details.ErrorDetails.Contains("Error code: 1007"))
+                {
+                    // Synthesize using a standard platform voice, e.g. en-US-ChristopherNeural
+                    synthesisResult = await SynthesizeOnceAsyncInternal("YourSubscriptionKey", "YourServiceRegion", null, "YourPlatformVoiceName");
+                }
+            }
+        }
+
+        // Custom voice with backup.
+        // If custom voice service is unavailable, you can fallback to custom voice service in another region.
+        public static async Task SynthesizeOnceUseCustomVoiceToSpeakerAsyncSwitchSecondaryRegion()
+        {
+            // Create a custom voice resource with primary subscription key and service region.
+            // Also create a speech resource with secondary subscription key and service region.
+            // Copy Custom Voice model from primary region to secondary region and deploy.
+            SpeechSynthesisResult synthesisResult = await SynthesizeOnceAsyncInternal("PrimarySubscriptionKey",
+                "PrimarySubscriptionRegion", "YourEndpointIdOnPrimaryRegion", "YourCustomVoiceName");
+            if (synthesisResult.Reason == ResultReason.Canceled)
+            {
+                SpeechSynthesisCancellationDetails details = SpeechSynthesisCancellationDetails.FromResult(synthesisResult);
+                if (details.ErrorCode == CancellationErrorCode.ConnectionFailure
+                    || details.ErrorCode == CancellationErrorCode.ServiceUnavailable
+                    || details.ErrorCode == CancellationErrorCode.ServiceTimeout
+                    || details.ErrorDetails.Contains("Error code: 1007"))
+                {
+                    // Synthesize using same custom voice model in secondary region.
+                    synthesisResult = await SynthesizeOnceAsyncInternal("SecondarySubscriptionKey", "SecondarySubscriptionRegion",
+                        "YourEndpointIdOnSecondaryRegion", "YourCustomVoiceName");
                 }
             }
         }

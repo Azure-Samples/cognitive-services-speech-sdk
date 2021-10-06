@@ -122,5 +122,5 @@ Start by running it in the Unity Editor (first option), then explore other optio
 
 ## References
 
-* [Quickstart article on the SDK documentation site](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-unity)
+* [Quickstart article on the SDK documentation site](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstarts/setup-platform?tabs=unity%2Cwindows%2Cjre%2Cbrowser&pivots=programming-language-csharp)
 * [Speech SDK API reference for C#](https://aka.ms/csspeech/csharpref)

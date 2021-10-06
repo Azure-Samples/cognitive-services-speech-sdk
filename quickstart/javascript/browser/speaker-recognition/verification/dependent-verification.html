@@ -55,31 +55,7 @@
   </div>
 
   <!-- Speech SDK reference sdk. -->
-  <script src="microsoft.cognitiveservices.speech.sdk.bundle.js"></script>
-
-  <!-- Speech SDK Authorization token -->
-  <script>
-  // Note: Replace the URL with a valid endpoint to retrieve
-  //       authorization tokens for your subscription.
-  var authorizationEndpoint = "token.php";
-
-  function RequestAuthorizationToken() {
-    if (authorizationEndpoint) {
-      var a = new XMLHttpRequest();
-      a.open("GET", authorizationEndpoint);
-      a.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-      a.send("");
-      a.onload = function() {
-          var token = JSON.parse(atob(this.responseText.split(".")[1]));
-          serviceRegion.value = token.region;
-          authorizationToken = this.responseText;
-          subscriptionKey.disabled = true;
-          subscriptionKey.value = "using authorization token (hit F5 to refresh)";
-          console.log("Got an authorization token: " + token);
-      }
-    }
-  }
-  </script>
+  <script src="https://aka.ms/csspeech/jsbrowserpackageraw"></script>
 
   <!-- Speech SDK USAGE -->
   <script>
@@ -91,7 +67,6 @@
 
     // subscription key and region for speech services.
     var subscriptionKey, serviceRegion;
-    var authorizationToken;
     var SpeechSDK;
     var client;
     var filePicker, testFilePicker,audioFiles, testFile;
@@ -123,17 +98,12 @@
         createVoiceProfileButton.disabled = true;
         resultDiv.innerHTML = "";
 
-        // if we got an authorization token, use the token. Otherwise use the provided subscription key
-        if (authorizationToken) {
-          speechConfig = SpeechSDK.SpeechConfig.fromAuthorizationToken(authorizationToken, serviceRegion.value);
-        } else {
-          if (subscriptionKey.value === "" || subscriptionKey.value === "subscription") {
-            alert("Please enter your Microsoft Cognitive Services Speech subscription key!");
-            createVoiceProfileButton.disabled = false;
-            return;
-          }
-          speechConfig = SpeechSDK.SpeechConfig.fromSubscription(subscriptionKey.value, serviceRegion.value);
-        }
+      if (subscriptionKey.value === "" || subscriptionKey.value === "subscription") {
+        alert("Please enter your Microsoft Cognitive Services Speech subscription key!");
+        createVoiceProfileButton.disabled = false;
+        return;
+      }
+      speechConfig = SpeechSDK.SpeechConfig.fromSubscription(subscriptionKey.value, serviceRegion.value);
 
         speechConfig.setProperty(SpeechSDK.PropertyId.SpeechServiceConnection_TranslationVoice, "en-US");
         client = new SpeechSDK.VoiceProfileClient(speechConfig);
@@ -141,7 +111,7 @@
         client.createProfileAsync(
           SpeechSDK.VoiceProfileType.TextDependentVerification,
           "en-us",
-          function (result) {
+          async function (result) {
             profile = result;
             window.console.log(result);
             
@@ -151,40 +121,19 @@
             
             let configs = [];
             for(var i = 0; i < audioFiles.length; i++){
-              configs.push(SpeechSDK.AudioConfig.fromWavFileInput(audioFiles[i]));
-            }
-
-            client.enrollProfileAsync(
-              profile, 
-              configs[0],
-              function(result) {
+              const config = SpeechSDK.AudioConfig.fromWavFileInput(audioFiles[i]);
+              try {
+                let result = await client.enrollProfileAsync(profile, config);
                 resultDiv.innerHTML += "(Enrollment result) Reason: " + SpeechSDK.ResultReason[result.reason]; 
                 resultDiv.innerHTML += "\n"; 
                 window.console.log(result);
-                client.enrollProfileAsync(
-                  profile,
-                  configs[1],
-                  function(result2) {
-                    resultDiv.innerHTML += "(Enrollment result) Reason: " + SpeechSDK.ResultReason[result2.reason];
-                    resultDiv.innerHTML += "\n";
-                    window.console.log(result2);
-                    client.enrollProfileAsync(
-                      profile,
-                      configs[2],
-                      function(result3) {
-                        resultDiv.innerHTML += "(Enrollment result) Reason: " + SpeechSDK.ResultReason[result3.reason];
-                        resultDiv.innerHTML += "\n";
-                        window.console.log(result3);
-                        verifySpeakerButton.disabled = false;
-                      },
-                      (err) => { resultDiv.innerHTML += "ERROR: " + err; })
-                  },
-                  (err) => { resultDiv.innerHTML += "ERROR: " + err; })
-              },
-              (err) => { resultDiv.innerHTML += "ERROR: " + err; })
-
+              } catch (err) {
+                resultDiv.innerHTML += "ERROR: " + err;
+              }
+            }
+            
+            verifySpeakerButton.disabled = false;
             resultDiv.innerHTML += "\r\n"; 
-
             createVoiceProfileButton.disabled = false;
           },
           function (err) {
@@ -246,11 +195,6 @@
 
         document.getElementById('content').style.display = 'block';
         document.getElementById('warning').style.display = 'none';
-
-        // in case we have a function for getting an authorization token, call it.
-        if (typeof RequestAuthorizationToken === "function") {
-            RequestAuthorizationToken();
-        }
       }
     });
   </script>

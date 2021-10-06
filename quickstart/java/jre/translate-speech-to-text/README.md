@@ -1,40 +1,40 @@
 # Quickstart: Translate speech in Java on Windows or Linux
 
 This sample demonstrates how to translate speech with the Speech SDK for Java on Windows or Linux (Ubuntu 16.04, Ubuntu 18.04, Debian 9, RHEL 8, CentOS 8).
-See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstarts/translate-speech-to-text?tabs=dotnet%2Cwindowsinstall&pivots=programming-language-java) on the SDK documentation page which describes how to build this sample from scratch in Eclipse.
+See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started-speech-translation?tabs=script%2Cwindowsinstall&pivots=programming-language-java) on the SDK documentation page which describes how to build this sample from scratch in Eclipse.
+
+> **Note:**
+> The Speech SDK for the JRE currently supports only the Windows x64 platform, macOS 10.13 or later, and [specific Linux distributions and target architectures](https://docs.microsoft.com/azure/cognitive-services/speech-service/speech-sdk?tabs=linux).
 
 ## Prerequisites
 
 * A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
-* A PC (Windows x64, Ubuntu 16.04/18.04 on x64 or ARM64, RHEL 8 or CentOS 8 on x64) capable to run Eclipse,[<sup>[1]</sup>](#footnote1) with a working microphone.
-* 64-bit JRE/JDK for Java 8.
+* A PC (Windows x64 or a supported Linux distribution) capable to run Eclipse,[<sup>[1]</sup>](#footnote1) with a working microphone.
+* Java 8 or 11 JRE/JDK.
 * Version 4.8 of [Eclipse](https://www.eclipse.org), 64-bit.[<sup>[1]</sup>](#footnote1)
-* On Ubuntu, run the following commands for the installation of required packages:
+* On Ubuntu or Debian, run the following commands for the installation of required packages:
 
   ```sh
   sudo apt-get update
   sudo apt-get install libssl1.0.0 libasound2
   ```
 
-* On Debian 9, run the following commands for the installation of required packages:
+  * If libssl1.0.0 is not available, install libssl1.0.x (where x is greater than 0) or libssl1.1 instead.
 
-  ```sh
-  sudo apt-get update
-  sudo apt-get install libssl1.0.2 libasound2
-  ```
-
-* On RHEL 8 or CentOS 8, run the following commands for the installation of required packages:
+* On RHEL or CentOS, run the following commands for the installation of required packages:
 
   ```sh
   sudo yum update
   sudo yum install alsa-lib java-1.8.0-openjdk-devel openssl
   ```
 
-<small><a name="footnote1">1</a>. This sample has not been verified with Eclipse on ARM64.</small>
+  * See also [how to configure RHEL/CentOS 7 for Speech SDK](https://docs.microsoft.com/azure/cognitive-services/speech-service/how-to-configure-rhel-centos-7).
+
+<small><a name="footnote1">1</a>. This sample has not been verified with Eclipse on ARM platforms.</small>
 
 ## Build the sample
 
-> Note: more detailed step-by-step instructions are available [here](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-translate-speech-java-jre).
+&gt; Note: more detailed step-by-step instructions are [available here](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started-speech-translation?tabs=script%2Cwindowsinstall&amp;pivots=programming-language-java).
 
 * **By downloading the Microsoft Cognitive Services Speech SDK when building this sample, you acknowledge its license, see [Speech SDK license agreement](https://docs.microsoft.com/azure/cognitive-services/speech-service/license).**
 * [Download the sample code to your development PC.](/README.md#get-the-samples)
@@ -51,5 +51,4 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 
 ## References
 
-* [Quickstart article on the SDK documentation site](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-translate-speech-java-jre)
 * [Speech SDK API reference for Java](https://aka.ms/csspeech/javaref)

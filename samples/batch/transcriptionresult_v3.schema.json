@@ -36,6 +36,7 @@
             "$id": "#root/durationInTicks",
             "title": "Duration in ticks",
             "type": "integer",
+            "format": "int64",
             "description": "total audio duration in ticks (1 tick is 100 nanoseconds)",
             "examples": [
                 41200000
@@ -125,7 +126,7 @@
                         "examples": [
                             "Hello world."
                         ],
-                        "pattern": "^.*$"
+                        "pattern": "^(.*\n*)*$"
                     }
                 }
             }
@@ -154,7 +155,7 @@
                         "title": "Recognition status",
                         "type": "string",
                         "default": "",
-                        "description": "recognition state, e.g. \"Success\", \"Failure\"",
+                        "description": "recognition state, e.g. \"Success\".",
                         "examples": [
                             "Success"
                         ],
@@ -197,6 +198,7 @@
                         "$id": "#root/recognizedPhrases/items/offsetInTicks",
                         "title": "Offset in ticks",
                         "type": "integer",
+                        "format": "int64",
                         "description": "offset in audio of this phrase in ticks (1 tick is 100 nanoseconds)",
                         "examples": [
                             700000
@@ -208,6 +210,7 @@
                         "$id": "#root/recognizedPhrases/items/durationInTicks",
                         "title": "Duration in ticks",
                         "type": "integer",
+                        "format": "int64",
                         "description": "audio duration of this phrase in ticks (1 tick is 100 nanoseconds)",
                         "examples": [
                             15900000
@@ -298,7 +301,7 @@
                                     "examples": [
                                         "Hello world."
                                     ],
-                                    "pattern": "^.*$"
+                                    "pattern": "^(.*\n*)*$"
                                 },
                                 "words": {
                                     "$id": "#root/recognizedPhrases/items/nBest/items/words",
@@ -356,6 +359,7 @@
                                                 "$id": "#root/recognizedPhrases/items/nBest/items/words/items/offsetInTicks",
                                                 "title": "Offset in ticks",
                                                 "type": "integer",
+                                                "format": "int64",
                                                 "description": "offset in audio of this phrase in ticks (1 tick is 100 nanoseconds)",
                                                 "examples": [
                                                     900000
@@ -367,6 +371,7 @@
                                                 "$id": "#root/recognizedPhrases/items/nBest/items/words/items/durationInTicks",
                                                 "title": "Duration in ticks",
                                                 "type": "integer",
+                                                "format": "int64",
                                                 "description": "audio duration of this phrase in ticks (1 tick is 100 nanoseconds)",
                                                 "examples": [
                                                     4800000
