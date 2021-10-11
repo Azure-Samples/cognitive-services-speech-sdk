@@ -17,6 +17,9 @@ namespace StartTranscriptionByTimer
 
         public static readonly bool IsAzureGovDeployment = bool.TryParse(Environment.GetEnvironmentVariable(nameof(IsAzureGovDeployment), EnvironmentVariableTarget.Process), out IsAzureGovDeployment) && IsAzureGovDeployment;
 
+        // BYOS = Bring your own storage (https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/speech-encryption-of-data-at-rest#bring-your-own-storage-byos-for-customization-and-logging)
+        public static readonly bool IsByosEnabledSubscription = bool.TryParse(Environment.GetEnvironmentVariable(nameof(IsByosEnabledSubscription), EnvironmentVariableTarget.Process), out IsByosEnabledSubscription) && IsByosEnabledSubscription;
+
         public static readonly int MessagesPerFunctionExecution = int.TryParse(Environment.GetEnvironmentVariable(nameof(MessagesPerFunctionExecution), EnvironmentVariableTarget.Process), out MessagesPerFunctionExecution) ? MessagesPerFunctionExecution.ClampInt(1, Constants.MaxMessagesPerFunctionExecution) : Constants.DefaultMessagesPerFunctionExecution;
 
         public static readonly int FilesPerTranscriptionJob = int.TryParse(Environment.GetEnvironmentVariable(nameof(FilesPerTranscriptionJob), EnvironmentVariableTarget.Process), out FilesPerTranscriptionJob) ? FilesPerTranscriptionJob.ClampInt(1, Constants.MaxFilesPerTranscriptionJob) : Constants.DefaultFilesPerTranscriptionJob;
@@ -33,7 +36,7 @@ namespace StartTranscriptionByTimer
 
         public static readonly string AzureSpeechServicesKey = Environment.GetEnvironmentVariable(nameof(AzureSpeechServicesKey), EnvironmentVariableTarget.Process);
 
-        public static readonly string AzureSpeechServicesEndpointUri = Environment.GetEnvironmentVariable(nameof(AzureSpeechServicesEndpointUri), EnvironmentVariableTarget.Process);
+        public static readonly string AzureSpeechServicesEndpointUri = Environment.GetEnvironmentVariable(nameof(AzureSpeechServicesEndpointUri), EnvironmentVariableTarget.Process).TrimEnd('/') + '/';
 
         public static readonly string AzureWebJobsStorage = Environment.GetEnvironmentVariable(nameof(AzureWebJobsStorage), EnvironmentVariableTarget.Process);
 
