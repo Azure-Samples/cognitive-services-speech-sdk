@@ -14,16 +14,16 @@ namespace TextAnalytics
     using Azure.AI.TextAnalytics;
     using Connector;
     using Connector.Enums;
+    using Connector.Serializable.TranscriptionStartedServiceBusMessage;
     using FetchTranscriptionFunction;
     using Microsoft.Extensions.Logging;
+    using static Connector.Serializable.TranscriptionStartedServiceBusMessage.TextAnalyticsRequest;
 
     public class TextAnalyticsProvider
     {
         private const int MaxRecordsPerRequest = 25;
 
         private static readonly TimeSpan RequestTimeout = TimeSpan.FromMinutes(3);
-
-        private static readonly TimeSpan PollingInterval = TimeSpan.FromSeconds(15);
 
         private readonly TextAnalyticsClient TextAnalyticsClient;
 
@@ -38,17 +38,44 @@ namespace TextAnalytics
             Log = log;
         }
 
-        public async Task<IEnumerable<string>> AddUtteranceLevelEntitiesAsync(
+        public async Task<bool> TextAnalyticsRequestsCompleted(IEnumerable<AudioFileInfo> audioFileInfos)
+        {
+            var runningTextAnalyticsRequests = new List<TextAnalyticsRequest>();
+            runningTextAnalyticsRequests.AddRange(audioFileInfos.SelectMany(audioFileInfo => audioFileInfo.TextAnalyticsRequests.AudioLevelRequests).Where(text => text.Status == TextAnalyticsRequestStatus.Running));
+            runningTextAnalyticsRequests.AddRange(audioFileInfos.SelectMany(audioFileInfo => audioFileInfo.TextAnalyticsRequests.UtteranceLevelRequests).Where(text => text.Status == TextAnalyticsRequestStatus.Running));
+
+            var textAnalyticsRequestCompleted = true;
+
+            foreach (var textAnalyticsJob in runningTextAnalyticsRequests)
+            {
+                var operation = new AnalyzeActionsOperation(textAnalyticsJob.Id, TextAnalyticsClient);
+
+                using var cts = new CancellationTokenSource();
+                cts.CancelAfter(RequestTimeout);
+                await operation.UpdateStatusAsync(cts.Token).ConfigureAwait(false);
+
+                if (operation.HasCompleted)
+                {
+                    textAnalyticsJob.Status = TextAnalyticsRequestStatus.Completed;
+                }
+                else
+                {
+                    textAnalyticsRequestCompleted = false;
+                }
+            }
+
+            return textAnalyticsRequestCompleted;
+        }
+
+        public async Task<(IEnumerable<string> jobIds, IEnumerable<string> errors)> SubmitUtteranceLevelRequests(
             SpeechTranscript speechTranscript,
             SentimentAnalysisSetting sentimentAnalysisSetting)
         {
             speechTranscript = speechTranscript ?? throw new ArgumentNullException(nameof(speechTranscript));
 
-            var errors = new List<string>();
-
             if (sentimentAnalysisSetting != SentimentAnalysisSetting.UtteranceLevel)
             {
-                return errors;
+                return (null, null);
             }
 
             var documents = speechTranscript.RecognizedPhrases.Where(r => r.NBest.FirstOrDefault() != null && !string.IsNullOrEmpty(r.NBest.First().Display)).Select(r => new TextDocumentInput($"{r.Channel}_{r.Offset}", r.NBest.First().Display) { Language = Locale });
@@ -59,55 +86,19 @@ namespace TextAnalytics
                 AnalyzeSentimentActions = new List<AnalyzeSentimentAction>() { new AnalyzeSentimentAction() }
             };
 
-            var (sentimentResults, piiResults, requestErrors) = await this.GetDocumentResultsAsync(documents, actions).ConfigureAwait(false);
-            errors.AddRange(requestErrors);
-
-            foreach (var recognizedPhrase in speechTranscript.RecognizedPhrases)
-            {
-                var index = $"{recognizedPhrase.Channel}_{recognizedPhrase.Offset}";
-                var firstNBest = recognizedPhrase.NBest.FirstOrDefault();
-
-                var sentimentResult = sentimentResults.Where(s => s.Id == index).FirstOrDefault();
-
-                if (firstNBest != null)
-                {
-                    firstNBest.Sentiment = new Sentiment()
-                    {
-                        Negative = sentimentResult?.DocumentSentiment.ConfidenceScores.Negative ?? 0.0,
-                        Positive = sentimentResult?.DocumentSentiment.ConfidenceScores.Positive ?? 0.0,
-                        Neutral = sentimentResult?.DocumentSentiment.ConfidenceScores.Neutral ?? 0.0,
-                    };
-                }
-            }
-
-            return errors;
+            return await SubmitDocumentsAsync(documents, actions).ConfigureAwait(false);
         }
 
-        public async Task<IEnumerable<string>> AddAudioLevelEntitiesAsync(
+        public async Task<(IEnumerable<string> jobIds, IEnumerable<string> errors)> SubmitAudioLevelRequests(
             SpeechTranscript speechTranscript,
             SentimentAnalysisSetting sentimentAnalysisSetting,
             PiiRedactionSetting piiRedactionSetting)
         {
             speechTranscript = speechTranscript ?? throw new ArgumentNullException(nameof(speechTranscript));
 
-            var errors = new List<string>();
-
             if (sentimentAnalysisSetting != SentimentAnalysisSetting.AudioLevel && piiRedactionSetting != PiiRedactionSetting.UtteranceAndAudioLevel)
             {
-                return errors;
-            }
-
-            // Remove other nBests if pii is redacted
-            if (piiRedactionSetting != PiiRedactionSetting.None)
-            {
-                speechTranscript.RecognizedPhrases.ToList().ForEach(phrase =>
-                {
-                    if (phrase.NBest != null && phrase.NBest.Any())
-                    {
-                        var firstNBest = phrase.NBest.First();
-                        phrase.NBest = new[] { firstNBest };
-                    }
-                });
+                return (null, null);
             }
 
             var documents = speechTranscript.CombinedRecognizedPhrases.Where(r => !string.IsNullOrEmpty(r.Display)).Select(r => new TextDocumentInput($"{r.Channel}", r.Display) { Language = Locale });
@@ -139,7 +130,59 @@ namespace TextAnalytics
                 actions.RecognizePiiEntitiesActions = new List<RecognizePiiEntitiesAction>() { action };
             }
 
-            var (sentimentResults, piiResults, requestErrors) = await this.GetDocumentResultsAsync(documents, actions).ConfigureAwait(false);
+            return await SubmitDocumentsAsync(documents, actions).ConfigureAwait(false);
+        }
+
+        public async Task<IEnumerable<string>> AddUtteranceLevelEntitiesAsync(
+            IEnumerable<string> jobIds,
+            SpeechTranscript speechTranscript)
+        {
+            speechTranscript = speechTranscript ?? throw new ArgumentNullException(nameof(speechTranscript));
+            var errors = new List<string>();
+
+            if (jobIds == null || !jobIds.Any())
+            {
+                return errors;
+            }
+
+            var (sentimentResults, piiResults, requestErrors) = await this.GetOperationsResultsAsync(jobIds).ConfigureAwait(false);
+            errors.AddRange(requestErrors);
+
+            foreach (var recognizedPhrase in speechTranscript.RecognizedPhrases)
+            {
+                var index = $"{recognizedPhrase.Channel}_{recognizedPhrase.Offset}";
+                var firstNBest = recognizedPhrase.NBest.FirstOrDefault();
+
+                // utterance level requests can only contain sentiment results at the moment
+                var sentimentResult = sentimentResults.Where(s => s.Id == index).FirstOrDefault();
+
+                if (firstNBest != null)
+                {
+                    firstNBest.Sentiment = new Sentiment()
+                    {
+                        Negative = sentimentResult?.DocumentSentiment.ConfidenceScores.Negative ?? 0.0,
+                        Positive = sentimentResult?.DocumentSentiment.ConfidenceScores.Positive ?? 0.0,
+                        Neutral = sentimentResult?.DocumentSentiment.ConfidenceScores.Neutral ?? 0.0,
+                    };
+                }
+            }
+
+            return errors;
+        }
+
+        public async Task<IEnumerable<string>> AddAudioLevelEntitiesAsync(
+            IEnumerable<string> jobIds,
+            SpeechTranscript speechTranscript)
+        {
+            speechTranscript = speechTranscript ?? throw new ArgumentNullException(nameof(speechTranscript));
+            var errors = new List<string>();
+
+            if (jobIds == null || !jobIds.Any())
+            {
+                return errors;
+            }
+
+            var (sentimentResults, piiResults, requestErrors) = await this.GetOperationsResultsAsync(jobIds).ConfigureAwait(false);
             errors.AddRange(requestErrors);
 
             foreach (var combinedRecognizedPhrase in speechTranscript.CombinedRecognizedPhrases)
@@ -191,22 +234,18 @@ namespace TextAnalytics
         }
 
         private async Task<(
-            IEnumerable<AnalyzeSentimentResult> sentimentResults,
-            IEnumerable<RecognizePiiEntitiesResult> piiResults,
+            IEnumerable<string> jobIds,
             IEnumerable<string> errors)>
-            GetDocumentResultsAsync(
+            SubmitDocumentsAsync(
             IEnumerable<TextDocumentInput> documents,
             TextAnalyticsActions actions)
         {
-            var errors = new List<string>();
-            var sentimentResults = new List<AnalyzeSentimentResult>();
-            var piiResults = new List<RecognizePiiEntitiesResult>();
-
             if (!documents.Any())
             {
-                return (sentimentResults, piiResults, errors);
+                return (null, null);
             }
 
+            // Chunk documents to avoid running into text analytics #documents limit
             var chunkedDocuments = new List<List<TextDocumentInput>>();
             var totalDocuments = documents.Count();
 
@@ -216,7 +255,70 @@ namespace TextAnalytics
                 chunkedDocuments.Add(chunk);
             }
 
-            Log.LogInformation($"Sending text analytics requests for {chunkedDocuments.Count} chunks in total.");
+            var tasks = new List<Task<(
+                string jobId,
+                IEnumerable<string> errors)>>();
+
+            var counter = 0;
+            foreach (var documentChunk in chunkedDocuments)
+            {
+                var index = counter;
+                tasks.Add(SubmitDocumentsChunkAsync(index, documentChunk, actions));
+                counter++;
+            }
+
+            var results = await Task.WhenAll(tasks).ConfigureAwait(false);
+
+            var jobIds = results.Select(t => t.jobId);
+            var errors = results.SelectMany(t => t.errors);
+
+            return (jobIds, errors);
+        }
+
+        private async Task<(
+            string jobId,
+            IEnumerable<string> errors)>
+            SubmitDocumentsChunkAsync(int chunkId, List<TextDocumentInput> documentChunk, TextAnalyticsActions actions)
+        {
+            var errors = new List<string>();
+
+            try
+            {
+                Log.LogInformation($"Sending text analytics request for document chunk with id {chunkId}.");
+                using var cts = new CancellationTokenSource();
+                cts.CancelAfter(RequestTimeout);
+
+                var operation = await TextAnalyticsClient.StartAnalyzeActionsAsync(documentChunk, actions, cancellationToken: cts.Token).ConfigureAwait(false);
+                return (operation.Id, errors);
+            }
+            catch (OperationCanceledException)
+            {
+                throw new TimeoutException($"The operation has timed out after {RequestTimeout.TotalSeconds} seconds.");
+            }
+
+            // do not catch throttling errors, rather throw and retry
+            catch (RequestFailedException e) when (e.Status != 429)
+            {
+                errors.Add($"Text analytics request failed with error: {e.Message}");
+            }
+
+            return (null, errors);
+        }
+
+        private async Task<(
+            IEnumerable<AnalyzeSentimentResult> sentimentResults,
+            IEnumerable<RecognizePiiEntitiesResult> piiResults,
+            IEnumerable<string> errors)>
+            GetOperationsResultsAsync(IEnumerable<string> jobIds)
+        {
+            var errors = new List<string>();
+            var sentimentResults = new List<AnalyzeSentimentResult>();
+            var piiResults = new List<RecognizePiiEntitiesResult>();
+
+            if (!jobIds.Any())
+            {
+                return (sentimentResults, piiResults, errors);
+            }
 
             var tasks = new List<Task<(
                 IEnumerable<AnalyzeSentimentResult> sentimentResults,
@@ -224,10 +326,10 @@ namespace TextAnalytics
                 IEnumerable<string> errors)>>();
 
             var counter = 0;
-            foreach (var documentChunk in chunkedDocuments)
+            foreach (var jobId in jobIds)
             {
                 var index = counter;
-                tasks.Add(GetChunkedResults(index, documentChunk, actions));
+                tasks.Add(GetOperationResults(index, jobId));
                 counter++;
             }
 
@@ -247,7 +349,7 @@ namespace TextAnalytics
             IEnumerable<AnalyzeSentimentResult> sentimentResults,
             IEnumerable<RecognizePiiEntitiesResult> piiResults,
             IEnumerable<string> errors)>
-            GetChunkedResults(int chunkId, List<TextDocumentInput> documentChunk, TextAnalyticsActions actions)
+            GetOperationResults(int index, string operationId)
         {
             var errors = new List<string>();
             var sentimentResults = new List<AnalyzeSentimentResult>();
@@ -255,15 +357,20 @@ namespace TextAnalytics
 
             try
             {
-                Log.LogInformation($"Sending text analytics request for document chunk with id {chunkId}.");
+                Log.LogInformation($"Sending text analytics request for document chunk with id {index}.");
                 using var cts = new CancellationTokenSource();
                 cts.CancelAfter(RequestTimeout);
 
-                var operation = await TextAnalyticsClient.StartAnalyzeActionsAsync(documentChunk, actions, cancellationToken: cts.Token).ConfigureAwait(false);
-                await operation.WaitForCompletionAsync(PollingInterval, cts.Token).ConfigureAwait(false);
-                Log.LogInformation($"Received text analytics response for document chunk with id {chunkId}.");
+                var textAnalyticsOperation = new AnalyzeActionsOperation(operationId, TextAnalyticsClient);
 
-                await foreach (var documentsInPage in operation.Value)
+                await textAnalyticsOperation.UpdateStatusAsync().ConfigureAwait(false);
+
+                if (!textAnalyticsOperation.HasCompleted)
+                {
+                    throw new InvalidOperationException("Tried to get result of not completed text analytics request.");
+                }
+
+                await foreach (var documentsInPage in textAnalyticsOperation.GetValuesAsync())
                 {
                     foreach (var piiResult in documentsInPage.RecognizePiiEntitiesResults)
                     {
