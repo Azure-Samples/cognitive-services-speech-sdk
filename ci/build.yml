@@ -30,7 +30,7 @@ jobs:
     CG_RAN: false
     DECODE_PERCENTS: true
   pool:
-    name: Hosted Ubuntu 1804
+    vmImage: ubuntu-18.04
   timeoutInMinutes: 10
   steps:
   - bash: ./ci/check-git-head.sh
