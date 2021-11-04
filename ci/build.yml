@@ -20,7 +20,7 @@ resources:
   clean: true
 
 variables:
-  SPEECHSDK_NUGET_VERSION: 4.6
+  SPEECHSDK_NUGET_VERSION: 4.9.4
   CG_RAN: true # we do Component Governance explicitly only in the Pre job
 
 jobs:
@@ -30,7 +30,7 @@ jobs:
     CG_RAN: false
     DECODE_PERCENTS: true
   pool:
-    vmImage: ubuntu-18.04
+    vmImage: 'ubuntu-18.04'
   timeoutInMinutes: 10
   steps:
   - bash: ./ci/check-git-head.sh
@@ -92,5 +92,12 @@ jobs:
     displayName: 'Build samples (*.sln)'
     # Get results from all builds:
     continueOnError: true
+  # gradle 7.0+ needs Java 11
+  - task: JavaToolInstaller@0
+    inputs:
+      versionSpec: '11'
+      jdkArchitectureOption: 'x64'
+      jdkSourceOption: 'PreInstalled'
+    displayName: Use Java 11
   - bash: ./ci/run-gradle.sh
     displayName: 'Build samples (gradle)'

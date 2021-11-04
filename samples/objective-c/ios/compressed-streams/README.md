@@ -2,6 +2,8 @@
 
 The Speech SDK's **Compressed Audio Input Stream** API provides a way to stream compressed audio to the Speech Service using a pull or push stream.
 
+**NOTE**: The compressed audio support using Gstreamer is disabled in the latest Speech SDK due to instability problems.
+
 ## Prerequisites
 
 * A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).

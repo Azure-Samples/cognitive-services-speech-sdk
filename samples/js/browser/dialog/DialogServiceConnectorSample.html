@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="viewport" content="width=device-width">
+
+        <title>DialogServiceConnector sample</title>
+    </head>
+
+    <body>
+        <div id="warning">
+            <h1 style="font-weight:500;">Speech Recognition Speech SDK not found (microsoft.cognitiveservices.speech.sdk.bundle.js missing).</h1>
+        </div>
+
+        <div id="content" style="display:none">
+            <table width="100%">
+              <tr>
+                <td></td>
+                <td><h1 style="font-weight:500;">DialogServiceConnector sample</h1></td>
+              </tr>
+              <tr>
+                <td align="right">Subscription key</td>
+                <td><input id="subscriptionKey" type="password" size="40"></td><t
+              </tr>
+              <tr>
+                <td align="right">Region</td>
+                <td><input id="serviceRegion" type="text" size="40"></td>
+              </tr>
+              <tr>
+                <td></td>
+                <td><button id="connectButton">Connect</button></td>
+              </tr>
+              <tr>
+                <td></td>
+                <td><button id="listenButton">Start listening</button></td>
+              </tr>
+              <tr>
+                <td align="right">Results:</td>
+                <td><textarea id="resultDiv" style="display: inline-block;width:500px;height:200px"></textarea></td>
+              </tr>
+              <tr>
+                <td align="right">Activity:</td>
+                <td><textarea id="activityDiv" style="display: inline-block;width:500px;height:200px"></textarea></td>
+              </tr>
+              <tr>
+                  <td align="right">Custom activity</td>
+                  <td><textarea id="customActivityDiv" style="display: block;width:500px;height:200px"></textarea></td>
+              </tr>
+              <tr>
+                <td></td>
+                <td><button id="sendActivityButton">Send activity</button></td>
+              </tr>
+              <tr>
+                <td align="right">New token</td>
+                <td><textarea id="newTokenDiv" style="display: block;width:500px;height:200px"></textarea></td>
+            </tr>
+            <tr>
+              <td></td>
+              <td><button id="updateTokenButton">Update token</button></td>
+            </tr>
+
+            </table>
+        </div>
+
+        <!-- Speech SDK REFERENCE -->
+        <script src="https://aka.ms/csspeech/jsbrowserpackageraw"></script>
+
+        <!-- Speech SDK USAGE -->
+        <script type="text/javascript" src="connector.js"></script>
+    </body>
+</html>

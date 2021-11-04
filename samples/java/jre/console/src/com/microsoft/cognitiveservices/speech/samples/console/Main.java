@@ -40,6 +40,17 @@ public class Main {
         System.out.println("P. Speech synthesis word boundary event.");
         System.out.println("Q: Speech synthesis server scenario example.");
         System.out.println("R: Speech synthesis with source language auto detection.");
+        System.out.println("S: Speaker verification with microphone.");
+        System.out.println("T: Speaker verification with file.");
+        System.out.println("U: Speaker identification with microphone.");
+        System.out.println("V: Speaker identification with file.");
+        System.out.println("W: Speech recognition from default microphone with Microsoft Audio Stack enabled.");
+        System.out.println("X: Speech recognition from a microphone with Microsoft Audio Stack enabled and "
+                + "pre-defined microphone array geometry specified.");
+        System.out.println("Y: Speech recognition from multi-channel file with Microsoft Audio Stack enabled and "
+                + "custom microphone array geometry specified.");
+        System.out.println("Z: Speech recognition from pull stream with custom set of enhancements from Microsoft Audio Stack enabled.");
+        System.out.println("AA: Speech recognition from push stream with Microsoft Audio Stack enabled and beamforming angles specified.");
 
         System.out.print(prompt);
 
@@ -129,6 +140,33 @@ public class Main {
                     break;
                 case "r":
                     SpeechSynthesisSamples.synthesisWithSourceLanguageAutoDetectionAsync();
+                    break;
+                case "s":
+                    SpeakerRecognitionSamples.verificationWithMicrophoneAsync();
+                    break;
+                case "t":
+                    SpeakerRecognitionSamples.verificationWithFileAsync();
+                    break;
+                case "u":
+                    SpeakerRecognitionSamples.identificationWithMicrophoneAsync();
+                    break;
+                case "v":
+                    SpeakerRecognitionSamples.identificationWithFileAsync();
+                    break;
+                case "w":
+                    SpeechRecognitionSamples.continuousRecognitionFromDefaultMicrophoneWithMASEnabled();
+                    break;
+                case "x":
+                    SpeechRecognitionSamples.recognitionFromMicrophoneWithMASEnabledAndPresetGeometrySpecified();
+                    break;
+                case "y":
+                    SpeechRecognitionSamples.continuousRecognitionFromMultiChannelFileWithMASEnabledAndCustomGeometrySpecified();
+                    break;
+                case "z":
+                    SpeechRecognitionSamples.recognitionFromPullStreamWithSelectMASEnhancementsEnabled();
+                    break;
+                case "aa":
+                    SpeechRecognitionSamples.continuousRecognitionFromPushStreamWithMASEnabledAndBeamformingAnglesSpecified();
                     break;
                 case "0":
                     System.out.println("Exiting...");

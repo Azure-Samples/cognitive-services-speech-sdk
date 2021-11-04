@@ -193,8 +193,8 @@ void SpeakerIdentificationWithPullStream()
     auto client = VoiceProfileClient::FromConfig(config);
 
     // Creates and train two voice profiles.
-    auto profile1 = VoiceProfileEnrollmentWithPullStream(client, audioDirName + "aboutSpeechSdk.wav");
-    auto profile2 = VoiceProfileEnrollmentWithPullStream(client, audioDirName + "speechService.wav");
+    auto profile1 = VoiceProfileEnrollmentWithPullStream(client, audioDirName + "TalkForAFewSeconds16.wav");
+    auto profile2 = VoiceProfileEnrollmentWithPullStream(client, audioDirName + "neuralActivationPhrase.wav");
 
     if (!profile1->GetId().empty() && !profile2->GetId().empty())
     {
@@ -346,25 +346,30 @@ shared_ptr<VoiceProfile> VoiceProfileEnrollmentWithPullStream (const shared_ptr<
     // Creates an audio config object from stream input;
     auto audioInput = AudioConfig::FromStreamInput(pullStream);
 
-    // Enrolls the voice profile using the push stream
-    auto result = client->EnrollProfileAsync(profile, audioInput).get();
+    auto reason = ResultReason::EnrollingVoiceProfile;
+    while (reason == ResultReason::EnrollingVoiceProfile)
+    {
+        // Enrolls the voice profile using the push stream
+        auto result = client->EnrollProfileAsync(profile, audioInput).get();
 
-    // After the voice profile has been successfully enrolled, you can start verifying your voice.
-    if (result->Reason == ResultReason::EnrolledVoiceProfile)
-    {
-        cout << "Enrolled.\n";
-    }
-    // More audio are needed to enroll the speaker.
-    else if (result->Reason == ResultReason::EnrollingVoiceProfile)
-    {
-        cout << "RemainingEnrollmentsSpeechLength in hundred nanosecond: " << result->GetEnrollmentInfo(EnrollmentInfoType::RemainingEnrollmentsSpeechLength) << endl;
-    }
-    // Something went wrong while enrolling the speaker.
-    else if (result->Reason == ResultReason::Canceled)
-    {
-        auto cancellation = VoiceProfileEnrollmentCancellationDetails::FromResult(result);
-        cout << "CANCELED: ErrorCode=" << (int)cancellation->ErrorCode << std::endl;
-        cout << "CANCELED: ErrorDetails=" << cancellation->ErrorDetails << std::endl;
+        // After the voice profile has been successfully enrolled, you can start verifying your voice.
+        if (result->Reason == ResultReason::EnrolledVoiceProfile)
+        {
+            cout << "Enrolled.\n";
+        }
+        // More audio are needed to enroll the speaker.
+        else if (result->Reason == ResultReason::EnrollingVoiceProfile)
+        {
+            cout << "RemainingEnrollmentsSpeechLength in hundred nanosecond: " << result->GetEnrollmentInfo(EnrollmentInfoType::RemainingEnrollmentsSpeechLength) << endl;
+        }
+        // Something went wrong while enrolling the speaker.
+        else if (result->Reason == ResultReason::Canceled)
+        {
+            auto cancellation = VoiceProfileEnrollmentCancellationDetails::FromResult(result);
+            cout << "CANCELED: ErrorCode=" << (int)cancellation->ErrorCode << std::endl;
+            cout << "CANCELED: ErrorDetails=" << cancellation->ErrorDetails << std::endl;
+        }
+        reason = result->Reason;
     }
 
     return profile;
@@ -395,6 +400,12 @@ void VoiceProfileIdentificationWithPullStream(const shared_ptr<SpeechConfig>& co
         cout << "The most similar voice profile is " << result->ProfileId << " with similarity score " << result->GetScore() << endl;
         auto raw = result->Properties.GetProperty(PropertyId::SpeechServiceResponse_JsonResult);
         cout << "The raw json from the service is " << raw << endl;
+    }
+    // No speaker recognized.
+    else if (result->Reason == ResultReason::NoMatch)
+    {
+        auto raw = result->Properties.GetProperty(PropertyId::SpeechServiceResponse_JsonResult);
+        cout << "NoMatch: The raw json from the service is " << raw << endl;
     }
     // Something went wrong while recognizing the speaker.
     else if (result->Reason == ResultReason::Canceled)
@@ -444,10 +455,21 @@ shared_ptr<VoiceProfile> VoiceProfileEnrollmentWithMicrophone(const shared_ptr<V
     // Creates an audio config object from the default microphone.
     auto audioInput = AudioConfig::FromDefaultMicrophoneInput();
 
-    // speak clearly to microphone. The loop exits when the voice profile is enrolled or something went wrong.
-    while (true)
+    // Get list of accepted activation phrases for enrollment
+    auto phrasesResult = client->GetActivationPhrasesAsync(VoiceProfileType::TextIndependentIdentification, "en-us").get();
+    auto phrases = phrasesResult->GetPhrases();
+    if (phrases->size() <= 0)
     {
-        cout << "Say something clearly to train your voice profile...";
+        cout << "No activation phrases received. Aborting..." << std::endl;
+        return profile;
+    }
+
+    auto reason = ResultReason::EnrollingVoiceProfile;
+    // speak clearly to microphone. The loop exits when the voice profile is enrolled or something went wrong.
+    while (reason == ResultReason::EnrollingVoiceProfile)
+    {
+       
+        cout << "Say '" << phrases->at(0) << "' to train your voice profile...";
         // Enrolls the voice profile using the push stream
         auto result = client->EnrollProfileAsync(profile, audioInput).get();
 
@@ -470,6 +492,7 @@ shared_ptr<VoiceProfile> VoiceProfileEnrollmentWithMicrophone(const shared_ptr<V
             cout << "CANCELED: ErrorDetails=" << cancellation->ErrorDetails << endl;
             break;
         }
+        reason = result->Reason;
     }
     return profile;
 }

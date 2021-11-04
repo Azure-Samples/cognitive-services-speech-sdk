@@ -470,7 +470,6 @@ namespace MicrosoftSpeechSDKSamples
         // Translation from microphone.
         public static async Task TranslationWithMicrophoneAsync_withLanguageDetectionEnabled()
         {
-            // <TranslationWithMicrophoneAsync>
             // Translation source language.
             // Replace with a language of your choice.
             string fromLanguage = "en-US";
@@ -582,13 +581,11 @@ namespace MicrosoftSpeechSDKSamples
                 // Stops continuous recognition.
                 await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
             }
-            // </TranslationWithMicrophoneAsync>
         }
 
         // Translation using multi-lingual file input.
         public static async Task TranslationWithMultiLingualFileAsync_withLanguageDetectionEnabled()
         {
-            // <TranslationWithFileAsync>
             // Offical v2 endpoint with service region
             // Please replace the service region with your region
             var v2EndpointInString = String.Format("wss://{0}.stt.speech.microsoft.com/speech/universal/v2", "YourServiceRegion");
@@ -702,7 +699,6 @@ namespace MicrosoftSpeechSDKSamples
                     await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
                 }
             }
-            // </TranslationWithFileAsync>
         }
 
         #endregion

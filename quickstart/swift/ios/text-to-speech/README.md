@@ -15,7 +15,7 @@ This sample demonstrates how to create an iOS app in Swift using the Cognitive S
 
 **By downloading the Microsoft Cognitive Services Speech SDK, you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license201809).**
 
-The Cognitive Services Speech SDK for iOS is distributed as a framework bundle.
+The Cognitive Services Speech SDK for iOS is distributed as a xcframework package.
 It can be used in Xcode projects as a [CocoaPod](https://cocoapods.org/), or downloaded directly [here](https://aka.ms/csspeech/iosbinary) and linked manually. This guide uses a CocoaPod.
 Note that this tutorial will not work without changes for any version earlier than 1.7.0 of the SDK.
 
@@ -43,21 +43,6 @@ This sample uses bridging header (MicrosoftCognitiveServicesSpeech-Bridging-Head
 Alternatively from 1.16.0 SDK and onwards, you can also import Speech SDK as follows.
 
 import MicrosoftCognitiveServicesSpeech
-
-## Use Speech SDK as xcframework
-
-1. Step download https://aka.ms/csspeech/iosbinary  
-your-mac$ ls  
-MicrosoftCognitiveServicesSpeech.framework
-
-2. Extract arm64 bits from the framework file to separate binary (MicrosoftCognitiveServicesSpeech) because xcframework conversion does not support multiple binaries  
-your-mac$ lipo -extract arm64 MicrosoftCognitiveServicesSpeech.framework/MicrosoftCognitiveServicesSpeech -o MicrosoftCognitiveServicesSpeech
-
-3. Replace multi-arch (x86_64, arm64) binary in the framework file with arm64 extracted binary (MicrosoftCognitiveServicesSpeech)  
-your-mac$ mv MicrosoftCognitiveServicesSpeech MicrosoftCognitiveServicesSpeech.framework/
-
-4. Create xcframework from the updated framework file  
-your-mac$ xcodebuild -create-xcframework -framework MicrosoftCognitiveServicesSpeech.framework/ -output MicrosoftCognitiveServicesSpeech.xcframework
 
 ## References
 
