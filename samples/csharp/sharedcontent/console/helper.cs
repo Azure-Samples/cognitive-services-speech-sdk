@@ -14,16 +14,18 @@ namespace MicrosoftSpeechSDKSamples
 {
     public class Helper
     {
-        public static AudioConfig OpenWavFile(string filename)
+        public static AudioConfig OpenWavFile(string filename, AudioProcessingOptions audioProcessingOptions = null)
         {
             BinaryReader reader = new BinaryReader(File.OpenRead(filename));
-            return OpenWavFile(reader);
+            return OpenWavFile(reader, audioProcessingOptions);
         }
 
-        public static AudioConfig OpenWavFile(BinaryReader reader)
+        public static AudioConfig OpenWavFile(BinaryReader reader, AudioProcessingOptions audioProcessingOptions = null)
         {
             AudioStreamFormat format = readWaveHeader(reader);
-            return AudioConfig.FromStreamInput(new BinaryAudioStreamReader(reader), format);
+            return (audioProcessingOptions == null)
+                    ? AudioConfig.FromStreamInput(new BinaryAudioStreamReader(reader), format)
+                    : AudioConfig.FromStreamInput(new BinaryAudioStreamReader(reader), format, audioProcessingOptions);
         }
 
         public static BinaryAudioStreamReader CreateWavReader(string filename)

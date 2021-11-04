@@ -24,76 +24,12 @@ This project hosts the **samples** for the Microsoft Cognitive Services Speech S
 
 Please check [here](https://aka.ms/csspeech/whatsnew) for release notes and older releases.
 
-* Speech SDK Release 1.16.0
-
-  March 2021 we released version 1.16.0 of the Speech SDK
-
-* Speech SDK Release 1.15.0
-
-  January 2021 we released version 1.15.0 of the Speech SDK
-
-* Speech SDK Release 1.14.0
-
-  October 2020 we released version 1.14.0 of the Speech SDK
-
-* Speech SDK Release 1.13.0
-
-  July 2020 we released version 1.13.0 of the Speech SDK
-
-* Speech SDK Release 1.12.1
-
-  June 2020 we released version 1.12.1 of the Speech SDK  
-
-* Speech SDK Release 1.12.0
-
-  May 2020 we released version 1.12.0 of the Speech SDK
-
-* Speech SDK Release 1.11.0
-
-  March 2020 we released version 1.11.0 of the Speech SDK
-
-* Speech SDK Release 1.10.0
-
-  February 2020 we released version 1.10.0 of the Speech SDK
-
-* Speech SDK Release 1.9.0
-
-  January 2020 we released version 1.9.0 of the Speech SDK
-
-* Speech SDK Release 1.8.0
-
-  November 2019 we released version 1.8.0 of the Speech SDK
-
-* Speech SDK Release 1.7.0
-
-  September 2019 we released version 1.7.0 of the Speech SDK
-
-* Speech SDK Release 1.6.0
-
-  June 2019 we released version 1.6.0 of the Speech SDK.
-
-* Speech SDK Release 1.5.1
-
-  Middle of May 2019 we released version 1.5.1 of the Speech SDK.
-
-* Speech SDK Release 1.5.0
-
-  Beginning of May 2019 we released version 1.5.0 of the Speech SDK.
-
-* Speech SDK Release 1.4.0
-
-  Beginning of April 2019 we released version 1.4.0 of the Speech SDK.
-
-* Speech SDK Release 1.3.1
-
-  End of February 2019 we released version 1.3.1 of the Speech SDK.
-
 ## Features
 
 This repository hosts samples that help you to get started with several features of the SDK.
 In addition more complex scenarios are included to give you a head-start on using speech technology in your application.
 
-We tested the samples with the latest released version of the SDK on Windows 10, Linux (on [supported Linux distributions and target architectures](https://docs.microsoft.com/azure/cognitive-services/speech-service/speech-sdk?tabs=linux)), Android devices (API 23: Android 6.0 Marshmallow or higher), and iOS 11.4 devices.
+We tested the samples with the latest released version of the SDK on Windows 10, Linux (on [supported Linux distributions and target architectures](https://docs.microsoft.com/azure/cognitive-services/speech-service/speech-sdk?tabs=linux)), Android devices (API 23: Android 6.0 Marshmallow or higher), Mac x64 (OS version 10.14 or higher) and Mac M1 arm64 (OS version 11.0 or higher) and iOS 11.4 devices.
 
 ## Getting Started
 

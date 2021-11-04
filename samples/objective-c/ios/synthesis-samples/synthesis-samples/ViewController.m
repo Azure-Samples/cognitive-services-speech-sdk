@@ -11,6 +11,7 @@
     NSString *serviceRegion;
 
     NSString *inputText;
+    SPXSpeechSynthesizer *synthesizerForEvents;
 }
 
 @property (strong, nonatomic) IBOutlet UITextField *inputField;
@@ -402,60 +403,64 @@
 }
 
 - (void)synthesisEvent {
-    SPXSpeechConfiguration *speechConfig = [[SPXSpeechConfiguration alloc] initWithSubscription:speechKey region:serviceRegion];
-    if (!speechConfig) {
-        NSLog(@"Could not load speech config");
-        [self updateErrorText:(@"Speech Config Error")];
-        return;
+    if (!synthesizerForEvents) {
+        SPXSpeechConfiguration *speechConfig = [[SPXSpeechConfiguration alloc] initWithSubscription:speechKey region:serviceRegion];
+        if (!speechConfig) {
+            NSLog(@"Could not load speech config");
+            [self updateErrorText:(@"Speech Config Error")];
+            return;
+        }
+
+        synthesizerForEvents = [[SPXSpeechSynthesizer alloc] initWithSpeechConfiguration:speechConfig audioConfiguration:nil];
+        if (!synthesizerForEvents) {
+            NSLog(@"Could not create speech synthesizer");
+            [self updateResultText:(@"Speech Synthesis Error")];
+            return;
+        }
+
+        // connet callbacks
+        [synthesizerForEvents addSynthesisStartedEventHandler: ^ (SPXSpeechSynthesizer *synthesizer, SPXSpeechSynthesisEventArgs *eventArgs) {
+            NSLog(@"Synthesis started");
+            [self updateStatusText:@"Synthesis started."];
+        }];
+
+        [synthesizerForEvents addSynthesizingEventHandler: ^ (SPXSpeechSynthesizer *synthesizer, SPXSpeechSynthesisEventArgs *eventArgs) {
+            NSLog(@"Synthesizing");
+            [self updateStatusText:@"Synthesizing."];
+        }];
+
+        [synthesizerForEvents addSynthesisCompletedEventHandler: ^ (SPXSpeechSynthesizer *synthesizer, SPXSpeechSynthesisEventArgs *eventArgs) {
+            [self updateResultText:@"Speech synthesis was completed."];
+        }];
+
+        [synthesizerForEvents addSynthesisCanceledEventHandler: ^ (SPXSpeechSynthesizer *synthesizer, SPXSpeechSynthesisEventArgs *eventArgs) {
+            SPXSpeechSynthesisCancellationDetails *details = [[SPXSpeechSynthesisCancellationDetails alloc] initFromCanceledSynthesisResult:eventArgs.result];
+            NSLog(@"Speech synthesis was canceled: %@. Did you pass the correct key/region combination?", details.errorDetails);
+            [self updateErrorText:([NSString stringWithFormat:@"Canceled: %@", details.errorDetails])];
+        }];
+
+        [synthesizerForEvents addSynthesisWordBoundaryEventHandler: ^ (SPXSpeechSynthesizer *synthesizer, SPXSpeechSynthesisWordBoundaryEventArgs *eventArgs) {
+            // The unit of AudioOffset is tick (1 tick = 100 nanoseconds), divide by 10,000 to converted to milliseconds.
+            NSLog(@"Word boundary event received. Audio offset: %fms, text offset %lu, word length: %lu.", eventArgs.audioOffset/10000., eventArgs.textOffset, eventArgs.wordLength);
+            [self updateStatusText:[NSString stringWithFormat:@"Word boundary event received. Audio offset: %fms, text offset %lu, word length: %lu.", eventArgs.audioOffset/10000., eventArgs.textOffset, eventArgs.wordLength]];
+        }];
+
+        [synthesizerForEvents addVisemeReceivedEventHandler: ^ (SPXSpeechSynthesizer *synthesizer, SPXSpeechSynthesisVisemeEventArgs *eventArgs) {
+            // The unit of AudioOffset is tick (1 tick = 100 nanoseconds), divide by 10,000 to converted to milliseconds.
+            NSLog(@"Viseme event received. Audio offset: %fms, viseme id: %lu.", eventArgs.audioOffset/10000., eventArgs.visemeId);
+            [self updateStatusText:[NSString stringWithFormat:@"Viseme event received. Audio offset: %fms, viseme id: %lu.", eventArgs.audioOffset/10000., eventArgs.visemeId]];
+        }];
+
+        // To trigger a bookmark event, bookmark tags are required in the SSML, e.g.
+        // "<speak version='1.0' xml:lang='en-US' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts'><voice name='Microsoft Server Speech Text to Speech Voice (en-US, AriaNeural)'><bookmark mark='bookmark_one'/> one. <bookmark mark='bookmark_two'/> two. three. four.</voice></speak>"
+        [synthesizerForEvents addBookmarkReachedEventHandler: ^ (SPXSpeechSynthesizer *synthesizer, SPXSpeechSynthesisBookmarkEventArgs *eventArgs) {
+            // The unit of AudioOffset is tick (1 tick = 100 nanoseconds), divide by 10,000 to converted to milliseconds.
+            NSLog(@"Bookmark reached. Audio offset: %fms, bookmark text: %@.", eventArgs.audioOffset/10000., eventArgs.text);
+            [self updateStatusText:[NSString stringWithFormat:@"Bookmark reached. Audio offset: %fms, bookmark text: %@.", eventArgs.audioOffset/10000., eventArgs.text]];
+        }];
     }
 
-    SPXSpeechSynthesizer *synthesizer = [[SPXSpeechSynthesizer alloc] initWithSpeechConfiguration:speechConfig audioConfiguration:nil];
-    if (!synthesizer) {
-        NSLog(@"Could not create speech synthesizer");
-        [self updateResultText:(@"Speech Synthesis Error")];
-        return;
-    }
-
-    // connet callbacks
-    [synthesizer addSynthesisStartedEventHandler: ^ (SPXSpeechSynthesizer *synthesizer, SPXSpeechSynthesisEventArgs *eventArgs) {
-        [self updateStatusText:@"Synthesis started."];
-    }];
-
-    [synthesizer addSynthesizingEventHandler: ^ (SPXSpeechSynthesizer *synthesizer, SPXSpeechSynthesisEventArgs *eventArgs) {
-        [self updateStatusText:@"Synthesizing."];
-    }];
-
-    [synthesizer addSynthesisCompletedEventHandler: ^ (SPXSpeechSynthesizer *synthesizer, SPXSpeechSynthesisEventArgs *eventArgs) {
-        [self updateResultText:@"Speech synthesis was completed."];
-    }];
-
-    [synthesizer addSynthesisCanceledEventHandler: ^ (SPXSpeechSynthesizer *synthesizer, SPXSpeechSynthesisEventArgs *eventArgs) {
-        SPXSpeechSynthesisCancellationDetails *details = [[SPXSpeechSynthesisCancellationDetails alloc] initFromCanceledSynthesisResult:eventArgs.result];
-        NSLog(@"Speech synthesis was canceled: %@. Did you pass the correct key/region combination?", details.errorDetails);
-        [self updateErrorText:([NSString stringWithFormat:@"Canceled: %@", details.errorDetails])];
-    }];
-
-    [synthesizer addSynthesisWordBoundaryEventHandler: ^ (SPXSpeechSynthesizer *synthesizer, SPXSpeechSynthesisWordBoundaryEventArgs *eventArgs) {
-        // The unit of AudioOffset is tick (1 tick = 100 nanoseconds), divide by 10,000 to converted to milliseconds.
-        NSLog(@"Word boundary event received. Audio offset: %fms, text offset %lu, word length: %lu.", eventArgs.audioOffset/10000., eventArgs.textOffset, eventArgs.wordLength);
-        [self updateStatusText:[NSString stringWithFormat:@"Word boundary event received. Audio offset: %fms, text offset %lu, word length: %lu.", eventArgs.audioOffset/10000., eventArgs.textOffset, eventArgs.wordLength]];
-    }];
-
-    [synthesizer addVisemeReceivedEventHandler: ^ (SPXSpeechSynthesizer *synthesizer, SPXSpeechSynthesisVisemeEventArgs *eventArgs) {
-        // The unit of AudioOffset is tick (1 tick = 100 nanoseconds), divide by 10,000 to converted to milliseconds.
-        NSLog(@"Viseme event received. Audio offset: %fms, viseme id: %lu.", eventArgs.audioOffset/10000., eventArgs.visemeId);
-        [self updateStatusText:[NSString stringWithFormat:@"Viseme event received. Audio offset: %fms, viseme id: %lu.", eventArgs.audioOffset/10000., eventArgs.visemeId]];
-    }];
-
-    // To trigger a bookmark event, bookmark tags are required in the SSML, e.g.
-    // "<speak version='1.0' xml:lang='en-US' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts'><voice name='Microsoft Server Speech Text to Speech Voice (en-US, AriaNeural)'><bookmark mark='bookmark_one'/> one. <bookmark mark='bookmark_two'/> two. three. four.</voice></speak>"
-    [synthesizer addBookmarkReachedEventHandler: ^ (SPXSpeechSynthesizer *synthesizer, SPXSpeechSynthesisBookmarkEventArgs *eventArgs) {
-        // The unit of AudioOffset is tick (1 tick = 100 nanoseconds), divide by 10,000 to converted to milliseconds.
-        NSLog(@"Bookmark reached. Audio offset: %fms, bookmark text: %@.", eventArgs.audioOffset/10000., eventArgs.text);
-        [self updateStatusText:[NSString stringWithFormat:@"Bookmark reached. Audio offset: %fms, bookmark text: %@.", eventArgs.audioOffset/10000., eventArgs.text]];
-    }];
-
-    [synthesizer startSpeakingText:inputText];
+    [synthesizerForEvents startSpeakingText:inputText];
 }
 
 - (BOOL)textField:(UITextField *)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string {
