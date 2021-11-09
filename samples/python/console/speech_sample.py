@@ -288,6 +288,7 @@ def speech_recognize_continuous_from_file():
     speech_recognizer.stop_continuous_recognition()
     # </SpeechContinuousRecognitionWithFile>
 
+# <SpeechRecognitionFromMicrophone>
 def speech_recognize_keyword_from_microphone():
     """performs keyword-triggered speech recognition with input microphone"""
     speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
@@ -342,6 +343,7 @@ def speech_recognize_keyword_from_microphone():
         time.sleep(.5)
 
     speech_recognizer.stop_keyword_recognition()
+# </SpeechRecognitionFromMicrophone>
 
 def speech_recognition_with_pull_stream():
     """gives an example how to use a pull audio stream to recognize speech from a custom audio
