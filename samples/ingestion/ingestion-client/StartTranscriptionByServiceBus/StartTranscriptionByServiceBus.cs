@@ -8,7 +8,7 @@ namespace StartTranscription
     using System;
     using System.Text;
     using System.Threading.Tasks;
-    using Microsoft.Azure.ServiceBus;
+    using Azure.Messaging.ServiceBus;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Extensions.Logging;
     using StartTranscriptionByTimer;
@@ -16,7 +16,7 @@ namespace StartTranscription
     public static class StartTranscriptionByServiceBus
     {
         [FunctionName("StartTranscriptionByServiceBus")]
-        public static async Task Run([ServiceBusTrigger("start_transcription_queue", Connection = "AzureServiceBus")]Message message, ILogger log)
+        public static async Task Run([ServiceBusTrigger("start_transcription_queue", Connection = "AzureServiceBus")]ServiceBusReceivedMessage message, ILogger log)
         {
             if (log == null)
             {
@@ -28,8 +28,8 @@ namespace StartTranscription
                 throw new ArgumentNullException(nameof(message));
             }
 
-            log.LogInformation($"C# ServiceBus queue trigger function processed message: {message.Label}");
-            log.LogInformation($"Received message: SequenceNumber:{message.SystemProperties.SequenceNumber} Body:{Encoding.UTF8.GetString(message.Body)}");
+            log.LogInformation($"C# ServiceBus queue trigger function processed message: {message.Subject}");
+            log.LogInformation($"Received message: SequenceNumber:{message.SequenceNumber} Body:{message.Body}");
 
             var transcriptionHelper = new StartTranscriptionHelper(log);
 

@@ -8,26 +8,27 @@ namespace Connector
     using System;
     using System.Text;
     using System.Threading.Tasks;
+    using Azure.Messaging.ServiceBus;
     using Microsoft.Azure.ServiceBus;
     using Microsoft.Extensions.Logging;
 
     public static class ServiceBusUtilities
     {
-        public static async Task SendServiceBusMessageAsync(QueueClient queueClient, string messageContent, ILogger log, TimeSpan delay)
+        public static async Task SendServiceBusMessageAsync(ServiceBusSender queueSender, string messageContent, ILogger log, TimeSpan delay)
         {
-            var message = new Message(Encoding.UTF8.GetBytes(messageContent));
-            await SendServiceBusMessageAsync(queueClient, message, log, delay).ConfigureAwait(false);
+            var message = new Azure.Messaging.ServiceBus.ServiceBusMessage(Encoding.UTF8.GetBytes(messageContent));
+            await SendServiceBusMessageAsync(queueSender, message, log, delay).ConfigureAwait(false);
         }
 
-        public static async Task SendServiceBusMessageAsync(QueueClient queueClient, Message message, ILogger log, TimeSpan delay)
+        public static async Task SendServiceBusMessageAsync(ServiceBusSender queueSender, Azure.Messaging.ServiceBus.ServiceBusMessage message, ILogger log, TimeSpan delay)
         {
-            if (queueClient == null)
+            if (queueSender == null)
             {
-                throw new ArgumentNullException(nameof(queueClient));
+                throw new ArgumentNullException(nameof(queueSender));
             }
 
             log.LogInformation($"Sending message with delay of {delay.TotalMinutes} minutes.");
-            await queueClient.ScheduleMessageAsync(message, DateTimeOffset.Now.Add(delay)).ConfigureAwait(false);
+            await queueSender.ScheduleMessageAsync(message, DateTimeOffset.Now.Add(delay)).ConfigureAwait(false);
         }
     }
 }

@@ -13,11 +13,10 @@ namespace FetchTranscriptionFunction
     using System.Threading.Tasks;
     using System.Xml;
     using Azure;
+    using Azure.Messaging.ServiceBus;
     using Connector;
     using Connector.Enums;
-    using Microsoft.Azure.ServiceBus;
     using Microsoft.Extensions.Logging;
-    using Microsoft.WindowsAzure.Storage;
     using Newtonsoft.Json;
     using TextAnalytics;
 
@@ -25,9 +24,13 @@ namespace FetchTranscriptionFunction
     {
         private static readonly StorageConnector StorageConnectorInstance = new (FetchTranscriptionEnvironmentVariables.AzureWebJobsStorage);
 
-        private static readonly QueueClient StartQueueClientInstance = new (new ServiceBusConnectionStringBuilder(FetchTranscriptionEnvironmentVariables.StartTranscriptionServiceBusConnectionString));
+        private static readonly ServiceBusClient StartServiceBusClient = new ServiceBusClient(FetchTranscriptionEnvironmentVariables.StartTranscriptionServiceBusConnectionString);
 
-        private static readonly QueueClient FetchQueueClientInstance = new (new ServiceBusConnectionStringBuilder(FetchTranscriptionEnvironmentVariables.FetchTranscriptionServiceBusConnectionString));
+        private static readonly ServiceBusSender StartServiceBusSender = StartServiceBusClient.CreateSender(FetchTranscriptionEnvironmentVariables.StartTranscriptionServiceBusQueueName);
+
+        private static readonly ServiceBusClient FetchServiceBusClient = new ServiceBusClient(FetchTranscriptionEnvironmentVariables.FetchTranscriptionServiceBusConnectionString);
+
+        private static readonly ServiceBusSender FetchServiceBusSender = FetchServiceBusClient.CreateSender(FetchTranscriptionEnvironmentVariables.FetchTranscriptionServiceBusQueueName);
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "Catch general exception to allow manual retrying.")]
         public static async Task ProcessTranscriptionJobAsync(TranscriptionStartedMessage serviceBusMessage, ILogger log)
@@ -59,11 +62,11 @@ namespace FetchTranscriptionFunction
                         break;
                     case "Running":
                         log.LogInformation($"Transcription running, polling again after {messageDelayTime.TotalMinutes} minutes.");
-                        await ServiceBusUtilities.SendServiceBusMessageAsync(FetchQueueClientInstance, serviceBusMessage.CreateMessageString(), log, messageDelayTime).ConfigureAwait(false);
+                        await ServiceBusUtilities.SendServiceBusMessageAsync(StartServiceBusSender, serviceBusMessage.CreateMessageString(), log, messageDelayTime).ConfigureAwait(false);
                         break;
                     case "NotStarted":
                         log.LogInformation($"Transcription not started, polling again after {messageDelayTime.TotalMinutes} minutes.");
-                        await ServiceBusUtilities.SendServiceBusMessageAsync(FetchQueueClientInstance, serviceBusMessage.CreateMessageString(), log, messageDelayTime).ConfigureAwait(false);
+                        await ServiceBusUtilities.SendServiceBusMessageAsync(FetchServiceBusSender, serviceBusMessage.CreateMessageString(), log, messageDelayTime).ConfigureAwait(false);
                         break;
                 }
             }
@@ -145,7 +148,7 @@ namespace FetchTranscriptionFunction
                 if (retryAudioFile && audio.RetryCount < FetchTranscriptionEnvironmentVariables.RetryLimit)
                 {
                     log.LogInformation($"Retrying transcription with name {fileName} - retry count: {audio.RetryCount}");
-                    var sbMessage = new ServiceBusMessage
+                    var sbMessage = new Connector.ServiceBusMessage
                     {
                         Data = new Data
                         {
@@ -155,8 +158,8 @@ namespace FetchTranscriptionFunction
                         RetryCount = audio.RetryCount + 1
                     };
 
-                    var audioFileMessage = new Message(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(sbMessage)));
-                    await ServiceBusUtilities.SendServiceBusMessageAsync(StartQueueClientInstance, audioFileMessage, log, TimeSpan.FromMinutes(1)).ConfigureAwait(false);
+                    var audioFileMessage = new Azure.Messaging.ServiceBus.ServiceBusMessage(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(sbMessage)));
+                    await ServiceBusUtilities.SendServiceBusMessageAsync(StartServiceBusSender, audioFileMessage, log, TimeSpan.FromMinutes(1)).ConfigureAwait(false);
                 }
                 else
                 {
@@ -379,7 +382,7 @@ namespace FetchTranscriptionFunction
             if (message.FailedExecutionCounter <= FetchTranscriptionEnvironmentVariables.RetryLimit || statusCode == HttpStatusCode.TooManyRequests)
             {
                 log.LogInformation("Retrying..");
-                await ServiceBusUtilities.SendServiceBusMessageAsync(FetchQueueClientInstance, message.CreateMessageString(), log, messageDelayTime).ConfigureAwait(false);
+                await ServiceBusUtilities.SendServiceBusMessageAsync(FetchServiceBusSender, message.CreateMessageString(), log, messageDelayTime).ConfigureAwait(false);
             }
             else
             {
@@ -411,7 +414,7 @@ namespace FetchTranscriptionFunction
                         false,
                         log).ConfigureAwait(false);
                 }
-                catch (StorageException e)
+                catch (RequestFailedException e)
                 {
                     log.LogError($"Storage Exception {e} while writing error log to file and moving result");
                 }
