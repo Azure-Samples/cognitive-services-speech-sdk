@@ -413,7 +413,7 @@ void StandaloneLanguageDetectionSamples()
     {
         cout << "\nStandalone Language Detection SAMPLES:\n";
         cout << "1.) Standalone language detection with microphone input.\n";
-        cout << "2.) Standalone language detection in single-shot mode with file input.\n";
+        cout << "2.) Standalone language detection in at-start mode with file input.\n";
         cout << "3.) Standalone language detection in continuous mode with file input.\n";
         cout << "4.) Standalone language detection in continuous mode with multi-lingual file input.\n";
         cout << "\nChoice (0 for MAIN MENU): ";

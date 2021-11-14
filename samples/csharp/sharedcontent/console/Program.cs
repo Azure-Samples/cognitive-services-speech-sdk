@@ -53,7 +53,7 @@ namespace MicrosoftSpeechSDKSamples
             var prompt = "Your choice (0: Stop): ";
 
             Console.WriteLine("1. Language detection with microphone input.");
-            Console.WriteLine("2. SingleShot language detection with file input.");
+            Console.WriteLine("2. At-Start language detection with file input.");
             Console.WriteLine("3. Continuous language detection with multi-lingual audio input.");
 
             Console.Write(prompt);

@@ -20,7 +20,7 @@ void recognizeSpeech() {
     cout << "Say something...\n";
 
     // Performs recognition. RecognizeOnceAsync() returns when the first utterance has been recognized,
-    // so it is suitable only for single shot recognition like command or query. For long-running
+    // so it is suitable only for at-start recognition like command or query. For long-running
     // recognition, use StartContinuousRecognitionAsync() instead.
     auto result = recognizer->RecognizeOnceAsync().get();
 

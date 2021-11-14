@@ -668,7 +668,7 @@
 }
 
 /*
- * Performs single-shot pronunciation assessment from microphone.
+ * Performs at-start pronunciation assessment from microphone.
  */
 - (void)pronunciationAssessFromMicrophone {
     SPXSpeechConfiguration *speechConfig = [[SPXSpeechConfiguration alloc] initWithSubscription:speechKey region:serviceRegion];

@@ -28,7 +28,7 @@ namespace MicrosoftSpeechSDKSamples
             // Replace with your own subscription key and service region (e.g., "westus").
             var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
-            // Single-Shot with Latency priority
+            // At-Start with Latency priority
             // Please refer to the documentation of language id with different modes
             config.SetProperty(PropertyId.SpeechServiceConnection_SingleLanguageIdPriority, "Latency");
 
@@ -80,7 +80,7 @@ namespace MicrosoftSpeechSDKSamples
             // Replace with your own subscription key and service region (e.g., "westus").
             var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
-            // Single-Shot with Accuracy
+            // At-Start with Accuracy
             // Please refer to the documentation of language id with different modes
             config.SetProperty(PropertyId.SpeechServiceConnection_SingleLanguageIdPriority, "Accuracy");
 

@@ -104,11 +104,11 @@
                 <td align="right">Scenario:</td>
                 <td align="left">
                     <select id="scenarioSelection">
-                        <option value="speechRecognizerRecognizeOnce">Single-shot speech-to-text</option>
+                        <option value="speechRecognizerRecognizeOnce">At-Start speech-to-text</option>
                         <option value="speechRecognizerContinuous">Continuous speech-to-text</option>
-                        <option value="intentRecognizerRecognizeOnce">Single-shot intent recognition</option>
+                        <option value="intentRecognizerRecognizeOnce">At-Start intent recognition</option>
                         <option value="translationRecognizerContinuous">Continuous translation</option>
-                        <option value="pronunciationAssessmentOnce">Single-shot pronunciation assessment</option>
+                        <option value="pronunciationAssessmentOnce">At-Start pronunciation assessment</option>
                         <option value="pronunciationAssessmentContinuous">Continuous pronunciation assessment</option>
                     </select>
                 </td>
@@ -601,7 +601,7 @@
             statusDiv.innerHTML += `(recognized)  Reason: ${SpeechSDK.ResultReason[result.reason]}`;
             if (scenarioSelection.value === 'speechRecognizerRecognizeOnce'
                 || scenarioSelection.value === 'intentRecognizerRecognizeOnce') {
-                // Clear the final results view for single-shot scenarios
+                // Clear the final results view for at-start scenarios
                 phraseDiv.innerHTML = '';
             } else {
                 // Otherwise, just remove the ongoing hypothesis line
@@ -715,7 +715,7 @@
             // * In the case of continuous scenarios, these final results will be generated after each segment of audio
             //   with sufficient silence at the end.
             // * In the case of intent scenarios, only these final results will contain intent JSON data.
-            // * Single-shot scenarios can also use a continuation on recognizeOnceAsync calls to handle this without
+            // * At-Start scenarios can also use a continuation on recognizeOnceAsync calls to handle this without
             //   event registration.
             recognizer.recognized = onRecognized;
 
@@ -833,7 +833,7 @@
             applyCommonConfigurationTo(reco);
 
             // Start the continuous recognition. Note that, in this continuous scenario, activity is purely event-
-            // driven, as use of continuation (as is in the single-shot sample) isn't applicable when there's not a
+            // driven, as use of continuation (as is in the at-start sample) isn't applicable when there's not a
             // single result.
             reco.startContinuousRecognitionAsync();
         }
@@ -947,7 +947,7 @@
             pronunciationAssessmentConfig.applyTo(reco);
 
             // Start the continuous recognition. Note that, in this continuous scenario, activity is purely event-
-            // driven, as use of continuation (as is in the single-shot sample) isn't applicable when there's not a
+            // driven, as use of continuation (as is in the at-start sample) isn't applicable when there's not a
             // single result.
             reco.startContinuousRecognitionAsync();
         }
