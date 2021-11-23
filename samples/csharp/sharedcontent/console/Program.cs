@@ -117,7 +117,7 @@ namespace MicrosoftSpeechSDKSamples
         }
 
         /// <summary>
-        /// Speech recogntion with Microsoft Audio Stack enabled.
+        /// Speech recognition with Microsoft Audio Stack enabled.
         /// </summary>
         private static void SpeechRecognitionWithMASEnabled()
         {

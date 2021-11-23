@@ -19,6 +19,7 @@ samples = OrderedDict([
     (speech_sample, [
         speech_sample.speech_recognize_once_from_mic,
         speech_sample.speech_recognize_once_from_file,
+        speech_sample.speech_recognize_once_from_file_with_detailed_recognition_results,
         speech_sample.speech_recognize_once_compressed_input,
         speech_sample.speech_recognize_once_from_file_with_customized_model,
         speech_sample.speech_recognize_once_from_file_with_custom_endpoint_parameters,
