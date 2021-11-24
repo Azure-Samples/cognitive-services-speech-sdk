@@ -48,8 +48,6 @@ namespace StartTranscriptionByTimer
 
         public static readonly string FetchTranscriptionServiceBusConnectionString = Environment.GetEnvironmentVariable(nameof(FetchTranscriptionServiceBusConnectionString), EnvironmentVariableTarget.Process);
 
-        public static readonly string FetchTranscriptionServiceBusQueueName = Environment.GetEnvironmentVariable(nameof(FetchTranscriptionServiceBusQueueName), EnvironmentVariableTarget.Process);
-
         public static readonly string Locale = Environment.GetEnvironmentVariable(nameof(Locale), EnvironmentVariableTarget.Process);
 
         public static readonly string ProfanityFilterMode = Environment.GetEnvironmentVariable(nameof(ProfanityFilterMode), EnvironmentVariableTarget.Process);
@@ -57,7 +55,5 @@ namespace StartTranscriptionByTimer
         public static readonly string PunctuationMode = Environment.GetEnvironmentVariable(nameof(PunctuationMode), EnvironmentVariableTarget.Process);
 
         public static readonly string StartTranscriptionServiceBusConnectionString = Environment.GetEnvironmentVariable(nameof(StartTranscriptionServiceBusConnectionString), EnvironmentVariableTarget.Process);
-
-        public static readonly string StartTranscriptionServiceBusQueueName = Environment.GetEnvironmentVariable(nameof(StartTranscriptionServiceBusQueueName), EnvironmentVariableTarget.Process);
     }
 }

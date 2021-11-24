@@ -9,14 +9,13 @@ namespace Connector
     using System.Text;
     using System.Threading.Tasks;
     using Azure.Messaging.ServiceBus;
-    using Microsoft.Azure.ServiceBus;
     using Microsoft.Extensions.Logging;
 
     public static class ServiceBusUtilities
     {
         public static async Task SendServiceBusMessageAsync(ServiceBusSender queueSender, string messageContent, ILogger log, TimeSpan delay)
         {
-            var message = new Azure.Messaging.ServiceBus.ServiceBusMessage(Encoding.UTF8.GetBytes(messageContent));
+            var message = new Azure.Messaging.ServiceBus.ServiceBusMessage(messageContent);
             await SendServiceBusMessageAsync(queueSender, message, log, delay).ConfigureAwait(false);
         }
 

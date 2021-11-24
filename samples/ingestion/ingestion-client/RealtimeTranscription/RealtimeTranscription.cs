@@ -8,8 +8,8 @@ namespace RealtimeTranscription
     using System;
     using System.Text;
     using System.Threading.Tasks;
+    using Azure.Messaging.ServiceBus;
     using Connector;
-    using Microsoft.Azure.ServiceBus;
     using Microsoft.Azure.WebJobs;
     using Microsoft.CognitiveServices.Speech;
     using Microsoft.Extensions.Logging;
@@ -24,7 +24,7 @@ namespace RealtimeTranscription
             RealtimeTranscriptionEnvironmentVariables.AzureSpeechServicesKey);
 
         [FunctionName("RealtimeTranscription")]
-        public static async Task Run([ServiceBusTrigger("start_transcription_queue", Connection = "AzureServiceBus")]Message message, ILogger logger)
+        public static async Task Run([ServiceBusTrigger("start_transcription_queue", Connection = "AzureServiceBus")]ServiceBusReceivedMessage message, ILogger logger)
         {
             if (logger == null)
             {
@@ -36,10 +36,10 @@ namespace RealtimeTranscription
                 throw new ArgumentNullException(nameof(message));
             }
 
-            logger.LogInformation($"C# ServiceBus queue trigger function processed message: {message.Label}");
-            logger.LogInformation($"Received message: SequenceNumber:{message.SystemProperties.SequenceNumber} Body:{Encoding.UTF8.GetString(message.Body)}");
+            logger.LogInformation($"C# ServiceBus queue trigger function processed message: {message.Subject}");
+            logger.LogInformation($"Received message: SequenceNumber:{message.SequenceNumber} Body:{Encoding.UTF8.GetString(message.Body)}");
 
-            var serviceBusMessage = JsonConvert.DeserializeObject<ServiceBusMessage>(Encoding.UTF8.GetString(message.Body));
+            var serviceBusMessage = JsonConvert.DeserializeObject<Connector.ServiceBusMessage>(Encoding.UTF8.GetString(message.Body));
 
             if (!serviceBusMessage.EventType.Contains("BlobCreate", StringComparison.OrdinalIgnoreCase) ||
                 !StorageConnector.GetContainerNameFromUri(serviceBusMessage.Data.Url).Equals(RealtimeTranscriptionEnvironmentVariables.AudioInputContainer, StringComparison.Ordinal))

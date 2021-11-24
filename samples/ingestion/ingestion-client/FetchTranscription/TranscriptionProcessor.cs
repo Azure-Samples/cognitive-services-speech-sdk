@@ -26,11 +26,11 @@ namespace FetchTranscriptionFunction
 
         private static readonly ServiceBusClient StartServiceBusClient = new ServiceBusClient(FetchTranscriptionEnvironmentVariables.StartTranscriptionServiceBusConnectionString);
 
-        private static readonly ServiceBusSender StartServiceBusSender = StartServiceBusClient.CreateSender(FetchTranscriptionEnvironmentVariables.StartTranscriptionServiceBusQueueName);
+        private static readonly ServiceBusSender StartServiceBusSender = StartServiceBusClient.CreateSender(ServiceBusConnectionStringProperties.Parse(FetchTranscriptionEnvironmentVariables.StartTranscriptionServiceBusConnectionString).EntityPath);
 
         private static readonly ServiceBusClient FetchServiceBusClient = new ServiceBusClient(FetchTranscriptionEnvironmentVariables.FetchTranscriptionServiceBusConnectionString);
 
-        private static readonly ServiceBusSender FetchServiceBusSender = FetchServiceBusClient.CreateSender(FetchTranscriptionEnvironmentVariables.FetchTranscriptionServiceBusQueueName);
+        private static readonly ServiceBusSender FetchServiceBusSender = FetchServiceBusClient.CreateSender(ServiceBusConnectionStringProperties.Parse(FetchTranscriptionEnvironmentVariables.FetchTranscriptionServiceBusConnectionString).EntityPath);
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "Catch general exception to allow manual retrying.")]
         public static async Task ProcessTranscriptionJobAsync(TranscriptionStartedMessage serviceBusMessage, ILogger log)
@@ -158,7 +158,7 @@ namespace FetchTranscriptionFunction
                         RetryCount = audio.RetryCount + 1
                     };
 
-                    var audioFileMessage = new Azure.Messaging.ServiceBus.ServiceBusMessage(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(sbMessage)));
+                    var audioFileMessage = new Azure.Messaging.ServiceBus.ServiceBusMessage(JsonConvert.SerializeObject(sbMessage));
                     await ServiceBusUtilities.SendServiceBusMessageAsync(StartServiceBusSender, audioFileMessage, log, TimeSpan.FromMinutes(1)).ConfigureAwait(false);
                 }
                 else

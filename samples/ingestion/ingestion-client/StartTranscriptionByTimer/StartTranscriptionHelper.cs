@@ -28,11 +28,11 @@ namespace StartTranscriptionByTimer
 
         private static readonly ServiceBusClient StartServiceBusClient = new ServiceBusClient(StartTranscriptionEnvironmentVariables.StartTranscriptionServiceBusConnectionString);
 
-        private static readonly ServiceBusSender StartSender = StartServiceBusClient.CreateSender(StartTranscriptionEnvironmentVariables.StartTranscriptionServiceBusQueueName);
+        private static readonly ServiceBusSender StartSender = StartServiceBusClient.CreateSender(ServiceBusConnectionStringProperties.Parse(StartTranscriptionEnvironmentVariables.StartTranscriptionServiceBusConnectionString).EntityPath);
 
         private static readonly ServiceBusClient FetchServiceBusClient = new ServiceBusClient(StartTranscriptionEnvironmentVariables.FetchTranscriptionServiceBusConnectionString);
 
-        private static readonly ServiceBusSender FetchSender = FetchServiceBusClient.CreateSender(StartTranscriptionEnvironmentVariables.FetchTranscriptionServiceBusQueueName);
+        private static readonly ServiceBusSender FetchSender = FetchServiceBusClient.CreateSender(ServiceBusConnectionStringProperties.Parse(StartTranscriptionEnvironmentVariables.FetchTranscriptionServiceBusConnectionString).EntityPath);
 
         private readonly string SubscriptionKey = StartTranscriptionEnvironmentVariables.AzureSpeechServicesKey;
 
@@ -258,7 +258,7 @@ namespace StartTranscriptionByTimer
                 {
                     sbMessage.RetryCount += 1;
                     var messageDelay = GetMessageDelayTime(sbMessage.RetryCount);
-                    var newMessage = new Azure.Messaging.ServiceBus.ServiceBusMessage(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(sbMessage)));
+                    var newMessage = new Azure.Messaging.ServiceBus.ServiceBusMessage(JsonConvert.SerializeObject(sbMessage));
                     await ServiceBusUtilities.SendServiceBusMessageAsync(StartSender, newMessage, Logger, messageDelay).ConfigureAwait(false);
                 }
                 else
