@@ -4,8 +4,8 @@ This sample demonstrates various forms of speech recognition, intent recognition
 
 ## Prerequisites
 
-* Python 3.5 or later needs to be installed. Downloads are available [here](https://www.python.org/downloads/).
-* The Speech SDK Python package is available for Windows (x64 and x86), Mac (macOS X version 10.12 or later), and Linux (see the list of [supported Linux distributions and target architectures](https://docs.microsoft.com/azure/cognitive-services/speech-service/speech-sdk?tabs=linux)).
+* On Windows and Linux Python 3.6 or later needs to be installed. On Mac, minimum version for Python is 3.7. Downloads are available [here](https://www.python.org/downloads/).
+* The Python Speech SDK package is available for Windows (x64 and x86), Mac x64 (macOS X version 10.14 or later), Mac arm64 (macOS version 11.0 or later), and Linux (see the list of [supported Linux distributions and target architectures](https://docs.microsoft.com/azure/cognitive-services/speech-service/speech-sdk?tabs=linux)).
 * On Ubuntu or Debian, run the following commands for the installation of required packages:
   ```sh
   sudo apt-get update
