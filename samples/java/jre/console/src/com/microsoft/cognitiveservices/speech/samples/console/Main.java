@@ -52,6 +52,7 @@ public class Main {
                 + "custom microphone array geometry specified.");
         System.out.println("36. Speech recognition from pull stream with custom set of enhancements from Microsoft Audio Stack enabled.");
         System.out.println("37. Speech recognition from push stream with Microsoft Audio Stack enabled and beamforming angles specified.");
+        System.out.println("38. Speech synthesis to audio and SRT files.");
 
         System.out.print(prompt);
 
@@ -172,6 +173,8 @@ public class Main {
                 case "37":
                     SpeechRecognitionSamples.continuousRecognitionFromPushStreamWithMASEnabledAndBeamformingAnglesSpecified();
                     break;
+                case "38":
+                    SpeechSynthesisSamples.synthesisWordBoundaryEventToSrtAsync();
                 case "0":
                     System.out.println("Exiting...");
                     break;
