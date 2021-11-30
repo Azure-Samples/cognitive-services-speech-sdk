@@ -160,7 +160,7 @@ void IntentContinuousRecognitionWithFile()
     auto recognizer = IntentRecognizer::FromConfig(config, audioInput);
 
     // promise for synchronization of recognition end.
-    std::promise<void> recognitionEnd;
+    promise<void> recognitionEnd;
 
     // Creates a Language Understanding model using the app id, and adds specific intents from your model
     auto model = LanguageUnderstandingModel::FromAppId("YourLanguageUnderstandingAppId");
@@ -250,7 +250,7 @@ void IntentRecognitionWithPatternMatchingAndMicrophone()
     model->Entities.push_back({ "floorName" , Intent::EntityType::List, Intent::EntityMatchMode::Strict, {"ground floor", "lobby", "1st", "first", "one", "2nd", "second", "two"} });
 
     // Add the model to a model vector.
-    std::vector<std::shared_ptr<LanguageUnderstandingModel>> modelCollection;
+    vector<shared_ptr<LanguageUnderstandingModel>> modelCollection;
     modelCollection.push_back(model);
 
     // Apply the language model collection to the recognizer.
