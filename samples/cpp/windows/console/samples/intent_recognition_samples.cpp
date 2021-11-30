@@ -222,3 +222,86 @@ void IntentContinuousRecognitionWithFile()
     recognizer->StopContinuousRecognitionAsync().get();
     // </IntentContinuousRecognitionWithFile>
 }
+
+// Intent recognition using pattern matching and microphone.
+void IntentRecognitionWithPatternMatchingAndMicrophone()
+{
+    // <IntentRecognitionWithPatternMatchingAndMicrophone>
+    // Creates an instance of a speech config with specified subscription key
+    // and service region. Note that in contrast to the other samples this DOES NOT require a
+    // LUIS application.
+    // The default recognition language is "en-us".
+    auto config = SpeechConfig::FromSubscription("YourLanguageUnderstandingSubscriptionKey", "YourLanguageUnderstandingServiceRegion");
+
+    // Creates an intent recognizer using microphone as audio input.
+    auto recognizer = IntentRecognizer::FromConfig(config);
+
+    // Creates a Pattern Matching model and adds specific intents from your model. 
+    // The Id is used to identify this model from others in the collection.
+    auto model = PatternMatchingModel::FromModelId("YourPatternMatchingModelId");
+
+    // Adds some intents to look for specific patterns.
+    model->Intents.push_back({ {"Take me to floor {floorName}", "Go to floor {floorName}", "Take me to {floorName}", "Go to floor {floorName}", "Go to {floorName}", "{floorName}"}, "ChangeFloors"});
+    model->Intents.push_back({ {"{action} the doors", "{action} doors", "{action} the door", "{action} door"}, "DoorControl"});
+
+    // Creates the "floorName" entity and set it to type list.
+    // Adds acceptable values. NOTE the default entity type is Any and so we do not need
+    // to declare the "action" entity.
+    model->Entities.push_back({ "floorName" , Intent::EntityType::List, Intent::EntityMatchMode::Strict, {"ground floor", "lobby", "1st", "first", "one", "2nd", "second", "two"}});
+
+    // Add the model to a model vector.
+    std::vector<std::shared_ptr<LanguageUnderstandingModel>> modelCollection;
+    modelCollection.push_back(model);
+    
+    // Apply the language model collection to the recognizer.
+    recognizer->ApplyLanguageModels(modelCollection);
+
+    cout << "Say something...\n";
+
+    // Starts intent recognition, and returns after a single utterance is recognized. The end of a
+    // single utterance is determined by listening for silence at the end or until a maximum of 15
+    // seconds of audio is processed.  The task returns the recognition text as result. 
+    // Note: Since RecognizeOnceAsync() returns only a single utterance, it is suitable only for single
+    // shot recognition like command or query. 
+    // For long-running multi-utterance recognition, use StartContinuousRecognitionAsync() instead.
+    auto result = recognizer->RecognizeOnceAsync().get();
+
+    // Checks result.
+    if (result->Reason == ResultReason::RecognizedIntent)
+    {
+        cout << "RECOGNIZED: Text=" << result->Text << std::endl;
+        cout << "  Intent Id: " << result->IntentId << std::endl;
+
+        auto entities = result->GetEntities();
+        if (entities.find("floorName") != entities.end())
+        {
+            std::cout << "  Floor name: = " << entities["floorName"].c_str() << std::endl;
+        }
+
+        if (entities.find("action") != entities.end())
+        {
+            std::cout << "  Action: = " << entities["action"].c_str() << std::endl;
+        }
+    }
+    else if (result->Reason == ResultReason::RecognizedSpeech)
+    {
+        cout << "RECOGNIZED: Text=" << result->Text << " (intent could not be recognized)" << std::endl;
+    }
+    else if (result->Reason == ResultReason::NoMatch)
+    {
+        cout << "NOMATCH: Speech could not be recognized." << std::endl;
+    }
+    else if (result->Reason == ResultReason::Canceled)
+    {
+        auto cancellation = CancellationDetails::FromResult(result);
+        cout << "CANCELED: Reason=" << (int)cancellation->Reason << std::endl;
+
+        if (cancellation->Reason == CancellationReason::Error)
+        {
+            cout << "CANCELED: ErrorCode=" << (int)cancellation->ErrorCode << std::endl;
+            cout << "CANCELED: ErrorDetails=" << cancellation->ErrorDetails << std::endl;
+            cout << "CANCELED: Did you update the subscription info?" << std::endl;
+        }
+    }
+    // </IntentRecognitionWithPatternMatchingAndMicrophone>
+}
