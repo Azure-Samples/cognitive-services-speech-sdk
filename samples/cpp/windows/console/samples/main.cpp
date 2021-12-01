@@ -23,6 +23,7 @@ extern void SpeechRecognitionFromPullStreamWithSelectMASEnhancementsEnabled();
 extern void SpeechContinuousRecognitionFromPushStreamWithMASEnabledAndBeamformingAnglesSpecified();
 
 extern void IntentRecognitionWithMicrophone();
+extern void IntentRecognitionWithPatternMatchingAndMicrophone();
 extern void IntentRecognitionWithLanguage();
 extern void IntentContinuousRecognitionWithFile();
 
@@ -184,6 +185,7 @@ void IntentSamples()
         cout << "1.) Intent recognition with microphone input.\n";
         cout << "2.) Intent recognition in the specified language.\n";
         cout << "3.) Intent continuous recognition with file input.\n";
+        cout << "4.) Intent recognition from default microphone and pattern matching.\n";
         cout << "\nChoice (0 for MAIN MENU): ";
         cout.flush();
 
@@ -200,6 +202,9 @@ void IntentSamples()
             break;
         case '3':
             IntentContinuousRecognitionWithFile();
+            break;
+        case '4':
+            IntentRecognitionWithPatternMatchingAndMicrophone();
             break;
         case '0':
             break;
