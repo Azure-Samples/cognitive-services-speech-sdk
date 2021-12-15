@@ -27,7 +27,7 @@
         <dependency>
             <groupId>com.microsoft.bot</groupId>
             <artifactId>bot-builder</artifactId>
-            <version>4.13.0</version>
+            <version>4.14.1</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
