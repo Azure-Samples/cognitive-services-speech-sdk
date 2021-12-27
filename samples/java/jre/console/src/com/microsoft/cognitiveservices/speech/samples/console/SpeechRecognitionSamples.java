@@ -18,7 +18,7 @@ import java.io.StringReader;
 import jakarta.json.Json;
 import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
-import jakarta.json.JsonReader; 
+import jakarta.json.JsonReader;
 
 // <toplevel>
 import com.microsoft.cognitiveservices.speech.*;
@@ -116,7 +116,7 @@ public class SpeechRecognitionSamples {
                 JsonReader jsonReader = Json.createReader(new StringReader(jsonText));
 
                 // Extract the "NBest" array of recognition results from the JSON.
-                // Note that the first cell in the NBest array corresponds to the recognition results 
+                // Note that the first cell in the NBest array corresponds to the recognition results
                 // (NOT the cell with the highest confidence number!)
                 JsonArray nbestArray = jsonReader.readObject().getJsonArray("NBest");
 
@@ -327,12 +327,12 @@ public class SpeechRecognitionSamples {
         SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
         // Create an object that parses the WAV file and implements PullAudioInputStreamCallback to read audio data from the file.
-        // Replace with your own audio file name. 
+        // Replace with your own audio file name.
         WavStream wavStream = new WavStream(new FileInputStream("YourAudioFile.wav"));
-        
+
         // Create a pull audio input stream from the WAV file
         PullAudioInputStream inputStream = PullAudioInputStream.createPullStream(wavStream, wavStream.getFormat());
-        
+
         // Create a configuration object for the recognizer, to read from the pull audio input stream
         AudioConfig audioInput = AudioConfig.fromStreamInput(inputStream);
 
@@ -966,10 +966,8 @@ public class SpeechRecognitionSamples {
 
         stopRecognitionSemaphore.acquire();
 
-
         System.out.println("Press any key to stop");
         new Scanner(System.in).nextLine();
-
 
         config.close();
         audioInput.close();
