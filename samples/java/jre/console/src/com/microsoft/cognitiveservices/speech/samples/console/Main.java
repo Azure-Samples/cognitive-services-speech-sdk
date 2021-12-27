@@ -52,6 +52,8 @@ public class Main {
                 + "custom microphone array geometry specified.");
         System.out.println("36. Speech recognition from pull stream with custom set of enhancements from Microsoft Audio Stack enabled.");
         System.out.println("37. Speech recognition from push stream with Microsoft Audio Stack enabled and beamforming angles specified.");
+        System.out.println("38. Pronunciation assessment with microphone input.");
+        System.out.println("39. Pronunciation assessment with stream input.");
 
         System.out.print(prompt);
 
@@ -171,6 +173,12 @@ public class Main {
                     break;
                 case "37":
                     SpeechRecognitionSamples.continuousRecognitionFromPushStreamWithMASEnabledAndBeamformingAnglesSpecified();
+                    break;
+                case "38":
+                    SpeechRecognitionSamples.pronunciationAssessmentWithMicrophoneAsync();
+                    break;
+                case "39":
+                    SpeechRecognitionSamples.pronunciationAssessmentWithPushStream();
                     break;
                 case "0":
                     System.out.println("Exiting...");

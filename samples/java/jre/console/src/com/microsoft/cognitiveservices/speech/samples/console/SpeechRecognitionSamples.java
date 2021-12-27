@@ -798,8 +798,9 @@ public class SpeechRecognitionSamples {
     public static void pronunciationAssessmentWithMicrophoneAsync() throws ExecutionException, InterruptedException {
         // Creates an instance of a speech config with specified subscription key and service region.
         // Replace with your own subscription key and service region (e.g., "westus").
-        // Note: The pronunciation assessment feature is currently only available on en-US language.
         SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+
+        config.setSpeechRecognitionLanguage("en-US");
 
         // The pronunciation assessment service has a longer default end silence timeout (5 seconds) than normal STT
         // as the pronunciation assessment is widely used in education scenario where kids have longer break in reading.
@@ -811,10 +812,10 @@ public class SpeechRecognitionSamples {
         PronunciationAssessmentConfig pronunciationConfig = new PronunciationAssessmentConfig(referenceText,
             PronunciationAssessmentGradingSystem.HundredMark, PronunciationAssessmentGranularity.Phoneme, true);
 
-        // Creates a speech recognizer for the specified language, using microphone as audio input.
-        SpeechRecognizer recognizer = new SpeechRecognizer(config);
+        while (true)
         {
-            while (true)
+            // Creates a speech recognizer for the specified language, using microphone as audio input.
+            SpeechRecognizer recognizer = new SpeechRecognizer(config);
             {
                 // Receives reference text from console input.
                 System.out.println("Enter reference text you want to assess, or enter empty text to exit.");
@@ -863,12 +864,116 @@ public class SpeechRecognitionSamples {
                 }
 
                 result.close();
+                recognizer.close();
             }
 
             pronunciationConfig.close();
             config.close();
-            recognizer.close();
         }
+    }
+
+    // Pronunciation assessment with events from a push stream
+    // This sample takes and existing file and reads it by chunk into a local buffer and then pushes the
+    // buffer into an PushAudioStream for pronunciation assessment.
+    public static void pronunciationAssessmentWithPushStream() throws InterruptedException, IOException
+    {
+        // Creates an instance of a speech config with specified
+        // subscription key and service region. Replace with your own subscription key
+        // and service region (e.g., "westus").
+        SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+
+        // Set pronunciation assessment language
+        config.setSpeechRecognitionLanguage("en-US");
+
+        // Create the push stream to push audio to.
+        PushAudioInputStream pushStream = AudioInputStream.createPushStream();
+
+        // Creates a speech recognizer using Push Stream as audio input.
+        AudioConfig audioInput = AudioConfig.fromStreamInput(pushStream);
+
+        SpeechRecognizer recognizer = new SpeechRecognizer(config, audioInput);
+
+        stopRecognitionSemaphore = new Semaphore(0);
+
+        recognizer.recognized.addEventListener((s, e) -> {
+            if (e.getResult().getReason() == ResultReason.RecognizedSpeech) {
+                System.out.println("RECOGNIZED: Text=" + e.getResult().getText());
+                PronunciationAssessmentResult pronunciationResult = PronunciationAssessmentResult.fromResult(e.getResult());
+                System.out.println(
+                        String.format(
+                                "    Accuracy score: %f, Pronunciation score: %f, Completeness score : %f, FluencyScore: %f",
+                                pronunciationResult.getAccuracyScore(), pronunciationResult.getPronunciationScore(),
+                                pronunciationResult.getCompletenessScore(), pronunciationResult.getFluencyScore()));
+            }
+            else if (e.getResult().getReason() == ResultReason.NoMatch) {
+                System.out.println("NOMATCH: Speech could not be recognized.");
+            }
+            stopRecognitionSemaphore.release();
+        });
+
+        recognizer.canceled.addEventListener((s, e) -> {
+            System.out.println("CANCELED: Reason=" + e.getReason());
+
+            if (e.getReason() == CancellationReason.Error) {
+                System.out.println("CANCELED: ErrorCode=" + e.getErrorCode());
+                System.out.println("CANCELED: ErrorDetails=" + e.getErrorDetails());
+                System.out.println("CANCELED: Did you update the subscription info?");
+            }
+
+            stopRecognitionSemaphore.release();
+        });
+
+        recognizer.sessionStarted.addEventListener((s, e) -> {
+            System.out.println("\n    Session started event.");
+        });
+
+        recognizer.sessionStopped.addEventListener((s, e) -> {
+            System.out.println("\n    Session stopped event.");
+        });
+
+        String referenceText = "Hello world";
+        // create pronunciation assessment config, set grading system, granularity and if enable miscue based on your requirement.
+        PronunciationAssessmentConfig pronunciationConfig = new PronunciationAssessmentConfig(referenceText,
+                PronunciationAssessmentGradingSystem.HundredMark, PronunciationAssessmentGranularity.Phoneme, true);
+        pronunciationConfig.applyTo(recognizer);
+
+        System.out.println("Assessing...");
+        recognizer.recognizeOnceAsync();
+
+        // Replace with your own audio file name.
+        // The input stream the sample will read from.
+        InputStream inputStream = new FileInputStream("YourAudioFile.wav");
+
+        // Arbitrary buffer size.
+        byte[] readBuffer = new byte[4096];
+
+        // Push audio read from the file into the PushStream.
+        // The audio can be pushed into the stream before, after, or during recognition
+        // and recognition will continue as data becomes available.
+        int bytesRead;
+        while ((bytesRead = inputStream.read(readBuffer)) != -1) {
+            if (bytesRead == readBuffer.length) {
+                pushStream.write(readBuffer);
+            } else {
+                // Last buffer read from the WAV file is likely to have less bytes
+                pushStream.write(Arrays.copyOfRange(readBuffer, 0, bytesRead));
+            }
+        }
+
+        inputStream.close();
+        // Signal the end of stream to stop assessment
+        pushStream.close();
+
+        stopRecognitionSemaphore.acquire();
+
+
+        System.out.println("Press any key to stop");
+        new Scanner(System.in).nextLine();
+
+
+        config.close();
+        audioInput.close();
+        recognizer.close();
     }
 
     // Speech recognition from default microphone with Microsoft Audio Stack enabled.
