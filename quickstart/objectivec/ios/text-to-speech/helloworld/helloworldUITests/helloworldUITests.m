@@ -46,13 +46,13 @@
     XCUIElement *resultLabel = app.staticTexts[@"result_label"];
     XCTAssert(resultLabel.exists);
     
-    NSPredicate *pred = [NSPredicate predicateWithFormat:@"label == %@", @"The synthesis is completed."];
+    NSPredicate *pred = [NSPredicate predicateWithFormat:@"label == %@", @"The synthesis was completed."];
     
     [self expectationForPredicate:pred evaluatedWithObject:resultLabel handler:nil];
     
     [synthButton tap];
     
-    [self waitForExpectationsWithTimeout:20 handler:nil];
+    [self waitForExpectationsWithTimeout:60 handler:nil];
 }
 
 @end

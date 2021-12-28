@@ -5,8 +5,8 @@
 // <code>
 package com.microsoft.cognitiveservices.speech.samples.quickstart;
 
-import android.support.v4.app.ActivityCompat;
-import android.support.v7.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -62,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
         EditText speakText = this.findViewById(R.id.speakText);
 
         try {
-            // Note: this will block the UI thread, so eventually, you want to register for the event 
+            // Note: this will block the UI thread, so eventually, you want to register for the event
             SpeechSynthesisResult result = synthesizer.SpeakText(speakText.getText().toString());
             assert(result != null);
 

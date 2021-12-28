@@ -115,11 +115,11 @@ namespace MicrosoftSpeechSDKSamples
             var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
             // Sets the voice name.
-            // e.g. "Microsoft Server Speech Text to Speech Voice (en-US, ChristopherNeural)".
+            // e.g. "Microsoft Server Speech Text to Speech Voice (en-US, JennyNeural)".
             // The full list of supported voices can be found here:
             // https://aka.ms/csspeech/voicenames
             // And, you can try GetVoicesAsync method to get all available voices (see SynthesisGetAvailableVoicesAsync() sample below).
-            var voice = "Microsoft Server Speech Text to Speech Voice (en-US, ChristopherNeural)";
+            var voice = "Microsoft Server Speech Text to Speech Voice (en-US, JennyNeural)";
             config.SpeechSynthesisVoiceName = voice;
 
             // Creates a speech synthesizer for the specified voice, using the default speaker as audio output.
@@ -910,7 +910,7 @@ namespace MicrosoftSpeechSDKSamples
                     || details.ErrorCode == CancellationErrorCode.ServiceTimeout
                     || details.ErrorDetails.Contains("Error code: 1007"))
                 {
-                    // Synthesize using a standard platform voice, e.g. en-US-ChristopherNeural
+                    // Synthesize using a standard platform voice, e.g. en-US-JennyNeural
                     synthesisResult = await SynthesizeOnceAsyncInternal("YourSubscriptionKey", "YourServiceRegion", null, "YourPlatformVoiceName");
                 }
             }

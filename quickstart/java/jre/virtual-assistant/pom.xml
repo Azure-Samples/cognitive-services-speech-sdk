@@ -17,7 +17,7 @@
         <dependency>
             <groupId>com.microsoft.cognitiveservices.speech</groupId>
             <artifactId>client-sdk</artifactId>
-            <version>1.18.0</version>
+            <version>1.19.0</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -27,7 +27,7 @@
         <dependency>
             <groupId>com.microsoft.bot</groupId>
             <artifactId>bot-builder</artifactId>
-            <version>4.13.0</version>
+            <version>4.14.1</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
@@ -57,7 +57,7 @@
         <dependency>
             <groupId>com.nimbusds</groupId>
             <artifactId>nimbus-jose-jwt</artifactId>
-            <version>7.9</version>
+            <version>9.15.2</version>
         </dependency>
     </dependencies>
     <!-- </dependencies> -->

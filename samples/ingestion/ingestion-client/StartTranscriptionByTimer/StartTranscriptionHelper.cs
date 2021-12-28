@@ -39,10 +39,6 @@ namespace StartTranscriptionByTimer
 
         private readonly int FilesPerTranscriptionJob = StartTranscriptionEnvironmentVariables.FilesPerTranscriptionJob;
 
-        private readonly string HostName = StartTranscriptionEnvironmentVariables.IsAzureGovDeployment ?
-            $"https://{StartTranscriptionEnvironmentVariables.AzureSpeechServicesRegion}.api.cognitive.microsoft.us/" :
-            $"https://{StartTranscriptionEnvironmentVariables.AzureSpeechServicesRegion}.api.cognitive.microsoft.com/";
-
         private readonly ILogger Logger;
 
         private readonly string Locale;
@@ -174,13 +170,20 @@ namespace StartTranscriptionByTimer
             {
                 var properties = GetTranscriptionPropertyBag();
 
-                var sasUrls = new List<string>();
+                var audioUrls = new List<string>();
                 var audioFileInfos = new List<AudioFileInfo>();
 
                 foreach (var serviceBusMessage in serviceBusMessages)
                 {
-                    var sasUrl = StorageConnectorInstance.CreateSas(serviceBusMessage.Data.Url);
-                    sasUrls.Add(sasUrl);
+                    if (StartTranscriptionEnvironmentVariables.IsByosEnabledSubscription)
+                    {
+                        audioUrls.Add(serviceBusMessage.Data.Url.AbsoluteUri);
+                    }
+                    else
+                    {
+                        audioUrls.Add(StorageConnectorInstance.CreateSas(serviceBusMessage.Data.Url));
+                    }
+
                     audioFileInfos.Add(new AudioFileInfo(serviceBusMessage.Data.Url.AbsoluteUri, serviceBusMessage.RetryCount));
                 }
 
@@ -188,14 +191,14 @@ namespace StartTranscriptionByTimer
 
                 if (Guid.TryParse(StartTranscriptionEnvironmentVariables.CustomModelId, out var customModelId))
                 {
-                    modelIdentity = ModelIdentity.Create(StartTranscriptionEnvironmentVariables.AzureSpeechServicesRegion, customModelId);
+                    modelIdentity = new ModelIdentity($"{StartTranscriptionEnvironmentVariables.AzureSpeechServicesEndpointUri}speechtotext/v3.0/models/{customModelId}");
                 }
 
-                var transcriptionDefinition = TranscriptionDefinition.Create(jobName, "StartByTimerTranscription", Locale, sasUrls, properties, modelIdentity);
+                var transcriptionDefinition = TranscriptionDefinition.Create(jobName, "StartByTimerTranscription", Locale, audioUrls, properties, modelIdentity);
 
                 var transcriptionLocation = await BatchClient.PostTranscriptionAsync(
                     transcriptionDefinition,
-                    HostName,
+                    StartTranscriptionEnvironmentVariables.AzureSpeechServicesEndpointUri,
                     SubscriptionKey).ConfigureAwait(false);
 
                 Logger.LogInformation($"Location: {transcriptionLocation}");
