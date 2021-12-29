@@ -127,11 +127,11 @@ public class SpeechSynthesisSamples {
         SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
         // Sets the voice name.
-        // e.g. "Microsoft Server Speech Text to Speech Voice (en-US, ChristopherNeural)".
+        // e.g. "Microsoft Server Speech Text to Speech Voice (en-US, JennyNeural)".
         // The full list of supported voices can be found here:
         // https://aka.ms/csspeech/voicenames
         // And, you can try getVoicesAsync method to get all available voices (see synthesisGetAvailableVoicesAsync() sample below).
-        String voice = "en-US-ChristopherNeural";
+        String voice = "en-US-JennyNeural";
         config.setSpeechSynthesisVoiceName(voice);
 
         // Creates a speech synthesizer using the default speaker as audio output.

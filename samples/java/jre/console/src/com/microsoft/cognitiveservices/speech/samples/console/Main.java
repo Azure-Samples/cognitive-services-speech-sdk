@@ -52,7 +52,9 @@ public class Main {
                 + "custom microphone array geometry specified.");
         System.out.println("36. Speech recognition from pull stream with custom set of enhancements from Microsoft Audio Stack enabled.");
         System.out.println("37. Speech recognition from push stream with Microsoft Audio Stack enabled and beamforming angles specified.");
-        System.out.println("38. Speech synthesis to audio and SRT files.");
+        System.out.println("38. Pronunciation assessment with microphone input.");
+        System.out.println("39. Pronunciation assessment with stream input.");
+        System.out.println("40. Speech synthesis to audio and SRT files.");
 
         System.out.print(prompt);
 
@@ -67,7 +69,7 @@ public class Main {
                     break;
                 case "2":
                     SpeechRecognitionSamples.recognitionWithMicrophoneAsyncAndDetailedRecognitionResults();
-                    break;                    
+                    break;
                 case "3":
                     SpeechRecognitionSamples.recognitionWithLanguageAsync();
                     break;
@@ -174,7 +176,14 @@ public class Main {
                     SpeechRecognitionSamples.continuousRecognitionFromPushStreamWithMASEnabledAndBeamformingAnglesSpecified();
                     break;
                 case "38":
-                    SpeechSynthesisSamples.synthesisWordBoundaryEventToSrtAsync();
+                    SpeechRecognitionSamples.pronunciationAssessmentWithMicrophoneAsync();
+                    break;
+                case "39":
+                    SpeechRecognitionSamples.pronunciationAssessmentWithPushStream();
+                    break;
+                case "40":
+                SpeechSynthesisSamples.synthesisWordBoundaryEventToSrtAsync();
+                    break;
                 case "0":
                     System.out.println("Exiting...");
                     break;
