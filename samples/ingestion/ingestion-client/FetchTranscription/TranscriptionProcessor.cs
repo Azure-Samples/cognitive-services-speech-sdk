@@ -192,7 +192,7 @@ namespace FetchTranscriptionFunction
             var textAnalytics = textAnalyticsInfoProvided ? new TextAnalytics(serviceBusMessage.Locale, textAnalyticsKey, textAnalyticsRegion, log) : null;
 
             var insights = (FetchTranscriptionEnvironmentVariables.RedactPii || FetchTranscriptionEnvironmentVariables.DetectCallReason) ?
-                new Insights(subscriptionKey, FetchTranscriptionEnvironmentVariables.AzureSpeechServicesRegion, log) :
+                new Insights(subscriptionKey, FetchTranscriptionEnvironmentVariables.AzureSpeechServicesRegion, FetchTranscriptionEnvironmentVariables.RedactPiiCategories, log) :
                 null;
 
             var generalErrorsStringBuilder = new StringBuilder();

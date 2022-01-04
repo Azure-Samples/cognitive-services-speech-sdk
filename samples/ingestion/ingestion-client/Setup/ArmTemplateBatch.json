@@ -143,6 +143,13 @@
                 "description": "A value indicating whether PII should be redacted."
             }
         },
+        "ProjectFrankfurt: RedactPiiCategories": {
+            "defaultValue": "",
+            "type": "String",
+            "metadata": {
+                "description": "The Pii categories that should be redacted. Leave empty to redact all. Add categories in format: Address;Credit Card;Email;Name;..."
+            }
+        },
         "ProjectFrankfurt: RedactPiiAudio": {
             "defaultValue": false,
             "type": "bool",
@@ -909,12 +916,13 @@
                 "TextAnalyticsKey": "[concat('@Microsoft.KeyVault(VaultName=', variables('KeyVaultName'), ';SecretName=', variables('TextAnalyticsKeySecretName'), ')')]",
                 "TextAnalyticsRegion": "[variables('TextAnalyticsRegion')]",
                 "UseSqlDatabase": "[variables('UseSqlDatabase')]",
-                "WEBSITE_RUN_FROM_PACKAGE": "https://mspublicstorage.blob.core.windows.net/ingestion-client-insights/09092021.0/FetchTranscription.zip",
+                "WEBSITE_RUN_FROM_PACKAGE": "https://mspublicstorage.blob.core.windows.net/ingestion-client-insights/04012022.0/FetchTranscription.zip",
                 "CreateConsolidatedOutputFiles": "[variables('CreateConsolidatedOutputFiles')]",
                 "ConsolidatedFilesOutputContainer": "[variables('ConsolidatedFilesOutputContainer')]",
                 "CreateAudioProcessedContainer": "[variables('CreateAudioProcessedContainer')]",
                 "AudioProcessedContainer": "[variables('AudioProcessedContainer')]",
                 "RedactPii": "[parameters('ProjectFrankfurt: RedactPii')]",
+                "RedactPiiCategories": "[parameters('ProjectFrankfurt: RedactPiiCategories')]",
                 "DetectCallReason": "[parameters('ProjectFrankfurt: DetectCallReason')]"
             }
         }

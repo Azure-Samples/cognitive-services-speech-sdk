@@ -36,6 +36,8 @@ namespace FetchTranscriptionFunction
 
         public static readonly int RetryLimit = int.TryParse(Environment.GetEnvironmentVariable(nameof(RetryLimit), EnvironmentVariableTarget.Process), out RetryLimit) ? RetryLimit.ClampInt(1, Constants.MaxRetryLimit) : Constants.DefaultRetryLimit;
 
+        public static readonly string[] RedactPiiCategories = Environment.GetEnvironmentVariable(nameof(RedactPiiCategories), EnvironmentVariableTarget.Process).Split(Constants.Delimiter);
+
         public static readonly string AudioInputContainer = Environment.GetEnvironmentVariable(nameof(AudioInputContainer), EnvironmentVariableTarget.Process);
 
         public static readonly string AzureSpeechServicesKey = Environment.GetEnvironmentVariable(nameof(AzureSpeechServicesKey), EnvironmentVariableTarget.Process);

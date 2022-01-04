@@ -29,17 +29,20 @@ namespace FetchTranscription
 
         private readonly string SubscriptionKey;
 
+        private readonly string[] PiiCategories;
+
         private readonly ILogger Log;
 
-        public Insights(string subscriptionKey, string region, ILogger log)
+        public Insights(string subscriptionKey, string region, string[] piiCategories, ILogger log)
         {
             PiiRedactionUri = new Uri($"https://{region}.stt.speech.microsoft.com/api/v1.0/insights/pii/transcript/redact");
             CallReasonUri = new Uri($"https://{region}.stt.speech.microsoft.com/api/v1.0/insights/callreason/transcript/predict");
             SubscriptionKey = subscriptionKey;
+            PiiCategories = piiCategories;
             Log = log;
         }
 
-        public static string ConvertSpeechTranscriptToInsightsFormat(SpeechTranscript speechTranscript)
+        public string ConvertSpeechTranscriptToInsightsFormat(SpeechTranscript speechTranscript)
         {
             if (speechTranscript == null)
             {
@@ -91,6 +94,11 @@ namespace FetchTranscription
                             new JProperty("2", "Customer"))));
             }
 
+            if (this.PiiCategories.Any())
+            {
+                requestJObject.Add("Categories", JToken.FromObject(this.PiiCategories));
+            }
+
             return JsonConvert.SerializeObject(requestJObject, Formatting.Indented);
         }
 
@@ -105,7 +113,7 @@ namespace FetchTranscription
 
             try
             {
-                var chunkString = ConvertSpeechTranscriptToInsightsFormat(speechTranscript);
+                var chunkString = this.ConvertSpeechTranscriptToInsightsFormat(speechTranscript);
                 var byteData = Encoding.UTF8.GetBytes(chunkString);
 
                 using var content = new ByteArrayContent(byteData);
@@ -151,7 +159,7 @@ namespace FetchTranscription
 
             try
             {
-                var chunkString = ConvertSpeechTranscriptToInsightsFormat(speechTranscript);
+                var chunkString = this.ConvertSpeechTranscriptToInsightsFormat(speechTranscript);
                 var byteData = Encoding.UTF8.GetBytes(chunkString);
 
                 using var content = new ByteArrayContent(byteData);
