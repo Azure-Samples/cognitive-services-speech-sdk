@@ -1,6 +1,6 @@
 # How to get phonemes in IPA format
 
-1. Follow [How to use speech SDK for pronunciation assessment](https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/how-to-pronunciation-assessment) to learn the basic usage of Pronunciation Assessment API.
+1. Follow [How to use speech SDK for pronunciation assessment](https://docs.microsoft.com/azure/cognitive-services/speech-service/how-to-pronunciation-assessment) to learn the basic usage of Pronunciation Assessment API.
 
 2. Update the Pronunciation Assessment configuration to trigger the IPA format. Based on the code from step 1, modify the code of creating "pronunciationAssessmentConfig" to below:
 
