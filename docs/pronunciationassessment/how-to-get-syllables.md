@@ -171,7 +171,7 @@
                     }
                 }],
                 "Phonemes": [
-                    // omitted phonemes
+                    ... // omitted phonemes
                 ]
             }]
         }]

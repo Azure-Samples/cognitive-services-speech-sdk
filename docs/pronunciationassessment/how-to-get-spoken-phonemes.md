@@ -141,7 +141,7 @@ There could also be case with `NBestPhonemes`: / k /, / ɡ /, …, which means t
                             "Phoneme": "k",
                             "Score": 5.0
                         },
-                        // omitted n best phonemes
+                        ... // omitted n best phonemes
                         ]
                     }
                 },
@@ -152,7 +152,7 @@ There could also be case with `NBestPhonemes`: / k /, / ɡ /, …, which means t
                     "PronunciationAssessment": {
                         "AccuracyScore": 100.0
                         "NBestPhonemes": [
-                            // omitted n best phonemes
+                            ... // omitted n best phonemes
                         ]
                     }
                 },
@@ -163,7 +163,7 @@ There could also be case with `NBestPhonemes`: / k /, / ɡ /, …, which means t
                     "PronunciationAssessment": {
                         "AccuracyScore": 100.0
                         "NBestPhonemes": [
-                            // omitted n best phonemes
+                            ... // omitted n best phonemes
                         ]
                     }
                 }]
@@ -194,7 +194,7 @@ There could also be case with `NBestPhonemes`: / k /, / ɡ /, …, which means t
                     }
                 }],
                 "Phonemes": [
-                    // omitted phonemes
+                    ... // omitted phonemes
                 ]
             }]
         }]
