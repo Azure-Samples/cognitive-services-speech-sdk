@@ -3,6 +3,7 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 // <code>
+// <skeleton_1>
 using System;
 using System.Text;
 using Windows.UI.Xaml;
@@ -48,23 +49,33 @@ namespace helloworld
 
         private async void SpeechRecognitionFromMicrophone_ButtonClicked(object sender, RoutedEventArgs e)
         {
+        // </skeleton_1>
+            // <create_speech_configuration>
             // Creates an instance of a speech config with specified subscription key and service region.
             // Replace with your own subscription key and service region (e.g., "westus").
             var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+            // </create_speech_configuration>
 
+            // <skeleton_2>
             try
             {
+            // </skeleton_2>
+                // <create_speech_recognizer_1>
                 // Creates a speech recognizer using microphone as audio input.
                 using (var recognizer = new SpeechRecognizer(config))
                 {
+                // </create_speech_recognizer_1>
                     // Starts speech recognition, and returns after a single utterance is recognized. The end of a
                     // single utterance is determined by listening for silence at the end or until a maximum of 15
                     // seconds of audio is processed.  The task returns the recognition text as result.
                     // Note: Since RecognizeOnceAsync() returns only a single utterance, it is suitable only for single
                     // shot recognition like command or query.
                     // For long-running multi-utterance recognition, use StartContinuousRecognitionAsync() instead.
+                    // <recognize_phrase>
                     var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+                    // </recognize_phrase>
 
+                    // <print_results>
                     // Checks result.
                     StringBuilder sb = new StringBuilder();
                     if (result.Reason == ResultReason.RecognizedSpeech)
@@ -90,7 +101,11 @@ namespace helloworld
 
                     // Update the UI
                     NotifyUser(sb.ToString(), NotifyType.StatusMessage);
+                    // </print_results>
+                // <create_speech_recognizer_2>
                 }
+                // </create_speech_recognizer_2>
+            // <skeleton_3>
             }
             catch(Exception ex)
             {
@@ -152,4 +167,5 @@ namespace helloworld
         }
     }
 }
+// </skeleton_3>
 // </code>
