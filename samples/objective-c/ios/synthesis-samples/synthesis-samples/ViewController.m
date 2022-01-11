@@ -149,7 +149,7 @@
     // https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support#text-to-speech
     speechConfig.speechSynthesisLanguage = @"en-GB";
     // Sets the voice name
-    // e.g. "Microsoft Server Speech Text to Speech Voice (en-US, ChristopherNeural)".
+    // e.g. "Microsoft Server Speech Text to Speech Voice (en-US, JennyNeural)".
     // The full list of supported voices can be found here:
     // https://aka.ms/csspeech/voicenames
     // And, you can try getVoices method to get all available voices.
