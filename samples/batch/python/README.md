@@ -29,26 +29,30 @@ The sample code itself is [main.py](python-client/main.py) and can be run using 
 You will need to adapt the following information to run the sample:
 
 1. Your subscription key and region.
-1. The URI of an audio recording in blob storage.
-1. (Optional:) The model ID of an adapted model, if you want to use a custom model.
-1. (Optional:) The URI of a container with audio files if you want to transcribe all of them with a single request.
+   
+   The code needs a Subscription Key, this is *not* your Azure Subscription key, but the Cognitive service key. Please make sure you are using the subscription key for your Cognitive Services or Speech resource, and not the subscription id of Azure. You can get the key from the "Keys and Endpoint" tab on your resource in the Azure Portal.
+
+2. The URI of an audio recording in blob storage.
+3. (Optional:) The model ID of an adapted model, if you want to use a custom model.
+4. (Optional:) The URI of a container with audio files if you want to transcribe all of them with a single request.
+   
+   Container name can be defined simply as follows:
+   
+   RECORDINGS_CONTAINER_URI = "https://YourStorageName.blob.core.windows.net/FolderName" 
+
+   On Azure portal, go to 'Access Policy' of the folder and give 'read permission'. Make sure to setup proper 'Access Level' too.
+
+   However, destinationContainerUrl in properties, should have  proper URL with permission defined on them which can be created by going to container, and selecting "Shared access tokens" from settings. And then choose permissions from the drop down and then click on "Generate SAS token and URL". Copy the Blolb SAS URL and paste in the code where destinationContainerUrl is needed. 
+
 
 You can use a development environment like PyCharm to edit, debug, and execute the sample.
 
 ## NOTE
 
-Here are few small things which may threw people off. 
-
-The code needs a Subscription Key, this is *not* your Azure Subscription key, but the Cognitive service key. Please make sure you are using the subscription key for your Cognitive Services or Speech resource, and not the subscription id of Azure. You can get the key from the "Keys and Endpoint" tab on your resource in the Azure Portal.
-
-Code ask for Service Region, In Azure portal you will  see the region name as "East US" with a space, but you have to add "eastus" in code.  
+Code ask for Service Region, In Azure portal you may see the region name as "East US" with a space, but you have to add "eastus" in code. [Here](https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/regions#rest-apis) is lists all the supported Azure regions for REST APIs. 
 
 Batch transcription is only available with a standard (paid) subscription. Free subscription will not work for batch. 
 
-container name can be defined simply as follows:
-RECORDINGS_CONTAINER_URI = "https://YourStorageName.blob.core.windows.net/FolderName" 
-
-However, destinationContainerUrl in properties, should have  proper URL with permission defined on them which can be created by going to container, and selecting "Shared access tokens" from settings. And then choose permissions from the drop down and then click on "Generate SAS token and URL". Copy the Blolb SAS URL and paste in the code where destinationContainerUrl is needed. 
 
 
 
