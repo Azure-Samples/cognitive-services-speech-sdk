@@ -16,8 +16,14 @@ extern void SpeechContinuousRecognitionWithPullStream();
 extern void SpeechContinuousRecognitionWithPushStream();
 extern void KeywordTriggeredSpeechRecognitionWithMicrophone();
 extern void PronunciationAssessmentWithMicrophone();
+extern void SpeechContinuousRecognitionFromDefaultMicrophoneWithMASEnabled();
+extern void SpeechRecognitionFromMicrophoneWithMASEnabledAndPresetGeometrySpecified();
+extern void SpeechContinuousRecognitionFromMultiChannelFileWithMASEnabledAndCustomGeometrySpecified();
+extern void SpeechRecognitionFromPullStreamWithSelectMASEnhancementsEnabled();
+extern void SpeechContinuousRecognitionFromPushStreamWithMASEnabledAndBeamformingAnglesSpecified();
 
 extern void IntentRecognitionWithMicrophone();
+extern void IntentRecognitionWithPatternMatchingAndMicrophone();
 extern void IntentRecognitionWithLanguage();
 extern void IntentContinuousRecognitionWithFile();
 
@@ -43,6 +49,7 @@ extern void SpeechSynthesisBookmarkEvent();
 
 extern void ConversationWithPullAudioStream();
 extern void ConversationWithPushAudioStream();
+extern void ConversationWithMicrophone();
 
 extern void SpeakerVerificationWithMicrophone();
 extern void SpeakerVerificationWithPushStream();
@@ -75,6 +82,15 @@ void SpeechSamples()
         cout << "6.) Speech recognition using push stream input.\n";
         cout << "7.) Speech recognition using microphone with a keyword trigger.\n";
         cout << "8.) Pronunciation assessment using microphone input.\n";
+        cout << "9.) Speech recognition from default microphone with Microsoft Audio Stack enabled.\n";
+        cout << "a.) Speech recognition from a microphone with Microsoft Audio Stack enabled and "
+                "pre-defined microphone array geometry specified.\n";
+        cout << "b.) Speech recognition from multi-channel file with Microsoft Audio Stack enabled and "
+                "custom microphone array geometry specified.\n";
+        cout << "c.) Speech recognition from pull stream with custom set of enhancements from "
+                "Microsoft Audio Stack enabled.\n";
+        cout << "d.) Speech recognition from push stream with Microsoft Audio Stack enabled and "
+                "beamforming angles specified.\n";
         cout << "\nChoice (0 for MAIN MENU): ";
         cout.flush();
 
@@ -106,6 +122,25 @@ void SpeechSamples()
             break;
         case '8':
             PronunciationAssessmentWithMicrophone();
+            break;
+        case '9':
+            SpeechContinuousRecognitionFromDefaultMicrophoneWithMASEnabled();
+            break;
+        case 'A':
+        case 'a':
+            SpeechRecognitionFromMicrophoneWithMASEnabledAndPresetGeometrySpecified();
+            break;
+        case 'B':
+        case 'b':
+            SpeechContinuousRecognitionFromMultiChannelFileWithMASEnabledAndCustomGeometrySpecified();
+            break;
+        case 'C':
+        case 'c':
+            SpeechRecognitionFromPullStreamWithSelectMASEnhancementsEnabled();
+            break;
+        case 'D':
+        case 'd':
+            SpeechContinuousRecognitionFromPushStreamWithMASEnabledAndBeamformingAnglesSpecified();
             break;
         case '0':
             break;
@@ -150,6 +185,7 @@ void IntentSamples()
         cout << "1.) Intent recognition with microphone input.\n";
         cout << "2.) Intent recognition in the specified language.\n";
         cout << "3.) Intent continuous recognition with file input.\n";
+        cout << "4.) Intent recognition from default microphone and pattern matching.\n";
         cout << "\nChoice (0 for MAIN MENU): ";
         cout.flush();
 
@@ -166,6 +202,9 @@ void IntentSamples()
             break;
         case '3':
             IntentContinuousRecognitionWithFile();
+            break;
+        case '4':
+            IntentRecognitionWithPatternMatchingAndMicrophone();
             break;
         case '0':
             break;
@@ -308,6 +347,7 @@ void ConversationTranscriberSamples()
         cout << "\nConversationTranscriber SAMPLES:\n";
         cout << "1.) ConversationTranscriber with pull input audio stream.\n";
         cout << "2.) ConversationTranscriber with push input audio stream.\n";
+        cout << "3.) ConversationTranscriber with microphone.\n";
         cout << "\nChoice (0 for MAIN MENU): ";
         cout.flush();
 
@@ -321,6 +361,9 @@ void ConversationTranscriberSamples()
             break;
         case '2':
             ConversationWithPushAudioStream();
+            break;
+        case '3':
+            ConversationWithMicrophone();
             break;
         case '0':
             break;

@@ -116,6 +116,52 @@ namespace MicrosoftSpeechSDKSamples
             Console.WriteLine("\nExecution done. " + prompt);
         }
 
+        /// <summary>
+        /// Speech recognition with Microsoft Audio Stack enabled.
+        /// </summary>
+        private static void SpeechRecognitionWithMASEnabled()
+        {
+            Console.WriteLine("Please choose from the following samples (with Microsoft Audio Stack enabled)");
+            var prompt = "Your choice (0: Stop): ";
+
+            Console.WriteLine("1. Speech recognition from default microphone.");
+            Console.WriteLine("2. Speech recognition from a microphone with pre-defined microphone array geometry specified.");
+            Console.WriteLine("3. Speech recognition from multi-channel file with custom microphone array geometry specified.");
+            Console.WriteLine("4. Speech recognition from pull stream with custom set of enhancements enabled.");
+            Console.WriteLine("5. Speech recognition from push stream with beamforming angles specified.");
+
+            Console.Write(prompt);
+
+            ConsoleKeyInfo x;
+            x = Console.ReadKey();
+            Console.WriteLine("");
+            switch (x.Key)
+            {
+                case ConsoleKey.D1:
+                    SpeechRecognitionSamples.ContinuousRecognitionFromDefaultMicrophoneWithMASEnabled().Wait();
+                    break;
+                case ConsoleKey.D2:
+                    SpeechRecognitionSamples.RecognitionFromMicrophoneWithMASEnabledAndPresetGeometrySpecified().Wait();
+                    break;
+                case ConsoleKey.D3:
+                    SpeechRecognitionSamples.ContinuousRecognitionFromMultiChannelFileWithMASEnabledAndCustomGeometrySpecified().Wait();
+                    break;
+                case ConsoleKey.D4:
+                    SpeechRecognitionSamples.RecognitionFromPullStreamWithSelectMASEnhancementsEnabled().Wait();
+                    break;
+                case ConsoleKey.D5:
+                    SpeechRecognitionSamples.ContinuousRecognitionFromPushStreamWithMASEnabledAndBeamformingAnglesSpecified().Wait();
+                    break;
+                case ConsoleKey.D0:
+                    Console.WriteLine("Exiting...");
+                    break;
+                default:
+                    Console.WriteLine("Invalid input.");
+                    break;
+            }
+            Console.WriteLine("\nExecution done. " + prompt);
+        }
+
         static void Main(string[] args)
         {
 
@@ -159,6 +205,7 @@ namespace MicrosoftSpeechSDKSamples
             Console.WriteLine("F1. Speech recognition with language detection enabled samples");
             Console.WriteLine("F2. Standalone language detection samples.");
             Console.WriteLine("F3. Translation with language detection samples.");
+            Console.WriteLine("F4. Speech recognition with Microsoft Audio Stack samples.");
 
             Console.Write(prompt);
 
@@ -282,6 +329,9 @@ namespace MicrosoftSpeechSDKSamples
                         break;
                     case ConsoleKey.F3:
                         TranslationWithLanguageDetectionEnabled();
+                        break;
+                    case ConsoleKey.F4:
+                        SpeechRecognitionWithMASEnabled();
                         break;
                     case ConsoleKey.D0:
                         Console.WriteLine("Exiting...");
