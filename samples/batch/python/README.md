@@ -28,33 +28,17 @@ pip install requests
 The sample code itself is [main.py](python-client/main.py) and can be run using Python 3.7 or higher.
 You will need to adapt the following information to run the sample:
 
-1. Your subscription key and region.
-   
-   The code needs a Subscription Key, this is *not* your Azure Subscription key, but the Cognitive service key. Please make sure you are using the subscription key for your Cognitive Services or Speech resource, and not the subscription id of Azure. You can get the key from the "Keys and Endpoint" tab on your resource in the Azure Portal.
+1. Your Cognitive Services subscription key and region.
+    
+    Some notes:
 
-2. The URI of an audio recording in blob storage.
-3. (Optional:) The model ID of an adapted model, if you want to use a custom model.
-4. (Optional:) The URI of a container with audio files if you want to transcribe all of them with a single request.
-   
-   Container name can be defined simply as follows:
-   
-   RECORDINGS_CONTAINER_URI = "https://YourStorageName.blob.core.windows.net/FolderName" 
+    - You can get the subscription key from the "Keys and Endpoint" tab on your Cognitive Services or Speech resource in the Azure Portal.
+    - Batch transcription is only available for paid subscriptions, free subscriptions are not supported.
+    - Please refer to [this page](https://docs.microsoft.com/azure/cognitive-services/speech-service/regions#rest-apis) for a complete list of region identifiers in the expected format.
 
-   On Azure portal, go to 'Access Policy' of the folder and give 'read permission'. Make sure to setup proper 'Access Level' too.
-
-   However, destinationContainerUrl in properties, should have  proper URL with permission defined on them which can be created by going to container, and selecting "Shared access tokens" from settings. And then choose permissions from the drop down and then click on "Generate SAS token and URL". Copy the Blolb SAS URL and paste in the code where destinationContainerUrl is needed. 
-
+1. The URI of an audio recording in blob storage. Please refer to the [Azure Storage documentation](https://docs.microsoft.com//rest/api/storageservices/authorize-requests-to-azure-storage) on information on how to authorize accesses against blob storage.
+1. (Optional:) The model ID of an adapted model, if you want to use a custom model.
+1. (Optional:) The URI of a container with audio files if you want to transcribe all of them with a single request.
 
 You can use a development environment like PyCharm to edit, debug, and execute the sample.
-
-## NOTE
-
-Code ask for Service Region, In Azure portal you may see the region name as "East US" with a space, but you have to add "eastus" in code. [Here](https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/regions#rest-apis) is lists all the supported Azure regions for REST APIs. 
-
-Batch transcription is only available with a standard (paid) subscription. Free subscription will not work for batch. 
-
-
-
-
-
 
