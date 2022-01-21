@@ -117,7 +117,7 @@ public class SpeechRecognition : MonoBehaviour
         {
             recognizedString = "This app cannot function without access to the microphone.";
             errorString = "ERROR: Microphone access denied.";
-            Debug.Log(errorString);
+            Debug.LogError(errorString);
         }
     }
 
@@ -132,7 +132,7 @@ public class SpeechRecognition : MonoBehaviour
             recognizedString = "You forgot to obtain Cognitive Services Speech credentials and inserting them in this app." + Environment.NewLine +
                                "See the README file and/or the instructions in the Awake() function for more info before proceeding.";
             errorString = "ERROR: Missing service credentials";
-            Debug.Log(errorString);
+            Debug.LogError(errorString);
             return;
         }
         Debug.Log("Creating Speech Recognizer.");
@@ -240,8 +240,8 @@ public class SpeechRecognition : MonoBehaviour
         errorString = e.ToString();
         if (e.Reason == CancellationReason.Error)
         {
-            Debug.Log($"CANCELED: ErrorDetails={e.ErrorDetails}");
-            Debug.Log($"CANCELED: Did you update the subscription info?");
+            Debug.LogError($"CANCELED: ErrorDetails={e.ErrorDetails}");
+            Debug.LogError("CANCELED: Did you update the subscription info?");
         }
     }
     #endregion
@@ -370,8 +370,8 @@ public class SpeechRecognition : MonoBehaviour
         errorString = e.ToString();
         if (e.Reason == CancellationReason.Error)
         {
-            Debug.Log($"CANCELED: ErrorDetails={e.ErrorDetails}");
-            Debug.Log($"CANCELED: Did you update the subscription info?");
+            Debug.LogError($"CANCELED: ErrorDetails={e.ErrorDetails}");
+            Debug.LogError($"CANCELED: Did you update the subscription info?");
         }
     }
 #endregion

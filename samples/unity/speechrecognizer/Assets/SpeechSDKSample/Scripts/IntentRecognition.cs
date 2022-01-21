@@ -123,7 +123,7 @@ public class IntentRecognition : MonoBehaviour {
             recognizedString = "You forgot to obtain Cognitive Services LUIS credentials and inserting them in this app." + Environment.NewLine +
                                "See the README file and/or the instructions in the Awake() function for more info before proceeding.";
             errorString = "ERROR: Missing service credentials";
-            Debug.Log(errorString);
+            Debug.LogError(errorString);
             return;
         }
         Debug.Log("Creating Intent Recognizer.");
@@ -276,8 +276,8 @@ public class IntentRecognition : MonoBehaviour {
         errorString = e.ToString();
         if (e.Reason == CancellationReason.Error)
         {
-            Debug.Log($"CANCELED: ErrorDetails={e.ErrorDetails}");
-            Debug.Log($"CANCELED: Did you update the subscription info?");
+            Debug.LogError($"CANCELED: ErrorDetails={e.ErrorDetails}");
+            Debug.LogError("CANCELED: Did you update the subscription info?");
         }
     }
     #endregion
