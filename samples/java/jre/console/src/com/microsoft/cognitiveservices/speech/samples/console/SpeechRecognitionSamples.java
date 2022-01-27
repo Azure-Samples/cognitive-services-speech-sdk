@@ -895,6 +895,7 @@ public class SpeechRecognitionSamples {
 
         stopRecognitionSemaphore = new Semaphore(0);
 
+        final long[] lastAudioUploadedTime = new long[1];
         recognizer.recognized.addEventListener((s, e) -> {
             if (e.getResult().getReason() == ResultReason.RecognizedSpeech) {
                 System.out.println("RECOGNIZED: Text=" + e.getResult().getText());
@@ -904,6 +905,9 @@ public class SpeechRecognitionSamples {
                                 "    Accuracy score: %f, Pronunciation score: %f, Completeness score : %f, FluencyScore: %f",
                                 pronunciationResult.getAccuracyScore(), pronunciationResult.getPronunciationScore(),
                                 pronunciationResult.getCompletenessScore(), pronunciationResult.getFluencyScore()));
+                System.out.println(e.getResult().getProperties().getProperty(PropertyId.SpeechServiceResponse_JsonResult));
+                long resultReceivedTime = System.currentTimeMillis();
+                System.out.println(String.format("Latency: %d ms", resultReceivedTime - lastAudioUploadedTime[0]));
             }
             else if (e.getResult().getReason() == ResultReason.NoMatch) {
                 System.out.println("NOMATCH: Speech could not be recognized.");
@@ -958,11 +962,16 @@ public class SpeechRecognitionSamples {
                 // Last buffer read from the WAV file is likely to have less bytes
                 pushStream.write(Arrays.copyOfRange(readBuffer, 0, bytesRead));
             }
+
+            // Sleep corresponding time for the uploaded audio chunk, to simulate the natural speaking rate.
+            Thread.sleep(bytesRead / 32);
         }
 
         inputStream.close();
         // Signal the end of stream to stop assessment
         pushStream.close();
+
+        lastAudioUploadedTime[0] = System.currentTimeMillis();
 
         stopRecognitionSemaphore.acquire();
 
