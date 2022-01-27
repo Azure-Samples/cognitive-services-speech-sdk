@@ -28,8 +28,15 @@ pip install requests
 The sample code itself is [main.py](python-client/main.py) and can be run using Python 3.7 or higher.
 You will need to adapt the following information to run the sample:
 
-1. Your subscription key and region.
-1. The URI of an audio recording in blob storage.
+1. Your Cognitive Services subscription key and region.
+    
+    Some notes:
+
+    - You can get the subscription key from the "Keys and Endpoint" tab on your Cognitive Services or Speech resource in the Azure Portal.
+    - Batch transcription is only available for paid subscriptions, free subscriptions are not supported.
+    - Please refer to [this page](https://docs.microsoft.com/azure/cognitive-services/speech-service/regions#rest-apis) for a complete list of region identifiers in the expected format.
+
+1. The URI of an audio recording in blob storage. Please refer to the [Azure Storage documentation](https://docs.microsoft.com//rest/api/storageservices/authorize-requests-to-azure-storage) on information on how to authorize accesses against blob storage.
 1. (Optional:) The model ID of an adapted model, if you want to use a custom model.
 1. (Optional:) The URI of a container with audio files if you want to transcribe all of them with a single request.
 
