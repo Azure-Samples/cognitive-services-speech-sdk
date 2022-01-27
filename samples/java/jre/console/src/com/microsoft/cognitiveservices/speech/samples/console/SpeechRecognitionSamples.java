@@ -905,7 +905,6 @@ public class SpeechRecognitionSamples {
                                 "    Accuracy score: %f, Pronunciation score: %f, Completeness score : %f, FluencyScore: %f",
                                 pronunciationResult.getAccuracyScore(), pronunciationResult.getPronunciationScore(),
                                 pronunciationResult.getCompletenessScore(), pronunciationResult.getFluencyScore()));
-                System.out.println(e.getResult().getProperties().getProperty(PropertyId.SpeechServiceResponse_JsonResult));
                 long resultReceivedTime = System.currentTimeMillis();
                 System.out.println(String.format("Latency: %d ms", resultReceivedTime - lastAudioUploadedTime[0]));
             }
