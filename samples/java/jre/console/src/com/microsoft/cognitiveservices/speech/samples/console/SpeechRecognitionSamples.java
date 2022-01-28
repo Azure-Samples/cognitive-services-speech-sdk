@@ -885,8 +885,16 @@ public class SpeechRecognitionSamples {
         // Set pronunciation assessment language
         config.setSpeechRecognitionLanguage("en-US");
 
+        // Set audio format
+        long samplesPerSecond = 16000;
+        short bitsPerSample = 16;
+        short channels = 1;
+
+        // Whether to simulate the real time recording (need be set to true when measuring latency with streaming)
+        boolean simulateRealtimeRecording = false;
+
         // Create the push stream to push audio to.
-        PushAudioInputStream pushStream = AudioInputStream.createPushStream();
+        PushAudioInputStream pushStream = AudioInputStream.createPushStream(AudioStreamFormat.getWaveFormatPCM(samplesPerSecond, bitsPerSample, channels));
 
         // Creates a speech recognizer using Push Stream as audio input.
         AudioConfig audioInput = AudioConfig.fromStreamInput(pushStream);
@@ -962,8 +970,11 @@ public class SpeechRecognitionSamples {
                 pushStream.write(Arrays.copyOfRange(readBuffer, 0, bytesRead));
             }
 
-            // Sleep corresponding time for the uploaded audio chunk, to simulate the natural speaking rate.
-            Thread.sleep(bytesRead / 32);
+            if (simulateRealtimeRecording)
+            {
+                // Sleep corresponding time for the uploaded audio chunk, to simulate the natural speaking rate.
+                Thread.sleep(bytesRead * 1000 / (bitsPerSample / 8) / samplesPerSecond / channels );
+            }
         }
 
         inputStream.close();
