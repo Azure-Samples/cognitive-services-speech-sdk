@@ -3,7 +3,6 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
-// <code>
 // <skeleton_1>
 #include "stdafx.h"
 #include <iostream>
@@ -105,4 +104,3 @@ int wmain()
     return 0;
 }
 // </skeleton_2>
-// </code>
