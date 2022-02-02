@@ -3,6 +3,7 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
+// <code>
 // <skeleton_1>
 using System;
 using System.Threading.Tasks;
@@ -29,13 +30,13 @@ namespace helloworld
                 "YourLanguageUnderstandingSubscriptionKey",
                 "YourLanguageUnderstandingServiceRegion");
             // </create_speech_configuration>
-            
+
             // <create_intent_recognizer_1>
             // Creates an intent recognizer using microphone as audio input.
             using (var recognizer = new IntentRecognizer(config))
             {
                 // </create_intent_recognizer_1>
-                
+
                 // <add_intents>
                 // Creates a Language Understanding model using the app id, and adds specific intents from your model
                 var model = LanguageUnderstandingModel.FromAppId("YourLanguageUnderstandingAppId");
@@ -43,7 +44,7 @@ namespace helloworld
                 recognizer.AddIntent(model, "YourLanguageUnderstandingIntentName2", "id2");
                 recognizer.AddIntent(model, "YourLanguageUnderstandingIntentName3", "any-IntentId-here");
                 // </add_intents>
-                
+
                 // To add all of the possible intents from a LUIS model to the recognizer, uncomment the line below:
                 // recognizer.AddAllIntents(model);
 
@@ -59,7 +60,7 @@ namespace helloworld
                 // For long-running multi-utterance recognition, use StartContinuousRecognitionAsync() instead.
                 var result = await recognizer.RecognizeOnceAsync();
                 // </recognize_intent>
-                
+
                 // <print_results>
                 // Checks result.
                 switch (result.Reason)
@@ -105,3 +106,4 @@ namespace helloworld
     }
 }
 // </skeleton_2>
+// </code>

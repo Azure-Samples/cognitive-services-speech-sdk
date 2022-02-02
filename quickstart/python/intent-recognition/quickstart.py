@@ -1,6 +1,7 @@
 # Copyright (c) Microsoft. All rights reserved.
 # Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 
+# <code>
 # <skeleton>
 import azure.cognitiveservices.speech as speechsdk
 
@@ -61,3 +62,4 @@ elif intent_result.reason == speechsdk.ResultReason.Canceled:
     if intent_result.cancellation_details.reason == speechsdk.CancellationReason.Error:
         print("Error details: {}".format(intent_result.cancellation_details.error_details))
 # </print_results>
+# </code>
