@@ -53,6 +53,9 @@
     <ClCompile Include="standalone_language_detection_samples.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="diagnostics_logging_samples.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="whatstheweatherlike.wav">
