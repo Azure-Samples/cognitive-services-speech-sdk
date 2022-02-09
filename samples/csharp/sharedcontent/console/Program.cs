@@ -17,7 +17,7 @@ namespace MicrosoftSpeechSDKSamples
         private static readonly string invalid = "\n Invalid input, choose again.";
         private static readonly string done = "\n Done!";
 
-        private static void XSpeechRecognition()
+        private static void SpeechRecognition()
         {
             ConsoleKeyInfo x;
 
