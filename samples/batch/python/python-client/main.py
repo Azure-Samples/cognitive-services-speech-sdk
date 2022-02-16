@@ -23,7 +23,8 @@ DESCRIPTION = "Simple transcription description"
 LOCALE = "en-US"
 RECORDINGS_BLOB_URI = "<Your SAS Uri to the recording>"
 
-# Provide the uri of a container with audio files for transcribing all of them with a single request
+# Provide the uri of a container with audio files for transcribing all of them
+# with a single request. At least 'read' and 'list' (rl) permissions are required.
 RECORDINGS_CONTAINER_URI = "<Your SAS Uri to a container of audio files>"
 
 # Set model information when doing transcription with custom models
@@ -147,7 +148,7 @@ def transcribe():
         # "profanityFilterMode": "Masked",
         # "wordLevelTimestampsEnabled": True,
         # "diarizationEnabled": True,
-        # "destinationContainerUrl": "<results container>",
+        # "destinationContainerUrl": "<SAS Uri with at least write (w) permissions for an Azure Storage blob container that results should be written to>",
         # "timeToLive": "PT1H"
     }
 

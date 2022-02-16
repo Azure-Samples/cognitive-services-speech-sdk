@@ -29,7 +29,7 @@ void recognizeIntent()
         "YourLanguageUnderstandingSubscriptionKey",
         "YourLanguageUnderstandingServiceRegion");
     // </create_speech_configuration>
-    
+
     // <create_intent_recognizer>
     // Creates an intent recognizer using microphone as audio input.
     auto recognizer = IntentRecognizer::FromConfig(config);
@@ -42,7 +42,7 @@ void recognizeIntent()
     recognizer->AddIntent(model, "YourLanguageUnderstandingIntentName2", "id2");
     recognizer->AddIntent(model, "YourLanguageUnderstandingIntentName3", "any-IntentId-here");
     // </add_intents>
-    
+
     // To add all of the possible intents from a LUIS model to the recognizer, uncomment the line below:
     // recognizer->AddAllIntents(model);
 
@@ -57,7 +57,7 @@ void recognizeIntent()
     // For long-running multi-utterance recognition, use StartContinuousRecognitionAsync() instead.
     auto result = recognizer->RecognizeOnceAsync().get();
     // </recognize_intent>
-    
+
     // <print_results>
     // Checks result.
     if (result->Reason == ResultReason::RecognizedIntent)
@@ -86,7 +86,7 @@ void recognizeIntent()
             cout << "CANCELED: Did you update the subscription info?" << std::endl;
         }
     }
-    // </print_results>       
+    // </print_results>
     // <skeleton_2>
 }
 

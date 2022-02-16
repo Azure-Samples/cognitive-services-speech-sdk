@@ -4,8 +4,7 @@ This Speech SDK sample demonstrates how to use Unity's microphone and streaming 
 Using Unity's microphone instead of internal microphone from the Speech SDK can be useful in scenarios where user wants e.g. to save the audio recorded from the microphone for some other purposes. Also this can be usefull in platforms like Android which has limitations in shared microphone accesses. 
 
 > Note:
-> The Speech SDK for Unity supports Windows Desktop (x86 and x64) or Universal Windows Platform (x86, x64, ARM/ARM64), Android (x86, ARM32/64), iOS (x64 simulator, ARM64) and Mac (x64).
-> Speech SDK support has been built and verified for Windows and Android using Windows PC development environment for Unity and for iOS using Mac development environment for Unity.
+> The Speech SDK for Unity supports Windows Desktop (x86 and x64) or Universal Windows Platform (x86, x64, ARM/ARM64), Android (x86, ARM32/64), iOS (x64 simulator, ARM64), Mac (x64) and Linux (x64).
 
 ## Prerequisites
 
