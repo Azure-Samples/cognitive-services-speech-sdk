@@ -547,7 +547,7 @@
                 "deadLetteringOnMessageExpiration": false,
                 "enableBatchedOperations": false,
                 "duplicateDetectionHistoryTimeWindow": "PT10M",
-                "maxDeliveryCount": 5,
+                "maxDeliveryCount": 1,
                 "status": "Active",
                 "autoDeleteOnIdle": "P10675199DT2H48M5.4775807S",
                 "enablePartitioning": false,
