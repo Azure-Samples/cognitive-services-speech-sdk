@@ -179,7 +179,7 @@ public class SpeakerRecognitionSamples {
                 if(enrollProfileFromMicrophone(client, profile)) {
 
                     System.out.println("Enrolled successfully");
-                    System.out.println("Verification: Please say 'My Voice is my passport, verify me'");
+                    System.out.println("Verification: Please say 'I'll talk for a few seconds, so you can recognize my voice in the future.'");
 
                     verifySpeaker(speechConfig, profile, AudioConfig.fromDefaultMicrophoneInput());
                 }
@@ -209,7 +209,7 @@ public class SpeakerRecognitionSamples {
         boolean success = false;
 
         try (AudioConfig audioConfig = AudioConfig.fromDefaultMicrophoneInput()) {
-            System.out.println("Please say 'My Voice is my passport, verify me'");
+            System.out.println("Please say 'I'll talk for a few seconds, so you can recognize my voice in the future.'");
             success = enrollProfile(client, profile, audioConfig);
         }
         return success;
@@ -225,7 +225,7 @@ public class SpeakerRecognitionSamples {
                 resultReason = result.getReason();
 
                 if (result.getReason() == ResultReason.EnrollingVoiceProfile) {
-                    System.out.println("Enrolling, please repeat 'My Voice is my passport, verify me'");
+                    System.out.println("Enrolling, please repeat 'I'll talk for a few seconds, so you can recognize my voice in the future.'");
                 }
                 else if (result.getReason() == ResultReason.NoMatch) {
                     System.out.println("NOMATCH: Speech could not be recognized.");

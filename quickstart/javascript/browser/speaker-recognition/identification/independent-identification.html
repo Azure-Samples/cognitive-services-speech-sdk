@@ -45,6 +45,10 @@
       </tr>
       <tr>
         <td></td>
+        <td><button id="listPhrasesButton">List Activation Phrases</button></td>
+      </tr>
+      <tr>
+        <td></td>
         <td><button id="deleteProfileButton">Delete Voice Profile</button></td>
       </tr>
       <tr>
@@ -67,6 +71,7 @@
     var createVoiceProfileButton;
     var identifySpeakerButton;
     var deleteProfileButton;
+    var listPhrasesButton;
 
     // subscription key and region for speech services.
     var subscriptionKey, serviceRegion;
@@ -74,11 +79,13 @@
     var client;
     var filePicker, testFilePicker,audioFiles, testFile;
     var speechConfig, profile;
+    var locale = "en-us";
 
     document.addEventListener("DOMContentLoaded", function () {
 
       createVoiceProfileButton = document.getElementById("createVoiceProfileButton");
       identifySpeakerButton = document.getElementById("identifySpeakerButton");
+      listPhrasesButton = document.getElementById("listPhrasesButton");
       deleteProfileButton = document.getElementById("deleteProfileButton");
       subscriptionKey = document.getElementById("subscriptionKey");
       serviceRegion = document.getElementById("serviceRegion");
@@ -87,6 +94,7 @@
       testFilePicker = document.getElementById("testFilePicker");
       
       deleteProfileButton.disabled = true;
+      listPhrasesButton.disabled = true;
       identifySpeakerButton.disabled = true;
       filePicker.addEventListener("change", function () {
           audioFiles = filePicker.files;
@@ -108,11 +116,12 @@
         }
         speechConfig = SpeechSDK.SpeechConfig.fromSubscription(subscriptionKey.value, serviceRegion.value);
 
-        speechConfig.setProperty(SpeechSDK.PropertyId.SpeechServiceConnection_TranslationVoice, "en-US");
+        speechConfig.setProperty(SpeechSDK.PropertyId.SpeechServiceConnection_TranslationVoice, locale);
         client = new SpeechSDK.VoiceProfileClient(speechConfig);
+        listPhrasesButton.disabled = false;
 
         try {
-          profile = await client.createProfileAsync(SpeechSDK.VoiceProfileType.TextIndependentIdentification, "en-us");
+          profile = await client.createProfileAsync(SpeechSDK.VoiceProfileType.TextIndependentIdentification, locale);
           window.console.log(profile);
 
           resultDiv.innerHTML += "Profile created ProfileId: " + profile.profileId;
@@ -160,6 +169,23 @@
         } catch (err) {
           window.console.log(err);
           resultDiv.innerHTML += "ERROR: " + err; 
+        }
+      });
+
+      listPhrasesButton.addEventListener("click", async function () {
+        if (client) {
+          try {
+            let result = await client.getActivationPhrasesAsync(SpeechSDK.VoiceProfileType.TextIndependentIdentification, locale);
+            if (result.phrases.length > 0) {
+              for (const phrase of result.phrases) {
+                resultDiv.innerHTML += "(Activation Phrases) Received: " + phrase;
+                resultDiv.innerHTML += "\r\n";
+              }
+            }
+          } catch (err) {
+            window.console.log(err);
+            resultDiv.innerHTML += "ERROR: " + err; 
+          }
         }
       });
 

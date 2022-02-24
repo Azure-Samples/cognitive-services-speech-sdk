@@ -10,6 +10,7 @@ Speech recognition samples for the Microsoft Cognitive Services Speech SDK
 import time
 import wave
 import string
+import json
 
 try:
     import azure.cognitiveservices.speech as speechsdk
@@ -92,6 +93,69 @@ def speech_recognize_once_from_file():
             print("Error details: {}".format(cancellation_details.error_details))
     # </SpeechRecognitionWithFile>
 
+def speech_recognize_once_from_file_with_detailed_recognition_results():
+    """performs one-shot speech recognition with input from an audio file, showing detailed recognition results including word-level timing"""
+    # <SpeechRecognitionFromFileWithDetailedRecognitionResults>
+    speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
+
+    # Ask for detailed recognition result
+    speech_config.output_format = speechsdk.OutputFormat.Detailed
+
+    # If you also want word-level timing in the detailed recognition results, set the following.
+    # Note that if you set the following, you can omit the previous line
+    #   "speech_config.output_format = speechsdk.OutputFormat.Detailed",
+    # since word-level timing implies detailed recognition results.
+    speech_config.request_word_level_timestamps()
+
+    audio_config = speechsdk.audio.AudioConfig(filename=weatherfilename)
+
+    # Creates a speech recognizer using a file as audio input, also specify the speech language
+    speech_recognizer = speechsdk.SpeechRecognizer(
+        speech_config=speech_config, language="en-US", audio_config=audio_config)
+
+    # Starts speech recognition, and returns after a single utterance is recognized. The end of a
+    # single utterance is determined by listening for silence at the end or until a maximum of 15
+    # seconds of audio is processed. It returns the recognition text as result.
+    # Note: Since recognize_once() returns only a single utterance, it is suitable only for single
+    # shot recognition like command or query.
+    # For long-running multi-utterance recognition, use start_continuous_recognition() instead.
+    result = speech_recognizer.recognize_once()
+
+    # Check the result
+    if result.reason == speechsdk.ResultReason.RecognizedSpeech:
+        print("Recognized: {}".format(result.text))
+
+        # Time units are in hundreds of nanoseconds (HNS), where 10000 HNS equals 1 millisecond
+        print("Offset: {}".format(result.offset))
+        print("Duration: {}".format(result.duration))
+
+        # Now get the detailed recognition results from the JSON
+        json_result = json.loads(result.json)
+
+        # The first cell in the NBest list corresponds to the recognition results 
+        # (NOT the cell with the highest confidence number!)
+        print("Detailed results - Lexical: {}".format(json_result['NBest'][0]['Lexical']))
+        # ITN stands for Inverse Text Normalization
+        print("Detailed results - ITN: {}".format(json_result['NBest'][0]['ITN']))
+        print("Detailed results - MaskedITN: {}".format(json_result['NBest'][0]['MaskedITN']))
+        print("Detailed results - Display: {}".format(json_result['NBest'][0]['Display']))
+
+        # Print word-level timing. Time units are HNS.
+        words = json_result['NBest'][0]['Words']
+        print(f"Detailed results - Word timing:\nWord:\tOffset:\tDuration:")
+        for word in words:
+            print(f"{word['Word']}\t{word['Offset']}\t{word['Duration']}")
+
+        # You can access alternative recognition results through json_result['NBest'][i], i=1,2,..
+
+    elif result.reason == speechsdk.ResultReason.NoMatch:
+        print("No speech could be recognized: {}".format(result.no_match_details))
+    elif result.reason == speechsdk.ResultReason.Canceled:
+        cancellation_details = result.cancellation_details
+        print("Speech Recognition canceled: {}".format(cancellation_details.reason))
+        if cancellation_details.reason == speechsdk.CancellationReason.Error:
+            print("Error details: {}".format(cancellation_details.error_details))
+    # </SpeechRecognitionFromFileWithDetailedRecognitionResults>
 
 def speech_recognize_once_compressed_input():
     """performs one-shot speech recognition with compressed input from an audio file"""
@@ -288,6 +352,7 @@ def speech_recognize_continuous_from_file():
     speech_recognizer.stop_continuous_recognition()
     # </SpeechContinuousRecognitionWithFile>
 
+# <SpeechRecognitionUsingKeywordModel>
 def speech_recognize_keyword_from_microphone():
     """performs keyword-triggered speech recognition with input microphone"""
     speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
@@ -342,6 +407,7 @@ def speech_recognize_keyword_from_microphone():
         time.sleep(.5)
 
     speech_recognizer.stop_keyword_recognition()
+# </SpeechRecognitionUsingKeywordModel>
 
 def speech_recognition_with_pull_stream():
     """gives an example how to use a pull audio stream to recognize speech from a custom audio
