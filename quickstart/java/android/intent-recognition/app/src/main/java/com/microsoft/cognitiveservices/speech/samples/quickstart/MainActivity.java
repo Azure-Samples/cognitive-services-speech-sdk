@@ -5,8 +5,8 @@
 // <code>
 package com.microsoft.cognitiveservices.speech.samples.quickstart;
 
-import android.support.v4.app.ActivityCompat;
-import android.support.v7.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -54,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
 
-        // Release speech synthesizer and its dependencies
+        // Release intent recognizer and its dependencies
         reco.close();
         speechConfig.close();
     }
@@ -63,15 +63,11 @@ public class MainActivity extends AppCompatActivity {
         TextView txt = (TextView) this.findViewById(R.id.hello); // 'hello' is the ID of your text view
 
         try {
-            // Note: this will block the UI thread, so eventually, you want to register for the event
             Future<IntentRecognitionResult> task = reco.recognizeOnceAsync();
-            assert(task != null);
-
+            // Note: this will block the UI thread, so eventually, you want to register for the event (see full samples)
             IntentRecognitionResult result = task.get();
-            assert(result != null);
 
             String res = "";
-
             // Checks result.
             if (result.getReason() == ResultReason.RecognizedIntent) {
                 res = res.concat("RECOGNIZED: Text=" + result.getText());

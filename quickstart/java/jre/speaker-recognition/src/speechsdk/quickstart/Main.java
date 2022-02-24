@@ -88,8 +88,8 @@ public class Main {
         String speechSubscriptionKey = "YOUR_SUBSCRIPTION_KEY";
         // Replace below with your own service region (e.g., "westus").
         String serviceRegion = "YOUR_SUBSCRIPTION_REGION";
-        String audioFile1 = "aboutSpeechSdk.wav";
-        String audioFile2 = "speechService.wav";
+        String audioFile1 = "TalkForAFewSeconds16.wav";
+        String audioFile2 = "TalkForAFewSeconds16.wav";
 
         // Creates an instance of a voice profile client using speech configuration with specified
         // subscription key and service region
@@ -133,7 +133,7 @@ public class Main {
         String speechSubscriptionKey = "YOUR_SUBSCRIPTION_KEY";
         // Replace below with your own service region (e.g., "westus").
         String serviceRegion = "YOUR_SUBSCRIPTION_REGION";
-        String audioFile = "myVoiceisMyPassportVerifyMe01.wav";
+        String audioFile = "TalkForAFewSeconds16.wav";
 
         // Creates an instance of a voice profile client using speech configuration with specified
         // subscription key and service region
