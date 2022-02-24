@@ -17,10 +17,7 @@ namespace MicrosoftSpeechSDKSamples
         private static readonly string invalid = "\n Invalid input, choose again.";
         private static readonly string done = "\n Done!";
 
-        /// <summary>
-        /// Speech recognition with Microsoft Audio Stack enabled.
-        /// </summary>
-        private static void SpeechRecognitionWithMASEnabled()
+        private static void SpeechRecognition()
         {
             ConsoleKeyInfo x;
 
