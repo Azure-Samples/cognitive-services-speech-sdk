@@ -22,6 +22,9 @@
     <Compile Include="..\..\..\sharedcontent\console\standalone_language_detection_samples.cs">
       <Link>standalone_language_detection_samples.cs</Link>
     </Compile>
+    <Compile Include="..\..\..\sharedcontent\console\speech_diagnostics_logging_samples.cs">
+      <Link>speech_diagnostics_logging_samples.cs</Link>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>
@@ -46,8 +49,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.18.0" />
-    <PackageReference Include="Microsoft.CognitiveServices.Speech.Remoteconversation" Version="1.18.0" />
+    <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.20.0" />
+    <PackageReference Include="Microsoft.CognitiveServices.Speech.Remoteconversation" Version="1.20.0" />
   </ItemGroup>
 
 </Project>

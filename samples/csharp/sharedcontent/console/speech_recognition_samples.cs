@@ -72,10 +72,18 @@ namespace MicrosoftSpeechSDKSamples
             // Creates an instance of a speech config with specified subscription key and service region.
             // Replace with your own subscription key and service region (e.g., "westus").
             var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
-
+ 
             // Replace the language with your language in BCP-47 format, e.g., en-US.
             var language = "de-DE";
+
+            // Ask for detailed recognition result
             config.OutputFormat = OutputFormat.Detailed;
+
+            // If you also want word-level timing in the detailed recognition results, set the following.
+            // Note that if you set the following, you can omit the previous line
+            //      "config.OutputFormat = OutputFormat.Detailed", 
+            // since word-level timing implies detailed recognition results.
+            config.RequestWordLevelTimestamps();
 
             // Creates a speech recognizer for the specified language, using microphone as audio input.
             // Requests detailed output format.
@@ -95,13 +103,23 @@ namespace MicrosoftSpeechSDKSamples
                 // Checks result.
                 if (result.Reason == ResultReason.RecognizedSpeech)
                 {
-                    Console.WriteLine($"RECOGNIZED: Text={result.Text}");
-                    Console.WriteLine("  DETAILED RESULTS:");
+                    Console.WriteLine($"RECOGNIZED: Text = {result.Text}");
+                    Console.WriteLine("  Detailed results:");
 
+                    // The first item in detailedResults corresponds to the recognized text
+                    // (NOT the item with the highest confidence number!)
                     var detailedResults = result.Best();
-                    foreach (var item in detailedResults) // NOTE: We need to put this in all languages, or take it out of CSharp
+                    foreach (var item in detailedResults) 
                     {
-                        Console.WriteLine($"    Confidence: {item.Confidence}, Text: {item.Text}, LexicalForm: {item.LexicalForm}, NormalizedForm: {item.NormalizedForm}, MaskedNormalizedForm: {item.MaskedNormalizedForm}");
+                        Console.WriteLine($"\tConfidence: {item.Confidence}\n\tText: {item.Text}\n\tLexicalForm: {item.LexicalForm}\n\tNormalizedForm: {item.NormalizedForm}\n\tMaskedNormalizedForm: {item.MaskedNormalizedForm}");
+                        Console.WriteLine($"\tWord-level timing:");
+                        Console.WriteLine($"\t\tWord | Offset | Duration");
+
+                        // Word-level timing
+                        foreach (var word in item.Words)
+                        {
+                            Console.WriteLine($"\t\t{word.Word} {word.Offset} {word.Duration}");
+                        }
                     }
                 }
                 else if (result.Reason == ResultReason.NoMatch)

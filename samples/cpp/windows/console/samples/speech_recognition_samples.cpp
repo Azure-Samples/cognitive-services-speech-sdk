@@ -7,6 +7,7 @@
 
 // <toplevel>
 #include <speechapi_cxx.h>
+#include <nlohmann/json.hpp>
 #include <fstream>
 #include "wav_file_reader.h"
 
@@ -67,8 +68,14 @@ void SpeechRecognitionWithLanguageAndUsingDetailedOutputFormat()
     // Replace with your own subscription key and service region (e.g., "westus").
     auto config = SpeechConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
-    // Request detailed output format.
+    // Request for detailed recognition result
     config->SetOutputFormat(OutputFormat::Detailed);
+
+    // If you also want word-level timing in the detailed recognition results, set the following.
+    // Note that if you set the following, you can omit the previous line
+    //   "config->SetOutputFormat(OutputFormat::Detailed)",
+    // since word-level timing implies detailed recognition results.
+    config->RequestWordLevelTimestamps();
 
     // Creates a speech recognizer in the specified language using microphone as audio input.
     // Replace the language with your language in BCP-47 format, e.g. en-US.
@@ -87,9 +94,39 @@ void SpeechRecognitionWithLanguageAndUsingDetailedOutputFormat()
     // Checks result.
     if (result->Reason == ResultReason::RecognizedSpeech)
     {
-        cout << "RECOGNIZED: Text=" << result->Text << std::endl
-             << "  Speech Service JSON: " << result->Properties.GetProperty(PropertyId::SpeechServiceResponse_JsonResult)
-             << std::endl;
+        cout << "RECOGNIZED: Text = " << result->Text << std::endl;
+
+        // Time units are in hundreds of nanoseconds (HNS), where 10000 HNS equals 1 millisecond
+        cout << "Offset: " << result->Offset() << std::endl
+             << "Duration: " << result->Duration() << std::endl;
+
+        // Get access to the JSON string that includes detailed speech recognition results
+        string jsonString = result->Properties.GetProperty(PropertyId::SpeechServiceResponse_JsonResult);
+        // cout << "  Speech Service JSON: " << jsonString << std::endl;
+
+        // Extract the "NBest" array of recognition results from the JSON.
+        // Note that the first cell in the NBest array corresponds to the recognition results 
+        // (NOT the cell with the highest confidence number!)
+        auto jsonResult = nlohmann::json::parse(jsonString);
+        auto nbestArray = jsonResult["NBest"];
+        for (int i = 0; i < nbestArray.size(); i++)
+        {
+            auto nbestItem = nbestArray[i];
+            cout << "\tConfidence: " << nbestItem["Confidence"] << std::endl;
+            cout << "\tLexical: " << nbestItem["Lexical"] << std::endl;
+            cout << "\tITN: " <<  nbestItem["ITN"] << std::endl; // ITN stands for Inverse Text Normalization
+            cout << "\tMaskedITN: " << nbestItem["MaskedITN"] << std::endl;
+            cout << "\tDisplay: " << nbestItem["Display"] << std::endl;
+
+            // Word-level timing
+            auto wordsArray = nbestItem["Words"];
+            cout << "\t\tWord | Offset | Duration" << std::endl;
+            for (int j = 0; j < wordsArray.size(); j++)
+            {
+                auto wordItem = wordsArray[j];
+                cout << "\t\t" << wordItem["Word"] << " " << wordItem["Offset"] << " " << wordItem["Duration"] << std::endl;
+            }
+        }
     }
     else if (result->Reason == ResultReason::NoMatch)
     {
