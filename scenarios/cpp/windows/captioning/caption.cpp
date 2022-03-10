@@ -69,16 +69,13 @@ struct UserConfig
 	const bool prioritizeAccuracyEnabled = false;
 	const bool dictationEnabled = false;
 	const bool profanityFilterEnabled = false;
-	const bool languageIDEnabled = false;
-	const std::vector<std::string> languageIDLanguages;
-	const bool outputFileEnabled = false;
-	const std::string outputFile;
-	const bool phraseListEnabled = false;
-	const std::string phraseList;
+	const std::optional<std::vector<std::string>> languageIDLanguages = std::nullopt;
+	const std::optional<std::string> inputFile = std::nullopt;
+	const std::optional<std::string> outputFile = std::nullopt;
+	const std::optional<std::string> phraseList;
 	const bool suppressOutputEnabled = false;
 	const bool partialResultsEnabled = false;
-	const bool stablePartialResultThresholdEnabled = false;
-	const std::string stablePartialResultThreshold;
+	const std::optional<std::string> stablePartialResultThreshold = std::nullopt;
 	const bool srtEnabled = false;
 	const bool trueTextEnabled = false;
 	const std::string subscriptionKey;
@@ -88,16 +85,13 @@ struct UserConfig
 		bool prioritizeAccuracyEnabled,
 		bool dictationEnabled,
 		bool profanityFilterEnabled,
-		bool languageIDEnabled,
-		std::vector<std::string> languageIDLanguages,
-		bool outputFileEnabled,
-		std::string outputFile,
-		bool phraseListEnabled,
-		std::string phraseList,
+		std::optional<std::vector<std::string>> languageIDLanguages,
+		std::optional<std::string> inputFile,
+		std::optional<std::string> outputFile,
+		std::optional<std::string> phraseList,
 		bool suppressOutputEnabled,
 		bool partialResultsEnabled,
-		bool stablePartialResultThresholdEnabled,
-		std::string stablePartialResultThreshold,
+		std::optional<std::string> stablePartialResultThreshold,
 		bool srtEnabled,
 		bool trueTextEnabled,
 		std::string subscriptionKey,
@@ -106,15 +100,12 @@ struct UserConfig
 		prioritizeAccuracyEnabled (prioritizeAccuracyEnabled),
 		dictationEnabled (dictationEnabled),
 		profanityFilterEnabled (profanityFilterEnabled),
-		languageIDEnabled (languageIDEnabled),
 		languageIDLanguages (languageIDLanguages),
-		outputFileEnabled (outputFileEnabled),
+		inputFile (inputFile),
 		outputFile (outputFile),
-		phraseListEnabled (phraseListEnabled),
 		phraseList (phraseList),
 		suppressOutputEnabled (suppressOutputEnabled),
 		partialResultsEnabled (partialResultsEnabled),
-		stablePartialResultThresholdEnabled (stablePartialResultThresholdEnabled),
 		stablePartialResultThreshold (stablePartialResultThreshold),
 		srtEnabled (srtEnabled),
 		trueTextEnabled (trueTextEnabled),
@@ -123,7 +114,7 @@ struct UserConfig
 		{}
 };
 
-struct captionTime
+struct CaptionTime
 {
 	const int startHours;
 	const int endHours;
@@ -132,7 +123,7 @@ struct captionTime
 	const float startSeconds;
 	const float endSeconds;
 
-	captionTime (
+	CaptionTime (
 		int startHours,
 		int endHours,
 		int startMinutes,
@@ -205,40 +196,139 @@ std::vector<std::string> split (const std::string& s, char delimiter)
 	return tokens;
 }
 
+std::string V2EndpointFromRegion (std::string region)
+{
+	return std::string (v2EndpointStart + region + v2EndpointEnd);
+}
+
+CaptionTime CaptionTimeFromTicks (uint64_t startTicks, uint64_t endTicks)
+{
+	const float startSeconds_1 = startTicks / ticksPerSecond;
+	const float endSeconds_1 = endTicks / ticksPerSecond;
+	
+	const int startMinutes_1 = startSeconds_1 / 60;
+	const int endMinutes_1 = endSeconds_1 / 60;	
+	
+	const int startHours = startMinutes_1 / 60;
+	const int endHours = endMinutes_1 / 60;
+	
+	const float startSeconds_2 = fmod (startSeconds_1, 60.0);
+	const float endSeconds_2 = fmod (endSeconds_1, 60.0);
+	
+	const float startMinutes_2 = fmod (startMinutes_1, 60.0);
+	const float endMinutes_2 = fmod (endMinutes_1, 60.0);
+	
+	return CaptionTime (startHours, endHours, startMinutes_2, endMinutes_2, startSeconds_2, endSeconds_2);
+}
+
+std::string AddLanguageToResult (std::shared_ptr<SpeechRecognitionResult> result, UserConfig userConfig)
+{
+	std::ostringstream text;
+	if (true == userConfig.languageIDLanguages.has_value ())
+	{
+		auto languageIDResult = AutoDetectSourceLanguageResult::FromResult (result);
+		text << "[" << languageIDResult->Language << "] " << result->Text << std::endl;
+	}
+	else
+	{
+		text << result->Text << std::endl;
+	}
+	return text.str ();
+}
+
+std::string CaptionFromSpeechRecognitionResult (bool srt, int sequenceNumber, std::shared_ptr<SpeechRecognitionResult> result, UserConfig userConfig)
+{
+	std::ostringstream caption;
+	CaptionTime captionTime = CaptionTimeFromTicks (result->Offset (), result->Offset () + result->Duration ());	
+	
+	std::ostringstream startSeconds_1, endSeconds_1;
+// setw value is 2 for seconds + 1 for floating point + 3 for decimal places.
+	startSeconds_1 << std::setfill ('0') << std::setw (6) << std::fixed << std::setprecision (3) << captionTime.startSeconds;
+	endSeconds_1 << std::setfill ('0') << std::setw (6) << std::fixed << std::setprecision (3) << captionTime.endSeconds;	
+	
+	if (true == srt)
+	{
+// SRT format requires ',' as decimal separator rather than '.'.
+		std::string startSeconds_2 (startSeconds_1.str ());
+		std::string endSeconds_2 (endSeconds_1.str ());
+		std::replace (startSeconds_2.begin (), startSeconds_2.end (), '.', ',');
+		std::replace (endSeconds_2.begin (), endSeconds_2.end (), '.', ',');
+		caption << sequenceNumber << "\n"
+			<< std::setfill ('0') << std::setw (2) << captionTime.startHours << ":"
+			<< std::setfill ('0') << std::setw (2) << captionTime.startMinutes << ":" << startSeconds_2 << " --> "
+			<< std::setfill ('0') << std::setw (2) << captionTime.endHours << ":"
+			<< std::setfill ('0') << std::setw (2) << captionTime.endMinutes << ":" << endSeconds_2 << std::endl;
+	}
+	else
+	{
+		caption << std::setfill ('0') << std::setw (2) << captionTime.startHours << ":"
+			<< std::setfill ('0') << std::setw (2) << captionTime.startMinutes << ":" << startSeconds_1.str () << " --> "
+			<< std::setfill ('0') << std::setw (2) << captionTime.endHours << ":"
+			<< std::setfill ('0') << std::setw (2) << captionTime.endMinutes << ":" << endSeconds_1.str () << std::endl;
+	}
+	caption << AddLanguageToResult (result, userConfig) << std::endl;
+	return caption.str ();
+}
+
+void WriteToConsole (std::string text, UserConfig userConfig)
+{
+	if (false == userConfig.suppressOutputEnabled)
+	{
+		std::cout << text;
+	}
+}
+
+void WriteToConsoleOrFile (std::string text, UserConfig userConfig)
+{
+	if (false == userConfig.suppressOutputEnabled)
+	{
+		std::cout << text;
+	}
+	if (true == userConfig.outputFile.has_value ())
+	{
+		std::ofstream outputStream;
+		outputStream.open (userConfig.outputFile.value (), std::ios_base::app);
+		outputStream << text;
+		outputStream.close ();
+	}
+}
+
+void Initialize (UserConfig userConfig)
+{
+	if (true == userConfig.outputFile.has_value ())
+	{
+		std::filesystem::path outputFile { userConfig.outputFile.value () };
+// If the output file exists, truncate it.
+		if (std::filesystem::exists (outputFile))
+		{
+			std::ofstream outputStream;
+			outputStream.open (userConfig.outputFile.value ());
+			outputStream.close ();			
+		}
+	}
+
+	if (false == userConfig.srtEnabled && false == userConfig.partialResultsEnabled)
+	{
+		WriteToConsoleOrFile ("WEBVTT\n\n", userConfig);
+	}
+}
+
 /*
 Main functions
 */
 
-std::shared_ptr<Audio::AudioConfig> ArgsToAudioConfig (int argc, char* argv[])
-{
-	std::shared_ptr<Audio::AudioConfig> audioConfig;
-	std::optional<std::string> audioInputFile = GetCmdOption (argv, argv + argc, "-i");
-	if (true == audioInputFile.has_value ())
-	{
-		audioConfig = Audio::AudioConfig::FromWavFileInput (audioInputFile.value ());
-	}
-	else
-	{
-		audioConfig = Audio::AudioConfig::FromDefaultMicrophoneInput ();
-	}
-	return audioConfig;
-}
-
-UserConfig ArgsToUserConfig (int argc, char* argv[])
+UserConfig UserConfigFromArgs (int argc, char* argv[])
 {
 	bool prioritizeAccuracyEnabled = false;
 	bool dictationEnabled = false;
 	bool profanityFilterEnabled = false;
-	bool languageIDEnabled = false;
-	std::vector<std::string> languageIDLanguages;
-	bool outputFileEnabled = false;
-	std::string outputFile;
-	bool phraseListEnabled = false;
-	std::string phraseList;
+	std::optional<std::vector<std::string>> languageIDLanguages;
+	std::optional<std::string> inputFile;
+	std::optional<std::string> outputFile;
+	std::optional<std::string> phraseList;
 	bool suppressOutputEnabled = false;
 	bool partialResultsEnabled = false;
-	bool stablePartialResultThresholdEnabled = false;
-	std::string stablePartialResultThreshold;
+	std::optional<std::string> stablePartialResultThreshold;
 	bool srtEnabled = false;
 	bool trueTextEnabled = false;
 	std::string subscriptionKey;
@@ -256,38 +346,17 @@ UserConfig ArgsToUserConfig (int argc, char* argv[])
 	prioritizeAccuracyEnabled = CmdOptionExists (argv, argv + argc, "-a");
 	dictationEnabled = CmdOptionExists (argv, argv + argc, "-d");
 	profanityFilterEnabled = CmdOptionExists (argv, argv + argc, "-f");
-	
 	std::optional<std::string> languageIDLanguagesResult = GetCmdOption (argv, argv + argc, "-l");
 	if (true == languageIDLanguagesResult.has_value ())
 	{
-		languageIDEnabled = true;
-		languageIDLanguages = split (languageIDLanguagesResult.value (), ',');
+		languageIDLanguages = std::optional<std::vector<std::string>>{ split (languageIDLanguagesResult.value (), ',') };
 	}
-
-	std::optional<std::string> outputFileResult = GetCmdOption (argv, argv + argc, "-o");
-	if (true == outputFileResult.has_value ())
-	{
-		outputFileEnabled = true;
-		outputFile = outputFileResult.value ();
-	}
-	
-	std::optional<std::string> phraseListResult = GetCmdOption (argv, argv + argc, "-p");
-	if (true == phraseListResult.has_value ())
-	{
-		phraseListEnabled = true;
-		phraseList = phraseListResult.value ();
-	}
-
+	inputFile = GetCmdOption (argv, argv + argc, "-i");
+	outputFile = GetCmdOption (argv, argv + argc, "-o");
+	phraseList = GetCmdOption (argv, argv + argc, "-p");
 	suppressOutputEnabled = CmdOptionExists (argv, argv + argc, "-q");
 	partialResultsEnabled = CmdOptionExists (argv, argv + argc, "-u");
-	
-	std::optional<std::string> stablePartialResultThresholdResult = GetCmdOption (argv, argv + argc, "-r");
-	if (true == stablePartialResultThresholdResult.has_value ())
-	{
-		stablePartialResultThresholdEnabled = true;
-		stablePartialResultThreshold = stablePartialResultThresholdResult.value ();
-	}
-	
+	stablePartialResultThreshold = GetCmdOption (argv, argv + argc, "-r");
 	srtEnabled = CmdOptionExists (argv, argv + argc, "-s");
 	trueTextEnabled = CmdOptionExists (argv, argv + argc, "-t");
 	
@@ -295,15 +364,12 @@ UserConfig ArgsToUserConfig (int argc, char* argv[])
 		prioritizeAccuracyEnabled,
 		dictationEnabled,
 		profanityFilterEnabled,
-		languageIDEnabled,
 		languageIDLanguages,
-		outputFileEnabled,
+		inputFile,
 		outputFile,
-		phraseListEnabled,
 		phraseList,
 		suppressOutputEnabled,
 		partialResultsEnabled,
-		stablePartialResultThresholdEnabled,
 		stablePartialResultThreshold,
 		srtEnabled,
 		trueTextEnabled,
@@ -314,16 +380,25 @@ UserConfig ArgsToUserConfig (int argc, char* argv[])
 	return userConfig;
 }
 
-std::string RegionToV2Endpoint (std::string region)
+std::shared_ptr<Audio::AudioConfig> AudioConfigFromUserConfig (UserConfig userConfig)
 {
-	return std::string (v2EndpointStart + region + v2EndpointEnd);
+	std::shared_ptr<Audio::AudioConfig> audioConfig;
+	if (true == userConfig.inputFile.has_value ())
+	{
+		audioConfig = Audio::AudioConfig::FromWavFileInput (userConfig.inputFile.value ());
+	}
+	else
+	{
+		audioConfig = Audio::AudioConfig::FromDefaultMicrophoneInput ();
+	}
+	return audioConfig;
 }
 
-std::shared_ptr<SpeechConfig> UserConfigToSpeechConfig (UserConfig userConfig)
+std::shared_ptr<SpeechConfig> SpeechConfigFromUserConfig (UserConfig userConfig)
 {
 	std::shared_ptr<SpeechConfig> speechConfig;
-	if (userConfig.languageIDEnabled) {
-		std::string endpoint = RegionToV2Endpoint (userConfig.region);
+	if (userConfig.languageIDLanguages.has_value ()) {
+		std::string endpoint = V2EndpointFromRegion (userConfig.region);
 		speechConfig = SpeechConfig::FromEndpoint (endpoint, userConfig.subscriptionKey);
 	}
 	else
@@ -345,11 +420,11 @@ https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started-s
 		speechConfig->SetProfanity (ProfanityOption::Removed);
 	}
 	
-	if (true == userConfig.stablePartialResultThresholdEnabled)
+	if (true == userConfig.stablePartialResultThreshold.has_value ())
 	{
 // Note: To get default value:
 // std::cout << speechConfig->GetProperty (PropertyId::SpeechServiceResponse_StablePartialResultThreshold) << std::endl;
-		speechConfig->SetProperty (PropertyId::SpeechServiceResponse_StablePartialResultThreshold, userConfig.stablePartialResultThreshold);
+		speechConfig->SetProperty (PropertyId::SpeechServiceResponse_StablePartialResultThreshold, userConfig.stablePartialResultThreshold.value ());
 	}
 	
 	if (true == userConfig.trueTextEnabled)
@@ -360,12 +435,12 @@ https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started-s
 	return speechConfig;
 }
 
-std::shared_ptr<SpeechRecognizer> UserConfigToSpeechRecognizer (std::shared_ptr<SpeechConfig> speechConfig, std::shared_ptr<Audio::AudioConfig> audioConfig, UserConfig userConfig)
+std::shared_ptr<SpeechRecognizer> SpeechRecognizerFromSpeechConfig (std::shared_ptr<SpeechConfig> speechConfig, std::shared_ptr<Audio::AudioConfig> audioConfig, UserConfig userConfig)
 {
 	std::shared_ptr<SpeechRecognizer> speechRecognizer;
-	if (true == userConfig.languageIDEnabled)
+	if (true == userConfig.languageIDLanguages.has_value ())
 	{
-		std::shared_ptr<AutoDetectSourceLanguageConfig> detectLanguageConfig = AutoDetectSourceLanguageConfig::FromLanguages (userConfig.languageIDLanguages);
+		std::shared_ptr<AutoDetectSourceLanguageConfig> detectLanguageConfig = AutoDetectSourceLanguageConfig::FromLanguages (userConfig.languageIDLanguages.value ());
 		speechRecognizer = SpeechRecognizer::FromConfig (speechConfig, detectLanguageConfig, audioConfig);
 	}
 	else
@@ -373,117 +448,20 @@ std::shared_ptr<SpeechRecognizer> UserConfigToSpeechRecognizer (std::shared_ptr<
 		speechRecognizer = SpeechRecognizer::FromConfig (speechConfig, audioConfig);
 	}
 	
-	std::shared_ptr<PhraseListGrammar> grammar = PhraseListGrammar::FromRecognizer (speechRecognizer);
-	grammar->AddPhrase (userConfig.phraseList);
+	if (true == userConfig.phraseList.has_value ())
+	{
+		std::shared_ptr<PhraseListGrammar> grammar = PhraseListGrammar::FromRecognizer (speechRecognizer);
+		grammar->AddPhrase (userConfig.phraseList.value ());
+	}
 	
 	return speechRecognizer;
 }
 
-captionTime TicksToCaptionTime (uint64_t startTicks, uint64_t endTicks)
+std::shared_ptr<SpeechRecognizer> SpeechRecognizerFromUserConfig (UserConfig userConfig)
 {
-	const float startSeconds_1 = startTicks / ticksPerSecond;
-	const float endSeconds_1 = endTicks / ticksPerSecond;
-	
-	const int startMinutes_1 = startSeconds_1 / 60;
-	const int endMinutes_1 = endSeconds_1 / 60;	
-	
-	const int startHours = startMinutes_1 / 60;
-	const int endHours = endMinutes_1 / 60;
-	
-	const float startSeconds_2 = fmod (startSeconds_1, 60.0);
-	const float endSeconds_2 = fmod (endSeconds_1, 60.0);
-	
-	const float startMinutes_2 = fmod (startMinutes_1, 60.0);
-	const float endMinutes_2 = fmod (endMinutes_1, 60.0);
-	
-	return captionTime (startHours, endHours, startMinutes_2, endMinutes_2, startSeconds_2, endSeconds_2);
-}
-
-std::string CaptionTimeToCaption (bool srt, int sequenceNumber, captionTime captionTime, std::string text, std::optional<std::string> language)
-{
-	std::ostringstream result;
-	if (true == srt)
-	{
-// SRT format requires ',' as decimal separator rather than '.'.
-		std::ostringstream startSeconds_1, endSeconds_1;
-// setw value is 2 for seconds + 1 for floating point + 3 for decimal places.
-		startSeconds_1 << std::setfill ('0') << std::setw (6) << std::fixed << std::setprecision (3) << captionTime.startSeconds;
-		endSeconds_1 << std::setfill ('0') << std::setw (6) << std::fixed << std::setprecision (3) << captionTime.endSeconds;
-		std::string startSeconds_2 (startSeconds_1.str ());
-		std::string endSeconds_2 (endSeconds_1.str ());
-		std::replace (startSeconds_2.begin (), startSeconds_2.end (), '.', ',');
-		std::replace (endSeconds_2.begin (), endSeconds_2.end (), '.', ',');
-
-		result << sequenceNumber << "\n"
-			<< std::setfill ('0') << std::setw (2) << captionTime.startHours << ":"
-			<< std::setfill ('0') << std::setw (2) << captionTime.startMinutes << ":" << startSeconds_2 << " --> "
-			<< std::setfill ('0') << std::setw (2) << captionTime.endHours << ":"
-			<< std::setfill ('0') << std::setw (2) << captionTime.endMinutes << ":" << endSeconds_2 << std::endl;
-	}
-	else
-	{
-		result << std::setfill ('0') << std::setw (2) << captionTime.startHours << ":"
-			<< std::setfill ('0') << std::setw (2) << captionTime.startMinutes << ":"
-// setw value is 2 for seconds + 1 for floating point + 3 for decimal places.
-			<< std::setfill ('0') << std::setw (6) << std::fixed << std::setprecision (3) << captionTime.startSeconds << " --> "
-			<< std::setfill ('0') << std::setw (2) << captionTime.endHours << ":"
-			<< std::setfill ('0') << std::setw (2) << captionTime.endMinutes << ":"
-			<< std::setfill ('0') << std::setw (6) << std::fixed << std::setprecision (3) << captionTime.endSeconds << std::endl;
-	}
-	
-	if (true == language.has_value ())
-	{
-		result << "[" << *language << "] " << text << std::endl << std::endl;
-	}
-	else
-	{
-		result << text << std::endl << std::endl;
-	}	
-	
-	return result.str ();
-}
-
-void WriteToConsole (std::string text, UserConfig userConfig)
-{
-	if (false == userConfig.suppressOutputEnabled)
-	{
-		std::cout << text;
-	}
-}
-
-void WriteToConsoleOrFile (std::string text, UserConfig userConfig)
-{
-	if (false == userConfig.suppressOutputEnabled)
-	{
-		std::cout << text;
-	}
-	if (true == userConfig.outputFileEnabled)
-	{
-		std::ofstream outputStream;
-		outputStream.open (userConfig.outputFile, std::ios_base::app);
-		outputStream << text;
-		outputStream.close ();
-	}
-}
-
-void Initialize (UserConfig userConfig)
-{
-	if (true == userConfig.outputFileEnabled)
-	{
-		std::filesystem::path outputFile {userConfig.outputFile};
-// If the output file exists, truncate it.
-		if (std::filesystem::exists (outputFile))
-		{
-			std::ofstream outputStream;
-			outputStream.open (userConfig.outputFile);
-			outputStream.close ();			
-		}
-	}
-
-	if (false == userConfig.srtEnabled && false == userConfig.partialResultsEnabled)
-	{
-		WriteToConsoleOrFile ("WEBVTT\n\n", userConfig);
-	}
+	std::shared_ptr<Audio::AudioConfig> audioConfig = AudioConfigFromUserConfig (userConfig);
+	std::shared_ptr<SpeechConfig> speechConfig = SpeechConfigFromUserConfig (userConfig);
+	return SpeechRecognizerFromSpeechConfig (speechConfig, audioConfig, userConfig);
 }
 
 std::optional<std::string> RecognizeContinuous (std::shared_ptr<SpeechRecognizer> speechRecognizer, UserConfig userConfig)
@@ -500,23 +478,7 @@ https://www.cppstories.com/2020/08/lambda-capturing.html/
 			{
 				if (ResultReason::RecognizingSpeech == e.Result->Reason && e.Result->Text.length () > 0)
 				{
-					std::optional<std::string> language = std::nullopt;
-					if (true == userConfig.languageIDEnabled)
-					{
-						auto languageIDResult = AutoDetectSourceLanguageResult::FromResult (e.Result);
-						language = std::optional<std::string>{ languageIDResult->Language };
-					}
-					
-					std::ostringstream result;
-					if (true == language.has_value ())
-					{
-						result << "[" << *language << "] " << e.Result->Text << std::endl;
-					}
-					else
-					{
-						result << e.Result->Text << std::endl;
-					}
-					WriteToConsoleOrFile (result.str (), userConfig);
+					WriteToConsoleOrFile (AddLanguageToResult (e.Result, userConfig), userConfig);
 				}
 				else if (ResultReason::NoMatch == e.Result->Reason)
 				{
@@ -530,17 +492,8 @@ https://www.cppstories.com/2020/08/lambda-capturing.html/
 			{
 				if (ResultReason::RecognizedSpeech == e.Result->Reason && e.Result->Text.length () > 0)
 				{
-					std::optional<std::string> language = std::nullopt;
-					if (true == userConfig.languageIDEnabled)
-					{
-						auto languageIDResult = AutoDetectSourceLanguageResult::FromResult (e.Result);
-						language = std::optional<std::string>{ languageIDResult->Language };
-					}
-					
 					sequenceNumber++;
-					captionTime captionTime = TicksToCaptionTime (e.Result->Offset (), e.Result->Offset () + e.Result->Duration ());
-					std::string caption (CaptionTimeToCaption (userConfig.srtEnabled, sequenceNumber, captionTime, e.Result->Text, language));
-					WriteToConsoleOrFile (caption, userConfig);
+					WriteToConsoleOrFile (CaptionFromSpeechRecognitionResult (userConfig.srtEnabled, sequenceNumber, e.Result, userConfig), userConfig);
 				}
 				else if (ResultReason::NoMatch == e.Result->Reason)
 				{
@@ -605,10 +558,8 @@ int main (int argc, char* argv[])
 		}
 		else
 		{
-			std::shared_ptr<Audio::AudioConfig> audioConfig = ArgsToAudioConfig (argc, argv);
-			UserConfig userConfig = ArgsToUserConfig (argc, argv);
-			std::shared_ptr<SpeechConfig> speechConfig = UserConfigToSpeechConfig (userConfig);
-			std::shared_ptr<SpeechRecognizer> speechRecognizer = UserConfigToSpeechRecognizer (speechConfig, audioConfig, userConfig);
+			UserConfig userConfig = UserConfigFromArgs (argc, argv);
+			std::shared_ptr<SpeechRecognizer> speechRecognizer = SpeechRecognizerFromUserConfig (userConfig);
 			Initialize (userConfig);
 			std::optional<std::string> error = RecognizeContinuous (speechRecognizer, userConfig);
 			if (true == error.has_value ())
