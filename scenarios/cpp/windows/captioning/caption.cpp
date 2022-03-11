@@ -33,8 +33,8 @@ Types
 struct UserConfig
 {
     const bool prioritizeAccuracyEnabled = false;
-    const bool dictationEnabled = false;
-    const bool profanityFilterEnabled = false;
+    const bool profanityFilterRemoveEnabled = false;
+    const bool profanityFilterMaskEnabled = false;
     const std::optional<std::vector<std::string>> languageIDLanguages = std::nullopt;
     const std::optional<std::string> inputFile = std::nullopt;
     const std::optional<std::string> outputFile = std::nullopt;
@@ -49,8 +49,8 @@ struct UserConfig
     
     UserConfig(
         bool prioritizeAccuracyEnabled,
-        bool dictationEnabled,
-        bool profanityFilterEnabled,
+        bool profanityFilterRemoveEnabled,
+        bool profanityFilterMaskEnabled,
         std::optional<std::vector<std::string>> languageIDLanguages,
         std::optional<std::string> inputFile,
         std::optional<std::string> outputFile,
@@ -64,8 +64,8 @@ struct UserConfig
         std::string region
         ) :
         prioritizeAccuracyEnabled(prioritizeAccuracyEnabled),
-        dictationEnabled(dictationEnabled),
-        profanityFilterEnabled(profanityFilterEnabled),
+        profanityFilterRemoveEnabled(profanityFilterRemoveEnabled),
+        profanityFilterMaskEnabled(profanityFilterMaskEnabled),
         languageIDLanguages(languageIDLanguages),
         inputFile(inputFile),
         outputFile(outputFile),
@@ -80,7 +80,7 @@ struct UserConfig
         {}
 };
 
-struct CaptionTime
+struct Timestamp
 {
     const int startHours;
     const int endHours;
@@ -89,7 +89,7 @@ struct CaptionTime
     const float startSeconds;
     const float endSeconds;
 
-    CaptionTime(
+    Timestamp(
         int startHours,
         int endHours,
         int startMinutes,
@@ -168,7 +168,7 @@ std::string V2EndpointFromRegion(std::string region)
     return std::string("wss://" + region + ".stt.speech.microsoft.com/speech/universal/v2");
 }
 
-CaptionTime CaptionTimeFromTicks(uint64_t startTicks, uint64_t endTicks)
+Timestamp TimestampFromTicks(uint64_t startTicks, uint64_t endTicks)
 {
     const float ticksPerSecond = 10000000.0;
 
@@ -187,54 +187,66 @@ CaptionTime CaptionTimeFromTicks(uint64_t startTicks, uint64_t endTicks)
     const float startMinutes_2 = fmod(startMinutes_1, 60.0);
     const float endMinutes_2 = fmod(endMinutes_1, 60.0);
     
-    return CaptionTime(startHours, endHours, startMinutes_2, endMinutes_2, startSeconds_2, endSeconds_2);
+    return Timestamp(startHours, endHours, startMinutes_2, endMinutes_2, startSeconds_2, endSeconds_2);
 }
 
-std::string AddLanguageToResult(std::shared_ptr<SpeechRecognitionResult> result, UserConfig userConfig)
+std::string GetTimestamp(std::shared_ptr<SpeechRecognitionResult> result, UserConfig userConfig)
 {
-    if (userConfig.languageIDLanguages.has_value())
-    {
-        auto languageIDResult = AutoDetectSourceLanguageResult::FromResult(result);
-        return "[" + languageIDResult->Language + "] " + result->Text + "\n";
-    }
-    else
-    {
-        return result->Text + "\n";
-    }
-}
-
-std::string CaptionFromSpeechRecognitionResult(bool srt, int sequenceNumber, std::shared_ptr<SpeechRecognitionResult> result, UserConfig userConfig)
-{
-    std::ostringstream caption;
-    CaptionTime captionTime = CaptionTimeFromTicks(result->Offset(), result->Offset() + result->Duration());    
+    std::ostringstream strTimestamp;
+    Timestamp timestamp = TimestampFromTicks(result->Offset(), result->Offset() + result->Duration());    
     
     std::ostringstream startSeconds_1, endSeconds_1;
 // setw value is 2 for seconds + 1 for floating point + 3 for decimal places.
-    startSeconds_1 << std::setfill('0') << std::setw(6) << std::fixed << std::setprecision(3) << captionTime.startSeconds;
-    endSeconds_1 << std::setfill('0') << std::setw(6) << std::fixed << std::setprecision(3) << captionTime.endSeconds;    
+    startSeconds_1 << std::setfill('0') << std::setw(6) << std::fixed << std::setprecision(3) << timestamp.startSeconds;
+    endSeconds_1 << std::setfill('0') << std::setw(6) << std::fixed << std::setprecision(3) << timestamp.endSeconds;    
     
-    if (srt)
+    if (userConfig.srtEnabled)
     {
 // SRT format requires ',' as decimal separator rather than '.'.
         std::string startSeconds_2(startSeconds_1.str());
         std::string endSeconds_2(endSeconds_1.str());
         std::replace(startSeconds_2.begin(), startSeconds_2.end(), '.', ',');
         std::replace(endSeconds_2.begin(), endSeconds_2.end(), '.', ',');
-        caption << sequenceNumber << "\n"
-            << std::setfill('0') << std::setw(2) << captionTime.startHours << ":"
-            << std::setfill('0') << std::setw(2) << captionTime.startMinutes << ":" << startSeconds_2 << " --> "
-            << std::setfill('0') << std::setw(2) << captionTime.endHours << ":"
-            << std::setfill('0') << std::setw(2) << captionTime.endMinutes << ":" << endSeconds_2 << std::endl;
+        strTimestamp << std::setfill('0') << std::setw(2) << timestamp.startHours << ":"
+            << std::setfill('0') << std::setw(2) << timestamp.startMinutes << ":" << startSeconds_2 << " --> "
+            << std::setfill('0') << std::setw(2) << timestamp.endHours << ":"
+            << std::setfill('0') << std::setw(2) << timestamp.endMinutes << ":" << endSeconds_2;
     }
     else
     {
-        caption << std::setfill('0') << std::setw(2) << captionTime.startHours << ":"
-            << std::setfill('0') << std::setw(2) << captionTime.startMinutes << ":" << startSeconds_1.str() << " --> "
-            << std::setfill('0') << std::setw(2) << captionTime.endHours << ":"
-            << std::setfill('0') << std::setw(2) << captionTime.endMinutes << ":" << endSeconds_1.str() << std::endl;
+        strTimestamp << std::setfill('0') << std::setw(2) << timestamp.startHours << ":"
+            << std::setfill('0') << std::setw(2) << timestamp.startMinutes << ":" << startSeconds_1.str() << " --> "
+            << std::setfill('0') << std::setw(2) << timestamp.endHours << ":"
+            << std::setfill('0') << std::setw(2) << timestamp.endMinutes << ":" << endSeconds_1.str();
     }
-    caption << AddLanguageToResult(result, userConfig) << std::endl;
-    return caption.str();
+    
+    return strTimestamp.str ();
+}
+
+std::string GetLanguage(std::shared_ptr<SpeechRecognitionResult> result, UserConfig userConfig)
+{
+    if (userConfig.languageIDLanguages.has_value())
+    {
+        auto languageIDResult = AutoDetectSourceLanguageResult::FromResult(result);
+        return "[" + languageIDResult->Language + "] ";
+    }
+    else
+    {
+        return "";
+    }
+}
+
+std::string CaptionFromSpeechRecognitionResult(bool partial, int sequenceNumber, std::shared_ptr<SpeechRecognitionResult> result, UserConfig userConfig)
+{
+    std::string caption;
+    if (!partial && userConfig.srtEnabled)
+    {
+        caption += sequenceNumber + "\n";
+    }
+    caption += GetTimestamp(result, userConfig) + "\n"
+        + GetLanguage(result, userConfig)
+        + result->Text + "\n\n";
+    return caption;
 }
 
 void WriteToConsole(std::string text, UserConfig userConfig)
@@ -301,8 +313,8 @@ UserConfig UserConfigFromArgs(int argc, char* argv[])
 
     return UserConfig(
         CmdOptionExists(argv, argv + argc, "-a"),
-        CmdOptionExists(argv, argv + argc, "-d"),
         CmdOptionExists(argv, argv + argc, "-f"),
+        CmdOptionExists(argv, argv + argc, "-m"),
         languageIDLanguages,
         GetCmdOption(argv, argv + argc, "-i"),
         GetCmdOption(argv, argv + argc, "-o"),
@@ -344,18 +356,13 @@ std::shared_ptr<SpeechConfig> SpeechConfigFromUserConfig(UserConfig userConfig)
         speechConfig = SpeechConfig::FromSubscription(userConfig.subscriptionKey, userConfig.region);
     }
 
-/* Note: Dictation mode is only supported for continuous recognition.
-See:
-https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started-speech-to-text?tabs=windowsinstall&pivots=programming-language-cpp#dictation-mode
-*/
-    if (userConfig.dictationEnabled)
-    {
-        speechConfig->EnableDictation();
-    }
-
-    if (userConfig.profanityFilterEnabled)
+    if (userConfig.profanityFilterRemoveEnabled)
     {
         speechConfig->SetProfanity(ProfanityOption::Removed);
+    }
+    else if (userConfig.profanityFilterMaskEnabled)
+    {
+        speechConfig->SetProfanity(ProfanityOption::Masked);
     }
     
     if (userConfig.stablePartialResultThreshold.has_value())
@@ -416,7 +423,7 @@ https://www.cppstories.com/2020/08/lambda-capturing.html/
             {
                 if (ResultReason::RecognizingSpeech == e.Result->Reason && e.Result->Text.length() > 0)
                 {
-                    WriteToConsoleOrFile(AddLanguageToResult(e.Result, userConfig), userConfig);
+                    WriteToConsoleOrFile(CaptionFromSpeechRecognitionResult(true, 0, e.Result, userConfig), userConfig);
                 }
                 else if (ResultReason::NoMatch == e.Result->Reason)
                 {
@@ -431,7 +438,7 @@ https://www.cppstories.com/2020/08/lambda-capturing.html/
                 if (ResultReason::RecognizedSpeech == e.Result->Reason && e.Result->Text.length() > 0)
                 {
                     sequenceNumber++;
-                    WriteToConsoleOrFile(CaptionFromSpeechRecognitionResult(userConfig.srtEnabled, sequenceNumber, e.Result, userConfig), userConfig);
+                    WriteToConsoleOrFile(CaptionFromSpeechRecognitionResult(false, sequenceNumber, e.Result, userConfig), userConfig);
                 }
                 else if (ResultReason::NoMatch == e.Result->Reason)
                 {
@@ -488,13 +495,13 @@ https://www.cppstories.com/2020/08/lambda-capturing.html/
 
 int main(int argc, char* argv[])
 {
-    const std::string usage = "Usage: caption.exe [-d] [-f] [-h] [-i file] [-l] [-o file] [-p phrases] [-q] [-r number] [-s] [-t] [-u] <subscriptionKey> <region>\n"
-    "              -d: Enable dictation mode.\n"
-    "              -f: Enable profanity filter.\n"
+    const std::string usage = "Usage: caption.exe [-f] [-h] [-i file] [-l] [-o file] [-p phrases] [-q] [-r number] [-s] [-t] [-u] <subscriptionKey> <region>\n"
+    "              -f: Enable profanity filter (remove profanity). Overrides -m.\n"
     "              -h: Show this help and stop.\n"
     "              -i: Input audio file *file* (default input is from the microphone.)\n"
     "    -l languages: Enable language identification for specified *languages*.\n"
     "                  Example: en-US,ja-JP\n"
+    "              -m: Enable profanity filter (mask profanity). -f overrides this.\n"
     "         -o file: Output to *file*.\n"
     "      -p phrases: Add specified *phrases*.\n"
     "                  Example: Constoso;Jessie;Rehaan\n"
