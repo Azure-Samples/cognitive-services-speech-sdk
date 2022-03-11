@@ -286,65 +286,35 @@ Main functions
 
 UserConfig UserConfigFromArgs(int argc, char* argv[])
 {
-    bool prioritizeAccuracyEnabled = false;
-    bool dictationEnabled = false;
-    bool profanityFilterEnabled = false;
-    std::optional<std::vector<std::string>> languageIDLanguages;
-    std::optional<std::string> inputFile;
-    std::optional<std::string> outputFile;
-    std::optional<std::string> phraseList;
-    bool suppressOutputEnabled = false;
-    bool partialResultsEnabled = false;
-    std::optional<std::string> stablePartialResultThreshold;
-    bool srtEnabled = false;
-    bool trueTextEnabled = false;
-    std::string subscriptionKey;
-    std::string region;
-
 // Verify argc >= 3 (caption.exe, subscriptionKey, region)
     if (argc < 3)
     {
         throw TooFewArguments();
     }
 
-    subscriptionKey = argv[argc - 2];
-    region = argv[argc - 1];
-
-    prioritizeAccuracyEnabled = CmdOptionExists(argv, argv + argc, "-a");
-    dictationEnabled = CmdOptionExists(argv, argv + argc, "-d");
-    profanityFilterEnabled = CmdOptionExists(argv, argv + argc, "-f");
+    std::optional<std::vector<std::string>> languageIDLanguages = std::nullopt;
     std::optional<std::string> languageIDLanguagesResult = GetCmdOption(argv, argv + argc, "-l");
     if (languageIDLanguagesResult.has_value())
     {
         languageIDLanguages = std::optional<std::vector<std::string>>{ split(languageIDLanguagesResult.value(), ',') };
     }
-    inputFile = GetCmdOption(argv, argv + argc, "-i");
-    outputFile = GetCmdOption(argv, argv + argc, "-o");
-    phraseList = GetCmdOption(argv, argv + argc, "-p");
-    suppressOutputEnabled = CmdOptionExists(argv, argv + argc, "-q");
-    partialResultsEnabled = CmdOptionExists(argv, argv + argc, "-u");
-    stablePartialResultThreshold = GetCmdOption(argv, argv + argc, "-r");
-    srtEnabled = CmdOptionExists(argv, argv + argc, "-s");
-    trueTextEnabled = CmdOptionExists(argv, argv + argc, "-t");
-    
-    UserConfig userConfig = UserConfig(
-        prioritizeAccuracyEnabled,
-        dictationEnabled,
-        profanityFilterEnabled,
+
+    return UserConfig(
+        CmdOptionExists(argv, argv + argc, "-a"),
+        CmdOptionExists(argv, argv + argc, "-d"),
+        CmdOptionExists(argv, argv + argc, "-f"),
         languageIDLanguages,
-        inputFile,
-        outputFile,
-        phraseList,
-        suppressOutputEnabled,
-        partialResultsEnabled,
-        stablePartialResultThreshold,
-        srtEnabled,
-        trueTextEnabled,
-        subscriptionKey,
-        region
+        GetCmdOption(argv, argv + argc, "-i"),
+        GetCmdOption(argv, argv + argc, "-o"),
+        GetCmdOption(argv, argv + argc, "-p"),
+        CmdOptionExists(argv, argv + argc, "-q"),
+        CmdOptionExists(argv, argv + argc, "-u"),
+        GetCmdOption(argv, argv + argc, "-r"),
+        CmdOptionExists(argv, argv + argc, "-s"),
+        CmdOptionExists(argv, argv + argc, "-t"),
+        argv[argc - 2],
+        argv[argc - 1]
     );
-    
-    return userConfig;
 }
 
 std::shared_ptr<Audio::AudioConfig> AudioConfigFromUserConfig(UserConfig userConfig)
