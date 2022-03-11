@@ -190,7 +190,7 @@ Timestamp TimestampFromTicks(uint64_t startTicks, uint64_t endTicks)
     return Timestamp(startHours, endHours, startMinutes_2, endMinutes_2, startSeconds_2, endSeconds_2);
 }
 
-std::string GetTimestamp(std::shared_ptr<SpeechRecognitionResult> result, UserConfig userConfig)
+std::string TimestampFromSpeechRecognitionResult(std::shared_ptr<SpeechRecognitionResult> result, UserConfig userConfig)
 {
     std::ostringstream strTimestamp;
     Timestamp timestamp = TimestampFromTicks(result->Offset(), result->Offset() + result->Duration());    
@@ -223,7 +223,7 @@ std::string GetTimestamp(std::shared_ptr<SpeechRecognitionResult> result, UserCo
     return strTimestamp.str ();
 }
 
-std::string GetLanguage(std::shared_ptr<SpeechRecognitionResult> result, UserConfig userConfig)
+std::string LanguageFromSpeechRecognitionResult(std::shared_ptr<SpeechRecognitionResult> result, UserConfig userConfig)
 {
     if (userConfig.languageIDLanguages.has_value())
     {
@@ -236,15 +236,15 @@ std::string GetLanguage(std::shared_ptr<SpeechRecognitionResult> result, UserCon
     }
 }
 
-std::string CaptionFromSpeechRecognitionResult(bool partial, int sequenceNumber, std::shared_ptr<SpeechRecognitionResult> result, UserConfig userConfig)
+std::string CaptionFromSpeechRecognitionResult(int sequenceNumber, std::shared_ptr<SpeechRecognitionResult> result, UserConfig userConfig)
 {
     std::string caption;
-    if (!partial && userConfig.srtEnabled)
+    if (!userConfig.partialResultsEnabled && userConfig.srtEnabled)
     {
         caption += sequenceNumber + "\n";
     }
-    caption += GetTimestamp(result, userConfig) + "\n"
-        + GetLanguage(result, userConfig)
+    caption += TimestampFromSpeechRecognitionResult(result, userConfig) + "\n"
+        + LanguageFromSpeechRecognitionResult(result, userConfig)
         + result->Text + "\n\n";
     return caption;
 }
@@ -253,16 +253,13 @@ void WriteToConsole(std::string text, UserConfig userConfig)
 {
     if (!userConfig.suppressOutputEnabled)
     {
-        std::cout << text;
+        std::cout << text << std::flush;
     }
 }
 
 void WriteToConsoleOrFile(std::string text, UserConfig userConfig)
 {
-    if (!userConfig.suppressOutputEnabled)
-    {
-        std::cout << text;
-    }
+    WriteToConsole(text, userConfig);
     if (userConfig.outputFile.has_value())
     {
         std::ofstream outputStream;
@@ -423,7 +420,8 @@ https://www.cppstories.com/2020/08/lambda-capturing.html/
             {
                 if (ResultReason::RecognizingSpeech == e.Result->Reason && e.Result->Text.length() > 0)
                 {
-                    WriteToConsoleOrFile(CaptionFromSpeechRecognitionResult(true, 0, e.Result, userConfig), userConfig);
+// We don't show sequence numbers for partial results.
+                    WriteToConsoleOrFile(CaptionFromSpeechRecognitionResult(0, e.Result, userConfig), userConfig);
                 }
                 else if (ResultReason::NoMatch == e.Result->Reason)
                 {
@@ -438,7 +436,7 @@ https://www.cppstories.com/2020/08/lambda-capturing.html/
                 if (ResultReason::RecognizedSpeech == e.Result->Reason && e.Result->Text.length() > 0)
                 {
                     sequenceNumber++;
-                    WriteToConsoleOrFile(CaptionFromSpeechRecognitionResult(false, sequenceNumber, e.Result, userConfig), userConfig);
+                    WriteToConsoleOrFile(CaptionFromSpeechRecognitionResult(sequenceNumber, e.Result, userConfig), userConfig);
                 }
                 else if (ResultReason::NoMatch == e.Result->Reason)
                 {
@@ -521,8 +519,8 @@ int main(int argc, char* argv[])
         else
         {
             UserConfig userConfig = UserConfigFromArgs(argc, argv);
-            std::shared_ptr<SpeechRecognizer> speechRecognizer = SpeechRecognizerFromUserConfig(userConfig);
             Initialize(userConfig);
+            std::shared_ptr<SpeechRecognizer> speechRecognizer = SpeechRecognizerFromUserConfig(userConfig);
             std::optional<std::string> error = RecognizeContinuous(speechRecognizer, userConfig);
             if (error.has_value())
             {
