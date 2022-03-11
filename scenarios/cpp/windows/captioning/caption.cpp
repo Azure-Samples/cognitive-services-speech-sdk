@@ -32,7 +32,6 @@ Types
 
 struct UserConfig
 {
-    const bool prioritizeAccuracyEnabled = false;
     const bool profanityFilterRemoveEnabled = false;
     const bool profanityFilterMaskEnabled = false;
     const std::optional<std::vector<std::string>> languageIDLanguages = std::nullopt;
@@ -48,7 +47,6 @@ struct UserConfig
     const std::string region;
     
     UserConfig(
-        bool prioritizeAccuracyEnabled,
         bool profanityFilterRemoveEnabled,
         bool profanityFilterMaskEnabled,
         std::optional<std::vector<std::string>> languageIDLanguages,
@@ -63,7 +61,6 @@ struct UserConfig
         std::string subscriptionKey,
         std::string region
         ) :
-        prioritizeAccuracyEnabled(prioritizeAccuracyEnabled),
         profanityFilterRemoveEnabled(profanityFilterRemoveEnabled),
         profanityFilterMaskEnabled(profanityFilterMaskEnabled),
         languageIDLanguages(languageIDLanguages),
@@ -227,7 +224,7 @@ std::string LanguageFromSpeechRecognitionResult(std::shared_ptr<SpeechRecognitio
 {
     if (userConfig.languageIDLanguages.has_value())
     {
-        auto languageIDResult = AutoDetectSourceLanguageResult::FromResult(result);
+        std::shared_ptr<AutoDetectSourceLanguageResult> languageIDResult = AutoDetectSourceLanguageResult::FromResult(result);
         return "[" + languageIDResult->Language + "] ";
     }
     else
@@ -282,7 +279,6 @@ void Initialize(UserConfig userConfig)
             outputStream.close();            
         }
     }
-
     if (!userConfig.srtEnabled && !userConfig.partialResultsEnabled)
     {
         WriteToConsoleOrFile("WEBVTT\n\n", userConfig);
@@ -309,7 +305,6 @@ UserConfig UserConfigFromArgs(int argc, char* argv[])
     }
 
     return UserConfig(
-        CmdOptionExists(argv, argv + argc, "-a"),
         CmdOptionExists(argv, argv + argc, "-f"),
         CmdOptionExists(argv, argv + argc, "-m"),
         languageIDLanguages,
@@ -328,16 +323,14 @@ UserConfig UserConfigFromArgs(int argc, char* argv[])
 
 std::shared_ptr<Audio::AudioConfig> AudioConfigFromUserConfig(UserConfig userConfig)
 {
-    std::shared_ptr<Audio::AudioConfig> audioConfig;
     if (userConfig.inputFile.has_value())
     {
-        audioConfig = Audio::AudioConfig::FromWavFileInput(userConfig.inputFile.value());
+        return Audio::AudioConfig::FromWavFileInput(userConfig.inputFile.value());
     }
     else
     {
-        audioConfig = Audio::AudioConfig::FromDefaultMicrophoneInput();
+        return Audio::AudioConfig::FromDefaultMicrophoneInput();
     }
-    return audioConfig;
 }
 
 std::shared_ptr<SpeechConfig> SpeechConfigFromUserConfig(UserConfig userConfig)
@@ -493,7 +486,7 @@ https://www.cppstories.com/2020/08/lambda-capturing.html/
 
 int main(int argc, char* argv[])
 {
-    const std::string usage = "Usage: caption.exe [-f] [-h] [-i file] [-l] [-o file] [-p phrases] [-q] [-r number] [-s] [-t] [-u] <subscriptionKey> <region>\n"
+    const std::string usage = "Usage: caption.exe [-f] [-h] [-i file] [-l] [-m] [-o file] [-p phrases] [-q] [-r number] [-s] [-t] [-u] <subscriptionKey> <region>\n"
     "              -f: Enable profanity filter (remove profanity). Overrides -m.\n"
     "              -h: Show this help and stop.\n"
     "              -i: Input audio file *file* (default input is from the microphone.)\n"
