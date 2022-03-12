@@ -233,8 +233,10 @@ def recognize_continuous(speech_recognizer : speechsdk.SpeechRecognizer, user_co
         write_to_console(text = "Session stopped.".format(linesep), user_config = user_config);
         done = True
 
-    speech_recognizer.recognizing.connect(recognizing_handler)
-    speech_recognizer.recognized.connect(recognized_handler)
+    if user_config.partial_results_enabled :
+        speech_recognizer.recognizing.connect(recognizing_handler)
+    else :
+        speech_recognizer.recognized.connect(recognized_handler)
     speech_recognizer.session_stopped.connect(stopped_handler)
     speech_recognizer.canceled.connect(canceled_handler)
 
@@ -245,7 +247,7 @@ def recognize_continuous(speech_recognizer : speechsdk.SpeechRecognizer, user_co
 
     return
 
-usage = """Usage: python caption.py [-f] [-h] [-i file] [-l] [-m] [-o file] [-p phrases] [-q] [-r number] [-s] [-t] [-u] <subscriptionKey> <region>
+usage = """Usage: python caption.py [-f] [-h] [-i file] [-l languages] [-m] [-o file] [-p phrases] [-q] [-r number] [-s] [-t] [-u] <subscriptionKey> <region>
               -f: Enable profanity filter (remove profanity). Overrides -m.
               -h: Show this help and stop.
               -i: Input audio file *file* (default input is from the microphone.)
