@@ -15,6 +15,9 @@ See also:
 https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstarts/setup-platform?tabs=dotnet%2Cmacos%2Cjre%2Cbrowser&pivots=programming-language-go#configure-the-go-environment
 - The Speech SDK on Windows requires the Microsoft Visual C++ Redistributable for Visual Studio 2019 on the system. See:
 https://docs.microsoft.com/azure/cognitive-services/speech-service/speech-sdk?tabs=windows%2Cubuntu%2Cios-xcode%2Cmac-xcode%2Candroid-studio
+- In Windows, place the following files from the Speech SDK in the same folder as your .go file (if you are using `go run`) or compiled .exe:
+    - Microsoft.CognitiveServices.Speech.core.dll
+    - Microsoft.CognitiveServices.Speech.extension.audio.sys.dll
 */
     "github.com/Microsoft/cognitive-services-speech-sdk-go/common"
     "github.com/Microsoft/cognitive-services-speech-sdk-go/audio"
@@ -168,7 +171,7 @@ func WriteToConsoleOrFile(text string, userConfig UserConfig) {
 }
 
 func Initialize(userConfig UserConfig) {
-    if(nil != userConfig.outputFile) {
+    if nil != userConfig.outputFile {
         _, err := os.Stat(*userConfig.outputFile)
         if nil == err {
             os.Remove(*userConfig.outputFile)
@@ -202,8 +205,8 @@ func UserConfigFromArgs(args []string) UserConfig {
         region : "",
     }
     
-// Verify argc >= 3(caption.go, subscriptionKey, region)
-    if(len(args) < 3) {
+// Verify argc >= 3 (caption.go, subscriptionKey, region)
+    if len(args) < 3 {
         log.Fatal("Too few arguments.")
     }
 
