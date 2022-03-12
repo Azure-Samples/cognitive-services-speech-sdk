@@ -295,31 +295,36 @@ Main functions
             var recognitionEnd = new TaskCompletionSource<string?>();
             int sequenceNumber = 0;
 
-            speechRecognizer.Recognizing += (object? sender, SpeechRecognitionEventArgs e) =>
-                {
-                    if (ResultReason.RecognizingSpeech == e.Result.Reason && e.Result.Text.Length > 0)
+            if (userConfig.partialResultsEnabled)
+            {
+                speechRecognizer.Recognizing += (object? sender, SpeechRecognitionEventArgs e) =>
                     {
-// We don't show sequence numbers for partial results.
-                        WriteToConsoleOrFile(CaptionFromSpeechRecognitionResult(0, e.Result, userConfig), userConfig);
-                    }
-                    else if (ResultReason.NoMatch == e.Result.Reason)
+                        if (ResultReason.RecognizingSpeech == e.Result.Reason && e.Result.Text.Length > 0)
+                        {
+    // We don't show sequence numbers for partial results.
+                            WriteToConsoleOrFile(CaptionFromSpeechRecognitionResult(0, e.Result, userConfig), userConfig);
+                        }
+                        else if (ResultReason.NoMatch == e.Result.Reason)
+                        {
+                            WriteToConsole("NOMATCH: Speech could not be recognized.\n", userConfig);
+                        }
+                    };
+            }
+            else
+            {
+                speechRecognizer.Recognized += (object? sender, SpeechRecognitionEventArgs e) =>
                     {
-                        WriteToConsole("NOMATCH: Speech could not be recognized.\n", userConfig);
-                    }
-                };
-
-            speechRecognizer.Recognized += (object? sender, SpeechRecognitionEventArgs e) =>
-                {
-                    if (ResultReason.RecognizedSpeech == e.Result.Reason && e.Result.Text.Length > 0)
-                    {
-                        sequenceNumber++;
-                        WriteToConsoleOrFile(CaptionFromSpeechRecognitionResult(0, e.Result, userConfig), userConfig);
-                    }
-                    else if (ResultReason.NoMatch == e.Result.Reason)
-                    {
-                        WriteToConsole("NOMATCH: Speech could not be recognized.\n", userConfig);
-                    }
-                };
+                        if (ResultReason.RecognizedSpeech == e.Result.Reason && e.Result.Text.Length > 0)
+                        {
+                            sequenceNumber++;
+                            WriteToConsoleOrFile(CaptionFromSpeechRecognitionResult(0, e.Result, userConfig), userConfig);
+                        }
+                        else if (ResultReason.NoMatch == e.Result.Reason)
+                        {
+                            WriteToConsole("NOMATCH: Speech could not be recognized.\n", userConfig);
+                        }
+                    };
+            }
 
             speechRecognizer.Canceled += (object? sender, SpeechRecognitionCanceledEventArgs e) =>
                 {
@@ -370,7 +375,7 @@ dotnet run -- -h
 */
         static void Main(string[] args)
         {
-            const string usage = @"Usage: caption.exe [-f] [-h] [-i file] [-l] [-m] [-o file] [-p phrases] [-q] [-r number] [-s] [-t] [-u] <subscriptionKey> <region>
+            const string usage = @"Usage: caption.exe [-f] [-h] [-i file] [-l languages] [-m] [-o file] [-p phrases] [-q] [-r number] [-s] [-t] [-u] <subscriptionKey> <region>
               -f: Enable profanity filter (remove profanity). Overrides -m.
               -h: Show this help and stop.
               -i: Input audio file *file* (default input is from the microphone.)
