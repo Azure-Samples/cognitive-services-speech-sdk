@@ -486,7 +486,7 @@ https://www.cppstories.com/2020/08/lambda-capturing.html/
 
 int main(int argc, char* argv[])
 {
-    const std::string usage = "Usage: caption.exe [-f] [-h] [-i file] [-l] [-m] [-o file] [-p phrases] [-q] [-r number] [-s] [-t] [-u] <subscriptionKey> <region>\n"
+    const std::string usage = "Usage: caption.exe [-f] [-h] [-i file] [-l languages] [-m] [-o file] [-p phrases] [-q] [-r number] [-s] [-t] [-u] <subscriptionKey> <region>\n"
     "              -f: Enable profanity filter (remove profanity). Overrides -m.\n"
     "              -h: Show this help and stop.\n"
     "              -i: Input audio file *file* (default input is from the microphone.)\n"
