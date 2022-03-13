@@ -81,7 +81,7 @@ func IndexOf(xs []string, x string)(bool, int) {
 func GetCmdOption(args []string, option string) *string {
     var result, index = IndexOf(args, option)
     if result && index < len(args) - 2 {
-// We found the option(for example, "-o"), so advance from that to the value(for example, "filename").
+// We found the option (for example, "-o"), so advance from that to the value (for example, "filename").
         return &args[index + 1]
     } else {
         return nil
@@ -358,17 +358,17 @@ func recognizeContinuous(speechRecognizer *speech.SpeechRecognizer, userConfig U
 
 func main() {
     var usage string = `Usage: go run caption.go [-f] [-h] [-i file] [-m] [-o file] [-p phrases] [-q] [-r number] [-s] [-t] [-u] <subscriptionKey> <region>
-            -f: Enable profanity filter(remove profanity). Overrides -m.
+            -f: Enable profanity filter (remove profanity). Overrides -m.
             -h: Show this help and stop.
-            -i: Input audio file *file*(default input is from the microphone.)
-            -m: Enable profanity filter(mask profanity). -f overrides this.
+            -i: Input audio file *file* (default input is from the microphone.)
+            -m: Enable profanity filter (mask profanity). -f overrides this.
        -o file: Output to *file*.
     -p phrases: Add specified *phrases*.
                 Example: Constoso;Jessie;Rehaan
-            -q: Suppress console output(except errors).
+            -q: Suppress console output (except errors).
      -r number: Set stable partial result threshold to *number*.
                 Example: 3
-            -s: Emit SRT(default is WebVTT.)
+            -s: Emit SRT (default is WebVTT.)
             -t: Enable TrueText.
             -u: Emit partial results instead of finalized results.`
 
