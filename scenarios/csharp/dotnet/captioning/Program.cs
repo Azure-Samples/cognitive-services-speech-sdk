@@ -301,7 +301,7 @@ Main functions
                     {
                         if (ResultReason.RecognizingSpeech == e.Result.Reason && e.Result.Text.Length > 0)
                         {
-    // We don't show sequence numbers for partial results.
+// We don't show sequence numbers for partial results.
                             WriteToConsoleOrFile(CaptionFromSpeechRecognitionResult(0, e.Result, userConfig), userConfig);
                         }
                         else if (ResultReason.NoMatch == e.Result.Reason)
@@ -317,7 +317,7 @@ Main functions
                         if (ResultReason.RecognizedSpeech == e.Result.Reason && e.Result.Text.Length > 0)
                         {
                             sequenceNumber++;
-                            WriteToConsoleOrFile(CaptionFromSpeechRecognitionResult(0, e.Result, userConfig), userConfig);
+                            WriteToConsoleOrFile(CaptionFromSpeechRecognitionResult(sequenceNumber, e.Result, userConfig), userConfig);
                         }
                         else if (ResultReason.NoMatch == e.Result.Reason)
                         {
