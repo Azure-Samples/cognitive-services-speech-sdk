@@ -370,13 +370,16 @@ std::shared_ptr<SpeechConfig> SpeechConfigFromUserConfig(UserConfig userConfig)
     return speechConfig;
 }
 
-std::shared_ptr<SpeechRecognizer> SpeechRecognizerFromSpeechConfig(std::shared_ptr<SpeechConfig> speechConfig, std::shared_ptr<Audio::AudioConfig> audioConfig, UserConfig userConfig)
+std::shared_ptr<SpeechRecognizer> SpeechRecognizerFromUserConfig(UserConfig userConfig)
 {
+    std::shared_ptr<Audio::AudioConfig> audioConfig = AudioConfigFromUserConfig(userConfig);
+    std::shared_ptr<SpeechConfig> speechConfig = SpeechConfigFromUserConfig(userConfig);
     std::shared_ptr<SpeechRecognizer> speechRecognizer;
+    
     if (userConfig.languageIDLanguages.has_value())
     {
-        std::shared_ptr<AutoDetectSourceLanguageConfig> detectLanguageConfig = AutoDetectSourceLanguageConfig::FromLanguages(userConfig.languageIDLanguages.value());
-        speechRecognizer = SpeechRecognizer::FromConfig(speechConfig, detectLanguageConfig, audioConfig);
+        std::shared_ptr<AutoDetectSourceLanguageConfig> autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig::FromLanguages(userConfig.languageIDLanguages.value());
+        speechRecognizer = SpeechRecognizer::FromConfig(speechConfig, autoDetectSourceLanguageConfig, audioConfig);
     }
     else
     {
@@ -390,13 +393,6 @@ std::shared_ptr<SpeechRecognizer> SpeechRecognizerFromSpeechConfig(std::shared_p
     }
     
     return speechRecognizer;
-}
-
-std::shared_ptr<SpeechRecognizer> SpeechRecognizerFromUserConfig(UserConfig userConfig)
-{
-    std::shared_ptr<Audio::AudioConfig> audioConfig = AudioConfigFromUserConfig(userConfig);
-    std::shared_ptr<SpeechConfig> speechConfig = SpeechConfigFromUserConfig(userConfig);
-    return SpeechRecognizerFromSpeechConfig(speechConfig, audioConfig, userConfig);
 }
 
 std::optional<std::string> RecognizeContinuous(std::shared_ptr<SpeechRecognizer> speechRecognizer, UserConfig userConfig)
@@ -414,7 +410,7 @@ https://www.cppstories.com/2020/08/lambda-capturing.html/
                 if (ResultReason::RecognizingSpeech == e.Result->Reason && e.Result->Text.length() > 0)
                 {
 // We don't show sequence numbers for partial results.
-                    WriteToConsoleOrFile(CaptionFromSpeechRecognitionResult(0, e.Result, userConfig), userConfig);
+                    WriteToConsole(CaptionFromSpeechRecognitionResult(0, e.Result, userConfig), userConfig);
                 }
                 else if (ResultReason::NoMatch == e.Result->Reason)
                 {
@@ -422,21 +418,19 @@ https://www.cppstories.com/2020/08/lambda-capturing.html/
                 }
             });
     }
-    else
-    {
-        speechRecognizer->Recognized.Connect([&userConfig, &sequenceNumber](const SpeechRecognitionEventArgs& e)
+
+    speechRecognizer->Recognized.Connect([&userConfig, &sequenceNumber](const SpeechRecognitionEventArgs& e)
+        {
+            if (ResultReason::RecognizedSpeech == e.Result->Reason && e.Result->Text.length() > 0)
             {
-                if (ResultReason::RecognizedSpeech == e.Result->Reason && e.Result->Text.length() > 0)
-                {
-                    sequenceNumber++;
-                    WriteToConsoleOrFile(CaptionFromSpeechRecognitionResult(sequenceNumber, e.Result, userConfig), userConfig);
-                }
-                else if (ResultReason::NoMatch == e.Result->Reason)
-                {
-                    WriteToConsole("NOMATCH: Speech could not be recognized.\n", userConfig);
-                }
-            });
-    }
+                sequenceNumber++;
+                WriteToConsoleOrFile(CaptionFromSpeechRecognitionResult(sequenceNumber, e.Result, userConfig), userConfig);
+            }
+            else if (ResultReason::NoMatch == e.Result->Reason)
+            {
+                WriteToConsole("NOMATCH: Speech could not be recognized.\n", userConfig);
+            }
+        });
 
     speechRecognizer->Canceled.Connect([&userConfig, &recognitionEnd](const SpeechRecognitionCanceledEventArgs& e)
         {
@@ -499,9 +493,9 @@ int main(int argc, char* argv[])
     "              -q: Suppress console output (except errors).\n"
     "       -r number: Set stable partial result threshold to *number*.\n"
     "                  Example: 3\n"
-    "              -s: Emit SRT (default is WebVTT.)\n"
+    "              -s: Output captions in SRT format (default is WebVTT format.)\n"
     "              -t: Enable TrueText.\n"
-    "              -u: Emit partial results instead of finalized results.\n";
+    "              -u: Output partial results. These are always written to the console, never to an output file. -q overrides this.\n";
 
     try
     {
