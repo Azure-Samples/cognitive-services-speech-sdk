@@ -165,12 +165,14 @@ def speech_config_from_user_config(user_config : Read_Only_Dict) -> speechsdk.Sp
 
     return speech_config
 
-def speech_recognizer_from_speech_config(speech_config : speechsdk.SpeechConfig, audio_config : speechsdk.AudioConfig, user_config : Read_Only_Dict) -> speechsdk.SpeechRecognizer :
+def speech_recognizer_from_user_config(user_config : Read_Only_Dict) -> speechsdk.SpeechRecognizer :
+    audio_config = audio_config_from_user_config(user_config)
+    speech_config = speech_config_from_user_config(user_config)
     speech_recognizer = None
 
     if user_config["languages"] is not None :
-        detect_language_config = speechsdk.AutoDetectSourceLanguageConfig(user_config["languages"].split(","))
-        speech_recognizer = speechsdk.SpeechRecognizer(speech_config = speech_config, audio_config = audio_config, auto_detect_source_language_config = detect_language_config)
+        auto_detect_source_language_config = speechsdk.AutoDetectSourceLanguageConfig(user_config["languages"].split(","))
+        speech_recognizer = speechsdk.SpeechRecognizer(speech_config = speech_config, audio_config = audio_config, auto_detect_source_language_config = auto_detect_source_language_config)
     else :
         speech_recognizer = speechsdk.SpeechRecognizer(speech_config = speech_config, audio_config = audio_config)
 
@@ -180,11 +182,6 @@ def speech_recognizer_from_speech_config(speech_config : speechsdk.SpeechConfig,
 
     return speech_recognizer
 
-def speech_recognizer_from_user_config(user_config : Read_Only_Dict) -> speechsdk.SpeechRecognizer :
-    audioConfig = audio_config_from_user_config(user_config)
-    speechConfig = speech_config_from_user_config(user_config)
-    return speech_recognizer_from_speech_config(speechConfig, audioConfig, user_config)
-
 def recognize_continuous(speech_recognizer : speechsdk.SpeechRecognizer, user_config : Read_Only_Dict) :
     sequence_number = 0
     done = False
@@ -192,7 +189,7 @@ def recognize_continuous(speech_recognizer : speechsdk.SpeechRecognizer, user_co
     def recognizing_handler(e : speechsdk.SpeechRecognitionEventArgs) :
         if speechsdk.ResultReason.RecognizingSpeech == e.result.reason and len(e.result.text) > 0 :
 # We don't show sequence numbers for partial results.
-            write_to_console_or_file(text = caption_from_speech_recognition_result(sequence_number = 0, result = e.result, user_config = user_config), user_config = user_config)
+            write_to_console(text = caption_from_speech_recognition_result(sequence_number = 0, result = e.result, user_config = user_config), user_config = user_config)
         elif speechsdk.ResultReason.NoMatch == e.result.reason :
             write_to_console(text = "NOMATCH: Speech could not be recognized.{}".format(linesep), user_config = user_config)
 
@@ -233,10 +230,9 @@ def recognize_continuous(speech_recognizer : speechsdk.SpeechRecognizer, user_co
         write_to_console(text = "Session stopped.".format(linesep), user_config = user_config);
         done = True
 
-    if user_config.partial_results_enabled :
+    if user_config["partial_results_enabled"] :
         speech_recognizer.recognizing.connect(recognizing_handler)
-    else :
-        speech_recognizer.recognized.connect(recognized_handler)
+    speech_recognizer.recognized.connect(recognized_handler)
     speech_recognizer.session_stopped.connect(stopped_handler)
     speech_recognizer.canceled.connect(canceled_handler)
 
@@ -260,9 +256,9 @@ usage = """Usage: python caption.py [-f] [-h] [-i file] [-l languages] [-m] [-o 
               -q: Suppress console output (except errors).
        -r number: Set stable partial result threshold to *number*.
                   Example: 3
-              -s: Emit SRT (default is WebVTT.)
+              -s: Output captions in SRT format (default is WebVTT format.)
               -t: Enable TrueText.
-              -u: Emit partial results instead of finalized results."""
+              -u: Output partial results. These are always written to the console, never to an output file. -q overrides this."""
 
 try :
     if cmd_option_exists("-h") :
