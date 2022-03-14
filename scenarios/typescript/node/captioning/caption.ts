@@ -196,9 +196,11 @@ function SpeechConfigFromUserConfig(userConfig : UserConfig) : sdk.SpeechConfig
     return speechConfig;
 }
 
-function SpeechRecognizerFromSpeechConfig(speechConfig : sdk.SpeechConfig, audio_config : sdk.AudioConfig, userConfig : UserConfig) : sdk.SpeechRecognizer
+function SpeechRecognizerFromUserConfig(userConfig : UserConfig) : sdk.SpeechRecognizer
 {
-    var speechRecognizer = new sdk.SpeechRecognizer(speechConfig, audio_config);
+    const audioConfig = AudioConfigFromUserConfig(userConfig);
+    const speechConfig = SpeechConfigFromUserConfig(userConfig);
+    var speechRecognizer = new sdk.SpeechRecognizer(speechConfig, audioConfig);
     
     if (null !== userConfig.phraseList)
     {
@@ -207,13 +209,6 @@ function SpeechRecognizerFromSpeechConfig(speechConfig : sdk.SpeechConfig, audio
     }
     
     return speechRecognizer;
-}
-
-function SpeechRecognizerFromUserConfig(userConfig : UserConfig) : sdk.SpeechRecognizer
-{
-    const audioConfig = AudioConfigFromUserConfig(userConfig);
-    const speechConfig = SpeechConfigFromUserConfig(userConfig);
-    return SpeechRecognizerFromSpeechConfig(speechConfig, audioConfig, userConfig);
 }
 
 /* See:
@@ -229,7 +224,7 @@ function RecognizeContinuous(speechRecognizer : sdk.SpeechRecognizer, userConfig
             if (sdk.ResultReason.RecognizingSpeech == e.result.reason && e.result.text.length > 0)
             {
 // We don't show sequence numbers for partial results.
-                WriteToConsoleOrFile(CaptionFromSpeechRecognitionResult(0, e.result, userConfig), userConfig);
+                WriteToConsole(CaptionFromSpeechRecognitionResult(0, e.result, userConfig), userConfig);
             }
             else if (sdk.ResultReason.NoMatch == e.result.reason)
             {
@@ -237,20 +232,18 @@ function RecognizeContinuous(speechRecognizer : sdk.SpeechRecognizer, userConfig
             }
         };
     }
-    else
-    {
-        speechRecognizer.recognized = function(s, e) {
-            if (sdk.ResultReason.RecognizedSpeech == e.result.reason && e.result.text.length > 0)
-            {
-                sequenceNumber++;
-                WriteToConsoleOrFile(CaptionFromSpeechRecognitionResult(sequenceNumber, e.result, userConfig), userConfig);
-            }
-            else if (sdk.ResultReason.NoMatch == e.result.reason)
-            {
-                WriteToConsole("NOMATCH: Speech could not be recognized.${newline}", userConfig);
-            }
-        };
-    }
+
+    speechRecognizer.recognized = function(s, e) {
+        if (sdk.ResultReason.RecognizedSpeech == e.result.reason && e.result.text.length > 0)
+        {
+            sequenceNumber++;
+            WriteToConsoleOrFile(CaptionFromSpeechRecognitionResult(sequenceNumber, e.result, userConfig), userConfig);
+        }
+        else if (sdk.ResultReason.NoMatch == e.result.reason)
+        {
+            WriteToConsole("NOMATCH: Speech could not be recognized.${newline}", userConfig);
+        }
+    };
 
     speechRecognizer.canceled =(s, e) => {
         if (sdk.CancellationReason.EndOfStream == e.reason)
@@ -291,9 +284,9 @@ function main(args : string[]) : void
             -q: Suppress console output (except errors).
      -r number: Set stable partial result threshold to *number*.
                 Example: 3
-            -s: Emit SRT(default is WebVTT.)
+            -s: Output captions in SRT format (default is WebVTT format.)
             -t: Enable TrueText.
-            -u: Emit partial results instead of finalized results.`;
+            -u: Output partial results. These are always written to the console, never to an output file. -q overrides this.`;
 
 // Verify argc >= 3 (caption.exe, subscriptionKey, region)
     if (args.length < 3)
