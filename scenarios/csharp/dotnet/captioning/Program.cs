@@ -261,13 +261,16 @@ Main functions
             return speechConfig;
         }
 
-        static SpeechRecognizer SpeechRecognizerFromSpeechConfig(SpeechConfig speechConfig, AudioConfig audioConfig, UserConfig userConfig)
+        static SpeechRecognizer SpeechRecognizerFromUserConfig(UserConfig userConfig)
         {
+            AudioConfig audioConfig = AudioConfigFromUserConfig(userConfig);
+            SpeechConfig speechConfig = SpeechConfigFromUserConfig(userConfig);
             SpeechRecognizer speechRecognizer;
+            
             if (userConfig.languageIDLanguages is string[] languageIDLanguagesValue)
             {
-                AutoDetectSourceLanguageConfig detectLanguageConfig = AutoDetectSourceLanguageConfig.FromLanguages(languageIDLanguagesValue);
-                speechRecognizer = new SpeechRecognizer(speechConfig, detectLanguageConfig, audioConfig);
+                AutoDetectSourceLanguageConfig autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig.FromLanguages(languageIDLanguagesValue);
+                speechRecognizer = new SpeechRecognizer(speechConfig, autoDetectSourceLanguageConfig, audioConfig);
             }
             else
             {
@@ -283,13 +286,6 @@ Main functions
             return speechRecognizer;
         }
 
-        static SpeechRecognizer SpeechRecognizerFromUserConfig(UserConfig userConfig)
-        {
-            AudioConfig audioConfig = AudioConfigFromUserConfig(userConfig);
-            SpeechConfig speechConfig = SpeechConfigFromUserConfig(userConfig);
-            return SpeechRecognizerFromSpeechConfig(speechConfig, audioConfig, userConfig);
-        }
-
         static async Task<string?> RecognizeContinuous(SpeechRecognizer speechRecognizer, UserConfig userConfig)
         {
             var recognitionEnd = new TaskCompletionSource<string?>();
@@ -302,7 +298,7 @@ Main functions
                         if (ResultReason.RecognizingSpeech == e.Result.Reason && e.Result.Text.Length > 0)
                         {
 // We don't show sequence numbers for partial results.
-                            WriteToConsoleOrFile(CaptionFromSpeechRecognitionResult(0, e.Result, userConfig), userConfig);
+                            WriteToConsole(CaptionFromSpeechRecognitionResult(0, e.Result, userConfig), userConfig);
                         }
                         else if (ResultReason.NoMatch == e.Result.Reason)
                         {
@@ -310,21 +306,19 @@ Main functions
                         }
                     };
             }
-            else
-            {
-                speechRecognizer.Recognized += (object? sender, SpeechRecognitionEventArgs e) =>
+
+            speechRecognizer.Recognized += (object? sender, SpeechRecognitionEventArgs e) =>
+                {
+                    if (ResultReason.RecognizedSpeech == e.Result.Reason && e.Result.Text.Length > 0)
                     {
-                        if (ResultReason.RecognizedSpeech == e.Result.Reason && e.Result.Text.Length > 0)
-                        {
-                            sequenceNumber++;
-                            WriteToConsoleOrFile(CaptionFromSpeechRecognitionResult(sequenceNumber, e.Result, userConfig), userConfig);
-                        }
-                        else if (ResultReason.NoMatch == e.Result.Reason)
-                        {
-                            WriteToConsole("NOMATCH: Speech could not be recognized.\n", userConfig);
-                        }
-                    };
-            }
+                        sequenceNumber++;
+                        WriteToConsoleOrFile(CaptionFromSpeechRecognitionResult(sequenceNumber, e.Result, userConfig), userConfig);
+                    }
+                    else if (ResultReason.NoMatch == e.Result.Reason)
+                    {
+                        WriteToConsole("NOMATCH: Speech could not be recognized.\n", userConfig);
+                    }
+                };
 
             speechRecognizer.Canceled += (object? sender, SpeechRecognitionCanceledEventArgs e) =>
                 {
@@ -388,9 +382,9 @@ dotnet run -- -h
               -q: Suppress console output (except errors).
        -r number: Set stable partial result threshold to *number*.
                   Example: 3
-              -s: Emit SRT (default is WebVTT.)
+              -s: Output captions in SRT format (default is WebVTT format.)
               -t: Enable TrueText.
-              -u: Emit partial results instead of finalized results.";
+              -u: Output partial results. These are always written to the console, never to an output file. -q overrides this.";
             
             try
             {
