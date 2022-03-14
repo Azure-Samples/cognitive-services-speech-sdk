@@ -277,9 +277,11 @@ Main functions
         return speechConfig;
     }
 
-    static SpeechRecognizer SpeechRecognizerFromSpeechConfig(SpeechConfig speechConfig, AudioConfig audio_config, UserConfig userConfig)
+    static SpeechRecognizer SpeechRecognizerFromUserConfig(UserConfig userConfig)
     {
-        final SpeechRecognizer speechRecognizer = new SpeechRecognizer(speechConfig, audio_config);
+        final AudioConfig audioConfig = AudioConfigFromUserConfig(userConfig);
+        final SpeechConfig speechConfig = SpeechConfigFromUserConfig(userConfig);
+        final SpeechRecognizer speechRecognizer = new SpeechRecognizer(speechConfig, audioConfig);
         
         if(userConfig.getPhraseList().isPresent())
         {
@@ -290,14 +292,7 @@ Main functions
         return speechRecognizer;
     }
 
-    static SpeechRecognizer SpeechRecognizerFromUserConfig(UserConfig userConfig)
-    {
-        final AudioConfig audioConfig = AudioConfigFromUserConfig(userConfig);
-        final SpeechConfig speechConfig = SpeechConfigFromUserConfig(userConfig);
-        return SpeechRecognizerFromSpeechConfig(speechConfig, audioConfig, userConfig);
-    }
-
-    static void RecognizeContinuous(SpeechRecognizer speechRecognizer, UserConfig userConfig) throws ExecutionException, InterruptedException, IOException
+    static void RecognizeContinuous(SpeechRecognizer speechRecognizer, UserConfig userConfig) throws ExecutionException, InterruptedException
     {
 // This lets us modify local variables from inside a lambda.
         final boolean[] done = new boolean[] { false };
@@ -308,17 +303,8 @@ Main functions
             speechRecognizer.recognizing.addEventListener((s, e) -> {
                 if(ResultReason.RecognizingSpeech == e.getResult().getReason() && e.getResult().getText().length() > 0)
                 {
-                    try
-                    {
 // We don't show sequence numbers for partial results.
-                        WriteToConsoleOrFile(CaptionFromSpeechRecognitionResult(0, e.getResult(), userConfig), userConfig);
-                    }
-                    catch(IOException ex)
-                    {
-// Error output should not be suppressed, even if suppress output flag is set.
-                        System.out.println(ex.getMessage());
-                        done[0] = true;
-                    }
+                    WriteToConsole(CaptionFromSpeechRecognitionResult(0, e.getResult(), userConfig), userConfig);
                 }
                 else if(ResultReason.NoMatch == e.getResult().getReason())
                 {
@@ -326,29 +312,27 @@ Main functions
                 }
             });
         }
-        else
-        {
-            speechRecognizer.recognized.addEventListener((s, e) -> {
-                if(ResultReason.RecognizedSpeech == e.getResult().getReason() && e.getResult().getText().length() > 0)
+
+        speechRecognizer.recognized.addEventListener((s, e) -> {
+            if(ResultReason.RecognizedSpeech == e.getResult().getReason() && e.getResult().getText().length() > 0)
+            {
+                sequenceNumber[0]++;
+                try
                 {
-                    sequenceNumber[0]++;
-                    try
-                    {
-                        WriteToConsoleOrFile(CaptionFromSpeechRecognitionResult(sequenceNumber[0], e.getResult(), userConfig), userConfig);
-                    }
-                    catch(IOException ex)
-                    {
+                    WriteToConsoleOrFile(CaptionFromSpeechRecognitionResult(sequenceNumber[0], e.getResult(), userConfig), userConfig);
+                }
+                catch(IOException ex)
+                {
 // Error output should not be suppressed, even if suppress output flag is set.
-                        System.out.println(ex.getMessage());
-                        done[0] = true;
-                    }
+                    System.out.println(ex.getMessage());
+                    done[0] = true;
                 }
-                else if(ResultReason.NoMatch == e.getResult().getReason())
-                {
-                    WriteToConsole(String.format("NOMATCH: Speech could not be recognized.%s", System.lineSeparator()), userConfig);
-                }
-            });
-        }
+            }
+            else if(ResultReason.NoMatch == e.getResult().getReason())
+            {
+                WriteToConsole(String.format("NOMATCH: Speech could not be recognized.%s", System.lineSeparator()), userConfig);
+            }
+        });
         
         speechRecognizer.canceled.addEventListener((s, e) -> {
             if(CancellationReason.EndOfStream == e.getReason())
@@ -405,9 +389,9 @@ Usage: java -cp .;target\\dependency\\* Caption [-f] [-h] [-i file] [-m] [-o fil
             -q: Suppress console output (except errors).
      -r number: Set stable partial result threshold to *number*.
                 Example: 3
-            -s: Emit SRT (default is WebVTT.)
+            -s: Output captions in SRT format (default is WebVTT format.)
             -t: Enable TrueText.
-            -u: Emit partial results instead of finalized results.
+            -u: Output partial results. These are always written to the console, never to an output file. -q overrides this.
 """;
 
         try
