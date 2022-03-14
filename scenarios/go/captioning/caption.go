@@ -266,7 +266,11 @@ func SpeechConfigFromUserConfig(userConfig UserConfig) *speech.SpeechConfig {
     return speechConfig
 }
 
-func SpeechRecognizerFromSpeechConfig(speechConfig *speech.SpeechConfig, audioConfig *audio.AudioConfig, userConfig UserConfig) *speech.SpeechRecognizer {
+func SpeechRecognizerFromUserConfig(userConfig UserConfig) *speech.SpeechRecognizer {
+    var audioConfig = AudioConfigFromUserConfig(userConfig)
+    defer audioConfig.Close()
+    var speechConfig = SpeechConfigFromUserConfig(userConfig)
+    defer speechConfig.Close()
     var speechRecognizer, err = speech.NewSpeechRecognizerFromConfig(speechConfig, audioConfig)
     if nil != err {
         log.Fatal(err)
@@ -286,20 +290,12 @@ func SpeechRecognizerFromSpeechConfig(speechConfig *speech.SpeechConfig, audioCo
     return speechRecognizer
 }
 
-func SpeechRecognizerFromUserConfig(userConfig UserConfig) *speech.SpeechRecognizer {
-    var audioConfig = AudioConfigFromUserConfig(userConfig)
-    defer audioConfig.Close()
-    var speechConfig = SpeechConfigFromUserConfig(userConfig)
-    defer speechConfig.Close()
-    return SpeechRecognizerFromSpeechConfig(speechConfig, audioConfig, userConfig)
-}
-
 func GetRecognizingHandler(userConfig UserConfig) func(speech.SpeechRecognitionEventArgs) {
     return func(e speech.SpeechRecognitionEventArgs) {
         defer e.Close()
         if common.RecognizingSpeech == e.Result.Reason && len(e.Result.Text) > 0 {
 // We don't show sequence numbers for partial results.
-            WriteToConsoleOrFile(CaptionFromSpeechRecognitionResult(0, e.Result, userConfig), userConfig);
+            WriteToConsole(CaptionFromSpeechRecognitionResult(0, e.Result, userConfig), userConfig);
         } else if common.NoMatch == e.Result.Reason {
             WriteToConsole("NOMATCH: Speech could not be recognized.\n", userConfig);
         }
@@ -344,9 +340,8 @@ func GetCanceledHandler(userConfig UserConfig) func(speech.SpeechRecognitionCanc
 func recognizeContinuous(speechRecognizer *speech.SpeechRecognizer, userConfig UserConfig) {
     if userConfig.partialResultsEnabled {
         speechRecognizer.Recognizing(GetRecognizingHandler(userConfig))
-    } else {
-        speechRecognizer.Recognized(GetRecognizedHandler(userConfig))
     }
+    speechRecognizer.Recognized(GetRecognizedHandler(userConfig))
     speechRecognizer.SessionStopped(GetSessionStoppedHandler(userConfig))
     speechRecognizer.Canceled(GetCanceledHandler(userConfig))
     
@@ -368,9 +363,9 @@ func main() {
             -q: Suppress console output (except errors).
      -r number: Set stable partial result threshold to *number*.
                 Example: 3
-            -s: Emit SRT (default is WebVTT.)
+            -s: Output captions in SRT format (default is WebVTT format.)
             -t: Enable TrueText.
-            -u: Emit partial results instead of finalized results.`
+            -u: Output partial results. These are always written to the console, never to an output file. -q overrides this.`
 
     if CmdOptionExists(os.Args, "-h") {
         fmt.Println(usage);
