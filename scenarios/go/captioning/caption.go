@@ -37,7 +37,6 @@ type UserConfig struct {
     profanityFilterMaskEnabled bool
     inputFile *string
     outputFile *string
-    phraseList *string
     suppressOutputEnabled bool
     partialResultsEnabled bool
     stablePartialResultThreshold *string
@@ -195,7 +194,6 @@ func UserConfigFromArgs(args []string) UserConfig {
         profanityFilterMaskEnabled : false,
         inputFile : nil,
         outputFile : nil,
-        phraseList : nil,
         suppressOutputEnabled : false,
         partialResultsEnabled : false,
         stablePartialResultThreshold : nil,
@@ -217,7 +215,6 @@ func UserConfigFromArgs(args []string) UserConfig {
     userConfig.profanityFilterMaskEnabled = CmdOptionExists(args, "-m")
     userConfig.inputFile = GetCmdOption(args, "-i")
     userConfig.outputFile = GetCmdOption(args, "-o")
-    userConfig.phraseList = GetCmdOption(args, "-p")
     userConfig.partialResultsEnabled = CmdOptionExists(args, "-u")
     userConfig.suppressOutputEnabled = CmdOptionExists(args, "-q");
     userConfig.stablePartialResultThreshold = GetCmdOption(args, "-r")
@@ -276,17 +273,6 @@ func SpeechRecognizerFromUserConfig(userConfig UserConfig) *speech.SpeechRecogni
         log.Fatal(err)
     }
     
-// TODO1 Phrase list not supported in Go? https://github.com/microsoft/cognitive-services-speech-sdk-go/search?q=phrase returns 0 relevant results.
-/*
-    if nil != userConfig.phraseList {
-        grammar, err := speech.PhraseListGrammar.FromRecognizer(speechRecognizer)
-        if nil != err {
-            log.Fatal(err)
-        }
-        grammar.AddPhrase(*userConfig.phraseList)
-    }
-*/
-
     return speechRecognizer
 }
 
@@ -352,14 +338,12 @@ func recognizeContinuous(speechRecognizer *speech.SpeechRecognizer, userConfig U
 }
 
 func main() {
-    var usage string = `Usage: go run caption.go [-f] [-h] [-i file] [-m] [-o file] [-p phrases] [-q] [-r number] [-s] [-t] [-u] <subscriptionKey> <region>
+    var usage string = `Usage: go run caption.go [-f] [-h] [-i file] [-m] [-o file] [-q] [-r number] [-s] [-t] [-u] <subscriptionKey> <region>
             -f: Enable profanity filter (remove profanity). Overrides -m.
             -h: Show this help and stop.
             -i: Input audio file *file* (default input is from the microphone.)
             -m: Enable profanity filter (mask profanity). -f overrides this.
        -o file: Output to *file*.
-    -p phrases: Add specified *phrases*.
-                Example: Constoso;Jessie;Rehaan
             -q: Suppress console output (except errors).
      -r number: Set stable partial result threshold to *number*.
                 Example: 3
