@@ -140,8 +140,8 @@ namespace helloworld
 
         private void InitializeDialogServiceConnector()
         {
-            // create a DialogServiceConfig by providing a bot secret key and Cognitive Services subscription key
-            // the RecoLanguage property is optional (default en-US); note that only en-US is supported in Preview
+            // Create a DialogServiceConfig by providing a Cognitive Services subscription key and key region.
+            // The RecoLanguage property is optional (default en-US).
             const string speechSubscriptionKey = "YourSpeechSubscriptionKey"; // Your subscription key
             const string region = "YourServiceRegion"; // Your subscription service region. Note: only 'westus2' is currently supported
 
@@ -150,7 +150,7 @@ namespace helloworld
             connector = new DialogServiceConnector(botConfig);
 
             // ActivityReceived is the main way your bot will communicate with the client and uses bot framework activities
-            connector.ActivityReceived += async (sender, activityReceivedEventArgs) =>
+            connector.ActivityReceived += (sender, activityReceivedEventArgs) =>
             {
                 NotifyUser($"Activity received, hasAudio={activityReceivedEventArgs.HasAudio} activity={activityReceivedEventArgs.Activity}");
 

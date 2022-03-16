@@ -1,5 +1,6 @@
 package com.microsoft.cognitiveservices.speech.samples.console;
 
+import com.microsoft.cognitiveservices.speech.audio.AudioStreamFormat;
 import com.microsoft.cognitiveservices.speech.audio.PullAudioInputStreamCallback;
 
 import java.io.IOException;
@@ -7,6 +8,7 @@ import java.io.InputStream;
 
 public class WavStream extends PullAudioInputStreamCallback {
     private final InputStream stream;
+    private AudioStreamFormat format;
 
     public WavStream(InputStream wavStream) {
         try {
@@ -37,6 +39,10 @@ public class WavStream extends PullAudioInputStreamCallback {
             // ignored
         }
     }
+    
+    public AudioStreamFormat getFormat() {
+        return format;
+    }
     // endregion
 
     // region Wav File helper functions
@@ -64,7 +70,7 @@ public class WavStream extends PullAudioInputStreamCallback {
         return n;
     }
 
-    public InputStream parseWavHeader(InputStream reader) throws IOException {
+    private InputStream parseWavHeader(InputStream reader) throws IOException {
         // Note: assumption about order of chunks
         // Tag "RIFF"
         byte data[] = new byte[4];
@@ -91,12 +97,16 @@ public class WavStream extends PullAudioInputStreamCallback {
         int formatTag = ReadUInt16(reader);
         int channels = ReadUInt16(reader);
         int samplesPerSec = (int) ReadUInt32(reader);
+        @SuppressWarnings("unused")
         int avgBytesPerSec = (int) ReadUInt32(reader);
+        @SuppressWarnings("unused")
         int blockAlign = ReadUInt16(reader);
         int bitsPerSample = ReadUInt16(reader);
+        
+        // Speech SDK supports audio input streams in the following format: 8khz or 16khz sample rate, mono, 16 bit per sample
         ThrowIfFalse(formatTag == 1, "PCM"); // PCM
         ThrowIfFalse(channels == 1, "single channel");
-        ThrowIfFalse(samplesPerSec == 16000, "samples per second");
+        ThrowIfFalse(samplesPerSec == 16000 || samplesPerSec == 8000, "samples per second");
         ThrowIfFalse(bitsPerSample == 16, "bits per sample");
 
         // Until now we have read 16 bytes in format, the rest is cbSize and is ignored
@@ -114,6 +124,10 @@ public class WavStream extends PullAudioInputStreamCallback {
         // data chunk size
         // Note: assumption is that only a single data chunk
         /* int dataLength = */ReadInt32(reader);
+        
+        // Save the stream format, as it may be needed later to configure an input stream to a recognizer
+        this.format = AudioStreamFormat.getWaveFormatPCM(samplesPerSec, (short)bitsPerSample, (short)channels);
+        
         return reader;
     }
 

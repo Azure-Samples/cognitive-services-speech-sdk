@@ -1,89 +1,54 @@
-(function() {
+(async function() {
   "use strict";
   
   // pull in the required packages.
-  var sdk = require("microsoft-cognitiveservices-speech-sdk");
-  var fs = require("fs");
-
-  let getAudioConfigFromFile = (file) => {
-      // Create the push stream we need for the speech sdk.
-      let pushStream = sdk.AudioInputStream.createPushStream();
-
-      // Open the file and push it to the push stream.
-      fs.createReadStream(file).on("data", function(arrayBuffer) {
-        pushStream.write(arrayBuffer.buffer);
-      }).on("end", function() {
-        pushStream.close();
-      });
-      return sdk.AudioConfig.fromStreamInput(pushStream);
-  };
+  const sdk = require("microsoft-cognitiveservices-speech-sdk");
+  const fs = require("fs");
   
   // replace with your own subscription key,
   // service region (e.g., "westus"), and
   // the name of the files you want to use
   // to enroll and then identify the speaker.
-  let subscriptionKey = "YourSubscriptionKey";
-  let serviceRegion = "YourSubscriptionRegion"; // e.g., "westus"
-  let enrollFile = "aboutSpeechSdk.wav"; // 16000 Hz, Mono
-  let identificationFile = "myVoiceIsMyPassportVerifyMe01.wav"; // 16000 Hz, Mono
+  const subscriptionKey = "YourSubscriptionKey";
+  const serviceRegion = "YourSubscriptionRegion"; // e.g., "westus"
+  const enrollFile = "aboutSpeechSdk.wav"; // 16000 Hz, Mono
+  const identificationFile = "myVoiceIsMyPassportVerifyMe01.wav"; // 16000 Hz, Mono
   
   // now create the speech config with the credentials for the subscription
-  let speechConfig = sdk.SpeechConfig.fromSubscription(subscriptionKey, serviceRegion);
-  let client = new sdk.VoiceProfileClient(speechConfig);
-  let locale = "en-us";
+  const speechConfig = sdk.SpeechConfig.fromSubscription(subscriptionKey, serviceRegion);
+  const client = new sdk.VoiceProfileClient(speechConfig);
+  const locale = "en-us";
 
   // we are done with the setup
-  client.createProfileAsync(
-    sdk.VoiceProfileType.TextIndependentIdentification,
-    locale,
-    function (result) {
-      let profile = result;
-      let enrollConfig = getAudioConfigFromFile(enrollFile);
+  try {
+    const profile = await client.createProfileAsync(sdk.VoiceProfileType.TextIndependentIdentification, locale);
+    const audioConfig = sdk.AudioConfig.fromWavFileInput(fs.readFileSync(enrollFile));
 
-      console.log("Profile id: " + profile.profileId +" created, now enrolling using file: " + enrollFile);
+    console.log("Profile id: " + profile.profileId +" created, now enrolling using file: " + enrollFile);
+    const enrollResult = await client.enrollProfileAsync(profile, audioConfig);
 
-      client.enrollProfileAsync(
-        profile, 
-        enrollConfig,
-        function(enrollResult) {
-          console.log("(Enrollment result) Reason: " + sdk.ResultReason[enrollResult.reason]); 
-          let identificationConfig = getAudioConfigFromFile(identificationFile);
-          let recognizer = new sdk.SpeakerRecognizer(speechConfig, identificationConfig);
-          let model = sdk.SpeakerIdentificationModel.fromProfiles([profile]);
-          recognizer.recognizeOnceAsync(
-            model,
-            function(identificationResult) {
-              let reason = identificationResult.reason; 
-              console.log("(Identification result) Reason: " + sdk.ResultReason[reason]); 
+    console.log("(Enrollment result) Reason: " + sdk.ResultReason[enrollResult.reason]); 
+    const idConfig = sdk.AudioConfig.fromWavFileInput(fs.readFileSync(identificationFile));
+    const recognizer = new sdk.SpeakerRecognizer(speechConfig, idConfig);
+    const model = sdk.SpeakerIdentificationModel.fromProfiles([profile]);
+    const identificationResult = await recognizer.recognizeOnceAsync(model);
 
-              if( reason === sdk.ResultReason.Canceled ) {
-                let cancellationDetails = sdk.SpeakerRecognitionCancellationDetails.fromResult(identificationResult);
-                console.log("(Identification canceled) Error Details: " + cancellationDetails.errorDetails); 
-                console.log("(Identification canceled) Error Code: " + cancellationDetails.errorCode);
-              } else {
-                console.log("(Identification result) Profile Id: " + identificationResult.profileId); 
-                console.log("(Identification result) Score: " + identificationResult.score);
-              }
+    var reason = identificationResult.reason; 
+    console.log("(Identification result) Reason: " + sdk.ResultReason[reason]); 
 
-              client.deleteProfileAsync(
-                profile,
-                function(deleteResult) {
-                  console.log("(Delete profile result) Reason: " + sdk.ResultReason[deleteResult.reason]); 
-                },
-                function(err) {
-                  console.log("ERROR deleting profile: " + err); 
-                });
-            },
-            function(err) {
-              console.log("ERROR recognizing speaker: " + err); 
-            });
-        },
-        function(err) {
-          console.log("ERROR enrolling profile: " + err); 
-        });
-    },
-    function (err) {
-      console.log("ERROR creating profile: " + err); 
-    });
-  
+    if( reason === sdk.ResultReason.Canceled ) {
+      const cancellationDetails = sdk.SpeakerRecognitionCancellationDetails.fromResult(identificationResult);
+      console.log("(Identification canceled) Error Details: " + cancellationDetails.errorDetails); 
+      console.log("(Identification canceled) Error Code: " + cancellationDetails.errorCode);
+    } else {
+      console.log("(Identification result) Profile Id: " + identificationResult.profileId); 
+      console.log("(Identification result) Score: " + identificationResult.score);
+    }
+
+    const deleteResult = await client.deleteProfileAsync(profile);
+    console.log("(Delete profile result) Reason: " + sdk.ResultReason[deleteResult.reason]); 
+
+  } catch (err) {
+    console.log("ERROR during operation: " + err); 
+  }
 }());

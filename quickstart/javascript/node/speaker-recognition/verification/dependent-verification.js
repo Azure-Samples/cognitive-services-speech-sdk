@@ -1,111 +1,63 @@
-(function() {
+(async function() {
   "use strict";
   
   // pull in the required packages.
-  var sdk = require("microsoft-cognitiveservices-speech-sdk");
-  var fs = require("fs");
+  const sdk = require("microsoft-cognitiveservices-speech-sdk");
+  const fs = require("fs");
 
-  let getAudioConfigFromFile = (file) => {
-      // Create the push stream we need for the speech sdk.
-      let pushStream = sdk.AudioInputStream.createPushStream();
-
-      // Open the file and push it to the push stream.
-      fs.createReadStream(file).on("data", function(arrayBuffer) {
-        pushStream.write(arrayBuffer.buffer);
-      }).on("end", function() {
-        pushStream.close();
-      });
-      return sdk.AudioConfig.fromStreamInput(pushStream);
-  };
-  
   // replace with your own subscription key,
   // service region (e.g., "westus"), and
   // the name of the files you want to use
   // to enroll and then verify the speaker.
   // Note that three different samples are 
   // necessary to enroll for verification.
-  let subscriptionKey = "YourSubscriptionKey";
-  let serviceRegion = "YourSubscriptionRegion"; // e.g., "westus"
-  let enrollFiles = ["myVoiceIsMyPassportVerifyMe01.wav","myVoiceIsMyPassportVerifyMe02.wav","myVoiceIsMyPassportVerifyMe03.wav"]; // 16000 Hz, Mono
-  let verificationFile = "myVoiceIsMyPassportVerifyMe04.wav"; // 16000 Hz, Mono
+  const subscriptionKey = "YourSubscriptionKey";
+  const serviceRegion = "YourSubscriptionRegion"; // e.g., "westus"
+  const enrollFiles = ["myVoiceIsMyPassportVerifyMe01.wav","myVoiceIsMyPassportVerifyMe02.wav","myVoiceIsMyPassportVerifyMe03.wav"]; // 16000 Hz, Mono
+  const verificationFile = "myVoiceIsMyPassportVerifyMe04.wav"; // 16000 Hz, Mono
   
   // now create the speech config with the credentials for the subscription
-  let speechConfig = sdk.SpeechConfig.fromSubscription(subscriptionKey, serviceRegion);
-  let client = new sdk.VoiceProfileClient(speechConfig);
-  let locale = "en-us";
+  const speechConfig = sdk.SpeechConfig.fromSubscription(subscriptionKey, serviceRegion);
+  const client = new sdk.VoiceProfileClient(speechConfig);
+  const locale = "en-us";
 
-  // we are done with the setup
-  client.createProfileAsync(
-    sdk.VoiceProfileType.TextDependentVerification,
-    locale,
-    function (result) {
-      let profile = result;
-      let enrollConfigs = [];
-      enrollFiles.forEach(f => {
-        enrollConfigs.push(getAudioConfigFromFile(f));
-      });
+  const getAudioConfigFromFile = function (file) {
+    return sdk.AudioConfig.fromWavFileInput(fs.readFileSync(file));
+  };
 
-      console.log("Profile id: " + profile.profileId +" created, now enrolling using files beginning with: " + enrollFiles[0]);
+  try {
+    // we are done with the setup, so create a dependent verification specific profile
+    const profile = await client.createProfileAsync(sdk.VoiceProfileType.TextDependentVerification, locale);
 
-      client.enrollProfileAsync(
-        profile, 
-        enrollConfigs[0],
-        function(enrollResult) {
-          console.log("(Enrollment result) Reason: " + sdk.ResultReason[enrollResult.reason]); 
-          client.enrollProfileAsync(
-            profile, 
-            enrollConfigs[1],
-            function(enrollResult) {
-              console.log("(Enrollment result) Reason: " + sdk.ResultReason[enrollResult.reason]); 
-              client.enrollProfileAsync(
-                profile, 
-                enrollConfigs[2],
-                function(enrollResult) {
-                  console.log("(Enrollment result) Reason: " + sdk.ResultReason[enrollResult.reason]); 
-                  let verificationConfig = getAudioConfigFromFile(verificationFile);
-                  let recognizer = new sdk.SpeakerRecognizer(speechConfig, verificationConfig);
-                  let model = sdk.SpeakerVerificationModel.fromProfile(profile);
-                  recognizer.recognizeOnceAsync(
-                    model,
-                    function(verificationResult) {
-                      let reason = verificationResult.reason; 
-                      console.log("(Verification result) Reason: " + sdk.ResultReason[reason]); 
-                      if( reason === sdk.ResultReason.Canceled ) {
-                        let cancellationDetails = sdk.SpeakerRecognitionCancellationDetails.fromResult(verificationResult);
-                        console.log("(Verification canceled) Error Details: " + cancellationDetails.errorDetails); 
-                        console.log("(Verification canceled) Error Code: " + cancellationDetails.errorCode);
-                      } else {
-                        console.log("(Verification result) Profile Id: " + verificationResult.profileId); 
-                        console.log("(Verification result) Score: " + verificationResult.score);
-                      }
-                      client.deleteProfileAsync(
-                        profile,
-                        function(deleteResult) {
-                          console.log("(Delete profile result) Reason: " + sdk.ResultReason[deleteResult.reason]); 
-                        },
-                        function(err) {
-                          console.log("Delete Profile ERROR: " + err); 
-                        });
-                    },
-                    function(err) {
-                      console.log("Recognize Once ERROR: " + err); 
-                    });
-                },
-                function(err) {
-                  console.log("Third Enrollment file ERROR: " + err); 
-                });
-            },
-            function(err) {
-              console.log("Second Enrollment file ERROR: " + err); 
-            });
-        },
-        function(err) {
-          console.log("First Enrollment file ERROR: " + err); 
-        });
-    },
-    function (err) {
-      console.log("Create Profile ERROR: " + err); 
-    });
+    console.log("Profile id: " + profile.profileId +" created, now enrolling using files beginning with: " + enrollFiles[0]);
+    // create audio configs for each of the enrollment files to use for each of the enrollment steps
+    for (const enrollFile of enrollFiles) {
+      const enrollConfig = getAudioConfigFromFile(enrollFile);
+      const enrollResult = await client.enrollProfileAsync(profile, enrollConfig);
+      console.log("(Enrollment result) Reason: " + sdk.ResultReason[enrollResult.reason]); 
+    }
+    const verificationConfig = getAudioConfigFromFile(verificationFile);
+    const recognizer = new sdk.SpeakerRecognizer(speechConfig, verificationConfig);
+    
+    // For verification scenarios, create a SpeakerVerificationModel. (Note that identification scenarios use a different type and API here.)
+    const model = sdk.SpeakerVerificationModel.fromProfile(profile);
+    const verificationResult = await recognizer.recognizeOnceAsync(model);
+    const reason = verificationResult.reason; 
+    console.log("(Verification result) Reason: " + sdk.ResultReason[reason]); 
+    if( reason === sdk.ResultReason.Canceled ) {
+      const cancellationDetails = sdk.SpeakerRecognitionCancellationDetails.fromResult(verificationResult);
+      console.log("(Verification canceled) Error Details: " + cancellationDetails.errorDetails); 
+      console.log("(Verification canceled) Error Code: " + cancellationDetails.errorCode);
+    } else {
+      console.log("(Verification result) Profile Id: " + verificationResult.profileId); 
+      console.log("(Verification result) Score: " + verificationResult.score);
+    }
+
+    // Delete voice profile after we're done with this scenario 
+    const deleteResult = await client.deleteProfileAsync(profile);
+    console.log("(Delete profile result) Reason: " + sdk.ResultReason[deleteResult.reason]); 
+  } catch (err) {
+    console.log("ERROR: " + err); 
+  }
   
 }());
-

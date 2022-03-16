@@ -38,6 +38,7 @@ proguard-rules.pro text
 *.properties text
 *.py text
 *.ruleset text
+*.runsettings text
 *.sln text
 *.storyboard text
 *.swift text
@@ -56,6 +57,7 @@ proguard-rules.pro text
 
 # Binary extensions:
 *.class binary
+*.bmp binary
 *.jar binary
 *.jpg binary
 *.mp3 binary

@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -14,10 +14,10 @@
 		F3184E56214674DA0096193E /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F3184E54214674DA0096193E /* LaunchScreen.storyboard */; };
 		F3184E59214674DA0096193E /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = F3184E58214674DA0096193E /* main.m */; };
 		F3184E68214685C80096193E /* whatstheweatherlike.wav in Resources */ = {isa = PBXBuildFile; fileRef = F3184E67214685C70096193E /* whatstheweatherlike.wav */; };
-		F376163E21540C9D0097B6F1 /* MicrosoftCognitiveServicesSpeech.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F376163D21540C9D0097B6F1 /* MicrosoftCognitiveServicesSpeech.framework */; };
-		F376163F21540C9D0097B6F1 /* MicrosoftCognitiveServicesSpeech.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = F376163D21540C9D0097B6F1 /* MicrosoftCognitiveServicesSpeech.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		F3D2F4A1216A516E006E5F52 /* helloworldUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = F3D2F4A0216A516E006E5F52 /* helloworldUITests.m */; };
 		F3D2F4AC216A563C006E5F52 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F3D2F4A8216A5538006E5F52 /* XCTest.framework */; };
+		FC9F9C9526D2FA9B006DA509 /* MicrosoftCognitiveServicesSpeech.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = FC9F9C9426D2FA9B006DA509 /* MicrosoftCognitiveServicesSpeech.xcframework */; };
+		FC9F9C9626D2FAA4006DA509 /* MicrosoftCognitiveServicesSpeech.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = FC9F9C9426D2FA9B006DA509 /* MicrosoftCognitiveServicesSpeech.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -37,7 +37,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				F376163F21540C9D0097B6F1 /* MicrosoftCognitiveServicesSpeech.framework in Embed Frameworks */,
+				FC9F9C9626D2FAA4006DA509 /* MicrosoftCognitiveServicesSpeech.xcframework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -56,11 +56,11 @@
 		F3184E57214674DA0096193E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		F3184E58214674DA0096193E /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		F3184E67214685C70096193E /* whatstheweatherlike.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = whatstheweatherlike.wav; path = ./whatstheweatherlike.wav; sourceTree = "<group>"; };
-		F376163D21540C9D0097B6F1 /* MicrosoftCognitiveServicesSpeech.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MicrosoftCognitiveServicesSpeech.framework; path = ../MicrosoftCognitiveServicesSpeech.framework; sourceTree = "<group>"; };
 		F3D2F49E216A516E006E5F52 /* helloworldUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = helloworldUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		F3D2F4A0216A516E006E5F52 /* helloworldUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = helloworldUITests.m; sourceTree = "<group>"; };
 		F3D2F4A2216A516E006E5F52 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		F3D2F4A8216A5538006E5F52 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Platforms/iPhoneOS.platform/Developer/Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
+		FC9F9C9426D2FA9B006DA509 /* MicrosoftCognitiveServicesSpeech.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = MicrosoftCognitiveServicesSpeech.xcframework; path = ../MicrosoftCognitiveServicesSpeech.xcframework; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -68,7 +68,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F376163E21540C9D0097B6F1 /* MicrosoftCognitiveServicesSpeech.framework in Frameworks */,
+				FC9F9C9526D2FA9B006DA509 /* MicrosoftCognitiveServicesSpeech.xcframework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -86,7 +86,7 @@
 		F3184E3D214674D60096193E = {
 			isa = PBXGroup;
 			children = (
-				F376163D21540C9D0097B6F1 /* MicrosoftCognitiveServicesSpeech.framework */,
+				FC9F9C9426D2FA9B006DA509 /* MicrosoftCognitiveServicesSpeech.xcframework */,
 				F3184E67214685C70096193E /* whatstheweatherlike.wav */,
 				F3184E48214674D60096193E /* helloworld */,
 				F3D2F49F216A516E006E5F52 /* helloworldUITests */,

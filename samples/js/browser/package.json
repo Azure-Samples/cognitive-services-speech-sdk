@@ -1,0 +1,42 @@
+{
+  "name": "speech-sample",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@testing-library/jest-dom": "^5.11.8",
+    "@testing-library/user-event": "^12.6.0",
+    "axios": "^0.21.1",
+    "bootstrap": "^4.5.3",
+    "dotenv": "^8.2.0",
+    "microsoft-cognitiveservices-speech-sdk": "^1.18",
+    "universal-cookie": "^4.0.4",
+    "web-vitals": "^0.2.4"
+  },
+  "scripts": {
+    "server": "node-env-run server --exec nodemon | pino-colada",
+    "dev": "run-p server start"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "express-pino-logger": "^5.0.0",
+    "node-env-run": "^4.0.2",
+    "nodemon": "^2.0.7",
+    "npm-run-all": "^4.1.5",
+    "pino-colada": "^2.1.0"
+  },
+  "proxy": "http://localhost:3001"
+}

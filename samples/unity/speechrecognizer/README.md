@@ -6,24 +6,28 @@ This sample demonstrates how to use the Microsoft Cognitive Service Speech SDK i
 * Intent recognition via speech input using Natural Language Understanding
 
 > Note:
-> The Microsoft Cognitive Services Speech SDK for Unity is currently in beta.
-> The Speech SDK for Unity is currently in beta. It supports Windows Desktop (x86 and x64) or Universal Windows Platform (x86, x64, ARM/ARM64), and Android (x86, ARM32/64).
+> The Speech SDK for Unity supports Windows Desktop (x86 and x64) or Universal Windows Platform (x86, x64, ARM/ARM64), Android (x86, ARM32/64), iOS (x64 simulator, ARM64), Mac (x64) and Linux (x64).
 
 ## Prerequisites
 
 * This sample is targeted for Unity 2018.3 or later. To install, pick an appropriate option in the [Unity store](https://store.unity.com/).
-  * If you are not familiar with Unity, it is recommended to consult [Unity learning resources](https://unity.com/learn) and study the [Unity User Manual](https://docs.unity3d.com/Manual/UnityManual.html) before starting your app development.
+  > Note:
+  > [UWP ARM64 support was only added in Unity 2019.1](https://blogs.unity3d.com/2019/04/16/introducing-unity-2019-1/#universal)
+  > If you are not familiar with Unity, it is recommended to study the [Unity User Manual](https://docs.unity3d.com/Manual/UnityManual.html) before starting your app development.
 * A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
 * A Windows PC with Windows 10 Fall Creators Update (10.0; Build 16299) or later and with a working microphone.
+* A Mac device with Xcode and Unity installed for iOS development.
 * [Microsoft Visual Studio 2017](https://www.visualstudio.com/), Community Edition or higher.
-* For ARM64 support, install the [optional build tools, and Windows 10 SDK for ARM/ARM64](https://blogs.windows.com/buildingapps/2018/11/15/official-support-for-windows-10-on-arm-development/)
+* For Windows ARM64 support, install the [optional build tools, and Windows 10 SDK for ARM/ARM64](https://blogs.windows.com/buildingapps/2018/11/15/official-support-for-windows-10-on-arm-development/)
 * Access to your computer's microphone.
 * To target Android: an Android device (ARM32/64, x86; API 23: Android 6.0 Marshmallow or higher) [enabled for development](https://developer.android.com/studio/debug/dev-options) with a working microphone.
+* To target iOS: an iOS device (ARM64) [enabled for development](https://learn.unity.com/tutorial/building-for-mobile) with a working microphone.
+* To target MacOS: Use latest LTS version of Unity 2019 or higher as they have integrated support for microphone access in Unity Player settings.
 
-## Download the Speech SDK for Unity (Beta)
+## Download the Speech SDK for Unity
 
-* **By downloading the Speech SDK for Unity (Beta) you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license201809).**
-* The Speech SDK for Unity (Beta) is packaged as a Unity asset package (.unitypackage).
+* **By downloading the Speech SDK for Unity you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license201809).**
+* The Speech SDK for Unity is packaged as a Unity asset package (.unitypackage).
   Download it from [here](https://aka.ms/csspeech/unitypackage).
 
 ## Import the Speech SDK plugin for Unity in the sample 
@@ -40,7 +44,8 @@ This sample demonstrates how to use the Microsoft Cognitive Service Speech SDK i
   * Import the Speech SDK by selecting **Assets** > **Import Package** > **Custom Package**.
   * In the file picker, select the Speech SDK .unitypackage file that you downloaded before.
   * Ensure that all files are selected and click **Import**.
-
+  * NOTE: If you have installed Unity only for specific platform e.g. Unity CloudBuild for Android, be aware that you may need to remove other 
+  * platform (iOS, Mac, WSA) binaries from the Speech SDK Plugins folder to avoid possible conflicts with the same library name.
 
 ## SCENE 1: Prepare & run the Speech Recognition & Translation sample scene
 
@@ -139,7 +144,7 @@ Note: the instructions below are the same regardless of the sample scene you wis
 * Select **Build**.
 * In the folder picker, create and select a new build folder.
 * Once the build has finished, the Windows Explorer launches with the folder containing the application `SpeechRecognitionSample.exe`. **Do not launch it yet**
-* Navigate to the `SpeechRecognitionSample_Data/Plugins` folder in your build output folder. Copy the DLL `Microsoft.CognitiveServices.Speech.core.dll` into the `SpeechRecognitionSample_Data/Managed` folder.
+* Navigate to the `SpeechRecognitionSample_Data/Plugins` folder in your build output folder. Copy ALL the DLLs beginning with `Microsoft.CognitiveServices.Speech` into the `SpeechRecognitionSample_Data/Managed` folder.
 * Double-click on `SpeechRecognitionSample.exe` in the build output folder to start the application.
 * Then, follow the `SCENE 1` run instructions outlined above to test the scene.
 * Close the app to stop speech recognition.

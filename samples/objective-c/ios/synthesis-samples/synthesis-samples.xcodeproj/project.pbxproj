@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -12,8 +12,8 @@
 		3C89361222F284DA008F93D3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3C89361122F284DA008F93D3 /* Assets.xcassets */; };
 		3C89361822F284DA008F93D3 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C89361722F284DA008F93D3 /* main.m */; };
 		3C89362222F284DA008F93D3 /* synthesis_samplesUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C89362122F284DA008F93D3 /* synthesis_samplesUITests.m */; };
-		3C89362D22F28561008F93D3 /* MicrosoftCognitiveServicesSpeech.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C89362C22F28560008F93D3 /* MicrosoftCognitiveServicesSpeech.framework */; };
-		3C89362E22F28561008F93D3 /* MicrosoftCognitiveServicesSpeech.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 3C89362C22F28560008F93D3 /* MicrosoftCognitiveServicesSpeech.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		FC9F9C9B26D2FBBD006DA509 /* MicrosoftCognitiveServicesSpeech.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = FC9F9C9A26D2FBBD006DA509 /* MicrosoftCognitiveServicesSpeech.xcframework */; };
+		FC9F9C9C26D2FBC3006DA509 /* MicrosoftCognitiveServicesSpeech.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = FC9F9C9A26D2FBBD006DA509 /* MicrosoftCognitiveServicesSpeech.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -33,7 +33,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				3C89362E22F28561008F93D3 /* MicrosoftCognitiveServicesSpeech.framework in Embed Frameworks */,
+				FC9F9C9C26D2FBC3006DA509 /* MicrosoftCognitiveServicesSpeech.xcframework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -52,7 +52,7 @@
 		3C89361D22F284DA008F93D3 /* synthesis-samplesUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "synthesis-samplesUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		3C89362122F284DA008F93D3 /* synthesis_samplesUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = synthesis_samplesUITests.m; sourceTree = "<group>"; };
 		3C89362322F284DA008F93D3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		3C89362C22F28560008F93D3 /* MicrosoftCognitiveServicesSpeech.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MicrosoftCognitiveServicesSpeech.framework; path = ../MicrosoftCognitiveServicesSpeech.framework; sourceTree = "<group>"; };
+		FC9F9C9A26D2FBBD006DA509 /* MicrosoftCognitiveServicesSpeech.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = MicrosoftCognitiveServicesSpeech.xcframework; path = ../MicrosoftCognitiveServicesSpeech.xcframework; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -60,7 +60,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3C89362D22F28561008F93D3 /* MicrosoftCognitiveServicesSpeech.framework in Frameworks */,
+				FC9F9C9B26D2FBBD006DA509 /* MicrosoftCognitiveServicesSpeech.xcframework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -77,7 +77,7 @@
 		3C8935FC22F284D8008F93D3 = {
 			isa = PBXGroup;
 			children = (
-				3C89362C22F28560008F93D3 /* MicrosoftCognitiveServicesSpeech.framework */,
+				FC9F9C9A26D2FBBD006DA509 /* MicrosoftCognitiveServicesSpeech.xcframework */,
 				3C89360722F284D9008F93D3 /* synthesis-samples */,
 				3C89362022F284DA008F93D3 /* synthesis-samplesUITests */,
 				3C89360622F284D9008F93D3 /* Products */,
