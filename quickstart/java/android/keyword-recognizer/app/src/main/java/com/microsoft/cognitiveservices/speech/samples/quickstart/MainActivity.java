@@ -6,8 +6,8 @@
 package com.microsoft.cognitiveservices.speech.samples.quickstart;
 
 import android.content.res.AssetManager;
-import android.support.v4.app.ActivityCompat;
-import android.support.v7.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -43,24 +43,19 @@ public class MainActivity extends AppCompatActivity {
     public void onSpeechButtonClicked(View v) {
         TextView txt = (TextView) this.findViewById(R.id.hello); // 'hello' is the ID of your text view
         txt.setText("Say \"Computer\"");
-        Runnable asyncTask = () -> {
-            try {
-                AssetManager am = getAssets();
-                AudioConfig config = AudioConfig.fromDefaultMicrophoneInput();
-                assert(config != null);
 
-                KeywordRecognizer reco = new KeywordRecognizer(config);
-                assert(reco != null);
+        Runnable asyncTask = () -> {
+            try (AssetManager am = getAssets();
+                 AudioConfig config = AudioConfig.fromDefaultMicrophoneInput();
+                 KeywordRecognizer reco = new KeywordRecognizer(config);) {
 
                 InputStream is = am.open("kws.table");
                 KeywordRecognitionModel model = KeywordRecognitionModel.fromStream(is, "computer", false);
                 Future<KeywordRecognitionResult> task = reco.recognizeOnceAsync(model);
-                assert(task != null);
 
                 // Note: this will block the UI thread, so eventually, you want to
-                //        register for the event (see full samples)
+                //       register for the event (see full samples)
                 KeywordRecognitionResult result = task.get();
-                assert(result != null);
 
                 if (result.getReason() == ResultReason.RecognizedKeyword) {
                     txt.setText("Recognized " + result.getText());
@@ -69,7 +64,6 @@ public class MainActivity extends AppCompatActivity {
                     txt.setText("Error: got the wrong sort of recognition.");
                 }
 
-                reco.close();
             } catch (Exception ex) {
                 Log.e("SpeechSDKDemo", "unexpected " + ex.getMessage());
                 assert(false);

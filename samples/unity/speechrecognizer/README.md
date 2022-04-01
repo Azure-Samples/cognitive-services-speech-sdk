@@ -6,7 +6,7 @@ This sample demonstrates how to use the Microsoft Cognitive Service Speech SDK i
 * Intent recognition via speech input using Natural Language Understanding
 
 > Note:
-> The Speech SDK for Unity supports Windows Desktop (x86 and x64) or Universal Windows Platform (x86, x64, ARM/ARM64), Android (x86, ARM32/64), iOS (x64 simulator, ARM64) and Mac (x64).
+> The Speech SDK for Unity supports Windows Desktop (x86 and x64) or Universal Windows Platform (x86, x64, ARM/ARM64), Android (x86, ARM32/64), iOS (x64 simulator, ARM64), Mac (x64) and Linux (x64).
 
 ## Prerequisites
 

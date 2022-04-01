@@ -57,6 +57,7 @@ proguard-rules.pro text
 
 # Binary extensions:
 *.class binary
+*.bmp binary
 *.jar binary
 *.jpg binary
 *.mp3 binary

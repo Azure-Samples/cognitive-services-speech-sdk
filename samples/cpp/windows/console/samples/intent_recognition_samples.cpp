@@ -8,7 +8,6 @@
 // <toplevel>
 #include <speechapi_cxx.h>
 
-using namespace std;
 using namespace Microsoft::CognitiveServices::Speech;
 using namespace Microsoft::CognitiveServices::Speech::Audio;
 using namespace Microsoft::CognitiveServices::Speech::Intent;
@@ -37,7 +36,7 @@ void IntentRecognitionWithMicrophone()
     recognizer->AddIntent(model, "YourLanguageUnderstandingIntentName2", "id2");
     recognizer->AddIntent(model, "YourLanguageUnderstandingIntentName3", "any-IntentId-here");
 
-    cout << "Say something...\n";
+    std::cout << "Say something..." << std::endl;
 
     // Starts intent recognition, and returns after a single utterance is recognized. The end of a
     // single utterance is determined by listening for silence at the end or until a maximum of 15
@@ -50,28 +49,28 @@ void IntentRecognitionWithMicrophone()
     // Checks result.
     if (result->Reason == ResultReason::RecognizedIntent)
     {
-        cout << "RECOGNIZED: Text=" << result->Text << endl;
-        cout << "  Intent Id: " << result->IntentId << endl;
-        cout << "  Intent Service JSON: " << result->Properties.GetProperty(PropertyId::LanguageUnderstandingServiceResponse_JsonResult) << endl;
+        std::cout << "RECOGNIZED: Text=" << result->Text << std::endl;
+        std::cout << "  Intent Id: " << result->IntentId << std::endl;
+        std::cout << "  Intent Service JSON: " << result->Properties.GetProperty(PropertyId::LanguageUnderstandingServiceResponse_JsonResult) << std::endl;
     }
     else if (result->Reason == ResultReason::RecognizedSpeech)
     {
-        cout << "RECOGNIZED: Text=" << result->Text << " (intent could not be recognized)" << endl;
+        std::cout << "RECOGNIZED: Text=" << result->Text << " (intent could not be recognized)" << std::endl;
     }
     else if (result->Reason == ResultReason::NoMatch)
     {
-        cout << "NOMATCH: Speech could not be recognized." << endl;
+        std::cout << "NOMATCH: Speech could not be recognized." << std::endl;
     }
     else if (result->Reason == ResultReason::Canceled)
     {
         auto cancellation = CancellationDetails::FromResult(result);
-        cout << "CANCELED: Reason=" << (int)cancellation->Reason << endl;
+        std::cout << "CANCELED: Reason=" << (int)cancellation->Reason << std::endl;
 
         if (cancellation->Reason == CancellationReason::Error)
         {
-            cout << "CANCELED: ErrorCode=" << (int)cancellation->ErrorCode << endl;
-            cout << "CANCELED: ErrorDetails=" << cancellation->ErrorDetails << endl;
-            cout << "CANCELED: Did you update the subscription info?" << endl;
+            std::cout << "CANCELED: ErrorCode=" << (int)cancellation->ErrorCode << std::endl;
+            std::cout << "CANCELED: ErrorDetails=" << cancellation->ErrorDetails << std::endl;
+            std::cout << "CANCELED: Did you update the subscription info?" << std::endl;
         }
     }
     // </IntentRecognitionWithMicrophone>
@@ -101,7 +100,7 @@ void IntentRecognitionWithLanguage()
     recognizer->AddIntent(model, "YourLanguageUnderstandingIntentName2", "id2");
     recognizer->AddIntent(model, "YourLanguageUnderstandingIntentName3", "any-IntentId-here");
 
-    cout << "Say something in " << lang << "..." << endl;
+    std::cout << "Say something in " << lang << "..." << std::endl;
 
     // Starts speech recognition, and returns after a single utterance is recognized. The end of a
     // single utterance is determined by listening for silence at the end, or until a maximum of 15
@@ -114,28 +113,28 @@ void IntentRecognitionWithLanguage()
     // Checks result.
     if (result->Reason == ResultReason::RecognizedIntent)
     {
-        cout << "RECOGNIZED: Text=" << result->Text << endl;
-        cout << "  Intent Id: " << result->IntentId << endl;
-        cout << "  Intent Service JSON: " << result->Properties.GetProperty(PropertyId::LanguageUnderstandingServiceResponse_JsonResult) << endl;
+        std::cout << "RECOGNIZED: Text=" << result->Text << std::endl;
+        std::cout << "  Intent Id: " << result->IntentId << std::endl;
+        std::cout << "  Intent Service JSON: " << result->Properties.GetProperty(PropertyId::LanguageUnderstandingServiceResponse_JsonResult) << std::endl;
     }
     else if (result->Reason == ResultReason::RecognizedSpeech)
     {
-        cout << "RECOGNIZED: Text=" << result->Text << " (intent could not be recognized)" << endl;
+        std::cout << "RECOGNIZED: Text=" << result->Text << " (intent could not be recognized)" << std::endl;
     }
     else if (result->Reason == ResultReason::NoMatch)
     {
-        cout << "NOMATCH: Speech could not be recognized." << endl;
+        std::cout << "NOMATCH: Speech could not be recognized." << std::endl;
     }
     else if (result->Reason == ResultReason::Canceled)
     {
         auto cancellation = CancellationDetails::FromResult(result);
-        cout << "CANCELED: Reason=" << (int)cancellation->Reason << endl;
+        std::cout << "CANCELED: Reason=" << (int)cancellation->Reason << std::endl;
 
         if (cancellation->Reason == CancellationReason::Error)
         {
-            cout << "CANCELED: ErrorCode=" << (int)cancellation->ErrorCode << endl;
-            cout << "CANCELED: ErrorDetails=" << cancellation->ErrorDetails << endl;
-            cout << "CANCELED: Did you update the subscription info?" << endl;
+            std::cout << "CANCELED: ErrorCode=" << (int)cancellation->ErrorCode << std::endl;
+            std::cout << "CANCELED: ErrorDetails=" << cancellation->ErrorDetails << std::endl;
+            std::cout << "CANCELED: Did you update the subscription info?" << std::endl;
         }
     }
     // </IntentRecognitionWithLanguage>
@@ -159,8 +158,8 @@ void IntentContinuousRecognitionWithFile()
     auto audioInput = AudioConfig::FromWavFileInput("whatstheweatherlike.wav");
     auto recognizer = IntentRecognizer::FromConfig(config, audioInput);
 
-    // promise for synchronization of recognition end.
-    promise<void> recognitionEnd;
+    // std::promise for synchronization of recognition end.
+    std::promise<void> recognitionEnd;
 
     // Creates a Language Understanding model using the app id, and adds specific intents from your model
     auto model = LanguageUnderstandingModel::FromAppId("YourLanguageUnderstandingAppId");
@@ -171,36 +170,36 @@ void IntentContinuousRecognitionWithFile()
     // Subscribes to events.
     recognizer->Recognizing.Connect([](const IntentRecognitionEventArgs& e)
         {
-            cout << "Recognizing:" << e.Result->Text << endl;
+            std::cout << "Recognizing:" << e.Result->Text << std::endl;
         });
 
     recognizer->Recognized.Connect([](const IntentRecognitionEventArgs& e)
         {
             if (e.Result->Reason == ResultReason::RecognizedIntent)
             {
-                cout << "RECOGNIZED: Text=" << e.Result->Text << endl;
-                cout << "  Intent Id: " << e.Result->IntentId << endl;
-                cout << "  Intent Service JSON: " << e.Result->Properties.GetProperty(PropertyId::LanguageUnderstandingServiceResponse_JsonResult) << endl;
+                std::cout << "RECOGNIZED: Text=" << e.Result->Text << std::endl;
+                std::cout << "  Intent Id: " << e.Result->IntentId << std::endl;
+                std::cout << "  Intent Service JSON: " << e.Result->Properties.GetProperty(PropertyId::LanguageUnderstandingServiceResponse_JsonResult) << std::endl;
             }
             else if (e.Result->Reason == ResultReason::RecognizedSpeech)
             {
-                cout << "RECOGNIZED: Text=" << e.Result->Text << " (intent could not be recognized)" << endl;
+                std::cout << "RECOGNIZED: Text=" << e.Result->Text << " (intent could not be recognized)" << std::endl;
             }
             else if (e.Result->Reason == ResultReason::NoMatch)
             {
-                cout << "NOMATCH: Speech could not be recognized." << endl;
+                std::cout << "NOMATCH: Speech could not be recognized." << std::endl;
             }
         });
 
     recognizer->Canceled.Connect([&recognitionEnd](const IntentRecognitionCanceledEventArgs& e)
         {
-            cout << "CANCELED: Reason=" << (int)e.Reason << endl;
+            std::cout << "CANCELED: Reason=" << (int)e.Reason << std::endl;
 
             if (e.Reason == CancellationReason::Error)
             {
-                cout << "CANCELED: ErrorCode=" << (int)e.ErrorCode << endl;
-                cout << "CANCELED: ErrorDetails=" << e.ErrorDetails << endl;
-                cout << "CANCELED: Did you update the subscription info?" << endl;
+                std::cout << "CANCELED: ErrorCode=" << (int)e.ErrorCode << std::endl;
+                std::cout << "CANCELED: ErrorDetails=" << e.ErrorDetails << std::endl;
+                std::cout << "CANCELED: Did you update the subscription info?" << std::endl;
             }
 
             recognitionEnd.set_value(); // Notify to stop recognition.
@@ -208,7 +207,7 @@ void IntentContinuousRecognitionWithFile()
 
     recognizer->SessionStopped.Connect([&recognitionEnd](const SessionEventArgs& e)
         {
-            cout << "Session stopped.";
+            std::cout << "Session stopped.";
             recognitionEnd.set_value(); // Notify to stop recognition.
         });
 
@@ -240,23 +239,37 @@ void IntentRecognitionWithPatternMatchingAndMicrophone()
     // The Id is used to identify this model from others in the collection.
     auto model = PatternMatchingModel::FromModelId("YourPatternMatchingModelId");
 
+    // Creates a std::string with a pattern that uses groups of optional words. "[Go | Take me]" will match either "Go", "Take me", or "".
+    std::string patternWithOptionalWords = "[Go | Take me] to [floor|level] {floorName}";
+    // Creates a std::string with a pattern that uses an optional entity and group that could be used to tie commands together.
+    std::string patternWithOptionalEntity = "Go to parking [{parkingLevel}]";
+
+    // You can also have multiple entities of the same name in a single pattern by adding appending a unique identifier
+    // to distinguish between the instances. For example:
+    std::string patternWithTwoOfTheSameEntity = "Go to floor {floorName:1} [and then go to floor {floorName:2}]";
+    // NOTE: Both floorName:1 and floorName:2 are tied to the same list of entries. The identifier can be a string
+    //       and is separated from the entity name by a ':'
+
     // Adds some intents to look for specific patterns.
-    model->Intents.push_back({ {"Take me to floor {floorName}", "Go to floor {floorName}", "Take me to {floorName}", "Go to floor {floorName}", "Go to {floorName}", "{floorName}"}, "ChangeFloors" });
+    model->Intents.push_back({ {patternWithOptionalWords, patternWithOptionalEntity, patternWithTwoOfTheSameEntity, "{floorName}"}, "ChangeFloors" });
     model->Intents.push_back({ {"{action} the doors", "{action} doors", "{action} the door", "{action} door"}, "DoorControl" });
 
     // Creates the "floorName" entity and set it to type list.
     // Adds acceptable values. NOTE the default entity type is Any and so we do not need
     // to declare the "action" entity.
-    model->Entities.push_back({ "floorName" , Intent::EntityType::List, Intent::EntityMatchMode::Strict, {"ground floor", "lobby", "1st", "first", "one", "2nd", "second", "two"} });
+    model->Entities.push_back({ "floorName" , Intent::EntityType::List, Intent::EntityMatchMode::Strict, {"ground floor", "lobby", "1st", "first", "one", "1", "2nd", "second", "two", "2"}});
 
-    // Add the model to a model vector.
-    vector<shared_ptr<LanguageUnderstandingModel>> modelCollection;
+    // Creates the "parkingLevel" entity as a prebuilt Integer
+    model->Entities.push_back({ "parkingLevel" , Intent::EntityType::PrebuiltInteger});
+
+    // Add the model to a model std::vector.
+    std::vector<std::shared_ptr<LanguageUnderstandingModel>> modelCollection;
     modelCollection.push_back(model);
 
     // Apply the language model collection to the recognizer.
     recognizer->ApplyLanguageModels(modelCollection);
 
-    cout << "Say something...\n";
+    std::cout << "Say something..." << std::endl;
 
     // Starts intent recognition, and returns after a single utterance is recognized. The end of a
     // single utterance is determined by listening for silence at the end, or until a maximum of 15
@@ -269,38 +282,59 @@ void IntentRecognitionWithPatternMatchingAndMicrophone()
     // Checks result.
     if (result->Reason == ResultReason::RecognizedIntent)
     {
-        cout << "RECOGNIZED: Text=" << result->Text << endl;
-        cout << "  Intent Id: " << result->IntentId << endl;
-
+        std::cout << "RECOGNIZED: Text=" << result->Text << std::endl;
+        std::cout << "  Intent Id: " << result->IntentId << std::endl;
         auto entities = result->GetEntities();
-        if (entities.find("floorName") != entities.end())
+        if (result->IntentId == "ChangeFloors")
         {
-            cout << "  Floor name: = " << entities["floorName"].c_str() << endl;
-        }
 
-        if (entities.find("action") != entities.end())
+            if (entities.find("floorName") != entities.end())
+            {
+                std::cout << "     Floor name: = " << entities["floorName"].c_str() << std::endl;
+            }
+
+            if (entities.find("floorName:1") != entities.end())
+            {
+                std::cout << "   Floor name 1: = " << entities["floorName"].c_str() << std::endl;
+            }
+
+            if (entities.find("floorName:2") != entities.end())
+            {
+                std::cout << "   Floor name 2: = " << entities["floorName"].c_str() << std::endl;
+            }
+
+            if (entities.find("parkingLevel") != entities.end())
+            {
+                std::cout << "  Parking Level: = " << entities["floorName"].c_str() << std::endl;
+            }
+        }
+        else if (result->IntentId == "DoorControl")
         {
-            cout << "  Action: = " << entities["action"].c_str() << endl;
+
+            if (entities.find("action") != entities.end())
+            {
+                std::cout << "         Action: = " << entities["action"].c_str() << std::endl;
+            }
         }
     }
     else if (result->Reason == ResultReason::RecognizedSpeech)
     {
-        cout << "RECOGNIZED: Text=" << result->Text << " (intent could not be recognized)" << endl;
+        std::cout << "RECOGNIZED: Text=" << result->Text << " (intent could not be recognized)" << std::endl;
     }
     else if (result->Reason == ResultReason::NoMatch)
     {
-        cout << "NOMATCH: Speech could not be recognized." << endl;
+        std::cout << "NOMATCH: Speech could not be recognized." << std::endl;
     }
     else if (result->Reason == ResultReason::Canceled)
     {
         auto cancellation = CancellationDetails::FromResult(result);
-        cout << "CANCELED: Reason=" << (int)cancellation->Reason << endl;
+        std::cout << "CANCELED: Reason=" << (int)cancellation->Reason << std::endl;
 
         if (cancellation->Reason == CancellationReason::Error)
         {
-            cout << "CANCELED: ErrorCode=" << (int)cancellation->ErrorCode << endl;
-            cout << "CANCELED: ErrorDetails=" << cancellation->ErrorDetails << endl;
-            cout << "CANCELED: Did you update the subscription info?" << endl;
+            std::cout << "CANCELED: ErrorCode=" << (int)cancellation->ErrorCode << std::endl;
+            std::cout << "CANCELED: ErrorDetails=" << cancellation->ErrorDetails << std::endl;
+            std::cout << "CANCELED: Did you update the subscription info?" << std::endl;
         }
     }
     // </IntentRecognitionWithPatternMatchingAndMicrophone>
