@@ -128,9 +128,9 @@ public class HelloWorld : MonoBehaviour
             // Creates an instance of a speech config with specified subscription key and service region.
             speechConfig = SpeechConfig.FromSubscription(SubscriptionKey, Region);
 
-            // The default format is Riff24Khz16BitMonoPcm.
+            // The default format is RIFF, which has a riff header.
             // We are playing the audio in memory as audio clip, which doesn't require riff header.
-            // So we need to set the format to Raw24Khz16BitMonoPcm.
+            // So we need to set the format to raw (24KHz for better quality).
             speechConfig.SetSpeechSynthesisOutputFormat(SpeechSynthesisOutputFormat.Raw24Khz16BitMonoPcm);
 
             // Creates a speech synthesizer.
