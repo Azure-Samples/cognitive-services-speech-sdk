@@ -44,7 +44,7 @@ def speech_language_detection_once_from_mic():
     speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
 
     # Sets the Priority (optional, defaults to 'Latency'). Either 'Latency' or 'Accuracy' is accepted.
-    speech_config.set_property(property_id=speechsdk.PropertyId.SpeechServiceConnection_SingleLanguageIdPriority, value='Accuracy')
+    speech_config.set_property(property_id=speechsdk.PropertyId.SpeechServiceConnection_SingleLanguageIdPriority, value='Latency')
 
     # Creates a source language recognizer using microphone as audio input.
     # The default language is "en-us".
