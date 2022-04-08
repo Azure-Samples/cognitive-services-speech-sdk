@@ -34,14 +34,15 @@ speech_key, service_region = "YourSubscriptionKey", "YourServiceRegion"
 weatherfilename = "whatstheweatherlike.wav"
 weatherfilenamemp3 = "whatstheweatherlike.mp3"
 
-# Specify the AutoDetectSourceLanguageConfig, which defines the number of possible languages
-auto_detect_source_language_config = speechsdk.languageconfig.AutoDetectSourceLanguageConfig(languages=["de-DE", "en-US"])
-
 def speech_language_detection_once_from_mic():
     """performs one-shot speech language detection from the default microphone"""
     # <SpeechLanguageDetectionWithMicrophone>
+
+    # Specify the AutoDetectSourceLanguageConfig, which defines the number of possible languages
+    auto_detect_source_language_config = speechsdk.languageconfig.AutoDetectSourceLanguageConfig(languages=["de-DE", "en-US"])
+
     speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
-    
+
     # Set the Priority (optional, default Latency, either Latency or Accuracy is accepted)
     speech_config.set_property(property_id=speechsdk.PropertyId.SpeechServiceConnection_SingleLanguageIdPriority, value='Accuracy')
 
@@ -75,6 +76,10 @@ def speech_language_detection_once_from_mic():
 def speech_language_detection_once_from_file():
     """performs one-shot speech recognition with input from an audio file"""
     # <SpeechLanguageDetectionWithFile>
+
+    # Specify the AutoDetectSourceLanguageConfig, which defines the number of possible languages
+    auto_detect_source_language_config = speechsdk.languageconfig.AutoDetectSourceLanguageConfig(languages=["de-DE", "en-US"])
+
     speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
 
     # Set the Priority (optional, default Latency, either Latency or Accuracy is accepted)
@@ -110,6 +115,10 @@ def speech_language_detection_once_from_file():
 def speech_language_detection_once_from_continuous():
     """performs continuous speech language detection with input from an audio file"""
     # <SpeechContinuousLanguageDetectionWithFile>
+
+    # Specify the AutoDetectSourceLanguageConfig, which defines the number of possible languages
+    auto_detect_source_language_config = speechsdk.languageconfig.AutoDetectSourceLanguageConfig(languages=["de-DE", "en-US"])
+
     speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
 
     # Set the Priority (default Latency, either Latency or Accuracy is accepted)
