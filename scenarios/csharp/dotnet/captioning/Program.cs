@@ -1,93 +1,48 @@
-/*
-Dependencies
-*/
+//
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+//
 
-using System; // File
-using System.Linq; // Enumerable.Contains
-using System.Text; // StringBuilder
-using System.Threading.Tasks; // Task
-
-/* Notes:
-- Install the Speech NuGet package:
-dotnet add package Microsoft.CognitiveServices.Speech
-- The Speech SDK on Windows requires the Microsoft Visual C++ Redistributable for Visual Studio 2019 on the system. See:
-https://docs.microsoft.com/azure/cognitive-services/speech-service/speech-sdk?tabs=windows%2Cubuntu%2Cios-xcode%2Cmac-xcode%2Candroid-studio
-*/
+// Notes:
+// - Install the Speech NuGet package:
+// dotnet add package Microsoft.CognitiveServices.Speech
+// - The Speech SDK on Windows requires the Microsoft Visual C++ Redistributable for Visual Studio 2019 on the system. See:
+// https://docs.microsoft.com/azure/cognitive-services/speech-service/speech-sdk
 using Microsoft.CognitiveServices.Speech;
 using Microsoft.CognitiveServices.Speech.Audio;
+using System;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace Caption
+namespace Captioning
 {
-/*
-Types
-*/
-
-    public struct UserConfig
-    {
-        readonly public bool profanityFilterRemoveEnabled = false;
-        readonly public bool profanityFilterMaskEnabled = false;
-        readonly public string[]? languageIDLanguages;
-        readonly public string? inputFile;
-        readonly public string? outputFile;
-        readonly public string? phraseList;
-        readonly public bool suppressOutputEnabled = false;
-        readonly public bool partialResultsEnabled = false;
-        readonly public string? stablePartialResultThreshold;
-        readonly public bool srtEnabled = false;
-        readonly public bool trueTextEnabled = false;
-        readonly public string subscriptionKey;
-        readonly public string region;
-        
-        public UserConfig (
-            bool profanityFilterRemoveEnabled,
-            bool profanityFilterMaskEnabled,
-            string[]? languageIDLanguages,
-            string? inputFile,
-            string? outputFile,
-            string? phraseList,
-            bool suppressOutputEnabled,
-            bool partialResultsEnabled,
-            string? stablePartialResultThreshold,
-            bool srtEnabled,
-            bool trueTextEnabled,
-            string subscriptionKey,
-            string region
-            )
-        {
-            this.profanityFilterRemoveEnabled = profanityFilterRemoveEnabled;
-            this.profanityFilterMaskEnabled = profanityFilterMaskEnabled;
-            this.languageIDLanguages = languageIDLanguages;
-            this.inputFile = inputFile;
-            this.outputFile = outputFile;
-            this.phraseList = phraseList;
-            this.suppressOutputEnabled = suppressOutputEnabled;
-            this.partialResultsEnabled = partialResultsEnabled;
-            this.stablePartialResultThreshold = stablePartialResultThreshold;
-            this.srtEnabled = srtEnabled;
-            this.trueTextEnabled = trueTextEnabled;
-            this.subscriptionKey = subscriptionKey;
-            this.region = region;
-        }
-    }
-
-    public class TooFewArguments : Exception
-    {
-        public TooFewArguments() : base() { }
-    }
-
     class Program
     {
-
-/*
-Helper functions
-*/
-
-        static string? GetCmdOption(string[] args, string option)
+        private UserConfig userConfig;
+        private const string usage = @"Usage: caption.exe [-f] [-h] [-i path] [-l languages] [-m] [-o path] [-p phrases] [-q] [-r number] [-s] [-t] [-u] <subscriptionKey> <region>
+              -f: Remove profanity (default behavior is to mask profanity). Overrides -m.
+              -h: Show this help and stop.
+         -i path: Input audio file *path* (default input is from the microphone.)
+    -l languages: Enable language identification for specified *languages*.
+                  Example: en-US,ja-JP
+              -m: Disable masking profanity (default behavior). -f overrides this.
+         -o path: Output to file *path*.
+      -p phrases: Add specified *phrases*.
+                  Example: Constoso;Jessie;Rehaan
+              -q: Suppress console output (except errors).
+       -r number: Set stable partial result threshold to *number*.
+                  Example: 3
+              -s: Output captions in SubRip Text format (default is WebVTT format.)
+              -t: Enable TrueText.
+              -u: Output Recognizing results (default is Recognized results only). These are always written to the console, never to an output file. -q overrides this.";
+        
+        private static string? GetCmdOption(string[] args, string option)
         {
-            int index = Array.IndexOf(args, option);
+            var index = Array.IndexOf(args, option);
             if (index > -1 && index < args.Length - 2)
             {
-// We found the option (for example, "-o"), so advance from that to the value (for example, "filename").
+                // We found the option (for example, "-o"), so advance from that to the value (for example, "filename").
                 return args[index + 1];
             }
             else {
@@ -95,42 +50,34 @@ Helper functions
             }
         }
 
-        static bool CmdOptionExists(string[] args, string option)
+        private static bool CmdOptionExists(string[] args, string option)
         {
             return args.Contains (option);
         }
 
-        static string V2EndpointFromRegion(string region)
+        private static string V2EndpointFromRegion(string region)
         {
-// Note: Continuous language identification is supported only with v2 endpoints.
-            return "wss://" + region + ".stt.speech.microsoft.com/speech/universal/v2";
+            // Note: Continuous language identification is supported only with v2 endpoints.
+            return $"wss://{region}.stt.speech.microsoft.com/speech/universal/v2";
         }
 
-        static string TimestampFromSpeechRecognitionResult(SpeechRecognitionResult result, UserConfig userConfig)
+        private string TimestampFromSpeechRecognitionResult(SpeechRecognitionResult result)
         {
-            DateTime startTime = new DateTime(result.OffsetInTicks);
-            DateTime endTime = startTime.Add(result.Duration);
-            string format;
+            var startTime = new DateTime(result.OffsetInTicks);
+            var endTime = startTime.Add(result.Duration);
 
-            if(userConfig.srtEnabled)
-            {
-// SRT format requires ',' as decimal separator rather than '.'.
-                format = "HH:mm:ss,fff";
-            }
-            else
-            {
-                format = "HH:mm:ss.fff";
-            }
-
-            return String.Format("{0} --> {1}", startTime.ToString(format), endTime.ToString(format));
+            // SRT format requires ',' as decimal separator rather than '.'.
+            return this.userConfig.useSubRipTextCaptionFormat
+                ? $"{startTime:HH:mm:ss,fff} --> {endTime:HH:mm:ss,fff}"
+                : $"{startTime:HH:mm:ss.fff} --> {endTime:HH:mm:ss.fff}";            
         }
 
-        static string LanguageFromSpeechRecognitionResult(SpeechRecognitionResult result, UserConfig userConfig)
+        private string LanguageFromSpeechRecognitionResult(SpeechRecognitionResult result)
         {
-            if (userConfig.languageIDLanguages is not null)
+            if (this.userConfig.languageIDLanguages is not null)
             {
-                AutoDetectSourceLanguageResult languageIDResult = AutoDetectSourceLanguageResult.FromResult(result);
-                return "[" + languageIDResult.Language + "] ";
+                var languageIDResult = AutoDetectSourceLanguageResult.FromResult(result);
+                return $"[{languageIDResult.Language}]";
             }
             else
             {
@@ -138,58 +85,45 @@ Helper functions
             }
         }
 
-        static string CaptionFromSpeechRecognitionResult(int sequenceNumber, SpeechRecognitionResult result, UserConfig userConfig)
+        private string CaptionFromSpeechRecognitionResult(int sequenceNumber, SpeechRecognitionResult result)
         {
-            StringBuilder caption = new StringBuilder();
-            if (!userConfig.partialResultsEnabled && userConfig.srtEnabled)
+            var caption = new StringBuilder();
+            if (!this.userConfig.showRecognizingResults && this.userConfig.useSubRipTextCaptionFormat)
             {
-                caption.AppendFormat("{0}{1}", sequenceNumber, Environment.NewLine);
+                caption.AppendFormat($"{sequenceNumber}{Environment.NewLine}");
             }
-            caption.AppendFormat("{0}{1}", TimestampFromSpeechRecognitionResult(result, userConfig), Environment.NewLine);
-            caption.Append(LanguageFromSpeechRecognitionResult(result, userConfig));
-            caption.AppendFormat("{0}{1}{1}", result.Text, Environment.NewLine);
+            caption.AppendFormat($"{TimestampFromSpeechRecognitionResult(result)}{Environment.NewLine}");
+            caption.Append(LanguageFromSpeechRecognitionResult(result));
+            caption.AppendFormat($"{result.Text}{Environment.NewLine}{Environment.NewLine}");
             return caption.ToString();
         }
 
-        static void WriteToConsole(string text, UserConfig userConfig)
+        private void WriteToConsole(string text)
         {
-            if (!userConfig.suppressOutputEnabled)
+            if (!this.userConfig.suppressConsoleOutput)
             {
                 Console.Write(text);
             }
         }
 
-        static void WriteToConsoleOrFile(string text, UserConfig userConfig)
+        private void WriteToConsoleOrFile(string text)
         {
-            WriteToConsole(text, userConfig);
-            if (userConfig.outputFile is string outputFileValue)
+            WriteToConsole(text);
+            if (this.userConfig.outputFilePath is string outputFilePathValue)
             {
-                File.AppendAllText(outputFileValue, text);
+                File.AppendAllText(outputFilePathValue, text);
             }
         }
 
-        static void Initialize(UserConfig userConfig)
+        //
+        // Constructor
+        //
+        public Program(string[] args)
         {
-            if (userConfig.outputFile is string outputFileValue && File.Exists(outputFileValue))
-            {
-                File.Delete(outputFileValue);
-            }
-            if (!userConfig.srtEnabled)
-            {
-                WriteToConsoleOrFile(String.Format("WEBVTT{0}{0}", Environment.NewLine), userConfig);
-            }
-        }
-
-/*
-Main functions
-*/
-
-        static UserConfig UserConfigFromArgs(string[] args)
-        {
-// Verify argc >= 3 (caption.exe, subscriptionKey, region)
+            // Verify argc >= 3 (caption.exe, subscriptionKey, region)
             if (args.Length < 3)
             {
-                throw new TooFewArguments();
+                throw new ArgumentException($"Too few arguments.{Environment.NewLine}Usage: {usage}");
             }
 
             string[]? languageIDLanguages = null;
@@ -198,7 +132,7 @@ Main functions
                 languageIDLanguages = languageIDLanguagesResult.Split(',');
             }
             
-            return new UserConfig(
+            this.userConfig = new UserConfig(
                 CmdOptionExists(args, "-f"),
                 CmdOptionExists(args, "-m"),
                 languageIDLanguages,
@@ -215,11 +149,26 @@ Main functions
             );
         }
 
-        static AudioConfig AudioConfigFromUserConfig(UserConfig userConfig)
+        private void Initialize()
         {
-            if (userConfig.inputFile is string inputFileValue)
+            if (this.userConfig.outputFilePath is string outputFilePathValue && File.Exists(outputFilePathValue))
             {
-                return AudioConfig.FromWavFileInput(inputFileValue);
+                File.Delete(outputFilePathValue);
+            }
+            if (!this.userConfig.useSubRipTextCaptionFormat)
+            {
+                WriteToConsoleOrFile($"WEBVTT{Environment.NewLine}");
+            }
+        }
+
+        //
+        // Create AudioConfig
+        //
+        private AudioConfig AudioConfigFromUserConfig()
+        {
+            if (this.userConfig.inputFilePath is string inputFilePathValue)
+            {
+                return AudioConfig.FromWavFileInput(inputFilePathValue);
             }
             else
             {
@@ -227,33 +176,37 @@ Main functions
             }
         }
 
-        static SpeechConfig SpeechConfigFromUserConfig(UserConfig userConfig)
+        //
+        // Create SpeechConfig
+        //
+        private SpeechConfig SpeechConfigFromUserConfig()
         {
             SpeechConfig speechConfig;
-            if (userConfig.languageIDLanguages is not null)
+            // Language identification requires V2 endpoint.
+            if (this.userConfig.languageIDLanguages is not null)
             {
-                speechConfig = SpeechConfig.FromEndpoint(new Uri(V2EndpointFromRegion(userConfig.region)), userConfig.subscriptionKey);
+                speechConfig = SpeechConfig.FromEndpoint(new Uri(V2EndpointFromRegion(this.userConfig.region)), this.userConfig.subscriptionKey);
             }
             else
             {
-                speechConfig = SpeechConfig.FromSubscription(userConfig.subscriptionKey, userConfig.region);
+                speechConfig = SpeechConfig.FromSubscription(this.userConfig.subscriptionKey, this.userConfig.region);
             }
 
-            if (userConfig.profanityFilterRemoveEnabled)
+            if (this.userConfig.removeProfanity)
             {
                 speechConfig.SetProfanity(ProfanityOption.Removed);
             }
-            else if (userConfig.profanityFilterMaskEnabled)
+            else if (this.userConfig.disableMaskingProfanity)
             {
-                speechConfig.SetProfanity(ProfanityOption.Masked);
+                speechConfig.SetProfanity(ProfanityOption.Raw);
             }
             
-            if (userConfig.stablePartialResultThreshold is string stablePartialResultThresholdValue)
+            if (this.userConfig.stablePartialResultThreshold is string stablePartialResultThresholdValue)
             {
                 speechConfig.SetProperty(PropertyId.SpeechServiceResponse_StablePartialResultThreshold, stablePartialResultThresholdValue);
             }
             
-            if (userConfig.trueTextEnabled)
+            if (this.userConfig.useTrueText)
             {
                 speechConfig.SetProperty(PropertyId.SpeechServiceResponse_PostProcessingOption, "TrueText");
             }
@@ -261,15 +214,18 @@ Main functions
             return speechConfig;
         }
 
-        static SpeechRecognizer SpeechRecognizerFromUserConfig(UserConfig userConfig)
+        //
+        // Create SpeechRecognizer
+        //
+        private SpeechRecognizer SpeechRecognizerFromUserConfig()
         {
-            AudioConfig audioConfig = AudioConfigFromUserConfig(userConfig);
-            SpeechConfig speechConfig = SpeechConfigFromUserConfig(userConfig);
+            var audioConfig = AudioConfigFromUserConfig();
+            var speechConfig = SpeechConfigFromUserConfig();
             SpeechRecognizer speechRecognizer;
             
             if (userConfig.languageIDLanguages is string[] languageIDLanguagesValue)
             {
-                AutoDetectSourceLanguageConfig autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig.FromLanguages(languageIDLanguagesValue);
+                var autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig.FromLanguages(languageIDLanguagesValue);
                 speechRecognizer = new SpeechRecognizer(speechConfig, autoDetectSourceLanguageConfig, audioConfig);
             }
             else
@@ -277,32 +233,35 @@ Main functions
                 speechRecognizer = new SpeechRecognizer(speechConfig, audioConfig);
             }
             
-            if (userConfig.phraseList is string phraseListValue)
+            if (this.userConfig.phraseList is string phraseListValue)
             {
-                PhraseListGrammar grammar = PhraseListGrammar.FromRecognizer(speechRecognizer);
+                var grammar = PhraseListGrammar.FromRecognizer(speechRecognizer);
                 grammar.AddPhrase(phraseListValue);
             }
             
             return speechRecognizer;
         }
 
-        static async Task<string?> RecognizeContinuous(SpeechRecognizer speechRecognizer, UserConfig userConfig)
+        //
+        // Convert audio to captions
+        //
+        private async Task<string?> RecognizeContinuous(SpeechRecognizer speechRecognizer)
         {
             var recognitionEnd = new TaskCompletionSource<string?>();
             int sequenceNumber = 0;
 
-            if (userConfig.partialResultsEnabled)
+            if (this.userConfig.showRecognizingResults)
             {
                 speechRecognizer.Recognizing += (object? sender, SpeechRecognitionEventArgs e) =>
                     {
                         if (ResultReason.RecognizingSpeech == e.Result.Reason && e.Result.Text.Length > 0)
                         {
-// We don't show sequence numbers for partial results.
-                            WriteToConsole(CaptionFromSpeechRecognitionResult(0, e.Result, userConfig), userConfig);
+                            // We don't show sequence numbers for partial results.
+                            WriteToConsole(CaptionFromSpeechRecognitionResult(0, e.Result));
                         }
                         else if (ResultReason.NoMatch == e.Result.Reason)
                         {
-                            WriteToConsole("NOMATCH: Speech could not be recognized.\n", userConfig);
+                            WriteToConsole($"NOMATCH: Speech could not be recognized.{Environment.NewLine}");
                         }
                     };
             }
@@ -312,11 +271,11 @@ Main functions
                     if (ResultReason.RecognizedSpeech == e.Result.Reason && e.Result.Text.Length > 0)
                     {
                         sequenceNumber++;
-                        WriteToConsoleOrFile(CaptionFromSpeechRecognitionResult(sequenceNumber, e.Result, userConfig), userConfig);
+                        WriteToConsoleOrFile(CaptionFromSpeechRecognitionResult(sequenceNumber, e.Result));
                     }
                     else if (ResultReason.NoMatch == e.Result.Reason)
                     {
-                        WriteToConsole("NOMATCH: Speech could not be recognized.\n", userConfig);
+                        WriteToConsole($"NOMATCH: Speech could not be recognized.{Environment.NewLine}");
                     }
                 };
 
@@ -324,68 +283,50 @@ Main functions
                 {
                     if (CancellationReason.EndOfStream == e.Reason)
                     {
-                        WriteToConsole(String.Format("End of stream reached.{0}", Environment.NewLine), userConfig);
+                        WriteToConsole($"End of stream reached.{Environment.NewLine}");
                         recognitionEnd.TrySetResult(null); // Notify to stop recognition.
                     }
                     else if (CancellationReason.CancelledByUser == e.Reason)
                     {
-                        WriteToConsole(String.Format("User canceled request.{0}", Environment.NewLine), userConfig);
+                        WriteToConsole($"User canceled request.{Environment.NewLine}");
                         recognitionEnd.TrySetResult(null); // Notify to stop recognition.
                     }
                     else if (CancellationReason.Error == e.Reason)
                     {
-                        var error = String.Format("Encountered error.{0}Error code: {1}{0}Error details: {2}{0}", Environment.NewLine, (int)e.ErrorCode, e.ErrorDetails);
+                        var error = $"Encountered error.{Environment.NewLine}Error code: {(int)e.ErrorCode}{Environment.NewLine}Error details: {e.ErrorDetails}{Environment.NewLine}";
                         recognitionEnd.TrySetResult(error); // Notify to stop recognition.
                     }
                     else
                     {
-                        var error = String.Format("Request was cancelled for an unrecognized reason: {0}.{1}", (int)e.Reason, Environment.NewLine);
+                        var error = $"Request was cancelled for an unrecognized reason: {(int)e.Reason}.{Environment.NewLine}";
                         recognitionEnd.TrySetResult(error); // Notify to stop recognition.
                     }
                 };
 
             speechRecognizer.SessionStopped += (object? sender, SessionEventArgs e) =>
                 {
-                    WriteToConsole(String.Format("Session stopped.{0}", Environment.NewLine), userConfig);
+                    WriteToConsole($"Session stopped.{Environment.NewLine}");
                     recognitionEnd.TrySetResult(null); // Notify to stop recognition.
                 };
 
-// Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
+            // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
             await speechRecognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
 
-// Waits for recognition end.
+            // Waits for recognition end.
             Task.WaitAll(new[] { recognitionEnd.Task });
 
-// Stops recognition.
+            // Stops recognition.
             await speechRecognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
             
             return recognitionEnd.Task.Result;
         }
 
-/* Note: To pass command-line arguments, run:
-dotnet run -- [args]
-For example:
-dotnet run -- -h
-*/
-        static void Main(string[] args)
+        // Note: To pass command-line arguments, run:
+        // dotnet run -- [args]
+        // For example:
+        // dotnet run -- -h
+        public static void Main(string[] args)
         {
-            const string usage = @"Usage: caption.exe [-f] [-h] [-i file] [-l languages] [-m] [-o file] [-p phrases] [-q] [-r number] [-s] [-t] [-u] <subscriptionKey> <region>
-              -f: Enable profanity filter (remove profanity). Overrides -m.
-              -h: Show this help and stop.
-              -i: Input audio file *file* (default input is from the microphone.)
-    -l languages: Enable language identification for specified *languages*.
-                  Example: en-US,ja-JP
-              -m: Enable profanity filter (mask profanity). -f overrides this.
-         -o file: Output to *file*.
-      -p phrases: Add specified *phrases*.
-                  Example: Constoso;Jessie;Rehaan
-              -q: Suppress console output (except errors).
-       -r number: Set stable partial result threshold to *number*.
-                  Example: 3
-              -s: Output captions in SRT format (default is WebVTT format.)
-              -t: Enable TrueText.
-              -u: Output partial results. These are always written to the console, never to an output file. -q overrides this.";
-            
             try
             {
                 if (args.Contains("-h"))
@@ -394,19 +335,14 @@ dotnet run -- -h
                 }
                 else
                 {
-                    UserConfig userConfig = UserConfigFromArgs(args);
-                    Initialize(userConfig);
-                    SpeechRecognizer speechRecognizer = SpeechRecognizerFromUserConfig(userConfig);                    
-                    if (RecognizeContinuous(speechRecognizer, userConfig).Result is string error)
+                    Program program = new Program(args);
+                    program.Initialize();
+                    var speechRecognizer = program.SpeechRecognizerFromUserConfig();
+                    if (program.RecognizeContinuous(speechRecognizer).Result is string error)
                     {
                         Console.WriteLine(error);
                     }
                 }
-            }
-            catch(TooFewArguments)
-            {
-                Console.WriteLine("Too few arguments.");
-                Console.WriteLine(usage);
             }
             catch(Exception e)
             {
