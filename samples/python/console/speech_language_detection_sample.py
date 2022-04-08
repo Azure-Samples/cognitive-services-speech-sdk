@@ -156,7 +156,8 @@ def speech_language_detection_once_from_continuous():
                     endOffset = duration + startOffset
                 else:
                     endOffset = 0
-                print("Detected language = " + detectedSrcLang + ", startOffset = " + str(startOffset) + " nanoseconds, endOffset = " + str(endOffset) + " nanoseconds, Duration = " + str(duration) + " nanoseconds.")
+                print("Detected language = " + detectedSrcLang)
+                print("Start offset = " + str(startOffset) + ", End offset = " + str(endOffset) + ", Duration = " + str(duration) + " (in units of hundreds of nanoseconds (HNS))")
                 global language_detected
                 language_detected = True
 
