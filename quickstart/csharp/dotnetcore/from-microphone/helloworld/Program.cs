@@ -9,6 +9,7 @@ using System.IO;
 using System.Threading.Tasks;
 using Microsoft.CognitiveServices.Speech;
 using Microsoft.CognitiveServices.Speech.Audio;
+
 class Program 
 {
     static string YourSubscriptionKey = "YourSubscriptionKey";
