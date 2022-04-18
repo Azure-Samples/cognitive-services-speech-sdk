@@ -16,7 +16,7 @@
         <OutputPath>bin\Release\</OutputPath>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.ServiceBus" Version="4.3.0" />
+        <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.ServiceBus" Version="5.3.0" />
         <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.8">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
