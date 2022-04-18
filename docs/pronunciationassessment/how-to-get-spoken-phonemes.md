@@ -1,4 +1,4 @@
-# How to get phonemes in IPA format
+# How to get spoken phonemes
 
 1. Follow [How to use speech SDK for pronunciation assessment](https://docs.microsoft.com/azure/cognitive-services/speech-service/how-to-pronunciation-assessment) to learn the basic usage of Pronunciation Assessment API.
 
