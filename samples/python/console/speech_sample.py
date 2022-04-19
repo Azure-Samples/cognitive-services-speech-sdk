@@ -132,7 +132,7 @@ def speech_recognize_once_from_file_with_detailed_recognition_results():
         # Now get the detailed recognition results from the JSON
         json_result = json.loads(result.json)
 
-        # The first cell in the NBest list corresponds to the recognition results 
+        # The first cell in the NBest list corresponds to the recognition results
         # (NOT the cell with the highest confidence number!)
         print("Detailed results - Lexical: {}".format(json_result['NBest'][0]['Lexical']))
         # ITN stands for Inverse Text Normalization
@@ -518,8 +518,6 @@ def speech_recognition_with_push_stream():
             time.sleep(.1)
     finally:
         # stop recognition and clean up
-        wav_fh.close()
-        stream.close()
         speech_recognizer.stop_continuous_recognition()
 
 def speech_recognize_once_with_auto_language_detection_from_mic():
@@ -641,11 +639,13 @@ def speech_recognize_keyword_locally_from_microphone():
 
 
 def pronunciation_assessment_from_microphone():
-    """"performs one-shot pronunciation assessment asynchronously with input from microphone."""
+    """"
+    Performs one-shot pronunciation assessment asynchronously with input from microphone.
+    See more information at https://aka.ms/csspeech/pa
+    """
 
     # Creates an instance of a speech config with specified subscription key and service region.
     # Replace with your own subscription key and service region (e.g., "westus").
-    # Note: The pronunciation assessment feature is currently only available on en-US language.
     config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
 
     # The pronunciation assessment service has a longer default end silence timeout (5 seconds) than normal STT
@@ -660,7 +660,8 @@ def pronunciation_assessment_from_microphone():
                                                                    granularity=speechsdk.PronunciationAssessmentGranularity.Phoneme,
                                                                    enable_miscue=True)
 
-    recognizer = speechsdk.SpeechRecognizer(speech_config=config)
+    # Creates a speech recognizer, also specify the speech language
+    recognizer = speechsdk.SpeechRecognizer(speech_config=config, language="en-US")
     while True:
         # Receives reference text from console input.
         print('Enter reference text you want to assess, or enter empty text to exit.')
@@ -707,7 +708,10 @@ def pronunciation_assessment_from_microphone():
 
 
 def pronunciation_assessment_continuous_from_file():
-    """performs continuous speech recognition asynchronously with input from an audio file"""
+    """
+    Performs continuous speech recognition asynchronously with input from an audio file
+    See more information at https://aka.ms/csspeech/pa
+    """
 
     import difflib
     import json

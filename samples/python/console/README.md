@@ -1,10 +1,10 @@
 # Python console app
 
-This sample demonstrates various forms of speech recognition, intent recognition, speech synthesis, and translation using the Speech SDK for Python.
+This sample demonstrates various forms of speech recognition, intent recognition, speech synthesis, translation and transcription using the Speech SDK for Python.
 
 ## Prerequisites
 
-* On Windows and Linux Python 3.6 or later needs to be installed. On Mac, minimum version for Python is 3.7. Downloads are available [here](https://www.python.org/downloads/).
+* On Windows and Linux Python 3.7 or later needs to be installed. Downloads are available [here](https://www.python.org/downloads/).
 * The Python Speech SDK package is available for Windows (x64 and x86), Mac x64 (macOS X version 10.14 or later), Mac arm64 (macOS version 11.0 or later), and Linux (see the list of [supported Linux distributions and target architectures](https://docs.microsoft.com/azure/cognitive-services/speech-service/speech-sdk?tabs=linux)).
 * On Ubuntu or Debian, run the following commands for the installation of required packages:
   ```sh
@@ -34,6 +34,10 @@ This sample demonstrates various forms of speech recognition, intent recognition
   pip install azure-cognitiveservices-speech
   ```
   in a terminal.
+* For transcription sample, install the Scipy package in your Python interpreter by executing the command
+  ```sh
+  pip install scipy
+  ```
 * [Download the sample code to your development PC.](/README.md#get-the-samples)
 * To tailor the sample to your configuration, use search and replace across the whole sample directory to update the following strings:
 
