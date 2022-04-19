@@ -55,6 +55,10 @@ public class Main {
         System.out.println("38. Pronunciation assessment with microphone input.");
         System.out.println("39. Pronunciation assessment with stream input.");
         System.out.println("40. Speech synthesis to audio and SRT files.");
+        System.out.println("41. Recognize once from file, with at-start language detection.");
+        System.out.println("42. Continuous speech recognition from file, with at-start language detection.");
+        System.out.println("43. Continuous speech recognition from file, with at-start language detection with custom model.");
+        System.out.println("44. Continuous speech recognition from file, with continuous language detection with custom models.");
 
         System.out.print(prompt);
 
@@ -182,7 +186,19 @@ public class Main {
                     SpeechRecognitionSamples.pronunciationAssessmentWithPushStream();
                     break;
                 case "40":
-                SpeechSynthesisSamples.synthesisWordBoundaryEventToSrtAsync();
+                    SpeechSynthesisSamples.synthesisWordBoundaryEventToSrtAsync();
+                    break;
+                case "41":
+                    SpeechRecognitionSamples.recognizeOnceFromFileWithAtStartLanguageDetection();
+                    break;
+                case "42":
+                    SpeechRecognitionSamples.continuousRecognitionFromFileWithAtStartLanguageDetection();
+                    break;
+                case "43":
+                    SpeechRecognitionSamples.continuousRecognitionFromFileWithAtStartLanguageDetectionWithCustomModels();
+                    break;
+                case "44":
+                    SpeechRecognitionSamples.continuousRecognitionFromFileWithContinuousLanguageDetectionWithCustomModels();
                     break;
                 case "0":
                     System.out.println("Exiting...");

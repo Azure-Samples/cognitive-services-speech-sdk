@@ -26,6 +26,7 @@ extern void IntentRecognitionWithMicrophone();
 extern void IntentRecognitionWithPatternMatchingAndMicrophone();
 extern void IntentRecognitionWithLanguage();
 extern void IntentContinuousRecognitionWithFile();
+extern void IntentPatternMatchingWithMicrophoneAndKeywordSpotting();
 
 extern void TranslationWithMicrophone();
 extern void TranslationContinuousRecognition();
@@ -192,6 +193,7 @@ void IntentSamples()
         cout << "2.) Intent recognition in the specified language.\n";
         cout << "3.) Intent continuous recognition with file input.\n";
         cout << "4.) Intent recognition from default microphone and pattern matching.\n";
+        cout << "5.) Intent recognition with keyword spotting from default microphone and pattern matching.\n";
         cout << "\nChoice (0 for MAIN MENU): ";
         cout.flush();
 
@@ -211,6 +213,9 @@ void IntentSamples()
             break;
         case '4':
             IntentRecognitionWithPatternMatchingAndMicrophone();
+            break;
+        case '5':
+            IntentPatternMatchingWithMicrophoneAndKeywordSpotting();
             break;
         case '0':
             break;
