@@ -107,7 +107,7 @@ def speech_language_detection_once_from_file():
         print("No speech could be recognized: {}".format(result.no_match_details))
     elif result.reason == speechsdk.ResultReason.Canceled:
         cancellation_details = result.cancellation_details
-        print("Speech Langauge Detection canceled: {}".format(cancellation_details.reason))
+        print("Speech Language Detection canceled: {}".format(cancellation_details.reason))
         if cancellation_details.reason == speechsdk.CancellationReason.Error:
             print("Error details: {}".format(cancellation_details.error_details))
     # </SpeechLanguageDetectionWithFile>

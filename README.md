@@ -168,6 +168,13 @@ Samples for using the Speech Service REST API (no Speech SDK installation requir
 | ---                                     | --- |
 | [Batch transcription](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/batch/)  | Demonstrates usage of batch transcription from different programming languages |
 
+## Tools
+
+| Tool | Platform | Description |
+| ---- | -------- | ----------- |
+| Enumerate audio devices | C++, Windows | Shows how to get the Device ID of all connected microphones and loudspeakers. Device ID is required if you want to listen via non-default microphone (Speech Recognition), or play to a non-default loudspeaker (Text-To-Speech) using Speech SDK |
+| Enumerate audio devices | C# .NET Framework, Windows | -"- |
+
 ## Sample data for Custom Speech
 - [Sample data for Custom Speech](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/sampledata/customspeech)
 

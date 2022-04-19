@@ -776,7 +776,7 @@
         NSUInteger wordCount = [words count];
         sumAccuracy += pronunciationResult.accuracyScore * wordCount;
         sumFluency += pronunciationResult.fluencyScore * wordCount;
-        sumWords +=  wordCount;
+        sumWords += wordCount;
     }];
 
     __block bool end = false;
