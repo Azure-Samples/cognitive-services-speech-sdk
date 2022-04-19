@@ -109,7 +109,7 @@ void SpeechRecognitionWithLanguageAndUsingDetailedOutputFormat()
         // (NOT the cell with the highest confidence number!)
         auto jsonResult = nlohmann::json::parse(jsonString);
         auto nbestArray = jsonResult["NBest"];
-        for (int i = 0; i < nbestArray.size(); i++)
+        for (size_t i = 0; i < nbestArray.size(); i++)
         {
             auto nbestItem = nbestArray[i];
             cout << "\tConfidence: " << nbestItem["Confidence"] << std::endl;
@@ -121,7 +121,7 @@ void SpeechRecognitionWithLanguageAndUsingDetailedOutputFormat()
             // Word-level timing
             auto wordsArray = nbestItem["Words"];
             cout << "\t\tWord | Offset | Duration" << std::endl;
-            for (int j = 0; j < wordsArray.size(); j++)
+            for (size_t j = 0; j < wordsArray.size(); j++)
             {
                 auto wordItem = wordsArray[j];
                 cout << "\t\t" << wordItem["Word"] << " " << wordItem["Offset"] << " " << wordItem["Duration"] << std::endl;

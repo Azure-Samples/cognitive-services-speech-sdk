@@ -6,6 +6,7 @@ package com.microsoft.cognitiveservices.speech.samples.sdkdemo;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.text.method.ScrollingMovementMethod;
@@ -24,6 +25,7 @@ import com.microsoft.cognitiveservices.speech.PronunciationAssessmentGradingSyst
 import com.microsoft.cognitiveservices.speech.PronunciationAssessmentGranularity;
 import com.microsoft.cognitiveservices.speech.PronunciationAssessmentResult;
 import com.microsoft.cognitiveservices.speech.PropertyId;
+import com.microsoft.cognitiveservices.speech.WordLevelTimingResult;
 import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.ResultReason;
 import com.microsoft.cognitiveservices.speech.intent.LanguageUnderstandingModel;
@@ -89,13 +91,16 @@ public class MainActivity extends AppCompatActivity {
 
     private MicrophoneStream microphoneStream;
     private MicrophoneStream createMicrophoneStream() {
+        this.releaseMicrophoneStream();
+
+        microphoneStream = new MicrophoneStream();
+        return microphoneStream;
+    }
+    private void releaseMicrophoneStream() {
         if (microphoneStream != null) {
             microphoneStream.close();
             microphoneStream = null;
         }
-
-        microphoneStream = new MicrophoneStream();
-        return microphoneStream;
     }
 
     @Override
@@ -438,8 +443,8 @@ public class MainActivity extends AppCompatActivity {
 
                 ArrayList<String> recognizedWords = new ArrayList<>();
                 ArrayList<Word> pronWords = new ArrayList<>();
-                int[] totalDurations = new int[2]; // duration, valid duration
-                int[] offsets = new int[2]; // start offset, end offset
+                long[] totalDurations = new long[2]; // duration, valid duration
+                long[] offsets = new long[2]; // start offset, end offset
                 double[] totalAccuracyScore = new double[1];
                 reco.recognized.addEventListener((o, speechRecognitionResultEventArgs) -> {
                     final String s = speechRecognitionResultEventArgs.getResult().getText();
@@ -450,29 +455,21 @@ public class MainActivity extends AppCompatActivity {
                         ", completeness score: " + pronResult.getCompletenessScore() +
                         ", fluency score: " + pronResult.getFluencyScore());
                     String jString = speechRecognitionResultEventArgs.getResult().getProperties().getProperty(PropertyId.SpeechServiceResponse_JsonResult);
-                    try {
-                        JSONObject json = new JSONObject(jString);
-                        JSONArray currentWords = json.getJSONArray("NBest").getJSONObject(0).getJSONArray("Words");
-                        for (int j = 0; j < currentWords.length(); j++) {
-                            JSONObject w = currentWords.getJSONObject(j);
-                            JSONObject pron = w.getJSONObject("PronunciationAssessment");
-                            Word word = new Word(w.getString("Word"),
-                                pron.getString("ErrorType"),
-                                pron.getDouble("AccuracyScore"),
-                                w.getInt("Duration"),
-                                w.getInt("Offset"));
-                            pronWords.add(word);
-                            recognizedWords.add(word.word);
-                            totalAccuracyScore[0] += word.duration * word.accuracyScore;
-                            totalDurations[0] += word.duration;
-                            if (word.errorType != null && word.errorType.equals("None")) {
-                                totalDurations[1] += word.duration + 100000;
-                            }
-                            offsets[1] = word.offset + word.duration + 100000;
+
+                    for (WordLevelTimingResult w: pronResult.getWords()) {
+                        Word word = new Word(w.getWord(),
+                            w.getErrorType(),
+                            w.getAccuracyScore(),
+                            w.getDuration() / 10000, // The time unit is ticks (100ns); convert it to milliseconds
+                            w.getOffset() / 10000); // Same as above
+                        pronWords.add(word);
+                        recognizedWords.add(word.word);
+                        totalAccuracyScore[0] += word.duration * word.accuracyScore;
+                        totalDurations[0] += word.duration;
+                        if (word.errorType != null && word.errorType.equals("None")) {
+                            totalDurations[1] += word.duration + 10;
                         }
-                    } catch (JSONException e) {
-                        System.out.println(e.getMessage());
-                        displayException(e);
+                        offsets[1] = word.offset + word.duration + 10;
                     }
                 });
 
@@ -550,12 +547,26 @@ public class MainActivity extends AppCompatActivity {
         pronunciationAssessmentFromStreamButton.setOnClickListener(view -> {
             final String logTag = "pron";
 
+            if (this.microphoneStream != null) {
+                /*
+                 The pronunciation assessment service has a longer default end silence timeout (5 seconds) than normal STT
+                 as the pronunciation assessment is widely used in education scenario where kids have longer break in reading.
+                 You can explicitly stop the recording stream to stop assessment and the service will return the results immediately
+                 */
+                this.releaseMicrophoneStream();
+                return;
+            }
+
             disableButtons();
+            this.pronunciationAssessmentFromStreamButton.setEnabled(true);
+            this.pronunciationAssessmentFromStreamButton.setText("Stop recording");
             clearTextBox();
             try {
+                 createMicrophoneStream();
                 final AudioConfig audioConfig = AudioConfig.fromStreamInput(createMicrophoneStream());
                 final SpeechRecognizer reco = new SpeechRecognizer(speechConfig, audioConfig);
 
+                // Replace this referenceText to match your input.
                 String referenceText =  "Today is a nice day.";
                 PronunciationAssessmentConfig pronConfig =
                     new PronunciationAssessmentConfig(referenceText,
@@ -578,7 +589,9 @@ public class MainActivity extends AppCompatActivity {
                     Log.i(logTag, "Session stopped.");
                     reco.stopContinuousRecognitionAsync();
 
+                    this.releaseMicrophoneStream();
                     enableButtons();
+                    this.pronunciationAssessmentFromStreamButton.setText("Pronunciation Assessment From Stream");
                 });
 
                 reco.recognizeOnceAsync();
@@ -678,14 +691,14 @@ public class MainActivity extends AppCompatActivity {
         public String word;
         public String errorType;
         public double accuracyScore;
-        public int duration;
-        public int offset;
+        public long duration;
+        public long offset;
         public Word(String word, String errorType) {
             this.word = word;
             this.errorType = errorType;
         }
 
-        public Word(String word, String errorType, double accuracyScore, int duration, int offset) {
+        public Word(String word, String errorType, double accuracyScore, long duration, long offset) {
             this(word, errorType);
             this.accuracyScore = accuracyScore;
             this.duration = duration;

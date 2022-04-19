@@ -16,6 +16,7 @@ using UnityEngine.Android;
 #endif
 using IntentRecognitionResults;
 using TinyJson;
+using Debug = UnityEngine.Debug;
 
 /// <summary>
 /// The IntentRecognition class lets the user dictate voice commands via speech recognition and
@@ -122,10 +123,10 @@ public class IntentRecognition : MonoBehaviour {
             recognizedString = "You forgot to obtain Cognitive Services LUIS credentials and inserting them in this app." + Environment.NewLine +
                                "See the README file and/or the instructions in the Awake() function for more info before proceeding.";
             errorString = "ERROR: Missing service credentials";
-            UnityEngine.Debug.LogFormat(errorString);
+            Debug.LogError(errorString);
             return;
         }
-        UnityEngine.Debug.LogFormat("Creating Intent Recognizer.");
+        Debug.Log("Creating Intent Recognizer.");
         recognizedString = "Initializing intent recognition, please wait...";
 
         if (intentreco == null)
@@ -158,7 +159,7 @@ public class IntentRecognition : MonoBehaviour {
             intentreco.SessionStarted += SessionStartedHandler;
             intentreco.SessionStopped += SessionStoppedHandler;
         }
-        UnityEngine.Debug.LogFormat("CreateIntentRecognizer exit");
+        Debug.Log("CreateIntentRecognizer exit");
     }
 
     /// <summary>
@@ -170,52 +171,52 @@ public class IntentRecognition : MonoBehaviour {
         {
             errorString = "One or more LUIS subscription parameters are missing. Check your values and try again.";
             return;
-        } 
+        }
 
-        UnityEngine.Debug.LogFormat("Starting Continuous Intent Recognition.");
+        Debug.Log("Starting Continuous Intent Recognition.");
         CreateIntentRecognizer();
 
         if (intentreco != null)
         {
-            UnityEngine.Debug.LogFormat("Starting Intent Recognizer.");
+            Debug.Log("Starting Intent Recognizer.");
 
             // Starts continuous intent recognition.
             await intentreco.StartContinuousRecognitionAsync().ConfigureAwait(false);
 
             recognizedString = "Intent Recognizer is now running.";
-            UnityEngine.Debug.LogFormat("Intent Recognizer is now running.");
+            Debug.Log("Intent Recognizer is now running.");
         }
-        UnityEngine.Debug.LogFormat("Start Continuous Intent Recognition exit");
+        Debug.Log("Start Continuous Intent Recognition exit");
     }
 
     #region Intent Recognition Event Handlers
     private void SessionStartedHandler(object sender, SessionEventArgs e)
     {
-        UnityEngine.Debug.LogFormat($"\n    Session started event. Event: {e.ToString()}.");
+        Debug.Log($"\n    Session started event. Event: {e.ToString()}.");
     }
 
     private void SessionStoppedHandler(object sender, SessionEventArgs e)
     {
-        UnityEngine.Debug.LogFormat($"\n    Session event. Event: {e.ToString()}.");
-        UnityEngine.Debug.LogFormat($"Session Stop detected. Stop the recognition.");
+        Debug.Log($"\n    Session event. Event: {e.ToString()}.");
+        Debug.Log($"Session Stop detected. Stop the recognition.");
     }
 
     private void SpeechStartDetectedHandler(object sender, RecognitionEventArgs e)
     {
-        UnityEngine.Debug.LogFormat($"SpeechStartDetected received: offset: {e.Offset}.");
+        Debug.Log($"SpeechStartDetected received: offset: {e.Offset}.");
     }
 
     private void SpeechEndDetectedHandler(object sender, RecognitionEventArgs e)
     {
-        UnityEngine.Debug.LogFormat($"SpeechEndDetected received: offset: {e.Offset}.");
-        UnityEngine.Debug.LogFormat($"Speech end detected.");
+        Debug.Log($"SpeechEndDetected received: offset: {e.Offset}.");
+        Debug.Log($"Speech end detected.");
     }
 
     private void RecognizingHandler(object sender, IntentRecognitionEventArgs e)
     {
         if (e.Result.Reason == ResultReason.RecognizingSpeech)
         {
-            UnityEngine.Debug.LogFormat($"HYPOTHESIS: Text={e.Result.Text}");
+            Debug.Log($"HYPOTHESIS: Text={e.Result.Text}");
             lock (threadLocker)
             {
                 recognizedString = $"HYPOTHESIS: {Environment.NewLine}{e.Result.Text}";
@@ -228,7 +229,7 @@ public class IntentRecognition : MonoBehaviour {
         if (e.Result.Reason == ResultReason.RecognizedIntent)
         {
             //Console.WriteLine($"    Language Understanding JSON: {e.Result.Properties.GetProperty(PropertyId.LanguageUnderstandingServiceResponse_JsonResult)}.");
-            UnityEngine.Debug.LogFormat($"RECOGNIZED: Intent={e.Result.IntentId} Text={e.Result.Text}");
+            Debug.Log($"RECOGNIZED: Intent={e.Result.IntentId} Text={e.Result.Text}");
             lock (threadLocker)
             {
                 recognizedString = $"RESULT: Intent={e.Result.IntentId}";
@@ -256,7 +257,7 @@ public class IntentRecognition : MonoBehaviour {
         }
         if (e.Result.Reason == ResultReason.RecognizedSpeech)
         {
-            UnityEngine.Debug.LogFormat($"RECOGNIZED: Text={e.Result.Text}");
+            Debug.Log($"RECOGNIZED: Text={e.Result.Text}");
             lock (threadLocker)
             {
                 recognizedString = $"RESULT: {Environment.NewLine}{e.Result.Text}";
@@ -264,19 +265,19 @@ public class IntentRecognition : MonoBehaviour {
         }
         else if (e.Result.Reason == ResultReason.NoMatch)
         {
-            UnityEngine.Debug.LogFormat($"NOMATCH: Speech could not be recognized.");
+            Debug.Log($"NOMATCH: Speech could not be recognized.");
         }
     }
 
     private void CanceledHandler(object sender, IntentRecognitionCanceledEventArgs e)
     {
-        UnityEngine.Debug.LogFormat($"CANCELED: Reason={e.Reason}");
+        Debug.Log($"CANCELED: Reason={e.Reason}");
 
         errorString = e.ToString();
         if (e.Reason == CancellationReason.Error)
         {
-            UnityEngine.Debug.LogFormat($"CANCELED: ErrorDetails={e.ErrorDetails}");
-            UnityEngine.Debug.LogFormat($"CANCELED: Did you update the subscription info?");
+            Debug.LogError($"CANCELED: ErrorDetails={e.ErrorDetails}");
+            Debug.LogError("CANCELED: Did you update the subscription info?");
         }
     }
     #endregion
@@ -326,7 +327,7 @@ public class IntentRecognition : MonoBehaviour {
             intentreco.Dispose();
             intentreco = null;
             recognizedString = "Intent Recognizer is now stopped.";
-            UnityEngine.Debug.LogFormat("Intent Recognizer is now stopped.");
+            Debug.Log("Intent Recognizer is now stopped.");
         }
     }
 

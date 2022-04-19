@@ -29,9 +29,29 @@
                 </Grid.RowDefinitions>
                 <TextBlock Grid.Row="0" Grid.Column="0" Text="Settings:" Margin="0,10,0,0" Width="326" FontSize="20"/>
                 <ComboBox Margin="0,0,10,0" Grid.Row="2" Grid.Column="0" HorizontalAlignment="Left" SelectedValuePath="Tag" SelectedIndex="0" Width="150"  Name="RegionComboBox" SelectionChanged="RegionCombox_SelectionChanged" >
-                    <ComboBoxItem Tag="westus" IsSelected="true" >westus</ComboBoxItem>
+                    <!-- Get full list of text-to-speech supported regions from https://docs.microsoft.com/azure/cognitive-services/speech-service/regions#speech-to-text-text-to-speech-and-translation -->
+                    <ComboBoxItem Tag="centralus">centralus</ComboBoxItem>
+                    <ComboBoxItem Tag="eastus">eastus</ComboBoxItem>
+                    <ComboBoxItem Tag="eastus2">eastus2</ComboBoxItem>
+                    <ComboBoxItem Tag="northcentralus">northcentralus</ComboBoxItem>
+                    <ComboBoxItem Tag="southcentralus">southcentralus</ComboBoxItem>
+                    <ComboBoxItem Tag="westcentralus">westcentralus</ComboBoxItem>
+                    <ComboBoxItem Tag="westus" IsSelected="true">westus</ComboBoxItem>
+                    <ComboBoxItem Tag="westus2">westus2</ComboBoxItem>
+                    <ComboBoxItem Tag="canadacentral">canadacentral</ComboBoxItem>
+                    <ComboBoxItem Tag="brazilsouth">brazilsouth</ComboBoxItem>
                     <ComboBoxItem Tag="eastasia">eastasia</ComboBoxItem>
+                    <ComboBoxItem Tag="southeastasia">southeastasia</ComboBoxItem>
+                    <ComboBoxItem Tag="australiaeast">australiaeast</ComboBoxItem>
+                    <ComboBoxItem Tag="centralindia">centralindia</ComboBoxItem>
+                    <ComboBoxItem Tag="japaneast">japaneast</ComboBoxItem>
+                    <ComboBoxItem Tag="japanwest">japanwest</ComboBoxItem>
+                    <ComboBoxItem Tag="koreacentral">koreacentral</ComboBoxItem>
                     <ComboBoxItem Tag="northeurope">northeurope</ComboBoxItem>
+                    <ComboBoxItem Tag="westeurope">westeurope</ComboBoxItem>
+                    <ComboBoxItem Tag="francecentral">francecentral</ComboBoxItem>
+                    <ComboBoxItem Tag="switzerlandnorth">switzerlandnorth</ComboBoxItem>
+                    <ComboBoxItem Tag="uksouth">uksouth</ComboBoxItem>
                 </ComboBox>
                 <ComboBox Margin="0,0,10,0" Grid.Row="2" Grid.Column="1" HorizontalAlignment="Left" SelectedValuePath="Tag" SelectedIndex="0" Width="150"  Name="LanguageComboBox" SelectionChanged="LanguageCombox_SelectionChanged" >
                     <ComboBoxItem Tag="ar-EG">ar-EG</ComboBoxItem>

@@ -152,7 +152,7 @@ The following samples demonstrate additional capabilities of the Speech SDK, suc
 | [Speech-to-text UWP sample](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/csharp/uwp/speechtotext-uwp)                                          | Windows  | Demonstrates speech recognition |
 | [Text-to-speech UWP sample](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/csharp/uwp/texttospeech-uwp)                                          | Windows  | Demonstrates speech synthesis |
 | [Speech recognition sample for Android](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/java/android/sdkdemo/)                                     | Android  | Demonstrates speech and intent recognition |
-| [Speech recognition and translation sample for the browser, using JavaScript](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/js/browser/)         | Web      | Demonstrates speech recognition, intent recognition, and translation |
+| [Speech recognition, synthesis, and translation sample for the browser, using JavaScript](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/js/browser/)         | Web      | Demonstrates speech recognition, intent recognition, and translation |
 | [Speech recognition and translation sample using JavaScript and Node.js](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/js/node)                 | Node.js  | Demonstrates speech recognition, intent recognition, and translation |
 | [Speech recognition sample for iOS using a connection object](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/objective-c/ios)  | iOS      | Demonstrates speech recognition |
 | [Extended speech recognition sample for iOS](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/objective-c/ios)           | iOS      | Demonstrates speech recognition using streams etc.|
@@ -167,6 +167,13 @@ Samples for using the Speech Service REST API (no Speech SDK installation requir
 | Sample                                  | Description |
 | ---                                     | --- |
 | [Batch transcription](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/batch/)  | Demonstrates usage of batch transcription from different programming languages |
+
+## Tools
+
+| Tool | Platform | Description |
+| ---- | -------- | ----------- |
+| Enumerate audio devices | C++, Windows | Shows how to get the Device ID of all connected microphones and loudspeakers. Device ID is required if you want to listen via non-default microphone (Speech Recognition), or play to a non-default loudspeaker (Text-To-Speech) using Speech SDK |
+| Enumerate audio devices | C# .NET Framework, Windows | -"- |
 
 ## Sample data for Custom Speech
 - [Sample data for Custom Speech](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/sampledata/customspeech)

@@ -91,7 +91,7 @@ namespace MicrosoftSpeechSDKSamples
 
             // Creates an instance of AutoDetectSourceLanguageConfig with the 2 source language candidates
             // Currently this feature only supports 2 different language candidates
-            // Replace the languages to be the language candidates for your speech. Please see https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support for all supported langauges
+            // Replace the languages to be the language candidates for your speech. Please see https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support for all supported languages
             var autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig.FromLanguages(new string[] { "en-US", "zh-CN" });
 
             var stopRecognition = new TaskCompletionSource<int>();
