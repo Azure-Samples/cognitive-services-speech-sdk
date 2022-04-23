@@ -8,9 +8,13 @@
 // dotnet add package Microsoft.CognitiveServices.Speech
 // - The Speech SDK on Windows requires the Microsoft Visual C++ Redistributable for Visual Studio 2019 on the system. See:
 // https://docs.microsoft.com/azure/cognitive-services/speech-service/speech-sdk
+// - Install gstreamer:
+// https://docs.microsoft.com/azure/cognitive-services/speech-service/how-to-use-codec-compressed-audio-input-streams
 using Microsoft.CognitiveServices.Speech;
 using Microsoft.CognitiveServices.Speech.Audio;
+
 using System;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,7 +24,10 @@ namespace Captioning
     class Program
     {
         private UserConfig userConfig;
-        private const string usage = @"Usage: caption.exe [-f] [-h] [-i path] [-l languages] [-m] [-o path] [-p phrases] [-q] [-r number] [-s] [-t] [-u] <subscriptionKey> <region>
+        private const string usage = @"Usage: caption.exe [-c ALAW|ANY|FLAC|MP3|MULAW|OGG_OPUS] [-f] [-h] [-i path] [-l languages] [-m] [-o path] [-p phrases] [-q] [-s] [-t number] [-u] <subscriptionKey> <region>
+       -c format: Use compressed audio format.
+                  Valid values: ALAW, ANY, FLAC, MP3, MULAW, OGG_OPUS.
+                  Default value: ANY.
               -f: Remove profanity (default behavior is to mask profanity). Overrides -m.
               -h: Show this help and stop.
          -i path: Input audio file *path* (default input is from the microphone.)
@@ -31,10 +38,9 @@ namespace Captioning
       -p phrases: Add specified *phrases*.
                   Example: Constoso;Jessie;Rehaan
               -q: Suppress console output (except errors).
-       -r number: Set stable partial result threshold to *number*.
-                  Example: 3
               -s: Output captions in SubRip Text format (default is WebVTT format.)
-              -t: Enable TrueText.
+       -t number: Set stable partial result threshold to *number*.
+                  Example: 3
               -u: Output Recognizing results (default is Recognized results only). These are always written to the console, never to an output file. -q overrides this.";
         
         private static string? GetCmdOption(string[] args, string option)
@@ -53,6 +59,27 @@ namespace Captioning
         private static bool CmdOptionExists(string[] args, string option)
         {
             return args.Contains (option);
+        }
+
+        private static AudioStreamContainerFormat GetCompressedAudioFormat(string[] args)
+        {
+            var value = GetCmdOption(args, "-c");
+            if (null == value)
+            {
+                return AudioStreamContainerFormat.ANY;
+            }
+            else
+            {
+                switch (value.ToLower())
+                {
+                    case "alaw" : return AudioStreamContainerFormat.ALAW;
+                    case "flac" : return AudioStreamContainerFormat.FLAC;
+                    case "mp3" : return AudioStreamContainerFormat.MP3;
+                    case "mulaw" : return AudioStreamContainerFormat.MULAW;
+                    case "ogg_opus" : return AudioStreamContainerFormat.OGG_OPUS;
+                    default : return AudioStreamContainerFormat.ANY;
+                }
+            }
         }
 
         private static string V2EndpointFromRegion(string region)
@@ -133,6 +160,7 @@ namespace Captioning
             }
             
             this.userConfig = new UserConfig(
+                GetCompressedAudioFormat(args),
                 CmdOptionExists(args, "-f"),
                 CmdOptionExists(args, "-m"),
                 languageIDLanguages,
@@ -141,9 +169,8 @@ namespace Captioning
                 GetCmdOption(args, "-p"),
                 CmdOptionExists(args, "-q"),
                 CmdOptionExists(args, "-u"),
-                GetCmdOption(args, "-r"),
                 CmdOptionExists(args, "-s"),
-                CmdOptionExists(args, "-t"),
+                GetCmdOption(args, "-t"),
                 args[args.Length - 2],
                 args[args.Length - 1]
             );
@@ -168,7 +195,17 @@ namespace Captioning
         {
             if (this.userConfig.inputFilePath is string inputFilePathValue)
             {
-                return AudioConfig.FromWavFileInput(inputFilePathValue);
+                if (inputFilePathValue.EndsWith(".wav"))
+                {
+                    return Helper.OpenWavFile(inputFilePathValue, AudioProcessingOptions.Create(0));
+                }
+                else
+                {
+                    var reader = new BinaryReader(File.OpenRead(inputFilePathValue));
+                    var format = AudioStreamFormat.GetCompressedFormat(userConfig.compressedAudioFormat);
+                    var stream = new PullAudioInputStream(new BinaryAudioStreamReader(reader), format);
+                    return AudioConfig.FromStreamInput(stream);
+                }
             }
             else
             {
@@ -206,10 +243,7 @@ namespace Captioning
                 speechConfig.SetProperty(PropertyId.SpeechServiceResponse_StablePartialResultThreshold, stablePartialResultThresholdValue);
             }
             
-            if (this.userConfig.useTrueText)
-            {
-                speechConfig.SetProperty(PropertyId.SpeechServiceResponse_PostProcessingOption, "TrueText");
-            }
+            speechConfig.SetProperty(PropertyId.SpeechServiceResponse_PostProcessingOption, "TrueText");
             
             return speechConfig;
         }
