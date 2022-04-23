@@ -3,10 +3,14 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
+using Microsoft.CognitiveServices.Speech.Audio;
+
 namespace Captioning
 {
     public class UserConfig
     {
+        /// Compressed audio format for input audio. Default is Any.
+        readonly public AudioStreamContainerFormat compressedAudioFormat = AudioStreamContainerFormat.ANY;
         /// True to remove profanity. Default is to mask it. If true, this overrides disableMaskingProfanity.
         readonly public bool removeProfanity = false;
         /// True to not mask profanity. Default is to mask it. If removeProfanity is true, it overrides this setting.
@@ -29,19 +33,18 @@ namespace Captioning
         /// Recognizing results are always written to the console, never to an output file.
         /// If suppressConsoleOutput is true, it overrides this setting.
         readonly public bool showRecognizingResults = false;
+        /// Output captions in SubRip Text format (default is WebVTT format).
+        readonly public bool useSubRipTextCaptionFormat = false;
         /// Set the stable partial result threshold on the Speech service. This setting value must contain an integer.
         /// Example: 3
         readonly public string? stablePartialResultThreshold;
-        /// Output captions in SubRip Text format (default is WebVTT format).
-        readonly public bool useSubRipTextCaptionFormat = false;
-        /// Enable the TrueText setting on the Speech service.
-        readonly public bool useTrueText = false;
         /// The subscription key for your Speech service subscription.
         readonly public string subscriptionKey;
         /// The region for your Speech service subscription.
         readonly public string region;
         
         public UserConfig (
+            AudioStreamContainerFormat compressedAudioFormat,
             bool removeProfanity,
             bool disableMaskingProfanity,
             string[]? languageIDLanguages,
@@ -50,13 +53,13 @@ namespace Captioning
             string? phraseList,
             bool suppressConsoleOutput,
             bool showRecognizingResults,
-            string? stablePartialResultThreshold,
             bool useSubRipTextCaptionFormat,
-            bool useTrueText,
+            string? stablePartialResultThreshold,
             string subscriptionKey,
             string region
             )
         {
+            this.compressedAudioFormat = compressedAudioFormat;
             this.removeProfanity = removeProfanity;
             this.disableMaskingProfanity = disableMaskingProfanity;
             this.languageIDLanguages = languageIDLanguages;
@@ -65,9 +68,8 @@ namespace Captioning
             this.phraseList = phraseList;
             this.suppressConsoleOutput = suppressConsoleOutput;
             this.showRecognizingResults = showRecognizingResults;
-            this.stablePartialResultThreshold = stablePartialResultThreshold;
             this.useSubRipTextCaptionFormat = useSubRipTextCaptionFormat;
-            this.useTrueText = useTrueText;
+            this.stablePartialResultThreshold = stablePartialResultThreshold;
             this.subscriptionKey = subscriptionKey;
             this.region = region;
         }
