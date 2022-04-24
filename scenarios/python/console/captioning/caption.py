@@ -86,21 +86,17 @@ def audio_config_from_user_config(user_config : helper.Read_Only_Dict) -> tuple[
     if user_config["input_file"] is None :
         return speechsdk.AudioConfig(use_default_microphone = True)
     else :
-        if user_config["input_file"].endswith(".wav") :
-            callback = helper.WavFileReaderCallback(filename=user_config["input_file"])
-            format = speechsdk.audio.AudioStreamFormat(samples_per_second=callback.samples_per_second, bits_per_sample=callback.bytes_per_sample * 8, channels=callback.channels)
-# TODO1 TEMP
-            print("Samples per second: {}".format (callback.samples_per_second))
-            print("Bytes per sample: {}".format (callback.bytes_per_sample))
-            print("Channels: {}".format (callback.channels))
-            stream = speechsdk.audio.PullAudioInputStream(pull_stream_callback = callback, stream_format = format)
-# TODO1 Need to return callback, format, stream to keep them in scope.
-            return speechsdk.audio.AudioConfig(stream=stream), callback, format, stream
+        format = None
+        if user_config["input_file"].endswith(".wav") :        
+            reader = wave.open(user_config["input_file"], mode=None)
+            format = speechsdk.audio.AudioStreamFormat(samples_per_second=reader.getframerate(), bits_per_sample=reader.getsampwidth() * 8, channels=reader.getnchannels())
+            reader.close()        
         else :
-            callback = helper.BinaryFileReaderCallback(filename=user_config["input_file"])
             format = speechsdk.audio.AudioStreamFormat(compressed_stream_format=user_config["compressed_audio_format"])
-            stream = speechsdk.audio.PullAudioInputStream(stream_format=format, pull_stream_callback=callback)
-            return speechsdk.audio.AudioConfig(stream=stream), callback, format, stream
+        callback = helper.BinaryFileReaderCallback(filename=user_config["input_file"])
+        stream = speechsdk.audio.PullAudioInputStream(pull_stream_callback = callback, stream_format = format)
+        # TODO1 Need to return callback, format, stream to keep them in scope.
+        return speechsdk.audio.AudioConfig(stream=stream), callback, format, stream
 
 def speech_config_from_user_config(user_config : helper.Read_Only_Dict) -> speechsdk.SpeechConfig :
     speech_config = None
@@ -119,9 +115,6 @@ def speech_config_from_user_config(user_config : helper.Read_Only_Dict) -> speec
         speech_config.set_property(property_id = speechsdk.PropertyId.SpeechServiceResponse_StablePartialResultThreshold, value = user_config["stable_partial_result_threshold"])
 
     speech_config.set_property(property_id = speechsdk.PropertyId.SpeechServiceResponse_PostProcessingOption, value = "TrueText")
-
-# TODO1 TEMP
-    speech_config.set_property(speechsdk.PropertyId.Speech_LogFilename, "log_{}.txt".format (datetime.now().strftime("%Y%m%d_%H_%M_%S")))
 
     return speech_config
 
@@ -204,7 +197,7 @@ def recognize_continuous(speech_recognizer : speechsdk.SpeechRecognizer, user_co
 
     return
 
-usage = """Usage: python caption.py [-c ALAW|ANY|FLAC|MP3|MULAW|OGG_OPUS] [-f] [-h] [-i file] [-l languages] [-m] [-o file] [-p phrases] [-q] [-r number] [-t number] [-u] <subscriptionKey> <region>
+usage = """Usage: python caption.py [-c ALAW|ANY|FLAC|MP3|MULAW|OGG_OPUS] [-f] [-h] [-i file] [-l languages] [-m] [-o file] [-p phrases] [-q] [-s] [-t number] [-u] <subscriptionKey> <region>
        -c format: Use compressed audio format.
                   Valid values: ALAW, ANY, FLAC, MP3, MULAW, OGG_OPUS.
                   Default value: ANY.
