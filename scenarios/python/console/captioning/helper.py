@@ -11,30 +11,6 @@ from typing import Optional
 
 import azure.cognitiveservices.speech as speechsdk
 
-# See speech_recognition_with_pull_stream() in:
-# https://github.com/Azure-Samples/cognitive-services-speech-sdk/blob/master/samples/python/console/speech_sample.py
-class WavFileReaderCallback(speechsdk.audio.PullAudioInputStreamCallback):
-    """Example class that implements the Pull Audio Stream interface to recognize speech from
-    an audio file"""
-    def __init__(self, filename: str):
-        super().__init__()
-        self._file_h = wave.open(filename, mode=None)
-        self.samples_per_second = self._file_h.getframerate()
-        self.bytes_per_sample = self._file_h.getsampwidth()
-        self.channels = self._file_h.getnchannels()
-        assert self._file_h.getcomptype() == 'NONE'
-
-    def read(self, buffer: memoryview) -> int:
-        """read callback function"""
-        size = buffer.nbytes
-        frames = self._file_h.readframes(size // self.bytes_per_sample)
-        buffer[:len(frames)] = frames
-        return len(frames)
-
-    def close(self):
-        """close callback function"""
-        self._file_h.close()
-
 # See speech_recognize_once_compressed_input() in:
 # https://github.com/Azure-Samples/cognitive-services-speech-sdk/blob/master/samples/python/console/speech_sample.py
 class BinaryFileReaderCallback(speechsdk.audio.PullAudioInputStreamCallback):
