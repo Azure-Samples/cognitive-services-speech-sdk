@@ -144,32 +144,32 @@ func UserConfigFromArgs(args []string) UserConfig {
 
 func AudioConfigFromUserConfig(userConfig UserConfig) *audio.AudioConfig {
     if nil != userConfig.inputFile {
-// TODO1 Test with .wav files that are not 16K/2 bytes/1 channel. Works, however I think we are not using a pull stream. Just combine this with the code block below. The only difference is the format we pass to CreatePullStreamFromFormat.
-// TODO1 Use pull stream. We'll need to read the wav file header to create the format?
+        var format *audio.AudioStreamFormat
+        var err error
         if strings.HasSuffix(*userConfig.inputFile, ".wav") {
-            result, err := audio.NewAudioConfigFromWavFileInput(*userConfig.inputFile)
+            framerate, bitsPerSample, nChannels := ReadWavFileHeader(*userConfig.inputFile)
+            format, err = audio.GetWaveFormatPCM(framerate, bitsPerSample, nChannels)
             if nil != err {
                 log.Fatal(err)
             }
-            return result
         } else {
-            format, err := audio.GetCompressedFormat(userConfig.compressedAudioFormat)
+            format, err = audio.GetCompressedFormat(userConfig.compressedAudioFormat)
             if nil != err {
                 log.Fatal(err)
             }
             defer format.Close()
-            callback := GetBinaryFileReaderCallback(*userConfig.inputFile)
-            stream, err := audio.CreatePullStreamFromFormat(callback, format)
-            if nil != err {
-                log.Fatal(err)
-            }
-            defer stream.Close()
-            audioConfig, err := audio.NewAudioConfigFromStreamInput(stream)
-            if nil != err {
-                log.Fatal(err)
-            }
-            return audioConfig
         }
+        callback := GetBinaryFileReaderCallback(*userConfig.inputFile)
+        stream, err := audio.CreatePullStreamFromFormat(callback, format)
+        if nil != err {
+            log.Fatal(err)
+        }
+        defer stream.Close()
+        audioConfig, err := audio.NewAudioConfigFromStreamInput(stream)
+        if nil != err {
+            log.Fatal(err)
+        }
+        return audioConfig
     } else {
         result, err := audio.NewAudioConfigFromDefaultMicrophoneInput()
         if nil != err {
@@ -196,9 +196,6 @@ func SpeechConfigFromUserConfig(userConfig UserConfig) *speech.SpeechConfig {
     }
     
     speechConfig.SetProperty(common.SpeechServiceResponsePostProcessingOption, "TrueText")
-
-// TODO1 TEMP
-//    speechConfig.SetProperty(common.SpeechLogFilename, "log_20220424.txt")
 
     return speechConfig
 }
