@@ -7,6 +7,7 @@ package main
 
 import(
     "bufio"
+    "encoding/binary"
     "fmt"
     "github.com/Microsoft/cognitive-services-speech-sdk-go/common"
     "github.com/Microsoft/cognitive-services-speech-sdk-go/audio"
@@ -40,9 +41,8 @@ func (this *BinaryFileReaderCallback) Read(maxSize uint32) ([]byte, int) {
     return buffer, n
 }
 
-// TODO1 FIX? It keeps getting properties 11001 and 11002.
+// TODO1 Fix? We keep getting requests for properties 11001 and 11002. Returning "" seems to cause no problem.
 func (this *BinaryFileReaderCallback) GetProperty(id common.PropertyID) string {
-// TODO1 TEMP
 //    print ("GetProperty: ")
 //    print (id)
 //    print ("\n")
@@ -53,9 +53,62 @@ func (this *BinaryFileReaderCallback) CloseStream() {
     defer this.file.Close()
 }
 
-func ReadWavFileHeader(filename string) (int, int, int) {
+func ReadTag(reader *bufio.Reader, expected string) {
+    buffer := make([]byte, len(expected))
+    _, err := reader.Read(buffer);
+    if nil != err {
+        log.Fatal(err)
+    }
+    if expected != string(buffer) {
+        log.Fatal(fmt.Sprintf("Error reading WAV file header. Expected: %s. Actual: %s.", expected, string(buffer)))
+    }
+}
 
-    return 0, 0, 0
+func ReadWavFileHeader(filename string) (uint32, uint8, uint8) {
+    file, err := os.Open(filename)
+    reader := bufio.NewReader(file)
+    defer file.Close()
+
+    // Tag "RIFF"
+    ReadTag(reader, "RIFF")
+    
+    // Chunk size (32-bit integer)
+    reader.Discard(4)
+
+    // Tag "WAVE"
+    ReadTag(reader, "WAVE")
+
+    // Tag: "fmt"
+    ReadTag(reader, "fmt ");
+
+    // Chunk format size
+    reader.Discard(4)
+    // Format tag
+    reader.Discard(2)
+    // Number of channels
+    nChannelsBuffer := make([]byte, 2)
+    _, err = reader.Read(nChannelsBuffer)
+    if nil != err {
+        log.Fatal(err)
+    }    
+    // Framerate
+    framerateBuffer := make([]byte, 4)
+    _, err = reader.Read(framerateBuffer)
+    if nil != err {
+        log.Fatal(err)
+    }
+    // Average bytes per second
+    reader.Discard(4)
+    // Block align
+    reader.Discard(2)
+    // Bits per sample
+    bitsPerSampleBuffer := make([]byte, 2)
+    _, err = reader.Read(bitsPerSampleBuffer)
+    if nil != err {
+        log.Fatal(err)
+    }
+
+    return binary.LittleEndian.Uint32(framerateBuffer[:4]), uint8(bitsPerSampleBuffer[0]), uint8(nChannelsBuffer[0])
 }
 
 type UserConfig struct { 
