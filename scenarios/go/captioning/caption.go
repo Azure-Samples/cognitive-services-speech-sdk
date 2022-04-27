@@ -171,11 +171,11 @@ func AudioConfigFromUserConfig(userConfig UserConfig) *audio.AudioConfig {
         }
         return audioConfig
     } else {
-        result, err := audio.NewAudioConfigFromDefaultMicrophoneInput()
+        audioConfig, err := audio.NewAudioConfigFromDefaultMicrophoneInput()
         if nil != err {
             log.Fatal(err)
         }
-        return result
+        return audioConfig
     }
 }
 
