@@ -1,8 +1,9 @@
-"use strict";
+//
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+//
 
-/*
-Dependencies
-*/
+"use strict";
 
 /* Notes:
 - To install dependencies for this sample:
@@ -10,12 +11,99 @@ npm install microsoft-cognitiveservices-speech-sdk
 - The Speech SDK on Windows requires the Microsoft Visual C++ Redistributable for Visual Studio 2019 on the system. See:
 https://docs.microsoft.com/azure/cognitive-services/speech-service/speech-sdk?tabs=windows%2Cubuntu%2Cios-xcode%2Cmac-xcode%2Candroid-studio
 */
-import * as sdk from "microsoft-cognitiveservices-speech-sdk";
-import * as fs from "fs";
 
-/*
-Types
-*/
+import { Buffer } from 'buffer';
+import * as fs from "fs";
+import * as sdk from "microsoft-cognitiveservices-speech-sdk";
+
+// For definition of PullAudioInputStreamCallback interface, see:
+// https://github.com/microsoft/cognitive-services-speech-sdk-js/blob/master/src/sdk/Audio/PullAudioInputStreamCallback.ts
+class BinaryFileReader implements sdk.PullAudioInputStreamCallback {
+    m_fd : number;
+
+    constructor(audioFileName: string) {
+        this.m_fd = fs.openSync(audioFileName, 'r');
+// TODO1 If err, throw.
+    }
+
+    // See:
+    // https://javascript.info/arraybuffer-binary-arrays
+    read(dataBuffer: ArrayBuffer): number {
+        var view = new Uint16Array(dataBuffer);
+        var bytesRead = fs.readSync(this.m_fd, view);
+        return bytesRead;
+    }
+    
+    close(): void {
+        fs.closeSync(this.m_fd);
+    }
+}
+
+interface WavFileHeaderInfo {
+    framerate : number;
+    bitsPerSample : number;
+    nChannels : number;
+}
+
+function ReadInt32(fd : number) : number {
+    var buffer = Buffer.alloc(4);
+    var bytesRead = fs.readSync(fd, buffer);
+    // TODO1 Throw if bytesRead wrong.
+    return buffer.readInt32LE();
+}
+
+function ReadUInt16(fd : number) : number {
+    var buffer = Buffer.alloc(2);
+    var bytesRead = fs.readSync(fd, buffer);
+    // TODO1 Throw if bytesRead wrong.
+    return buffer.readUInt16LE();
+}
+
+function ReadUInt32(fd : number) : number {
+    var buffer = Buffer.alloc(4);
+    var bytesRead = fs.readSync(fd, buffer);
+    // TODO1 Throw if bytesRead wrong.
+    return buffer.readUInt32LE();
+}
+
+function ReadString(fd : number, length : number) : string {
+    var buffer = Buffer.alloc(length);
+    var bytesRead = fs.readSync(fd, buffer);
+    // TODO1 Throw if bytesRead wrong.
+    return buffer.toString();
+}
+
+function ReadWavFileHeader(audioFileName : string) : WavFileHeaderInfo {
+    var fd = fs.openSync(audioFileName, 'r');
+
+    if(ReadString(fd, 4) != "RIFF") {
+        throw "Invalid .wav file header.";
+    }
+    // File length
+    ReadInt32(fd);
+    if(ReadString(fd, 4) != "WAVE") {
+        throw "Invalid .wav file header.";
+    }
+    if(ReadString(fd, 4) != "fmt ") {
+        throw "Invalid .wav file header.";
+    }
+    // Format size
+    // TODO1 Throw if >= 16
+    ReadInt32(fd);
+    // Format tag
+    ReadUInt16(fd);
+    var nChannels = ReadUInt16(fd);
+    var framerate = ReadUInt32(fd);
+    // Average bytes per second
+    ReadUInt32(fd);
+    // Block align
+    ReadUInt16(fd);
+    var bitsPerSample = ReadUInt16(fd);
+
+    fs.closeSync(fd);
+
+    return { framerate : framerate, bitsPerSample : bitsPerSample, nChannels : nChannels };
+}
 
 interface UserConfig {
     readonly profanityFilterRemoveEnabled : boolean;
@@ -32,22 +120,14 @@ interface UserConfig {
     readonly region : string;
 }
 
-/*
-Global constants
-*/
-
 const newline = "\n";
-
-/*
-Helper functions
-*/
 
 function GetCmdOption(args : string[], option : string) : string
 {
     const index = args.indexOf(option);
     if (index > -1 && index < args.length - 2)
     {
-// We found the option(for example, "-o"), so advance from that to the value(for example, "filename").
+        // We found the option(for example, "-o"), so advance from that to the value(for example, "filename").
         return args[index + 1];
     }
     else {
@@ -62,17 +142,16 @@ function CmdOptionExists(args : string[], option : string) : boolean
 
 function TimestampFromSpeechRecognitionResult(result : sdk.SpeechRecognitionResult, userConfig : UserConfig) : string
 {
-/* Offset and duration are measured in 100-nanosecond increments. The Date constructor takes a value measured in milliseconds.
-100 nanoseconds is equal to a tick. There are 10,000 ticks in a millisecond.
-See:
-https://docs.microsoft.com/en-us/dotnet/api/system.timespan.ticks
-https://docs.microsoft.com/en-us/javascript/api/microsoft-cognitiveservices-speech-sdk/speechrecognitionresult?view=azure-node-latest#microsoft-cognitiveservices-speech-sdk-speechrecognitionresult-offset
-https://docs.microsoft.com/en-us/javascript/api/microsoft-cognitiveservices-speech-sdk/speechrecognitionresult?view=azure-node-latest#microsoft-cognitiveservices-speech-sdk-speechrecognitionresult-duration
-*/
+    /* Offset and duration are measured in 100-nanosecond increments. The Date constructor takes a value measured in milliseconds.
+    100 nanoseconds is equal to a tick. There are 10,000 ticks in a millisecond.
+    See:
+    https://docs.microsoft.com/dotnet/api/system.timespan.ticks
+    https://docs.microsoft.com/javascript/api/microsoft-cognitiveservices-speech-sdk/speechrecognitionresult
+    */
     const ticksPerMillisecond = 10000;
     const startTime = new Date(result.offset/ticksPerMillisecond);
     const endTime = new Date(result.offset/ticksPerMillisecond + result.duration/ticksPerMillisecond);
-// Note We must use getUTC* methods, or the results are adjusted for our local time zone, which we don't want.
+    // Note We must use getUTC* methods, or the results are adjusted for our local time zone, which we don't want.
     const start_hours = startTime.getUTCHours().toString().padStart(2, '0');
     const start_minutes = startTime.getUTCMinutes().toString().padStart(2, '0');
     const start_seconds = startTime.getUTCSeconds().toString().padStart(2, '0');
@@ -84,7 +163,7 @@ https://docs.microsoft.com/en-us/javascript/api/microsoft-cognitiveservices-spee
     
     if (userConfig.srtEnabled)
     {
-// SRT format requires ',' as decimal separator rather than '.'.
+        // SRT format requires ',' as decimal separator rather than '.'.
         return `${start_hours}:${start_minutes}:${start_seconds},${start_milliseconds} --> ${end_hours}:${end_minutes}:${end_seconds},${end_milliseconds}`;
     }
     else
@@ -135,10 +214,6 @@ function Initialize(userConfig : UserConfig) : void
     }
 }
 
-/*
-Main functions
-*/
-
 // Note: We verified args.length >= 3 in the caller, main().
 function UserConfigFromArgs(args : string[]) : UserConfig
 {
@@ -162,7 +237,11 @@ function AudioConfigFromUserConfig(userConfig : UserConfig) : sdk.AudioConfig
 {
     if (null !== userConfig.inputFile)
     {
-        return sdk.AudioConfig.fromWavFileInput(fs.readFileSync(userConfig.inputFile));
+        var header = ReadWavFileHeader(userConfig.inputFile);
+        var format = sdk.AudioStreamFormat.getWaveFormatPCM(header.framerate, header.bitsPerSample, header.nChannels);
+        var callback = new BinaryFileReader(userConfig.inputFile);
+        var stream = sdk.AudioInputStream.createPullStream(callback, format);
+        return sdk.AudioConfig.fromStreamInput(stream);
     }
     else
     {
@@ -188,10 +267,7 @@ function SpeechConfigFromUserConfig(userConfig : UserConfig) : sdk.SpeechConfig
         speechConfig.setProperty("SpeechServiceResponse_StablePartialResultThreshold", userConfig.stablePartialResultThreshold);
     }
     
-    if (userConfig.trueTextEnabled)
-    {
-        speechConfig.setProperty("SpeechServiceResponse_PostProcessingOption", "TrueText");
-    }
+    speechConfig.setProperty("SpeechServiceResponse_PostProcessingOption", "TrueText");
     
     return speechConfig;
 }
@@ -212,7 +288,7 @@ function SpeechRecognizerFromUserConfig(userConfig : UserConfig) : sdk.SpeechRec
 }
 
 /* See:
-https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/how-to-recognize-speech?tabs=windowsinstall&pivots=programming-language-javascript#use-continuous-recognition
+https://docs.microsoft.com/azure/cognitive-services/speech-service/how-to-recognize-speech
 */
 function RecognizeContinuous(speechRecognizer : sdk.SpeechRecognizer, userConfig : UserConfig) : void
 {
@@ -223,7 +299,7 @@ function RecognizeContinuous(speechRecognizer : sdk.SpeechRecognizer, userConfig
         speechRecognizer.recognizing = function(s, e) {
             if (sdk.ResultReason.RecognizingSpeech == e.result.reason && e.result.text.length > 0)
             {
-// We don't show sequence numbers for partial results.
+                // We don't show sequence numbers for partial results.
                 WriteToConsole(CaptionFromSpeechRecognitionResult(0, e.result, userConfig), userConfig);
             }
             else if (sdk.ResultReason.NoMatch == e.result.reason)
@@ -241,6 +317,7 @@ function RecognizeContinuous(speechRecognizer : sdk.SpeechRecognizer, userConfig
         }
         else if (sdk.ResultReason.NoMatch == e.result.reason)
         {
+            // TODO1 String interpolation isn't working!
             WriteToConsole("NOMATCH: Speech could not be recognized.${newline}", userConfig);
         }
     };
@@ -288,7 +365,7 @@ function main(args : string[]) : void
             -t: Enable TrueText.
             -u: Output partial results. These are always written to the console, never to an output file. -q overrides this.`;
 
-// Verify argc >= 3 (caption.exe, subscriptionKey, region)
+    // Verify argc >= 3 (caption.exe, subscriptionKey, region)
     if (args.length < 3)
     {
         console.log("Too few arguments.");
