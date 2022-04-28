@@ -6,7 +6,6 @@
 #include <speechapi_cxx.h>
 #include <fstream>
 
-using namespace std;
 using namespace Microsoft::CognitiveServices::Speech::Audio;
 
 // Adapted from code in:
@@ -61,7 +60,7 @@ class AudioInputFromFileCallback final : public PullAudioInputStreamCallback
 {
 public:
     // Constructor that creates an input stream from a file.
-    AudioInputFromFileCallback(const string& audioFileName)
+    AudioInputFromFileCallback(const std::string& audioFileName)
         : m_reader(audioFileName)
     {
     }
