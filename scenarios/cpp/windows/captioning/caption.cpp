@@ -26,12 +26,11 @@ https://docs.microsoft.com/azure/cognitive-services/speech-service/speech-sdk?ta
 
 #include "helper.h"
 
-using namespace std;
 using namespace Microsoft::CognitiveServices::Speech;
 using namespace Microsoft::CognitiveServices::Speech::Audio;
 using namespace Microsoft::CognitiveServices::Speech::Speaker;
 
-class TooFewArguments : public exception
+class TooFewArguments : public std::exception
 {
     public: const char* what() const throw()
     {
@@ -43,9 +42,9 @@ class TooFewArguments : public exception
 https://stackoverflow.com/a/868894
 The value parameter to std::find must be std::string. Otherwise std::find will compare the pointer values rather than the string contents.
 */
-optional<string> GetCmdOption(char** begin, char** end, const string& option)
+std::optional<std::string> GetCmdOption(char** begin, char** end, const std::string& option)
 {
-    char** result = find(begin, end, option);
+    char** result = std::find(begin, end, option);
     if (result != end)
     {
         // We found the option (for example, "-o"), so advance from that to the value (for example, "filename").
@@ -53,30 +52,30 @@ optional<string> GetCmdOption(char** begin, char** end, const string& option)
         // std::string(nullptr) is undefined.        
         if (value != end && nullptr != *value)
         {
-            return optional<string>{ string(*value) };
+            return std::optional<std::string>{ std::string(*value) };
         }
         else
         {
-            return nullopt;
+            return std::nullopt;
         }
     }
     else
     {
-        return nullopt;
+        return std::nullopt;
     }
 }
 
-inline bool CmdOptionExists(char** begin, char** end, const string& option)
+inline bool CmdOptionExists(char** begin, char** end, const std::string& option)
 {
-    return find(begin, end, option) != end;
+    return std::find(begin, end, option) != end;
 }
 
-vector<string> split(const string& s, char delimiter)
+std::vector<std::string> split(const std::string& s, char delimiter)
 {
-    vector<string> tokens;
-    string token;
-    istringstream tokenStream(s);
-    while(getline(tokenStream, token, delimiter))
+    std::vector<std::string> tokens;
+    std::string token;
+    std::istringstream tokenStream(s);
+    while(std::getline(tokenStream, token, delimiter))
     {
         tokens.push_back(token);
     }
@@ -85,15 +84,15 @@ vector<string> split(const string& s, char delimiter)
 
 // See:
 // https://stackoverflow.com/a/42844629
-static bool endsWith(const string& str, const string& suffix)
+static bool endsWith(const std::string& str, const std::string& suffix)
 {
     return str.size() >= suffix.size() && 0 == str.compare(str.size()-suffix.size(), suffix.size(), suffix);
 }
 
-static string V2EndpointFromRegion(string region)
+static std::string V2EndpointFromRegion(std::string region)
 {
     // Note: Continuous language identification is supported only with v2 endpoints.
-    return string("wss://" + region + ".stt.speech.microsoft.com/speech/universal/v2");
+    return std::string("wss://" + region + ".stt.speech.microsoft.com/speech/universal/v2");
 }
 
 static Timestamp TimestampFromTicks(uint64_t startTicks, uint64_t endTicks)
@@ -126,11 +125,11 @@ static UserConfig UserConfigFromArgs(int argc, char* argv[])
         throw TooFewArguments();
     }
 
-    optional<vector<string>> languageIDLanguages = nullopt;
-    optional<string> languageIDLanguagesResult = GetCmdOption(argv, argv + argc, "-l");
+    std::optional<std::vector<std::string>> languageIDLanguages = std::nullopt;
+    std::optional<std::string> languageIDLanguagesResult = GetCmdOption(argv, argv + argc, "-l");
     if (languageIDLanguagesResult.has_value())
     {
-        languageIDLanguages = optional<vector<string>>{ split(languageIDLanguagesResult.value(), ',') };
+        languageIDLanguages = std::optional<std::vector<std::string>>{ split(languageIDLanguagesResult.value(), ',') };
     }
 
     return UserConfig(
@@ -154,48 +153,48 @@ class Captioning
 private:
 
     UserConfig m_userConfig;
-    shared_ptr<AudioStreamFormat> m_format = NULL;
-    shared_ptr<AudioInputFromFileCallback> m_callback = NULL;
-    shared_ptr<PullAudioInputStream> m_stream = NULL;
+    std::shared_ptr<AudioStreamFormat> m_format = NULL;
+    std::shared_ptr<AudioInputFromFileCallback> m_callback = NULL;
+    std::shared_ptr<PullAudioInputStream> m_stream = NULL;
 
-    string TimestampFromSpeechRecognitionResult(shared_ptr<SpeechRecognitionResult> result)
+    std::string TimestampFromSpeechRecognitionResult(std::shared_ptr<SpeechRecognitionResult> result)
     {
-        ostringstream strTimestamp;
+        std::ostringstream strTimestamp;
         Timestamp timestamp = TimestampFromTicks(result->Offset(), result->Offset() + result->Duration());    
         
-        ostringstream startSeconds_1, endSeconds_1;
+        std::ostringstream startSeconds_1, endSeconds_1;
         // setw value is 2 for seconds + 1 for floating point + 3 for decimal places.
-        startSeconds_1 << setfill('0') << setw(6) << fixed << setprecision(3) << timestamp.startSeconds;
-        endSeconds_1 << setfill('0') << setw(6) << fixed << setprecision(3) << timestamp.endSeconds;    
+        startSeconds_1 << std::setfill('0') << std::setw(6) << std::fixed << std::setprecision(3) << timestamp.startSeconds;
+        endSeconds_1 << std::setfill('0') << std::setw(6) << std::fixed << std::setprecision(3) << timestamp.endSeconds;    
         
         if (m_userConfig.srtEnabled)
         {
             // SRT format requires ',' as decimal separator rather than '.'.
-            string startSeconds_2(startSeconds_1.str());
-            string endSeconds_2(endSeconds_1.str());
+            std::string startSeconds_2(startSeconds_1.str());
+            std::string endSeconds_2(endSeconds_1.str());
             replace(startSeconds_2.begin(), startSeconds_2.end(), '.', ',');
             replace(endSeconds_2.begin(), endSeconds_2.end(), '.', ',');
-            strTimestamp << setfill('0') << setw(2) << timestamp.startHours << ":"
-                << setfill('0') << setw(2) << timestamp.startMinutes << ":" << startSeconds_2 << " --> "
-                << setfill('0') << setw(2) << timestamp.endHours << ":"
-                << setfill('0') << setw(2) << timestamp.endMinutes << ":" << endSeconds_2;
+            strTimestamp << std::setfill('0') << std::setw(2) << timestamp.startHours << ":"
+                << std::setfill('0') << std::setw(2) << timestamp.startMinutes << ":" << startSeconds_2 << " --> "
+                << std::setfill('0') << std::setw(2) << timestamp.endHours << ":"
+                << std::setfill('0') << std::setw(2) << timestamp.endMinutes << ":" << endSeconds_2;
         }
         else
         {
-            strTimestamp << setfill('0') << setw(2) << timestamp.startHours << ":"
-                << setfill('0') << setw(2) << timestamp.startMinutes << ":" << startSeconds_1.str() << " --> "
-                << setfill('0') << setw(2) << timestamp.endHours << ":"
-                << setfill('0') << setw(2) << timestamp.endMinutes << ":" << endSeconds_1.str();
+            strTimestamp << std::setfill('0') << std::setw(2) << timestamp.startHours << ":"
+                << std::setfill('0') << std::setw(2) << timestamp.startMinutes << ":" << startSeconds_1.str() << " --> "
+                << std::setfill('0') << std::setw(2) << timestamp.endHours << ":"
+                << std::setfill('0') << std::setw(2) << timestamp.endMinutes << ":" << endSeconds_1.str();
         }
         
         return strTimestamp.str ();
     }
 
-    string LanguageFromSpeechRecognitionResult(shared_ptr<SpeechRecognitionResult> result)
+    std::string LanguageFromSpeechRecognitionResult(std::shared_ptr<SpeechRecognitionResult> result)
     {
         if (m_userConfig.languageIDLanguages.has_value())
         {
-            shared_ptr<AutoDetectSourceLanguageResult> languageIDResult = AutoDetectSourceLanguageResult::FromResult(result);
+            std::shared_ptr<AutoDetectSourceLanguageResult> languageIDResult = AutoDetectSourceLanguageResult::FromResult(result);
             return "[" + languageIDResult->Language + "] ";
         }
         else
@@ -204,9 +203,9 @@ private:
         }
     }
 
-    string CaptionFromSpeechRecognitionResult(int sequenceNumber, shared_ptr<SpeechRecognitionResult> result)
+    std::string CaptionFromSpeechRecognitionResult(int sequenceNumber, std::shared_ptr<SpeechRecognitionResult> result)
     {
-        string caption;
+        std::string caption;
         if (!m_userConfig.partialResultsEnabled && m_userConfig.srtEnabled)
         {
             caption += sequenceNumber + "\n";
@@ -217,33 +216,33 @@ private:
         return caption;
     }
 
-    void WriteToConsole(string text)
+    void WriteToConsole(std::string text)
     {
         if (!m_userConfig.suppressOutputEnabled)
         {
-            cout << text << flush;
+            std::cout << text << std::flush;
         }
     }
 
-    void WriteToConsoleOrFile(string text)
+    void WriteToConsoleOrFile(std::string text)
     {
         WriteToConsole(text);
         if (m_userConfig.outputFile.has_value())
         {
-            ofstream outputStream;
-            outputStream.open(m_userConfig.outputFile.value(), ios_base::app);
+            std::ofstream outputStream;
+            outputStream.open(m_userConfig.outputFile.value(), std::ios_base::app);
             outputStream << text;
             outputStream.close();
         }
     }
 
-    shared_ptr<Audio::AudioConfig> AudioConfigFromUserConfig()
+    std::shared_ptr<Audio::AudioConfig> AudioConfigFromUserConfig()
     {
         if (m_userConfig.inputFile.has_value())
         {
             if (endsWith(m_userConfig.inputFile.value(), ".wav"))
             {
-                auto reader = make_shared<WavFileReader>(m_userConfig.inputFile.value());
+                auto reader = std::make_shared<WavFileReader>(m_userConfig.inputFile.value());
                 m_format = AudioStreamFormat::GetWaveFormatPCM(reader->m_formatHeader.SamplesPerSec, reader->m_formatHeader.BitsPerSample, reader->m_formatHeader.Channels);
                 reader->Close();
             }
@@ -253,7 +252,7 @@ private:
 //                m_format = AudioStreamFormat::GetCompressedFormat(m_userConfig.compressedAudioFormat);
                 m_format = AudioStreamFormat::GetCompressedFormat(AudioStreamContainerFormat::ANY);
             }
-            m_callback = make_shared<AudioInputFromFileCallback>(m_userConfig.inputFile.value());
+            m_callback = std::make_shared<AudioInputFromFileCallback>(m_userConfig.inputFile.value());
             m_stream = AudioInputStream::CreatePullStream(m_format, m_callback);
             return AudioConfig::FromStreamInput(m_stream);
         }
@@ -263,12 +262,12 @@ private:
         }
     }
 
-    shared_ptr<SpeechConfig> SpeechConfigFromUserConfig()
+    std::shared_ptr<SpeechConfig> SpeechConfigFromUserConfig()
     {
-        shared_ptr<SpeechConfig> speechConfig;
+        std::shared_ptr<SpeechConfig> speechConfig;
         if (m_userConfig.languageIDLanguages.has_value())
         {
-            string endpoint = V2EndpointFromRegion(m_userConfig.region);
+            std::string endpoint = V2EndpointFromRegion(m_userConfig.region);
             speechConfig = SpeechConfig::FromEndpoint(endpoint, m_userConfig.subscriptionKey);
         }
         else
@@ -303,11 +302,11 @@ public:
     {
         if (m_userConfig.outputFile.has_value())
         {
-            filesystem::path outputFile { m_userConfig.outputFile.value() };
+            std::filesystem::path outputFile { m_userConfig.outputFile.value() };
             // If the output file exists, truncate it.
-            if (filesystem::exists(outputFile))
+            if (std::filesystem::exists(outputFile))
             {
-                ofstream outputStream;
+                std::ofstream outputStream;
                 outputStream.open(m_userConfig.outputFile.value());
                 outputStream.close();            
             }
@@ -318,15 +317,15 @@ public:
         }
     }
 
-    shared_ptr<SpeechRecognizer> SpeechRecognizerFromUserConfig()
+    std::shared_ptr<SpeechRecognizer> SpeechRecognizerFromUserConfig()
     {
-        shared_ptr<Audio::AudioConfig> audioConfig = AudioConfigFromUserConfig();
-        shared_ptr<SpeechConfig> speechConfig = SpeechConfigFromUserConfig();
-        shared_ptr<SpeechRecognizer> speechRecognizer;
+        std::shared_ptr<Audio::AudioConfig> audioConfig = AudioConfigFromUserConfig();
+        std::shared_ptr<SpeechConfig> speechConfig = SpeechConfigFromUserConfig();
+        std::shared_ptr<SpeechRecognizer> speechRecognizer;
         
         if (m_userConfig.languageIDLanguages.has_value())
         {
-            shared_ptr<AutoDetectSourceLanguageConfig> autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig::FromLanguages(m_userConfig.languageIDLanguages.value());
+            std::shared_ptr<AutoDetectSourceLanguageConfig> autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig::FromLanguages(m_userConfig.languageIDLanguages.value());
             speechRecognizer = SpeechRecognizer::FromConfig(speechConfig, autoDetectSourceLanguageConfig, audioConfig);
         }
         else
@@ -336,16 +335,16 @@ public:
 
         if (m_userConfig.phraseList.has_value())
         {
-            shared_ptr<PhraseListGrammar> grammar = PhraseListGrammar::FromRecognizer(speechRecognizer);
+            std::shared_ptr<PhraseListGrammar> grammar = PhraseListGrammar::FromRecognizer(speechRecognizer);
             grammar->AddPhrase(m_userConfig.phraseList.value());
         }
         
         return speechRecognizer;
     }
 
-    optional<string> RecognizeContinuous(shared_ptr<SpeechRecognizer> speechRecognizer)
+    std::optional<std::string> RecognizeContinuous(std::shared_ptr<SpeechRecognizer> speechRecognizer)
     {
-        promise<optional<string>> recognitionEnd;
+        std::promise<std::optional<std::string>> recognitionEnd;
         int sequenceNumber = 0;
 
         if (m_userConfig.partialResultsEnabled) {
@@ -385,40 +384,40 @@ public:
                 if (CancellationReason::EndOfStream == e.Reason)
                 {
                     WriteToConsole("End of stream reached.\n");
-                    recognitionEnd.set_value(nullopt); // Notify to stop recognition.
+                    recognitionEnd.set_value(std::nullopt); // Notify to stop recognition.
                 }
                 else if (CancellationReason::CancelledByUser == e.Reason)
                 {
                     WriteToConsole("User canceled request.\n");
-                    recognitionEnd.set_value(nullopt); // Notify to stop recognition.
+                    recognitionEnd.set_value(std::nullopt); // Notify to stop recognition.
                 }
                 else if (CancellationReason::Error == e.Reason)
                 {
-                    ostringstream error;
+                    std::ostringstream error;
                     error << "Encountered error.\n"
                         << "ErrorCode: " << (int)e.ErrorCode << "\n"
-                        << "ErrorDetails: " << e.ErrorDetails << endl;
-                    recognitionEnd.set_value(optional<string>{ error.str() }); // Notify to stop recognition.
+                        << "ErrorDetails: " << e.ErrorDetails << std::endl;
+                    recognitionEnd.set_value(std::optional<std::string>{ error.str() }); // Notify to stop recognition.
                 }
                 else
                 {
-                    ostringstream error;
-                    error << "Request was cancelled for an unrecognized reason: " << (int)e.Reason << endl;
-                    recognitionEnd.set_value(optional<string>{ error.str() }); // Notify to stop recognition.
+                    std::ostringstream error;
+                    error << "Request was cancelled for an unrecognized reason: " << (int)e.Reason << std::endl;
+                    recognitionEnd.set_value(std::optional<std::string>{ error.str() }); // Notify to stop recognition.
                 }
             });
 
         speechRecognizer->SessionStopped.Connect([this, &recognitionEnd](const SessionEventArgs& e)
             {
                 WriteToConsole("Session stopped.\n");
-                recognitionEnd.set_value(nullopt); // Notify to stop recognition.
+                recognitionEnd.set_value(std::nullopt); // Notify to stop recognition.
             });
 
         // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
         speechRecognizer->StartContinuousRecognitionAsync().get();
 
         // Waits for recognition end.
-        optional<string> result = recognitionEnd.get_future().get();
+        std::optional<std::string> result = recognitionEnd.get_future().get();
 
         // Stops recognition.
         speechRecognizer->StopContinuousRecognitionAsync().get();
@@ -429,7 +428,7 @@ public:
 
 int main(int argc, char* argv[])
 {
-    const string usage = "Usage: caption.exe [-f] [-h] [-i file] [-l languages] [-m] [-o file] [-p phrases] [-q] [-s] [-t number] [-u] <subscriptionKey> <region>\n"
+    const std::string usage = "Usage: caption.exe [-f] [-h] [-i file] [-l languages] [-m] [-o file] [-p phrases] [-q] [-s] [-t number] [-u] <subscriptionKey> <region>\n"
     "              -f: Enable profanity filter (remove profanity). Overrides -m.\n"
     "              -h: Show this help and stop.\n"
     "              -i: Input audio file *file* (default input is from the microphone.)\n"
@@ -449,27 +448,27 @@ int main(int argc, char* argv[])
     {
         if (CmdOptionExists(argv, argv + argc, "-h"))
         {
-            cout << usage << endl;
+            std::cout << usage << std::endl;
         }
         else
         {
             auto userConfig = UserConfigFromArgs(argc, argv);
-            auto captioning = make_shared<Captioning>(userConfig);
-            shared_ptr<SpeechRecognizer> speechRecognizer = captioning->SpeechRecognizerFromUserConfig();
-            optional<string> error = captioning->RecognizeContinuous(speechRecognizer);
+            auto captioning = std::make_shared<Captioning>(userConfig);
+            std::shared_ptr<SpeechRecognizer> speechRecognizer = captioning->SpeechRecognizerFromUserConfig();
+            std::optional<std::string> error = captioning->RecognizeContinuous(speechRecognizer);
             if (error.has_value())
             {
-                cout << error.value() << endl;
+                std::cout << error.value() << std::endl;
             }
         }
     }
     catch (TooFewArguments e)
     {
-        cout << e.what() << "\n"
-            << usage << endl;
+        std::cout << e.what() << "\n"
+            << usage << std::endl;
     }
-    catch (exception e)
+    catch (std::exception e)
     {
-        cout << e.what() << endl;
+        std::cout << e.what() << std::endl;
     }
 }
