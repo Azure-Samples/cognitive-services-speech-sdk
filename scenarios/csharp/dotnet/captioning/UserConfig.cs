@@ -3,18 +3,19 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
+using Microsoft.CognitiveServices.Speech;
 using Microsoft.CognitiveServices.Speech.Audio;
 
 namespace Captioning
 {
     public class UserConfig
     {
+        /// True to use a compressed audio format; otherwise, use uncompressed (wav).
+        readonly public bool useCompressedAudio = false;
         /// Compressed audio format for input audio. Default is Any.
         readonly public AudioStreamContainerFormat compressedAudioFormat = AudioStreamContainerFormat.ANY;
-        /// True to remove profanity. Default is to mask it. If true, this overrides disableMaskingProfanity.
-        readonly public bool removeProfanity = false;
-        /// True to not mask profanity. Default is to mask it. If removeProfanity is true, it overrides this setting.
-        readonly public bool disableMaskingProfanity = false;
+        /// Whether to show, remove, or mask profanity. Default is to mask it.
+        readonly public ProfanityOption profanityOption = ProfanityOption.Masked;
         /// Enable language identification for these languages.
         /// Languages must be delimited by commas.
         /// Example: en-US,ja-JP
@@ -44,9 +45,9 @@ namespace Captioning
         readonly public string region;
         
         public UserConfig (
+            bool useCompressedAudio,
             AudioStreamContainerFormat compressedAudioFormat,
-            bool removeProfanity,
-            bool disableMaskingProfanity,
+            ProfanityOption profanityOption,
             string[]? languageIDLanguages,
             string? inputFilePath,
             string? outputFilePath,
@@ -59,9 +60,9 @@ namespace Captioning
             string region
             )
         {
+            this.useCompressedAudio = useCompressedAudio;
             this.compressedAudioFormat = compressedAudioFormat;
-            this.removeProfanity = removeProfanity;
-            this.disableMaskingProfanity = disableMaskingProfanity;
+            this.profanityOption = profanityOption;
             this.languageIDLanguages = languageIDLanguages;
             this.inputFilePath = inputFilePath;
             this.outputFilePath = outputFilePath;
