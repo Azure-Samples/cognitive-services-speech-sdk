@@ -6,13 +6,19 @@
 #include <speechapi_cxx.h>
 #include <fstream>
 
+using namespace Microsoft::CognitiveServices::Speech;
 using namespace Microsoft::CognitiveServices::Speech::Audio;
 
 // Adapted from code in:
-// https://github.com/Azure-Samples/cognitive-services-speech-sdk/blob/master/samples/cpp/windows/console/samples/wav_file_reader.h
-class BinaryFileReader final
+// https://github.com/Azure-Samples/cognitive-services-speech-sdk/blob/master/samples/cpp/windows/console/samples/speech_recognition_samples.cpp
+class BinaryFileReader final : public PullAudioInputStreamCallback
 {
+private:
+
+    std::fstream m_fs;
+
 public:
+
     // Constructor that creates an input stream from a file.
     BinaryFileReader(const std::string& audioFileName)
     {
@@ -29,6 +35,12 @@ public:
         }
     }
 
+    // Implements AudioInputStream::Read() which is called to get data from the audio stream.
+    // It copies data available in the stream to 'dataBuffer', but no more than 'size' bytes.
+    // If the data available is less than 'size' bytes, it is allowed to just return the amount of data that is currently available.
+    // If there is no data, this function must wait until data is available.
+    // It returns the number of bytes that have been copied in 'dataBuffer'.
+    // It returns 0 to indicate that the stream reaches end or is closed.
     int Read(uint8_t* dataBuffer, uint32_t size)
     {
         if (m_fs.eof())
@@ -43,46 +55,11 @@ public:
             return (int)m_fs.gcount();
     }
 
+    // Implements AudioInputStream::Close() which is called when the stream needs to be closed.
     void Close()
     {
         m_fs.close();
     }
-    
-private:
-    std::fstream m_fs;
-};
-
-// TODO1 Just combine AudioInputFromFileCallback with BinaryFileReader?
-
-// See SpeechContinuousRecognitionWithPullStream() in:
-// https://github.com/Azure-Samples/cognitive-services-speech-sdk/blob/master/samples/cpp/windows/console/samples/speech_recognition_samples.cpp
-class AudioInputFromFileCallback final : public PullAudioInputStreamCallback
-{
-public:
-    // Constructor that creates an input stream from a file.
-    AudioInputFromFileCallback(const std::string& audioFileName)
-        : m_reader(audioFileName)
-    {
-    }
-
-    // Implements AudioInputStream::Read() which is called to get data from the audio stream.
-    // It copies data available in the stream to 'dataBuffer', but no more than 'size' bytes.
-    // If the data available is less than 'size' bytes, it is allowed to just return the amount of data that is currently available.
-    // If there is no data, this function must wait until data is available.
-    // It returns the number of bytes that have been copied in 'dataBuffer'.
-    // It returns 0 to indicate that the stream reaches end or is closed.
-    int Read(uint8_t* dataBuffer, uint32_t size) override
-    {
-        return m_reader.Read(dataBuffer, size);
-    }
-    // Implements AudioInputStream::Close() which is called when the stream needs to be closed.
-    void Close() override
-    {
-        m_reader.Close();
-    }
-
-private:
-    BinaryFileReader m_reader;
 };
 
 // Adapted from code in:
@@ -100,35 +77,11 @@ struct WAVEFORMAT
 
 class WavFileReader final
 {
-public:
-    // Constructor that creates an input stream from a file.
-    WavFileReader(const std::string& audioFileName)
-    {
-        if (audioFileName.empty())
-        {
-            throw std::invalid_argument("Audio filename is empty");
-        }
-
-        std::ios_base::openmode mode = std::ios_base::binary | std::ios_base::in;
-        m_fs.open(audioFileName, mode);
-        if (!m_fs.good())
-        {
-            throw std::invalid_argument("Failed to open the specified audio file.");
-        }
-        
-        // Get audio format from the file header.
-        GetFormatFromWavFile();
-    }
-
-    void Close()
-    {
-        m_fs.close();
-    }
+private:
 
     WAVEFORMAT m_formatHeader;
     static_assert(sizeof(m_formatHeader) == 16, "unexpected size of m_formatHeader");
 
-private:
     // Defines common constants for WAV format.
     static constexpr uint16_t tagBufferSize = 4;
     static constexpr uint16_t chunkTypeBufferSize = 4;
@@ -181,9 +134,7 @@ private:
             {
                 throw std::runtime_error("Invalid file header, tag 'WAVE' is expected.");
             }
-
-// TODO1 Stop once we get bits per sample. Ignore data chunk.
-
+            
             bool foundDataChunk = false;
             while (!foundDataChunk && m_fs.good() && !m_fs.eof())
             {
@@ -226,47 +177,81 @@ private:
         // Set to not throw exceptions when starting to read audio data
         m_fs.exceptions(std::ifstream::goodbit);
     }
+    
+public:
+
+    // Constructor that creates an input stream from a file.
+    WavFileReader(const std::string& audioFileName)
+    {
+        if (audioFileName.empty())
+        {
+            throw std::invalid_argument("Audio filename is empty");
+        }
+
+        std::ios_base::openmode mode = std::ios_base::binary | std::ios_base::in;
+        m_fs.open(audioFileName, mode);
+        if (!m_fs.good())
+        {
+            throw std::invalid_argument("Failed to open the specified audio file.");
+        }
+        
+        // Get audio format from the file header.
+        GetFormatFromWavFile();
+    }
+
+    WAVEFORMAT GetFormat()
+    {
+        return m_formatHeader;
+    }
+
+    void Close()
+    {
+        m_fs.close();
+    }
 };
 
 struct UserConfig
 {
-    const bool profanityFilterRemoveEnabled = false;
-    const bool profanityFilterMaskEnabled = false;
+    const bool useCompressedAudio = false;
+    const AudioStreamContainerFormat compressedAudioFormat = AudioStreamContainerFormat::ANY;
+    const ProfanityOption profanityOption = ProfanityOption::Masked;
     const std::optional<std::vector<std::string>> languageIDLanguages = std::nullopt;
     const std::optional<std::string> inputFile = std::nullopt;
     const std::optional<std::string> outputFile = std::nullopt;
     const std::optional<std::string> phraseList;
-    const bool suppressOutputEnabled = false;
-    const bool partialResultsEnabled = false;
+    const bool suppressConsoleOutput = false;
+    const bool showRecognizingResults = false;
     const std::optional<std::string> stablePartialResultThreshold = std::nullopt;
-    const bool srtEnabled = false;
+    const bool useSubRipTextCaptionFormat = false;
     const std::string subscriptionKey;
     const std::string region;
     
     UserConfig(
-        bool profanityFilterRemoveEnabled,
-        bool profanityFilterMaskEnabled,
+        bool useCompressedAudio,
+        AudioStreamContainerFormat compressedAudioFormat,
+        ProfanityOption profanityOption,
         std::optional<std::vector<std::string>> languageIDLanguages,
         std::optional<std::string> inputFile,
         std::optional<std::string> outputFile,
         std::optional<std::string> phraseList,
-        bool suppressOutputEnabled,
-        bool partialResultsEnabled,
+        bool suppressConsoleOutput,
+        bool showRecognizingResults,
         std::optional<std::string> stablePartialResultThreshold,
-        bool srtEnabled,
+        bool useSubRipTextCaptionFormat,
         std::string subscriptionKey,
         std::string region
         ) :
-        profanityFilterRemoveEnabled(profanityFilterRemoveEnabled),
-        profanityFilterMaskEnabled(profanityFilterMaskEnabled),
+        useCompressedAudio(useCompressedAudio),
+        compressedAudioFormat(compressedAudioFormat),
+        profanityOption(profanityOption),
         languageIDLanguages(languageIDLanguages),
         inputFile(inputFile),
         outputFile(outputFile),
         phraseList(phraseList),
-        suppressOutputEnabled(suppressOutputEnabled),
-        partialResultsEnabled(partialResultsEnabled),
+        suppressConsoleOutput(suppressConsoleOutput),
+        showRecognizingResults(showRecognizingResults),
         stablePartialResultThreshold(stablePartialResultThreshold),
-        srtEnabled(srtEnabled),
+        useSubRipTextCaptionFormat(useSubRipTextCaptionFormat),
         subscriptionKey(subscriptionKey),
         region(region)
         {}
