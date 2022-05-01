@@ -5,12 +5,11 @@
 
 "use strict";
 
-/* Notes:
-- To install dependencies for this sample:
-npm install microsoft-cognitiveservices-speech-sdk
-- The Speech SDK on Windows requires the Microsoft Visual C++ Redistributable for Visual Studio 2019 on the system. See:
-https://docs.microsoft.com/azure/cognitive-services/speech-service/speech-sdk?tabs=windows%2Cubuntu%2Cios-xcode%2Cmac-xcode%2Candroid-studio
-*/
+// Notes:
+// - To install dependencies for this sample:
+// npm install microsoft-cognitiveservices-speech-sdk
+// - The Speech SDK on Windows requires the Microsoft Visual C++ Redistributable for Visual Studio 2019 on the system. See:
+// https://docs.microsoft.com/azure/cognitive-services/speech-service/speech-sdk
 
 import { Buffer } from 'buffer';
 import * as fs from "fs";
@@ -23,7 +22,6 @@ class BinaryFileReader implements sdk.PullAudioInputStreamCallback {
 
     constructor(audioFileName: string) {
         this.m_fd = fs.openSync(audioFileName, 'r');
-// TODO1 If err, throw.
     }
 
     // See:
@@ -48,28 +46,36 @@ interface WavFileHeaderInfo {
 function ReadInt32(fd : number) : number {
     var buffer = Buffer.alloc(4);
     var bytesRead = fs.readSync(fd, buffer);
-    // TODO1 Throw if bytesRead wrong.
+    if (4 != bytesRead) {
+        throw "Error reading 32-bit integer from .wav file header. Expected 4 bytes. Actual bytes read: " + String(bytesRead);
+    }
     return buffer.readInt32LE();
 }
 
 function ReadUInt16(fd : number) : number {
     var buffer = Buffer.alloc(2);
     var bytesRead = fs.readSync(fd, buffer);
-    // TODO1 Throw if bytesRead wrong.
+    if (2 != bytesRead) {
+        throw "Error reading 16-bit unsigned integer from .wav file header. Expected 2 bytes. Actual bytes read: " + String(bytesRead);
+    }
     return buffer.readUInt16LE();
 }
 
 function ReadUInt32(fd : number) : number {
     var buffer = Buffer.alloc(4);
     var bytesRead = fs.readSync(fd, buffer);
-    // TODO1 Throw if bytesRead wrong.
+    if (4 != bytesRead) {
+        throw "Error reading unsigned 32-bit integer from .wav file header. Expected 4 bytes. Actual bytes read: " + String(bytesRead);
+    }
     return buffer.readUInt32LE();
 }
 
 function ReadString(fd : number, length : number) : string {
     var buffer = Buffer.alloc(length);
     var bytesRead = fs.readSync(fd, buffer);
-    // TODO1 Throw if bytesRead wrong.
+    if (length != bytesRead) {
+        throw "Error reading string from .wav file header. Expected " + String(length) + " bytes. Actual bytes read: " + String(bytesRead);
+    }
     return buffer.toString();
 }
 
@@ -77,19 +83,21 @@ function ReadWavFileHeader(audioFileName : string) : WavFileHeaderInfo {
     var fd = fs.openSync(audioFileName, 'r');
 
     if(ReadString(fd, 4) != "RIFF") {
-        throw "Invalid .wav file header.";
+        throw "Error reading .wav file header. Expected 'RIFF' tag.";
     }
     // File length
     ReadInt32(fd);
     if(ReadString(fd, 4) != "WAVE") {
-        throw "Invalid .wav file header.";
+        throw "Error reading .wav file header. Expected 'WAVE' tag.";
     }
     if(ReadString(fd, 4) != "fmt ") {
-        throw "Invalid .wav file header.";
+        throw "Error reading .wav file header. Expected 'fmt ' tag.";
     }
     // Format size
-    // TODO1 Throw if >= 16
-    ReadInt32(fd);
+    var formatSize = ReadInt32(fd);
+    if (formatSize > 16) {
+        throw "Error reading .wav file header. Expected format size 16 bytes. Actual size: " + String(formatSize);
+    }
     // Format tag
     ReadUInt16(fd);
     var nChannels = ReadUInt16(fd);
@@ -106,16 +114,14 @@ function ReadWavFileHeader(audioFileName : string) : WavFileHeaderInfo {
 }
 
 interface UserConfig {
-    readonly profanityFilterRemoveEnabled : boolean;
-    readonly profanityFilterMaskEnabled : boolean;
+    readonly profanityOption : sdk.ProfanityOption;
     readonly inputFile : string;
     readonly outputFile : string;
     readonly phraseList : string;
-    readonly suppressOutputEnabled : boolean;
-    readonly partialResultsEnabled : boolean;
+    readonly suppressConsoleOutput : boolean;
+    readonly showRecognizingResults : boolean;
     readonly stablePartialResultThreshold : string;
-    readonly srtEnabled : boolean;
-    readonly trueTextEnabled : boolean;
+    readonly useSubRipTextCaptionFormat : boolean;
     readonly subscriptionKey : string;
     readonly region : string;
 }
@@ -125,9 +131,9 @@ const newline = "\n";
 function GetCmdOption(args : string[], option : string) : string
 {
     const index = args.indexOf(option);
-    if (index > -1 && index < args.length - 2)
+    if (index > -1 && index < args.length - 1)
     {
-        // We found the option(for example, "-o"), so advance from that to the value(for example, "filename").
+        // We found the option(for example, "--output"), so advance from that to the value(for example, "filename").
         return args[index + 1];
     }
     else {
@@ -140,14 +146,31 @@ function CmdOptionExists(args : string[], option : string) : boolean
     return args.includes(option);
 }
 
+function GetProfanityOption(args : string[]) : sdk.ProfanityOption
+{
+    var value = GetCmdOption(args, "--profanity");
+    if (null === value)
+    {
+        return sdk.ProfanityOption.Masked;
+    }
+    else
+    {
+        switch (value.toLowerCase())
+        {
+            case "raw" : return sdk.ProfanityOption.Raw;
+            case "remove" : return sdk.ProfanityOption.Removed;
+            default : return sdk.ProfanityOption.Masked;
+        }
+    }
+}
+
 function TimestampFromSpeechRecognitionResult(result : sdk.SpeechRecognitionResult, userConfig : UserConfig) : string
 {
-    /* Offset and duration are measured in 100-nanosecond increments. The Date constructor takes a value measured in milliseconds.
-    100 nanoseconds is equal to a tick. There are 10,000 ticks in a millisecond.
-    See:
-    https://docs.microsoft.com/dotnet/api/system.timespan.ticks
-    https://docs.microsoft.com/javascript/api/microsoft-cognitiveservices-speech-sdk/speechrecognitionresult
-    */
+    // Offset and duration are measured in 100-nanosecond increments. The Date constructor takes a value measured in milliseconds.
+    // 100 nanoseconds is equal to a tick. There are 10,000 ticks in a millisecond.
+    // See:
+    // https://docs.microsoft.com/dotnet/api/system.timespan.ticks
+    // https://docs.microsoft.com/javascript/api/microsoft-cognitiveservices-speech-sdk/speechrecognitionresult
     const ticksPerMillisecond = 10000;
     const startTime = new Date(result.offset/ticksPerMillisecond);
     const endTime = new Date(result.offset/ticksPerMillisecond + result.duration/ticksPerMillisecond);
@@ -161,7 +184,7 @@ function TimestampFromSpeechRecognitionResult(result : sdk.SpeechRecognitionResu
     const end_seconds = endTime.getUTCSeconds().toString().padStart(2, '0');
     const end_milliseconds = endTime.getUTCMilliseconds().toString().padStart(3, '0');    
     
-    if (userConfig.srtEnabled)
+    if (userConfig.useSubRipTextCaptionFormat)
     {
         // SRT format requires ',' as decimal separator rather than '.'.
         return `${start_hours}:${start_minutes}:${start_seconds},${start_milliseconds} --> ${end_hours}:${end_minutes}:${end_seconds},${end_milliseconds}`;
@@ -175,7 +198,7 @@ function TimestampFromSpeechRecognitionResult(result : sdk.SpeechRecognitionResu
 function CaptionFromSpeechRecognitionResult(sequenceNumber : number, result : sdk.SpeechRecognitionResult, userConfig : UserConfig) : string
 {
     var caption = "";
-    if (!userConfig.partialResultsEnabled && userConfig.srtEnabled)
+    if (!userConfig.showRecognizingResults && userConfig.useSubRipTextCaptionFormat)
     {
         caption += `${sequenceNumber}${newline}`;
     }
@@ -186,7 +209,7 @@ function CaptionFromSpeechRecognitionResult(sequenceNumber : number, result : sd
 
 function WriteToConsole(text : string, userConfig : UserConfig) : void
 {
-    if (!userConfig.suppressOutputEnabled)
+    if (!userConfig.suppressConsoleOutput)
     {
         process.stdout.write(text);
     }
@@ -208,28 +231,35 @@ function Initialize(userConfig : UserConfig) : void
         fs.unlinkSync(userConfig.outputFile);
     }
 
-    if (!userConfig.srtEnabled)
+    if (!userConfig.useSubRipTextCaptionFormat)
     {
         WriteToConsoleOrFile(`WEBVTT${newline}${newline}`, userConfig);
     }
 }
 
-// Note: We verified args.length >= 3 in the caller, main().
-function UserConfigFromArgs(args : string[]) : UserConfig
+function UserConfigFromArgs(args : string[], usage : string) : UserConfig
 {
+    var key = GetCmdOption(args, "--key");
+    if(null === key)
+    {
+        throw `"Missing subscription key.${newline}${usage}"`;
+    }
+    var region = GetCmdOption(args, "--region");
+    if(null === region)
+    {
+        throw `"Missing region.${newline}${usage}"`;
+    }
     return {
-        profanityFilterRemoveEnabled : CmdOptionExists(args, "-f"),
-        profanityFilterMaskEnabled : CmdOptionExists(args, "-m"),
-        inputFile : GetCmdOption(args, "-i"),
-        outputFile : GetCmdOption(args, "-o"),
-        phraseList : GetCmdOption(args, "-p"),
-        suppressOutputEnabled : CmdOptionExists(args, "-q"),
-        partialResultsEnabled : CmdOptionExists(args, "-u"),
-        stablePartialResultThreshold : GetCmdOption(args, "-r"),
-        srtEnabled : CmdOptionExists(args, "-s"),
-        trueTextEnabled : CmdOptionExists(args, "-t"),
-        subscriptionKey : args[args.length - 2],
-        region : args[args.length - 1],
+        profanityOption : GetProfanityOption(args),
+        inputFile : GetCmdOption(args, "--input"),
+        outputFile : GetCmdOption(args, "--output"),
+        phraseList : GetCmdOption(args, "--phrases"),
+        suppressConsoleOutput : CmdOptionExists(args, "--quiet"),
+        showRecognizingResults : CmdOptionExists(args, "--recognizing"),
+        stablePartialResultThreshold : GetCmdOption(args, "--threshold"),
+        useSubRipTextCaptionFormat : CmdOptionExists(args, "--srt"),
+        subscriptionKey : key,
+        region : region,
     };
 }
 
@@ -253,15 +283,8 @@ function SpeechConfigFromUserConfig(userConfig : UserConfig) : sdk.SpeechConfig
 {
     const speechConfig = sdk.SpeechConfig.fromSubscription(userConfig.subscriptionKey, userConfig.region);
 
-    if (userConfig.profanityFilterRemoveEnabled)
-    {
-        speechConfig.setProfanity(sdk.ProfanityOption.Removed);
-    }
-    else if (userConfig.profanityFilterMaskEnabled)
-    {
-        speechConfig.setProfanity(sdk.ProfanityOption.Masked);
-    }
-    
+    speechConfig.setProfanity(userConfig.profanityOption);
+
     if (null !== userConfig.stablePartialResultThreshold)
     {
         speechConfig.setProperty("SpeechServiceResponse_StablePartialResultThreshold", userConfig.stablePartialResultThreshold);
@@ -287,14 +310,13 @@ function SpeechRecognizerFromUserConfig(userConfig : UserConfig) : sdk.SpeechRec
     return speechRecognizer;
 }
 
-/* See:
-https://docs.microsoft.com/azure/cognitive-services/speech-service/how-to-recognize-speech
-*/
+// See:
+// https://docs.microsoft.com/azure/cognitive-services/speech-service/how-to-recognize-speech
 function RecognizeContinuous(speechRecognizer : sdk.SpeechRecognizer, userConfig : UserConfig) : void
 {
     var sequenceNumber = 0;
     
-    if (userConfig.partialResultsEnabled)
+    if (userConfig.showRecognizingResults)
     {
         speechRecognizer.recognizing = function(s, e) {
             if (sdk.ResultReason.RecognizingSpeech == e.result.reason && e.result.text.length > 0)
@@ -317,7 +339,7 @@ function RecognizeContinuous(speechRecognizer : sdk.SpeechRecognizer, userConfig
         }
         else if (sdk.ResultReason.NoMatch == e.result.reason)
         {
-            // TODO1 String interpolation isn't working!
+            // TODO1 String interpolation isn't working.
             WriteToConsole("NOMATCH: Speech could not be recognized.${newline}", userConfig);
         }
     };
@@ -350,36 +372,42 @@ function RecognizeContinuous(speechRecognizer : sdk.SpeechRecognizer, userConfig
 
 function main(args : string[]) : void
 {
-    const usage = `Usage: node caption.js [-f] [-h] [-i file] [-m] [-o file] [-p phrases] [-q] [-r number] [-s] [-t] [-u] <subscriptionKey> <region>
-            -f: Enable profanity filter (remove profanity). Overrides -m.
-            -h: Show this help and stop.
-            -i: Input audio file *file* (default input is from the microphone.)
-            -m: Enable profanity filter (mask profanity). -f overrides this.
-       -o file: Output to *file*.
-    -p phrases: Add specified *phrases*.
-                Example: Constoso;Jessie;Rehaan
-            -q: Suppress console output (except errors).
-     -r number: Set stable partial result threshold to *number*.
-                Example: 3
-            -s: Output captions in SRT format (default is WebVTT format.)
-            -t: Enable TrueText.
-            -u: Output partial results. These are always written to the console, never to an output file. -q overrides this.`;
+    const usage = `Usage: node captioning.js [...]
 
-    // Verify argc >= 3 (caption.exe, subscriptionKey, region)
-    if (args.length < 3)
-    {
-        console.log("Too few arguments.");
-        console.log(usage);
-        return;
-    }
+  CONNECTION
+    --key KEY                     Your Azure Speech service subscription key.
+    --region REGION               Your Azure Speech service region.
+                                  Examples: westus, eastus
 
-    if (CmdOptionExists(args, "-h"))
+  INPUT
+    --input FILE                  Input audio from file (default input is the microphone.)
+    --url URL                     Input audio from URL (default input is the microphone.)
+
+  RECOGNITION
+    --recognizing                 Output Recognizing results (default output is Recognized results only.)
+                                  These are always written to the console, never to an output file.
+                                  --quiet overrides this.
+
+  ACCURACY
+    --phrases PHRASE1;PHRASE2     Example: Constoso;Jessie;Rehaan
+
+  OUTPUT
+    --help                        Show this help and stop.
+    --output FILE                 Output captions to file.
+    --srt                         Output captions in SubRip Text format (default format is WebVTT.)
+    --quiet                       Suppress console output, except errors.
+    --profanity OPTION            Valid values: raw, remove, mask
+    --threshold NUMBER            Set stable partial result threshold.
+                                  Default value: 3
+`;
+
+    if (CmdOptionExists(args, "--help"))
     {
         console.log(usage);
     }
     else
     {
-        const userConfig = UserConfigFromArgs(args);    
+        const userConfig = UserConfigFromArgs(args, usage);
         Initialize(userConfig);    
         const audio_config = AudioConfigFromUserConfig(userConfig);
         const speechRecognizer = SpeechRecognizerFromUserConfig(userConfig);
