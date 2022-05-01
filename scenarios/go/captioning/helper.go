@@ -112,9 +112,9 @@ func ReadWavFileHeader(filename string) (uint32, uint8, uint8) {
 }
 
 type UserConfig struct { 
+    useCompressedAudio bool
     compressedAudioFormat audio.AudioStreamContainerFormat
-    removeProfanity bool
-    disableMaskingProfanity bool
+    profanityOption common.ProfanityOption
     inputFile *string
     outputFile *string
     suppressConsoleOutput bool
@@ -150,8 +150,8 @@ func IndexOf(xs []string, x string)(bool, int) {
 
 func GetCmdOption(args []string, option string) *string {
     var result, index = IndexOf(args, option)
-    if result && index < len(args) - 2 {
-        // We found the option (for example, "-o"), so advance from that to the value (for example, "filename").
+    if result && index < len(args) - 1 {
+        // We found the option (for example, "--output"), so advance from that to the value (for example, "filename").
         return &args[index + 1]
     } else {
         return nil
