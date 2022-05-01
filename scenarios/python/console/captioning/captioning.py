@@ -19,29 +19,32 @@ from sys import argv
 from time import sleep
 from typing import Any
 import wave
-
 import azure.cognitiveservices.speech as speechsdk
 import helper
 
-def user_config_from_args() -> helper.Read_Only_Dict :
-    argc = len(argv)
-    if argc < 3 :
-        raise RuntimeError("Too few arguments. Usage:{}{}".format(linesep, usage))
-
+def user_config_from_args(usage : str) -> helper.Read_Only_Dict :
+    key = helper.get_cmd_option("--key")
+    if key is None:
+        raise RuntimeError("Missing subscription key.{}{}".format(linesep, usage))
+    region = helper.get_cmd_option("--region")
+    if region is None:
+        print(argv)
+        raise RuntimeError("Missing region.{}{}".format(linesep, usage))
+        
     return helper.Read_Only_Dict({
+        "use_compressed_audio" : helper.cmd_option_exists("--format"),
         "compressed_audio_format" : helper.get_compressed_audio_format(),
-        "remove_profanity" : helper.cmd_option_exists("-f"),
-        "disable_masking_profanity" : helper.cmd_option_exists("-m"),
-        "suppress_console_output" : helper.cmd_option_exists("-q"),
-        "use_sub_rip_text_caption_format" : helper.cmd_option_exists("-s"),
-        "input_file" : helper.get_cmd_option("-i"),
-        "output_file" : helper.get_cmd_option("-o"),
-        "language_ID_languages" : helper.get_cmd_option("-l"),
-        "phrase_list" : helper.get_cmd_option("-p"),
-        "show_recognizing_results" : helper.get_cmd_option("-u"),
-        "stable_partial_result_threshold" : helper.get_cmd_option("-t"),
-        "subscription_key" : argv[argc - 2],
-        "region" : argv[argc - 1],
+        "profanity_option" : helper.get_profanity_option(),
+        "suppress_console_output" : helper.cmd_option_exists("--quiet"),
+        "use_sub_rip_text_caption_format" : helper.cmd_option_exists("--srt"),
+        "input_file" : helper.get_cmd_option("--input"),
+        "output_file" : helper.get_cmd_option("--output"),
+        "language_ID_languages" : helper.get_cmd_option("--languages"),
+        "phrase_list" : helper.get_cmd_option("--phrases"),
+        "show_recognizing_results" : helper.get_cmd_option("--recognizing"),
+        "stable_partial_result_threshold" : helper.get_cmd_option("--threshold"),
+        "subscription_key" : key,
+        "region" : region,
     })
 
 # Note: Continuous language identification is supported only with v2 endpoints.
@@ -82,20 +85,21 @@ def initialize(user_config : helper.Read_Only_Dict) :
         helper.write_to_console_or_file(text = "WEBVTT{}{}".format(linesep, linesep), user_config = user_config)
     return
 
-def audio_config_from_user_config(user_config : helper.Read_Only_Dict) -> tuple[speechsdk.AudioConfig, Any, speechsdk.audio.AudioStreamFormat, speechsdk.audio.PullAudioInputStream] :
+def audio_config_from_user_config(user_config : helper.Read_Only_Dict) -> tuple[speechsdk.AudioConfig, helper.BinaryFileReaderCallback, speechsdk.audio.AudioStreamFormat, speechsdk.audio.PullAudioInputStream] :
     if user_config["input_file"] is None :
-        return speechsdk.AudioConfig(use_default_microphone = True)
+        return speechsdk.AudioConfig(use_default_microphone = True), None, None, None
     else :
         format = None
-        if user_config["input_file"].endswith(".wav") :        
+        if not user_config["use_compressed_audio"] :
             reader = wave.open(user_config["input_file"], mode=None)
             format = speechsdk.audio.AudioStreamFormat(samples_per_second=reader.getframerate(), bits_per_sample=reader.getsampwidth() * 8, channels=reader.getnchannels())
-            reader.close()        
+            reader.close()
         else :
             format = speechsdk.audio.AudioStreamFormat(compressed_stream_format=user_config["compressed_audio_format"])
         callback = helper.BinaryFileReaderCallback(filename=user_config["input_file"])
         stream = speechsdk.audio.PullAudioInputStream(pull_stream_callback = callback, stream_format = format)
-        # TODO1 Need to return callback, format, stream to keep them in scope.
+        # We return the BinaryFileReaderCallback, AudioStreamFormat, and PullAudioInputStream
+        # because we need to keep them in scope until they are actually used.
         return speechsdk.audio.AudioConfig(stream=stream), callback, format, stream
 
 def speech_config_from_user_config(user_config : helper.Read_Only_Dict) -> speechsdk.SpeechConfig :
@@ -106,10 +110,7 @@ def speech_config_from_user_config(user_config : helper.Read_Only_Dict) -> speec
     else :
         speech_config = speechsdk.SpeechConfig(subscription = user_config["subscription_key"], region = user_config["region"])
 
-    if user_config["remove_profanity"] :
-        speech_config.set_profanity(speechsdk.ProfanityOption.Removed)
-    elif user_config["disable_masking_profanity"] :
-        speech_config.set_profanity(speechsdk.ProfanityOption.Raw)
+    speech_config.set_profanity(user_config["profanity_option"])
 
     if user_config["stable_partial_result_threshold"] is not None :
         speech_config.set_property(property_id = speechsdk.PropertyId.SpeechServiceResponse_StablePartialResultThreshold, value = user_config["stable_partial_result_threshold"])
@@ -118,7 +119,7 @@ def speech_config_from_user_config(user_config : helper.Read_Only_Dict) -> speec
 
     return speech_config
 
-def speech_recognizer_from_user_config(user_config : helper.Read_Only_Dict) -> tuple[speechsdk.SpeechRecognizer, Any, speechsdk.audio.AudioStreamFormat, speechsdk.audio.PullAudioInputStream] :
+def speech_recognizer_from_user_config(user_config : helper.Read_Only_Dict) -> tuple[speechsdk.SpeechRecognizer, helper.BinaryFileReaderCallback, speechsdk.audio.AudioStreamFormat, speechsdk.audio.PullAudioInputStream] :
     (audio_config, callback, format, stream) = audio_config_from_user_config(user_config)
     speech_config = speech_config_from_user_config(user_config)
     speech_recognizer = None
@@ -135,7 +136,7 @@ def speech_recognizer_from_user_config(user_config : helper.Read_Only_Dict) -> t
 
     return (speech_recognizer, callback, format, stream)
 
-def recognize_continuous(speech_recognizer : speechsdk.SpeechRecognizer, user_config : helper.Read_Only_Dict, callback : Any, format : speechsdk.audio.AudioStreamFormat, stream : speechsdk.audio.PullAudioInputStream) :
+def recognize_continuous(speech_recognizer : speechsdk.SpeechRecognizer, user_config : helper.Read_Only_Dict, callback : helper.BinaryFileReaderCallback, format : speechsdk.audio.AudioStreamFormat, stream : speechsdk.audio.PullAudioInputStream) :
     sequence_number = 0
     done = False
 
@@ -197,30 +198,49 @@ def recognize_continuous(speech_recognizer : speechsdk.SpeechRecognizer, user_co
 
     return
 
-usage = """Usage: python caption.py [-c ALAW|ANY|FLAC|MP3|MULAW|OGG_OPUS] [-f] [-h] [-i file] [-l languages] [-m] [-o file] [-p phrases] [-q] [-s] [-t number] [-u] <subscriptionKey> <region>
-       -c format: Use compressed audio format.
-                  Valid values: ALAW, ANY, FLAC, MP3, MULAW, OGG_OPUS.
-                  Default value: ANY.
-              -f: Remove profanity (default behavior is to mask profanity). Overrides -m.
-              -h: Show this help and stop.
-              -i: Input audio file *file* (default input is from the microphone.)
-    -l languages: Enable language identification for specified *languages*.
-                  Example: en-US,ja-JP
-              -m: Disable masking profanity (default behavior). -f overrides this.
-         -o file: Output to *file*.
-      -p phrases: Add specified *phrases*.
-                  Example: Constoso;Jessie;Rehaan
-              -q: Suppress console output (except errors).
-              -s: Output captions in SRT format (default is WebVTT format.)
-       -t number: Set stable partial result threshold to *number*.
-                  Example: 3
-              -u: Output partial results. These are always written to the console, never to an output file. -q overrides this."""
+usage = """Usage: python captioning.py [...]
+
+  CONNECTION
+    --key KEY                     Your Azure Speech service subscription key.
+    --region REGION               Your Azure Speech service region.
+                                  Examples: westus, eastus
+
+  LANGUAGE
+    --languages LANG1,LANG2       Enable language identification for specified languages.
+                                  Example: en-US,ja-JP
+
+  INPUT
+    --input FILE                  Input audio from file (default input is the microphone.)
+    --url URL                     Input audio from URL (default input is the microphone.)
+    --format FORMAT               Use compressed audio format.
+                                  Valid only with --file or --url.
+                                  If this is not specified, uncompressed format (wav) is assumed.
+                                  Valid values: alaw, any, flac, mp3, mulaw, ogg_opus
+                                  Default value: any
+
+  RECOGNITION
+    --recognizing                 Output Recognizing results (default output is Recognized results only.)
+                                  These are always written to the console, never to an output file.
+                                  --quiet overrides this.
+
+  ACCURACY
+    --phrases PHRASE1;PHRASE2     Example: Constoso;Jessie;Rehaan
+
+  OUTPUT
+    --help                        Show this help and stop.
+    --output FILE                 Output captions to file.
+    --srt                         Output captions in SubRip Text format (default format is WebVTT.)
+    --quiet                       Suppress console output, except errors.
+    --profanity OPTION            Valid values: raw, remove, mask
+    --threshold NUMBER            Set stable partial result threshold.
+                                  Default value: 3
+"""
 
 try :
-    if helper.cmd_option_exists("-h") :
+    if helper.cmd_option_exists("--help") :
         print(usage)
     else :
-        user_config = user_config_from_args()
+        user_config = user_config_from_args(usage)
         initialize(user_config = user_config)
         (speech_recognizer, stream, format, callback) = speech_recognizer_from_user_config(user_config = user_config)
         recognize_continuous(speech_recognizer = speech_recognizer, user_config = user_config, stream = stream, format = format, callback = callback)
