@@ -52,8 +52,8 @@ def get_cmd_option(option : str) -> Optional[str] :
     argc = len(argv)
     if option in argv :
         index = argv.index(option)
-        if index < argc - 2 :
-            # We found the option (for example, "-o"), so advance from that to the value (for example, "filename").
+        if index < argc - 1 :
+            # We found the option (for example, "--output"), so advance from that to the value (for example, "filename").
             return argv[index + 1]
         else :
             return None
@@ -64,17 +64,27 @@ def cmd_option_exists(option : str) -> bool :
     return option in argv
 
 def get_compressed_audio_format() -> speechsdk.AudioStreamContainerFormat :
-    value = get_cmd_option("-c")
+    value = get_cmd_option("--format")
     if value is None :
         return speechsdk.AudioStreamContainerFormat.ANY
     else :
         value = value.lower()
-        if value == "alaw" : return speechsdk.AudioStreamContainerFormat.ALAW
-        elif value == "flac" : return speechsdk.AudioStreamContainerFormat.FLAC
-        elif value == "mp3" : return speechsdk.AudioStreamContainerFormat.MP3
-        elif value == "mulaw" : return speechsdk.AudioStreamContainerFormat.MULAW
-        elif value == "ogg_opus" : return speechsdk.AudioStreamContainerFormat.OGG_OPUS
+        if "alaw" == value : return speechsdk.AudioStreamContainerFormat.ALAW
+        elif "flac" == value : return speechsdk.AudioStreamContainerFormat.FLAC
+        elif "mp3" == value : return speechsdk.AudioStreamContainerFormat.MP3
+        elif "mulaw" == value : return speechsdk.AudioStreamContainerFormat.MULAW
+        elif "ogg_opus" == value : return speechsdk.AudioStreamContainerFormat.OGG_OPUS
         else : return speechsdk.AudioStreamContainerFormat.ANY;
+
+def get_profanity_option() -> speechsdk.ProfanityOption :
+    value = get_cmd_option("--profanity")
+    if value is None :
+        return speechsdk.ProfanityOption.Masked
+    else :
+        value = value.lower()
+        if "raw"  == value: return speechsdk.ProfanityOption.Raw
+        elif "remove" == value : return speechsdk.ProfanityOption.Removed
+        else : return speechsdk.ProfanityOption.Masked
 
 # We cannot simply create time with ticks.
 def time_from_ticks(ticks) -> time :
