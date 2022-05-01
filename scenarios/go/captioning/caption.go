@@ -32,7 +32,7 @@ import(
 )
 
 func GetCompressedAudioFormat(args []string) audio.AudioStreamContainerFormat {
-    var value = GetCmdOption(args, "-c");
+    var value = GetCmdOption(args, "--format");
     if nil == value {
         return audio.ANY
     } else {
@@ -43,6 +43,19 @@ func GetCompressedAudioFormat(args []string) audio.AudioStreamContainerFormat {
             case "mulaw" : return audio.MULAW
             case "ogg_opus" : return audio.OGGOPUS
             default : return audio.ANY
+        }
+    }
+}
+
+func GetProfanityOption(args []string) common.ProfanityOption {
+    var value = GetCmdOption(args, "--profanity");
+    if nil == value {
+        return common.Masked
+    } else {
+        switch strings.ToLower(*value) {
+            case "raw" : return common.Raw
+            case "remove" : return common.Removed
+            default : return common.Masked
         }
     }
 }
@@ -106,11 +119,11 @@ func Initialize(userConfig UserConfig) {
     }
 }
 
-func UserConfigFromArgs(args []string) UserConfig {
+func UserConfigFromArgs(args []string, usage string) UserConfig {
     var userConfig = UserConfig {
+        useCompressedAudio : false,
         compressedAudioFormat : audio.ANY,
-        removeProfanity : false,
-        disableMaskingProfanity : false,
+        profanityOption : common.Masked,
         inputFile : nil,
         outputFile : nil,
         suppressConsoleOutput : false,
@@ -121,23 +134,26 @@ func UserConfigFromArgs(args []string) UserConfig {
         region : "",
     }
     
-// Verify argc >= 3 (caption.go, subscriptionKey, region)
-    if len(args) < 3 {
-        log.Fatal("Too few arguments.")
+    var key = GetCmdOption(args, "--key")
+    if nil == key {
+        log.Fatal(fmt.Sprintf("Missing subscription key.%s%s", newline, usage))
     }
-
-    userConfig.subscriptionKey = args[len(args) - 2]
-    userConfig.region = args[len(args) - 1]
-
+    var region = GetCmdOption(args, "--region")    
+    if nil == region {
+        log.Fatal(fmt.Sprintf("Missing region.%s%s", newline, usage))
+    }
+    
+    userConfig.useCompressedAudio = CmdOptionExists(args, "--format")
     userConfig.compressedAudioFormat = GetCompressedAudioFormat(args)
-    userConfig.removeProfanity = CmdOptionExists(args, "-f")
-    userConfig.disableMaskingProfanity = CmdOptionExists(args, "-m")
-    userConfig.inputFile = GetCmdOption(args, "-i")
-    userConfig.outputFile = GetCmdOption(args, "-o")
-    userConfig.showRecognizingResults = CmdOptionExists(args, "-u")
-    userConfig.suppressConsoleOutput = CmdOptionExists(args, "-q");
-    userConfig.stablePartialResultThreshold = GetCmdOption(args, "-r")
-    userConfig.useSubRipTextCaptionFormat = CmdOptionExists(args, "-s")
+    userConfig.profanityOption = GetProfanityOption(args)
+    userConfig.inputFile = GetCmdOption(args, "--input")
+    userConfig.outputFile = GetCmdOption(args, "--output")
+    userConfig.showRecognizingResults = CmdOptionExists(args, "--recognizing")
+    userConfig.suppressConsoleOutput = CmdOptionExists(args, "--quiet");
+    userConfig.stablePartialResultThreshold = GetCmdOption(args, "--threshold")
+    userConfig.useSubRipTextCaptionFormat = CmdOptionExists(args, "--srt")
+    userConfig.subscriptionKey = *key
+    userConfig.region = *region
     
     return userConfig
 }
@@ -185,11 +201,7 @@ func SpeechConfigFromUserConfig(userConfig UserConfig) *speech.SpeechConfig {
         log.Fatal(err)
     }
 
-    if userConfig.removeProfanity {
-        speechConfig.SetProfanity(common.Removed)
-    } else if userConfig.disableMaskingProfanity {
-        speechConfig.SetProfanity(common.Masked)
-    }
+    speechConfig.SetProfanity(userConfig.profanityOption)
     
     if nil != userConfig.stablePartialResultThreshold {
         speechConfig.SetProperty(common.SpeechServiceResponseStablePartialResultThreshold, *userConfig.stablePartialResultThreshold)
@@ -275,25 +287,44 @@ func recognizeContinuous(speechRecognizer *speech.SpeechRecognizer, userConfig U
 }
 
 func main() {
-    var usage string = `Usage: go run caption.go [-c ALAW|ANY|FLAC|MP3|MULAW|OGG_OPUS] [-f] [-h] [-i file] [-m] [-o file] [-q] [-s] [-t number] [-u] <subscriptionKey> <region>
-       -c format: Use compressed audio format.
-                  Valid values: ALAW, ANY, FLAC, MP3, MULAW, OGG_OPUS.
-                  Default value: ANY.
-              -f: Remove profanity (default behavior is to mask profanity). Overrides -m.
-              -h: Show this help and stop.
-              -i: Input audio file *file* (default input is from the microphone.)
-              -m: Disable masking profanity (default behavior). -f overrides this.
-         -o file: Output to *file*.
-              -q: Suppress console output (except errors).
-              -s: Output captions in SRT format (default is WebVTT format.)
-       -t number: Set stable partial result threshold to *number*.
-                  Example: 3
-              -u: Output partial results. These are always written to the console, never to an output file. -q overrides this.`
+    var usage string = `Usage: go run captioning.go [...]
 
-    if CmdOptionExists(os.Args, "-h") {
+  CONNECTION
+    --key KEY                     Your Azure Speech service subscription key.
+    --region REGION               Your Azure Speech service region.
+                                  Examples: westus, eastus
+
+  INPUT
+    --input FILE                  Input audio from file (default input is the microphone.)
+    --url URL                     Input audio from URL (default input is the microphone.)
+    --format FORMAT               Use compressed audio format.
+                                  Valid only with --file or --url.
+                                  If this is not specified, uncompressed format (wav) is assumed.
+                                  Valid values: alaw, any, flac, mp3, mulaw, ogg_opus
+                                  Default value: any
+
+  RECOGNITION
+    --recognizing                 Output Recognizing results (default output is Recognized results only.)
+                                  These are always written to the console, never to an output file.
+                                  --quiet overrides this.
+
+  ACCURACY
+    --phrases PHRASE1;PHRASE2     Example: Constoso;Jessie;Rehaan
+
+  OUTPUT
+    --help                        Show this help and stop.
+    --output FILE                 Output captions to file.
+    --srt                         Output captions in SubRip Text format (default format is WebVTT.)
+    --quiet                       Suppress console output, except errors.
+    --profanity OPTION            Valid values: raw, remove, mask
+    --threshold NUMBER            Set stable partial result threshold.
+                                  Default value: 3
+`
+
+    if CmdOptionExists(os.Args, "--help") {
         fmt.Println(usage);
     } else {
-        var userConfig = UserConfigFromArgs(os.Args)
+        var userConfig = UserConfigFromArgs(os.Args, usage)
         Initialize(userConfig)
         var speechRecognizer = SpeechRecognizerFromUserConfig(userConfig)
         defer speechRecognizer.Close()
