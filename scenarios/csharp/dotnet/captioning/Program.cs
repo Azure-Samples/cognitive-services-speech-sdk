@@ -10,45 +10,64 @@
 // https://docs.microsoft.com/azure/cognitive-services/speech-service/speech-sdk
 // - Install gstreamer:
 // https://docs.microsoft.com/azure/cognitive-services/speech-service/how-to-use-codec-compressed-audio-input-streams
-using Microsoft.CognitiveServices.Speech;
-using Microsoft.CognitiveServices.Speech.Audio;
 
 using System;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.CognitiveServices.Speech;
+using Microsoft.CognitiveServices.Speech.Audio;
 
 namespace Captioning
 {
     class Program
     {
         private UserConfig userConfig;
-        private const string usage = @"Usage: caption.exe [-c ALAW|ANY|FLAC|MP3|MULAW|OGG_OPUS] [-f] [-h] [-i path] [-l languages] [-m] [-o path] [-p phrases] [-q] [-s] [-t number] [-u] <subscriptionKey> <region>
-       -c format: Use compressed audio format.
-                  Valid values: ALAW, ANY, FLAC, MP3, MULAW, OGG_OPUS.
-                  Default value: ANY.
-              -f: Remove profanity (default behavior is to mask profanity). Overrides -m.
-              -h: Show this help and stop.
-         -i path: Input audio file *path* (default input is from the microphone.)
-    -l languages: Enable language identification for specified *languages*.
-                  Example: en-US,ja-JP
-              -m: Disable masking profanity (default behavior). -f overrides this.
-         -o path: Output to file *path*.
-      -p phrases: Add specified *phrases*.
-                  Example: Constoso;Jessie;Rehaan
-              -q: Suppress console output (except errors).
-              -s: Output captions in SubRip Text format (default is WebVTT format.)
-       -t number: Set stable partial result threshold to *number*.
-                  Example: 3
-              -u: Output Recognizing results (default is Recognized results only). These are always written to the console, never to an output file. -q overrides this.";
+        private const string usage = @"USAGE: dotnet run -- [...]
+
+  CONNECTION
+    --key KEY                     Your Azure Speech service subscription key.
+    --region REGION               Your Azure Speech service region.
+                                  Examples: westus, eastus
+
+  LANGUAGE
+    --languages LANG1,LANG2       Enable language identification for specified languages.
+                                  Example: en-US,ja-JP
+
+  INPUT
+    --input FILE                  Input audio from file (default input is the microphone.)
+    --url URL                     Input audio from URL (default input is the microphone.)
+    --format FORMAT               Use compressed audio format.
+                                  Valid only with --file or --url.
+                                  If this is not specified, uncompressed format (wav) is assumed.
+                                  Valid values: alaw, any, flac, mp3, mulaw, ogg_opus
+                                  Default value: any
+
+  RECOGNITION
+    --recognizing                 Output Recognizing results (default output is Recognized results only.)
+                                  These are always written to the console, never to an output file.
+                                  --quiet overrides this.
+
+  ACCURACY
+    --phrases PHRASE1;PHRASE2     Example: Constoso;Jessie;Rehaan
+
+  OUTPUT
+    --help                        Show this help and stop.
+    --output FILE                 Output captions to file.
+    --srt                         Output captions in SubRip Text format (default format is WebVTT.)
+    --quiet                       Suppress console output, except errors.
+    --profanity OPTION            Valid values: raw, remove, mask
+    --threshold NUMBER            Set stable partial result threshold.
+                                  Default value: 3
+";
         
         private static string? GetCmdOption(string[] args, string option)
         {
             var index = Array.IndexOf(args, option);
-            if (index > -1 && index < args.Length - 2)
+            if (index > -1 && index < args.Length - 1)
             {
-                // We found the option (for example, "-o"), so advance from that to the value (for example, "filename").
+                // We found the option (for example, "--output"), so advance from that to the value (for example, "filename").
                 return args[index + 1];
             }
             else {
@@ -61,9 +80,19 @@ namespace Captioning
             return args.Contains (option);
         }
 
+        private static string[]? GetLanguageIDLanguages(string[] args)
+        {
+            string[]? languageIDLanguages = null;
+            if (GetCmdOption(args, "--languages") is string languageIDLanguagesResult)
+            {
+                languageIDLanguages = languageIDLanguagesResult.Split(',');
+            }
+            return languageIDLanguages;
+        }
+
         private static AudioStreamContainerFormat GetCompressedAudioFormat(string[] args)
         {
-            var value = GetCmdOption(args, "-c");
+            var value = GetCmdOption(args, "--format");
             if (null == value)
             {
                 return AudioStreamContainerFormat.ANY;
@@ -78,6 +107,24 @@ namespace Captioning
                     case "mulaw" : return AudioStreamContainerFormat.MULAW;
                     case "ogg_opus" : return AudioStreamContainerFormat.OGG_OPUS;
                     default : return AudioStreamContainerFormat.ANY;
+                }
+            }
+        }
+
+        private static ProfanityOption GetProfanityOption(string[] args)
+        {
+            var value = GetCmdOption(args, "--profanity");
+            if (value is null)
+            {
+                return ProfanityOption.Masked;
+            }
+            else
+            {
+                switch (value.ToLower())
+                {
+                    case "raw" : return ProfanityOption.Raw;
+                    case "remove" : return ProfanityOption.Removed;
+                    default : return ProfanityOption.Masked;
                 }
             }
         }
@@ -147,32 +194,31 @@ namespace Captioning
         //
         public Program(string[] args)
         {
-            // Verify argc >= 3 (caption.exe, subscriptionKey, region)
-            if (args.Length < 3)
+            var key = GetCmdOption(args, "--key");
+            if (key is null)
             {
-                throw new ArgumentException($"Too few arguments.{Environment.NewLine}Usage: {usage}");
+                throw new ArgumentException($"Missing subscription key.{Environment.NewLine}Usage: {usage}");
             }
-
-            string[]? languageIDLanguages = null;
-            if (GetCmdOption(args, "-l") is string languageIDLanguagesResult)
+            var region = GetCmdOption(args, "--region");
+            if (region is null)
             {
-                languageIDLanguages = languageIDLanguagesResult.Split(',');
+                throw new ArgumentException($"Missing region.{Environment.NewLine}Usage: {usage}");
             }
             
             this.userConfig = new UserConfig(
+                CmdOptionExists(args, "--format"),
                 GetCompressedAudioFormat(args),
-                CmdOptionExists(args, "-f"),
-                CmdOptionExists(args, "-m"),
-                languageIDLanguages,
-                GetCmdOption(args, "-i"),
-                GetCmdOption(args, "-o"),
-                GetCmdOption(args, "-p"),
-                CmdOptionExists(args, "-q"),
-                CmdOptionExists(args, "-u"),
-                CmdOptionExists(args, "-s"),
-                GetCmdOption(args, "-t"),
-                args[args.Length - 2],
-                args[args.Length - 1]
+                GetProfanityOption(args),
+                GetLanguageIDLanguages(args),
+                GetCmdOption(args, "--input"),
+                GetCmdOption(args, "--output"),
+                GetCmdOption(args, "--phrases"),
+                CmdOptionExists(args, "--quiet"),
+                CmdOptionExists(args, "--recognizing"),
+                CmdOptionExists(args, "--srt"),
+                GetCmdOption(args, "--threshold"),
+                key,
+                region
             );
         }
 
@@ -195,7 +241,7 @@ namespace Captioning
         {
             if (this.userConfig.inputFilePath is string inputFilePathValue)
             {
-                if (inputFilePathValue.EndsWith(".wav"))
+                if (!this.userConfig.useCompressedAudio)
                 {
                     return Helper.OpenWavFile(inputFilePathValue, AudioProcessingOptions.Create(0));
                 }
@@ -229,14 +275,7 @@ namespace Captioning
                 speechConfig = SpeechConfig.FromSubscription(this.userConfig.subscriptionKey, this.userConfig.region);
             }
 
-            if (this.userConfig.removeProfanity)
-            {
-                speechConfig.SetProfanity(ProfanityOption.Removed);
-            }
-            else if (this.userConfig.disableMaskingProfanity)
-            {
-                speechConfig.SetProfanity(ProfanityOption.Raw);
-            }
+            speechConfig.SetProfanity(this.userConfig.profanityOption);
             
             if (this.userConfig.stablePartialResultThreshold is string stablePartialResultThresholdValue)
             {
@@ -358,12 +397,12 @@ namespace Captioning
         // Note: To pass command-line arguments, run:
         // dotnet run -- [args]
         // For example:
-        // dotnet run -- -h
+        // dotnet run -- --help
         public static void Main(string[] args)
         {
             try
             {
-                if (args.Contains("-h"))
+                if (args.Contains("--help"))
                 {
                     Console.WriteLine(usage);
                 }
