@@ -9,7 +9,6 @@
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-
 import com.microsoft.cognitiveservices.speech.audio.AudioStreamFormat;
 
 public class WavFileReader {
@@ -69,7 +68,7 @@ public class WavFileReader {
         ThrowIfFalse((numRead == 4) && (data[0] == 'R') && (data[1] == 'I') && (data[2] == 'F') && (data[3] == 'F'), "RIFF");
 
         // Chunk size
-        /* int fileLength = */ReadInt32(m_stream);
+        ReadInt32(m_stream);
 
         // Subchunk, Wave Header
         // Subchunk, Format
