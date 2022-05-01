@@ -30,7 +30,7 @@
     <Import Project="..\packages\Microsoft.CognitiveServices.Speech.1.21.0\build\native\Microsoft.CognitiveServices.Speech.targets" Condition="Exists('..\packages\Microsoft.CognitiveServices.Speech.1.21.0\build\native\Microsoft.CognitiveServices.Speech.targets')" />
   </ImportGroup>
   <ItemGroup>
-    <ClCompile Include="caption.cpp">
+    <ClCompile Include="captioning.cpp">
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
