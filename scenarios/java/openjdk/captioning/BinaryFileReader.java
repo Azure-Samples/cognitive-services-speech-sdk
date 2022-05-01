@@ -9,7 +9,6 @@
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-
 import com.microsoft.cognitiveservices.speech.audio.PullAudioInputStreamCallback;
 
 public class BinaryFileReader extends PullAudioInputStreamCallback {
