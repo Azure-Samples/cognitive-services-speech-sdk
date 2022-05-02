@@ -284,7 +284,7 @@ struct Timestamp
 };
 
 bool EndsWith(const std::string& str, const std::string& suffix);
-inline bool CmdOptionExists(char** begin, char** end, const std::string& option);
+bool CmdOptionExists(char** begin, char** end, const std::string& option);
 std::string V2EndpointFromRegion(std::string region);
 Timestamp TimestampFromTicks(uint64_t startTicks, uint64_t endTicks);
 std::shared_ptr<UserConfig> UserConfigFromArgs(int argc, char* argv[], std::string usage);
