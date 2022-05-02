@@ -28,7 +28,6 @@ def user_config_from_args(usage : str) -> helper.Read_Only_Dict :
         raise RuntimeError("Missing subscription key.{}{}".format(linesep, usage))
     region = helper.get_cmd_option("--region")
     if region is None:
-        print(argv)
         raise RuntimeError("Missing region.{}{}".format(linesep, usage))
         
     return helper.Read_Only_Dict({
