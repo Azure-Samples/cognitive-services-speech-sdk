@@ -91,8 +91,8 @@ final class UserConfig
 
     static private Optional<String> GetCmdOption(List<String> args, String option)
     {
-        final var index = args.indexOf(option);
-        if(index > -1 && index < args.size() - 1)
+        final int index = args.indexOf(option);
+        if (index > -1 && index < args.size() - 1)
         {
             // We found the option (for example, "--output"), so advance from that to the value (for example, "filename").
             return Optional.of(args.get(index + 1));
@@ -109,7 +109,7 @@ final class UserConfig
 
     static public AudioStreamContainerFormat GetCompressedAudioFormat(List<String> args)
     {
-        final var value = GetCmdOption(args, "--format");
+        final Optional<String> value = GetCmdOption(args, "--format");
         if (!value.isPresent())
         {
             return AudioStreamContainerFormat.ANY;
@@ -130,7 +130,7 @@ final class UserConfig
 
     static public ProfanityOption GetProfanityOption(List<String> args)
     {
-        final var value = GetCmdOption(args, "--profanity");
+        final Optional<String> value = GetCmdOption(args, "--profanity");
         if (!value.isPresent())
         {
             return ProfanityOption.Masked;
@@ -148,13 +148,13 @@ final class UserConfig
     
     static public UserConfig UserConfigFromArgs(List<String> args, String usage) throws IllegalArgumentException
     {
-        var key = GetCmdOption(args, "--key");
-        if(!key.isPresent())
+        Optional<String> key = GetCmdOption(args, "--key");
+        if (!key.isPresent())
         {
             throw new IllegalArgumentException(String.format("Missing subscription key.%s%s", System.lineSeparator(), usage));
         }
-        var region = GetCmdOption(args, "--region");
-        if(!region.isPresent())
+        Optional<String> region = GetCmdOption(args, "--region");
+        if (!region.isPresent())
         {
             throw new IllegalArgumentException(String.format("Missing region.%s%s", System.lineSeparator(), usage));
         }
