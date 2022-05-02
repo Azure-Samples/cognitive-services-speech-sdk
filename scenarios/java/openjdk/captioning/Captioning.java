@@ -40,7 +40,7 @@ public class Captioning
         final var endTime = new Date((result.getOffset().add(result.getDuration())).divide(ticksPerMillisecond).longValue());
         
         var format = "";
-        if(m_userConfig.getUseSubRipTextCaptionFormat())
+        if (m_userConfig.getUseSubRipTextCaptionFormat())
         {
             // SRT format requires ',' as decimal separator rather than '.'.
             format = "HH:mm:ss,S";
@@ -58,7 +58,7 @@ public class Captioning
     private String CaptionFromSpeechRecognitionResult(int sequenceNumber, SpeechRecognitionResult result)
     {
         var caption = new StringBuilder();
-        if(!m_userConfig.getShowRecognizingResults() && m_userConfig.getUseSubRipTextCaptionFormat())
+        if (!m_userConfig.getShowRecognizingResults() && m_userConfig.getUseSubRipTextCaptionFormat())
         {
             caption.append(String.format("%d%s", sequenceNumber, System.lineSeparator()));
         }
@@ -69,7 +69,7 @@ public class Captioning
 
     private void WriteToConsole(String text)
     {
-        if(!m_userConfig.getSuppressConsoleOutput())
+        if (!m_userConfig.getSuppressConsoleOutput())
         {
             System.out.print(text);
         }
@@ -78,7 +78,7 @@ public class Captioning
     private void WriteToConsoleOrFile(String text) throws IOException
     {
         WriteToConsole(text);
-        if(m_userConfig.getOutputFile().isPresent())
+        if (m_userConfig.getOutputFile().isPresent())
         {
             try
             {
@@ -97,16 +97,16 @@ public class Captioning
     {
         m_userConfig = userConfig;
         
-        if(m_userConfig.getOutputFile().isPresent())
+        if (m_userConfig.getOutputFile().isPresent())
         {
             var outputFile = new File(m_userConfig.getOutputFile().get());
-            if(outputFile.exists())
+            if (outputFile.exists())
             {
                 outputFile.delete();
             }
         }
 
-        if(!m_userConfig.getUseSubRipTextCaptionFormat())
+        if (!m_userConfig.getUseSubRipTextCaptionFormat())
         {
             WriteToConsoleOrFile(String.format("WEBVTT%s%s", System.lineSeparator(), System.lineSeparator()));
         }
@@ -114,7 +114,7 @@ public class Captioning
 
     private AudioConfig AudioConfigFromUserConfig()
     {
-        if(m_userConfig.getInputFile().isPresent())
+        if (m_userConfig.getInputFile().isPresent())
         {
             if (!m_userConfig.getUseCompressedAudio())
             {
@@ -142,7 +142,7 @@ public class Captioning
 
         speechConfig.setProfanity(m_userConfig.getProfanityOption());
 
-        if(m_userConfig.getStablePartialResultThreshold().isPresent())
+        if (m_userConfig.getStablePartialResultThreshold().isPresent())
         {
             speechConfig.setProperty(PropertyId.SpeechServiceResponse_StablePartialResultThreshold, m_userConfig.getStablePartialResultThreshold().get());
         }
@@ -154,11 +154,11 @@ public class Captioning
 
     private SpeechRecognizer SpeechRecognizerFromUserConfig()
     {
-        final var audioConfig = AudioConfigFromUserConfig();
-        final var speechConfig = SpeechConfigFromUserConfig();
+        final AudioConfig audioConfig = AudioConfigFromUserConfig();
+        final SpeechConfig speechConfig = SpeechConfigFromUserConfig();
         final var speechRecognizer = new SpeechRecognizer(speechConfig, audioConfig);
         
-        if(m_userConfig.getPhraseList().isPresent())
+        if (m_userConfig.getPhraseList().isPresent())
         {
             var grammar = PhraseListGrammar.fromRecognizer(speechRecognizer);
             grammar.addPhrase(m_userConfig.getPhraseList().get());
@@ -173,15 +173,15 @@ public class Captioning
         final var done = new boolean[] { false };
         final var sequenceNumber = new int[] { 0 };
 
-        if(m_userConfig.getShowRecognizingResults())
+        if (m_userConfig.getShowRecognizingResults())
         {
             speechRecognizer.recognizing.addEventListener((s, e) -> {
-                if(ResultReason.RecognizingSpeech == e.getResult().getReason() && e.getResult().getText().length() > 0)
+                if (ResultReason.RecognizingSpeech == e.getResult().getReason() && e.getResult().getText().length() > 0)
                 {
                     // We don't show sequence numbers for partial results.
                     WriteToConsole(CaptionFromSpeechRecognitionResult(0, e.getResult()));
                 }
-                else if(ResultReason.NoMatch == e.getResult().getReason())
+                else if (ResultReason.NoMatch == e.getResult().getReason())
                 {
                     WriteToConsole(String.format("NOMATCH: Speech could not be recognized.%s", System.lineSeparator()));
                 }
@@ -189,7 +189,7 @@ public class Captioning
         }
 
         speechRecognizer.recognized.addEventListener((s, e) -> {
-            if(ResultReason.RecognizedSpeech == e.getResult().getReason() && e.getResult().getText().length() > 0)
+            if (ResultReason.RecognizedSpeech == e.getResult().getReason() && e.getResult().getText().length() > 0)
             {
                 sequenceNumber[0]++;
                 try
@@ -203,24 +203,24 @@ public class Captioning
                     done[0] = true;
                 }
             }
-            else if(ResultReason.NoMatch == e.getResult().getReason())
+            else if (ResultReason.NoMatch == e.getResult().getReason())
             {
                 WriteToConsole(String.format("NOMATCH: Speech could not be recognized.%s", System.lineSeparator()));
             }
         });
         
         speechRecognizer.canceled.addEventListener((s, e) -> {
-            if(CancellationReason.EndOfStream == e.getReason())
+            if (CancellationReason.EndOfStream == e.getReason())
             {
                 WriteToConsole(String.format("End of stream reached.%s", System.lineSeparator()));
                 done[0] = true; // Notify to stop recognition.
             }
-            else if(CancellationReason.CancelledByUser == e.getReason())
+            else if (CancellationReason.CancelledByUser == e.getReason())
             {
                 WriteToConsole(String.format("User canceled request.%s", System.lineSeparator()));
                 done[0] = true; // Notify to stop recognition.
             }
-            else if(CancellationReason.Error == e.getReason())
+            else if (CancellationReason.Error == e.getReason())
             {
                 // Error output should not be suppressed, even if suppress output flag is set.
                 System.out.println(String.format("Encountered error.%sError code: %d%sError details: %s%s", System.lineSeparator(), e.getErrorCode(), e.getErrorDetails()));
@@ -255,6 +255,9 @@ public class Captioning
         final var usage = """
 Usage: java -cp .;target\\dependency\\* Captioning [...]
 
+  HELP
+    --help                        Show this help and stop.
+
   CONNECTION
     --key KEY                     Your Azure Speech service subscription key.
     --region REGION               Your Azure Speech service region.
@@ -264,10 +267,9 @@ Usage: java -cp .;target\\dependency\\* Captioning [...]
     --input FILE                  Input audio from file (default input is the microphone.)
     --url URL                     Input audio from URL (default input is the microphone.)
     --format FORMAT               Use compressed audio format.
+                                  If this is not present, uncompressed format (wav) is assumed.
                                   Valid only with --file or --url.
-                                  If this is not specified, uncompressed format (wav) is assumed.
                                   Valid values: alaw, any, flac, mp3, mulaw, ogg_opus
-                                  Default value: any
 
   RECOGNITION
     --recognizing                 Output Recognizing results (default output is Recognized results only.)
@@ -278,8 +280,7 @@ Usage: java -cp .;target\\dependency\\* Captioning [...]
     --phrases PHRASE1;PHRASE2     Example: Constoso;Jessie;Rehaan
 
   OUTPUT
-    --help                        Show this help and stop.
-    --output FILE                 Output captions to file.
+    --output FILE                 Output captions to text file.
     --srt                         Output captions in SubRip Text format (default format is WebVTT.)
     --quiet                       Suppress console output, except errors.
     --profanity OPTION            Valid values: raw, remove, mask
@@ -290,16 +291,16 @@ Usage: java -cp .;target\\dependency\\* Captioning [...]
         try
         {
             List<String> argsList = Arrays.stream(args).collect(Collectors.toList());
-            if(argsList.contains("--help"))
+            if (argsList.contains("--help"))
             {
                 System.out.println(usage);
             }
             else
             {
                 final var captioning = new Captioning();
-                final var userConfig = UserConfig.UserConfigFromArgs(argsList, usage);
+                final UserConfig userConfig = UserConfig.UserConfigFromArgs(argsList, usage);
                 captioning.Initialize(userConfig);
-                final var speechRecognizer = captioning.SpeechRecognizerFromUserConfig();
+                final SpeechRecognizer speechRecognizer = captioning.SpeechRecognizerFromUserConfig();
                 captioning.RecognizeContinuous(speechRecognizer);
             }
         }
