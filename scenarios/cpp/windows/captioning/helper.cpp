@@ -65,7 +65,7 @@ static std::optional<std::string> GetCmdOption(char** begin, char** end, const s
     }
 }
 
-inline bool CmdOptionExists(char** begin, char** end, const std::string& option)
+bool CmdOptionExists(char** begin, char** end, const std::string& option)
 {
     return std::find(begin, end, option) != end;
 }
