@@ -124,7 +124,7 @@ def speech_recognizer_from_user_config(user_config : helper.Read_Only_Dict) -> t
     speech_recognizer = None
 
     if user_config["language_ID_languages"] is not None :
-        auto_detect_source_language_config = speechsdk.AutoDetectSourceLanguageConfig(user_config["language_ID_languages"].split(","))
+        auto_detect_source_language_config = speechsdk.AutoDetectSourceLanguageConfig(user_config["language_ID_languages"].split(";"))
         speech_recognizer = speechsdk.SpeechRecognizer(speech_config = speech_config, audio_config = audio_config, auto_detect_source_language_config = auto_detect_source_language_config)
     else :
         speech_recognizer = speechsdk.SpeechRecognizer(speech_config = speech_config, audio_config = audio_config)
@@ -199,23 +199,25 @@ def recognize_continuous(speech_recognizer : speechsdk.SpeechRecognizer, user_co
 
 usage = """Usage: python captioning.py [...]
 
+  HELP
+    --help                        Show this help and stop.
+
   CONNECTION
     --key KEY                     Your Azure Speech service subscription key.
     --region REGION               Your Azure Speech service region.
                                   Examples: westus, eastus
 
   LANGUAGE
-    --languages LANG1,LANG2       Enable language identification for specified languages.
-                                  Example: en-US,ja-JP
+    --languages LANG1;LANG2       Enable language identification for specified languages.
+                                  Example: en-US;ja-JP
 
   INPUT
     --input FILE                  Input audio from file (default input is the microphone.)
     --url URL                     Input audio from URL (default input is the microphone.)
     --format FORMAT               Use compressed audio format.
+                                  If this is not present, uncompressed format (wav) is assumed.
                                   Valid only with --file or --url.
-                                  If this is not specified, uncompressed format (wav) is assumed.
                                   Valid values: alaw, any, flac, mp3, mulaw, ogg_opus
-                                  Default value: any
 
   RECOGNITION
     --recognizing                 Output Recognizing results (default output is Recognized results only.)
@@ -226,8 +228,7 @@ usage = """Usage: python captioning.py [...]
     --phrases PHRASE1;PHRASE2     Example: Constoso;Jessie;Rehaan
 
   OUTPUT
-    --help                        Show this help and stop.
-    --output FILE                 Output captions to file.
+    --output FILE                 Output captions to text file.
     --srt                         Output captions in SubRip Text format (default format is WebVTT.)
     --quiet                       Suppress console output, except errors.
     --profanity OPTION            Valid values: raw, remove, mask
