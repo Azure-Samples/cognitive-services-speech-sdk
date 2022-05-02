@@ -374,6 +374,9 @@ function main(args : string[]) : void
 {
     const usage = `Usage: node captioning.js [...]
 
+  HELP
+    --help                        Show this help and stop.
+
   CONNECTION
     --key KEY                     Your Azure Speech service subscription key.
     --region REGION               Your Azure Speech service region.
@@ -392,8 +395,7 @@ function main(args : string[]) : void
     --phrases PHRASE1;PHRASE2     Example: Constoso;Jessie;Rehaan
 
   OUTPUT
-    --help                        Show this help and stop.
-    --output FILE                 Output captions to file.
+    --output FILE                 Output captions to text file.
     --srt                         Output captions in SubRip Text format (default format is WebVTT.)
     --quiet                       Suppress console output, except errors.
     --profanity OPTION            Valid values: raw, remove, mask
