@@ -37,7 +37,7 @@ private:
     std::string TimestampFromSpeechRecognitionResult(std::shared_ptr<SpeechRecognitionResult> result)
     {
         std::ostringstream strTimestamp;
-        auto timestamp = TimestampFromTicks(result->Offset(), result->Offset() + result->Duration());    
+        Timestamp timestamp = TimestampFromTicks(result->Offset(), result->Offset() + result->Duration());    
         
         std::ostringstream startSeconds_1, endSeconds_1;
         // setw value is 2 for seconds + 1 for floating point + 3 for decimal places.
@@ -142,7 +142,7 @@ private:
         std::shared_ptr<SpeechConfig> speechConfig;
         if (m_userConfig->languageIDLanguages.has_value())
         {
-            auto endpoint = V2EndpointFromRegion(m_userConfig->region);
+            std::string endpoint = V2EndpointFromRegion(m_userConfig->region);
             speechConfig = SpeechConfig::FromEndpoint(endpoint, m_userConfig->subscriptionKey);
         }
         else
@@ -187,8 +187,8 @@ public:
 
     std::shared_ptr<SpeechRecognizer> SpeechRecognizerFromUserConfig()
     {
-        auto audioConfig = AudioConfigFromUserConfig();
-        auto speechConfig = SpeechConfigFromUserConfig();
+        std::shared_ptr<AudioConfig> audioConfig = AudioConfigFromUserConfig();
+        std::shared_ptr<SpeechConfig> speechConfig = SpeechConfigFromUserConfig();
         std::shared_ptr<SpeechRecognizer> speechRecognizer;
         
         if (m_userConfig->languageIDLanguages.has_value())
@@ -213,11 +213,10 @@ public:
     std::optional<std::string> RecognizeContinuous(std::shared_ptr<SpeechRecognizer> speechRecognizer)
     {
         std::promise<std::optional<std::string>> recognitionEnd;
-        auto sequenceNumber = 0;
+        int sequenceNumber = 0;
 
         if (m_userConfig->showRecognizingResults) {
-            // Capture variables we will need inside the lambda.
-            // See:
+            // Capture variables we will need inside the lambda. See:
             // https://www.cppstories.com/2020/08/lambda-capturing.html/
             speechRecognizer->Recognizing.Connect([this](const SpeechRecognitionEventArgs& e)
                 {
@@ -284,7 +283,7 @@ public:
         speechRecognizer->StartContinuousRecognitionAsync().get();
 
         // Waits for recognition end.
-        auto result = recognitionEnd.get_future().get();
+        std::optional<std::string> result = recognitionEnd.get_future().get();
 
         // Stops recognition.
         speechRecognizer->StopContinuousRecognitionAsync().get();
@@ -295,22 +294,23 @@ public:
 
 int main(int argc, char* argv[])
 {
-    const std::string usage = "Usage: caption.exe [...]\n\n"
+    const std::string usage = "Usage: captioning.exe [...]\n\n"
+"  HELP\n"
+"    --help                        Show this help and stop.\n\n"
 "  CONNECTION\n"
 "    --key KEY                     Your Azure Speech service subscription key.\n"
 "    --region REGION               Your Azure Speech service region.\n"
 "                                  Examples: westus, eastus\n\n"
 "  LANGUAGE\n"
-"    --languages LANG1,LANG2       Enable language identification for specified languages.\n"
-"                                  Example: en-US,ja-JP\n\n"
+"    --languages LANG1;LANG2       Enable language identification for specified languages.\n"
+"                                  Example: en-US;ja-JP\n\n"
 "  INPUT\n"
 "    --input FILE                  Input audio from file (default input is the microphone.)\n"
 "    --url URL                     Input audio from URL (default input is the microphone.)\n"
 "    --format FORMAT               Use compressed audio format.\n"
+"                                  If this is not present, uncompressed format (wav) is assumed.\n"
 "                                  Valid only with --file or --url.\n"
-"                                  If this is not specified, uncompressed format (wav) is assumed.\n"
-"                                  Valid values: alaw, any, flac, mp3, mulaw, ogg_opus\n"
-"                                  Default value: any\n\n"
+"                                  Valid values: alaw, any, flac, mp3, mulaw, ogg_opus\n\n"
 "  RECOGNITION\n"
 "    --recognizing                 Output Recognizing results (default output is Recognized results only.)\n"
 "                                  These are always written to the console, never to an output file.\n"
@@ -318,8 +318,7 @@ int main(int argc, char* argv[])
 "  ACCURACY\n"
 "    --phrases PHRASE1;PHRASE2     Example: Constoso;Jessie;Rehaan\n\n"
 "  OUTPUT\n"
-"    --help                        Show this help and stop.\n"
-"    --output FILE                 Output captions to file.\n"
+"    --output FILE                 Output captions to text file.\n"
 "    --srt                         Output captions in SubRip Text format (default format is WebVTT.)\n"
 "    --quiet                       Suppress console output, except errors.\n"
 "    --profanity OPTION            Valid values: raw, remove, mask\n"
@@ -334,10 +333,10 @@ int main(int argc, char* argv[])
         }
         else
         {
-            auto userConfig = UserConfigFromArgs(argc, argv, usage);
+            std::shared_ptr<UserConfig> userConfig = UserConfigFromArgs(argc, argv, usage);
             auto captioning = std::make_shared<Captioning>(userConfig);
-            auto speechRecognizer = captioning->SpeechRecognizerFromUserConfig();
-            auto error = captioning->RecognizeContinuous(speechRecognizer);
+            std::shared_ptr<SpeechRecognizer> speechRecognizer = captioning->SpeechRecognizerFromUserConfig();
+            std::optional<std::string> error = captioning->RecognizeContinuous(speechRecognizer);
             if (error.has_value())
             {
                 std::cout << error.value() << std::endl;
