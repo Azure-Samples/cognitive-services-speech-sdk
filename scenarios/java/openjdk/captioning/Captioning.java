@@ -33,63 +33,6 @@ public class Captioning
     PullAudioInputStreamCallback m_callback;
     PullAudioInputStream m_stream;
 
-    static private Optional<String> GetCmdOption(List<String> args, String option)
-    {
-        final var index = args.indexOf(option);
-        if(index > -1 && index < args.size() - 1)
-        {
-            // We found the option (for example, "--output"), so advance from that to the value (for example, "filename").
-            return Optional.of(args.get(index + 1));
-        }
-        else {
-            return Optional.empty();
-        }
-    }
-
-    static private boolean CmdOptionExists(List<String> args, String option)
-    {
-        return(args.contains(option));
-    }
-
-    static private AudioStreamContainerFormat GetCompressedAudioFormat(List<String> args)
-    {
-        final var value = GetCmdOption(args, "--format");
-        if (!value.isPresent())
-        {
-            return AudioStreamContainerFormat.ANY;
-        }
-        else
-        {
-            switch (value.get().toLowerCase())
-            {
-                case "alaw" : return AudioStreamContainerFormat.ALAW;
-                case "flac" : return AudioStreamContainerFormat.FLAC;
-                case "mp3" : return AudioStreamContainerFormat.MP3;
-                case "mulaw" : return AudioStreamContainerFormat.MULAW;
-                case "ogg_opus" : return AudioStreamContainerFormat.OGG_OPUS;
-                default : return AudioStreamContainerFormat.ANY;
-            }
-        }
-    }
-
-    static private ProfanityOption GetProfanityOption(List<String> args)
-    {
-        final var value = GetCmdOption(args, "--profanity");
-        if (!value.isPresent())
-        {
-            return ProfanityOption.Masked;
-        }
-        else
-        {
-            switch (value.get().toLowerCase())
-            {
-                case "raw" : return ProfanityOption.Raw;
-                case "removed" : return ProfanityOption.Removed;
-                default : return ProfanityOption.Masked;
-            }
-        }
-    }
-
     private String TimestampFromSpeechRecognitionResult(SpeechRecognitionResult result)
     {
         final var ticksPerMillisecond = BigInteger.valueOf(10000);
@@ -167,35 +110,6 @@ public class Captioning
         {
             WriteToConsoleOrFile(String.format("WEBVTT%s%s", System.lineSeparator(), System.lineSeparator()));
         }
-    }
-
-    static private UserConfig UserConfigFromArgs(List<String> args, String usage) throws IllegalArgumentException
-    {
-        var key = GetCmdOption(args, "--key");
-        if(!key.isPresent())
-        {
-            throw new IllegalArgumentException(String.format("Missing subscription key.%s%s", System.lineSeparator(), usage));
-        }
-        var region = GetCmdOption(args, "--region");
-        if(!region.isPresent())
-        {
-            throw new IllegalArgumentException(String.format("Missing region.%s%s", System.lineSeparator(), usage));
-        }
-        
-        return new UserConfig(
-            CmdOptionExists(args, "--format"),
-            GetCompressedAudioFormat(args),
-            GetProfanityOption(args),
-            GetCmdOption(args, "--input"),
-            GetCmdOption(args, "--output"),
-            GetCmdOption(args, "--phrases"),
-            CmdOptionExists(args, "--quiet"),
-            CmdOptionExists(args, "--recognizing"),
-            GetCmdOption(args, "--threshold"),
-            CmdOptionExists(args, "--srt"),
-            key.get(),
-            region.get()
-        );
     }
 
     private AudioConfig AudioConfigFromUserConfig()
@@ -383,7 +297,7 @@ Usage: java -cp .;target\\dependency\\* Captioning [...]
             else
             {
                 final var captioning = new Captioning();
-                final var userConfig = UserConfigFromArgs(argsList, usage);
+                final var userConfig = UserConfig.UserConfigFromArgs(argsList, usage);
                 captioning.Initialize(userConfig);
                 final var speechRecognizer = captioning.SpeechRecognizerFromUserConfig();
                 captioning.RecognizeContinuous(speechRecognizer);
