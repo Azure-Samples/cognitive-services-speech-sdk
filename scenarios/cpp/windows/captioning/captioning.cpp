@@ -328,7 +328,7 @@ int main(int argc, char* argv[])
 
     try
     {
-        if (CmdOptionExists(argv, argv + argc, "--help"))
+        if (CommandLineOptionExists(argv, argv + argc, "--help"))
         {
             std::cout << usage << std::endl;
         }
