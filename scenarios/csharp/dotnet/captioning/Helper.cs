@@ -64,13 +64,13 @@ namespace Captioning
             Trace.Assert((data[0] == 'f') && (data[1] == 'm') && (data[2] == 't') && (data[3] == ' '), "Wrong format tag in wav header");
 
             // chunk format size
-            var formatSize = reader.ReadInt32();
-            var formatTag = reader.ReadUInt16();
-            var channels = reader.ReadUInt16();
-            var samplesPerSecond = reader.ReadUInt32();
-            var avgBytesPerSec = reader.ReadUInt32();
-            var blockAlign = reader.ReadUInt16();
-            var bitsPerSample = reader.ReadUInt16();
+            int formatSize = reader.ReadInt32();
+            ushort formatTag = reader.ReadUInt16();
+            ushort channels = reader.ReadUInt16();
+            uint samplesPerSecond = reader.ReadUInt32();
+            uint avgBytesPerSec = reader.ReadUInt32();
+            ushort blockAlign = reader.ReadUInt16();
+            ushort bitsPerSample = reader.ReadUInt16();
 
             // Until now we have read 16 bytes in format, the rest is cbSize and is ignored for now.
             if (formatSize > 16)
@@ -81,7 +81,7 @@ namespace Captioning
             reader.Read(data, 0, 4);
             if (data[0] == 'L' && data[1] == 'I' && data[2] == 'S' && data[3] == 'T')
             {
-                var listChunkSize = reader.ReadUInt32();
+                uint listChunkSize = reader.ReadUInt32();
                 reader.ReadBytes((int)listChunkSize);
                 reader.Read(data, 0, 4);
             }
