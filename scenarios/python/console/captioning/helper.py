@@ -36,8 +36,6 @@ class BinaryFileReaderCallback(speechsdk.audio.PullAudioInputStreamCallback):
             print('Exception in `close`: {}'.format(ex))
             raise
 
-# See
-# https://stackoverflow.com/a/28452633
 class Read_Only_Dict(Mapping):
     def __init__(self, data):
         self._data = data
