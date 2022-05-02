@@ -289,6 +289,9 @@ func recognizeContinuous(speechRecognizer *speech.SpeechRecognizer, userConfig U
 func main() {
     var usage string = `Usage: go run captioning.go [...]
 
+  HELP
+    --help                        Show this help and stop.
+
   CONNECTION
     --key KEY                     Your Azure Speech service subscription key.
     --region REGION               Your Azure Speech service region.
@@ -298,10 +301,9 @@ func main() {
     --input FILE                  Input audio from file (default input is the microphone.)
     --url URL                     Input audio from URL (default input is the microphone.)
     --format FORMAT               Use compressed audio format.
+                                  If this is not present, uncompressed format (wav) is assumed.
                                   Valid only with --file or --url.
-                                  If this is not specified, uncompressed format (wav) is assumed.
                                   Valid values: alaw, any, flac, mp3, mulaw, ogg_opus
-                                  Default value: any
 
   RECOGNITION
     --recognizing                 Output Recognizing results (default output is Recognized results only.)
@@ -312,8 +314,7 @@ func main() {
     --phrases PHRASE1;PHRASE2     Example: Constoso;Jessie;Rehaan
 
   OUTPUT
-    --help                        Show this help and stop.
-    --output FILE                 Output captions to file.
+    --output FILE                 Output captions to text file.
     --srt                         Output captions in SubRip Text format (default format is WebVTT.)
     --quiet                       Suppress console output, except errors.
     --profanity OPTION            Valid values: raw, remove, mask
