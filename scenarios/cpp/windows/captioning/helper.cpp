@@ -38,11 +38,11 @@ static std::string ToLower(std::string str)
 // The value parameter to std::find must be std::string. Otherwise std::find will compare the pointer values rather than the string contents.
 static std::optional<std::string> GetCommandLineOption(char** begin, char** end, const std::string& option)
 {
-    auto result = std::find(begin, end, option);
+    char** result = std::find(begin, end, option);
     if (result != end)
     {
         // We found the option (for example, "--output"), so advance from that to the value (for example, "filename").
-        auto value = ++result;
+        char** value = ++result;
         // std::string(nullptr) is undefined.        
         if (value != end && nullptr != *value)
         {
@@ -66,14 +66,14 @@ bool CommandLineOptionExists(char** begin, char** end, const std::string& option
 
 static AudioStreamContainerFormat GetCompressedAudioFormat(char** begin, char** end)
 {
-    auto format = GetCommandLineOption(begin, end, "--format");
+    std::optional<std::string> format = GetCommandLineOption(begin, end, "--format");
     if (!format.has_value())
     {
         return AudioStreamContainerFormat::ANY;
     }
     else
     {
-        auto value = ToLower(format.value());
+        std::string value = ToLower(format.value());
         if ("alaw" == value)
         {
             return AudioStreamContainerFormat::ALAW;
@@ -103,14 +103,14 @@ static AudioStreamContainerFormat GetCompressedAudioFormat(char** begin, char** 
 
 static ProfanityOption GetProfanityOption(char** begin, char** end)
 {
-    auto profanity = GetCommandLineOption(begin, end, "--profanity");
+    std::optional<std::string> profanity = GetCommandLineOption(begin, end, "--profanity");
     if (!profanity.has_value())
     {
         return ProfanityOption::Masked;
     }
     else
     {
-        auto value = ToLower(profanity.value());
+        std::string value = ToLower(profanity.value());
         if ("raw" == value)
         {
             return ProfanityOption::Raw;
@@ -134,41 +134,35 @@ std::string V2EndpointFromRegion(std::string region)
 
 Timestamp TimestampFromTicks(uint64_t startTicks, uint64_t endTicks)
 {
-    const auto ticksPerSecond = 10000000.0;
+    const float ticksPerSecond = 10000000.0;
 
-    const auto startSeconds_1 = startTicks / ticksPerSecond;
-    const auto endSeconds_1 = endTicks / ticksPerSecond;
+    const int startSeconds = startTicks / ticksPerSecond;
+    const int endSeconds = endTicks / ticksPerSecond;
     
-    const auto startMinutes_1 = startSeconds_1 / 60;
-    const auto endMinutes_1 = endSeconds_1 / 60;    
+    const int startMinutes = startSeconds / 60;
+    const int endMinutes = endSeconds / 60;    
     
-    const auto startHours = startMinutes_1 / 60;
-    const auto endHours = endMinutes_1 / 60;
-    
-    const auto startSeconds_2 = fmod(startSeconds_1, 60.0);
-    const auto endSeconds_2 = fmod(endSeconds_1, 60.0);
-    
-    const auto startMinutes_2 = fmod(startMinutes_1, 60.0);
-    const auto endMinutes_2 = fmod(endMinutes_1, 60.0);
-    
-    return Timestamp(startHours, endHours, startMinutes_2, endMinutes_2, startSeconds_2, endSeconds_2);
+    const int startHours = startMinutes / 60;
+    const int endHours = endMinutes / 60;
+
+    return Timestamp(startHours, endHours, fmod(startMinutes, 60.0), fmod(endMinutes, 60.0), fmod(startSeconds, 60.0), fmod(endSeconds, 60.0));
 }
 
 std::shared_ptr<UserConfig> UserConfigFromArgs(int argc, char* argv[], std::string usage)
 {
     std::optional<std::vector<std::string>> languageIDLanguages = std::nullopt;
-    auto languageIDLanguagesResult = GetCommandLineOption(argv, argv + argc, "--languages");
+    std::optional<std::string> languageIDLanguagesResult = GetCommandLineOption(argv, argv + argc, "--languages");
     if (languageIDLanguagesResult.has_value())
     {
-        languageIDLanguages = std::optional<std::vector<std::string>>{ Split(languageIDLanguagesResult.value(), ',') };
+        languageIDLanguages = std::optional<std::vector<std::string>>{ Split(languageIDLanguagesResult.value(), ';') };
     }
 
-    auto key = GetCommandLineOption(argv, argv + argc, "--key");
+    std::optional<std::string> key = GetCommandLineOption(argv, argv + argc, "--key");
     if (!key.has_value())
     {
         throw std::invalid_argument("Missing subscription key.\n" + usage);
     }
-    auto region = GetCommandLineOption(argv, argv + argc, "--region");
+    std::optional<std::string> region = GetCommandLineOption(argv, argv + argc, "--region");
     if (!region.has_value())
     {
         throw std::invalid_argument("Missing region.\n" + usage);
