@@ -26,23 +26,25 @@ namespace Captioning
         private UserConfig userConfig;
         private const string usage = @"USAGE: dotnet run -- [...]
 
+  HELP
+    --help                        Show this help and stop.
+
   CONNECTION
     --key KEY                     Your Azure Speech service subscription key.
     --region REGION               Your Azure Speech service region.
                                   Examples: westus, eastus
 
   LANGUAGE
-    --languages LANG1,LANG2       Enable language identification for specified languages.
-                                  Example: en-US,ja-JP
+    --languages LANG1;LANG2       Enable language identification for specified languages.
+                                  Example: en-US;ja-JP
 
   INPUT
     --input FILE                  Input audio from file (default input is the microphone.)
     --url URL                     Input audio from URL (default input is the microphone.)
     --format FORMAT               Use compressed audio format.
+                                  If this is not present, uncompressed format (wav) is assumed.
                                   Valid only with --file or --url.
-                                  If this is not specified, uncompressed format (wav) is assumed.
                                   Valid values: alaw, any, flac, mp3, mulaw, ogg_opus
-                                  Default value: any
 
   RECOGNITION
     --recognizing                 Output Recognizing results (default output is Recognized results only.)
@@ -53,8 +55,7 @@ namespace Captioning
     --phrases PHRASE1;PHRASE2     Example: Constoso;Jessie;Rehaan
 
   OUTPUT
-    --help                        Show this help and stop.
-    --output FILE                 Output captions to file.
+    --output FILE                 Output captions to text file.
     --srt                         Output captions in SubRip Text format (default format is WebVTT.)
     --quiet                       Suppress console output, except errors.
     --profanity OPTION            Valid values: raw, remove, mask
@@ -64,7 +65,7 @@ namespace Captioning
         
         private static string? GetCmdOption(string[] args, string option)
         {
-            var index = Array.IndexOf(args, option);
+            int index = Array.IndexOf(args, option);
             if (index > -1 && index < args.Length - 1)
             {
                 // We found the option (for example, "--output"), so advance from that to the value (for example, "filename").
@@ -85,14 +86,14 @@ namespace Captioning
             string[]? languageIDLanguages = null;
             if (GetCmdOption(args, "--languages") is string languageIDLanguagesResult)
             {
-                languageIDLanguages = languageIDLanguagesResult.Split(',');
+                languageIDLanguages = languageIDLanguagesResult.Split(';');
             }
             return languageIDLanguages;
         }
 
         private static AudioStreamContainerFormat GetCompressedAudioFormat(string[] args)
         {
-            var value = GetCmdOption(args, "--format");
+            string? value = GetCmdOption(args, "--format");
             if (null == value)
             {
                 return AudioStreamContainerFormat.ANY;
@@ -113,7 +114,7 @@ namespace Captioning
 
         private static ProfanityOption GetProfanityOption(string[] args)
         {
-            var value = GetCmdOption(args, "--profanity");
+            string? value = GetCmdOption(args, "--profanity");
             if (value is null)
             {
                 return ProfanityOption.Masked;
@@ -138,7 +139,7 @@ namespace Captioning
         private string TimestampFromSpeechRecognitionResult(SpeechRecognitionResult result)
         {
             var startTime = new DateTime(result.OffsetInTicks);
-            var endTime = startTime.Add(result.Duration);
+            DateTime endTime = startTime.Add(result.Duration);
 
             // SRT format requires ',' as decimal separator rather than '.'.
             return this.userConfig.useSubRipTextCaptionFormat
@@ -194,12 +195,12 @@ namespace Captioning
         //
         public Program(string[] args)
         {
-            var key = GetCmdOption(args, "--key");
+            string? key = GetCmdOption(args, "--key");
             if (key is null)
             {
                 throw new ArgumentException($"Missing subscription key.{Environment.NewLine}Usage: {usage}");
             }
-            var region = GetCmdOption(args, "--region");
+            string? region = GetCmdOption(args, "--region");
             if (region is null)
             {
                 throw new ArgumentException($"Missing region.{Environment.NewLine}Usage: {usage}");
@@ -292,8 +293,8 @@ namespace Captioning
         //
         private SpeechRecognizer SpeechRecognizerFromUserConfig()
         {
-            var audioConfig = AudioConfigFromUserConfig();
-            var speechConfig = SpeechConfigFromUserConfig();
+            AudioConfig audioConfig = AudioConfigFromUserConfig();
+            SpeechConfig speechConfig = SpeechConfigFromUserConfig();
             SpeechRecognizer speechRecognizer;
             
             if (userConfig.languageIDLanguages is string[] languageIDLanguagesValue)
@@ -410,7 +411,7 @@ namespace Captioning
                 {
                     Program program = new Program(args);
                     program.Initialize();
-                    var speechRecognizer = program.SpeechRecognizerFromUserConfig();
+                    SpeechRecognizer speechRecognizer = program.SpeechRecognizerFromUserConfig();
                     if (program.RecognizeContinuous(speechRecognizer).Result is string error)
                     {
                         Console.WriteLine(error);
