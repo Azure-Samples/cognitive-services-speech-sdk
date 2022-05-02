@@ -3,6 +3,7 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
+import java.util.List;
 import java.util.Optional;
 import com.microsoft.cognitiveservices.speech.*;
 import com.microsoft.cognitiveservices.speech.audio.*;
@@ -86,5 +87,91 @@ final class UserConfig
         this.useSubRipTextCaptionFormat = useSubRipTextCaptionFormat;
         this.subscriptionKey = subscriptionKey;
         this.region = region;
+    }
+
+    static private Optional<String> GetCmdOption(List<String> args, String option)
+    {
+        final var index = args.indexOf(option);
+        if(index > -1 && index < args.size() - 1)
+        {
+            // We found the option (for example, "--output"), so advance from that to the value (for example, "filename").
+            return Optional.of(args.get(index + 1));
+        }
+        else {
+            return Optional.empty();
+        }
+    }
+
+    static private boolean CmdOptionExists(List<String> args, String option)
+    {
+        return(args.contains(option));
+    }
+
+    static public AudioStreamContainerFormat GetCompressedAudioFormat(List<String> args)
+    {
+        final var value = GetCmdOption(args, "--format");
+        if (!value.isPresent())
+        {
+            return AudioStreamContainerFormat.ANY;
+        }
+        else
+        {
+            switch (value.get().toLowerCase())
+            {
+                case "alaw" : return AudioStreamContainerFormat.ALAW;
+                case "flac" : return AudioStreamContainerFormat.FLAC;
+                case "mp3" : return AudioStreamContainerFormat.MP3;
+                case "mulaw" : return AudioStreamContainerFormat.MULAW;
+                case "ogg_opus" : return AudioStreamContainerFormat.OGG_OPUS;
+                default : return AudioStreamContainerFormat.ANY;
+            }
+        }
+    }
+
+    static public ProfanityOption GetProfanityOption(List<String> args)
+    {
+        final var value = GetCmdOption(args, "--profanity");
+        if (!value.isPresent())
+        {
+            return ProfanityOption.Masked;
+        }
+        else
+        {
+            switch (value.get().toLowerCase())
+            {
+                case "raw" : return ProfanityOption.Raw;
+                case "removed" : return ProfanityOption.Removed;
+                default : return ProfanityOption.Masked;
+            }
+        }
+    }
+    
+    static public UserConfig UserConfigFromArgs(List<String> args, String usage) throws IllegalArgumentException
+    {
+        var key = GetCmdOption(args, "--key");
+        if(!key.isPresent())
+        {
+            throw new IllegalArgumentException(String.format("Missing subscription key.%s%s", System.lineSeparator(), usage));
+        }
+        var region = GetCmdOption(args, "--region");
+        if(!region.isPresent())
+        {
+            throw new IllegalArgumentException(String.format("Missing region.%s%s", System.lineSeparator(), usage));
+        }
+        
+        return new UserConfig(
+            CmdOptionExists(args, "--format"),
+            GetCompressedAudioFormat(args),
+            GetProfanityOption(args),
+            GetCmdOption(args, "--input"),
+            GetCmdOption(args, "--output"),
+            GetCmdOption(args, "--phrases"),
+            CmdOptionExists(args, "--quiet"),
+            CmdOptionExists(args, "--recognizing"),
+            GetCmdOption(args, "--threshold"),
+            CmdOptionExists(args, "--srt"),
+            key.get(),
+            region.get()
+        );
     }
 }
