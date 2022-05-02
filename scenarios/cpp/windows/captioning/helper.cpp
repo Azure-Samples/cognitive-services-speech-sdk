@@ -24,25 +24,19 @@ static std::vector<std::string> Split(const std::string& s, char delimiter)
     return tokens;
 }
 
-// See:
-// https://stackoverflow.com/a/42844629
 bool EndsWith(const std::string& str, const std::string& suffix)
 {
     return str.size() >= suffix.size() && 0 == str.compare(str.size()-suffix.size(), suffix.size(), suffix);
 }
 
-// See:
-// https://stackoverflow.com/a/313990
 static std::string ToLower(std::string str)
 {
     std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c){ return std::tolower(c); });
     return str;
 }
 
-// Simple command line argument parsing functions. See
-// https://stackoverflow.com/a/868894
 // The value parameter to std::find must be std::string. Otherwise std::find will compare the pointer values rather than the string contents.
-static std::optional<std::string> GetCmdOption(char** begin, char** end, const std::string& option)
+static std::optional<std::string> GetCommandLineOption(char** begin, char** end, const std::string& option)
 {
     auto result = std::find(begin, end, option);
     if (result != end)
@@ -65,14 +59,14 @@ static std::optional<std::string> GetCmdOption(char** begin, char** end, const s
     }
 }
 
-bool CmdOptionExists(char** begin, char** end, const std::string& option)
+bool CommandLineOptionExists(char** begin, char** end, const std::string& option)
 {
     return std::find(begin, end, option) != end;
 }
 
 static AudioStreamContainerFormat GetCompressedAudioFormat(char** begin, char** end)
 {
-    auto format = GetCmdOption(begin, end, "--format");
+    auto format = GetCommandLineOption(begin, end, "--format");
     if (!format.has_value())
     {
         return AudioStreamContainerFormat::ANY;
@@ -109,7 +103,7 @@ static AudioStreamContainerFormat GetCompressedAudioFormat(char** begin, char** 
 
 static ProfanityOption GetProfanityOption(char** begin, char** end)
 {
-    auto profanity = GetCmdOption(begin, end, "--profanity");
+    auto profanity = GetCommandLineOption(begin, end, "--profanity");
     if (!profanity.has_value())
     {
         return ProfanityOption::Masked;
@@ -163,35 +157,35 @@ Timestamp TimestampFromTicks(uint64_t startTicks, uint64_t endTicks)
 std::shared_ptr<UserConfig> UserConfigFromArgs(int argc, char* argv[], std::string usage)
 {
     std::optional<std::vector<std::string>> languageIDLanguages = std::nullopt;
-    auto languageIDLanguagesResult = GetCmdOption(argv, argv + argc, "--languages");
+    auto languageIDLanguagesResult = GetCommandLineOption(argv, argv + argc, "--languages");
     if (languageIDLanguagesResult.has_value())
     {
         languageIDLanguages = std::optional<std::vector<std::string>>{ Split(languageIDLanguagesResult.value(), ',') };
     }
 
-    auto key = GetCmdOption(argv, argv + argc, "--key");
+    auto key = GetCommandLineOption(argv, argv + argc, "--key");
     if (!key.has_value())
     {
         throw std::invalid_argument("Missing subscription key.\n" + usage);
     }
-    auto region = GetCmdOption(argv, argv + argc, "--region");
+    auto region = GetCommandLineOption(argv, argv + argc, "--region");
     if (!region.has_value())
     {
         throw std::invalid_argument("Missing region.\n" + usage);
     }
 
     return std::make_shared<UserConfig>(
-        CmdOptionExists(argv, argv + argc, "--format"),
+        CommandLineOptionExists(argv, argv + argc, "--format"),
         GetCompressedAudioFormat(argv, argv + argc),
         GetProfanityOption(argv, argv + argc),
         languageIDLanguages,
-        GetCmdOption(argv, argv + argc, "--input"),
-        GetCmdOption(argv, argv + argc, "--output"),
-        GetCmdOption(argv, argv + argc, "--phrases"),
-        CmdOptionExists(argv, argv + argc, "--quiet"),
-        CmdOptionExists(argv, argv + argc, "--recognizing"),
-        GetCmdOption(argv, argv + argc, "--threshold"),
-        CmdOptionExists(argv, argv + argc, "--srt"),
+        GetCommandLineOption(argv, argv + argc, "--input"),
+        GetCommandLineOption(argv, argv + argc, "--output"),
+        GetCommandLineOption(argv, argv + argc, "--phrases"),
+        CommandLineOptionExists(argv, argv + argc, "--quiet"),
+        CommandLineOptionExists(argv, argv + argc, "--recognizing"),
+        GetCommandLineOption(argv, argv + argc, "--threshold"),
+        CommandLineOptionExists(argv, argv + argc, "--srt"),
         key.value(),
         region.value()
     );
