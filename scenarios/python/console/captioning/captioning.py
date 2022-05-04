@@ -84,22 +84,27 @@ def initialize(user_config : helper.Read_Only_Dict) :
         helper.write_to_console_or_file(text = "WEBVTT{}{}".format(linesep, linesep), user_config = user_config)
     return
 
-def audio_config_from_user_config(user_config : helper.Read_Only_Dict) -> tuple[speechsdk.AudioConfig, helper.BinaryFileReaderCallback, speechsdk.audio.AudioStreamFormat, speechsdk.audio.PullAudioInputStream] :
+def audio_config_from_user_config(user_config : helper.Read_Only_Dict) -> helper.Read_Only_Dict :
     if user_config["input_file"] is None :
         return speechsdk.AudioConfig(use_default_microphone = True), None, None, None
     else :
-        format = None
+        audio_stream_format = None
         if not user_config["use_compressed_audio"] :
             reader = wave.open(user_config["input_file"], mode=None)
-            format = speechsdk.audio.AudioStreamFormat(samples_per_second=reader.getframerate(), bits_per_sample=reader.getsampwidth() * 8, channels=reader.getnchannels())
+            audio_stream_format = speechsdk.audio.AudioStreamFormat(samples_per_second=reader.getframerate(), bits_per_sample=reader.getsampwidth() * 8, channels=reader.getnchannels())
             reader.close()
         else :
-            format = speechsdk.audio.AudioStreamFormat(compressed_stream_format=user_config["compressed_audio_format"])
+            audio_stream_format = speechsdk.audio.AudioStreamFormat(compressed_stream_format=user_config["compressed_audio_format"])
         callback = helper.BinaryFileReaderCallback(filename=user_config["input_file"])
-        stream = speechsdk.audio.PullAudioInputStream(pull_stream_callback = callback, stream_format = format)
+        stream = speechsdk.audio.PullAudioInputStream(pull_stream_callback = callback, stream_format = audio_stream_format)
         # We return the BinaryFileReaderCallback, AudioStreamFormat, and PullAudioInputStream
         # because we need to keep them in scope until they are actually used.
-        return speechsdk.audio.AudioConfig(stream=stream), callback, format, stream
+        return helper.Read_Only_Dict({
+            "audio_config" : speechsdk.audio.AudioConfig(stream=stream),
+            "audio_stream_format" : audio_stream_format,
+            "pull_input_audio_stream_callback" : callback,
+            "pull_input_audio_stream" : stream,
+        })
 
 def speech_config_from_user_config(user_config : helper.Read_Only_Dict) -> speechsdk.SpeechConfig :
     speech_config = None
@@ -118,24 +123,29 @@ def speech_config_from_user_config(user_config : helper.Read_Only_Dict) -> speec
 
     return speech_config
 
-def speech_recognizer_from_user_config(user_config : helper.Read_Only_Dict) -> tuple[speechsdk.SpeechRecognizer, helper.BinaryFileReaderCallback, speechsdk.audio.AudioStreamFormat, speechsdk.audio.PullAudioInputStream] :
-    (audio_config, callback, format, stream) = audio_config_from_user_config(user_config)
+def speech_recognizer_from_user_config(user_config : helper.Read_Only_Dict) -> helper.Read_Only_Dict :
+    audio_config_data = audio_config_from_user_config(user_config)
     speech_config = speech_config_from_user_config(user_config)
     speech_recognizer = None
 
     if user_config["language_ID_languages"] is not None :
         auto_detect_source_language_config = speechsdk.AutoDetectSourceLanguageConfig(user_config["language_ID_languages"].split(";"))
-        speech_recognizer = speechsdk.SpeechRecognizer(speech_config = speech_config, audio_config = audio_config, auto_detect_source_language_config = auto_detect_source_language_config)
+        speech_recognizer = speechsdk.SpeechRecognizer(speech_config = speech_config, audio_config = audio_config_data["audio_config"], auto_detect_source_language_config = auto_detect_source_language_config)
     else :
-        speech_recognizer = speechsdk.SpeechRecognizer(speech_config = speech_config, audio_config = audio_config)
+        speech_recognizer = speechsdk.SpeechRecognizer(speech_config = speech_config, audio_config = audio_config_data["audio_config"])
 
     if user_config["phrase_list"] is not None :
         grammar = speechsdk.PhraseListGrammar.from_recognizer(recognizer = speech_recognizer)
         grammar.addPhrase(user_config["phrase_list"])
 
-    return (speech_recognizer, callback, format, stream)
+    return helper.Read_Only_Dict({
+        "speech_recognizer" : speech_recognizer,
+        "audio_stream_format" : audio_config_data["audio_stream_format"],
+        "pull_input_audio_stream_callback" : audio_config_data["pull_input_audio_stream_callback"],
+        "pull_input_audio_stream" : audio_config_data["pull_input_audio_stream"],
+    })
 
-def recognize_continuous(speech_recognizer : speechsdk.SpeechRecognizer, user_config : helper.Read_Only_Dict, callback : helper.BinaryFileReaderCallback, format : speechsdk.audio.AudioStreamFormat, stream : speechsdk.audio.PullAudioInputStream) :
+def recognize_continuous(speech_recognizer : speechsdk.SpeechRecognizer, user_config : helper.Read_Only_Dict, format : speechsdk.audio.AudioStreamFormat, callback : helper.BinaryFileReaderCallback, stream : speechsdk.audio.PullAudioInputStream) :
     sequence_number = 0
     done = False
 
@@ -213,10 +223,9 @@ usage = """Usage: python captioning.py [...]
 
   INPUT
     --input FILE                  Input audio from file (default input is the microphone.)
-    --url URL                     Input audio from URL (default input is the microphone.)
     --format FORMAT               Use compressed audio format.
                                   If this is not present, uncompressed format (wav) is assumed.
-                                  Valid only with --file or --url.
+                                  Valid only with --file.
                                   Valid values: alaw, any, flac, mp3, mulaw, ogg_opus
 
   RECOGNITION
@@ -242,7 +251,7 @@ try :
     else :
         user_config = user_config_from_args(usage)
         initialize(user_config = user_config)
-        (speech_recognizer, stream, format, callback) = speech_recognizer_from_user_config(user_config = user_config)
-        recognize_continuous(speech_recognizer = speech_recognizer, user_config = user_config, stream = stream, format = format, callback = callback)
+        speech_recognizer_data = speech_recognizer_from_user_config(user_config = user_config)
+        recognize_continuous(speech_recognizer = speech_recognizer_data["speech_recognizer"], user_config = user_config, format = speech_recognizer_data["audio_stream_format"], callback = speech_recognizer_data["pull_input_audio_stream_callback"], stream = speech_recognizer_data["pull_input_audio_stream"])
 except Exception as e:
     print(e)
