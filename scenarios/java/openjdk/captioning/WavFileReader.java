@@ -65,7 +65,7 @@ public class WavFileReader {
         // Tag "RIFF"
         byte data[] = new byte[4];
         int numRead = m_stream.read(data, 0, 4);
-        ThrowIfFalse((numRead == 4) && (data[0] == 'R') && (data[1] == 'I') && (data[2] == 'F') && (data[3] == 'F'), "RIFF");
+        ThrowIfFalse((numRead == 4) && (data[0] == 'R') && (data[1] == 'I') && (data[2] == 'F') && (data[3] == 'F'), "Invalid WAV file header, tag 'RIFF' is expected.");
 
         // Chunk size
         ReadInt32(m_stream);
@@ -74,11 +74,11 @@ public class WavFileReader {
         // Subchunk, Format
         // Tag: "WAVE"
         numRead = m_stream.read(data, 0, 4);
-        ThrowIfFalse((numRead == 4) && (data[0] == 'W') && (data[1] == 'A') && (data[2] == 'V') && (data[3] == 'E'), "WAVE");
+        ThrowIfFalse((numRead == 4) && (data[0] == 'W') && (data[1] == 'A') && (data[2] == 'V') && (data[3] == 'E'), "Invalid file header, tag 'WAVE' is expected.");
 
         // Tag: "fmt"
         numRead = m_stream.read(data, 0, 4);
-        ThrowIfFalse((numRead == 4) && (data[0] == 'f') && (data[1] == 'm') && (data[2] == 't') && (data[3] == ' '), "fmt ");
+        ThrowIfFalse((numRead == 4) && (data[0] == 'f') && (data[1] == 'm') && (data[2] == 't') && (data[3] == ' '), "Invalid file header, tag 'fmt ' is expected.");
 
         // chunk format size
         long formatSize = ReadInt32(m_stream);
