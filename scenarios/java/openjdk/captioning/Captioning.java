@@ -251,42 +251,40 @@ public class Captioning
     }
 
     public static void main(String[] args) {
-        // Text block content must begin on a new line.
-        final var usage = """
-Usage: java -cp .;target\\dependency\\* Captioning [...]
-
-  HELP
-    --help                        Show this help and stop.
-
-  CONNECTION
-    --key KEY                     Your Azure Speech service subscription key.
-    --region REGION               Your Azure Speech service region.
-                                  Examples: westus, eastus
-
-  INPUT
-    --input FILE                  Input audio from file (default input is the microphone.)
-    --url URL                     Input audio from URL (default input is the microphone.)
-    --format FORMAT               Use compressed audio format.
-                                  If this is not present, uncompressed format (wav) is assumed.
-                                  Valid only with --file or --url.
-                                  Valid values: alaw, any, flac, mp3, mulaw, ogg_opus
-
-  RECOGNITION
-    --recognizing                 Output Recognizing results (default output is Recognized results only.)
-                                  These are always written to the console, never to an output file.
-                                  --quiet overrides this.
-
-  ACCURACY
-    --phrases PHRASE1;PHRASE2     Example: Constoso;Jessie;Rehaan
-
-  OUTPUT
-    --output FILE                 Output captions to text file.
-    --srt                         Output captions in SubRip Text format (default format is WebVTT.)
-    --quiet                       Suppress console output, except errors.
-    --profanity OPTION            Valid values: raw, remove, mask
-    --threshold NUMBER            Set stable partial result threshold.
-                                  Default value: 3
-""";
+        final var usage = new StringBuilder()
+.append("Usage: java -cp .;target\\dependency\\* Captioning [...]").append(System.lineSeparator())
+.append(System.lineSeparator())
+.append("  HELP").append(System.lineSeparator())
+.append("    --help                        Show this help and stop.").append(System.lineSeparator())
+.append(System.lineSeparator())
+.append("  CONNECTION").append(System.lineSeparator())
+.append("    --key KEY                     Your Azure Speech service subscription key.").append(System.lineSeparator())
+.append("    --region REGION               Your Azure Speech service region.").append(System.lineSeparator())
+.append("                                  Examples: westus, eastus").append(System.lineSeparator())
+.append(System.lineSeparator())
+.append("  INPUT").append(System.lineSeparator())
+.append("    --input FILE                  Input audio from file (default input is the microphone.)").append(System.lineSeparator())
+.append("    --format FORMAT               Use compressed audio format.").append(System.lineSeparator())
+.append("                                  If this is not present, uncompressed format (wav) is assumed.").append(System.lineSeparator())
+.append("                                  Valid only with --file.").append(System.lineSeparator())
+.append("                                  Valid values: alaw, any, flac, mp3, mulaw, ogg_opus").append(System.lineSeparator())
+.append(System.lineSeparator())
+.append("  RECOGNITION").append(System.lineSeparator())
+.append("    --recognizing                 Output Recognizing results (default output is Recognized results only.)").append(System.lineSeparator())
+.append("                                  These are always written to the console, never to an output file.").append(System.lineSeparator())
+.append("                                  --quiet overrides this.").append(System.lineSeparator())
+.append(System.lineSeparator())
+.append("  ACCURACY").append(System.lineSeparator())
+.append("    --phrases PHRASE1;PHRASE2     Example: Constoso;Jessie;Rehaan").append(System.lineSeparator())
+.append(System.lineSeparator())
+.append("  OUTPUT").append(System.lineSeparator())
+.append("    --output FILE                 Output captions to text file.").append(System.lineSeparator())
+.append("    --srt                         Output captions in SubRip Text format (default format is WebVTT.)").append(System.lineSeparator())
+.append("    --quiet                       Suppress console output, except errors.").append(System.lineSeparator())
+.append("    --profanity OPTION            Valid values: raw, remove, mask").append(System.lineSeparator())
+.append("    --threshold NUMBER            Set stable partial result threshold.").append(System.lineSeparator())
+.append("                                  Default value: 3").append(System.lineSeparator())
+.toString();
 
         try
         {
