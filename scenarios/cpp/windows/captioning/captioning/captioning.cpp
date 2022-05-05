@@ -120,7 +120,7 @@ private:
             if (EndsWith(m_userConfig->inputFile.value(), ".wav"))
             {
                 auto reader = std::make_shared<WavFileReader>(m_userConfig->inputFile.value());
-                m_format = AudioStreamFormat::GetWaveFormatPCM(reader->GetFormat().SamplesPerSec, reader->GetFormat().BitsPerSample, reader->GetFormat().Channels);
+                m_format = AudioStreamFormat::GetWaveFormatPCM(reader->GetFormat().SamplesPerSec, (uint8_t)reader->GetFormat().BitsPerSample, (uint8_t)reader->GetFormat().Channels);
                 reader->Close();
             }
             else
@@ -190,7 +190,7 @@ public:
         std::shared_ptr<AudioConfig> audioConfig = AudioConfigFromUserConfig();
         std::shared_ptr<SpeechConfig> speechConfig = SpeechConfigFromUserConfig();
         std::shared_ptr<SpeechRecognizer> speechRecognizer;
-        
+
         if (m_userConfig->languageIDLanguages.has_value())
         {
             auto autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig::FromLanguages(m_userConfig->languageIDLanguages.value());
@@ -287,7 +287,7 @@ public:
 
         // Stops recognition.
         speechRecognizer->StopContinuousRecognitionAsync().get();
-        
+
         return result;
     }
 };
@@ -306,10 +306,9 @@ int main(int argc, char* argv[])
 "                                  Example: en-US;ja-JP\n\n"
 "  INPUT\n"
 "    --input FILE                  Input audio from file (default input is the microphone.)\n"
-"    --url URL                     Input audio from URL (default input is the microphone.)\n"
 "    --format FORMAT               Use compressed audio format.\n"
 "                                  If this is not present, uncompressed format (wav) is assumed.\n"
-"                                  Valid only with --file or --url.\n"
+"                                  Valid only with --file.\n"
 "                                  Valid values: alaw, any, flac, mp3, mulaw, ogg_opus\n\n"
 "  RECOGNITION\n"
 "    --recognizing                 Output Recognizing results (default output is Recognized results only.)\n"
@@ -341,6 +340,7 @@ int main(int argc, char* argv[])
             {
                 std::cout << error.value() << std::endl;
             }
+            
         }
     }
     catch (std::exception e)
