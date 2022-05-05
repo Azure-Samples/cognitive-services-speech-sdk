@@ -145,7 +145,7 @@ Timestamp TimestampFromTicks(uint64_t startTicks, uint64_t endTicks)
     const int startHours = startMinutes / 60;
     const int endHours = endMinutes / 60;
 
-    return Timestamp(startHours, endHours, startMinutes % 60, endMinutes % 60, fmod(startSeconds, 60.0), fmod(endSeconds, 60.0));
+    return Timestamp(startHours, endHours, startMinutes % 60, endMinutes % 60, fmod(startSeconds, 60.0f), fmod(endSeconds, 60.0f));
 }
 
 std::shared_ptr<UserConfig> UserConfigFromArgs(int argc, char* argv[], std::string usage)
