@@ -41,11 +41,7 @@ func (this *BinaryFileReaderCallback) Read(maxSize uint32) ([]byte, int) {
     return buffer, n
 }
 
-// TODO1 Fix? We keep getting requests for properties 11001 and 11002. Returning "" seems to cause no problem.
 func (this *BinaryFileReaderCallback) GetProperty(id common.PropertyID) string {
-//    print ("GetProperty: ")
-//    print (id)
-//    print ("\n")
     return ""
 }
 
