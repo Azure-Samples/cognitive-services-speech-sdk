@@ -136,16 +136,16 @@ Timestamp TimestampFromTicks(uint64_t startTicks, uint64_t endTicks)
 {
     const float ticksPerSecond = 10000000.0;
 
-    const int startSeconds = startTicks / ticksPerSecond;
-    const int endSeconds = endTicks / ticksPerSecond;
+    const float startSeconds = startTicks / ticksPerSecond;
+    const float endSeconds = endTicks / ticksPerSecond;
     
-    const int startMinutes = startSeconds / 60;
-    const int endMinutes = endSeconds / 60;    
+    const int startMinutes = (int)startSeconds / 60;
+    const int endMinutes = (int)endSeconds / 60;    
     
     const int startHours = startMinutes / 60;
     const int endHours = endMinutes / 60;
 
-    return Timestamp(startHours, endHours, fmod(startMinutes, 60.0), fmod(endMinutes, 60.0), fmod(startSeconds, 60.0), fmod(endSeconds, 60.0));
+    return Timestamp(startHours, endHours, startMinutes % 60, endMinutes % 60, fmod(startSeconds, 60.0), fmod(endSeconds, 60.0));
 }
 
 std::shared_ptr<UserConfig> UserConfigFromArgs(int argc, char* argv[], std::string usage)
