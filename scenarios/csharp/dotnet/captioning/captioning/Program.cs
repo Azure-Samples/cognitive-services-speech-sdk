@@ -40,10 +40,9 @@ namespace Captioning
 
   INPUT
     --input FILE                  Input audio from file (default input is the microphone.)
-    --url URL                     Input audio from URL (default input is the microphone.)
     --format FORMAT               Use compressed audio format.
                                   If this is not present, uncompressed format (wav) is assumed.
-                                  Valid only with --file or --url.
+                                  Valid only with --file.
                                   Valid values: alaw, any, flac, mp3, mulaw, ogg_opus
 
   RECOGNITION
@@ -149,7 +148,7 @@ namespace Captioning
 
         private string LanguageFromSpeechRecognitionResult(SpeechRecognitionResult result)
         {
-            if (this.userConfig.languageIDLanguages is not null)
+            if (null != this.userConfig.languageIDLanguages)
             {
                 var languageIDResult = AutoDetectSourceLanguageResult.FromResult(result);
                 return $"[{languageIDResult.Language}]";
@@ -231,7 +230,7 @@ namespace Captioning
             }
             if (!this.userConfig.useSubRipTextCaptionFormat)
             {
-                WriteToConsoleOrFile($"WEBVTT{Environment.NewLine}");
+                WriteToConsoleOrFile($"WEBVTT{Environment.NewLine}{Environment.NewLine}");
             }
         }
 
@@ -267,7 +266,7 @@ namespace Captioning
         {
             SpeechConfig speechConfig;
             // Language identification requires V2 endpoint.
-            if (this.userConfig.languageIDLanguages is not null)
+            if (null != this.userConfig.languageIDLanguages)
             {
                 speechConfig = SpeechConfig.FromEndpoint(new Uri(V2EndpointFromRegion(this.userConfig.region)), this.userConfig.subscriptionKey);
             }
