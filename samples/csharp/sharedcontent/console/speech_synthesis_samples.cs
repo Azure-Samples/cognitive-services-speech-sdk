@@ -324,7 +324,7 @@ namespace MicrosoftSpeechSDKSamples
 
             // here is plain text file. A simple logic is to split by lines which is a paragraph. 
             // we assume a paragraph won't exceed 10 min limit here. 
-            string[] paragraphs = System.IO.File.ReadAllLines("c:\\temp\\test.txt");
+            string[] paragraphs = System.IO.File.ReadAllLines("test.txt");
             int RetryCount = 10;
             System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
             sw.Start();
