@@ -4,11 +4,10 @@ In this sample, you create captions from audio input using the speech-to-text ca
 
 ## Prerequisites
 
-> [!div class="checklist"]
-> * Azure subscription - [Create one for free](https://azure.microsoft.com/free/cognitive-services)
-> * <a href="https://ms.portal.azure.com/#create/Microsoft.CognitiveServicesSpeechServices"  title="Create a Speech resource"  target="_blank">Create a Speech resource</a> in the Azure portal. You can use the free pricing tier (`F0`) to try the service, and upgrade later to a paid tier for production.
-> * Get the resource key and region. After your Speech resource is deployed, select **Go to resource** to view and manage keys. For more information about Cognitive Services resources, see [Get the keys for your resource](~/articles/cognitive-services/cognitive-services-apis-create-account.md#get-the-keys-for-your-resource). 
-* [Microsoft Visual Studio 2019](https://www.visualstudio.com/), Community Edition or higher.
+- Azure subscription - [Create one for free](https://azure.microsoft.com/free/cognitive-services)
+- <a href="https://ms.portal.azure.com/#create/Microsoft.CognitiveServicesSpeechServices"  title="Create a Speech resource"  target="_blank">Create a Speech resource</a> in the Azure portal. You can use the free pricing tier (`F0`) to try the service, and upgrade later to a paid tier for production.
+- Get the resource key and region. After your Speech resource is deployed, select **Go to resource** to view and manage keys. For more information about Cognitive Services resources, see [Get the keys for your resource](~/articles/cognitive-services/cognitive-services-apis-create-account.md#get-the-keys-for-your-resource). 
+- [Microsoft Visual Studio 2019](https://www.visualstudio.com/), Community Edition or higher.
 
 ## Set up the environment
 
@@ -16,12 +15,12 @@ Install the **Desktop development with C++** workload in Visual Studio and the *
 
 The Speech SDK is available as a [NuGet package](https://www.nuget.org/packages/Microsoft.CognitiveServices.Speech) and implements .NET Standard 2.0. You install the Speech SDK in the next section of this article, but first check the [platform-specific installation instructions](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstarts/setup-platform?tabs=dotnet%2Cwindows%2Cjre%2Cbrowser&pivots=programming-language-cpp) for any more requirements.
 
-> [!NOTE]
+> **NOTE**
 > By downloading the Microsoft Cognitive Services Speech SDK, you acknowledge its [license agreement](https://aka.ms/csspeech/license201809).
 
 If you wish to create captions from compressed audio files such as MP4 files, you must also install [GStreamer](~/articles/cognitive-services/speech-service/how-to-use-codec-compressed-audio-input-streams.md).
 
-> [!NOTE]
+> **NOTE**
 > - When you install GStreamer on a Windows computer, you must create environment variables named `GST_PLUGIN_PATH` and `GSTREAMER_ROOT_X86_64`, as well as adding `C:\gstreamer\1.0\msvc_x86_64\bin` to your PATH environment variable (see the previous link for more information). Be sure to make these changes to your system environment variables, not your user environment variables. After making changes to your system environment variables, you must reboot your computer for the changes to take effect.
 > - If you install the 64-bit version of GStreamer, you must also [configure your C++ project to target 64-bit platforms](https://docs.microsoft.com/en-us/cpp/build/how-to-configure-visual-cpp-projects-to-target-64-bit-platforms?view=msvc-170).
 > If one or more of these conditions is not met, you might receive the error `SPXERR_GSTREAMER_NOT_FOUND_ERROR` when you try to use GStreamer with the captioning scenario app.
@@ -34,14 +33,14 @@ If you wish to create captions from compressed audio files such as MP4 files, yo
     ```powershell
     Install-Package Microsoft.CognitiveServices.Speech
     ```
-    > [!NOTE]
+    > **NOTE**
     > If you are seeing red squigglies from IntelliSense for Speech SDK APIs,
     > right-click in your editor window and select **Rescan** > **Rescan Solution**.
-1. Make sure the compiler is set to **ISO C++17 Standard (/std:c++17)** at **Project** > **Properties** > **General** > **C++ Language Standard**.
-1. Set the active solution configuration and platform to the desired values under **Build** \> **Configuration Manager**:
-    - On a 64-bit Windows installation, choose `x64` as active solution platform.
-    - On a 32-bit Windows installation, choose `x86` as active solution platform.
-1. Enter your preferred command line arguments at **Project** > **Properties** > **Debugging** > **Command Arguments**. See [usage and arguments](#usage-and-arguments) for the available options. Here is an example. Replace `YourSubscriptionKey` with your Speech resource key, and replace `YourServiceRegion` with your Speech resource region:
+1. Open **Project** > **Properties** > **General**. Set **Configuration** to `All configurations`. Set **C++ Language Standard** to `ISO C++17 Standard (/std:c++17)`.
+1. Open **Build** > **Configuration Manager**.
+    - On a 64-bit Windows installation, set **Active solution platform** to `x64`.
+    - On a 32-bit Windows installation, set **Active solution platform** to `x86`.
+1. Open **Project** > **Properties** > **Debugging**. Enter your preferred command line arguments at **Command Arguments**. See [usage and arguments](#usage-and-arguments) for the available options. Here is an example. Replace `YourSubscriptionKey` with your Speech resource key, and replace `YourServiceRegion` with your Speech resource region:
     ```
     --key YourSubscriptionKey --region YourServiceRegion --input c:\caption\caption.this.mp4 --format any --output c:\caption\caption.output.txt - --srt --recognizing --threshold 5 --profanity mask --phrases "Contoso;Jessie;Rehaan"
     ```
