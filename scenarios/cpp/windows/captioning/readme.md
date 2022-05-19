@@ -107,6 +107,6 @@ You can use the [Azure portal](https://docs.microsoft.com/azure/cognitive-servic
 
 ## References
 
+* [Captioning concepts](https://docs.microsoft.com/azure/cognitive-services/speech-service/captioning-concepts)
+* [Captioning quickstart](https://docs.microsoft.com/azure/cognitive-services/speech-service/captioning-quickstart)
 * [Speech SDK API reference for C++](https://aka.ms/csspeech/cppref)
-* [Package (NuGet)](https://www.nuget.org/packages/Microsoft.CognitiveServices.Speech)
-* [Additional Samples on GitHub](https://aka.ms/speech/github-cpp)
