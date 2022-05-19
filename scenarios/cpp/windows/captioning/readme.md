@@ -27,7 +27,7 @@ If you wish to create captions from compressed audio files such as MP4 files, yo
 
 ## Build and run the sample
 
-1. Download or copy the [scenarios/cpp/windows/captioning/](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/scenarios/go/captioning/) sample files from GitHub into a local directory. 
+1. Download or copy the [scenarios/cpp/windows/captioning/](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/scenarios/cpp/captioning/) sample files from GitHub into a local directory.
 1. Open the `captioning.sln` solution file in Visual Studio.  
 1. Install the Speech SDK in your project with the NuGet package manager.
     ```powershell
