@@ -49,6 +49,7 @@
                     <ComboBoxItem Tag="northeurope">northeurope</ComboBoxItem>
                     <ComboBoxItem Tag="westeurope">westeurope</ComboBoxItem>
                     <ComboBoxItem Tag="francecentral">francecentral</ComboBoxItem>
+                    <ComboBoxItem Tag="switzerlandnorth">switzerlandnorth</ComboBoxItem>
                     <ComboBoxItem Tag="uksouth">uksouth</ComboBoxItem>
                 </ComboBox>
                 <ComboBox Margin="0,0,10,0" Grid.Row="2" Grid.Column="1" HorizontalAlignment="Left" SelectedValuePath="Tag" SelectedIndex="0" Width="150"  Name="LanguageComboBox" SelectionChanged="LanguageCombox_SelectionChanged" >

@@ -4,6 +4,7 @@
 //
 
 // <code>
+// <skeleton_1>
 using System;
 using System.Threading.Tasks;
 using Microsoft.CognitiveServices.Speech;
@@ -15,6 +16,7 @@ namespace helloworld
     {
         public static async Task RecognizeIntentAsync()
         {
+            // </skeleton_1>
             // Creates an instance of a speech config with specified subscription key
             // and service region. Note that in contrast to other services supported by
             // the Cognitive Services Speech SDK, the Language Understanding service
@@ -23,22 +25,30 @@ namespace helloworld
             // Once you've obtained it, replace with below with your own Language Understanding subscription key
             // and service region (e.g., "westus").
             // The default language is "en-us".
+            // <create_speech_configuration>
             var config = SpeechConfig.FromSubscription(
                 "YourLanguageUnderstandingSubscriptionKey",
                 "YourLanguageUnderstandingServiceRegion");
+            // </create_speech_configuration>
 
+            // <create_intent_recognizer_1>
             // Creates an intent recognizer using microphone as audio input.
             using (var recognizer = new IntentRecognizer(config))
             {
+                // </create_intent_recognizer_1>
+
+                // <add_intents>
                 // Creates a Language Understanding model using the app id, and adds specific intents from your model
                 var model = LanguageUnderstandingModel.FromAppId("YourLanguageUnderstandingAppId");
                 recognizer.AddIntent(model, "YourLanguageUnderstandingIntentName1", "id1");
                 recognizer.AddIntent(model, "YourLanguageUnderstandingIntentName2", "id2");
                 recognizer.AddIntent(model, "YourLanguageUnderstandingIntentName3", "any-IntentId-here");
+                // </add_intents>
 
                 // To add all of the possible intents from a LUIS model to the recognizer, uncomment the line below:
                 // recognizer.AddAllIntents(model);
 
+                // <recognize_intent>
                 // Starts recognizing.
                 Console.WriteLine("Say something...");
 
@@ -49,7 +59,9 @@ namespace helloworld
                 // shot recognition like command or query. 
                 // For long-running multi-utterance recognition, use StartContinuousRecognitionAsync() instead.
                 var result = await recognizer.RecognizeOnceAsync();
+                // </recognize_intent>
 
+                // <print_results>
                 // Checks result.
                 switch (result.Reason)
                 {
@@ -78,7 +90,11 @@ namespace helloworld
                         }
                         break;
                 }
+                // </print_results>
+            // <create_intent_recognizer_2>
             }
+            // </create_intent_recognizer_2>
+        // <skeleton_2>
         }
 
         static async Task Main()
@@ -89,4 +105,5 @@ namespace helloworld
         }
     }
 }
+// </skeleton_2>
 // </code>

@@ -115,11 +115,11 @@ namespace MicrosoftSpeechSDKSamples
             var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
             // Sets the voice name.
-            // e.g. "Microsoft Server Speech Text to Speech Voice (en-US, ChristopherNeural)".
+            // e.g. "Microsoft Server Speech Text to Speech Voice (en-US, JennyNeural)".
             // The full list of supported voices can be found here:
             // https://aka.ms/csspeech/voicenames
             // And, you can try GetVoicesAsync method to get all available voices (see SynthesisGetAvailableVoicesAsync() sample below).
-            var voice = "Microsoft Server Speech Text to Speech Voice (en-US, ChristopherNeural)";
+            var voice = "Microsoft Server Speech Text to Speech Voice (en-US, JennyNeural)";
             config.SpeechSynthesisVoiceName = voice;
 
             // Creates a speech synthesizer for the specified voice, using the default speaker as audio output.
@@ -302,6 +302,67 @@ namespace MicrosoftSpeechSDKSamples
                                 Console.WriteLine($"CANCELED: ErrorDetails=[{cancellation.ErrorDetails}]");
                                 Console.WriteLine($"CANCELED: Did you update the subscription info?");
                             }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Speech synthesis a plain text file to MP3 file. It can support a long text file with more than 10 minutes limit.
+        // the audio output will be put into one file that can be played continuously  
+        public static async Task SynthesisFileToMp3FileAsync()
+        {
+            // Creates an instance of a speech config with specified subscription key and service region.
+            // Replace with your own subscription key and service region (e.g., "westus").
+            // The default language is "en-us".
+            var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+
+            // Sets the synthesis output format.
+            // The full list of supported format can be found here:
+            // https://docs.microsoft.com/azure/cognitive-services/speech-service/rest-text-to-speech#audio-outputs
+            config.SetSpeechSynthesisOutputFormat(SpeechSynthesisOutputFormat.Audio16Khz32KBitRateMonoMp3);
+
+            // here is plain text file. A simple logic is to split by lines which is a paragraph. 
+            // we assume a paragraph won't exceed 10 min limit here. 
+            string[] paragraphs = System.IO.File.ReadAllLines("test.txt");
+            int RetryCount = 10;
+            System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+            sw.Start();
+
+            // Creates a speech synthesizer using file as audio output.
+            // Replace with your own audio file name.
+            var fileName = "outputaudio.mp3";
+            using (var fileOutput = AudioConfig.FromWavFileOutput(fileName))
+            using (var synthesizer = new SpeechSynthesizer(config, fileOutput))
+            {
+                foreach (string pargraph in paragraphs)
+                {
+                    int retry = RetryCount;
+                    while (retry > 0)
+                    {
+                        using (var result = await synthesizer.SpeakTextAsync(pargraph))
+                        {
+                            if (result.Reason == ResultReason.SynthesizingAudioCompleted)
+                            {
+                                Console.WriteLine($"success on {pargraph} {result.ResultId} in {sw.ElapsedMilliseconds} msec");
+                                break;
+                            }
+                            else if (result.Reason == ResultReason.Canceled)
+                            {
+                                Console.WriteLine($"failed on {pargraph} {result.ResultId}");
+                                var cancellation = SpeechSynthesisCancellationDetails.FromResult(result);
+                                Console.WriteLine($"CANCELED: Reason={cancellation.Reason}");
+
+                                if (cancellation.Reason == CancellationReason.Error)
+                                {
+                                    Console.WriteLine($"CANCELED: ErrorCode={cancellation.ErrorCode}");
+                                    Console.WriteLine($"CANCELED: ErrorDetails=[{cancellation.ErrorDetails}]");
+                                    Console.WriteLine($"CANCELED: Did you update the subscription info?");
+                                }
+                            }
+
+                            retry--;
+                            Console.WriteLine("retrying again...");
                         }
                     }
                 }
@@ -910,7 +971,7 @@ namespace MicrosoftSpeechSDKSamples
                     || details.ErrorCode == CancellationErrorCode.ServiceTimeout
                     || details.ErrorDetails.Contains("Error code: 1007"))
                 {
-                    // Synthesize using a standard platform voice, e.g. en-US-ChristopherNeural
+                    // Synthesize using a standard platform voice, e.g. en-US-JennyNeural
                     synthesisResult = await SynthesizeOnceAsyncInternal("YourSubscriptionKey", "YourServiceRegion", null, "YourPlatformVoiceName");
                 }
             }
