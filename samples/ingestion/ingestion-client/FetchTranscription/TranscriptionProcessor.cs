@@ -16,6 +16,7 @@ namespace FetchTranscriptionFunction
     using Azure.Messaging.ServiceBus;
     using Connector;
     using Connector.Enums;
+    using Connector.Serializable.TranscriptionStartedServiceBusMessage;
     using Microsoft.Extensions.Logging;
     using Newtonsoft.Json;
     using TextAnalytics;
@@ -202,7 +203,7 @@ namespace FetchTranscriptionFunction
                 if (!textAnalyticsRequestCompleted)
                 {
                     log.LogInformation($"Text analytics request still running for job {jobName} - re-queueing message.");
-                    await ServiceBusUtilities.SendServiceBusMessageAsync(FetchQueueClientInstance, serviceBusMessage.CreateMessageString(), log, GetMessageDelayTime(serviceBusMessage.PollingCounter)).ConfigureAwait(false);
+                    await ServiceBusUtilities.SendServiceBusMessageAsync(FetchServiceBusSender, serviceBusMessage.CreateMessageString(), log, GetMessageDelayTime(serviceBusMessage.PollingCounter)).ConfigureAwait(false);
                     return;
                 }
             }
@@ -316,7 +317,7 @@ namespace FetchTranscriptionFunction
                     log.LogInformation($"Added text analytics requests to service bus message - re-queueing message.");
 
                     // Poll for first time with TA request after 1 minute
-                    await ServiceBusUtilities.SendServiceBusMessageAsync(FetchQueueClientInstance, serviceBusMessage.CreateMessageString(), log, TimeSpan.FromMinutes(1)).ConfigureAwait(false);
+                    await ServiceBusUtilities.SendServiceBusMessageAsync(FetchServiceBusSender, serviceBusMessage.CreateMessageString(), log, TimeSpan.FromMinutes(1)).ConfigureAwait(false);
                     return;
                 }
             }

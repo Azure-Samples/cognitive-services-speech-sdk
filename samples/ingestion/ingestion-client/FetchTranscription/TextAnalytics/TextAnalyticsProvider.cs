@@ -67,6 +67,13 @@ namespace TextAnalytics
             return textAnalyticsRequestCompleted;
         }
 
+        /// <summary>
+        /// Submits text analytics requests depending on the settings (sentimentAnalysisSetting). Every utterance will be submitted independently to text analytics.
+        /// (This means for instance that every utterance will have a separate sentiment score).
+        /// </summary>
+        /// <param name="speechTranscript">The speech transcript object.</param>
+        /// <param name="sentimentAnalysisSetting">The sentiment analysis setting.</param>
+        /// <returns>The job ids and errors, if any were found.</returns>
         public async Task<(IEnumerable<string> jobIds, IEnumerable<string> errors)> SubmitUtteranceLevelRequests(
             SpeechTranscript speechTranscript,
             SentimentAnalysisSetting sentimentAnalysisSetting)
@@ -89,6 +96,14 @@ namespace TextAnalytics
             return await SubmitDocumentsAsync(documents, actions).ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// Submits text analytics requests depending on the settings (sentimentAnalysisSetting). The whole transcript (per channel) will be submitted in a single request.
+        /// (This means for instance that one single sentiment score will be generated per channel).
+        /// </summary>
+        /// <param name="speechTranscript">The speech transcript object.</param>
+        /// <param name="sentimentAnalysisSetting">The sentiment analysis setting.</param>
+        /// <param name="piiRedactionSetting">The PII redaction setting.</param>
+        /// <returns>The job ids and errors, if any were found.</returns>
         public async Task<(IEnumerable<string> jobIds, IEnumerable<string> errors)> SubmitAudioLevelRequests(
             SpeechTranscript speechTranscript,
             SentimentAnalysisSetting sentimentAnalysisSetting,
