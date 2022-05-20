@@ -239,7 +239,8 @@ namespace FetchTranscriptionFunction
                 FetchTranscriptionEnvironmentVariables.SentimentAnalysisSetting != SentimentAnalysisSetting.None &&
                 FetchTranscriptionEnvironmentVariables.PiiRedactionSetting != PiiRedactionSetting.None)
             {
-                // if we already got text analytics requests, get the results - otherwise, start new ones
+                // If we already got text analytics requests in the transcript (containsTextAnalyticsRequest), add the results to the transcript.
+                // Otherwise, submit new text analytics requests.
                 if (containsTextAnalyticsRequest)
                 {
                     foreach (var speechTranscriptMapping in speechTranscriptMappings)

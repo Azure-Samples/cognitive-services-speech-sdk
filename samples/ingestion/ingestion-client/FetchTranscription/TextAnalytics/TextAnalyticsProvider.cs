@@ -19,6 +19,25 @@ namespace TextAnalytics
     using Microsoft.Extensions.Logging;
     using static Connector.Serializable.TranscriptionStartedServiceBusMessage.TextAnalyticsRequest;
 
+    /// <summary>
+    /// The text analytics provide.
+    ///
+    /// General overview of text analytics request processing:
+    ///
+    /// For a succeded transcription, check if transcription has text analytics job info.
+    ///     if true:
+    ///         Check if text analytics job terminated.
+    ///         if true:
+    ///             Add text analytics results to transcript, write transcript to storage.
+    ///         if false:
+    ///             Re-enqueue job, check again after X minutes.
+    ///     if false:
+    ///         Check if text analytics is requested
+    ///         if true:
+    ///             Add text analytics job info to transcription. Re-enqueue job, check again after X minutes.
+    ///         if false:
+    ///             Write transcript to storage.
+    /// </summary>
     public class TextAnalyticsProvider
     {
         private const int MaxRecordsPerRequest = 25;
@@ -38,6 +57,11 @@ namespace TextAnalytics
             Log = log;
         }
 
+        /// <summary>
+        /// Checks for all text analytics requests that were marked as running if they have completed and sets a new state accordingly.
+        /// </summary>
+        /// <param name="audioFileInfos"></param>
+        /// <returns>True if all requests completed, else false.</returns>
         public async Task<bool> TextAnalyticsRequestsCompleted(IEnumerable<AudioFileInfo> audioFileInfos)
         {
             var runningTextAnalyticsRequests = new List<TextAnalyticsRequest>();
@@ -148,6 +172,12 @@ namespace TextAnalytics
             return await SubmitDocumentsAsync(documents, actions).ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// Gets the (utterance-level) results from text analytics, adds the results to the speech transcript.
+        /// </summary>
+        /// <param name="jobIds">The text analytics job ids.</param>
+        /// <param name="speechTranscript">The speech transcript object.</param>
+        /// <returns>The errors, if any.</returns>
         public async Task<IEnumerable<string>> AddUtteranceLevelEntitiesAsync(
             IEnumerable<string> jobIds,
             SpeechTranscript speechTranscript)
@@ -185,6 +215,12 @@ namespace TextAnalytics
             return errors;
         }
 
+        /// <summary>
+        /// Gets the (audio-level) results from text analytics, adds the results to the speech transcript.
+        /// </summary>
+        /// <param name="jobIds">The text analytics job ids.</param>
+        /// <param name="speechTranscript">The speech transcript object.</param>
+        /// <returns>The errors, if any.</returns>
         public async Task<IEnumerable<string>> AddAudioLevelEntitiesAsync(
             IEnumerable<string> jobIds,
             SpeechTranscript speechTranscript)
@@ -248,10 +284,7 @@ namespace TextAnalytics
             return errors;
         }
 
-        private async Task<(
-            IEnumerable<string> jobIds,
-            IEnumerable<string> errors)>
-            SubmitDocumentsAsync(
+        private async Task<(IEnumerable<string> jobIds, IEnumerable<string> errors)> SubmitDocumentsAsync(
             IEnumerable<TextDocumentInput> documents,
             TextAnalyticsActions actions)
         {
@@ -290,10 +323,7 @@ namespace TextAnalytics
             return (jobIds, errors);
         }
 
-        private async Task<(
-            string jobId,
-            IEnumerable<string> errors)>
-            SubmitDocumentsChunkAsync(int chunkId, List<TextDocumentInput> documentChunk, TextAnalyticsActions actions)
+        private async Task<(string jobId, IEnumerable<string> errors)> SubmitDocumentsChunkAsync(int chunkId, List<TextDocumentInput> documentChunk, TextAnalyticsActions actions)
         {
             var errors = new List<string>();
 
@@ -320,11 +350,7 @@ namespace TextAnalytics
             return (null, errors);
         }
 
-        private async Task<(
-            IEnumerable<AnalyzeSentimentResult> sentimentResults,
-            IEnumerable<RecognizePiiEntitiesResult> piiResults,
-            IEnumerable<string> errors)>
-            GetOperationsResultsAsync(IEnumerable<string> jobIds)
+        private async Task<(IEnumerable<AnalyzeSentimentResult> sentimentResults, IEnumerable<RecognizePiiEntitiesResult> piiResults, IEnumerable<string> errors)> GetOperationsResultsAsync(IEnumerable<string> jobIds)
         {
             var errors = new List<string>();
             var sentimentResults = new List<AnalyzeSentimentResult>();
@@ -360,11 +386,7 @@ namespace TextAnalytics
             return (sentimentResults, piiResults, errors);
         }
 
-        private async Task<(
-            IEnumerable<AnalyzeSentimentResult> sentimentResults,
-            IEnumerable<RecognizePiiEntitiesResult> piiResults,
-            IEnumerable<string> errors)>
-            GetOperationResults(int index, string operationId)
+        private async Task<(IEnumerable<AnalyzeSentimentResult> sentimentResults, IEnumerable<RecognizePiiEntitiesResult> piiResults, IEnumerable<string> errors)> GetOperationResults(int index, string operationId)
         {
             var errors = new List<string>();
             var sentimentResults = new List<AnalyzeSentimentResult>();
