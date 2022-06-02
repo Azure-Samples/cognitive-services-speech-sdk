@@ -7,7 +7,7 @@ In this sample app for Windows, macOS, or Linux, you create captions from audio 
 - Azure subscription - [Create one for free](https://azure.microsoft.com/free/cognitive-services)
 - <a href="https://ms.portal.azure.com/#create/Microsoft.CognitiveServicesSpeechServices"  title="Create a Speech resource"  target="_blank">Create a Speech resource</a> in the Azure portal. You can use the free pricing tier (`F0`) to try the service, and upgrade later to a paid tier for production.
 - Get the resource key and region. After your Speech resource is deployed, select **Go to resource** to view and manage keys. For more information about Cognitive Services resources, see [Get the keys for your resource](https://docs.microsoft.com/azure/cognitive-services/cognitive-services-apis-create-account#get-the-keys-for-your-resource).
-- Install the [Java 8 or 11 JRE/JDK.](https://java.com/en/download/help/download_options.html).
+- Install the [Java 8 or 11 JRE/JDK](https://java.com/en/download/help/download_options.html).
 - Install [Apache Maven](https://maven.apache.org/install.html).
 
 ## Set up the environment
