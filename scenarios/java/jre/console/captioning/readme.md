@@ -9,6 +9,18 @@ In this sample app for Windows, macOS, or Linux, you create captions from audio 
 - Get the resource key and region. After your Speech resource is deployed, select **Go to resource** to view and manage keys. For more information about Cognitive Services resources, see [Get the keys for your resource](https://docs.microsoft.com/azure/cognitive-services/cognitive-services-apis-create-account#get-the-keys-for-your-resource).
 - Install the [Java 8 or 11 JRE/JDK](https://java.com/en/download/help/download_options.html).
 - Install [Apache Maven](https://maven.apache.org/install.html).
+- On Ubuntu or Debian, run the following commands to install the required packages:
+```sh
+sudo apt-get update
+sudo apt-get install libssl1.0.0 libasound2
+```
+If libssl1.0.0 is not available, install libssl1.0.x (where x is greater than 0) or libssl1.1 instead.
+- On RHEL or CentOS, run the following commands to install the required packages:
+```sh
+sudo yum update
+sudo yum install alsa-lib java-1.8.0-openjdk-devel openssl
+```
+See also [how to configure RHEL/CentOS 7 for Speech SDK](https://docs.microsoft.com/azure/cognitive-services/speech-service/how-to-configure-rhel-centos-7).
 
 ## Set up the environment
 
