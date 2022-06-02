@@ -10,7 +10,8 @@ In this sample app for Windows, macOS, or Linux, you create captions from audio 
 - Azure subscription - [Create one for free](https://azure.microsoft.com/free/cognitive-services)
 - <a href="https://ms.portal.azure.com/#create/Microsoft.CognitiveServicesSpeechServices"  title="Create a Speech resource"  target="_blank">Create a Speech resource</a> in the Azure portal. You can use the free pricing tier (`F0`) to try the service, and upgrade later to a paid tier for production.
 - Get the resource key and region. After your Speech resource is deployed, select **Go to resource** to view and manage keys. For more information about Cognitive Services resources, see [Get the keys for your resource](https://docs.microsoft.com/azure/cognitive-services/cognitive-services-apis-create-account#get-the-keys-for-your-resource).
-- If you are running Windows, install the [Microsoft Visual C++ Redistributable for Visual Studio 2015, 2017 and 2019](https://support.microsoft.com/help/2977003/the-latest-supported-visual-c-downloads).
+- On Windows and Linux, install Python 3.6 or later. On macOS, install Python 3.7 or later. Downloads are available [here](https://www.python.org/downloads/).
+- If you are running Windows, install the [Microsoft Visual C++ Redistributable for Visual Studio 2017](https://support.microsoft.com/help/2977003/the-latest-supported-visual-c-downloads).
 - On Ubuntu or Debian, run the following commands to install the required packages:
 ```sh
 sudo apt-get update
@@ -20,7 +21,7 @@ If libssl1.0.0 is not available, install libssl1.0.x (where x is greater than 0)
 - On RHEL or CentOS, run the following commands to install the required packages:
 ```sh
 sudo yum update
-sudo yum install alsa-lib dotnet-sdk-3.1 openssl
+sudo yum install alsa-lib openssl python3
 ```
 See also [how to configure RHEL/CentOS 7 for Speech SDK](https://docs.microsoft.com/azure/cognitive-services/speech-service/how-to-configure-rhel-centos-7).
 
