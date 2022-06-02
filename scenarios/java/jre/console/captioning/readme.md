@@ -12,7 +12,7 @@ In this sample app for Windows, macOS, or Linux, you create captions from audio 
 
 ## Set up the environment
 
-The Speech SDK is available as a [Maven package](https://mvnrepository.com/artifact/com.microsoft.cognitiveservices.speech/client-sdk) and implements .NET Standard 2.0. You install the Speech SDK in the next section of this article, but first check the [platform-specific installation instructions](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstarts/setup-platform) for any more requirements.
+The Speech SDK is available as a [Maven package](https://mvnrepository.com/artifact/com.microsoft.cognitiveservices.speech/client-sdk). You install the Speech SDK in the next section of this article, but first check the [platform-specific installation instructions](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstarts/setup-platform) for any more requirements.
 
 > **NOTE**
 > By downloading the Microsoft Cognitive Services Speech SDK, you acknowledge its [license agreement](https://aka.ms/csspeech/license201809).
