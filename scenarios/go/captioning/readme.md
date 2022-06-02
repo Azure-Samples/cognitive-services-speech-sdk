@@ -19,7 +19,7 @@ If libssl1.0.0 is not available, install libssl1.0.x (where x is greater than 0)
 - On RHEL or CentOS, run the following commands to install the required packages:
 ```sh
 sudo yum update
-sudo yum install alsa-lib dotnet-sdk-3.1 openssl
+sudo yum install alsa-lib golang openssl
 ```
 See also [how to configure RHEL/CentOS 7 for Speech SDK](https://docs.microsoft.com/azure/cognitive-services/speech-service/how-to-configure-rhel-centos-7).
 
