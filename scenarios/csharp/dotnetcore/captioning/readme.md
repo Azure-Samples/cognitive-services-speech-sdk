@@ -1,13 +1,29 @@
 # Captioning app with the Speech SDK for .NET
 
-In this sample app, you create captions from audio input using the speech-to-text capability of the Speech SDK for .NET.
+In this sample app for Windows, macOS, or Linux, you create captions from audio input using the speech-to-text capability of the Speech SDK for .NET.
+
+> **Note:**
+> We currently only support [specific Linux distributions and target architectures](https://docs.microsoft.com/azure/cognitive-services/speech-service/speech-sdk?tabs=linux).
 
 ## Prerequisites
 
 - Azure subscription - [Create one for free](https://azure.microsoft.com/free/cognitive-services)
 - <a href="https://ms.portal.azure.com/#create/Microsoft.CognitiveServicesSpeechServices"  title="Create a Speech resource"  target="_blank">Create a Speech resource</a> in the Azure portal. You can use the free pricing tier (`F0`) to try the service, and upgrade later to a paid tier for production.
 - Get the resource key and region. After your Speech resource is deployed, select **Go to resource** to view and manage keys. For more information about Cognitive Services resources, see [Get the keys for your resource](https://docs.microsoft.com/azure/cognitive-services/cognitive-services-apis-create-account#get-the-keys-for-your-resource).
-- [.NET](https://docs.microsoft.com/dotnet/core/install/).
+- Install [.NET Core 3.1 or later](https://docs.microsoft.com/dotnet/core/install/).
+- If you are running Windows, install the [Microsoft Visual C++ Redistributable for Visual Studio 2015, 2017 and 2019](https://support.microsoft.com/help/2977003/the-latest-supported-visual-c-downloads).
+- On Ubuntu or Debian, run the following commands to install the required packages:
+```sh
+sudo apt-get update
+sudo apt-get install libssl1.0.0 libasound2
+```
+If libssl1.0.0 is not available, install libssl1.0.x (where x is greater than 0) or libssl1.1 instead.
+- On RHEL or CentOS, run the following commands to install the required packages:
+```sh
+sudo yum update
+sudo yum install alsa-lib dotnet-sdk-3.1 openssl
+```
+See also [how to configure RHEL/CentOS 7 for Speech SDK](https://docs.microsoft.com/azure/cognitive-services/speech-service/how-to-configure-rhel-centos-7).
 
 ## Set up the environment
 
