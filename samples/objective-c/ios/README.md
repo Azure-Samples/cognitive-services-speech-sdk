@@ -35,18 +35,17 @@ The [synthesis sample app](./synthesis-samples) shows various other techniques t
 
 **By downloading the Microsoft Cognitive Services Speech SDK, you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license201809).**
 
-The Cognitive Services Speech SDK for iOS can be downloaded as a zip-file from https://aka.ms/csspeech/iosbinary. Download and unpack the files to the directory of this `README.md`, i.e. parallel to the samples directories.
+The Cognitive Services Speech SDK for iOS can be downloaded as a zip-file from https://aka.ms/csspeech/iosbinary. Download and unpack the "MicrosoftCognitiveServicesSpeech.xcframework" files to the directory of this `README.md`, i.e. parallel to the samples directories.
 
 ## Build the samples
 
-Open either Xcode project with the sample code.
-This loads the project in Xcode.
+1. Open either Xcode project with the sample code. This loads the project in Xcode.
+1. In the Xcode project, add a reference to the extracted "MicrosoftCognitiveServicesSpeech.xcframework" folder and it's contents.
 Next, add your subscription details to the `<sample name>/ViewController.m` file:
+   1. Replace the string `YourSubscriptionKey` with your subscription key.
+   1. Replace the string `YourServiceRegion` with the region associated with your subscription (for example, `westus` for the free trial subscription).
 
-1. Replace the string `YourSubscriptionKey` with your subscription key.
-2. Replace the string `YourServiceRegion` with the region associated with your subscription (for example, `westus` for the free trial subscription).
-
-To build the sample app and check if all the paths are set correctly, choose **Product** > **Build** from the menu.
+To build the sample app and check if all the paths are set correctly, select **Product** > **Build** from the menu.
 
 ## Run the samples
 
