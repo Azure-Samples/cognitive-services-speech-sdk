@@ -3,12 +3,6 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
-// Notes:
-// - Install the Speech NuGet package:
-// dotnet add package Microsoft.CognitiveServices.Speech
-// - The Speech SDK on Windows requires the Microsoft Visual C++ Redistributable for Visual Studio 2019 on the system. See:
-// https://docs.microsoft.com/azure/cognitive-services/speech-service/speech-sdk
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
