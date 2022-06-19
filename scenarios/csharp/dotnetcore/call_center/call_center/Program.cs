@@ -15,11 +15,9 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-// To install, run:
-// dotnet add <path to call_center.csproj> package Newtonsoft.Json
-using Newtonsoft.Json.Linq;
 
 namespace Call_Center
 {
@@ -131,23 +129,21 @@ namespace Call_Center
             var payload_1 = new { contentUrls = new string[]{transcriptionUri}, locale = "en-US", displayName = displayName };
             var payload_2 = System.Text.Json.JsonSerializer.Serialize(payload_1);
             var response = await SendPost(uri.Uri.ToString(), payload_2, speechKey, new HttpStatusCode[]{ HttpStatusCode.Created });
-            var parsed_json = JObject.Parse(response.Item2);
-            // Create Transcription API JSON response sample and schema:
-            // https://westus.dev.cognitive.microsoft.com/docs/services/speech-to-text-api-v3-0/operations/CreateTranscription
-            var transcription_uri = parsed_json.Value<string>("self");
-            if (null == transcription_uri)
+            using (JsonDocument document = JsonDocument.Parse(response.Item2))
             {
-                throw new Exception ($"Unable to parse response from Create Transcription API:{Environment.NewLine}{response.Item2}");
+                // Create Transcription API JSON response sample and schema:
+                // https://westus.dev.cognitive.microsoft.com/docs/services/speech-to-text-api-v3-0/operations/CreateTranscription
+                var transcription_uri = document.RootElement.GetProperty("self").ToString();
+                // The transcription ID is at the end of the transcription URI.
+                var transcription_id = transcription_uri.Split("/").Last();
+                // Verify the transcription ID is a valid GUID.
+                Guid guid;
+                if (!Guid.TryParse(transcription_id, out guid))
+                {
+                    throw new Exception ($"Unable to parse response from Create Transcription API:{Environment.NewLine}{response.Item2}");
+                }
+                return transcription_id;
             }
-            // The transcription ID is at the end of the transcription URI.
-            var transcription_id = transcription_uri.Split("/").Last();
-            // Verify the transcription ID is a valid GUID.
-            Guid guid;
-            if (!Guid.TryParse(transcription_id, out guid))
-            {
-                throw new Exception ($"Unable to parse response from Create Transcription API:{Environment.NewLine}{response.Item2}");
-            }
-            return transcription_id;
         }
 
         // Return true if the transcription has status "Succeeded".
@@ -156,13 +152,11 @@ namespace Call_Center
             var uri = new UriBuilder(Uri.UriSchemeHttps, speechHost);
             uri.Path = $"{speechTranscriptionPath}/{transcription_id}";
             var response = await SendGet(uri.Uri.ToString(), speechKey, new HttpStatusCode[]{ HttpStatusCode.OK });
-            var parsed_json = JObject.Parse(response.Item2);
-            var status = parsed_json.Value<string>("status");
-            if (null == status)
+            using (JsonDocument document = JsonDocument.Parse(response.Item2))
             {
-                throw new Exception ($"Unable to parse response from Get Transcription API:{Environment.NewLine}{response.Item2}");
+                var status = document.RootElement.GetProperty("status").ToString();
+                return 0 == string.Compare("Succeeded", status);
             }
-            return 0 == string.Compare("Succeeded", status);
         }
 
         // Poll the transcription status until it has status "Succeeded".
@@ -182,32 +176,43 @@ namespace Call_Center
             var uri = new UriBuilder(Uri.UriSchemeHttps, speechHost);
             uri.Path = $"{speechTranscriptionPath}/{transcription_id}/files";
             var response = await SendGet(uri.Uri.ToString(), speechKey, new HttpStatusCode[]{ HttpStatusCode.OK });
-            var parsed_json = JObject.Parse(response.Item2);
-            // JSONPath examples:
-            // https://www.ietf.org/id/draft-ietf-jsonpath-base-04.html#name-jsonpath-examples
-            // Get Transcription Files JSON response sample and schema:
-            // https://westus.dev.cognitive.microsoft.com/docs/services/speech-to-text-api-v3-0/operations/GetTranscriptionFiles
-            // Note: We use SelectToken() instead of SelectTokens() because we only expect one transcription.
-            var contentUri = parsed_json.SelectToken("$.values[?(@.kind == 'Transcription')].links.contentUrl");
-            if (null == contentUri)
+            using (JsonDocument document = JsonDocument.Parse(response.Item2))
             {
-                throw new Exception ($"Unable to parse response from Get Transcription Files API:{Environment.NewLine}{response.Item2}");
+
+                // Get Transcription Files JSON response sample and schema:
+                // https://westus.dev.cognitive.microsoft.com/docs/services/speech-to-text-api-v3-0/operations/GetTranscriptionFiles
+                string? contentUri = null;
+                foreach (JsonElement value in document.RootElement.GetProperty("values").EnumerateArray())
+                {
+                    if ("Transcription" == value.GetProperty("kind").ToString())
+                    {
+                        contentUri = value.GetProperty("links").GetProperty("contentUrl").ToString();
+                        break;
+                    }
+                }
+                if (null == contentUri)
+                {
+                    throw new Exception ($"Unable to parse response from Get Transcription Files API:{Environment.NewLine}{response.Item2}");
+                }
+                return contentUri.ToString();
             }
-            return contentUri.ToString();
         }
 
         // Return transcription content as a list of phrases.
         async static Task<IEnumerable<string>> GetTranscriptionPhrases(string transcription_uri)
         {
             var response = await SendGet(transcription_uri, "", new HttpStatusCode[]{ HttpStatusCode.OK });
-            var parsed_json = JObject.Parse(response.Item2);
-            var results = parsed_json.SelectTokens("$.recognizedPhrases[*].nBest[0].display");
-            if (!results.Any())
+            using (JsonDocument document = JsonDocument.Parse(response.Item2))
             {
-                throw new Exception ($"Unable to parse transcription content:{Environment.NewLine}{response.Item2}");
+                var recognizedPhrases = document.RootElement.GetProperty("recognizedPhrases").EnumerateArray().ToArray();
+                return recognizedPhrases.Select(phrase =>
+                    {
+                        var best = phrase.GetProperty("nBest").EnumerateArray().ToArray()[0];
+                        return best.GetProperty("display").ToString();
+                    }
+                // Convert Select results to arrays to prevent them being disposed with the JsonDocument.
+                ).ToArray();
             }
-            // Convert each JToken to string.
-            return results.Select(x => x.ToString());
         }
 
         async static void DeleteTranscription(string transcription_id)
@@ -238,14 +243,12 @@ namespace Call_Center
             var documents_2 = string.Join(',', documents_1.ToArray());
             var content = $@"{{ ""documents"": [{documents_2}] }}";
             var response = await SendPost(uri.Uri.ToString(), content, textAnalyticsKey, new HttpStatusCode[] { HttpStatusCode.OK });
-            var parsed_json = JObject.Parse(response.Item2);
-            var languages = parsed_json.SelectTokens("$.documents[*].detectedLanguage.iso6391Name");
-            if (!languages.Any())
+            using (JsonDocument document = JsonDocument.Parse(response.Item2))
             {
-                throw new Exception ($"Unable to parse response from Detect Languages API:{Environment.NewLine}{response.Item2}");
+                var documents = document.RootElement.GetProperty("documents").EnumerateArray().ToArray();
+                // Convert Select results to arrays to prevent them being disposed with the JsonDocument.
+                return documents.Select(document => document.GetProperty("detectedLanguage").GetProperty("iso6391Name").ToString()).ToArray();
             }
-            // Convert each JToken to string.
-            return languages.Select(x => x.ToString());
         }
 
         // Convert a list of transcription phrases to "document" JSON elements as expected by various Text Analytics REST APIs.
@@ -278,14 +281,29 @@ namespace Call_Center
             // Sentiment JSON request and response samples:
             // https://docs.microsoft.com/en-us/rest/api/cognitiveservices-textanalytics/3.1preview4/sentiment/sentiment#examples
             var response = await SendPost(uri.Uri.ToString(), transcription_documents, textAnalyticsKey, new HttpStatusCode[] { HttpStatusCode.OK });
-            var parsed_json = JObject.Parse(response.Item2);
-            var sentiments = parsed_json.SelectTokens("$.documents[*].sentiment");
-            if (!sentiments.Any())
+            using (JsonDocument document = JsonDocument.Parse(response.Item2))
             {
-                throw new Exception ($"Unable to parse response from Sentiment API:{Environment.NewLine}{response.Item2}");
+                var documents = document.RootElement.GetProperty("documents").EnumerateArray().ToArray();
+                // Convert Select results to arrays to prevent them being disposed with the JsonDocument.
+                return documents.Select(document => document.GetProperty("sentiment").ToString()).ToArray();
             }
-            // Convert each JToken to string.
-            return sentiments.Select(x => x.ToString());
+        }
+
+        // Get key phrases for transcription phrases.
+        async static Task<IEnumerable<IEnumerable<string>>> GetKeyPhrases(string transcription_documents)
+        {
+            var uri = new UriBuilder(Uri.UriSchemeHttps, textAnalyticsHost);
+            uri.Path = keyPhrasesPath;
+
+            // Key phrases JSON request and response samples:
+            // https://docs.microsoft.com/en-us/rest/api/cognitiveservices-textanalytics/3.1preview4/key-phrases/key-phrases#examples
+            var response = await SendPost(uri.Uri.ToString(), transcription_documents, textAnalyticsKey, new HttpStatusCode[] { HttpStatusCode.OK });
+            using (JsonDocument document = JsonDocument.Parse(response.Item2))
+            {
+                var documents = document.RootElement.GetProperty("documents").EnumerateArray().ToArray();
+                // Convert Select results to array to prevent them being disposed with the JsonDocument.
+                return documents.Select(document => document.GetProperty("keyPhrases").EnumerateArray().ToArray().Select(phrase => phrase.ToString()).ToArray()).ToArray();
+            }
         }
 
         // Get recognized entities (general) for transcription phrases.
@@ -297,37 +315,16 @@ namespace Call_Center
             // Entities recognition JSON request and response samples:
             // https://docs.microsoft.com/en-us/rest/api/cognitiveservices-textanalytics/3.1preview4/entities-recognition-general/entities-recognition-general#examples
             var response = await SendPost(uri.Uri.ToString(), transcription_documents, textAnalyticsKey, new HttpStatusCode[] { HttpStatusCode.OK });
-            var parsed_json = JObject.Parse(response.Item2);
-            var documents = parsed_json.SelectTokens("$.documents[*]");
-            if (!documents.Any())
+            using (JsonDocument document = JsonDocument.Parse(response.Item2))
             {
-                throw new Exception ($"Unable to parse response from Entities Recognition (General) API:{Environment.NewLine}{response.Item2}");
-            }
-            else
-            {
+                var documents = document.RootElement.GetProperty("documents").EnumerateArray().ToArray();
+                // Convert Select results to arrays to prevent them being disposed with the JsonDocument.
                 return documents.Select(document =>
                     {
-                        var entities = document.SelectTokens("$.entities[*]");
-                        if (entities.Any())
-                        {
-                            return entities.Select(entity =>
-                                {
-                                    var category = entity.SelectToken("$.category");
-                                    var text = entity.SelectToken("$.text");
-                                    if (null == category || null == text)
-                                    {
-                                        throw new Exception ($"Unable to parse response from Entities Recognition (General) API:{Environment.NewLine}{response.Item2}");
-                                    }
-                                    return (category.ToString(), text.ToString());
-                                }
-                            );
-                        }
-                        else
-                        {
-                            return Enumerable.Empty<(string, string)>();
-                        }
+                        var entities = document.GetProperty("entities").EnumerateArray().ToArray();
+                        return entities.Select(entity => (entity.GetProperty("category").ToString(), entity.GetProperty("text").ToString())).ToArray();
                     }
-                );
+                ).ToArray();
             }
         }
 
@@ -340,42 +337,27 @@ namespace Call_Center
             // Entities recognition JSON request and response samples:
             // https://docs.microsoft.com/en-us/rest/api/cognitiveservices-textanalytics/3.1preview4/entities-recognition-general/entities-recognition-general#examples
             var response = await SendPost(uri.Uri.ToString(), transcription_documents, textAnalyticsKey, new HttpStatusCode[] { HttpStatusCode.OK });
-            var parsed_json = JObject.Parse(response.Item2);
-            var documents = parsed_json.SelectTokens("$.documents[*]");
-            if (!documents.Any())
+            using (JsonDocument document = JsonDocument.Parse(response.Item2))
             {
-                throw new Exception ($"Unable to parse response from Entities Recognition (PII) API:{Environment.NewLine}{response.Item2}");
-            }
-            else
-            {
+                var documents = document.RootElement.GetProperty("documents").EnumerateArray().ToArray();
+                // Convert Select results to arrays to prevent them being disposed with the JsonDocument.
                 return documents.Select(document =>
                     {
-                        var entities = document.SelectTokens("$.entities[*]");
-                        if (entities.Any())
-                        {
-                            return entities.Select(entity =>
-                                {
-                                    var category = entity.SelectToken("$.category");
-                                    var text = entity.SelectToken("$.text");
-                                    if (null == category || null == text)
-                                    {
-                                        throw new Exception ($"Unable to parse response from Entities Recognition (PII) API:{Environment.NewLine}{response.Item2}");
-                                    }
-                                    return (category.ToString(), text.ToString());
-                                }
-                            );
-                        }
-                        else
-                        {
-                            return Enumerable.Empty<(string, string)>();
-                        }
+                        var entities = document.GetProperty("entities").EnumerateArray().ToArray();
+                        return entities.Select(entity => (entity.GetProperty("category").ToString(), entity.GetProperty("text").ToString())).ToArray();
                     }
-                );
+                ).ToArray();
             }
         }
 
         // Print each transcription phrase, followed by its language, sentiment, and so on.
-        static void PrintResults(IEnumerable<string> transcription_phrases, IEnumerable<string> transcription_languages, IEnumerable<string> transcription_sentiments, IEnumerable<IEnumerable<(string, string)>> transcription_entities_general, IEnumerable<IEnumerable<(string, string)>> transcription_entities_pii)
+        static void PrintResults(
+            IEnumerable<string> transcription_phrases,
+            IEnumerable<string> transcription_languages,
+            IEnumerable<string> transcription_sentiments,
+            IEnumerable<IEnumerable<string>> key_phrases,
+            IEnumerable<IEnumerable<(string, string)>> transcription_entities_general,
+            IEnumerable<IEnumerable<(string, string)>> transcription_entities_pii)
         {
             var phrases_2 = transcription_phrases.Zip(transcription_languages).Select(t =>
                 $"Phrase: {t.First}{Environment.NewLine}Language: {t.Second}{Environment.NewLine}"
@@ -383,11 +365,17 @@ namespace Call_Center
             var phrases_3 = phrases_2.Zip(transcription_sentiments).Select(t =>
                 $"{t.First}Sentiment: {t.Second}{Environment.NewLine}"
             );
-            var phrases_4 = phrases_3.Zip(transcription_entities_general).Select(t =>
+            var phrases_4 = phrases_3.Zip(key_phrases).Select(t =>
+                {
+                    var key_phrases = t.Second.Aggregate("", (result, key_phrase) => $"{result}    {key_phrase}{Environment.NewLine}");
+                    return $"{t.First}Key phrases:{Environment.NewLine}{key_phrases}";
+                }
+            );
+            var phrases_5 = phrases_4.Zip(transcription_entities_general).Select(t =>
                 {
                     if (t.Second.Any())
                     {
-                        var entities = t.Second.Aggregate("", (result, entity) => $"{result}Category: {entity.Item1}. Text: {entity.Item2}.{Environment.NewLine}");
+                        var entities = t.Second.Aggregate("", (result, entity) => $"{result}    Category: {entity.Item1}. Text: {entity.Item2}.{Environment.NewLine}");
                         return $"{t.First}Recognized entities (general):{Environment.NewLine}{entities}";
                     }
                     else
@@ -396,11 +384,11 @@ namespace Call_Center
                     }
                 }
             );
-            var phrases_5 = phrases_4.Zip(transcription_entities_pii).Select(t =>
+            var phrases_6 = phrases_5.Zip(transcription_entities_pii).Select(t =>
                 {
                     if (t.Second.Any())
                     {
-                        var entities = t.Second.Aggregate("", (result, entity) => $"{result}Category: {entity.Item1}. Text: {entity.Item2}.{Environment.NewLine}");
+                        var entities = t.Second.Aggregate("", (result, entity) => $"{result}    Category: {entity.Item1}. Text: {entity.Item2}.{Environment.NewLine}");
                         return $"{t.First}Recognized entities (PII):{Environment.NewLine}{entities}";
                     }
                     else
@@ -409,7 +397,7 @@ namespace Call_Center
                     }
                 }
             );
-            foreach (var phrase in phrases_5)
+            foreach (var phrase in phrases_6)
             {
                 Console.WriteLine(phrase);
             }
@@ -427,9 +415,10 @@ namespace Call_Center
             var languages = await GetTranscriptionLanguages(phrases);
             var documents = TranscriptionPhrasesToDocuments(phrases, languages);
             var sentiments = await GetSentiments(documents);
+            var key_phrases = await GetKeyPhrases(documents);
             var entities_general = await GetRecognizedEntitiesGeneral(documents);
             var entities_pii = await GetRecognizedEntitiesPII(documents);
-            PrintResults(phrases, languages, sentiments, entities_general, entities_pii);
+            PrintResults(phrases, languages, sentiments, key_phrases, entities_general, entities_pii);
             // Clean up resources.
             DeleteTranscription(transcription_id);
             return;
@@ -438,6 +427,8 @@ namespace Call_Center
         public static void Main(string[] args)
         {
             Run().Wait();
+            Console.WriteLine("Press any key to exit.");
+            Console.ReadKey();
             return;
         }
     }
