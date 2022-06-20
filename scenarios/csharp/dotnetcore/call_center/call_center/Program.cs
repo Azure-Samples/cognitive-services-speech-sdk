@@ -335,7 +335,7 @@ namespace Call_Center
             uri.Path = entitiesRecognitionPIIPath;
 
             // Entities recognition JSON request and response samples:
-            // https://docs.microsoft.com/en-us/rest/api/cognitiveservices-textanalytics/3.1preview4/entities-recognition-general/entities-recognition-general#examples
+            // https://docs.microsoft.com/en-us/rest/api/cognitiveservices-textanalytics/3.1preview4/entities-recognition-pii/entities-recognition-pii#examples
             var response = await SendPost(uri.Uri.ToString(), transcription_documents, textAnalyticsKey, new HttpStatusCode[] { HttpStatusCode.OK });
             using (JsonDocument document = JsonDocument.Parse(response.Item2))
             {
