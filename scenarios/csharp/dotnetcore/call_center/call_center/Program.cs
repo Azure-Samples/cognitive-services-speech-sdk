@@ -104,7 +104,7 @@ namespace Call_Center
             using (var client = new HttpClient())
             using (var request = new HttpRequestMessage())
             {
-                request.Method = HttpMethod.Get;
+                request.Method = HttpMethod.Delete;
                 request.RequestUri = new Uri(uri);
                 request.Headers.Add("Ocp-Apim-Subscription-Key", key);
 
