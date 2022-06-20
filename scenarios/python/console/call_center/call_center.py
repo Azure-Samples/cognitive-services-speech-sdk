@@ -241,7 +241,7 @@ def print_results(
 def run() -> None :
     # How to use batch transcription:
     # https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/cognitive-services/Speech-Service/batch-transcription.md
-    transcription_id = await create_transcription(transcriptionUri);
+    transcription_id = create_transcription(transcriptionUri);
     WaitForTranscription(transcription_id)
     transcription_url = get_transcription_uri(transcription_id)
     phrases = get_transcription_phrases(transcription_url)
