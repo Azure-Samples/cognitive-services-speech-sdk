@@ -57,10 +57,14 @@ namespace Call_Center
                 request.Headers.Add("Ocp-Apim-Subscription-Key", key);
 
                 var response_1 = await client.SendAsync(request);
-                var response_2 = await response_1.Content.ReadAsStringAsync();
-                if (!expectedStatusCodes.Contains(response_1.StatusCode) || response_1.Content == null)
+                if (response_1.Content == null)
                 {
-                    throw new Exception(response_2);
+                    throw new Exception($"The response from {uri} contains no content.");
+                }
+                var response_2 = await response_1.Content.ReadAsStringAsync();
+                if (!expectedStatusCodes.Contains(response_1.StatusCode))
+                {
+                    throw new Exception($"The response from {uri} has an unexpected status code: {response_1.StatusCode}");
                 }
                 return (response_1, response_2);
             }
@@ -80,12 +84,15 @@ namespace Call_Center
                 {
                     request.Content = new StringContent(requestBody, Encoding.UTF8, "application/json");
                 }
-                
                 var response_1 = await client.SendAsync(request);
-                var response_2 = await response_1.Content.ReadAsStringAsync();
-                if (!expectedStatusCodes.Contains(response_1.StatusCode) || response_1.Content == null)
+                if (response_1.Content == null)
                 {
-                    throw new Exception(response_2);
+                    throw new Exception($"The response from {uri} contains no content.");
+                }
+                var response_2 = await response_1.Content.ReadAsStringAsync();
+                if (!expectedStatusCodes.Contains(response_1.StatusCode))
+                {
+                    throw new Exception($"The response from {uri} has an unexpected status code: {response_1.StatusCode}");
                 }
                 return (response_1, response_2);
             }
@@ -172,7 +179,6 @@ namespace Call_Center
             var response = await SendGet(uri.Uri.ToString(), speechKey, new HttpStatusCode[]{ HttpStatusCode.OK });
             using (JsonDocument document = JsonDocument.Parse(response.Item2))
             {
-
                 // Get Transcription Files JSON response sample and schema:
                 // https://westus.dev.cognitive.microsoft.com/docs/services/speech-to-text-api-v3-0/operations/GetTranscriptionFiles
                 string? contentUri = null;
@@ -220,7 +226,7 @@ namespace Call_Center
         // Detect languages for a list of transcription phrases.
         static async Task<IEnumerable<string>> GetTranscriptionLanguages(IEnumerable<string> transcription_phrases)
         {
-            var uri = new UriBuilder(Uri.UriSchemeHttps, speechHost);
+            var uri = new UriBuilder(Uri.UriSchemeHttps, textAnalyticsHost);
             uri.Path = detectLanguagePath;
 
             // Convert each transcription phrase to a "document" as expected by the Text Analytics Detect Language REST API.
