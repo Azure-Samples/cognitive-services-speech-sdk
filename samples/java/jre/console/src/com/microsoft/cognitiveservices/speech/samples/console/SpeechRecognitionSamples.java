@@ -632,7 +632,7 @@ public class SpeechRecognitionSamples {
     // Shows how to recognize one utterance from an audio file, with at-start language detection.
     // We assume the utterance is spoken in either English (US), Spanish (Mexico) or German.
     // Speech recognition will use the standard recognition model associated with the detected language.
-    // <SpeechContinuousRecognitionAndLanguageId>
+    // <SpeechRecognizeOnceAndLanguageId>
     public static void recognizeOnceFromFileWithAtStartLanguageDetection() throws InterruptedException, ExecutionException, IOException
     {
         // Creates an instance of a speech config with specified subscription key and service region. Replace with your own subscription key
@@ -691,11 +691,12 @@ public class SpeechRecognitionSamples {
         audioConfig.close();
         autoDetectSourceLanguageConfig.close();
     }
-    // </SpeechContinuousRecognitionAndLanguageId>
+    // </SpeechRecognizeOnceAndLanguageId>
 
     // Shows how to do continuous speech recognition from an audio file, with at-start language detection.
     // We assume the audio spoken is either English (US), Spanish (Mexico) or German. The language does not change.
     // Speech recognition will use the standard recognition model associated with the detected language.
+    // <SpeechContinuousRecognitionAndLanguageId>
     public static void continuousRecognitionFromFileWithAtStartLanguageDetection() throws InterruptedException, ExecutionException, IOException
     {
         // Creates an instance of a speech config with specified subscription key and service region. Replace with your own subscription key
@@ -776,7 +777,8 @@ public class SpeechRecognitionSamples {
         audioConfig.close();
         autoDetectSourceLanguageConfig.close();
     }
-
+    // </SpeechContinuousRecognitionAndLanguageId>
+    
     // Shows how to do continuous speech recognition from an audio file, with at-start language detection.
     // We assume the audio spoken is either English (US), Spanish (Mexico) or German. The language does not change.
     // Speech recognition will use the appropriate custom model specified, associated with the detected language.
