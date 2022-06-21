@@ -62,7 +62,7 @@ namespace FetchTranscriptionFunction
                         break;
                     case "Running":
                         log.LogInformation($"Transcription running, polling again after {messageDelayTime.TotalMinutes} minutes.");
-                        await ServiceBusUtilities.SendServiceBusMessageAsync(StartServiceBusSender, serviceBusMessage.CreateMessageString(), log, messageDelayTime).ConfigureAwait(false);
+                        await ServiceBusUtilities.SendServiceBusMessageAsync(FetchServiceBusSender, serviceBusMessage.CreateMessageString(), log, messageDelayTime).ConfigureAwait(false);
                         break;
                     case "NotStarted":
                         log.LogInformation($"Transcription not started, polling again after {messageDelayTime.TotalMinutes} minutes.");
