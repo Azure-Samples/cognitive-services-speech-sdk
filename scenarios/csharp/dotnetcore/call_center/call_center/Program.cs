@@ -167,7 +167,7 @@ namespace Call_Center
             using (JsonDocument document = JsonDocument.Parse(response.Item2))
             {
                 var status = document.RootElement.GetProperty("status").ToString();
-                return 0 == string.Compare("Succeeded", status);
+                return 0 == string.Compare("Succeeded", status, StringComparison.InvariantCultureIgnoreCase);
             }
         }
 
@@ -180,6 +180,7 @@ namespace Call_Center
                 Thread.Sleep(waitSeconds * 1000);
                 done = await GetTranscriptionStatus(transcriptionId);
             }
+            Console.WriteLine();
             return;
         }
 
@@ -210,7 +211,7 @@ namespace Call_Center
         }
 
         // Return transcription content as a list of phrases.
-        async static Task<IEnumerable<string>> GetTranscriptionPhrases(string transcriptionUri)
+        async static Task<string[]> GetTranscriptionPhrases(string transcriptionUri)
         {
             var response = await SendGet(transcriptionUri, "", new HttpStatusCode[]{ HttpStatusCode.OK });
             using (JsonDocument document = JsonDocument.Parse(response.Item2))
@@ -235,7 +236,7 @@ namespace Call_Center
         }
 
         // Detect languages for a list of transcription phrases.
-        static async Task<IEnumerable<string>> GetTranscriptionLanguages(IEnumerable<string> transcriptionPhrases)
+        static async Task<string[]> GetTranscriptionLanguages(IEnumerable<string> transcriptionPhrases)
         {
             var uri = new UriBuilder(Uri.UriSchemeHttps, textAnalyticsHost);
             uri.Path = detectLanguagePath;
@@ -263,7 +264,7 @@ namespace Call_Center
         }
 
         // Convert a list of transcription phrases to "document" JSON elements as expected by various Text Analytics REST APIs.
-        static string TranscriptionPhrasesToDocuments(IEnumerable<string> transcriptionPhrases, IEnumerable<string> transcriptionLanguages, int maxNumberOfDocuments)
+        static string TranscriptionPhrasesToDocuments(string[] transcriptionPhrases, string[] transcriptionLanguages, int maxNumberOfDocuments)
         {
             // Combine the list of transcription phrases with the corresponding list of transcription languages into a single
             // list of tuples. Convert each (phrase, language) tuple into a "document" as expected by various Text Analytics
@@ -284,7 +285,7 @@ namespace Call_Center
         }
 
         // Get sentiments for transcription phrases.
-        async static Task<IEnumerable<string>> GetSentiments(string transcriptionDocuments)
+        async static Task<string[]> GetSentiments(string transcriptionDocuments)
         {
             var uri = new UriBuilder(Uri.UriSchemeHttps, textAnalyticsHost);
             uri.Path = sentimentAnalysisPath;
@@ -301,7 +302,7 @@ namespace Call_Center
         }
 
         // Get recognized entities (general) for transcription phrases.
-        async static Task<IEnumerable<IEnumerable<(string, string)>>> GetRecognizedEntitiesGeneral(string transcriptionDocuments)
+        async static Task<(string, string)[][]> GetRecognizedEntitiesGeneral(string transcriptionDocuments)
         {
             var uri = new UriBuilder(Uri.UriSchemeHttps, textAnalyticsHost);
             uri.Path = entitiesRecognitionGeneralPath;
@@ -323,7 +324,7 @@ namespace Call_Center
         }
 
         // Convert a list of transcription phrases to "conversationItems" JSON elements as expected by the Conversation Summary REST API.
-        static string TranscriptionPhrasesToConversationItems(IEnumerable<string> transcriptionPhrases)
+        static string TranscriptionPhrasesToConversationItems(string[] transcriptionPhrases)
         {
             // Include a counter to use as a document ID.
             var documents_1 = transcriptionPhrases.Select((phrase, id) => {
@@ -430,7 +431,7 @@ namespace Call_Center
             using (JsonDocument document = JsonDocument.Parse(response.Item2))
             {
                 var status = document.RootElement.GetProperty("status").ToString();
-                return 0 == string.Compare("succeeded", status);
+                return 0 == string.Compare("succeeded", status, StringComparison.InvariantCultureIgnoreCase);
             }
         }
 
@@ -443,10 +444,11 @@ namespace Call_Center
                 Thread.Sleep(waitSeconds * 1000);
                 done = await GetConversationAnalysisStatus(conversationAnalysisUrl);
             }
+            Console.WriteLine();
             return;
         }
 
-        async static Task<IEnumerable<(string, string)>> GetConversationSummary(string conversationSummaryUrl) {
+        async static Task<(string, string)[]> GetConversationSummary(string conversationSummaryUrl) {
             var response = await SendGet(conversationSummaryUrl, languageKey, new HttpStatusCode[]{ HttpStatusCode.OK });
             using (JsonDocument document = JsonDocument.Parse(response.Item2))
             {
@@ -460,7 +462,7 @@ namespace Call_Center
             }
         }
 
-        async static Task<IEnumerable<IEnumerable<(string, string)>>> GetConversationPIIAnalysis(string conversationPIIAnalysisUrl) {
+        async static Task<(string, string)[][]> GetConversationPIIAnalysis(string conversationPIIAnalysisUrl) {
             var response = await SendGet(conversationPIIAnalysisUrl, languageKey, new HttpStatusCode[]{ HttpStatusCode.OK });
             using (JsonDocument document = JsonDocument.Parse(response.Item2))
             {
@@ -481,48 +483,51 @@ namespace Call_Center
 
         // Print each transcription phrase, followed by its language, sentiment, and so on.
         static void PrintResults(
-            IEnumerable<string> transcriptionPhrases,
-            IEnumerable<string> transcriptionLanguages,
-            IEnumerable<string> transcriptionSentiments,
-            IEnumerable<IEnumerable<(string, string)>> transcriptionEntitiesGeneral,
-            IEnumerable<(string, string)> conversationSummary,
-            IEnumerable<IEnumerable<(string, string)>> conversationPIIAnalysis)
+            string[] transcriptionPhrases,
+            string[] transcriptionLanguages,
+            string[] transcriptionSentiments,
+            (string, string)[][] transcriptionEntitiesGeneral,
+            (string, string)[] conversationSummary,
+            (string, string)[][] conversationPIIAnalysis)
         {
-            var phrases_2 = transcriptionPhrases.Zip(transcriptionLanguages).Select(t =>
-                $"Phrase: {t.First}{Environment.NewLine}Language: {t.Second}{Environment.NewLine}"
-            );
-            var phrases_3 = phrases_2.Zip(transcriptionSentiments).Select(t =>
-                $"{t.First}Sentiment: {t.Second}{Environment.NewLine}"
-            );
-            var phrases_4 = phrases_3.Zip(transcriptionEntitiesGeneral).Select(t =>
-                {
-                    if (t.Second.Any())
-                    {
-                        var entities = t.Second.Aggregate("", (result, entity) => $"{result}    Category: {entity.Item1}. Text: {entity.Item2}.{Environment.NewLine}");
-                        return $"{t.First}Recognized entities (general):{Environment.NewLine}{entities}";
-                    }
-                    else
-                    {
-                        return $"{t.First}Recognized entities (general): none.{Environment.NewLine}";
-                    }
-                }
-            );
-            var phrases_5 = phrases_4.Zip(conversationPIIAnalysis).Select(t =>
-                {
-                    if (t.Second.Any())
-                    {
-                        var entities = t.Second.Aggregate("", (result, entity) => $"{result}    Category: {entity.Item1}. Text: {entity.Item2}.{Environment.NewLine}");
-                        return $"{t.First}Recognized entities (PII):{Environment.NewLine}{entities}";
-                    }
-                    else
-                    {
-                        return $"{t.First}Recognized entities (PII): none.{Environment.NewLine}";
-                    }
-                }
-            );
-            foreach (var phrase in phrases_5)
+            for (var index = 0; index < transcriptionPhrases.Length; index++)
             {
-                Console.WriteLine(phrase);
+                Console.WriteLine ($"Phrase: {transcriptionPhrases[index]}");
+                if (index < transcriptionLanguages.Length)
+                {
+                    Console.WriteLine ($"Language: {transcriptionLanguages[index]}");
+                }
+                if (index < transcriptionSentiments.Length)
+                {
+                    Console.WriteLine ($"Sentiment: {transcriptionSentiments[index]}");
+                }
+
+                if (index < transcriptionEntitiesGeneral.Length)
+                {
+                    if (transcriptionEntitiesGeneral[index].Length > 0)
+                    {
+                        var entities = transcriptionEntitiesGeneral[index].Aggregate("", (result, entity) => $"{result}    Category: {entity.Item1}. Text: {entity.Item2}.{Environment.NewLine}");
+                        Console.Write ($"Recognized entities (general):{Environment.NewLine}{entities}");
+                    }
+                    else
+                    {
+                        Console.WriteLine ($"Recognized entities (general): none.");
+                    }
+                }
+
+                if (index < conversationPIIAnalysis.Length)
+                {
+                    if (conversationPIIAnalysis[index].Length > 0)
+                    {
+                        var entities = conversationPIIAnalysis[index].Aggregate("", (result, entity) => $"{result}    Category: {entity.Item1}. Text: {entity.Item2}.{Environment.NewLine}");
+                        Console.Write ($"Recognized entities (PII):{Environment.NewLine}{entities}");
+                    }
+                    else
+                    {
+                        Console.WriteLine ($"Recognized entities (PII): none.");
+                    }
+                }
+                Console.WriteLine();
             }
             Console.WriteLine(conversationSummary.Aggregate($"Conversation summary:{Environment.NewLine}", (result, item) => $"{result}    Aspect: {item.Item1}. Summary: {item.Item2}.{Environment.NewLine}"));
             return;
