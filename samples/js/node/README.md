@@ -31,6 +31,17 @@ The sample demonstrates the speech, intent, and translation recognizers, as well
 node index.js [speech|intent|translate|synthesis] {filename}
 ```
 
+## Run the Microphone Streaming sample for node.js
+
+Although the Cognitive Services SDK doesn't yet support mic streaming, its easy to get it working using external packages.
+To use the sample provided, follow these steps:
+* Download and install [Sox ver 14.4.1](https://sourceforge.net/projects/sox/files/sox/14.4.1/)
+* Ensure you have the keys in `settings.js` as outlined above.
+* Run `npm i` from the terminal.
+* Run `node micSTT.js`
+* Once you see the 'Listening for speech' message, you can speak into the mic
+* You should see the final response after you have seen the 'buffer of speech received' message.
+
 ## References
 
 * [Node.js quickstart article on the SDK documentation site](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-js-node)
