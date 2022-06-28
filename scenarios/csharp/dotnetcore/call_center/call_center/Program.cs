@@ -301,28 +301,6 @@ namespace Call_Center
             }
         }
 
-        // Get recognized entities (general) for transcription phrases.
-        async static Task<(string, string)[][]> GetRecognizedEntitiesGeneral(string transcriptionDocuments)
-        {
-            var uri = new UriBuilder(Uri.UriSchemeHttps, textAnalyticsHost);
-            uri.Path = entitiesRecognitionGeneralPath;
-
-            // Entities recognition JSON request and response samples:
-            // https://docs.microsoft.com/en-us/rest/api/cognitiveservices-textanalytics/3.1preview4/entities-recognition-general/entities-recognition-general#examples
-            var response = await SendPost(uri.Uri.ToString(), transcriptionDocuments, textAnalyticsKey, new HttpStatusCode[] { HttpStatusCode.OK });
-            using (JsonDocument document = JsonDocument.Parse(response.Item2))
-            {
-                var documents = document.RootElement.GetProperty("documents").EnumerateArray().ToArray();
-                // Convert Select results to arrays to prevent them being disposed with the JsonDocument.
-                return documents.Select(document =>
-                    {
-                        var entities = document.GetProperty("entities").EnumerateArray().ToArray();
-                        return entities.Select(entity => (entity.GetProperty("category").ToString(), entity.GetProperty("text").ToString())).ToArray();
-                    }
-                ).ToArray();
-            }
-        }
-
         // Convert a list of transcription phrases to "conversationItems" JSON elements as expected by the Conversation Summary REST API.
         static string TranscriptionPhrasesToConversationItems(string[] transcriptionPhrases)
         {
@@ -486,7 +464,6 @@ namespace Call_Center
             string[] transcriptionPhrases,
             string[] transcriptionLanguages,
             string[] transcriptionSentiments,
-            (string, string)[][] transcriptionEntitiesGeneral,
             (string, string)[] conversationSummary,
             (string, string)[][] conversationPIIAnalysis)
         {
@@ -501,20 +478,6 @@ namespace Call_Center
                 {
                     Console.WriteLine ($"Sentiment: {transcriptionSentiments[index]}");
                 }
-
-                if (index < transcriptionEntitiesGeneral.Length)
-                {
-                    if (transcriptionEntitiesGeneral[index].Length > 0)
-                    {
-                        var entities = transcriptionEntitiesGeneral[index].Aggregate("", (result, entity) => $"{result}    Category: {entity.Item1}. Text: {entity.Item2}.{Environment.NewLine}");
-                        Console.Write ($"Recognized entities (general):{Environment.NewLine}{entities}");
-                    }
-                    else
-                    {
-                        Console.WriteLine ($"Recognized entities (general): none.");
-                    }
-                }
-
                 if (index < conversationPIIAnalysis.Length)
                 {
                     if (conversationPIIAnalysis[index].Length > 0)
@@ -543,7 +506,6 @@ namespace Call_Center
             var phrases = await GetTranscriptionPhrases(transcriptionUrl);
             var languages = await GetTranscriptionLanguages(phrases);
             var sentiments = await GetSentiments(TranscriptionPhrasesToDocuments(phrases, languages, 10));
-            var entitiesGeneral = await GetRecognizedEntitiesGeneral(TranscriptionPhrasesToDocuments(phrases, languages, 5));
             var conversationItems = TranscriptionPhrasesToConversationItems(phrases);
             // NOTE: Conversation summary is currently in gated public preview. You can sign up here:
             // https://aka.ms/applyforconversationsummarization/
@@ -553,7 +515,7 @@ namespace Call_Center
             var conversationPIIAnalysisUrl = await RequestConversationPIIAnalysis(conversationItems, conversationLanguage);
             await WaitForConversationAnalysis(conversationPIIAnalysisUrl, "PII");
             var conversationPIIAnalysis = await GetConversationPIIAnalysis(conversationPIIAnalysisUrl);
-            PrintResults(phrases, languages, sentiments, entitiesGeneral, conversationSummary, conversationPIIAnalysis);
+            PrintResults(phrases, languages, sentiments, conversationSummary, conversationPIIAnalysis);
             // Clean up resources.
             DeleteTranscription(transcriptionId);
             return;
