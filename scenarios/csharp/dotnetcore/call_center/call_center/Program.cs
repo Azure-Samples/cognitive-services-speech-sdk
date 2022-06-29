@@ -21,12 +21,7 @@ namespace Call_Center
         static string speechRegion = "PASTE_YOUR_SPEECH_REGION_HERE";
         // Replace this value with the subscription key for your Speech subscription.
         static string speechKey = "PASTE_YOUR_SPEECH_SUBSCRIPTION_KEY_HERE";
-
-        // Replace this value with the endpoint for your Text Analytics subscription.
-        static string textAnalyticsHost = "PASTE_YOUR_TEXT_ANALYTICS_ENDPOINT_HERE";
-        // Replace this value with the subscription key for your Text Analytics subscription.
-        static string textAnalyticsKey = "PASTE_YOUR_TEXT_ANALYTICS_SUBSCRIPTION_KEY_HERE";
-
+        
         // Replace this value with the endpoint for your Cognitive Language subscription.
         static string languageHost = "PASTE_YOUR_COGNITIVE_LANGUAGE_ENDPOINT_HERE";
         // Replace this value with the subscription key for your Cognitive Language subscription.
@@ -41,18 +36,13 @@ namespace Call_Center
         // This should not change unless you switch to a new version of the Speech REST API.
         static string speechTranscriptionPath = "speechtotext/v3.0/transcriptions";
 
-        // These should not change unless you switch to a new version of the Text Analytics REST API.
-        static string detectLanguagePath = "text/analytics/v3.1/languages";
-        static string entitiesRecognitionGeneralPath = "text/analytics/v3.1/entities/recognition/general";
-        static string entitiesRecognitionPIIPath = "text/analytics/v3.1/entities/recognition/pii";
-        static string keyPhrasesPath = "text/analytics/v3.1/keyPhrases";
-        static string sentimentAnalysisPath = "text/analytics/v3.1/sentiment";
-
         // These should not change unless you switch to a new version of the Cognitive Language REST API.
-        static string requestConversationSummaryPath = "/language/analyze-conversations/jobs";
-        static string requestConversationSummaryQuery = "api-version=2022-05-15-preview";
+        static string sentimentAnalysisPath = "language/:analyze-text";
+        static string sentimentAnalysisQuery = "api-version=2022-05-01";
+        static string conversationAnalysisPath = "/language/analyze-conversations/jobs";
+        static string conversationAnalysisQuery = "api-version=2022-05-15-preview";
 
-        static string conversationLanguage = "en";
+        static string language = "en";
 
         // How long to wait while polling transcription status.
         static int waitSeconds = 5;
@@ -77,6 +67,7 @@ namespace Call_Center
                 {
                     throw new Exception($"The response from {uri} has an unexpected status code: {response_1.StatusCode}");
                 }
+                
                 return (response_1, response_2);
             }
         }
@@ -105,6 +96,7 @@ namespace Call_Center
                 {
                     throw new Exception($"The response from {uri} has an unexpected status code: {response_1.StatusCode}. Response:{Environment.NewLine}{response_2}");
                 }
+                
                 return (response_1, response_2);
             }
         }
@@ -138,7 +130,7 @@ namespace Call_Center
             // Create Transcription API JSON request sample and schema:
             // https://westus.dev.cognitive.microsoft.com/docs/services/speech-to-text-api-v3-0/operations/CreateTranscription
             // Note: locale and displayName are required.
-            var payload_1 = new { contentUrls = new string[]{transcriptionAudioUri}, locale = "en-US", displayName = displayName };
+            var payload_1 = new { contentUrls = new string[]{transcriptionAudioUri}, properties = new { diarizationEnabled = true }, locale = "en-US", displayName = displayName };
             var payload_2 = System.Text.Json.JsonSerializer.Serialize(payload_1);
             var response = await SendPost(uri.Uri.ToString(), payload_2, speechKey, new HttpStatusCode[]{ HttpStatusCode.Created });
             using (JsonDocument document = JsonDocument.Parse(response.Item2))
@@ -210,8 +202,8 @@ namespace Call_Center
             }
         }
 
-        // Return transcription content as a list of phrases.
-        async static Task<string[]> GetTranscriptionPhrases(string transcriptionUri)
+        // Return transcription content as a list of phrases and speaker numbers.
+        async static Task<(string, int)[]> GetTranscriptionPhrasesAndSpeakers(string transcriptionUri)
         {
             var response = await SendGet(transcriptionUri, "", new HttpStatusCode[]{ HttpStatusCode.OK });
             using (JsonDocument document = JsonDocument.Parse(response.Item2))
@@ -220,7 +212,7 @@ namespace Call_Center
                 return recognizedPhrases.Select(phrase =>
                     {
                         var best = phrase.GetProperty("nBest").EnumerateArray().ToArray()[0];
-                        return best.GetProperty("display").ToString();
+                        return (best.GetProperty("display").ToString(), phrase.GetProperty("speaker").GetInt32());
                     }
                 // Convert Select results to arrays to prevent them being disposed with the JsonDocument.
                 ).ToArray();
@@ -235,170 +227,108 @@ namespace Call_Center
             return;
         }
 
-        // Detect languages for a list of transcription phrases.
-        static async Task<string[]> GetTranscriptionLanguages(IEnumerable<string> transcriptionPhrases)
-        {
-            var uri = new UriBuilder(Uri.UriSchemeHttps, textAnalyticsHost);
-            uri.Path = detectLanguagePath;
-
-            // Convert each transcription phrase to a "document" as expected by the Text Analytics Detect Language REST API.
-            // Include a counter to use as a document ID.
-            // Detect Language API JSON request and response samples:
-            // https://docs.microsoft.com/en-us/rest/api/cognitiveservices-textanalytics/3.1preview4/languages/languages
-            var documents_1 = transcriptionPhrases.Select((phrase, id) => $@"
-{{
-    ""id"": ""{id}"",
-    ""text"": ""{phrase}""
-}}
-            ");
-            // Concatenate documents with ',' separator.
-            var documents_2 = string.Join(',', documents_1.ToArray());
-            var content = $@"{{ ""documents"": [{documents_2}] }}";
-            var response = await SendPost(uri.Uri.ToString(), content, textAnalyticsKey, new HttpStatusCode[] { HttpStatusCode.OK });
-            using (JsonDocument document = JsonDocument.Parse(response.Item2))
-            {
-                var documents = document.RootElement.GetProperty("documents").EnumerateArray().ToArray();
-                // Convert Select results to arrays to prevent them being disposed with the JsonDocument.
-                return documents.Select(document => document.GetProperty("detectedLanguage").GetProperty("iso6391Name").ToString()).ToArray();
-            }
-        }
-
-        // Convert a list of transcription phrases to "document" JSON elements as expected by various Text Analytics REST APIs.
-        static string TranscriptionPhrasesToDocuments(string[] transcriptionPhrases, string[] transcriptionLanguages, int maxNumberOfDocuments)
-        {
-            // Combine the list of transcription phrases with the corresponding list of transcription languages into a single
-            // list of tuples. Convert each (phrase, language) tuple into a "document" as expected by various Text Analytics
-            // REST APIs. For example, see the sample request body for the
-            // Sentiment REST API:
-            // https://docs.microsoft.com/en-us/rest/api/cognitiveservices-textanalytics/3.1preview4/sentiment/sentiment#examples
-            // Include a counter to use as a document ID.
-            var documents_1 = transcriptionPhrases.Zip(transcriptionLanguages).Take(maxNumberOfDocuments).Select((t, id) => $@"
-{{
-    ""id"": ""{id}"",
-    ""language"": ""{t.Second}"",
-    ""text"": ""{t.First}""
-}}
-            ");
-            // Concatenate documents with ',' separator.
-            var documents_2 = string.Join(',', documents_1.ToArray());
-            return $@"{{ ""documents"": [{documents_2}] }}";
-        }
-
         // Get sentiments for transcription phrases.
-        async static Task<string[]> GetSentiments(string transcriptionDocuments)
+        static string[] GetSentiments(string[] phrases)
         {
-            var uri = new UriBuilder(Uri.UriSchemeHttps, textAnalyticsHost);
+            var uri = new UriBuilder(Uri.UriSchemeHttps, languageHost);
             uri.Path = sentimentAnalysisPath;
+            uri.Query = sentimentAnalysisQuery;
 
-            // Sentiment JSON request and response samples:
-            // https://docs.microsoft.com/en-us/rest/api/cognitiveservices-textanalytics/3.1preview4/sentiment/sentiment#examples
-            var response = await SendPost(uri.Uri.ToString(), transcriptionDocuments, textAnalyticsKey, new HttpStatusCode[] { HttpStatusCode.OK });
-            using (JsonDocument document = JsonDocument.Parse(response.Item2))
-            {
-                var documents = document.RootElement.GetProperty("documents").EnumerateArray().ToArray();
-                // Convert Select results to arrays to prevent them being disposed with the JsonDocument.
-                return documents.Select(document => document.GetProperty("sentiment").ToString()).ToArray();
-            }
+            // Convert each transcription phrase to a "document" as expected by the sentiment analysis REST API.
+            // Include a counter to use as a document ID.
+            var documentsToSend = phrases.Select((phrase, id) =>
+                {
+                    return new {
+                        id = id,
+                        language = language,
+                        text = phrase
+                    };
+                }
+            );
+            
+            // We can only analyze sentiment for 10 documents per request.
+            // We cannot use SelectMany here because the lambda returns a Task.
+            var tasks = documentsToSend.Chunk(10).Select(async chunk =>
+                {
+                    var content_1 = new { kind = "SentimentAnalysis", analysisInput = new { documents = chunk }};
+                    var content_2 = System.Text.Json.JsonSerializer.Serialize(content_1);
+                    var response = await SendPost(uri.Uri.ToString(), content_2, languageKey, new HttpStatusCode[] { HttpStatusCode.OK });
+                    using (JsonDocument document = JsonDocument.Parse(response.Item2))
+                    {
+                        var documents = document.RootElement.GetProperty("results").GetProperty("documents").EnumerateArray().ToArray();
+                        // Convert Select results to arrays to prevent them being disposed with the JsonDocument.
+                        return documents.Select(document => (Int32.Parse(document.GetProperty("id").ToString()), document.GetProperty("sentiment").ToString())).ToArray();
+                    }
+                }
+            ).ToArray();
+            Task.WaitAll(tasks);
+            return tasks
+                .Select(task => task.Result)
+                .Aggregate(new (int, string)[] {}, (acc, sublist) => acc.Concat(sublist).ToArray())
+                .OrderBy(x => x.Item1)
+                .Select(x => x.Item2)
+                .ToArray();
         }
 
-        // Convert a list of transcription phrases to "conversationItems" JSON elements as expected by the Conversation Summary REST API.
-        static string TranscriptionPhrasesToConversationItems(string[] transcriptionPhrases)
+        // Convert a list of transcription phrases to "conversationItems" JSON elements as expected by the conversation analysis REST API.
+        static object[] TranscriptionPhrasesToConversationItems((string, int)[] transcriptionPhrasesAndSpeakers)
         {
             // Include a counter to use as a document ID.
-            var documents_1 = transcriptionPhrases.Select((phrase, id) => {
-                var agentOrCustomerRole = id % 2 == 0 ? "Agent" : "Customer";
-                var agentOrCustomerParticipantId = id % 2 == 0 ? "Agent_1" : "Customer_1";
-                return $@"
-{{
-    ""id"": ""{id}"",
-    ""text"": ""{phrase}"",
-    ""role"": ""{agentOrCustomerRole}"",
-""participantId"": ""{agentOrCustomerParticipantId}""
-}}
-                ";
-            });
-            // Concatenate documents with ',' separator.
-            return string.Join(',', documents_1.ToArray());
+            return transcriptionPhrasesAndSpeakers.Select((phraseAndSpeaker, id) =>
+                {
+                    // The first person to speak is probably the agent.
+                    var agentOrCustomerRole = 1 == phraseAndSpeaker.Item2 ? "Agent" : "Customer";
+                    var agentOrCustomerParticipantId = phraseAndSpeaker.Item2;
+                    return new {
+                        id = id,
+                        text = phraseAndSpeaker.Item1,
+                        role = agentOrCustomerRole,
+                        participantId = agentOrCustomerParticipantId
+                    };
+                }
+            ).ToArray();
         }
 
-        // Request summary of a conversation.
-        async static Task<string> RequestConversationSummary(string conversationItems, string language) {
+        // Request the analysis of a conversation.
+        async static Task<string> RequestConversationAnalysis(object[] conversationItems) {
             var uri = new UriBuilder(Uri.UriSchemeHttps, languageHost);
-            uri.Path = requestConversationSummaryPath;
-            uri.Query = requestConversationSummaryQuery;
+            uri.Path = conversationAnalysisPath;
+            uri.Query = conversationAnalysisQuery;
 
             var displayName = $"call_center_{DateTime.Now.ToString()}";
 
-            // Conversation analysis API JSON request sample and schema:
-            // https://westus2.dev.cognitive.microsoft.com/docs/services/Language-2022-05-15-preview/operations/AnalyzeConversation_SubmitJob
-            var payload = $@"
-{{
-    ""displayName"": ""{displayName}"",
-    ""analysisInput"": {{
-        ""conversations"": [
-            {{
-                ""id"": ""conversation1"",
-                ""language"": ""{language}"",
-                ""modality"": ""text"",
-                ""conversationItems"": [
-                    {conversationItems}
-                ]
-            }}
-        ]
-    }},
-    ""tasks"": [
-        {{
-            ""taskName"": ""analyze_1"",
-            ""kind"": ""ConversationalSummarizationTask"",
-            ""parameters"": {{
-                ""modelVersion"": ""2022-05-15-preview"",
-                ""summaryAspects"": [
-                    ""Issue"",
-                    ""Resolution""
-                ]
-            }}
-        }}
-    ]
-}}
-            ";
-            var response = await SendPost(uri.Uri.ToString(), payload, languageKey, new HttpStatusCode[]{ HttpStatusCode.Accepted });
-            return response.Item1.Headers.GetValues("operation-location").First();
-        }
-
-        // Request PII analysis of a conversation.
-        async static Task<string> RequestConversationPIIAnalysis(string conversationItems, string language) {
-            var uri = new UriBuilder(Uri.UriSchemeHttps, languageHost);
-            uri.Path = requestConversationSummaryPath;
-            uri.Query = requestConversationSummaryQuery;
-
-            var displayName = $"call_center_{DateTime.Now.ToString()}";
-
-            // Conversation analysis API JSON request sample and schema:
-            // https://westus2.dev.cognitive.microsoft.com/docs/services/Language-2022-05-15-preview/operations/AnalyzeConversation_SubmitJob
-            var payload = $@"
-{{
-    ""displayName"": ""{displayName}"",
-    ""analysisInput"": {{
-        ""conversations"": [
-            {{
-                ""id"": ""conversation1"",
-                ""language"": ""{language}"",
-                ""modality"": ""text"",
-                ""conversationItems"": [
-                    {conversationItems}
-                ]
-            }}
-        ]
-    }},
-    ""tasks"": [
-        {{
-          ""kind"": ""ConversationalPIITask"",
-          ""taskName"": ""PII_1""
-        }}
-    ]
-}}
-            ";
-            var response = await SendPost(uri.Uri.ToString(), payload, languageKey, new HttpStatusCode[]{ HttpStatusCode.Accepted });
+            var content_1 = new {
+                displayName = displayName,
+                analysisInput = new {
+                    conversations = new object[] {
+                        new {
+                            id = "conversation1",
+                            language = language,
+                            modality = "text",
+                            conversationItems = conversationItems
+                        }
+                    }
+                },
+                tasks = new object[] {
+                    new {
+                        taskName = "summary_1",
+                        kind = "ConversationalSummarizationTask",
+                        parameters = new {
+                            modelVersion = "2022-05-15-preview",
+                            summaryAspects = new string[] {
+                                "Issue",
+                                "Resolution"
+                            }
+                        }
+                    },
+                    new {
+                      kind = "ConversationalPIITask",
+                      taskName = "PII_1"
+                    }
+                }
+            };
+            var content_2 = System.Text.Json.JsonSerializer.Serialize(content_1);
+            var response = await SendPost(uri.Uri.ToString(), content_2, languageKey, new HttpStatusCode[]{ HttpStatusCode.Accepted });
             return response.Item1.Headers.GetValues("operation-location").First();
         }
 
@@ -414,11 +344,11 @@ namespace Call_Center
         }
 
         // Poll the conversation analysis status until it has status "Succeeded".
-        async static Task WaitForConversationAnalysis(string conversationAnalysisUrl, string analysisType)
+        async static Task WaitForConversationAnalysis(string conversationAnalysisUrl)
         {
             var done = false;
             while(!done) {
-                Console.WriteLine($"Waiting {waitSeconds} seconds for conversation analysis ({analysisType}) to complete.");
+                Console.WriteLine($"Waiting {waitSeconds} seconds for conversation analysis to complete.");
                 Thread.Sleep(waitSeconds * 1000);
                 done = await GetConversationAnalysisStatus(conversationAnalysisUrl);
             }
@@ -426,54 +356,46 @@ namespace Call_Center
             return;
         }
 
-        async static Task<(string, string)[]> GetConversationSummary(string conversationSummaryUrl) {
-            var response = await SendGet(conversationSummaryUrl, languageKey, new HttpStatusCode[]{ HttpStatusCode.OK });
+        async static Task<((string, string)[], (string, string)[][])> GetConversationAnalysis(string conversationAnalysisUrl) {
+            var response = await SendGet(conversationAnalysisUrl, languageKey, new HttpStatusCode[]{ HttpStatusCode.OK });
             using (JsonDocument document = JsonDocument.Parse(response.Item2))
             {
-                var tasks = document.RootElement.GetProperty("tasks");
-                var items = tasks.GetProperty("items").EnumerateArray().ToArray();
-                var results = items.First().GetProperty("results");
-                var conversations = results.GetProperty("conversations").EnumerateArray().ToArray();
-                var summaries = conversations.First().GetProperty("summaries").EnumerateArray().ToArray();
+                var tasks = document.RootElement.GetProperty("tasks").GetProperty("items").EnumerateArray().ToArray();
+                
+                var summaryTask = tasks.First(task => 0 == String.Compare(task.GetProperty("taskName").ToString(), "summary_1", StringComparison.InvariantCultureIgnoreCase));
+                var summaryResults = summaryTask.GetProperty("results");
+                var summaryConversations = summaryResults.GetProperty("conversations").EnumerateArray().ToArray();
+                var summaries = summaryConversations.First().GetProperty("summaries").EnumerateArray().ToArray();
                 // Convert Select results to arrays to prevent them being disposed with the JsonDocument.
-                return summaries.Select(summary => (summary.GetProperty("aspect").ToString(), summary.GetProperty("text").ToString())).ToArray();
-            }
-        }
+                var conversationSummary = summaries.Select(summary => (summary.GetProperty("aspect").ToString(), summary.GetProperty("text").ToString())).ToArray();
 
-        async static Task<(string, string)[][]> GetConversationPIIAnalysis(string conversationPIIAnalysisUrl) {
-            var response = await SendGet(conversationPIIAnalysisUrl, languageKey, new HttpStatusCode[]{ HttpStatusCode.OK });
-            using (JsonDocument document = JsonDocument.Parse(response.Item2))
-            {
-                var tasks = document.RootElement.GetProperty("tasks");
-                var items = tasks.GetProperty("items").EnumerateArray().ToArray();
-                var results = items.First().GetProperty("results");
-                var conversations = results.GetProperty("conversations").EnumerateArray().ToArray();
-                var conversationItems = conversations.First().GetProperty("conversationItems").EnumerateArray().ToArray();
+                var PIITask = tasks.First(task => 0 == String.Compare(task.GetProperty("taskName").ToString(), "PII_1", StringComparison.InvariantCultureIgnoreCase));
+                var PIIResults = PIITask.GetProperty("results");
+                var PIIConversations = PIIResults.GetProperty("conversations").EnumerateArray().ToArray();
+                var conversationItems = PIIConversations.First().GetProperty("conversationItems").EnumerateArray().ToArray();
                 // Convert Select results to arrays to prevent them being disposed with the JsonDocument.
-                return conversationItems.Select(document =>
+                var conversationPIIAnalysis = conversationItems.Select(document =>
                     {
                         var entities = document.GetProperty("entities").EnumerateArray().ToArray();
                         return entities.Select(entity => (entity.GetProperty("category").ToString(), entity.GetProperty("text").ToString())).ToArray();
                     }
                 ).ToArray();
+                
+                return (conversationSummary, conversationPIIAnalysis);
             }
         }
 
         // Print each transcription phrase, followed by its language, sentiment, and so on.
         static void PrintResults(
-            string[] transcriptionPhrases,
-            string[] transcriptionLanguages,
+            (string,int)[] transcriptionPhrasesAndSpeakers,
             string[] transcriptionSentiments,
             (string, string)[] conversationSummary,
             (string, string)[][] conversationPIIAnalysis)
         {
-            for (var index = 0; index < transcriptionPhrases.Length; index++)
+            for (var index = 0; index < transcriptionPhrasesAndSpeakers.Length; index++)
             {
-                Console.WriteLine ($"Phrase: {transcriptionPhrases[index]}");
-                if (index < transcriptionLanguages.Length)
-                {
-                    Console.WriteLine ($"Language: {transcriptionLanguages[index]}");
-                }
+                Console.WriteLine ($"Phrase: {transcriptionPhrasesAndSpeakers[index].Item1}");
+                Console.WriteLine ($"Speaker: {transcriptionPhrasesAndSpeakers[index].Item2}");
                 if (index < transcriptionSentiments.Length)
                 {
                     Console.WriteLine ($"Sentiment: {transcriptionSentiments[index]}");
@@ -503,19 +425,16 @@ namespace Call_Center
             var transcriptionId = await CreateTranscription(transcriptionAudioUri);
             await WaitForTranscription(transcriptionId);
             var transcriptionUrl = await GetTranscriptionUri(transcriptionId);
-            var phrases = await GetTranscriptionPhrases(transcriptionUrl);
-            var languages = await GetTranscriptionLanguages(phrases);
-            var sentiments = await GetSentiments(TranscriptionPhrasesToDocuments(phrases, languages, 10));
-            var conversationItems = TranscriptionPhrasesToConversationItems(phrases);
+            var phrasesAndSpeakers = await GetTranscriptionPhrasesAndSpeakers(transcriptionUrl);
+            var phrases = phrasesAndSpeakers.Select(phraseAndSpeaker => phraseAndSpeaker.Item1).ToArray();
+            var sentiments = GetSentiments(phrases);
+            var conversationItems = TranscriptionPhrasesToConversationItems(phrasesAndSpeakers);
             // NOTE: Conversation summary is currently in gated public preview. You can sign up here:
             // https://aka.ms/applyforconversationsummarization/
-            var conversationSummaryUrl = await RequestConversationSummary(conversationItems, conversationLanguage);
-            await WaitForConversationAnalysis(conversationSummaryUrl, "summary");
-            var conversationSummary = await GetConversationSummary(conversationSummaryUrl);
-            var conversationPIIAnalysisUrl = await RequestConversationPIIAnalysis(conversationItems, conversationLanguage);
-            await WaitForConversationAnalysis(conversationPIIAnalysisUrl, "PII");
-            var conversationPIIAnalysis = await GetConversationPIIAnalysis(conversationPIIAnalysisUrl);
-            PrintResults(phrases, languages, sentiments, conversationSummary, conversationPIIAnalysis);
+            var conversationAnalysisUrl = await RequestConversationAnalysis(conversationItems);
+            await WaitForConversationAnalysis(conversationAnalysisUrl);
+            var (conversationSummary, conversationPIIAnalysis) = await GetConversationAnalysis(conversationAnalysisUrl);
+            PrintResults(phrasesAndSpeakers, sentiments, conversationSummary, conversationPIIAnalysis);
             // Clean up resources.
             DeleteTranscription(transcriptionId);
             return;
