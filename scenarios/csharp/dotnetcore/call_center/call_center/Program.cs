@@ -30,6 +30,13 @@ namespace Call_Center
         // Replace this value with the URL of the audio file you want to transcribe.
         static string transcriptionAudioUri = "https://github.com/Azure-Samples/cognitive-services-speech-sdk/raw/v-jaswel-patch-3/scenarios/csharp/dotnetcore/call_center/call_center/sample_1.wav";
 
+        // The language to use for sentiment analysis and conversation analysis.
+        // This should be a two-letter ISO 639-1 code.
+        static string language = "en";
+
+        // How long to wait while polling transcription status.
+        static int waitSeconds = 5;
+
         // This should not change unless the Speech REST API changes.
         static string speechHost = $"{speechRegion}.api.cognitive.microsoft.com";
 
@@ -41,11 +48,6 @@ namespace Call_Center
         static string sentimentAnalysisQuery = "api-version=2022-05-01";
         static string conversationAnalysisPath = "/language/analyze-conversations/jobs";
         static string conversationAnalysisQuery = "api-version=2022-05-15-preview";
-
-        static string language = "en";
-
-        // How long to wait while polling transcription status.
-        static int waitSeconds = 5;
 
         // Send GET request with authentication and return the response and response content.
         async static Task<(HttpResponseMessage, string)> SendGet(string uri, string key, HttpStatusCode[] expectedStatusCodes)
