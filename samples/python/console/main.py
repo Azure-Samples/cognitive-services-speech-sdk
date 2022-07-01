@@ -4,15 +4,15 @@
 # Copyright (c) Microsoft. All rights reserved.
 # Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 
-import speech_sample
+import platform
+from collections import OrderedDict
+
 import intent_sample
+import speech_language_detection_sample
+import speech_sample
+import speech_synthesis_sample
 import transcription_sample
 import translation_sample
-import speech_synthesis_sample
-import speech_language_detection_sample
-
-from collections import OrderedDict
-import platform
 
 eofkey = 'Ctrl-Z' if "Windows" == platform.system() else 'Ctrl-D'
 
