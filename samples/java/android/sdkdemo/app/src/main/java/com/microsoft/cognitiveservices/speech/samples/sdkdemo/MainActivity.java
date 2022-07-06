@@ -155,12 +155,12 @@ public class MainActivity extends AppCompatActivity {
             clearTextBox();
 
             try {
-                // In general, if the device default microphone is used then it is enough to
+                // In general, if the device default microphone is used then it is enough
                 // to either have AudioConfig.fromDefaultMicrophoneInput or omit the audio
                 // config altogether. 
                 // AudioConfig.fromStreamInput is specifically needed if you want to use an
                 // external microphone (including Bluetooth that couldn't be otherwise used)
-                // or mix audio from some other source to microphone audio, for example.
+                // or mix audio from some other source to microphone audio.
                 final AudioConfig audioInput = AudioConfig.fromStreamInput(createMicrophoneStream());
                 final SpeechRecognizer reco = new SpeechRecognizer(speechConfig, audioInput);
 
