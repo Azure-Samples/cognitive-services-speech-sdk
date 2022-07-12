@@ -29,15 +29,15 @@ intent_service_region = "YourLanguageUnderstandingServiceRegion"
 language_understanding_app_id = "YourLanguageUnderstandingAppId"
 
 
-# Specify the path to a audio file containing speech (mono WAV / PCM with a sampling rate of 16
-# kHz).
+# Specify the path to an audio file containing speech (mono WAV / PCM with a sampling rate of 16kHz).
 lampfilename = "TurnOnTheLamp.wav"
 
 
 def recognize_intent_once_from_mic():
     """performs one-shot intent recognition from input from the default microphone"""
     # <IntentRecognitionOnceWithMic>
-    # Set up the config for the intent recognizer (remember that this uses the Language Understanding key, not the Speech Services key)!
+    # Set up the config for the intent recognizer
+    # remember that this uses the Language Understanding key, not the Speech Services key!
     intent_config = speechsdk.SpeechConfig(subscription=intent_key, region=intent_service_region)
     audio_config = speechsdk.audio.AudioConfig(use_default_microphone=True)
 
@@ -81,7 +81,8 @@ def recognize_intent_once_from_mic():
 def recognize_intent_once_from_file():
     """performs one-shot intent recognition from input from an audio file"""
     # <IntentRecognitionOnceWithFile>
-    # Set up the config for the intent recognizer (remember that this uses the Language Understanding key, not the Speech Services key)!
+    # Set up the config for the intent recognizer
+    # remember that this uses the Language Understanding key, not the Speech Services key!
     intent_config = speechsdk.SpeechConfig(subscription=intent_key, region=intent_service_region)
     audio_config = speechsdk.audio.AudioConfig(filename=lampfilename)
 
@@ -136,7 +137,7 @@ def recognize_intent_once_async_from_mic():
     # Set up a flag to mark when asynchronous recognition is done
     done = False
 
-    def recognized_callback(evt):
+    def recognized_callback(evt: speechsdk.intent.IntentRecognitionEventArgs):
         """
         Callback that is called on successful recognition of a full utterance by both speech
         processing and intent classification
@@ -146,7 +147,7 @@ def recognize_intent_once_async_from_mic():
         nonlocal done
         done = True
 
-    def canceled_callback(evt):
+    def canceled_callback(evt: speechsdk.intent.IntentRecognitionCanceledEventArgs):
         """Callback that is called on a failure by either speech or language processing"""
         result = evt.result
         print("Intent recognition canceled: {}".format(result.cancellation_details.reason))
@@ -155,7 +156,7 @@ def recognize_intent_once_async_from_mic():
         nonlocal done
         done = True
 
-    def recognizing_callback(evt):
+    def recognizing_callback(evt: speechsdk.intent.IntentRecognitionEventArgs):
         """Callback that is called on intermediate results from speech transcription"""
         result = evt.result
         print("Intermediate transcription: \"{}\"".format(result.text))
@@ -214,7 +215,7 @@ def recognize_intent_continuous():
     # Connect callback functions to the signals the intent recognizer fires.
     done = False
 
-    def stop_cb(evt):
+    def stop_cb(evt: speechsdk.SessionEventArgs):
         """callback that signals to stop continuous recognition upon receiving an event `evt`"""
         print('CLOSING on {}'.format(evt))
         nonlocal done
@@ -230,7 +231,7 @@ def recognize_intent_continuous():
             evt, evt.result.text, evt.result.reason, evt.result.intent_id, evt.result.intent_json)))
 
     # cancellation event
-    intent_recognizer.canceled.connect(lambda evt: print("CANCELED: {} ({})".format(evt.cancellation_details, evt.reason)))
+    intent_recognizer.canceled.connect(lambda evt: print(f"CANCELED: {evt.cancellation_details} ({evt.reason})"))
 
     # stop continuous recognition on session stopped, end of speech or canceled events
     intent_recognizer.session_stopped.connect(stop_cb)
@@ -244,4 +245,3 @@ def recognize_intent_continuous():
 
     intent_recognizer.stop_continuous_recognition()
     # </IntentContinuousRecognitionWithFile>
-
