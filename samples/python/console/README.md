@@ -9,10 +9,10 @@ This sample demonstrates various forms of speech recognition, intent recognition
 * On Ubuntu or Debian, run the following commands for the installation of required packages:
   ```sh
   sudo apt-get update
-  sudo apt-get install libssl1.0.0 libasound2
+  sudo apt-get install libssl-dev libasound2
   ```
 
-  * If libssl1.0.0 is not available, install libssl1.0.x (where x is greater than 0) or libssl1.1 instead.
+  * On **Ubuntu 22.04 LTS** it is also required to download and install the latest **libssl1.1** package e.g. from http://security.ubuntu.com/ubuntu/pool/main/o/openssl/.
 
 * On RHEL or CentOS, run the following commands for the installation of required packages:
   ```sh
