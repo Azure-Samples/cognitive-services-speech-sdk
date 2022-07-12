@@ -8,8 +8,9 @@ Conversation transcription samples for the Microsoft Cognitive Services Speech S
 """
 
 import time
-from scipy.io import wavfile
 import uuid
+
+from scipy.io import wavfile
 
 try:
     import azure.cognitiveservices.speech as speechsdk
@@ -25,12 +26,14 @@ except ImportError:
 
 # Set up the subscription info for the Speech Service:
 # Replace with your own subscription key and service region (e.g., "centralus").
-# See the limitations in supported regions, https://docs.microsoft.com/azure/cognitive-services/speech-service/how-to-use-conversation-transcription
+# See the limitations in supported regions,
+# https://docs.microsoft.com/azure/cognitive-services/speech-service/how-to-use-conversation-transcription
 speech_key, service_region = "YourSubscriptionKey", "YourServiceRegion"
 
 # This sample uses a wavfile which is captured using a supported Speech SDK devices (8 channel, 16kHz, 16-bit PCM)
 # See https://docs.microsoft.com/azure/cognitive-services/speech-service/speech-devices-sdk-microphone
 conversationfilename = "YourConversationWavFile"
+
 
 # This sample demonstrates how to differentiate speakers using conversation transcription service.
 # Differentiation of speakers do not require voice signatures. In case more enhanced speaker identification is required,
@@ -39,7 +42,7 @@ def conversation_transcription_differentiate_speakers():
     # Creates speech configuration with subscription information
     speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
     speech_config.set_property_by_name("ConversationTranscriptionInRoomAndOnline", "true")
-    speech_config.set_property_by_name("DifferentiateGuestSpeakers", "true");
+    speech_config.set_property_by_name("DifferentiateGuestSpeakers", "true")
 
     channels = 8
     bits_per_sample = 16
@@ -56,7 +59,8 @@ def conversation_transcription_differentiate_speakers():
     transcriber = speechsdk.transcription.ConversationTranscriber(audio_config)
 
     done = False
-    def stop_cb(evt):
+
+    def stop_cb(evt: speechsdk.SessionEventArgs):
         """callback that signals to stop continuous transcription upon receiving an event `evt`"""
         print('CLOSING {}'.format(evt))
         nonlocal done
@@ -72,7 +76,7 @@ def conversation_transcription_differentiate_speakers():
     transcriber.canceled.connect(stop_cb)
 
     # Add participants to the conversation.
-    # Note user voice signatures are not required for speaker differentation.
+    # Note user voice signatures are not required for speaker differentiation.
     # Use voice signatures when adding participants when more enhanced speaker identification is required.
     katie = speechsdk.transcription.Participant("katie@example.com", "en-us")
     stevie = speechsdk.transcription.Participant("stevie@example.com", "en-us")

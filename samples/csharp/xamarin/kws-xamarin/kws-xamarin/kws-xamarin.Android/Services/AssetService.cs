@@ -8,8 +8,6 @@ using System.Threading.Tasks;
 using Android;
 using Android.App;
 using Android.OS;
-using Android.Support.Design.Widget;
-using Android.Support.V4.App;
 using Java.IO;
 using File = Java.IO.File;
 
