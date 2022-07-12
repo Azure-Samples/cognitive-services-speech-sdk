@@ -160,7 +160,7 @@ If you want to perform Text Analytics, add those credentials.
 
 * Add Personally Identifiable Information (PII) Redaction [Batch Template Only]
 
-> **_NOTE:_** The ARM template also allows you to customize the PII categories through the PiiCategories variable (e.g., to only redact person names and organizations set the value to "Person,Organization"). A full list of all supported categories can be found in the [PII Entity Categories](https://docs.microsoft.com/azure/cognitive-services/text-analytics/named-entity-types?tabs=personal). The ARM template also allows you to set a minimum confidence for redaction through the PiiMinimumPrecision value, the value must be between 0.0 and 1.0. More details can be found in the [Pii Detection Documentation](https://docs.microsoft.com/azure/search/cognitive-search-skill-pii-detection).
+> **_NOTE:_** The ARM template also allows you to customize the PII categories through the PiiCategories variable (e.g., to only redact person names and organizations set the value to "Person,Organization"). A full list of all supported categories can be found in the [PII Entity Categories](https://docs.microsoft.com/azure/cognitive-services/text-analytics/named-entity-types?tabs=personal).
 
 If you want to further analytics we could map the transcript json we produce to a DB schema. [Batch Template Only]
 
