@@ -12,6 +12,7 @@
 // https://docs.microsoft.com/azure/cognitive-services/speech-service/how-to-use-codec-compressed-audio-input-streams
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -21,9 +22,31 @@ using Microsoft.CognitiveServices.Speech.Audio;
 
 namespace Captioning
 {
+    struct CaptionChunk
+    {
+        public string? language;
+        public int startIndex;
+        public string text;
+        public DateTime startTime;
+        public DateTime endTime;
+        
+        public CaptionChunk(string? language, int startIndex, string text, DateTime startTime, DateTime endTime) {
+            this.language = language;
+            this.startIndex = startIndex;
+            this.text = text;
+            this.startTime = startTime;
+            this.endTime = endTime;
+        }
+    }
+    
     class Program
     {
         private UserConfig userConfig;
+        private TaskCompletionSource<string?> recognitionEnd = new TaskCompletionSource<string?>();
+        private int srtSequenceNumber = 0;
+        // If the user specifies --recognizing and --maxCaptionLength, we need to break Recognizing results into chunks.
+        private CaptionChunk? currentCaptionChunk;
+        
         private const string usage = @"USAGE: dotnet run -- [...]
 
   HELP
@@ -47,8 +70,8 @@ namespace Captioning
 
   RECOGNITION
     --recognizing                 Output Recognizing results (default output is Recognized results only.)
-                                  These are always written to the console, never to an output file.
-                                  --quiet overrides this.
+    --recognized                  Output Recognized results.
+                                  Default is true, unless --recognizing is true, then default is false.
 
   ACCURACY
     --phrases PHRASE1;PHRASE2     Example: Constoso;Jessie;Rehaan
@@ -56,6 +79,7 @@ namespace Captioning
   OUTPUT
     --output FILE                 Output captions to text file.
     --srt                         Output captions in SubRip Text format (default format is WebVTT.)
+    --maxCaptionLength LENGTH     Break up captions longer than LENGTH.
     --quiet                       Suppress console output, except errors.
     --profanity OPTION            Valid values: raw, remove, mask
     --threshold NUMBER            Set stable partial result threshold.
@@ -64,7 +88,7 @@ namespace Captioning
         
         private static string? GetCmdOption(string[] args, string option)
         {
-            int index = Array.IndexOf(args, option);
+            int index = Array.FindIndex(args, x => x.Equals(option, StringComparison.OrdinalIgnoreCase));
             if (index > -1 && index < args.Length - 1)
             {
                 // We found the option (for example, "--output"), so advance from that to the value (for example, "filename").
@@ -135,41 +159,199 @@ namespace Captioning
             return $"wss://{region}.stt.speech.microsoft.com/speech/universal/v2";
         }
 
-        private string TimestampFromSpeechRecognitionResult(SpeechRecognitionResult result)
+        private string GetTimestamp(DateTime startTime, DateTime endTime)
         {
-            var startTime = new DateTime(result.OffsetInTicks);
-            DateTime endTime = startTime.Add(result.Duration);
-
             // SRT format requires ',' as decimal separator rather than '.'.
             return this.userConfig.useSubRipTextCaptionFormat
                 ? $"{startTime:HH:mm:ss,fff} --> {endTime:HH:mm:ss,fff}"
-                : $"{startTime:HH:mm:ss.fff} --> {endTime:HH:mm:ss.fff}";            
+                : $"{startTime:HH:mm:ss.fff} --> {endTime:HH:mm:ss.fff}";
         }
 
-        private string LanguageFromSpeechRecognitionResult(SpeechRecognitionResult result)
+        private string? LanguageFromSpeechRecognitionResult(SpeechRecognitionResult result)
         {
             if (null != this.userConfig.languageIDLanguages)
             {
                 var languageIDResult = AutoDetectSourceLanguageResult.FromResult(result);
-                return $"[{languageIDResult.Language}]";
+                return languageIDResult.Language;
             }
             else
             {
+                return null;
+            }
+        }
+
+        private List<List<WordLevelTimingResult>> ChunksFromWordLevelTimingResults(List<WordLevelTimingResult> results)
+        {
+            var chunks = new List<List<WordLevelTimingResult>>();
+            var currentChunk = new List<WordLevelTimingResult>();
+            var currentChunkLength = 0;
+            foreach(var result in results)
+            {
+                // If the current word, preceded by a space, makes the current chunk too long...
+                if (currentChunkLength + result.Word.Length + 1 > userConfig.maxCaptionLength)
+                {
+                    // Add the current chunk to the results.
+                    chunks.Add(currentChunk);
+                    // Start a new chunk and add the current word.
+                    currentChunk = new List<WordLevelTimingResult>();
+                    currentChunk.Add(result);
+                    currentChunkLength = result.Word.Length;
+// TODO1 If we get a word whose length alone > userConfig.maxCaptionLength, throw? Tell user they set limit too low. Or maybe just let the word through?
+                }
+                else
+                {
+                    // Add the current word to the current chunk. Account for the preceding space.
+                    currentChunk.Add(result);
+                    currentChunkLength += result.Word.Length + 1;
+                }
+            }
+            // Add the last chunk to the results.
+            chunks.Add(currentChunk);
+            return chunks;
+        }
+
+        private (string text, DateTime startTime, DateTime endTime) TextAndTimesFromChunk(List<WordLevelTimingResult> chunk)
+        {
+            var text = new StringBuilder();
+            var endTime = chunk[0].Offset;
+            foreach (var word in chunk)
+            {
+                text.AppendFormat($"{word.Word} ");
+                endTime += word.Duration;
+            }
+            return (text.ToString(), new DateTime(chunk[0].Offset), new DateTime(endTime));
+        }
+
+        private string CaptionFromTextAndTimes(string? language, string text, DateTime startTime, DateTime endTime)
+        {
+            var caption = new StringBuilder();
+            
+            if (this.userConfig.useSubRipTextCaptionFormat)
+            {
+                caption.AppendFormat($"{srtSequenceNumber}{Environment.NewLine}");
+                srtSequenceNumber++;
+            }
+            caption.AppendFormat($"{GetTimestamp(startTime, endTime)}{Environment.NewLine}");
+            if (null != language)
+            {
+                caption.Append($"[{language}] ");
+            }
+            caption.AppendFormat($"{text}{Environment.NewLine}{Environment.NewLine}");
+            return caption.ToString();
+        }
+
+        private string SplitRecognizedResult(SpeechRecognitionResult result)
+        {
+            string? language = LanguageFromSpeechRecognitionResult(result);
+            
+            var detailedResults = result.Best();
+            // Notes:
+            // You must set speechConfig.RequestWordLevelTimestamps() to get word-level timestamps.
+            // Word-level timestamps are only available for Recognized results.
+            if(detailedResults != null && detailedResults.Any())
+            {
+                // The first item in detailedResults corresponds to the recognized text.
+                // This is not necessarily the item with the highest confidence number.
+                var words = detailedResults.ToList()[0].Words.ToList();
+                
+                List<List<WordLevelTimingResult>> chunks = ChunksFromWordLevelTimingResults(words);
+                var caption = new StringBuilder();
+                foreach(var chunk in chunks)
+                {
+                    var (text, startTime, endTime) = TextAndTimesFromChunk(chunk);
+                    caption.Append(CaptionFromTextAndTimes(language, text, startTime, endTime));
+                }
+                return caption.ToString();
+            }
+            else
+            {
+                recognitionEnd.TrySetResult("Error: SpeechRecognitionResult missing detailed results. To get detailed results, you must call SpeechConfig.RequestWordLevelTimestamps()."); // Notify to stop recognition.
                 return "";
             }
         }
 
-        private string CaptionFromSpeechRecognitionResult(int sequenceNumber, SpeechRecognitionResult result)
+        private string CaptionFromSpeechRecognitionResult(SpeechRecognitionResult result)
         {
-            var caption = new StringBuilder();
-            if (!this.userConfig.showRecognizingResults && this.userConfig.useSubRipTextCaptionFormat)
+            string? language = LanguageFromSpeechRecognitionResult(result);
+            var startTime = new DateTime(result.OffsetInTicks);
+            DateTime endTime = startTime.Add(result.Duration);
+            return CaptionFromTextAndTimes(language, result.Text, startTime, endTime);
+        }
+
+        private string CaptionFromRecognizedSpeechEventResult(SpeechRecognitionResult result)
+        {
+            if (null != userConfig.maxCaptionLength && result.Text.Length > userConfig.maxCaptionLength)
             {
-                caption.AppendFormat($"{sequenceNumber}{Environment.NewLine}");
+                return SplitRecognizedResult(result);
             }
-            caption.AppendFormat($"{TimestampFromSpeechRecognitionResult(result)}{Environment.NewLine}");
-            caption.Append(LanguageFromSpeechRecognitionResult(result));
-            caption.AppendFormat($"{result.Text}{Environment.NewLine}{Environment.NewLine}");
-            return caption.ToString();
+            else
+            {
+                return CaptionFromSpeechRecognitionResult(result);
+            }
+        }
+
+        private string SplitRecognizingResult(SpeechRecognitionResult result)
+        {
+            // If the entire text of the Recognizing result is within the max caption length, simply create or update the current caption chunk.
+            if (result.Text.Length <= this.userConfig.maxCaptionLength)
+            {
+                currentCaptionChunk = new CaptionChunk (LanguageFromSpeechRecognitionResult(result), 0, result.Text, new DateTime(result.OffsetInTicks), new DateTime(result.OffsetInTicks).Add(result.Duration));
+                return null;
+            }
+            else
+            {
+                // If the entire text of the Recognizing result exceeds the max caption length, and we have not yet created a current caption chunk,
+                // then there was never a Recognizing result that was within the max caption length, which means the max caption length is too short.
+                if (this.currentCaptionChunk is null)
+                {
+                    recognitionEnd.TrySetResult("Error: You may have set --maxCaptionLength to too short a length."); // Notify to stop recognition.
+                    return null;
+                }
+                else
+                {
+                    // Get the text for what will become the current caption chunk.
+                    var text = result.Text.Substring(this.currentCaptionChunk.Value.startIndex);
+                
+                    // Does the current caption chunk now exceed the max caption length?
+                    if (text.Length > this.userConfig.maxCaptionLength)
+                    {
+                        // Show the current caption chunk.
+                        var caption = CaptionFromTextAndTimes(this.currentCaptionChunk.Value.language, this.currentCaptionChunk.Value.text, this.currentCaptionChunk.Value.startTime, this.currentCaptionChunk.Value.endTime);
+
+                        // TODO1 Break on any non-word character, not just space.
+                        // Move the starting index for the current caption chunk forward to one character after
+                        // the last space in the old caption chunk.
+                        var startIndex = text.Substring(0, this.userConfig.maxCaptionLength.Value).LastIndexOf(" ") + 1;
+                        // Get the text for the new current caption chunk using the new starting index.
+                        text = text.Substring(startIndex);
+                        // Update the current caption chunk. Add the new starting index to the old starting index.
+                        // Note the starting index applies to the entire Recognizing result, not the current caption chunk.
+                        // Set the new starting timestamp to one millisecond after the old ending timestamp.
+                        this.currentCaptionChunk = new CaptionChunk (this.currentCaptionChunk.Value.language, this.currentCaptionChunk.Value.startIndex + startIndex, text, this.currentCaptionChunk.Value.endTime.Add(TimeSpan.FromMilliseconds(1)), new DateTime(result.OffsetInTicks).Add(result.Duration));
+                        
+                        return caption;
+                    }
+                    else
+                    {
+                        // If the current caption chunk is still within the max caption length,
+                        // simply update the current caption chunk with the new text and ending timestamp.
+                        this.currentCaptionChunk = new CaptionChunk (this.currentCaptionChunk.Value.language, this.currentCaptionChunk.Value.startIndex, text, this.currentCaptionChunk.Value.startTime, new DateTime(result.OffsetInTicks).Add(result.Duration));
+                        return null;
+                    }
+                }                
+            }
+        }
+
+        private string? CaptionFromRecognizingSpeechEventResult(SpeechRecognitionResult result)
+        {
+            if (this.userConfig.maxCaptionLength is null)
+            {
+                return CaptionFromSpeechRecognitionResult(result);
+            }
+            else
+            {
+                return SplitRecognizingResult(result);
+            }
         }
 
         private void WriteToConsole(string text)
@@ -205,6 +387,13 @@ namespace Captioning
                 throw new ArgumentException($"Missing region.{Environment.NewLine}Usage: {usage}");
             }
             
+            string? strMaxCaptionLength = GetCmdOption(args, "--maxCaptionLength");
+            int? intMaxCaptionLength = null;
+            if (null != strMaxCaptionLength)
+            {
+                intMaxCaptionLength = Int32.Parse(strMaxCaptionLength);
+            }
+            
             this.userConfig = new UserConfig(
                 CmdOptionExists(args, "--format"),
                 GetCompressedAudioFormat(args),
@@ -214,8 +403,10 @@ namespace Captioning
                 GetCmdOption(args, "--output"),
                 GetCmdOption(args, "--phrases"),
                 CmdOptionExists(args, "--quiet"),
+                CmdOptionExists(args, "--recognized"),
                 CmdOptionExists(args, "--recognizing"),
                 CmdOptionExists(args, "--srt"),
+                intMaxCaptionLength,
                 GetCmdOption(args, "--threshold"),
                 key,
                 region
@@ -282,6 +473,7 @@ namespace Captioning
                 speechConfig.SetProperty(PropertyId.SpeechServiceResponse_StablePartialResultThreshold, stablePartialResultThresholdValue);
             }
             
+            speechConfig.RequestWordLevelTimestamps();
             speechConfig.SetProperty(PropertyId.SpeechServiceResponse_PostProcessingOption, "TrueText");
             
             return speechConfig;
@@ -309,7 +501,9 @@ namespace Captioning
             if (this.userConfig.phraseList is string phraseListValue)
             {
                 var grammar = PhraseListGrammar.FromRecognizer(speechRecognizer);
-                grammar.AddPhrase(phraseListValue);
+                foreach (var phrase in phraseListValue.Split(";")) {
+                    grammar.AddPhrase(phrase);
+                }
             }
             
             return speechRecognizer;
@@ -320,17 +514,17 @@ namespace Captioning
         //
         private async Task<string?> RecognizeContinuous(SpeechRecognizer speechRecognizer)
         {
-            var recognitionEnd = new TaskCompletionSource<string?>();
-            int sequenceNumber = 0;
-
             if (this.userConfig.showRecognizingResults)
             {
                 speechRecognizer.Recognizing += (object? sender, SpeechRecognitionEventArgs e) =>
                     {
                         if (ResultReason.RecognizingSpeech == e.Result.Reason && e.Result.Text.Length > 0)
                         {
-                            // We don't show sequence numbers for partial results.
-                            WriteToConsole(CaptionFromSpeechRecognitionResult(0, e.Result));
+                            var caption = CaptionFromRecognizingSpeechEventResult(e.Result);
+                            if (null != caption)
+                            {
+                                WriteToConsoleOrFile(caption);
+                            }
                         }
                         else if (ResultReason.NoMatch == e.Result.Reason)
                         {
@@ -341,14 +535,25 @@ namespace Captioning
 
             speechRecognizer.Recognized += (object? sender, SpeechRecognitionEventArgs e) =>
                 {
-                    if (ResultReason.RecognizedSpeech == e.Result.Reason && e.Result.Text.Length > 0)
+                    // If the user specifies --recognizing and --maxCaptionLength, then a Recognized event
+                    // means we need to show the current caption chunk, if any, then clear it.
+                    if (this.userConfig.showRecognizingResults && null != this.currentCaptionChunk)
                     {
-                        sequenceNumber++;
-                        WriteToConsoleOrFile(CaptionFromSpeechRecognitionResult(sequenceNumber, e.Result));
+                        WriteToConsoleOrFile(CaptionFromTextAndTimes(this.currentCaptionChunk.Value.language, this.currentCaptionChunk.Value.text, this.currentCaptionChunk.Value.startTime, this.currentCaptionChunk.Value.endTime));
+                        currentCaptionChunk = null;
                     }
-                    else if (ResultReason.NoMatch == e.Result.Reason)
+                    // If the user does not specify --recognizing, then we show Recognized results by default.
+                    // If the user does specify --recognizing, then we show Recognized results only if the user also specifies --recognized.
+                    if (!this.userConfig.showRecognizingResults || this.userConfig.showRecognizedResults)
                     {
-                        WriteToConsole($"NOMATCH: Speech could not be recognized.{Environment.NewLine}");
+                        if (ResultReason.RecognizedSpeech == e.Result.Reason && e.Result.Text.Length > 0)
+                        {
+                            WriteToConsoleOrFile(CaptionFromRecognizedSpeechEventResult(e.Result));
+                        }
+                        else if (ResultReason.NoMatch == e.Result.Reason)
+                        {
+                            WriteToConsole($"NOMATCH: Speech could not be recognized.{Environment.NewLine}");
+                        }
                     }
                 };
 
