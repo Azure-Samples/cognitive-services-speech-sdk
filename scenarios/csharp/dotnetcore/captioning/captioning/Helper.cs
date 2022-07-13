@@ -157,7 +157,6 @@ namespace Captioning
             base.Dispose(disposing);
         }
 
-
         private bool disposed = false;
     }
 }
