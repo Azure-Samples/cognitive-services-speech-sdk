@@ -30,12 +30,15 @@ namespace Captioning
         readonly public string? phraseList;
         /// True to suppress console output (except errors). If true, this overrides showRecognizingResults.
         readonly public bool suppressConsoleOutput = false;
+        /// True to output Recognized results.
+        readonly public bool showRecognizedResults = false;
         /// True to output Recognizing results. Default is to output Recognized results only.
         /// Recognizing results are always written to the console, never to an output file.
         /// If suppressConsoleOutput is true, it overrides this setting.
         readonly public bool showRecognizingResults = false;
         /// Output captions in SubRip Text format (default is WebVTT format).
         readonly public bool useSubRipTextCaptionFormat = false;
+        readonly public int? maxCaptionLength;
         /// Set the stable partial result threshold on the Speech service. This setting value must contain an integer.
         /// Example: 3
         readonly public string? stablePartialResultThreshold;
@@ -53,8 +56,10 @@ namespace Captioning
             string? outputFilePath,
             string? phraseList,
             bool suppressConsoleOutput,
+            bool showRecognizedResults,
             bool showRecognizingResults,
             bool useSubRipTextCaptionFormat,
+            int? maxCaptionLength,
             string? stablePartialResultThreshold,
             string subscriptionKey,
             string region
@@ -68,8 +73,10 @@ namespace Captioning
             this.outputFilePath = outputFilePath;
             this.phraseList = phraseList;
             this.suppressConsoleOutput = suppressConsoleOutput;
+            this.showRecognizedResults = showRecognizedResults;
             this.showRecognizingResults = showRecognizingResults;
             this.useSubRipTextCaptionFormat = useSubRipTextCaptionFormat;
+            this.maxCaptionLength = maxCaptionLength;
             this.stablePartialResultThreshold = stablePartialResultThreshold;
             this.subscriptionKey = subscriptionKey;
             this.region = region;
