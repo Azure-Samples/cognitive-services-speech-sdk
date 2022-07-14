@@ -106,7 +106,7 @@ namespace TextAnalytics
 
             if (sentimentAnalysisSetting != SentimentAnalysisSetting.UtteranceLevel)
             {
-                return (null, null);
+                return (new List<string>(), new List<string>());
             }
 
             var documents = speechTranscript.RecognizedPhrases.Where(r => r.NBest.FirstOrDefault() != null && !string.IsNullOrEmpty(r.NBest.First().Display)).Select(r => new TextDocumentInput($"{r.Channel}_{r.Offset}", r.NBest.First().Display) { Language = Locale });
@@ -137,7 +137,7 @@ namespace TextAnalytics
 
             if (sentimentAnalysisSetting != SentimentAnalysisSetting.AudioLevel && piiRedactionSetting != PiiRedactionSetting.UtteranceAndAudioLevel)
             {
-                return (null, null);
+                return (new List<string>(), new List<string>());
             }
 
             var documents = speechTranscript.CombinedRecognizedPhrases.Where(r => !string.IsNullOrEmpty(r.Display)).Select(r => new TextDocumentInput($"{r.Channel}", r.Display) { Language = Locale });
@@ -290,7 +290,7 @@ namespace TextAnalytics
         {
             if (!documents.Any())
             {
-                return (null, null);
+                return (new List<string>(), new List<string>());
             }
 
             // Chunk documents to avoid running into text analytics #documents limit
