@@ -1,31 +1,38 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-(function() {
-  // <code>
-  "use strict";
-  
-  // pull in the required packages.
-  var sdk = require("microsoft-cognitiveservices-speech-sdk");
-  var fs = require("fs");
-  
-  // replace with your own subscription key,
-  // service region (e.g., "westus"), and
-  // the name of the file you want to run
-  // through the speech recognizer.
-  var subscriptionKey = "YourSubscriptionKey";
-  var serviceRegion = "YourServiceRegion"; // e.g., "westus"
-  var filename = "YourAudioFile.wav"; // 16000 Hz, Mono
-  
-  // create the push stream we need for the speech sdk.
-  var pushStream = sdk.AudioInputStream.createPushStream();
-  
-  // open the file and push it to the push stream.
-  fs.createReadStream(filename).on('data', function(arrayBuffer) {
-    pushStream.write(arrayBuffer.slice());
-  }).on('end', function() {
-    pushStream.close();
-  });
+const fs = require("fs");
+const sdk = require("microsoft-cognitiveservices-speech-sdk");
+const speechConfig = sdk.SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+speechConfig.speechRecognitionLanguage = "en-US";
+
+function fromFile() {
+    let audioConfig = sdk.AudioConfig.fromWavFileInput(fs.readFileSync("YourAudioFile.wav"));
+    let speechRecognizer = new sdk.SpeechRecognizer(speechConfig, audioConfig);
+
+    speechRecognizer.recognizeOnceAsync(result => {
+        switch (result.reason) {
+            case sdk.ResultReason.RecognizedSpeech:
+                console.log(`RECOGNIZED: Text=${result.text}`);
+                break;
+            case sdk.ResultReason.NoMatch:
+                console.log("NOMATCH: Speech could not be recognized.");
+                break;
+            case sdk.ResultReason.Canceled:
+                const cancellation = sdk.CancellationDetails.fromResult(result);
+                console.log(`CANCELED: Reason=${cancellation.reason}`);
+
+                if (cancellation.reason == sdk.CancellationReason.Error) {
+                    console.log(`CANCELED: ErrorCode=${cancellation.ErrorCode}`);
+                    console.log(`CANCELED: ErrorDetails=${cancellation.errorDetails}`);
+                    console.log("CANCELED: Did you set the speech resource key and region values?");
+                }
+                break;
+        }
+        speechRecognizer.close();
+    });
+}
+fromFile();
   
   // we are done with the setup
   console.log("Now recognizing from: " + filename);
