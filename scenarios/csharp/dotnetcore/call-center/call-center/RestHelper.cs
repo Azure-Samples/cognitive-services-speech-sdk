@@ -14,7 +14,7 @@ namespace CallCenter
 {
     public static class RestHelper
     {
-        public static async Task<(HttpResponseMessage, string)> SendGet(string uri, string key, HttpStatusCode[] expectedStatusCodes)
+        public static async Task<(HttpResponseMessage response, string content)> SendGet(string uri, string key, HttpStatusCode[] expectedStatusCodes)
         {
             using (var client = new HttpClient())
             using (var request = new HttpRequestMessage())
@@ -38,7 +38,7 @@ namespace CallCenter
             }
         }
 
-        public static async Task<(HttpResponseMessage, string)> SendPost(string uri, string requestBody, string key, HttpStatusCode[] expectedStatusCodes)
+        public static async Task<(HttpResponseMessage response, string content)> SendPost(string uri, string requestBody, string key, HttpStatusCode[] expectedStatusCodes)
         {
             using (var client = new HttpClient())
             using (var request = new HttpRequestMessage())
