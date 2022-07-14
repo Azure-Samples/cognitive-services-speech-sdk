@@ -8,6 +8,7 @@ namespace Connector
     using System;
     using System.Collections.Generic;
     using System.Net.Http;
+    using System.Net.Sockets;
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
@@ -117,6 +118,13 @@ namespace Connector
                 await responseMessage.EnsureSuccessStatusCodeAsync().ConfigureAwait(false);
 
                 return responseMessage;
+            }
+            catch (HttpRequestException requestException)
+                when (requestException.InnerException != null &&
+                requestException.InnerException is SocketException socketException &&
+                socketException.SocketErrorCode == SocketError.TimedOut)
+            {
+                throw new TimeoutException($"Timeout in httpRequestException with socketException: {requestException}.");
             }
             catch (OperationCanceledException)
             {
