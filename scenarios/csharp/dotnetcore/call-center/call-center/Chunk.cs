@@ -1,102 +1,88 @@
 //
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 //
 
-using System;
-using System.Linq;
+// Source:
+// https://github.com/dotnet/runtime/blob/main/src/libraries/System.Linq/src/System/Linq/Chunk.cs
 
-namespace CallCenter
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+
+namespace System.Linq
 {
-    public class UserConfig
+    public static partial class Enumerable
     {
-        /// This should not change unless the Speech REST API changes.
-        private const string partialSpeechEndpoint = ".api.cognitive.microsoft.com";
-        /// True to treat input audio as stereo; otherwise, treat it as mono.
-        readonly public bool useStereoAudio = false;
-        /// Language for sentiment analysis and conversation analysis.
-        readonly public string language;
-        /// Locale for batch transcription.
-        readonly public string locale;
-        /// Input audio file URL.
-        readonly public string inputAudioURL;
-        /// The subscription key for your Speech service subscription.
-        readonly public string speechSubscriptionKey;
-        /// The endpoint for your Speech service subscription.
-        readonly public string speechEndpoint;
-        /// The subscription key for your Cognitive Language subscription.
-        readonly public string languageSubscriptionKey;
-        /// The endpoint for your Cognitive Language subscription.
-        readonly public string languageEndpoint;
-
-        public static string? GetCmdOption(string[] args, string option)
+        /// <summary>
+        /// Split the elements of a sequence into chunks of size at most <paramref name="size"/>.
+        /// </summary>
+        /// <remarks>
+        /// Every chunk except the last will be of size <paramref name="size"/>.
+        /// The last chunk will contain the remaining elements and may be of a smaller size.
+        /// </remarks>
+        /// <param name="source">
+        /// An <see cref="IEnumerable{T}"/> whose elements to chunk.
+        /// </param>
+        /// <param name="size">
+        /// Maximum size of each chunk.
+        /// </param>
+        /// <typeparam name="TSource">
+        /// The type of the elements of source.
+        /// </typeparam>
+        /// <returns>
+        /// An <see cref="IEnumerable{T}"/> that contains the elements the input sequence split into chunks of size <paramref name="size"/>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="source"/> is null.
+        /// </exception>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// <paramref name="size"/> is below 1.
+        /// </exception>
+        public static IEnumerable<TSource[]> Chunk<TSource>(this IEnumerable<TSource> source, int size)
         {
-            int index = Array.FindIndex(args, x => x.Equals(option, StringComparison.OrdinalIgnoreCase));
-            if (index > -1 && index < args.Length - 1)
+            if (source == null)
             {
-                // We found the option (for example, "--output"), so advance from that to the value (for example, "filename").
-                return args[index + 1];
+                // Modified to support C# 8.
+                //ThrowHelper.ThrowArgumentNullException(ExceptionArgument.source);
+                throw new ArgumentNullException("source");
             }
-            else
+
+            if (size < 1)
             {
-                return null;
+                // Modified to support C# 8.
+                //ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.size);
+                throw new ArgumentOutOfRangeException("size");
             }
+
+            return ChunkIterator(source, size);
         }
 
-        public static bool CmdOptionExists(string[] args, string option)
+        private static IEnumerable<TSource[]> ChunkIterator<TSource>(IEnumerable<TSource> source, int size)
         {
-            return args.Contains(option);
-        }
+            using IEnumerator<TSource> e = source.GetEnumerator();
 
-        public UserConfig(string[] args, string usage)
-        {
-            string? speechSubscriptionKey = GetCmdOption(args, "--speechKey");
-            if (speechSubscriptionKey is null)
+            if (e.MoveNext())
             {
-                throw new ArgumentException($"Missing Speech subscription key.{Environment.NewLine}Usage: {usage}");
-            }
-            string? speechRegion = GetCmdOption(args, "--speechRegion");
-            if (speechRegion is null)
-            {
-                throw new ArgumentException($"Missing Speech region.{Environment.NewLine}Usage: {usage}");
-            }
-            
-            string? languageSubscriptionKey = GetCmdOption(args, "--languageKey");
-            if (languageSubscriptionKey is null)
-            {
-                throw new ArgumentException($"Missing Language subscription key.{Environment.NewLine}Usage: {usage}");
-            }
-            string? languageEndpoint = GetCmdOption(args, "--languageEndpoint");
-            if (languageEndpoint is null)
-            {
-                throw new ArgumentException($"Missing Language endpoint.{Environment.NewLine}Usage: {usage}");
-            }
+                // Modified to support C# 8.
+                //List<TSource> chunkBuilder = new();
+                List<TSource> chunkBuilder = new List<TSource> {};
+                while (true)
+                {
+                    do
+                    {
+                        chunkBuilder.Add(e.Current);
+                    }
+                    while (chunkBuilder.Count < size && e.MoveNext());
 
-            string? inputAudioURL = GetCmdOption(args, "--input");
-            if (inputAudioURL is null)
-            {
-                throw new ArgumentException($"Missing input audio URL.{Environment.NewLine}Usage: {usage}");
+                    yield return chunkBuilder.ToArray();
+
+                    if (chunkBuilder.Count < size || !e.MoveNext())
+                    {
+                        yield break;
+                    }
+                    chunkBuilder.Clear();
+                }
             }
-            
-            string? language = GetCmdOption(args, "--language");
-            if (language is null)
-            {
-                language = "en";
-            }
-            string? locale = GetCmdOption(args, "--locale");
-            if (locale is null)
-            {
-                locale = "en-US";
-            }
-  
-            this.useStereoAudio = CmdOptionExists(args, "--stereo");
-            this.language = language;
-            this.locale = locale;
-            this.inputAudioURL = inputAudioURL;
-            this.speechSubscriptionKey = speechSubscriptionKey;
-            this.speechEndpoint = $"{speechRegion}{partialSpeechEndpoint}";
-            this.languageSubscriptionKey = languageSubscriptionKey;
-            this.languageEndpoint = languageEndpoint;
         }
     }
 }
