@@ -4,14 +4,15 @@
 # Copyright (c) Microsoft. All rights reserved.
 # Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 
-import speech_sample
-import intent_sample
-import translation_sample
-import speech_synthesis_sample
-import speech_language_detection_sample
-
-from collections import OrderedDict
 import platform
+from collections import OrderedDict
+
+import intent_sample
+import speech_language_detection_sample
+import speech_sample
+import speech_synthesis_sample
+import transcription_sample
+import translation_sample
 
 eofkey = 'Ctrl-Z' if "Windows" == platform.system() else 'Ctrl-D'
 
@@ -40,6 +41,8 @@ samples = OrderedDict([
         translation_sample.translation_once_from_mic,
         translation_sample.translation_once_from_file,
         translation_sample.translation_continuous,
+    ]), (transcription_sample, [
+        transcription_sample.conversation_transcription_differentiate_speakers,
     ]), (speech_synthesis_sample, [
         speech_synthesis_sample.speech_synthesis_to_speaker,
         speech_synthesis_sample.speech_synthesis_with_language,

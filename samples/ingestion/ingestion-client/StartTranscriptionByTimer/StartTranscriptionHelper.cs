@@ -15,10 +15,9 @@ namespace StartTranscriptionByTimer
     using System.Net.Http;
     using System.Text;
     using System.Threading.Tasks;
+    using Azure.Messaging.ServiceBus;
     using Connector;
     using Connector.Serializable.TranscriptionStartedServiceBusMessage;
-    using Microsoft.Azure.ServiceBus;
-    using Microsoft.Azure.ServiceBus.Core;
     using Microsoft.Extensions.Logging;
     using Microsoft.WindowsAzure.Storage;
     using Newtonsoft.Json;
@@ -27,9 +26,13 @@ namespace StartTranscriptionByTimer
     {
         private static readonly StorageConnector StorageConnectorInstance = new (StartTranscriptionEnvironmentVariables.AzureWebJobsStorage);
 
-        private static readonly QueueClient StartQueueClientInstance = new (new ServiceBusConnectionStringBuilder(StartTranscriptionEnvironmentVariables.StartTranscriptionServiceBusConnectionString));
+        private static readonly ServiceBusClient StartServiceBusClient = new ServiceBusClient(StartTranscriptionEnvironmentVariables.StartTranscriptionServiceBusConnectionString);
 
-        private static readonly QueueClient FetchQueueClientInstance = new (new ServiceBusConnectionStringBuilder(StartTranscriptionEnvironmentVariables.FetchTranscriptionServiceBusConnectionString));
+        private static readonly ServiceBusSender StartSender = StartServiceBusClient.CreateSender(ServiceBusConnectionStringProperties.Parse(StartTranscriptionEnvironmentVariables.StartTranscriptionServiceBusConnectionString).EntityPath);
+
+        private static readonly ServiceBusClient FetchServiceBusClient = new ServiceBusClient(StartTranscriptionEnvironmentVariables.FetchTranscriptionServiceBusConnectionString);
+
+        private static readonly ServiceBusSender FetchSender = FetchServiceBusClient.CreateSender(ServiceBusConnectionStringProperties.Parse(StartTranscriptionEnvironmentVariables.FetchTranscriptionServiceBusConnectionString).EntityPath);
 
         private readonly string SubscriptionKey = StartTranscriptionEnvironmentVariables.AzureSpeechServicesKey;
 
@@ -49,14 +52,14 @@ namespace StartTranscriptionByTimer
             Locale = StartTranscriptionEnvironmentVariables.Locale.Split('|')[0].Trim();
         }
 
-        public async Task StartTranscriptionsAsync(IEnumerable<Message> messages, MessageReceiver messageReceiver, DateTime startDateTime)
+        public async Task StartTranscriptionsAsync(IEnumerable<ServiceBusReceivedMessage> messages, ServiceBusReceiver messageReceiver, DateTime startDateTime)
         {
             if (messageReceiver == null)
             {
                 throw new ArgumentNullException(nameof(messageReceiver));
             }
 
-            var chunkedMessages = new List<List<Message>>();
+            var chunkedMessages = new List<List<ServiceBusReceivedMessage>>();
             var messageCount = messages.Count();
 
             for (int i = 0; i < messageCount; i += FilesPerTranscriptionJob)
@@ -73,7 +76,7 @@ namespace StartTranscriptionByTimer
                 var jobName = $"{startDateTime.ToString("yyyy-MM-ddTHH:mm:ss", CultureInfo.InvariantCulture)}_{i}";
                 var chunk = chunkedMessages.ElementAt(i);
                 await StartBatchTranscriptionJobAsync(chunk, jobName).ConfigureAwait(false);
-                await messageReceiver.CompleteAsync(chunk.Select(m => m.SystemProperties.LockToken)).ConfigureAwait(false);
+                await messageReceiver.CompleteMessageAsync(chunk[i]).ConfigureAwait(false);
 
                 // only renew lock after 2 minutes
                 if (stopwatch.Elapsed.TotalSeconds > 120)
@@ -82,7 +85,7 @@ namespace StartTranscriptionByTimer
                     {
                         foreach (var message in remainingChunk)
                         {
-                            await messageReceiver.RenewLockAsync(message).ConfigureAwait(false);
+                            await messageReceiver.RenewMessageLockAsync(message).ConfigureAwait(false);
                         }
                     }
 
@@ -94,33 +97,33 @@ namespace StartTranscriptionByTimer
             }
         }
 
-        public async Task StartTranscriptionAsync(Message message)
+        public async Task StartTranscriptionAsync(ServiceBusReceivedMessage message)
         {
             if (message == null)
             {
                 throw new ArgumentNullException(nameof(message));
             }
 
-            var busMessage = JsonConvert.DeserializeObject<ServiceBusMessage>(Encoding.UTF8.GetString(message.Body));
+            var busMessage = JsonConvert.DeserializeObject<Connector.ServiceBusMessage>(message.Body.ToString());
             var audioFileName = StorageConnector.GetFileNameFromUri(busMessage.Data.Url);
 
             await StartBatchTranscriptionJobAsync(new[] { message }, audioFileName).ConfigureAwait(false);
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "Catch general exception to ensure that job continues execution even if message is invalid.")]
-        public bool IsValidServiceBusMessage(Message message)
+        public bool IsValidServiceBusMessage(ServiceBusReceivedMessage message)
         {
-            if (message == null || message.Body == null || !message.Body.Any())
+            if (message == null || message.Body == null)
             {
                 Logger.LogError($"Message {nameof(message)} is null.");
                 return false;
             }
 
-            var messageBody = Encoding.UTF8.GetString(message.Body);
+            var messageBody = message.Body.ToString();
 
             try
             {
-                var serviceBusMessage = JsonConvert.DeserializeObject<ServiceBusMessage>(messageBody);
+                var serviceBusMessage = JsonConvert.DeserializeObject<Connector.ServiceBusMessage>(messageBody);
 
                 if (serviceBusMessage.EventType.Contains("BlobCreate", StringComparison.OrdinalIgnoreCase) &&
                     StorageConnector.GetContainerNameFromUri(serviceBusMessage.Data.Url).Equals(AudioInputContainerName, StringComparison.Ordinal))
@@ -155,7 +158,7 @@ namespace StartTranscriptionByTimer
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "Allow general exception catching to retry transcriptions in that case.")]
-        private async Task StartBatchTranscriptionJobAsync(IEnumerable<Message> messages, string jobName)
+        private async Task StartBatchTranscriptionJobAsync(IEnumerable<ServiceBusReceivedMessage> messages, string jobName)
         {
             if (messages == null || !messages.Any())
             {
@@ -164,7 +167,7 @@ namespace StartTranscriptionByTimer
             }
 
             var locationString = string.Empty;
-            var serviceBusMessages = messages.Select(message => JsonConvert.DeserializeObject<ServiceBusMessage>(Encoding.UTF8.GetString(message.Body)));
+            var serviceBusMessages = messages.Select(message => JsonConvert.DeserializeObject<Connector.ServiceBusMessage>(Encoding.UTF8.GetString(message.Body)));
 
             try
             {
@@ -184,7 +187,7 @@ namespace StartTranscriptionByTimer
                         audioUrls.Add(StorageConnectorInstance.CreateSas(serviceBusMessage.Data.Url));
                     }
 
-                    audioFileInfos.Add(new AudioFileInfo(serviceBusMessage.Data.Url.AbsoluteUri, serviceBusMessage.RetryCount));
+                    audioFileInfos.Add(new AudioFileInfo(serviceBusMessage.Data.Url.AbsoluteUri, serviceBusMessage.RetryCount, textAnalyticsRequests: null));
                 }
 
                 ModelIdentity modelIdentity = null;
@@ -213,7 +216,7 @@ namespace StartTranscriptionByTimer
                     0);
 
                 var fetchingDelay = TimeSpan.FromMinutes(StartTranscriptionEnvironmentVariables.InitialPollingDelayInMinutes);
-                await ServiceBusUtilities.SendServiceBusMessageAsync(FetchQueueClientInstance, transcriptionMessage.CreateMessageString(), Logger, fetchingDelay).ConfigureAwait(false);
+                await ServiceBusUtilities.SendServiceBusMessageAsync(FetchSender, transcriptionMessage.CreateMessageString(), Logger, fetchingDelay).ConfigureAwait(false);
             }
             catch (TimeoutException e)
             {
@@ -244,19 +247,19 @@ namespace StartTranscriptionByTimer
             Logger.LogInformation($"Fetch transcription queue successfully informed about job at: {jobName}");
         }
 
-        private async Task RetryOrFailMessagesAsync(IEnumerable<Message> messages, string errorMessage, HttpStatusCode statusCode)
+        private async Task RetryOrFailMessagesAsync(IEnumerable<ServiceBusReceivedMessage> messages, string errorMessage, HttpStatusCode statusCode)
         {
             Logger.LogError(errorMessage);
             foreach (var message in messages)
             {
-                var sbMessage = JsonConvert.DeserializeObject<ServiceBusMessage>(Encoding.UTF8.GetString(message.Body));
+                var sbMessage = JsonConvert.DeserializeObject<Connector.ServiceBusMessage>(Encoding.UTF8.GetString(message.Body));
 
                 if (sbMessage.RetryCount <= StartTranscriptionEnvironmentVariables.RetryLimit || statusCode == HttpStatusCode.TooManyRequests)
                 {
                     sbMessage.RetryCount += 1;
                     var messageDelay = GetMessageDelayTime(sbMessage.RetryCount);
-                    var newMessage = new Message(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(sbMessage)));
-                    await ServiceBusUtilities.SendServiceBusMessageAsync(StartQueueClientInstance, newMessage, Logger, messageDelay).ConfigureAwait(false);
+                    var newMessage = new Azure.Messaging.ServiceBus.ServiceBusMessage(JsonConvert.SerializeObject(sbMessage));
+                    await ServiceBusUtilities.SendServiceBusMessageAsync(StartSender, newMessage, Logger, messageDelay).ConfigureAwait(false);
                 }
                 else
                 {
@@ -269,7 +272,7 @@ namespace StartTranscriptionByTimer
             }
         }
 
-        private async Task WriteFailedJobLogToStorageAsync(IEnumerable<ServiceBusMessage> serviceBusMessages, string errorMessage, string jobName)
+        private async Task WriteFailedJobLogToStorageAsync(IEnumerable<Connector.ServiceBusMessage> serviceBusMessages, string errorMessage, string jobName)
         {
             Logger.LogError(errorMessage);
             var jobErrorFileName = $"jobs/{jobName}.txt";

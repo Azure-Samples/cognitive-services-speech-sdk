@@ -1,3 +1,4 @@
+.flake8 text
 .gitattributes text
 .gitignore text
 Podfile text
@@ -17,6 +18,7 @@ proguard-rules.pro text
 *.cs text
 *.csproj text
 *.entitlements text
+*.go text
 *.gradle text
 *.h text
 *.html text
@@ -42,6 +44,7 @@ proguard-rules.pro text
 *.sln text
 *.storyboard text
 *.swift text
+*.ts text
 *.txt text
 *.unity text
 *.vcxproj text
@@ -57,6 +60,7 @@ proguard-rules.pro text
 
 # Binary extensions:
 *.class binary
+*.bmp binary
 *.jar binary
 *.jpg binary
 *.mp3 binary

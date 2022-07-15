@@ -26,6 +26,7 @@ extern void IntentRecognitionWithMicrophone();
 extern void IntentRecognitionWithPatternMatchingAndMicrophone();
 extern void IntentRecognitionWithLanguage();
 extern void IntentContinuousRecognitionWithFile();
+extern void IntentPatternMatchingWithMicrophoneAndKeywordSpotting();
 
 extern void TranslationWithMicrophone();
 extern void TranslationContinuousRecognition();
@@ -68,6 +69,12 @@ extern void StandaloneLanguageDetectionInSingleshotModeWithFileInput();
 extern void StandaloneLanguageDetectionInContinuousModeWithFileInput();
 extern void StandaloneLanguageDetectionInContinuousModeWithMultiLingualFileInput();
 
+extern void DiagnosticsLoggingFileLoggerWithoutFilter();
+extern void DiagnosticsLoggingFileLoggerWithFilter();
+extern void DiagnosticsLoggingEventLoggerWithoutFilter();
+extern void DiagnosticsLoggingEventLoggerWithFilter();
+extern void DiagnosticsLoggingMemoryLogger();
+
 void SpeechSamples()
 {
     string input;
@@ -83,14 +90,14 @@ void SpeechSamples()
         cout << "7.) Speech recognition using microphone with a keyword trigger.\n";
         cout << "8.) Pronunciation assessment using microphone input.\n";
         cout << "9.) Speech recognition from default microphone with Microsoft Audio Stack enabled.\n";
-        cout << "a.) Speech recognition from a microphone with Microsoft Audio Stack enabled and "
-                "pre-defined microphone array geometry specified.\n";
-        cout << "b.) Speech recognition from multi-channel file with Microsoft Audio Stack enabled and "
-                "custom microphone array geometry specified.\n";
-        cout << "c.) Speech recognition from pull stream with custom set of enhancements from "
-                "Microsoft Audio Stack enabled.\n";
-        cout << "d.) Speech recognition from push stream with Microsoft Audio Stack enabled and "
-                "beamforming angles specified.\n";
+        cout << "a.) Speech recognition from a microphone with Microsoft Audio Stack enabled and\n"
+                "    pre-defined microphone array geometry specified.\n";
+        cout << "b.) Speech recognition from multi-channel file with Microsoft Audio Stack enabled and\n"
+                "    custom microphone array geometry specified.\n";
+        cout << "c.) Speech recognition from pull stream with custom set of enhancements from\n"
+                "    Microsoft Audio Stack enabled.\n";
+        cout << "d.) Speech recognition from push stream with Microsoft Audio Stack enabled and\n"
+                "    beam-forming angles specified.\n";
         cout << "\nChoice (0 for MAIN MENU): ";
         cout.flush();
 
@@ -186,6 +193,7 @@ void IntentSamples()
         cout << "2.) Intent recognition in the specified language.\n";
         cout << "3.) Intent continuous recognition with file input.\n";
         cout << "4.) Intent recognition from default microphone and pattern matching.\n";
+        cout << "5.) Intent recognition with keyword spotting from default microphone and pattern matching.\n";
         cout << "\nChoice (0 for MAIN MENU): ";
         cout.flush();
 
@@ -205,6 +213,9 @@ void IntentSamples()
             break;
         case '4':
             IntentRecognitionWithPatternMatchingAndMicrophone();
+            break;
+        case '5':
+            IntentPatternMatchingWithMicrophoneAndKeywordSpotting();
             break;
         case '0':
             break;
@@ -451,6 +462,46 @@ void StandaloneLanguageDetectionSamples()
     } while (input[0] != '0');
 }
 
+void DiagnosticsLoggingSamples()
+{
+    string input;
+    do
+    {
+        cout << "\nTRACE LOGGING SAMPLES:\n";
+        cout << "1.) Trace logging to a file (without filter).\n";
+        cout << "2.) Trace logging to a file (with filter).\n";
+        cout << "3.) Trace logging events (without filter).\n";
+        cout << "4.) Trace logging events (with filter).\n";
+        cout << "5.) Trace logging to memory.\n";
+        cout << "\nChoice (0 for MAIN MENU): ";
+        cout.flush();
+
+        input.clear();
+        getline(cin, input);
+
+        switch (input[0])
+        {
+        case '1':
+            DiagnosticsLoggingFileLoggerWithoutFilter();
+            break;
+        case '2':
+            DiagnosticsLoggingFileLoggerWithFilter();
+            break;
+        case '3':
+            DiagnosticsLoggingEventLoggerWithoutFilter();
+            break;
+        case '4':
+            DiagnosticsLoggingEventLoggerWithFilter();
+            break;
+        case '5':
+            DiagnosticsLoggingMemoryLogger();
+            break;
+        case '0':
+            break;
+        }
+    } while (input[0] != '0');
+}
+
 #ifdef _WIN32
 int wmain(int argc, wchar_t **argv)
 #else
@@ -466,9 +517,10 @@ int main(int argc, char **argv)
         cout << "3.) Translation samples.\n";
         cout << "4.) Speech synthesis samples.\n";
         cout << "5.) Conversation transcriber samples.\n";
-        cout << "6.) Speaker Recognition samples.\n";
+        cout << "6.) Speaker recognition samples.\n";
         cout << "7.) Standalone language detection samples.\n";
-        cout << "8.) Speech Recgnition with language detection samples.\n";
+        cout << "8.) Speech recognition with language detection samples.\n";
+        cout << "9.) Diagnostics logging samples (trace logging).\n";
         cout << "\nChoice (0 to Exit): ";
         cout.flush();
 
@@ -500,6 +552,9 @@ int main(int argc, char **argv)
             break;
         case '8':
             SpeechWithLanguageIdSamples();
+            break;
+        case '9':
+            DiagnosticsLoggingSamples();
             break;
         case '0':
             break;

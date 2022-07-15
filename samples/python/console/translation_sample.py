@@ -29,6 +29,7 @@ speech_key, service_region = "YourSubscriptionKey", "YourServiceRegion"
 # kHz).
 weatherfilename = "whatstheweatherlike.wav"
 
+
 def translation_once_from_mic():
     """performs one-shot speech translation from input from an audio file"""
     # <TranslationOnceWithMic>
@@ -124,14 +125,14 @@ def translation_continuous():
     recognizer = speechsdk.translation.TranslationRecognizer(
         translation_config=translation_config, audio_config=audio_config)
 
-    def result_callback(event_type, evt):
+    def result_callback(event_type: str, evt: speechsdk.translation.TranslationRecognitionEventArgs):
         """callback to display a translation result"""
         print("{}: {}\n\tTranslations: {}\n\tResult Json: {}".format(
             event_type, evt, evt.result.translations.items(), evt.result.json))
 
     done = False
 
-    def stop_cb(evt):
+    def stop_cb(evt: speechsdk.SessionEventArgs):
         """callback that signals to stop continuous recognition upon receiving an event `evt`"""
         print('CLOSING on {}'.format(evt))
         nonlocal done
@@ -151,7 +152,7 @@ def translation_continuous():
     recognizer.session_stopped.connect(stop_cb)
     recognizer.canceled.connect(stop_cb)
 
-    def synthesis_callback(evt):
+    def synthesis_callback(evt: speechsdk.translation.TranslationRecognitionEventArgs):
         """
         callback for the synthesis event
         """
@@ -169,4 +170,3 @@ def translation_continuous():
 
     recognizer.stop_continuous_recognition()
     # </TranslationContinuous>
-
