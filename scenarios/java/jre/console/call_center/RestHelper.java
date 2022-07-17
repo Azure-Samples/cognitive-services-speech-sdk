@@ -1,3 +1,8 @@
+//
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+//
+
 import java.io.*;
 import java.net.*;
 import java.util.*;
@@ -22,7 +27,7 @@ public class RestHelper {
         connection.setRequestMethod("GET");
         connection.setRequestProperty("Ocp-Apim-Subscription-Key", key);
 
-        StringBuilder response = new StringBuilder ();
+        StringBuilder response = new StringBuilder();
         BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
         String line;
         while ((line = in.readLine()) != null) {
@@ -35,7 +40,11 @@ public class RestHelper {
             throw new Exception(String.format("The response from %s has an unexpected status code: %d", url_1, statusCode));
         }
 
-        return new RestResult(response.toString(), parseJson(response.toString()), connection.getHeaderFields());
+        JsonObject json = null;
+        if (response.length() > 0) {
+            json = parseJson(response.toString());
+        }
+        return new RestResult(response.toString(), json, connection.getHeaderFields());
     }
     
     public static RestResult sendPost (String url_1, String content, String key, int[] expectedStatusCodes) throws Exception {
@@ -54,7 +63,7 @@ public class RestHelper {
         wr.flush();
         wr.close();
 
-        StringBuilder response = new StringBuilder ();
+        StringBuilder response = new StringBuilder();
         BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
         String line;
         while ((line = in.readLine()) != null) {
@@ -67,7 +76,11 @@ public class RestHelper {
             throw new Exception(String.format("The response from %s has an unexpected status code: %d", url_1, statusCode));
         }
 
-        return new RestResult(response.toString(), parseJson(response.toString()), connection.getHeaderFields());
+        JsonObject json = null;
+        if (response.length() > 0) {
+            json = parseJson(response.toString());
+        }
+        return new RestResult(response.toString(), json, connection.getHeaderFields());
     }
     
     public static void sendDelete (String url_1, String key, int[] expectedStatusCodes) throws Exception {
