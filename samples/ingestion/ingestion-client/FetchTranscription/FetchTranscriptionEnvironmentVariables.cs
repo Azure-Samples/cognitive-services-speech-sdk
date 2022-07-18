@@ -6,6 +6,9 @@
 namespace FetchTranscriptionFunction
 {
     using System;
+    using System.Collections.Generic;
+    using System.Linq;
+
     using Connector;
     using Connector.Constants;
     using Connector.Enums;
@@ -17,6 +20,10 @@ namespace FetchTranscriptionFunction
         public static readonly PiiRedactionSetting PiiRedactionSetting = Enum.TryParse(Environment.GetEnvironmentVariable(nameof(PiiRedactionSetting), EnvironmentVariableTarget.Process), out PiiRedactionSetting) ? PiiRedactionSetting : PiiRedactionSetting.None;
 
         public static readonly bool CreateHtmlResultFile = bool.TryParse(Environment.GetEnvironmentVariable(nameof(CreateHtmlResultFile), EnvironmentVariableTarget.Process), out CreateHtmlResultFile) && CreateHtmlResultFile;
+
+        public static readonly ConversationPiiSetting ConversationPiiSetting = Enum.TryParse(Environment.GetEnvironmentVariable(nameof(ConversationPiiSetting), EnvironmentVariableTarget.Process), out SentimentAnalysisSetting) ? ConversationPiiSetting : ConversationPiiSetting.None;
+
+        public static readonly IEnumerable<ConversationPiiCategory> ConversationPiiCategories = GetConversationPiiCategories(Environment.GetEnvironmentVariable(nameof(ConversationPiiCategories), EnvironmentVariableTarget.Process));
 
         public static readonly bool UseSqlDatabase = bool.TryParse(Environment.GetEnvironmentVariable(nameof(UseSqlDatabase), EnvironmentVariableTarget.Process), out UseSqlDatabase) && UseSqlDatabase;
 
@@ -59,5 +66,26 @@ namespace FetchTranscriptionFunction
         public static readonly bool CreateAudioProcessedContainer = bool.TryParse(Environment.GetEnvironmentVariable(nameof(CreateAudioProcessedContainer), EnvironmentVariableTarget.Process), out CreateAudioProcessedContainer) && CreateAudioProcessedContainer;
 
         public static readonly string AudioProcessedContainer = Environment.GetEnvironmentVariable(nameof(AudioProcessedContainer), EnvironmentVariableTarget.Process);
+
+        public static List<ConversationPiiCategory> GetConversationPiiCategories(string piiCategories)
+        {
+            if (string.IsNullOrWhiteSpace(piiCategories))
+            {
+                return new List<ConversationPiiCategory>
+                {
+                    ConversationPiiCategory.All
+                };
+            }
+
+            var piiCategoriesList = piiCategories.Split(',').ToList();
+            var categories = new List<ConversationPiiCategory>();
+            piiCategoriesList.ForEach(category =>
+            {
+                Enum.TryParse(category, ignoreCase: true, out ConversationPiiCategory catgoryEnum);
+                categories.Add(catgoryEnum);
+            });
+
+            return categories;
+        }
     }
 }

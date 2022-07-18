@@ -10,13 +10,23 @@ namespace TextAnalytics
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+
     using Azure;
     using Azure.AI.TextAnalytics;
+
     using Connector;
     using Connector.Enums;
+    using Connector.Serializable.Language.Conversations;
     using Connector.Serializable.TranscriptionStartedServiceBusMessage;
+
+    using FetchTranscription.Language;
+
     using FetchTranscriptionFunction;
+
     using Microsoft.Extensions.Logging;
+
+    using Newtonsoft.Json;
+
     using static Connector.Serializable.TranscriptionStartedServiceBusMessage.TextAnalyticsRequest;
 
     /// <summary>
@@ -46,15 +56,18 @@ namespace TextAnalytics
 
         private readonly TextAnalyticsClient TextAnalyticsClient;
 
+        private readonly AnalyzeConversationsProvider ConversationsAnalysisProvider;
+
         private readonly string Locale;
 
         private readonly ILogger Log;
 
-        public TextAnalyticsProvider(string locale, string subscriptionKey, string region, ILogger log)
+        public TextAnalyticsProvider(string locale, string subscriptionKey, string region, ILogger log, AnalyzeConversationsProvider conversationsProvider)
         {
             TextAnalyticsClient = new TextAnalyticsClient(new Uri($"https://{region}.api.cognitive.microsoft.com"), new AzureKeyCredential(subscriptionKey));
             Locale = locale;
             Log = log;
+            ConversationsAnalysisProvider = conversationsProvider;
         }
 
         /// <summary>
@@ -66,8 +79,8 @@ namespace TextAnalytics
         {
             var runningTextAnalyticsRequests = new List<TextAnalyticsRequest>();
             runningTextAnalyticsRequests.AddRange(audioFileInfos.SelectMany(audioFileInfo => audioFileInfo.TextAnalyticsRequests.AudioLevelRequests).Where(text => text.Status == TextAnalyticsRequestStatus.Running));
-            runningTextAnalyticsRequests.AddRange(audioFileInfos.SelectMany(audioFileInfo => audioFileInfo.TextAnalyticsRequests.UtteranceLevelRequests).Where(text => text.Status == TextAnalyticsRequestStatus.Running));
 
+            runningTextAnalyticsRequests.AddRange(audioFileInfos.SelectMany(audioFileInfo => audioFileInfo.TextAnalyticsRequests.UtteranceLevelRequests)?.Where(text => text.Status == TextAnalyticsRequestStatus.Running));
             var textAnalyticsRequestCompleted = true;
 
             foreach (var textAnalyticsJob in runningTextAnalyticsRequests)
@@ -176,10 +189,12 @@ namespace TextAnalytics
         /// Gets the (utterance-level) results from text analytics, adds the results to the speech transcript.
         /// </summary>
         /// <param name="jobIds">The text analytics job ids.</param>
+        /// <param name="conversationJobIds">The conversation analysis job Ids.</param>
         /// <param name="speechTranscript">The speech transcript object.</param>
         /// <returns>The errors, if any.</returns>
         public async Task<IEnumerable<string>> AddUtteranceLevelEntitiesAsync(
             IEnumerable<string> jobIds,
+            IEnumerable<string> conversationJobIds,
             SpeechTranscript speechTranscript)
         {
             speechTranscript = speechTranscript ?? throw new ArgumentNullException(nameof(speechTranscript));
@@ -193,22 +208,53 @@ namespace TextAnalytics
             var (sentimentResults, piiResults, requestErrors) = await this.GetOperationsResultsAsync(jobIds).ConfigureAwait(false);
             errors.AddRange(requestErrors);
 
+            (IEnumerable<AnalyzeConversationPiiResults> piiResults, IEnumerable<string> errors) conversationsPiiResults = default;
+
+            var isConversationalPiiEnabled = ConversationsAnalysisProvider.IsConversationalPiiEnabled();
+            if (isConversationalPiiEnabled)
+            {
+                if (conversationJobIds == null || !conversationJobIds.Any())
+                {
+                    return errors;
+                }
+
+                conversationsPiiResults = await ConversationsAnalysisProvider.GetConversationsOperationsResult(conversationJobIds).ConfigureAwait(false);
+            }
+
             foreach (var recognizedPhrase in speechTranscript.RecognizedPhrases)
             {
                 var index = $"{recognizedPhrase.Channel}_{recognizedPhrase.Offset}";
                 var firstNBest = recognizedPhrase.NBest.FirstOrDefault();
 
-                // utterance level requests can only contain sentiment results at the moment
-                var sentimentResult = sentimentResults.Where(s => s.Id == index).FirstOrDefault();
-
-                if (firstNBest != null)
+                if (isConversationalPiiEnabled)
                 {
-                    firstNBest.Sentiment = new Sentiment()
+                    // Might consider moving to a lookup as loop will add latency.
+                    var piiResult = conversationsPiiResults.piiResults
+                        .SelectMany(pii => pii.Conversations)
+                        .SelectMany(conv => conv.ConversationItems)
+                        .Where(item => item.Id == index)
+                        .FirstOrDefault();
+
+                    firstNBest.Display = piiResult?.RedactedContent.Text ?? string.Empty;
+                    firstNBest.ITN = piiResult?.RedactedContent.Itn ?? string.Empty;
+                    firstNBest.Lexical = piiResult?.RedactedContent.Lexical ?? string.Empty;
+                    firstNBest.MaskedITN = piiResult?.RedactedContent.MaskedItn ?? string.Empty;
+                }
+
+                if (sentimentResults != null)
+                {
+                    // utterance level requests can only contain sentiment results at the moment
+                    var sentimentResult = sentimentResults.Where(s => s.Id == index).FirstOrDefault();
+
+                    if (firstNBest != null)
                     {
-                        Negative = sentimentResult?.DocumentSentiment.ConfidenceScores.Negative ?? 0.0,
-                        Positive = sentimentResult?.DocumentSentiment.ConfidenceScores.Positive ?? 0.0,
-                        Neutral = sentimentResult?.DocumentSentiment.ConfidenceScores.Neutral ?? 0.0,
-                    };
+                        firstNBest.Sentiment = new Sentiment()
+                        {
+                            Negative = sentimentResult?.DocumentSentiment.ConfidenceScores.Negative ?? 0.0,
+                            Positive = sentimentResult?.DocumentSentiment.ConfidenceScores.Positive ?? 0.0,
+                            Neutral = sentimentResult?.DocumentSentiment.ConfidenceScores.Neutral ?? 0.0,
+                        };
+                    }
                 }
             }
 
@@ -219,10 +265,12 @@ namespace TextAnalytics
         /// Gets the (audio-level) results from text analytics, adds the results to the speech transcript.
         /// </summary>
         /// <param name="jobIds">The text analytics job ids.</param>
+        /// <param name="conversationJobIds">The conversation analysis job Ids.</param>
         /// <param name="speechTranscript">The speech transcript object.</param>
         /// <returns>The errors, if any.</returns>
         public async Task<IEnumerable<string>> AddAudioLevelEntitiesAsync(
             IEnumerable<string> jobIds,
+            IEnumerable<string> conversationJobIds,
             SpeechTranscript speechTranscript)
         {
             speechTranscript = speechTranscript ?? throw new ArgumentNullException(nameof(speechTranscript));
@@ -231,6 +279,18 @@ namespace TextAnalytics
             if (jobIds == null || !jobIds.Any())
             {
                 return errors;
+            }
+
+            (IEnumerable<AnalyzeConversationPiiResults> piiResults, IEnumerable<string> errors) conversationsPiiResults = default;
+            var isConversationalPiiEnabled = ConversationsAnalysisProvider.IsConversationalPiiEnabled();
+            if (isConversationalPiiEnabled)
+            {
+                if (conversationJobIds == null || !conversationJobIds.Any())
+                {
+                    return errors;
+                }
+
+                conversationsPiiResults = await ConversationsAnalysisProvider.GetConversationsOperationsResult(conversationJobIds).ConfigureAwait(false);
             }
 
             var (sentimentResults, piiResults, requestErrors) = await this.GetOperationsResultsAsync(jobIds).ConfigureAwait(false);
@@ -251,31 +311,53 @@ namespace TextAnalytics
                     };
                 }
 
-                var piiResult = piiResults.Where(document => document.Id.Equals($"{channel}", StringComparison.OrdinalIgnoreCase)).SingleOrDefault();
-                if (piiResult != null)
+                if (ConversationsAnalysisProvider.IsConversationalPiiEnabled())
                 {
-                    var redactedText = piiResult.Entities.RedactedText;
-
-                    combinedRecognizedPhrase.Display = redactedText;
-                    combinedRecognizedPhrase.ITN = string.Empty;
-                    combinedRecognizedPhrase.MaskedITN = string.Empty;
-                    combinedRecognizedPhrase.Lexical = string.Empty;
-
-                    var phrases = speechTranscript.RecognizedPhrases.Where(phrase => phrase.Channel == channel);
-
-                    var startIndex = 0;
-                    foreach (var phrase in phrases)
+                    if (conversationsPiiResults.piiResults != null)
                     {
-                        var firstNBest = phrase.NBest.FirstOrDefault();
+                        // TODO: Figure out what is the right order by predicate for ensuring no out of order conversation items.
+                        var piiResult = conversationsPiiResults.piiResults
+                        .SelectMany(response => response.Conversations)
+                        .SelectMany(conv => conv.ConversationItems)
+                        .Select(conv => conv.RedactedContent);
 
-                        if (firstNBest != null && !string.IsNullOrEmpty(firstNBest.Display))
+                        if (piiResult != null)
                         {
-                            firstNBest.Display = redactedText.Substring(startIndex, firstNBest.Display.Length);
-                            firstNBest.ITN = string.Empty;
-                            firstNBest.MaskedITN = string.Empty;
-                            firstNBest.Lexical = string.Empty;
+                            combinedRecognizedPhrase.Display = string.Join(" ", piiResult.Select(content => content.Text));
+                            combinedRecognizedPhrase.Lexical = string.Join(" ", piiResult.Select(content => content.Lexical));
+                            combinedRecognizedPhrase.ITN = string.Join(" ", piiResult.Select(content => content.Itn));
+                            combinedRecognizedPhrase.MaskedITN = string.Join(" ", piiResult.Select(content => content.MaskedItn));
+                        }
+                    }
+                }
+                else
+                {
+                    var piiResult = piiResults.Where(document => document.Id.Equals($"{channel}", StringComparison.OrdinalIgnoreCase)).SingleOrDefault();
+                    if (piiResult != null)
+                    {
+                        var redactedText = piiResult.Entities.RedactedText;
 
-                            startIndex += firstNBest.Display.Length + 1;
+                        combinedRecognizedPhrase.Display = redactedText;
+                        combinedRecognizedPhrase.ITN = string.Empty;
+                        combinedRecognizedPhrase.MaskedITN = string.Empty;
+                        combinedRecognizedPhrase.Lexical = string.Empty;
+
+                        var phrases = speechTranscript.RecognizedPhrases.Where(phrase => phrase.Channel == channel);
+
+                        var startIndex = 0;
+                        foreach (var phrase in phrases)
+                        {
+                            var firstNBest = phrase.NBest.FirstOrDefault();
+
+                            if (firstNBest != null && !string.IsNullOrEmpty(firstNBest.Display))
+                            {
+                                firstNBest.Display = redactedText.Substring(startIndex, firstNBest.Display.Length);
+                                firstNBest.ITN = string.Empty;
+                                firstNBest.MaskedITN = string.Empty;
+                                firstNBest.Lexical = string.Empty;
+
+                                startIndex += firstNBest.Display.Length + 1;
+                            }
                         }
                     }
                 }
@@ -290,7 +372,7 @@ namespace TextAnalytics
         {
             if (!documents.Any())
             {
-                return (new List<string>(), new List<string>());
+                return (null, null);
             }
 
             // Chunk documents to avoid running into text analytics #documents limit
@@ -334,6 +416,7 @@ namespace TextAnalytics
                 cts.CancelAfter(RequestTimeout);
 
                 var operation = await TextAnalyticsClient.StartAnalyzeActionsAsync(documentChunk, actions, cancellationToken: cts.Token).ConfigureAwait(false);
+                Log.LogInformation($"id: {operation.Id}");
                 return (operation.Id, errors);
             }
             catch (OperationCanceledException)
