@@ -136,7 +136,8 @@ def speech_recognizer_from_user_config(user_config : helper.Read_Only_Dict) -> h
 
     if user_config["phrase_list"] is not None :
         grammar = speechsdk.PhraseListGrammar.from_recognizer(recognizer = speech_recognizer)
-        grammar.addPhrase(user_config["phrase_list"])
+        for phrase in user_config["phrase_list"].split(";") :
+            grammar.addPhrase(phrase)
 
     return helper.Read_Only_Dict({
         "speech_recognizer" : speech_recognizer,
@@ -210,39 +211,39 @@ def recognize_continuous(speech_recognizer : speechsdk.SpeechRecognizer, user_co
 usage = """Usage: python captioning.py [...]
 
   HELP
-    --help                        Show this help and stop.
+    --help                          Show this help and stop.
 
   CONNECTION
-    --key KEY                     Your Azure Speech service subscription key.
-    --region REGION               Your Azure Speech service region.
-                                  Examples: westus, eastus
+    --key KEY                       Your Azure Speech service subscription key.
+    --region REGION                 Your Azure Speech service region.
+                                    Examples: westus, eastus
 
   LANGUAGE
-    --languages LANG1;LANG2       Enable language identification for specified languages.
-                                  Example: en-US;ja-JP
+    --languages LANG1;LANG2         Enable language identification for specified languages.
+                                    Example: en-US;ja-JP
 
   INPUT
-    --input FILE                  Input audio from file (default input is the microphone.)
-    --format FORMAT               Use compressed audio format.
-                                  If this is not present, uncompressed format (wav) is assumed.
-                                  Valid only with --file.
-                                  Valid values: alaw, any, flac, mp3, mulaw, ogg_opus
+    --input FILE                    Input audio from file (default input is the microphone.)
+    --format FORMAT                 Use compressed audio format.
+                                    If this is not present, uncompressed format (wav) is assumed.
+                                    Valid only with --file.
+                                    Valid values: alaw, any, flac, mp3, mulaw, ogg_opus
 
   RECOGNITION
-    --recognizing                 Output Recognizing results (default output is Recognized results only.)
-                                  These are always written to the console, never to an output file.
-                                  --quiet overrides this.
+    --recognizing                   Output Recognizing results (default output is Recognized results only.)
+                                    These are always written to the console, never to an output file.
+                                    --quiet overrides this.
 
   ACCURACY
-    --phrases PHRASE1;PHRASE2     Example: Constoso;Jessie;Rehaan
+    --phrases "PHRASE1;PHRASE2"     Example: "Constoso;Jessie;Rehaan"
 
   OUTPUT
-    --output FILE                 Output captions to text file.
-    --srt                         Output captions in SubRip Text format (default format is WebVTT.)
-    --quiet                       Suppress console output, except errors.
-    --profanity OPTION            Valid values: raw, remove, mask
-    --threshold NUMBER            Set stable partial result threshold.
-                                  Default value: 3
+    --output FILE                   Output captions to text file.
+    --srt                           Output captions in SubRip Text format (default format is WebVTT.)
+    --quiet                         Suppress console output, except errors.
+    --profanity OPTION              Valid values: raw, remove, mask
+    --threshold NUMBER              Set stable partial result threshold.
+                                    Default value: 3
 """
 
 try :

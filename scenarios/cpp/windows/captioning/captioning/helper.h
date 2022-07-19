@@ -9,6 +9,8 @@
 using namespace Microsoft::CognitiveServices::Speech;
 using namespace Microsoft::CognitiveServices::Speech::Audio;
 
+std::vector<std::string> Split(const std::string& s, char delimiter);
+
 // Adapted from code in:
 // https://github.com/Azure-Samples/cognitive-services-speech-sdk/blob/master/samples/cpp/windows/console/samples/speech_recognition_samples.cpp
 class BinaryFileReader final : public PullAudioInputStreamCallback
