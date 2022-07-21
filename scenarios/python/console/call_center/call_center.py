@@ -231,7 +231,7 @@ def run() -> None :
 
   INPUT
     --input URL                     Input audio from URL. Required.
-    --stereo FORMAT                 Use stereo audio format.
+    --stereo                        Use stereo audio format.
                                     If this is not present, mono is assumed.
 """
 
@@ -241,7 +241,7 @@ def run() -> None :
         user_config = helper.user_config_from_args(usage)
         # How to use batch transcription:
         # https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/cognitive-services/Speech-Service/batch-transcription.md
-        #transcription_id = create_transcription(transcriptionUri);
+        #transcription_id = create_transcription(transcription_url); # TODO1 Fix
         # TODO1 Fix this before uploading.
         transcription_id = "fafe4af1-73ad-4658-b9c6-a0f3f753387d"
         # TODO1 Fix this before uploading.
