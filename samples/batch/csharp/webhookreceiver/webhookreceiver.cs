@@ -45,7 +45,7 @@ namespace WebHookReceiver
             {
                 var message = $"Missing or invalid value for required header \"{WebHookEventKindHeaderName}\".";
                 logger.LogError(message);
-                
+
                 return new BadRequestErrorMessageResult(message);
             }
 
@@ -81,7 +81,7 @@ namespace WebHookReceiver
             if (eventKind == WebHookEventKind.Challenge)
             {
                 logger.LogInformation("Received challenge and responded.");
-                
+
                 return new OkObjectResult(validationToken);
             }
 
