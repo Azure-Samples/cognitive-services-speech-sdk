@@ -216,16 +216,6 @@
                 "description": "A value indicating whether personally identifiable information (PII) redaction for conversations is requested (either with audio redaction timestamps or not). Will only be performed if a Text Analytics Key and Region is provided."
             }
         },
-        "ConversationPiiCategories":{
-            "defaultValue": ["all"],
-            "type": "array",
-            "allowedValues":[
-                ["all"]
-            ],
-            "metadata": {
-                "description": "A value indicating which type of PII will be redacted using the conversational PII redaction APIs. Will only be performed if a Text Analytics Key and Region is provided."
-            }
-        },
         "SqlAdministratorLogin": {
             "type": "string",
             "defaultValue": "",
@@ -971,7 +961,7 @@
                 "CreateAudioProcessedContainer": "[variables('CreateAudioProcessedContainer')]",
                 "AudioProcessedContainer": "[variables('AudioProcessedContainer')]",
                 "PiiCategories": "[variables('PiiCategories')]",
-                "ConversationPiiCategories": "[parameters('ConversationPiiCategories')]"
+                "ConversationPiiCategories": "[parameters('PiiCategories')]"
             }
         }
     ],

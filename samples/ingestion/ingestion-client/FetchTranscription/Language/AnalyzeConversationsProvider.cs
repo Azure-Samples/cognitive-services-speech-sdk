@@ -15,6 +15,7 @@ namespace FetchTranscription.Language
     using Azure.AI.Language.Conversations;
     using Azure.Core;
     using Connector;
+    using Connector.Serializable;
     using Connector.Serializable.Language.Conversations;
     using FetchTranscriptionFunction;
     using Microsoft.Extensions.Logging;
@@ -50,7 +51,7 @@ namespace FetchTranscription.Language
         /// API to submit an analyzeConversations async Request.
         /// </summary>
         /// <param name="speechTranscript">Instance of the speech transcript.</param>
-        /// <returns>An enumerable of the jobs IDs and errors if any</returns>
+        /// <returns>An enumerable of the jobs IDs and errors if any.</returns>
         public async Task<(IEnumerable<string> jobIds, IEnumerable<string> errors)> SubmitAnalyzeConversationsRequestAsync(SpeechTranscript speechTranscript)
         {
             speechTranscript = speechTranscript ?? throw new ArgumentNullException(nameof(speechTranscript));
@@ -142,6 +143,46 @@ namespace FetchTranscription.Language
             return (piiResults, errors);
         }
 
+        /// <summary>
+        /// Checks for all conversational analytics requests that were marked as running if they have completed and sets a new state accordingly.
+        /// </summary>
+        /// <param name="conversationRequests">Enumerable for conversationRequests.</param>
+        /// <returns>True if all requests completed, else false.</returns>
+        public async Task<bool> ConversationalRequestsCompleted(IEnumerable<Connector.Serializable.TranscriptionStartedServiceBusMessage.TextAnalyticsRequest> conversationRequests)
+        {
+            if (!IsConversationalPiiEnabled())
+            {
+                return true;
+            }
+
+            if (conversationRequests == null || !conversationRequests.Any())
+            {
+                return true;
+            }
+
+            var runningJobsCount = 0;
+
+            foreach (var textAnalyticsJob in conversationRequests)
+            {
+                var response = await ConversationAnalysisClient.GetAnalyzeConversationJobStatusAsync(Guid.Parse(textAnalyticsJob.Id)).ConfigureAwait(false);
+
+                if (response.IsError)
+                {
+                    continue;
+                }
+
+                var analysisResult = JsonConvert.DeserializeObject<AnalyzeConversationsResult>(response.Content.ToString());
+
+                if (analysisResult.Tasks.InProgress == 0)
+                {
+                    // some jobs are still running.
+                    runningJobsCount++;
+                }
+            }
+
+            return runningJobsCount == 0;
+        }
+
         private async Task<(IEnumerable<string> jobId, IEnumerable<string> errors)> SubmitConversationsAsync(dynamic data)
         {
             var errors = new List<string>();
@@ -170,8 +211,6 @@ namespace FetchTranscription.Language
             {
                 errors.Add($"Text analytics request failed with error: {e.Message}");
             }
-
-            Log.LogError($"Returning response back: null");
 
             return (null, errors);
         }

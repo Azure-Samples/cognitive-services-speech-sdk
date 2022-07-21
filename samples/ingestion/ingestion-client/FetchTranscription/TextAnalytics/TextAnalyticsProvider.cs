@@ -78,9 +78,18 @@ namespace TextAnalytics
         public async Task<bool> TextAnalyticsRequestsCompleted(IEnumerable<AudioFileInfo> audioFileInfos)
         {
             var runningTextAnalyticsRequests = new List<TextAnalyticsRequest>();
-            runningTextAnalyticsRequests.AddRange(audioFileInfos.SelectMany(audioFileInfo => audioFileInfo.TextAnalyticsRequests.AudioLevelRequests).Where(text => text.Status == TextAnalyticsRequestStatus.Running));
+            var conversationRequestCompleted = true;
 
-            runningTextAnalyticsRequests.AddRange(audioFileInfos.SelectMany(audioFileInfo => audioFileInfo.TextAnalyticsRequests.UtteranceLevelRequests).Where(text => text.Status == TextAnalyticsRequestStatus.Running));
+            if (audioFileInfos.Where(audioFileInfo => audioFileInfo.TextAnalyticsRequests.UtteranceLevelRequests != null).Any())
+            {
+                runningTextAnalyticsRequests.AddRange(audioFileInfos.SelectMany(audioFileInfo => audioFileInfo.TextAnalyticsRequests.AudioLevelRequests).Where(text => text.Status == TextAnalyticsRequestStatus.Running));
+            }
+
+            if (audioFileInfos.Where(audioFileInfo => audioFileInfo.TextAnalyticsRequests.UtteranceLevelRequests != null).Any())
+            {
+                runningTextAnalyticsRequests.AddRange(audioFileInfos.SelectMany(audioFileInfo => audioFileInfo.TextAnalyticsRequests.UtteranceLevelRequests).Where(text => text.Status == TextAnalyticsRequestStatus.Running));
+            }
+
             var textAnalyticsRequestCompleted = true;
 
             foreach (var textAnalyticsJob in runningTextAnalyticsRequests)
@@ -101,7 +110,14 @@ namespace TextAnalytics
                 }
             }
 
-            return textAnalyticsRequestCompleted;
+            if (audioFileInfos.Where(audioFileInfo => audioFileInfo.TextAnalyticsRequests.UtteranceLevelRequests != null).Any())
+            {
+                var runningConversationJobs = audioFileInfos.SelectMany(audioFileInfo => audioFileInfo.TextAnalyticsRequests.ConversationRequests).Where(text => text.Status == TextAnalyticsRequestStatus.Running);
+
+                conversationRequestCompleted = await ConversationsAnalysisProvider.ConversationalRequestsCompleted(runningConversationJobs).ConfigureAwait(false);
+            }
+
+            return textAnalyticsRequestCompleted && conversationRequestCompleted;
         }
 
         /// <summary>
@@ -416,7 +432,6 @@ namespace TextAnalytics
                 cts.CancelAfter(RequestTimeout);
 
                 var operation = await TextAnalyticsClient.StartAnalyzeActionsAsync(documentChunk, actions, cancellationToken: cts.Token).ConfigureAwait(false);
-                Log.LogInformation($"id: {operation.Id}");
                 return (operation.Id, errors);
             }
             catch (OperationCanceledException)
