@@ -132,7 +132,7 @@ def transcribe():
     # configure API key authorization: subscription_key
     configuration = cris_client.Configuration()
     configuration.api_key["Ocp-Apim-Subscription-Key"] = SUBSCRIPTION_KEY
-    configuration.host = f"https://{SERVICE_REGION}.api.cognitive.microsoft.com/speechtotext/v3.0"
+    configuration.host = f"https://{SERVICE_REGION}.api.cognitive.microsoft.com/speechtotext/v3.1-preview.1"
 
     # create the client object and authenticate
     client = cris_client.ApiClient(configuration)
@@ -143,14 +143,20 @@ def transcribe():
     # Specify transcription properties by passing a dict to the properties parameter. See
     # https://docs.microsoft.com/azure/cognitive-services/speech-service/batch-transcription#configuration-properties
     # for supported parameters.
-    properties = {
-        # "punctuationMode": "DictatedAndAutomatic",
-        # "profanityFilterMode": "Masked",
-        # "wordLevelTimestampsEnabled": True,
-        # "diarizationEnabled": True,
-        # "destinationContainerUrl": "<SAS Uri with at least write (w) permissions for an Azure Storage blob container that results should be written to>",
-        # "timeToLive": "PT1H"
-    }
+    properties = cris_client.TranscriptionProperties()
+    # properties.word_level_timestamps_enabled = True
+    # properties.display_form_word_level_timestamps_enabled = True
+    # properties.punctuation_mode = "DictatedAndAutomatic"
+    # properties.profanity_filter_mode = "Masked"
+    # properties.destination_container_url = "<SAS Uri with at least write (w) permissions for an Azure Storage blob container that results should be written to>"
+    # properties.time_to_live = "PT1H"
+
+    # uncomment the following block to enable and configure speaker separation
+    # properties.diarization_enabled = True
+    # properties.diarization = cris_client.DiarizationProperties(
+    #     cris_client.DiarizationSpeakersProperties(min_count=1, max_count=5))
+
+    # properties.language_identification = cris_client.LanguageIdentificationProperties(["en-US", "ja-JP"])
 
     # Use base models for transcription. Comment this block if you are using a custom model.
     transcription_definition = transcribe_from_single_blob(RECORDINGS_BLOB_URI, properties)
@@ -158,10 +164,11 @@ def transcribe():
     # Uncomment this block to use custom models for transcription.
     # transcription_definition = transcribe_with_custom_model(api, RECORDINGS_BLOB_URI, properties)
 
+    # uncomment the following block to enable and configure language identification prior to transcription
     # Uncomment this block to transcribe all files from a container.
     # transcription_definition = transcribe_from_container(RECORDINGS_CONTAINER_URI, properties)
 
-    created_transcription, status, headers = api.create_transcription_with_http_info(transcription=transcription_definition)
+    created_transcription, status, headers = api.transcriptions_create_with_http_info(transcription=transcription_definition)
 
     # get the transcription Id from the location URI
     transcription_id = headers["location"].split("/")[-1]
@@ -178,14 +185,14 @@ def transcribe():
         # wait for 5 seconds before refreshing the transcription status
         time.sleep(5)
 
-        transcription = api.get_transcription(transcription_id)
+        transcription = api.transcriptions_get(transcription_id)
         logging.info(f"Transcriptions status: {transcription.status}")
 
         if transcription.status in ("Failed", "Succeeded"):
             completed = True
 
         if transcription.status == "Succeeded":
-            pag_files = api.get_transcription_files(transcription_id)
+            pag_files = api.transcriptions_list_files(transcription_id)
             for file_data in _paginate(api, pag_files):
                 if file_data.kind != "Transcription":
                     continue

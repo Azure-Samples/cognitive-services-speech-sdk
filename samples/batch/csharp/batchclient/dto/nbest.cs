@@ -20,5 +20,7 @@ namespace BatchClient
         public string Display { get; set; }
 
         public IEnumerable<WordDetails> Words { get; set; }
+
+        public IEnumerable<DisplayPhraseElement> DisplayPhraseElements { get; set; }
     }
 }
