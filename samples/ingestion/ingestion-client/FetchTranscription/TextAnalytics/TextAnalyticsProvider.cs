@@ -372,7 +372,7 @@ namespace TextAnalytics
         {
             if (!documents.Any())
             {
-                return (null, null);
+                return (new List<string>(), new List<string>());
             }
 
             // Chunk documents to avoid running into text analytics #documents limit
