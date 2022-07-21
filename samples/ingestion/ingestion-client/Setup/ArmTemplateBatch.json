@@ -220,13 +220,7 @@
             "defaultValue": ["all"],
             "type": "array",
             "allowedValues":[
-                "all",
-                "name",
-                "address",
-                "creditCard",
-                "phoneNumber",
-                "numericIdentifier",
-                "email"
+                ["all"]
             ],
             "metadata": {
                 "description": "A value indicating which type of PII will be redacted using the conversational PII redaction APIs. Will only be performed if a Text Analytics Key and Region is provided."

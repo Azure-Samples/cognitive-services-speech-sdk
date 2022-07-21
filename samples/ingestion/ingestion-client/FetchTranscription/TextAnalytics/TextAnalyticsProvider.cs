@@ -80,7 +80,7 @@ namespace TextAnalytics
             var runningTextAnalyticsRequests = new List<TextAnalyticsRequest>();
             runningTextAnalyticsRequests.AddRange(audioFileInfos.SelectMany(audioFileInfo => audioFileInfo.TextAnalyticsRequests.AudioLevelRequests).Where(text => text.Status == TextAnalyticsRequestStatus.Running));
 
-            runningTextAnalyticsRequests.AddRange(audioFileInfos.SelectMany(audioFileInfo => audioFileInfo.TextAnalyticsRequests.UtteranceLevelRequests)?.Where(text => text.Status == TextAnalyticsRequestStatus.Running));
+            runningTextAnalyticsRequests.AddRange(audioFileInfos.SelectMany(audioFileInfo => audioFileInfo.TextAnalyticsRequests.UtteranceLevelRequests).Where(text => text.Status == TextAnalyticsRequestStatus.Running));
             var textAnalyticsRequestCompleted = true;
 
             foreach (var textAnalyticsJob in runningTextAnalyticsRequests)
