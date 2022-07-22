@@ -5,8 +5,6 @@
 
 namespace BatchClient
 {
-    using Newtonsoft.Json;
-
     public class DiarizationProperties
     {
         public DiarizationSpeakersProperties Speakers { get; set; }

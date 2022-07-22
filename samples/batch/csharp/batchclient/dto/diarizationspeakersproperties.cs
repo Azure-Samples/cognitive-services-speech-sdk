@@ -5,8 +5,6 @@
 
 namespace BatchClient
 {
-    using Newtonsoft.Json;
-
     public class DiarizationSpeakersProperties
     {
         public int MinCount { get; set; }
