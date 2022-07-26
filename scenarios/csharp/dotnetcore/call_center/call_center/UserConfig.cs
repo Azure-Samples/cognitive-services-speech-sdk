@@ -20,6 +20,8 @@ namespace CallCenter
         readonly public string locale;
         /// Input audio file URL.
         readonly public string inputAudioURL;
+        /// Output file path.
+        readonly public string? outputFilePath;
         /// The subscription key for your Speech service subscription.
         readonly public string speechSubscriptionKey;
         /// The endpoint for your Speech service subscription.
@@ -93,6 +95,7 @@ namespace CallCenter
             this.language = language;
             this.locale = locale;
             this.inputAudioURL = inputAudioURL;
+            this.outputFilePath = GetCmdOption(args, "--output");
             this.speechSubscriptionKey = speechSubscriptionKey;
             this.speechEndpoint = $"{speechRegion}{partialSpeechEndpoint}";
             this.languageSubscriptionKey = languageSubscriptionKey;
