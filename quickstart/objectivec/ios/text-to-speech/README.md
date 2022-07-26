@@ -10,6 +10,7 @@ This sample demonstrates how to create a iOS app in Objective-C using the Cognit
 ## Get the Code for the Sample App
 
 * [Download the sample code to your development PC.](/README.md#get-the-samples)
+* This Sample includes the QuickStart for Objective-C. See the [accompanying article](https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/get-started-text-to-speech?tabs=terminal&pivots=programming-language-cpp) on the SDK documentation page which describes how to build this sample from scratch in Visual Studio 2017.
 
 ## Get the Speech SDK for iOS
 
@@ -37,5 +38,5 @@ It can be used in Xcode projects as a [CocoaPod](https://cocoapods.org/), or dow
 
 ## References
 
-* [Quickstart article on the SDK documentation site](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-text-to-speech-objectivec-ios)
+* [Quickstart article on the SDK documentation site](https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/get-started-text-to-speech?tabs=terminal&pivots=programming-language-objectivec)
 * [Speech SDK API reference for Objective-C](https://aka.ms/csspeech/objectivecref)

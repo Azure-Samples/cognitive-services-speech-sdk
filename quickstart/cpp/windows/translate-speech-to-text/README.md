@@ -18,6 +18,7 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 
 * **By building this sample you will download the Microsoft Cognitive Services Speech SDK. By downloading you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license201809).**
 * [Download the sample code to your development PC.](/README.md#get-the-samples)
+* Getting Started with C++  [Quickstart article on the SDK documentation site](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started-text-to-speech?tabs=terminal&pivots=programming-language-cpp)
 * Start Microsoft Visual Studio 2017 and select **File** \> **Open** \> **Project/Solution**.
 * Navigate to the folder containing this sample, and select the solution file contained within it.
 * Edit the `helloworld.cpp` source:

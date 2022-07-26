@@ -7,7 +7,9 @@ This sample demonstrates how to create an iOS app in Swift using the Cognitive S
 * A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
 * A macOS machine with [Xcode](https://geo.itunes.apple.com/us/app/xcode/id497799835?mt=12) version 9.4.1 or later and [CocoaPods](https://cocoapods.org/) installed.
 
-## Get the code for the sample app
+## Get the code and QuickStart for the sample app
+
+See the [accompanying article](https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/get-started-text-to-speech?tabs=terminal&pivots=programming-language-swift) on the SDK documentation page.
 
 * [Download the sample code to your development machine.](/README.md#get-the-samples)
 
@@ -46,5 +48,5 @@ import MicrosoftCognitiveServicesSpeech
 
 ## References
 
-* [Quickstart article on the SDK documentation site](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-text-to-speech-swift-ios)
+* [Quickstart article on the SDK documentation site](https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/get-started-text-to-speech?tabs=terminal&pivots=programming-language-swift)
 * [Speech SDK API reference for Objective-C](https://aka.ms/csspeech/objectivecref)

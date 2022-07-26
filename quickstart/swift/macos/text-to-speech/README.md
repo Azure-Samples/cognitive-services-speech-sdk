@@ -10,6 +10,7 @@ This sample demonstrates how to create an macOS app in Swift using the Cognitive
 ## Get the code for the sample app
 
 * [Download the sample code to your development machine.](/README.md#get-the-samples)
+* See the [accompanying article](https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/get-started-text-to-speech?tabs=terminal&pivots=programming-language-swift) on the SDK documentation page.
 
 ## Get the Speech SDK for macOS
 

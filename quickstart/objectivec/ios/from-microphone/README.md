@@ -1,7 +1,7 @@
 # Quickstart: Recognize speech from a microphone in Objective-C on iOS
 
 This sample demonstrates how to recognize speech with Objective-C using the Speech SDK for iOS.
-See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstarts/speech-to-text-from-microphone-langs/objectivec-ios) on the SDK documentation page for step-by-step instructions.
+See the [accompanying article](https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/get-started-text-to-speech?tabs=terminal&pivots=programming-language-objectivec) on the SDK documentation page for step-by-step instructions.
 
 ## Prerequisites
 
@@ -37,5 +37,5 @@ In the simulator window that opens, after you click the "Recognize!" button in t
 
 ## References
 
-* [Quickstart article on the SDK documentation site](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-objectivec-ios)
+* [Quickstart article on the SDK documentation site](https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/get-started-text-to-speech?tabs=terminal&pivots=programming-language-objectivec)
 * [Speech SDK API reference for Objective-C](https://aka.ms/csspeech/objectivecref)

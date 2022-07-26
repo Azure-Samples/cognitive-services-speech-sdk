@@ -13,6 +13,7 @@ This sample demonstrates how to synthesize speech with the Speech SDK for JavaSc
 ## Prepare the sample
 
 * [Download the sample code to your development PC.](/README.md#get-the-samples)
+See the [accompanying article](https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/get-started-text-to-speech?tabs=terminal&pivots=programming-language-javascript) on the SDK documentation page which describes how to build this sample from scratch in Visual Studio 2017.
 * Open a command prompt at the quickstart directory, and run `npm install` to install the dependencies of the quickstart.
   This will place the Speech SDK library in the `node_modules` directory.
 * Update the `index.js` file with your configuration:
@@ -26,5 +27,5 @@ This sample demonstrates how to synthesize speech with the Speech SDK for JavaSc
 Execute `node index.js` from the location where you have downloaded this quickstart.
 
 ## References
-
+* [JavaScript article on the SDK documentation site](https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/get-started-text-to-speech?tabs=terminal&pivots=programming-language-javascript)
 * [Speech SDK API reference for JavaScript](https://aka.ms/csspeech/javascriptref)
