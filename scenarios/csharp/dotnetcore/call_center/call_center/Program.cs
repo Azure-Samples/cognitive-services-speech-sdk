@@ -5,6 +5,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -31,7 +32,7 @@ namespace CallCenter
         private UserConfig userConfig;
         
         // How long to wait while polling batch transcription and conversation analysis status.
-        private const int waitSeconds = 5;
+        private const int waitSeconds = 10;
 
         // This should not change unless you switch to a new version of the Speech REST API.
         private const string speechTranscriptionPath = "speechtotext/v3.0/transcriptions";
@@ -60,12 +61,18 @@ namespace CallCenter
                     locale = this.userConfig.locale,
                     displayName = $"call_center_{DateTime.Now.ToString()}"
                 };
-            var response = await RestHelper.SendPost(uri.Uri.ToString(), System.Text.Json.JsonSerializer.Serialize(content), this.userConfig.speechSubscriptionKey, new HttpStatusCode[]{ HttpStatusCode.Created });
+            var response = await RestHelper.SendPost(uri.Uri.ToString(), JsonSerializer.Serialize(content), this.userConfig.speechSubscriptionKey, new HttpStatusCode[]{ HttpStatusCode.Created });
+            // NOTE: Clone the root element of the JsonDocument. Otherwise, once it is disposed,
+            // when you try to access any data you obtained from it, you may get the error:
+            // Cannot access a disposed object.
+            // Object name: 'JsonDocument'.
+            // See:
+            // https://docs.microsoft.com/dotnet/api/system.text.json.jsonelement.clone
             using (JsonDocument document = JsonDocument.Parse(response.content))
             {
                 // Create Transcription API JSON response sample and schema:
                 // https://westus.dev.cognitive.microsoft.com/docs/services/speech-to-text-api-v3-0/operations/CreateTranscription
-                var transcriptionUri = document.RootElement.GetProperty("self").ToString();
+                var transcriptionUri = document.RootElement.Clone().GetProperty("self").ToString();
                 // The transcription ID is at the end of the transcription URI.
                 var transcriptionId = transcriptionUri.Split("/").Last();
                 // Verify the transcription ID is a valid GUID.
@@ -85,13 +92,13 @@ namespace CallCenter
             var response = await RestHelper.SendGet(uri.Uri.ToString(), this.userConfig.speechSubscriptionKey, new HttpStatusCode[]{ HttpStatusCode.OK });
             using (JsonDocument document = JsonDocument.Parse(response.content))
             {
-                if (0 == string.Compare("Failed", document.RootElement.GetProperty("status").ToString(), StringComparison.InvariantCultureIgnoreCase))
+                if (0 == string.Compare("Failed", document.RootElement.Clone().GetProperty("status").ToString(), StringComparison.InvariantCultureIgnoreCase))
                 {
                     throw new Exception($"Unable to transcribe audio input. Response:{Environment.NewLine}{response.content}");
                 }
                 else
                 {
-                    return 0 == string.Compare("Succeeded", document.RootElement.GetProperty("status").ToString(), StringComparison.InvariantCultureIgnoreCase);
+                    return 0 == string.Compare("Succeeded", document.RootElement.Clone().GetProperty("status").ToString(), StringComparison.InvariantCultureIgnoreCase);
                 }
             }
         }
@@ -105,40 +112,59 @@ namespace CallCenter
                 Thread.Sleep(waitSeconds * 1000);
                 done = await GetTranscriptionStatus(transcriptionId);
             }
-            Console.WriteLine();
             return;
         }
 
-        private async Task<string> GetTranscriptionUri(string transcriptionId)
+        private async Task<string> GetTranscriptionFiles(string transcriptionId)
         {
             var uri = new UriBuilder(Uri.UriSchemeHttps, this.userConfig.speechEndpoint);
             uri.Path = $"{speechTranscriptionPath}/{transcriptionId}/files";
             var response = await RestHelper.SendGet(uri.Uri.ToString(), this.userConfig.speechSubscriptionKey, new HttpStatusCode[]{ HttpStatusCode.OK });
-            using (JsonDocument document = JsonDocument.Parse(response.content))
+            return response.content;
+        }
+
+        private string GetTranscriptionUri(string transcriptionFiles)
+        {
+            using (JsonDocument document = JsonDocument.Parse(transcriptionFiles))
             {
                 // Get Transcription Files JSON response sample and schema:
                 // https://westus.dev.cognitive.microsoft.com/docs/services/speech-to-text-api-v3-0/operations/GetTranscriptionFiles
-                // NOTE: Convert JsonDocument GetProperty results to strings or arrays, as appropriate,
-                // to keep them from being disposed with the JsonDocument.
-                return document.RootElement.GetProperty("values").EnumerateArray().ToArray()
+                return document.RootElement.Clone().GetProperty("values").EnumerateArray().ToArray()
                     .First(value => 0 == String.Compare("Transcription", value.GetProperty("kind").ToString(), StringComparison.InvariantCultureIgnoreCase))
                     .GetProperty("links").GetProperty("contentUrl").ToString();
             }
         }
 
-        private async Task<(string phrase, int speakerID)[]> GetTranscriptionPhrasesAndSpeakers(string transcriptionUri)
+        private async Task<JsonElement> GetTranscription(string transcriptionUri)
         {
             var response = await RestHelper.SendGet(transcriptionUri, "", new HttpStatusCode[]{ HttpStatusCode.OK });
             using (JsonDocument document = JsonDocument.Parse(response.content))
             {
-                var recognizedPhrases = document.RootElement.GetProperty("recognizedPhrases").EnumerateArray().ToArray();
-                return recognizedPhrases.Select(phrase =>
-                    {
-                        var best = phrase.GetProperty("nBest").EnumerateArray().ToArray().First();
-                        return (best.GetProperty("display").ToString(), phrase.GetProperty("speaker").GetInt32());
-                    }
-                ).ToArray();
+                return document.RootElement.Clone();
             }
+        }
+
+        private (string phrase, int speakerID)[] GetTranscriptionPhrasesAndSpeakers(JsonElement transcription)
+        {
+            var recognizedPhrases_1 = transcription.GetProperty("recognizedPhrases").EnumerateArray().ToArray();
+            var recognizedPhrases_2 = recognizedPhrases_1.Select(phrase =>
+                {
+                    var best = phrase.GetProperty("nBest").EnumerateArray().ToArray().First();
+                    return new {
+                        phrase = best.GetProperty("display").ToString(),
+                        // If the user specified stereo audio, and therefore we turned off diarization,
+                        // the speaker number is replaced by a channel number.
+                        speakerNumber = this.userConfig.useStereoAudio ? phrase.GetProperty("channel").GetInt32() : phrase.GetProperty("speaker").GetInt32(),
+                        offset = phrase.GetProperty("offsetInTicks").GetDouble()
+                    };
+                }
+            );
+            var recognizedPhrases_3 = this.userConfig.useStereoAudio
+                // For stereo audio, the phrases are sorted by channel number, so to resort them by offset.
+                ? recognizedPhrases_2.OrderBy(x => x.offset)
+                : recognizedPhrases_2;
+            // Discard the offset.
+            return recognizedPhrases_3.Select(x => (x.phrase, x.speakerNumber)).ToArray();
         }
 
         private async Task DeleteTranscription(string transcriptionId)
@@ -149,7 +175,7 @@ namespace CallCenter
             return;
         }
 
-        private string[] GetSentiments(string[] phrases)
+        private JsonElement GetSentimentAnalysis(string[] phrases)
         {
             var uri = new UriBuilder(Uri.UriSchemeHttps, this.userConfig.languageEndpoint);
             uri.Path = sentimentAnalysisPath;
@@ -173,20 +199,39 @@ namespace CallCenter
             var tasks = documentsToSend.Chunk(10).Select(async chunk =>
                 {
                     var content_1 = new { kind = "SentimentAnalysis", analysisInput = new { documents = chunk }};
-                    var content_2 = System.Text.Json.JsonSerializer.Serialize(content_1);
+                    var content_2 = JsonSerializer.Serialize(content_1);
                     var response = await RestHelper.SendPost(uri.Uri.ToString(), content_2, this.userConfig.languageSubscriptionKey, new HttpStatusCode[] { HttpStatusCode.OK });
-                    using (JsonDocument document = JsonDocument.Parse(response.content))
-                    {
-                        return document.RootElement.GetProperty("results").GetProperty("documents").EnumerateArray().ToArray()
-                            .Select(document => (Int32.Parse(document.GetProperty("id").ToString()), document.GetProperty("sentiment").ToString()))
-                            .ToArray();
-                    }
+                    return response.content;
                 }
             ).ToArray();
             Task.WaitAll(tasks);
-            return tasks
-                .Select(task => task.Result)
-                .Aggregate(new (int id, string sentiment)[] {}, (acc, sublist) => acc.Concat(sublist).ToArray())
+            var documents = tasks.SelectMany(task => {
+                var result = task.Result;
+                using (JsonDocument document = JsonDocument.Parse(result))
+                {
+                    return document.RootElement.Clone().GetProperty("results").GetProperty("documents").EnumerateArray().ToArray();
+                }
+            }).ToArray();
+            var document = new
+            {
+                kind = "SentimentAnalysisResults",
+                results = new
+                {
+                    documents = documents
+                }
+            };
+            using (JsonDocument document_2 = JsonDocument.Parse(JsonSerializer.Serialize(document)))
+            {
+                return document_2.RootElement.Clone();
+            }
+        }
+
+        private string[] GetSentiments(JsonElement sentimentAnalysis)
+        {
+            return sentimentAnalysis
+                .GetProperty("results")
+                .GetProperty("documents").EnumerateArray().ToArray()
+                .Select(document => new { id = Int32.Parse(document.GetProperty("id").ToString()), sentiment = document.GetProperty("sentiment").ToString() } ).ToArray()
                 .OrderBy(x => x.id)
                 .Select(x => x.sentiment)
                 .ToArray();
@@ -255,7 +300,7 @@ namespace CallCenter
                     }
                 }
             };
-            var response = await RestHelper.SendPost(uri.Uri.ToString(), System.Text.Json.JsonSerializer.Serialize(content), this.userConfig.languageSubscriptionKey, new HttpStatusCode[]{ HttpStatusCode.Accepted });
+            var response = await RestHelper.SendPost(uri.Uri.ToString(), JsonSerializer.Serialize(content), this.userConfig.languageSubscriptionKey, new HttpStatusCode[]{ HttpStatusCode.Accepted });
             return response.response.Headers.GetValues("operation-location").First();
         }
 
@@ -264,7 +309,14 @@ namespace CallCenter
             var response = await RestHelper.SendGet(conversationAnalysisUrl, this.userConfig.languageSubscriptionKey, new HttpStatusCode[]{ HttpStatusCode.OK });
             using (JsonDocument document = JsonDocument.Parse(response.content))
             {
-                return 0 == string.Compare("succeeded", document.RootElement.GetProperty("status").ToString(), StringComparison.InvariantCultureIgnoreCase);
+                if (0 == string.Compare("Failed", document.RootElement.Clone().GetProperty("status").ToString(), StringComparison.InvariantCultureIgnoreCase))
+                {
+                    throw new Exception($"Unable to analyze conversation. Response:{Environment.NewLine}{response.content}");
+                }
+                else
+                {
+                    return 0 == string.Compare("Succeeded", document.RootElement.Clone().GetProperty("status").ToString(), StringComparison.InvariantCultureIgnoreCase);
+                }                
             }
         }
 
@@ -277,50 +329,55 @@ namespace CallCenter
                 Thread.Sleep(waitSeconds * 1000);
                 done = await GetConversationAnalysisStatus(conversationAnalysisUrl);
             }
-            Console.WriteLine();
             return;
         }
 
-        private async Task<ConversationAnalysisResult> GetConversationAnalysis(string conversationAnalysisUrl)
+        private async Task<JsonElement> GetConversationAnalysis(string conversationAnalysisUrl)
         {
             var response = await RestHelper.SendGet(conversationAnalysisUrl, this.userConfig.languageSubscriptionKey, new HttpStatusCode[]{ HttpStatusCode.OK });
             using (JsonDocument document = JsonDocument.Parse(response.content))
             {
-                var tasks = document.RootElement.GetProperty("tasks").GetProperty("items").EnumerateArray().ToArray();
-                
-                var summaryTask = tasks.First(task => 0 == String.Compare(task.GetProperty("taskName").ToString(), "summary_1", StringComparison.InvariantCultureIgnoreCase));
-                var conversationSummary = summaryTask.GetProperty("results").GetProperty("conversations").EnumerateArray().ToArray()
-                    .First().GetProperty("summaries").EnumerateArray().ToArray()
-                    .Select(summary => (summary.GetProperty("aspect").ToString(), summary.GetProperty("text").ToString()))
-                    .ToArray();
-
-                var PIITask = tasks.First(task => 0 == String.Compare(task.GetProperty("taskName").ToString(), "PII_1", StringComparison.InvariantCultureIgnoreCase));
-                var conversationPIIAnalysis = PIITask.GetProperty("results").GetProperty("conversations").EnumerateArray().ToArray()
-                    .First().GetProperty("conversationItems").EnumerateArray().ToArray()
-                    .Select(document =>
-                        {
-                            return document.GetProperty("entities").EnumerateArray().ToArray()
-                                .Select(entity => (entity.GetProperty("category").ToString(), entity.GetProperty("text").ToString())).ToArray();
-                        })
-                    .ToArray();
-                
-                return new ConversationAnalysisResult(conversationSummary, conversationPIIAnalysis);
+                return document.RootElement.Clone();
             }
         }
+        
+        private ConversationAnalysisResult GetConversationAnalysisResult(JsonElement conversationAnalysis)
+        {
+            var tasks = conversationAnalysis.GetProperty("tasks").GetProperty("items").EnumerateArray().ToArray();
+            
+            var summaryTask = tasks.First(task => 0 == String.Compare(task.GetProperty("taskName").ToString(), "summary_1", StringComparison.InvariantCultureIgnoreCase));
+            var conversationSummary = summaryTask.GetProperty("results").GetProperty("conversations").EnumerateArray().ToArray()
+                .First().GetProperty("summaries").EnumerateArray().ToArray()
+                .Select(summary => (summary.GetProperty("aspect").ToString(), summary.GetProperty("text").ToString()))
+                .ToArray();
 
-        // Print each transcription phrase, followed by its language, sentiment, and so on.
-        private void PrintResults(
+            var PIITask = tasks.First(task => 0 == String.Compare(task.GetProperty("taskName").ToString(), "PII_1", StringComparison.InvariantCultureIgnoreCase));
+            var conversationPIIAnalysis = PIITask.GetProperty("results").GetProperty("conversations").EnumerateArray().ToArray()
+                .First().GetProperty("conversationItems").EnumerateArray().ToArray()
+                .Select(document =>
+                    {
+                        return document.GetProperty("entities").EnumerateArray().ToArray()
+                            .Select(entity => (entity.GetProperty("category").ToString(), entity.GetProperty("text").ToString())).ToArray();
+                    })
+                .ToArray();
+            
+            return new ConversationAnalysisResult(conversationSummary, conversationPIIAnalysis);
+        }
+
+        // Create a string that contains each transcription phrase, followed by sentiment, PII, and so on.
+        private String GetResults(
             (string phrase, int speakerID)[] transcriptionPhrasesAndSpeakers,
             string[] transcriptionSentiments,
             ConversationAnalysisResult conversationAnalysis)
         {
+            var result = new StringBuilder();
             for (var index = 0; index < transcriptionPhrasesAndSpeakers.Length; index++)
             {
-                Console.WriteLine($"Phrase: {transcriptionPhrasesAndSpeakers[index].phrase}");
-                Console.WriteLine($"Speaker: {transcriptionPhrasesAndSpeakers[index].speakerID}");
+                result.AppendLine($"Phrase: {transcriptionPhrasesAndSpeakers[index].phrase}");
+                result.AppendLine($"Speaker: {transcriptionPhrasesAndSpeakers[index].speakerID}");
                 if (index < transcriptionSentiments.Length)
                 {
-                    Console.WriteLine($"Sentiment: {transcriptionSentiments[index]}");
+                    result.AppendLine($"Sentiment: {transcriptionSentiments[index]}");
                 }
                 if (index < conversationAnalysis.PIIAnalysis.Length)
                 {
@@ -328,18 +385,28 @@ namespace CallCenter
                     {
                         var entities = conversationAnalysis.PIIAnalysis[index].Aggregate("",
                             (result, entity) => $"{result}    Category: {entity.category}. Text: {entity.text}.{Environment.NewLine}");
-                        Console.Write($"Recognized entities (PII):{Environment.NewLine}{entities}");
+                        result.Append($"Recognized entities (PII):{Environment.NewLine}{entities}");
                     }
                     else
                     {
-                        Console.WriteLine($"Recognized entities (PII): none.");
+                        result.AppendLine($"Recognized entities (PII): none.");
                     }
                 }
-                Console.WriteLine();
+                result.AppendLine();
             }
-            Console.WriteLine(conversationAnalysis.summary.Aggregate($"Conversation summary:{Environment.NewLine}",
+            result.AppendLine(conversationAnalysis.summary.Aggregate($"Conversation summary:{Environment.NewLine}",
                 (result, item) => $"{result}    Aspect: {item.aspect}. Summary: {item.summary}.{Environment.NewLine}"));
-            return;
+            return result.ToString();
+        }
+
+        private void PrintResults(JsonElement transcription, JsonElement sentimentAnalysis, JsonElement conversationAnalysis)
+        {
+            var results = new {
+                transcription = transcription,
+                sentimentAnalysis = sentimentAnalysis,
+                conversationAnalysis = conversationAnalysis
+            };
+            Console.WriteLine(JsonSerializer.Serialize(results, new JsonSerializerOptions() { WriteIndented = true}));
         }
 
         // Note: To pass command-line arguments, run:
@@ -351,18 +418,27 @@ namespace CallCenter
             // How to use batch transcription:
             // https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/cognitive-services/Speech-Service/batch-transcription.md
             var transcriptionId = await CreateTranscription();
+            Console.WriteLine($"Transcription ID: {transcriptionId}");
             await WaitForTranscription(transcriptionId);
-            var transcriptionUrl = await GetTranscriptionUri(transcriptionId);
-            var phrasesAndSpeakers = await GetTranscriptionPhrasesAndSpeakers(transcriptionUrl);
+            var transcriptionFiles = await GetTranscriptionFiles(transcriptionId);
+            var transcriptionUri = GetTranscriptionUri(transcriptionFiles);
+            var transcription = await GetTranscription(transcriptionUri);
+            var phrasesAndSpeakers = GetTranscriptionPhrasesAndSpeakers(transcription);
             var phrases = phrasesAndSpeakers.Select(phraseAndSpeaker => phraseAndSpeaker.phrase).ToArray();
-            var sentiments = GetSentiments(phrases);
+            var sentimentAnalysis = GetSentimentAnalysis(phrases);
             var conversationItems = TranscriptionPhrasesToConversationItems(phrasesAndSpeakers);
             // NOTE: Conversation summary is currently in gated public preview. You can sign up here:
             // https://aka.ms/applyforconversationsummarization/
             var conversationAnalysisUrl = await RequestConversationAnalysis(conversationItems);
             await WaitForConversationAnalysis(conversationAnalysisUrl);
-            var conversationAnalysisResult = await GetConversationAnalysis(conversationAnalysisUrl);
-            PrintResults(phrasesAndSpeakers, sentiments, conversationAnalysisResult);
+            var conversationAnalysis = await GetConversationAnalysis(conversationAnalysisUrl);
+            if (this.userConfig.outputFilePath is string outputFilePathValue)
+            {
+                var sentiments = GetSentiments(sentimentAnalysis);
+                var conversationAnalysisResult = GetConversationAnalysisResult(conversationAnalysis);
+                File.AppendAllText(outputFilePathValue, GetResults(phrasesAndSpeakers, sentiments, conversationAnalysisResult));
+            }
+            PrintResults(transcription, sentimentAnalysis, conversationAnalysis);
             // Clean up resources.
             Console.WriteLine("Deleting transcription.");
             await DeleteTranscription(transcriptionId);
@@ -394,6 +470,8 @@ namespace CallCenter
     --input URL                     Input audio from URL. Required.
     --stereo                        Use stereo audio format.
                                     If this is not present, mono is assumed.
+  OUTPUT
+    --output FILE                   Output phrase list and conversation summary to text file.
 ";
             
             try
