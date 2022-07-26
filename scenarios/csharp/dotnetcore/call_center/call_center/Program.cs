@@ -436,7 +436,7 @@ namespace CallCenter
             {
                 var sentiments = GetSentiments(sentimentAnalysis);
                 var conversationAnalysisResult = GetConversationAnalysisResult(conversationAnalysis);
-                File.AppendAllText(outputFilePathValue, GetResults(phrasesAndSpeakers, sentiments, conversationAnalysisResult));
+                File.WriteAllText(outputFilePathValue, GetResults(phrasesAndSpeakers, sentiments, conversationAnalysisResult));
             }
             PrintResults(transcription, sentimentAnalysis, conversationAnalysis);
             // Clean up resources.
