@@ -41,8 +41,6 @@ The Cognitive Services Speech SDK Python package can be installed from [pyPI](ht
 pip install azure-cognitiveservices-speech
 ```
 
-Note: this tutorial will not work without changes for any version earlier than 1.7.0 of the SDK.
-
 ## Run the sample
 
 Before you run the sample code, replace the dummy values `YourSubscriptionKey` and `YourServiceRegion` by your subscription information.
