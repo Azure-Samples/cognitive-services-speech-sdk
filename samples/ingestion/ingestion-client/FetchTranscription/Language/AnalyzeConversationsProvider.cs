@@ -44,7 +44,8 @@ namespace FetchTranscription.Language
 
         public bool IsConversationalPiiEnabled()
         {
-            return Locale.Contains("en", StringComparison.OrdinalIgnoreCase) && FetchTranscriptionEnvironmentVariables.ConversationPiiSetting != Connector.Enums.ConversationPiiSetting.None;
+            return Locale.Contains("en", StringComparison.OrdinalIgnoreCase) 
+                && FetchTranscriptionEnvironmentVariables.ConversationPiiSetting != Connector.Enums.ConversationPiiSetting.None;
         }
 
         /// <summary>
@@ -76,7 +77,7 @@ namespace FetchTranscription.Language
                                 Id = $"{item.Channel}_{item.Offset}",
                                 ParticipantId = $"{item.Channel}",
                                 AudioTimings = item.NBest.First().Words
-                                    .Select(word => new WordLevelAudioTiming
+                                    ?.Select(word => new WordLevelAudioTiming
                                     {
                                         Word = word.Word,
                                         Duration = (long)word.DurationInTicks,
@@ -173,7 +174,7 @@ namespace FetchTranscription.Language
 
                 var analysisResult = JsonConvert.DeserializeObject<AnalyzeConversationsResult>(response.Content.ToString());
 
-                if (analysisResult.Tasks.InProgress == 0)
+                if (analysisResult.Tasks.InProgress != 0)
                 {
                     // some jobs are still running.
                     runningJobsCount++;
