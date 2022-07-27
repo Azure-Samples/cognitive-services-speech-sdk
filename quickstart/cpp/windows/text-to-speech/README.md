@@ -5,10 +5,10 @@ See the [accompanying article](https://docs.microsoft.com/en-us/azure/cognitive-
 
 ## Prerequisites
 
-* * A subscription key and region for the Speech service. 
-  * Azure subscription - [Create one for free](https://azure.microsoft.com/en-us/free/cognitive-services/)
+ * A subscription key and region for the Speech service. 
+  * Azure subscription - [Create one for free](https://azure.microsoft.com/free/cognitive-services/)
   * [Create a Speech resource](https://ms.portal.azure.com/#create/Microsoft.CognitiveServicesSpeechServices) in the Azure portal.
-  * Get the resource key and region. After your Speech resource is deployed, select Go to resource to view and manage keys. or  more information about Cognitive Services resources, see [Get the keys for your resource](https://docs.microsoft.com/en-us/azure/cognitive-services/cognitive-services-apis-create-account?tabs=multiservice%2Cwindows#get-the-keys-for-your-resource)
+  * Get the resource key and region. After your Speech resource is deployed, select Go to resource to view and manage keys. For more information about Cognitive Services resources, see [Get the keys for your resource](https://docs.microsoft.com/en-us/azure/cognitive-services/cognitive-services-apis-create-account?tabs=multiservice%2Cwindows#get-the-keys-for-your-resource)
 * A Windows PC with a working speaker or headset.
 * [Microsoft Visual Studio 2017](https://www.visualstudio.com/), Community Edition or higher.
 * The **Desktop development with C++** workload in Visual Studio and the **NuGet package manager** component in Visual Studio.
@@ -39,5 +39,5 @@ To debug the app and then run it, press F5 or use **Debug** \> **Start Debugging
 
 ## References
 
-* [Quickstart article on the SDK documentation site](https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/get-started-text-to-speech?tabs=terminal&pivots=programming-language-cpp)
+* [Quickstart article on the SDK documentation site](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started-text-to-speech?tabs=terminal&pivots=programming-language-cpp)
 * [Speech SDK API reference for C++](https://aka.ms/csspeech/cppref)
