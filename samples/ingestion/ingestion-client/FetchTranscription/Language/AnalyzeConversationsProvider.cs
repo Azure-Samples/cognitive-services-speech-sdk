@@ -44,8 +44,7 @@ namespace FetchTranscription.Language
 
         public bool IsConversationalPiiEnabled()
         {
-            return Locale.Contains("en", StringComparison.OrdinalIgnoreCase) 
-                && FetchTranscriptionEnvironmentVariables.ConversationPiiSetting != Connector.Enums.ConversationPiiSetting.None;
+            return Locale.Contains("en", StringComparison.OrdinalIgnoreCase) && FetchTranscriptionEnvironmentVariables.ConversationPiiSetting != Connector.Enums.ConversationPiiSetting.None;
         }
 
         /// <summary>
