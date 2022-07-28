@@ -40,9 +40,11 @@ namespace FetchTranscription.Language
             Log = log;
         }
 
+#pragma warning disable CA1822 // Mark members as static
         public bool IsConversationalPiiEnabled()
+#pragma warning restore CA1822 // Mark members as static
         {
-            return Locale.Contains("en", StringComparison.OrdinalIgnoreCase) && FetchTranscriptionEnvironmentVariables.ConversationPiiSetting != Connector.Enums.ConversationPiiSetting.None;
+            return FetchTranscriptionEnvironmentVariables.ConversationPiiSetting != Connector.Enums.ConversationPiiSetting.None;
         }
 
         /// <summary>
@@ -65,21 +67,25 @@ namespace FetchTranscription.Language
                         Language = Locale,
                         Modality = Modality.transcript,
                         ConversationItems = speechTranscript.RecognizedPhrases.Where(r => !string.IsNullOrEmpty(r.NBest.First().Lexical))
-                            .Select(item => new ConversationItem()
+                            .Select(item =>
                             {
-                                Text = item.NBest.First().Display,
-                                Lexical = item.NBest.First().Lexical,
-                                Itn = item.NBest.First().ITN,
-                                MaskedItn = item.NBest.First().MaskedITN,
-                                Id = $"{item.Channel}_{item.Offset}",
-                                ParticipantId = $"{item.Channel}",
-                                AudioTimings = item.NBest.First().Words
-                                    ?.Select(word => new WordLevelAudioTiming
-                                    {
-                                        Word = word.Word,
-                                        Duration = (long)word.DurationInTicks,
-                                        Offset = (long)word.OffsetInTicks
-                                    })
+                                var topResult = item.NBest.First();
+                                return new ConversationItem()
+                                {
+                                    Text = topResult.Display,
+                                    Lexical = topResult.Lexical,
+                                    Itn = topResult.ITN,
+                                    MaskedItn = topResult.MaskedITN,
+                                    Id = $"{item.Channel}_{item.Offset}",
+                                    ParticipantId = $"{item.Channel}",
+                                    AudioTimings = topResult.Words
+                                        ?.Select(word => new WordLevelAudioTiming
+                                        {
+                                            Word = word.Word,
+                                            Duration = (long)word.DurationInTicks,
+                                            Offset = (long)word.OffsetInTicks
+                                        })
+                                };
                             }).ToList()
                     }
                 }),

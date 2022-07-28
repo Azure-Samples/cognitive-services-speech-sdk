@@ -81,8 +81,8 @@ namespace FetchTranscriptionFunction
             var categories = new List<ConversationPiiCategory>();
             piiCategoriesList.ForEach(category =>
             {
-                Enum.TryParse(category, ignoreCase: true, out ConversationPiiCategory catgoryEnum);
-                categories.Add(catgoryEnum);
+                Enum.TryParse(category, ignoreCase: true, out ConversationPiiCategory categoryEnum);
+                categories.Add(categoryEnum);
             });
 
             return categories;

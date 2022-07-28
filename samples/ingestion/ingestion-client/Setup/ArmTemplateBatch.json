@@ -209,11 +209,10 @@
             "type": "String",
             "allowedValues": [
                 "None",
-                "DoNotIncludeAudioRedaction",
-                "IncludeAudioRedaction"
+                "Enable"
             ],
             "metadata": {
-                "description": "A value indicating whether personally identifiable information (PII) redaction for conversations is requested (either with audio redaction timestamps or not). Will only be performed if a Text Analytics Key and Region is provided."
+                "description": "A value indicating whether personally identifiable information (PII) redaction for conversations is requested Will only be performed if a Text Analytics Key and Region is provided."
             }
         },
         "SqlAdministratorLogin": {
@@ -277,6 +276,7 @@
         "TextAnalyticsKeySecretName": "TextAnalyticsKey",
         "DatabaseConnectionStringSecretName": "DatabaseConnectionString",
         "PiiCategories": "",
+        "ConversationPiiCategories": "",
         "IsAzureGovDeployment": "[or(equals(parameters('AzureSpeechServicesRegion'),'usgovarizona'), equals(parameters('AzureSpeechServicesRegion'),'usgovvirginia'))]",
         "AzureSpeechServicesEndpointUri": "[if(not(equals(parameters('CustomEndpoint'),'')), parameters('CustomEndpoint'), if(variables('IsAzureGovDeployment'), concat('https://', parameters('AzureSpeechServicesRegion') ,'.api.cognitive.microsoft.us/'), concat('https://', parameters('AzureSpeechServicesRegion') ,'.api.cognitive.microsoft.com/')))]",
         "EndpointSuffix": "[if(variables('IsAzureGovDeployment'),'core.usgovcloudapi.net','core.windows.net')]"
@@ -931,8 +931,8 @@
             },
             "properties": {
                 "APPLICATIONINSIGHTS_CONNECTION_STRING": "[reference(resourceId('Microsoft.Insights/components', variables('AppInsightsName')), '2020-02-02-preview').ConnectionString]",
-                "PiiRedactionSetting": "[parameters('PiiRedaction')]",
-                "ConversationPiiSetting":"[parameters('ConversationPiiRedaction')]",
+                "PiiRedactionSetting": "[parameters('ConversationPiiRedaction')]",
+                "ConversationPiiSetting":"IncludeAudioRedaction",
                 "SentimentAnalysisSetting": "[parameters('SentimentAnalysis')]",
                 "AudioInputContainer": "[variables('AudioInputContainer')]",
                 "AzureServiceBus": "[listKeys(variables('AuthRuleRMK'),'2015-08-01').primaryConnectionString]",
@@ -961,7 +961,7 @@
                 "CreateAudioProcessedContainer": "[variables('CreateAudioProcessedContainer')]",
                 "AudioProcessedContainer": "[variables('AudioProcessedContainer')]",
                 "PiiCategories": "[variables('PiiCategories')]",
-                "ConversationPiiCategories": "[parameters('PiiCategories')]"
+                "ConversationPiiCategories": "[variables('ConversationPiiCategories')]"
             }
         }
     ],

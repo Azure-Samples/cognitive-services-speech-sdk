@@ -40,8 +40,5 @@ namespace Connector
 
         [JsonProperty("recognizedPhrases")]
         public IEnumerable<RecognizedPhrase> RecognizedPhrases { get; }
-
-        [JsonProperty("analyticsResults")]
-        public ConversationAnalyticsResults AnalyticsResults { get; }
     }
 }

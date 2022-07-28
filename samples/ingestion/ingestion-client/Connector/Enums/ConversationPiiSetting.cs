@@ -8,7 +8,7 @@ namespace Connector.Enums
     public enum ConversationPiiSetting
     {
         None = 0,
-        DoNotIncludeAudioRedaction,
+        Enable,
         IncludeAudioRedaction,
     }
 }
