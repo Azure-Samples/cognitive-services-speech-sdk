@@ -6,10 +6,14 @@
 namespace Connector.Serializable.Language.Conversations
 {
     using System;
+    using JsonSubTypes;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Converters;
 
-    public class Item
+    [JsonConverter(typeof(JsonSubtypes), nameof(Kind))]
+    [JsonSubtypes.KnownSubType(typeof(ConversationPiiItem), AnalyzeConversationsTaskResultKind.conversationalPIIResults)]
+    [JsonSubtypes.KnownSubType(typeof(ConversationSummarizationItem), AnalyzeConversationsTaskResultKind.conversationalSummarizationResults)]
+    public abstract class Item
     {
         [JsonProperty("kind")]
         [JsonConverter(typeof(StringEnumConverter))]
@@ -23,8 +27,5 @@ namespace Connector.Serializable.Language.Conversations
 
         [JsonProperty("status")]
         public string Status { get; set; }
-
-        [JsonProperty("results")]
-        public AnalyzeConversationPiiResults Results { get; set; }
     }
 }

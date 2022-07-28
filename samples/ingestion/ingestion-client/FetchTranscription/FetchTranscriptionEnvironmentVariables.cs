@@ -21,7 +21,7 @@ namespace FetchTranscriptionFunction
 
         public static readonly bool CreateHtmlResultFile = bool.TryParse(Environment.GetEnvironmentVariable(nameof(CreateHtmlResultFile), EnvironmentVariableTarget.Process), out CreateHtmlResultFile) && CreateHtmlResultFile;
 
-        public static readonly ConversationPiiSetting ConversationPiiSetting = Enum.TryParse(Environment.GetEnvironmentVariable(nameof(ConversationPiiSetting), EnvironmentVariableTarget.Process), out SentimentAnalysisSetting) ? ConversationPiiSetting : ConversationPiiSetting.None;
+        public static readonly ConversationPiiSetting ConversationPiiSetting = Enum.TryParse(Environment.GetEnvironmentVariable(nameof(ConversationPiiSetting), EnvironmentVariableTarget.Process), out ConversationPiiSetting) ? ConversationPiiSetting : ConversationPiiSetting.None;
 
         public static readonly IEnumerable<ConversationPiiCategory> ConversationPiiCategories = GetConversationPiiCategories(Environment.GetEnvironmentVariable(nameof(ConversationPiiCategories), EnvironmentVariableTarget.Process));
 

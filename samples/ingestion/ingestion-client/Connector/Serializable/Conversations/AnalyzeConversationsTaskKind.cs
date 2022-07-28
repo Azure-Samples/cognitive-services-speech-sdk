@@ -7,6 +7,7 @@ namespace Connector.Serializable.Language.Conversations
 {
     public enum AnalyzeConversationsTaskKind
     {
-        ConversationalPIITask
+        ConversationalPIITask,
+        ConversationalSummarizationTask
     }
 }

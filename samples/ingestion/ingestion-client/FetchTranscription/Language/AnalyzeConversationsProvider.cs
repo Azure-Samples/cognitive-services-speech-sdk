@@ -10,12 +10,10 @@ namespace FetchTranscription.Language
     using System.Linq;
     using System.Text.Json;
     using System.Threading.Tasks;
-
     using Azure;
     using Azure.AI.Language.Conversations;
     using Azure.Core;
     using Connector;
-    using Connector.Serializable;
     using Connector.Serializable.Language.Conversations;
     using FetchTranscriptionFunction;
     using Microsoft.Extensions.Logging;
@@ -209,7 +207,7 @@ namespace FetchTranscription.Language
             // do not catch throttling errors, rather throw and retry
             catch (RequestFailedException e) when (e.Status != 429)
             {
-                errors.Add($"Text analytics request failed with error: {e.Message}");
+                errors.Add($"Conversation analytics request failed with error: {e.Message}");
             }
 
             return (null, errors);
@@ -220,7 +218,7 @@ namespace FetchTranscription.Language
             var errors = new List<string>();
             try
             {
-                Log.LogInformation($"Sending text analytics request for jobid {jobId}.");
+                Log.LogInformation($"Sending conversation analytics request for jobid {jobId}.");
 
                 var response = await ConversationAnalysisClient.GetAnalyzeConversationJobStatusAsync(Guid.Parse(jobId)).ConfigureAwait(false);
 
@@ -236,6 +234,7 @@ namespace FetchTranscription.Language
                     // all tasks completed.
                     return (analysisResult.Tasks
                         .Items.Where(item => item.Kind == AnalyzeConversationsTaskResultKind.conversationalPIIResults)
+                        .Select(s => s as ConversationPiiItem)
                         .Select(s => s.Results), errors);
                 }
             }

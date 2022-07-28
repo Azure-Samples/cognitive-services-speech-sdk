@@ -9,6 +9,7 @@ namespace Connector.Serializable.Language.Conversations
     {
 #pragma warning disable SA1300 // Element should begin with upper-case letter
         conversationalPIIResults,
+        conversationalSummarizationResults,
 #pragma warning restore SA1300 // Element should begin with upper-case letter
     }
 }
