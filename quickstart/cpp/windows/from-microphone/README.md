@@ -36,5 +36,5 @@ To debug the app and then run it, press F5 or use **Debug** \> **Start Debugging
 
 ## References
 
-* [Quickstart article on the SDK documentation site](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-cpp-windows)
+* [Quickstart article on the SDK documentation site](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstarts/speech-to-text-from-microphone?tabs=dotnet%2Cx-android%2CWindows%2Cjava-runtime%2Cwindowsinstall&pivots=programming-language-cpp)
 * [Speech SDK API reference for C++](https://aka.ms/csspeech/cppref)

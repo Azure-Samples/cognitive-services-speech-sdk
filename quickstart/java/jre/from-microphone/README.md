@@ -1,7 +1,7 @@
 # Quickstart: Recognize speech from a microphone in Java on Windows, macOS, or Linux
 
 This sample demonstrates how to recognize speech with the Speech SDK for Java on Windows, macOS or Linux.
-See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-java-jre) on the SDK documentation page which describes how to build this sample from scratch in Eclipse.
+See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started-speech-to-text?tabs=terminal&pivots=programming-language-java) on the SDK documentation page which describes how to build this sample from scratch in Eclipse.
 
 > **Note:**
 > The Speech SDK for the JRE currently supports the Windows x64 platform, macOS x64 (10.14 or later), macOS M1 arm64 (11.0 or later), and [specific Linux distributions and target architectures](https://docs.microsoft.com/azure/cognitive-services/speech-service/speech-sdk?tabs=linux).
@@ -37,6 +37,8 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 > Note: more detailed step-by-step instructions are available [here](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-java-jre).
 
 * **By downloading the Microsoft Cognitive Services Speech SDK when building this sample, you acknowledge its license, see [Speech SDK license agreement](https://docs.microsoft.com/azure/cognitive-services/speech-service/license).**
+*This sample demonstrates how to recognize speech with the Speech SDK for Java on Windows, macOS or Linux.
+See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started-speech-to-text?tabs=terminal&pivots=programming-language-java)
 * [Download the sample code to your development PC.](/README.md#get-the-samples)
 * Create an empty workspace in Eclipse and import the folder containing this sample as a project into your workspace.
 * Edit the `Main` source:

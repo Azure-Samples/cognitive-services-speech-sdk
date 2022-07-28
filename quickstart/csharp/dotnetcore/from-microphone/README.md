@@ -38,6 +38,8 @@ This sample demonstrates how to recognize speech with C# under .NET Core 3.1 (Wi
 ## Build the sample
 
 * **By building this sample you will download the Microsoft Cognitive Services Speech SDK. By downloading you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license201809).**
+
+* [Quickstart article on the SDK documentation site](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started-speech-to-text?tabs=terminal&pivots=programming-language-csharp)
 * [Download the sample code to your development PC.](/README.md#get-the-samples)
 
 * If you are using Microsoft Visual Studio 2017 on Windows:
