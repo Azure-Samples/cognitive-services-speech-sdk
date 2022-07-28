@@ -335,6 +335,7 @@ namespace TextAnalytics
                         var piiResult = conversationsPiiResults.piiResults
                         .SelectMany(response => response.Conversations)
                         .SelectMany(conv => conv.ConversationItems)
+                        .Where(convItem => convItem.Id.StartsWith($"{channel}", StringComparison.OrdinalIgnoreCase))
                         .Select(conv => conv.RedactedContent);
 
                         if (piiResult != null)
