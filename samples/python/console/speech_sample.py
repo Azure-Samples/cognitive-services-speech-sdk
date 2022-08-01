@@ -10,6 +10,7 @@ Speech recognition samples for the Microsoft Cognitive Services Speech SDK
 import json
 import string
 import time
+import threading
 import wave
 
 try:
@@ -485,6 +486,24 @@ def speech_recognition_with_pull_stream():
     speech_recognizer.stop_continuous_recognition()
 
 
+def push_stream_writer(stream):
+    # The number of bytes to push per buffer
+    n_bytes = 3200
+    wav_fh = wave.open(weatherfilename)
+    # start pushing data until all data has been read from the file
+    try:
+        while(True):
+            frames = wav_fh.readframes(n_bytes // 2)
+            print('read {} bytes'.format(len(frames)))
+            if not frames:
+                break
+            stream.write(frames)
+            time.sleep(.1)
+    finally:
+        wav_fh.close()
+        stream.close()  # must be done to signal the end of stream
+
+
 def speech_recognition_with_push_stream():
     """gives an example how to use a push audio stream to recognize speech from a custom audio
     source"""
@@ -496,34 +515,33 @@ def speech_recognition_with_push_stream():
 
     # instantiate the speech recognizer with push stream input
     speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, audio_config=audio_config)
+    recognition_done = threading.Event()
 
     # Connect callbacks to the events fired by the speech recognizer
+    def session_stopped_cb(evt):
+        """callback that signals to stop continuous recognition upon receiving an event `evt`"""
+        print('SESSION STOPPED: {}'.format(evt))
+        recognition_done.set()
+
     speech_recognizer.recognizing.connect(lambda evt: print('RECOGNIZING: {}'.format(evt)))
     speech_recognizer.recognized.connect(lambda evt: print('RECOGNIZED: {}'.format(evt)))
     speech_recognizer.session_started.connect(lambda evt: print('SESSION STARTED: {}'.format(evt)))
-    speech_recognizer.session_stopped.connect(lambda evt: print('SESSION STOPPED {}'.format(evt)))
+    speech_recognizer.session_stopped.connect(session_stopped_cb)
     speech_recognizer.canceled.connect(lambda evt: print('CANCELED {}'.format(evt)))
 
-    # The number of bytes to push per buffer
-    n_bytes = 3200
-    wav_fh = wave.open(weatherfilename)
+    # start push stream writer thread
+    push_stream_writer_thread = threading.Thread(target=push_stream_writer, args=[stream])
+    push_stream_writer_thread.start()
 
     # start continuous speech recognition
     speech_recognizer.start_continuous_recognition()
 
-    # start pushing data until all data has been read from the file
-    try:
-        while(True):
-            frames = wav_fh.readframes(n_bytes // 2)
-            print('read {} bytes'.format(len(frames)))
-            if not frames:
-                break
+    # wait until all input processed
+    recognition_done.wait()
 
-            stream.write(frames)
-            time.sleep(.1)
-    finally:
-        # stop recognition and clean up
-        speech_recognizer.stop_continuous_recognition()
+    # stop recognition and clean up
+    speech_recognizer.stop_continuous_recognition()
+    push_stream_writer_thread.join()
 
 
 def speech_recognize_once_with_auto_language_detection_from_mic():

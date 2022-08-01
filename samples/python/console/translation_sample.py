@@ -31,7 +31,7 @@ weatherfilename = "whatstheweatherlike.wav"
 
 
 def translation_once_from_mic():
-    """performs one-shot speech translation from input from an audio file"""
+    """performs one-shot speech translation from input from the default microphone"""
     # <TranslationOnceWithMic>
     # set up translation parameters: source language and target languages
     translation_config = speechsdk.translation.SpeechTranslationConfig(
@@ -118,7 +118,7 @@ def translation_continuous():
     translation_config = speechsdk.translation.SpeechTranslationConfig(
         subscription=speech_key, region=service_region,
         speech_recognition_language='en-US',
-        target_languages=('de', 'fr'), voice_name="de-DE-Hedda")
+        target_languages=('de', 'fr'), voice_name="de-DE-KatjaNeural")
     audio_config = speechsdk.audio.AudioConfig(filename=weatherfilename)
 
     # Creates a translation recognizer using and audio file as input.
@@ -127,7 +127,7 @@ def translation_continuous():
 
     def result_callback(event_type: str, evt: speechsdk.translation.TranslationRecognitionEventArgs):
         """callback to display a translation result"""
-        print("{}: {}\n\tTranslations: {}\n\tResult Json: {}".format(
+        print("{}:\n {}\n\tTranslations: {}\n\tResult Json: {}\n".format(
             event_type, evt, evt.result.translations.items(), evt.result.json))
 
     done = False
@@ -138,6 +138,10 @@ def translation_continuous():
         nonlocal done
         done = True
 
+    def canceled_cb(evt: speechsdk.translation.TranslationRecognitionCanceledEventArgs):
+        print('CANCELED:\n\tReason:{}\n'.format(evt.result.reason))
+        print('\tDetails: {} ({})'.format(evt, evt.result.cancellation_details.error_details))
+
     # connect callback functions to the events fired by the recognizer
     recognizer.session_started.connect(lambda evt: print('SESSION STARTED: {}'.format(evt)))
     recognizer.session_stopped.connect(lambda evt: print('SESSION STOPPED {}'.format(evt)))
@@ -146,7 +150,7 @@ def translation_continuous():
     # event for final result
     recognizer.recognized.connect(lambda evt: result_callback('RECOGNIZED', evt))
     # cancellation event
-    recognizer.canceled.connect(lambda evt: print('CANCELED: {} ({})'.format(evt, evt.reason)))
+    recognizer.canceled.connect(canceled_cb)
 
     # stop continuous recognition on either session stopped or canceled events
     recognizer.session_stopped.connect(stop_cb)
