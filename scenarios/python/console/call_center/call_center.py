@@ -9,6 +9,7 @@ from http import HTTPStatus
 from itertools import chain
 from json import dumps, loads
 from os import linesep
+from pathlib import Path
 from time import sleep
 from typing import Dict, List, Tuple
 import uuid
@@ -25,9 +26,9 @@ conversation_analysis_query = "?api-version=2022-05-15-preview";
 conversation_summary_model_version = "2022-05-15-preview";
 
 # How long to wait while polling batch transcription and conversation analysis status.
-wait_seconds = 5
+wait_seconds = 10
 
-def create_transcription(transcription_uri : str, user_config : helper.Read_Only_Dict) -> str :
+def create_transcription(user_config : helper.Read_Only_Dict) -> str :
     uri = f"https://{user_config['speech_endpoint']}{speech_transcription_path}"
 
     # Create Transcription API JSON request sample and schema:
@@ -36,8 +37,8 @@ def create_transcription(transcription_uri : str, user_config : helper.Read_Only
     # - locale and displayName are required.
     # - diarizationEnabled should only be used with mono audio input.
     content = {
-        "contentUrls" : [transcription_uri],
-        "properties" : { "diarizationEnabled" : not user_config["useStereoAudio"] },
+        "contentUrls" : [user_config["input_audio_url"]],
+        "properties" : { "diarizationEnabled" : not user_config["use_stereo_audio"] },
         "locale" : user_config["locale"],
         "displayName" : f"call_center_{datetime.now()}",
     }
@@ -59,7 +60,10 @@ def create_transcription(transcription_uri : str, user_config : helper.Read_Only
 def get_transcription_status(transcription_id : str, user_config : helper.Read_Only_Dict) -> bool :
     uri = f"https://{user_config['speech_endpoint']}{speech_transcription_path}/{transcription_id}"
     response = helper.send_get(uri=uri, key=user_config["speech_subscription_key"], expected_status_codes=[HTTPStatus.OK])
-    return "Succeeded" == response["json"]["status"]
+    if "failed" == response["json"]["status"].lower() :
+        raise Exception(f"Unable to transcribe audio input. Response:{linesep}{response['text']}")
+    else :
+        return "succeeded" == response["json"]["status"].lower()
 
 def wait_for_transcription(transcription_id : str, user_config : helper.Read_Only_Dict) -> None :
     done = False
@@ -68,37 +72,50 @@ def wait_for_transcription(transcription_id : str, user_config : helper.Read_Onl
         sleep(wait_seconds)
         done = get_transcription_status(transcription_id, user_config=user_config)
 
-def get_transcription_uri(transcription_id : str, user_config : helper.Read_Only_Dict) -> str :
+def get_transcription_files(transcription_id : str, user_config : helper.Read_Only_Dict) -> Dict :
     uri = f"https://{user_config['speech_endpoint']}{speech_transcription_path}/{transcription_id}/files"
     response = helper.send_get(uri=uri, key=user_config["speech_subscription_key"], expected_status_codes=[HTTPStatus.OK])
+    return response["json"]
+
+def get_transcription_uri(transcription_files : Dict, user_config : helper.Read_Only_Dict) -> str :
     # Get Transcription Files JSON response sample and schema:
     # https://westus.dev.cognitive.microsoft.com/docs/services/speech-to-text-api-v3-0/operations/GetTranscriptionFiles
-    value = next(filter(lambda value: "Transcription" == value["kind"], response["json"]["values"]), None)    
+    value = next(filter(lambda value: "Transcription" == value["kind"], transcription_files["values"]), None)    
     if value is None :
-        raise Exception (f"Unable to parse response from Get Transcription Files API:{linesep}{response['text']}")
+        raise Exception (f"Unable to parse response from Get Transcription Files API:{linesep}{transcription_files['text']}")
     return value["links"]["contentUrl"]
 
-def get_transcription_phrases_and_speakers(transcription_uri : str) -> List[Dict] :
+def get_transcription(transcription_uri : str) -> Dict :
     response = helper.send_get(uri=transcription_uri, key="", expected_status_codes=[HTTPStatus.OK])
-    return list(map(lambda phrase : { "phrase" : phrase["nBest"][0]["display"], "speaker_id" : int(phrase["speaker"]) }, response["json"]["recognizedPhrases"]))
+    return response["json"]
+
+def get_transcription_phrases_and_speakers(transcription : Dict, user_config : helper.Read_Only_Dict) -> List[Dict] :
+    def helper(phrase : Dict) -> Dict :
+        return {
+            "phrase" : phrase["nBest"][0]["display"],
+            # If the user specified stereo audio, and therefore we turned off diarization,
+            # the speaker number is replaced by a channel number.
+            "speaker_number" : int(phrase["channel"]) if user_config["use_stereo_audio"] else int(phrase["speaker"]),
+            "offset" : float(phrase["offsetInTicks"]),
+        }
+    phrases_1 = list(map(helper, transcription["recognizedPhrases"]))
+    # For stereo audio, the phrases are sorted by channel number, so resort them by offset.
+    return sorted(phrases_1, key=lambda x : x["offset"]) if user_config["use_stereo_audio"] else phrases_1
 
 def delete_transcription(transcription_id : str, user_config : helper.Read_Only_Dict) -> None :
     uri = f"https://{user_config['speech_endpoint']}{speech_transcription_path}/{transcription_id}"
     helper.send_delete(uri=uri, key=user_config["speech_subscription_key"], expected_status_codes=[HTTPStatus.NO_CONTENT])
 
-def get_sentiments_helper(documents : List[Dict], user_config : helper.Read_Only_Dict) -> List[Dict] :
+def get_sentiments_helper(documents : List[Dict], user_config : helper.Read_Only_Dict) -> Dict :
     uri = f"https://{user_config['language_endpoint']}{sentiment_analysis_path}{sentiment_analysis_query}"
     content = {
         "kind" : "SentimentAnalysis",
         "analysisInput" : { "documents" : documents },
     }
     response = helper.send_post(uri = uri, content=content, key=user_config["language_subscription_key"], expected_status_codes=[HTTPStatus.OK])
-    return [{
-        "id" : int(document["id"]),
-        "sentiment" : document["sentiment"],
-    } for document in response["json"]["results"]["documents"]]
+    return response["json"]["results"]["documents"]
 
-def get_sentiments(phrases : List[str], user_config : helper.Read_Only_Dict) -> List[str] :
+def get_sentiment_analysis(phrases : List[str], user_config : helper.Read_Only_Dict) -> Dict :
     # Convert each transcription phrase to a "document" as expected by the sentiment analysis REST API.
     # Include a counter to use as a document ID.
     # We can only analyze sentiment for 10 documents per request.
@@ -108,21 +125,34 @@ def get_sentiments(phrases : List[str], user_config : helper.Read_Only_Dict) -> 
         "text" : phrase,
     } for id, phrase in enumerate(phrases)], 10)
     # Get the sentiments for each chunk of documents.
-    sentiments_1 = list(map(lambda xs : get_sentiments_helper(xs, user_config), documents_to_send))
+    documents_1 = list(map(lambda xs : get_sentiments_helper(xs, user_config), documents_to_send))
     # Flatten the results into a single list.
-    sentiments_2 = list(chain.from_iterable(sentiments_1))
+    documents_2 = list(chain.from_iterable(documents_1))
+    return {
+        "kind" : "SentimentAnalysisResults",
+        "results" :
+        {
+            "documents" : documents_2,
+        },
+    }
+
+def get_sentiments(sentiment_analysis : Dict) -> List[str] :
+    sentiments_1 = [{
+        "id" : int(document["id"]),
+        "sentiment" : document["sentiment"],
+    } for document in sentiment_analysis["results"]["documents"]]
     # Sort by document ID.
-    sentiments_3 = sorted(sentiments_2, key=lambda x : x["id"])
+    sentiments_2 = sorted(sentiments_1, key=lambda x : x["id"])
     # Discard document ID.
-    return list(map(lambda x : x["sentiment"], sentiments_3))
+    return list(map(lambda x : x["sentiment"], sentiments_2))
 
 def transcription_phrases_to_conversation_items(phrases_and_speakers : List[Dict]) -> List[Dict] :
     return [{
         "id" : document_id,
         "text" : phrase_and_speaker["phrase"],
         # The first person to speak is probably the agent.
-        "role" : "Agent" if 1 == phrase_and_speaker["speaker_id"] else "Customer",
-        "participantId" : phrase_and_speaker["speaker_id"]
+        "role" : "Agent" if 1 == phrase_and_speaker["speaker_number"] else "Customer",
+        "participantId" : phrase_and_speaker["speaker_number"]
     } for document_id, phrase_and_speaker in enumerate(phrases_and_speakers)]
 
 def request_conversation_analysis(conversation_items : List[Dict], user_config : helper.Read_Only_Dict) -> str :
@@ -160,7 +190,10 @@ def request_conversation_analysis(conversation_items : List[Dict], user_config :
 
 def get_conversation_analysis_status(conversation_analysis_url : str, user_config : helper.Read_Only_Dict) -> bool :
     response = helper.send_get(uri=conversation_analysis_url, key=user_config["language_subscription_key"], expected_status_codes=[HTTPStatus.OK])
-    return "succeeded" == response["json"]["status"]
+    if "failed" == response["json"]["status"].lower() :
+        raise Exception(f"Unable to analyze conversation. Response:{linesep}{response['text']}")
+    else :
+        return "succeeded" == response["json"]["status"].lower()
 
 def wait_for_conversation_analysis(conversation_analysis_url : str, user_config : helper.Read_Only_Dict) -> None :
     done = False
@@ -171,16 +204,19 @@ def wait_for_conversation_analysis(conversation_analysis_url : str, user_config 
 
 def get_conversation_analysis(conversation_analysis_url : str, user_config : helper.Read_Only_Dict) -> Dict :
     response = helper.send_get(uri=conversation_analysis_url, key=user_config["language_subscription_key"], expected_status_codes=[HTTPStatus.OK])
-    tasks = response["json"]["tasks"]["items"]
+    return response["json"]
+
+def get_conversation_analysis_result(conversation_analysis : Dict, user_config : helper.Read_Only_Dict) -> Dict :
+    tasks = conversation_analysis["tasks"]["items"]
     summary_task = next(filter(lambda task : "summary_1" == task["taskName"], tasks), None)
     if summary_task is None :
-        raise Exception (f"Unable to parse response from Get Conversation Analysis API:{linesep}{response['text']}")
+        raise Exception (f"Unable to parse response from Get Conversation Analysis API:{linesep}{conversation_analysis['text']}")
     conversation = summary_task["results"]["conversations"][0]
     aspects = list(map(lambda summary : { "aspect" : summary["aspect"], "text" : summary["text"] }, conversation["summaries"]))
 
     pii_task = next(filter(lambda task : "PII_1" == task["taskName"], tasks), None)
     if pii_task is None :
-        raise Exception (f"Unable to parse response from Get Conversation Analysis API:{linesep}{response['text']}")
+        raise Exception (f"Unable to parse response from Get Conversation Analysis API:{linesep}{conversation_analysis['text']}")
     conversation = pii_task["results"]["conversations"][0]
     pii = [
         [{
@@ -194,20 +230,30 @@ def get_conversation_analysis(conversation_analysis_url : str, user_config : hel
         "pii_analysis" : pii,
     }
 
-def print_results(phrases_and_speakers : List[Dict], sentiments : List[str], conversation_analysis : Dict) -> None :
+def get_results(phrases_and_speakers : List[Dict], sentiments : List[str], conversation_analysis : Dict) -> str :
+    result = ""
     for i, phrase_and_speaker in enumerate(phrases_and_speakers) :
-        print(f"Phrase: {phrases_and_speakers[i]['phrase']}")
-        print(f"Speaker: {phrases_and_speakers[i]['speaker_id']}")
+        result += f"Phrase: {phrases_and_speakers[i]['phrase']}{linesep}"
+        result += f"Speaker: {phrases_and_speakers[i]['speaker_number']}{linesep}"
         if i < len(sentiments) :
-            print(f"Sentiment: {sentiments[i]}")
+            result += f"Sentiment: {sentiments[i]}{linesep}"
         if i < len(conversation_analysis["pii_analysis"]) :
             if len(conversation_analysis["pii_analysis"][i]) > 0 :
                 entities = reduce(lambda acc, entity : f"{acc}    Category: {entity['category']}. Text: {entity['text']}.{linesep}", conversation_analysis["pii_analysis"][i])
-                print(f"Recognized entities (PII):{linesep}{entities}")
+                result += f"Recognized entities (PII):{linesep}{entities}"
             else :
-                print("Recognized entities (PII): none.")
-        print()
-        print(reduce(lambda acc, item : f"{acc}    Aspect: {item['aspect']}. Summary: {item['text']}.{linesep}", conversation_analysis["conversation_summary"], f"Conversation summary:{linesep}"))
+                result += f"Recognized entities (PII): none.{linesep}"
+        result += linesep
+        result += reduce(lambda acc, item : f"{acc}    Aspect: {item['aspect']}. Summary: {item['text']}.{linesep}", conversation_analysis["conversation_summary"], f"Conversation summary:{linesep}")
+    return result
+
+def print_results(transcription : Dict, sentiment_analysis : Dict, conversation_analysis : Dict) -> None :
+    results = {
+        "transcription" : transcription,
+        "sentiment_analysis" : sentiment_analysis,
+        "conversation_analysis" : conversation_analysis
+    }
+    print(dumps(results, indent=4));
 
 def run() -> None :
     usage = """USAGE: dotnet run -- [...]
@@ -233,6 +279,9 @@ def run() -> None :
     --input URL                     Input audio from URL. Required.
     --stereo                        Use stereo audio format.
                                     If this is not present, mono is assumed.
+                                    
+  OUTPUT
+    --output FILE                   Output phrase list and conversation summary to text file.
 """
 
     if helper.cmd_option_exists("--help") :
@@ -241,24 +290,30 @@ def run() -> None :
         user_config = helper.user_config_from_args(usage)
         # How to use batch transcription:
         # https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/cognitive-services/Speech-Service/batch-transcription.md
-        #transcription_id = create_transcription(transcription_url); # TODO1 Fix
-        # TODO1 Fix this before uploading.
-        transcription_id = "fafe4af1-73ad-4658-b9c6-a0f3f753387d"
-        # TODO1 Fix this before uploading.
-        #wait_for_transcription(transcription_id)
-        transcription_url = get_transcription_uri(transcription_id, user_config)
-        phrases_and_speakers = get_transcription_phrases_and_speakers(transcription_url)
+        transcription_id = create_transcription(user_config)
+        wait_for_transcription(transcription_id, user_config)
+        print(f"Transcription ID: {transcription_id}")
+        transcription_files = get_transcription_files(transcription_id, user_config)
+        transcription_uri = get_transcription_uri(transcription_files, user_config)
+        transcription = get_transcription(transcription_uri);
+        phrases_and_speakers = get_transcription_phrases_and_speakers(transcription, user_config)
         phrases = list(map(lambda x : x["phrase"], phrases_and_speakers))
-        sentiments = get_sentiments(phrases, user_config)
+        sentiment_analysis = get_sentiment_analysis(phrases, user_config);
         conversation_items = transcription_phrases_to_conversation_items(phrases_and_speakers)
         # NOTE: Conversation summary is currently in gated public preview. You can sign up here:
         # https://aka.ms/applyforconversationsummarization/
-        conversation_analysis_url = request_conversation_analysis(conversation_items, user_config);
-        wait_for_conversation_analysis(conversation_analysis_url, user_config);
-        conversation_analysis_result = get_conversation_analysis(conversation_analysis_url, user_config);
-        print_results(phrases_and_speakers, sentiments, conversation_analysis_result);
+        conversation_analysis_url = request_conversation_analysis(conversation_items, user_config)
+        wait_for_conversation_analysis(conversation_analysis_url, user_config)
+        conversation_analysis = get_conversation_analysis(conversation_analysis_url, user_config)
+        if user_config["output_file_path"] is not None :
+            sentiments = get_sentiments(sentiment_analysis)
+            conversation_analysis_result = get_conversation_analysis_result(conversation_analysis, user_config)
+            output_file_path = Path(user_config["output_file_path"])
+            with open(output_file_path, mode="w", newline="") as f :
+                f.write(get_results(phrases_and_speakers, sentiments, conversation_analysis_result))
+        print_results(transcription, sentiment_analysis, conversation_analysis)
         # Clean up resources.
-        # TODO1 Fix this before uploading.
-        #delete_transcription(transcription_id);
-    
+        print("Deleting transcription.")
+        delete_transcription(transcription_id, user_config)
+
 run()

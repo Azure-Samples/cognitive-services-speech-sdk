@@ -72,6 +72,7 @@ def user_config_from_args(usage : str) -> Read_Only_Dict :
         "language" : language,
         "locale" : locale,
         "input_audio_url" : input_audio_url,
+        "output_file_path" : get_cmd_option("--output"),
         "speech_subscription_key" : speech_subscription_key,
         "speech_endpoint" : f"{speech_region}{partial_speech_endpoint}",
         "language_subscription_key" : language_subscription_key,
