@@ -105,7 +105,7 @@ namespace FetchTranscription.Language
                                 "piiCategories", FetchTranscriptionEnvironmentVariables.ConversationPiiCategories.ToList()
                             },
                             {
-                                "redactionSource", FetchTranscriptionEnvironmentVariables.ConversationPIIInferenceSource ?? DefaultInferenceSource
+                                "redactionSource", FetchTranscriptionEnvironmentVariables.ConversationPiiInferenceSource ?? DefaultInferenceSource
                             },
                             {
                                 "includeAudioRedaction", FetchTranscriptionEnvironmentVariables.ConversationPiiSetting == Connector.Enums.ConversationPiiSetting.IncludeAudioRedaction

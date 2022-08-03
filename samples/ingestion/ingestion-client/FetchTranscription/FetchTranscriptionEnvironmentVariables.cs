@@ -22,7 +22,7 @@ namespace FetchTranscriptionFunction
 
         public static readonly string ConversationPiiCategories = Environment.GetEnvironmentVariable(nameof(ConversationPiiCategories), EnvironmentVariableTarget.Process);
 
-        public static readonly string ConversationPIIInferenceSource = Environment.GetEnvironmentVariable(nameof(ConversationPIIInferenceSource), EnvironmentVariableTarget.Process);
+        public static readonly string ConversationPiiInferenceSource = Environment.GetEnvironmentVariable(nameof(ConversationPiiInferenceSource), EnvironmentVariableTarget.Process);
 
         public static readonly bool UseSqlDatabase = bool.TryParse(Environment.GetEnvironmentVariable(nameof(UseSqlDatabase), EnvironmentVariableTarget.Process), out UseSqlDatabase) && UseSqlDatabase;
 
