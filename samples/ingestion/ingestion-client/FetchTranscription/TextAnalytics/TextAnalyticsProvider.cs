@@ -66,9 +66,8 @@ namespace TextAnalytics
         public async Task<bool> TextAnalyticsRequestsCompleted(IEnumerable<AudioFileInfo> audioFileInfos)
         {
             var runningTextAnalyticsRequests = new List<TextAnalyticsRequest>();
-            var conversationRequestCompleted = true;
 
-            if (audioFileInfos.Where(audioFileInfo => audioFileInfo.TextAnalyticsRequests.UtteranceLevelRequests != null).Any())
+            if (audioFileInfos.Where(audioFileInfo => audioFileInfo.TextAnalyticsRequests.AudioLevelRequests != null).Any())
             {
                 runningTextAnalyticsRequests.AddRange(audioFileInfos.SelectMany(audioFileInfo => audioFileInfo.TextAnalyticsRequests.AudioLevelRequests).Where(text => text.Status == TextAnalyticsRequestStatus.Running));
             }
@@ -98,7 +97,7 @@ namespace TextAnalytics
                 }
             }
 
-            return textAnalyticsRequestCompleted && conversationRequestCompleted;
+            return textAnalyticsRequestCompleted;
         }
 
         /// <summary>
