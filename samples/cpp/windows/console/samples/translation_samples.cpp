@@ -8,6 +8,9 @@
 // <toplevel>
 #include <string>
 #include <vector>
+#ifdef _WIN32
+    #include <windows.h>
+#endif
 #include <speechapi_cxx.h>
 
 using namespace std;
@@ -172,7 +175,7 @@ void TranslationAndLanguageIdWithMicrophone()
     auto autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig::FromLanguages({ "en-US", "de-DE" });
 
     // Sets source and target languages
-    // The source language will be detected by the language detection feature. 
+    // The source language will be detected by the language detection feature.
     // However, the SpeechRecognitionLanguage still need to set with a locale string, but it will not be used as the source language.
     // This will be fixed in a future version of Speech SDK.
     auto fromLanguage = "en-US";
@@ -242,7 +245,7 @@ void TranslationRecognitionAndLanguageIdWithMultiLingualFile()
     promise<void> recognitionEnd;
 
     // Sets source and target languages
-    // The source language will be detected by the language detection feature. 
+    // The source language will be detected by the language detection feature.
     // However, the SpeechRecognitionLanguage still need to set with a locale string, but it will not be used as the source language.
     // This will be fixed in a future version of Speech SDK.
     auto fromLanguage = "en-US";
