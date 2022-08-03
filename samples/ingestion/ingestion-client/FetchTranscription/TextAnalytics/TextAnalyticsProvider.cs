@@ -10,14 +10,20 @@ namespace TextAnalytics
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+
     using Azure;
     using Azure.AI.TextAnalytics;
+
     using Connector;
     using Connector.Enums;
     using Connector.Serializable.TranscriptionStartedServiceBusMessage;
-    using FetchTranscription.Language;
+
     using FetchTranscriptionFunction;
+
+    using Language;
+
     using Microsoft.Extensions.Logging;
+
     using static Connector.Serializable.TranscriptionStartedServiceBusMessage.TextAnalyticsRequest;
 
     /// <summary>

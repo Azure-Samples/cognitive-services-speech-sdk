@@ -18,7 +18,6 @@ namespace FetchTranscriptionFunction
     using Connector.Enums;
     using Connector.Serializable.TranscriptionStartedServiceBusMessage;
 
-    using global::FetchTranscription.Language;
 
     using Microsoft.Extensions.Logging;
     using Newtonsoft.Json;
