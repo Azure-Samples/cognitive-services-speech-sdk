@@ -10,26 +10,32 @@ namespace FetchTranscription.Language
     using System.Linq;
     using System.Text.Json;
     using System.Threading.Tasks;
+
     using Azure;
     using Azure.AI.Language.Conversations;
     using Azure.Core;
+
     using Connector;
     using Connector.Serializable.Language.Conversations;
+    using Connector.Serializable.TranscriptionStartedServiceBusMessage;
+
     using FetchTranscriptionFunction;
+
     using Microsoft.Extensions.Logging;
+
     using Newtonsoft.Json;
+
+    using static Connector.Serializable.TranscriptionStartedServiceBusMessage.TextAnalyticsRequest;
 
     /// <summary>
     /// Analyze Conversations async client.
     /// </summary>
     public class AnalyzeConversationsProvider
     {
+        private const string DefaultInferenceSource = "lexical";
         private static readonly TimeSpan RequestTimeout = TimeSpan.FromMinutes(3);
-
         private readonly ConversationAnalysisClient ConversationAnalysisClient;
-
         private readonly string Locale;
-
         private readonly ILogger Log;
 
         public AnalyzeConversationsProvider(string locale, string subscriptionKey, string region, ILogger log)
@@ -40,9 +46,7 @@ namespace FetchTranscription.Language
             Log = log;
         }
 
-#pragma warning disable CA1822 // Mark members as static
-        public bool IsConversationalPiiEnabled()
-#pragma warning restore CA1822 // Mark members as static
+        public static bool IsConversationalPiiEnabled()
         {
             return FetchTranscriptionEnvironmentVariables.ConversationPiiSetting != Connector.Enums.ConversationPiiSetting.None;
         }
@@ -76,7 +80,7 @@ namespace FetchTranscription.Language
                                     Lexical = topResult.Lexical,
                                     Itn = topResult.ITN,
                                     MaskedItn = topResult.MaskedITN,
-                                    Id = $"{item.Channel}_{item.Offset}",
+                                    Id = item.Offset,
                                     ParticipantId = $"{item.Channel}",
                                     AudioTimings = topResult.Words
                                         ?.Select(word => new WordLevelAudioTiming
@@ -98,10 +102,10 @@ namespace FetchTranscription.Language
                         Parameters = new Dictionary<string, object>
                         {
                             {
-                                "piiCategories",    FetchTranscriptionEnvironmentVariables.ConversationPiiCategories.Select(s => s.ToString()).ToList()
+                                "piiCategories", FetchTranscriptionEnvironmentVariables.ConversationPiiCategories.ToList()
                             },
                             {
-                                "redactionSource", "lexical"
+                                "redactionSource", FetchTranscriptionEnvironmentVariables.ConversationPIIInferenceSource ?? DefaultInferenceSource
                             },
                             {
                                 "includeAudioRedaction", FetchTranscriptionEnvironmentVariables.ConversationPiiSetting == Connector.Enums.ConversationPiiSetting.IncludeAudioRedaction
@@ -117,12 +121,10 @@ namespace FetchTranscription.Language
         /// <summary>
         /// API to get the job result of all analyze conversation jobs.
         /// </summary>
-        /// <param name="jobIds">Enumerable of jobIds.</param>
+        /// <param name="jobIds">Enumerable of conversational jobIds.</param>
         /// <returns>Enumerable of results of conversation PII redaction and errors encountered if any.</returns>
-        public async Task<(IEnumerable<AnalyzeConversationPiiResults> piiResults, IEnumerable<string> errors)> GetConversationsOperationsResult(IEnumerable<string> jobIds)
+        public async Task<(AnalyzeConversationPiiResults piiResults, IEnumerable<string> errors)> GetConversationsOperationsResult(IEnumerable<string> jobIds)
         {
-            var piiResults = new List<AnalyzeConversationPiiResults>();
-
             var errors = new List<string>();
 
             if (!jobIds.Any())
@@ -133,16 +135,28 @@ namespace FetchTranscription.Language
             var tasks = jobIds.Select(async jobId => await GetConversationsOperationResults(jobId).ConfigureAwait(false));
 
             var results = await Task.WhenAll(tasks).ConfigureAwait(false);
-            foreach (var result in results)
-            {
-                piiResults.AddRange(result.piiResults);
 
-                var piiErrors = piiResults.Where(s => s.Errors != null || s.Errors.Any());
-                if (piiErrors.Any())
-                {
-                    errors.AddRange(piiErrors.SelectMany(s => s.Errors).Select(s => $"Error thrown for conversation : {s.Id}"));
-                }
+            var piiErrors = results.SelectMany(result => result.piiResults).SelectMany(s => s.Errors);
+            if (piiErrors.Any())
+            {
+                errors.AddRange(piiErrors.Select(s => $"Error thrown for conversation : {s.Id}"));
+                return (null, errors);
             }
+
+            var warnings = results.SelectMany(result => result.piiResults).SelectMany(s => s.Conversations).SelectMany(s => s.Warnings);
+            var conversationItems = results.SelectMany(result => result.piiResults).SelectMany(s => s.Conversations).SelectMany(s => s.ConversationItems);
+
+            var piiResults = new AnalyzeConversationPiiResults
+            {
+                Conversations = new List<ConversationPiiResult>
+                {
+                    new ConversationPiiResult
+                    {
+                        Warnings = warnings,
+                        ConversationItems = conversationItems
+                    }
+                }
+            };
 
             return (piiResults, errors);
         }
@@ -152,17 +166,14 @@ namespace FetchTranscription.Language
         /// </summary>
         /// <param name="conversationRequests">Enumerable for conversationRequests.</param>
         /// <returns>True if all requests completed, else false.</returns>
-        public async Task<bool> ConversationalRequestsCompleted(IEnumerable<Connector.Serializable.TranscriptionStartedServiceBusMessage.TextAnalyticsRequest> conversationRequests)
+        public async Task<bool> ConversationalRequestsCompleted(IEnumerable<AudioFileInfo> audioFileInfos)
         {
-            if (!IsConversationalPiiEnabled())
+            if (!IsConversationalPiiEnabled() || !audioFileInfos.Where(audioFileInfo => audioFileInfo.TextAnalyticsRequests.ConversationRequests != null).Any())
             {
                 return true;
             }
 
-            if (conversationRequests == null || !conversationRequests.Any())
-            {
-                return true;
-            }
+            var conversationRequests = audioFileInfos.SelectMany(audioFileInfo => audioFileInfo.TextAnalyticsRequests.ConversationRequests).Where(text => text.Status == TextAnalyticsRequestStatus.Running);
 
             var runningJobsCount = 0;
 
@@ -185,6 +196,45 @@ namespace FetchTranscription.Language
             }
 
             return runningJobsCount == 0;
+        }
+
+        /// <summary>
+        /// Gets the (audio-level) results from text analytics, adds the results to the speech transcript.
+        /// </summary>
+        /// <param name="conversationJobIds">The conversation analysis job Ids.</param>
+        /// <param name="speechTranscript">The speech transcript object.</param>
+        /// <returns>The errors, if any.</returns>
+        public async Task<IEnumerable<string>> AddConversationalEntitiesAsync(
+            IEnumerable<string> conversationJobIds,
+            SpeechTranscript speechTranscript)
+        {
+            speechTranscript = speechTranscript ?? throw new ArgumentNullException(nameof(speechTranscript));
+            var errors = new List<string>();
+
+            var isConversationalPiiEnabled = IsConversationalPiiEnabled();
+            if (!isConversationalPiiEnabled)
+            {
+                return new List<string>();
+            }
+
+            if (conversationJobIds == null || !conversationJobIds.Any())
+            {
+                return errors;
+            }
+
+            var conversationsPiiResults = await GetConversationsOperationsResult(conversationJobIds).ConfigureAwait(false);
+
+            if (conversationsPiiResults.errors.Any())
+            {
+                errors.AddRange(conversationsPiiResults.errors);
+            }
+
+            speechTranscript.ConversationAnalyticsResults = new ConversationAnalyticsResults
+            {
+                AnalyzeConversationPiiResults = conversationsPiiResults.piiResults,
+            };
+
+            return errors;
         }
 
         private async Task<(IEnumerable<string> jobId, IEnumerable<string> errors)> SubmitConversationsAsync(dynamic data)

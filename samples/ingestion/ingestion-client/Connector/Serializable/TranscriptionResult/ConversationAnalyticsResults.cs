@@ -11,9 +11,9 @@ namespace Connector
     public class ConversationAnalyticsResults
     {
         [JsonProperty("conversationPiiResults")]
-        public AnalyzeConversationPiiResults AnalyzeConversationPiiResults { get; }
+        public AnalyzeConversationPiiResults AnalyzeConversationPiiResults { get; set; }
 
         [JsonProperty("conversationSummarizationResults")]
-        public AnalyzeConversationSummarizationResults AnalyzeConversationSummarizationResults { get; }
+        public AnalyzeConversationSummarizationResults AnalyzeConversationSummarizationResults { get; set; }
     }
 }

@@ -10,23 +10,14 @@ namespace TextAnalytics
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
-
     using Azure;
     using Azure.AI.TextAnalytics;
-
     using Connector;
     using Connector.Enums;
-    using Connector.Serializable.Language.Conversations;
     using Connector.Serializable.TranscriptionStartedServiceBusMessage;
-
     using FetchTranscription.Language;
-
     using FetchTranscriptionFunction;
-
     using Microsoft.Extensions.Logging;
-
-    using Newtonsoft.Json;
-
     using static Connector.Serializable.TranscriptionStartedServiceBusMessage.TextAnalyticsRequest;
 
     /// <summary>
@@ -56,25 +47,22 @@ namespace TextAnalytics
 
         private readonly TextAnalyticsClient TextAnalyticsClient;
 
-        private readonly AnalyzeConversationsProvider ConversationsAnalysisProvider;
-
         private readonly string Locale;
 
         private readonly ILogger Log;
 
-        public TextAnalyticsProvider(string locale, string subscriptionKey, string region, ILogger log, AnalyzeConversationsProvider conversationsProvider)
+        public TextAnalyticsProvider(string locale, string subscriptionKey, string region, ILogger log)
         {
             TextAnalyticsClient = new TextAnalyticsClient(new Uri($"https://{region}.api.cognitive.microsoft.com"), new AzureKeyCredential(subscriptionKey));
             Locale = locale;
             Log = log;
-            ConversationsAnalysisProvider = conversationsProvider;
         }
 
         /// <summary>
         /// Checks for all text analytics requests that were marked as running if they have completed and sets a new state accordingly.
-        /// </summary>
         /// <param name="audioFileInfos"></param>
         /// <returns>True if all requests completed, else false.</returns>
+        /// </summary>
         public async Task<bool> TextAnalyticsRequestsCompleted(IEnumerable<AudioFileInfo> audioFileInfos)
         {
             var runningTextAnalyticsRequests = new List<TextAnalyticsRequest>();
@@ -108,13 +96,6 @@ namespace TextAnalytics
                 {
                     textAnalyticsRequestCompleted = false;
                 }
-            }
-
-            if (audioFileInfos.Where(audioFileInfo => audioFileInfo.TextAnalyticsRequests.UtteranceLevelRequests != null).Any())
-            {
-                var runningConversationJobs = audioFileInfos.SelectMany(audioFileInfo => audioFileInfo.TextAnalyticsRequests.ConversationRequests).Where(text => text.Status == TextAnalyticsRequestStatus.Running);
-
-                conversationRequestCompleted = await ConversationsAnalysisProvider.ConversationalRequestsCompleted(runningConversationJobs).ConfigureAwait(false);
             }
 
             return textAnalyticsRequestCompleted && conversationRequestCompleted;
@@ -205,12 +186,10 @@ namespace TextAnalytics
         /// Gets the (utterance-level) results from text analytics, adds the results to the speech transcript.
         /// </summary>
         /// <param name="jobIds">The text analytics job ids.</param>
-        /// <param name="conversationJobIds">The conversation analysis job Ids.</param>
         /// <param name="speechTranscript">The speech transcript object.</param>
         /// <returns>The errors, if any.</returns>
         public async Task<IEnumerable<string>> AddUtteranceLevelEntitiesAsync(
             IEnumerable<string> jobIds,
-            IEnumerable<string> conversationJobIds,
             SpeechTranscript speechTranscript)
         {
             speechTranscript = speechTranscript ?? throw new ArgumentNullException(nameof(speechTranscript));
@@ -224,38 +203,10 @@ namespace TextAnalytics
             var (sentimentResults, piiResults, requestErrors) = await this.GetOperationsResultsAsync(jobIds).ConfigureAwait(false);
             errors.AddRange(requestErrors);
 
-            (IEnumerable<AnalyzeConversationPiiResults> piiResults, IEnumerable<string> errors) conversationsPiiResults = default;
-
-            var isConversationalPiiEnabled = ConversationsAnalysisProvider.IsConversationalPiiEnabled();
-            if (isConversationalPiiEnabled)
-            {
-                if (conversationJobIds == null || !conversationJobIds.Any())
-                {
-                    return errors;
-                }
-
-                conversationsPiiResults = await ConversationsAnalysisProvider.GetConversationsOperationsResult(conversationJobIds).ConfigureAwait(false);
-            }
-
             foreach (var recognizedPhrase in speechTranscript.RecognizedPhrases)
             {
                 var index = $"{recognizedPhrase.Channel}_{recognizedPhrase.Offset}";
                 var firstNBest = recognizedPhrase.NBest.FirstOrDefault();
-
-                if (isConversationalPiiEnabled)
-                {
-                    // Might consider moving to a lookup as loop will add latency.
-                    var piiResult = conversationsPiiResults.piiResults
-                        .SelectMany(pii => pii.Conversations)
-                        .SelectMany(conv => conv.ConversationItems)
-                        .Where(item => item.Id == index)
-                        .FirstOrDefault();
-
-                    firstNBest.Display = piiResult?.RedactedContent.Text ?? string.Empty;
-                    firstNBest.ITN = piiResult?.RedactedContent.Itn ?? string.Empty;
-                    firstNBest.Lexical = piiResult?.RedactedContent.Lexical ?? string.Empty;
-                    firstNBest.MaskedITN = piiResult?.RedactedContent.MaskedItn ?? string.Empty;
-                }
 
                 if (sentimentResults != null)
                 {
@@ -281,12 +232,10 @@ namespace TextAnalytics
         /// Gets the (audio-level) results from text analytics, adds the results to the speech transcript.
         /// </summary>
         /// <param name="jobIds">The text analytics job ids.</param>
-        /// <param name="conversationJobIds">The conversation analysis job Ids.</param>
         /// <param name="speechTranscript">The speech transcript object.</param>
         /// <returns>The errors, if any.</returns>
         public async Task<IEnumerable<string>> AddAudioLevelEntitiesAsync(
             IEnumerable<string> jobIds,
-            IEnumerable<string> conversationJobIds,
             SpeechTranscript speechTranscript)
         {
             speechTranscript = speechTranscript ?? throw new ArgumentNullException(nameof(speechTranscript));
@@ -295,18 +244,6 @@ namespace TextAnalytics
             if (jobIds == null || !jobIds.Any())
             {
                 return errors;
-            }
-
-            (IEnumerable<AnalyzeConversationPiiResults> piiResults, IEnumerable<string> errors) conversationsPiiResults = default;
-            var isConversationalPiiEnabled = ConversationsAnalysisProvider.IsConversationalPiiEnabled();
-            if (isConversationalPiiEnabled)
-            {
-                if (conversationJobIds == null || !conversationJobIds.Any())
-                {
-                    return errors;
-                }
-
-                conversationsPiiResults = await ConversationsAnalysisProvider.GetConversationsOperationsResult(conversationJobIds).ConfigureAwait(false);
             }
 
             var (sentimentResults, piiResults, requestErrors) = await this.GetOperationsResultsAsync(jobIds).ConfigureAwait(false);
@@ -327,27 +264,7 @@ namespace TextAnalytics
                     };
                 }
 
-                if (ConversationsAnalysisProvider.IsConversationalPiiEnabled())
-                {
-                    if (conversationsPiiResults.piiResults != null)
-                    {
-                        // TODO: Figure out what is the right order by predicate for ensuring no out of order conversation items.
-                        var piiResult = conversationsPiiResults.piiResults
-                        .SelectMany(response => response.Conversations)
-                        .SelectMany(conv => conv.ConversationItems)
-                        .Where(convItem => convItem.Id.StartsWith($"{channel}", StringComparison.OrdinalIgnoreCase))
-                        .Select(conv => conv.RedactedContent);
-
-                        if (piiResult != null)
-                        {
-                            combinedRecognizedPhrase.Display = string.Join(" ", piiResult.Select(content => content.Text));
-                            combinedRecognizedPhrase.Lexical = string.Join(" ", piiResult.Select(content => content.Lexical));
-                            combinedRecognizedPhrase.ITN = string.Join(" ", piiResult.Select(content => content.Itn));
-                            combinedRecognizedPhrase.MaskedITN = string.Join(" ", piiResult.Select(content => content.MaskedItn));
-                        }
-                    }
-                }
-                else
+                if (!AnalyzeConversationsProvider.IsConversationalPiiEnabled())
                 {
                     var piiResult = piiResults.Where(document => document.Id.Equals($"{channel}", StringComparison.OrdinalIgnoreCase)).SingleOrDefault();
                     if (piiResult != null)

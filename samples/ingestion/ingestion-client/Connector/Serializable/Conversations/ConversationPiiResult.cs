@@ -18,10 +18,10 @@ namespace Connector.Serializable.Language.Conversations
         }
 
         [JsonProperty(PropertyName = "conversationItems")]
-        public IReadOnlyList<ConversationPiiResultItem> ConversationItems
+        public IEnumerable<ConversationPiiResultItem> ConversationItems
         {
             get;
-            private set;
+            set;
         }
 
         [JsonProperty("warnings")]
