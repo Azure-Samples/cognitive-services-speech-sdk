@@ -8,6 +8,7 @@ from collections.abc import Mapping
 from datetime import time
 from sys import argv
 from typing import Optional
+from pathlib import Path
 
 import azure.cognitiveservices.speech as speechsdk
 
