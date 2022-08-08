@@ -164,7 +164,7 @@ namespace Language
         /// <summary>
         /// Checks for all conversational analytics requests that were marked as running if they have completed and sets a new state accordingly.
         /// </summary>
-        /// <param name="conversationRequests">Enumerable for conversationRequests.</param>
+        /// <param name="audioFileInfos">Enumerable for audioFiles.</param>
         /// <returns>True if all requests completed, else false.</returns>
         public async Task<bool> ConversationalRequestsCompleted(IEnumerable<AudioFileInfo> audioFileInfos)
         {
