@@ -27,7 +27,7 @@ except ImportError:
 # Replace with your own subscription key and service region (e.g., "westus").
 speech_key, service_region = "YourSubscriptionKey", "YourServiceRegion"
 
-# Specify the path to an audio file containing speech (mono WAV / PCM with a sampling rate of 16
+# Specify the path to audio files containing speech (mono WAV / PCM with a sampling rate of 16
 # kHz).
 single_language_wav_file = "whatstheweatherlike.wav"
 multilingual_wav_file = "en-us_zh-cn.wav"
