@@ -41,6 +41,8 @@ samples = OrderedDict([
         translation_sample.translation_once_from_mic,
         translation_sample.translation_once_from_file,
         translation_sample.translation_continuous,
+        translation_sample.translation_once_with_lid_from_file,
+        translation_sample.translation_continuous_with_lid_from_multilingual_file,
     ]), (transcription_sample, [
         transcription_sample.conversation_transcription_differentiate_speakers,
     ]), (speech_synthesis_sample, [
