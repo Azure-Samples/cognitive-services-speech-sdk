@@ -364,17 +364,12 @@ def speech_recognize_continuous_async_from_microphone():
     speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config)
 
     done = False
-    cancel = False
-
+    
     def recognizing_cb(evt: speechsdk.SpeechRecognitionEventArgs):
         print('RECOGNIZING: {}'.format(evt))
 
     def recognized_cb(evt: speechsdk.SpeechRecognitionEventArgs):
         print('RECOGNIZED: {}'.format(evt))
-        if (evt.result.text.lower() == "cancel."):  # note case and punctuation...
-            print("Detected Cancel command, stopping recognition.")
-            nonlocal cancel
-            cancel = True
 
     def stop_cb(evt: speechsdk.SessionEventArgs):
         """callback that signals to stop continuous recognition"""
@@ -394,16 +389,18 @@ def speech_recognize_continuous_async_from_microphone():
     # Call stop_continuous_recognition_async() to stop recognition.
     result_future = speech_recognizer.start_continuous_recognition_async()
 
-    result_future.get()  # initialization is done.
-    print('voidfuture compleated, initialization is done, and Continuous Recognition is now running....')
-    print('Say "Cancel" to stop recognition.')
+    result_future.get()  # wait for voidfuture, so we know engine initialization is done.
+    print('Continuous Recognition is now running, say something.')
 
     while not done:
-        # No real sample work to do on this thread, so just sleep to keep
-        # speech_recognizer from getting destroyed if thread exits early.
-        time.sleep(.5)
-        if (cancel):
+        # No real sample parallel work to do on this thread, so just wait for user to type stop.
+        # Can't exit function or speech_recognizer will go out of scope and be destroyed while running.
+        print('type "stop" then enter when done')
+        stop = input()
+        if (stop.lower() == "stop"):
+            print('Stopping async recognition.')
             speech_recognizer.stop_continuous_recognition_async()
+            break
 
     print("recognition stopped, main thread can exit now.")
 
