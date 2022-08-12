@@ -76,7 +76,15 @@ namespace StartTranscriptionByTimer
                 var jobName = $"{startDateTime.ToString("yyyy-MM-ddTHH:mm:ss", CultureInfo.InvariantCulture)}_{i}";
                 var chunk = chunkedMessages.ElementAt(i);
                 await StartBatchTranscriptionJobAsync(chunk, jobName).ConfigureAwait(false);
-                await messageReceiver.CompleteMessageAsync(chunk[i]).ConfigureAwait(false);
+
+                // Complete messages in batches of 10, process each batch in parallel:
+                var messagesInChunk = chunk.Count;
+                for (var j = 0; j < messagesInChunk; j += 10)
+                {
+                    var completionBatch = chunk.Skip(j).Take(Math.Min(10, messagesInChunk - j));
+                    var completionTasks = completionBatch.Select(sb => messageReceiver.CompleteMessageAsync(sb));
+                    await Task.WhenAll(completionTasks).ConfigureAwait(false);
+                }
 
                 // only renew lock after 2 minutes
                 if (stopwatch.Elapsed.TotalSeconds > 120)
