@@ -7,6 +7,8 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.CognitiveServices.Speech;
+using Microsoft.CognitiveServices.Speech.Audio;
+
 
 namespace helloworld
 {
