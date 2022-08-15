@@ -106,6 +106,7 @@
             conversation = SpeechSDK.Conversation.createConversationAsync(speechConfig, randomId);
             window.console.log("conversation created, id: " + randomId);
             transcriber = new SpeechSDK.ConversationTranscriber(audioConfig);
+
             transcriber.joinConversationAsync(conversation, () => {
                 var voiceSignatureUser1 = `{ 
                   Version: 0,
@@ -117,7 +118,9 @@
                   Tag: "<<VOICE_TAG_HERE>>",
                   Data: "<<VOICE_DATA_HERE>>"
                  }`;
-                // creates a participant
+                
+                {
+                 // creates a participant
                 var user1 = SpeechSDK.Participant.From("user1@example.com", "en-us", voiceSignatureUser1);
 
                 // creates another participant
@@ -125,9 +128,16 @@
 
                 // Adds user1 as a participant to the conversation.
                 conversation.addParticipantAsync(user1);
-
+                
                 // Adds user2 as a participant to the conversation.
                 conversation.addParticipantAsync(user2);
+                }
+
+                var speechContext = {"mode": "Conversation"};
+                speechContext["enrichment"] = {"conversation": {"disfluency": "Raw"}};
+
+                var connection = transcriber.connection;
+                connection.setMessageProperty("speech.context", "phraseDetection", speechContext);
 
                 transcriber.sessionStarted = function (s, e) {
                     window.console.log(e);
