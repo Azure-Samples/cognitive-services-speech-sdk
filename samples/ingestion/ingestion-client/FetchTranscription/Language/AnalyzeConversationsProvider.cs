@@ -80,7 +80,7 @@ namespace Language
                                     Lexical = topResult.Lexical,
                                     Itn = topResult.ITN,
                                     MaskedItn = topResult.MaskedITN,
-                                    Id = item.Offset,
+                                    Id = $"{item.Offset}__{item.Channel}",
                                     ParticipantId = $"{item.Channel}",
                                     AudioTimings = topResult.Words
                                         ?.Select(word => new WordLevelAudioTiming

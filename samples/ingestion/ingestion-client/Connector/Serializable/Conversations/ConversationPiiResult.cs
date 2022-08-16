@@ -17,7 +17,7 @@ namespace Connector.Serializable.Language.Conversations
             set;
         }
 
-        [JsonProperty(PropertyName = "conversationItems")]
+        [JsonProperty(PropertyName = "conversationItems", ItemConverterType = typeof(ConversationPiiCustomConverter))]
         public IEnumerable<ConversationPiiResultItem> ConversationItems
         {
             get;

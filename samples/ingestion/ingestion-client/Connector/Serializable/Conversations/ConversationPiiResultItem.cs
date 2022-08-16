@@ -22,6 +22,26 @@ namespace Connector.Serializable.Language.Conversations
         }
 
         /// <summary>
+        /// Gets or sets the participant id of the conversation item.
+        /// </summary>
+        [JsonProperty(PropertyName = "participantId")]
+        public string ParticipantId
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets the offset of the conversation item.
+        /// </summary>
+        [JsonProperty(PropertyName = "offset")]
+        public string Offset
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// Gets or sets the redacted content for transcript.
         /// </summary>
         [JsonProperty(PropertyName = "redactedContent")]
