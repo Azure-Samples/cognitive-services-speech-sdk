@@ -364,7 +364,7 @@ def speech_recognize_continuous_async_from_microphone():
     speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config)
 
     done = False
-    
+
     def recognizing_cb(evt: speechsdk.SpeechRecognitionEventArgs):
         print('RECOGNIZING: {}'.format(evt))
 
