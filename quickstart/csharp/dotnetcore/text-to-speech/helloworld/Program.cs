@@ -5,68 +5,58 @@
 
 // <code>
 using System;
+using System.IO;
 using System.Threading.Tasks;
 using Microsoft.CognitiveServices.Speech;
 using Microsoft.CognitiveServices.Speech.Audio;
 
-
-namespace helloworld
+class Program 
 {
-    class Program
+    static string YourSubscriptionKey = "YourSubscriptionKey";
+    static string YourServiceRegion = "YourServiceRegion";
+
+    static void OutputSpeechSynthesisResult(SpeechSynthesisResult speechSynthesisResult, string text)
     {
-        public static async Task SynthesisToSpeakerAsync()
+        switch (speechSynthesisResult.Reason)
         {
-            // To support Chinese Characters on Windows platform
-            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
-            {
-                Console.InputEncoding = System.Text.Encoding.Unicode;
-                Console.OutputEncoding = System.Text.Encoding.Unicode;
-            }
+            case ResultReason.SynthesizingAudioCompleted:
+                Console.WriteLine($"Speech synthesized for text: [{text}]");
+                break;
+            case ResultReason.Canceled:
+                var cancellation = SpeechSynthesisCancellationDetails.FromResult(speechSynthesisResult);
+                Console.WriteLine($"CANCELED: Reason={cancellation.Reason}");
 
-
-            // Creates an instance of a speech config with specified subscription key and service region.
-            // Replace with your own subscription key and service region (e.g., "westus").
-            var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
-
-            // Set the voice name, refer to https://aka.ms/speech/voices/neural for full list.
-            config.SpeechSynthesisVoiceName = "en-US-AriaNeural";
-
-
-            // Creates a speech synthesizer using the default speaker as audio output.
-            using (var synthesizer = new SpeechSynthesizer(config))
-            {
-                // Receive a text from console input and synthesize it to speaker.
-                Console.WriteLine("Type some text that you want to speak...");
-                Console.Write("> ");
-                string text = Console.ReadLine();
-                using (var result = await synthesizer.SpeakTextAsync(text))
+                if (cancellation.Reason == CancellationReason.Error)
                 {
-                    if (result.Reason == ResultReason.SynthesizingAudioCompleted)
-                    {
-                        Console.WriteLine($"Speech synthesized to speaker for text [{text}]");
-                    }
-                    else if (result.Reason == ResultReason.Canceled)
-                    {
-                        var cancellation = SpeechSynthesisCancellationDetails.FromResult(result);
-                        Console.WriteLine($"CANCELED: Reason={cancellation.Reason}");
-
-                        if (cancellation.Reason == CancellationReason.Error)
-                        {
-                            Console.WriteLine($"CANCELED: ErrorCode={cancellation.ErrorCode}");
-                            Console.WriteLine($"CANCELED: ErrorDetails=[{cancellation.ErrorDetails}]");
-                            Console.WriteLine($"CANCELED: Did you update the subscription info?");
-                        }
-                    }
+                    Console.WriteLine($"CANCELED: ErrorCode={cancellation.ErrorCode}");
+                    Console.WriteLine($"CANCELED: ErrorDetails=[{cancellation.ErrorDetails}]");
+                    Console.WriteLine($"CANCELED: Did you set the speech resource key and region values?");
                 }
-            }
+                break;
+            default:
+                break;
+        }
+    }
+
+    async static Task Main(string[] args)
+    {
+        var speechConfig = SpeechConfig.FromSubscription(YourSubscriptionKey, YourServiceRegion);      
+
+        // The language of the voice that speaks.
+        speechConfig.SpeechSynthesisVoiceName = "en-US-JennyNeural"; 
+
+        using (var speechSynthesizer = new SpeechSynthesizer(speechConfig))
+        {
+            // Get text from the console and synthesize to the default speaker.
+            Console.WriteLine("Enter some text that you want to speak >");
+            string text = Console.ReadLine();
+
+            var speechSynthesisResult = await speechSynthesizer.SpeakTextAsync(text);
+            OutputSpeechSynthesisResult(speechSynthesisResult, text);
         }
 
-        static async Task Main()
-        {
-            await SynthesisToSpeakerAsync();
-            Console.WriteLine("Press any key to exit...");
-            Console.ReadKey();
-        }
+        Console.WriteLine("Press any key to exit...");
+        Console.ReadKey();
     }
 }
 // </code>

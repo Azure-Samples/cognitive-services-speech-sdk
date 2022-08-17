@@ -2,30 +2,27 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
-
-#include "stdafx.h"
-// <code>
-#include <iostream>
+#include <iostream> // cin, cout
 #include <speechapi_cxx.h>
 
 using namespace std;
 using namespace Microsoft::CognitiveServices::Speech;
+using namespace Microsoft::CognitiveServices::Speech::Audio;
 
-void synthesizeSpeech()
+auto YourSubscriptionKey = "YourSubscriptionKey";
+auto YourServiceRegion = "YourServiceRegion";
+
+int main()
 {
-    // Creates an instance of a speech config with specified subscription key and service region.
-    // Replace with your own subscription key and service region (e.g., "westus").
-    auto config = SpeechConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+    auto speechConfig = SpeechConfig::FromSubscription(YourSubscriptionKey, YourServiceRegion);
 
-    // Set the voice name, refer to https://aka.ms/speech/voices/neural for full list.
-    config->SetSpeechSynthesisVoiceName("en-US-AriaNeural");
+    // The language of the voice that speaks.
+    speechConfig->SetSpeechSynthesisVoiceName("en-US-JennyNeural");
 
-    // Creates a speech synthesizer using the default speaker as audio output. The default spoken language is "en-us".
-    auto synthesizer = SpeechSynthesizer::FromConfig(config);
+    auto synthesizer = SpeechSynthesizer::FromConfig(speechConfig);
 
-    // Receive a text from console input and synthesize it to speaker.
-    cout << "Type some text that you want to speak..." << std::endl;
-    cout << "> ";
+    // Get text from the console and synthesize to the default speaker.
+    cout << "Enter some text that you want to speak >" << std::endl;
     std::string text;
     getline(cin, text);
 
@@ -45,25 +42,11 @@ void synthesizeSpeech()
         {
             cout << "CANCELED: ErrorCode=" << (int)cancellation->ErrorCode << std::endl;
             cout << "CANCELED: ErrorDetails=[" << cancellation->ErrorDetails << "]" << std::endl;
-            cout << "CANCELED: Did you update the subscription info?" << std::endl;
+            cout << "CANCELED: Did you set the speech resource key and region values?" << std::endl;
         }
     }
 
-    // This is to give some time for the speaker to finish playing back the audio
     cout << "Press enter to exit..." << std::endl;
     cin.get();
-}
-
-int wmain()
-{
-    try
-    {
-        synthesizeSpeech();
-    }
-    catch (exception e)
-    {
-        cout << e.what();
-    }
-    return 0;
 }
 // </code>

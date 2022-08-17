@@ -4,63 +4,53 @@
 //
 
 // <code>
+
 using System;
+using System.IO;
 using System.Threading.Tasks;
 using Microsoft.CognitiveServices.Speech;
+using Microsoft.CognitiveServices.Speech.Audio;
 
-namespace helloworld
+class Program 
 {
-    class Program
+    static string YourSubscriptionKey = "YourSubscriptionKey";
+    static string YourServiceRegion = "YourServiceRegion";
+
+    static void OutputSpeechRecognitionResult(SpeechRecognitionResult speechRecognitionResult)
     {
-        public static async Task RecognizeSpeechAsync()
+        switch (speechRecognitionResult.Reason)
         {
-            // Creates an instance of a speech config with specified subscription key and service region.
-            // Replace with your own subscription key // and service region (e.g., "westus").
-            var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+            case ResultReason.RecognizedSpeech:
+                Console.WriteLine($"RECOGNIZED: Text={speechRecognitionResult.Text}");
+                break;
+            case ResultReason.NoMatch:
+                Console.WriteLine($"NOMATCH: Speech could not be recognized.");
+                break;
+            case ResultReason.Canceled:
+                var cancellation = CancellationDetails.FromResult(speechRecognitionResult);
+                Console.WriteLine($"CANCELED: Reason={cancellation.Reason}");
 
-            // Creates a speech recognizer.
-            using (var recognizer = new SpeechRecognizer(config))
-            {
-                Console.WriteLine("Say something...");
-
-                // Starts speech recognition, and returns after a single utterance is recognized. The end of a
-                // single utterance is determined by listening for silence at the end or until a maximum of 15
-                // seconds of audio is processed.  The task returns the recognition text as result. 
-                // Note: Since RecognizeOnceAsync() returns only a single utterance, it is suitable only for single
-                // shot recognition like command or query. 
-                // For long-running multi-utterance recognition, use StartContinuousRecognitionAsync() instead.
-                var result = await recognizer.RecognizeOnceAsync();
-
-                // Checks result.
-                if (result.Reason == ResultReason.RecognizedSpeech)
+                if (cancellation.Reason == CancellationReason.Error)
                 {
-                    Console.WriteLine($"We recognized: {result.Text}");
+                    Console.WriteLine($"CANCELED: ErrorCode={cancellation.ErrorCode}");
+                    Console.WriteLine($"CANCELED: ErrorDetails={cancellation.ErrorDetails}");
+                    Console.WriteLine($"CANCELED: Did you set the speech resource key and region values?");
                 }
-                else if (result.Reason == ResultReason.NoMatch)
-                {
-                    Console.WriteLine($"NOMATCH: Speech could not be recognized.");
-                }
-                else if (result.Reason == ResultReason.Canceled)
-                {
-                    var cancellation = CancellationDetails.FromResult(result);
-                    Console.WriteLine($"CANCELED: Reason={cancellation.Reason}");
-
-                    if (cancellation.Reason == CancellationReason.Error)
-                    {
-                        Console.WriteLine($"CANCELED: ErrorCode={cancellation.ErrorCode}");
-                        Console.WriteLine($"CANCELED: ErrorDetails={cancellation.ErrorDetails}");
-                        Console.WriteLine($"CANCELED: Did you update the subscription info?");
-                    }
-                }
-            }
+                break;
         }
+    }
 
-        static async Task Main()
-        {
-            await RecognizeSpeechAsync();
-            Console.WriteLine("Please press <Return> to continue.");
-            Console.ReadLine();
-        }
+    async static Task Main(string[] args)
+    {
+        var speechConfig = SpeechConfig.FromSubscription(YourSubscriptionKey, YourServiceRegion);        
+        speechConfig.SpeechRecognitionLanguage = "en-US";
+
+        using var audioConfig = AudioConfig.FromDefaultMicrophoneInput();
+        using var speechRecognizer = new SpeechRecognizer(speechConfig, audioConfig);
+
+        Console.WriteLine("Speak into your microphone.");
+        var speechRecognitionResult = await speechRecognizer.RecognizeOnceAsync();
+        OutputSpeechRecognitionResult(speechRecognitionResult);
     }
 }
 // </code>
