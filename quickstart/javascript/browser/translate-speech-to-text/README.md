@@ -7,7 +7,7 @@ This sample shows how to translate speech with the Speech Service using the Spee
 ## Prerequisites
 
 * A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
-* A PC or Mac, with a working microphone.
+* A PC or Mac, with a working with a speaker.
 * A text editor.
 * Optionally, a web server that supports hosting PHP scripts.
 
