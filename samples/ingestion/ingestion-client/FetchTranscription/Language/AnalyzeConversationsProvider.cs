@@ -33,7 +33,6 @@ namespace Language
     public class AnalyzeConversationsProvider
     {
         private const string DefaultInferenceSource = "lexical";
-        private const int MaxChunkSize = 100;
         private static readonly TimeSpan RequestTimeout = TimeSpan.FromMinutes(3);
         private readonly ConversationAnalysisClient ConversationAnalysisClient;
         private readonly string Locale;
@@ -70,7 +69,7 @@ namespace Language
                 var topResult = recognizedPhrase.NBest.First();
                 var textCount = topResult.Lexical.Length;
 
-                if (count == -1 || (count + textCount) > MaxChunkSize)
+                if (count == -1 || (count + textCount) > FetchTranscriptionEnvironmentVariables.ConversationPiiMaxChunkSize)
                 {
                     count = 0;
                     jobCount++;

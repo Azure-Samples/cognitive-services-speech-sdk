@@ -24,6 +24,8 @@ namespace FetchTranscriptionFunction
 
         public static readonly string ConversationPiiInferenceSource = Environment.GetEnvironmentVariable(nameof(ConversationPiiInferenceSource), EnvironmentVariableTarget.Process);
 
+        public static readonly int ConversationPiiMaxChunkSize = int.TryParse(Environment.GetEnvironmentVariable(nameof(ConversationPiiMaxChunkSize), EnvironmentVariableTarget.Process), out ConversationPiiMaxChunkSize) ? ConversationPiiMaxChunkSize : Constants.DefaultConversationAnalysisMaxChunkSize;
+
         public static readonly bool UseSqlDatabase = bool.TryParse(Environment.GetEnvironmentVariable(nameof(UseSqlDatabase), EnvironmentVariableTarget.Process), out UseSqlDatabase) && UseSqlDatabase;
 
         public static readonly int InitialPollingDelayInMinutes = int.TryParse(Environment.GetEnvironmentVariable(nameof(InitialPollingDelayInMinutes), EnvironmentVariableTarget.Process), out InitialPollingDelayInMinutes) ? InitialPollingDelayInMinutes.ClampInt(2, Constants.MaxInitialPollingDelayInMinutes) : Constants.DefaultInitialPollingDelayInMinutes;
