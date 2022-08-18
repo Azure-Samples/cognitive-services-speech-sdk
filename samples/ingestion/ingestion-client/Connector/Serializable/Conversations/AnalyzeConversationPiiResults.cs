@@ -10,6 +10,9 @@ namespace Connector.Serializable.Language.Conversations
 
     public class AnalyzeConversationPiiResults : AnalyzeConversationResultsBase
     {
+        [JsonProperty("combinedRedactedContent")]
+        public IEnumerable<CombinedConversationPiiResult> CombinedRedactedContent { get; set; }
+
         [JsonProperty("conversations")]
         public IEnumerable<ConversationPiiResult> Conversations { get; set; }
     }

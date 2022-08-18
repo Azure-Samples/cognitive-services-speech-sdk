@@ -24,8 +24,8 @@ namespace Connector.Serializable.Language.Conversations
         /// <summary>
         /// Gets or sets the participant id of the conversation item.
         /// </summary>
-        [JsonProperty(PropertyName = "participantId")]
-        public string ParticipantId
+        [JsonProperty(PropertyName = "channel")]
+        public string Channel
         {
             get;
             set;

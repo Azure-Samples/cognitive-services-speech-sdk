@@ -33,6 +33,7 @@ namespace Language
     public class AnalyzeConversationsProvider
     {
         private const string DefaultInferenceSource = "lexical";
+        private const int MaxChunkSize = 100;
         private static readonly TimeSpan RequestTimeout = TimeSpan.FromMinutes(3);
         private readonly ConversationAnalysisClient ConversationAnalysisClient;
         private readonly string Locale;
@@ -60,60 +61,76 @@ namespace Language
         {
             speechTranscript = speechTranscript ?? throw new ArgumentNullException(nameof(speechTranscript));
 
-            var data = new AnalyzeConversationsRequest
+            var data = new List<AnalyzeConversationsRequest>();
+            var count = -1;
+            var jobCount = 0;
+            var turnCount = 0;
+            foreach (var recognizedPhrase in speechTranscript.RecognizedPhrases)
             {
-                DisplayName = "IngestionClient",
-                AnalysisInput = new AnalysisInput(new[]
+                var topResult = recognizedPhrase.NBest.First();
+                var textCount = topResult.Lexical.Length;
+
+                if (count == -1 || (count + textCount) > MaxChunkSize)
                 {
-                    new Conversation
+                    count = 0;
+                    jobCount++;
+                    data.Add(new AnalyzeConversationsRequest
                     {
-                        Id = Guid.NewGuid().ToString(),
-                        Language = Locale,
-                        Modality = Modality.transcript,
-                        ConversationItems = speechTranscript.RecognizedPhrases.Where(r => !string.IsNullOrEmpty(r.NBest.First().Lexical))
-                            .Select(item =>
-                            {
-                                var topResult = item.NBest.First();
-                                return new ConversationItem()
-                                {
-                                    Text = topResult.Display,
-                                    Lexical = topResult.Lexical,
-                                    Itn = topResult.ITN,
-                                    MaskedItn = topResult.MaskedITN,
-                                    Id = $"{item.Offset}__{item.Channel}",
-                                    ParticipantId = $"{item.Channel}",
-                                    AudioTimings = topResult.Words
-                                        ?.Select(word => new WordLevelAudioTiming
-                                        {
-                                            Word = word.Word,
-                                            Duration = (long)word.DurationInTicks,
-                                            Offset = (long)word.OffsetInTicks
-                                        })
-                                };
-                            }).ToList()
-                    }
-                }),
-                Tasks = new[]
-                {
-                    new AnalyzeConversationsTask
-                    {
-                        TaskName = "Conversation PII task",
-                        Kind = AnalyzeConversationsTaskKind.ConversationalPIITask,
-                        Parameters = new Dictionary<string, object>
+                        DisplayName = "IngestionClient",
+                        AnalysisInput = new AnalysisInput(new[]
                         {
+                            new Conversation
                             {
-                                "piiCategories", FetchTranscriptionEnvironmentVariables.ConversationPiiCategories.ToList()
-                            },
+                                Id = $"{jobCount}",
+                                Language = Locale,
+                                Modality = Modality.transcript,
+                                ConversationItems = new List<ConversationItem>()
+                            }
+                        }),
+                        Tasks = new[]
+                        {
+                            new AnalyzeConversationsTask
                             {
-                                "redactionSource", FetchTranscriptionEnvironmentVariables.ConversationPiiInferenceSource ?? DefaultInferenceSource
-                            },
-                            {
-                                "includeAudioRedaction", FetchTranscriptionEnvironmentVariables.ConversationPiiSetting == Connector.Enums.ConversationPiiSetting.IncludeAudioRedaction
+                                TaskName = "Conversation PII task",
+                                Kind = AnalyzeConversationsTaskKind.ConversationalPIITask,
+                                Parameters = new Dictionary<string, object>
+                                {
+                                    {
+                                        "piiCategories", FetchTranscriptionEnvironmentVariables.ConversationPiiCategories.ToList()
+                                    },
+                                    {
+                                        "redactionSource", FetchTranscriptionEnvironmentVariables.ConversationPiiInferenceSource ?? DefaultInferenceSource
+                                    },
+                                    {
+                                        "includeAudioRedaction", FetchTranscriptionEnvironmentVariables.ConversationPiiSetting == Connector.Enums.ConversationPiiSetting.IncludeAudioRedaction
+                                    }
+                                }
                             }
                         }
-                    }
+                    });
                 }
-            };
+
+                data.Last().AnalysisInput.Conversations[0].ConversationItems.Add(new ConversationItem
+                {
+                    Text = topResult.Display,
+                    Lexical = topResult.Lexical,
+                    Itn = topResult.ITN,
+                    MaskedItn = topResult.MaskedITN,
+                    Id = $"{turnCount}__{recognizedPhrase.Offset}__{recognizedPhrase.Channel}",
+                    ParticipantId = $"{recognizedPhrase.Channel}",
+                    AudioTimings = topResult.Words
+                        ?.Select(word => new WordLevelAudioTiming
+                        {
+                            Word = word.Word,
+                            Duration = (long)word.DurationInTicks,
+                            Offset = (long)word.OffsetInTicks
+                        })
+                });
+                count += textCount;
+                turnCount++;
+            }
+
+            Log.LogInformation($"Submitting {jobCount} jobs to Conversations...");
 
             return await SubmitConversationsAsync(data).ConfigureAwait(false);
         }
@@ -126,14 +143,12 @@ namespace Language
         public async Task<(AnalyzeConversationPiiResults piiResults, IEnumerable<string> errors)> GetConversationsOperationsResult(IEnumerable<string> jobIds)
         {
             var errors = new List<string>();
-
             if (!jobIds.Any())
             {
                 return (null, errors);
             }
 
             var tasks = jobIds.Select(async jobId => await GetConversationsOperationResults(jobId).ConfigureAwait(false));
-
             var results = await Task.WhenAll(tasks).ConfigureAwait(false);
 
             var piiErrors = results.SelectMany(result => result.piiResults).SelectMany(s => s.Errors);
@@ -146,6 +161,23 @@ namespace Language
             var warnings = results.SelectMany(result => result.piiResults).SelectMany(s => s.Conversations).SelectMany(s => s.Warnings);
             var conversationItems = results.SelectMany(result => result.piiResults).SelectMany(s => s.Conversations).SelectMany(s => s.ConversationItems);
 
+            var combinedRedactedContent = new List<CombinedConversationPiiResult>();
+
+            foreach (var group in conversationItems.GroupBy(item => item.Channel))
+            {
+#pragma warning disable CA1305 // Specify IFormatProvider
+                var items = group.ToList().OrderBy(s => int.Parse(s.Id));
+#pragma warning restore CA1305 // Specify IFormatProvider
+
+                combinedRedactedContent.Add(new CombinedConversationPiiResult
+                {
+                    Channel = group.Key,
+                    Display = string.Join(" ", group.Select(s => s.RedactedContent.Text)).Trim(),
+                    ITN = string.Join(" ", group.Select(s => s.RedactedContent.Itn)).Trim(),
+                    Lexical = string.Join(" ", group.Select(s => s.RedactedContent.Lexical)).Trim(),
+                });
+            }
+
             var piiResults = new AnalyzeConversationPiiResults
             {
                 Conversations = new List<ConversationPiiResult>
@@ -155,7 +187,8 @@ namespace Language
                         Warnings = warnings,
                         ConversationItems = conversationItems
                     }
-                }
+                },
+                CombinedRedactedContent = combinedRedactedContent
             };
 
             return (piiResults, errors);
@@ -237,23 +270,28 @@ namespace Language
             return errors;
         }
 
-        private async Task<(IEnumerable<string> jobId, IEnumerable<string> errors)> SubmitConversationsAsync(dynamic data)
+        private async Task<(IEnumerable<string> jobId, IEnumerable<string> errors)> SubmitConversationsAsync(IEnumerable<AnalyzeConversationsRequest> data)
         {
             var errors = new List<string>();
-
+            var jobs = new List<string>();
             try
             {
-                Log.LogInformation($"Sending language conversation request.");
+                Log.LogInformation($"Sending language conversation requests.");
 
-                var operation = await ConversationAnalysisClient.AnalyzeConversationAsync(WaitUntil.Started, RequestContent.Create(JsonConvert.SerializeObject(data))).ConfigureAwait(false);
+                foreach (var request in data)
+                {
+                    using var input = RequestContent.Create(JsonConvert.SerializeObject(request));
+                    var operation = await ConversationAnalysisClient.AnalyzeConversationAsync(WaitUntil.Started, input).ConfigureAwait(false);
 
-                var response = await operation.UpdateStatusAsync().ConfigureAwait(false);
+                    var response = await operation.UpdateStatusAsync().ConfigureAwait(false);
+                    using JsonDocument result = JsonDocument.Parse(response.ContentStream);
+                    var jobResults = result.RootElement;
+                    var jobId = jobResults.GetProperty("jobId");
+                    Log.LogInformation($"Submitting TA job: {jobId}");
+                    jobs.Add(jobId.ToString());
+                }
 
-                using JsonDocument result = JsonDocument.Parse(response.ContentStream);
-                var jobResults = result.RootElement;
-                var jobId = jobResults.GetProperty("jobId");
-
-                return (new List<string> { jobId.GetString() }, errors);
+                return (jobs, errors);
             }
             catch (OperationCanceledException)
             {
@@ -266,7 +304,7 @@ namespace Language
                 errors.Add($"Conversation analytics request failed with error: {e.Message}");
             }
 
-            return (null, errors);
+            return (jobs, errors);
         }
 
         private async Task<(IEnumerable<AnalyzeConversationPiiResults> piiResults, IEnumerable<string> errors)> GetConversationsOperationResults(string jobId)

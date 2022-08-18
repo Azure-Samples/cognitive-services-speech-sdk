@@ -24,10 +24,11 @@ namespace Connector.Serializable.Language.Conversations
             var response = JsonConvert.DeserializeObject<ConversationPiiResultItem>(jo.ToString());
             var values = response.Id.Split("__");
 
-            if (values != null && values.Length == 2)
+            if (values != null && values.Length == 3)
             {
-                response.ParticipantId = values[1];
-                response.Offset = values[0];
+                response.Id = values[0];
+                response.Channel = values[2];
+                response.Offset = values[1];
             }
 
             return response;
