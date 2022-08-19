@@ -9,7 +9,7 @@ namespace Connector
 
     /// <summary>
     /// Exception that is being thrown when azure functions should trigger a retry (up to a max. retry limit)
-    /// after a certain number of minutes.
+    /// after a certain number of minutes (with exponential backoff).
     /// </summary>
     public sealed class TransientFailureException : Exception
     {
