@@ -26,5 +26,7 @@ namespace Connector.Constants
         public const int MaxFilesPerTranscriptionJob = 1000;
 
         public const int DefaultFilesPerTranscriptionJob = 100;
+
+        public const int DefaultConversationAnalysisMaxChunkSize = 5000;
     }
 }
