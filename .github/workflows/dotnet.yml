@@ -2,7 +2,9 @@ name: .NET
 
 on:
   push:
-    branches: [ "master" ]
+    branches: 
+      - "master"
+      - "jvandervegte/**"
   pull_request:
     branches: [ "master" ]
 
