@@ -29,7 +29,7 @@ namespace Connector
 
         private static readonly TimeSpan GetFilesTimeout = TimeSpan.FromMinutes(5);
 
-        private static readonly HttpClient HttpClient = new () { Timeout = Timeout.InfiniteTimeSpan };
+        private static readonly HttpClient HttpClient = new HttpClient() { Timeout = Timeout.InfiniteTimeSpan };
 
         private static readonly AsyncRetryPolicy RetryPolicy =
             Policy
