@@ -8,6 +8,12 @@ using Microsoft.CognitiveServices.Speech.Audio;
 
 namespace Captioning
 {
+	public enum CaptioningMode
+	{
+    	Offline,
+    	RealTime
+	}
+	
     public class UserConfig
     {
         /// True to use a compressed audio format; otherwise, use uncompressed (wav).
@@ -26,16 +32,20 @@ namespace Captioning
         readonly public string? outputFilePath;
         /// Predefined phrases to help the Speech service interpret the provided audio.
         /// Phrases must be delimited by semicolons.
-        /// Example: Constoso;Jessie;Rehaan
+        /// Example: "Constoso;Jessie;Rehaan"
         readonly public string? phraseList;
-        /// True to suppress console output (except errors). If true, this overrides showRecognizingResults.
+        /// True to suppress console output (except errors).
         readonly public bool suppressConsoleOutput = false;
-        /// True to output Recognizing results. Default is to output Recognized results only.
-        /// Recognizing results are always written to the console, never to an output file.
-        /// If suppressConsoleOutput is true, it overrides this setting.
-        readonly public bool showRecognizingResults = false;
+        /// The captioning mode. Default is offline.
+        readonly public CaptioningMode captioningMode = CaptioningMode.Offline;
+        /// Simulated real-time caption delay. Default is 0. Only applies to real-time captioning mode.
+        readonly public int realTimeDelay = 0;
         /// Output captions in SubRip Text format (default is WebVTT format).
         readonly public bool useSubRipTextCaptionFormat = false;
+        /// The maximum number of characters per line for a caption. Default is no limit.
+        readonly public int? maxCaptionLength;
+        /// The maximum number of lines for a single caption. Only applies when maxCaptionLength is specified. Default is 3.
+        readonly public int maxCaptionLines;
         /// Set the stable partial result threshold on the Speech service. This setting value must contain an integer.
         /// Example: 3
         readonly public string? stablePartialResultThreshold;
@@ -53,8 +63,11 @@ namespace Captioning
             string? outputFilePath,
             string? phraseList,
             bool suppressConsoleOutput,
-            bool showRecognizingResults,
+            CaptioningMode captioningMode,
+            int realTimeDelay,
             bool useSubRipTextCaptionFormat,
+            int? maxCaptionLength,
+            int maxCaptionLines,
             string? stablePartialResultThreshold,
             string subscriptionKey,
             string region
@@ -68,8 +81,11 @@ namespace Captioning
             this.outputFilePath = outputFilePath;
             this.phraseList = phraseList;
             this.suppressConsoleOutput = suppressConsoleOutput;
-            this.showRecognizingResults = showRecognizingResults;
+            this.captioningMode = captioningMode;
+            this.realTimeDelay = realTimeDelay;
             this.useSubRipTextCaptionFormat = useSubRipTextCaptionFormat;
+            this.maxCaptionLength = maxCaptionLength;
+            this.maxCaptionLines = maxCaptionLines;
             this.stablePartialResultThreshold = stablePartialResultThreshold;
             this.subscriptionKey = subscriptionKey;
             this.region = region;
