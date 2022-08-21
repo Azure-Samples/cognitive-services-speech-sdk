@@ -29,9 +29,10 @@ namespace Captioning
         private UserConfig _userConfig;
         private TaskCompletionSource<string?> _recognitionEnd = new TaskCompletionSource<string?>();
         private int _srtSequenceNumber = 0;
-        private CaptionHelper _captionHelper = null;
-        private int _currentCaptionIndex = 0;
-        private long? _previousCaptionEndTime = null;
+        private CaptionHelper _captionHelper;
+        private int? _currentCaptionsLength = null;
+        private int? _currentCaptionSize = null;
+        private long? _previousCaptionEndTimeTicks = null;
         
         private const string usage = @"USAGE: dotnet run -- [...]
 
@@ -62,6 +63,7 @@ namespace Captioning
     --realTimeDelay               Simulated real-time caption delay.
                                   Valid only with --realTime.
                                   Minimum is 0. Default is 0.
+                                  TODO1 Not implemented.
 
   ACCURACY
     --phrases PHRASE1;PHRASE2     Example: ""Constoso;Jessie;Rehaan""
@@ -192,9 +194,8 @@ namespace Captioning
             return caption.ToString();
         }
 
-// TODO1 Implement realTimeDelay.
 // JW 20220819 new code
-        private string AdjustRealTimeCaption(string? language, Caption caption)
+        private string AdjustRealTimeCaption(string? language, Caption caption, bool isRecognizedResult)
         {
             string retval = null;
             
@@ -208,44 +209,59 @@ namespace Captioning
                 caption.Text += "\n&nbsp;";
             }
             
-            if (_previousCaptionEndTime is null)
+            // If the current caption has decreased in size, due to a change in a previous caption,
+            // drop this caption and do not update the previous ending timestamp.
+            // Always show Recognized results.
+            if (_currentCaptionSize is null || caption.Text.Length >= _currentCaptionSize.Value || isRecognizedResult)
             {
-                // If this is the first caption, leave its starting timestamp unchanged.
-                retval = CaptionFromTextAndTimes(language, caption.Text, new DateTime(caption.Begin.Ticks), new DateTime(caption.End.Ticks));
-                // Record the ending timestamp so we can ensure the next caption starts after this one ends.
-                _previousCaptionEndTime = caption.End.Ticks;
-            }
-            else
-            {
-                // If the starting timestamp is already later than the previous ending timestamp, leave it unchanged.
-                // Otherwise, move the starting timestamp forward to the previous ending timestamp.
-                var beginTime = caption.Begin.Ticks > _previousCaptionEndTime.Value ? caption.Begin.Ticks : _previousCaptionEndTime.Value;
-                // If the starting timestamp is later than the ending timestamp,
-                // drop this caption and do not update the previous ending timestamp.
-                // TODO1 Alternative: Push the ending timestamp forward until it is later than the starting timestamp. We would need to
-                // reset this somehow on the next Recognized result.
-                if (beginTime < caption.End.Ticks)
+                // By default, leave the starting timestamp unchanged.
+                var beginTimeTicks = caption.Begin.Ticks;
+                if (_previousCaptionEndTimeTicks is long previousCaptionEndTimeTicksValue)
                 {
-                    retval = CaptionFromTextAndTimes(language, caption.Text, new DateTime(beginTime), new DateTime(caption.End.Ticks));                        
-                    _previousCaptionEndTime = caption.End.Ticks;
+                    // If the starting timestamp is already later than the previous ending timestamp, leave it unchanged.
+                    // Otherwise, move the starting timestamp forward to the previous ending timestamp.
+                    beginTimeTicks = beginTimeTicks > previousCaptionEndTimeTicksValue ? beginTimeTicks : previousCaptionEndTimeTicksValue;
+                }
+
+                // If the starting timestamp is later than the ending timestamp,
+                // drop this caption and do not update the previous ending timestamp or current caption size.
+                if (beginTimeTicks < caption.End.Ticks)
+                {
+                    retval = CaptionFromTextAndTimes(language, caption.Text, new DateTime(beginTimeTicks), new DateTime(caption.End.Ticks));
+                    // Record the ending timestamp so we can ensure the next caption starts after this one ends.
+                    _previousCaptionEndTimeTicks = caption.End.Ticks;
+                    // Record the current caption size so we can drop any subsequent current captions with smaller sizes.
+                    _currentCaptionSize = caption.Text.Length;
+                }
+                // Always show Recognized results.
+                else if (isRecognizedResult)
+                {
+                    var beginTime = new DateTime(beginTimeTicks);
+                    // Set the ending timestamp to one second after the starting timestamp.
+                    var endTime = beginTime.Add(TimeSpan.FromSeconds(1));
+                    retval = CaptionFromTextAndTimes(language, caption.Text, beginTime, endTime);
+                    // Record the ending timestamp and current caption size.
+                    _previousCaptionEndTimeTicks = endTime.Ticks;
+                    _currentCaptionSize = caption.Text.Length;
                 }
             }
+            
             return retval;
         }
 
-        private string CaptionFromSpeechRecognitionResult(SpeechRecognitionResult result, bool isRecognizedResult)
+        private List<string> CaptionFromSpeechRecognitionResult(SpeechRecognitionResult result, bool isRecognizedResult)
         {
+            var retval = new List<string>();
+            string? language = LanguageFromSpeechRecognitionResult(result);
+            
             if (this._userConfig.maxCaptionLength is null)
             {
-                string? language = LanguageFromSpeechRecognitionResult(result);
                 var startTime = new DateTime(result.OffsetInTicks);
                 DateTime endTime = startTime.Add(result.Duration);
-                return CaptionFromTextAndTimes(language, result.Text, startTime, endTime);
+                retval.Add(CaptionFromTextAndTimes(language, result.Text, startTime, endTime));
             }
             else
             {
-                string retval = null;
-                string? language = LanguageFromSpeechRecognitionResult(result);
                 // Split the caption into multiple captions based on maxCaptionLength and maxCaptionLines.
                 List<Caption> captions = this._captionHelper.GetCaptions(result, result.Text);
                 
@@ -256,41 +272,57 @@ namespace Captioning
                 Console.WriteLine("*** END DEBUG ***");
                 Console.WriteLine();
 */
-                if (isRecognizedResult)
+
+                // Make sure CaptionHelper returned at least one caption.
+                if (captions.Count > 0)
                 {
-                    // Reset the current caption index.
-                    // TODO1 Consider instead resetting it whenever 1 == captions.Count.
-                    _currentCaptionIndex = 0;
+                    // If we have a current number of captions...
+                    if (_currentCaptionsLength is int currentCaptionsLengthValue)
+                    {
+                        // If the number of captions returned by CaptionHelper has decreased...
+                        if (captions.Count < _currentCaptionsLength)
+                        {
+                            // Reset the current caption size.
+                            _currentCaptionSize = null;
+                        }
+                        // If the number of captions returned by CaptionHelper has increased...
+                        else if (captions.Count > _currentCaptionsLength && captions.Count > 1)
+                        {
+                            // Get the previous current caption.
+                            var oldCaption = captions[captions.Count - 2];
+                            // Show the previous current caption for an extra second, since we are about to replace it.
+                            oldCaption.End = oldCaption.End.Add(TimeSpan.FromSeconds(1));
+                            // Emit the previous current caption.
+                            retval.Add(AdjustRealTimeCaption(language, oldCaption, isRecognizedResult));
+                            
+                            // Reset the current caption size.
+                            _currentCaptionSize = null;
+                        }
+                    }
+
+                    // Set the current number of captions.
+                    _currentCaptionsLength = captions.Count;
 
                     // Get the current caption.
                     var caption = captions[captions.Count - 1];
-                    // Show the current caption for an extra second, since it is the final Recognized result.
-                    // TODO1 This should be configurable, but we don't want it confused with real-time delay.
-                    caption.End = caption.End.Add(TimeSpan.FromSeconds(1));
-                    retval = AdjustRealTimeCaption(language, caption);
-                }
-                else
-                {
-                    // If the number of captions has just increased, the latest caption becomes the current caption.
-                    if (captions.Count > _currentCaptionIndex + 1)
+
+                    if (isRecognizedResult)
                     {
-                        // Get the old current caption.
-                        var oldCaption = captions[captions.Count - 2];
-                        // Show the old current caption for an extra second, since we are about to replace it.
-                        oldCaption.End = oldCaption.End.Add(TimeSpan.FromSeconds(1));
-                        // Emit the old current caption followed by the new current caption.
-                        retval = AdjustRealTimeCaption(language, oldCaption) + AdjustRealTimeCaption(language, captions[captions.Count - 1]);
-                        // Update the current caption index to that of the new current caption.
-                        _currentCaptionIndex = captions.Count - 1;
-                    }   
+                        // Show the current caption for an extra second, since it is a final (Recognized) result.
+                        // TODO1 This should be configurable, but we don't want it confused with real-time delay.
+                        caption.End = caption.End.Add(TimeSpan.FromSeconds(1));
+                        retval.Add(AdjustRealTimeCaption(language, caption, isRecognizedResult));
+                        // Reset the current caption size.
+                        _currentCaptionSize = null;                        
+                    }
                     else
                     {
-                        retval = AdjustRealTimeCaption(language, captions[_currentCaptionIndex]);
+                        retval.Add(AdjustRealTimeCaption(language, caption, isRecognizedResult));
                     }
                 }
-                
-                return retval;
             }
+            
+            return retval;
         }
 // JW 20220819 end new code
 
@@ -503,11 +535,8 @@ namespace Captioning
                     {
                         if (ResultReason.RecognizingSpeech == e.Result.Reason && e.Result.Text.Length > 0)
                         {
-                            string caption = CaptionFromSpeechRecognitionResult(e.Result, false);
-                            if (!string.IsNullOrEmpty(caption))
-                            {
-                                WriteToConsoleOrFile(caption);
-                            }
+                            List<string> captions = CaptionFromSpeechRecognitionResult(e.Result, false);
+                            captions.ForEach(caption => WriteToConsoleOrFile(caption));
                         }
                         else if (ResultReason.NoMatch == e.Result.Reason)
                         {
@@ -521,11 +550,8 @@ namespace Captioning
                 {
                     if (ResultReason.RecognizedSpeech == e.Result.Reason && e.Result.Text.Length > 0)
                     {
-                        string caption = CaptionFromSpeechRecognitionResult(e.Result, true);
-                        if (!string.IsNullOrEmpty(caption))
-                        {
-                            WriteToConsoleOrFile(caption);
-                        }
+                        List<string> captions = CaptionFromSpeechRecognitionResult(e.Result, true);
+                        captions.ForEach(caption => WriteToConsoleOrFile(caption));
                     }
                     else if (ResultReason.NoMatch == e.Result.Reason)
                     {
