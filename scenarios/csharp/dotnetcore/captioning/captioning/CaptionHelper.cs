@@ -98,7 +98,8 @@ namespace Azure.AI.Details.Common.CLI
         }
 */
 
-        private string GetTextOrTranslation(RecognitionResult result)
+        // JW 20220819 Changed return type to nullable.
+        private string? GetTextOrTranslation(RecognitionResult result)
         {
             if (_language == null) return result.Text;
 
@@ -231,13 +232,16 @@ namespace Azure.AI.Details.Common.CLI
 
         private static bool IsFinalResult(object result)
         {
-            RecognitionResult final = result as RecognitionResult;
+            // JW 20220819 Changed to nullable to fix compiler warning.
+            // Note nullable reference types are enabled in .csproj.
+            RecognitionResult? final = result as RecognitionResult;
             return final?.Reason == ResultReason.RecognizedSpeech ||
                    final?.Reason == ResultReason.RecognizedIntent ||
                    final?.Reason == ResultReason.TranslatedSpeech;
         }
 
-        private readonly string _language;
+        // JW 20220819 Changed to nullable to fix compiler warning.
+        private readonly string? _language;
         private readonly string[] _firstPassTerminators;
         private readonly string[] _secondPassTerminators;
 
