@@ -29,7 +29,7 @@ namespace Captioning
         private UserConfig _userConfig;
         private TaskCompletionSource<string?> _recognitionEnd = new TaskCompletionSource<string?>();
         private int _srtSequenceNumber = 0;
-        private CaptionHelper _captionHelper;
+        private CaptionHelper? _captionHelper;
         private int? _currentCaptionsLength = null;
         private int? _currentCaptionSize = null;
         private long? _previousCaptionEndTimeTicks = null;
@@ -195,9 +195,9 @@ namespace Captioning
         }
 
 // JW 20220819 new code
-        private string AdjustRealTimeCaption(string? language, Caption caption, bool isRecognizedResult)
+        private string? AdjustRealTimeCaption(string? language, Caption caption, bool isRecognizedResult)
         {
-            string retval = null;
+            string? retval = null;
             
             // If the caption has fewer lines than maxCaptionLines, pad it with empty lines.
             // That way, captions start at (maxCaptionLines) from the bottom of the screen,
@@ -260,10 +260,10 @@ namespace Captioning
                 DateTime endTime = startTime.Add(result.Duration);
                 retval.Add(CaptionFromTextAndTimes(language, result.Text, startTime, endTime));
             }
-            else
+            else if (this._captionHelper is CaptionHelper captionHelper)
             {
                 // Split the caption into multiple captions based on maxCaptionLength and maxCaptionLines.
-                List<Caption> captions = this._captionHelper.GetCaptions(result, result.Text);
+                List<Caption> captions = captionHelper.GetCaptions(result, result.Text);
                 
 // TODO1 Debugging code to see all results from CaptionHelper.GetCaptions().
 /*
@@ -293,8 +293,10 @@ namespace Captioning
                             // Show the previous current caption for an extra second, since we are about to replace it.
                             oldCaption.End = oldCaption.End.Add(TimeSpan.FromSeconds(1));
                             // Emit the previous current caption.
-                            retval.Add(AdjustRealTimeCaption(language, oldCaption, isRecognizedResult));
-                            
+                            if (AdjustRealTimeCaption(language, oldCaption, isRecognizedResult) is string adjustedCaption)
+                            {
+                                retval.Add(adjustedCaption);
+                            }
                             // Reset the current caption size.
                             _currentCaptionSize = null;
                         }
@@ -311,13 +313,19 @@ namespace Captioning
                         // Show the current caption for an extra second, since it is a final (Recognized) result.
                         // TODO1 This should be configurable, but we don't want it confused with real-time delay.
                         caption.End = caption.End.Add(TimeSpan.FromSeconds(1));
-                        retval.Add(AdjustRealTimeCaption(language, caption, isRecognizedResult));
+                        if (AdjustRealTimeCaption(language, caption, isRecognizedResult) is string adjustedCaption)
+                        {
+                            retval.Add(adjustedCaption);
+                        }
                         // Reset the current caption size.
                         _currentCaptionSize = null;                        
                     }
                     else
                     {
-                        retval.Add(AdjustRealTimeCaption(language, caption, isRecognizedResult));
+                        if (AdjustRealTimeCaption(language, caption, isRecognizedResult) is string adjustedCaption)
+                        {
+                            retval.Add(adjustedCaption);
+                        }
                     }
                 }
             }
