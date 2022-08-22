@@ -183,13 +183,9 @@ namespace Captioning
             if (this._userConfig.useSubRipTextCaptionFormat)
             {
                 caption.AppendFormat($"{this._srtSequenceNumber}{Environment.NewLine}");
-                caption.AppendFormat($"{GetTimestamp(startTime, endTime)}{Environment.NewLine}");
                 this._srtSequenceNumber++;
             }
-            else
-            {
-                caption.AppendFormat($"{GetTimestamp(startTime, endTime)} line:-{this._userConfig.maxCaptionLines} align:start{Environment.NewLine}");
-            }
+            caption.AppendFormat($"{GetTimestamp(startTime, endTime)}{Environment.NewLine}");
             if (null != language)
             {
                 caption.Append($"[{language}] ");
