@@ -183,10 +183,13 @@ namespace Captioning
             if (this._userConfig.useSubRipTextCaptionFormat)
             {
                 caption.AppendFormat($"{this._srtSequenceNumber}{Environment.NewLine}");
+                caption.AppendFormat($"{GetTimestamp(startTime, endTime)}{Environment.NewLine}");
                 this._srtSequenceNumber++;
             }
-            // TODO1 This is for WebVTT. Need to figure out SRT also.
-            caption.AppendFormat($"{GetTimestamp(startTime, endTime)} line:-{this._userConfig.maxCaptionLines} align:start{Environment.NewLine}");
+            else
+            {
+                caption.AppendFormat($"{GetTimestamp(startTime, endTime)} line:-{this._userConfig.maxCaptionLines} align:start{Environment.NewLine}");
+            }
             if (null != language)
             {
                 caption.Append($"[{language}] ");
@@ -199,19 +202,6 @@ namespace Captioning
         private string? AdjustRealTimeCaption(string? language, Caption caption, bool isRecognizedResult)
         {
             string? retval = null;
-            
-            // If the caption has fewer lines than maxCaptionLines, pad it with empty lines.
-            // That way, captions start at (maxCaptionLines) from the bottom of the screen,
-            // and progress toward the bottom of the screen, rather than start at the
-            // bottom and be pushed upward.
-// TODO1 Remove
-/*
-            var captionLines = Regex.Matches(caption.Text, "\\n").Count + 1;
-            for (int i = 0; i < this._userConfig.maxCaptionLines - captionLines; i++)
-            {
-                caption.Text += "\n&nbsp;";
-            }
-*/
             
             // If the current caption has decreased in size, due to a change in a previous caption,
             // drop this caption and do not update the previous ending timestamp.
