@@ -265,6 +265,9 @@
         "TextAnalyticsKeySecretName": "TextAnalyticsKey",
         "DatabaseConnectionStringSecretName": "DatabaseConnectionString",
         "PiiCategories": "",
+        "ConversationPiiCategories": "",
+        "ConversationPiiRedaction": "None",
+        "ConversationPiiInferenceSource": "text",
         "IsAzureGovDeployment": "[or(equals(parameters('AzureSpeechServicesRegion'),'usgovarizona'), equals(parameters('AzureSpeechServicesRegion'),'usgovvirginia'))]",
         "AzureSpeechServicesEndpointUri": "[if(not(equals(parameters('CustomEndpoint'),'')), parameters('CustomEndpoint'), if(variables('IsAzureGovDeployment'), concat('https://', parameters('AzureSpeechServicesRegion') ,'.api.cognitive.microsoft.us/'), concat('https://', parameters('AzureSpeechServicesRegion') ,'.api.cognitive.microsoft.com/')))]",
         "EndpointSuffix": "[if(variables('IsAzureGovDeployment'),'core.usgovcloudapi.net','core.windows.net')]"
@@ -947,7 +950,10 @@
                 "ConsolidatedFilesOutputContainer": "[variables('ConsolidatedFilesOutputContainer')]",
                 "CreateAudioProcessedContainer": "[variables('CreateAudioProcessedContainer')]",
                 "AudioProcessedContainer": "[variables('AudioProcessedContainer')]",
-                "PiiCategories": "[variables('PiiCategories')]"
+                "PiiCategories": "[variables('PiiCategories')]",
+                "ConversationPiiCategories": "[variables('ConversationPiiCategories')]",
+                "ConversationPiiInferenceSource": "[variables('ConversationPiiInferenceSource')]",
+                "ConversationPiiSetting":"[variables('ConversationPiiRedaction')]"
             }
         }
     ],
