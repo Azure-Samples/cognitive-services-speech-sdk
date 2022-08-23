@@ -75,9 +75,27 @@ namespace FetchTranscriptionFunction
                         break;
                 }
             }
+            catch (TransientFailureException e)
+            {
+                await RetryOrFailJobAsync(
+                    serviceBusMessage,
+                    $"Exception {e} in job {jobName} at {transcriptionLocation}: {e.Message}",
+                    jobName,
+                    transcriptionLocation,
+                    subscriptionKey,
+                    log,
+                    isThrottled: false).ConfigureAwait(false);
+            }
             catch (TimeoutException e)
             {
-                await RetryOrFailJobAsync(serviceBusMessage, $"Exception {e} in job {jobName} at {transcriptionLocation}: {e.Message}", jobName, transcriptionLocation, subscriptionKey, HttpStatusCode.RequestTimeout, log).ConfigureAwait(false);
+                await RetryOrFailJobAsync(
+                    serviceBusMessage,
+                    $"TimeoutException {e} in job {jobName} at {transcriptionLocation}: {e.Message}",
+                    jobName,
+                    transcriptionLocation,
+                    subscriptionKey,
+                    log,
+                    isThrottled: false).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -97,7 +115,7 @@ namespace FetchTranscriptionFunction
 
                 if (httpStatusCode.HasValue && httpStatusCode.Value.IsRetryableStatus())
                 {
-                    await RetryOrFailJobAsync(serviceBusMessage, $"Exception {e} in job {jobName} at {transcriptionLocation}: {e.Message}", jobName, transcriptionLocation, subscriptionKey, httpStatusCode.Value, log).ConfigureAwait(false);
+                    await RetryOrFailJobAsync(serviceBusMessage, $"Exception {e} in job {jobName} at {transcriptionLocation}: {e.Message}", jobName, transcriptionLocation, subscriptionKey, log, isThrottled: httpStatusCode.Value == HttpStatusCode.TooManyRequests).ConfigureAwait(false);
                 }
                 else
                 {
@@ -485,13 +503,13 @@ namespace FetchTranscriptionFunction
             }
         }
 
-        private static async Task RetryOrFailJobAsync(TranscriptionStartedMessage message, string errorMessage, string jobName, string transcriptionLocation, string subscriptionKey, HttpStatusCode statusCode, ILogger log)
+        private static async Task RetryOrFailJobAsync(TranscriptionStartedMessage message, string errorMessage, string jobName, string transcriptionLocation, string subscriptionKey, ILogger log, bool isThrottled)
         {
             log.LogError(errorMessage);
             message.FailedExecutionCounter += 1;
             var messageDelayTime = GetMessageDelayTime(message.PollingCounter);
 
-            if (message.FailedExecutionCounter <= FetchTranscriptionEnvironmentVariables.RetryLimit || statusCode == HttpStatusCode.TooManyRequests)
+            if (message.FailedExecutionCounter <= FetchTranscriptionEnvironmentVariables.RetryLimit || isThrottled)
             {
                 log.LogInformation("Retrying..");
                 await ServiceBusUtilities.SendServiceBusMessageAsync(FetchServiceBusSender, message.CreateMessageString(), log, messageDelayTime).ConfigureAwait(false);

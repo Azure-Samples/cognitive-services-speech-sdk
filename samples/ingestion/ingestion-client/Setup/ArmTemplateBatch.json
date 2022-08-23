@@ -444,7 +444,7 @@
                                 "storageKeyType": "SharedAccessKey",
                                 "administratorLogin": "[parameters('SqlAdministratorLogin')]",
                                 "administratorLoginPassword": "[parameters('SqlAdministratorLoginPassword')]",
-                                "storageUri": "https://ingestionclientstorage.blob.core.windows.net/binaries/12082022.0/IngestionClient.bacpac"
+                                "storageUri": "https://ingestionclientstorage.blob.core.windows.net/binaries/23082022.0/IngestionClient.bacpac"
                             }
                         }
                     ]
@@ -881,7 +881,7 @@
                 "PunctuationMode": "[parameters('PunctuationMode')]",
                 "RetryLimit": "[variables('RetryLimit')]",
                 "StartTranscriptionServiceBusConnectionString": "[listKeys(variables('AuthRuleCT'),'2015-08-01').primaryConnectionString]",
-                "WEBSITE_RUN_FROM_PACKAGE": "[if(variables('timerBasedExecution'),'https://ingestionclientstorage.blob.core.windows.net/binaries/12082022.0/StartTranscriptionByTimer.zip','https://ingestionclientstorage.blob.core.windows.net/binaries/12082022.0/StartTranscriptionByServiceBus.zip')]"
+                "WEBSITE_RUN_FROM_PACKAGE": "[if(variables('timerBasedExecution'),'https://ingestionclientstorage.blob.core.windows.net/binaries/23082022.0/StartTranscriptionByTimer.zip','https://ingestionclientstorage.blob.core.windows.net/binaries/23082022.0/StartTranscriptionByServiceBus.zip')]"
             }
         },
         {
@@ -945,7 +945,7 @@
                 "TextAnalyticsKey": "[concat('@Microsoft.KeyVault(VaultName=', variables('KeyVaultName'), ';SecretName=', variables('TextAnalyticsKeySecretName'), ')')]",
                 "TextAnalyticsRegion": "[parameters('TextAnalyticsRegion')]",
                 "UseSqlDatabase": "[variables('UseSqlDatabase')]",
-                "WEBSITE_RUN_FROM_PACKAGE": "https://ingestionclientstorage.blob.core.windows.net/binaries/12082022.0/FetchTranscription.zip",
+                "WEBSITE_RUN_FROM_PACKAGE": "https://ingestionclientstorage.blob.core.windows.net/binaries/23082022.0/FetchTranscription.zip",
                 "CreateConsolidatedOutputFiles": "[variables('CreateConsolidatedOutputFiles')]",
                 "ConsolidatedFilesOutputContainer": "[variables('ConsolidatedFilesOutputContainer')]",
                 "CreateAudioProcessedContainer": "[variables('CreateAudioProcessedContainer')]",
