@@ -1,4 +1,4 @@
-﻿//
+//
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
@@ -15,6 +15,34 @@ using System.Threading.Tasks;
 
 namespace CallCenter
 {
+    public class TranscriptionPhrase
+    {
+        readonly public string phrase;
+        readonly public int speakerNumber;
+        readonly public double offset;
+        
+        public TranscriptionPhrase(string phrase, int speakerNumber, double offset)
+        {
+            this.phrase = phrase;
+            this.speakerNumber = speakerNumber;
+            this.offset = offset;
+        }
+    }
+    
+    public class SentimentAnalysisResult
+    {
+        readonly public int speakerNumber;
+        readonly public double offset;
+        readonly public JsonElement document;
+        
+        public SentimentAnalysisResult(int speakerNumber, double offset, JsonElement document)
+        {
+            this.speakerNumber = speakerNumber;
+            this.offset = offset;
+            this.document = document;
+        }
+    }
+    
     public class ConversationAnalysisResult
     {
         readonly public (string aspect, string summary)[] summary;
@@ -144,27 +172,20 @@ namespace CallCenter
             }
         }
 
-        private (string phrase, int speakerNumber)[] GetTranscriptionPhrasesAndSpeakers(JsonElement transcription)
+        private TranscriptionPhrase[] GetTranscriptionPhrases(JsonElement transcription)
         {
-            var recognizedPhrases_1 = transcription.GetProperty("recognizedPhrases").EnumerateArray().ToArray();
-            var recognizedPhrases_2 = recognizedPhrases_1.Select(phrase =>
+            return transcription
+                .GetProperty("recognizedPhrases").EnumerateArray()
+                .Select(phrase =>
                 {
                     var best = phrase.GetProperty("nBest").EnumerateArray().ToArray().First();
-                    return new {
-                        phrase = best.GetProperty("display").ToString(),
-                        // If the user specified stereo audio, and therefore we turned off diarization,
-                        // the speaker number is replaced by a channel number.
-                        speakerNumber = this.userConfig.useStereoAudio ? phrase.GetProperty("channel").GetInt32() : phrase.GetProperty("speaker").GetInt32(),
-                        offset = phrase.GetProperty("offsetInTicks").GetDouble()
-                    };
-                }
-            );
-            var recognizedPhrases_3 = this.userConfig.useStereoAudio
-                // For stereo audio, the phrases are sorted by channel number, so resort them by offset.
-                ? recognizedPhrases_2.OrderBy(x => x.offset)
-                : recognizedPhrases_2;
-            // Discard the offset.
-            return recognizedPhrases_3.Select(x => (x.phrase, x.speakerNumber)).ToArray();
+                    // If the user specified stereo audio, and therefore we turned off diarization,
+                    // the speaker number is replaced by a channel number.
+                    var speakerNumber = this.userConfig.useStereoAudio ? phrase.GetProperty("channel").GetInt32() : phrase.GetProperty("speaker").GetInt32();
+                    return new TranscriptionPhrase(best.GetProperty("display").ToString(), speakerNumber, phrase.GetProperty("offsetInTicks").GetDouble());
+                })
+                .OrderBy(phrase => phrase.offset)
+                .ToArray();
         }
 
         private async Task DeleteTranscription(string transcriptionId)
@@ -175,21 +196,25 @@ namespace CallCenter
             return;
         }
 
-        private JsonElement GetSentimentAnalysis(string[] phrases)
+        private SentimentAnalysisResult[] GetSentimentAnalysis(TranscriptionPhrase[] phrases)
         {
             var uri = new UriBuilder(Uri.UriSchemeHttps, this.userConfig.languageEndpoint);
             uri.Path = sentimentAnalysisPath;
             uri.Query = sentimentAnalysisQuery;
 
+            // Create a map of phrase ID to phrase data so we can retrieve it later.
+            var phraseData = new Dictionary<int, (int speakerNumber, double offset)>();
+
             // Convert each transcription phrase to a "document" as expected by the sentiment analysis REST API.
             // Include a counter to use as a document ID.
             var documentsToSend = phrases.Select((phrase, id) =>
                 {
+                    phraseData.Add(id, (phrase.speakerNumber, phrase.offset));
                     return new
                     {
                         id = id,
                         language = this.userConfig.language,
-                        text = phrase
+                        text = phrase.phrase
                     };
                 }
             );
@@ -205,50 +230,97 @@ namespace CallCenter
                 }
             ).ToArray();
             Task.WaitAll(tasks);
-            var documents = tasks.SelectMany(task => {
+            return tasks.SelectMany(task => {
                 var result = task.Result;
                 using (JsonDocument document = JsonDocument.Parse(result))
                 {
-                    return document.RootElement.Clone().GetProperty("results").GetProperty("documents").EnumerateArray().ToArray();
+                    return document.RootElement.Clone()
+                        .GetProperty("results")
+                        .GetProperty("documents").EnumerateArray()
+                        .Select(document => {
+                            (int speakerNumber, double offset) = phraseData[Int32.Parse(document.GetProperty("id").ToString())];
+                            return new SentimentAnalysisResult(speakerNumber, offset, document);
+                        });
                 }
             }).ToArray();
+        }
+
+        private string[] GetSentiments(SentimentAnalysisResult[] sentimentAnalysisResults)
+        {
+            return sentimentAnalysisResults
+                .OrderBy(x => x.offset)
+                .Select(result => result.document.GetProperty("sentiment").ToString() )
+                .ToArray();
+        }
+
+        private JsonElement[] GetSentimentConfidenceScores(SentimentAnalysisResult[] sentimentAnalysisResults)
+        {
+            return sentimentAnalysisResults
+                .OrderBy(x => x.offset)
+                .Select(result => result.document.GetProperty("confidenceScores") )
+                .ToArray();
+        }
+
+        private JsonElement MergeSentimentConfidenceScoresIntoTranscription(JsonElement transcription, JsonElement[] sentimentConfidenceScores)
+        {
+            var recognizedPhrases_2 = transcription
+                .GetProperty("recognizedPhrases").EnumerateArray()
+                .OrderBy(phrase => phrase.GetProperty("offsetInTicks").GetDouble())
+                // Include a counter to retrieve the sentiment data.
+                .Select((phrase, id) => {
+                    var nBest_2 = phrase
+                        .GetProperty("nBest")
+                        .EnumerateArray()
+                        .Select(nBestItem => {
+                            // TODO1 Instead, try turning nBestItem into an object, adding the field, then JsonDocument.Parse(JsonSerializer.Serialize(obj))?
+                            return new
+                            {
+                                confidence = nBestItem.GetProperty("confidence"),
+                                lexical = nBestItem.GetProperty("lexical"),
+                                itn = nBestItem.GetProperty("itn"),
+                                maskedITN = nBestItem.GetProperty("maskedITN"),
+                                display = nBestItem.GetProperty("display"),
+                                sentiment = sentimentConfidenceScores[id]
+                            };
+                        });
+                    return new
+                    {
+                        recognitionStatus = phrase.GetProperty("recognitionStatus"),
+                        channel = phrase.GetProperty("channel"),
+                        offset = phrase.GetProperty("offset"),
+                        duration = phrase.GetProperty("duration"),
+                        offsetInTicks = phrase.GetProperty("offsetInTicks"),
+                        durationInTicks = phrase.GetProperty("durationInTicks"),
+                        nBest = nBest_2
+                    };
+                });
             var document = new
             {
-                kind = "SentimentAnalysisResults",
-                results = new
-                {
-                    documents = documents
-                }
+                source = transcription.GetProperty("source"),
+                timestamp = transcription.GetProperty("timestamp"),
+                durationInTicks = transcription.GetProperty("durationInTicks"),
+                duration = transcription.GetProperty("duration"),
+                combinedRecognizedPhrases = transcription.GetProperty("combinedRecognizedPhrases"),
+                recognizedPhrases = recognizedPhrases_2
             };
             using (JsonDocument document_2 = JsonDocument.Parse(JsonSerializer.Serialize(document)))
             {
                 return document_2.RootElement.Clone();
             }
         }
-
-        private string[] GetSentiments(JsonElement sentimentAnalysis)
-        {
-            return sentimentAnalysis
-                .GetProperty("results")
-                .GetProperty("documents").EnumerateArray().ToArray()
-                .Select(document => new { id = Int32.Parse(document.GetProperty("id").ToString()), sentiment = document.GetProperty("sentiment").ToString() } ).ToArray()
-                .OrderBy(x => x.id)
-                .Select(x => x.sentiment)
-                .ToArray();
-        }
-
-        private object[] TranscriptionPhrasesToConversationItems((string phrase, int speakerNumber)[] transcriptionPhrasesAndSpeakers)
+        
+        private object[] TranscriptionPhrasesToConversationItems(TranscriptionPhrase[] transcriptionPhrases)
         {
             // Include a counter to use as a document ID.
-            return transcriptionPhrasesAndSpeakers.Select((phraseAndSpeaker, documentID) =>
+            return transcriptionPhrases.Select((phrase, documentID) =>
                 {
                     return new
                     {
                         id = documentID,
-                        text = phraseAndSpeaker.phrase,
+                        text = phrase.phrase,
                         // The first person to speak is probably the agent.
-                        role = 1 == phraseAndSpeaker.speakerNumber ? "Agent" : "Customer",
-                        participantId = phraseAndSpeaker.speakerNumber
+                        role = 1 == phrase.speakerNumber ? "Agent" : "Customer",
+                        participantId = phrase.speakerNumber
                     };
                 }
             ).ToArray();
@@ -366,15 +438,15 @@ namespace CallCenter
 
         // Create a string that contains each transcription phrase, followed by sentiment, PII, and so on.
         private String GetResults(
-            (string phrase, int speakerNumber)[] transcriptionPhrasesAndSpeakers,
+            TranscriptionPhrase[] transcriptionPhrases,
             string[] transcriptionSentiments,
             ConversationAnalysisResult conversationAnalysis)
         {
             var result = new StringBuilder();
-            for (var index = 0; index < transcriptionPhrasesAndSpeakers.Length; index++)
+            for (var index = 0; index < transcriptionPhrases.Length; index++)
             {
-                result.AppendLine($"Phrase: {transcriptionPhrasesAndSpeakers[index].phrase}");
-                result.AppendLine($"Speaker: {transcriptionPhrasesAndSpeakers[index].speakerNumber}");
+                result.AppendLine($"Phrase: {transcriptionPhrases[index].phrase}");
+                result.AppendLine($"Speaker: {transcriptionPhrases[index].speakerNumber}");
                 if (index < transcriptionSentiments.Length)
                 {
                     result.AppendLine($"Sentiment: {transcriptionSentiments[index]}");
@@ -399,11 +471,10 @@ namespace CallCenter
             return result.ToString();
         }
 
-        private void PrintResults(JsonElement transcription, JsonElement sentimentAnalysis, JsonElement conversationAnalysis)
+        private void PrintResults(JsonElement transcription, JsonElement conversationAnalysis)
         {
             var results = new {
                 transcription = transcription,
-                sentimentAnalysis = sentimentAnalysis,
                 conversationAnalysis = conversationAnalysis
             };
             Console.WriteLine(JsonSerializer.Serialize(results, new JsonSerializerOptions() { WriteIndented = true}));
@@ -423,10 +494,11 @@ namespace CallCenter
             JsonElement transcriptionFiles = await GetTranscriptionFiles(transcriptionId);
             var transcriptionUri = GetTranscriptionUri(transcriptionFiles);
             JsonElement transcription = await GetTranscription(transcriptionUri);
-            var phrasesAndSpeakers = GetTranscriptionPhrasesAndSpeakers(transcription);
-            var phrases = phrasesAndSpeakers.Select(phraseAndSpeaker => phraseAndSpeaker.phrase).ToArray();
-            JsonElement sentimentAnalysis = GetSentimentAnalysis(phrases);
-            var conversationItems = TranscriptionPhrasesToConversationItems(phrasesAndSpeakers);
+            var transcriptionPhrases = GetTranscriptionPhrases(transcription);
+            SentimentAnalysisResult[] sentimentAnalysisResults = GetSentimentAnalysis(transcriptionPhrases);
+            JsonElement[] sentimentConfidenceScores = GetSentimentConfidenceScores(sentimentAnalysisResults);
+            JsonElement transcription_2 = MergeSentimentConfidenceScoresIntoTranscription(transcription, sentimentConfidenceScores);
+            var conversationItems = TranscriptionPhrasesToConversationItems(transcriptionPhrases);
             // NOTE: Conversation summary is currently in gated public preview. You can sign up here:
             // https://aka.ms/applyforconversationsummarization/
             var conversationAnalysisUrl = await RequestConversationAnalysis(conversationItems);
@@ -434,11 +506,11 @@ namespace CallCenter
             JsonElement conversationAnalysis = await GetConversationAnalysis(conversationAnalysisUrl);
             if (this.userConfig.outputFilePath is string outputFilePathValue)
             {
-                var sentiments = GetSentiments(sentimentAnalysis);
+                var sentiments = GetSentiments(sentimentAnalysisResults);
                 var conversationAnalysisResult = GetConversationAnalysisResult(conversationAnalysis);
-                File.WriteAllText(outputFilePathValue, GetResults(phrasesAndSpeakers, sentiments, conversationAnalysisResult));
+                File.WriteAllText(outputFilePathValue, GetResults(transcriptionPhrases, sentiments, conversationAnalysisResult));
             }
-            PrintResults(transcription, sentimentAnalysis, conversationAnalysis);
+            PrintResults(transcription_2, conversationAnalysis);
             // Clean up resources.
             Console.WriteLine("Deleting transcription.");
             await DeleteTranscription(transcriptionId);
