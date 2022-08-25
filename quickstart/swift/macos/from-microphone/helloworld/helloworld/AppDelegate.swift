@@ -51,6 +51,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             speechConfig = nil
         }
         speechConfig?.speechRecognitionLanguage = "en-US"
+
         let audioConfig = SPXAudioConfiguration()
 
         let reco = try! SPXSpeechRecognizer(speechConfiguration: speechConfig!, audioConfiguration: audioConfig)
@@ -70,6 +71,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         if result.reason != SPXResultReason.recognizedSpeech {
             let cancellationDetails = try! SPXCancellationDetails(fromCanceledRecognitionResult: result)
             print("cancelled: \(result.reason), \(cancellationDetails.errorDetails)")
+            print("Did you set the speech resource key and region values?")
             updateLabel(text: "Error: \(cancellationDetails.errorDetails)", color: .red)
         }
     }
