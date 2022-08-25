@@ -308,7 +308,9 @@ namespace Language
                 Log.LogWarning($"Conversation analytics request failed with error: {e.Message}");
                 errors.Add($"Conversation analytics request failed with error: {e.Message}");
             }
+#pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception e)
+#pragma warning restore CA1031 // Do not catch general exception types
             {
                 Log.LogWarning($"Conversation analytics request failed with error: {e.Message}");
                 errors.Add($"Conversation analytics request failed with error: {e.Message}");
