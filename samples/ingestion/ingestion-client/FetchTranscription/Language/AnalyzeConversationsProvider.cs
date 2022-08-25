@@ -60,6 +60,11 @@ namespace Language
         {
             speechTranscript = speechTranscript ?? throw new ArgumentNullException(nameof(speechTranscript));
 
+            if (!IsConversationalPiiEnabled())
+            {
+                return (new List<string>(), new List<string>());
+            }
+
             var data = new List<AnalyzeConversationsRequest>();
             var count = -1;
             var jobCount = 0;
@@ -300,6 +305,7 @@ namespace Language
             // do not catch throttling errors, rather throw and retry
             catch (RequestFailedException e) when (e.Status != 429)
             {
+                Log.LogWarning($"Conversation analytics request failed with error: {e.Message}");
                 errors.Add($"Conversation analytics request failed with error: {e.Message}");
             }
 
