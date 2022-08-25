@@ -308,6 +308,11 @@ namespace Language
                 Log.LogWarning($"Conversation analytics request failed with error: {e.Message}");
                 errors.Add($"Conversation analytics request failed with error: {e.Message}");
             }
+            catch (Exception e)
+            {
+                Log.LogWarning($"Conversation analytics request failed with error: {e.Message}");
+                errors.Add($"Conversation analytics request failed with error: {e.Message}");
+            }
 
             return (jobs, errors);
         }
