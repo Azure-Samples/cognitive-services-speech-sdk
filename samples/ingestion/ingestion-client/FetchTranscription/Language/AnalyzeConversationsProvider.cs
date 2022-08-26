@@ -69,7 +69,8 @@ namespace Language
             var count = -1;
             var jobCount = 0;
             var turnCount = 0;
-            foreach (var recognizedPhrase in speechTranscript.RecognizedPhrases)
+            foreach (var recognizedPhrase in speechTranscript.RecognizedPhrases
+                .Where(rp => rp.NBest.FirstOrDefault() != null && !string.IsNullOrEmpty(rp.NBest.First().Display)))
             {
                 var topResult = recognizedPhrase.NBest.First();
                 var textCount = topResult.Lexical.Length;
