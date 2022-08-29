@@ -349,9 +349,10 @@ namespace Language
 
                 if (!string.Equals(analysisResult.Status, "succeeded", StringComparison.OrdinalIgnoreCase))
                 {
-                    errors.AddRange(analysisResult.Errors.Select(e => e.Error.Message));
-                    Log.LogWarning($"Conversation analysis request failed with error: {analysisResult.Tasks.Items}");
-                    errors.Add($"Conversation analysis request failed");
+                    var errorMessages = analysisResult.Errors.Select(e => e.Error.Message);
+                    Log.LogWarning($"Conversation analysis request failed with error: {errorMessages.FirstOrDefault()}");
+                    errors.Add($"Conversation analysis request failed: {errorMessages.FirstOrDefault()}");
+                    errors.AddRange(errorMessages);
                     return (null, errors);
                 }
 
