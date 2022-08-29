@@ -148,53 +148,61 @@ namespace Language
         public async Task<(AnalyzeConversationPiiResults piiResults, IEnumerable<string> errors)> GetConversationsOperationsResult(IEnumerable<string> jobIds)
         {
             var errors = new List<string>();
+            var piiResults = new AnalyzeConversationPiiResults();
             if (!jobIds.Any())
             {
                 return (null, errors);
             }
 
-            var tasks = jobIds.Select(async jobId => await GetConversationsOperationResults(jobId).ConfigureAwait(false));
-            var results = await Task.WhenAll(tasks).ConfigureAwait(false);
-
-            var piiErrors = results.SelectMany(result => result.piiResults).SelectMany(s => s.Errors);
-            if (piiErrors.Any())
+            try
             {
-                errors.AddRange(piiErrors.Select(s => $"Error thrown for conversation : {s.Id}"));
-                return (null, errors);
-            }
+                var tasks = jobIds.Select(async jobId => await GetConversationsOperationResults(jobId).ConfigureAwait(false));
+                var results = await Task.WhenAll(tasks).ConfigureAwait(false);
 
-            var warnings = results.SelectMany(result => result.piiResults).SelectMany(s => s.Conversations).SelectMany(s => s.Warnings);
-            var conversationItems = results.SelectMany(result => result.piiResults).SelectMany(s => s.Conversations).SelectMany(s => s.ConversationItems);
+                var piiErrors = results.SelectMany(result => result.piiResults).SelectMany(s => s.Errors);
+                if (piiErrors.Any())
+                {
+                    errors.AddRange(piiErrors.Select(s => $"Error thrown for conversation : {s.Id}"));
+                    return (null, errors);
+                }
 
-            var combinedRedactedContent = new List<CombinedConversationPiiResult>();
+                var warnings = results.SelectMany(result => result.piiResults).SelectMany(s => s.Conversations).SelectMany(s => s.Warnings);
+                var conversationItems = results.SelectMany(result => result.piiResults).SelectMany(s => s.Conversations).SelectMany(s => s.ConversationItems);
 
-            foreach (var group in conversationItems.GroupBy(item => item.Channel))
-            {
+                var combinedRedactedContent = new List<CombinedConversationPiiResult>();
+
+                foreach (var group in conversationItems.GroupBy(item => item.Channel))
+                {
 #pragma warning disable CA1305 // Specify IFormatProvider
-                var items = group.ToList().OrderBy(s => int.Parse(s.Id));
+                    var items = group.ToList().OrderBy(s => int.Parse(s.Id));
 #pragma warning restore CA1305 // Specify IFormatProvider
 
-                combinedRedactedContent.Add(new CombinedConversationPiiResult
-                {
-                    Channel = group.Key,
-                    Display = string.Join(" ", group.Select(s => s.RedactedContent.Text)).Trim(),
-                    ITN = string.Join(" ", group.Select(s => s.RedactedContent.Itn)).Trim(),
-                    Lexical = string.Join(" ", group.Select(s => s.RedactedContent.Lexical)).Trim(),
-                });
-            }
+                    combinedRedactedContent.Add(new CombinedConversationPiiResult
+                    {
+                        Channel = group.Key,
+                        Display = string.Join(" ", group.Select(s => s.RedactedContent.Text)).Trim(),
+                        ITN = string.Join(" ", group.Select(s => s.RedactedContent.Itn)).Trim(),
+                        Lexical = string.Join(" ", group.Select(s => s.RedactedContent.Lexical)).Trim(),
+                    });
+                }
 
-            var piiResults = new AnalyzeConversationPiiResults
-            {
-                Conversations = new List<ConversationPiiResult>
+                piiResults.Conversations = new List<ConversationPiiResult>
                 {
                     new ConversationPiiResult
                     {
                         Warnings = warnings,
                         ConversationItems = conversationItems
                     }
-                },
-                CombinedRedactedContent = combinedRedactedContent
-            };
+                };
+                piiResults.CombinedRedactedContent = combinedRedactedContent;
+            }
+#pragma warning disable CA1031 // Do not catch general exception types
+            catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
+            {
+                Log.LogWarning($"Exception when parsing result from TA: {ex.Message}");
+                errors.Add($"Exception when parsing result from TA: {ex.Message}");
+            }
 
             return (piiResults, errors);
         }
