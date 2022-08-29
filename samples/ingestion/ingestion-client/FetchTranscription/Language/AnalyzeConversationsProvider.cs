@@ -162,7 +162,7 @@ namespace Language
                 var piiErrors = results.SelectMany(result => result.piiResults).SelectMany(s => s.Errors);
                 if (piiErrors.Any())
                 {
-                    errors.AddRange(piiErrors.Select(s => $"Error thrown for conversation : {s.Id}"));
+                    errors.AddRange(piiErrors.Select(s => $"Error thrown for conversation : {s.Id} message: [{s.Error.Code}: {s.Error.Message}]"));
                     return (null, errors);
                 }
 
