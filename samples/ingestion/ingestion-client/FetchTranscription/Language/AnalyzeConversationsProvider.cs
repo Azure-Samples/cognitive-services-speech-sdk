@@ -339,6 +339,7 @@ namespace Language
 
                 if (response.IsError)
                 {
+                    Log.LogWarning($"Conversation analysis failed with error.");
                     errors.Add($"Conversation analysis failed with error.");
                 }
 
@@ -361,6 +362,14 @@ namespace Language
             // do not catch throttling errors, rather throw and retry
             catch (RequestFailedException e) when (e.Status != 429)
             {
+                Log.LogWarning($"Conversation analysis request failed with error: {e.Message}");
+                errors.Add($"Conversation analysis request failed with error: {e.Message}");
+            }
+#pragma warning disable CA1031 // Do not catch general exception types
+            catch (Exception e)
+#pragma warning restore CA1031 // Do not catch general exception types
+            {
+                Log.LogWarning($"Conversation analysis request failed with error: {e.Message}");
                 errors.Add($"Conversation analysis request failed with error: {e.Message}");
             }
 
