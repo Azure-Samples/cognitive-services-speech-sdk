@@ -345,6 +345,16 @@ namespace Language
 
                 var analysisResult = JsonConvert.DeserializeObject<AnalyzeConversationsResult>(response.Content.ToString());
 
+                Log.LogWarning($"Result Status {analysisResult.Status}: Completed: {analysisResult.Tasks.Completed} \t Failed:{analysisResult.Tasks.Failed} \t InProgress: {analysisResult.Tasks.InProgress}");
+
+                if (!string.Equals(analysisResult.Status, "succeeded", StringComparison.OrdinalIgnoreCase))
+                {
+                    errors.AddRange(analysisResult.Errors.Select(e => e.Error.Message));
+                    Log.LogWarning($"Conversation analysis request failed with error: {analysisResult.Tasks.Items}");
+                    errors.Add($"Conversation analysis request failed");
+                    return (null, errors);
+                }
+
                 if (analysisResult.Tasks.InProgress == 0)
                 {
                     // all tasks completed.
@@ -373,6 +383,7 @@ namespace Language
                 errors.Add($"Conversation analysis request failed with error: {e.Message}");
             }
 
+            Log.LogWarning($"Conversation analysis returned no result");
             return (null, errors);
         }
     }
