@@ -7,6 +7,7 @@ namespace Language
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
     using System.Text.Json;
     using System.Threading.Tasks;
@@ -66,19 +67,30 @@ namespace Language
             }
 
             var data = new List<AnalyzeConversationsRequest>();
-            var count = -1;
+            var previousTextElementCount = -1;
             var jobCount = 0;
             var turnCount = 0;
             foreach (var recognizedPhrase in speechTranscript.RecognizedPhrases
                 .Where(rp => rp.NBest.FirstOrDefault() != null && !string.IsNullOrEmpty(rp.NBest.First().Display)))
             {
                 var topResult = recognizedPhrase.NBest.First();
-                var textCount = topResult.Lexical.Length;
+                var textElementCount = GetInputSize(topResult, FetchTranscriptionEnvironmentVariables.ConversationPiiInferenceSource);
 
-                if (count == -1 || (count + textCount) > FetchTranscriptionEnvironmentVariables.ConversationPiiMaxChunkSize)
+                // We do not support cases where the content size of recognized phrases to be greater than 5000 character chunks as this would mean we need to chunk the conversation turn and our model performance degrades if the content of a recognized phrase is chunked.
+                // We will add an error in this case. We can add logic to handle this further.
+                if (textElementCount > FetchTranscriptionEnvironmentVariables.ConversationPiiMaxChunkSize)
                 {
-                    count = 0;
+                    var errors = new List<string> { $"The conversation contains a recognized phrase [offset : ${recognizedPhrase.Offset} channel: ${recognizedPhrase.Channel}] where the size if greater than {FetchTranscriptionEnvironmentVariables.ConversationPiiMaxChunkSize} Text Elements. Ignoring the conversation." };
+
+                    return (null, errors);
+                }
+
+                if (previousTextElementCount == -1 || (previousTextElementCount + textElementCount) > FetchTranscriptionEnvironmentVariables.ConversationPiiMaxChunkSize)
+                {
+                    // create a new job
+                    previousTextElementCount = 0;
                     jobCount++;
+
                     data.Add(new AnalyzeConversationsRequest
                     {
                         DisplayName = "IngestionClient",
@@ -131,7 +143,7 @@ namespace Language
                             Offset = (long)word.OffsetInTicks
                         })
                 });
-                count += textCount;
+                previousTextElementCount += textElementCount;
                 turnCount++;
             }
 
@@ -282,6 +294,26 @@ namespace Language
             };
 
             return errors;
+        }
+
+        private static int GetInputSize(NBest topResult, string conversationPiiInferenceSource)
+        {
+            var inputString = topResult.Lexical;
+            if (conversationPiiInferenceSource.Equals("text", StringComparison.OrdinalIgnoreCase))
+            {
+                inputString = topResult.Display;
+            }
+            else if (conversationPiiInferenceSource.Equals("itn", StringComparison.OrdinalIgnoreCase))
+            {
+                inputString = topResult.ITN;
+            }
+            else if (conversationPiiInferenceSource.Equals("maskedITN", StringComparison.OrdinalIgnoreCase))
+            {
+                inputString = topResult.MaskedITN;
+            }
+
+            var stringInfo = new StringInfo(inputString);
+            return stringInfo.LengthInTextElements;
         }
 
         private async Task<(IEnumerable<string> jobId, IEnumerable<string> errors)> SubmitConversationsAsync(IEnumerable<AnalyzeConversationsRequest> data)
