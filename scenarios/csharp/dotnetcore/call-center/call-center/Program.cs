@@ -64,10 +64,10 @@ namespace CallCenter
     
     public class CombinedRedactedContent
     {
-        int channel;
-        public StringBuilder lexical;
-        public StringBuilder itn;
-        public StringBuilder display;
+        readonly public int channel;
+        readonly public StringBuilder lexical;
+        readonly public StringBuilder itn;
+        readonly public StringBuilder display;
         
         public CombinedRedactedContent(int channel)
         {
@@ -95,6 +95,14 @@ namespace CallCenter
         private const string conversationAnalysisQuery = "api-version=2022-05-15-preview";
         private const string conversationSummaryModelVersion = "2022-05-15-preview";
 
+        //
+        // Constructor
+        //
+        public Program(string[] args, string usage)
+        {
+            this.userConfig = new UserConfig(args, usage);
+        }
+
         // Helper method to convert JsonElement to object prior to .NET 6.
         private T ObjectFromJsonElement<T>(JsonElement element)
         {
@@ -105,11 +113,21 @@ namespace CallCenter
         // Helper method to change value in JsonElement by converting it to a Dictionary and back again.
         private JsonElement AddOrChangeValueInJsonElement<T>(JsonElement element, string key, T newValue)
         {
-            Dictionary<string, JsonElement> dict = ObjectFromJsonElement<Dictionary<string, JsonElement>>(element);
+            // Convert JsonElement to dictionary.
+            Dictionary<string, JsonElement> dictionary = ObjectFromJsonElement<Dictionary<string, JsonElement>>(element);
+            // Convert newValue to JsonElement.
             using (JsonDocument doc = JsonDocument.Parse(JsonSerializer.Serialize(newValue)))
             {
-                dict[key] = doc.RootElement.Clone();
-                using (JsonDocument doc_2 = JsonDocument.Parse(JsonSerializer.Serialize(dict)))
+                // Add/update key in dictionary to newValue.
+                // NOTE: Always clone the root element of the JsonDocument. Otherwise, once it is disposed,
+                // when you try to access any data you obtained from it, you get the error:
+                // "Cannot access a disposed object.
+                // Object name: 'JsonDocument'."
+                // See:
+                // https://docs.microsoft.com/dotnet/api/system.text.json.jsonelement.clone
+                dictionary[key] = doc.RootElement.Clone();
+                // Convert dictionary back to JsonElement.
+                using (JsonDocument doc_2 = JsonDocument.Parse(JsonSerializer.Serialize(dictionary)))
                 {
                     return doc_2.RootElement.Clone();
                 }
@@ -134,16 +152,12 @@ namespace CallCenter
                     displayName = $"call_center_{DateTime.Now.ToString()}"
                 };
             var response = await RestHelper.SendPost(uri.Uri.ToString(), JsonSerializer.Serialize(content), this.userConfig.speechSubscriptionKey, new HttpStatusCode[]{ HttpStatusCode.Created });
-            // NOTE: Clone the root element of the JsonDocument. Otherwise, once it is disposed,
-            // when you try to access any data you obtained from it, you may get the error:
-            // Cannot access a disposed object.
-            // Object name: 'JsonDocument'.
-            // See:
-            // https://docs.microsoft.com/dotnet/api/system.text.json.jsonelement.clone
             using (JsonDocument document = JsonDocument.Parse(response.content))
             {
                 // Create Transcription API JSON response sample and schema:
                 // https://westus.dev.cognitive.microsoft.com/docs/services/speech-to-text-api-v3-0/operations/CreateTranscription
+                // NOTE: Remember to call ToString(), EnumerateArray(), GetInt32(), etc. on the return value from GetProperty
+                // to convert it from a JsonElement.
                 var transcriptionUri = document.RootElement.Clone().GetProperty("self").ToString();
                 // The transcription ID is at the end of the transcription URI.
                 var transcriptionId = transcriptionUri.Split("/").Last();
@@ -202,7 +216,7 @@ namespace CallCenter
         {
             // Get Transcription Files JSON response sample and schema:
             // https://westus.dev.cognitive.microsoft.com/docs/services/speech-to-text-api-v3-0/operations/GetTranscriptionFiles
-            return transcriptionFiles.GetProperty("values").EnumerateArray().ToArray()
+            return transcriptionFiles.GetProperty("values").EnumerateArray()
                 .First(value => 0 == String.Compare("Transcription", value.GetProperty("kind").ToString(), StringComparison.InvariantCultureIgnoreCase))
                 .GetProperty("links").GetProperty("contentUrl").ToString();
         }
@@ -222,7 +236,7 @@ namespace CallCenter
                 .GetProperty("recognizedPhrases").EnumerateArray()
                 .Select(phrase =>
                 {
-                    var best = phrase.GetProperty("nBest").EnumerateArray().ToArray().First();
+                    var best = phrase.GetProperty("nBest").EnumerateArray().First();
                     // If the user specified stereo audio, and therefore we turned off diarization,
                     // the speaker number is replaced by a channel number.
                     var speakerNumber = this.userConfig.useStereoAudio ? phrase.GetProperty("channel").GetInt32() : phrase.GetProperty("speaker").GetInt32();
@@ -274,26 +288,30 @@ namespace CallCenter
                 }
             ).ToArray();
             Task.WaitAll(tasks);
-            return tasks.SelectMany(task => {
-                var result = task.Result;
-                using (JsonDocument document = JsonDocument.Parse(result))
+            return tasks.SelectMany(task =>
                 {
-                    return document.RootElement.Clone()
-                        .GetProperty("results")
-                        .GetProperty("documents").EnumerateArray()
-                        .Select(document => {
-                            (int speakerNumber, double offsetInTicks) = phraseData[Int32.Parse(document.GetProperty("id").ToString())];
-                            return new SentimentAnalysisResult(speakerNumber, offsetInTicks, document);
-                        });
+                    var result = task.Result;
+                    using (JsonDocument document = JsonDocument.Parse(result))
+                    {
+                        return document.RootElement.Clone()
+                            .GetProperty("results")
+                            .GetProperty("documents").EnumerateArray()
+                            .Select(document =>
+                                {
+                                    (int speakerNumber, double offsetInTicks) = phraseData[Int32.Parse(document.GetProperty("id").ToString())];
+                                    return new SentimentAnalysisResult(speakerNumber, offsetInTicks, document);
+                                }
+                            );
+                    }
                 }
-            }).ToArray();
+            ).ToArray();
         }
 
         private string[] GetSentimentsForSimpleOutput(SentimentAnalysisResult[] sentimentAnalysisResults)
         {
             return sentimentAnalysisResults
                 .OrderBy(x => x.offsetInTicks)
-                .Select(result => result.document.GetProperty("sentiment").ToString() )
+                .Select(result => result.document.GetProperty("sentiment").ToString())
                 .ToArray();
         }
 
@@ -301,23 +319,28 @@ namespace CallCenter
         {
             return sentimentAnalysisResults
                 .OrderBy(x => x.offsetInTicks)
-                .Select(result => result.document.GetProperty("confidenceScores") )
+                .Select(result => result.document.GetProperty("confidenceScores"))
                 .ToArray();
         }
 
         private JsonElement MergeSentimentConfidenceScoresIntoTranscription(JsonElement transcription, JsonElement[] sentimentConfidenceScores)
         {
-            var recognizedPhrases_2 = transcription
+            IEnumerable<JsonElement> recognizedPhrases_2 = transcription
                 .GetProperty("recognizedPhrases").EnumerateArray()
                 .OrderBy(phrase => phrase.GetProperty("offsetInTicks").GetDouble())
                 // Include a counter to retrieve the sentiment data.
-                .Select((phrase, id) => {
-                    var nBest_2 = phrase
-                        .GetProperty("nBest")
-                        .EnumerateArray()
-                        .Select(nBestItem => AddOrChangeValueInJsonElement<JsonElement>(nBestItem, "sentiment", sentimentConfidenceScores[id]));
-                    return AddOrChangeValueInJsonElement<IEnumerable<JsonElement>>(phrase, "nBest", nBest_2);
-                });
+                .Select((phrase, id) =>
+                    {
+                        IEnumerable<JsonElement> nBest_2 = phrase
+                            .GetProperty("nBest")
+                            .EnumerateArray()
+                            // Add the sentiment confidence scores to the JsonElement in the nBest array.
+                            .Select(nBestItem => AddOrChangeValueInJsonElement<JsonElement>(nBestItem, "sentiment", sentimentConfidenceScores[id]));
+                        // Update the nBest item in the recognizedPhrases array.
+                        return AddOrChangeValueInJsonElement<IEnumerable<JsonElement>>(phrase, "nBest", nBest_2);
+                    }
+                );
+            // Update the recognizedPhrases item in the transcription.
             return AddOrChangeValueInJsonElement<IEnumerable<JsonElement>>(transcription, "recognizedPhrases", recognizedPhrases_2);
         }
         
@@ -353,7 +376,8 @@ namespace CallCenter
                 displayName = displayName,
                 analysisInput = new
                 {
-                    conversations = new object[] {
+                    conversations = new object[]
+                    {
                         new
                         {
                             id = "conversation1",
@@ -440,21 +464,22 @@ namespace CallCenter
         
         private ConversationAnalysisForSimpleOutput GetConversationAnalysisForSimpleOutput(JsonElement conversationAnalysis)
         {
-            var tasks = conversationAnalysis.GetProperty("tasks").GetProperty("items").EnumerateArray().ToArray();
+            var tasks = conversationAnalysis.GetProperty("tasks").GetProperty("items").EnumerateArray();
             
             var summaryTask = tasks.First(task => 0 == String.Compare(task.GetProperty("taskName").ToString(), "summary_1", StringComparison.InvariantCultureIgnoreCase));
-            var conversationSummary = summaryTask.GetProperty("results").GetProperty("conversations").EnumerateArray().ToArray()
-                .First().GetProperty("summaries").EnumerateArray().ToArray()
+            var conversationSummary = summaryTask.GetProperty("results").GetProperty("conversations").EnumerateArray()
+                .First().GetProperty("summaries").EnumerateArray()
                 .Select(summary => (summary.GetProperty("aspect").ToString(), summary.GetProperty("text").ToString()))
                 .ToArray();
 
             var PIITask = tasks.First(task => 0 == String.Compare(task.GetProperty("taskName").ToString(), "PII_1", StringComparison.InvariantCultureIgnoreCase));
-            var conversationPIIAnalysis = PIITask.GetProperty("results").GetProperty("conversations").EnumerateArray().ToArray()
-                .First().GetProperty("conversationItems").EnumerateArray().ToArray()
+            var conversationPIIAnalysis = PIITask.GetProperty("results").GetProperty("conversations").EnumerateArray()
+                .First().GetProperty("conversationItems").EnumerateArray()
                 .Select(document =>
                     {
-                        return document.GetProperty("entities").EnumerateArray().ToArray()
-                            .Select(entity => (entity.GetProperty("category").ToString(), entity.GetProperty("text").ToString())).ToArray();
+                        return document.GetProperty("entities").EnumerateArray()
+                            .Select(entity => (entity.GetProperty("category").ToString(), entity.GetProperty("text").ToString()))
+                            .ToArray();
                     })
                 .ToArray();
             
@@ -498,66 +523,65 @@ namespace CallCenter
 
         private void PrintSimpleOutput(string outputFilePathValue, TranscriptionPhrase[] transcriptionPhrases, SentimentAnalysisResult[] sentimentAnalysisResults, JsonElement conversationAnalysis)
         {
-            var sentiments = GetSentimentsForSimpleOutput(sentimentAnalysisResults);
-            var conversation = GetConversationAnalysisForSimpleOutput(conversationAnalysis);
+            string[] sentiments = GetSentimentsForSimpleOutput(sentimentAnalysisResults);
+            ConversationAnalysisForSimpleOutput conversation = GetConversationAnalysisForSimpleOutput(conversationAnalysis);
             File.WriteAllText(outputFilePathValue, GetSimpleOutput(transcriptionPhrases, sentiments, conversation));
         }
 
         private object GetConversationAnalysisForFullOutput(TranscriptionPhrase[] transcriptionPhrases, JsonElement conversationAnalysis)
         {
-            var tasks = conversationAnalysis.GetProperty("tasks").GetProperty("items").EnumerateArray().ToArray();
-            var summaryTask = tasks.First(task => 0 == String.Compare(task.GetProperty("taskName").ToString(), "summary_1", StringComparison.InvariantCultureIgnoreCase));
-            var conversationSummaryResults = summaryTask.GetProperty("results");
-            var PIITask = tasks.First(task => 0 == String.Compare(task.GetProperty("taskName").ToString(), "PII_1", StringComparison.InvariantCultureIgnoreCase));
-            var conversationPiiResults = PIITask.GetProperty("results");
-            
-            var conversation = conversationPiiResults.GetProperty("conversations").EnumerateArray().First();
-            var conversationItems = conversation.GetProperty("conversationItems").EnumerateArray();
+            // Get the conversation summary and conversation PII analysis task results.
+            IEnumerable<JsonElement> tasks = conversationAnalysis.GetProperty("tasks").GetProperty("items").EnumerateArray();
+            JsonElement conversationSummaryResults = tasks.First(task => 0 == String.Compare(task.GetProperty("taskName").ToString(), "summary_1", StringComparison.InvariantCultureIgnoreCase)).GetProperty("results");
+            JsonElement conversationPiiResults = tasks.First(task => 0 == String.Compare(task.GetProperty("taskName").ToString(), "PII_1", StringComparison.InvariantCultureIgnoreCase)).GetProperty("results");
+            // There should be only one conversation.
+            JsonElement conversation = conversationPiiResults.GetProperty("conversations").EnumerateArray().First();
+            // Order conversation items by ID so they match the order of the transcription phrases.
+            IEnumerable<JsonElement> conversationItems = conversation.GetProperty("conversationItems").EnumerateArray().OrderBy(conversationItem => Int32.Parse(conversationItem.GetProperty("id").ToString()));
             var combinedRedactedContent = new CombinedRedactedContent[]{ new CombinedRedactedContent(0), new CombinedRedactedContent(1) };
-            var conversationItems_2 = conversationItems.Select((conversationItem, index) => {
-                var channel = transcriptionPhrases[index].speakerNumber;
-                var conversationItem_2 = AddOrChangeValueInJsonElement<string>(conversationItem, "channel", channel.ToString());
-                var conversationItem_3 = AddOrChangeValueInJsonElement<string>(conversationItem_2, "offset", transcriptionPhrases[index].offset);
-                var redactedContent = conversationItem.GetProperty("redactedContent");
-                combinedRedactedContent[channel].display.AppendFormat("{0} ", redactedContent.GetProperty("text").ToString());
-                combinedRedactedContent[channel].lexical.AppendFormat("{0} ", redactedContent.GetProperty("lexical").ToString());
-                combinedRedactedContent[channel].itn.AppendFormat("{0} ", redactedContent.GetProperty("itn").ToString());
-                return conversationItem_3;
-            });
-            var conversation_2 = AddOrChangeValueInJsonElement<IEnumerable<JsonElement>>(conversation, "conversationItems", conversationItems_2);
-            var conversationPiiResults_2 = new
-            {
-                combinedRedactedContent = new object[]
+            IEnumerable<JsonElement> conversationItems_2 = conversationItems.Select((conversationItem, index) =>
                 {
-                    new
-                    {
-                        channel = "0",
-                        display = combinedRedactedContent[0].display.ToString(),
-                        itn = combinedRedactedContent[0].itn.ToString(),
-                        lexical = combinedRedactedContent[0].lexical.ToString()
-                    },
-                    new
-                    {
-                        channel = "1",
-                        display = combinedRedactedContent[1].display.ToString(),
-                        itn = combinedRedactedContent[1].itn.ToString(),
-                        lexical = combinedRedactedContent[1].lexical.ToString()
-                    }
-                },
-                conversations = new JsonElement[]{ conversation_2 }
-            };
+                    // Get the channel and offset for this conversation item from the corresponding transcription phrase.
+                    var channel = transcriptionPhrases[index].speakerNumber;
+                    // Add channel and offset to conversation item JsonElement.
+                    var conversationItem_2 = AddOrChangeValueInJsonElement<string>(conversationItem, "channel", channel.ToString());
+                    var conversationItem_3 = AddOrChangeValueInJsonElement<string>(conversationItem_2, "offset", transcriptionPhrases[index].offset);
+                    // Get the text, lexical, and itn fields from redacted content, and append them to the combined redacted content for this channel.
+                    var redactedContent = conversationItem.GetProperty("redactedContent");
+                    combinedRedactedContent[channel].display.AppendFormat("{0} ", redactedContent.GetProperty("text").ToString());
+                    combinedRedactedContent[channel].lexical.AppendFormat("{0} ", redactedContent.GetProperty("lexical").ToString());
+                    combinedRedactedContent[channel].itn.AppendFormat("{0} ", redactedContent.GetProperty("itn").ToString());
+                    return conversationItem_3;
+                }
+            );
+            // Update the conversationItems item in the conversation JsonElement.
+            JsonElement conversation_2 = AddOrChangeValueInJsonElement<IEnumerable<JsonElement>>(conversation, "conversationItems", conversationItems_2);
             return new
             {
                 conversationSummaryResults = conversationSummaryResults,
-                conversationPiiResults = conversationPiiResults_2
+                conversationPiiResults = new
+                {
+                    combinedRedactedContent = combinedRedactedContent.Select(item =>
+                        {
+                            return new
+                            {
+                                channel = item.channel.ToString(),
+                                display = item.display.ToString(),
+                                itn = item.itn.ToString(),
+                                lexical = item.lexical.ToString()
+                            };
+                        }
+                    ),
+                    conversations = new JsonElement[]{ conversation_2 }
+                }
             };
         }
 
-        private void PrintFullOutput(JsonElement transcription, TranscriptionPhrase[] transcriptionPhrases, JsonElement conversationAnalysis)
+        private void PrintFullOutput(JsonElement transcription, JsonElement[] sentimentConfidenceScores, TranscriptionPhrase[] transcriptionPhrases, JsonElement conversationAnalysis)
         {
             var results = new
             {
-                transcription = transcription,
+                transcription = MergeSentimentConfidenceScoresIntoTranscription(transcription, sentimentConfidenceScores),
                 conversationAnalyticsResults = GetConversationAnalysisForFullOutput(transcriptionPhrases, conversationAnalysis)
             };
             Console.WriteLine(JsonSerializer.Serialize(results, new JsonSerializerOptions() { WriteIndented = true, Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping }));
@@ -590,8 +614,7 @@ namespace CallCenter
             {
                 PrintSimpleOutput(outputFilePathValue, transcriptionPhrases, sentimentAnalysisResults, conversationAnalysis);
             }
-            JsonElement transcription_2 = MergeSentimentConfidenceScoresIntoTranscription(transcription, sentimentConfidenceScores);
-            PrintFullOutput(transcription_2, transcriptionPhrases, conversationAnalysis);
+            PrintFullOutput(transcription, sentimentConfidenceScores, transcriptionPhrases, conversationAnalysis);
             // Clean up resources.
             Console.WriteLine("Deleting transcription.");
             await DeleteTranscription(transcriptionId);
@@ -628,21 +651,14 @@ namespace CallCenter
     --output FILE                   Output phrase list and conversation summary to text file.
 ";
             
-            try
+            if (args.Contains("--help"))
             {
-                if (args.Contains("--help"))
-                {
-                    Console.WriteLine(usage);
-                }
-                else
-                {
-                    await (new Program { userConfig = new UserConfig(args, usage) }).Run();
-                }
+                Console.WriteLine(usage);
             }
-            catch(Exception e)
+            else
             {
-                Console.WriteLine(e.Message);
-            }            
+                await (new Program(args, usage)).Run();
+            }
         }
     }
 }
