@@ -11,19 +11,14 @@ namespace Language
     using System.Linq;
     using System.Text.Json;
     using System.Threading.Tasks;
-
     using Azure;
     using Azure.AI.Language.Conversations;
     using Azure.Core;
-
     using Connector;
     using Connector.Serializable.Language.Conversations;
     using Connector.Serializable.TranscriptionStartedServiceBusMessage;
-
     using FetchTranscriptionFunction;
-
     using Microsoft.Extensions.Logging;
-
     using Newtonsoft.Json;
 
     using static Connector.Serializable.TranscriptionStartedServiceBusMessage.TextAnalyticsRequest;
@@ -174,7 +169,6 @@ namespace Language
                 var piiErrors = results.SelectMany(result => result.piiResults).SelectMany(s => s.Errors);
                 if (piiErrors.Any())
                 {
-                    Log.LogWarning($"Error thrown for conversation. Message: [{piiErrors.FirstOrDefault().Error.Code}: {piiErrors.FirstOrDefault().Error.Message}]");
                     errors.AddRange(piiErrors.Select(s => $"Error thrown for conversation : {s.Id} message: [{s.Error.Code}: {s.Error.Message}]"));
                     return (null, errors);
                 }
@@ -213,7 +207,6 @@ namespace Language
             catch (Exception ex)
 #pragma warning restore CA1031 // Do not catch general exception types
             {
-                Log.LogWarning($"Exception when parsing result from TA: {ex.Message}");
                 errors.Add($"Exception when parsing result from TA: {ex.Message}");
             }
 
@@ -347,14 +340,12 @@ namespace Language
             // do not catch throttling errors, rather throw and retry
             catch (RequestFailedException e) when (e.Status != 429)
             {
-                Log.LogWarning($"Conversation analytics request failed with error: {e.Message}");
                 errors.Add($"Conversation analytics request failed with error: {e.Message}");
             }
 #pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception e)
 #pragma warning restore CA1031 // Do not catch general exception types
             {
-                Log.LogWarning($"Conversation analytics request failed with error: {e.Message}");
                 errors.Add($"Conversation analytics request failed with error: {e.Message}");
             }
 
@@ -372,18 +363,14 @@ namespace Language
 
                 if (response.IsError)
                 {
-                    Log.LogWarning($"Conversation analysis failed with error.");
                     errors.Add($"Conversation analysis failed with error.");
                 }
 
                 var analysisResult = JsonConvert.DeserializeObject<AnalyzeConversationsResult>(response.Content.ToString());
 
-                Log.LogWarning($"Result Status {analysisResult.Status}: Completed: {analysisResult.Tasks.Completed} \t Failed:{analysisResult.Tasks.Failed} \t InProgress: {analysisResult.Tasks.InProgress}");
-
                 if (!string.Equals(analysisResult.Status, "succeeded", StringComparison.OrdinalIgnoreCase))
                 {
                     var errorMessages = analysisResult.Errors.Select(e => e.Error.Message);
-                    Log.LogWarning($"Conversation analysis request failed with error: {errorMessages.FirstOrDefault()}");
                     errors.Add($"Conversation analysis request failed: {errorMessages.FirstOrDefault()}");
                     errors.AddRange(errorMessages);
                     return (null, errors);
@@ -406,18 +393,16 @@ namespace Language
             // do not catch throttling errors, rather throw and retry
             catch (RequestFailedException e) when (e.Status != 429)
             {
-                Log.LogWarning($"Conversation analysis request failed with error: {e.Message}");
                 errors.Add($"Conversation analysis request failed with error: {e.Message}");
             }
 #pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception e)
 #pragma warning restore CA1031 // Do not catch general exception types
             {
-                Log.LogWarning($"Conversation analysis request failed with error: {e.Message}");
                 errors.Add($"Conversation analysis request failed with error: {e.Message}");
             }
 
-            Log.LogWarning($"Conversation analysis returned no result");
+            Log.LogInformation($"Conversation analysis returned no result");
             return (null, errors);
         }
     }
