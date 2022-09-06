@@ -36,10 +36,10 @@ namespace helloworld
         // helper function for speaker identification.
         public static async Task IdentifySpeakersAsync(SpeechConfig config, List<VoiceProfile> profiles)
         {
-            var speakerRecognizer = new SpeakerRecognizer(config, AudioConfig.FromWavFileInput(@"wikipediaOcelot.wav"));
+            var speakerRecognizer = new SpeakerRecognizer(config, AudioConfig.FromWavFileInput(@"TalkForAFewSeconds16.wav"));
             var model = SpeakerIdentificationModel.FromProfiles(profiles);
             var result = await speakerRecognizer.RecognizeOnceAsync(model);
-            if(result.Reason == ResultReason.RecognizedSpeakers)
+            if (result.Reason == ResultReason.RecognizedSpeakers)
             {
                 Console.WriteLine($"The most similiar voice profile is {result.ProfileId} with similiarity score {result.Score}");
                 var raw = result.Properties.GetProperty(PropertyId.SpeechServiceResponse_JsonResult);
@@ -53,23 +53,28 @@ namespace helloworld
             // Create audio input for enrollment from audio files. Replace with your own audio files.
             using (var audioInput = AudioConfig.FromWavFileInput(audioFileName))
             {
-                var result = await client.EnrollProfileAsync(profile, audioInput);
-                if (result.Reason == ResultReason.EnrollingVoiceProfile)
+                var reason = ResultReason.EnrollingVoiceProfile;
+                while (reason == ResultReason.EnrollingVoiceProfile)
                 {
-                    Console.WriteLine($"Enrolling profile id {profile.Id}.");
+                    var result = await client.EnrollProfileAsync(profile, audioInput);
+                    if (result.Reason == ResultReason.EnrollingVoiceProfile)
+                    {
+                        Console.WriteLine($"Enrolling profile id {profile.Id}.");
+                    }
+                    else if (result.Reason == ResultReason.EnrolledVoiceProfile)
+                    {
+                        Console.WriteLine($"Enrolled profile id {profile.Id}.");
+                    }
+                    else if (result.Reason == ResultReason.Canceled)
+                    {
+                        var cancellation = VoiceProfileEnrollmentCancellationDetails.FromResult(result);
+                        Console.WriteLine($"CANCELED {profile.Id}: ErrorCode={cancellation.ErrorCode}");
+                        Console.WriteLine($"CANCELED {profile.Id}: ErrorDetails={cancellation.ErrorDetails}");
+                    }
+                    Console.WriteLine($"Summation of pure speech across all enrollments in seconds is {result.EnrollmentsSpeechLength.TotalSeconds}.");
+                    Console.WriteLine($"The remaining enrollments speech length in seconds is {result.RemainingEnrollmentsSpeechLength?.TotalSeconds}.");
+                    reason = result.Reason;
                 }
-                else if (result.Reason == ResultReason.EnrolledVoiceProfile)
-                {
-                    Console.WriteLine($"Enrolled profile id {profile.Id}.");
-                }
-                else if (result.Reason == ResultReason.Canceled)
-                {
-                    var cancellation = VoiceProfileEnrollmentCancellationDetails.FromResult(result);
-                    Console.WriteLine($"CANCELED {profile.Id}: ErrorCode={cancellation.ErrorCode}");
-                    Console.WriteLine($"CANCELED {profile.Id}: ErrorDetails={cancellation.ErrorDetails}");
-                }
-                Console.WriteLine($"Summation of pure speech across all enrollments in seconds is {result.EnrollmentsSpeechLength.TotalSeconds}.");
-                Console.WriteLine($"The remaining enrollments speech length in seconds is {result.RemainingEnrollmentsSpeechLength?.TotalSeconds}.");
             }
         }
 
@@ -93,8 +98,8 @@ namespace helloworld
                 {
                     Console.WriteLine($"Created profiles {profile1.Id} and {profile2.Id} for text independent identification.");
 
-                    await EnrollSpeakerAsync(client, profile1, @"aboutSpeechSdk.wav");
-                    await EnrollSpeakerAsync(client, profile2, @"speechService.wav");
+                    await EnrollSpeakerAsync(client, profile1, @"TalkForAFewSeconds16.wav");
+                    await EnrollSpeakerAsync(client, profile2, @"neuralActivationPhrase.wav");
                     List<VoiceProfile> profiles = new List<VoiceProfile> { profile1, profile2 };
                     await IdentifySpeakersAsync(config, profiles);
                 }

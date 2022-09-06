@@ -8,7 +8,7 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>samples</RootNamespace>
     <AssemblyName>samples</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <RuntimeIdentifiers>win-x64;win-x86;win-arm;win-arm64</RuntimeIdentifiers>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -103,6 +103,9 @@
     <Compile Include="..\..\..\sharedcontent\console\standalone_language_detection_samples.cs">
       <Link>standalone_language_detection_samples.cs</Link>
     </Compile>
+    <Compile Include="..\..\..\sharedcontent\console\speech_diagnostics_logging_samples.cs">
+      <Link>speech_diagnostics_logging_samples.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -134,8 +137,8 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.18.0" />
-    <PackageReference Include="Microsoft.CognitiveServices.Speech.Remoteconversation" Version="1.16.0" />
+    <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.23.0" />
+    <PackageReference Include="Microsoft.CognitiveServices.Speech.Remoteconversation" Version="1.23.0" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -25,7 +25,7 @@ except ImportError:
 speech_key, service_region = "YourSubscriptionKey", "YourServiceRegion"
 
 
-def speech_synthesis_to_speaker():
+def speech_synthesis_to_speaker() -> None:
     """performs speech synthesis to the default speaker"""
     # Creates an instance of a speech config with specified subscription key and service region.
     speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
@@ -58,7 +58,7 @@ def speech_synthesis_with_language():
     # Sets the synthesis language.
     # The full list of supported languages can be found here:
     # https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support#text-to-speech
-    language = "de-DE";
+    language = "de-DE"
     speech_config.speech_synthesis_language = language
     # Creates a speech synthesizer for the specified language,
     # using the default speaker as audio output.
@@ -87,11 +87,12 @@ def speech_synthesis_with_voice():
     # Creates an instance of a speech config with specified subscription key and service region.
     speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
     # Sets the synthesis voice name.
-    # e.g. "Microsoft Server Speech Text to Speech Voice (en-US, ChristopherNeural)".
+    # e.g. "Microsoft Server Speech Text to Speech Voice (en-US, JennyNeural)".
     # The full list of supported voices can be found here:
     # https://aka.ms/csspeech/voicenames
-    # And, you can try get_voices_async method to get all available voices (see speech_synthesis_get_available_voices() sample below).
-    voice = "Microsoft Server Speech Text to Speech Voice (en-US, ChristopherNeural)"
+    # And, you can try get_voices_async method to get all available voices.
+    # See speech_synthesis_get_available_voices() sample below.
+    voice = "Microsoft Server Speech Text to Speech Voice (en-US, JennyNeural)"
     speech_config.speech_synthesis_voice_name = voice
     # Creates a speech synthesizer for the specified voice,
     # using the default speaker as audio output.
@@ -175,7 +176,7 @@ def speech_synthesis_to_wave_file():
 
 
 def speech_synthesis_to_mp3_file():
-    """performs speech synthesis to an mp3 file"""
+    """performs speech synthesis to a mp3 file"""
     # Creates an instance of a speech config with specified subscription key and service region.
     speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
     # Sets the synthesis output format.
@@ -256,21 +257,21 @@ def speech_synthesis_to_push_audio_output_stream():
         Example class that implements the PushAudioOutputStreamCallback, which is used to show
         how to push output audio to a stream
         """
-        def __init__(self):
+        def __init__(self) -> None:
             super().__init__()
             self._audio_data = bytes(0)
             self._closed = False
 
         def write(self, audio_buffer: memoryview) -> int:
             """
-            The callback function which is invoked when the synthesizer has a output audio chunk
+            The callback function which is invoked when the synthesizer has an output audio chunk
             to write out
             """
             self._audio_data += audio_buffer
             print("{} bytes received.".format(audio_buffer.nbytes))
             return audio_buffer.nbytes
 
-        def close(self):
+        def close(self) -> None:
             """
             The callback function which is invoked when the synthesizer is about to close the
             stream.
@@ -376,7 +377,7 @@ def speech_synthesis_to_audio_data_stream():
             print("Audio data for text [{}] was saved to [{}]".format(text, file_name))
 
             # You can also read data from audio data stream and process it in memory
-            # Reset the stream position to the beginning since saving to file puts the postion to end.
+            # Reset the stream position to the beginning since saving to file puts the position to end.
             audio_data_stream.position = 0
 
             # Reads data from the stream
@@ -406,7 +407,8 @@ def speech_synthesis_events():
 
     # Subscribes to events
     speech_synthesizer.synthesis_started.connect(lambda evt: print("Synthesis started: {}".format(evt)))
-    speech_synthesizer.synthesizing.connect(lambda evt: print("Synthesis ongoing, audio chunk received: {}".format(evt)))
+    speech_synthesizer.synthesizing.connect(
+        lambda evt: print("Synthesis ongoing, audio chunk received: {}".format(evt)))
     speech_synthesizer.synthesis_completed.connect(lambda evt: print("Synthesis completed: {}".format(evt)))
 
     # Receives a text from console input and synthesizes it to result.
@@ -518,7 +520,11 @@ def speech_synthesis_bookmark_event():
     input()
 
     # Bookmark tag is needed in the SSML, e.g.
-    ssml = "<speak version='1.0' xml:lang='en-US' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts'><voice name='Microsoft Server Speech Text to Speech Voice (en-US, AriaNeural)'><bookmark mark='bookmark_one'/> one. <bookmark mark='bookmark_two'/> two. three. four.</voice></speak>";
+    ssml = "<speak version='1.0' xml:lang='en-US' xmlns='http://www.w3.org/2001/10/synthesis' " \
+           "xmlns:mstts='http://www.w3.org/2001/mstts'>" \
+           "<voice name='Microsoft Server Speech Text to Speech Voice (en-US, AriaNeural)'>" \
+           "<bookmark mark='bookmark_one'/> one. " \
+           "<bookmark mark='bookmark_two'/> two. three. four.</voice></speak> "
 
     result = speech_synthesizer.speak_ssml_async(ssml).get()
     # Check result
@@ -536,7 +542,7 @@ def speech_synthesis_with_auto_language_detection_to_speaker():
        Note: this is a preview feature, which might be updated in future versions."""
     speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
 
-    # create the auto detection language configuration without specific languages
+    # create the auto-detection language configuration without specific languages
     auto_detect_source_language_config = \
         speechsdk.languageconfig.AutoDetectSourceLanguageConfig()
 
@@ -572,7 +578,8 @@ def speech_synthesis_get_available_voices():
     # Creates a speech synthesizer.
     speech_synthesizer = speechsdk.SpeechSynthesizer(speech_config=speech_config, audio_config=None)
 
-    print("Enter a locale in BCP-47 format (e.g. en-US) that you want to get the voices of, or enter empty to get voices in all locales.")
+    print("Enter a locale in BCP-47 format (e.g. en-US) that you want to get the voices of, "
+          "or enter empty to get voices in all locales.")
     try:
         text = input()
     except EOFError:

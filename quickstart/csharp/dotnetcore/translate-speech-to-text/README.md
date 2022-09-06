@@ -1,6 +1,6 @@
 # Quickstart: Translate speech in C# for .NET Core on Windows or Linux
 
-This sample demonstrates how to translate speech with C# under .NET Core 2.0 (Windows or Linux) using the Speech SDK.
+This sample demonstrates how to translate speech with C# under .NET Core 3.1 (Windows or Linux) using the Speech SDK.
 See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started-speech-translation?tabs=script%2Cwindowsinstall&pivots=programming-language-csharp) on the SDK documentation page which describes how to build this sample from scratch in Visual Studio 2017.
 
 > **Note:**
@@ -16,22 +16,22 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
     * The **.NET Core cross-platform development** workload in Visual Studio.
       You can enable it in **Tools** \> **Get Tools and Features**.
   * On Windows or Linux:
-    * [.NET Core 2.1](https://www.microsoft.com/net/download/dotnet-core/2.1)
-    * On Windows you also need the [Microsoft Visual C++ Redistributable for Visual Studio 2017](https://support.microsoft.com/help/2977003/the-latest-supported-visual-c-downloads) for your platform.
+    * [.NET Core 3.1](https://dotnet.microsoft.com/download/dotnet/3.1)
+    * On Windows you also need the [Microsoft Visual C++ Redistributable for Visual Studio 2015, 2017 and 2019](https://support.microsoft.com/help/2977003/the-latest-supported-visual-c-downloads) for your platform.
 * On Ubuntu or Debian, run the following commands for the installation of required packages:
 
   ```sh
   sudo apt-get update
-  sudo apt-get install libssl1.0.0 libasound2
+  sudo apt-get install libssl-dev libasound2
   ```
 
-  * If libssl1.0.0 is not available, install libssl1.0.x (where x is greater than 0) or libssl1.1 instead.
+  * On **Ubuntu 22.04 LTS** it is also required to download and install the latest **libssl1.1** package e.g. from http://security.ubuntu.com/ubuntu/pool/main/o/openssl/.
 
 * On RHEL or CentOS, run the following commands for the installation of required packages:
 
   ```sh
   sudo yum update
-  sudo yum install alsa-lib dotnet-sdk-2.1 openssl
+  sudo yum install alsa-lib dotnet-sdk-3.1 openssl
   ```
 
   * See also [how to configure RHEL/CentOS 7 for Speech SDK](https://docs.microsoft.com/azure/cognitive-services/speech-service/how-to-configure-rhel-centos-7).
@@ -66,7 +66,7 @@ To debug the app and then run it, press F5 or use **Debug** \> **Start Debugging
 Run the following command from the directory that contains this sample:
 
 ```bash
-dotnet helloworld/bin/Debug/netcoreapp2.1/helloworld.dll
+dotnet helloworld/bin/Debug/netcoreapp3.1/helloworld.dll
 ```
 
 ## References

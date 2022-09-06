@@ -7,7 +7,7 @@ This sample shows how to use the Speech Service using the Speech SDK for JavaScr
 ## Prerequisites
 
 * A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
-* A PC or Mac, with a working microphone.
+* A PC or Mac, with a working speaker.
 * A text editor.
 * Optionally, a web server that supports hosting PHP scripts.
 

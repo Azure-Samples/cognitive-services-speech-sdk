@@ -23,7 +23,8 @@ DESCRIPTION = "Simple transcription description"
 LOCALE = "en-US"
 RECORDINGS_BLOB_URI = "<Your SAS Uri to the recording>"
 
-# Provide the uri of a container with audio files for transcribing all of them with a single request
+# Provide the uri of a container with audio files for transcribing all of them
+# with a single request. At least 'read' and 'list' (rl) permissions are required.
 RECORDINGS_CONTAINER_URI = "<Your SAS Uri to a container of audio files>"
 
 # Set model information when doing transcription with custom models
@@ -137,7 +138,7 @@ def transcribe():
     client = cris_client.ApiClient(configuration)
 
     # create an instance of the transcription api class
-    api = cris_client.DefaultApi(api_client=client)
+    api = cris_client.CustomSpeechTranscriptionsApi(api_client=client)
 
     # Specify transcription properties by passing a dict to the properties parameter. See
     # https://docs.microsoft.com/azure/cognitive-services/speech-service/batch-transcription#configuration-properties
@@ -147,7 +148,7 @@ def transcribe():
         # "profanityFilterMode": "Masked",
         # "wordLevelTimestampsEnabled": True,
         # "diarizationEnabled": True,
-        # "destinationContainerUrl": "<results container>",
+        # "destinationContainerUrl": "<SAS Uri with at least write (w) permissions for an Azure Storage blob container that results should be written to>",
         # "timeToLive": "PT1H"
     }
 

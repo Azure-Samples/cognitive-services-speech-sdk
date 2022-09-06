@@ -75,7 +75,15 @@ namespace MicrosoftSpeechSDKSamples
 
             // Replace the language with your language in BCP-47 format, e.g., en-US.
             var language = "de-DE";
+
+            // Ask for detailed recognition result
             config.OutputFormat = OutputFormat.Detailed;
+
+            // If you also want word-level timing in the detailed recognition results, set the following.
+            // Note that if you set the following, you can omit the previous line
+            //      "config.OutputFormat = OutputFormat.Detailed",
+            // since word-level timing implies detailed recognition results.
+            config.RequestWordLevelTimestamps();
 
             // Creates a speech recognizer for the specified language, using microphone as audio input.
             // Requests detailed output format.
@@ -95,13 +103,23 @@ namespace MicrosoftSpeechSDKSamples
                 // Checks result.
                 if (result.Reason == ResultReason.RecognizedSpeech)
                 {
-                    Console.WriteLine($"RECOGNIZED: Text={result.Text}");
-                    Console.WriteLine("  DETAILED RESULTS:");
+                    Console.WriteLine($"RECOGNIZED: Text = {result.Text}");
+                    Console.WriteLine("  Detailed results:");
 
+                    // The first item in detailedResults corresponds to the recognized text
+                    // (NOT the item with the highest confidence number!)
                     var detailedResults = result.Best();
-                    foreach (var item in detailedResults) // NOTE: We need to put this in all languages, or take it out of CSharp
+                    foreach (var item in detailedResults)
                     {
-                        Console.WriteLine($"    Confidence: {item.Confidence}, Text: {item.Text}, LexicalForm: {item.LexicalForm}, NormalizedForm: {item.NormalizedForm}, MaskedNormalizedForm: {item.MaskedNormalizedForm}");
+                        Console.WriteLine($"\tConfidence: {item.Confidence}\n\tText: {item.Text}\n\tLexicalForm: {item.LexicalForm}\n\tNormalizedForm: {item.NormalizedForm}\n\tMaskedNormalizedForm: {item.MaskedNormalizedForm}");
+                        Console.WriteLine($"\tWord-level timing:");
+                        Console.WriteLine($"\t\tWord | Offset | Duration");
+
+                        // Word-level timing
+                        foreach (var word in item.Words)
+                        {
+                            Console.WriteLine($"\t\t{word.Word} {word.Offset} {word.Duration}");
+                        }
                     }
                 }
                 else if (result.Reason == ResultReason.NoMatch)
@@ -948,12 +966,15 @@ namespace MicrosoftSpeechSDKSamples
         }
 
         // Pronunciation assessment with microphone as audio input.
+        // See more information at https://aka.ms/csspeech/pa
         public static async Task PronunciationAssessmentWithMicrophoneAsync()
         {
             // Creates an instance of a speech config with specified subscription key and service region.
             // Replace with your own subscription key and service region (e.g., "westus").
-            // Note: The pronunciation assessment feature is currently only available on en-US language.
             var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+
+            // Replace the language with your language in BCP-47 format, e.g., en-US.
+            var language = "en-US";
 
             // The pronunciation assessment service has a longer default end silence timeout (5 seconds) than normal STT
             // as the pronunciation assessment is widely used in education scenario where kids have longer break in reading.
@@ -966,7 +987,7 @@ namespace MicrosoftSpeechSDKSamples
                 GradingSystem.HundredMark, Granularity.Phoneme, true);
 
             // Creates a speech recognizer for the specified language, using microphone as audio input.
-            using (var recognizer = new SpeechRecognizer(config))
+            using (var recognizer = new SpeechRecognizer(config, language))
             {
                 while (true)
                 {
@@ -1028,11 +1049,11 @@ namespace MicrosoftSpeechSDKSamples
         }
 
         // Pronunciation assessment with audio stream input.
+        // See more information at https://aka.ms/csspeech/pa
         public static void PronunciationAssessmentWithStream()
         {
             // Creates an instance of a speech config with specified subscription key and service region.
             // Replace with your own subscription key and service region (e.g., "westus").
-            // Note: The pronunciation assessment feature is currently only available on en-US language.
             var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
             // Read audio data from file. In real scenario this can be from memory or network
@@ -1120,6 +1141,391 @@ namespace MicrosoftSpeechSDKSamples
                 }
             }
             Console.WriteLine("Recognized {0}", recognitionResult.Text);
+        }
+
+        // Speech recognition from default microphone with Microsoft Audio Stack enabled.
+        public static async Task ContinuousRecognitionFromDefaultMicrophoneWithMASEnabled()
+        {
+            // Creates an instance of a speech config with specified subscription key and service region.
+            // Replace with your own subscription key and service region (e.g., "westus").
+            var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+
+            var stopRecognition = new TaskCompletionSource<int>();
+
+            // Creates an instance of audio config using default microphone as audio input and with audio processing options specified.
+            // All default enhancements from Microsoft Audio Stack are enabled.
+            // On Windows, microphone array geometry is obtained from the driver. On other operating systems, a single channel (mono)
+            // microphone is assumed.
+            using (var audioProcessingOptions = AudioProcessingOptions.Create(AudioProcessingConstants.AUDIO_INPUT_PROCESSING_ENABLE_DEFAULT))
+            using (var audioInput = AudioConfig.FromDefaultMicrophoneInput(audioProcessingOptions))
+            {
+                // Creates a speech recognizer.
+                using (var recognizer = new SpeechRecognizer(config, audioInput))
+                {
+                    // Subscribes to events.
+                    recognizer.Recognizing += (s, e) =>
+                    {
+                        Console.WriteLine($"RECOGNIZING: Text={e.Result.Text}");
+                    };
+
+                    recognizer.Recognized += (s, e) =>
+                    {
+                        if (e.Result.Reason == ResultReason.RecognizedSpeech)
+                        {
+                            Console.WriteLine($"RECOGNIZED: Text={e.Result.Text}");
+                        }
+                        else if (e.Result.Reason == ResultReason.NoMatch)
+                        {
+                            Console.WriteLine($"NOMATCH: Speech could not be recognized.");
+                        }
+                    };
+
+                    recognizer.Canceled += (s, e) =>
+                    {
+                        Console.WriteLine($"CANCELED: Reason={e.Reason}");
+
+                        if (e.Reason == CancellationReason.Error)
+                        {
+                            Console.WriteLine($"CANCELED: ErrorCode={e.ErrorCode}");
+                            Console.WriteLine($"CANCELED: ErrorDetails={e.ErrorDetails}");
+                            Console.WriteLine($"CANCELED: Did you update the subscription info?");
+                        }
+
+                        stopRecognition.TrySetResult(0);
+                    };
+
+                    recognizer.SessionStarted += (s, e) =>
+                    {
+                        Console.WriteLine("\n    Session started event.");
+                    };
+
+                    recognizer.SessionStopped += (s, e) =>
+                    {
+                        Console.WriteLine("\n    Session stopped event.");
+                        Console.WriteLine("\nStop recognition.");
+                        stopRecognition.TrySetResult(0);
+                    };
+
+                    // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
+                    await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
+
+                    // Waits for completion.
+                    // Use Task.WaitAny to keep the task rooted.
+                    Task.WaitAny(new[] { stopRecognition.Task });
+
+                    // Stops recognition.
+                    await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
+                }
+            }
+        }
+
+        // Speech recognition from a microphone with Microsoft Audio Stack enabled and pre-defined microphone array geometry specified.
+        public static async Task RecognitionFromMicrophoneWithMASEnabledAndPresetGeometrySpecified()
+        {
+            // Creates an instance of a speech config with specified subscription key and service region.
+            // Replace with your own subscription key and service region (e.g., "westus").
+            var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+
+            // Creates an instance of audio config using a microphone as audio input and with audio processing options specified.
+            // All default enhancements from Microsoft Audio Stack are enabled and preset microphone array geometry is specified
+            // in audio processing options.
+            using (var audioProcessingOptions = AudioProcessingOptions.Create(AudioProcessingConstants.AUDIO_INPUT_PROCESSING_ENABLE_DEFAULT,
+                                                                              PresetMicrophoneArrayGeometry.Linear2))
+            using (var audioInput = AudioConfig.FromMicrophoneInput("<device id>", audioProcessingOptions))
+            {
+                // Creates a speech recognizer.
+                using (var recognizer = new SpeechRecognizer(config, audioInput))
+                {
+                    // Starts recognizing.
+                    Console.WriteLine("Say something...");
+
+                    // Starts speech recognition, and returns after a single utterance is recognized. The end of a
+                    // single utterance is determined by listening for silence at the end or until a maximum of 15
+                    // seconds of audio is processed.  The task returns the recognition text as result.
+                    // Note: Since RecognizeOnceAsync() returns only a single utterance, it is suitable only for single
+                    // shot recognition like command or query.
+                    // For long-running multi-utterance recognition, use StartContinuousRecognitionAsync() instead.
+                    var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+
+                    // Checks result.
+                    if (result.Reason == ResultReason.RecognizedSpeech)
+                    {
+                        Console.WriteLine($"RECOGNIZED: Text={result.Text}");
+                    }
+                    else if (result.Reason == ResultReason.NoMatch)
+                    {
+                        Console.WriteLine($"NOMATCH: Speech could not be recognized.");
+                    }
+                    else if (result.Reason == ResultReason.Canceled)
+                    {
+                        var cancellation = CancellationDetails.FromResult(result);
+                        Console.WriteLine($"CANCELED: Reason={cancellation.Reason}");
+
+                        if (cancellation.Reason == CancellationReason.Error)
+                        {
+                            Console.WriteLine($"CANCELED: ErrorCode={cancellation.ErrorCode}");
+                            Console.WriteLine($"CANCELED: ErrorDetails={cancellation.ErrorDetails}");
+                            Console.WriteLine($"CANCELED: Did you update the subscription info?");
+                        }
+                    }
+                }
+            }
+        }
+
+        // Speech recognition from multi-channel file with Microsoft Audio Stack enabled and custom microphone array geometry specified.
+        public static async Task ContinuousRecognitionFromMultiChannelFileWithMASEnabledAndCustomGeometrySpecified()
+        {
+            // Creates an instance of a speech config with specified subscription key and service region.
+            // Replace with your own subscription key and service region (e.g., "westus").
+            var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+
+            var stopRecognition = new TaskCompletionSource<int>();
+
+            // Approximate coordinates for a microphone array with one microphone in the center and six microphones evenly spaced
+            // in a circle with radius approximately equal to 42.5 mm.
+            MicrophoneCoordinates[] microphoneCoordinates = new MicrophoneCoordinates[7]
+            {
+                new MicrophoneCoordinates(0, 0, 0),
+                new MicrophoneCoordinates(40, 0, 0),
+                new MicrophoneCoordinates(20, -35, 0),
+                new MicrophoneCoordinates(-20, -35, 0),
+                new MicrophoneCoordinates(-40, 0, 0),
+                new MicrophoneCoordinates(-20, 35, 0),
+                new MicrophoneCoordinates(20, 35, 0)
+            };
+
+            // Creates an instance of microphone array geometry with microphone coordinates.
+            var microphoneArrayGeometry = new MicrophoneArrayGeometry(MicrophoneArrayType.Planar, microphoneCoordinates);
+
+            // Creates an instance of audio config using multi-channel WAV file as audio input and with audio processing options specified.
+            // All default enhancements from Microsoft Audio Stack are enabled and custom microphone array geometry is provided.
+            using (var audioProcessingOptions = AudioProcessingOptions.Create(AudioProcessingConstants.AUDIO_INPUT_PROCESSING_ENABLE_DEFAULT,
+                                                                              microphoneArrayGeometry,
+                                                                              SpeakerReferenceChannel.LastChannel))
+            using (var audioInput = AudioConfig.FromWavFileInput("katiesteve.wav", audioProcessingOptions))
+            {
+                // Creates a speech recognizer.
+                using (var recognizer = new SpeechRecognizer(config, audioInput))
+                {
+                    // Subscribes to events.
+                    recognizer.Recognizing += (s, e) =>
+                    {
+                        Console.WriteLine($"RECOGNIZING: Text={e.Result.Text}");
+                    };
+
+                    recognizer.Recognized += (s, e) =>
+                    {
+                        if (e.Result.Reason == ResultReason.RecognizedSpeech)
+                        {
+                            Console.WriteLine($"RECOGNIZED: Text={e.Result.Text}");
+                        }
+                        else if (e.Result.Reason == ResultReason.NoMatch)
+                        {
+                            Console.WriteLine($"NOMATCH: Speech could not be recognized.");
+                        }
+                    };
+
+                    recognizer.Canceled += (s, e) =>
+                    {
+                        Console.WriteLine($"CANCELED: Reason={e.Reason}");
+
+                        if (e.Reason == CancellationReason.Error)
+                        {
+                            Console.WriteLine($"CANCELED: ErrorCode={e.ErrorCode}");
+                            Console.WriteLine($"CANCELED: ErrorDetails={e.ErrorDetails}");
+                            Console.WriteLine($"CANCELED: Did you update the subscription info?");
+                        }
+
+                        stopRecognition.TrySetResult(0);
+                    };
+
+                    recognizer.SessionStarted += (s, e) =>
+                    {
+                        Console.WriteLine("\n    Session started event.");
+                    };
+
+                    recognizer.SessionStopped += (s, e) =>
+                    {
+                        Console.WriteLine("\n    Session stopped event.");
+                        Console.WriteLine("\nStop recognition.");
+                        stopRecognition.TrySetResult(0);
+                    };
+
+                    // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
+                    await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
+
+                    // Waits for completion.
+                    // Use Task.WaitAny to keep the task rooted.
+                    Task.WaitAny(new[] { stopRecognition.Task });
+
+                    // Stops recognition.
+                    await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
+                }
+            }
+        }
+
+        // Speech recognition from pull stream with custom set of enhancements from Microsoft Audio Stack enabled.
+        public static async Task RecognitionFromPullStreamWithSelectMASEnhancementsEnabled()
+        {
+            // Creates an instance of a speech config with specified subscription key and service region.
+            // Replace with your own subscription key and service region (e.g., "westus").
+            var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+
+            // Creates an instance of audio config with pull stream as audio input and with audio processing options specified.
+            // All default enhancements from Microsoft Audio Stack are enabled except acoustic echo cancellation and preset
+            // microphone array geometry is specified in audio processing options.
+            using (var audioProcessingOptions = AudioProcessingOptions.Create(AudioProcessingConstants.AUDIO_INPUT_PROCESSING_ENABLE_DEFAULT |
+                                                                              AudioProcessingConstants.AUDIO_INPUT_PROCESSING_DISABLE_ECHO_CANCELLATION,
+                                                                              PresetMicrophoneArrayGeometry.Mono))
+            using (var audioInput = Helper.OpenWavFile("whatstheweatherlike.wav", audioProcessingOptions))
+            {
+                // Creates a speech recognizer.
+                using (var recognizer = new SpeechRecognizer(config, audioInput))
+                {
+                    // Starts speech recognition, and returns after a single utterance is recognized. The end of a
+                    // single utterance is determined by listening for silence at the end or until a maximum of 15
+                    // seconds of audio is processed.  The task returns the recognition text as result.
+                    // Note: Since RecognizeOnceAsync() returns only a single utterance, it is suitable only for single
+                    // shot recognition like command or query.
+                    // For long-running multi-utterance recognition, use StartContinuousRecognitionAsync() instead.
+                    var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+
+                    // Checks result.
+                    if (result.Reason == ResultReason.RecognizedSpeech)
+                    {
+                        Console.WriteLine($"RECOGNIZED: Text={result.Text}");
+                    }
+                    else if (result.Reason == ResultReason.NoMatch)
+                    {
+                        Console.WriteLine($"NOMATCH: Speech could not be recognized.");
+                    }
+                    else if (result.Reason == ResultReason.Canceled)
+                    {
+                        var cancellation = CancellationDetails.FromResult(result);
+                        Console.WriteLine($"CANCELED: Reason={cancellation.Reason}");
+
+                        if (cancellation.Reason == CancellationReason.Error)
+                        {
+                            Console.WriteLine($"CANCELED: ErrorCode={cancellation.ErrorCode}");
+                            Console.WriteLine($"CANCELED: ErrorDetails={cancellation.ErrorDetails}");
+                            Console.WriteLine($"CANCELED: Did you update the subscription info?");
+                        }
+                    }
+                }
+            }
+        }
+
+        // Speech recognition from push stream with Microsoft Audio Stack enabled and beamforming angles specified.
+        public static async Task ContinuousRecognitionFromPushStreamWithMASEnabledAndBeamformingAnglesSpecified()
+        {
+            // Creates an instance of a speech config with specified subscription key and service region.
+            // Replace with your own subscription key and service region (e.g., "westus").
+            var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+
+            var stopRecognition = new TaskCompletionSource<int>();
+
+            // Approximate coordinates for a microphone array with one microphone in the center and six microphones evenly spaced
+            // in a circle with radius approximately equal to 42.5 mm.
+            MicrophoneCoordinates[] microphoneCoordinates = new MicrophoneCoordinates[7]
+            {
+                new MicrophoneCoordinates(0, 0, 0),
+                new MicrophoneCoordinates(40, 0, 0),
+                new MicrophoneCoordinates(20, -35, 0),
+                new MicrophoneCoordinates(-20, -35, 0),
+                new MicrophoneCoordinates(-40, 0, 0),
+                new MicrophoneCoordinates(-20, 35, 0),
+                new MicrophoneCoordinates(20, 35, 0)
+            };
+
+            // Creates an instance of microphone array geometry with beamforming angles and microphone coordinates.
+            var microphoneArrayGeometry = new MicrophoneArrayGeometry(MicrophoneArrayType.Planar, 70, 110, microphoneCoordinates);
+
+            // Create the push stream to push audio to.
+            using (var pushStream = AudioInputStream.CreatePushStream(AudioStreamFormat.GetWaveFormatPCM(16000, (byte)16, (byte)8)))
+            {
+                // Creates an instance of audio config with push stream as audio input and with audio processing options specified.
+                // All default enhancements from Microsoft Audio Stack are enabled and custom microphone array geometry with beamforming
+                // angles is specified.
+                using (var audioProcessingOptions = AudioProcessingOptions.Create(AudioProcessingConstants.AUDIO_INPUT_PROCESSING_ENABLE_DEFAULT,
+                                                                                  microphoneArrayGeometry,
+                                                                                  SpeakerReferenceChannel.LastChannel))
+                using(var audioInput = AudioConfig.FromStreamInput(pushStream, audioProcessingOptions))
+                {
+                    // Creates a speech recognizer using audio stream input.
+                    using (var recognizer = new SpeechRecognizer(config, audioInput))
+                    {
+                        // Subscribes to events.
+                        recognizer.Recognizing += (s, e) =>
+                        {
+                            Console.WriteLine($"RECOGNIZING: Text={e.Result.Text}");
+                        };
+
+                        recognizer.Recognized += (s, e) =>
+                        {
+                            if (e.Result.Reason == ResultReason.RecognizedSpeech)
+                            {
+                                Console.WriteLine($"RECOGNIZED: Text={e.Result.Text}");
+                            }
+                            else if (e.Result.Reason == ResultReason.NoMatch)
+                            {
+                                Console.WriteLine($"NOMATCH: Speech could not be recognized.");
+                            }
+                        };
+
+                        recognizer.Canceled += (s, e) =>
+                        {
+                            Console.WriteLine($"CANCELED: Reason={e.Reason}");
+
+                            if (e.Reason == CancellationReason.Error)
+                            {
+                                Console.WriteLine($"CANCELED: ErrorCode={e.ErrorCode}");
+                                Console.WriteLine($"CANCELED: ErrorDetails={e.ErrorDetails}");
+                                Console.WriteLine($"CANCELED: Did you update the subscription info?");
+                            }
+
+                            stopRecognition.TrySetResult(0);
+                        };
+
+                        recognizer.SessionStarted += (s, e) =>
+                        {
+                            Console.WriteLine("\nSession started event.");
+                        };
+
+                        recognizer.SessionStopped += (s, e) =>
+                        {
+                            Console.WriteLine("\nSession stopped event.");
+                            Console.WriteLine("\nStop recognition.");
+                            stopRecognition.TrySetResult(0);
+                        };
+
+                        // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
+                        await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
+
+                        // Open and read the wave file and push the buffers into the recognizer
+                        using (BinaryAudioStreamReader reader = Helper.CreateBinaryFileReader("katiesteve.wav"))
+                        {
+                            byte[] buffer = new byte[1000];
+                            while (true)
+                            {
+                                var readSamples = reader.Read(buffer, (uint)buffer.Length);
+                                if (readSamples == 0)
+                                {
+                                    break;
+                                }
+                                pushStream.Write(buffer, readSamples);
+                            }
+                        }
+                        pushStream.Close();
+
+                        // Waits for completion.
+                        // Use Task.WaitAny to keep the task rooted.
+                        Task.WaitAny(new[] { stopRecognition.Task });
+
+                        // Stops recognition.
+                        await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
+                    }
+                }
+            }
         }
 
     }

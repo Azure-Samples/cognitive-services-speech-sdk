@@ -21,7 +21,7 @@ namespace FetchTranscriptionFunction
                 throw new ArgumentNullException(nameof(log));
             }
 
-            log.LogInformation($"C# Timer trigger function executed at: {DateTime.Now}");
+            log.LogInformation($"C# Service bus triggered function executed at: {DateTime.Now}");
 
             if (string.IsNullOrEmpty(message))
             {

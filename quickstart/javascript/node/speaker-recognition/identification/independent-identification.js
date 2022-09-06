@@ -1,86 +1,54 @@
-(function() {
+(async function() {
   "use strict";
   
   // pull in the required packages.
-  var sdk = require("microsoft-cognitiveservices-speech-sdk");
-  var fs = require("fs");
-
+  const sdk = require("microsoft-cognitiveservices-speech-sdk");
+  const fs = require("fs");
   
   // replace with your own subscription key,
   // service region (e.g., "westus"), and
   // the name of the files you want to use
   // to enroll and then identify the speaker.
-  var subscriptionKey = "YourSubscriptionKey";
-  var serviceRegion = "YourSubscriptionRegion"; // e.g., "westus"
-  var enrollFile = "aboutSpeechSdk.wav"; // 16000 Hz, Mono
-  var identificationFile = "myVoiceIsMyPassportVerifyMe01.wav"; // 16000 Hz, Mono
+  const subscriptionKey = "YourSubscriptionKey";
+  const serviceRegion = "YourSubscriptionRegion"; // e.g., "westus"
+  const enrollFile = "aboutSpeechSdk.wav"; // 16000 Hz, Mono
+  const identificationFile = "TalkForAFewSeconds16.wav"; // 16000 Hz, Mono
   
   // now create the speech config with the credentials for the subscription
-  var speechConfig = sdk.SpeechConfig.fromSubscription(subscriptionKey, serviceRegion);
-  var client = new sdk.VoiceProfileClient(speechConfig);
-  var locale = "en-us";
+  const speechConfig = sdk.SpeechConfig.fromSubscription(subscriptionKey, serviceRegion);
+  const client = new sdk.VoiceProfileClient(speechConfig);
+  const locale = "en-us";
 
   // we are done with the setup
-  client.createProfileAsync(
-    sdk.VoiceProfileType.TextIndependentIdentification,
-    locale,
-    async function (result) {
-      var profile = result;
-      var getAudioConfigFromFile = function (file) {
-          // Create the push stream we need for the speech sdk.
-          var pushStream = sdk.AudioInputStream.createPushStream();
+  try {
+    const profile = await client.createProfileAsync(sdk.VoiceProfileType.TextIndependentIdentification, locale);
+    const audioConfig = sdk.AudioConfig.fromWavFileInput(fs.readFileSync(enrollFile));
 
-          // Open the file and push it to the push stream.
-          fs.createReadStream(file).on("data", function(arrayBuffer) {
-            pushStream.write(arrayBuffer.buffer);
-          }).on("end", function() {
-            pushStream.close();
-          });
-          return sdk.AudioConfig.fromStreamInput(pushStream);
-      };
-      var enrollConfig = getAudioConfigFromFile(enrollFile);
+    console.log("Profile id: " + profile.profileId +" created, now enrolling using file: " + enrollFile);
+    const enrollResult = await client.enrollProfileAsync(profile, audioConfig);
 
-      console.log("Profile id: " + profile.profileId +" created, now enrolling using file: " + enrollFile);
+    console.log("(Enrollment result) Reason: " + sdk.ResultReason[enrollResult.reason]); 
+    const idConfig = sdk.AudioConfig.fromWavFileInput(fs.readFileSync(identificationFile));
+    const recognizer = new sdk.SpeakerRecognizer(speechConfig, idConfig);
+    const model = sdk.SpeakerIdentificationModel.fromProfiles([profile]);
+    const identificationResult = await recognizer.recognizeOnceAsync(model);
 
-      try {
-        var enrollResult = await client.enrollProfileAsync(profile, enrollConfig);
-        console.log("(Enrollment result) Reason: " + sdk.ResultReason[enrollResult.reason]); 
-        var identificationConfig = getAudioConfigFromFile(identificationFile);
-        var recognizer = new sdk.SpeakerRecognizer(speechConfig, identificationConfig);
-        var model = sdk.SpeakerIdentificationModel.fromProfiles([profile]);
-        recognizer.recognizeOnceAsync(
-          model,
-          function(identificationResult) {
-            var reason = identificationResult.reason; 
-            console.log("(Identification result) Reason: " + sdk.ResultReason[reason]); 
+    var reason = identificationResult.reason; 
+    console.log("(Identification result) Reason: " + sdk.ResultReason[reason]); 
 
-            if( reason === sdk.ResultReason.Canceled ) {
-              var cancellationDetails = sdk.SpeakerRecognitionCancellationDetails.fromResult(identificationResult);
-              console.log("(Identification canceled) Error Details: " + cancellationDetails.errorDetails); 
-              console.log("(Identification canceled) Error Code: " + cancellationDetails.errorCode);
-            } else {
-              console.log("(Identification result) Profile Id: " + identificationResult.profileId); 
-              console.log("(Identification result) Score: " + identificationResult.score);
-            }
+    if( reason === sdk.ResultReason.Canceled ) {
+      const cancellationDetails = sdk.SpeakerRecognitionCancellationDetails.fromResult(identificationResult);
+      console.log("(Identification canceled) Error Details: " + cancellationDetails.errorDetails); 
+      console.log("(Identification canceled) Error Code: " + cancellationDetails.errorCode);
+    } else {
+      console.log("(Identification result) Profile Id: " + identificationResult.profileId); 
+      console.log("(Identification result) Score: " + identificationResult.score);
+    }
 
-            client.deleteProfileAsync(
-              profile,
-              function(deleteResult) {
-                console.log("(Delete profile result) Reason: " + sdk.ResultReason[deleteResult.reason]); 
-              },
-              function(err) {
-                console.log("ERROR deleting profile: " + err); 
-              });
-          },
-          function(err) {
-            console.log("ERROR recognizing speaker: " + err); 
-          });
-        } catch (err) {
-          console.log("ERROR enrolling profile: " + err); 
-        }
-    },
-    function (err) {
-      console.log("ERROR creating profile: " + err); 
-    });
-  
+    const deleteResult = await client.deleteProfileAsync(profile);
+    console.log("(Delete profile result) Reason: " + sdk.ResultReason[deleteResult.reason]); 
+
+  } catch (err) {
+    console.log("ERROR during operation: " + err); 
+  }
 }());

@@ -292,12 +292,19 @@ __pycache__/
 *.xsd.cs
 
 # Unity project
-quickstart/csharp-unity/[Ll]ibrary/
-quickstart/csharp-unity/[Tt]emp/
-quickstart/csharp-unity/[Oo]bj/
-quickstart/csharp-unity/[Bb]uild/
-quickstart/csharp-unity/[Bb]uilds/
-quickstart/csharp-unity/[Ll]ogs/
+quickstart/csharp/unity/*/[Ll]ibrary/
+quickstart/csharp/unity/*/[Tt]emp/
+quickstart/csharp/unity/*/[Oo]bj/
+quickstart/csharp/unity/*/[Bb]uild/
+quickstart/csharp/unity/*/[Bb]uilds/
+quickstart/csharp/unity/*/[Ll]ogs/
+quickstart/csharp/unity/*/[Uu]ser[Ss]ettings/
+
+quickstart/csharp/unity/*/*.csproj
+quickstart/csharp/unity/*/*.sln
+quickstart/csharp/unity/*/*.apk
+
+quickstart/csharp/unity/*/Assets/SpeechSDK/
 
 # Linux executables
 quickstart/cpp-linux/helloworld
@@ -313,6 +320,14 @@ quickstart/**/text-to-speech/*.wav
 # compiled JavaScript files
 quickstart/javascript/**/microsoft.cognitiveservices.speech.sdk.bundle*.js*
 samples/js/**/microsoft.cognitiveservices.speech.sdk.bundle*.js*
+
+# generated pods directory and xcode workspace
+**/swift/**/Pods/
+**/swift/**/Podfile.lock
+**/swift/**/*.xcworkspace/
+**/objectivec/**/Pods/
+**/objectivec/**/Podfile.lock
+**/objectivec/**/*.xcworkspace/
 
 # iOS framwork
 samples/objective-c/ios/MicrosoftCognitiveServicesSpeech.framework/

@@ -2,7 +2,8 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
-// <code>
+
+// <skeleton_1>
 package speechsdk.quickstart;
 
 import com.microsoft.cognitiveservices.speech.*;
@@ -17,7 +18,8 @@ public class Main {
      * @param args Arguments are ignored in this sample.
      */
     public static void main(String[] args) {
-        
+    // </skeleton_1>
+        // <create_speech_configuration>
         // Replace below with with specified subscription key (called 'endpoint key' by the Language Understanding service)
         String languageUnderstandingSubscriptionKey = "YourLanguageUnderstandingSubscriptionKey";
         // Replace below with your own service region (e.g., "westus").
@@ -26,22 +28,30 @@ public class Main {
         // Creates an instance of intent recognizer with a given speech configuration.
         // Recognizer is created with the default microphone audio input and default language "en-us".
         try (SpeechConfig config = SpeechConfig.fromSubscription(languageUnderstandingSubscriptionKey, languageUnderstandingServiceRegion);
-             IntentRecognizer recognizer = new IntentRecognizer(config)) {
-            
+        // </create_speech_configuration>
+            // <create_intent_recognizer>
+            IntentRecognizer recognizer = new IntentRecognizer(config)) {
+            // </create_intent_recognizer>
+
+            // <add_intents>
             // Creates a language understanding model using the app id, and adds specific intents from your model
             LanguageUnderstandingModel model = LanguageUnderstandingModel.fromAppId("YourLanguageUnderstandingAppId");
             recognizer.addIntent(model, "YourLanguageUnderstandingIntentName1", "id1");
             recognizer.addIntent(model, "YourLanguageUnderstandingIntentName2", "id2");
             recognizer.addIntent(model, "YourLanguageUnderstandingIntentName3", "any-IntentId-here");
+            // </add_intents>
 
             // To add all of the possible intents from a LUIS model to the recognizer, uncomment the line below:
             // recognizer.addAllIntents(model);
 
+            // <recognize_intent>
             System.out.println("Say something...");
 
             // Starts recognition. It returns when the first utterance has been recognized.
             IntentRecognitionResult result = recognizer.recognizeOnceAsync().get();
+            // </recognize_intent>
 
+            // <print_result>
             // Checks result.
             if (result.getReason() == ResultReason.RecognizedIntent) {
                 System.out.println("RECOGNIZED: Text=" + result.getText());
@@ -65,13 +75,14 @@ public class Main {
                     System.out.println("CANCELED: Did you update the subscription info?");
                 }
             }
-            
+            // </print_result>
+        // <skeleton_2>
         } catch (Exception ex) {
             System.out.println("Unexpected exception: " + ex.getMessage());
 
             assert(false);
             System.exit(1);
-        } 
+        }
     }
 }
-// </code>
+// </skeleton_2>

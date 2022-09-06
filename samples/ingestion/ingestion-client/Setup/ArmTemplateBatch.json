@@ -96,6 +96,13 @@
                 "description": "The region the Azure speech services subscription is associated with."
             }
         },
+        "CustomEndpoint": {
+            "defaultValue": "",
+            "type": "String",
+            "metadata": {
+                "description": "Enter the address of your private endpoint here (e.g. https://mycustomendpoint.cognitiveservices.azure.com/) if you are connecting with a private endpoint"
+            }
+        },
         "ProfanityFilterMode": {
             "defaultValue": "None",
             "type": "String",
@@ -231,6 +238,7 @@
         "CreateConsolidatedOutputFiles": false,
         "TimerBasedExecution": true,
         "CreateAudioProcessedContainer": true,
+        "IsByosEnabledSubscription": false,
         "MessagesPerFunctionExecution": 1000,
         "FilesPerTranscriptionJob": 100,
         "RetryLimit": 4,
@@ -257,7 +265,11 @@
         "TextAnalyticsKeySecretName": "TextAnalyticsKey",
         "DatabaseConnectionStringSecretName": "DatabaseConnectionString",
         "PiiCategories": "",
+        "ConversationPiiCategories": "",
+        "ConversationPiiRedaction": "None",
+        "ConversationPiiInferenceSource": "text",
         "IsAzureGovDeployment": "[or(equals(parameters('AzureSpeechServicesRegion'),'usgovarizona'), equals(parameters('AzureSpeechServicesRegion'),'usgovvirginia'))]",
+        "AzureSpeechServicesEndpointUri": "[if(not(equals(parameters('CustomEndpoint'),'')), parameters('CustomEndpoint'), if(variables('IsAzureGovDeployment'), concat('https://', parameters('AzureSpeechServicesRegion') ,'.api.cognitive.microsoft.us/'), concat('https://', parameters('AzureSpeechServicesRegion') ,'.api.cognitive.microsoft.com/')))]",
         "EndpointSuffix": "[if(variables('IsAzureGovDeployment'),'core.usgovcloudapi.net','core.windows.net')]"
     },
     "resources": [
@@ -432,7 +444,7 @@
                                 "storageKeyType": "SharedAccessKey",
                                 "administratorLogin": "[parameters('SqlAdministratorLogin')]",
                                 "administratorLoginPassword": "[parameters('SqlAdministratorLoginPassword')]",
-                                "storageUri": "https://mspublicstorage.blob.core.windows.net/ingestion-client/IngestionClient.bacpac"
+                                "storageUri": "https://ingestionclientstorage.blob.core.windows.net/binaries/23082022.0/IngestionClient.bacpac"
                             }
                         }
                     ]
@@ -562,7 +574,7 @@
                 "deadLetteringOnMessageExpiration": false,
                 "enableBatchedOperations": false,
                 "duplicateDetectionHistoryTimeWindow": "PT10M",
-                "maxDeliveryCount": 1,
+                "maxDeliveryCount": 5,
                 "status": "Active",
                 "autoDeleteOnIdle": "P10675199DT2H48M5.4775807S",
                 "enablePartitioning": false,
@@ -858,8 +870,10 @@
                 "FilesPerTranscriptionJob": "[variables('FilesPerTranscriptionJob')]",
                 "FUNCTIONS_EXTENSION_VERSION": "~3",
                 "FUNCTIONS_WORKER_RUNTIME": "dotnet",
+                "AzureSpeechServicesEndpointUri": "[variables('AzureSpeechServicesEndpointUri')]",
                 "InitialPollingDelayInMinutes": "[variables('InitialPollingDelayInMinutes')]",
                 "IsAzureGovDeployment": "[variables('IsAzureGovDeployment')]",
+                "IsByosEnabledSubscription": "[variables('IsByosEnabledSubscription')]",
                 "MaxPollingDelayInMinutes": "[variables('MaxPollingDelayInMinutes')]",
                 "Locale": "[parameters('Locale')]",
                 "MessagesPerFunctionExecution": "[variables('MessagesPerFunctionExecution')]",
@@ -867,7 +881,7 @@
                 "PunctuationMode": "[parameters('PunctuationMode')]",
                 "RetryLimit": "[variables('RetryLimit')]",
                 "StartTranscriptionServiceBusConnectionString": "[listKeys(variables('AuthRuleCT'),'2015-08-01').primaryConnectionString]",
-                "WEBSITE_RUN_FROM_PACKAGE": "[if(variables('timerBasedExecution'),'https://mspublicstorage.blob.core.windows.net/ingestion-client/StartTranscriptionByTimer.zip','https://mspublicstorage.blob.core.windows.net/ingestion-client/StartTranscriptionByServiceBus.zip')]"
+                "WEBSITE_RUN_FROM_PACKAGE": "[if(variables('timerBasedExecution'),'https://ingestionclientstorage.blob.core.windows.net/binaries/23082022.0/StartTranscriptionByTimer.zip','https://ingestionclientstorage.blob.core.windows.net/binaries/23082022.0/StartTranscriptionByServiceBus.zip')]"
             }
         },
         {
@@ -931,12 +945,15 @@
                 "TextAnalyticsKey": "[concat('@Microsoft.KeyVault(VaultName=', variables('KeyVaultName'), ';SecretName=', variables('TextAnalyticsKeySecretName'), ')')]",
                 "TextAnalyticsRegion": "[parameters('TextAnalyticsRegion')]",
                 "UseSqlDatabase": "[variables('UseSqlDatabase')]",
-                "WEBSITE_RUN_FROM_PACKAGE": "https://mspublicstorage.blob.core.windows.net/ingestion-client/FetchTranscription.zip",
+                "WEBSITE_RUN_FROM_PACKAGE": "https://ingestionclientstorage.blob.core.windows.net/binaries/23082022.0/FetchTranscription.zip",
                 "CreateConsolidatedOutputFiles": "[variables('CreateConsolidatedOutputFiles')]",
                 "ConsolidatedFilesOutputContainer": "[variables('ConsolidatedFilesOutputContainer')]",
                 "CreateAudioProcessedContainer": "[variables('CreateAudioProcessedContainer')]",
                 "AudioProcessedContainer": "[variables('AudioProcessedContainer')]",
-                "PiiCategories": "[variables('PiiCategories')]"
+                "PiiCategories": "[variables('PiiCategories')]",
+                "ConversationPiiCategories": "[variables('ConversationPiiCategories')]",
+                "ConversationPiiInferenceSource": "[variables('ConversationPiiInferenceSource')]",
+                "ConversationPiiSetting":"[variables('ConversationPiiRedaction')]"
             }
         }
     ],

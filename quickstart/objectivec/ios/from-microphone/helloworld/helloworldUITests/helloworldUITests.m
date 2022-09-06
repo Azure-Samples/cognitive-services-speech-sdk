@@ -35,12 +35,12 @@
     // sleep to make sure elements are there
     [NSThread sleepForTimeInterval:1];
     XCUIElement * reco_button = app.buttons[@"recognize_file_button"];
-    XCUIElement * result_label = app.otherElements[@"result_label"];
-    
-    XCTAssert(result_label.exists);
     XCTAssert(reco_button.exists);
     
-    NSPredicate *pred = [NSPredicate predicateWithFormat:@"label BEGINSWITH 'What'"];
+    XCUIElement * result_label = app.staticTexts[@"result_label"];
+    XCTAssert(result_label.exists);
+    
+    NSPredicate *pred = [NSPredicate predicateWithFormat:@"label CONTAINS[c] %@", @"weather"];
     
     [self expectationForPredicate:pred evaluatedWithObject:result_label handler:nil];
 
