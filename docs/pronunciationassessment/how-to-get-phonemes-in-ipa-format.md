@@ -78,7 +78,7 @@
     NSString* pronunciationAssessmentResultJson = [result.properties getPropertyByName:@"RESULT-Json"];
     ```
 
-4. By running the code with above updates, the content of `pronunciationAssessmentResultJson` will be like below. It is in JSON format, and you can parse it with any JSON parsing library. In below JSON you can see that the phonemes are in IPA format. This is because you specified "phonemeAlphabet":"IPA" in step2 above. If you don't specify this, the phonemes will be in SAPI format by default.
+4. By running the code with above updates, the content of `pronunciationAssessmentResultJson` will be like below. It is in JSON format, and you can parse it with any JSON parsing library. In below JSON you can see that the phonemes are in IPA format. This is because you specified "phonemeAlphabet":"IPA" in step 2 above. If you don't specify this, the phonemes will be in SAPI format by default.
 
     ```json
     {

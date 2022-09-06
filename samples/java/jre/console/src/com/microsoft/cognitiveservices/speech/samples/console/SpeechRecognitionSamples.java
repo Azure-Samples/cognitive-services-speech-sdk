@@ -407,6 +407,8 @@ public class SpeechRecognitionSamples {
 
         // Replace with your own audio file name.
         // The input stream the sample will read from.
+        // The default format for a PushStream is 16Khz, 16 bit mono.
+        // You can use a different format by passing an AudioStreamFormat into createPushStream. 
         InputStream inputStream = new FileInputStream("YourAudioFile.wav");
 
         // Create the push stream to push audio to.
