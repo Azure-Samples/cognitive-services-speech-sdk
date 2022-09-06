@@ -26,39 +26,41 @@ public class Main {
         System.out.println("11. Intent recognition with microphone.");
         System.out.println("12. Intent recognition with language.");
         System.out.println("13. Intent continuous recognition using events with file.");
-        System.out.println("14. Speech continuous recognition using events with a PushStream.");
-        System.out.println("15. Speech continuous recognition using events with file and Phrase List.");
-        System.out.println("16. Speech synthesis to speaker output.");
-        System.out.println("17. Speech synthesis with specified language.");
-        System.out.println("18. Speech synthesis with specified voice.");
-        System.out.println("19. Speech synthesis to wave file.");
-        System.out.println("20. Speech synthesis to mp3 file.");
-        System.out.println("21. Speech synthesis to pull audio output stream.");
-        System.out.println("22. Speech synthesis to push audio output stream.");
-        System.out.println("23. Speech synthesis to result.");
-        System.out.println("24. Speech synthesis to audio data stream.");
-        System.out.println("25. Speech synthesis events.");
-        System.out.println("26. Speech synthesis word boundary event.");
-        System.out.println("27. Speech synthesis server scenario example.");
-        System.out.println("28. Speech synthesis with source language auto detection.");
-        System.out.println("29. Speaker verification with microphone.");
-        System.out.println("30. Speaker verification with file.");
-        System.out.println("31. Speaker identification with microphone.");
-        System.out.println("32. Speaker identification with file.");
-        System.out.println("33. Speech recognition from default microphone with Microsoft Audio Stack enabled.");
-        System.out.println("34. Speech recognition from a microphone with Microsoft Audio Stack enabled and "
+        System.out.println("14. Intent Pattern Matching with microphone.");
+        System.out.println("15. Intent Pattern Matching with microphone and keyword spotting.");
+        System.out.println("16. Speech continuous recognition using events with a PushStream.");
+        System.out.println("17. Speech continuous recognition using events with file and Phrase List.");
+        System.out.println("18. Speech synthesis to speaker output.");
+        System.out.println("19. Speech synthesis with specified language.");
+        System.out.println("20. Speech synthesis with specified voice.");
+        System.out.println("21. Speech synthesis to wave file.");
+        System.out.println("22. Speech synthesis to mp3 file.");
+        System.out.println("23. Speech synthesis to pull audio output stream.");
+        System.out.println("24. Speech synthesis to push audio output stream.");
+        System.out.println("25. Speech synthesis to result.");
+        System.out.println("26. Speech synthesis to audio data stream.");
+        System.out.println("27. Speech synthesis events.");
+        System.out.println("28. Speech synthesis word boundary event.");
+        System.out.println("29. Speech synthesis server scenario example.");
+        System.out.println("30. Speech synthesis with source language auto detection.");
+        System.out.println("31. Speaker verification with microphone.");
+        System.out.println("32. Speaker verification with file.");
+        System.out.println("33. Speaker identification with microphone.");
+        System.out.println("34. Speaker identification with file.");
+        System.out.println("35. Speech recognition from default microphone with Microsoft Audio Stack enabled.");
+        System.out.println("36. Speech recognition from a microphone with Microsoft Audio Stack enabled and "
                 + "pre-defined microphone array geometry specified.");
-        System.out.println("35. Speech recognition from multi-channel file with Microsoft Audio Stack enabled and "
+        System.out.println("37. Speech recognition from multi-channel file with Microsoft Audio Stack enabled and "
                 + "custom microphone array geometry specified.");
-        System.out.println("36. Speech recognition from pull stream with custom set of enhancements from Microsoft Audio Stack enabled.");
-        System.out.println("37. Speech recognition from push stream with Microsoft Audio Stack enabled and beamforming angles specified.");
-        System.out.println("38. Pronunciation assessment with microphone input.");
-        System.out.println("39. Pronunciation assessment with stream input.");
-        System.out.println("40. Speech synthesis to audio and SRT files.");
-        System.out.println("41. Recognize once from file, with at-start language detection.");
-        System.out.println("42. Continuous speech recognition from file, with at-start language detection.");
-        System.out.println("43. Continuous speech recognition from file, with at-start language detection with custom model.");
-        System.out.println("44. Continuous speech recognition from file, with continuous language detection with custom models.");
+        System.out.println("38. Speech recognition from pull stream with custom set of enhancements from Microsoft Audio Stack enabled.");
+        System.out.println("39. Speech recognition from push stream with Microsoft Audio Stack enabled and beamforming angles specified.");
+        System.out.println("40. Pronunciation assessment with microphone input.");
+        System.out.println("41. Pronunciation assessment with stream input.");
+        System.out.println("42. Speech synthesis to audio and SRT files.");
+        System.out.println("43. Recognize once from file, with at-start language detection.");
+        System.out.println("44. Continuous speech recognition from file, with at-start language detection.");
+        System.out.println("45. Continuous speech recognition from file, with at-start language detection with custom model.");
+        System.out.println("46. Continuous speech recognition from file, with continuous language detection with custom models.");
 
         System.out.print(prompt);
 
@@ -108,96 +110,102 @@ public class Main {
                     IntentRecognitionSamples.intentContinuousRecognitionWithFile();
                     break;
                 case "14":
-                    SpeechRecognitionSamples.continuousRecognitionWithPushStream();
+                    IntentRecognitionSamples.IntentPatternMatchingWithMicrophone();
                     break;
                 case "15":
-                    SpeechRecognitionSamples.continuousRecognitionWithFileWithPhraseListAsync();
+                    IntentRecognitionSamples.IntentPatternMatchingWithMicrophoneAndKeywordSpotting();
                     break;
                 case "16":
-                    SpeechSynthesisSamples.synthesisToSpeakerAsync();
+                    SpeechRecognitionSamples.continuousRecognitionWithPushStream();
                     break;
                 case "17":
-                    SpeechSynthesisSamples.synthesisWithLanguageAsync();
+                    SpeechRecognitionSamples.continuousRecognitionWithFileWithPhraseListAsync();
                     break;
                 case "18":
-                    SpeechSynthesisSamples.synthesisWithVoiceAsync();
+                    SpeechSynthesisSamples.synthesisToSpeakerAsync();
                     break;
                 case "19":
-                    SpeechSynthesisSamples.synthesisToWaveFileAsync();
+                    SpeechSynthesisSamples.synthesisWithLanguageAsync();
                     break;
                 case "20":
-                    SpeechSynthesisSamples.synthesisToMp3FileAsync();
+                    SpeechSynthesisSamples.synthesisWithVoiceAsync();
                     break;
                 case "21":
-                    SpeechSynthesisSamples.synthesisToPullAudioOutputStreamAsync();
+                    SpeechSynthesisSamples.synthesisToWaveFileAsync();
                     break;
                 case "22":
-                    SpeechSynthesisSamples.synthesisToPushAudioOutputStreamAsync();
+                    SpeechSynthesisSamples.synthesisToMp3FileAsync();
                     break;
                 case "23":
-                    SpeechSynthesisSamples.synthesisToResultAsync();
+                    SpeechSynthesisSamples.synthesisToPullAudioOutputStreamAsync();
                     break;
                 case "24":
-                    SpeechSynthesisSamples.synthesisToAudioDataStreamAsync();
+                    SpeechSynthesisSamples.synthesisToPushAudioOutputStreamAsync();
                     break;
                 case "25":
-                    SpeechSynthesisSamples.synthesisEventsAsync();
+                    SpeechSynthesisSamples.synthesisToResultAsync();
                     break;
                 case "26":
-                    SpeechSynthesisSamples.synthesisWordBoundaryEventAsync();
+                    SpeechSynthesisSamples.synthesisToAudioDataStreamAsync();
                     break;
                 case "27":
-                    SpeechSynthesisScenarioSamples.synthesisServerScenarioAsync();
+                    SpeechSynthesisSamples.synthesisEventsAsync();
                     break;
                 case "28":
-                    SpeechSynthesisSamples.synthesisWithSourceLanguageAutoDetectionAsync();
+                    SpeechSynthesisSamples.synthesisWordBoundaryEventAsync();
                     break;
                 case "29":
-                    SpeakerRecognitionSamples.verificationWithMicrophoneAsync();
+                    SpeechSynthesisScenarioSamples.synthesisServerScenarioAsync();
                     break;
                 case "30":
-                    SpeakerRecognitionSamples.verificationWithFileAsync();
+                    SpeechSynthesisSamples.synthesisWithSourceLanguageAutoDetectionAsync();
                     break;
                 case "31":
-                    SpeakerRecognitionSamples.identificationWithMicrophoneAsync();
+                    SpeakerRecognitionSamples.verificationWithMicrophoneAsync();
                     break;
                 case "32":
-                    SpeakerRecognitionSamples.identificationWithFileAsync();
+                    SpeakerRecognitionSamples.verificationWithFileAsync();
                     break;
                 case "33":
-                    SpeechRecognitionSamples.continuousRecognitionFromDefaultMicrophoneWithMASEnabled();
+                    SpeakerRecognitionSamples.identificationWithMicrophoneAsync();
                     break;
                 case "34":
-                    SpeechRecognitionSamples.recognitionFromMicrophoneWithMASEnabledAndPresetGeometrySpecified();
+                    SpeakerRecognitionSamples.identificationWithFileAsync();
                     break;
                 case "35":
-                    SpeechRecognitionSamples.continuousRecognitionFromMultiChannelFileWithMASEnabledAndCustomGeometrySpecified();
+                    SpeechRecognitionSamples.continuousRecognitionFromDefaultMicrophoneWithMASEnabled();
                     break;
                 case "36":
-                    SpeechRecognitionSamples.recognitionFromPullStreamWithSelectMASEnhancementsEnabled();
+                    SpeechRecognitionSamples.recognitionFromMicrophoneWithMASEnabledAndPresetGeometrySpecified();
                     break;
                 case "37":
-                    SpeechRecognitionSamples.continuousRecognitionFromPushStreamWithMASEnabledAndBeamformingAnglesSpecified();
+                    SpeechRecognitionSamples.continuousRecognitionFromMultiChannelFileWithMASEnabledAndCustomGeometrySpecified();
                     break;
                 case "38":
-                    SpeechRecognitionSamples.pronunciationAssessmentWithMicrophoneAsync();
+                    SpeechRecognitionSamples.recognitionFromPullStreamWithSelectMASEnhancementsEnabled();
                     break;
                 case "39":
-                    SpeechRecognitionSamples.pronunciationAssessmentWithPushStream();
+                    SpeechRecognitionSamples.continuousRecognitionFromPushStreamWithMASEnabledAndBeamformingAnglesSpecified();
                     break;
                 case "40":
-                    SpeechSynthesisSamples.synthesisWordBoundaryEventToSrtAsync();
+                    SpeechRecognitionSamples.pronunciationAssessmentWithMicrophoneAsync();
                     break;
                 case "41":
-                    SpeechRecognitionSamples.recognizeOnceFromFileWithAtStartLanguageDetection();
+                    SpeechRecognitionSamples.pronunciationAssessmentWithPushStream();
                     break;
                 case "42":
-                    SpeechRecognitionSamples.continuousRecognitionFromFileWithAtStartLanguageDetection();
+                    SpeechSynthesisSamples.synthesisWordBoundaryEventToSrtAsync();
                     break;
                 case "43":
-                    SpeechRecognitionSamples.continuousRecognitionFromFileWithAtStartLanguageDetectionWithCustomModels();
+                    SpeechRecognitionSamples.recognizeOnceFromFileWithAtStartLanguageDetection();
                     break;
                 case "44":
+                    SpeechRecognitionSamples.continuousRecognitionFromFileWithAtStartLanguageDetection();
+                    break;
+                case "45":
+                    SpeechRecognitionSamples.continuousRecognitionFromFileWithAtStartLanguageDetectionWithCustomModels();
+                    break;
+                case "46":
                     SpeechRecognitionSamples.continuousRecognitionFromFileWithContinuousLanguageDetectionWithCustomModels();
                     break;
                 case "0":

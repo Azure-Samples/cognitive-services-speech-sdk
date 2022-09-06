@@ -10,16 +10,11 @@ namespace Tests
     using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
-    using Connector;
-    using Connector.Enums;
-    using FetchTranscriptionFunction;
     using Microsoft.CognitiveServices.Speech;
     using Microsoft.Extensions.Logging;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Moq;
-    using Newtonsoft.Json;
     using RealtimeTranscription;
-    using TextAnalytics;
 
     [TestClass]
     public class EndToEndTests
@@ -56,26 +51,6 @@ namespace Tests
 
             var firstNBest = jsonResults.First().NBest.First();
             Assert.AreEqual(firstNBest.Lexical, "hello");
-        }
-
-        [TestMethod]
-        [TestCategory(TestCategories.EndToEndTest)]
-        public async Task TestTextAnalyticsAsync()
-        {
-            var body = File.ReadAllText(@"testFiles/transcriptSample.json");
-            var speechTranscript = JsonConvert.DeserializeObject<SpeechTranscript>(body);
-
-            var textAnalytics = new TextAnalyticsProvider(
-                "en-us",
-                TestProperties["SpeechServicesSubscriptionKey"].ToString(),
-                TestProperties["SpeechServicesRegion"].ToString(),
-                Logger.Object);
-
-            await textAnalytics.AddAudioLevelEntitiesAsync(speechTranscript, SentimentAnalysisSetting.AudioLevel, PiiRedactionSetting.UtteranceAndAudioLevel).ConfigureAwait(false);
-            await textAnalytics.AddUtteranceLevelEntitiesAsync(speechTranscript, SentimentAnalysisSetting.UtteranceLevel).ConfigureAwait(false);
-
-            Assert.IsNotNull(speechTranscript.CombinedRecognizedPhrases.First().Sentiment);
-            Assert.IsNotNull(speechTranscript.RecognizedPhrases.First().NBest.First().Sentiment);
         }
     }
 }

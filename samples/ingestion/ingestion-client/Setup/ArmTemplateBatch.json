@@ -265,6 +265,9 @@
         "TextAnalyticsKeySecretName": "TextAnalyticsKey",
         "DatabaseConnectionStringSecretName": "DatabaseConnectionString",
         "PiiCategories": "",
+        "ConversationPiiCategories": "",
+        "ConversationPiiRedaction": "None",
+        "ConversationPiiInferenceSource": "text",
         "IsAzureGovDeployment": "[or(equals(parameters('AzureSpeechServicesRegion'),'usgovarizona'), equals(parameters('AzureSpeechServicesRegion'),'usgovvirginia'))]",
         "AzureSpeechServicesEndpointUri": "[if(not(equals(parameters('CustomEndpoint'),'')), parameters('CustomEndpoint'), if(variables('IsAzureGovDeployment'), concat('https://', parameters('AzureSpeechServicesRegion') ,'.api.cognitive.microsoft.us/'), concat('https://', parameters('AzureSpeechServicesRegion') ,'.api.cognitive.microsoft.com/')))]",
         "EndpointSuffix": "[if(variables('IsAzureGovDeployment'),'core.usgovcloudapi.net','core.windows.net')]"
@@ -441,7 +444,7 @@
                                 "storageKeyType": "SharedAccessKey",
                                 "administratorLogin": "[parameters('SqlAdministratorLogin')]",
                                 "administratorLoginPassword": "[parameters('SqlAdministratorLoginPassword')]",
-                                "storageUri": "https://ingestionclientstorage.blob.core.windows.net/binaries/11102021.0/IngestionClient.bacpac"
+                                "storageUri": "https://ingestionclientstorage.blob.core.windows.net/binaries/23082022.0/IngestionClient.bacpac"
                             }
                         }
                     ]
@@ -878,7 +881,7 @@
                 "PunctuationMode": "[parameters('PunctuationMode')]",
                 "RetryLimit": "[variables('RetryLimit')]",
                 "StartTranscriptionServiceBusConnectionString": "[listKeys(variables('AuthRuleCT'),'2015-08-01').primaryConnectionString]",
-                "WEBSITE_RUN_FROM_PACKAGE": "[if(variables('timerBasedExecution'),'https://ingestionclientstorage.blob.core.windows.net/binaries/11102021.0/StartTranscriptionByTimer.zip','https://ingestionclientstorage.blob.core.windows.net/binaries/11102021.0/StartTranscriptionByServiceBus.zip')]"
+                "WEBSITE_RUN_FROM_PACKAGE": "[if(variables('timerBasedExecution'),'https://ingestionclientstorage.blob.core.windows.net/binaries/23082022.0/StartTranscriptionByTimer.zip','https://ingestionclientstorage.blob.core.windows.net/binaries/23082022.0/StartTranscriptionByServiceBus.zip')]"
             }
         },
         {
@@ -942,12 +945,15 @@
                 "TextAnalyticsKey": "[concat('@Microsoft.KeyVault(VaultName=', variables('KeyVaultName'), ';SecretName=', variables('TextAnalyticsKeySecretName'), ')')]",
                 "TextAnalyticsRegion": "[parameters('TextAnalyticsRegion')]",
                 "UseSqlDatabase": "[variables('UseSqlDatabase')]",
-                "WEBSITE_RUN_FROM_PACKAGE": "https://ingestionclientstorage.blob.core.windows.net/binaries/11102021.0/FetchTranscription.zip",
+                "WEBSITE_RUN_FROM_PACKAGE": "https://ingestionclientstorage.blob.core.windows.net/binaries/23082022.0/FetchTranscription.zip",
                 "CreateConsolidatedOutputFiles": "[variables('CreateConsolidatedOutputFiles')]",
                 "ConsolidatedFilesOutputContainer": "[variables('ConsolidatedFilesOutputContainer')]",
                 "CreateAudioProcessedContainer": "[variables('CreateAudioProcessedContainer')]",
                 "AudioProcessedContainer": "[variables('AudioProcessedContainer')]",
-                "PiiCategories": "[variables('PiiCategories')]"
+                "PiiCategories": "[variables('PiiCategories')]",
+                "ConversationPiiCategories": "[variables('ConversationPiiCategories')]",
+                "ConversationPiiInferenceSource": "[variables('ConversationPiiInferenceSource')]",
+                "ConversationPiiSetting":"[variables('ConversationPiiRedaction')]"
             }
         }
     ],

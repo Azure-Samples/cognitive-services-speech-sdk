@@ -3,7 +3,7 @@
 This sample demonstrates how to verify a speaker with the Speech SDK for JavaScript on Node.js.
 See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-js-node) on the SDK documentation page which describes how to build this sample from scratch in your favourite editor.
 
-**Note:** Microsoft limits access to speaker recognition. You can apply for access through the [Azure Cognitive Services speaker recognition limited access review](https://aka.ms/azure-speaker-recognition). For more information, see [Limited access for speaker recognition](https://docs.microsoft.com/en-us/legal/cognitive-services/speech-service/speaker-recognition/limited-access-speaker-recognition).
+**Note:** Microsoft limits access to speaker recognition. You can apply for access through the [Azure Cognitive Services speaker recognition limited access review](https://aka.ms/azure-speaker-recognition). For more information, see [Limited access for speaker recognition](https://docs.microsoft.com/legal/cognitive-services/speech-service/speaker-recognition/limited-access-speaker-recognition).
 
 ## Prerequisites
 
