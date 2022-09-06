@@ -226,9 +226,13 @@ namespace StartTranscriptionByTimer
                 var fetchingDelay = TimeSpan.FromMinutes(StartTranscriptionEnvironmentVariables.InitialPollingDelayInMinutes);
                 await ServiceBusUtilities.SendServiceBusMessageAsync(FetchSender, transcriptionMessage.CreateMessageString(), Logger, fetchingDelay).ConfigureAwait(false);
             }
+            catch (TransientFailureException e)
+            {
+                await RetryOrFailMessagesAsync(messages, $"Exception in job {jobName}: {e.Message}", isThrottled: false).ConfigureAwait(false);
+            }
             catch (TimeoutException e)
             {
-                await RetryOrFailMessagesAsync(messages, $"Timeout in job {jobName}: {e.Message}", HttpStatusCode.RequestTimeout).ConfigureAwait(false);
+                await RetryOrFailMessagesAsync(messages, $"Exception in job {jobName}: {e.Message}", isThrottled: false).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -244,7 +248,7 @@ namespace StartTranscriptionByTimer
 
                 if (httpStatusCode.HasValue && httpStatusCode.Value.IsRetryableStatus())
                 {
-                    await RetryOrFailMessagesAsync(messages, $"Error in job {jobName}: {e.Message}", httpStatusCode.Value).ConfigureAwait(false);
+                    await RetryOrFailMessagesAsync(messages, $"Error in job {jobName}: {e.Message}", isThrottled: httpStatusCode.Value == HttpStatusCode.TooManyRequests).ConfigureAwait(false);
                 }
                 else
                 {
@@ -255,14 +259,14 @@ namespace StartTranscriptionByTimer
             Logger.LogInformation($"Fetch transcription queue successfully informed about job at: {jobName}");
         }
 
-        private async Task RetryOrFailMessagesAsync(IEnumerable<ServiceBusReceivedMessage> messages, string errorMessage, HttpStatusCode statusCode)
+        private async Task RetryOrFailMessagesAsync(IEnumerable<ServiceBusReceivedMessage> messages, string errorMessage, bool isThrottled)
         {
             Logger.LogError(errorMessage);
             foreach (var message in messages)
             {
                 var sbMessage = JsonConvert.DeserializeObject<Connector.ServiceBusMessage>(Encoding.UTF8.GetString(message.Body));
 
-                if (sbMessage.RetryCount <= StartTranscriptionEnvironmentVariables.RetryLimit || statusCode == HttpStatusCode.TooManyRequests)
+                if (sbMessage.RetryCount <= StartTranscriptionEnvironmentVariables.RetryLimit || isThrottled)
                 {
                     sbMessage.RetryCount += 1;
                     var messageDelay = GetMessageDelayTime(sbMessage.RetryCount);
