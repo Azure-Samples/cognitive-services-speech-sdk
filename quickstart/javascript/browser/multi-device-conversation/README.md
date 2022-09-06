@@ -1,4 +1,4 @@
-# Quickstart: Recognize speech in JavaScript on a Web Browser.
+# Quickstart: Recognize Speech in JavaScript for a Multi-Device-Conversation for a Web-Browser.
 
 These samples demonstrate how to recognize speech, and how to create or join a multi-device conversation with real-time transcriptions and translations, using the Speech SDK for JavaScript on a web browser, like Microsoft Edge, or Chrome.
 * See the [overview article](https://docs.microsoft.com/azure/cognitive-services/speech-service/multi-device-conversation) on the SDK documentation page to learn more about Multi-device Conversation (Preview).

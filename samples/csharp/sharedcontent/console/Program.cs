@@ -17,6 +17,89 @@ namespace MicrosoftSpeechSDKSamples
         private static readonly string invalid = "\n Invalid input, choose again.";
         private static readonly string done = "\n Done!";
 
+        static void Main(string[] args)
+        {
+            ConsoleKeyInfo x;
+
+            do
+            {
+                Console.WriteLine("");
+                Console.WriteLine(" Speech SDK Samples");
+                Console.WriteLine("");
+                Console.WriteLine(choose);
+                Console.WriteLine("");
+                Console.WriteLine(" 1. Speech recognition samples.");
+                Console.WriteLine(" 2. Speech translation samples.");
+                Console.WriteLine(" 3. Intent recognition samples.");
+                Console.WriteLine(" 4. Speech synthesis samples.");
+                Console.WriteLine(" 5. Conversation transcriber samples.");
+                Console.WriteLine(" 6. Speech recognition with language detection enabled samples");
+                Console.WriteLine(" 7. Standalone language detection samples.");
+                Console.WriteLine(" 8. Speech recognition with Microsoft Audio Stack (MAS) samples.");
+                Console.WriteLine(" 9. Diagnostics logging samples (trace logging).");
+                Console.WriteLine(" a. Pronunciation assessment samples.");
+                Console.WriteLine("");
+                Console.Write(mainPrompt);
+
+                x = Console.ReadKey();
+                Console.WriteLine("");
+
+                switch (x.Key)
+                {
+                    case ConsoleKey.D1:
+                    case ConsoleKey.NumPad1:
+                        SpeechRecognition();
+                        break;
+                    case ConsoleKey.D2:
+                    case ConsoleKey.NumPad2:
+                        SpeechTranslation();
+                        break;
+                    case ConsoleKey.D3:
+                    case ConsoleKey.NumPad3:
+                        IntentRecognition();
+                        break;
+                    case ConsoleKey.D4:
+                    case ConsoleKey.NumPad4:
+                        SpeechSynthesis();
+                        break;
+                    case ConsoleKey.D5:
+                    case ConsoleKey.NumPad5:
+                        ConversationTranscriber();
+                        break;
+                    case ConsoleKey.D6:
+                    case ConsoleKey.NumPad6:
+                        SpeechRecognitionWithLanguageDetectionEnabled();
+                        break;
+                    case ConsoleKey.D7:
+                    case ConsoleKey.NumPad7:
+                        LanguageDetectionSamples();
+                        break;
+                    case ConsoleKey.D8:
+                    case ConsoleKey.NumPad8:
+                        SpeechRecognitionWithMASEnabled();
+                        break;
+                    case ConsoleKey.D9:
+                    case ConsoleKey.NumPad9:
+                        SpeechDiagnosticsLogging();
+                        break;
+                    case ConsoleKey.A:
+                        PronunciationAssessment();
+                        break;
+                    case ConsoleKey.D0:
+                    case ConsoleKey.NumPad0:
+                        Console.WriteLine(exiting);
+                        break;
+                    default:
+                        Console.WriteLine(invalid);
+                        break;
+                }
+
+            } while (x.Key != ConsoleKey.D0);
+        }
+
+        /// <summary>
+        /// Speech recognition Sample.
+        /// </summary>
         private static void SpeechRecognition()
         {
             ConsoleKeyInfo x;
@@ -114,6 +197,9 @@ namespace MicrosoftSpeechSDKSamples
             } while (x.Key != ConsoleKey.D0);
         }
 
+        //
+        // Speech synthesis samples
+        //
         private static void SpeechSynthesis()
         {
             ConsoleKeyInfo x;
@@ -135,10 +221,18 @@ namespace MicrosoftSpeechSDKSamples
                 Console.WriteLine(" 8. Speech synthesis to result.");
                 Console.WriteLine(" 9. Speech synthesis to audio data stream.");
                 Console.WriteLine(" a. Speech synthesis events.");
-                Console.WriteLine(" b. Speech synthesis word boundary event.");
-                Console.WriteLine(" c. Speech synthesis using authorization token.");
-                Console.WriteLine(" d. Speech synthesis in server scenario.");
-                Console.WriteLine(" e. Speech synthesis with source language auto detection.");
+                Console.WriteLine(" b. Speech synthesis with word boundary event.");
+                Console.WriteLine(" c. Speech synthesis with viseme event.");
+                Console.WriteLine(" d. Speech synthesis with bookmark event.");
+                Console.WriteLine(" e. Speech synthesis using authorization token.");
+                Console.WriteLine(" f. Speech synthesis in server scenario.");
+                Console.WriteLine(" g. Speech synthesis with source language auto detection.");
+                Console.WriteLine(" h. Speech synthesis using custom voice.");
+                Console.WriteLine(" i. Get available speech synthesis voices.");
+                Console.WriteLine(" j. Speech synthesis to speaker output with fallback to secondary region.");
+                Console.WriteLine(" k. Speech synthesis to speaker output with custom voice and fallback to standard voice.");
+                Console.WriteLine(" l. Speech synthesis to speaker output with custom voice and fallback to secondary region.");
+                Console.WriteLine(" m. Speech synthesis from a long text file into mp3 file");
                 Console.WriteLine("");
                 Console.Write(prompt);
 
@@ -191,13 +285,37 @@ namespace MicrosoftSpeechSDKSamples
                         SpeechSynthesisSamples.SynthesisWordBoundaryEventAsync().Wait();
                         break;
                     case ConsoleKey.C:
-                        SpeechSynthesisWithTokenSample.SpeechSynthesisWithAuthorizationTokenAsync().Wait();
+                        SpeechSynthesisSamples.SynthesisVisemeEventAsync().Wait();
                         break;
                     case ConsoleKey.D:
-                        SpeechSynthesisServerScenarioSample.SpeechSynthesizeWithPool();
+                        SpeechSynthesisSamples.SynthesisBookmarkEventAsync().Wait();
                         break;
                     case ConsoleKey.E:
+                        SpeechSynthesisWithTokenSample.SpeechSynthesisWithAuthorizationTokenAsync().Wait();
+                        break;
+                    case ConsoleKey.F:
+                        SpeechSynthesisServerScenarioSample.SpeechSynthesizeWithPool();
+                        break;
+                    case ConsoleKey.G:
                         SpeechSynthesisSamples.SynthesisWithAutoDetectSourceLanguageAsync().Wait();
+                        break;
+                    case ConsoleKey.H:
+                        SpeechSynthesisSamples.SynthesisUsingCustomVoiceAsync().Wait();
+                        break;
+                    case ConsoleKey.I:
+                        SpeechSynthesisSamples.SynthesisGetAvailableVoicesAsync().Wait();
+                        break;
+                    case ConsoleKey.J:
+                        SpeechSynthesisSamples.SynthesizeOnceToSpeakerAsyncSwitchSecondaryRegion().Wait();
+                        break;
+                    case ConsoleKey.K:
+                        SpeechSynthesisSamples.SynthesizeOnceUseCustomVoiceToSpeakerAsyncSwitchPlatformVoice().Wait();
+                        break;
+                    case ConsoleKey.L:
+                        SpeechSynthesisSamples.SynthesizeOnceUseCustomVoiceToSpeakerAsyncSwitchSecondaryRegion().Wait();
+                        break;
+                    case ConsoleKey.M:
+                        SpeechSynthesisSamples.SynthesisFileToMp3FileAsync().Wait();
                         break;
                     case ConsoleKey.D0:
                     case ConsoleKey.NumPad0:
@@ -291,6 +409,7 @@ namespace MicrosoftSpeechSDKSamples
                 Console.WriteLine(" 2. Intent continuous recognition with file input.");
                 Console.WriteLine(" 3. Intent recognition in the specified language with microphone input.");
                 Console.WriteLine(" 4. Intent recognition from default microphone and pattern matching.");
+                Console.WriteLine(" 5. Intent recognition with keyword spotting from default microphone and pattern matching.");
                 Console.WriteLine("");
                 Console.Write(prompt);
 
@@ -315,6 +434,10 @@ namespace MicrosoftSpeechSDKSamples
                     case ConsoleKey.D4:
                     case ConsoleKey.NumPad4:
                         IntentRecognitionSamples.IntentPatternMatchingWithMicrophoneAsync().Wait();
+                        break;
+                    case ConsoleKey.D5:
+                    case ConsoleKey.NumPad5:
+                        IntentRecognitionSamples.IntentPatternMatchingWithMicrophoneAndKeywordSpottingAsync().Wait();
                         break;
                     case ConsoleKey.D0:
                     case ConsoleKey.NumPad0:
@@ -654,78 +777,52 @@ namespace MicrosoftSpeechSDKSamples
             } while (x.Key != ConsoleKey.D0);
         }
 
-        static void Main(string[] args)
+        //
+        // Shows pronunciation assessment samples.
+        // See more information at https://aka.ms/csspeech/pa
+        //
+        private static void PronunciationAssessment()
         {
             ConsoleKeyInfo x;
 
             do
             {
                 Console.WriteLine("");
-                Console.WriteLine(" Speech SDK Samples");
+                Console.WriteLine(" Speech SDK - Pronunciation Assessment");
                 Console.WriteLine("");
                 Console.WriteLine(choose);
                 Console.WriteLine("");
-                Console.WriteLine(" 1. Speech recognition samples.");
-                Console.WriteLine(" 2. Speech translation samples.");
-                Console.WriteLine(" 3. Intent recognition samples.");
-                Console.WriteLine(" 4. Speech synthesis samples.");
-                Console.WriteLine(" 5. Conversation transcriber samples.");
-                Console.WriteLine(" 6. Speech recognition with language detection enabled samples");
-                Console.WriteLine(" 7. Standalone language detection samples.");
-                Console.WriteLine(" 8. Speech recognition with Microsoft Audio Stack (MAS) samples.");
-                Console.WriteLine(" 9. Diagnostics logging samples (trace logging).");
+                Console.WriteLine(" 1. Pronunciation assessment with microphone input.");
+                Console.WriteLine(" 2. Pronunciation assessment with stream input.");
                 Console.WriteLine("");
-                Console.Write(mainPrompt);
+                Console.Write(prompt);
 
                 x = Console.ReadKey();
-                Console.WriteLine("");
+                Console.WriteLine("\n");
+                bool sampleWasRun = true;
 
                 switch (x.Key)
                 {
                     case ConsoleKey.D1:
                     case ConsoleKey.NumPad1:
-                        SpeechRecognition();
+                        SpeechRecognitionSamples.PronunciationAssessmentWithMicrophoneAsync().Wait();
                         break;
                     case ConsoleKey.D2:
                     case ConsoleKey.NumPad2:
-                        SpeechTranslation();
-                        break;
-                    case ConsoleKey.D3:
-                    case ConsoleKey.NumPad3:
-                        IntentRecognition();
-                        break;
-                    case ConsoleKey.D4:
-                    case ConsoleKey.NumPad4:
-                        SpeechSynthesis();
-                        break;
-                    case ConsoleKey.D5:
-                    case ConsoleKey.NumPad5:
-                        ConversationTranscriber();
-                        break;
-                    case ConsoleKey.D6:
-                    case ConsoleKey.NumPad6:
-                        SpeechRecognitionWithLanguageDetectionEnabled();
-                        break;
-                    case ConsoleKey.D7:
-                    case ConsoleKey.NumPad7:
-                        LanguageDetectionSamples();
-                        break;
-                    case ConsoleKey.D8:
-                    case ConsoleKey.NumPad8:
-                        SpeechRecognitionWithMASEnabled();
-                        break;
-                    case ConsoleKey.D9:
-                    case ConsoleKey.NumPad9:
-                        SpeechDiagnosticsLogging();
+                        SpeechRecognitionSamples.PronunciationAssessmentWithStream();
                         break;
                     case ConsoleKey.D0:
                     case ConsoleKey.NumPad0:
-                        Console.WriteLine(exiting);
+                        Console.WriteLine(back);
+                        sampleWasRun = false;
                         break;
                     default:
                         Console.WriteLine(invalid);
+                        sampleWasRun = false;
                         break;
                 }
+
+                if (sampleWasRun) Console.WriteLine(done);
 
             } while (x.Key != ConsoleKey.D0);
         }

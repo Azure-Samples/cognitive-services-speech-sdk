@@ -8,9 +8,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("Microsoft Cognitive Services Speech SDK C# Samples")]
 [assembly: AssemblyDescription("The C# samples for using Microsoft Cognitive Services Speech functionality")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Microsoft")]
+[assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("Microsoft Cognitive Services Speech SDK")]
-[assembly: AssemblyCopyright("© Microsoft Corporation. All rights reserved")]
+[assembly: AssemblyCopyright("Copyright © Microsoft 2022")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

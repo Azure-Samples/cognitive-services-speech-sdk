@@ -9,8 +9,7 @@ namespace StartTranscriptionByTimer
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
-    using Microsoft.Azure.ServiceBus;
-    using Microsoft.Azure.ServiceBus.Core;
+    using Azure.Messaging.ServiceBus;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Extensions.Logging;
 
@@ -18,7 +17,11 @@ namespace StartTranscriptionByTimer
     {
         private const double MessageReceiveTimeoutInSeconds = 60;
 
-        private static readonly MessageReceiver MessageReceiverInstance = new (new ServiceBusConnectionStringBuilder(StartTranscriptionEnvironmentVariables.StartTranscriptionServiceBusConnectionString), prefetchCount: StartTranscriptionEnvironmentVariables.MessagesPerFunctionExecution);
+        private static readonly ServiceBusClient ServiceBusClient = new ServiceBusClient(StartTranscriptionEnvironmentVariables.StartTranscriptionServiceBusConnectionString);
+
+        private static readonly ServiceBusReceiverOptions ServiceBusReceiverOptions = new ServiceBusReceiverOptions() { PrefetchCount = StartTranscriptionEnvironmentVariables.MessagesPerFunctionExecution };
+
+        private static readonly ServiceBusReceiver ServiceBusReceiver = ServiceBusClient.CreateReceiver(ServiceBusConnectionStringProperties.Parse(StartTranscriptionEnvironmentVariables.StartTranscriptionServiceBusConnectionString).EntityPath, ServiceBusReceiverOptions);
 
         [FunctionName("StartTranscriptionByTimer")]
         public static async Task Run([TimerTrigger("0 */2 * * * *")] TimerInfo myTimer, ILogger log)
@@ -36,11 +39,11 @@ namespace StartTranscriptionByTimer
             var startDateTime = DateTime.UtcNow;
             log.LogInformation($"C# Timer trigger function v3 executed at: {startDateTime}. Next occurrence on {myTimer.Schedule.GetNextOccurrence(startDateTime)}.");
 
-            var validServiceBusMessages = new List<Message>();
+            var validServiceBusMessages = new List<ServiceBusReceivedMessage>();
             var transcriptionHelper = new StartTranscriptionHelper(log);
 
             log.LogInformation("Pulling messages from queue...");
-            var messages = await MessageReceiverInstance.ReceiveAsync(StartTranscriptionEnvironmentVariables.MessagesPerFunctionExecution, TimeSpan.FromSeconds(MessageReceiveTimeoutInSeconds)).ConfigureAwait(false);
+            var messages = await ServiceBusReceiver.ReceiveMessagesAsync(StartTranscriptionEnvironmentVariables.MessagesPerFunctionExecution, TimeSpan.FromSeconds(MessageReceiveTimeoutInSeconds)).ConfigureAwait(false);
 
             if (messages == null || !messages.Any())
             {
@@ -51,21 +54,21 @@ namespace StartTranscriptionByTimer
             log.LogInformation($"Got {messages.Count} in this iteration.");
             foreach (var message in messages)
             {
-                if (message.SystemProperties.LockedUntilUtc > DateTime.UtcNow.AddSeconds(5))
+                if (message.LockedUntil > DateTime.UtcNow.AddSeconds(5))
                 {
                     try
                     {
                         if (transcriptionHelper.IsValidServiceBusMessage(message))
                         {
-                            await MessageReceiverInstance.RenewLockAsync(message.SystemProperties.LockToken).ConfigureAwait(false);
+                            await ServiceBusReceiver.RenewMessageLockAsync(message).ConfigureAwait(false);
                             validServiceBusMessages.Add(message);
                         }
                         else
                         {
-                            await MessageReceiverInstance.CompleteAsync(message.SystemProperties.LockToken).ConfigureAwait(false);
+                            await ServiceBusReceiver.CompleteMessageAsync(message).ConfigureAwait(false);
                         }
                     }
-                    catch (MessageLockLostException)
+                    catch (ServiceBusException ex) when (ex.Reason == ServiceBusFailureReason.MessageLockLost)
                     {
                         log.LogInformation($"Message lock expired for message. Ignore message in this iteration.");
                     }
@@ -80,7 +83,7 @@ namespace StartTranscriptionByTimer
 
             log.LogInformation($"Pulled {validServiceBusMessages.Count} valid messages from queue.");
 
-            await transcriptionHelper.StartTranscriptionsAsync(validServiceBusMessages, MessageReceiverInstance, startDateTime).ConfigureAwait(false);
+            await transcriptionHelper.StartTranscriptionsAsync(validServiceBusMessages, ServiceBusReceiver, startDateTime).ConfigureAwait(false);
         }
     }
 }

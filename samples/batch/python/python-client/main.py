@@ -138,7 +138,7 @@ def transcribe():
     client = cris_client.ApiClient(configuration)
 
     # create an instance of the transcription api class
-    api = cris_client.DefaultApi(api_client=client)
+    api = cris_client.CustomSpeechTranscriptionsApi(api_client=client)
 
     # Specify transcription properties by passing a dict to the properties parameter. See
     # https://docs.microsoft.com/azure/cognitive-services/speech-service/batch-transcription#configuration-properties
