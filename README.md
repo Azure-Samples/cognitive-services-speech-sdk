@@ -24,68 +24,12 @@ This project hosts the **samples** for the Microsoft Cognitive Services Speech S
 
 Please check [here](https://aka.ms/csspeech/whatsnew) for release notes and older releases.
 
-* Speech SDK Release 1.14.0
-
-  October 2020 we released version 1.14.0 of the Speech SDK
-
-* Speech SDK Release 1.13.0
-
-  July 2020 we released version 1.13.0 of the Speech SDK
-
-* Speech SDK Release 1.12.1
-
-  June 2020 we released version 1.12.1 of the Speech SDK  
-
-* Speech SDK Release 1.12.0
-
-  May 2020 we released version 1.12.0 of the Speech SDK
-
-* Speech SDK Release 1.11.0
-
-  March 2020 we released version 1.11.0 of the Speech SDK
-
-* Speech SDK Release 1.10.0
-
-  February 2020 we released version 1.10.0 of the Speech SDK
-
-* Speech SDK Release 1.9.0
-
-  January 2020 we released version 1.9.0 of the Speech SDK
-
-* Speech SDK Release 1.8.0
-
-  November 2019 we released version 1.8.0 of the Speech SDK
-
-* Speech SDK Release 1.7.0
-
-  September 2019 we released version 1.7.0 of the Speech SDK
-
-* Speech SDK Release 1.6.0
-
-  June 2019 we released version 1.6.0 of the Speech SDK.
-
-* Speech SDK Release 1.5.1
-
-  Middle of May 2019 we released version 1.5.1 of the Speech SDK.
-
-* Speech SDK Release 1.5.0
-
-  Beginning of May 2019 we released version 1.5.0 of the Speech SDK.
-
-* Speech SDK Release 1.4.0
-
-  Beginning of April 2019 we released version 1.4.0 of the Speech SDK.
-
-* Speech SDK Release 1.3.1
-
-  End of February 2019 we released version 1.3.1 of the Speech SDK.
-
 ## Features
 
 This repository hosts samples that help you to get started with several features of the SDK.
 In addition more complex scenarios are included to give you a head-start on using speech technology in your application.
 
-We tested the samples with the latest released version of the SDK on Windows 10, Linux (on [supported Linux distributions and target architectures](https://docs.microsoft.com/azure/cognitive-services/speech-service/speech-sdk?tabs=linux)), Android devices (API 23: Android 6.0 Marshmallow or higher), and iOS 11.4 devices.
+We tested the samples with the latest released version of the SDK on Windows 10, Linux (on [supported Linux distributions and target architectures](https://docs.microsoft.com/azure/cognitive-services/speech-service/speech-sdk?tabs=linux)), Android devices (API 23: Android 6.0 Marshmallow or higher), Mac x64 (OS version 10.14 or higher) and Mac M1 arm64 (OS version 11.0 or higher) and iOS 11.4 devices.
 
 ## Getting Started
 
@@ -106,6 +50,16 @@ The [SDK documentation](https://aka.ms/csspeech) has extensive sections about ge
 > By downloading the Microsoft Cognitive Services Speech SDK, you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license201809).**
 
 Please see the description of each individual sample for instructions on how to build and run it.
+
+## Related GitHub repositories
+
+* [Azure-Samples/Cognitive-Services-Voice-Assistant](https://github.com/Azure-Samples/Cognitive-Services-Voice-Assistant) - Additional samples and tools to help you build an application that uses Speech SDK's DialogServiceConnector for voice communication with your [Bot-Framework bot](https://dev.botframework.com/) or [Custom Command](https://docs.microsoft.com/azure/cognitive-services/speech-service/custom-commands) web application.
+
+* [microsoft/cognitive-services-speech-sdk-js](https://github.com/microsoft/cognitive-services-speech-sdk-js) - Java Script implementation of Speech SDK
+
+* [Microsoft/cognitive-services-speech-sdk-go](https://github.com/Microsoft/cognitive-services-speech-sdk-go) - Go implementation of Speech SDK
+
+* [Azure-Samples/Speech-Service-Actions-Template](https://github.com/Azure-Samples/Speech-Service-Actions-Template) - Template to create a repository to develop Azure Custom Speech models with built-in support for DevOps and common software engineering practices
 
 ### Speech recognition quickstarts
 
@@ -166,11 +120,15 @@ If you want to build them from scratch, please follow the quickstart or basics a
 | [Quickstart Objective-C macOS](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/objectivec/macos/text-to-speech) | macOS | Demonstrates one-shot speech synthesis to the default speaker. |
 | [Quickstart Swift macOS](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/swift/macos/text-to-speech) | macOS | Demonstrates one-shot speech synthesis to the default speaker. |
 
-### Voice assistants quickstarts
+### Voice Assistant quickstarts
 
-The following quickstarts demonstrate how to create a custom voice assistant.
+The following quickstarts demonstrate how to create a custom Voice Assistant.
 The applications will connect to a previously authored bot configured to use the Direct Line Speech channel, send a voice request, and return a voice response activity (if configured).
-If you want to build these quickstarts from scratch, please follow the quickstart or basics articles on our [documentation page](https://aka.ms/csspeech).
+If you want to build these quickstarts from scratch, please follow the quickstart or basics articles on our [documentation page](https://docs.microsoft.com/azure/cognitive-services/speech-service/index-voice-assistants).
+
+See also [Azure-Samples/Cognitive-Services-Voice-Assistant](https://github.com/Azure-Samples/Cognitive-Services-Voice-Assistant) for full Voice Assistant samples and tools.
+
+<br>
 
 | Quickstart | Platform | Description |
 | ---------- | -------- | ----------- |
@@ -194,7 +152,7 @@ The following samples demonstrate additional capabilities of the Speech SDK, suc
 | [Speech-to-text UWP sample](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/csharp/uwp/speechtotext-uwp)                                          | Windows  | Demonstrates speech recognition |
 | [Text-to-speech UWP sample](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/csharp/uwp/texttospeech-uwp)                                          | Windows  | Demonstrates speech synthesis |
 | [Speech recognition sample for Android](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/java/android/sdkdemo/)                                     | Android  | Demonstrates speech and intent recognition |
-| [Speech recognition and translation sample for the browser, using JavaScript](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/js/browser/)         | Web      | Demonstrates speech recognition, intent recognition, and translation |
+| [Speech recognition, synthesis, and translation sample for the browser, using JavaScript](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/js/browser/)         | Web      | Demonstrates speech recognition, intent recognition, and translation |
 | [Speech recognition and translation sample using JavaScript and Node.js](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/js/node)                 | Node.js  | Demonstrates speech recognition, intent recognition, and translation |
 | [Speech recognition sample for iOS using a connection object](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/objective-c/ios)  | iOS      | Demonstrates speech recognition |
 | [Extended speech recognition sample for iOS](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/objective-c/ios)           | iOS      | Demonstrates speech recognition using streams etc.|
@@ -202,12 +160,20 @@ The following samples demonstrate additional capabilities of the Speech SDK, suc
 | [C# UWP DialogServiceConnector sample for Windows](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/csharp/uwp/virtualassistant-uwp/) | Windows | Demonstrates speech recognition through the DialogServiceConnector and receiving activity responses. |
 | [C# Unity sample for Windows or Android](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/unity/speechrecognizer/) | Windows, Android |  Demonstrates speech recognition, intent recognition, and translation for Unity |
 | [C# Unity SpeechBotConnector sample for Windows or Android](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/csharp/unity/VirtualAssistantPreview/) | Windows, Android | Demonstrates speech recognition through the SpeechBotConnector and receiving activity responses. |
+| [C#, C++ and Java DialogServiceConnector samples](https://github.com/Azure-Samples/Cognitive-Services-Voice-Assistant) | Windows, Linux, Android | Additional samples and tools to help you build an application that uses Speech SDK's DialogServiceConnector for voice communication with your [Bot-Framework Bot](https://dev.botframework.com/) or [Custom Command](https://docs.microsoft.com/azure/cognitive-services/speech-service/custom-commands) web application. |
 
 Samples for using the Speech Service REST API (no Speech SDK installation required):
 
 | Sample                                  | Description |
 | ---                                     | --- |
 | [Batch transcription](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/batch/)  | Demonstrates usage of batch transcription from different programming languages |
+
+## Tools
+
+| Tool | Platform | Description |
+| ---- | -------- | ----------- |
+| Enumerate audio devices | C++, Windows | Shows how to get the Device ID of all connected microphones and loudspeakers. Device ID is required if you want to listen via non-default microphone (Speech Recognition), or play to a non-default loudspeaker (Text-To-Speech) using Speech SDK |
+| Enumerate audio devices | C# .NET Framework, Windows | -"- |
 
 ## Sample data for Custom Speech
 - [Sample data for Custom Speech](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/sampledata/customspeech)

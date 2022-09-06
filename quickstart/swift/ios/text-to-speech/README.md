@@ -15,7 +15,7 @@ This sample demonstrates how to create an iOS app in Swift using the Cognitive S
 
 **By downloading the Microsoft Cognitive Services Speech SDK, you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license201809).**
 
-The Cognitive Services Speech SDK for iOS is distributed as a framework bundle.
+The Cognitive Services Speech SDK for iOS is distributed as a xcframework package.
 It can be used in Xcode projects as a [CocoaPod](https://cocoapods.org/), or downloaded directly [here](https://aka.ms/csspeech/iosbinary) and linked manually. This guide uses a CocoaPod.
 Note that this tutorial will not work without changes for any version earlier than 1.7.0 of the SDK.
 
@@ -35,6 +35,14 @@ Note that this tutorial will not work without changes for any version earlier th
 1. Select the test destination (**Product** > **Destination**) to choose a device connected to your macOS machine or a iOS simulator.
 1. Build and run the example code by selecting **Product** -> **Run** from the menu or clicking the **Play** button.
 1. After you input some text and click the button in the app, you should hear the synthesized audio played.
+
+## Importing Speech SDK as module
+
+This sample uses bridging header (MicrosoftCognitiveServicesSpeech-Bridging-Header.h) to include MicrosoftCognitiveServicesSpeech framework into the app.
+
+Alternatively from 1.16.0 SDK and onwards, you can also import Speech SDK as follows.
+
+import MicrosoftCognitiveServicesSpeech
 
 ## References
 

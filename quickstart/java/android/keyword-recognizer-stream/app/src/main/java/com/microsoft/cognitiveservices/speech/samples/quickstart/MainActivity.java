@@ -6,8 +6,8 @@
 package com.microsoft.cognitiveservices.speech.samples.quickstart;
 
 import android.content.res.AssetManager;
-import android.support.v4.app.ActivityCompat;
-import android.support.v7.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -75,8 +75,7 @@ public class MainActivity extends AppCompatActivity {
             try {
                 final byte[] buffer = new byte[300];
                 while (!stopPumping.get()) {
-                    if (!src.canReadData(300))
-                    {
+                    if (!src.canReadData(300)) {
                         continue;
                     }
                     long count = src.readData(buffer);
@@ -89,8 +88,7 @@ public class MainActivity extends AppCompatActivity {
                         dst.write(buffer);
                     }
                 }
-            } catch (Exception ex)
-            {
+            } catch (Exception ex) {
                 Log.e("SpeechSDKDemo", "Pump got an exception");
             }
         };
@@ -100,56 +98,46 @@ public class MainActivity extends AppCompatActivity {
         enableButton(false);
         updateText("Say \"Computer\"");
         Runnable asyncTask = () -> {
-            try {
-                AssetManager am = getAssets();
-                AudioConfig config = AudioConfig.fromDefaultMicrophoneInput();
-                assert(config != null);
-
-                KeywordRecognizer reco = new KeywordRecognizer(config);
-                assert(reco != null);
+            try (AssetManager am = getAssets();
+                 AudioConfig config = AudioConfig.fromDefaultMicrophoneInput();
+                 KeywordRecognizer reco = new KeywordRecognizer(config);) {
 
                 InputStream is = am.open("kws.table");
                 KeywordRecognitionModel model = KeywordRecognitionModel.fromStream(is, "computer", false);
                 Future<KeywordRecognitionResult> task = reco.recognizeOnceAsync(model);
-                assert(task != null);
 
+                // Note: this will block the UI thread, so eventually, you want to
+                //       register for the event (see full samples)
                 KeywordRecognitionResult result = task.get();
-                assert(result != null);
 
                 if (result.getReason() == ResultReason.RecognizedKeyword) {
                     updateText("Recognized " + result.getText());
                 }
                 else {
                     updateText("Error: got the wrong sort of recognition.");
-                    reco.close();
                     enableButton(true);
                     return;
                 }
-                AudioDataStream audioDataStream = AudioDataStream.fromResult(result);
+                // Get audio data from the KeywordRecognitionResult and transcribe it from speech to text
+                try (AudioDataStream audioDataStream = AudioDataStream.fromResult(result);
+                     PushAudioInputStream srInputStream = PushAudioInputStream.create();
+                     AudioConfig srAudioConfig = AudioConfig.fromStreamInput(srInputStream);
+                     SpeechConfig srConfig = SpeechConfig.fromSubscription(speechSubscriptionKey, serviceRegion);
+                     SpeechRecognizer speechRecognizer = new SpeechRecognizer(srConfig, srAudioConfig);) {
 
-                PushAudioInputStream srInputStream = PushAudioInputStream.create();
-                AudioConfig srAudioConfig = AudioConfig.fromStreamInput(srInputStream);
-                SpeechConfig srConfig = SpeechConfig.fromSubscription(speechSubscriptionKey, serviceRegion);
-                SpeechRecognizer speechRecognizer = new SpeechRecognizer(srConfig, srAudioConfig);
-                /* We pump the audio into the push stream */
-                stopPumping.set(false);
-                es.execute(pump(audioDataStream, srInputStream));
-                SpeechRecognitionResult srResult = speechRecognizer.recognizeOnceAsync().get();
-                stopPumping.set(true);
-                if (srResult.getReason() == ResultReason.RecognizedSpeech) {
-                    updateText("Recognized Speech " + srResult.getText());
+                    /* We pump the audio into the push stream */
+                    stopPumping.set(false);
+                    es.execute(pump(audioDataStream, srInputStream));
+                    SpeechRecognitionResult srResult = speechRecognizer.recognizeOnceAsync().get();
+                    stopPumping.set(true);
+                    if (srResult.getReason() == ResultReason.RecognizedSpeech) {
+                        updateText("Recognized Speech " + srResult.getText());
+                    }
+                    else {
+                        updateText("Error: got the wrong sort of recognition.");
+                    }
                 }
-                else {
-                    updateText("Error: got the wrong sort of recognition.");
-                }
-                audioDataStream.detachInput();
-                audioDataStream.close();
-                reco.close();
-                config.close();
-                speechRecognizer.close();
-                srAudioConfig.close();
-                srConfig.close();
-                srInputStream.close();
+
             } catch (Exception ex) {
                 Log.e("SpeechSDKDemo", "unexpected " + ex.getMessage());
                 enableButton(true);

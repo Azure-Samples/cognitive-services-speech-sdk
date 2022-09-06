@@ -4,7 +4,7 @@
   <mp:PhoneIdentity PhoneProductId="f767bb24-409a-4446-9075-138be52026b1" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
   <Properties>
     <DisplayName>MicrosoftSpeechSDKSamples.UwpSpeechRecognitionSample</DisplayName>
-    <PublisherDisplayName>weixu</PublisherDisplayName>
+    <PublisherDisplayName>Microsoft</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
   <Dependencies>

@@ -16,11 +16,11 @@ The compressed audio input stream should be either in MP3 or Opus format.
 
   ```sh
   sudo apt-get update
-  sudo apt-get install build-essential libssl1.0.0 libasound2 wget
+  sudo apt-get install build-essential libssl-dev libasound2 wget
   sudo apt-get install libgstreamer1.0-0 gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly
   ```
 
-  * If libssl1.0.0 is not available, install libssl1.0.x (where x is greater than 0) or libssl1.1 instead.
+  * On **Ubuntu 22.04 LTS** it is also required to download and install the latest **libssl1.1** package e.g. from http://security.ubuntu.com/ubuntu/pool/main/o/openssl/.
 
 * On RHEL or CentOS, install these packages to build and run this sample:
 

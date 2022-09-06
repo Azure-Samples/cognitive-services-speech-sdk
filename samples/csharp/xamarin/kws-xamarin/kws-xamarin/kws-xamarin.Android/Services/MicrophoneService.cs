@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 using Android;
 using Android.App;
 using Android.OS;
-using Android.Support.Design.Widget;
-using Android.Support.V4.App;
+using AndroidX.Core.App;
+using Google.Android.Material.Snackbar;
 
 namespace kws_xamarin.Droid
 {

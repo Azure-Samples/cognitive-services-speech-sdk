@@ -15,10 +15,10 @@ This sample demonstrates various forms of speech recognition, intent recognition
 
   ```sh
   sudo apt-get update
-  sudo apt-get install libssl1.0.0 libasound2
+  sudo apt-get install libssl-dev libasound2
   ```
 
-  * If libssl1.0.0 is not available, install libssl1.0.x (where x is greater than 0) or libssl1.1 instead.
+  * On **Ubuntu 22.04 LTS** it is also required to download and install the latest **libssl1.1** package e.g. from http://security.ubuntu.com/ubuntu/pool/main/o/openssl/.
 
 * On RHEL or CentOS, run the following commands for the installation of required packages:
 
@@ -56,7 +56,12 @@ This sample demonstrates various forms of speech recognition, intent recognition
 ## Run the sample
 
 * Press F11, or select **Run** \> **Debug**.
+* Or run in terminal:
 
+```sh
+mvn clean package
+java -jar ./target/SpeechSDKDemo-0.0.1-SNAPSHOT-jar-with-dependencies.jar
+```
 ## References
 
 * [Speech SDK API reference for Java](https://aka.ms/csspeech/javaref)

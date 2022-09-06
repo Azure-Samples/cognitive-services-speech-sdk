@@ -1,7 +1,7 @@
 # Quickstart: Translate speech in C++ for Windows
 
 This sample demonstrates how to translate speech with C++ using the Speech SDK for Windows.
-See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-translate-speech-cpp-windows) on the SDK documentation page which describes how to build this sample from scratch in Visual Studio 2017.
+See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started-speech-translation?tabs=script%2Cwindowsinstall&pivots=programming-language-cpp) on the SDK documentation page which describes how to build this sample from scratch in Visual Studio 2017.
 
 ## Prerequisites
 
@@ -36,5 +36,5 @@ To debug the app and then run it, press F5 or use **Debug** \> **Start Debugging
 
 ## References
 
-* [Quickstart article on the SDK documentation site](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-translate-speech-cpp-windows)
+* [Quickstart article on the SDK documentation site](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started-speech-translation?tabs=script%2Cwindowsinstall&pivots=programming-language-cpp)
 * [Speech SDK API reference for C++](https://aka.ms/csspeech/cppref)

@@ -11,11 +11,50 @@
 using namespace std;
 using namespace Microsoft::CognitiveServices::Speech;
 using namespace Microsoft::CognitiveServices::Speech::Audio;
+using namespace Microsoft::CognitiveServices::Speech::Speaker;
 
+// Enroll a given profile, and print the resulting id if successful
+void enrollProfile(std::shared_ptr<VoiceProfileClient> client, std::shared_ptr <VoiceProfile> profile, std::shared_ptr <AudioConfig> audioConfig)
+{
+   ResultReason reason = ResultReason::EnrollingVoiceProfile;
+   std::shared_ptr<VoiceProfileEnrollmentResult> result;
+
+   // 20 seconds of spoken audio is required for a valid enrollment, loop until the service completes enrollment
+   while (reason == ResultReason::EnrollingVoiceProfile)
+   {
+       result = client->EnrollProfileAsync(profile, audioConfig).get();
+       reason = result->Reason;
+   }
+   if (reason == ResultReason::EnrolledVoiceProfile)
+   {
+       cout << "Enrolled profile " << profile->GetId() << endl;
+   }
+   else if (reason == ResultReason::Canceled)
+   {
+       cout << "Profile enrollment failed!" << endl;
+       auto cancellation = CancellationDetails::FromResult(result);
+       cout << "CANCELED: Reason=" << (int)cancellation->Reason << std::endl;
+
+       if (cancellation->Reason == CancellationReason::Error) {
+          cout << "CANCELED: ErrorCode= " << (int)cancellation->ErrorCode << std::endl;
+          cout << "CANCELED: ErrorDetails=" << cancellation->ErrorDetails << std::endl;
+       }
+   }
+   else
+   {
+       cout << "Profile enrollment failed, result: " << result->Text << endl;
+   }
+}
+
+// Speaker verification using audio sample file
 void verifySpeaker(const shared_ptr<SpeechConfig>& config, const shared_ptr<VoiceProfile>& profile)
 {
     auto speakerRecognizer = SpeakerRecognizer::FromConfig(config, AudioConfig::FromWavFileInput("myVoiceIsMyPassportVerifyMe04.wav"));
+
+    // Creates the model from the profile to be verified against
     auto model = SpeakerVerificationModel::FromProfile(profile);
+
+    // Verify the given audio sample
     auto result = speakerRecognizer->RecognizeOnceAsync(model).get();
     if (result->Reason == ResultReason::RecognizedSpeaker)
     {
@@ -29,6 +68,7 @@ void verifySpeaker(const shared_ptr<SpeechConfig>& config, const shared_ptr<Voic
     }
 }
 
+// Speaker profile creation, enrollment, and verification using audio sample files
 void speakerVerification()
 {
     // Creates an instance of a speech config with specified subscription key and service region.
@@ -44,6 +84,8 @@ void speakerVerification()
     for (auto& trainingFile : trainingFiles)
     {
         auto audioInput = AudioConfig::FromWavFileInput(trainingFile);
+
+        // Enrolls the profile using each training file in turn
         auto result = client->EnrollProfileAsync(profile, audioInput).get();
         if (result->Reason == ResultReason::EnrollingVoiceProfile)
         {
@@ -52,6 +94,8 @@ void speakerVerification()
         else if (result->Reason == ResultReason::EnrolledVoiceProfile)
         {
             cout << "Enrolled profile id " << profile->GetId() << endl;
+
+            // Verifies the enrolled profile
             verifySpeaker(config, profile);
             break;
         }
@@ -71,10 +115,15 @@ void speakerVerification()
     }
 }
 
+// Speaker identification using audio sample file
 void identifySpeakers(const shared_ptr<SpeechConfig>& config, const vector<shared_ptr<VoiceProfile>>& profiles)
 {
-    auto speakerRecognizer = SpeakerRecognizer::FromConfig(config, AudioConfig::FromWavFileInput("wikipediaOcelot.wav"));
+    auto speakerRecognizer = SpeakerRecognizer::FromConfig(config, AudioConfig::FromWavFileInput("TalkForAFewSeconds16.wav"));
+
+    // Creates the model from the profile to be verified against
     auto model = SpeakerIdentificationModel::FromProfiles(profiles);
+
+    // Identify the given audio sample
     auto result = speakerRecognizer->RecognizeOnceAsync(model).get();
     if (result->Reason == ResultReason::RecognizedSpeakers)
     {
@@ -84,6 +133,7 @@ void identifySpeakers(const shared_ptr<SpeechConfig>& config, const vector<share
     }
 }
 
+// Speaker profile creation, enrollment, and identification using audio sample files
 void speakerIdentification()
 {
    // Creates an instance of a speech config with specified subscription key and service region.
@@ -99,17 +149,12 @@ void speakerIdentification()
    cout << "Created profiles " << profile1->GetId() << " and " << profile2->GetId() << " for text independent identification." << endl;
 
    // Enroll the two profiles
-   auto result1 = client->EnrollProfileAsync(profile1, AudioConfig::FromWavFileInput("aboutSpeechSdk.wav")).get();
-   cout << "Enrolled profile " << profile1->GetId() << endl;
-   auto result2 = client->EnrollProfileAsync(profile2, AudioConfig::FromWavFileInput("speechService.wav")).get();
-   cout << "Enrolled profile " << profile2->GetId() << endl;
+   enrollProfile(client, profile1, AudioConfig::FromWavFileInput("TalkForAFewSeconds16.wav"));
+   enrollProfile(client, profile2, AudioConfig::FromWavFileInput("neuralActivationPhrase.wav"));
 
    // Identify the two profiles after successful enrollments.
-   if (result1->Reason == ResultReason::EnrolledVoiceProfile && result2->Reason == ResultReason::EnrolledVoiceProfile)
-   {
-       vector<shared_ptr<VoiceProfile>> profiles{ profile1, profile2 };
-       identifySpeakers(config, profiles);
-   }
+   vector<shared_ptr<VoiceProfile>> profiles{ profile1, profile2 };
+   identifySpeakers(config, profiles);
 
    // delete the two profiles after we are done.
    if (!profile1->GetId().empty())

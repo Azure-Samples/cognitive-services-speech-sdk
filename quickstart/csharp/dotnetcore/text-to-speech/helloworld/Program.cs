@@ -14,9 +14,21 @@ namespace helloworld
     {
         public static async Task SynthesisToSpeakerAsync()
         {
+            // To support Chinese Characters on Windows platform
+            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+            {
+                Console.InputEncoding = System.Text.Encoding.Unicode;
+                Console.OutputEncoding = System.Text.Encoding.Unicode;
+            }
+
+
             // Creates an instance of a speech config with specified subscription key and service region.
             // Replace with your own subscription key and service region (e.g., "westus").
             var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+
+            // Set the voice name, refer to https://aka.ms/speech/voices/neural for full list.
+            config.SpeechSynthesisVoiceName = "en-US-AriaNeural";
+
 
             // Creates a speech synthesizer using the default speaker as audio output.
             using (var synthesizer = new SpeechSynthesizer(config))
@@ -25,7 +37,6 @@ namespace helloworld
                 Console.WriteLine("Type some text that you want to speak...");
                 Console.Write("> ");
                 string text = Console.ReadLine();
-
                 using (var result = await synthesizer.SpeakTextAsync(text))
                 {
                     if (result.Reason == ResultReason.SynthesizingAudioCompleted)

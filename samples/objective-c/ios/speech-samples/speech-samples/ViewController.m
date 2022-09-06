@@ -4,6 +4,7 @@
 //
 
 #import "ViewController.h"
+#import "AudioRecorder.h"
 #import <AVFoundation/AVFoundation.h>
 #import <MicrosoftCognitiveServicesSpeech/SPXSpeechApi.h>
 
@@ -11,6 +12,7 @@
     NSString *speechKey;
     NSString *serviceRegion;
     NSString *pronunciationAssessmentReferenceText;
+    AudioRecorder *recorder;
 }
 
 @property (strong, nonatomic) IBOutlet UIButton *recognizeFromFileButton;
@@ -20,6 +22,7 @@
 @property (strong, nonatomic) IBOutlet UIButton *recognizeWithPullStreamButton;
 @property (strong, nonatomic) IBOutlet UIButton *recognizeWithAutoLanguageDetectionButton;
 @property (strong, nonatomic) IBOutlet UIButton *pronunciationAssessFromMicButton;
+@property (strong, nonatomic) IBOutlet UIButton *pronunciationAssessFromFileButton;
 @property (strong, nonatomic) IBOutlet UIButton *recognizeKeywordFromFileButton;
 
 @property (strong, nonatomic) IBOutlet UILabel *recognitionResultLabel;
@@ -32,6 +35,7 @@
 - (IBAction)recognizeWithAutoLanguageDetectionButtonTapped:(UIButton *)sender;
 - (IBAction)recognizeKeywordFromFileButtonTapped:(UIButton *)sender;
 - (IBAction)pronunciationAssessFromMicButtonTapped:(UIButton *)sender;
+- (IBAction)pronunciationAssessFromFileButtonTapped:(UIButton *)sender;
 @end
 
 @implementation ViewController
@@ -47,62 +51,71 @@
     self.recognizeFromMicButton = [UIButton buttonWithType:UIButtonTypeSystem];
     [self.recognizeFromMicButton addTarget:self action:@selector(recognizeFromMicButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
     [self.recognizeFromMicButton setTitle:@"Start rec from mic" forState:UIControlStateNormal];
-    [self.recognizeFromMicButton setFrame:CGRectMake(50.0, 100.0, 300.0, 50.0)];
+    [self.recognizeFromMicButton setFrame:CGRectMake(50.0, 70.0, 300.0, 40.0)];
     self.recognizeFromMicButton.accessibilityIdentifier = @"recognize_mic_button";
     [self.view addSubview:self.recognizeFromMicButton];
 
     self.recognizeFromFileButton = [UIButton buttonWithType:UIButtonTypeSystem];
     [self.recognizeFromFileButton addTarget:self action:@selector(recognizeFromFileButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
     [self.recognizeFromFileButton setTitle:@"Start rec from file" forState:UIControlStateNormal];
-    [self.recognizeFromFileButton setFrame:CGRectMake(50.0, 150.0, 300.0, 50.0)];
+    [self.recognizeFromFileButton setFrame:CGRectMake(50.0, 110.0, 300.0, 40.0)];
     self.recognizeFromFileButton.accessibilityIdentifier = @"recognize_file_button";
     [self.view addSubview:self.recognizeFromFileButton];
 
     self.recognizeWithPhraseHintButton = [UIButton buttonWithType:UIButtonTypeSystem];
     [self.recognizeWithPhraseHintButton addTarget:self action:@selector(recognizeWithPhraseHintButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
     [self.recognizeWithPhraseHintButton setTitle:@"Start rec from file with PhraseHint" forState:UIControlStateNormal];
-    [self.recognizeWithPhraseHintButton setFrame:CGRectMake(50.0, 200.0, 300.0, 50.0)];
+    [self.recognizeWithPhraseHintButton setFrame:CGRectMake(50.0, 150.0, 300.0, 40.0)];
     self.recognizeWithPhraseHintButton.accessibilityIdentifier = @"recognize_phrase_hint_button";
     [self.view addSubview:self.recognizeWithPhraseHintButton];
 
     self.recognizeWithPushStreamButton = [UIButton buttonWithType:UIButtonTypeSystem];
     [self.recognizeWithPushStreamButton addTarget:self action:@selector(recognizeWithPushStreamButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
     [self.recognizeWithPushStreamButton setTitle:@"Start rec from file with push stream" forState:UIControlStateNormal];
-    [self.recognizeWithPushStreamButton setFrame:CGRectMake(50.0, 250.0, 300.0, 50.0)];
+    [self.recognizeWithPushStreamButton setFrame:CGRectMake(50.0, 190.0, 300.0, 40.0)];
     self.recognizeWithPushStreamButton.accessibilityIdentifier = @"recognize_push_stream_button";
     [self.view addSubview:self.recognizeWithPushStreamButton];
 
     self.recognizeWithPullStreamButton = [UIButton buttonWithType:UIButtonTypeSystem];
     [self.recognizeWithPullStreamButton addTarget:self action:@selector(recognizeWithPullStreamButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
     [self.recognizeWithPullStreamButton setTitle:@"Start rec from file with pull stream" forState:UIControlStateNormal];
-    [self.recognizeWithPullStreamButton setFrame:CGRectMake(50.0, 300.0, 300.0, 50.0)];
+    [self.recognizeWithPullStreamButton setFrame:CGRectMake(50.0, 230.0, 300.0, 40.0)];
     self.recognizeWithPullStreamButton.accessibilityIdentifier = @"recognize_pull_stream_button";
     [self.view addSubview:self.recognizeWithPullStreamButton];
 
     self.recognizeWithAutoLanguageDetectionButton = [UIButton buttonWithType:UIButtonTypeSystem];
     [self.recognizeWithAutoLanguageDetectionButton addTarget:self action:@selector(recognizeWithAutoLanguageDetectionButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
     [self.recognizeWithAutoLanguageDetectionButton setTitle:@"Start rec with auto language detection" forState:UIControlStateNormal];
-    [self.recognizeWithAutoLanguageDetectionButton setFrame:CGRectMake(50.0, 350.0, 300.0, 50.0)];
+    [self.recognizeWithAutoLanguageDetectionButton setFrame:CGRectMake(50.0, 270.0, 300.0, 40.0)];
     self.recognizeWithAutoLanguageDetectionButton.accessibilityIdentifier = @"recognize_language_detection_button";
     [self.view addSubview:self.recognizeWithAutoLanguageDetectionButton];
 
     self.recognizeKeywordFromFileButton = [UIButton buttonWithType:UIButtonTypeSystem];
     [self.recognizeKeywordFromFileButton addTarget:self action:@selector(recognizeKeywordFromFileButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
     [self.recognizeKeywordFromFileButton setTitle:@"Recognize keyword" forState:UIControlStateNormal];
-    [self.recognizeKeywordFromFileButton setFrame:CGRectMake(50.0, 400.0, 300.0, 50.0)];
+    [self.recognizeKeywordFromFileButton setFrame:CGRectMake(50.0, 310.0, 300.0, 40.0)];
     self.recognizeKeywordFromFileButton.accessibilityIdentifier = @"recognize_keyword_button";
     [self.view addSubview:self.recognizeKeywordFromFileButton];
 
     self.pronunciationAssessFromMicButton = [UIButton buttonWithType:UIButtonTypeSystem];
     [self.pronunciationAssessFromMicButton addTarget:self action:@selector(pronunciationAssessFromMicButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
-    [self.pronunciationAssessFromMicButton setTitle:[NSString stringWithFormat:@"Start pronuciation assessment \n (Read out \"%@\")", pronunciationAssessmentReferenceText] forState:UIControlStateNormal];
+    [self.pronunciationAssessFromMicButton setTitle:[NSString stringWithFormat:@"Start pronunciation assessment \n (Read out \"%@\")", pronunciationAssessmentReferenceText] forState:UIControlStateNormal];
     [self.pronunciationAssessFromMicButton titleLabel].lineBreakMode = NSLineBreakByWordWrapping;
     [self.pronunciationAssessFromMicButton titleLabel].textAlignment = NSTextAlignmentCenter;
-    [self.pronunciationAssessFromMicButton setFrame:CGRectMake(50.0, 450.0, 300.0, 50.0)];
-    self.pronunciationAssessFromMicButton.accessibilityIdentifier = @"pronuciation_assessment_button";
+    [self.pronunciationAssessFromMicButton setFrame:CGRectMake(50.0, 350.0, 300.0, 40.0)];
+    self.pronunciationAssessFromMicButton.accessibilityIdentifier = @"pronunciation_assessment_button";
     [self.view addSubview:self.pronunciationAssessFromMicButton];
 
-    self.recognitionResultLabel = [[UILabel alloc] initWithFrame:CGRectMake(50.0, 350.0, 300.0, 400.0)];
+    self.pronunciationAssessFromFileButton = [UIButton buttonWithType:UIButtonTypeSystem];
+    [self.pronunciationAssessFromFileButton addTarget:self action:@selector(pronunciationAssessFromFileButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
+    [self.pronunciationAssessFromFileButton setTitle:@"Start continuous pronunciation assessment from file." forState:UIControlStateNormal];
+    [self.pronunciationAssessFromFileButton titleLabel].lineBreakMode = NSLineBreakByWordWrapping;
+    [self.pronunciationAssessFromFileButton titleLabel].textAlignment = NSTextAlignmentCenter;
+    [self.pronunciationAssessFromFileButton setFrame:CGRectMake(50.0, 390.0, 300.0, 40.0)];
+    self.pronunciationAssessFromFileButton.accessibilityIdentifier = @"pronunciation_assessment_file_button";
+    [self.view addSubview:self.pronunciationAssessFromFileButton];
+
+    self.recognitionResultLabel = [[UILabel alloc] initWithFrame:CGRectMake(50.0, 430.0, 300.0, 300.0)];
     self.recognitionResultLabel.lineBreakMode = NSLineBreakByWordWrapping;
     self.recognitionResultLabel.numberOfLines = 0;
     self.recognitionResultLabel.accessibilityIdentifier = @"result_label";
@@ -154,8 +167,23 @@
 }
 
 - (IBAction)pronunciationAssessFromMicButtonTapped:(UIButton *)sender {
+    if ([[(UIButton *)sender currentTitle]isEqualToString:@"Stop recording"])
+    {
+        [self->recorder stop];
+        [self.pronunciationAssessFromMicButton setTitle:[NSString stringWithFormat:@"Start pronunciation assessment \n (Read out \"%@\")", self->pronunciationAssessmentReferenceText] forState:UIControlStateNormal];
+    }
+    else
+    {
+        [self.pronunciationAssessFromMicButton setTitle:@"Stop recording" forState:UIControlStateNormal];
+        dispatch_async(dispatch_get_global_queue(QOS_CLASS_DEFAULT, 0), ^{
+            [self pronunciationAssessFromMicrophone];
+        });
+    }
+}
+
+- (IBAction)pronunciationAssessFromFileButtonTapped:(UIButton *)sender {
     dispatch_async(dispatch_get_global_queue(QOS_CLASS_DEFAULT, 0), ^{
-        [self pronunciationAssessFromMicrophone];
+        [self pronunciationAssessFromFile];
     });
 }
 
@@ -640,7 +668,7 @@
 }
 
 /*
- * Performs pronunciation assessment.
+ * Performs single-shot pronunciation assessment from microphone.
  */
 - (void)pronunciationAssessFromMicrophone {
     SPXSpeechConfiguration *speechConfig = [[SPXSpeechConfiguration alloc] initWithSubscription:speechKey region:serviceRegion];
@@ -650,9 +678,11 @@
         return;
     }
 
-    [self updateRecognitionStatusText:(@"Assessing...")];
+    SPXPushAudioInputStream *stream = [[SPXPushAudioInputStream alloc] init];
+    self->recorder = [[AudioRecorder alloc]initWithPushStream:stream];
+    SPXAudioConfiguration *audioConfig = [[SPXAudioConfiguration alloc]initWithStreamInput:stream];
 
-    SPXSpeechRecognizer* speechRecognizer = [[SPXSpeechRecognizer alloc] init:speechConfig];
+    SPXSpeechRecognizer* speechRecognizer = [[SPXSpeechRecognizer alloc] initWithSpeechConfiguration:speechConfig audioConfiguration:audioConfig];
     if (!speechRecognizer) {
         NSLog(@"Could not create speech recognizer");
         [self updateRecognitionResultText:(@"Speech Recognition Error")];
@@ -667,6 +697,8 @@
                                              enableMiscue:true];
 
     [pronunicationConfig applyToRecognizer:speechRecognizer];
+    [self updateRecognitionStatusText:(@"Assessing...")];
+    [self->recorder record];
 
     SPXSpeechRecognitionResult *speechResult = [speechRecognizer recognizeOnce];
     if (SPXResultReason_Canceled == speechResult.reason) {
@@ -681,6 +713,98 @@
     } else {
         NSLog(@"There was an error.");
         [self updateRecognitionErrorText:(@"Speech Recognition Error")];
+    }
+
+    [self->recorder stop];
+}
+
+/*
+ * Performs continuous pronunciation assessment from file.
+ */
+- (void)pronunciationAssessFromFile {
+    NSBundle *mainBundle = [NSBundle mainBundle];
+    NSString *pronFile = [mainBundle pathForResource: @"pronunciation-assessment" ofType:@"wav"];
+    NSLog(@"pronFile path: %@", pronFile);
+    if (!pronFile) {
+        NSLog(@"Cannot find audio file!");
+        [self updateRecognitionErrorText:(@"Cannot find audio file")];
+        return;
+    }
+
+    SPXAudioConfiguration* pronAudioSource = [[SPXAudioConfiguration alloc] initWithWavFileInput:pronFile];
+    if (!pronAudioSource) {
+        NSLog(@"Loading audio file failed!");
+        [self updateRecognitionErrorText:(@"Audio Error")];
+        return;
+    }
+
+    SPXSpeechConfiguration *speechConfig = [[SPXSpeechConfiguration alloc] initWithSubscription:speechKey region:serviceRegion];
+    if (!speechConfig) {
+        NSLog(@"Could not load speech config");
+        [self updateRecognitionErrorText:(@"Speech Config Error")];
+        return;
+    }
+
+    SPXSpeechRecognizer* speechRecognizer = [[SPXSpeechRecognizer alloc] initWithSpeechConfiguration:speechConfig audioConfiguration:pronAudioSource];
+    if (!speechRecognizer) {
+        NSLog(@"Could not create speech recognizer");
+        [self updateRecognitionResultText:(@"Speech Recognition Error")];
+        return;
+    }
+
+    // Create pronunciation assessment config, set grading system, granularity and if enable miscue based on your requirement.
+    // The audio text is "Hello hello world! Today is a day!"
+    SPXPronunciationAssessmentConfiguration *pronunicationConfig =
+    [[SPXPronunciationAssessmentConfiguration alloc] init:@"Hello world! Today is a nice day!"
+                                            gradingSystem:SPXPronunciationAssessmentGradingSystem_HundredMark
+                                              granularity:SPXPronunciationAssessmentGranularity_Phoneme
+                                             enableMiscue:true];
+
+    [pronunicationConfig applyToRecognizer:speechRecognizer];
+    [self updateRecognitionStatusText:(@"Assessing...")];
+
+    // connect callbacks
+    __block double sumAccuracy = 0;
+    __block double sumFluency = 0;
+    __block int sumWords = 0;
+    [speechRecognizer addRecognizedEventHandler: ^ (SPXSpeechRecognizer *recognizer, SPXSpeechRecognitionEventArgs *eventArgs) {
+        NSLog(@"Received final result event. SessionId: %@, recognition result:%@. Status %ld. offset %llu duration %llu resultid:%@", eventArgs.sessionId, eventArgs.result.text, (long)eventArgs.result.reason, eventArgs.result.offset, eventArgs.result.duration, eventArgs.result.resultId);
+        SPXPronunciationAssessmentResult *pronunciationResult = [[SPXPronunciationAssessmentResult alloc]init:eventArgs.result];
+        NSString *resultText = [NSString stringWithFormat:@"Received final result event. \nrecognition result: %@, Accuracy score: %.2f, Pronunciation score: %.2f, Completeness Score: %.2f, Fluency score: %.2f.", eventArgs.result.text, pronunciationResult.accuracyScore, pronunciationResult.pronunciationScore, pronunciationResult.completenessScore, pronunciationResult.fluencyScore];
+        [self updateRecognitionResultText:resultText];
+        NSArray *words = [eventArgs.result.text componentsSeparatedByString:@" "];
+        NSUInteger wordCount = [words count];
+        sumAccuracy += pronunciationResult.accuracyScore * wordCount;
+        sumFluency += pronunciationResult.fluencyScore * wordCount;
+        sumWords += wordCount;
+    }];
+
+    __block bool end = false;
+    [speechRecognizer addCanceledEventHandler:^(SPXSpeechRecognizer *recognizer, SPXSpeechRecognitionCanceledEventArgs *eventArgs) {
+        SPXCancellationDetails *details = [[SPXCancellationDetails alloc] initFromCanceledRecognitionResult:eventArgs.result];
+        NSLog(@"Pronunciation assessment was canceled: %@. Did you pass the correct key/region combination?", details.errorDetails);
+        [self updateRecognitionErrorText:([NSString stringWithFormat:@"Canceled: %@", details.errorDetails ])];
+        end = true;
+    }];
+
+    // session stopped callback to recognize stream has ended
+    [speechRecognizer addSessionStoppedEventHandler: ^ (SPXRecognizer *recognizer, SPXSessionEventArgs *eventArgs) {
+        NSLog(@"Received session stopped event. SessionId: %@", eventArgs.sessionId);
+        end = true;
+    }];
+
+    // start recognizing
+    [speechRecognizer startContinuousRecognition];
+
+    // wait until a session stopped event has been received
+    while (end == false)
+        [NSThread sleepForTimeInterval:1.0f];
+    [speechRecognizer stopContinuousRecognition];
+
+    if (sumWords > 0) {
+        // Overall accuracy and fluency scores are the weighted average of scores of all sentences.
+        NSString *resultText = [NSString stringWithFormat:@"Assessment finished. \nOverall accuracy score: %.2f, fluency score: %.2f.", sumAccuracy / sumWords, sumFluency / sumWords];
+        [self updateRecognitionResultText:resultText];
     }
 }
 

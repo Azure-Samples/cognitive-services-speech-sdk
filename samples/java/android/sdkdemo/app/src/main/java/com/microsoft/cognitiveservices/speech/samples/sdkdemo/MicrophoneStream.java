@@ -33,8 +33,11 @@ public class MicrophoneStream extends PullAudioInputStreamCallback {
 
     @Override
     public int read(byte[] bytes) {
-        long ret = this.recorder.read(bytes, 0, bytes.length);
-        return (int)ret;
+        if (this.recorder != null) {
+            long ret = this.recorder.read(bytes, 0, bytes.length);
+            return (int) ret;
+        }
+        return 0;
     }
 
     @Override

@@ -19,11 +19,10 @@ using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 using System.Threading.Tasks;
+using Windows.Devices.Enumeration;
 using Microsoft.CognitiveServices.Speech;
 using Microsoft.CognitiveServices.Speech.Audio;
 using Windows.Storage;
-using Windows.Media.Core;
-using Windows.Media.Playback;
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 namespace MicrosoftSpeechSDKSamples.UwpSpeechSynthesisSample
 {
@@ -38,14 +37,8 @@ namespace MicrosoftSpeechSDKSamples.UwpSpeechSynthesisSample
         /// </summary>
         public string SubscriptionKey
         {
-            get
-            {
-                return this.subscriptionKey;
-            }
-            set
-            {
-                this.subscriptionKey = value?.Trim();
-            }
+            get => this.subscriptionKey;
+            set => this.subscriptionKey = value?.Trim();
         }
         /// <summary>
         /// Gets or sets region name of the service
@@ -57,15 +50,12 @@ namespace MicrosoftSpeechSDKSamples.UwpSpeechSynthesisSample
         public string SynthesisLanguage { get; set; }
         // Private properties
         private string subscriptionKey;
-
-        private MediaPlayer mediaPlayer;
         #endregion
         public MainPage()
         {
             this.InitializeComponent();
             this.Region = ((ComboBoxItem)RegionComboBox.SelectedItem).Tag.ToString();
             this.SynthesisLanguage = ((ComboBoxItem)LanguageComboBox.SelectedItem).Tag.ToString();
-            this.mediaPlayer = new MediaPlayer();
         }
         private async void SpeechSynthesisToSpeaker_ButtonClicked(object sender, RoutedEventArgs e)
         {
@@ -76,10 +66,16 @@ namespace MicrosoftSpeechSDKSamples.UwpSpeechSynthesisSample
             }
             // Creates an instance of a speech config with specified subscription key and region.
             var config = SpeechConfig.FromSubscription(this.SubscriptionKey, this.Region);
+            config.SetSpeechSynthesisOutputFormat(SpeechSynthesisOutputFormat.Riff24Khz16BitMonoPcm);
             config.SpeechSynthesisLanguage = this.SynthesisLanguage;
 
+            var deviceConfig = AudioConfig.FromDefaultSpeakerOutput();
+            // Using following codes to specify an output device for rendering 
+            // var devices = await DeviceInformation.FindAllAsync(DeviceClass.AudioRender);
+            // var deviceConfig = AudioConfig.FromSpeakerOutput(devices[0].Id);
+
             // Creates a speech synthesizer.
-            using (var synthesizer = new SpeechSynthesizer(config, null))
+            using (var synthesizer = new SpeechSynthesizer(config, deviceConfig))
             {
                 // Receive a text from "Text for Synthesizing" text box and synthesize it to speaker.
                 using (var result = await synthesizer.SpeakTextAsync(this.TextForSynthesizingTextBox.Text).ConfigureAwait(false))
@@ -88,17 +84,6 @@ namespace MicrosoftSpeechSDKSamples.UwpSpeechSynthesisSample
                     if (result.Reason == ResultReason.SynthesizingAudioCompleted)
                     {
                         NotifyUser($"Speech Synthesis Succeeded.", NotifyType.StatusMessage);
-
-                        // Since native playback is not yet supported on UWP yet (currently only supported on Windows/Linux Desktop),
-                        // use the WinRT API to play audio here as a short term solution
-                        using (var audioStream = AudioDataStream.FromResult(result))
-                        {
-                            // Save synthesized audio data as a wave file and user MediaPlayer to play it
-                            var filePath = Path.Combine(ApplicationData.Current.LocalFolder.Path, "outputaudio_for_playback.wav");
-                            await audioStream.SaveToWaveFileAsync(filePath);
-                            mediaPlayer.Source = MediaSource.CreateFromStorageFile(await StorageFile.GetFileFromPathAsync(filePath));
-                            mediaPlayer.Play();
-                        }
                     }
                     else if (result.Reason == ResultReason.Canceled)
                     {
@@ -318,10 +303,7 @@ namespace MicrosoftSpeechSDKSamples.UwpSpeechSynthesisSample
             }
             // Raise an event if necessary to enable a screen reader to announce the status update.
             var peer = Windows.UI.Xaml.Automation.Peers.FrameworkElementAutomationPeer.FromElement(StatusBlock);
-            if (peer != null)
-            {
-                peer.RaiseAutomationEvent(Windows.UI.Xaml.Automation.Peers.AutomationEvents.LiveRegionChanged);
-            }
+            peer?.RaiseAutomationEvent(Windows.UI.Xaml.Automation.Peers.AutomationEvents.LiveRegionChanged);
         }
     }
 }
