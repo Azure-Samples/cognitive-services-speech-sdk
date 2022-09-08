@@ -20,6 +20,11 @@ namespace Connector.Enums
         URL,
         IPAddress,
         DateTime,
-        Quantity
+        Quantity,
+        USSocialSecurityNumber,
+        Name,
+        CreditCard,
+        Address,
+        NumericIdentifier
     }
 }

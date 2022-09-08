@@ -4,14 +4,15 @@
 # Copyright (c) Microsoft. All rights reserved.
 # Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 
-import speech_sample
-import intent_sample
-import translation_sample
-import speech_synthesis_sample
-import speech_language_detection_sample
-
-from collections import OrderedDict
 import platform
+from collections import OrderedDict
+
+import intent_sample
+import speech_language_detection_sample
+import speech_sample
+import speech_synthesis_sample
+import transcription_sample
+import translation_sample
 
 eofkey = 'Ctrl-Z' if "Windows" == platform.system() else 'Ctrl-D'
 
@@ -25,6 +26,7 @@ samples = OrderedDict([
         speech_sample.speech_recognize_once_from_file_with_custom_endpoint_parameters,
         speech_sample.speech_recognize_async_from_file,
         speech_sample.speech_recognize_continuous_from_file,
+        speech_sample.speech_recognize_continuous_async_from_microphone,
         speech_sample.speech_recognition_with_pull_stream,
         speech_sample.speech_recognition_with_push_stream,
         speech_sample.speech_recognize_keyword_from_microphone,
@@ -40,6 +42,10 @@ samples = OrderedDict([
         translation_sample.translation_once_from_mic,
         translation_sample.translation_once_from_file,
         translation_sample.translation_continuous,
+        translation_sample.translation_once_with_lid_from_file,
+        translation_sample.translation_continuous_with_lid_from_multilingual_file,
+    ]), (transcription_sample, [
+        transcription_sample.conversation_transcription_differentiate_speakers,
     ]), (speech_synthesis_sample, [
         speech_synthesis_sample.speech_synthesis_to_speaker,
         speech_synthesis_sample.speech_synthesis_with_language,

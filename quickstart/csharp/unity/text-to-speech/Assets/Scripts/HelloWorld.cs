@@ -169,7 +169,10 @@ public class HelloWorld : MonoBehaviour
 
     void OnDestroy()
     {
-        synthesizer.Dispose();
+        if (synthesizer != null)
+        {
+            synthesizer.Dispose();
+        }
     }
 }
 // </code>
