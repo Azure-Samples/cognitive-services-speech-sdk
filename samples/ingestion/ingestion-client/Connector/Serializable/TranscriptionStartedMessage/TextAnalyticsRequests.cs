@@ -11,14 +11,18 @@ namespace Connector.Serializable.TranscriptionStartedServiceBusMessage
     {
         public TextAnalyticsRequests(
             IEnumerable<TextAnalyticsRequest> utteranceLevelRequests,
-            IEnumerable<TextAnalyticsRequest> audioLevelRequests)
+            IEnumerable<TextAnalyticsRequest> audioLevelRequests,
+            IEnumerable<TextAnalyticsRequest> conversationRequests)
         {
             UtteranceLevelRequests = utteranceLevelRequests;
             AudioLevelRequests = audioLevelRequests;
+            ConversationRequests = conversationRequests;
         }
 
         public IEnumerable<TextAnalyticsRequest> UtteranceLevelRequests { get; }
 
         public IEnumerable<TextAnalyticsRequest> AudioLevelRequests { get; }
+
+        public IEnumerable<TextAnalyticsRequest> ConversationRequests { get; }
     }
 }
