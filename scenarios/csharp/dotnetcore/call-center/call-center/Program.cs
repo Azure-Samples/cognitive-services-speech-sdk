@@ -239,7 +239,8 @@ namespace CallCenter
                     var best = phrase.GetProperty("nBest").EnumerateArray().First();
                     // If the user specified stereo audio, and therefore we turned off diarization,
                     // the speaker number is replaced by a channel number.
-                    var speakerNumber = this.userConfig.useStereoAudio ? phrase.GetProperty("channel").GetInt32() : phrase.GetProperty("speaker").GetInt32();
+                    // Note: Channels are numbered from 0. Speakers are numbered from 1.
+                    var speakerNumber = this.userConfig.useStereoAudio ? phrase.GetProperty("channel").GetInt32() : phrase.GetProperty("speaker").GetInt32() - 1;
                     return new TranscriptionPhrase(best.GetProperty("display").ToString(), best.GetProperty("itn").ToString(), best.GetProperty("lexical").ToString(), speakerNumber, phrase.GetProperty("offset").ToString(), phrase.GetProperty("offsetInTicks").GetDouble());
                 })
                 .OrderBy(phrase => phrase.offsetInTicks)
