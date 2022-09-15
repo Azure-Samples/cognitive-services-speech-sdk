@@ -75,6 +75,19 @@ def get_synthesis(job_id):
     else:
         logger.error(f'Failed to get batch synthesis job: {response.text}')
 
+def list_synthesis_jobs(skip: int = 0, top: int = 100):
+    """List all batch synthesis jobs in the subscription"""
+    url = f'https://{SERVICE_REGION}.customvoice.api.speech.microsoft.com/api/texttospeech/3.1-preview1/batchsynthesis?skip={skip}&top={top}'
+    header = {
+        'Ocp-Apim-Subscription-Key': SUBSCRIPTION_KEY
+    }
+    response = requests.get(url, headers=header)
+    if response.status_code < 400:
+        logger.info(f'List batch synthesis jobs successfully, got {len(response.json()["values"])} jobs')
+        logger.info(response.json())
+    else:
+        logger.error(f'Failed to list batch synthesis jobs: {response.text}')
+
 if __name__ == '__main__':
     job_id = submit_synthesis()
     if job_id is not None:
