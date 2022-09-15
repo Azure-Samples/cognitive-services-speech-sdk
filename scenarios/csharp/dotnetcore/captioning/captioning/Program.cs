@@ -30,9 +30,13 @@ namespace Captioning
         private TaskCompletionSource<string?> _recognitionEnd = new TaskCompletionSource<string?>();
         private int _srtSequenceNumber = 0;
         private CaptionHelper? _captionHelper;
-        private int? _currentCaptionsLength = null;
-        private int? _currentCaptionSize = null;
+        // TODO1
+//        private int? _currentNumberOfCaptions = null;
+//        private int? _currentCaptionSize = null;
         private long? _previousCaptionEndTimeTicks = null;
+        // TODO1
+        private List<string> _recognizedCaptions = new List<string>();
+        private List<string> _recognizingCaptions = new List<string>();
         
         private const string usage = @"USAGE: dotnet run -- [...]
 
@@ -73,9 +77,9 @@ namespace Captioning
     --srt                         Output captions in SubRip Text format (default format is WebVTT.)
     --maxCaptionLength LENGTH     Set the maximum number of characters per line for a caption to LENGTH.
                                   Minimum is 20. Default is no limit.
-    --maxCaptionLines LINES       Set the maximum number of lines for a caption to LINES.
+    --captionLines LINES          Set the number of lines for a caption to LINES.
                                   Valid only with --maxCaptionLength.
-                                  Minimum is 1. Default is 3.
+                                  Minimum is 1. Default is 2.
     --quiet                       Suppress console output, except errors.
     --profanity OPTION            Valid values: raw, remove, mask
     --threshold NUMBER            Set stable partial result threshold.
@@ -195,15 +199,17 @@ namespace Captioning
         }
 
 // JW 20220819 new code
+
         private string? AdjustRealTimeCaption(string? language, Caption caption, bool isRecognizedResult)
         {
             string? retval = null;
-            
+/*            
             // If the current caption has decreased in size, due to a change in a previous caption,
             // drop this caption and do not update the previous ending timestamp.
             // Always show Recognized results.
             if (_currentCaptionSize is null || caption.Text.Length >= _currentCaptionSize.Value || isRecognizedResult)
             {
+*/
                 // By default, leave the starting timestamp unchanged.
                 var beginTimeTicks = caption.Begin.Ticks;
                 if (_previousCaptionEndTimeTicks is long previousCaptionEndTimeTicksValue)
@@ -221,7 +227,7 @@ namespace Captioning
                     // Record the ending timestamp so we can ensure the next caption starts after this one ends.
                     _previousCaptionEndTimeTicks = caption.End.Ticks;
                     // Record the current caption size so we can drop any subsequent current captions with smaller sizes.
-                    _currentCaptionSize = caption.Text.Length;
+//                    _currentCaptionSize = caption.Text.Length;
                 }
                 // Always show Recognized results.
                 else if (isRecognizedResult)
@@ -232,28 +238,59 @@ namespace Captioning
                     retval = CaptionFromTextAndTimes(language, caption.Text, beginTime, endTime);
                     // Record the ending timestamp and current caption size.
                     _previousCaptionEndTimeTicks = endTime.Ticks;
-                    _currentCaptionSize = caption.Text.Length;
+//                    _currentCaptionSize = caption.Text.Length;
                 }
+/*
             }
-            
+*/
             return retval;
         }
 
-        private List<string> CaptionFromSpeechRecognitionResult(SpeechRecognitionResult result, bool isRecognizedResult)
+        private string? CaptionFromSpeechRecognitionResult(SpeechRecognitionResult result, bool isRecognizedResult)
         {
-            var retval = new List<string>();
+            //var retval = new List<string>();
+            string? retval = null;
             string? language = LanguageFromSpeechRecognitionResult(result);
             
             if (this._userConfig.maxCaptionLength is null)
             {
                 var startTime = new DateTime(result.OffsetInTicks);
                 DateTime endTime = startTime.Add(result.Duration);
-                retval.Add(CaptionFromTextAndTimes(language, result.Text, startTime, endTime));
+                retval = CaptionFromTextAndTimes(language, result.Text, startTime, endTime);
             }
             else if (this._captionHelper is CaptionHelper captionHelper)
             {
-                // Split the caption into multiple captions based on maxCaptionLength and maxCaptionLines.
+                // Split the caption into multiple captions based on maxCaptionLength and captionLines.
                 List<Caption> captions = captionHelper.GetCaptions(result, result.Text);
+                
+/*
+                // TODO1 Won't repeated lines cause problems?
+                
+                // TODO1 Problem is if captions is < queue length. Maybe need to pad captions themselves out to queue length, then add? But then we might push out stuff we do not want to. I think we need to retain the existing code for determining when new captions arrive, then apply this logic.
+                foreach (Caption item in captions)
+                {
+                    _currentCaptions.Enqueue(item.Text);
+                }
+                // TODO1 TEMP; use VTT cues instead.
+                while (_currentCaptions.Count < _userConfig.captionLines)
+                {
+                    _currentCaptions.Enqueue("&nbsp;");
+                }
+                while (_currentCaptions.Count > _userConfig.captionLines)
+                {
+                    _currentCaptions.Dequeue();
+                }
+
+// TODO1 This will throw if count is 0.
+// TODO1 Problem, getcaptions returns more than one result. Do we just want the last one?
+                Caption caption = captions[captions.Count - 1];
+                caption.Text = string.Join("\n", _currentCaptions.ToArray());
+// TODO1 caption needs to be, what, _currentCaptions? The text from _currentCaptions?
+                if (AdjustRealTimeCaption(language, caption, isRecognizedResult) is string adjustedCaption)
+                {
+                    retval.Add(adjustedCaption);
+                }
+*/
                 
 // TODO1 Debugging code to see all results from CaptionHelper.GetCaptions().
 /*
@@ -263,20 +300,22 @@ namespace Captioning
                 Console.WriteLine();
 */
 
+// TODO1 What we are doing here is determining whether this is a new caption, namely if the number of captions from captionHelper has decreased. I think it is in THAT case we want to use the queue.
+/*
                 // Make sure CaptionHelper returned at least one caption.
                 if (captions.Count > 0)
                 {
                     // If we have a current number of captions...
-                    if (_currentCaptionsLength is int currentCaptionsLengthValue)
+                    if (_currentNumberOfCaptions is int currentNumberOfCaptionsValue)
                     {
                         // If the number of captions returned by CaptionHelper has decreased...
-                        if (captions.Count < _currentCaptionsLength)
+                        if (captions.Count < currentNumberOfCaptionsValue)
                         {
                             // Reset the current caption size.
                             _currentCaptionSize = null;
                         }
                         // If the number of captions returned by CaptionHelper has increased...
-                        else if (captions.Count > _currentCaptionsLength && captions.Count > 1)
+                        else if (captions.Count > currentNumberOfCaptionsValue && captions.Count > 1)
                         {
                             // Get the previous current caption.
                             var oldCaption = captions[captions.Count - 2];
@@ -293,11 +332,13 @@ namespace Captioning
                     }
 
                     // Set the current number of captions.
-                    _currentCaptionsLength = captions.Count;
+                    _currentNumberOfCaptions = captions.Count;
 
                     // Get the current caption.
                     var caption = captions[captions.Count - 1];
 
+// TODO1 Is this identical to captionslength decreasing due to new caption? I.e. can new caption only happen after recognized result?
+// TODO1 Why is this not an else case of the above?
                     if (isRecognizedResult)
                     {
                         // Show the current caption for an extra second, since it is a final (Recognized) result.
@@ -319,7 +360,50 @@ namespace Captioning
                     }
                 }
             }
-            
+*/
+
+// TODO1 Need to split each caption into lines, then put those into these lists.
+// TODO1 Should do that in caption helper instead.
+
+                // Make sure CaptionHelper returned at least one caption.
+                if (captions.Count > 0)
+                {
+                    List<string> lines = captions.SelectMany(caption => caption.Text.Split("\n")).ToList();
+                    _recognizingCaptions.Clear();
+                    foreach (string line in lines)
+                    {
+                        if (isRecognizedResult)
+                        {
+                            _recognizedCaptions.Add(line);
+                        }
+                        else
+                        {
+                            _recognizingCaptions.Add(line);
+                        }
+                    }
+
+                    List<string> lines_2 = _recognizingCaptions.TakeLast(_userConfig.captionLines).ToList();
+                    int recognizedCaptionsIndex = _recognizedCaptions.Count - 1;
+                    while (lines_2.Count < _userConfig.captionLines && recognizedCaptionsIndex >= 0)
+                    {
+                        lines_2.Insert(0, _recognizedCaptions[recognizedCaptionsIndex]);
+                        recognizedCaptionsIndex--;
+                    }
+                    
+                    // TODO1 What did we do beforehand to get the timestamps? Same thing?
+                    // TODO1 Note we have already verified captions.Count > 0.
+                    var old_caption = captions.Last();
+                    var caption_2 = new Caption()
+                    {
+                        Sequence = old_caption.Sequence,
+                        Begin = old_caption.Begin,
+                        End = old_caption.End,
+                        Text = lines_2.Aggregate((acc, item) => $"{acc}\n{item}")
+                    };
+                    retval = AdjustRealTimeCaption(language, caption_2, isRecognizedResult);
+                }
+            }
+        
             return retval;
         }
 // JW 20220819 end new code
@@ -381,14 +465,14 @@ namespace Captioning
                 }
             }
             
-            string? strMaxCaptionLines = GetCmdOption(args, "--maxCaptionLines");
-            int intMaxCaptionLines = 3;
-            if (null != strMaxCaptionLines)
+            string? strCaptionLines = GetCmdOption(args, "--captionLines");
+            int intCaptionLines = 2;
+            if (null != strCaptionLines)
             {
-                intMaxCaptionLines = Int32.Parse(strMaxCaptionLines);
-                if (intMaxCaptionLines < 1)
+                intCaptionLines = Int32.Parse(strCaptionLines);
+                if (intCaptionLines < 1)
                 {
-                    intMaxCaptionLines = 3;
+                    intCaptionLines = 2;
                 }
             }
             
@@ -405,7 +489,7 @@ namespace Captioning
                 intRealTimeDelay,
                 CmdOptionExists(args, "--srt"),
                 intMaxCaptionLength,
-                intMaxCaptionLines,
+                intCaptionLines,
                 GetCmdOption(args, "--threshold"),
                 key,
                 region
@@ -435,7 +519,7 @@ namespace Captioning
                     // Use the result of LanguageFromSpeechRecognitionResult().
                     language = languageIDLanguagesValue[0].Substring(0, 2);
                 }
-                this._captionHelper = new CaptionHelper(language, this._userConfig.maxCaptionLength.Value, this._userConfig.maxCaptionLines, Enumerable.Empty<object>());
+                this._captionHelper = new CaptionHelper(language, this._userConfig.maxCaptionLength.Value, this._userConfig.captionLines, Enumerable.Empty<object>());
             }
         }
 
@@ -533,8 +617,10 @@ namespace Captioning
                     {
                         if (ResultReason.RecognizingSpeech == e.Result.Reason && e.Result.Text.Length > 0)
                         {
-                            List<string> captions = CaptionFromSpeechRecognitionResult(e.Result, false);
-                            captions.ForEach(caption => WriteToConsoleOrFile(caption));
+                            if (CaptionFromSpeechRecognitionResult(e.Result, false) is string caption)
+                            {
+                                WriteToConsoleOrFile(caption);
+                            }
                         }
                         else if (ResultReason.NoMatch == e.Result.Reason)
                         {
@@ -548,8 +634,10 @@ namespace Captioning
                 {
                     if (ResultReason.RecognizedSpeech == e.Result.Reason && e.Result.Text.Length > 0)
                     {
-                        List<string> captions = CaptionFromSpeechRecognitionResult(e.Result, true);
-                        captions.ForEach(caption => WriteToConsoleOrFile(caption));
+                        if (CaptionFromSpeechRecognitionResult(e.Result, true) is string caption)
+                        {
+                            WriteToConsoleOrFile(caption);
+                        }
                     }
                     else if (ResultReason.NoMatch == e.Result.Reason)
                     {
