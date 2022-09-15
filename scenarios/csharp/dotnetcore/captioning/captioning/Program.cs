@@ -64,10 +64,9 @@ namespace Captioning
                                   Overrides --realTime.
     --realTime                    Output real-time results.
                                   Default output mode is offline.
-    --realTimeDelay               Simulated real-time caption delay.
+    --realTimeDelay SECONDS       Extend display of Recognized (final) results by SECONDS.
                                   Valid only with --realTime.
-                                  Minimum is 0. Default is 0.
-                                  TODO1 Not implemented.
+                                  Minimum is 0.0. Default is 1.0.
 
   ACCURACY
     --phrases PHRASE1;PHRASE2     Example: ""Constoso;Jessie;Rehaan""
@@ -233,8 +232,8 @@ namespace Captioning
                 else if (isRecognizedResult)
                 {
                     var beginTime = new DateTime(beginTimeTicks);
-                    // Set the ending timestamp to one second after the starting timestamp.
-                    var endTime = beginTime.Add(TimeSpan.FromSeconds(1));
+                    // Set the ending timestamp after the starting timestamp.
+                    var endTime = beginTime.Add(TimeSpan.FromSeconds(_userConfig.realTimeDelay));
                     retval = CaptionFromTextAndTimes(language, caption.Text, beginTime, endTime);
                     // Record the ending timestamp and current caption size.
                     _previousCaptionEndTimeTicks = endTime.Ticks;
@@ -397,7 +396,7 @@ namespace Captioning
                     {
                         Sequence = old_caption.Sequence,
                         Begin = old_caption.Begin,
-                        End = old_caption.End,
+                        End = isRecognizedResult ? old_caption.End.Add(TimeSpan.FromSeconds(_userConfig.realTimeDelay)) : old_caption.End,
                         Text = lines_2.Aggregate((acc, item) => $"{acc}\n{item}")
                     };
                     retval = AdjustRealTimeCaption(language, caption_2, isRecognizedResult);
@@ -444,13 +443,13 @@ namespace Captioning
             CaptioningMode captioningMode = CmdOptionExists(args, "--realTime") && !CmdOptionExists(args, "--offline") ? CaptioningMode.RealTime : CaptioningMode.Offline;
             
             string? strRealTimeDelay = GetCmdOption(args, "--realTimeDelay");
-            int intRealTimeDelay = 0;
+            double dblRealTimeDelay = 1.0;
             if (null != strRealTimeDelay)
             {
-                intRealTimeDelay = Int32.Parse(strRealTimeDelay);
-                if (intRealTimeDelay < 0)
+                dblRealTimeDelay = Double.Parse(strRealTimeDelay);
+                if (dblRealTimeDelay < 0.0)
                 {
-                    intRealTimeDelay = 0;
+                    dblRealTimeDelay = 1.0;
                 }
             }
             
@@ -486,7 +485,7 @@ namespace Captioning
                 GetCmdOption(args, "--phrases"),
                 CmdOptionExists(args, "--quiet"),
                 captioningMode,
-                intRealTimeDelay,
+                dblRealTimeDelay,
                 CmdOptionExists(args, "--srt"),
                 intMaxCaptionLength,
                 intCaptionLines,
