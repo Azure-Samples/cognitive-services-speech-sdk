@@ -240,7 +240,20 @@ namespace CallCenter
                     // If the user specified stereo audio, and therefore we turned off diarization,
                     // the speaker number is replaced by a channel number.
                     // Note: Channels are numbered from 0. Speakers are numbered from 1.
-                    var speakerNumber = this.userConfig.useStereoAudio ? phrase.GetProperty("channel").GetInt32() : phrase.GetProperty("speaker").GetInt32() - 1;
+                    int speakerNumber;
+                    JsonElement element;
+                    if (phrase.TryGetProperty("channel", out element))
+                    {
+                        speakerNumber = element.GetInt32();
+                    }
+                    else if (phrase.TryGetProperty("speaker", out element))
+                    {
+                        speakerNumber = element.GetInt32() - 1;
+                    }
+                    else
+                    {
+                        throw new Exception("nBest item contains neither channel nor speaker attribute.");
+                    }
                     return new TranscriptionPhrase(best.GetProperty("display").ToString(), best.GetProperty("itn").ToString(), best.GetProperty("lexical").ToString(), speakerNumber, phrase.GetProperty("offset").ToString(), phrase.GetProperty("offsetInTicks").GetDouble());
                 })
                 .OrderBy(phrase => phrase.offsetInTicks)
@@ -650,8 +663,8 @@ namespace CallCenter
     --help                          Show this help and stop.
 
   CONNECTION
-    --speechKey KEY                 Your Azure Speech service subscription key. Required.
-    --speechRegion REGION           Your Azure Speech service region. Required.
+    --speechKey KEY                 Your Azure Speech service subscription key. Required unless --jsonInput is present.
+    --speechRegion REGION           Your Azure Speech service region. Required unless --jsonInput is present.
                                     Examples: westus, eastus
     --languageKey KEY               Your Azure Cognitive Language subscription key. Required.
     --languageEndpoint ENDPOINT     Your Azure Cognitive Language endpoint. Required.
@@ -664,8 +677,8 @@ namespace CallCenter
                                     Default: en-US
 
   INPUT
-    --input URL                     Input audio from URL. Required unless --jsonInput is used.
-    --jsonInput FILE                Input JSON Speech batch transcription result from FILE.
+    --input URL                     Input audio from URL. Required unless --jsonInput is present.
+    --jsonInput FILE                Input JSON Speech batch transcription result from FILE. Overrides --input.
     --stereo                        Use stereo audio format.
                                     If this is not present, mono is assumed.
 
