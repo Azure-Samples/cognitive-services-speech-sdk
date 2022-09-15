@@ -8,7 +8,7 @@ public class BatchSynthesisBillingDetails
     /// <summary>
     /// Gets or sets the number of billable characters for custom neural voices in the input file.
     /// </summary>
-    public long CusotmNeural { get; set; }
+    public long CustomNeural { get; set; }
 
     /// <summary>
     /// Gets or sets the number of billable characters for prebuild neural voices in the input file.

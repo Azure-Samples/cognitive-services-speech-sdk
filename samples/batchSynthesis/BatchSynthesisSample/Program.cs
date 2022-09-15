@@ -4,8 +4,8 @@
 //
 
 // The host name of the batch sytnhesis API, e.g. https://eastus.customvoice.api.speech.microsoft.com
-var hostName = "https://centraluseuap.customvoice.api.speech.microsoft.com";
-var subscriptionKey = "ab0c1d61c9aa45a0860affa6874b4e51";
+var hostName = "<host name>";
+var subscriptionKey = "<subscription key>";
 
 var sampleScript = "This is the waistline, and it's falling.\r\nAlexis, meet Bill and Hillary, and the rest of America.\r\nThis is Jordan, Scottie Pippen and the ring dynasty.\r\nThe more I looked, the gloomier I got.\r\nHe saw Macbeth, the three witches, and the boiling cauldron.\r\nBut it is good to get together, cook together, eat together and enjoy.\r\nThe priorities, they say, are sofa, blanket, and clothing.\r\nThe metallic walls curve, twist, and turn.\r\nThe seagrass fiber is tough, durable and smooth.\r\nThe dissenters were Stevens, Souter, Ginsburg and Breyer.";
 
