@@ -134,7 +134,7 @@ namespace CallCenter
             }
         }
 
-        private async Task<string> CreateTranscription()
+        private async Task<string> CreateTranscription(string inputAudioURL)
         {
             var uri = new UriBuilder(Uri.UriSchemeHttps, this.userConfig.speechEndpoint);
             uri.Path = speechTranscriptionPath;
@@ -146,7 +146,7 @@ namespace CallCenter
             // - diarizationEnabled should only be used with mono audio input.
             var content = new
                 {
-                    contentUrls = new string[] { this.userConfig.inputAudioURL },
+                    contentUrls = new string[] { inputAudioURL },
                     properties = new { diarizationEnabled = !this.userConfig.useStereoAudio },
                     locale = this.userConfig.locale,
                     displayName = $"call_center_{DateTime.Now.ToString()}"
@@ -592,16 +592,33 @@ namespace CallCenter
         // dotnet run -- [args]
         // For example:
         // dotnet run -- --help
-        public async Task Run()
+        public async Task Run(string usage)
         {
-            // How to use batch transcription:
-            // https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/cognitive-services/Speech-Service/batch-transcription.md
-            var transcriptionId = await CreateTranscription();
-            await WaitForTranscription(transcriptionId);
-            Console.WriteLine($"Transcription ID: {transcriptionId}");
-            JsonElement transcriptionFiles = await GetTranscriptionFiles(transcriptionId);
-            var transcriptionUri = GetTranscriptionUri(transcriptionFiles);
-            JsonElement transcription = await GetTranscription(transcriptionUri);
+            JsonElement transcription;
+            string transcriptionId = "";
+            if (this.userConfig.inputFilePath is string inputFilePathValue)
+            {
+                using (JsonDocument document = JsonDocument.Parse(File.ReadAllText(inputFilePathValue)))
+                {
+                    transcription = document.RootElement.Clone();
+                }
+            }
+            else if (this.userConfig.inputAudioURL is string inputAudioURLValue)
+            {
+                // How to use batch transcription:
+                // https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/cognitive-services/Speech-Service/batch-transcription.md
+                transcriptionId = await CreateTranscription(inputAudioURLValue);
+                await WaitForTranscription(transcriptionId);
+                Console.WriteLine($"Transcription ID: {transcriptionId}");
+                JsonElement transcriptionFiles = await GetTranscriptionFiles(transcriptionId);
+                var transcriptionUri = GetTranscriptionUri(transcriptionFiles);
+                Console.WriteLine($"Transcription URI: {transcriptionUri}");
+                transcription = await GetTranscription(transcriptionUri);
+            }
+            else
+            {
+                throw new ArgumentException($"Missing input audio URL.{Environment.NewLine}Usage: {usage}");
+            }
             var transcriptionPhrases = GetTranscriptionPhrases(transcription);
             SentimentAnalysisResult[] sentimentAnalysisResults = GetSentimentAnalysis(transcriptionPhrases);
             JsonElement[] sentimentConfidenceScores = GetSentimentConfidenceScores(sentimentAnalysisResults);
@@ -616,9 +633,12 @@ namespace CallCenter
                 PrintSimpleOutput(outputFilePathValue, transcriptionPhrases, sentimentAnalysisResults, conversationAnalysis);
             }
             PrintFullOutput(transcription, sentimentConfidenceScores, transcriptionPhrases, conversationAnalysis);
-            // Clean up resources.
-            Console.WriteLine("Deleting transcription.");
-            await DeleteTranscription(transcriptionId);
+            if (this.userConfig.inputFilePath is null)
+            {
+                // Clean up resources.
+                Console.WriteLine("Deleting transcription.");
+                await DeleteTranscription(transcriptionId);
+            }
             return;
         }
 
@@ -644,7 +664,8 @@ namespace CallCenter
                                     Default: en-US
 
   INPUT
-    --input URL                     Input audio from URL. Required.
+    --input URL                     Input audio from URL. Required unless --jsonInput is used.
+    --jsonInput FILE                Input JSON Speech batch transcription result from FILE.
     --stereo                        Use stereo audio format.
                                     If this is not present, mono is assumed.
 
@@ -658,7 +679,7 @@ namespace CallCenter
             }
             else
             {
-                await (new Program(args, usage)).Run();
+                await (new Program(args, usage)).Run(usage);
             }
         }
     }
