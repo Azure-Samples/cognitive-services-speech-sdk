@@ -38,8 +38,8 @@ namespace Captioning
         readonly public bool suppressConsoleOutput = false;
         /// The captioning mode. Default is offline.
         readonly public CaptioningMode captioningMode = CaptioningMode.Offline;
-        /// Simulated real-time caption delay. Default is 0. Only applies to real-time captioning mode.
-        readonly public int realTimeDelay = 0;
+        /// Simulated real-time caption delay. Default is 1.0. Only applies to real-time captioning mode.
+        readonly public double realTimeDelay = 0.0;
         /// Output captions in SubRip Text format (default is WebVTT format).
         readonly public bool useSubRipTextCaptionFormat = false;
         /// The maximum number of characters per line for a caption. Default is no limit.
@@ -64,7 +64,7 @@ namespace Captioning
             string? phraseList,
             bool suppressConsoleOutput,
             CaptioningMode captioningMode,
-            int realTimeDelay,
+            double realTimeDelay,
             bool useSubRipTextCaptionFormat,
             int? maxCaptionLength,
             int captionLines,
