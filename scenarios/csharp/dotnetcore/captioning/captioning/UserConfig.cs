@@ -44,8 +44,8 @@ namespace Captioning
         readonly public bool useSubRipTextCaptionFormat = false;
         /// The maximum number of characters per line for a caption. Default is no limit.
         readonly public int? maxCaptionLength;
-        /// The maximum number of lines for a single caption. Only applies when maxCaptionLength is specified. Default is 3.
-        readonly public int maxCaptionLines;
+        /// How many lines of captioning to show. TODO1 Only applies when maxCaptionLength is specified. Default is 2.
+        readonly public int captionLines;
         /// Set the stable partial result threshold on the Speech service. This setting value must contain an integer.
         /// Example: 3
         readonly public string? stablePartialResultThreshold;
@@ -67,7 +67,7 @@ namespace Captioning
             int realTimeDelay,
             bool useSubRipTextCaptionFormat,
             int? maxCaptionLength,
-            int maxCaptionLines,
+            int captionLines,
             string? stablePartialResultThreshold,
             string subscriptionKey,
             string region
@@ -85,7 +85,7 @@ namespace Captioning
             this.realTimeDelay = realTimeDelay;
             this.useSubRipTextCaptionFormat = useSubRipTextCaptionFormat;
             this.maxCaptionLength = maxCaptionLength;
-            this.maxCaptionLines = maxCaptionLines;
+            this.captionLines = captionLines;
             this.stablePartialResultThreshold = stablePartialResultThreshold;
             this.subscriptionKey = subscriptionKey;
             this.region = region;
