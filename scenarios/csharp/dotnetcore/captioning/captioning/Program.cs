@@ -33,6 +33,7 @@ namespace Captioning
         // TODO1
 //        private int? _currentNumberOfCaptions = null;
 //        private int? _currentCaptionSize = null;
+        private Caption? _previousCaption = null;
         private long? _previousCaptionEndTimeTicks = null;
         // TODO1
         private List<string> _recognizedCaptions = new List<string>();
@@ -158,12 +159,12 @@ namespace Captioning
             return $"wss://{region}.stt.speech.microsoft.com/speech/universal/v2";
         }
 
-        private string GetTimestamp(DateTime startTime, DateTime endTime)
+        private string GetTimestamp(TimeSpan startTime, TimeSpan endTime)
         {
             // SRT format requires ',' as decimal separator rather than '.'.
             return this._userConfig.useSubRipTextCaptionFormat
-                ? $"{startTime:HH:mm:ss,fff} --> {endTime:HH:mm:ss,fff}"
-                : $"{startTime:HH:mm:ss.fff} --> {endTime:HH:mm:ss.fff}";
+                ? $"{startTime:hh\\:mm\\:ss\\,fff} --> {endTime:hh\\:mm\\:ss\\,fff}"
+                : $"{startTime:hh\\:mm\\:ss\\.fff} --> {endTime:hh\\:mm\\:ss\\.fff}";
         }
 
         private string? LanguageFromSpeechRecognitionResult(SpeechRecognitionResult result)
@@ -179,29 +180,31 @@ namespace Captioning
             }
         }
 
-        private string CaptionFromTextAndTimes(string? language, string text, DateTime startTime, DateTime endTime)
+// TODO1 Rename
+        private string CaptionFromTextAndTimes(string? language, Caption caption)
         {
-            var caption = new StringBuilder();
+            var retval = new StringBuilder();
             
             if (this._userConfig.useSubRipTextCaptionFormat)
             {
-                caption.AppendFormat($"{this._srtSequenceNumber}{Environment.NewLine}");
+                retval.AppendFormat($"{this._srtSequenceNumber}{Environment.NewLine}");
                 this._srtSequenceNumber++;
             }
-            caption.AppendFormat($"{GetTimestamp(startTime, endTime)}{Environment.NewLine}");
-            if (null != language)
+            retval.AppendFormat($"{GetTimestamp(caption.Begin, caption.End)}{Environment.NewLine}");
+            if (language is string languageValue)
             {
-                caption.Append($"[{language}] ");
+                retval.Append($"[{languageValue}] ");
             }
-            caption.AppendFormat($"{text}{Environment.NewLine}{Environment.NewLine}");
-            return caption.ToString();
+            retval.AppendFormat($"{caption.Text}{Environment.NewLine}{Environment.NewLine}");
+            return retval.ToString();
         }
 
 // JW 20220819 new code
 
-        private string? AdjustRealTimeCaption(string? language, Caption caption, bool isRecognizedResult)
+// Change this to return Caption?
+        private Caption? AdjustRealTimeCaption(string? language, Caption caption, bool isRecognizedResult)
         {
-            string? retval = null;
+            Caption? retval = null;
 /*            
             // If the current caption has decreased in size, due to a change in a previous caption,
             // drop this caption and do not update the previous ending timestamp.
@@ -222,7 +225,8 @@ namespace Captioning
                 // drop this caption and do not update the previous ending timestamp or current caption size.
                 if (beginTimeTicks < caption.End.Ticks)
                 {
-                    retval = CaptionFromTextAndTimes(language, caption.Text, new DateTime(beginTimeTicks), new DateTime(caption.End.Ticks));
+                    //retval = CaptionFromTextAndTimes(language, caption.Text, new DateTime(beginTimeTicks), new DateTime(caption.End.Ticks));
+                    retval = new Caption() { Sequence = caption.Sequence, Begin = new TimeSpan(beginTimeTicks), End = caption.End, Text = caption.Text };
                     // Record the ending timestamp so we can ensure the next caption starts after this one ends.
                     _previousCaptionEndTimeTicks = caption.End.Ticks;
                     // Record the current caption size so we can drop any subsequent current captions with smaller sizes.
@@ -231,10 +235,11 @@ namespace Captioning
                 // Always show Recognized results.
                 else if (isRecognizedResult)
                 {
-                    var beginTime = new DateTime(beginTimeTicks);
+                    var beginTime = new TimeSpan(beginTimeTicks);
                     // Set the ending timestamp after the starting timestamp.
                     var endTime = beginTime.Add(TimeSpan.FromSeconds(_userConfig.realTimeDelay));
-                    retval = CaptionFromTextAndTimes(language, caption.Text, beginTime, endTime);
+                    //retval = CaptionFromTextAndTimes(language, caption.Text, beginTime, endTime);
+                    retval = new Caption() { Sequence = caption.Sequence, Begin = beginTime, End = endTime, Text = caption.Text };
                     // Record the ending timestamp and current caption size.
                     _previousCaptionEndTimeTicks = endTime.Ticks;
 //                    _currentCaptionSize = caption.Text.Length;
@@ -245,6 +250,7 @@ namespace Captioning
             return retval;
         }
 
+// TODO1 Need to check offline or realTime and adjust behavior accordingly.
         private string? CaptionFromSpeechRecognitionResult(SpeechRecognitionResult result, bool isRecognizedResult)
         {
             //var retval = new List<string>();
@@ -253,9 +259,10 @@ namespace Captioning
             
             if (this._userConfig.maxCaptionLength is null)
             {
-                var startTime = new DateTime(result.OffsetInTicks);
-                DateTime endTime = startTime.Add(result.Duration);
-                retval = CaptionFromTextAndTimes(language, result.Text, startTime, endTime);
+                var startTime = new TimeSpan(result.OffsetInTicks);
+                TimeSpan endTime = startTime.Add(result.Duration);
+                // TODO1 No idea if sequence number is right.
+                retval = CaptionFromTextAndTimes(language, new Caption(){ Sequence = _srtSequenceNumber, Begin = startTime, End = endTime, Text = result.Text });
             }
             else if (this._captionHelper is CaptionHelper captionHelper)
             {
@@ -394,12 +401,44 @@ namespace Captioning
                     var old_caption = captions.Last();
                     var caption_2 = new Caption()
                     {
+                        // TODO1 Check this is right.
                         Sequence = old_caption.Sequence,
                         Begin = old_caption.Begin,
-                        End = isRecognizedResult ? old_caption.End.Add(TimeSpan.FromSeconds(_userConfig.realTimeDelay)) : old_caption.End,
+// TODO1
+//                        End = isRecognizedResult ? old_caption.End.Add(TimeSpan.FromSeconds(_userConfig.realTimeDelay)) : old_caption.End,
+// TODO1 Fix?
+                        End = old_caption.End,
                         Text = lines_2.Aggregate((acc, item) => $"{acc}\n{item}")
                     };
-                    retval = AdjustRealTimeCaption(language, caption_2, isRecognizedResult);
+                    
+                    if (AdjustRealTimeCaption(language, caption_2, isRecognizedResult) is Caption caption_3)
+                    {
+                        if (_previousCaption is Caption previousCaptionValue)
+                        {
+                            TimeSpan end;
+                            if (caption_3.Begin.Subtract(previousCaptionValue.End) > TimeSpan.FromSeconds(_userConfig.realTimeDelay))
+                            {
+                                end = previousCaptionValue.End.Add(TimeSpan.FromSeconds(_userConfig.realTimeDelay));
+                                _recognizedCaptions.Clear();
+                            }
+                            else
+                            {
+                                end = caption_3.Begin;
+                            }
+                            
+                            Caption caption_4 = new Caption() { Sequence = previousCaptionValue.Sequence, Begin = previousCaptionValue.Begin, End = end, Text = previousCaptionValue.Text };
+//                            if (AdjustRealTimeCaption(language, caption_4, isRecognizedResult) is Caption caption_5)
+//                            {
+                            retval = CaptionFromTextAndTimes(language, caption_4);
+//                            }
+                        }
+                        
+                        _previousCaption = caption_3;
+                    }
+                    
+
+                    
+// TODO1 Need to handle final caption.
                 }
             }
         
