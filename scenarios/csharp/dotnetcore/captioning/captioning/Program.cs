@@ -161,6 +161,7 @@ namespace Captioning
 
         private string GetTimestamp(TimeSpan startTime, TimeSpan endTime)
         {
+            // TODO1 Verify we need to escape ,
             // SRT format requires ',' as decimal separator rather than '.'.
             return this._userConfig.useSubRipTextCaptionFormat
                 ? $"{startTime:hh\\:mm\\:ss\\,fff} --> {endTime:hh\\:mm\\:ss\\,fff}"
@@ -389,12 +390,6 @@ namespace Captioning
                     }
 
                     List<string> lines_2 = _recognizingCaptions.TakeLast(_userConfig.captionLines).ToList();
-                    int recognizedCaptionsIndex = _recognizedCaptions.Count - 1;
-                    while (lines_2.Count < _userConfig.captionLines && recognizedCaptionsIndex >= 0)
-                    {
-                        lines_2.Insert(0, _recognizedCaptions[recognizedCaptionsIndex]);
-                        recognizedCaptionsIndex--;
-                    }
                     
                     // TODO1 What did we do beforehand to get the timestamps? Same thing?
                     // TODO1 Note we have already verified captions.Count > 0.
@@ -408,24 +403,35 @@ namespace Captioning
 //                        End = isRecognizedResult ? old_caption.End.Add(TimeSpan.FromSeconds(_userConfig.realTimeDelay)) : old_caption.End,
 // TODO1 Fix?
                         End = old_caption.End,
-                        Text = lines_2.Aggregate((acc, item) => $"{acc}\n{item}")
+                        Text = "",
                     };
                     
                     if (AdjustRealTimeCaption(language, caption_2, isRecognizedResult) is Caption caption_3)
                     {
+                        string text = lines_2.Aggregate((acc, item) => $"{acc}\n{item}");
+                        
                         if (_previousCaption is Caption previousCaptionValue)
                         {
                             TimeSpan end;
                             if (caption_3.Begin.Subtract(previousCaptionValue.End) > TimeSpan.FromSeconds(_userConfig.realTimeDelay))
                             {
                                 end = previousCaptionValue.End.Add(TimeSpan.FromSeconds(_userConfig.realTimeDelay));
+                                // TODO1 Problem, this can prevent the recognized result from ever appearing in the file. But commenting it out does not work either.
                                 _recognizedCaptions.Clear();
                             }
                             else
                             {
+                                // TODO1 We could hold off on adding recognizedCaption lines until here, and also hold off on aggregating lines into Text until here? Or maybe after this if/else block.
+                                int recognizedCaptionsIndex = _recognizedCaptions.Count - 1;
+                                while (lines_2.Count < _userConfig.captionLines && recognizedCaptionsIndex >= 0)
+                                {
+                                    lines_2.Insert(0, _recognizedCaptions[recognizedCaptionsIndex]);
+                                    recognizedCaptionsIndex--;
+                                }
+                                text = lines_2.Aggregate((acc, item) => $"{acc}\n{item}");    
                                 end = caption_3.Begin;
                             }
-                            
+
                             Caption caption_4 = new Caption() { Sequence = previousCaptionValue.Sequence, Begin = previousCaptionValue.Begin, End = end, Text = previousCaptionValue.Text };
 //                            if (AdjustRealTimeCaption(language, caption_4, isRecognizedResult) is Caption caption_5)
 //                            {
@@ -433,7 +439,8 @@ namespace Captioning
 //                            }
                         }
                         
-                        _previousCaption = caption_3;
+                        Caption caption_5 = new Caption(){ Sequence = caption_3.Sequence, Begin = caption_3.Begin, End = caption_3.End, Text = text };
+                        _previousCaption = caption_5;
                     }
                     
 
