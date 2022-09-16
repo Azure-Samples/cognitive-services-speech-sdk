@@ -37,7 +37,7 @@ The [SDK documentation](https://aka.ms/csspeech) has extensive sections about ge
 
 ## Get the samples
 
-* The easiest way to use these samples without using Git is to download the current version as a [ZIP file](https://github.com/Azure-Samples/cognitive-services-speech-sdk/archive/master.zip).
+* The easiest way to use these samples is to download the current version of the Git [ZIP file](https://github.com/Azure-Samples/cognitive-services-speech-sdk/archive/master.zip).
 
   * On Windows, before you unzip the archive, right-click it, select **Properties**, and then select **Unblock**.
   * Be sure to unzip the entire archive, and not just individual samples.

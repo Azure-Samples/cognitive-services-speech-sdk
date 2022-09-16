@@ -1,11 +1,11 @@
 # Quickstart: Recognize speech in C++ for macOS
 
 This sample demonstrates how to recognize speech with C++ using the Speech SDK for macOS.
-See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstarts/speech-to-text-from-microphone?tabs=dotnet%2Cx-android%2CmacOS%2Cjava-runtime%2Cwindowsinstall&pivots=programming-language-cpp) on the SDK documentation page for step-by-step instructions.
+See the [QuickStart Documentation](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstarts/speech-to-text-from-microphone?tabs=dotnet%2Cx-android%2CmacOS%2Cjava-runtime%2Cwindowsinstall&pivots=programming-language-cpp) on the SDK documentation page for step-by-step instructions.
 
 ## Prerequisites
 
-* A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
+* A subscription key for the Speech service is needed. See [To receive your Subscription Key for free](https://azure.microsoft.com/en-us/free/cognitive-services/).
 * A Mac with a working microphone.
 
 ## Build the sample

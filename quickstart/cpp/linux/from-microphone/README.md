@@ -1,14 +1,14 @@
 # Quickstart: Recognize speech in C++ for Linux
 
 This sample demonstrates how to recognize speech with C++ using the Speech SDK for Linux.
-See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstarts/speech-to-text-from-microphone?tabs=dotnet%2Cx-android%2Clinux%2Cjava-runtime%2Cwindowsinstall&pivots=programming-language-cpp) on the SDK documentation page for step-by-step instructions.
+See the [Accompanying QuickStart Documentation](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstarts/speech-to-text-from-microphone?tabs=dotnet%2Cx-android%2Clinux%2Cjava-runtime%2Cwindowsinstall&pivots=programming-language-cpp) on the SDK documentation page for step-by-step instructions.
 
 > **Note:**
-> We currently only support [specific Linux distributions and target architectures](https://docs.microsoft.com/azure/cognitive-services/speech-service/speech-sdk?tabs=linux).
+> We currently only support [specific Linux distributions and target architectures](https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/quickstarts/setup-platform?tabs=linux%2Cubuntu%2Cdotnet%2Cjre%2Cmaven%2Cnodejs%2Cmac%2Cpypi&pivots=programming-language-csharp).
 
 ## Prerequisites
 
-* A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
+* A subscription key for the Speech service is needed. See [Create a Speech Service Key for free](https://azure.microsoft.com/en-us/free/cognitive-services/).
 * A Linux PC with a working microphone.
 * On Ubuntu or Debian, install these packages to build and run this sample:
 
