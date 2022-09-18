@@ -29,14 +29,28 @@ namespace Azure.AI.Details.Common.CLI
 
     public class CaptionHelper
     {
-// JW 20220819
-/*
         public static IEnumerable<Caption> GetCaptions(string language, int maxWidth, int maxHeight, IEnumerable<object> results)
         {
             var helper = new CaptionHelper(language, maxWidth, maxHeight, results);
             return helper.GetCaptions();
         }
-*/
+
+        public List<string> LinesFromText(string text)
+        {
+            var retval = new List<string>();
+            
+            var index = 0;
+            while (index < text.Length)
+            {
+                index = SkipSkippable(text, index);
+
+                int lineLength = GetBestWidth(text, index);
+                retval.Add(text.Substring(index, lineLength).Trim());
+                index = index + lineLength;
+            }
+            
+            return retval;
+        }
 
         public CaptionHelper(string language, int maxWidth, int maxHeight, IEnumerable<object> results)
         {
@@ -45,8 +59,6 @@ namespace Azure.AI.Details.Common.CLI
             this._maxWidth = maxWidth;
             this._maxHeight = maxHeight;
             this._results = results;
-// JW 20220819
-            this._captions = new List<Caption>();
 
             // consider adapting to use http://unicode.org/reports/tr29/#Sentence_Boundaries
             var iso639 = _language?.Split('-').FirstOrDefault();
@@ -67,12 +79,10 @@ namespace Azure.AI.Details.Common.CLI
             }
         }
 
-// JW 20220819
-/*
         public IEnumerable<Caption> GetCaptions()
         {
             EnsureCaptions();
-            return _captions;
+            return _captions!;
         }
 
         private void EnsureCaptions()
@@ -96,9 +106,7 @@ namespace Azure.AI.Details.Common.CLI
                 AddCaptionsForFinalResult(result, text);
             }
         }
-*/
 
-        // JW 20220819 Changed return type to nullable.
         private string? GetTextOrTranslation(RecognitionResult result)
         {
             if (_language == null) return result.Text;
@@ -108,15 +116,10 @@ namespace Azure.AI.Details.Common.CLI
                 : null;
         }
 
-// JW 20220819
-//        private void AddCaptionsForFinalResult(RecognitionResult result, string text)
-        public List<Caption> GetCaptions(RecognitionResult result, string text)
+        private void AddCaptionsForFinalResult(RecognitionResult result, string text)
         {
             var captionStartsAt = 0;
             var captionLines = new List<string>();
-
-// JW 20220819
-            var retval = new List<Caption>();
 
             var index = 0;
             while (index < text.Length)
@@ -136,7 +139,7 @@ namespace Azure.AI.Details.Common.CLI
                     var captionText = string.Join('\n', captionLines.ToArray());
                     captionLines.Clear();
 
-                    var captionSequence = _captions.Count + 1;
+                    var captionSequence = _captions!.Count + 1;
                     var isFirstCaption = captionStartsAt == 0;
 
                     (var captionBegin, var captionEnd) = isFirstCaption && isLastCaption
@@ -153,14 +156,8 @@ namespace Azure.AI.Details.Common.CLI
                     _captions.Add(caption);
                     
                     captionStartsAt = index;
-                    
-                    // JW 20220819
-                    retval.Add(caption);
                 }
             }
-            
-            // JW 20220819
-            return retval;
         }
 
         private int GetBestWidth(string text, int startIndex)
@@ -232,15 +229,12 @@ namespace Azure.AI.Details.Common.CLI
 
         private static bool IsFinalResult(object result)
         {
-            // JW 20220819 Changed to nullable to fix compiler warning.
-            // Note nullable reference types are enabled in .csproj.
             RecognitionResult? final = result as RecognitionResult;
             return final?.Reason == ResultReason.RecognizedSpeech ||
                    final?.Reason == ResultReason.RecognizedIntent ||
                    final?.Reason == ResultReason.TranslatedSpeech;
         }
 
-        // JW 20220819 Changed to nullable to fix compiler warning.
         private readonly string? _language;
         private readonly string[] _firstPassTerminators;
         private readonly string[] _secondPassTerminators;
@@ -249,6 +243,6 @@ namespace Azure.AI.Details.Common.CLI
         private readonly int _maxHeight;
         private readonly IEnumerable<object> _results;
 
-        private List<Caption> _captions;
+        private List<Caption>? _captions;
     }
 }
