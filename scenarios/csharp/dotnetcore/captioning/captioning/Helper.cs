@@ -3,17 +3,28 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
-using Microsoft.CognitiveServices.Speech;
-using Microsoft.CognitiveServices.Speech.Audio;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using Microsoft.CognitiveServices.Speech;
+using Microsoft.CognitiveServices.Speech.Audio;
 
 namespace Captioning
 {
+    public static class LinqHelper
+    {
+        // Transform list {1,2,3,4} into {(1,2),(2,3),(3,4)}.
+        public static IEnumerable<(T, T)> Pairwise<T>(this IEnumerable<T> xs)
+        {
+            return xs.Zip(xs.Skip(1), (a, b) => (a, b));
+        }
+    }
+    
     // This code is adapted from:
     // https://github.com/Azure-Samples/cognitive-services-speech-sdk/blob/master/samples/csharp/sharedcontent/console/helper.cs
-    public class Helper
+    public static class Helper
     {
         public static AudioConfig OpenWavFile(string filename, AudioProcessingOptions audioProcessingOptions)
         {
@@ -156,7 +167,6 @@ namespace Captioning
             disposed = true;
             base.Dispose(disposing);
         }
-
 
         private bool disposed = false;
     }
