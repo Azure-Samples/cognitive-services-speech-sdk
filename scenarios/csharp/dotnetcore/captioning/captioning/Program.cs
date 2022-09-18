@@ -33,15 +33,32 @@ namespace Captioning
         private List<string> _recognizedLines = new List<string>();
         private List<RecognitionResult> _offlineResults = new List<RecognitionResult>();
         
-        private IEnumerable<(T, T)> Pairwise<T>(IEnumerable<T> xs)
+        private static IEnumerable<(T, T)> Pairwise<T>(IEnumerable<T> xs)
         {
             return xs.Zip(xs.Skip(1), (a, b) => (a, b));
         }
-        
+
         private static string V2EndpointFromRegion(string region)
         {
             // Note: Continuous language identification is supported only with v2 endpoints.
             return $"wss://{region}.stt.speech.microsoft.com/speech/universal/v2";
+        }
+
+        private void WriteToConsole(string text)
+        {
+            if (!this._userConfig!.suppressConsoleOutput)
+            {
+                Console.Write(text);
+            }
+        }
+
+        private void WriteToConsoleOrFile(string text)
+        {
+            WriteToConsole(text);
+            if (this._userConfig!.outputFilePath is string outputFilePathValue)
+            {
+                File.AppendAllText(outputFilePathValue, text);
+            }
         }
 
         private string GetTimestamp(TimeSpan startTime, TimeSpan endTime)
@@ -240,7 +257,7 @@ ResultId:42da47f298334ab6aa393a9b2e0b50cd Reason:RecognizedSpeech Recognized tex
                 foreach (Caption caption in CaptionsFromOfflineResults())
                 {
                     // TODO1 Fix language. We might be able to remove lang parameter from StringFromCaption.
-                    WriteToConsole(StringFromCaption(null, caption));
+                    WriteToConsoleOrFile(StringFromCaption(null, caption));
                 }
             }
             else if (CaptioningMode.RealTime == this._userConfig!.captioningMode)
@@ -249,25 +266,8 @@ ResultId:42da47f298334ab6aa393a9b2e0b50cd Reason:RecognizedSpeech Recognized tex
                 {
                     previousCaptionValue.End.Add(this._userConfig!.remainTime);
                     // TODO1 Fix language. We might be able to remove lang parameter from StringFromCaption.
-                    WriteToConsole(StringFromCaption(null, previousCaptionValue));
+                    WriteToConsoleOrFile(StringFromCaption(null, previousCaptionValue));
                 }
-            }
-        }
-
-        private void WriteToConsole(string text)
-        {
-            if (!this._userConfig!.suppressConsoleOutput)
-            {
-                Console.Write(text);
-            }
-        }
-
-        private void WriteToConsoleOrFile(string text)
-        {
-            WriteToConsole(text);
-            if (this._userConfig!.outputFilePath is string outputFilePathValue)
-            {
-                File.AppendAllText(outputFilePathValue, text);
             }
         }
 
