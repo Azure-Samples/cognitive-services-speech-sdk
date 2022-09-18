@@ -43,6 +43,8 @@ namespace Captioning
         readonly public CaptioningMode captioningMode = CaptioningMode.Offline;
         /// How long (in seconds) a caption should remain on screen. Default is 1.0.
         readonly public TimeSpan remainTime;
+        /// How long (in seconds) to delay all caption timestamps. Default is 1.0.
+        readonly public TimeSpan delay;
         /// Output captions in SubRip Text format (default is WebVTT format).
         readonly public bool useSubRipTextCaptionFormat = false;
         /// The maximum number of characters per line for a caption. Default is no limit.
@@ -68,6 +70,7 @@ namespace Captioning
             bool suppressConsoleOutput,
             CaptioningMode captioningMode,
             TimeSpan remainTime,
+            TimeSpan delay,
             bool useSubRipTextCaptionFormat,
             int? maxLineLength,
             int lines,
@@ -86,6 +89,7 @@ namespace Captioning
             this.suppressConsoleOutput = suppressConsoleOutput;
             this.captioningMode = captioningMode;
             this.remainTime = remainTime;
+            this.delay = delay;
             this.useSubRipTextCaptionFormat = useSubRipTextCaptionFormat;
             this.maxLineLength = maxLineLength;
             this.lines = lines;
@@ -188,6 +192,18 @@ namespace Captioning
                 timeSpanRemainTime = TimeSpan.FromSeconds(dblRemainTime);
             }
             
+            string? strDelay = GetCmdOption(args, "--delay");
+            TimeSpan timeSpanDelay = TimeSpan.FromSeconds(1.0);
+            if (null != strDelay)
+            {
+                double dblDelay = Double.Parse(strDelay);
+                if (dblDelay < 0.0)
+                {
+                    dblDelay = 1.0;
+                }
+                timeSpanDelay = TimeSpan.FromSeconds(dblDelay);
+            }
+            
             string? strMaxLineLength = GetCmdOption(args, "--maxLineLength");
             int? intMaxLineLength = null;
             if (null != strMaxLineLength)
@@ -221,6 +237,7 @@ namespace Captioning
                 CmdOptionExists(args, "--quiet"),
                 captioningMode,
                 timeSpanRemainTime,
+                timeSpanDelay,
                 CmdOptionExists(args, "--srt"),
                 intMaxLineLength,
                 intLines,
