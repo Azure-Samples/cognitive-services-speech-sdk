@@ -33,9 +33,9 @@ namespace Captioning
         private List<string> _recognizedLines = new List<string>();
         private List<RecognitionResult> _offlineResults = new List<RecognitionResult>();
         
-        private IEnumerable<Tuple<T, T>> Pairwise<T>(IEnumerable<T> xs)
+        private IEnumerable<(T, T)> Pairwise<T>(IEnumerable<T> xs)
         {
-            return xs.Zip(xs.Skip(1), (a, b) => Tuple.Create(a, b));
+            return xs.Zip(xs.Skip(1), (a, b) => (a, b));
         }
         
         private static string V2EndpointFromRegion(string region)
@@ -199,37 +199,45 @@ ResultId:42da47f298334ab6aa393a9b2e0b50cd Reason:RecognizedSpeech Recognized tex
             return retval;
         }
 
+        private IEnumerable<Caption> CaptionsFromOfflineResults()
+        {
+            IEnumerable<Caption> captions;
+            if (this._userConfig!.maxLineLength is int maxLineLengthValue)
+            {
+                captions = CaptionHelper.GetCaptions(null, maxLineLengthValue, this._userConfig!.lines, _offlineResults);
+            }
+            else
+            {
+                captions = _offlineResults.Select(result =>
+                {
+                    var startTime = new TimeSpan(result.OffsetInTicks);
+                    return new Caption()
+                    {
+                        Sequence = _srtSequenceNumber++,
+                        Begin = startTime,
+                        End = startTime.Add(result.Duration),
+                        Text = result.Text
+                    };
+                });
+            }
+            Caption lastCaption = captions.Last();
+            lastCaption.End.Add(this._userConfig!.remainTime);
+            List<Caption> captions_2 = Pairwise(captions)
+                .Select(captions => {
+                    TimeSpan previousEnd = captions.Item1.End.Add(_userConfig!.remainTime);
+                    captions.Item1.End = previousEnd < captions.Item2.Begin ? previousEnd : captions.Item2.Begin;
+                    return captions.Item1;
+                })
+                .ToList();
+            captions_2.Add(lastCaption);
+            return captions_2;
+        }
+
         private void Finish()
         {
-            // TODO1 Move this to separate func, CaptionsFromOfflineResults.
-            /* TODO1 Need to add remainTime to each caption end time unless next caption replaces it.
-            Same as real time. Check if end + remainTime < next caption begin time, choose whichever is earlier.
-            We'll need to chunk captions into pairs and compare each pair.
-            No IEnumerable.Pairwise? Have to adapt our Chunk method? From call center?
-            Except we also have to have it overlap the chunks, not separate them. Call it Windowed.
-            */
             if (CaptioningMode.Offline == this._userConfig!.captioningMode)
             {
-                IEnumerable<Caption> captions;
-                if (this._userConfig!.maxLineLength is int maxLineLengthValue)
-                {
-                    captions = CaptionHelper.GetCaptions(null, maxLineLengthValue, this._userConfig!.lines, _offlineResults);
-                }
-                else
-                {
-                    captions = _offlineResults.Select(result =>
-                    {
-                        var startTime = new TimeSpan(result.OffsetInTicks);
-                        return new Caption()
-                        {
-                            Sequence = _srtSequenceNumber++,
-                            Begin = startTime,
-                            End = startTime.Add(result.Duration),
-                            Text = result.Text
-                        };
-                    });
-                }
-                foreach (Caption caption in captions)
+                foreach (Caption caption in CaptionsFromOfflineResults())
                 {
                     // TODO1 Fix language. We might be able to remove lang parameter from StringFromCaption.
                     WriteToConsole(StringFromCaption(null, caption));
