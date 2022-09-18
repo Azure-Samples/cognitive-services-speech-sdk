@@ -11,11 +11,11 @@ using Microsoft.CognitiveServices.Speech.Audio;
 
 namespace Captioning
 {
-	public enum CaptioningMode
-	{
-    	Offline,
-    	RealTime
-	}
+    public enum CaptioningMode
+    {
+        Offline,
+        RealTime
+    }
 	
     public class UserConfig
     {
