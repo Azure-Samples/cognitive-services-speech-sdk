@@ -33,11 +33,6 @@ namespace Captioning
         private List<string> _recognizedLines = new List<string>();
         private List<RecognitionResult> _offlineResults = new List<RecognitionResult>();
         
-        private static IEnumerable<(T, T)> Pairwise<T>(IEnumerable<T> xs)
-        {
-            return xs.Zip(xs.Skip(1), (a, b) => (a, b));
-        }
-
         private static string V2EndpointFromRegion(string region)
         {
             // Note: Continuous language identification is supported only with v2 endpoints.
@@ -125,12 +120,15 @@ ResultId:42da47f298334ab6aa393a9b2e0b50cd Reason:RecognizedSpeech Recognized tex
         {
             string retval;
             
+            // If the user specified a max line length...
             if (this._userConfig!.maxLineLength is int maxLineLengthValue)
             {
                 // Split the caption text into multiple lines based on maxLineLength and lines.
                 var captionHelper = new CaptionHelper(null, maxLineLengthValue, this._userConfig!.lines, Enumerable.Empty<object>());
                 List<string> lines = captionHelper.LinesFromText(text);
-                
+
+                // Recognizing results can change with each new result, so we do not save previous Recognizing results.
+                // Recognized results are final, so we save them in a member value.
                 var recognizingLines = new List<string>();
                 if (isRecognizedResult)
                 {
@@ -141,6 +139,8 @@ ResultId:42da47f298334ab6aa393a9b2e0b50cd Reason:RecognizedSpeech Recognized tex
                     recognizingLines = lines.TakeLast(_userConfig!.lines).ToList();
                 }
                 
+                // If the Recognizing result has fewer lines than _userConfig.lines,
+                // we insert lines from our saved Recognized results.
                 int recognizedLinesToAdd = Math.Max(0, _userConfig!.lines - recognizingLines.Count());
                 recognizingLines = _recognizedLines.TakeLast(recognizedLinesToAdd).Concat(recognizingLines).ToList();
                 retval = string.Join('\n', recognizingLines.ToArray());
@@ -153,7 +153,7 @@ ResultId:42da47f298334ab6aa393a9b2e0b50cd Reason:RecognizedSpeech Recognized tex
             return retval;
         }
 
-        // TODO1 Test real-time mode with other videos.
+        // TODO1 Set default max length 60? How to let them set no limit?
 
         private string? CaptionFromRealTimeResult(SpeechRecognitionResult result, bool isRecognizedResult)
         {
@@ -161,7 +161,7 @@ ResultId:42da47f298334ab6aa393a9b2e0b50cd Reason:RecognizedSpeech Recognized tex
             string? language = LanguageFromSpeechRecognitionResult(result);
 
             // Convert the SpeechRecognitionResult to a caption.
-            var startTime = new TimeSpan(result.OffsetInTicks);
+            var startTime = new TimeSpan(result.OffsetInTicks).Add(this._userConfig!.delay);
             Caption caption = new Caption()
             {
                 Sequence = _srtSequenceNumber++,
@@ -227,7 +227,7 @@ ResultId:42da47f298334ab6aa393a9b2e0b50cd Reason:RecognizedSpeech Recognized tex
             {
                 captions = _offlineResults.Select(result =>
                 {
-                    var startTime = new TimeSpan(result.OffsetInTicks);
+                    var startTime = new TimeSpan(result.OffsetInTicks).Add(this._userConfig!.delay);
                     return new Caption()
                     {
                         Sequence = _srtSequenceNumber++,
@@ -239,7 +239,8 @@ ResultId:42da47f298334ab6aa393a9b2e0b50cd Reason:RecognizedSpeech Recognized tex
             }
             Caption lastCaption = captions.Last();
             lastCaption.End.Add(this._userConfig!.remainTime);
-            List<Caption> captions_2 = Pairwise(captions)
+            List<Caption> captions_2 = captions
+                .Pairwise()
                 .Select(captions => {
                     TimeSpan previousEnd = captions.Item1.End.Add(_userConfig!.remainTime);
                     captions.Item1.End = previousEnd < captions.Item2.Begin ? previousEnd : captions.Item2.Begin;
@@ -489,8 +490,6 @@ ResultId:42da47f298334ab6aa393a9b2e0b50cd Reason:RecognizedSpeech Recognized tex
                                      Overrides --realTime.
     --realTime                       Output real-time results.
                                      Default output mode is offline.
-    --remainTime SECONDS             How many SECONDS a caption should remain on screen if it is not replaced by another.
-                                     Minimum is 0.0. Default is 1.0.
 
   ACCURACY
     --phrases ""PHRASE1;PHRASE2""    Example: ""Constoso;Jessie;Rehaan""
@@ -503,6 +502,10 @@ ResultId:42da47f298334ab6aa393a9b2e0b50cd Reason:RecognizedSpeech Recognized tex
     --lines LINES                    Set the number of lines for a caption to LINES.
                                      Valid only with --maxLineLength.
                                      Minimum is 1. Default is 2.
+    --delay SECONDS                  How many SECONDS to delay the appearance of each caption.
+                                     Minimum is 0.0. Default is 1.0.
+    --remainTime SECONDS             How many SECONDS a caption should remain on screen if it is not replaced by another.
+                                     Minimum is 0.0. Default is 1.0.
     --quiet                          Suppress console output, except errors.
     --profanity OPTION               Valid values: raw, remove, mask
     --threshold NUMBER               Set stable partial result threshold.
