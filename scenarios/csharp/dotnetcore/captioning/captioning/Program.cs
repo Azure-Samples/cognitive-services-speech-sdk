@@ -68,7 +68,6 @@ namespace Captioning
 Passing result to CaptionHelper causes GetTextOrTranslation to return nothing.
 GetTextOrTranslation looks for result is TranslationRecognitionResult translated && translated.Translations.Keys.Contains(_language).
 That's not happening because we don't specify languages to the speech recognizer. Default languageIDLanguages is empty list, not en-US.
-Does on the fly lang recognition even work right now?
 
 Result looks like this:
 ResultId:42da47f298334ab6aa393a9b2e0b50cd Reason:RecognizedSpeech Recognized text:<One more with six seconds.>. Json:{"Id":"42da47f298334ab6aa393a9b2e0b50cd","RecognitionStatus":"Success","DisplayText":"One more with six seconds.","Offset":25800000,"Duration":15900000}
@@ -87,15 +86,15 @@ ResultId:42da47f298334ab6aa393a9b2e0b50cd Reason:RecognizedSpeech Recognized tex
 
         private string? LanguageFromSpeechRecognitionResult(SpeechRecognitionResult result)
         {
+            string? retval = null;
+            
             if (null != this._userConfig!.languageIDLanguages)
             {
                 var languageIDResult = AutoDetectSourceLanguageResult.FromResult(result);
-                return languageIDResult.Language;
+                retval = languageIDResult.Language;
             }
-            else
-            {
-                return null;
-            }
+
+            return retval;
         }
 
         private string StringFromCaption(string? language, Caption caption)
@@ -118,42 +117,28 @@ ResultId:42da47f298334ab6aa393a9b2e0b50cd Reason:RecognizedSpeech Recognized tex
 
         private string AdjustRealTimeCaptionText(string text, bool isRecognizedResult)
         {
-            string retval;
-            
-            // If the user specified a max line length...
-            if (this._userConfig!.maxLineLength is int maxLineLengthValue)
-            {
-                // Split the caption text into multiple lines based on maxLineLength and lines.
-                var captionHelper = new CaptionHelper(null, maxLineLengthValue, this._userConfig!.lines, Enumerable.Empty<object>());
-                List<string> lines = captionHelper.LinesFromText(text);
+            // Split the caption text into multiple lines based on maxLineLength and lines.
+            var captionHelper = new CaptionHelper(null, this._userConfig!.maxLineLength, this._userConfig!.lines, Enumerable.Empty<object>());
+            List<string> lines = captionHelper.LinesFromText(text);
 
-                // Recognizing results can change with each new result, so we do not save previous Recognizing results.
-                // Recognized results are final, so we save them in a member value.
-                var recognizingLines = new List<string>();
-                if (isRecognizedResult)
-                {
-                    _recognizedLines = _recognizedLines.Concat(lines).ToList();
-                }
-                else
-                {
-                    recognizingLines = lines.TakeLast(_userConfig!.lines).ToList();
-                }
-                
-                // If the Recognizing result has fewer lines than _userConfig.lines,
-                // we insert lines from our saved Recognized results.
-                int recognizedLinesToAdd = Math.Max(0, _userConfig!.lines - recognizingLines.Count());
-                recognizingLines = _recognizedLines.TakeLast(recognizedLinesToAdd).Concat(recognizingLines).ToList();
-                retval = string.Join('\n', recognizingLines.ToArray());
+            // Recognizing results can change with each new result, so we do not save previous Recognizing results.
+            // Recognized results are final, so we save them in a member value.
+            var recognizingLines = new List<string>();
+            if (isRecognizedResult)
+            {
+                _recognizedLines = _recognizedLines.Concat(lines).ToList();
             }
             else
             {
-                retval = text;
+                recognizingLines = lines.TakeLast(_userConfig!.lines).ToList();
             }
             
-            return retval;
+            // If the Recognizing result has fewer lines than _userConfig.lines,
+            // we insert lines from our saved Recognized results.
+            int recognizedLinesToAdd = Math.Max(0, _userConfig!.lines - recognizingLines.Count());
+            recognizingLines = _recognizedLines.TakeLast(recognizedLinesToAdd).Concat(recognizingLines).ToList();
+            return string.Join('\n', recognizingLines.ToArray());
         }
-
-        // TODO1 Set default max length 60? How to let them set no limit?
 
         private string? CaptionFromRealTimeResult(SpeechRecognitionResult result, bool isRecognizedResult)
         {
@@ -167,7 +152,7 @@ ResultId:42da47f298334ab6aa393a9b2e0b50cd Reason:RecognizedSpeech Recognized tex
                 Sequence = _srtSequenceNumber++,
                 Begin = startTime,
                 End = startTime.Add(result.Duration),
-                // We are not ready to adjust the text for this caption.
+                // We are not ready to set the text for this caption.
                 // First we need to determine whether to clear _recognizedLines.
                 Text = ""
             };
@@ -203,7 +188,12 @@ ResultId:42da47f298334ab6aa393a9b2e0b50cd Reason:RecognizedSpeech Recognized tex
                     caption.Begin = previousCaption.End;
                 }
 
-                retval = StringFromCaption(language, previousCaption);
+                // If the start timestamp is later than the end timestamp, drop the caption.
+                // This sometimes happens when we receive a lot of Recognizing results close together.
+                if (previousCaption.Begin < previousCaption.End)
+                {
+                    retval = StringFromCaption(language, previousCaption);
+                }
             }
 
             // Break the caption text into lines if needed.
@@ -218,35 +208,25 @@ ResultId:42da47f298334ab6aa393a9b2e0b50cd Reason:RecognizedSpeech Recognized tex
 
         private IEnumerable<Caption> CaptionsFromOfflineResults()
         {
-            IEnumerable<Caption> captions;
-            if (this._userConfig!.maxLineLength is int maxLineLengthValue)
-            {
-                captions = CaptionHelper.GetCaptions(null, maxLineLengthValue, this._userConfig!.lines, _offlineResults);
-            }
-            else
-            {
-                captions = _offlineResults.Select(result =>
-                {
-                    var startTime = new TimeSpan(result.OffsetInTicks).Add(this._userConfig!.delay);
-                    return new Caption()
-                    {
-                        Sequence = _srtSequenceNumber++,
-                        Begin = startTime,
-                        End = startTime.Add(result.Duration),
-                        Text = result.Text
-                    };
-                });
-            }
+            // Split the caption text into multiple lines based on maxLineLength and lines.
+            IEnumerable<Caption> captions = CaptionHelper.GetCaptions(null, this._userConfig!.maxLineLength, this._userConfig!.lines, _offlineResults);
+            // Save the last caption.
             Caption lastCaption = captions.Last();
             lastCaption.End.Add(this._userConfig!.remainTime);
+            // In offline mode, all captions come from RecognitionResults of type Recognized.
+            // Set the end timestamp for each caption to the earliest of:
+            // - The end timestamp for this caption plus the remain time.
+            // - The start timestamp for the next caption.            
             List<Caption> captions_2 = captions
                 .Pairwise()
-                .Select(captions => {
-                    TimeSpan previousEnd = captions.Item1.End.Add(_userConfig!.remainTime);
-                    captions.Item1.End = previousEnd < captions.Item2.Begin ? previousEnd : captions.Item2.Begin;
+                .Select(captions =>
+                {
+                    TimeSpan end = captions.Item1.End.Add(_userConfig!.remainTime);
+                    captions.Item1.End = end < captions.Item2.Begin ? end : captions.Item2.Begin;
                     return captions.Item1;
                 })
                 .ToList();
+            // Re-add the last caption.
             captions_2.Add(lastCaption);
             return captions_2;
         }
@@ -263,6 +243,7 @@ ResultId:42da47f298334ab6aa393a9b2e0b50cd Reason:RecognizedSpeech Recognized tex
             }
             else if (CaptioningMode.RealTime == this._userConfig!.captioningMode)
             {
+                // Show the last "previous" caption, which is actually the last caption.
                 if (_previousCaption is Caption previousCaptionValue)
                 {
                     previousCaptionValue.End.Add(this._userConfig!.remainTime);
@@ -272,6 +253,11 @@ ResultId:42da47f298334ab6aa393a9b2e0b50cd Reason:RecognizedSpeech Recognized tex
             }
         }
 
+        //
+        // Create UserConfig from command-line arguments.
+        // Clear output file if needed.
+        // Write WebVTT header if needed.
+        //
         private void Initialize(string[] args, string usage)
         {
             this._userConfig = UserConfig.UserConfigFromArgs(args, usage);
@@ -498,9 +484,8 @@ ResultId:42da47f298334ab6aa393a9b2e0b50cd Reason:RecognizedSpeech Recognized tex
     --output FILE                    Output captions to FILE.
     --srt                            Output captions in SubRip Text format (default format is WebVTT.)
     --maxLineLength LENGTH           Set the maximum number of characters per line for a caption to LENGTH.
-                                     Minimum is 20. Default is no limit.
+                                     Minimum is 20. Default is 37.
     --lines LINES                    Set the number of lines for a caption to LINES.
-                                     Valid only with --maxLineLength.
                                      Minimum is 1. Default is 2.
     --delay SECONDS                  How many SECONDS to delay the appearance of each caption.
                                      Minimum is 0.0. Default is 1.0.
