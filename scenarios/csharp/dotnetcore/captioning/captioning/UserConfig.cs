@@ -47,8 +47,8 @@ namespace Captioning
         readonly public TimeSpan delay;
         /// Output captions in SubRip Text format (default is WebVTT format).
         readonly public bool useSubRipTextCaptionFormat = false;
-        /// The maximum number of characters per line for a caption. Default is no limit.
-        readonly public int? maxLineLength;
+        /// The maximum number of characters per line for a caption. Default is 37.
+        readonly public int maxLineLength;
         /// How many lines of captioning to show. Only valid with maxLineLength. Default is 2.
         readonly public int lines;
         /// Set the stable partial result threshold on the Speech service. This setting value must contain an integer.
@@ -72,7 +72,7 @@ namespace Captioning
             TimeSpan remainTime,
             TimeSpan delay,
             bool useSubRipTextCaptionFormat,
-            int? maxLineLength,
+            int maxLineLength,
             int lines,
             string? stablePartialResultThreshold,
             string subscriptionKey,
@@ -205,7 +205,7 @@ namespace Captioning
             }
             
             string? strMaxLineLength = GetCmdOption(args, "--maxLineLength");
-            int? intMaxLineLength = null;
+            int intMaxLineLength = 37;
             if (null != strMaxLineLength)
             {
                 intMaxLineLength = Int32.Parse(strMaxLineLength);
