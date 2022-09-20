@@ -3,7 +3,6 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
-using System.ComponentModel;
 using Newtonsoft.Json;
 
 public sealed class BatchSynthesisProperties : BatchSynthesisPropertiesDefinition
@@ -31,8 +30,8 @@ public sealed class BatchSynthesisProperties : BatchSynthesisPropertiesDefinitio
     /// Gets the duration of the transcription. The duration is encoded as ISO 8601 duration
     /// ("PnYnMnDTnHnMnS", see https://en.wikipedia.org/wiki/ISO_8601#Durations).
     /// </summary>
-    //[JsonConverter(typeof(TimeSpanConverter))]
-    //public TimeSpan Duration { get; set; }
+    [JsonConverter(typeof(TimeSpanConverter))]
+    public TimeSpan Duration { get; set; }
 
     /// <summary>
     /// Gets or sets the details of billable characters by voice type in the input file.

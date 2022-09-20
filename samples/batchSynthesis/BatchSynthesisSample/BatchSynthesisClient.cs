@@ -5,22 +5,13 @@
 
 using Newtonsoft.Json;
 using System.Net.Http.Formatting;
-using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
 public class BatchSynthesisClient
 {
     private const string OcpApimSubscriptionKey = "Ocp-Apim-Subscription-Key";
-    private readonly JsonSerializerOptions serializationOption = new JsonSerializerOptions
-    {
-        PropertyNameCaseInsensitive = true,
-        Converters =
-            {
-                new JsonStringEnumConverter()
-            }
-    };
-
+    
     private readonly string hostName;
     private readonly string baseUri;
     private readonly string subscriptionKey;
@@ -51,7 +42,7 @@ public class BatchSynthesisClient
                 return syntheses;
             }
 
-            var pagedSyntheses = await response.Content.ReadFromJsonAsync<PaginatedResults<BatchSynthesis>>(serializationOption).ConfigureAwait(false);
+            var pagedSyntheses = await response.Content.ReadAsAsync<PaginatedResults<BatchSynthesis>>().ConfigureAwait(false);
             syntheses.AddRange(pagedSyntheses.Values);
             uri = pagedSyntheses.NextLink;
         }
@@ -70,7 +61,7 @@ public class BatchSynthesisClient
             return null;
         }
 
-        return await response.Content.ReadFromJsonAsync<BatchSynthesis>(serializationOption).ConfigureAwait(false);
+        return await response.Content.ReadAsAsync<BatchSynthesis>().ConfigureAwait(false);
     }
 
     public async Task DeleteSynthesisAsync(Guid id)

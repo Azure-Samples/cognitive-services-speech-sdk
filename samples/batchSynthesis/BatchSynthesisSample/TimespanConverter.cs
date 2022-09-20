@@ -6,7 +6,7 @@
 using System.Xml;
 using Newtonsoft.Json;
 
-public class TimespanConverter : JsonConverter<TimeSpan>
+public class TimeSpanConverter : JsonConverter<TimeSpan>
 {
     public override void WriteJson(JsonWriter writer, TimeSpan value, JsonSerializer serializer)
     {
