@@ -4,6 +4,7 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 using Microsoft.CognitiveServices.Speech;
@@ -19,6 +20,13 @@ namespace Captioning
 	
     public class UserConfig
     {
+        // TODO1 TEMP
+        readonly public static int defaultMaxLineLengthSBCS = 37;
+        readonly public static int defaultMaxLineLengthMBCS = 30;
+        
+        // TODO1 TEMP
+        readonly public bool debug = false;
+        
         /// True to use a compressed audio format; otherwise, use uncompressed (wav).
         readonly public bool useCompressedAudio = false;
         /// Compressed audio format for input audio. Default is Any.
@@ -28,7 +36,7 @@ namespace Captioning
         /// Enable language identification for these languages.
         /// Languages must be delimited by commas.
         /// Example: en-US,ja-JP
-        readonly public string[]? languageIDLanguages;
+        readonly public List<string> languageIDLanguages;
         /// Input audio file path. Default input is the microphone.
         readonly public string? inputFilePath;
         /// Output file path. Default output is the console.
@@ -60,10 +68,11 @@ namespace Captioning
         readonly public string region;
         
         public UserConfig (
+            bool debug,
             bool useCompressedAudio,
             AudioStreamContainerFormat compressedAudioFormat,
             ProfanityOption profanityOption,
-            string[]? languageIDLanguages,
+            List<string> languageIDLanguages,
             string? inputFilePath,
             string? outputFilePath,
             string? phraseList,
@@ -79,6 +88,7 @@ namespace Captioning
             string region
             )
         {
+            this.debug = debug;
             this.useCompressedAudio = useCompressedAudio;
             this.compressedAudioFormat = compressedAudioFormat;
             this.profanityOption = profanityOption;
@@ -116,14 +126,18 @@ namespace Captioning
             return args.Contains (option, StringComparer.OrdinalIgnoreCase);
         }
 
-        private static string[]? GetLanguageIDLanguages(string[] args)
+        private static List<string> GetLanguageIDLanguages(string[] args)
         {
-            string[]? languageIDLanguages = null;
+            var retval = new List<string>();
             if (GetCmdOption(args, "--languages") is string languageIDLanguagesResult)
             {
-                languageIDLanguages = languageIDLanguagesResult.Split(';');
+                foreach (string language in languageIDLanguagesResult.Split(';'))
+                {
+                    retval.Add(language);
+                }
             }
-            return languageIDLanguages;
+            // TODO1 Default to en-US?
+            return retval;
         }
 
         private static AudioStreamContainerFormat GetCompressedAudioFormat(string[] args)
@@ -205,7 +219,7 @@ namespace Captioning
             }
             
             string? strMaxLineLength = GetCmdOption(args, "--maxLineLength");
-            int intMaxLineLength = 37;
+            int intMaxLineLength = defaultMaxLineLengthSBCS;
             if (null != strMaxLineLength)
             {
                 intMaxLineLength = Int32.Parse(strMaxLineLength);
@@ -227,6 +241,7 @@ namespace Captioning
             }
             
             return new UserConfig(
+                CmdOptionExists(args, "--debug"),
                 CmdOptionExists(args, "--format"),
                 GetCompressedAudioFormat(args),
                 GetProfanityOption(args),
