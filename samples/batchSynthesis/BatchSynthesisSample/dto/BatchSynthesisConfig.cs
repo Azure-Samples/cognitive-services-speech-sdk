@@ -6,37 +6,37 @@
 public class BatchSynthesisConfig
 {
     /// <summary>
-    /// Gets or sets the voice name.
+    /// The voice name.
     /// </summary>
     public string Voice { get; set; }
 
     /// <summary>
-    /// Gets or sets the role name.
+    /// The role name.
     /// </summary>
     string Role { get; set; }
 
     /// <summary>
-    /// Gets or sets the style name.
+    /// The style name.
     /// </summary>
     string Style { get; set; }
 
     /// <summary>
-    /// Gets or sets the style degree value.
+    /// The style degree value.
     /// </summary>
     string StyleDegree { get; set; }
 
     /// <summary>
-    /// Gets or sets rate value.
+    /// The rate value.
     /// </summary>
     string Rate { get; set; }
 
     /// <summary>
-    /// Gets or sets pitch value.
+    /// The pitch value.
     /// </summary>
     string Pitch { get; set; }
 
     /// <summary>
-    /// Gets or sets volume value.
+    /// The volume value.
     /// </summary>
     string Volume { get; set; }
 }

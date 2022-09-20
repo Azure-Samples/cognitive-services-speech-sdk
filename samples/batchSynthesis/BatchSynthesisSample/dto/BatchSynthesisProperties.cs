@@ -8,38 +8,38 @@ using Newtonsoft.Json;
 public sealed class BatchSynthesisProperties : BatchSynthesisPropertiesDefinition
 {
     /// <summary>
-    /// Gets or sets a value of generated audio size in bytes.
+    /// The value of generated audio size in bytes.
     /// </summary>
     public long? AudioSize { get; set; }
     /// <summary>
-    /// Gets or sets the number of succeeded audios.
+    /// The number of succeeded audios.
     /// </summary>
     public int? SucceededAudioCount { get; set; }
 
     /// <summary>
-    /// Gets or sets the number of failed audios.
+    /// The number of failed audios.
     /// </summary>
     public int? FailedAudioCount { get; set; }
 
     /// <summary>
-    /// Gets or sets the total audio duration in ticks.
+    /// The total audio duration in ticks.
     /// </summary>
     public long? DurationInTicks { get; set; }
 
     /// <summary>
-    /// Gets the duration of the transcription. The duration is encoded as ISO 8601 duration
+    /// The duration of the transcription. The duration is encoded as ISO 8601 duration
     /// ("PnYnMnDTnHnMnS", see https://en.wikipedia.org/wiki/ISO_8601#Durations).
     /// </summary>
     [JsonConverter(typeof(TimeSpanConverter))]
     public TimeSpan Duration { get; set; }
 
     /// <summary>
-    /// Gets or sets the details of billable characters by voice type in the input file.
+    /// The details of billable characters by voice type in the input file.
     /// </summary>
     public BatchSynthesisBillingDetails BillingDetails { get; set; }
 
     /// <summary>
-    /// Gets or sets the details of the error in case the entity is in a failed state.
+    /// The details of the error in case the entity is in a failed state.
     /// </summary>
     public EntityError Error { get; set; }
 }

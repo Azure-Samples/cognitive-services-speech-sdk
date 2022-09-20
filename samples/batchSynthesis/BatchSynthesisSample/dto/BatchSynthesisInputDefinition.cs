@@ -6,7 +6,7 @@
 public class BatchSynthesisInputDefinition
 {
     /// <summary>
-    /// Gets or sets the input text string, it could be SSML or plain text.
+    /// The input text string, it could be SSML or plain text.
     /// </summary>
     public string Text { get; set; }
 }

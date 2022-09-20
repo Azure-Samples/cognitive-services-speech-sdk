@@ -6,12 +6,12 @@
 public class EntityError
 {
     /// <summary>
-    /// Gets the code of this error.
+    /// The code of this error.
     /// </summary>
     public string Code { get; set; }
 
     /// <summary>
-    /// Gets the message for this error.
+    /// The message for this error.
     /// </summary>
     public string Message { get; set; }
 }
