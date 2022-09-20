@@ -171,12 +171,21 @@ ResultId:42da47f298334ab6aa393a9b2e0b50cd Reason:RecognizedSpeech Recognized tex
                 {
                     var strResultType = isRecognizedResult ? "Recognized" : "Recognizing";
                     WriteToConsoleOrFile($@"DEBUG: Dropping out-of-order result.
-Result type: {strResultType}
-Previous result end time (un-delayed): {previousEndTimeValue.ToString()}
-This result end time (un-delayed): {endTime.ToString()}
-This result start time (delayed): {startTime.Add(this._userConfig!.delay).ToString()}
-This result end time (delayed): {endTime.Add(this._userConfig!.delay).ToString()}
+Dropped result:
+Type: {strResultType}
+Start time (undelayed): {startTime.ToString()}
+Start time (delayed): {startTime.Add(this._userConfig!.delay).ToString()}
+End time (undelayed): {endTime.ToString()}
+End time (delayed): {endTime.Add(this._userConfig!.delay).ToString()}
 Text: {result.Text}
+
+Previous result:
+End time (undelayed): {previousEndTimeValue.ToString()}
+End time (delayed): {previousEndTimeValue.Add(this._userConfig!.delay).ToString()}
+
+Dropped result undelayed end time ({endTime.ToString()}) <= previous result undelayed end time ({previousEndTimeValue.ToString()}).
+Note previous result will appear *after* this debug output.
+END DEBUG
 
 ");
                 }
