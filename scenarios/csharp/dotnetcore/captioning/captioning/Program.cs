@@ -29,8 +29,12 @@ namespace Captioning
         private UserConfig? _userConfig;
         private int _srtSequenceNumber = 0;
         private Caption? _previousCaption;
+        private TimeSpan? _previousEndTime;
         private bool _previousResultIsRecognized = false;
         private List<string> _recognizedLines = new List<string>();
+        // TODO1 TEMP
+        //private List<RecognitionResult> _realTimeResults = new List<RecognitionResult>();
+        
         private List<RecognitionResult> _offlineResults = new List<RecognitionResult>();
         
         private static string V2EndpointFromRegion(string region)
@@ -72,6 +76,7 @@ That's not happening because we don't specify languages to the speech recognizer
 Result looks like this:
 ResultId:42da47f298334ab6aa393a9b2e0b50cd Reason:RecognizedSpeech Recognized text:<One more with six seconds.>. Json:{"Id":"42da47f298334ab6aa393a9b2e0b50cd","RecognitionStatus":"Success","DisplayText":"One more with six seconds.","Offset":25800000,"Duration":15900000}
 */
+/*
         private string GetLanguageForCaptionHelper()
         {
             var language = "en-US";
@@ -83,12 +88,13 @@ ResultId:42da47f298334ab6aa393a9b2e0b50cd Reason:RecognizedSpeech Recognized tex
             }
             return language;
         }
+*/
 
         private string? LanguageFromSpeechRecognitionResult(SpeechRecognitionResult result)
         {
             string? retval = null;
             
-            if (null != this._userConfig!.languageIDLanguages)
+            if (this._userConfig!.languageIDLanguages.Count > 0)
             {
                 var languageIDResult = AutoDetectSourceLanguageResult.FromResult(result);
                 retval = languageIDResult.Language;
@@ -107,6 +113,7 @@ ResultId:42da47f298334ab6aa393a9b2e0b50cd Reason:RecognizedSpeech Recognized tex
             }
             retval.AppendFormat($"{GetTimestamp(caption.Begin, caption.End)}{Environment.NewLine}");
             // TODO1 I think Heiko wanted to remove this. I.e., only have language specified for entire transcript, not per result.
+            // TODO1 Keep it, only show if there are > 1 language.
             if (language is string languageValue)
             {
                 retval.Append($"[{languageValue}] ");
@@ -118,6 +125,12 @@ ResultId:42da47f298334ab6aa393a9b2e0b50cd Reason:RecognizedSpeech Recognized tex
         private string AdjustRealTimeCaptionText(string text, bool isRecognizedResult)
         {
             // Split the caption text into multiple lines based on maxLineLength and lines.
+            // TODO1 We should always pass null to caption helper, it only wants language info
+            // so it can check for TranslationRecognitionResult.
+            // Maybe we should just comment that out.
+            // Or just always pass null.
+            // Get CaptionHelper out of the business of messing with languages.
+            // TODO1 Which means we should set maxLineLength from 37 to 30 here, not there?
             var captionHelper = new CaptionHelper(null, this._userConfig!.maxLineLength, this._userConfig!.lines, Enumerable.Empty<object>());
             List<string> lines = captionHelper.LinesFromText(text);
 
@@ -145,63 +158,86 @@ ResultId:42da47f298334ab6aa393a9b2e0b50cd Reason:RecognizedSpeech Recognized tex
             string? retval = null;
             string? language = LanguageFromSpeechRecognitionResult(result);
 
-            // Convert the SpeechRecognitionResult to a caption.
-            var startTime = new TimeSpan(result.OffsetInTicks).Add(this._userConfig!.delay);
-            Caption caption = new Caption()
+            var startTime = new TimeSpan(result.OffsetInTicks);
+            var endTime = startTime.Add(result.Duration);
+            // If the end timestamp for the previous result is later
+            // than the end timestamp for this result, drop the result.
+            // This sometimes happens when we receive a lot of Recognizing results close together.
+            if (_previousEndTime is TimeSpan previousEndTimeValue &&
+                previousEndTimeValue >= endTime)
             {
-                Sequence = _srtSequenceNumber++,
-                Begin = startTime,
-                End = startTime.Add(result.Duration),
-                // We are not ready to set the text for this caption.
-                // First we need to determine whether to clear _recognizedLines.
-                Text = ""
-            };
+                // TODO1 TEMP
+                if (this._userConfig!.debug)
+                {
+                    var strResultType = isRecognizedResult ? "Recognized" : "Recognizing";
+                    WriteToConsoleOrFile($@"DEBUG: Dropping out-of-order result.
+Result type: {strResultType}
+Previous result end time (un-delayed): {previousEndTimeValue.ToString()}
+This result end time (un-delayed): {endTime.ToString()}
+This result start time (delayed): {startTime.Add(this._userConfig!.delay).ToString()}
+This result end time (delayed): {endTime.Add(this._userConfig!.delay).ToString()}
+Text: {result.Text}
 
-            // If we have a previous caption...
-            if (_previousCaption is Caption previousCaption)
-            {
-                // If the previous result was type Recognized...
-                if (_previousResultIsRecognized)
-                {
-                    // Set the end timestamp for the previous caption to the earliest of:
-                    // - The end timestamp for the previous caption plus the remain time.
-                    // - The start timestamp for the current caption.
-                    TimeSpan previousEnd = previousCaption.End.Add(_userConfig!.remainTime);
-                    previousCaption.End = previousEnd < caption.Begin ? previousEnd : caption.Begin;
-                    // If the gap between the original end timestamp for the previous caption
-                    // and the start timestamp for the current caption is larger than remainTime,
-                    // clear the cached recognized lines.
-                    // Note this needs to be done before we call AdjustRealTimeCaptionText
-                    // for the current caption, because it uses _recognizedLines.
-                    if (previousEnd < caption.Begin)
-                    {
-                        _recognizedLines.Clear();
-                    }
-                }
-                // If the previous result was type Recognizing, simply set the start timestamp
-                // for the current caption to the end timestamp for the previous caption.
-                // Note this presumes there will not be a large gap between Recognizing results,
-                // because such a gap would cause the previous Recognizing result to be succeeded
-                // by a Recognized result.
-                else
-                {
-                    caption.Begin = previousCaption.End;
-                }
-
-                // If the start timestamp is later than the end timestamp, drop the caption.
-                // This sometimes happens when we receive a lot of Recognizing results close together.
-                if (previousCaption.Begin < previousCaption.End)
-                {
-                    retval = StringFromCaption(language, previousCaption);
+");
                 }
             }
+            else
+            {
+                // Record the end timestamp for this result.
+                _previousEndTime = endTime;
+                
+                // Convert the SpeechRecognitionResult to a caption.
+                Caption caption = new Caption()
+                {
+                    Sequence = _srtSequenceNumber++,
+                    Begin = startTime.Add(this._userConfig!.delay),
+                    End = endTime.Add(this._userConfig!.delay),
+                    // We are not ready to set the text for this caption.
+                    // First we need to determine whether to clear _recognizedLines.
+                    Text = ""
+                };
 
-            // Break the caption text into lines if needed.
-            caption.Text = AdjustRealTimeCaptionText(result.Text, isRecognizedResult);
-            // Save the current caption as the previous caption.
-            _previousCaption = caption;
-            // Save the result type as the previous result type.
-            _previousResultIsRecognized = isRecognizedResult;
+                // If we have a previous caption...
+                if (_previousCaption is Caption previousCaption)
+                {
+                    // If the previous result was type Recognized...
+                    if (_previousResultIsRecognized)
+                    {
+                        // Set the end timestamp for the previous caption to the earliest of:
+                        // - The end timestamp for the previous caption plus the remain time.
+                        // - The start timestamp for the current caption.
+                        TimeSpan previousEnd = previousCaption.End.Add(_userConfig!.remainTime);
+                        previousCaption.End = previousEnd < caption.Begin ? previousEnd : caption.Begin;
+                        // If the gap between the original end timestamp for the previous caption
+                        // and the start timestamp for the current caption is larger than remainTime,
+                        // clear the cached recognized lines.
+                        // Note this needs to be done before we call AdjustRealTimeCaptionText
+                        // for the current caption, because it uses _recognizedLines.
+                        if (previousEnd < caption.Begin)
+                        {
+                            _recognizedLines.Clear();
+                        }
+                    }
+                    // If the previous result was type Recognizing, simply set the start timestamp
+                    // for the current caption to the end timestamp for the previous caption.
+                    // Note this presumes there will not be a large gap between Recognizing results,
+                    // because such a gap would cause the previous Recognizing result to be succeeded
+                    // by a Recognized result.
+                    else
+                    {
+                        caption.Begin = previousCaption.End;
+                    }
+
+                    retval = StringFromCaption(language, previousCaption);
+                }
+
+                // Break the caption text into lines if needed.
+                caption.Text = AdjustRealTimeCaptionText(result.Text, isRecognizedResult);
+                // Save the current caption as the previous caption.
+                _previousCaption = caption;
+                // Save the result type as the previous result type.
+                _previousResultIsRecognized = isRecognizedResult;
+            }
 
             return retval;
         }
@@ -231,8 +267,29 @@ ResultId:42da47f298334ab6aa393a9b2e0b50cd Reason:RecognizedSpeech Recognized tex
             return captions_2;
         }
 
+// TODO1 Just create separate caption helpers, one per language, filter input to it by language, then combine output and sort by begin timestamp.
+// We ARE going to have to do that because one might be zh, one not.
+
         private void Finish()
         {
+            // TODO1 TEMP
+/*
+            foreach ((RecognitionResult, RecognitionResult) captions in _realTimeResults.Pairwise())
+            {
+                var (item1, item2) = (captions.Item1, captions.Item2);
+                if (item1.OffsetInTicks > item2.OffsetInTicks)
+                {
+                    WriteToConsoleOrFile($"ALERT: item 1 start {item1.OffsetInTicks} > item 2 start {item2.OffsetInTicks}. Item 1 text: {item1.Text}\n. Item 2 text: {item2.Text}\n");
+                }
+                var item1_end = new TimeSpan(item1.OffsetInTicks).Add(item1.Duration);
+                var item2_end = new TimeSpan(item2.OffsetInTicks).Add(item2.Duration);
+                if (item1_end >= item2_end)
+                {
+                    WriteToConsoleOrFile($"ALERT: item 1 end {item1_end.ToString()} >= item 2 end {item2_end.ToString()}. Item 1 text: {item1.Text}\n. Item 2 text: {item2.Text}\n");
+                }                
+            }
+*/
+            
             if (CaptioningMode.Offline == this._userConfig!.captioningMode)
             {
                 foreach (Caption caption in CaptionsFromOfflineResults())
@@ -334,9 +391,9 @@ ResultId:42da47f298334ab6aa393a9b2e0b50cd Reason:RecognizedSpeech Recognized tex
             SpeechConfig speechConfig = SpeechConfigFromUserConfig();
             SpeechRecognizer speechRecognizer;
             
-            if (this._userConfig!.languageIDLanguages is string[] languageIDLanguagesValue)
+            if (this._userConfig!.languageIDLanguages.Count > 0)
             {
-                var autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig.FromLanguages(languageIDLanguagesValue);
+                var autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig.FromLanguages(this._userConfig!.languageIDLanguages.ToArray());
                 speechRecognizer = new SpeechRecognizer(speechConfig, autoDetectSourceLanguageConfig, audioConfig);
             }
             else
@@ -367,6 +424,9 @@ ResultId:42da47f298334ab6aa393a9b2e0b50cd Reason:RecognizedSpeech Recognized tex
             {
                 speechRecognizer.Recognizing += (object? sender, SpeechRecognitionEventArgs e) =>
                     {
+                        // TODO1 TEMP
+                        //_realTimeResults.Add(e.Result);
+                        
                         if (ResultReason.RecognizingSpeech == e.Result.Reason && e.Result.Text.Length > 0)
                         {
                             if (CaptionFromRealTimeResult(e.Result, false) is string caption)
@@ -484,7 +544,7 @@ ResultId:42da47f298334ab6aa393a9b2e0b50cd Reason:RecognizedSpeech Recognized tex
     --output FILE                    Output captions to FILE.
     --srt                            Output captions in SubRip Text format (default format is WebVTT.)
     --maxLineLength LENGTH           Set the maximum number of characters per line for a caption to LENGTH.
-                                     Minimum is 20. Default is 37.
+                                     Minimum is 20. Default is 37 (30 for Chinese). TODO1 Also Japanese, Korean?
     --lines LINES                    Set the number of lines for a caption to LINES.
                                      Minimum is 1. Default is 2.
     --delay SECONDS                  How many SECONDS to delay the appearance of each caption.
