@@ -4,7 +4,9 @@ This sample demonstrates how to recognize intent with Java using the Speech SDK 
 See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstarts/speech-to-text-from-microphone?tabs=dotnet%2Cx-android%2Clinux%2Candroid%2Cwindowsinstall&pivots=programming-language-java) on the SDK documentation page which describes how to build this sample from scratch in Android Studio.
 
 ## Prerequisites
-
+* A subscription key and region for the Speech service [Create one for free](https://azure.microsoft.com/en-us/free/cognitive-services/)
+* [Create a Speech resource](https://ms.portal.azure.com/#create/Microsoft.CognitiveServicesSpeechServices) in the Azure portal.
+* Get the resource key and region. After your Speech resource is deployed, select Go to resource to view and manage keys. or  more information about Cognitive Services resources, see [Get the keys for your resource](https://docs.microsoft.com/en-us/azure/cognitive-services/cognitive-services-apis-create-account?tabs=multiservice%2Cwindows#get-the-keys-for-your-resource)
 * A LUIS account. You can get one for free through the [LUIS portal](https://www.luis.ai/home).
 * A new or existing LUIS app - [create LUIS app](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstarts/intent-recognition#create-a-luis-app-for-intent-recognition)
 * A PC (Windows, Linux, Mac) capable to run Android Studio.

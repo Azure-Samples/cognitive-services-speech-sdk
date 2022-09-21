@@ -8,7 +8,9 @@ See the [Accompanying QuickStart Documentation](https://docs.microsoft.com/azure
 
 ## Prerequisites
 
-* A subscription key for the Speech service is needed. See [Create a Speech Service Key for free](https://azure.microsoft.com/en-us/free/cognitive-services/).
+* [Create a Speech Portal](https://ms.portal.azure.com/#create/Microsoft.CognitiveServicesSpeechServices) Create a Speech Portal
+* Get the resource key and region. After your Speech resource is deployed, select Go to resource to view and manage keys. For more information about Cognitive Services resources, see [Get the keys for the resource](https://learn.microsoft.com/en-us/azure/cognitive-services/cognitive-services-apis-create-account?tabs=multiservice%2Canomaly-detector%2Clanguage-service%2Ccomputer-vision%2Clinux#get-the-keys-for-your-resource)
+
 * A Linux PC with a working microphone.
 * On Ubuntu or Debian, install these packages to build and run this sample:
 
