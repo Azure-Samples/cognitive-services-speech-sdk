@@ -21,6 +21,7 @@ namespace Azure.AI.Details.Common.CLI
 {
     public struct Caption
     {
+        public string? Language;
         public int Sequence;
         public TimeSpan Begin;
         public TimeSpan End;
@@ -29,7 +30,7 @@ namespace Azure.AI.Details.Common.CLI
 
     public class CaptionHelper
     {
-        public static IEnumerable<Caption> GetCaptions(string language, int maxWidth, int maxHeight, IEnumerable<object> results)
+        public static IEnumerable<Caption> GetCaptions(string? language, int maxWidth, int maxHeight, IEnumerable<object> results)
         {
             var helper = new CaptionHelper(language, maxWidth, maxHeight, results);
             return helper.GetCaptions();
@@ -52,7 +53,7 @@ namespace Azure.AI.Details.Common.CLI
             return retval;
         }
 
-        public CaptionHelper(string language, int maxWidth, int maxHeight, IEnumerable<object> results)
+        public CaptionHelper(string? language, int maxWidth, int maxHeight, IEnumerable<object> results)
         {
             this._language = language;
 
@@ -109,11 +110,16 @@ namespace Azure.AI.Details.Common.CLI
 
         private string? GetTextOrTranslation(RecognitionResult result)
         {
+            return result.Text;
+            // 20220921 We do not use this for now because this sample
+            // does not handle TranslationRecognitionResults.
+            /*
             if (_language == null) return result.Text;
 
             return result is TranslationRecognitionResult translated && translated.Translations.Keys.Contains(_language)
                 ? translated.Translations[_language]
                 : null;
+            */
         }
 
         private void AddCaptionsForFinalResult(RecognitionResult result, string text)
