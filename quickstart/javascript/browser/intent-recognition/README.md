@@ -5,7 +5,9 @@ This sample shows how to recognize intent with the Speech Service using the Spee
 * See the [overview article](https://docs.microsoft.com/azure/cognitive-services/speech-service/intent-recognition) on the SDK documentation page to learn more about intent recognition using the Speech Service.
 
 ## Prerequisites
-
+* A subscription key and region for the Speech service [Create one for free](https://azure.microsoft.com/en-us/free/cognitive-services/)
+* [Create a Speech resource](https://ms.portal.azure.com/#create/Microsoft.CognitiveServicesSpeechServices) in the Azure portal.
+* Get the resource key and region. After your Speech resource is deployed, select Go to resource to view and manage keys. or  more information about Cognitive Services resources, see [Get the keys for your resource](https://docs.microsoft.com/en-us/azure/cognitive-services/cognitive-services-apis-create-account?tabs=multiservice%2Cwindows#get-the-keys-for-your-resource)
 * A LUIS account. You can get one for free through the [LUIS portal](https://www.luis.ai/home).
 * A new or existing LUIS app - [create LUIS app](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstarts/intent-recognition#create-a-luis-app-for-intent-recognition)
 * A PC or Mac, with a working microphone.
