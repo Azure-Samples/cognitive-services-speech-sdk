@@ -20,13 +20,11 @@ namespace Captioning
 	
     public class UserConfig
     {
-        // TODO1 TEMP
         readonly public static int defaultMaxLineLengthSBCS = 37;
         readonly public static int defaultMaxLineLengthMBCS = 30;
         
-        // TODO1 TEMP
+        // 20220921 This is for debugging out-of-order Recognizing results and can be removed.
         readonly public bool debug = false;
-        
         /// True to use a compressed audio format; otherwise, use uncompressed (wav).
         readonly public bool useCompressedAudio = false;
         /// Compressed audio format for input audio. Default is Any.
@@ -136,7 +134,6 @@ namespace Captioning
                     retval.Add(language);
                 }
             }
-            // TODO1 Default to en-US?
             return retval;
         }
 
