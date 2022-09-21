@@ -164,7 +164,7 @@ ResultId:42da47f298334ab6aa393a9b2e0b50cd Reason:RecognizedSpeech Recognized tex
             // than the end timestamp for this result, drop the result.
             // This sometimes happens when we receive a lot of Recognizing results close together.
             if (_previousEndTime is TimeSpan previousEndTimeValue &&
-                previousEndTimeValue >= endTime)
+                previousEndTimeValue > endTime)
             {
                 // TODO1 TEMP
                 if (this._userConfig!.debug)
@@ -183,7 +183,7 @@ Previous result:
 End time (undelayed): {previousEndTimeValue.ToString()}
 End time (delayed): {previousEndTimeValue.Add(this._userConfig!.delay).ToString()}
 
-Dropped result undelayed end time ({endTime.ToString()}) <= previous result undelayed end time ({previousEndTimeValue.ToString()}).
+Dropped result undelayed end time ({endTime.ToString()}) < previous result undelayed end time ({previousEndTimeValue.ToString()}).
 Note previous result will appear *after* this debug output.
 END DEBUG
 
@@ -234,7 +234,21 @@ END DEBUG
                     // by a Recognized result.
                     else
                     {
+                        // TODO1 Note for some Recognized results this might give them a display time of 0, however, they'll be put in the recognized list and shown behind any current recognizing results.
                         caption.Begin = previousCaption.End;
+                    }
+
+                    // TODO1 TEMP
+                    if (this._userConfig!.debug && previousCaption.Begin > previousCaption.End)
+                    {
+                        var strResultType = _previousResultIsRecognized ? "Recognized" : "Recognizing";
+                        WriteToConsoleOrFile($@"DEBUG: Caption start time > caption end time.
+Type: {strResultType}
+Start time: {previousCaption.Begin.ToString()}
+End time: {previousCaption.End.ToString()}
+END DEBUG
+
+");
                     }
 
                     retval = StringFromCaption(language, previousCaption);
