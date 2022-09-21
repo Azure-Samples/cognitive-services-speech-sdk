@@ -32,10 +32,8 @@ namespace Captioning
         private TimeSpan? _previousEndTime;
         private bool _previousResultIsRecognized = false;
         private List<string> _recognizedLines = new List<string>();
-        // TODO1 TEMP
-        //private List<RecognitionResult> _realTimeResults = new List<RecognitionResult>();
         
-        private List<RecognitionResult> _offlineResults = new List<RecognitionResult>();
+        private List<SpeechRecognitionResult> _offlineResults = new List<SpeechRecognitionResult>();
         
         private static string V2EndpointFromRegion(string region)
         {
@@ -68,42 +66,19 @@ namespace Captioning
                 : $"{startTime:hh\\:mm\\:ss\\.fff} --> {endTime:hh\\:mm\\:ss\\.fff}";
         }
 
-/* TODO1 This is not currently used.
-Passing result to CaptionHelper causes GetTextOrTranslation to return nothing.
-GetTextOrTranslation looks for result is TranslationRecognitionResult translated && translated.Translations.Keys.Contains(_language).
-That's not happening because we don't specify languages to the speech recognizer. Default languageIDLanguages is empty list, not en-US.
-
-Result looks like this:
-ResultId:42da47f298334ab6aa393a9b2e0b50cd Reason:RecognizedSpeech Recognized text:<One more with six seconds.>. Json:{"Id":"42da47f298334ab6aa393a9b2e0b50cd","RecognitionStatus":"Success","DisplayText":"One more with six seconds.","Offset":25800000,"Duration":15900000}
-*/
-/*
-        private string GetLanguageForCaptionHelper()
-        {
-            var language = "en-US";
-            if (this._userConfig!.languageIDLanguages is string[] languageIDLanguagesValue)
-            {
-                // If the user specified languages, for now, we just use the first one.
-                // TODO1 Talk to Rob and Heiko about this. Should CaptionHelper get the language from each result?
-                language = languageIDLanguagesValue[0];
-            }
-            return language;
-        }
-*/
-
         private string? LanguageFromSpeechRecognitionResult(SpeechRecognitionResult result)
         {
             string? retval = null;
             
             if (this._userConfig!.languageIDLanguages.Count > 0)
             {
-                var languageIDResult = AutoDetectSourceLanguageResult.FromResult(result);
-                retval = languageIDResult.Language;
+                retval = AutoDetectSourceLanguageResult.FromResult(result).Language;
             }
 
             return retval;
         }
 
-        private string StringFromCaption(string? language, Caption caption)
+        private string StringFromCaption(Caption caption)
         {
             var retval = new StringBuilder();
             
@@ -112,9 +87,8 @@ ResultId:42da47f298334ab6aa393a9b2e0b50cd Reason:RecognizedSpeech Recognized tex
                 retval.AppendFormat($"{caption.Sequence}{Environment.NewLine}");
             }
             retval.AppendFormat($"{GetTimestamp(caption.Begin, caption.End)}{Environment.NewLine}");
-            // TODO1 I think Heiko wanted to remove this. I.e., only have language specified for entire transcript, not per result.
-            // TODO1 Keep it, only show if there are > 1 language.
-            if (language is string languageValue)
+            // Only show the language prefix if the user specified multiple languages.
+            if (caption.Language is string languageValue && this._userConfig!.languageIDLanguages.Count > 1)
             {
                 retval.Append($"[{languageValue}] ");
             }
@@ -122,16 +96,10 @@ ResultId:42da47f298334ab6aa393a9b2e0b50cd Reason:RecognizedSpeech Recognized tex
             return retval.ToString();
         }
 
-        private string AdjustRealTimeCaptionText(string text, bool isRecognizedResult)
+        private string AdjustRealTimeCaptionText(string? language, string text, bool isRecognizedResult)
         {
             // Split the caption text into multiple lines based on maxLineLength and lines.
-            // TODO1 We should always pass null to caption helper, it only wants language info
-            // so it can check for TranslationRecognitionResult.
-            // Maybe we should just comment that out.
-            // Or just always pass null.
-            // Get CaptionHelper out of the business of messing with languages.
-            // TODO1 Which means we should set maxLineLength from 37 to 30 here, not there?
-            var captionHelper = new CaptionHelper(null, this._userConfig!.maxLineLength, this._userConfig!.lines, Enumerable.Empty<object>());
+            var captionHelper = new CaptionHelper(language, this._userConfig!.maxLineLength, this._userConfig!.lines, Enumerable.Empty<object>());
             List<string> lines = captionHelper.LinesFromText(text);
 
             // Recognizing results can change with each new result, so we do not save previous Recognizing results.
@@ -166,7 +134,7 @@ ResultId:42da47f298334ab6aa393a9b2e0b50cd Reason:RecognizedSpeech Recognized tex
             if (_previousEndTime is TimeSpan previousEndTimeValue &&
                 previousEndTimeValue > endTime)
             {
-                // TODO1 TEMP
+                // 20220921 This is for debugging out-of-order Recognizing results and can be removed.
                 if (this._userConfig!.debug)
                 {
                     var strResultType = isRecognizedResult ? "Recognized" : "Recognizing";
@@ -198,6 +166,7 @@ END DEBUG
                 // Convert the SpeechRecognitionResult to a caption.
                 Caption caption = new Caption()
                 {
+                    Language = language,
                     Sequence = _srtSequenceNumber++,
                     Begin = startTime.Add(this._userConfig!.delay),
                     End = endTime.Add(this._userConfig!.delay),
@@ -234,11 +203,10 @@ END DEBUG
                     // by a Recognized result.
                     else
                     {
-                        // TODO1 Note for some Recognized results this might give them a display time of 0, however, they'll be put in the recognized list and shown behind any current recognizing results.
                         caption.Begin = previousCaption.End;
                     }
 
-                    // TODO1 TEMP
+                    // 20220921 This is for debugging out-of-order Recognizing results and can be removed.
                     if (this._userConfig!.debug && previousCaption.Begin > previousCaption.End)
                     {
                         var strResultType = _previousResultIsRecognized ? "Recognized" : "Recognizing";
@@ -251,11 +219,11 @@ END DEBUG
 ");
                     }
 
-                    retval = StringFromCaption(language, previousCaption);
+                    retval = StringFromCaption(previousCaption);
                 }
 
                 // Break the caption text into lines if needed.
-                caption.Text = AdjustRealTimeCaptionText(result.Text, isRecognizedResult);
+                caption.Text = AdjustRealTimeCaptionText(language, result.Text, isRecognizedResult);
                 // Save the current caption as the previous caption.
                 _previousCaption = caption;
                 // Save the result type as the previous result type.
@@ -267,8 +235,25 @@ END DEBUG
 
         private IEnumerable<Caption> CaptionsFromOfflineResults()
         {
-            // Split the caption text into multiple lines based on maxLineLength and lines.
-            IEnumerable<Caption> captions = CaptionHelper.GetCaptions(null, this._userConfig!.maxLineLength, this._userConfig!.lines, _offlineResults);
+            IEnumerable<Caption> captions = _offlineResults
+                // Group offline results by language.
+                .GroupBy(result => LanguageFromSpeechRecognitionResult(result))
+                // For each language, for each caption, split the caption text
+                // into multiple lines based on maxLineLength and lines.
+                // We need to group by language because CaptionHelper handles
+                // some languages differently.
+                // Combine all updated captions.
+                .SelectMany(grouping => {
+                    IEnumerable<Caption> captions = CaptionHelper.GetCaptions(grouping.Key, this._userConfig!.maxLineLength, this._userConfig!.lines, grouping);
+                    // Add the language to each caption.
+                    return captions.Select(caption => {
+                        caption.Language = grouping.Key;
+                        return caption;
+                    });
+                })
+                // Re-sort the captions by starting timestamp.
+                .OrderBy(caption => caption.Begin);
+
             // Save the last caption.
             Caption lastCaption = captions.Last();
             lastCaption.End.Add(this._userConfig!.remainTime);
@@ -290,35 +275,13 @@ END DEBUG
             return captions_2;
         }
 
-// TODO1 Just create separate caption helpers, one per language, filter input to it by language, then combine output and sort by begin timestamp.
-// We ARE going to have to do that because one might be zh, one not.
-
         private void Finish()
         {
-            // TODO1 TEMP
-/*
-            foreach ((RecognitionResult, RecognitionResult) captions in _realTimeResults.Pairwise())
-            {
-                var (item1, item2) = (captions.Item1, captions.Item2);
-                if (item1.OffsetInTicks > item2.OffsetInTicks)
-                {
-                    WriteToConsoleOrFile($"ALERT: item 1 start {item1.OffsetInTicks} > item 2 start {item2.OffsetInTicks}. Item 1 text: {item1.Text}\n. Item 2 text: {item2.Text}\n");
-                }
-                var item1_end = new TimeSpan(item1.OffsetInTicks).Add(item1.Duration);
-                var item2_end = new TimeSpan(item2.OffsetInTicks).Add(item2.Duration);
-                if (item1_end >= item2_end)
-                {
-                    WriteToConsoleOrFile($"ALERT: item 1 end {item1_end.ToString()} >= item 2 end {item2_end.ToString()}. Item 1 text: {item1.Text}\n. Item 2 text: {item2.Text}\n");
-                }                
-            }
-*/
-            
             if (CaptioningMode.Offline == this._userConfig!.captioningMode)
             {
                 foreach (Caption caption in CaptionsFromOfflineResults())
                 {
-                    // TODO1 Fix language. We might be able to remove lang parameter from StringFromCaption.
-                    WriteToConsoleOrFile(StringFromCaption(null, caption));
+                    WriteToConsoleOrFile(StringFromCaption(caption));
                 }
             }
             else if (CaptioningMode.RealTime == this._userConfig!.captioningMode)
@@ -327,8 +290,7 @@ END DEBUG
                 if (_previousCaption is Caption previousCaptionValue)
                 {
                     previousCaptionValue.End.Add(this._userConfig!.remainTime);
-                    // TODO1 Fix language. We might be able to remove lang parameter from StringFromCaption.
-                    WriteToConsoleOrFile(StringFromCaption(null, previousCaptionValue));
+                    WriteToConsoleOrFile(StringFromCaption(previousCaptionValue));
                 }
             }
         }
@@ -447,9 +409,6 @@ END DEBUG
             {
                 speechRecognizer.Recognizing += (object? sender, SpeechRecognitionEventArgs e) =>
                     {
-                        // TODO1 TEMP
-                        //_realTimeResults.Add(e.Result);
-                        
                         if (ResultReason.RecognizingSpeech == e.Result.Reason && e.Result.Text.Length > 0)
                         {
                             if (CaptionFromRealTimeResult(e.Result, false) is string caption)
@@ -567,7 +526,7 @@ END DEBUG
     --output FILE                    Output captions to FILE.
     --srt                            Output captions in SubRip Text format (default format is WebVTT.)
     --maxLineLength LENGTH           Set the maximum number of characters per line for a caption to LENGTH.
-                                     Minimum is 20. Default is 37 (30 for Chinese). TODO1 Also Japanese, Korean?
+                                     Minimum is 20. Default is 37 (30 for Chinese).
     --lines LINES                    Set the number of lines for a caption to LINES.
                                      Minimum is 1. Default is 2.
     --delay SECONDS                  How many SECONDS to delay the appearance of each caption.
