@@ -390,7 +390,7 @@ END DEBUG
             {
                 var grammar = PhraseListGrammar.FromRecognizer(speechRecognizer);
                 foreach (var phrase in phraseListValue.Split(";")) {
-                    grammar.AddPhrase(phrase);
+                    grammar.AddPhrase(phrase.Trim());
                 }
             }
             
