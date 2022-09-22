@@ -149,7 +149,8 @@ namespace CallCenter
                     contentUrls = new string[] { inputAudioURL },
                     properties = new { diarizationEnabled = !this.userConfig.useStereoAudio },
                     locale = this.userConfig.locale,
-                    displayName = $"call_center_{DateTime.Now.ToString()}"
+                    displayName = $"call_center_{DateTime.Now.ToString()}",
+                    timeToLive = "PT30M"
                 };
             var response = await RestHelper.SendPost(uri.Uri.ToString(), JsonSerializer.Serialize(content), this.userConfig.speechSubscriptionKey, new HttpStatusCode[]{ HttpStatusCode.Created });
             using (JsonDocument document = JsonDocument.Parse(response.content))
@@ -238,17 +239,17 @@ namespace CallCenter
                 {
                     var best = phrase.GetProperty("nBest").EnumerateArray().First();
                     // If the user specified stereo audio, and therefore we turned off diarization,
-                    // the speaker number is replaced by a channel number.
+                    // only the channel property is present.
                     // Note: Channels are numbered from 0. Speakers are numbered from 1.
                     int speakerNumber;
                     JsonElement element;
-                    if (phrase.TryGetProperty("channel", out element))
-                    {
-                        speakerNumber = element.GetInt32();
-                    }
-                    else if (phrase.TryGetProperty("speaker", out element))
+                    if (phrase.TryGetProperty("speaker", out element))
                     {
                         speakerNumber = element.GetInt32() - 1;
+                    }                    
+                    else if (phrase.TryGetProperty("channel", out element))
+                    {
+                        speakerNumber = element.GetInt32();
                     }
                     else
                     {
@@ -349,6 +350,9 @@ namespace CallCenter
                             .GetProperty("nBest")
                             .EnumerateArray()
                             // Add the sentiment confidence scores to the JsonElement in the nBest array.
+                            // TODO2 We are adding the same sentiment data to each nBest item.
+                            // However, the sentiment data are based on the phrase from the first nBest item.
+                            // See GetTranscriptionPhrases() and GetSentimentAnalysis().
                             .Select(nBestItem => AddOrChangeValueInJsonElement<JsonElement>(nBestItem, "sentiment", sentimentConfidenceScores[id]));
                         // Update the nBest item in the recognizedPhrases array.
                         return AddOrChangeValueInJsonElement<IEnumerable<JsonElement>>(phrase, "nBest", nBest_2);
@@ -426,7 +430,7 @@ namespace CallCenter
                                 "All",
                             },
                             includeAudioRedaction = false,
-                            redactionSource = "lexical",
+                            redactionSource = "text",
                             modelVersion = conversationSummaryModelVersion,
                             loggingOptOut = false,
                         },
@@ -531,15 +535,15 @@ namespace CallCenter
                 result.AppendLine();
             }
             result.AppendLine(conversationAnalysis.summary.Aggregate($"Conversation summary:{Environment.NewLine}",
-                (result, item) => $"{result}    Aspect: {item.aspect}. Summary: {item.summary}.{Environment.NewLine}"));
+                (result, item) => $"{result}    {item.aspect}: {item.summary}.{Environment.NewLine}"));
             return result.ToString();
         }
 
-        private void PrintSimpleOutput(string outputFilePathValue, TranscriptionPhrase[] transcriptionPhrases, SentimentAnalysisResult[] sentimentAnalysisResults, JsonElement conversationAnalysis)
+        private void PrintSimpleOutput(TranscriptionPhrase[] transcriptionPhrases, SentimentAnalysisResult[] sentimentAnalysisResults, JsonElement conversationAnalysis)
         {
             string[] sentiments = GetSentimentsForSimpleOutput(sentimentAnalysisResults);
             ConversationAnalysisForSimpleOutput conversation = GetConversationAnalysisForSimpleOutput(conversationAnalysis);
-            File.WriteAllText(outputFilePathValue, GetSimpleOutput(transcriptionPhrases, sentiments, conversation));
+            Console.WriteLine(GetSimpleOutput(transcriptionPhrases, sentiments, conversation));
         }
 
         private object GetConversationAnalysisForFullOutput(TranscriptionPhrase[] transcriptionPhrases, JsonElement conversationAnalysis)
@@ -591,14 +595,14 @@ namespace CallCenter
             };
         }
 
-        private void PrintFullOutput(JsonElement transcription, JsonElement[] sentimentConfidenceScores, TranscriptionPhrase[] transcriptionPhrases, JsonElement conversationAnalysis)
+        private void PrintFullOutput(string outputFilePathValue, JsonElement transcription, JsonElement[] sentimentConfidenceScores, TranscriptionPhrase[] transcriptionPhrases, JsonElement conversationAnalysis)
         {
             var results = new
             {
                 transcription = MergeSentimentConfidenceScoresIntoTranscription(transcription, sentimentConfidenceScores),
                 conversationAnalyticsResults = GetConversationAnalysisForFullOutput(transcriptionPhrases, conversationAnalysis)
             };
-            Console.WriteLine(JsonSerializer.Serialize(results, new JsonSerializerOptions() { WriteIndented = true, Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping }));
+            File.WriteAllText(outputFilePathValue, JsonSerializer.Serialize(results, new JsonSerializerOptions() { WriteIndented = true, Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping }));
         }
 
         // Note: To pass command-line arguments, run:
@@ -641,16 +645,10 @@ namespace CallCenter
             var conversationAnalysisUrl = await RequestConversationAnalysis(conversationItems);
             await WaitForConversationAnalysis(conversationAnalysisUrl);
             JsonElement conversationAnalysis = await GetConversationAnalysis(conversationAnalysisUrl);
+            PrintSimpleOutput(transcriptionPhrases, sentimentAnalysisResults, conversationAnalysis);
             if (this.userConfig.outputFilePath is string outputFilePathValue)
             {
-                PrintSimpleOutput(outputFilePathValue, transcriptionPhrases, sentimentAnalysisResults, conversationAnalysis);
-            }
-            PrintFullOutput(transcription, sentimentConfidenceScores, transcriptionPhrases, conversationAnalysis);
-            if (this.userConfig.inputFilePath is null)
-            {
-                // Clean up resources.
-                Console.WriteLine("Deleting transcription.");
-                await DeleteTranscription(transcriptionId);
+                PrintFullOutput(outputFilePathValue, transcription, sentimentConfidenceScores, transcriptionPhrases, conversationAnalysis);
             }
             return;
         }
