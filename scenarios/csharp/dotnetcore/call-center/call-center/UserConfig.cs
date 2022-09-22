@@ -19,7 +19,9 @@ namespace CallCenter
         /// Locale for batch transcription.
         readonly public string locale;
         /// Input audio file URL.
-        readonly public string inputAudioURL;
+        readonly public string? inputAudioURL;
+        /// Input batch transcription output file.
+        readonly public string? inputFilePath;
         /// Output file path.
         readonly public string? outputFilePath;
         /// The subscription key for your Speech service subscription.
@@ -52,15 +54,40 @@ namespace CallCenter
 
         public UserConfig(string[] args, string usage)
         {
+            string? inputAudioURL = GetCmdOption(args, "--input");
+            string? inputFilePath = GetCmdOption(args, "--jsonInput");
+            if (inputAudioURL is null && inputFilePath is null)
+            {
+                throw new ArgumentException($"Please specify either --input or --jsonInput.{Environment.NewLine}Usage: {usage}");
+            }            
+            
             string? speechSubscriptionKey = GetCmdOption(args, "--speechKey");
             if (speechSubscriptionKey is null)
             {
-                throw new ArgumentException($"Missing Speech subscription key.{Environment.NewLine}Usage: {usage}");
+                if (inputFilePath is null)
+                {
+                    throw new ArgumentException($"Missing Speech subscription key. Speech subscription key is required unless --jsonInput is present.{Environment.NewLine}Usage: {usage}");
+                }
+                else
+                {
+                    speechSubscriptionKey = "";
+                }
             }
-            string? speechRegion = GetCmdOption(args, "--speechRegion");
-            if (speechRegion is null)
+            string speechEndpoint = "";
+            if (GetCmdOption(args, "--speechRegion") is string speechRegionValue)
             {
-                throw new ArgumentException($"Missing Speech region.{Environment.NewLine}Usage: {usage}");
+                speechEndpoint = $"{speechRegionValue}{partialSpeechEndpoint}";
+            }
+            else
+            {
+                if (inputFilePath is null)
+                {
+                    throw new ArgumentException($"Missing Speech region. Speech region is required unless --jsonInput is present.{Environment.NewLine}Usage: {usage}");
+                }
+                else
+                {
+                    speechEndpoint = "";
+                }
             }
             
             string? languageSubscriptionKey = GetCmdOption(args, "--languageKey");
@@ -73,13 +100,8 @@ namespace CallCenter
             {
                 throw new ArgumentException($"Missing Language endpoint.{Environment.NewLine}Usage: {usage}");
             }
-
-            string? inputAudioURL = GetCmdOption(args, "--input");
-            if (inputAudioURL is null)
-            {
-                throw new ArgumentException($"Missing input audio URL.{Environment.NewLine}Usage: {usage}");
-            }
-            
+            languageEndpoint = languageEndpoint.Replace("https://", "");
+           
             string? language = GetCmdOption(args, "--language");
             if (language is null)
             {
@@ -95,9 +117,10 @@ namespace CallCenter
             this.language = language;
             this.locale = locale;
             this.inputAudioURL = inputAudioURL;
+            this.inputFilePath = inputFilePath;
             this.outputFilePath = GetCmdOption(args, "--output");
             this.speechSubscriptionKey = speechSubscriptionKey;
-            this.speechEndpoint = $"{speechRegion}{partialSpeechEndpoint}";
+            this.speechEndpoint = speechEndpoint;
             this.languageSubscriptionKey = languageSubscriptionKey;
             this.languageEndpoint = languageEndpoint;
         }
