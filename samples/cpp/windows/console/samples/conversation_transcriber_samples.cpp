@@ -9,6 +9,7 @@
 #include <fstream>
 #include "wav_file_reader.h"
 #include <chrono>
+#include <thread>
 
 using namespace std;
 using namespace Microsoft::CognitiveServices::Speech;

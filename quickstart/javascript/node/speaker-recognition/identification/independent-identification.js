@@ -12,7 +12,7 @@
   const subscriptionKey = "YourSubscriptionKey";
   const serviceRegion = "YourSubscriptionRegion"; // e.g., "westus"
   const enrollFile = "aboutSpeechSdk.wav"; // 16000 Hz, Mono
-  const identificationFile = "myVoiceIsMyPassportVerifyMe01.wav"; // 16000 Hz, Mono
+  const identificationFile = "TalkForAFewSeconds16.wav"; // 16000 Hz, Mono
   
   // now create the speech config with the credentials for the subscription
   const speechConfig = sdk.SpeechConfig.fromSubscription(subscriptionKey, serviceRegion);

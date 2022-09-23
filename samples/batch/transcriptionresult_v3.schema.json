@@ -218,6 +218,17 @@
                         "default": 0,
                         "minimum": 0
                     },
+                    "speaker": {
+                        "$id": "#root/recognizedPhrases/items/speaker",
+                        "title": "Speaker",
+                        "type": "integer",
+                        "description": "if `diarizationEnabled` is `true`, this is the identified speaker, otherwise this property is not present",
+                        "examples": [
+                            1
+                        ],
+                        "default": 0,
+                        "minimum": 0
+                    },
                     "nBest": {
                         "$id": "#root/recognizedPhrases/items/nBest",
                         "title": "NBest",
@@ -247,17 +258,6 @@
                                     "default": 0.0,
                                     "minimum": 0.0,
                                     "maximum": 1.0
-                                },
-                                "speaker": {
-                                    "$id": "#root/recognizedPhrases/items/nBest/items/speaker",
-                                    "title": "Speaker",
-                                    "type": "integer",
-                                    "description": "if `diarizationEnabled` is `true`, this is the identified speaker (1 or 2), otherwise this property is not present",
-                                    "examples": [
-                                        1
-                                    ],
-                                    "default": 1,
-                                    "minimum": 1
                                 },
                                 "lexical": {
                                     "$id": "#root/recognizedPhrases/items/nBest/items/lexical",

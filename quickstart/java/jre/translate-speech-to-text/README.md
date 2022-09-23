@@ -1,6 +1,6 @@
 # Quickstart: Translate speech in Java on Windows, macOS or Linux
 
-This sample demonstrates how to translate speech with the Speech SDK for Java on Windows or Linux (Ubuntu 16.04, Ubuntu 18.04, Debian 9, RHEL 8, CentOS 8).
+This sample demonstrates how to translate speech with the Speech SDK for Java on Windows, macOS or Linux.
 See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started-speech-translation?tabs=script%2Cwindowsinstall&pivots=programming-language-java) on the SDK documentation page which describes how to build this sample from scratch in Eclipse.
 
 > **Note:**
@@ -16,10 +16,10 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 
   ```sh
   sudo apt-get update
-  sudo apt-get install libssl1.0.0 libasound2
+  sudo apt-get install libssl-dev libasound2
   ```
 
-  * If libssl1.0.0 is not available, install libssl1.0.x (where x is greater than 0) or libssl1.1 instead.
+  * On **Ubuntu 22.04 LTS** it is also required to download and install the latest **libssl1.1** package e.g. from http://security.ubuntu.com/ubuntu/pool/main/o/openssl/.
 
 * On RHEL or CentOS, run the following commands for the installation of required packages:
 

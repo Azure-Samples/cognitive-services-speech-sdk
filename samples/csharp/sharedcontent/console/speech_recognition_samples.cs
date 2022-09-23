@@ -72,7 +72,7 @@ namespace MicrosoftSpeechSDKSamples
             // Creates an instance of a speech config with specified subscription key and service region.
             // Replace with your own subscription key and service region (e.g., "westus").
             var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
- 
+
             // Replace the language with your language in BCP-47 format, e.g., en-US.
             var language = "de-DE";
 
@@ -81,7 +81,7 @@ namespace MicrosoftSpeechSDKSamples
 
             // If you also want word-level timing in the detailed recognition results, set the following.
             // Note that if you set the following, you can omit the previous line
-            //      "config.OutputFormat = OutputFormat.Detailed", 
+            //      "config.OutputFormat = OutputFormat.Detailed",
             // since word-level timing implies detailed recognition results.
             config.RequestWordLevelTimestamps();
 
@@ -109,7 +109,7 @@ namespace MicrosoftSpeechSDKSamples
                     // The first item in detailedResults corresponds to the recognized text
                     // (NOT the item with the highest confidence number!)
                     var detailedResults = result.Best();
-                    foreach (var item in detailedResults) 
+                    foreach (var item in detailedResults)
                     {
                         Console.WriteLine($"\tConfidence: {item.Confidence}\n\tText: {item.Text}\n\tLexicalForm: {item.LexicalForm}\n\tNormalizedForm: {item.NormalizedForm}\n\tMaskedNormalizedForm: {item.MaskedNormalizedForm}");
                         Console.WriteLine($"\tWord-level timing:");
@@ -966,12 +966,15 @@ namespace MicrosoftSpeechSDKSamples
         }
 
         // Pronunciation assessment with microphone as audio input.
+        // See more information at https://aka.ms/csspeech/pa
         public static async Task PronunciationAssessmentWithMicrophoneAsync()
         {
             // Creates an instance of a speech config with specified subscription key and service region.
             // Replace with your own subscription key and service region (e.g., "westus").
-            // Note: The pronunciation assessment feature is currently only available on en-US language.
             var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+
+            // Replace the language with your language in BCP-47 format, e.g., en-US.
+            var language = "en-US";
 
             // The pronunciation assessment service has a longer default end silence timeout (5 seconds) than normal STT
             // as the pronunciation assessment is widely used in education scenario where kids have longer break in reading.
@@ -984,7 +987,7 @@ namespace MicrosoftSpeechSDKSamples
                 GradingSystem.HundredMark, Granularity.Phoneme, true);
 
             // Creates a speech recognizer for the specified language, using microphone as audio input.
-            using (var recognizer = new SpeechRecognizer(config))
+            using (var recognizer = new SpeechRecognizer(config, language))
             {
                 while (true)
                 {
@@ -1046,11 +1049,11 @@ namespace MicrosoftSpeechSDKSamples
         }
 
         // Pronunciation assessment with audio stream input.
+        // See more information at https://aka.ms/csspeech/pa
         public static void PronunciationAssessmentWithStream()
         {
             // Creates an instance of a speech config with specified subscription key and service region.
             // Replace with your own subscription key and service region (e.g., "westus").
-            // Note: The pronunciation assessment feature is currently only available on en-US language.
             var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
             // Read audio data from file. In real scenario this can be from memory or network
