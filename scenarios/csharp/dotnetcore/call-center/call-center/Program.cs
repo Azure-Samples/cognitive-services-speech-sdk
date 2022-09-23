@@ -147,10 +147,12 @@ namespace CallCenter
             var content = new
                 {
                     contentUrls = new string[] { inputAudioURL },
-                    properties = new { diarizationEnabled = !this.userConfig.useStereoAudio },
+                    properties = new { 
+                        diarizationEnabled = !this.userConfig.useStereoAudio,
+                        timeToLive = "PT3M"
+                    },
                     locale = this.userConfig.locale,
                     displayName = $"call_center_{DateTime.Now.ToString()}",
-                    timeToLive = "PT30M"
                 };
             var response = await RestHelper.SendPost(uri.Uri.ToString(), JsonSerializer.Serialize(content), this.userConfig.speechSubscriptionKey, new HttpStatusCode[]{ HttpStatusCode.Created });
             using (JsonDocument document = JsonDocument.Parse(response.content))
