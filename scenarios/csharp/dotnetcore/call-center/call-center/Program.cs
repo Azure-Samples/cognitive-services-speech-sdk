@@ -149,7 +149,7 @@ namespace CallCenter
                     contentUrls = new string[] { inputAudioURL },
                     properties = new { 
                         diarizationEnabled = !this.userConfig.useStereoAudio,
-                        timeToLive = "PT3M"
+                        timeToLive = "PT30M"
                     },
                     locale = this.userConfig.locale,
                     displayName = $"call_center_{DateTime.Now.ToString()}",
