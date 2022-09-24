@@ -5,12 +5,11 @@
 
 # Note: abc = abstract base classes
 from collections.abc import Mapping
-from datetime import time
+from datetime import date, datetime, time, timedelta
 from sys import argv
 from typing import Optional
 from pathlib import Path
-
-import azure.cognitiveservices.speech as speechsdk
+import azure.cognitiveservices.speech as speechsdk # type: ignore
 
 # See speech_recognize_once_compressed_input() in:
 # https://github.com/Azure-Samples/cognitive-services-speech-sdk/blob/master/samples/python/console/speech_sample.py
@@ -47,43 +46,14 @@ class Read_Only_Dict(Mapping):
     def __iter__(self):
         return iter(self._data)
 
-def get_cmd_option(option : str) -> Optional[str] :
-    argc = len(argv)
-    if option in argv :
-        index = argv.index(option)
-        if index < argc - 1 :
-            # We found the option (for example, "--output"), so advance from that to the value (for example, "filename").
-            return argv[index + 1]
-        else :
-            return None
-    else :
-        return None
+# See:
+# https://stackoverflow.com/a/12448721
+# https://stackoverflow.com/a/39651061
+def add_time_and_timedelta(t1 : time, t2 : timedelta) -> time :
+    return (datetime.combine(date.min, t1) + t2).time()
 
-def cmd_option_exists(option : str) -> bool :
-    return option in argv
-
-def get_compressed_audio_format() -> speechsdk.AudioStreamContainerFormat :
-    value = get_cmd_option("--format")
-    if value is None :
-        return speechsdk.AudioStreamContainerFormat.ANY
-    else :
-        value = value.lower()
-        if "alaw" == value : return speechsdk.AudioStreamContainerFormat.ALAW
-        elif "flac" == value : return speechsdk.AudioStreamContainerFormat.FLAC
-        elif "mp3" == value : return speechsdk.AudioStreamContainerFormat.MP3
-        elif "mulaw" == value : return speechsdk.AudioStreamContainerFormat.MULAW
-        elif "ogg_opus" == value : return speechsdk.AudioStreamContainerFormat.OGG_OPUS
-        else : return speechsdk.AudioStreamContainerFormat.ANY;
-
-def get_profanity_option() -> speechsdk.ProfanityOption :
-    value = get_cmd_option("--profanity")
-    if value is None :
-        return speechsdk.ProfanityOption.Masked
-    else :
-        value = value.lower()
-        if "raw"  == value: return speechsdk.ProfanityOption.Raw
-        elif "remove" == value : return speechsdk.ProfanityOption.Removed
-        else : return speechsdk.ProfanityOption.Masked
+def subtract_times(t1 : time, t2 : time) -> timedelta :
+    return datetime.combine(date.min, t2) - datetime.combine(date.min, t1)
 
 # We cannot simply create time with ticks.
 def time_from_ticks(ticks) -> time :
