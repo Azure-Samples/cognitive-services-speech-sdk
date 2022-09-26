@@ -59,7 +59,7 @@ namespace CallCenter
             if (inputAudioURL is null && inputFilePath is null)
             {
                 throw new ArgumentException($"Please specify either --input or --jsonInput.{Environment.NewLine}Usage: {usage}");
-            }            
+            }
             
             string? speechSubscriptionKey = GetCmdOption(args, "--speechKey");
             if (speechSubscriptionKey is null)

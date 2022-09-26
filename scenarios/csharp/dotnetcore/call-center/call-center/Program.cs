@@ -18,6 +18,7 @@ namespace CallCenter
 {
     public class TranscriptionPhrase
     {
+        readonly public int id;
         readonly public string text;
         readonly public string itn;
         readonly public string lexical;
@@ -25,8 +26,9 @@ namespace CallCenter
         readonly public string offset;
         readonly public double offsetInTicks;
         
-        public TranscriptionPhrase(string text, string itn, string lexical, int speakerNumber, string offset, double offsetInTicks)
+        public TranscriptionPhrase(int id, string text, string itn, string lexical, int speakerNumber, string offset, double offsetInTicks)
         {
+            this.id = id;
             this.text = text;
             this.itn = itn;
             this.lexical = lexical;
@@ -147,12 +149,12 @@ namespace CallCenter
             var content = new
                 {
                     contentUrls = new string[] { inputAudioURL },
-                    properties = new { 
+                    properties = new {
                         diarizationEnabled = !this.userConfig.useStereoAudio,
                         timeToLive = "PT30M"
                     },
                     locale = this.userConfig.locale,
-                    displayName = $"call_center_{DateTime.Now.ToString()}",
+                    displayName = $"call_center_{DateTime.Now.ToString()}"
                 };
             var response = await RestHelper.SendPost(uri.Uri.ToString(), JsonSerializer.Serialize(content), this.userConfig.speechSubscriptionKey, new HttpStatusCode[]{ HttpStatusCode.Created });
             using (JsonDocument document = JsonDocument.Parse(response.content))
@@ -210,7 +212,7 @@ namespace CallCenter
             uri.Path = $"{speechTranscriptionPath}/{transcriptionId}/files";
             var response = await RestHelper.SendGet(uri.Uri.ToString(), this.userConfig.speechSubscriptionKey, new HttpStatusCode[]{ HttpStatusCode.OK });
             using (JsonDocument document = JsonDocument.Parse(response.content))
-            {            
+            {
                 return document.RootElement.Clone();
             }
         }
@@ -237,7 +239,7 @@ namespace CallCenter
         {
             return transcription
                 .GetProperty("recognizedPhrases").EnumerateArray()
-                .Select(phrase =>
+                .Select((phrase, id) =>
                 {
                     var best = phrase.GetProperty("nBest").EnumerateArray().First();
                     // If the user specified stereo audio, and therefore we turned off diarization,
@@ -257,9 +259,8 @@ namespace CallCenter
                     {
                         throw new Exception("nBest item contains neither channel nor speaker attribute.");
                     }
-                    return new TranscriptionPhrase(best.GetProperty("display").ToString(), best.GetProperty("itn").ToString(), best.GetProperty("lexical").ToString(), speakerNumber, phrase.GetProperty("offset").ToString(), phrase.GetProperty("offsetInTicks").GetDouble());
+                    return new TranscriptionPhrase(id, best.GetProperty("display").ToString(), best.GetProperty("itn").ToString(), best.GetProperty("lexical").ToString(), speakerNumber, phrase.GetProperty("offset").ToString(), phrase.GetProperty("offsetInTicks").GetDouble());
                 })
-                .OrderBy(phrase => phrase.offsetInTicks)
                 .ToArray();
         }
 
@@ -281,13 +282,12 @@ namespace CallCenter
             var phraseData = new Dictionary<int, (int speakerNumber, double offsetInTicks)>();
 
             // Convert each transcription phrase to a "document" as expected by the sentiment analysis REST API.
-            // Include a counter to use as a document ID.
-            var documentsToSend = phrases.Select((phrase, id) =>
+            var documentsToSend = phrases.Select(phrase =>
                 {
-                    phraseData.Add(id, (phrase.speakerNumber, phrase.offsetInTicks));
+                    phraseData.Add(phrase.id, (phrase.speakerNumber, phrase.offsetInTicks));
                     return new
                     {
-                        id = id,
+                        id = phrase.id,
                         language = this.userConfig.language,
                         text = phrase.text
                     };
@@ -344,7 +344,6 @@ namespace CallCenter
         {
             IEnumerable<JsonElement> recognizedPhrases_2 = transcription
                 .GetProperty("recognizedPhrases").EnumerateArray()
-                .OrderBy(phrase => phrase.GetProperty("offsetInTicks").GetDouble())
                 // Include a counter to retrieve the sentiment data.
                 .Select((phrase, id) =>
                     {
@@ -366,17 +365,16 @@ namespace CallCenter
         
         private object[] TranscriptionPhrasesToConversationItems(TranscriptionPhrase[] transcriptionPhrases)
         {
-            // Include a counter to use as a document ID.
-            return transcriptionPhrases.Select((phrase, documentID) =>
+            return transcriptionPhrases.Select(phrase =>
                 {
                     return new
                     {
-                        id = documentID,
+                        id = phrase.id,
                         text = phrase.text,
                         itn = phrase.itn,
                         lexical = phrase.lexical,
                         // The first person to speak is probably the agent.
-                        role = 1 == phrase.speakerNumber ? "Agent" : "Customer",
+                        role = 0 == phrase.speakerNumber ? "Agent" : "Customer",
                         participantId = phrase.speakerNumber
                     };
                 }
@@ -564,7 +562,7 @@ namespace CallCenter
                     // Get the channel and offset for this conversation item from the corresponding transcription phrase.
                     var channel = transcriptionPhrases[index].speakerNumber;
                     // Add channel and offset to conversation item JsonElement.
-                    var conversationItem_2 = AddOrChangeValueInJsonElement<string>(conversationItem, "channel", channel.ToString());
+                    var conversationItem_2 = AddOrChangeValueInJsonElement<int>(conversationItem, "channel", channel);
                     var conversationItem_3 = AddOrChangeValueInJsonElement<string>(conversationItem_2, "offset", transcriptionPhrases[index].offset);
                     // Get the text, lexical, and itn fields from redacted content, and append them to the combined redacted content for this channel.
                     var redactedContent = conversationItem.GetProperty("redactedContent");
@@ -585,7 +583,7 @@ namespace CallCenter
                         {
                             return new
                             {
-                                channel = item.channel.ToString(),
+                                channel = item.channel,
                                 display = item.display.ToString(),
                                 itn = item.itn.ToString(),
                                 lexical = item.lexical.ToString()
@@ -638,6 +636,11 @@ namespace CallCenter
             {
                 throw new ArgumentException($"Missing input audio URL.{Environment.NewLine}Usage: {usage}");
             }
+            // For stereo audio, the phrases are sorted by channel number, so resort them by offset.
+            var phrases = transcription
+                .GetProperty("recognizedPhrases").EnumerateArray()
+                .OrderBy(phrase => phrase.GetProperty("offsetInTicks").GetDouble());
+            transcription = AddOrChangeValueInJsonElement<IEnumerable<JsonElement>>(transcription, "recognizedPhrases", phrases);            
             var transcriptionPhrases = GetTranscriptionPhrases(transcription);
             SentimentAnalysisResult[] sentimentAnalysisResults = GetSentimentAnalysis(transcriptionPhrases);
             JsonElement[] sentimentConfidenceScores = GetSentimentConfidenceScores(sentimentAnalysisResults);
