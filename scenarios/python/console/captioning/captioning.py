@@ -268,8 +268,6 @@ class Captioning(object) :
     def speech_config_from_user_config(self) -> speechsdk.SpeechConfig :
         speech_config = None
         if self._user_config["languages"] is not None :
-            #TODO1 TEMP
-            print("Using v2 endpoint.")
             endpoint = self.v2_endpoint_from_region(self._user_config["region"])
             speech_config = speechsdk.SpeechConfig(endpoint=endpoint, subscription=self._user_config["subscription_key"])
         else :
