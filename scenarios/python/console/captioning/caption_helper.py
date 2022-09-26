@@ -59,12 +59,12 @@ class CaptionHelper(object) :
             self.add_captions_for_final_result(result, text)
 
     def get_text_or_translation(self, result : speechsdk.RecognitionResult) -> Optional[str] :
-        return result.Text
+        return result.text
 
         # 20220921 We do not use this for now because this sample
         # does not handle TranslationRecognitionResults.
         #if not self._language :
-        #    return result.Text
+        #    return result.text
         #if type(result) is speechsdk.TranslationRecognitionResult and self._language in result.Translations :
         #    return result.Translations[self._language]
         #else :
@@ -131,7 +131,7 @@ class CaptionHelper(object) :
 
     def get_full_caption_result_timing(self, result : speechsdk.RecognitionResult) -> Tuple[time, time] :
         begin = helper.time_from_ticks(result.offset)
-        end = helper.time_from_ticks(begin + result.duration)
+        end = helper.time_from_ticks(result.offset + result.duration)
         return (begin, end)
 
     def get_partial_result_caption_timing(self, result : speechsdk.RecognitionResult, text : str, caption_text : str, caption_starts_at : int, caption_length : int) -> Tuple[time, time] :

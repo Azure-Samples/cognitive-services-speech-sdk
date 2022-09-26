@@ -68,6 +68,7 @@ USAGE = """Usage: python captioning.py [...]
                                      Minimum is 0.0. Default is 1.0.
     --quiet                          Suppress console output, except errors.
     --profanity OPTION               Valid values: raw, remove, mask
+                                     Default is mask.
     --threshold NUMBER               Set stable partial result threshold.
                                      Default is 3.
 """
@@ -228,10 +229,10 @@ class Captioning(object) :
             for caption in self.captions_from_offline_results() :
                 helper.write_to_console_or_file(text=self.string_from_caption(caption), user_config=self._user_config)
         elif user_config_helper.CaptioningMode.REALTIME == self._user_config["captioning_mode"] :
-                # Show the last "previous" caption, which is actually the last caption.
-                if self._previous_caption is not None :
-                    self._previous_caption.end = helper.add_time_and_timedelta(self._previous_caption.end, self._user_config["remain_time"])
-                    helper.write_to_console_or_file(text=self.string_from_caption(self._previous_caption), user_config=self._user_config)
+            # Show the last "previous" caption, which is actually the last caption.
+            if self._previous_caption is not None :
+                self._previous_caption.end = helper.add_time_and_timedelta(self._previous_caption.end, self._user_config["remain_time"])
+                helper.write_to_console_or_file(text=self.string_from_caption(self._previous_caption), user_config=self._user_config)
 
     def initialize(self) :
         if self._user_config["output_file"] is not None and exists(self._user_config["output_file"]) :
@@ -327,6 +328,10 @@ class Captioning(object) :
                 try :
                     if user_config_helper.CaptioningMode.OFFLINE == self._user_config["captioning_mode"] :
                         self._offline_results.append(e.result)
+                        
+                        # TODO1 TEMP
+                        #nonlocal done
+                        #done = True
                     else :
                         caption = self.caption_from_real_time_result(e.result, True)
                         if caption is not None :

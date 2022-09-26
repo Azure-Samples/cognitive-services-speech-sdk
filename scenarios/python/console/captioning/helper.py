@@ -50,10 +50,16 @@ class Read_Only_Dict(Mapping):
 # https://stackoverflow.com/a/12448721
 # https://stackoverflow.com/a/39651061
 def add_time_and_timedelta(t1 : time, t2 : timedelta) -> time :
+# TODO1 TEMP
+#    print(f"t1: {t1}")
+#    print(f"t2: {t2}")
+#    print(f"t1 date: {datetime.combine(date.min, t1)}")
+#    print(f"t1 date + t2: {datetime.combine(date.min, t1) + t2}")
+#    print()
     return (datetime.combine(date.min, t1) + t2).time()
 
 def subtract_times(t1 : time, t2 : time) -> timedelta :
-    return datetime.combine(date.min, t2) - datetime.combine(date.min, t1)
+    return datetime.combine(date.min, t1) - datetime.combine(date.min, t2)
 
 # We cannot simply create time with ticks.
 def time_from_ticks(ticks) -> time :
