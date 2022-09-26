@@ -125,13 +125,10 @@ class Captioning(object) :
         if is_recognized_result :
             self._recognized_lines = self._recognized_lines + lines
         else :
-            recognizing_lines = lines[-self._user_config["lines"]:]
+            recognizing_lines = lines
         
-        # If the Recognizing result has fewer lines than self._user_config.lines,
-        # we insert lines from our saved Recognized results.
-        recognized_lines_to_add = max(0, self._user_config["lines"] - len(recognizing_lines))
-        recognizing_lines = self._recognized_lines[-recognized_lines_to_add:] + recognizing_lines
-        return '\n'.join(recognizing_lines)
+        caption_lines = self._recognized_lines + recognizing_lines
+        return '\n'.join(caption_lines[-self._user_config["lines"]:])
 
     def caption_from_real_time_result(self, result : speechsdk.SpeechRecognitionResult, is_recognized_result : bool) -> Optional[str] :
         retval : Optional[str] = None
@@ -271,6 +268,8 @@ class Captioning(object) :
     def speech_config_from_user_config(self) -> speechsdk.SpeechConfig :
         speech_config = None
         if self._user_config["languages"] is not None :
+            #TODO1 TEMP
+            print("Using v2 endpoint.")
             endpoint = self.v2_endpoint_from_region(self._user_config["region"])
             speech_config = speechsdk.SpeechConfig(endpoint=endpoint, subscription=self._user_config["subscription_key"])
         else :
