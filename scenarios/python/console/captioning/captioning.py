@@ -328,10 +328,6 @@ class Captioning(object) :
                 try :
                     if user_config_helper.CaptioningMode.OFFLINE == self._user_config["captioning_mode"] :
                         self._offline_results.append(e.result)
-                        
-                        # TODO1 TEMP
-                        #nonlocal done
-                        #done = True
                     else :
                         caption = self.caption_from_real_time_result(e.result, True)
                         if caption is not None :
