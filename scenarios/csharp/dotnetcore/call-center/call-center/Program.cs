@@ -134,7 +134,7 @@ namespace CallCenter
             }
         }
 
-        private async Task<string> CreateTranscription()
+        private async Task<string> CreateTranscription(string inputAudioURL)
         {
             var uri = new UriBuilder(Uri.UriSchemeHttps, this.userConfig.speechEndpoint);
             uri.Path = speechTranscriptionPath;
@@ -146,10 +146,13 @@ namespace CallCenter
             // - diarizationEnabled should only be used with mono audio input.
             var content = new
                 {
-                    contentUrls = new string[] { this.userConfig.inputAudioURL },
-                    properties = new { diarizationEnabled = !this.userConfig.useStereoAudio },
+                    contentUrls = new string[] { inputAudioURL },
+                    properties = new { 
+                        diarizationEnabled = !this.userConfig.useStereoAudio,
+                        timeToLive = "PT30M"
+                    },
                     locale = this.userConfig.locale,
-                    displayName = $"call_center_{DateTime.Now.ToString()}"
+                    displayName = $"call_center_{DateTime.Now.ToString()}",
                 };
             var response = await RestHelper.SendPost(uri.Uri.ToString(), JsonSerializer.Serialize(content), this.userConfig.speechSubscriptionKey, new HttpStatusCode[]{ HttpStatusCode.Created });
             using (JsonDocument document = JsonDocument.Parse(response.content))
@@ -238,8 +241,22 @@ namespace CallCenter
                 {
                     var best = phrase.GetProperty("nBest").EnumerateArray().First();
                     // If the user specified stereo audio, and therefore we turned off diarization,
-                    // the speaker number is replaced by a channel number.
-                    var speakerNumber = this.userConfig.useStereoAudio ? phrase.GetProperty("channel").GetInt32() : phrase.GetProperty("speaker").GetInt32();
+                    // only the channel property is present.
+                    // Note: Channels are numbered from 0. Speakers are numbered from 1.
+                    int speakerNumber;
+                    JsonElement element;
+                    if (phrase.TryGetProperty("speaker", out element))
+                    {
+                        speakerNumber = element.GetInt32() - 1;
+                    }                    
+                    else if (phrase.TryGetProperty("channel", out element))
+                    {
+                        speakerNumber = element.GetInt32();
+                    }
+                    else
+                    {
+                        throw new Exception("nBest item contains neither channel nor speaker attribute.");
+                    }
                     return new TranscriptionPhrase(best.GetProperty("display").ToString(), best.GetProperty("itn").ToString(), best.GetProperty("lexical").ToString(), speakerNumber, phrase.GetProperty("offset").ToString(), phrase.GetProperty("offsetInTicks").GetDouble());
                 })
                 .OrderBy(phrase => phrase.offsetInTicks)
@@ -335,6 +352,9 @@ namespace CallCenter
                             .GetProperty("nBest")
                             .EnumerateArray()
                             // Add the sentiment confidence scores to the JsonElement in the nBest array.
+                            // TODO2 We are adding the same sentiment data to each nBest item.
+                            // However, the sentiment data are based on the phrase from the first nBest item.
+                            // See GetTranscriptionPhrases() and GetSentimentAnalysis().
                             .Select(nBestItem => AddOrChangeValueInJsonElement<JsonElement>(nBestItem, "sentiment", sentimentConfidenceScores[id]));
                         // Update the nBest item in the recognizedPhrases array.
                         return AddOrChangeValueInJsonElement<IEnumerable<JsonElement>>(phrase, "nBest", nBest_2);
@@ -412,7 +432,7 @@ namespace CallCenter
                                 "All",
                             },
                             includeAudioRedaction = false,
-                            redactionSource = "lexical",
+                            redactionSource = "text",
                             modelVersion = conversationSummaryModelVersion,
                             loggingOptOut = false,
                         },
@@ -517,15 +537,15 @@ namespace CallCenter
                 result.AppendLine();
             }
             result.AppendLine(conversationAnalysis.summary.Aggregate($"Conversation summary:{Environment.NewLine}",
-                (result, item) => $"{result}    Aspect: {item.aspect}. Summary: {item.summary}.{Environment.NewLine}"));
+                (result, item) => $"{result}    {item.aspect}: {item.summary}.{Environment.NewLine}"));
             return result.ToString();
         }
 
-        private void PrintSimpleOutput(string outputFilePathValue, TranscriptionPhrase[] transcriptionPhrases, SentimentAnalysisResult[] sentimentAnalysisResults, JsonElement conversationAnalysis)
+        private void PrintSimpleOutput(TranscriptionPhrase[] transcriptionPhrases, SentimentAnalysisResult[] sentimentAnalysisResults, JsonElement conversationAnalysis)
         {
             string[] sentiments = GetSentimentsForSimpleOutput(sentimentAnalysisResults);
             ConversationAnalysisForSimpleOutput conversation = GetConversationAnalysisForSimpleOutput(conversationAnalysis);
-            File.WriteAllText(outputFilePathValue, GetSimpleOutput(transcriptionPhrases, sentiments, conversation));
+            Console.WriteLine(GetSimpleOutput(transcriptionPhrases, sentiments, conversation));
         }
 
         private object GetConversationAnalysisForFullOutput(TranscriptionPhrase[] transcriptionPhrases, JsonElement conversationAnalysis)
@@ -577,30 +597,47 @@ namespace CallCenter
             };
         }
 
-        private void PrintFullOutput(JsonElement transcription, JsonElement[] sentimentConfidenceScores, TranscriptionPhrase[] transcriptionPhrases, JsonElement conversationAnalysis)
+        private void PrintFullOutput(string outputFilePathValue, JsonElement transcription, JsonElement[] sentimentConfidenceScores, TranscriptionPhrase[] transcriptionPhrases, JsonElement conversationAnalysis)
         {
             var results = new
             {
                 transcription = MergeSentimentConfidenceScoresIntoTranscription(transcription, sentimentConfidenceScores),
                 conversationAnalyticsResults = GetConversationAnalysisForFullOutput(transcriptionPhrases, conversationAnalysis)
             };
-            Console.WriteLine(JsonSerializer.Serialize(results, new JsonSerializerOptions() { WriteIndented = true, Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping }));
+            File.WriteAllText(outputFilePathValue, JsonSerializer.Serialize(results, new JsonSerializerOptions() { WriteIndented = true, Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping }));
         }
 
         // Note: To pass command-line arguments, run:
         // dotnet run -- [args]
         // For example:
         // dotnet run -- --help
-        public async Task Run()
+        public async Task Run(string usage)
         {
-            // How to use batch transcription:
-            // https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/cognitive-services/Speech-Service/batch-transcription.md
-            var transcriptionId = await CreateTranscription();
-            await WaitForTranscription(transcriptionId);
-            Console.WriteLine($"Transcription ID: {transcriptionId}");
-            JsonElement transcriptionFiles = await GetTranscriptionFiles(transcriptionId);
-            var transcriptionUri = GetTranscriptionUri(transcriptionFiles);
-            JsonElement transcription = await GetTranscription(transcriptionUri);
+            JsonElement transcription;
+            string transcriptionId = "";
+            if (this.userConfig.inputFilePath is string inputFilePathValue)
+            {
+                using (JsonDocument document = JsonDocument.Parse(File.ReadAllText(inputFilePathValue)))
+                {
+                    transcription = document.RootElement.Clone();
+                }
+            }
+            else if (this.userConfig.inputAudioURL is string inputAudioURLValue)
+            {
+                // How to use batch transcription:
+                // https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/cognitive-services/Speech-Service/batch-transcription.md
+                transcriptionId = await CreateTranscription(inputAudioURLValue);
+                await WaitForTranscription(transcriptionId);
+                Console.WriteLine($"Transcription ID: {transcriptionId}");
+                JsonElement transcriptionFiles = await GetTranscriptionFiles(transcriptionId);
+                var transcriptionUri = GetTranscriptionUri(transcriptionFiles);
+                Console.WriteLine($"Transcription URI: {transcriptionUri}");
+                transcription = await GetTranscription(transcriptionUri);
+            }
+            else
+            {
+                throw new ArgumentException($"Missing input audio URL.{Environment.NewLine}Usage: {usage}");
+            }
             var transcriptionPhrases = GetTranscriptionPhrases(transcription);
             SentimentAnalysisResult[] sentimentAnalysisResults = GetSentimentAnalysis(transcriptionPhrases);
             JsonElement[] sentimentConfidenceScores = GetSentimentConfidenceScores(sentimentAnalysisResults);
@@ -610,14 +647,11 @@ namespace CallCenter
             var conversationAnalysisUrl = await RequestConversationAnalysis(conversationItems);
             await WaitForConversationAnalysis(conversationAnalysisUrl);
             JsonElement conversationAnalysis = await GetConversationAnalysis(conversationAnalysisUrl);
+            PrintSimpleOutput(transcriptionPhrases, sentimentAnalysisResults, conversationAnalysis);
             if (this.userConfig.outputFilePath is string outputFilePathValue)
             {
-                PrintSimpleOutput(outputFilePathValue, transcriptionPhrases, sentimentAnalysisResults, conversationAnalysis);
+                PrintFullOutput(outputFilePathValue, transcription, sentimentConfidenceScores, transcriptionPhrases, conversationAnalysis);
             }
-            PrintFullOutput(transcription, sentimentConfidenceScores, transcriptionPhrases, conversationAnalysis);
-            // Clean up resources.
-            Console.WriteLine("Deleting transcription.");
-            await DeleteTranscription(transcriptionId);
             return;
         }
 
@@ -629,8 +663,8 @@ namespace CallCenter
     --help                          Show this help and stop.
 
   CONNECTION
-    --speechKey KEY                 Your Azure Speech service subscription key. Required.
-    --speechRegion REGION           Your Azure Speech service region. Required.
+    --speechKey KEY                 Your Azure Speech service subscription key. Required unless --jsonInput is present.
+    --speechRegion REGION           Your Azure Speech service region. Required unless --jsonInput is present.
                                     Examples: westus, eastus
     --languageKey KEY               Your Azure Cognitive Language subscription key. Required.
     --languageEndpoint ENDPOINT     Your Azure Cognitive Language endpoint. Required.
@@ -643,7 +677,8 @@ namespace CallCenter
                                     Default: en-US
 
   INPUT
-    --input URL                     Input audio from URL. Required.
+    --input URL                     Input audio from URL. Required unless --jsonInput is present.
+    --jsonInput FILE                Input JSON Speech batch transcription result from FILE. Overrides --input.
     --stereo                        Use stereo audio format.
                                     If this is not present, mono is assumed.
 
@@ -657,7 +692,7 @@ namespace CallCenter
             }
             else
             {
-                await (new Program(args, usage)).Run();
+                await (new Program(args, usage)).Run(usage);
             }
         }
     }
