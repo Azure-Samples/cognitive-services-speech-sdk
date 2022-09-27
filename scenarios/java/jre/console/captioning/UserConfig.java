@@ -5,11 +5,21 @@
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.*;
 import com.microsoft.cognitiveservices.speech.*;
 import com.microsoft.cognitiveservices.speech.audio.*;
 
+enum CaptioningMode
+{
+    Offline,
+    RealTime
+}
+
 final class UserConfig
 {
+    final public static int defaultMaxLineLengthSBCS = 37;
+    final public static int defaultMaxLineLengthMBCS = 30;    
+    
     final private boolean useCompressedAudio;
     final private AudioStreamContainerFormat compressedAudioFormat;
     final private ProfanityOption profanityOption;
@@ -17,46 +27,78 @@ final class UserConfig
     final private Optional<String> outputFile;
     final private Optional<String> phraseList;
     final private boolean suppressConsoleOutput;
-    final private boolean showRecognizingResults;
-    final private Optional<String> stablePartialResultThreshold;
+    final private CaptioningMode captioningMode;
+    final private int remainTime;
+    final private int delay;
     final private boolean useSubRipTextCaptionFormat;
+    final private int maxLineLength;
+    final private int lines;
+    final private Optional<String> stablePartialResultThreshold;    
     final private String subscriptionKey;
     final private String region;
 
-    public boolean getUseCompressedAudio() {
+    public boolean getUseCompressedAudio()
+    {
         return useCompressedAudio;
     }
-    public AudioStreamContainerFormat getCompressedAudioFormat() {
+    public AudioStreamContainerFormat getCompressedAudioFormat()
+    {
         return compressedAudioFormat;
     }
-    public ProfanityOption getProfanityOption() {
+    public ProfanityOption getProfanityOption()
+    {
         return profanityOption;
     }
-    public Optional<String> getInputFile() {
+    public Optional<String> getInputFile()
+    {
         return inputFile;
     }
-    public Optional<String> getOutputFile() {
+    public Optional<String> getOutputFile()
+    {
         return outputFile;
     }
-    public Optional<String> getPhraseList() {
+    public Optional<String> getPhraseList()
+    {
         return phraseList;
     }
-    public boolean getSuppressConsoleOutput() {
+    public boolean getSuppressConsoleOutput()
+    {
         return suppressConsoleOutput;
     }
-    public boolean getShowRecognizingResults() {
-        return showRecognizingResults;
+    public CaptioningMode getCaptioningMode()
+    {
+        return captioningMode;
     }
-    public Optional<String> getStablePartialResultThreshold() {
-        return stablePartialResultThreshold;
+    public int getRemainTime()
+    {
+        return remainTime;
     }
-    public boolean getUseSubRipTextCaptionFormat() {
+    public int getDelay()
+    {
+        return delay;
+    }
+    public boolean getUseSubRipTextCaptionFormat()
+    {
         return useSubRipTextCaptionFormat;
     }
-    public String getSubscriptionKey() {
+    public int getMaxLineLength()
+    {
+        return maxLineLength;
+    }
+    public int getLines()
+    {
+        return lines;
+    }
+    public Optional<String> getStablePartialResultThreshold()
+    {
+        return stablePartialResultThreshold;
+    }
+    public String getSubscriptionKey()
+    {
         return subscriptionKey;
     }
-    public String getRegion() {
+    public String getRegion()
+    {
         return region;
     }
 
@@ -68,9 +110,13 @@ final class UserConfig
         Optional<String> outputFile,
         Optional<String> phraseList,
         boolean suppressConsoleOutput,
-        boolean showRecognizingResults,
-        Optional<String> stablePartialResultThreshold,
+        CaptioningMode captioningMode,
+        int remainTime,
+        int delay,
         boolean useSubRipTextCaptionFormat,
+        int maxLineLength,
+        int lines,
+        Optional<String> stablePartialResultThreshold,
         String subscriptionKey,
         String region
         )
@@ -82,16 +128,20 @@ final class UserConfig
         this.outputFile = outputFile;
         this.phraseList = phraseList;
         this.suppressConsoleOutput = suppressConsoleOutput;
-        this.showRecognizingResults = showRecognizingResults;
-        this.stablePartialResultThreshold = stablePartialResultThreshold;
+        this.captioningMode = captioningMode;
+        this.remainTime = remainTime;
+        this.delay = delay;
         this.useSubRipTextCaptionFormat = useSubRipTextCaptionFormat;
+        this.maxLineLength = maxLineLength;
+        this.lines = lines;
+        this.stablePartialResultThreshold = stablePartialResultThreshold;
         this.subscriptionKey = subscriptionKey;
         this.region = region;
     }
 
     static private Optional<String> GetCmdOption(List<String> args, String option)
     {
-        final int index = args.indexOf(option);
+        final int index = args.stream().map(arg -> arg.toLowerCase()).toList().indexOf(option.toLowerCase());
         if (index > -1 && index < args.size() - 1)
         {
             // We found the option (for example, "--output"), so advance from that to the value (for example, "filename").
@@ -104,7 +154,7 @@ final class UserConfig
 
     static private boolean CmdOptionExists(List<String> args, String option)
     {
-        return(args.contains(option));
+        return(args.stream().map(arg -> arg.toLowerCase()).toList().contains(option.toLowerCase()));
     }
 
     static public AudioStreamContainerFormat GetCompressedAudioFormat(List<String> args)
@@ -159,6 +209,52 @@ final class UserConfig
             throw new IllegalArgumentException(String.format("Missing region.%s%s", System.lineSeparator(), usage));
         }
         
+        CaptioningMode captioningMode = CmdOptionExists(args, "--realTime") && !CmdOptionExists(args, "--offline") ? CaptioningMode.RealTime : CaptioningMode.Offline;
+        
+        Optional<String> strRemainTime = GetCmdOption(args, "--remainTime");
+        int remainTime = 1000;
+        if (strRemainTime.isPresent())
+        {
+            remainTime = Integer.parseInt(strRemainTime.get());
+            if (remainTime < 0)
+            {
+                remainTime = 1000;
+            }
+        }
+        
+        Optional<String> strDelay = GetCmdOption(args, "--delay");
+        int delay = 1000;
+        if (strDelay.isPresent())
+        {
+            delay = Integer.parseInt(strDelay.get());
+            if (delay < 0)
+            {
+                delay = 1000;
+            }
+        }
+        
+        Optional<String> strMaxLineLength = GetCmdOption(args, "--maxLineLength");
+        int maxLineLength = defaultMaxLineLengthSBCS;
+        if (strMaxLineLength.isPresent())
+        {
+            maxLineLength = Integer.parseInt(strMaxLineLength.get());
+            if (maxLineLength < 20)
+            {
+                maxLineLength = 20;
+            }
+        }
+        
+        Optional<String> strLines = GetCmdOption(args, "--lines");
+        int lines = 2;
+        if (strLines.isPresent())
+        {
+            lines = Integer.parseInt(strLines.get());
+            if (lines < 1)
+            {
+                lines = 2;
+            }
+        }
+        
         return new UserConfig(
             CmdOptionExists(args, "--format"),
             GetCompressedAudioFormat(args),
@@ -167,9 +263,13 @@ final class UserConfig
             GetCmdOption(args, "--output"),
             GetCmdOption(args, "--phrases"),
             CmdOptionExists(args, "--quiet"),
-            CmdOptionExists(args, "--recognizing"),
-            GetCmdOption(args, "--threshold"),
+            captioningMode,
+            remainTime,
+            delay,
             CmdOptionExists(args, "--srt"),
+            maxLineLength,
+            lines,
+            GetCmdOption(args, "--threshold"),
             key.get(),
             region.get()
         );
