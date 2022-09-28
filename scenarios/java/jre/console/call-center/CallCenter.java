@@ -189,7 +189,7 @@ public class CallCenter
                 speakerNumber = phrase.get("channel").getAsInt();
             }
             
-            return new TranscriptionPhrase(index, best.get("display").getAsString(), best.get("itn").getAsString(), best.get("lexical").getAsString(), speakerNumber, phrase.get("offset").toString(), phrase.get("offsetInTicks").getAsDouble());
+            return new TranscriptionPhrase(index, best.get("display").getAsString(), best.get("itn").getAsString(), best.get("lexical").getAsString(), speakerNumber, phrase.get("offset").getAsString(), phrase.get("offsetInTicks").getAsDouble());
         })
         .collect(Collectors.toList());
     }
@@ -246,9 +246,9 @@ public class CallCenter
 
     private JsonObject MergeSentimentConfidenceScoresIntoTranscription(JsonObject transcription, List<JsonObject> sentimentConfidenceScores)
     {
-        var index = 0;
-        for (var phrase : transcription.getAsJsonArray("recognizedPhrases"))
+        for (var index = 0; index < transcription.getAsJsonArray("recognizedPhrases").size(); index++)
         {
+            var phrase = transcription.getAsJsonArray("recognizedPhrases").get(index);
             for (var best_item : phrase.getAsJsonObject().getAsJsonArray("nBest"))
             {
                 // Add the sentiment confidence scores to the JsonElement in the nBest array.
@@ -412,15 +412,74 @@ public class CallCenter
         System.out.println(GetSimpleOutput(transcriptionPhrases, sentiments, conversation));
     }
 
-    private CombinedResults GetConversationAnalysisForFullOutput(List<TranscriptionPhrase> transcriptionPhrases, RestResult conversationAnalysis)
+    private CombinedResults GetConversationAnalysisForFullOutput(List<TranscriptionPhrase> transcriptionPhrases, RestResult conversationAnalysis) throws Exception
     {
-        return new CombinedResults(null, null);
+        // Get the conversation summary and conversation PII analysis task results.
+        Optional<JsonObject> summaryTask = Optional.empty();
+        Optional<JsonObject> PIITask = Optional.empty();
+        Iterator<JsonElement> iterator = conversationAnalysis.getJson().get("tasks").getAsJsonObject().getAsJsonArray("items").iterator();
+        while (iterator.hasNext())
+        {
+            JsonObject value = (JsonObject)iterator.next().getAsJsonObject();
+            if (value.get("taskName").getAsString().equals("summary_1"))
+            {
+                summaryTask = Optional.of(value);
+            }
+            else if (value.get("taskName").getAsString().equals("PII_1"))
+            {
+                PIITask = Optional.of(value);
+            }
+        }
+        if (!summaryTask.isPresent() || !PIITask.isPresent())
+        {
+            throw new Exception (String.format("Unable to parse response from Get Conversation Analysis API:%s%s", System.lineSeparator(), conversationAnalysis.getText()));
+        }
+        // There should be only one conversation.
+        JsonObject conversation = PIITask.get().get("results").getAsJsonObject().getAsJsonArray("conversations").get(0).getAsJsonObject();
+        Spliterator<JsonElement> conversationItems_1 = conversation.getAsJsonArray("conversationItems").spliterator();
+        // Order conversation items by ID so they match the order of the transcription phrases.
+        List<JsonObject> conversationItems_2 = StreamSupport.stream(conversationItems_1, false)
+            .map(conversationItem -> conversationItem.getAsJsonObject())
+            .sorted(Comparator.comparing(conversationItem -> conversationItem.get("id").getAsInt()))
+            .collect(Collectors.toList());
+        List<CombinedRedactedContent> combinedRedactedContent_1 = new ArrayList<CombinedRedactedContent>(Arrays.asList(new CombinedRedactedContent(0), new CombinedRedactedContent(1)));
+        for (var index = 0; index < conversationItems_2.size(); index++)
+        {
+            // Get the channel and offset for this conversation item from the corresponding transcription phrase.
+            var channel = transcriptionPhrases.get(index).speakerNumber;
+            // Add channel and offset to conversation item JsonElement.
+            var conversationItem = conversationItems_2.get(index);
+            conversationItem.addProperty("channel", channel);
+            conversationItem.addProperty("offset", transcriptionPhrases.get(index).offset);
+            // Get the text, lexical, and itn fields from redacted content, and append them to the combined redacted content for this channel.
+            var redactedContent = conversationItem.get("redactedContent").getAsJsonObject();
+            combinedRedactedContent_1.get(channel).display.append(String.format("%s ", redactedContent.get("text").getAsString()));
+            combinedRedactedContent_1.get(channel).lexical.append(String.format("%s ", redactedContent.get("lexical").getAsString()));
+            combinedRedactedContent_1.get(channel).itn.append(String.format("%s ", redactedContent.get("itn").getAsString()));
+        }
+        JsonArray combinedRedactedContent_2 = new JsonArray();
+        for (var index = 0; index < combinedRedactedContent_1.size(); index++)
+        {
+            CombinedRedactedContent content_1 = combinedRedactedContent_1.get(index);
+            JsonObject content_2 = new JsonObject();
+            content_2.addProperty("channel", content_1.channel);
+            content_2.addProperty("display", content_1.display.toString());
+            content_2.addProperty("itn", content_1.itn.toString());
+            content_2.addProperty("lexical", content_1.lexical.toString());
+            combinedRedactedContent_2.add(content_2);
+        }
+        JsonObject conversationPiiResults = new JsonObject();
+        conversationPiiResults.add("combinedRedactedContent", combinedRedactedContent_2);
+        JsonArray conversations = new JsonArray();
+        conversations.add(conversation);
+        conversationPiiResults.add("conversations", conversations);
+        return new CombinedResults(summaryTask.get().get("results").getAsJsonObject(), conversationPiiResults);
     }
 
-    private void PrintFullOutput(String outputFilePath, JsonObject transcription, List<JsonObject> sentimentConfidenceScores, List<TranscriptionPhrase> transcriptionPhrases, RestResult conversationAnalysis) throws IOException
+    private void PrintFullOutput(String outputFilePath, JsonObject transcription, List<JsonObject> sentimentConfidenceScores, List<TranscriptionPhrase> transcriptionPhrases, RestResult conversationAnalysis) throws Exception, IOException
     {
         var results = new FullOutput(MergeSentimentConfidenceScoresIntoTranscription(transcription, sentimentConfidenceScores), GetConversationAnalysisForFullOutput(transcriptionPhrases, conversationAnalysis));
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
         var outputFile = new FileWriter(_userConfig.getOutputFilePath().get(), true);
         outputFile.write(gson.toJson(results));
         outputFile.close();
@@ -490,15 +549,15 @@ public class CallCenter
                 }
                 // For stereo audio, the phrases are sorted by channel number, so resort them by offset.
                 Spliterator<JsonElement> unsorted_phrases = transcription.get().getAsJsonArray("recognizedPhrases").spliterator();
-                var sorted_phrases = StreamSupport.stream(unsorted_phrases, false)
+                var sorted_phrases_1 = StreamSupport.stream(unsorted_phrases, false)
                     .sorted(Comparator.comparing(phrase -> phrase.getAsJsonObject().get("offsetInTicks").getAsDouble()))
                     .collect(Collectors.toList());
-                var phrases_2 = new JsonArray(sorted_phrases.size());
-                for (var phrase : sorted_phrases)
+                var sorted_phrases_2 = new JsonArray(sorted_phrases_1.size());
+                for (var phrase : sorted_phrases_1)
                 {
-                    phrases_2.add(phrase);
+                    sorted_phrases_2.add(phrase);
                 }
-                transcription.get().add("recognizedPhrases", phrases_2);
+                transcription.get().add("recognizedPhrases", sorted_phrases_2);
                 
                 final List<TranscriptionPhrase> phrases = callCenter.GetTranscriptionPhrases(transcription.get());
                 final List<SentimentAnalysisResult> sentimentAnalysisResults = callCenter.GetSentimentAnalysis(phrases);
