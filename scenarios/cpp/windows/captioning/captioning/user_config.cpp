@@ -9,30 +9,15 @@
 #include <iomanip>
 #include <iostream>
 #include <optional>
+#include <string>
 #include <sstream>
-#include "helper.h"
+#include <vector>
+#include "string_helper.h"
+#include "user_config.h"
 
-static std::vector<std::string> Split(const std::string& s, char delimiter)
+bool CommandLineOptionExists(char** begin, char** end, const std::string& option)
 {
-    std::vector<std::string> tokens;
-    std::string token;
-    std::istringstream tokenStream(s);
-    while(std::getline(tokenStream, token, delimiter))
-    {
-        tokens.push_back(token);
-    }
-    return tokens;
-}
-
-bool EndsWith(const std::string& str, const std::string& suffix)
-{
-    return str.size() >= suffix.size() && 0 == str.compare(str.size()-suffix.size(), suffix.size(), suffix);
-}
-
-static std::string ToLower(std::string str)
-{
-    std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c){ return std::tolower(c); });
-    return str;
+    return std::find(begin, end, option) != end;
 }
 
 // The value parameter to std::find must be std::string. Otherwise std::find will compare the pointer values rather than the string contents.
@@ -59,11 +44,6 @@ static std::optional<std::string> GetCommandLineOption(char** begin, char** end,
     }
 }
 
-bool CommandLineOptionExists(char** begin, char** end, const std::string& option)
-{
-    return std::find(begin, end, option) != end;
-}
-
 static AudioStreamContainerFormat GetCompressedAudioFormat(char** begin, char** end)
 {
     std::optional<std::string> format = GetCommandLineOption(begin, end, "--format");
@@ -73,7 +53,7 @@ static AudioStreamContainerFormat GetCompressedAudioFormat(char** begin, char** 
     }
     else
     {
-        std::string value = ToLower(format.value());
+        std::string value = StringHelper::ToLower(format.value());
         if ("alaw" == value)
         {
             return AudioStreamContainerFormat::ALAW;
@@ -110,7 +90,7 @@ static ProfanityOption GetProfanityOption(char** begin, char** end)
     }
     else
     {
-        std::string value = ToLower(profanity.value());
+        std::string value = StringHelper::ToLower(profanity.value());
         if ("raw" == value)
         {
             return ProfanityOption::Raw;
@@ -126,37 +106,8 @@ static ProfanityOption GetProfanityOption(char** begin, char** end)
     }
 }
 
-std::string V2EndpointFromRegion(std::string region)
-{
-    // Note: Continuous language identification is supported only with v2 endpoints.
-    return std::string("wss://" + region + ".stt.speech.microsoft.com/speech/universal/v2");
-}
-
-Timestamp TimestampFromTicks(uint64_t startTicks, uint64_t endTicks)
-{
-    const float ticksPerSecond = 10000000.0;
-
-    const float startSeconds = startTicks / ticksPerSecond;
-    const float endSeconds = endTicks / ticksPerSecond;
-    
-    const int startMinutes = (int)startSeconds / 60;
-    const int endMinutes = (int)endSeconds / 60;    
-    
-    const int startHours = startMinutes / 60;
-    const int endHours = endMinutes / 60;
-
-    return Timestamp(startHours, endHours, startMinutes % 60, endMinutes % 60, fmod(startSeconds, 60.0f), fmod(endSeconds, 60.0f));
-}
-
 std::shared_ptr<UserConfig> UserConfigFromArgs(int argc, char* argv[], std::string usage)
 {
-    std::optional<std::vector<std::string>> languageIDLanguages = std::nullopt;
-    std::optional<std::string> languageIDLanguagesResult = GetCommandLineOption(argv, argv + argc, "--languages");
-    if (languageIDLanguagesResult.has_value())
-    {
-        languageIDLanguages = std::optional<std::vector<std::string>>{ Split(languageIDLanguagesResult.value(), ';') };
-    }
-
     std::optional<std::string> key = GetCommandLineOption(argv, argv + argc, "--key");
     if (!key.has_value())
     {
@@ -168,6 +119,59 @@ std::shared_ptr<UserConfig> UserConfigFromArgs(int argc, char* argv[], std::stri
         throw std::invalid_argument("Missing region.\n" + usage);
     }
 
+    std::optional<std::vector<std::string>> languageIDLanguages = std::nullopt;
+    std::optional<std::string> languageIDLanguagesResult = GetCommandLineOption(argv, argv + argc, "--languages");
+    if (languageIDLanguagesResult.has_value())
+    {
+        languageIDLanguages = std::optional<std::vector<std::string>>{ StringHelper::Split(languageIDLanguagesResult.value(), ';') };
+    }
+
+    CaptioningMode captioningMode = CommandLineOptionExists(argv, argv + argc, "--realTime") && !CommandLineOptionExists(argv, argv + argc, "--offline") ? CaptioningMode::RealTime : CaptioningMode::Offline;
+    
+    std::optional<std::string> strRemainTime = GetCommandLineOption(argv, argv + argc, "--remainTime");
+    int remainTime = 1000;
+    if (strRemainTime.has_value())
+    {
+        remainTime = std::stoi(strRemainTime.value());
+        if (remainTime < 0)
+        {
+            remainTime = 1000;
+        }
+    }
+    
+    std::optional<std::string> strDelay = GetCommandLineOption(argv, argv + argc, "--delay");
+    int delay = 1000;
+    if (strDelay.has_value())
+    {
+        delay = std::stoi(strDelay.value());
+        if (delay < 0)
+        {
+            delay = 1000;
+        }
+    }
+    
+    std::optional<std::string> strMaxLineLength = GetCommandLineOption(argv, argv + argc, "--maxLineLength");
+    int maxLineLength = UserConfig::defaultMaxLineLengthSBCS;
+    if (strMaxLineLength.has_value())
+    {
+        maxLineLength = std::stoi(strMaxLineLength.value());
+        if (maxLineLength < 20)
+        {
+            maxLineLength = 20;
+        }
+    }
+    
+    std::optional<std::string> strLines = GetCommandLineOption(argv, argv + argc, "--lines");
+    int lines = 2;
+    if (strLines.has_value())
+    {
+        lines = std::stoi(strLines.value());
+        if (lines < 1)
+        {
+            lines = 2;
+        }
+    }
+
     return std::make_shared<UserConfig>(
         CommandLineOptionExists(argv, argv + argc, "--format"),
         GetCompressedAudioFormat(argv, argv + argc),
@@ -177,10 +181,20 @@ std::shared_ptr<UserConfig> UserConfigFromArgs(int argc, char* argv[], std::stri
         GetCommandLineOption(argv, argv + argc, "--output"),
         GetCommandLineOption(argv, argv + argc, "--phrases"),
         CommandLineOptionExists(argv, argv + argc, "--quiet"),
-        CommandLineOptionExists(argv, argv + argc, "--recognizing"),
-        GetCommandLineOption(argv, argv + argc, "--threshold"),
+        captioningMode,
+        remainTime,
+        delay,
         CommandLineOptionExists(argv, argv + argc, "--srt"),
+        maxLineLength,
+        lines,        
+        GetCommandLineOption(argv, argv + argc, "--threshold"),
         key.value(),
         region.value()
     );
+}
+
+std::string V2EndpointFromRegion(std::string region)
+{
+    // Note: Continuous language identification is supported only with v2 endpoints.
+    return std::string("wss://" + region + ".stt.speech.microsoft.com/speech/universal/v2");
 }
