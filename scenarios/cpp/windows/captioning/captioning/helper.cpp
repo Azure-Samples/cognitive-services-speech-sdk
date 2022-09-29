@@ -12,7 +12,7 @@
 #include <sstream>
 #include "helper.h"
 
-static std::vector<std::string> Split(const std::string& s, char delimiter)
+std::vector<std::string> Split(const std::string& s, char delimiter)
 {
     std::vector<std::string> tokens;
     std::string token;

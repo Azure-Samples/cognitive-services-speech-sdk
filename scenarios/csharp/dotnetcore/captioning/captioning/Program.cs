@@ -27,39 +27,39 @@ namespace Captioning
         private const string usage = @"USAGE: dotnet run -- [...]
 
   HELP
-    --help                        Show this help and stop.
+    --help                          Show this help and stop.
 
   CONNECTION
-    --key KEY                     Your Azure Speech service subscription key.
-    --region REGION               Your Azure Speech service region.
-                                  Examples: westus, eastus
+    --key KEY                       Your Azure Speech service subscription key.
+    --region REGION                 Your Azure Speech service region.
+                                    Examples: westus, eastus
 
   LANGUAGE
-    --languages LANG1;LANG2       Enable language identification for specified languages.
-                                  Example: en-US;ja-JP
+    --languages LANG1;LANG2         Enable language identification for specified languages.
+                                    Example: en-US;ja-JP
 
   INPUT
-    --input FILE                  Input audio from file (default input is the microphone.)
-    --format FORMAT               Use compressed audio format.
-                                  If this is not present, uncompressed format (wav) is assumed.
-                                  Valid only with --file.
-                                  Valid values: alaw, any, flac, mp3, mulaw, ogg_opus
+    --input FILE                    Input audio from file (default input is the microphone.)
+    --format FORMAT                 Use compressed audio format.
+                                    If this is not present, uncompressed format (wav) is assumed.
+                                    Valid only with --file.
+                                    Valid values: alaw, any, flac, mp3, mulaw, ogg_opus
 
   RECOGNITION
-    --recognizing                 Output Recognizing results (default output is Recognized results only.)
-                                  These are always written to the console, never to an output file.
-                                  --quiet overrides this.
+    --recognizing                   Output Recognizing results (default output is Recognized results only.)
+                                    These are always written to the console, never to an output file.
+                                    --quiet overrides this.
 
   ACCURACY
-    --phrases PHRASE1;PHRASE2     Example: Constoso;Jessie;Rehaan
+    --phrases ""PHRASE1;PHRASE2""   Example: ""Constoso;Jessie;Rehaan""
 
   OUTPUT
-    --output FILE                 Output captions to text file.
-    --srt                         Output captions in SubRip Text format (default format is WebVTT.)
-    --quiet                       Suppress console output, except errors.
-    --profanity OPTION            Valid values: raw, remove, mask
-    --threshold NUMBER            Set stable partial result threshold.
-                                  Default value: 3
+    --output FILE                   Output captions to text file.
+    --srt                           Output captions in SubRip Text format (default format is WebVTT.)
+    --quiet                         Suppress console output, except errors.
+    --profanity OPTION              Valid values: raw, remove, mask
+    --threshold NUMBER              Set stable partial result threshold.
+                                    Default value: 3
 ";
         
         private static string? GetCmdOption(string[] args, string option)
@@ -309,7 +309,9 @@ namespace Captioning
             if (this.userConfig.phraseList is string phraseListValue)
             {
                 var grammar = PhraseListGrammar.FromRecognizer(speechRecognizer);
-                grammar.AddPhrase(phraseListValue);
+                foreach (var phrase in phraseListValue.Split(";")) {
+                    grammar.AddPhrase(phrase);
+                }
             }
             
             return speechRecognizer;
@@ -320,7 +322,7 @@ namespace Captioning
         //
         private async Task<string?> RecognizeContinuous(SpeechRecognizer speechRecognizer)
         {
-            var recognitionEnd = new TaskCompletionSource<string?>();
+            var stopRecognition = new TaskCompletionSource<string?>();
             int sequenceNumber = 0;
 
             if (this.userConfig.showRecognizingResults)
@@ -357,41 +359,42 @@ namespace Captioning
                     if (CancellationReason.EndOfStream == e.Reason)
                     {
                         WriteToConsole($"End of stream reached.{Environment.NewLine}");
-                        recognitionEnd.TrySetResult(null); // Notify to stop recognition.
+                        stopRecognition.TrySetResult(null); // Notify to stop recognition.
                     }
                     else if (CancellationReason.CancelledByUser == e.Reason)
                     {
                         WriteToConsole($"User canceled request.{Environment.NewLine}");
-                        recognitionEnd.TrySetResult(null); // Notify to stop recognition.
+                        stopRecognition.TrySetResult(null); // Notify to stop recognition.
                     }
                     else if (CancellationReason.Error == e.Reason)
                     {
                         var error = $"Encountered error.{Environment.NewLine}Error code: {(int)e.ErrorCode}{Environment.NewLine}Error details: {e.ErrorDetails}{Environment.NewLine}";
-                        recognitionEnd.TrySetResult(error); // Notify to stop recognition.
+                        stopRecognition.TrySetResult(error); // Notify to stop recognition.
                     }
                     else
                     {
                         var error = $"Request was cancelled for an unrecognized reason: {(int)e.Reason}.{Environment.NewLine}";
-                        recognitionEnd.TrySetResult(error); // Notify to stop recognition.
+                        stopRecognition.TrySetResult(error); // Notify to stop recognition.
                     }
                 };
 
             speechRecognizer.SessionStopped += (object? sender, SessionEventArgs e) =>
                 {
                     WriteToConsole($"Session stopped.{Environment.NewLine}");
-                    recognitionEnd.TrySetResult(null); // Notify to stop recognition.
+                    stopRecognition.TrySetResult(null); // Notify to stop recognition.
                 };
 
             // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
             await speechRecognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
 
-            // Waits for recognition end.
-            Task.WaitAll(new[] { recognitionEnd.Task });
+            // Waits for completion.
+            // Use Task.WaitAny to keep the task rooted.
+            Task.WaitAny(new[] { stopRecognition.Task });
 
             // Stops recognition.
             await speechRecognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
             
-            return recognitionEnd.Task.Result;
+            return stopRecognition.Task.Result;
         }
 
         // Note: To pass command-line arguments, run:

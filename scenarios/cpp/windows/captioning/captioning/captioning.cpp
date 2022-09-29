@@ -204,7 +204,9 @@ public:
         if (m_userConfig->phraseList.has_value())
         {
             auto grammar = PhraseListGrammar::FromRecognizer(speechRecognizer);
-            grammar->AddPhrase(m_userConfig->phraseList.value());
+            for (auto phrase : Split(m_userConfig->phraseList.value(), ';')) {
+                grammar->AddPhrase(phrase);
+            }
         }
         
         return speechRecognizer;
@@ -296,33 +298,33 @@ int main(int argc, char* argv[])
 {
     const std::string usage = "Usage: captioning.exe [...]\n\n"
 "  HELP\n"
-"    --help                        Show this help and stop.\n\n"
+"    --help                         Show this help and stop.\n\n"
 "  CONNECTION\n"
-"    --key KEY                     Your Azure Speech service subscription key.\n"
-"    --region REGION               Your Azure Speech service region.\n"
-"                                  Examples: westus, eastus\n\n"
+"    --key KEY                      Your Azure Speech service subscription key.\n"
+"    --region REGION                Your Azure Speech service region.\n"
+"                                   Examples: westus, eastus\n\n"
 "  LANGUAGE\n"
-"    --languages LANG1;LANG2       Enable language identification for specified languages.\n"
-"                                  Example: en-US;ja-JP\n\n"
+"    --languages LANG1;LANG2        Enable language identification for specified languages.\n"
+"                                   Example: en-US;ja-JP\n\n"
 "  INPUT\n"
-"    --input FILE                  Input audio from file (default input is the microphone.)\n"
-"    --format FORMAT               Use compressed audio format.\n"
-"                                  If this is not present, uncompressed format (wav) is assumed.\n"
-"                                  Valid only with --file.\n"
-"                                  Valid values: alaw, any, flac, mp3, mulaw, ogg_opus\n\n"
+"    --input FILE                   Input audio from file (default input is the microphone.)\n"
+"    --format FORMAT                Use compressed audio format.\n"
+"                                   If this is not present, uncompressed format (wav) is assumed.\n"
+"                                   Valid only with --file.\n"
+"                                   Valid values: alaw, any, flac, mp3, mulaw, ogg_opus\n\n"
 "  RECOGNITION\n"
-"    --recognizing                 Output Recognizing results (default output is Recognized results only.)\n"
-"                                  These are always written to the console, never to an output file.\n"
-"                                  --quiet overrides this.\n\n"
+"    --recognizing                  Output Recognizing results (default output is Recognized results only.)\n"
+"                                   These are always written to the console, never to an output file.\n"
+"                                   --quiet overrides this.\n\n"
 "  ACCURACY\n"
-"    --phrases PHRASE1;PHRASE2     Example: Constoso;Jessie;Rehaan\n\n"
+"    --phrases ""PHRASE1;PHRASE2""  Example: ""Constoso;Jessie;Rehaan""\n\n"
 "  OUTPUT\n"
-"    --output FILE                 Output captions to text file.\n"
-"    --srt                         Output captions in SubRip Text format (default format is WebVTT.)\n"
-"    --quiet                       Suppress console output, except errors.\n"
-"    --profanity OPTION            Valid values: raw, remove, mask\n"
-"    --threshold NUMBER            Set stable partial result threshold.\n"
-"                                  Default value: 3\n";
+"    --output FILE                  Output captions to text file.\n"
+"    --srt                          Output captions in SubRip Text format (default format is WebVTT.)\n"
+"    --quiet                        Suppress console output, except errors.\n"
+"    --profanity OPTION             Valid values: raw, remove, mask\n"
+"    --threshold NUMBER             Set stable partial result threshold.\n"
+"                                   Default value: 3\n";
 
     try
     {
