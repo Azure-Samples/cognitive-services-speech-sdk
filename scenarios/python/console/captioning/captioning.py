@@ -32,12 +32,15 @@ USAGE = """Usage: python captioning.py [...]
 
   CONNECTION
     --key KEY                        Your Azure Speech service subscription key.
+                                     Required unless you have the SPEECH_KEY environment variable set.
     --region REGION                  Your Azure Speech service region.
+                                     Required unless you have the SPEECH_REGION environment variable set.
                                      Examples: westus, eastus
 
   LANGUAGE
-    --languages LANG1;LANG2          Enable language identification for specified languages.
-                                     Example: en-US;ja-JP
+    --language LANG1                 Specify language. This is used when breaking captions into lines.
+                                     Default value is en-US.
+                                     Examples: en-US, ja-JP
 
   INPUT
     --input FILE                     Input audio from file (default input is the microphone.)
@@ -83,10 +86,6 @@ class Captioning(object) :
         self._recognized_lines : List[str] = []
         self._offline_results : List[speechsdk.SpeechRecognitionResult] = []
 
-    # Note: Continuous language identification is supported only with v2 endpoints.
-    def v2_endpoint_from_region(self, region : str) -> str :
-        return "wss://{}.stt.speech.microsoft.com/speech/universal/v2".format(region);
-
     def get_timestamp(self, start : time, end : time) -> str :
         time_format = ""
         if self._user_config["use_sub_rip_text_caption_format"] :
@@ -97,26 +96,17 @@ class Captioning(object) :
         # Truncate microseconds to milliseconds.
         return "{} --> {}".format(start.strftime(time_format)[:-3], end.strftime(time_format)[:-3])
 
-    def language_from_speech_recognition_result(self, result : speechsdk.SpeechRecognitionResult) -> str :
-        if self._user_config["languages"] is not None :
-            return "[{}] ".format(speechsdk.AutoDetectSourceLanguageResult(result).language)
-        else :
-            return ""
-
     def string_from_caption(self, caption : caption_helper.Caption) -> str :
         retval = ""
         if self._user_config["use_sub_rip_text_caption_format"] :
             retval += str(caption.sequence) + linesep
         retval += self.get_timestamp(caption.begin, caption.end) + linesep
-        # Only show the language prefix if the user specified multiple languages.
-        if caption.language is not None and len(self._user_config["languages"]) > 1 :
-            retval += "[{}] ".format(caption.language)
         retval += caption.text + linesep + linesep
         return retval
 
-    def adjust_real_time_caption_text(self, language : Optional[str], text : str, is_recognized_result : bool) -> str :
+    def adjust_real_time_caption_text(self, text : str, is_recognized_result : bool) -> str :
         # Split the caption text into multiple lines based on max_line_length and lines.
-        temp_caption_helper = caption_helper.CaptionHelper(language, self._user_config["max_line_length"], self._user_config["lines"], [])
+        temp_caption_helper = caption_helper.CaptionHelper(self._user_config["language"], self._user_config["max_line_length"], self._user_config["lines"], [])
         lines = temp_caption_helper.lines_from_text(text)
 
         # Recognizing results can change with each new result, so we do not save previous Recognizing results.
@@ -132,7 +122,6 @@ class Captioning(object) :
 
     def caption_from_real_time_result(self, result : speechsdk.SpeechRecognitionResult, is_recognized_result : bool) -> Optional[str] :
         retval : Optional[str] = None
-        language = self.language_from_speech_recognition_result(result)
 
         start_time = helper.time_from_ticks(result.offset)
         end_time = helper.time_from_ticks(result.offset + result.duration)
@@ -149,7 +138,7 @@ class Captioning(object) :
             # Convert the SpeechRecognitionResult to a caption.
             # We are not ready to set the text for this caption.
             # First we need to determine whether to clear _recognizedLines.
-            caption = caption_helper.Caption(language, self._srt_sequence_number, helper.add_time_and_timedelta(start_time, self._user_config["delay"]), helper.add_time_and_timedelta(end_time, self._user_config["delay"]), "")
+            caption = caption_helper.Caption(self._user_config["language"], self._srt_sequence_number, helper.add_time_and_timedelta(start_time, self._user_config["delay"]), helper.add_time_and_timedelta(end_time, self._user_config["delay"]), "")
             # Increment the sequence number.
             self._srt_sequence_number += 1
 
@@ -180,7 +169,7 @@ class Captioning(object) :
                 retval = self.string_from_caption(self._previous_caption)
 
             # Break the caption text into lines if needed.
-            caption.text = self.adjust_real_time_caption_text(language, result.text, is_recognized_result)
+            caption.text = self.adjust_real_time_caption_text(result.text, is_recognized_result)
             # Save the current caption as the previous caption.
             self._previous_caption = caption
             # Save the result type as the previous result type.
@@ -189,22 +178,7 @@ class Captioning(object) :
         return retval
 
     def captions_from_offline_results(self) -> List[caption_helper.Caption] :
-        # Group offline results by language.
-        groups = groupby(self._offline_results, lambda result : self.language_from_speech_recognition_result(result))
-        captions : List[caption_helper.Caption] = []
-        for (key, results) in groups :
-            # For each language, for each caption, split the caption text
-            # into multiple lines based on maxLineLength and lines.
-            # We need to group by language because CaptionHelper handles
-            # some languages differently.
-            for caption in caption_helper.get_captions(key, self._user_config["max_line_length"], self._user_config["lines"], list(results)) :
-                # Add the language to each caption.
-                caption.language = key
-                # Combine all updated captions.
-                captions.append(caption)
-        # Sort the captions by starting timestamp.
-        captions = sorted(captions, key=lambda caption : caption.begin)
-
+        captions = caption_helper.get_captions(self._user_config["language"], self._user_config["max_line_length"], self._user_config["lines"], list(self._offline_results))
         # Save the last caption.
         last_caption = captions[-1]
         last_caption.end = helper.add_time_and_timedelta(last_caption.end, self._user_config["remain_time"])
@@ -267,11 +241,7 @@ class Captioning(object) :
 
     def speech_config_from_user_config(self) -> speechsdk.SpeechConfig :
         speech_config = None
-        if self._user_config["languages"] is not None :
-            endpoint = self.v2_endpoint_from_region(self._user_config["region"])
-            speech_config = speechsdk.SpeechConfig(endpoint=endpoint, subscription=self._user_config["subscription_key"])
-        else :
-            speech_config = speechsdk.SpeechConfig(subscription=self._user_config["subscription_key"], region=self._user_config["region"])
+        speech_config = speechsdk.SpeechConfig(subscription=self._user_config["subscription_key"], region=self._user_config["region"])
 
         speech_config.set_profanity(self._user_config["profanity_option"])
 
@@ -285,13 +255,7 @@ class Captioning(object) :
     def speech_recognizer_from_user_config(self) -> helper.Read_Only_Dict :
         audio_config_data = self.audio_config_from_user_config()
         speech_config = self.speech_config_from_user_config()
-        speech_recognizer = None
-
-        if len(self._user_config["languages"]) > 0 :
-            auto_detect_source_language_config = speechsdk.AutoDetectSourceLanguageConfig(self._user_config["languages"])
-            speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, audio_config=audio_config_data["audio_config"], auto_detect_source_language_config=auto_detect_source_language_config)
-        else :
-            speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, audio_config=audio_config_data["audio_config"])
+        speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, audio_config=audio_config_data["audio_config"])
 
         if len(self._user_config["phrases"]) > 0 :
             grammar = speechsdk.PhraseListGrammar.from_recognizer(recognizer=speech_recognizer)

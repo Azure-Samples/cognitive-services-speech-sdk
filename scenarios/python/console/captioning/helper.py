@@ -11,6 +11,9 @@ from typing import Optional
 from pathlib import Path
 import azure.cognitiveservices.speech as speechsdk # type: ignore
 
+DEFAULT_MAX_LINE_LENGTH_SBCS = 37
+DEFAULT_MAX_LINE_LENGTH_MBCS = 30
+
 # See speech_recognize_once_compressed_input() in:
 # https://github.com/Azure-Samples/cognitive-services-speech-sdk/blob/master/samples/python/console/speech_sample.py
 class BinaryFileReaderCallback(speechsdk.audio.PullAudioInputStreamCallback):

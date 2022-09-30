@@ -5,7 +5,7 @@
 
 from datetime import timedelta
 from enum import Enum
-from os import linesep
+from os import linesep, environ
 from sys import argv
 from typing import List, Optional
 import azure.cognitiveservices.speech as speechsdk # type: ignore
@@ -14,9 +14,6 @@ import helper
 class CaptioningMode(Enum):
     OFFLINE = 1
     REALTIME = 2
-
-DEFAULT_MAX_LINE_LENGTH_SBCS = 37
-DEFAULT_MAX_LINE_LENGTH_MBCS = 30
 
 def get_cmd_option(option : str) -> Optional[str] :
     argc = len(argv)
@@ -33,11 +30,11 @@ def get_cmd_option(option : str) -> Optional[str] :
 def cmd_option_exists(option : str) -> bool :
     return option.lower() in list(map(lambda arg : arg.lower(), argv))
 
-def get_languages() -> List[str] :
-    retval : List[str] = []
-    languages = get_cmd_option("--languages")
-    if languages is not None :
-        retval = list(map(lambda language : language.strip().lower(), languages.split(';')))
+def get_language() -> str :
+    retval = "en-US"
+    language = get_cmd_option("--language")
+    if language is not None :
+        retval = language
     return retval
 
 def get_phrases() -> List[str] :
@@ -71,12 +68,24 @@ def get_profanity_option() -> speechsdk.ProfanityOption :
         else : return speechsdk.ProfanityOption.Masked
 
 def user_config_from_args(usage : str) -> helper.Read_Only_Dict :
-    key = get_cmd_option("--key")
-    if key is None:
-        raise RuntimeError("Missing subscription key.{}{}".format(linesep, usage))
-    region = get_cmd_option("--region")
-    if region is None:
-        raise RuntimeError("Missing region.{}{}".format(linesep, usage))
+    key = ""
+    if "SPEECH_KEY" in environ :
+        key = environ["SPEECH_KEY"]
+    else :
+        keyOption = get_cmd_option("--key")
+        if keyOption is None:
+            raise RuntimeError("Please set the SPEECH_KEY environment variable or provide a Speech subscription key with the --key option.{}{}".format(linesep, usage))
+        else :
+            key = keyOption
+    region = ""
+    if "SPEECH_REGION" in environ :
+        region = environ["SPEECH_REGION"]
+    else :
+        regionOption = get_cmd_option("--region")
+        if regionOption is None:
+            raise RuntimeError("Please set the SPEECH_REGION environment variable or provide a Speech subscription region with the --region option.{}{}".format(linesep, usage))
+        else :
+            region = regionOption
 
     captioning_mode = CaptioningMode.REALTIME if cmd_option_exists("--realtime") and not cmd_option_exists("--offline") else CaptioningMode.OFFLINE
 
@@ -96,7 +105,7 @@ def user_config_from_args(usage : str) -> helper.Read_Only_Dict :
             flt_delay = 1.0
         td_delay = timedelta(seconds=flt_delay)
     
-    int_max_line_length = DEFAULT_MAX_LINE_LENGTH_SBCS
+    int_max_line_length = helper.DEFAULT_MAX_LINE_LENGTH_SBCS
     s_max_line_length = get_cmd_option("--maxLineLength")
     if s_max_line_length is not None :
         int_max_line_length = int(s_max_line_length)
@@ -114,7 +123,7 @@ def user_config_from_args(usage : str) -> helper.Read_Only_Dict :
         "use_compressed_audio" : cmd_option_exists("--format"),
         "compressed_audio_format" : get_compressed_audio_format(),
         "profanity_option" : get_profanity_option(),
-        "languages" : get_languages(),
+        "language" : get_language(),
         "input_file" : get_cmd_option("--input"),
         "output_file" : get_cmd_option("--output"),        
         "phrases" : get_phrases(),

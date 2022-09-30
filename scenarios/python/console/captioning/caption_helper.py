@@ -38,8 +38,8 @@ class CaptionHelper(object) :
             if "zh" == iso639.lower() :
                 self._first_pass_terminators = ["，", "、", "；", "？", "！", "?", "!", ",", ";"]
                 self._second_pass_terminators = ["。", " "]
-                if (37 == self._max_width) :
-                    self._max_width = 30
+                if (helper.DEFAULT_MAX_LINE_LENGTH_SBCS == self._max_width) :
+                    self._max_width = helper.DEFAULT_MAX_LINE_LENGTH_MBCS
 
     def get_captions(self) -> List[Caption] :
         self.ensure_captions()
