@@ -357,9 +357,9 @@ namespace TextAnalytics
                 var operation = await TextAnalyticsClient.StartAnalyzeActionsAsync(documentChunk, actions, cancellationToken: cts.Token).ConfigureAwait(false);
                 return (operation.Id, errors);
             }
-            catch (OperationCanceledException)
+            catch (OperationCanceledException operationCanceledException)
             {
-                throw new TimeoutException($"The operation has timed out after {RequestTimeout.TotalSeconds} seconds.");
+                throw new TransientFailureException($"Operation was canceled after {RequestTimeout.TotalSeconds} seconds.", operationCanceledException);
             }
 
             // do not catch throttling errors, rather throw and retry
@@ -451,9 +451,9 @@ namespace TextAnalytics
                     }
                 }
             }
-            catch (OperationCanceledException)
+            catch (OperationCanceledException operationCanceledException)
             {
-                throw new TimeoutException($"The operation has timed out after {RequestTimeout.TotalSeconds} seconds.");
+                throw new TransientFailureException($"Operation was canceled after {RequestTimeout.TotalSeconds} seconds.", operationCanceledException);
             }
 
             // do not catch throttling errors, rather throw and retry
