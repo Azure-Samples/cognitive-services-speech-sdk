@@ -20,7 +20,6 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.CognitiveServices.Speech;
 using Microsoft.CognitiveServices.Speech.Audio;
-using Azure.AI.Details.Common.CLI;
 
 namespace Captioning
 {
@@ -32,15 +31,8 @@ namespace Captioning
         private TimeSpan? _previousEndTime;
         private bool _previousResultIsRecognized = false;
         private List<string> _recognizedLines = new List<string>();
-        
         private List<SpeechRecognitionResult> _offlineResults = new List<SpeechRecognitionResult>();
         
-        private static string V2EndpointFromRegion(string region)
-        {
-            // Note: Continuous language identification is supported only with v2 endpoints.
-            return $"wss://{region}.stt.speech.microsoft.com/speech/universal/v2";
-        }
-
         private void WriteToConsole(string text)
         {
             if (!this._userConfig!.suppressConsoleOutput)
@@ -66,18 +58,6 @@ namespace Captioning
                 : $"{startTime:hh\\:mm\\:ss\\.fff} --> {endTime:hh\\:mm\\:ss\\.fff}";
         }
 
-        private string? LanguageFromSpeechRecognitionResult(SpeechRecognitionResult result)
-        {
-            string? retval = null;
-            
-            if (this._userConfig!.languageIDLanguages.Count > 0)
-            {
-                retval = AutoDetectSourceLanguageResult.FromResult(result).Language;
-            }
-
-            return retval;
-        }
-
         private string StringFromCaption(Caption caption)
         {
             var retval = new StringBuilder();
@@ -87,19 +67,14 @@ namespace Captioning
                 retval.AppendFormat($"{caption.Sequence}{Environment.NewLine}");
             }
             retval.AppendFormat($"{GetTimestamp(caption.Begin, caption.End)}{Environment.NewLine}");
-            // Only show the language prefix if the user specified multiple languages.
-            if (caption.Language is string languageValue && this._userConfig!.languageIDLanguages.Count > 1)
-            {
-                retval.Append($"[{languageValue}] ");
-            }
             retval.AppendFormat($"{caption.Text}{Environment.NewLine}{Environment.NewLine}");
             return retval.ToString();
         }
 
-        private string AdjustRealTimeCaptionText(string? language, string text, bool isRecognizedResult)
+        private string AdjustRealTimeCaptionText(string text, bool isRecognizedResult)
         {
             // Split the caption text into multiple lines based on maxLineLength and lines.
-            var captionHelper = new CaptionHelper(language, this._userConfig!.maxLineLength, this._userConfig!.lines, Enumerable.Empty<object>());
+            var captionHelper = new CaptionHelper(this._userConfig!.language, this._userConfig!.maxLineLength, this._userConfig!.lines, Enumerable.Empty<object>());
             List<string> lines = captionHelper.LinesFromText(text);
 
             // Recognizing results can change with each new result, so we do not save previous Recognizing results.
@@ -111,20 +86,16 @@ namespace Captioning
             }
             else
             {
-                recognizingLines = lines.TakeLast(_userConfig!.lines).ToList();
+                recognizingLines = lines;
             }
             
-            // If the Recognizing result has fewer lines than _userConfig.lines,
-            // we insert lines from our saved Recognized results.
-            int recognizedLinesToAdd = Math.Max(0, _userConfig!.lines - recognizingLines.Count());
-            recognizingLines = _recognizedLines.TakeLast(recognizedLinesToAdd).Concat(recognizingLines).ToList();
-            return string.Join('\n', recognizingLines.ToArray());
+            IEnumerable<string> captionLines = _recognizedLines.Concat(recognizingLines).TakeLast(_userConfig!.lines);
+            return string.Join('\n', captionLines.ToArray());
         }
 
         private string? CaptionFromRealTimeResult(SpeechRecognitionResult result, bool isRecognizedResult)
         {
             string? retval = null;
-            string? language = LanguageFromSpeechRecognitionResult(result);
 
             var startTime = new TimeSpan(result.OffsetInTicks);
             var endTime = startTime.Add(result.Duration);
@@ -134,29 +105,7 @@ namespace Captioning
             if (_previousEndTime is TimeSpan previousEndTimeValue &&
                 previousEndTimeValue > endTime)
             {
-                // 20220921 This is for debugging out-of-order Recognizing results and can be removed.
-                if (this._userConfig!.debug)
-                {
-                    var strResultType = isRecognizedResult ? "Recognized" : "Recognizing";
-                    WriteToConsoleOrFile($@"DEBUG: Dropping out-of-order result.
-Dropped result:
-Type: {strResultType}
-Start time (undelayed): {startTime.ToString()}
-Start time (delayed): {startTime.Add(this._userConfig!.delay).ToString()}
-End time (undelayed): {endTime.ToString()}
-End time (delayed): {endTime.Add(this._userConfig!.delay).ToString()}
-Text: {result.Text}
-
-Previous result:
-End time (undelayed): {previousEndTimeValue.ToString()}
-End time (delayed): {previousEndTimeValue.Add(this._userConfig!.delay).ToString()}
-
-Dropped result undelayed end time ({endTime.ToString()}) < previous result undelayed end time ({previousEndTimeValue.ToString()}).
-Note previous result will appear *after* this debug output.
-END DEBUG
-
-");
-                }
+                // Do nothing.
             }
             else
             {
@@ -166,7 +115,7 @@ END DEBUG
                 // Convert the SpeechRecognitionResult to a caption.
                 Caption caption = new Caption()
                 {
-                    Language = language,
+                    Language = this._userConfig!.language,
                     Sequence = _srtSequenceNumber++,
                     Begin = startTime.Add(this._userConfig!.delay),
                     End = endTime.Add(this._userConfig!.delay),
@@ -206,24 +155,11 @@ END DEBUG
                         caption.Begin = previousCaption.End;
                     }
 
-                    // 20220921 This is for debugging out-of-order Recognizing results and can be removed.
-                    if (this._userConfig!.debug && previousCaption.Begin > previousCaption.End)
-                    {
-                        var strResultType = _previousResultIsRecognized ? "Recognized" : "Recognizing";
-                        WriteToConsoleOrFile($@"DEBUG: Caption start time > caption end time.
-Type: {strResultType}
-Start time: {previousCaption.Begin.ToString()}
-End time: {previousCaption.End.ToString()}
-END DEBUG
-
-");
-                    }
-
                     retval = StringFromCaption(previousCaption);
                 }
 
                 // Break the caption text into lines if needed.
-                caption.Text = AdjustRealTimeCaptionText(language, result.Text, isRecognizedResult);
+                caption.Text = AdjustRealTimeCaptionText(result.Text, isRecognizedResult);
                 // Save the current caption as the previous caption.
                 _previousCaption = caption;
                 // Save the result type as the previous result type.
@@ -235,24 +171,7 @@ END DEBUG
 
         private IEnumerable<Caption> CaptionsFromOfflineResults()
         {
-            IEnumerable<Caption> captions = _offlineResults
-                // Group offline results by language.
-                .GroupBy(result => LanguageFromSpeechRecognitionResult(result))
-                // For each language, for each caption, split the caption text
-                // into multiple lines based on maxLineLength and lines.
-                // We need to group by language because CaptionHelper handles
-                // some languages differently.
-                // Combine all updated captions.
-                .SelectMany(grouping => {
-                    IEnumerable<Caption> captions = CaptionHelper.GetCaptions(grouping.Key, this._userConfig!.maxLineLength, this._userConfig!.lines, grouping);
-                    // Add the language to each caption.
-                    return captions.Select(caption => {
-                        caption.Language = grouping.Key;
-                        return caption;
-                    });
-                })
-                // Re-sort the captions by starting timestamp.
-                .OrderBy(caption => caption.Begin);
+            IEnumerable<Caption> captions = CaptionHelper.GetCaptions(this._userConfig!.language, this._userConfig!.maxLineLength, this._userConfig!.lines, _offlineResults);
 
             // Save the last caption.
             Caption lastCaption = captions.Last();
@@ -344,16 +263,7 @@ END DEBUG
         //
         private SpeechConfig SpeechConfigFromUserConfig()
         {
-            SpeechConfig speechConfig;
-            // Language identification requires V2 endpoint.
-            if (null != this._userConfig!.languageIDLanguages)
-            {
-                speechConfig = SpeechConfig.FromEndpoint(new Uri(V2EndpointFromRegion(this._userConfig!.region)), this._userConfig!.subscriptionKey);
-            }
-            else
-            {
-                speechConfig = SpeechConfig.FromSubscription(this._userConfig!.subscriptionKey, this._userConfig!.region);
-            }
+            SpeechConfig speechConfig = SpeechConfig.FromSubscription(this._userConfig!.subscriptionKey, this._userConfig!.region);
 
             speechConfig.SetProfanity(this._userConfig!.profanityOption);
             
@@ -376,15 +286,7 @@ END DEBUG
             SpeechConfig speechConfig = SpeechConfigFromUserConfig();
             SpeechRecognizer speechRecognizer;
             
-            if (this._userConfig!.languageIDLanguages.Count > 0)
-            {
-                var autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig.FromLanguages(this._userConfig!.languageIDLanguages.ToArray());
-                speechRecognizer = new SpeechRecognizer(speechConfig, autoDetectSourceLanguageConfig, audioConfig);
-            }
-            else
-            {
-                speechRecognizer = new SpeechRecognizer(speechConfig, audioConfig);
-            }
+            speechRecognizer = new SpeechRecognizer(speechConfig, audioConfig);
             
             if (this._userConfig!.phraseList is string phraseListValue)
             {
@@ -499,12 +401,15 @@ END DEBUG
 
   CONNECTION
     --key KEY                        Your Azure Speech service subscription key.
+                                     Required unless you have the SPEECH_KEY environment variable set.
     --region REGION                  Your Azure Speech service region.
+                                     Required unless you have the SPEECH_REGION environment variable set.
                                      Examples: westus, eastus
 
   LANGUAGE
-    --languages LANG1;LANG2          Enable language identification for specified languages.
-                                     Example: en-US;ja-JP
+    --language LANG                  Specify language. This is used when breaking captions into lines.
+                                     Default value is en-US.
+                                     Examples: en-US, ja-JP
 
   INPUT
     --input FILE                     Input audio from file (default input is the microphone.)
@@ -535,6 +440,7 @@ END DEBUG
                                      Minimum is 0.0. Default is 1.0.
     --quiet                          Suppress console output, except errors.
     --profanity OPTION               Valid values: raw, remove, mask
+                                     Default is mask.
     --threshold NUMBER               Set stable partial result threshold.
                                      Default is 3.
 ";

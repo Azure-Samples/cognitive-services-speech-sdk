@@ -17,7 +17,7 @@ using Microsoft.CognitiveServices.Speech.Transcription;
 using System.Collections.Generic;
 using System.Globalization;
 
-namespace Azure.AI.Details.Common.CLI
+namespace Captioning
 {
     public struct Caption
     {
@@ -74,9 +74,9 @@ namespace Azure.AI.Details.Common.CLI
                 _ => new string[]{" ", "."}
             };
 
-            if (maxWidth == 37 && iso639 == "zh")
+            if (maxWidth == UserConfig.defaultMaxLineLengthSBCS && iso639 == "zh")
             {
-                this._maxWidth = 30;
+                this._maxWidth = UserConfig.defaultMaxLineLengthMBCS;
             }
         }
 
@@ -154,6 +154,7 @@ namespace Azure.AI.Details.Common.CLI
 
                     var caption = new Caption()
                     {
+                        Language = _language,
                         Sequence = captionSequence,
                         Begin = captionBegin,
                         End = captionEnd,

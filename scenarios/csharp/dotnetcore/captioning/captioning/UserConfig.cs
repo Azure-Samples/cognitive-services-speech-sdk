@@ -31,10 +31,8 @@ namespace Captioning
         readonly public AudioStreamContainerFormat compressedAudioFormat = AudioStreamContainerFormat.ANY;
         /// Whether to show, remove, or mask profanity. Default is to mask it.
         readonly public ProfanityOption profanityOption = ProfanityOption.Masked;
-        /// Enable language identification for these languages.
-        /// Languages must be delimited by commas.
-        /// Example: en-US,ja-JP
-        readonly public List<string> languageIDLanguages;
+        /// Examples: en-US, ja-JP
+        readonly public string language;
         /// Input audio file path. Default input is the microphone.
         readonly public string? inputFilePath;
         /// Output file path. Default output is the console.
@@ -70,7 +68,7 @@ namespace Captioning
             bool useCompressedAudio,
             AudioStreamContainerFormat compressedAudioFormat,
             ProfanityOption profanityOption,
-            List<string> languageIDLanguages,
+            string language,
             string? inputFilePath,
             string? outputFilePath,
             string? phraseList,
@@ -90,7 +88,7 @@ namespace Captioning
             this.useCompressedAudio = useCompressedAudio;
             this.compressedAudioFormat = compressedAudioFormat;
             this.profanityOption = profanityOption;
-            this.languageIDLanguages = languageIDLanguages;
+            this.language = language;
             this.inputFilePath = inputFilePath;
             this.outputFilePath = outputFilePath;
             this.phraseList = phraseList;
@@ -124,15 +122,12 @@ namespace Captioning
             return args.Contains (option, StringComparer.OrdinalIgnoreCase);
         }
 
-        private static List<string> GetLanguageIDLanguages(string[] args)
+        private static string GetLanguage(string[] args)
         {
-            var retval = new List<string>();
-            if (GetCmdOption(args, "--languages") is string languageIDLanguagesResult)
+            var retval = "en-US";
+            if (GetCmdOption(args, "--language") is string language)
             {
-                foreach (string language in languageIDLanguagesResult.Split(';'))
-                {
-                    retval.Add(language);
-                }
+                retval = language;
             }
             return retval;
         }
@@ -178,15 +173,31 @@ namespace Captioning
         
         public static UserConfig UserConfigFromArgs(string[] args, string usage)
         {
-            string? key = GetCmdOption(args, "--key");
-            if (key is null)
+            string key;
+            if (Environment.GetEnvironmentVariable("SPEECH_KEY") is string keyValue)
             {
-                throw new ArgumentException($"Missing subscription key.{Environment.NewLine}Usage: {usage}");
+                key = keyValue;
             }
-            string? region = GetCmdOption(args, "--region");
-            if (region is null)
+            else if (GetCmdOption(args, "--key") is string keyOptionValue)
             {
-                throw new ArgumentException($"Missing region.{Environment.NewLine}Usage: {usage}");
+                key = keyOptionValue;
+            }
+            else
+            {
+                throw new ArgumentException($"Please set the SPEECH_KEY environment variable or provide a Speech subscription key with the --key option.{Environment.NewLine}Usage: {usage}");
+            }
+            string region;
+            if (Environment.GetEnvironmentVariable("SPEECH_REGION") is string regionValue)
+            {
+                region = regionValue;
+            }
+            else if (GetCmdOption(args, "--region") is string regionOptionValue)
+            {
+                region = regionOptionValue;
+            }
+            else
+            {
+                throw new ArgumentException($"Please set the SPEECH_REGION environment variable or provide a Speech region with the --region option.{Environment.NewLine}Usage: {usage}");
             }
             
             CaptioningMode captioningMode = CmdOptionExists(args, "--realTime") && !CmdOptionExists(args, "--offline") ? CaptioningMode.RealTime : CaptioningMode.Offline;
@@ -242,7 +253,7 @@ namespace Captioning
                 CmdOptionExists(args, "--format"),
                 GetCompressedAudioFormat(args),
                 GetProfanityOption(args),
-                GetLanguageIDLanguages(args),
+                GetLanguage(args),
                 GetCmdOption(args, "--input"),
                 GetCmdOption(args, "--output"),
                 GetCmdOption(args, "--phrases"),
