@@ -31,7 +31,8 @@ CONVERSATION_SUMMARY_MODEL_VERSION = "2022-05-15-preview";
 WAIT_SECONDS = 10
 
 class TranscriptionPhrase(object) :
-    def __init__(self, text : str, itn : str, lexical : str, speaker_number : int, offset : str, offset_in_ticks : float) :
+    def __init__(self, id : int, text : str, itn : str, lexical : str, speaker_number : int, offset : str, offset_in_ticks : float) :
+        self.id = id
         self.text = text
         self.itn = itn
         self.lexical = lexical
@@ -60,20 +61,13 @@ class ConversationAnalysisForSimpleOutput(object) :
         self.summary = summary
         self.pii_analysis = pii_analysis
 
-class CombinedRedactedContent(object) :
-    def __init__(self, channel : int) :
-        self.channel = channel
-        self.lexical = ""
-        self.itn = ""
-        self.display = ""
-
-# TODO1 TEMP
+# This needs to be serialized to JSON, so we use a Dict instead of a class.
 def get_combined_redacted_content(channel : int) -> Dict :
     return {
         "channel" : channel,
-        "lexical" : "",
+        "display" : "",
         "itn" : "",
-        "display" : ""
+        "lexical" : ""
     }
 
 def create_transcription(user_config : helper.Read_Only_Dict) -> str :
@@ -141,7 +135,8 @@ def get_transcription(transcription_uri : str) -> Dict :
     return response["json"]
 
 def get_transcription_phrases(transcription : Dict, user_config : helper.Read_Only_Dict) -> List[TranscriptionPhrase] :
-    def helper(phrase : Dict) -> TranscriptionPhrase :
+    def helper(id_and_phrase : Tuple[int, Dict]) -> TranscriptionPhrase :
+        (id, phrase) = id_and_phrase
         best = phrase["nBest"][0]
         speaker_number : int
         # If the user specified stereo audio, and therefore we turned off diarization,
@@ -153,10 +148,9 @@ def get_transcription_phrases(transcription : Dict, user_config : helper.Read_On
             speaker_number = phrase["channel"]
         else :
             raise Exception(f"nBest item contains neither channel nor speaker attribute.{linesep}{best}")
-        return TranscriptionPhrase(best["display"], best["itn"], best["lexical"], speaker_number, phrase["offset"], phrase["offsetInTicks"])
-    phrases = list(map(helper, transcription["recognizedPhrases"]))
+        return TranscriptionPhrase(id, best["display"], best["itn"], best["lexical"], speaker_number, phrase["offset"], phrase["offsetInTicks"])
     # For stereo audio, the phrases are sorted by channel number, so resort them by offset.
-    return sorted(phrases, key=lambda x : x.offset_in_ticks)
+    return list(map(helper, enumerate(transcription["recognizedPhrases"])))
 
 def delete_transcription(transcription_id : str, user_config : helper.Read_Only_Dict) -> None :
     uri = f"https://{user_config['speech_endpoint']}{SPEECH_TRANSCRIPTION_PATH}/{transcription_id}"
@@ -178,10 +172,10 @@ def get_sentiment_analysis(phrases : List[TranscriptionPhrase], user_config : he
     # Convert each transcription phrase to a "document" as expected by the sentiment analysis REST API.
     # Include a counter to use as a document ID.
     documents : List[Dict] = []
-    for id, phrase in enumerate(phrases) :
-        phrase_data[id] = (phrase.speaker_number, phrase.offset_in_ticks)
+    for phrase in phrases :
+        phrase_data[phrase.id] = (phrase.speaker_number, phrase.offset_in_ticks)
         documents.append({
-            "id" : id,
+            "id" : phrase.id,
             "language" : user_config["language"],
             "text" : phrase.text,
         })
@@ -202,28 +196,21 @@ def get_sentiment_confidence_scores(sentiment_analysis_results : List[SentimentA
     return list(map(lambda result : result.document["confidenceScores"], sorted_by_offset))
 
 def merge_sentiment_confidence_scores_into_transcription(transcription : Dict, sentiment_confidence_scores : List[Dict]) -> Dict :
-# TODO1 This might not work. Might return copy of recognizedPhrases.
-    for id, phrase in enumerate(sorted(transcription["recognizedPhrases"], key=lambda x : float(x["offsetInTicks"]))) :
+    for id, phrase in enumerate(transcription["recognizedPhrases"]) :
         for best_item in phrase["nBest"] :
             best_item["sentiment"] = sentiment_confidence_scores[id]
     return transcription
-# TODO1 Remove
-#    phrases = sorted(transcription["recognizedPhrases"], key=lambda x : float(x["offsetInTicks"]))
-#    for id, phrase in enumerate(phrases) :
-#        best = list(map(lambda best_item : best_item["sentiment"] = sentiment_confidence_scores[id], phrase["nBest"])
-#        phrase["nBest"] = best
-#    transcription["recognizedPhrases"] = phrases
 
 def transcription_phrases_to_conversation_items(phrases : List[TranscriptionPhrase]) -> List[Dict] :
     return [{
-        "id" : id,
+        "id" : phrase.id,
         "text" : phrase.text,
         "itn" : phrase.itn,
-        "lexical" : phrase.lexical,        
+        "lexical" : phrase.lexical,
         # The first person to speak is probably the agent.
         "role" : "Agent" if 0 == phrase.speaker_number else "Customer",
         "participantId" : phrase.speaker_number
-    } for id, phrase in enumerate(phrases)]
+    } for phrase in phrases]
 
 def request_conversation_analysis(conversation_items : List[Dict], user_config : helper.Read_Only_Dict) -> str :
     uri = f"https://{user_config['language_endpoint']}{CONVERSATION_ANALYSIS_PATH}{CONVERSATION_ANALYSIS_QUERY}"
@@ -306,14 +293,14 @@ def get_conversation_analysis_for_simple_output(conversation_analysis : Dict, us
 
 def get_simple_output(phrases : List[TranscriptionPhrase], sentiments : List[str], conversation_analysis : ConversationAnalysisForSimpleOutput) -> str :
     result = ""
-    for i, phrase in enumerate(phrases) :
-        result += f"Phrase: {phrases[i].text}{linesep}"
-        result += f"Speaker: {phrases[i].speaker_number}{linesep}"
-        if i < len(sentiments) :
-            result += f"Sentiment: {sentiments[i]}{linesep}"
-        if i < len(conversation_analysis.pii_analysis) :
-            if len(conversation_analysis.pii_analysis[i]) > 0 :
-                entities = reduce(lambda acc, entity : f"{acc}    Category: {entity.category}. Text: {entity.text}.{linesep}", conversation_analysis.pii_analysis[i], "")
+    for index, phrase in enumerate(phrases) :
+        result += f"Phrase: {phrase.text}{linesep}"
+        result += f"Speaker: {phrase.speaker_number}{linesep}"
+        if index < len(sentiments) :
+            result += f"Sentiment: {sentiments[index]}{linesep}"
+        if index < len(conversation_analysis.pii_analysis) :
+            if len(conversation_analysis.pii_analysis[index]) > 0 :
+                entities = reduce(lambda acc, entity : f"{acc}    Category: {entity.category}. Text: {entity.text}.{linesep}", conversation_analysis.pii_analysis[index], "")
                 result += f"Recognized entities (PII):{linesep}{entities}"
             else :
                 result += f"Recognized entities (PII): none.{linesep}"
@@ -329,21 +316,18 @@ def print_simple_output(phrases : List[TranscriptionPhrase], sentiment_analysis_
 def get_conversation_analysis_for_full_output(phrases : List[TranscriptionPhrase], conversation_analysis : Dict) -> Dict :
     # Get the conversation summary and conversation PII analysis task results.
     tasks = conversation_analysis["tasks"]["items"]
-# TODO1 Need to pass None as param to next, as default retval. See other instances.
     conversation_summary_results = next(filter(lambda task : "summary_1" == task["taskName"], tasks))["results"]
     conversation_pii_results = next(filter(lambda task : "PII_1" == task["taskName"], tasks))["results"]
     # There should be only one conversation.
     conversation = conversation_pii_results["conversations"][0]
     # Order conversation items by ID so they match the order of the transcription phrases.
-    # TODO1 This probably copies conversation_items. So we might need to re-add to conversation.
-    conversation_items = sorted(conversation["conversationItems"], key=lambda item : int(item["id"]))
+    conversation["conversationItems"] = sorted(conversation["conversationItems"], key=lambda item : int(item["id"]))
     combined_redacted_content = [get_combined_redacted_content(0), get_combined_redacted_content(1)]
-    for index, conversation_item in enumerate(conversation_items) :
+    for index, conversation_item in enumerate(conversation["conversationItems"]) :
         # Get the channel and offset for this conversation item from the corresponding transcription phrase.
         channel = phrases[index].speaker_number
         # Add channel and offset to conversation item JsonElement.
-        # TODO1 Check this.
-        conversation_item["channel"] = str(channel)
+        conversation_item["channel"] = channel
         conversation_item["offset"] = phrases[index].offset
         # Get the text, lexical, and itn fields from redacted content, and append them to the combined redacted content for this channel.
         redacted_content = conversation_item["redactedContent"]
@@ -364,7 +348,7 @@ def print_full_output(output_file_path : str, transcription : Dict, sentiment_co
         "conversationAnalyticsResults" : get_conversation_analysis_for_full_output(phrases, conversation_analysis)
     }
     with open(output_file_path, mode = "w", newline = "") as f :
-        f.write(dumps(results, indent=4))
+        f.write(dumps(results, indent=2))
 
 def run() -> None :
     usage = """python call_center.py [...]
@@ -400,6 +384,7 @@ def run() -> None :
         print(usage)
     else :
         user_config = user_config_helper.user_config_from_args(usage)
+        transcription : Dict
         transcription_id : str
         if user_config["input_file_path"] is not None :
             with open(user_config["input_file_path"], mode="r") as f :
@@ -416,6 +401,8 @@ def run() -> None :
             transcription = get_transcription(transcription_uri)
         else :
             raise Exception(f"Missing input audio URL.{linesep}{usage}")
+        # For stereo audio, the phrases are sorted by channel number, so resort them by offset.
+        transcription["recognizedPhrases"] = sorted(transcription["recognizedPhrases"], key=lambda phrase : phrase["offsetInTicks"])
         phrases = get_transcription_phrases(transcription, user_config)
         sentiment_analysis_results = get_sentiment_analysis(phrases, user_config);
         sentiment_confidence_scores = get_sentiment_confidence_scores(sentiment_analysis_results)

@@ -32,8 +32,6 @@ def user_config_from_args(usage : str) -> helper.Read_Only_Dict :
     if input_audio_url is None and input_file_path is None :
         raise RuntimeError(f"Please specify either --input or --jsonInput.{linesep}{usage}")
 
-# TODO1 Remove https:// from language_endpoint?
-
     speech_subscription_key = get_cmd_option("--speechKey")
     if speech_subscription_key is None and input_file_path is None :
         raise RuntimeError(f"Missing Speech subscription key. Speech subscription key is required unless --jsonInput is present.{linesep}{usage}")
@@ -47,6 +45,7 @@ def user_config_from_args(usage : str) -> helper.Read_Only_Dict :
     language_endpoint = get_cmd_option("--languageEndpoint")
     if language_endpoint is None:
         raise RuntimeError(f"Missing Language endpoint.{linesep}{usage}")
+    language_endpoint = language_endpoint.replace("https://", "")
 
     language = get_cmd_option("--language")
     if language is None:
