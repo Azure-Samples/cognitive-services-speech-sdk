@@ -17,7 +17,7 @@ namespace Captioning
         Offline,
         RealTime
     }
-	
+
     public class UserConfig
     {
         readonly public static int defaultMaxLineLengthSBCS = 37;
