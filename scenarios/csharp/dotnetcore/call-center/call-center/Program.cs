@@ -138,7 +138,7 @@ namespace CallCenter
 
         private async Task<string> CreateTranscription(string inputAudioURL)
         {
-            var uri = new UriBuilder(Uri.UriSchemeHttps, this.userConfig.speechEndpoint);
+            var uri = new UriBuilder(Uri.UriSchemeHttps, this.userConfig.speechEndpoint!);
             uri.Path = speechTranscriptionPath;
 
             // Create Transcription API JSON request sample and schema:
@@ -156,7 +156,7 @@ namespace CallCenter
                     locale = this.userConfig.locale,
                     displayName = $"call_center_{DateTime.Now.ToString()}"
                 };
-            var response = await RestHelper.SendPost(uri.Uri.ToString(), JsonSerializer.Serialize(content), this.userConfig.speechSubscriptionKey, new HttpStatusCode[]{ HttpStatusCode.Created });
+            var response = await RestHelper.SendPost(uri.Uri.ToString(), JsonSerializer.Serialize(content), this.userConfig.speechSubscriptionKey!, new HttpStatusCode[]{ HttpStatusCode.Created });
             using (JsonDocument document = JsonDocument.Parse(response.content))
             {
                 // Create Transcription API JSON response sample and schema:
@@ -178,9 +178,9 @@ namespace CallCenter
 
         private async Task<bool> GetTranscriptionStatus(string transcriptionId)
         {
-            var uri = new UriBuilder(Uri.UriSchemeHttps, this.userConfig.speechEndpoint);
+            var uri = new UriBuilder(Uri.UriSchemeHttps, this.userConfig.speechEndpoint!);
             uri.Path = $"{speechTranscriptionPath}/{transcriptionId}";
-            var response = await RestHelper.SendGet(uri.Uri.ToString(), this.userConfig.speechSubscriptionKey, new HttpStatusCode[]{ HttpStatusCode.OK });
+            var response = await RestHelper.SendGet(uri.Uri.ToString(), this.userConfig.speechSubscriptionKey!, new HttpStatusCode[]{ HttpStatusCode.OK });
             using (JsonDocument document = JsonDocument.Parse(response.content))
             {
                 if (0 == string.Compare("Failed", document.RootElement.Clone().GetProperty("status").ToString(), StringComparison.InvariantCultureIgnoreCase))
@@ -208,9 +208,9 @@ namespace CallCenter
 
         private async Task<JsonElement> GetTranscriptionFiles(string transcriptionId)
         {
-            var uri = new UriBuilder(Uri.UriSchemeHttps, this.userConfig.speechEndpoint);
+            var uri = new UriBuilder(Uri.UriSchemeHttps, this.userConfig.speechEndpoint!);
             uri.Path = $"{speechTranscriptionPath}/{transcriptionId}/files";
-            var response = await RestHelper.SendGet(uri.Uri.ToString(), this.userConfig.speechSubscriptionKey, new HttpStatusCode[]{ HttpStatusCode.OK });
+            var response = await RestHelper.SendGet(uri.Uri.ToString(), this.userConfig.speechSubscriptionKey!, new HttpStatusCode[]{ HttpStatusCode.OK });
             using (JsonDocument document = JsonDocument.Parse(response.content))
             {
                 return document.RootElement.Clone();
@@ -266,9 +266,9 @@ namespace CallCenter
 
         private async Task DeleteTranscription(string transcriptionId)
         {
-            var uri = new UriBuilder(Uri.UriSchemeHttps, this.userConfig.speechEndpoint);
+            var uri = new UriBuilder(Uri.UriSchemeHttps, this.userConfig.speechEndpoint!);
             uri.Path = $"{speechTranscriptionPath}/{transcriptionId}";
-            await RestHelper.SendDelete(uri.Uri.ToString(), this.userConfig.speechSubscriptionKey);
+            await RestHelper.SendDelete(uri.Uri.ToString(), this.userConfig.speechSubscriptionKey!);
             return;
         }
 
@@ -612,7 +612,6 @@ namespace CallCenter
         public async Task Run(string usage)
         {
             JsonElement transcription;
-            string transcriptionId = "";
             if (this.userConfig.inputFilePath is string inputFilePathValue)
             {
                 using (JsonDocument document = JsonDocument.Parse(File.ReadAllText(inputFilePathValue)))
@@ -624,7 +623,7 @@ namespace CallCenter
             {
                 // How to use batch transcription:
                 // https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/cognitive-services/Speech-Service/batch-transcription.md
-                transcriptionId = await CreateTranscription(inputAudioURLValue);
+                string transcriptionId = await CreateTranscription(inputAudioURLValue);
                 await WaitForTranscription(transcriptionId);
                 Console.WriteLine($"Transcription ID: {transcriptionId}");
                 JsonElement transcriptionFiles = await GetTranscriptionFiles(transcriptionId);
