@@ -27,7 +27,7 @@ public:
     const bool useCompressedAudio = false;
     const AudioStreamContainerFormat compressedAudioFormat = AudioStreamContainerFormat::ANY;
     const ProfanityOption profanityOption = ProfanityOption::Masked;
-    const std::optional<std::vector<std::string>> languageIDLanguages = std::nullopt;
+    const std::string language;
     const std::optional<std::string> inputFile = std::nullopt;
     const std::optional<std::string> outputFile = std::nullopt;
     const std::optional<std::string> phraseList;
@@ -46,7 +46,7 @@ public:
         bool useCompressedAudio,
         AudioStreamContainerFormat compressedAudioFormat,
         ProfanityOption profanityOption,
-        std::optional<std::vector<std::string>> languageIDLanguages,
+        std::string language,
         std::optional<std::string> inputFile,
         std::optional<std::string> outputFile,
         std::optional<std::string> phraseList,
@@ -64,7 +64,7 @@ public:
         useCompressedAudio(useCompressedAudio),
         compressedAudioFormat(compressedAudioFormat),
         profanityOption(profanityOption),
-        languageIDLanguages(languageIDLanguages),
+        language(language),
         inputFile(inputFile),
         outputFile(outputFile),
         phraseList(phraseList),
@@ -82,5 +82,5 @@ public:
 };
 
 bool CommandLineOptionExists(char** begin, char** end, const std::string& option);
+std::string getEnvironmentVariable(const char* name);
 std::shared_ptr<UserConfig> UserConfigFromArgs(int argc, char* argv[], std::string usage);
-std::string V2EndpointFromRegion(std::string region);

@@ -81,6 +81,24 @@ static AudioStreamContainerFormat GetCompressedAudioFormat(char** begin, char** 
     }
 }
 
+std::string GetEnvironmentVariable(const char* name)
+{
+#if defined(_MSC_VER)
+    size_t requiredSize = 0;
+    (void)getenv_s(&requiredSize, nullptr, 0, name);
+    if (requiredSize == 0)
+    {
+        return "";
+    }
+    auto buffer = std::make_unique<char[]>(requiredSize);
+    (void)getenv_s(&requiredSize, buffer.get(), requiredSize, name);
+    return buffer.get();
+#else
+    auto value = getenv(name);
+    return value ? value : "";
+#endif
+}
+
 static ProfanityOption GetProfanityOption(char** begin, char** end)
 {
     std::optional<std::string> profanity = GetCommandLineOption(begin, end, "--profanity");
@@ -108,22 +126,38 @@ static ProfanityOption GetProfanityOption(char** begin, char** end)
 
 std::shared_ptr<UserConfig> UserConfigFromArgs(int argc, char* argv[], std::string usage)
 {
-    std::optional<std::string> key = GetCommandLineOption(argv, argv + argc, "--key");
-    if (!key.has_value())
+    std::string key = GetEnvironmentVariable("SPEECH_KEY");
+    if (0 == size(key))
     {
-        throw std::invalid_argument("Missing subscription key.\n" + usage);
+        std::optional<std::string> keyOption = GetCommandLineOption(argv, argv + argc, "--key");
+        if (!keyOption.has_value())
+        {
+            throw std::invalid_argument("Please set the SPEECH_KEY environment variable or provide a Speech subscription key with the --key option.\n" + usage);
+        }
+        else
+        {
+            key = keyOption.value();
+        }
     }
-    std::optional<std::string> region = GetCommandLineOption(argv, argv + argc, "--region");
-    if (!region.has_value())
+    std::string region = GetEnvironmentVariable("SPEECH_REGION");
+    if (0 == size(region))
     {
-        throw std::invalid_argument("Missing region.\n" + usage);
+        std::optional<std::string> regionOption = GetCommandLineOption(argv, argv + argc, "--region");
+        if (!regionOption.has_value())
+        {
+            throw std::invalid_argument("Please set the SPEECH_REGION environment variable or provide a Speech subscription region with the --region option.\n" + usage);
+        }
+        else
+        {
+            region = regionOption.value();
+        }
     }
-
-    std::optional<std::vector<std::string>> languageIDLanguages = std::nullopt;
-    std::optional<std::string> languageIDLanguagesResult = GetCommandLineOption(argv, argv + argc, "--languages");
-    if (languageIDLanguagesResult.has_value())
+    
+    std::string language = "en-US";
+    std::optional<std::string> languageResult = GetCommandLineOption(argv, argv + argc, "--language");
+    if (languageResult.has_value())
     {
-        languageIDLanguages = std::optional<std::vector<std::string>>{ StringHelper::Split(languageIDLanguagesResult.value(), ';') };
+        language = languageResult.value();
     }
 
     CaptioningMode captioningMode = CommandLineOptionExists(argv, argv + argc, "--realTime") && !CommandLineOptionExists(argv, argv + argc, "--offline") ? CaptioningMode::RealTime : CaptioningMode::Offline;
@@ -176,7 +210,7 @@ std::shared_ptr<UserConfig> UserConfigFromArgs(int argc, char* argv[], std::stri
         CommandLineOptionExists(argv, argv + argc, "--format"),
         GetCompressedAudioFormat(argv, argv + argc),
         GetProfanityOption(argv, argv + argc),
-        languageIDLanguages,
+        language,
         GetCommandLineOption(argv, argv + argc, "--input"),
         GetCommandLineOption(argv, argv + argc, "--output"),
         GetCommandLineOption(argv, argv + argc, "--phrases"),
@@ -188,13 +222,7 @@ std::shared_ptr<UserConfig> UserConfigFromArgs(int argc, char* argv[], std::stri
         maxLineLength,
         lines,        
         GetCommandLineOption(argv, argv + argc, "--threshold"),
-        key.value(),
-        region.value()
+        key,
+        region
     );
-}
-
-std::string V2EndpointFromRegion(std::string region)
-{
-    // Note: Continuous language identification is supported only with v2 endpoints.
-    return std::string("wss://" + region + ".stt.speech.microsoft.com/speech/universal/v2");
 }

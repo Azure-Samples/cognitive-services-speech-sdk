@@ -88,19 +88,6 @@ private:
         return StringFromTimestamp(startTime, m_userConfig->useSubRipTextCaptionFormat) + " --> " + StringFromTimestamp(endTime, m_userConfig->useSubRipTextCaptionFormat);
     }
 
-    std::string LanguageFromSpeechRecognitionResult(std::shared_ptr<SpeechRecognitionResult> result)
-    {
-        if (m_userConfig->languageIDLanguages.has_value())
-        {
-            auto languageIDResult = AutoDetectSourceLanguageResult::FromResult(result);
-            return "[" + languageIDResult->Language + "] ";
-        }
-        else
-        {
-            return "";
-        }
-    }
-
     std::string StringFromCaption(Caption caption)
     {
         std::string retval;
@@ -116,7 +103,7 @@ private:
     std::string AdjustRealTimeCaptionText(std::string text, bool isRecognizedResult)
     {
         // Split the caption text into multiple lines based on maxLineLength and lines.
-        auto captionHelper = std::make_shared<CaptionHelper>(std::nullopt, m_userConfig->maxLineLength, m_userConfig->lines, std::vector<std::shared_ptr<RecognitionResult>>());
+        auto captionHelper = std::make_shared<CaptionHelper>(m_userConfig->language, m_userConfig->maxLineLength, m_userConfig->lines, std::vector<std::shared_ptr<RecognitionResult>>());
         std::vector<std::string> lines = captionHelper->LinesFromText(text);
 
         // Recognizing results can change with each new result, so we do not save previous Recognizing results.
@@ -159,7 +146,7 @@ private:
             // Convert the SpeechRecognitionResult to a caption.
             // We are not ready to set the text for this caption.
             // First we need to determine whether to clear m_recognizedLines.
-            auto caption = Caption(std::nullopt, m_srtSequenceNumber++, TimestampPlusMilliseconds(startTime, m_userConfig->delay), TimestampPlusMilliseconds(endTime, m_userConfig->delay), "");
+            auto caption = Caption(m_userConfig->language, m_srtSequenceNumber++, TimestampPlusMilliseconds(startTime, m_userConfig->delay), TimestampPlusMilliseconds(endTime, m_userConfig->delay), "");
 
             // If we have a previous caption...
             if (m_previousCaption.has_value())
@@ -215,7 +202,7 @@ private:
         std::transform(m_offlineResults.begin(), m_offlineResults.end(), offlineResults.begin(), [](std::shared_ptr<SpeechRecognitionResult> result) {
             return std::static_pointer_cast<RecognitionResult>(result);
         });
-        std::vector<Caption> captions = CaptionHelper::GetCaptions(std::nullopt, m_userConfig->maxLineLength, m_userConfig->lines, offlineResults);
+        std::vector<Caption> captions = CaptionHelper::GetCaptions(m_userConfig->language, m_userConfig->maxLineLength, m_userConfig->lines, offlineResults);
 
         // In offline mode, all captions come from RecognitionResults of type Recognized.
         // Set the end timestamp for each caption to the earliest of:
@@ -260,15 +247,7 @@ private:
     std::shared_ptr<SpeechConfig> SpeechConfigFromUserConfig()
     {
         std::shared_ptr<SpeechConfig> speechConfig;
-        if (m_userConfig->languageIDLanguages.has_value())
-        {
-            std::string endpoint = V2EndpointFromRegion(m_userConfig->region);
-            speechConfig = SpeechConfig::FromEndpoint(endpoint, m_userConfig->subscriptionKey);
-        }
-        else
-        {
-            speechConfig = SpeechConfig::FromSubscription(m_userConfig->subscriptionKey, m_userConfig->region);
-        }
+        speechConfig = SpeechConfig::FromSubscription(m_userConfig->subscriptionKey, m_userConfig->region);
 
         speechConfig->SetProfanity(m_userConfig->profanityOption);
 
@@ -311,15 +290,7 @@ public:
         std::shared_ptr<SpeechConfig> speechConfig = SpeechConfigFromUserConfig();
         std::shared_ptr<SpeechRecognizer> speechRecognizer;
 
-        if (m_userConfig->languageIDLanguages.has_value())
-        {
-            auto autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig::FromLanguages(m_userConfig->languageIDLanguages.value());
-            speechRecognizer = SpeechRecognizer::FromConfig(speechConfig, autoDetectSourceLanguageConfig, audioConfig);
-        }
-        else
-        {
-            speechRecognizer = SpeechRecognizer::FromConfig(speechConfig, audioConfig);
-        }
+        speechRecognizer = SpeechRecognizer::FromConfig(speechConfig, audioConfig);
 
         if (m_userConfig->phraseList.has_value())
         {
@@ -455,11 +426,14 @@ int main(int argc, char* argv[])
 "    --help                           Show this help and stop.\n\n"
 "  CONNECTION\n"
 "    --key KEY                        Your Azure Speech service subscription key.\n"
+"                                     Required unless you have the SPEECH_KEY environment variable set.\n"
 "    --region REGION                  Your Azure Speech service region.\n"
+"                                     Required unless you have the SPEECH_REGION environment variable set.\n"
 "                                     Examples: westus, eastus\n\n"
 "  LANGUAGE\n"
-"    --languages LANG1;LANG2          Enable language identification for specified languages.\n"
-"                                     Example: en-US;ja-JP\n\n"
+"    --language LANG                  Specify language. This is used when breaking captions into lines.\n"
+"                                     Default value is en-US.\n"
+"                                     Examples: en-US, ja-JP\n\n"
 "  INPUT\n"
 "    --input FILE                     Input audio from file (default input is the microphone.)\n"
 "    --format FORMAT                  Use compressed audio format.\n"

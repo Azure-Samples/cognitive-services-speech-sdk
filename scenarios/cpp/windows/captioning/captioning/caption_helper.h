@@ -11,6 +11,7 @@
 #include <string>
 #include <vector>
 #include "string_helper.h"
+#include "user_config.h"
 
 using namespace Microsoft::CognitiveServices::Speech;
 
@@ -98,9 +99,9 @@ public:
             _secondPassTerminators = {" ", "."};
         }
 
-        if (maxWidth == 37 && (StringHelper::CaseInsensitiveCompare(iso639, "zh")))
+        if (maxWidth == UserConfig::defaultMaxLineLengthSBCS && (StringHelper::CaseInsensitiveCompare(iso639, "zh")))
         {
-            _maxWidth = 30;
+            _maxWidth = UserConfig::defaultMaxLineLengthMBCS;
         }
     }
 
