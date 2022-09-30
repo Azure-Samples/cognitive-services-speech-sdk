@@ -41,14 +41,6 @@ public class Captioning
     PullAudioInputStreamCallback _callback;
     PullAudioInputStream _stream;
 
-    // 20220926 This is not used yet. Continuous recognition language ID
-    // is not yet supported for Java.
-    private static String V2EndpointFromRegion(String region)
-    {
-        // Note: Continuous language identification is supported only with v2 endpoints.
-        return String.format("wss://%s.stt.speech.microsoft.com/speech/universal/v2", region);
-    }
-
     private void WriteToConsole(String text)
     {
         if (!_userConfig.getSuppressConsoleOutput())
@@ -107,7 +99,7 @@ public class Captioning
     private String AdjustRealTimeCaptionText(String text, boolean isRecognizedResult)
     {
         // Split the caption text into multiple lines based on maxLineLength and lines.
-        var captionHelper = new CaptionHelper(Optional.empty(), _userConfig.getMaxLineLength(), _userConfig.getLines(), new ArrayList<RecognitionResult>());
+        var captionHelper = new CaptionHelper(Optional.of(_userConfig.getLanguage()), _userConfig.getMaxLineLength(), _userConfig.getLines(), new ArrayList<RecognitionResult>());
         List<String> lines = captionHelper.LinesFromText(text);
 
         // Recognizing results can change with each new result, so we do not save previous Recognizing results.
@@ -115,10 +107,7 @@ public class Captioning
         List<String> recognizingLines = new ArrayList<String>();
         if (isRecognizedResult)
         {
-            // Do not simply convert the stream to a list and assign it to
-            // _recognizedLines, because it seems the list is deallocated,
-            // which leaves _recognizedLines as null.
-            _recognizedLines.addAll(Stream.concat(_recognizedLines.stream(), lines.stream()).toList());
+            _recognizedLines.addAll(lines);
         }
         else
         {
@@ -155,7 +144,7 @@ public class Captioning
             // Convert the SpeechRecognitionResult to a caption.
             // We are not ready to set the text for this caption.
             // First we need to determine whether to clear _recognizedLines.
-            Caption caption = new Caption(Optional.empty(), _srtSequenceNumber++, startTime.plusMillis(_userConfig.getDelay()), endTime.plusMillis(_userConfig.getDelay()), "");
+            Caption caption = new Caption(Optional.of(_userConfig.getLanguage()), _srtSequenceNumber++, startTime.plusMillis(_userConfig.getDelay()), endTime.plusMillis(_userConfig.getDelay()), "");
 
             // If we have a previous caption...
             if (_previousCaption.isPresent())
@@ -208,7 +197,7 @@ public class Captioning
         // List<SpeechRecognitionResult> as a List<RecognitionResult>.
         // https://docs.oracle.com/javase/tutorial/java/generics/inheritance.html
         List<RecognitionResult> offlineResults = _offlineResults.stream().map(result -> (RecognitionResult)result).toList();
-        List<Caption> captions = CaptionHelper.GetCaptions(Optional.empty(), _userConfig.getMaxLineLength(), _userConfig.getLines(), offlineResults);
+        List<Caption> captions = CaptionHelper.GetCaptions(Optional.of(_userConfig.getLanguage()), _userConfig.getMaxLineLength(), _userConfig.getLines(), offlineResults);
 
         // In offline mode, all captions come from RecognitionResults of type Recognized.
         // Set the end timestamp for each caption to the earliest of:
@@ -372,7 +361,7 @@ public class Captioning
                         {
                             WriteToConsoleOrFile(caption.get());
                         }
-                    }                   
+                    }
                 }
                 catch(IOException ex)
                 {
@@ -437,8 +426,15 @@ public class Captioning
 .append(System.lineSeparator())
 .append("  CONNECTION").append(System.lineSeparator())
 .append("    --key KEY                        Your Azure Speech service subscription key.").append(System.lineSeparator())
+.append("                                     Required unless you have the SPEECH_KEY environment variable set.").append(System.lineSeparator())
 .append("    --region REGION                  Your Azure Speech service region.").append(System.lineSeparator())
+.append("                                     Required unless you have the SPEECH_REGION environment variable set.").append(System.lineSeparator())
 .append("                                     Examples: westus, eastus").append(System.lineSeparator())
+.append(System.lineSeparator())
+.append("  LANGUAGE").append(System.lineSeparator())
+.append("    --language LANG                  Specify language. This is used when breaking captions into lines.").append(System.lineSeparator())
+.append("                                     Default value is en-US.").append(System.lineSeparator())
+.append("                                     Examples: en-US, ja-JP").append(System.lineSeparator())
 .append(System.lineSeparator())
 .append("  INPUT").append(System.lineSeparator())
 .append("    --input FILE                     Input audio from file (default input is the microphone.)").append(System.lineSeparator())

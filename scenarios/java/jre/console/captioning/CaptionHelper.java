@@ -83,9 +83,9 @@ public class CaptionHelper
                 break;
         }
 
-        if (maxWidth == 37 && iso639 == "zh")
+        if (maxWidth == UserConfig.defaultMaxLineLengthSBCS && iso639 == "zh")
         {
-            this._maxWidth = 30;
+            this._maxWidth = UserConfig.defaultMaxLineLengthMBCS;
         }
         else
         {

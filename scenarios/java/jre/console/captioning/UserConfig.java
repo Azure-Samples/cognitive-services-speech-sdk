@@ -18,11 +18,12 @@ enum CaptioningMode
 final class UserConfig
 {
     final public static int defaultMaxLineLengthSBCS = 37;
-    final public static int defaultMaxLineLengthMBCS = 30;    
+    final public static int defaultMaxLineLengthMBCS = 30;
     
     final private boolean useCompressedAudio;
     final private AudioStreamContainerFormat compressedAudioFormat;
     final private ProfanityOption profanityOption;
+    final private String language;
     final private Optional<String> inputFile;
     final private Optional<String> outputFile;
     final private Optional<String> phraseList;
@@ -48,6 +49,10 @@ final class UserConfig
     public ProfanityOption getProfanityOption()
     {
         return profanityOption;
+    }
+    public String getLanguage()
+    {
+        return language;
     }
     public Optional<String> getInputFile()
     {
@@ -106,6 +111,7 @@ final class UserConfig
         boolean useCompressedAudio,
         AudioStreamContainerFormat compressedAudioFormat,
         ProfanityOption profanityOption,
+        String language,
         Optional<String> inputFile,
         Optional<String> outputFile,
         Optional<String> phraseList,
@@ -124,6 +130,7 @@ final class UserConfig
         this.useCompressedAudio = useCompressedAudio;
         this.compressedAudioFormat = compressedAudioFormat;
         this.profanityOption = profanityOption;
+        this.language = language;
         this.inputFile = inputFile;
         this.outputFile = outputFile;
         this.phraseList = phraseList;
@@ -147,7 +154,8 @@ final class UserConfig
             // We found the option (for example, "--output"), so advance from that to the value (for example, "filename").
             return Optional.of(args.get(index + 1));
         }
-        else {
+        else
+        {
             return Optional.empty();
         }
     }
@@ -198,15 +206,38 @@ final class UserConfig
     
     static public UserConfig UserConfigFromArgs(List<String> args, String usage) throws IllegalArgumentException
     {
-        Optional<String> key = GetCmdOption(args, "--key");
-        if (!key.isPresent())
+        String key = System.getenv("SPEECH_KEY");
+        if (0 == key.length())
         {
-            throw new IllegalArgumentException(String.format("Missing subscription key.%s%s", System.lineSeparator(), usage));
+            Optional<String> keyOption = GetCmdOption(args, "--key");
+            if (!keyOption.isPresent())
+            {
+                throw new IllegalArgumentException(String.format("Please set the SPEECH_KEY environment variable or provide a Speech subscription key with the --key option.%s%s", System.lineSeparator(), usage));
+            }
+            else
+            {
+                key = keyOption.get();
+            }
         }
-        Optional<String> region = GetCmdOption(args, "--region");
-        if (!region.isPresent())
+        String region = System.getenv("SPEECH_REGION");
+        if (0 == region.length())
         {
-            throw new IllegalArgumentException(String.format("Missing region.%s%s", System.lineSeparator(), usage));
+            Optional<String> regionOption = GetCmdOption(args, "--region");
+            if (!regionOption.isPresent())
+            {
+                throw new IllegalArgumentException(String.format("Please set the SPEECH_REGION environment variable or provide a Speech subscription region with the --region option%s%s", System.lineSeparator(), usage));
+            }
+            else
+            {
+                region = regionOption.get();
+            }
+        }
+        
+        String language = "en-US";
+        Optional<String> languageOption = GetCmdOption(args, "--language");
+        if (languageOption.isPresent())
+        {
+            language = languageOption.get();
         }
         
         CaptioningMode captioningMode = CmdOptionExists(args, "--realTime") && !CmdOptionExists(args, "--offline") ? CaptioningMode.RealTime : CaptioningMode.Offline;
@@ -259,6 +290,7 @@ final class UserConfig
             CmdOptionExists(args, "--format"),
             GetCompressedAudioFormat(args),
             GetProfanityOption(args),
+            language,
             GetCmdOption(args, "--input"),
             GetCmdOption(args, "--output"),
             GetCmdOption(args, "--phrases"),
@@ -270,8 +302,8 @@ final class UserConfig
             maxLineLength,
             lines,
             GetCmdOption(args, "--threshold"),
-            key.get(),
-            region.get()
+            key,
+            region
         );
     }
 }
