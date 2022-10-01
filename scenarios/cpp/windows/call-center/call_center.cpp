@@ -278,18 +278,22 @@ public:
     nlohmann::json MergeSentimentConfidenceScoresIntoTranscription(nlohmann::json transcription, std::vector<nlohmann::json> sentimentConfidenceScores)
     {
         int id = 0;
-        for (auto i = 0; i < transcription["recognizedPhrases"].size(); i++)
+        nlohmann::json recognizedPhrases_2 = JsonHelper::Map([&id, sentimentConfidenceScores](nlohmann::json phrase) -> nlohmann::json
         {
-            for (auto j = 0; j < transcription["recognizedPhrases"][i]["nBest"].size(); j++)
+            nlohmann::json nBest_2 = JsonHelper::Map([id, sentimentConfidenceScores](nlohmann::json item) -> nlohmann::json
             {
                 // Add the sentiment confidence scores to the item in the nBest array.
                 // TODO2 We are adding the same sentiment data to each nBest item.
                 // However, the sentiment data are based on the phrase from the first nBest item.
                 // See GetTranscriptionPhrases() and GetSentimentAnalysis().
-                // TODO1 TEMP
-//                transcription["recognizedPhrases"][i]["nBest"][j]["sentiment"] = sentimentConfidenceScores[id++];
-            }
-        }
+                item["sentiment"] = sentimentConfidenceScores[id];
+                return item;
+            }, phrase["nBest"]);
+            phrase["nBest"] = nBest_2;
+            id++;
+            return phrase;
+        }, transcription["recognizedPhrases"]);
+        transcription["recognizedPhrases"] = recognizedPhrases_2;
         return transcription;
     }
     
@@ -621,7 +625,7 @@ int main(int argc, char* argv[])
                 std::shared_ptr<RestResult> transcriptionFiles = callCenter->GetTranscriptionFiles(transcriptionId);
                 std::string transcriptionUri = callCenter->GetTranscriptionUri(transcriptionFiles);
                 std::cout << "Transcription URI: " << transcriptionUri << std::endl;
-                nlohmann::json transcription = callCenter->GetTranscription(transcriptionUri);
+                transcription = callCenter->GetTranscription(transcriptionUri);
             }
             
             // For stereo audio, the phrases are sorted by channel number, so resort them by offset.
