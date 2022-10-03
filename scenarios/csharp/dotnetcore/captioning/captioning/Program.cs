@@ -265,6 +265,7 @@ namespace Captioning
         {
             SpeechConfig speechConfig = SpeechConfig.FromSubscription(this._userConfig!.subscriptionKey, this._userConfig!.region);
 
+            speechConfig.SpeechRecognitionLanguage = this._userConfig!.language;
             speechConfig.SetProfanity(this._userConfig!.profanityOption);
             
             if (this._userConfig!.stablePartialResultThreshold is string stablePartialResultThresholdValue)
