@@ -31,7 +31,7 @@ import com.microsoft.cognitiveservices.speech.audio.*;
 public class Captioning
 {
     UserConfig _userConfig;
-    int _srtSequenceNumber = 0;
+    int _srtSequenceNumber = 1;
     Optional<Caption> _previousCaption = Optional.empty();
     Optional<Instant> _previousEndTime = Optional.empty();
     boolean _previousResultIsRecognized = false;
