@@ -26,7 +26,7 @@ namespace Captioning
     class Program
     {
         private UserConfig? _userConfig;
-        private int _srtSequenceNumber = 0;
+        private int _srtSequenceNumber = 1;
         private Caption? _previousCaption;
         private TimeSpan? _previousEndTime;
         private bool _previousResultIsRecognized = false;
@@ -400,7 +400,7 @@ namespace Captioning
     --help                           Show this help and stop.
 
   CONNECTION
-    --key KEY                        Your Azure Speech service subscription key.
+    --key KEY                        Your Azure Speech service resource key.
                                      Required unless you have the SPEECH_KEY environment variable set.
     --region REGION                  Your Azure Speech service region.
                                      Required unless you have the SPEECH_REGION environment variable set.
@@ -434,10 +434,10 @@ namespace Captioning
                                      Minimum is 20. Default is 37 (30 for Chinese).
     --lines LINES                    Set the number of lines for a caption to LINES.
                                      Minimum is 1. Default is 2.
-    --delay SECONDS                  How many SECONDS to delay the appearance of each caption.
-                                     Minimum is 0.0. Default is 1.0.
-    --remainTime SECONDS             How many SECONDS a caption should remain on screen if it is not replaced by another.
-                                     Minimum is 0.0. Default is 1.0.
+    --delay MILLISECONDS             How many MILLISECONDS to delay the appearance of each caption.
+                                     Minimum is 0. Default is 1000.
+    --remainTime MILLISECONDS        How many MILLISECONDS a caption should remain on screen if it is not replaced by another.
+                                     Minimum is 0. Default is 1000.
     --quiet                          Suppress console output, except errors.
     --profanity OPTION               Valid values: raw, remove, mask
                                      Default is mask.
@@ -453,6 +453,7 @@ namespace Captioning
             {
                 Program program = new Program();
                 program.Initialize(args, usage);
+                
                 SpeechRecognizer speechRecognizer = program.SpeechRecognizerFromUserConfig();
                 if (program.RecognizeContinuous(speechRecognizer).Result is string error)
                 {
