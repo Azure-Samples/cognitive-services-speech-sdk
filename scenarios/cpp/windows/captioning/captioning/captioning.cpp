@@ -93,7 +93,7 @@ private:
         std::string retval;
         if (m_userConfig->useSubRipTextCaptionFormat)
         {
-            retval += caption.sequence + "\n";
+            retval += std::to_string(caption.sequence) + "\n";
         }
         retval += GetTimestamp(caption.begin, caption.end) + "\n";
         retval += caption.text + "\n\n";
