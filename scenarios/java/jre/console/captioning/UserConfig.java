@@ -206,31 +206,18 @@ final class UserConfig
     
     static public UserConfig UserConfigFromArgs(List<String> args, String usage) throws IllegalArgumentException
     {
-        String key = System.getenv("SPEECH_KEY");
+
+        Optional<String> keyOption = GetCmdOption(args, "--key");
+        String key = keyOption.isPresent() ? keyOption.get() : System.getenv("SPEECH_KEY");
         if (0 == key.length())
         {
-            Optional<String> keyOption = GetCmdOption(args, "--key");
-            if (!keyOption.isPresent())
-            {
-                throw new IllegalArgumentException(String.format("Please set the SPEECH_KEY environment variable or provide a Speech subscription key with the --key option.%s%s", System.lineSeparator(), usage));
-            }
-            else
-            {
-                key = keyOption.get();
-            }
+            throw new IllegalArgumentException(String.format("Please set the SPEECH_KEY environment variable or provide a Speech resource key with the --key option.%s%s", System.lineSeparator(), usage));
         }
-        String region = System.getenv("SPEECH_REGION");
+        Optional<String> regionOption = GetCmdOption(args, "--region");
+        String region = regionOption.isPresent() ? regionOption.get() : System.getenv("SPEECH_REGION");
         if (0 == region.length())
         {
-            Optional<String> regionOption = GetCmdOption(args, "--region");
-            if (!regionOption.isPresent())
-            {
-                throw new IllegalArgumentException(String.format("Please set the SPEECH_REGION environment variable or provide a Speech subscription region with the --region option%s%s", System.lineSeparator(), usage));
-            }
-            else
-            {
-                region = regionOption.get();
-            }
+            throw new IllegalArgumentException(String.format("Please set the SPEECH_REGION environment variable or provide a Speech resource region with the --region option%s%s", System.lineSeparator(), usage));
         }
         
         String language = "en-US";
