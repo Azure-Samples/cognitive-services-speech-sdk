@@ -74,7 +74,7 @@ public class CaptionHelper
         
         switch (iso639) {
             case "zh":
-                this._firstPassTerminators = new String[]{", ", " ", "; ", "? ", "!", "?", "!", ",", ";"};
+                this._firstPassTerminators = new String[]{"，", "、", "；", "？", "！", "?", "!", ",", ";"};
                 this._secondPassTerminators = new String[]{"。", " "};
                 break;
             default:
