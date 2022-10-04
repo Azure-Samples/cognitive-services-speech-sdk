@@ -401,9 +401,9 @@ namespace Captioning
 
   CONNECTION
     --key KEY                        Your Azure Speech service resource key.
-                                     Required unless you have the SPEECH_KEY environment variable set.
+                                     Overrides the SPEECH_KEY environment variable. You must set the environment variable (recommended) or use the `--key` option.
     --region REGION                  Your Azure Speech service region.
-                                     Required unless you have the SPEECH_REGION environment variable set.
+                                     Overrides the SPEECH_REGION environment variable. You must set the environment variable (recommended) or use the `--region` option.
                                      Examples: westus, eastus
 
   LANGUAGE
