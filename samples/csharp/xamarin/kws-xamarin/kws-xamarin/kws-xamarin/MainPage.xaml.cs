@@ -41,7 +41,7 @@ namespace kws_xamarin
                 // The phrase your keyword recognition model triggers on.
                 var keyword = "Computer";
 
-                var stopRecognition = new TaskCompletionSource<int>();
+                var stopRecognition = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
                 var resultStr = "";
 
                 // Creates a speech recognizer using microphone as audio input.
