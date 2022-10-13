@@ -205,13 +205,13 @@ namespace MicrosoftSpeechSDKSamples.WpfSpeechRecognitionSample
 
             if (this.UseCustomModel || this.UseBaseAndCustomModels)
             {
-                stopCustomRecognitionTaskCompletionSource = new TaskCompletionSource<int>();
+                stopCustomRecognitionTaskCompletionSource = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
                 Task.Run(async () => { await CreateCustomReco().ConfigureAwait(false); });
             }
 
             if (this.UseBaseModel || this.UseBaseAndCustomModels)
             {
-                stopBaseRecognitionTaskCompletionSource = new TaskCompletionSource<int>();
+                stopBaseRecognitionTaskCompletionSource = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
                 Task.Run(async () => { await CreateBaseReco().ConfigureAwait(false); });
             }
         }
