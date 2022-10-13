@@ -14,7 +14,7 @@ namespace kws_xamarin.iOS
 
         public Task<bool> GetPermissionsAsync()
         {
-            tcsPermissions = new TaskCompletionSource<bool>();
+            tcsPermissions = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
             RequestMicPermission();
             return tcsPermissions.Task;
         }
