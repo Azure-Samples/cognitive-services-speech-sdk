@@ -71,17 +71,24 @@ namespace TextAnalytics
         /// </summary>
         public async Task<bool> TextAnalyticsRequestsCompleted(IEnumerable<AudioFileInfo> audioFileInfos)
         {
+            if (audioFileInfos == null || !audioFileInfos.Where(audioFileInfo => audioFileInfo.TextAnalyticsRequests != null).Any())
+            {
+                return true;
+            }
+
             var runningTextAnalyticsRequests = new List<TextAnalyticsRequest>();
 
-            if (audioFileInfos.Where(audioFileInfo => audioFileInfo.TextAnalyticsRequests.AudioLevelRequests != null).Any())
-            {
-                runningTextAnalyticsRequests.AddRange(audioFileInfos.SelectMany(audioFileInfo => audioFileInfo.TextAnalyticsRequests.AudioLevelRequests).Where(text => text.Status == TextAnalyticsRequestStatus.Running));
-            }
+            runningTextAnalyticsRequests.AddRange(
+                audioFileInfos
+                    .Where(audioFileInfo => audioFileInfo.TextAnalyticsRequests?.AudioLevelRequests != null)
+                    .SelectMany(audioFileInfo => audioFileInfo.TextAnalyticsRequests.AudioLevelRequests)
+                    .Where(text => text.Status == TextAnalyticsRequestStatus.Running));
 
-            if (audioFileInfos.Where(audioFileInfo => audioFileInfo.TextAnalyticsRequests.UtteranceLevelRequests != null).Any())
-            {
-                runningTextAnalyticsRequests.AddRange(audioFileInfos.SelectMany(audioFileInfo => audioFileInfo.TextAnalyticsRequests.UtteranceLevelRequests).Where(text => text.Status == TextAnalyticsRequestStatus.Running));
-            }
+            runningTextAnalyticsRequests.AddRange(
+                audioFileInfos
+                    .Where(audioFileInfo => audioFileInfo.TextAnalyticsRequests?.UtteranceLevelRequests != null)
+                    .SelectMany(audioFileInfo => audioFileInfo.TextAnalyticsRequests.UtteranceLevelRequests)
+                    .Where(text => text.Status == TextAnalyticsRequestStatus.Running));
 
             var textAnalyticsRequestCompleted = true;
 
