@@ -247,7 +247,7 @@ namespace FetchTranscriptionFunction
 
                 if (string.IsNullOrEmpty(transcriptionResult.Source))
                 {
-                    var errorMessage = $"Transcription source is unknown, skipping evaluation.";
+                    var errorMessage = "Transcription source is unknown, skipping evaluation.";
                     log.LogError(errorMessage);
 
                     generalErrorsStringBuilder.AppendLine(errorMessage);
@@ -256,6 +256,14 @@ namespace FetchTranscriptionFunction
 
                 var audioFileName = StorageConnector.GetFileNameFromUri(new Uri(transcriptionResult.Source));
                 var audioFileInfo = serviceBusMessage.AudioFileInfos.Where(a => a.FileName == audioFileName).First();
+
+                if (speechTranscriptMappings.ContainsKey(audioFileInfo))
+                {
+                    var errorMessage = $"Duplicate audio file in job, skipping: {audioFileInfo.FileName}.";
+                    log.LogError(errorMessage);
+                    generalErrorsStringBuilder.AppendLine(errorMessage);
+                    continue;
+                }
 
                 speechTranscriptMappings.Add(audioFileInfo, transcriptionResult);
             }
@@ -286,19 +294,19 @@ namespace FetchTranscriptionFunction
 
                         var textAnalyticsErrors = new List<string>();
 
-                        if (audioFileInfo.TextAnalyticsRequests.AudioLevelRequests.Any())
+                        if (audioFileInfo.TextAnalyticsRequests.AudioLevelRequests?.Any() == true)
                         {
                             var audioLevelErrors = await textAnalyticsProvider.AddAudioLevelEntitiesAsync(audioFileInfo.TextAnalyticsRequests.AudioLevelRequests.Select(request => request.Id), speechTranscript).ConfigureAwait(false);
                             textAnalyticsErrors.AddRange(audioLevelErrors);
                         }
 
-                        if (audioFileInfo.TextAnalyticsRequests.UtteranceLevelRequests.Any())
+                        if (audioFileInfo.TextAnalyticsRequests.UtteranceLevelRequests?.Any() == true)
                         {
                             var utteranceLevelErrors = await textAnalyticsProvider.AddUtteranceLevelEntitiesAsync(audioFileInfo.TextAnalyticsRequests.UtteranceLevelRequests.Select(request => request.Id), speechTranscript).ConfigureAwait(false);
                             textAnalyticsErrors.AddRange(utteranceLevelErrors);
                         }
 
-                        if (audioFileInfo.TextAnalyticsRequests.ConversationRequests.Any())
+                        if (audioFileInfo.TextAnalyticsRequests.ConversationRequests?.Any() == true)
                         {
                             var conversationalAnalyticsErrors = await conversationsAnalysisProvider.AddConversationalEntitiesAsync(audioFileInfo.TextAnalyticsRequests.ConversationRequests.Select(request => request.Id), speechTranscript).ConfigureAwait(false);
                             textAnalyticsErrors.AddRange(conversationalAnalyticsErrors);
@@ -369,6 +377,7 @@ namespace FetchTranscriptionFunction
             foreach (var speechTranscriptMapping in speechTranscriptMappings)
             {
                 var speechTranscript = speechTranscriptMapping.Value;
+
                 var audioFileInfo = speechTranscriptMapping.Key;
                 var fileName = audioFileInfo.FileName;
 
