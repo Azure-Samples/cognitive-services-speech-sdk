@@ -90,9 +90,6 @@ namespace MicrosoftSpeechSDKSamples
             {
                 using (var recognizer = new SourceLanguageRecognizer(config, autoDetectSourceLanguageConfig, audioInput))
                 {
-                    // Starts recognizing.
-                    Console.WriteLine("Say something...");
-
                     // Starts language detection, and returns after a single utterance is recognized.
                     // The task returns the recognition text as result.
                     // Note: Since RecognizeOnceAsync() returns only a single utterance, it is suitable only for single
@@ -139,7 +136,7 @@ namespace MicrosoftSpeechSDKSamples
             // Please refer to the documentation of language id with different modes
             config.SetProperty(PropertyId.SpeechServiceConnection_ContinuousLanguageIdPriority, "Latency");
 
-            var stopRecognition = new TaskCompletionSource<int>();
+            var stopRecognition = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
 
             // Creates a speech recognizer using file as audio input.
             // Replace with your own audio file name.

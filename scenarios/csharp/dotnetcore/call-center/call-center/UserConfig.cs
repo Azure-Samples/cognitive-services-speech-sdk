@@ -25,9 +25,9 @@ namespace CallCenter
         /// Output file path.
         readonly public string? outputFilePath;
         /// The subscription key for your Speech service subscription.
-        readonly public string speechSubscriptionKey;
+        readonly public string? speechSubscriptionKey;
         /// The endpoint for your Speech service subscription.
-        readonly public string speechEndpoint;
+        readonly public string? speechEndpoint;
         /// The subscription key for your Cognitive Language subscription.
         readonly public string languageSubscriptionKey;
         /// The endpoint for your Cognitive Language subscription.
@@ -59,35 +59,22 @@ namespace CallCenter
             if (inputAudioURL is null && inputFilePath is null)
             {
                 throw new ArgumentException($"Please specify either --input or --jsonInput.{Environment.NewLine}Usage: {usage}");
-            }            
+            }
             
             string? speechSubscriptionKey = GetCmdOption(args, "--speechKey");
-            if (speechSubscriptionKey is null)
+            if (speechSubscriptionKey is null && inputFilePath is null)
             {
-                if (inputFilePath is null)
-                {
-                    throw new ArgumentException($"Missing Speech subscription key. Speech subscription key is required unless --jsonInput is present.{Environment.NewLine}Usage: {usage}");
-                }
-                else
-                {
-                    speechSubscriptionKey = "";
-                }
+                throw new ArgumentException($"Missing Speech subscription key. Speech subscription key is required unless --jsonInput is present.{Environment.NewLine}Usage: {usage}");
             }
-            string speechEndpoint = "";
-            if (GetCmdOption(args, "--speechRegion") is string speechRegionValue)
+            string? speechEndpoint = null;
+            string? speechRegion = GetCmdOption(args, "--speechRegion");
+            if (speechRegion is string speechRegionValue)
             {
                 speechEndpoint = $"{speechRegionValue}{partialSpeechEndpoint}";
             }
-            else
+            else if (inputFilePath is null)
             {
-                if (inputFilePath is null)
-                {
-                    throw new ArgumentException($"Missing Speech region. Speech region is required unless --jsonInput is present.{Environment.NewLine}Usage: {usage}");
-                }
-                else
-                {
-                    speechEndpoint = "";
-                }
+                throw new ArgumentException($"Missing Speech region. Speech region is required unless --jsonInput is present.{Environment.NewLine}Usage: {usage}");
             }
             
             string? languageSubscriptionKey = GetCmdOption(args, "--languageKey");

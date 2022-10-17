@@ -48,9 +48,10 @@ extern void SpeechSynthesisGetAvailableVoices();
 extern void SpeechSynthesisVisemeEvent();
 extern void SpeechSynthesisBookmarkEvent();
 
-extern void ConversationWithPullAudioStream();
-extern void ConversationWithPushAudioStream();
-extern void ConversationWithMicrophone();
+extern void ConversationTranscriptionWithMicrophoneUsingAudioProcessingOptions();
+extern void ConversationTranscriptionWithPullAudioStreamUsingMultichannelAudio();
+extern void ConversationTranscriptionWithPushAudioStreamUsingMultichannelAudio();
+extern void ConversationTranscriptionWithMultichannelAudioFile();
 
 extern void SpeakerVerificationWithMicrophone();
 extern void SpeakerVerificationWithPushStream();
@@ -356,9 +357,10 @@ void ConversationTranscriberSamples()
     do
     {
         cout << "\nConversationTranscriber SAMPLES:\n";
-        cout << "1.) ConversationTranscriber with pull input audio stream.\n";
-        cout << "2.) ConversationTranscriber with push input audio stream.\n";
-        cout << "3.) ConversationTranscriber with microphone.\n";
+        cout << "1.) ConversationTranscriber with microphone using audio processing options.\n";
+        cout << "2.) ConversationTranscriber with pull audio stream using multichannel audio.\n";
+        cout << "3.) ConversationTranscriber with push audio stream using multichannel audio.\n";
+        cout << "4.) ConversationTranscriber with audio file using multichannel audio.\n";
         cout << "\nChoice (0 for MAIN MENU): ";
         cout.flush();
 
@@ -368,15 +370,22 @@ void ConversationTranscriberSamples()
         switch (input[0])
         {
         case '1':
-            ConversationWithPullAudioStream();
+            ConversationTranscriptionWithMicrophoneUsingAudioProcessingOptions();
             break;
+
         case '2':
-            ConversationWithPushAudioStream();
+            ConversationTranscriptionWithPullAudioStreamUsingMultichannelAudio();
             break;
+
         case '3':
-            ConversationWithMicrophone();
+            ConversationTranscriptionWithPushAudioStreamUsingMultichannelAudio();
             break;
-        case '0':
+
+        case '4':
+            ConversationTranscriptionWithMultichannelAudioFile();
+            break;
+
+        case '5':
             break;
         }
     } while (input[0] != '0');
