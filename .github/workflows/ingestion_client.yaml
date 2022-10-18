@@ -2,7 +2,6 @@ name: Build Ingestion Client Binaries
 
 on:
   push:
-    branches: 
     branches: ['main', 'master', 'jvandervegte/testPublishOnAction']
     paths: ['samples/ingestion/ingestion-client/**']
 
@@ -16,7 +15,7 @@ jobs:
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 3.1.101
+        dotnet-version: 6.x
     - name: Clean Solution
       run: dotnet clean ./samples/ingestion/ingestion-client/BatchIngestionClient.sln --configuration Release && dotnet nuget locals all --clear
     - name: Build BatchIngestionClient

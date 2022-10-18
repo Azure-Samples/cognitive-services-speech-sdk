@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFramework>netcoreapp3.1</TargetFramework>
+        <TargetFramework>net6.0</TargetFramework>
         <AzureFunctionsVersion>v3</AzureFunctionsVersion>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -16,15 +16,15 @@
         <OutputPath>bin\Release\</OutputPath>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.ServiceBus" Version="5.3.0" />
+        <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.ServiceBus" Version="5.3.0"/>
         <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.8">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="3.0.13" />
-        <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.24.0" />
-        <PackageReference Include="NAudio.Core" Version="2.0.0" />
-        <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+        <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="3.0.13"/>
+        <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.24.0"/>
+        <PackageReference Include="NAudio.Core" Version="2.0.0"/>
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.1"/>
         <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -41,6 +41,6 @@
         </AdditionalFiles>
     </ItemGroup>
     <ItemGroup>
-        <ProjectReference Include="..\Connector\Connector.csproj" />
+        <ProjectReference Include="..\Connector\Connector.csproj"/>
     </ItemGroup>
 </Project>

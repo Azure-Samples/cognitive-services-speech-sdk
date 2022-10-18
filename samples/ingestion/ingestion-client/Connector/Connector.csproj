@@ -1,46 +1,42 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  
-  <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <CodeAnalysisRuleSet>..\BatchIngestionClient.ruleset</CodeAnalysisRuleSet>
-    <LangVersion>latest</LangVersion>
-    <DebugType>full</DebugType>
-    <OutputPath>bin\Debug\</OutputPath>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <CodeAnalysisRuleSet>..\BatchIngestionClient.ruleset</CodeAnalysisRuleSet>
-    <LangVersion>latest</LangVersion>
-    <DebugType>pdbonly</DebugType>
-    <OutputPath>bin\Release\</OutputPath>
-  </PropertyGroup>
-  
-  <ItemGroup>
-    <PackageReference Include="Azure.Storage.Blobs" Version="12.13.0" />
-    <PackageReference Include="JsonSubTypes" Version="1.8.0" />
-    <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.ServiceBus" Version="5.3.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.8">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Polly" Version="7.2.3" />
-    <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="System.Data.SqlClient" Version="4.8.3" />
-  </ItemGroup>
-  
-  <ItemGroup>
-    <None Update="connectorsettings.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <AdditionalFiles Include="..\stylecop.json">
-      <Link>stylecop.json</Link>
-    </AdditionalFiles>
-  </ItemGroup>
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+        <CodeAnalysisRuleSet>..\BatchIngestionClient.ruleset</CodeAnalysisRuleSet>
+        <LangVersion>latest</LangVersion>
+        <DebugType>full</DebugType>
+        <OutputPath>bin\Debug\</OutputPath>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+        <CodeAnalysisRuleSet>..\BatchIngestionClient.ruleset</CodeAnalysisRuleSet>
+        <LangVersion>latest</LangVersion>
+        <DebugType>pdbonly</DebugType>
+        <OutputPath>bin\Release\</OutputPath>
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="Azure.Storage.Blobs" Version="12.13.0"/>
+        <PackageReference Include="JsonSubTypes" Version="1.8.0"/>
+        <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.ServiceBus" Version="5.3.0"/>
+        <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.8">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Polly" Version="7.2.3"/>
+        <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="System.Data.SqlClient" Version="4.8.3"/>
+    </ItemGroup>
+    <ItemGroup>
+        <None Update="connectorsettings.json">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
+    <ItemGroup>
+        <AdditionalFiles Include="..\stylecop.json">
+            <Link>stylecop.json</Link>
+        </AdditionalFiles>
+    </ItemGroup>
 </Project>
