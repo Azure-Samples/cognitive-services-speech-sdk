@@ -1274,7 +1274,7 @@ dotnet_diagnostic.IDE0076.severity = warning
 # avoid legacy format target in global SuppressMessageAttribute
 dotnet_diagnostic.IDE0077.severity = warning
 # simplify new expression
-dotnet_diagnostic.IDE0090.severity = warning
+dotnet_diagnostic.IDE0090.severity = none
 dotnet_code_quality_unused_parameters = non_public
 
 # Build rules static analysis

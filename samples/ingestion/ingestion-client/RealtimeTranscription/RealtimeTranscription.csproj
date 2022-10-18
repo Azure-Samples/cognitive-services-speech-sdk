@@ -20,11 +20,6 @@
         </None>
     </ItemGroup>
     <ItemGroup>
-        <AdditionalFiles Include="..\stylecop.json">
-            <Link>stylecop.json</Link>
-        </AdditionalFiles>
-    </ItemGroup>
-    <ItemGroup>
         <ProjectReference Include="..\Connector\Connector.csproj"/>
     </ItemGroup>
 </Project>

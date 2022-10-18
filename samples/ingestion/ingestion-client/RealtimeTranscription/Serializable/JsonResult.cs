@@ -1,4 +1,4 @@
-// <copyright file="JsonResult.cs" company="Microsoft Corporation">
+﻿// <copyright file="JsonResult.cs" company="Microsoft Corporation">
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
@@ -10,13 +10,13 @@ namespace RealtimeTranscription
 
     public sealed class JsonResult
     {
-        public JsonResult(string recognitionStatus, long offset, long duration, string speakerId, List<NBest> nBest)
+        public JsonResult(string recognitionStatus, long offset, long duration, string speakerId, List<NBest> nbest)
         {
             this.RecognitionStatus = recognitionStatus;
             this.Offset = offset;
             this.Duration = duration;
             this.SpeakerId = speakerId;
-            this.NBest = nBest;
+            this.NBest = nbest;
         }
 
         public string RecognitionStatus { get; }

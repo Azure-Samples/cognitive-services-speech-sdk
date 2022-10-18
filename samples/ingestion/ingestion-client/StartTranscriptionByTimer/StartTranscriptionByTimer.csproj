@@ -19,9 +19,4 @@
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
     </ItemGroup>
-    <ItemGroup>
-        <AdditionalFiles Include="..\stylecop.json">
-            <Link>stylecop.json</Link>
-        </AdditionalFiles>
-    </ItemGroup>
 </Project>

@@ -1,4 +1,4 @@
-// <copyright file="AnalyzeConversationsProvider.cs" company="Microsoft Corporation">
+﻿// <copyright file="AnalyzeConversationsProvider.cs" company="Microsoft Corporation">
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
@@ -34,16 +34,16 @@ namespace Language
     {
         private const string DefaultInferenceSource = "lexical";
         private static readonly TimeSpan RequestTimeout = TimeSpan.FromMinutes(3);
-        private readonly ConversationAnalysisClient ConversationAnalysisClient;
+        private readonly ConversationAnalysisClient conversationAnalysisClient;
         private readonly string locale;
-        private readonly ILogger Log;
+        private readonly ILogger log;
 
         public AnalyzeConversationsProvider(string locale, string subscriptionKey, string region, ILogger log)
         {
-            this.ConversationAnalysisClient = new ConversationAnalysisClient(new Uri($"https://{region}.api.cognitive.microsoft.com"), new AzureKeyCredential(subscriptionKey));
+            this.conversationAnalysisClient = new ConversationAnalysisClient(new Uri($"https://{region}.api.cognitive.microsoft.com"), new AzureKeyCredential(subscriptionKey));
 
             this.locale = locale;
-            this.Log = log;
+            this.log = log;
         }
 
         public static bool IsConversationalPiiEnabled()
@@ -81,7 +81,7 @@ namespace Language
                             new Conversation
                             {
                                 Id = $"{jobCount}",
-                                Language = locale,
+                                Language = this.locale,
                                 Modality = Modality.transcript,
                                 ConversationItems = new List<ConversationItem>()
                             }
@@ -129,7 +129,7 @@ namespace Language
                 turnCount++;
             }
 
-            this.Log.LogInformation($"Submitting {jobCount} jobs to Conversations...");
+            this.log.LogInformation($"Submitting {jobCount} jobs to Conversations...");
 
             return await this.SubmitConversationsAsync(data).ConfigureAwait(false);
         }
@@ -211,7 +211,7 @@ namespace Language
 
             foreach (var textAnalyticsJob in conversationRequests)
             {
-                var response = await this.ConversationAnalysisClient.GetAnalyzeConversationJobStatusAsync(Guid.Parse(textAnalyticsJob.Id)).ConfigureAwait(false);
+                var response = await this.conversationAnalysisClient.GetAnalyzeConversationJobStatusAsync(Guid.Parse(textAnalyticsJob.Id)).ConfigureAwait(false);
 
                 if (response.IsError)
                 {
@@ -275,18 +275,18 @@ namespace Language
             var jobs = new List<string>();
             try
             {
-                this.Log.LogInformation($"Sending language conversation requests.");
+                this.log.LogInformation($"Sending language conversation requests.");
 
                 foreach (var request in data)
                 {
                     using var input = RequestContent.Create(JsonConvert.SerializeObject(request));
-                    var operation = await this.ConversationAnalysisClient.AnalyzeConversationAsync(WaitUntil.Started, input).ConfigureAwait(false);
+                    var operation = await this.conversationAnalysisClient.AnalyzeConversationAsync(WaitUntil.Started, input).ConfigureAwait(false);
 
                     var response = await operation.UpdateStatusAsync().ConfigureAwait(false);
                     using JsonDocument result = JsonDocument.Parse(response.ContentStream);
                     var jobResults = result.RootElement;
                     var jobId = jobResults.GetProperty("jobId");
-                    this.Log.LogInformation($"Submitting TA job: {jobId}");
+                    this.log.LogInformation($"Submitting TA job: {jobId}");
                     jobs.Add(jobId.ToString());
                 }
 
@@ -311,9 +311,9 @@ namespace Language
             var errors = new List<string>();
             try
             {
-                this.Log.LogInformation($"Sending conversation analytics request for jobid {jobId}.");
+                this.log.LogInformation($"Sending conversation analytics request for jobid {jobId}.");
 
-                var response = await this.ConversationAnalysisClient.GetAnalyzeConversationJobStatusAsync(Guid.Parse(jobId)).ConfigureAwait(false);
+                var response = await this.conversationAnalysisClient.GetAnalyzeConversationJobStatusAsync(Guid.Parse(jobId)).ConfigureAwait(false);
 
                 if (response.IsError)
                 {

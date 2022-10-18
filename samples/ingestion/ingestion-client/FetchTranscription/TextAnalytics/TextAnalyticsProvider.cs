@@ -1,4 +1,4 @@
-// <copyright file="TextAnalyticsProvider.cs" company="Microsoft Corporation">
+﻿// <copyright file="TextAnalyticsProvider.cs" company="Microsoft Corporation">
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
@@ -53,15 +53,15 @@ namespace TextAnalytics
 
         private readonly TextAnalyticsClient textAnalyticsClient;
 
-        private readonly string Locale;
+        private readonly string locale;
 
-        private readonly ILogger Log;
+        private readonly ILogger log;
 
         public TextAnalyticsProvider(string locale, string subscriptionKey, string region, ILogger log)
         {
             this.textAnalyticsClient = new TextAnalyticsClient(new Uri($"https://{region}.api.cognitive.microsoft.com"), new AzureKeyCredential(subscriptionKey));
-            this.Locale = locale;
-            this.Log = log;
+            this.locale = locale;
+            this.log = log;
         }
 
         /// <summary>
@@ -131,7 +131,7 @@ namespace TextAnalytics
                 return (new List<string>(), new List<string>());
             }
 
-            var documents = speechTranscript.RecognizedPhrases.Where(r => r.NBest.FirstOrDefault() != null && !string.IsNullOrEmpty(r.NBest.First().Display)).Select(r => new TextDocumentInput($"{r.Channel}_{r.Offset}", r.NBest.First().Display) { Language = Locale });
+            var documents = speechTranscript.RecognizedPhrases.Where(r => r.NBest.FirstOrDefault() != null && !string.IsNullOrEmpty(r.NBest.First().Display)).Select(r => new TextDocumentInput($"{r.Channel}_{r.Offset}", r.NBest.First().Display) { Language = this.locale });
 
             var actions = new TextAnalyticsActions
             {
@@ -162,7 +162,7 @@ namespace TextAnalytics
                 return (new List<string>(), new List<string>());
             }
 
-            var documents = speechTranscript.CombinedRecognizedPhrases.Where(r => !string.IsNullOrEmpty(r.Display)).Select(r => new TextDocumentInput($"{r.Channel}", r.Display) { Language = Locale });
+            var documents = speechTranscript.CombinedRecognizedPhrases.Where(r => !string.IsNullOrEmpty(r.Display)).Select(r => new TextDocumentInput($"{r.Channel}", r.Display) { Language = this.locale });
 
             var actions = new TextAnalyticsActions
             {
@@ -357,7 +357,7 @@ namespace TextAnalytics
 
             try
             {
-                this.Log.LogInformation($"Sending text analytics request for document chunk with id {chunkId}.");
+                this.log.LogInformation($"Sending text analytics request for document chunk with id {chunkId}.");
                 using var cts = new CancellationTokenSource();
                 cts.CancelAfter(RequestTimeout);
 
@@ -422,7 +422,7 @@ namespace TextAnalytics
 
             try
             {
-                this.Log.LogInformation($"Sending text analytics request for document chunk with id {index}.");
+                this.log.LogInformation($"Sending text analytics request for document chunk with id {index}.");
                 using var cts = new CancellationTokenSource();
                 cts.CancelAfter(RequestTimeout);
 
