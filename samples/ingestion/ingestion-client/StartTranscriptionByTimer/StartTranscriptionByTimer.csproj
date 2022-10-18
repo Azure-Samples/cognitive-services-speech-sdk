@@ -3,18 +3,6 @@
         <TargetFramework>net6.0</TargetFramework>
         <AzureFunctionsVersion>v3</AzureFunctionsVersion>
     </PropertyGroup>
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-        <CodeAnalysisRuleSet>..\BatchIngestionClient.ruleset</CodeAnalysisRuleSet>
-        <LangVersion>latest</LangVersion>
-        <DebugType>full</DebugType>
-        <OutputPath>bin\Debug\</OutputPath>
-    </PropertyGroup>
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-        <CodeAnalysisRuleSet>..\BatchIngestionClient.ruleset</CodeAnalysisRuleSet>
-        <LangVersion>latest</LangVersion>
-        <DebugType>pdbonly</DebugType>
-        <OutputPath>bin\Release\</OutputPath>
-    </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="Azure.Messaging.ServiceBus" Version="7.11.0"/>
         <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="4.1.3"/>

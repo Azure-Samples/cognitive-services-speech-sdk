@@ -3,18 +3,6 @@
         <TargetFramework>net6.0</TargetFramework>
         <AzureFunctionsVersion>v3</AzureFunctionsVersion>
     </PropertyGroup>
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-        <CodeAnalysisRuleSet>..\BatchIngestionClient.ruleset</CodeAnalysisRuleSet>
-        <LangVersion>latest</LangVersion>
-        <DebugType>full</DebugType>
-        <OutputPath>bin\Debug\</OutputPath>
-    </PropertyGroup>
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-        <CodeAnalysisRuleSet>..\BatchIngestionClient.ruleset</CodeAnalysisRuleSet>
-        <LangVersion>latest</LangVersion>
-        <DebugType>pdbonly</DebugType>
-        <OutputPath>bin\Release\</OutputPath>
-    </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.ServiceBus" Version="5.8.0"/>
         <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="4.1.3"/>

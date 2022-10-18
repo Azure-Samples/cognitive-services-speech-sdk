@@ -1,4 +1,4 @@
-// <copyright file="RecognizedPhrase.cs" company="Microsoft Corporation">
+﻿// <copyright file="RecognizedPhrase.cs" company="Microsoft Corporation">
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
@@ -10,7 +10,7 @@ namespace Connector
 
     public class RecognizedPhrase
     {
-        public RecognizedPhrase(string recognitionStatus, int channel, int speaker, string offset, string duration, long offsetInTicks, long durationInTicks, IEnumerable<NBest> nBest)
+        public RecognizedPhrase(string recognitionStatus, int channel, int speaker, string offset, string duration, long offsetInTicks, long durationInTicks, IEnumerable<NBest> nbest)
         {
             this.RecognitionStatus = recognitionStatus;
             this.Channel = channel;
@@ -19,7 +19,7 @@ namespace Connector
             this.Duration = duration;
             this.OffsetInTicks = offsetInTicks;
             this.DurationInTicks = durationInTicks;
-            this.NBest = nBest;
+            this.NBest = nbest;
         }
 
         [JsonProperty("recognitionStatus")]

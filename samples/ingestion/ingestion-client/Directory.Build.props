@@ -1,0 +1,17 @@
+<Project>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+        <LangVersion>latest</LangVersion>
+        <DebugType>full</DebugType>
+        <OutputPath>bin\Debug\</OutputPath>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+        <LangVersion>latest</LangVersion>
+        <DebugType>pdbonly</DebugType>
+        <OutputPath>bin\Release\</OutputPath>
+    </PropertyGroup>
+    <ItemGroup>
+        <CodeAnalysisDictionary Include="../CustomDictionary.xml">
+            <Link>CustomDictionary.xml</Link>
+        </CodeAnalysisDictionary>
+    </ItemGroup>
+</Project>

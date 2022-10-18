@@ -3,16 +3,6 @@
         <TargetFramework>net6.0</TargetFramework>
         <AzureFunctionsVersion>v3</AzureFunctionsVersion>
     </PropertyGroup>
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-        <LangVersion>latest</LangVersion>
-        <DebugType>full</DebugType>
-        <OutputPath>bin\Debug\</OutputPath>
-    </PropertyGroup>
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-        <LangVersion>latest</LangVersion>
-        <DebugType>pdbonly</DebugType>
-        <OutputPath>bin\Release\</OutputPath>
-    </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="Azure.AI.Language.Conversations" Version="1.1.0-beta.1" />
         <PackageReference Include="Azure.AI.TextAnalytics" Version="5.1.1" />

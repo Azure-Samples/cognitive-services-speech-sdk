@@ -51,7 +51,7 @@ namespace TextAnalytics
 
         private static readonly TimeSpan RequestTimeout = TimeSpan.FromMinutes(3);
 
-        private readonly TextAnalyticsClient TextAnalyticsClient;
+        private readonly TextAnalyticsClient textAnalyticsClient;
 
         private readonly string Locale;
 
@@ -59,7 +59,7 @@ namespace TextAnalytics
 
         public TextAnalyticsProvider(string locale, string subscriptionKey, string region, ILogger log)
         {
-            this.TextAnalyticsClient = new TextAnalyticsClient(new Uri($"https://{region}.api.cognitive.microsoft.com"), new AzureKeyCredential(subscriptionKey));
+            this.textAnalyticsClient = new TextAnalyticsClient(new Uri($"https://{region}.api.cognitive.microsoft.com"), new AzureKeyCredential(subscriptionKey));
             this.Locale = locale;
             this.Log = log;
         }
@@ -94,7 +94,7 @@ namespace TextAnalytics
 
             foreach (var textAnalyticsJob in runningTextAnalyticsRequests)
             {
-                var operation = new AnalyzeActionsOperation(textAnalyticsJob.Id, this.TextAnalyticsClient);
+                var operation = new AnalyzeActionsOperation(textAnalyticsJob.Id, this.textAnalyticsClient);
 
                 using var cts = new CancellationTokenSource();
                 cts.CancelAfter(RequestTimeout);
@@ -361,7 +361,7 @@ namespace TextAnalytics
                 using var cts = new CancellationTokenSource();
                 cts.CancelAfter(RequestTimeout);
 
-                var operation = await this.TextAnalyticsClient.StartAnalyzeActionsAsync(documentChunk, actions, cancellationToken: cts.Token).ConfigureAwait(false);
+                var operation = await this.textAnalyticsClient.StartAnalyzeActionsAsync(documentChunk, actions, cancellationToken: cts.Token).ConfigureAwait(false);
                 return (operation.Id, errors);
             }
             catch (OperationCanceledException operationCanceledException)
@@ -426,7 +426,7 @@ namespace TextAnalytics
                 using var cts = new CancellationTokenSource();
                 cts.CancelAfter(RequestTimeout);
 
-                var textAnalyticsOperation = new AnalyzeActionsOperation(operationId, this.TextAnalyticsClient);
+                var textAnalyticsOperation = new AnalyzeActionsOperation(operationId, this.textAnalyticsClient);
 
                 await textAnalyticsOperation.UpdateStatusAsync().ConfigureAwait(false);
 

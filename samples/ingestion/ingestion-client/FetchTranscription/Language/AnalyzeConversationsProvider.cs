@@ -35,14 +35,14 @@ namespace Language
         private const string DefaultInferenceSource = "lexical";
         private static readonly TimeSpan RequestTimeout = TimeSpan.FromMinutes(3);
         private readonly ConversationAnalysisClient ConversationAnalysisClient;
-        private readonly string Locale;
+        private readonly string locale;
         private readonly ILogger Log;
 
         public AnalyzeConversationsProvider(string locale, string subscriptionKey, string region, ILogger log)
         {
             this.ConversationAnalysisClient = new ConversationAnalysisClient(new Uri($"https://{region}.api.cognitive.microsoft.com"), new AzureKeyCredential(subscriptionKey));
 
-            this.Locale = locale;
+            this.locale = locale;
             this.Log = log;
         }
 
@@ -81,7 +81,7 @@ namespace Language
                             new Conversation
                             {
                                 Id = $"{jobCount}",
-                                Language = Locale,
+                                Language = locale,
                                 Modality = Modality.transcript,
                                 ConversationItems = new List<ConversationItem>()
                             }
