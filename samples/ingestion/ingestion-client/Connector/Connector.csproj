@@ -7,15 +7,6 @@
         <PackageReference Include="JsonSubTypes" Version="1.9.0" />
         <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.ServiceBus" Version="5.8.0" />
         <PackageReference Include="Polly" Version="7.2.3" />
-        <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
-            <PrivateAssets>all</PrivateAssets>
-            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        </PackageReference>
         <PackageReference Include="System.Data.SqlClient" Version="4.8.4" />
-    </ItemGroup>
-    <ItemGroup>
-        <None Update="connectorsettings.json">
-            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </None>
     </ItemGroup>
 </Project>
