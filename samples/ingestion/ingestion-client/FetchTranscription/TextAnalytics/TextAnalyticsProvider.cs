@@ -59,9 +59,9 @@ namespace TextAnalytics
 
         public TextAnalyticsProvider(string locale, string subscriptionKey, string region, ILogger log)
         {
-            TextAnalyticsClient = new TextAnalyticsClient(new Uri($"https://{region}.api.cognitive.microsoft.com"), new AzureKeyCredential(subscriptionKey));
-            Locale = locale;
-            Log = log;
+            this.TextAnalyticsClient = new TextAnalyticsClient(new Uri($"https://{region}.api.cognitive.microsoft.com"), new AzureKeyCredential(subscriptionKey));
+            this.Locale = locale;
+            this.Log = log;
         }
 
         /// <summary>
@@ -94,7 +94,7 @@ namespace TextAnalytics
 
             foreach (var textAnalyticsJob in runningTextAnalyticsRequests)
             {
-                var operation = new AnalyzeActionsOperation(textAnalyticsJob.Id, TextAnalyticsClient);
+                var operation = new AnalyzeActionsOperation(textAnalyticsJob.Id, this.TextAnalyticsClient);
 
                 using var cts = new CancellationTokenSource();
                 cts.CancelAfter(RequestTimeout);
@@ -139,7 +139,7 @@ namespace TextAnalytics
                 AnalyzeSentimentActions = new List<AnalyzeSentimentAction>() { new AnalyzeSentimentAction() }
             };
 
-            return await SubmitDocumentsAsync(documents, actions).ConfigureAwait(false);
+            return await this.SubmitDocumentsAsync(documents, actions).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -191,7 +191,7 @@ namespace TextAnalytics
                 actions.RecognizePiiEntitiesActions = new List<RecognizePiiEntitiesAction>() { action };
             }
 
-            return await SubmitDocumentsAsync(documents, actions).ConfigureAwait(false);
+            return await this.SubmitDocumentsAsync(documents, actions).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -339,7 +339,7 @@ namespace TextAnalytics
             foreach (var documentChunk in chunkedDocuments)
             {
                 var index = counter;
-                tasks.Add(SubmitDocumentsChunkAsync(index, documentChunk, actions));
+                tasks.Add(this.SubmitDocumentsChunkAsync(index, documentChunk, actions));
                 counter++;
             }
 
@@ -357,11 +357,11 @@ namespace TextAnalytics
 
             try
             {
-                Log.LogInformation($"Sending text analytics request for document chunk with id {chunkId}.");
+                this.Log.LogInformation($"Sending text analytics request for document chunk with id {chunkId}.");
                 using var cts = new CancellationTokenSource();
                 cts.CancelAfter(RequestTimeout);
 
-                var operation = await TextAnalyticsClient.StartAnalyzeActionsAsync(documentChunk, actions, cancellationToken: cts.Token).ConfigureAwait(false);
+                var operation = await this.TextAnalyticsClient.StartAnalyzeActionsAsync(documentChunk, actions, cancellationToken: cts.Token).ConfigureAwait(false);
                 return (operation.Id, errors);
             }
             catch (OperationCanceledException operationCanceledException)
@@ -398,7 +398,7 @@ namespace TextAnalytics
             foreach (var jobId in jobIds)
             {
                 var index = counter;
-                tasks.Add(GetOperationResults(index, jobId));
+                tasks.Add(this.GetOperationResults(index, jobId));
                 counter++;
             }
 
@@ -422,11 +422,11 @@ namespace TextAnalytics
 
             try
             {
-                Log.LogInformation($"Sending text analytics request for document chunk with id {index}.");
+                this.Log.LogInformation($"Sending text analytics request for document chunk with id {index}.");
                 using var cts = new CancellationTokenSource();
                 cts.CancelAfter(RequestTimeout);
 
-                var textAnalyticsOperation = new AnalyzeActionsOperation(operationId, TextAnalyticsClient);
+                var textAnalyticsOperation = new AnalyzeActionsOperation(operationId, this.TextAnalyticsClient);
 
                 await textAnalyticsOperation.UpdateStatusAsync().ConfigureAwait(false);
 

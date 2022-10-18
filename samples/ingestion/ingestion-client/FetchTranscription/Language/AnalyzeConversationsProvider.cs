@@ -40,10 +40,10 @@ namespace Language
 
         public AnalyzeConversationsProvider(string locale, string subscriptionKey, string region, ILogger log)
         {
-            ConversationAnalysisClient = new ConversationAnalysisClient(new Uri($"https://{region}.api.cognitive.microsoft.com"), new AzureKeyCredential(subscriptionKey));
+            this.ConversationAnalysisClient = new ConversationAnalysisClient(new Uri($"https://{region}.api.cognitive.microsoft.com"), new AzureKeyCredential(subscriptionKey));
 
-            Locale = locale;
-            Log = log;
+            this.Locale = locale;
+            this.Log = log;
         }
 
         public static bool IsConversationalPiiEnabled()
@@ -129,9 +129,9 @@ namespace Language
                 turnCount++;
             }
 
-            Log.LogInformation($"Submitting {jobCount} jobs to Conversations...");
+            this.Log.LogInformation($"Submitting {jobCount} jobs to Conversations...");
 
-            return await SubmitConversationsAsync(data).ConfigureAwait(false);
+            return await this.SubmitConversationsAsync(data).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -147,7 +147,7 @@ namespace Language
                 return (null, errors);
             }
 
-            var tasks = jobIds.Select(async jobId => await GetConversationsOperationResults(jobId).ConfigureAwait(false));
+            var tasks = jobIds.Select(async jobId => await this.GetConversationsOperationResults(jobId).ConfigureAwait(false));
             var results = await Task.WhenAll(tasks).ConfigureAwait(false);
 
             var piiErrors = results.SelectMany(result => result.piiResults).SelectMany(s => s.Errors);
@@ -211,7 +211,7 @@ namespace Language
 
             foreach (var textAnalyticsJob in conversationRequests)
             {
-                var response = await ConversationAnalysisClient.GetAnalyzeConversationJobStatusAsync(Guid.Parse(textAnalyticsJob.Id)).ConfigureAwait(false);
+                var response = await this.ConversationAnalysisClient.GetAnalyzeConversationJobStatusAsync(Guid.Parse(textAnalyticsJob.Id)).ConfigureAwait(false);
 
                 if (response.IsError)
                 {
@@ -254,7 +254,7 @@ namespace Language
                 return errors;
             }
 
-            var conversationsPiiResults = await GetConversationsOperationsResult(conversationJobIds).ConfigureAwait(false);
+            var conversationsPiiResults = await this.GetConversationsOperationsResult(conversationJobIds).ConfigureAwait(false);
 
             if (conversationsPiiResults.errors.Any())
             {
@@ -275,18 +275,18 @@ namespace Language
             var jobs = new List<string>();
             try
             {
-                Log.LogInformation($"Sending language conversation requests.");
+                this.Log.LogInformation($"Sending language conversation requests.");
 
                 foreach (var request in data)
                 {
                     using var input = RequestContent.Create(JsonConvert.SerializeObject(request));
-                    var operation = await ConversationAnalysisClient.AnalyzeConversationAsync(WaitUntil.Started, input).ConfigureAwait(false);
+                    var operation = await this.ConversationAnalysisClient.AnalyzeConversationAsync(WaitUntil.Started, input).ConfigureAwait(false);
 
                     var response = await operation.UpdateStatusAsync().ConfigureAwait(false);
                     using JsonDocument result = JsonDocument.Parse(response.ContentStream);
                     var jobResults = result.RootElement;
                     var jobId = jobResults.GetProperty("jobId");
-                    Log.LogInformation($"Submitting TA job: {jobId}");
+                    this.Log.LogInformation($"Submitting TA job: {jobId}");
                     jobs.Add(jobId.ToString());
                 }
 
@@ -311,9 +311,9 @@ namespace Language
             var errors = new List<string>();
             try
             {
-                Log.LogInformation($"Sending conversation analytics request for jobid {jobId}.");
+                this.Log.LogInformation($"Sending conversation analytics request for jobid {jobId}.");
 
-                var response = await ConversationAnalysisClient.GetAnalyzeConversationJobStatusAsync(Guid.Parse(jobId)).ConfigureAwait(false);
+                var response = await this.ConversationAnalysisClient.GetAnalyzeConversationJobStatusAsync(Guid.Parse(jobId)).ConfigureAwait(false);
 
                 if (response.IsError)
                 {

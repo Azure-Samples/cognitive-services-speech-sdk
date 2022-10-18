@@ -169,11 +169,11 @@ dotnet_diagnostic.CA1052.severity = error
 
 dotnet_diagnostic.CA1053.severity = error
 
-dotnet_diagnostic.CA1054.severity = error
+dotnet_diagnostic.CA1054.severity = none
 
 dotnet_diagnostic.CA1055.severity = error
 
-dotnet_diagnostic.CA1056.severity = error
+dotnet_diagnostic.CA1056.severity = none
 
 dotnet_diagnostic.CA1057.severity = error
 

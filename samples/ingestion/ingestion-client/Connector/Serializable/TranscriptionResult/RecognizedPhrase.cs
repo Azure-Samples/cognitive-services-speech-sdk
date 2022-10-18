@@ -12,14 +12,14 @@ namespace Connector
     {
         public RecognizedPhrase(string recognitionStatus, int channel, int speaker, string offset, string duration, long offsetInTicks, long durationInTicks, IEnumerable<NBest> nBest)
         {
-            RecognitionStatus = recognitionStatus;
-            Channel = channel;
-            Speaker = speaker;
-            Offset = offset;
-            Duration = duration;
-            OffsetInTicks = offsetInTicks;
-            DurationInTicks = durationInTicks;
-            NBest = nBest;
+            this.RecognitionStatus = recognitionStatus;
+            this.Channel = channel;
+            this.Speaker = speaker;
+            this.Offset = offset;
+            this.Duration = duration;
+            this.OffsetInTicks = offsetInTicks;
+            this.DurationInTicks = durationInTicks;
+            this.NBest = nBest;
         }
 
         [JsonProperty("recognitionStatus")]
