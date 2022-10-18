@@ -181,21 +181,34 @@ namespace StartTranscriptionByTimer
             {
                 var properties = GetTranscriptionPropertyBag();
 
+                // only needed to make sure we do not add the same uri twice:
+                var absoluteUrls = new HashSet<string>();
+
                 var audioUrls = new List<string>();
                 var audioFileInfos = new List<AudioFileInfo>();
 
                 foreach (var serviceBusMessage in serviceBusMessages)
                 {
+                    var absoluteAudioUrl = serviceBusMessage.Data.Url.AbsoluteUri;
+
+                    if (absoluteUrls.Contains(absoluteAudioUrl))
+                    {
+                        Logger.LogError($"Unexpectedly received the same audio file twice: {absoluteAudioUrl}");
+                        continue;
+                    }
+
+                    absoluteUrls.Add(absoluteAudioUrl);
+
                     if (StartTranscriptionEnvironmentVariables.IsByosEnabledSubscription)
                     {
-                        audioUrls.Add(serviceBusMessage.Data.Url.AbsoluteUri);
+                        audioUrls.Add(absoluteAudioUrl);
                     }
                     else
                     {
                         audioUrls.Add(StorageConnectorInstance.CreateSas(serviceBusMessage.Data.Url));
                     }
 
-                    audioFileInfos.Add(new AudioFileInfo(serviceBusMessage.Data.Url.AbsoluteUri, serviceBusMessage.RetryCount, textAnalyticsRequests: null));
+                    audioFileInfos.Add(new AudioFileInfo(absoluteAudioUrl, serviceBusMessage.RetryCount, textAnalyticsRequests: null));
                 }
 
                 ModelIdentity modelIdentity = null;
