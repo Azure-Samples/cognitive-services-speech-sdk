@@ -3,7 +3,7 @@ name: Build Ingestion Client Binaries
 on:
   push:
     branches: ['main', 'master', 'jvandervegte/testPublishOnAction']
-    paths: ['samples/ingestion/ingestion-client/**']
+    paths: ['samples/ingestion/ingestion-client/**', '.github/workflows/ingestion_client.yaml']
 
 jobs:
   build:
