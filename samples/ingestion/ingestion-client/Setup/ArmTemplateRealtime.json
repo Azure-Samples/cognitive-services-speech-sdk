@@ -123,7 +123,7 @@
         }
     },
     "variables": {
-        "Version": "v0.0.2",
+        "Version": "v0.0.3",
         "AudioInputContainer": "audio-input",
         "AudioProcessedContainer": "audio-processed",
         "ErrorFilesOutputContainer": "audio-failed",
@@ -150,7 +150,9 @@
         "AuthRuleRMK": "[resourceId('Microsoft.ServiceBus/namespaces/authorizationRules', variables('ServiceBusName'),'RootManageSharedAccessKey')]",
         "AuthRuleCT": "[resourceId('Microsoft.ServiceBus/namespaces/queues/authorizationRules', variables('ServiceBusName'), 'start_transcription_queue','StartTranscription')]",
         "AppServicePlanName": "[concat('AppServicePlan-', variables('InstanceId'))]",
-        "AzureSpeechServicesKeySecretName": "AzureSpeechServicesKey"
+        "AzureSpeechServicesKeySecretName": "AzureSpeechServicesKey",
+        "BinariesRoutePrefix": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/releases/download/ingestion-",
+        "RealtimeTranscriptionBinary": "[concat(variables('BinariesRoutePrefix'), variables('Version'), '/RealtimeTranscription.zip')]"
     },
     "resources": [
         {
