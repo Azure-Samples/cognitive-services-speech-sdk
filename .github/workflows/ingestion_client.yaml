@@ -17,9 +17,8 @@ jobs:
 
     - name: Check Release Version 
       run: |
-        ArmTemplateBatchJson=$(cat ./samples/ingestion/ingestion-client/ArmTemplateBatch.json)
-        ArmTemplateRealtimeJson=$(cat ./samples/ingestion/ingestion-client/ArmTemplateRealtime.json)
-        echo "${{fromJson(${ArmTemplateBatchJson}).variables.Version}}"
+        version=$( cat ./samples/ingestion/ingestion-client/ArmTemplateBatch.json | jq '.variables.Version' )
+        echo "::set-output name=version::version"
 
     - name: Clean Solution
       run: dotnet clean ./samples/ingestion/ingestion-client/BatchIngestionClient.sln --configuration Release && dotnet nuget locals all --clear
