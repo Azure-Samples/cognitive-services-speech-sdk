@@ -26,10 +26,10 @@ jobs:
           echo "Realtime template: ${versionRealtime}"
 
       - name: Check Release Versions
-        if: steps.get_release_versions.version == '' || steps.get_release_versions.version != steps.get_release_versions.versionRealtime
+        if: steps.get_release_versions.outputs.version == '' || steps.get_release_versions.outputs.version != steps.get_release_versions.outputs.versionRealtime
         run: |
-          echo "Realtime template: ${{steps.get_release_versions.version}}"
-          echo steps.get_release_versions.version
+          echo "Realtime template: ${{steps.get_release_versions.outputs.version}}"
+          echo ${{ steps.get_release_versions.outputs.upload_url }}
 
       - name: Clean Solution
         run: dotnet clean ./samples/ingestion/ingestion-client/BatchIngestionClient.sln --configuration Release && dotnet nuget locals all --clear
