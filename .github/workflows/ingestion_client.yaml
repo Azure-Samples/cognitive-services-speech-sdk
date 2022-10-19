@@ -15,8 +15,15 @@ jobs:
       with:
         dotnet-version: '6.0.x'
 
+    - name: Check Release Version 
+      run: |
+        ArmTemplateBatchJson=$(cat ./samples/ingestion/ingestion-client/ArmTemplateBatch.json)
+        ArmTemplateRealtimeJson=$(cat ./samples/ingestion/ingestion-client/ArmTemplateRealtime.json)
+        echo "${{fromJson(ArmTemplateBatchJson).variables.Version}}"
+
     - name: Clean Solution
       run: dotnet clean ./samples/ingestion/ingestion-client/BatchIngestionClient.sln --configuration Release && dotnet nuget locals all --clear
+
     - name: Build BatchIngestionClient
       run: dotnet build  samples/ingestion/ingestion-client --configuration Release
 
@@ -51,7 +58,7 @@ jobs:
         draft: false
         prerelease: false
 
-    - name: Upload Release Asset
+    - name: Upload StartTranscriptionByTimer
       id: upload-release-asset 
       uses: actions/upload-release-asset@v1
       env:
@@ -60,4 +67,37 @@ jobs:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ./StartTranscriptionByTimer.zip
         asset_name: StartTranscriptionByTimer.zip
+        asset_content_type: application/zip
+
+    - name: Upload StartTranscriptionByServiceBus
+      id: upload-release-asset 
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./StartTranscriptionByServiceBus.zip
+        asset_name: StartTranscriptionByServiceBus.zip
+        asset_content_type: application/zip
+
+    - name: Upload FetchTranscription
+      id: upload-release-asset 
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./FetchTranscription.zip
+        asset_name: FetchTranscription.zip
+        asset_content_type: application/zip
+
+    - name: Upload RealtimeTranscription
+      id: upload-release-asset 
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./RealtimeTranscription.zip
+        asset_name: RealtimeTranscription.zip
         asset_content_type: application/zip

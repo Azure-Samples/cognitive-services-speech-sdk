@@ -123,6 +123,7 @@
         }
     },
     "variables": {
+        "Version": "v0.0.1",
         "AudioInputContainer": "audio-input",
         "AudioProcessedContainer": "audio-processed",
         "ErrorFilesOutputContainer": "audio-failed",
