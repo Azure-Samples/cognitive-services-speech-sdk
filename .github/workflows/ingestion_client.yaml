@@ -41,3 +41,25 @@ jobs:
       run: dotnet publish -c Release -f net6.0 --no-self-contained --output ./RealtimeTranscription samples/ingestion/ingestion-client/RealtimeTranscription/RealtimeTranscription.csproj
     - name: Zip RealtimeTranscription
       run: zip -r RealtimeTranscription.zip ./RealtimeTranscription
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: false
+        prerelease: false
+
+    - name: Upload Release Asset
+      id: upload-release-asset 
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./StartTranscriptionByTimer.zip
+        asset_name: StartTranscriptionByTimer.zip
+        asset_content_type: application/zip
