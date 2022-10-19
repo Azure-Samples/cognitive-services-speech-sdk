@@ -27,9 +27,17 @@ jobs:
 
       - name: Check Release Versions
         if: steps.get_release_versions.outputs.version == '' || steps.get_release_versions.outputs.version != steps.get_release_versions.outputs.versionRealtime
-        run: |
-          echo "Realtime template: ${{steps.get_release_versions.outputs.version}}"
-          echo ${{ steps.get_release_versions.outputs.upload_url }}
+        uses: actions/github-script@v3
+        with:
+          script: |
+            core.setFailed('Invalid version specified or mismatching.')
+
+      - name: Check if Release Exists
+        if: git show-ref --tags steps.get_release_versions.outputs.version
+        uses: actions/github-script@v3
+        with:
+          script: |
+            core.setFailed('Release with version already exists.')
 
       - name: Clean Solution
         run: dotnet clean ./samples/ingestion/ingestion-client/BatchIngestionClient.sln --configuration Release && dotnet nuget locals all --clear
@@ -64,7 +72,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: 'v0.0.1'
-          release_name: 'Release v0.0.1'
+          release_name: 'Ingestion Client v0.0.1'
           draft: false
           prerelease: false
 
