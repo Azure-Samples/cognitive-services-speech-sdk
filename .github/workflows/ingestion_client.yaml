@@ -30,8 +30,8 @@ jobs:
       uses: actions/github-script@v3
       with:
         script: |
-          echo "1 template: ${steps.get_release_versions.version}"
-          echo "2 template: ${steps.get_release_versions.versionRealtime}"
+          echo "1 template: ${{steps.get_release_versions.version}}"
+          echo "2 template: ${{steps.get_release_versions.versionRealtime}}"
           core.setFailed('Invalid version specified or mismatching:{{steps.get_release_versions.version}}')
 
     - name: Clean Solution
