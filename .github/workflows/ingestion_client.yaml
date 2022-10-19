@@ -30,15 +30,15 @@ jobs:
         uses: actions/github-script@v3
         with:
           script: |
-            core.setFailed('Invalid version specified or mismatching.')
+            core.setFailed('Invalid version specified or mismatching versions in batch and realtime.')
 
       - name: Check if Release Exists
         id: check_if_tagged
         shell: bash
-        run: git show-ref --tags --verify --quiet -- "refs/tags/${{ steps.get_release_versions.outputs.version }}" && echo "::set-output name=tagged::0" || echo "::set-output name=tagged::1"
+        run: git show-ref --tags --verify --quiet -- "refs/tags/${{ steps.get_release_versions.outputs.version }}" && echo "::set-output name=tagExists::1" || echo "::set-output name=tagExists::0"
 
       - name: Verify if Release Exists
-        if: steps.check_if_tagged.outputs.tagged == 1
+        if: steps.check_if_tagged.outputs.tagExists == 1
         uses: actions/github-script@v3
         with:
           script: |
