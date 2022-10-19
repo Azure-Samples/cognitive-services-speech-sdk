@@ -123,7 +123,7 @@
         }
     },
     "variables": {
-        "Version": "v0.0.7",
+        "Version": "v0.0.8",
         "AudioInputContainer": "audio-input",
         "AudioProcessedContainer": "audio-processed",
         "ErrorFilesOutputContainer": "audio-failed",
@@ -151,7 +151,7 @@
         "AuthRuleCT": "[resourceId('Microsoft.ServiceBus/namespaces/queues/authorizationRules', variables('ServiceBusName'), 'start_transcription_queue','StartTranscription')]",
         "AppServicePlanName": "[concat('AppServicePlan-', variables('InstanceId'))]",
         "AzureSpeechServicesKeySecretName": "AzureSpeechServicesKey",
-        "BinariesRoutePrefix": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/releases/download/ingestion-",
+        "BinariesRoutePrefix": "https://github.com/HenryvanderVegte/cognitive-services-speech-sdk/releases/download/ingestion-",
         "RealtimeTranscriptionBinary": "[concat(variables('BinariesRoutePrefix'), variables('Version'), '/RealtimeTranscription.zip')]"
     },
     "resources": [
@@ -569,7 +569,7 @@
                 "ErrorFilesOutputContainer": "[variables('ErrorFilesOutputContainer')]",
                 "ErrorReportOutputContainer": "[variables('ErrorReportOutputContainer')]",
                 "FilesPerTranscriptionJob": "[variables('FilesPerTranscriptionJob')]",
-                "FUNCTIONS_EXTENSION_VERSION": "~3",
+                "FUNCTIONS_EXTENSION_VERSION": "~4",
                 "FUNCTIONS_WORKER_RUNTIME": "dotnet",
                 "JsonResultOutputContainer": "[variables('JsonResultOutputContainer')]",
                 "Locale": "[parameters('Locale')]",
