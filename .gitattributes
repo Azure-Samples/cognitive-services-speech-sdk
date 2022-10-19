@@ -65,8 +65,8 @@ proguard-rules.pro text
 *.sh text eol=lf
 
 # Binary extensions:
-*.class binary
 *.bacpac binary
+*.class binary
 *.bmp binary
 *.jar binary
 *.jpg binary
