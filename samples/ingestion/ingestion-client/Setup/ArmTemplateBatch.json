@@ -227,7 +227,7 @@
         }
     },
     "variables": {
-        "Version": "v0.0.8",
+        "Version": "v1.0.0",
         "AudioInputContainer": "audio-input",
         "AudioProcessedContainer": "audio-processed",
         "ErrorFilesOutputContainer": "audio-failed",
@@ -446,7 +446,7 @@
                             ],
                             "properties": {
                                 "operationMode": "Import",
-                                "storageKey": "",
+                                "storageKey": "?",
                                 "storageKeyType": "StorageAccessKey",
                                 "administratorLogin": "[parameters('SqlAdministratorLogin')]",
                                 "administratorLoginPassword": "[parameters('SqlAdministratorLoginPassword')]",
