@@ -66,6 +66,7 @@ proguard-rules.pro text
 
 # Binary extensions:
 *.class binary
+*.bacpac binary
 *.bmp binary
 *.jar binary
 *.jpg binary
@@ -77,4 +78,3 @@ proguard-rules.pro text
 *.wav binary
 *.zip binary
 *.webp binary
-.bacpac
