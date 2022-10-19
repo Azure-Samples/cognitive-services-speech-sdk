@@ -28,7 +28,7 @@ jobs:
     - name: Check Release Versions
       if: steps.get_release_versions.version == '' || steps.get_release_versions.version != steps.get_release_versions.versionRealtime
       run: |
-        echo "Realtime template: ${steps.get_release_versions.version}"
+        echo "Realtime template: ${{steps.get_release_versions.version}}"
         echo steps.get_release_versions.version
 
     - name: Clean Solution
