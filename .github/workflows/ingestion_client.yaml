@@ -41,22 +41,22 @@ jobs:
       - name: Publish StartTranscriptionByTimer function
         run: dotnet publish -c Release -f net6.0 --no-self-contained --output ./StartTranscriptionByTimer samples/ingestion/ingestion-client/StartTranscriptionByTimer/StartTranscriptionByTimer.csproj
       - name: Zip StartTranscriptionByTimer
-        run: cd StartTranscriptionByTimer; zip -r ../StartTranscriptionByTimer.zip *
+        run: cd StartTranscriptionByTimer && zip -r ../StartTranscriptionByTimer.zip *
 
       - name: Publish StartTranscriptionByServiceBus function
         run: dotnet publish -c Release -f net6.0 --no-self-contained --output ./StartTranscriptionByServiceBus samples/ingestion/ingestion-client/StartTranscriptionByServiceBus/StartTranscriptionByServiceBus.csproj
       - name: Zip StartTranscriptionByServiceBus
-        run: cd StartTranscriptionByServiceBus; zip -r ../StartTranscriptionByServiceBus.zip *
+        run: cd StartTranscriptionByServiceBus && zip -r ../StartTranscriptionByServiceBus.zip *
 
       - name: Publish FetchTranscription function
         run: dotnet publish -c Release -f net6.0 --no-self-contained --output ./FetchTranscription samples/ingestion/ingestion-client/FetchTranscription/FetchTranscription.csproj
       - name: Zip FetchTranscription
-        run: cd FetchTranscription; zip -r ../FetchTranscription.zip *
+        run: cd FetchTranscription && zip -r ../FetchTranscription.zip *
 
       - name: Publish RealtimeTranscription function
         run: dotnet publish -c Release -f net6.0 --no-self-contained --output ./RealtimeTranscription samples/ingestion/ingestion-client/RealtimeTranscription/RealtimeTranscription.csproj
       - name: Zip RealtimeTranscription
-        run: cd RealtimeTranscription; zip -r ../RealtimeTranscription.zip *
+        run: cd RealtimeTranscription && zip -r ../RealtimeTranscription.zip *
 
       - name: Create Release
         id: create_release
