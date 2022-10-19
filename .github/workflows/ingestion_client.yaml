@@ -26,7 +26,7 @@ jobs:
         echo "Realtime template: ${versionRealtime}"
 
     - name: Check Release Versions
-      if: ${{steps.get_release_versions.version}} == '' || ${{steps.get_release_versions.version}} != ${{steps.get_release_versions.versionRealtime}}
+      if: steps.get_release_versions.version == '' || steps.get_release_versions.version != steps.get_release_versions.versionRealtime
       uses: actions/github-script@v3
       with:
         script: |
