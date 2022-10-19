@@ -56,7 +56,7 @@ jobs:
       - name: Publish RealtimeTranscription function
         run: dotnet publish -c Release -f net6.0 --no-self-contained --output ./RealtimeTranscription samples/ingestion/ingestion-client/RealtimeTranscription/RealtimeTranscription.csproj
       - name: Zip RealtimeTranscription
-        run: zip -r RealtimeTranscription.zip ./RealtimeTranscription
+        run: cd RealtimeTranscription; zip -r ../RealtimeTranscription.zip *
 
       - name: Create Release
         id: create_release
