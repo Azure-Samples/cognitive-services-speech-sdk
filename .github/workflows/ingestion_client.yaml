@@ -27,10 +27,9 @@ jobs:
 
     - name: Check Release Versions
       if: steps.get_release_versions.version == '' || steps.get_release_versions.version != steps.get_release_versions.versionRealtime
-      uses: actions/github-script@v3
-      with:
-        script: |
-          core.setFailed('Invalid version specified or mismatching.')
+      run: |
+        echo "Realtime template: ${steps.get_release_versions.version}"
+        echo steps.get_release_versions.version
 
     - name: Clean Solution
       run: dotnet clean ./samples/ingestion/ingestion-client/BatchIngestionClient.sln --configuration Release && dotnet nuget locals all --clear
