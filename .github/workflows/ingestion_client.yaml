@@ -18,10 +18,8 @@ jobs:
       - name: Get Release Versions
         id: get_release_versions
         run: |
-          version=$(cat ./samples/ingestion/ingestion-client/Setup/ArmTemplateBatch.json | jq '.variables.Version')
-          versionRealtime=$(cat ./samples/ingestion/ingestion-client/Setup/ArmTemplateRealtime.json | jq '.variables.Version')
-          version=${version#"|"}
-          versionRealtime=${versionRealtime#"|"}
+          version=$(cat ./samples/ingestion/ingestion-client/Setup/ArmTemplateBatch.json | jq '.variables.Version' | tr -d '"')
+          versionRealtime=$(cat ./samples/ingestion/ingestion-client/Setup/ArmTemplateRealtime.json | jq '.variables.Version' | tr -d '"')
           echo ::set-output name=version::$version
           echo "Batch template: ${version}"
           echo ::set-output name=versionRealtime::$versionRealtime
