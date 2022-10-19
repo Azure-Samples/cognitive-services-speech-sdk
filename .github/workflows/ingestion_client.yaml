@@ -19,7 +19,7 @@ jobs:
       run: |
         ArmTemplateBatchJson=$(cat ./samples/ingestion/ingestion-client/ArmTemplateBatch.json)
         ArmTemplateRealtimeJson=$(cat ./samples/ingestion/ingestion-client/ArmTemplateRealtime.json)
-        echo "${{fromJson($ArmTemplateBatchJson).variables.Version}}"
+        echo "${{fromJson(${ArmTemplateBatchJson}).variables.Version}}"
 
     - name: Clean Solution
       run: dotnet clean ./samples/ingestion/ingestion-client/BatchIngestionClient.sln --configuration Release && dotnet nuget locals all --clear
