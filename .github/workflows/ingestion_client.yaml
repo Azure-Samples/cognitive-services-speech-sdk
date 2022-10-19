@@ -25,7 +25,7 @@ jobs:
           echo ::set-output name=versionRealtime::$versionRealtime
           echo "Realtime template: ${versionRealtime}"
 
-      - name: Check Release Versions
+      - name: Verify Release Versions
         if: steps.get_release_versions.outputs.version == '' || steps.get_release_versions.outputs.version != steps.get_release_versions.outputs.versionRealtime
         uses: actions/github-script@v3
         with:
@@ -33,11 +33,16 @@ jobs:
             core.setFailed('Invalid version specified or mismatching.')
 
       - name: Check if Release Exists
-        if: git show-ref --tags steps.get_release_versions.outputs.version
+        id: check_if_tagged
+        shell: bash
+        run: git show-ref --tags --verify --quiet -- "refs/tags/${{ steps.get_release_versions.outputs.version }}" && echo "::set-output name=tagged::0" || echo "::set-output name=tagged::1"
+
+      - name: Verify if Release Exists
+        if: steps.check_if_tagged.outputs.tagged == 1
         uses: actions/github-script@v3
         with:
           script: |
-            core.setFailed('Release with version already exists.')
+            core.setFailed('Release with tag already exists.')
 
       - name: Clean Solution
         run: dotnet clean ./samples/ingestion/ingestion-client/BatchIngestionClient.sln --configuration Release && dotnet nuget locals all --clear
