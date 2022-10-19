@@ -15,10 +15,21 @@ jobs:
       with:
         dotnet-version: '6.0.x'
 
-    - name: Check Release Version 
+    - name: Get Release Versions
+      id: get_release_versions
       run: |
-        version=$( cat ./samples/ingestion/ingestion-client/ArmTemplateBatch.json | jq '.variables.Version' )
+        version=$( cat ./samples/ingestion/ingestion-client/Setup/ArmTemplateBatch.json | jq '.variables.Version' )
+        versionRealtime=$( cat ./samples/ingestion/ingestion-client/Setup/ArmTemplateRealtime.json | jq '.variables.Version' )
         echo "::set-output name=version::version"
+        echo "::set-output name=versionRealtime::versionRealtime"
+
+    - name: Check Release Versions
+      if: ${{ steps.get_release_versions.version == '' || steps.get_release_versions.version != steps.get_release_versions.versionRealtime}}
+      uses: actions/github-script@v3
+      with:
+        script: |
+          core.setFailed('Invalid version specified')
+
 
     - name: Clean Solution
       run: dotnet clean ./samples/ingestion/ingestion-client/BatchIngestionClient.sln --configuration Release && dotnet nuget locals all --clear
