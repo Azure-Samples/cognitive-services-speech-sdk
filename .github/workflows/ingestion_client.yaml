@@ -20,9 +20,9 @@ jobs:
       run: |
         version="$(cat ./samples/ingestion/ingestion-client/Setup/ArmTemplateBatch.json | jq '.variables.Version' )"
         versionRealtime="$(cat ./samples/ingestion/ingestion-client/Setup/ArmTemplateRealtime.json | jq '.variables.Version' )"
-        echo "::set-output name=version::$version"
+        echo ::set-output name=version::$version
         echo "Batch template: ${version}"
-        echo "::set-output name=versionRealtime::$versionRealtime"
+        echo ::set-output name=versionRealtime::$versionRealtime
         echo "Realtime template: ${versionRealtime}"
 
     - name: Check Release Versions
