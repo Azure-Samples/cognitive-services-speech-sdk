@@ -276,7 +276,7 @@
         "StartTranscriptionByTimerBinary": "[concat(variables('BinariesRoutePrefix'), variables('Version'), '/StartTranscriptionByTimer.zip')]",
         "StartTranscriptionByServiceBusBinary": "[concat(variables('BinariesRoutePrefix'), variables('Version'), '/StartTranscriptionByServiceBus.zip')]",
         "FetchTranscriptionBinary": "[concat(variables('BinariesRoutePrefix'), variables('Version'), '/FetchTranscription.zip')]",
-        "DatabaseBacpac": "[concat(variables('BinariesRoutePrefix'), variables('Version'), '/IngestionClient.bacpac')]",
+        "DatabaseBacpac": "[concat(variables('BinariesRoutePrefix'), variables('Version'), '/IngestionClient.bacpac')]"
     },
     "resources": [
         {
