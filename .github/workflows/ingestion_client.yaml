@@ -22,7 +22,7 @@ jobs:
         versionRealtime="$(cat ./samples/ingestion/ingestion-client/Setup/ArmTemplateRealtime.json | jq '.variables.Version' )"
         echo "::set-output name=version::$version"
         echo "::set-output name=versionRealtime::$versionRealtime"
-        echo "${{version}}"
+        echo "${version}"
 
     - name: Check Release Versions
       if: ${{ steps.get_release_versions.version == '' || steps.get_release_versions.version != steps.get_release_versions.versionRealtime}}
