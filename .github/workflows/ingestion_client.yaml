@@ -35,7 +35,7 @@ jobs:
       - name: Check if Release Exists
         id: check_if_tagged
         shell: bash
-        run: git show-ref --tags --verify --quiet -- "refs/tags/${{ steps.get_release_versions.outputs.version }}" && echo "::set-output name=tagExists::1" || echo "::set-output name=tagExists::0"
+        run: (git show-ref --tags --verify --quiet -- "refs/tags/${{ steps.get_release_versions.outputs.version }}" && echo "::set-output name=tagExists::1" && echo "Exists")|| (echo "::set-output name=tagExists::0" && echo "Not Exists")
 
       - name: Verify if Release Exists
         if: steps.check_if_tagged.outputs.tagExists == 1
