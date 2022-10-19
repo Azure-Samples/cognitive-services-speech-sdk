@@ -64,8 +64,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: 'v0.0.1'
-          release_name: 'Ingestion Client v0.0.1'
+          tag_name: 'ingestion-${steps.get_release_versions.outputs.version}'
+          release_name: 'Ingestion Client ${steps.get_release_versions.outputs.version}'
           draft: false
           prerelease: false
 
