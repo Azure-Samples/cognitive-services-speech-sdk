@@ -1241,7 +1241,7 @@ csharp_preserve_single_line_statements = true
 dotnet_sort_system_directives_first = true
 csharp_using_directive_placement = inside_namespace:warning
 dotnet_separate_import_directive_groups = true
-file_header_template = <copyright file="{fileName}" company="Microsoft Corporation">\nCopyright (c) Microsoft Corporation. All rights reserved.\n</copyright>
+file_header_template = <copyright file="{fileName}" company="Microsoft Corporation">\nCopyright (c) Microsoft Corporation. All rights reserved.\nLicensed under the MIT license. See LICENSE.md file in the project root for full license information.\n</copyright>
 
 # Build rules code style
 

@@ -18,8 +18,9 @@ jobs:
       - name: Get Release Versions
         id: get_release_versions
         run: |
-          version=$(cat ./samples/ingestion/ingestion-client/Setup/ArmTemplateBatch.json | jq '.variables.Version' | tr -d '"')
-          versionRealtime=$(cat ./samples/ingestion/ingestion-client/Setup/ArmTemplateRealtime.json | jq '.variables.Version' | tr -d '"')
+          set -u -e -o pipefail
+          version=$(cat ./samples/ingestion/ingestion-client/Setup/ArmTemplateBatch.json | jq .variables.version)
+          versionRealtime=$(cat ./samples/ingestion/ingestion-client/Setup/ArmTemplateRealtime.json | jq .variables.Version)
           echo ::set-output name=version::$version
           echo "Batch template: ${version}"
           echo ::set-output name=versionRealtime::$versionRealtime
@@ -36,7 +37,7 @@ jobs:
         run: dotnet clean ./samples/ingestion/ingestion-client/BatchIngestionClient.sln --configuration Release && dotnet nuget locals all --clear
 
       - name: Build BatchIngestionClient
-        run: dotnet build  samples/ingestion/ingestion-client --configuration Release
+        run: dotnet build samples/ingestion/ingestion-client --configuration Release
 
       - name: Publish StartTranscriptionByTimer function
         run: dotnet publish -c Release -f net6.0 --no-self-contained --output ./StartTranscriptionByTimer samples/ingestion/ingestion-client/StartTranscriptionByTimer/StartTranscriptionByTimer.csproj
