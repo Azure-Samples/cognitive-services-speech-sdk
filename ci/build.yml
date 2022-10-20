@@ -104,11 +104,14 @@ jobs:
   - bash: ./ci/run-gradle.sh
     displayName: 'Build samples (gradle)'
     
-- job: Windows2022
+- job: UbuntuLatest
+  variables:
+    V_VSTS_FEED: $[dependencies.Pre.outputs['var.V_VSTS_FEED']]
+    V_INCLUDE_NUGET_ORG: $[dependencies.Pre.outputs['var.V_INCLUDE_NUGET_ORG']]
   dependsOn: Pre
   timeoutInMinutes: 60
   pool:
-    vmImage: 'windows-2022'
+    vmImage: 'ubuntu-latest'
   steps:
   - task: NuGetToolInstaller@0
     displayName: Use NuGet $(SPEECHSDK_NUGET_VERSION)
