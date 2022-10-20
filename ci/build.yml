@@ -85,7 +85,7 @@ jobs:
       command: restore
       vstsFeed: $(V_VSTS_FEED)
       includeNuGetOrg: $(V_INCLUDE_NUGET_ORG)
-      restoreSolution: '!**/BatchIngestionClient.sln' # Restoring everything but ingestion client since it is on .net6.0
+      restoreSolution: '**\*;!samples\ingestion\ingestion-client\**\*' # Restoring everything but ingestion client since it is on .net6.0
   # Note: for now building any platform. In the future, should build all available.
   - task: VSBuild@1
     inputs:
@@ -123,7 +123,7 @@ jobs:
       command: restore
       vstsFeed: $(V_VSTS_FEED)
       includeNuGetOrg: $(V_INCLUDE_NUGET_ORG)
-      restoreSolution: '**/BatchIngestionClient.sln' # Restoring only ingestion client since it is on .net6.0
+      restoreSolution: 'samples\ingestion\ingestion-client\**\*' # Restoring only ingestion client since it is on .net6.0
   - task: VSBuild@1
     inputs:
       maximumCpuCount: true
