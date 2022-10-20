@@ -110,6 +110,15 @@ jobs:
   pool:
     vmImage: 'windows-2022'
   steps:
+  - task: NuGetToolInstaller@0
+    displayName: Use NuGet $(SPEECHSDK_NUGET_VERSION)
+    inputs:
+      versionSpec: $(SPEECHSDK_NUGET_VERSION)
+  - task: NuGetCommand@2
+    inputs:
+      command: restore
+      vstsFeed: $(V_VSTS_FEED)
+      includeNuGetOrg: $(V_INCLUDE_NUGET_ORG)
   - task: VSBuild@1
     inputs:
       maximumCpuCount: true
