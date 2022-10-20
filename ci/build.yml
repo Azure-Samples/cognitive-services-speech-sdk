@@ -81,9 +81,9 @@ jobs:
     inputs:
       versionSpec: $(SPEECHSDK_NUGET_VERSION)
   - task: UseDotNet@2
-    displayName: 'Install .NET Core SDK 3.x'
+    displayName: 'Install .NET Core SDK 2.x'
     inputs:
-      version: 3.x
+      version: 2.x
   - task: NuGetCommand@2
     inputs:
       command: restore
