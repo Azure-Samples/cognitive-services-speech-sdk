@@ -84,6 +84,10 @@ jobs:
     displayName: 'Install .NET Core SDK 2.x'
     inputs:
       version: 2.x
+  - task: UseDotNet@2
+    displayName: 'Install .NET Core SDK 3.x'
+    inputs:
+      version: 3.x
   - task: NuGetCommand@2
     inputs:
       command: restore
