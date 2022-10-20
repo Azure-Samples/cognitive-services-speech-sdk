@@ -85,7 +85,7 @@ jobs:
       command: restore
       vstsFeed: $(V_VSTS_FEED)
       includeNuGetOrg: $(V_INCLUDE_NUGET_ORG)
-      restoreSolution: '**\*;!samples\ingestion\ingestion-client\**\*' # Restoring everything but ingestion client since it is on .net6.0
+      restoreSolution: '**\*.sln;!samples\ingestion\ingestion-client\**\*.sln' # Restoring everything but ingestion client since it is on .net6.0
   # Note: for now building any platform. In the future, should build all available.
   - task: VSBuild@1
     inputs:
@@ -105,14 +105,14 @@ jobs:
   - bash: ./ci/run-gradle.sh
     displayName: 'Build samples (gradle)'
     
-- job: UbuntuLatest
+- job: Windows2022
   variables:
     V_VSTS_FEED: $[dependencies.Pre.outputs['var.V_VSTS_FEED']]
     V_INCLUDE_NUGET_ORG: $[dependencies.Pre.outputs['var.V_INCLUDE_NUGET_ORG']]
   dependsOn: Pre
   timeoutInMinutes: 60
   pool:
-    vmImage: 'ubuntu-latest'
+    vmImage: 'windows-2022'
   steps:
   - task: NuGetToolInstaller@0
     displayName: Use NuGet $(SPEECHSDK_NUGET_VERSION)
