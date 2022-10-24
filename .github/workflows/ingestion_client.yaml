@@ -2,7 +2,7 @@ name: Build Ingestion Client Binaries
 
 on:
   push:
-    branches: ['main', 'master']
+    branches: ['main', 'master', 'jvandervegte/UseRawJqOutput']
     paths: ['samples/ingestion/ingestion-client/**', '.github/workflows/ingestion_client.yaml']
 
 jobs:
@@ -19,8 +19,8 @@ jobs:
         id: get_release_versions
         run: |
           set -u -e -o pipefail
-          version=$(cat ./samples/ingestion/ingestion-client/Setup/ArmTemplateBatch.json | jq .variables.Version)
-          versionRealtime=$(cat ./samples/ingestion/ingestion-client/Setup/ArmTemplateRealtime.json | jq .variables.Version)
+          version=$(cat ./samples/ingestion/ingestion-client/Setup/ArmTemplateBatch.json | jq -r .variables.Version)
+          versionRealtime=$(cat ./samples/ingestion/ingestion-client/Setup/ArmTemplateRealtime.json | jq -r .variables.Version)
           echo ::set-output name=version::$version
           echo "Batch template: ${version}"
           echo ::set-output name=versionRealtime::$versionRealtime
