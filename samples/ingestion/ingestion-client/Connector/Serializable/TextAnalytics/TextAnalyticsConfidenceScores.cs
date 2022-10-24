@@ -9,9 +9,9 @@ namespace Connector.Serializable.TextAnalytics
     {
         public TextAnalyticsConfidenceScores(float positive, float neutral, float negative)
         {
-            Positive = positive;
-            Neutral = neutral;
-            Negative = negative;
+            this.Positive = positive;
+            this.Neutral = neutral;
+            this.Negative = negative;
         }
 
         public float Positive { get; private set; }
