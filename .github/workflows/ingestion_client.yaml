@@ -2,7 +2,7 @@ name: Build Ingestion Client Binaries
 
 on:
   push:
-    branches: ['main', 'master', 'jvandervegte/UseRawJqOutput']
+    branches: ['main', 'master']
     paths: ['samples/ingestion/ingestion-client/**', '.github/workflows/ingestion_client.yaml']
 
 jobs:
