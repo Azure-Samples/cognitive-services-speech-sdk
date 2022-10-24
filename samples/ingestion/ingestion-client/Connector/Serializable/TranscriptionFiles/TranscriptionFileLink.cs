@@ -9,7 +9,7 @@ namespace Connector.Serializable.TranscriptionFiles
     {
         public TranscriptionFileLink(string contentUrl)
         {
-            ContentUrl = contentUrl;
+            this.ContentUrl = contentUrl;
         }
 
         public string ContentUrl { get; }
