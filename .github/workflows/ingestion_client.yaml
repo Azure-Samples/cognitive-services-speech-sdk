@@ -19,7 +19,7 @@ jobs:
         id: get_release_versions
         run: |
           set -u -e -o pipefail
-          version=$(cat ./samples/ingestion/ingestion-client/Setup/ArmTemplateBatch.json | jq .variables.version)
+          version=$(cat ./samples/ingestion/ingestion-client/Setup/ArmTemplateBatch.json | jq .variables.Version)
           versionRealtime=$(cat ./samples/ingestion/ingestion-client/Setup/ArmTemplateRealtime.json | jq .variables.Version)
           echo ::set-output name=version::$version
           echo "Batch template: ${version}"
