@@ -220,12 +220,15 @@ namespace Language
         /// <returns>True if all requests completed, else false.</returns>
         public async Task<bool> ConversationalRequestsCompleted(IEnumerable<AudioFileInfo> audioFileInfos)
         {
-            if (!IsConversationalPiiEnabled() || !audioFileInfos.Where(audioFileInfo => audioFileInfo.TextAnalyticsRequests.ConversationRequests != null).Any())
+            if (!IsConversationalPiiEnabled() || !audioFileInfos.Where(audioFileInfo => audioFileInfo.TextAnalyticsRequests?.ConversationRequests != null).Any())
             {
                 return true;
             }
 
-            var conversationRequests = audioFileInfos.SelectMany(audioFileInfo => audioFileInfo.TextAnalyticsRequests.ConversationRequests).Where(text => text.Status == TextAnalyticsRequestStatus.Running);
+            var conversationRequests = audioFileInfos
+                    .Where(audioFileInfo => audioFileInfo.TextAnalyticsRequests?.ConversationRequests != null)
+                    .SelectMany(audioFileInfo => audioFileInfo.TextAnalyticsRequests.ConversationRequests)
+                    .Where(text => text.Status == TextAnalyticsRequestStatus.Running);
 
             var runningJobsCount = 0;
 
