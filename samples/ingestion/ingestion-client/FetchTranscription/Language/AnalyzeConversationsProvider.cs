@@ -324,13 +324,8 @@ namespace Language
                 {
                     using var input = RequestContent.Create(JsonConvert.SerializeObject(request));
                     var operation = await ConversationAnalysisClient.AnalyzeConversationAsync(WaitUntil.Started, input).ConfigureAwait(false);
-
-                    var response = await operation.UpdateStatusAsync().ConfigureAwait(false);
-                    using JsonDocument result = JsonDocument.Parse(response.ContentStream);
-                    var jobResults = result.RootElement;
-                    var jobId = jobResults.GetProperty("jobId");
-                    Log.LogInformation($"Submitting TA job: {jobId}");
-                    jobs.Add(jobId.ToString());
+                    operation.GetRawResponse().Headers.TryGetValue("operation-location", out var operationLocation);
+                    var jobId = new Uri(operationLocation).AbsolutePath.Split("/").Last();
                 }
 
                 return (jobs, errors);
@@ -345,13 +340,6 @@ namespace Language
             {
                 errors.Add($"Conversation analytics request failed with error: {e.Message}");
             }
-#pragma warning disable CA1031 // Do not catch general exception types
-            catch (Exception e)
-#pragma warning restore CA1031 // Do not catch general exception types
-            {
-                errors.Add($"Conversation analytics request failed with error: {e.Message}");
-            }
-
             return (jobs, errors);
         }
 
@@ -395,12 +383,6 @@ namespace Language
 
             // do not catch throttling errors, rather throw and retry
             catch (RequestFailedException e) when (e.Status != 429)
-            {
-                errors.Add($"Conversation analysis request failed with error: {e.Message}");
-            }
-#pragma warning disable CA1031 // Do not catch general exception types
-            catch (Exception e)
-#pragma warning restore CA1031 // Do not catch general exception types
             {
                 errors.Add($"Conversation analysis request failed with error: {e.Message}");
             }
