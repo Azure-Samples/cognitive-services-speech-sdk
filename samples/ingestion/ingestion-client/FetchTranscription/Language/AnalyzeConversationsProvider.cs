@@ -326,6 +326,7 @@ namespace Language
                     var operation = await ConversationAnalysisClient.AnalyzeConversationAsync(WaitUntil.Started, input).ConfigureAwait(false);
                     operation.GetRawResponse().Headers.TryGetValue("operation-location", out var operationLocation);
                     var jobId = new Uri(operationLocation).AbsolutePath.Split("/").Last();
+                    jobs.Add(jobId);
                 }
 
                 return (jobs, errors);
@@ -340,6 +341,7 @@ namespace Language
             {
                 errors.Add($"Conversation analytics request failed with error: {e.Message}");
             }
+
             return (jobs, errors);
         }
 
