@@ -18,6 +18,7 @@ proguard-rules.pro text
 *.cpp text
 *.cs text
 *.csproj text
+*.editorconfig text
 *.entitlements text
 *.go text
 *.gradle text
@@ -27,6 +28,7 @@ proguard-rules.pro text
 *.java text
 *.js text
 *.json text
+*.kt text
 *.lst text
 *.m text
 *.mat text
@@ -40,6 +42,7 @@ proguard-rules.pro text
 *.prefs text
 *.pro text
 *.properties text
+*.props text
 *.py text
 *.ruleset text
 *.runsettings text
@@ -54,6 +57,7 @@ proguard-rules.pro text
 *.xaml text
 *.xib text
 *.xml text
+*.yaml text
 *.yml text
 
 
@@ -61,6 +65,7 @@ proguard-rules.pro text
 *.sh text eol=lf
 
 # Binary extensions:
+*.bacpac binary
 *.class binary
 *.bmp binary
 *.jar binary
@@ -72,3 +77,4 @@ proguard-rules.pro text
 *.table binary
 *.wav binary
 *.zip binary
+*.webp binary

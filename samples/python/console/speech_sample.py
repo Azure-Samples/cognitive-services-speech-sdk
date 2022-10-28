@@ -712,7 +712,7 @@ def speech_recognize_keyword_locally_from_microphone():
 
 
 def pronunciation_assessment_from_microphone():
-    """"
+    """
     Performs one-shot pronunciation assessment asynchronously with input from microphone.
     See more information at https://aka.ms/csspeech/pa
     """
@@ -739,11 +739,14 @@ def pronunciation_assessment_from_microphone():
     while True:
         # Receives reference text from console input.
         print('Enter reference text you want to assess, or enter empty text to exit.')
-        print('> ')
+        print('> ', end='')
 
         try:
             reference_text = input()
         except EOFError:
+            break
+
+        if not reference_text:
             break
 
         pronunciation_config.reference_text = reference_text

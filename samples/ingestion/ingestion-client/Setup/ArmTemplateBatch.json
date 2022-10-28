@@ -227,6 +227,7 @@
         }
     },
     "variables": {
+        "Version": "v1.0.0",
         "AudioInputContainer": "audio-input",
         "AudioProcessedContainer": "audio-processed",
         "ErrorFilesOutputContainer": "audio-failed",
@@ -270,7 +271,12 @@
         "ConversationPiiInferenceSource": "text",
         "IsAzureGovDeployment": "[or(equals(parameters('AzureSpeechServicesRegion'),'usgovarizona'), equals(parameters('AzureSpeechServicesRegion'),'usgovvirginia'))]",
         "AzureSpeechServicesEndpointUri": "[if(not(equals(parameters('CustomEndpoint'),'')), parameters('CustomEndpoint'), if(variables('IsAzureGovDeployment'), concat('https://', parameters('AzureSpeechServicesRegion') ,'.api.cognitive.microsoft.us/'), concat('https://', parameters('AzureSpeechServicesRegion') ,'.api.cognitive.microsoft.com/')))]",
-        "EndpointSuffix": "[if(variables('IsAzureGovDeployment'),'core.usgovcloudapi.net','core.windows.net')]"
+        "EndpointSuffix": "[if(variables('IsAzureGovDeployment'),'core.usgovcloudapi.net','core.windows.net')]",
+        "BinariesRoutePrefix": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/releases/download/ingestion-",
+        "StartTranscriptionByTimerBinary": "[concat(variables('BinariesRoutePrefix'), variables('Version'), '/StartTranscriptionByTimer.zip')]",
+        "StartTranscriptionByServiceBusBinary": "[concat(variables('BinariesRoutePrefix'), variables('Version'), '/StartTranscriptionByServiceBus.zip')]",
+        "FetchTranscriptionBinary": "[concat(variables('BinariesRoutePrefix'), variables('Version'), '/FetchTranscription.zip')]",
+        "DatabaseBacpac": "[concat(variables('BinariesRoutePrefix'), variables('Version'), '/IngestionClient.bacpac')]"
     },
     "resources": [
         {
@@ -441,10 +447,10 @@
                             "properties": {
                                 "operationMode": "Import",
                                 "storageKey": "?",
-                                "storageKeyType": "SharedAccessKey",
+                                "storageKeyType": "StorageAccessKey",
                                 "administratorLogin": "[parameters('SqlAdministratorLogin')]",
                                 "administratorLoginPassword": "[parameters('SqlAdministratorLoginPassword')]",
-                                "storageUri": "https://ingestionclientstorage.blob.core.windows.net/binaries/23082022.0/IngestionClient.bacpac"
+                                "storageUri": "[variables('DatabaseBacpac')]"
                             }
                         }
                     ]
@@ -868,7 +874,7 @@
                 "ErrorReportOutputContainer": "[variables('ErrorReportOutputContainer')]",
                 "FetchTranscriptionServiceBusConnectionString": "[listKeys(variables('AuthRuleFT'),'2015-08-01').primaryConnectionString]",
                 "FilesPerTranscriptionJob": "[variables('FilesPerTranscriptionJob')]",
-                "FUNCTIONS_EXTENSION_VERSION": "~3",
+                "FUNCTIONS_EXTENSION_VERSION": "~4",
                 "FUNCTIONS_WORKER_RUNTIME": "dotnet",
                 "AzureSpeechServicesEndpointUri": "[variables('AzureSpeechServicesEndpointUri')]",
                 "InitialPollingDelayInMinutes": "[variables('InitialPollingDelayInMinutes')]",
@@ -881,7 +887,7 @@
                 "PunctuationMode": "[parameters('PunctuationMode')]",
                 "RetryLimit": "[variables('RetryLimit')]",
                 "StartTranscriptionServiceBusConnectionString": "[listKeys(variables('AuthRuleCT'),'2015-08-01').primaryConnectionString]",
-                "WEBSITE_RUN_FROM_PACKAGE": "[if(variables('timerBasedExecution'),'https://ingestionclientstorage.blob.core.windows.net/binaries/23082022.0/StartTranscriptionByTimer.zip','https://ingestionclientstorage.blob.core.windows.net/binaries/23082022.0/StartTranscriptionByServiceBus.zip')]"
+                "WEBSITE_RUN_FROM_PACKAGE": "[if(variables('timerBasedExecution'), variables('StartTranscriptionByTimerBinary'), variables('StartTranscriptionByServiceBusBinary'))]"
             }
         },
         {
@@ -934,7 +940,7 @@
                 "ErrorFilesOutputContainer": "[variables('ErrorFilesOutputContainer')]",
                 "ErrorReportOutputContainer": "[variables('ErrorReportOutputContainer')]",
                 "FetchTranscriptionServiceBusConnectionString": "[listKeys(variables('AuthRuleFT'),'2015-08-01').primaryConnectionString]",
-                "FUNCTIONS_EXTENSION_VERSION": "~3",
+                "FUNCTIONS_EXTENSION_VERSION": "~4",
                 "FUNCTIONS_WORKER_RUNTIME": "dotnet",
                 "HtmlResultOutputContainer": "[variables('HtmlResultOutputContainer')]",
                 "InitialPollingDelayInMinutes": "[variables('InitialPollingDelayInMinutes')]",
@@ -945,7 +951,7 @@
                 "TextAnalyticsKey": "[concat('@Microsoft.KeyVault(VaultName=', variables('KeyVaultName'), ';SecretName=', variables('TextAnalyticsKeySecretName'), ')')]",
                 "TextAnalyticsRegion": "[parameters('TextAnalyticsRegion')]",
                 "UseSqlDatabase": "[variables('UseSqlDatabase')]",
-                "WEBSITE_RUN_FROM_PACKAGE": "https://ingestionclientstorage.blob.core.windows.net/binaries/23082022.0/FetchTranscription.zip",
+                "WEBSITE_RUN_FROM_PACKAGE": "[variables('FetchTranscriptionBinary')]",
                 "CreateConsolidatedOutputFiles": "[variables('CreateConsolidatedOutputFiles')]",
                 "ConsolidatedFilesOutputContainer": "[variables('ConsolidatedFilesOutputContainer')]",
                 "CreateAudioProcessedContainer": "[variables('CreateAudioProcessedContainer')]",

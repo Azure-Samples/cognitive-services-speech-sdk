@@ -141,7 +141,7 @@ namespace FetchTranscriptionFunction
             return TimeSpan.FromMinutes(updatedDelay);
         }
 
-        private static async Task ProcessFailedTranscriptionAsync(string transcriptionLocation, string subscriptionKey, TranscriptionStartedMessage serviceBusMessage, Transcription transcription, string jobName, ILogger log)
+        private static async Task ProcessFailedTranscriptionAsync(string transcriptionLocation, string subscriptionKey, TranscriptionStartedMessage transcriptionStartedMessage, Transcription transcription, string jobName, ILogger log)
         {
             var safeErrorCode = transcription?.Properties?.Error?.Code ?? "unknown";
             var safeErrorMessage = transcription?.Properties?.Error?.Message ?? "unknown";
@@ -164,14 +164,14 @@ namespace FetchTranscriptionFunction
 
             var retryAudioFile = IsRetryableError(safeErrorCode);
 
-            foreach (var audio in serviceBusMessage.AudioFileInfos)
+            foreach (var audio in transcriptionStartedMessage.AudioFileInfos)
             {
                 var fileName = StorageConnector.GetFileNameFromUri(new Uri(audio.FileUrl));
 
                 if (retryAudioFile && audio.RetryCount < FetchTranscriptionEnvironmentVariables.RetryLimit)
                 {
                     log.LogInformation($"Retrying transcription with name {fileName} - retry count: {audio.RetryCount}");
-                    var sbMessage = new Connector.ServiceBusMessage
+                    var serviceBusMessage = new Connector.ServiceBusMessage
                     {
                         Data = new Data
                         {
@@ -181,7 +181,7 @@ namespace FetchTranscriptionFunction
                         RetryCount = audio.RetryCount + 1
                     };
 
-                    var audioFileMessage = new Azure.Messaging.ServiceBus.ServiceBusMessage(JsonConvert.SerializeObject(sbMessage));
+                    var audioFileMessage = new Azure.Messaging.ServiceBus.ServiceBusMessage(JsonConvert.SerializeObject(serviceBusMessage));
                     await ServiceBusUtilities.SendServiceBusMessageAsync(StartServiceBusSender, audioFileMessage, log, TimeSpan.FromMinutes(1)).ConfigureAwait(false);
                 }
                 else
@@ -247,7 +247,7 @@ namespace FetchTranscriptionFunction
 
                 if (string.IsNullOrEmpty(transcriptionResult.Source))
                 {
-                    var errorMessage = $"Transcription source is unknown, skipping evaluation.";
+                    var errorMessage = "Transcription source is unknown, skipping evaluation.";
                     log.LogError(errorMessage);
 
                     generalErrorsStringBuilder.AppendLine(errorMessage);
@@ -256,6 +256,14 @@ namespace FetchTranscriptionFunction
 
                 var audioFileName = StorageConnector.GetFileNameFromUri(new Uri(transcriptionResult.Source));
                 var audioFileInfo = serviceBusMessage.AudioFileInfos.Where(a => a.FileName == audioFileName).First();
+
+                if (speechTranscriptMappings.ContainsKey(audioFileInfo))
+                {
+                    var errorMessage = $"Duplicate audio file in job, skipping: {audioFileInfo.FileName}.";
+                    log.LogError(errorMessage);
+                    generalErrorsStringBuilder.AppendLine(errorMessage);
+                    continue;
+                }
 
                 speechTranscriptMappings.Add(audioFileInfo, transcriptionResult);
             }
@@ -286,19 +294,19 @@ namespace FetchTranscriptionFunction
 
                         var textAnalyticsErrors = new List<string>();
 
-                        if (audioFileInfo.TextAnalyticsRequests.AudioLevelRequests.Any())
+                        if (audioFileInfo.TextAnalyticsRequests.AudioLevelRequests?.Any() == true)
                         {
                             var audioLevelErrors = await textAnalyticsProvider.AddAudioLevelEntitiesAsync(audioFileInfo.TextAnalyticsRequests.AudioLevelRequests.Select(request => request.Id), speechTranscript).ConfigureAwait(false);
                             textAnalyticsErrors.AddRange(audioLevelErrors);
                         }
 
-                        if (audioFileInfo.TextAnalyticsRequests.UtteranceLevelRequests.Any())
+                        if (audioFileInfo.TextAnalyticsRequests.UtteranceLevelRequests?.Any() == true)
                         {
                             var utteranceLevelErrors = await textAnalyticsProvider.AddUtteranceLevelEntitiesAsync(audioFileInfo.TextAnalyticsRequests.UtteranceLevelRequests.Select(request => request.Id), speechTranscript).ConfigureAwait(false);
                             textAnalyticsErrors.AddRange(utteranceLevelErrors);
                         }
 
-                        if (audioFileInfo.TextAnalyticsRequests.ConversationRequests.Any())
+                        if (audioFileInfo.TextAnalyticsRequests.ConversationRequests?.Any() == true)
                         {
                             var conversationalAnalyticsErrors = await conversationsAnalysisProvider.AddConversationalEntitiesAsync(audioFileInfo.TextAnalyticsRequests.ConversationRequests.Select(request => request.Id), speechTranscript).ConfigureAwait(false);
                             textAnalyticsErrors.AddRange(conversationalAnalyticsErrors);
@@ -369,6 +377,7 @@ namespace FetchTranscriptionFunction
             foreach (var speechTranscriptMapping in speechTranscriptMappings)
             {
                 var speechTranscript = speechTranscriptMapping.Value;
+
                 var audioFileInfo = speechTranscriptMapping.Key;
                 var fileName = audioFileInfo.FileName;
 
@@ -421,9 +430,9 @@ namespace FetchTranscriptionFunction
 
                     var containsMultipleTranscriptions = resultFiles.Skip(1).Any();
                     var jobId = containsMultipleTranscriptions ? Guid.NewGuid() : new Guid(transcriptionLocation.Split('/').LastOrDefault());
-                    var dbConnectionString = FetchTranscriptionEnvironmentVariables.DatabaseConnectionString;
-                    using var dbConnector = new DatabaseConnector(log, dbConnectionString);
-                    await dbConnector.StoreTranscriptionAsync(
+                    var databaseConnectionString = FetchTranscriptionEnvironmentVariables.DatabaseConnectionString;
+                    using var databaseConnector = new DatabaseConnector(log, databaseConnectionString);
+                    await databaseConnector.StoreTranscriptionAsync(
                         jobId,
                         serviceBusMessage.Locale,
                         string.IsNullOrEmpty(fileName) ? jobName : fileName,

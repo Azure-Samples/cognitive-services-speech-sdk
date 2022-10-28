@@ -100,7 +100,7 @@ namespace MicrosoftSpeechSDKSamples.UwpSpeechRecognitionSample
         private TaskCompletionSource<int> stopRecognitionTaskCompletionSource;
         private async void SpeechRecognitionFromFile_ButtonClicked()
         {
-            stopRecognitionTaskCompletionSource = new TaskCompletionSource<int>();
+            stopRecognitionTaskCompletionSource = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
             if (!AreKeysValid())
             {
                 NotifyUser("Subscription Key is missing!", NotifyType.ErrorMessage);
@@ -182,7 +182,7 @@ namespace MicrosoftSpeechSDKSamples.UwpSpeechRecognitionSample
         }
         private async void SpeechRecognitionFromStream_ButtonClicked(object sender, RoutedEventArgs e)
         {
-            stopRecognitionTaskCompletionSource = new TaskCompletionSource<int>();
+            stopRecognitionTaskCompletionSource = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
             AudioConfig audioInput = null;
             BinaryReader reader = null;
             Stream stream = null;
