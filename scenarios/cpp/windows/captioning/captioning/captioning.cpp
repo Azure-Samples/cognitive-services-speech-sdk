@@ -56,7 +56,7 @@ private:
     std::shared_ptr<AudioStreamFormat> m_format = NULL;
     std::shared_ptr<BinaryFileReader> m_callback = NULL;
     std::shared_ptr<PullAudioInputStream> m_stream = NULL;
-    int m_srtSequenceNumber = 0;
+    int m_srtSequenceNumber = 1;
     std::optional<Caption> m_previousCaption = std::nullopt;
     std::optional<Timestamp> m_previousEndTime = std::nullopt;
     bool m_previousResultIsRecognized = false;
@@ -93,7 +93,7 @@ private:
         std::string retval;
         if (m_userConfig->useSubRipTextCaptionFormat)
         {
-            retval += caption.sequence + "\n";
+            retval += std::to_string(caption.sequence) + "\n";
         }
         retval += GetTimestamp(caption.begin, caption.end) + "\n";
         retval += caption.text + "\n\n";
@@ -454,10 +454,10 @@ int main(int argc, char* argv[])
 "                                     Minimum is 20. Default is 37 (30 for Chinese).\n"
 "    --lines LINES                    Set the number of lines for a caption to LINES.\n"
 "                                     Minimum is 1. Default is 2.\n"
-"    --delay SECONDS                  How many SECONDS to delay the appearance of each caption.\n"
-"                                     Minimum is 0.0. Default is 1.0.\n"
-"    --remainTime SECONDS             How many SECONDS a caption should remain on screen if it is not replaced by another.\n"
-"                                     Minimum is 0.0. Default is 1.0.\n\n"
+"    --delay MILLISECONDS             How many MILLISECONDS to delay the appearance of each caption.\n"
+"                                     Minimum is 0. Default is 1000.\n"
+"    --remainTime MILLISECONDS        How many MILLISECONDS a caption should remain on screen if it is not replaced by another.\n"
+"                                     Minimum is 0. Default is 1000.\n\n"
 "    --quiet                          Suppress console output, except errors.\n"
 "    --profanity OPTION               Valid values: raw, remove, mask\n"
 "    --threshold NUMBER               Set stable partial result threshold.\n"

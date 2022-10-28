@@ -89,21 +89,21 @@ def user_config_from_args(usage : str) -> helper.Read_Only_Dict :
 
     captioning_mode = CaptioningMode.REALTIME if cmd_option_exists("--realtime") and not cmd_option_exists("--offline") else CaptioningMode.OFFLINE
 
-    td_remain_time = timedelta(seconds=1.0)
+    td_remain_time = timedelta(milliseconds=1000)
     s_remain_time = get_cmd_option("--remainTime")
     if s_remain_time is not None :
-        flt_remain_time = float(s_remain_time)
-        if flt_remain_time < 0.0 :
-            flt_remain_time = 1.0
-        td_remain_time = timedelta(seconds=flt_remain_time)
+        int_remain_time = float(s_remain_time)
+        if int_remain_time < 0 :
+            int_remain_time = 1000
+        td_remain_time = timedelta(milliseconds=int_remain_time)
 
-    td_delay = timedelta(seconds=1.0)
+    td_delay = timedelta(milliseconds=1000)
     s_delay = get_cmd_option("--delay")
     if s_delay is not None :
-        flt_delay = float(s_delay)
-        if flt_delay < 0.0 :
-            flt_delay = 1.0
-        td_delay = timedelta(seconds=flt_delay)
+        int_delay = float(s_delay)
+        if int_delay < 0 :
+            int_delay = 1000
+        td_delay = timedelta(milliseconds=int_delay)
     
     int_max_line_length = helper.DEFAULT_MAX_LINE_LENGTH_SBCS
     s_max_line_length = get_cmd_option("--maxLineLength")

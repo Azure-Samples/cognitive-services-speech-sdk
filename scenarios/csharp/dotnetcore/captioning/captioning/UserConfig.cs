@@ -45,9 +45,9 @@ namespace Captioning
         readonly public bool suppressConsoleOutput = false;
         /// The captioning mode. Default is offline.
         readonly public CaptioningMode captioningMode = CaptioningMode.Offline;
-        /// How long (in seconds) a caption should remain on screen. Default is 1.0.
+        /// How long (in milliseconds) a caption should remain on screen. Default is 1000.
         readonly public TimeSpan remainTime;
-        /// How long (in seconds) to delay all caption timestamps. Default is 1.0.
+        /// How long (in milliseconds) to delay all caption timestamps. Default is 1000.
         readonly public TimeSpan delay;
         /// Output captions in SubRip Text format (default is WebVTT format).
         readonly public bool useSubRipTextCaptionFormat = false;
@@ -203,27 +203,27 @@ namespace Captioning
             CaptioningMode captioningMode = CmdOptionExists(args, "--realTime") && !CmdOptionExists(args, "--offline") ? CaptioningMode.RealTime : CaptioningMode.Offline;
             
             string? strRemainTime = GetCmdOption(args, "--remainTime");
-            TimeSpan timeSpanRemainTime = TimeSpan.FromSeconds(1.0);
+            TimeSpan timeSpanRemainTime = TimeSpan.FromMilliseconds(1000);
             if (null != strRemainTime)
             {
-                double dblRemainTime = Double.Parse(strRemainTime);
-                if (dblRemainTime < 0.0)
+                int intRemainTime = Int32.Parse(strRemainTime);
+                if (intRemainTime < 0)
                 {
-                    dblRemainTime = 1.0;
+                    intRemainTime = 1000;
                 }
-                timeSpanRemainTime = TimeSpan.FromSeconds(dblRemainTime);
+                timeSpanRemainTime = TimeSpan.FromMilliseconds(intRemainTime);
             }
             
             string? strDelay = GetCmdOption(args, "--delay");
-            TimeSpan timeSpanDelay = TimeSpan.FromSeconds(1.0);
+            TimeSpan timeSpanDelay = TimeSpan.FromMilliseconds(1000);
             if (null != strDelay)
             {
-                double dblDelay = Double.Parse(strDelay);
-                if (dblDelay < 0.0)
+                int intDelay = Int32.Parse(strDelay);
+                if (intDelay < 0)
                 {
-                    dblDelay = 1.0;
+                    intDelay = 1000;
                 }
-                timeSpanDelay = TimeSpan.FromSeconds(dblDelay);
+                timeSpanDelay = TimeSpan.FromMilliseconds(intDelay);
             }
             
             string? strMaxLineLength = GetCmdOption(args, "--maxLineLength");
