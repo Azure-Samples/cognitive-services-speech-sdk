@@ -134,11 +134,11 @@ Choose the scenarios that you are interested in.
 
 Navigate to the folder containing this sample and run
 ```sh
-dotnet samples/bin/Debug/netcoreapp6.0/samples.dll
+dotnet samples/bin/Debug/net6.0/samples.dll
 ```
 or
 ```sh
-dotnet samples/bin/Release/netcoreapp6.0/samples.dll
+dotnet samples/bin/Release/net6.0/samples.dll
 ```
 according to the build configuration that was used.
 
