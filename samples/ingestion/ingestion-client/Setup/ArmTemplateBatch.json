@@ -435,23 +435,6 @@
                             "dependsOn": [
                                 "[variables('DatabaseName')]"
                             ]
-                        },
-                        {
-                            "name": "Import",
-                            "condition": "[variables('UseSqlDatabase')]",
-                            "type": "extensions",
-                            "apiVersion": "2014-04-01",
-                            "dependsOn": [
-                                "[resourceId('Microsoft.Sql/servers/databases', variables('SqlServerName'), variables('DatabaseName'))]"
-                            ],
-                            "properties": {
-                                "operationMode": "Import",
-                                "storageKey": "?",
-                                "storageKeyType": "StorageAccessKey",
-                                "administratorLogin": "[parameters('SqlAdministratorLogin')]",
-                                "administratorLoginPassword": "[parameters('SqlAdministratorLoginPassword')]",
-                                "storageUri": "[variables('DatabaseBacpac')]"
-                            }
                         }
                     ]
                 },
