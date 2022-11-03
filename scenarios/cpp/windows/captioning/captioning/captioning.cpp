@@ -259,6 +259,7 @@ private:
         }
         
         speechConfig->SetProperty(PropertyId::SpeechServiceResponse_PostProcessingOption, "TrueText");
+        speechConfig->SetSpeechRecognitionLanguage(m_userConfig->language);
         
         return speechConfig;
     }
