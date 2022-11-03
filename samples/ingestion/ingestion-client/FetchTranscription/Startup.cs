@@ -3,6 +3,10 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 
+using Microsoft.Azure.Functions.Extensions.DependencyInjection;
+
+[assembly: FunctionsStartup(typeof(FetchTranscription.Startup))]
+
 namespace FetchTranscription
 {
     using System;

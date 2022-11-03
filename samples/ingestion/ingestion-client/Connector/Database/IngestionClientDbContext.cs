@@ -10,14 +10,19 @@ namespace Connector.Database
 
     public class IngestionClientDbContext : DbContext
     {
-        public virtual DbSet<Transcriptions> Transcriptions { get; set; }
+        public IngestionClientDbContext(DbContextOptions<IngestionClientDbContext> options)
+            : base(options)
+        {
+        }
 
-        public virtual DbSet<CombinedRecognizedPhrases> CombinedRecognizedPhrases { get; set; }
+        public DbSet<Transcriptions> Transcriptions { get; set; }
 
-        public virtual DbSet<NBests> NBests { get; set; }
+        public DbSet<CombinedRecognizedPhrases> CombinedRecognizedPhrases { get; set; }
 
-        public virtual DbSet<RecognizedPhrases> RecognizedPhrases { get; set; }
+        public DbSet<NBests> NBests { get; set; }
 
-        public virtual DbSet<Words> Words { get; set; }
+        public DbSet<RecognizedPhrases> RecognizedPhrases { get; set; }
+
+        public DbSet<Words> Words { get; set; }
     }
 }
