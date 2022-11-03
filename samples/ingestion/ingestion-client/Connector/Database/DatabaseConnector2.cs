@@ -7,14 +7,13 @@ namespace Connector.Database
 {
     using System;
     using System.Collections.Generic;
-    using System.Data.SqlClient;
     using System.Globalization;
     using System.Linq;
-    using System.Threading.Channels;
     using System.Threading.Tasks;
 
     using Connector.Database.Models;
 
+    using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Logging;
 
     public class DatabaseConnector2
@@ -38,18 +37,17 @@ namespace Connector.Database
         {
             _ = speechTranscript ?? throw new ArgumentNullException(nameof(speechTranscript));
 
-            var transcriptions = new Transcriptions(
-                id: transcriptionId,
-                locale: locale,
-                name: fileName,
-                source: speechTranscript.Source,
-                timestamp: DateTime.Parse(speechTranscript.Timestamp, CultureInfo.InvariantCulture),
-                duration: speechTranscript.Duration ?? string.Empty,
-                durationInSeconds: TimeSpan.FromTicks(speechTranscript.DurationInTicks).TotalSeconds,
-                numberOfChannels: speechTranscript.CombinedRecognizedPhrases.Count(),
-                approximateCost: approximateCost,
-                combinedRecognizedPhrases: null);
-
+            var transcription = new Transcriptions(
+            id: transcriptionId,
+            locale: locale,
+            name: fileName,
+            source: speechTranscript.Source,
+            timestamp: DateTime.Parse(speechTranscript.Timestamp, CultureInfo.InvariantCulture),
+            duration: speechTranscript.Duration ?? string.Empty,
+            durationInSeconds: TimeSpan.FromTicks(speechTranscript.DurationInTicks).TotalSeconds,
+            numberOfChannels: speechTranscript.CombinedRecognizedPhrases.Count(),
+            approximateCost: approximateCost);
+            var combinedRecognizedPhrases = new List<CombinedRecognizedPhrases>();
 
             var phrasesByChannel = speechTranscript.RecognizedPhrases.GroupBy(t => t.Channel);
 
@@ -59,7 +57,7 @@ namespace Connector.Database
 
                 var combinedPhrase = speechTranscript.CombinedRecognizedPhrases.Where(t => t.Channel == channel).FirstOrDefault();
 
-                var combinedRecognizedPhrases = new CombinedRecognizedPhrases(
+                var combinedRecognizedPhrase = new CombinedRecognizedPhrases(
                     id: Guid.NewGuid(),
                     channel: channel,
                     lexical: combinedPhrase?.Lexical ?? string.Empty,
@@ -68,8 +66,9 @@ namespace Connector.Database
                     display: combinedPhrase?.Lexical ?? string.Empty,
                     sentimentNegative: combinedPhrase?.Sentiment?.Negative ?? 0d,
                     sentimentNeutral: combinedPhrase?.Sentiment?.Neutral ?? 0d,
-                    sentimentPositive: combinedPhrase?.Sentiment?.Positive ?? 0d,
-                    recognizedPhrases: null);
+                    sentimentPositive: combinedPhrase?.Sentiment?.Positive ?? 0d);
+
+                var recognizedPhrases = new List<RecognizedPhrases>();
 
                 var orderedPhrases = phrases.OrderBy(p => p.OffsetInTicks);
                 var previousEndInMs = 0.0;
@@ -84,45 +83,48 @@ namespace Connector.Database
                         channel: phrase.Channel,
                         offset: phrase.Offset,
                         duration: phrase.Duration,
-                        
-
-
-
-                    var phraseId = Guid.NewGuid();
-                    var query = "INSERT INTO dbo.RecognizedPhrases (ID, CombinedRecognizedPhraseID, RecognitionStatus, Speaker, Channel, Offset, Duration, SilenceBetweenCurrentAndPreviousSegmentInMs)" +
-                        " VALUES (@id, @combinedRecognizedPhraseID, @recognitionStatus, @speaker, @channel, @offset, @duration, @silenceBetweenCurrentAndPreviousSegmentInMs)";
-
-                    using var command = new SqlCommand(query, this.connection);
-                    command.Parameters.AddWithValue("@id", phraseId);
-                    command.Parameters.AddWithValue("@combinedRecognizedPhraseID", combinedPhraseID);
-                    command.Parameters.AddWithValue("@recognitionStatus", recognizedPhrase.RecognitionStatus);
-                    command.Parameters.AddWithValue("@speaker", recognizedPhrase.Speaker);
-                    command.Parameters.AddWithValue("@channel", recognizedPhrase.Channel);
-                    command.Parameters.AddWithValue("@offset", recognizedPhrase.Offset);
-                    command.Parameters.AddWithValue("@duration", recognizedPhrase.Duration);
-                    command.Parameters.AddWithValue("@silenceBetweenCurrentAndPreviousSegmentInMs", silenceBetweenCurrentAndPreviousSegmentInMs);
-
-                    var result = await command.ExecuteNonQueryAsync().ConfigureAwait(false);
-
-                    if (result < 0)
-                    {
-                        this.logger.LogInformation("Did not store phrase in Db, command did not update table");
-                    }
-                    else
-                    {
-                        foreach (var nbestResult in recognizedPhrase.NBest)
-                        {
-                            await this.StoreNBestAsync(phraseId, nbestResult).ConfigureAwait(false);
-                        }
-                    }
-
+                        silenceBetweenCurrentAndPreviousSegmentInMs: silenceBetweenCurrentAndPreviousSegmentInMs,
+                        nBests: null);
 
                     previousEndInMs = (TimeSpan.FromTicks(phrase.OffsetInTicks) + TimeSpan.FromTicks(phrase.DurationInTicks)).TotalMilliseconds;
+
+                    foreach (var nbestResult in phrase.NBest)
+                    {
+                        var nbests = new NBests(
+                            id: Guid.NewGuid(),
+                            confidence: nbestResult.Confidence,
+                            lexical: nbestResult.Lexical,
+                            itn: nbestResult.ITN,
+                            maskedItn: nbestResult.MaskedITN,
+                            display: nbestResult.Display,
+                            sentimentNegative: nbestResult.Sentiment?.Negative ?? 0d,
+                            sentimentNeutral: nbestResult.Sentiment?.Neutral ?? 0d,
+                            sentimentPositive: nbestResult.Sentiment?.Positive ?? 0d,
+                            words: null);
+
+                        if (nbests.Words == null)
+                        {
+                            foreach (var word in nbests.Words)
+                            {
+                                var words = new Words(
+                                    id: Guid.NewGuid(),
+                                    word: word.Word,
+                                    offset: word.Offset,
+                                    duration: word.Duration,
+                                    confidence: word.Confidence);
+
+                                await this.StoreWordsAsync(nbestID, word).ConfigureAwait(false);
+                            }
+                        }
+                    }
                 }
+
+                combinedRecognizedPhrases.Add(combinedRecognizedPhrase);
             }
 
+            transcription = transcription.WithCombinedRecognizedPhrases(combinedRecognizedPhrases);
 
-           
+
 
 
         }

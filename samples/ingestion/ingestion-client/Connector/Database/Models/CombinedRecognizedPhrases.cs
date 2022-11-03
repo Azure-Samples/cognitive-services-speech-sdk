@@ -12,7 +12,7 @@ namespace Connector.Database.Models
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2227:Collection properties should be read only", Justification = "Used by Entity Framework")]
     public class CombinedRecognizedPhrases : DbModelBase
     {
-        public CombinedRecognizedPhrases(Guid id, int channel, string lexical, string itn, string maskedItn, string display, double sentimentNegative, double sentimentNeutral, double sentimentPositive, ICollection<RecognizedPhrases> recognizedPhrases)
+        public CombinedRecognizedPhrases(Guid id, int channel, string lexical, string itn, string maskedItn, string display, double sentimentNegative, double sentimentNeutral, double sentimentPositive)
         {
             this.Id = id;
             this.Channel = channel;
@@ -23,7 +23,6 @@ namespace Connector.Database.Models
             this.SentimentNegative = sentimentNegative;
             this.SentimentNeutral = sentimentNeutral;
             this.SentimentPositive = sentimentPositive;
-            this.RecognizedPhrases = recognizedPhrases;
         }
 
         [Key]
@@ -46,5 +45,11 @@ namespace Connector.Database.Models
         public double SentimentPositive { get; private set; }
 
         public ICollection<RecognizedPhrases> RecognizedPhrases { get; set; }
+
+        public CombinedRecognizedPhrases WithRecognizedPhrases(ICollection<RecognizedPhrases> recognizedPhrases)
+        {
+            this.RecognizedPhrases = recognizedPhrases;
+            return this;
+        }
     }
 }

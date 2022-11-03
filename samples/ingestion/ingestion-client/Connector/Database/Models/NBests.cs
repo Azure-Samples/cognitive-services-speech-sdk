@@ -12,7 +12,7 @@ namespace Connector.Database.Models
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2227:Collection properties should be read only", Justification = "Used by Entity Framework")]
     public class NBests : DbModelBase
     {
-        public NBests(Guid id, float confidence, string lexical, string itn, string maskedItn, string display, float sentimentNegative, float sentimentNeutral, float sentimentPositive, ICollection<Words> words)
+        public NBests(Guid id, double confidence, string lexical, string itn, string maskedItn, string display, double sentimentNegative, double sentimentNeutral, double sentimentPositive)
         {
             this.Id = id;
             this.Confidence = confidence;
@@ -23,13 +23,12 @@ namespace Connector.Database.Models
             this.SentimentNegative = sentimentNegative;
             this.SentimentNeutral = sentimentNeutral;
             this.SentimentPositive = sentimentPositive;
-            this.Words = words;
         }
 
         [Key]
         public Guid Id { get; set; }
 
-        public float Confidence { get; private set; }
+        public double Confidence { get; private set; }
 
         public string Lexical { get; private set; }
 
@@ -39,12 +38,18 @@ namespace Connector.Database.Models
 
         public string Display { get; private set; }
 
-        public float SentimentNegative { get; private set; }
+        public double SentimentNegative { get; private set; }
 
-        public float SentimentNeutral { get; private set; }
+        public double SentimentNeutral { get; private set; }
 
-        public float SentimentPositive { get; private set; }
+        public double SentimentPositive { get; private set; }
 
         public ICollection<Words> Words { get; set; }
+
+        public NBests WithWords(ICollection<Words> words)
+        {
+            this.Words = words;
+            return this;
+        }
     }
 }

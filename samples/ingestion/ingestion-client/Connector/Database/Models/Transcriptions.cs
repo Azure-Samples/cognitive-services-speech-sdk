@@ -12,7 +12,7 @@ namespace Connector.Database.Models
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2227:Collection properties should be read only", Justification = "Used by Entity Framework")]
     public class Transcriptions : DbModelBase
     {
-        public Transcriptions(Guid id, string locale, string name, string source, DateTime timestamp, string duration, double durationInSeconds, int numberOfChannels, float approximateCost, ICollection<CombinedRecognizedPhrases> combinedRecognizedPhrases)
+        public Transcriptions(Guid id, string locale, string name, string source, DateTime timestamp, string duration, double durationInSeconds, int numberOfChannels, float approximateCost)
         {
             this.Id = id;
             this.Locale = locale;
@@ -23,7 +23,6 @@ namespace Connector.Database.Models
             this.DurationInSeconds = durationInSeconds;
             this.NumberOfChannels = numberOfChannels;
             this.ApproximateCost = approximateCost;
-            this.CombinedRecognizedPhrases = combinedRecognizedPhrases;
         }
 
         [Key]
@@ -50,5 +49,11 @@ namespace Connector.Database.Models
         public float ApproximateCost { get; private set; }
 
         public ICollection<CombinedRecognizedPhrases> CombinedRecognizedPhrases { get; set; }
+
+        public Transcriptions WithCombinedRecognizedPhrases(ICollection<CombinedRecognizedPhrases> combinedRecognizedPhrases)
+        {
+            this.CombinedRecognizedPhrases = combinedRecognizedPhrases;
+            return this;
+        }
     }
 }
