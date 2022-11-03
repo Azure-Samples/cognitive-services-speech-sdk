@@ -325,7 +325,7 @@ namespace TextAnalytics
             var chunkedDocuments = new List<List<TextDocumentInput>>();
             var totalDocuments = documents.Count();
 
-            for (int i = 0; i < totalDocuments; i += MaxRecordsPerRequest)
+            for (var i = 0; i < totalDocuments; i += MaxRecordsPerRequest)
             {
                 var chunk = documents.Skip(i).Take(Math.Min(MaxRecordsPerRequest, totalDocuments - i)).ToList();
                 chunkedDocuments.Add(chunk);
@@ -345,7 +345,7 @@ namespace TextAnalytics
 
             var results = await Task.WhenAll(tasks).ConfigureAwait(false);
 
-            var jobIds = results.Select(t => t.jobId);
+            var jobIds = results.Select(t => t.jobId).Where(t => !string.IsNullOrEmpty(t));
             var errors = results.SelectMany(t => t.errors);
 
             return (jobIds, errors);
