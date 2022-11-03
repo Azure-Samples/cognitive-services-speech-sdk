@@ -24,8 +24,12 @@ namespace FetchTranscription
         public override void Configure(IFunctionsHostBuilder builder)
         {
             _ = builder ?? throw new ArgumentNullException(nameof(builder));
-            builder.Services.AddDbContext<IngestionClientDbContext>(
-              options => SqlServerDbContextOptionsExtensions.UseSqlServer(options, FetchTranscriptionEnvironmentVariables.DatabaseConnectionString));
+
+            if (FetchTranscriptionEnvironmentVariables.UseSqlDatabase)
+            {
+                builder.Services.AddDbContext<IngestionClientDbContext>(
+                  options => SqlServerDbContextOptionsExtensions.UseSqlServer(options, FetchTranscriptionEnvironmentVariables.DatabaseConnectionString));
+            }
         }
     }
 }

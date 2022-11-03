@@ -12,6 +12,20 @@ namespace Connector.Database.Models
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2227:Collection properties should be read only", Justification = "Used by Entity Framework")]
     public class NBests : DbModelBase
     {
+        public NBests(Guid id, float confidence, string lexical, string itn, string maskedItn, string display, float sentimentNegative, float sentimentNeutral, float sentimentPositive, ICollection<Words> words)
+        {
+            this.Id = id;
+            this.Confidence = confidence;
+            this.Lexical = lexical;
+            this.Itn = itn;
+            this.MaskedItn = maskedItn;
+            this.Display = display;
+            this.SentimentNegative = sentimentNegative;
+            this.SentimentNeutral = sentimentNeutral;
+            this.SentimentPositive = sentimentPositive;
+            this.Words = words;
+        }
+
         [Key]
         public Guid Id { get; set; }
 

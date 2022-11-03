@@ -10,6 +10,15 @@ namespace Connector.Database.Models
 
     public class Words : DbModelBase
     {
+        public Words(Guid id, string word, string offset, string duration, float confidence)
+        {
+            this.Id = id;
+            this.Word = word;
+            this.Offset = offset;
+            this.Duration = duration;
+            this.Confidence = confidence;
+        }
+
         [Key]
         public Guid Id { get; set; }
 

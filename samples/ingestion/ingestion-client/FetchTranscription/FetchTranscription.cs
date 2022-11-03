@@ -8,21 +8,12 @@ namespace FetchTranscriptionFunction
     using System;
     using System.Threading.Tasks;
     using Connector;
-    using Connector.Database;
 
     using Microsoft.Azure.WebJobs;
-    using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Logging;
 
-    public class FetchTranscription
+    public static class FetchTranscription
     {
-        public FetchTranscription(IngestionClientDbContext ingestionClientDbContext)
-        {
-            ingestionClientDbContext = ingestionClientDbContext ?? throw new ArgumentNullException(nameof(ingestionClientDbContext));
-            ingestionClientDbContext.Database.EnsureCreated();
-            ingestionClientDbContext.Database.Migrate();
-        }
-
         [FunctionName("FetchTranscription")]
         public static async Task Run([ServiceBusTrigger("fetch_transcription_queue", Connection = "AzureServiceBus")]string message, ILogger log)
         {
