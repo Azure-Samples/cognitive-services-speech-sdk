@@ -106,10 +106,10 @@ Sample settings:
   nuget restore samples.sln
   for nupkg in packages/Microsoft.*/*.nupkg ; do unzip -o $nupkg -d SpeechSDK ; done
   ```
-* Edit `Makefile` in the same folder, and update
+* Edit `Makefile` in the same folder and update
   * SPEECHSDK_ROOT to the full path of the `SpeechSDK` folder that was created in the previous step.
   * TARGET_PLATFORM, in case the default value does not match your platform (see `SpeechSDK/runtimes` created in the previous step).
-* Run `make`.
+* Run `make`
 * If there are no errors, set `LD_LIBRARY_PATH` (Linux) or `DYLD_LIBRARY_PATH` (macOS) according to instructions in `make` output.
 
 ## Run the sample
@@ -161,6 +161,20 @@ set CLOUD_SPEECH_SERVICE_REGION=westus
 export CLOUD_SPEECH_SERVICE_REGION="westus"
 ```
 **Note:** On Linux and macOS, use quotation marks around the values of environment variables set on the command line as shown in the example. Otherwise strings with spaces (like embedded speech model/voice names) will be cut short.
+
+## Remarks
+
+For a new project from scratch, install the following Speech SDK packages as needed:
+* [Microsoft.CognitiveServices.Speech](https://www.nuget.org/packages/Microsoft.CognitiveServices.Speech)
+  * mandatory for using the Speech SDK
+* [Microsoft.CognitiveServices.Speech.Extension.Embedded.SR](https://www.nuget.org/packages/Microsoft.CognitiveServices.Speech.Extension.Embedded.SR)
+  * required for embedded speech recognition
+* [Microsoft.CognitiveServices.Speech.Extension.Embedded.TTS](https://www.nuget.org/packages/Microsoft.CognitiveServices.Speech.Extension.Embedded.TTS)
+  * required for embedded speech synthesis
+* [Microsoft.CognitiveServices.Speech.Extension.ONNX.Runtime](https://www.nuget.org/packages/Microsoft.CognitiveServices.Speech.Extension.ONNX.Runtime)
+  * required by embedded speech
+* [Microsoft.CognitiveServices.Speech.Extension.Telemetry](https://www.nuget.org/packages/Microsoft.CognitiveServices.Speech.Extension.Telemetry)
+  * required by embedded speech
 
 ## References
 

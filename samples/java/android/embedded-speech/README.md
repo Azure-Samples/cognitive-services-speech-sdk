@@ -60,6 +60,19 @@ Note: If the build is successful but Android Studio shows references to Speech S
      See https://developer.android.com/about/versions/11/privacy/storage for information on alternatives.
 1. Press the button in the app to recognize speech from the device microphone.
 
+## Remarks
+
+For a new project from scratch, add [client-sdk-embedded](https://mvnrepository.com/artifact/com.microsoft.cognitiveservices.speech/client-sdk-embedded) (`.aar`) as a dependency.
+This package supports cloud, embedded, and hybrid speech.
+Do **not** add [client-sdk](https://mvnrepository.com/artifact/com.microsoft.cognitiveservices.speech/client-sdk) in the same project, it supports only cloud speech services.
+
+**Note:** Make sure that `@aar` suffix is used when the dependency is specified in `build.gradle`. For example,
+```
+dependencies {
+    implementation 'com.microsoft.cognitiveservices.speech:client-sdk-embedded:1.24.1@aar'
+    ...
+```
+
 ## References
 
 * [Speech SDK API reference for Java](https://aka.ms/csspeech/javaref)
