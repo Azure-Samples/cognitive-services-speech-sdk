@@ -78,6 +78,6 @@ def write_to_console_or_file(text : str, user_config : Read_Only_Dict) :
     write_to_console(text = text, user_config = user_config)
     if user_config["output_file"] is not None :
         file_path = Path(user_config["output_file"])
-        with open(file_path, mode = "a", newline = "") as f :
+        with open(file_path, mode = "a", newline = "", encoding='utf-8') as f :
             f.write(text)
     return
