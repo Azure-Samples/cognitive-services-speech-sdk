@@ -1,4 +1,4 @@
-// <copyright file="NBests.cs" company="Microsoft Corporation">
+// <copyright file="CombinedRecognizedPhrase.cs" company="Microsoft Corporation">
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
@@ -10,12 +10,12 @@ namespace Connector.Database.Models
     using System.ComponentModel.DataAnnotations;
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2227:Collection properties should be read only", Justification = "Used by Entity Framework")]
-    public class NBests : DbModelBase
+    public class CombinedRecognizedPhrase : DbModelBase
     {
-        public NBests(Guid id, double confidence, string lexical, string itn, string maskedItn, string display, double sentimentNegative, double sentimentNeutral, double sentimentPositive)
+        public CombinedRecognizedPhrase(Guid id, int channel, string lexical, string itn, string maskedItn, string display, double sentimentNegative, double sentimentNeutral, double sentimentPositive)
         {
-            this.Id = id;
-            this.Confidence = confidence;
+            this.ID = id;
+            this.Channel = channel;
             this.Lexical = lexical;
             this.Itn = itn;
             this.MaskedItn = maskedItn;
@@ -26,9 +26,9 @@ namespace Connector.Database.Models
         }
 
         [Key]
-        public Guid Id { get; set; }
+        public Guid ID { get; set; }
 
-        public double Confidence { get; private set; }
+        public int Channel { get; private set; }
 
         public string Lexical { get; private set; }
 
@@ -44,11 +44,11 @@ namespace Connector.Database.Models
 
         public double SentimentPositive { get; private set; }
 
-        public ICollection<Words> Words { get; set; }
+        public ICollection<RecognizedPhrase> RecognizedPhrases { get; set; }
 
-        public NBests WithWords(ICollection<Words> words)
+        public CombinedRecognizedPhrase WithRecognizedPhrases(ICollection<RecognizedPhrase> recognizedPhrases)
         {
-            this.Words = words;
+            this.RecognizedPhrases = recognizedPhrases;
             return this;
         }
     }

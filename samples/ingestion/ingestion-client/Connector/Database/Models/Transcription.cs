@@ -1,4 +1,4 @@
-// <copyright file="Transcriptions.cs" company="Microsoft Corporation">
+// <copyright file="Transcription.cs" company="Microsoft Corporation">
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
@@ -10,11 +10,11 @@ namespace Connector.Database.Models
     using System.ComponentModel.DataAnnotations;
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2227:Collection properties should be read only", Justification = "Used by Entity Framework")]
-    public class Transcriptions : DbModelBase
+    public class Transcription : DbModelBase
     {
-        public Transcriptions(Guid id, string locale, string name, string source, DateTime timestamp, string duration, double durationInSeconds, int numberOfChannels, float approximateCost)
+        public Transcription(Guid id, string locale, string name, string source, DateTime timestamp, string duration, double durationInSeconds, int numberOfChannels, float approximateCost)
         {
-            this.Id = id;
+            this.ID = id;
             this.Locale = locale;
             this.Name = name;
             this.Source = source;
@@ -26,7 +26,7 @@ namespace Connector.Database.Models
         }
 
         [Key]
-        public Guid Id { get; set; }
+        public Guid ID { get; set; }
 
         [StringLength(MaxLocaleLength)]
         public string Locale { get; private set; }
@@ -48,9 +48,9 @@ namespace Connector.Database.Models
 
         public float ApproximateCost { get; private set; }
 
-        public ICollection<CombinedRecognizedPhrases> CombinedRecognizedPhrases { get; set; }
+        public ICollection<CombinedRecognizedPhrase> CombinedRecognizedPhrases { get; set; }
 
-        public Transcriptions WithCombinedRecognizedPhrases(ICollection<CombinedRecognizedPhrases> combinedRecognizedPhrases)
+        public Transcription WithCombinedRecognizedPhrases(ICollection<CombinedRecognizedPhrase> combinedRecognizedPhrases)
         {
             this.CombinedRecognizedPhrases = combinedRecognizedPhrases;
             return this;

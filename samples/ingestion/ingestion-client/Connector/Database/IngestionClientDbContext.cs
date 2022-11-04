@@ -15,14 +15,14 @@ namespace Connector.Database
         {
         }
 
-        public DbSet<Transcriptions> Transcriptions { get; set; }
+        public DbSet<Transcription> Transcriptions { get; set; }
 
-        public DbSet<CombinedRecognizedPhrases> CombinedRecognizedPhrases { get; set; }
+        public DbSet<CombinedRecognizedPhrase> CombinedRecognizedPhrases { get; set; }
 
-        public DbSet<NBests> NBests { get; set; }
+        public DbSet<NBest> NBests { get; set; }
 
-        public DbSet<RecognizedPhrases> RecognizedPhrases { get; set; }
+        public DbSet<RecognizedPhrase> RecognizedPhrases { get; set; }
 
-        public DbSet<Words> Words { get; set; }
+        public DbSet<Word> Words { get; set; }
     }
 }

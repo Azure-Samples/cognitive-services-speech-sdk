@@ -1,4 +1,4 @@
-// <copyright file="Words.cs" company="Microsoft Corporation">
+// <copyright file="Word.cs" company="Microsoft Corporation">
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
@@ -7,13 +7,14 @@ namespace Connector.Database.Models
 {
     using System;
     using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations.Schema;
 
-    public class Words : DbModelBase
+    public class Word : DbModelBase
     {
-        public Words(Guid id, string word, string offset, string duration, float confidence)
+        public Word(Guid id, string wordText, string offset, string duration, double confidence)
         {
             this.Id = id;
-            this.Word = word;
+            this.WordText = wordText;
             this.Offset = offset;
             this.Duration = duration;
             this.Confidence = confidence;
@@ -22,8 +23,9 @@ namespace Connector.Database.Models
         [Key]
         public Guid Id { get; set; }
 
+        [Column("Word")]
         [StringLength(MaxDefaultStringLength)]
-        public string Word { get; private set; }
+        public string WordText { get; private set; }
 
         [StringLength(MaxTimeSpanColumnLength)]
         public string Offset { get; private set; }
@@ -31,6 +33,6 @@ namespace Connector.Database.Models
         [StringLength(MaxTimeSpanColumnLength)]
         public string Duration { get; private set; }
 
-        public float Confidence { get; private set; }
+        public double Confidence { get; private set; }
     }
 }

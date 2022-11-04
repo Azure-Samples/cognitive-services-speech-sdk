@@ -7,7 +7,7 @@ namespace Connector.Database.Models
 {
     public abstract class DbModelBase
     {
-        public const int MaxTimeSpanColumnLength = 26;
+        public const int MaxTimeSpanColumnLength = 255;
 
         public const int MaxLocaleLength = 255;
 

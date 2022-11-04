@@ -9,6 +9,7 @@ namespace Connector.Database
     using System.Collections.Generic;
     using System.Globalization;
     using System.Linq;
+    using System.Threading.Channels;
     using System.Threading.Tasks;
 
     using Connector.Database.Models;
@@ -37,17 +38,17 @@ namespace Connector.Database
         {
             _ = speechTranscript ?? throw new ArgumentNullException(nameof(speechTranscript));
 
-            var transcription = new Transcriptions(
-            id: transcriptionId,
-            locale: locale,
-            name: fileName,
-            source: speechTranscript.Source,
-            timestamp: DateTime.Parse(speechTranscript.Timestamp, CultureInfo.InvariantCulture),
-            duration: speechTranscript.Duration ?? string.Empty,
-            durationInSeconds: TimeSpan.FromTicks(speechTranscript.DurationInTicks).TotalSeconds,
-            numberOfChannels: speechTranscript.CombinedRecognizedPhrases.Count(),
-            approximateCost: approximateCost);
-            var combinedRecognizedPhrases = new List<CombinedRecognizedPhrases>();
+            var transcription = new Transcription(
+                id: transcriptionId,
+                locale: locale,
+                name: fileName,
+                source: speechTranscript.Source,
+                timestamp: DateTime.Parse(speechTranscript.Timestamp, CultureInfo.InvariantCulture),
+                duration: speechTranscript.Duration ?? string.Empty,
+                durationInSeconds: TimeSpan.FromTicks(speechTranscript.DurationInTicks).TotalSeconds,
+                numberOfChannels: speechTranscript.CombinedRecognizedPhrases.Count(),
+                approximateCost: approximateCost);
+            var combinedRecognizedPhrases = new List<CombinedRecognizedPhrase>();
 
             var phrasesByChannel = speechTranscript.RecognizedPhrases.GroupBy(t => t.Channel);
 
@@ -57,76 +58,114 @@ namespace Connector.Database
 
                 var combinedPhrase = speechTranscript.CombinedRecognizedPhrases.Where(t => t.Channel == channel).FirstOrDefault();
 
-                var combinedRecognizedPhrase = new CombinedRecognizedPhrases(
-                    id: Guid.NewGuid(),
-                    channel: channel,
-                    lexical: combinedPhrase?.Lexical ?? string.Empty,
-                    itn: combinedPhrase?.Lexical ?? string.Empty,
-                    maskedItn: combinedPhrase?.Lexical ?? string.Empty,
-                    display: combinedPhrase?.Lexical ?? string.Empty,
-                    sentimentNegative: combinedPhrase?.Sentiment?.Negative ?? 0d,
-                    sentimentNeutral: combinedPhrase?.Sentiment?.Neutral ?? 0d,
-                    sentimentPositive: combinedPhrase?.Sentiment?.Positive ?? 0d);
+                var combinedRecognizedPhraseDb = AddCombinedRecognizedPhrase(combinedPhrase, channel, phrases);
 
-                var recognizedPhrases = new List<RecognizedPhrases>();
-
-                var orderedPhrases = phrases.OrderBy(p => p.OffsetInTicks);
-                var previousEndInMs = 0.0;
-                foreach (var phrase in orderedPhrases)
-                {
-                    var silenceBetweenCurrentAndPreviousSegmentInMs = Math.Max(0, TimeSpan.FromTicks(phrase.OffsetInTicks).TotalMilliseconds - previousEndInMs);
-
-                    var recognizedPhrases = new RecognizedPhrases(
-                        id: Guid.NewGuid(),
-                        recognitionStatus: phrase.RecognitionStatus,
-                        speaker: phrase.Speaker,
-                        channel: phrase.Channel,
-                        offset: phrase.Offset,
-                        duration: phrase.Duration,
-                        silenceBetweenCurrentAndPreviousSegmentInMs: silenceBetweenCurrentAndPreviousSegmentInMs,
-                        nBests: null);
-
-                    previousEndInMs = (TimeSpan.FromTicks(phrase.OffsetInTicks) + TimeSpan.FromTicks(phrase.DurationInTicks)).TotalMilliseconds;
-
-                    foreach (var nbestResult in phrase.NBest)
-                    {
-                        var nbests = new NBests(
-                            id: Guid.NewGuid(),
-                            confidence: nbestResult.Confidence,
-                            lexical: nbestResult.Lexical,
-                            itn: nbestResult.ITN,
-                            maskedItn: nbestResult.MaskedITN,
-                            display: nbestResult.Display,
-                            sentimentNegative: nbestResult.Sentiment?.Negative ?? 0d,
-                            sentimentNeutral: nbestResult.Sentiment?.Neutral ?? 0d,
-                            sentimentPositive: nbestResult.Sentiment?.Positive ?? 0d,
-                            words: null);
-
-                        if (nbests.Words == null)
-                        {
-                            foreach (var word in nbests.Words)
-                            {
-                                var words = new Words(
-                                    id: Guid.NewGuid(),
-                                    word: word.Word,
-                                    offset: word.Offset,
-                                    duration: word.Duration,
-                                    confidence: word.Confidence);
-
-                                await this.StoreWordsAsync(nbestID, word).ConfigureAwait(false);
-                            }
-                        }
-                    }
-                }
-
-                combinedRecognizedPhrases.Add(combinedRecognizedPhrase);
+                combinedRecognizedPhrases.Add(combinedRecognizedPhraseDb);
             }
 
             transcription = transcription.WithCombinedRecognizedPhrases(combinedRecognizedPhrases);
 
+            this.ingestionClientDbContext.Add(transcription);
+            var entitiesAdded = await this.ingestionClientDbContext.SaveChangesAsync().ConfigureAwait(false);
 
+            this.logger.LogInformation($"Added transcription to database, added {entitiesAdded} entities.");
 
+            return true;
+        }
 
+        private static CombinedRecognizedPhrase AddCombinedRecognizedPhrase(Connector.CombinedRecognizedPhrase combinedRecognizedPhrase, int channel, IEnumerable<Connector.RecognizedPhrase> recognizedPhrases)
+        {
+            var combinedRecognizedPhraseDb = new CombinedRecognizedPhrase(
+                id: Guid.NewGuid(),
+                channel: channel,
+                lexical: combinedRecognizedPhrase?.Lexical ?? string.Empty,
+                itn: combinedRecognizedPhrase?.Lexical ?? string.Empty,
+                maskedItn: combinedRecognizedPhrase?.Lexical ?? string.Empty,
+                display: combinedRecognizedPhrase?.Lexical ?? string.Empty,
+                sentimentNegative: combinedRecognizedPhrase?.Sentiment?.Negative ?? 0d,
+                sentimentNeutral: combinedRecognizedPhrase?.Sentiment?.Neutral ?? 0d,
+                sentimentPositive: combinedRecognizedPhrase?.Sentiment?.Positive ?? 0d);
+
+            var recognizedPhrasesDb = new List<RecognizedPhrase>();
+
+            var orderedPhrases = recognizedPhrases.OrderBy(p => p.OffsetInTicks);
+            var previousEndInMs = 0.0;
+            foreach (var phrase in orderedPhrases)
+            {
+                var silenceBetweenCurrentAndPreviousSegmentInMs = Math.Max(0, TimeSpan.FromTicks(phrase.OffsetInTicks).TotalMilliseconds - previousEndInMs);
+
+                var recognizedPhraseDb = AddRecognizedPhrase(phrase, silenceBetweenCurrentAndPreviousSegmentInMs);
+                previousEndInMs = (TimeSpan.FromTicks(phrase.OffsetInTicks) + TimeSpan.FromTicks(phrase.DurationInTicks)).TotalMilliseconds;
+
+                recognizedPhrasesDb.Add(recognizedPhraseDb);
+            }
+
+            combinedRecognizedPhraseDb = combinedRecognizedPhraseDb.WithRecognizedPhrases(recognizedPhrasesDb);
+            return combinedRecognizedPhraseDb;
+        }
+
+        private static RecognizedPhrase AddRecognizedPhrase(Connector.RecognizedPhrase recognizedPhrase, double silenceBetweenCurrentAndPreviousSegmentInMs)
+        {
+            var recognizedPhraseDb = new RecognizedPhrase(
+                id: Guid.NewGuid(),
+                recognitionStatus: recognizedPhrase.RecognitionStatus,
+                speaker: recognizedPhrase.Speaker,
+                channel: recognizedPhrase.Channel,
+                offset: recognizedPhrase.Offset,
+                duration: recognizedPhrase.Duration,
+                silenceBetweenCurrentAndPreviousSegmentInMs: silenceBetweenCurrentAndPreviousSegmentInMs);
+
+            var nbestsDb = new List<NBest>();
+
+            foreach (var nbestResult in recognizedPhrase.NBest)
+            {
+                var nbestDb = AddNBestResult(nbestResult);
+                nbestsDb.Add(nbestDb);
+            }
+
+            recognizedPhraseDb = recognizedPhraseDb.WithNBests(nbestsDb);
+            return recognizedPhraseDb;
+        }
+
+        private static NBest AddNBestResult(Connector.NBest nbest)
+        {
+            var nbestDb = new NBest(
+                id: Guid.NewGuid(),
+                confidence: nbest.Confidence,
+                lexical: nbest.Lexical,
+                itn: nbest.ITN,
+                maskedItn: nbest.MaskedITN,
+                display: nbest.Display,
+                sentimentNegative: nbest.Sentiment?.Negative ?? 0d,
+                sentimentNeutral: nbest.Sentiment?.Neutral ?? 0d,
+                sentimentPositive: nbest.Sentiment?.Positive ?? 0d);
+
+            if (nbest.Words != null)
+            {
+                var wordsDb = new List<Word>();
+
+                foreach (var word in nbest.Words)
+                {
+                    var wordDb = CreateWord(word);
+                    wordsDb.Add(wordDb);
+                }
+
+                nbestDb = nbestDb.WithWords(wordsDb);
+            }
+
+            return nbestDb;
+        }
+
+        private static Word CreateWord(Connector.Words word)
+        {
+            var wordDb = new Word(
+                id: Guid.NewGuid(),
+                wordText: word.Word,
+                offset: word.Offset,
+                duration: word.Duration,
+                confidence: word.Confidence);
+
+            return wordDb;
         }
     }
 }
