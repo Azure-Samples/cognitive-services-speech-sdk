@@ -8,13 +8,14 @@ namespace Connector.Database.Models
     using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations.Schema;
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2227:Collection properties should be read only", Justification = "Used by Entity Framework")]
     public class CombinedRecognizedPhrase : DbModelBase
     {
         public CombinedRecognizedPhrase(Guid id, int channel, string lexical, string itn, string maskedItn, string display, double sentimentNegative, double sentimentNeutral, double sentimentPositive)
         {
-            this.ID = id;
+            this.Id = id;
             this.Channel = channel;
             this.Lexical = lexical;
             this.Itn = itn;
@@ -25,8 +26,9 @@ namespace Connector.Database.Models
             this.SentimentPositive = sentimentPositive;
         }
 
+        [Column("ID")]
         [Key]
-        public Guid ID { get; set; }
+        public Guid Id { get; set; }
 
         public int Channel { get; private set; }
 

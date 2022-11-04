@@ -20,6 +20,7 @@ namespace Connector.Database.Models
             this.Confidence = confidence;
         }
 
+        [Column("ID")]
         [Key]
         public Guid Id { get; set; }
 

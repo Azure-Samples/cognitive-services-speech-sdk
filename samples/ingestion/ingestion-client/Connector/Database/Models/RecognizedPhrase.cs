@@ -8,6 +8,7 @@ namespace Connector.Database.Models
     using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations.Schema;
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2227:Collection properties should be read only", Justification = "Used by Entity Framework")]
     public class RecognizedPhrase : DbModelBase
@@ -23,6 +24,7 @@ namespace Connector.Database.Models
             this.SilenceBetweenCurrentAndPreviousSegmentInMs = silenceBetweenCurrentAndPreviousSegmentInMs;
         }
 
+        [Column("ID")]
         [Key]
         public Guid Id { get; set; }
 

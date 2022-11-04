@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Connector.Migrations
 {
     [DbContext(typeof(IngestionClientDbContext))]
-    [Migration("20221103101257_Init")]
+    [Migration("20221104081113_Init")]
     partial class Init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,11 +24,12 @@ namespace Connector.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
 
-            modelBuilder.Entity("Connector.Database.Models.CombinedRecognizedPhrases", b =>
+            modelBuilder.Entity("Connector.Database.Models.CombinedRecognizedPhrase", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("ID");
 
                     b.Property<int>("Channel")
                         .HasColumnType("int");
@@ -45,33 +46,34 @@ namespace Connector.Migrations
                     b.Property<string>("MaskedItn")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<float>("SentimentNegative")
-                        .HasColumnType("real");
+                    b.Property<double>("SentimentNegative")
+                        .HasColumnType("float");
 
-                    b.Property<float>("SentimentNeutral")
-                        .HasColumnType("real");
+                    b.Property<double>("SentimentNeutral")
+                        .HasColumnType("float");
 
-                    b.Property<float>("SentimentPositive")
-                        .HasColumnType("real");
+                    b.Property<double>("SentimentPositive")
+                        .HasColumnType("float");
 
-                    b.Property<Guid?>("TranscriptionsId")
+                    b.Property<Guid?>("TranscriptionId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("TranscriptionsId");
+                    b.HasIndex("TranscriptionId");
 
                     b.ToTable("CombinedRecognizedPhrases");
                 });
 
-            modelBuilder.Entity("Connector.Database.Models.NBests", b =>
+            modelBuilder.Entity("Connector.Database.Models.NBest", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("ID");
 
-                    b.Property<float>("Confidence")
-                        .HasColumnType("real");
+                    b.Property<double>("Confidence")
+                        .HasColumnType("float");
 
                     b.Property<string>("Display")
                         .HasColumnType("nvarchar(max)");
@@ -85,74 +87,79 @@ namespace Connector.Migrations
                     b.Property<string>("MaskedItn")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid?>("RecognizedPhrasesId")
+                    b.Property<Guid?>("RecognizedPhraseId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<float>("SentimentNegative")
-                        .HasColumnType("real");
+                    b.Property<double>("SentimentNegative")
+                        .HasColumnType("float");
 
-                    b.Property<float>("SentimentNeutral")
-                        .HasColumnType("real");
+                    b.Property<double>("SentimentNeutral")
+                        .HasColumnType("float");
 
-                    b.Property<float>("SentimentPositive")
-                        .HasColumnType("real");
+                    b.Property<double>("SentimentPositive")
+                        .HasColumnType("float");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("RecognizedPhrasesId");
+                    b.HasIndex("RecognizedPhraseId");
 
                     b.ToTable("NBests");
                 });
 
-            modelBuilder.Entity("Connector.Database.Models.RecognizedPhrases", b =>
+            modelBuilder.Entity("Connector.Database.Models.RecognizedPhrase", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("ID");
 
                     b.Property<int>("Channel")
                         .HasColumnType("int");
 
-                    b.Property<Guid?>("CombinedRecognizedPhrasesId")
+                    b.Property<Guid?>("CombinedRecognizedPhraseId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Duration")
-                        .HasMaxLength(26)
-                        .HasColumnType("nvarchar(26)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
 
                     b.Property<string>("Offset")
-                        .HasMaxLength(26)
-                        .HasColumnType("nvarchar(26)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
 
                     b.Property<string>("RecognitionStatus")
                         .HasMaxLength(32)
                         .HasColumnType("nvarchar(32)");
+
+                    b.Property<double>("SilenceBetweenCurrentAndPreviousSegmentInMs")
+                        .HasColumnType("float");
 
                     b.Property<int>("Speaker")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CombinedRecognizedPhrasesId");
+                    b.HasIndex("CombinedRecognizedPhraseId");
 
                     b.ToTable("RecognizedPhrases");
                 });
 
-            modelBuilder.Entity("Connector.Database.Models.Transcriptions", b =>
+            modelBuilder.Entity("Connector.Database.Models.Transcription", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("ID");
 
                     b.Property<float>("ApproximateCost")
                         .HasColumnType("real");
 
                     b.Property<string>("Duration")
-                        .HasMaxLength(26)
-                        .HasColumnType("nvarchar(26)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
 
-                    b.Property<float>("DurationInSeconds")
-                        .HasColumnType("real");
+                    b.Property<double>("DurationInSeconds")
+                        .HasColumnType("float");
 
                     b.Property<string>("Locale")
                         .HasMaxLength(255)
@@ -177,81 +184,83 @@ namespace Connector.Migrations
                     b.ToTable("Transcriptions");
                 });
 
-            modelBuilder.Entity("Connector.Database.Models.Words", b =>
+            modelBuilder.Entity("Connector.Database.Models.Word", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("ID");
 
-                    b.Property<float>("Confidence")
-                        .HasColumnType("real");
+                    b.Property<double>("Confidence")
+                        .HasColumnType("float");
 
                     b.Property<string>("Duration")
-                        .HasMaxLength(26)
-                        .HasColumnType("nvarchar(26)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
 
-                    b.Property<Guid?>("NBestsId")
+                    b.Property<Guid?>("NBestId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Offset")
-                        .HasMaxLength(26)
-                        .HasColumnType("nvarchar(26)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
 
-                    b.Property<string>("Word")
+                    b.Property<string>("WordText")
                         .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasColumnType("nvarchar(500)")
+                        .HasColumnName("Word");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("NBestsId");
+                    b.HasIndex("NBestId");
 
                     b.ToTable("Words");
                 });
 
-            modelBuilder.Entity("Connector.Database.Models.CombinedRecognizedPhrases", b =>
+            modelBuilder.Entity("Connector.Database.Models.CombinedRecognizedPhrase", b =>
                 {
-                    b.HasOne("Connector.Database.Models.Transcriptions", null)
+                    b.HasOne("Connector.Database.Models.Transcription", null)
                         .WithMany("CombinedRecognizedPhrases")
-                        .HasForeignKey("TranscriptionsId");
+                        .HasForeignKey("TranscriptionId");
                 });
 
-            modelBuilder.Entity("Connector.Database.Models.NBests", b =>
+            modelBuilder.Entity("Connector.Database.Models.NBest", b =>
                 {
-                    b.HasOne("Connector.Database.Models.RecognizedPhrases", null)
+                    b.HasOne("Connector.Database.Models.RecognizedPhrase", null)
                         .WithMany("NBests")
-                        .HasForeignKey("RecognizedPhrasesId");
+                        .HasForeignKey("RecognizedPhraseId");
                 });
 
-            modelBuilder.Entity("Connector.Database.Models.RecognizedPhrases", b =>
+            modelBuilder.Entity("Connector.Database.Models.RecognizedPhrase", b =>
                 {
-                    b.HasOne("Connector.Database.Models.CombinedRecognizedPhrases", null)
+                    b.HasOne("Connector.Database.Models.CombinedRecognizedPhrase", null)
                         .WithMany("RecognizedPhrases")
-                        .HasForeignKey("CombinedRecognizedPhrasesId");
+                        .HasForeignKey("CombinedRecognizedPhraseId");
                 });
 
-            modelBuilder.Entity("Connector.Database.Models.Words", b =>
+            modelBuilder.Entity("Connector.Database.Models.Word", b =>
                 {
-                    b.HasOne("Connector.Database.Models.NBests", null)
+                    b.HasOne("Connector.Database.Models.NBest", null)
                         .WithMany("Words")
-                        .HasForeignKey("NBestsId");
+                        .HasForeignKey("NBestId");
                 });
 
-            modelBuilder.Entity("Connector.Database.Models.CombinedRecognizedPhrases", b =>
+            modelBuilder.Entity("Connector.Database.Models.CombinedRecognizedPhrase", b =>
                 {
                     b.Navigation("RecognizedPhrases");
                 });
 
-            modelBuilder.Entity("Connector.Database.Models.NBests", b =>
+            modelBuilder.Entity("Connector.Database.Models.NBest", b =>
                 {
                     b.Navigation("Words");
                 });
 
-            modelBuilder.Entity("Connector.Database.Models.RecognizedPhrases", b =>
+            modelBuilder.Entity("Connector.Database.Models.RecognizedPhrase", b =>
                 {
                     b.Navigation("NBests");
                 });
 
-            modelBuilder.Entity("Connector.Database.Models.Transcriptions", b =>
+            modelBuilder.Entity("Connector.Database.Models.Transcription", b =>
                 {
                     b.Navigation("CombinedRecognizedPhrases");
                 });

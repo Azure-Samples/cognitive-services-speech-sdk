@@ -8,13 +8,14 @@ namespace Connector.Database.Models
     using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations.Schema;
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2227:Collection properties should be read only", Justification = "Used by Entity Framework")]
     public class Transcription : DbModelBase
     {
         public Transcription(Guid id, string locale, string name, string source, DateTime timestamp, string duration, double durationInSeconds, int numberOfChannels, float approximateCost)
         {
-            this.ID = id;
+            this.Id = id;
             this.Locale = locale;
             this.Name = name;
             this.Source = source;
@@ -25,8 +26,9 @@ namespace Connector.Database.Models
             this.ApproximateCost = approximateCost;
         }
 
+        [Column("ID")]
         [Key]
-        public Guid ID { get; set; }
+        public Guid Id { get; set; }
 
         [StringLength(MaxLocaleLength)]
         public string Locale { get; private set; }
