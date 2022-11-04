@@ -172,9 +172,9 @@ For a new project from scratch, install the following Speech SDK packages as nee
 * [Microsoft.CognitiveServices.Speech.Extension.Embedded.TTS](https://www.nuget.org/packages/Microsoft.CognitiveServices.Speech.Extension.Embedded.TTS)
   * required for embedded speech synthesis
 * [Microsoft.CognitiveServices.Speech.Extension.ONNX.Runtime](https://www.nuget.org/packages/Microsoft.CognitiveServices.Speech.Extension.ONNX.Runtime)
-  * required by embedded speech
+  * required by embedded speech recognition and synthesis
 * [Microsoft.CognitiveServices.Speech.Extension.Telemetry](https://www.nuget.org/packages/Microsoft.CognitiveServices.Speech.Extension.Telemetry)
-  * required by embedded speech
+  * required by embedded speech recognition and synthesis
 
 ## References
 
