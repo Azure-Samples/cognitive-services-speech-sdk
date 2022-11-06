@@ -249,7 +249,8 @@ class Captioning(object) :
             speech_config.set_property(property_id=speechsdk.PropertyId.SpeechServiceResponse_StablePartialResultThreshold, value=self._user_config["stable_partial_result_threshold"])
 
         speech_config.set_property(property_id=speechsdk.PropertyId.SpeechServiceResponse_PostProcessingOption, value="TrueText")
-
+        speech_config.speech_recognition_language=self._user_config["language"]
+        
         return speech_config
 
     def speech_recognizer_from_user_config(self) -> helper.Read_Only_Dict :

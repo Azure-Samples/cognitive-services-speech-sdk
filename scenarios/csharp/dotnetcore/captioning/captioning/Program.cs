@@ -274,6 +274,7 @@ namespace Captioning
             }
             
             speechConfig.SetProperty(PropertyId.SpeechServiceResponse_PostProcessingOption, "TrueText");
+            speechConfig.SpeechRecognitionLanguage = this._userConfig!.language;
             
             return speechConfig;
         }

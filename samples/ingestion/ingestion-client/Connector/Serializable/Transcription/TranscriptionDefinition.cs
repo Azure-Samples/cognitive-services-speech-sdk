@@ -18,12 +18,12 @@ namespace Connector
             Dictionary<string, string> properties,
             ModelIdentity model)
         {
-            DisplayName = name;
-            Description = description;
-            ContentUrls = contentUrls;
-            Locale = locale;
-            Model = model;
-            Properties = properties;
+            this.DisplayName = name;
+            this.Description = description;
+            this.ContentUrls = contentUrls;
+            this.Locale = locale;
+            this.Model = model;
+            this.Properties = properties;
         }
 
         public string DisplayName { get; set; }
