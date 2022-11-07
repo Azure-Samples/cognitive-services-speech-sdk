@@ -53,12 +53,12 @@ namespace Connector.Migrations
                     b.Property<double>("SentimentPositive")
                         .HasColumnType("float");
 
-                    b.Property<Guid?>("TranscriptionId")
+                    b.Property<Guid?>("TranscriptionID")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("TranscriptionId");
+                    b.HasIndex("TranscriptionID");
 
                     b.ToTable("CombinedRecognizedPhrases");
                 });
@@ -85,7 +85,7 @@ namespace Connector.Migrations
                     b.Property<string>("MaskedItn")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid?>("RecognizedPhraseId")
+                    b.Property<Guid?>("RecognizedPhraseID")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<double>("SentimentNegative")
@@ -99,7 +99,7 @@ namespace Connector.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("RecognizedPhraseId");
+                    b.HasIndex("RecognizedPhraseID");
 
                     b.ToTable("NBests");
                 });
@@ -114,7 +114,7 @@ namespace Connector.Migrations
                     b.Property<int>("Channel")
                         .HasColumnType("int");
 
-                    b.Property<Guid?>("CombinedRecognizedPhraseId")
+                    b.Property<Guid?>("CombinedRecognizedPhraseID")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Duration")
@@ -137,7 +137,7 @@ namespace Connector.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CombinedRecognizedPhraseId");
+                    b.HasIndex("CombinedRecognizedPhraseID");
 
                     b.ToTable("RecognizedPhrases");
                 });
@@ -196,7 +196,7 @@ namespace Connector.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
-                    b.Property<Guid?>("NBestId")
+                    b.Property<Guid?>("NBestID")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Offset")
@@ -210,7 +210,7 @@ namespace Connector.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("NBestId");
+                    b.HasIndex("NBestID");
 
                     b.ToTable("Words");
                 });
@@ -219,28 +219,28 @@ namespace Connector.Migrations
                 {
                     b.HasOne("Connector.Database.Models.Transcription", null)
                         .WithMany("CombinedRecognizedPhrases")
-                        .HasForeignKey("TranscriptionId");
+                        .HasForeignKey("TranscriptionID");
                 });
 
             modelBuilder.Entity("Connector.Database.Models.NBest", b =>
                 {
                     b.HasOne("Connector.Database.Models.RecognizedPhrase", null)
                         .WithMany("NBests")
-                        .HasForeignKey("RecognizedPhraseId");
+                        .HasForeignKey("RecognizedPhraseID");
                 });
 
             modelBuilder.Entity("Connector.Database.Models.RecognizedPhrase", b =>
                 {
                     b.HasOne("Connector.Database.Models.CombinedRecognizedPhrase", null)
                         .WithMany("RecognizedPhrases")
-                        .HasForeignKey("CombinedRecognizedPhraseId");
+                        .HasForeignKey("CombinedRecognizedPhraseID");
                 });
 
             modelBuilder.Entity("Connector.Database.Models.Word", b =>
                 {
                     b.HasOne("Connector.Database.Models.NBest", null)
                         .WithMany("Words")
-                        .HasForeignKey("NBestId");
+                        .HasForeignKey("NBestID");
                 });
 
             modelBuilder.Entity("Connector.Database.Models.CombinedRecognizedPhrase", b =>

@@ -76,7 +76,7 @@ namespace Connector.Database
             var previousEndInMs = 0.0;
             foreach (var phrase in orderedPhrases)
             {
-                var silenceBetweenCurrentAndPreviousSegmentInMs = Math.Max(0, TimeSpan.FromTicks(phrase.OffsetInTicks).TotalMilliseconds - previousEndInMs);
+                var silenceBetweenCurrentAndPreviousSegmentInMs = Convert.ToInt32(Math.Max(0, TimeSpan.FromTicks(phrase.OffsetInTicks).TotalMilliseconds - previousEndInMs));
 
                 var recognizedPhraseDb = AddRecognizedPhrase(phrase, silenceBetweenCurrentAndPreviousSegmentInMs);
                 previousEndInMs = (TimeSpan.FromTicks(phrase.OffsetInTicks) + TimeSpan.FromTicks(phrase.DurationInTicks)).TotalMilliseconds;
@@ -88,7 +88,7 @@ namespace Connector.Database
             return combinedRecognizedPhraseDb;
         }
 
-        private static RecognizedPhrase AddRecognizedPhrase(Connector.RecognizedPhrase recognizedPhrase, double silenceBetweenCurrentAndPreviousSegmentInMs)
+        private static RecognizedPhrase AddRecognizedPhrase(Connector.RecognizedPhrase recognizedPhrase, int silenceBetweenCurrentAndPreviousSegmentInMs)
         {
             var recognizedPhraseDb = new RecognizedPhrase(
                 id: Guid.NewGuid(),

@@ -13,7 +13,7 @@ namespace Connector.Database.Models
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2227:Collection properties should be read only", Justification = "Used by Entity Framework")]
     public class RecognizedPhrase : DbModelBase
     {
-        public RecognizedPhrase(Guid id, string recognitionStatus, int speaker, int channel, string offset, string duration, double silenceBetweenCurrentAndPreviousSegmentInMs)
+        public RecognizedPhrase(Guid id, string recognitionStatus, int speaker, int channel, string offset, string duration, int silenceBetweenCurrentAndPreviousSegmentInMs)
         {
             this.Id = id;
             this.RecognitionStatus = recognitionStatus;
@@ -41,8 +41,9 @@ namespace Connector.Database.Models
         [StringLength(MaxTimeSpanColumnLength)]
         public string Duration { get; private set; }
 
-        public double SilenceBetweenCurrentAndPreviousSegmentInMs { get; private set; }
+        public int SilenceBetweenCurrentAndPreviousSegmentInMs { get; private set; }
 
+        [ForeignKey("RecognizedPhraseID")]
         public ICollection<NBest> NBests { get; set; }
 
         public RecognizedPhrase WithNBests(ICollection<NBest> nbests)

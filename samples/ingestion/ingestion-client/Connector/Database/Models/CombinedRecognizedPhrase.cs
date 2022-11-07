@@ -46,6 +46,7 @@ namespace Connector.Database.Models
 
         public double SentimentPositive { get; private set; }
 
+        [ForeignKey("CombinedRecognizedPhraseID")]
         public ICollection<RecognizedPhrase> RecognizedPhrases { get; set; }
 
         public CombinedRecognizedPhrase WithRecognizedPhrases(ICollection<RecognizedPhrase> recognizedPhrases)

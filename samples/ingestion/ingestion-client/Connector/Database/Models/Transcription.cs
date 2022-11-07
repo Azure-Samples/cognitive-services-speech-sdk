@@ -50,6 +50,7 @@ namespace Connector.Database.Models
 
         public float ApproximateCost { get; private set; }
 
+        [ForeignKey("TranscriptionID")]
         public ICollection<CombinedRecognizedPhrase> CombinedRecognizedPhrases { get; set; }
 
         public Transcription WithCombinedRecognizedPhrases(ICollection<CombinedRecognizedPhrase> combinedRecognizedPhrases)

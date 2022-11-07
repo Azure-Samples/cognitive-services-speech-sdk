@@ -46,6 +46,7 @@ namespace Connector.Database.Models
 
         public double SentimentPositive { get; private set; }
 
+        [ForeignKey("NBestID")]
         public ICollection<Word> Words { get; set; }
 
         public NBest WithWords(ICollection<Word> words)

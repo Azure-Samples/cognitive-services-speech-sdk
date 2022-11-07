@@ -1,4 +1,4 @@
-// <copyright file="20221107093239_Init.cs" company="Microsoft Corporation">
+// <copyright file="20221107105238_Init.cs" company="Microsoft Corporation">
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
@@ -15,7 +15,6 @@ namespace Connector.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             _ = migrationBuilder ?? throw new ArgumentNullException(nameof(migrationBuilder));
-
             migrationBuilder.CreateTable(
                 name: "Transcriptions",
                 columns: table => new
@@ -54,8 +53,8 @@ namespace Connector.Migrations
                 {
                     table.PrimaryKey("PK_CombinedRecognizedPhrases", x => x.ID);
                     table.ForeignKey(
-                        name: "FK_CombinedRecognizedPhrases_Transcriptions_TranscriptionId",
-                        column: x => x.TranscriptionId,
+                        name: "FK_CombinedRecognizedPhrases_Transcriptions_TranscriptionID",
+                        column: x => x.TranscriptionID,
                         principalTable: "Transcriptions",
                         principalColumn: "ID");
                 });
@@ -71,14 +70,14 @@ namespace Connector.Migrations
                     Offset = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
                     Duration = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
                     SilenceBetweenCurrentAndPreviousSegmentInMs = table.Column<double>(type: "float", nullable: false),
-                    CombinedRecognizedPhraseId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                    CombinedRecognizedPhraseID = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_RecognizedPhrases", x => x.ID);
                     table.ForeignKey(
-                        name: "FK_RecognizedPhrases_CombinedRecognizedPhrases_CombinedRecognizedPhraseId",
-                        column: x => x.CombinedRecognizedPhraseId,
+                        name: "FK_RecognizedPhrases_CombinedRecognizedPhrases_CombinedRecognizedPhraseID",
+                        column: x => x.CombinedRecognizedPhraseID,
                         principalTable: "CombinedRecognizedPhrases",
                         principalColumn: "ID");
                 });
@@ -96,14 +95,14 @@ namespace Connector.Migrations
                     SentimentNegative = table.Column<double>(type: "float", nullable: false),
                     SentimentNeutral = table.Column<double>(type: "float", nullable: false),
                     SentimentPositive = table.Column<double>(type: "float", nullable: false),
-                    RecognizedPhraseId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                    RecognizedPhraseID = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_NBests", x => x.ID);
                     table.ForeignKey(
-                        name: "FK_NBests_RecognizedPhrases_RecognizedPhraseId",
-                        column: x => x.RecognizedPhraseId,
+                        name: "FK_NBests_RecognizedPhrases_RecognizedPhraseID",
+                        column: x => x.RecognizedPhraseID,
                         principalTable: "RecognizedPhrases",
                         principalColumn: "ID");
                 });
@@ -117,37 +116,37 @@ namespace Connector.Migrations
                     Offset = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
                     Duration = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
                     Confidence = table.Column<double>(type: "float", nullable: false),
-                    NBestId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                    NBestID = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Words", x => x.ID);
                     table.ForeignKey(
-                        name: "FK_Words_NBests_NBestId",
-                        column: x => x.NBestId,
+                        name: "FK_Words_NBests_NBestID",
+                        column: x => x.NBestID,
                         principalTable: "NBests",
                         principalColumn: "ID");
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_CombinedRecognizedPhrases_TranscriptionId",
+                name: "IX_CombinedRecognizedPhrases_TranscriptionID",
                 table: "CombinedRecognizedPhrases",
-                column: "TranscriptionId");
+                column: "TranscriptionID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_NBests_RecognizedPhraseId",
+                name: "IX_NBests_RecognizedPhraseID",
                 table: "NBests",
-                column: "RecognizedPhraseId");
+                column: "RecognizedPhraseID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_RecognizedPhrases_CombinedRecognizedPhraseId",
+                name: "IX_RecognizedPhrases_CombinedRecognizedPhraseID",
                 table: "RecognizedPhrases",
-                column: "CombinedRecognizedPhraseId");
+                column: "CombinedRecognizedPhraseID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Words_NBestId",
+                name: "IX_Words_NBestID",
                 table: "Words",
-                column: "NBestId");
+                column: "NBestID");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
