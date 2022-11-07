@@ -153,6 +153,12 @@ export CLOUD_SPEECH_SERVICE_REGION="westus"
 ```
 **Note:** On Linux and macOS, use quotation marks around the values of environment variables set on the command line as shown in the example. Otherwise strings with spaces (like embedded speech model/voice names) will be cut short.
 
+## Remarks
+
+For a new project from scratch, add [client-sdk-embedded](https://mvnrepository.com/artifact/com.microsoft.cognitiveservices.speech/client-sdk-embedded) (`.jar`) as a dependency.
+This package supports cloud, embedded, and hybrid speech.
+Do **not** add [client-sdk](https://mvnrepository.com/artifact/com.microsoft.cognitiveservices.speech/client-sdk) in the same project, it supports only cloud speech services.
+
 ## References
 
 * [Speech SDK API reference for Java](https://aka.ms/csspeech/javaref)

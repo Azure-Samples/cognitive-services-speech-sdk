@@ -290,6 +290,7 @@ public class Captioning
         }
         
         speechConfig.setProperty(PropertyId.SpeechServiceResponse_PostProcessingOption, "TrueText");
+        speechConfig.setSpeechRecognitionLanguage(_userConfig.getLanguage());
         
         return speechConfig;
     }
