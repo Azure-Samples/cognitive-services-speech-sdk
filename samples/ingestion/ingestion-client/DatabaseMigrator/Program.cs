@@ -7,6 +7,12 @@ namespace DatabaseMigrator
 {
     public static class Program
     {
+        /// <summary>
+        /// Used for creating a database migration locally.
+        /// Run
+        /// dotnet ef migrations add Init --project Connector --startup-project DatabaseMigrator
+        /// to add entity framework database migration
+        /// </summary>
         public static void Main()
         {
         }
