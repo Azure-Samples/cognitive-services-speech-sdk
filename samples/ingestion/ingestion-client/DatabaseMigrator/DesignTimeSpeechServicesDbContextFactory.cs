@@ -5,7 +5,6 @@
 
 namespace DatabaseMigrator
 {
-    using System;
     using Connector.Database;
 
     using Microsoft.EntityFrameworkCore;
@@ -15,7 +14,6 @@ namespace DatabaseMigrator
     {
         public IngestionClientDbContext CreateDbContext(string[] args)
         {
-            Console.WriteLine("Design time context generation using designtimedb.");
             var optionsBuilder = new DbContextOptionsBuilder<IngestionClientDbContext>();
             optionsBuilder.UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=DesignTimeDb;Trusted_Connection=True;MultipleActiveResultSets=true");
             var options = optionsBuilder.Options;
