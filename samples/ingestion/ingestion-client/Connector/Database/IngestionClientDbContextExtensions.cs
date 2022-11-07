@@ -15,6 +15,8 @@ namespace Connector.Database
 
     public static class IngestionClientDbContextExtensions
     {
+        private const int MaxNBestsPerRecognizedPhrase = 1;
+
         public static async Task StoreTranscriptionAsync(
             this IngestionClientDbContext ingestionClientDbContext,
             Guid transcriptionId,
@@ -43,11 +45,8 @@ namespace Connector.Database
             foreach (var phrases in phrasesByChannel)
             {
                 var channel = phrases.Key;
-
                 var combinedPhrase = speechTranscript.CombinedRecognizedPhrases.Where(t => t.Channel == channel).FirstOrDefault();
-
                 var combinedRecognizedPhraseDb = AddCombinedRecognizedPhrase(combinedPhrase, channel, phrases);
-
                 combinedRecognizedPhrases.Add(combinedRecognizedPhraseDb);
             }
 
@@ -101,7 +100,7 @@ namespace Connector.Database
 
             var nbestsDb = new List<NBest>();
 
-            foreach (var nbestResult in recognizedPhrase.NBest)
+            foreach (var nbestResult in recognizedPhrase.NBest.Take(MaxNBestsPerRecognizedPhrase))
             {
                 var nbestDb = AddNBestResult(nbestResult);
                 nbestsDb.Add(nbestDb);
