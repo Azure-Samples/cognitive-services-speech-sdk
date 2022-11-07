@@ -21,6 +21,7 @@ namespace FetchTranscriptionFunction
 
     using Language;
 
+    using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
     using Newtonsoft.Json;
@@ -541,17 +542,22 @@ namespace FetchTranscriptionFunction
 
                     var containsMultipleTranscriptions = resultFiles.Skip(1).Any();
                     var jobId = containsMultipleTranscriptions ? Guid.NewGuid() : new Guid(transcriptionLocation.Split('/').LastOrDefault());
-                    var databaseConnectionString = FetchTranscriptionEnvironmentVariables.DatabaseConnectionString;
-                    using var databaseConnector = new DatabaseConnector(log, databaseConnectionString);
 
-                    await this.databaseContext.StoreTranscriptionAsync(
-                        jobId,
-                        serviceBusMessage.Locale,
-                        string.IsNullOrEmpty(fileName) ? jobName : fileName,
-                        (float)approximatedCost,
-                        speechTranscript).ConfigureAwait(false);
-
-                    log.LogInformation($"Added transcription {jobId} to database.");
+                    try
+                    {
+                        await this.databaseContext.StoreTranscriptionAsync(
+                            jobId,
+                            serviceBusMessage.Locale,
+                            string.IsNullOrEmpty(fileName) ? jobName : fileName,
+                            (float)approximatedCost,
+                            speechTranscript).ConfigureAwait(false);
+                    }
+                    catch (Exception exception) when (exception is DbUpdateException || exception is DbUpdateConcurrencyException)
+                    {
+                        var errorMessage = $"Exception while processing database update: {exception}";
+                        log.LogError(errorMessage);
+                        generalErrorsStringBuilder.AppendLine(errorMessage);
+                    }
                 }
 
                 if (FetchTranscriptionEnvironmentVariables.CreateAudioProcessedContainer)
