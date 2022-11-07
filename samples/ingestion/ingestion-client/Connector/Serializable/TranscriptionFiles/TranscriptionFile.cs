@@ -12,9 +12,9 @@ namespace Connector.Serializable.TranscriptionFiles
     {
         public TranscriptionFile(string name, string kind, TranscriptionFileLink links)
         {
-            Name = name;
-            KindString = kind;
-            Links = links;
+            this.Name = name;
+            this.KindString = kind;
+            this.Links = links;
         }
 
         public string Name { get; set; }
@@ -23,7 +23,7 @@ namespace Connector.Serializable.TranscriptionFiles
         {
             get
             {
-                if (Enum.TryParse(KindString, out TranscriptionFileKind outputKind))
+                if (Enum.TryParse(this.KindString, out TranscriptionFileKind outputKind))
                 {
                     return outputKind;
                 }

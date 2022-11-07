@@ -19,7 +19,7 @@ namespace Tests
     [TestClass]
     public class EndToEndTests
     {
-        private static IDictionary<string, object> TestProperties;
+        private static IDictionary<string, object> testProperties;
 
         private static Mock<ILogger> Logger { get; set; }
 
@@ -27,7 +27,7 @@ namespace Tests
         public static void ClassInitialize(TestContext context)
         {
             context = context ?? throw new ArgumentNullException(nameof(context));
-            TestProperties = context.Properties;
+            testProperties = context.Properties;
             Logger = new Mock<ILogger>();
         }
 
@@ -35,8 +35,8 @@ namespace Tests
         [TestCategory(TestCategories.EndToEndTest)]
         public async Task TestMultiChannelFromSasTestAsync()
         {
-            var region = TestProperties["SpeechServicesRegion"].ToString();
-            var subscriptionKey = TestProperties["SpeechServicesSubscriptionKey"].ToString();
+            var region = testProperties["SpeechServicesRegion"].ToString();
+            var subscriptionKey = testProperties["SpeechServicesSubscriptionKey"].ToString();
             var conf = SpeechConfig.FromEndpoint(
                 new Uri($"wss://{region}.stt.speech.microsoft.com/speech/recognition/conversation/cognitiveservices/v1?setfeature=multichannel2&initialSilenceTimeoutMs=600000&endSilenceTimeoutMs=600000"),
                 subscriptionKey);

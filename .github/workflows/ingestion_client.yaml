@@ -1,0 +1,115 @@
+name: Build Ingestion Client Binaries
+
+on:
+  push:
+    branches: ['main', 'master']
+    paths: ['samples/ingestion/ingestion-client/**', '.github/workflows/ingestion_client.yaml']
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '6.0.x'
+
+      - name: Get Release Versions
+        id: get_release_versions
+        run: |
+          set -u -e -o pipefail
+          version=$(cat ./samples/ingestion/ingestion-client/Setup/ArmTemplateBatch.json | jq -r .variables.Version)
+          versionRealtime=$(cat ./samples/ingestion/ingestion-client/Setup/ArmTemplateRealtime.json | jq -r .variables.Version)
+          echo ::set-output name=version::$version
+          echo "Batch template: ${version}"
+          echo ::set-output name=versionRealtime::$versionRealtime
+          echo "Realtime template: ${versionRealtime}"
+
+      - name: Verify Release Versions
+        if: steps.get_release_versions.outputs.version == '' || steps.get_release_versions.outputs.version != steps.get_release_versions.outputs.versionRealtime
+        uses: actions/github-script@v3
+        with:
+          script: |
+            core.setFailed('Invalid version specified or mismatching versions in batch and realtime.')
+
+      - name: Clean Solution
+        run: dotnet clean ./samples/ingestion/ingestion-client/BatchIngestionClient.sln --configuration Release && dotnet nuget locals all --clear
+
+      - name: Build BatchIngestionClient
+        run: dotnet build samples/ingestion/ingestion-client --configuration Release
+
+      - name: Publish StartTranscriptionByTimer function
+        run: dotnet publish -c Release -f net6.0 --no-self-contained --output ./StartTranscriptionByTimer samples/ingestion/ingestion-client/StartTranscriptionByTimer/StartTranscriptionByTimer.csproj
+      - name: Zip StartTranscriptionByTimer
+        run: cd StartTranscriptionByTimer && zip -r ../StartTranscriptionByTimer.zip *
+
+      - name: Publish StartTranscriptionByServiceBus function
+        run: dotnet publish -c Release -f net6.0 --no-self-contained --output ./StartTranscriptionByServiceBus samples/ingestion/ingestion-client/StartTranscriptionByServiceBus/StartTranscriptionByServiceBus.csproj
+      - name: Zip StartTranscriptionByServiceBus
+        run: cd StartTranscriptionByServiceBus && zip -r ../StartTranscriptionByServiceBus.zip *
+
+      - name: Publish FetchTranscription function
+        run: dotnet publish -c Release -f net6.0 --no-self-contained --output ./FetchTranscription samples/ingestion/ingestion-client/FetchTranscription/FetchTranscription.csproj
+      - name: Zip FetchTranscription
+        run: cd FetchTranscription && zip -r ../FetchTranscription.zip *
+
+      - name: Publish RealtimeTranscription function
+        run: dotnet publish -c Release -f net6.0 --no-self-contained --output ./RealtimeTranscription samples/ingestion/ingestion-client/RealtimeTranscription/RealtimeTranscription.csproj
+      - name: Zip RealtimeTranscription
+        run: cd RealtimeTranscription && zip -r ../RealtimeTranscription.zip *
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: 'ingestion-${{steps.get_release_versions.outputs.version}}'
+          release_name: 'Ingestion Client ${{steps.get_release_versions.outputs.version}}'
+          draft: false
+          prerelease: false
+
+      - name: Upload StartTranscriptionByTimer
+        id: upload-release-asset-0
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./StartTranscriptionByTimer.zip
+          asset_name: StartTranscriptionByTimer.zip
+          asset_content_type: application/zip
+
+      - name: Upload StartTranscriptionByServiceBus
+        id: upload-release-asset-1 
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./StartTranscriptionByServiceBus.zip
+          asset_name: StartTranscriptionByServiceBus.zip
+          asset_content_type: application/zip
+
+      - name: Upload FetchTranscription
+        id: upload-release-asset-2
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./FetchTranscription.zip
+          asset_name: FetchTranscription.zip
+          asset_content_type: application/zip
+
+      - name: Upload RealtimeTranscription
+        id: upload-release-asset-3
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./RealtimeTranscription.zip
+          asset_name: RealtimeTranscription.zip
+          asset_content_type: application/zip
