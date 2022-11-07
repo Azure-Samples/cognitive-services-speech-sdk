@@ -227,7 +227,7 @@
         }
     },
     "variables": {
-        "Version": "v1.0.1",
+        "Version": "v2.0.0",
         "AudioInputContainer": "audio-input",
         "AudioProcessedContainer": "audio-processed",
         "ErrorFilesOutputContainer": "audio-failed",
@@ -275,8 +275,7 @@
         "BinariesRoutePrefix": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/releases/download/ingestion-",
         "StartTranscriptionByTimerBinary": "[concat(variables('BinariesRoutePrefix'), variables('Version'), '/StartTranscriptionByTimer.zip')]",
         "StartTranscriptionByServiceBusBinary": "[concat(variables('BinariesRoutePrefix'), variables('Version'), '/StartTranscriptionByServiceBus.zip')]",
-        "FetchTranscriptionBinary": "[concat(variables('BinariesRoutePrefix'), variables('Version'), '/FetchTranscription.zip')]",
-        "DatabaseBacpac": "[concat(variables('BinariesRoutePrefix'), variables('Version'), '/IngestionClient.bacpac')]"
+        "FetchTranscriptionBinary": "[concat(variables('BinariesRoutePrefix'), variables('Version'), '/FetchTranscription.zip')]"
     },
     "resources": [
         {
