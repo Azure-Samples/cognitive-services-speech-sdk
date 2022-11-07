@@ -1,4 +1,4 @@
-// <copyright file="20221107105238_Init.cs" company="Microsoft Corporation">
+// <copyright file="20221107110715_Init.cs" company="Microsoft Corporation">
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
@@ -15,6 +15,7 @@ namespace Connector.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             _ = migrationBuilder ?? throw new ArgumentNullException(nameof(migrationBuilder));
+
             migrationBuilder.CreateTable(
                 name: "Transcriptions",
                 columns: table => new
@@ -69,7 +70,7 @@ namespace Connector.Migrations
                     Channel = table.Column<int>(type: "int", nullable: false),
                     Offset = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
                     Duration = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
-                    SilenceBetweenCurrentAndPreviousSegmentInMs = table.Column<double>(type: "float", nullable: false),
+                    SilenceBetweenCurrentAndPreviousSegmentInMs = table.Column<int>(type: "int", nullable: false),
                     CombinedRecognizedPhraseID = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
@@ -112,7 +113,7 @@ namespace Connector.Migrations
                 columns: table => new
                 {
                     ID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Word = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    Word = table.Column<string>(type: "nvarchar(511)", maxLength: 511, nullable: true),
                     Offset = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
                     Duration = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
                     Confidence = table.Column<double>(type: "float", nullable: false),

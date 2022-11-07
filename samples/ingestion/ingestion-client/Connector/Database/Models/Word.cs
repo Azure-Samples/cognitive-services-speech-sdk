@@ -25,7 +25,7 @@ namespace Connector.Database.Models
         public Guid Id { get; set; }
 
         [Column("Word")]
-        [StringLength(MaxDefaultStringLength)]
+        [StringLength(MaxWordLength)]
         public string WordText { get; private set; }
 
         [StringLength(MaxTimeSpanColumnLength)]

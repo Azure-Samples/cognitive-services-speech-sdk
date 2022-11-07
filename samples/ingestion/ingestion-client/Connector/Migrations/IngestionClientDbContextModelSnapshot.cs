@@ -129,8 +129,8 @@ namespace Connector.Migrations
                         .HasMaxLength(32)
                         .HasColumnType("nvarchar(32)");
 
-                    b.Property<double>("SilenceBetweenCurrentAndPreviousSegmentInMs")
-                        .HasColumnType("float");
+                    b.Property<int>("SilenceBetweenCurrentAndPreviousSegmentInMs")
+                        .HasColumnType("int");
 
                     b.Property<int>("Speaker")
                         .HasColumnType("int");
@@ -204,8 +204,8 @@ namespace Connector.Migrations
                         .HasColumnType("nvarchar(255)");
 
                     b.Property<string>("WordText")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)")
+                        .HasMaxLength(511)
+                        .HasColumnType("nvarchar(511)")
                         .HasColumnName("Word");
 
                     b.HasKey("Id");

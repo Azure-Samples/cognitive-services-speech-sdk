@@ -13,6 +13,8 @@ namespace Connector.Database.Models
 
         public const int MaxDefaultStringLength = 500;
 
+        public const int MaxWordLength = 511;
+
         public const int MaxStateLength = 32;
     }
 }
