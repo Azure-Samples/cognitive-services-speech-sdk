@@ -1,4 +1,4 @@
-// <copyright file="20221104081113_Init.cs" company="Microsoft Corporation">
+// <copyright file="20221107093239_Init.cs" company="Microsoft Corporation">
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
@@ -14,7 +14,7 @@ namespace Connector.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder = migrationBuilder ?? throw new ArgumentNullException(nameof(migrationBuilder));
+            _ = migrationBuilder ?? throw new ArgumentNullException(nameof(migrationBuilder));
 
             migrationBuilder.CreateTable(
                 name: "Transcriptions",
@@ -48,7 +48,7 @@ namespace Connector.Migrations
                     SentimentNegative = table.Column<double>(type: "float", nullable: false),
                     SentimentNeutral = table.Column<double>(type: "float", nullable: false),
                     SentimentPositive = table.Column<double>(type: "float", nullable: false),
-                    TranscriptionId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                    TranscriptionID = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -152,7 +152,7 @@ namespace Connector.Migrations
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder = migrationBuilder ?? throw new ArgumentNullException(nameof(migrationBuilder));
+            _ = migrationBuilder ?? throw new ArgumentNullException(nameof(migrationBuilder));
 
             migrationBuilder.DropTable(
                 name: "Words");

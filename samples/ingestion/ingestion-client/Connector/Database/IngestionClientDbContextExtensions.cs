@@ -1,4 +1,4 @@
-// <copyright file="DatabaseConnector2.cs" company="Microsoft Corporation">
+// <copyright file="IngestionClientDbContextExtensions.cs" company="Microsoft Corporation">
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
@@ -9,33 +9,21 @@ namespace Connector.Database
     using System.Collections.Generic;
     using System.Globalization;
     using System.Linq;
-    using System.Threading.Channels;
     using System.Threading.Tasks;
 
     using Connector.Database.Models;
 
-    using Microsoft.EntityFrameworkCore;
-    using Microsoft.Extensions.Logging;
-
-    public class DatabaseConnector2
+    public static class IngestionClientDbContextExtensions
     {
-        private readonly ILogger logger;
-
-        private readonly IngestionClientDbContext ingestionClientDbContext;
-
-        public DatabaseConnector2(ILogger logger, IngestionClientDbContext ingestionClientDbContext)
-        {
-            this.logger = logger;
-            this.ingestionClientDbContext = ingestionClientDbContext;
-        }
-
-        public async Task<bool> StoreTranscriptionAsync(
+        public static async Task StoreTranscriptionAsync(
+            this IngestionClientDbContext ingestionClientDbContext,
             Guid transcriptionId,
             string locale,
             string fileName,
             float approximateCost,
             SpeechTranscript speechTranscript)
         {
+            _ = ingestionClientDbContext ?? throw new ArgumentNullException(nameof(ingestionClientDbContext));
             _ = speechTranscript ?? throw new ArgumentNullException(nameof(speechTranscript));
 
             var transcription = new Transcription(
@@ -65,12 +53,8 @@ namespace Connector.Database
 
             transcription = transcription.WithCombinedRecognizedPhrases(combinedRecognizedPhrases);
 
-            this.ingestionClientDbContext.Add(transcription);
-            var entitiesAdded = await this.ingestionClientDbContext.SaveChangesAsync().ConfigureAwait(false);
-
-            this.logger.LogInformation($"Added transcription to database, added {entitiesAdded} entities.");
-
-            return true;
+            ingestionClientDbContext.Add(transcription);
+            var entitiesAdded = await ingestionClientDbContext.SaveChangesAsync().ConfigureAwait(false);
         }
 
         private static CombinedRecognizedPhrase AddCombinedRecognizedPhrase(Connector.CombinedRecognizedPhrase combinedRecognizedPhrase, int channel, IEnumerable<Connector.RecognizedPhrase> recognizedPhrases)
