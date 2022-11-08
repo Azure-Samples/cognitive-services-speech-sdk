@@ -1,4 +1,4 @@
-﻿//
+//
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
@@ -9,7 +9,7 @@ using System.Net.Http.Formatting;
 public class BatchSynthesisClient
 {
     private const string OcpApimSubscriptionKey = "Ocp-Apim-Subscription-Key";
-    
+
     private readonly string hostName;
     private readonly string baseUri;
     private readonly string subscriptionKey;
