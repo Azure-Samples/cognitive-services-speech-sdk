@@ -125,32 +125,19 @@ static ProfanityOption GetProfanityOption(char** begin, char** end)
 }
 
 std::shared_ptr<UserConfig> UserConfigFromArgs(int argc, char* argv[], std::string usage)
-{
-    std::string key = GetEnvironmentVariable("SPEECH_KEY");
+{   
+    std::optional<std::string> keyOption = GetCommandLineOption(argv, argv + argc, "--key");
+    std::string key = keyOption.has_value() ? keyOption.value() : GetEnvironmentVariable("SPEECH_KEY");
     if (0 == size(key))
     {
-        std::optional<std::string> keyOption = GetCommandLineOption(argv, argv + argc, "--key");
-        if (!keyOption.has_value())
-        {
-            throw std::invalid_argument("Please set the SPEECH_KEY environment variable or provide a Speech subscription key with the --key option.\n" + usage);
-        }
-        else
-        {
-            key = keyOption.value();
-        }
+        throw std::invalid_argument("Please set the SPEECH_KEY environment variable or provide a Speech resource key with the --key option.\n" + usage);
     }
-    std::string region = GetEnvironmentVariable("SPEECH_REGION");
+
+    std::optional<std::string> regionOption = GetCommandLineOption(argv, argv + argc, "--region");
+    std::string region = regionOption.has_value() ? regionOption.value() : GetEnvironmentVariable("SPEECH_REGION");
     if (0 == size(region))
     {
-        std::optional<std::string> regionOption = GetCommandLineOption(argv, argv + argc, "--region");
-        if (!regionOption.has_value())
-        {
-            throw std::invalid_argument("Please set the SPEECH_REGION environment variable or provide a Speech subscription region with the --region option.\n" + usage);
-        }
-        else
-        {
-            region = regionOption.value();
-        }
+        throw std::invalid_argument("Please set the SPEECH_REGION environment variable or provide a Speech resource region with the --region option.\n" + usage);
     }
     
     std::string language = "en-US";
