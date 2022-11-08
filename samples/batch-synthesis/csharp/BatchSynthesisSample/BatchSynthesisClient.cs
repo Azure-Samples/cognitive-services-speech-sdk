@@ -5,8 +5,6 @@
 
 using Newtonsoft.Json;
 using System.Net.Http.Formatting;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 
 public class BatchSynthesisClient
 {

@@ -3,16 +3,38 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
-// The host name of the batch sytnhesis API, e.g. https://eastus.customvoice.api.speech.microsoft.com
-var hostName = "https://centraluseuap.customvoice.api.speech.microsoft.com";
-var subscriptionKey = "b410a73b5ded4a799bdbfdb7c83a459d";
 
-var sampleScript = "This is the waistline, and it's falling.\r\nAlexis, meet Bill and Hillary, and the rest of America.\r\nThis is Jordan, Scottie Pippen and the ring dynasty.\r\nThe more I looked, the gloomier I got.\r\nHe saw Macbeth, the three witches, and the boiling cauldron.\r\nBut it is good to get together, cook together, eat together and enjoy.\r\nThe priorities, they say, are sofa, blanket, and clothing.\r\nThe metallic walls curve, twist, and turn.\r\nThe seagrass fiber is tough, durable and smooth.\r\nThe dissenters were Stevens, Souter, Ginsburg and Breyer.";
+// Your Speech resource key and region
+// This example requires environment variables named "SPEECH_KEY" and "SPEECH_REGION"
+string speechRegion;
+string speechKey;
 
-var synthesisClient = new BatchSynthesisClient(hostName, subscriptionKey);
+if (Environment.GetEnvironmentVariable("SPEECH_REGION") is string regionValue)
+{
+    speechRegion = regionValue;
+}
+else
+{
+    throw new ArgumentException($"Please set the SPEECH_REGION environment variable to set speech resource region.");
+}
+
+if (Environment.GetEnvironmentVariable("SPEECH_KEY") is string keyValue)
+{
+    speechKey = keyValue;
+}
+else
+{
+    throw new ArgumentException($"Please set the SPEECH_KEY environment variable to set speech resource key.");
+}
+
+var host = $"https://{speechRegion}.customvoice.api.speech.microsoft.com";
+
+var sampleScript = "This is the waistline, and it's falling.\nAlexis, meet Bill and Hillary, and the rest of America.\nThis is Jordan, Scottie Pippen and the ring dynasty.\nThe more I looked, the gloomier I got.\nHe saw Macbeth, the three witches, and the boiling cauldron.\nBut it is good to get together, cook together, eat together and enjoy.\nThe priorities, they say, are sofa, blanket, and clothing.\nThe metallic walls curve, twist, and turn.\nThe seagrass fiber is tough, durable and smooth.\nThe dissenters were Stevens, Souter, Ginsburg and Breyer.";
+
+var synthesisClient = new BatchSynthesisClient(host, speechKey);
 
 // Get all synthesis tasks.
-var syntheses = await synthesisClient.GetAllSynthesesAsync().ConfigureAwait(false);
+var synthesisJobs = await synthesisClient.GetAllSynthesesAsync().ConfigureAwait(false);
 
 // Create a new synthesis task with plain text
 var newSynthesisUri = await synthesisClient.CreateSynthesisAsync(
