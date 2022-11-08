@@ -6,27 +6,33 @@
 
 import json
 import logging
-from pathlib import Path
-import requests
+import os
 import sys
 import time
+from pathlib import Path
+
+import requests
 
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG,
         format="[%(asctime)s] %(message)s", datefmt="%m/%d/%Y %I:%M:%S %p %Z")
 logger = logging.getLogger(__name__)
 
-# Your subscription key and region for the speech service
+# Your Speech resource key and region
+# This example requires environment variables named "SPEECH_KEY" and "SPEECH_REGION"
 
-SUBSCRIPTION_KEY = "YourSubscriptionKey"
-SERVICE_REGION = "YourServiceRegion"
+SUBSCRIPTION_KEY = os.environ.get('SPEECH_KEY')
+SERVICE_REGION = os.environ.get('SPEECH_KEY')
 
 NAME = "Simple synthesis"
 DESCRIPTION = "Simple synthesis description"
 
+# The service host suffix.
+# For azure.cn the host suffix is "customvoice.api.speech.azure.cn"
+SERVICE_HOST = "customvoice.api.speech.microsoft.com"
+
 
 def submit_synthesis():
-    url = 'https://{}.customvoice.api.speech.microsoft.com/api/texttospeech/3.1-preview1/batchsynthesis'.format(
-        SERVICE_REGION)
+    url = f'https://{SERVICE_REGION}.{SERVICE_HOST}/api/texttospeech/3.1-preview1/batchsynthesis'
     header = {
         'Ocp-Apim-Subscription-Key': SUBSCRIPTION_KEY,
         'Content-Type': 'application/json'
@@ -42,6 +48,12 @@ def submit_synthesis():
         'synthesisConfig': {
             "voice": "en-US-JennyNeural",
         },
+        # Replace with your custom voice name and deployment ID if you want to use custom voice.
+        # Multiple voices are supported, the mixture of custom voices and platform voices is allowed.
+        # Invalid voice name or deployment ID will be rejected.
+        'customVoices': {
+            # "YOUR_CUSTOM_VOICE_NAME": "YOUR_CUSTOM_VOICE_ID"
+        },
         "inputs": [
             {
                 "text": text
@@ -49,9 +61,9 @@ def submit_synthesis():
         ],
         "properties": {
             "outputFormat": "audio-24khz-160kbitrate-mono-mp3",
+            # "destinationContainerUrl": "<blob container url with SAS token>"
         },
     }
-
 
     response = requests.post(url, json.dumps(payload), headers=header)
     if response.status_code < 400:
@@ -63,7 +75,7 @@ def submit_synthesis():
 
 
 def get_synthesis(job_id):
-    url = f'https://{SERVICE_REGION}.customvoice.api.speech.microsoft.com/api/texttospeech/3.1-preview1/batchsynthesis/{job_id}'
+    url = f'https://{SERVICE_REGION}.{SERVICE_HOST}/api/texttospeech/3.1-preview1/batchsynthesis/{job_id}'
     header = {
         'Ocp-Apim-Subscription-Key': SUBSCRIPTION_KEY
     }
@@ -75,9 +87,10 @@ def get_synthesis(job_id):
     else:
         logger.error(f'Failed to get batch synthesis job: {response.text}')
 
+
 def list_synthesis_jobs(skip: int = 0, top: int = 100):
     """List all batch synthesis jobs in the subscription"""
-    url = f'https://{SERVICE_REGION}.customvoice.api.speech.microsoft.com/api/texttospeech/3.1-preview1/batchsynthesis?skip={skip}&top={top}'
+    url = f'https://{SERVICE_REGION}.{SERVICE_HOST}/api/texttospeech/3.1-preview1/batchsynthesis?skip={skip}&top={top}'
     header = {
         'Ocp-Apim-Subscription-Key': SUBSCRIPTION_KEY
     }
@@ -87,6 +100,7 @@ def list_synthesis_jobs(skip: int = 0, top: int = 100):
         logger.info(response.json())
     else:
         logger.error(f'Failed to list batch synthesis jobs: {response.text}')
+
 
 if __name__ == '__main__':
     job_id = submit_synthesis()
