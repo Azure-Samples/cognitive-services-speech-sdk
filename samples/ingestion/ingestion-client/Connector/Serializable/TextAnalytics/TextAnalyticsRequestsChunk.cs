@@ -11,7 +11,7 @@ namespace Connector.Serializable
     {
         public TextAnalyticsRequestsChunk(IEnumerable<TextAnalyticsRequest> documents)
         {
-            Documents = documents;
+            this.Documents = documents;
         }
 
         public IEnumerable<TextAnalyticsRequest> Documents { get; private set; }

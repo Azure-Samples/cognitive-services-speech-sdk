@@ -60,7 +60,7 @@ public class KwsSample : MonoBehaviour
             UnityEngine.Debug.Log(kwsModelDir);
             var model = KeywordRecognitionModel.FromFile(kwsModelDir);
 
-            var stopRecognition = new TaskCompletionSource<int>();
+            var stopRecognition = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
             var resultStr = "";
 
             // Creates a speech recognizer using microphone as audio input.
