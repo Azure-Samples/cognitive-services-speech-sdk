@@ -3,16 +3,20 @@
 
 // pull in the required packages.
 var sdk = require("microsoft-cognitiveservices-speech-sdk");
+var filePushStream = require("./filePushStream");
 
 (function() {
 "use strict";
 
     module.exports = {
-    main: function(settings, audioStream) {
+    main: function(settings) {
 
         // now create the audio-config pointing to our stream and
         // the speech config specifying the language.
-        var audioConfig = sdk.AudioConfig.fromStreamInput(audioStream);
+        var wavFileHeader = filePushStream.readWavFileHeader(settings.filename);
+        var format = sdk.AudioStreamFormat.getWaveFormatPCM(wavFileHeader.framerate, wavFileHeader.bitsPerSample, wavFileHeader.nChannels);
+        var audioStream = filePushStream.openPushStream(settings.filename);
+        var audioConfig = sdk.AudioConfig.fromStreamInput(audioStream, format);
         var intentConfig = sdk.SpeechConfig.fromSubscription(settings.luSubscriptionKey, settings.luServiceRegion);
 
         // setting the recognition language to English.
