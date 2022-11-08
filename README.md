@@ -177,6 +177,7 @@ Samples for using the Speech Service REST API (no Speech SDK installation requir
 | Enumerate audio devices | C# .NET Framework, Windows | -"- |
 
 ## Sample data for Custom Speech
+
 - [Sample data for Custom Speech](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/sampledata/customspeech)
 
 ## Resources
