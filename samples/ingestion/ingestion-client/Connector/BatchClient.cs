@@ -33,7 +33,7 @@ namespace Connector
 
         private static readonly AsyncRetryPolicy RetryPolicy =
             Policy
-                .Handle<HttpRequestException>()
+                .Handle<Exception>(e => e is HttpStatusCodeException || e is HttpRequestException)
                 .WaitAndRetryAsync(MaxNumberOfRetries, retryAttempt => TimeSpan.FromSeconds(2));
 
         public static Task<TranscriptionReportFile> GetTranscriptionReportFileFromSasAsync(string sasUri)
