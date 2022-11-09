@@ -353,6 +353,45 @@ namespace FetchTranscriptionFunction
             var generalErrorsStringBuilder = new StringBuilder();
             var speechTranscriptMappings = new Dictionary<AudioFileInfo, SpeechTranscript>();
 
+            foreach (var resultFile in resultFiles)
+            {
+                log.LogInformation($"Getting result for file {resultFile.Name}");
+
+                try
+                {
+                    var transcriptionResult = await BatchClient.GetSpeechTranscriptFromSasAsync(resultFile.Links.ContentUrl).ConfigureAwait(false);
+
+                    if (string.IsNullOrEmpty(transcriptionResult.Source))
+                    {
+                        var errorMessage = "Transcription source is unknown, skipping evaluation.";
+                        log.LogError(errorMessage);
+
+                        generalErrorsStringBuilder.AppendLine(errorMessage);
+                        continue;
+                    }
+
+                    var audioFileName = StorageConnector.GetFileNameFromUri(new Uri(transcriptionResult.Source));
+                    var audioFileInfo = serviceBusMessage.AudioFileInfos.Where(a => a.FileName == audioFileName).First();
+
+                    if (speechTranscriptMappings.ContainsKey(audioFileInfo))
+                    {
+                        var errorMessage = $"Duplicate audio file in job, skipping: {audioFileInfo.FileName}.";
+                        log.LogError(errorMessage);
+                        generalErrorsStringBuilder.AppendLine(errorMessage);
+                        continue;
+                    }
+
+                    speechTranscriptMappings.Add(audioFileInfo, transcriptionResult);
+                }
+                catch (Exception e) when (e is HttpStatusCodeException || e is HttpRequestException)
+                {
+                    var errorMessage = $"Failed getting speech transcript from content url: {e.Message}";
+                    log.LogError(errorMessage);
+
+                    generalErrorsStringBuilder.AppendLine(errorMessage);
+                }
+            }
+
             if (textAnalyticsProvider != null && (FetchTranscriptionEnvironmentVariables.SentimentAnalysisSetting != SentimentAnalysisSetting.None
                     || FetchTranscriptionEnvironmentVariables.PiiRedactionSetting != PiiRedactionSetting.None || AnalyzeConversationsProvider.IsConversationalPiiEnabled()))
             {
@@ -456,45 +495,6 @@ namespace FetchTranscriptionFunction
                     // Poll for first time with TA request after 1 minute
                     await ServiceBusUtilities.SendServiceBusMessageAsync(FetchServiceBusSender, serviceBusMessage.CreateMessageString(), log, TimeSpan.FromMinutes(1)).ConfigureAwait(false);
                     return;
-                }
-            }
-
-            foreach (var resultFile in resultFiles)
-            {
-                log.LogInformation($"Getting result for file {resultFile.Name}");
-
-                try
-                {
-                    var transcriptionResult = await BatchClient.GetSpeechTranscriptFromSasAsync(resultFile.Links.ContentUrl).ConfigureAwait(false);
-
-                    if (string.IsNullOrEmpty(transcriptionResult.Source))
-                    {
-                        var errorMessage = "Transcription source is unknown, skipping evaluation.";
-                        log.LogError(errorMessage);
-
-                        generalErrorsStringBuilder.AppendLine(errorMessage);
-                        continue;
-                    }
-
-                    var audioFileName = StorageConnector.GetFileNameFromUri(new Uri(transcriptionResult.Source));
-                    var audioFileInfo = serviceBusMessage.AudioFileInfos.Where(a => a.FileName == audioFileName).First();
-
-                    if (speechTranscriptMappings.ContainsKey(audioFileInfo))
-                    {
-                        var errorMessage = $"Duplicate audio file in job, skipping: {audioFileInfo.FileName}.";
-                        log.LogError(errorMessage);
-                        generalErrorsStringBuilder.AppendLine(errorMessage);
-                        continue;
-                    }
-
-                    speechTranscriptMappings.Add(audioFileInfo, transcriptionResult);
-                }
-                catch (Exception e) when (e is HttpStatusCodeException || e is HttpRequestException)
-                {
-                    var errorMessage = $"Failed getting speech transcript from content url: {e.Message}";
-                    log.LogError(errorMessage);
-
-                    generalErrorsStringBuilder.AppendLine(errorMessage);
                 }
             }
 
