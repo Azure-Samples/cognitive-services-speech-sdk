@@ -205,11 +205,11 @@ There are several containers to distinguish between the various outputs. We sugg
 
 By default, the ARM template uses the newest version of the Ingestion Client which can be found in this repository. To use a custom version, edit the paths to the binaries inside the deployment template to point to a custom published version. By default, our binaries are: 
 
-* https://mspublicstorage.blob.core.windows.net/transcription-enabled-storage/FetchTranscription.zip 
+* https://github.com/Azure-Samples/cognitive-services-speech-sdk/releases/download/ingestion-v{latest}/FetchTranscription.zip
 
-* https://mspublicstorage.blob.core.windows.net/transcription-enabled-storage/StartTranscriptionByTimer.zip
+* https://github.com/Azure-Samples/cognitive-services-speech-sdk/releases/download/ingestion-v{latest}/StartTranscriptionByTimer.zip
 
-* https://mspublicstorage.blob.core.windows.net/transcription-enabled-storage/StartTranscriptionByServiceBus.zip) 
+* https://github.com/Azure-Samples/cognitive-services-speech-sdk/releases/download/ingestion-v{latest}/StartTranscriptionByServiceBus.zip) 
 
 To publish a new version, you can use Visual Studio, right-click on the project, click **Publish** and follow the instructions.
 
@@ -219,7 +219,7 @@ Although you do not need to download or change the code, you can still download 
 
 ```
 git clone https://github.com/Azure-Samples/cognitive-services-speech-sdk
-cd cognitive-services-speech-sdk/samples/batch/transcription-enabled-storage
+cd cognitive-services-speech-sdk/samples/ingestion/ingestion-client
 ```
 
 ## Costs

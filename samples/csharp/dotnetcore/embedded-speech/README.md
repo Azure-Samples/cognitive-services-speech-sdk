@@ -156,6 +156,20 @@ export CLOUD_SPEECH_SERVICE_REGION="westus"
 ```
 **Note:** On Linux and macOS, use quotation marks around the values of environment variables set on the command line as shown in the example. Otherwise strings with spaces (like embedded speech model/voice names) will be cut short.
 
+## Remarks
+
+For a new project from scratch, install the following Speech SDK packages as needed:
+* [Microsoft.CognitiveServices.Speech](https://www.nuget.org/packages/Microsoft.CognitiveServices.Speech)
+  * mandatory for using the Speech SDK
+* [Microsoft.CognitiveServices.Speech.Extension.Embedded.SR](https://www.nuget.org/packages/Microsoft.CognitiveServices.Speech.Extension.Embedded.SR)
+  * required for embedded speech recognition
+* [Microsoft.CognitiveServices.Speech.Extension.Embedded.TTS](https://www.nuget.org/packages/Microsoft.CognitiveServices.Speech.Extension.Embedded.TTS)
+  * required for embedded speech synthesis
+* [Microsoft.CognitiveServices.Speech.Extension.ONNX.Runtime](https://www.nuget.org/packages/Microsoft.CognitiveServices.Speech.Extension.ONNX.Runtime)
+  * required by embedded speech recognition and synthesis
+* [Microsoft.CognitiveServices.Speech.Extension.Telemetry](https://www.nuget.org/packages/Microsoft.CognitiveServices.Speech.Extension.Telemetry)
+  * required by embedded speech recognition and synthesis
+
 ## References
 
 * [Speech SDK API reference for C#](https://aka.ms/csspeech/csharpref)

@@ -113,14 +113,3 @@ jobs:
           asset_path: ./RealtimeTranscription.zip
           asset_name: RealtimeTranscription.zip
           asset_content_type: application/zip
-
-      - name: Upload Bacpac File
-        id: upload-release-asset-4
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./samples/ingestion/ingestion-client/Setup/IngestionClient.bacpac
-          asset_name: IngestionClient.bacpac
-          asset_content_type: application/octet-stream
