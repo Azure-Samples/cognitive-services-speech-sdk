@@ -29,7 +29,7 @@ else
 
 var host = $"https://{speechRegion}.customvoice.api.speech.microsoft.com";
 
-var sampleScript = "This is the waistline, and it's falling.\nAlexis, meet Bill and Hillary, and the rest of America.\nThis is Jordan, Scottie Pippen and the ring dynasty.\nThe more I looked, the gloomier I got.\nHe saw Macbeth, the three witches, and the boiling cauldron.\nBut it is good to get together, cook together, eat together and enjoy.\nThe priorities, they say, are sofa, blanket, and clothing.\nThe metallic walls curve, twist, and turn.\nThe seagrass fiber is tough, durable and smooth.\nThe dissenters were Stevens, Souter, Ginsburg and Breyer.";
+var sampleScript = await File.ReadAllTextAsync("Gatsby-chapter1.txt").ConfigureAwait(false);
 
 var synthesisClient = new BatchSynthesisClient(host, speechKey);
 

@@ -3,6 +3,8 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
+using Newtonsoft.Json;
+
 public class BatchSynthesisPropertiesDefinition
 {
     /// <summary>
@@ -35,4 +37,13 @@ public class BatchSynthesisPropertiesDefinition
     /// The value indicating whether the sentence boundary output will be generated.
     /// </summary>
     public bool SentenceBoundaryEnabled { get; set; }
+
+    /// <summary>
+    /// How long the batch task will be kept in the system after it has completed. Once the
+    /// batch task reaches the time to live after completion (succeeded or failed) it will be automatically
+    /// deleted. The longest supported duration is 31 days, the default vaule is 31 days.
+    /// The duration is encoded as ISO 8601 duration ("PnYnMnDTnHnMnS", see https://en.wikipedia.org/wiki/ISO_8601#Durations).
+    /// </summary>
+    [JsonConverter(typeof(TimeSpanConverter))]
+    public TimeSpan? TimeToLive { get; set; }
 }
