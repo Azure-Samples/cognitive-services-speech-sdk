@@ -8,4 +8,9 @@
     <PackageReference Include="Microsoft.AspNet.WebApi.Client" version="5.2.7" PrivateAssets="All" />
     <PackageReference Include="Newtonsoft.Json" version="12.0.1" PrivateAssets="All" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="..\..\Gatsby-chapter1.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
 </Project>
