@@ -13,6 +13,8 @@ namespace FetchTranscription.Database
 {
     using Connector.Database;
 
+    using FetchTranscriptionFunction;
+
     using Microsoft.Azure.WebJobs.Description;
     using Microsoft.Azure.WebJobs.Host.Config;
     using Microsoft.EntityFrameworkCore;
@@ -30,9 +32,12 @@ namespace FetchTranscription.Database
 
         public void Initialize(ExtensionConfigContext context)
         {
-            using var scope = this.scopeFactory.CreateScope();
-            var databaseContext = scope.ServiceProvider.GetService<IngestionClientDbContext>();
-            databaseContext.Database.Migrate();
+            if (FetchTranscriptionEnvironmentVariables.UseSqlDatabase)
+            {
+                using var scope = this.scopeFactory.CreateScope();
+                var databaseContext = scope.ServiceProvider.GetService<IngestionClientDbContext>();
+                databaseContext.Database.Migrate();
+            }
         }
     }
 }
