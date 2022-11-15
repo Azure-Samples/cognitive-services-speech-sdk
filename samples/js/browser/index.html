@@ -520,7 +520,7 @@
                     const renewToken = async () => {
                         await RequestAuthorizationToken();
                         if(!!reco) {
-		                    reco.authorizationToken = authorizationToken;
+                            reco.authorizationToken = authorizationToken;
                         }
                         setTimeout(renewToken, 600000);
                     };
