@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See https://aka.ms/csspeech/license for the full license information.
 //
-// <code>
+
 package com.microsoft.cognitiveservices.speech.samples.embedded;
 
 import androidx.core.app.ActivityCompat;
@@ -112,4 +112,3 @@ public class MainActivity extends AppCompatActivity
         }
     }
 }
-// </code>
