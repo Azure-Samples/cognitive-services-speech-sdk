@@ -68,42 +68,35 @@ def get_profanity_option() -> speechsdk.ProfanityOption :
         else : return speechsdk.ProfanityOption.Masked
 
 def user_config_from_args(usage : str) -> helper.Read_Only_Dict :
-    key = ""
-    if "SPEECH_KEY" in environ :
-        key = environ["SPEECH_KEY"]
-    else :
-        keyOption = get_cmd_option("--key")
-        if keyOption is None:
-            raise RuntimeError("Please set the SPEECH_KEY environment variable or provide a Speech subscription key with the --key option.{}{}".format(linesep, usage))
-        else :
-            key = keyOption
-    region = ""
-    if "SPEECH_REGION" in environ :
-        region = environ["SPEECH_REGION"]
-    else :
-        regionOption = get_cmd_option("--region")
-        if regionOption is None:
-            raise RuntimeError("Please set the SPEECH_REGION environment variable or provide a Speech subscription region with the --region option.{}{}".format(linesep, usage))
-        else :
-            region = regionOption
+    keyEnv = environ["SPEECH_KEY"] if "SPEECH_KEY" in environ else None
+    keyOption = get_cmd_option("--key")
+    key = keyOption if keyOption is not None else keyEnv
+    if key is None :
+        raise RuntimeError("Please set the SPEECH_KEY environment variable or provide a Speech resource key with the --key option.{}{}".format(linesep, usage))
+
+    regionEnv = environ["SPEECH_REGION"] if "SPEECH_REGION" in environ else None
+    regionOption = get_cmd_option("--region")
+    region = regionOption if regionOption is not None else regionEnv
+    if region is None :
+        raise RuntimeError("Please set the SPEECH_REGION environment variable or provide a Speech resource region with the --region option.{}{}".format(linesep, usage))
 
     captioning_mode = CaptioningMode.REALTIME if cmd_option_exists("--realtime") and not cmd_option_exists("--offline") else CaptioningMode.OFFLINE
 
-    td_remain_time = timedelta(seconds=1.0)
+    td_remain_time = timedelta(milliseconds=1000)
     s_remain_time = get_cmd_option("--remainTime")
     if s_remain_time is not None :
-        flt_remain_time = float(s_remain_time)
-        if flt_remain_time < 0.0 :
-            flt_remain_time = 1.0
-        td_remain_time = timedelta(seconds=flt_remain_time)
+        int_remain_time = float(s_remain_time)
+        if int_remain_time < 0 :
+            int_remain_time = 1000
+        td_remain_time = timedelta(milliseconds=int_remain_time)
 
-    td_delay = timedelta(seconds=1.0)
+    td_delay = timedelta(milliseconds=1000)
     s_delay = get_cmd_option("--delay")
     if s_delay is not None :
-        flt_delay = float(s_delay)
-        if flt_delay < 0.0 :
-            flt_delay = 1.0
-        td_delay = timedelta(seconds=flt_delay)
+        int_delay = float(s_delay)
+        if int_delay < 0 :
+            int_delay = 1000
+        td_delay = timedelta(milliseconds=int_delay)
     
     int_max_line_length = helper.DEFAULT_MAX_LINE_LENGTH_SBCS
     s_max_line_length = get_cmd_option("--maxLineLength")

@@ -151,7 +151,11 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="helper.h" />
+    <ClInclude Include="binary_file_reader.h" />
+    <ClInclude Include="caption_helper.h" />
+    <ClInclude Include="string_helper.h" />
+    <ClInclude Include="user_config.h" />
+    <ClInclude Include="wav_file_reader.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

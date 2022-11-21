@@ -94,7 +94,7 @@ def _paginate(api, paginated_object):
     """
     yield from paginated_object.values
     typename = type(paginated_object).__name__
-    auth_settings = ["apiKeyHeader", "apiKeyQuery"]
+    auth_settings = ["api_key"]
     while paginated_object.next_link:
         link = paginated_object.next_link[len(api.api_client.configuration.host):]
         paginated_object, status, headers = api.api_client.call_api(link, "GET",

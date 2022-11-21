@@ -517,7 +517,14 @@
 
                 // in case we have a function for getting an authorization token, call it.
                 if (typeof RequestAuthorizationToken === "function") {
-                    RequestAuthorizationToken();
+                    const renewToken = async () => {
+                        await RequestAuthorizationToken();
+                        if(!!reco) {
+                            reco.authorizationToken = authorizationToken;
+                        }
+                        setTimeout(renewToken, 600000);
+                    };
+                    await renewToken();
                 }
             });
         });

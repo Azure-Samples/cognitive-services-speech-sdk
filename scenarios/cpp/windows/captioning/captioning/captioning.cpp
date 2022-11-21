@@ -56,7 +56,7 @@ private:
     std::shared_ptr<AudioStreamFormat> m_format = NULL;
     std::shared_ptr<BinaryFileReader> m_callback = NULL;
     std::shared_ptr<PullAudioInputStream> m_stream = NULL;
-    int m_srtSequenceNumber = 0;
+    int m_srtSequenceNumber = 1;
     std::optional<Caption> m_previousCaption = std::nullopt;
     std::optional<Timestamp> m_previousEndTime = std::nullopt;
     bool m_previousResultIsRecognized = false;
@@ -259,6 +259,7 @@ private:
         }
         
         speechConfig->SetProperty(PropertyId::SpeechServiceResponse_PostProcessingOption, "TrueText");
+        speechConfig->SetSpeechRecognitionLanguage(m_userConfig->language);
         
         return speechConfig;
     }
@@ -425,10 +426,10 @@ int main(int argc, char* argv[])
 "  HELP\n"
 "    --help                           Show this help and stop.\n\n"
 "  CONNECTION\n"
-"    --key KEY                        Your Azure Speech service subscription key.\n"
-"                                     Required unless you have the SPEECH_KEY environment variable set.\n"
+"    --key KEY                        Your Azure Speech service resource key.\n"
+"                                     Overrides the SPEECH_KEY environment variable. You must set the environment variable (recommended) or use the `--key` option.\n"
 "    --region REGION                  Your Azure Speech service region.\n"
-"                                     Required unless you have the SPEECH_REGION environment variable set.\n"
+"                                     Overrides the SPEECH_REGION environment variable. You must set the environment variable (recommended) or use the `--region` option.\n"
 "                                     Examples: westus, eastus\n\n"
 "  LANGUAGE\n"
 "    --language LANG                  Specify language. This is used when breaking captions into lines.\n"
@@ -454,10 +455,10 @@ int main(int argc, char* argv[])
 "                                     Minimum is 20. Default is 37 (30 for Chinese).\n"
 "    --lines LINES                    Set the number of lines for a caption to LINES.\n"
 "                                     Minimum is 1. Default is 2.\n"
-"    --delay SECONDS                  How many SECONDS to delay the appearance of each caption.\n"
-"                                     Minimum is 0.0. Default is 1.0.\n"
-"    --remainTime SECONDS             How many SECONDS a caption should remain on screen if it is not replaced by another.\n"
-"                                     Minimum is 0.0. Default is 1.0.\n\n"
+"    --delay MILLISECONDS             How many MILLISECONDS to delay the appearance of each caption.\n"
+"                                     Minimum is 0.0. Default is 1000.\n"
+"    --remainTime MILLISECONDS        How many MILLISECONDS a caption should remain on screen if it is not replaced by another.\n"
+"                                     Minimum is 0.0. Default is 1000.\n\n"
 "    --quiet                          Suppress console output, except errors.\n"
 "    --profanity OPTION               Valid values: raw, remove, mask\n"
 "    --threshold NUMBER               Set stable partial result threshold.\n"
