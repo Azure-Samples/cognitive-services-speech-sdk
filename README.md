@@ -165,6 +165,7 @@ Samples for using the Speech Service REST API (no Speech SDK installation requir
 | Sample                                  | Description |
 | ---                                     | --- |
 | [Batch transcription](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/batch/)  | Demonstrates usage of batch transcription from different programming languages |
+| [Batch synthesis](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/batch-synthesis/)  | Demonstrates usage of batch synthesis from different programming languages |
 
 ## Tools
 
@@ -174,6 +175,7 @@ Samples for using the Speech Service REST API (no Speech SDK installation requir
 | Enumerate audio devices | C# .NET Framework, Windows | -"- |
 
 ## Sample data for Custom Speech
+
 - [Sample data for Custom Speech](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/sampledata/customspeech)
 
 ## Resources
