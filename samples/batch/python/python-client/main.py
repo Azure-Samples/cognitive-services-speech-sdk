@@ -141,7 +141,7 @@ def transcribe():
     api = cris_client.CustomSpeechTranscriptionsApi(api_client=client)
 
     # Specify transcription properties by passing a dict to the properties parameter. See
-    # https://docs.microsoft.com/azure/cognitive-services/speech-service/batch-transcription#configuration-properties
+    # https://learn.microsoft.com/azure/cognitive-services/speech-service/batch-transcription-create?pivots=rest-api#request-configuration-options
     # for supported parameters.
     properties = {
         # "punctuationMode": "DictatedAndAutomatic",
