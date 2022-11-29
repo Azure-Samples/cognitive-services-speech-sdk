@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See https://aka.ms/csspeech/license for the full license information.
 //
-// <code>
+
 using UnityEngine;
 using UnityEngine.UI;
 using Microsoft.CognitiveServices.Speech;
@@ -230,4 +230,3 @@ public class HelloWorld : MonoBehaviour
         }
     }
 }
-// </code>

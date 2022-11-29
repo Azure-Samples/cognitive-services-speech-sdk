@@ -31,7 +31,7 @@ import com.microsoft.cognitiveservices.speech.audio.*;
 public class Captioning
 {
     UserConfig _userConfig;
-    int _srtSequenceNumber = 0;
+    int _srtSequenceNumber = 1;
     Optional<Caption> _previousCaption = Optional.empty();
     Optional<Instant> _previousEndTime = Optional.empty();
     boolean _previousResultIsRecognized = false;
@@ -426,10 +426,10 @@ public class Captioning
 .append("    --help                           Show this help and stop.").append(System.lineSeparator())
 .append(System.lineSeparator())
 .append("  CONNECTION").append(System.lineSeparator())
-.append("    --key KEY                        Your Azure Speech service subscription key.").append(System.lineSeparator())
-.append("                                     Required unless you have the SPEECH_KEY environment variable set.").append(System.lineSeparator())
+.append("    --key KEY                        Your Azure Speech service resource key.").append(System.lineSeparator())
+.append("                                     Overrides the SPEECH_KEY environment variable. You must set the environment variable (recommended) or use the `--key` option.").append(System.lineSeparator())
 .append("    --region REGION                  Your Azure Speech service region.").append(System.lineSeparator())
-.append("                                     Required unless you have the SPEECH_REGION environment variable set.").append(System.lineSeparator())
+.append("                                     Overrides the SPEECH_REGION environment variable. You must set the environment variable (recommended) or use the `--region` option.").append(System.lineSeparator())
 .append("                                     Examples: westus, eastus").append(System.lineSeparator())
 .append(System.lineSeparator())
 .append("  LANGUAGE").append(System.lineSeparator())
