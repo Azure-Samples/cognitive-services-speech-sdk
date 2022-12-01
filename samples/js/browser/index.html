@@ -705,11 +705,11 @@
         }
 
         function onCanceled (sender, cancellationEventArgs) {
-            window.console.log(e);
+            window.console.log(cancellationEventArgs);
 
-            statusDiv.innerHTML += "(cancel) Reason: " + SpeechSDK.CancellationReason[e.reason];
-            if (e.reason === SpeechSDK.CancellationReason.Error) {
-                statusDiv.innerHTML += ": " + e.errorDetails;
+            statusDiv.innerHTML += "(cancel) Reason: " + SpeechSDK.CancellationReason[cancellationEventArgs.reason];
+            if (cancellationEventArgs.reason === SpeechSDK.CancellationReason.Error) {
+                statusDiv.innerHTML += ": " + cancellationEventArgs.errorDetails;
             }
             statusDiv.innerHTML += "\r\n";
         }
