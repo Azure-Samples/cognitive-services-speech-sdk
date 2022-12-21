@@ -817,9 +817,8 @@ def pronunciation_assessment_continuous_from_file():
     done = False
     recognized_words = []
     accuracy_scores = []
+    fluency_scores = []
     durations = []
-    valid_durations = []
-    start_offset, end_offset = None, None
 
     def stop_cb(evt: speechsdk.SessionEventArgs):
         """callback that signals to stop continuous recognition upon receiving an event `evt`"""
@@ -834,19 +833,14 @@ def pronunciation_assessment_continuous_from_file():
             pronunciation_result.accuracy_score, pronunciation_result.pronunciation_score,
             pronunciation_result.completeness_score, pronunciation_result.fluency_score
         ))
-        nonlocal recognized_words, accuracy_scores, durations, valid_durations, start_offset, end_offset
+        nonlocal recognized_words, accuracy_scores, fluency_scores, durations
         recognized_words += pronunciation_result.words
         accuracy_scores.append(pronunciation_result.accuracy_score)
+        fluency_scores.append(pronunciation_result.fluency_score)
         json_result = evt.result.properties.get(speechsdk.PropertyId.SpeechServiceResponse_JsonResult)
         jo = json.loads(json_result)
         nb = jo['NBest'][0]
         durations.append(sum([int(w['Duration']) for w in nb['Words']]))
-        if start_offset is None:
-            start_offset = nb['Words'][0]['Offset']
-        end_offset = nb['Words'][-1]['Offset'] + nb['Words'][-1]['Duration'] + 100000
-        for w, d in zip(pronunciation_result.words, nb['Words']):
-            if w.error_type == 'None':
-                valid_durations.append(d['Duration'] + 100000)
 
     # Connect callbacks to the events fired by the speech recognizer
     speech_recognizer.recognized.connect(recognized)
@@ -864,11 +858,8 @@ def pronunciation_assessment_continuous_from_file():
 
     speech_recognizer.stop_continuous_recognition()
 
-    # We can calculate whole accuracy and fluency scores by duration weighted averaging
-    accuracy_score = sum(i[0] * i[1] for i in zip(accuracy_scores, durations)) / sum(durations)
     # Re-calculate fluency score
-    if start_offset is not None:
-        fluency_score = sum(valid_durations) / (end_offset - start_offset) * 100
+    fluency_score = sum([x * y for (x, y) in zip(fluency_scores, durations)]) / sum(durations)
 
     # we need to convert the reference text to lower case, and split to words, then remove the punctuations.
     if language == 'zh-CN':
@@ -905,6 +896,15 @@ def pronunciation_assessment_continuous_from_file():
                 final_words += recognized_words[j1:j2]
     else:
         final_words = recognized_words
+
+    # We can calculate whole accuracy by averaging
+    final_accuracy_scores = []
+    for word in final_words:
+        if word.error_type == 'Insertion':
+            continue
+        else:
+            final_accuracy_scores.append(word.accuracy_score)
+    accuracy_score = sum(final_accuracy_scores) / len(final_accuracy_scores)
 
     # Calculate whole completeness score
     completeness_score = len([w for w in final_words if w.error_type == 'None']) / len(reference_words) * 100
